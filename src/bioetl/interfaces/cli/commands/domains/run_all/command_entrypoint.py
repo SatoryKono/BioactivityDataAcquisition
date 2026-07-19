@@ -8,6 +8,9 @@ from typing import Protocol
 import click
 
 from bioetl.interfaces.cli.commands.domains.shared.click_options import (
+    typed_click_command,
+    typed_click_option,
+    typed_pass_context,
     with_debug_option,
     with_dry_run_option,
     with_health_server_options,
@@ -33,8 +36,8 @@ def build_run_all_click_command(
 ) -> click.Command:
     """Build the canonical Click command object for ``bioetl run-all``."""
 
-    @click.command("run-all")
-    @click.option(
+    @typed_click_command("run-all")
+    @typed_click_option(
         "--source",
         required=True,
         help="Provider name (e.g., chembl, pubchem, uniprot)",
@@ -43,7 +46,7 @@ def build_run_all_click_command(
     @with_limit_option("Maximum records per pipeline")
     @with_dry_run_option("Preview mode - show pipelines without execution")
     @with_yes_option("Skip confirmation prompt for rebuild/backfill")
-    @click.option(
+    @typed_click_option(
         "--list-only",
         is_flag=True,
         help="List pipelines for the source without running them",
@@ -51,7 +54,7 @@ def build_run_all_click_command(
     @with_debug_option("Enable DEBUG level logging")
     @with_health_server_options(default_health_server_port)
     @with_observability_backend_options(default_health_server_port)
-    @click.pass_context
+    @typed_pass_context
     def run_all_command(click_context: click.Context, /, **kwargs: object) -> None:
         """Run all registered pipelines for one provider sequentially."""
         run_callback(click_context, **kwargs)

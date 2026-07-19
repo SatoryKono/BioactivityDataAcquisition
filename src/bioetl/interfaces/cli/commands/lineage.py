@@ -7,6 +7,12 @@ from typing import TYPE_CHECKING
 
 import click
 
+from bioetl.interfaces.cli.commands.domains.shared.click_options import (
+    typed_click_argument,
+    typed_click_group,
+    typed_click_option,
+    typed_group_command,
+)
 from bioetl.interfaces.cli.commands.domains.shared.inspection_output import (
     emit_inspection_payload,
 )
@@ -205,19 +211,19 @@ def _resolve_explain_identifier(
     return run_id if run_id is not None else manifest_id
 
 
-@click.group()
+@typed_click_group()
 def lineage() -> None:
     """Inspect persisted lineage fragments and run traceability."""
 
 
-@lineage.command("show-fragment")
-@click.argument("fragment_id")
-@click.option(
+@typed_group_command(lineage, "show-fragment")
+@typed_click_argument("fragment_id")
+@typed_click_option(
     "--semantic",
     is_flag=True,
     help="Use diagnostic semantic fragment-id lookup instead of occurrence id.",
 )
-@click.option(
+@typed_click_option(
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),
@@ -243,13 +249,13 @@ def show_fragment_command(
     )
 
 
-@lineage.command("trace")
-@click.option(
+@typed_group_command(lineage, "trace")
+@typed_click_option(
     "--dataset-ref",
     required=True,
     help="Canonical dataset/node ref, e.g. silver:chembl.activity@12",
 )
-@click.option(
+@typed_click_option(
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),
@@ -271,10 +277,12 @@ def trace_command(dataset_ref: str, output_format: str) -> None:
     )
 
 
-@lineage.command("explain")
-@click.option("--run-id", default=None, help="Resolve lineage by RUN_ID")
-@click.option("--manifest-id", default=None, help="Resolve lineage by MANIFEST_ID")
-@click.option(
+@typed_group_command(lineage, "explain")
+@typed_click_option("--run-id", default=None, help="Resolve lineage by RUN_ID")
+@typed_click_option(
+    "--manifest-id", default=None, help="Resolve lineage by MANIFEST_ID"
+)
+@typed_click_option(
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),

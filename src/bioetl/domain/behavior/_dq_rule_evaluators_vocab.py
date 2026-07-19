@@ -64,6 +64,8 @@ def _resolve_custom_validation_strategy(
 def _target_json_vocabulary_strategy(value: object, validator_name: str | None) -> bool:
     """Validate against target component JSON vocabulary."""
     vocab = _target_json_vocabulary(validator_name)
+    if vocab is None:
+        return True
     return _target_json_vocabulary_rule_violated(value, allowed_values=vocab)
 
 
@@ -72,12 +74,16 @@ def _target_xref_json_vocabulary_strategy(
 ) -> bool:
     """Validate against target xref JSON vocabulary."""
     xref_vocab = _target_xref_json_vocabulary(validator_name)
+    if xref_vocab is None:
+        return True
     return _target_xref_json_vocabulary_rule_violated(value, allowed_values=xref_vocab)
 
 
 def _publication_taxonomy_strategy(value: object, validator_name: str | None) -> bool:
     """Validate against publication taxonomy vocabulary."""
     pub_taxonomy = _publication_taxonomy_vocabulary(validator_name)
+    if pub_taxonomy is None:
+        return True
     return _publication_taxonomy_rule_violated(value, allowed_values=pub_taxonomy)
 
 
@@ -101,6 +107,8 @@ def _publication_taxonomy_vocabulary(
         "validate_publication_subclass_taxonomy": "publication_subclass",
         "validate_publication_class_taxonomy": "publication_class",
     }
+    if validator_name is None:
+        return None
     field_name = mapping.get(validator_name)
     if field_name is None:
         return None

@@ -1,10 +1,13 @@
-"""Run command for BioETL CLI."""
+"""Permanent public run command seam.
+
+The retained owner package is ``bioetl.interfaces.cli.commands.domains.run``.
+"""
 
 from __future__ import annotations
 
 import asyncio
 import sys
-from collections.abc import Callable, Mapping
+from collections.abc import Mapping
 from functools import partial
 from typing import TYPE_CHECKING, NoReturn, cast
 
@@ -237,10 +240,7 @@ async def _run_pipeline_async(
         registry=registry,
         metrics_starter=ensure_metrics_server_started,
         health_context_factory=health_server_context,
-        runner_service_factory=cast(
-            "Callable[..., object]",
-            _run_runtime_helpers.get_pipeline_runner_service,
-        ),
+        runner_service_factory=_run_runtime_helpers.get_pipeline_runner_service,
     )
 
 
@@ -260,6 +260,10 @@ def _build_run_command_input_from_options(
     options: Mapping[str, object],
 ) -> RunCommandInput:
     """Build typed run-command input from Click's object-valued kwargs mapping."""
+    backend_options = build_observability_backend_cli_kwargs_from_options(
+        options,
+        default_port=DEFAULT_HEALTH_SERVER_PORT,
+    )
     return RunCommandInput(
         pipeline=cast("str", options["pipeline"]),
         run_type=cast("str", options["run_type"]),
@@ -276,10 +280,8 @@ def _build_run_command_input_from_options(
         debug=cast("bool", options["debug"]),
         health_server=cast("bool", options["health_server"]),
         health_port=cast("int", options["health_port"]),
-        **build_observability_backend_cli_kwargs_from_options(
-            options,
-            default_port=DEFAULT_HEALTH_SERVER_PORT,
-        ),
+        ensure_observability_backend=backend_options.ensure_observability_backend,
+        observability_backend_port=backend_options.observability_backend_port,
         enable_tracing=cast("bool | None", options["enable_tracing"]),
         use_cached_bronze=cast("bool", options["use_cached_bronze"]),
         cached_bronze_date=cast(str | None, options["cached_bronze_date"]),

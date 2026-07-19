@@ -35,6 +35,13 @@ from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime
 from bioetl.interfaces.cli.commands.domains.health.server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
 )
+from bioetl.interfaces.cli.commands.domains.shared.click_options import (
+    typed_click_argument,
+    typed_click_group,
+    typed_click_option,
+    typed_group_command,
+    typed_pass_obj,
+)
 from bioetl.interfaces.cli.commands.domains.shared.inspection_output import (
     emit_inspection_payload,
 )
@@ -53,14 +60,14 @@ __all__ = [
 ]
 
 
-@click.group()
+@typed_click_group()
 def workflow() -> None:
     """Run and inspect declarative workflows."""
 
 
-@workflow.command("run")
-@click.argument("name")
-@click.option(
+@typed_group_command(workflow, "run")
+@typed_click_argument("name")
+@typed_click_option(
     "--dry-run",
     is_flag=True,
     help=(
@@ -68,123 +75,123 @@ def workflow() -> None:
         "destructive transform steps switch to preview/no-op semantics."
     ),
 )
-@click.option(
+@typed_click_option(
     "--only-steps",
     help="Comma-separated subset of step IDs to execute with required dependencies",
 )
-@click.option(
+@typed_click_option(
     "--run-type",
     type=click.Choice(["incremental", "backfill", "rebuild"]),
     help="Override workflow pipeline run_type for this execution",
 )
-@click.option(
+@typed_click_option(
     "--start-offset",
     type=int,
     help="Override pipeline start_offset for workflow pipeline steps",
 )
-@click.option(
+@typed_click_option(
     "--limit",
     type=int,
     help="Override pipeline record limit for workflow pipeline steps",
 )
-@click.option(
+@typed_click_option(
     "--input-csv",
     type=click.Path(exists=True),
     help="Path to CSV file with filter IDs for workflow pipeline steps",
 )
-@click.option(
+@typed_click_option(
     "--filter-column",
     type=str,
     help="Override CSV filter column for workflow pipeline steps",
 )
-@click.option(
+@typed_click_option(
     "--filter-field",
     type=str,
     help="Override source filter field for workflow pipeline steps",
 )
-@click.option(
+@typed_click_option(
     "--vacuum-after-run",
     is_flag=True,
     default=None,
     help="Override Delta VACUUM execution after successful workflow pipeline steps",
 )
-@click.option(
+@typed_click_option(
     "--vacuum-retention-days",
     type=int,
     help="Override Delta VACUUM retention for workflow pipeline steps",
 )
-@click.option(
+@typed_click_option(
     "--log-level",
     type=str,
     help="Override log level for workflow pipeline steps",
 )
-@click.option(
+@typed_click_option(
     "--ignore-yaml-filter",
     is_flag=True,
     default=None,
     help="Ignore YAML filter defaults for workflow pipeline steps",
 )
-@click.option(
+@typed_click_option(
     "--skip-gold",
     is_flag=True,
     default=None,
     help="Skip Gold writes for workflow pipeline steps",
 )
-@click.option(
+@typed_click_option(
     "--execution-context",
     type=str,
     help="Override execution context for workflow pipeline steps",
 )
-@click.option(
+@typed_click_option(
     "--use-cached-bronze/--no-cached-bronze",
     default=None,
     help="Override Bronze cache usage for workflow pipeline steps",
 )
-@click.option(
+@typed_click_option(
     "--cached-bronze-path",
     type=click.Path(exists=True),
     help="Explicit Bronze cache path for workflow pipeline steps",
 )
-@click.option(
+@typed_click_option(
     "--cached-bronze-date",
     type=str,
     help="Bronze cache date filter for workflow pipeline steps",
 )
-@click.option(
+@typed_click_option(
     "--exact-replay/--no-exact-replay",
     "exact_replay",
     default=None,
     help="Override strict exact replay request for workflow pipeline steps",
 )
-@click.option(
+@typed_click_option(
     "--required-persistence-profile",
     type=click.Choice(["degraded_observable", "replay_ready", "forensic_grade"]),
     default=None,
     help="Override required control-plane persistence profile for workflow steps",
 )
-@click.option(
+@typed_click_option(
     "--replay-of-run-id",
     type=str,
     help="Explicit parent run_id for exact replay workflow pipeline steps",
 )
-@click.option(
+@typed_click_option(
     "--replay-of-manifest-id",
     type=str,
     help="Explicit parent manifest_id for exact replay workflow pipeline steps",
 )
-@click.option(
+@typed_click_option(
     "--tracing/--no-tracing",
     "enable_tracing",
     default=None,
     help="Override distributed tracing for workflow pipeline steps",
 )
-@click.option(
+@typed_click_option(
     "--debug-export/--no-debug-export",
     "debug_export_enabled",
     default=None,
     help="Persist a per-run debug audit pack for workflow pipeline steps",
 )
-@click.option(
+@typed_click_option(
     "--debug-export-format",
     "debug_export_formats",
     multiple=True,
@@ -193,56 +200,56 @@ def workflow() -> None:
     help="Repeatable debug-export formats for workflow pipeline steps",
     show_default=True,
 )
-@click.option(
+@typed_click_option(
     "--debug-export-dir",
     type=click.Path(),
     help="Override the debug-export root directory for workflow pipeline steps",
 )
-@click.option(
+@typed_click_option(
     "--resume-last",
     is_flag=True,
     help="Resume the latest incomplete or failed execution for this workflow",
 )
-@click.option(
+@typed_click_option(
     "--resume-manifest-id",
     type=str,
     help="Resume one specific workflow execution state selected by manifest_id",
 )
-@click.option(
+@typed_click_option(
     "--resume-run-id",
     type=click.UUID,
     help="Resume one specific workflow execution state selected by workflow run_id",
 )
-@click.option(
+@typed_click_option(
     "--force-steps",
     help="Comma-separated step IDs to force even when resume would normally skip them",
 )
-@click.option(
+@typed_click_option(
     "--repair-steps",
     help="Comma-separated step IDs to explicitly repair before resume proceeds",
 )
-@click.option(
+@typed_click_option(
     "--incremental",
     is_flag=True,
     default=False,
     help="Auto-increment start_offset from last successful execution. "
     "Cannot be used with resume selectors or --start-offset.",
 )
-@click.option(
+@typed_click_option(
     "--ensure-observability-backend/--no-ensure-observability-backend",
     "ensure_observability_backend",
     default=True,
     help="Auto-start a detached Quarantine Explorer backend for Grafana ID/detail panels.",
     show_default=True,
 )
-@click.option(
+@typed_click_option(
     "--observability-backend-port",
     type=int,
     default=DEFAULT_HEALTH_SERVER_PORT,
     help="Port for the detached Quarantine Explorer backend used by Grafana ID/detail panels.",
     show_default=True,
 )
-@click.pass_obj
+@typed_pass_obj
 def run_workflow_command(
     registry: PipelineRegistry | None,
     name: str,
@@ -321,20 +328,20 @@ def run_workflow_command(
     )
 
 
-@workflow.command("status")
-@click.argument("name")
-@click.option(
+@typed_group_command(workflow, "status")
+@typed_click_argument("name")
+@typed_click_option(
     "--only-steps",
     help="Comma-separated subset of step IDs to inspect with required dependencies",
 )
-@click.option(
+@typed_click_option(
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),
     default="text",
     help="Output format",
 )
-@click.option("--run-id", help="Inspect one specific workflow run ID")
+@typed_click_option("--run-id", help="Inspect one specific workflow run ID")
 def workflow_status_command(
     name: str,
     only_steps: str | None,

@@ -7,11 +7,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import click
-
 from bioetl.interfaces.cli.commands.domains.maintenance.service_access import (
     get_bronze_cleanup_service,
     preview_cleanup,
+)
+from bioetl.interfaces.cli.commands.domains.shared.click_options import (
+    typed_click_command,
+    typed_click_option,
 )
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CliBoundaryExecutionPolicy,
@@ -74,14 +76,14 @@ def _cleanup_policy(
     )
 
 
-@click.command("bronze-cleanup")
-@click.option(
+@typed_click_command("bronze-cleanup")
+@typed_click_option(
     "-r",
     "--retention-days",
     default=90,
     help="Remove files older than N days",
 )
-@click.option(
+@typed_click_option(
     "--dry-run",
     is_flag=True,
     help="Show what would be removed",
@@ -121,8 +123,8 @@ def bronze_cleanup_command(retention_days: int, dry_run: bool) -> None:
     )
 
 
-@click.command("cleanup-preview")
-@click.option(
+@typed_click_command("cleanup-preview")
+@typed_click_option(
     "--pipeline",
     required=True,
     help="Pipeline name to preview (e.g., chembl_activity)",

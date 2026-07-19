@@ -8,6 +8,11 @@ from typing import TYPE_CHECKING
 
 import click
 
+from bioetl.interfaces.cli.commands.domains.shared.click_options import (
+    typed_click_argument,
+    typed_click_command,
+    typed_click_option,
+)
 from bioetl.interfaces.cli.commands.export_support import (
     ExportFormat,
     _build_export_options,
@@ -42,20 +47,20 @@ def get_export_service() -> ExportService:
     return _impl()
 
 
-@click.command("export")
-@click.argument("table", required=False)
-@click.option(
+@typed_click_command("export")
+@typed_click_argument("table", required=False)
+@typed_click_option(
     "--list",
     "list_tables",
     is_flag=True,
     help="List all available Delta tables",
 )
-@click.option(
+@typed_click_option(
     "--preview",
     is_flag=True,
     help="Show table schema and sample data",
 )
-@click.option(
+@typed_click_option(
     "--format",
     "-f",
     "output_format",
@@ -63,49 +68,49 @@ def get_export_service() -> ExportService:
     default="csv",
     help="Output format (default: csv)",
 )
-@click.option(
+@typed_click_option(
     "--layer",
     "-l",
     type=click.Choice(["silver", "gold"]),
     default="silver",
     help="Medallion layer to export from (default: silver)",
 )
-@click.option(
+@typed_click_option(
     "--output",
     "-o",
     type=click.Path(path_type=Path),
     help="Output directory (default: data/exports)",
 )
-@click.option(
+@typed_click_option(
     "--limit",
     type=int,
     help="Maximum number of rows to export",
 )
-@click.option(
+@typed_click_option(
     "--columns",
     "-c",
     help="Comma-separated list of columns to include",
 )
-@click.option(
+@typed_click_option(
     "--requester",
     help="Requester identity for governed export audit metadata",
 )
-@click.option(
+@typed_click_option(
     "--role",
     type=click.Choice(["viewer", "investigator", "exporter", "admin"]),
     default="viewer",
     show_default=True,
     help="Governed export role used for redaction policy",
 )
-@click.option(
+@typed_click_option(
     "--filters-hash",
     help="Stable SHA/hash of the query filters used for parity auditing",
 )
-@click.option(
+@typed_click_option(
     "--expires-at",
     help="ISO-8601 expiry timestamp for governed export download semantics",
 )
-@click.option(
+@typed_click_option(
     "--redaction-profile",
     type=click.Choice(["default", "none"]),
     default="default",

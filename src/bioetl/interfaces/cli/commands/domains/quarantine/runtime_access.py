@@ -21,11 +21,11 @@ def get_quarantine_runtime_service(pipeline: str) -> _QuarantineRuntimeService:
         get_quarantine_runtime_service as _impl,
     )
 
-    return cast(_QuarantineRuntimeService, _impl(pipeline))
+    return cast("_QuarantineRuntimeService", _impl(pipeline))
 
 
 def get_quarantine_service() -> _QuarantineService:
     """Load the quarantine admin service through the canonical services seam."""
     from bioetl.composition.health_service_access import get_quarantine_service as _impl
 
-    return cast(_QuarantineService, _impl())
+    return cast("_QuarantineService", _impl())

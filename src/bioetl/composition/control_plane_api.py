@@ -10,9 +10,6 @@ if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.checkpoint_manager import (
         CheckpointRuntimeService,
     )
-    from bioetl.application.services.audit_inspection_service import (
-        AuditInspectionService,
-    )
     from bioetl.application.services.config_service import ConfigService
     from bioetl.application.services.control_plane.forensic import (
         ForensicRunDiffService,
@@ -50,6 +47,7 @@ if TYPE_CHECKING:
         ControlPlaneArtifactLifecyclePlan,
         ControlPlaneArtifactLifecyclePolicy,
     )
+    from bioetl.domain.ports import AdrServicePort
     from bioetl.domain.workflow import WorkflowConfig
 
     from bioetl.composition.registry_api import PipelineRegistry
@@ -67,7 +65,7 @@ if TYPE_CHECKING:
             plan: ControlPlaneArtifactLifecyclePlan,
         ) -> ControlPlaneArtifactLifecycleApplyResult: ...
 
-    def get_adr_service() -> AuditInspectionService: ...
+    def get_adr_service() -> AdrServicePort: ...
 
     def bootstrap_control_plane_lifecycle_store() -> (
         ControlPlaneArtifactLifecycleStoreProtocol

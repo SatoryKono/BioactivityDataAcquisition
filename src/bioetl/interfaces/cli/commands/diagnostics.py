@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import click
 
@@ -26,6 +26,12 @@ from bioetl.interfaces.cli.commands.domains.diagnostics.rendering import (
 from bioetl.interfaces.cli.commands.domains.quarantine.support import (
     _QuarantineRuntimeService,
     _show_quarantine_stats_for_pipeline_cli_options,
+)
+from bioetl.interfaces.cli.commands.domains.shared.click_options import (
+    typed_click_argument,
+    typed_click_group,
+    typed_click_option,
+    typed_group_command,
 )
 from bioetl.interfaces.cli.commands.domains.shared.inspection_commands import (
     add_audit_run_options,
@@ -96,7 +102,7 @@ def get_quarantine_runtime_service(pipeline: str) -> _QuarantineRuntimeService:
         get_quarantine_runtime_service as _impl,
     )
 
-    return cast(_QuarantineRuntimeService, _impl(pipeline))
+    return _impl(pipeline)
 
 
 def get_forensic_run_diff_service() -> ForensicRunDiffService:
@@ -113,25 +119,25 @@ def _build_diagnostics_guide_lines() -> list[str]:
     return build_diagnostics_guide_lines()
 
 
-@click.group()
+@typed_click_group()
 def diagnostics() -> None:
     """Unified operator diagnostics across health, checkpoints, manifests, and quarantine."""
 
 
-@diagnostics.command("guide")
+@typed_group_command(diagnostics, "guide")
 def diagnostics_guide() -> None:
     """Show the canonical diagnostics discovery and routing guide."""
     render_guide_lines(build_diagnostics_guide_lines())
 
 
-@diagnostics.command("health")
-@click.option(
+@typed_group_command(diagnostics, "health")
+@typed_click_option(
     "--provider",
     "-p",
     multiple=True,
     help="Provider name(s) to check; omit to check all configured providers",
 )
-@click.option(
+@typed_click_option(
     "--json",
     "output_json",
     is_flag=True,
@@ -146,8 +152,8 @@ def diagnostics_health(provider: tuple[str, ...], output_json: bool) -> None:
     )
 
 
-@diagnostics.command("metrics")
-@click.option("--json", "output_json", is_flag=True, help="Output as JSON")
+@typed_group_command(diagnostics, "metrics")
+@typed_click_option("--json", "output_json", is_flag=True, help="Output as JSON")
 def diagnostics_metrics(output_json: bool) -> None:
     """Show the canonical metrics/admin observability workflow summary."""
     emit_metrics_profile(get_metrics_operator_profile(), output_json=output_json)
@@ -170,7 +176,7 @@ def _emit_run_dossier(
     )
 
 
-@diagnostics.command("run")
+@typed_group_command(diagnostics, "run")
 @add_audit_run_options
 def diagnostics_run(run_id: str, limit: int, output_format: str) -> None:
     """Inspect one pipeline run as a bounded forensic dossier."""
@@ -182,16 +188,16 @@ def diagnostics_run(run_id: str, limit: int, output_format: str) -> None:
     )
 
 
-@diagnostics.command("dossier")
-@click.option("--run-id", default=None, help="Pipeline RUN_ID to inspect")
-@click.option("--manifest-id", default=None, help="MANIFEST_ID to inspect")
-@click.option(
+@typed_group_command(diagnostics, "dossier")
+@typed_click_option("--run-id", default=None, help="Pipeline RUN_ID to inspect")
+@typed_click_option("--manifest-id", default=None, help="MANIFEST_ID to inspect")
+@typed_click_option(
     "--limit",
     default=100,
     show_default=True,
     help="Maximum audit entries",
 )
-@click.option(
+@typed_click_option(
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),
@@ -213,8 +219,8 @@ def diagnostics_dossier(
     )
 
 
-@diagnostics.command("contract-checks")
-@click.option("--json", "output_json", is_flag=True, help="Output as JSON")
+@typed_group_command(diagnostics, "contract-checks")
+@typed_click_option("--json", "output_json", is_flag=True, help="Output as JSON")
 def diagnostics_contract_checks(output_json: bool) -> None:
     """Run public observability contract checks."""
     report = run_observability_contract_checks()
@@ -226,7 +232,7 @@ def diagnostics_contract_checks(output_json: bool) -> None:
         raise SystemExit(ExitCode.FAIL)
 
 
-@diagnostics.command("checkpoint")
+@typed_group_command(diagnostics, "checkpoint")
 @add_checkpoint_workflow_options
 def diagnostics_checkpoint(
     pipeline: str,
@@ -244,9 +250,9 @@ def diagnostics_checkpoint(
     )
 
 
-@diagnostics.command("manifest")
-@click.argument("identifier")
-@click.option(
+@typed_group_command(diagnostics, "manifest")
+@typed_click_argument("identifier")
+@typed_click_option(
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),
@@ -273,10 +279,10 @@ def _emit_manifest_payload(
     emit_manifest_payload(service, identifier=identifier, output_format=output_format)
 
 
-@diagnostics.command("forensic-diff")
-@click.argument("left_identifier")
-@click.argument("right_identifier")
-@click.option(
+@typed_group_command(diagnostics, "forensic-diff")
+@typed_click_argument("left_identifier")
+@typed_click_argument("right_identifier")
+@typed_click_option(
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),
@@ -297,7 +303,7 @@ def diagnostics_forensic_diff(
     )
 
 
-@diagnostics.command("quarantine")
+@typed_group_command(diagnostics, "quarantine")
 @add_quarantine_stats_options(silver_filter_alias_help=SILVER_FILTER_ALIAS_HELP)
 def diagnostics_quarantine(
     pipeline: str,

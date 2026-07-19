@@ -35,7 +35,7 @@ def _extract_with_fallback(
     if value is not None:
         return cast(_OPTIONAL_STR, value)
     if fallback_key:
-        return cast(_OPTIONAL_STR, extract_run_context_anchor(data, fallback_key))
+        return extract_run_context_anchor(data, fallback_key)
     return None
 
 

@@ -22,7 +22,7 @@ from bioetl.composition.runtime_builders import (
     _run_manifest_replay_support as replay_helper_module,
 )
 from bioetl.composition.runtime_builders._run_manifest_creation_support import (
-    _RunManifestCreateRequestInputs,
+    RunManifestCreateRequestInputs,
     build_manifest_create_request,
     emit_replay_reconstructability_metric,
 )
@@ -190,7 +190,7 @@ def test_build_manifest_create_request_uses_supplied_reproducibility_context(
         reason="fixture",
     )
     request = build_manifest_create_request(
-        _RunManifestCreateRequestInputs(
+        RunManifestCreateRequestInputs(
             ctx=_make_run_context(),
             inputs=SimpleNamespace(
                 cached_bronze=None,

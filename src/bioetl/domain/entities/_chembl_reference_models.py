@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from bioetl.domain._immutability import freeze_fields
+from bioetl.domain.immutability import freeze_fields
 
 
 class ChemblPublicationRecord(BaseModel):

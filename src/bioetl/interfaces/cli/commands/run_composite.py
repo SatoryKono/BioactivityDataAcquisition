@@ -1,4 +1,7 @@
-"""Run the composite pipeline CLI command."""
+"""Permanent public run-composite command seam.
+
+The reviewed owner package is ``bioetl.interfaces.cli.commands.domains.composite``.
+"""
 
 from __future__ import annotations
 
@@ -50,6 +53,10 @@ from bioetl.interfaces.cli.commands.domains.health.server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
     echo_health_server_info,
     health_server_context,
+)
+from bioetl.interfaces.cli.commands.domains.shared.click_options import (
+    typed_click_command,
+    typed_click_option,
 )
 from bioetl.interfaces.cli.formatters import echo_info, echo_warning
 
@@ -179,102 +186,102 @@ def _exit_with_composite_result(success: bool, error_message: str | None) -> Non
     _exit_with_composite_result_impl(success, error_message)
 
 
-@click.command(name="run-composite")
-@click.option(
+@typed_click_command(name="run-composite")
+@typed_click_option(
     "--composite",
     callback=_validate_composite_name,
     required=True,
     help="Composite pipeline name (e.g., 'publication')",
 )
-@click.option(
+@typed_click_option(
     "--resume",
     is_flag=True,
     help="Resume from last checkpoint state; not a strict exact replay",
 )
-@click.option(
+@typed_click_option(
     "--dry-run",
     is_flag=True,
     help="Preview execution without writing data",
 )
-@click.option(
+@typed_click_option(
     "--seed-limit",
     type=int,
     help="Maximum records for seed pipeline",
 )
-@click.option(
+@typed_click_option(
     "--enrich-only",
     type=str,
     help="Run only specified enrichers (comma-separated)",
 )
-@click.option(
+@typed_click_option(
     "--required-only",
     is_flag=True,
     help="Skip optional enrichers",
 )
-@click.option(
+@typed_click_option(
     "--force-enricher",
     type=str,
     help="Force re-run of specified enricher (ignores checkpoint)",
 )
-@click.option(
+@typed_click_option(
     "--use-cached-bronze/--no-cached-bronze",
     "use_cached_bronze",
     default=False,
     help="Load data from Bronze cache instead of API; composite remains rebuild/resume only",
     show_default=True,
 )
-@click.option(
+@typed_click_option(
     "--cached-bronze-date",
     type=str,
     default=None,
     help="Filter Bronze cache by date (YYYY-MM-DD)",
 )
-@click.option(
+@typed_click_option(
     "--cached-bronze-path",
     type=click.Path(exists=True),
     default=None,
     help="Explicit path to Bronze cache directory",
 )
-@click.option(
+@typed_click_option(
     "--cached-bronze-enrichers/--no-cached-bronze-enrichers",
     "cached_bronze_enrichers",
     default=None,
     help="Override cached Bronze for enrichers (default: follow --use-cached-bronze)",
 )
-@click.option(
+@typed_click_option(
     "--cached-bronze-dependencies/--no-cached-bronze-dependencies",
     "cached_bronze_dependencies",
     default=False,
     help="Override cached Bronze for dependencies (default: use API)",
     show_default=True,
 )
-@click.option(
+@typed_click_option(
     "--debug",
     is_flag=True,
     help="Enable DEBUG level logging",
 )
-@click.option(
+@typed_click_option(
     "--health-server/--no-health-server",
     "health_server",
     default=True,
     help="Enable/disable HTTP health server during execution.",
     show_default=True,
 )
-@click.option(
+@typed_click_option(
     "--health-port",
     type=int,
     default=DEFAULT_HEALTH_SERVER_PORT,
     help="Port for the HTTP health server.",
     show_default=True,
 )
-@click.option(
+@typed_click_option(
     "--ensure-observability-backend/--no-ensure-observability-backend",
     "ensure_observability_backend",
     default=True,
     help="Auto-start a detached Quarantine Explorer backend for Grafana ID/detail panels.",
     show_default=True,
 )
-@click.option(
+@typed_click_option(
     "--observability-backend-port",
     type=int,
     default=DEFAULT_HEALTH_SERVER_PORT,

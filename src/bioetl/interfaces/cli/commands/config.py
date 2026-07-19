@@ -7,11 +7,17 @@ Uses ConfigService from composition entrypoints for clean layering.
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import click
 
 from bioetl.domain.types import JsonDict
+from bioetl.interfaces.cli.commands.domains.shared.click_options import (
+    typed_click_argument,
+    typed_click_group,
+    typed_click_option,
+    typed_group_command,
+)
 from bioetl.interfaces.cli.formatters import echo_error, echo_info
 
 if TYPE_CHECKING:
@@ -42,7 +48,7 @@ def get_configured_pipeline_names() -> list[str]:
         list_configured_pipeline_names as _impl,
     )
 
-    return _impl()
+    return cast("list[str]", _impl())
 
 
 def _config_to_dict(config: object) -> JsonDict:
@@ -68,14 +74,14 @@ def _config_to_dict(config: object) -> JsonDict:
     return {"value": config}  # Wrap primitives in a dict
 
 
-@click.group()
+@typed_click_group()
 def config() -> None:
     """View and validate configuration."""
 
 
-@config.command("show")
-@click.argument("pipeline")
-@click.option(
+@typed_group_command(config, "show")
+@typed_click_argument("pipeline")
+@typed_click_option(
     "--format",
     "output_format",
     type=click.Choice(["json", "yaml"]),
@@ -116,8 +122,8 @@ def show_command(pipeline: str, output_format: str) -> None:
         echo_info(yaml.dump(config_dict, default_flow_style=False, sort_keys=False))
 
 
-@config.command("validate")
-@click.argument("pipeline")
+@typed_group_command(config, "validate")
+@typed_click_argument("pipeline")
 def validate_command(pipeline: str) -> None:
     """Validate configuration for a pipeline.
 
@@ -146,8 +152,8 @@ def validate_command(pipeline: str) -> None:
         echo_error("Config file not found", str(e))
 
 
-@config.command("show-settings")
-@click.option(
+@typed_group_command(config, "show-settings")
+@typed_click_option(
     "--format",
     "output_format",
     type=click.Choice(["json", "yaml"]),
@@ -202,7 +208,7 @@ def show_settings_command(output_format: str) -> None:
         echo_info(yaml.dump(settings_dict, default_flow_style=False, sort_keys=False))
 
 
-@config.command("list-pipelines")
+@typed_group_command(config, "list-pipelines")
 def list_pipelines_command() -> None:
     """List all configured pipelines.
 

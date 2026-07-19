@@ -12,6 +12,9 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from types import MappingProxyType
 
+from bioetl.domain.normalization.profiles._chembl_policy_family_mapping import (
+    family_mapping_by_name,
+)
 from bioetl.domain.normalization.profiles.chembl_policy_registry_data import (
     DEFAULT_CHEMBL_POLICY_REGISTRY_DATA,
     ChemblControlledVocabularyFamily,
@@ -67,11 +70,6 @@ _REFERENCE_IDENTIFIER_FAMILIES: Mapping[str, ChemblReferenceIdentifierFamily] = 
     MappingProxyType({})
 )
 _POLICY_SURFACES: Mapping[tuple[str, str], ChemblPolicySurface] = MappingProxyType({})
-
-
-def _family_mapping_by_name(families: tuple[object, ...]) -> Mapping[str, object]:
-    """Index immutable family payloads by family_name."""
-    return MappingProxyType({str(family.family_name): family for family in families})
 
 
 def _parse_chembl_field_ref(field_ref: str) -> tuple[str, str]:
@@ -210,16 +208,14 @@ def _add_reference_identifier_surfaces(
 def initialize_chembl_policy_registry(data: ChemblPolicyRegistryData) -> None:
     """Inject immutable policy data into the domain registry runtime state."""
     global _CONTROLLED_VOCABULARIES, _ONTOLOGY_FAMILIES, _POLICY_SURFACES
-    global \
-        _REFERENCE_IDENTIFIER_FAMILIES, \
-        _STRICT_BOOLEAN_FAMILIES, \
-        _STRICT_FLAG_FAMILIES
+    global _REFERENCE_IDENTIFIER_FAMILIES, _STRICT_BOOLEAN_FAMILIES
+    global _STRICT_FLAG_FAMILIES
 
-    _STRICT_BOOLEAN_FAMILIES = _family_mapping_by_name(data.strict_boolean_families)
-    _STRICT_FLAG_FAMILIES = _family_mapping_by_name(data.strict_flag_families)
-    _CONTROLLED_VOCABULARIES = _family_mapping_by_name(data.controlled_vocabularies)
-    _ONTOLOGY_FAMILIES = _family_mapping_by_name(data.ontology_families)
-    _REFERENCE_IDENTIFIER_FAMILIES = _family_mapping_by_name(
+    _STRICT_BOOLEAN_FAMILIES = family_mapping_by_name(data.strict_boolean_families)
+    _STRICT_FLAG_FAMILIES = family_mapping_by_name(data.strict_flag_families)
+    _CONTROLLED_VOCABULARIES = family_mapping_by_name(data.controlled_vocabularies)
+    _ONTOLOGY_FAMILIES = family_mapping_by_name(data.ontology_families)
+    _REFERENCE_IDENTIFIER_FAMILIES = family_mapping_by_name(
         data.reference_identifier_families
     )
     _POLICY_SURFACES = _build_policy_surfaces(data)

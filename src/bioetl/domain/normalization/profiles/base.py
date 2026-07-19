@@ -78,9 +78,10 @@ class FieldRule:
             "include_in_hash": self.include_in_hash,
             "set_like": self.set_like,
         }
+        normalizer_ref = _normalizer_ref(self.normalizer)
         return FieldRuleIdentity(
             field_name=self.field_name,
-            normalizer_ref=payload["normalizer_ref"],
+            normalizer_ref=normalizer_ref,
             include_in_hash=self.include_in_hash,
             set_like=self.set_like,
             compatibility_hash=_sha256_hex(payload),

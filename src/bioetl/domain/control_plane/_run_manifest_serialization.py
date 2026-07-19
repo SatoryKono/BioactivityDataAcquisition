@@ -16,14 +16,22 @@ from bioetl.domain.normalization.control_plane import (
 )
 
 
+def _raise_immutable_mapping(*_args: object, **_kwargs: object) -> NoReturn:
+    raise TypeError("RunManifest payload mappings are immutable")
+
+
 class _FrozenManifestMapping(dict[object, object]):
     """Immutable dict-compatible payload mapping for manifest snapshots."""
 
     __slots__ = ()
 
+    __ior__ = _raise_immutable_mapping
+    __or__ = _raise_immutable_mapping
+    __ror__ = _raise_immutable_mapping
+
     @staticmethod
     def _raise_immutable() -> NoReturn:
-        raise TypeError("RunManifest payload mappings are immutable")
+        _raise_immutable_mapping()
 
     def __setitem__(self, key: object, value: object) -> None:
         self._raise_immutable()
@@ -44,10 +52,7 @@ class _FrozenManifestMapping(dict[object, object]):
         self._raise_immutable()
 
     def update(self, *_args: object, **_kwargs: object) -> None:
-        self._raise_immutable()
-
-    def __ior__(self, other: object) -> NoReturn:
-        self._raise_immutable()
+        _raise_immutable_mapping()
 
 
 def freeze_manifest_payload(value: object) -> object:

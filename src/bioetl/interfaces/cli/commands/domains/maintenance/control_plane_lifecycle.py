@@ -12,6 +12,10 @@ from bioetl.domain.control_plane import (
     ControlPlaneArtifactLifecyclePlan,
     ControlPlaneArtifactLifecyclePolicy,
 )
+from bioetl.interfaces.cli.commands.domains.shared.click_options import (
+    typed_click_command,
+    typed_click_option,
+)
 from bioetl.interfaces.cli.formatters import echo_dry_run_prefix, echo_info
 
 if TYPE_CHECKING:
@@ -48,21 +52,21 @@ def bootstrap_control_plane_lifecycle_store() -> (
     return cast("ControlPlaneArtifactLifecycleStoreProtocol", _impl())
 
 
-@click.command("control-plane-lifecycle")
-@click.option(
+@typed_click_command("control-plane-lifecycle")
+@typed_click_option(
     "--retention-days",
     "-r",
     default=90,
     show_default=True,
     help="Minimum age of control-plane artifacts to delete.",
 )
-@click.option(
+@typed_click_option(
     "--apply",
     "apply_mode",
     is_flag=True,
     help="Delete selected candidates. Default is dry-run preview.",
 )
-@click.option(
+@typed_click_option(
     "--format",
     "output_format",
     type=click.Choice(["text", "json"]),
@@ -70,32 +74,32 @@ def bootstrap_control_plane_lifecycle_store() -> (
     show_default=True,
     help="Output format for the lifecycle plan.",
 )
-@click.option(
+@typed_click_option(
     "--protected-manifest-id",
     multiple=True,
     help="Manifest ID to retain regardless of age.",
 )
-@click.option(
+@typed_click_option(
     "--protected-run-id",
     multiple=True,
     help="Run ID to retain regardless of age.",
 )
-@click.option(
+@typed_click_option(
     "--protected-effective-config-artifact-id",
     multiple=True,
     help="Effective-config artifact ID to retain regardless of age.",
 )
-@click.option(
+@typed_click_option(
     "--protected-lineage-fragment-id",
     multiple=True,
     help="Lineage fragment ID to retain regardless of age.",
 )
-@click.option(
+@typed_click_option(
     "--protected-snapshot-id",
     multiple=True,
     help="Input snapshot ID to retain regardless of age.",
 )
-@click.option(
+@typed_click_option(
     "--allow-profile-floor-violation",
     is_flag=True,
     help=(

@@ -20,19 +20,19 @@ if TYPE_CHECKING:
     from bioetl.interfaces.cli.commands import config as config
     from bioetl.interfaces.cli.commands import config_dq as config_dq
     from bioetl.interfaces.cli.commands import debug as debug
-    from bioetl.interfaces.cli.commands import diagnostics as diagnostics
     from bioetl.interfaces.cli.commands import export as export
     from bioetl.interfaces.cli.commands import lineage as lineage
     from bioetl.interfaces.cli.commands import lock as lock
     from bioetl.interfaces.cli.commands import maintenance as maintenance
-    from bioetl.interfaces.cli.commands import quarantine as quarantine
-    from bioetl.interfaces.cli.commands import run as run
-    from bioetl.interfaces.cli.commands import run_all as run_all
     from bioetl.interfaces.cli.commands import run_manifest as run_manifest
     from bioetl.interfaces.cli.commands import vacuum as vacuum
     from bioetl.interfaces.cli.commands import workflow as workflow
 
+    diagnostics: ModuleType
     health: ModuleType
+    quarantine: ModuleType
+    run: ModuleType
+    run_all: ModuleType
     run_composite: ModuleType
 
 _PUBLIC_COMMAND_MODULES = frozenset(

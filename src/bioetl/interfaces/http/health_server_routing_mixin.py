@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 from urllib.parse import parse_qs, urlsplit
 
 from bioetl.application.runtime_clock import current_utc_time
@@ -84,8 +84,8 @@ class HealthServerRoutingMixin:
     def _response_timestamp(self) -> str:
         """Return the sanctioned timestamp source for health responses."""
         if self._clock is not None:
-            return self._clock.now().isoformat()
-        return current_utc_time().isoformat()
+            return cast("str", self._clock.now().isoformat())
+        return cast("str", current_utc_time().isoformat())
 
     async def _route_request(self, writer: asyncio.StreamWriter, path: str) -> None:
         """Route request to appropriate handler."""

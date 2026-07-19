@@ -10,8 +10,11 @@ import json
 from collections.abc import Callable
 from typing import TYPE_CHECKING, cast
 
-import click
-
+from bioetl.interfaces.cli.commands.domains.shared.click_options import (
+    typed_click_group,
+    typed_click_option,
+    typed_group_command,
+)
 from bioetl.interfaces.cli.commands.domains.shared.inspection_commands import (
     add_audit_run_options,
     add_checkpoint_workflow_options,
@@ -38,7 +41,7 @@ __all__ = [
 _NONE_ENTRY_LINE = "  - none"
 
 
-@click.group()
+@typed_click_group()
 def checkpoint() -> None:
     """Manage checkpoints."""
 
@@ -283,8 +286,8 @@ def _render_checkpoint_payload(payload: dict[str, object]) -> str:
     return json.dumps(payload, indent=2, default=str)
 
 
-@checkpoint.command("list")
-@click.option("--pipeline", required=True, help="Pipeline name")
+@typed_group_command(checkpoint, "list")
+@typed_click_option("--pipeline", required=True, help="Pipeline name")
 def checkpoint_list(pipeline: str) -> None:
     """List all checkpoints.
 
@@ -303,7 +306,7 @@ def checkpoint_list(pipeline: str) -> None:
     asyncio.run(_list())
 
 
-@checkpoint.command("audit-run")
+@typed_group_command(checkpoint, "audit-run")
 @add_audit_run_options
 def checkpoint_audit_run(run_id: str, limit: int, output_format: str) -> None:
     """Inspect one pipeline run across audit and run-manifest observability surfaces."""
@@ -317,7 +320,7 @@ def checkpoint_audit_run(run_id: str, limit: int, output_format: str) -> None:
     )
 
 
-@checkpoint.command("inspect")
+@typed_group_command(checkpoint, "inspect")
 @add_checkpoint_workflow_options
 def checkpoint_inspect(
     pipeline: str,

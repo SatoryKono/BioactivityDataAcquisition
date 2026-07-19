@@ -8,13 +8,13 @@ import tempfile
 from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Protocol, cast
 
 import click
 
 from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.domains.health.failure_handling import (
-    handle_health_failure,
+    handle_health_failure as _handle_health_failure,
 )
 from bioetl.interfaces.cli.commands.domains.health.rendering import (
     build_health_server_info_lines,
@@ -34,8 +34,6 @@ if TYPE_CHECKING:
     from bioetl.interfaces.http.health_server import HealthServer
 
 DEFAULT_HEALTH_SERVER_PORT = 8081
-
-_handle_health_failure = handle_health_failure
 
 _HEALTH_SERVER_DOMAIN_ERROR_TITLE = "Health server failed with domain error"
 _HEALTH_SERVER_UNEXPECTED_ERROR_TITLE = "Unexpected error in health server command"
@@ -111,7 +109,7 @@ def get_runtime_settings() -> _HealthRuntimeSettings:
     """Load runtime settings through the composition boundary."""
     from bioetl.composition.runtime_builders.config_access import get_settings as _impl
 
-    return _impl()
+    return cast("_HealthRuntimeSettings", _impl())
 
 
 def _start_metrics_server_via_interface(
@@ -126,7 +124,8 @@ def _start_metrics_server_via_interface(
     """Start the metrics server through the observability composition seam."""
     from bioetl.composition.observability_api import start_metrics_server as _impl
 
-    return _impl(
+    starter = cast("Callable[..., bool]", _impl)
+    return starter(
         port=port,
         addr=addr,
         fail_fast=fail_fast,

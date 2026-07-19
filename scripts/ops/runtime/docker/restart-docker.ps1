@@ -72,7 +72,11 @@ function Protect-SensitiveValue {
         return $Protected
     }
     if (($Value -is [System.Collections.IEnumerable]) -and -not ($Value -is [string])) {
-        return @($Value | ForEach-Object { Protect-SensitiveValue $_ })
+        $ProtectedItems = [System.Collections.Generic.List[object]]::new()
+        foreach ($Item in $Value) {
+            [void]$ProtectedItems.Add((Protect-SensitiveValue $Item))
+        }
+        return ,$ProtectedItems
     }
     return $Value
 }
@@ -205,7 +209,7 @@ function Get-CliOrigins {
             Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
             Sort-Object -Unique
     )
-    return @(Protect-SensitiveValue $Origins)
+    return $Origins
 }
 
 function Collect-Diagnostics {
@@ -269,7 +273,7 @@ function Collect-Diagnostics {
         classification = if ($DesktopActive -and $LocalEngineActive) { 'possible_duplicate_active_engines' } elseif ($DesktopActive -or $LocalEngineActive) { 'single_active_engine_observed' } else { 'no_active_engine_observed' }
         cli_origin_classification = if ($CliOrigins.Count -gt 1) { 'multiple_cli_origins' } elseif ($CliOrigins.Count -eq 1) { 'single_cli_origin' } else { 'cli_unavailable' }
         cli_origins = $CliOrigins
-        context_endpoints = @(Protect-SensitiveValue $ContextEndpoints)
+        context_endpoints = $ContextEndpoints
         context_endpoint_note = 'Multiple configured contexts do not by themselves prove duplicate active engines.'
         desktop_engine_active = $DesktopActive
         local_wsl_engine_active = $LocalEngineActive
@@ -306,8 +310,8 @@ function Collect-Diagnostics {
     )
     $Diagnostics.vhd_attachment = [ordered]@{
         classification = if ([string]::IsNullOrWhiteSpace($VhdText)) { 'unavailable' } elseif ($VhdConflicts.Count -gt 0) { 'attachment_conflict_observed' } elseif ($VhdReferences.Count -gt 0) { 'vhd_reference_observed_no_conflict' } else { 'no_attachment_conflict_observed' }
-        references = @(Protect-SensitiveValue $VhdReferences)
-        conflict_indicators = @(Protect-SensitiveValue $VhdConflicts)
+        references = $VhdReferences
+        conflict_indicators = $VhdConflicts
     }
 
     $ComposeRows = @(ConvertFrom-JsonLines $Compose.output)
@@ -321,7 +325,7 @@ function Collect-Diagnostics {
     $HasLinuxOrigin = @($Origins | Where-Object { $_ -match '^/' }).Count -gt 0
     $Diagnostics.project_origins = [ordered]@{
         classification = if ($Compose.returncode -ne 0) { 'unavailable' } elseif ($Origins.Count -eq 0) { 'no_projects_observed' } elseif ($HasWindowsOrigin -and $HasLinuxOrigin) { 'mixed_windows_linux_origins' } elseif ($HasWindowsOrigin) { 'windows_origins_observed' } elseif ($HasLinuxOrigin) { 'linux_origins_observed' } else { 'unclassified_origins_observed' }
-        origins = @(Protect-SensitiveValue $Origins)
+        origins = $Origins
     }
 
     $ContainerRows = @(ConvertFrom-JsonLines $Containers.output)

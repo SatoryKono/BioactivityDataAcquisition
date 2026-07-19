@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import click
 
@@ -23,6 +23,7 @@ from bioetl.interfaces.cli.commands.domains.quarantine.support import (
     _show_quarantine_stats,
 )
 from bioetl.interfaces.cli.commands.domains.shared.inspection_commands import (
+    InspectionPayloadProvider,
     run_async_inspection_command,
 )
 from bioetl.interfaces.cli.commands.domains.shared.inspection_output import (
@@ -101,18 +102,24 @@ def emit_run_dossier(
     if bool(run_id) == bool(manifest_id):
         raise click.UsageError("Provide exactly one of --run-id or --manifest-id")
 
-    async def _inspect_by_manifest_id() -> object:
+    async def _inspect_by_manifest_id() -> InspectionPayloadProvider:
         assert manifest_id is not None
-        return await bundle.workflow_service.inspect_manifest_dossier(
-            manifest_id,
-            audit_limit=limit,
+        return cast(
+            "InspectionPayloadProvider",
+            await bundle.workflow_service.inspect_manifest_dossier(
+                manifest_id,
+                audit_limit=limit,
+            ),
         )
 
-    async def _inspect_by_run_id() -> object:
+    async def _inspect_by_run_id() -> InspectionPayloadProvider:
         assert run_id is not None
-        return await bundle.workflow_service.inspect_run_dossier(
-            run_id,
-            audit_limit=limit,
+        return cast(
+            "InspectionPayloadProvider",
+            await bundle.workflow_service.inspect_run_dossier(
+                run_id,
+                audit_limit=limit,
+            ),
         )
 
     action = _inspect_by_manifest_id if manifest_id else _inspect_by_run_id

@@ -482,15 +482,15 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 180
-      total_loc: 22597
+      total_loc: 22218
       files_ge_250_loc: 4
       helper_function_ratio: 0.36
       max_internal_fan_in: 7
       max_internal_fan_in_module: bioetl.application.core.span_helpers
     trend:
-      status: reviewed_2026-07-07_application_core_live_metric_refresh
-      next_action: 2026-07-07 refreshes measured application_core metrics against
-        the committed hotspot-family baseline at 180 files, 22319 LOC, 4 files_ge_250_loc,
+      status: reviewed_2026-07-18_application_core_live_metric_refresh
+      next_action: 2026-07-18 refreshes measured application_core metrics against
+        the committed hotspot-family baseline at 180 files, 22218 LOC, 4 files_ge_250_loc,
         helper_function_ratio 0.357, and max_internal_fan_in 7. Bounded-growth budgets
         remain flat at 7 files_ge_250_loc and max_internal_fan_in 10; no technical-debt
         budget is increased.
@@ -596,7 +596,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 55
-      total_loc: 6846
+      total_loc: 6842
       files_ge_250_loc: 0
       helper_function_ratio: 0.358
       max_internal_fan_in: 3
@@ -713,7 +713,7 @@ oversized_source_module_inventory:
     owner: '@bioetl-reproducibility'
     target_split: separate score-card policy rules from manifest projection helpers
   - path: src/bioetl/interfaces/cli/commands/domains/health/server_integration.py
-    lines: 409
+    lines: 408
     owner: '@bioetl-interfaces'
     target_split: split health server integration, metrics server wiring, and quarantine
       service helpers

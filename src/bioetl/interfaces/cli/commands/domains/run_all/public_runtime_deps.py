@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable, Mapping
+from collections.abc import Callable, Coroutine, Mapping
+from contextlib import AbstractAsyncContextManager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, NoReturn
 
 import click
 
+from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
+    ObservabilityBackendEnsureResult,
+)
 from bioetl.interfaces.cli.commands.domains.run_all.command_policy import (
     RunAllCommandInput,
 )
@@ -20,6 +24,12 @@ if TYPE_CHECKING:
     from bioetl.composition.registry_api import PipelineRegistry
     from bioetl.interfaces.cli.exit_codes import ExitCode
 
+_HealthServerContextFactory = Callable[..., AbstractAsyncContextManager[object]]
+_RunAllCoroutineRunner = Callable[
+    [Coroutine[object, object, BatchRunResult]],
+    BatchRunResult,
+]
+
 
 @dataclass(frozen=True, slots=True)
 class RunAllCallbackRuntime:
@@ -30,7 +40,9 @@ class RunAllCallbackRuntime:
     build_input: Callable[..., RunAllCommandInput]
     dispatch_cli_callback: Callable[..., None]
     disable_transient_health_server: Callable[..., bool]
-    ensure_observability_backend_started: Callable[..., object]
+    ensure_observability_backend_started: Callable[
+        ..., ObservabilityBackendEnsureResult
+    ]
     run_with_cli_policy: Callable[[click.Context, RunAllCommandInput], None]
 
 
@@ -58,8 +70,8 @@ class RunAllBatchRuntime:
     ensure_metrics_server_started: Callable[[], object]
     get_pipeline_runner_service: Callable[..., PipelineRunnerService]
     handle_failure: Callable[..., None]
-    health_server_context_factory: Callable[..., object]
-    run_coro: Callable[[Awaitable[BatchRunResult]], BatchRunResult]
+    health_server_context_factory: _HealthServerContextFactory
+    run_coro: _RunAllCoroutineRunner
 
 
 @dataclass(frozen=True, slots=True)

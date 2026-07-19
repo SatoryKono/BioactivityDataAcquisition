@@ -13,40 +13,40 @@ from bioetl.composition._service_protocols import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.services.audit_inspection_service import (
+    from bioetl.composition._service_types import (
+        AdrServicePort,
         AuditInspectionService,
-    )
-    from bioetl.application.services.bronze_cleanup_service import (
         BronzeCleanupResult,
         BronzeCleanupService,
-    )
-    from bioetl.application.services.checkpoint_service import CheckpointService
-    from bioetl.application.services.control_plane.workflow.execution_service import (
-        WorkflowExecutionService,
-    )
-    from bioetl.application.services.control_plane.workflow.inspection_service import (
-        WorkflowInspectionService,
-    )
-    from bioetl.application.services.execution.pipeline_runner_service import (
-        PipelineRunnerService,
-    )
-    from bioetl.application.services.health_service import HealthService
-    from bioetl.application.services.metrics_service import MetricsService
-    from bioetl.application.services.observability_workflow_service import (
+        CheckpointService,
+        ConfigService,
+        ContractMigrationService,
+        ExportService,
+        ForensicRunDiffService,
+        HealthService,
+        HistoricalReplayClosureService,
+        HistoricalReplayCorpusService,
+        HistoricalReplayUniverseService,
+        LineageInspectionService,
+        LockPort,
+        LockService,
+        MetricsService,
         ObservabilityWorkflowService,
-    )
-    from bioetl.application.services.quarantine_service import QuarantineService
-    from bioetl.application.services.vacuum_service import VacuumService
-    from bioetl.application.services.workflow_runner_service import (
+        PipelineRegistry,
+        PipelineRunnerService,
+        QuarantinePort,
+        QuarantineService,
+        RunManifestInspectionService,
+        VacuumService,
+        WorkflowConfig,
+        WorkflowExecutionService,
+        WorkflowInspectionService,
         WorkflowRunnerService,
     )
-    from bioetl.composition.registry_api import PipelineRegistry
-    from bioetl.domain.ports import LockPort, QuarantinePort
-    from bioetl.domain.workflow import WorkflowConfig
 
 
 _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE = "bioetl.composition.bootstrap.cli.checkpoint"
-_BOOTSTRAP_RUN_MANIFEST_EXPORT_MODULE = "bioetl.composition.bootstrap.cli.run_manifest"
+_RUN_MANIFEST_BOOTSTRAP = "bioetl.composition.bootstrap.cli.run_manifest"
 _BOOTSTRAP_STORAGE_EXPORT_MODULE = "bioetl.composition.bootstrap.cli.storage"
 _BOOTSTRAP_CLI_MODULE = "bioetl.composition.bootstrap.cli"
 
@@ -59,14 +59,10 @@ _BOOTSTRAP_EXPORTS: dict[str, str] = {
     "bootstrap_config_service": "bioetl.composition.bootstrap.cli.config",
     "bootstrap_contract_migration_service": _BOOTSTRAP_STORAGE_EXPORT_MODULE,
     "bootstrap_export_service": _BOOTSTRAP_STORAGE_EXPORT_MODULE,
-    "bootstrap_forensic_run_diff_service": _BOOTSTRAP_RUN_MANIFEST_EXPORT_MODULE,
-    "bootstrap_historical_replay_corpus_service": _BOOTSTRAP_RUN_MANIFEST_EXPORT_MODULE,
-    "bootstrap_historical_replay_closure_service": (
-        _BOOTSTRAP_RUN_MANIFEST_EXPORT_MODULE
-    ),
-    "bootstrap_historical_replay_universe_service": (
-        _BOOTSTRAP_RUN_MANIFEST_EXPORT_MODULE
-    ),
+    "bootstrap_forensic_run_diff_service": _RUN_MANIFEST_BOOTSTRAP,
+    "bootstrap_historical_replay_corpus_service": _RUN_MANIFEST_BOOTSTRAP,
+    "bootstrap_historical_replay_closure_service": _RUN_MANIFEST_BOOTSTRAP,
+    "bootstrap_historical_replay_universe_service": _RUN_MANIFEST_BOOTSTRAP,
     "bootstrap_health_server_dependencies": "bioetl.composition.bootstrap.cli.health",
     "bootstrap_health_service": "bioetl.composition.bootstrap.cli.health",
     "bootstrap_lineage_service": _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE,
@@ -221,10 +217,13 @@ def load_workflow_config(name: str) -> WorkflowConfig:
     return _workflow_services.load_workflow_config(name)
 
 
-def get_contract_migration_service() -> object:
+def get_contract_migration_service() -> ContractMigrationService:
     """Get the contract migration planner service."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_contract_migration_service")
+    return cast(
+        "ContractMigrationService",
+        _invoke_bootstrap("bootstrap_contract_migration_service"),
+    )
 
 
 def get_health_service() -> HealthService:
@@ -272,61 +271,78 @@ def get_quarantine_port() -> QuarantinePort:
     return cast("QuarantinePort", _invoke_bootstrap("bootstrap_quarantine_adapter"))
 
 
-def get_adr_service() -> object:
+def get_adr_service() -> AdrServicePort:
     """Get ADR management port."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_adr_service")
+    return cast("AdrServicePort", _invoke_bootstrap("bootstrap_adr_service"))
 
 
-def get_config_service() -> object:
+def get_config_service() -> ConfigService:
     """Get application configuration service."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_config_service")
+    return cast("ConfigService", _invoke_bootstrap("bootstrap_config_service"))
 
 
-def get_export_service() -> object:
+def get_export_service() -> ExportService:
     """Get Delta export service."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_export_service")
+    return cast("ExportService", _invoke_bootstrap("bootstrap_export_service"))
 
 
-def get_forensic_run_diff_service() -> object:
+def get_forensic_run_diff_service() -> ForensicRunDiffService:
     """Get forensic run diff service."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_forensic_run_diff_service")
+    return cast(
+        "ForensicRunDiffService",
+        _invoke_bootstrap("bootstrap_forensic_run_diff_service"),
+    )
 
 
-def get_historical_replay_closure_service() -> object:
+def get_historical_replay_closure_service() -> HistoricalReplayClosureService:
     """Get historical replay closure service."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_historical_replay_closure_service")
+    return cast(
+        "HistoricalReplayClosureService",
+        _invoke_bootstrap("bootstrap_historical_replay_closure_service"),
+    )
 
 
-def get_historical_replay_corpus_service() -> object:
+def get_historical_replay_corpus_service() -> HistoricalReplayCorpusService:
     """Get historical replay corpus service."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_historical_replay_corpus_service")
+    return cast(
+        "HistoricalReplayCorpusService",
+        _invoke_bootstrap("bootstrap_historical_replay_corpus_service"),
+    )
 
 
-def get_historical_replay_universe_service() -> object:
+def get_historical_replay_universe_service() -> HistoricalReplayUniverseService:
     """Get historical replay universe service."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_historical_replay_universe_service")
+    return cast(
+        "HistoricalReplayUniverseService",
+        _invoke_bootstrap("bootstrap_historical_replay_universe_service"),
+    )
 
 
-def get_lineage_service() -> object:
+def get_lineage_service() -> LineageInspectionService:
     """Get lineage service."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_lineage_service")
+    return cast(
+        "LineageInspectionService", _invoke_bootstrap("bootstrap_lineage_service")
+    )
 
 
-def get_lock_service() -> object:
+def get_lock_service() -> LockService:
     """Get administrative lock service."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_lock_service")
+    return cast("LockService", _invoke_bootstrap("bootstrap_lock_service"))
 
 
-def get_run_manifest_service() -> object:
+def get_run_manifest_service() -> RunManifestInspectionService:
     """Get run-manifest service without full pipeline registration."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_run_manifest_service")
+    return cast(
+        "RunManifestInspectionService",
+        _invoke_bootstrap("bootstrap_run_manifest_service"),
+    )

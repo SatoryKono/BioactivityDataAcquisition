@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     import bioetl.domain.error_types as error_types
     import bioetl.domain.exceptions as exceptions
     import bioetl.domain.lineage as lineage
+    import bioetl.domain.immutability as immutability
     import bioetl.domain.observability_contract as observability_contract
     import bioetl.domain.observability_event_mapping as observability_event_mapping
     import bioetl.domain.observability_metric_names as observability_metric_names
@@ -66,6 +67,7 @@ __all__ = [
     "get_runtime_observability_publication_contract",
     "get_version",
     "is_canonical_runtime_observability_emitter",
+    "immutability",
     "lineage",
     "map_domain_event_to_observability_event",
     "observability_contract",
@@ -92,6 +94,7 @@ _MODULE_EXPORTS = {
     "deterministic_identity": "bioetl.domain.deterministic_identity",
     "error_types": "bioetl.domain.error_types",
     "exceptions": "bioetl.domain.exceptions",
+    "immutability": "bioetl.domain.immutability",
     "lineage": "bioetl.domain.lineage",
     "observability_contract": "bioetl.domain.observability_contract",
     "observability_event_mapping": "bioetl.domain.observability_event_mapping",

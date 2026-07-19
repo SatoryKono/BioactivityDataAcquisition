@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from datetime import datetime, UTC
 from pathlib import Path
+from threading import get_ident
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -359,6 +360,41 @@ class TestDQReportService:
         assert result.bronze_enabled is True
         mock_bronze_analyzer.analyze.assert_called_once()
         mock_report_writer.write_bronze_report.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_generate_reports_offloads_sync_analyzer_from_event_loop(
+        self,
+        mock_logger: MagicMock,
+        mock_bronze_analyzer: MagicMock,
+        mock_report_writer: AsyncMock,
+        dq_context: DQReportContext,
+        bronze_dq_config: MagicMock,
+    ) -> None:
+        """Synchronous DQ analysis must not starve runtime heartbeat tasks."""
+        event_loop_thread_id = get_ident()
+        analyzer_thread_ids: list[int] = []
+        report = mock_bronze_analyzer.analyze.return_value
+
+        def _analyze(*args: object, **kwargs: object) -> object:
+            del args, kwargs
+            analyzer_thread_ids.append(get_ident())
+            return report
+
+        mock_bronze_analyzer.analyze.side_effect = _analyze
+        service = DQReportService(
+            logger=mock_logger,
+            bronze_analyzer=mock_bronze_analyzer,
+            report_writer=mock_report_writer,
+        )
+
+        result = await service.generate_reports(
+            context=dq_context,
+            bronze_config=bronze_dq_config,
+        )
+
+        assert result.bronze_report_path is not None
+        assert analyzer_thread_ids
+        assert analyzer_thread_ids[0] != event_loop_thread_id
 
     @pytest.mark.asyncio
     async def test_generate_reports_emits_dq_check_failure_metrics(

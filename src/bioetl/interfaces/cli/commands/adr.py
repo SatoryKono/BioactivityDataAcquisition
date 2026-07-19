@@ -9,9 +9,13 @@ import json
 from collections.abc import Callable
 from typing import TYPE_CHECKING, cast
 
-import click
-
 from bioetl.domain.types import JsonDict
+from bioetl.interfaces.cli.commands.domains.shared.click_options import (
+    typed_click_argument,
+    typed_click_group,
+    typed_click_option,
+    typed_group_command,
+)
 from bioetl.interfaces.cli.formatters import echo_error, echo_info
 
 if TYPE_CHECKING:
@@ -26,7 +30,7 @@ __all__ = [
 ]
 
 
-@click.group()
+@typed_click_group()
 def adr() -> None:
     """ADR (Architecture Decision Records) utilities."""
 
@@ -41,8 +45,8 @@ def get_adr_service() -> AdrServicePort:
     return impl()
 
 
-@adr.command("list")
-@click.option("--json", "as_json", is_flag=True, help="Output as JSON")
+@typed_group_command(adr, "list")
+@typed_click_option("--json", "as_json", is_flag=True, help="Output as JSON")
 def list_command(as_json: bool) -> None:
     """List all ADR documents.
 
@@ -69,9 +73,9 @@ def list_command(as_json: bool) -> None:
         echo_info(f"  - ADR-{item.number:03d}: {item.title}")
 
 
-@adr.command("show")
-@click.argument("number", type=int)
-@click.option("--raw", is_flag=True, help="Print raw markdown content")
+@typed_group_command(adr, "show")
+@typed_click_option("--raw", is_flag=True, help="Print raw markdown content")
+@typed_click_argument("number", type=int)
 def show_command(number: int, raw: bool) -> None:
     """Show a specific ADR by number.
 
@@ -100,8 +104,8 @@ def show_command(number: int, raw: bool) -> None:
     echo_info(head)
 
 
-@adr.command("validate")
-@click.option("--json", "as_json", is_flag=True, help="Output as JSON")
+@typed_group_command(adr, "validate")
+@typed_click_option("--json", "as_json", is_flag=True, help="Output as JSON")
 def validate_command(as_json: bool) -> None:
     """Validate ADR repository and print a summary.
 

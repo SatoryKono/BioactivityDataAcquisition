@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Awaitable, Callable, Mapping
 from pathlib import Path
 from typing import TYPE_CHECKING, Protocol
@@ -39,6 +40,7 @@ class _DQReport(Protocol):
 
     @property
     def checks(self) -> Mapping[str, object]: ...
+
 
 _ANALYZER_OR_WRITER_UNAVAILABLE = "analyzer or writer not available"
 _NO_DATA_REASON_BY_STAGE = {
@@ -137,7 +139,11 @@ async def _generate_report_for_stage[ReportT: _DQReport](
         return None
 
     try:
-        report = analyze_report()
+        # DQ analyzers expose a synchronous port and may perform CPU-heavy
+        # dataframe scans.  Keep that work off the event-loop thread so the
+        # runtime lock heartbeat can continue renewing its lease during
+        # post-run report generation.
+        report = await asyncio.to_thread(analyze_report)
         return await _finalize_generated_report(
             context=context,
             stage=stage,

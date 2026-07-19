@@ -5,10 +5,13 @@ Implements table archival to cold storage.
 
 from __future__ import annotations
 
-import click
-
 from bioetl.interfaces.cli.commands.domains.maintenance.service_access import (
     get_lifecycle_service,
+)
+from bioetl.interfaces.cli.commands.domains.shared.click_options import (
+    typed_click_argument,
+    typed_click_command,
+    typed_click_option,
 )
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CliBoundaryExecutionPolicy,
@@ -34,10 +37,10 @@ def _archive_policy(table: str) -> CliBoundaryExecutionPolicy:
     )
 
 
-@click.command("archive")
-@click.argument("table")
-@click.argument("target_path")
-@click.option(
+@typed_click_command("archive")
+@typed_click_argument("table")
+@typed_click_argument("target_path")
+@typed_click_option(
     "--remove-source",
     is_flag=True,
     help="Remove source table after archiving",

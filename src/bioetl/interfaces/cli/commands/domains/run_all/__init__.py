@@ -6,7 +6,9 @@ from importlib import import_module
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from bioetl.interfaces.cli.commands.run_all import run_all as run_all
+    import click
+
+    run_all: click.Command
 
 __all__ = ["run_all"]
 

@@ -1,4 +1,7 @@
-"""Health-check CLI commands and health-server entrypoints."""
+"""Permanent public health command seam.
+
+The internal owner is ``bioetl.interfaces.cli.commands.domains.health.command``.
+"""
 
 from __future__ import annotations
 
@@ -19,6 +22,11 @@ from bioetl.interfaces.cli.commands.domains.health.server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
     _handle_health_failure,
     run_long_lived_health_server_command,
+)
+from bioetl.interfaces.cli.commands.domains.shared.click_options import (
+    typed_click_group,
+    typed_click_option,
+    typed_group_command,
 )
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,
@@ -150,19 +158,19 @@ def _render_health_results(
     sys.exit(ExitCode.FAIL)
 
 
-@click.group()
+@typed_click_group()
 def health() -> None:
     """Health check and monitoring operations."""
 
 
-@health.command("server")
-@click.option(
+@typed_group_command(health, "server")
+@typed_click_option(
     "--host",
     default="127.0.0.1",
     help="Host to bind to. Use 0.0.0.0 to expose externally.",
     show_default=True,
 )
-@click.option(
+@typed_click_option(
     "--port",
     "-p",
     default=DEFAULT_HEALTH_SERVER_PORT,
@@ -195,14 +203,14 @@ def health_server_command(host: str, port: int) -> None:
     run_health_server_command(host, port)
 
 
-@health.command("check")
-@click.option(
+@typed_group_command(health, "check")
+@typed_click_option(
     "--provider",
     "-p",
     multiple=True,
     help="Provider(s) to check. If not specified, checks all configured providers.",
 )
-@click.option(
+@typed_click_option(
     "--json",
     "output_json",
     is_flag=True,
