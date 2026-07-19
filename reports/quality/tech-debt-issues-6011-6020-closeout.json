@@ -106,9 +106,9 @@
         "reports/quality/full-app-duplication-baseline.json",
         "reports/quality/hotspot-duplication-baseline.json"
       ],
-      "outcome": "Duplication clusters were classified for actionability without mechanical deduplication: hotspot duplication is zero, full-app duplication remains governed at 40 clusters, and broader application/composition report-only duplication remains triaged as facade/wiring/contract-pattern work.",
+      "outcome": "Duplication clusters were classified for actionability without mechanical deduplication: hotspot duplication is 14 clusters (within budget), full-app duplication remains governed at 40 clusters, and broader application/composition report-only duplication remains triaged as facade/wiring/contract-pattern work.",
       "triage": {
-        "hotspot_duplicate_clusters": 0,
+        "hotspot_duplicate_clusters": 14,
         "full_app_duplicate_clusters": 0,
         "broad_report_only_duplicate_clusters": 106,
         "recommended_follow_up": [
