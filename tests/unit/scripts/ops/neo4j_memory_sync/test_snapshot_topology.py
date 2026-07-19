@@ -19,5 +19,17 @@ from tests.testing_support.neo4j_memory_sync import (  # noqa: F401
     test_storage_surface_helpers_merge_base_and_pipeline_overrides,
     test_workflow_quality_gates_detect_repo_gate_signals,
 )
+from tests.testing_support.neo4j_memory_sync_support.common import (
+    _skip_full_repo_snapshot_on_windows,
+)
 
 pytestmark = [pytest.mark.memory, pytest.mark.timeout(180)]
+
+
+def test_full_repo_snapshot_is_skipped_on_windows() -> None:
+    assert _skip_full_repo_snapshot_on_windows("linux") is None
+    with pytest.raises(
+        pytest.skip.Exception,
+        match="full repo walk which is prohibitively slow on Windows",
+    ):
+        _skip_full_repo_snapshot_on_windows("win32")

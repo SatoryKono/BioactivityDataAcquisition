@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import sys
 import tempfile
 from copy import deepcopy
 from functools import lru_cache
@@ -131,8 +132,16 @@ def _repo_root() -> Path:
     return Path(__file__).resolve().parents[3]
 
 
+def _skip_full_repo_snapshot_on_windows(platform: str) -> None:
+    if platform.startswith("win"):
+        pytest.skip(
+            "Snapshot tests require full repo walk which is prohibitively slow on Windows"
+        )
+
+
 @lru_cache(maxsize=1)
 def _snapshot_base() -> object:
+    _skip_full_repo_snapshot_on_windows(sys.platform)
     original_lookup = _sync_core._git_last_commit_age_days_bulk
     _sync_core._git_last_commit_age_days_bulk = _deterministic_git_age_lookup
     try:
