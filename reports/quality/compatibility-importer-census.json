@@ -1,12 +1,12 @@
 {
-  "snapshot_date": "2026-07-17",
+  "snapshot_date": "2026-07-18",
   "inventory_source": "configs/quality/compatibility_facade_inventory.yaml",
   "twin_ratchet_source": "configs/quality/compatibility_twin_module_ratchet.yaml",
   "config_root_facade_source": "configs/quality/infrastructure_config_root_facade_inventory.yaml",
   "control_plane_root_facade_source": "configs/quality/application_control_plane_root_facade_inventory.yaml",
   "summary": {
     "retained_entrypoint_count": 12,
-    "retained_public_entrypoint_burden": 0,
+    "retained_public_entrypoint_burden": 7,
     "removed_compatibility_surface_count": 23,
     "removed_compatibility_surfaces_with_src_importers": 0,
     "removed_compatibility_surfaces_with_test_importers": 0,
@@ -33,16 +33,18 @@
       "external_breaking_change_required": true,
       "internal_callers_zero": false,
       "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
-      "src_importers": [],
+      "src_importers": [
+        "src/bioetl/interfaces/cli/commands/__init__.py"
+      ],
       "test_importers": [
         "tests/unit/interfaces/cli/commands/test_boundary_families.py",
         "tests/unit/interfaces/cli/test_cli_run_commands.py"
       ],
-      "src_importer_count": 0,
+      "src_importer_count": 1,
       "test_importer_count": 2,
-      "surface_classification": "external-facing",
+      "surface_classification": "first-party-active",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
-      "sunset_status": "external-facing"
+      "sunset_status": "first-party-active"
     },
     {
       "path": "src/bioetl/interfaces/cli/commands/run_all.py",
@@ -53,7 +55,10 @@
       "external_breaking_change_required": true,
       "internal_callers_zero": false,
       "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
-      "src_importers": [],
+      "src_importers": [
+        "src/bioetl/interfaces/cli/commands/__init__.py",
+        "src/bioetl/interfaces/cli/commands/domains/run_all/__init__.py"
+      ],
       "test_importers": [
         "tests/integration/interfaces/test_cli_exit_code_matrix.py",
         "tests/unit/interfaces/cli/commands/test_run_all_command_policy.py",
@@ -61,11 +66,11 @@
         "tests/unit/interfaces/cli/test_cli_run_commands.py",
         "tests/unit/interfaces/cli/test_run_all_service_mock.py"
       ],
-      "src_importer_count": 0,
+      "src_importer_count": 2,
       "test_importer_count": 5,
-      "surface_classification": "external-facing",
+      "surface_classification": "first-party-active",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
-      "sunset_status": "external-facing"
+      "sunset_status": "first-party-active"
     },
     {
       "path": "src/bioetl/interfaces/cli/commands/run_composite.py",
@@ -112,16 +117,19 @@
       "external_breaking_change_required": true,
       "internal_callers_zero": false,
       "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
-      "src_importers": [],
+      "src_importers": [
+        "src/bioetl/interfaces/cli/commands/__init__.py",
+        "src/bioetl/interfaces/cli/commands/domains/diagnostics/command.py"
+      ],
       "test_importers": [
         "tests/unit/interfaces/cli/commands/test_commands_package.py",
         "tests/unit/interfaces/cli/commands/test_diagnostics.py"
       ],
-      "src_importer_count": 0,
+      "src_importer_count": 2,
       "test_importer_count": 2,
-      "surface_classification": "external-facing",
+      "surface_classification": "first-party-active",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
-      "sunset_status": "external-facing"
+      "sunset_status": "first-party-active"
     },
     {
       "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
@@ -132,15 +140,18 @@
       "external_breaking_change_required": true,
       "internal_callers_zero": false,
       "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
-      "src_importers": [],
+      "src_importers": [
+        "src/bioetl/interfaces/cli/commands/__init__.py",
+        "src/bioetl/interfaces/cli/commands/domains/quarantine/command.py"
+      ],
       "test_importers": [
         "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py"
       ],
-      "src_importer_count": 0,
+      "src_importer_count": 2,
       "test_importer_count": 1,
-      "surface_classification": "external-facing",
+      "surface_classification": "first-party-active",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
-      "sunset_status": "external-facing"
+      "sunset_status": "first-party-active"
     },
     {
       "path": "src/bioetl/composition/entrypoints.py",
@@ -475,16 +486,18 @@
       "external_breaking_change_required": true,
       "internal_callers_zero": false,
       "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
-      "src_importers": [],
+      "src_importers": [
+        "src/bioetl/interfaces/cli/commands/__init__.py"
+      ],
       "test_importers": [
         "tests/unit/interfaces/cli/commands/test_boundary_families.py",
         "tests/unit/interfaces/cli/test_cli_run_commands.py"
       ],
-      "src_importer_count": 0,
+      "src_importer_count": 1,
       "test_importer_count": 2,
-      "surface_classification": "external-facing",
+      "surface_classification": "first-party-active",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
-      "sunset_status": "external-facing"
+      "sunset_status": "first-party-active"
     },
     {
       "path": "src/bioetl/interfaces/cli/commands/run_all.py",
@@ -495,7 +508,10 @@
       "external_breaking_change_required": true,
       "internal_callers_zero": false,
       "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
-      "src_importers": [],
+      "src_importers": [
+        "src/bioetl/interfaces/cli/commands/__init__.py",
+        "src/bioetl/interfaces/cli/commands/domains/run_all/__init__.py"
+      ],
       "test_importers": [
         "tests/integration/interfaces/test_cli_exit_code_matrix.py",
         "tests/unit/interfaces/cli/commands/test_run_all_command_policy.py",
@@ -503,11 +519,11 @@
         "tests/unit/interfaces/cli/test_cli_run_commands.py",
         "tests/unit/interfaces/cli/test_run_all_service_mock.py"
       ],
-      "src_importer_count": 0,
+      "src_importer_count": 2,
       "test_importer_count": 5,
-      "surface_classification": "external-facing",
+      "surface_classification": "first-party-active",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
-      "sunset_status": "external-facing"
+      "sunset_status": "first-party-active"
     },
     {
       "path": "src/bioetl/interfaces/cli/commands/run_composite.py",
@@ -554,16 +570,19 @@
       "external_breaking_change_required": true,
       "internal_callers_zero": false,
       "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
-      "src_importers": [],
+      "src_importers": [
+        "src/bioetl/interfaces/cli/commands/__init__.py",
+        "src/bioetl/interfaces/cli/commands/domains/diagnostics/command.py"
+      ],
       "test_importers": [
         "tests/unit/interfaces/cli/commands/test_commands_package.py",
         "tests/unit/interfaces/cli/commands/test_diagnostics.py"
       ],
-      "src_importer_count": 0,
+      "src_importer_count": 2,
       "test_importer_count": 2,
-      "surface_classification": "external-facing",
+      "surface_classification": "first-party-active",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
-      "sunset_status": "external-facing"
+      "sunset_status": "first-party-active"
     },
     {
       "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
@@ -574,15 +593,18 @@
       "external_breaking_change_required": true,
       "internal_callers_zero": false,
       "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
-      "src_importers": [],
+      "src_importers": [
+        "src/bioetl/interfaces/cli/commands/__init__.py",
+        "src/bioetl/interfaces/cli/commands/domains/quarantine/command.py"
+      ],
       "test_importers": [
         "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py"
       ],
-      "src_importer_count": 0,
+      "src_importer_count": 2,
       "test_importer_count": 1,
-      "surface_classification": "external-facing",
+      "surface_classification": "first-party-active",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
-      "sunset_status": "external-facing"
+      "sunset_status": "first-party-active"
     },
     {
       "path": "src/bioetl/composition/entrypoints.py",
@@ -1364,9 +1386,12 @@
           "Keep ordinary runtime maintenance access narrowed to `src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py`.",
           "Treat any future retirement of the public maintenance command itself as a separate external-breaking-change review, not part of this debt ratchet wave."
         ],
-        "src_importers": [],
+        "src_importers": [
+          "src/bioetl/interfaces/cli/commands/__init__.py",
+          "src/bioetl/interfaces/cli/commands/domains/maintenance/__init__.py"
+        ],
         "test_importers": [],
-        "src_importer_count": 0,
+        "src_importer_count": 2,
         "test_importer_count": 0
       }
     ]

@@ -1183,7 +1183,7 @@
         "tests/architecture/test_test_governance_audit.py:345",
         "tests/architecture/test_test_governance_audit.py:385",
         "tests/architecture/test_test_governance_audit.py:406",
-        "tests/architecture/test_test_governance_audit.py:422"
+        "tests/architecture/test_test_governance_audit.py:421"
       ],
       "assertless_tests": [],
       "intentional_no_exception_tests": 0,
@@ -2118,7 +2118,7 @@
           "tests/architecture/test_test_governance_audit.py:345",
           "tests/architecture/test_test_governance_audit.py:385",
           "tests/architecture/test_test_governance_audit.py:406",
-          "tests/architecture/test_test_governance_audit.py:422"
+          "tests/architecture/test_test_governance_audit.py:421"
         ],
         "assertless_tests": [],
         "intentional_no_exception_tests": 0,
@@ -2187,7 +2187,6 @@
         "tests/fixtures/",
         "tests/golden/",
         "tests/helpers/",
-        "tests/infrastructure/",
         "tests/integration/",
         "tests/performance/",
         "tests/security/",
@@ -2197,7 +2196,6 @@
         "tests/unit/"
       ],
       "top_level_directories_including_pycache": [
-        "tests/__pycache__/",
         "tests/architecture/",
         "tests/benchmarks/",
         "tests/contract/",
@@ -2206,7 +2204,6 @@
         "tests/fixtures/",
         "tests/golden/",
         "tests/helpers/",
-        "tests/infrastructure/",
         "tests/integration/",
         "tests/performance/",
         "tests/security/",
@@ -2215,16 +2212,16 @@
         "tests/testing_support/",
         "tests/unit/"
       ],
-      "top_level_directory_count": 16,
-      "top_level_directory_count_including_pycache": 17
+      "top_level_directory_count": 15,
+      "top_level_directory_count_including_pycache": 15
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2014,
-    "total_test_functions": 22515,
+    "total_test_functions": 22513,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "132940a977bcfed4a88fe17c068dbc4b6a447112cac3ff3cc01eff9598c3279c",
+  "source_tree_sha256": "0cad41cfa0756eaf187cd784c44e742d61e68d6a9bbab2961fad1f0b37f698c7",
   "summary": {
     "assertless_total_candidates": 105,
     "compatibility_test_files": 0,
@@ -2253,7 +2250,6 @@
       "tests/fixtures/",
       "tests/golden/",
       "tests/helpers/",
-      "tests/infrastructure/",
       "tests/integration/",
       "tests/performance/",
       "tests/security/",
@@ -2263,7 +2259,6 @@
       "tests/unit/"
     ],
     "top_level_directories_including_pycache": [
-      "tests/__pycache__/",
       "tests/architecture/",
       "tests/benchmarks/",
       "tests/contract/",
@@ -2272,7 +2267,6 @@
       "tests/fixtures/",
       "tests/golden/",
       "tests/helpers/",
-      "tests/infrastructure/",
       "tests/integration/",
       "tests/performance/",
       "tests/security/",
@@ -2281,11 +2275,11 @@
       "tests/testing_support/",
       "tests/unit/"
     ],
-    "top_level_directory_count": 16,
-    "top_level_directory_count_including_pycache": 17
+    "top_level_directory_count": 15,
+    "top_level_directory_count_including_pycache": 15
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2014,
-  "total_test_functions": 22515,
+  "total_test_functions": 22513,
   "uuid4_call_sites": 0
 }
