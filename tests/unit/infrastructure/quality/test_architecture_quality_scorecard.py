@@ -196,3 +196,22 @@ def test_architecture_quality_scorecard_does_not_penalize_retained_public_api() 
     }
 
     assert _build_categories(retained_counts_changed) == _build_categories(metrics)
+
+
+def test_architecture_quality_scorecard_does_not_double_count_sunset_subset() -> None:
+    metrics = {
+        "transition_compat_count": 3,
+        "sunset_compat_count": 0,
+        "expired_compat_count": 0,
+    }
+    overlapping_sunset_metrics = {**metrics, "sunset_compat_count": 2}
+
+    baseline_scores = {
+        category["id"]: category["score"] for category in _build_categories(metrics)
+    }
+    overlapping_scores = {
+        category["id"]: category["score"]
+        for category in _build_categories(overlapping_sunset_metrics)
+    }
+
+    assert overlapping_scores == baseline_scores
