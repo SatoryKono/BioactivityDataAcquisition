@@ -245,7 +245,9 @@
   3. Raw duplication только как temporary exception
 
 **Audited exact-duplicate reuse:**
-- `Monitor: Data Quality Score (Volume-weighted)` и `Track: Data Quality Score Trend (Volume-weighted)` в `bioetl-dq-v2` share expression intentionally
+- `bioetl_dq_current_status` intentionally serves the compact `Status` and expanded `Monitor DQ Current Status` panels
+- `bioetl_runtime_current_status_trusted` intentionally serves the compact `Status` and expanded `Runtime Status` panels
+- DQ weighted stat and trend have distinct time semantics: the stat uses a fixed seven-day (`[7d]`) retained snapshot, while the trend uses raw selected-range samples; missing retained samples remain `UNKNOWN`
 - `Monitor: Lineage Refs Missing` canonically belongs to `bioetl-control-plane-v1`
 - `bioetl-dq-v2` uses a textual handoff instead of duplicating the same counter
 
@@ -518,7 +520,7 @@ Incident triage по provider health: latency/failures/degraded/retries exhauste
 - Answer-first L2 incident surface
 - First-screen использует canonical current-status recording rules (`bioetl_dq_current_status`, `bioetl_dq_current_reason`)
 - Range evidence, raw tables, Silver reject breakdowns, logs, traces ниже first-screen
-- `Monitor: Data Quality Score (Volume-weighted)` и `Track: Data Quality Score Trend (Volume-weighted)` share expression intentionally (different UI roles)
+- `Monitor: Data Quality Score (Volume-weighted)` and `Track: Data Quality Score Trend (Volume-weighted)` have distinct time semantics: fixed seven-day (`[7d]`) retained snapshot versus raw selected-range samples; absence remains `UNKNOWN`
 - `Monitor: Lineage Refs Missing` canonically belongs to `bioetl-control-plane-v1`
 - `bioetl-dq-v2` uses a textual handoff instead of duplicating the same counter
 - Critical panels SHOULD иметь actionable CTA

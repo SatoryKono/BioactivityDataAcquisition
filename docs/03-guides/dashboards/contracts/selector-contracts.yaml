@@ -112,11 +112,21 @@ pipeline_universe_contract:
   role_local_exceptions:
     bioetl-control-plane-v1:
       query_metric: bioetl_control_plane_run_type_universe
-      required_relation: subset_of_canonical_user_facing_metric
+      required_relation: provenance_gated_overlap
+      allowed_role_local_only_sources:
+        - bioetl_control_plane_manifest_writes_total
+      allowed_canonical_only_sources:
+        - bioetl_pipeline_runs_total
+        - bioetl_records_processed_total
+      shared_planned_source: bioetl_workflow_pipeline_expected
+      unexplained_difference_count_required: 0
       reason: |
-        Control Plane lists only scopes with manifest/ledger evidence or an
-        explicitly planned workflow child. A pipeline with only data-plane
-        telemetry is intentionally ineligible for this local selector.
+        Control Plane lists scopes with manifest evidence or an explicitly
+        planned workflow child. A manifest-only in-flight scope can therefore
+        appear before canonical data-plane telemetry, while a pipeline with
+        only data-plane telemetry is intentionally ineligible for this local
+        selector. Every difference MUST be explained by the declared source
+        families; unexplained divergence is forbidden.
       out_of_scope_handoff: fail_closed_with_overview_return_path
     bioetl-silver-reject-explorer:
       query_metric: bioetl_records_processed_total
@@ -131,14 +141,19 @@ pipeline_universe_contract:
       accepts the canonical user-facing universe.
     - Links into a role-local exception MUST provide an explicit fail-closed
       empty state or return path; silent blank panels are forbidden.
-    - Role-local selectors MUST NOT widen beyond the canonical user-facing
-      metric.
+    - Silver Reject Explorer MUST NOT widen beyond the canonical user-facing
+      metric because processed-row evidence is part of that universe.
+    - Control Plane role-local-only scopes MUST be backed by manifest-write
+      provenance; canonical-only scopes MUST be explainable by data-plane
+      telemetry without a manifest artifact.
   closure_evidence:
     required_dashboard_count: 8
-    required_chembl_pipeline_count: 15
-    required_missing_count: 0
+    shared_required_chembl_pipeline_count: 15
+    shared_required_missing_count: 0
     verify_exact_shared_relation: true
-    verify_local_subset_relations: true
+    verify_control_plane_provenance_gated_overlap: true
+    verify_explorer_subset_relation: true
+    required_unexplained_difference_count: 0
 
 dashboard_families:
   pipeline_summary:
@@ -279,8 +294,8 @@ shipped_selector_registry:
       - run_id
     query_source_families:
       workflow: prometheus_workflow_runs_total
-      pipeline: prometheus_control_plane_universe
-      run_type: prometheus_control_plane_universe
+      pipeline: prometheus_control_plane_run_type_universe
+      run_type: prometheus_control_plane_run_type_universe
       run_id: control_plane_filter_options_api
   bioetl-overview-v2:
     family: hybrid_overview
@@ -298,8 +313,8 @@ shipped_selector_registry:
       - run_id
     query_source_families:
       workflow: prometheus_workflow_runs_total
-      pipeline: prometheus_records_processed_total
-      run_type: prometheus_records_processed_total
+      pipeline: prometheus_overview_pipeline_run_type_universe
+      run_type: prometheus_overview_pipeline_run_type_universe
       run_id: control_plane_filter_options_api
   bioetl-runtime:
     family: pipeline_summary
@@ -345,8 +360,8 @@ shipped_selector_registry:
       - provider
     query_source_families:
       workflow: prometheus_workflow_runs_total
-      pipeline: prometheus_records_processed_total
-      run_type: prometheus_records_processed_total
+      pipeline: prometheus_overview_pipeline_run_type_universe
+      run_type: prometheus_overview_pipeline_run_type_universe
       run_id: control_plane_filter_options_api
       provider: prometheus_provider_health_union
       pipeline_context: textbox_navigation_context
@@ -369,8 +384,8 @@ shipped_selector_registry:
       - stage
     query_source_families:
       workflow: prometheus_workflow_runs_total
-      pipeline: prometheus_records_processed_total
-      run_type: prometheus_records_processed_total
+      pipeline: prometheus_overview_pipeline_run_type_universe
+      run_type: prometheus_overview_pipeline_run_type_universe
       run_id: control_plane_filter_options_api
       stage: prometheus_records_processed_total
   bioetl-workflow-overview:
@@ -402,8 +417,8 @@ shipped_selector_registry:
       - step_kind
     query_source_families:
       workflow: prometheus_workflow_runs_total
-      pipeline: prometheus_records_processed_total
-      run_type: prometheus_records_processed_total
+      pipeline: prometheus_overview_pipeline_run_type_universe
+      run_type: prometheus_overview_pipeline_run_type_universe
       run_id: control_plane_filter_options_api
       workflow_context: control_plane_filter_options_api
       pipeline_context: prometheus_workflow_runs_total
@@ -454,8 +469,8 @@ shipped_selector_registry:
       - run_type
     query_source_families:
       workflow: prometheus_workflow_runs_total
-      pipeline: prometheus_records_processed_total
-      run_type: prometheus_records_processed_total
+      pipeline: prometheus_overview_pipeline_run_type_universe
+      run_type: prometheus_overview_pipeline_run_type_universe
 
 ship_now_selector_contract_by_uid:
   bioetl-control-plane-v1:

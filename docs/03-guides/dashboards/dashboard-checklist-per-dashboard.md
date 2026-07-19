@@ -401,7 +401,7 @@
 - [ ] Answer-first L2 incident surface
 - [ ] First-screen использует canonical current-status recording rules (`bioetl_dq_current_status`, `bioetl_dq_current_reason`)
 - [ ] Range evidence, raw tables, Silver reject breakdowns, logs, traces ниже first-screen
-- [ ] `Monitor: Data Quality Score (Volume-weighted)` и `Track: Data Quality Score Trend (Volume-weighted)` share expression intentionally
+- [ ] `Monitor: Data Quality Score (Volume-weighted)` and `Track: Data Quality Score Trend (Volume-weighted)` have distinct time semantics: fixed seven-day (`[7d]`) retained snapshot versus raw selected-range samples; absence remains `UNKNOWN`
 - [ ] `Monitor: Lineage Refs Missing` stays canonical in `bioetl-control-plane-v1`
 - [ ] `bioetl-dq-v2` uses a handoff note/link instead of duplicating the metric
 - [ ] Critical panels имеют actionable CTA
