@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import pytest
+import yaml
 
 from tests.integration._grafana_test_support import (
     get_dashboard_files,
@@ -13,34 +14,40 @@ from tests.integration._grafana_test_support import (
 
 pytestmark = pytest.mark.integration
 
+_DUPLICATE_ALLOWLIST = Path("configs/quality/dashboard_query_duplicate_allowlist.yaml")
+
 
 def _expected_duplicate_uses() -> dict[str, set[tuple[str, str]]]:
-    return {
-        '((sum((bioetl_dq_validation_score{pipeline=~"$pipeline"} * '
-        'bioetl_dq_validation_record_count{pipeline=~"$pipeline"}))) / '
-        'clamp_min(sum(bioetl_dq_validation_record_count{pipeline=~"$pipeline"}), '
-        "1))": {
-            (
-                "bioetl-dq-v2.json",
-                "Monitor: Data Quality Score (Volume-weighted)",
-            ),
-            (
-                "bioetl-dq-v2.json",
-                "Track: Data Quality Score Trend (Volume-weighted)",
-            ),
-        },
-        'max(bioetl_dq_current_status{pipeline=~"$pipeline"})': {
-            ("bioetl-dq-v2.json", "Monitor DQ Current Status"),
-            ("bioetl-dq-v2.json", "Status"),
-        },
-        'max(bioetl_runtime_current_status_trusted{pipeline=~"$pipeline",run_type=~"$run_type"})': {
-            ("bioetl-runtime.json", "Runtime Status"),
-            ("bioetl-runtime.json", "Status"),
-        },
-    }
+    payload = yaml.safe_load(_DUPLICATE_ALLOWLIST.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    exact_duplicates = payload.get("exact_duplicates")
+    assert isinstance(exact_duplicates, dict)
+    allowed_groups = exact_duplicates.get("allowed_groups")
+    assert isinstance(allowed_groups, list)
+
+    expected: dict[str, set[tuple[str, str]]] = {}
+    for group in allowed_groups:
+        assert isinstance(group, dict)
+        expression = group.get("normalized_expression")
+        panel_refs = group.get("panel_refs")
+        assert isinstance(expression, str) and expression.strip()
+        assert isinstance(panel_refs, list) and panel_refs
+
+        normalized_expression = " ".join(expression.split())
+        uses: set[tuple[str, str]] = set()
+        for panel_ref in panel_refs:
+            assert isinstance(panel_ref, str)
+            dashboard, separator, title = panel_ref.partition(" :: ")
+            assert separator and dashboard and title
+            uses.add((dashboard, title))
+        assert len(uses) > 1
+        assert normalized_expression not in expected
+        expected[normalized_expression] = uses
+
+    return expected
 
 
-def _assert_dq_duplicate_reuse_semantics() -> None:
+def _assert_dq_score_time_semantics() -> None:
     dq_dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     dq_panels = {
         panel.get("title"): panel
@@ -63,11 +70,22 @@ def _assert_dq_duplicate_reuse_semantics() -> None:
     ]
     assert score_trend.get("type") == "timeseries"
     assert score_trend.get("options", {}).get("tooltip", {}).get("mode") == "single"
-    assert "review trend" in str(score_summary.get("description", "")).lower()
-    assert (
-        "trend over selected time range"
-        in str(score_trend.get("description", "")).lower()
-    )
+
+    summary_targets = score_summary.get("targets", [])
+    trend_targets = score_trend.get("targets", [])
+    assert len(summary_targets) == 1
+    assert len(trend_targets) == 1
+    summary_expr = " ".join(str(summary_targets[0].get("expr", "")).split())
+    trend_expr = " ".join(str(trend_targets[0].get("expr", "")).split())
+    assert summary_expr != trend_expr
+    assert "last_over_time(" in summary_expr
+    assert "[7d]" in summary_expr
+    assert "last_over_time(" not in trend_expr
+    assert trend_targets[0].get("range") is True
+
+    summary_description = str(score_summary.get("description", "")).lower()
+    assert "7 days" in summary_description
+    assert "trend panel" in summary_description
 
 
 def _assert_lineage_control_plane_ownership_handoff() -> None:
@@ -131,5 +149,5 @@ def test_exact_duplicate_promql_groups_are_only_explicitly_justified_reuse() -> 
         "Dashboard exact PromQL duplication drifted outside the audited allowlist: "
         f"{duplicate_uses_by_expr}"
     )
-    _assert_dq_duplicate_reuse_semantics()
+    _assert_dq_score_time_semantics()
     _assert_lineage_control_plane_ownership_handoff()

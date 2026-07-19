@@ -286,23 +286,29 @@ def _load_allowlist(path: Path) -> dict[str, object]:
     return payload
 
 
-def _allowed_exact_panel_refs(policy: dict[str, object]) -> set[tuple[str, ...]]:
+def _allowed_exact_groups(
+    policy: dict[str, object],
+) -> set[tuple[str, tuple[str, ...]]]:
+    """Return allowed exact expressions paired with their reviewed panel sets."""
     exact = policy.get("exact_duplicates")
     if not isinstance(exact, dict):
         return set()
     groups = exact.get("allowed_groups")
     if not isinstance(groups, list):
         return set()
-    allowed: set[tuple[str, ...]] = set()
+    allowed: set[tuple[str, tuple[str, ...]]] = set()
     for item in groups:
         if not isinstance(item, dict):
+            continue
+        expression = item.get("normalized_expression")
+        if not isinstance(expression, str) or not expression.strip():
             continue
         panel_refs = item.get("panel_refs")
         if not isinstance(panel_refs, list):
             continue
         refs = tuple(sorted(str(ref) for ref in panel_refs if str(ref).strip()))
         if refs:
-            allowed.add(refs)
+            allowed.add((_normalize_expression(expression), refs))
     return allowed
 
 
@@ -318,6 +324,29 @@ def _near_duplicate_max_count(policy: dict[str, object]) -> int | None:
     return None
 
 
+def _reviewed_near_panel_refs(
+    policy: dict[str, object],
+) -> set[tuple[str, ...]] | None:
+    """Return reviewed near-duplicate panel sets when policy declares them."""
+    near = policy.get("near_duplicates")
+    if not isinstance(near, dict) or "reviewed_groups" not in near:
+        return None
+    groups = near.get("reviewed_groups")
+    if not isinstance(groups, list):
+        return set()
+    reviewed: set[tuple[str, ...]] = set()
+    for item in groups:
+        if not isinstance(item, dict):
+            continue
+        panel_refs = item.get("panel_refs")
+        if not isinstance(panel_refs, list):
+            continue
+        refs = tuple(sorted(str(ref) for ref in panel_refs if str(ref).strip()))
+        if refs:
+            reviewed.add(refs)
+    return reviewed
+
+
 def evaluate_governance(
     *,
     exact_duplicates: tuple[ExactDuplicateGroup, ...],
@@ -326,12 +355,17 @@ def evaluate_governance(
 ) -> tuple[GovernanceViolation, ...]:
     """Evaluate duplicate-query groups against the reviewed allowlist/budget."""
     policy = _load_allowlist(allowlist_path)
-    allowed_exact_refs = _allowed_exact_panel_refs(policy)
+    allowed_exact_groups = _allowed_exact_groups(policy)
     near_max_count = _near_duplicate_max_count(policy)
+    reviewed_near_refs = _reviewed_near_panel_refs(policy)
     violations: list[GovernanceViolation] = []
 
     for group in exact_duplicates:
-        if tuple(sorted(group.panel_refs)) in allowed_exact_refs:
+        group_key = (
+            _normalize_expression(group.expression),
+            tuple(sorted(group.panel_refs)),
+        )
+        if group_key in allowed_exact_groups:
             continue
         violations.append(
             GovernanceViolation(
@@ -354,6 +388,20 @@ def evaluate_governance(
                 ),
             )
         )
+    if reviewed_near_refs is not None:
+        for group in near_duplicates:
+            if tuple(sorted(group.panel_refs)) in reviewed_near_refs:
+                continue
+            violations.append(
+                GovernanceViolation(
+                    kind="unreviewed_near_duplicate",
+                    scope=group.scope,
+                    panel_refs=group.panel_refs,
+                    message=(
+                        "Near-duplicate query group is not declared in reviewed_groups"
+                    ),
+                )
+            )
     return tuple(violations)
 
 

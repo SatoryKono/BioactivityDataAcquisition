@@ -87,6 +87,59 @@ operator_context_shell:
     evidence; pipeline-summary dashboards remain pipeline/run_type current-state
     surfaces.
 
+pipeline_universe_contract:
+  status: shipped
+  canonical_user_facing_metric: bioetl_overview_pipeline_run_type_universe
+  canonical_relation: |
+    bioetl_overview_pipeline_run_type_universe is an exact recording-rule alias
+    of bioetl_runtime_pipeline_run_type_universe. The two metrics MUST expose
+    identical (pipeline, run_type) label sets; they are not separate user
+    universes.
+  shared_selector_uids:
+    - bioetl-overview-v2
+    - bioetl-runtime
+    - bioetl-provider-health-v2
+    - bioetl-dq-v2
+    - bioetl-workflow-overview
+    - bioetl-alerts-slo
+  shared_query_metrics:
+    bioetl-overview-v2: bioetl_overview_pipeline_run_type_universe
+    bioetl-runtime: bioetl_runtime_pipeline_run_type_universe
+    bioetl-provider-health-v2: bioetl_overview_pipeline_run_type_universe
+    bioetl-dq-v2: bioetl_overview_pipeline_run_type_universe
+    bioetl-workflow-overview: bioetl_overview_pipeline_run_type_universe
+    bioetl-alerts-slo: bioetl_overview_pipeline_run_type_universe
+  role_local_exceptions:
+    bioetl-control-plane-v1:
+      query_metric: bioetl_control_plane_run_type_universe
+      required_relation: subset_of_canonical_user_facing_metric
+      reason: |
+        Control Plane lists only scopes with manifest/ledger evidence or an
+        explicitly planned workflow child. A pipeline with only data-plane
+        telemetry is intentionally ineligible for this local selector.
+      out_of_scope_handoff: fail_closed_with_overview_return_path
+    bioetl-silver-reject-explorer:
+      query_metric: bioetl_records_processed_total
+      required_relation: subset_of_canonical_user_facing_metric
+      reason: |
+        The forensic backend requires one concrete pipeline with processed-row
+        evidence. Planned-only and control-plane-only scopes are intentionally
+        ineligible until reject data exists.
+      out_of_scope_handoff: require_concrete_pipeline_or_show_typed_empty_state
+  handoff_rules:
+    - Shared-selector links MUST preserve pipeline only when the destination
+      accepts the canonical user-facing universe.
+    - Links into a role-local exception MUST provide an explicit fail-closed
+      empty state or return path; silent blank panels are forbidden.
+    - Role-local selectors MUST NOT widen beyond the canonical user-facing
+      metric.
+  closure_evidence:
+    required_dashboard_count: 8
+    required_chembl_pipeline_count: 15
+    required_missing_count: 0
+    verify_exact_shared_relation: true
+    verify_local_subset_relations: true
+
 dashboard_families:
   pipeline_summary:
     uids:
