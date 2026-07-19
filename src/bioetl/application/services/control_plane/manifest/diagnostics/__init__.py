@@ -67,6 +67,7 @@ class _ReplayRefreshProjection:
     replay_payload: dict[str, object]
     exact_replay_eligible: bool
     replay_mode: str
+    continuation_mode: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -187,6 +188,9 @@ def _build_refresh_replay_projection(
         },
         exact_replay_eligible=replay_projection_bundle.exact_replay_eligible,
         replay_mode=str(replay_projection_bundle.operator_projection["replay_mode"]),
+        continuation_mode=str(
+            replay_projection_bundle.operator_projection["continuation_mode"]
+        ),
     )
 
 
@@ -249,6 +253,7 @@ def _build_refresh_summary_update(
         manifest=refresh_context.effective_manifest,
         requested_exact_replay=refresh_context.requested_exact_replay,
         resume_requested=refresh_context.resume_requested,
+        continuation_mode=replay_projection.continuation_mode,
         policy_assessment=refresh_context.policy_assessment,
         replay_family_context=replay_family_context,
     )

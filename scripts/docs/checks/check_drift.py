@@ -203,6 +203,9 @@ AI_GEMINI_RUNTIME_CLAIM_GUARD_PATHS: tuple[Path, ...] = (
     Path(".cursor/rules/05-agent-workflow.mdc"),
     Path("docs/00-project/ai/rules/cursor/05-agent-workflow.mdc"),
 )
+AI_OPTIONAL_LOCAL_RUNTIME_CLAIM_GUARD_PATHS = frozenset(
+    {Path(".cursor/rules/05-agent-workflow.mdc")}
+)
 AI_GEMINI_RUNTIME_CLAIM_FORBIDDEN_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"\.gemini/\*\*\s+is\s+the\s+active\s+Gemini\s+runtime\s+tree"),
     re.compile(r"\.codex/\*\*\s+and\s+\.gemini/\*\*\s+are\s+active\s+runtime\s+trees"),
@@ -1277,7 +1280,10 @@ def check_freshness(report: DriftReport) -> None:
             _rel(PROJECT_ROOT / AI_RULES_README_PATH),
             "AI rules README missing",
         )
-    elif current_rules_version and f"(v{current_rules_version})" not in ai_rules_readme_text:
+    elif (
+        current_rules_version
+        and f"(v{current_rules_version})" not in ai_rules_readme_text
+    ):
         report.add(
             "freshness",
             "ERROR",
@@ -1694,20 +1700,14 @@ def _iter_windsurf_rule_entrypoints(project_root: Path) -> tuple[Path, ...]:
     root = project_root / WINDSURF_RULE_DOCS_DIR
     if not root.exists():
         return ()
-    return tuple(
-        path.relative_to(project_root)
-        for path in sorted(root.glob("*.md"))
-    )
+    return tuple(path.relative_to(project_root) for path in sorted(root.glob("*.md")))
 
 
 def _iter_windsurf_workflow_entrypoints(project_root: Path) -> tuple[Path, ...]:
     root = project_root / WINDSURF_WORKFLOW_DOCS_DIR
     if not root.exists():
         return ()
-    return tuple(
-        path.relative_to(project_root)
-        for path in sorted(root.glob("*.md"))
-                )
+    return tuple(path.relative_to(project_root) for path in sorted(root.glob("*.md")))
 
 
 def _iter_docs_mirror_skill_entrypoints(project_root: Path) -> tuple[Path, ...]:
@@ -1715,8 +1715,7 @@ def _iter_docs_mirror_skill_entrypoints(project_root: Path) -> tuple[Path, ...]:
     if not root.exists():
         return ()
     return tuple(
-        path.relative_to(project_root)
-        for path in sorted(root.glob("*/SKILL.md"))
+        path.relative_to(project_root) for path in sorted(root.glob("*/SKILL.md"))
     )
 
 
@@ -1783,6 +1782,8 @@ def _check_unverified_gemini_runtime_claims(
         path = project_root / relative_path
         text = _read_doc(path)
         if not text:
+            if relative_path in AI_OPTIONAL_LOCAL_RUNTIME_CLAIM_GUARD_PATHS:
+                continue
             report.add(
                 "ai-surfaces",
                 "ERROR",
@@ -1797,8 +1798,7 @@ def _check_unverified_gemini_runtime_claims(
                     "ai-surfaces",
                     "ERROR",
                     _display_relative_path(relative_path),
-                    "Unverified Gemini runtime-tree claim detected: "
-                    f"{match.group(0)}",
+                    f"Unverified Gemini runtime-tree claim detected: {match.group(0)}",
                 )
 
 

@@ -197,6 +197,65 @@ def _scorecard_metric_count(
     return int(value) if isinstance(value, (int, float)) else 0
 
 
+def _build_compatibility_quality_metrics(
+    compatibility_summary: dict[str, Any],  # Any: JSON values are dynamic
+    scorecard: dict[str, Any],  # Any: YAML config values are dynamic
+) -> dict[str, object]:
+    retained_entrypoint_count = int(compatibility_summary["retained_entrypoint_count"])
+    retained_public_export_facade_count = int(
+        compatibility_summary["retained_public_export_facade_count"]
+    )
+    reviewed_entrypoint_count = _scorecard_metric_count(
+        scorecard,
+        "sanctioned_public_entrypoint_governance",
+        "public_entrypoint_count",
+    )
+    reviewed_public_export_facade_count = _scorecard_metric_count(
+        scorecard,
+        "sanctioned_public_entrypoint_governance",
+        "public_export_facade_count",
+    )
+    conflict_count = max(
+        int(
+            compatibility_summary.get(
+                "retained_public_export_facades_with_duplicate_exports", 0
+            )
+        ),
+        int(
+            compatibility_summary.get(
+                "retained_public_export_facades_with_resolution_conflicts", 0
+            )
+        ),
+        int(
+            compatibility_summary.get(
+                "retained_public_export_facades_with_wrapper_contract_drift", 0
+            )
+        ),
+    )
+    return {
+        "retained_entrypoint_count": retained_entrypoint_count,
+        "retained_public_export_facade_count": retained_public_export_facade_count,
+        "transition_compat_count": _scorecard_metric_count(
+            scorecard, "compatibility_debt_metrics", "transition_compat_count"
+        ),
+        "sunset_compat_count": _scorecard_metric_count(
+            scorecard, "compatibility_debt_metrics", "sunset_compat_count"
+        ),
+        "expired_compat_count": _scorecard_metric_count(
+            scorecard, "compatibility_debt_metrics", "expired_compat_count"
+        ),
+        "public_entrypoint_growth_count": max(
+            0, retained_entrypoint_count - reviewed_entrypoint_count
+        ),
+        "public_export_facade_growth_count": max(
+            0,
+            retained_public_export_facade_count - reviewed_public_export_facade_count,
+        ),
+        "public_export_facade_conflict_count": conflict_count,
+        "twin_pair_count": compatibility_summary["twin_pair_count"],
+    }
+
+
 def _build_architecture_quality_metrics(
     dependency_map: dict[str, Any],  # Any: JSON artifact can have any value type
     coverage_inventory: dict[str, Any],  # Any: JSON artifact can have any value type
@@ -225,36 +284,9 @@ def _build_architecture_quality_metrics(
     hotspot_summary = hotspot_baseline["summary"]
     adr_summary = adr_enforcement_matrix["summary"]
     test_governance_summary = test_governance_report["report"]
-    retained_entrypoint_count = int(compatibility_summary["retained_entrypoint_count"])
-    retained_public_export_facade_count = int(
-        compatibility_summary["retained_public_export_facade_count"]
-    )
-    reviewed_entrypoint_count = _scorecard_metric_count(
+    compatibility_metrics = _build_compatibility_quality_metrics(
+        compatibility_summary,
         scorecard,
-        "sanctioned_public_entrypoint_governance",
-        "public_entrypoint_count",
-    )
-    reviewed_public_export_facade_count = _scorecard_metric_count(
-        scorecard,
-        "sanctioned_public_entrypoint_governance",
-        "public_export_facade_count",
-    )
-    public_export_facade_conflict_count = max(
-        int(
-            compatibility_summary.get(
-                "retained_public_export_facades_with_duplicate_exports", 0
-            )
-        ),
-        int(
-            compatibility_summary.get(
-                "retained_public_export_facades_with_resolution_conflicts", 0
-            )
-        ),
-        int(
-            compatibility_summary.get(
-                "retained_public_export_facades_with_wrapper_contract_drift", 0
-            )
-        ),
     )
     return {
         "layer_violations": len(dependency_map.get("violations", [])),
@@ -264,26 +296,7 @@ def _build_architecture_quality_metrics(
         "hotspot_family_count": len(coverage_summary["hotspot_family_coverage"]),
         "hotspot_budget_warning_count": hotspot_summary["budget_warnings"],
         "total_duplicate_clusters": duplication_summary["total_duplicate_clusters"],
-        "retained_entrypoint_count": retained_entrypoint_count,
-        "retained_public_export_facade_count": retained_public_export_facade_count,
-        "transition_compat_count": _scorecard_metric_count(
-            scorecard, "compatibility_debt_metrics", "transition_compat_count"
-        ),
-        "sunset_compat_count": _scorecard_metric_count(
-            scorecard, "compatibility_debt_metrics", "sunset_compat_count"
-        ),
-        "expired_compat_count": _scorecard_metric_count(
-            scorecard, "compatibility_debt_metrics", "expired_compat_count"
-        ),
-        "public_entrypoint_growth_count": max(
-            0, retained_entrypoint_count - reviewed_entrypoint_count
-        ),
-        "public_export_facade_growth_count": max(
-            0,
-            retained_public_export_facade_count - reviewed_public_export_facade_count,
-        ),
-        "public_export_facade_conflict_count": public_export_facade_conflict_count,
-        "twin_pair_count": compatibility_summary["twin_pair_count"],
+        **compatibility_metrics,
         "compatibility_test_file_count": test_governance_summary[
             "compatibility_test_files"
         ],

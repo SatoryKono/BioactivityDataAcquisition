@@ -33,7 +33,7 @@ class BatchWriterColumnsMixin:
         try:
             converted = schema.to_schema()
             if hasattr(converted, "select_columns"):
-                return converted.select_columns(list(column_order))
+                return converted.select_columns(list(column_order))  # type: ignore[no-any-return]
         except _SCHEMA_EXTRACTION_ERRORS:
             return schema
         return None
@@ -47,7 +47,7 @@ class BatchWriterColumnsMixin:
         if not hasattr(schema, "select_columns"):
             return None
         try:
-            return schema.select_columns(list(column_order))
+            return schema.select_columns(list(column_order))  # type: ignore[no-any-return]
         except _SCHEMA_EXTRACTION_ERRORS:
             return schema
 
@@ -65,7 +65,7 @@ class BatchWriterColumnsMixin:
             projected_fields = [
                 schema.field(name) for name in column_order if name in schema.names
             ]
-            return pa.schema(projected_fields, metadata=schema.metadata)
+            return pa.schema(projected_fields, metadata=schema.metadata)  # type: ignore[no-any-return]
         except (ImportError, AttributeError, TypeError, ValueError):
             return schema
 

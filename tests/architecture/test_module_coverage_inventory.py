@@ -230,6 +230,7 @@ def test_module_coverage_inventory_source_tree_hash_is_current() -> None:
 
     committed = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
     assert committed["source_tree_sha256"] == compute_source_tree_sha256(repo_root=ROOT)
+    assert "source_tree_sha256" not in committed["summary"]
 
 
 @pytest.mark.architecture

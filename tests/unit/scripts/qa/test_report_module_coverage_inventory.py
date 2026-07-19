@@ -88,7 +88,9 @@ def test_refresh_existing_inventory_reuses_stable_snapshot_digest(
     )
     monkeypatch.setattr(
         "scripts.engineering.qa.report_module_coverage_inventory.compute_source_tree_sha256",
-        lambda *, repo_root: pytest.fail("source hash should come from stable snapshot read"),
+        lambda *, repo_root: pytest.fail(
+            "source hash should come from stable snapshot read"
+        ),
     )
 
     refreshed = _refresh_existing_inventory_source_tree(
@@ -105,7 +107,7 @@ def test_refresh_existing_inventory_reuses_stable_snapshot_digest(
                     "missing_lines": 0,
                 }
             ],
-            "summary": {},
+            "summary": {"source_tree_sha256": "stale-summary-digest"},
             "source_tree_sha256": "old-digest",
         },
         repo_root=tmp_path,
@@ -113,6 +115,7 @@ def test_refresh_existing_inventory_reuses_stable_snapshot_digest(
 
     assert refreshed["source_tree_sha256"] == "stable-digest"
     assert refreshed["summary"]["source_module_count"] == 1
+    assert "source_tree_sha256" not in refreshed["summary"]
 
 
 def test_module_is_declaration_only_treats_private_attrs_surface_as_non_runtime() -> (

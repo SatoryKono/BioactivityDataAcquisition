@@ -22,23 +22,7 @@ policy:
 registries:
   file_size_limits: {}
   function_complexity: {}
-  function_length:
-    "src/bioetl/infrastructure/quality/architecture_debt_artifact_tasks.py::build_compatibility_surface_tasks":
-      value: 120
-      owner: "@bioetl-architecture"
-      reason: Architecture quality infrastructure task with complex compatibility surface generation logic
-      classification: infrastructure_quality
-      linked_rf: RF-023
-      expires_on: "2026-12-31"
-      removal_step: Refactor into smaller helper functions after ADR-050 compliance
-    "src/bioetl/infrastructure/quality/architecture_quality_scorecard.py::_build_architecture_quality_metrics":
-      value: 120
-      owner: "@bioetl-architecture"
-      reason: Architecture quality scorecard metric aggregation with multiple metric families
-      classification: infrastructure_quality
-      linked_rf: RF-023
-      expires_on: "2026-12-31"
-      removal_step: Extract metric-specific builders into separate functions
+  function_length: {}
   class_size: {}
   class_method_count: {}
   god_object: {}
