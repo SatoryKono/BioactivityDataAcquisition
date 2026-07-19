@@ -4,7 +4,8 @@
 Usage:
     python scripts/engineering/repo/publish_tdx_audit_issues.py
     python scripts/engineering/repo/publish_tdx_audit_issues.py --apply
-    python scripts/engineering/repo/publish_tdx_audit_issues.py --apply --codes TDX-AUDIT-012,TDX-AUDIT-013 --update-pack
+    python scripts/engineering/repo/publish_tdx_audit_issues.py --apply \
+        --codes TDX-AUDIT-012,TDX-AUDIT-013 --update-pack
     python scripts/engineering/repo/publish_tdx_audit_issues.py --apply --reopen 5839,5840
 
 Requires a GitHub token in ``GITHUB_TOKEN`` or ``GITHUB_PERSONAL_ACCESS_TOKEN``.
@@ -25,6 +26,14 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Final
 
+REPO_ROOT = Path(__file__).resolve().parents[3]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.engineering.qa.technical_debt_audit_registry import (  # noqa: E402
+    resolve_current_technical_debt_audit,
+)
+
 try:
     from dotenv import load_dotenv
 except ImportError:  # pragma: no cover - optional in minimal envs
@@ -34,9 +43,14 @@ API_BASE: Final[str] = "https://api.github.com"
 DEFAULT_OWNER: Final[str] = "SatoryKono"
 DEFAULT_REPO: Final[str] = "BioactivityDataAcquisition"
 DEFAULT_TOKEN_ENV: Final[str] = "GITHUB_TOKEN"
-ISSUES_DIR: Final[Path] = Path(__file__).resolve().parents[3] / ".github" / "ISSUES"
-DEFAULT_ISSUE_PACK: Final[Path] = ISSUES_DIR / "TECH-DEBT-AUDIT-2026-07-03-ISSUE-PACK.md"
+ISSUES_DIR: Final[Path] = REPO_ROOT / ".github" / "ISSUES"
+DEFAULT_ISSUE_PACK: Final[Path] = (
+    ISSUES_DIR / "TECH-DEBT-AUDIT-2026-07-03-ISSUE-PACK.md"
+)
 LEGACY_ISSUE_PACK: Final[Path] = ISSUES_DIR / "TECH-DEBT-AUDIT-2026-07-01-ISSUE-PACK.md"
+CURRENT_AUDIT_REFERENCE: Final[str] = (
+    resolve_current_technical_debt_audit(REPO_ROOT).relative_to(REPO_ROOT).as_posix()
+)
 REOPEN_COMMENT: Final[str] = (
     "Reopened after the refreshed `2026-07-03` technical-debt audit on current "
     "`main`.\n\n"
@@ -46,7 +60,7 @@ REOPEN_COMMENT: Final[str] = (
     "seams). This issue remains the active owner until the acceptance criteria "
     "are met on regenerated evidence.\n\n"
     "Evidence anchors:\n"
-    "- `reports/quality/total-tech-debt-audit-main-2026-07-01.md`\n"
+    f"- `{CURRENT_AUDIT_REFERENCE}`\n"
     "- `reports/quality/debt-governance-gates.json`\n"
     "- `reports/quality/full-app-duplication-baseline.json`\n"
     "- `reports/quality/module-coverage-inventory.json`\n"
@@ -77,7 +91,7 @@ class IssueRecord:
 
 
 def _repo_root() -> Path:
-    return Path(__file__).resolve().parents[3]
+    return REPO_ROOT
 
 
 def _load_token(token_env: str) -> str:
@@ -116,7 +130,9 @@ def _github_request(
                 time.sleep(1.5 * attempt)
                 continue
             detail = exc.read().decode("utf-8", errors="replace")
-            raise RuntimeError(f"GitHub API {method} {url} failed: {exc.code} {detail}") from exc
+            raise RuntimeError(
+                f"GitHub API {method} {url} failed: {exc.code} {detail}"
+            ) from exc
     raise RuntimeError(f"GitHub API {method} {url} exhausted retries")
 
 
@@ -206,7 +222,9 @@ def _reopen_issue(*, token: str, number: int, comment: str) -> IssueRecord:
         payload={"state": "open"},
     )
     comment_url = f"{issue_url}/comments"
-    _github_request(method="POST", url=comment_url, token=token, payload={"body": comment})
+    _github_request(
+        method="POST", url=comment_url, token=token, payload={"body": comment}
+    )
     return IssueRecord(
         number=int(updated["number"]),
         title=str(updated["title"]),
@@ -228,7 +246,9 @@ def _update_issue_pack(*, issue_pack: Path, records: list[IssueRecord]) -> None:
         link = f"[#{record.number}]({record.url})"
         pattern = rf"(\d+\. `{code}`[^\n]*)(\s+#\d+)?$"
         replacement = rf"\1 {link}"
-        content, count = re.subn(pattern, replacement, content, count=1, flags=re.MULTILINE)
+        content, count = re.subn(
+            pattern, replacement, content, count=1, flags=re.MULTILINE
+        )
         if count == 0:
             content += f"\n- {link} `{code}` {record.title}"
     issue_pack.write_text(content, encoding="utf-8")
@@ -285,7 +305,9 @@ def run(argv: list[str] | None = None) -> int:
         print(f"- {draft.code}: {draft.title}")
 
     if not args.apply:
-        print("\n[DRY-RUN] Pass --apply to create missing issues and reopen closed wave.")
+        print(
+            "\n[DRY-RUN] Pass --apply to create missing issues and reopen closed wave."
+        )
         return 0
 
     token = _load_token(args.token_env)
@@ -295,7 +317,9 @@ def run(argv: list[str] | None = None) -> int:
         for raw_number in args.reopen.split(","):
             number = int(raw_number.strip())
             print(f"Reopening #{number}...")
-            records.append(_reopen_issue(token=token, number=number, comment=REOPEN_COMMENT))
+            records.append(
+                _reopen_issue(token=token, number=number, comment=REOPEN_COMMENT)
+            )
 
     for draft in drafts:
         existing = _search_existing_issue(token=token, title=draft.title)
@@ -309,7 +333,9 @@ def run(argv: list[str] | None = None) -> int:
                     action="exists-open",
                 )
             )
-            print(f"Skipping create for {draft.code}; already open as #{existing['number']}.")
+            print(
+                f"Skipping create for {draft.code}; already open as #{existing['number']}."
+            )
             continue
         if existing and existing.get("state") == "closed":
             print(
@@ -328,7 +354,9 @@ def run(argv: list[str] | None = None) -> int:
     for record in records:
         print(f"- {record.action}: #{record.number} {record.url}")
 
-    summary_path = _repo_root() / "reports/quality/tech-debt-tdx-audit-issue-publish.json"
+    summary_path = (
+        _repo_root() / "reports/quality/tech-debt-tdx-audit-issue-publish.json"
+    )
     summary_path.write_text(
         json.dumps(
             {

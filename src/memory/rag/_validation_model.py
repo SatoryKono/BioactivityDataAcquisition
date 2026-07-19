@@ -73,7 +73,13 @@ class RagManifestValidationError(ValueError):
     def __init__(self, report: RagValidationReport) -> None:
         self.report = report
         codes = ", ".join(sorted({issue.code for issue in report.issues}))
-        super().__init__(f"RAG manifest validation failed: {codes or 'unknown error'}")
+        issue_preview = "; ".join(
+            f"{issue.code}@{issue.path}" for issue in report.issues[:5]
+        )
+        details = f" ({issue_preview})" if issue_preview else ""
+        super().__init__(
+            f"RAG manifest validation failed: {codes or 'unknown error'}{details}"
+        )
 
 
 def normalize_rag_source_path(
@@ -122,9 +128,7 @@ def calculate_source_surface_sha256(
             raise FileNotFoundError(f"RAG source does not exist: {normalized}")
         identities.append(
             {
-                "content_hash": content_hash(
-                    resolved_path.read_text(encoding="utf-8")
-                ),
+                "content_hash": content_hash(resolved_path.read_text(encoding="utf-8")),
                 "source_path": normalized,
             }
         )
@@ -137,7 +141,9 @@ def calculate_source_surface_sha256(
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
-def _run_git(root: Path, arguments: list[str]) -> subprocess.CompletedProcess[str] | None:
+def _run_git(
+    root: Path, arguments: list[str]
+) -> subprocess.CompletedProcess[str] | None:
     if not (root / ".git").exists():
         return None
     try:
