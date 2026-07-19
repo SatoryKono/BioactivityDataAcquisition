@@ -1,6 +1,6 @@
 {
   "summary": {
-    "snapshot_date": "2026-06-01",
+    "snapshot_date": "2026-07-19",
     "families": 5,
     "scorecard": "configs/quality/debt_scorecard.yaml",
     "budget_warnings": 0,
@@ -16,7 +16,7 @@
       "path_prefixes": [
         "src/bioetl/application/core/"
       ],
-      "duplication_clusters": 0,
+      "duplication_clusters": 6,
       "files": 180,
       "total_loc": 22218,
       "files_ge_250_loc": 4,
@@ -39,7 +39,7 @@
       "path_prefixes": [
         "src/bioetl/composition/bootstrap/runtime/"
       ],
-      "duplication_clusters": 0,
+      "duplication_clusters": 1,
       "files": 50,
       "total_loc": 6101,
       "files_ge_250_loc": 0,
@@ -62,7 +62,7 @@
       "path_prefixes": [
         "src/bioetl/composition/factories/pipeline/"
       ],
-      "duplication_clusters": 0,
+      "duplication_clusters": 1,
       "files": 35,
       "total_loc": 4642,
       "files_ge_250_loc": 2,
@@ -85,7 +85,7 @@
       "path_prefixes": [
         "src/bioetl/application/services/control_plane/"
       ],
-      "duplication_clusters": 0,
+      "duplication_clusters": 6,
       "files": 124,
       "total_loc": 15299,
       "files_ge_250_loc": 11,
@@ -108,7 +108,7 @@
       "path_prefixes": [
         "src/bioetl/composition/runtime_builders/"
       ],
-      "duplication_clusters": 0,
+      "duplication_clusters": 6,
       "files": 55,
       "total_loc": 6842,
       "files_ge_250_loc": 0,
