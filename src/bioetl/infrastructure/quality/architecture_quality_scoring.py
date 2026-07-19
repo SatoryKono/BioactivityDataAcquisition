@@ -16,6 +16,7 @@ _CATEGORY_BASELINES: tuple[dict[str, object], ...] = (
         "metric_keys": (
             "layer_violations",
             "transition_compat_count",
+            "sunset_compat_count",
             "expired_compat_count",
         ),
     },

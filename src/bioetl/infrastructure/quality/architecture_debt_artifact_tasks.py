@@ -116,7 +116,6 @@ def build_compatibility_surface_tasks(
     if not census:
         return []
     summary = cast(dict[str, object], census.get("summary", {}))
-    review_window = cast(dict[str, object], inventory.get("review_window", {}))
     scorecard = load_yaml_if_present(artifact_paths["debt_scorecard"])
     compatibility_governance = cast(
         dict[str, object],
@@ -322,6 +321,7 @@ def build_dead_code_review_tasks(
     if not inventory:
         return []
     summary = cast(dict[str, object], inventory.get("summary", {}))
+    review_window = cast(dict[str, object], inventory.get("review_window", {}))
     untriaged_candidates = int(  # type: ignore[call-overload]
         summary.get("repo_wide_untriaged_zero_import_candidate_count", 0)
     )
