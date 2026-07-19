@@ -353,13 +353,7 @@ _TUNED_ALERT_EXPECTATIONS: dict[str, dict[str, object]] = {
     "BioETLMetricsEndpointUnavailable": {
         "severity": "critical",
         "for": "5m",
-        "fragments": [
-            "bioetl_pipeline_runs_total",
-            "absent_over_time",
-            'up{job="bioetl"}',
-            "== 0",
-            "and on()",
-        ],
+        "fragments": ["absent_over_time(bioetl_pipeline_runs_total[10m])"],
     },
     "BioETLMetricsEndpointScrapeMissing": {
         "severity": "warning",
@@ -1002,7 +996,7 @@ def test_canonical_current_status_recording_rules_exist() -> None:
         "bioetl_runtime_current_failure_signals_15m": "bioetl_runtime_alert_condition_pipeline_runs_failed_15m",
         "bioetl_runtime_current_degraded_signals_15m": "bioetl_runtime_alert_condition_no_terminal_run_30m",
         "bioetl_runtime_current_status": "bioetl_runtime_current_failure_signals_15m",
-        "bioetl_runtime_trust_gap_status_10m": 'up{job="bioetl"}',
+        "bioetl_runtime_trust_gap_status_10m": "absent_over_time(bioetl_pipeline_runs_total[10m])",
         "bioetl_runtime_trust_gap_active_10m": "bioetl_runtime_trust_gap_status_10m",
         "bioetl_runtime_pipeline_run_type_universe_scoped": "label_replace",
         "bioetl_runtime_current_status_scoped": "bioetl_runtime_current_status",
@@ -1525,20 +1519,23 @@ def test_monitoring_stack_alerts_reference_up_metric_and_checklist_runbook() -> 
     rule_map = _build_rule_map(payload)
 
     expected = {
-        "BioETLMetricsEndpointUnavailable": "5m",
-        "BioETLMetricsEndpointScrapeMissing": "10m",
-        "BioETLPrometheusUnavailable": "2m",
-        "BioETLGrafanaUnavailable": "2m",
-        "BioETLPushgatewayUnavailable": "5m",
-        "BioETLQuarantineExplorerUnavailable": "2m",
-        "BioETLGrafanaRendererUnavailable": "2m",
+        "BioETLMetricsEndpointUnavailable": (
+            "5m",
+            "absent_over_time(bioetl_pipeline_runs_total[10m])",
+        ),
+        "BioETLMetricsEndpointScrapeMissing": ("10m", "up"),
+        "BioETLPrometheusUnavailable": ("2m", "up"),
+        "BioETLGrafanaUnavailable": ("2m", "up"),
+        "BioETLPushgatewayUnavailable": ("5m", "up"),
+        "BioETLQuarantineExplorerUnavailable": ("2m", "up"),
+        "BioETLGrafanaRendererUnavailable": ("2m", "up"),
     }
 
-    for alert_name, expected_for in expected.items():
+    for alert_name, (expected_for, expected_metric) in expected.items():
         rule = rule_map[alert_name]
         expr = rule.get("expr", "")
         annotations = rule.get("annotations", {})
-        assert "up" in expr
+        assert expected_metric in expr
         assert rule.get("for") == expected_for
         assert annotations.get("runbook") == (
             "docs/05-operations/runbooks/observability-checklist.md"

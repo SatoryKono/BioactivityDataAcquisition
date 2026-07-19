@@ -33,6 +33,7 @@ slo_contracts:
         slo_intent: "Reviewed screenshot and render evidence remains available; an outage blocks render acceptance but not Prometheus collection"
     metrics:
       - up
+      - bioetl_pipeline_runs_total
     alerts:
       - name: BioETLMetricsEndpointUnavailable
         severity: critical
