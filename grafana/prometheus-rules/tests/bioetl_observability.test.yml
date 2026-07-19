@@ -9,33 +9,36 @@ tests:
     interval: 1m
     input_series:
       - series: 'up{job="bioetl",instance="host.docker.internal:8000"}'
-        values: '0 0 0 0 0'
+        values: '0 0 0 0 0 0 0 0 0 0 0'
+      - series: 'bioetl_pipeline_runs_total{pipeline="test",run_type="test",status="success"}'
+        values: '0 0 0 0 0 0 0 0 0 0 0'
     alert_rule_test:
-      - eval_time: 3m
+      - eval_time: 6m
         alertname: BioETLMetricsEndpointUnavailable
         exp_alerts:
           - exp_labels:
               severity: critical
-              job: bioetl
-              instance: host.docker.internal:8000
             exp_annotations:
-              summary: BioETL metrics endpoint is unavailable
-              description: Prometheus could not scrape the BioETL /metrics endpoint for instance=host.docker.internal:8000.
+              summary: BioETL metrics are unavailable
+              description: No BioETL metrics (bioetl_pipeline_runs_total) have been observed for 10m, and the scrape endpoint is also unavailable. This indicates either BioETL is not running or metrics collection is completely broken.
               runbook: docs/05-operations/runbooks/observability-checklist.md
 
   - name: metrics-endpoint-scrape-missing
     interval: 1m
-    input_series: []
+    input_series:
+      - series: 'up{job="bioetl",instance="host.docker.internal:8000"}'
+        values: '0 0 0 0 0 0 0 0 0 0 0 0'
+      - series: 'bioetl_pipeline_runs_total{pipeline="test",run_type="test",status="success"}'
+        values: '0+1x12'
     alert_rule_test:
       - eval_time: 11m
         alertname: BioETLMetricsEndpointScrapeMissing
         exp_alerts:
           - exp_labels:
-              severity: critical
-              job: bioetl
+              severity: warning
             exp_annotations:
-              summary: BioETL metrics endpoint has stopped emitting scrape samples
-              description: No up{job="bioetl"} samples were observed for 10m; monitoring blind spots may be silent.
+              summary: BioETL scrape endpoint is unavailable but Pushgateway metrics are present
+              description: The BioETL /metrics scrape endpoint is unavailable (up{job="bioetl"} is absent), but BioETL metrics are still being received via Pushgateway. This is expected when using Pushgateway instead of direct scraping.
               runbook: docs/05-operations/runbooks/observability-checklist.md
 
   - name: prometheus-unavailable
@@ -842,6 +845,25 @@ tests:
     input_series:
       - series: 'bioetl_pipeline_runs_total{pipeline="chembl_assay",run_type="backfill",status="success"}'
         values: '0+0x10 1+0x10'
+      - series: 'up{job="bioetl"}'
+        values: '0+0x20'
+    promql_expr_test:
+      - expr: bioetl_runtime_trust_gap_status_10m
+        eval_time: 19m
+        exp_samples:
+          - labels: '{__name__="bioetl_runtime_trust_gap_status_10m"}'
+            value: 0
+      - expr: bioetl_runtime_current_status_trusted{pipeline="chembl_assay",run_type="backfill"}
+        eval_time: 19m
+        exp_samples:
+          - labels: '{__name__="bioetl_runtime_current_status_trusted",pipeline="chembl_assay",run_type="backfill"}'
+            value: 0
+
+  - name: runtime-trusted-status-fails-closed-on-complete-metrics-absence
+    interval: 1m
+    input_series:
+      - series: 'bioetl_pipeline_runs_total{pipeline="chembl_assay",run_type="backfill",status="success"}'
+        values: '0+0x20'
       - series: 'up{job="bioetl"}'
         values: '0+0x20'
     promql_expr_test:
