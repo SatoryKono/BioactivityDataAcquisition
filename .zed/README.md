@@ -195,8 +195,6 @@ settings include only non-secret context servers.
 - **memory** - Persistent project memory
 - **filesystem** - Workspace file system access
 - **fetch** - HTTP fetch support
-- **biomoltechDocs** - BioETL documentation access
-- **mintlify** - Documentation search
 - **deepwiki** - Repository documentation
 
 Secret-bearing or machine-local servers such as GitHub, Brave Search, Grafana,

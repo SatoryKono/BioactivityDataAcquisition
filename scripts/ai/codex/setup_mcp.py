@@ -16,7 +16,17 @@ from pathlib import Path
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-FETCH_SPEC = ["--from", "mcp-server-fetch==2025.4.7", "mcp-server-fetch"]
+# mcp-server-fetch 2025.4.7 does not complete the stdio handshake under
+# CPython 3.14 in the supported WSL setup. Keep uvx on the validated runtime
+# until the pinned server is upgraded and its 3.14 transport is verified.
+FETCH_PYTHON_VERSION = "3.13"
+FETCH_SPEC = [
+    "--python",
+    FETCH_PYTHON_VERSION,
+    "--from",
+    "mcp-server-fetch==2025.4.7",
+    "mcp-server-fetch",
+]
 MANAGED_BLOCK_BEGIN = "# === BEGIN MANAGED MCP SERVERS ==="
 MANAGED_BLOCK_END = "# === END MANAGED MCP SERVERS ==="
 CACHE_DIR_NAME = ".cache"
@@ -34,6 +44,8 @@ REMOVED_MCP_SERVER_NAMES = frozenset(
         "dockerhub",
         "pdf",
         "paper-search",
+        "biomoltechDocs",
+        "mintlify",
     }
 )
 
@@ -41,8 +53,6 @@ REMOVED_MCP_SERVER_NAMES = frozenset(
 # Any new remote HTTP MCP server must be added to this allowlist after security review.
 APPROVED_REMOTE_MCP_BASE_URLS = frozenset(
     {
-        "https://biomoltech.mintlify.app/mcp",
-        "https://mcp.mintlify.com",
         "https://mcp.deepwiki.com/mcp",
         "https://api.ref.tools/mcp",
     }
@@ -203,8 +213,6 @@ def _canonical_servers(
             workspace_root,
             portable_workspace_paths=portable_workspace_paths,
         ),
-        "biomoltechDocs": _http_server("https://biomoltech.mintlify.app/mcp"),
-        "mintlify": _http_server("https://mcp.mintlify.com"),
         "deepwiki": _http_server("https://mcp.deepwiki.com/mcp"),
         "ref": _http_server("https://api.ref.tools/mcp"),
     }
@@ -446,7 +454,8 @@ def _write_codex_config(workspace_root: Path) -> Path:
     config_path = config_dir / "config.toml"
 
     existing = config_path.read_text(encoding="utf-8") if config_path.exists() else ""
-    preserved = _strip_managed_mcp_blocks(existing, set(servers))
+    managed_or_retired_names = set(servers) | set(REMOVED_MCP_SERVER_NAMES)
+    preserved = _strip_managed_mcp_blocks(existing, managed_or_retired_names)
     managed_block = _render_codex_mcp_toml(servers)
 
     if preserved:

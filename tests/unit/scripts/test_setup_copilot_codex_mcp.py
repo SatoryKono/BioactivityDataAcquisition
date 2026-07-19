@@ -63,6 +63,8 @@ def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> 
         "chembl",
         "pubchem",
         "pubmed",
+        "biomoltechDocs",
+        "mintlify",
     }
 
     runtime_servers = codex_settings["mcpServers"]
@@ -71,6 +73,7 @@ def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> 
     assert qodo_payload["mcpServers"] == servers
     assert zed_payload["mcpServers"] == servers
     assert not removed_servers.intersection(servers)
+    assert not removed_servers.intersection(gemini_settings["mcpServers"])
     assert servers["filesystem"]["args"][-1] == "."
     assert devin_servers["filesystem"]["args"][-1] == "."
     assert runtime_servers["filesystem"]["args"][-1] == str(workspace_root.resolve())
@@ -85,6 +88,14 @@ def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> 
     assert runtime_servers["memory"]["env"]["MEMORY_FILE_PATH"] == str(
         (workspace_root / "docs/00-project/ai/memory/mcp-memory.json").resolve()
     )
+    assert servers["fetch"]["args"] == [
+        "--python",
+        "3.13",
+        "--from",
+        "mcp-server-fetch==2025.4.7",
+        "mcp-server-fetch",
+    ]
+    assert runtime_servers["fetch"]["args"] == servers["fetch"]["args"]
     assert servers["github"]["args"][0] == (
         f"scripts/ai/mcp/github-mcp-wrapper{wrapper_suffix}"
     )
@@ -110,16 +121,9 @@ def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> 
             workspace_root / f"scripts/ai/mcp/mcp_mermaid_wrapper{wrapper_suffix}"
         ).resolve()
     )
-    assert servers["biomoltechDocs"]["type"] == "http"
-    assert servers["biomoltechDocs"]["url"] == "https://biomoltech.mintlify.app/mcp"
-    assert servers["mintlify"]["url"] == "https://mcp.mintlify.com"
     assert servers["deepwiki"]["url"] == "https://mcp.deepwiki.com/mcp"
     assert servers["ref"]["type"] == "http"
     assert servers["ref"]["url"] == "https://api.ref.tools/mcp"
-    assert (
-        gemini_settings["mcpServers"]["biomoltechDocs"]["httpUrl"]
-        == "https://biomoltech.mintlify.app/mcp"
-    )
     assert (
         gemini_settings["mcpServers"]["ref"]["httpUrl"] == "https://api.ref.tools/mcp"
     )
@@ -219,6 +223,22 @@ def test_skip_codex_validation_still_updates_codex_config(
     fake_home = tmp_path / "home"
     workspace_root.mkdir()
     fake_home.mkdir()
+    codex_dir = fake_home / ".codex"
+    codex_dir.mkdir()
+    codex_config = codex_dir / "config.toml"
+    codex_config.write_text(
+        """
+[mcp_servers.pycharm]
+url = "http://127.0.0.1:64342/sse"
+
+[mcp_servers.biomoltechDocs]
+url = "https://retired.invalid/mcp"
+
+[mcp_servers.mintlify]
+url = "https://retired.invalid/mcp"
+""".lstrip(),
+        encoding="utf-8",
+    )
 
     def fail_validation(_workspace_root: Path) -> None:
         raise AssertionError("Codex CLI validation should have been skipped")
@@ -238,8 +258,10 @@ def test_skip_codex_validation_still_updates_codex_config(
     )
 
     assert exit_code == 0
-    codex_config = fake_home / ".codex" / "config.toml"
     rendered = codex_config.read_text(encoding="utf-8")
+    assert "[mcp_servers.pycharm]" in rendered
+    assert "[mcp_servers.biomoltechDocs]" not in rendered
+    assert "[mcp_servers.mintlify]" not in rendered
     assert "[mcp_servers.filesystem]" in rendered
     assert "[mcp_servers.memory]" in rendered
     assert "[mcp_servers.ref]" in rendered

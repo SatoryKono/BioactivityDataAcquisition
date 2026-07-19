@@ -43,8 +43,7 @@ memory, filesystem, fetch, github, context7, ast-grep, mcp-code-interpreter,
 prometheus, grafana, mermaid,
 brave-search,
 docker, neo4j-cypher, neo4j-memory,
-biomoltechDocs, mintlify, deepwiki
-ref
+deepwiki, ref
 
 `ref` uses the key-free `https://api.ref.tools/mcp` endpoint. Local clients
 authenticate through OAuth or, for Codex, an `env_http_headers` reference to
@@ -63,6 +62,8 @@ docker-docs
 dockerhub  
 pdf  
 paper-search
+biomoltechDocs
+mintlify
 
 ## Retired wrapper artifacts
 

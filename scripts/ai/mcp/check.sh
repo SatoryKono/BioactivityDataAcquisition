@@ -150,12 +150,21 @@ fi
 
 printf "=== MCP server list ===\n%s\n\n" "$list_out"
 
-for server in memory filesystem fetch github docker context7 ast-grep mcp-code-interpreter prometheus grafana brave-search neo4j-cypher neo4j-memory mermaid biomoltechDocs mintlify deepwiki ref; do
+for server in memory filesystem fetch github docker context7 ast-grep mcp-code-interpreter prometheus grafana brave-search neo4j-cypher neo4j-memory mermaid deepwiki ref; do
   if grep -Eq "^${server}[[:space:]]" <<<"$list_out"; then
     ok "Server '${server}' is registered"
   else
     fail "Server '${server}' is missing"
     status=1
+  fi
+done
+
+for server in biomoltechDocs mintlify; do
+  if grep -Eq "^${server}[[:space:]]" <<<"$list_out"; then
+    fail "Retired server '${server}' is still registered"
+    status=1
+  else
+    ok "Retired server '${server}' is absent"
   fi
 done
 
@@ -179,6 +188,7 @@ ref_out="$(codex mcp get ref 2>&1 || true)"
 require_contains "$memory_out" "@modelcontextprotocol/server-memory@2026.1.26" "memory is pinned to @2026.1.26" || status=1
 require_contains "$filesystem_out" "@modelcontextprotocol/server-filesystem@2026.1.14" "filesystem is pinned to @2026.1.14" || status=1
 require_contains "$fetch_out" "mcp-server-fetch==2025.4.7" "fetch is pinned to mcp-server-fetch==2025.4.7" || status=1
+require_contains "$fetch_out" "--python 3.13" "fetch uses the WSL-compatible CPython 3.13 runtime" || status=1
 require_wrapper_path "$github_out" "$EXPECTED_GITHUB_WRAPPER_PATH" "github is routed through the project wrapper" || status=1
 require_wrapper_path "$docker_out" "$EXPECTED_DOCKER_WRAPPER_PATH" "docker is routed through the project wrapper" || status=1
 require_wrapper_path "$context7_out" "$EXPECTED_CONTEXT7_WRAPPER_PATH" "context7 is routed through the project wrapper" || status=1
@@ -190,10 +200,6 @@ require_wrapper_path "$brave_out" "$EXPECTED_BRAVE_WRAPPER_PATH" "brave-search i
 require_wrapper_path "$neo4j_cypher_out" "$EXPECTED_NEO4J_CYPHER_WRAPPER_PATH" "neo4j-cypher is routed through the project wrapper" || status=1
 require_wrapper_path "$neo4j_memory_out" "$EXPECTED_NEO4J_MEMORY_WRAPPER_PATH" "neo4j-memory is routed through the project wrapper" || status=1
 require_wrapper_path "$mermaid_out" "$EXPECTED_MERMAID_WRAPPER_PATH" "mermaid is routed through the project wrapper" || status=1
-biomoltech_out="$(codex mcp get biomoltechDocs 2>&1 || true)"
-mintlify_out="$(codex mcp get mintlify 2>&1 || true)"
-require_contains "$biomoltech_out" "https://biomoltech.mintlify.app/mcp" "biomoltechDocs is registered as a remote Mintlify MCP" || status=1
-require_contains "$mintlify_out" "https://mcp.mintlify.com" "mintlify is registered as the OAuth-enabled Mintlify MCP" || status=1
 require_contains "$deepwiki_out" "https://mcp.deepwiki.com/mcp" "deepwiki is registered as the official DeepWiki MCP" || status=1
 require_contains "$ref_out" "https://api.ref.tools/mcp" "ref is registered as the Ref Tools MCP" || status=1
 require_contains "$ref_out" "x-ref-api-key=REF_TOOL_API_KEY" "ref auth uses the local REF_TOOL_API_KEY env header" || status=1

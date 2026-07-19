@@ -4,6 +4,10 @@ import pytest
 
 from pathlib import Path
 
+from scripts.engineering.qa.import_graph_inventory import (
+    collect_bioetl_importers,
+    collect_zero_import_bioetl_modules,
+)
 from scripts.engineering.qa.report_compatibility_importer_census import (
     REMOVED_COMPATIBILITY_SURFACES,
     build_compatibility_importer_census,
@@ -18,6 +22,29 @@ pytestmark = pytest.mark.unit
 def _write(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
+
+
+def test_import_graph_counts_type_stub_imports_as_static_importers(
+    tmp_path: Path,
+) -> None:
+    _write(tmp_path / "src/bioetl/domain/ports/__init__.py", "")
+    _write(
+        tmp_path / "src/bioetl/domain/ports/__init__.pyi",
+        "from bioetl.domain.ports.sample import SamplePort as SamplePort\n",
+    )
+    _write(
+        tmp_path / "src/bioetl/domain/ports/sample.py",
+        "class SamplePort:\n    pass\n",
+    )
+
+    importers = collect_bioetl_importers(tmp_path)
+    assert importers["bioetl.domain.ports.sample"]["src"] == (
+        "src/bioetl/domain/ports/__init__.pyi",
+    )
+    zero_import_paths = {
+        str(row["path"]) for row in collect_zero_import_bioetl_modules(tmp_path)
+    }
+    assert "src/bioetl/domain/ports/sample.py" not in zero_import_paths
 
 
 def _write_compatibility_metadata_fixture(tmp_path: Path) -> dict[str, object]:
