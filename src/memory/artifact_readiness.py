@@ -55,9 +55,15 @@ def rag_chunks_ready(
     catalog = _load_catalog(catalog_path)
     if catalog is None:
         return False
-    resolved_root = repo_root.resolve() if repo_root is not None else _discover_repo_root(chunks_path)
+    resolved_root = (
+        repo_root.resolve()
+        if repo_root is not None
+        else _discover_repo_root(chunks_path)
+    )
     verify_sources = resolved_root is not None
-    if resolved_root is not None and _can_use_metadata_fast_path(resolved_root, catalog):
+    if resolved_root is not None and _can_use_metadata_fast_path(
+        resolved_root, catalog
+    ):
         verify_sources = False
     validation_root = resolved_root or chunks_path.parent
     report = validate_rag_manifest_files(

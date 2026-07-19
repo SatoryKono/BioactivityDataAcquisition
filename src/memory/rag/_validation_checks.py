@@ -34,18 +34,27 @@ def catalog_sources(
     """Validate and index catalog sources by physical path."""
     raw_sources = catalog.get("sources")
     if not isinstance(raw_sources, list):
-        add_issue(issues, "invalid_catalog", "catalog.sources", "sources must be a list")
+        add_issue(
+            issues, "invalid_catalog", "catalog.sources", "sources must be a list"
+        )
         return {}
 
     sources: dict[str, dict[str, Any]] = {}
     for index, raw_source in enumerate(raw_sources):
         issue_path = f"catalog.sources[{index}]"
         if not isinstance(raw_source, dict):
-            add_issue(issues, "invalid_catalog_source", issue_path, "source must be an object")
+            add_issue(
+                issues, "invalid_catalog_source", issue_path, "source must be an object"
+            )
             continue
         raw_path = raw_source.get("source_path")
         if not isinstance(raw_path, str):
-            add_issue(issues, "invalid_source_path", issue_path, "source_path must be a string")
+            add_issue(
+                issues,
+                "invalid_source_path",
+                issue_path,
+                "source_path must be a string",
+            )
             continue
         try:
             normalized = normalize_rag_source_path(
@@ -103,8 +112,7 @@ def validate_catalog_metadata(
         )
     git_head_sha = catalog.get("git_head_sha")
     if git_head_sha is not None and not (
-        isinstance(git_head_sha, str)
-        and re.fullmatch(r"[0-9a-f]{40,64}", git_head_sha)
+        isinstance(git_head_sha, str) and re.fullmatch(r"[0-9a-f]{40,64}", git_head_sha)
     ):
         add_issue(
             issues,
@@ -190,10 +198,17 @@ def validate_chunks(
             continue
         chunk_id = chunk.get("id")
         if not isinstance(chunk_id, str) or not chunk_id:
-            add_issue(issues, "invalid_chunk_id", issue_path, "id must be a non-empty string")
+            add_issue(
+                issues, "invalid_chunk_id", issue_path, "id must be a non-empty string"
+            )
         elif chunk_id in seen_ids:
             stale_indices.add(index)
-            add_issue(issues, "duplicate_chunk_id", issue_path, f"duplicate chunk id: {chunk_id}")
+            add_issue(
+                issues,
+                "duplicate_chunk_id",
+                issue_path,
+                f"duplicate chunk id: {chunk_id}",
+            )
         else:
             seen_ids.add(chunk_id)
 
@@ -201,7 +216,12 @@ def validate_chunks(
         if not isinstance(raw_source_path, str):
             chunk_sources[index] = None
             stale_indices.add(index)
-            add_issue(issues, "invalid_source_path", issue_path, "source_path must be a string")
+            add_issue(
+                issues,
+                "invalid_source_path",
+                issue_path,
+                "source_path must be a string",
+            )
         else:
             try:
                 source_path = normalize_rag_source_path(
@@ -307,7 +327,11 @@ def validate_source_identity(
     identity_mismatch = catalog.get("source_surface_sha256") != current_hash
     catalog_head = catalog.get("git_head_sha")
     current_head = current_identity["git_head_sha"]
-    if catalog_head is not None and current_head is not None and catalog_head != current_head:
+    if (
+        catalog_head is not None
+        and current_head is not None
+        and catalog_head != current_head
+    ):
         identity_mismatch = True
     if identity_mismatch:
         add_issue(
