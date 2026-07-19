@@ -558,7 +558,7 @@ hotspot_family_ratchets:
     linked_issue: '#4547'
     ratchet_stage: reviewed-baseline
     ratchet_scope: duplication-report-plus-bounded-growth
-    expected_action: Keep duplication clusters at 1 while holding file-growth and
+    expected_action: Keep duplication clusters at zero while holding file-growth and
       fan-in at the reviewed baseline during control-plane changes.
     path_prefixes:
     - src/bioetl/application/services/control_plane/
@@ -566,7 +566,7 @@ hotspot_family_ratchets:
       files_ge_250_loc: 16
       max_internal_fan_in: 4
     metrics:
-      duplication_clusters: 1
+      duplication_clusters: 0
       files: 124
       total_loc: 15299
       files_ge_250_loc: 11
