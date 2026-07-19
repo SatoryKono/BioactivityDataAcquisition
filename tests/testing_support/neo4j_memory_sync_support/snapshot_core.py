@@ -1,20 +1,11 @@
 """Core snapshot surface assertions for Neo4j memory sync."""
 
+# Names in this assertion module intentionally come from the shared test namespace.
+# ruff: noqa: F405
+
 from __future__ import annotations
 
-import sys
-
-import pytest
-
 from .common import *  # noqa: F403
-
-
-@pytest.fixture(autouse=True)
-def _skip_snapshot_core_on_windows() -> None:
-    if sys.platform.startswith("win"):
-        pytest.skip(
-            "Snapshot tests require full repo walk which is prohibitively slow on Windows"
-        )
 
 
 def _assert_node_keys_present(
