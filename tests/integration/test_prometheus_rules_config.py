@@ -352,13 +352,13 @@ def _classify_retry_exhaustions(exhaustions_per_hour: int) -> str | None:
 _TUNED_ALERT_EXPECTATIONS: dict[str, dict[str, object]] = {
     "BioETLMetricsEndpointUnavailable": {
         "severity": "critical",
-        "for": "2m",
-        "fragments": ['up{job="bioetl"}', "== 0"],
+        "for": "5m",
+        "fragments": ['bioetl_pipeline_runs_total', "absent_over_time", 'up{job="bioetl"}'],
     },
     "BioETLMetricsEndpointScrapeMissing": {
-        "severity": "critical",
-        "for": "1m",
-        "fragments": ['up{job="bioetl"}', "absent_over_time"],
+        "severity": "warning",
+        "for": "10m",
+        "fragments": ['up{job="bioetl"}', "absent_over_time", 'bioetl_pipeline_runs_total', "not"],
     },
     "BioETLPrometheusUnavailable": {
         "severity": "critical",
