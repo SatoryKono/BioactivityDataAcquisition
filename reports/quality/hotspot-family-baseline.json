@@ -85,9 +85,9 @@
       "path_prefixes": [
         "src/bioetl/application/services/control_plane/"
       ],
-      "duplication_clusters": 1,
+      "duplication_clusters": 0,
       "files": 124,
-      "total_loc": 15297,
+      "total_loc": 15299,
       "files_ge_250_loc": 11,
       "helper_function_ratio": 0.457,
       "max_internal_fan_in": 3,

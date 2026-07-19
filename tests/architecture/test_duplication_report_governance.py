@@ -199,11 +199,11 @@ def test_hotspot_duplication_baseline_is_clean_zero_ratchet() -> None:
     summary = payload.get("summary", {})
     assert isinstance(summary, dict)
 
-    # Updated baseline to 14 duplicate clusters (2026-07-19)
+    # Updated baseline to 13 duplicate clusters (2026-07-19)
     # All clusters are low-risk (export_facade_or_package_barrel, composition_runtime_wiring_pattern)
     # TODO: Work on reducing this back to 0 through refactoring
-    assert summary.get("total_duplicate_clusters") == 14
-    assert summary.get("total_raw_duplicate_clusters") == 14
+    assert summary.get("total_duplicate_clusters") == 13
+    assert summary.get("total_raw_duplicate_clusters") == 13
 
 
 def test_full_app_duplication_baseline_covers_audit_visibility_scope() -> None:
