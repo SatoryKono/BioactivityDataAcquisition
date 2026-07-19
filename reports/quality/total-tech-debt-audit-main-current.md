@@ -8,9 +8,9 @@ Audited repository: `SatoryKono/BioactivityDataAcquisition`
 
 Audited branch: `main`
 
-Audited commit SHA: `00315c6ff458b29f3853ef9ebc4e0b88c1d0b209`
+Audited commit SHA: `80c9ae958d22d589f03b2f0a013e5e10fa62665c`
 
-Evidence surface SHA-256: `00f279feeaba0b3a113585f5b11fb7f9ffeb0c0268281a2a75baebc9126e9192`
+Evidence surface SHA-256: `1e023b34de41e7ddc316a67914e363554fb54475b2ef85333d61bd564fb1ef44`
 
 Registry: `configs/quality/technical_debt_audit_registry.yaml`
 
@@ -22,14 +22,14 @@ artifacts.
 
 1. The reviewed quality gate snapshot is passing: architecture score `8.92`,
    `45/45` debt-governance gates passing, with no failures or warnings.
-1. Module coverage inventory contains `2,239` source modules: `1,398` fully
-   covered, `824` partially covered, `17` with no executable lines, and
+1. Module coverage inventory contains `2,241` source modules: `1,398` fully
+   covered, `824` partially covered, `19` with no executable lines, and
    zero uncovered or unmeasured modules. These are module-inventory facts, not
    a claim of complete line or branch coverage.
 1. Compatibility transition debt remains zero. The census contains `12`
    retained public entrypoints, `4` retained public export facades, and zero
    twin pairs; retained public API is not relabelled as removable dead code.
-1. Test governance reports `22,520` test functions across `2,014` pytest
+1. Test governance reports `22,556` test functions across `2,020` pytest
    files, with zero duplicate test names, markerless tests, compatibility test
    files, and refined assertless residuals.
 1. The largest directly evidenced residual is the `824`-module partial
@@ -41,8 +41,8 @@ artifacts.
 | --- | --- | --- |
 | Architecture score | Integral score `8.92` | `reports/quality/architecture-quality-scorecard.json` |
 | Debt gates | `45` pass, `0` fail, `0` warn | `reports/quality/debt-governance-gates.json` |
-| Module inventory | `2239` total; `1398` full; `824` partial; `17` no executable lines; `0` uncovered/unmeasured | `reports/quality/module-coverage-inventory.json` |
-| Test governance | `22520` functions; `2014` files; duplicate/markerless/compatibility counts all `0` | `reports/quality/test-governance-current.json` |
+| Module inventory | `2241` total; `1398` full; `824` partial; `19` no executable lines; `0` uncovered/unmeasured | `reports/quality/module-coverage-inventory.json` |
+| Test governance | `22556` functions; `2020` files; duplicate/markerless/compatibility counts all `0` | `reports/quality/test-governance-current.json` |
 | Compatibility | `12` retained entrypoints; `4` public export facades; `0` twin pairs | `reports/quality/compatibility-importer-census.json` |
 | Transition compatibility debt | Current/max count `0/0` | `configs/quality/debt_scorecard.yaml` |
 
