@@ -115,6 +115,31 @@ def test_check_ai_surfaces_reports_missing_policy_token(
     assert "Missing required AI policy/runtime token" in report.issues[0].detail
 
 
+def test_gemini_claim_guard_allows_missing_machine_local_cursor_deploy(
+    tmp_path: Path,
+) -> None:
+    canonical = (
+        tmp_path
+        / "docs"
+        / "00-project"
+        / "ai"
+        / "rules"
+        / "cursor"
+        / "05-agent-workflow.mdc"
+    )
+    canonical.parent.mkdir(parents=True)
+    canonical.write_text("canonical Cursor rule\n", encoding="utf-8")
+
+    report = check_drift.DriftReport()
+    check_drift._check_unverified_gemini_runtime_claims(
+        report,
+        project_root=tmp_path,
+    )
+
+    missing_paths = {issue.doc_file for issue in report.issues}
+    assert ".cursor/rules/05-agent-workflow.mdc" not in missing_paths
+
+
 def test_check_ai_surfaces_reports_forbidden_legacy_runtime_dependency(
     monkeypatch, tmp_path: Path
 ) -> None:

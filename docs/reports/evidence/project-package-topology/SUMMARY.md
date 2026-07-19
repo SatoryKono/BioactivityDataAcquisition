@@ -1,13 +1,13 @@
 # Сводка evidence: project-package-topology
 
-Дата: 2026-07-18
+Дата: 2026-07-19
 Статус: refreshed
 
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see
 `docs/reports/evidence/project-evidence-rebaseline/06-status/EVIDENCE-PACK-REVIEW-2026-03-27.md`
 for wave status, retained-vs-reopened interpretation, and current review scope.
 
-Refresh note (2026-07-18): the summary was remeasured from the live working
+Refresh note (2026-07-19): the summary was remeasured from the live working
 tree with deterministic Python file and first-order package scans excluding
 `__pycache__`. The summary is reconciled with the source-tree portion of
 `reports/quality/module-coverage-inventory.json` after running the canonical
@@ -15,12 +15,12 @@ module-coverage producer. The inventory retains its `2026-07-13` coverage-data
 snapshot date because no newer canonical coverage run was substituted for the
 tracked coverage measurements.
 
-Current-baseline note (2026-07-18): architectural planning and GitHub issues
+Current-baseline note (2026-07-19): architectural planning and GitHub issues
 MUST cite this summary or a newer regenerated package-topology pack for current
 counts. The current source baseline is
 `source_module_count=2239` with
-`source_tree_sha256=9ddcbcf42aa107d5d596ab0d8dc11f3c08a886983af1dab513382e827d95f414`.
-Raw files dated before `2026-07-18` are retained only as historical detailed
+`source_tree_sha256=dd3995ccbc3518a23e1c66d9c08f7f2eb6c78ca574fb653b35a9fa76f5cabcd9`.
+Raw files dated before `2026-07-19` are retained only as historical detailed
 inputs and must be refreshed before they are used for line-item topology
 evidence.
 

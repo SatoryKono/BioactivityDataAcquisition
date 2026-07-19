@@ -1,5 +1,5 @@
 {
-  "snapshot_date": "2026-07-18",
+  "snapshot_date": "2026-07-19",
   "inventory_source": "configs/quality/compatibility_facade_inventory.yaml",
   "twin_ratchet_source": "configs/quality/compatibility_twin_module_ratchet.yaml",
   "config_root_facade_source": "configs/quality/infrastructure_config_root_facade_inventory.yaml",
@@ -1349,18 +1349,18 @@
   ],
   "first_safe_removal_wave": {
     "linked_issue": "#5485",
-    "review_date": "2026-06-19",
+    "review_date": "2026-07-19",
     "rows": [
       {
         "path": "src/bioetl/interfaces/cli/commands/maintenance.py",
         "module_name": "bioetl.interfaces.cli.commands.maintenance",
         "owner": "bioetl.interfaces.cli.commands",
         "previous_status": "public-entrypoint",
-        "surface_classification": "confirmed-unused",
-        "action": "remove_from_retained_entrypoint_debt_inventory",
-        "rationale": "The top-level maintenance command no longer has first-party `src/` or test importers in the compatibility importer census, so it no longer needs retained-entrypoint debt tracking.",
+        "surface_classification": "first-party-active",
+        "action": "defer_until_first_party_importers_zero",
+        "rationale": "The live importer census reports two reviewed first-party `src/` importers for the top-level maintenance command, so the removal wave is deferred until those importers return to zero.",
         "migration_prerequisites": [
-          "Keep public CLI discovery wired through `bioetl.interfaces.cli.commands.maintenance` without reintroducing new first-party importer debt.",
+          "Keep public CLI discovery and the maintenance owner package lazy while narrowing first-party references to zero before reconsidering removal from debt tracking.",
           "Keep ordinary runtime maintenance access narrowed to `src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py`.",
           "Treat any future retirement of the public maintenance command itself as a separate external-breaking-change review, not part of this debt ratchet wave."
         ],
