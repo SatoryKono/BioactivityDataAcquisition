@@ -49,11 +49,11 @@ def _gold_write_metric_labels(
     *,
     status: str | None = None,
 ) -> dict[str, str]:
-    pipeline, table = _split_gold_table_label(request.table_name)
+    pipeline, table = _split_gold_table_label(request.table_name)  # type: ignore[attr-defined]
     labels = {
         "pipeline": pipeline,
         "table": table,
-        "mode": _normalize_gold_metric_mode(request.mode),
+        "mode": _normalize_gold_metric_mode(request.mode),  # type: ignore[attr-defined]
     }
     if status is not None:
         labels["status"] = _normalize_gold_metric_status(status)

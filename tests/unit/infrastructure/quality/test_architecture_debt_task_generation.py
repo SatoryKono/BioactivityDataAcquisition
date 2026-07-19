@@ -346,6 +346,35 @@ def test_generate_tasks_payload_excludes_reviewed_retained_surfaces(
     assert payload["tasks"] == []
 
 
+def test_generate_tasks_payload_does_not_infer_zero_growth_limit(
+    tmp_path: Path,
+) -> None:
+    registry_path = tmp_path / "registry.yaml"
+    _write_registry(registry_path, registries={})
+    compatibility_path = tmp_path / "compatibility.json"
+    debt_scorecard_path = tmp_path / "debt_scorecard.yaml"
+    _write_json(
+        compatibility_path,
+        {
+            "summary": {
+                "retained_entrypoint_count": 12,
+                "retained_public_export_facade_count": 4,
+            }
+        },
+    )
+    debt_scorecard_path.write_text("{}\n", encoding="utf-8")
+
+    payload = generate_architecture_debt_tasks_payload(
+        registry_path=registry_path,
+        project_root=tmp_path,
+        generated_at=datetime(2026, 7, 19, 10, 5, tzinfo=UTC),
+        compatibility_census_path=compatibility_path,
+        debt_scorecard_path=debt_scorecard_path,
+    )
+
+    assert payload["tasks"] == []
+
+
 def test_default_output_path_uses_quality_reports_directory(tmp_path: Path) -> None:
     generated_at = datetime(2026, 4, 4, 10, 5, tzinfo=UTC)
 

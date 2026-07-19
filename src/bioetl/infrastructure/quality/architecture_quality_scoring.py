@@ -123,10 +123,14 @@ def _score_layer_compliance(metrics: dict[str, object]) -> float:
 
 
 def _score_hexagonal_ports_adapters(metrics: dict[str, object]) -> float:
+    active_compat_count = max(
+        _metric_int(metrics, "transition_compat_count"),
+        _metric_int(metrics, "sunset_compat_count"),
+    )
     return _clamp_score(
         9.2
         - 1.5 * _metric_int(metrics, "layer_violations")
-        - 0.5 * _metric_int(metrics, "transition_compat_count")
+        - 0.5 * active_compat_count
         - 1.0 * _metric_int(metrics, "expired_compat_count")
     )
 
@@ -196,10 +200,13 @@ def _score_determinism_replay_observability(metrics: dict[str, object]) -> float
 
 
 def _score_debt_burden_evolution_friction(metrics: dict[str, object]) -> float:
+    active_compat_count = max(
+        _metric_int(metrics, "transition_compat_count"),
+        _metric_int(metrics, "sunset_compat_count"),
+    )
     return _clamp_score(
         8.5
-        - 0.2 * _metric_int(metrics, "transition_compat_count")
-        - 0.2 * _metric_int(metrics, "sunset_compat_count")
+        - 0.2 * active_compat_count
         - 0.5 * _metric_int(metrics, "expired_compat_count")
         - 0.2 * _metric_int(metrics, "public_entrypoint_growth_count")
         - 0.25 * _metric_int(metrics, "public_export_facade_growth_count")
@@ -232,9 +239,9 @@ def _score_category(category_id: str, metrics: dict[str, object]) -> float:
 def _build_categories(metrics: dict[str, object]) -> list[dict[str, object]]:
     categories: list[dict[str, object]] = []
     for item in _CATEGORY_BASELINES:
-        weight = float(item["weight"])
+        weight = float(item["weight"])  # type: ignore[arg-type]
         score = _score_category(str(item["id"]), metrics)
-        metric_keys = tuple(str(key) for key in item["metric_keys"])
+        metric_keys = tuple(str(key) for key in item["metric_keys"])  # type: ignore[attr-defined]
         categories.append(
             {
                 "id": item["id"],

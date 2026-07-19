@@ -61,7 +61,7 @@ def load_provider_enums_from_file(
         raise ValueError(f"Enum config must be a YAML mapping: {yaml_path}")
     normalized = {str(key): value for key, value in payload.items()}
     if yaml_path == _default_enum_path(normalized_provider):
-        return _freeze_sequences(normalized)
+        return _freeze_sequences(normalized)  # type: ignore[no-any-return]
     return normalized
 
 
