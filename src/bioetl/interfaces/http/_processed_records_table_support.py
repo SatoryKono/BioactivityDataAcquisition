@@ -15,6 +15,17 @@ from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.control_plane.run_ledger import ARTIFACT_PUBLISHED_EVENT
 from bioetl.domain.types import RunID
 from bioetl.interfaces.http._processed_records_http import open_url as _open_url
+from bioetl.interfaces.http._processed_records_value_support import (
+    _as_float,
+    _count_text,
+    _optional_int,
+    _optional_text,
+    _promql_string,
+    _selector_regex,
+    _selector_tokens,
+    _sum_metric_values,
+    is_deficit,  # noqa: F401 - re-exported for the table facade
+)
 
 PROCESSED_RECORDS_TABLE_CONTRACT = "processed_records_table_v1"
 DEFAULT_PROMETHEUS_BASE_URL = "http://localhost:9090"
@@ -143,18 +154,20 @@ def fetch_processed_record_values(
     pipeline: str,
     run_type: str | None,
 ) -> dict[str, float | None]:
-    """Fetch one instant value per visible Processed Records row from Prometheus."""
-    metric_values: dict[str, float | None] = {}
+    """Fetch all visible Processed Records values in one Prometheus request."""
+    metric_values: dict[str, float | None] = {
+        spec.metric: None for spec in PROCESSED_RECORDS_ROW_SPECS
+    }
     prometheus_base_urls = _candidate_prometheus_base_urls(prometheus_base_url)
-    for spec in PROCESSED_RECORDS_ROW_SPECS:
-        metric_values[spec.metric] = _query_prometheus_scalar_with_fallbacks(
+    metric_values.update(
+        _query_prometheus_vector_with_fallbacks(
             prometheus_base_urls=prometheus_base_urls,
-            query=_processed_record_value_query(
-                metric=spec.metric,
+            query=_processed_record_values_query(
                 pipeline=pipeline,
                 run_type=run_type,
             ),
         )
+    )
     return metric_values
 
 
@@ -210,6 +223,26 @@ def _processed_record_value_query(
     )
 
 
+def _processed_record_values_query(
+    *,
+    pipeline: str,
+    run_type: str | None,
+) -> str:
+    """Build one vector query while retaining metric names as row keys."""
+    pipeline_regex = _promql_string(_selector_regex(pipeline))
+    run_type_regex = _promql_string(_selector_regex(run_type))
+    metric_regex = (
+        "(?:"
+        + "|".join(re.escape(spec.metric) for spec in PROCESSED_RECORDS_ROW_SPECS)
+        + ")"
+    )
+    return (
+        'sum by (__name__) ({__name__=~"'
+        f'{metric_regex}",pipeline=~"{pipeline_regex}",'
+        f'run_type=~"{run_type_regex}"}})'
+    )
+
+
 def selector_tokens(raw: str | None) -> tuple[str, ...]:
     return _selector_tokens(raw)
 
@@ -227,10 +260,6 @@ def sum_metric_values(
     metrics: tuple[str, ...],
 ) -> float | None:
     return _sum_metric_values(metric_values, metrics)
-
-
-def is_deficit(*, total: float | None, minimum: float | None) -> bool:
-    return total is not None and minimum is not None and total < minimum
 
 
 def count_text(value: float | None) -> str:
@@ -312,6 +341,40 @@ def _query_prometheus_scalar(*, prometheus_base_url: str, query: str) -> float |
     return parsed
 
 
+def _query_prometheus_vector(
+    *,
+    prometheus_base_url: str,
+    query: str,
+) -> dict[str, float]:
+    """Return finite vector samples keyed by their retained metric name."""
+    url = (
+        prometheus_base_url.rstrip("/") + "/api/v1/query?" + urlencode({"query": query})
+    )
+    try:
+        with _open_url(url, timeout=PROMETHEUS_QUERY_TIMEOUT_SECONDS) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+    except (HTTPError, URLError, TimeoutError, OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError(f"Prometheus query failed: {exc}") from exc
+
+    if payload.get("status") != "success":
+        error_message = payload.get("error") or payload.get("errorType") or "unknown"
+        raise RuntimeError(f"Prometheus query failed: {error_message}")
+
+    values: dict[str, float] = {}
+    for sample in payload.get("data", {}).get("result", []):
+        metric = sample.get("metric", {}).get("__name__")
+        value = sample.get("value")
+        if not isinstance(metric, str) or not isinstance(value, list) or len(value) < 2:
+            continue
+        try:
+            parsed = float(value[1])
+        except (TypeError, ValueError):
+            continue
+        if math.isfinite(parsed):
+            values[metric] = parsed
+    return values
+
+
 def _query_prometheus_scalar_with_fallbacks(
     *,
     prometheus_base_urls: tuple[str, ...],
@@ -329,86 +392,27 @@ def _query_prometheus_scalar_with_fallbacks(
     raise RuntimeError("; ".join(errors))
 
 
+def _query_prometheus_vector_with_fallbacks(
+    *,
+    prometheus_base_urls: tuple[str, ...],
+    query: str,
+) -> dict[str, float]:
+    """Try each configured Prometheus endpoint for one vector request."""
+    errors: list[str] = []
+    for prometheus_base_url in prometheus_base_urls:
+        try:
+            return _query_prometheus_vector(
+                prometheus_base_url=prometheus_base_url,
+                query=query,
+            )
+        except RuntimeError as exc:
+            errors.append(f"{prometheus_base_url}: {exc}")
+    raise RuntimeError("; ".join(errors))
+
+
 def _candidate_prometheus_base_urls(prometheus_base_url: str) -> tuple[str, ...]:
     primary = prometheus_base_url.rstrip("/")
     candidates = [primary]
     if primary == DEFAULT_PROMETHEUS_BASE_URL:
         candidates.extend(DEFAULT_PROMETHEUS_BASE_URL_FALLBACKS)
     return tuple(dict.fromkeys(candidate.rstrip("/") for candidate in candidates))
-
-
-def _selector_regex(raw: str | None) -> str:
-    tokens = _selector_tokens(raw)
-    if not tokens:
-        return ".*"
-    if len(tokens) == 1:
-        return re.escape(tokens[0])
-    return "(?:" + "|".join(re.escape(token) for token in tokens) + ")"
-
-
-def _selector_tokens(raw: str | None) -> tuple[str, ...]:
-    if raw is None:
-        return ()
-    normalized = raw.strip()
-    if not normalized or normalized in _ALL_SCOPE_TOKENS:
-        return ()
-    if normalized.startswith("{") and normalized.endswith("}"):
-        normalized = normalized[1:-1]
-
-    tokens: list[str] = []
-    for part in normalized.split(","):
-        token = part.strip()
-        if not token or token in _ALL_SCOPE_TOKENS:
-            return ()
-        if token not in tokens:
-            tokens.append(token)
-    return tuple(tokens)
-
-
-def _promql_string(raw: str) -> str:
-    return raw.replace("\\", "\\\\").replace('"', '\\"')
-
-
-def _as_float(value: float | int | None) -> float | None:
-    if value is None:
-        return None
-    parsed = float(value)
-    if not math.isfinite(parsed):
-        return None
-    return parsed
-
-
-def _optional_text(value: object | None) -> str | None:
-    if value is None:
-        return None
-    text = str(value).strip()
-    return text or None
-
-
-def _optional_int(value: object | None) -> int | None:
-    if isinstance(value, bool) or value is None:
-        return None
-    if not isinstance(value, (str, bytes, bytearray, int, float)):
-        return None
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return None
-
-
-def _sum_metric_values(
-    metric_values: dict[str, float | int | None], metrics: tuple[str, ...]
-) -> float | None:
-    values = tuple(_as_float(metric_values.get(metric)) for metric in metrics)
-    if any(value is None for value in values):
-        return None
-    return sum(value for value in values if value is not None)
-
-
-def _count_text(value: float | None) -> str:
-    if value is None:
-        return "No data"
-    rounded = round(value)
-    if math.isclose(value, rounded, abs_tol=1e-9):
-        return f"{int(rounded):,}".replace(",", " ")
-    return str(value)

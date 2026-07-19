@@ -59,6 +59,11 @@ BioETL предоставляет комплексную систему observab
   metrics are enabled;
 - Pushgateway publication остаётся best-effort on run completion and uses
   replace-style bounded aggregate snapshots;
+- canonical `HELP`/`TYPE` metadata comes from the code metric registry and is
+  preserved by both direct scrape and Pushgateway publication;
+- Prometheus `/api/v1/metadata` is the live verification surface, while the
+  shipped container target is `pushgateway:9091` (`localhost:9091` is only the
+  host-side publication address);
 - `bioetl diagnostics metrics` — canonical operator summary для этих
   auto-managed behaviors.
 - `bioetl diagnostics run --run-id <run-id>` показывает bounded trace

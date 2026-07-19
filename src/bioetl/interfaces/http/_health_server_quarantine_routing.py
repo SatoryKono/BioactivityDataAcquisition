@@ -9,6 +9,12 @@ from urllib.parse import unquote
 if TYPE_CHECKING:
     from bioetl.application.services.quarantine_service import QuarantineService
 
+from bioetl.interfaces.http._forensic_request_budget import (
+    ForensicEndpointUnavailable,
+    forensic_unavailable_payload,
+    run_bounded_forensic_operation,
+)
+
 _NOT_FOUND_MESSAGE = "Not Found"
 
 
@@ -29,6 +35,9 @@ class _HealthResponseSupport(Protocol):
 
 
 class _HealthQuarantineRoutingHost(_HealthResponseSupport, Protocol):
+    @property
+    def _forensic_endpoint_limiter(self) -> asyncio.Semaphore: ...
+
     @property
     def _quarantine_service(self) -> QuarantineService | None: ...
 
@@ -56,10 +65,14 @@ async def dispatch_quarantine_request(
 ) -> None:
     """Route record-level quarantine explorer requests."""
     if host._quarantine_service is None:
-        await host._send_response(
+        endpoint = path.rsplit("/", maxsplit=1)[-1] or "quarantine"
+        await host._send_payload_response(
             writer,
             503,
-            "Quarantine explorer unavailable",
+            forensic_unavailable_payload(
+                endpoint=endpoint,
+                reason="backend_unavailable",
+            ),
         )
         return
 
@@ -119,16 +132,40 @@ async def handle_filtered_stats(
     """Handle aggregate stats endpoint for filtered Silver records."""
     assert host._quarantine_service is not None
     pipeline = host._read_required_param(query, "pipeline")
-    payload = await host._quarantine_service.get_filtered_stats(
-        pipeline=pipeline,
-        run_type=host._read_optional_param(query, "run_type"),
-        reason_code=host._read_optional_param(query, "reason_code"),
-        field=host._read_optional_param(query, "field"),
-        run_id=host._read_optional_param(query, "run_id"),
-        payload_hash=host._read_optional_param(query, "payload_hash"),
-        from_ts=host._read_optional_param(query, "from"),
-        to_ts=host._read_optional_param(query, "to"),
-    )
+    try:
+        payload = await run_bounded_forensic_operation(
+            limiter=host._forensic_endpoint_limiter,
+            operation_factory=lambda: host._quarantine_service.get_filtered_stats(
+                pipeline=pipeline,
+                run_type=host._read_optional_param(query, "run_type"),
+                reason_code=host._read_optional_param(query, "reason_code"),
+                field=host._read_optional_param(query, "field"),
+                run_id=host._read_optional_param(query, "run_id"),
+                payload_hash=host._read_optional_param(query, "payload_hash"),
+                from_ts=host._read_optional_param(query, "from"),
+                to_ts=host._read_optional_param(query, "to"),
+            ),
+        )
+    except ForensicEndpointUnavailable as exc:
+        await host._send_payload_response(
+            writer,
+            exc.status_code,
+            forensic_unavailable_payload(
+                endpoint="filtered-stats",
+                reason=exc.reason,
+            ),
+        )
+        return
+    except (ConnectionError, OSError, RuntimeError):
+        await host._send_payload_response(
+            writer,
+            503,
+            forensic_unavailable_payload(
+                endpoint="filtered-stats",
+                reason="backend_unavailable",
+            ),
+        )
+        return
     await host._send_payload_response(writer, 200, payload)
 
 

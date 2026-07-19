@@ -16,21 +16,21 @@ from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 pytestmark = pytest.mark.unit
 
 
-def test_fetch_processed_record_values_queries_every_visible_row(
+def test_fetch_processed_record_values_queries_all_visible_rows_once(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """The Prometheus fetch helper should issue one scoped query per row spec."""
+    """The Prometheus fetch helper should issue one scoped vector query."""
     calls: list[tuple[tuple[str, ...], str]] = []
 
     def fake_query(
         *,
         prometheus_base_urls: tuple[str, ...],
         query: str,
-    ) -> float:
+    ) -> dict[str, float]:
         calls.append((prometheus_base_urls, query))
-        return float(len(calls))
+        return {support.PROCESSED_RECORDS_ROW_SPECS[0].metric: 1.0}
 
-    monkeypatch.setattr(support, "_query_prometheus_scalar_with_fallbacks", fake_query)
+    monkeypatch.setattr(support, "_query_prometheus_vector_with_fallbacks", fake_query)
 
     values = support.fetch_processed_record_values(
         prometheus_base_url="http://localhost:9090/",
@@ -40,6 +40,8 @@ def test_fetch_processed_record_values_queries_every_visible_row(
 
     assert len(values) == len(support.PROCESSED_RECORDS_ROW_SPECS)
     assert values[support.PROCESSED_RECORDS_ROW_SPECS[0].metric] == 1.0
+    assert values[support.PROCESSED_RECORDS_ROW_SPECS[1].metric] is None
+    assert len(calls) == 1
     assert calls[0][0] == (
         "http://localhost:9090",
         "http://prometheus:9090",
@@ -47,6 +49,7 @@ def test_fetch_processed_record_values_queries_every_visible_row(
     )
     assert 'pipeline=~"(?:chembl_activity|pubchem_compound)"' in calls[0][1]
     assert 'run_type=~"backfill"' in calls[0][1]
+    assert calls[0][1].startswith("sum by (__name__)")
 
 
 def test_processed_record_selector_and_formatting_edges() -> None:
@@ -357,3 +360,36 @@ def test_query_prometheus_scalar_with_fallbacks_reports_all_errors(
             prometheus_base_urls=("http://one", "http://two"),
             query="down",
         )
+
+
+def test_query_prometheus_vector_preserves_metric_names_and_missing_values(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    payload = {
+        "status": "success",
+        "data": {
+            "result": [
+                {
+                    "metric": {"__name__": "bioetl_processed_records_bronze_current"},
+                    "value": [1, "42"],
+                },
+                {
+                    "metric": {
+                        "__name__": "bioetl_processed_records_gold_written_current"
+                    },
+                    "value": [1, "nan"],
+                },
+                {"metric": {}, "value": [1, "7"]},
+            ]
+        },
+    }
+    monkeypatch.setattr(
+        support, "_open_url", lambda *_args, **_kwargs: _FakeResponse(payload)
+    )
+
+    values = support._query_prometheus_vector(
+        prometheus_base_url="http://prometheus.example",
+        query="sum by (__name__) (...) ",
+    )
+
+    assert values == {"bioetl_processed_records_bronze_current": 42.0}

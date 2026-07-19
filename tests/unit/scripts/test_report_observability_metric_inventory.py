@@ -1556,6 +1556,11 @@ def test_build_runtime_cardinality_review_summary_passes_with_live_prometheus_re
         "_query_prometheus_scalar",
         lambda **_kwargs: 12,
     )
+    monkeypatch.setattr(
+        inventory,
+        "_query_prometheus_label_values",
+        lambda **_kwargs: {"pipeline": ["chembl_activity", "pubchem_compound"]},
+    )
 
     summary = inventory._build_runtime_cardinality_review_summary(
         {
@@ -1572,6 +1577,10 @@ def test_build_runtime_cardinality_review_summary_passes_with_live_prometheus_re
     assert summary["live_observed_series"] == {"bioetl_hotspot_total": 12}
     assert summary["live_threshold_violations"] == []
     assert summary["query_errors"] == {}
+    assert summary["label_keys"] == {"bioetl_hotspot_total": ["pipeline"]}
+    assert summary["observed_label_values"] == {
+        "bioetl_hotspot_total": {"pipeline": ["chembl_activity", "pubchem_compound"]}
+    }
 
 
 def test_build_runtime_cardinality_review_summary_fails_on_live_threshold_violation(
@@ -1592,6 +1601,11 @@ def test_build_runtime_cardinality_review_summary_fails_on_live_threshold_violat
         inventory,
         "_query_prometheus_scalar",
         lambda **_kwargs: 5,
+    )
+    monkeypatch.setattr(
+        inventory,
+        "_query_prometheus_label_values",
+        lambda **_kwargs: {},
     )
 
     summary = inventory._build_runtime_cardinality_review_summary(
@@ -1632,6 +1646,37 @@ def test_query_prometheus_scalar_parses_vector_response(
     )
 
     assert observed == 7
+
+
+def test_query_prometheus_label_values_records_watch_list_dimensions(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class FakeResponse:
+        def __enter__(self) -> FakeResponse:
+            return self
+
+        def __exit__(self, exc_type, exc, tb) -> None:
+            return None
+
+        def read(self, *_args: object, **_kwargs: object) -> bytes:
+            return (
+                b'{"status":"success","data":{"resultType":"vector","result":['
+                b'{"metric":{"__name__":"bioetl_hotspot_total","pipeline":"b",'
+                b'"status":"ok"},"value":[0,"1"]},'
+                b'{"metric":{"__name__":"bioetl_hotspot_total","pipeline":"a",'
+                b'"status":"ok"},"value":[0,"1"]}]}}'
+            )
+
+    monkeypatch.setattr(inventory, "urlopen", lambda *_args, **_kwargs: FakeResponse())
+
+    observed = inventory._query_prometheus_label_values(
+        prometheus_base_url="http://prometheus.example",
+        metric_name="bioetl_hotspot_total",
+        label_names=frozenset({"pipeline", "status"}),
+        bearer_token="",
+    )
+
+    assert observed == {"pipeline": ["a", "b"], "status": ["ok"]}
 
 
 @pytest.mark.parametrize(

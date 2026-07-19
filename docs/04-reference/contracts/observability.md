@@ -1,22 +1,22 @@
 ______________________________________________________________________
 
-Version: 1.0.3
+Version: 1.0.4
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-13'
+  Last verified: '2026-07-19'
 
 ______________________________________________________________________
 
 # BioETL Observability Specification (DD)
 
-Этот документ фиксирует **каноническую** спецификацию наблюдаемости BioETL по состоянию на **2026-07-13**.
+Этот документ фиксирует **каноническую** спецификацию наблюдаемости BioETL по состоянию на **2026-07-19**.
 
 - Статус: `active`
-- Версия: `3.5.1`
+- Версия: `3.5.2`
 - Scope: `logs + metrics + tracing + correlation + provider health + control plane + audit + traceability`
 - Source of truth: код в `src/bioetl/**/observability*`, `src/bioetl/application/observability/*`, `src/bioetl/infrastructure/adapters/http/*`
 
@@ -211,6 +211,22 @@ Canonical composite/runtime phase additions:
 `configs/quality/observability_metric_declarations.yaml`.
 Для repo-local reconciliation docs/runtime/rules drift используйте:
 `python -m scripts.engineering.qa report-observability-metric-inventory --json`.
+
+### 3.1 Prometheus descriptor authority
+
+Code-level metric definitions assembled by
+`src/bioetl/infrastructure/observability/prometheus_metric_registries.py` are
+the authoritative source for every `bioetl_*` metric `HELP` text and `TYPE`.
+Both the direct `/metrics` exposition and the restricted registry published to
+Pushgateway MUST preserve those descriptors. Prometheus
+`/api/v1/metadata?metric=<name>` is deployment evidence that scrape and
+transport preserved the contract; it is not a second source of truth. A
+missing metadata response is therefore `unavailable` evidence and must not be
+silently interpreted as an untyped metric.
+
+Inside the shipped monitoring network Prometheus MUST scrape the service name
+`pushgateway:9091`. `localhost:9091` remains valid only for host-side clients
+publishing through the exposed port.
 
 Ниже обязательное ядро (MUST для мониторинга запусков):
 

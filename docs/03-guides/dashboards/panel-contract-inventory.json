@@ -1821,12 +1821,12 @@
       "dashboard_uid": "bioetl-dq-v2",
       "datasource_type": "prometheus",
       "documents_backend_down": false,
-      "documents_valid_empty": false,
-      "formula": "((sum((bioetl_dq_validation_score{pipeline=~\"$pipeline\"} * bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}))) / clamp_min(sum(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}), 1))",
+      "documents_valid_empty": true,
+      "formula": "((sum((last_over_time(bioetl_dq_validation_score{pipeline=~\"$pipeline\"}[7d]) * last_over_time(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}[7d])))) / clamp_min(sum(last_over_time(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}[7d])), 1))",
       "kind": "promql",
       "panel_id": 2,
       "panel_title": "Monitor: Data Quality Score (Volume-weighted)",
-      "query": "((sum((bioetl_dq_validation_score{pipeline=~\"$pipeline\"} * bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}))) / clamp_min(sum(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}), 1))",
+      "query": "((sum((last_over_time(bioetl_dq_validation_score{pipeline=~\"$pipeline\"}[7d]) * last_over_time(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}[7d])))) / clamp_min(sum(last_over_time(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}[7d])), 1))",
       "query_tokens": [
         "bioetl_dq_validation_record_count",
         "bioetl_dq_validation_score"
@@ -1900,11 +1900,11 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": true,
-      "formula": "min(bioetl_dq_validation_score{pipeline=~\"$pipeline\"})",
+      "formula": "min(last_over_time(bioetl_dq_validation_score{pipeline=~\"$pipeline\"}[7d]))",
       "kind": "promql",
       "panel_id": 5,
       "panel_title": "Monitor: Worst-Entity DQ Score",
-      "query": "min(bioetl_dq_validation_score{pipeline=~\"$pipeline\"})",
+      "query": "min(last_over_time(bioetl_dq_validation_score{pipeline=~\"$pipeline\"}[7d]))",
       "query_tokens": [
         "bioetl_dq_validation_score"
       ],

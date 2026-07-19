@@ -1203,14 +1203,14 @@
       },
       "targets": [
         {
-          "expr": "((sum((bioetl_dq_validation_score{pipeline=~\"$pipeline\"} * bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}))) / clamp_min(sum(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}), 1))",
+          "expr": "((sum((last_over_time(bioetl_dq_validation_score{pipeline=~\"$pipeline\"}[7d]) * last_over_time(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}[7d])))) / clamp_min(sum(last_over_time(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}[7d])), 1))",
           "legendFormat": "Quality",
           "refId": "A"
         }
       ],
       "title": "Monitor: Data Quality Score (Volume-weighted)",
       "type": "stat",
-      "description": "Selected-range volume-weighted DQ score on the canonical 0.0-1.0 ratio scale, where 1.0 means all records are valid. This is neutral supporting evidence, not the current-status gate. Review trend in the adjacent timeseries panel."
+      "description": "Latest volume-weighted DQ score retained for up to 7 days between runs on the canonical 0.0-1.0 ratio scale, where 1.0 means all records are valid. UNKNOWN means no matching score and record-count samples exist in that window; absence is never coerced to 0. Review raw sample history in the adjacent trend panel."
     },
     {
       "datasource": {
@@ -1289,14 +1289,14 @@
       },
       "targets": [
         {
-          "expr": "min(bioetl_dq_validation_score{pipeline=~\"$pipeline\"})",
+          "expr": "min(last_over_time(bioetl_dq_validation_score{pipeline=~\"$pipeline\"}[7d]))",
           "legendFormat": "Worst Entity",
           "refId": "A"
         }
       ],
       "title": "Monitor: Worst-Entity DQ Score",
       "type": "stat",
-      "description": "Selected-range pipeline-scoped worst-entity DQ score on the canonical 0.0-1.0 ratio scale, where 1.0 means all records are valid. No data means no matching validation score samples for the selected scope, not a successful exact run."
+      "description": "Latest pipeline-scoped worst-entity DQ score retained for up to 7 days between runs on the canonical 0.0-1.0 ratio scale, where 1.0 means all records are valid. UNKNOWN means no matching validation score sample exists in that window, not a successful run and not a zero score."
     },
     {
       "datasource": {

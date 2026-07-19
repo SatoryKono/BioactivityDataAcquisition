@@ -688,21 +688,21 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "1048",
+      "line": "1054",
       "path": "tests/unit/interfaces/http/test_health_server.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_handle_request_error_without_logger"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "1091",
+      "line": "1097",
       "path": "tests/unit/interfaces/http/test_health_server.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_close_writer_handles_exceptions"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "1175",
+      "line": "1181",
       "path": "tests/unit/interfaces/http/test_health_server.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_consume_headers"
@@ -1926,21 +1926,21 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "1048",
+        "line": "1054",
         "path": "tests/unit/interfaces/http/test_health_server.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_handle_request_error_without_logger"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "1091",
+        "line": "1097",
         "path": "tests/unit/interfaces/http/test_health_server.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_close_writer_handles_exceptions"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "1175",
+        "line": "1181",
         "path": "tests/unit/interfaces/http/test_health_server.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_consume_headers"
@@ -2176,8 +2176,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2014,
-      "test_python_file_count": 2224,
+      "test_glob_file_count": 2020,
+      "test_python_file_count": 2231,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2217,12 +2217,12 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 2014,
-    "total_test_functions": 22520,
+    "total_test_files": 2020,
+    "total_test_functions": 22556,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "e22f4e4d1a4dab66d0bc640e1901ecd512634830c28ebffa35536c333cae0e69",
+  "source_tree_sha256": "b713c860a005c27f9aac5a94b3d8b806b8f47311ef60c016da7060055dc04523",
   "summary": {
     "assertless_total_candidates": 105,
     "compatibility_test_files": 0,
@@ -2240,8 +2240,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2014,
-    "test_python_file_count": 2224,
+    "test_glob_file_count": 2020,
+    "test_python_file_count": 2231,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2281,7 +2281,7 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 2014,
-  "total_test_functions": 22520,
+  "total_test_files": 2020,
+  "total_test_functions": 22556,
   "uuid4_call_sites": 0
 }

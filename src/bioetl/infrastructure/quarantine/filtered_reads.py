@@ -50,17 +50,52 @@ def _load_scoped_pyarrow_table(
     *,
     pipeline_single: str,
     filters: list[tuple[str, str, object]],
+    columns: list[str] | None = None,
 ) -> pa.Table:
     """Read rows scoped by pipeline for partitioned and legacy non-partitioned tables."""
+    kwargs: dict[str, object] = {"filters": filters}
+    if columns is not None:
+        kwargs["columns"] = columns
     if "pipeline" in _delta_partition_columns(dt):
         return dt.to_pyarrow_table(
             partitions=[("pipeline", "=", pipeline_single)],
-            filters=filters,
+            **kwargs,
         )
     return dt.to_pyarrow_table(
         partitions=None,
-        filters=[*filters, ("pipeline", "=", pipeline_single)],
+        **{
+            **kwargs,
+            "filters": [*filters, ("pipeline", "=", pipeline_single)],
+        },
     )
+
+
+def _filtered_projection_columns(
+    dt: DeltaTable,
+    *,
+    include_payload: bool,
+    include_payload_preview: bool,
+) -> list[str] | None:
+    """Return the smallest compatible Delta projection for explorer reads."""
+    try:
+        available = {str(field.name) for field in dt.schema().fields}
+    except (AttributeError, RuntimeError, TypeError, ValueError):
+        return None
+
+    requested = [
+        "ingestion_ts",
+        "pipeline",
+        "run_id",
+        "run_type",
+        "_run_type",
+        "payload_hash",
+        "error_code",
+        "error_details",
+        "dq_status",
+    ]
+    if include_payload or include_payload_preview:
+        requested.append("payload")
+    return [column for column in requested if column in available]
 
 
 def _load_filtered_rows(
@@ -102,6 +137,11 @@ def _load_filtered_rows(
         dt,
         pipeline_single=pipeline_single,
         filters=filters,
+        columns=_filtered_projection_columns(
+            dt,
+            include_payload=include_payload,
+            include_payload_preview=include_payload_preview,
+        ),
     )
     table_records: list[JsonDict] = arrow_table.to_pylist()
     run_type_lookup = _build_run_type_lookup(table_records, base_path=base_path)
