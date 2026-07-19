@@ -179,6 +179,24 @@ def _current_compatibility_debt_metrics(
     return metrics if isinstance(metrics, dict) else {}
 
 
+def _scorecard_metric_count(
+    scorecard: dict[str, Any],  # Any: YAML config can have any value type
+    section_name: str,
+    metric_name: str,
+) -> int:
+    section = scorecard.get(section_name, {})
+    if not isinstance(section, dict):
+        return 0
+    metrics = section.get("metrics", {})
+    if not isinstance(metrics, dict):
+        return 0
+    policy = metrics.get(metric_name, {})
+    if not isinstance(policy, dict):
+        return 0
+    value = policy.get("current_count", 0)
+    return int(value) if isinstance(value, (int, float)) else 0
+
+
 def _build_architecture_quality_metrics(
     dependency_map: dict[str, Any],  # Any: JSON artifact can have any value type
     coverage_inventory: dict[str, Any],  # Any: JSON artifact can have any value type
@@ -197,6 +215,7 @@ def _build_architecture_quality_metrics(
     adr_enforcement_matrix: dict[
         str, Any  # Any: JSON artifact can have any value type
     ],  # Any: JSON artifact can have any value type
+    scorecard: dict[str, Any],  # Any: YAML config can have any value type
 ) -> dict[str, object]:
     coverage_summary = coverage_inventory["summary"]
     status_counts = coverage_summary["status_counts"]
@@ -206,6 +225,37 @@ def _build_architecture_quality_metrics(
     hotspot_summary = hotspot_baseline["summary"]
     adr_summary = adr_enforcement_matrix["summary"]
     test_governance_summary = test_governance_report["report"]
+    retained_entrypoint_count = int(compatibility_summary["retained_entrypoint_count"])
+    retained_public_export_facade_count = int(
+        compatibility_summary["retained_public_export_facade_count"]
+    )
+    reviewed_entrypoint_count = _scorecard_metric_count(
+        scorecard,
+        "sanctioned_public_entrypoint_governance",
+        "public_entrypoint_count",
+    )
+    reviewed_public_export_facade_count = _scorecard_metric_count(
+        scorecard,
+        "sanctioned_public_entrypoint_governance",
+        "public_export_facade_count",
+    )
+    public_export_facade_conflict_count = max(
+        int(
+            compatibility_summary.get(
+                "retained_public_export_facades_with_duplicate_exports", 0
+            )
+        ),
+        int(
+            compatibility_summary.get(
+                "retained_public_export_facades_with_resolution_conflicts", 0
+            )
+        ),
+        int(
+            compatibility_summary.get(
+                "retained_public_export_facades_with_wrapper_contract_drift", 0
+            )
+        ),
+    )
     return {
         "layer_violations": len(dependency_map.get("violations", [])),
         "source_module_count": coverage_summary["source_module_count"],
@@ -214,10 +264,25 @@ def _build_architecture_quality_metrics(
         "hotspot_family_count": len(coverage_summary["hotspot_family_coverage"]),
         "hotspot_budget_warning_count": hotspot_summary["budget_warnings"],
         "total_duplicate_clusters": duplication_summary["total_duplicate_clusters"],
-        "retained_entrypoint_count": compatibility_summary["retained_entrypoint_count"],
-        "retained_public_export_facade_count": compatibility_summary[
-            "retained_public_export_facade_count"
-        ],
+        "retained_entrypoint_count": retained_entrypoint_count,
+        "retained_public_export_facade_count": retained_public_export_facade_count,
+        "transition_compat_count": _scorecard_metric_count(
+            scorecard, "compatibility_debt_metrics", "transition_compat_count"
+        ),
+        "sunset_compat_count": _scorecard_metric_count(
+            scorecard, "compatibility_debt_metrics", "sunset_compat_count"
+        ),
+        "expired_compat_count": _scorecard_metric_count(
+            scorecard, "compatibility_debt_metrics", "expired_compat_count"
+        ),
+        "public_entrypoint_growth_count": max(
+            0, retained_entrypoint_count - reviewed_entrypoint_count
+        ),
+        "public_export_facade_growth_count": max(
+            0,
+            retained_public_export_facade_count - reviewed_public_export_facade_count,
+        ),
+        "public_export_facade_conflict_count": public_export_facade_conflict_count,
         "twin_pair_count": compatibility_summary["twin_pair_count"],
         "compatibility_test_file_count": test_governance_summary[
             "compatibility_test_files"
@@ -293,6 +358,7 @@ def build_architecture_quality_scorecard(
         hotspot_baseline,
         test_governance_report,
         adr_enforcement_matrix,
+        scorecard,
     )
     categories = _build_categories(metrics)
     integral_score = round(

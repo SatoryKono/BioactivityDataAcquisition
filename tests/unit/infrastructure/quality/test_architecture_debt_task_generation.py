@@ -142,6 +142,7 @@ def test_generate_tasks_payload_adds_artifact_backlog_tasks(tmp_path: Path) -> N
             "summary": {
                 "sanctioned_public_entrypoint_count": 3,
                 "sanctioned_public_export_facade_count": 2,
+                "retained_public_export_facades_with_duplicate_exports": 1,
             }
         },
     )
@@ -175,6 +176,7 @@ def test_generate_tasks_payload_adds_artifact_backlog_tasks(tmp_path: Path) -> N
         {
             "summary": {
                 "repo_wide_zero_import_candidate_count": 4,
+                "repo_wide_untriaged_zero_import_candidate_count": 2,
             },
             "review_window": {
                 "mode": "fail-fast-zero-untriaged",
@@ -184,11 +186,39 @@ def test_generate_tasks_payload_adds_artifact_backlog_tasks(tmp_path: Path) -> N
     debt_scorecard_path.write_text(
         yaml.safe_dump(
             {
+                "compatibility_debt_metrics": {
+                    "metrics": {
+                        "transition_compat_count": {
+                            "current_count": 1,
+                            "target_count": 0,
+                        },
+                        "sunset_compat_count": {
+                            "current_count": 0,
+                            "target_count": 0,
+                        },
+                        "expired_compat_count": {
+                            "current_count": 0,
+                            "max_count": 0,
+                        },
+                    }
+                },
                 "sanctioned_public_entrypoint_governance": {
                     "metrics": {
-                        "public_entrypoint_count": {"owner": "@bioetl-architecture"}
+                        "public_entrypoint_count": {
+                            "current_count": 3,
+                            "owner": "@bioetl-architecture",
+                        },
+                        "public_export_facade_count": {"current_count": 2},
+                        "public_export_facade_conflict_count": {"current_count": 0},
                     }
-                }
+                },
+                "retirement_governance_metrics": {
+                    "metrics": {
+                        "repo_wide_untriaged_zero_import_candidate_count": {
+                            "max_count": 0
+                        }
+                    }
+                },
             },
             sort_keys=False,
         ),
@@ -210,7 +240,7 @@ def test_generate_tasks_payload_adds_artifact_backlog_tasks(tmp_path: Path) -> N
     task_families = {task.get("task_family") for task in payload["tasks"]}
     assert {
         "ARD-COMPAT-001",
-        "ARD-COMPAT-002",
+        "ARD-COMPAT-006",
         "ARD-DUP-001",
         "ARD-HOT-001",
         "ARD-DEAD-001",
@@ -222,6 +252,98 @@ def test_generate_tasks_payload_adds_artifact_backlog_tasks(tmp_path: Path) -> N
         "dead_code_review",
     } <= task_families
     assert payload["registry_summary"]["total_tasks"] == 5
+    tasks_by_id = {task["id"]: task for task in payload["tasks"]}
+    assert tasks_by_id["ARD-COMPAT-001"]["registry_key"] == (
+        "compatibility_debt_metrics.transition_compat_count"
+    )
+    assert tasks_by_id["ARD-COMPAT-006"]["source_artifact"] == (
+        "reports/quality/compatibility-importer-census.json"
+    )
+    assert tasks_by_id["ARD-DEAD-001"]["registry_key"] == (
+        "repo_wide_untriaged_zero_import_candidate_count"
+    )
+    assert {"ARD-COMPAT-004", "ARD-COMPAT-005"}.isdisjoint(task_ids)
+
+
+def test_generate_tasks_payload_excludes_reviewed_retained_surfaces(
+    tmp_path: Path,
+) -> None:
+    registry_path = tmp_path / "registry.yaml"
+    _write_registry(registry_path, registries={})
+    compatibility_path = tmp_path / "compatibility.json"
+    dead_code_path = tmp_path / "dead-code.json"
+    debt_scorecard_path = tmp_path / "debt_scorecard.yaml"
+    _write_json(
+        compatibility_path,
+        {
+            "summary": {
+                "retained_entrypoint_count": 12,
+                "retained_public_export_facade_count": 4,
+                "retained_public_export_facades_with_duplicate_exports": 0,
+                "retained_public_export_facades_with_resolution_conflicts": 0,
+                "retained_public_export_facades_with_wrapper_contract_drift": 0,
+            }
+        },
+    )
+    _write_json(
+        dead_code_path,
+        {
+            "summary": {
+                "repo_wide_zero_import_candidate_count": 9,
+                "repo_wide_classified_zero_import_candidate_count": 9,
+                "repo_wide_untriaged_zero_import_candidate_count": 0,
+            }
+        },
+    )
+    debt_scorecard_path.write_text(
+        yaml.safe_dump(
+            {
+                "compatibility_debt_metrics": {
+                    "metrics": {
+                        "transition_compat_count": {
+                            "current_count": 0,
+                            "target_count": 0,
+                        },
+                        "sunset_compat_count": {
+                            "current_count": 0,
+                            "target_count": 0,
+                        },
+                        "expired_compat_count": {
+                            "current_count": 0,
+                            "max_count": 0,
+                        },
+                    }
+                },
+                "sanctioned_public_entrypoint_governance": {
+                    "metrics": {
+                        "public_entrypoint_count": {"current_count": 12},
+                        "public_export_facade_count": {"current_count": 4},
+                        "public_export_facade_conflict_count": {"current_count": 0},
+                    }
+                },
+                "retirement_governance_metrics": {
+                    "metrics": {
+                        "repo_wide_untriaged_zero_import_candidate_count": {
+                            "max_count": 0
+                        }
+                    }
+                },
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+
+    payload = generate_architecture_debt_tasks_payload(
+        registry_path=registry_path,
+        project_root=tmp_path,
+        generated_at=datetime(2026, 7, 19, 10, 0, tzinfo=UTC),
+        compatibility_census_path=compatibility_path,
+        dead_code_inventory_path=dead_code_path,
+        debt_scorecard_path=debt_scorecard_path,
+    )
+
+    assert payload["tasks"] == []
 
 
 def test_default_output_path_uses_quality_reports_directory(tmp_path: Path) -> None:
