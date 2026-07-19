@@ -207,6 +207,7 @@ version: 1
 exact_duplicates:
   allowed_groups:
     - id: reviewed
+      normalized_expression: sum(metric_a)
       panel_refs:
         - "bioetl-dq-v2.json :: Monitor: Score"
         - "bioetl-dq-v2.json :: Track: Score"
@@ -223,6 +224,50 @@ near_duplicates:
     )
 
     assert violations == ()
+
+
+def test_evaluate_governance_flags_exact_expression_mismatch(
+    tmp_path: Path,
+) -> None:
+    query_uses = (
+        QueryUse(
+            dashboard="bioetl-dq-v2.json",
+            panel_title="Monitor: Score",
+            target_ref="target[1]",
+            expression="sum(metric_a)",
+        ),
+        QueryUse(
+            dashboard="bioetl-dq-v2.json",
+            panel_title="Track: Score",
+            target_ref="target[1]",
+            expression="sum(metric_a)",
+        ),
+    )
+    allowlist = tmp_path / "allowlist.yaml"
+    allowlist.write_text(
+        """
+version: 1
+exact_duplicates:
+  allowed_groups:
+    - id: reviewed
+      normalized_expression: sum(metric_b)
+      panel_refs:
+        - "bioetl-dq-v2.json :: Monitor: Score"
+        - "bioetl-dq-v2.json :: Track: Score"
+near_duplicates:
+  max_count: 0
+""",
+        encoding="utf-8",
+    )
+
+    violations = evaluate_governance(
+        exact_duplicates=build_exact_duplicate_groups(query_uses),
+        near_duplicates=(),
+        allowlist_path=allowlist,
+    )
+
+    assert len(violations) == 1
+    assert violations[0].kind == "unreviewed_exact_duplicate"
 
 
 def test_evaluate_governance_flags_unreviewed_exact_duplicate(tmp_path: Path) -> None:
@@ -287,6 +332,78 @@ def test_evaluate_governance_flags_near_duplicate_budget(tmp_path: Path) -> None
     assert violations[0].kind == "near_duplicate_budget_exceeded"
 
 
+def test_evaluate_governance_requires_declared_near_group_when_reviewed_groups_exist(
+    tmp_path: Path,
+) -> None:
+    query_uses = (
+        QueryUse(
+            dashboard="bioetl-runtime.json",
+            panel_title="Track Bronze",
+            target_ref="target[1]",
+            expression='sum(bioetl_metric_b{stage="bronze"})',
+        ),
+        QueryUse(
+            dashboard="bioetl-runtime.json",
+            panel_title="Track Gold",
+            target_ref="target[1]",
+            expression='sum(bioetl_metric_b{stage="gold"})',
+        ),
+    )
+    allowlist = tmp_path / "allowlist.yaml"
+    allowlist.write_text(
+        "version: 1\nnear_duplicates:\n  max_count: 1\n  reviewed_groups: []\n",
+        encoding="utf-8",
+    )
+
+    violations = evaluate_governance(
+        exact_duplicates=(),
+        near_duplicates=build_near_duplicate_groups(query_uses),
+        allowlist_path=allowlist,
+    )
+
+    assert len(violations) == 1
+    assert violations[0].kind == "unreviewed_near_duplicate"
+
+
+def test_evaluate_governance_allows_declared_near_group(tmp_path: Path) -> None:
+    query_uses = (
+        QueryUse(
+            dashboard="bioetl-runtime.json",
+            panel_title="Track Bronze",
+            target_ref="target[1]",
+            expression='sum(bioetl_metric_b{stage="bronze"})',
+        ),
+        QueryUse(
+            dashboard="bioetl-runtime.json",
+            panel_title="Track Gold",
+            target_ref="target[1]",
+            expression='sum(bioetl_metric_b{stage="gold"})',
+        ),
+    )
+    allowlist = tmp_path / "allowlist.yaml"
+    allowlist.write_text(
+        """\
+version: 1
+near_duplicates:
+  max_count: 1
+  reviewed_groups:
+    - id: reviewed
+      panel_refs:
+        - "bioetl-runtime.json :: Track Bronze"
+        - "bioetl-runtime.json :: Track Gold"
+""",
+        encoding="utf-8",
+    )
+
+    violations = evaluate_governance(
+        exact_duplicates=(),
+        near_duplicates=build_near_duplicate_groups(query_uses),
+        allowlist_path=allowlist,
+    )
+
+    assert violations == ()
+
+
 def test_qa_cli_report_dashboard_query_duplicates_help_smoke() -> None:
     spec = qa_router.COMMAND_SPECS["report-dashboard-query-duplicates"]
     assert spec.runner == "module"
@@ -309,7 +426,6 @@ def test_qa_cli_report_dashboard_query_duplicates_check_passes_current_allowlist
         qa_router.main,
         "report-dashboard-query-duplicates",
         "--check",
-        "--include-single-panel-near",
     )
 
     assert_cli_succeeded(result)

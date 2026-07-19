@@ -36,6 +36,12 @@ def _dashboard_variables(dashboard_file: str) -> dict[str, dict]:
     }
 
 
+def _variable_query_text(dashboard_file: str, variable_name: str) -> str:
+    variable = _dashboard_variables(dashboard_file)[variable_name]
+    query = variable.get("query", {})
+    return str(query.get("query", "") if isinstance(query, dict) else query)
+
+
 def test_selector_contract_declares_single_normative_source() -> None:
     marker = _SELECTOR_CONTRACT.get("normative_source")
     assert isinstance(marker, dict)
@@ -55,6 +61,64 @@ def test_selector_taxonomy_contains_required_classes() -> None:
         "forensic_only",
     ):
         assert key in taxonomy
+
+
+def test_pipeline_universe_contract_matches_shipped_query_sources() -> None:
+    contract = _SELECTOR_CONTRACT.get("pipeline_universe_contract")
+    registry = _SELECTOR_CONTRACT.get("shipped_selector_registry")
+    assert isinstance(contract, dict)
+    assert isinstance(registry, dict)
+    assert contract.get("status") == "shipped"
+    assert (
+        contract.get("canonical_user_facing_metric")
+        == "bioetl_overview_pipeline_run_type_universe"
+    )
+
+    shared = contract.get("shared_query_metrics")
+    exceptions = contract.get("role_local_exceptions")
+    assert isinstance(shared, dict)
+    assert isinstance(exceptions, dict)
+    assert set(shared) | set(exceptions) == set(registry)
+    assert set(shared) & set(exceptions) == set()
+
+    file_by_uid = {
+        "bioetl-control-plane-v1": "bioetl-control-plane-v1.json",
+        "bioetl-overview-v2": "bioetl-overview-v2.json",
+        "bioetl-runtime": "bioetl-runtime.json",
+        "bioetl-provider-health-v2": "bioetl-provider-health-v2.json",
+        "bioetl-dq-v2": "bioetl-dq-v2.json",
+        "bioetl-workflow-overview": "bioetl-workflow-overview.json",
+        "bioetl-silver-reject-explorer": "bioetl-silver-reject-explorer.json",
+        "bioetl-alerts-slo": "bioetl-alerts-slo.json",
+    }
+    for uid, metric in shared.items():
+        query = _variable_query_text(file_by_uid[uid], "pipeline")
+        assert metric in query
+    for uid, payload in exceptions.items():
+        assert isinstance(payload, dict)
+        assert payload.get("required_relation") == (
+            "subset_of_canonical_user_facing_metric"
+        )
+        query = _variable_query_text(file_by_uid[uid], "pipeline")
+        assert payload.get("query_metric") in query
+
+
+def test_overview_universe_is_an_exact_runtime_alias() -> None:
+    rules_path = Path("grafana/prometheus-rules/bioetl_observability.yml")
+    payload = yaml.safe_load(rules_path.read_text(encoding="utf-8"))
+    rules = [
+        rule
+        for group in payload.get("groups", [])
+        for rule in group.get("rules", [])
+        if isinstance(rule, dict)
+    ]
+    record_map = {
+        rule.get("record"): str(rule.get("expr", "")).strip() for rule in rules
+    }
+
+    assert record_map["bioetl_overview_pipeline_run_type_universe"] == (
+        "bioetl_runtime_pipeline_run_type_universe"
+    )
 
 
 def test_dashboard_families_cover_all_shipped_dashboards() -> None:
