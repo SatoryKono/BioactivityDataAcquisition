@@ -490,7 +490,10 @@ groups:
         expr: >-
           clamp_max(
             # Pushgateway compatibility: check for actual BioETL metrics presence instead of scrape status
-            max(absent_over_time(bioetl_pipeline_runs_total[10m]))
+            max(
+              absent_over_time(bioetl_pipeline_runs_total[10m])
+              or vector(0)
+            )
             + on() group_left()
             (
               (sum(increase(prometheus_rule_evaluation_failures_total{rule_group=~".*bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$"}[10m])) > bool 0)
@@ -890,13 +893,19 @@ groups:
           runbook: "docs/05-operations/runbooks/observability-checklist.md"
 
       - alert: BioETLMetricsEndpointScrapeMissing
-        expr: absent_over_time(up{job="bioetl"}[10m]) and not absent_over_time(bioetl_pipeline_runs_total[10m])
+        expr: |
+          (
+            up{job="bioetl"} == 0
+            or absent_over_time(up{job="bioetl"}[10m])
+          )
+          unless on()
+          absent_over_time(bioetl_pipeline_runs_total[10m])
         for: 10m
         labels:
           severity: warning
         annotations:
           summary: "BioETL scrape endpoint is unavailable but Pushgateway metrics are present"
-          description: "The BioETL /metrics scrape endpoint is unavailable (up{job=\"bioetl\"} is absent), but BioETL metrics are still being received via Pushgateway. This is expected when using Pushgateway instead of direct scraping."
+          description: "The BioETL /metrics scrape endpoint is unavailable (up{job=\"bioetl\"} is zero or absent), but BioETL metrics are still being received via Pushgateway. This is expected when using Pushgateway instead of direct scraping."
           runbook: "docs/05-operations/runbooks/observability-checklist.md"
 
       - alert: BioETLPrometheusUnavailable
