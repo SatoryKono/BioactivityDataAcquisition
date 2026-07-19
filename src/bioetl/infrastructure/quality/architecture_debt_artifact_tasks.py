@@ -87,7 +87,9 @@ def _append_reviewed_metric_task(
     notes: list[str],
     source_artifact: str = "configs/quality/debt_scorecard.yaml",
 ) -> None:
-    limit_value = int(policy.get(limit_field, 0))
+    if limit_field not in policy:
+        return
+    limit_value = int(policy[limit_field])  # type: ignore[call-overload]
     if current_value <= limit_value:
         return
     tasks.append(
@@ -114,6 +116,7 @@ def build_compatibility_surface_tasks(
     if not census:
         return []
     summary = cast(dict[str, object], census.get("summary", {}))
+    review_window = cast(dict[str, object], inventory.get("review_window", {}))
     scorecard = load_yaml_if_present(artifact_paths["debt_scorecard"])
     compatibility_governance = cast(
         dict[str, object],
@@ -135,7 +138,7 @@ def build_compatibility_surface_tasks(
         ("ARD-COMPAT-003", "expired_compat_count", "max_count"),
     ):
         policy = _metric_policy(compatibility_metrics, metric_name)
-        current_value = int(policy.get("current_count", 0))
+        current_value = int(policy.get("current_count", 0))  # type: ignore[call-overload]
         _append_reviewed_metric_task(
             tasks,
             task_id=task_id,
@@ -150,7 +153,7 @@ def build_compatibility_surface_tasks(
             notes=[f"{metric_name}={current_value}"],
         )
 
-    public_entrypoint_count = int(
+    public_entrypoint_count = int(  # type: ignore[call-overload]
         summary.get(
             "sanctioned_public_entrypoint_count",
             summary.get("retained_entrypoint_count", 0),
@@ -173,7 +176,7 @@ def build_compatibility_surface_tasks(
         source_artifact="reports/quality/compatibility-importer-census.json",
     )
 
-    public_export_count = int(
+    public_export_count = int(  # type: ignore[call-overload]
         summary.get(
             "sanctioned_public_export_facade_count",
             summary.get("retained_public_export_facade_count", 0),
@@ -196,10 +199,10 @@ def build_compatibility_surface_tasks(
         source_artifact="reports/quality/compatibility-importer-census.json",
     )
 
-    conflict_count = max(
-        int(summary.get("retained_public_export_facades_with_duplicate_exports", 0)),
-        int(summary.get("retained_public_export_facades_with_resolution_conflicts", 0)),
-        int(
+    conflict_count = max(  # type: ignore[call-overload]
+        int(summary.get("retained_public_export_facades_with_duplicate_exports", 0)),  # type: ignore[call-overload]
+        int(summary.get("retained_public_export_facades_with_resolution_conflicts", 0)),  # type: ignore[call-overload]
+        int(  # type: ignore[call-overload]
             summary.get("retained_public_export_facades_with_wrapper_contract_drift", 0)
         ),
     )
@@ -240,7 +243,7 @@ def build_duplication_tasks(
         categories: list[str] = []
         if isinstance(actionability, list):
             categories = [
-                str(item.get("category"))
+                str(item.get("category"))  # type: ignore[arg-type]
                 for item in actionability
                 if isinstance(item, dict) and item.get("category")
             ]
@@ -319,7 +322,7 @@ def build_dead_code_review_tasks(
     if not inventory:
         return []
     summary = cast(dict[str, object], inventory.get("summary", {}))
-    untriaged_candidates = int(
+    untriaged_candidates = int(  # type: ignore[call-overload]
         summary.get("repo_wide_untriaged_zero_import_candidate_count", 0)
     )
     scorecard = load_yaml_if_present(artifact_paths["debt_scorecard"])
@@ -333,10 +336,15 @@ def build_dead_code_review_tasks(
         retirement_metrics,
         "repo_wide_untriaged_zero_import_candidate_count",
     )
-    limit_value = int(policy.get("max_count", 0))
+    reviewed_limit = policy.get(
+        "max_count",
+        review_window.get("max_untriaged_zero_import_candidates"),
+    )
+    if not isinstance(reviewed_limit, int):
+        return []
+    limit_value = reviewed_limit
     if untriaged_candidates <= limit_value:
         return []
-    review_window = cast(dict[str, object], inventory.get("review_window", {}))
     return [
         _build_artifact_task(
             task_id="ARD-DEAD-001",

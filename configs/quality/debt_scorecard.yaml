@@ -680,7 +680,7 @@ supporting_scripts_governance:
 oversized_source_module_inventory:
   linked_issue: '#4679'
   split_on_touch: true
-  max_tracked_lines: 579
+  max_tracked_lines: 500
   top_modules:
   - path: src/bioetl/application/pipelines/common/base_publication_transformer.py
     lines: 316
@@ -718,7 +718,7 @@ oversized_source_module_inventory:
     target_split: split health server integration, metrics server wiring, and quarantine
       service helpers
   - path: src/bioetl/domain/ports/__init__.py
-    lines: 579
+    lines: 373
     owner: '@bioetl-domain'
     target_split: Split domain ports lazy facade into functional port group modules
     note: Lazy facade is classified in public_lazy_facade_inventory.yaml as owner_package_root with domain_package classification. This is an intentional lazy import optimization for the domain package root.
@@ -933,9 +933,9 @@ retirement_governance_metrics:
       max_count: 1
       linked_issue: '#6352'
       owner: '@bioetl-architecture'
-      rationale: Repo-wide zero-import candidates reduced to 2 after recent cleanup
-        and reclassification. The retired composition.registry facade is no longer
-        counted.
+      rationale: Repo-wide zero-import candidates reduced to 1 after recent cleanup
+        and reclassification. The retained module entrypoint is fully classified and
+        is not actionable dead-code debt.
       ratchet_policy: Non-growth fail-fast unless a reviewed dead-code inventory refresh
         updates the classified candidate set intentionally.
     repo_wide_classified_zero_import_candidate_count:
@@ -943,8 +943,8 @@ retirement_governance_metrics:
       max_count: 1
       linked_issue: '#6352'
       owner: '@bioetl-architecture'
-      rationale: Every repo-wide zero-import candidate remains covered by an explicit
-        disposition ledger entry. The classified residue includes 2 modules.
+      rationale: The sole repo-wide zero-import candidate remains covered by an explicit
+        disposition ledger entry.
       ratchet_policy: Non-growth fail-fast unless the repo-wide classification ledger
         is intentionally rebaselined during review.
     repo_wide_untriaged_zero_import_candidate_count:
@@ -959,9 +959,8 @@ retirement_governance_metrics:
       max_count: 1
       linked_issue: '#6352'
       owner: '@bioetl-architecture'
-      rationale: 'Only 1 of 2 repo-wide zero-import candidates is anchored by evidence:
-        __main__.py has explicit owner-test suites. The remaining module requires
-        owner test evidence or classification review.'
+      rationale: The sole repo-wide zero-import candidate is anchored by evidence;
+        __main__.py has explicit owner-test suites.
       ratchet_policy: Non-growth fail-fast unless the reviewed candidate set intentionally
         shrinks and the owner-test evidence is regenerated in lockstep.
     repo_wide_candidates_without_owner_tests_count:
@@ -969,8 +968,7 @@ retirement_governance_metrics:
       max_count: 0
       linked_issue: '#6352'
       owner: '@bioetl-architecture'
-      rationale: One repo-wide zero-import candidate lacks owner test evidence and
-        requires classification review or owner test development.
+      rationale: No repo-wide zero-import candidate lacks owner test evidence.
       ratchet_policy: Non-growth fail-fast unless the reviewed candidate set intentionally
         shrinks and owner-test evidence is added.
     repo_wide_non_static_reachability_candidate_count:

@@ -46,9 +46,9 @@ class ChemblPolicyRegistryLoader:
                     invalid_value_mode=str(payload["invalid_value_mode"]),
                     fields=tuple(str(field_ref) for field_ref in payload["fields"]),
                 )
-                for family_name, payload in controlled[
+                for family_name, payload in controlled[  # type: ignore[attr-defined]
                     "controlled_vocabularies"
-                ].items()
+                ].items()  # type: ignore[attr-defined]
             ),
             ontology_families=self._load_ontology_families(ontology),
             publication_classification_fields=(
@@ -63,9 +63,9 @@ class ChemblPolicyRegistryLoader:
                     invalid_value_mode=str(payload["invalid_value_mode"]),
                     fields=tuple(str(field_ref) for field_ref in payload["fields"]),
                 )
-                for family_name, payload in reference_identifiers[
+                for family_name, payload in reference_identifiers[  # type: ignore[attr-defined]
                     "reference_identifier_families"
-                ].items()
+                ].items()  # type: ignore[attr-defined]
             ),
         )
 
@@ -82,13 +82,13 @@ class ChemblPolicyRegistryLoader:
             )
 
         augmented_families = {
-            str(family_name): dict(family_payload)
-            for family_name, family_payload in families.items()
+            str(family_name): dict(family_payload)  # type: ignore[arg-type]
+            for family_name, family_payload in families.items()  # type: ignore[attr-defined]
             if isinstance(family_payload, dict)
         }
         ChemblPolicyRegistryLoader._merge_unit_companion_policies(
             augmented_families,
-            payload.get("unit_companion_policies", {}),
+            payload.get("unit_companion_policies", {}),  # type: ignore[arg-type]
         )
 
         return tuple(
@@ -168,19 +168,22 @@ class ChemblPolicyRegistryLoader:
     ) -> None:
         base_suffix = f".{family_name}_units"
         family_fields = [
-            str(field_ref) for field_ref in family_payload.get("fields", ())
+            str(field_ref)
+            for field_ref in family_payload.get("fields", ())  # type: ignore[arg-type]
         ]
-        companion_fields = family_payload.setdefault("companion_fields", {})
+        companion_fields = family_payload.setdefault("companion_fields", {})  # type: ignore[arg-type]
         if not isinstance(companion_fields, dict):
             companion_fields = {}
-            family_payload["companion_fields"] = companion_fields
+            family_payload["companion_fields"] = companion_fields  # type: ignore[index]
 
-        iri_fields = [str(field_ref) for field_ref in companion_fields.get("iri", ())]
+        iri_fields = [str(field_ref) for field_ref in companion_fields.get("iri", ())]  # type: ignore[arg-type]
         mapping_status_fields = [
-            str(field_ref) for field_ref in companion_fields.get("mapping_status", ())
+            str(field_ref)
+            for field_ref in companion_fields.get("mapping_status", ())  # type: ignore[arg-type]
         ]
         version_fields = [
-            str(field_ref) for field_ref in companion_fields.get("version", ())
+            str(field_ref)
+            for field_ref in companion_fields.get("version", ())  # type: ignore[arg-type]
         ]
 
         for field_ref in policy_fields:
