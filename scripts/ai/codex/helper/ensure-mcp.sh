@@ -65,6 +65,17 @@ filesystem_args = servers.get("filesystem", {}).get("args", [])
 if not filesystem_args or filesystem_args[-1] != ".":
     errors.append("filesystem scope must be repo-relative '.'")
 
+fetch_args = servers.get("fetch", {}).get("args", [])
+expected_fetch_args = [
+    "--python",
+    "3.13",
+    "--from",
+    "mcp-server-fetch==2025.4.7",
+    "mcp-server-fetch",
+]
+if fetch_args != expected_fetch_args:
+    errors.append("fetch must use pinned CPython 3.13 and mcp-server-fetch 2025.4.7")
+
 memory_env = servers.get("memory", {}).get("env", {})
 if memory_env.get("MEMORY_FILE_PATH") != "docs/00-project/ai/memory/mcp-memory.json":
     errors.append("memory file path must be repo-relative docs/00-project/ai/memory/mcp-memory.json")

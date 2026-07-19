@@ -25,6 +25,8 @@
     "fetch": {
       "command": "uvx",
       "args": [
+        "--python",
+        "3.13",
         "--from",
         "mcp-server-fetch==2025.4.7",
         "mcp-server-fetch"
@@ -102,14 +104,6 @@
       "args": [
         "scripts/ai/mcp/mcp_mermaid_wrapper.sh"
       ]
-    },
-    "biomoltechDocs": {
-      "type": "http",
-      "url": "https://biomoltech.mintlify.app/mcp"
-    },
-    "mintlify": {
-      "type": "http",
-      "url": "https://mcp.mintlify.com"
     },
     "deepwiki": {
       "type": "http",

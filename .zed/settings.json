@@ -116,12 +116,6 @@
         "UV_TOOL_DIR": ".cache/uv-tools"
       }
     },
-    "biomoltechDocs": {
-      "url": "https://biomoltech.mintlify.app/mcp"
-    },
-    "mintlify": {
-      "url": "https://mcp.mintlify.com"
-    },
     "deepwiki": {
       "url": "https://mcp.deepwiki.com/mcp"
     }

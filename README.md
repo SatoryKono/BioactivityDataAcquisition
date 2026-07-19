@@ -383,7 +383,8 @@ What this script does:
 
 - Writes workspace MCP config for Copilot at `.vscode/mcp.json`.
 - Synchronizes `.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`, `.qodo/mcp.json`, `.codex/settings.json`, `.devin/config.json`, and the managed MCP block in `~/.codex/config.toml`.
-- Registers the current MCP set: `memory`, `filesystem`, `fetch`, `github`, `docker`, `context7`, `ast-grep`, `mcp-code-interpreter`, `prometheus`, `grafana`, `brave-search`, `neo4j-cypher`, `neo4j-memory`, `mermaid`, `biomoltechDocs`, `mintlify`, and `deepwiki`.
+- Registers the current MCP set: `memory`, `filesystem`, `fetch`, `github`, `docker`, `context7`, `ast-grep`, `mcp-code-interpreter`, `prometheus`, `grafana`, `brave-search`, `neo4j-cypher`, `neo4j-memory`, `mermaid`, `deepwiki`, and `ref`.
+- Runs the pinned `mcp-server-fetch==2025.4.7` through `uvx --python 3.13`; this avoids the known stdio startup hang under CPython 3.14 in WSL while keeping the tracked config portable.
 - Uses repo-local wrappers for local and Docker-backed servers so auth and machine-local settings stay out of tracked MCP config files.
 - Uses local defaults when not overridden:
   - `PROMETHEUS_URL=http://host.docker.internal:9090`

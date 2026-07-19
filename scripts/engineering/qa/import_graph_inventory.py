@@ -101,28 +101,56 @@ def _iter_python_modules(scan: PackageScan) -> list[tuple[str, Path]]:
     )
 
 
+def _iter_import_sources(scan: PackageScan) -> list[tuple[str, Path]]:
+    """Return runtime modules and type stubs that can declare imports."""
+    return list(
+        _iter_import_sources_cached(
+            str(scan.root.resolve()),
+            scan.module_prefix,
+        )
+    )
+
+
 @cache
 def _iter_python_modules_cached(
     root_str: str,
     module_prefix: str,
+) -> tuple[tuple[str, Path], ...]:
+    return _iter_module_sources_cached(root_str, module_prefix, (".py",))
+
+
+@cache
+def _iter_import_sources_cached(
+    root_str: str,
+    module_prefix: str,
+) -> tuple[tuple[str, Path], ...]:
+    return _iter_module_sources_cached(root_str, module_prefix, (".py", ".pyi"))
+
+
+@cache
+def _iter_module_sources_cached(
+    root_str: str,
+    module_prefix: str,
+    suffixes: tuple[str, ...],
 ) -> tuple[tuple[str, Path], ...]:
     root = Path(root_str)
     if not root.exists():
         return ()
 
     modules: list[tuple[str, Path]] = []
-    for relative_path in discover_files(root_str, ".py"):
-        py_file = root / relative_path
-        rel_path = py_file.relative_to(root)
-        if py_file.name == "__init__.py":
-            rel_parts = rel_path.parent.parts
-        else:
-            rel_parts = rel_path.with_suffix("").parts
-        module_name = ".".join(
-            [module_prefix, *rel_parts] if rel_parts else [module_prefix]
-        )
-        modules.append((module_name, py_file))
-    return tuple(modules)
+    for suffix in suffixes:
+        for relative_path in discover_files(root_str, suffix):
+            source_file = root / relative_path
+            rel_path = source_file.relative_to(root)
+            if source_file.name in {"__init__.py", "__init__.pyi"}:
+                rel_parts = rel_path.parent.parts
+            else:
+                rel_parts = rel_path.with_suffix("").parts
+            module_name = ".".join(
+                [module_prefix, *rel_parts] if rel_parts else [module_prefix]
+            )
+            modules.append((module_name, source_file))
+    return tuple(sorted(modules, key=lambda item: item[1].as_posix()))
 
 
 def _collect_existing_modules(scan: PackageScan) -> frozenset[str]:
@@ -139,9 +167,9 @@ def _collect_parsed_modules(repo_root_str: str) -> tuple[ParsedModule, ...]:
 
     for scan in scans:
         for importer_module, py_file, source_text in _read_module_sources(
-            _iter_python_modules(scan)
+            _iter_import_sources(scan)
         ):
-            importer_is_package = py_file.name == "__init__.py"
+            importer_is_package = py_file.name in {"__init__.py", "__init__.pyi"}
             try:
                 tree = ast.parse(source_text)
             except SyntaxError:

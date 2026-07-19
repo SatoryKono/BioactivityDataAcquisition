@@ -45,7 +45,7 @@ This policy applies to:
    absolute paths when the consuming tool requires them.
 1. Treat `.devin/config.json` as a portable tracked Devin projection. The setup
    generator replaces only `mcpServers` with the canonical repo-relative
-   18-server payload and preserves existing Devin-owned top-level settings such
+   16-server payload and preserves existing Devin-owned top-level settings such
    as `version`, `devin`, `shell`, and `theme_mode`.
 1. Devin starts repository work in its cloned workspace and root environment
    commands from the repository root. Relative MCP filesystem, cache, memory,

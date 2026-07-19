@@ -192,7 +192,7 @@ grep -r "MEMORY_FILE_PATH" .codex/settings.json .gemini/settings.json
 | `memory`              | Semantic knowledge graph | `MEMORY_FILE_PATH` → `docs/00-project/ai/memory/mcp-memory.json` |
 | `github`              | GitHub API               | Токен через `gh auth token` или env var                          |
 | `filesystem`          | Доступ к файлам          | Корень проекта                                                   |
-| `fetch`               | Web fetch                | pinned `mcp-server-fetch==2025.4.7`                              |
+| `fetch`               | Web fetch                | pinned `mcp-server-fetch==2025.4.7` via `uvx --python 3.13`      |
 
 #### 4. Проверка плагинов
 

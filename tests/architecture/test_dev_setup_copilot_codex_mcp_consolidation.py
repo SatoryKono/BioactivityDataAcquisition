@@ -27,8 +27,6 @@ EXPECTED_MCP_SERVERS = {
     "neo4j-cypher",
     "neo4j-memory",
     "mermaid",
-    "biomoltechDocs",
-    "mintlify",
     "deepwiki",
     "ref",
     "ast-grep",
@@ -82,6 +80,8 @@ def _load_workspace_mcp_config(
                     "chembl": {"command": "old"},
                     "pubchem": {"command": "old"},
                     "pubmed": {"command": "old"},
+                    "biomoltechDocs": {"command": "old"},
+                    "mintlify": {"command": "old"},
                     "local-extra": {"command": "kept"},
                 }
             }
@@ -168,6 +168,8 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
         "chembl",
         "pubchem",
         "pubmed",
+        "biomoltechDocs",
+        "mintlify",
     } & set(gemini_settings["mcpServers"])
     assert set(servers) == EXPECTED_MCP_SERVERS
     assert servers["memory"]["command"] == "npx"
@@ -187,15 +189,13 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
     assert codex_filesystem_scope.resolve().samefile(root.resolve())
     assert servers["fetch"]["command"] == "uvx"
     assert servers["fetch"]["args"] == [
+        "--python",
+        "3.13",
         "--from",
         "mcp-server-fetch==2025.4.7",
         "mcp-server-fetch",
     ]
     _assert_platform_wrappers(servers)
-    assert servers["biomoltechDocs"]["type"] == "http"
-    assert servers["biomoltechDocs"]["url"] == "https://biomoltech.mintlify.app/mcp"
-    assert servers["mintlify"]["type"] == "http"
-    assert servers["mintlify"]["url"] == "https://mcp.mintlify.com"
     assert servers["deepwiki"]["type"] == "http"
     assert servers["deepwiki"]["url"] == "https://mcp.deepwiki.com/mcp"
     assert servers["ref"]["type"] == "http"
@@ -277,14 +277,14 @@ def test_remote_mcp_servers_are_in_allowlist() -> None:
 
     # Extract the allowlist from the setup_mcp.py file
     allowlist_match = re.search(
-        r'APPROVED_REMOTE_MCP_BASE_URLS = frozenset\(\s*\{([^}]+)\}\s*\)',
+        r"APPROVED_REMOTE_MCP_BASE_URLS = frozenset\(\s*\{([^}]+)\}\s*\)",
         setup_mcp_content,
         re.DOTALL,
     )
     assert allowlist_match, "APPROVED_REMOTE_MCP_BASE_URLS not found in setup_mcp.py"
     allowlist_urls = {
-        url.strip().strip('"\'')
-        for url in allowlist_match.group(1).split(',')
+        url.strip().strip("\"'")
+        for url in allowlist_match.group(1).split(",")
         if url.strip()
     }
 
@@ -307,10 +307,8 @@ def test_unapproved_remote_mcp_url_rejected() -> None:
     """Attempting to add an unapproved remote MCP URL should raise ValueError."""
     from scripts.ai.codex import setup_mcp
 
-    # This should raise ValueError because the URL is not in the allowlist
-    try:
+    with pytest.raises(ValueError) as exc_info:
         setup_mcp._http_server("https://unapproved.example.com/mcp")
-        assert False, "Expected ValueError for unapproved remote MCP URL"
-    except ValueError as e:
-        assert "not in approved allowlist" in str(e)
-        assert "https://unapproved.example.com/mcp" in str(e)
+
+    assert "not in approved allowlist" in str(exc_info.value)
+    assert "https://unapproved.example.com/mcp" in str(exc_info.value)

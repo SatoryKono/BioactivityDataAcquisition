@@ -230,7 +230,7 @@ registers the active BioETL MCP server set:
 | --- | --- | --- |
 | `memory` | `npx @modelcontextprotocol/server-memory` | Persistent assistant memory file |
 | `filesystem` | `npx @modelcontextprotocol/server-filesystem` | Repo-scoped file access |
-| `fetch` | `uvx mcp-server-fetch` | HTTP fetch tooling |
+| `fetch` | `uvx --python 3.13 --from mcp-server-fetch==2025.4.7 mcp-server-fetch` | HTTP fetch tooling; CPython 3.13 avoids the known 3.14 stdio startup hang in WSL |
 | `github` | Project wrapper | GitHub API access |
 | `docker` | Project wrapper | Docker MCP gateway access |
 | `context7` | Project wrapper | Documentation/context lookup |
@@ -242,15 +242,13 @@ registers the active BioETL MCP server set:
 | `neo4j-cypher` | Project wrapper | Neo4j Cypher access |
 | `neo4j-memory` | Project wrapper | Neo4j-backed project memory access |
 | `mermaid` | Project wrapper | Mermaid rendering/diagram tooling |
-| `biomoltechDocs` | Remote HTTP MCP | BioETL documentation lookup |
-| `mintlify` | Remote HTTP MCP | Mintlify documentation lookup |
 | `deepwiki` | Remote HTTP MCP | DeepWiki repository documentation lookup |
 | `ref` | Remote HTTP MCP with OAuth | Ref Tools documentation search and URL retrieval |
 
 Retired MCP servers such as `sequential-thinking`, `pdf`, `needle`,
-`docker-docs`, `dockerhub`, and `paper-search` are intentionally not registered
-in generated configs. See `docs/00-project/ai/mcp-governance.md` for the
-active/retired inventory.
+`docker-docs`, `dockerhub`, `paper-search`, `biomoltechDocs`, and
+`mintlify` are intentionally not registered in generated configs. See
+`docs/00-project/ai/mcp-governance.md` for the active/retired inventory.
 
 After the initial setup, manual MCP re-registration should not be necessary on
 every new Codex session: `bash scripts/ai/codex/run-codex.sh`,
