@@ -123,9 +123,9 @@ _LAZY_COMMAND_SPECS: dict[str, tuple[str, str, str]] = {
 }
 
 _EAGER_COMMANDS: dict[str, tuple[Command | Group, str]] = {
-    "dq": (dq_command, "Data quality configuration commands"),
-    "debug": (debug_command, "Run a pipeline with breakpoints"),
-    "lock": (lock_command, "Inspect and manage local runtime locks"),
+    "dq": (cast(Command, dq_command), "Data quality configuration commands"),
+    "debug": (cast(Command, debug_command), "Run a pipeline with breakpoints"),
+    "lock": (cast(Command, lock_command), "Inspect and manage local runtime locks"),
 }
 
 
@@ -184,9 +184,9 @@ def _configure_lazy_cli_group(group: Group) -> Group:
             lazy_commands=_LAZY_COMMAND_SPECS,
         )
 
-    group.list_commands = list_commands
-    group.get_command = get_command
-    group.format_commands = format_commands
+    group.list_commands = list_commands  # type: ignore[method-assign]
+    group.get_command = get_command  # type: ignore[method-assign]
+    group.format_commands = format_commands  # type: ignore[method-assign]
     return group
 
 
@@ -202,7 +202,7 @@ def _build_main_registry() -> object:
 
 def register_all_pipelines(*, registry: object | None = None) -> None:
     """Historical CLI patch seam for pipeline registration."""
-    _register_all_pipelines(registry=registry)
+    _register_all_pipelines(registry=registry)  # type: ignore[arg-type]
 
 
 def build_cli_registry() -> object:

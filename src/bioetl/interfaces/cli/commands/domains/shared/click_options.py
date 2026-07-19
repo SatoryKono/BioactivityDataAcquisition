@@ -42,7 +42,7 @@ def typed_click_option(*args: object, **kwargs: object) -> CommandDecorator:
     """Attach one Click option while preserving the wrapped callback type."""
 
     def decorator(func: CommandCallback) -> CommandCallback:
-        return _cast_command(click.option(*args, **kwargs)(func))
+        return _cast_command(click.option(*args, **kwargs)(func))  # type: ignore[arg-type]
 
     return decorator
 
@@ -51,7 +51,7 @@ def typed_click_argument(*args: object, **kwargs: object) -> CommandDecorator:
     """Attach one Click argument while preserving the wrapped callback type."""
 
     def decorator(func: CommandCallback) -> CommandCallback:
-        return _cast_command(click.argument(*args, **kwargs)(func))
+        return _cast_command(click.argument(*args, **kwargs)(func))  # type: ignore[arg-type]
 
     return decorator
 
@@ -60,7 +60,7 @@ def typed_click_command(name: str | None = None, **attrs: object) -> CommandDeco
     """Register one standalone Click command while preserving callback types."""
 
     def decorator(func: CommandCallback) -> CommandCallback:
-        return _cast_command(click.command(name, **attrs)(func))
+        return _cast_command(click.command(name, **attrs)(func))  # type: ignore[call-overload]
 
     return decorator
 
@@ -69,7 +69,7 @@ def typed_click_group(**attrs: object) -> CommandDecorator:
     """Register one Click command group while preserving callback types."""
 
     def decorator(func: CommandCallback) -> CommandCallback:
-        return _cast_command(click.group(**attrs)(func))
+        return _cast_command(click.group(**attrs)(func))  # type: ignore[call-overload]
 
     return decorator
 
@@ -102,7 +102,7 @@ def typed_version_option(**kwargs: object) -> CommandDecorator:
     """Attach Click version metadata while preserving callback types."""
 
     def decorator(func: CommandCallback) -> CommandCallback:
-        return _cast_command(click.version_option(**kwargs)(func))
+        return _cast_command(click.version_option(**kwargs)(func))  # type: ignore[arg-type]
 
     return decorator
 
