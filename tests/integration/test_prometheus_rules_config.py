@@ -353,12 +353,24 @@ _TUNED_ALERT_EXPECTATIONS: dict[str, dict[str, object]] = {
     "BioETLMetricsEndpointUnavailable": {
         "severity": "critical",
         "for": "5m",
-        "fragments": ['bioetl_pipeline_runs_total', "absent_over_time", 'up{job="bioetl"}'],
+        "fragments": [
+            "bioetl_pipeline_runs_total",
+            "absent_over_time",
+            'up{job="bioetl"}',
+            "== 0",
+            "and on()",
+        ],
     },
     "BioETLMetricsEndpointScrapeMissing": {
         "severity": "warning",
         "for": "10m",
-        "fragments": ['up{job="bioetl"}', "absent_over_time", 'bioetl_pipeline_runs_total', "not"],
+        "fragments": [
+            'up{job="bioetl"}',
+            "absent_over_time",
+            "bioetl_pipeline_runs_total",
+            "== 0",
+            "unless on()",
+        ],
     },
     "BioETLPrometheusUnavailable": {
         "severity": "critical",
@@ -1513,8 +1525,8 @@ def test_monitoring_stack_alerts_reference_up_metric_and_checklist_runbook() -> 
     rule_map = _build_rule_map(payload)
 
     expected = {
-        "BioETLMetricsEndpointUnavailable": "2m",
-        "BioETLMetricsEndpointScrapeMissing": "1m",
+        "BioETLMetricsEndpointUnavailable": "5m",
+        "BioETLMetricsEndpointScrapeMissing": "10m",
         "BioETLPrometheusUnavailable": "2m",
         "BioETLGrafanaUnavailable": "2m",
         "BioETLPushgatewayUnavailable": "5m",

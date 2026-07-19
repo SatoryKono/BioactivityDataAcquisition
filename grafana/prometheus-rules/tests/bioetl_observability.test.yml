@@ -7,11 +7,7 @@ evaluation_interval: 1m
 tests:
   - name: metrics-endpoint-unavailable
     interval: 1m
-    input_series:
-      - series: 'up{job="bioetl",instance="host.docker.internal:8000"}'
-        values: '0 0 0 0 0 0 0 0 0 0 0'
-      - series: 'bioetl_pipeline_runs_total{pipeline="test",run_type="test",status="success"}'
-        values: '0 0 0 0 0 0 0 0 0 0 0'
+    input_series: []
     alert_rule_test:
       - eval_time: 6m
         alertname: BioETLMetricsEndpointUnavailable
@@ -20,7 +16,7 @@ tests:
               severity: critical
             exp_annotations:
               summary: BioETL metrics are unavailable
-              description: No BioETL metrics (bioetl_pipeline_runs_total) have been observed for 10m, and the scrape endpoint is also unavailable. This indicates either BioETL is not running or metrics collection is completely broken.
+              description: No BioETL metrics (bioetl_pipeline_runs_total) have been observed for 10m via either direct scrape or Pushgateway. This indicates either BioETL is not running or metrics collection is completely broken.
               runbook: docs/05-operations/runbooks/observability-checklist.md
 
   - name: metrics-endpoint-scrape-missing
@@ -36,10 +32,30 @@ tests:
         exp_alerts:
           - exp_labels:
               severity: warning
+              job: bioetl
+              instance: host.docker.internal:8000
             exp_annotations:
               summary: BioETL scrape endpoint is unavailable but Pushgateway metrics are present
-              description: The BioETL /metrics scrape endpoint is unavailable (up{job="bioetl"} is absent), but BioETL metrics are still being received via Pushgateway. This is expected when using Pushgateway instead of direct scraping.
+              description: The BioETL /metrics scrape endpoint is unavailable (up{job="bioetl"} is zero or absent), but BioETL metrics are still being received via Pushgateway. This is expected when using Pushgateway instead of direct scraping.
               runbook: docs/05-operations/runbooks/observability-checklist.md
+      - eval_time: 11m
+        alertname: BioETLMetricsEndpointUnavailable
+        exp_alerts: []
+
+  - name: metrics-endpoint-healthy
+    interval: 1m
+    input_series:
+      - series: 'up{job="bioetl",instance="host.docker.internal:8000"}'
+        values: '1+0x12'
+      - series: 'bioetl_pipeline_runs_total{pipeline="test",run_type="test",status="success"}'
+        values: '0+1x12'
+    alert_rule_test:
+      - eval_time: 11m
+        alertname: BioETLMetricsEndpointUnavailable
+        exp_alerts: []
+      - eval_time: 11m
+        alertname: BioETLMetricsEndpointScrapeMissing
+        exp_alerts: []
 
   - name: prometheus-unavailable
     interval: 1m
