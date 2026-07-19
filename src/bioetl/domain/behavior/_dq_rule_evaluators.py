@@ -34,6 +34,7 @@ from bioetl.domain.exceptions import ValidationError
 
 if TYPE_CHECKING:
     from bioetl.domain.config.validation import (
+        ConditionalValidation,
         CrossFieldValidation,
         FieldValidation,
     )
@@ -63,7 +64,7 @@ def _cross_rule_violated(record: JsonDict, rule: CrossFieldValidation) -> bool:
     return evaluator(record, rule, present_count)
 
 
-def _conditional_matches(record: JsonDict, rule: CrossFieldValidation) -> bool:
+def _conditional_matches(record: JsonDict, rule: ConditionalValidation) -> bool:
     value = record.get(rule.condition_field)
     evaluator = _CONDITIONAL_MATCHERS.get(rule.condition_operator)
     if evaluator is None:
@@ -135,6 +136,10 @@ def _custom_rule_violated(
     value: object,
     validator_name: str | None,
 ) -> bool:
+    if validator_name is None:
+        raise ValidationError(
+            f"Unknown custom validator: {validator_name!r}", field="validator"
+        )
     special_evaluator = _SPECIAL_CUSTOM_RULE_EVALUATORS.get(validator_name)
     if special_evaluator is not None:
         return special_evaluator(record, value)

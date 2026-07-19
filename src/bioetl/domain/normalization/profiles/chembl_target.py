@@ -50,7 +50,7 @@ _META_FIELDS = frozenset(
     }
 )
 _TITLE_FIELDS = frozenset({"pref_name"})
-_ABSTRACT_FIELDS = frozenset()
+_ABSTRACT_FIELDS: frozenset[str] = frozenset()
 _INT_FIELDS = frozenset({"taxonomy_id"})
 _FLOAT_FIELDS = frozenset({"primary_component_id"})
 _BOOLEAN_FIELDS = chembl_boolean_family_fields("bool_like", entity="target")

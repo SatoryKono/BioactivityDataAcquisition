@@ -36,7 +36,7 @@ class BioETLError(Exception):
     """
 
     error_type: ClassVar[ErrorType]
-    reason_code: ClassVar[str | None] = None
+    reason_code: str | None = None
 
     # Private attributes that should be excluded from context
     _CONTEXT_EXCLUDE: ClassVar[frozenset[str]] = frozenset(

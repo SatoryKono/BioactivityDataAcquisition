@@ -95,10 +95,18 @@ def test_collect_src_tree_uses_git_tracked_inventory(
         [
             "src/bioetl/domain/example.py",
             "src/bioetl/application/services/runner.py",
+            "src/bioetl/domain/deleted.py",
             "docs/ignored.py",
             "",
         ]
     )
+    for relative_path in (
+        "src/bioetl/domain/example.py",
+        "src/bioetl/application/services/runner.py",
+    ):
+        path = tmp_path / relative_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("pass\n", encoding="utf-8")
 
     def fake_run(*args: object, **_kwargs: object) -> subprocess.CompletedProcess[str]:
         return subprocess.CompletedProcess(
@@ -116,9 +124,7 @@ def test_collect_src_tree_uses_git_tracked_inventory(
         "src/bioetl/application/services/runner.py",
         "src/bioetl/domain/example.py",
     ]
-    assert {
-        path.relative_to(tmp_path).as_posix() for path in directories
-    } >= {
+    assert {path.relative_to(tmp_path).as_posix() for path in directories} >= {
         "src/bioetl",
         "src/bioetl/application",
         "src/bioetl/application/services",

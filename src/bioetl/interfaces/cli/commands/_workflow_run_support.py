@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable, Mapping
-from typing import TYPE_CHECKING, Literal, Protocol
+from typing import TYPE_CHECKING, Literal, Protocol, cast
 from uuid import UUID
 
 import click
@@ -85,13 +85,13 @@ class _MetricsPublisher(Protocol):
 
 
 __all__ = [
+    "_MetricsPublisher",
+    "_WorkflowExecutionServiceResolver",
     "_build_workflow_override_config",
     "_execute_workflow_and_publish_metrics",
     "_handle_workflow_result",
     "_load_and_apply_workflow_config",
     "_validate_run_workflow_options",
-    "_WorkflowExecutionServiceResolver",
-    "_MetricsPublisher",
 ]
 
 
@@ -337,11 +337,14 @@ def _resolve_workflow_step_required_profile(
         contract_ref=f"{provider}.{entity}",
         execution_context=execution_context,
     )
-    return resolve_effective_required_persistence_profile(
-        configured_required_profile=configured_profile,
-        family_default_profile=profile.default_required_persistence_profile,
-        exact_replay_requested=exact_replay,
-        allow_degraded_opt_down=configured_profile == "degraded_observable",
+    return cast(
+        "str",
+        resolve_effective_required_persistence_profile(
+            configured_required_profile=configured_profile,
+            family_default_profile=profile.default_required_persistence_profile,
+            exact_replay_requested=exact_replay,
+            allow_degraded_opt_down=configured_profile == "degraded_observable",
+        ),
     )
 
 
@@ -357,13 +360,17 @@ def _resolve_step_option(
     """Resolve one workflow step run option with workflow defaults fallback."""
     if field_name == "exact_replay":
         step_value = step.run_options.exact_replay
-        return step_value if step_value is not None else config.defaults.exact_replay
+        return cast(
+            "bool | str | None",
+            step_value if step_value is not None else config.defaults.exact_replay,
+        )
     if field_name == "use_cached_bronze":
         step_value = step.run_options.use_cached_bronze
-        return (
-            step_value if step_value is not None else config.defaults.use_cached_bronze
+        return cast(
+            "bool | str | None",
+            step_value if step_value is not None else config.defaults.use_cached_bronze,
         )
     profile_value = step.run_options.required_persistence_profile
     if profile_value is not None:
-        return profile_value
-    return config.defaults.required_persistence_profile
+        return cast("bool | str | None", profile_value)
+    return cast("bool | str | None", config.defaults.required_persistence_profile)

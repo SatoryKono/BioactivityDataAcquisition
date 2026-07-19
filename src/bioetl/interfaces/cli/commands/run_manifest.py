@@ -28,6 +28,12 @@ from bioetl.interfaces.cli.commands._run_manifest_services import (
     get_historical_replay_universe_service,
     get_run_manifest_service,
 )
+from bioetl.interfaces.cli.commands.domains.shared.click_options import (
+    typed_click_argument,
+    typed_click_group,
+    typed_click_option,
+    typed_group_command,
+)
 from bioetl.interfaces.cli.commands.domains.shared.inspection_output import (
     emit_inspection_payload,
 )
@@ -68,14 +74,14 @@ def _has_required_universal_exact_replay_claim(report: object) -> bool:
     return bool(gate.get("satisfied", False))
 
 
-@click.group()
+@typed_click_group()
 def run_manifest() -> None:
     """Inspect control-plane run manifests and ledger history."""
 
 
-@run_manifest.command("show")
-@click.argument("identifier")
-@click.option(
+@typed_group_command(run_manifest, "show")
+@typed_click_argument("identifier")
+@typed_click_option(
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),
@@ -96,9 +102,9 @@ def show_command(identifier: str, output_format: str) -> None:
     _emit_payload(result.to_dict(), output_format)
 
 
-@run_manifest.command("score")
-@click.argument("identifier")
-@click.option(
+@typed_group_command(run_manifest, "score")
+@typed_click_argument("identifier")
+@typed_click_option(
     "--format",
     "output_format",
     type=click.Choice(["json", "yaml", "text"]),
@@ -132,10 +138,10 @@ def score_command(identifier: str, output_format: str) -> None:
     _emit_payload(payload, output_format)
 
 
-@run_manifest.command("diff")
-@click.argument("left_identifier")
-@click.argument("right_identifier")
-@click.option(
+@typed_group_command(run_manifest, "diff")
+@typed_click_argument("left_identifier")
+@typed_click_argument("right_identifier")
+@typed_click_option(
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),
@@ -160,10 +166,10 @@ def diff_command(
     _emit_payload(result.to_dict(), output_format)
 
 
-@run_manifest.command("verify")
-@click.argument("left_identifier")
-@click.argument("right_identifier")
-@click.option(
+@typed_group_command(run_manifest, "verify")
+@typed_click_argument("left_identifier")
+@typed_click_argument("right_identifier")
+@typed_click_option(
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),
@@ -188,9 +194,9 @@ def verify_command(
     _emit_payload(result.to_dict(), output_format)
 
 
-@run_manifest.command("replay-bundle")
-@click.argument("identifier")
-@click.option(
+@typed_group_command(run_manifest, "replay-bundle")
+@typed_click_argument("identifier")
+@typed_click_option(
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),
@@ -211,10 +217,10 @@ def replay_bundle_command(identifier: str, output_format: str) -> None:
     _emit_payload(build_run_replay_bundle_descriptor(result).to_dict(), output_format)
 
 
-@run_manifest.command("forensic-diff")
-@click.argument("left_identifier")
-@click.argument("right_identifier")
-@click.option(
+@typed_group_command(run_manifest, "forensic-diff")
+@typed_click_argument("left_identifier")
+@typed_click_argument("right_identifier")
+@typed_click_option(
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),
@@ -239,8 +245,8 @@ def forensic_diff_command(
     _emit_payload(result.to_dict(), output_format)
 
 
-@run_manifest.command("inventory")
-@click.option(
+@typed_group_command(run_manifest, "inventory")
+@typed_click_option(
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),
@@ -254,11 +260,11 @@ def inventory_command(output_format: str) -> None:
     _emit_payload(result.to_dict(), output_format)
 
 
-@run_manifest.command("certify-historical-bulk")
-@click.argument(
+@typed_group_command(run_manifest, "certify-historical-bulk")
+@typed_click_argument(
     "plan_path", type=click.Path(exists=True, dir_okay=False, path_type=Path)
 )
-@click.option(
+@typed_click_option(
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),
@@ -281,21 +287,21 @@ def certify_historical_bulk_command(
     _emit_payload(result.to_dict(), output_format)
 
 
-@run_manifest.command("closure-report")
-@click.option(
+@typed_group_command(run_manifest, "closure-report")
+@typed_click_option(
     "--dispositions",
     "dispositions_path",
     type=click.Path(exists=True, dir_okay=False, path_type=Path),
     default=None,
     help="Optional JSON residual-disposition file.",
 )
-@click.option(
+@typed_click_option(
     "--write",
     "write_artifact",
     is_flag=True,
     help="Persist the closure report under data/output/control/historical_replay_closure.",
 )
-@click.option(
+@typed_click_option(
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),
@@ -328,31 +334,31 @@ def closure_report_command(
     _emit_payload(payload, output_format)
 
 
-@run_manifest.command("universe-report")
-@click.option(
+@typed_group_command(run_manifest, "universe-report")
+@typed_click_option(
     "--external-pack",
     "external_pack_paths",
     type=click.Path(exists=True, dir_okay=False, path_type=Path),
     multiple=True,
     help="Authoritative archived/offline historical-run pack to merge into the full-universe report.",
 )
-@click.option(
+@typed_click_option(
     "--write",
     "write_artifact",
     is_flag=True,
     help="Persist the full-universe report under data/output/control/historical_replay_universe.",
 )
-@click.option(
+@typed_click_option(
     "--require-universal-claim",
     is_flag=True,
     help="Fail closed unless the governed full-corpus universal exact-replay gate is satisfied.",
 )
-@click.option(
+@typed_click_option(
     "--require-durable-evidence-coverage",
     is_flag=True,
     help="Fail closed unless durable evidence coverage is claimed for all known historical runs.",
 )
-@click.option(
+@typed_click_option(
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),

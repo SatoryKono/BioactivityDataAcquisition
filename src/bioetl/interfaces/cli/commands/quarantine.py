@@ -28,6 +28,11 @@ from bioetl.interfaces.cli.commands.domains.quarantine.support import (
     _resolve_silver_filter_error_code,
     _show_quarantine_stats_for_pipeline_cli_options,
 )
+from bioetl.interfaces.cli.commands.domains.shared.click_options import (
+    typed_click_group,
+    typed_click_option,
+    typed_group_command,
+)
 from bioetl.interfaces.cli.commands.domains.shared.inspection_commands import (
     add_quarantine_stats_options,
     run_quarantine_stats_command,
@@ -44,7 +49,7 @@ SILVER_FILTER_ALIAS_HELP = (
 
 def get_quarantine_runtime_service(pipeline: str) -> _QuarantineRuntimeService:
     """Load the quarantine runtime service through the composition seam."""
-    return cast(_QuarantineRuntimeService, get_runtime_quarantine_service(pipeline))
+    return get_runtime_quarantine_service(pipeline)
 
 
 def get_run_manifest_service() -> RunManifestInspectionServiceProtocol:
@@ -58,22 +63,22 @@ def get_run_manifest_service() -> RunManifestInspectionServiceProtocol:
 
 def get_quarantine_service() -> _QuarantineService:
     """Load the quarantine admin service through composition on demand."""
-    return cast(_QuarantineService, get_admin_quarantine_service())
+    return get_admin_quarantine_service()
 
 
-@click.group()
+@typed_click_group()
 def quarantine() -> None:
     """Manage quarantine (failed records)."""
 
 
-@quarantine.command("serve")
-@click.option(
+@typed_group_command(quarantine, "serve")
+@typed_click_option(
     "--host",
     default="0.0.0.0",
     help="Host to bind the Quarantine Explorer backend to.",
     show_default=True,
 )
-@click.option(
+@typed_click_option(
     "--port",
     "-p",
     default=DEFAULT_QUARANTINE_SERVER_PORT,
@@ -81,7 +86,7 @@ def quarantine() -> None:
     help="Port for the long-lived Quarantine Explorer backend.",
     show_default=True,
 )
-@click.option(
+@typed_click_option(
     "--data-root",
     type=click.Path(path_type=Path, exists=True, file_okay=False),
     help=(
@@ -96,7 +101,9 @@ def quarantine_serve(host: str, port: int, data_root: Path | None) -> None:
             "must be an absolute directory path",
             param_hint="--data-root",
         )
-    resolved_data_root = data_root.resolve(strict=True) if data_root is not None else None
+    resolved_data_root = (
+        data_root.resolve(strict=True) if data_root is not None else None
+    )
     if resolved_data_root is None:
         run_long_lived_quarantine_backend_command(host=host, port=port)
     else:
@@ -107,15 +114,15 @@ def quarantine_serve(host: str, port: int, data_root: Path | None) -> None:
         )
 
 
-@quarantine.command("inspect")
-@click.option("--pipeline", required=True, help="Pipeline name")
-@click.option("--limit", type=int, default=100, help="Maximum records to show")
-@click.option("--error-code", help="Filter by error code")
-@click.option(
+@typed_group_command(quarantine, "inspect")
+@typed_click_option("--pipeline", required=True, help="Pipeline name")
+@typed_click_option("--limit", type=int, default=100, help="Maximum records to show")
+@typed_click_option("--error-code", help="Filter by error code")
+@typed_click_option(
     "--run-id",
     help="Scope inspection to one pipeline run ID",
 )
-@click.option(
+@typed_click_option(
     "--silver-filter-only",
     is_flag=True,
     help=SILVER_FILTER_ALIAS_HELP,
@@ -146,7 +153,7 @@ def quarantine_inspect(
     )
 
 
-@quarantine.command("stats")
+@typed_group_command(quarantine, "stats")
 @add_quarantine_stats_options(silver_filter_alias_help=SILVER_FILTER_ALIAS_HELP)
 def quarantine_stats(
     pipeline: str,
@@ -167,13 +174,13 @@ def quarantine_stats(
     )
 
 
-@quarantine.command("replay")
-@click.option("--pipeline", required=True, help="Pipeline name")
-@click.option("--error-code", help="Filter by error code")
-@click.option(
+@typed_group_command(quarantine, "replay")
+@typed_click_option("--pipeline", required=True, help="Pipeline name")
+@typed_click_option("--error-code", help="Filter by error code")
+@typed_click_option(
     "--max-age-days", type=int, default=7, help="Max age of records to replay"
 )
-@click.option("--dry-run", is_flag=True, help="Show records without replaying")
+@typed_click_option("--dry-run", is_flag=True, help="Show records without replaying")
 def quarantine_replay(
     pipeline: str,
     error_code: str | None,
@@ -194,13 +201,13 @@ def quarantine_replay(
     )
 
 
-@quarantine.command("purge")
-@click.option("--pipeline", required=True, help="Pipeline name")
-@click.option(
+@typed_group_command(quarantine, "purge")
+@typed_click_option("--pipeline", required=True, help="Pipeline name")
+@typed_click_option(
     "--older-than-days", type=int, default=30, help="Delete records older than N days"
 )
-@click.option("--dry-run", is_flag=True, help="Show count without deleting")
-@click.option("--force", is_flag=True, help="Skip confirmation prompt")
+@typed_click_option("--dry-run", is_flag=True, help="Show count without deleting")
+@typed_click_option("--force", is_flag=True, help="Skip confirmation prompt")
 def quarantine_purge(
     pipeline: str,
     older_than_days: int,
@@ -221,10 +228,12 @@ def quarantine_purge(
     )
 
 
-@quarantine.command("resolve")
-@click.option("--pipeline", required=True, help="Pipeline name")
-@click.option("--payload-hash", required=True, help="Payload hash of record to resolve")
-@click.option(
+@typed_group_command(quarantine, "resolve")
+@typed_click_option("--pipeline", required=True, help="Pipeline name")
+@typed_click_option(
+    "--payload-hash", required=True, help="Payload hash of record to resolve"
+)
+@typed_click_option(
     "--status", type=click.Choice(["IGNORED", "REPROCESSED"]), default="IGNORED"
 )
 def quarantine_resolve(pipeline: str, payload_hash: str, status: str) -> None:

@@ -251,6 +251,7 @@ def compose_origin_findings(
     bundle: Sequence[StackSpec],
     runtime_origin: Path,
 ) -> list[str]:
+    pinned_origin = runtime_origin.resolve(strict=False)
     expected = {spec.project for spec in bundle}
     seen: set[str] = set()
     findings: list[str] = []
@@ -273,7 +274,7 @@ def compose_origin_findings(
             continue
         try:
             for origin in origins:
-                Path(origin).resolve(strict=False).relative_to(runtime_origin)
+                Path(origin).resolve(strict=False).relative_to(pinned_origin)
         except ValueError:
             findings.append(f"{project}: runtime origin outside pinned mirror")
     findings.extend(

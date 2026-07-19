@@ -30,9 +30,11 @@ def _coerce_list_like(value: object) -> list[object] | None:
 def _coerce_numeric_value(value: object) -> float | None:
     if isinstance(value, bool):
         return None
+    if not isinstance(value, (int, float, str)):
+        return None
     try:
         numeric_value = float(value)
-    except (TypeError, ValueError):
+    except ValueError:
         return None
     return numeric_value if math.isfinite(numeric_value) else None
 

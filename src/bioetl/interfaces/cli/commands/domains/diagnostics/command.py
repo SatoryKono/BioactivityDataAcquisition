@@ -9,24 +9,24 @@ from bioetl.interfaces.cli.commands.domains.shared.public_module_alias import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.interfaces.cli.commands.diagnostics import (
-        COMMANDS as COMMANDS,
+    from collections.abc import Callable
+
+    import click
+
+    from bioetl.composition.observability_api import (
+        MetricsOperatorProfile,
+        ObservabilityDiagnosticsBundle,
     )
-    from bioetl.interfaces.cli.commands.diagnostics import (
-        _build_diagnostics_guide_lines as _build_diagnostics_guide_lines,
+    from bioetl.interfaces.cli.commands.domains.quarantine.support import (
+        _QuarantineRuntimeService,
     )
-    from bioetl.interfaces.cli.commands.diagnostics import (
-        diagnostics as diagnostics,
-    )
-    from bioetl.interfaces.cli.commands.diagnostics import (
-        get_metrics_operator_profile as get_metrics_operator_profile,
-    )
-    from bioetl.interfaces.cli.commands.diagnostics import (
-        get_observability_diagnostics_bundle as get_observability_diagnostics_bundle,
-    )
-    from bioetl.interfaces.cli.commands.diagnostics import (
-        get_quarantine_runtime_service as get_quarantine_runtime_service,
-    )
+
+    COMMANDS: tuple[str, ...]
+    _build_diagnostics_guide_lines: Callable[[], list[str]]
+    diagnostics: click.Group
+    get_metrics_operator_profile: Callable[[], MetricsOperatorProfile]
+    get_observability_diagnostics_bundle: Callable[[], ObservabilityDiagnosticsBundle]
+    get_quarantine_runtime_service: Callable[[str], _QuarantineRuntimeService]
 
 install_public_module_alias(
     globals(),

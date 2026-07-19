@@ -57,7 +57,7 @@ services:
       - "127.0.0.1:19080:9080"
     depends_on:
       loki:
-        condition: service_started
+        condition: service_healthy
     networks:
       - monitoring
     restart: unless-stopped

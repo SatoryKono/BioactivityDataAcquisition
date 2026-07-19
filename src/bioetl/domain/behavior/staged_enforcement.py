@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
+from typing import TypedDict
 
 from bioetl.domain.types import JsonDict
 
@@ -146,7 +147,11 @@ def _stage_allowed_by_current_policy(
         EnforcementStage.SOFT_FAIL: 1,
         EnforcementStage.HARD_FAIL: 2,
     }
-    return threshold_stage if order[threshold_stage] <= order[configured_stage] else configured_stage
+    return (
+        threshold_stage
+        if order[threshold_stage] <= order[configured_stage]
+        else configured_stage
+    )
 
 
 def create_enforcement_engine() -> StagedEnforcementEngine:
@@ -154,7 +159,14 @@ def create_enforcement_engine() -> StagedEnforcementEngine:
     return StagedEnforcementEngine()
 
 
-_DEFAULT_POLICY_SPECS: tuple[dict[str, object], ...] = (
+class _DefaultPolicySpec(TypedDict):
+    check_name: str
+    current_stage: EnforcementStage
+    failure_threshold: float
+    warning_threshold: float
+
+
+_DEFAULT_POLICY_SPECS: tuple[_DefaultPolicySpec, ...] = (
     {
         "check_name": "fixture_governance",
         "current_stage": EnforcementStage.SOFT_FAIL,
@@ -200,11 +212,11 @@ _CONTRACT_POLICY_NAMES = frozenset(
 
 def _build_default_policies() -> dict[str, EnforcementPolicy]:
     return {
-        str(spec["check_name"]): EnforcementPolicy(
-            check_name=str(spec["check_name"]),
+        spec["check_name"]: EnforcementPolicy(
+            check_name=spec["check_name"],
             current_stage=spec["current_stage"],
-            failure_threshold=float(spec["failure_threshold"]),
-            warning_threshold=float(spec["warning_threshold"]),
+            failure_threshold=spec["failure_threshold"],
+            warning_threshold=spec["warning_threshold"],
         )
         for spec in _DEFAULT_POLICY_SPECS
     }

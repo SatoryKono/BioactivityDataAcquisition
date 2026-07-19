@@ -1,5 +1,5 @@
 {
-  "snapshot_date": "2026-07-17",
+  "snapshot_date": "2026-07-18",
   "inventory_source": "configs/quality/compatibility_facade_inventory.yaml",
   "twin_ratchet_source": "configs/quality/compatibility_twin_module_ratchet.yaml",
   "config_root_facade_source": "configs/quality/infrastructure_config_root_facade_inventory.yaml",
@@ -1364,9 +1364,12 @@
           "Keep ordinary runtime maintenance access narrowed to `src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py`.",
           "Treat any future retirement of the public maintenance command itself as a separate external-breaking-change review, not part of this debt ratchet wave."
         ],
-        "src_importers": [],
+        "src_importers": [
+          "src/bioetl/interfaces/cli/commands/__init__.py",
+          "src/bioetl/interfaces/cli/commands/domains/maintenance/__init__.py"
+        ],
         "test_importers": [],
-        "src_importer_count": 0,
+        "src_importer_count": 2,
         "test_importer_count": 0
       }
     ]

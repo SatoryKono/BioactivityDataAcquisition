@@ -1144,6 +1144,7 @@ def _collect_src_tree_from_git(
             path.endswith(".py")
             and Path(path).parts[: len(SRC_ROOT.parts)] == SRC_ROOT.parts
             and "__pycache__" not in Path(path).parts
+            and (repo_root / path).is_file()
         )
     )
     if not relative_files:

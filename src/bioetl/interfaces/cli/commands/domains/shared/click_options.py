@@ -4,14 +4,107 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from typing import cast
 
 import click
+
+CommandCallback = Callable[..., object]
+CommandDecorator = Callable[[CommandCallback], CommandCallback]
+
+__all__ = [
+    "CommandCallback",
+    "CommandDecorator",
+    "typed_click_argument",
+    "typed_click_command",
+    "typed_click_group",
+    "typed_click_option",
+    "typed_group_command",
+    "typed_pass_context",
+    "typed_pass_obj",
+    "typed_version_option",
+    "with_debug_option",
+    "with_dry_run_option",
+    "with_health_server_options",
+    "with_limit_option",
+    "with_observability_backend_options",
+    "with_run_type_option",
+    "with_yes_option",
+]
 
 
 def _cast_command[**_CommandParams, _CommandReturn](
     func: Callable[_CommandParams, _CommandReturn],
 ) -> Callable[_CommandParams, _CommandReturn]:
     return func
+
+
+def typed_click_option(*args: object, **kwargs: object) -> CommandDecorator:
+    """Attach one Click option while preserving the wrapped callback type."""
+
+    def decorator(func: CommandCallback) -> CommandCallback:
+        return _cast_command(click.option(*args, **kwargs)(func))
+
+    return decorator
+
+
+def typed_click_argument(*args: object, **kwargs: object) -> CommandDecorator:
+    """Attach one Click argument while preserving the wrapped callback type."""
+
+    def decorator(func: CommandCallback) -> CommandCallback:
+        return _cast_command(click.argument(*args, **kwargs)(func))
+
+    return decorator
+
+
+def typed_click_command(name: str | None = None, **attrs: object) -> CommandDecorator:
+    """Register one standalone Click command while preserving callback types."""
+
+    def decorator(func: CommandCallback) -> CommandCallback:
+        return _cast_command(click.command(name, **attrs)(func))
+
+    return decorator
+
+
+def typed_click_group(**attrs: object) -> CommandDecorator:
+    """Register one Click command group while preserving callback types."""
+
+    def decorator(func: CommandCallback) -> CommandCallback:
+        return _cast_command(click.group(**attrs)(func))
+
+    return decorator
+
+
+def typed_group_command(
+    group: CommandCallback,
+    name: str | None = None,
+    **attrs: object,
+) -> CommandDecorator:
+    """Register one subcommand on an existing Click group."""
+
+    def decorator(func: CommandCallback) -> CommandCallback:
+        group_obj = cast(click.Group, group)
+        return _cast_command(group_obj.command(name, **attrs)(func))
+
+    return decorator
+
+
+def typed_pass_context(func: CommandCallback) -> CommandCallback:
+    """Attach Click pass-context handling while preserving callback types."""
+    return _cast_command(click.pass_context(func))
+
+
+def typed_pass_obj(func: CommandCallback) -> CommandCallback:
+    """Attach Click pass-obj handling while preserving callback types."""
+    return _cast_command(click.pass_obj(func))
+
+
+def typed_version_option(**kwargs: object) -> CommandDecorator:
+    """Attach Click version metadata while preserving callback types."""
+
+    def decorator(func: CommandCallback) -> CommandCallback:
+        return _cast_command(click.version_option(**kwargs)(func))
+
+    return decorator
 
 
 def with_run_type_option[**_CommandParams, _CommandReturn](

@@ -24,8 +24,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.domain._immutability import freeze_fields
 from bioetl.domain.entities.base import BaseEntity
+from bioetl.domain.immutability import freeze_fields
 
 
 @dataclass(frozen=True, kw_only=True)

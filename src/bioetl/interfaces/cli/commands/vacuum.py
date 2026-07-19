@@ -5,9 +5,16 @@ Implements vacuum operations for Delta tables storage reclamation.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import click
 
 from bioetl.interfaces.cli.commands.domains.maintenance import service_access
+from bioetl.interfaces.cli.commands.domains.shared.click_options import (
+    typed_click_argument,
+    typed_click_command,
+    typed_click_option,
+)
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CliBoundaryExecutionPolicy,
     build_target_cli_boundary_policy,
@@ -19,6 +26,12 @@ from bioetl.interfaces.cli.formatters import (
     echo_vacuum_all_summary,
     echo_vacuum_result,
 )
+
+if TYPE_CHECKING:
+    from bioetl.application.services.medallion_lifecycle import (
+        MedallionLifecycleService,
+    )
+    from bioetl.application.services.vacuum_service import VacuumService
 
 __all__ = [
     "get_lifecycle_service",
@@ -36,12 +49,12 @@ _VACUUM_ALL_UNEXPECTED_ERROR_TITLE = "Unexpected error during maintenance vacuum
 _VACUUM_ALL_INTERRUPTED_MESSAGE = "Maintenance vacuum-all interrupted by user (Ctrl+C)"
 
 
-def get_lifecycle_service() -> object:
+def get_lifecycle_service() -> MedallionLifecycleService:
     """Load the lifecycle service through the owner-only maintenance seam."""
     return service_access.get_lifecycle_service()
 
 
-def get_vacuum_service() -> object:
+def get_vacuum_service() -> VacuumService:
     """Load the vacuum service through the owner-only maintenance seam."""
     return service_access.get_vacuum_service()
 
@@ -55,25 +68,24 @@ def _maintenance_policy(
     interrupted_message: str,
 ) -> CliBoundaryExecutionPolicy:
     """Build the shared CLI boundary policy for maintenance vacuum commands."""
-    policy_kwargs = {
-        "reason_prefix": reason_prefix,
-        "target": target,
-        "domain_error_title": domain_error_title,
-        "unexpected_error_title": unexpected_error_title,
-        "interrupted_message": interrupted_message,
-    }
-    return build_target_cli_boundary_policy(**policy_kwargs)
+    return build_target_cli_boundary_policy(
+        reason_prefix=reason_prefix,
+        target=target,
+        domain_error_title=domain_error_title,
+        unexpected_error_title=unexpected_error_title,
+        interrupted_message=interrupted_message,
+    )
 
 
-@click.command("vacuum")
-@click.argument("table")
-@click.option(
+@typed_click_command("vacuum")
+@typed_click_argument("table")
+@typed_click_option(
     "--retention-days",
     "-r",
     default=7,
     help="Minimum age of files to remove (days)",
 )
-@click.option(
+@typed_click_option(
     "--dry-run",
     is_flag=True,
     help="Show what would be removed without removing",
@@ -125,19 +137,19 @@ def vacuum_command(table: str, retention_days: int, dry_run: bool) -> None:
     )
 
 
-@click.command("vacuum-all")
-@click.option(
+@typed_click_command("vacuum-all")
+@typed_click_option(
     "--retention-days",
     "-r",
     default=7,
     help="Minimum age of files to remove (days)",
 )
-@click.option(
+@typed_click_option(
     "--dry-run",
     is_flag=True,
     help="Show what would be removed without removing",
 )
-@click.option(
+@typed_click_option(
     "--layer",
     type=click.Choice(["all", "silver", "gold"]),
     default="all",

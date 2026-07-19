@@ -100,16 +100,15 @@ def push_metrics_to_gateway(
         push_metrics_to_gateway as _impl,
     )
 
-    gateway_kwargs: dict[str, object] = {
-        "run_label": run_label,
-        "pipeline_name": pipeline_name,
-        "run_type": run_type,
-    }
-    if grouping_key_extra is not None:
-        gateway_kwargs["grouping_key_extra"] = grouping_key_extra
-    if metric_names is not None:
-        gateway_kwargs["metric_names"] = metric_names
-    return bool(_impl(**gateway_kwargs))
+    return bool(
+        _impl(
+            run_label=run_label,
+            pipeline_name=pipeline_name,
+            run_type=run_type,
+            grouping_key_extra=grouping_key_extra,
+            metric_names=metric_names,
+        )
+    )
 
 
 install_lazy_exports(

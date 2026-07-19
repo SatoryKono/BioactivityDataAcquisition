@@ -1,4 +1,7 @@
-"""Run-all CLI public command seam."""
+"""Permanent public run-all command seam.
+
+The retained owner package is ``bioetl.interfaces.cli.commands.domains.run_all``.
+"""
 
 from __future__ import annotations
 

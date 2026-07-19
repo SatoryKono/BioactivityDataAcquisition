@@ -18,6 +18,21 @@ from bioetl.domain.control_plane._reproducibility_profile_types import (
     ReproducibilityFamilyProfile,
 )
 
+__all__ = [
+    "ReproducibilityExecutionContext",
+    "ReproducibilityFamilyProfile",
+    "build_lineage_closure_boundary",
+    "build_replay_family_contract",
+    "published_production_reproducibility_families",
+    "published_reproducibility_family_inventory",
+    "published_supported_boundary_families",
+    "published_supported_reproducibility_families",
+    "registered_reproducibility_families",
+    "registered_reproducibility_family_inventory",
+    "resolve_reproducibility_family",
+    "resolve_reproducibility_family_profile",
+]
+
 
 def registered_reproducibility_families() -> list[str]:
     """Return every registered reproducibility family in the repository."""

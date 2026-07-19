@@ -14,6 +14,12 @@ import click
 import yaml
 
 from bioetl.domain.types import JsonDict
+from bioetl.interfaces.cli.commands.domains.shared.click_options import (
+    typed_click_argument,
+    typed_click_group,
+    typed_click_option,
+    typed_group_command,
+)
 from bioetl.interfaces.cli.formatters import echo_error, echo_info
 
 if TYPE_CHECKING:
@@ -38,14 +44,14 @@ def get_config_service() -> ConfigService:
     return _impl()
 
 
-@click.group()
+@typed_click_group()
 def dq() -> None:
     """Data Quality configuration commands."""
 
 
-@dq.command("show")
-@click.argument("pipeline")
-@click.option(
+@typed_group_command(dq, "show")
+@typed_click_argument("pipeline")
+@typed_click_option(
     "--format",
     "output_format",
     type=click.Choice(["json", "yaml"]),
@@ -84,9 +90,9 @@ def show_dq_config_command(pipeline: str, output_format: str) -> None:
         echo_info(yaml.dump(dq_config, default_flow_style=False, sort_keys=False))
 
 
-@dq.command("validate")
-@click.argument("pipeline")
-@click.option(
+@typed_group_command(dq, "validate")
+@typed_click_argument("pipeline")
+@typed_click_option(
     "--config-file",
     type=click.Path(exists=True),
     help="Path to DQ config file to validate",
@@ -144,16 +150,16 @@ def validate_dq_config_command(pipeline: str, config_file: str | None) -> None:
         echo_error("DQ Configuration validation failed", str(e))
 
 
-@dq.command("show-effective")
-@click.argument("pipeline")
-@click.option(
+@typed_group_command(dq, "show-effective")
+@typed_click_argument("pipeline")
+@typed_click_option(
     "--format",
     "output_format",
     type=click.Choice(["json", "yaml"]),
     default="yaml",
     help="Output format",
 )
-@click.option(
+@typed_click_option(
     "--override",
     "overrides",
     multiple=True,
@@ -205,9 +211,9 @@ def show_effective_config_command(
         echo_error("Failed to create effective config artifact", str(e))
 
 
-@dq.command("check-compatibility")
-@click.argument("artifact1_file")
-@click.argument("artifact2_file")
+@typed_group_command(dq, "check-compatibility")
+@typed_click_argument("artifact1_file")
+@typed_click_argument("artifact2_file")
 def check_compatibility_command(artifact1_file: str, artifact2_file: str) -> None:
     """Check compatibility between two configuration artifacts.
 

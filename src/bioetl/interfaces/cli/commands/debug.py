@@ -8,10 +8,15 @@ from __future__ import annotations
 
 import asyncio
 import sys
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import click
 
+from bioetl.interfaces.cli.commands.domains.shared.click_options import (
+    typed_click_command,
+    typed_click_option,
+    typed_pass_context,
+)
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_info
 
@@ -44,21 +49,21 @@ def _load_stage_breakpoint() -> type[StageBreakpoint]:
     """Resolve StageBreakpoint lazily to avoid command import fan-out."""
     from bioetl.domain.ports import StageBreakpoint
 
-    return StageBreakpoint
+    return cast("type[StageBreakpoint]", StageBreakpoint)
 
 
 def _load_run_options_type() -> type[RunOptions]:
     """Resolve RunOptions lazily to keep CLI imports lightweight."""
     from bioetl.application.services.execution.pipeline_runner_models import RunOptions
 
-    return RunOptions
+    return cast("type[RunOptions]", RunOptions)
 
 
 def _load_debug_abort_error_type() -> type[DebugAbortError]:
     """Resolve DebugAbortError lazily to keep CLI imports lightweight."""
     from bioetl.application.services.pipeline_debug_service import DebugAbortError
 
-    return DebugAbortError
+    return cast("type[DebugAbortError]", DebugAbortError)
 
 
 def _resolve_context_registry(
@@ -96,36 +101,36 @@ def get_pipeline_runner_service(
     return _impl(registry=registry)
 
 
-@click.command()
-@click.option(
+@typed_click_command()
+@typed_click_option(
     "--pipeline",
     callback=_validate_pipeline_name,
     required=True,
     help="Pipeline to debug",
 )
-@click.option(
+@typed_click_option(
     "--breakpoints",
     type=str,
     default=None,
     help=f"Comma-separated breakpoints: {', '.join(_BREAKPOINT_CHOICES)}. "
     "Default: all breakpoints enabled.",
 )
-@click.option(
+@typed_click_option(
     "--limit", type=int, default=10, help="Max records to process (default: 10)"
 )
-@click.option(
+@typed_click_option(
     "--mode",
     type=click.Choice(["interactive", "log"]),
     default="interactive",
     help="Debug mode: interactive (CLI prompts) or log (auto-continue with logging)",
 )
-@click.option(
+@typed_click_option(
     "--run-type",
     type=click.Choice(["incremental", "backfill", "rebuild"]),
     default="incremental",
     help="Type of run",
 )
-@click.pass_context
+@typed_pass_context
 def debug(
     ctx: click.Context,
     pipeline: str,

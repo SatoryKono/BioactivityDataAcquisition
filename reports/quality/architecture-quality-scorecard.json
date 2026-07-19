@@ -23,7 +23,7 @@
     },
     {
       "evidence_metrics": {
-        "source_module_count": 2237,
+        "source_module_count": 2239,
         "uncovered_module_count": 0
       },
       "id": "ddd_invariants",
@@ -47,7 +47,7 @@
       "evidence_metrics": {
         "hotspot_budget_warning_count": 0,
         "hotspot_family_count": 5,
-        "source_module_count": 2237,
+        "source_module_count": 2239,
         "total_duplicate_clusters": 0
       },
       "id": "module_boundaries_coupling",
@@ -173,7 +173,7 @@
     "retained_public_export_facade_count": 4,
     "runtime_cardinality_review_required_count": 0,
     "runtime_cardinality_threshold_violation_count": 0,
-    "source_module_count": 2237,
+    "source_module_count": 2239,
     "total_duplicate_clusters": 0,
     "twin_pair_count": 0,
     "uncovered_module_count": 0,
@@ -189,7 +189,7 @@
     },
     "compatibility_importer_census": {
       "path": "reports/quality/compatibility-importer-census.json",
-      "snapshot_date": "2026-07-17"
+      "snapshot_date": "2026-07-18"
     },
     "contract_registry_diagnostics": {
       "path": "reports/quality/contract-registry-diagnostics.json",
@@ -207,7 +207,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "75cdf7e6d3c7e58e86fa496b9924e2ad209cd0549487a5f4c5522dda31de66e8"
+      "source_fingerprint": "2ca0ca9f6ed41df948e4fa6044108817e1fc24c16ec8df336e6f2c8f7c993dd5"
     },
     "duplication_baseline": {
       "path": "reports/quality/full-app-duplication-baseline.json",
@@ -222,7 +222,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "3938fbd2bc1a5654e5ad56d4084713831e21cda7abb131fd30b87a83ffe16cd2",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "b43a50ba4fd0ec68329c2c77a9432e494f22db749291e4161a9cb84d0f9a7982"
+      "source_tree_sha256": "9ddcbcf42aa107d5d596ab0d8dc11f3c08a886983af1dab513382e827d95f414"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

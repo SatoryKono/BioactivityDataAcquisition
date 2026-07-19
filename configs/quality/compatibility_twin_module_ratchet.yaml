@@ -14,17 +14,4 @@ touch_policy:
   rationale: Refactors touching a tracked twin-family surface must not add
     private-module importers or grow private import counts beyond the committed
     census baseline without an explicit ratchet refresh.
-families:
-  - name: _immutability
-    owner: "@bioetl-domain"
-    linked_issue: "#6225"
-    twin_module_paths:
-      - src/bioetl/domain/_immutability.py
-    tracked_src_importers:
-      - src/bioetl/domain/aggregates/_batch_record.py
-      - src/bioetl/domain/control_plane/contract_registry_types.py
-      - src/bioetl/domain/control_plane/workflow_manifest.py
-      - src/bioetl/domain/entities/crossref.py
-      - src/bioetl/domain/entities/openalex.py
-      - src/bioetl/domain/entities/pubmed.py
-      - src/bioetl/domain/workflow/transform_spec.py
+families: []

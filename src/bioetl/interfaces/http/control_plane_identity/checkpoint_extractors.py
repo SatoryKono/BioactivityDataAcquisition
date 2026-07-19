@@ -6,6 +6,8 @@ This module extracts legacy HTTP identity anchor values.
 
 from __future__ import annotations
 
+from typing import cast
+
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 from bioetl.interfaces.http.control_plane_identity.formatting import (
@@ -60,7 +62,7 @@ def normalize_checkpoint_metadata_payload(
     # Preserve custom metadata keys that are not modeled on CheckpointMetadata yet.
     for key, value in checkpoint.items():
         normalized.setdefault(str(key), value)
-    return normalized
+    return cast("dict[str, object]", normalized)
 
 
 def checkpoint_value(manifest: RunManifest, *keys: str) -> object | None:
@@ -85,7 +87,7 @@ def first_payload_value(manifest: RunManifest, *keys: str) -> object | None:
         for key in keys:
             value = payload.get(key)
             if is_present(value):
-                return value
+                return cast("object | None", value)
     return None
 
 

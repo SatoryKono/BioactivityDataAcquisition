@@ -10,9 +10,12 @@ import asyncio
 from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
-import click
-
 from bioetl.domain.types import RunID
+from bioetl.interfaces.cli.commands.domains.shared.click_options import (
+    typed_click_group,
+    typed_click_option,
+    typed_group_command,
+)
 from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
 
 if TYPE_CHECKING:
@@ -26,7 +29,7 @@ __all__ = [
 ]
 
 
-@click.group()
+@typed_click_group()
 def lock() -> None:
     """Manage pipeline locks."""
 
@@ -40,10 +43,10 @@ def get_lock_service() -> LockService:
     return _impl()
 
 
-@lock.command("release")
-@click.option("--pipeline", required=True, help="Pipeline name (lock key)")
-@click.option("--run-id", required=True, help="Run ID that holds the lock")
-@click.option("--exclusive", is_flag=True, help="Release exclusive lock")
+@typed_group_command(lock, "release")
+@typed_click_option("--pipeline", required=True, help="Pipeline name (lock key)")
+@typed_click_option("--run-id", required=True, help="Run ID that holds the lock")
+@typed_click_option("--exclusive", is_flag=True, help="Release exclusive lock")
 def release_command(pipeline: str, run_id: str, exclusive: bool) -> None:
     """Release a pipeline lock.
 
@@ -84,9 +87,9 @@ def release_command(pipeline: str, run_id: str, exclusive: bool) -> None:
     asyncio.run(_run())
 
 
-@lock.command("check")
-@click.option("--pipeline", required=True, help="Pipeline name (lock key)")
-@click.option("--run-id", required=True, help="Run ID to check")
+@typed_group_command(lock, "check")
+@typed_click_option("--pipeline", required=True, help="Pipeline name (lock key)")
+@typed_click_option("--run-id", required=True, help="Run ID to check")
 def check_command(pipeline: str, run_id: str) -> None:
     """Check if a lock is held by a specific run-id.
 

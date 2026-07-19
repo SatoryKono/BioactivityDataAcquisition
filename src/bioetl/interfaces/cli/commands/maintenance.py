@@ -7,8 +7,10 @@ This module keeps subcommand imports lazy so ``maintenance --help`` stays cheap.
 from __future__ import annotations
 
 from importlib import import_module
+from typing import cast
 
 import click
+from click.core import Group
 
 from bioetl.interfaces.cli.commands.archive import archive_command
 from bioetl.interfaces.cli.commands.cleanup import (
@@ -17,6 +19,9 @@ from bioetl.interfaces.cli.commands.cleanup import (
 )
 from bioetl.interfaces.cli.commands.domains.maintenance.control_plane_lifecycle import (
     control_plane_lifecycle_command,
+)
+from bioetl.interfaces.cli.commands.domains.shared.click_options import (
+    typed_click_group,
 )
 from bioetl.interfaces.cli.commands.vacuum import vacuum_all_command, vacuum_command
 
@@ -71,28 +76,26 @@ def _load_maintenance_command(name: str) -> click.Command | click.Group | None:
     return command
 
 
-class _LazyMaintenanceGroup(click.Group):
-    """Click group that resolves maintenance subcommands on demand."""
+def _configure_lazy_maintenance_group(group: Group) -> Group:
+    """Attach lazy command resolution to the maintenance Click group."""
 
-    def list_commands(self, ctx: click.Context) -> list[str]:
+    def list_commands(ctx: click.Context) -> list[str]:
         del ctx
         return [*_EAGER_MAINTENANCE_COMMANDS, *_LAZY_MAINTENANCE_COMMANDS]
 
     def get_command(
-        self,
         ctx: click.Context,
         cmd_name: str,
     ) -> click.Command | click.Group | None:
         del ctx
-        if cmd_name in self.commands:
-            return self.commands[cmd_name]
+        if cmd_name in group.commands:
+            return group.commands[cmd_name]
         command = _load_maintenance_command(cmd_name)
         if command is not None:
-            self.commands[cmd_name] = command
+            group.commands[cmd_name] = command
         return command
 
     def format_commands(
-        self,
         ctx: click.Context,
         formatter: click.HelpFormatter,
     ) -> None:
@@ -104,7 +107,15 @@ class _LazyMaintenanceGroup(click.Group):
             lazy_commands=_LAZY_MAINTENANCE_COMMANDS,
         )
 
+    group.list_commands = list_commands
+    group.get_command = get_command
+    group.format_commands = format_commands
+    return group
 
-@click.group(cls=_LazyMaintenanceGroup)
-def maintenance() -> None:
+
+@typed_click_group()
+def _maintenance_group() -> None:
     """Maintenance operations for Delta tables."""
+
+
+maintenance: Group = _configure_lazy_maintenance_group(cast(Group, _maintenance_group))

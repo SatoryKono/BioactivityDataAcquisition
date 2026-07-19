@@ -184,14 +184,14 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "383",
+      "line": "391",
       "path": "tests/unit/composition/test_observability_contract.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_noop_metrics_all_methods_are_noop"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "393",
+      "line": "401",
       "path": "tests/unit/composition/test_observability_contract.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_noop_metrics_close_is_idempotent"
@@ -1183,7 +1183,7 @@
         "tests/architecture/test_test_governance_audit.py:345",
         "tests/architecture/test_test_governance_audit.py:385",
         "tests/architecture/test_test_governance_audit.py:406",
-        "tests/architecture/test_test_governance_audit.py:422"
+        "tests/architecture/test_test_governance_audit.py:421"
       ],
       "assertless_tests": [],
       "intentional_no_exception_tests": 0,
@@ -1422,14 +1422,14 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "383",
+        "line": "391",
         "path": "tests/unit/composition/test_observability_contract.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_noop_metrics_all_methods_are_noop"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "393",
+        "line": "401",
         "path": "tests/unit/composition/test_observability_contract.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_noop_metrics_close_is_idempotent"
@@ -2118,7 +2118,7 @@
           "tests/architecture/test_test_governance_audit.py:345",
           "tests/architecture/test_test_governance_audit.py:385",
           "tests/architecture/test_test_governance_audit.py:406",
-          "tests/architecture/test_test_governance_audit.py:422"
+          "tests/architecture/test_test_governance_audit.py:421"
         ],
         "assertless_tests": [],
         "intentional_no_exception_tests": 0,
@@ -2220,11 +2220,11 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2014,
-    "total_test_functions": 22515,
+    "total_test_functions": 22513,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "132940a977bcfed4a88fe17c068dbc4b6a447112cac3ff3cc01eff9598c3279c",
+  "source_tree_sha256": "b5ecfd49a8e31b0f10ca87bec296833b2c4f57ac10a5532ff25d4b6967331c72",
   "summary": {
     "assertless_total_candidates": 105,
     "compatibility_test_files": 0,
@@ -2286,6 +2286,6 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2014,
-  "total_test_functions": 22515,
+  "total_test_functions": 22513,
   "uuid4_call_sites": 0
 }

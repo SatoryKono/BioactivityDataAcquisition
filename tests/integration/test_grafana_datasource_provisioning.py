@@ -148,7 +148,7 @@ def test_audit_profile_mounts_explicit_roots_read_only_and_uses_bounded_loki_job
     assert services["grafana"]["depends_on"]["quarantine-explorer-audit"] == {
         "condition": "service_healthy"
     }
-    assert audit_promtail["depends_on"]["loki"] == {"condition": "service_started"}
+    assert audit_promtail["depends_on"]["loki"] == {"condition": "service_healthy"}
     assert audit_promtail["healthcheck"] == {"disable": True}
 
 
@@ -178,7 +178,7 @@ def test_default_runtime_log_sink_reaches_canonical_loki_dashboard_job() -> None
             "timeout": "10s",
         }
     ]
-    assert promtail_service["depends_on"]["loki"] == {"condition": "service_started"}
+    assert promtail_service["depends_on"]["loki"] == {"condition": "service_healthy"}
     runtime_jobs = [
         job
         for job in promtail["scrape_configs"]
@@ -318,7 +318,18 @@ def test_tracing_datasource_default_matches_optional_tracing_profile() -> None:
     assert loki["profiles"] == ["tracing"]
     assert promtail["profiles"] == ["tracing"]
     assert tempo["profiles"] == ["tracing"]
-    assert loki["healthcheck"] == {"disable": True}
+    assert loki["healthcheck"] == {
+        "test": [
+            "CMD",
+            "/usr/bin/loki",
+            "-config.file=/etc/loki/config.yml",
+            "-verify-config=true",
+        ],
+        "interval": "30s",
+        "timeout": "15s",
+        "retries": 10,
+        "start_period": "60s",
+    }
     assert (
         "BIOETL_ENABLE_TRACING_DATASOURCES=${BIOETL_ENABLE_TRACING_DATASOURCES:-auto}"
         in grafana["environment"]

@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Coroutine, Mapping
+from contextlib import AbstractAsyncContextManager
 from typing import TYPE_CHECKING, cast
 
 import click
@@ -54,6 +55,13 @@ if TYPE_CHECKING:
         PipelineRunnerService,
     )
     from bioetl.composition.registry_api import PipelineRegistry
+
+
+def run_batch_coro(
+    coro: Coroutine[object, object, BatchRunResult],
+) -> BatchRunResult:
+    """Run one batch coroutine through the canonical asyncio entrypoint."""
+    return asyncio.run(coro)
 
 
 def load_pipeline_runner_service(
@@ -164,6 +172,7 @@ def build_run_all_command_input_from_options(
     *,
     build_input: Callable[..., RunAllCommandInput] = build_run_all_command_input,
 ) -> RunAllCommandInput:
+    backend_options = build_observability_backend_cli_kwargs_from_options(options)
     return build_input(
         source=cast("str", options["source"]),
         run_type=cast("str", options["run_type"]),
@@ -174,7 +183,8 @@ def build_run_all_command_input_from_options(
         debug=cast("bool", options["debug"]),
         health_server=cast("bool", options["health_server"]),
         health_port=cast("int", options["health_port"]),
-        **build_observability_backend_cli_kwargs_from_options(options),
+        ensure_observability_backend=backend_options.ensure_observability_backend,
+        observability_backend_port=backend_options.observability_backend_port,
     )
 
 
@@ -230,7 +240,9 @@ def default_batch_runtime(
     *,
     ensure_metrics_server_started: Callable[[], object],
     get_pipeline_runner_service: Callable[..., PipelineRunnerService],
-    health_server_context_factory: Callable[..., object],
+    health_server_context_factory: Callable[
+        ..., AbstractAsyncContextManager[object]
+    ],
 ) -> RunAllBatchRuntime:
     return RunAllBatchRuntime(
         ensure_metrics_server_started=ensure_metrics_server_started,
@@ -241,5 +253,5 @@ def default_batch_runtime(
             reason_code=reason_code,
         ),
         health_server_context_factory=health_server_context_factory,
-        run_coro=asyncio.run,
+        run_coro=run_batch_coro,
     )

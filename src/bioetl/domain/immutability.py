@@ -5,6 +5,14 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Never
 
+__all__ = [
+    "FrozenDict",
+    "FrozenList",
+    "deep_freeze_json",
+    "deep_thaw_json",
+    "freeze_fields",
+]
+
 
 def _immutable(*_args: object, **_kwargs: object) -> Never:
     raise TypeError("nested state is immutable")

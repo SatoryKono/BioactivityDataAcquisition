@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from typing import TYPE_CHECKING
 
 import bioetl.composition.runtime_builders.run_manifest_support as _manifest_support
-from bioetl.application.services.control_plane.manifest.service import (
-    RunManifestCreateSpec,
-)
+from bioetl.application.services.control_plane.manifest import RunManifestCreateSpec
 from bioetl.composition.runtime_builders._run_manifest_attr_support import (
     read_attr as _read_attr,
 )
@@ -45,7 +44,12 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
 )
 
-_RunManifestCreateRequestInputs = RunManifestCreateRequestInputs
+if TYPE_CHECKING:
+    from bioetl.application.services.control_plane.ledger import (
+        RunLedgerService as Ledger,
+    )
+    from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
+    from bioetl.domain.context import PipelineRunContext as Context
 
 
 def build_manifest_create_request(
@@ -188,4 +192,6 @@ def emit_replay_reconstructability_metric(
         )
 
 
-create_ledger_service = _create_ledger_service
+def create_ledger_service(inputs: RunnerInputs, ctx: Context) -> Ledger | None:
+    """Keep the public ownership seam local to this support module."""
+    return _create_ledger_service(inputs, ctx)

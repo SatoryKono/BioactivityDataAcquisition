@@ -5,9 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
-from bioetl.application.services.control_plane.ledger.service import (
-    RunLedgerService,
-)
+from bioetl.application.services.control_plane.ledger import RunLedgerService
 from bioetl.application.services.control_plane.manifest.service import (
     RunManifestCreateSpec,
 )
@@ -137,9 +135,7 @@ def assemble_manifest_create_spec(
             pipeline_name=ctx.pipeline_name,
             workflow_id=ctx.workflow_id,
             debug_export_root=(
-                ctx.debug_export_dir
-                if ctx.debug_export_enabled
-                else None
+                ctx.debug_export_dir if ctx.debug_export_enabled else None
             ),
         ),
         pipeline_version=get_pipeline_version(inputs.yaml_config),

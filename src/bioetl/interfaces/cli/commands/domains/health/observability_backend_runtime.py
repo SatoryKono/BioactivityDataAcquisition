@@ -123,23 +123,31 @@ def resolve_observability_backend_cli_options(
     )
 
 
+@dataclass(frozen=True, slots=True)
+class ObservabilityBackendCliOptions:
+    """Normalized observability-backend CLI options for run commands."""
+
+    ensure_observability_backend: bool
+    observability_backend_port: int
+
+
 def build_observability_backend_cli_kwargs(
     *,
     ensure_observability_backend: bool,
     observability_backend_port: int,
-) -> dict[str, object]:
+) -> ObservabilityBackendCliOptions:
     """Return normalized CLI kwargs shared by run-oriented command inputs."""
-    return {
-        "ensure_observability_backend": ensure_observability_backend,
-        "observability_backend_port": observability_backend_port,
-    }
+    return ObservabilityBackendCliOptions(
+        ensure_observability_backend=ensure_observability_backend,
+        observability_backend_port=observability_backend_port,
+    )
 
 
 def build_observability_backend_cli_kwargs_from_options(
     options: Mapping[str, object],
     *,
     default_port: int = DEFAULT_HEALTH_SERVER_PORT,
-) -> dict[str, object]:
+) -> ObservabilityBackendCliOptions:
     """Resolve and normalize backend startup kwargs from raw Click options."""
     ensure_observability_backend, observability_backend_port = (
         resolve_observability_backend_cli_options(

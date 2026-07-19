@@ -8,7 +8,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import TypeGuard
 
-from bioetl.domain._immutability import deep_freeze_json
+from bioetl.domain.immutability import deep_freeze_json
 from bioetl.domain.types import JsonDict
 from bioetl.domain.workflow.config import TransformStepConfig
 

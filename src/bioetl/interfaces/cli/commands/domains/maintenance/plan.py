@@ -9,6 +9,11 @@ import click
 from bioetl.interfaces.cli.commands.domains.maintenance.service_access import (
     get_contract_migration_service,
 )
+from bioetl.interfaces.cli.commands.domains.shared.click_options import (
+    typed_click_argument,
+    typed_click_command,
+    typed_click_option,
+)
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CliBoundaryExecutionPolicy,
     run_sync_with_cli_failure_policy,
@@ -126,9 +131,9 @@ def _plan_policy(pipeline: str) -> CliBoundaryExecutionPolicy:
     )
 
 
-@click.command("plan")
-@click.argument("pipeline")
-@click.option(
+@typed_click_command("plan")
+@typed_click_argument("pipeline")
+@typed_click_option(
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),

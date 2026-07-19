@@ -9,15 +9,18 @@ from bioetl.interfaces.cli.commands.domains.shared.public_module_alias import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.interfaces.cli.commands.quarantine import (
-        get_quarantine_runtime_service as get_quarantine_runtime_service,
+    from collections.abc import Callable
+
+    import click
+
+    from bioetl.interfaces.cli.commands.domains.quarantine.support import (
+        _QuarantineRuntimeService,
+        _QuarantineService,
     )
-    from bioetl.interfaces.cli.commands.quarantine import (
-        get_quarantine_service as get_quarantine_service,
-    )
-    from bioetl.interfaces.cli.commands.quarantine import (
-        quarantine as quarantine,
-    )
+
+    get_quarantine_runtime_service: Callable[[str], _QuarantineRuntimeService]
+    get_quarantine_service: Callable[[], _QuarantineService]
+    quarantine: click.Group
 
 install_public_module_alias(
     globals(),

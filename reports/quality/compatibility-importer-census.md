@@ -1,6 +1,6 @@
 # Compatibility Importer Census
 
-- snapshot_date: 2026-07-17
+- snapshot_date: 2026-07-18
 - retained_entrypoint_count: 12
 - retained_public_entrypoint_burden: 0
 - removed_compatibility_surface_count: 23
@@ -77,7 +77,7 @@
 
 | Path | Owner | Previous status | Surface classification | src importers | test importers | Action |
 | --- | --- | --- | --- | ---: | ---: | --- |
-| `src/bioetl/interfaces/cli/commands/maintenance.py` | `bioetl.interfaces.cli.commands` | `public-entrypoint` | `confirmed-unused` | 0 | 0 | `remove_from_retained_entrypoint_debt_inventory` |
+| `src/bioetl/interfaces/cli/commands/maintenance.py` | `bioetl.interfaces.cli.commands` | `public-entrypoint` | `confirmed-unused` | 2 | 0 | `remove_from_retained_entrypoint_debt_inventory` |
 Migration prerequisites for `src/bioetl/interfaces/cli/commands/maintenance.py`: Keep public CLI discovery wired through `bioetl.interfaces.cli.commands.maintenance` without reintroducing new first-party importer debt.; Keep ordinary runtime maintenance access narrowed to `src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py`.; Treat any future retirement of the public maintenance command itself as a separate external-breaking-change review, not part of this debt ratchet wave.
 
 ## Removed Compatibility Surfaces

@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from uuid import UUID
 
-from bioetl.domain._immutability import deep_thaw_json, freeze_fields
+from bioetl.domain.immutability import deep_thaw_json, freeze_fields
 from bioetl.domain.types import RunID
 
 __all__ = ["WorkflowManifest", "WorkflowManifestStep"]

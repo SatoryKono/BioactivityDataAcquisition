@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 
-from bioetl.domain._immutability import freeze_fields
+from bioetl.domain.immutability import freeze_fields
 from bioetl.domain.types.contract_identity import ContractIdentity, LifecycleStatus
 
 
