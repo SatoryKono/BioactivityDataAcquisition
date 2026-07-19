@@ -476,10 +476,17 @@ uv run python -m scripts.engineering.qa report-dashboard-query-duplicates
 
 Current audited exact-duplicate reuse:
 
-- `Monitor: Data Quality Score (Volume-weighted)` and
-  `Track: Data Quality Score Trend (Volume-weighted)` in `bioetl-dq-v2` share
-  one weighted-score expression intentionally because they answer different UI
-  roles: current gauge verdict vs trend review.
+- `bioetl_dq_current_status` is intentionally reused by the compact `Status`
+  card and the expanded `Monitor DQ Current Status` diagnostic in
+  `bioetl-dq-v2`.
+- `bioetl_runtime_current_status_trusted` is intentionally reused by the
+  compact `Status` card and the expanded `Runtime Status` diagnostic in
+  `bioetl-runtime`.
+- The DQ weighted stat and trend are no longer an exact duplicate and have
+  distinct time semantics: `Monitor: Data Quality Score (Volume-weighted)`
+  uses a fixed seven-day (`[7d]`) latest-retained snapshot, while
+  `Track: Data Quality Score Trend (Volume-weighted)` uses raw selected-range
+  samples. Missing retained samples remain `UNKNOWN`, never a synthetic zero.
 - `Monitor: Lineage Refs Missing` now has a single canonical owner:
   `bioetl-control-plane-v1`.
 - `bioetl-dq-v2` MUST hand off to Control Plane with an explicit note/link
@@ -487,8 +494,8 @@ Current audited exact-duplicate reuse:
 
 Implementation guardrails:
 
-- Justified exact duplicates MUST remain audited in
-  `tests/integration/test_grafana_dashboard_metric_semantics.py`.
+- Justified exact duplicates MUST remain audited in the query-duplicate
+  allowlist and integration query-governance tests.
 - The report command is report-only; it is for discovery and review, not for
   automatic JSON rewrites.
 

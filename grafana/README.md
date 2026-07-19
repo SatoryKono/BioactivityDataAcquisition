@@ -1157,10 +1157,10 @@ not use it as a Prometheus label.
 | 9102 | Inspect DQ Current Reasons                  | Table      | `topk(5, bioetl_dq_current_reason{pipeline=~"$pipeline"} > 0)`                                                                        | Current DQ reasons table with `severity` and `action_target`; `CRIT` can come from quarantine/validation blockers even when `filtered_out=0`.                             |
 | 9103 | Review: First Action                         | Text      | n/a                                                                                                                                    | CTA block sits in the same shared-shell row as `ID` and `Processed Records` (`w=8`, `h=10`). Review current status and reasons first; if `filtered_out=0`, inspect quarantine, validation failures, and blocked records before assuming reject-path only. |
 | 1   | Track Range Evidence: Bronze -> Silver -> Gold | Timeseries | `sum by (pipeline, stage) (max_over_time(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__interval]))` | Full-width selected-range evidence panel that now sits below the compact current-context band; не определяет current DQ status.                                            |
-| 2   | Monitor: Data Quality Score (Volume-weighted) | Stat      | `sum(score * record_count) / clamp_min(sum(record_count), 1)`                                                                          | Neutral TIME RANGE score evidence на базе `bioetl_dq_validation_score` и `bioetl_dq_validation_record_count`; it does not replace CURRENT status.   |
+| 2   | Monitor: Data Quality Score (Volume-weighted) | Stat      | `sum(last_over_time(score[7d]) * last_over_time(record_count[7d])) / clamp_min(sum(last_over_time(record_count[7d])), 1)`                 | Latest retained seven-day DQ snapshot на базе `bioetl_dq_validation_score` и `bioetl_dq_validation_record_count`; без retained samples остаётся `UNKNOWN`, а не ложным `0`.   |
 | 3   | Track: Source Records in Range (Bronze)      | Stat       | `round(sum(max_over_time(bioetl_records_processed_total{...stage="bronze"}[$__range])) or vector(0))`                                  | Суммарный Bronze input для pushed-counter evidence внутри активного Grafana окна; это bounded range evidence, а не latest-value snapshot.                                   |
 | 4   | Track: Clean Records in Range (Gold)         | Stat       | `round(sum(max_over_time(bioetl_records_processed_total{...stage="gold"}[$__range])) or vector(0))`                                    | Суммарный Gold output для pushed-counter evidence внутри активного Grafana окна; это bounded range evidence, а не latest-value snapshot.                                    |
-| 5   | Monitor: Worst-Entity DQ Score               | Stat      | `min(bioetl_dq_validation_score{pipeline=~"$pipeline"})`                                                                                | Худший TIME RANGE DQ score. При отсутствии samples panel remains `UNKNOWN`, not synthetic `0`. |
+| 5   | Monitor: Worst-Entity DQ Score               | Stat      | `min(last_over_time(bioetl_dq_validation_score{pipeline=~"$pipeline"}[7d]))`                                                           | Худший latest-retained DQ score за семь дней. При отсутствии samples panel remains `UNKNOWN`, not synthetic `0`. |
 | 8   | Time Range · Worst Freshness Age (hours; SLA 24/72) | Gauge | `max(clamp_min(time() - max_over_time(bioetl_data_freshness_seconds{pipeline=~"$pipeline"}[$__range]), 0)) / 3600` | TIME RANGE freshness age in hours; WARN `>=24h`, CRIT `>=72h`, null `UNKNOWN`. Query, unit, title, and thresholds use hours. |
 | 6   | Track: Records Quarantined in Range          | Stat       | `round(sum(max_over_time(bioetl_dq_records_quarantined_total{...}[$__range])) or vector(0))`                                           | Selected-range quarantine evidence; non-zero here can explain current DQ pressure even when Silver structural rejects remain zero.                                           |
 | 7   | Track: Silver Validation Failures in Range   | Stat       | `round(sum(max_over_time(bioetl_silver_validation_failures_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__range])) or vector(0))` | Visible selected-range validation blocker count; non-zero can drive current `CRIT` even when `filtered_out=0`.                                                               |
@@ -2021,21 +2021,33 @@ entity-level gauge-метрик:
 
 ```promql
 (
-  (sum(bioetl_dq_validation_score{pipeline=~"$pipeline"} * bioetl_dq_validation_record_count{pipeline=~"$pipeline"}) or vector(0))
+  sum(
+    last_over_time(bioetl_dq_validation_score{pipeline=~"$pipeline"}[7d])
+    * last_over_time(bioetl_dq_validation_record_count{pipeline=~"$pipeline"}[7d])
+  )
   /
-  clamp_min((sum(bioetl_dq_validation_record_count{pipeline=~"$pipeline"}) or vector(0)), 1)
+  clamp_min(
+    sum(last_over_time(bioetl_dq_validation_record_count{pipeline=~"$pipeline"}[7d])),
+    1
+  )
 )
 ```
 
-Этот показатель используется в gauge-панели `4. Data Quality`
-с пороговыми значениями:
+Этот current stat использует фиксированное seven-day окно, чтобы сохранять
+последний репрезентативный DQ snapshot между запусками. Если в окне нет
+retained samples, результат остаётся `UNKNOWN`; synthetic zero не создаётся.
+`Track: Data Quality Score Trend (Volume-weighted)` намеренно имеет distinct
+time semantics и вычисляет raw expression как selected-range trend.
 
-| Значение | Цвет      | Интерпретация                                                |
-| -------- | --------- | ------------------------------------------------------------ |
-| < 50%    | Красный   | Критическая проблема: более половины записей теряется        |
-| 50-80%   | Оранжевый | Предупреждение: значительная потеря данных, требует внимания |
-| 80-95%   | Жёлтый    | Допустимо: небольшая потеря на валидации/дедупликации        |
-| > 95%    | Зелёный   | Нормально: высокое качество данных                           |
+Показатель используется в stat-панели `4. Data Quality` с пороговыми
+значениями:
+
+| Значение       | Цвет      | Интерпретация                                      |
+| -------------- | --------- | -------------------------------------------------- |
+| < 80%          | Красный   | Критическое снижение качества                      |
+| 80% .. < 95%   | Оранжевый | Предупреждение, требуется расследование             |
+| >= 95%         | Зелёный   | Нормально: высокое качество данных                 |
+| Нет samples    | UNKNOWN   | Недостаточно evidence; это не числовой ноль        |
 
 Entity-level gauge `bioetl_dq_validation_score` сохраняется отдельно и остаётся
 полезным для worst-case surface (`Monitor: Worst-Entity DQ Score`), но aggregate panel

@@ -7,7 +7,10 @@ from pathlib import Path
 import pytest
 import yaml
 
-from tests.integration._grafana_test_support import load_dashboard
+from tests.integration._grafana_test_support import (
+    get_dashboard_panels,
+    load_dashboard,
+)
 
 pytestmark = pytest.mark.integration
 
@@ -40,6 +43,26 @@ def _variable_query_text(dashboard_file: str, variable_name: str) -> str:
     variable = _dashboard_variables(dashboard_file)[variable_name]
     query = variable.get("query", {})
     return str(query.get("query", "") if isinstance(query, dict) else query)
+
+
+def _record_expression(rules_file: str, record_name: str) -> str:
+    payload = yaml.safe_load(Path(rules_file).read_text(encoding="utf-8"))
+    for group in payload.get("groups", []):
+        for rule in group.get("rules", []):
+            if rule.get("record") == record_name:
+                return str(rule.get("expr", "")).strip()
+    raise AssertionError(f"missing recording rule: {record_name}")
+
+
+def _panel_by_id(dashboard_file: str, panel_id: int) -> dict:
+    dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_file)
+    matches = [
+        panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("id") == panel_id
+    ]
+    assert len(matches) == 1, f"{dashboard_file} must contain panel id={panel_id}"
+    return matches[0]
 
 
 def test_selector_contract_declares_single_normative_source() -> None:
@@ -94,13 +117,90 @@ def test_pipeline_universe_contract_matches_shipped_query_sources() -> None:
     for uid, metric in shared.items():
         query = _variable_query_text(file_by_uid[uid], "pipeline")
         assert metric in query
+        source_family = registry[uid]["query_source_families"]["pipeline"]
+        assert source_family == f"prometheus_{metric.removeprefix('bioetl_')}"
     for uid, payload in exceptions.items():
         assert isinstance(payload, dict)
-        assert payload.get("required_relation") == (
-            "subset_of_canonical_user_facing_metric"
-        )
         query = _variable_query_text(file_by_uid[uid], "pipeline")
-        assert payload.get("query_metric") in query
+        metric = payload.get("query_metric")
+        assert metric in query
+        source_family = registry[uid]["query_source_families"]["pipeline"]
+        assert source_family == f"prometheus_{metric.removeprefix('bioetl_')}"
+
+    control_plane = exceptions["bioetl-control-plane-v1"]
+    assert control_plane.get("required_relation") == "provenance_gated_overlap"
+    assert control_plane.get("allowed_role_local_only_sources") == [
+        "bioetl_control_plane_manifest_writes_total"
+    ]
+    assert control_plane.get("allowed_canonical_only_sources") == [
+        "bioetl_pipeline_runs_total",
+        "bioetl_records_processed_total",
+    ]
+    assert (
+        control_plane.get("shared_planned_source")
+        == "bioetl_workflow_pipeline_expected"
+    )
+    assert control_plane.get("unexplained_difference_count_required") == 0
+
+    explorer = exceptions["bioetl-silver-reject-explorer"]
+    assert explorer.get("required_relation") == (
+        "subset_of_canonical_user_facing_metric"
+    )
+
+
+def test_pipeline_universe_relations_follow_recording_rule_sources() -> None:
+    canonical_expr = _record_expression(
+        "grafana/prometheus-rules/bioetl_observability.yml",
+        "bioetl_runtime_pipeline_run_type_universe",
+    )
+    control_plane_expr = _record_expression(
+        "grafana/prometheus-rules/bioetl_control_plane_current_status.yml",
+        "bioetl_control_plane_run_type_universe",
+    )
+
+    for source in (
+        "bioetl_pipeline_runs_total",
+        "bioetl_records_processed_total",
+        "bioetl_workflow_pipeline_expected",
+    ):
+        assert source in canonical_expr
+    assert "bioetl_control_plane_manifest_writes_total" not in canonical_expr
+
+    for source in (
+        "bioetl_control_plane_manifest_writes_total",
+        "bioetl_workflow_pipeline_expected",
+    ):
+        assert source in control_plane_expr
+    assert "bioetl_pipeline_runs_total" not in control_plane_expr
+    assert "bioetl_records_processed_total" not in control_plane_expr
+
+
+def test_role_local_pipeline_handoffs_have_visible_recovery_paths() -> None:
+    navigation = _panel_by_id("bioetl-control-plane-v1.json", 1000)
+    assert "/d/bioetl-overview-v2/" in str(
+        navigation.get("options", {}).get("content", "")
+    )
+
+    for panel_id in (9410, 9411):
+        panel = _panel_by_id("bioetl-control-plane-v1.json", panel_id)
+        guidance = " ".join(
+            (
+                str(panel.get("description", "")),
+                str(panel.get("options", {}).get("content", "")),
+            )
+        ).lower()
+        assert "scope" in guidance
+        assert "health" in guidance
+
+    explorer_scope = _panel_by_id("bioetl-silver-reject-explorer.json", 1)
+    recovery = " ".join(
+        (
+            str(explorer_scope.get("description", "")),
+            str(explorer_scope.get("options", {}).get("content", "")),
+        )
+    ).lower()
+    for token in ("reset", "concrete pipeline", "backend health"):
+        assert token in recovery
 
 
 def test_overview_universe_is_an_exact_runtime_alias() -> None:

@@ -328,10 +328,12 @@ Run: `uv run python -m scripts.engineering.qa report-dashboard-query-duplicates`
   3. [ ] Raw duplication only as temporary exception
 
 ### 10.3 Audited Exact-Duplicate Reuse
-- [ ] `Monitor: Data Quality Score (Volume-weighted)` and `Track: Data Quality Score Trend (Volume-weighted)` in `bioetl-dq-v2` share expression intentionally (different UI roles)
+- [ ] `bioetl_dq_current_status` intentionally serves the compact `Status` and expanded `Monitor DQ Current Status` panels
+- [ ] `bioetl_runtime_current_status_trusted` intentionally serves the compact `Status` and expanded `Runtime Status` panels
+- [ ] DQ weighted stat and trend have distinct time semantics: fixed seven-day (`[7d]`) retained snapshot versus raw selected-range samples; absence remains `UNKNOWN`
 - [ ] `Monitor: Lineage Refs Missing` remains canonical in `bioetl-control-plane-v1`
 - [ ] `bioetl-dq-v2` uses a handoff note/link instead of duplicating the metric
-- [ ] Justified exact duplicates audited in `tests/integration/test_grafana_dashboard_metric_semantics.py`
+- [ ] Justified exact duplicates are present in the query-duplicate allowlist and query-governance integration tests
 
 ---
 
@@ -540,10 +542,10 @@ Check against `contracts/navigation-links.yaml` → `provider_context_mapping_co
 
 ## Audit Summary
 
-**Dashboard UID**: _______________  
-**Dashboard Title**: _______________  
-**Auditor**: _______________  
-**Date**: _______________  
+**Dashboard UID**: _______________
+**Dashboard Title**: _______________
+**Auditor**: _______________
+**Date**: _______________
 
 ### Overall Status
 - [ ] PASS - All MUST requirements satisfied
