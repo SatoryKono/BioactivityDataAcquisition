@@ -934,7 +934,7 @@ retirement_governance_metrics:
     repo_wide_zero_import_candidate_count:
       current_count: 1
       max_count: 1
-      linked_issue: '#6352'
+      linked_issue: '#6353'
       owner: '@bioetl-architecture'
       rationale: Repo-wide zero-import candidates reduced to 1 after recent cleanup
         and reclassification. The retained module entrypoint is fully classified and
@@ -944,7 +944,7 @@ retirement_governance_metrics:
     repo_wide_classified_zero_import_candidate_count:
       current_count: 1
       max_count: 1
-      linked_issue: '#6352'
+      linked_issue: '#6353'
       owner: '@bioetl-architecture'
       rationale: The sole repo-wide zero-import candidate remains covered by an explicit
         disposition ledger entry.
@@ -953,14 +953,14 @@ retirement_governance_metrics:
     repo_wide_untriaged_zero_import_candidate_count:
       current_count: 0
       max_count: 0
-      linked_issue: '#6352'
+      linked_issue: '#6353'
       owner: '@bioetl-architecture'
       rationale: All repo-wide zero-import candidates are now classified.
       ratchet_policy: Zero-budget fail-fast metric.
     repo_wide_owner_test_anchored_candidate_count:
       current_count: 1
       max_count: 1
-      linked_issue: '#6352'
+      linked_issue: '#6353'
       owner: '@bioetl-architecture'
       rationale: The sole repo-wide zero-import candidate is anchored by evidence;
         __main__.py has explicit owner-test suites.
@@ -969,7 +969,7 @@ retirement_governance_metrics:
     repo_wide_candidates_without_owner_tests_count:
       current_count: 0
       max_count: 0
-      linked_issue: '#6352'
+      linked_issue: '#6353'
       owner: '@bioetl-architecture'
       rationale: No repo-wide zero-import candidate lacks owner test evidence.
       ratchet_policy: Non-growth fail-fast unless the reviewed candidate set intentionally

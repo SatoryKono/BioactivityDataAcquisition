@@ -71,6 +71,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   manifests, runtime checks, focused tests, and WSL setup guidance were updated
   together.
 
+- **Architecture-debt import graph false positives (#6353):** Public `.pyi`
+  type-stub re-exports now count as first-party static import evidence, so
+  canonical port owner modules no longer produce false actionable dead-code
+  tasks. The runtime candidate inventory remains `.py`-only; no technical-debt
+  budgets or exclusions were increased.
+
 - **Broad `except Exception` replaced with specific exception types in `StorageAdapterMaintenanceMixin` (RF-006.1)**: `maintenance_mixin.py` catch-all `except Exception` blocks replaced with concrete exception types, improving error observability and preventing silent swallowing of unexpected errors.
   - Modified: `src/bioetl/composition/factories/storage/maintenance_mixin.py` — replaced `except Exception` with specific exception types
 
