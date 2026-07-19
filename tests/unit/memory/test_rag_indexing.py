@@ -338,7 +338,7 @@ def test_write_and_reload_rag_manifests(tmp_path: Path) -> None:
     )
 
 
-def test_build_rag_manifests_skips_missing_tracked_source_paths(
+def test_build_rag_manifests_fails_on_missing_tracked_source_paths(
     tmp_path: Path,
     monkeypatch: object,
 ) -> None:
@@ -355,15 +355,8 @@ def test_build_rag_manifests_skips_missing_tracked_source_paths(
         ],
     )
 
-    catalog, chunks = build_rag_manifests(tmp_path)
-
-    assert catalog["source_count"] == 1
-    assert catalog["sources"][0]["source_path"] == "docs/00-project/overview.md"
-    assert all(
-        chunk["source_path"]
-        != "src/bioetl/interfaces/cli/commands/_inspection_output.py"
-        for chunk in chunks
-    )
+    with pytest.raises(FileNotFoundError, match="_inspection_output.py"):
+        build_rag_manifests(tmp_path)
 
 
 def test_build_rag_manifests_workflow_scope_limits_to_focus_matches(
