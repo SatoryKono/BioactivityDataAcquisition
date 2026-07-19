@@ -24,7 +24,7 @@ import sys
 from collections import defaultdict
 from datetime import UTC, date, datetime
 from pathlib import Path
-from typing import Final
+from typing import TYPE_CHECKING, Final, cast
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
@@ -334,7 +334,7 @@ def _run_text_discovery_command(
     timeout: float,
 ) -> tuple[subprocess.CompletedProcess[str], str]:
     """Capture small discovery output through a bounded subprocess call."""
-    result = subprocess.run(
+    result = subprocess.run(  # type: ignore[arg-type]
         command,
         capture_output=True,
         text=True,
@@ -351,11 +351,11 @@ def _hidden_windows_subprocess_kwargs(
     *,
     os_name: str = os.name,
     subprocess_module: object = subprocess,
-) -> dict[str, object]:
+) -> dict[str, int]:
     if os_name != "nt":
         return {}
 
-    kwargs: dict[str, object] = {}
+    kwargs: dict[str, int] = {}
     create_no_window = int(getattr(subprocess_module, "CREATE_NO_WINDOW", 0))
     if create_no_window:
         kwargs["creationflags"] = create_no_window
@@ -469,7 +469,7 @@ def _scan_canonical_metric_mentions_with_git_grep(
     for index in range(0, len(relative_paths), _METRIC_MENTION_GREP_CHUNK_SIZE):
         chunk = relative_paths[index : index + _METRIC_MENTION_GREP_CHUNK_SIZE]
         try:
-            result = subprocess.run(
+            result = subprocess.run(  # type: ignore[arg-type]
                 [
                     "git",
                     "-C",
@@ -544,7 +544,7 @@ def _scan_canonical_metric_mentions_with_rg(
                 check=False,
                 timeout=_METRIC_MENTION_GREP_TIMEOUT_SECONDS,
                 **_hidden_windows_subprocess_kwargs(),
-            )
+            )  # type: ignore[arg-type]
         except OSError:
             return None
         except subprocess.TimeoutExpired:
