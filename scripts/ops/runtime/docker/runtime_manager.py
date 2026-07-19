@@ -311,7 +311,9 @@ def readiness_findings(
     return findings
 
 
-def _digest_from_image(value: str) -> str | None:
+def _digest_from_image(value: str | None) -> str | None:
+    if not value:
+        return None
     match = re.search(r"@(?P<digest>sha256:[0-9a-fA-F]{64})$", value)
     return match.group("digest").lower() if match else None
 

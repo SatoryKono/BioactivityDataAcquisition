@@ -64,6 +64,25 @@ def test_readiness_accepts_matching_repo_digest_when_config_reference_differs() 
     assert runtime_manager.readiness_findings(spec, [snapshot], baseline={}) == []
 
 
+def test_readiness_accepts_build_only_service_without_expected_image() -> None:
+    snapshot = runtime_manager.ServiceSnapshot(
+        service="bioetl",
+        container_id="abc",
+        state="running",
+        health="healthy",
+        restart_count=0,
+        oom_killed=False,
+        image="bioetl-main-bioetl:local",
+    )
+
+    assert (
+        runtime_manager.readiness_findings(
+            _spec(expected_images={}), [snapshot], baseline={}
+        )
+        == []
+    )
+
+
 def test_collect_snapshots_resolves_repo_digests_from_real_container_shape() -> None:
     spec = _spec(expected_images={"bioetl": "bioetl:test@sha256:" + "a" * 64})
     calls: list[list[str]] = []
