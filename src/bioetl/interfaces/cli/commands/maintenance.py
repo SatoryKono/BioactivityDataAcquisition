@@ -38,18 +38,18 @@ _LAZY_MAINTENANCE_COMMANDS: dict[str, tuple[str, str, str]] = {
 }
 
 _EAGER_MAINTENANCE_COMMANDS: dict[str, tuple[click.Command | click.Group, str]] = {
-    "archive": (archive_command, "Archive a Delta table"),
-    "bronze-cleanup": (bronze_cleanup_command, "Remove expired Bronze artifacts"),
+    "archive": (cast(click.Command, archive_command), "Archive a Delta table"),
+    "bronze-cleanup": (cast(click.Command, bronze_cleanup_command), "Remove expired Bronze artifacts"),
     "cleanup-preview": (
-        cleanup_preview_command,
+        cast(click.Command, cleanup_preview_command),
         "Preview pipeline cleanup scope",
     ),
     "control-plane-lifecycle": (
-        control_plane_lifecycle_command,
+        cast(click.Command, control_plane_lifecycle_command),
         "Plan/apply control-plane artifact cleanup",
     ),
-    "vacuum": (vacuum_command, "Vacuum one Delta table"),
-    "vacuum-all": (vacuum_all_command, "Vacuum multiple Delta tables"),
+    "vacuum": (cast(click.Command, vacuum_command), "Vacuum one Delta table"),
+    "vacuum-all": (cast(click.Command, vacuum_all_command), "Vacuum multiple Delta tables"),
 }
 
 
@@ -107,9 +107,9 @@ def _configure_lazy_maintenance_group(group: Group) -> Group:
             lazy_commands=_LAZY_MAINTENANCE_COMMANDS,
         )
 
-    group.list_commands = list_commands
-    group.get_command = get_command
-    group.format_commands = format_commands
+    group.list_commands = list_commands  # type: ignore[method-assign]
+    group.get_command = get_command  # type: ignore[method-assign]
+    group.format_commands = format_commands  # type: ignore[method-assign]
     return group
 
 
