@@ -51,6 +51,7 @@ python -m scripts.diagrams <command> [args...]
 
 | Command               | Script                                             | Description                                                |
 | --------------------- | -------------------------------------------------- | ---------------------------------------------------------- |
+| `generate-dataflows`  | `generate_pipeline_dataflows.py`                   | Generate source-backed pipeline views, passport, JSON IR, and field CSV |
 | `docs-agent`          | `run_diagram_docs_agent.sh`                        | Run checks + DOCX export + PDF export pipeline             |
 | `render-pdf`          | `generate_all_bundles.py --collection architecture` | Refresh architecture Markdown bundle via the canonical generator |
 | `render-pdf-desc`     | `generate_with_descriptions_pdf.py`                | Generate PDF with descriptions                             |
@@ -95,6 +96,7 @@ python -m scripts.diagrams <command> [args...]
 | `render-docx`         | When DOCX export is needed for external review                                                              | Manual, on-demand                      |
 | `render-views`        | When the views Markdown bundle needs refresh                                                                | Manual, on-demand                      |
 | `render-desc-indexes` | When description indexes drift or card counts change                                                        | Manual, on-demand                      |
+| `generate-dataflows`  | After `chembl_activity` config, filters, transformer, or Silver/Gold contracts change                        | Docs CI drift gate                     |
 | `nightly`             | Full Phase 2 diagram validation (DIAG-T024..T029)                                                           | Scheduled nightly (2:20 UTC)           |
 
 ## Other Files

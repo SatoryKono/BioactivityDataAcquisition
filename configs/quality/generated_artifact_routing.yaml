@@ -1,5 +1,5 @@
 schema_version: 1
-updated: "2026-05-20"
+updated: "2026-07-18"
 description: >
   Registry of maintained generators and their approved generated-artifact
   destinations. This is a governance surface for repository layout cleanup:
@@ -15,6 +15,12 @@ allowed_output_roots:
     - docs/reports/dictionaries/
     - docs/02-architecture/generated/
     - docs/02-architecture/diagrams/class-diagrams/90-pkg-
+    - docs/02-architecture/diagrams/architecture/49-chembl-
+    - docs/02-architecture/diagrams/architecture/50-chembl-
+    - docs/02-architecture/diagrams/architecture/51a-chembl-
+    - docs/02-architecture/diagrams/architecture/51b-chembl-
+    - docs/02-architecture/diagrams/architecture/52a-chembl-
+    - docs/02-architecture/diagrams/architecture/52b-chembl-
     - docs/02-architecture/diagrams/bundles/
     - docs/02-architecture/diagrams/descriptions/
     - docs/02-architecture/diagrams/architecture/png/
@@ -504,6 +510,27 @@ routes:
       - docs/02-architecture/diagrams/class-diagrams/90-pkg-*.mmd
     notes: Supplemental package-family class diagrams are regenerated from
       source-tree introspection and must not be hand-edited for cleanup.
+
+  - id: pipeline-dataflow-generated-docs
+    generator: scripts/diagrams/generate_pipeline_dataflows.py
+    output_kind: curated_generated_docs
+    commit_policy: tracked_curated_generated_doc
+    outputs:
+      - docs/02-architecture/diagrams/architecture/49-chembl-pipeline-activity-dataflow.mmd
+      - docs/02-architecture/diagrams/architecture/50-chembl-pipeline-activity-filter-criteria.mmd
+      - docs/02-architecture/diagrams/architecture/51a-chembl-pipeline-activity-silver-fields-1.mmd
+      - docs/02-architecture/diagrams/architecture/51b-chembl-pipeline-activity-silver-fields-2.mmd
+      - docs/02-architecture/diagrams/architecture/52a-chembl-pipeline-activity-gold-fields-1.mmd
+      - docs/02-architecture/diagrams/architecture/52b-chembl-pipeline-activity-gold-fields-2.mmd
+      - docs/02-architecture/diagrams/descriptions/architecture/49-chembl-pipeline-activity-dataflow.md
+      - docs/02-architecture/diagrams/descriptions/architecture/50-chembl-pipeline-activity-filter-criteria.md
+      - docs/02-architecture/diagrams/descriptions/architecture/51a-chembl-pipeline-activity-silver-fields-1.md
+      - docs/02-architecture/diagrams/descriptions/architecture/51b-chembl-pipeline-activity-silver-fields-2.md
+      - docs/02-architecture/diagrams/descriptions/architecture/52a-chembl-pipeline-activity-gold-fields-1.md
+      - docs/02-architecture/diagrams/descriptions/architecture/52b-chembl-pipeline-activity-gold-fields-2.md
+      - docs/02-architecture/generated/pipeline-dataflows/chembl_activity/
+    notes: Typed effective-config IR owns the ChEMBL activity Mermaid views,
+      description cards, field inventory, and pipeline passport.
 
   - id: architecture-diagram-bundles
     generator: scripts/diagrams/generate_all_bundles.py

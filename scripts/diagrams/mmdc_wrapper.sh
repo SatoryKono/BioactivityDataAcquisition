@@ -25,7 +25,7 @@ MMDC_SKIP_VERSION_CHECK="${MMDC_SKIP_VERSION_CHECK:-0}"
 
 candidate_version() {
   local candidate="$1"
-  "$candidate" --version 2>/dev/null | head -n 1 | sed -E 's/.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/'
+  "$candidate" --version 2>/dev/null | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+' | head -n 1
 }
 
 assert_candidate_version() {
