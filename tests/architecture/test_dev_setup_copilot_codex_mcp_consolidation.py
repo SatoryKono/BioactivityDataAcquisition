@@ -31,6 +31,11 @@ EXPECTED_MCP_SERVERS = {
     "ref",
     "ast-grep",
     "mcp-code-interpreter",
+    "deja",
+    "adr-analysis",
+    "mutmut",
+    "code-analyzer",
+    "github-actions",
 }
 
 WRAPPER_SCRIPT_STEMS = {
@@ -45,6 +50,11 @@ WRAPPER_SCRIPT_STEMS = {
     "neo4j-cypher": "mcp_neo4j_cypher_wrapper",
     "neo4j-memory": "mcp_neo4j_memory_wrapper",
     "mermaid": "mcp_mermaid_wrapper",
+    "deja": "mcp_deja_wrapper",
+    "adr-analysis": "mcp_adr_analysis_wrapper",
+    "mutmut": "mcp_mutmut_wrapper",
+    "code-analyzer": "mcp_code_analyzer_wrapper",
+    "github-actions": "mcp_github_actions_wrapper",
 }
 
 
@@ -200,6 +210,13 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
     assert servers["deepwiki"]["url"] == "https://mcp.deepwiki.com/mcp"
     assert servers["ref"]["type"] == "http"
     assert servers["ref"]["url"] == "https://api.ref.tools/mcp"
+    assert servers["deja"]["env"]["NPM_CONFIG_CACHE"] == ".cache/npm-cache"
+    assert servers["adr-analysis"]["env"] == {
+        "PROJECT_PATH": ".",
+        "ADR_PATH": "docs/02-architecture/decisions",
+    }
+    assert servers["mutmut"]["env"]["MUTMUT_PROJECT_PATH"] == "."
+    assert servers["code-analyzer"]["env"]["PROJECT_PATH"] == "."
 
 
 def test_tracked_mcp_projections_reject_workstation_paths() -> None:

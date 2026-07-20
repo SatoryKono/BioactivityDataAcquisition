@@ -239,6 +239,14 @@ review_lanes:
         current_live_state: present_local_only_root_surface
         canonical_path: null
         action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
+      - path: .agents
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
+      - path: .cache
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
       - path: .claude
         current_live_state: absent_from_root_baseline
         canonical_path: .codex
@@ -247,8 +255,20 @@ review_lanes:
         current_live_state: present_local_only_root_surface
         canonical_path: GEMINI.md
         action_if_reintroduced: keep machine-local Gemini configuration untracked and use GEMINI.md for tracked contributor guidance
+      - path: .junie
+        current_live_state: absent_from_root_baseline
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
       - path: .jules
         current_live_state: absent_from_root_baseline
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
+      - path: .npm-cache
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
+      - path: .sonarlint
+        current_live_state: present_local_only_root_surface
         canonical_path: null
         action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
       - path: skills-lock.json
@@ -263,6 +283,14 @@ review_lanes:
         current_live_state: present_curated_root_surface
         canonical_path: .zed
         action_if_reintroduced: keep_only_as_curated_shared_project_editor_configuration_without_credentials_or_local_runtime_state
+      - path: .windsurf
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
+      - path: caddy
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
       - path: script-codex
         current_live_state: present_local_only_root_surface
         canonical_path: scripts/ai/codex

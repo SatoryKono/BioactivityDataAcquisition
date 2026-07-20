@@ -105,6 +105,49 @@
         "scripts/ai/mcp/mcp_mermaid_wrapper.sh"
       ]
     },
+    "deja": {
+      "command": "bash",
+      "args": [
+        "scripts/ai/mcp/mcp_deja_wrapper.sh"
+      ],
+      "env": {
+        "NPM_CONFIG_CACHE": ".cache/npm-cache"
+      }
+    },
+    "adr-analysis": {
+      "command": "bash",
+      "args": [
+        "scripts/ai/mcp/mcp_adr_analysis_wrapper.sh"
+      ],
+      "env": {
+        "PROJECT_PATH": ".",
+        "ADR_PATH": "docs/02-architecture/decisions"
+      }
+    },
+    "mutmut": {
+      "command": "bash",
+      "args": [
+        "scripts/ai/mcp/mcp_mutmut_wrapper.sh"
+      ],
+      "env": {
+        "MUTMUT_PROJECT_PATH": "."
+      }
+    },
+    "code-analyzer": {
+      "command": "bash",
+      "args": [
+        "scripts/ai/mcp/mcp_code_analyzer_wrapper.sh"
+      ],
+      "env": {
+        "PROJECT_PATH": "."
+      }
+    },
+    "github-actions": {
+      "command": "bash",
+      "args": [
+        "scripts/ai/mcp/mcp_github_actions_wrapper.sh"
+      ]
+    },
     "deepwiki": {
       "type": "http",
       "url": "https://mcp.deepwiki.com/mcp"

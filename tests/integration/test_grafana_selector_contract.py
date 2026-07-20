@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -16,6 +17,9 @@ pytestmark = pytest.mark.integration
 
 _SELECTOR_CONTRACT_PATH = Path(
     "docs/03-guides/dashboards/contracts/selector-contracts.yaml"
+)
+_SELECTOR_EVIDENCE_PATH = Path(
+    "reports/observability/grafana/selector-audit-2026-07-20/selector-evidence.json"
 )
 
 
@@ -173,6 +177,136 @@ def test_pipeline_universe_relations_follow_recording_rule_sources() -> None:
         assert source in control_plane_expr
     assert "bioetl_pipeline_runs_total" not in control_plane_expr
     assert "bioetl_records_processed_total" not in control_plane_expr
+
+
+def test_pipeline_selector_live_closure_evidence_is_complete() -> None:
+    contract = _SELECTOR_CONTRACT.get("pipeline_universe_contract")
+    registry = _SELECTOR_CONTRACT.get("shipped_selector_registry")
+    assert isinstance(contract, dict)
+    assert isinstance(registry, dict)
+
+    closure = contract.get("closure_evidence")
+    assert isinstance(closure, dict)
+    latest = closure.get("latest_live_evidence")
+    assert isinstance(latest, dict)
+    assert Path(str(latest.get("path"))) == _SELECTOR_EVIDENCE_PATH
+
+    evidence = json.loads(_SELECTOR_EVIDENCE_PATH.read_text(encoding="utf-8"))
+    assert evidence.get("schema_version") == latest.get("schema_version") == 1
+    assert evidence.get("issue_number") == latest.get("issue_number") == 6359
+    assert evidence.get("captured_at_utc") == latest.get("captured_at_utc")
+    assert (
+        evidence.get("source", {}).get("relevant_runtime_paths_dirty_before_capture")
+        == []
+    )
+
+    dashboards = evidence.get("dashboards")
+    captures = evidence.get("response_captures")
+    assert isinstance(dashboards, list)
+    assert isinstance(captures, dict)
+    assert len(dashboards) == closure.get("required_dashboard_count") == 8
+    assert {dashboard.get("uid") for dashboard in dashboards} == set(registry)
+
+    shared_metrics = contract.get("shared_query_metrics")
+    exceptions = contract.get("role_local_exceptions")
+    assert isinstance(shared_metrics, dict)
+    assert isinstance(exceptions, dict)
+    expected_metric_by_uid = dict(shared_metrics)
+    expected_metric_by_uid.update(
+        {
+            uid: payload.get("query_metric")
+            for uid, payload in exceptions.items()
+            if isinstance(payload, dict)
+        }
+    )
+
+    for dashboard in dashboards:
+        uid = dashboard.get("uid")
+        assert dashboard.get("live_api_http_status") == 200
+        assert dashboard.get("live_provisioned") is True
+        assert dashboard.get("query_metric_match") is True
+        assert dashboard.get("expected_query_metric") == expected_metric_by_uid[uid]
+
+        capture = captures.get(dashboard.get("datasource_response_ref"))
+        assert isinstance(capture, dict)
+        assert capture.get("metric") == expected_metric_by_uid[uid]
+        values = capture.get("pipeline_values_response")
+        pairs = capture.get("series_projection_response")
+        assert isinstance(values, dict)
+        assert isinstance(pairs, dict)
+        assert values.get("http_status") == 200
+        assert values.get("status") == "success"
+        assert pairs.get("http_status") == 200
+        assert pairs.get("status") == "success"
+
+        pipeline_values = values.get("data")
+        pair_values = pairs.get("pairs")
+        assert isinstance(pipeline_values, list)
+        assert isinstance(pair_values, list)
+        assert pipeline_values == sorted(set(pipeline_values))
+        assert values.get("value_count") == len(pipeline_values)
+        pair_keys = [
+            (pair.get("pipeline"), pair.get("run_type"))
+            for pair in pair_values
+            if isinstance(pair, dict)
+        ]
+        assert pair_keys == sorted(
+            set(pair_keys), key=lambda item: (item[0], item[1] or "")
+        )
+        assert pairs.get("pair_count") == len(pair_keys)
+
+    shared = evidence.get("shared_contract")
+    assert isinstance(shared, dict)
+    assert shared.get("exact_pipeline_values_across_default_ranges") is True
+    assert shared.get("exact_pipeline_run_type_pairs_across_default_ranges") is True
+    assert shared.get("chembl_pipeline_count") == closure.get(
+        "shared_required_chembl_pipeline_count"
+    )
+
+    relations = evidence.get("relations")
+    assert isinstance(relations, dict)
+    for range_name in ("12h", "24h"):
+        relation = relations.get(range_name)
+        assert isinstance(relation, dict)
+        assert relation.get("unexplained") == []
+        assert relation.get("overview_runtime_exact") == {
+            "pipeline_values_equal": True,
+            "pairs_equal": True,
+        }
+        control_plane = relation.get("control_plane")
+        explorer = relation.get("explorer")
+        assert isinstance(control_plane, dict)
+        assert isinstance(explorer, dict)
+        assert (
+            control_plane.get("observed_values_backed_by_manifest_or_planned") is True
+        )
+        assert control_plane.get("observed_pairs_backed_by_manifest_or_planned") is True
+        assert explorer.get("pipeline_subset_of_canonical") is True
+        assert explorer.get("pair_subset_of_canonical") is True
+        assert explorer.get("explorer_only_pipelines") == []
+        assert explorer.get("explorer_only_pairs") == []
+
+    navigation = evidence.get("navigation_handoff")
+    assert isinstance(navigation, dict)
+    assert navigation.get("live_dashboard_count") == latest.get(
+        "require_live_dashboard_count"
+    )
+    assert navigation.get("checked_dashboard_links") == navigation.get(
+        "expected_dashboard_links"
+    )
+    assert navigation.get("missing_target_count") == 0
+    assert navigation.get("missing_time_range_count") == 0
+    assert navigation.get("literal_pipeline_substitution_count") == 0
+    assert navigation.get("control_plane_recovery_path_verified") is True
+    assert navigation.get("explorer_recovery_copy_verified") is True
+
+    verdict = evidence.get("verdict")
+    assert isinstance(verdict, dict)
+    assert verdict.get("status") == latest.get("expected_verdict") == "pass"
+    assert verdict.get("unexplained_difference_count") == closure.get(
+        "required_unexplained_difference_count"
+    )
+    assert verdict.get("issue_closeable") is True
 
 
 def test_role_local_pipeline_handoffs_have_visible_recovery_paths() -> None:

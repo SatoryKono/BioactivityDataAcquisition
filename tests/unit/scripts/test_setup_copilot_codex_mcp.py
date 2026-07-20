@@ -51,6 +51,29 @@ def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> 
     )
     servers = payload["mcpServers"]
     wrapper_suffix = ".ps1" if os.name == "nt" else ".sh"
+    expected_servers = {
+        "memory",
+        "filesystem",
+        "fetch",
+        "github",
+        "docker",
+        "context7",
+        "ast-grep",
+        "mcp-code-interpreter",
+        "prometheus",
+        "grafana",
+        "brave-search",
+        "neo4j-cypher",
+        "neo4j-memory",
+        "mermaid",
+        "deja",
+        "adr-analysis",
+        "mutmut",
+        "code-analyzer",
+        "github-actions",
+        "deepwiki",
+        "ref",
+    }
     removed_servers = {
         "sequential-thinking",
         "pdf",
@@ -69,6 +92,7 @@ def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> 
 
     runtime_servers = codex_settings["mcpServers"]
     devin_servers = devin_config["mcpServers"]
+    assert set(servers) == expected_servers
     assert devin_servers == servers
     assert qodo_payload["mcpServers"] == servers
     assert zed_payload["mcpServers"] == servers
@@ -121,6 +145,32 @@ def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> 
             workspace_root / f"scripts/ai/mcp/mcp_mermaid_wrapper{wrapper_suffix}"
         ).resolve()
     )
+    for server_name, wrapper_stem in {
+        "deja": "mcp_deja_wrapper",
+        "adr-analysis": "mcp_adr_analysis_wrapper",
+        "mutmut": "mcp_mutmut_wrapper",
+        "code-analyzer": "mcp_code_analyzer_wrapper",
+        "github-actions": "mcp_github_actions_wrapper",
+    }.items():
+        assert servers[server_name]["args"][0] == (
+            f"scripts/ai/mcp/{wrapper_stem}{wrapper_suffix}"
+        )
+        assert runtime_servers[server_name]["args"][0] == str(
+            (
+                workspace_root / f"scripts/ai/mcp/{wrapper_stem}{wrapper_suffix}"
+            ).resolve()
+        )
+    assert servers["deja"]["env"]["NPM_CONFIG_CACHE"] == ".cache/npm-cache"
+    assert servers["adr-analysis"]["env"] == {
+        "PROJECT_PATH": ".",
+        "ADR_PATH": "docs/02-architecture/decisions",
+    }
+    assert runtime_servers["adr-analysis"]["env"] == {
+        "PROJECT_PATH": str(workspace_root.resolve()),
+        "ADR_PATH": str((workspace_root / "docs/02-architecture/decisions").resolve()),
+    }
+    assert servers["mutmut"]["env"]["MUTMUT_PROJECT_PATH"] == "."
+    assert servers["code-analyzer"]["env"]["PROJECT_PATH"] == "."
     assert servers["deepwiki"]["url"] == "https://mcp.deepwiki.com/mcp"
     assert servers["ref"]["type"] == "http"
     assert servers["ref"]["url"] == "https://api.ref.tools/mcp"
