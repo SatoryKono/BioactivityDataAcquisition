@@ -46,6 +46,9 @@ class RagValidationReport:
     missing_path_count: int
     stale_chunk_count: int
     source_surface_sha256: str | None
+    generator_version: int | None = None
+    git_head_sha: str | None = None
+    working_tree_state: str | None = None
 
     @property
     def ok(self) -> bool:
@@ -64,6 +67,9 @@ class RagValidationReport:
             "ok": self.ok,
             "source_surface_sha256": self.source_surface_sha256,
             "stale_chunk_count": self.stale_chunk_count,
+            "generator_version": self.generator_version,
+            "git_head_sha": self.git_head_sha,
+            "working_tree_state": self.working_tree_state,
         }
 
 

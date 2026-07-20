@@ -132,6 +132,22 @@ def validate_rag_manifest_payload(
         missing_path_count=len(missing_paths),
         stale_chunk_count=len(stale_indices),
         source_surface_sha256=current_hash,
+        generator_version=(
+            catalog.get("generator_version")
+            if isinstance(catalog.get("generator_version"), int)
+            and not isinstance(catalog.get("generator_version"), bool)
+            else None
+        ),
+        git_head_sha=(
+            catalog.get("git_head_sha")
+            if isinstance(catalog.get("git_head_sha"), str)
+            else None
+        ),
+        working_tree_state=(
+            catalog.get("working_tree_state")
+            if isinstance(catalog.get("working_tree_state"), str)
+            else None
+        ),
     )
 
 

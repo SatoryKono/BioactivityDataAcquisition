@@ -257,35 +257,33 @@ payload = {
     "failed_steps": [step["label"] for step in steps if step["status"] == "failed"],
 }
 
-if memory_validation_path is not None and memory_output_root is not None:
-    catalog_path = memory_output_root / "rag" / "manifests" / "corpus_catalog.json"
+if memory_validation_path is not None:
     try:
         validation = json.loads(memory_validation_path.read_text(encoding="utf-8"))
-        catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        pass
-    else:
-        issue_codes = sorted(
-            {
-                str(issue.get("code"))
-                for issue in validation.get("issues", [])
-                if isinstance(issue, dict) and issue.get("code")
-            }
-        )
-        payload["memory_rag_validation"] = {
-            "build_scope": validation.get("build_scope"),
-            "chunk_count": validation.get("chunk_count"),
-            "eligible_source_count": validation.get("eligible_source_count"),
-            "generator_version": catalog.get("generator_version"),
-            "git_head_sha": catalog.get("git_head_sha"),
-            "indexed_source_count": validation.get("indexed_source_count"),
-            "issue_codes": issue_codes,
-            "missing_path_count": validation.get("missing_path_count"),
-            "ok": validation.get("ok"),
-            "source_surface_sha256": validation.get("source_surface_sha256"),
-            "stale_chunk_count": validation.get("stale_chunk_count"),
-            "working_tree_state": catalog.get("working_tree_state"),
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise SystemExit(f"unable to read memory RAG validation report: {exc}") from exc
+
+    issue_codes = sorted(
+        {
+            str(issue.get("code"))
+            for issue in validation.get("issues", [])
+            if isinstance(issue, dict) and issue.get("code")
         }
+    )
+    payload["memory_rag_validation"] = {
+        "build_scope": validation.get("build_scope"),
+        "chunk_count": validation.get("chunk_count"),
+        "eligible_source_count": validation.get("eligible_source_count"),
+        "generator_version": validation.get("generator_version"),
+        "git_head_sha": validation.get("git_head_sha"),
+        "indexed_source_count": validation.get("indexed_source_count"),
+        "issue_codes": issue_codes,
+        "missing_path_count": validation.get("missing_path_count"),
+        "ok": validation.get("ok"),
+        "source_surface_sha256": validation.get("source_surface_sha256"),
+        "stale_chunk_count": validation.get("stale_chunk_count"),
+        "working_tree_state": validation.get("working_tree_state"),
+    }
 
 report_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 print(f"[pretest-guardrails] report: {report_path}")
