@@ -33,6 +33,10 @@ on:
       - 'src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py'
       - 'src/bioetl/domain/schemas/chembl/activity.py'
       - 'src/bioetl/infrastructure/schemas/silver_chembl_core.py'
+      - 'docs/02-architecture/generated/pipeline-dataflows/**'
+      - 'src/bioetl/domain/schemas/**'
+      - 'src/bioetl/infrastructure/schemas/**'
+      - 'src/bioetl/domain/contracts/gold/**'
       - 'scripts/engineering/qa/check_xwalk_missing_backlog.py'
       - '.github/actions/setup-python-uv/**'
       - 'tests/architecture/test_ai_runtime_governance_links.py'
@@ -69,6 +73,10 @@ on:
       - 'src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py'
       - 'src/bioetl/domain/schemas/chembl/activity.py'
       - 'src/bioetl/infrastructure/schemas/silver_chembl_core.py'
+      - 'docs/02-architecture/generated/pipeline-dataflows/**'
+      - 'src/bioetl/domain/schemas/**'
+      - 'src/bioetl/infrastructure/schemas/**'
+      - 'src/bioetl/domain/contracts/gold/**'
       - 'scripts/engineering/qa/check_xwalk_missing_backlog.py'
       - '.github/actions/setup-python-uv/**'
       - 'tests/architecture/test_ai_runtime_governance_links.py'
@@ -86,6 +94,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -154,6 +164,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -204,6 +216,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
+          persist-credentials: false
           fetch-depth: 0
 
       - name: Check for diagram file changes
@@ -240,6 +253,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
 
       - name: Setup Mermaid CLI
         uses: ./.github/actions/setup-mermaid
@@ -280,6 +295,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
 
       - name: Setup Mermaid CLI
         uses: ./.github/actions/setup-mermaid
@@ -319,6 +336,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
 
       - name: Setup Mermaid CLI
         uses: ./.github/actions/setup-mermaid
@@ -403,6 +422,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
 
       - name: Check for source-vs-rendered drift
         run: |

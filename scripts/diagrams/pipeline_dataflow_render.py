@@ -135,7 +135,10 @@ def _overview(ir: PipelineDataflowIR) -> str:
             '    API["ChEMBL activity API"]',
             f'    Query["Source query<br/>{len(ir.extraction_criteria)} criteria"]',
             '    Bronze["Bronze records<br/>raw source payload"]',
-            '    Input["Input-file filter<br/>disabled"]',
+            (
+                f'    Input["Input-file filter<br/>'
+                f'{"enabled" if ir.input_criteria and ir.input_criteria[0].enabled else "disabled"}"]'
+            ),
             '    Transform["Activity Transformer<br/>Bronze to Silver"]',
             f'    SilverFilter["Silver structural filter<br/>{len(ir.silver_criteria)} criteria"]',
             (
@@ -217,8 +220,15 @@ def _criteria(ir: PipelineDataflowIR) -> str:
     )
     for index, chunk in enumerate(extraction_chunks, start=1):
         lines.append(_criteria_node(f"Extract{index}", f"API criteria {index}", chunk))
+    input_criterion = ir.input_criteria[0]
+    input_enabled = bool(input_criterion.enabled)
+    input_column = ""
+    if isinstance(input_criterion.value, dict):
+        input_column = str(input_criterion.value.get("column_name") or "")
+    column_suffix = f"<br/>{input_column} column" if input_column else ""
     lines.append(
-        '    Input["Input-file filter<br/>enabled = false<br/>activity_id column"]'
+        f'    Input["Input-file filter<br/>enabled = '
+        f'{str(input_enabled).lower()}{column_suffix}"]'
     )
     lines.append('    SilverStage["Silver structural criteria"]')
     for index, chunk in enumerate(silver_chunks, start=1):
@@ -272,7 +282,7 @@ def _criteria(ir: PipelineDataflowIR) -> str:
             "    class SilverStage,"
             + ",".join(f"Silver{index}" for index in range(1, len(silver_chunks) + 1))
             + " silver",
-            "    class SilverExclude warning",
+            *(("    class SilverExclude warning",) if silver_exclusions else ()),
             "    class GoldStage,GoldColumns,GoldRanges,GoldRequired gold",
             "    class DQ dq",
             f"    class {','.join(criteria_card_ids)} criteriaCard",
@@ -281,7 +291,6 @@ def _criteria(ir: PipelineDataflowIR) -> str:
             "",
         )
     )
-    assert ir.input_criteria[0].enabled is False
     return "\n".join(lines)
 
 

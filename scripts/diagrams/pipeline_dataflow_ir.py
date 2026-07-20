@@ -247,7 +247,12 @@ def _project_fields(
             f"Unknown column groups: {missing}; available: {sorted(by_name)}"
         )
 
-    for group_name in include_groups:
+    # Match runtime: preserve column_groups YAML order, not include_groups order.
+    include_set = set(include_groups)
+    ordered_include = [
+        str(group["name"]) for group in groups if str(group["name"]) in include_set
+    ]
+    for group_name in ordered_include:
         _append_projected_group(
             by_name[group_name],
             available=available_set,
@@ -437,7 +442,7 @@ def build_pipeline_dataflow_ir(
     effective = cast(_JsonObject, _json_compatible(config.model_dump(mode="json")))
     provider = str(effective["provider"])
     entity = str(effective["entity_type"])
-    schema_row = build_unified_schema_row(pipeline_name)
+    schema_row = build_unified_schema_row(pipeline_name, configs_root=root)
 
     groups = cast(list[_JsonObject], effective["data_schema"]["column_groups"])
     silver_policy = cast(_JsonObject, effective["data_schema"]["silver"])

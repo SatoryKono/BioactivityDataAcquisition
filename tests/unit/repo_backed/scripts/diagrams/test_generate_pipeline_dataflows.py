@@ -156,3 +156,60 @@ def test_unified_schema_inventory_ignores_composite_workflow_configs() -> None:
     assert rows
     assert any(row["pipeline_name"] == "chembl_activity" for row in rows)
     assert all("/composite/" not in row["config_path"] for row in rows)
+
+
+def test_cli_reports_controlled_build_failure(monkeypatch) -> None:
+    def boom(_args):
+        raise ValueError("simulated build failure")
+
+    monkeypatch.setattr(
+        "scripts.diagrams.generate_pipeline_dataflows.build_outputs",
+        boom,
+    )
+    assert main(["--pipeline", "chembl_activity"]) == 1
+
+
+def test_project_fields_rejects_unknown_groups() -> None:
+    from scripts.diagrams.pipeline_dataflow_ir import _project_fields
+
+    with pytest.raises(ValueError, match="Unknown column groups"):
+        _project_fields(
+            ["a", "b"],
+            groups=[{"name": "core", "fields": ["a"]}],
+            include_groups=["missing_group"],
+            exclude_fields=[],
+        )
+
+
+def test_project_fields_follows_column_groups_order() -> None:
+    from scripts.diagrams.pipeline_dataflow_ir import _project_fields
+
+    result = _project_fields(
+        ["a", "b", "c"],
+        groups=[
+            {"name": "second", "fields": ["b"]},
+            {"name": "first", "fields": ["a"]},
+            {"name": "third", "fields": ["c"]},
+        ],
+        include_groups=["third", "first"],
+        exclude_fields=[],
+    )
+    # Runtime preserves column_groups order: first appears before third in groups list.
+    assert result == ["a", "c"]
+
+
+def test_transformer_registry_lookup_via_ast(activity_ir: PipelineDataflowIR) -> None:
+    transformer = activity_ir.post_processing.transformer_class
+    assert transformer
+    assert "Activity" in transformer or "activity" in transformer.lower()
+
+
+def test_overview_and_criteria_render_input_filter_from_ir(
+    activity_ir: PipelineDataflowIR,
+) -> None:
+    views = render_mermaid_views(activity_ir)
+    overview = views[DIAGRAM_FILENAMES[0]]
+    criteria = views[DIAGRAM_FILENAMES[1]]
+    assert "Input-file filter<br/>disabled" in overview
+    assert "enabled = false" in criteria
+    assert "class SilverExclude warning" in criteria

@@ -848,11 +848,17 @@ def build_unified_schema_rows() -> list[dict[str, str]]:
     return rows
 
 
-def build_unified_schema_row(pipeline_name: str) -> dict[str, str]:
+def build_unified_schema_row(
+    pipeline_name: str,
+    *,
+    configs_root: Path | None = None,
+) -> dict[str, str]:
     """Build one unified schema-map row for a registered entity pipeline.
 
     Args:
         pipeline_name: Canonical ``<provider>_<entity>`` pipeline identifier.
+        configs_root: Optional configuration root. When provided, entity YAML is
+            resolved under ``configs_root/entities`` instead of the default tree.
 
     Returns:
         One row using the same shape as :func:`build_unified_schema_rows`.
@@ -865,12 +871,18 @@ def build_unified_schema_row(pipeline_name: str) -> dict[str, str]:
     if binding is None:
         raise ValueError(f"No pipeline registry entry found for {pipeline_name}")
 
-    path = ENTITIES_DIR / binding.provider / f"{binding.entity_type}.yaml"
+    entities_dir = (
+        Path(configs_root).resolve() / "entities"
+        if configs_root is not None
+        else ENTITIES_DIR
+    )
+    path = entities_dir / binding.provider / f"{binding.entity_type}.yaml"
     if not path.is_file():
-        raise ValueError(
-            f"Entity config not found for {pipeline_name}: "
-            f"{path.relative_to(PROJECT_ROOT).as_posix()}"
-        )
+        try:
+            display = path.relative_to(PROJECT_ROOT).as_posix()
+        except ValueError:
+            display = path.as_posix()
+        raise ValueError(f"Entity config not found for {pipeline_name}: {display}")
 
     return _build_row_from_config_path(
         path,
