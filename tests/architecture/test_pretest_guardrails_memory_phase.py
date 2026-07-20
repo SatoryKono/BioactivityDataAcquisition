@@ -18,14 +18,24 @@ def test_pretest_guardrails_script_runs_memory_phase() -> None:
     )
 
     assert "run_memory_checks()" in script
+    assert 'local memory_pythonpath="$REPO_ROOT/src:$REPO_ROOT"' in script
+    assert script.count('env PYTHONPATH="$memory_pythonpath"') == 5
     assert "memory-validate" in script
     assert '"$PYTHON_BIN" -m memory.tooling.validate' in script
     assert "memory-workflow-smoke" in script
     assert '"$PYTHON_BIN" -m memory.tooling.workflow smoke' in script
     assert "memory-refresh-smoke" in script
     assert '"$PYTHON_BIN" -m memory.tooling.refresh_all' in script
+    assert '--root "$REPO_ROOT"' in script
     assert "--rag-build-scope full" in script
     assert "memory-rag-manifest-validate" in script
+    assert "capture_json_output" in script
+    assert 'payload["memory_rag_validation"]' in script
+    assert '"git_head_sha": catalog.get("git_head_sha")' in script
+    assert '"working_tree_state": catalog.get("working_tree_state")' in script
+    assert '"source_surface_sha256": validation.get("source_surface_sha256")' in script
+    assert '"missing_path_count": validation.get("missing_path_count")' in script
+    assert '"stale_chunk_count": validation.get("stale_chunk_count")' in script
     assert '"$PYTHON_BIN" -m memory.rag.validation' in script
     assert '"$MEMORY_TMP_OUTPUT/rag/manifests"' in script
     assert "--require-build-scope full" in script

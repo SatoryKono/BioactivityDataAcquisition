@@ -171,6 +171,9 @@ Apply pruning:
 python -m memory.tooling.prune --apply
 ```
 
+Pruning and episodic-density counts include generated session/summary notes,
+but always exclude the versioned templates under `episodic/templates/`.
+
 Run a curated review loop report:
 
 ```bash
@@ -235,6 +238,12 @@ python -m memory.tooling.refresh_all
 python -m memory.query all chembl_activity --profile architecture --auto-refresh
 ```
 
+When `pretest_guardrails.sh` receives `--report-json`, its compact
+`memory_rag_validation` evidence records full-scope source/chunk counts, the
+exact Git and source-surface identity, working-tree state, and zero-stale
+outcome. The rebuild-only catalog and chunks remain in temporary storage and
+are not embedded in the pretest report.
+
 The `.devin/wiki.json` surface is indexed only as auxiliary navigation context.
 It must not override runtime code, configs, accepted ADRs, or published active
 docs, and each retrieved wiki claim should be confirmed against canonical
@@ -255,7 +264,8 @@ Artifact storage policy is declared in `policy/storage.yaml`.
 Current default stance:
 
 - `policy/`, `catalog/`, `schemas/`, and `curated/` are versioned
-- `episodic/` is ephemeral and prunable
+- generated notes under `episodic/sessions/` and `episodic/summaries/` are
+  ephemeral and prunable; `episodic/templates/` is versioned and non-prunable
 - generated RAG and timeline artifacts are rebuild-only; full RAG builds write
   to `derived/rag/manifests/`, while the legacy `rag/manifests/` lane remains a
   read-only migration fallback and generated JSON/JSONL files are never tracked

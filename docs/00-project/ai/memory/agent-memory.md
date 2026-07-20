@@ -50,7 +50,8 @@ ______________________________________________________________________
 > `python -m memory.tooling.workflow review-curated`
 > и архивируй superseded curated notes вместо тихого накопления stale memory.
 > Episodic density по умолчанию проверяется через policy-backed prune dry-run:
-> `max_active=1000`, review cadence `7` days.
+> `max_active=1000`, review cadence `7` days. Versioned templates из
+> `src/memory/episodic/templates/` не входят в prune/density scan.
 
 ______________________________________________________________________
 

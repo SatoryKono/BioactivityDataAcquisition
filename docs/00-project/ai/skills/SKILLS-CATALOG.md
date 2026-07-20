@@ -146,7 +146,7 @@
 - [technical-designer-mermaid](local/technical-designer-mermaid/SKILL.md)
 - [vcr-record](local/vcr-record/SKILL.md)
 - [verify-architecture](local/verify-architecture/SKILL.md)
-- [architecture-guardian (public)](local/public/architecture-guardian/SKILL.md)
+- [architecture-guardian (public)](global/public/architecture-guardian/SKILL.md)
 
 ## Точки Входа Глобального Snapshot
 

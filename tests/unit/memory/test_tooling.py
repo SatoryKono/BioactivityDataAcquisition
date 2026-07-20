@@ -184,6 +184,31 @@ def test_find_prunable_episodic_notes_uses_metadata_ttl(tmp_path: Path) -> None:
     assert candidates[0].path == str(note)
 
 
+def test_prune_excludes_versioned_episodic_templates(tmp_path: Path) -> None:
+    templates = tmp_path / "templates"
+    templates.mkdir()
+    template = templates / "session.md"
+    template.write_text(
+        "---\ncreated_at: 2026-04-01T00:00:00Z\nttl_days: 7\n---\n",
+        encoding="utf-8",
+    )
+    session = tmp_path / "sessions" / "old.md"
+    session.parent.mkdir()
+    session.write_text(
+        "---\ncreated_at: 2026-04-01T00:00:00Z\nttl_days: 7\n---\n",
+        encoding="utf-8",
+    )
+
+    report = prune_episodic_notes(
+        tmp_path,
+        now=datetime(2026, 4, 20, tzinfo=UTC),
+    )
+
+    assert report["candidate_count"] == 1
+    assert report["total_count"] == 1
+    assert report["candidates"][0]["path"] == str(session)
+
+
 def test_prune_episodic_notes_apply_removes_expired_files(tmp_path: Path) -> None:
     note = tmp_path / "old.yaml"
     note.write_text(

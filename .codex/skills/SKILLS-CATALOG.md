@@ -70,8 +70,7 @@ runtime change.
 
 | Skill                         | Path                                        | Purpose                               |
 | ----------------------------- | ------------------------------------------- | ------------------------------------- |
-| `hierarchical-evidence-orchestration` | `.codex/skills/hierarchical-evidence-orchestration` | Coordinate hierarchical evidence collection |
-| `hierarchical-evidence-orchestration` | `.codex/skills/hierarchical-evidence-orchestration` | Coordinate hierarchical evidence collection |
+| `documentation-audit`         | `.codex/skills/documentation-audit`         | Full docs audit and updates           |
 | `documentation-cascade-audit` | `.codex/skills/documentation-cascade-audit` | Hierarchical docs audit orchestration |
 
 ### Research and Planning Utilities
@@ -80,6 +79,7 @@ runtime change.
 | ------------------------------ | -------------------------------------------- | ------------------------------------------------- |
 | `capability-discovery`         | `.codex/skills/capability-discovery`         | Discover available agents/skills/quality commands |
 | `collecting-evidence`          | `.codex/skills/collecting-evidence`          | Build traceable evidence objects                  |
+| `deep-research`                | `.codex/skills/deep-research`                | Structured deep research workflow                 |
 | `hierarchical-evidence-orchestration` | `.codex/skills/hierarchical-evidence-orchestration` | Coordinate hierarchical evidence collection |
 | `synthesizing-pillars`         | `.codex/skills/synthesizing-pillars`         | Convert evidence into synthesis insights          |
 | `making-decisions`             | `.codex/skills/making-decisions`             | Turn synthesis into explicit decisions            |

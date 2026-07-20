@@ -425,8 +425,8 @@ scripts/docs/build/**/*.pyc
 !/docs/reports/evidence/project-legacy-compatibility-remediation/06-status/
 /docs/reports/evidence/project-legacy-compatibility-remediation/06-status/*
 !/docs/reports/evidence/project-legacy-compatibility-remediation/06-status/recovered-cross-synthesis-provenance-2026-05-21.yaml
-/src/memory/episodic/summaries
-/src/memory/episodic
+/src/memory/episodic/sessions/
+/src/memory/episodic/summaries/
 # Memory rebuild-only artifacts are generated locally by the memory workflow.
 /src/memory/derived/rag/manifests/
 /src/memory/rag/manifests/

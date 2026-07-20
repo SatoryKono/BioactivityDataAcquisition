@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import json
+from collections import Counter
 from pathlib import Path
 from typing import Any, cast
 
@@ -75,20 +75,13 @@ def test_closeout_ratchet_policy_does_not_allow_stale_historical_tests() -> None
     assert "historical_evidence" not in policy["allowed_classifications"]
 
 
-def test_closeout_retention_audit_matches_live_inventory() -> None:
-    """2026-07-03 retention audit must cover every classified closeout ratchet."""
-    audit_path = (
-        PROJECT_ROOT
-        / "reports/quality/closeout-ratchet-retention-audit-2026-07-03.json"
-    )
-    payload = json.loads(audit_path.read_text(encoding="utf-8"))
+def test_closeout_retention_summary_matches_live_inventory() -> None:
+    """The tracked triage must summarize the live closeout inventory directly."""
     triage = _load_triage()
+    entries = _triage_entries()
+    classifications = Counter(entry["classification"] for entry in entries)
 
-    assert payload["linked_issue"] == "#5931"
-    assert payload["closeout_file_count"] == len(_triage_entries())
-    assert payload["disposition_summary"]["retain_active"] == len(_triage_entries())
-    assert (
-        payload["authoritative_triage"]
-        == "configs/quality/closeout_ratchet_triage.yaml"
-    )
     assert triage["linked_issue"] == "#5931"
+    assert triage["reviewed_on"] <= triage["review_by"]
+    assert sum(classifications.values()) == len(_closeout_test_paths())
+    assert set(classifications) == set(triage["policy"]["allowed_classifications"])

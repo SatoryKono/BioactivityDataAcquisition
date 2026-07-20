@@ -29,6 +29,7 @@ STEP_LOG_FILE=""
 SESSION_STATUS="ok"
 PRETEST_START_TS=""
 MEMORY_TMP_OUTPUT=""
+MEMORY_RAG_VALIDATION_REPORT=""
 
 usage() {
     cat <<'EOF'
@@ -146,6 +147,20 @@ PY
     return 1
 }
 
+capture_json_output() {
+    local output_path="$1"
+    shift
+
+    local output rc
+    rc=0
+    output="$("$@")" || rc=$?
+    printf '%s\n' "$output"
+    if [[ -n "$output_path" ]]; then
+        printf '%s\n' "$output" >"$output_path"
+    fi
+    return "$rc"
+}
+
 config_profile_value() {
     local profile="$1"
     local key="$2"
@@ -196,7 +211,7 @@ write_report() {
     fi
 
     mkdir -p "$(dirname "$report_path")"
-    "$PYTHON_BIN" - "$STEP_LOG_FILE" "$report_path" "$MODE" "$SCOPE" "$SESSION_STATUS" "$PRETEST_START_TS" "$STRICT_DOCS" <<'PY'
+    "$PYTHON_BIN" - "$STEP_LOG_FILE" "$report_path" "$MODE" "$SCOPE" "$SESSION_STATUS" "$PRETEST_START_TS" "$STRICT_DOCS" "$MEMORY_RAG_VALIDATION_REPORT" "$MEMORY_TMP_OUTPUT" <<'PY'
 from __future__ import annotations
 
 import json
@@ -211,6 +226,8 @@ scope = sys.argv[4]
 status = sys.argv[5]
 started_at = sys.argv[6]
 strict_docs = sys.argv[7] == "1"
+memory_validation_path = Path(sys.argv[8]) if sys.argv[8] else None
+memory_output_root = Path(sys.argv[9]) if sys.argv[9] else None
 
 steps = []
 if step_file.exists():
@@ -240,6 +257,36 @@ payload = {
     "failed_steps": [step["label"] for step in steps if step["status"] == "failed"],
 }
 
+if memory_validation_path is not None and memory_output_root is not None:
+    catalog_path = memory_output_root / "rag" / "manifests" / "corpus_catalog.json"
+    try:
+        validation = json.loads(memory_validation_path.read_text(encoding="utf-8"))
+        catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        pass
+    else:
+        issue_codes = sorted(
+            {
+                str(issue.get("code"))
+                for issue in validation.get("issues", [])
+                if isinstance(issue, dict) and issue.get("code")
+            }
+        )
+        payload["memory_rag_validation"] = {
+            "build_scope": validation.get("build_scope"),
+            "chunk_count": validation.get("chunk_count"),
+            "eligible_source_count": validation.get("eligible_source_count"),
+            "generator_version": catalog.get("generator_version"),
+            "git_head_sha": catalog.get("git_head_sha"),
+            "indexed_source_count": validation.get("indexed_source_count"),
+            "issue_codes": issue_codes,
+            "missing_path_count": validation.get("missing_path_count"),
+            "ok": validation.get("ok"),
+            "source_surface_sha256": validation.get("source_surface_sha256"),
+            "stale_chunk_count": validation.get("stale_chunk_count"),
+            "working_tree_state": catalog.get("working_tree_state"),
+        }
+
 report_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 print(f"[pretest-guardrails] report: {report_path}")
 PY
@@ -248,6 +295,9 @@ PY
 cleanup_temp() {
     if [[ -n "$MEMORY_TMP_OUTPUT" && -d "$MEMORY_TMP_OUTPUT" ]]; then
         rm -rf "$MEMORY_TMP_OUTPUT"
+    fi
+    if [[ -n "$MEMORY_RAG_VALIDATION_REPORT" && -f "$MEMORY_RAG_VALIDATION_REPORT" ]]; then
+        rm -f "$MEMORY_RAG_VALIDATION_REPORT"
     fi
     if [[ -n "$STEP_LOG_FILE" && -f "$STEP_LOG_FILE" ]]; then
         rm -f "$STEP_LOG_FILE"
@@ -463,10 +513,17 @@ run_memory_checks() {
     [[ "$SKIP_MEMORY" == "0" ]] || return 0
     [[ "$RUN_MEMORY_CHECKS" == "1" ]] || return 0
 
+    local memory_pythonpath="$REPO_ROOT/src:$REPO_ROOT"
+    if [[ -n "${PYTHONPATH:-}" ]]; then
+        memory_pythonpath="$memory_pythonpath:$PYTHONPATH"
+    fi
+
     run_step memory-validate \
+        env PYTHONPATH="$memory_pythonpath" \
         "$PYTHON_BIN" -m memory.tooling.validate
 
     run_step memory-workflow-smoke \
+        env PYTHONPATH="$memory_pythonpath" \
         "$PYTHON_BIN" -m memory.tooling.workflow smoke \
         --validation-timeout-seconds 15 \
         --json
@@ -475,15 +532,20 @@ run_memory_checks() {
         MEMORY_TMP_OUTPUT="/tmp/bioetl-memory-refresh-dry-run"
     else
         MEMORY_TMP_OUTPUT="$(mktemp -d)"
+        MEMORY_RAG_VALIDATION_REPORT="$(mktemp)"
     fi
 
     run_step memory-refresh-smoke \
+        env PYTHONPATH="$memory_pythonpath" \
         "$PYTHON_BIN" -m memory.tooling.refresh_all \
+        --root "$REPO_ROOT" \
         --output-root "$MEMORY_TMP_OUTPUT" \
         --rag-build-scope full \
         --json
 
     run_step memory-rag-manifest-validate \
+        capture_json_output "$MEMORY_RAG_VALIDATION_REPORT" \
+        env PYTHONPATH="$memory_pythonpath" \
         "$PYTHON_BIN" -m memory.rag.validation \
         --root "$REPO_ROOT" \
         --manifest-dir "$MEMORY_TMP_OUTPUT/rag/manifests" \
@@ -491,6 +553,7 @@ run_memory_checks() {
         --json
 
     run_step memory-prune-dry-run \
+        env PYTHONPATH="$memory_pythonpath" \
         "$PYTHON_BIN" -m memory.tooling.prune --json
 }
 
