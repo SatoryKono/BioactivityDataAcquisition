@@ -37,6 +37,7 @@ Commands:
   help          Show this message
 """
 
+# Exit early for help requests to avoid slow imports on Windows
 if __name__ == "__main__" and (
     len(sys.argv) == 1 or sys.argv[1] in {"help", "--help", "-h"}
 ):
