@@ -39,7 +39,9 @@ def forensic_unavailable_payload(
 async def run_bounded_forensic_operation[ResultT](
     *,
     limiter: asyncio.Semaphore,
-    operation_factory: Callable[[], Coroutine[Any, Any, ResultT]],
+    operation_factory: Callable[
+        [], Coroutine[Any, Any, ResultT]
+    ],  # Any: standard coroutine signature
     timeout_seconds: float = FORENSIC_ENDPOINT_TIMEOUT_SECONDS,
     queue_timeout_seconds: float = FORENSIC_ENDPOINT_QUEUE_TIMEOUT_SECONDS,
 ) -> ResultT:

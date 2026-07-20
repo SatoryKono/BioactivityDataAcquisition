@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = ROOT / "src" / "bioetl"
 
 EXPECTED_LAZY_EXPORT_FACADES = {
+    "src/bioetl/application/composite/__init__.py": "public_package_facade",
     "src/bioetl/application/core/wiring/__init__.py": "public_package_facade",
     "src/bioetl/application/pipelines/common/blocks.py": "dynamic_entrypoint",
     "src/bioetl/application/pipelines/crossref/__init__.py": ("public_package_facade"),

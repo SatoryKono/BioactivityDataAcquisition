@@ -18,6 +18,7 @@ from bioetl.application.core.wiring.transformer import (
 )
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
+    get_data_source_creator,
 )
 from bioetl.composition.factories.pipeline.assembler_helpers import (
     _FactoryLike,
@@ -117,14 +118,16 @@ class GenericPipelineFactory[TPipeline: "BasePipeline"]:
             transformer_class,
             provider_registry,
         )
+        # Resolve against the light data-source factory seam. Do NOT import the
+        # public assembler facade here: that module pulls runner_assembly →
+        # ServicesBuilder → composite runner and can take minutes on cold
+        # Windows/GDrive checkouts, which aborts E2E session fixtures under
+        # pytest-timeout during register_all_pipelines().
         self._create_data_source = resolve_data_source_creator(
             data_source_creator=data_source_creator,
             provider=provider,
             provider_registry=provider_registry,
-            get_data_source_creator_fn=cast(
-                Callable[..., DataSourceCreatorProtocol],
-                _public_assembler_callable("get_data_source_creator"),
-            ),
+            get_data_source_creator_fn=get_data_source_creator,
         )
 
     def create_transformer(

@@ -181,7 +181,9 @@ async def expire_gold_orphan_rows(
     )
 
 
-def _require_gold_writer(host: ReconciliationMutationHost) -> Any:
+def _require_gold_writer(
+    host: ReconciliationMutationHost,
+) -> Any:  # Any: returns gold_writer matching GoldWriteRetryModuleProtocol
     gold_writer = host.gold_writer
     if gold_writer is None:
         raise ValueError(
@@ -197,7 +199,7 @@ def _require_gold_writer(host: ReconciliationMutationHost) -> Any:
 
 
 def _expire_gold_orphan_rows_once(
-    module: Any,
+    module: Any,  # Any: module matching GoldWriteRetryModuleProtocol
     table_path: str,
     key_rows: list[dict[str, object]],
     merge_condition: str,

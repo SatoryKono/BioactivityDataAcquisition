@@ -46,6 +46,7 @@
       "decision_date": "2025-05-20",
       "decision_path": "docs/02-architecture/decisions/ADR-002-medallion-architecture.md",
       "enforcement_owner_paths": [
+        "scripts/diagrams/pipeline_dataflow_render.py",
         "tests/unit/infrastructure/adr/test_fs_adr_service.py",
         "tests/unit/interfaces/cli/commands/test_adr_commands.py",
         "tests/unit/memory/graph/importers/test_expanded_json.py"
@@ -60,6 +61,7 @@
         "docs/04-reference/contracts/gold-schemas.md",
         "docs/04-reference/publication-validation-index.md",
         "docs/05-operations/vacuum-retention.md",
+        "scripts/diagrams/pipeline_dataflow_render.py",
         "tests/unit/infrastructure/adr/test_fs_adr_service.py",
         "tests/unit/interfaces/cli/commands/test_adr_commands.py",
         "tests/unit/memory/graph/importers/test_expanded_json.py"
@@ -1338,6 +1340,7 @@
         "configs/quality/scripts_inventory_manifest.json",
         "scripts/diagrams/harmonize_link_styles.py",
         "scripts/diagrams/lint_diagrams.py",
+        "scripts/diagrams/pipeline_dataflow_render.py",
         "scripts/diagrams/prune_orphan_nodes.py",
         "scripts/docs/checks/check_drift.py",
         "tests/architecture/test_config_topology_docs_drift.py",
@@ -1361,6 +1364,7 @@
         "docs/00-project/ai/skills/local/technical-designer-mermaid/references/patterns.md",
         "scripts/diagrams/harmonize_link_styles.py",
         "scripts/diagrams/lint_diagrams.py",
+        "scripts/diagrams/pipeline_dataflow_render.py",
         "scripts/diagrams/prune_orphan_nodes.py",
         "scripts/docs/checks/check_drift.py",
         "tests/architecture/test_config_topology_docs_drift.py",

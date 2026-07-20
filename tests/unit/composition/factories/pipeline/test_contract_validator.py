@@ -182,7 +182,9 @@ class TestValidateContractPolicy:
 class TestCreateFactory:
     """Tests for create_factory."""
 
-    @patch("bioetl.composition.factories.pipeline.assembler.get_data_source_creator")
+    @patch(
+        "bioetl.composition.factories.pipeline._assembler_factory.get_data_source_creator"
+    )
     @patch(
         "bioetl.composition.factories.pipeline.contract_validator._validate_contract_policy"
     )
@@ -209,7 +211,9 @@ class TestCreateFactory:
         assert result is not None
         assert result.pipeline_name == "test_pipe"
 
-    @patch("bioetl.composition.factories.pipeline.assembler.get_data_source_creator")
+    @patch(
+        "bioetl.composition.factories.pipeline._assembler_factory.get_data_source_creator"
+    )
     @patch(
         "bioetl.composition.factories.pipeline.contract_validator._validate_contract_policy"
     )
@@ -235,7 +239,9 @@ class TestCreateFactory:
         assert result.transformer_class is not None
         assert result.transformer_class.__name__ == "PubChemCompoundTransformer"
 
-    @patch("bioetl.composition.factories.pipeline.assembler.get_data_source_creator")
+    @patch(
+        "bioetl.composition.factories.pipeline._assembler_factory.get_data_source_creator"
+    )
     @patch(
         "bioetl.composition.factories.pipeline.contract_validator._validate_contract_policy"
     )
@@ -269,7 +275,9 @@ class TestCreateFactory:
             provider_registry=None,
         )
 
-    @patch("bioetl.composition.factories.pipeline.assembler.get_data_source_creator")
+    @patch(
+        "bioetl.composition.factories.pipeline._assembler_factory.get_data_source_creator"
+    )
     @patch(
         "bioetl.composition.factories.pipeline.contract_validator._validate_contract_policy"
     )
