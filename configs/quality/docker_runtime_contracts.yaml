@@ -31,6 +31,9 @@ diagnostics:
   F003:
     severity: error
     title: Compose project or service ownership drift
+  F004:
+    severity: error
+    title: Container environment collides with an image-owned namespace
 
 host_probe:
   owner: scripts/ops/runtime/docker/docker_runtime_probe.py
@@ -142,6 +145,11 @@ stacks:
       - NEO4J_PASSWORD
     required_secret_environment_names:
       - NEO4J_PASSWORD
+    required_non_secret_environment_values:
+      NEO4J_USERNAME: neo4j
+    forbidden_container_environment_names:
+      - NEO4J_USERNAME
+      - NEO4J_PASSWORD
     readiness:
       neo4j: http://127.0.0.1:7474
     migration:
@@ -162,6 +170,11 @@ stacks:
       - NEO4J_AUDIT_PASSWORD
     required_secret_environment_names:
       - NEO4J_AUDIT_PASSWORD
+    required_non_secret_environment_values:
+      NEO4J_AUDIT_USERNAME: neo4j
+    forbidden_container_environment_names:
+      - NEO4J_USERNAME
+      - NEO4J_PASSWORD
     readiness:
       neo4j-audit: http://127.0.0.1:7475
   redis:

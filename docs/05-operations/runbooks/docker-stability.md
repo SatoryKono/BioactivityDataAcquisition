@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: P1
   Runtime profile: Local-Only optional Docker adjunct (ADR-010).
-  Last verified: '2026-07-16'
+  Last verified: '2026-07-20'
 
 ______________________________________________________________________
 
@@ -52,6 +52,13 @@ Use `runtime_manager.py recover --stack <stack>` only after preflight passes.
 Recovery is bounded to three attempts and preserves named volumes. Never use
 `docker system prune`, `docker compose down -v`, or delete Docker data as an
 incident response shortcut.
+
+If the daemon responds but only `bioetl-neo4j` is restarting, treat it as a
+service configuration incident before changing Docker Desktop or WSL. The
+signature `Unrecognized setting ... name: USERNAME` is covered by
+`neo4j-backend-recovery-quick-start.md`; preflight code `F004` blocks the
+unsafe `NEO4J_USERNAME`/`NEO4J_PASSWORD` container keys. A WSL Docker-socket
+transport error does not by itself prove that the Windows Docker daemon exited.
 
 When the daemon itself is unavailable, use
 `scripts/ops/runtime/docker/restart-docker.ps1`. Its v2 report bounds every

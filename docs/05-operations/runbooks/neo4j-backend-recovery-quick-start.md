@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 1.1.0
+Version: 1.2.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: P2
   Runtime profile: Local-Only optional Neo4j memory backend.
-  Last verified: '2026-07-16'
+  Last verified: '2026-07-20'
 
 ______________________________________________________________________
 
@@ -41,7 +41,19 @@ reduces auxiliary memory retrieval only.
    python scripts/ops/runtime/docker/runtime_manager.py check --stack neo4j
    ```
 
-2. If Docker Desktop/WSL is unavailable, capture bounded evidence first:
+2. For a restart loop, capture bounded service logs:
+
+   ```bash
+   python scripts/ops/runtime/docker/runtime_manager.py logs --stack neo4j --tail 100
+   ```
+
+   The signature
+   `Failed to read config: Unrecognized setting ... name: USERNAME` means that
+   image-owned `NEO4J_*` configuration names were used for application
+   credentials. Do not add `NEO4J_USERNAME` or `NEO4J_PASSWORD` to the
+   container environment.
+
+3. If Docker Desktop/WSL is unavailable, capture bounded evidence first:
 
    ```powershell
    .\scripts\ops\runtime\docker\restart-docker.ps1 `
@@ -49,7 +61,7 @@ reduces auxiliary memory retrieval only.
      -ReportPath reports/quality/docker-desktop-recovery.json
    ```
 
-3. Diagnose, recover and verify readiness through the single lifecycle owner:
+4. Diagnose, recover and verify readiness through the single lifecycle owner:
 
    ```bash
    python scripts/ops/runtime/docker/runtime_manager.py diagnose --stack neo4j
@@ -57,7 +69,7 @@ reduces auxiliary memory retrieval only.
    python scripts/ops/runtime/docker/runtime_manager.py status --stack neo4j
    ```
 
-4. Run the backend-specific protocol check when configured:
+5. Run the backend-specific protocol check when configured:
 
    ```bash
    bash scripts/ai/mcp/check_neo4j_memory.sh
@@ -66,6 +78,20 @@ reduces auxiliary memory retrieval only.
 Do not replace readiness polling with fixed sleeps or direct restart loops.
 `status` must report the required service healthy; a merely running container
 is not success.
+
+## Neo4j environment namespace
+
+The host/client contract remains `NEO4J_USERNAME` and `NEO4J_PASSWORD`.
+The supported bootstrap username is `neo4j`; supply it through the current
+process environment. The Compose service maps health-check credentials to
+`BIOETL_NEO4J_USERNAME` and `BIOETL_NEO4J_PASSWORD`, while the image
+receives the supported `NEO4J_AUTH=neo4j/<password>` bootstrap setting.
+
+Neo4j interprets other `NEO4J_*` container variables as configuration keys.
+The Docker contract therefore forbids exact container keys
+`NEO4J_USERNAME` and `NEO4J_PASSWORD`. Preflight reports `F004` for a
+namespace collision and `ENVIRONMENT_VALUE_UNSUPPORTED` when the bootstrap
+username is not `neo4j`. Findings contain variable names, never values.
 
 ## Escalation
 
@@ -79,7 +105,7 @@ container or volume as an automatic next step.
 - `status --stack neo4j` succeeds;
 - HTTP 7474 and Bolt 7687 protocol checks succeed;
 - volume identity before/after is unchanged;
-- no new restart, OOM, unhealthy or image-identity finding exists.
+- no new restart, OOM, unhealthy, image-identity or `F004` finding exists.
 
 ## Rollback/Recovery
 

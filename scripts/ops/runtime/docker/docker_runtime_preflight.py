@@ -144,17 +144,25 @@ def _is_bind_mount(volume: Any) -> bool:
     )
 
 
-def _environment_names(service: Mapping[str, Any]) -> set[str]:
+def _container_environment_names(service: Mapping[str, Any]) -> set[str]:
     names: set[str] = set()
     environment = service.get("environment", {})
     if isinstance(environment, dict):
         names.update(str(name) for name in environment)
-        values: Iterable[Any] = environment.values()
     elif isinstance(environment, list):
-        values = environment
         for item in environment:
             if isinstance(item, str):
                 names.add(item.split("=", maxsplit=1)[0])
+    return names
+
+
+def _environment_names(service: Mapping[str, Any]) -> set[str]:
+    names = _container_environment_names(service)
+    environment = service.get("environment", {})
+    if isinstance(environment, dict):
+        values: Iterable[Any] = environment.values()
+    elif isinstance(environment, list):
+        values = environment
     else:
         values = []
     for value in values:
@@ -424,6 +432,10 @@ def _static_observations(
             )
 
         stack_env_names: set[str] = set()
+        forbidden_environment_names = {
+            str(name)
+            for name in stack_contract.get("forbidden_container_environment_names", [])
+        }
         stack_ports: list[dict[str, Any]] = []
         stack_images: list[str] = []
         stack_mount_sources: list[dict[str, str]] = []
@@ -476,7 +488,23 @@ def _static_observations(
                     f"{stack_name}/{service_name}"
                 )
 
+            container_environment_names = _container_environment_names(service)
             stack_env_names.update(_environment_names(service))
+            for environment_name in sorted(
+                forbidden_environment_names & container_environment_names
+            ):
+                findings.append(
+                    Finding(
+                        "F004",
+                        "error",
+                        "Container environment variable uses an image-owned name",
+                        {
+                            "stack": stack_name,
+                            "service": service_name,
+                            "name": environment_name,
+                        },
+                    )
+                )
             image = service.get("image")
             if image:
                 stack_images.append(str(image))
@@ -534,6 +562,37 @@ def _static_observations(
                         )
                     )
                 seen_ports[published] = actual_owner
+
+        required_values = (
+            stack_contract.get("required_non_secret_environment_values", {})
+            if selected_stack in {None, stack_name}
+            else {}
+        )
+        for environment_name, expected_value in required_values.items():
+            actual_value = environment.get(str(environment_name))
+            evidence = {
+                "stack": stack_name,
+                "name": str(environment_name),
+                "expected": str(expected_value),
+            }
+            if actual_value is None:
+                findings.append(
+                    Finding(
+                        "ENVIRONMENT_MISSING",
+                        "error",
+                        "Required non-secret environment variable is absent",
+                        evidence,
+                    )
+                )
+            elif actual_value != str(expected_value):
+                findings.append(
+                    Finding(
+                        "ENVIRONMENT_VALUE_UNSUPPORTED",
+                        "error",
+                        "Environment variable has an unsupported value",
+                        evidence,
+                    )
+                )
 
         required_secrets = (
             stack_contract.get("required_secret_environment_names", [])
@@ -601,14 +660,11 @@ def _static_observations(
     if codex_contract:
         codex = compose_observations.get("codex", {})
         codex_compose = _load_yaml(root / codex_contract["compose_file"])
-        filesystem_service = codex_compose.get("services", {}).get(
-            "mcp-filesystem", {}
-        )
+        filesystem_service = codex_compose.get("services", {}).get("mcp-filesystem", {})
         obscuring_targets = [
             target
             for volume in filesystem_service.get("volumes", [])
-            if _is_bind_mount(volume)
-            and (target := _volume_target(volume)) == "/app"
+            if _is_bind_mount(volume) and (target := _volume_target(volume)) == "/app"
         ]
         if obscuring_targets:
             findings.append(
