@@ -1499,7 +1499,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "docs/03-guides/dashboards/dashboard-requirements-comprehensive.md",
       "occurrence_count": 1,
-      "first_line": 584,
+      "first_line": 586,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""
@@ -1631,7 +1631,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "src/bioetl/infrastructure/quarantine/filtered_reads.py",
       "occurrence_count": 2,
-      "first_line": 92,
+      "first_line": 127,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""
@@ -1763,7 +1763,7 @@
       "symbol": "bioetl_silver_filter_rejections_total",
       "path": "docs/03-guides/metrics-monitoring.md",
       "occurrence_count": 1,
-      "first_line": 271,
+      "first_line": 276,
       "role": "Silver filter rejection metric",
       "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
       "notes": ""

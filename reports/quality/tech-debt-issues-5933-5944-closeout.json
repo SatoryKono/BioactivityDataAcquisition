@@ -162,7 +162,7 @@
   },
   "metrics": {
     "source_module_count": {
-      "current": 2239,
+      "current": 2241,
       "source": "reports/quality/module-coverage-inventory.json"
     },
     "source_tree_sha256": {

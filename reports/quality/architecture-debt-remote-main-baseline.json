@@ -26,8 +26,8 @@
         "coverage_xml_sha256": "3938fbd2bc1a5654e5ad56d4084713831e21cda7abb131fd30b87a83ffe16cd2",
         "schema_version": 1,
         "snapshot_date": "2026-07-13",
-        "source_module_count": 2239,
-        "source_tree_sha256": "dea7f7bfcf39c6cae5e1c5e7ab630ecbe70171a36bf48cf46fb237c0fa0c3b74",
+        "source_module_count": 2241,
+        "source_tree_sha256": "55c3f056cd81485faf70f8cb5f4d99b2dadfd872ff95939613aefaec6622c770",
         "unmeasured_module_count": 0
       }
     },
