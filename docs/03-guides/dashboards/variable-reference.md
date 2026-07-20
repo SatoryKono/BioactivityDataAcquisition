@@ -69,6 +69,15 @@ Machine-readable selector SSOT:
 | `$run_id` | `bioetl-overview-v2`, `bioetl-control-plane-v1`, `bioetl-runtime`, `bioetl-provider-health-v2`, `bioetl-dq-v2`, `bioetl-workflow-overview` | Quarantine Explorer HTTP `/ops/control-plane/filter-options?dimension=run_id&response_shape=list&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}` | Single-select, no Include All | `-` | Preserved identity context for shared HTTP `ID`/details panels and primary-dashboard handoffs; not a Prometheus label. Generic inbound links to Silver Reject Explorer must not map this value into `$quarantine_run_id`; outbound explorer/alert links do not export primary `$run_id`. |
 | `$stage` | `bioetl-runtime`, `bioetl-dq-v2` | Runtime: `bioetl_pipeline_stage_expected`; DQ: `bioetl_records_processed_total` | Multi-select with Include All | Dynamic Grafana selection | Bounded stage breakdown filter, not a forensic identifier. |
 
+The latest live closure audit for the `$pipeline` relation is recorded in
+[`selector-evidence.json`](../../../reports/observability/grafana/selector-audit-2026-07-20/selector-evidence.json).
+At the captured 12h/24h ranges, the six shared dashboards resolved an exact
+27-pipeline / 54-pair set, while Control Plane and Explorer each resolved a
+provenance-backed 15-pipeline / 16-pair subset. These counts are evidence, not
+fixed limits: the stable contract is exact equality for shared dashboards,
+declared provenance for Control Plane differences, Explorer subset safety,
+and zero unexplained values.
+
 ## Dashboard-specific variables
 
 | Variable | Dashboard | Selection mode | Default / fallback | Notes |

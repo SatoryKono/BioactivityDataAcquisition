@@ -14,6 +14,7 @@ This policy applies to:
 
 - `.mcp.json`
 - `scripts/ai/.mcp.json`
+- `.zed/mcp.json`
 - `.codex/settings.json`
 - `.gemini/settings.json`
 - `.codex/config.toml`
@@ -27,6 +28,7 @@ This policy applies to:
 | --- | --- | --- | --- |
 | `.mcp.json` | yes | tracked exact-root workspace MCP entrypoint | generated from `scripts/ai/codex/setup_mcp.py`; MUST stay repo-relative and must not embed machine-local absolute paths |
 | `scripts/ai/.mcp.json` | yes | tracked workspace MCP mirror | generated with the same portable payload as `.mcp.json` for AI runtime/script consumers |
+| `.zed/mcp.json` | yes | tracked Zed workspace MCP mirror | generated with the same portable payload as `.mcp.json` |
 | `.codex/settings.json` | no | local-only/generated runtime config | may exist in local checkouts; ignored by `.gitignore`; may contain machine-local absolute paths |
 | `.codex/config.toml` | no | local-only/untracked runtime config | may exist in local checkouts; ignored by `.gitignore`; may contain machine-local absolute paths |
 | `.gemini/settings.json` | no | local-only/generated runtime config | may exist in local checkouts; not a tracked runtime source on `main`; may contain machine-local absolute paths |
@@ -38,14 +40,14 @@ This policy applies to:
 ## Strategy
 
 1. Treat `.mcp.json` as a retained exact-root workspace entrypoint, not as a
-   machine-local runtime file. It and `scripts/ai/.mcp.json` MUST use
-   repo-relative paths.
+   machine-local runtime file. It, `scripts/ai/.mcp.json`, and `.zed/mcp.json`
+   MUST use repo-relative paths.
 1. Treat generated Codex/Gemini/editor runtime mirrors as local-only runtime
    surfaces when ignored by `.gitignore`; these may contain machine-local
    absolute paths when the consuming tool requires them.
 1. Treat `.devin/config.json` as a portable tracked Devin projection. The setup
    generator replaces only `mcpServers` with the canonical repo-relative
-   16-server payload and preserves existing Devin-owned top-level settings such
+   21-server payload and preserves existing Devin-owned top-level settings such
    as `version`, `devin`, `shell`, and `theme_mode`.
 1. Devin starts repository work in its cloned workspace and root environment
    commands from the repository root. Relative MCP filesystem, cache, memory,

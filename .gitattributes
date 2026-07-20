@@ -31,6 +31,7 @@
 *.whl binary
 *.gz binary
 *.zip binary
+*.zst binary
 
 # Jupyter notebooks
 *.ipynb text eol=lf

@@ -93,6 +93,11 @@ wrapper_stems = {
     "neo4j-cypher": "mcp_neo4j_cypher_wrapper",
     "neo4j-memory": "mcp_neo4j_memory_wrapper",
     "mermaid": "mcp_mermaid_wrapper",
+    "deja": "mcp_deja_wrapper",
+    "adr-analysis": "mcp_adr_analysis_wrapper",
+    "mutmut": "mcp_mutmut_wrapper",
+    "code-analyzer": "mcp_code_analyzer_wrapper",
+    "github-actions": "mcp_github_actions_wrapper",
 }
 removed_server_names = {
     "sonarqube",
@@ -126,7 +131,14 @@ for server in servers.values():
     if isinstance(server, dict):
         env = server.get("env", {})
         if isinstance(env, dict):
-            for key in ("NPM_CONFIG_CACHE", "UV_CACHE_DIR", "UV_TOOL_DIR"):
+            for key in (
+                "NPM_CONFIG_CACHE",
+                "UV_CACHE_DIR",
+                "UV_TOOL_DIR",
+                "PROJECT_PATH",
+                "ADR_PATH",
+                "MUTMUT_PROJECT_PATH",
+            ):
                 if key in env:
                     portable_path_values.append(str(env[key]))
         args = server.get("args", [])
@@ -202,6 +214,9 @@ check_workspace_mcp_config "${REPO_ROOT}/.vscode/mcp.json"
 if [[ -f "${REPO_ROOT}/.cursor/mcp.json" ]]; then
     check_workspace_mcp_config "${REPO_ROOT}/.cursor/mcp.json"
 fi
+check_workspace_mcp_config "${REPO_ROOT}/.qodo/mcp.json"
+check_workspace_mcp_config "${REPO_ROOT}/.zed/mcp.json"
+check_workspace_mcp_config "${REPO_ROOT}/.devin/config.json"
 check_codex_config
 validate_codex_mcp_list
 

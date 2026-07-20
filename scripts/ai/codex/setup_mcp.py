@@ -126,6 +126,11 @@ def _canonical_servers(
         workspace_root,
         portable_workspace_paths=portable_workspace_paths,
     )
+    adr_path = _config_path(
+        workspace_root / "docs/02-architecture/decisions",
+        workspace_root,
+        portable_workspace_paths=portable_workspace_paths,
+    )
     cache_root = workspace_root / CACHE_DIR_NAME
 
     npm_cache_dir = _config_path(
@@ -213,6 +218,31 @@ def _canonical_servers(
             workspace_root,
             portable_workspace_paths=portable_workspace_paths,
         ),
+        "deja": _wrapper_command(
+            "mcp_deja_wrapper",
+            workspace_root,
+            portable_workspace_paths=portable_workspace_paths,
+        ),
+        "adr-analysis": _wrapper_command(
+            "mcp_adr_analysis_wrapper",
+            workspace_root,
+            portable_workspace_paths=portable_workspace_paths,
+        ),
+        "mutmut": _wrapper_command(
+            "mcp_mutmut_wrapper",
+            workspace_root,
+            portable_workspace_paths=portable_workspace_paths,
+        ),
+        "code-analyzer": _wrapper_command(
+            "mcp_code_analyzer_wrapper",
+            workspace_root,
+            portable_workspace_paths=portable_workspace_paths,
+        ),
+        "github-actions": _wrapper_command(
+            "mcp_github_actions_wrapper",
+            workspace_root,
+            portable_workspace_paths=portable_workspace_paths,
+        ),
         "deepwiki": _http_server("https://mcp.deepwiki.com/mcp"),
         "ref": _http_server("https://api.ref.tools/mcp"),
     }
@@ -220,6 +250,13 @@ def _canonical_servers(
     # Preserve the committed config shape where the GitHub wrapper receives npm cache.
     servers["github"]["env"] = {"NPM_CONFIG_CACHE": npm_cache_dir}
     servers["memory"]["env"]["MEMORY_FILE_PATH"] = str(memory_file_path)
+    servers["deja"]["env"] = {"NPM_CONFIG_CACHE": npm_cache_dir}
+    servers["adr-analysis"]["env"] = {
+        "PROJECT_PATH": workspace_root_str,
+        "ADR_PATH": adr_path,
+    }
+    servers["mutmut"]["env"] = {"MUTMUT_PROJECT_PATH": workspace_root_str}
+    servers["code-analyzer"]["env"] = {"PROJECT_PATH": workspace_root_str}
     return servers
 
 

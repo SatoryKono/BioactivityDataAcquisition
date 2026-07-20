@@ -154,6 +154,15 @@ pipeline_universe_contract:
     verify_control_plane_provenance_gated_overlap: true
     verify_explorer_subset_relation: true
     required_unexplained_difference_count: 0
+    latest_live_evidence:
+      path: reports/observability/grafana/selector-audit-2026-07-20/selector-evidence.json
+      schema_version: 1
+      issue_number: 6359
+      captured_at_utc: "2026-07-20T08:05:54Z"
+      expected_verdict: pass
+      require_relevant_runtime_paths_clean: true
+      require_live_dashboard_count: 8
+      require_complete_navigation_links: true
 
 dashboard_families:
   pipeline_summary:
