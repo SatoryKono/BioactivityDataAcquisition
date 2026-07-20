@@ -14,6 +14,7 @@ import yaml
 from memory.resources import POLICY_DIR, discover_memory_root, load_yaml_resource
 
 SUPPORTED_NOTE_EXTENSIONS = {".json", ".yaml", ".yml", ".md"}
+NON_PRUNABLE_EPISODIC_DIRECTORIES = {"templates"}
 
 
 def _episodic_root() -> Path:
@@ -82,6 +83,14 @@ def _extract_markdown_metadata(path: Path) -> dict[str, Any]:
         return _read_prune_fields_from_front_matter(handle)
 
 
+def _is_prunable_note_path(path: Path, root: Path) -> bool:
+    """Return whether ``path`` belongs to ephemeral episodic-note storage."""
+    relative = path.relative_to(root)
+    return not any(
+        part in NON_PRUNABLE_EPISODIC_DIRECTORIES for part in relative.parts[:-1]
+    )
+
+
 def _read_prune_fields_from_front_matter(handle: IO[str]) -> dict[str, Any]:
     metadata: dict[str, Any] = {}
     for line in handle:
@@ -123,7 +132,7 @@ def find_prunable_episodic_notes(
     for path in sorted(resolved_root.rglob("*")):
         if not path.is_file() or path.suffix not in SUPPORTED_NOTE_EXTENSIONS:
             continue
-        if path.name == "README.md":
+        if path.name == "README.md" or not _is_prunable_note_path(path, resolved_root):
             continue
         metadata = _extract_metadata(path)
         created_at = _coerce_created_at(metadata.get("created_at"))
@@ -191,6 +200,7 @@ def _count_episodic_notes(root: Path) -> int:
         if path.is_file()
         and path.suffix in SUPPORTED_NOTE_EXTENSIONS
         and path.name != "README.md"
+        and _is_prunable_note_path(path, root)
     )
 
 

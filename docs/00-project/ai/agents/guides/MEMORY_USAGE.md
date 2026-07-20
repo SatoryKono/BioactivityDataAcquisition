@@ -48,6 +48,11 @@ directory is a read-only migration fallback. Generated JSON/JSONL files are not
 committed, and bounded workflow-scope manifests must remain in a temporary or
 external output directory.
 
+`pretest_guardrails.sh --report-json ...` persists only compact
+`memory_rag_validation` evidence: full-scope counts, exact Git/source-surface
+identity, working-tree state, and the zero-stale result. It does not persist or
+commit the temporary corpus itself.
+
 ## Conflict Priority
 
 Use different precedence depending on the type of conflict.
