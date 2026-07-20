@@ -74,7 +74,9 @@ class TestDataSourceCreatorHelper:
 class TestGenericPipelineFactory:
     """Tests for GenericPipelineFactory."""
 
-    @patch("bioetl.composition.factories.pipeline.assembler.get_data_source_creator")
+    @patch(
+        "bioetl.composition.factories.pipeline._assembler_factory.get_data_source_creator"
+    )
     def test_init_with_provider(self, mock_get_data_source_creator):
         """Test factory initialization with provider name."""
         mock_pipeline_class = MagicMock()
@@ -98,7 +100,9 @@ class TestGenericPipelineFactory:
         assert factory.silver_schema is None
         assert factory._create_data_source is mock_creator
 
-    @patch("bioetl.composition.factories.pipeline.assembler.get_data_source_creator")
+    @patch(
+        "bioetl.composition.factories.pipeline._assembler_factory.get_data_source_creator"
+    )
     def test_init_with_explicit_provider_registry(self, mock_get_data_source_creator):
         """Factory should thread explicit provider registry into creator resolution."""
         mock_pipeline_class = MagicMock()

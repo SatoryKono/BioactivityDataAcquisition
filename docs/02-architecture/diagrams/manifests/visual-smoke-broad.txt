@@ -2,6 +2,7 @@
 # Nightly warn-only tier until the broader baseline is stable.
 
 # Extended tier
+docs/02-architecture/diagrams/architecture/svg/49-chembl-pipeline-activity-dataflow.svg
 docs/02-architecture/diagrams/foundation/svg/01-full-system-component.svg
 docs/02-architecture/diagrams/foundation/svg/30-port-adapter-mapping.svg
 docs/02-architecture/diagrams/views/svg/01-full-system-component-full.svg

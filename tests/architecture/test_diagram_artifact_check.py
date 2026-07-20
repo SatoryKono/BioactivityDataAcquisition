@@ -138,7 +138,7 @@ def test_visual_smoke_manifest_tiers_are_ordered_and_resolve() -> None:
     extended_entries = _manifest_entries(extended)
     broad_entries = _manifest_entries(broad)
 
-    assert len(base_entries) == 5
+    assert len(base_entries) == 6
     assert len(extended_entries) >= 25
     assert len(broad_entries) >= 50
     assert set(base_entries).issubset(extended_entries)

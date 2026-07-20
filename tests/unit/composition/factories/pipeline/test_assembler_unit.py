@@ -94,7 +94,9 @@ class TestGenericPipelineFactory:
         assert factory.provider == "chembl"
         assert factory.gold_schema is gold_schema
 
-    @patch("bioetl.composition.factories.pipeline.assembler.get_data_source_creator")
+    @patch(
+        "bioetl.composition.factories.pipeline._assembler_factory.get_data_source_creator"
+    )
     def test_resolves_default_data_source_creator(
         self, mock_get_creator: MagicMock
     ) -> None:
@@ -450,7 +452,9 @@ class TestGenericPipelineFactory:
 class TestCreatePipelineFactory:
     """Tests for create_pipeline_factory convenience function."""
 
-    @patch("bioetl.composition.factories.pipeline.assembler.get_data_source_creator")
+    @patch(
+        "bioetl.composition.factories.pipeline._assembler_factory.get_data_source_creator"
+    )
     def test_returns_generic_pipeline_factory(
         self, mock_get_creator: MagicMock
     ) -> None:

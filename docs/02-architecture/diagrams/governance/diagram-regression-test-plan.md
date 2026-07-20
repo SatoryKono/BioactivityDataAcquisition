@@ -119,6 +119,7 @@ _Связанные документы: diagram-modernization-program.md, diagra
 
 ## 6. Кандидаты в эталонный пул
 
+1. `diagrams/architecture/49-chembl-pipeline-activity-dataflow.mmd`
 1. `diagrams/foundation/01-full-system-component.mmd`
 1. `diagrams/foundation/30-port-adapter-mapping.mmd`
 1. `diagrams/views/01-full-system-component-full.mermaid`
