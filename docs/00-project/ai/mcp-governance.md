@@ -57,33 +57,33 @@ generated MCP configuration.
 - **Статус:** ✅ Работает
 - **Описание:** Auto-recall настроен в `.codex/AGENTS.md`
 - **Настройка:** `DEJA_AUTO_RECALL_PATH` указывает на `.codex/AGENTS.md`
-- **Обёртка:** `scripts/ai/mcp/mcp_deja_wrapper.sh`
+- **Обёртки:** `scripts/ai/mcp/mcp_deja_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_deja_wrapper.ps1` (Windows)
 
 ### adr-analysis
 - **Статус:** ✅ Работает
 - **Описание:** Prompt-only режим для анализа Architecture Decision Records
 - **Настройка:** `PROJECT_PATH` и `ADR_PATH` для анализа ADR в `docs/02-architecture/decisions`
-- **Обёртка:** `scripts/ai/mcp/mcp_adr_analysis_wrapper.sh`
+- **Обёртки:** `scripts/ai/mcp/mcp_adr_analysis_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_adr_analysis_wrapper.ps1` (Windows)
 
 ### mutmut
 - **Статус:** ✅ Работает
 - **Описание:** Mutation testing MCP сервер
 - **Настройка:** `MUTMUT_PROJECT_PATH` для проекта
 - **Установка:** `uvx --from git+...wdm0006/mutmut-mcp`
-- **Обёртка:** `scripts/ai/mcp/mcp_mutmut_wrapper.sh`
+- **Обёртки:** `scripts/ai/mcp/mcp_mutmut_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_mutmut_wrapper.ps1` (Windows)
 
 ### code-analyzer
 - **Статус:** ✅ Работает
 - **Описание:** Анализ кода с использованием Ruff, Vulture и type checkers
 - **Настройка:** `PROJECT_PATH` для проекта
 - **Установка:** `uvx mcp-server-analyzer`
-- **Обёртка:** `scripts/ai/mcp/mcp_code_analyzer_wrapper.sh`
+- **Обёртки:** `scripts/ai/mcp/mcp_code_analyzer_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1` (Windows)
 
 ### github-actions
 - **Статус:** ✅ Работает
 - **Описание:** Анализ и генерация GitHub Actions workflows
 - **Настройка:** Локальная установка в `~/github-actions-mcp/dist/index.js` или fallback на npx
-- **Обёртка:** `scripts/ai/mcp/mcp_github_actions_wrapper.sh`
+- **Обёртки:** `scripts/ai/mcp/mcp_github_actions_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_github_actions_wrapper.ps1` (Windows)
 
 ## Удалённые MCP
 sonarqube  

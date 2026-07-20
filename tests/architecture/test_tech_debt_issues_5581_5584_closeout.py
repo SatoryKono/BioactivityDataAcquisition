@@ -36,7 +36,6 @@ TOOLING_ROOTS_WITH_OWNER_DECISIONS = {
     ".sonarlint",
     ".vibe",
     ".windsurf",
-    "caddy",
 }
 ENV_SURFACES = {".env", ".env.local", "new.env"}
 
