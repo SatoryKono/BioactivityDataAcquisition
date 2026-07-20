@@ -45,8 +45,8 @@ configurations отключают `ADD_CONTENT_ROOTS` и `ADD_SOURCE_ROOTS` и �
 | `logs`, `profiles`, `tmp`, caches, `htmlcov` | Excluded |
 | `tests/fixtures` | не исключать |
 
-Локальный `.idea/*.iml` не публикуется, потому что PyCharm может добавлять туда
-machine-specific roots. Для active checkout держите один canonical clone;
+Локальный `.idea/` целиком не публикуется, потому что PyCharm добавляет туда
+machine-specific roots и runtime state. Для active checkout держите один canonical clone;
 другие ветки открывайте через отдельные Git worktree и отдельные окна IDE.
 
 Для машины с 32 GB RAM стартовый IDE heap — `4096 MB`. Меняйте только `-Xmx`
@@ -89,7 +89,8 @@ margin. Универсальный пример `100` из исходного п
 
 ## 5. Shared run/debug configurations
 
-В репозитории публикуются только переносимые configurations:
+В `configs/ide/pycharm/runConfigurations/` публикуются только переносимые
+configuration templates:
 
 | Имя | Назначение |
 | --- | --- |
@@ -142,12 +143,28 @@ chat/agent integration допустим, если он не включает inl
 
 ## 8. Что хранится в Git
 
-Root `.gitignore` использует точный allowlist. Публикуются:
+Root `.gitignore` полностью игнорирует локальный `.idea/`. В Git публикуются
+переносимые templates с той же относительной структурой:
 
-- `.idea/runConfigurations/` — только перечисленные выше configurations;
-- `.idea/codeStyles/`;
-- `.idea/inspectionProfiles/`;
-- `.idea/pyLspTools.xml`.
+- `configs/ide/pycharm/runConfigurations/` — только перечисленные выше
+  configurations;
+- `configs/ide/pycharm/codeStyles/`;
+- `configs/ide/pycharm/inspectionProfiles/`;
+- `configs/ide/pycharm/pyLspTools.xml`.
+
+После clean clone скопируйте templates в локальный `.idea/`:
+
+```powershell
+New-Item -ItemType Directory -Force .\.idea | Out-Null
+Copy-Item -Recurse -Force .\configs\ide\pycharm\* .\.idea\
+```
+
+или в Bash/WSL:
+
+```bash
+mkdir -p .idea
+cp -R configs/ide/pycharm/. .idea/
+```
 
 Не публикуются `workspace.xml`, `.iml`, shelves, Local History, data sources,
 plugin state, MCP/AI tokens и локальные SDK paths. Любые `.env`/`.env.*`

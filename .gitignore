@@ -186,30 +186,9 @@ log_test.txt
 /reports/Codex/review_py-test-swarm_*.md
 
 # IDE / Editors
-# Keep machine-local PyCharm state ignored while sharing only reviewed,
-# portable project settings.  Add new shared files explicitly: do not widen
-# this allowlist to workspace, data-source, shelf, or secret-bearing state.
-.idea/*
-!.idea/runConfigurations/
-.idea/runConfigurations/*
-!.idea/runConfigurations/BioETL_Smoke_Offline.xml
-!.idea/runConfigurations/Mypy_Full.xml
-!.idea/runConfigurations/Pytest_Coverage.xml
-!.idea/runConfigurations/Pytest_Debug.xml
-!.idea/runConfigurations/Pytest_Fast.xml
-!.idea/runConfigurations/Pytest_Full.xml
-!.idea/runConfigurations/Quality_Gate.xml
-!.idea/runConfigurations/Ruff_Check.xml
-!.idea/runConfigurations/Ruff_Format_Check.xml
-!.idea/codeStyles/
-.idea/codeStyles/*
-!.idea/codeStyles/Project.xml
-!.idea/codeStyles/codeStyleConfig.xml
-!.idea/inspectionProfiles/
-.idea/inspectionProfiles/*
-!.idea/inspectionProfiles/Project_Default.xml
-!.idea/inspectionProfiles/profiles_settings.xml
-!.idea/pyLspTools.xml
+# PyCharm project state is machine-local. Portable project templates live in
+# configs/ide/pycharm/ and may be copied into this ignored directory.
+.idea/
 .vscode/
 .agent-work/
 .agentbridge/
