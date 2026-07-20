@@ -19,7 +19,7 @@ Current-baseline note (2026-07-20): architectural planning and GitHub issues
 MUST cite this summary or a newer regenerated package-topology pack for current
 counts. The current source baseline is
 `source_module_count=2241` with
-`source_tree_sha256=18f1faed8f940084301e2b3015ed997e7bc57e555165c0bd761cf5d9b9923b28`.
+`source_tree_sha256=ca81217edb2aabe51ecbdb390070a8112e551b17400d9f381f5f3b2e6d44d803`.
 Raw files dated before `2026-07-19` are retained only as historical detailed
 inputs and must be refreshed before they are used for line-item topology
 evidence.

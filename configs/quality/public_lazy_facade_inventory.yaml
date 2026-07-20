@@ -5,7 +5,7 @@ reviewed_on: "2026-07-12"
 review_by: "2026-10-31"
 owner: "@bioetl-architecture"
 new_surface_policy: fail_fast_unclassified_lazy_public_facade
-row_count: 51
+row_count: 52
 rationale: >-
   Lazy public facades are intentional only when the owning package declares the
   owner, allowed importer class, classification, and exit criteria. New
@@ -135,6 +135,7 @@ facades:
   - {path: src/bioetl/composition/bootstrap/runtime/composite.py, module: bioetl.composition.bootstrap.runtime.composite, markers: [__getattr__], <<: *composition_internal}
   - {path: src/bioetl/composition/bootstrap/runtime/__init__.py, module: bioetl.composition.bootstrap.runtime, markers: [__getattr__, _PUBLIC_EXPORTS], <<: *composition_package}
   - {path: src/bioetl/application/services/control_plane/replay/__init__.py, module: bioetl.application.services.control_plane.replay, markers: [__getattr__, _PUBLIC_EXPORTS], <<: *control_plane_package}
+  - {path: src/bioetl/application/composite/__init__.py, module: bioetl.application.composite, markers: [__getattr__], <<: *application_package}
   - {path: src/bioetl/application/pipelines/common/blocks.py, module: bioetl.application.pipelines.common.blocks, markers: [__getattr__], <<: *application_internal}
   - {path: src/bioetl/application/pipelines/crossref/__init__.py, module: bioetl.application.pipelines.crossref, markers: [__getattr__], <<: *application_package}
   - {path: src/bioetl/application/core/wiring/factory.py, module: bioetl.application.core.wiring.factory, markers: [_PUBLIC_EXPORTS], <<: *application_external}

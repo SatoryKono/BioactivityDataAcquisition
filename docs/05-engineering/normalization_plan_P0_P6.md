@@ -120,8 +120,9 @@ The active implementation policy is:
   derived vocabulary surfaces without live ChEMBL calls.
 - The generated normalization matrix under
   `docs/reports/generated/pipeline_normalization_field_matrix/` is part of the
-  release evidence bundle and must be regenerated after profile, schema, DQ, or
-  publication-classification changes.
+  release evidence bundle — including the first-class MD artifact
+  `pipeline_normalization_field_matrix.md` — and must be regenerated after
+  profile, schema, DQ, or publication-classification changes.
 
 Rollout notes:
 
@@ -373,6 +374,8 @@ Current evidence bundle on `main`:
 
 - canonical plan: [normalization_plan_P0_P6.md](normalization_plan_P0_P6.md)
 - rebuild-only multi-pipeline matrix generator: [generate_pipeline_normalization_field_matrix.py](../../scripts/docs/generate_pipeline_normalization_field_matrix.py)
+- published multi-pipeline matrix MD: [pipeline_normalization_field_matrix.md](../reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md)
+- published multi-pipeline matrix CSV: [pipeline_normalization_field_matrix.csv](../reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.csv)
 - fallback inventory report: [report_normalization_fallback_inventory.py](../../scripts/engineering/qa/report_normalization_fallback_inventory.py)
 - published normalization reference entrypoint: [non-chembl-normalization-overview.md](../04-reference/normalization/non-chembl-normalization-overview.md)
 - join-key policy seams: [join_keys.py](../../src/bioetl/domain/normalization/join_keys.py) and [join_key_normalization.py](../../src/bioetl/application/composite/join_key_normalization.py)
@@ -729,11 +732,14 @@ profiles, fallback seams, and composite join-key policies.
 ### Current state on `main`
 
 - [generate_pipeline_normalization_field_matrix.py](../../scripts/docs/generate_pipeline_normalization_field_matrix.py) already generates deterministic multi-pipeline artifacts
+- published outputs include `pipeline_normalization_field_matrix.csv` and
+  `pipeline_normalization_field_matrix.md` under
+  `docs/reports/generated/pipeline_normalization_field_matrix/`
 
 ### Requirements
 
 - CSV is mandatory
-- MD is first-class published artifact
+- MD is first-class published artifact (`pipeline_normalization_field_matrix.md`)
 - DOCX/PDF remain optional
 - output order is deterministic
 - the artifact reflects shipped profile coverage, fallback coverage, and join-key normalization seams
