@@ -16,7 +16,6 @@ pytestmark = pytest.mark.integration
 
 _DUPLICATE_ALLOWLIST = Path("configs/quality/dashboard_query_duplicate_allowlist.yaml")
 
-
 def _expected_duplicate_uses() -> dict[str, set[tuple[str, str]]]:
     payload = yaml.safe_load(_DUPLICATE_ALLOWLIST.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
