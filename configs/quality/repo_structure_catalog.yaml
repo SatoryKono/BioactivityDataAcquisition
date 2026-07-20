@@ -67,8 +67,6 @@ root_tooling_roots:
       role: curated_project_wiki_surface
     - path: .gemini
       role: curated_shared_agent_runtime_surface
-    - path: .idea
-      role: curated_shared_ide_metadata_surface
     - path: .vibe
       role: curated_shared_vendor_runtime_surface
     - path: .vscode
@@ -105,6 +103,8 @@ local_tolerated_root_dirs:
       role: local_coverage_merge_workspace_untracked
     - path: .hypothesis
       role: local_property_test_cache_untracked
+    - path: .idea
+      role: local_pycharm_project_state_untracked
     - path: .import_linter_cache
       role: local_import_linter_cache_untracked
     - path: .mypy_cache

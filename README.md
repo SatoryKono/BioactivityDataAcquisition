@@ -693,11 +693,12 @@ Only approved top-level entries are allowed.
 - Build/configuration: `pyproject.toml`, `uv.lock`, `Makefile`, `.pre-commit-config.yaml`, `.github/`
 - Operational/project assets: `configs/`, `scripts/`, `assets/`, `data/`, `reports/`, `grafana/`
 - Shared AI/editor tooling surfaces approved by policy:
-  `.codex/`, `.cursor/`, `.gemini/`, `.idea/`, `.vibe/`, `.vscode/`
+  `.codex/`, `.cursor/`, `.gemini/`, `.vibe/`, `.vscode/`
 - Local-only tolerated tooling/cache surfaces:
-  `.ai/`, `.aiassistant/`, `ai/`, `.jules/`, `.junie/`, `.sonarlint/`,
+  `.ai/`, `.aiassistant/`, `ai/`, `.idea/`, `.jules/`, `.junie/`, `.sonarlint/`,
   `.windsurf/`, `.agent-work/`, `.agentbridge/`, `.agents/`, `.cache/`,
   `caddy/`
+- Portable PyCharm project templates: `configs/ide/pycharm/`
 - Explicit exceptions listed in `.github/root-allowlist.txt`
 
 `.codex_tmp/` is allowed only as ignored local scratch space; it must not be

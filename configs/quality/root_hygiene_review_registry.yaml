@@ -231,8 +231,8 @@ review_lanes:
     retention_action: retain_curated_runtime_roots_and_keep_local_generated_state_untracked
     cleanup_policy: owner_decision_required_before_rehome_or_delete
     verification:
-      - git ls-files .claude .vibe .ai .gemini .jules .zed skills-lock.json
-      - rg -n "\\.claude/|\\.vibe|\\.ai/|\\.gemini/|\\.jules/|\\.zed/|skills-lock\\.json" .github docs scripts tests configs README.md pyproject.toml
+      - git ls-files .claude .vibe .ai .gemini .idea .jules .zed skills-lock.json
+      - rg -n "\\.claude/|\\.vibe|\\.ai/|\\.gemini/|\\.idea/|\\.jules/|\\.zed/|skills-lock\\.json" .github docs scripts tests configs README.md pyproject.toml
       - .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked
     candidates:
       - path: .ai
@@ -247,6 +247,10 @@ review_lanes:
         current_live_state: present_local_only_root_surface
         canonical_path: GEMINI.md
         action_if_reintroduced: keep machine-local Gemini configuration untracked and use GEMINI.md for tracked contributor guidance
+      - path: .idea
+        current_live_state: present_local_only_root_surface
+        canonical_path: configs/ide/pycharm
+        action_if_reintroduced: keep PyCharm project state untracked and publish only portable reviewed templates under configs/ide/pycharm
       - path: .jules
         current_live_state: absent_from_root_baseline
         canonical_path: null

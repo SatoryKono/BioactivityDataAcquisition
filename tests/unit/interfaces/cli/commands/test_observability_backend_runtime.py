@@ -339,6 +339,7 @@ def test_ensure_backend_failure_message_includes_exit_code_and_log_tail() -> Non
         process.poll.return_value = 7
         start = MagicMock(return_value=process)
         wait = MagicMock(return_value=False)
+        listener_pid = MagicMock(return_value=None)  # No existing listener
 
         result = ensure_observability_backend_started(
             enabled=True,
@@ -346,6 +347,7 @@ def test_ensure_backend_failure_message_includes_exit_code_and_log_tail() -> Non
             probe_fn=probe,
             start_fn=start,
             wait_fn=wait,
+            listener_pid_fn=listener_pid,
         )
 
         assert result.status == "failed"

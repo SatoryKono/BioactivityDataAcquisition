@@ -6,6 +6,7 @@ configs, and compatibility policy documents for BioETL.
 ## File Types
 
 - `YAML` / `JSON` / `TOML`: configuration and schema files
+- `XML`: portable IDE project templates under `configs/ide/`
 - `.env*`: environment files
 - `Dockerfile` / compose files: container and local runtime setup
 - tool-specific config files
@@ -33,6 +34,8 @@ retired forms, removal dates, and permanent rationales are governed by
 - `configs/_schema/`: canonical JSON schemas for pipeline, source, composite, and
   related config contracts
 - `configs/providers/`: provider YAML definitions
+- `configs/ide/pycharm/`: reviewed portable PyCharm templates copied into the
+  ignored local `.idea/` directory
 - `configs/quality/`: architecture, compatibility, generated-artifact routing,
   and debt registries
 
