@@ -150,6 +150,83 @@ def test_required_environment_contract_lists_names_only() -> None:
         assert set(stack.get("required_secret_environment_names", [])) <= set(
             stack["required_environment_names"]
         )
+        required_values = stack.get("required_non_secret_environment_values", {})
+        assert set(required_values) <= set(stack["required_environment_names"])
+        assert set(required_values).isdisjoint(
+            stack.get("required_secret_environment_names", [])
+        )
+
+
+def test_neo4j_environment_avoids_image_owned_configuration_names() -> None:
+    contract = _load_yaml(CONTRACT_PATH)
+    preflight = _load_preflight()
+    expected_safe_names = {
+        "neo4j": {
+            "BIOETL_NEO4J_USERNAME",
+            "BIOETL_NEO4J_PASSWORD",
+        },
+        "neo4j-audit": {
+            "BIOETL_NEO4J_AUDIT_USERNAME",
+            "BIOETL_NEO4J_AUDIT_PASSWORD",
+        },
+    }
+
+    for stack_name, safe_names in expected_safe_names.items():
+        stack = contract["stacks"][stack_name]
+        compose = _load_yaml(ROOT / stack["compose_file"])
+        service = next(iter(compose["services"].values()))
+        container_names = preflight._container_environment_names(service)
+        forbidden = set(stack["forbidden_container_environment_names"])
+
+        assert forbidden == {"NEO4J_USERNAME", "NEO4J_PASSWORD"}
+        assert container_names.isdisjoint(forbidden)
+        assert safe_names <= container_names
+        assert service["environment"]["NEO4J_AUTH"].startswith("neo4j/")
+
+
+def test_preflight_reports_image_environment_namespace_collision() -> None:
+    contract = _load_yaml(CONTRACT_PATH)
+    preflight = _load_preflight()
+    contract["stacks"]["main"]["forbidden_container_environment_names"] = [
+        "NEO4J_USERNAME"
+    ]
+
+    findings, _ = preflight._static_observations(ROOT, contract)
+    collisions = [finding for finding in findings if finding.code == "F004"]
+
+    assert [
+        (
+            finding.evidence["stack"],
+            finding.evidence["service"],
+            finding.evidence["name"],
+        )
+        for finding in collisions
+    ] == [("main", "bioetl", "NEO4J_USERNAME")]
+
+
+def test_preflight_rejects_unsupported_neo4j_bootstrap_username(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    contract = _load_yaml(CONTRACT_PATH)
+    preflight = _load_preflight()
+    monkeypatch.setenv("NEO4J_USERNAME", "unsupported-user")
+    monkeypatch.setenv("NEO4J_AUDIT_USERNAME", "unsupported-audit-user")
+
+    findings, _ = preflight._static_observations(ROOT, contract)
+    unsupported = [
+        finding
+        for finding in findings
+        if finding.code == "ENVIRONMENT_VALUE_UNSUPPORTED"
+    ]
+
+    assert [
+        (finding.evidence["stack"], finding.evidence["name"]) for finding in unsupported
+    ] == [
+        ("neo4j", "NEO4J_USERNAME"),
+        ("neo4j-audit", "NEO4J_AUDIT_USERNAME"),
+    ]
+    assert "unsupported-user" not in repr(unsupported)
+    assert "unsupported-audit-user" not in repr(unsupported)
 
 
 def test_required_secret_presence_is_checked_without_reading_values(
