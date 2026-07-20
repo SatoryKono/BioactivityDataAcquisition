@@ -58,12 +58,14 @@ generated MCP configuration.
 - **Описание:** Auto-recall настроен в `.codex/AGENTS.md`
 - **Настройка:** `DEJA_AUTO_RECALL_PATH` указывает на `.codex/AGENTS.md`
 - **Обёртка:** `scripts/ai/mcp/mcp_deja_wrapper.sh`
+- **Windows companion:** `scripts/ai/mcp/mcp_deja_wrapper.ps1`
 
 ### adr-analysis
 - **Статус:** ✅ Работает
 - **Описание:** Prompt-only режим для анализа Architecture Decision Records
 - **Настройка:** `PROJECT_PATH` и `ADR_PATH` для анализа ADR в `docs/02-architecture/decisions`
 - **Обёртка:** `scripts/ai/mcp/mcp_adr_analysis_wrapper.sh`
+- **Windows companion:** `scripts/ai/mcp/mcp_adr_analysis_wrapper.ps1`
 
 ### mutmut
 - **Статус:** ✅ Работает
@@ -71,6 +73,7 @@ generated MCP configuration.
 - **Настройка:** `MUTMUT_PROJECT_PATH` для проекта
 - **Установка:** `uvx --from git+...wdm0006/mutmut-mcp`
 - **Обёртка:** `scripts/ai/mcp/mcp_mutmut_wrapper.sh`
+- **Windows companion:** `scripts/ai/mcp/mcp_mutmut_wrapper.ps1`
 
 ### code-analyzer
 - **Статус:** ✅ Работает
@@ -78,27 +81,29 @@ generated MCP configuration.
 - **Настройка:** `PROJECT_PATH` для проекта
 - **Установка:** `uvx mcp-server-analyzer`
 - **Обёртка:** `scripts/ai/mcp/mcp_code_analyzer_wrapper.sh`
+- **Windows companion:** `scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1`
 
 ### github-actions
 - **Статус:** ✅ Работает
 - **Описание:** Анализ и генерация GitHub Actions workflows
 - **Настройка:** Локальная установка в `~/github-actions-mcp/dist/index.js` или fallback на npx
 - **Обёртка:** `scripts/ai/mcp/mcp_github_actions_wrapper.sh`
+- **Windows companion:** `scripts/ai/mcp/mcp_github_actions_wrapper.ps1`
 
 ## Удалённые MCP
-sonarqube  
-chembl  
-pubchem  
-pubmed  
-sequential-thinking  
-openaiDeveloperDocs  
-needle  
-docker-docs  
-dockerhub  
-pdf  
-paper-search
-biomoltechDocs
-mintlify
+- sonarqube
+- chembl
+- pubchem
+- pubmed
+- sequential-thinking
+- openaiDeveloperDocs
+- needle
+- docker-docs
+- dockerhub
+- pdf
+- paper-search
+- biomoltechDocs
+- mintlify
 
 ## Retired wrapper artifacts
 

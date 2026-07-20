@@ -1,18 +1,17 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-20T08:30:18.413012+00:00",
+  "generated_at": "2026-07-20T09:27:07.199475+00:00",
   "summary": {
     "total_scripts": 490,
     "status_counts": {
-      "active": 346,
-      "orphan": 5,
-      "supporting": 139
+      "active": 341,
+      "supporting": 149
     },
     "reference_group_coverage": {
       "agents": 5,
       "build": 11,
       "ci": 63,
-      "docs": 190,
+      "docs": 196,
       "other": 33,
       "scripts": 383,
       "skills": 16,
@@ -659,7 +658,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 13,
       "references": [
         {
           "path": "docs/05-operations/verification/root-hygiene-refactoring-plan-2026-07-08.md",
@@ -990,7 +989,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 136,
+      "reference_count": 132,
       "references": [
         {
           "path": "docs/00-project/governance/03-file-policy.md",
@@ -1104,7 +1103,7 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 22,
+      "reference_count": 20,
       "references": [
         {
           "path": "docs/05-operations/verification/root-hygiene-refactoring-plan-2026-07-08.md",
@@ -1197,7 +1196,7 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 8,
       "references": [
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md",
@@ -2308,21 +2307,32 @@
     {
       "path": "scripts/ai/mcp/mcp_adr_analysis_wrapper.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "docs/00-project/ai/mcp-governance.md",
+          "line": 68,
+          "source_group": "docs",
+          "text": "- **Windows companion:** `scripts/ai/mcp/mcp_adr_analysis_wrapper.ps1`"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows-side companion for the ADR Analysis MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
     },
     {
       "path": "scripts/ai/mcp/mcp_adr_analysis_wrapper.sh",
       "type": "sh",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 66,
+          "line": 67,
           "source_group": "docs",
           "text": "- **Обёртка:** `scripts/ai/mcp/mcp_adr_analysis_wrapper.sh`"
         },
@@ -2332,7 +2342,11 @@
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_adr_analysis_wrapper.sh\""
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP wrapper for ADR Analysis server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
     },
     {
       "path": "scripts/ai/mcp/mcp_ast_grep_wrapper.ps1",
@@ -2422,21 +2436,32 @@
     {
       "path": "scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "docs/00-project/ai/mcp-governance.md",
+          "line": 84,
+          "source_group": "docs",
+          "text": "- **Windows companion:** `scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1`"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows-side companion for the Code Analyzer MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
     },
     {
       "path": "scripts/ai/mcp/mcp_code_analyzer_wrapper.sh",
       "type": "sh",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 80,
+          "line": 83,
           "source_group": "docs",
           "text": "- **Обёртка:** `scripts/ai/mcp/mcp_code_analyzer_wrapper.sh`"
         },
@@ -2446,7 +2471,11 @@
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_code_analyzer_wrapper.sh\""
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP wrapper for Code Analyzer server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
     },
     {
       "path": "scripts/ai/mcp/mcp_code_interpreter_wrapper.ps1",
@@ -2517,15 +2546,26 @@
     {
       "path": "scripts/ai/mcp/mcp_deja_wrapper.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "docs/00-project/ai/mcp-governance.md",
+          "line": 61,
+          "source_group": "docs",
+          "text": "- **Windows companion:** `scripts/ai/mcp/mcp_deja_wrapper.ps1`"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows-side companion for the Deja MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
     },
     {
       "path": "scripts/ai/mcp/mcp_deja_wrapper.sh",
       "type": "sh",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -2541,7 +2581,11 @@
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_deja_wrapper.sh\""
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP wrapper for Deja server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
     },
     {
       "path": "scripts/ai/mcp/mcp_docker_docs_wrapper.sh",
@@ -2552,7 +2596,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 109,
+          "line": 114,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/mcp_docker_docs_wrapper.sh`"
         }
@@ -2571,7 +2615,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 480,
+          "line": 557,
           "source_group": "tests",
           "text": "powershell_wrapper = (ROOT / \"scripts/ai/mcp/mcp_docker_wrapper.ps1\").read_text("
         }
@@ -2611,7 +2655,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 110,
+          "line": 115,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/mcp_dockerhub_wrapper.sh`"
         }
@@ -2624,21 +2668,32 @@
     {
       "path": "scripts/ai/mcp/mcp_github_actions_wrapper.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "docs/00-project/ai/mcp-governance.md",
+          "line": 91,
+          "source_group": "docs",
+          "text": "- **Windows companion:** `scripts/ai/mcp/mcp_github_actions_wrapper.ps1`"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows-side companion for the GitHub Actions MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
     },
     {
       "path": "scripts/ai/mcp/mcp_github_actions_wrapper.sh",
       "type": "sh",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 86,
+          "line": 90,
           "source_group": "docs",
           "text": "- **Обёртка:** `scripts/ai/mcp/mcp_github_actions_wrapper.sh`"
         },
@@ -2648,7 +2703,11 @@
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_github_actions_wrapper.sh\""
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP wrapper for GitHub Actions server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
     },
     {
       "path": "scripts/ai/mcp/mcp_grafana_wrapper.ps1",
@@ -2742,21 +2801,32 @@
     {
       "path": "scripts/ai/mcp/mcp_mutmut_wrapper.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "docs/00-project/ai/mcp-governance.md",
+          "line": 76,
+          "source_group": "docs",
+          "text": "- **Windows companion:** `scripts/ai/mcp/mcp_mutmut_wrapper.ps1`"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows-side companion for the Mutmut MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
     },
     {
       "path": "scripts/ai/mcp/mcp_mutmut_wrapper.sh",
       "type": "sh",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 73,
+          "line": 75,
           "source_group": "docs",
           "text": "- **Обёртка:** `scripts/ai/mcp/mcp_mutmut_wrapper.sh`"
         },
@@ -2766,7 +2836,11 @@
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_mutmut_wrapper.sh\""
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP wrapper for Mutmut server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
     },
     {
       "path": "scripts/ai/mcp/mcp_needle_wrapper.sh",
@@ -2777,7 +2851,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 111,
+          "line": 116,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/mcp_needle_wrapper.sh`"
         }
@@ -2924,7 +2998,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 112,
+          "line": 117,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/mcp_paper_search_wrapper.sh`"
         }
@@ -3055,7 +3129,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 461,
+          "line": 538,
           "source_group": "tests",
           "text": "smoke = ROOT / \"scripts/ai/mcp/protocol_smoke.py\""
         }
@@ -3086,7 +3160,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 471,
+          "line": 548,
           "source_group": "tests",
           "text": "powershell = (ROOT / \"scripts/ai/mcp/support/docker_cli_resolver.ps1\").read_text("
         }
@@ -3505,7 +3579,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 14,
       "references": [
         {
           "path": "Makefile",
@@ -3980,19 +4054,19 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 214,
+          "line": 215,
           "source_group": "docs",
           "text": "| `scripts.diagrams`                | `uv run python -m scripts.diagrams`                | Diagram lint, check, fix, render            |"
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 241,
+          "line": 242,
           "source_group": "docs",
           "text": "uv run python -m scripts.diagrams lint"
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 242,
+          "line": 243,
           "source_group": "docs",
           "text": "uv run python -m scripts.diagrams check-quality-gates"
         }
@@ -4657,16 +4731,10 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 11,
       "references": [
         {
           "path": "Makefile",
-          "line": 243,
-          "source_group": "build",
-          "text": "$(RUN) python scripts/diagrams/generate_all_bundles.py"
-        },
-        {
-          "path": "makefile",
           "line": 243,
           "source_group": "build",
           "text": "$(RUN) python scripts/diagrams/generate_all_bundles.py"
@@ -4706,6 +4774,12 @@
           "line": 87,
           "source_group": "scripts",
           "text": "\"generate_all_bundles.py\", \"--collection\", \"architecture\""
+        },
+        {
+          "path": "scripts/diagrams/__main__.py",
+          "line": 91,
+          "source_group": "scripts",
+          "text": "\"render-views\": python_command(\"generate_all_bundles.py\", \"--collection\", \"views\"),"
         }
       ]
     },
@@ -5195,7 +5269,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 25,
+      "reference_count": 24,
       "references": [
         {
           "path": ".codex/agents/py-doc-bot.md",
@@ -6461,7 +6535,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": ".github/ISSUES/CHEMBL-016-Close-Remaining-Chembl-Normalization-Governance-Gaps.md",
@@ -6480,6 +6554,12 @@
           "line": 349,
           "source_group": "docs",
           "text": "- [generate_pipeline_normalization_field_matrix.py](../../scripts/docs/generate_pipeline_normalization_field_matrix.py)"
+        },
+        {
+          "path": "docs/05-engineering/normalization_plan_P0_P6.md",
+          "line": 375,
+          "source_group": "docs",
+          "text": "- rebuild-only multi-pipeline matrix generator: [generate_pipeline_normalization_field_matrix.py](../../scripts/docs/generate_pipeline_normalization_field_matrix.py)"
         },
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
@@ -6957,13 +7037,13 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 209,
+          "line": 210,
           "source_group": "docs",
           "text": "| `scripts.engineering.baselines`   | `uv run python -m scripts.engineering.baselines`   | Baseline maintenance for engineering checks |"
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 254,
+          "line": 255,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.baselines dq-baseline --dry-run"
         },
@@ -7013,7 +7093,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 25,
+      "reference_count": 24,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -7053,13 +7133,13 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 208,
+          "line": 209,
           "source_group": "docs",
           "text": "| `scripts.engineering.ci`          | `uv run python -m scripts.engineering.ci`          | CI pipeline: pytest runner, quality gates   |"
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 250,
+          "line": 251,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.ci quality-gate"
         }
@@ -7646,7 +7726,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 227,
+          "line": 230,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/.wsl-vpn-fix.ps1`                   | Recover Windows-side VPN proxy settings for WSL interoperability                          |"
         }
@@ -7673,7 +7753,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 217,
+          "line": 218,
           "source_group": "docs",
           "text": "| `scripts.engineering.dev`         | `uv run python -m scripts.engineering.dev`         | Dev setup, test runner, mock metrics        |"
         },
@@ -7714,7 +7794,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 45,
+      "reference_count": 43,
       "references": [
         {
           "path": "docs/00-project/governance/03-file-policy.md",
@@ -7787,7 +7867,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 185,
+          "line": 188,
           "source_group": "scripts",
           "text": "| `install-deps`       | `scripts/engineering/dev/install_deps.py`                    | Auxiliary helper script, not a full project bootstrap            |"
         },
@@ -7808,7 +7888,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 190,
+          "line": 193,
           "source_group": "scripts",
           "text": "| `mock-metrics`       | `scripts/engineering/dev/metrics_mock_server.py`             | Start mock metrics server                                        |"
         },
@@ -7840,8 +7920,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 16,
       "references": [
+        {
+          "path": "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+          "line": 51,
+          "source_group": "docs",
+          "text": "`pretest_guardrails.sh --report-json ...` persists only compact"
+        },
         {
           "path": "scripts/engineering/dev/README.md",
           "line": 49,
@@ -7862,13 +7948,13 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 187,
+          "line": 190,
           "source_group": "scripts",
           "text": "| `pretest-guardrails` | `scripts/engineering/dev/pretest_guardrails.sh`              | Run cleanup + repo/docs/memory/architecture preflight            |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 219,
+          "line": 222,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/pretest_guardrails.sh`              | Run cleanup + repo/docs/memory/architecture preflight before broad bash pytest runs       |"
         },
@@ -7883,12 +7969,6 @@
           "line": 18,
           "source_group": "scripts",
           "text": "& $Bash.Source \"scripts/engineering/dev/pretest_guardrails.sh\" @args"
-        },
-        {
-          "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 492,
-          "source_group": "scripts",
-          "text": "if should_run_preflight && [[ -f \"scripts/engineering/dev/pretest_guardrails.sh\" ]]; then"
         }
       ]
     },
@@ -7916,13 +7996,13 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 186,
+          "line": 189,
           "source_group": "scripts",
           "text": "| `probe-quality`      | `scripts/engineering/dev/quality_gate_probe.py`              | Measure narrow pytest/mypy startup latency and timeout behavior  |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 223,
+          "line": 226,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/quality_gate_probe.py`              | Diagnose narrow pytest/mypy startup latency and timeout behavior                          |"
         },
@@ -7943,13 +8023,13 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 191,
+          "line": 194,
           "source_group": "scripts",
           "text": "| `mock-quarantine`    | `scripts/engineering/dev/quarantine_explorer_mock_server.py` | Start mock quarantine explorer API server                        |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 224,
+          "line": 227,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/quarantine_explorer_mock_server.py` | Start mock `/ops/quarantine/*` endpoints for Silver Reject Explorer smoke checks          |"
         },
@@ -8260,7 +8340,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 22,
+      "reference_count": 21,
       "references": [
         {
           "path": "Makefile",
@@ -8321,7 +8401,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 216,
+          "line": 219,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/run_tests.ps1`                      | Run tests (PowerShell variant)                                                            |"
         },
@@ -8372,13 +8452,13 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 188,
+          "line": 191,
           "source_group": "scripts",
           "text": "| `run-tests`          | `scripts/engineering/dev/run_tests.py`                       | Run tests                                                        |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 192,
+          "line": 195,
           "source_group": "scripts",
           "text": "| `test-changed`       | `scripts/engineering/dev/run_tests.py changed`               | Run tests for changed files only                                 |"
         },
@@ -8417,7 +8497,7 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 215,
+          "line": 218,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/run_tests.sh`                       | Run tests (shell variant)                                                                 |"
         },
@@ -8468,7 +8548,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 183,
+          "line": 184,
           "source_group": "docs",
           "text": ".\\scripts\\engineering\\dev\\setup_env_windows.ps1"
         },
@@ -8525,7 +8605,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 189,
+          "line": 190,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/setup_env_wsl.sh"
         },
@@ -8581,7 +8661,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 20,
+      "reference_count": 17,
       "references": [
         {
           "path": ".github/workflows/root-hygiene.yml",
@@ -8621,7 +8701,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 218,
+          "line": 219,
           "source_group": "docs",
           "text": "| `scripts.engineering.diagnostics` | `uv run python -m scripts.engineering.diagnostics` | Debug: cleanup, pandera, storage            |"
         },
@@ -9064,7 +9144,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 227,
+          "line": 228,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.qa check-c901"
         },
@@ -10386,7 +10466,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 220,
+          "line": 221,
           "source_group": "docs",
           "text": "Каждая группа поддерживает `--help` и `<command> --help`. Скрипты также доступны напрямую: `python scripts/engineering/qa/naming_audit.py`."
         },
@@ -11704,7 +11784,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 212,
+          "line": 213,
           "source_group": "docs",
           "text": "| `scripts.engineering.qa.vcr`      | `uv run python -m scripts.engineering.qa.vcr`      | VCR governance: placement, naming, secrets  |"
         }
@@ -11766,7 +11846,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 246,
+          "line": 247,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.qa.vcr check-placement"
         },
@@ -11823,7 +11903,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 226,
+          "line": 227,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.qa check-naming --check"
         },
@@ -11930,7 +12010,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 79,
+      "reference_count": 76,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-016-Enforce-Zero-Reference-Script-Governance.md",
@@ -12275,7 +12355,7 @@
         },
         {
           "path": "scripts/engineering/dev/pretest_guardrails.sh",
-          "line": 431,
+          "line": 481,
           "source_group": "scripts",
           "text": "\"$PYTHON_BIN\" -m scripts.engineering.repo check-catalog \\"
         },
@@ -12320,7 +12400,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 228,
+          "line": 229,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.repo check-inventory --check"
         },
@@ -12433,7 +12513,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/05-operations/verification/root-hygiene-refactoring-plan-2026-07-08.md",
@@ -12455,12 +12535,6 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",
-          "line": 147,
-          "source_group": "tests",
-          "text": "ROOT / \"scripts\" / \"engineering\" / \"repo\" / \"cleanup_root_local_clutter.py\""
-        },
-        {
-          "path": "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py~",
           "line": 147,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"repo\" / \"cleanup_root_local_clutter.py\""
@@ -12501,7 +12575,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/pretest_guardrails.sh",
-          "line": 372,
+          "line": 422,
           "source_group": "scripts",
           "text": "run_step cleanup env BIOETL_PREFLIGHT_PRESERVE_PYTEST_CACHE=1 bash scripts/engineering/repo/preflight_cleanup.sh"
         },
@@ -13064,7 +13138,7 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 73,
+      "reference_count": 72,
       "references": [
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
@@ -13143,13 +13217,13 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 211,
+          "line": 212,
           "source_group": "docs",
           "text": "| `scripts.ops.data`                | `uv run python -m scripts.ops.data`                | Data integrity: checksums, delta, data dir  |"
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 247,
+          "line": 248,
           "source_group": "docs",
           "text": "uv run python -m scripts.ops.data checksums --generate"
         },
@@ -13361,7 +13435,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 56,
+      "reference_count": 40,
       "references": [
         {
           "path": "Makefile",
@@ -13785,7 +13859,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 18,
+      "reference_count": 17,
       "references": [
         {
           "path": "Makefile",
@@ -13804,12 +13878,6 @@
           "line": 290,
           "source_group": "docs",
           "text": "`scripts/ops/launchers/codex/setup_plugins.sh --pytest-only` перед запуском pytest."
-        },
-        {
-          "path": "makefile",
-          "line": 190,
-          "source_group": "build",
-          "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only"
         },
         {
           "path": "scripts/engineering/dev/README.md",
@@ -13834,6 +13902,12 @@
           "line": 570,
           "source_group": "scripts",
           "text": "# setup_plugins.sh may provision a temporary pytest runtime under /tmp when"
+        },
+        {
+          "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
+          "line": 109,
+          "source_group": "scripts",
+          "text": "Candidate(\"scripts/ops/launchers/codex/setup_plugins.sh\", BOOTSTRAP_HELPER_ROLE),"
         }
       ]
     },
@@ -14718,7 +14792,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 677,
+          "line": 754,
           "source_group": "tests",
           "text": "probe = (ROOT / \"scripts/ops/runtime/docker/docker_runtime_probe.py\").read_text("
         }
@@ -14743,13 +14817,13 @@
         },
         {
           "path": "docs/05-operations/runbooks/docker-stability.md",
-          "line": 57,
+          "line": 64,
           "source_group": "docs",
           "text": "`scripts/ops/runtime/docker/restart-docker.ps1`. Its v2 report bounds every"
         },
         {
           "path": "docs/05-operations/runbooks/neo4j-backend-recovery-quick-start.md",
-          "line": 47,
+          "line": 59,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\restart-docker.ps1 `"
         },
@@ -14779,7 +14853,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 621,
+          "line": 698,
           "source_group": "tests",
           "text": "recovery = (ROOT / \"scripts/ops/runtime/docker/restart-docker.ps1\").read_text("
         }
@@ -14861,7 +14935,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 232,
+          "line": 309,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1\","
         }
@@ -14922,7 +14996,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 231,
+          "line": 308,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/runtime/neo4j/neo4j_quick_start.sh\","
         }
@@ -15936,13 +16010,13 @@
       "references": [
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 456,
+          "line": 533,
           "source_group": "tests",
           "text": "for name in (\"startup.sh\", \"startup.ps1\", \"shutdown.sh\", \"shutdown.ps1\")"
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 614,
+          "line": 691,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
@@ -15973,7 +16047,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 456,
+          "line": 533,
           "source_group": "tests",
           "text": "for name in (\"startup.sh\", \"startup.ps1\", \"shutdown.sh\", \"shutdown.ps1\")"
         },
@@ -16004,13 +16078,13 @@
       "references": [
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 456,
+          "line": 533,
           "source_group": "tests",
           "text": "for name in (\"startup.sh\", \"startup.ps1\", \"shutdown.sh\", \"shutdown.ps1\")"
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 614,
+          "line": 691,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
@@ -16041,7 +16115,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 456,
+          "line": 533,
           "source_group": "tests",
           "text": "for name in (\"startup.sh\", \"startup.ps1\", \"shutdown.sh\", \"shutdown.ps1\")"
         },

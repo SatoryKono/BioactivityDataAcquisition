@@ -23,7 +23,5 @@ This ADR has been superseded. See [ADR-015: Pipeline Services Lifecycle](ADR-015
 
 ADR-008 described graceful shutdown strategy. This approach was superseded by ADR-015 which established a more comprehensive Pipeline Services Lifecycle management.
 
-## Archived Content
-
-The full content of this ADR is available in the archive:
-- [Archived ADR-008: Graceful Shutdown Strategy](../../99-archive/decisions/ADR-008-graceful-shutdown-strategy.md)
+Historical detail remains available through repository history; this retained
+supersession record and ADR-015 are the active navigation surfaces.

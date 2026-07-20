@@ -107,6 +107,9 @@ artifact via `python -m scripts.engineering.qa report-family-baseline --check`.
 It now also validates the `src/memory/` subsystem, runs a refresh smoke on a
 temporary output root, exercises the lightweight pre/post workflow smoke, and
 performs a dry-run episodic prune check.
+When `--report-json` is supplied, the report also includes compact
+`memory_rag_validation` counts and Git/source-surface identity from the
+temporary full build; it never embeds the rebuild-only catalog or chunks.
 
 The canonical shard membership and ignore/deselect rules for
 `run_pytest_sharded.sh` are now externalized in

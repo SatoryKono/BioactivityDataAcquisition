@@ -533,7 +533,7 @@ pytest tests/architecture/test_dq_contract_patterns.py tests/architecture/test_c
 
 ### Current Documentation
 
-- [DQ Contract System Architecture (archived)](../../99-archive/dq-contract-system-component-spec.archive.md)
+- [ADR-045: Data Quality Contract System](../../02-architecture/decisions/ADR-045-dq-contract-system.md)
 - [Observability Metrics Contract](observability.md)
 - [Run Manifest & Ledger Contract](run-manifest-ledger.md)
 - [Gold Schema Contracts](gold-schemas.md)

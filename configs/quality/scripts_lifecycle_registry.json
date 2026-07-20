@@ -134,6 +134,12 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as a top-level ChEMBL activity-field matrix shim while legacy direct-file tests still require the exact path; keep it supporting and prefer python -m scripts.docs dispatch for active use."
     },
+    "scripts/ai/mcp/mcp_adr_analysis_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows-side companion for the ADR Analysis MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
+    },
     "scripts/ai/mcp/mcp_ast_grep_wrapper.ps1": {
       "owner": "@bioetl-platform",
       "decision": "windows_compatibility_wrapper",
@@ -145,6 +151,12 @@
       "decision": "windows_compatibility_wrapper",
       "review_by": "2026-07-15",
       "next_step": "Retain as the Windows-side companion for the canonical Brave Search MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
+    },
+    "scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows-side companion for the Code Analyzer MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
     },
     "scripts/ai/mcp/mcp_code_interpreter_wrapper.ps1": {
       "owner": "@bioetl-platform",
@@ -158,6 +170,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the Windows-side companion for the canonical Context7 MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
     },
+    "scripts/ai/mcp/mcp_deja_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows-side companion for the Deja MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
+    },
     "scripts/ai/mcp/mcp_docker_wrapper.ps1": {
       "owner": "@bioetl-platform",
       "decision": "windows_compatibility_wrapper",
@@ -170,11 +188,23 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the Windows-side companion for the canonical Grafana MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
     },
+    "scripts/ai/mcp/mcp_github_actions_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows-side companion for the GitHub Actions MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
+    },
     "scripts/ai/mcp/mcp_mermaid_wrapper.ps1": {
       "owner": "@bioetl-platform",
       "decision": "windows_compatibility_wrapper",
       "review_by": "2026-07-15",
       "next_step": "Retain as the Windows-side companion for the canonical Mermaid MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
+    },
+    "scripts/ai/mcp/mcp_mutmut_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows-side companion for the Mutmut MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
     },
     "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1": {
       "owner": "@bioetl-platform",
@@ -188,6 +218,24 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the Windows-side companion for the canonical Neo4j Memory MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
     },
+    "scripts/ai/mcp/mcp_adr_analysis_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP wrapper for ADR Analysis server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
+    },
+    "scripts/ai/mcp/mcp_code_analyzer_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP wrapper for Code Analyzer server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
+    },
+    "scripts/ai/mcp/mcp_deja_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP wrapper for Deja server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
+    },
     "scripts/ai/mcp/mcp_docker_docs_wrapper.sh": {
       "owner": "@bioetl-platform",
       "decision": "mcp_compatibility_wrapper",
@@ -200,11 +248,23 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as the MCP wrapper for DockerHub server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
     },
+    "scripts/ai/mcp/mcp_github_actions_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP wrapper for GitHub Actions server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
+    },
     "scripts/ai/mcp/mcp_mermaid_wrapper.sh": {
       "owner": "@bioetl-platform",
       "decision": "mcp_compatibility_wrapper",
       "review_by": "2026-09-30",
       "next_step": "Retain as the MCP wrapper for Mermaid diagram server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
+    },
+    "scripts/ai/mcp/mcp_mutmut_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP wrapper for Mutmut server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
     },
     "scripts/ai/mcp/mcp_needle_wrapper.sh": {
       "owner": "@bioetl-platform",
@@ -637,24 +697,6 @@
       "decision": "windows_compatibility_wrapper",
       "review_by": "2026-07-15",
       "next_step": "Retain only as an unreferenced Windows compatibility installer during the reviewed retirement window; remove it once external bootstrap docs and local operator flows no longer depend on the old Codex command shim."
-    },
-    "scripts/ops/observability/validate_emitter_contracts.py": {
-      "owner": "@bioetl-observability",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a bounded historical emitter-contract diagnostic while the canonical typed inventory and closure campaign own active validation; retire after operator references migrate and do not promote it to an active CI surface."
-    },
-    "scripts/ops/observability/validate_live_observability.py": {
-      "owner": "@bioetl-observability",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a bounded historical live-observability diagnostic while the canonical closure campaign owns reproducible evidence; retire after operator references migrate and do not promote it to an active CI surface."
-    },
-    "scripts/ops/observability/validate_metric_to_panel_mapping.py": {
-      "owner": "@bioetl-observability",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a bounded historical metric-to-panel diagnostic while the generated full panel-contract inventory owns parity; retire after operator references migrate and do not promote it to an active CI surface."
     },
     "scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1": {
       "owner": "@bioetl-platform",
