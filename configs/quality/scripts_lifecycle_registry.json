@@ -134,6 +134,18 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as a top-level ChEMBL activity-field matrix shim while legacy direct-file tests still require the exact path; keep it supporting and prefer python -m scripts.docs dispatch for active use."
     },
+    "scripts/ai/mcp/mcp_adr_analysis_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows-side companion for the canonical ADR Analysis MCP wrapper generated on Windows; keep it supporting unless tracked Windows runtime configs become first-class governed artifacts."
+    },
+    "scripts/ai/mcp/mcp_adr_analysis_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP transport wrapper for ADR Analysis while canonical MCP configs route through it; keep it supporting unless it becomes a standalone governed CLI entrypoint."
+    },
     "scripts/ai/mcp/mcp_ast_grep_wrapper.ps1": {
       "owner": "@bioetl-platform",
       "decision": "windows_compatibility_wrapper",
@@ -145,6 +157,18 @@
       "decision": "windows_compatibility_wrapper",
       "review_by": "2026-07-15",
       "next_step": "Retain as the Windows-side companion for the canonical Brave Search MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
+    },
+    "scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows-side companion for the canonical Code Analyzer MCP wrapper generated on Windows; keep it supporting unless tracked Windows runtime configs become first-class governed artifacts."
+    },
+    "scripts/ai/mcp/mcp_code_analyzer_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP transport wrapper for Code Analyzer while canonical MCP configs route through it; keep it supporting unless it becomes a standalone governed CLI entrypoint."
     },
     "scripts/ai/mcp/mcp_code_interpreter_wrapper.ps1": {
       "owner": "@bioetl-platform",
@@ -158,11 +182,35 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the Windows-side companion for the canonical Context7 MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
     },
+    "scripts/ai/mcp/mcp_deja_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows-side companion for the canonical deja MCP wrapper generated on Windows; keep it supporting unless tracked Windows runtime configs become first-class governed artifacts."
+    },
+    "scripts/ai/mcp/mcp_deja_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP transport wrapper for deja while canonical MCP configs route through it; keep it supporting unless it becomes a standalone governed CLI entrypoint."
+    },
     "scripts/ai/mcp/mcp_docker_wrapper.ps1": {
       "owner": "@bioetl-platform",
       "decision": "windows_compatibility_wrapper",
       "review_by": "2026-07-15",
       "next_step": "Retain as the Windows-side companion for the canonical Docker MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
+    },
+    "scripts/ai/mcp/mcp_github_actions_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows-side companion for the canonical GitHub Actions MCP wrapper generated on Windows; keep it supporting unless tracked Windows runtime configs become first-class governed artifacts."
+    },
+    "scripts/ai/mcp/mcp_github_actions_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP transport wrapper for GitHub Actions while canonical MCP configs route through it; keep it supporting unless it becomes a standalone governed CLI entrypoint."
     },
     "scripts/ai/mcp/mcp_grafana_wrapper.ps1": {
       "owner": "@bioetl-platform",
@@ -175,6 +223,18 @@
       "decision": "windows_compatibility_wrapper",
       "review_by": "2026-07-15",
       "next_step": "Retain as the Windows-side companion for the canonical Mermaid MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
+    },
+    "scripts/ai/mcp/mcp_mutmut_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows-side companion for the canonical mutmut MCP wrapper generated on Windows; keep it supporting unless tracked Windows runtime configs become first-class governed artifacts."
+    },
+    "scripts/ai/mcp/mcp_mutmut_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP transport wrapper for mutmut while canonical MCP configs route through it; keep it supporting unless it becomes a standalone governed CLI entrypoint."
     },
     "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1": {
       "owner": "@bioetl-platform",

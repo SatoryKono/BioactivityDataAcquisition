@@ -1,7 +1,7 @@
 version: 1.0.0
 status: active
 owner: Engineering / Architecture
-last_verified: "2026-07-03"
+last_verified: "2026-07-20"
 
 current_live_root_baseline:
   tracked_root_audit_status: pass
@@ -37,7 +37,7 @@ review_lanes:
         canonical_path: .env.example
         action_if_reintroduced: security_review_then_untrack_or_replace_with_example
       - path: .env.local
-        current_live_state: absent_from_root_baseline
+        current_live_state: present_local_only_root_surface
         canonical_path: .env.example
         action_if_reintroduced: security_review_then_untrack_or_replace_with_example
       - path: new.env
@@ -239,14 +239,6 @@ review_lanes:
         current_live_state: present_local_only_root_surface
         canonical_path: null
         action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
-      - path: .agents
-        current_live_state: present_local_only_root_surface
-        canonical_path: null
-        action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
-      - path: .cache
-        current_live_state: present_local_only_root_surface
-        canonical_path: null
-        action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
       - path: .claude
         current_live_state: absent_from_root_baseline
         canonical_path: .codex
@@ -255,20 +247,8 @@ review_lanes:
         current_live_state: present_local_only_root_surface
         canonical_path: GEMINI.md
         action_if_reintroduced: keep machine-local Gemini configuration untracked and use GEMINI.md for tracked contributor guidance
-      - path: .junie
-        current_live_state: absent_from_root_baseline
-        canonical_path: null
-        action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
       - path: .jules
         current_live_state: absent_from_root_baseline
-        canonical_path: null
-        action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
-      - path: .npm-cache
-        current_live_state: present_local_only_root_surface
-        canonical_path: null
-        action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
-      - path: .sonarlint
-        current_live_state: present_local_only_root_surface
         canonical_path: null
         action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
       - path: skills-lock.json
@@ -283,14 +263,6 @@ review_lanes:
         current_live_state: present_curated_root_surface
         canonical_path: .zed
         action_if_reintroduced: keep_only_as_curated_shared_project_editor_configuration_without_credentials_or_local_runtime_state
-      - path: .windsurf
-        current_live_state: present_local_only_root_surface
-        canonical_path: null
-        action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
-      - path: caddy
-        current_live_state: present_local_only_root_surface
-        canonical_path: null
-        action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
       - path: script-codex
         current_live_state: present_local_only_root_surface
         canonical_path: scripts/ai/codex
@@ -308,7 +280,7 @@ review_lanes:
       - rg -n "DOCKER_QUICKSTART\\.md|best_practices\\.md" docs/00-project/governance/qodo/README.md docs/DOCKER_QUICKSTART.md .github/root-allowlist.txt docs/00-project/governance/03-file-policy.md
     candidates:
       - path: DOCKER_QUICKSTART.md
-        current_live_state: present_approved_root_surface
+        current_live_state: absent_from_root_baseline
         canonical_path: docs/DOCKER_QUICKSTART.md
         action_if_reintroduced: retain_only_while_the_reviewed_adr010_operator_entrypoint_requires_the_exact_root_filename_otherwise_route_callers_to_docs/DOCKER_QUICKSTART.md_and_drop_the_root_copy
       - path: best_practices.md
@@ -494,11 +466,6 @@ review_lanes:
         current_live_state: absent_from_root_baseline
         canonical_path: pyproject.toml
         action_if_reintroduced: keep_untracked_as_a_recovery_only_surface_and_prune_after_rebuilding_the_windows_virtualenv
-      - path: caddy
-        current_live_state: present_local_only_root_surface
-        canonical_path: .mcp.json
-        action_if_reintroduced: keep_runtime_state_untracked; persistent MCP Compose is retired
-
   - lane_id: local_vendor_tooling_roots
     classification: review_required
     scope: local vendor/editor tooling roots that must remain untracked unless explicitly promoted
@@ -507,11 +474,15 @@ review_lanes:
     retention_action: keep_untracked_or_promote_only_after_explicit_owner_review
     cleanup_policy: exact_candidate_review_only_no_blind_delete
     verification:
-      - git ls-files .junie .qodo .sonarlint .windsurf
-      - git check-ignore -v .junie .qodo .sonarlint .windsurf
-      - rg -n "\\.junie/|\\.qodo/|\\.sonarlint/|\\.windsurf/" .gitignore docs scripts .github tests configs
+      - git ls-files .junie .qodo .sonarlint .windsurf caddy
+      - git check-ignore -v .junie .qodo .sonarlint .windsurf caddy
+      - rg -n "\\.junie/|\\.qodo/|\\.sonarlint/|\\.windsurf/|caddy/" .gitignore docs scripts .github tests configs
     candidates:
       - path: .junie
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_or_move_curated_shared_content_to_an_approved_root_surface
+      - path: caddy
         current_live_state: present_local_only_root_surface
         canonical_path: null
         action_if_reintroduced: keep_untracked_or_move_curated_shared_content_to_an_approved_root_surface
