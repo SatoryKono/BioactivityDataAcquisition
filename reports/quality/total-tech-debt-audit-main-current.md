@@ -10,7 +10,7 @@ Audited branch: `main`
 
 Audited commit SHA: `80c9ae958d22d589f03b2f0a013e5e10fa62665c`
 
-Evidence surface SHA-256: `1e023b34de41e7ddc316a67914e363554fb54475b2ef85333d61bd564fb1ef44`
+Evidence surface SHA-256: `144c6b67ccd4287cbd8ef86f7694b144965f885984644259db0ff98e4464d7f2`
 
 Registry: `configs/quality/technical_debt_audit_registry.yaml`
 
@@ -29,7 +29,7 @@ artifacts.
 1. Compatibility transition debt remains zero. The census contains `12`
    retained public entrypoints, `4` retained public export facades, and zero
    twin pairs; retained public API is not relabelled as removable dead code.
-1. Test governance reports `22,556` test functions across `2,020` pytest
+1. Test governance reports `22,561` test functions across `2,020` pytest
    files, with zero duplicate test names, markerless tests, compatibility test
    files, and refined assertless residuals.
 1. The largest directly evidenced residual is the `824`-module partial
@@ -42,7 +42,7 @@ artifacts.
 | Architecture score | Integral score `8.92` | `reports/quality/architecture-quality-scorecard.json` |
 | Debt gates | `45` pass, `0` fail, `0` warn | `reports/quality/debt-governance-gates.json` |
 | Module inventory | `2241` total; `1398` full; `824` partial; `19` no executable lines; `0` uncovered/unmeasured | `reports/quality/module-coverage-inventory.json` |
-| Test governance | `22556` functions; `2020` files; duplicate/markerless/compatibility counts all `0` | `reports/quality/test-governance-current.json` |
+| Test governance | `22561` functions; `2020` files; duplicate/markerless/compatibility counts all `0` | `reports/quality/test-governance-current.json` |
 | Compatibility | `12` retained entrypoints; `4` public export facades; `0` twin pairs | `reports/quality/compatibility-importer-census.json` |
 | Transition compatibility debt | Current/max count `0/0` | `configs/quality/debt_scorecard.yaml` |
 
