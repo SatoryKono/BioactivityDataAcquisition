@@ -372,7 +372,7 @@ docs.
 Current evidence bundle on `main`:
 
 - canonical plan: [normalization_plan_P0_P6.md](normalization_plan_P0_P6.md)
-- shipped multi-pipeline matrix: [pipeline_normalization_field_matrix.md](../reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md)
+- rebuild-only multi-pipeline matrix generator: [generate_pipeline_normalization_field_matrix.py](../../scripts/docs/generate_pipeline_normalization_field_matrix.py)
 - fallback inventory report: [report_normalization_fallback_inventory.py](../../scripts/engineering/qa/report_normalization_fallback_inventory.py)
 - published normalization reference entrypoint: [non-chembl-normalization-overview.md](../04-reference/normalization/non-chembl-normalization-overview.md)
 - join-key policy seams: [join_keys.py](../../src/bioetl/domain/normalization/join_keys.py) and [join_key_normalization.py](../../src/bioetl/application/composite/join_key_normalization.py)

@@ -254,4 +254,4 @@ After orchestration:
 
 - [references/orchestration-contract.md](references/orchestration-contract.md) - orchestration rules and levels
 - [references/shard-task-briefs.md](references/shard-task-briefs.md) - task delegation templates
-- [../../../docs/00-project/ai/skills/local/collecting-evidence/SKILL.md](../../../docs/00-project/ai/skills/local/collecting-evidence/SKILL.md) - evidence collection skill
+- [../collecting-evidence/SKILL.md](../collecting-evidence/SKILL.md) - evidence collection skill

@@ -94,6 +94,7 @@ design rationale and layer structure.
   integrators, or maintainers must consult directly.
 - Use the repo-only plans index for working context:
   [`../plans/README.md`](../plans/README.md).
-- Historical archive material lives in the archived [`../99-archive/README.md`](../99-archive/README.md) index.
+- Historical report material lives in the
+  [archived reports index](../99-archive/reports/README.md).
 - Reports remain non-canonical and should be navigated directly through the
   `docs/reports/` tree when needed.

@@ -23,7 +23,5 @@ This ADR has been superseded. See [ADR-010: Local-Only Deployment Strategy](ADR-
 
 ADR-003 described in-memory locking strategy for multi-instance deployment. This approach was superseded by ADR-010 which established Local-Only deployment model, eliminating the need for distributed locking.
 
-## Archived Content
-
-The full content of this ADR is available in the archive:
-- [Archived ADR-003: In-Memory Locking Strategy](../../99-archive/decisions/ADR-003-in-memory-locking-strategy.md)
+Historical detail remains available through repository history; this retained
+supersession record and ADR-010 are the active navigation surfaces.
