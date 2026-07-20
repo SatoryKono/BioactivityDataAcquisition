@@ -1,0 +1,8 @@
+# Generated ChEMBL activity diagram artifacts (relative to repository root).
+
+docs/02-architecture/diagrams/architecture/svg/49-chembl-pipeline-activity-dataflow.svg
+docs/02-architecture/diagrams/architecture/svg/50-chembl-pipeline-activity-filter-criteria.svg
+docs/02-architecture/diagrams/architecture/svg/51a-chembl-pipeline-activity-silver-fields-1.svg
+docs/02-architecture/diagrams/architecture/svg/51b-chembl-pipeline-activity-silver-fields-2.svg
+docs/02-architecture/diagrams/architecture/svg/52a-chembl-pipeline-activity-gold-fields-1.svg
+docs/02-architecture/diagrams/architecture/svg/52b-chembl-pipeline-activity-gold-fields-2.svg

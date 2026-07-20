@@ -1,7 +1,7 @@
 # BioETL Architecture Diagrams Bundle
 
-- Generated: 2026-07-06T11:30:20
-- Diagram count: 83
+- Generated: 2026-07-18T18:29:11
+- Diagram count: 89
 
 ## Table of Contents
 
@@ -88,6 +88,12 @@
 - [46-filter-config-resolution-and-column-filter-evaluation — Filter Config Resolution And Column Filter Evaluation](#46-filter-config-resolution-and-column-filter-evaluation)
 - [47-run-manifest-domain-model-and-serialization-surface — Run Manifest Domain Model And Serialization Surface](#47-run-manifest-domain-model-and-serialization-surface)
 - [48-effective-config-artifact-domain-model — Effective Config Artifact Domain Model](#48-effective-config-artifact-domain-model)
+- [49-chembl-pipeline-activity-dataflow — ChEMBL Activity Source To Silver And Gold](#49-chembl-pipeline-activity-dataflow)
+- [50-chembl-pipeline-activity-filter-criteria — ChEMBL Activity Query And Filtering Criteria](#50-chembl-pipeline-activity-filter-criteria)
+- [51a-chembl-pipeline-activity-silver-fields-1 — ChEMBL Activity Silver Output Fields 1 Of 2](#51a-chembl-pipeline-activity-silver-fields-1)
+- [51b-chembl-pipeline-activity-silver-fields-2 — ChEMBL Activity Silver Output Fields 2 Of 2](#51b-chembl-pipeline-activity-silver-fields-2)
+- [52a-chembl-pipeline-activity-gold-fields-1 — ChEMBL Activity Gold Output Fields 1 Of 2](#52a-chembl-pipeline-activity-gold-fields-1)
+- [52b-chembl-pipeline-activity-gold-fields-2 — ChEMBL Activity Gold Output Fields 2 Of 2](#52b-chembl-pipeline-activity-gold-fields-2)
 
 \newpage
 
@@ -97,7 +103,7 @@
 
 **Simplified High-Level Hexagonal Architecture**
 
-*SVG/PNG не найдены: `../architecture/svg/01-high-level-hexagonal-simple.svg`, `../architecture/png/01-high-level-hexagonal-simple.png`*
+![01-high-level-hexagonal-simple](../architecture/svg/01-high-level-hexagonal-simple.svg)
 
 ### Описание
 Диаграмма «Simplified High-Level Hexagonal Architecture» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Simplified overview of Ports & Adapters pattern with essential layers only.. Схема имеет плотность порядка 13 узлов и 15 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: External Systems, Interfaces Layer, Composition Layer, Application Layer, Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: External APIs (ChEMBL, PubMed, UniProt, etc.), File System (Delta Lake / Parquet), Observability (Prometheus, OpenTelemetry), CLI Commands, Bootstrap / Assembly, Core Pipeline (Executor, Transformer, Writer). Примечание: Simplified version of 01-high-level-hexagonal.mmd (46 nodes → 13 nodes).
@@ -1201,7 +1207,7 @@
 
 **Control Plane Artifact Publication Pipeline**
 
-*SVG/PNG не найдены: `../architecture/svg/24-control-plane-artifact-publication-pipeline.svg`, `../architecture/png/24-control-plane-artifact-publication-pipeline.png`*
+![24-control-plane-artifact-publication-pipeline](../architecture/svg/24-control-plane-artifact-publication-pipeline.svg)
 
 ### Описание
 Диаграмма «Control Plane Artifact Publication Pipeline» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Control Plane». В комментариях исходника зафиксирован фокус диаграммы: {init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%. Схема имеет плотность порядка 16 узлов и 18 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: CLI run / workflow commands, composition.bootstrap.runtime.assembly, PipelineRunner, build_postrun_service, control plane writers, RunManifest.
@@ -1219,7 +1225,7 @@
 
 **Effective Execution Config Resolution And Artifact Hashing**
 
-*SVG/PNG не найдены: `../architecture/svg/25-effective-execution-config-resolution-and-artifact-hashing.svg`, `../architecture/png/25-effective-execution-config-resolution-and-artifact-hashing.png`*
+![25-effective-execution-config-resolution-and-artifact-hashing](../architecture/svg/25-effective-execution-config-resolution-and-artifact-hashing.svg)
 
 ### Описание
 Диаграмма «Effective Execution Config Resolution And Artifact Hashing» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате диаграмма последовательности (sequence) и служит ориентиром на уровне детализации «System / Interaction». В комментариях исходника зафиксирован фокус диаграммы: {init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%.
@@ -1237,7 +1243,7 @@
 
 **Reproducible Run Contract Across Manifest Ledger And Output Metadata**
 
-*SVG/PNG не найдены: `../architecture/svg/26-reproducible-run-contract-across-manifest-ledger-and-output-metadata.svg`, `../architecture/png/26-reproducible-run-contract-across-manifest-ledger-and-output-metadata.png`*
+![26-reproducible-run-contract-across-manifest-ledger-and-output-metadata](../architecture/svg/26-reproducible-run-contract-across-manifest-ledger-and-output-metadata.svg)
 
 ### Описание
 Диаграмма «Reproducible Run Contract Across Manifest Ledger And Output Metadata» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Control Plane». В комментариях исходника зафиксирован фокус диаграммы: {init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%. Схема имеет плотность порядка 11 узлов и 16 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: RunManifest, RunLedgerEntry, EffectiveConfigArtifact, run_id / manifest_id / batch_id, bronze metadata yaml, silver metadata yaml.
@@ -1255,7 +1261,7 @@
 
 **Composite Preflight Field Priority And Normalization Compatibility Resolution**
 
-*SVG/PNG не найдены: `../architecture/svg/27-composite-preflight-field-priority-and-normalization-compatibility-resolution.svg`, `../architecture/png/27-composite-preflight-field-priority-and-normalization-compatibility-resolution.png`*
+![27-composite-preflight-field-priority-and-normalization-compatibility-resolution](../architecture/svg/27-composite-preflight-field-priority-and-normalization-compatibility-resolution.svg)
 
 ### Описание
 Диаграмма «Composite Preflight Field Priority And Normalization Compatibility Resolution» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате диаграмма последовательности (sequence) и служит ориентиром на уровне детализации «System / Interaction». В комментариях исходника зафиксирован фокус диаграммы: {init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%.
@@ -1273,7 +1279,7 @@
 
 **Historical Replay Universe Inventory And Closure Report**
 
-*SVG/PNG не найдены: `../architecture/svg/28-historical-replay-universe-inventory-and-closure-report.svg`, `../architecture/png/28-historical-replay-universe-inventory-and-closure-report.png`*
+![28-historical-replay-universe-inventory-and-closure-report](../architecture/svg/28-historical-replay-universe-inventory-and-closure-report.svg)
 
 ### Описание
 Диаграмма «Historical Replay Universe Inventory And Closure Report» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате диаграмма последовательности (sequence) и служит ориентиром на уровне детализации «System / Interaction». В комментариях исходника зафиксирован фокус диаграммы: {init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%.
@@ -1291,7 +1297,7 @@
 
 **Provider Registry Loading To Data Source Creation**
 
-*SVG/PNG не найдены: `../architecture/svg/29-provider-registry-loading-to-data-source-creation.svg`, `../architecture/png/29-provider-registry-loading-to-data-source-creation.png`*
+![29-provider-registry-loading-to-data-source-creation](../architecture/svg/29-provider-registry-loading-to-data-source-creation.svg)
 
 ### Описание
 Диаграмма «Provider Registry Loading To Data Source Creation» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате диаграмма последовательности (sequence) и служит ориентиром на уровне детализации «System / Interaction». В комментариях исходника зафиксирован фокус диаграммы: {init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%.
@@ -1309,7 +1315,7 @@
 
 **Postrun Retention Deduplication And Vacuum Warning Path**
 
-*SVG/PNG не найдены: `../architecture/svg/30-postrun-retention-deduplication-and-vacuum-warning-path.svg`, `../architecture/png/30-postrun-retention-deduplication-and-vacuum-warning-path.png`*
+![30-postrun-retention-deduplication-and-vacuum-warning-path](../architecture/svg/30-postrun-retention-deduplication-and-vacuum-warning-path.svg)
 
 ### Описание
 Диаграмма «Postrun Retention Deduplication And Vacuum Warning Path» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате диаграмма последовательности (sequence) и служит ориентиром на уровне детализации «System / Interaction». В комментариях исходника зафиксирован фокус диаграммы: {init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%.
@@ -1327,7 +1333,7 @@
 
 **Workflow Control Plane Manifest And Ledger Publication**
 
-*SVG/PNG не найдены: `../architecture/svg/31-workflow-control-plane-manifest-and-ledger-publication.svg`, `../architecture/png/31-workflow-control-plane-manifest-and-ledger-publication.png`*
+![31-workflow-control-plane-manifest-and-ledger-publication](../architecture/svg/31-workflow-control-plane-manifest-and-ledger-publication.svg)
 
 ### Описание
 Диаграмма «Workflow Control Plane Manifest And Ledger Publication» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Control Plane». В комментариях исходника зафиксирован фокус диаграммы: {init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%. Схема имеет плотность порядка 9 узлов и 10 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: workflow CLI command, workflow execution state, WorkflowManifestStep, WorkflowManifest, WorkflowLedger, child run manifests.
@@ -1345,7 +1351,7 @@
 
 **Lock Heartbeat Checkpoint And Shutdown Collaboration**
 
-*SVG/PNG не найдены: `../architecture/svg/32-lock-heartbeat-checkpoint-and-shutdown-collaboration.svg`, `../architecture/png/32-lock-heartbeat-checkpoint-and-shutdown-collaboration.png`*
+![32-lock-heartbeat-checkpoint-and-shutdown-collaboration](../architecture/svg/32-lock-heartbeat-checkpoint-and-shutdown-collaboration.svg)
 
 ### Описание
 Диаграмма «Lock Heartbeat Checkpoint And Shutdown Collaboration» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате диаграмма последовательности (sequence) и служит ориентиром на уровне детализации «System / Interaction». В комментариях исходника зафиксирован фокус диаграммы: {init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%.
@@ -1363,7 +1369,7 @@
 
 **Pipeline Service Bundle And Runner Dependencies**
 
-*SVG/PNG не найдены: `../architecture/svg/33-pipeline-service-bundle-and-runner-dependencies.svg`, `../architecture/png/33-pipeline-service-bundle-and-runner-dependencies.png`*
+![33-pipeline-service-bundle-and-runner-dependencies](../architecture/svg/33-pipeline-service-bundle-and-runner-dependencies.svg)
 
 ### Описание
 Диаграмма «Pipeline Service Bundle And Runner Dependencies» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Application / Component». В комментариях исходника зафиксирован фокус диаграммы: {init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%. Схема имеет плотность порядка 9 узлов и 9 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: PipelineRunner, PipelineService, PipelineStorageProtocol, BatchExecutor, RecordProcessor, BatchWriter.
@@ -1381,7 +1387,7 @@
 
 **PipelineRun Aggregate Stage Result And Terminal Transition Model**
 
-*SVG/PNG не найдены: `../architecture/svg/34-pipelinerun-aggregate-stage-result-and-terminal-transition-model.svg`, `../architecture/png/34-pipelinerun-aggregate-stage-result-and-terminal-transition-model.png`*
+![34-pipelinerun-aggregate-stage-result-and-terminal-transition-model](../architecture/svg/34-pipelinerun-aggregate-stage-result-and-terminal-transition-model.svg)
 
 ### Описание
 Диаграмма «PipelineRun Aggregate Stage Result And Terminal Transition Model» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате диаграмма состояний (state diagram) и служит ориентиром на уровне детализации «Domain / Aggregate». В комментариях исходника зафиксирован фокус диаграммы: {init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%.
@@ -1399,7 +1405,7 @@
 
 **Batch Aggregate Seal Write Commit Failure Lifecycle**
 
-*SVG/PNG не найдены: `../architecture/svg/35-batch-aggregate-seal-write-commit-failure-lifecycle.svg`, `../architecture/png/35-batch-aggregate-seal-write-commit-failure-lifecycle.png`*
+![35-batch-aggregate-seal-write-commit-failure-lifecycle](../architecture/svg/35-batch-aggregate-seal-write-commit-failure-lifecycle.svg)
 
 ### Описание
 Диаграмма «Batch Aggregate Seal Write Commit Failure Lifecycle» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате диаграмма состояний (state diagram) и служит ориентиром на уровне детализации «Domain / Aggregate». В комментариях исходника зафиксирован фокус диаграммы: {init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%.
@@ -1417,7 +1423,7 @@
 
 **Quarantine Entry Review And Resolution Flow**
 
-*SVG/PNG не найдены: `../architecture/svg/36-quarantine-entry-review-resolution-and-discard-flow.svg`, `../architecture/png/36-quarantine-entry-review-resolution-and-discard-flow.png`*
+![36-quarantine-entry-review-resolution-and-discard-flow](../architecture/svg/36-quarantine-entry-review-resolution-and-discard-flow.svg)
 
 ### Описание
 Диаграмма «Quarantine Entry Review And Resolution Flow» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате диаграмма состояний (state diagram) и служит ориентиром на уровне детализации «Domain / Aggregate». В комментариях исходника зафиксирован фокус диаграммы: {init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%.
@@ -1435,7 +1441,7 @@
 
 **Observability Bootstrap Bundle From Settings To Ports**
 
-*SVG/PNG не найдены: `../architecture/svg/37-observability-bootstrap-bundle-from-settings-to-ports.svg`, `../architecture/png/37-observability-bootstrap-bundle-from-settings-to-ports.png`*
+![37-observability-bootstrap-bundle-from-settings-to-ports](../architecture/svg/37-observability-bootstrap-bundle-from-settings-to-ports.svg)
 
 ### Описание
 Диаграмма «Observability Bootstrap Bundle From Settings To Ports» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Observability». В комментариях исходника зафиксирован фокус диаграммы: {init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%. Схема имеет плотность порядка 13 узлов и 15 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Runtime settings, bootstrap_logger, bootstrap_tracer, bootstrap_metrics, bootstrap_dq_monitor, bootstrap_observability_bundle.
@@ -1453,7 +1459,7 @@
 
 **ChEMBL Activity Extraction To Bronze Artifact Publication**
 
-*SVG/PNG не найдены: `../architecture/svg/38-chembl-bronze-activity-extraction-to-artifact-publication.svg`, `../architecture/png/38-chembl-bronze-activity-extraction-to-artifact-publication.png`*
+![38-chembl-bronze-activity-extraction-to-artifact-publication](../architecture/svg/38-chembl-bronze-activity-extraction-to-artifact-publication.svg)
 
 ### Описание
 Диаграмма «ChEMBL Activity Extraction To Bronze Artifact Publication» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате диаграмма последовательности (sequence) и служит ориентиром на уровне детализации «Provider / Interaction». В комментариях исходника зафиксирован фокус диаграммы: {init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%.
@@ -1471,7 +1477,7 @@
 
 **CrossRef Publication Search Fallback And Batch DOI Fetch**
 
-*SVG/PNG не найдены: `../architecture/svg/39-crossref-search-fallback-and-batch-doi-fetch-publications.svg`, `../architecture/png/39-crossref-search-fallback-and-batch-doi-fetch-publications.png`*
+![39-crossref-search-fallback-and-batch-doi-fetch-publications](../architecture/svg/39-crossref-search-fallback-and-batch-doi-fetch-publications.svg)
 
 ### Описание
 Диаграмма «CrossRef Publication Search Fallback And Batch DOI Fetch» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате диаграмма последовательности (sequence) и служит ориентиром на уровне детализации «Provider / Interaction». В комментариях исходника зафиксирован фокус диаграммы: {init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%.
@@ -1489,7 +1495,7 @@
 
 **PubMed Search Fetch XML Parse And Publication Mapping**
 
-*SVG/PNG не найдены: `../architecture/svg/40-pubmed-search-fetch-xml-parse-and-publication-mapping.svg`, `../architecture/png/40-pubmed-search-fetch-xml-parse-and-publication-mapping.png`*
+![40-pubmed-search-fetch-xml-parse-and-publication-mapping](../architecture/svg/40-pubmed-search-fetch-xml-parse-and-publication-mapping.svg)
 
 ### Описание
 Диаграмма «PubMed Search Fetch XML Parse And Publication Mapping» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате диаграмма последовательности (sequence) и служит ориентиром на уровне детализации «Provider / Interaction». В комментариях исходника зафиксирован фокус диаграммы: {init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%.
@@ -1507,7 +1513,7 @@
 
 **OpenAlex Cursor Pagination And Response Mapping Path**
 
-*SVG/PNG не найдены: `../architecture/svg/41-openalex-cursor-pagination-and-response-mapping-path.svg`, `../architecture/png/41-openalex-cursor-pagination-and-response-mapping-path.png`*
+![41-openalex-cursor-pagination-and-response-mapping-path](../architecture/svg/41-openalex-cursor-pagination-and-response-mapping-path.svg)
 
 ### Описание
 Диаграмма «OpenAlex Cursor Pagination And Response Mapping Path» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате диаграмма последовательности (sequence) и служит ориентиром на уровне детализации «Provider / Interaction». В комментариях исходника зафиксирован фокус диаграммы: {init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%.
@@ -1525,7 +1531,7 @@
 
 **SemanticScholar Search Fallback And Batch Request Flow**
 
-*SVG/PNG не найдены: `../architecture/svg/42-semanticscholar-search-fallback-and-batch-request-flow.svg`, `../architecture/png/42-semanticscholar-search-fallback-and-batch-request-flow.png`*
+![42-semanticscholar-search-fallback-and-batch-request-flow](../architecture/svg/42-semanticscholar-search-fallback-and-batch-request-flow.svg)
 
 ### Описание
 Диаграмма «SemanticScholar Search Fallback And Batch Request Flow» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате диаграмма последовательности (sequence) и служит ориентиром на уровне детализации «Provider / Interaction». В комментариях исходника зафиксирован фокус диаграммы: {init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%.
@@ -1543,7 +1549,7 @@
 
 **UniProt IDMapping To Protein Fetch Enrichment**
 
-*SVG/PNG не найдены: `../architecture/svg/43-uniprot-mapping-job-to-protein-fetch-enrichment.svg`, `../architecture/png/43-uniprot-mapping-job-to-protein-fetch-enrichment.png`*
+![43-uniprot-mapping-job-to-protein-fetch-enrichment](../architecture/svg/43-uniprot-mapping-job-to-protein-fetch-enrichment.svg)
 
 ### Описание
 Диаграмма «UniProt IDMapping To Protein Fetch Enrichment» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Provider / Component». В комментариях исходника зафиксирован фокус диаграммы: {init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%. Схема имеет плотность порядка 10 узлов и 9 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: seed ids or accessions, UniProtAdapter, UniProtIdMappingClient, start idmapping job, poll job status, mapped accession set.
@@ -1561,7 +1567,7 @@
 
 **PubChem Compound Fetch Strategy Resolution**
 
-*SVG/PNG не найдены: `../architecture/svg/44-pubchem-fetch-strategy-resolution-for-compounds.svg`, `../architecture/png/44-pubchem-fetch-strategy-resolution-for-compounds.png`*
+![44-pubchem-fetch-strategy-resolution-for-compounds](../architecture/svg/44-pubchem-fetch-strategy-resolution-for-compounds.svg)
 
 ### Описание
 Диаграмма «PubChem Compound Fetch Strategy Resolution» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Provider / Component». В комментариях исходника зафиксирован фокус диаграммы: {init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%. Схема имеет плотность порядка 9 узлов и 8 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: compound request, PubChemAdapter, fetch_strategies.py, query_builder.py, fetch_flow.py, response_mapper.py.
@@ -1579,7 +1585,7 @@
 
 **DQ Contract Config Loading And Policy Resolution**
 
-*SVG/PNG не найдены: `../architecture/svg/45-dq-contract-config-loading-and-policy-resolution.svg`, `../architecture/png/45-dq-contract-config-loading-and-policy-resolution.png`*
+![45-dq-contract-config-loading-and-policy-resolution](../architecture/svg/45-dq-contract-config-loading-and-policy-resolution.svg)
 
 ### Описание
 Диаграмма «DQ Contract Config Loading And Policy Resolution» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Configuration / Component». В комментариях исходника зафиксирован фокус диаграммы: {init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%. Схема имеет плотность порядка 8 узлов и 7 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: DQ YAML policies, dq_config_loader.py, _dq_config_normalization.py, _dq_config_validation_merge.py, DQPolicySnapshot, dq_policy_resolver.py.
@@ -1597,7 +1603,7 @@
 
 **Filter Config Resolution And Column Filter Evaluation**
 
-*SVG/PNG не найдены: `../architecture/svg/46-filter-config-resolution-and-column-filter-evaluation.svg`, `../architecture/png/46-filter-config-resolution-and-column-filter-evaluation.png`*
+![46-filter-config-resolution-and-column-filter-evaluation](../architecture/svg/46-filter-config-resolution-and-column-filter-evaluation.svg)
 
 ### Описание
 Диаграмма «Filter Config Resolution And Column Filter Evaluation» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Configuration / Component». В комментариях исходника зафиксирован фокус диаграммы: {init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%. Схема имеет плотность порядка 9 узлов и 11 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: filter YAML, filter_config_loader.py, input_config.py, silver_config.py, gold_config.py, column_filter.py.
@@ -1615,7 +1621,7 @@
 
 **Run Manifest Domain Model And Serialization Surface**
 
-*SVG/PNG не найдены: `../architecture/svg/47-run-manifest-domain-model-and-serialization-surface.svg`, `../architecture/png/47-run-manifest-domain-model-and-serialization-surface.png`*
+![47-run-manifest-domain-model-and-serialization-surface](../architecture/svg/47-run-manifest-domain-model-and-serialization-surface.svg)
 
 ### Описание
 Диаграмма «Run Manifest Domain Model And Serialization Surface» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Domain / Model». В комментариях исходника зафиксирован фокус диаграммы: {init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%. Схема имеет плотность порядка 6 узлов и 5 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: RunManifest, ReplayCapability, RunInputSnapshotRef, RunSourceRef, RunArtifactRef, RunCodeProvenance.
@@ -1633,7 +1639,7 @@
 
 **Effective Config Artifact Domain Model**
 
-*SVG/PNG не найдены: `../architecture/svg/48-effective-config-artifact-domain-model.svg`, `../architecture/png/48-effective-config-artifact-domain-model.png`*
+![48-effective-config-artifact-domain-model](../architecture/svg/48-effective-config-artifact-domain-model.svg)
 
 ### Описание
 Диаграмма «Effective Config Artifact Domain Model» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Domain / Model». В комментариях исходника зафиксирован фокус диаграммы: {init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%. Схема имеет плотность порядка 9 узлов и 8 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: EffectiveConfigArtifact, EffectiveConfigHashes, ConfigSourceRef, ResolvedConfigSnapshot, RuntimeOverrideSnapshot, ExecutionEnvironmentSnapshot.
@@ -1642,3 +1648,123 @@
 - Тип: `classDiagram`
 - Уровень: `Domain / Model`
 - Дата: `2026-05-12`
+
+\newpage
+
+<div style="page-break-before: always;"></div>
+
+## 49-chembl-pipeline-activity-dataflow
+
+**ChEMBL Activity Source To Silver And Gold**
+
+![49-chembl-pipeline-activity-dataflow](../architecture/svg/49-chembl-pipeline-activity-dataflow.svg)
+
+### Описание
+Диаграмма «ChEMBL Activity Source To Silver And Gold» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Pipeline / Dataflow». В комментариях исходника зафиксирован фокус диаграммы: Generated from the resolved chembl_activity configuration and contracts.. Схема имеет плотность порядка 14 узлов и 13 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: ChEMBL activity API, Source query 9 criteria, Bronze records raw source payload, Input-file filter disabled, Activity Transformer Bronze to Silver, Silver structural filter 29 criteria. Связанный ADR: ADR-002, ADR-040.
+
+### Метаданные
+- Тип: `flowchart`
+- Уровень: `Pipeline / Dataflow`
+- Дата: `2026-07-18`
+- Узлы (metadata): `14`
+- ADR: `ADR-002, ADR-040`
+
+\newpage
+
+<div style="page-break-before: always;"></div>
+
+## 50-chembl-pipeline-activity-filter-criteria
+
+**ChEMBL Activity Query And Filtering Criteria**
+
+![50-chembl-pipeline-activity-filter-criteria](../architecture/svg/50-chembl-pipeline-activity-filter-criteria.svg)
+
+### Описание
+Диаграмма «ChEMBL Activity Query And Filtering Criteria» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Pipeline / Rules». В комментариях исходника зафиксирован фокус диаграммы: Generated from the resolved chembl_activity configuration and contracts.. Схема имеет плотность порядка 17 узлов и 25 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Source query criteria applied by ChEMBL API, Input-file filter enabled = false activity_id column, Silver structural criteria, Required fields 1 activity_id molecule_id assay_id target_id publication_id, Required fields 5 pchembl_value uo_units journal publication_year _state, Required fields 6 assay_type potential_duplicate standard_relation. Связанный ADR: ADR-002, ADR-040.
+
+### Метаданные
+- Тип: `flowchart`
+- Уровень: `Pipeline / Rules`
+- Дата: `2026-07-18`
+- Узлы (metadata): `17`
+- ADR: `ADR-002, ADR-040`
+
+\newpage
+
+<div style="page-break-before: always;"></div>
+
+## 51a-chembl-pipeline-activity-silver-fields-1
+
+**ChEMBL Activity Silver Output Fields 1 Of 2**
+
+![51a-chembl-pipeline-activity-silver-fields-1](../architecture/svg/51a-chembl-pipeline-activity-silver-fields-1.svg)
+
+### Описание
+Диаграмма «ChEMBL Activity Silver Output Fields 1 Of 2» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Pipeline / Silver Contract». В комментариях исходника зафиксирован фокус диаграммы: Generated from the resolved chembl_activity configuration and contracts.. Схема имеет плотность порядка 13 узлов и 12 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Silver output sheet 1 of 2 60 fields, Fields 1-5 entity_id content_hash _run_id _run_type _source_batch_id, Fields 6-10 _ingestion_ts _index _state activity_id assay_id, Fields 36-40 activity_type activity_relation activity_value units text_value. Связанный ADR: ADR-002, ADR-040.
+
+### Метаданные
+- Тип: `flowchart`
+- Уровень: `Pipeline / Silver Contract`
+- Дата: `2026-07-18`
+- Узлы (metadata): `13`
+- ADR: `ADR-002, ADR-040`
+
+\newpage
+
+<div style="page-break-before: always;"></div>
+
+## 51b-chembl-pipeline-activity-silver-fields-2
+
+**ChEMBL Activity Silver Output Fields 2 Of 2**
+
+![51b-chembl-pipeline-activity-silver-fields-2](../architecture/svg/51b-chembl-pipeline-activity-silver-fields-2.svg)
+
+### Описание
+Диаграмма «ChEMBL Activity Silver Output Fields 2 Of 2» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Pipeline / Silver Contract». В комментариях исходника зафиксирован фокус диаграммы: Generated from the resolved chembl_activity configuration and contracts.. Схема имеет плотность порядка 5 узлов и 4 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Silver output sheet 2 of 2 17 fields, Fields 76-77 _dq_error _dq_warn. Связанный ADR: ADR-002, ADR-040.
+
+### Метаданные
+- Тип: `flowchart`
+- Уровень: `Pipeline / Silver Contract`
+- Дата: `2026-07-18`
+- Узлы (metadata): `5`
+- ADR: `ADR-002, ADR-040`
+
+\newpage
+
+<div style="page-break-before: always;"></div>
+
+## 52a-chembl-pipeline-activity-gold-fields-1
+
+**ChEMBL Activity Gold Output Fields 1 Of 2**
+
+![52a-chembl-pipeline-activity-gold-fields-1](../architecture/svg/52a-chembl-pipeline-activity-gold-fields-1.svg)
+
+### Описание
+Диаграмма «ChEMBL Activity Gold Output Fields 1 Of 2» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Pipeline / Gold Contract». В комментариях исходника зафиксирован фокус диаграммы: Generated from the resolved chembl_activity configuration and contracts.. Схема имеет плотность порядка 13 узлов и 12 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Gold output sheet 1 of 2 60 fields, Fields 1-5 entity_id content_hash activity_id assay_id molecule_id. Связанный ADR: ADR-002, ADR-040.
+
+### Метаданные
+- Тип: `flowchart`
+- Уровень: `Pipeline / Gold Contract`
+- Дата: `2026-07-18`
+- Узлы (metadata): `13`
+- ADR: `ADR-002, ADR-040`
+
+\newpage
+
+<div style="page-break-before: always;"></div>
+
+## 52b-chembl-pipeline-activity-gold-fields-2
+
+**ChEMBL Activity Gold Output Fields 2 Of 2**
+
+![52b-chembl-pipeline-activity-gold-fields-2](../architecture/svg/52b-chembl-pipeline-activity-gold-fields-2.svg)
+
+### Описание
+Диаграмма «ChEMBL Activity Gold Output Fields 2 Of 2» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Pipeline / Gold Contract». В комментариях исходника зафиксирован фокус диаграммы: Generated from the resolved chembl_activity configuration and contracts.. Схема имеет плотность порядка 3 узлов и 2 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Gold output sheet 2 of 2 6 fields, Fields 66-66 publication_year. Связанный ADR: ADR-002, ADR-040.
+
+### Метаданные
+- Тип: `flowchart`
+- Уровень: `Pipeline / Gold Contract`
+- Дата: `2026-07-18`
+- Узлы (metadata): `3`
+- ADR: `ADR-002, ADR-040`

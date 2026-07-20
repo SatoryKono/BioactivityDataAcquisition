@@ -1,0 +1,38 @@
+%% BioETL — ChEMBL Activity Silver Output Fields 1 Of 2
+%% Generated from the resolved chembl_activity configuration and contracts.
+
+%% @version 1.0.0
+%% @date    2026-07-18
+%% @type    flowchart
+%% @level   Pipeline / Silver Contract
+%% @nodes   13
+%% @adr     ADR-002, ADR-040
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}, 'flowchart': {'wrappingWidth': 360}}}%%
+flowchart TB
+    Layer["Silver output<br/>sheet 1 of 2<br/>60 fields"]
+    Fields1["Fields 1-5<br/>entity_id<br/>content_hash<br/>_run_id<br/>_run_type<br/>_source_batch_id"]
+    Fields2["Fields 6-10<br/>_ingestion_ts<br/>_index<br/>_state<br/>activity_id<br/>assay_id"]
+    Fields3["Fields 11-15<br/>molecule_id<br/>target_id<br/>publication_id<br/>standard_relation<br/>standard_value"]
+    Fields4["Fields 16-20<br/>standard_units<br/>standard_type<br/>standard_flag<br/>pchembl_value<br/>data_validity_comment"]
+    Fields5["Fields 21-25<br/>activity_comment<br/>potential_duplicate<br/>bao_endpoint<br/>bao_endpoint_iri<br/>bao_endpoint_mapping_status"]
+    Fields6["Fields 26-30<br/>uo_units<br/>uo_unit_iri<br/>uo_unit_mapping_status<br/>uo_ontology_version<br/>qudt_units"]
+    Fields7["Fields 31-35<br/>qudt_unit_iri<br/>qudt_unit_mapping_status<br/>qudt_ontology_version<br/>src_id<br/>record_id"]
+    Fields8["Fields 36-40<br/>activity_type<br/>activity_relation<br/>activity_value<br/>units<br/>text_value"]
+    Fields9["Fields 41-45<br/>standard_text_value<br/>upper_value<br/>standard_upper_value<br/>toid<br/>manual_curation_flag"]
+    Fields10["Fields 46-50<br/>original_activity_id<br/>data_validity_description<br/>ligand_efficiency_bei<br/>ligand_efficiency_le<br/>ligand_efficiency_lle"]
+    Fields11["Fields 51-55<br/>ligand_efficiency_sei<br/>action_type<br/>action_type_description<br/>action_type_parent_type<br/>activity_properties"]
+    Fields12["Fields 56-60<br/>canonical_smiles<br/>molecule_pref_name<br/>parent_molecule_id<br/>target_pref_name<br/>target_organism"]
+
+    Layer --> Fields1 --> Fields2 --> Fields3 --> Fields4 --> Fields5 --> Fields6
+    Layer --> Fields7 --> Fields8 --> Fields9 --> Fields10 --> Fields11 --> Fields12
+
+    class Layer,Fields1,Fields2,Fields3,Fields4,Fields5,Fields6,Fields7,Fields8,Fields9,Fields10,Fields11,Fields12 silver
+    class Fields1,Fields2,Fields3,Fields4,Fields5,Fields6,Fields7,Fields8,Fields9,Fields10,Fields11,Fields12 fieldCard
+    classDef fieldCard font-size:13px
+    classDef source fill:#f1f5f9,stroke:#64748b,stroke-width:2px
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    classDef bronze fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    classDef silver fill:#f8fafc,stroke:#475569,stroke-width:2px
+    classDef gold fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+    classDef dq fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    classDef warning fill:#fff1f2,stroke:#dc2626,stroke-width:2px
