@@ -88,7 +88,7 @@ def test_public_lazy_facade_inventory_has_policy_shape() -> None:
     assert payload["new_surface_policy"] == (
         "fail_fast_unclassified_lazy_public_facade"
     )
-    assert payload["row_count"] == len(facades) == 51
+    assert payload["row_count"] == len(facades) == 52
     assert set(payload["allowed_classifications"]) == {
         "external_public_api",
         "owner_package_root",
