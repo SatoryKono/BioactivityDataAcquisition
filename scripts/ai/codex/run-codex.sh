@@ -83,7 +83,7 @@ Commands:
   check          Check environment setup
   setup          Setup missing components
   mcp-check      Check Codex MCP configuration
-  mcp-setup      Sync Codex MCP configuration
+  mcp-setup      Force-refresh Codex MCP configuration
   help           Show this help
 
 Examples:
@@ -112,7 +112,7 @@ case "$COMMAND" in
         exit $?
         ;;
     mcp-setup)
-        bash "${HELPER_DIR}/ensure-mcp.sh" --ensure
+        bash "${HELPER_DIR}/ensure-mcp.sh" --refresh
         exit $?
         ;;
     *)

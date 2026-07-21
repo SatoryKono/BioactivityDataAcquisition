@@ -102,6 +102,32 @@ Never use volume/data deletion or prune as rollback.
 Record timestamps, primary cause, bounded commands, evidence paths, operator
 and follow-up owner.
 
+## Supported local stability profile (RF-006 / RF-008)
+
+Promotion and host recovery campaigns require one reviewed host lane. Record
+the measured profile with campaign evidence; do not invent success from a
+partial sample.
+
+| Dimension | Supported profile |
+| --------- | ----------------- |
+| Engine topology | Single Docker Desktop engine (`desktop-linux`); no parallel named engines for the same projects |
+| Desktop / engine versions | Record live `docker version` / Desktop build in the campaign report (example observed lane: Desktop 4.82 / Engine 29.6.x) |
+| Runtime origin | Absolute Linux path outside `/mnt` and `/tmp` (default campaign origin: `/home/<user>/.local/share/bioetl-runtime/BioactivityDataAcquisition2`) |
+| Compose projects | Canonical `bioetl-main` and `bioetl-monitoring` only for the release bundle |
+| Networks | Required services use contracted networks (e.g. `bioetl-runtime`); residual `warp-network` attachment fails promotion |
+| Resource Saver | Prefer **off** during 100-cycle / 72-hour / recovery campaigns so engine sleep does not inflate recovery latency |
+| WSL memory reclaim | `autoMemoryReclaim=gradual` only after host-specific validation; repository automation never edits `.wslconfig` |
+| Recovery path | Evidence-first `restart-docker.ps1` / `docker desktop restart` with ≤180s objective; force-kill only with two-factor last-resort confirmation |
+| Forbidden routine actions | `down -v`, prune, VHDX/data-root deletion, unattended force-kill, `wsl --shutdown` |
+
+### Proven causes vs residual host risk
+
+| Class | Examples | How recorded |
+| ----- | -------- | ------------ |
+| Proven project defect | Build-only service without expected image must not crash readiness (`_digest_from_image(None)`); F004 Neo4j env collision | Unit/architecture contracts + redacted incident bundles |
+| Proven recovery behavior | Normal recovery never begins with process termination; last-resort requires exact token + `ShouldProcess` | PowerShell fixtures + `restart-docker.ps1` |
+| Residual host risk until campaign proof | Desktop CLI restart flakiness, mixed Compose origins, engine pipe unavailable after Desktop UI "running", Resource Saver wake latency | Keep #6297/#6299 open until ≥99/100 recoveries within 180s, volume identity stable, and signed campaign summary exists |
+
 ## Compliance
 
 Docker remains optional under ADR-010; no secret-bearing file or technical-debt

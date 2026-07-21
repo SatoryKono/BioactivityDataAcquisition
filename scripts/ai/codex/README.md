@@ -46,7 +46,7 @@ scripts/ai/codex/
 │   ├── check-env.ps1          # Check environment (PowerShell)
 │   ├── check-env.sh           # Check environment (Bash)
 │   ├── setup-env.sh           # Setup (skips hanging apt, uses Node.js binaries)
-│   ├── ensure-mcp.sh          # Sync workspace MCP files and ~/.codex/config.toml
+│   ├── ensure-mcp.sh          # Verify persisted MCP config and repair drift
 │   ├── diagnose-hang.ps1      # 🔧 Debug setup hangs
 │   └── run-codex-impl.sh      # Codex launcher implementation
 ├── README.md                  # This file
@@ -167,8 +167,11 @@ This will:
 
 ## MCP configuration
 
-`run-codex.sh` runs `helper/ensure-mcp.sh` before launching Codex. `run-codex.ps1`
-delegates to that same flow, and the retained transport launchers
+`run-codex.sh` runs `helper/ensure-mcp.sh` before launching Codex. The helper
+first validates the persisted files and leaves them unchanged when they are
+current; it regenerates them only when configuration is missing or stale.
+`run-codex.sh mcp-setup` remains the explicit force-refresh command.
+`run-codex.ps1` delegates to that same flow, and the retained transport launchers
 `scripts/ops/launchers/codex/codex.sh` and
 `scripts/ops/launchers/codex/codex-exec.sh` now do the same. This writes:
 
@@ -188,6 +191,10 @@ such as `~/.codex/config.toml` and `.codex/settings.json` may contain
 machine-local absolute paths for tools that require them.
 
 Set `CODEX_SKIP_MCP_SETUP=1` only when you intentionally want to launch Codex without synchronizing MCP. Set `CODEX_VALIDATE_MCP_LIST=1` to additionally run `codex mcp list --json`; this validation is off by default because some local MCP/server environments can make the CLI list operation hang.
+
+MCP stdio server processes are session-scoped and therefore start again for
+each Codex session. That process startup is expected and is distinct from
+rewriting or re-entering the persisted MCP configuration.
 
 The canonical `headless.sh` / `headless.ps1` launchers set `CODEX_SKIP_MCP_SETUP=1`
 for you. `diagnose_wsl.sh`, `diagnose_wsl.ps1`, and `diagnose_wsl.bat` are the
@@ -267,7 +274,7 @@ All logic is in `helper/` folder:
 
 - `check-env.ps1` / `check-env.sh` - Verify setup
 - `setup-env.sh` - Install components (Node.js, npm, Codex)
-- `ensure-mcp.sh` - Sync MCP configs before launching Codex
+- `ensure-mcp.sh` - Verify MCP configs and repair only missing or stale state
   - **NEW**: Skips apt-get if it hangs
   - **NEW**: Downloads Node.js binaries directly
   - **NEW**: 3 retry attempts for npm install

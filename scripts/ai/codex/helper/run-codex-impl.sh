@@ -86,18 +86,18 @@ if [[ -f "${SHARED_WSL_PROXY_ENV}" ]]; then
     source "${SHARED_WSL_PROXY_ENV}" 2>/dev/null || true
 fi
 
-# Keep Codex's native config.toml in sync with the repo MCP config before
-# launching. Codex reads ~/.codex/config.toml, not .mcp.json directly.
+# Verify Codex's persisted native config before launching and repair it only
+# when missing or stale. Codex reads ~/.codex/config.toml, not .mcp.json directly.
 if [[ "${CODEX_SKIP_MCP_SETUP:-0}" != "1" ]]; then
     if [[ ! -x "${ENSURE_MCP_SCRIPT}" ]]; then
         echo "[ERROR] MCP setup helper not found: ${ENSURE_MCP_SCRIPT}" >&2
         exit 1
     fi
-    # Add 60-second timeout to prevent hanging on setup_mcp.py
+    # Bound both the persisted-config verification and any required repair.
     if ! timeout 60 "${ENSURE_MCP_SCRIPT}" --ensure --codex-bin "${CODEX_BIN}" >/dev/null 2>&1; then
         echo "[WARN] MCP setup timed out or failed, continuing anyway" >&2
     else
-        echo "[INFO] MCP configuration synchronized"
+        echo "[INFO] MCP configuration ready"
     fi
 fi
 
