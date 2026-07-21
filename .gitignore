@@ -449,3 +449,6 @@ data/2026-07-03_20-21-59.gif
 .github/workflows/docs.yml
 .xml
 /_loop_*
+
+# Grok machine-local MCP (absolute Windows paths)
+.grok/config.toml

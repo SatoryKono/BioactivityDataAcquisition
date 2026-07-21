@@ -10,7 +10,10 @@ import asyncio
 import pytest
 from bioetl.domain.types import JsonDict
 
-pytest_plugins = ["tests.contract._semanticscholar_contract_support"]
+# Fixtures live in tests/contract/conftest.py (imported from
+# _semanticscholar_contract_support). Do not re-declare pytest_plugins here:
+# a second plugin load after another module already imported the support
+# package triggers PytestAssertRewriteWarning.
 STABLE_DOI = "10.1038/s41586-020-2649-2"
 
 

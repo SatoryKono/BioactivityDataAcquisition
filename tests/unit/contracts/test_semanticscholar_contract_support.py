@@ -3,8 +3,6 @@ from __future__ import annotations
 import httpx
 import pytest
 
-from tests.contract._semanticscholar_contract_support import _request_or_skip
-
 
 class _StubClient:
     def __init__(
@@ -30,6 +28,8 @@ class _StubClient:
 
 @pytest.mark.asyncio
 async def test_request_or_skip__http_500__skips_transient_provider_error() -> None:
+    from tests.contract._semanticscholar_contract_support import _request_or_skip
+
     request = httpx.Request(
         "GET", "https://api.semanticscholar.org/graph/v1/paper/search"
     )
@@ -49,6 +49,8 @@ async def test_request_or_skip__http_500__skips_transient_provider_error() -> No
 
 @pytest.mark.asyncio
 async def test_request_or_skip__connect_timeout__skips_endpoint_unreachable() -> None:
+    from tests.contract._semanticscholar_contract_support import _request_or_skip
+
     request = httpx.Request(
         "GET", "https://api.semanticscholar.org/graph/v1/paper/search"
     )
