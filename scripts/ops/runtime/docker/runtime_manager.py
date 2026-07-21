@@ -611,6 +611,13 @@ _RECOVERABLE_PREFLIGHT_CODES = frozenset(
         "CONTAINER_OOM",
     }
 )
+_DAEMON_UNAVAILABLE_PREFLIGHT_CODES = frozenset(
+    {
+        "CAPACITY_DOCKER_ROOT",
+        "DAEMON_UNAVAILABLE",
+        "DOCKER_DAEMON",
+    }
+)
 
 
 def _preflight_errors_are_recoverable(preflight_path: Path) -> bool:
@@ -639,6 +646,130 @@ def _preflight_errors_are_recoverable(preflight_path: Path) -> bool:
     )
 
 
+def _preflight_indicates_daemon_unavailable(preflight_path: Path) -> bool:
+    """True when preflight failed because the Docker engine is unreachable."""
+    try:
+        payload = json.loads(preflight_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    findings = payload.get("findings") or []
+    if not isinstance(findings, list):
+        return False
+    for finding in findings:
+        if not isinstance(finding, Mapping):
+            continue
+        code = str(finding.get("code") or "")
+        message = str(finding.get("message") or "")
+        evidence = finding.get("evidence") or {}
+        evidence_text = json.dumps(evidence, ensure_ascii=False) if evidence else ""
+        blob = f"{code}\n{message}\n{evidence_text}"
+        if code in _DAEMON_UNAVAILABLE_PREFLIGHT_CODES:
+            return True
+        if _daemon_connection_error(blob):
+            return True
+    return False
+
+
+def _invoke_desktop_recovery(
+    report_path: Path,
+    *,
+    runner: Runner,
+    timeout: float,
+) -> CommandResult:
+    """Bounded RF-006 Desktop recovery (no last-resort force-kill)."""
+    script = ROOT / "scripts/ops/runtime/docker/restart-docker.ps1"
+    if not script.is_file():
+        return CommandResult(
+            ["restart-docker.ps1"],
+            127,
+            stderr=f"missing desktop recovery script: {script}",
+        )
+    # Prefer Windows PowerShell so Docker Desktop CLI resolves on Windows hosts.
+    powershell_candidates = (
+        "powershell.exe",
+        "/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
+    )
+    powershell = next(
+        (candidate for candidate in powershell_candidates if shutil.which(candidate) or Path(candidate).is_file()),
+        None,
+    )
+    if powershell is None:
+        return CommandResult(
+            ["powershell.exe", "-File", str(script)],
+            127,
+            stderr="Windows PowerShell not found for Desktop recovery",
+        )
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    # Convert paths for PowerShell when running under WSL.
+    script_arg = str(script)
+    report_arg = str(report_path)
+    if str(script).startswith("/"):
+        converted_script = runner(["wslpath", "-w", str(script)], ROOT, min(10.0, timeout))
+        converted_report = runner(
+            ["wslpath", "-w", str(report_path)], ROOT, min(10.0, timeout)
+        )
+        if converted_script.returncode == 0 and converted_report.returncode == 0:
+            script_arg = converted_script.stdout.strip()
+            report_arg = converted_report.stdout.strip()
+    internal = max(10, min(175, int(timeout) - 5)) if timeout > 15 else max(5, int(timeout))
+    return runner(
+        [
+            powershell,
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            script_arg,
+            "-TimeoutSeconds",
+            str(internal),
+            "-CommandTimeoutSeconds",
+            "15",
+            "-ReportPath",
+            report_arg,
+        ],
+        ROOT,
+        timeout,
+    )
+
+
+def _daemon_connection_error(stderr: str | None, stdout: str | None = None) -> bool:
+    """True when compose/CLI output indicates a transient Docker daemon outage."""
+    text = f"{stderr or ''}\n{stdout or ''}".lower()
+    markers = (
+        "cannot connect to the docker daemon",
+        "is the docker daemon running",
+        "error during connect",
+        "docker desktop is unable to start",
+        "failed to connect to the docker api",
+        "connection refused",
+        "pipe is being closed",
+        "the system cannot find the file specified",
+    )
+    return any(marker in text for marker in markers)
+
+
+def _wait_for_daemon(
+    *,
+    runner: Runner,
+    deadline: float,
+    sleep: Sleeper,
+    clock: Clock,
+    poll_interval: float = 2.0,
+) -> bool:
+    """Poll `docker info` until the daemon answers or the deadline is reached."""
+    while clock() < deadline:
+        remaining = max(0.1, min(5.0, deadline - clock()))
+        probe = runner(
+            ["docker", "info", "--format", "{{.ServerVersion}}"],
+            ROOT,
+            remaining,
+        )
+        if probe.returncode == 0 and str(probe.stdout or "").strip():
+            return True
+        sleep(min(poll_interval, max(0.0, deadline - clock())))
+    return False
+
+
 def start_or_recover(
     spec: StackSpec,
     contract_path: Path,
@@ -657,6 +788,7 @@ def start_or_recover(
     deadline = started + timeout
     history: list[dict[str, Any]] = []
     recent_logs: dict[str, Any] = {"captured": False, "stdout": "", "stderr": ""}
+    desktop_recovery_attempted = False
     preflight_path = report_dir / f"docker-runtime-{spec.name}-preflight.json"
     preflight = _preflight(
         contract_path,
@@ -665,10 +797,51 @@ def start_or_recover(
         runner=runner,
         timeout=min(max(0.1, deadline - clock()), 60.0),
     )
-    if preflight.returncode != 0 and not (
-        recover and _preflight_errors_are_recoverable(preflight_path)
+    if (
+        recover
+        and preflight.returncode != 0
+        and _preflight_indicates_daemon_unavailable(preflight_path)
+        and clock() < deadline
+    ):
+        # RF-006: bounded Desktop recovery before failing closed on daemon outage.
+        desktop_report = report_dir / f"docker-desktop-recovery-{spec.name}.json"
+        desktop = _invoke_desktop_recovery(
+            desktop_report,
+            runner=runner,
+            timeout=min(max(0.1, deadline - clock()), 180.0),
+        )
+        desktop_recovery_attempted = True
+        history.append(
+            {
+                "attempt": 0,
+                "action": "desktop_recovery",
+                "returncode": desktop.returncode,
+                "elapsed_seconds": round(clock() - started, 3),
+            }
+        )
+        _wait_for_daemon(
+            runner=runner,
+            deadline=deadline,
+            sleep=sleep,
+            clock=clock,
+            poll_interval=max(poll_interval, 2.0),
+        )
+        preflight = _preflight(
+            contract_path,
+            preflight_path,
+            spec.name,
+            runner=runner,
+            timeout=min(max(0.1, deadline - clock()), 60.0),
+        )
+    # Both start and recover may proceed when the only preflight errors are live
+    # container health/restart/OOM — those are exactly what up --wait must clear.
+    # Origin/port/capacity/daemon environment gates still fail closed.
+    if preflight.returncode != 0 and not _preflight_errors_are_recoverable(
+        preflight_path
     ):
         findings = [{"cause": "preflight_failed", "stderr": preflight.stderr}]
+        if desktop_recovery_attempted:
+            findings.append({"cause": "daemon_unavailable", "desktop_recovery": True})
         snapshots: list[ServiceSnapshot] = []
         attempts = 0
     else:
@@ -708,10 +881,12 @@ def start_or_recover(
                     if remaining <= 0:
                         findings = [{"cause": "readiness_timeout", "attempt": attempts}]
                         break
-                    # recover: force-recreate clears sticky unhealthy state left by
-                    # pause/kill/fault injection so compose --wait can succeed.
+                    # Attempt 1: non-destructive up (covers simple kill).
+                    # Later attempts: force-recreate clears sticky pause/unhealthy
+                    # state left by fault injection. Avoid always force-recreate —
+                    # it has crashed Desktop under load on this host lane.
                     up_args: list[str] = ["up", "-d"]
-                    if recover:
+                    if attempts >= 2:
                         up_args.append("--force-recreate")
                     up_args.extend(
                         [
@@ -744,6 +919,55 @@ def start_or_recover(
                         )
                         if not findings:
                             return 0
+                    elif _daemon_connection_error(result.stderr, result.stdout):
+                        findings = [
+                            {
+                                "cause": "daemon_unavailable",
+                                "stderr": result.stderr,
+                                "attempt": attempts,
+                            }
+                        ]
+                        # Transient Desktop flaps: wait for daemon before next attempt
+                        # instead of burning retries while the socket is still down.
+                        if attempts < max_attempts and clock() < deadline:
+                            restored = _wait_for_daemon(
+                                runner=runner,
+                                deadline=min(deadline, clock() + 20.0),
+                                sleep=sleep,
+                                clock=clock,
+                                poll_interval=max(poll_interval, 2.0),
+                            )
+                            if (
+                                not restored
+                                and not desktop_recovery_attempted
+                                and clock() < deadline
+                            ):
+                                desktop_report = (
+                                    report_dir
+                                    / f"docker-desktop-recovery-{spec.name}-attempt{attempts}.json"
+                                )
+                                desktop = _invoke_desktop_recovery(
+                                    desktop_report,
+                                    runner=runner,
+                                    timeout=min(max(0.1, deadline - clock()), 180.0),
+                                )
+                                desktop_recovery_attempted = True
+                                history.append(
+                                    {
+                                        "attempt": attempts,
+                                        "action": "desktop_recovery",
+                                        "returncode": desktop.returncode,
+                                        "elapsed_seconds": round(clock() - started, 3),
+                                    }
+                                )
+                                _wait_for_daemon(
+                                    runner=runner,
+                                    deadline=deadline,
+                                    sleep=sleep,
+                                    clock=clock,
+                                    poll_interval=max(poll_interval, 2.0),
+                                )
+                            continue
                     else:
                         findings = [
                             {

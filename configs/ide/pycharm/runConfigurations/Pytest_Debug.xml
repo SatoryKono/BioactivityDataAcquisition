@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="pytest-debug-current-file" type="tests" factoryName="py.test">
+  <configuration default="false" name="pytest-debug" type="tests" factoryName="py.test">
     <module name="BioactivityDataAcquisition2" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />

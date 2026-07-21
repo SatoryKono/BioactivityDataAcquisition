@@ -54,24 +54,69 @@ def bootstrap_campaign(
         return False
     state["initial_volume_ids"] = bundle_volume_ids(runtime_origin, bundle)
     for spec in bundle:
+        # Monitoring has multiple services and can need longer first-start budget
+        # when Desktop is cold; main stays at 180s.
+        start_timeout = 300.0 if str(spec.stack) == "monitoring" else 180.0
+        probe_path = evidence_dir / "bootstrap" / f"probe-prestart-{spec.stack}.json"
+        prestart = probe_command(
+            runtime_origin,
+            spec,
+            probe_path,
+            45.0,
+            contract=contract,
+        )
+        steps.append(
+            {
+                "stack": spec.stack,
+                "action": "probe-prestart",
+                "result": prestart,
+            }
+        )
+        if prestart.get("returncode") == 0 and prestart.get("summary_ok"):
+            # Stack already green: skip compose start churn that can flap Desktop.
+            steps.append(
+                {
+                    "stack": spec.stack,
+                    "action": "start",
+                    "result": {
+                        "returncode": 0,
+                        "skipped": True,
+                        "reason": "prestart_probe_ok",
+                    },
+                }
+            )
+            continue
         result = manager_step(
             runtime_origin,
             contract,
             spec,
             "start",
             evidence_dir / "bootstrap" / f"manager-{spec.stack}",
-            180.0,
+            start_timeout,
         )
         steps.append({"stack": spec.stack, "action": "start", "result": result})
         if result["returncode"] != 0:
-            state["last_failure"] = f"bootstrap-start-{spec.stack}"
-            atomic_json(
-                evidence_dir / "bootstrap" / "bootstrap.json",
-                {"passed": False, "steps": steps},
-                replace=False,
+            # One bounded recover retry absorbs transient daemon flaps after start.
+            recover = manager_step(
+                runtime_origin,
+                contract,
+                spec,
+                "recover",
+                evidence_dir / "bootstrap" / f"manager-recover-{spec.stack}",
+                start_timeout,
             )
-            index_and_save(state, state_path, evidence_dir)
-            return False
+            steps.append(
+                {"stack": spec.stack, "action": "recover-after-start", "result": recover}
+            )
+            if recover["returncode"] != 0:
+                state["last_failure"] = f"bootstrap-start-{spec.stack}"
+                atomic_json(
+                    evidence_dir / "bootstrap" / "bootstrap.json",
+                    {"passed": False, "steps": steps},
+                    replace=False,
+                )
+                index_and_save(state, state_path, evidence_dir)
+                return False
     rows = live_compose_rows(runtime_origin)
     origins = compose_origin_findings(rows, bundle, runtime_origin)
     baselines: dict[str, str] = {}

@@ -44791,7 +44791,7 @@
       "github_issue_url": null,
       "inbound_links": 7,
       "lifecycle": null,
-      "outbound_links": 41,
+      "outbound_links": 42,
       "owner": "BioETL Team",
       "path": "docs/05-operations/runbooks/index.md",
       "recommended_action": "keep",
@@ -45326,6 +45326,34 @@
       "outbound_links": 3,
       "owner": "BioETL Team",
       "path": "docs/05-operations/runbooks/vacuum-procedures.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "05-operations",
+      "status": "Active",
+      "surface_family": "active",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": "runbook",
+      "declared_status": "active",
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 1,
+      "lifecycle": null,
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "docs/05-operations/runbooks/windows-c-to-d-migration.md",
       "recommended_action": "keep",
       "root_doc_kind": null,
       "section": "05-operations",
@@ -86603,7 +86631,7 @@
       "archive-after-github-state-check": 121,
       "archive-after-migration": 81,
       "generate-automatically": 722,
-      "keep": 2139,
+      "keep": 2140,
       "reconcile-with-github-state": 4
     },
     "by_section": {
@@ -86615,7 +86643,7 @@
       "03-guides": 78,
       "04-reference": 193,
       "05-engineering": 9,
-      "05-operations": 79,
+      "05-operations": 80,
       "99-archive": 78,
       "AGENTS.md": 1,
       "CHANGELOG.md": 1,
@@ -86641,14 +86669,14 @@
       "tools": 1
     },
     "by_status": {
-      "Active": 1947,
+      "Active": 1948,
       "Archived": 78,
       "Canonical": 63,
       "Generated": 722,
       "Working": 257
     },
     "by_surface_family": {
-      "active": 1947,
+      "active": 1948,
       "archive": 78,
       "canonical": 63,
       "generated": 722,
@@ -86656,7 +86684,7 @@
     },
     "by_tracking_state": {
       "ignored_local": 1196,
-      "tracked": 1871
+      "tracked": 1872
     },
     "docs_reports_local_count": 1214,
     "duplicate_group_count": 2,
@@ -86677,8 +86705,8 @@
         "path": "docs/reports/evidence/project-legacy-compatibility-remediation/.quarantined-03-synthesis-corrupt-20260521"
       }
     ],
-    "total_doc_like": 3067,
+    "total_doc_like": 3068,
     "total_doc_like_ignored_local": 1196,
-    "total_doc_like_tracked": 1871
+    "total_doc_like_tracked": 1872
   }
 }

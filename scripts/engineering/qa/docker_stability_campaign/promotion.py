@@ -9,6 +9,7 @@ from typing import Any
 
 from .commands import (
     bundle_volume_ids,
+    desktop_engine_restart_command,
     desktop_recovery_diagnostic_bundle,
     observe_docker_vm_reserve,
     probe_command,
@@ -65,10 +66,9 @@ def run_recovery_trials(
         started = time.monotonic()
         deadline = started + 180.0
         steps: list[dict[str, Any]] = []
-        interruption = run_command(
-            ["docker", "desktop", "restart"],
+        interruption = desktop_engine_restart_command(
+            runtime_origin,
             remaining_seconds(deadline, reserve=1.0),
-            cwd=runtime_origin,
         )
         steps.append({"action": "desktop-restart", "result": interruption})
         clean = interruption["returncode"] == 0

@@ -156,5 +156,11 @@
       "type": "http",
       "url": "https://api.ref.tools/mcp"
     }
+  },
+  "devin": {
+    "org_id": "bioetl"
+  },
+  "shell": {
+    "setup_complete": true
   }
 }

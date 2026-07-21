@@ -311,10 +311,12 @@ def test_fault_case_reserves_deadline_for_restore(
     )
 
     deadlines = dict(executor.calls)
-    assert deadlines["recover"] > deadlines["probe"]
+    # Restore uses start (non-destructive) after kill; deadline must be later
+    # than observe so the restore budget is preserved.
+    assert deadlines["start"] > deadlines["probe"]
     report = model.load_json(tmp_path / "raw" / "faults" / case.name / "case.json")
     assert report["steps"][-1]["phase"] == "restore"
-    assert report["steps"][-1]["operation"] == "recover"
+    assert report["steps"][-1]["operation"] == "start"
 
 
 def test_pressure_fault_is_synchronous_and_verifies_no_residual_workload(
@@ -596,6 +598,7 @@ def test_desktop_recovery_bundle_is_bounded_and_never_requests_last_resort(
         return {"returncode": 0, "stdout": "", "stderr": ""}
 
     monkeypatch.setattr(commands, "run_command", run)
+    monkeypatch.setattr(commands, "resolve_windows_powershell", lambda: "powershell.exe")
 
     result = commands.desktop_recovery_diagnostic_bundle(tmp_path, report)
 
@@ -605,6 +608,52 @@ def test_desktop_recovery_bundle_is_bounded_and_never_requests_last_resort(
     assert invocation[0] == "powershell.exe"
     assert "-ConfirmLastResort" not in invocation
     assert invocation[invocation.index("-TimeoutSeconds") + 1] == "175"
+
+
+def test_desktop_engine_restart_uses_windows_powershell_not_wsl_docker_plugin(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Regression: WSL `docker desktop restart` misses /opt/docker-desktop backend."""
+    observed: list[list[str]] = []
+
+    def run(command: list[str], timeout: float, *, cwd: Path) -> dict[str, object]:
+        del timeout, cwd
+        observed.append(list(command))
+        return {
+            "returncode": 0,
+            "stdout": "Docker Desktop is restarting\n",
+            "stderr": "",
+            "timed_out": False,
+            "command": list(command),
+            "duration_seconds": 1.0,
+        }
+
+    monkeypatch.setattr(commands, "run_command", run)
+    monkeypatch.setattr(
+        commands,
+        "resolve_windows_powershell",
+        lambda: "/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
+    )
+
+    result = commands.desktop_engine_restart_command(tmp_path, 30.0)
+
+    assert result["returncode"] == 0
+    assert len(observed) == 1
+    invocation = observed[0]
+    assert invocation[0].endswith("powershell.exe")
+    assert "docker desktop restart" in " ".join(invocation)
+    assert invocation[:4] != ["docker", "desktop", "restart"]
+
+
+def test_desktop_engine_restart_fails_closed_without_powershell(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(commands, "resolve_windows_powershell", lambda: None)
+
+    result = commands.desktop_engine_restart_command(tmp_path, 30.0)
+
+    assert result["returncode"] == 127
+    assert result["primary_cause"] == "windows_powershell_missing"
 
 
 def test_failed_recovery_trial_captures_v2_desktop_diagnostics(
@@ -635,8 +684,12 @@ def test_failed_recovery_trial_captures_v2_desktop_diagnostics(
     )
     monkeypatch.setattr(
         promotion,
-        "run_command",
-        lambda *_args, **_kwargs: {"returncode": 1, "timed_out": False},
+        "desktop_engine_restart_command",
+        lambda *_args, **_kwargs: {
+            "returncode": 1,
+            "timed_out": False,
+            "stderr": "desktop restart failed",
+        },
     )
 
     def probe(

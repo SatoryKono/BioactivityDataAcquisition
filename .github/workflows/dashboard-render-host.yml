@@ -29,13 +29,15 @@ jobs:
 
       - name: Run occurrence-bound dashboard release cycle
         env:
+          PIPELINE: ${{ inputs.pipeline }}
+          RUN_TYPE: ${{ inputs.run_type }}
           GRAFANA_USERNAME: ${{ secrets.GRAFANA_USERNAME }}
           GRAFANA_PASSWORD: ${{ secrets.GRAFANA_PASSWORD }}
         run: |
           occurrence_id="dashboard-host-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           uv run python -m scripts.ops run-grafana-audit-cycle \
-            --pipeline "${{ inputs.pipeline }}" \
-            --run-type "${{ inputs.run_type }}" \
+            --pipeline "${PIPELINE}" \
+            --run-type "${RUN_TYPE}" \
             --occurrence-id "${occurrence_id}" \
             --semantic-output reports/observability/grafana/live-panel-audit.json \
             --screenshot-dir reports/observability/grafana/screenshots \
