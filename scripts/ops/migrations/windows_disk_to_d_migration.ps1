@@ -27,7 +27,8 @@ param(
     [string[]]$Waves = @('Wave1', 'Wave2', 'Wave3'),
     [string[]]$OnlyApps = @(),
     [switch]$ListOnly,
-    [switch]$Check
+    [switch]$Check,
+    [switch]$FailOnUnresolved
 )
 
 $ErrorActionPreference = 'Stop'
@@ -179,7 +180,7 @@ function Write-ActionPreview {
     if ($Item.Source -and (Test-Path -LiteralPath $Item.Source -ErrorAction SilentlyContinue)) {
         Write-Output ("    robocopy `"{0}`" `"{1}`" /E /COPY:DAT /DCOPY:DAT /R:1 /W:1 /XJ /SL" -f $Item.Source, (Join-Path $BackupRoot $Item.Id))
     } else {
-        Write-Output "    # TODO: review source path manually before backup"
+        Write-Output "    # Manual action: review source path before backup"
     }
     Write-Output "    # Validate: installed/uninstall path update, startup entries, CLI path(s), service path, and smoke test"
 }
@@ -225,11 +226,31 @@ function Main {
     $filtered = Get-PlanWave -Candidates $candidates -WaveSelection $Waves -AppSelection $OnlyApps
 
     Write-Output "Source plan: $PlanPath"
-    Write-Output "Mode: DryRun=$($DryRun.ToString()) ListOnly=$($ListOnly.ToString())"
+    Write-Output ("Mode: Check={0} ListOnly={1}" -f $Check.IsPresent, $ListOnly.IsPresent)
     Write-Output ("Found entries: {0}" -f $candidates.Count)
     Write-Output ("Filtered entries: {0}" -f $filtered.Count)
 
     Write-Log ("Plan read from {0}; filtered entries={1}" -f $PlanPath, $filtered.Count)
+
+    $missingSourceMap = $filtered | Where-Object { [string]::IsNullOrWhiteSpace($_.Source) -or -not (Test-Path -LiteralPath $_.Source -ErrorAction SilentlyContinue) }
+    Write-Output ("Entries with unresolved source path: {0}" -f $missingSourceMap.Count)
+    foreach ($item in $missingSourceMap) {
+        if ([string]::IsNullOrWhiteSpace($item.Source)) {
+            Write-Output ("  - {0}: source is unknown in catalog" -f $item.Id)
+        } else {
+            Write-Output ("  - {0}: path not found now: {1}" -f $item.Id, $item.Source)
+        }
+    }
+
+    if ($Check) {
+        Write-Output "Check completed."
+        Write-Output ("Parsed={0}, filtered={1}, unresolved={2}" -f $candidates.Count, $filtered.Count, $missingSourceMap.Count)
+        if ($FailOnUnresolved -and $missingSourceMap.Count -gt 0) {
+            Write-Output 'Check failed: unresolved sources were found and -FailOnUnresolved was requested.'
+            exit 2
+        }
+        return
+    }
 
     foreach ($wave in $WaveMap.Keys) {
         if ($Waves -notcontains $wave) { continue }
@@ -237,11 +258,7 @@ function Main {
         Emit-WavePlan -Items $items -WaveName $wave
     }
 
-    if ($Check) {
-        Write-Output ("Plan parse check complete: {0} rows." -f $candidates.Count)
-        return
-    }
-    if ($ListOnly -or $DryRun) {
+    if ($ListOnly) {
         Write-Output ''
         Write-Output 'Dry run completed. No destructive changes were executed.'
         return

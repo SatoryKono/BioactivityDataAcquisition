@@ -99,9 +99,14 @@ current/legacy volume across:
 - one uninterrupted 72-hour soak;
 - 10 bounded engine recovery trials.
 
-The first clean 24 hours may satisfy RF-017 only when its evidence also covers
-both stacks, exact Run/Manifest ID, numeric Processed Records (including a
-legitimate zero), host/in-network Prometheus parity and reviewed Grafana panels.
+Workstation cutover RF-017 (#6311) closes on a continuous healthy observation
+window after canonical restore. Default is 24 hours; the active operator
+override for the 2026-07 cutover is **2.4 hours**. That window satisfies
+RF-017 only when its evidence also covers both stacks, exact Run/Manifest ID,
+numeric Processed Records (including a legitimate zero), host/in-network
+Prometheus parity, reviewed Grafana panels, and Linux-only Compose origins
+(no `/tmp` or Windows bind paths). The separate release-level 72-hour soak and
+100-cycle campaign remain under the Docker stability program (#6299).
 
 ## Resume and evidence integrity
 

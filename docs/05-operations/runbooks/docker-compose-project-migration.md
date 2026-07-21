@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: P1
   Runtime profile: Local-Only optional Docker adjunct (ADR-010).
-  Last verified: '2026-07-16'
+  Last verified: '2026-07-21'
 
 ______________________________________________________________________
 
@@ -166,7 +166,8 @@ restart the container while a restored plugin volume is being inspected.
 
 ## Verification
 
-Before promotion, require all of the following:
+Before workstation cutover closeout (RF-017 / #6311), require all of the
+following:
 
 1. Runtime preflight reports zero errors and warnings from the Linux origin.
 1. Host and Grafana-network fixed-time Prometheus queries return identical
@@ -175,11 +176,27 @@ Before promotion, require all of the following:
    numeric Processed Records, including legitimate zero-valued rows.
 1. Ten full stop/start cycles preserve volume mountpoints with restart delta,
    OOM kills, and unresolved unhealthy states all equal to zero.
-1. The same invariants remain clean for the full 24-hour observation window.
+1. The same invariants remain clean for the observation window. Default
+   workstation observation is **24 hours**. Operator override for this cutover
+   program was **2.4 hours** continuous healthy observation after canonical
+   restore (evidence:
+   `reports/quality/docker-dashboard-cutover-observation.json`). The release
+   campaign 100-cycle / 72-hour soak remains owned by the Docker stability
+   program (#6299), not by workstation cutover closeout.
+1. Active Compose origins for `bioetl-main` and `bioetl-monitoring` are
+   Linux-filesystem only. Paths under `/tmp`, `/mnt/*`, and Windows drive
+   letters (`E:\`, …) are unsupported and fail preflight/finalize.
+
+Finalize with:
+
+```bash
+python scripts/ops/runtime/docker/_rf017_finalize_observation.py
+```
 
 Retain the verified backups and all legacy source volumes throughout the
-observation. If a stateful canary fails, restore only the affected target
-volume from its verified backup; do not prune or delete the legacy source.
+observation and after closeout. If a stateful canary fails, restore only the
+affected target volume from its verified backup; do not prune or delete the
+legacy source.
 
 ## Rollback/Recovery
 
