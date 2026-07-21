@@ -58,7 +58,7 @@ Commands:
   check          Check environment
   setup          Setup components
   mcp-check      Check MCP configuration
-  mcp-setup      Sync MCP configuration
+  mcp-setup      Force-refresh MCP configuration
   login          Login with API key
   device-login   Device code auth
   help           Show this help

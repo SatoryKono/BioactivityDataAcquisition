@@ -250,11 +250,12 @@ Retired MCP servers such as `sequential-thinking`, `pdf`, `needle`,
 `mintlify` are intentionally not registered in generated configs. See
 `docs/00-project/ai/mcp-governance.md` for the active/retired inventory.
 
-After the initial setup, manual MCP re-registration should not be necessary on
-every new Codex session: `bash scripts/ai/codex/run-codex.sh`,
+After the initial setup, manual MCP re-registration is not necessary on every
+new Codex session. `bash scripts/ai/codex/run-codex.sh`,
 `scripts/ops/launchers/codex/codex.sh`, and
-`scripts/ops/launchers/codex/codex-exec.sh` resynchronize `~/.codex/config.toml`
-from the canonical generated config before launching Codex.
+`scripts/ops/launchers/codex/codex-exec.sh` verify the persisted workspace
+projections and the managed `~/.codex/config.toml` block before launch. Current
+files are left untouched; missing or stale state is regenerated automatically.
 
 ______________________________________________________________________
 

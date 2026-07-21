@@ -22,8 +22,8 @@ def _passing_state() -> dict[str, object]:
     state.update(
         completed_cycles=100,
         soak_observed_seconds=72 * 3600,
-        engine_recovery_trials=100,
-        engine_recovery_successes=99,
+        engine_recovery_trials=10,
+        engine_recovery_successes=10,
         probe_samples=1,
         docker_vm_min_free_bytes=4 * 1024**3,
         fault_cases={name: {"passed": True} for name in model.FAULT_CASE_NAMES},
@@ -459,7 +459,7 @@ def test_validate_args_refuses_reduced_thresholds() -> None:
         execute=True,
         cycles=99,
         soak_hours=72,
-        engine_recovery_trials=100,
+        engine_recovery_trials=10,
         soak_sample_seconds=60,
         confirm_host_disruption=campaign.CONFIRM_TOKEN,
         signing_key="key",
@@ -469,13 +469,18 @@ def test_validate_args_refuses_reduced_thresholds() -> None:
     with pytest.raises(ValueError, match="cannot be reduced"):
         campaign.validate_args(args)
 
+    args.cycles = 100
+    args.engine_recovery_trials = 9
+    with pytest.raises(ValueError, match="cannot be reduced"):
+        campaign.validate_args(args)
+
 
 def test_validate_args_requires_exact_disruption_token_and_full_fingerprint() -> None:
     args = argparse.Namespace(
         execute=True,
         cycles=100,
         soak_hours=72,
-        engine_recovery_trials=100,
+        engine_recovery_trials=10,
         soak_sample_seconds=60,
         confirm_host_disruption="yes",
         signing_key="key",

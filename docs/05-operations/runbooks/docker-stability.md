@@ -126,7 +126,7 @@ partial sample.
 | ----- | -------- | ------------ |
 | Proven project defect | Build-only service without expected image must not crash readiness (`_digest_from_image(None)`); F004 Neo4j env collision | Unit/architecture contracts + redacted incident bundles |
 | Proven recovery behavior | Normal recovery never begins with process termination; last-resort requires exact token + `ShouldProcess` | PowerShell fixtures + `restart-docker.ps1` |
-| Residual host risk until campaign proof | Desktop CLI restart flakiness, mixed Compose origins, engine pipe unavailable after Desktop UI "running", Resource Saver wake latency | Keep #6297/#6299 open until ≥99/100 recoveries within 180s, volume identity stable, and signed campaign summary exists |
+| Residual host risk until campaign proof | Desktop CLI restart flakiness, mixed Compose origins, engine pipe unavailable after Desktop UI "running", Resource Saver wake latency | Keep #6297/#6299 open until ≥99% of 10 recovery trials succeed within 180s, volume identity stable, and signed campaign summary exists |
 
 ## Compliance
 

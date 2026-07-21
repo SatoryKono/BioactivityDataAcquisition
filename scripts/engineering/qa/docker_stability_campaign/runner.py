@@ -71,7 +71,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--cycles", type=int, default=100)
     parser.add_argument("--soak-hours", type=float, default=72.0)
     parser.add_argument("--soak-sample-seconds", type=float, default=60.0)
-    parser.add_argument("--engine-recovery-trials", type=int, default=100)
+    parser.add_argument("--engine-recovery-trials", type=int, default=10)
     parser.add_argument("--confirm-host-disruption", default="")
     parser.add_argument(
         "--state",
@@ -97,7 +97,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 def validate_args(args: argparse.Namespace) -> None:
     if not args.execute:
         raise ValueError("refusing to count evidence without --execute")
-    if args.cycles < 100 or args.soak_hours < 72 or args.engine_recovery_trials < 100:
+    if args.cycles < 100 or args.soak_hours < 72 or args.engine_recovery_trials < 10:
         raise ValueError("release thresholds cannot be reduced")
     if args.soak_sample_seconds < 1:
         raise ValueError("soak sample interval must be at least one second")

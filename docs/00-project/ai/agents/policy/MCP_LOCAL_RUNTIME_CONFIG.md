@@ -61,6 +61,10 @@ This policy applies to:
 1. If broader portability work is required, introduce an explicit
    template/strategy change instead of implying that all current runtime
    surfaces are portable.
+1. Codex launchers MUST treat MCP synchronization as an idempotent ensure
+   operation: verify persisted workspace projections and the managed
+   `~/.codex/config.toml` block first, regenerate only missing or stale state,
+   and reserve force-refresh for an explicit setup command.
 
 ## Token Configuration
 
