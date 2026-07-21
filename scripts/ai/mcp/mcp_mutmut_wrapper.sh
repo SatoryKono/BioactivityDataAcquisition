@@ -21,6 +21,10 @@ else
     exit 1
 fi
 
+UV_CACHE_DIR="${UV_CACHE_DIR:-${REPO_ROOT}/.cache/uv-cache}"
+UV_TOOL_DIR="${UV_TOOL_DIR:-${REPO_ROOT}/.cache/uv-tools}"
+export UV_CACHE_DIR UV_TOOL_DIR
+
 # Mutmut MCP configuration
 export MUTMUT_PROJECT_PATH="${REPO_ROOT}"
 

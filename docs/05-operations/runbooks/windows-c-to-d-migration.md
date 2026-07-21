@@ -37,13 +37,21 @@ Changes should stay limited to explicitly approved binaries and data roots.
 
 ```powershell
 pwsh -NoProfile -File scripts/ops/migrations/windows_disk_to_d_migration.ps1 `
+  -Check `
+  -PlanPath 'D:\migration-plan-C-to-D.md'
+```
+
+2. Generate full wave plan without execution:
+
+```powershell
+pwsh -NoProfile -File scripts/ops/migrations/windows_disk_to_d_migration.ps1 `
   -PlanPath 'D:\migration-plan-C-to-D.md' `
   -BackupRoot 'D:\Migration_Backup\2026-07-21' `
   -LogRoot 'D:\Migration_Logs' `
   -Waves Wave1,Wave2,Wave3,Wave4
 ```
 
-2. Optional narrow run (single app or wave):
+3. Optional narrow run (single app or wave):
 
 ```powershell
 pwsh -NoProfile -File scripts/ops/migrations/windows_disk_to_d_migration.ps1 `
@@ -51,11 +59,46 @@ pwsh -NoProfile -File scripts/ops/migrations/windows_disk_to_d_migration.ps1 `
   -OnlyApps APP-06,APP-07
 ```
 
-3. For each printed item:
+4. For each printed item:
    - execute only backup command template for user data (not installer binaries),
    - run uninstall/install via official installer in custom D:\ path where supported,
    - validate startup + CLI/service/path associations after a reboot,
    - keep rollback evidence in the generated migration log.
+
+5. Validation mode (recommended before any `Wave*` execution):
+
+```powershell
+pwsh -NoProfile -File scripts/ops/migrations/windows_disk_to_d_migration.ps1 `
+  -Check `
+  -FailOnUnresolved `
+  -PlanPath 'D:\migration-plan-C-to-D.md'
+```
+
+Ожидаемый результат:
+- `Check completed.` — значит разбор плана и отбор по волнам прошли успешно.
+- `Parsed`, `filtered`, `unresolved` — диагностические счётчики в конце.
+- `unresolved=0` для строгого пропуска в автоматике с `-FailOnUnresolved`.
+
+6. Optional one-liner for automated wave pre-check:
+
+```powershell
+$check = Start-Process -FilePath pwsh -ArgumentList @(
+  '-NoProfile', '-File', 'scripts/ops/migrations/windows_disk_to_d_migration.ps1',
+  '-Check', '-FailOnUnresolved',
+  '-PlanPath', 'D:\migration-plan-C-to-D.md',
+  '-Waves', 'Wave1'
+) -NoNewWindow -Wait -PassThru
+if ($check.ExitCode -ne 0) {
+  throw "Pre-check failed with exit code $($check.ExitCode). Resolve unresolved paths before continuing."
+}
+```
+
+Interpretation:
+
+- exit code `0` — pre-check passed and execution planning is safe to proceed.
+- exit code `2` — pre-check found unresolved paths (`-FailOnUnresolved`),
+  migration should not continue until catalog is corrected.
+- other non-zero exit code — infrastructure/permission/environment issue before migration run.
 
 ## Script responsibilities
 
