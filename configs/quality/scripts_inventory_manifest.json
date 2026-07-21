@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-21T15:55:32.117302+00:00",
+  "generated_at": "2026-07-21T19:00:13.961732+00:00",
   "summary": {
     "total_scripts": 500,
     "status_counts": {
@@ -555,7 +555,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 18,
+      "reference_count": 19,
       "references": [
         {
           "path": "docs/03-guides/development/codex-paths.md",
@@ -2286,7 +2286,7 @@
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 42,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.sh\""
         },
@@ -2344,7 +2344,7 @@
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 120,
+          "line": 134,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_adr_analysis_wrapper.sh\""
         }
@@ -2375,7 +2375,7 @@
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 63,
+          "line": 68,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.sh\""
         },
@@ -2421,7 +2421,7 @@
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 87,
+          "line": 96,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
         },
@@ -2473,7 +2473,7 @@
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 139,
+          "line": 155,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_code_analyzer_wrapper.sh\""
         }
@@ -2504,7 +2504,7 @@
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 69,
+          "line": 75,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_code_interpreter_wrapper.sh\""
         },
@@ -2537,7 +2537,7 @@
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 57,
+          "line": 61,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_context7_wrapper.sh\""
         },
@@ -2583,7 +2583,7 @@
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 111,
+          "line": 124,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_deja_wrapper.sh\""
         }
@@ -2640,7 +2640,7 @@
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 51,
+          "line": 54,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_docker_wrapper.sh\""
         },
@@ -2705,7 +2705,7 @@
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 148,
+          "line": 165,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_github_actions_wrapper.sh\""
         }
@@ -2749,7 +2749,7 @@
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 81,
+          "line": 89,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.sh\""
         },
@@ -2788,7 +2788,7 @@
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 105,
+          "line": 117,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_mermaid_wrapper.sh\""
         },
@@ -2838,7 +2838,7 @@
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 130,
+          "line": 145,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_mutmut_wrapper.sh\""
         }
@@ -2895,7 +2895,7 @@
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 93,
+          "line": 103,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
         },
@@ -3042,7 +3042,7 @@
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 75,
+          "line": 82,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
         },
@@ -3295,7 +3295,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
@@ -3311,7 +3311,7 @@
         },
         {
           "path": "scripts/ai/codex/helper/run-codex-impl.sh",
-          "line": 24,
+          "line": 25,
           "source_group": "scripts",
           "text": "REPO_ENV_LOADER=\"${REPO_ROOT}/scripts/ai/mcp/support/load_repo_env.sh\""
         },
@@ -3320,6 +3320,18 @@
           "line": 8,
           "source_group": "scripts",
           "text": "source scripts/ai/mcp/support/load_repo_env.sh"
+        },
+        {
+          "path": "scripts/ops/launchers/codex/codex-exec.sh",
+          "line": 10,
+          "source_group": "scripts",
+          "text": "REPO_ENV_LOADER=\"${REPO_ROOT}/scripts/ai/mcp/support/load_repo_env.sh\""
+        },
+        {
+          "path": "scripts/ops/launchers/codex/codex.sh",
+          "line": 10,
+          "source_group": "scripts",
+          "text": "REPO_ENV_LOADER=\"${REPO_ROOT}/scripts/ai/mcp/support/load_repo_env.sh\""
         }
       ]
     },
@@ -6846,7 +6858,7 @@
           "path": "docs/filters/inventory-baseline.csv",
           "line": 173,
           "source_group": "docs",
-          "text": ",,,,,,inventory,,surface,source_profile,extraction_params,config_source_profile_policy,scripts/docs/matrix/generate_pipeline_normalization_matrix.py,5,1571,Source-profile extraction policy,extraction_"
+          "text": ",,,,,,inventory,,surface,source_profile,extraction_params,config_source_profile_policy,scripts/docs/matrix/generate_pipeline_normalization_matrix.py,5,1584,Source-profile extraction policy,extraction_"
         },
         {
           "path": "docs/filters/inventory-baseline.json",
@@ -6858,7 +6870,7 @@
           "path": "docs/filters/inventory-baseline.md",
           "line": 130,
           "source_group": "docs",
-          "text": "| `config_source_profile_policy` | `extraction_params` | `scripts/docs/matrix/generate_pipeline_normalization_matrix.py` | 5 | 1571 | Source-profile extraction policy |"
+          "text": "| `config_source_profile_policy` | `extraction_params` | `scripts/docs/matrix/generate_pipeline_normalization_matrix.py` | 5 | 1584 | Source-profile extraction policy |"
         },
         {
           "path": "scripts/data_quality/inventory_silver_filters_migration.py",
@@ -9905,11 +9917,11 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/engineering/qa/docker_stability_campaign/cycles.py",
-          "line": 9,
+          "line": 12,
           "source_group": "scripts",
           "text": "from .commands import ("
         },
@@ -9918,18 +9930,6 @@
           "line": 12,
           "source_group": "scripts",
           "text": "from .commands import ("
-        },
-        {
-          "path": "scripts/engineering/qa/docker_stability_campaign/faults.py",
-          "line": 350,
-          "source_group": "scripts",
-          "text": "from .commands import probe_command"
-        },
-        {
-          "path": "scripts/engineering/qa/docker_stability_campaign/faults.py",
-          "line": 387,
-          "source_group": "scripts",
-          "text": "from .commands import desktop_engine_restart_command"
         },
         {
           "path": "scripts/engineering/qa/docker_stability_campaign/promotion.py",
@@ -9989,7 +9989,7 @@
         },
         {
           "path": "scripts/engineering/qa/docker_stability_campaign/cycles.py",
-          "line": 17,
+          "line": 20,
           "source_group": "scripts",
           "text": "from .faults import HostFaultExecutor, build_fault_cases, execute_fault_case"
         },
@@ -10026,13 +10026,13 @@
         },
         {
           "path": "scripts/engineering/qa/docker_stability_campaign/cycles.py",
-          "line": 18,
+          "line": 21,
           "source_group": "scripts",
           "text": "from .model import atomic_json, compose_origin_findings"
         },
         {
           "path": "scripts/engineering/qa/docker_stability_campaign/faults.py",
-          "line": 19,
+          "line": 20,
           "source_group": "scripts",
           "text": "from .model import ("
         },
@@ -10174,7 +10174,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/docker_stability_campaign/cycles.py",
-          "line": 19,
+          "line": 22,
           "source_group": "scripts",
           "text": "from .stage_support import ("
         },
@@ -13755,7 +13755,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 44,
+      "reference_count": 45,
       "references": [
         {
           "path": "docs/03-guides/development/codex-paths.md",

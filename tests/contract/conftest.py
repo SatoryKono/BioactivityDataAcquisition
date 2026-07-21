@@ -12,6 +12,17 @@ from functools import lru_cache
 
 import pytest
 
+# Register Semantic Scholar live fixtures once for the whole contract package.
+# Keep the implementation in ``_semanticscholar_contract_support`` but do not
+# declare ``pytest_plugins`` from multiple test modules — that imports the
+# support module before pytest can rewrite it and raises
+# PytestAssertRewriteWarning on the second suite (pilot vs baseline).
+from tests.contract._semanticscholar_contract_support import (  # noqa: E402,F401
+    semanticscholar_batch_payload,
+    semanticscholar_client,
+    semanticscholar_search_payload,
+)
+
 _CONTRACT_PATH_TOKEN_POSIX = "/contract/"
 _CONTRACT_PATH_TOKEN_WINDOWS = "\\contract\\"
 _NETWORK_PROBE_HOSTS = (

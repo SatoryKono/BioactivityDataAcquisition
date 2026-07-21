@@ -45,7 +45,7 @@ if (-not $env:NEO4J_DATABASE) {
     $env:NEO4J_DATABASE = "neo4j"
 }
 if (-not $env:NPM_CONFIG_CACHE) {
-    $env:NPM_CONFIG_CACHE = "/tmp/npm-cache"
+    $env:NPM_CONFIG_CACHE = Join-Path ([System.IO.Path]::GetTempPath()) "bioetl-npm-cache"
 }
 
 Test-McpNeo4jCredentials -Purpose "Neo4j Memory MCP"

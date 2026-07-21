@@ -15,8 +15,9 @@ from tests.contract._provider_contract_drift import (
 )
 from bioetl.domain.types import JsonDict
 
-
-pytest_plugins = ["tests.contract._semanticscholar_contract_support"]
+# Fixtures: tests/contract/conftest.py (from _semanticscholar_contract_support).
+# Avoid pytest_plugins here — dual registration with the pilot suite rewrites
+# the already-imported support module and emits PytestAssertRewriteWarning.
 UPDATE_SNAPSHOTS = os.environ.get("UPDATE_SNAPSHOTS", "0") == "1"
 REPLAY_SNAPSHOT_PROBES = ("paper_search_endpoint", "paper_batch_lookup_by_doi")
 

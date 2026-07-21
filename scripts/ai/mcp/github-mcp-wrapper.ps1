@@ -10,7 +10,8 @@ Remove-Item Env:BIOETL_SKIP_ENV_LOCAL -ErrorAction SilentlyContinue
 . (Join-Path $PSScriptRoot "support/token_validation.ps1")
 
 if (-not $env:NPM_CONFIG_CACHE) {
-    $env:NPM_CONFIG_CACHE = "/tmp/npm-cache"
+    # Prefer a writable Windows temp path; /tmp is not reliable under native pwsh.
+    $env:NPM_CONFIG_CACHE = Join-Path ([System.IO.Path]::GetTempPath()) "bioetl-npm-cache"
 }
 
 if (-not $env:GITHUB_PERSONAL_ACCESS_TOKEN -and $env:GITHUB_TOKEN) {

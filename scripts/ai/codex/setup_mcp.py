@@ -77,6 +77,7 @@ def _add_startup_timeouts(servers: dict[str, dict[str, Any]]) -> None:
         if server_name in servers:
             servers[server_name]["startup_timeout_sec"] = timeout
 
+
 # Allowlist of approved remote MCP server base URLs for security governance.
 # Any new remote HTTP MCP server must be added to this allowlist after security review.
 APPROVED_REMOTE_MCP_BASE_URLS = frozenset(
