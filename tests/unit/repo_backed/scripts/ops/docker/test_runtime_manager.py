@@ -395,8 +395,85 @@ def test_recover_continues_when_preflight_only_reports_container_health(
     assert result == 0
     up_calls = [call for call in calls if "up" in call]
     assert up_calls
-    assert any("--force-recreate" in call for call in up_calls)
+    # First recover attempt stays non-destructive (no force-recreate).
+    assert "--force-recreate" not in up_calls[0]
     assert not list(tmp_path.glob("docker-incident-*.json"))
+
+
+def test_recovery_force_recreates_only_after_first_failed_attempt(
+    tmp_path: Path,
+) -> None:
+    up_calls: list[list[str]] = []
+    attempts = {"up": 0}
+
+    def runner(
+        command: Sequence[str], cwd: Path, timeout: float
+    ) -> runtime_manager.CommandResult:
+        del cwd, timeout
+        current = list(command)
+        joined = " ".join(current)
+        if "docker_runtime_preflight.py" in joined or "config" in current:
+            return runtime_manager.CommandResult(current, 0)
+        if "network" in current and "inspect" in current:
+            return runtime_manager.CommandResult(
+                current,
+                0,
+                stdout="scripts/ops/runtime/docker/runtime_manager.py\n",
+            )
+        if "compose" in current and "ps" in current:
+            if attempts["up"] < 2:
+                return runtime_manager.CommandResult(current, 0, stdout="")
+            return runtime_manager.CommandResult(
+                current,
+                0,
+                stdout=json.dumps([{"ID": "abcdef123456", "Service": "bioetl"}]),
+            )
+        if current[:2] == ["docker", "inspect"]:
+            return runtime_manager.CommandResult(
+                current,
+                0,
+                stdout=json.dumps(
+                    {
+                        "State": {
+                            "Status": "running",
+                            "OOMKilled": False,
+                            "Health": {"Status": "healthy"},
+                        },
+                        "RestartCount": 0,
+                        "Image": "bioetl:test",
+                        "ImageID": "sha256:img",
+                    }
+                ),
+            )
+        if current[:3] == ["docker", "image", "inspect"]:
+            return runtime_manager.CommandResult(
+                current,
+                0,
+                stdout=json.dumps({"RepoDigests": ["bioetl:test@sha256:expected"]}),
+            )
+        if "up" in current:
+            attempts["up"] += 1
+            up_calls.append(current)
+            if attempts["up"] == 1:
+                return runtime_manager.CommandResult(current, 1, stderr="still unready")
+            return runtime_manager.CommandResult(current, 0)
+        raise AssertionError(current)
+
+    result = runtime_manager.start_or_recover(
+        _spec(),
+        Path("contract.yml"),
+        tmp_path,
+        recover=True,
+        runner=runner,
+        max_attempts=3,
+        sleep=lambda _seconds: None,
+        stabilization_seconds=0.0,
+    )
+
+    assert result == 0
+    assert len(up_calls) >= 2
+    assert "--force-recreate" not in up_calls[0]
+    assert "--force-recreate" in up_calls[1]
 
 
 def test_recovery_is_bounded_to_three_attempts_and_writes_one_incident(
@@ -482,6 +559,98 @@ def test_clean_requires_confirmation_and_never_deletes_data(tmp_path: Path) -> N
     assert "--volumes" not in rendered
     assert "-v" not in calls[-1]
     assert "prune" not in rendered
+
+
+def test_recovery_waits_for_daemon_after_transient_socket_failure(
+    tmp_path: Path,
+) -> None:
+    """Compose can fail mid-up when Desktop flaps; recover must wait and retry."""
+    up_attempts = 0
+    info_probes = 0
+
+    def runner(
+        command: Sequence[str], cwd: Path, timeout: float
+    ) -> runtime_manager.CommandResult:
+        del cwd, timeout
+        nonlocal up_attempts, info_probes
+        current = list(command)
+        joined = " ".join(current)
+        if "docker_runtime_preflight.py" in joined or "config" in current:
+            return runtime_manager.CommandResult(current, 0)
+        if "network" in current and "inspect" in current:
+            return runtime_manager.CommandResult(
+                current,
+                0,
+                stdout="scripts/ops/runtime/docker/runtime_manager.py\n",
+            )
+        if "info" in current and "--format" in current:
+            info_probes += 1
+            return runtime_manager.CommandResult(current, 0, stdout="29.6.2\n")
+        if "compose" in current and "ps" in current:
+            if up_attempts < 1:
+                return runtime_manager.CommandResult(current, 0, stdout="")
+            return runtime_manager.CommandResult(
+                current,
+                0,
+                stdout=json.dumps(
+                    [{"ID": "abcdef123456", "Service": "bioetl"}]
+                ),
+            )
+        if current[:2] == ["docker", "inspect"]:
+            return runtime_manager.CommandResult(
+                current,
+                0,
+                stdout=json.dumps(
+                    {
+                        "State": {
+                            "Status": "running",
+                            "OOMKilled": False,
+                            "Health": {"Status": "healthy"},
+                        },
+                        "RestartCount": 0,
+                        "Image": "bioetl:test",
+                        "ImageID": "sha256:img",
+                    }
+                ),
+            )
+        if current[:3] == ["docker", "image", "inspect"]:
+            return runtime_manager.CommandResult(
+                current,
+                0,
+                stdout=json.dumps(
+                    {"RepoDigests": ["bioetl:test@sha256:expected"]}
+                ),
+            )
+        if "up" in current:
+            up_attempts += 1
+            if up_attempts == 1:
+                return runtime_manager.CommandResult(
+                    current,
+                    1,
+                    stderr=(
+                        "unable to get image 'bioetl-main-bioetl': "
+                        "Cannot connect to the Docker daemon at unix:///var/run/docker.sock. "
+                        "Is the docker daemon running?"
+                    ),
+                )
+            return runtime_manager.CommandResult(current, 0)
+        raise AssertionError(current)
+
+    result = runtime_manager.start_or_recover(
+        _spec(),
+        Path("contract.yml"),
+        tmp_path,
+        recover=True,
+        runner=runner,
+        max_attempts=3,
+        sleep=lambda _seconds: None,
+        stabilization_seconds=0.0,
+    )
+
+    assert result == 0
+    assert up_attempts == 2
+    assert info_probes >= 1
+    assert not list(tmp_path.glob("docker-incident-*.json"))
 
 
 def test_recovery_attempts_share_one_overall_deadline(tmp_path: Path) -> None:

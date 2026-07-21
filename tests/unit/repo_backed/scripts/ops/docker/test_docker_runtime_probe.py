@@ -350,6 +350,61 @@ def test_expected_image_override_is_scoped_to_required_service(
     assert captured["expected_images"] == {"bioetl": "fault@sha256:" + "0" * 64}
 
 
+def test_expected_image_override_allows_build_only_required_service(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Main bioetl is build-only: compose has no image, expected_images is empty."""
+    build_only = runtime_manager.StackSpec(
+        name="main",
+        project="bioetl-main",
+        compose_file=tmp_path / "docker-compose.yml",
+        required_services=("bioetl",),
+        expected_images={},
+    )
+    captured: dict[str, object] = {}
+    monkeypatch.setattr(probe, "resolve_stack", lambda *_args: build_only)
+
+    def build_report(
+        candidate: runtime_manager.StackSpec, *_args: object, **_kwargs: object
+    ):
+        captured["expected_images"] = dict(candidate.expected_images)
+        return {
+            "summary": {"ok": True},
+            "project": candidate.project,
+            "stack": candidate.name,
+            "slo": {
+                "daemon_available": True,
+                "restart_count_delta": 0,
+                "oom_kills": 0,
+                "disk_reserve_bytes": 1,
+                "recovery_attempt_count": 0,
+                "recovery_duration_seconds": 0,
+            },
+            "services": [],
+            "resources": [],
+            "primary_cause": None,
+        }
+
+    monkeypatch.setattr(probe, "build_report", build_report)
+    monkeypatch.setattr(probe, "write_report", lambda *_args: None)
+
+    result = probe.main(
+        [
+            "--contract",
+            str(tmp_path / "contract.yml"),
+            "--output",
+            str(tmp_path / "probe.json"),
+            "--expected-image-override",
+            "bioetl=bioetl/fault-injection@sha256:" + "0" * 64,
+        ]
+    )
+
+    assert result == 0
+    assert captured["expected_images"] == {
+        "bioetl": "bioetl/fault-injection@sha256:" + "0" * 64
+    }
+
+
 def test_expected_image_override_rejects_unknown_service(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:

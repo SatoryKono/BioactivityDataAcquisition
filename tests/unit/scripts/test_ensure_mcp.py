@@ -16,7 +16,16 @@ from scripts.ai.codex import setup_mcp
 pytestmark = pytest.mark.unit
 
 ROOT = Path(__file__).resolve().parents[3]
-SCRIPT = ROOT / "scripts" / "ai" / "codex" / "helper" / "ensure-mcp.sh"
+
+
+def _to_bash_path(path: Path) -> str:
+    value = path.as_posix()
+    if len(value) >= 3 and value[1] == ":" and value[2] == "/":
+        return f"/mnt/{value[0].lower()}{value[2:]}"
+    return value
+
+
+SCRIPT = _to_bash_path(ROOT / "scripts" / "ai" / "codex" / "helper" / "ensure-mcp.sh")
 
 
 def _prepare_workspace(root: Path) -> None:
@@ -56,13 +65,13 @@ def _run_helper(
     env = os.environ.copy()
     env.update(
         {
-            "HOME": str(home),
-            "REPO_ROOT": str(workspace),
+            "HOME": _to_bash_path(home),
+            "REPO_ROOT": _to_bash_path(workspace),
             "CODEX_VALIDATE_MCP_LIST": "0",
         }
     )
     return subprocess.run(
-        ["bash", str(SCRIPT), mode],
+        ["bash", SCRIPT, mode],
         cwd=workspace,
         env=env,
         text=True,

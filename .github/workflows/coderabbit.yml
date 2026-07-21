@@ -1,32 +1,33 @@
 name: CodeRabbit
 
+# PR reviews are handled by the CodeRabbit GitHub App (no API key in PR context).
+# This workflow runs the CLI only on trusted events (push to protected default
+# branches and manual dispatch) so CODERABBIT_API_KEY is never exposed to
+# untrusted pull_request code.
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
   push:
     branches: [main, master]
   workflow_dispatch:
 
 permissions:
   contents: read
-  pull-requests: write
 
 concurrency:
-  group: coderabbit-${{ github.event.pull_request.number || github.sha }}
+  group: coderabbit-${{ github.sha }}
   cancel-in-progress: true
 
 jobs:
   cli-review:
     name: CodeRabbit CLI
-    if: github.event_name == 'pull_request' || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    timeout-minutes: 60
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
-          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Install CodeRabbit CLI
         run: curl -fsSL https://cli.coderabbit.ai/install.sh | sh
@@ -35,7 +36,8 @@ jobs:
         env:
           CODERABBIT_API_KEY: ${{ secrets.CODERABBIT_API_KEY }}
         run: |
-          if [ -z "$CODERABBIT_API_KEY" ]; then
+          set -euo pipefail
+          if [ -z "${CODERABBIT_API_KEY:-}" ]; then
             echo "::warning::CODERABBIT_API_KEY is not set. Skipping CLI review."
             echo "Add an Agentic API key secret, or rely on the CodeRabbit GitHub App for PR reviews."
             exit 0
@@ -43,12 +45,15 @@ jobs:
 
           coderabbit auth login --api-key "$CODERABBIT_API_KEY"
 
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            BASE="${{ github.event.pull_request.base.ref }}"
-            coderabbit review --base="$BASE" --pr="${{ github.event.pull_request.number }}"
-          elif [ "${{ github.event_name }}" = "push" ]; then
+          if [ "${{ github.event_name }}" = "push" ]; then
             BEFORE="${{ github.event.before }}"
-            coderabbit review --before="$BEFORE" --head="${{ github.sha }}"
+            ZERO="0000000000000000000000000000000000000000"
+            if [ -z "$BEFORE" ] || [ "$BEFORE" = "$ZERO" ]; then
+              coderabbit review --base=main --plain
+            else
+              coderabbit review --base-commit="$BEFORE" --plain
+            fi
           else
-            coderabbit review --head="${{ github.sha }}"
+            # workflow_dispatch: compare current HEAD against main
+            coderabbit review --base=main --plain
           fi

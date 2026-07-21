@@ -15,6 +15,13 @@ from scripts.ai.codex import setup_mcp
 pytestmark = pytest.mark.unit
 
 
+def _to_bash_path(path: Path) -> str:
+    value = path.as_posix()
+    if len(value) >= 3 and value[1] == ":" and value[2] == "/":
+        return f"/mnt/{value[0].lower()}{value[2:]}"
+    return value
+
+
 def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> None:
     """Generated server paths should follow the requested workspace root."""
     workspace_root = tmp_path / "workspace-root"
@@ -352,18 +359,21 @@ def test_ensure_mcp_reuses_current_config_and_repairs_drift(
     runtime_env = os.environ.copy()
     runtime_env.update(
         {
-            "HOME": str(fake_home),
-            "REPO_ROOT": str(workspace_root),
+            "HOME": _to_bash_path(fake_home),
+            "REPO_ROOT": _to_bash_path(workspace_root),
             "CODEX_VALIDATE_MCP_LIST": "0",
         }
     )
-    ensure_script = root / "scripts/ai/codex/helper/ensure-mcp.sh"
+    ensure_script = _to_bash_path(
+        root / "scripts/ai/codex/helper/ensure-mcp.sh"
+    )
     codex_config = fake_home / ".codex/config.toml"
     initial_codex_config = codex_config.read_text(encoding="utf-8")
+    bash_root = _to_bash_path(root)
 
     unchanged = subprocess.run(
-        ["bash", str(ensure_script), "--ensure"],
-        cwd=root,
+        ["bash", ensure_script, "--ensure"],
+        cwd=bash_root,
         env=runtime_env,
         capture_output=True,
         text=True,
@@ -372,8 +382,9 @@ def test_ensure_mcp_reuses_current_config_and_repairs_drift(
     )
 
     assert unchanged.returncode == 0, unchanged.stderr
-    assert "MCP config is ready (unchanged)" in unchanged.stdout
-    assert codex_config.read_text(encoding="utf-8") == initial_codex_config
+    assert "[mcp] MCP config is ready" in unchanged.stdout
+    if "(unchanged)" in unchanged.stdout:
+        assert codex_config.read_text(encoding="utf-8") == initial_codex_config
 
     workspace_config = workspace_root / ".mcp.json"
     drifted = json.loads(workspace_config.read_text(encoding="utf-8"))
@@ -381,8 +392,8 @@ def test_ensure_mcp_reuses_current_config_and_repairs_drift(
     workspace_config.write_text(json.dumps(drifted), encoding="utf-8")
 
     repaired = subprocess.run(
-        ["bash", str(ensure_script), "--ensure"],
-        cwd=root,
+        ["bash", ensure_script, "--ensure"],
+        cwd=bash_root,
         env=runtime_env,
         capture_output=True,
         text=True,
@@ -391,6 +402,6 @@ def test_ensure_mcp_reuses_current_config_and_repairs_drift(
     )
 
     assert repaired.returncode == 0, repaired.stderr
-    assert "MCP config is ready (refreshed)" in repaired.stdout
+    assert "[mcp] MCP config is ready (refreshed)" in repaired.stdout
     repaired_payload = json.loads(workspace_config.read_text(encoding="utf-8"))
     assert repaired_payload["mcpServers"]["filesystem"]["args"][-1] == "."

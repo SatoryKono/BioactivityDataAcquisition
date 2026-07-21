@@ -36,11 +36,13 @@ def build_fault_cases() -> tuple[FaultCase, ...]:
             (FaultOperation("kill_service", "main", "bioetl"),),
             (FaultOperation("probe", "main", expected="cause:service_unready"),),
             (
+                # Prefer start over recover: kill leaves a clean dead container;
+                # force-recreate recover has repeatedly crashed Docker Desktop.
                 FaultOperation(
-                    "recover", "main", expected="success", max_seconds=120.0
+                    "start", "main", expected="success", max_seconds=180.0
                 ),
             ),
-            max_seconds=240.0,
+            max_seconds=360.0,
         ),
         FaultCase(
             "failed_health_readiness",
@@ -49,9 +51,10 @@ def build_fault_cases() -> tuple[FaultCase, ...]:
             (FaultOperation("probe", "main", expected="cause:service_unready"),),
             (
                 FaultOperation("unpause_service", "main", "bioetl"),
-                FaultOperation("recover", "main", max_seconds=120.0),
+                # After pause, health stays sticky; recover attempt>=2 force-recreates.
+                FaultOperation("recover", "main", max_seconds=180.0),
             ),
-            max_seconds=240.0,
+            max_seconds=360.0,
         ),
         FaultCase(
             "occupied_required_port",
@@ -63,9 +66,10 @@ def build_fault_cases() -> tuple[FaultCase, ...]:
             (FaultOperation("start", "main", expected="finding:HOST_PORT_COLLISION"),),
             (
                 FaultOperation("release_port", port=8081),
-                FaultOperation("recover", "main", max_seconds=120.0),
+                # Allow Desktop socket flaps to reconnect within the restore budget.
+                FaultOperation("recover", "main", max_seconds=180.0),
             ),
-            max_seconds=240.0,
+            max_seconds=360.0,
         ),
         FaultCase(
             "expected_image_identity_drift",
@@ -86,8 +90,8 @@ def build_fault_cases() -> tuple[FaultCase, ...]:
             "interrupted",
             (FaultOperation("stop", "main"),),
             (FaultOperation("interrupt_start", "main", expected="interrupted"),),
-            (FaultOperation("recover", "main", max_seconds=120.0),),
-            max_seconds=240.0,
+            (FaultOperation("start", "main", max_seconds=180.0),),
+            max_seconds=360.0,
         ),
         FaultCase(
             "bounded_memory_pid_pressure",
@@ -343,13 +347,11 @@ marker.unlink(missing_ok=True)
                 timeout,
             )
         if operation.kind == "desktop_restart":
-            from .commands import run_command
+            # WSL `docker desktop restart` fails without /opt/docker-desktop backend.
+            # Route through the Windows host CLI (same lane as RF-006 recovery).
+            from .commands import desktop_engine_restart_command
 
-            return run_command(
-                ["docker", "desktop", "restart"],
-                timeout,
-                cwd=self.runtime_origin,
-            )
+            return desktop_engine_restart_command(self.runtime_origin, timeout)
         raise ValueError(f"unsupported fault operation: {operation.kind}")
 
     def close(self) -> None:

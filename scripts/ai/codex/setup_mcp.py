@@ -306,6 +306,16 @@ def _write_devin_config(output_root: Path, workspace_root: Path) -> Path:
     settings_path.parent.mkdir(parents=True, exist_ok=True)
 
     existing = _load_existing_json_object(settings_path, label="Devin workspace config")
+    if not isinstance(existing.get("devin"), dict):
+        existing["devin"] = {"org_id": "bioetl"}
+    else:
+        existing["devin"].setdefault("org_id", "bioetl")
+
+    if not isinstance(existing.get("shell"), dict):
+        existing["shell"] = {"setup_complete": True}
+    else:
+        existing["shell"].setdefault("setup_complete", True)
+
     existing["mcpServers"] = deepcopy(
         _canonical_servers(workspace_root, portable_workspace_paths=True)
     )

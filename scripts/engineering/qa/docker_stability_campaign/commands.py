@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import os
+import shutil
 import subprocess
 import sys
 import time
@@ -14,6 +16,11 @@ from .model import StackSpec, atomic_json, load_json, redact
 
 COMMAND_OUTPUT_LIMIT = 4000
 DOCKER_VM_MIN_FREE_BYTES = 4 * 1024**3
+_WINDOWS_POWERSHELL_CANDIDATES = (
+    "powershell.exe",
+    "/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
+    "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+)
 
 
 def run_command(
@@ -68,6 +75,71 @@ def remaining_seconds(deadline: float, *, reserve: float = 0.0) -> float:
     return remaining
 
 
+def resolve_windows_powershell() -> str | None:
+    """Locate Windows PowerShell for Docker Desktop host operations.
+
+    The WSL `docker desktop` plugin looks for `/opt/docker-desktop/bin/com.docker.backend`
+    and fails on standard Docker Desktop for Windows installs. Host control must go
+    through the Windows docker.exe Desktop CLI via powershell.exe.
+    """
+    for candidate in _WINDOWS_POWERSHELL_CANDIDATES:
+        if os.path.sep in candidate or (len(candidate) > 1 and candidate[1] == ":"):
+            if Path(candidate).is_file():
+                return candidate
+            continue
+        resolved = shutil.which(candidate)
+        if resolved:
+            return resolved
+    return None
+
+
+def desktop_engine_restart_command(
+    runtime_origin: Path,
+    timeout: float,
+) -> dict[str, Any]:
+    """Interrupt Docker Desktop via the Windows host CLI (not the WSL plugin path).
+
+    Returns bounded subprocess evidence. Callers still run stack recover/probe after
+    this injection; this helper only owns the engine restart primitive.
+    """
+    powershell = resolve_windows_powershell()
+    if powershell is None:
+        return {
+            "command": ["powershell.exe", "-NoProfile", "-Command", "docker desktop restart"],
+            "returncode": 127,
+            "timed_out": False,
+            "duration_seconds": 0.0,
+            "stdout": "",
+            "stderr": (
+                "Windows PowerShell not found; cannot run docker desktop restart "
+                "from the Windows host CLI"
+            ),
+            "primary_cause": "windows_powershell_missing",
+        }
+    # Prefer docker.exe on the Windows PATH so the Desktop CLI plugin resolves
+    # against the Desktop backend, not the incomplete WSL plugin install.
+    script = (
+        "$ErrorActionPreference = 'Continue'; "
+        "docker desktop restart; "
+        "if ($null -ne $LASTEXITCODE) { exit $LASTEXITCODE }; "
+        "if (-not $?) { exit 1 }; "
+        "exit 0"
+    )
+    return run_command(
+        [
+            powershell,
+            "-NoProfile",
+            "-NonInteractive",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-Command",
+            script,
+        ],
+        timeout,
+        cwd=runtime_origin,
+    )
+
+
 def desktop_recovery_diagnostic_bundle(
     runtime_origin: Path,
     report: Path,
@@ -99,9 +171,10 @@ def desktop_recovery_diagnostic_bundle(
             "diagnostic_bundle_present": False,
         }
     internal_timeout = max(10, min(175, int(timeout) - 5))
+    powershell = resolve_windows_powershell() or "powershell.exe"
     result = run_command(
         [
-            "powershell.exe",
+            powershell,
             "-NoProfile",
             "-ExecutionPolicy",
             "Bypass",

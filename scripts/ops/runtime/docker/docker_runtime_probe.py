@@ -521,17 +521,18 @@ def main(argv: Sequence[str] | None = None) -> int:
         spec = resolve_stack(contract, args.stack)
         if args.expected_image_override:
             service, separator, image = args.expected_image_override.partition("=")
+            # Build-only services have no compose `image` field, so they are absent
+            # from expected_images until this scheduled drift fault injects one.
             if (
                 separator != "="
                 or not service
                 or not image
                 or service not in spec.required_services
-                or service not in spec.expected_images
             ):
                 raise ValueError("Invalid required-service expected image override")
             spec = replace(
                 spec,
-                expected_images={**spec.expected_images, service: image},
+                expected_images={**dict(spec.expected_images), service: image},
             )
         report = build_report(
             spec,
