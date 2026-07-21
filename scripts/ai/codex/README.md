@@ -190,7 +190,11 @@ The tracked workspace manifests `.mcp.json`, `scripts/ai/.mcp.json`, and
 such as `~/.codex/config.toml` and `.codex/settings.json` may contain
 machine-local absolute paths for tools that require them.
 
-Set `CODEX_SKIP_MCP_SETUP=1` only when you intentionally want to launch Codex without synchronizing MCP. Set `CODEX_VALIDATE_MCP_LIST=1` to additionally run `codex mcp list --json`; this validation is off by default because some local MCP/server environments can make the CLI list operation hang.
+Set `CODEX_SKIP_MCP_SETUP=1` only when you intentionally want to launch Codex
+without verifying or repairing MCP. Set `CODEX_VALIDATE_MCP_LIST=1` to
+additionally run `codex mcp list --json`; this validation is off by default
+because some local MCP/server environments can make the CLI list operation
+hang.
 
 MCP stdio server processes are session-scoped and therefore start again for
 each Codex session. That process startup is expected and is distinct from
