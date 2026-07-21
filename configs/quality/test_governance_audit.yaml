@@ -587,7 +587,7 @@ test_audit_closeout_2026_07_08:
     test_file_count_definition: tests/**/test_*.py from pyproject python_files
     repo_backed_unit_lane: repo-backed-unit
     repo_backed_unit_subtree: tests/unit/repo_backed/
-    repo_backed_unit_test_files: 36
+    repo_backed_unit_test_files: 37
     performance_baseline_reports:
     - reports/test-telemetry/slowest-tests.json
     - reports/test-telemetry/slowest-tests.md
@@ -982,9 +982,6 @@ repo_backed_unit_test_exceptions:
     lane, not unit-fast.
   review_date: '2026-09-30'
   entries:
-  - path: tests/unit/repo_backed/application/composite/test_non_chembl_join_key_normalization.py
-    target_lane: repo-backed-unit
-    protected_surface: tests/fixtures/normalization/non_chembl_identifier_cases.yaml
   - path: tests/unit/repo_backed/application/pipelines/crossref/test_business_data_builder.py
     target_lane: repo-backed-unit
     protected_surface: src/bioetl/application/pipelines/crossref/_business_data_builder.py
@@ -1046,6 +1043,9 @@ repo_backed_unit_test_exceptions:
   - path: tests/unit/repo_backed/infrastructure/adapters/chembl/test_fetch_multi_filter_mixin.py
     target_lane: repo-backed-unit
     protected_surface: src/bioetl/infrastructure/adapters/chembl/fetch_multi_filter_mixin.py
+  - path: tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/diagrams/{generate_pipeline_dataflows,pipeline_dataflow_ir,pipeline_dataflow_render}.py + configs/entities/chembl/activity.yaml
   - path: tests/unit/repo_backed/scripts/diagrams/test_write_path_security.py
     target_lane: repo-backed-unit
     protected_surface: scripts/diagrams/{fix_pagebreaks_in_bundles,uniform_diagram_sizes}.py

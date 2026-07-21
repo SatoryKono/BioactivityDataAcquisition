@@ -167,6 +167,31 @@ def _iter_all_test_python_files(root: Path) -> list[Path]:
     ]
 
 
+def _read_text_file(path: Path) -> str:
+    """Read a text file as UTF-8, recovering UTF-16 BOM/encoding mistakes.
+
+    Some Windows editors rewrite Python files as UTF-16 LE (BOM ``\\xff\\xfe``).
+    Governance scanning must not crash on those files; when recovery succeeds the
+    file is rewritten as UTF-8 so subsequent tooling stays stable.
+    """
+    raw = path.read_bytes()
+    if not raw:
+        return ""
+    if raw.startswith(b"\xff\xfe") or raw.startswith(b"\xfe\xff"):
+        text = raw.decode("utf-16")
+        path.write_bytes(text.encode("utf-8"))
+        return text
+    if raw.startswith(b"\xef\xbb\xbf"):
+        return raw.decode("utf-8-sig")
+    try:
+        return raw.decode("utf-8")
+    except UnicodeDecodeError:
+        # Last-resort recovery for UTF-16 without a reliable BOM prefix.
+        text = raw.decode("utf-16")
+        path.write_bytes(text.encode("utf-8"))
+        return text
+
+
 @cache
 def _compute_test_governance_source_tree_sha256(root_str: str) -> str:
     """Hash the report inputs so committed artifacts can be reused when fresh."""
@@ -391,8 +416,8 @@ def _collect_repo_backed_unit_inventory(root: Path) -> dict[str, Any]:
     for path in test_files:
         relative = path.relative_to(root).as_posix()
         try:
-            text = path.read_text(encoding="utf-8")
-        except OSError:
+            text = _read_text_file(path)
+        except (OSError, UnicodeDecodeError):
             unmarked_paths.append(relative)
             continue
         if "pytest.mark.repo_backed" in text:
@@ -610,8 +635,16 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
             compatibility_files.append(relative)
 
         try:
-            source = path.read_text(encoding="utf-8")
+            source = _read_text_file(path)
         except OSError:
+            continue
+        except UnicodeDecodeError as exc:
+            parse_errors.append(
+                {
+                    "path": relative,
+                    "error": f"utf-8 decode failed: {exc}",
+                }
+            )
             continue
 
         try:
