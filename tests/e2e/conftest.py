@@ -236,9 +236,7 @@ def _prefer_active_parquet_delta_reads(*, platform: str = sys.platform) -> bool:
     if platform != "linux":
         return False
     try:
-        return "microsoft" in Path("/proc/version").read_text(
-            encoding="utf-8"
-        ).lower()
+        return "microsoft" in Path("/proc/version").read_text(encoding="utf-8").lower()
     except OSError:
         return False
 

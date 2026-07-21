@@ -128,9 +128,7 @@ def test_run_id_selector_is_control_plane_backed_table_query() -> None:
     assert "run_type=${run_type:csv}" in query_url
 
 
-def test_first_screen_layout_matches_reviewed_progressive_disclosure_baseline() -> (
-    None
-):
+def test_first_screen_layout_matches_reviewed_progressive_disclosure_baseline() -> None:
     expected = {
         "Provenance": {"id": 99, "x": 0, "y": 3, "w": 16, "h": 4},
         "Status": {"id": 214, "x": 16, "y": 3, "w": 8, "h": 4},

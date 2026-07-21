@@ -37,9 +37,7 @@ DEFAULT_INCLUDE_PATTERNS = (
     "tests/fixtures/golden/**/*.yaml",
     "tests/fixtures/golden/**/*.yml",
 )
-DEFAULT_EXCLUDE_PATTERNS = (
-    DEFAULT_JSON_ARTIFACT.as_posix(),
-)
+DEFAULT_EXCLUDE_PATTERNS = (DEFAULT_JSON_ARTIFACT.as_posix(),)
 JSCPD_BLIND_SPOT_ANCHORS = (
     "**/configs/**",
     "**/*.yaml",
@@ -83,7 +81,10 @@ def classify_artifact_scope(relative_path: str) -> str:
     normalized = relative_path.replace("\\", "/")
     if "registry" in normalized:
         return "registry"
-    if normalized.startswith("tests/fixtures/contracts/") or "/contracts/" in normalized:
+    if (
+        normalized.startswith("tests/fixtures/contracts/")
+        or "/contracts/" in normalized
+    ):
         return "contract"
     if normalized.startswith("configs/"):
         return "config"

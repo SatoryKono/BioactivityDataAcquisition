@@ -97,9 +97,7 @@ def test_codex_skill_markdown_links_resolve() -> None:
                 continue
             target_path = _target_path(skill_path, target)
             if not target_path.exists():
-                broken.append(
-                    f"{skill_path.relative_to(root).as_posix()} -> {target}"
-                )
+                broken.append(f"{skill_path.relative_to(root).as_posix()} -> {target}")
 
     assert broken == []
 
@@ -121,16 +119,23 @@ def test_codex_active_skills_have_openai_metadata_or_explicit_tombstone() -> Non
         metadata = yaml.safe_load(metadata_path.read_text(encoding="utf-8"))
         interface = metadata.get("interface") if isinstance(metadata, dict) else None
         if not isinstance(interface, dict):
-            invalid.append(f"{metadata_path.relative_to(root).as_posix()}: missing interface")
+            invalid.append(
+                f"{metadata_path.relative_to(root).as_posix()}: missing interface"
+            )
             continue
 
         default_prompt = interface.get("default_prompt")
         short_description = interface.get("short_description")
-        if not isinstance(default_prompt, str) or f"${skill_name}" not in default_prompt:
+        if (
+            not isinstance(default_prompt, str)
+            or f"${skill_name}" not in default_prompt
+        ):
             invalid.append(
                 f"{metadata_path.relative_to(root).as_posix()}: default_prompt must mention ${skill_name}"
             )
-        if not isinstance(short_description, str) or not (25 <= len(short_description) <= 64):
+        if not isinstance(short_description, str) or not (
+            25 <= len(short_description) <= 64
+        ):
             invalid.append(
                 f"{metadata_path.relative_to(root).as_posix()}: short_description must be 25-64 chars"
             )

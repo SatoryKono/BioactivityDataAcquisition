@@ -49,6 +49,34 @@ REMOVED_MCP_SERVER_NAMES = frozenset(
     }
 )
 
+
+def _add_startup_timeouts(servers: dict[str, dict[str, Any]]) -> None:
+    startup_timeouts = {
+        "fetch": 120,
+        "context7": 120,
+        "docker": 120,
+        "mermaid": 180,
+        "memory": 120,
+        "github": 180,
+        "brave-search": 180,
+        "prometheus": 180,
+        "grafana": 180,
+        "github-actions": 180,
+        "ast-grep": 120,
+        "mcp-code-interpreter": 120,
+        "neo4j-cypher": 120,
+        "neo4j-memory": 120,
+        "code-analyzer": 120,
+        "adr-analysis": 120,
+        "mutmut": 120,
+        "deja": 120,
+        "deepwiki": 120,
+        "ref": 120,
+    }
+    for server_name, timeout in startup_timeouts.items():
+        if server_name in servers:
+            servers[server_name]["startup_timeout_sec"] = timeout
+
 # Allowlist of approved remote MCP server base URLs for security governance.
 # Any new remote HTTP MCP server must be added to this allowlist after security review.
 APPROVED_REMOTE_MCP_BASE_URLS = frozenset(
@@ -257,6 +285,7 @@ def _canonical_servers(
     }
     servers["mutmut"]["env"] = {"MUTMUT_PROJECT_PATH": workspace_root_str}
     servers["code-analyzer"]["env"] = {"PROJECT_PATH": workspace_root_str}
+    _add_startup_timeouts(servers)
     return servers
 
 
@@ -266,6 +295,8 @@ def _codex_runtime_servers(workspace_root: Path) -> dict[str, dict[str, Any]]:
     servers["ref"]["env_http_headers"] = {
         "x-ref-api-key": REF_API_KEY_ENV_VAR,
     }
+    _add_startup_timeouts(servers)
+
     return servers
 
 
@@ -296,7 +327,7 @@ def _write_workspace_codex_settings(output_root: Path, workspace_root: Path) -> 
     existing = _load_existing_json_object(
         settings_path, label="Codex workspace settings"
     )
-    existing["mcpServers"] = deepcopy(_canonical_servers(workspace_root))
+    existing["mcpServers"] = deepcopy(_codex_runtime_servers(workspace_root))
     _write_json(settings_path, existing)
     return settings_path
 
@@ -441,6 +472,9 @@ def _render_codex_mcp_toml(servers: dict[str, dict[str, Any]]) -> str:
         else:
             lines.append(f"command = {_toml_string(str(server['command']))}")
             lines.append(f"args = {_toml_array(server.get('args', []))}")
+
+        if "startup_timeout_sec" in server:
+            lines.append(f"startup_timeout_sec = {int(server['startup_timeout_sec'])}")
 
         env_http_headers = server.get("env_http_headers")
         if env_http_headers:

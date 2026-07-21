@@ -39,7 +39,10 @@ _LAZY_MAINTENANCE_COMMANDS: dict[str, tuple[str, str, str]] = {
 
 _EAGER_MAINTENANCE_COMMANDS: dict[str, tuple[click.Command | click.Group, str]] = {
     "archive": (cast(click.Command, archive_command), "Archive a Delta table"),
-    "bronze-cleanup": (cast(click.Command, bronze_cleanup_command), "Remove expired Bronze artifacts"),
+    "bronze-cleanup": (
+        cast(click.Command, bronze_cleanup_command),
+        "Remove expired Bronze artifacts",
+    ),
     "cleanup-preview": (
         cast(click.Command, cleanup_preview_command),
         "Preview pipeline cleanup scope",
@@ -49,7 +52,10 @@ _EAGER_MAINTENANCE_COMMANDS: dict[str, tuple[click.Command | click.Group, str]] 
         "Plan/apply control-plane artifact cleanup",
     ),
     "vacuum": (cast(click.Command, vacuum_command), "Vacuum one Delta table"),
-    "vacuum-all": (cast(click.Command, vacuum_all_command), "Vacuum multiple Delta tables"),
+    "vacuum-all": (
+        cast(click.Command, vacuum_all_command),
+        "Vacuum multiple Delta tables",
+    ),
 }
 
 

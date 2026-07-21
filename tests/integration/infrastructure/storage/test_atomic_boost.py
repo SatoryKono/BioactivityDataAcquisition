@@ -54,7 +54,9 @@ class TestReplaceWithRetryLine96:
             retry_events.append((attempt, delay))
 
         with patch.object(Path, "replace", flaky_replace):
-            with patch("bioetl.infrastructure.storage.support._atomic_replace.time.sleep"):
+            with patch(
+                "bioetl.infrastructure.storage.support._atomic_replace.time.sleep"
+            ):
                 _replace_with_retry(
                     temp, target, retry_policy=policy, on_retry=on_retry
                 )
@@ -86,7 +88,9 @@ class TestReplaceWithRetryLine96:
         )
 
         with patch.object(Path, "replace", flaky_replace):
-            with patch("bioetl.infrastructure.storage.support._atomic_replace.time.sleep"):
+            with patch(
+                "bioetl.infrastructure.storage.support._atomic_replace.time.sleep"
+            ):
                 _replace_with_retry(temp, target, retry_policy=policy, on_retry=None)
 
         assert target.exists()

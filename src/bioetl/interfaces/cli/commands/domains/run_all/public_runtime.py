@@ -240,9 +240,7 @@ def default_batch_runtime(
     *,
     ensure_metrics_server_started: Callable[[], object],
     get_pipeline_runner_service: Callable[..., PipelineRunnerService],
-    health_server_context_factory: Callable[
-        ..., AbstractAsyncContextManager[object]
-    ],
+    health_server_context_factory: Callable[..., AbstractAsyncContextManager[object]],
 ) -> RunAllBatchRuntime:
     return RunAllBatchRuntime(
         ensure_metrics_server_started=ensure_metrics_server_started,

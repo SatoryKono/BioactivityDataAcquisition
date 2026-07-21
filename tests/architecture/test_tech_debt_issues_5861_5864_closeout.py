@@ -159,10 +159,7 @@ def test_issue_5863_control_plane_hotspot_loc_ratchet_improved() -> None:
 
     assert FORENSIC_SUPPORT.exists()
     assert len(FORENSIC_SERVICE.read_text(encoding="utf-8").splitlines()) < 250
-    assert (
-        family["files_ge_250_loc"]
-        == 11
-    )
+    assert family["files_ge_250_loc"] == 11
     assert (
         family["files_ge_250_loc"]
         <= closeout["metrics"]["control_plane_files_ge_250_loc"]["opening"]
@@ -190,10 +187,7 @@ def test_issue_5864_runtime_builder_registration_is_explicit_and_helper_ratio_im
         ROOT
         / "tests/unit/composition/runtime_builders/test_runtime_builder_registry_manifest.py"
     ).exists()
-    assert (
-        family["helper_function_ratio"]
-        == 0.358
-    )
+    assert family["helper_function_ratio"] == 0.358
     assert (
         family["helper_function_ratio"]
         <= closeout["metrics"]["runtime_builders_helper_function_ratio"]["opening"]

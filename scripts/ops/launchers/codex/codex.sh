@@ -7,6 +7,38 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
 ENSURE_SCRIPT="${REPO_ROOT}/scripts/ai/codex/helper/ensure-codex-cli.sh"
 ENSURE_MCP_SCRIPT="${REPO_ROOT}/scripts/ai/codex/helper/ensure-mcp.sh"
+REPO_ENV_LOADER="${REPO_ROOT}/scripts/ai/mcp/support/load_repo_env.sh"
+
+if [[ -f "${REPO_ENV_LOADER}" ]]; then
+    while IFS= read -r -d '' key && IFS= read -r -d '' value; do
+        printf -v "${key}" '%s' "${value}"
+        export "${key}"
+    done < <(
+        (
+            # shellcheck source=../../ai/mcp/support/load_repo_env.sh
+            source "${REPO_ENV_LOADER}"
+            load_repo_env_if_present
+            for key in \
+                "REF_TOOL_API_KEY" \
+                "BRAVE_API_KEY" \
+                "GITHUB_PERSONAL_ACCESS_TOKEN" \
+                "GITHUB_TOKEN" \
+                "HUB_PAT_TOKEN" \
+                "DOCKERHUB_USERNAME" \
+                "NEO4J_URI" \
+                "NEO4J_USERNAME" \
+                "NEO4J_PASSWORD" \
+                "NEO4J_DATABASE" \
+                "GRAFANA_SERVICE_ACCOUNT_TOKEN" \
+                "GRAFANA_USERNAME" \
+                "GRAFANA_PASSWORD"; do
+                if [[ -n "${!key:-}" ]]; then
+                    printf '%s\0%s\0' "${key}" "${!key}"
+                fi
+            done
+        )
+    )
+fi
 
 if [[ ! -f "${ENSURE_SCRIPT}" ]]; then
     echo "[codex] ERROR: bootstrap helper not found: ${ENSURE_SCRIPT}" >&2

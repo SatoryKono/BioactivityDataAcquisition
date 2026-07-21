@@ -20,7 +20,9 @@ def test_run_tests_backend_help_works() -> None:
     """Canonical backend should provide help output with zero exit code."""
     root = repo_root()
     # Use longer timeout for Windows slow filesystem
-    result = run_repo_python("scripts/engineering/dev/run_tests.py", "help", cwd=root, timeout=120.0)
+    result = run_repo_python(
+        "scripts/engineering/dev/run_tests.py", "help", cwd=root, timeout=120.0
+    )
     assert result.returncode == 0, result.stderr
     assert "BioETL Test Runner" in result.stdout
 

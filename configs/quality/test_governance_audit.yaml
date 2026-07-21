@@ -822,7 +822,7 @@ oversized_test_module_inventory:
     note: Oversized test module inventory updated to reflect completed split from #6326. The source file is now 983 lines (within 2000 LOC limit) and the extracted surface is 1234 lines (tracked in top_modules).
   - issue_ref: '#4506'
     source: tests/unit/composition/runtime_builders/test_runner_builder_profiles.py
-    source_lines_after_split: 1096
+    source_lines_after_split: 1098
     extracted_surface: tests/unit/composition/runtime_builders/test_runner_builder_contracts.py
     extracted_surface_lines: 220
     owner: composition-runtime

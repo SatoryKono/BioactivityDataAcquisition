@@ -63,7 +63,9 @@ def evaluate_branch_coverage(
         field="branches-covered",
     )
     if branch_covered > branch_total:
-        raise ValueError("coverage XML has branches-covered greater than branches-valid")
+        raise ValueError(
+            "coverage XML has branches-covered greater than branches-valid"
+        )
     if branch_total == 0:
         raise ValueError("coverage XML does not contain branch measurement data")
 

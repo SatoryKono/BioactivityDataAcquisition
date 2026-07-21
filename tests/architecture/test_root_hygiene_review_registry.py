@@ -138,8 +138,7 @@ def test_root_hygiene_review_registry_tracks_observed_transient_root_families() 
     }
 
     assert (
-        by_path["artifacts"]["current_live_state"]
-        == "present_local_only_root_surface"
+        by_path["artifacts"]["current_live_state"] == "present_local_only_root_surface"
     )
     assert by_path["artifacts"]["canonical_path"] is None
     assert (
@@ -442,7 +441,10 @@ def test_root_review_contract_entrypoints_have_exact_filename_owners() -> None:
         assert candidate["canonical_path"] == path
     assert by_path["mint.json"]["current_live_state"] == "absent_from_root_baseline"
     assert by_path["mint.json"]["canonical_path"] is None
-    assert by_path["pr_compliance_checklist.yaml"]["current_live_state"] == "absent_from_root_baseline"
+    assert (
+        by_path["pr_compliance_checklist.yaml"]["current_live_state"]
+        == "absent_from_root_baseline"
+    )
     assert by_path["pr_compliance_checklist.yaml"]["canonical_path"] is None
     assert (
         by_path["sonar-project.properties"]["current_live_state"]

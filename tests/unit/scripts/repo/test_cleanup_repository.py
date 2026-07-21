@@ -630,7 +630,9 @@ def test_main_dry_run_report_writes_non_destructive_classification_metadata(
 
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(module, "_tracked_paths", lambda _repo_root: [])
-    monkeypatch.setattr(module, "_git_path_has_history", lambda _repo_root, _path: False)
+    monkeypatch.setattr(
+        module, "_git_path_has_history", lambda _repo_root, _path: False
+    )
     monkeypatch.setattr(module, "_count_reference_hits", lambda _repo_root, _path: 0)
     monkeypatch.setattr(
         sys,

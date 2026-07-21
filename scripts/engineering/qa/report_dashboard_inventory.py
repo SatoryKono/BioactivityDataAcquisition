@@ -248,7 +248,9 @@ def _normalize_contract_datasources(raw_sources: object) -> list[str]:
     return _sort_data_sources(sources)
 
 
-def _dashboard_inventory_contract_entries() -> tuple[dict[str, dict[str, Any]], list[str]]:
+def _dashboard_inventory_contract_entries() -> tuple[
+    dict[str, dict[str, Any]], list[str]
+]:
     errors: list[str] = []
     payload = yaml.safe_load(DASHBOARD_INVENTORY_CONTRACT.read_text(encoding="utf-8"))
     dashboards = payload.get("dashboards", []) if isinstance(payload, dict) else []

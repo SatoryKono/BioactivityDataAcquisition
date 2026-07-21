@@ -123,9 +123,7 @@ def collect_vcr_replay_preflight(
     cassettes = _cassette_files(resolved_vcr_root)
     metadata = _metadata_files(resolved_vcr_root)
     pointer_rows = _pointer_rows(cassettes, root=root)
-    strict_pointer_rows = [
-        row for row in pointer_rows if row["strict_replay_blocked"]
-    ]
+    strict_pointer_rows = [row for row in pointer_rows if row["strict_replay_blocked"]]
     catalog = _catalog_status(
         root=root,
         catalog_path=catalog_path,

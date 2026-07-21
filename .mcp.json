@@ -9,7 +9,8 @@
       "env": {
         "NPM_CONFIG_CACHE": ".cache/npm-cache",
         "MEMORY_FILE_PATH": "docs/00-project/ai/memory/mcp-memory.json"
-      }
+      },
+      "startup_timeout_sec": 120
     },
     "filesystem": {
       "command": "npx",
@@ -34,7 +35,8 @@
       "env": {
         "UV_CACHE_DIR": ".cache/uv-cache",
         "UV_TOOL_DIR": ".cache/uv-tools"
-      }
+      },
+      "startup_timeout_sec": 120
     },
     "github": {
       "command": "bash",
@@ -43,67 +45,78 @@
       ],
       "env": {
         "NPM_CONFIG_CACHE": ".cache/npm-cache"
-      }
+      },
+      "startup_timeout_sec": 180
     },
     "docker": {
       "command": "bash",
       "args": [
         "scripts/ai/mcp/mcp_docker_wrapper.sh"
-      ]
+      ],
+      "startup_timeout_sec": 120
     },
     "context7": {
       "command": "bash",
       "args": [
         "scripts/ai/mcp/mcp_context7_wrapper.sh"
-      ]
+      ],
+      "startup_timeout_sec": 120
     },
     "ast-grep": {
       "command": "bash",
       "args": [
         "scripts/ai/mcp/mcp_ast_grep_wrapper.sh"
-      ]
+      ],
+      "startup_timeout_sec": 120
     },
     "mcp-code-interpreter": {
       "command": "bash",
       "args": [
         "scripts/ai/mcp/mcp_code_interpreter_wrapper.sh"
-      ]
+      ],
+      "startup_timeout_sec": 120
     },
     "prometheus": {
       "command": "bash",
       "args": [
         "scripts/ai/mcp/mcp_prometheus_wrapper.sh"
-      ]
+      ],
+      "startup_timeout_sec": 180
     },
     "grafana": {
       "command": "bash",
       "args": [
         "scripts/ai/mcp/mcp_grafana_wrapper.sh"
-      ]
+      ],
+      "startup_timeout_sec": 180
     },
     "brave-search": {
       "command": "bash",
       "args": [
         "scripts/ai/mcp/mcp_brave_search_wrapper.sh"
-      ]
+      ],
+      "startup_timeout_sec": 180
     },
     "neo4j-cypher": {
       "command": "bash",
       "args": [
         "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh"
-      ]
+      ],
+      "startup_timeout_sec": 120
     },
     "neo4j-memory": {
       "command": "bash",
       "args": [
         "scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh"
-      ]
+      ],
+      "startup_timeout_sec": 120
     },
     "mermaid": {
       "command": "bash",
       "args": [
         "scripts/ai/mcp/mcp_mermaid_wrapper.sh"
-      ]
+      ],
+      "startup_timeout_sec": 180
     },
     "deja": {
       "command": "bash",
@@ -112,7 +125,8 @@
       ],
       "env": {
         "NPM_CONFIG_CACHE": ".cache/npm-cache"
-      }
+      },
+      "startup_timeout_sec": 120
     },
     "adr-analysis": {
       "command": "bash",
@@ -122,7 +136,8 @@
       "env": {
         "PROJECT_PATH": ".",
         "ADR_PATH": "docs/02-architecture/decisions"
-      }
+      },
+      "startup_timeout_sec": 120
     },
     "mutmut": {
       "command": "bash",
@@ -131,7 +146,8 @@
       ],
       "env": {
         "MUTMUT_PROJECT_PATH": "."
-      }
+      },
+      "startup_timeout_sec": 120
     },
     "code-analyzer": {
       "command": "bash",
@@ -140,21 +156,25 @@
       ],
       "env": {
         "PROJECT_PATH": "."
-      }
+      },
+      "startup_timeout_sec": 120
     },
     "github-actions": {
       "command": "bash",
       "args": [
         "scripts/ai/mcp/mcp_github_actions_wrapper.sh"
-      ]
+      ],
+      "startup_timeout_sec": 180
     },
     "deepwiki": {
       "type": "http",
-      "url": "https://mcp.deepwiki.com/mcp"
+      "url": "https://mcp.deepwiki.com/mcp",
+      "startup_timeout_sec": 120
     },
     "ref": {
       "type": "http",
-      "url": "https://api.ref.tools/mcp"
+      "url": "https://api.ref.tools/mcp",
+      "startup_timeout_sec": 120
     }
   }
 }

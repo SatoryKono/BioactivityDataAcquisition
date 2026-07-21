@@ -11,12 +11,39 @@ Run with: make test-smoke
 
 from __future__ import annotations
 
+import subprocess
+import sys
 import pytest
 
 
 @pytest.mark.smoke
 class TestRuntimeDependencies:
     """Verify critical runtime dependencies are installed and importable."""
+
+    @staticmethod
+    def check_module_importable_isolated(module_name: str) -> None:
+        command = [
+            sys.executable,
+            "-c",
+            f"import importlib; importlib.import_module({module_name!r})",
+        ]
+        try:
+            proc = subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=20,
+            )
+        except subprocess.TimeoutExpired as err:
+            pytest.fail(
+                f"Timed out importing runtime dependency {module_name} after 20s in an"
+                f" isolated process.\n{err}"
+            )
+        assert proc.returncode == 0, (
+            f"Failed to import runtime dependency {module_name}: {proc.stdout}"
+            f"{proc.stderr}"
+        )
 
     @pytest.mark.parametrize(
         "module_name",
@@ -40,10 +67,7 @@ class TestRuntimeDependencies:
     )
     def test_runtime_dependency_importable(self, module_name: str) -> None:
         """Each critical dependency must be importable."""
-        import importlib
-
-        module = importlib.import_module(module_name)
-        assert module is not None
+        self.check_module_importable_isolated(module_name)
 
 
 @pytest.mark.smoke

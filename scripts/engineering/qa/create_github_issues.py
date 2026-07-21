@@ -14,7 +14,13 @@ load_dotenv()
 
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 REPO = "SatoryKono/BioactivityDataAcquisition"
-ISSUES_FILE = Path(__file__).parent.parent.parent.parent / "docs" / "05-engineering" / "test_coverage_issues.md"
+ISSUES_FILE = (
+    Path(__file__).parent.parent.parent.parent
+    / "docs"
+    / "05-engineering"
+    / "test_coverage_issues.md"
+)
+
 
 def parse_issues():
     """Parse issues from markdown file"""
@@ -39,27 +45,30 @@ def parse_issues():
         # Remove metadata section from body
         body_cleaned = re.sub(r"\*\*Title:\*\*.+?\n\n", "", body, count=1)
 
-        issues.append({
-            "title": title,
-            "body": body_cleaned,
-            "labels": labels,
-            "priority": priority
-        })
+        issues.append(
+            {
+                "title": title,
+                "body": body_cleaned,
+                "labels": labels,
+                "priority": priority,
+            }
+        )
 
     return issues
+
 
 def create_issue(issue_data):
     """Create a GitHub issue"""
     url = f"https://api.github.com/repos/{REPO}/issues"
     headers = {
         "Authorization": f"token {GITHUB_TOKEN}",
-        "Accept": "application/vnd.github.v3+json"
+        "Accept": "application/vnd.github.v3+json",
     }
 
     payload = {
         "title": issue_data["title"],
         "body": issue_data["body"],
-        "labels": issue_data["labels"]
+        "labels": issue_data["labels"],
     }
 
     response = requests.post(url, json=payload, headers=headers)
@@ -73,6 +82,7 @@ def create_issue(issue_data):
         print(f"   Status: {response.status_code}")
         print(f"   Error: {response.text}")
         return None
+
 
 def main():
     """Main function"""
@@ -116,6 +126,7 @@ def main():
         print("Failed issues:")
         for title in failed:
             print(f"  - {title}")
+
 
 if __name__ == "__main__":
     main()

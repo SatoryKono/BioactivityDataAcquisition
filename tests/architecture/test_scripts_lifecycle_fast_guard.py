@@ -20,7 +20,9 @@ def _project_root() -> Path:
 def test_lifecycle_registry_covers_non_active_inventory_scripts() -> None:
     """All non-active scripts in inventory must have lifecycle entries."""
     if sys.platform.startswith("win"):
-        pytest.skip("Scripts lifecycle registry check requires full repo walk which is prohibitively slow on Windows")
+        pytest.skip(
+            "Scripts lifecycle registry check requires full repo walk which is prohibitively slow on Windows"
+        )
     root = _project_root()
     manifest_path = root / "configs" / "quality" / "scripts_inventory_manifest.json"
     registry_path = root / "configs" / "quality" / "scripts_lifecycle_registry.json"

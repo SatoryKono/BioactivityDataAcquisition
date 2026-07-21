@@ -11,7 +11,9 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config_from_root
+from bioetl.infrastructure.config.pipeline_config_api import (
+    load_pipeline_config_from_root,
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 CONFIGS_ROOT = PROJECT_ROOT / "configs"
@@ -249,11 +251,7 @@ def _contract_test_paths(
 
 
 def _golden_contract_test_paths(contract_test_paths: list[str]) -> list[str]:
-    paths = {
-        path
-        for path in contract_test_paths
-        if "golden" in path.lower()
-    }
+    paths = {path for path in contract_test_paths if "golden" in path.lower()}
     paths.update(
         path
         for path in GENERIC_GOLDEN_CONTRACT_TEST_PATHS
@@ -490,7 +488,8 @@ def _build_row(
         "missing_constraint_surfaces": missing_constraint_surfaces,
         "pandera_check_constraint_evidence_declared": (
             schema_source_summary["pandera_check_count_in_source"] > 0
-            or contract_artifact_summary["published_contract_check_constraint_count"] > 0
+            or contract_artifact_summary["published_contract_check_constraint_count"]
+            > 0
         ),
         "published_artifact_paths": published_artifacts,
         "published_artifact_missing_paths": published_artifact_missing_paths,
@@ -535,8 +534,7 @@ def build_payload(*, snapshot_date: str | None = None) -> dict[str, Any]:
     constraint_missing_rows = [
         row
         for row in rows
-        if row["gold_enabled"]
-        and row["constraint_completeness_status"] != "covered"
+        if row["gold_enabled"] and row["constraint_completeness_status"] != "covered"
     ]
     return {
         "snapshot_date": snapshot_date or date.today().isoformat(),
@@ -643,14 +641,15 @@ def main(argv: list[str] | None = None) -> int:
         help="Fail when committed artifacts drift from generator output.",
     )
     args = parser.parse_args(argv)
-    snapshot_date = (
-        _existing_snapshot_date(args.json_out) if args.check else None
-    )
+    snapshot_date = _existing_snapshot_date(args.json_out) if args.check else None
 
     if args.check:
-        expected = json.dumps(
-            build_payload(snapshot_date=snapshot_date), indent=2, sort_keys=True
-        ) + "\n"
+        expected = (
+            json.dumps(
+                build_payload(snapshot_date=snapshot_date), indent=2, sort_keys=True
+            )
+            + "\n"
+        )
         actual = args.json_out.read_text(encoding="utf-8")
         if actual != expected:
             print(

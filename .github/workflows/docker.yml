@@ -96,9 +96,14 @@ jobs:
         uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4
 
       - name: Validate docker-compose.yml syntax
+        env:
+          # Placeholder only for `compose config` interpolation; not a real secret.
+          NEO4J_PASSWORD: ci-compose-validation-placeholder
         run: docker compose config > /dev/null
 
       - name: Validate docker-compose.monitoring.yml syntax
+        env:
+          NEO4J_PASSWORD: ci-compose-validation-placeholder
         run: docker compose -f docker-compose.monitoring.yml config > /dev/null
 
   docker-build:

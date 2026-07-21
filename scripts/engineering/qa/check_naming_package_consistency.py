@@ -1151,7 +1151,8 @@ def _collect_src_tree_from_git(
         return None
 
     py_files = tuple(
-        repo_root / path for path in sorted(relative_files, key=lambda item: item.as_posix())
+        repo_root / path
+        for path in sorted(relative_files, key=lambda item: item.as_posix())
     )
     directories = _tracked_source_directories(relative_files, repo_root=repo_root)
     return py_files, directories

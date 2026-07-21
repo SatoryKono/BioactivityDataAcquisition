@@ -690,7 +690,11 @@ def _invoke_desktop_recovery(
         "/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
     )
     powershell = next(
-        (candidate for candidate in powershell_candidates if shutil.which(candidate) or Path(candidate).is_file()),
+        (
+            candidate
+            for candidate in powershell_candidates
+            if shutil.which(candidate) or Path(candidate).is_file()
+        ),
         None,
     )
     if powershell is None:
@@ -704,14 +708,18 @@ def _invoke_desktop_recovery(
     script_arg = str(script)
     report_arg = str(report_path)
     if str(script).startswith("/"):
-        converted_script = runner(["wslpath", "-w", str(script)], ROOT, min(10.0, timeout))
+        converted_script = runner(
+            ["wslpath", "-w", str(script)], ROOT, min(10.0, timeout)
+        )
         converted_report = runner(
             ["wslpath", "-w", str(report_path)], ROOT, min(10.0, timeout)
         )
         if converted_script.returncode == 0 and converted_report.returncode == 0:
             script_arg = converted_script.stdout.strip()
             report_arg = converted_report.stdout.strip()
-    internal = max(10, min(175, int(timeout) - 5)) if timeout > 15 else max(5, int(timeout))
+    internal = (
+        max(10, min(175, int(timeout) - 5)) if timeout > 15 else max(5, int(timeout))
+    )
     return runner(
         [
             powershell,

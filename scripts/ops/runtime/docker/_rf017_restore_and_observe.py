@@ -113,7 +113,9 @@ def wait_ready(names: list[str], timeout_s: float = 480) -> None:
 
 
 def compose_ls() -> list[dict[object, object]]:
-    completed = run(["docker", "compose", "ls", "--all", "--format", "json"], timeout=90)
+    completed = run(
+        ["docker", "compose", "ls", "--all", "--format", "json"], timeout=90
+    )
     if completed.returncode != 0:
         raise RuntimeError(completed.stderr)
     payload = json.loads(completed.stdout or "[]")
@@ -150,15 +152,15 @@ def snapshot_required() -> dict[str, object]:
             "oom_killed": state.get("OOMKilled"),
             "started_at": state.get("StartedAt"),
             "networks": sorted((data.get("NetworkSettings") or {}).get("Networks", {})),
-            "config_files": (data.get("Config") or {}).get("Labels", {}).get(
-                "com.docker.compose.project.config_files"
-            ),
-            "project": (data.get("Config") or {}).get("Labels", {}).get(
-                "com.docker.compose.project"
-            ),
-            "working_dir": (data.get("Config") or {}).get("Labels", {}).get(
-                "com.docker.compose.project.working_dir"
-            ),
+            "config_files": (data.get("Config") or {})
+            .get("Labels", {})
+            .get("com.docker.compose.project.config_files"),
+            "project": (data.get("Config") or {})
+            .get("Labels", {})
+            .get("com.docker.compose.project"),
+            "working_dir": (data.get("Config") or {})
+            .get("Labels", {})
+            .get("com.docker.compose.project.working_dir"),
         }
     return snaps
 
@@ -197,7 +199,9 @@ def restore_topology() -> dict[str, object]:
         if run(["docker", "network", "inspect", network], timeout=30).returncode != 0:
             created = run(["docker", "network", "create", network], timeout=30)
             if created.returncode != 0:
-                raise RuntimeError(f"network create failed: {network}: {created.stderr}")
+                raise RuntimeError(
+                    f"network create failed: {network}: {created.stderr}"
+                )
 
     labeled = run(
         [
@@ -352,7 +356,10 @@ def validate_canonical(topology: dict[str, object]) -> None:
     main_files = str(main.get("ConfigFiles") or "")
     if "/tmp/" in mon_files or "E:\\" in mon_files or "E:/" in mon_files:
         raise RuntimeError(f"monitoring still non-canonical: {mon_files}")
-    if "bioetl-runtime" not in main_files and "BioactivityDataAcquisition2" not in main_files:
+    if (
+        "bioetl-runtime" not in main_files
+        and "BioactivityDataAcquisition2" not in main_files
+    ):
         # main path should be Linux runtime
         if "/home/" not in main_files:
             raise RuntimeError(f"main still non-canonical: {main_files}")
@@ -368,7 +375,16 @@ def main() -> int:
     validate_canonical(topology)
     observation = open_observation(topology)
     update_final(observation)
-    print(json.dumps({"ok": True, "observation": observation["started_at"], "projects": topology["compose_projects"]}, indent=2))
+    print(
+        json.dumps(
+            {
+                "ok": True,
+                "observation": observation["started_at"],
+                "projects": topology["compose_projects"],
+            },
+            indent=2,
+        )
+    )
     return 0
 
 

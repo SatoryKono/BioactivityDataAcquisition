@@ -31,7 +31,9 @@ def _load_json(path: Path) -> dict[str, object]:
 def test_zero_reference_supporting_scripts_are_triaged_and_ratcheted() -> None:
     """Zero-reference supporting scripts must stay triaged within scorecard budgets."""
     if sys.platform.startswith("win"):
-        pytest.skip("Scripts inventory governance check requires full repo walk which is prohibitively slow on Windows")
+        pytest.skip(
+            "Scripts inventory governance check requires full repo walk which is prohibitively slow on Windows"
+        )
     scorecard = _load_yaml(SCORECARD_PATH)
     policy = scorecard.get("supporting_scripts_governance", {})
     assert isinstance(policy, dict)

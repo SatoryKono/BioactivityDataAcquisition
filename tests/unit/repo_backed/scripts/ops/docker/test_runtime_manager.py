@@ -373,9 +373,7 @@ def test_recover_continues_when_preflight_only_reports_container_health(
             return runtime_manager.CommandResult(
                 current,
                 0,
-                stdout=json.dumps(
-                    {"RepoDigests": ["bioetl:test@sha256:" + "a" * 64]}
-                ),
+                stdout=json.dumps({"RepoDigests": ["bioetl:test@sha256:" + "a" * 64]}),
             )
         if "config" in current:
             return runtime_manager.CommandResult(current, 0)
@@ -592,9 +590,7 @@ def test_recovery_waits_for_daemon_after_transient_socket_failure(
             return runtime_manager.CommandResult(
                 current,
                 0,
-                stdout=json.dumps(
-                    [{"ID": "abcdef123456", "Service": "bioetl"}]
-                ),
+                stdout=json.dumps([{"ID": "abcdef123456", "Service": "bioetl"}]),
             )
         if current[:2] == ["docker", "inspect"]:
             return runtime_manager.CommandResult(
@@ -617,9 +613,7 @@ def test_recovery_waits_for_daemon_after_transient_socket_failure(
             return runtime_manager.CommandResult(
                 current,
                 0,
-                stdout=json.dumps(
-                    {"RepoDigests": ["bioetl:test@sha256:expected"]}
-                ),
+                stdout=json.dumps({"RepoDigests": ["bioetl:test@sha256:expected"]}),
             )
         if "up" in current:
             up_attempts += 1

@@ -12,7 +12,9 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DOMAIN_ROOT = PROJECT_ROOT / "src" / "bioetl" / "domain"
-DEFAULT_JSON_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "domain-io-taint-inventory.json"
+DEFAULT_JSON_OUTPUT = (
+    PROJECT_ROOT / "reports" / "quality" / "domain-io-taint-inventory.json"
+)
 
 SCHEMA_BOUNDARY_PREFIXES = (
     "src/bioetl/domain/contracts/",
@@ -159,7 +161,9 @@ def _relative(path: Path) -> str:
     return path.relative_to(PROJECT_ROOT).as_posix()
 
 
-def _scan_imports(path: Path, tree: ast.AST) -> tuple[list[TaintFinding], list[TaintFinding]]:
+def _scan_imports(
+    path: Path, tree: ast.AST
+) -> tuple[list[TaintFinding], list[TaintFinding]]:
     relative_path = _relative(path)
     violations: list[TaintFinding] = []
     allowed_exceptions: list[TaintFinding] = []
@@ -233,7 +237,9 @@ def build_payload(repo_root: Path = PROJECT_ROOT) -> dict[str, object]:
         allowed_exceptions.extend(visitor.allowed_exceptions)
 
     violations.sort(key=lambda finding: (finding.path, finding.line, finding.kind))
-    allowed_exceptions.sort(key=lambda finding: (finding.path, finding.line, finding.kind))
+    allowed_exceptions.sort(
+        key=lambda finding: (finding.path, finding.line, finding.kind)
+    )
     return {
         "schema_version": 1,
         "generated_by": "scripts.engineering.qa.report_domain_io_taint_inventory",

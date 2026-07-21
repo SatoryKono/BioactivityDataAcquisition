@@ -464,12 +464,9 @@ class TestCompositionRootIntegrity:
             if lazy_deps_file.exists()
             else ""
         )
-        phase_has_factory_usage = (
-            "bioetl.composition.factories" in phase_content
-            or (
-                "_pipeline_bootstrap_lazy_dependencies" in phase_content
-                and "bioetl.composition.factories" in lazy_deps_content
-            )
+        phase_has_factory_usage = "bioetl.composition.factories" in phase_content or (
+            "_pipeline_bootstrap_lazy_dependencies" in phase_content
+            and "bioetl.composition.factories" in lazy_deps_content
         )
 
         assert has_factory_usage and phase_has_factory_usage, (

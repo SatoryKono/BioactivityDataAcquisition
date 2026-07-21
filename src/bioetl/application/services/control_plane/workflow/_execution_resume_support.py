@@ -82,7 +82,9 @@ def validate_resume_state(
     _validate_repair_requirements(latest_state, repair_steps, force_steps)
 
 
-def _validate_workflow_name(latest_state: WorkflowExecutionState, workflow_name: str) -> None:
+def _validate_workflow_name(
+    latest_state: WorkflowExecutionState, workflow_name: str
+) -> None:
     """Ensure resume state belongs to the correct workflow."""
     if latest_state.workflow_name != workflow_name:
         raise RuntimeError(
@@ -112,7 +114,9 @@ def _validate_step_integrity(latest_state: WorkflowExecutionState) -> tuple[str,
     return step_ids
 
 
-def _validate_step_references(latest_state: WorkflowExecutionState, step_ids: tuple[str, ...]) -> None:
+def _validate_step_references(
+    latest_state: WorkflowExecutionState, step_ids: tuple[str, ...]
+) -> None:
     """Ensure persisted step references are consistent."""
     unknown_selected = set(latest_state.selected_step_ids).difference(step_ids)
     unknown_completed = set(latest_state.completed_transform_fingerprints).difference(
@@ -134,7 +138,9 @@ def _validate_lifecycle_status(latest_state: WorkflowExecutionState) -> None:
         raise RuntimeError("Workflow resume state is damaged: unknown lifecycle status")
 
 
-def _validate_execution_fingerprint(latest_state: WorkflowExecutionState, current_fingerprint: str) -> None:
+def _validate_execution_fingerprint(
+    latest_state: WorkflowExecutionState, current_fingerprint: str
+) -> None:
     """Ensure execution fingerprint matches current configuration."""
     if latest_state.execution_fingerprint != current_fingerprint:
         raise RuntimeError(
@@ -143,7 +149,9 @@ def _validate_execution_fingerprint(latest_state: WorkflowExecutionState, curren
         )
 
 
-def _validate_completion_status(latest_state: WorkflowExecutionState, workflow_name: str) -> None:
+def _validate_completion_status(
+    latest_state: WorkflowExecutionState, workflow_name: str
+) -> None:
     """Reject resume if workflow already completed successfully."""
     if latest_state.status == "success":
         raise RuntimeError(

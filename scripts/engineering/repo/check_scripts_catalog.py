@@ -349,7 +349,9 @@ def _check_active_script_count_budget(
     summary = _as_dict(manifest_payload.get("summary"))
     summary_total = summary.get("total_scripts")
     if not isinstance(summary_total, int):
-        violations.append(f"manifest summary total missing or malformed: {manifest_rel}")
+        violations.append(
+            f"manifest summary total missing or malformed: {manifest_rel}"
+        )
     elif summary_total != len(scripts):
         violations.append(
             f"manifest summary total does not match scripts list: {manifest_rel} "
@@ -359,7 +361,9 @@ def _check_active_script_count_budget(
     recomputed_status_counts: Counter[str] = Counter()
     for index, item in enumerate(scripts):
         if not isinstance(item, dict):
-            violations.append(f"manifest script row malformed at index {index}: {manifest_rel}")
+            violations.append(
+                f"manifest script row malformed at index {index}: {manifest_rel}"
+            )
             continue
         status = item.get("status")
         if not isinstance(status, str) or not status.strip():

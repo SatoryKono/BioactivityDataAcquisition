@@ -186,7 +186,9 @@ def _scan_error(path: str, error: str) -> dict[str, str]:
     return {"path": path, "error": error}
 
 
-def _safe_iter_local_doc_tree(root_relative: str) -> tuple[list[str], list[dict[str, str]]]:
+def _safe_iter_local_doc_tree(
+    root_relative: str,
+) -> tuple[list[str], list[dict[str, str]]]:
     """Scan an explicit local docs root without shelling out to broad traversal."""
     root = PROJECT_ROOT / root_relative
     if not root.exists():
@@ -733,11 +735,7 @@ def _build_inventory() -> dict[str, Any]:
     catalog = _load_structure_catalog()
     plan_lifecycle = _plan_lifecycle_map(catalog)
     docs_draft_successors = _docs_draft_successor_map(catalog)
-    texts = {
-        path: _read_text(path)
-        for path in source_paths
-        if _should_scan_text(path)
-    }
+    texts = {path: _read_text(path) for path in source_paths if _should_scan_text(path)}
     duplicate_groups = _duplicate_groups(texts)
     routes = _load_routes()
     incoming: Counter[str] = Counter()
@@ -826,7 +824,8 @@ def _build_inventory() -> dict[str, Any]:
                 "duplicate_group": duplicate_group,
                 "duplicate_resolution": (
                     lifecycle
-                    if lifecycle in {
+                    if lifecycle
+                    in {
                         "published_skill_reference_redirect",
                         "generated_skill_reference_mirror",
                     }
@@ -1166,7 +1165,9 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"  - {path}")
             if len(route_violations) > 20:
                 print(f"  ... and {len(route_violations) - 20} more")
-            print("[hint] add a route to configs/quality/generated_artifact_routing.yaml")
+            print(
+                "[hint] add a route to configs/quality/generated_artifact_routing.yaml"
+            )
             return 1
         print("[documentation-cleanup-inventory] inventory is synchronized")
         return 0

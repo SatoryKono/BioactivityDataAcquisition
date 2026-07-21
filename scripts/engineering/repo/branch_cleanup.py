@@ -98,7 +98,9 @@ def _github_request(
                 status = response.status
                 raw = response.read().decode("utf-8")
             if status not in accept_status:
-                raise RuntimeError(f"GitHub API {method} {url} unexpected status {status}")
+                raise RuntimeError(
+                    f"GitHub API {method} {url} unexpected status {status}"
+                )
             if not raw:
                 return None
             return json.loads(raw)
@@ -128,7 +130,9 @@ def _list_remote_branches(*, token: str, owner: str, repo: str) -> list[dict[str
     return rows
 
 
-def _list_open_pull_requests(*, token: str, owner: str, repo: str) -> list[dict[str, Any]]:
+def _list_open_pull_requests(
+    *, token: str, owner: str, repo: str
+) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     page = 1
     while True:
@@ -145,7 +149,9 @@ def _list_open_pull_requests(*, token: str, owner: str, repo: str) -> list[dict[
     return rows
 
 
-def _commit_date(*, token: str, owner: str, repo: str, sha: str, cache: dict[str, str]) -> str:
+def _commit_date(
+    *, token: str, owner: str, repo: str, sha: str, cache: dict[str, str]
+) -> str:
     if sha in cache:
         return cache[sha]
     url = f"{API_BASE}/repos/{owner}/{repo}/commits/{sha}"
@@ -166,7 +172,9 @@ def _commit_date(*, token: str, owner: str, repo: str, sha: str, cache: dict[str
 def _atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    tmp.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
     tmp.replace(path)
 
 
@@ -262,7 +270,8 @@ def build_inventory(
             "phase1_garbage_targets": len(phase1_targets),
             "phase2_stale_draft_targets": len(phase2_targets),
             "categories": {
-                category: category_counts.get(category, 0) for category in CATEGORY_ORDER
+                category: category_counts.get(category, 0)
+                for category in CATEGORY_ORDER
             },
         },
         "phase1_garbage_targets": phase1_targets,
@@ -334,7 +343,9 @@ def apply_phases(
             action = {"phase": 1, "action": "delete_remote_branch", "branch": branch}
             if apply:
                 try:
-                    _delete_remote_branch(token=token, owner=owner, repo=repo, branch=branch)
+                    _delete_remote_branch(
+                        token=token, owner=owner, repo=repo, branch=branch
+                    )
                     action["status"] = "done"
                 except RuntimeError as exc:
                     action["status"] = "failed"
@@ -401,9 +412,7 @@ def apply_phases(
             else:
                 delete_action["status"] = "planned"
             actions.append(delete_action)
-            print(
-                f"[{delete_action['status'].upper()}] phase2 delete origin/{branch}"
-            )
+            print(f"[{delete_action['status'].upper()}] phase2 delete origin/{branch}")
 
     return {
         "mode": "apply" if apply else "dry-run",
@@ -421,7 +430,9 @@ def apply_phases(
 
 def _default_inventory_path() -> Path:
     stamp = datetime.now(tz=UTC).strftime("%Y-%m-%d")
-    return _repo_root() / "reports" / "quality" / f"branch-cleanup-inventory-{stamp}.json"
+    return (
+        _repo_root() / "reports" / "quality" / f"branch-cleanup-inventory-{stamp}.json"
+    )
 
 
 def _parse_phases(raw: str) -> set[int]:
@@ -443,7 +454,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    inventory = subparsers.add_parser("inventory", help="Generate branch cleanup inventory")
+    inventory = subparsers.add_parser(
+        "inventory", help="Generate branch cleanup inventory"
+    )
     inventory.add_argument("--owner", default=DEFAULT_OWNER)
     inventory.add_argument("--repo", default=DEFAULT_REPO)
     inventory.add_argument("--cutoff-iso", default=DEFAULT_CUTOFF_ISO)

@@ -379,7 +379,7 @@ def _render_dashboard(record: DashboardRecord, config: RenderConfig) -> Path:
             render_url,
             headers=_auth_headers(config),
             timeout_seconds=config.timeout_seconds,
-        )
+        ),
     )
     return target
 

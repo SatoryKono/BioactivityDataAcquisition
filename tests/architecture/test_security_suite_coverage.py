@@ -29,7 +29,9 @@ def test_security_suite_covers_at_least_ten_distinct_boundaries() -> None:
         test_path = ROOT / "tests" / "security" / test_name
         surface_path = ROOT / production_surface
         assert test_path.is_file(), f"Missing security test boundary: {test_path}"
-        assert surface_path.exists(), f"Missing production security surface: {surface_path}"
+        assert surface_path.exists(), (
+            f"Missing production security surface: {surface_path}"
+        )
         tree = ast.parse(test_path.read_text(encoding="utf-8"))
         assert any(
             isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))

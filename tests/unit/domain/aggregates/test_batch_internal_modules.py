@@ -194,7 +194,13 @@ class TestBatchLifecycleFunctions:
         # Should fail from COMMITTED
         with pytest.raises(InvalidStateError, match="Cannot commit"):
             lifecycle.mark_committed(
-                BatchStatus.COMMITTED, events, run_id, batch_id, 8, Layer.SILVER, _ts(20)
+                BatchStatus.COMMITTED,
+                events,
+                run_id,
+                batch_id,
+                8,
+                Layer.SILVER,
+                _ts(20),
             )
 
         # Should fail from FAILED

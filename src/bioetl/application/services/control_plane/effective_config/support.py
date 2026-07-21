@@ -54,6 +54,7 @@ __all__ = [
     "validate_runtime_environment_provenance",
 ]
 
+
 def build_dq_components(
     dq_config: DQConfig | None,
 ) -> tuple[list[DQPolicyRef], list[DQPolicySnapshot], dict[str, str]]:

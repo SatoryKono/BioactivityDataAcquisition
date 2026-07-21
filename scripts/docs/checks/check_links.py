@@ -1193,7 +1193,9 @@ def _run_contracts_index_check() -> int:
 def _run_workflow_inventory_check() -> int:
     missing_in_doc, extra_in_doc = check_github_actions_workflow_inventory()
     if not (missing_in_doc or extra_in_doc):
-        print("Workflow inventory: OK (published workflow doc matches .github/workflows)")
+        print(
+            "Workflow inventory: OK (published workflow doc matches .github/workflows)"
+        )
         return 0
 
     _print_section_header("GITHUB ACTIONS WORKFLOW INVENTORY MISMATCH")
@@ -1219,7 +1221,9 @@ def _run_provider_overview_check() -> int:
 
     _print_section_header("CHEMBL PROVIDER OVERVIEW MISMATCH")
     if missing_in_readme:
-        print("  Active ChEMBL entity configs missing in docs/04-reference/providers/README.md:")
+        print(
+            "  Active ChEMBL entity configs missing in docs/04-reference/providers/README.md:"
+        )
         for item in missing_in_readme:
             print(f"    - chembl/{item}.md")
     if extra_in_readme:

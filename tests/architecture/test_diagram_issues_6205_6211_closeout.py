@@ -40,7 +40,9 @@ def test_issue_pack_6205_6211_closeout_artifact_is_complete() -> None:
         if not (ROOT / relative_path).exists()
     ]
     assert missing_evidence == []
-    assert all(issue["status"] == "closeable" for issue in closeout["outcomes"].values())
+    assert all(
+        issue["status"] == "closeable" for issue in closeout["outcomes"].values()
+    )
 
 
 def test_issue_6205_rendered_artifact_policy_is_aligned() -> None:
@@ -72,8 +74,8 @@ def test_issue_6207_renderer_uses_atomic_svg_and_png_writes() -> None:
     renderer = _read("docs/02-architecture/diagrams/tooling/render.sh")
 
     assert "replace_atomically" in renderer
-    assert '.${base}.svg.tmp.XXXXXX' in renderer
-    assert '.${base}.png.tmp.XXXXXX' in renderer
+    assert ".${base}.svg.tmp.XXXXXX" in renderer
+    assert ".${base}.png.tmp.XXXXXX" in renderer
     assert 'replace_atomically "$svg_tmp" "$svg_out"' in renderer
     assert 'replace_atomically "$png_tmp" "$png_out"' in renderer
 
@@ -114,11 +116,16 @@ def test_issue_6210_windows_powershell_workflow_is_documented() -> None:
 
 
 def test_issue_6211_mkdocs_publication_target_is_validation_only() -> None:
-    publication_policy = _read("docs/00-project/governance/06-doc-publication-policy.md")
+    publication_policy = _read(
+        "docs/00-project/governance/06-doc-publication-policy.md"
+    )
     readme = _read("docs/02-architecture/diagrams/README.md")
     workflow = _read(".github/workflows/docs.yml")
 
-    assert "validation/build workflow, not a GitHub Pages deployment workflow" in publication_policy
+    assert (
+        "validation/build workflow, not a GitHub Pages deployment workflow"
+        in publication_policy
+    )
     assert "MkDocs is validation-only" in readme
     assert "validate-mkdocs" in workflow
     assert "deploy" not in workflow.lower()

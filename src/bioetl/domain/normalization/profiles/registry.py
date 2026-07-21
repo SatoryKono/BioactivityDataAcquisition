@@ -55,28 +55,34 @@ def build_normalization_profile_registry() -> Mapping[
     tuple[str, str], NormalizationProfile
 ]:
     """Return the immutable registry of shipped normalization profiles."""
-    return MappingProxyType({
-        (declaration.provider, declaration.entity_type): declaration.profile
-        for declaration in NORMALIZATION_PROFILE_DECLARATIONS
-    })
+    return MappingProxyType(
+        {
+            (declaration.provider, declaration.entity_type): declaration.profile
+            for declaration in NORMALIZATION_PROFILE_DECLARATIONS
+        }
+    )
 
 
 def build_normalization_profile_identities() -> Mapping[
     tuple[str, str], NormalizationProfileIdentity
 ]:
     """Return deterministic identities for shipped normalization profiles."""
-    return MappingProxyType({
-        coordinates: profile.identity
-        for coordinates, profile in build_normalization_profile_registry().items()
-    })
+    return MappingProxyType(
+        {
+            coordinates: profile.identity
+            for coordinates, profile in build_normalization_profile_registry().items()
+        }
+    )
 
 
 def build_normalization_profile_module_paths() -> Mapping[tuple[str, str], str]:
     """Return canonical source-module paths for shipped normalization profiles."""
-    return MappingProxyType({
-        (declaration.provider, declaration.entity_type): declaration.module_path
-        for declaration in NORMALIZATION_PROFILE_DECLARATIONS
-    })
+    return MappingProxyType(
+        {
+            (declaration.provider, declaration.entity_type): declaration.module_path
+            for declaration in NORMALIZATION_PROFILE_DECLARATIONS
+        }
+    )
 
 
 NORMALIZATION_PROFILE_REGISTRY = build_normalization_profile_registry()

@@ -131,7 +131,12 @@ class TestPrometheusMetrics:
             prometheus_metrics.increment_counter(
                 name="bioetl_dq_anomaly_detected",
                 value=1,
-                labels={"pipeline": "test", "metric": "test", "severity": "warning", "anomaly_type": "spike"},
+                labels={
+                    "pipeline": "test",
+                    "metric": "test",
+                    "severity": "warning",
+                    "anomaly_type": "spike",
+                },
             )
             COUNTERS["bioetl_dq_anomaly_detected_total"].labels.assert_called_once()
 
@@ -140,7 +145,9 @@ class TestPrometheusMetrics:
                 value=1,
                 labels={"pipeline": "test"},
             )
-            COUNTERS["bioetl_dq_soft_threshold_exceeded_total"].labels.assert_called_once()
+            COUNTERS[
+                "bioetl_dq_soft_threshold_exceeded_total"
+            ].labels.assert_called_once()
 
             prometheus_metrics.increment_counter(
                 name="bioetl_dq_baseline_updated",

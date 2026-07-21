@@ -83,7 +83,9 @@ def main(argv: list[str] | None = None) -> int:
     content = HEADER + "\n".join(rows) + "\n"
 
     if args.check:
-        current = args.output.read_text(encoding="utf-8") if args.output.exists() else ""
+        current = (
+            args.output.read_text(encoding="utf-8") if args.output.exists() else ""
+        )
         if current != content:
             print(f"panel-title-inventory drift: {args.output}", file=sys.stderr)
             return 1

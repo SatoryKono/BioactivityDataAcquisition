@@ -477,6 +477,8 @@ def test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stal
 ) -> None:
     import sys
 
+    # Force the non-test branch so module_coverage_inventory staleness is
+    # evaluated from the live source-tree hash gate (not short-circuited).
     monkeypatch.delitem(sys.modules, "pytest", raising=False)
     monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
     monkeypatch.setattr(
@@ -488,6 +490,18 @@ def test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stal
         gates,
         "_artifact_matches_builder",
         lambda *, repo_root, rel_path, payload_builder: True,
+    )
+    # Avoid full hotspot AST census / remote-main git work; this test only
+    # asserts release failure from a stale module-coverage inventory hash.
+    monkeypatch.setattr(
+        gates,
+        "_hotspot_family_baseline_artifact_matches_builder",
+        lambda *, repo_root: True,
+    )
+    monkeypatch.setattr(
+        gates,
+        "_remote_main_baseline_artifact_matches_builder",
+        lambda *, repo_root: True,
     )
 
     payload = gates.build_payload(repo_root=gates.PROJECT_ROOT)
@@ -557,6 +571,12 @@ def test_build_payload_marks_config_surface_backlog_drift_as_stale_artifact(
         gates,
         "build_backlog",
         lambda: {"schema_version": "drifted-live-backlog"},
+    )
+    # Avoid full hotspot AST census; this test only asserts config-backlog drift.
+    monkeypatch.setattr(
+        gates,
+        "_hotspot_family_baseline_artifact_matches_builder",
+        lambda *, repo_root: True,
     )
 
     payload = gates.build_payload(repo_root=gates.PROJECT_ROOT)

@@ -473,8 +473,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def _build_artifact_state(
-) -> tuple[
+def _build_artifact_state() -> tuple[
     str,
     str,
     int,
@@ -803,9 +802,7 @@ def main(argv: list[str] | None = None) -> int:
         ) and _artifact_matches(args.report_output, report_content)
         ok = ok and _baseline_metrics_match(args.baseline_json_out, baseline_metrics)
         ok = ok and _baseline_families_match(args.baseline_json_out, family_payload)
-        ok = ok and _baseline_taxonomy_match(
-            args.baseline_json_out, parameter_taxonomy
-        )
+        ok = ok and _baseline_taxonomy_match(args.baseline_json_out, parameter_taxonomy)
         if ok:
             print("[ok] config matrix artifacts are up to date")
             return 0

@@ -76,9 +76,7 @@ def _relative_luminance(hex_color: str) -> float:
         value = "".join(component * 2 for component in value)
     channels = [int(value[offset : offset + 2], 16) / 255 for offset in (0, 2, 4)]
     linear = [
-        channel / 12.92
-        if channel <= 0.04045
-        else ((channel + 0.055) / 1.055) ** 2.4
+        channel / 12.92 if channel <= 0.04045 else ((channel + 0.055) / 1.055) ** 2.4
         for channel in channels
     ]
     return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2]
@@ -99,12 +97,8 @@ class _NavigationMarkupParser(HTMLParser):
         super().__init__(convert_charrefs=True)
         self.elements: list[tuple[str, dict[str, str]]] = []
 
-    def handle_starttag(
-        self, tag: str, attrs: list[tuple[str, str | None]]
-    ) -> None:
-        self.elements.append(
-            (tag, {name: value or "" for name, value in attrs})
-        )
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        self.elements.append((tag, {name: value or "" for name, value in attrs}))
 
 
 def test_rf001_headline_status_is_evidence_aware() -> None:
@@ -313,7 +307,15 @@ def test_rf003_1024_layout_prioritizes_actions_and_readability() -> None:
         for prop in override.get("properties", [])
         if prop.get("id") == "custom.width"
         and override.get("matcher", {}).get("options")
-        in {"Time", "scope", "alertname", "severity", "pipeline", "run_type", "alertstate"}
+        in {
+            "Time",
+            "scope",
+            "alertname",
+            "severity",
+            "pipeline",
+            "run_type",
+            "alertstate",
+        }
     ]
     assert sum(widths) <= 865
     excluded = alert_table.get("transformations", [])[0]["options"]["excludeByName"]

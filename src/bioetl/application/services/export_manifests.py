@@ -304,7 +304,9 @@ def write_export_sidecar_manifests(
         redacted_columns=redacted_columns,
         strict=strict,
     )
-    output_path_obj = output_path if isinstance(output_path, Path) else Path(output_path)
+    output_path_obj = (
+        output_path if isinstance(output_path, Path) else Path(output_path)
+    )
     manifest_prefix = output_path_obj.stem
     provenance_path_str = writer.write_manifest(
         manifest_name=f"{manifest_prefix}.provenance-manifest",

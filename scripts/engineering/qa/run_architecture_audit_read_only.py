@@ -70,7 +70,9 @@ def _lint_imports_command(repo_root: Path) -> tuple[str, ...]:
     return (discovered, "--config", ".importlinter")
 
 
-def architecture_audit_checks(repo_root: Path = PROJECT_ROOT) -> tuple[ArchitectureAuditCheck, ...]:
+def architecture_audit_checks(
+    repo_root: Path = PROJECT_ROOT,
+) -> tuple[ArchitectureAuditCheck, ...]:
     """Return the canonical read-only architecture audit command set."""
     python = sys.executable
     return (
@@ -318,9 +320,7 @@ def run_architecture_audit_read_only(
             "after": list(after_status),
             "status_unavailable": mutation_status_unavailable,
         },
-        "checks": [
-            {**asdict(result), "status": result.status} for result in results
-        ],
+        "checks": [{**asdict(result), "status": result.status} for result in results],
         "summary": {
             "check_count": len(results),
             "pass_count": sum(1 for result in results if result.returncode == 0),

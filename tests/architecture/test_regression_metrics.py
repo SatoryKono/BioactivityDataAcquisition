@@ -698,7 +698,9 @@ def _load_dep_map_snapshot() -> Any:
 def test_dependency_map_violations_zero() -> None:
     """Dependency map must have zero import-matrix violations."""
     if sys.platform.startswith("win"):
-        pytest.skip("Dependency map snapshot requires full repo walk which is prohibitively slow on Windows")
+        pytest.skip(
+            "Dependency map snapshot requires full repo walk which is prohibitively slow on Windows"
+        )
     snapshot = _load_dep_map_snapshot()
 
     assert len(snapshot.violations) == 0, (
@@ -713,7 +715,9 @@ def test_dependency_map_violations_zero() -> None:
 def test_cross_layer_group_edges_budget() -> None:
     """Cross-layer group edges must not exceed the budget."""
     if sys.platform.startswith("win"):
-        pytest.skip("Dependency map snapshot requires full repo walk which is prohibitively slow on Windows")
+        pytest.skip(
+            "Dependency map snapshot requires full repo walk which is prohibitively slow on Windows"
+        )
     snapshot = _load_dep_map_snapshot()
     edge_count = len(snapshot.cross_layer_group_edges)
 
@@ -725,7 +729,9 @@ def test_cross_layer_group_edges_budget() -> None:
 def test_cross_layer_group_edges_total_budget() -> None:
     """Total cross-layer group edges (full graph) must not exceed the budget."""
     if sys.platform.startswith("win"):
-        pytest.skip("Dependency map snapshot requires full repo walk which is prohibitively slow on Windows")
+        pytest.skip(
+            "Dependency map snapshot requires full repo walk which is prohibitively slow on Windows"
+        )
     snapshot = _load_dep_map_snapshot()
     total = snapshot.cross_layer_group_edges_total
 

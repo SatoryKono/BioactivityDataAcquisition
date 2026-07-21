@@ -203,9 +203,7 @@ class RunManifestHydrationMixin:
             workflow_run_id=_optional_payload_string(
                 normalized_payload, "workflow_run_id"
             ),
-            workflow_name=_optional_payload_string(
-                normalized_payload, "workflow_name"
-            ),
+            workflow_name=_optional_payload_string(normalized_payload, "workflow_name"),
             workflow_step_id=_optional_payload_string(
                 normalized_payload, "workflow_step_id"
             ),

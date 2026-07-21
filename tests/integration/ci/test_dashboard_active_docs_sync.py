@@ -190,9 +190,7 @@ def test_http_identity_panel_docs_match_shipped_datasource_contract(
 
     for panel in (identity_panel, processed_panel):
         assert panel["datasource"] == "Quarantine Explorer"
-    assert str(identity_target["url"]).startswith(
-        "/ops/control-plane/identity-table"
-    )
+    assert str(identity_target["url"]).startswith("/ops/control-plane/identity-table")
     assert str(processed_target["url"]).startswith(
         "/ops/observability/processed-records"
     )

@@ -157,20 +157,27 @@ def test_closeout_artifact_is_complete_and_budget_safe_for_issue_pack_5790_5796(
     assert zero_import_metrics["count"] <= 9
     assert zero_import_metrics["classified"] == zero_import_metrics["count"]
     assert zero_import_metrics["owner_test_anchored"] == zero_import_metrics["count"]
-    config_duplicate_metric = closeout["metrics"][
-        "config_surface_duplicate_clusters"
-    ]
+    config_duplicate_metric = closeout["metrics"]["config_surface_duplicate_clusters"]
     assert config_duplicate_metric["current"] == 21
     assert config_duplicate_metric["opening_baseline"] == 24
-    assert config_duplicate_metric["current"] < config_duplicate_metric["opening_baseline"]
-    assert closeout["metrics"]["runtime_basics_targeted_coverage_percent"]["targeted_closeout_proof"] == 100.0
+    assert (
+        config_duplicate_metric["current"] < config_duplicate_metric["opening_baseline"]
+    )
+    assert (
+        closeout["metrics"]["runtime_basics_targeted_coverage_percent"][
+            "targeted_closeout_proof"
+        ]
+        == 100.0
+    )
     assert "required_closeout_checks" in closeout
     assert len(closeout["required_closeout_checks"]) > 0
-    assert "src/bioetl/infrastructure/adapters/common/error_bundles.py" in closeout[
-        "outcomes"
-    ]["5791"]["evidence"]
-    assert "src/bioetl/application/pipelines/common/base_publication_transformer.py" in (
-        closeout["outcomes"]["5792"]["evidence"]
+    assert (
+        "src/bioetl/infrastructure/adapters/common/error_bundles.py"
+        in closeout["outcomes"]["5791"]["evidence"]
+    )
+    assert (
+        "src/bioetl/application/pipelines/common/base_publication_transformer.py"
+        in (closeout["outcomes"]["5792"]["evidence"])
     )
     assert all(
         outcome["status"] == "closeable" for outcome in closeout["outcomes"].values()
@@ -192,7 +199,10 @@ def test_closeout_artifact_is_complete_and_budget_safe_for_issue_pack_5790_5796(
     for outcome in closeout["outcomes"].values():
         assert "debt_type" in outcome
         assert "closeout_reason" in outcome
-        assert "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py" in outcome["evidence"]
+        assert (
+            "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py"
+            in outcome["evidence"]
+        )
 
 
 def test_issue_5790_compatibility_metadata_is_present_and_conflict_free() -> None:
@@ -201,7 +211,10 @@ def test_issue_5790_compatibility_metadata_is_present_and_conflict_free() -> Non
     census = _load_json(COMPATIBILITY_CENSUS)
     snapshot_text = COMPATIBILITY_SNAPSHOT.read_text(encoding="utf-8")
 
-    assert closeout["outcomes"]["5790"]["debt_type"] == "compatibility_entrypoint_governance"
+    assert (
+        closeout["outcomes"]["5790"]["debt_type"]
+        == "compatibility_entrypoint_governance"
+    )
     assert closeout["outcomes"]["5790"]["outcome"] == "improved"
     assert "closeout_reason" in closeout["outcomes"]["5790"]
 
@@ -277,7 +290,9 @@ def test_issue_5792_pipeline_duplication_dropped_under_base_transformer_defaults
     base_text = BASE_PUBLICATION_TRANSFORMER.read_text(encoding="utf-8")
     context_text = PUBLICATION_TRANSFORMER_CONTEXT.read_text(encoding="utf-8")
 
-    assert closeout["outcomes"]["5792"]["debt_type"] == "pipeline_transformer_duplication"
+    assert (
+        closeout["outcomes"]["5792"]["debt_type"] == "pipeline_transformer_duplication"
+    )
     assert closeout["outcomes"]["5792"]["outcome"] == "improved"
     assert closeout["outcomes"]["5792"]["opening_baseline"] == 11
     assert closeout["outcomes"]["5792"]["current_value"] == 0
@@ -317,13 +332,15 @@ def test_issue_5793_zero_import_candidates_have_explicit_owner_governance() -> N
     )
     metrics = closeout["metrics"]["repo_wide_zero_import_candidates"]
     assert summary["repo_wide_zero_import_candidate_count"] == metrics["count"]
-    assert summary["repo_wide_classified_zero_import_candidate_count"] == metrics[
-        "classified"
-    ]
+    assert (
+        summary["repo_wide_classified_zero_import_candidate_count"]
+        == metrics["classified"]
+    )
     assert summary["repo_wide_untriaged_zero_import_candidate_count"] == 0
-    assert summary["repo_wide_owner_test_anchored_candidate_count"] == metrics[
-        "owner_test_anchored"
-    ]
+    assert (
+        summary["repo_wide_owner_test_anchored_candidate_count"]
+        == metrics["owner_test_anchored"]
+    )
     assert summary["repo_wide_candidates_without_owner_tests_count"] == 0
 
     for row in inventory["repo_wide_zero_import_candidates"]:

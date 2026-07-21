@@ -42,9 +42,7 @@ def test_current_state_inventory_matches_full_app_duplication_baseline() -> None
 
     inventory = CURRENT_STATE.read_text(encoding="utf-8")
 
-    assert (
-        f"`{actionable}` actionable / `{raw}` raw excluded clusters" in inventory
-    )
+    assert f"`{actionable}` actionable / `{raw}` raw excluded clusters" in inventory
     assert "current actionable duplication is zero" in inventory
     assert raw == excluded
     assert "`43` clusters" not in inventory

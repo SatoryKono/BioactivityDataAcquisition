@@ -152,8 +152,7 @@ def test_delta_log_fallback_reads_only_current_active_parquet(
     delta_log = table_path / "_delta_log"
     delta_log.mkdir(parents=True)
     (delta_log / "00000000000000000000.json").write_text(
-        '{"add":{"path":"old.parquet"}}\n'
-        '{"add":{"path":"active%20row.parquet"}}\n',
+        '{"add":{"path":"old.parquet"}}\n{"add":{"path":"active%20row.parquet"}}\n',
         encoding="utf-8",
     )
     (delta_log / "00000000000000000001.json").write_text(

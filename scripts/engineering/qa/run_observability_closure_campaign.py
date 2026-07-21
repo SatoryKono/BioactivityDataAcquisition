@@ -961,8 +961,9 @@ def _stage_workflow_fixture(
     chembl_root = canonical_bronze_root / "chembl"
     assay, assay_source = _find_bronze_record(
         chembl_root / "assay",
-        predicate=lambda row: bool(row.get("target_chembl_id"))
-        and bool(row.get("document_chembl_id")),
+        predicate=lambda row: (
+            bool(row.get("target_chembl_id")) and bool(row.get("document_chembl_id"))
+        ),
     )
     source_assay = dict(assay)
     try:
@@ -970,21 +971,25 @@ def _stage_workflow_fixture(
         publication_id = str(assay["document_chembl_id"])
         target, target_source = _find_bronze_record(
             chembl_root / "target",
-            predicate=lambda row: str(row.get("target_chembl_id") or "")
-            == target_id
-            and _workflow_target_is_gold_eligible(row),
+            predicate=lambda row: (
+                str(row.get("target_chembl_id") or "") == target_id
+                and _workflow_target_is_gold_eligible(row)
+            ),
         )
         publication, publication_source = _find_bronze_record(
             chembl_root / "publication",
-            predicate=lambda row: str(row.get("document_chembl_id") or "")
-            == publication_id,
+            predicate=lambda row: (
+                str(row.get("document_chembl_id") or "") == publication_id
+            ),
         )
         assay_derivation = "lossless_join_compatible_source_record"
     except ValueError:
         target, target_source = _find_bronze_record(
             chembl_root / "target",
-            predicate=lambda row: bool(row.get("target_chembl_id"))
-            and _workflow_target_is_gold_eligible(row),
+            predicate=lambda row: (
+                bool(row.get("target_chembl_id"))
+                and _workflow_target_is_gold_eligible(row)
+            ),
         )
         publication, publication_source = _find_bronze_record(
             chembl_root / "publication",
@@ -1024,7 +1029,7 @@ def _stage_workflow_fixture(
         compressed_destination = destination.with_suffix(".jsonl.zst")
         atomic_write_bytes(
             compressed_destination,
-            zstandard.ZstdCompressor(level=3).compress(rendered.encode("utf-8"))
+            zstandard.ZstdCompressor(level=3).compress(rendered.encode("utf-8")),
         )
         evidence_records.append(
             {
@@ -2444,8 +2449,8 @@ def main(argv: list[str] | None = None) -> int:
     atomic_write_text(registry_stdout_path, registry_completed.stdout)
     before = {str(path.resolve()): _tree_signature(path) for path in canonical_roots}
     assert args.canonical_data_root is not None
-    cached_bronze_root, standalone_fixture_evidence = (
-        _stage_standalone_fixture_cache(repo_root=repo_root, audit_root=audit_root)
+    cached_bronze_root, standalone_fixture_evidence = _stage_standalone_fixture_cache(
+        repo_root=repo_root, audit_root=audit_root
     )
     # Validate and stage the cross-entity workflow fixture before spending the
     # campaign budget on 30 standalone processes.  A bounded input snapshot can
@@ -2593,9 +2598,7 @@ def main(argv: list[str] | None = None) -> int:
             "successful_attempt_count": sum(
                 attempt.exit_code == 0 for attempt in attempts
             ),
-            "failed_attempt_count": sum(
-                attempt.exit_code != 0 for attempt in attempts
-            ),
+            "failed_attempt_count": sum(attempt.exit_code != 0 for attempt in attempts),
         },
         "attempts": [asdict(item) for item in attempts],
         "online_attempt_gate": {

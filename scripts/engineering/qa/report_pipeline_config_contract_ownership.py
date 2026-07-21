@@ -11,7 +11,9 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config_from_root
+from bioetl.infrastructure.config.pipeline_config_api import (
+    load_pipeline_config_from_root,
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_JSON_OUTPUT = (
@@ -268,9 +270,7 @@ def _existing_snapshot_date(path: Path) -> str | None:
     return snapshot_date if isinstance(snapshot_date, str) and snapshot_date else None
 
 
-def _render_markdown(
-    rows: list[dict[str, str | bool]], *, snapshot_date: str
-) -> str:
+def _render_markdown(rows: list[dict[str, str | bool]], *, snapshot_date: str) -> str:
     lines = [
         "# Pipeline Config Contract Ownership Map",
         "",
@@ -358,7 +358,9 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.check:
         expected = (
-            json.dumps(build_payload(snapshot_date=snapshot_date), indent=2, sort_keys=True)
+            json.dumps(
+                build_payload(snapshot_date=snapshot_date), indent=2, sort_keys=True
+            )
             + "\n"
         )
         actual = args.json_out.read_text(encoding="utf-8")

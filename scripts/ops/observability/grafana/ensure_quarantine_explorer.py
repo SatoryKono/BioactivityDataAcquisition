@@ -87,7 +87,9 @@ def main(argv: list[str] | None = None) -> int:
         ),
         required_probe_paths=required_probe_paths,
     )
-    health_url = build_observability_backend_health_url(host=args.probe_host, port=args.port)
+    health_url = build_observability_backend_health_url(
+        host=args.probe_host, port=args.port
+    )
     liveness_available = probe_observability_backend(health_url)
     contract_ready = liveness_available and probe_observability_backend_required_paths(
         health_url, required_probe_paths=required_probe_paths

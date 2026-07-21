@@ -11,6 +11,7 @@ from typing import Any
 
 from .commands import (
     compose_command,
+    desktop_engine_restart_command,
     manager_command,
     probe_command,
     remaining_seconds,
@@ -38,9 +39,7 @@ def build_fault_cases() -> tuple[FaultCase, ...]:
             (
                 # Prefer start over recover: kill leaves a clean dead container;
                 # force-recreate recover has repeatedly crashed Docker Desktop.
-                FaultOperation(
-                    "start", "main", expected="success", max_seconds=180.0
-                ),
+                FaultOperation("start", "main", expected="success", max_seconds=180.0),
             ),
             max_seconds=360.0,
         ),
@@ -51,8 +50,9 @@ def build_fault_cases() -> tuple[FaultCase, ...]:
             (FaultOperation("probe", "main", expected="cause:service_unready"),),
             (
                 FaultOperation("unpause_service", "main", "bioetl"),
-                # After pause, health stays sticky; recover attempt>=2 force-recreates.
-                FaultOperation("recover", "main", max_seconds=180.0),
+                # Poll readiness after unpause. Avoid force-recreate recover: it
+                # repeatedly crashes Docker Desktop on this host lane.
+                FaultOperation("wait_healthy", "main", max_seconds=180.0),
             ),
             max_seconds=360.0,
         ),
@@ -346,11 +346,45 @@ marker.unlink(missing_ok=True)
                 ),
                 timeout,
             )
+        if operation.kind == "wait_healthy":
+            # Bounded poll after unpause/restart without force-recreate churn.
+            # Use module-level probe_command import — a local import here would
+            # shadow it for the whole execute() and break observe:probe.
+            spec = self._spec(operation)
+            started = time.monotonic()
+            deadline_local = started + timeout
+            last: dict[str, Any] = {
+                "returncode": 1,
+                "primary_cause": "readiness_timeout",
+            }
+            sequence = 0
+            while time.monotonic() < deadline_local:
+                sequence += 1
+                remaining = max(1.0, deadline_local - time.monotonic())
+                output = evidence / f"wait-healthy-{ordinal:02d}-{sequence:02d}.json"
+                # No bootstrap baseline: after pause/unpause restart deltas are
+                # expected; we only require live readiness to return to green.
+                last = probe_command(
+                    self.runtime_origin,
+                    spec,
+                    output,
+                    min(30.0, remaining),
+                    contract=self.contract,
+                )
+                if int(last.get("returncode", 1)) == 0 and last.get("summary_ok", True):
+                    last["wait_healthy"] = True
+                    last["polls"] = sequence
+                    last["duration_seconds"] = round(time.monotonic() - started, 3)
+                    return last
+                time.sleep(min(3.0, max(0.1, deadline_local - time.monotonic())))
+            last["wait_healthy"] = False
+            last["polls"] = sequence
+            last["duration_seconds"] = round(time.monotonic() - started, 3)
+            last["returncode"] = int(last.get("returncode", 1)) or 1
+            return last
         if operation.kind == "desktop_restart":
             # WSL `docker desktop restart` fails without /opt/docker-desktop backend.
             # Route through the Windows host CLI (same lane as RF-006 recovery).
-            from .commands import desktop_engine_restart_command
-
             return desktop_engine_restart_command(self.runtime_origin, timeout)
         raise ValueError(f"unsupported fault operation: {operation.kind}")
 

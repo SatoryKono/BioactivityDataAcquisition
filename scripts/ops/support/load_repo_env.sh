@@ -44,7 +44,8 @@ from pathlib import Path
 env_paths = [Path(p) for p in sys.argv[1:]]
 shell_keys = set()
 for key in os.environ:
-    shell_keys.add(key)
+    if os.environ.get(key):
+        shell_keys.add(key)
 
 values: dict[str, str] = {}
 for env_path in env_paths:
@@ -152,6 +153,12 @@ normalize_repo_env_aliases() {
   if [[ -z "${GITHUB_TOKEN:-}" && -n "${GITHUB_PERSONAL_ACCESS_TOKEN:-}" ]]; then
     export GITHUB_TOKEN="${GITHUB_PERSONAL_ACCESS_TOKEN}"
   fi
+  if [[ -z "${GITHUB_TOKEN:-}" && -n "${GH_TOKEN:-}" ]]; then
+    export GITHUB_TOKEN="${GH_TOKEN}"
+  fi
+  if [[ -z "${GITHUB_PERSONAL_ACCESS_TOKEN:-}" && -n "${GH_TOKEN:-}" ]]; then
+    export GITHUB_PERSONAL_ACCESS_TOKEN="${GH_TOKEN}"
+  fi
 
   if [[ -z "${NEEDLE_API_KEY:-}" && -n "${NEEDLE_TOKEN:-}" ]]; then
     export NEEDLE_API_KEY="${NEEDLE_TOKEN}"
@@ -163,6 +170,10 @@ normalize_repo_env_aliases() {
     elif [[ -n "${BRAVE_API_KEY1:-}" ]]; then
       export BRAVE_API_KEY="${BRAVE_API_KEY1}"
     fi
+  fi
+
+  if [[ -z "${REF_TOOL_API_KEY:-}" && -n "${REF_API_KEY:-}" ]]; then
+    export REF_TOOL_API_KEY="${REF_API_KEY}"
   fi
 
   if [[ -z "${HUB_PAT_TOKEN:-}" ]]; then

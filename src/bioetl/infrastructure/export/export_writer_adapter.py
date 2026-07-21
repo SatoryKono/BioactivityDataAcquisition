@@ -33,9 +33,13 @@ class ExportWriterAdapter(ExportWriterPort):
         output_dir_obj.mkdir(parents=True, exist_ok=True)
         safe_name = f"{layer}_{table_name.replace('.', '_')}"
         if fmt == "csv":
-            return str(_write_delimited_file(table, output_dir_obj / f"{safe_name}.csv", ","))
+            return str(
+                _write_delimited_file(table, output_dir_obj / f"{safe_name}.csv", ",")
+            )
         if fmt == "tsv":
-            return str(_write_delimited_file(table, output_dir_obj / f"{safe_name}.tsv", "\t"))
+            return str(
+                _write_delimited_file(table, output_dir_obj / f"{safe_name}.tsv", "\t")
+            )
         if fmt == "xlsx":
             return str(_write_xlsx_file(table, output_dir_obj / f"{safe_name}.xlsx"))
         raise ValueError(f"Unsupported format: {fmt}")

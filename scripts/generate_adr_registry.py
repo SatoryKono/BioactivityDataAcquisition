@@ -427,14 +427,12 @@ class ADRRegistryGenerator:
                 relationships=relationships,
             )
 
-            resolved_title = (
-                self._metadata_str_value(front_matter.get("title"))
-                or index_metadata.get("title")
-            )
-            resolved_category = (
-                self._metadata_str_value(front_matter.get("category"))
-                or index_metadata.get("category")
-            )
+            resolved_title = self._metadata_str_value(
+                front_matter.get("title")
+            ) or index_metadata.get("title")
+            resolved_category = self._metadata_str_value(
+                front_matter.get("category")
+            ) or index_metadata.get("category")
 
             # Create metadata object
             adr_metadata = ADRMetadata(

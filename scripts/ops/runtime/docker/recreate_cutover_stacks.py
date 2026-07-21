@@ -92,7 +92,9 @@ def _print_env_summary(label: str, env_map: Mapping[str, str]) -> None:
     print(f"{label}: {json.dumps(redacted, ensure_ascii=False)}", flush=True)
 
 
-def _compose_env(base: Mapping[str, str], overrides: Mapping[str, str]) -> dict[str, str]:
+def _compose_env(
+    base: Mapping[str, str], overrides: Mapping[str, str]
+) -> dict[str, str]:
     merged = dict(base)
     merged.update(overrides)
     # Avoid Windows path rewriting of Linux-style compose paths by keeping PATH.
@@ -211,7 +213,9 @@ def main() -> int:
     )
     missing_mon = [k for k in required_monitoring if k not in monitoring_overrides]
     if missing_mon:
-        raise RuntimeError(f"missing monitoring secrets from live containers: {missing_mon}")
+        raise RuntimeError(
+            f"missing monitoring secrets from live containers: {missing_mon}"
+        )
     if "NEO4J_PASSWORD" not in main_overrides:
         raise RuntimeError("missing NEO4J_PASSWORD from live main container")
 
@@ -224,7 +228,9 @@ def main() -> int:
         if exists.returncode != 0:
             created = _run(["docker", "network", "create", network], timeout=30.0)
             if created.returncode != 0:
-                raise RuntimeError(f"failed to create network {network}: {created.stderr}")
+                raise RuntimeError(
+                    f"failed to create network {network}: {created.stderr}"
+                )
 
     recreate_stack(
         runtime=runtime,

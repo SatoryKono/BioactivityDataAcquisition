@@ -105,7 +105,12 @@ def desktop_engine_restart_command(
     powershell = resolve_windows_powershell()
     if powershell is None:
         return {
-            "command": ["powershell.exe", "-NoProfile", "-Command", "docker desktop restart"],
+            "command": [
+                "powershell.exe",
+                "-NoProfile",
+                "-Command",
+                "docker desktop restart",
+            ],
             "returncode": 127,
             "timed_out": False,
             "duration_seconds": 0.0,
@@ -326,31 +331,50 @@ def volume_ids(
     runtime_origin: Path,
     spec: StackSpec,
     timeout: float = 20.0,
+    *,
+    retries: int = 5,
+    retry_sleep: float = 2.0,
 ) -> set[str]:
-    project = run_command(
-        [
-            "docker",
-            "volume",
-            "ls",
-            "--filter",
-            f"label=com.docker.compose.project={spec.project}",
-            "--format",
-            "{{.Name}}",
-        ],
-        timeout,
-        cwd=runtime_origin,
+    """List Compose project volumes; retry when the Docker daemon flaps."""
+    last_error = "docker volume ls failed"
+    attempts = max(1, int(retries))
+    for attempt in range(1, attempts + 1):
+        project = run_command(
+            [
+                "docker",
+                "volume",
+                "ls",
+                "--filter",
+                f"label=com.docker.compose.project={spec.project}",
+                "--format",
+                "{{.Name}}",
+            ],
+            timeout,
+            cwd=runtime_origin,
+        )
+        all_volumes = run_command(
+            ["docker", "volume", "ls", "--format", "{{.Name}}"],
+            timeout,
+            cwd=runtime_origin,
+        )
+        if project["returncode"] == 0 and all_volumes["returncode"] == 0:
+            names = {line for line in str(project["stdout"]).splitlines() if line}
+            existing = {
+                line for line in str(all_volumes["stdout"]).splitlines() if line
+            }
+            names.update(set(spec.protected_volumes) & existing)
+            return names
+        last_error = (
+            f"project_rc={project.get('returncode')} "
+            f"all_rc={all_volumes.get('returncode')} "
+            f"stderr={project.get('stderr') or all_volumes.get('stderr')}"
+        )
+        if attempt < attempts:
+            time.sleep(retry_sleep * attempt)
+    raise RuntimeError(
+        f"unable to capture volume identity for {spec.stack} after {attempts} "
+        f"attempts ({last_error})"
     )
-    all_volumes = run_command(
-        ["docker", "volume", "ls", "--format", "{{.Name}}"],
-        timeout,
-        cwd=runtime_origin,
-    )
-    if project["returncode"] != 0 or all_volumes["returncode"] != 0:
-        raise RuntimeError(f"unable to capture volume identity for {spec.stack}")
-    names = {line for line in str(project["stdout"]).splitlines() if line}
-    existing = {line for line in str(all_volumes["stdout"]).splitlines() if line}
-    names.update(set(spec.protected_volumes) & existing)
-    return names
 
 
 def required_volume_precondition(
@@ -543,8 +567,34 @@ def observe_docker_vm_reserve(
         result = {**candidate, "path": path}
         break
     else:
-        # Preserve the last attempt's command evidence for the incident bundle.
-        if attempts:
+        # Host vsock to the docker-desktop distro flaps on this lane even when
+        # the Docker API is healthy. Fall back to df inside a short-lived
+        # container against the VM rootfs (approximate but fail-open on API).
+        fallback = run_command(
+            [
+                "docker",
+                "run",
+                "--rm",
+                "--entrypoint",
+                "df",
+                "alpine:3.20",
+                "-Pk",
+                "/",
+            ],
+            timeout,
+            cwd=runtime_origin,
+        )
+        attempts.append({"path": "container:/", "method": "docker_run_df", **fallback})
+        kib = (
+            _parse_df_pk_available_kib(str(fallback.get("stdout", "")))
+            if fallback.get("returncode") == 0
+            else None
+        )
+        if kib is not None:
+            free_bytes = kib * 1024
+            result = {**fallback, "path": "container:/", "method": "docker_run_df"}
+        elif attempts:
+            # Preserve the last attempt's command evidence for the incident bundle.
             result = dict(attempts[-1])
 
     previous = state.get("docker_vm_min_free_bytes")

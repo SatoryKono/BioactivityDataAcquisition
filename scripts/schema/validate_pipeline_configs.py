@@ -712,7 +712,10 @@ def _validate_registry_manifest_surface(configs_root: Path) -> list[str]:
     )
 
     resolved_configs_root = resolve_configs_root(configs_root)
-    if resolved_configs_root.resolve() == (get_default_repo_root() / "configs").resolve():
+    if (
+        resolved_configs_root.resolve()
+        == (get_default_repo_root() / "configs").resolve()
+    ):
         from bioetl.composition.factories.pipeline.registry_manifest import (
             PIPELINE_CONFIGS,
         )
@@ -751,7 +754,9 @@ def _build_local_registry_manifest(
         pipeline_payload = payload.get("pipeline")
         pipeline = pipeline_payload if isinstance(pipeline_payload, dict) else {}
         provider = str(
-            payload.get("provider") or pipeline.get("provider") or entity_path.parent.name
+            payload.get("provider")
+            or pipeline.get("provider")
+            or entity_path.parent.name
         )
         entity = str(
             payload.get("entity") or pipeline.get("entity_type") or entity_path.stem
