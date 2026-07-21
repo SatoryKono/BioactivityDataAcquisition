@@ -8,8 +8,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 HELPER_DIR="${SCRIPT_DIR}/helper"
 REPO_ROOT="${REPO_ROOT:-$(timeout 5 git rev-parse --show-toplevel 2>/dev/null || echo "${SCRIPT_DIR}/../../..")}"
 USER_NPM_BIN="${HOME}/.npm-global/bin"
+LINUX_NPM_BIN="${HOME}/.cache/bioetl-codex/npm-global/bin"
 
-# Prefer user-scoped npm globals over stale system-wide installs.
+# Prefer Linux-native and user-scoped npm globals over stale system installs.
+# /usr/local/bin/codex is often root-owned and lagging behind @latest.
+if [[ -d "${LINUX_NPM_BIN}" ]]; then
+    export PATH="${LINUX_NPM_BIN}:${PATH}"
+fi
 if [[ -d "${USER_NPM_BIN}" ]]; then
     export PATH="${USER_NPM_BIN}:${PATH}"
 fi
@@ -49,6 +54,10 @@ resolve_codex_bin() {
     local candidate=""
     if [[ -n "${CODEX_BIN:-}" ]] && [[ -x "${CODEX_BIN}" ]]; then
         printf "%s\n" "${CODEX_BIN}"
+        return 0
+    fi
+    if [[ -x "${LINUX_NPM_BIN}/codex" ]]; then
+        printf "%s\n" "${LINUX_NPM_BIN}/codex"
         return 0
     fi
     if [[ -x "${USER_NPM_BIN}/codex" ]]; then

@@ -7,7 +7,7 @@ Your system is fully configured. **WSL2 + Ubuntu** with **Node.js, npm, and Code
 - ✓ WSL2 running (Ubuntu distro)
 - ✓ Node.js v20.10.0
 - ✓ npm 10.2.3
-- ✓ Codex CLI 0.118.0
+- ✓ Codex CLI 0.144.6 (Linux-native install under `~/.cache/bioetl-codex` / `~/.npm-global`)
 - ✓ OpenAI API key configured in `.env.codex`
 - ✓ Docker Desktop running
 
