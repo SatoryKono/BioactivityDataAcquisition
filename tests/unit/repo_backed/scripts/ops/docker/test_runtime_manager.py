@@ -93,6 +93,7 @@ def test_collect_snapshots_resolves_repo_digests_from_real_container_shape() -> 
         current = list(command)
         calls.append(current)
         if "compose" in current and "ps" in current:
+            assert runtime_manager._COMPOSE_PS_LEAN_FORMAT in current
             return runtime_manager.CommandResult(
                 current,
                 0,
@@ -133,6 +134,118 @@ def test_collect_snapshots_resolves_repo_digests_from_real_container_shape() -> 
     container_template = calls[1][calls[1].index("--format") + 1]
     assert ".RepoDigests" not in container_template
     assert calls[2][:3] == ["docker", "image", "inspect"]
+
+
+def test_collect_snapshots_parses_ndjson_even_when_full_json_would_truncate() -> None:
+    """Regression: full compose ps JSON with Labels exceeds _bounded(4000)."""
+    fat_label_row = {
+        "ID": "aaaaaaaaaaaa",
+        "Service": "grafana",
+        "Name": "bioetl-grafana",
+        "State": "running",
+        "Health": "healthy",
+        "Image": "grafana/grafana:12.0.0",
+        "Labels": "x" * 5000,
+    }
+    lean_rows = [
+        {
+            "ID": "bbbbbbbbbbbb",
+            "Service": "prometheus",
+            "Name": "bioetl-prometheus",
+            "State": "running",
+            "Health": "healthy",
+            "Image": "prom/prometheus:v3",
+        },
+        {
+            "ID": "cccccccccccc",
+            "Service": "pushgateway",
+            "Name": "bioetl-pushgateway",
+            "State": "running",
+            "Health": "healthy",
+            "Image": "prom/pushgateway:v1",
+        },
+        {
+            "ID": "dddddddddddd",
+            "Service": "renderer",
+            "Name": "bioetl-renderer",
+            "State": "running",
+            "Health": "healthy",
+            "Image": "grafana/grafana-image-renderer",
+        },
+        {
+            "ID": "aaaaaaaaaaaa",
+            "Service": "grafana",
+            "Name": "bioetl-grafana",
+            "State": "running",
+            "Health": "healthy",
+            "Image": "grafana/grafana:12.0.0",
+        },
+    ]
+    # Prove the historical failure mode: full JSON truncates later services.
+    full_stdout = "\n".join(json.dumps(row) for row in [fat_label_row, *lean_rows[1:]])
+    assert len(full_stdout) > 4000
+    truncated = runtime_manager._bounded(full_stdout)
+    truncated_services: set[str] = set()
+    for line in truncated.splitlines():
+        if not line.strip():
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            # Partial final line after truncation is expected.
+            continue
+        if isinstance(row, dict) and row.get("Service"):
+            truncated_services.add(str(row["Service"]))
+    # Later lean services are dropped once the fat Labels row fills the bound.
+    assert "prometheus" not in truncated_services
+    assert "renderer" not in truncated_services
+
+    def runner(
+        command: Sequence[str], cwd: Path, timeout: float
+    ) -> runtime_manager.CommandResult:
+        current = list(command)
+        if "compose" in current and "ps" in current:
+            return runtime_manager.CommandResult(
+                current,
+                0,
+                stdout="\n".join(json.dumps(row) for row in lean_rows),
+            )
+        if current[:2] == ["docker", "inspect"]:
+            return runtime_manager.CommandResult(
+                current,
+                0,
+                stdout=json.dumps(
+                    {
+                        "State": {
+                            "Status": "running",
+                            "OOMKilled": False,
+                            "Health": {"Status": "healthy"},
+                        },
+                        "RestartCount": 0,
+                        "Image": "img:test",
+                        "ImageID": "sha256:img",
+                    }
+                ),
+            )
+        if current[:3] == ["docker", "image", "inspect"]:
+            return runtime_manager.CommandResult(
+                current,
+                0,
+                stdout=json.dumps({"RepoDigests": []}),
+            )
+        raise AssertionError(current)
+
+    mon = runtime_manager.StackSpec(
+        name="monitoring",
+        project="bioetl-monitoring",
+        compose_file=Path("docker-compose.monitoring.yml"),
+        required_services=("prometheus", "pushgateway", "grafana", "renderer"),
+        expected_images={},
+    )
+    snapshots, _ = runtime_manager.collect_snapshots(mon, runner=runner)
+    names = {snap.service for snap in snapshots}
+    assert names == {"prometheus", "pushgateway", "grafana", "renderer"}
+    assert runtime_manager.readiness_findings(mon, snapshots, baseline={}) == []
 
 
 def test_running_without_health_is_not_ready() -> None:
@@ -188,6 +301,104 @@ def test_preflight_failure_writes_one_redacted_incident_without_mutation(
     assert "ghp_" not in incidents[0].read_text(encoding="utf-8")
 
 
+def test_recover_continues_when_preflight_only_reports_container_health(
+    tmp_path: Path,
+) -> None:
+    """Recover must not fail closed solely because the target service is unhealthy."""
+    preflight_path = tmp_path / "docker-runtime-main-preflight.json"
+    preflight_path.write_text(
+        json.dumps(
+            {
+                "summary": {"errors": 1, "warnings": 0, "ok": False},
+                "findings": [
+                    {
+                        "code": "CONTAINER_HEALTH",
+                        "severity": "error",
+                        "message": "Container is unhealthy",
+                        "evidence": {"name": "/bioetl"},
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    calls: list[list[str]] = []
+
+    def runner(
+        command: Sequence[str], cwd: Path, timeout: float
+    ) -> runtime_manager.CommandResult:
+        current = list(command)
+        calls.append(current)
+        joined = " ".join(current)
+        if "docker_runtime_preflight.py" in joined:
+            return runtime_manager.CommandResult(current, 2)
+        if "network" in current and "inspect" in current:
+            return runtime_manager.CommandResult(
+                current,
+                0,
+                stdout="scripts/ops/runtime/docker/runtime_manager.py\n",
+            )
+        if "compose" in current and "ps" in current:
+            return runtime_manager.CommandResult(
+                current,
+                0,
+                stdout=json.dumps(
+                    {
+                        "ID": "abcdef123456",
+                        "Service": "bioetl",
+                        "State": "running",
+                        "Health": "healthy",
+                        "Image": "bioetl:test@sha256:" + "a" * 64,
+                    }
+                ),
+            )
+        if current[:2] == ["docker", "inspect"]:
+            return runtime_manager.CommandResult(
+                current,
+                0,
+                stdout=json.dumps(
+                    {
+                        "State": {
+                            "Status": "running",
+                            "OOMKilled": False,
+                            "Health": {"Status": "healthy"},
+                        },
+                        "RestartCount": 0,
+                        "Image": "bioetl:test",
+                        "ImageID": "sha256:img",
+                    }
+                ),
+            )
+        if current[:3] == ["docker", "image", "inspect"]:
+            return runtime_manager.CommandResult(
+                current,
+                0,
+                stdout=json.dumps(
+                    {"RepoDigests": ["bioetl:test@sha256:" + "a" * 64]}
+                ),
+            )
+        if "config" in current:
+            return runtime_manager.CommandResult(current, 0)
+        if "up" in current:
+            return runtime_manager.CommandResult(current, 0)
+        raise AssertionError(current)
+
+    result = runtime_manager.start_or_recover(
+        _spec(expected_images={"bioetl": "bioetl:test@sha256:" + "a" * 64}),
+        Path("contract.yml"),
+        tmp_path,
+        recover=True,
+        runner=runner,
+        sleep=lambda _seconds: None,
+    )
+
+    assert result == 0
+    up_calls = [call for call in calls if "up" in call]
+    assert up_calls
+    assert any("--force-recreate" in call for call in up_calls)
+    assert not list(tmp_path.glob("docker-incident-*.json"))
+
+
 def test_recovery_is_bounded_to_three_attempts_and_writes_one_incident(
     tmp_path: Path,
 ) -> None:
@@ -198,8 +409,17 @@ def test_recovery_is_bounded_to_three_attempts_and_writes_one_incident(
     ) -> runtime_manager.CommandResult:
         current = list(command)
         calls.append(current)
-        if "docker_runtime_preflight.py" in " ".join(current):
+        joined = " ".join(current)
+        if "docker_runtime_preflight.py" in joined:
             return runtime_manager.CommandResult(current, 0)
+        if "network" in current and "inspect" in current:
+            return runtime_manager.CommandResult(
+                current,
+                0,
+                stdout="scripts/ops/runtime/docker/runtime_manager.py\n",
+            )
+        if "compose" in current and "ps" in current:
+            return runtime_manager.CommandResult(current, 0, stdout="")
         if current[-2:] == ["--format", "json"]:
             return runtime_manager.CommandResult(current, 0, stdout="[]")
         if "config" in current:
@@ -273,8 +493,17 @@ def test_recovery_attempts_share_one_overall_deadline(tmp_path: Path) -> None:
     ) -> runtime_manager.CommandResult:
         nonlocal up_calls
         current = list(command)
-        if "docker_runtime_preflight.py" in " ".join(current) or "config" in current:
+        joined = " ".join(current)
+        if "docker_runtime_preflight.py" in joined or "config" in current:
             return runtime_manager.CommandResult(current, 0)
+        if "network" in current and "inspect" in current:
+            return runtime_manager.CommandResult(
+                current,
+                0,
+                stdout="scripts/ops/runtime/docker/runtime_manager.py\n",
+            )
+        if "compose" in current and "ps" in current:
+            return runtime_manager.CommandResult(current, 0, stdout="")
         if current[-2:] == ["--format", "json"]:
             return runtime_manager.CommandResult(current, 0, stdout="[]")
         if "up" in current:

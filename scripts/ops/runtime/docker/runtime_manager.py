@@ -87,7 +87,13 @@ def _display_path(path: Path) -> str:
         return str(path)
 
 
-def _run(command: Sequence[str], cwd: Path, timeout: float) -> CommandResult:
+def _run(
+    command: Sequence[str],
+    cwd: Path,
+    timeout: float,
+    *,
+    output_limit: int | None = 4000,
+) -> CommandResult:
     try:
         completed = subprocess.run(
             list(command),
@@ -99,11 +105,16 @@ def _run(command: Sequence[str], cwd: Path, timeout: float) -> CommandResult:
         )
     except (FileNotFoundError, subprocess.TimeoutExpired) as exc:
         return CommandResult(list(command), 127, stderr=str(exc))
+    stdout = completed.stdout
+    stderr = completed.stderr
+    if output_limit is not None:
+        stdout = _bounded(stdout, output_limit)
+        stderr = _bounded(stderr, output_limit)
     return CommandResult(
         list(command),
         completed.returncode,
-        _bounded(completed.stdout),
-        _bounded(completed.stderr),
+        stdout,
+        stderr,
     )
 
 
@@ -173,13 +184,26 @@ def _json_rows(text: str) -> list[dict[str, Any]]:
     return [row for row in payload if isinstance(row, dict)]
 
 
+# Lean compose-ps template keeps multi-service stacks inside incident bounds.
+# Full `--format json` includes Labels and is truncated by `_bounded` (4000),
+# which previously dropped monitoring services after grafana.
+_COMPOSE_PS_LEAN_FORMAT = (
+    '{"ID":"{{.ID}}","Service":"{{.Service}}","Name":"{{.Name}}",'
+    '"State":"{{.State}}","Health":"{{.Health}}","Image":"{{.Image}}"}'
+)
+
+
 def collect_snapshots(
     spec: StackSpec,
     *,
     runner: Runner = _run,
     timeout: float = 15.0,
 ) -> tuple[list[ServiceSnapshot], list[CommandResult]]:
-    ps = runner(_compose(spec, "ps", "--all", "--format", "json"), ROOT, timeout)
+    ps = runner(
+        _compose(spec, "ps", "--all", "--format", _COMPOSE_PS_LEAN_FORMAT),
+        ROOT,
+        timeout,
+    )
     observations = [ps]
     if ps.returncode != 0:
         return [], observations
@@ -580,6 +604,41 @@ def _wait_ready(
     return last_snapshots, last_findings
 
 
+_RECOVERABLE_PREFLIGHT_CODES = frozenset(
+    {
+        "CONTAINER_HEALTH",
+        "CONTAINER_RESTART",
+        "CONTAINER_OOM",
+    }
+)
+
+
+def _preflight_errors_are_recoverable(preflight_path: Path) -> bool:
+    """Allow recover to proceed when preflight only reports live container health.
+
+    Recover is invoked precisely because required services are unready/unhealthy.
+    Origin, network, capacity, and other environment gates still fail closed.
+    """
+    try:
+        payload = json.loads(preflight_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    findings = payload.get("findings") or []
+    if not isinstance(findings, list):
+        return False
+    errors = [
+        finding
+        for finding in findings
+        if isinstance(finding, Mapping) and finding.get("severity") == "error"
+    ]
+    if not errors:
+        return True
+    return all(
+        str(finding.get("code") or "") in _RECOVERABLE_PREFLIGHT_CODES
+        for finding in errors
+    )
+
+
 def start_or_recover(
     spec: StackSpec,
     contract_path: Path,
@@ -606,7 +665,9 @@ def start_or_recover(
         runner=runner,
         timeout=min(max(0.1, deadline - clock()), 60.0),
     )
-    if preflight.returncode != 0:
+    if preflight.returncode != 0 and not (
+        recover and _preflight_errors_are_recoverable(preflight_path)
+    ):
         findings = [{"cause": "preflight_failed", "stderr": preflight.stderr}]
         snapshots: list[ServiceSnapshot] = []
         attempts = 0
@@ -647,15 +708,20 @@ def start_or_recover(
                     if remaining <= 0:
                         findings = [{"cause": "readiness_timeout", "attempt": attempts}]
                         break
-                    command = _compose(
-                        spec,
-                        "up",
-                        "-d",
-                        "--wait",
-                        "--wait-timeout",
-                        str(max(1, int(remaining))),
-                        *spec.required_services,
+                    # recover: force-recreate clears sticky unhealthy state left by
+                    # pause/kill/fault injection so compose --wait can succeed.
+                    up_args: list[str] = ["up", "-d"]
+                    if recover:
+                        up_args.append("--force-recreate")
+                    up_args.extend(
+                        [
+                            "--wait",
+                            "--wait-timeout",
+                            str(max(1, int(remaining))),
+                            *spec.required_services,
+                        ]
                     )
+                    command = _compose(spec, *up_args)
                     result = runner(command, ROOT, remaining)
                     history.append(
                         {

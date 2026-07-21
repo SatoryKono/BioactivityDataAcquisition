@@ -35,52 +35,54 @@ $ErrorActionPreference = 'Stop'
 
 $WaveMap = [ordered]@{
     Wave0 = @()
-    Wave1 = @('APP-15','APP-16','APP-17','APP-18','APP-19','APP-11','APP-12','APP-13','APP-14','APP-06','APP-07','APP-08','APP-09','APP-10','APP-01','APP-02','APP-03','APP-04','APP-05')
+    Wave1 = @('APP-15','APP-16','APP-17','APP-18','APP-19','APP-20','APP-21','APP-11','APP-12','APP-13','APP-14','APP-06','APP-07','APP-08','APP-09','APP-10','APP-01','APP-02','APP-03','APP-04','APP-05')
     Wave2 = @('DEV-01','DEV-02','DEV-03','DEV-04','DEV-05','DEV-06','DEV-07','DEV-08','DEV-09','DEV-10','DEV-11','DEV-12','DEV-13','DEV-14','DEV-15','DEV-16','DEV-17','DEV-18','DEV-19','DEV-20','DEV-21','DEV-22','DEV-23')
     Wave3 = @('SCI-01','SCI-02','SCI-03','SCI-04','SCI-05','SCI-06','SCI-07','SCI-08','SCI-09','SCI-10')
     Wave4 = @('Store')
 }
 
 $CatalogOverrides = [ordered]@{
-    'APP-01' = @{ Source = 'C:\Users\Fedor\AppData\Local\Programs\Opera\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\Opera Software\'; Target = 'D:\Users\Fedor\AppData\Local\Programs\Opera\'; DataTarget = 'D:\AppData\Opera\Profile\'; InstallHint = 'Reinstall from official installer'; },
-    'APP-02' = @{ Source = 'C:\Users\Fedor\AppData\Local\Programs\eXpress\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\eXpress\'; Target = 'D:\Users\Fedor\AppData\Local\Programs\eXpress\'; DataTarget = 'D:\Migration_Backup\2026-07-21\eXpress\Data\'; InstallHint = 'Reinstall on D:' },
-    'APP-03' = @{ Source = 'C:\Users\Fedor\AppData\Local\Programs\Antigravity\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\Antigravity\'; Target = 'D:\Users\Fedor\AppData\Local\Programs\Antigravity\'; DataTarget = 'D:\Migration_Backup\2026-07-21\Antigravity\Data\'; InstallHint = 'Reinstall on D:' },
-    'APP-04' = @{ Source = 'C:\Users\Fedor\AppData\Local\Programs\Microsoft VS Code\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\Code\'; Target = 'D:\Users\Fedor\AppData\Local\Programs\Microsoft VS Code\'; DataTarget = 'D:\Migration_Backup\2026-07-21\Code\Data\'; InstallHint = 'Reinstall on D:, then migrate extensions manifest manually' },
-    'APP-05' = @{ Source = 'C:\Users\Fedor\AppData\Roaming\Zoom\'; Target = 'D:\Program Files\Zoom\'; DataTarget = 'D:\Migration_Backup\2026-07-21\Zoom\Data\'; DataSource = $null; InstallHint = 'Installer must support custom location' },
-    'APP-06' = @{ Source = 'C:\Program Files\LibreOffice\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\LibreOffice\'; Target = 'D:\Program Files\LibreOffice\'; DataTarget = 'D:\Migration_Backup\2026-07-21\LibreOffice\Data\'; InstallHint = 'Reinstall on D:' },
-    'APP-07' = @{ Source = 'C:\Program Files\Inkscape\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\Inkscape\'; Target = 'D:\Program Files\Inkscape\'; DataTarget = 'D:\Migration_Backup\2026-07-21\Inkscape\Data\'; InstallHint = 'Reinstall on D:' },
-    'APP-08' = @{ Source = 'C:\Program Files\Koala Clash\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\Koala-Clash\'; Target = 'D:\Program Files\Koala Clash\'; DataTarget = 'D:\Migration_Backup\2026-07-21\KoalaClash\Data\'; InstallHint = 'Reinstall on D: (postpone if recent)' },
-    'APP-09' = @{ Source = 'C:\Program Files\obs-studio\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\obs-studio\'; Target = 'D:\Program Files\obs-studio\'; DataTarget = 'D:\Migration_Backup\2026-07-21\obs-studio\Data\'; InstallHint = 'Reinstall on D:' },
-    'APP-10' = @{ Source = 'C:\Program Files (x86)\Zotero\'; DataSource = 'C:\Users\Fedor\Zotero\'; DataTarget = 'D:\AppData\Zotero\Data\'; Target = 'D:\Program Files\Zotero\'; InstallHint = 'Reinstall on D: and repoint data directory' },
-    'APP-11' = @{ Source = 'C:\Program Files (x86)\Data Match Enterprise\'; DataSource = 'C:\ProgramData\DataMatch Enterprise 3\'; Target = 'D:\Program Files (x86)\Data Match Enterprise\'; DataTarget = 'D:\Migration_Backup\2026-07-21\DataMatch\Data\'; InstallHint = 'Reinstall on D:' },
-    'APP-12' = @{ Source = 'C:\Program Files (x86)\ACDFREE11\'; DataSource = 'C:\ProgramData\Advanced Chemistry Development\'; Target = 'D:\Program Files (x86)\ACDFREE11\'; DataTarget = 'D:\Migration_Backup\2026-07-21\ACDFREE11\Data\'; InstallHint = 'Reinstall on D:' },
-    'APP-13' = @{ Source = 'C:\Program Files (x86)\PDF Enhancer\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\Apago\'; Target = 'D:\Program Files (x86)\PDF Enhancer\'; DataTarget = 'D:\Migration_Backup\2026-07-21\ApagoPDFEnhancer\Data\'; InstallHint = 'Reinstall on D:' },
-    'APP-14' = @{ Source = 'C:\Program Files (x86)\Apago\PDF Shrink\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\Apago\PDF Shrink\'; Target = 'D:\Program Files (x86)\Apago\PDF Shrink\'; DataTarget = 'D:\Migration_Backup\2026-07-21\ApagoPDFShrink\Data\'; InstallHint = 'Reinstall on D:' },
-    'APP-15' = @{ Source = 'C:\Program Files\VS Revo Group\Revo Uninstaller\'; Target = 'D:\Program Files\VS Revo Group\Revo Uninstaller\'; DataSource = $null; DataTarget = 'D:\Migration_Backup\2026-07-21\RevoUninstaller\Data\'; InstallHint = 'Reinstall on D:' },
-    'APP-16' = @{ Source = 'C:\Program Files (x86)\XnView\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\XnView\'; Target = 'D:\Program Files (x86)\XnView\'; DataTarget = 'D:\Migration_Backup\2026-07-21\XnView\Data\'; InstallHint = 'Reinstall on D:' },
-    'APP-17' = @{ Source = 'C:\Program Files (x86)\Sizer\'; Target = 'D:\Program Files (x86)\Sizer\'; DataSource = $null; DataTarget = $null; InstallHint = 'Move together with wave' },
-    'APP-18' = @{ Source = 'C:\Program Files\Unlocker\'; Target = 'D:\Program Files\Unlocker\'; DataSource = $null; DataTarget = $null; InstallHint = 'Reinstall on D:' },
-    'APP-19' = @{ Source = 'C:\Program Files (x86)\University of Illinois\VMD\'; DataSource = $null; Target = 'D:\Program Files (x86)\University of Illinois\VMD\'; DataTarget = $null; InstallHint = 'Reinstall on D:' },
-    'DEV-01' = @{ Source = 'C:\Program Files\JetBrains\IntelliJ IDEA 2025.3\'; Target = 'D:\Program Files\JetBrains\IntelliJ IDEA 2025.3\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\JetBrains\IntelliJIdea2025.3\'; DataTarget='D:\Migration_Backup\2026-07-21\IntelliJ\Data\'; InstallHint='JetBrains Toolbox or installer with custom path' },
-    'DEV-02' = @{ Source = 'C:\Program Files\JetBrains\DataGrip 2025.3.5\'; Target = 'D:\Program Files\JetBrains\DataGrip 2025.3.5\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\JetBrains\Datagrip\'; DataTarget='D:\Migration_Backup\2026-07-21\DataGrip\Data\'; InstallHint='JetBrains Toolbox or installer with custom path' },
-    'DEV-03' = @{ Source = 'C:\Windows\System32'; Target = $null; InstallHint = 'CLI check first: where.exe and path references in build scripts' },
-    'DEV-16' = @{ Source = 'C:\Program Files\Python39\'; Target = 'D:\Runtimes\Python39\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\Python\Python39\'; DataTarget='D:\Migration_Backup\2026-07-21\Python39\Data\'; InstallHint='Manual reinstall + env refresh' },
-    'DEV-17' = @{ Source = 'Microsoft Store Python 3.9'; Target = 'Windows Settings -> Move'; DataSource = $null; DataTarget = $null; InstallHint='Use Move app button if available' },
-    'DEV-18' = @{ Source = 'C:\Program Files\OpenBabel\'; Target = 'D:\Program Files\OpenBabel\'; DataSource = $null; InstallHint='Keep / validate D:\_programs\OpenBabel-3.1.1 first' },
-    'DEV-19' = @{ Source = 'C:\Program Files\OpenBabel2\'; Target = 'D:\Program Files\OpenBabel2\'; DataSource = $null; InstallHint='Remove or reinstall on D: after dependency check' },
-    'DEV-20' = @{ Source = 'C:\Program Files\OpenBabel2\'; Target = 'D:\Program Files\OpenBabel2\'; DataSource = $null; InstallHint='Remove or reinstall on D: after dependency check' },
-    'DEV-21' = @{ Source = 'C:\Program Files\Pandoc\'; Target = 'D:\Program Files\Pandoc\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\pandoc\'; DataTarget='D:\Migration_Backup\2026-07-21\Pandoc\Data\'; InstallHint='Reinstall on D:' },
-    'DEV-22' = @{ Source = 'C:\Program Files\wkhtmltox\'; Target = 'D:\Program Files\wkhtmltopdf\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\wkhtmltopdf\'; DataTarget='D:\Migration_Backup\2026-07-21\wkhtmltopdf\Data\'; InstallHint='Reinstall on D:' },
-    'DEV-23' = @{ Source = 'C:\Program Files (x86)\WinSCP\'; Target = 'D:\Program Files (x86)\WinSCP\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\WinSCP\'; DataTarget='D:\Migration_Backup\2026-07-21\WinSCP\Data\'; InstallHint='Export sessions/config, reinstall on D:' },
-    'SCI-01' = @{ Source = 'C:\Program Files (x86)\ABBYY FineReader 12\'; Target = 'D:\Program Files (x86)\ABBYY FineReader 12\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\ABBYY\'; DataTarget='D:\AppData\ABBYY\'; InstallHint='Reinstall on D:, preserve license/deactivation evidence' },
-    'SCI-02' = @{ Source = 'C:\Users\Fedor\AppData\Local\Programs\chemofficeplus\'; Target = 'D:\Users\Fedor\AppData\Local\Programs\chemofficeplus\'; DataSource = $null; DataTarget='D:\Migration_Backup\2026-07-21\ChemOfficePlus\Data\'; InstallHint='Reinstall on D: custom path' },
-    'SCI-03' = @{ Source = 'C:\Program Files\PerkinElmerInformatics\ChemOffice2022\'; Target = 'D:\Program Files\PerkinElmerInformatics\ChemOffice2022\'; DataSource = 'C:\ProgramData\PerkinElmerInformatics\'; DataTarget='D:\Migration_Backup\2026-07-21\ChemOffice2022\Data\'; InstallHint='Move as bundle only after installer/version validation' },
-    'SCI-04' = @{ Source = 'C:\Program Files\Carl Zeiss\'; Target = 'D:\Program Files\Carl Zeiss\'; DataSource = 'C:\ProgramData\Carl Zeiss\'; DataTarget='D:\Migration_Backup\2026-07-21\CarlZeiss\Data\'; InstallHint='Installer-only, one-day block per ZEISS bundle' },
-    'SCI-05' = @{ Source = 'C:\Program Files\Carl Zeiss\'; Target = 'D:\Program Files\Carl Zeiss\'; DataSource = $null; DataTarget='D:\Migration_Backup\2026-07-21\CarlZeiss\Data\'; InstallHint='Bundle with SCI-04' },
-    'SCI-06' = @{ Source = 'C:\Program Files\Carl Zeiss\'; Target = 'D:\Program Files\Carl Zeiss\'; DataSource = $null; DataTarget='D:\Migration_Backup\2026-07-21\CarlZeiss\Data\'; InstallHint='Bundle with SCI-04' },
-    'SCI-07' = @{ Source = 'C:\Users\Fedor\Documents\ZeissPy'; Target = 'D:\Users\Fedor\Documents\ZeissPy'; DataSource = $null; DataTarget='D:\Migration_Backup\2026-07-21\ZeissPy\Data\'; InstallHint='Bundle with SCI-04' },
-    'SCI-08' = @{ Source = 'C:\Program Files (x86)\Carl Zeiss\'; Target = 'D:\Program Files (x86)\Carl Zeiss\'; DataSource = 'C:\ProgramData\Carl Zeiss\'; DataTarget='D:\Migration_Backup\2026-07-21\CarlZeiss\Data\'; InstallHint='Bundle with SCI-04' },
-    'SCI-09' = @{ Source = 'C:\ProgramData\Carl Zeiss\'; Target = 'D:\ProgramData\Carl Zeiss\'; DataSource = $null; DataTarget='D:\Migration_Backup\2026-07-21\CarlZeiss\License\'; InstallHint='Bundle with SCI-04, preserve license evidence' },
+    'APP-01' = @{ Source = 'C:\Users\Fedor\AppData\Local\Programs\Opera\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\Opera Software\'; Target = 'D:\Users\Fedor\AppData\Local\Programs\Opera\'; DataTarget = 'D:\AppData\Opera\Profile\'; InstallHint = 'Reinstall from official installer'; }
+    'APP-02' = @{ Source = 'C:\Users\Fedor\AppData\Local\Programs\eXpress\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\eXpress\'; Target = 'D:\Users\Fedor\AppData\Local\Programs\eXpress\'; DataTarget = 'D:\Migration_Backup\2026-07-21\eXpress\Data\'; InstallHint = 'Reinstall on D:' }
+    'APP-03' = @{ Source = 'C:\Users\Fedor\AppData\Local\Programs\Antigravity\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\Antigravity\'; Target = 'D:\Users\Fedor\AppData\Local\Programs\Antigravity\'; DataTarget = 'D:\Migration_Backup\2026-07-21\Antigravity\Data\'; InstallHint = 'Reinstall on D:' }
+    'APP-04' = @{ Source = 'C:\Users\Fedor\AppData\Local\Programs\Microsoft VS Code\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\Code\'; Target = 'D:\Users\Fedor\AppData\Local\Programs\Microsoft VS Code\'; DataTarget = 'D:\Migration_Backup\2026-07-21\Code\Data\'; InstallHint = 'Reinstall on D:, then migrate extensions manifest manually' }
+    'APP-05' = @{ Source = 'C:\Users\Fedor\AppData\Roaming\Zoom\'; Target = 'D:\Program Files\Zoom\'; DataTarget = 'D:\Migration_Backup\2026-07-21\Zoom\Data\'; DataSource = $null; InstallHint = 'Installer must support custom location' }
+    'APP-06' = @{ Source = 'C:\Program Files\LibreOffice\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\LibreOffice\'; Target = 'D:\Program Files\LibreOffice\'; DataTarget = 'D:\Migration_Backup\2026-07-21\LibreOffice\Data\'; InstallHint = 'Reinstall on D:' }
+    'APP-07' = @{ Source = 'C:\Program Files\Inkscape\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\Inkscape\'; Target = 'D:\Program Files\Inkscape\'; DataTarget = 'D:\Migration_Backup\2026-07-21\Inkscape\Data\'; InstallHint = 'Reinstall on D:' }
+    'APP-08' = @{ Source = 'C:\Program Files\Koala Clash\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\Koala-Clash\'; Target = 'D:\Program Files\Koala Clash\'; DataTarget = 'D:\Migration_Backup\2026-07-21\KoalaClash\Data\'; InstallHint = 'Reinstall on D: (postpone if recent)' }
+    'APP-09' = @{ Source = 'C:\Program Files\obs-studio\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\obs-studio\'; Target = 'D:\Program Files\obs-studio\'; DataTarget = 'D:\Migration_Backup\2026-07-21\obs-studio\Data\'; InstallHint = 'Reinstall on D:' }
+    'APP-10' = @{ Source = 'C:\Program Files (x86)\Zotero\'; DataSource = 'C:\Users\Fedor\Zotero\'; DataTarget = 'D:\AppData\Zotero\Data\'; Target = 'D:\Program Files\Zotero\'; InstallHint = 'Reinstall on D: and repoint data directory' }
+    'APP-11' = @{ Source = 'C:\Program Files (x86)\Data Match Enterprise\'; DataSource = 'C:\ProgramData\DataMatch Enterprise 3\'; Target = 'D:\Program Files (x86)\Data Match Enterprise\'; DataTarget = 'D:\Migration_Backup\2026-07-21\DataMatch\Data\'; InstallHint = 'Reinstall on D:' }
+    'APP-12' = @{ Source = 'C:\Program Files (x86)\ACDFREE11\'; DataSource = 'C:\ProgramData\Advanced Chemistry Development\'; Target = 'D:\Program Files (x86)\ACDFREE11\'; DataTarget = 'D:\Migration_Backup\2026-07-21\ACDFREE11\Data\'; InstallHint = 'Reinstall on D:' }
+    'APP-13' = @{ Source = 'C:\Program Files (x86)\PDF Enhancer\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\Apago\'; Target = 'D:\Program Files (x86)\PDF Enhancer\'; DataTarget = 'D:\Migration_Backup\2026-07-21\ApagoPDFEnhancer\Data\'; InstallHint = 'Reinstall on D:' }
+    'APP-14' = @{ Source = 'C:\Program Files (x86)\Apago\PDF Shrink\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\Apago\PDF Shrink\'; Target = 'D:\Program Files (x86)\Apago\PDF Shrink\'; DataTarget = 'D:\Migration_Backup\2026-07-21\ApagoPDFShrink\Data\'; InstallHint = 'Reinstall on D:' }
+    'APP-15' = @{ Source = 'C:\Program Files\VS Revo Group\Revo Uninstaller\'; Target = 'D:\Program Files\VS Revo Group\Revo Uninstaller\'; DataSource = $null; DataTarget = 'D:\Migration_Backup\2026-07-21\RevoUninstaller\Data\'; InstallHint = 'Reinstall on D:' }
+    'APP-16' = @{ Source = 'C:\Program Files (x86)\XnView\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\XnView\'; Target = 'D:\Program Files (x86)\XnView\'; DataTarget = 'D:\Migration_Backup\2026-07-21\XnView\Data\'; InstallHint = 'Reinstall on D:' }
+    'APP-17' = @{ Source = 'C:\Program Files (x86)\Sizer\'; Target = 'D:\Program Files (x86)\Sizer\'; DataSource = $null; DataTarget = $null; InstallHint = 'Move together with wave' }
+    'APP-18' = @{ Source = 'C:\Program Files\Unlocker\'; Target = 'D:\Program Files\Unlocker\'; DataSource = $null; DataTarget = $null; InstallHint = 'Reinstall on D:' }
+    'APP-19' = @{ Source = 'C:\Program Files (x86)\University of Illinois\VMD\'; DataSource = $null; Target = 'D:\Program Files (x86)\University of Illinois\VMD\'; DataTarget = $null; InstallHint = 'Reinstall on D:' }
+    'APP-20' = @{ Source = 'C:\Program Files\Cloudflare\Cloudflare One Client\'; DataSource = 'C:\Users\Fedor\AppData\Local\Cloudflare\'; Target = 'D:\Program Files\Cloudflare\Cloudflare One Client\'; DataTarget = 'D:\Migration_Backup\2026-07-21\Cloudflare One Client\Data\'; StartupCheck = 'HKCU/HKLM Run or shell startup entry'; ServiceCheck = 'CloudflareOneClient / CloudflareTunnel service launch behavior'; InstallHint = 'Reinstall on D:, confirm zero-trust status and auto-start after login' }
+    'APP-21' = @{ Source = 'C:\Program Files\Total Commander\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\GHISLER\'; Target = 'D:\Program Files\Total Commander\'; DataTarget = 'D:\Migration_Backup\2026-07-21\Total Commander\Data\'; StartupCheck = 'Startup links + shell extension auto-load'; ServiceCheck = 'No service expected; verify shell integration hooks'; InstallHint = 'Reinstall on D: (or mirror portable layout) and revalidate shortcut path' }
+    'DEV-01' = @{ Source = 'C:\Program Files\JetBrains\IntelliJ IDEA 2025.3\'; Target = 'D:\Program Files\JetBrains\IntelliJ IDEA 2025.3\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\JetBrains\IntelliJIdea2025.3\'; DataTarget='D:\Migration_Backup\2026-07-21\IntelliJ\Data\'; InstallHint='JetBrains Toolbox or installer with custom path' }
+    'DEV-02' = @{ Source = 'C:\Program Files\JetBrains\DataGrip 2025.3.5\'; Target = 'D:\Program Files\JetBrains\DataGrip 2025.3.5\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\JetBrains\Datagrip\'; DataTarget='D:\Migration_Backup\2026-07-21\DataGrip\Data\'; InstallHint='JetBrains Toolbox or installer with custom path' }
+    'DEV-03' = @{ Source = 'C:\Windows\System32'; Target = $null; InstallHint = 'CLI check first: where.exe and path references in build scripts' }
+    'DEV-16' = @{ Source = 'C:\Program Files\Python39\'; Target = 'D:\Runtimes\Python39\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\Python\Python39\'; DataTarget='D:\Migration_Backup\2026-07-21\Python39\Data\'; InstallHint='Manual reinstall + env refresh' }
+    'DEV-17' = @{ Source = 'Microsoft Store Python 3.9'; Target = 'Windows Settings -> Move'; DataSource = $null; DataTarget = $null; InstallHint='Use Move app button if available' }
+    'DEV-18' = @{ Source = 'C:\Program Files\OpenBabel\'; Target = 'D:\Program Files\OpenBabel\'; DataSource = $null; InstallHint='Keep / validate D:\_programs\OpenBabel-3.1.1 first' }
+    'DEV-19' = @{ Source = 'C:\Program Files\OpenBabel2\'; Target = 'D:\Program Files\OpenBabel2\'; DataSource = $null; InstallHint='Remove or reinstall on D: after dependency check' }
+    'DEV-20' = @{ Source = 'C:\Program Files\OpenBabel2\'; Target = 'D:\Program Files\OpenBabel2\'; DataSource = $null; InstallHint='Remove or reinstall on D: after dependency check' }
+    'DEV-21' = @{ Source = 'C:\Program Files\Pandoc\'; Target = 'D:\Program Files\Pandoc\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\pandoc\'; DataTarget='D:\Migration_Backup\2026-07-21\Pandoc\Data\'; InstallHint='Reinstall on D:' }
+    'DEV-22' = @{ Source = 'C:\Program Files\wkhtmltox\'; Target = 'D:\Program Files\wkhtmltopdf\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\wkhtmltopdf\'; DataTarget='D:\Migration_Backup\2026-07-21\wkhtmltopdf\Data\'; InstallHint='Reinstall on D:' }
+    'DEV-23' = @{ Source = 'C:\Program Files (x86)\WinSCP\'; Target = 'D:\Program Files (x86)\WinSCP\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\WinSCP\'; DataTarget='D:\Migration_Backup\2026-07-21\WinSCP\Data\'; InstallHint='Export sessions/config, reinstall on D:' }
+    'SCI-01' = @{ Source = 'C:\Program Files (x86)\ABBYY FineReader 12\'; Target = 'D:\Program Files (x86)\ABBYY FineReader 12\'; DataSource = 'C:\Users\Fedor\AppData\Roaming\ABBYY\'; DataTarget='D:\AppData\ABBYY\'; InstallHint='Reinstall on D:, preserve license/deactivation evidence' }
+    'SCI-02' = @{ Source = 'C:\Users\Fedor\AppData\Local\Programs\chemofficeplus\'; Target = 'D:\Users\Fedor\AppData\Local\Programs\chemofficeplus\'; DataSource = $null; DataTarget='D:\Migration_Backup\2026-07-21\ChemOfficePlus\Data\'; InstallHint='Reinstall on D: custom path' }
+    'SCI-03' = @{ Source = 'C:\Program Files\PerkinElmerInformatics\ChemOffice2022\'; Target = 'D:\Program Files\PerkinElmerInformatics\ChemOffice2022\'; DataSource = 'C:\ProgramData\PerkinElmerInformatics\'; DataTarget='D:\Migration_Backup\2026-07-21\ChemOffice2022\Data\'; InstallHint='Move as bundle only after installer/version validation' }
+    'SCI-04' = @{ Source = 'C:\Program Files\Carl Zeiss\'; Target = 'D:\Program Files\Carl Zeiss\'; DataSource = 'C:\ProgramData\Carl Zeiss\'; DataTarget='D:\Migration_Backup\2026-07-21\CarlZeiss\Data\'; InstallHint='Installer-only, one-day block per ZEISS bundle' }
+    'SCI-05' = @{ Source = 'C:\Program Files\Carl Zeiss\'; Target = 'D:\Program Files\Carl Zeiss\'; DataSource = $null; DataTarget='D:\Migration_Backup\2026-07-21\CarlZeiss\Data\'; InstallHint='Bundle with SCI-04' }
+    'SCI-06' = @{ Source = 'C:\Program Files\Carl Zeiss\'; Target = 'D:\Program Files\Carl Zeiss\'; DataSource = $null; DataTarget='D:\Migration_Backup\2026-07-21\CarlZeiss\Data\'; InstallHint='Bundle with SCI-04' }
+    'SCI-07' = @{ Source = 'C:\Users\Fedor\Documents\ZeissPy'; Target = 'D:\Users\Fedor\Documents\ZeissPy'; DataSource = $null; DataTarget='D:\Migration_Backup\2026-07-21\ZeissPy\Data\'; InstallHint='Bundle with SCI-04' }
+    'SCI-08' = @{ Source = 'C:\Program Files (x86)\Carl Zeiss\'; Target = 'D:\Program Files (x86)\Carl Zeiss\'; DataSource = 'C:\ProgramData\Carl Zeiss\'; DataTarget='D:\Migration_Backup\2026-07-21\CarlZeiss\Data\'; InstallHint='Bundle with SCI-04' }
+    'SCI-09' = @{ Source = 'C:\ProgramData\Carl Zeiss\'; Target = 'D:\ProgramData\Carl Zeiss\'; DataSource = $null; DataTarget='D:\Migration_Backup\2026-07-21\CarlZeiss\License\'; InstallHint='Bundle with SCI-04, preserve license evidence' }
     'SCI-10' = @{ Source = 'C:\Program Files (x86)\Common Files\Carl Zeiss\'; Target = 'D:\Program Files (x86)\Common Files\Carl Zeiss\'; DataSource = $null; DataTarget=$null; InstallHint='Bundle with SCI-04' }
 }
 
@@ -122,6 +124,8 @@ function Parse-PlanCandidates {
                 Application = $matches.app.Trim()
                 Size = $matches.size.Trim()
                 Decision = $matches.decision.Trim()
+                StartupCheck = $null
+                ServiceCheck = $null
                 Source = $null
                 DataSource = $null
                 Target = $null
@@ -147,7 +151,7 @@ function Enrich-Candidates {
         } else {
             $item.Wave = 'Unassigned'
         }
-        if ($CatalogOverrides.ContainsKey($item.Id)) {
+        if ($CatalogOverrides.Contains($item.Id)) {
             $override = $CatalogOverrides[$item.Id]
             foreach ($k in $override.Keys) {
                 $item.$k = $override[$k]
@@ -175,6 +179,8 @@ function Write-ActionPreview {
     if ($Item.Target) { Write-Output ("  Target:     {0}" -f $Item.Target) } else { Write-Output "  Target:     (manual from original plan)" }
     if ($Item.DataSource) { Write-Output ("  Data src:   {0}" -f $Item.DataSource) }
     if ($Item.DataTarget) { Write-Output ("  Data dst:   {0}" -f $Item.DataTarget) }
+    if ($Item.StartupCheck) { Write-Output ("  Startup:   {0}" -f $Item.StartupCheck) }
+    if ($Item.ServiceCheck) { Write-Output ("  Service:   {0}" -f $Item.ServiceCheck) }
     if ($Item.InstallHint) { Write-Output ("  Installer:  {0}" -f $Item.InstallHint) }
     Write-Output "  Commands:"
     if ($Item.Source -and (Test-Path -LiteralPath $Item.Source -ErrorAction SilentlyContinue)) {

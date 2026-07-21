@@ -403,25 +403,77 @@ def record_probe(
     )
 
 
+def _parse_df_pk_available_kib(stdout: str) -> int | None:
+    """Parse BusyBox/GNU `df -Pk` Available column (1 KiB blocks)."""
+    for line in str(stdout).splitlines():
+        parts = line.split()
+        if len(parts) < 4:
+            continue
+        # Header row: Filesystem 1024-blocks Used Available ...
+        if parts[0].lower().startswith("filesystem"):
+            continue
+        if not parts[3].isdigit():
+            continue
+        return int(parts[3])
+    return None
+
+
 def observe_docker_vm_reserve(
     state: dict[str, Any], runtime_origin: Path, timeout: float = 15.0
 ) -> dict[str, Any]:
-    result = run_command(
-        [
-            "wsl.exe",
-            "-d",
-            "docker-desktop",
-            "--exec",
-            "df",
-            "-B1",
-            "--output=avail",
-            "/var/lib/docker",
-        ],
-        timeout,
-        cwd=runtime_origin,
+    """Measure free Docker-VM disk with BusyBox-compatible df.
+
+    Docker Desktop's ``docker-desktop`` distro ships BusyBox (no
+    ``--output=avail``) and stores the engine disk at
+    ``/mnt/docker-desktop-disk`` rather than a mount at ``/var/lib/docker``.
+    """
+    # Prefer the Desktop virtual disk; fall back for older layouts / Linux hosts.
+    probe_paths = (
+        "/mnt/docker-desktop-disk",
+        "/var/lib/docker",
+        "/",
     )
-    values = [int(value) for value in str(result["stdout"]).split() if value.isdigit()]
-    free_bytes = values[-1] if result["returncode"] == 0 and values else 0
+    attempts: list[dict[str, Any]] = []
+    free_bytes = 0
+    result: dict[str, Any] = {
+        "returncode": 1,
+        "stdout": "",
+        "stderr": "docker vm free space unavailable",
+        "timed_out": False,
+        "command": [],
+        "duration_seconds": 0.0,
+    }
+    for path in probe_paths:
+        # BusyBox-safe: POSIX output, 1 KiB blocks. Avoid GNU-only --output=.
+        candidate = run_command(
+            [
+                "wsl.exe",
+                "-d",
+                "docker-desktop",
+                "--exec",
+                "df",
+                "-Pk",
+                path,
+            ],
+            timeout,
+            cwd=runtime_origin,
+        )
+        attempts.append({"path": path, **candidate})
+        kib = (
+            _parse_df_pk_available_kib(str(candidate.get("stdout", "")))
+            if candidate.get("returncode") == 0
+            else None
+        )
+        if kib is None:
+            continue
+        free_bytes = kib * 1024
+        result = {**candidate, "path": path}
+        break
+    else:
+        # Preserve the last attempt's command evidence for the incident bundle.
+        if attempts:
+            result = dict(attempts[-1])
+
     previous = state.get("docker_vm_min_free_bytes")
     state["docker_vm_min_free_bytes"] = (
         free_bytes if previous is None else min(int(previous), free_bytes)
@@ -430,4 +482,4 @@ def observe_docker_vm_reserve(
         state["docker_vm_reserve_breaches"] = (
             int(state.get("docker_vm_reserve_breaches", 0)) + 1
         )
-    return {**result, "free_bytes": free_bytes}
+    return {**result, "free_bytes": free_bytes, "attempts": attempts}

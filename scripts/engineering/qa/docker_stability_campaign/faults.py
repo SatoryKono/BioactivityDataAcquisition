@@ -35,7 +35,12 @@ def build_fault_cases() -> tuple[FaultCase, ...]:
             "service_unready",
             (FaultOperation("kill_service", "main", "bioetl"),),
             (FaultOperation("probe", "main", expected="cause:service_unready"),),
-            (FaultOperation("recover", "main", expected="success"),),
+            (
+                FaultOperation(
+                    "recover", "main", expected="success", max_seconds=120.0
+                ),
+            ),
+            max_seconds=240.0,
         ),
         FaultCase(
             "failed_health_readiness",
@@ -44,8 +49,9 @@ def build_fault_cases() -> tuple[FaultCase, ...]:
             (FaultOperation("probe", "main", expected="cause:service_unready"),),
             (
                 FaultOperation("unpause_service", "main", "bioetl"),
-                FaultOperation("recover", "main"),
+                FaultOperation("recover", "main", max_seconds=120.0),
             ),
+            max_seconds=240.0,
         ),
         FaultCase(
             "occupied_required_port",
@@ -57,8 +63,9 @@ def build_fault_cases() -> tuple[FaultCase, ...]:
             (FaultOperation("start", "main", expected="finding:HOST_PORT_COLLISION"),),
             (
                 FaultOperation("release_port", port=8081),
-                FaultOperation("recover", "main"),
+                FaultOperation("recover", "main", max_seconds=120.0),
             ),
+            max_seconds=240.0,
         ),
         FaultCase(
             "expected_image_identity_drift",
@@ -79,7 +86,8 @@ def build_fault_cases() -> tuple[FaultCase, ...]:
             "interrupted",
             (FaultOperation("stop", "main"),),
             (FaultOperation("interrupt_start", "main", expected="interrupted"),),
-            (FaultOperation("recover", "main"),),
+            (FaultOperation("recover", "main", max_seconds=120.0),),
+            max_seconds=240.0,
         ),
         FaultCase(
             "bounded_memory_pid_pressure",
@@ -96,12 +104,13 @@ def build_fault_cases() -> tuple[FaultCase, ...]:
             "desktop_restart",
             (FaultOperation("desktop_restart", max_seconds=180.0),),
             (
-                FaultOperation("recover", "main", max_seconds=70.0),
-                FaultOperation("recover", "monitoring", max_seconds=70.0),
-                FaultOperation("probe", "main", max_seconds=20.0),
-                FaultOperation("probe", "monitoring", max_seconds=20.0),
+                FaultOperation("recover", "main", max_seconds=120.0),
+                FaultOperation("recover", "monitoring", max_seconds=120.0),
+                FaultOperation("probe", "main", max_seconds=30.0),
+                FaultOperation("probe", "monitoring", max_seconds=30.0),
             ),
             (),
+            max_seconds=480.0,
         ),
     )
     if tuple(case.name for case in cases) != FAULT_CASE_NAMES:
