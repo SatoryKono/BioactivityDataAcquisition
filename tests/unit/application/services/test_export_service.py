@@ -357,7 +357,9 @@ class TestExportService:
         ) -> Path:
             if payload["manifest_type"] == "bioetl.dataset_snapshot.provenance":
                 provenance_payloads.append(payload)
-            output_dir_path = output_dir if isinstance(output_dir, Path) else Path(output_dir)
+            output_dir_path = (
+                output_dir if isinstance(output_dir, Path) else Path(output_dir)
+            )
             return output_dir_path / f"{manifest_name}.json"
 
         mock_writer.write_manifest.side_effect = _manifest_path

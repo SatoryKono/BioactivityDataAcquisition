@@ -132,7 +132,9 @@ def test_issue_5847_root_baseline_is_reduced_without_new_root_directory() -> Non
 
     assert len(root_files) <= payload["outcomes"]["5847"]["tracked_root_files_after"]
     assert len(root_dirs) == payload["outcomes"]["5847"]["tracked_root_dirs_after"]
-    assert len(allowlist_entries) <= payload["outcomes"]["5847"]["allowlist_entries_after"]
+    assert (
+        len(allowlist_entries) <= payload["outcomes"]["5847"]["allowlist_entries_after"]
+    )
     assert not (RETIRED_ROOT_ENTRIES & tracked)
     for path in RETIRED_ROOT_ENTRIES:
         assert not (ROOT / path).exists()
@@ -271,5 +273,8 @@ def test_issue_5852_review_class_root_files_have_exact_filename_contracts() -> N
             == "reviewed_exact_filename_tool_contract"
         )
         assert candidates[path]["current_live_state"] == "present_approved_root_surface"
-    assert candidates["pr_compliance_checklist.yaml"]["current_live_state"] == "absent_from_root_baseline"
+    assert (
+        candidates["pr_compliance_checklist.yaml"]["current_live_state"]
+        == "absent_from_root_baseline"
+    )
     assert candidates["pr_compliance_checklist.yaml"]["canonical_path"] is None

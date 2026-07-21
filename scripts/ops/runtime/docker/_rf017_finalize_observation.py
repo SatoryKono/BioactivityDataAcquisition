@@ -107,7 +107,9 @@ def main() -> int:
         base = baseline.get(name) or baseline.get("bioetl") or {}
         try:
             restart_delta += max(
-                0, int(snap.get("restart_count") or 0) - int(base.get("restart_count") or 0)
+                0,
+                int(snap.get("restart_count") or 0)
+                - int(base.get("restart_count") or 0),
             )
         except (TypeError, ValueError):
             pass
@@ -141,9 +143,15 @@ def main() -> int:
         "unresolved_unhealthy": unhealthy,
         "failures": failures,
     }
-    OBS_PATH.write_text(json.dumps(obs, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    OBS_PATH.write_text(
+        json.dumps(obs, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
 
-    final = json.loads(FINAL_PATH.read_text(encoding="utf-8")) if FINAL_PATH.is_file() else {}
+    final = (
+        json.loads(FINAL_PATH.read_text(encoding="utf-8"))
+        if FINAL_PATH.is_file()
+        else {}
+    )
     final["status"] = "complete" if ok else "failed"
     final["generated_at"] = finished
     final.setdefault("gates", {})["observation"] = {

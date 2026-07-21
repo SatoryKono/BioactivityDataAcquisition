@@ -90,15 +90,18 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
         """
         self._assert_running("record_stage_success")
         completed = StageResult(
-                stage=stage,
-                status=StageStatus.SUCCESS,
-                started_at=started_at,
-                completed_at=completed_at,
-                result=result,
-                records_processed=records_processed,
-            )
+            stage=stage,
+            status=StageStatus.SUCCESS,
+            started_at=started_at,
+            completed_at=completed_at,
+            result=result,
+            records_processed=records_processed,
+        )
         for index in range(len(self._stages) - 1, -1, -1):
-            if self._stages[index].stage == stage and self._stages[index].status == StageStatus.RUNNING:
+            if (
+                self._stages[index].stage == stage
+                and self._stages[index].status == StageStatus.RUNNING
+            ):
                 self._stages[index] = completed
                 break
         else:

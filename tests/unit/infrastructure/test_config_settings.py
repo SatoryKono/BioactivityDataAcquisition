@@ -48,7 +48,7 @@ class TestPipelineSettings:
         )
         assert (
             settings.silver_merge_timeout.e2e_execution_timeout_seconds
-            == pytest.approx(300.0)
+            == pytest.approx(600.0)
         )
         assert settings.silver_merge_timeout.plain_write_process_isolation is False
         assert settings.control_plane.run_manifest_enabled is True

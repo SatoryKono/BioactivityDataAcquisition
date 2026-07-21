@@ -65,7 +65,7 @@
     },
     {
       "category": "architecture_helper_guard",
-      "line": "142",
+      "line": "147",
       "path": "tests/architecture/test_codex_skill_agent_links.py",
       "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
       "test_name": "test_codex_project_skills_do_not_have_user_global_duplicates"
@@ -107,7 +107,7 @@
     },
     {
       "category": "architecture_helper_guard",
-      "line": "1116",
+      "line": "1117",
       "path": "tests/architecture/test_quality_debt_scorecard.py",
       "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
       "test_name": "test_growth_rollout_warns_registry_section_before_cutoff"
@@ -753,13 +753,13 @@
     "tests/architecture/test_code_metrics.py:196",
     "tests/architecture/test_code_metrics.py:202",
     "tests/architecture/test_code_metrics.py:213",
-    "tests/architecture/test_codex_skill_agent_links.py:142",
+    "tests/architecture/test_codex_skill_agent_links.py:147",
     "tests/architecture/test_di_constructors.py:322",
     "tests/architecture/test_port_contracts_hypothesis.py:541",
     "tests/architecture/test_port_contracts_hypothesis.py:562",
     "tests/architecture/test_port_contracts_hypothesis.py:596",
     "tests/architecture/test_port_contracts_resilience_concurrency.py:183",
-    "tests/architecture/test_quality_debt_scorecard.py:1116",
+    "tests/architecture/test_quality_debt_scorecard.py:1117",
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:74",
     "tests/integration/infrastructure/storage/test_delta_reader.py:576",
     "tests/unit/application/core/test_batch_tracing.py:110",
@@ -1303,7 +1303,7 @@
       },
       {
         "category": "architecture_helper_guard",
-        "line": "142",
+        "line": "147",
         "path": "tests/architecture/test_codex_skill_agent_links.py",
         "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
         "test_name": "test_codex_project_skills_do_not_have_user_global_duplicates"
@@ -1345,7 +1345,7 @@
       },
       {
         "category": "architecture_helper_guard",
-        "line": "1116",
+        "line": "1117",
         "path": "tests/architecture/test_quality_debt_scorecard.py",
         "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
         "test_name": "test_growth_rollout_warns_registry_section_before_cutoff"
@@ -1991,13 +1991,13 @@
       "tests/architecture/test_code_metrics.py:196",
       "tests/architecture/test_code_metrics.py:202",
       "tests/architecture/test_code_metrics.py:213",
-      "tests/architecture/test_codex_skill_agent_links.py:142",
+      "tests/architecture/test_codex_skill_agent_links.py:147",
       "tests/architecture/test_di_constructors.py:322",
       "tests/architecture/test_port_contracts_hypothesis.py:541",
       "tests/architecture/test_port_contracts_hypothesis.py:562",
       "tests/architecture/test_port_contracts_hypothesis.py:596",
       "tests/architecture/test_port_contracts_resilience_concurrency.py:183",
-      "tests/architecture/test_quality_debt_scorecard.py:1116",
+      "tests/architecture/test_quality_debt_scorecard.py:1117",
       "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:74",
       "tests/integration/infrastructure/storage/test_delta_reader.py:576",
       "tests/unit/application/core/test_batch_tracing.py:110",
@@ -2176,8 +2176,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2021,
-      "test_python_file_count": 2232,
+      "test_glob_file_count": 2022,
+      "test_python_file_count": 2233,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2217,12 +2217,12 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 2021,
-    "total_test_functions": 22579,
+    "total_test_files": 2022,
+    "total_test_functions": 22593,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "041daa8c39b6fd1401065d4cd9869f46f70eff7ce580f3ea3ba51fe5f82296c7",
+  "source_tree_sha256": "5bd96fb5323bf38c3dd4f1c2a3cbc97208f2016a37fb09a66d9fbbce274b87f4",
   "summary": {
     "assertless_total_candidates": 105,
     "compatibility_test_files": 0,
@@ -2240,8 +2240,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2021,
-    "test_python_file_count": 2232,
+    "test_glob_file_count": 2022,
+    "test_python_file_count": 2233,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2281,7 +2281,7 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 2021,
-  "total_test_functions": 22579,
+  "total_test_files": 2022,
+  "total_test_functions": 22593,
   "uuid4_call_sites": 0
 }

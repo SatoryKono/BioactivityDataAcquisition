@@ -1028,7 +1028,10 @@ def _assert_relation_membership(
         assert relation_key in relation_keys
 
 
-@pytest.mark.skipif(sys.platform.startswith("win"), reason="Snapshot topology tests require full repo walk which is prohibitively slow on Windows")
+@pytest.mark.skipif(
+    sys.platform.startswith("win"),
+    reason="Snapshot topology tests require full repo walk which is prohibitively slow on Windows",
+)
 @pytest.mark.timeout(300)
 def test_duplication_analysis_config_excludes_normalization_registry_path() -> None:
     root = _repo_root()
@@ -1056,7 +1059,10 @@ def _assert_relation_absence(
         assert relation_key not in relation_keys
 
 
-@pytest.mark.skipif(sys.platform.startswith("win"), reason="Snapshot topology tests require full repo walk which is prohibitively slow on Windows")
+@pytest.mark.skipif(
+    sys.platform.startswith("win"),
+    reason="Snapshot topology tests require full repo walk which is prohibitively slow on Windows",
+)
 @pytest.mark.timeout(300)
 def test_snapshot_contains_expected_relations() -> None:
     _, snapshot = _snapshot()
@@ -1066,7 +1072,10 @@ def test_snapshot_contains_expected_relations() -> None:
     _assert_relation_absence(relation_keys, FORBIDDEN_RELATION_KEYS)
 
 
-@pytest.mark.skipif(sys.platform.startswith("win"), reason="Snapshot topology tests require full repo walk which is prohibitively slow on Windows")
+@pytest.mark.skipif(
+    sys.platform.startswith("win"),
+    reason="Snapshot topology tests require full repo walk which is prohibitively slow on Windows",
+)
 @pytest.mark.timeout(300)
 def test_snapshot_enriches_current_normalization_topology() -> None:
     _, snapshot = _snapshot()
@@ -1108,7 +1117,10 @@ def test_snapshot_enriches_current_normalization_topology() -> None:
     ) in relation_keys
 
 
-@pytest.mark.skipif(sys.platform.startswith("win"), reason="Snapshot topology tests require full repo walk which is prohibitively slow on Windows")
+@pytest.mark.skipif(
+    sys.platform.startswith("win"),
+    reason="Snapshot topology tests require full repo walk which is prohibitively slow on Windows",
+)
 @pytest.mark.timeout(300)
 def test_snapshot_contains_duplication_clusters_with_promotion_targets() -> None:
     _, snapshot = _snapshot()
@@ -1146,7 +1158,10 @@ def test_snapshot_contains_duplication_clusters_with_promotion_targets() -> None
     )
 
 
-@pytest.mark.skipif(sys.platform.startswith("win"), reason="Snapshot topology tests require full repo walk which is prohibitively slow on Windows")
+@pytest.mark.skipif(
+    sys.platform.startswith("win"),
+    reason="Snapshot topology tests require full repo walk which is prohibitively slow on Windows",
+)
 @pytest.mark.timeout(300)
 def test_snapshot_excludes_normalization_registry_duplication_noise() -> None:
     _, snapshot = _snapshot()
@@ -1163,7 +1178,10 @@ def test_snapshot_excludes_normalization_registry_duplication_noise() -> None:
     assert registry_members == []
 
 
-@pytest.mark.skipif(sys.platform.startswith("win"), reason="Snapshot topology tests require full repo walk which is prohibitively slow on Windows")
+@pytest.mark.skipif(
+    sys.platform.startswith("win"),
+    reason="Snapshot topology tests require full repo walk which is prohibitively slow on Windows",
+)
 @pytest.mark.timeout(300)
 def test_snapshot_contains_complexity_candidates_with_simplification_links() -> None:
     _, snapshot = _snapshot()
@@ -1310,7 +1328,10 @@ def test_default_legacy_prune_labels_cover_repo_managed_surfaces() -> None:
     assert set(DEFAULT_LEGACY_PRUNE_LABELS) == expected_labels
 
 
-@pytest.mark.skipif(sys.platform.startswith("win"), reason="Snapshot topology tests require full repo walk which is prohibitively slow on Windows")
+@pytest.mark.skipif(
+    sys.platform.startswith("win"),
+    reason="Snapshot topology tests require full repo walk which is prohibitively slow on Windows",
+)
 @pytest.mark.timeout(300)
 def test_build_diff_entries_tracks_missing_and_extra_keys() -> None:
     diff_entries = _build_diff_entries(
@@ -1374,7 +1395,10 @@ def test_storage_ref_from_output_path_normalizes_data_output_prefix() -> None:
     )
 
 
-@pytest.mark.skipif(sys.platform.startswith("win"), reason="Snapshot topology tests require full repo walk which is prohibitively slow on Windows")
+@pytest.mark.skipif(
+    sys.platform.startswith("win"),
+    reason="Snapshot topology tests require full repo walk which is prohibitively slow on Windows",
+)
 @pytest.mark.timeout(300)
 def test_filtered_snapshot_storage_layer_preserves_storage_runtime_and_artifact_links() -> (
     None
@@ -1429,7 +1453,10 @@ def test_filtered_snapshot_storage_layer_preserves_storage_runtime_and_artifact_
     ) in relation_keys
 
 
-@pytest.mark.skipif(sys.platform.startswith("win"), reason="Snapshot topology tests require full repo walk which is prohibitively slow on Windows")
+@pytest.mark.skipif(
+    sys.platform.startswith("win"),
+    reason="Snapshot topology tests require full repo walk which is prohibitively slow on Windows",
+)
 @pytest.mark.timeout(300)
 def test_filtered_snapshot_runtime_evidence_layer_preserves_runtime_support_links() -> (
     None
@@ -1474,7 +1501,10 @@ def test_filtered_snapshot_runtime_evidence_layer_preserves_runtime_support_link
     ) in relation_keys
 
 
-@pytest.mark.skipif(sys.platform.startswith("win"), reason="Snapshot topology tests require full repo walk which is prohibitively slow on Windows")
+@pytest.mark.skipif(
+    sys.platform.startswith("win"),
+    reason="Snapshot topology tests require full repo walk which is prohibitively slow on Windows",
+)
 @pytest.mark.timeout(300)
 def test_filtered_snapshot_workflow_graph_preserves_job_gate_and_run_targets() -> None:
     _, snapshot = _snapshot()
@@ -1543,7 +1573,10 @@ def test_filtered_snapshot_workflow_graph_preserves_job_gate_and_run_targets() -
     )
 
 
-@pytest.mark.skipif(sys.platform.startswith("win"), reason="Snapshot topology tests require full repo walk which is prohibitively slow on Windows")
+@pytest.mark.skipif(
+    sys.platform.startswith("win"),
+    reason="Snapshot topology tests require full repo walk which is prohibitively slow on Windows",
+)
 @pytest.mark.timeout(300)
 def test_filtered_snapshot_docs_drift_preserves_describes_edges() -> None:
     _, snapshot = _snapshot()
@@ -1578,7 +1611,10 @@ def test_filtered_snapshot_docs_drift_preserves_describes_edges() -> None:
     }
 
 
-@pytest.mark.skipif(sys.platform.startswith("win"), reason="Snapshot topology tests require full repo walk which is prohibitively slow on Windows")
+@pytest.mark.skipif(
+    sys.platform.startswith("win"),
+    reason="Snapshot topology tests require full repo walk which is prohibitively slow on Windows",
+)
 @pytest.mark.timeout(300)
 def test_snapshot_contains_workflow_execution_cli_and_claim_extensions() -> None:
     _, snapshot = _snapshot()

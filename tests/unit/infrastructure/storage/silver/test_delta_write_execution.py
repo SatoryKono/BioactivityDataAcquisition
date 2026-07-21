@@ -175,8 +175,7 @@ def test_run_plain_delta_write_subprocess_uses_arrow_file_not_stdin(
     assert isinstance(subprocess_kwargs, dict)
     assert "input" not in subprocess_kwargs
     assert not any(
-        path.exists()
-        for path in table_path.parent.glob(".plain_delta_payload_*.arrow")
+        path.exists() for path in table_path.parent.glob(".plain_delta_payload_*.arrow")
     )
 
 

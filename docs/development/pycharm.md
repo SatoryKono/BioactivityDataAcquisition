@@ -18,12 +18,17 @@
 
 - Ruff: единственный владелец lint/format/import optimizer (через pyproject.toml);
   ровно один formatter и ровно один import optimizer.
+- `External Tools` не используется как основная интеграция для `ruff`/`black`/`pytest`/`mypy`; все вызовы идут через нативные PyCharm tools и shared run/debug конфигурации.
+- Форматтерная политика едина: одновременно Ruff format и Black formatter не включаются как активные пути форматирования (On Save/Actions/CI).
 - Black: выключен в PyCharm при использовании Ruff formatter.
 - `mypy-full` — один и основной type-checking authority для типа, совпадает с CI target.
+ - `mypy --strict $FilePath$` не используется как основной quality gate; допускается только как вспомогательная локальная проверка.
  - Ruff check/mypy/pytest запускаются по репозиторным конфигам и имеют те же
-  параметры в CI/quality-gate.
+ параметры в CI/quality-gate.
 - `pytest-debug` выполняется без coverage (по умолчанию для debug сценариев),
   coverage используется только в `pytest-coverage`.
+ - Для CI/IDE quality gate `coverage` не ставится глобальным default-флагом в `pytest-fast`, `pytest-full`, `pytest-debug` — покрытие включается только в `pytest-coverage`-конфигурации.
+  - Чек-лист по coverage: нет `--cov` в `pytest-fast/full/debug`, нет global `--cov` в addopts/IDE defaults, `pytest-coverage` держит `--cov*` и пороги в одном месте.
 - Run/debug конфигурации:
   - `pytest-fast`
   - `pytest-full`
@@ -48,6 +53,8 @@
 - Детерминированный export: канонизация schema/dtypes/columns/timezone/nulls, stable sort с tie-breaker, canonical hash-set.
 - `atomic write` для outputs + reproducibility tests (двойной запуск с одинаковым input/context).
 - Live templates: только короткие API snippets; большой pipeline — в шаблоны/генераторы.
+- Детерминизм (сортировка/hash/canonicalization, clock) реализуется в коде и тестах; snippets/template не содержат deterministic control-flow.
+- Для Python отладка идёт через `debugpy`/`pydevd` (локально) и удалённый Python Debug Server/Attach по необходимости; режим `GDB-compatible` как отдельная IDE-настройка для PyCharm не существует.
 - Шаблоны используют корректный синтаксис (`$VARIABLE$`, `$END$`) и только существующие API/импорты проекта.
 - Для повторного pipeline run проводится reproducibility check: два прогонов с одинаковым
   input/config/context должны давать тот же output hash и совпадение key metadata.

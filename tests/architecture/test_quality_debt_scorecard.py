@@ -493,6 +493,7 @@ def test_debt_scorecard_declares_retirement_governance_kpis() -> None:
     inventory_path = ROOT / "reports" / "quality" / "dead-code-inventory.json"
     if inventory_path.exists():
         import json
+
         inventory = json.loads(inventory_path.read_text(encoding="utf-8"))
     else:
         inventory = build_dead_code_inventory(ROOT)

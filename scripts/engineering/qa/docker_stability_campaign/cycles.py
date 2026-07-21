@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import os
+import shutil
+import time
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
@@ -23,6 +26,48 @@ from .stage_support import (
     probe_services,
     save_state,
 )
+
+# Sibling lock files younger than this are treated as held by an active worker.
+_CYCLE_LOCK_STALE_SECONDS = 3600.0
+
+
+def _acquire_cycle_lock(cycle_dir: Path) -> int | None:
+    """Try to acquire exclusive sibling lock; return fd or None if active peer."""
+    lock_path = Path(f"{cycle_dir}.lock")
+    try:
+        return os.open(str(lock_path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+    except FileExistsError:
+        try:
+            age = time.time() - lock_path.stat().st_mtime
+        except OSError:
+            return None
+        if age < _CYCLE_LOCK_STALE_SECONDS:
+            return None
+        try:
+            lock_path.unlink(missing_ok=True)
+            return os.open(str(lock_path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        except (FileExistsError, OSError):
+            return None
+
+
+def _release_cycle_lock(cycle_dir: Path, fd: int | None) -> None:
+    if fd is None:
+        return
+    lock_path = Path(f"{cycle_dir}.lock")
+    try:
+        os.close(fd)
+    except OSError:
+        pass
+    try:
+        lock_path.unlink(missing_ok=True)
+    except OSError:
+        pass
+
+
+def _remove_incomplete_cycle_under_lock(cycle_dir: Path) -> None:
+    """Drop incomplete cycle evidence after exclusive lock is held."""
+    if cycle_dir.exists() and not (cycle_dir / "cycle.json").exists():
+        shutil.rmtree(cycle_dir)
 
 
 def bootstrap_campaign(
@@ -106,7 +151,11 @@ def bootstrap_campaign(
                 start_timeout,
             )
             steps.append(
-                {"stack": spec.stack, "action": "recover-after-start", "result": recover}
+                {
+                    "stack": spec.stack,
+                    "action": "recover-after-start",
+                    "result": recover,
+                }
             )
             if recover["returncode"] != 0:
                 state["last_failure"] = f"bootstrap-start-{spec.stack}"
@@ -203,6 +252,41 @@ def run_cycle(
 ) -> bool:
     number = int(state["completed_cycles"]) + 1
     cycle_dir = evidence_dir / "cycles" / f"cycle-{number:03d}"
+    # Exclusive lock: never rmtree a cycle tree owned by an active peer process.
+    lock_fd = _acquire_cycle_lock(cycle_dir)
+    if lock_fd is None:
+        state["last_failure"] = f"cycle-lock-busy-{number:03d}"
+        save_state(state_path, state)
+        return False
+    try:
+        os.write(lock_fd, f"{os.getpid()}\n".encode())
+        _remove_incomplete_cycle_under_lock(cycle_dir)
+        cycle_dir.mkdir(parents=True, exist_ok=True)
+        return _run_cycle_body(
+            state=state,
+            state_path=state_path,
+            evidence_dir=evidence_dir,
+            runtime_origin=runtime_origin,
+            contract=contract,
+            bundle=bundle,
+            number=number,
+            cycle_dir=cycle_dir,
+        )
+    finally:
+        _release_cycle_lock(cycle_dir, lock_fd)
+
+
+def _run_cycle_body(
+    *,
+    state: dict[str, Any],
+    state_path: Path,
+    evidence_dir: Path,
+    runtime_origin: Path,
+    contract: Path,
+    bundle: Sequence[Any],
+    number: int,
+    cycle_dir: Path,
+) -> bool:
     before = bundle_volume_ids(runtime_origin, bundle)
     steps: list[dict[str, Any]] = []
     baselines: dict[str, Path] = {}

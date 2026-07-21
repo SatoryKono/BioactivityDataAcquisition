@@ -78,7 +78,9 @@ async def export_existing_table(
         format=options.format,
         limit=options.limit,
     )
-    table_path_str = table_path if isinstance(table_path, str) else table_path.as_posix()
+    table_path_str = (
+        table_path if isinstance(table_path, str) else table_path.as_posix()
+    )
     table_payload = await reader.read_table(
         table_path_str, columns=options.columns, limit=options.limit
     )

@@ -58,8 +58,12 @@ def test_issue_5272_closeout_artifact_has_expected_shape() -> None:
             > closeout["baseline_metrics"]["application_core_covered_line_percent"]
         )
         # Application core must be zero for local closeout
-        assert closeout["current_metrics"]["application_core_uncovered_module_count"] == 0
-        assert closeout["current_metrics"]["application_core_unmeasured_module_count"] == 0
+        assert (
+            closeout["current_metrics"]["application_core_uncovered_module_count"] == 0
+        )
+        assert (
+            closeout["current_metrics"]["application_core_unmeasured_module_count"] == 0
+        )
     else:
         assert closeout["debt_outcome"] == "current_inventory_regressed"
         assert (

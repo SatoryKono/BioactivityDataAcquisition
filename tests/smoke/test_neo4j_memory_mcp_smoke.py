@@ -45,7 +45,7 @@ def test_parse_frames_rejects_unframed_stdout_preamble() -> None:
 
 @pytest.mark.skipif(
     sys.platform == "win32",
-    reason="MCP smoke test has timeout issues on Windows (platform-specific subprocess behavior)"
+    reason="MCP smoke test has timeout issues on Windows (platform-specific subprocess behavior)",
 )
 def test_run_smoke_command_succeeds_against_stub_mcp_server(tmp_path: Path) -> None:
     server = tmp_path / "stub_mcp_server.py"
@@ -123,7 +123,7 @@ while True:
 
 @pytest.mark.skipif(
     sys.platform == "win32",
-    reason="MCP smoke test has timeout issues on Windows (platform-specific subprocess behavior)"
+    reason="MCP smoke test has timeout issues on Windows (platform-specific subprocess behavior)",
 )
 def test_run_smoke_command_succeeds_when_server_stays_alive_after_handshake(
     tmp_path: Path,
@@ -202,7 +202,7 @@ while True:
 
 @pytest.mark.skipif(
     sys.platform == "win32",
-    reason="MCP smoke test has timeout issues on Windows (platform-specific subprocess behavior)"
+    reason="MCP smoke test has timeout issues on Windows (platform-specific subprocess behavior)",
 )
 def test_run_smoke_command_reports_invalid_stdout_from_wrapper(tmp_path: Path) -> None:
     server = tmp_path / "bad_mcp_server.py"

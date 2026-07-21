@@ -50,7 +50,9 @@ def _validate_metadata(entries: list[dict[str, object]], *, label: str) -> list[
         scopes = tuple(sorted(str(scope) for scope in raw_scopes or []))
         key = (str(entry.get("path") or entry.get("name")), scopes)
         if key in seen:
-            errors.append(f"duplicate {label} registry row: {key[0]} scopes={list(scopes)}")
+            errors.append(
+                f"duplicate {label} registry row: {key[0]} scopes={list(scopes)}"
+            )
         seen.add(key)
 
         owner = str(entry.get("owner", "")).strip()
@@ -82,16 +84,14 @@ def main() -> None:
     if not isinstance(path_entries, list) or not isinstance(function_entries, list):
         raise SystemExit("Registry must define path_entries and function_entries lists")
 
-    typed_path_entries = [
-        entry for entry in path_entries if isinstance(entry, dict)
-    ]
+    typed_path_entries = [entry for entry in path_entries if isinstance(entry, dict)]
     typed_function_entries = [
         entry for entry in function_entries if isinstance(entry, dict)
     ]
 
     errors = [
-        * _validate_metadata(typed_path_entries, label="path"),
-        * _validate_metadata(typed_function_entries, label="function"),
+        *_validate_metadata(typed_path_entries, label="path"),
+        *_validate_metadata(typed_function_entries, label="function"),
     ]
 
     workflow_xenon_paths = _extract_xenon_excludes(workflow_text)

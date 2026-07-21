@@ -28,7 +28,9 @@ MONITORING_NAMES = [
 MAIN_NAMES = ["bioetl", "bioetl-main-bioetl-1"]
 
 
-def run(cmd: list[str], *, env: dict[str, str] | None = None, timeout: float = 120) -> subprocess.CompletedProcess[str]:
+def run(
+    cmd: list[str], *, env: dict[str, str] | None = None, timeout: float = 120
+) -> subprocess.CompletedProcess[str]:
     print("+", " ".join(cmd), flush=True)
     return subprocess.run(
         cmd,

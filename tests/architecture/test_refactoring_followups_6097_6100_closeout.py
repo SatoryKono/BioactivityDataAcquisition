@@ -18,14 +18,22 @@ from tests.architecture.test_runtime_import_scc import (
 pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
-CLOSEOUT = ROOT / "reports" / "quality" / "refactoring-followups-6097-6100-closeout.json"
-COMPATIBILITY_CENSUS = ROOT / "reports" / "quality" / "compatibility-importer-census.json"
+CLOSEOUT = (
+    ROOT / "reports" / "quality" / "refactoring-followups-6097-6100-closeout.json"
+)
+COMPATIBILITY_CENSUS = (
+    ROOT / "reports" / "quality" / "compatibility-importer-census.json"
+)
 COMPATIBILITY_INVENTORY = (
     ROOT / "configs" / "quality" / "compatibility_facade_inventory.yaml"
 )
 CONFIG_BASELINE = ROOT / "reports" / "quality" / "config-discrepancy-baseline.json"
-CONFIG_COMPATIBILITY = ROOT / "configs" / "quality" / "config_compatibility_registry.yaml"
-CONTRACT_DIAGNOSTICS = ROOT / "reports" / "quality" / "contract-registry-diagnostics.json"
+CONFIG_COMPATIBILITY = (
+    ROOT / "configs" / "quality" / "config_compatibility_registry.yaml"
+)
+CONTRACT_DIAGNOSTICS = (
+    ROOT / "reports" / "quality" / "contract-registry-diagnostics.json"
+)
 VCR_CATALOG = ROOT / "reports" / "quality" / "vcr-metadata-catalog.json"
 EXPECTED_ISSUES = {6097, 6098, 6099, 6100}
 
@@ -131,9 +139,10 @@ def test_issue_6099_config_governance_has_owner_map_and_zero_drift() -> None:
         assert set(family["group_owner_map"]) == set(family["groups"])
 
     accepted_shapes = compatibility["accepted_shapes"]
-    assert len(accepted_shapes) <= compatibility["policy"]["burn_down"][
-        "accepted_shape_max"
-    ]
+    assert (
+        len(accepted_shapes)
+        <= compatibility["policy"]["burn_down"]["accepted_shape_max"]
+    )
     for entry in accepted_shapes:
         assert entry["status"] == "canonical-alias"
         assert str(entry["permanent_rationale"]).strip()

@@ -20,9 +20,11 @@ DEFAULT_SOURCE_DIR = Path("src/bioetl")
 DEFAULT_OUTPUT_DIR = Path("reports/observability/emitter-audit")
 DEFAULT_PATTERNS_FILE = Path("scripts/ops/observability/emitter-bypass-patterns.json")
 
+
 @dataclass
 class EmitterViolation:
     """Single emitter contract violation."""
+
     file_path: str
     line_number: int
     violation_type: str
@@ -35,54 +37,58 @@ class EmitterViolation:
         if not self.timestamp:
             self.timestamp = datetime.now(tz=UTC).isoformat()
 
+
 @dataclass
 class EmitterAuditReport:
     """Complete emitter audit report."""
+
     source_dir: str
     timestamp: str
     violations: list[EmitterViolation]
     summary: dict[str, Any]
+
 
 # Forbidden patterns for emitter bypass
 FORBIDDEN_PATTERNS = {
     "direct_prometheus_import": {
         "pattern": r"from prometheus_client import|import prometheus_client",
         "description": "Direct Prometheus client import - use canonical emitter contracts",
-        "severity": "error"
+        "severity": "error",
     },
     "direct_statsd_import": {
         "pattern": r"from statsd import|import statsd",
         "description": "Direct StatsD import - use canonical emitter contracts",
-        "severity": "error"
+        "severity": "error",
     },
     "direct_logging_import": {
         "pattern": r"from logging import|import logging",
         "description": "Direct logging import - use UnifiedLogger from observability layer",
-        "severity": "warning"
+        "severity": "warning",
     },
     "print_statement": {
         "pattern": r"\bprint\s*\(",
         "description": "Print statement - use structured logging via UnifiedLogger",
-        "severity": "warning"
+        "severity": "warning",
     },
     "direct_http_post": {
         "pattern": r"requests\.post|httpx\.post",
         "description": "Direct HTTP POST for metrics - use canonical emitter contracts",
-        "severity": "error"
+        "severity": "error",
     },
     "prometheus_counter_direct": {
         "pattern": r"Counter\(|Gauge\(|Histogram\(|Summary\(",
         "description": "Direct Prometheus metric creation - use canonical emitter contracts",
-        "severity": "error"
-    }
+        "severity": "error",
+    },
 }
 
 # Allowed import patterns
 ALLOWED_IMPORTS = {
     "bioetl.observability",
     "bioetl.infrastructure.logging",
-    "bioetl.interfaces.logging"
+    "bioetl.interfaces.logging",
 }
+
 
 class EmitterAnalyzer(ast.NodeVisitor):
     """AST analyzer for emitter contract violations."""
@@ -128,28 +134,33 @@ class EmitterAnalyzer(ast.NodeVisitor):
         for pattern_name, pattern_config in FORBIDDEN_PATTERNS.items():
             if "import" in pattern_name:
                 if re.search(pattern_config["pattern"], import_name):
-                    self.violations.append(EmitterViolation(
-                        file_path=self.file_path,
-                        line_number=line_no,
-                        violation_type=pattern_name,
-                        description=pattern_config["description"],
-                        code_snippet=import_name,
-                        severity=pattern_config["severity"]
-                    ))
+                    self.violations.append(
+                        EmitterViolation(
+                            file_path=self.file_path,
+                            line_number=line_no,
+                            violation_type=pattern_name,
+                            description=pattern_config["description"],
+                            code_snippet=import_name,
+                            severity=pattern_config["severity"],
+                        )
+                    )
 
     def _check_forbidden_call(self, func_name: str, line_no: int) -> None:
         """Check if function call is forbidden."""
         for pattern_name, pattern_config in FORBIDDEN_PATTERNS.items():
             if "import" not in pattern_name:
                 if re.search(pattern_config["pattern"], func_name):
-                    self.violations.append(EmitterViolation(
-                        file_path=self.file_path,
-                        line_number=line_no,
-                        violation_type=pattern_name,
-                        description=pattern_config["description"],
-                        code_snippet=func_name,
-                        severity=pattern_config["severity"]
-                    ))
+                    self.violations.append(
+                        EmitterViolation(
+                            file_path=self.file_path,
+                            line_number=line_no,
+                            violation_type=pattern_name,
+                            description=pattern_config["description"],
+                            code_snippet=func_name,
+                            severity=pattern_config["severity"],
+                        )
+                    )
+
 
 def analyze_file(file_path: Path) -> list[EmitterViolation]:
     """Analyze a single Python file for emitter violations."""
@@ -162,25 +173,30 @@ def analyze_file(file_path: Path) -> list[EmitterViolation]:
         analyzer.visit(tree)
         violations = analyzer.violations
     except SyntaxError as e:
-        violations.append(EmitterViolation(
-            file_path=str(file_path),
-            line_number=e.lineno or 0,
-            violation_type="syntax_error",
-            description=f"Syntax error in file: {e.msg}",
-            code_snippet="",
-            severity="error"
-        ))
+        violations.append(
+            EmitterViolation(
+                file_path=str(file_path),
+                line_number=e.lineno or 0,
+                violation_type="syntax_error",
+                description=f"Syntax error in file: {e.msg}",
+                code_snippet="",
+                severity="error",
+            )
+        )
     except Exception as e:
-        violations.append(EmitterViolation(
-            file_path=str(file_path),
-            line_number=0,
-            violation_type="analysis_error",
-            description=f"Analysis error: {e}",
-            code_snippet="",
-            severity="error"
-        ))
+        violations.append(
+            EmitterViolation(
+                file_path=str(file_path),
+                line_number=0,
+                violation_type="analysis_error",
+                description=f"Analysis error: {e}",
+                code_snippet="",
+                severity="error",
+            )
+        )
 
     return violations
+
 
 def analyze_directory(source_dir: Path) -> list[EmitterViolation]:
     """Analyze all Python files in directory."""
@@ -191,6 +207,7 @@ def analyze_directory(source_dir: Path) -> list[EmitterViolation]:
         all_violations.extend(violations)
 
     return all_violations
+
 
 def generate_summary(violations: list[EmitterViolation]) -> dict[str, Any]:
     """Generate summary statistics."""
@@ -216,8 +233,9 @@ def generate_summary(violations: list[EmitterViolation]) -> dict[str, Any]:
         "info": info,
         "by_type": dict(by_type),
         "by_file": dict(by_file),
-        "files_with_violations": len(by_file)
+        "files_with_violations": len(by_file),
     }
+
 
 def run_emitter_audit(source_dir: Path) -> EmitterAuditReport:
     """Run complete emitter contract audit."""
@@ -228,8 +246,9 @@ def run_emitter_audit(source_dir: Path) -> EmitterAuditReport:
         source_dir=str(source_dir),
         timestamp=datetime.now(tz=UTC).isoformat(),
         violations=violations,
-        summary=summary
+        summary=summary,
     )
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -239,13 +258,13 @@ def main():
         "--source-dir",
         type=Path,
         default=DEFAULT_SOURCE_DIR,
-        help="Source directory to analyze"
+        help="Source directory to analyze",
     )
     parser.add_argument(
         "--output-dir",
         type=Path,
         default=DEFAULT_OUTPUT_DIR,
-        help="Output directory for audit report"
+        help="Output directory for audit report",
     )
 
     args = parser.parse_args()
@@ -269,10 +288,10 @@ def main():
     print(f"Files with violations: {report.summary['files_with_violations']}")
     print()
 
-    if report.summary['by_type']:
+    if report.summary["by_type"]:
         print("Violations by type:")
         print("=" * 60)
-        for vtype, count in sorted(report.summary['by_type'].items()):
+        for vtype, count in sorted(report.summary["by_type"].items()):
             print(f"  {vtype}: {count}")
         print()
 
@@ -280,7 +299,9 @@ def main():
         print("Detailed violations:")
         print("=" * 60)
         for violation in report.violations[:20]:  # Show first 20
-            print(f"  [{violation.severity.upper()}] {violation.file_path}:{violation.line_number}")
+            print(
+                f"  [{violation.severity.upper()}] {violation.file_path}:{violation.line_number}"
+            )
             print(f"    Type: {violation.violation_type}")
             print(f"    Description: {violation.description}")
             print(f"    Code: {violation.code_snippet}")
@@ -292,7 +313,10 @@ def main():
         print("No violations found - emitter contracts are compliant!")
 
     # Save report
-    report_path = args.output_dir / f"emitter-audit-report-{datetime.now(tz=UTC).strftime('%Y%m%d-%H%M%S')}.json"
+    report_path = (
+        args.output_dir
+        / f"emitter-audit-report-{datetime.now(tz=UTC).strftime('%Y%m%d-%H%M%S')}.json"
+    )
     with open(report_path, "w") as f:
         json.dump(asdict(report), f, indent=2, default=str)
 
@@ -305,6 +329,7 @@ def main():
         sys.exit(2)
     else:
         sys.exit(0)
+
 
 if __name__ == "__main__":
     main()

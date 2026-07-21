@@ -28,4 +28,3 @@ def test_request_metadata_strips_url_credentials_and_encoded_secret_params() -> 
     assert request.query_params["cursor"] == "safe-cursor"
     assert "url-password" not in request.model_dump_json()
     assert "query-secret" not in request.model_dump_json()
-

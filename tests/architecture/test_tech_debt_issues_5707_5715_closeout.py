@@ -240,10 +240,7 @@ def test_issue_5711_coverage_tail_is_zero_unmeasured_and_owner_anchored() -> Non
     # Source module count can move with covered source additions; this closeout
     # guard owns residual tail debt, so require current artifacts to agree.
     assert summary["source_module_count"] == len(coverage["modules"])
-    assert (
-        scorecard["metrics"]["source_module_count"]
-        == summary["source_module_count"]
-    )
+    assert scorecard["metrics"]["source_module_count"] == summary["source_module_count"]
     assert summary["unmeasured_module_count"] == outcome["unmeasured_module_count"]
     assert summary["uncovered_module_count"] == outcome["uncovered_module_count"]
     # Skip no_executable_lines check for local development with uncommitted changes

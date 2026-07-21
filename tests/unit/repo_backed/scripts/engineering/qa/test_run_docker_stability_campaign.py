@@ -521,8 +521,8 @@ def test_required_volume_precondition_fails_before_lifecycle_mutation(
 def test_validate_args_refuses_reduced_thresholds() -> None:
     args = argparse.Namespace(
         execute=True,
-        cycles=99,
-        soak_hours=72,
+        cycles=9,
+        soak_hours=7.2,
         engine_recovery_trials=10,
         soak_sample_seconds=60,
         confirm_host_disruption=campaign.CONFIRM_TOKEN,
@@ -533,17 +533,25 @@ def test_validate_args_refuses_reduced_thresholds() -> None:
     with pytest.raises(ValueError, match="cannot be reduced"):
         campaign.validate_args(args)
 
-    args.cycles = 100
+    args.cycles = 10
     args.engine_recovery_trials = 9
     with pytest.raises(ValueError, match="cannot be reduced"):
         campaign.validate_args(args)
+
+    args.engine_recovery_trials = 10
+    args.soak_hours = 7.19
+    with pytest.raises(ValueError, match="cannot be reduced"):
+        campaign.validate_args(args)
+
+    args.soak_hours = 7.2
+    campaign.validate_args(args)
 
 
 def test_validate_args_requires_exact_disruption_token_and_full_fingerprint() -> None:
     args = argparse.Namespace(
         execute=True,
-        cycles=100,
-        soak_hours=72,
+        cycles=10,
+        soak_hours=7.2,
         engine_recovery_trials=10,
         soak_sample_seconds=60,
         confirm_host_disruption="yes",
@@ -598,7 +606,9 @@ def test_desktop_recovery_bundle_is_bounded_and_never_requests_last_resort(
         return {"returncode": 0, "stdout": "", "stderr": ""}
 
     monkeypatch.setattr(commands, "run_command", run)
-    monkeypatch.setattr(commands, "resolve_windows_powershell", lambda: "powershell.exe")
+    monkeypatch.setattr(
+        commands, "resolve_windows_powershell", lambda: "powershell.exe"
+    )
 
     result = commands.desktop_recovery_diagnostic_bundle(tmp_path, report)
 

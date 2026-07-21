@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: P1
   Runtime profile: Local-Only optional Docker adjunct (ADR-010).
-  Last verified: '2026-07-20'
+  Last verified: '2026-07-21'
 
 ______________________________________________________________________
 
@@ -126,7 +126,7 @@ partial sample.
 | ----- | -------- | ------------ |
 | Proven project defect | Build-only service without expected image must not crash readiness (`_digest_from_image(None)`); F004 Neo4j env collision | Unit/architecture contracts + redacted incident bundles |
 | Proven recovery behavior | Normal recovery never begins with process termination; last-resort requires exact token + `ShouldProcess` | PowerShell fixtures + `restart-docker.ps1` |
-| Residual host risk until campaign proof | Desktop CLI restart flakiness, mixed Compose origins, engine pipe unavailable after Desktop UI "running", Resource Saver wake latency | Keep #6297/#6299 open until ≥99% of 10 recovery trials succeed within 180s, volume identity stable, and signed campaign summary exists |
+| Residual host risk (RF-006 recovery bar) | Desktop CLI restart flakiness, mixed Compose origins, engine pipe unavailable after Desktop UI "running", Resource Saver wake latency | **Met 2026-07-21**: 10/10 recovery trials ≤180s (max 116.1s), volumes stable, signed summary `reports/quality/docker-stability-summary-rf006-6299.json` (+ `.asc`). Issues #6297/#6299 residual-risk bar closed. Optional RF-008 multi-hour soak/cycle campaign may continue for deeper promotion gates without reopening this residual row. |
 
 ## Compliance
 

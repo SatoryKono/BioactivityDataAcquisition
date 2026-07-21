@@ -156,6 +156,11 @@ log_test.txt
 !/reports/quality/total-tech-debt-audit-main-2026-06-16.md
 !/reports/quality/total-tech-debt-audit-main-current.md
 !/reports/quality/test-governance-current.json
+!/reports/quality/tech-debt-issues-6220-6229-closeout.json
+!/reports/quality/test-support-helper-ownership-map.json
+!/reports/quality/test-bootstrap-fixture-scope-profile.json
+!/reports/quality/test-audit-issues-5996-6003-closeout.json
+!/reports/quality/contract-registry-dq-diagnostics.json
 !/reports/quality/test-fixture-asset-duplication.json
 !/reports/quality/flaky-test-burndown-review.json
 !/reports/quality/domain-io-taint-inventory.json
@@ -401,6 +406,7 @@ scripts/docs/build/**/*.pyc
 /docs/reports/generated/*
 !/docs/reports/generated/documentation-cleanup-inventory.json
 !/docs/reports/generated/documentation-cleanup-inventory.md
+!/docs/reports/generated/chembl_matrix_structural_contract_v1.json
 !/docs/reports/evidence/
 /docs/reports/evidence/*
 !/docs/reports/evidence/project-test-health/
@@ -419,6 +425,11 @@ scripts/docs/build/**/*.pyc
 !/docs/reports/evidence/project-legacy-compatibility-remediation/04-decisions/
 /docs/reports/evidence/project-legacy-compatibility-remediation/04-decisions/*
 !/docs/reports/evidence/project-legacy-compatibility-remediation/04-decisions/DECISIONS.yaml
+!/docs/reports/evidence/project-package-topology/
+/docs/reports/evidence/project-package-topology/*
+!/docs/reports/evidence/project-package-topology/04-decisions/
+/docs/reports/evidence/project-package-topology/04-decisions/*
+!/docs/reports/evidence/project-package-topology/04-decisions/DECISIONS.yaml
 !/docs/reports/evidence/project-legacy-compatibility-remediation/05-risks/
 /docs/reports/evidence/project-legacy-compatibility-remediation/05-risks/*
 !/docs/reports/evidence/project-legacy-compatibility-remediation/05-risks/RISKS.yaml

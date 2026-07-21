@@ -25,7 +25,9 @@ def _discover_repo_root(start: Path) -> Path:
     raise RuntimeError(f"Could not locate repository root from {start}")
 
 
-def collect_expired_reports_quality_ttl(repo_root: Path) -> list[ReportsWorkspaceEvidence]:
+def collect_expired_reports_quality_ttl(
+    repo_root: Path,
+) -> list[ReportsWorkspaceEvidence]:
     """Return expired reports/quality surfaces governed by a replay-safe TTL."""
     return [
         row

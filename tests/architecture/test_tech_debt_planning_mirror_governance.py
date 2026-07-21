@@ -9,9 +9,7 @@ from pathlib import Path
 
 pytestmark = pytest.mark.architecture
 
-MIRROR_PATHS = (
-    Path(".github/ISSUES/TECH-DEBT-ZERO-BURNDOWN-EPIC.md"),
-)
+MIRROR_PATHS = (Path(".github/ISSUES/TECH-DEBT-ZERO-BURNDOWN-EPIC.md"),)
 
 
 def test_local_tech_debt_planning_mirrors_are_explicitly_non_authoritative() -> None:

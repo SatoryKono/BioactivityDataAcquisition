@@ -75,11 +75,7 @@ def _discover_parquet_files(source: Path) -> tuple[Path, ...]:
 def _discover_metadata_files(source: Path) -> tuple[Path, ...]:
     search_root = source if source.is_dir() else source.parent
     return tuple(
-        sorted(
-            path
-            for path in search_root.rglob("*metadata.y*ml")
-            if path.is_file()
-        )
+        sorted(path for path in search_root.rglob("*metadata.y*ml") if path.is_file())
     )
 
 

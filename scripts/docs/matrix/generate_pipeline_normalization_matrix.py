@@ -387,7 +387,11 @@ ENUM_CONFIG_SOURCES: dict[tuple[str, str, str], str] = {
     ("chembl", "publication", "oa_status"): _CHEMBL_CONTROLLED_VOCAB_CONFIG,
     ("chembl", "publication", "publication_type"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "publication_term", "term_type"): _CHEMBL_ENUM_CONFIG,
-    ("chembl", "subcellular_fraction", "subcellular_fraction"): _CHEMBL_CONTROLLED_VOCAB_CONFIG,
+    (
+        "chembl",
+        "subcellular_fraction",
+        "subcellular_fraction",
+    ): _CHEMBL_CONTROLLED_VOCAB_CONFIG,
     ("chembl", "target", "component_relationships"): _CHEMBL_CONTROLLED_VOCAB_CONFIG,
     ("chembl", "target", "component_types"): _CHEMBL_CONTROLLED_VOCAB_CONFIG,
     ("chembl", "target", "organism_class"): _CHEMBL_CONTROLLED_VOCAB_CONFIG,
@@ -542,7 +546,10 @@ ENUM_REGISTRY_PATHS: dict[tuple[str, str, str], tuple[str, ...]] = {
     ("chembl", "activity", "standard_units"): ("activity", "standard_units"),
     ("chembl", "assay", "assay_category"): ("assay", "categories"),
     ("chembl", "assay", "assay_group"): ("assay", "assay_groups"),
-    ("chembl", "assay", "assay_subcellular_fraction"): ("assay", "subcellular_fractions"),
+    ("chembl", "assay", "assay_subcellular_fraction"): (
+        "assay",
+        "subcellular_fractions",
+    ),
     ("chembl", "assay", "assay_test_type"): ("assay", "test_types"),
     ("chembl", "assay", "assay_type"): ("assay", "types"),
     ("chembl", "assay", "bao_format_mapping_status"): (
@@ -636,8 +643,14 @@ ENUM_REGISTRY_PATHS: dict[tuple[str, str, str], tuple[str, ...]] = {
     # cross-provider global taxonomy.
     ("chembl", "publication", "publication_type"): ("publication", "types"),
     ("chembl", "publication_term", "term_type"): ("publication_term", "term_types"),
-    ("chembl", "subcellular_fraction", "subcellular_fraction"): ("assay", "subcellular_fractions"),
-    ("chembl", "target", "component_relationships"): ("target", "component_relationships"),
+    ("chembl", "subcellular_fraction", "subcellular_fraction"): (
+        "assay",
+        "subcellular_fractions",
+    ),
+    ("chembl", "target", "component_relationships"): (
+        "target",
+        "component_relationships",
+    ),
     ("chembl", "target", "component_types"): ("target", "component_types"),
     ("chembl", "target", "organism_class"): ("target", "organism_classes"),
     ("chembl", "target", "target_type"): ("target", "types"),

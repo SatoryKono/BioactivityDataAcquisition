@@ -19,8 +19,9 @@ if [[ -f "${ENV_FILE}" ]]; then
 fi
 
 # Ref is a remote HTTP MCP server, so Codex itself must receive the header
-# source variable. Load it selectively from the repo env in a subshell so other
-# project secrets are not added to the Codex parent environment.
+# source variable. Load ONLY that key into the Codex parent environment.
+# Wrapper-scoped secrets (GitHub, Docker Hub, Neo4j, Grafana, Brave, etc.)
+# stay out of this process and are injected by each MCP wrapper via its own env.
 REPO_ENV_LOADER="${REPO_ROOT}/scripts/ai/mcp/support/load_repo_env.sh"
 if [[ -f "${REPO_ENV_LOADER}" ]]; then
     while IFS= read -r -d '' key && IFS= read -r -d '' value; do
@@ -31,9 +32,11 @@ if [[ -f "${REPO_ENV_LOADER}" ]]; then
             # shellcheck source=../../mcp/support/load_repo_env.sh
             source "${REPO_ENV_LOADER}"
             load_repo_env_if_present
-            if [[ -n "${REF_TOOL_API_KEY:-}" ]]; then
-                printf 'REF_TOOL_API_KEY\0%s\0' "${REF_TOOL_API_KEY}"
-            fi
+            for key in "REF_TOOL_API_KEY"; do
+                if [[ -n "${!key:-}" ]]; then
+                    printf '%s\0%s\0' "${key}" "${!key}"
+                fi
+            done
         )
     )
 fi

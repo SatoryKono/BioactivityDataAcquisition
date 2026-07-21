@@ -211,13 +211,21 @@ addopts = "-ra"
 
 Это стартовая заготовка, а не финальная политика BioETL. Наборы `B`, `UP`, `SIM`, `RUF`,
 исключения, per-module overrides и coverage threshold добавляются только после анализа
-текущей базы ошибок в репозитории.
+текущей базы ошибок в репозитории. Coverage threshold и pytest coverage-аргументы
+выполняются только в `pytest-coverage`, а не глобально для остальных pytest-конфигураций.
 
 Принцип целостности: `Ruff`, `mypy`, `pytest` используют конфигурацию
 репозитория (pyproject/lock/scripts, а где применимо — `configs`) и должны
 идентично совпадать с параметрами в CI.
 
 ## 4. Подключить инструменты в PyCharm
+
+### 4.0. Чек-лист по устранению глобального coverage
+
+- `pyproject.toml` не должен задавать `--cov` как глобальный default в `addopts`.
+- Не добавляйте `--cov` в `Tools | Python Integrated Tools | Testing` как общий дефолт.
+- `pytest-fast`, `pytest-full`, `pytest-debug` запускаются без coverage.
+- `pytest-coverage` — единственная pytest конфигурация для флага `--cov*`, `--cov-report*` и порогов покрытия.
 
 1. Подключите и настройте инструменты через UI PyCharm (без ручного редактирования XML), затем сохраните `run/debug` конфигурации как shared project files и только после этого продолжайте настройку следующей группы.
 
@@ -227,19 +235,46 @@ Ruff — единственный владелец lint, formatting и import op
 добавьте ровно один formatter и ровно один import optimizer, чтобы не было
 дублирования форматирования/импортных автофиксов:
 
+Важно: в PyCharm 2026.1 не используйте `External Tools` как основной путь
+для `ruff`/`black`/`pytest`/`mypy` — эти инструменты выполняются через
+штатную IDE-интеграцию (Tools/Actions on Save + Run/Debug + `pyproject.toml`/CI).
+Дополнительно: не допускайте одновременного активного Ruff Format и Black formatter.
+Выберите один из них и зафиксируйте политику в `pyproject.toml`, `.editorconfig`
+и project/shared IDE-конфигурациях.
+
 1. **Settings > Python > Tools > Ruff**: Enable, Interpreter mode,
    Inspections, Formatting и Import optimizer — включены.
-2. **Settings > Python > Tools > Black**: выключен.
+2. **Settings > Python > Tools > Black**: выключен, если активен Ruff formatter
+   (или включён только в ручном режиме, когда Black избран как единственный formatter).
 3. **Tools > Actions on Save**: включите ровно один formatter и ровно один
    import optimizer (в режиме Auto/On save по выбору команды), без второго
    formatter/import optimizer в цепочке.
 4. Project inspection profile отключает дублирующую `PyPep8Inspection`, но
    сохраняет semantic Python inspections. Ruff diagnostics остаются включены.
+5. Нельзя включать одновременно Ruff Format и Black как форматтеры для одного и того же
+   проекта; в каждой среде выбирается ровно один formatter-source-of-truth.
+6. Не используйте `mypy --strict $FilePath$` как основной quality gate; этот режим
+   оставляйте только как локальную/editorial диагностику, а основной контроль типа
+   выполняйте через `mypy-full` (project target / CI-equivalent).
 
 Ширина форматирования — фактическое значение BioETL `88` из
 `pyproject.toml`; `.editorconfig` и project code style показывают тот же right
 margin. Универсальный пример `100` из исходного плана здесь не применяется,
 потому что он расходился бы с formatter-ом репозитория.
+
+### 4.1.1 Форматтер-политика (выберите один вариант)
+
+Для текущего плана по умолчанию:
+
+1. Ruff format активен.
+2. Black отключён в PyCharm и не используется для форматирования в Actions on Save.
+3. На уровне `pyproject.toml` фиксировать `format`-политику только через `ruff`.
+
+Альтернативный вариант (если переход на Ruff невозможен):
+
+1. Ruff format disabled (formatter только в lint/import roles).
+2. Black включён как единственный formatter с управлением через PyCharm/CLI.
+3. В репозитории и CI нельзя оставлять конфликтующие formatter-инструкции.
 
 ### 4.2 Типизация
 
@@ -277,7 +312,8 @@ configuration templates:
 
 Все configurations используют project interpreter, working directory
 `$PROJECT_DIR$`, package/module entry points и не содержат secrets или
-абсолютных пользовательских путей. Coverage не включён в fast/debug.
+абсолютных пользовательских путей. Coverage не включён в fast/debug и не является
+глобальным дефолтом в `Run/Debug`/`On Save` для pytest.
 Каждая configuration должна запускаться после `clean clone` без ручного `PYTHONPATH`
 и без user-specific path overrides.
 
@@ -297,6 +333,7 @@ wrappers:
 - Используйте локальный PyCharm debugger и `pytest-debug`.
 - Coverage в обычных debug-сценариях отключена по умолчанию: в debug конфигурациях `pytest-debug` и локального pipeline-debug не должно быть `--cov`/coverage hooks.
 - Coverage и xdist в debug configuration отключены.
+- В PyCharm для Python нет отдельного режима `GDB-compatible` как глобальной debugger-настройки; используйте реальные режимы: локальный debug через `debugpy`, fallback на `pydevd` по необходимости и Remote Debug/Attach только по факту удалённого запуска.
 - Attach to subprocess, gevent и remote debugging включайте только для
   подтверждённого сценария.
   - Remote debugging настраивайте только при фактическом удалённом execution.
@@ -334,6 +371,8 @@ chat/agent integration допустим, если он не включает inl
 6. `quality-gate` — repository-level скрипт/CI command, который последовательно вызывает Ruff, mypy и tests.
 
 Не запускайте полный `mypy` и полный `pytest` на каждом `Save`; привяжите их только к ручным конфигурациям.
+`pytest` с `--cov` не включайте как глобальный default; coverage-опции должны выполняться
+только в `pytest-coverage`/профильных скриптах.
 Не дублируйте одинаковые параметры проверки между UI-конфигурациями, `pyproject.toml` и CI без явной необходимости — источник истины должен оставаться единым (в первую очередь `pyproject.toml` + CI-скрипты).
 Проверочный критерий переноса: после `clean clone` import и запуск `pytest-fast`/`mypy-full` работают из project files и project interpreter без добавления `PYTHONPATH` в run/debug конфигурациях.
 
@@ -365,15 +404,16 @@ chat/agent integration допустим, если он не включает inl
 1. Создать группу `BioETL` и привязать к ней шаблоны/скрипты проекта (run/debug, file templates, скелетные шаблоны конфигураций), чтобы исключить разнобой между командами.
 2. В live templates использовать синтаксис `$VARIABLE$` и `$END$`.
 3. Оставить live templates только для коротких проверенных `API` calls, чтобы не зацементировать архитектуру в шаблоне.
-4. Полный pipeline вынести в project file template или generator.
+4. Полный pipeline вынести в project file template или generator, где детерминизм реализован через библиотечные primitives и проверенный код.
 5. Проверить правильный синтаксис templates (live templates, file templates, скрипты скелета).
 6. Каждый template должен опираться на существующие API проекта/пакета/порты, а не вводить несуществующие вызовы.
 7. Каждый template должен импортировать существующие symbols из проектной базы/портов/сервисов и не вводить недекларированные импорты.
 8. Каждый template должен иметь typed signatures (аннотации типов).
-9. В обязательной бизнес-логике шаблонов не использовать `pass`; обязательные методы должны явно декларировать поведение (например, `NotImplementedError` или конкретную реализацию).
+9. В обязательной бизнес-логике шаблонов не использовать `pass`; обязательные методы должны явно декларировать поведение (например, `NotImplementedError` или конкретную реализацию). Snippet/template не заменяет реализацию или deterministic control-flow.
 10. Не создавать wall-clock time внутри transformation; время должно приходить из context/параметров/clock provider.
 11. Каждая используемая в шаблонах логика должна опираться только на library primitives, которые покрыты tests.
 12. Экспортировать templates или хранить project templates в VCS.
+13. Признак приёмки секции templates: детерминизм (сортировки/hashing/retry/clocking) подтверждается только кодом и тестами, не snippets.
 
 ## 8. Закрепить детерминизм в коде и тестах
 
@@ -385,6 +425,8 @@ chat/agent integration допустим, если он не включает inl
 6. Добавить `atomic write` primitive и тестировать поведение при сбое/интеррупте.
 7. Добавить reproducibility test: два запуска с одинаковым input/config/context дают одинаковые output hashes.
 8. Повторный pipeline run (smoke или production-like) обязателен: второй прогон должен матчиться по output hash/метаданным с первым.
+
+Важно: детерминизм устанавливается контрактами кода (canonicity, atomic write, сортировка, hash), а не snippet-логикой.
 
 ## 9. Упростить AI-слой
 
@@ -456,17 +498,9 @@ profiles/
 .env
 .env.local
 
-# Либо игнорировать всю .idea/, либо selectively делиться настройками.
-.idea/*
-!.idea/runConfigurations/
-!.idea/runConfigurations/**
-!.idea/codeStyles/
-!.idea/codeStyles/**
-!.idea/inspectionProfiles/
-!.idea/inspectionProfiles/**
-!.idea/fileTemplates/
-!.idea/fileTemplates/**
-!.idea/pyLspTools.xml
+# Игнорировать локальный `.idea/` целиком. Общие templates репозитория живут в
+# `configs/ide/pycharm/`, а не в `.idea/`.
+.idea/
 ```
 
 4. Адаптировать список data directories под проект: не игнорировать fixtures и small reference datasets, если они участвуют в `tests`.
@@ -545,3 +579,11 @@ machine-local files и не изменяются этим workflow.
    не находятся на cloud/network sync path.
 16. Для Windows Microsoft Defender exclusion для project directory разрешён только для
    доверенного каталога и только при наличии разрешения security policy.
+17. В процессе работы пайплайна и локальной разработки не используются устаревшие
+    `External Tools` для `ruff`/`black`/`pytest`/`mypy` как основной путь; используются
+    нативные интеграции PyCharm и project/CI конфигурации.
+18. Форматтерный пайплайн единый: нельзя одновременно включать Ruff format и Black как
+    активные formatter-источники для одного проектного потока (On Save/Actions/CI).
+19. Основной mypy-gate выполняется только через full project scope (`mypy-full`);
+   `mypy --strict $FilePath$` не рассматривается как заменяющий его.
+20. `coverage` не используется как глобальный дефолт для pytest в IDE и проектных Run/On Save-конфигурациях; отдельная конфигурация `pytest-coverage` — единственный источник отчётов и порогов покрытия.

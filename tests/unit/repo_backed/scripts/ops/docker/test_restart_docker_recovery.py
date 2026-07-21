@@ -4,6 +4,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import time
 from pathlib import Path
 
@@ -18,91 +19,179 @@ pytestmark = [
     pytest.mark.skipif(PWSH is None, reason="pwsh is required for behavioral fixtures"),
 ]
 
+# Python fakes are launched via PATHEXT-friendly ``.cmd`` wrappers. The recovery
+# script starts tools with ProcessStartInfo (no shell), so an extensionless
+# ``#!/bin/sh`` shim is never executed on Windows. A prior ``docker.exe`` stub
+# that always exited 2 shadowed CreateProcess and made every capability probe
+# look unsupported (``desktop_cli_unavailable``).
+_FAKE_DOCKER_PY = r"""
+from __future__ import annotations
+
+import json
+import os
+import sys
+import time
+from pathlib import Path
+
+mode = os.environ.get("FAKE_DOCKER_MODE", "recover")
+state = Path(os.environ["FAKE_DOCKER_STATE"])
+args = sys.argv[1:]
+
+
+def _out(text: str = "") -> None:
+    sys.stdout.write(text)
+    if text and not text.endswith("\n"):
+        sys.stdout.write("\n")
+
+
+if not args:
+    raise SystemExit(2)
+
+if args[0] == "info":
+    if state.is_file() and mode != "never_ready":
+        _out(json.dumps({"ServerVersion": "27.3.1", "DockerRootDir": "/var/lib/docker"}))
+        raise SystemExit(0)
+    raise SystemExit(1)
+
+if args[0] == "desktop":
+    command = args[1] if len(args) > 1 else ""
+    if len(args) >= 3 and args[-1] == "--help":
+        raise SystemExit(0)
+    if command == "status":
+        if mode == "command_timeout":
+            time.sleep(20)
+        _out("status token=ghp_abcdefghijklmnop")
+        raise SystemExit(5)
+    if command == "logs":
+        _out(
+            "ext4.vhdx attached NEO4J_PASSWORD=secret-value "
+            "https://user:pass@example.test"
+        )
+        raise SystemExit(0)
+    if command == "diagnose":
+        raise SystemExit(0)
+    if command == "restart":
+        if mode == "restart_timeout":
+            time.sleep(20)
+        if mode != "never_ready":
+            state.write_text("ready\n", encoding="utf-8")
+        raise SystemExit(0)
+    if command == "stop":
+        raise SystemExit(0)
+    if command == "start":
+        state.write_text("ready\n", encoding="utf-8")
+        raise SystemExit(0)
+    raise SystemExit(2)
+
+if args[0] == "version":
+    _out(json.dumps({"Client": {"Version": "27.3.1"}, "Server": {"Version": "27.3.1"}}))
+    raise SystemExit(0)
+
+if args[0] == "context" and len(args) > 1 and args[1] == "show":
+    _out("desktop-linux")
+    raise SystemExit(0)
+
+if args[0] == "context" and len(args) > 1 and args[1] == "ls":
+    _out(json.dumps({"Name": "desktop-linux", "DockerEndpoint": "npipe://desktop"}))
+    _out(json.dumps({"Name": "legacy", "DockerEndpoint": "tcp://127.0.0.1:2375"}))
+    raise SystemExit(0)
+
+if args[0] == "compose":
+    _out(
+        json.dumps(
+            [{"Name": "bioetl-main", "ConfigFiles": "/mnt/e/repo/docker-compose.yml"}]
+        )
+    )
+    raise SystemExit(0)
+
+if args[0] == "ps":
+    _out(
+        json.dumps(
+            {
+                "ID": "abc123",
+                "Names": "bioetl",
+                "Ports": "0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp",
+            }
+        )
+    )
+    raise SystemExit(0)
+
+if args[0] == "inspect":
+    _out("bind|/mnt/e/data|/app/data")
+    raise SystemExit(0)
+
+if args[0] == "system" and len(args) > 1 and args[1] == "df":
+    _out(json.dumps({"Type": "Images", "Size": "1GB"}))
+    raise SystemExit(0)
+
+raise SystemExit(2)
+"""
+
+_FAKE_WSL_PY = r"""
+from __future__ import annotations
+
+import sys
+
+args = sys.argv[1:]
+
+
+def _out(text: str) -> None:
+    sys.stdout.write(text + "\n")
+
+
+if args == ["--status"]:
+    _out("Default Distribution: Ubuntu")
+    raise SystemExit(0)
+if args[:1] == ["--list"]:
+    _out("docker-desktop Running 2")
+    raise SystemExit(0)
+if args[:1] == ["-d"]:
+    _out("Filesystem 1B-blocks Used Available Use% Mounted on")
+    _out("/dev/sdd 20000000000 1000000000 19000000000 6% /var/lib/docker")
+    raise SystemExit(0)
+raise SystemExit(2)
+"""
+
+
+def _write_cmd_launcher(path: Path, script_path: Path) -> None:
+    path.write_text(
+        (
+            "@echo off\r\n"
+            f'"{sys.executable}" "{script_path}" %*\r\n'
+            "exit /b %ERRORLEVEL%\r\n"
+        ),
+        encoding="utf-8",
+    )
+
+
+def _write_posix_launcher(path: Path, script_path: Path) -> None:
+    path.write_text(
+        f"#!/bin/sh\nexec '{sys.executable}' '{script_path}' \"$@\"\n",
+        encoding="utf-8",
+    )
+    path.chmod(0o755)
+
 
 def _fake_docker(bin_dir: Path) -> Path:
-    docker = bin_dir / "docker"
-    docker.write_text(
-        """#!/bin/sh
-mode=${FAKE_DOCKER_MODE:-recover}
-state=${FAKE_DOCKER_STATE:?}
-if [ "$1" = "info" ]; then
-  if [ -f "$state" ] && [ "$mode" != "never_ready" ]; then
-    printf '%s\\n' '{"ServerVersion":"27.3.1","DockerRootDir":"/var/lib/docker"}'
-    exit 0
-  fi
-  exit 1
-fi
-if [ "$1" = "desktop" ] && [ "$3" = "--help" ]; then exit 0; fi
-if [ "$1" = "desktop" ] && [ "$2" = "status" ]; then
-  if [ "$mode" = "command_timeout" ]; then /bin/sleep 20; fi
-  printf '%s\\n' 'status token=ghp_abcdefghijklmnop'
-  exit 5
-fi
-if [ "$1" = "desktop" ] && [ "$2" = "logs" ]; then
-  printf '%s\\n' 'ext4.vhdx attached NEO4J_PASSWORD=secret-value https://user:pass@example.test'
-  exit 0
-fi
-if [ "$1" = "desktop" ] && [ "$2" = "diagnose" ]; then exit 0; fi
-if [ "$1" = "desktop" ] && [ "$2" = "restart" ]; then
-  if [ "$mode" = "restart_timeout" ]; then /bin/sleep 20; fi
-  if [ "$mode" != "never_ready" ]; then /usr/bin/touch "$state"; fi
-  exit 0
-fi
-if [ "$1" = "desktop" ] && [ "$2" = "stop" ]; then exit 0; fi
-if [ "$1" = "desktop" ] && [ "$2" = "start" ]; then
-  /usr/bin/touch "$state"
-  exit 0
-fi
-if [ "$1" = "version" ]; then
-  printf '%s\\n' '{"Client":{"Version":"27.3.1"},"Server":{"Version":"27.3.1"}}'
-  exit 0
-fi
-if [ "$1" = "context" ] && [ "$2" = "show" ]; then printf '%s\\n' 'desktop-linux'; exit 0; fi
-if [ "$1" = "context" ] && [ "$2" = "ls" ]; then
-  printf '%s\\n' '{"Name":"desktop-linux","DockerEndpoint":"npipe://desktop"}'
-  printf '%s\\n' '{"Name":"legacy","DockerEndpoint":"tcp://127.0.0.1:2375"}'
-  exit 0
-fi
-if [ "$1" = "compose" ]; then
-  printf '%s\\n' '[{"Name":"bioetl-main","ConfigFiles":"/mnt/e/repo/docker-compose.yml"}]'
-  exit 0
-fi
-if [ "$1" = "ps" ]; then
-  printf '%s\\n' '{"ID":"abc123","Names":"bioetl","Ports":"0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp"}'
-  exit 0
-fi
-if [ "$1" = "inspect" ]; then
-  printf '%s\\n' 'bind|/mnt/e/data|/app/data'
-  exit 0
-fi
-if [ "$1" = "system" ] && [ "$2" = "df" ]; then
-  printf '%s\\n' '{"Type":"Images","Size":"1GB"}'
-  exit 0
-fi
-exit 2
-""",
-        encoding="utf-8",
-    )
-    docker.chmod(0o755)
-    docker_exe = bin_dir / "docker.exe"
-    docker_exe.write_text("#!/bin/sh\nexit 2\n", encoding="utf-8")
-    docker_exe.chmod(0o755)
-    wsl = bin_dir / "wsl.exe"
-    wsl.write_text(
-        """#!/bin/sh
-if [ "$1" = "--status" ]; then printf '%s\\n' 'Default Distribution: Ubuntu'; exit 0; fi
-if [ "$1" = "--list" ]; then printf '%s\\n' 'docker-desktop Running 2'; exit 0; fi
-if [ "$1" = "-d" ]; then
-  printf '%s\\n' 'Filesystem 1B-blocks Used Available Use% Mounted on'
-  printf '%s\\n' '/dev/sdd 20000000000 1000000000 19000000000 6% /var/lib/docker'
-  exit 0
-fi
-exit 2
-""",
-        encoding="utf-8",
-    )
-    wsl.chmod(0o755)
-    return docker
+    docker_py = bin_dir / "fake_docker.py"
+    wsl_py = bin_dir / "fake_wsl.py"
+    docker_py.write_text(_FAKE_DOCKER_PY, encoding="utf-8")
+    wsl_py.write_text(_FAKE_WSL_PY, encoding="utf-8")
+
+    # Primary Windows entry: PATHEXT / Get-Command resolve ``docker`` -> ``.cmd``.
+    _write_cmd_launcher(bin_dir / "docker.cmd", docker_py)
+    # POSIX / Git-Bash entry for non-Windows agents.
+    _write_posix_launcher(bin_dir / "docker", docker_py)
+    # Second distinct origin for ``multiple_cli_origins`` (avoid a non-PE
+    # ``docker.exe`` stub that would shadow CreateProcess on Windows).
+    _write_cmd_launcher(bin_dir / "docker.bat", docker_py)
+
+    _write_cmd_launcher(bin_dir / "wsl.cmd", wsl_py)
+    _write_posix_launcher(bin_dir / "wsl", wsl_py)
+    # Literal ``wsl.exe`` lookups from the recovery script resolve via Get-Command
+    # to ``wsl.cmd`` after the script-side command path resolution fix.
+    _write_cmd_launcher(bin_dir / "wsl.bat", wsl_py)
+    return bin_dir / "docker.cmd"
 
 
 def _run(
@@ -119,9 +208,8 @@ def _run(
     report = tmp_path / "recovery.json"
     state = tmp_path / "ready"
     env = os.environ.copy()
-    env["PATH"] = (
-        f"{bin_dir}{os.pathsep}{env.get('PATH', '')}" if cli_available else str(bin_dir)
-    )
+    # Isolate to the fake bin dir so capability probes never hit a real desktop CLI.
+    env["PATH"] = str(bin_dir)
     env["FAKE_DOCKER_MODE"] = mode
     env["FAKE_DOCKER_STATE"] = str(state)
     env.pop("WSL_DISTRO_NAME", None)
@@ -148,10 +236,18 @@ def _run(
             ]
         )
     started = time.monotonic()
+    # Allow headroom above -TimeoutSeconds 10 for diagnostics + last-resort paths.
     result = subprocess.run(
-        command, env=env, text=True, capture_output=True, timeout=15
+        command, env=env, text=True, capture_output=True, timeout=25
     )
     elapsed = time.monotonic() - started
+    if not report.is_file():
+        raise AssertionError(
+            "recovery report was not written\n"
+            f"returncode={result.returncode}\n"
+            f"stdout={result.stdout}\n"
+            f"stderr={result.stderr}"
+        )
     return result, json.loads(report.read_text(encoding="utf-8-sig")), elapsed
 
 

@@ -76,11 +76,16 @@ def _plans_readme_issues(*, catalog: dict[str, Any], readme_text: str) -> list[s
 
     readme_path = plans.get("readme")
     if readme_path != str(PLANS_README):
-        issues.append("repo_structure_catalog.plans.readme must point to docs/plans/README.md")
+        issues.append(
+            "repo_structure_catalog.plans.readme must point to docs/plans/README.md"
+        )
 
     if "configs/quality/repo_structure_catalog.yaml" not in readme_text:
         issues.append("docs/plans/README.md must reference repo_structure_catalog.yaml")
-    if "Only one tracked plan file may hold lifecycle `active_backlog`." not in readme_text:
+    if (
+        "Only one tracked plan file may hold lifecycle `active_backlog`."
+        not in readme_text
+    ):
         issues.append("docs/plans/README.md must restate the one-active-backlog rule")
 
     allowed_files = plans.get("allowed_files", [])
@@ -92,7 +97,9 @@ def _plans_readme_issues(*, catalog: dict[str, Any], readme_text: str) -> list[s
         if isinstance(entry, dict) and entry.get("lifecycle") == "active_backlog"
     ]
     if len(active_backlog) != 1:
-        issues.append("repo_structure_catalog.plans must declare exactly one active_backlog")
+        issues.append(
+            "repo_structure_catalog.plans must declare exactly one active_backlog"
+        )
     else:
         active_name = Path(active_backlog[0]).name
         if active_name not in readme_text:
@@ -105,7 +112,9 @@ def _plans_readme_issues(*, catalog: dict[str, Any], readme_text: str) -> list[s
 def _ops_index_issues(text: str) -> list[str]:
     issues: list[str] = []
     if "script-codex/" in text or "script-gemini/" in text:
-        issues.append("scripts/ops/INDEX.md must not point to root script-codex/ or script-gemini/ surfaces")
+        issues.append(
+            "scripts/ops/INDEX.md must not point to root script-codex/ or script-gemini/ surfaces"
+        )
     if "scripts/ai/codex/helper/ensure-codex-cli.sh" not in text:
         issues.append(
             "scripts/ops/INDEX.md must point helper guidance to scripts/ai/codex/helper/ensure-codex-cli.sh"
@@ -145,7 +154,9 @@ def _collect_issues(repo_root: Path) -> list[str]:
         for path in missing_zones
     )
 
-    issues.extend(_plans_readme_issues(catalog=policy.catalog, readme_text=plans_readme))
+    issues.extend(
+        _plans_readme_issues(catalog=policy.catalog, readme_text=plans_readme)
+    )
     issues.extend(_ops_index_issues(ops_index))
     return issues
 
@@ -160,7 +171,9 @@ def main(argv: list[str] | None = None) -> int:
             print(f"  - {issue}")
         return 1
 
-    print("[PASS] Root governance docs align with machine-readable governance surfaces.")
+    print(
+        "[PASS] Root governance docs align with machine-readable governance surfaces."
+    )
     return 0
 
 

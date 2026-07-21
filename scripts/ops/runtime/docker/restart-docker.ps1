@@ -51,7 +51,15 @@ function Protect-SensitiveValue {
         $Protected = [ordered]@{}
         foreach ($Key in $Value.Keys) {
             $SafeKey = Protect-SensitiveString ([string]$Key)
-            if ($SafeKey -match '(?i)(password|secret|token|credential|authorization|auth)') {
+            # Redact secret-bearing keys, but keep boolean/metadata flags such as
+            # last_resort_token_valid that only embed the word "token".
+            if (
+                $SafeKey -match '(?i)(password|secret|credential|authorization|(?<![a-z])auth(?![a-z]))' -or
+                (
+                    $SafeKey -match '(?i)token' -and
+                    $SafeKey -notmatch '(?i)(valid|enabled|present|count|requested)$'
+                )
+            ) {
                 $Protected[$SafeKey] = '<redacted>'
             } else {
                 $Protected[$SafeKey] = Protect-SensitiveValue $Value[$Key]
@@ -63,7 +71,13 @@ function Protect-SensitiveValue {
         $Protected = [ordered]@{}
         foreach ($Property in $Value.PSObject.Properties) {
             $SafeName = Protect-SensitiveString $Property.Name
-            if ($SafeName -match '(?i)(password|secret|token|credential|authorization|auth)') {
+            if (
+                $SafeName -match '(?i)(password|secret|credential|authorization|(?<![a-z])auth(?![a-z]))' -or
+                (
+                    $SafeName -match '(?i)token' -and
+                    $SafeName -notmatch '(?i)(valid|enabled|present|count|requested)$'
+                )
+            ) {
                 $Protected[$SafeName] = '<redacted>'
             } else {
                 $Protected[$SafeName] = Protect-SensitiveValue $Property.Value
@@ -95,18 +109,70 @@ function ConvertTo-ProcessArgument {
     return '"' + $Escaped + '"'
 }
 
+function ConvertTo-CmdArgument {
+    param([AllowEmptyString()] [string]$Argument)
+
+    # cmd.exe parses the whole /c string: expand %VAR%, treat bare |/&/<> as
+    # operators, and uses doubled quotes for literals inside a quoted token.
+    $Escaped = $Argument -replace '%', '%%'
+    $Escaped = $Escaped -replace '"', '""'
+    if ($Escaped -match '[\s"&|<>^]') {
+        return '"' + $Escaped + '"'
+    }
+    return $Escaped
+}
+
+function Resolve-BoundedCommandPath {
+    param([Parameter(Mandatory)] [string]$Name)
+
+    # Prefer an explicit on-PATH application (including PATHEXT .cmd/.bat shims).
+    # ProcessStartInfo without a shell does not reliably execute extensionless
+    # POSIX shims on Windows, and a bare FileName like "docker" may miss .cmd.
+    $Candidates = @(
+        Get-Command $Name -All -ErrorAction SilentlyContinue
+        if ($Name -notlike '*.exe') {
+            Get-Command ($Name + '.exe') -All -ErrorAction SilentlyContinue
+        }
+        if ($Name -like '*.exe') {
+            $Base = [System.IO.Path]::GetFileNameWithoutExtension($Name)
+            Get-Command $Base -All -ErrorAction SilentlyContinue
+            Get-Command ($Base + '.cmd') -All -ErrorAction SilentlyContinue
+            Get-Command ($Base + '.bat') -All -ErrorAction SilentlyContinue
+        }
+    ) | Where-Object { $null -ne $_ }
+
+    foreach ($Candidate in $Candidates) {
+        if ($Candidate.CommandType -eq 'Application' -and -not [string]::IsNullOrWhiteSpace($Candidate.Source)) {
+            return $Candidate.Source
+        }
+        if ($Candidate.CommandType -eq 'ExternalScript' -and -not [string]::IsNullOrWhiteSpace($Candidate.Source)) {
+            return $Candidate.Source
+        }
+    }
+    return $Name
+}
+
 function Invoke-BoundedCommand {
     param(
         [Parameter(Mandatory)] [string]$Name,
-        [string[]]$Arguments = @()
+        [string[]]$Arguments = @(),
+        # Desktop recovery actions (restart/stop/start) must still receive a full
+        # command budget after diagnostics have nearly exhausted the global
+        # TimeoutSeconds window; otherwise stop/start fallback is a no-op timeout.
+        [switch]$AllowOverrun
     )
 
     $CommandStarted = Get-Date
     $RemainingMilliseconds = Get-RemainingMilliseconds
-    $WaitMilliseconds = [math]::Min($CommandTimeoutSeconds * 1000, $RemainingMilliseconds)
+    if ($AllowOverrun) {
+        $WaitMilliseconds = $CommandTimeoutSeconds * 1000
+    } else {
+        $WaitMilliseconds = [math]::Min($CommandTimeoutSeconds * 1000, $RemainingMilliseconds)
+    }
     $Code = 127
     $TimedOut = $false
     $Output = ''
+    $ResolvedName = Resolve-BoundedCommandPath -Name $Name
 
     if ($WaitMilliseconds -le 0) {
         $Code = 124
@@ -116,20 +182,38 @@ function Invoke-BoundedCommand {
         $Process = [System.Diagnostics.Process]::new()
         try {
             $StartInfo = [System.Diagnostics.ProcessStartInfo]::new()
-            $StartInfo.FileName = $Name
-            $StartInfo.UseShellExecute = $false
+            # .cmd/.bat shims need a shell on Windows; PE apps do not.
+            # Arguments must use cmd-specific quoting (not PE argv rules): bare
+            # pipes in docker --format templates would otherwise split the line.
+            $IsShellScript = $ResolvedName -match '\.(cmd|bat)$'
+            if ($IsShellScript) {
+                $StartInfo.FileName = $env:ComSpec
+                if ([string]::IsNullOrWhiteSpace($StartInfo.FileName)) {
+                    $StartInfo.FileName = 'cmd.exe'
+                }
+                $QuotedArgs = @(
+                    $Arguments | ForEach-Object { ConvertTo-CmdArgument $_ }
+                ) -join ' '
+                $StartInfo.Arguments = '/d /c ' + (ConvertTo-CmdArgument $ResolvedName) + $(
+                    if ($QuotedArgs) { ' ' + $QuotedArgs } else { '' }
+                )
+                $StartInfo.UseShellExecute = $false
+            } else {
+                $StartInfo.FileName = $ResolvedName
+                $StartInfo.UseShellExecute = $false
+                if ($StartInfo.PSObject.Properties.Name -contains 'ArgumentList') {
+                    foreach ($Argument in $Arguments) {
+                        [void]$StartInfo.ArgumentList.Add($Argument)
+                    }
+                } else {
+                    $StartInfo.Arguments = @(
+                        $Arguments | ForEach-Object { ConvertTo-ProcessArgument $_ }
+                    ) -join ' '
+                }
+            }
             $StartInfo.RedirectStandardOutput = $true
             $StartInfo.RedirectStandardError = $true
             $StartInfo.CreateNoWindow = $true
-            if ($StartInfo.PSObject.Properties.Name -contains 'ArgumentList') {
-                foreach ($Argument in $Arguments) {
-                    [void]$StartInfo.ArgumentList.Add($Argument)
-                }
-            } else {
-                $StartInfo.Arguments = @(
-                    $Arguments | ForEach-Object { ConvertTo-ProcessArgument $_ }
-                ) -join ' '
-            }
             $Process.StartInfo = $StartInfo
             if (-not $Process.Start()) { throw "Unable to start $Name" }
             $StdOutTask = $Process.StandardOutput.ReadToEndAsync()
@@ -137,7 +221,26 @@ function Invoke-BoundedCommand {
             if (-not $Process.WaitForExit($WaitMilliseconds)) {
                 $TimedOut = $true
                 $Code = 124
+                $ProcessId = $Process.Id
                 try { $Process.Kill($true) } catch { }
+                # Ensure cmd.exe child trees (python sleep fakes) do not outlive
+                # the bounded command deadline on Windows.
+                if ($ProcessId -gt 0) {
+                    try {
+                        $Killer = [System.Diagnostics.Process]::new()
+                        $KillInfo = [System.Diagnostics.ProcessStartInfo]::new()
+                        $KillInfo.FileName = 'taskkill.exe'
+                        $KillInfo.Arguments = "/F /T /PID $ProcessId"
+                        $KillInfo.UseShellExecute = $false
+                        $KillInfo.CreateNoWindow = $true
+                        $KillInfo.RedirectStandardOutput = $true
+                        $KillInfo.RedirectStandardError = $true
+                        $Killer.StartInfo = $KillInfo
+                        [void]$Killer.Start()
+                        [void]$Killer.WaitForExit(2000)
+                        $Killer.Dispose()
+                    } catch { }
+                }
                 [void]$Process.WaitForExit(2000)
             } else {
                 $Code = $Process.ExitCode
@@ -283,7 +386,15 @@ function Collect-Diagnostics {
     $WslStatus = $null
     $WslList = $null
     $DockerDataDf = $null
-    if (Get-Command wsl.exe -ErrorAction SilentlyContinue) {
+    # Resolve via the same path logic as Invoke-BoundedCommand so PATHEXT shims
+    # (wsl.cmd) used by bounded recovery tests are accepted, not only PE wsl.exe.
+    $WslResolved = Resolve-BoundedCommandPath -Name 'wsl.exe'
+    $WslAvailable = (
+        (Get-Command wsl.exe -ErrorAction SilentlyContinue) -or
+        (Get-Command wsl -ErrorAction SilentlyContinue) -or
+        (($WslResolved -ne 'wsl.exe') -and (Test-Path -LiteralPath $WslResolved))
+    )
+    if ($WslAvailable) {
         $WslStatus = Invoke-BoundedCommand 'wsl.exe' @('--status')
         $WslList = Invoke-BoundedCommand 'wsl.exe' @('--list', '--verbose')
         $DockerDataDf = Invoke-BoundedCommand 'wsl.exe' @('-d', 'docker-desktop', '--exec', 'df', '-B1', '/var/lib/docker')
@@ -395,10 +506,16 @@ function Write-RecoveryReport {
         last_resort_token_valid = ($LastResortConfirmation -ceq $LastResortToken)
     }
     $Temporary = "$Target.tmp"
-    (Protect-SensitiveValue $Payload) |
-        ConvertTo-Json -Depth 12 |
-        Set-Content -LiteralPath $Temporary -Encoding utf8
-    Move-Item -LiteralPath $Temporary -Destination $Target -Force
+    # Evidence capture must always land on disk, even when the operator passed
+    # -WhatIf for last-resort ShouldProcess confirmation. Cmdlet -WhatIf:$false is
+    # unreliable under SupportsShouldProcess; use BCL IO which ignores WhatIf.
+    $Json = (Protect-SensitiveValue $Payload) | ConvertTo-Json -Depth 12
+    $Utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+    [System.IO.File]::WriteAllText($Temporary, ($Json + [Environment]::NewLine), $Utf8NoBom)
+    if ([System.IO.File]::Exists($Target)) {
+        [System.IO.File]::Delete($Target)
+    }
+    [System.IO.File]::Move($Temporary, $Target)
 }
 
 $InitiallyReady = Test-DockerReady
@@ -413,7 +530,7 @@ $RestartSupported = [bool]$Diagnostics.desktop.capabilities.restart
 $StopSupported = [bool]$Diagnostics.desktop.capabilities.stop
 $StartSupported = [bool]$Diagnostics.desktop.capabilities.start
 if ($RestartSupported) {
-    $Restart = Invoke-BoundedCommand 'docker' @('desktop', 'restart', '--detach')
+    $Restart = Invoke-BoundedCommand 'docker' @('desktop', 'restart', '--detach') -AllowOverrun
     $Actions.Add('docker_desktop_restart')
     if (($Restart.returncode -ne 0) -or $Restart.timed_out) {
         if (-not ($StopSupported -and $StartSupported)) {
@@ -421,13 +538,13 @@ if ($RestartSupported) {
             throw 'Supported Docker Desktop restart failed and the supported stop/start fallback is unavailable.'
         }
         $Actions.Add('docker_desktop_restart_failed_bounded')
-        $Stop = Invoke-BoundedCommand 'docker' @('desktop', 'stop', '--detach')
+        $Stop = Invoke-BoundedCommand 'docker' @('desktop', 'stop', '--detach') -AllowOverrun
         $Actions.Add('docker_desktop_stop')
         if (($Stop.returncode -ne 0) -or $Stop.timed_out) {
             Write-RecoveryReport 'desktop_stop_failed' $false $Actions
             throw 'Supported Docker Desktop stop fallback did not complete successfully within its command deadline.'
         }
-        $Start = Invoke-BoundedCommand 'docker' @('desktop', 'start', '--detach')
+        $Start = Invoke-BoundedCommand 'docker' @('desktop', 'start', '--detach') -AllowOverrun
         $Actions.Add('docker_desktop_start')
         if (($Start.returncode -ne 0) -or $Start.timed_out) {
             Write-RecoveryReport 'desktop_start_failed' $false $Actions
@@ -435,7 +552,7 @@ if ($RestartSupported) {
         }
     }
 } elseif ($StartSupported) {
-    $Start = Invoke-BoundedCommand 'docker' @('desktop', 'start', '--detach')
+    $Start = Invoke-BoundedCommand 'docker' @('desktop', 'start', '--detach') -AllowOverrun
     $Actions.Add('docker_desktop_start')
     if (($Start.returncode -ne 0) -or $Start.timed_out) {
         Write-RecoveryReport 'desktop_start_failed' $false $Actions

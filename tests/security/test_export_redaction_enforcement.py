@@ -38,4 +38,3 @@ def test_unprivileged_export_cannot_disable_redaction() -> None:
             table=table,
             options=ExportOptions(role="viewer", redaction_profile="none"),
         )
-

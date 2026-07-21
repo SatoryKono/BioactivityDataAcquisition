@@ -198,11 +198,11 @@ def test_compare_deployed_dashboards_ignores_benign_export_noise(
             "id": 777,
             "version": 123,
             "panels": [
-                    {
-                        "id": 1000,
-                        "datasource": {"type": "prometheus", "uid": "prometheus"},
-                        "type": "text",
-                        "title": "Review Dashboard Navigation",
+                {
+                    "id": 1000,
+                    "datasource": {"type": "prometheus", "uid": "prometheus"},
+                    "type": "text",
+                    "title": "Review Dashboard Navigation",
                     "pluginVersion": "10.4.0",
                     "links": [
                         {
@@ -360,8 +360,7 @@ def test_check_parity_detects_dashboard_inventory_datasource_drift(
     errors, per_dashboard = inventory._check_parity(inventory._load_inventory())
 
     assert any(
-        "dashboard-inventory: data_sources mismatch for bioetl-overview-v2"
-        in error
+        "dashboard-inventory: data_sources mismatch for bioetl-overview-v2" in error
         for error in errors
     )
     assert "bioetl-overview-v2" in per_dashboard

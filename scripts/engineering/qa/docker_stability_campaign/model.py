@@ -243,7 +243,15 @@ def release_bundle(contract: dict[str, Any]) -> tuple[StackSpec, ...]:
 
 
 def bundle_identity(bundle: Sequence[StackSpec]) -> list[dict[str, Any]]:
-    return [asdict(spec) for spec in bundle]
+    """JSON-stable identity rows (tuples → lists for resume equality after reload)."""
+    rows: list[dict[str, Any]] = []
+    for spec in bundle:
+        row = asdict(spec)
+        for key, value in list(row.items()):
+            if isinstance(value, tuple):
+                row[key] = list(value)
+        rows.append(row)
+    return rows
 
 
 def compose_origin_findings(

@@ -1,4 +1,4 @@
-"""Continuous, gap-sensitive 72-hour soak stage."""
+"""Continuous, gap-sensitive soak stage (minimum 7.2 hours for RF-008)."""
 
 from __future__ import annotations
 

@@ -35,6 +35,7 @@ __all__ = [
     "vacuum_table",
 ]
 
+
 class QuarantineRuntimeServiceProtocol(Protocol):
     """Minimal quarantine runtime-service contract exposed by resource APIs."""
 
@@ -55,12 +56,14 @@ class QuarantineRuntimeServiceProtocol(Protocol):
         """Return aggregate quarantine statistics."""
         ...
 
+
 class CheckpointRuntimeServiceProtocol(Protocol):
     """Minimal checkpoint runtime-service contract exposed by resource APIs."""
 
     def list_all(self) -> Awaitable[list[object]]:
         """List available checkpoints."""
         ...
+
 
 class MedallionLifecycleServiceProtocol(Protocol):
     """Minimal lifecycle service contract used by maintenance entrypoints."""
@@ -85,6 +88,7 @@ class MedallionLifecycleServiceProtocol(Protocol):
         """Archive one table."""
         ...
 
+
 class CleanupPreviewProtocol(Protocol):
     """Minimal preview payload contract for cleanup dry-run operations."""
 
@@ -92,6 +96,7 @@ class CleanupPreviewProtocol(Protocol):
     def total_files(self) -> int:
         """Return the number of files affected by the cleanup."""
         ...
+
 
 class CleanupServiceProtocol(Protocol):
     """Minimal cleanup service contract used by preview entrypoints."""
@@ -104,6 +109,7 @@ class CleanupServiceProtocol(Protocol):
         """Preview cleanup impact for the requested tables."""
         ...
 
+
 def bootstrap_quarantine_runtime_service(pipeline: str) -> object:
     """Resolve the quarantine runtime bootstrap lazily for patch-friendly tests."""
     from bioetl.composition.bootstrap.cli.checkpoint import (
@@ -111,6 +117,7 @@ def bootstrap_quarantine_runtime_service(pipeline: str) -> object:
     )
 
     return impl(pipeline)
+
 
 def bootstrap_checkpoint_runtime_service(pipeline: str) -> object:
     """Resolve the checkpoint runtime bootstrap lazily for patch-friendly tests."""
@@ -120,6 +127,7 @@ def bootstrap_checkpoint_runtime_service(pipeline: str) -> object:
 
     return impl(pipeline)
 
+
 def bootstrap_lifecycle_service() -> object:
     """Resolve the lifecycle bootstrap lazily for patch-friendly tests."""
     from bioetl.composition.bootstrap.cli.storage import (
@@ -127,6 +135,7 @@ def bootstrap_lifecycle_service() -> object:
     )
 
     return impl()
+
 
 def bootstrap_cleanup_service() -> CleanupServiceProtocol:
     """Resolve the cleanup bootstrap lazily for patch-friendly tests."""
@@ -136,6 +145,7 @@ def bootstrap_cleanup_service() -> CleanupServiceProtocol:
 
     return impl()
 
+
 def load_pipeline_config(pipeline: str) -> PipelineYamlConfig:
     """Resolve pipeline config loading lazily for patch-friendly tests."""
     from bioetl.infrastructure.config.pipeline_config_api import (
@@ -143,6 +153,7 @@ def load_pipeline_config(pipeline: str) -> PipelineYamlConfig:
     )
 
     return impl(pipeline)
+
 
 def _bootstrap_registered_resource[**_P, _T](
     bootstrap_fn: Callable[_P, _T],
@@ -153,6 +164,7 @@ def _bootstrap_registered_resource[**_P, _T](
     """Run registration bootstrap before delegating to a resource builder."""
     _ensure_registrations()
     return bootstrap_fn(*args, **kwargs)
+
 
 def get_quarantine_runtime_service(pipeline: str) -> QuarantineRuntimeServiceProtocol:
     """Get the quarantine runtime service for the given pipeline.
@@ -174,6 +186,7 @@ def get_quarantine_runtime_service(pipeline: str) -> QuarantineRuntimeServicePro
         _bootstrap_registered_resource(bootstrap_quarantine_runtime_service, pipeline),
     )
 
+
 def get_checkpoint_runtime_service(pipeline: str) -> CheckpointRuntimeServiceProtocol:
     """Get the checkpoint runtime service for the given pipeline.
 
@@ -194,6 +207,7 @@ def get_checkpoint_runtime_service(pipeline: str) -> CheckpointRuntimeServicePro
         _bootstrap_registered_resource(bootstrap_checkpoint_runtime_service, pipeline),
     )
 
+
 def get_lifecycle_service() -> MedallionLifecycleServiceProtocol:
     """Get the lifecycle service for maintenance operations.
 
@@ -211,6 +225,7 @@ def get_lifecycle_service() -> MedallionLifecycleServiceProtocol:
         _bootstrap_registered_resource(bootstrap_lifecycle_service),
     )
 
+
 async def vacuum_table(table: str, options: VacuumOptions) -> int:
     """Vacuum a Delta table to reclaim storage space.
 
@@ -226,12 +241,12 @@ async def vacuum_table(table: str, options: VacuumOptions) -> int:
         >>> files_removed = await vacuum_table("chembl.activity", options)
     """
     service = get_lifecycle_service()
-    result: int = await service.vacuum(
+    return await service.vacuum(
         table=table,
         retention_days=options.retention_days,
         dry_run=options.dry_run,
     )
-    return result
+
 
 async def archive_table(table: str, options: ArchiveOptions) -> int:
     """Archive a Delta table to cold storage.
@@ -248,12 +263,12 @@ async def archive_table(table: str, options: ArchiveOptions) -> int:
         >>> files_archived = await archive_table("chembl.activity", options)
     """
     service = get_lifecycle_service()
-    result: int = await service.archive(
+    return await service.archive(
         table=table,
         target_path=options.target_path,
         remove_source=options.remove_source,
     )
-    return result
+
 
 async def preview_cleanup(pipeline: str) -> CleanupPreviewProtocol:
     """Preview what data would be cleared for a pipeline.
@@ -286,6 +301,7 @@ async def preview_cleanup(pipeline: str) -> CleanupPreviewProtocol:
         gold_table=gold_table,
     )
 
+
 async def inspect_quarantine(
     pipeline: str, limit: int = 100
 ) -> list[JsonDict]:  # Any: quarantine record has heterogeneous values
@@ -313,6 +329,7 @@ async def inspect_quarantine(
     )  # Any: factory wiring; concrete types resolved at runtime
     return records
 
+
 async def list_checkpoints(pipeline: str) -> list[str]:
     """List all checkpoints for a pipeline.
 
@@ -330,5 +347,4 @@ async def list_checkpoints(pipeline: str) -> list[str]:
         ['checkpoint_2024_01_15', 'checkpoint_2024_01_16']
     """
     runtime_service = get_checkpoint_runtime_service(pipeline)
-    checkpoints = cast(list[str], await runtime_service.list_all())
-    return checkpoints
+    return cast(list[str], await runtime_service.list_all())

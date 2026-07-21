@@ -21,7 +21,9 @@ def test_tests_do_not_reintroduce_hardcoded_network_drive_skips() -> None:
     offenders: list[str] = []
     this_file = Path(__file__).resolve()
     # Exclude token validation helpers which legitimately skip on Windows
-    excluded_file = "tests/unit/repo_backed/scripts/ai/mcp/test_token_validation_helpers.py"
+    excluded_file = (
+        "tests/unit/repo_backed/scripts/ai/mcp/test_token_validation_helpers.py"
+    )
 
     for test_file in TESTS_DIR.rglob("test_*.py"):
         if test_file.resolve() == this_file:

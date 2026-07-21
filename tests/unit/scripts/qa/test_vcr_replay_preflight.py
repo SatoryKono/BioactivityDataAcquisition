@@ -38,9 +38,7 @@ def test_collect_vcr_replay_preflight_reports_exact_lfs_pointer_paths(
     cassette_dir.mkdir(parents=True)
     pointer = cassette_dir / "provider_contract_case.yaml"
     pointer.write_text(
-        "version https://git-lfs.github.com/spec/v1\n"
-        "oid sha256:abc\n"
-        "size 123\n",
+        "version https://git-lfs.github.com/spec/v1\noid sha256:abc\nsize 123\n",
         encoding="utf-8",
     )
     (cassette_dir / "provider_contract_case_meta.yaml").write_text(
@@ -68,7 +66,9 @@ def test_collect_vcr_replay_preflight_accepts_clean_catalog_and_secret_filter(
 ) -> None:
     cassette_dir = tmp_path / "tests" / "fixtures" / "vcr" / "pubchem"
     cassette_dir.mkdir(parents=True)
-    (cassette_dir / "test_health.yaml").write_text("interactions: []\n", encoding="utf-8")
+    (cassette_dir / "test_health.yaml").write_text(
+        "interactions: []\n", encoding="utf-8"
+    )
     (cassette_dir / "test_health_meta.yaml").write_text(
         "managed_inventory: true\n",
         encoding="utf-8",

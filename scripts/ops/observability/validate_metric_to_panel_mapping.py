@@ -7,13 +7,13 @@ Addresses OBS-002: Metric-to-Panel Mapping Runtime Proof Gap
 import argparse
 import json
 import sys
-from dataclasses import dataclass, asdict
-from datetime import datetime, UTC
+from dataclasses import asdict, dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
 from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
 from urllib.parse import quote
+from urllib.request import Request, urlopen
 
 # Configuration
 DEFAULT_PROMETHEUS_URL = "http://localhost:9090"
@@ -21,9 +21,11 @@ DEFAULT_DASHBOARD_DIR = Path("grafana/dashboards")
 DEFAULT_OUTPUT_DIR = Path("reports/observability/metric-panel-validation")
 DEFAULT_TIMEOUT = 5.0
 
+
 @dataclass
 class MetricPanelValidationResult:
     """Result of metric-to-panel validation."""
+
     dashboard_uid: str
     panel_id: int
     panel_title: str
@@ -37,18 +39,22 @@ class MetricPanelValidationResult:
         if not self.timestamp:
             self.timestamp = datetime.now(tz=UTC).isoformat()
 
+
 @dataclass
 class MetricPanelValidationReport:
     """Complete metric-to-panel validation report."""
+
     prometheus_url: str
     timestamp: str
     results: list[MetricPanelValidationResult]
     summary: dict[str, Any]
 
+
 def _fetch_json(url: str, timeout: float) -> dict[str, Any]:
     """Fetch JSON from URL."""
     with urlopen(url, timeout=timeout) as response:
         return json.loads(response.read().decode("utf-8"))
+
 
 def get_prometheus_metrics(prometheus_url: str, timeout: float) -> set[str]:
     """Get all metric names from Prometheus."""
@@ -61,41 +67,109 @@ def get_prometheus_metrics(prometheus_url: str, timeout: float) -> set[str]:
     except Exception:
         return set()
 
+
 def extract_metrics_from_promql(expr: str) -> list[str]:
     """Extract metric names from PromQL expression."""
     import re
+
     # Simple extraction - match metric name patterns
     # This is a basic implementation; full PromQL parsing would be more complex
-    metric_pattern = r'\b[a-zA-Z_][a-zA-Z0-9_]*\b'
+    metric_pattern = r"\b[a-zA-Z_][a-zA-Z0-9_]*\b"
     potential_metrics = re.findall(metric_pattern, expr)
 
     # Filter out PromQL keywords and functions
     keywords = {
-        'sum', 'avg', 'min', 'max', 'count', 'rate', 'irate', 'increase',
-        'by', 'without', 'group_left', 'group_right', 'offset', 'at',
-        'and', 'or', 'unless', 'label_replace', 'label_join',
-        'vector', 'matrix', 'scalar', 'string', 'on', 'ignoring', 'group',
-        'clamp_max', 'clamp_min', 'abs', 'sqrt', 'exp', 'ln', 'log2', 'log10',
-        'hour', 'minute', 'month', 'year', 'day', 'day_of_month', 'day_of_week',
-        'days_in_month', 'delta', 'idelta', 'predict_linear', 'holt_winters',
-        'quantile', 'topk', 'bottomk', 'resets', 'changes', 'deriv',
-        'bool', 'float', 'int'  # Type conversion functions
+        "sum",
+        "avg",
+        "min",
+        "max",
+        "count",
+        "rate",
+        "irate",
+        "increase",
+        "by",
+        "without",
+        "group_left",
+        "group_right",
+        "offset",
+        "at",
+        "and",
+        "or",
+        "unless",
+        "label_replace",
+        "label_join",
+        "vector",
+        "matrix",
+        "scalar",
+        "string",
+        "on",
+        "ignoring",
+        "group",
+        "clamp_max",
+        "clamp_min",
+        "abs",
+        "sqrt",
+        "exp",
+        "ln",
+        "log2",
+        "log10",
+        "hour",
+        "minute",
+        "month",
+        "year",
+        "day",
+        "day_of_month",
+        "day_of_week",
+        "days_in_month",
+        "delta",
+        "idelta",
+        "predict_linear",
+        "holt_winters",
+        "quantile",
+        "topk",
+        "bottomk",
+        "resets",
+        "changes",
+        "deriv",
+        "bool",
+        "float",
+        "int",  # Type conversion functions
     }
 
     # Also filter out common label names and values
     label_names = {
-        'job', 'instance', '__name__', 'alertstate', 'alertname', 'severity',
-        'pipeline', 'run_type', 'stage', 'status', 'step_kind', 'step_status',
-        'provider', 'adapter', 'workflow', 'error_type', 'reason_code'
+        "job",
+        "instance",
+        "__name__",
+        "alertstate",
+        "alertname",
+        "severity",
+        "pipeline",
+        "run_type",
+        "stage",
+        "status",
+        "step_kind",
+        "step_status",
+        "provider",
+        "adapter",
+        "workflow",
+        "error_type",
+        "reason_code",
     }
 
-    metrics = [m for m in potential_metrics if m not in keywords and m not in label_names and not m.isdigit()]
-    return list(set(metrics))
+    metrics = [
+        m
+        for m in potential_metrics
+        if m not in keywords and m not in label_names and not m.isdigit()
+    ]
+    return sorted(set(metrics))
+
 
 def load_dashboard(dashboard_path: Path) -> dict[str, Any]:
     """Load dashboard JSON."""
-    with open(dashboard_path, 'r', encoding='utf-8') as f:
+    with open(dashboard_path, "r", encoding="utf-8") as f:
         return json.load(f)
+
 
 def extract_panel_metrics(panel: dict[str, Any]) -> list[str]:
     """Extract metrics from a panel's targets."""
@@ -105,13 +179,11 @@ def extract_panel_metrics(panel: dict[str, Any]) -> list[str]:
         if expr:
             panel_metrics = extract_metrics_from_promql(expr)
             metrics.extend(panel_metrics)
-    return list(set(metrics))
+    return sorted(set(metrics))
+
 
 def validate_metric_exists(
-    metric_name: str,
-    prometheus_metrics: set[str],
-    prometheus_url: str,
-    timeout: float
+    metric_name: str, prometheus_metrics: set[str], prometheus_url: str, timeout: float
 ) -> tuple[bool, str]:
     """Validate if a metric exists in Prometheus."""
     if metric_name in prometheus_metrics:
@@ -125,16 +197,19 @@ def validate_metric_exists(
         if data.get("status") == "success":
             result_type = data.get("data", {}).get("resultType")
             results = data.get("data", {}).get("result", [])
-            if results or result_type in ("vector", "matrix", "scalar"):
-                return True, f"Metric {metric_name} queryable (resultType: {result_type})"
+            # Empty successful vector/matrix is "not found", not "queryable".
+            if results:
+                return (
+                    True,
+                    f"Metric {metric_name} queryable (resultType: {result_type})",
+                )
         return False, f"Metric {metric_name} not found in Prometheus"
     except Exception as e:
         return False, f"Metric {metric_name} query failed: {e}"
 
+
 def validate_panel_query(
-    panel: dict[str, Any],
-    prometheus_url: str,
-    timeout: float
+    panel: dict[str, Any], prometheus_url: str, timeout: float
 ) -> tuple[bool, str]:
     """Validate if a panel's query returns data."""
     for target in panel.get("targets", []):
@@ -155,11 +230,15 @@ def validate_panel_query(
                 results = result_data.get("result", [])
 
                 if results:
-                    return True, f"Query returned {len(results)} results (resultType: {result_type})"
-                else:
-                    return False, f"Query returned no results (resultType: {resultType})"
-            else:
-                return False, f"Query failed: {data.get('error', 'Unknown error')}"
+                    return (
+                        True,
+                        f"Query returned {len(results)} results (resultType: {result_type})",
+                    )
+                return (
+                    False,
+                    f"Query returned no results (resultType: {result_type})",
+                )
+            return False, f"Query failed: {data.get('error', 'Unknown error')}"
         except KeyError as e:
             return False, f"Query execution failed: missing key in response ({e})"
         except Exception as e:
@@ -167,11 +246,12 @@ def validate_panel_query(
 
     return False, "No valid queries found in panel"
 
+
 def validate_dashboard_metric_mapping(
     dashboard_path: Path,
     prometheus_metrics: set[str],
     prometheus_url: str,
-    timeout: float
+    timeout: float,
 ) -> list[MetricPanelValidationResult]:
     """Validate metric-to-panel mapping for a single dashboard."""
     results = []
@@ -195,14 +275,16 @@ def validate_dashboard_metric_mapping(
 
                 if not panel_metrics:
                     # Panels without explicit metrics (e.g., text panels)
-                    results.append(MetricPanelValidationResult(
-                        dashboard_uid=dashboard_uid,
-                        panel_id=panel_id,
-                        panel_title=panel_title,
-                        metric_name="N/A",
-                        status="skip",
-                        message="Panel has no PromQL metrics (text/row panel)"
-                    ))
+                    results.append(
+                        MetricPanelValidationResult(
+                            dashboard_uid=dashboard_uid,
+                            panel_id=panel_id,
+                            panel_title=panel_title,
+                            metric_name="N/A",
+                            status="skip",
+                            message="Panel has no PromQL metrics (text/row panel)",
+                        )
+                    )
                     process_panels(panel.get("panels", []))
                     continue
 
@@ -212,56 +294,68 @@ def validate_dashboard_metric_mapping(
                         metric_name, prometheus_metrics, prometheus_url, timeout
                     )
 
-                    results.append(MetricPanelValidationResult(
-                        dashboard_uid=dashboard_uid,
-                        panel_id=panel_id,
-                        panel_title=panel_title,
-                        metric_name=metric_name,
-                        status="pass" if exists else "fail",
-                        message=message,
-                        details={"metric_exists": exists}
-                    ))
+                    results.append(
+                        MetricPanelValidationResult(
+                            dashboard_uid=dashboard_uid,
+                            panel_id=panel_id,
+                            panel_title=panel_title,
+                            metric_name=metric_name,
+                            status="pass" if exists else "fail",
+                            message=message,
+                            details={"metric_exists": exists},
+                        )
+                    )
 
                 # Validate panel query execution (skip if contains template variables or Loki queries)
                 has_template_vars = any(
                     "$" in target.get("expr", "") for target in panel.get("targets", [])
                 )
                 datasource = panel.get("datasource", {})
-                datasource_type = datasource.get("type", "") if isinstance(datasource, dict) else ""
+                datasource_type = (
+                    datasource.get("type", "") if isinstance(datasource, dict) else ""
+                )
                 is_loki_query = datasource_type.lower() == "loki"
 
                 if not has_template_vars and not is_loki_query:
-                    query_valid, query_message = validate_panel_query(panel, prometheus_url, timeout)
+                    query_valid, query_message = validate_panel_query(
+                        panel, prometheus_url, timeout
+                    )
 
-                    results.append(MetricPanelValidationResult(
-                        dashboard_uid=dashboard_uid,
-                        panel_id=panel_id,
-                        panel_title=panel_title,
-                        metric_name="query_execution",
-                        status="pass" if query_valid else "fail",
-                        message=query_message,
-                        details={"query_valid": query_valid}
-                    ))
+                    results.append(
+                        MetricPanelValidationResult(
+                            dashboard_uid=dashboard_uid,
+                            panel_id=panel_id,
+                            panel_title=panel_title,
+                            metric_name="query_execution",
+                            status="pass" if query_valid else "fail",
+                            message=query_message,
+                            details={"query_valid": query_valid},
+                        )
+                    )
                 elif is_loki_query:
-                    results.append(MetricPanelValidationResult(
-                        dashboard_uid=dashboard_uid,
-                        panel_id=panel_id,
-                        panel_title=panel_title,
-                        metric_name="query_execution",
-                        status="skip",
-                        message="Panel uses Loki datasource, skipping Prometheus query validation",
-                        details={"datasource_type": "loki"}
-                    ))
+                    results.append(
+                        MetricPanelValidationResult(
+                            dashboard_uid=dashboard_uid,
+                            panel_id=panel_id,
+                            panel_title=panel_title,
+                            metric_name="query_execution",
+                            status="skip",
+                            message="Panel uses Loki datasource, skipping Prometheus query validation",
+                            details={"datasource_type": "loki"},
+                        )
+                    )
                 else:
-                    results.append(MetricPanelValidationResult(
-                        dashboard_uid=dashboard_uid,
-                        panel_id=panel_id,
-                        panel_title=panel_title,
-                        metric_name="query_execution",
-                        status="skip",
-                        message="Panel contains template variables, skipping query validation",
-                        details={"has_template_vars": True}
-                    ))
+                    results.append(
+                        MetricPanelValidationResult(
+                            dashboard_uid=dashboard_uid,
+                            panel_id=panel_id,
+                            panel_title=panel_title,
+                            metric_name="query_execution",
+                            status="skip",
+                            message="Panel contains template variables, skipping query validation",
+                            details={"has_template_vars": True},
+                        )
+                    )
 
                 # Process nested panels
                 process_panels(panel.get("panels", []))
@@ -269,22 +363,23 @@ def validate_dashboard_metric_mapping(
         process_panels(dashboard.get("panels", []))
 
     except Exception as e:
-        results.append(MetricPanelValidationResult(
-            dashboard_uid=dashboard_path.stem,
-            panel_id=0,
-            panel_title="dashboard_load_error",
-            metric_name="N/A",
-            status="fail",
-            message=f"Failed to load dashboard: {e}",
-            details={"error": str(e)}
-        ))
+        results.append(
+            MetricPanelValidationResult(
+                dashboard_uid=dashboard_path.stem,
+                panel_id=0,
+                panel_title="dashboard_load_error",
+                metric_name="N/A",
+                status="fail",
+                message=f"Failed to load dashboard: {e}",
+                details={"error": str(e)},
+            )
+        )
 
     return results
 
+
 def run_metric_panel_validation(
-    prometheus_url: str,
-    dashboard_dir: Path,
-    timeout: float
+    prometheus_url: str, dashboard_dir: Path, timeout: float
 ) -> MetricPanelValidationReport:
     """Run complete metric-to-panel validation."""
 
@@ -321,42 +416,41 @@ def run_metric_panel_validation(
         "success_rate": f"{(passed / total * 100):.1f}%" if total > 0 else "0%",
         "total_dashboards": len(dashboard_stats),
         "dashboard_stats": dashboard_stats,
-        "total_prometheus_metrics": len(prometheus_metrics)
+        "total_prometheus_metrics": len(prometheus_metrics),
     }
 
     return MetricPanelValidationReport(
         prometheus_url=prometheus_url,
         timestamp=datetime.now(tz=UTC).isoformat(),
         results=all_results,
-        summary=summary
+        summary=summary,
     )
+
 
 def main():
     parser = argparse.ArgumentParser(
         description="Validate metric-to-panel mapping for BioETL dashboards (OBS-002)"
     )
     parser.add_argument(
-        "--prometheus-url",
-        default=DEFAULT_PROMETHEUS_URL,
-        help="Prometheus base URL"
+        "--prometheus-url", default=DEFAULT_PROMETHEUS_URL, help="Prometheus base URL"
     )
     parser.add_argument(
         "--dashboard-dir",
         type=Path,
         default=DEFAULT_DASHBOARD_DIR,
-        help="Dashboard directory"
+        help="Dashboard directory",
     )
     parser.add_argument(
         "--timeout",
         type=float,
         default=DEFAULT_TIMEOUT,
-        help="Request timeout in seconds"
+        help="Request timeout in seconds",
     )
     parser.add_argument(
         "--output-dir",
         type=Path,
         default=DEFAULT_OUTPUT_DIR,
-        help="Output directory for validation report"
+        help="Output directory for validation report",
     )
 
     args = parser.parse_args()
@@ -373,7 +467,7 @@ def main():
     report = run_metric_panel_validation(
         prometheus_url=args.prometheus_url,
         dashboard_dir=args.dashboard_dir,
-        timeout=args.timeout
+        timeout=args.timeout,
     )
 
     # Print results
@@ -383,9 +477,11 @@ def main():
     print(f"Total dashboards validated: {report.summary['total_dashboards']}")
     print()
 
-    for dashboard_uid, stats in report.summary['dashboard_stats'].items():
+    for dashboard_uid, stats in report.summary["dashboard_stats"].items():
         print(f"Dashboard {dashboard_uid}:")
-        print(f"  Passed: {stats['pass']}, Failed: {stats['fail']}, Skipped: {stats['skip']}")
+        print(
+            f"  Passed: {stats['pass']}, Failed: {stats['fail']}, Skipped: {stats['skip']}"
+        )
 
     print()
     print("Summary:")
@@ -408,7 +504,10 @@ def main():
             print(f"  ... and {len(failed_results) - 10} more failures")
 
     # Save report
-    report_path = args.output_dir / f"metric-panel-report-{datetime.now(tz=UTC).strftime('%Y%m%d-%H%M%S')}.json"
+    report_path = (
+        args.output_dir
+        / f"metric-panel-report-{datetime.now(tz=UTC).strftime('%Y%m%d-%H%M%S')}.json"
+    )
     with open(report_path, "w") as f:
         json.dump(asdict(report), f, indent=2, default=str)
 
@@ -419,6 +518,7 @@ def main():
         sys.exit(1)
     else:
         sys.exit(0)
+
 
 if __name__ == "__main__":
     main()

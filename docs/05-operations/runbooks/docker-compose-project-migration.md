@@ -187,6 +187,14 @@ following:
    Linux-filesystem only. Paths under `/tmp`, `/mnt/*`, and Windows drive
    letters (`E:\`, …) are unsupported and fail preflight/finalize.
 
+Operator helpers for recreate / restore observation (supporting cutover tools):
+
+```bash
+python scripts/ops/runtime/docker/recreate_cutover_stacks.py
+python scripts/ops/runtime/docker/_rf017_recreate_once.py
+python scripts/ops/runtime/docker/_rf017_restore_and_observe.py
+```
+
 Finalize with:
 
 ```bash

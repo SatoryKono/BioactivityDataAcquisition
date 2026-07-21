@@ -54,10 +54,16 @@ def main() -> int:
         except OSError as e:
             # Пропускаем файлы с слишком длинными путями (Windows limitation)
             skipped_files.append(str(file_path))
-            print(f"Warning: Skipping file due to path error: {file_path}", file=sys.stderr)
+            print(
+                f"Warning: Skipping file due to path error: {file_path}",
+                file=sys.stderr,
+            )
 
     if skipped_files:
-        print(f"Warning: Skipped {len(skipped_files)} files due to path errors", file=sys.stderr)
+        print(
+            f"Warning: Skipped {len(skipped_files)} files due to path errors",
+            file=sys.stderr,
+        )
 
     if all_violations:
         print("Docs drift detected:", file=sys.stderr)

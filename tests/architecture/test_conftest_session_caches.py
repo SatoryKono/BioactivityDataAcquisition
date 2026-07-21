@@ -32,6 +32,39 @@ def test_build_text_cache_reads_utf8_files_and_skips_invalid_bytes(
     assert cache == {readable: "value = 1\n"}
 
 
+def test_list_markdown_files_via_walk_skips_site_build_tree(tmp_path: Path) -> None:
+    """MkDocs ``site/`` trees must not be walked (timeout source on cloud drives)."""
+    docs = tmp_path / "docs"
+    (docs / "guide").mkdir(parents=True)
+    keep = docs / "guide" / "a.md"
+    keep.write_text("# a\n", encoding="utf-8")
+
+    site_nested = docs / "site" / "deep" / "nested"
+    site_nested.mkdir(parents=True)
+    (site_nested / "index.html").write_text("<html></html>", encoding="utf-8")
+    # Even a stray .md under site must be ignored because the dir is pruned.
+    (site_nested / "noise.md").write_text("# noise\n", encoding="utf-8")
+
+    found = architecture_conftest._list_markdown_files_via_walk(docs)
+
+    assert found == [keep]
+
+
+def test_list_markdown_files_via_git_returns_none_outside_repo(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    docs = tmp_path / "docs"
+    docs.mkdir()
+    (docs / "a.md").write_text("# a\n", encoding="utf-8")
+
+    # Isolate Git discovery from any parent repository (e.g. workspace root).
+    monkeypatch.setenv("GIT_CEILING_DIRECTORIES", str(tmp_path))
+
+    assert architecture_conftest._list_markdown_files_via_git(docs) is None
+    assert architecture_conftest._list_markdown_files(docs) == [docs / "a.md"]
+
+
 def test_build_ast_cache_skips_syntax_errors(tmp_path: Path) -> None:
     valid = tmp_path / "valid.py"
     invalid = tmp_path / "invalid.py"

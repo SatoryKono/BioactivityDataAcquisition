@@ -87,7 +87,9 @@ def test_registry_discovery_binds_subprocess_to_checkout(
     (repo_root / "src").mkdir(parents=True)
     captured: dict[str, object] = {}
 
-    def fake_run(command: tuple[str, ...], **kwargs: object) -> subprocess.CompletedProcess[str]:
+    def fake_run(
+        command: tuple[str, ...], **kwargs: object
+    ) -> subprocess.CompletedProcess[str]:
         captured.update(kwargs)
         stdout = "Available pipelines:\n" + "".join(
             f"  - {pipeline}\n" for pipeline in campaign.CHEMBL_PIPELINES

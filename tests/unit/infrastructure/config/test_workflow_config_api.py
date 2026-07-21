@@ -345,9 +345,10 @@ def test_workflow_run_options_whitelist_matches_application_run_options() -> Non
         "workflow_run_id",
         "workflow_step_id",
     }
-    assert RUN_OPTIONS_OVERRIDE_FIELD_NAMES == {
-        field.name for field in fields(RunOptions)
-    } - internal_correlation_fields
+    assert (
+        RUN_OPTIONS_OVERRIDE_FIELD_NAMES
+        == {field.name for field in fields(RunOptions)} - internal_correlation_fields
+    )
 
 
 @pytest.mark.unit

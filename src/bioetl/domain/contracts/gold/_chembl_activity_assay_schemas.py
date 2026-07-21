@@ -126,9 +126,7 @@ class ChEMBLAssayGoldSchema(StrictGoldContractSchema):
     """Schema for ChEMBL Assay in Gold layer."""
 
     entity_id: Series[str] = pa.Field(nullable=False, str_matches=r"^.+$")
-    content_hash: Series[str] = pa.Field(
-        nullable=False, str_matches=r"^[a-f0-9]{64}$"
-    )
+    content_hash: Series[str] = pa.Field(nullable=False, str_matches=r"^[a-f0-9]{64}$")
     assay_id: Series[str] = pa.Field(nullable=False, str_matches=r"^.+$")
     target_id: Series[str] = pa.Field(nullable=True)
     publication_id: Series[str] = pa.Field(nullable=True)

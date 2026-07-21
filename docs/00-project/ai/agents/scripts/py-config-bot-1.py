@@ -100,8 +100,7 @@ def _validate_contract_alignment(
     elif (
         isinstance(business_keys, list)
         and isinstance(contract_pk, list)
-        and sorted(str(v) for v in business_keys)
-        != sorted(str(v) for v in contract_pk)
+        and sorted(str(v) for v in business_keys) != sorted(str(v) for v in contract_pk)
     ):
         medium.append(
             "Mismatch between pipeline.business_primary_keys and contracts.primary_key"

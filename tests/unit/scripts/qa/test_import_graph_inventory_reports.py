@@ -69,8 +69,7 @@ retained_entrypoints:
 """,
     )
     _write(
-        tmp_path
-        / "docs/02-architecture/07-compatibility-facade-inventory.md",
+        tmp_path / "docs/02-architecture/07-compatibility-facade-inventory.md",
         "| Path | Compatibility role | Canonical target | Status | Owner | "
         "Introduced in | Allowed call sites | Review date | Migration path | "
         "Exit criteria |\n"
@@ -117,8 +116,7 @@ def test_compatibility_metadata_consistency_reports_cross_artifact_drift(
 ) -> None:
     census_payload = _write_compatibility_metadata_fixture(tmp_path)
     inventory_doc = (
-        tmp_path
-        / "docs/02-architecture/07-compatibility-facade-inventory.md"
+        tmp_path / "docs/02-architecture/07-compatibility-facade-inventory.md"
     )
     _write(
         inventory_doc,

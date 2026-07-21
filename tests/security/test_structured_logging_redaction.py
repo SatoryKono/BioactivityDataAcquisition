@@ -29,4 +29,3 @@ def test_log_processor_recursively_redacts_keys_bearer_and_prefixed_tokens() -> 
         assert secret not in serialized
     assert filtered["run_id"] == "123e4567-e89b-12d3-a456-426614174000"
     assert "[REDACTED" in serialized
-

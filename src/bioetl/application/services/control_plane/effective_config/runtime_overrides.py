@@ -25,7 +25,9 @@ from bioetl.domain.control_plane.reproducibility_policy import (
 )
 from bioetl.domain.types import JsonDict
 
-ALLOWLISTED_SEMANTIC_ENV_OVERRIDE_KEYS: frozenset[str] = frozenset({"execution_environment"})
+ALLOWLISTED_SEMANTIC_ENV_OVERRIDE_KEYS: frozenset[str] = frozenset(
+    {"execution_environment"}
+)
 _EXPLICIT_DATA_DIR_SENTINEL = "<explicit-data-dir>"
 _CACHED_BRONZE_PATH_SENTINEL = "<cached-bronze-path>"
 
@@ -48,7 +50,9 @@ def apply_runtime_overrides(base_config: JsonDict, overrides: JsonDict) -> JsonD
     return effective_config
 
 
-def coerce_runtime_override_layer(runtime_overrides: JsonDict, layer_name: str) -> JsonDict:
+def coerce_runtime_override_layer(
+    runtime_overrides: JsonDict, layer_name: str
+) -> JsonDict:
     layer_overrides = runtime_overrides.get(layer_name, {})
     if layer_overrides is None:
         return {}
@@ -92,7 +96,9 @@ def validate_runtime_environment_provenance(
         )
 
 
-def build_runtime_override_snapshot(runtime_overrides: JsonDict) -> RuntimeOverrideSnapshot:
+def build_runtime_override_snapshot(
+    runtime_overrides: JsonDict,
+) -> RuntimeOverrideSnapshot:
     return RuntimeOverrideSnapshot(
         cli_overrides=coerce_runtime_override_layer(runtime_overrides, "cli"),
         env_overrides=coerce_runtime_override_layer(runtime_overrides, "env"),
@@ -107,7 +113,9 @@ def _normalized_settings_snapshot_hash(settings_snapshot: JsonDict) -> str:
     return f"sha256:{stable_hash(snapshot_payload)}"
 
 
-def _normalize_settings_snapshot_for_semantic_identity(settings_snapshot: JsonDict) -> str:
+def _normalize_settings_snapshot_for_semantic_identity(
+    settings_snapshot: JsonDict,
+) -> str:
     settings = settings_snapshot.get("settings")
     if isinstance(settings, dict) and settings.get("data_root_mode") == "explicit":
         data_dir = settings.get("data_dir")
@@ -127,7 +135,9 @@ def _normalize_cached_bronze_surface_for_semantic_identity(candidate: JsonDict) 
         cached_bronze["bronze_path"] = _CACHED_BRONZE_PATH_SENTINEL
 
 
-def normalize_runtime_overrides_for_semantic_identity(runtime_overrides: JsonDict) -> JsonDict:
+def normalize_runtime_overrides_for_semantic_identity(
+    runtime_overrides: JsonDict,
+) -> JsonDict:
     """Drop machine-local path variance from semantic replay identity inputs."""
     normalized = copy.deepcopy(runtime_overrides)
 
@@ -173,7 +183,9 @@ def build_execution_environment_snapshot(
     env_materialized = isinstance(execution_environment, dict) and bool(
         execution_environment
     )
-    semantic_dependencies = () if env_materialized else semantic_runtime_env_dependencies()
+    semantic_dependencies = (
+        () if env_materialized else semantic_runtime_env_dependencies()
+    )
     ambient_environment_policy = (
         MATERIALIZED_EXECUTION_ENVIRONMENT_POLICY
         if env_materialized

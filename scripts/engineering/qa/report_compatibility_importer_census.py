@@ -484,10 +484,7 @@ def validate_compatibility_metadata_consistency(
         artifact_name="compatibility registry",
     )
     inventory_doc_rows = _load_inventory_doc_rows(
-        repo_root
-        / "docs"
-        / "02-architecture"
-        / "07-compatibility-facade-inventory.md"
+        repo_root / "docs" / "02-architecture" / "07-compatibility-facade-inventory.md"
     )
     expected_census_rows = _expected_census_rows(retained_rows)
     census_rows = _index_metadata_rows(
@@ -1011,7 +1008,9 @@ def build_compatibility_importer_census(
             "tracked_twin_family_count": len(tracked_twin_rows),
             "config_root_symbol_count": len(config_symbol_rows),
             "config_root_src_importer_count": len(config_src_usage),
-            "control_plane_root_src_importer_count": len(control_plane_root_usage["src"]),
+            "control_plane_root_src_importer_count": len(
+                control_plane_root_usage["src"]
+            ),
             "retained_public_export_facade_count": len(retained_public_export_rows),
             "retained_public_export_facades_with_duplicate_exports": sum(
                 1
@@ -1343,8 +1342,7 @@ def main() -> int:
             return 1
         if not md_out.exists():
             print(
-                "[compatibility-importer-census] missing Markdown artifact: "
-                f"{md_out}"
+                f"[compatibility-importer-census] missing Markdown artifact: {md_out}"
             )
             return 1
         if json_out.read_text(encoding="utf-8") != rendered_json:

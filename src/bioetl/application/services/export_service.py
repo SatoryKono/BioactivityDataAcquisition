@@ -141,7 +141,9 @@ class ExportService:
         """
         table_path = self._get_table_path(table_name, layer)
 
-        table_path_ref = table_path if isinstance(table_path, str) else table_path.as_posix()
+        table_path_ref = (
+            table_path if isinstance(table_path, str) else table_path.as_posix()
+        )
         schema = await self.reader.get_schema(table_path_ref)
         if not isinstance(schema, _PreviewSchema):
             raise TypeError("Delta reader returned a non-iterable preview schema")
@@ -185,7 +187,9 @@ class ExportService:
         table_path = self._get_table_path(table_name, layer)
 
         try:
-            table_path_str = table_path if isinstance(table_path, str) else table_path.as_posix()
+            table_path_str = (
+                table_path if isinstance(table_path, str) else table_path.as_posix()
+            )
             if not await self.reader.table_exists(table_path_str):
                 return self._create_missing_table_result(
                     table_name=table_name,

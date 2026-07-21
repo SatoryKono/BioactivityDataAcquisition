@@ -334,7 +334,9 @@ def resolve_latest_gold_contract_path(
         if contracts_dir is not None
         else REPO_ROOT / "docs" / "04-reference" / "contracts" / "gold"
     )
-    pattern = re.compile(rf"^{re.escape(pipeline)}_v(?P<major>\d+)\.(?P<minor>\d+)\.json$")
+    pattern = re.compile(
+        rf"^{re.escape(pipeline)}_v(?P<major>\d+)\.(?P<minor>\d+)\.json$"
+    )
     candidates: list[tuple[tuple[int, int], Path]] = []
     for path in contracts_root.glob(f"{pipeline}_v*.json"):
         match = pattern.match(path.name)

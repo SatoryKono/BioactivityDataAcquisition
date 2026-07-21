@@ -16,7 +16,12 @@ ROOT = Path(__file__).resolve().parents[2]
 DASHBOARD_DIR = ROOT / "grafana" / "dashboards"
 ALLOWLIST_PATH = ROOT / "configs" / "quality" / "dashboard_promql_scope_allowlist.yaml"
 DASHBOARD_INVENTORY_PATH = (
-    ROOT / "docs" / "03-guides" / "dashboards" / "contracts" / "dashboard-inventory.yaml"
+    ROOT
+    / "docs"
+    / "03-guides"
+    / "dashboards"
+    / "contracts"
+    / "dashboard-inventory.yaml"
 )
 
 _DQ_VERDICT_RATIO_RE = re.compile(

@@ -276,8 +276,7 @@ def test_issue_5838_root_docker_adjuncts_are_reviewed_and_evidence_backed() -> N
 
     assert DOCKER_RELOCATION_AUDIT.exists()
     assert (
-        set(outcome["reviewed_root_docker_surfaces"])
-        - SUPERSEDED_DOCKER_SURFACES
+        set(outcome["reviewed_root_docker_surfaces"]) - SUPERSEDED_DOCKER_SURFACES
         == DOCKER_ROOT_SURFACES
     )
 

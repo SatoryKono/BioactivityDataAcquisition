@@ -93,8 +93,6 @@ def test_issue_6022_generated_artifact_coherence_gates_pass() -> None:
     )
 
 
-
-
 def test_issue_6023_dependency_map_has_runtime_headroom() -> None:
     closeout = _load_json(CLOSEOUT)
     dependency_map = _load_json(DEPENDENCY_MAP)

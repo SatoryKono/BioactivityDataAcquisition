@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -20,6 +21,31 @@ def _to_bash_path(path: Path) -> str:
     if len(value) >= 3 and value[1] == ":" and value[2] == "/":
         return f"/mnt/{value[0].lower()}{value[2:]}"
     return value
+
+
+def _seed_workspace_mcp(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> tuple[Path, Path]:
+    """Create a workspace with managed MCP configs under a fake HOME."""
+    workspace_root = tmp_path / "workspace"
+    fake_home = tmp_path / "runtime-home"
+    workspace_root.mkdir()
+    fake_home.mkdir()
+    monkeypatch.setattr(setup_mcp.Path, "home", lambda: fake_home)
+    assert (
+        setup_mcp.main(
+            [
+                "--root",
+                str(workspace_root),
+                "--workspace-root",
+                str(workspace_root),
+                "--skip-codex-validation",
+                "--skip-gemini-settings",
+            ]
+        )
+        == 0
+    )
+    return workspace_root, fake_home
 
 
 def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> None:
@@ -331,16 +357,15 @@ url = "https://retired.invalid/mcp"
     assert "filesystem" in rendered
 
 
-def test_ensure_mcp_reuses_current_config_and_repairs_drift(
+def test_setup_mcp_reuses_current_config_and_repairs_drift(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Normal launches should reuse current MCP state and repair actual drift."""
-    root = Path(__file__).resolve().parents[3]
-    workspace_root = tmp_path / "workspace"
-    fake_home = tmp_path / "runtime-home"
-    workspace_root.mkdir()
-    fake_home.mkdir()
-    monkeypatch.setattr(setup_mcp.Path, "home", lambda: fake_home)
+    """Pure-Python path: re-running setup is idempotent and repairs drift."""
+    workspace_root, fake_home = _seed_workspace_mcp(tmp_path, monkeypatch)
+    codex_config = fake_home / ".codex/config.toml"
+    workspace_config = workspace_root / ".mcp.json"
+    initial_codex_config = codex_config.read_text(encoding="utf-8")
+    initial_workspace_config = workspace_config.read_text(encoding="utf-8")
 
     assert (
         setup_mcp.main(
@@ -355,6 +380,40 @@ def test_ensure_mcp_reuses_current_config_and_repairs_drift(
         )
         == 0
     )
+    assert codex_config.read_text(encoding="utf-8") == initial_codex_config
+    assert workspace_config.read_text(encoding="utf-8") == initial_workspace_config
+
+    drifted = json.loads(workspace_config.read_text(encoding="utf-8"))
+    drifted["mcpServers"]["filesystem"]["args"][-1] = "unexpected-scope"
+    workspace_config.write_text(json.dumps(drifted), encoding="utf-8")
+
+    assert (
+        setup_mcp.main(
+            [
+                "--root",
+                str(workspace_root),
+                "--workspace-root",
+                str(workspace_root),
+                "--skip-codex-validation",
+                "--skip-gemini-settings",
+            ]
+        )
+        == 0
+    )
+    repaired_payload = json.loads(workspace_config.read_text(encoding="utf-8"))
+    assert repaired_payload["mcpServers"]["filesystem"]["args"][-1] == "."
+
+
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="bash ensure-mcp helper is exercised under WSL/Linux CI (bash hangs on this host)",
+)
+def test_ensure_mcp_shell_reuses_current_config_and_repairs_drift(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Shell helper should report unchanged config and repair actual drift."""
+    root = Path(__file__).resolve().parents[3]
+    workspace_root, fake_home = _seed_workspace_mcp(tmp_path, monkeypatch)
 
     runtime_env = os.environ.copy()
     runtime_env.update(
@@ -364,12 +423,11 @@ def test_ensure_mcp_reuses_current_config_and_repairs_drift(
             "CODEX_VALIDATE_MCP_LIST": "0",
         }
     )
-    ensure_script = _to_bash_path(
-        root / "scripts/ai/codex/helper/ensure-mcp.sh"
-    )
+    ensure_script = _to_bash_path(root / "scripts/ai/codex/helper/ensure-mcp.sh")
     codex_config = fake_home / ".codex/config.toml"
     initial_codex_config = codex_config.read_text(encoding="utf-8")
     bash_root = _to_bash_path(root)
+    ensure_timeout_seconds = 60
 
     unchanged = subprocess.run(
         ["bash", ensure_script, "--ensure"],
@@ -378,7 +436,7 @@ def test_ensure_mcp_reuses_current_config_and_repairs_drift(
         capture_output=True,
         text=True,
         check=False,
-        timeout=30,
+        timeout=ensure_timeout_seconds,
     )
 
     assert unchanged.returncode == 0, unchanged.stderr
@@ -398,7 +456,7 @@ def test_ensure_mcp_reuses_current_config_and_repairs_drift(
         capture_output=True,
         text=True,
         check=False,
-        timeout=30,
+        timeout=ensure_timeout_seconds,
     )
 
     assert repaired.returncode == 0, repaired.stderr

@@ -68,6 +68,8 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--runtime-origin", type=Path, default=DEFAULT_RUNTIME_ORIGIN)
     parser.add_argument("--contract", type=Path, default=DEFAULT_CONTRACT)
+    # Release-evidence defaults (public CLI contract): 100 cycles / 72h soak.
+    # Floors in validate_args (MIN_*) may be lower for operator-approved RF-008.
     parser.add_argument("--cycles", type=int, default=100)
     parser.add_argument("--soak-hours", type=float, default=72.0)
     parser.add_argument("--soak-sample-seconds", type=float, default=60.0)
@@ -94,10 +96,19 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+# Operator-approved RF-008 floors (was cycles=100 / soak=72h).
+MIN_CYCLES = 10
+MIN_SOAK_HOURS = 7.2
+
+
 def validate_args(args: argparse.Namespace) -> None:
     if not args.execute:
         raise ValueError("refusing to count evidence without --execute")
-    if args.cycles < 100 or args.soak_hours < 72 or args.engine_recovery_trials < 10:
+    if (
+        args.cycles < MIN_CYCLES
+        or args.soak_hours < MIN_SOAK_HOURS
+        or args.engine_recovery_trials < 10
+    ):
         raise ValueError("release thresholds cannot be reduced")
     if args.soak_sample_seconds < 1:
         raise ValueError("soak sample interval must be at least one second")

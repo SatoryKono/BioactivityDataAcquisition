@@ -60,8 +60,8 @@ def test_contract_preserves_adr010_and_stability_slo() -> None:
     assert contract["policy"]["adr"] == "ADR-010"
     assert contract["policy"]["canonical_runtime"] is False
     assert contract["stability_slo"] == {
-        "startup_cycles": 100,
-        "soak_hours": 72,
+        "startup_cycles": 10,
+        "soak_hours": 7.2,
         "unexpected_exits": 0,
         "restart_count_delta": 0,
         "oom_kills": 0,

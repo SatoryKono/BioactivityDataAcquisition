@@ -119,11 +119,15 @@ def categorize_branch(name: str) -> str:
         return "agent-reports"
     if re.match(r"^(codex|claude|copilot|devin|jules|agent|ai-|fedor/)", name):
         return "agent-other"
-    if re.match(r"^(main|master)[_-]20\d{6}", name) or re.match(r"^(main|master)-20\d{6}", name):
+    if re.match(r"^(main|master)[_-]20\d{6}", name) or re.match(
+        r"^(main|master)-20\d{6}", name
+    ):
         return "dated-snapshot"
     if name.startswith("dependabot/"):
         return "dependabot"
-    if re.match(r"^(feat|fix|feature|chore|issue|docs|consolidate|security-fix)/", name):
+    if re.match(
+        r"^(feat|fix|feature|chore|issue|docs|consolidate|security-fix)/", name
+    ):
         return "feature-fix"
     return "other"
 

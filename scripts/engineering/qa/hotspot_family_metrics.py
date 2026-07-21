@@ -101,7 +101,11 @@ def iter_family_python_files(*, path_prefixes: list[str]) -> list[Path]:
 def _tracked_family_python_files(*, path_prefixes: list[str]) -> list[Path] | None:
     """Return tracked Python files for the family, or None if git is unavailable."""
     normalized_prefixes = sorted(
-        {prefix.strip() for prefix in path_prefixes if isinstance(prefix, str) and prefix.strip()}
+        {
+            prefix.strip()
+            for prefix in path_prefixes
+            if isinstance(prefix, str) and prefix.strip()
+        }
     )
     if not normalized_prefixes:
         return []
@@ -140,9 +144,8 @@ def count_total_loc(*, files: list[Path]) -> int:
 
 def _is_type_checking_guard(test: ast.AST) -> bool:
     """Return whether an AST test is ``if TYPE_CHECKING``."""
-    return (
-        (isinstance(test, ast.Name) and test.id == TYPE_CHECKING_NAME)
-        or (isinstance(test, ast.Attribute) and test.attr == TYPE_CHECKING_NAME)
+    return (isinstance(test, ast.Name) and test.id == TYPE_CHECKING_NAME) or (
+        isinstance(test, ast.Attribute) and test.attr == TYPE_CHECKING_NAME
     )
 
 
@@ -177,9 +180,8 @@ def _is_facade_only_statement(node: ast.AST) -> bool:
                 _is_facade_only_statement(child) and not isinstance(child, ast.If)
                 for child in node.body
             )
-        return (
-            all(_is_facade_only_statement(child) for child in node.body)
-            and all(_is_facade_only_statement(child) for child in node.orelse)
+        return all(_is_facade_only_statement(child) for child in node.body) and all(
+            _is_facade_only_statement(child) for child in node.orelse
         )
     if isinstance(node, ast.If):
         body_ok = all(
@@ -205,7 +207,9 @@ def _is_import_facade_file(*, path: Path, source: str | None = None) -> bool:
         return False
 
     try:
-        tree = ast.parse(source if source is not None else path.read_text(encoding="utf-8"))
+        tree = ast.parse(
+            source if source is not None else path.read_text(encoding="utf-8")
+        )
     except SyntaxError:
         return False
 
@@ -234,7 +238,9 @@ def _is_import_facade_file(*, path: Path, source: str | None = None) -> bool:
     return import_count >= 1
 
 
-def _is_schema_or_field_definition_file(*, path: Path, source: str | None = None) -> bool:
+def _is_schema_or_field_definition_file(
+    *, path: Path, source: str | None = None
+) -> bool:
     """Heuristic classifier for schema/field definition modules."""
     if path.suffix != ".py":
         return False
@@ -267,7 +273,9 @@ def _is_schema_or_field_definition_file(*, path: Path, source: str | None = None
 
 def _is_loccap_excluded(*, path: Path, source: str | None = None) -> bool:
     """Return whether the module is excluded from 250 LOC family-growth checks."""
-    return _is_import_facade_file(path=path, source=source) or _is_schema_or_field_definition_file(
+    return _is_import_facade_file(
+        path=path, source=source
+    ) or _is_schema_or_field_definition_file(
         path=path,
         source=source,
     )

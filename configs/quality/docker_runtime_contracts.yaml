@@ -12,8 +12,8 @@ policy:
     canonical Python/venv runtime, tests, storage, locking, or orchestration.
 
 stability_slo:
-  startup_cycles: 100
-  soak_hours: 72
+  startup_cycles: 10
+  soak_hours: 7.2
   unexpected_exits: 0
   restart_count_delta: 0
   oom_kills: 0

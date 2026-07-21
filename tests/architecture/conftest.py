@@ -74,6 +74,20 @@ def _effective_subprocess_timeout(timeout: float | None) -> float | None:
     return timeout
 
 
+# Directories that must never be descended into when collecting docs markdown.
+# ``site`` is the local MkDocs HTML build (``docs/site/``, gitignored) and can
+# contain hundreds of non-markdown files; walking it on cloud-synced Windows
+# checkouts routinely blows the default 60s pytest timeout during fixture setup.
+_DOCS_MARKDOWN_WALK_SKIP_DIRNAMES = frozenset(
+    {
+        "__pycache__",
+        ".git",
+        ".worktrees",
+        "site",
+    }
+)
+
+
 def _list_python_files(root: Path) -> list[Path]:
     """Collect Python files under ``root`` faster than ``Path.rglob`` on /mnt/*."""
     python_files: list[Path] = []
@@ -90,16 +104,76 @@ def _list_python_files(root: Path) -> list[Path]:
     return sorted(python_files)
 
 
-def _list_markdown_files(root: Path) -> list[Path]:
-    """Collect Markdown files under ``root`` faster than ``Path.rglob`` on /mnt/*."""
+def _list_markdown_files_via_git(root: Path) -> list[Path] | None:
+    """Return tracked ``*.md`` under ``root`` via git, or ``None`` on failure.
+
+    Prefer this over a full filesystem walk so local generated trees such as
+    ``docs/site`` are never enumerated. Paths are joined without per-file
+    ``exists()``/``resolve()`` probes (those are extremely expensive on
+    cloud-synced drives and were a prior timeout source).
+    """
+    if not root.exists():
+        return []
+
+    try:
+        probe = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=10,
+            cwd=str(root),
+        )
+        if probe.returncode != 0:
+            return None
+        git_root = Path(probe.stdout.strip())
+        try:
+            rel_root = root.resolve().relative_to(git_root.resolve()).as_posix()
+        except ValueError:
+            return None
+
+        result = subprocess.run(
+            ["git", "-C", str(git_root), "ls-files", "-z", "--", rel_root],
+            capture_output=True,
+            check=False,
+            timeout=30,
+        )
+        if result.returncode != 0:
+            return None
+
+        markdown_files: list[Path] = []
+        for entry in result.stdout.split(b"\0"):
+            if not entry.endswith(b".md"):
+                continue
+            rel = entry.decode("utf-8", errors="surrogateescape")
+            markdown_files.append(git_root / rel)
+        return sorted(markdown_files)
+    except (FileNotFoundError, subprocess.TimeoutExpired, OSError, ValueError):
+        return None
+
+
+def _list_markdown_files_via_walk(root: Path) -> list[Path]:
+    """Filesystem walk fallback that prunes generated/build directories."""
     markdown_files: list[Path] = []
     for current_root, dirnames, filenames in os.walk(root):
-        dirnames[:] = [dirname for dirname in dirnames if dirname != "__pycache__"]
+        dirnames[:] = [
+            dirname
+            for dirname in dirnames
+            if dirname not in _DOCS_MARKDOWN_WALK_SKIP_DIRNAMES
+        ]
         current_path = Path(current_root)
         for filename in filenames:
             if filename.endswith(".md"):
                 markdown_files.append(current_path / filename)
     return sorted(markdown_files)
+
+
+def _list_markdown_files(root: Path) -> list[Path]:
+    """Collect Markdown files under ``root`` faster than ``Path.rglob`` on /mnt/*."""
+    git_listed = _list_markdown_files_via_git(root)
+    if git_listed is not None:
+        return git_listed
+    return _list_markdown_files_via_walk(root)
 
 
 def _cache_worker_count(total_files: int) -> int:

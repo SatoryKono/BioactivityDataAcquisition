@@ -24,6 +24,7 @@ def test_resolve_link_maps_wsl_absolute_repo_alias_on_windows(
     monkeypatch,
 ) -> None:
     """WSL-style absolute links should resolve when PROJECT_ROOT is Windows-style."""
+
     class FakeRoot:
         def resolve(self) -> FakeRoot:
             return self

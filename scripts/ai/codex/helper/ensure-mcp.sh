@@ -54,6 +54,7 @@ check_workspace_mcp_config() {
 import json
 import os
 import re
+import shutil
 import sys
 from pathlib import Path
 
@@ -84,7 +85,7 @@ memory_env = servers.get("memory", {}).get("env", {})
 if memory_env.get("MEMORY_FILE_PATH") != "docs/00-project/ai/memory/mcp-memory.json":
     errors.append("memory file path must be repo-relative docs/00-project/ai/memory/mcp-memory.json")
 
-suffix = ".ps1" if os.name == "nt" else ".sh"
+expected_wrapper_suffixes = (".sh", ".ps1")
 wrapper_stems = {
     "github": "github-mcp-wrapper",
     "docker": "mcp_docker_wrapper",
@@ -103,6 +104,13 @@ wrapper_stems = {
     "code-analyzer": "mcp_code_analyzer_wrapper",
     "github-actions": "mcp_github_actions_wrapper",
 }
+def is_command_available(command: str) -> bool:
+    if re.match(r"^[A-Za-z]:[\\/]", command):
+        return True
+    if "/" in command or "\\" in command:
+        return Path(command).exists()
+    return shutil.which(command) is not None
+
 removed_server_names = {
     "sonarqube",
     "chembl",
@@ -123,9 +131,13 @@ if retired_present:
 
 for server_name, stem in wrapper_stems.items():
     args = servers.get(server_name, {}).get("args", [])
-    expected = f"scripts/ai/mcp/{stem}{suffix}"
-    if not args or args[0] != expected:
-        errors.append(f"{server_name} wrapper must be {expected!r}")
+    command = str(servers.get(server_name, {}).get("command", "")).strip()
+    expected = tuple(f"scripts/ai/mcp/{stem}{suffix}" for suffix in expected_wrapper_suffixes)
+    if not args or args[0] not in expected:
+        allowed = " or ".join(repr(path) for path in expected)
+        errors.append(f"{server_name} wrapper must be one of: {allowed}")
+    if command and not is_command_available(command):
+        errors.append(f"{server_name} wrapper command is not on PATH: {command!r}")
 
 portable_path_values = [
     str(filesystem_args[-1]) if filesystem_args else "",
@@ -219,16 +231,23 @@ validate_codex_mcp_list() {
 }
 
 current_config_is_ready() {
-    local check_args=(--check)
-    if [[ -n "${CODEX_BIN}" ]]; then
-        check_args+=(--codex-bin "${CODEX_BIN}")
-    fi
-
-    # Keep the cheap structural check separate from the optional live Codex
-    # validation. A transient CLI/server failure must not trigger a config
-    # rewrite when the persisted files are already valid.
-    CODEX_VALIDATE_MCP_LIST=0 timeout 15 bash "${BASH_SOURCE[0]}" \
-        "${check_args[@]}" >/dev/null 2>&1
+    # Run structural checks in-process (subshell) instead of re-execing this
+    # script. Nested `timeout 15 bash --check` + later `timeout 15 python setup`
+    # easily exhausts a 30s pytest budget on slow/WSL filesystems, and
+    # re-exec doubles Python/import cold-start cost for no benefit.
+    # Live Codex CLI validation stays opt-in via validate_codex_mcp_list.
+    (
+        check_workspace_mcp_config "${REPO_ROOT}/.mcp.json"
+        check_workspace_mcp_config "${REPO_ROOT}/scripts/ai/.mcp.json"
+        check_workspace_mcp_config "${REPO_ROOT}/.vscode/mcp.json"
+        if [[ -f "${REPO_ROOT}/.cursor/mcp.json" ]]; then
+            check_workspace_mcp_config "${REPO_ROOT}/.cursor/mcp.json"
+        fi
+        check_workspace_mcp_config "${REPO_ROOT}/.qodo/mcp.json"
+        check_workspace_mcp_config "${REPO_ROOT}/.zed/mcp.json"
+        check_workspace_mcp_config "${REPO_ROOT}/.devin/config.json"
+        check_codex_config
+    ) >/dev/null 2>&1
 }
 
 if [[ ! -f "${SETUP_MCP}" ]]; then
@@ -259,7 +278,9 @@ esac
 if [[ "${SHOULD_GENERATE}" -eq 1 ]]; then
     # Bound regeneration and skip the potentially slow live CLI check here;
     # the structural checks below still fail closed on incomplete output.
-    timeout 15 python3 "${SETUP_MCP}" \
+    # 30s: WSL mounts of Windows drives pay high Python cold-start cost.
+    local_setup_timeout="${CODEX_MCP_SETUP_TIMEOUT:-30}"
+    timeout "${local_setup_timeout}" python3 "${SETUP_MCP}" \
         --root "${REPO_ROOT}" \
         --workspace-root "${REPO_ROOT}" \
         --skip-codex-validation \
