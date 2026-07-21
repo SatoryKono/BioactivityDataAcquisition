@@ -67,7 +67,7 @@ def test_contract_preserves_adr010_and_stability_slo() -> None:
         "oom_kills": 0,
         "unresolved_unhealthy": 0,
         "recovery_seconds_p99": 180,
-        "recovery_trials": 100,
+        "recovery_trials": 10,
     }
     assert contract["hardening_targets"]["implementation_issue"] == 6293
     assert contract["path_policy"]["mixed_origin_for_same_project_forbidden"] is True

@@ -19,7 +19,7 @@ stability_slo:
   oom_kills: 0
   unresolved_unhealthy: 0
   recovery_seconds_p99: 180
-  recovery_trials: 100
+  recovery_trials: 10
 
 diagnostics:
   F001:

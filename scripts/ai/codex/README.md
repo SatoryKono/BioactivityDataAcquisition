@@ -94,7 +94,7 @@ bash run-codex.sh "analyze the code"
 .\run-codex.ps1 check             # Check setup
 .\run-codex.ps1 setup             # Install missing components
 .\run-codex.ps1 mcp-check         # Check MCP configuration
-.\run-codex.ps1 mcp-setup         # Sync MCP configuration
+.\run-codex.ps1 mcp-setup         # Force-refresh MCP configuration
 .\run-codex.ps1 login             # Login with API key
 .\run-codex.ps1 device-login      # Device auth login
 .\headless.ps1 exec "prompt"      # Launch without MCP sync
@@ -110,7 +110,7 @@ bash run-codex.sh exec "prompt"   # Auto-exec mode
 bash run-codex.sh check           # Check setup
 bash run-codex.sh setup           # Install missing components
 bash run-codex.sh mcp-check       # Check MCP configuration
-bash run-codex.sh mcp-setup       # Sync MCP configuration
+bash run-codex.sh mcp-setup       # Force-refresh MCP configuration
 bash run-codex.sh login           # Login with API key
 bash run-codex.sh device-login    # Device auth login
 bash headless.sh exec "prompt"    # Launch without MCP sync
@@ -121,7 +121,7 @@ bash diagnose_wsl.sh              # Run WSL diagnostics
 
 1. **Check** - Validates the WSL/Bash environment and the managed Codex CLI path
 1. **Setup** (if needed) - Installs missing components through the repo-local helper flow
-1. **MCP sync before launch** - Regenerates `.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`, `.qodo/mcp.json`, `.codex/settings.json`, `.devin/config.json`, and the Codex-native `~/.codex/config.toml` MCP block
+1. **MCP verification before launch** - Reuses current MCP files and regenerates `.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`, `.qodo/mcp.json`, `.codex/settings.json`, `.devin/config.json`, and the Codex-native `~/.codex/config.toml` MCP block only when state is missing or stale
 1. **Launch** - Runs Codex from the repo root with the managed Codex CLI
 
 Codex does not read the workspace `.mcp.json` directly. The launcher keeps `~/.codex/config.toml` synchronized so Codex starts with the repository MCP servers configured.

@@ -54,7 +54,7 @@ bash run-codex.sh exec "fix the failing test"
 | `check` | Diagnostic | Verify environment setup |
 | `setup` | Maintenance | Install missing components |
 | `mcp-check` | Config | Check MCP server configuration |
-| `mcp-setup` | Config | Synchronize MCP configs |
+| `mcp-setup` | Config | Force-refresh MCP configs |
 | `login` | Auth | Authenticate with API key |
 | `device-login` | Auth | Authenticate with device code |
 

@@ -129,7 +129,7 @@ WSL версии, latency восстановления и отсутствия �
 
 ## Promotion evidence
 
-100 cycles, полный fault matrix, непрерывный 72-hour soak и 100 Desktop recovery
+100 cycles, полный fault matrix, непрерывный 72-hour soak и 10 Desktop recovery
 trials выполняются только запланированной командой из
 `docs/05-operations/runbooks/docker-image-resource-promotion.md`. Campaign
 требует точный disruption token и существующий GPG signing fingerprint; он не

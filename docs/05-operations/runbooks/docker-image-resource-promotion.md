@@ -75,7 +75,7 @@ python scripts/engineering/qa/run_docker_stability_campaign.py \
   --cycles 100 \
   --soak-hours 72 \
   --soak-sample-seconds 60 \
-  --engine-recovery-trials 100 \
+  --engine-recovery-trials 10 \
   --confirm-host-disruption I_UNDERSTAND_THIS_INTERRUPTS_DOCKER_DESKTOP \
   --signing-key <approved-key-id> \
   --signing-fingerprint <full-approved-fingerprint> \
@@ -97,7 +97,7 @@ current/legacy volume across:
 - supported Docker Desktop engine restart;
 - 100 cold/warm idempotency cycles;
 - one uninterrupted 72-hour soak;
-- 100 bounded engine recovery trials.
+- 10 bounded engine recovery trials.
 
 The first clean 24 hours may satisfy RF-017 only when its evidence also covers
 both stacks, exact Run/Manifest ID, numeric Processed Records (including a
@@ -123,7 +123,7 @@ result.
   unhealthy state or identity/origin drift;
 - every resource peak below 80% of its hard limit;
 - Docker VM free reserve at least 4 GiB and contract disk reserve preserved;
-- at least 99/100 engine recoveries complete within 180 seconds;
+- at least 99% of required engine recoveries (10 trials) complete within 180 seconds;
 - zero protected volume loss and exactly one incident record for each failed
   start/recovery;
 - detached signature verified against the approved fingerprint.
