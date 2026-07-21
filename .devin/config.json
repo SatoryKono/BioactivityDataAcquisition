@@ -156,13 +156,5 @@
       "type": "http",
       "url": "https://api.ref.tools/mcp"
     }
-  },
-  "version": 2,
-  "devin": {
-    "org_id": "org-5fa73a1fb0e845a0aa91127d0615fc44"
-  },
-  "shell": {
-    "setup_complete": true
-  },
-  "theme_mode": "light"
+  }
 }

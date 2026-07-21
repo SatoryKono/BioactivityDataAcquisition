@@ -17,15 +17,21 @@ if command -v uvx &> /dev/null; then
 elif command -v python3 &> /dev/null; then
     UV_CMD="python3 -m uv"
 else
-    echo "Error: Neither uvx nor python3 with uv module found" >&2
-    exit 1
+    UV_CMD=""
 fi
 
 UV_CACHE_DIR="${UV_CACHE_DIR:-${REPO_ROOT}/.cache/uv-cache}"
 UV_TOOL_DIR="${UV_TOOL_DIR:-${REPO_ROOT}/.cache/uv-tools}"
 export UV_CACHE_DIR UV_TOOL_DIR
+export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-${REPO_ROOT}/.cache/npm-cache}"
 
 # Code analyzer configuration
 export PROJECT_PATH="${REPO_ROOT}"
 
-exec ${UV_CMD} mcp-server-analyzer --stdio
+if [[ -n "${UV_CMD}" ]]; then
+  if ${UV_CMD} mcp-server-analyzer --stdio "$@"; then
+    exit 0
+  fi
+fi
+
+exec npx -y @modelcontextprotocol/server-analyzer --stdio "$@"

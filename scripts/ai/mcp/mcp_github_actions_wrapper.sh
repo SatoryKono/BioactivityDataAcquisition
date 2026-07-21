@@ -10,6 +10,7 @@ export BIOETL_SKIP_ENV_LOCAL=1
 source "${SCRIPT_DIR}/support/load_repo_env.sh"
 load_repo_env_if_present
 unset BIOETL_SKIP_ENV_LOCAL
+export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-${REPO_ROOT}/.cache/npm-cache}"
 
 # GitHub Actions MCP configuration
 # Check if local installation exists

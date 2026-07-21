@@ -76,6 +76,58 @@ def test_subprocess_timeout_is_bounded_evidence(
     assert "timed out" in result["stderr"]
 
 
+def test_observe_docker_vm_reserve_accepts_busybox_df_pk(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Docker Desktop uses BusyBox df without GNU --output=avail."""
+    calls: list[list[str]] = []
+
+    def fake_run(
+        command: list[str],
+        timeout: float,
+        *,
+        cwd: Path,
+    ) -> dict[str, object]:
+        del timeout, cwd
+        calls.append(list(command))
+        path = command[-1]
+        if path == "/var/lib/docker":
+            return {
+                "returncode": 1,
+                "stdout": "",
+                "stderr": "df: /var/lib/docker: can't find mount point",
+                "timed_out": False,
+                "command": list(command),
+                "duration_seconds": 0.01,
+            }
+        if path == "/mnt/docker-desktop-disk":
+            return {
+                "returncode": 0,
+                "stdout": (
+                    "Filesystem           1024-blocks    Used Available Capacity Mounted on\n"
+                    "/dev/sde             1055762868  29502808 972556588   3% "
+                    "/mnt/docker-desktop-disk\n"
+                ),
+                "stderr": "",
+                "timed_out": False,
+                "command": list(command),
+                "duration_seconds": 0.02,
+            }
+        raise AssertionError(command)
+
+    monkeypatch.setattr(commands, "run_command", fake_run)
+    state: dict[str, object] = {}
+    result = commands.observe_docker_vm_reserve(state, tmp_path)
+
+    assert result["returncode"] == 0
+    assert result["free_bytes"] == 972556588 * 1024
+    assert state["docker_vm_min_free_bytes"] == 972556588 * 1024
+    assert state.get("docker_vm_reserve_breaches", 0) == 0
+    assert any("--output=avail" not in call for call in calls)
+    assert any("df" in call and "-Pk" in call for call in calls)
+    assert commands._parse_df_pk_available_kib("Avail\nnot-a-row\n") is None
+
+
 def test_command_evidence_redacts_split_secret_value(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -125,8 +177,18 @@ def test_fault_matrix_covers_every_required_case_once() -> None:
     cases = faults.build_fault_cases()
 
     assert tuple(case.name for case in cases) == model.FAULT_CASE_NAMES
-    assert all(case.max_seconds <= 180 for case in cases)
+    # Desktop restart + dual-stack recover needs more than the historical 180s
+    # case budget, but must remain a hard upper bound (not open-ended).
+    assert all(case.max_seconds <= 480 for case in cases)
     assert all(operation.expected for case in cases for operation in case.observe)
+    recover_ops = [
+        operation
+        for case in cases
+        for operation in (*case.apply, *case.observe, *case.restore)
+        if operation.kind == "recover"
+    ]
+    assert recover_ops
+    assert all(operation.max_seconds >= 120 for operation in recover_ops)
 
 
 class _FakeFaultExecutor:
