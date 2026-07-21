@@ -9,21 +9,61 @@ on:
     paths:
       - 'Dockerfile.bioetl'
       - 'docker-compose*.yml'
-      - 'scripts/ops/runtime/docker/compose/*.yml'
+      - 'scripts/ops/runtime/docker/**'
+      - 'scripts/engineering/qa/docker_stability_campaign/**'
+      - 'scripts/engineering/qa/run_docker_stability_campaign.py'
+      - 'configs/quality/docker_runtime_contracts.yaml'
+      - 'tests/architecture/test_docker_runtime_contracts.py'
+      - 'tests/unit/repo_backed/scripts/ops/docker/**'
+      - 'tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py'
       - '.dockerignore'
+      - '.github/workflows/docker.yml'
   pull_request:
     branches: [ main, master, develop ]
     paths:
       - 'Dockerfile.bioetl'
       - 'docker-compose*.yml'
-      - 'scripts/ops/runtime/docker/compose/*.yml'
+      - 'scripts/ops/runtime/docker/**'
+      - 'scripts/engineering/qa/docker_stability_campaign/**'
+      - 'scripts/engineering/qa/run_docker_stability_campaign.py'
+      - 'configs/quality/docker_runtime_contracts.yaml'
+      - 'tests/architecture/test_docker_runtime_contracts.py'
+      - 'tests/unit/repo_backed/scripts/ops/docker/**'
+      - 'tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py'
       - '.dockerignore'
+      - '.github/workflows/docker.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  docker-runtime-contracts:
+    # Static + repo-backed unit contracts for optional Docker lane (RF-008).
+    # Host-disruptive recovery/fault-injection/soak remain opt-in/manual.
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Set up Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.12"
+          uv-extras: "dev"
+          enable-pytest-cache: "true"
+          pytest-cache-prefix: "docker-runtime-contracts"
+          pytest-cache-fingerprint: ${{ hashFiles('tests/architecture/test_docker_runtime_contracts.py', 'tests/unit/repo_backed/scripts/ops/docker/**', 'tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py', 'scripts/ops/runtime/docker/**', 'scripts/engineering/qa/docker_stability_campaign/**', 'configs/quality/docker_runtime_contracts.yaml') }}
+
+      - name: Run Docker runtime static and unit contracts
+        run: |
+          uv run pytest -q --tb=line \
+            tests/architecture/test_docker_runtime_contracts.py \
+            tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py \
+            tests/unit/repo_backed/scripts/ops/docker/test_docker_runtime_probe.py \
+            tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py
+
   docker-lint:
     runs-on: ubuntu-latest
     strategy:

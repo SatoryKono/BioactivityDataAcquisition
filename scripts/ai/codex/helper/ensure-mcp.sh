@@ -21,6 +21,10 @@ while [[ $# -gt 0 ]]; do
             MODE="ensure"
             shift
             ;;
+        --refresh)
+            MODE="refresh"
+            shift
+            ;;
         --codex-bin)
             CODEX_BIN="${2:-}"
             shift 2
@@ -160,9 +164,37 @@ PY
 check_codex_config() {
     local config_path="${HOME}/.codex/config.toml"
     [[ -f "${config_path}" ]] || fail "Missing Codex config: ${config_path}"
-    grep -Eq '^\[mcp_servers\.filesystem\]' "${config_path}" || fail "Codex config has no filesystem MCP server"
-    grep -Eq '^\[mcp_servers\.memory\]' "${config_path}" || fail "Codex config has no memory MCP server"
-    grep -Fq "${REPO_ROOT}" "${config_path}" || fail "Codex config does not reference current repo: ${config_path}"
+    python3 - "${SETUP_MCP}" "${config_path}" "${REPO_ROOT}" <<'PY' || \
+        fail "Codex managed MCP block is missing or stale: ${config_path}"
+import importlib.util
+import sys
+from pathlib import Path
+
+setup_path = Path(sys.argv[1])
+config_path = Path(sys.argv[2])
+workspace_root = Path(sys.argv[3])
+
+spec = importlib.util.spec_from_file_location("bioetl_setup_mcp", setup_path)
+if spec is None or spec.loader is None:
+    raise SystemExit(f"cannot load MCP setup module: {setup_path}")
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+
+begin = module.MANAGED_BLOCK_BEGIN
+end = module.MANAGED_BLOCK_END
+content = config_path.read_text(encoding="utf-8")
+if content.count(begin) != 1 or content.count(end) != 1:
+    raise SystemExit("managed MCP markers must occur exactly once")
+
+start = content.index(begin)
+finish = content.index(end, start) + len(end)
+actual = content[start:finish].strip()
+expected = module._render_codex_mcp_toml(
+    module._codex_runtime_servers(workspace_root)
+).strip()
+if actual != expected:
+    raise SystemExit("managed MCP block differs from canonical setup output")
+PY
     return 0
 }
 
@@ -186,20 +218,36 @@ validate_codex_mcp_list() {
     return 0
 }
 
+current_config_is_ready() {
+    local check_args=(--check)
+    if [[ -n "${CODEX_BIN}" ]]; then
+        check_args+=(--codex-bin "${CODEX_BIN}")
+    fi
+
+    # Keep the cheap structural check separate from the optional live Codex
+    # validation. A transient CLI/server failure must not trigger a config
+    # rewrite when the persisted files are already valid.
+    CODEX_VALIDATE_MCP_LIST=0 timeout 15 bash "${BASH_SOURCE[0]}" \
+        "${check_args[@]}" >/dev/null 2>&1
+}
+
 if [[ ! -f "${SETUP_MCP}" ]]; then
     fail "MCP setup script not found: ${SETUP_MCP}"
 fi
 
+SHOULD_GENERATE=0
+
 case "${MODE}" in
     ensure)
-        # Add 15-second timeout (stricter) to prevent hanging on Python script
-        # Skip validation (codex mcp list) which can hang on slow systems
-        timeout 15 python3 "${SETUP_MCP}" \
-            --root "${REPO_ROOT}" \
-            --workspace-root "${REPO_ROOT}" \
-            --skip-codex-validation \
-            --skip-gemini-settings >/dev/null 2>&1 || \
-        warn "MCP setup timed out or failed; config may be incomplete"
+        if current_config_is_ready; then
+            validate_codex_mcp_list
+            echo "[mcp] MCP config is ready (unchanged)"
+            exit 0
+        fi
+        SHOULD_GENERATE=1
+        ;;
+    refresh)
+        SHOULD_GENERATE=1
         ;;
     check)
         ;;
@@ -207,6 +255,17 @@ case "${MODE}" in
         fail "Unsupported MCP mode: ${MODE}"
         ;;
 esac
+
+if [[ "${SHOULD_GENERATE}" -eq 1 ]]; then
+    # Bound regeneration and skip the potentially slow live CLI check here;
+    # the structural checks below still fail closed on incomplete output.
+    timeout 15 python3 "${SETUP_MCP}" \
+        --root "${REPO_ROOT}" \
+        --workspace-root "${REPO_ROOT}" \
+        --skip-codex-validation \
+        --skip-gemini-settings >/dev/null 2>&1 || \
+        warn "MCP setup timed out or failed; config may be incomplete"
+fi
 
 check_workspace_mcp_config "${REPO_ROOT}/.mcp.json"
 check_workspace_mcp_config "${REPO_ROOT}/scripts/ai/.mcp.json"
@@ -220,4 +279,8 @@ check_workspace_mcp_config "${REPO_ROOT}/.devin/config.json"
 check_codex_config
 validate_codex_mcp_list
 
-echo "[mcp] MCP config is ready"
+if [[ "${SHOULD_GENERATE}" -eq 1 ]]; then
+    echo "[mcp] MCP config is ready (refreshed)"
+else
+    echo "[mcp] MCP config is ready"
+fi
