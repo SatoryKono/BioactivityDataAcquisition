@@ -6,6 +6,7 @@
 Canonical active migration entrypoints currently retained:
 
 - `scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py`
+- `scripts/ops/migrations/windows_disk_to_d_migration.ps1` (checklist runner for external Windows disk migration plans)
 
 Canonical one-off migration entrypoints currently retained:
 

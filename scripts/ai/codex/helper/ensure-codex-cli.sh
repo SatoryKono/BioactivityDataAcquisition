@@ -7,11 +7,28 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || (cd "${SCRIPT_DIR}/../../.." && pwd))}"
 
 CODEX_TOOL_HOME_DEFAULT="${REPO_ROOT}/.cache/tools/codex-cli"
-CODEX_NPM_PREFIX="${CODEX_NPM_PREFIX:-${CODEX_TOOL_HOME_DEFAULT}/npm-global}"
-CODEX_NPM_CACHE="${CODEX_NPM_CACHE:-${CODEX_TOOL_HOME_DEFAULT}/npm-cache}"
+# Windows-mounted paths under /mnt/* often reject npm rename (EACCES). Prefer a
+# Linux-native home cache when the repo lives on a WSL mount and no explicit
+# prefix was provided by the caller.
+if [[ -z "${CODEX_NPM_PREFIX:-}" ]]; then
+    if [[ "${REPO_ROOT}" == /mnt/* || "${REPO_ROOT}" == /mnt ]]; then
+        CODEX_NPM_PREFIX="${HOME}/.cache/bioetl-codex/npm-global"
+    else
+        CODEX_NPM_PREFIX="${CODEX_TOOL_HOME_DEFAULT}/npm-global"
+    fi
+fi
+if [[ -z "${CODEX_NPM_CACHE:-}" ]]; then
+    if [[ "${REPO_ROOT}" == /mnt/* || "${REPO_ROOT}" == /mnt ]]; then
+        CODEX_NPM_CACHE="${HOME}/.cache/bioetl-codex/npm-cache"
+    else
+        CODEX_NPM_CACHE="${CODEX_TOOL_HOME_DEFAULT}/npm-cache"
+    fi
+fi
 CODEX_BIN="${CODEX_NPM_PREFIX}/bin/codex"
 USER_CODEX_PREFIX_DEFAULT="${HOME}/.npm-global"
 USER_CODEX_BIN_DEFAULT="${USER_CODEX_PREFIX_DEFAULT}/bin/codex"
+LINUX_CODEX_PREFIX_DEFAULT="${HOME}/.cache/bioetl-codex/npm-global"
+LINUX_CODEX_BIN_DEFAULT="${LINUX_CODEX_PREFIX_DEFAULT}/bin/codex"
 
 MODE_UPDATE="update"
 MODE="ensure"
@@ -48,6 +65,12 @@ resolve_existing_codex() {
     if [[ -x "${CODEX_BIN}" ]]; then
         CODEX_BIN="${CODEX_BIN}"
         CODEX_NPM_PREFIX="${CODEX_NPM_PREFIX}"
+        return 0
+    fi
+
+    if [[ -x "${LINUX_CODEX_BIN_DEFAULT}" ]]; then
+        CODEX_BIN="${LINUX_CODEX_BIN_DEFAULT}"
+        CODEX_NPM_PREFIX="${LINUX_CODEX_PREFIX_DEFAULT}"
         return 0
     fi
 
