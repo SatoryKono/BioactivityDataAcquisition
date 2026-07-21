@@ -10,6 +10,8 @@ from pathlib import Path
 
 import pytest
 
+from scripts.ai.codex import setup_mcp
+
 
 pytestmark = pytest.mark.unit
 
@@ -35,23 +37,16 @@ def _prepare_workspace(root: Path) -> None:
 def _write_codex_config(home: Path, workspace: Path, *, valid: bool) -> Path:
     config_path = home / ".codex" / "config.toml"
     config_path.parent.mkdir(parents=True)
-    filesystem_section = ""
     if valid:
-        filesystem_section = f"""
-[mcp_servers.filesystem]
+        rendered = setup_mcp._render_codex_mcp_toml(
+            setup_mcp._codex_runtime_servers(workspace)
+        )
+    else:
+        rendered = f"""[mcp_servers.memory]
 command = "npx"
 args = ["{workspace}"]
 """
-    config_path.write_text(
-        (
-            f"""[mcp_servers.memory]
-command = "npx"
-args = ["{workspace}"]
-"""
-            + filesystem_section
-        ),
-        encoding="utf-8",
-    )
+    config_path.write_text(rendered, encoding="utf-8")
     return config_path
 
 
@@ -87,6 +82,8 @@ def test_ensure_keeps_valid_persisted_config_unchanged(tmp_path: Path) -> None:
     home.mkdir()
     _prepare_workspace(workspace)
     config_path = _write_codex_config(home, workspace, valid=True)
+    fixed_mtime_ns = 946_684_800_000_000_000
+    os.utime(config_path, ns=(fixed_mtime_ns, fixed_mtime_ns))
     original = config_path.read_text(encoding="utf-8")
 
     result = _run_helper(workspace, home, "--ensure")
@@ -94,7 +91,8 @@ def test_ensure_keeps_valid_persisted_config_unchanged(tmp_path: Path) -> None:
     assert result.returncode == 0, result.stderr
     assert "ready (unchanged)" in result.stdout
     assert config_path.read_text(encoding="utf-8") == original
-    assert "BEGIN MANAGED MCP SERVERS" not in original
+    assert config_path.stat().st_mtime_ns == fixed_mtime_ns
+    assert "BEGIN MANAGED MCP SERVERS" in original
 
 
 @pytest.mark.skipif(
