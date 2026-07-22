@@ -1,64 +1,64 @@
+"""Unit tests for Semantic Scholar contract replay fixture helpers."""
+
 from __future__ import annotations
 
-import httpx
 import pytest
 
 
-class _StubClient:
-    def __init__(
-        self,
-        response: httpx.Response | None = None,
-        exc: Exception | None = None,
-    ) -> None:
-        self._response = response
-        self._exc = exc
+def test_load_semanticscholar_replay_payload__delegates_to_replay_registry(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from tests.contract import _semanticscholar_contract_support
 
-    async def request(
-        self,
-        method: str,
-        url: str,
-        **kwargs: object,
-    ) -> httpx.Response:
-        del method, url, kwargs
-        if self._exc is not None:
-            raise self._exc
-        assert self._response is not None
-        return self._response
+    called: dict[str, bool] = {}
 
+    def _fake_load(probe: str) -> str:
+        called[probe] = True
+        return "ok"
 
-@pytest.mark.asyncio
-async def test_request_or_skip__http_500__skips_transient_provider_error() -> None:
-    from tests.contract._semanticscholar_contract_support import _request_or_skip
-
-    request = httpx.Request(
-        "GET", "https://api.semanticscholar.org/graph/v1/paper/search"
-    )
-    response = httpx.Response(
-        500,
-        request=request,
-        json={"message": "Internal Server Error"},
+    monkeypatch.setattr(
+        _semanticscholar_contract_support,
+        "_load_semanticscholar_replay_payload",
+        _fake_load,
     )
 
-    with pytest.raises(pytest.skip.Exception, match="HTTP 500"):
-        await _request_or_skip(
-            _StubClient(response=response),  # type: ignore[arg-type]
-            "GET",
-            str(request.url),
+    assert (
+        _semanticscholar_contract_support.load_semanticscholar_replay_payload(
+            probe="paper_search_endpoint"
         )
-
-
-@pytest.mark.asyncio
-async def test_request_or_skip__connect_timeout__skips_endpoint_unreachable() -> None:
-    from tests.contract._semanticscholar_contract_support import _request_or_skip
-
-    request = httpx.Request(
-        "GET", "https://api.semanticscholar.org/graph/v1/paper/search"
+        == "ok"
     )
-    exc = httpx.ConnectTimeout("timed out", request=request)
+    assert called == {"paper_search_endpoint": True}
 
-    with pytest.raises(pytest.skip.Exception, match="not reachable"):
-        await _request_or_skip(
-            _StubClient(exc=exc),  # type: ignore[arg-type]
-            "GET",
-            str(request.url),
+
+@pytest.mark.parametrize(
+    "probe",
+    ["paper_batch_lookup_by_doi", "paper_search_endpoint"],
+)
+def test_load_semanticscholar_replay_payload__returns_registered_probe_payload(
+    monkeypatch: pytest.MonkeyPatch,
+    probe: str,
+) -> None:
+    from tests.contract import _semanticscholar_contract_support
+
+    expected = {"probe": probe}
+
+    monkeypatch.setattr(
+        _semanticscholar_contract_support,
+        "_load_semanticscholar_replay_payload",
+        lambda _probe: expected,
+    )
+
+    assert (
+        _semanticscholar_contract_support.load_semanticscholar_replay_payload(
+            probe=probe
         )
+        == expected
+    )
+
+
+def test_load_semanticscholar_replay_payload__forwards_errors_for_unknown_probe() -> None:
+    import tests.contract._semanticscholar_contract_support as helper
+
+    with pytest.raises(Exception):
+        helper.load_semanticscholar_replay_payload(probe="unknown_probe")

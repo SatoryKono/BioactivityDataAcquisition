@@ -38,7 +38,6 @@ ENV_WRITE_SURFACES = (
     "scripts/ai/gemini/helper/setup-env.sh",
     "scripts/ai/codex/helper/check-env.ps1",
     "scripts/ai/gemini/run-gemini-docker.ps1",
-    "scripts/ai/mcp/mcp_dockerhub_wrapper.ps1",
     "scripts/ai/vibe/helper/setup-env.sh",
     "scripts/memory/setup/wsl_startup.sh",
 )

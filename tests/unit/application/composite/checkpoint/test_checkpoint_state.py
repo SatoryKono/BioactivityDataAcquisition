@@ -632,6 +632,65 @@ class TestToDict:
         assert d["created_at"] is None
         assert d["updated_at"] is None
 
+    def test_insertion_order_does_not_change_serialized_dependency_enricher_shapes(
+        self,
+    ) -> None:
+        """Equivalent states serialize to deterministic dependency/enricher ordering."""
+        dep_a = _make_dependency_result(pipeline_name="uniprot")
+        dep_b = _make_dependency_result(
+            pipeline_name="pubmed",
+            status=DependencyStatus.PARTIAL,
+        )
+        enr_a = _make_enrichment_result(enricher_name="crossref")
+        enr_b = _make_enrichment_result(
+            enricher_name="chembl",
+            status=EnrichmentStatus.PARTIAL,
+        )
+
+        state_a = CompositeCheckpointState(
+            composite_name="c",
+            run_id="r",
+            completed_dependencies=frozenset({"uniprot", "pubmed"}),
+            dependency_results={
+                "uniprot": dep_a,
+                "pubmed": dep_b,
+            },
+            completed_enrichers=frozenset({"crossref", "chembl"}),
+            enrichment_results={
+                "crossref": enr_a,
+                "chembl": enr_b,
+            },
+        )
+
+        state_b = CompositeCheckpointState(
+            composite_name="c",
+            run_id="r",
+            completed_dependencies=frozenset({"uniprot", "pubmed"}),
+            dependency_results={
+                "pubmed": dep_b,
+                "uniprot": dep_a,
+            },
+            completed_enrichers=frozenset({"crossref", "chembl"}),
+            enrichment_results={
+                "chembl": enr_b,
+                "crossref": enr_a,
+            },
+        )
+
+        first = state_a.to_dict()
+        second = state_b.to_dict()
+
+        assert first["completed_dependencies"] == second["completed_dependencies"]
+        assert first["completed_enrichers"] == second["completed_enrichers"]
+        assert list(first["dependency_results"]) == list(second["dependency_results"]) == [
+            "pubmed",
+            "uniprot",
+        ]
+        assert list(first["enrichment_results"]) == list(second["enrichment_results"]) == [
+            "chembl",
+            "crossref",
+        ]
+
 
 # ---------------------------------------------------------------------------
 # 8. from_dict deserialization

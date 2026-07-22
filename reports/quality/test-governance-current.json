@@ -1073,7 +1073,14 @@
     }
   },
   "assertless_total_candidates": 105,
-  "budget_violations": [],
+  "budget_violations": [
+    {
+      "actual": 2,
+      "budget": "markerless_test_functions_max",
+      "expected_max": 0,
+      "metric": "markerless_test_functions"
+    }
+  ],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1223,8 +1230,11 @@
     ]
   },
   "intentional_no_exception_contract": 89,
-  "markerless_examples": [],
-  "markerless_test_functions": 0,
+  "markerless_examples": [
+    "tests/unit/contracts/test_semanticscholar_contract_support.py:8",
+    "tests/unit/contracts/test_semanticscholar_contract_support.py:60"
+  ],
+  "markerless_test_functions": 2,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -2157,8 +2167,11 @@
         ".yml"
       ]
     },
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
+    "markerless_examples": [
+      "tests/unit/contracts/test_semanticscholar_contract_support.py:8",
+      "tests/unit/contracts/test_semanticscholar_contract_support.py:60"
+    ],
+    "markerless_test_functions": 2,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -2218,11 +2231,11 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2025,
-    "total_test_functions": 22608,
+    "total_test_functions": 22610,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "2012f0190cfb6719d9ad1ff92fff57b22e7d06e03a1e6897504f775aa44dda21",
+  "source_tree_sha256": "e530bcb2a35b4deb56ccd061ed2272e566a7b8e134b1c958c04929801642b397",
   "summary": {
     "assertless_total_candidates": 105,
     "compatibility_test_files": 0,
@@ -2230,8 +2243,11 @@
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 89,
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
+    "markerless_examples": [
+      "tests/unit/contracts/test_semanticscholar_contract_support.py:8",
+      "tests/unit/contracts/test_semanticscholar_contract_support.py:60"
+    ],
+    "markerless_test_functions": 2,
     "refined_assertless_tests": 0,
     "uuid4_call_sites": 0
   },
@@ -2282,6 +2298,6 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2025,
-  "total_test_functions": 22608,
+  "total_test_functions": 22610,
   "uuid4_call_sites": 0
 }

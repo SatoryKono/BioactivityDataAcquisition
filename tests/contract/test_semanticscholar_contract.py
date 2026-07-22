@@ -1,6 +1,6 @@
-"""Semantic Scholar live canary contract tests.
+"""Semantic Scholar canary contract tests.
 
-Verifies the minimal live contract surface used for provider maturity decisions.
+Verifies the minimal contract surface used for provider maturity decisions.
 Replay-schema assertions live in the snapshot-registry companion suite.
 """
 
@@ -15,11 +15,10 @@ from tests.contract._provider_contract_drift import (
 )
 from bioetl.domain.types import JsonDict
 
-# Fixtures: tests/contract/conftest.py (from _semanticscholar_contract_support).
-# Avoid pytest_plugins here — dual registration with the pilot suite rewrites
-# the already-imported support module and emits PytestAssertRewriteWarning.
+# Fixtures: tests/contract/conftest.py using replay-backed payloads.
 UPDATE_SNAPSHOTS = os.environ.get("UPDATE_SNAPSHOTS", "0") == "1"
 REPLAY_SNAPSHOT_PROBES = ("paper_search_endpoint", "paper_batch_lookup_by_doi")
+pytestmark = pytest.mark.no_api
 
 
 def _replay_snapshot_update_contract() -> tuple[bool, object, tuple[str, ...]]:
@@ -45,7 +44,7 @@ def _document_replay_snapshot_probe_bindings() -> None:
 @pytest.mark.semanticscholar
 @pytest.mark.timeout(300)
 class TestSemanticScholarContract:
-    """Promotion-grade Semantic Scholar live contract checks."""
+    """Promotion-grade Semantic Scholar contract checks."""
 
     @pytest.mark.asyncio
     async def test_paper_search_endpoint(
