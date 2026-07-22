@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.services.dq_report_models import DQReportContext
+from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.ports import SilverDQAnalyzeRequest
 
 if TYPE_CHECKING:
@@ -150,7 +151,7 @@ async def _generate_report_for_stage[ReportT: _DQReport](
             emit_generated_metric=emit_generated_metric,
             emit_check_failure_metric=emit_check_failure_metric,
         )
-    except (OSError, RuntimeError, TypeError, ValueError, KeyError) as exc:
+    except (BioETLError, OSError, RuntimeError, TimeoutError, ValueError) as exc:
         _log_report_generation_failure(
             context=context,
             stage=stage,
@@ -164,7 +165,7 @@ def _log_report_generation_failure(
     *,
     context: DQReportContext,
     stage: str,
-    error: Exception,
+    error: BaseException,
     logger: LoggerPort,
 ) -> None:
     """Log one shared DQ report generation failure surface."""
