@@ -50,11 +50,29 @@
       "review_by": "2026-09-30",
       "next_step": "Retain only as an optional manual shell-alias helper for local Gemini ergonomics; keep it supporting and do not promote it to a canonical launcher while run-gemini.sh remains the governed entrypoint."
     },
+    "scripts/ai/mcp/_check_env_keys.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded local diagnostic that reports MCP .env key presence and lengths without printing values; prefer the canonical MCP check workflow for routine validation and remove this helper once token diagnostics are consolidated."
+    },
+    "scripts/ai/mcp/_patch_grok_mcp_tokens.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded one-time Grok MCP config migration helper for Ref headers and startup timeouts; do not use it for Codex configuration and remove it after supported Grok configs no longer require migration."
+    },
     "scripts/ai/mcp/check.sh": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
       "review_by": "2026-09-30",
       "next_step": "Retain as the shell backend for the canonical scripts.ai.mcp check router command; prefer the router in new docs and promote back to an active public script only if direct shell invocation remains a reviewed public surface."
+    },
+    "scripts/ai/mcp/export_mcp_env_from_dotenv.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the documented Windows-side helper for exporting MCP variables to process or user scope when Grok launches HTTP MCP servers outside repo wrappers; keep secret values out of tracked configs and retire the helper if Grok gains direct repo env loading."
     },
     "scripts/ai/mcp/mcp_adr_analysis_wrapper.ps1": {
       "owner": "@bioetl-platform",
