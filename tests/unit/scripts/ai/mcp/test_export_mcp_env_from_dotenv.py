@@ -15,8 +15,8 @@ def run_export_script(
 ) -> subprocess.CompletedProcess[str]:
     """Run the export script and return the result."""
     # Test is in tests/unit/scripts/ai/mcp/, script is in scripts/ai/mcp/
-    # Need to go up 4 levels to reach repo root, then into scripts
-    script_path = Path(__file__).parent.parent.parent.parent / "scripts/ai/mcp/export_mcp_env_from_dotenv.ps1"
+    # Need to go up 5 levels to reach repo root, then into scripts
+    script_path = Path(__file__).parent.parent.parent.parent.parent / "scripts/ai/mcp/export_mcp_env_from_dotenv.ps1"
     cmd = [
         "pwsh",
         "-NoProfile",
@@ -120,7 +120,7 @@ class TestExportMcpEnvFromDotenv:
 
     def test_known_mcp_keys_listed(self) -> None:
         """Test that the script lists known MCP keys."""
-        script_path = Path(__file__).parent.parent.parent.parent.parent / "scripts/ai/mcp/export_mcp_env_from_dotenv.ps1"
+        script_path = Path(__file__).parent.parent.parent.parent / "scripts/ai/mcp/export_mcp_env_from_dotenv.ps1"
         content = script_path.read_text(encoding="utf-8")
         
         # Check for known MCP keys in the script
