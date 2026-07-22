@@ -386,7 +386,6 @@ class TestMedallionFormatValidation:
 
     def test_silver_parquet_format_rejected(self):
         """Test that Parquet format is rejected for Silver layer."""
-        from pydantic import ValidationError
 
         config_dict = {
             "pipeline_name": "test_pipeline",

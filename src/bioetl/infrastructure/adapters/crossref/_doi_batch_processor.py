@@ -140,6 +140,35 @@ class DoiBatchProcessor:
             request_collector=self._request_collector,
         )
 
+    def _batch_items_from_response(self, response: object) -> list[BronzeRecord]:
+        """Extract Bronze records from a successful CrossRef batch response."""
+        data = response.json()  # type: ignore[union-attr]
+        message = data.get("message", {})
+        items = message.get("items", []) if isinstance(message, dict) else []
+        return [cast(BronzeRecord, item) for item in items if isinstance(item, dict)]
+
+    async def _yield_batch_or_fallback(
+        self,
+        *,
+        response: object | None,
+        original_dois: list[str],
+    ) -> AsyncIterator[BronzeRecord]:
+        """Yield batch items or fall back to individual DOI fetches."""
+        if response is None:
+            raise CrossRefApiError("CrossRef batch request returned no response")
+        status_code = getattr(response, "status_code", None)
+        if status_code != 200:
+            self._logger.warning(
+                "crossref_batch_fetch_failed",
+                status_code=status_code,
+                doi_count=len(original_dois),
+            )
+            async for publication in self._fallback_individual_fetch(original_dois):
+                yield publication
+            return
+        for item in self._batch_items_from_response(response):
+            yield item
+
     async def fetch_batch(self, dois: list[str]) -> AsyncIterator[BronzeRecord]:
         """Fetch multiple publications by DOI batch."""
         if not dois:
@@ -151,28 +180,11 @@ class DoiBatchProcessor:
 
         try:
             response = await self._execute_batch_request(normalized_dois)
-
-            if response is None:
-                raise CrossRefApiError("CrossRef batch request returned no response")
-
-            logger = self._logger
-            if response.status_code != 200:
-                logger.warning(
-                    "crossref_batch_fetch_failed",
-                    status_code=response.status_code,
-                    doi_count=len(dois),
-                )
-                async for publication in self._fallback_individual_fetch(dois):
-                    yield publication
-                return
-
-            data = response.json()
-            message = data.get("message", {})
-            items = message.get("items", []) if isinstance(message, dict) else []
-            for item in items:
-                if isinstance(item, dict):
-                    yield cast(BronzeRecord, item)
-
+            async for publication in self._yield_batch_or_fallback(
+                response=response,
+                original_dois=dois,
+            ):
+                yield publication
         except CROSSREF_RUNTIME_ERRORS as error:
             self._logger.warning(
                 "crossref_batch_fetch_error",

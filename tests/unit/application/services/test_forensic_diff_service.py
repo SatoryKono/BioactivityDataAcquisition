@@ -18,7 +18,6 @@ from bioetl.application.services.control_plane.forensic.diagnostics_support impo
     _lineage_closure_payload,
     _metadata_sidecar_missing_count,
     _missing_evidence,
-    _replay_capability_payload,
     _resolve_forensic_verdict,
     _string_list,
     _string_list_or_empty,

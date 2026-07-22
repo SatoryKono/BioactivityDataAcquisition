@@ -17,7 +17,7 @@ import pytest
 # declare ``pytest_plugins`` from multiple test modules — that imports the
 # support module before pytest can rewrite it and raises
 # PytestAssertRewriteWarning on the second suite (pilot vs baseline).
-from tests.contract._semanticscholar_contract_support import (  # noqa: E402,F401
+from tests.contract._semanticscholar_contract_support import (  # noqa: F401
     semanticscholar_batch_payload,
     semanticscholar_client,
     semanticscholar_search_payload,

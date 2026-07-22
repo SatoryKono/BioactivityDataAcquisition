@@ -7,9 +7,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3069 |
-| Tracked doc-like files | 1873 |
-| Ignored local docs/reports files | 1196 |
+| Doc-like files | 3083 |
+| Tracked doc-like files | 1889 |
+| Ignored local docs/reports files | 1194 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
 | Generated routes | 64 |
@@ -18,8 +18,8 @@
 
 | Tracking State | Count |
 | --- | --- |
-| ignored_local | 1196 |
-| tracked | 1873 |
+| ignored_local | 1194 |
+| tracked | 1889 |
 
 ## Lifecycle Counts
 
@@ -28,7 +28,7 @@
 | active_backlog | 1 |
 | active_draft | 108 |
 | active_quality_baseline | 20 |
-| closeout_evidence | 31 |
+| closeout_evidence | 32 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 36 |
 | docs_reports_generated_or_route_owned | 23 |
@@ -43,7 +43,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 36 |
 | supporting_context | 12 |
-| working_report | 36 |
+| working_report | 49 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -62,8 +62,8 @@
 | Active | 1949 |
 | Archived | 78 |
 | Canonical | 63 |
-| Generated | 722 |
-| Working | 257 |
+| Generated | 723 |
+| Working | 270 |
 
 ## Surface Families
 
@@ -72,17 +72,17 @@
 | active | 1949 |
 | archive | 78 |
 | canonical | 63 |
-| generated | 722 |
-| working | 257 |
+| generated | 723 |
+| working | 270 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 121 |
-| archive-after-migration | 81 |
-| generate-automatically | 722 |
-| keep | 2141 |
+| archive-after-migration | 93 |
+| generate-automatically | 723 |
+| keep | 2142 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -163,12 +163,12 @@
 | `reports/quality/root-hygiene-cleanup-classification.json` | Working | 0 | archive-after-migration |
 | `reports/quality/root-hygiene-review-evidence.json` | Working | 0 | archive-after-migration |
 | `reports/quality/silver-gold-filter-parity-report.json` | Working | 0 | archive-after-migration |
+| `reports/quality/test-bootstrap-fixture-scope-profile.json` | Working | 0 | archive-after-migration |
+| `reports/quality/test-support-helper-ownership-map.json` | Working | 0 | archive-after-migration |
 | `reports/quality/total-tech-debt-audit-main-current.md` | Working | 0 | archive-after-migration |
 | `reports/review/S1-domain.md` | Working | 0 | archive-after-migration |
 | `reports/review/S1.1-contracts-ports.md` | Working | 0 | archive-after-migration |
 | `reports/review/S1.2-logic-models.md` | Working | 0 | archive-after-migration |
-| `reports/review/S2-application.md` | Working | 0 | archive-after-migration |
-| `reports/review/S2.1-core-composite.md` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 

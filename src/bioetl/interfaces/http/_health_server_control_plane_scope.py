@@ -59,6 +59,72 @@ def read_selected_run_id(
     return None if selected_run_id in {None, RUN_ID_NO_SELECTION} else selected_run_id
 
 
+def _identity_scope(
+    *,
+    requested_pipeline: str,
+    selected_pipelines: tuple[str, ...],
+    selected_run_types: tuple[str, ...],
+    selected_run_id: str | None,
+    resolved_manifest: RunManifest | None,
+    resolved_via: str,
+) -> _IdentityScope:
+    return _IdentityScope(
+        requested_pipeline=requested_pipeline,
+        selected_pipelines=selected_pipelines,
+        selected_run_types=selected_run_types,
+        selected_run_id=selected_run_id,
+        resolved_manifest=resolved_manifest,
+        resolved_via=resolved_via,
+    )
+
+
+def _parse_selected_run_types(
+    selected_run_types: tuple[str, ...],
+) -> tuple[tuple[RunType, ...], bool]:
+    try:
+        return tuple(RunType(value) for value in selected_run_types), False
+    except ValueError:
+        return (), True
+
+
+def _resolve_latest_manifest_scope(
+    *,
+    manifest_port: _RunManifestLookupPort,
+    requested_pipeline: str,
+    selected_pipelines: tuple[str, ...],
+    selected_run_types: tuple[str, ...],
+    selected_run_id: str | None,
+) -> _IdentityScope:
+    if len(selected_pipelines) != 1:
+        return _identity_scope(
+            requested_pipeline=requested_pipeline,
+            selected_pipelines=selected_pipelines,
+            selected_run_types=selected_run_types,
+            selected_run_id=selected_run_id,
+            resolved_manifest=None,
+            resolved_via="aggregate_scope_requires_exact_run_id",
+        )
+    run_types, invalid_run_type_scope = _parse_selected_run_types(selected_run_types)
+    resolved_manifest = (
+        None
+        if invalid_run_type_scope
+        else manifest_port.get_latest_for_scope(selected_pipelines[0], run_types)
+    )
+    resolved_via = (
+        "latest_manifest_for_scope"
+        if resolved_manifest is not None
+        else "no_manifest_for_scope"
+    )
+    return _identity_scope(
+        requested_pipeline=requested_pipeline,
+        selected_pipelines=selected_pipelines,
+        selected_run_types=selected_run_types,
+        selected_run_id=selected_run_id,
+        resolved_manifest=resolved_manifest,
+        resolved_via=resolved_via,
+    )
+
+
 def resolve_control_plane_identity_scope(
     host: _ControlPlaneScopeHost,
     query: dict[str, str],
@@ -73,7 +139,7 @@ def resolve_control_plane_identity_scope(
         requested_pipeline=requested_pipeline,
         selected_pipelines=selected_pipelines,
     ):
-        return _IdentityScope(
+        return _identity_scope(
             requested_pipeline=requested_pipeline,
             selected_pipelines=selected_pipelines,
             selected_run_types=selected_run_types,
@@ -88,7 +154,7 @@ def resolve_control_plane_identity_scope(
             selected_run_id,
         )
         if resolved_manifest is not None:
-            return _IdentityScope(
+            return _identity_scope(
                 requested_pipeline=requested_pipeline,
                 selected_pipelines=selected_pipelines,
                 selected_run_types=selected_run_types,
@@ -97,43 +163,12 @@ def resolve_control_plane_identity_scope(
                 resolved_via="selected_run_id",
             )
 
-    if len(selected_pipelines) != 1:
-        return _IdentityScope(
-            requested_pipeline=requested_pipeline,
-            selected_pipelines=selected_pipelines,
-            selected_run_types=selected_run_types,
-            selected_run_id=selected_run_id,
-            resolved_manifest=None,
-            resolved_via="aggregate_scope_requires_exact_run_id",
-        )
-
-    try:
-        run_types = tuple(RunType(value) for value in selected_run_types)
-    except ValueError:
-        run_types = ()
-        invalid_run_type_scope = True
-    else:
-        invalid_run_type_scope = False
-    resolved_manifest = (
-        None
-        if invalid_run_type_scope
-        else host._run_manifest_port.get_latest_for_scope(
-            selected_pipelines[0],
-            run_types,
-        )
-    )
-    resolved_via = (
-        "latest_manifest_for_scope"
-        if resolved_manifest is not None
-        else "no_manifest_for_scope"
-    )
-    return _IdentityScope(
+    return _resolve_latest_manifest_scope(
+        manifest_port=host._run_manifest_port,
         requested_pipeline=requested_pipeline,
         selected_pipelines=selected_pipelines,
         selected_run_types=selected_run_types,
         selected_run_id=selected_run_id,
-        resolved_manifest=resolved_manifest,
-        resolved_via=resolved_via,
     )
 
 

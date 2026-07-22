@@ -75,6 +75,73 @@ def build_selector_context_payload(
     }
 
 
+def _selector_ledger_for_dimension(
+    dimension: str,
+    selected_run_statuses: tuple[str, ...],
+    ledger_port: RunLedgerLookup | None,
+) -> RunLedgerLookup | None:
+    if dimension == "run_id" and not selected_run_statuses:
+        return None
+    return ledger_port
+
+
+def _apply_exact_run_only_fallback(
+    values: list[str],
+    *,
+    exact_run_only: bool,
+    selected_run_id: str | None,
+    fallback_value: str | None,
+) -> list[str]:
+    if exact_run_only and (selected_run_id is None or not values):
+        return exact_run_only_fallback_values(fallback_value)
+    return values
+
+
+def _prefix_run_id_no_selection(dimension: str, values: list[str]) -> list[str]:
+    if dimension != "run_id":
+        return values
+    return [RUN_ID_NO_SELECTION, *[value for value in values if value]]
+
+
+def _dimension_option_values(
+    *,
+    dimension: str,
+    options: dict[str, list[str]],
+    exact_run_only: bool,
+    selected_run_id: str | None,
+    fallback_value: str | None,
+) -> list[str]:
+    if dimension not in options:
+        raise ValueError(f"Unsupported control-plane filter dimension: {dimension}")
+    values = list(options[dimension])
+    values = _apply_exact_run_only_fallback(
+        values,
+        exact_run_only=exact_run_only,
+        selected_run_id=selected_run_id,
+        fallback_value=fallback_value,
+    )
+    return _prefix_run_id_no_selection(dimension, values)
+
+
+def _filter_options_response(
+    *,
+    response_shape: str,
+    dimension: str,
+    requested_pipeline: str | None,
+    selected_run_types: tuple[str, ...],
+    values: list[str],
+) -> dict[str, object]:
+    if response_shape == "list":
+        return {"items": values}
+    return {
+        "contract": SELECTOR_CONTEXT_CONTRACT,
+        "dimension": dimension,
+        "pipeline": requested_pipeline,
+        "run_type": list(selected_run_types),
+        "items": values,
+    }
+
+
 def build_selector_filter_options_payload(
     *,
     manifests: tuple[RunManifest, ...],
@@ -93,8 +160,10 @@ def build_selector_filter_options_payload(
 ) -> dict[str, object]:
     """Build Grafana variable option responses from the selector catalog."""
     workflow_aliases = build_workflow_aliases(workflow_manifests)
-    selector_ledger_port = (
-        None if dimension == "run_id" and not selected_run_statuses else ledger_port
+    selector_ledger_port = _selector_ledger_for_dimension(
+        dimension,
+        selected_run_statuses,
+        ledger_port,
     )
     records = build_selector_records(
         narrow_manifest_catalog(
@@ -121,19 +190,17 @@ def build_selector_filter_options_payload(
     )
     option_records = candidates if candidates else records
     options = options_payload(option_records)
-    if dimension not in options:
-        raise ValueError(f"Unsupported control-plane filter dimension: {dimension}")
-    values = list(options[dimension])
-    if exact_run_only and (selected_run_id is None or not values):
-        values = exact_run_only_fallback_values(fallback_value)
-    if dimension == "run_id":
-        values = [RUN_ID_NO_SELECTION, *[value for value in values if value]]
-    if response_shape == "list":
-        return {"items": values}
-    return {
-        "contract": SELECTOR_CONTEXT_CONTRACT,
-        "dimension": dimension,
-        "pipeline": requested_pipeline,
-        "run_type": list(selected_run_types),
-        "items": values,
-    }
+    values = _dimension_option_values(
+        dimension=dimension,
+        options=options,
+        exact_run_only=exact_run_only,
+        selected_run_id=selected_run_id,
+        fallback_value=fallback_value,
+    )
+    return _filter_options_response(
+        response_shape=response_shape,
+        dimension=dimension,
+        requested_pipeline=requested_pipeline,
+        selected_run_types=selected_run_types,
+        values=values,
+    )

@@ -27,6 +27,11 @@ function Normalize-BioetlRepoEnvAliases {
             $env:HUB_PAT_TOKEN = $env:DOCKERHUB_PAT
         } elseif ($env:DOCKERHUB_TOKEN) {
             $env:HUB_PAT_TOKEN = $env:DOCKERHUB_TOKEN
+        } elseif ($env:DOCKERHUB_PAT_TOKEN) {
+            $env:HUB_PAT_TOKEN = $env:DOCKERHUB_PAT_TOKEN
+        } elseif ($env:DOCKER_API_KEY) {
+            # Non-canonical alias used in some local .env files
+            $env:HUB_PAT_TOKEN = $env:DOCKER_API_KEY
         }
     }
     if (-not $env:DOCKERHUB_USERNAME -and $env:DOCKER_USERNAME) {

@@ -83,15 +83,14 @@ def test_dependency_map_drift_check_passes_current_repo(
     monkeypatch,
 ) -> None:
     # Skip on WSL and Windows due to filesystem performance causing dependency map generation timeout
-    import sys
 
     if sys.platform.startswith("win"):
         pytest.skip("Skipped on Windows due to filesystem performance")
     try:
-        with open("/proc/version", "r") as f:
+        with open("/proc/version") as f:
             if "microsoft" in f.read().lower():
                 pytest.skip("Skipped on WSL due to filesystem performance")
-    except (OSError, IOError):
+    except OSError:
         pass
 
     script_globals = runpy.run_path(

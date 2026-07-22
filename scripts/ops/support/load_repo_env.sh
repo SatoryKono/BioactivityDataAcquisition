@@ -181,6 +181,11 @@ normalize_repo_env_aliases() {
       export HUB_PAT_TOKEN="${DOCKERHUB_PAT}"
     elif [[ -n "${DOCKERHUB_TOKEN:-}" ]]; then
       export HUB_PAT_TOKEN="${DOCKERHUB_TOKEN}"
+    elif [[ -n "${DOCKERHUB_PAT_TOKEN:-}" ]]; then
+      export HUB_PAT_TOKEN="${DOCKERHUB_PAT_TOKEN}"
+    elif [[ -n "${DOCKER_API_KEY:-}" ]]; then
+      # Non-canonical alias used in some local .env files
+      export HUB_PAT_TOKEN="${DOCKER_API_KEY}"
     fi
   fi
   if [[ -z "${DOCKERHUB_USERNAME:-}" && -n "${DOCKER_USERNAME:-}" ]]; then

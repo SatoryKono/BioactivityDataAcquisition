@@ -38,4 +38,4 @@ def test_public_config_package_root_reexports_lazy_and_eager_surfaces() -> None:
 def test_public_config_package_root_rejects_unknown_attribute() -> None:
     """Unknown compatibility surface names must still fail loudly."""
     with pytest.raises(AttributeError, match="does_not_exist"):
-        getattr(public_config, "does_not_exist")
+        public_config.does_not_exist

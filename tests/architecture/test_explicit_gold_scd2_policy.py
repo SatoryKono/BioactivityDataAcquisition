@@ -7,6 +7,7 @@ REQ-ARCH-052: SCD2-candidate entity configs MUST explicitly declare
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import pytest
 import yaml

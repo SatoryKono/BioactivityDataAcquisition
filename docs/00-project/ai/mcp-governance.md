@@ -107,6 +107,7 @@ artifacts during the MCP retirement window and MUST NOT be registered in the
 tracked MCP configs:
 
 - `scripts/ai/mcp/mcp_docker_docs_wrapper.sh`
-- `scripts/ai/mcp/mcp_dockerhub_wrapper.sh`
+- `scripts/ai/mcp/mcp_dockerhub_wrapper.sh` (Linux/WSL),
+  `scripts/ai/mcp/mcp_dockerhub_wrapper.ps1` (Windows)
 - `scripts/ai/mcp/mcp_needle_wrapper.sh`
 - `scripts/ai/mcp/mcp_paper_search_wrapper.sh`

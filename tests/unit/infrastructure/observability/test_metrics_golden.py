@@ -16,7 +16,6 @@ from bioetl.infrastructure.observability.prometheus_metric_registries import (
     COUNTERS,
     HISTOGRAMS,
     METRIC_REGISTRY_FAMILIES,
-    METRIC_REGISTRY_INVENTORY,
 )
 
 FIXTURE_DIR = Path("tests/fixtures/golden/observability")
@@ -86,14 +85,13 @@ def _capture_histogram_registry_state() -> dict[str, object]:
                 ),
                 "type": "histogram",
                 "family": family.family,
-                "buckets": [
-                    b
-                    for b in getattr(
+                "buckets": list(
+                    getattr(
                         histogram,
                         "_upper_bounds",
                         getattr(histogram, "_upperbounds", ()),
                     )
-                ],
+                ),
             }
     return state
 

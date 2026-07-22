@@ -6,7 +6,6 @@ Tests GoldWriterValidationMixin strict schema validation and mode validation.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
 
 import pandera.pandas as pandera_pa
 import pytest

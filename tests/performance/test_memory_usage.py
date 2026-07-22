@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import gc
 import tracemalloc
-from typing import Any
 
 import pytest
 import psutil

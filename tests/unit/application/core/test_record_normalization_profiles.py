@@ -12,7 +12,7 @@ from bioetl.application.core.record_normalization_processor import (
     NormalizationContractError,
 )
 
-# ruff: noqa: F403,F405
+# ruff: noqa: F403
 from tests.unit.application.core.normalization_test_support import *
 
 

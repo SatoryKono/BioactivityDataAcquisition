@@ -103,4 +103,4 @@ def test_lazy_export_raises_attribute_error_for_unknown_name() -> None:
     import bioetl.composition.bootstrap.cli as cli_pkg
 
     with pytest.raises(AttributeError, match="has no attribute"):
-        getattr(cli_pkg, "does_not_exist_in_cli_exports")
+        cli_pkg.does_not_exist_in_cli_exports

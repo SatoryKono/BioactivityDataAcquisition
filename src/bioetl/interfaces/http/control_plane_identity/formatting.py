@@ -18,13 +18,23 @@ def stable_hash(value: object) -> str | None:
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
+def _count_csv_items(full: str) -> int:
+    return len([item for item in full.split(",") if item.strip()])
+
+
 def short_value(value: object | None) -> str:
     full = format_full_value(value)
     if not full:
         return ""
     if "," in full:
-        return f"{len([item for item in full.split(',') if item.strip()])} items"
-    return full if len(full) <= 12 else full[:12]
+        return f"{_count_csv_items(full)} items"
+    if len(full) <= 12:
+        return full
+    return full[:12]
+
+
+def _format_sequence_value(value: Iterable[object]) -> str:
+    return ", ".join(str(item) for item in value if is_present(item))
 
 
 def format_full_value(value: object | None) -> str:
@@ -35,17 +45,24 @@ def format_full_value(value: object | None) -> str:
     if isinstance(value, int | float):
         return str(value)
     if isinstance(value, list | tuple | set):
-        return ", ".join(str(item) for item in value if is_present(item))
+        return _format_sequence_value(value)
     if isinstance(value, Mapping):
         return json.dumps(value, sort_keys=True, default=str)
     return str(value).strip()
+
+
+def _is_present_string(value: str) -> bool:
+    text = value.strip()
+    if not text:
+        return False
+    return text.lower() not in {"none", "null"}
 
 
 def is_present(value: object | None) -> bool:
     if value is None:
         return False
     if isinstance(value, str):
-        return bool(value.strip()) and value.strip().lower() not in {"none", "null"}
+        return _is_present_string(value)
     if isinstance(value, Sequence) and not isinstance(value, str | bytes | bytearray):
         return bool(value)
     if isinstance(value, Mapping):

@@ -18,28 +18,41 @@ from bioetl.interfaces.http.control_plane_identity.formatting import (
 from bioetl.interfaces.http.control_plane_identity.specs import CHECKPOINT_ANCHORS
 
 
-def build_checkpoint_compare(
-    manifest: RunManifest | None,
-    *,
-    checkpoint_metadata: dict[str, object] | None = None,
+def _resolve_checkpoint_payload(
+    manifest: RunManifest,
+    checkpoint_metadata: dict[str, object] | None,
 ) -> dict[str, object]:
-    if manifest is None:
-        return {"status": "UNKNOWN", "rows": []}
-    current = current_checkpoint_anchors(manifest)
-    checkpoint = (
-        normalize_checkpoint_metadata_payload(checkpoint_metadata)
-        if checkpoint_metadata is not None
-        else checkpoint_anchor_payload(manifest)
-    )
-    if not checkpoint:
-        return {
-            "status": "MISSING",
-            "rows": [
-                checkpoint_row(name, current.get(name), None, "MISSING")
-                for name in CHECKPOINT_ANCHORS
-                if is_present(current.get(name))
-            ],
-        }
+    if checkpoint_metadata is not None:
+        return normalize_checkpoint_metadata_payload(checkpoint_metadata)
+    return checkpoint_anchor_payload(manifest)
+
+
+def _missing_checkpoint_rows(
+    current: dict[str, object | None],
+) -> list[dict[str, object]]:
+    return [
+        checkpoint_row(name, current.get(name), None, "MISSING")
+        for name in CHECKPOINT_ANCHORS
+        if is_present(current.get(name))
+    ]
+
+
+def _aggregate_checkpoint_status(statuses: list[str]) -> str:
+    if "MISMATCH" in statuses:
+        return "MISMATCH"
+    if "MISSING" in statuses and "OK" in statuses:
+        return "PARTIAL"
+    if all(item == "MISSING" for item in statuses):
+        return "MISSING"
+    if all(item in {"OK", "N/A"} for item in statuses):
+        return "OK"
+    return "PARTIAL"
+
+
+def _compare_checkpoint_pairs(
+    current: dict[str, object | None],
+    checkpoint: dict[str, object],
+) -> tuple[str, list[dict[str, object]]]:
     rows: list[dict[str, object]] = []
     statuses: list[str] = []
     for name in CHECKPOINT_ANCHORS:
@@ -48,16 +61,21 @@ def build_checkpoint_compare(
         status = checkpoint_pair_status(current_value, checkpoint_value)
         statuses.append(status)
         rows.append(checkpoint_row(name, current_value, checkpoint_value, status))
-    if "MISMATCH" in statuses:
-        status = "MISMATCH"
-    elif "MISSING" in statuses and "OK" in statuses:
-        status = "PARTIAL"
-    elif all(item == "MISSING" for item in statuses):
-        status = "MISSING"
-    elif all(item in {"OK", "N/A"} for item in statuses):
-        status = "OK"
-    else:
-        status = "PARTIAL"
+    return _aggregate_checkpoint_status(statuses), rows
+
+
+def build_checkpoint_compare(
+    manifest: RunManifest | None,
+    *,
+    checkpoint_metadata: dict[str, object] | None = None,
+) -> dict[str, object]:
+    if manifest is None:
+        return {"status": "UNKNOWN", "rows": []}
+    current = current_checkpoint_anchors(manifest)
+    checkpoint = _resolve_checkpoint_payload(manifest, checkpoint_metadata)
+    if not checkpoint:
+        return {"status": "MISSING", "rows": _missing_checkpoint_rows(current)}
+    status, rows = _compare_checkpoint_pairs(current, checkpoint)
     return {"status": status, "rows": rows}
 
 

@@ -14,9 +14,9 @@ _WINDOWS_GIT_FAILURE_CODES = {-1, 4294967295}
 def _is_wsl() -> bool:
     """Detect if running under WSL (Windows Subsystem for Linux)."""
     try:
-        with open("/proc/version", "r") as f:
+        with open("/proc/version") as f:
             return "microsoft" in f.read().lower()
-    except (OSError, IOError):
+    except OSError:
         return False
 
 
