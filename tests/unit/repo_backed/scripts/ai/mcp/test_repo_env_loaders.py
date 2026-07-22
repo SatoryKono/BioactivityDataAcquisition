@@ -161,8 +161,18 @@ def test_powershell_neo4j_auth_normalization(
 
 
 @pytest.mark.parametrize("auth", ["fixture-user", "/fixture-password", "fixture-user/"])
-def test_bash_rejects_malformed_neo4j_auth_without_leaking(auth: str) -> None:
-    result = _run_bash("normalize_repo_env_aliases", env=_clean_env(NEO4J_AUTH=auth))
+@pytest.mark.parametrize("explicit_credentials", [False, True])
+def test_bash_rejects_malformed_neo4j_auth_without_leaking(
+    auth: str, explicit_credentials: bool
+) -> None:
+    result = _run_bash(
+        "normalize_repo_env_aliases",
+        env=_clean_env(
+            NEO4J_AUTH=auth,
+            NEO4J_USERNAME="explicit-user" if explicit_credentials else None,
+            NEO4J_PASSWORD="explicit-password" if explicit_credentials else None,
+        ),
+    )
 
     assert result.returncode != 0
     assert "NEO4J_AUTH must use non-empty username/password format" in result.stderr
@@ -171,10 +181,17 @@ def test_bash_rejects_malformed_neo4j_auth_without_leaking(auth: str) -> None:
 
 @POWERSHELL_MARK
 @pytest.mark.parametrize("auth", ["fixture-user", "/fixture-password", "fixture-user/"])
-def test_powershell_rejects_malformed_neo4j_auth_without_leaking(auth: str) -> None:
+@pytest.mark.parametrize("explicit_credentials", [False, True])
+def test_powershell_rejects_malformed_neo4j_auth_without_leaking(
+    auth: str, explicit_credentials: bool
+) -> None:
     result = _run_powershell(
         "Normalize-BioetlRepoEnvAliases",
-        env=_clean_env(NEO4J_AUTH=auth),
+        env=_clean_env(
+            NEO4J_AUTH=auth,
+            NEO4J_USERNAME="explicit-user" if explicit_credentials else None,
+            NEO4J_PASSWORD="explicit-password" if explicit_credentials else None,
+        ),
     )
 
     assert result.returncode != 0
@@ -186,7 +203,7 @@ def test_bash_explicit_neo4j_credentials_take_precedence() -> None:
     result = _run_bash(
         "normalize_repo_env_aliases && printf '%s\\n%s\\n' \"$NEO4J_USERNAME\" \"$NEO4J_PASSWORD\"",
         env=_clean_env(
-            NEO4J_AUTH="malformed-packed-value",
+            NEO4J_AUTH="packed-user/packed-password",
             NEO4J_USERNAME="explicit-user",
             NEO4J_PASSWORD="explicit-password",
         ),
@@ -202,7 +219,7 @@ def test_powershell_explicit_neo4j_credentials_take_precedence() -> None:
         "[Console]::Out.WriteLine($env:NEO4J_USERNAME); "
         "[Console]::Out.WriteLine($env:NEO4J_PASSWORD)",
         env=_clean_env(
-            NEO4J_AUTH="malformed-packed-value",
+            NEO4J_AUTH="packed-user/packed-password",
             NEO4J_USERNAME="explicit-user",
             NEO4J_PASSWORD="explicit-password",
         ),
