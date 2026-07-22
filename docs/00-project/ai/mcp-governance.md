@@ -111,3 +111,19 @@ tracked MCP configs:
   `scripts/ai/mcp/mcp_dockerhub_wrapper.ps1` (Windows)
 - `scripts/ai/mcp/mcp_needle_wrapper.sh`
 - `scripts/ai/mcp/mcp_paper_search_wrapper.sh`
+
+## Devin HTTP Header Projection
+
+The canonical MCP server inventory is shared with Devin, but HTTP authentication
+must use Devin-supported configuration. The generated `.devin/config.json`
+projects the `ref` credential as:
+
+```json
+"headers": {
+  "x-ref-api-key": "$REF_TOOL_API_KEY"
+}
+```
+
+`env_http_headers` remains a Codex-specific field and MUST NOT be copied into
+Devin configuration. Store `REF_TOOL_API_KEY` in Devin Secrets; never commit the
+secret value.

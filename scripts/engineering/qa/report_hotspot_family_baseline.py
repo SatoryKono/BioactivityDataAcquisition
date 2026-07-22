@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import time
 from datetime import date
 from pathlib import Path
 
@@ -249,8 +251,47 @@ def _render_markdown(
 
 
 def _write_text(path: Path, content: str) -> None:
+    """Write UTF-8 text with retries for flaky WSL/Google-Drive mounts.
+
+    Some ``/mnt/<drive>`` mounts reject certain open modes intermittently
+    (``OSError: [Errno 22] Invalid argument``). Prefer atomic replace, then
+    fall back to direct overwrite without the ``newline=`` kwarg.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content, encoding="utf-8", newline="\n")
+    if path.exists():
+        try:
+            if path.read_text(encoding="utf-8") == content:
+                return
+        except OSError:
+            pass
+
+    payload = content if content.endswith("\n") or content == "" else content + "\n"
+    temporary_path = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    last_error: OSError | None = None
+    for attempt in range(3):
+        try:
+            # Avoid newline= on flaky FUSE mounts; normalize payload above.
+            temporary_path.write_text(payload, encoding="utf-8")
+            os.replace(temporary_path, path)
+            return
+        except OSError as exc:
+            last_error = exc
+            if temporary_path.exists():
+                try:
+                    temporary_path.unlink()
+                except OSError:
+                    pass
+            # Brief backoff for Google Drive / antivirus locks.
+            time.sleep(0.05 * (attempt + 1))
+    try:
+        with path.open("w", encoding="utf-8") as handle:
+            handle.write(payload)
+        return
+    except OSError as exc:
+        last_error = exc
+    raise OSError(
+        f"Unable to write {path} after atomic and direct retries: {last_error}"
+    ) from last_error
 
 
 def _check_file_sync(path: Path, expected: str) -> bool:

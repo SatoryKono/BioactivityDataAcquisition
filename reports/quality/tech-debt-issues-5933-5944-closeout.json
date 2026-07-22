@@ -162,15 +162,15 @@
   },
   "metrics": {
     "source_module_count": {
-      "current": 2241,
+      "current": 2244,
       "source": "reports/quality/module-coverage-inventory.json"
     },
     "source_tree_sha256": {
-      "current": "9ddcbcf42aa107d5d596ab0d8dc11f3c08a886983af1dab513382e827d95f414",
+      "current": "0a3a04f2b825f1dcc3764c3d9e8c08f72cab34ef7649c6dfe06405de62c1957e",
       "source": "reports/quality/module-coverage-inventory.json"
     },
     "architecture_quality_score": {
-      "current": 8.66,
+      "current": 8.92,
       "source": "reports/quality/architecture-quality-scorecard.json"
     },
     "config_count": {
@@ -210,7 +210,7 @@
       "theme": "governance_artifact_rebaseline",
       "outcome": "remote-main baseline records required-on-remote and branch-introduction semantics for governance artifacts; quality scorecard, module coverage, duplication baseline, remote baseline, and debt gates are regenerated against the current artifacts",
       "debt_outcome": "improved",
-      "integral_score": 8.66
+      "integral_score": 8.92
     },
     "5938": {
       "status": "closeable",

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from scripts.engineering.qa.report_hotspot_family_baseline import (
@@ -7,9 +9,20 @@ from scripts.engineering.qa.report_hotspot_family_baseline import (
     _budget_warnings_for_family,
     _merge_reviewed_baseline_metrics,
     _resolve_snapshot_date,
+    _write_text,
 )
 
 pytestmark = pytest.mark.unit
+
+
+def test_write_text_atomically_replaces_existing_file(tmp_path: Path) -> None:
+    output_path = tmp_path / "hotspot-family-baseline.md"
+    output_path.write_text("stale\n", encoding="utf-8")
+
+    _write_text(output_path, "current\n")
+
+    assert output_path.read_text(encoding="utf-8") == "current\n"
+    assert list(tmp_path.glob(".hotspot-family-baseline.md.*.tmp")) == []
 
 
 def test_resolve_snapshot_date_prefers_reviewed_scorecard_snapshot() -> None:
