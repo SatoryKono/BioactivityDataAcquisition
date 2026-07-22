@@ -42,7 +42,7 @@ class TestExportMcpEnvFromDotenv:
 
     def test_script_exists(self) -> None:
         """Test that the export script exists."""
-        script_path = Path(__file__).parent.parent.parent.parent.parent / "scripts/ai/mcp/export_mcp_env_from_dotenv.ps1"
+        script_path = Path(__file__).parent.parent.parent.parent / "scripts/ai/mcp/export_mcp_env_from_dotenv.ps1"
         assert script_path.exists()
 
     def test_script_runs_without_errors(self, tmp_path: Path) -> None:
