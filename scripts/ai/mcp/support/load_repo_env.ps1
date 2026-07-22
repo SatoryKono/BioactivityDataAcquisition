@@ -3,8 +3,16 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 function Normalize-BioetlRepoEnvAliases {
-    if (-not $env:GITHUB_PERSONAL_ACCESS_TOKEN -and $env:GITHUB_TOKEN) {
-        $env:GITHUB_PERSONAL_ACCESS_TOKEN = $env:GITHUB_TOKEN
+    # GitHub MCP expects GITHUB_PERSONAL_ACCESS_TOKEN; local .env often has GITHUB_TOKEN.
+    if (-not $env:GITHUB_PERSONAL_ACCESS_TOKEN) {
+        if ($env:GITHUB_TOKEN) {
+            $env:GITHUB_PERSONAL_ACCESS_TOKEN = $env:GITHUB_TOKEN
+        } elseif ($env:GITHUB_CDX_PERSONAL_ACCESS_TOKEN) {
+            $env:GITHUB_PERSONAL_ACCESS_TOKEN = $env:GITHUB_CDX_PERSONAL_ACCESS_TOKEN
+        } elseif ($env:GITHUB_ANY_PERSONAL_ADjCCESS_TOKEN) {
+            # Historical typo key kept for local compat (do not introduce in new .env files).
+            $env:GITHUB_PERSONAL_ACCESS_TOKEN = $env:GITHUB_ANY_PERSONAL_ADjCCESS_TOKEN
+        }
     }
     if (-not $env:GITHUB_TOKEN -and $env:GITHUB_PERSONAL_ACCESS_TOKEN) {
         $env:GITHUB_TOKEN = $env:GITHUB_PERSONAL_ACCESS_TOKEN
@@ -19,6 +27,20 @@ function Normalize-BioetlRepoEnvAliases {
             $env:BRAVE_API_KEY = $env:BRAVE_SEARCH_API_KEY
         } elseif ($env:BRAVE_API_KEY1) {
             $env:BRAVE_API_KEY = $env:BRAVE_API_KEY1
+        }
+    }
+
+    # ADR analysis uses OpenRouter; many local envs only set OPENAI_API_KEY.
+    if (-not $env:OPENROUTER_API_KEY -and $env:OPENAI_API_KEY) {
+        $env:OPENROUTER_API_KEY = $env:OPENAI_API_KEY
+    }
+
+    # Context7 optional key aliases
+    if (-not $env:CONTEXT7_API_KEY) {
+        if ($env:CONTEXT7_API_TOKEN) {
+            $env:CONTEXT7_API_KEY = $env:CONTEXT7_API_TOKEN
+        } elseif ($env:UPSTASH_CONTEXT7_API_KEY) {
+            $env:CONTEXT7_API_KEY = $env:UPSTASH_CONTEXT7_API_KEY
         }
     }
 
@@ -50,6 +72,18 @@ function Normalize-BioetlRepoEnvAliases {
     }
     if (-not $env:GRAFANA_PASSWORD -and $env:GF_SECURITY_ADMIN_PASSWORD) {
         $env:GRAFANA_PASSWORD = $env:GF_SECURITY_ADMIN_PASSWORD
+    }
+
+    # Neo4j auth pack → discrete username/password when needed.
+    if ($env:NEO4J_AUTH -and ((-not $env:NEO4J_USERNAME) -or (-not $env:NEO4J_PASSWORD))) {
+        $authParts = $env:NEO4J_AUTH -split '/', 2
+        if ($authParts.Count -eq 2) {
+            if (-not $env:NEO4J_USERNAME) { $env:NEO4J_USERNAME = $authParts[0] }
+            if (-not $env:NEO4J_PASSWORD) { $env:NEO4J_PASSWORD = $authParts[1] }
+        }
+    }
+    if (-not $env:NEO4J_URL -and $env:NEO4J_URI) {
+        $env:NEO4J_URL = $env:NEO4J_URI
     }
 }
 

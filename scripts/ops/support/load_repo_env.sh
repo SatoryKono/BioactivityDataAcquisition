@@ -176,6 +176,34 @@ normalize_repo_env_aliases() {
     export REF_TOOL_API_KEY="${REF_API_KEY}"
   fi
 
+  if [[ -z "${GITHUB_PERSONAL_ACCESS_TOKEN:-}" && -n "${GITHUB_CDX_PERSONAL_ACCESS_TOKEN:-}" ]]; then
+    export GITHUB_PERSONAL_ACCESS_TOKEN="${GITHUB_CDX_PERSONAL_ACCESS_TOKEN}"
+  fi
+  # Historical typo key kept for local compat only.
+  if [[ -z "${GITHUB_PERSONAL_ACCESS_TOKEN:-}" && -n "${GITHUB_ANY_PERSONAL_ADjCCESS_TOKEN:-}" ]]; then
+    export GITHUB_PERSONAL_ACCESS_TOKEN="${GITHUB_ANY_PERSONAL_ADjCCESS_TOKEN}"
+  fi
+
+  if [[ -z "${OPENROUTER_API_KEY:-}" && -n "${OPENAI_API_KEY:-}" ]]; then
+    export OPENROUTER_API_KEY="${OPENAI_API_KEY}"
+  fi
+
+  if [[ -z "${CONTEXT7_API_KEY:-}" ]]; then
+    if [[ -n "${CONTEXT7_API_TOKEN:-}" ]]; then
+      export CONTEXT7_API_KEY="${CONTEXT7_API_TOKEN}"
+    elif [[ -n "${UPSTASH_CONTEXT7_API_KEY:-}" ]]; then
+      export CONTEXT7_API_KEY="${UPSTASH_CONTEXT7_API_KEY}"
+    fi
+  fi
+
+  if [[ -n "${NEO4J_AUTH:-}" && ( -z "${NEO4J_USERNAME:-}" || -z "${NEO4J_PASSWORD:-}" ) ]]; then
+    export NEO4J_USERNAME="${NEO4J_USERNAME:-${NEO4J_AUTH%%/*}}"
+    export NEO4J_PASSWORD="${NEO4J_PASSWORD:-${NEO4J_AUTH#*/}}"
+  fi
+  if [[ -z "${NEO4J_URL:-}" && -n "${NEO4J_URI:-}" ]]; then
+    export NEO4J_URL="${NEO4J_URI}"
+  fi
+
   if [[ -z "${HUB_PAT_TOKEN:-}" ]]; then
     if [[ -n "${DOCKERHUB_PAT:-}" ]]; then
       export HUB_PAT_TOKEN="${DOCKERHUB_PAT}"

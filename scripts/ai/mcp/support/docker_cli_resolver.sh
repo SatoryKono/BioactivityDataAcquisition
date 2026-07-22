@@ -13,7 +13,8 @@ _resolve_first_working_docker() {
         printf '%s\n' "${candidate}"
         return 0
       fi
-    elif "${candidate}" mcp gateway --help >/dev/null 2>&1; then
+    elif "${candidate}" version >/dev/null 2>&1 \
+      && "${candidate}" mcp gateway --help >/dev/null 2>&1; then
       printf '%s\n' "${candidate}"
       return 0
     fi

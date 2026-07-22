@@ -166,11 +166,15 @@ def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> 
         "UV_TOOL_DIR": ".cache/uv-tools",
         "NPM_CONFIG_CACHE": ".cache/npm-cache",
     }
+    runtime_cache_root = Path.home() / ".cache/bioetl-mcp"
     assert runtime_servers["fetch"]["env"] == {
-        "UV_CACHE_DIR": str((workspace_root / ".cache/uv-cache").resolve()),
-        "UV_TOOL_DIR": str((workspace_root / ".cache/uv-tools").resolve()),
-        "NPM_CONFIG_CACHE": str((workspace_root / ".cache/npm-cache").resolve()),
+        "UV_CACHE_DIR": str(runtime_cache_root / "uv-cache"),
+        "UV_TOOL_DIR": str(runtime_cache_root / "uv-tools"),
+        "NPM_CONFIG_CACHE": str(runtime_cache_root / "npm-cache"),
     }
+    assert runtime_servers["context7"]["env"]["NPM_CONFIG_CACHE"] == str(
+        runtime_cache_root / "npm-cache"
+    )
     assert servers["github"]["args"][0] == (
         f"scripts/ai/mcp/github-mcp-wrapper{wrapper_suffix}"
     )

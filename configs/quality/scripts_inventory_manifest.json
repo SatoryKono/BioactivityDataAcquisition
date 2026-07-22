@@ -1,10 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-22T09:53:38.426541+00:00",
+  "generated_at": "2026-07-22T14:20:55.633152+00:00",
   "summary": {
-    "total_scripts": 502,
+    "total_scripts": 509,
     "status_counts": {
-      "active": 340,
+      "active": 343,
+      "orphan": 4,
       "supporting": 162
     },
     "reference_group_coverage": {
@@ -13,7 +14,7 @@
       "ci": 65,
       "docs": 205,
       "other": 33,
-      "scripts": 389,
+      "scripts": 392,
       "skills": 16,
       "tests": 225
     }
@@ -544,7 +545,7 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 426,
+          "line": 447,
           "source_group": "tests",
           "text": "ensure_script = _to_bash_path(root / \"scripts/ai/codex/helper/ensure-mcp.sh\")"
         }
@@ -2133,6 +2134,22 @@
       ]
     },
     {
+      "path": "scripts/ai/mcp/_check_env_keys.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/mcp/_patch_grok_mcp_tokens.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/ai/mcp/check.sh",
       "type": "sh",
       "status": "supporting",
@@ -2251,6 +2268,14 @@
       ]
     },
     {
+      "path": "scripts/ai/mcp/export_mcp_env_from_dotenv.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/ai/mcp/github-mcp-wrapper.ps1",
       "type": "ps1",
       "status": "active",
@@ -2259,7 +2284,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 277,
+          "line": 287,
           "source_group": "tests",
           "text": "ps_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.ps1\").read_text("
         },
@@ -2286,19 +2311,19 @@
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 44,
+          "line": 41,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
-          "line": 8,
+          "line": 9,
           "source_group": "scripts",
           "text": "EXPECTED_GITHUB_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/github-mcp-wrapper.sh\""
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 274,
+          "line": 284,
           "source_group": "tests",
           "text": "sh_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.sh\").read_text("
         },
@@ -2344,7 +2369,7 @@
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 134,
+          "line": 131,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_adr_analysis_wrapper.sh\""
         }
@@ -2375,13 +2400,13 @@
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 68,
+          "line": 65,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
-          "line": 11,
+          "line": 12,
           "source_group": "scripts",
           "text": "EXPECTED_AST_GREP_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_ast_grep_wrapper.sh\""
         }
@@ -2421,13 +2446,13 @@
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 96,
+          "line": 93,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
-          "line": 15,
+          "line": 16,
           "source_group": "scripts",
           "text": "EXPECTED_BRAVE_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
         },
@@ -2473,7 +2498,7 @@
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 155,
+          "line": 152,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_code_analyzer_wrapper.sh\""
         }
@@ -2504,13 +2529,13 @@
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 75,
+          "line": 72,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_code_interpreter_wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
-          "line": 12,
+          "line": 13,
           "source_group": "scripts",
           "text": "EXPECTED_CODE_INTERPRETER_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_code_interpreter_wrapper.sh\""
         }
@@ -2537,13 +2562,13 @@
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 61,
+          "line": 58,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_context7_wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
-          "line": 10,
+          "line": 11,
           "source_group": "scripts",
           "text": "EXPECTED_CONTEXT7_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_context7_wrapper.sh\""
         }
@@ -2583,7 +2608,7 @@
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 124,
+          "line": 121,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_deja_wrapper.sh\""
         }
@@ -2621,7 +2646,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 557,
+          "line": 558,
           "source_group": "tests",
           "text": "powershell_wrapper = (ROOT / \"scripts/ai/mcp/mcp_docker_wrapper.ps1\").read_text("
         }
@@ -2640,13 +2665,13 @@
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 54,
+          "line": 51,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_docker_wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
-          "line": 9,
+          "line": 10,
           "source_group": "scripts",
           "text": "EXPECTED_DOCKER_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_docker_wrapper.sh\""
         }
@@ -2691,6 +2716,35 @@
       "next_step": "Retain as the MCP wrapper for DockerHub server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
     },
     {
+      "path": "scripts/ai/mcp/mcp_fetch_wrapper.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_fetch_wrapper.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 29,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/mcp/check.sh",
+          "line": 8,
+          "source_group": "scripts",
+          "text": "EXPECTED_FETCH_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_fetch_wrapper.sh\""
+        }
+      ]
+    },
+    {
       "path": "scripts/ai/mcp/mcp_github_actions_wrapper.ps1",
       "type": "ps1",
       "status": "supporting",
@@ -2724,7 +2778,7 @@
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 165,
+          "line": 162,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_github_actions_wrapper.sh\""
         }
@@ -2768,13 +2822,13 @@
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 89,
+          "line": 86,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
-          "line": 14,
+          "line": 15,
           "source_group": "scripts",
           "text": "EXPECTED_GRAFANA_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_grafana_wrapper.sh\""
         },
@@ -2807,13 +2861,13 @@
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 117,
+          "line": 114,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_mermaid_wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
-          "line": 18,
+          "line": 19,
           "source_group": "scripts",
           "text": "EXPECTED_MERMAID_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_mermaid_wrapper.sh\""
         }
@@ -2857,7 +2911,7 @@
         },
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 145,
+          "line": 142,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_mutmut_wrapper.sh\""
         }
@@ -2914,13 +2968,13 @@
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 103,
+          "line": 100,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
-          "line": 16,
+          "line": 17,
           "source_group": "scripts",
           "text": "EXPECTED_NEO4J_CYPHER_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
         },
@@ -3061,13 +3115,13 @@
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 82,
+          "line": 79,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
-          "line": 13,
+          "line": 14,
           "source_group": "scripts",
           "text": "EXPECTED_PROMETHEUS_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
         },
@@ -3142,7 +3196,7 @@
       "references": [
         {
           "path": "scripts/ai/mcp/check.sh",
-          "line": 243,
+          "line": 248,
           "source_group": "scripts",
           "text": "if python3 \"${SCRIPT_DIR}/protocol_smoke.py\" --config \"${PROJECT_MCP_CONFIG}\" --server memory --timeout 15 >/dev/null; then"
         },
@@ -3206,7 +3260,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 21,
+      "reference_count": 19,
       "references": [
         {
           "path": "scripts/ai/mcp/mcp_brave_search_wrapper.sh",
@@ -3221,18 +3275,6 @@
           "text": "source \"${script_dir}/support/docker_cli_resolver.sh\""
         },
         {
-          "path": "scripts/ai/mcp/mcp_context7_wrapper.sh",
-          "line": 6,
-          "source_group": "scripts",
-          "text": "# shellcheck source=./support/docker_cli_resolver.sh"
-        },
-        {
-          "path": "scripts/ai/mcp/mcp_context7_wrapper.sh",
-          "line": 7,
-          "source_group": "scripts",
-          "text": "source \"${script_dir}/support/docker_cli_resolver.sh\""
-        },
-        {
           "path": "scripts/ai/mcp/mcp_docker_docs_wrapper.sh",
           "line": 5,
           "source_group": "scripts",
@@ -3252,6 +3294,18 @@
         },
         {
           "path": "scripts/ai/mcp/mcp_docker_wrapper.sh",
+          "line": 6,
+          "source_group": "scripts",
+          "text": "source \"${script_dir}/support/docker_cli_resolver.sh\""
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_dockerhub_wrapper.sh",
+          "line": 5,
+          "source_group": "scripts",
+          "text": "# shellcheck source=./support/docker_cli_resolver.sh"
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_dockerhub_wrapper.sh",
           "line": 6,
           "source_group": "scripts",
           "text": "source \"${script_dir}/support/docker_cli_resolver.sh\""
@@ -3263,7 +3317,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 18,
+      "reference_count": 22,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
@@ -3284,6 +3338,12 @@
           "text": "- `scripts/ai/mcp/support/load_repo_env.ps1` - PowerShell environment loader"
         },
         {
+          "path": "scripts/ai/mcp/export_mcp_env_from_dotenv.ps1",
+          "line": 28,
+          "source_group": "scripts",
+          "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
+        },
+        {
           "path": "scripts/ai/mcp/github-mcp-wrapper.ps1",
           "line": 6,
           "source_group": "scripts",
@@ -3296,19 +3356,13 @@
           "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
         },
         {
+          "path": "scripts/ai/mcp/mcp_ast_grep_wrapper.ps1",
+          "line": 6,
+          "source_group": "scripts",
+          "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
+        },
+        {
           "path": "scripts/ai/mcp/mcp_brave_search_wrapper.ps1",
-          "line": 6,
-          "source_group": "scripts",
-          "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
-        },
-        {
-          "path": "scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1",
-          "line": 6,
-          "source_group": "scripts",
-          "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
-        },
-        {
-          "path": "scripts/ai/mcp/mcp_context7_wrapper.ps1",
           "line": 6,
           "source_group": "scripts",
           "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
@@ -3365,7 +3419,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 20,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
@@ -3386,31 +3440,31 @@
           "text": ". (Join-Path $PSScriptRoot \"support/token_validation.ps1\")"
         },
         {
+          "path": "scripts/ai/mcp/mcp_adr_analysis_wrapper.ps1",
+          "line": 10,
+          "source_group": "scripts",
+          "text": ". (Join-Path $PSScriptRoot \"support/token_validation.ps1\")"
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_ast_grep_wrapper.ps1",
+          "line": 10,
+          "source_group": "scripts",
+          "text": ". (Join-Path $PSScriptRoot \"support/token_validation.ps1\")"
+        },
+        {
           "path": "scripts/ai/mcp/mcp_brave_search_wrapper.ps1",
           "line": 10,
           "source_group": "scripts",
           "text": ". (Join-Path $PSScriptRoot \"support/token_validation.ps1\")"
         },
         {
-          "path": "scripts/ai/mcp/mcp_dockerhub_wrapper.ps1",
-          "line": 14,
-          "source_group": "scripts",
-          "text": ". (Join-Path $PSScriptRoot \"support/token_validation.ps1\")"
-        },
-        {
-          "path": "scripts/ai/mcp/mcp_grafana_wrapper.ps1",
+          "path": "scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1",
           "line": 10,
           "source_group": "scripts",
           "text": ". (Join-Path $PSScriptRoot \"support/token_validation.ps1\")"
         },
         {
-          "path": "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1",
-          "line": 10,
-          "source_group": "scripts",
-          "text": ". (Join-Path $PSScriptRoot \"support/token_validation.ps1\")"
-        },
-        {
-          "path": "scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1",
+          "path": "scripts/ai/mcp/mcp_code_interpreter_wrapper.ps1",
           "line": 10,
           "source_group": "scripts",
           "text": ". (Join-Path $PSScriptRoot \"support/token_validation.ps1\")"
@@ -3422,7 +3476,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 18,
+      "reference_count": 34,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
@@ -3449,6 +3503,18 @@
           "text": "source \"${REPO_ROOT}/scripts/ai/mcp/support/token_validation.sh\""
         },
         {
+          "path": "scripts/ai/mcp/mcp_adr_analysis_wrapper.sh",
+          "line": 13,
+          "source_group": "scripts",
+          "text": "# shellcheck source=./support/token_validation.sh"
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_adr_analysis_wrapper.sh",
+          "line": 14,
+          "source_group": "scripts",
+          "text": "source \"${SCRIPT_DIR}/support/token_validation.sh\""
+        },
+        {
           "path": "scripts/ai/mcp/mcp_brave_search_wrapper.sh",
           "line": 10,
           "source_group": "scripts",
@@ -3459,18 +3525,78 @@
           "line": 11,
           "source_group": "scripts",
           "text": "source \"${script_dir}/support/token_validation.sh\""
-        },
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/support/uv_resolver.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
         {
-          "path": "scripts/ai/mcp/mcp_grafana_wrapper.sh",
-          "line": 10,
-          "source_group": "scripts",
-          "text": "# shellcheck source=./support/token_validation.sh"
-        },
-        {
-          "path": "scripts/ai/mcp/mcp_grafana_wrapper.sh",
+          "path": "scripts/ai/mcp/mcp_code_interpreter_wrapper.ps1",
           "line": 11,
           "source_group": "scripts",
-          "text": "source \"${script_dir}/support/token_validation.sh\""
+          "text": ". (Join-Path $PSScriptRoot \"support/uv_resolver.ps1\")"
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_fetch_wrapper.ps1",
+          "line": 11,
+          "source_group": "scripts",
+          "text": ". (Join-Path $PSScriptRoot \"support/uv_resolver.ps1\")"
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_mutmut_wrapper.ps1",
+          "line": 11,
+          "source_group": "scripts",
+          "text": ". (Join-Path $PSScriptRoot \"support/uv_resolver.ps1\")"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/support/uv_resolver.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 6,
+      "references": [
+        {
+          "path": "scripts/ai/mcp/mcp_code_interpreter_wrapper.sh",
+          "line": 16,
+          "source_group": "scripts",
+          "text": "# shellcheck source=./support/uv_resolver.sh"
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_code_interpreter_wrapper.sh",
+          "line": 17,
+          "source_group": "scripts",
+          "text": "source \"${SCRIPT_DIR}/support/uv_resolver.sh\""
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_fetch_wrapper.sh",
+          "line": 12,
+          "source_group": "scripts",
+          "text": "# shellcheck source=./support/uv_resolver.sh"
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_fetch_wrapper.sh",
+          "line": 13,
+          "source_group": "scripts",
+          "text": "source \"${SCRIPT_DIR}/support/uv_resolver.sh\""
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_mutmut_wrapper.sh",
+          "line": 15,
+          "source_group": "scripts",
+          "text": "# shellcheck source=./support/uv_resolver.sh"
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_mutmut_wrapper.sh",
+          "line": 16,
+          "source_group": "scripts",
+          "text": "source \"${SCRIPT_DIR}/support/uv_resolver.sh\""
         }
       ]
     },
@@ -15143,7 +15269,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 754,
+          "line": 755,
           "source_group": "tests",
           "text": "probe = (ROOT / \"scripts/ops/runtime/docker/docker_runtime_probe.py\").read_text("
         }
@@ -16398,7 +16524,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 691,
+          "line": 692,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
@@ -16466,7 +16592,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 691,
+          "line": 692,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
