@@ -18,7 +18,7 @@ export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-${REPO_ROOT}/.cache/npm-cache}"
 # Auto-recall path configuration
 export DEJA_AUTO_RECALL_PATH="${REPO_ROOT}/.codex/AGENTS.md"
 
-exit_mcp_validate_only "deja"
+mcp_exit_if_validate_only "deja"
 
 # Published package moved off @modelcontextprotocol/server-deja-vu (404).
 # Current package: @vshulcz/deja-vu (bin: deja).

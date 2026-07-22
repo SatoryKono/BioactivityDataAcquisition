@@ -18,7 +18,7 @@ export PROJECT_PATH="${REPO_ROOT}"
 export ADR_PATH="${REPO_ROOT}/docs/02-architecture/decisions"
 export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-${REPO_ROOT}/.cache/npm-cache}"
 
-exit_mcp_validate_only "adr-analysis"
+mcp_exit_if_validate_only "adr-analysis"
 
 # Published package: mcp-adr-analysis-server (bin: mcp-adr-analysis-server)
 exec npx -y mcp-adr-analysis-server --stdio

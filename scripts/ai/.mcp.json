@@ -24,17 +24,14 @@
       }
     },
     "fetch": {
-      "command": "uvx",
+      "command": "bash",
       "args": [
-        "--python",
-        "3.13",
-        "--from",
-        "mcp-server-fetch==2025.4.7",
-        "mcp-server-fetch"
+        "scripts/ai/mcp/mcp_fetch_wrapper.sh"
       ],
       "env": {
         "UV_CACHE_DIR": ".cache/uv-cache",
-        "UV_TOOL_DIR": ".cache/uv-tools"
+        "UV_TOOL_DIR": ".cache/uv-tools",
+        "NPM_CONFIG_CACHE": ".cache/npm-cache"
       },
       "startup_timeout_sec": 300
     },

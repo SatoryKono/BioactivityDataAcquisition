@@ -1,0 +1,11 @@
+npm warn cleanup Failed to remove some directories [
+npm warn cleanup   [
+npm warn cleanup     '\\\\?\\E:\\home\\ubuntu\\bioetl\\.cache\\npm-cache\\_npx\\06840a80dbd2e0e4\\node_modules',
+npm warn cleanup     [Error: EPERM: operation not permitted, rmdir 'E:\home\ubuntu\bioetl\.cache\npm-cache\_npx\06840a80dbd2e0e4\node_modules\zod\v4'] {
+npm warn cleanup       errno: -4048,
+npm warn cleanup       code: 'EPERM',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: 'E:\\home\\ubuntu\\bioetl\\.cache\\npm-cache\\_npx\\06840a80dbd2e0e4\\node_modules\\zod\\v4'
+npm warn cleanup     }
+npm warn cleanup   ]
+npm warn cleanup ]
