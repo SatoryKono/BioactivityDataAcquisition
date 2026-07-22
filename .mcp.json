@@ -36,7 +36,7 @@
         "UV_CACHE_DIR": ".cache/uv-cache",
         "UV_TOOL_DIR": ".cache/uv-tools"
       },
-      "startup_timeout_sec": 120
+      "startup_timeout_sec": 300
     },
     "github": {
       "command": "bash",
@@ -53,14 +53,14 @@
       "args": [
         "scripts/ai/mcp/mcp_docker_wrapper.sh"
       ],
-      "startup_timeout_sec": 120
+      "startup_timeout_sec": 240
     },
     "context7": {
       "command": "bash",
       "args": [
         "scripts/ai/mcp/mcp_context7_wrapper.sh"
       ],
-      "startup_timeout_sec": 120
+      "startup_timeout_sec": 240
     },
     "ast-grep": {
       "command": "bash",
@@ -74,21 +74,21 @@
       "args": [
         "scripts/ai/mcp/mcp_code_interpreter_wrapper.sh"
       ],
-      "startup_timeout_sec": 120
+      "startup_timeout_sec": 240
     },
     "prometheus": {
       "command": "bash",
       "args": [
         "scripts/ai/mcp/mcp_prometheus_wrapper.sh"
       ],
-      "startup_timeout_sec": 180
+      "startup_timeout_sec": 240
     },
     "grafana": {
       "command": "bash",
       "args": [
         "scripts/ai/mcp/mcp_grafana_wrapper.sh"
       ],
-      "startup_timeout_sec": 180
+      "startup_timeout_sec": 240
     },
     "brave-search": {
       "command": "bash",
@@ -116,7 +116,7 @@
       "args": [
         "scripts/ai/mcp/mcp_mermaid_wrapper.sh"
       ],
-      "startup_timeout_sec": 180
+      "startup_timeout_sec": 300
     },
     "deja": {
       "command": "bash",
@@ -169,7 +169,7 @@
     "deepwiki": {
       "type": "http",
       "url": "https://mcp.deepwiki.com/mcp",
-      "startup_timeout_sec": 120
+      "startup_timeout_sec": 240
     },
     "ref": {
       "type": "http",
