@@ -1,6 +1,6 @@
 # BioETL local-first Makefile
 
-.PHONY: help install test lint test-fast test-cov-fast-stable test-coverage test-architecture test-unit test-integration test-ci-local test-profile test-deps run-local sync-windsurf-rules
+.PHONY: help install test lint test-fast test-cov-fast-stable test-coverage test-architecture test-unit test-integration test-ci-local test-confidence-local test-confidence-unit test-confidence-contract test-profile test-deps run-local sync-windsurf-rules
 .PHONY: docker-check docker-build docker-start docker-stop docker-logs docker-health docker-clean docker-compose-check
 .PHONY: clean clean-all clean-local-artifacts clean-preflight precommit-install qa-arch-fast qa-debt security-check quarantine-inspect quarantine-replay quarantine-purge release-lock
 
@@ -29,6 +29,7 @@ help:
 	@echo "  make test-integration      Run non-e2e integration tests"
 	@echo "  make security-check        Run security test suite"
 	@echo "  make test-ci-local         Run local CI-oriented test subset"
+	@echo "  make test-confidence-local Run pure unit, fast architecture, offline contracts, and 85% coverage"
 	@echo "  make test-profile          Run pytest duration profiling"
 	@echo "  make test-deps             Verify test dependencies import"
 	@echo "  make run-local             Run sample local pipeline"
@@ -101,6 +102,18 @@ test-integration:
 
 test-ci-local:
 	$(RUN) pytest tests/ -q --ignore=tests/e2e --ignore=tests/contract -m "not slow and not benchmark and not memory"
+
+test-confidence-unit:
+	$(RUN) pytest tests/unit/ -q -m "not repo_backed and not slow and not serial and not benchmark and not memory"
+
+test-confidence-contract:
+	VCR_RECORD_MODE=none $(RUN) pytest tests/contract/ tests/unit/contracts/ -q -m "no_api or not network" -p no:xdist
+
+test-confidence-local:
+	$(MAKE) test-confidence-unit
+	$(MAKE) qa-arch-fast
+	$(MAKE) test-confidence-contract
+	$(MAKE) test-coverage
 
 test-profile:
 	$(RUN) pytest tests/ --durations=25 --durations-min=1.0 -q

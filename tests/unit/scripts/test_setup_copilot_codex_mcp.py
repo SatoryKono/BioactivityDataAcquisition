@@ -223,6 +223,7 @@ def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> 
     assert runtime_servers["adr-analysis"]["env"] == {
         "PROJECT_PATH": str(workspace_root.resolve()),
         "ADR_PATH": str((workspace_root / "docs/02-architecture/decisions").resolve()),
+        "NPM_CONFIG_CACHE": str(runtime_cache_root / "npm-cache"),
     }
     assert servers["mutmut"]["env"]["MUTMUT_PROJECT_PATH"] == "."
     assert servers["code-analyzer"]["env"]["PROJECT_PATH"] == "."

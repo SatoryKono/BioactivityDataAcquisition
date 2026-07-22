@@ -38,7 +38,11 @@ def test_read_coverage_percent_returns_percentage(tmp_path: Path) -> None:
 def test_read_slowest_summary_returns_empty_shape_when_missing(tmp_path: Path) -> None:
     payload = _read_slowest_summary(tmp_path / "missing.json")
 
-    assert payload == {"total_cases": None, "top_slowest": []}
+    assert payload == {
+        "total_cases": None,
+        "top_slowest": [],
+        "execution_context": {},
+    }
 
 
 def test_read_slowest_summary_accepts_compatibility_alias(tmp_path: Path) -> None:

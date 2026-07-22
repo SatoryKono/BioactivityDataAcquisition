@@ -8,14 +8,10 @@ from __future__ import annotations
 
 import asyncio
 import pytest
+from tests.contract.test_semanticscholar_contract import EXPECTED_BATCH_IDENTITIES
 from bioetl.domain.types import JsonDict
 
-EXPECTED_DOIS = frozenset(
-    {
-        "10.1038/nature12373",
-        "10.1016/j.cell.2019.03.025",
-    }
-)
+EXPECTED_DOIS = frozenset(EXPECTED_BATCH_IDENTITIES)
 pytestmark = pytest.mark.no_api
 
 

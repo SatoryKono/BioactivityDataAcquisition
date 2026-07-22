@@ -338,9 +338,7 @@ def test_explore_traces_links_use_safe_search_first_handoff(
             re.findall(r'href="([^"]*grafana-exploretraces-app[^"]*)"', nav_content)
         )
 
-    assert trace_urls, (
-        f"{dashboard_path.name} must expose an Explore Traces URL"
-    )
+    assert trace_urls, f"{dashboard_path.name} must expose an Explore Traces URL"
 
     for url in trace_urls:
         assert "/a/grafana-exploretraces-app/explore?actionView=search" in url, (
@@ -1254,42 +1252,40 @@ def test_provider_health_status_mappings_match_description_enum() -> None:
     )
     expected_pairs = {"0": "UNHEALTHY", "1": "DEGRADED", "2": "HEALTHY"}
     expected_null = "UNKNOWN"
+    panel = next(
+        (item for item in get_dashboard_panels(dashboard) if item.get("id") == 114),
+        None,
+    )
+    assert panel is not None, "provider health raw enum panel id=114 must exist"
+    mappings = panel.get("fieldConfig", {}).get("defaults", {}).get("mappings", [])
+    assert isinstance(mappings, list) and mappings, "panel id=114 mappings must exist"
+    value_mapping = next(
+        (mapping for mapping in mappings if mapping.get("type") == "value"),
+        None,
+    )
+    assert value_mapping is not None, "panel id=114 must define value mappings"
+    options = value_mapping.get("options", {})
+    assert set(options) == set(expected_pairs)
+    description = str(panel.get("description", ""))
+    for status_code, label in expected_pairs.items():
+        text = str(options[status_code].get("text", "")).upper()
+        assert text == label
+        assert f"{status_code}={label}" in description
 
-    for panel in get_dashboard_panels(dashboard):
-        mappings = panel.get("fieldConfig", {}).get("defaults", {}).get("mappings", [])
-        value_mapping = next(
-            (
-                mapping
-                for mapping in mappings
-                if mapping.get("type") == "value"
-                and isinstance(mapping.get("options"), dict)
-            ),
-            None,
-        )
-        if value_mapping is None:
-            continue
-
-        options = value_mapping.get("options", {})
-        if not all(key in options for key in (*expected_pairs.keys(), "null")):
-            continue
-
-        description = str(panel.get("description", ""))
-        for status_code, label in expected_pairs.items():
-            text = str(options[status_code].get("text", "")).upper()
-            assert text == label, (
-                f"Panel id={panel.get('id')} status {status_code} text must be {label}"
-            )
-            assert f"{status_code}={label}" in description, (
-                f"Panel id={panel.get('id')} description must include {status_code}={label}"
-            )
-
-        null_text = str(options["null"].get("text", "")).upper()
-        assert null_text == expected_null, (
-            f"Panel id={panel.get('id')} null mapping must be {expected_null}"
-        )
-        assert f"null={expected_null}" in description, (
-            f"Panel id={panel.get('id')} description must include null={expected_null}"
-        )
+    null_mappings = [
+        mapping
+        for mapping in mappings
+        if mapping.get("type") == "special"
+        and mapping.get("options", {}).get("match") == "null"
+    ]
+    assert len(null_mappings) == 1, "panel id=114 must map null exactly once"
+    assert (
+        str(null_mappings[0]["options"]["result"].get("text", "")).upper()
+        == expected_null
+    )
+    assert expected_null in description
+    assert "null/NaN=UNKNOWN" in description
+    assert "raw status is absent" in description
 
 
 def test_runtime_provider_alert_conditions_do_not_filter_on_missing_pipeline_labels():

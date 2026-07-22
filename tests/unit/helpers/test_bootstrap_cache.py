@@ -30,8 +30,8 @@ def test_bootstrap_cache_reuses_registries_for_same_fingerprint(tmp_path: Path) 
         )
 
     cache = BootstrapRegistryCache(
-        pipeline_registry_builder=lambda: {"pipeline": object()},
-        provider_registry_builder=lambda: {"provider": object()},
+        pipeline_metadata_builder=lambda: ("pipeline",),
+        provider_metadata_builder=tuple,
         fingerprint_builder=fingerprint,
     )
 
@@ -51,8 +51,8 @@ def test_bootstrap_cache_invalidates_when_config_content_changes(
     config_file.write_text("pipeline: alpha\n", encoding="utf-8")
 
     cache = BootstrapRegistryCache(
-        pipeline_registry_builder=lambda: object(),
-        provider_registry_builder=lambda: object(),
+        pipeline_metadata_builder=tuple,
+        provider_metadata_builder=tuple,
     )
 
     first = cache.get_or_build(configs_root=configs_root)

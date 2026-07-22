@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import json
 import re
 import subprocess
@@ -16,6 +17,9 @@ from scripts.engineering.qa import check_test_audit_preflight as preflight
 from scripts.engineering.qa.check_test_audit_preflight import (
     STRICT_BLOCKER_IDS,
     collect_test_audit_preflight,
+)
+from scripts.engineering.qa.report_test_governance_audit import (
+    _assertion_reachability_findings,
 )
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -88,12 +92,58 @@ def _issue_ids(payload: YamlMap) -> set[str]:
     }
 
 
+def _reachability(source: str) -> list[tuple[int, str]]:
+    tree = ast.parse(source)
+    function = next(
+        node
+        for node in tree.body
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+    )
+    return _assertion_reachability_findings(function)
+
+
+@pytest.mark.architecture
+def test_assertion_reachability_detects_early_return_continue_and_empty_params() -> (
+    None
+):
+    assert _reachability("def test_x():\n    return\n    assert False\n") == [
+        (2, "early_return_before_assertion")
+    ]
+    assert _reachability(
+        "def test_x(items):\n"
+        "    for item in items:\n"
+        "        if item:\n"
+        "            continue\n"
+        "        assert item is None\n"
+    ) == [(4, "continue_before_assertion")]
+    assert _reachability(
+        '@pytest.mark.parametrize("value", [])\ndef test_x(value):\n    assert value\n'
+    ) == [(1, "empty_parametrization")]
+
+
+@pytest.mark.architecture
+def test_assertion_reachability_accepts_aggregate_assert_after_filtered_loop() -> None:
+    assert (
+        _reachability(
+            "def test_x(items):\n"
+            "    errors = []\n"
+            "    for item in items:\n"
+            "        if item is None:\n"
+            "            continue\n"
+            "        errors.append(item)\n"
+            "    assert not errors\n"
+        )
+        == []
+    )
+
+
 @pytest.mark.architecture
 def test_test_governance_audit_registry_tracks_exact_issue_set() -> None:
     payload = _load_yaml(CONFIG_PATH)
 
     assert payload.get("schema_version") == 1
     assert _issue_ids(payload) == {
+        "6399",
         "4159",
         "4161",
         "4163",

@@ -22,11 +22,7 @@ Test-McpOptionalToken `
 
 Exit-McpValidateOnly -ServerName "context7"
 
-# Official npm MCP server (docker gateway is flaky when secrets engine is down).
+# CONTEXT7_API_KEY is inherited by the child; never expose it in process argv.
 # Do not remap stdout — MCP framing must pass through unmodified.
-if ($env:CONTEXT7_API_KEY) {
-    & npx -y "@upstash/context7-mcp@latest" --api-key $env:CONTEXT7_API_KEY
-} else {
-    & npx -y "@upstash/context7-mcp@latest"
-}
+& npx -y "@upstash/context7-mcp@3.2.4"
 exit $LASTEXITCODE

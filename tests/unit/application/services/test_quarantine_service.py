@@ -631,6 +631,23 @@ class TestQuarantineServiceReplay:
         call_kwargs = mock_quarantine_port.replay.call_args[1]
         assert call_kwargs["error_code"] == "DQ_NETWORK_ERROR"
 
+    def test_replay_records_failed_operator_metric_on_port_error(
+        self, quarantine_service, mock_quarantine_port
+    ) -> None:
+        mock_quarantine_port.replay.side_effect = OSError("unavailable")
+        quarantine_service._derive_operator_completion = MagicMock(
+            return_value=(datetime(2026, 4, 13, tzinfo=UTC), 1.5)
+        )
+
+        with pytest.raises(OSError, match="unavailable"):
+            quarantine_service.replay("pipeline1")
+
+        quarantine_service.metrics.increment_counter.assert_any_call(
+            "bioetl_quarantine_operator_operations_total",
+            1,
+            labels={"operation": "replay", "status": "failed"},
+        )
+
 
 @pytest.mark.unit
 class TestQuarantineServiceMarkAsReprocessed:
@@ -713,6 +730,23 @@ class TestQuarantineServicePurge:
             records_purged=0,
             completed_at=completed_at.isoformat(),
             duration_seconds=5.0,
+        )
+
+    def test_purge_records_failed_operator_metric_on_port_error(
+        self, quarantine_service, mock_quarantine_port
+    ) -> None:
+        mock_quarantine_port.purge.side_effect = ValueError("invalid retention")
+        quarantine_service._derive_operator_completion = MagicMock(
+            return_value=(datetime(2026, 4, 13, tzinfo=UTC), 2.5)
+        )
+
+        with pytest.raises(ValueError, match="invalid retention"):
+            quarantine_service.purge("pipeline1")
+
+        quarantine_service.metrics.increment_counter.assert_any_call(
+            "bioetl_quarantine_operator_operations_total",
+            1,
+            labels={"operation": "purge", "status": "failed"},
         )
 
 

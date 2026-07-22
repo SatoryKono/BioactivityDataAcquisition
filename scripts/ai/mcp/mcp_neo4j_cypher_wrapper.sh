@@ -8,6 +8,17 @@ REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../../.." && pwd)"
 # shellcheck source=./support/load_repo_env.sh
 export BIOETL_SKIP_ENV_LOCAL=1
 source "${SCRIPT_DIR}/support/load_repo_env.sh"
+if [[ -n "${NEO4J_AUTH:-}" ]]; then
+  neo4j_auth_username="${NEO4J_AUTH%%/*}"
+  neo4j_auth_password="${NEO4J_AUTH#*/}"
+  if [[ "${NEO4J_AUTH}" != */* \
+      || -z "${neo4j_auth_username}" \
+      || -z "${neo4j_auth_password}" ]]; then
+    printf 'error: NEO4J_AUTH must use non-empty username/password format for Neo4j Cypher MCP\n' >&2
+    exit 1
+  fi
+  unset neo4j_auth_username neo4j_auth_password
+fi
 load_repo_env_if_present
 unset BIOETL_SKIP_ENV_LOCAL
 # shellcheck source=./support/token_validation.sh

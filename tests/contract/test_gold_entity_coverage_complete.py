@@ -65,9 +65,11 @@ def test_gold_dq_bundle_policy_is_bounded_to_sensitive_outputs() -> None:
 
 def test_gold_contract_exports_are_schema_classes() -> None:
     """gold_contracts.__all__ must only expose GoldSchema DataFrameModel classes."""
-    for export_name in gold_contracts.__all__:
-        if not export_name.endswith("GoldSchema"):
-            continue
+    schema_exports = [
+        name for name in gold_contracts.__all__ if name.endswith("GoldSchema")
+    ]
+    assert schema_exports, "gold_contracts must expose at least one Gold schema"
+    for export_name in schema_exports:
         export_obj = getattr(gold_contracts, export_name)
         assert hasattr(export_obj, "to_schema"), (
             f"{export_name} must be a Pandera DataFrameModel"

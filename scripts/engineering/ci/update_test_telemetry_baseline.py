@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import xml.etree.ElementTree as ET
@@ -14,6 +15,28 @@ import yaml
 
 BRANCH_TELEMETRY_DIR = Path("reports/test-telemetry")
 TELEMETRY_FRESHNESS_MAX_AGE_DAYS = 45
+
+
+def compute_test_telemetry_source_tree_sha256(repo_root: Path = Path(".")) -> str:
+    """Hash maintained test sources and lane policy, excluding generated evidence."""
+    paths = list((repo_root / "tests").rglob("*.py"))
+    paths.extend(
+        repo_root / path
+        for path in (
+            "pyproject.toml",
+            "configs/quality/test_matrix.yaml",
+            ".github/workflows/tests.yml",
+        )
+    )
+    digest = hashlib.sha256()
+    for path in sorted(paths, key=lambda item: item.as_posix()):
+        if not path.exists():
+            continue
+        digest.update(path.relative_to(repo_root).as_posix().encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(path.read_bytes())
+        digest.update(b"\0")
+    return digest.hexdigest()
 
 
 def _parse_args() -> argparse.Namespace:
@@ -121,7 +144,7 @@ def _read_coverage_percent_from_log(path: Path) -> float | None:
 
 def _read_slowest_summary(path: Path) -> dict[str, object]:
     if not path.exists():
-        return {"total_cases": None, "top_slowest": []}
+        return {"total_cases": None, "top_slowest": [], "execution_context": {}}
     payload = json.loads(path.read_text(encoding="utf-8"))
     total_cases = payload.get("total_cases")
     top_slowest = payload.get("top_slowest")
@@ -132,6 +155,7 @@ def _read_slowest_summary(path: Path) -> dict[str, object]:
     return {
         "total_cases": total_cases if isinstance(total_cases, int) else None,
         "top_slowest": top_slowest,
+        "execution_context": payload.get("execution_context", {}),
     }
 
 
@@ -159,7 +183,18 @@ def _derive_slowest_summary_from_junit_paths(
             )
 
     rows.sort(key=lambda row: float(row["duration_s"]), reverse=True)
-    return {"total_cases": len(rows), "top_slowest": rows[:25]}
+    return {
+        "total_cases": len(rows),
+        "top_slowest": rows[:25],
+        "execution_context": {
+            "junit_source_count": len([path for path in junit_paths if path.exists()]),
+            "junit_sources": [path.name for path in junit_paths if path.exists()],
+            "executed_count": len(rows),
+            "worker_mode": "caller-declared; see source run metadata",
+            "lane_wall_time_s": {},
+            "explicit_exclusions": [],
+        },
+    }
 
 
 def _extract_slowest_zone(test_name: object) -> str:
@@ -223,6 +258,7 @@ def build_baseline_payload(
     source_commit: str,
     source_run_id: str,
     coverage_threshold: float,
+    source_tree_sha256: str | None = None,
 ) -> dict[str, object]:
     resolved_coverage_percent = (
         _read_coverage_percent(coverage_xml_path)
@@ -252,6 +288,7 @@ def build_baseline_payload(
         "refresh_status": status,
         "source_commit": source_commit or None,
         "source_run_id": source_run_id or None,
+        "source_tree_sha256": source_tree_sha256,
         "freshness_guard": {
             "timestamp_field": "refreshed_at_utc",
             "max_age_days": TELEMETRY_FRESHNESS_MAX_AGE_DAYS,
@@ -278,6 +315,7 @@ def build_baseline_payload(
             "total_cases": slowest_summary["total_cases"],
             "top_slowest": top_slowest,
             "top_slowest_zones": _summarize_slowest_zones(top_slowest),
+            "execution_context": slowest_summary.get("execution_context", {}),
         },
     }
 
@@ -488,6 +526,7 @@ def build_branch_telemetry_reports(payload: dict[str, object]) -> dict[str, str]
                 "source_branch": payload["source_branch"],
                 "source_commit": payload.get("source_commit"),
                 "source_run_id": payload.get("source_run_id"),
+                "source_tree_sha256": payload.get("source_tree_sha256"),
                 "refreshed_at_utc": payload["refreshed_at_utc"],
                 "refresh_status": payload["refresh_status"],
                 "coverage_percent": coverage_percent,
@@ -501,12 +540,14 @@ def build_branch_telemetry_reports(payload: dict[str, object]) -> dict[str, str]
                 "source_branch": payload["source_branch"],
                 "source_commit": payload.get("source_commit"),
                 "source_run_id": payload.get("source_run_id"),
+                "source_tree_sha256": payload.get("source_tree_sha256"),
                 "refreshed_at_utc": payload["refreshed_at_utc"],
                 "refresh_status": payload["refresh_status"],
                 "total_cases": duration["total_cases"],
                 "top_slowest": top_slowest,
                 "top_slowest_tests": top_slowest,
                 "top_slowest_zones": duration["top_slowest_zones"],
+                "execution_context": duration.get("execution_context", {}),
             },
             indent=2,
         )
@@ -578,6 +619,7 @@ def main() -> int:
         source_commit=args.source_commit,
         source_run_id=args.source_run_id,
         coverage_threshold=args.coverage_threshold,
+        source_tree_sha256=compute_test_telemetry_source_tree_sha256(),
     )
     output_yaml_path = Path(args.output_yaml)
     payload = merge_existing_baseline_supplemental_fields(

@@ -18,8 +18,5 @@ export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-${REPO_ROOT}/.cache/npm-cache}"
 mcp_validate_optional_token "CONTEXT7_API_KEY" 8 "Context7 MCP (optional higher rate limits)"
 mcp_exit_if_validate_only "context7"
 
-# Prefer official npm MCP server over docker gateway (secrets engine flaky on Windows).
-if [[ -n "${CONTEXT7_API_KEY:-}" ]]; then
-  exec npx -y "@upstash/context7-mcp@latest" --api-key "${CONTEXT7_API_KEY}"
-fi
-exec npx -y "@upstash/context7-mcp@latest"
+# CONTEXT7_API_KEY is inherited by the child; never expose it in process argv.
+exec npx -y "@upstash/context7-mcp@3.2.4"

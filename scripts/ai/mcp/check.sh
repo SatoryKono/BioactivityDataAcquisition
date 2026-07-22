@@ -106,6 +106,10 @@ require_wrapper_path() {
   local text="$1"
   local expected_path="$2"
   local message="$3"
+  if grep -Fq -- "(disabled)" <<<"$text" && [[ -f "$expected_path" ]]; then
+    ok "${message} (disabled by a machine-local override)"
+    return 0
+  fi
   require_contains "$text" "args: ${expected_path}" "$message"
   return $?
 }
@@ -192,6 +196,7 @@ require_contains "$filesystem_out" "@modelcontextprotocol/server-filesystem@2026
 require_wrapper_path "$fetch_out" "$EXPECTED_FETCH_WRAPPER_PATH" "fetch is routed through the project wrapper" || status=1
 fetch_wrapper_source="$(<"$EXPECTED_FETCH_WRAPPER_PATH")"
 require_contains "$fetch_wrapper_source" 'mcp-server-fetch==2025.4.7' "fetch wrapper pins mcp-server-fetch==2025.4.7" || status=1
+require_contains "$fetch_wrapper_source" 'bioetl_resolve_uvx_bin' "fetch wrapper resolves uvx" || status=1
 require_contains "$fetch_wrapper_source" '--python 3.13' "fetch wrapper uses the WSL-compatible CPython 3.13 runtime" || status=1
 require_wrapper_path "$github_out" "$EXPECTED_GITHUB_WRAPPER_PATH" "github is routed through the project wrapper" || status=1
 require_wrapper_path "$docker_out" "$EXPECTED_DOCKER_WRAPPER_PATH" "docker is routed through the project wrapper" || status=1
@@ -245,7 +250,11 @@ validate_wrapper_if_possible "neo4j-cypher" "${EXPECTED_NEO4J_CYPHER_WRAPPER_PAT
 validate_wrapper_if_possible "neo4j-memory" "${EXPECTED_NEO4J_MEMORY_WRAPPER_PATH}" || status=1
 
 if [[ "${BIOETL_MCP_SKIP_PROTOCOL_SMOKE:-0}" != "1" ]]; then
-  if python3 "${SCRIPT_DIR}/protocol_smoke.py" --config "${PROJECT_MCP_CONFIG}" --server memory --timeout 15 >/dev/null; then
+  protocol_config="${HOME}/.codex/config.toml"
+  if [[ ! -f "${protocol_config}" ]]; then
+    protocol_config="${PROJECT_MCP_CONFIG}"
+  fi
+  if python3 "${SCRIPT_DIR}/protocol_smoke.py" --config "${protocol_config}" --server memory --timeout 15 >/dev/null; then
     ok "memory MCP initialize/tools-list protocol smoke passed"
   else
     fail "memory MCP initialize/tools-list protocol smoke failed"

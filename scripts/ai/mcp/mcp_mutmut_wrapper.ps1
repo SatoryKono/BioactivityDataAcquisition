@@ -34,5 +34,5 @@ Install uv (https://docs.astral.sh/uv/) so uvx is on PATH, or place uvx under
 }
 
 Enable-BioetlUvxNetworkBypass
-& $uvx --from "git+https://github.com/wdm0006/mutmut-mcp" mutmut-mcp --stdio
+& $uvx --from "git+https://github.com/wdm0006/mutmut-mcp@1e3b47ccaaa31f4c651d8e424b90d392d1c1ed90" mutmut-mcp --stdio
 exit $LASTEXITCODE

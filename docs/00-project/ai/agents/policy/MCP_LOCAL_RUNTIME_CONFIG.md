@@ -45,6 +45,10 @@ This policy applies to:
 1. Treat generated Codex/Gemini/editor runtime mirrors as local-only runtime
    surfaces when ignored by `.gitignore`; these may contain machine-local
    absolute paths when the consuming tool requires them.
+1. Codex runtime npm/uv caches MUST use the native user cache directory
+   (`$XDG_CACHE_HOME/bioetl-mcp` or `~/.cache/bioetl-mcp`) instead of a
+   Windows-mounted workspace path. Tracked portable MCP projections continue
+   to use repo-relative `.cache/**` paths.
 1. Treat `.devin/config.json` as a portable tracked Devin projection. The setup
    generator replaces only `mcpServers` with the canonical repo-relative
    21-server payload and preserves existing Devin-owned top-level settings such

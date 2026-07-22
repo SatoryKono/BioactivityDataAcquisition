@@ -30,7 +30,7 @@ def test_cached_provider_registry_contains_provider_registrations(
 
 
 def test_cached_registry_clones_do_not_mutate_session_cache(
-    cached_bootstrap_registries: Any,
+    cached_bootstrap_metadata: Any,
     cached_populated_isolated_registry: Any,
     cached_provider_registry: Any,
 ) -> None:
@@ -38,7 +38,28 @@ def test_cached_registry_clones_do_not_mutate_session_cache(
     cached_populated_isolated_registry.clear()
     cached_provider_registry.clear()
 
-    assert "chembl_activity" in (
-        cached_bootstrap_registries.pipeline_registry.list_pipelines()
+    assert "chembl_activity" in cached_bootstrap_metadata.pipeline_names
+    assert "chembl" in {
+        definition.name for definition in cached_bootstrap_metadata.provider_definitions
+    }
+
+
+def test_two_registry_clones_do_not_share_mutable_provider_config(
+    cached_bootstrap_metadata: Any,
+) -> None:
+    """Mutation of one reconstructed config must not leak to another clone."""
+    from tests.helpers.bootstrap_cache import clone_provider_registry
+
+    first = clone_provider_registry(cached_bootstrap_metadata)
+    second = clone_provider_registry(cached_bootstrap_metadata)
+    first_config = first.get("chembl")
+    second_config = second.get("chembl")
+
+    first_config.default_kwargs["leak"] = True
+    if first_config.http_config is not None:
+        first_config.http_config.rate_overrides["leak"] = 1.0
+
+    assert "leak" not in second_config.default_kwargs
+    assert second_config.http_config is None or (
+        "leak" not in second_config.http_config.rate_overrides
     )
-    assert "chembl" in cached_bootstrap_registries.provider_registry.list_providers()

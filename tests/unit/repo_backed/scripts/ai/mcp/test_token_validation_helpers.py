@@ -25,8 +25,14 @@ ROOT = Path(__file__).resolve().parents[6]
 ENV_LOADER = ROOT / "scripts" / "ai" / "mcp" / "support" / "load_repo_env.sh"
 HELPER = ROOT / "scripts" / "ai" / "mcp" / "support" / "token_validation.sh"
 NEO4J_WRAPPERS = [
-    ROOT / "scripts" / "ai" / "mcp" / "mcp_neo4j_cypher_wrapper.sh",
-    ROOT / "scripts" / "ai" / "mcp" / "mcp_neo4j_memory_wrapper.sh",
+    (
+        ROOT / "scripts" / "ai" / "mcp" / "mcp_neo4j_cypher_wrapper.sh",
+        "NEO4J_USERNAME and NEO4J_PASSWORD are required",
+    ),
+    (
+        ROOT / "scripts" / "ai" / "mcp" / "mcp_neo4j_memory_wrapper.sh",
+        "NEO4J_USERNAME is required",
+    ),
 ]
 
 
@@ -113,9 +119,10 @@ def test_validate_only_exits_successfully() -> None:
     assert "[OK] demo MCP wrapper validation completed" in result.stdout
 
 
-@pytest.mark.parametrize("wrapper", NEO4J_WRAPPERS)
+@pytest.mark.parametrize(("wrapper", "expected_error"), NEO4J_WRAPPERS)
 def test_neo4j_wrapper_validate_only_fails_closed_without_auth(
     wrapper: Path,
+    expected_error: str,
 ) -> None:
     merged_env = {
         key: value
@@ -142,12 +149,14 @@ def test_neo4j_wrapper_validate_only_fails_closed_without_auth(
     )
 
     assert result.returncode != 0
-    assert "NEO4J_" in result.stderr
-    assert "is required" in result.stderr
+    assert expected_error in result.stderr
 
 
-@pytest.mark.parametrize("wrapper", NEO4J_WRAPPERS)
-def test_neo4j_wrapper_validate_only_accepts_explicit_auth(wrapper: Path) -> None:
+@pytest.mark.parametrize(("wrapper", "_expected_error"), NEO4J_WRAPPERS)
+def test_neo4j_wrapper_validate_only_accepts_explicit_auth(
+    wrapper: Path,
+    _expected_error: str,
+) -> None:
     merged_env = {
         key: value
         for key, value in os.environ.items()

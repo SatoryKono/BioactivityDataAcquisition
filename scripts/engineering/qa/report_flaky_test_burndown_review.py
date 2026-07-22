@@ -9,6 +9,7 @@ import json
 import os
 import sys
 import tempfile
+import xml.etree.ElementTree as ET
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -19,6 +20,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_INVENTORY = Path("configs/quality/flaky_test_inventory.yaml")
 DEFAULT_TEST_GOVERNANCE = Path("reports/quality/test-governance-current.json")
 DEFAULT_JSON_OUTPUT = Path("reports/quality/flaky-test-burndown-review.json")
+DEFAULT_EMPIRICAL_OUTPUT = Path("reports/test-telemetry/flaky-test-empirical.json")
 
 DIMENSION_SPECS = (
     ("by_layer", "layer", "layers"),
@@ -81,6 +83,136 @@ def _semantic_sha256(payload: dict[str, Any]) -> str:
         separators=(",", ":"),
     )
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def _file_tree_sha256(paths: list[Path], *, root: Path) -> str:
+    digest = hashlib.sha256()
+    for path in sorted(paths, key=lambda item: item.as_posix()):
+        digest.update(path.relative_to(root).as_posix().encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(path.read_bytes())
+        digest.update(b"\0")
+    return digest.hexdigest()
+
+
+def _junit_outcomes(path: Path) -> dict[str, str]:
+    root = ET.parse(path).getroot()
+    outcomes: dict[str, str] = {}
+    for case in root.iter("testcase"):
+        nodeid = f"{case.get('classname', 'unknown')}::{case.get('name', 'unknown')}"
+        if case.find("failure") is not None:
+            status = "failed"
+        elif case.find("error") is not None:
+            status = "error"
+        elif case.find("skipped") is not None:
+            status = "skipped"
+        else:
+            status = "passed"
+        outcomes[nodeid] = status
+    return dict(sorted(outcomes.items()))
+
+
+def build_empirical_payload(
+    repo_root: Path,
+    *,
+    run_dir: Path,
+    inventory_path: Path = DEFAULT_INVENTORY,
+) -> dict[str, object]:
+    """Build empirical repeated/order-randomized telemetry from JUnit runs."""
+    repo_root = repo_root.resolve()
+    resolved_run_dir = _resolve_path(repo_root, run_dir)
+    inventory = _load_yaml_mapping(_resolve_path(repo_root, inventory_path))
+    reviewed = {
+        str(entry["nodeid"]): entry
+        for entry in inventory.get("reviewed_flaky_tests", [])
+        if isinstance(entry, dict) and isinstance(entry.get("nodeid"), str)
+    }
+    replay_files = list((repo_root / "tests/fixtures/vcr").rglob("*.yaml"))
+    replay_fingerprint = _file_tree_sha256(replay_files, root=repo_root)
+    runs: list[dict[str, object]] = []
+    outcomes_by_node: dict[str, set[str]] = {}
+    source_shas: set[str] = set()
+    for metadata_path in sorted(resolved_run_dir.glob("run-*.json")):
+        metadata = _load_json_mapping(metadata_path)
+        run_id = metadata.get("run_id")
+        seed = metadata.get("seed")
+        source_sha = metadata.get("source_sha")
+        if not isinstance(run_id, str) or not run_id:
+            raise ValueError(f"Invalid run_id in {metadata_path}")
+        if isinstance(seed, bool) or not isinstance(seed, int):
+            raise ValueError(f"Invalid seed in {metadata_path}")
+        if not isinstance(source_sha, str) or not source_sha:
+            raise ValueError(f"Invalid source_sha in {metadata_path}")
+        junit_path = resolved_run_dir / f"junit-{run_id}.xml"
+        if not junit_path.exists():
+            raise ValueError(f"Missing JUnit for {run_id}: {junit_path}")
+        outcomes = _junit_outcomes(junit_path)
+        if not outcomes:
+            raise ValueError(f"Empirical run executed zero tests: {run_id}")
+        for nodeid, status in outcomes.items():
+            outcomes_by_node.setdefault(nodeid, set()).add(status)
+        outcome_sha = _semantic_sha256(outcomes)
+        source_shas.add(source_sha)
+        runs.append(
+            {
+                "run_id": run_id,
+                "seed": seed,
+                "order_mode": metadata.get("order_mode", "seeded-random"),
+                "shard_id": metadata.get("shard_id", "determinism-critical"),
+                "source_sha": source_sha,
+                "executed_count": len(outcomes),
+                "outcomes": outcomes,
+                "artifact_hashes": {
+                    "node_outcomes_sha256": outcome_sha,
+                    "replay_tree_sha256": replay_fingerprint,
+                },
+            }
+        )
+    if len(runs) < 3:
+        raise ValueError("Empirical flaky telemetry requires at least three runs")
+    if len(source_shas) != 1:
+        raise ValueError("Empirical runs must use one source SHA")
+
+    unstable = {
+        nodeid: sorted(statuses)
+        for nodeid, statuses in sorted(outcomes_by_node.items())
+        if len(statuses) > 1
+    }
+    untriaged = sorted(set(unstable) - set(reviewed))
+    quarantined = [
+        {
+            "nodeid": nodeid,
+            "owner": entry.get("owner"),
+            "cause": entry.get("cause"),
+            "status": entry.get("triage_status"),
+            "removal_criteria": entry.get("remediation"),
+        }
+        for nodeid, entry in sorted(reviewed.items())
+    ]
+    return {
+        "schema_version": "flaky-test-empirical-v1",
+        "generated_by": "scripts.engineering.qa.report_flaky_test_burndown_review",
+        "source_sha": next(iter(source_shas)),
+        "run_count": len(runs),
+        "runs": runs,
+        "comparison": {
+            "unstable_node_count": len(unstable),
+            "unstable_nodes": unstable,
+            "untriaged_unstable_nodes": untriaged,
+            "replay_fingerprint_stable": len(
+                {
+                    run["artifact_hashes"]["replay_tree_sha256"]  # type: ignore[index]
+                    for run in runs
+                }
+            )
+            == 1,
+        },
+        "curated_inventory_reconciliation": {
+            "inventory_sha256": _semantic_sha256(inventory),
+            "quarantine": quarantined,
+            "untriaged_count": len(untriaged),
+        },
+    }
 
 
 def _dimension_values(inventory: dict[str, Any]) -> dict[str, list[str]]:
@@ -285,6 +417,10 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=DEFAULT_TEST_GOVERNANCE,
     )
     parser.add_argument("--json-out", type=Path, default=DEFAULT_JSON_OUTPUT)
+    parser.add_argument("--empirical-run-dir", type=Path)
+    parser.add_argument(
+        "--empirical-json-out", type=Path, default=DEFAULT_EMPIRICAL_OUTPUT
+    )
     parser.add_argument("--check", action="store_true")
     return parser.parse_args(argv)
 
@@ -293,6 +429,17 @@ def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
     repo_root = args.repo_root.resolve()
     try:
+        if args.empirical_run_dir is not None:
+            payload = build_empirical_payload(
+                repo_root,
+                run_dir=args.empirical_run_dir,
+                inventory_path=args.inventory,
+            )
+            output_path = _resolve_path(repo_root, args.empirical_json_out)
+            _write_text_atomically(output_path, _canonical_json(payload))
+            untriaged = payload["curated_inventory_reconciliation"]["untriaged_count"]  # type: ignore[index]
+            print(f"[flaky-test-empirical] wrote {output_path}")
+            return 1 if untriaged else 0
         payload = build_payload(
             repo_root,
             inventory_path=args.inventory,

@@ -119,6 +119,7 @@ BUDGET_TO_METRIC = {
     "markerless_test_functions_max": "markerless_test_functions",
     "uuid4_call_sites_max": "uuid4_call_sites",
     "date_today_call_sites_max": "date_today_call_sites",
+    "unreviewed_assertion_bypass_max": "unreviewed_assertion_bypass_count",
 }
 CRITICAL_BEHAVIOR_ENVELOPES = {
     "control_plane_replay": (
@@ -142,6 +143,15 @@ CRITICAL_BEHAVIOR_ENVELOPES = {
         "tests/unit/domain/aggregates/test_quarantine_entry_invariant_properties.py",
     ),
     "test_governance": ("tests/architecture/test_test_governance_audit.py",),
+}
+ASSERTION_REACHABILITY_PATHS = frozenset(
+    path for paths in CRITICAL_BEHAVIOR_ENVELOPES.values() for path in paths
+) | {
+    "tests/integration/test_grafana_config.py",
+    "tests/integration/test_grafana_dashboard_links.py",
+    "tests/integration/test_grafana_layout_and_metadata.py",
+    "tests/integration/test_dashboard_required_panel_links.py",
+    "tests/integration/test_grafana_navigation_matrix.py",
 }
 
 
@@ -547,6 +557,177 @@ class _TestBodyVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
 
+def _call_is_assertion_signal(call: ast.Call) -> bool:
+    qualified = _qualified_name(call.func)
+    leaf = qualified.rsplit(".", 1)[-1]
+    return (
+        qualified in PYTEST_ASSERTION_HELPERS
+        or leaf in ASSERT_METHOD_NAMES
+        or leaf.startswith(
+            ("assert_", "_assert_", "check_", "validate_", "verify_", "expect_")
+        )
+    )
+
+
+def _direct_assertion_signal(statement: ast.stmt) -> bool:
+    """Return whether this statement asserts without relying on a nested branch."""
+    if isinstance(statement, ast.Assert):
+        return True
+    if isinstance(statement, ast.Expr) and isinstance(statement.value, ast.Call):
+        return _call_is_assertion_signal(statement.value)
+    if isinstance(statement, (ast.Assign, ast.AnnAssign)):
+        value = statement.value
+        return isinstance(value, ast.Call) and _call_is_assertion_signal(value)
+    if isinstance(statement, (ast.With, ast.AsyncWith)):
+        return any(
+            isinstance(item.context_expr, ast.Call)
+            and _call_is_assertion_signal(item.context_expr)
+            for item in statement.items
+        )
+    return False
+
+
+def _empty_parametrization_lines(
+    function: ast.FunctionDef | ast.AsyncFunctionDef,
+) -> list[int]:
+    lines: list[int] = []
+    for decorator in function.decorator_list:
+        if not isinstance(decorator, ast.Call):
+            continue
+        if _qualified_name(decorator.func) != "pytest.mark.parametrize":
+            continue
+        if len(decorator.args) < 2:
+            continue
+        values = decorator.args[1]
+        if isinstance(values, (ast.List, ast.Tuple, ast.Set)) and not values.elts:
+            lines.append(decorator.lineno)
+    return lines
+
+
+class _AssertionReachabilityAnalyzer:
+    """Small conservative CFG for assertion-bypassing test paths."""
+
+    def __init__(self) -> None:
+        self.findings: list[tuple[int, str]] = []
+        self.continue_before_assertion_lines: set[int] = set()
+
+    def analyze(
+        self,
+        function: ast.FunctionDef | ast.AsyncFunctionDef,
+    ) -> list[tuple[int, str]]:
+        visitor = _TestBodyVisitor()
+        visitor.visit(function)
+        if not visitor.has_assertion_signal:
+            return []
+        for line in _empty_parametrization_lines(function):
+            self.findings.append((line, "empty_parametrization"))
+        final_states = self._block(function.body, {False}, in_loop=False)
+        if False in final_states:
+            self.findings.extend(
+                (line, "continue_before_assertion")
+                for line in self.continue_before_assertion_lines
+            )
+        return sorted(set(self.findings))
+
+    def _block(
+        self,
+        statements: list[ast.stmt],
+        states: set[bool],
+        *,
+        in_loop: bool,
+    ) -> set[bool]:
+        active = set(states)
+        for statement in statements:
+            if not active:
+                break
+            active = self._statement(statement, active, in_loop=in_loop)
+        return active
+
+    def _statement(
+        self,
+        statement: ast.stmt,
+        states: set[bool],
+        *,
+        in_loop: bool,
+    ) -> set[bool]:
+        if _direct_assertion_signal(statement):
+            states = {True for _state in states}
+
+        if isinstance(statement, ast.Return):
+            if False in states:
+                self.findings.append(
+                    (statement.lineno, "early_return_before_assertion")
+                )
+            return set()
+        if isinstance(statement, ast.Continue):
+            if False in states:
+                self.continue_before_assertion_lines.add(statement.lineno)
+            return set()
+        if isinstance(statement, (ast.Raise, ast.Break)):
+            return set()
+        if isinstance(statement, ast.If):
+            return self._block(statement.body, states, in_loop=in_loop) | self._block(
+                statement.orelse, states, in_loop=in_loop
+            )
+        if isinstance(statement, (ast.For, ast.AsyncFor, ast.While)):
+            # Zero iterations is always a conservative path; body paths model the
+            # last successful iteration before loop exit.
+            body_states = self._block(statement.body, states, in_loop=True)
+            loop_exit = states | body_states
+            return self._block(statement.orelse, loop_exit, in_loop=in_loop)
+        if isinstance(statement, (ast.With, ast.AsyncWith)):
+            return self._block(statement.body, states, in_loop=in_loop)
+        if isinstance(statement, ast.Try):
+            paths = self._block(statement.body, states, in_loop=in_loop)
+            for handler in statement.handlers:
+                paths |= self._block(handler.body, states, in_loop=in_loop)
+            paths = self._block(statement.orelse, paths, in_loop=in_loop)
+            return self._block(statement.finalbody, paths, in_loop=in_loop)
+        if isinstance(statement, ast.Match):
+            paths = set(states)
+            for case in statement.cases:
+                paths |= self._block(case.body, states, in_loop=in_loop)
+            return paths
+        return states
+
+
+def _assertion_reachability_findings(
+    function: ast.FunctionDef | ast.AsyncFunctionDef,
+) -> list[tuple[int, str]]:
+    return _AssertionReachabilityAnalyzer().analyze(function)
+
+
+def _load_assertion_bypass_allowlist(root: Path) -> list[dict[str, str]]:
+    config_path = root / DEFAULT_CONFIG
+    if not config_path.exists():
+        return []
+    payload = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+    entries = payload.get("assertion_bypass_allowlist", [])
+    return [dict(entry) for entry in entries if isinstance(entry, dict)]
+
+
+def _review_assertion_bypass(
+    finding: dict[str, str],
+    allowlist: list[dict[str, str]],
+) -> dict[str, str]:
+    for entry in allowlist:
+        if all(
+            entry.get(key) == finding[key] for key in ("path", "test_name", "reason")
+        ):
+            return {
+                **finding,
+                "owner": entry.get("owner", "test-governance"),
+                "disposition": entry.get("disposition", "reviewed-retained"),
+                "reviewed": "true",
+            }
+    return {
+        **finding,
+        "owner": "unassigned",
+        "disposition": "fail-unreviewed",
+        "reviewed": "false",
+    }
+
+
 class _TestFunctionCollector(ast.NodeVisitor):
     def __init__(self) -> None:
         self.functions: list[tuple[ast.FunctionDef | ast.AsyncFunctionDef, bool]] = []
@@ -620,6 +801,9 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
     compatibility_files: list[str] = []
     parse_errors: list[dict[str, str]] = []
     critical_behavior_envelopes = _critical_envelope_template()
+    assertion_bypass_allowlist = _load_assertion_bypass_allowlist(root)
+    assertion_bypass_findings: list[dict[str, str]] = []
+    assertion_reachability_scanned_tests = 0
 
     total_functions = 0
     assertless_total_candidates = 0
@@ -665,6 +849,21 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
             date_today_call_sites += visitor.date_today_call_sites
             matched_envelopes = _matching_critical_envelopes(relative)
             assertless_category: str | None = None
+
+            if relative in ASSERTION_REACHABILITY_PATHS:
+                assertion_reachability_scanned_tests += 1
+                for finding_line, reason in _assertion_reachability_findings(function):
+                    assertion_bypass_findings.append(
+                        _review_assertion_bypass(
+                            {
+                                "path": relative,
+                                "line": str(finding_line),
+                                "test_name": function.name,
+                                "reason": reason,
+                            },
+                            assertion_bypass_allowlist,
+                        )
+                    )
 
             if not visitor.has_assertion_signal:
                 assertless_total_candidates += 1
@@ -760,6 +959,21 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
     intentional_no_exception_contract = assertless_category_counts.get(
         "intentional_no_exception_contract", 0
     )
+    unreviewed_assertion_bypass_count = sum(
+        finding["reviewed"] == "false" for finding in assertion_bypass_findings
+    )
+    functions_with_bypass = len(
+        {
+            (finding["path"], finding["test_name"])
+            for finding in assertion_bypass_findings
+        }
+    )
+    branch_reachability_percent = round(
+        100.0
+        * (assertion_reachability_scanned_tests - functions_with_bypass)
+        / max(assertion_reachability_scanned_tests, 1),
+        3,
+    )
 
     summary = {
         "assertless_total_candidates": assertless_total_candidates,
@@ -774,6 +988,8 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
         "markerless_examples": markerless_examples,
         "refined_assertless_tests": refined_assertless_tests,
         "uuid4_call_sites": uuid4_call_sites,
+        "unreviewed_assertion_bypass_count": unreviewed_assertion_bypass_count,
+        "assertion_branch_reachability_percent": branch_reachability_percent,
     }
 
     report = {
@@ -802,12 +1018,21 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
         "compatibility_test_files": len(compatibility_files),
         "compatibility_files": compatibility_files,
         "compatibility_examples": compatibility_files[:25],
-        "markerless_test_functions": markerless_test_functions,
         "uuid4_call_sites": uuid4_call_sites,
         "date_today_call_sites": date_today_call_sites,
         "critical_behavior_envelope_count": len(critical_behavior_envelopes),
         "critical_behavior_envelope_assertion_gap_count": assertion_gap_count,
         "critical_behavior_envelopes": critical_behavior_envelopes,
+        "assertion_branch_reachability": {
+            "metric_percent": branch_reachability_percent,
+            "scanned_test_count": assertion_reachability_scanned_tests,
+            "scan_paths": sorted(ASSERTION_REACHABILITY_PATHS),
+            "finding_count": len(assertion_bypass_findings),
+            "unreviewed_count": unreviewed_assertion_bypass_count,
+            "findings": assertion_bypass_findings,
+        },
+        "unreviewed_assertion_bypass_count": unreviewed_assertion_bypass_count,
+        "assertion_branch_reachability_percent": branch_reachability_percent,
         "fixture_asset_duplication": _collect_fixture_asset_duplication(root),
         "parse_errors": parse_errors,
     }
