@@ -34,4 +34,3 @@ Exit-McpValidateOnly -ServerName "adr-analysis"
 # it is not a CLI option and can cause the process to exit immediately.
 & npx -y mcp-adr-analysis-server
 exit $LASTEXITCODE
-

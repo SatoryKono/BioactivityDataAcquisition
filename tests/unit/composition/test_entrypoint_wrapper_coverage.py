@@ -2,7 +2,7 @@
 
 import pytest
 
-from bioetl.composition import composite_api, entrypoints, observability_api
+from bioetl.composition import entrypoints, observability_api
 
 pytestmark = pytest.mark.unit
 
@@ -38,7 +38,12 @@ def test_start_metrics_server_forwards_all_arguments(
 
 
 def test_load_pipeline_config_delegates(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The wrapper delegates to composite_api.load_pipeline_config."""
+    # Mock the actual implementation that gets imported inside the function
     sentinel = object()
-    monkeypatch.setattr(composite_api, "load_pipeline_config", lambda name: sentinel)
+    monkeypatch.setattr(
+        "bioetl.composition.composite_api.load_pipeline_config",
+        lambda name: sentinel,
+    )
 
     assert entrypoints.load_pipeline_config("chembl_activity") is sentinel

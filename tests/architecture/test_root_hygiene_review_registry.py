@@ -148,15 +148,11 @@ def test_root_hygiene_review_registry_tracks_observed_transient_root_families() 
         by_path["coverage.xml"]["current_live_state"]
         == "present_local_only_root_surface"
     )
-    assert (
-        by_path["Test Results - Pytest_All.html"]["current_live_state"]
-        == "present_local_only_root_surface"
-    )
-    assert (
-        by_path["Test Results - Pytest_All.xml"]["current_live_state"]
-        == "absent_from_root_baseline"
-    )
-    assert by_path[".xml"]["current_live_state"] == "present_local_only_root_surface"
+    assert not {
+        "Test Results - Pytest_All.html",
+        "Test Results - Pytest_All.xml",
+        ".xml",
+    }.intersection(by_path)
     assert (
         by_path["mcp-shell.log"]["current_live_state"]
         == "present_local_only_root_surface"

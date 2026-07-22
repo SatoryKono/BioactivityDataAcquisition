@@ -29,11 +29,26 @@ class _Output:
         return ""
 
 
+class _StderrChunks:
+    def __init__(self, value: str) -> None:
+        self._value = value
+        self._offset = 0
+
+    def read(self, size: int = -1) -> str:
+        if self._offset >= len(self._value):
+            return ""
+        if size < 0:
+            size = len(self._value) - self._offset
+        chunk = self._value[self._offset : self._offset + size]
+        self._offset += len(chunk)
+        return chunk
+
+
 class _Process:
-    def __init__(self) -> None:
+    def __init__(self, stderr: Any | None = None) -> None:
         self.stdin = _Input()
         self.stdout = _Output()
-        self.stderr: list[str] = []
+        self.stderr = [] if stderr is None else stderr
 
     def terminate(self) -> None:
         return None
@@ -88,6 +103,41 @@ def test_smoke_performs_initialize_and_tools_list(
         "notifications/initialized",
         "tools/list",
     ]
+
+
+def test_smoke_stderr_tail_is_character_bounded_after_shutdown(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    config = tmp_path / ".mcp.json"
+    config.write_text(
+        json.dumps({"mcpServers": {"example": {"command": "example-server"}}}),
+        encoding="utf-8",
+    )
+    payload = (
+        "DROP-ME" + "A" * (protocol_smoke._STDERR_RETENTION_CHARS + 5000) + "KEEP-ME"
+    )
+    process = _Process(stderr=_StderrChunks(payload))
+    responses = iter(
+        [
+            {"jsonrpc": "2.0", "id": 1, "result": {"protocolVersion": "1"}},
+            {"jsonrpc": "2.0", "id": 2, "result": {"tools": "invalid"}},
+        ]
+    )
+    monkeypatch.setattr(subprocess, "Popen", lambda *args, **kwargs: process)
+    monkeypatch.setattr(
+        protocol_smoke,
+        "_readline",
+        lambda stream, timeout: json.dumps(next(responses)),
+    )
+
+    with pytest.raises(RuntimeError) as exc_info:
+        protocol_smoke.smoke_server(config, "example", timeout=1)
+
+    message = str(exc_info.value)
+    assert "stderr_tail=" in message
+    assert "KEEP-ME" in message
+    assert "DROP-ME" not in message
+    assert len(message) < protocol_smoke._STDERR_ERROR_TAIL_CHARS + 500
 
 
 @pytest.mark.parametrize(

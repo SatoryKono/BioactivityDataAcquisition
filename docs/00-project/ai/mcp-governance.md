@@ -69,8 +69,14 @@ generated MCP configuration.
 - **Статус:** ✅ Работает
 - **Описание:** Mutation testing MCP сервер
 - **Настройка:** `MUTMUT_PROJECT_PATH` для проекта
-- **Установка:** `uvx --from git+...wdm0006/mutmut-mcp`
+- **Установка:** `uvx --from git+https://github.com/wdm0006/mutmut-mcp@1e3b47ccaaa31f4c651d8e424b90d392d1c1ed90`
 - **Обёртки:** `scripts/ai/mcp/mcp_mutmut_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_mutmut_wrapper.ps1` (Windows)
+
+Immutable pin обновляется только отдельным reviewed change: проверить новый
+commit в upstream-репозитории, запустить mutmut MCP smoke и
+`test_mutmut_git_dependency_is_pinned_consistently`, затем одновременно
+заменить SHA в обеих обёртках и в этом документе. Ветки, теги и неприкреплённые
+Git URL в runtime-командах запрещены.
 
 ### code-analyzer
 - **Статус:** ✅ Работает
@@ -86,16 +92,16 @@ generated MCP configuration.
 - **Обёртки:** `scripts/ai/mcp/mcp_github_actions_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_github_actions_wrapper.ps1` (Windows)
 
 ## Удалённые MCP
-sonarqube  
-chembl  
-pubchem  
-pubmed  
-sequential-thinking  
-openaiDeveloperDocs  
-needle  
-docker-docs  
-dockerhub  
-pdf  
+sonarqube
+chembl
+pubchem
+pubmed
+sequential-thinking
+openaiDeveloperDocs
+needle
+docker-docs
+dockerhub
+pdf
 paper-search
 biomoltechDocs
 mintlify

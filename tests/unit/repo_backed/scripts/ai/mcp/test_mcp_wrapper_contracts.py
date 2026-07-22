@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-import json
 import hashlib
+import json
 import os
 import re
 import shlex
 import shutil
 import subprocess
+import sys
 from collections.abc import Iterator
 from pathlib import Path
 
@@ -32,6 +33,7 @@ MUTMUT_PS1 = MCP_DIR / "mcp_mutmut_wrapper.ps1"
 ADR_ANALYSIS_PS1 = MCP_DIR / "mcp_adr_analysis_wrapper.ps1"
 CONTEXT7_SH = MCP_DIR / "mcp_context7_wrapper.sh"
 CONTEXT7_PS1 = MCP_DIR / "mcp_context7_wrapper.ps1"
+MCP_GOVERNANCE = ROOT / "docs" / "00-project" / "ai" / "mcp-governance.md"
 
 POWERSHELL = (
     shutil.which("pwsh") or shutil.which("powershell") or shutil.which("powershell.exe")
@@ -130,11 +132,22 @@ def _ps_quote(value: str) -> str:
     return "'" + value.replace("'", "''") + "'"
 
 
+def _powershell_python_path() -> str:
+    """Return a Python executable usable by the selected PowerShell runtime."""
+    if os.name == "nt" or not str(POWERSHELL).lower().endswith(".exe"):
+        return _powershell_path(Path(sys.executable))
+
+    windows_python = ROOT / ".venv-win" / "Scripts" / "python.exe"
+    if not windows_python.is_file():
+        pytest.skip("Windows Python is required for the scoped uvx contract on WSL")
+    return _powershell_path(windows_python)
+
+
 def _run_powershell_command(
     command: str, *, env: dict[str, str] | None = None
 ) -> subprocess.CompletedProcess[str]:
     assert POWERSHELL is not None
-    return subprocess.run(
+    result = subprocess.run(
         [
             POWERSHELL,
             "-NoProfile",
@@ -150,6 +163,9 @@ def _run_powershell_command(
         capture_output=True,
         check=False,
     )
+    if "UtilBindVsockAnyPort" in result.stderr:
+        pytest.skip("Windows PowerShell interop is unavailable in this WSL session")
+    return result
 
 
 def _run_powershell_file(
@@ -164,7 +180,7 @@ def _run_powershell_file(
             setup.append(f"Remove-Item 'Env:{name}' -ErrorAction SilentlyContinue")
     setup.append(f"& {_ps_quote(_powershell_path(path))}")
     setup.append("exit $LASTEXITCODE")
-    return subprocess.run(
+    result = subprocess.run(
         [
             POWERSHELL,
             "-NoProfile",
@@ -180,6 +196,9 @@ def _run_powershell_file(
         capture_output=True,
         check=False,
     )
+    if "UtilBindVsockAnyPort" in result.stderr:
+        pytest.skip("Windows PowerShell interop is unavailable in this WSL session")
+    return result
 
 
 @pytest.fixture
@@ -384,7 +403,20 @@ printf '%s\n%s\n' "${{resolved}}" "${{status}}"
 
 
 @BASH_MARK
-def test_bash_uv_network_bypass_removes_proxy_variables() -> None:
+def test_bash_uv_resolver_handles_unset_home() -> None:
+    env = _clean_env(PATH="/usr/bin:/bin", HOME=None, LOCALAPPDATA=None)
+
+    result = _run_bash(
+        f"source {shlex.quote(str(UV_RESOLVER_SH))}; bioetl_resolve_uvx_bin",
+        env=env,
+    )
+
+    assert result.returncode == 1
+    assert result.stdout == "uvx\n"
+
+
+@BASH_MARK
+def test_bash_uv_network_bypass_requires_explicit_opt_in() -> None:
     env = _clean_env(
         HTTP_PROXY="http://proxy.invalid",
         HTTPS_PROXY="http://proxy.invalid",
@@ -397,6 +429,9 @@ def test_bash_uv_network_bypass_removes_proxy_variables() -> None:
     script = f"""
 source {shlex.quote(str(UV_RESOLVER_SH))}
 bioetl_enable_uvx_network_bypass
+printf '%s\n' "${{HTTP_PROXY}}" "${{https_proxy}}"
+export BIOETL_UVX_DIRECT_NETWORK=1
+bioetl_enable_uvx_network_bypass
 printf '%s\n' "$NO_PROXY" "$no_proxy" "${{HTTP_PROXY-unset}}" \
   "${{https_proxy-unset}}" "$KEEP_ME"
 """
@@ -404,7 +439,15 @@ printf '%s\n' "$NO_PROXY" "$no_proxy" "${{HTTP_PROXY-unset}}" \
     result = _run_bash(script, env=env)
 
     assert result.returncode == 0, result.stderr
-    assert result.stdout.splitlines() == ["*", "*", "unset", "unset", "preserved"]
+    assert result.stdout.splitlines() == [
+        "http://proxy.invalid",
+        "http://proxy.invalid",
+        "*",
+        "*",
+        "unset",
+        "unset",
+        "preserved",
+    ]
 
 
 @POWERSHELL_MARK
@@ -435,6 +478,38 @@ printf '%s\n' "$NO_PROXY" "$no_proxy" "${{HTTP_PROXY-unset}}" \
             "function Resolve-Path { param($LiteralPath) "
             "[pscustomobject]@{Path=$LiteralPath} }",
             "Python313\\Scripts\\uvx.exe",
+        ),
+        (
+            "function Get-Command { param($Name, $ErrorAction) $null }\n"
+            "function Test-Path { param($LiteralPath, $Path, $ErrorAction) "
+            "$LiteralPath -like '*Python312*uvx.exe' }\n"
+            "function Resolve-Path { param($LiteralPath) "
+            "[pscustomobject]@{Path=$LiteralPath} }",
+            "Python312\\Scripts\\uvx.exe",
+        ),
+        (
+            "function Get-Command { param($Name, $ErrorAction) $null }\n"
+            "function Test-Path { param($LiteralPath, $Path, $ErrorAction) "
+            "$LiteralPath -like '*Python311*uvx.exe' }\n"
+            "function Resolve-Path { param($LiteralPath) "
+            "[pscustomobject]@{Path=$LiteralPath} }",
+            "Python311\\Scripts\\uvx.exe",
+        ),
+        (
+            "function Get-Command { param($Name, $ErrorAction) $null }\n"
+            "function Test-Path { param($LiteralPath, $Path, $ErrorAction) "
+            "$LiteralPath -like '*.local*bin*uvx.exe' }\n"
+            "function Resolve-Path { param($LiteralPath) "
+            "[pscustomobject]@{Path=$LiteralPath} }",
+            ".local\\bin\\uvx.exe",
+        ),
+        (
+            "function Get-Command { param($Name, $ErrorAction) $null }\n"
+            "function Test-Path { param($LiteralPath, $Path, $ErrorAction) "
+            "$LiteralPath -like '*.cargo*bin*uvx.exe' }\n"
+            "function Resolve-Path { param($LiteralPath) "
+            "[pscustomobject]@{Path=$LiteralPath} }",
+            ".cargo\\bin\\uvx.exe",
         ),
     ],
 )
@@ -471,7 +546,7 @@ function Test-Path {{ param($LiteralPath, $Path, $ErrorAction) $false }}
 
 
 @POWERSHELL_MARK
-def test_powershell_uv_network_bypass_removes_proxy_variables() -> None:
+def test_powershell_uv_network_bypass_requires_explicit_opt_in() -> None:
     helper = _ps_quote(_powershell_path(UV_RESOLVER_PS1))
     command = f"""
 . {helper}
@@ -483,7 +558,11 @@ $env:https_proxy='http://proxy.invalid'
 $env:all_proxy='http://proxy.invalid'
 $env:KEEP_ME='preserved'
 Enable-BioetlUvxNetworkBypass
+$preservedHttpProxy=$env:HTTP_PROXY
+$env:BIOETL_UVX_DIRECT_NETWORK='1'
+Enable-BioetlUvxNetworkBypass
 [ordered]@{{
+  preserved_http_proxy=$preservedHttpProxy
   no_proxy_value=$env:NO_PROXY
   http_proxy_value=[Environment]::GetEnvironmentVariable('HTTP_PROXY')
   https_proxy_value=[Environment]::GetEnvironmentVariable('https_proxy')
@@ -495,11 +574,81 @@ Enable-BioetlUvxNetworkBypass
 
     assert result.returncode == 0, result.stderr
     assert json.loads(result.stdout) == {
+        "preserved_http_proxy": "http://proxy.invalid",
         "no_proxy_value": "*",
         "http_proxy_value": None,
         "https_proxy_value": None,
         "keep_value": "preserved",
     }
+
+
+@POWERSHELL_MARK
+def test_powershell_uv_network_bypass_is_scoped_to_package_resolution(
+    windows_fixture_dir: Path,
+) -> None:
+    fake_uvx = windows_fixture_dir / "uvx.ps1"
+    resolution_capture = windows_fixture_dir / "resolution-env.json"
+    server_capture = windows_fixture_dir / "server-env.json"
+    fake_uvx.write_text(
+        """[ordered]@{
+    https_proxy=$env:HTTPS_PROXY
+    no_proxy=$env:NO_PROXY
+    arguments=@($args)
+} | ConvertTo-Json -Compress | Set-Content -LiteralPath $env:BIOETL_RESOLUTION_CAPTURE
+$pythonIndex = [Array]::IndexOf($args, 'python')
+$trampoline = $args[$pythonIndex + 2]
+$command = $args[$pythonIndex + 3]
+$commandArguments = @($args[($pythonIndex + 4)..($args.Count - 1)])
+& $env:BIOETL_TEST_PYTHON -c $trampoline $command @commandArguments
+exit $LASTEXITCODE
+""",
+        encoding="utf-8",
+        newline="",
+    )
+    server_script = (
+        "import json, os, pathlib, sys; "
+        "pathlib.Path(sys.argv[1]).write_text(json.dumps({"
+        "'https_proxy': os.environ.get('HTTPS_PROXY'), "
+        "'no_proxy': os.environ.get('NO_PROXY')}), encoding='utf-8')"
+    )
+    helper = _ps_quote(_powershell_path(UV_RESOLVER_PS1))
+    command = f"""
+. {helper}
+$env:HTTPS_PROXY='http://proxy.invalid'
+$env:NO_PROXY='localhost'
+$env:BIOETL_UVX_DIRECT_NETWORK='1'
+$env:BIOETL_RESOLUTION_CAPTURE={_ps_quote(_powershell_path(resolution_capture))}
+$env:BIOETL_TEST_PYTHON={_ps_quote(_powershell_python_path())}
+Invoke-BioetlUvxWithScopedBypass `
+  -UvxPath {_ps_quote(_powershell_path(fake_uvx))} `
+  -Package 'example-package==1.0' `
+  -Command {_ps_quote(_powershell_python_path())} `
+  -CommandArguments @('-c', {_ps_quote(server_script)}, {_ps_quote(_powershell_path(server_capture))})
+[ordered]@{{
+  https_proxy=$env:HTTPS_PROXY
+  no_proxy=$env:NO_PROXY
+}} | ConvertTo-Json -Compress
+"""
+
+    result = _run_powershell_command(command)
+
+    assert result.returncode == 0, result.stderr
+    resolution = json.loads(resolution_capture.read_text(encoding="utf-8"))
+    assert resolution["https_proxy"] is None
+    assert resolution["no_proxy"] == "*"
+    assert resolution["arguments"][:3] == [
+        "--from",
+        "example-package==1.0",
+        "python",
+    ]
+    expected_original = {
+        "https_proxy": "http://proxy.invalid",
+        "no_proxy": "localhost",
+    }
+    assert result.stderr == ""
+    assert server_capture.is_file(), (result.stdout, result.stderr, resolution)
+    assert json.loads(server_capture.read_text(encoding="utf-8")) == expected_original
+    assert json.loads(result.stdout) == expected_original
 
 
 @BASH_MARK
@@ -633,12 +782,18 @@ def test_code_interpreter_executes_uvx_when_deno_is_available(
 
 
 @BASH_MARK
+@pytest.mark.parametrize("explicit_credentials", [False, True])
 @pytest.mark.parametrize(
     "neo4j_auth", ["example-user", "/example-pass", "example-user/"]
 )
-def test_neo4j_wrapper_rejects_malformed_combined_auth(neo4j_auth: str) -> None:
+def test_neo4j_wrapper_rejects_malformed_combined_auth(
+    neo4j_auth: str,
+    explicit_credentials: bool,
+) -> None:
     env = _clean_env(
         NEO4J_AUTH=neo4j_auth,
+        NEO4J_USERNAME="explicit-user" if explicit_credentials else None,
+        NEO4J_PASSWORD="explicit-password" if explicit_credentials else None,
         BIOETL_MCP_VALIDATE_ONLY="1",
     )
 
@@ -648,6 +803,26 @@ def test_neo4j_wrapper_rejects_malformed_combined_auth(neo4j_auth: str) -> None:
     assert result.stdout == ""
     assert "NEO4J_AUTH must use non-empty username/password format" in result.stderr
     assert neo4j_auth not in result.stderr
+
+
+@BASH_MARK
+def test_neo4j_wrapper_rejects_malformed_auth_loaded_from_repo_env(
+    tmp_path: Path,
+) -> None:
+    env_fixture = tmp_path / "mcp-auth-fixture.txt"
+    env_fixture.write_text("NEO4J_AUTH=loaded-without-delimiter\n", encoding="utf-8")
+    env = _clean_env(
+        BIOETL_REPO_ENV_LOADED=None,
+        BIOETL_ENV_FILE=str(env_fixture),
+        BIOETL_MCP_VALIDATE_ONLY="1",
+    )
+
+    result = _run_bash(shlex.quote(str(NEO4J_CYPHER_SH)), env=env)
+
+    assert result.returncode != 0
+    assert result.stdout == ""
+    assert "NEO4J_AUTH must use non-empty username/password format" in result.stderr
+    assert "loaded-without-delimiter" not in result.stderr
 
 
 @BASH_MARK
@@ -682,13 +857,25 @@ def test_neo4j_explicit_credentials_take_precedence(tmp_path: Path) -> None:
         BIOETL_TEST_CAPTURE=str(capture_file),
     )
 
-    result = _run_bash(shlex.quote(str(NEO4J_CYPHER_SH)), env=env)
+    result = _run_bash(f"{shlex.quote(str(NEO4J_CYPHER_SH))} --example", env=env)
 
     assert result.returncode == 0, result.stderr
     captured = capture_file.read_text(encoding="utf-8")
     assert "neo4j_username=explicit-user" in captured
     assert "neo4j_password=explicit-password" in captured
     assert "packed-password" not in captured
+    assert "arg=@alanse/mcp-neo4j-server@0.2.0" in captured
+    assert "arg=--example" in captured
+
+
+def test_neo4j_wrappers_pin_server_and_forward_arguments() -> None:
+    shell_source = NEO4J_CYPHER_SH.read_text(encoding="utf-8")
+    powershell_source = (MCP_DIR / "mcp_neo4j_cypher_wrapper.ps1").read_text(
+        encoding="utf-8"
+    )
+
+    assert '"@alanse/mcp-neo4j-server@0.2.0" "$@"' in shell_source
+    assert '"@alanse/mcp-neo4j-server@0.2.0" @args' in powershell_source
 
 
 def test_mutmut_git_dependency_is_pinned_consistently() -> None:
@@ -700,6 +887,9 @@ def test_mutmut_git_dependency_is_pinned_consistently() -> None:
         commits.append(match.group(1))
 
     assert commits == [MUTMUT_COMMIT, MUTMUT_COMMIT]
+    governance = MCP_GOVERNANCE.read_text(encoding="utf-8")
+    assert MUTMUT_COMMIT in governance
+    assert "Immutable pin обновляется только отдельным reviewed change" in governance
 
 
 @POWERSHELL_MARK

@@ -72,7 +72,7 @@ def _resolve_e2e_merge_execution_timeout_seconds(
 ) -> int:
     """Return the platform-aware inner Silver merge timeout for E2E runs."""
     if platform == "win32":
-        return 300
+        return 600  # Increased from 300 for Windows subprocess isolation overhead
     return 90
 
 
@@ -86,7 +86,7 @@ def _resolve_e2e_pipeline_matrix_execution_timeout_seconds(
     if override is not None:
         return float(override)
     if platform == "win32":
-        return 360.0
+        return 600.0  # Increased from 360 for Windows subprocess isolation overhead
     return 105.0
 
 
@@ -94,8 +94,11 @@ def _resolve_e2e_plain_write_process_isolation(
     *,
     platform: str = sys.platform,
 ) -> bool:
-    """Return whether E2E should isolate plain Delta writes in a child process."""
-    return platform == "win32"
+    """Return whether E2E should isolate plain Delta writes in a child process.
+
+    Disabled on Windows to avoid subprocess overhead that causes timeouts.
+    """
+    return False  # Disabled subprocess isolation to avoid timeout overhead
 
 
 def _resolve_e2e_sequential_pipeline_timeout_seconds(

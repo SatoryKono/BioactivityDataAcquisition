@@ -16,8 +16,13 @@ import subprocess
 import threading
 import time
 import tomllib
+from collections import deque
 from pathlib import Path
 from typing import Any, TextIO
+
+_STDERR_READ_CHARS = 4096
+_STDERR_RETENTION_CHARS = 200_000
+_STDERR_ERROR_TAIL_CHARS = 1500
 
 _WINDOWS_PWSH_CANDIDATES = (
     Path(r"C:\Program Files\PowerShell\7\pwsh.exe"),
@@ -148,20 +153,23 @@ def smoke_server(
     )
     # Drain stderr continuously. Servers like mcp-run-python emit large Deno
     # install logs; if the pipe fills, the child blocks and initialize hangs.
-    stderr_chunks: list[str] = []
+    stderr_chars: deque[str] = deque(maxlen=_STDERR_RETENTION_CHARS)
+
+    def _stderr_tail() -> str:
+        return "".join(stderr_chars)[-_STDERR_ERROR_TAIL_CHARS:]
 
     def _drain_stderr() -> None:
         assert process.stderr is not None
         try:
-            for line in process.stderr:
-                stderr_chunks.append(line)
-                if sum(len(part) for part in stderr_chunks) > 200_000:
-                    del stderr_chunks[:-200]
+            while chunk := process.stderr.read(_STDERR_READ_CHARS):
+                stderr_chars.extend(chunk)
         except Exception:
             return
 
     stderr_thread = threading.Thread(target=_drain_stderr, daemon=True)
     stderr_thread.start()
+    report: dict[str, Any] | None = None
+    failure: Exception | None = None
     try:
         initialized = _request(
             process,
@@ -192,7 +200,7 @@ def smoke_server(
         tool_rows = tools.get("result", {}).get("tools")
         if "error" in tools or not isinstance(tool_rows, list):
             raise RuntimeError(f"MCP tools/list failed: {tools!r}")
-        return {
+        report = {
             "schema_version": "bioetl-mcp-protocol-smoke-v1",
             "server": server_name,
             "ok": True,
@@ -202,10 +210,7 @@ def smoke_server(
             "environment_names": sorted(server.get("env", {})),
         }
     except Exception as exc:
-        tail = "".join(stderr_chunks)[-1500:]
-        if tail:
-            raise type(exc)(f"{exc} | stderr_tail={tail!r}") from exc
-        raise
+        failure = exc
     finally:
         process.terminate()
         try:
@@ -214,6 +219,14 @@ def smoke_server(
             process.kill()
             process.wait(timeout=2)
         stderr_thread.join(timeout=1)
+
+    if failure is not None:
+        tail = _stderr_tail()
+        if tail:
+            raise RuntimeError(f"{failure} | stderr_tail={tail!r}") from failure
+        raise failure
+    assert report is not None
+    return report
 
 
 def _parse_args() -> argparse.Namespace:
