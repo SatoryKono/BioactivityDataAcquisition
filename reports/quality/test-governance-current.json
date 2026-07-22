@@ -226,7 +226,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "158",
+      "line": "152",
       "path": "tests/unit/domain/aggregates/test_quarantine_entry_internal_mixins.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_validate_required_fields_accepts_valid_input"
@@ -709,28 +709,28 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "73",
+      "line": "72",
       "path": "tests/unit/storage/gold/test_strict_validation.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_validate_records_with_records"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "87",
+      "line": "86",
       "path": "tests/unit/storage/gold/test_strict_validation.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_validate_scd2_requirements_valid"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "209",
+      "line": "208",
       "path": "tests/unit/storage/gold/test_strict_validation.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_validate_scd2_skips_for_non_scd2_modes"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "234",
+      "line": "233",
       "path": "tests/unit/storage/gold/test_strict_validation.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_validate_schema_strict_true"
@@ -1464,7 +1464,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "158",
+        "line": "152",
         "path": "tests/unit/domain/aggregates/test_quarantine_entry_internal_mixins.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_required_fields_accepts_valid_input"
@@ -1947,28 +1947,28 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "73",
+        "line": "72",
         "path": "tests/unit/storage/gold/test_strict_validation.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_records_with_records"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "87",
+        "line": "86",
         "path": "tests/unit/storage/gold/test_strict_validation.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_scd2_requirements_valid"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "209",
+        "line": "208",
         "path": "tests/unit/storage/gold/test_strict_validation.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_scd2_skips_for_non_scd2_modes"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "234",
+        "line": "233",
         "path": "tests/unit/storage/gold/test_strict_validation.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_schema_strict_true"
@@ -2176,8 +2176,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2022,
-      "test_python_file_count": 2233,
+      "test_glob_file_count": 2025,
+      "test_python_file_count": 2236,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2217,12 +2217,12 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 2022,
-    "total_test_functions": 22593,
+    "total_test_files": 2025,
+    "total_test_functions": 22608,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "5bd96fb5323bf38c3dd4f1c2a3cbc97208f2016a37fb09a66d9fbbce274b87f4",
+  "source_tree_sha256": "2012f0190cfb6719d9ad1ff92fff57b22e7d06e03a1e6897504f775aa44dda21",
   "summary": {
     "assertless_total_candidates": 105,
     "compatibility_test_files": 0,
@@ -2240,8 +2240,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2022,
-    "test_python_file_count": 2233,
+    "test_glob_file_count": 2025,
+    "test_python_file_count": 2236,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2281,7 +2281,7 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 2022,
-  "total_test_functions": 22593,
+  "total_test_files": 2025,
+  "total_test_functions": 22608,
   "uuid4_call_sites": 0
 }

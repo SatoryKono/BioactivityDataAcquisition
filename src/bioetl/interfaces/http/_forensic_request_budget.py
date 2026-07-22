@@ -40,8 +40,8 @@ async def run_bounded_forensic_operation[ResultT](
     *,
     limiter: asyncio.Semaphore,
     operation_factory: Callable[
-        [], Coroutine[Any, Any, ResultT]
-    ],  # Any: standard coroutine signature
+        [], Coroutine[Any, Any, ResultT]  # Any: standard coroutine yield/send types
+    ],
     timeout_seconds: float = FORENSIC_ENDPOINT_TIMEOUT_SECONDS,
     queue_timeout_seconds: float = FORENSIC_ENDPOINT_QUEUE_TIMEOUT_SECONDS,
 ) -> ResultT:

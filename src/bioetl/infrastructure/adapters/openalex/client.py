@@ -175,7 +175,7 @@ class OpenAlexAdapter(
 
 def _resolve_openalex_api_key(
     settings: Settings | None,
-    kwargs: dict[str, Any],
+    kwargs: dict[str, Any],  # Any: opaque factory kwargs from adapter registry
 ) -> object | None:
     """Resolve OpenAlex API key from kwargs or settings secrets."""
     api_key = kwargs.get("api_key")
@@ -191,7 +191,7 @@ def _resolve_openalex_api_key(
 
 def _resolve_openalex_mailto(
     settings: Settings | None,
-    kwargs: dict[str, Any],
+    kwargs: dict[str, Any],  # Any: opaque factory kwargs from adapter registry
 ) -> object | None:
     """Resolve legacy OpenAlex mailto attribution from kwargs or settings."""
     mailto = kwargs.get("mailto")
@@ -203,7 +203,7 @@ def _resolve_openalex_mailto(
 def _require_openalex_runtime(
     http_client: UnifiedHTTPClient | None,
     logger: LoggerPort | None,
-    kwargs: dict[str, Any],
+    kwargs: dict[str, Any],  # Any: opaque factory kwargs from adapter registry
 ) -> tuple[UnifiedHTTPClient, LoggerPort]:
     """Validate required OpenAlex runtime dependencies."""
     if http_client is None:

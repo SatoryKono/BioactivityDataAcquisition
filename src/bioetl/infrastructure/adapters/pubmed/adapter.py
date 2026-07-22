@@ -179,7 +179,7 @@ class PubMedAdapter(
 
 def _resolve_pubmed_email(
     settings: Settings | None,
-    kwargs: dict[str, Any],
+    kwargs: dict[str, Any],  # Any: opaque factory kwargs from adapter registry
 ) -> object | None:
     """Resolve PubMed contact email from kwargs or settings."""
     email = kwargs.get("email")
@@ -190,7 +190,7 @@ def _resolve_pubmed_email(
 
 def _resolve_pubmed_api_key(
     settings: Settings | None,
-    kwargs: dict[str, Any],
+    kwargs: dict[str, Any],  # Any: opaque factory kwargs from adapter registry
 ) -> object | None:
     """Resolve PubMed API key from kwargs or settings secrets."""
     api_key = kwargs.get("api_key")
@@ -205,7 +205,7 @@ def _resolve_pubmed_api_key(
 def _require_pubmed_runtime(
     http_client: UnifiedHTTPClient | None,
     logger: LoggerPort | None,
-    kwargs: dict[str, Any],
+    kwargs: dict[str, Any],  # Any: opaque factory kwargs from adapter registry
 ) -> tuple[UnifiedHTTPClient, LoggerPort]:
     """Validate required PubMed runtime dependencies."""
     if http_client is None:
