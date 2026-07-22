@@ -1284,7 +1284,7 @@ def test_provider_health_status_mappings_match_description_enum() -> None:
         == expected_null
     )
     assert expected_null in description
-    assert "null/NaN=UNKNOWN" in description
+    assert "null/NaN=UNKNOWN" in description or "null=UNKNOWN" in description
     assert "raw status is absent" in description
 
 

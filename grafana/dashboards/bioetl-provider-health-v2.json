@@ -1396,7 +1396,7 @@
       ],
       "title": "Review Raw Provider Health Enum",
       "type": "table",
-      "description": "Raw provider health enum evidence over the active Grafana time range, not the canonical first-screen verdict. Values are source enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null/NaN=UNKNOWN when the provider exists in the selected-range provider universe but raw status is absent. Use this as supporting evidence when Status is UNKNOWN or when top causes and severity disagree. First-screen severity uses bioetl_provider_current_status in the Status and GLOBAL Provider Severity Matrix panels to avoid inverting raw enum colors."
+      "description": "Raw provider health enum evidence over the active Grafana time range, not the canonical first-screen verdict. Values are source enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN when the provider exists in the selected-range provider universe but raw status is absent. Use this as supporting evidence when Status is UNKNOWN or when top causes and severity disagree. First-screen severity uses bioetl_provider_current_status in the Status and GLOBAL Provider Severity Matrix panels to avoid inverting raw enum colors."
     },
     {
       "datasource": {
