@@ -155,14 +155,22 @@ def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> 
     assert runtime_servers["memory"]["env"]["MEMORY_FILE_PATH"] == str(
         (workspace_root / "docs/00-project/ai/memory/mcp-memory.json").resolve()
     )
-    assert servers["fetch"]["args"] == [
-        "--python",
-        "3.13",
-        "--from",
-        "mcp-server-fetch==2025.4.7",
-        "mcp-server-fetch",
-    ]
-    assert runtime_servers["fetch"]["args"] == servers["fetch"]["args"]
+    assert servers["fetch"]["args"][0] == (
+        f"scripts/ai/mcp/mcp_fetch_wrapper{wrapper_suffix}"
+    )
+    assert runtime_servers["fetch"]["args"][0] == str(
+        (workspace_root / f"scripts/ai/mcp/mcp_fetch_wrapper{wrapper_suffix}").resolve()
+    )
+    assert servers["fetch"]["env"] == {
+        "UV_CACHE_DIR": ".cache/uv-cache",
+        "UV_TOOL_DIR": ".cache/uv-tools",
+        "NPM_CONFIG_CACHE": ".cache/npm-cache",
+    }
+    assert runtime_servers["fetch"]["env"] == {
+        "UV_CACHE_DIR": str((workspace_root / ".cache/uv-cache").resolve()),
+        "UV_TOOL_DIR": str((workspace_root / ".cache/uv-tools").resolve()),
+        "NPM_CONFIG_CACHE": str((workspace_root / ".cache/npm-cache").resolve()),
+    }
     assert servers["github"]["args"][0] == (
         f"scripts/ai/mcp/github-mcp-wrapper{wrapper_suffix}"
     )

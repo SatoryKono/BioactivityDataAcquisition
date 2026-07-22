@@ -5,6 +5,7 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../../.." && pwd)"
 PROJECT_MCP_CONFIG="${REPO_ROOT}/.mcp.json"
 EXPECTED_MEMORY_PATH="${REPO_ROOT}/docs/00-project/ai/memory/mcp-memory.json"
+EXPECTED_FETCH_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_fetch_wrapper.sh"
 EXPECTED_GITHUB_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/github-mcp-wrapper.sh"
 EXPECTED_DOCKER_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_docker_wrapper.sh"
 EXPECTED_CONTEXT7_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_context7_wrapper.sh"
@@ -41,6 +42,7 @@ def resolve_project_path(value: object) -> str:
 
 keys = [
     ("EXPECTED_MEMORY_PATH", ("memory", "env", "MEMORY_FILE_PATH")),
+    ("EXPECTED_FETCH_WRAPPER_PATH", ("fetch", "args", 0)),
     ("EXPECTED_GITHUB_WRAPPER_PATH", ("github", "args", 0)),
     ("EXPECTED_DOCKER_WRAPPER_PATH", ("docker", "args", 0)),
     ("EXPECTED_CONTEXT7_WRAPPER_PATH", ("context7", "args", 0)),
@@ -187,8 +189,10 @@ ref_out="$(codex mcp get ref 2>&1 || true)"
 
 require_contains "$memory_out" "@modelcontextprotocol/server-memory@2026.1.26" "memory is pinned to @2026.1.26" || status=1
 require_contains "$filesystem_out" "@modelcontextprotocol/server-filesystem@2026.1.14" "filesystem is pinned to @2026.1.14" || status=1
-require_contains "$fetch_out" "mcp-server-fetch==2025.4.7" "fetch is pinned to mcp-server-fetch==2025.4.7" || status=1
-require_contains "$fetch_out" "--python 3.13" "fetch uses the WSL-compatible CPython 3.13 runtime" || status=1
+require_wrapper_path "$fetch_out" "$EXPECTED_FETCH_WRAPPER_PATH" "fetch is routed through the project wrapper" || status=1
+fetch_wrapper_source="$(<"$EXPECTED_FETCH_WRAPPER_PATH")"
+require_contains "$fetch_wrapper_source" 'mcp-server-fetch==2025.4.7' "fetch wrapper pins mcp-server-fetch==2025.4.7" || status=1
+require_contains "$fetch_wrapper_source" 'uvx --python 3.13' "fetch wrapper uses the WSL-compatible CPython 3.13 runtime" || status=1
 require_wrapper_path "$github_out" "$EXPECTED_GITHUB_WRAPPER_PATH" "github is routed through the project wrapper" || status=1
 require_wrapper_path "$docker_out" "$EXPECTED_DOCKER_WRAPPER_PATH" "docker is routed through the project wrapper" || status=1
 require_wrapper_path "$context7_out" "$EXPECTED_CONTEXT7_WRAPPER_PATH" "context7 is routed through the project wrapper" || status=1
@@ -233,6 +237,7 @@ else
 fi
 
 validate_wrapper_if_possible "github" "${EXPECTED_GITHUB_WRAPPER_PATH}" "GITHUB_PERSONAL_ACCESS_TOKEN" || status=1
+validate_wrapper_if_possible "fetch" "${EXPECTED_FETCH_WRAPPER_PATH}" || status=1
 validate_wrapper_if_possible "brave-search" "${EXPECTED_BRAVE_WRAPPER_PATH}" "BRAVE_API_KEY" || status=1
 validate_wrapper_if_possible "prometheus" "${EXPECTED_PROMETHEUS_WRAPPER_PATH}" || status=1
 validate_wrapper_if_possible "grafana" "${EXPECTED_GRAFANA_WRAPPER_PATH}" || status=1

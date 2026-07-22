@@ -18,7 +18,7 @@ $env:DEJA_AUTO_RECALL_PATH = Join-Path $repoRoot ".codex/AGENTS.md"
 
 Exit-McpValidateOnly -ServerName "deja"
 
-# Published package moved off @modelcontextprotocol/server-deja-vu (404).
-# Current package: @vshulcz/deja-vu (bin: deja). MCP mode is the default for `deja`.
-& npx -y "@vshulcz/deja-vu@0.15.0" --stdio
+# Package: @vshulcz/deja-vu (bin: deja). MCP transport is the `mcp` subcommand
+# (not `--stdio` — that flag is invalid for this CLI).
+& npx -y "@vshulcz/deja-vu@0.15.0" mcp
 exit $LASTEXITCODE
