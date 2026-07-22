@@ -14,12 +14,9 @@ unset BIOETL_SKIP_ENV_LOCAL
 source "${SCRIPT_DIR}/support/token_validation.sh"
 
 export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-${REPO_ROOT}/.cache/npm-cache}"
-
-# Auto-recall path configuration
 export DEJA_AUTO_RECALL_PATH="${REPO_ROOT}/.codex/AGENTS.md"
 
 mcp_exit_if_validate_only "deja"
 
-# Published package moved off @modelcontextprotocol/server-deja-vu (404).
-# Current package: @vshulcz/deja-vu (bin: deja).
-exec npx -y "@vshulcz/deja-vu@0.15.0" --stdio
+# Package: @vshulcz/deja-vu (bin: deja). MCP transport is the `mcp` subcommand.
+exec npx -y "@vshulcz/deja-vu@0.15.0" mcp

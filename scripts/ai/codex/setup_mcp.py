@@ -16,17 +16,6 @@ from pathlib import Path
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-# mcp-server-fetch 2025.4.7 does not complete the stdio handshake under
-# CPython 3.14 in the supported WSL setup. Keep uvx on the validated runtime
-# until the pinned server is upgraded and its 3.14 transport is verified.
-FETCH_PYTHON_VERSION = "3.13"
-FETCH_SPEC = [
-    "--python",
-    FETCH_PYTHON_VERSION,
-    "--from",
-    "mcp-server-fetch==2025.4.7",
-    "mcp-server-fetch",
-]
 MANAGED_BLOCK_BEGIN = "# === BEGIN MANAGED MCP SERVERS ==="
 MANAGED_BLOCK_END = "# === END MANAGED MCP SERVERS ==="
 CACHE_DIR_NAME = ".cache"
@@ -187,11 +176,11 @@ def _canonical_servers(
             workspace_root_str,
             npm_cache_dir=npm_cache_dir,
         ),
-        "fetch": {
-            "command": "uvx",
-            "args": FETCH_SPEC,
-            "env": {"UV_CACHE_DIR": uv_cache_dir, "UV_TOOL_DIR": uv_tool_dir},
-        },
+        "fetch": _wrapper_command(
+            "mcp_fetch_wrapper",
+            workspace_root,
+            portable_workspace_paths=portable_workspace_paths,
+        ),
         "github": _wrapper_command(
             "github-mcp-wrapper",
             workspace_root,
@@ -280,6 +269,11 @@ def _canonical_servers(
     }
 
     # Preserve the committed config shape where the GitHub wrapper receives npm cache.
+    servers["fetch"]["env"] = {
+        "UV_CACHE_DIR": uv_cache_dir,
+        "UV_TOOL_DIR": uv_tool_dir,
+        "NPM_CONFIG_CACHE": npm_cache_dir,
+    }
     servers["github"]["env"] = {"NPM_CONFIG_CACHE": npm_cache_dir}
     servers["memory"]["env"]["MEMORY_FILE_PATH"] = str(memory_file_path)
     servers["deja"]["env"] = {"NPM_CONFIG_CACHE": npm_cache_dir}

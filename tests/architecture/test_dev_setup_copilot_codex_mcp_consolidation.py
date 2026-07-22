@@ -39,6 +39,7 @@ EXPECTED_MCP_SERVERS = {
 }
 
 WRAPPER_SCRIPT_STEMS = {
+    "fetch": "mcp_fetch_wrapper",
     "github": "github-mcp-wrapper",
     "docker": "mcp_docker_wrapper",
     "context7": "mcp_context7_wrapper",
@@ -197,14 +198,11 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
     codex_filesystem_scope = Path(str(codex_servers["filesystem"]["args"][-1]))
     assert codex_filesystem_scope.exists()
     assert codex_filesystem_scope.resolve().samefile(root.resolve())
-    assert servers["fetch"]["command"] == "uvx"
-    assert servers["fetch"]["args"] == [
-        "--python",
-        "3.13",
-        "--from",
-        "mcp-server-fetch==2025.4.7",
-        "mcp-server-fetch",
-    ]
+    assert servers["fetch"]["env"] == {
+        "UV_CACHE_DIR": ".cache/uv-cache",
+        "UV_TOOL_DIR": ".cache/uv-tools",
+        "NPM_CONFIG_CACHE": ".cache/npm-cache",
+    }
     _assert_platform_wrappers(servers)
     assert servers["deepwiki"]["type"] == "http"
     assert servers["deepwiki"]["url"] == "https://mcp.deepwiki.com/mcp"
@@ -226,12 +224,14 @@ def test_tracked_mcp_projections_reject_workstation_paths() -> None:
     scripts_payload = json.loads(
         (root / "scripts/ai/.mcp.json").read_text(encoding="utf-8")
     )
+    zed_payload = json.loads((root / ".zed/mcp.json").read_text(encoding="utf-8"))
     devin_payload = json.loads(
         (root / ".devin/config.json").read_text(encoding="utf-8")
     )
 
     expected_servers = workspace_payload["mcpServers"]
     assert scripts_payload["mcpServers"] == expected_servers
+    assert zed_payload["mcpServers"] == expected_servers
     devin_servers = devin_payload["mcpServers"]
     assert set(devin_servers) == set(expected_servers)
     for server_name, server_config in expected_servers.items():
@@ -249,7 +249,7 @@ def test_tracked_mcp_projections_reject_workstation_paths() -> None:
     assert devin_payload["shell"] == {"setup_complete": True}
 
     absolute_path = re.compile(r"^(?:/|[A-Za-z]:[\\/])")
-    for payload in (workspace_payload, scripts_payload, devin_payload):
+    for payload in (workspace_payload, scripts_payload, zed_payload, devin_payload):
         assert not [
             value for value in _all_string_values(payload) if absolute_path.match(value)
         ]

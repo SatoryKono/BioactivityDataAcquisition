@@ -145,7 +145,7 @@ def test_issue_5752_narrative_reports_match_live_governance_artifacts() -> None:
     assert "Lifecycle status: current" in debt_report
     assert "Integral score `8.92`" in debt_report
     assert "`45/45` debt-governance gates passing" in debt_report
-    assert "`22,614` test functions across `2,026` pytest" in debt_report
+    assert "`22,615` test functions across `2,026` pytest" in debt_report
     assert "| `bioetl.domain.composite.config` | 0 | 39 |" in debt_report
     assert "| `bioetl.application.composite.merger` | 0 | 5 |" in debt_report
 

@@ -42,7 +42,7 @@ artifacts.
 | Architecture score | Integral score `8.92` | `reports/quality/architecture-quality-scorecard.json` |
 | Debt gates | `45` pass, `0` fail, `0` warn | `reports/quality/debt-governance-gates.json` |
 | Module inventory | `2244` total; `1398` full; `824` partial; `22` no executable lines; `0` uncovered/unmeasured | `reports/quality/module-coverage-inventory.json` |
-| Test governance | `22614` functions; `2026` files; duplicate/markerless/compatibility counts all `0` | `reports/quality/test-governance-current.json` |
+| Test governance | `22615` functions; `2026` files; duplicate/markerless/compatibility counts all `0` | `reports/quality/test-governance-current.json` |
 | Compatibility | `12` retained entrypoints; `4` public export facades; `0` twin pairs | `reports/quality/compatibility-importer-census.json` |
 | Transition compatibility debt | Current/max count `0/0` | `configs/quality/debt_scorecard.yaml` |
 

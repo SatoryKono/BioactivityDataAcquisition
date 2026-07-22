@@ -221,6 +221,7 @@ def main() -> int:
             "server": args.server,
             "ok": False,
             "error": type(exc).__name__,
+            "error_message": str(exc)[:500],
         }
     rendered = json.dumps(report, indent=2, sort_keys=True) + "\n"
     if args.output:
