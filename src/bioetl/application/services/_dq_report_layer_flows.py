@@ -7,10 +7,7 @@ from collections.abc import Awaitable, Callable, Mapping
 from pathlib import Path
 from typing import TYPE_CHECKING, Protocol
 
-from bioetl.application.services.dq_report_models import (
-    _DQ_REPORT_ERRORS,
-    DQReportContext,
-)
+from bioetl.application.services.dq_report_models import DQReportContext
 from bioetl.domain.ports import SilverDQAnalyzeRequest
 
 if TYPE_CHECKING:
@@ -153,7 +150,7 @@ async def _generate_report_for_stage[ReportT: _DQReport](
             emit_generated_metric=emit_generated_metric,
             emit_check_failure_metric=emit_check_failure_metric,
         )
-    except _DQ_REPORT_ERRORS as exc:
+    except (OSError, RuntimeError, TypeError, ValueError, KeyError) as exc:
         _log_report_generation_failure(
             context=context,
             stage=stage,

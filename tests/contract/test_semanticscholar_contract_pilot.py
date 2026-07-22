@@ -10,18 +10,15 @@ import asyncio
 import pytest
 from bioetl.domain.types import JsonDict
 
-# Fixtures live in tests/contract/conftest.py (imported from
-# _semanticscholar_contract_support). Do not re-declare pytest_plugins here:
-# a second plugin load after another module already imported the support
-# package triggers PytestAssertRewriteWarning.
 STABLE_DOI = "10.1038/s41586-020-2649-2"
+pytestmark = pytest.mark.no_api
 
 
 @pytest.mark.semanticscholar
 @pytest.mark.pilot_soak
 @pytest.mark.timeout(300)
 class TestSemanticScholarPilotContract:
-    """Pilot-only Semantic Scholar live assertions."""
+    """Pilot-only Semantic Scholar assertions."""
 
     @pytest.mark.asyncio
     async def test_batch_lookup_preserves_doi_identity(

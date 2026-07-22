@@ -1,135 +1,55 @@
-"""Contract tests configuration and fixtures.
+"""Contract tests configuration and fixtures."""
 
-Provides common fixtures for live API contract testing.
-"""
-
-from __future__ import annotations
 
 import os
 import socket
 import threading
-import asyncio
-import contextlib
 from functools import lru_cache
-from time import monotonic
 
 import pytest
-import httpx
 import pytest_asyncio
 from bioetl.domain.types import JsonDict
-
-# Register Semantic Scholar live fixtures once for the whole contract package.
-# Keep live Semantic Scholar fixtures in conftest so the support module is not
-# imported during test collection, which avoids ``PytestAssertRewriteWarning``.
-SEMANTICSCHOLAR_API_BASE = "https://api.semanticscholar.org/graph/v1"
-SEARCH_TITLE = "SARS-CoV-2"
-SEARCH_FIELDS = "paperId,title,externalIds,year"
-JSON_ACCEPT_HEADER = "application/json"
-JSON_CONTENT_TYPE_HEADER = JSON_ACCEPT_HEADER
-REQUEST_SPACING_SECONDS = 8.0
-RATE_LIMIT_RETRY_SECONDS = 8.0
-MAX_RATE_LIMIT_ATTEMPTS = 6
-
-_SEARCH_PAYLOAD_CACHE: dict[str, object] | None = None
-_BATCH_PAYLOAD_CACHE: list[dict[str, object] | None] | None = None
-_LAST_REQUEST_AT = 0.0
+from tests.contract._provider_contract_replay import (
+    PROVIDER_CONTRACT_REPLAY_PROBES,
+    ProviderContractReplayProbe,
+    load_provider_contract_replay_payload,
+)
 
 
-def _retry_after_seconds(response: httpx.Response) -> float:
-    raw_retry_after = response.headers.get("Retry-After", "").strip()
-    if raw_retry_after:
-        with contextlib.suppress(ValueError):
-            parsed = float(raw_retry_after)
-            if parsed > 0:
-                return parsed
-    return RATE_LIMIT_RETRY_SECONDS
+def _get_replay_probe(provider: str, probe: str) -> ProviderContractReplayProbe:
+    for case in PROVIDER_CONTRACT_REPLAY_PROBES:
+        if case.provider == provider and case.probe == probe:
+            return case
+    raise pytest.UsageError(
+        f"No replay probe configured for {provider}.{probe}"
+    )
 
 
-def _backoff_seconds(response: httpx.Response, attempt: int) -> float:
-    base_delay = _retry_after_seconds(response)
-    multiplier = max(1, attempt + 1)
-    return base_delay * multiplier
-
-
-async def _request_or_skip(
-    client: httpx.AsyncClient,
-    method: str,
-    url: str,
-    **kwargs: object,
-) -> httpx.Response:
-    global _LAST_REQUEST_AT
-    for attempt in range(MAX_RATE_LIMIT_ATTEMPTS):
-        elapsed = monotonic() - _LAST_REQUEST_AT
-        if elapsed < REQUEST_SPACING_SECONDS:
-            await asyncio.sleep(REQUEST_SPACING_SECONDS - elapsed)
-
-        try:
-            response = await client.request(method, url, **kwargs)
-        except (httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadTimeout) as exc:
-            pytest.skip(f"Semantic Scholar endpoint not reachable: {exc}")
-
-        _LAST_REQUEST_AT = monotonic()
-        if response.status_code == 429 and attempt < (MAX_RATE_LIMIT_ATTEMPTS - 1):
-            await asyncio.sleep(_backoff_seconds(response, attempt))
-            continue
-        if response.status_code in {429, 500, 502, 503, 504}:
-            pytest.skip(
-                f"Semantic Scholar temporary server error: HTTP {response.status_code}"
-            )
-        return response
-    pytest.skip("Semantic Scholar temporary server error: exhausted 429 retry budget")
+def _load_semanticscholar_replay_payload(probe: str) -> object:
+    case = _get_replay_probe("semanticscholar", probe)
+    return load_provider_contract_replay_payload(case)
 
 
 @pytest_asyncio.fixture
-async def semanticscholar_client() -> httpx.AsyncClient:
-    """Shared AsyncClient to avoid needless connection churn in live runs."""
-    async with httpx.AsyncClient(timeout=30.0) as client:
-        yield client
-
-
-@pytest_asyncio.fixture
-async def semanticscholar_search_payload(
-    semanticscholar_client: httpx.AsyncClient,
-) -> JsonDict:
-    """Cached free-text search response for shape assertions."""
-    global _SEARCH_PAYLOAD_CACHE
-    if _SEARCH_PAYLOAD_CACHE is None:
-        response = await _request_or_skip(
-            semanticscholar_client,
-            "GET",
-            f"{SEMANTICSCHOLAR_API_BASE}/paper/search",
-            params={
-                "query": SEARCH_TITLE,
-                "limit": 1,
-                "offset": 0,
-                "fields": SEARCH_FIELDS,
-            },
-            headers={"Accept": JSON_ACCEPT_HEADER},
+async def semanticscholar_search_payload() -> JsonDict:
+    """Replay payload for Semantic Scholar free-text search contract."""
+    payload = _load_semanticscholar_replay_payload("paper_search_endpoint")
+    if not isinstance(payload, dict):
+        raise AssertionError(
+            "Semantic Scholar paper search replay payload must be a mapping"
         )
-        _SEARCH_PAYLOAD_CACHE = response.json()
-    return _SEARCH_PAYLOAD_CACHE
+    return payload
 
 
 @pytest_asyncio.fixture
-async def semanticscholar_batch_payload(
-    semanticscholar_client: httpx.AsyncClient,
-) -> list[JsonDict | None]:
-    """Cached DOI batch lookup response reused across batch assertions."""
-    global _BATCH_PAYLOAD_CACHE
-    if _BATCH_PAYLOAD_CACHE is None:
-        response = await _request_or_skip(
-            semanticscholar_client,
-            "POST",
-            f"{SEMANTICSCHOLAR_API_BASE}/paper/batch",
-            params={"fields": SEARCH_FIELDS},
-            json={"ids": ["DOI:10.1038/s41586-020-2649-2"]},
-            headers={
-                "Accept": JSON_ACCEPT_HEADER,
-                "Content-Type": JSON_CONTENT_TYPE_HEADER,
-            },
+async def semanticscholar_batch_payload() -> list[JsonDict | None]:
+    """Replay payload for Semantic Scholar DOI batch lookup contract."""
+    payload = _load_semanticscholar_replay_payload("paper_batch_lookup_by_doi")
+    if not isinstance(payload, list):
+        raise AssertionError(
+            "Semantic Scholar DOI batch replay payload must be a list"
         )
-        _BATCH_PAYLOAD_CACHE = response.json()
-    return _BATCH_PAYLOAD_CACHE
+    return payload
 
 _CONTRACT_PATH_TOKEN_POSIX = "/contract/"
 _CONTRACT_PATH_TOKEN_WINDOWS = "\\contract\\"
@@ -232,9 +152,6 @@ def pytest_collection_modifyitems(
     Tests marked with 'no_api' are exempt from this requirement as they don't
     require live API access (e.g., schema introspection tests).
     """
-    live_tests_enabled = bool(config.getoption("--live-api")) or _is_truthy_env_var(
-        "BIOETL_LIVE_API_TESTS"
-    )
     pilot_soak_enabled = bool(config.getoption("--pilot-soak")) or _is_truthy_env_var(
         "BIOETL_PILOT_SOAK_TESTS"
     )
@@ -249,25 +166,8 @@ def pytest_collection_modifyitems(
         if requires_network:
             item.add_marker(pytest.mark.network)
 
-            if not live_tests_enabled:
-                item.add_marker(
-                    pytest.mark.skip(
-                        reason=(
-                            "Live API tests disabled. Enable via --live-api "
-                            "or BIOETL_LIVE_API_TESTS=true."
-                        )
-                    )
-                )
-
         if "pilot_soak" in item.keywords and not pilot_soak_enabled:
-            item.add_marker(
-                pytest.mark.skip(
-                    reason=(
-                        "Pilot soak tests disabled. Enable via --pilot-soak "
-                        "or BIOETL_PILOT_SOAK_TESTS=true."
-                    )
-                )
-            )
+            item.add_marker(pytest.mark.pilot_soak)
 
 
 @pytest.fixture(scope="session")
@@ -289,9 +189,20 @@ def no_network(pytestconfig: pytest.Config) -> bool:
 @pytest.fixture(autouse=True)
 def _network_guard(request: pytest.FixtureRequest, no_network: bool) -> None:
     """Skip network-marked tests when connectivity guard is active."""
-    if no_network and "network" in request.node.keywords:
+    pilot_soak_enabled = bool(request.config.getoption("--pilot-soak")) or _is_truthy_env_var(
+        "BIOETL_PILOT_SOAK_TESTS"
+    )
+
+    should_skip_network = no_network and "network" in request.node.keywords
+    should_skip_pilot = (
+        "pilot_soak" in request.node.keywords and not pilot_soak_enabled
+    )
+    if should_skip_network or should_skip_pilot:
         pytest.skip(
-            "Network tests disabled. Enable --network or BIOETL_NETWORK_TESTS=true."
+            "Pilot soak tests disabled. Enable via --pilot-soak "
+            "or BIOETL_PILOT_SOAK_TESTS=true."
+            if should_skip_pilot
+            else "Network tests disabled. Enable --network or BIOETL_NETWORK_TESTS=true."
         )
 
 

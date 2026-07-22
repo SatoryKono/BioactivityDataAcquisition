@@ -19,6 +19,13 @@ from bioetl.interfaces.http.control_plane_identity.formatting import (
     is_present,
     short_value,
 )
+from bioetl.interfaces.http.control_plane_identity.payload_selection import (
+    build_identity_diagnostics,
+    gap_count_from_mapping,
+    identity_evidence_gap_rows,
+    identity_graph_gap_rows,
+    select_rows,
+)
 from bioetl.interfaces.http.control_plane_identity.severity import (
     applicability,
     domain_severity,
@@ -32,21 +39,12 @@ from bioetl.interfaces.http.control_plane_identity.source_model import (
 from bioetl.interfaces.http.control_plane_identity.specs import (
     ALLOWED_LOW_CARDINALITY_LABELS,
     ANCHOR_SPECS,
-    OVERVIEW_NAMES,
     SPEC_BY_NAME,
 )
 from bioetl.interfaces.http.control_plane_identity.types import (
     IDENTITY_EVIDENCE_CONTRACT,
     AnchorSpec,
     LedgerEntryProvider,
-)
-
-from bioetl.interfaces.http.control_plane_identity.payload_selection import (
-    build_identity_diagnostics,
-    gap_count_from_mapping,
-    identity_evidence_gap_rows,
-    identity_graph_gap_rows,
-    select_rows,
 )
 
 

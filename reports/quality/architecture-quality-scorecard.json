@@ -222,7 +222,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "55e01c1f58c0fe952a2d22e2630b86f563f6a3e34d604c270ab753a746edc04b"
+      "source_fingerprint": "aa1cbe7a4dc8d937f7b557d7804fa81c53092f74c3e9da0e1026c0c7be0216d3"
     },
     "duplication_baseline": {
       "path": "reports/quality/full-app-duplication-baseline.json",
@@ -232,7 +232,7 @@
     "hotspot_family_baseline": {
       "budget_warnings": 0,
       "path": "reports/quality/hotspot-family-baseline.json",
-      "snapshot_date": "2026-07-19"
+      "snapshot_date": "2026-07-22"
     },
     "module_coverage_inventory": {
       "coverage_xml_sha256": "3938fbd2bc1a5654e5ad56d4084713831e21cda7abb131fd30b87a83ffe16cd2",

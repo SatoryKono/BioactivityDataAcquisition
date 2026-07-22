@@ -2,19 +2,18 @@
 
 from __future__ import annotations
 
-import json
-import math
 import re
 from dataclasses import dataclass
 from typing import Literal
-from urllib.error import HTTPError, URLError
-from urllib.parse import urlencode
 from uuid import UUID
 
 from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.control_plane.run_ledger import ARTIFACT_PUBLISHED_EVENT
 from bioetl.domain.types import RunID
-from bioetl.interfaces.http._processed_records_http import open_url as _open_url
+from bioetl.interfaces.http._processed_records_prometheus import (
+    _candidate_prometheus_base_urls,
+    _query_prometheus_vector_with_fallbacks,
+)
 from bioetl.interfaces.http._processed_records_value_support import (
     _as_float,
     _count_text,
@@ -308,21 +307,4 @@ def format_percentage(
     if percent_format == "trimmed_3":
         return f"{percentage:.3f}".rstrip("0").rstrip(".") + "%"
     return "100%"
-
-from bioetl.interfaces.http._processed_records_prometheus import (
-    _candidate_prometheus_base_urls,
-    _fetch_prometheus_query_payload,
-    _finite_float_from_value_pair,
-    _metric_name_from_sample,
-    _parse_vector_sample,
-    _prometheus_error_message,
-    _prometheus_result_list,
-    _query_prometheus_scalar,
-    _query_prometheus_scalar_with_fallbacks,
-    _query_prometheus_vector,
-    _query_prometheus_vector_with_fallbacks,
-    _require_prometheus_success,
-    _scalar_from_payload,
-    _vector_samples_from_payload,
-)
 

@@ -159,7 +159,7 @@ while [[ $# -gt 0 ]]; do
         exit 1
       fi
       BASE_COMMIT="$2"
-      if [[ -z "$BASE_COMMIT" ]]; then
+      if [[ -z "$BASE_COMMIT" || "$BASE_COMMIT" == --* ]]; then
         echo "[ERROR] --base value cannot be empty"
         usage
         exit 1
@@ -168,7 +168,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     --base=*)
       BASE_COMMIT="${1#*=}"
-      if [[ -z "$BASE_COMMIT" ]]; then
+      if [[ -z "$BASE_COMMIT" || "$BASE_COMMIT" == --* ]]; then
         echo "[ERROR] --base value cannot be empty"
         usage
         exit 1
@@ -181,7 +181,7 @@ while [[ $# -gt 0 ]]; do
         exit 1
       fi
       LOG_DIR="$2"
-      if [[ -z "$LOG_DIR" ]]; then
+      if [[ -z "$LOG_DIR" || "$LOG_DIR" == --* ]]; then
         echo "[ERROR] --log-dir value cannot be empty"
         usage
         exit 1
@@ -190,7 +190,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     --log-dir=*)
       LOG_DIR="${1#*=}"
-      if [[ -z "$LOG_DIR" ]]; then
+      if [[ -z "$LOG_DIR" || "$LOG_DIR" == --* ]]; then
         echo "[ERROR] --log-dir value cannot be empty"
         usage
         exit 1

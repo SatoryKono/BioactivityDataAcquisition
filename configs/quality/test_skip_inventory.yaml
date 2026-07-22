@@ -44,23 +44,13 @@ entries:
     vcr_related: true
     review_date: "2026-06-02"
     rationale: Replay contract tests must skip closed when the cassette remains a Git LFS pointer instead of hydrated replay evidence.
-  - path: tests/contract/_semanticscholar_contract_support.py
-    suite: contract
-    category: live_endpoint_unavailability
-    owner: "@bioetl-contracts"
-    linked_issue: "#5562"
-    lifecycle: permanent_policy
-    reviewed_skip_calls: 3
-    vcr_related: false
-    review_date: "2026-06-02"
-    rationale: Semantic Scholar live probes may skip on transient endpoint or retry-budget exhaustion instead of failing unrelated governance lanes.
   - path: tests/contract/conftest.py
     suite: contract
     category: live_network_opt_in_guard
     owner: "@bioetl-contracts"
     linked_issue: "#5562"
     lifecycle: permanent_policy
-    reviewed_skip_calls: 4
+    reviewed_skip_calls: 1
     vcr_related: false
     review_date: "2026-06-02"
     rationale: Network-marked contract tests are intentionally opt-in and must skip when outbound connectivity or explicit enablement is absent.
@@ -114,6 +104,16 @@ entries:
     vcr_related: false
     review_date: "2026-06-02"
     rationale: PubChem live contract tests may skip on endpoint unavailability or transient 5xx failures.
+  - path: tests/contract/test_pubmed_contract.py
+    suite: contract
+    category: live_endpoint_unavailability
+    owner: "@bioetl-contracts"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 2
+    vcr_related: false
+    review_date: "2026-07-22"
+    rationale: PubMed/NCBI contract tests may skip on ConnectError/timeouts or temporary provider 5xx via _request_or_skip (aligned with Crossref/OpenAlex).
   - path: tests/contract/test_uniprot_contract.py
     suite: contract
     category: live_endpoint_unavailability
