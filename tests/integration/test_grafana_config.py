@@ -332,19 +332,15 @@ def test_explore_traces_links_use_safe_search_first_handoff(
         for url in _iter_structured_urls(dashboard)
         if "grafana-exploretraces-app" in url
     ]
-    if not trace_urls:
-        return
-
     for panel in dashboard.get("panels", []):
-        if panel.get("id") != 1000:
-            continue
         nav_content = unescape(str(panel.get("options", {}).get("content", "")))
         trace_urls.extend(
             re.findall(r'href="([^"]*grafana-exploretraces-app[^"]*)"', nav_content)
         )
 
-    if not trace_urls:
-        return
+    assert trace_urls, (
+        f"{dashboard_path.name} must expose an Explore Traces URL"
+    )
 
     for url in trace_urls:
         assert "/a/grafana-exploretraces-app/explore?actionView=search" in url, (

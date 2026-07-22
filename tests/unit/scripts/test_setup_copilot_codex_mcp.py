@@ -127,7 +127,16 @@ def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> 
     runtime_servers = codex_settings["mcpServers"]
     devin_servers = devin_config["mcpServers"]
     assert set(servers) == expected_servers
-    assert devin_servers == servers
+    assert set(devin_servers) == set(servers)
+    for server_name, server_config in servers.items():
+        if server_name != "ref":
+            assert devin_servers[server_name] == server_config
+    expected_devin_ref = dict(servers["ref"])
+    expected_devin_ref.pop("env_http_headers")
+    expected_devin_ref["headers"] = {
+        "x-ref-api-key": "$REF_TOOL_API_KEY",
+    }
+    assert devin_servers["ref"] == expected_devin_ref
     assert qodo_payload["mcpServers"] == servers
     assert zed_payload["mcpServers"] == servers
     assert not removed_servers.intersection(servers)

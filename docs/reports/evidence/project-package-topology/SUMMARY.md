@@ -1,6 +1,6 @@
 # Сводка evidence: project-package-topology
 
-Дата: 2026-07-20
+Дата: 2026-07-22
 Статус: refreshed
 
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see
@@ -15,11 +15,11 @@ module-coverage producer. The inventory retains its `2026-07-13` coverage-data
 snapshot date because no newer canonical coverage run was substituted for the
 tracked coverage measurements.
 
-Current-baseline note (2026-07-20): architectural planning and GitHub issues
+Current-baseline note (2026-07-22): architectural planning and GitHub issues
 MUST cite this summary or a newer regenerated package-topology pack for current
 counts. The current source baseline is
-`source_module_count=2241` with
-`source_tree_sha256=ef9f46fa1836ef49f45fd0c81b44ee6b11c435ab333d30b0d4510bf8b0b7e3e1`.
+`source_module_count=2244` with
+`source_tree_sha256=0a3a04f2b825f1dcc3764c3d9e8c08f72cab34ef7649c6dfe06405de62c1957e`.
 Raw files dated before `2026-07-19` are retained only as historical detailed
 inputs and must be refreshed before they are used for line-item topology
 evidence.
@@ -57,10 +57,10 @@ Collected: `6`
   for source, config, tests, scripts, docs, and reports.
 - `src/bioetl/` reflects the intended layered architecture through distinct
   first-order package groups.
-- Current Python file count under `src/bioetl` is `2241`, including two
+- Current Python file count under `src/bioetl` is `2244`, including two
   top-level package modules outside the five first-order architecture layers.
 - Current layer file counts are: `domain=575`, `application=664`,
-  `infrastructure=584`, `composition=276`, `interfaces=138`.
+  `infrastructure=585`, `composition=276`, `interfaces=142`.
 - Current first-order package counts are: `domain=22`, `application=6`,
   `infrastructure=20`, `composition=5`, `interfaces=2`.
 - `application` and `infrastructure` remain the broadest package surfaces by

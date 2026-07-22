@@ -83,17 +83,23 @@ def context():
 async def test_generate_bronze_report_error(service, context, mock_bronze_analyzer):
     """Test error handling in _generate_bronze_report."""
     from bioetl.domain.exceptions import DataQualityError
-    mock_bronze_analyzer.analyze.side_effect = DataQualityError("Analysis failed")
 
     config = MagicMock(spec=BronzeDQConfigPort)
     config.enabled = True
 
-    result = await service._generate_bronze_report(context, config)
+    for error in (
+        DataQualityError("Analysis failed"),
+        TimeoutError("Analysis timed out"),
+    ):
+        mock_bronze_analyzer.analyze.side_effect = error
 
-    assert result is None
-    service._logger.error.assert_called_with(
-        "bronze_dq_report_failed", run_id=context.run_id, error="Analysis failed"
-    )
+        result = await service._generate_bronze_report(context, config)
+
+        assert result is None
+        service._logger.error.assert_called_once_with(
+            "bronze_dq_report_failed", run_id=context.run_id, error=str(error)
+        )
+        service._logger.reset_mock()
 
 
 @pytest.mark.asyncio
