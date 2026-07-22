@@ -457,6 +457,14 @@ Shell export also works and overrides `.env` for the current session:
 export GITHUB_PERSONAL_ACCESS_TOKEN="<your_pat>"
 ```
 
+For Grok on Windows, HTTP MCP servers run outside the repo wrappers. Export the
+already configured local `.env` values to the current process, or add
+`-UserScope` and restart Grok to persist them for future sessions:
+
+```powershell
+pwsh scripts/ai/mcp/export_mcp_env_from_dotenv.ps1 -UserScope
+```
+
 On Windows, the project GitHub MCP wrapper can auto-read token from `gh auth token` when available.
 
 ### Cursor: Run Codex via Tasks

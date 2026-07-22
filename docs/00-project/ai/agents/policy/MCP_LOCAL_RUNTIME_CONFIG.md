@@ -82,6 +82,11 @@ The repo env loaders are:
 - `scripts/ops/support/load_repo_env.sh`
 - `scripts/ai/mcp/support/load_repo_env.ps1`
 
+For Grok on Windows, the documented compatibility helper
+`scripts/ai/mcp/export_mcp_env_from_dotenv.ps1` can export already configured
+local values to process scope, or to user scope with `-UserScope`. It MUST NOT
+write secret values into tracked MCP configuration.
+
 They load local env files when present and normalize common aliases such as:
 
 - `GITHUB_TOKEN` <-> `GITHUB_PERSONAL_ACCESS_TOKEN`

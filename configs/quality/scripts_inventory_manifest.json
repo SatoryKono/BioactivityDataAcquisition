@@ -1,18 +1,17 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-22T15:13:55.411306+00:00",
+  "generated_at": "2026-07-22T15:39:42.104948+00:00",
   "summary": {
     "total_scripts": 509,
     "status_counts": {
       "active": 343,
-      "orphan": 3,
-      "supporting": 163
+      "supporting": 166
     },
     "reference_group_coverage": {
       "agents": 5,
       "build": 11,
       "ci": 65,
-      "docs": 205,
+      "docs": 206,
       "other": 33,
       "scripts": 392,
       "skills": 16,
@@ -2136,18 +2135,26 @@
     {
       "path": "scripts/ai/mcp/_check_env_keys.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
-      "references": []
+      "references": [],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded local diagnostic that reports MCP .env key presence and lengths without printing values; prefer the canonical MCP check workflow for routine validation and remove this helper once token diagnostics are consolidated."
     },
     {
       "path": "scripts/ai/mcp/_patch_grok_mcp_tokens.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
-      "references": []
+      "references": [],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded one-time Grok MCP config migration helper for Ref headers and startup timeouts; do not use it for Codex configuration and remove it after supported Grok configs no longer require migration."
     },
     {
       "path": "scripts/ai/mcp/check.sh",
@@ -2270,10 +2277,21 @@
     {
       "path": "scripts/ai/mcp/export_mcp_env_from_dotenv.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
+          "line": 86,
+          "source_group": "docs",
+          "text": "`scripts/ai/mcp/export_mcp_env_from_dotenv.ps1` can export already configured"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the documented Windows-side helper for exporting MCP variables to process or user scope when Grok launches HTTP MCP servers outside repo wrappers; keep secret values out of tracked configs and retire the helper if Grok gains direct repo env loading."
     },
     {
       "path": "scripts/ai/mcp/github-mcp-wrapper.ps1",
@@ -2350,7 +2368,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 31,
+          "line": 32,
           "source_group": "tests",
           "text": "ADR_ANALYSIS_PS1 = MCP_DIR / \"mcp_adr_analysis_wrapper.ps1\""
         }
@@ -2523,7 +2541,7 @@
       "references": [
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 27,
+          "line": 28,
           "source_group": "tests",
           "text": "CODE_INTERPRETER_PS1 = MCP_DIR / \"mcp_code_interpreter_wrapper.ps1\""
         }
@@ -2563,7 +2581,7 @@
       "references": [
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 33,
+          "line": 34,
           "source_group": "tests",
           "text": "CONTEXT7_PS1 = MCP_DIR / \"mcp_context7_wrapper.ps1\""
         }
@@ -2594,7 +2612,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 32,
+          "line": 33,
           "source_group": "tests",
           "text": "CONTEXT7_SH = MCP_DIR / \"mcp_context7_wrapper.sh\""
         }
@@ -2750,7 +2768,7 @@
       "references": [
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 25,
+          "line": 26,
           "source_group": "tests",
           "text": "FETCH_PS1 = MCP_DIR / \"mcp_fetch_wrapper.ps1\""
         }
@@ -2781,7 +2799,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 24,
+          "line": 25,
           "source_group": "tests",
           "text": "FETCH_SH = MCP_DIR / \"mcp_fetch_wrapper.sh\""
         }
@@ -2935,7 +2953,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 30,
+          "line": 31,
           "source_group": "tests",
           "text": "MUTMUT_PS1 = MCP_DIR / \"mcp_mutmut_wrapper.ps1\""
         }
@@ -2966,7 +2984,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 29,
+          "line": 30,
           "source_group": "tests",
           "text": "MUTMUT_SH = MCP_DIR / \"mcp_mutmut_wrapper.sh\""
         }
@@ -3041,7 +3059,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 28,
+          "line": 29,
           "source_group": "tests",
           "text": "NEO4J_CYPHER_SH = MCP_DIR / \"mcp_neo4j_cypher_wrapper.sh\""
         },
@@ -3484,7 +3502,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 95,
+          "line": 100,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/token_validation.ps1`"
         },
@@ -3541,7 +3559,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 94,
+          "line": 99,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/token_validation.sh`"
         },
@@ -3616,7 +3634,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 23,
+          "line": 24,
           "source_group": "tests",
           "text": "UV_RESOLVER_PS1 = MCP_DIR / \"support\" / \"uv_resolver.ps1\""
         }
@@ -3667,7 +3685,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 22,
+          "line": 23,
           "source_group": "tests",
           "text": "UV_RESOLVER_SH = MCP_DIR / \"support\" / \"uv_resolver.sh\""
         }
@@ -8755,31 +8773,31 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 777,
+          "line": 786,
           "source_group": "docs",
           "text": "BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 796,
+          "line": 805,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/run_pytest_sharded.sh \\"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 887,
+          "line": 896,
           "source_group": "docs",
           "text": "| 5   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream` | Выполнить ускоренный coverage/sharded прогон |"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 888,
+          "line": 897,
           "source_group": "docs",
           "text": "| 6   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing` | В"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 925,
+          "line": 934,
           "source_group": "docs",
           "text": "BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded"
         }
@@ -11743,7 +11761,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 335,
+          "line": 344,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadat"
         },
@@ -12275,7 +12293,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 829,
+          "line": 838,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-placement`"
         }
@@ -12326,7 +12344,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 830,
+          "line": 839,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-naming`"
         },
@@ -12353,13 +12371,13 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 333,
+          "line": 342,
           "source_group": "docs",
           "text": "- `vcr_cassette_max_age_days: 90` является blocking stale-age threshold: CI теперь валидирует managed metadata inventory через `scripts/engineering/qa/vcr/check_vcr_metadata_age.py --max-age-days 90`"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 835,
+          "line": 844,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90`"
         },
@@ -14286,7 +14304,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 290,
+          "line": 299,
           "source_group": "docs",
           "text": "`scripts/ops/launchers/codex/setup_plugins.sh --pytest-only` перед запуском pytest."
         },
@@ -14506,7 +14524,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 335,
+          "line": 344,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadat"
         },
