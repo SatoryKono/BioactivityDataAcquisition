@@ -17,8 +17,11 @@ BRANCH_TELEMETRY_DIR = Path("reports/test-telemetry")
 TELEMETRY_FRESHNESS_MAX_AGE_DAYS = 45
 
 
-def compute_test_telemetry_source_tree_sha256(repo_root: Path = Path(".")) -> str:
+def compute_test_telemetry_source_tree_sha256(
+    repo_root: Path = Path(__file__).resolve().parents[3],
+) -> str:
     """Hash maintained test sources and lane policy, excluding generated evidence."""
+    repo_root = repo_root.resolve()
     paths = list((repo_root / "tests").rglob("*.py"))
     paths.extend((repo_root / "src" / "bioetl").rglob("*.py"))
     paths.extend(
