@@ -92,7 +92,7 @@ function Normalize-BioetlRepoEnvAliases {
     }
 
     # Neo4j auth pack → discrete username/password when needed.
-    if ($env:NEO4J_AUTH -and ((-not $env:NEO4J_USERNAME) -or (-not $env:NEO4J_PASSWORD))) {
+    if ($env:NEO4J_AUTH) {
         $authParts = ConvertFrom-BioetlNeo4jAuth -Auth $env:NEO4J_AUTH
         if (-not $env:NEO4J_USERNAME) { $env:NEO4J_USERNAME = $authParts.Username }
         if (-not $env:NEO4J_PASSWORD) { $env:NEO4J_PASSWORD = $authParts.Password }
