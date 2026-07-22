@@ -16,6 +16,12 @@ from bioetl.infrastructure.adapters.uniprot.fallback_resolver import (
 pytestmark = pytest.mark.unit
 
 
+@pytest.fixture(autouse=True)
+def isolate_xdg_cache_home(monkeypatch):
+    """Isolate fallback-cache scenario from XDG_CACHE_HOME."""
+    monkeypatch.delenv("XDG_CACHE_HOME", raising=False)
+
+
 def test_resolve_uniprot_missing_ids_filters_found_and_deduplicates() -> None:
     missing_ids = resolve_uniprot_missing_ids(
         filter_ids=["A", "B", "B", "C", "D"],

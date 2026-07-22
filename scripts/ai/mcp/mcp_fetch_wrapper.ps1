@@ -35,6 +35,9 @@ Do not use npm package mcp-server-fetch (canary / not production).
     exit 1
 }
 
-Enable-BioetlUvxNetworkBypass
-& $uvx --python 3.13 --from "mcp-server-fetch==2025.4.7" mcp-server-fetch
+Invoke-BioetlUvxWithScopedBypass `
+    -UvxPath $uvx `
+    -Package "mcp-server-fetch==2025.4.7" `
+    -Command "mcp-server-fetch" `
+    -UvxArguments @("--python", "3.13")
 exit $LASTEXITCODE

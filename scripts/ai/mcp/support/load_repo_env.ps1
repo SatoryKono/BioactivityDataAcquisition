@@ -2,6 +2,23 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+function ConvertFrom-BioetlNeo4jAuth {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Auth
+    )
+
+    $separatorIndex = $Auth.IndexOf('/')
+    if ($separatorIndex -le 0 -or $separatorIndex -eq ($Auth.Length - 1)) {
+        throw "NEO4J_AUTH must use non-empty username/password format"
+    }
+
+    return [pscustomobject]@{
+        Username = $Auth.Substring(0, $separatorIndex)
+        Password = $Auth.Substring($separatorIndex + 1)
+    }
+}
+
 function Normalize-BioetlRepoEnvAliases {
     # GitHub MCP expects GITHUB_PERSONAL_ACCESS_TOKEN; local .env often has GITHUB_TOKEN.
     if (-not $env:GITHUB_PERSONAL_ACCESS_TOKEN) {
@@ -76,11 +93,9 @@ function Normalize-BioetlRepoEnvAliases {
 
     # Neo4j auth pack → discrete username/password when needed.
     if ($env:NEO4J_AUTH -and ((-not $env:NEO4J_USERNAME) -or (-not $env:NEO4J_PASSWORD))) {
-        $authParts = $env:NEO4J_AUTH -split '/', 2
-        if ($authParts.Count -eq 2) {
-            if (-not $env:NEO4J_USERNAME) { $env:NEO4J_USERNAME = $authParts[0] }
-            if (-not $env:NEO4J_PASSWORD) { $env:NEO4J_PASSWORD = $authParts[1] }
-        }
+        $authParts = ConvertFrom-BioetlNeo4jAuth -Auth $env:NEO4J_AUTH
+        if (-not $env:NEO4J_USERNAME) { $env:NEO4J_USERNAME = $authParts.Username }
+        if (-not $env:NEO4J_PASSWORD) { $env:NEO4J_PASSWORD = $authParts.Password }
     }
     if (-not $env:NEO4J_URL -and $env:NEO4J_URI) {
         $env:NEO4J_URL = $env:NEO4J_URI

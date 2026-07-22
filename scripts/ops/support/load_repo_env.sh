@@ -3,7 +3,7 @@
 load_repo_env_if_present() {
   if [[ "${BIOETL_REPO_ENV_LOADED:-0}" == "1" ]]; then
     normalize_repo_env_aliases
-    return 0
+    return $?
   fi
 
   local script_dir repo_root env_file env_local_file load_env_local
@@ -20,7 +20,7 @@ load_repo_env_if_present() {
   if [[ ! -f "${env_file}" && ! -f "${env_local_file}" ]]; then
     export BIOETL_REPO_ENV_LOADED=1
     normalize_repo_env_aliases
-    return 0
+    return $?
   fi
 
   # Try Python-based loading first (most reliable)
@@ -146,6 +146,32 @@ PY
   normalize_repo_env_aliases
 }
 
+normalize_neo4j_auth_aliases() {
+  if [[ -z "${NEO4J_AUTH:-}" ]]; then
+    return 0
+  fi
+
+  local parsed_username parsed_password
+  if [[ "${NEO4J_AUTH}" != */* ]]; then
+    printf 'error: NEO4J_AUTH must use non-empty username/password format\n' >&2
+    return 1
+  fi
+
+  parsed_username="${NEO4J_AUTH%%/*}"
+  parsed_password="${NEO4J_AUTH#*/}"
+  if [[ -z "${parsed_username}" || -z "${parsed_password}" ]]; then
+    printf 'error: NEO4J_AUTH must use non-empty username/password format\n' >&2
+    return 1
+  fi
+
+  if [[ -n "${NEO4J_USERNAME:-}" && -n "${NEO4J_PASSWORD:-}" ]]; then
+    return 0
+  fi
+
+  export NEO4J_USERNAME="${NEO4J_USERNAME:-${parsed_username}}"
+  export NEO4J_PASSWORD="${NEO4J_PASSWORD:-${parsed_password}}"
+}
+
 normalize_repo_env_aliases() {
   if [[ -z "${GITHUB_PERSONAL_ACCESS_TOKEN:-}" && -n "${GITHUB_TOKEN:-}" ]]; then
     export GITHUB_PERSONAL_ACCESS_TOKEN="${GITHUB_TOKEN}"
@@ -196,10 +222,7 @@ normalize_repo_env_aliases() {
     fi
   fi
 
-  if [[ -n "${NEO4J_AUTH:-}" && ( -z "${NEO4J_USERNAME:-}" || -z "${NEO4J_PASSWORD:-}" ) ]]; then
-    export NEO4J_USERNAME="${NEO4J_USERNAME:-${NEO4J_AUTH%%/*}}"
-    export NEO4J_PASSWORD="${NEO4J_PASSWORD:-${NEO4J_AUTH#*/}}"
-  fi
+  normalize_neo4j_auth_aliases || return 1
   if [[ -z "${NEO4J_URL:-}" && -n "${NEO4J_URI:-}" ]]; then
     export NEO4J_URL="${NEO4J_URI}"
   fi

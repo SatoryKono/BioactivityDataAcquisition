@@ -248,6 +248,18 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as the PowerShell Docker CLI resolver helper used by MCP wrapper transports; keep it supporting unless Docker CLI discovery becomes a standalone governed MCP command."
     },
+    "scripts/ai/mcp/support/uv_resolver.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal PowerShell uvx resolution and proxy-cleanup helper shared by MCP wrappers; keep it supporting unless command resolution becomes a standalone governed MCP command."
+    },
+    "scripts/ai/mcp/support/uv_resolver.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal shell uvx resolution and proxy-cleanup helper shared by MCP wrappers; keep it supporting unless command resolution becomes a standalone governed MCP command."
+    },
     "scripts/ai/sync_ai_governance.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",

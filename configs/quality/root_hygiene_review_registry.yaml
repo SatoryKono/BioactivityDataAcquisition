@@ -161,9 +161,9 @@ review_lanes:
     classification: review_required
     scope: observed transient root helpers, raw test dumps, and reviewed root artifact routing
     verification:
-      - git ls-files .coverage coverage.xml 'Test Results - Pytest_All.html' 'Test Results - Pytest_All.xml' .xml mcp-shell.log _tmp_panel_inventory.mjs _tmp_panel_inventory.ps1 temp_analyze_conflicting.py temp_get_hash.py test_output.txt tests.txt logs artifacts
-      - git check-ignore -v .coverage coverage.xml 'Test Results - Pytest_All.html' 'Test Results - Pytest_All.xml' .xml mcp-shell.log
-      - rg -n "\\.coverage$|coverage\\.xml|Test Results - Pytest_All\\.(html|xml)|mcp-shell\\.log|^\\.xml$|_tmp_panel_inventory\\.(mjs|ps1)|temp_analyze_conflicting\\.py|temp_get_hash\\.py|test_output\\.txt|tests\\.txt|logs/|reports/logs/|artifacts/debug_exports/" .github docs scripts tests configs README.md Makefile pyproject.toml .gitignore
+      - git ls-files .coverage coverage.xml mcp-shell.log _tmp_panel_inventory.mjs _tmp_panel_inventory.ps1 temp_analyze_conflicting.py temp_get_hash.py test_output.txt tests.txt logs artifacts
+      - git check-ignore -v .coverage coverage.xml mcp-shell.log
+      - rg -n "\\.coverage$|coverage\\.xml|mcp-shell\\.log|_tmp_panel_inventory\\.(mjs|ps1)|temp_analyze_conflicting\\.py|temp_get_hash\\.py|test_output\\.txt|tests\\.txt|logs/|reports/logs/|artifacts/debug_exports/" .github docs scripts tests configs README.md Makefile pyproject.toml .gitignore
       - .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked
     candidates:
       - path: artifacts
@@ -178,18 +178,6 @@ review_lanes:
         current_live_state: present_local_only_root_surface
         canonical_path: null
         action_if_reintroduced: remove_root_coverage_xml_or_route_retained_coverage_evidence_to_reports_coverage
-      - path: Test Results - Pytest_All.html
-        current_live_state: present_local_only_root_surface
-        canonical_path: null
-        action_if_reintroduced: remove_root_html_test_report_or_route_retained_coverage_evidence_to_reports_coverage
-      - path: Test Results - Pytest_All.xml
-        current_live_state: absent_from_root_baseline
-        canonical_path: null
-        action_if_reintroduced: remove_root_junit_dump_or_route_retained_test_evidence_to_reports_junit
-      - path: .xml
-        current_live_state: present_local_only_root_surface
-        canonical_path: null
-        action_if_reintroduced: remove_ad_hoc_root_xml_dump_or_route_retained_test_evidence_to_reports_junit
       - path: mcp-shell.log
         current_live_state: present_local_only_root_surface
         canonical_path: null

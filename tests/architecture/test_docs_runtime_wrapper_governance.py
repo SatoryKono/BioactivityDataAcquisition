@@ -80,7 +80,8 @@ def _iter_active_text_files() -> list[Path]:
     return files
 
 
-def test_docs_direct_file_dispatch_does_not_regrow_in_active_surfaces() -> None:
+def \
+    test_docs_direct_file_dispatch_does_not_regrow_in_active_surfaces() -> None:
     """Active docs/workflows should use module dispatch instead of docs shim files."""
     violations: list[str] = []
     for path in _iter_active_text_files():

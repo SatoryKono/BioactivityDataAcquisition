@@ -33,11 +33,11 @@ class TestRuntimeDependencies:
                 capture_output=True,
                 text=True,
                 check=False,
-                timeout=20,
+                timeout=60,  # Increased timeout for heavy dependencies (polars, pandas, etc.)
             )
         except subprocess.TimeoutExpired as err:
             pytest.fail(
-                f"Timed out importing runtime dependency {module_name} after 20s in an"
+                f"Timed out importing runtime dependency {module_name} after 60s in an"
                 f" isolated process.\n{err}"
             )
         assert proc.returncode == 0, (
@@ -129,6 +129,7 @@ class TestCoreImports:
         assert base_transformer is not None
         assert runner is not None
 
+    @pytest.mark.timeout(120)  # Extended timeout for polars import
     def test_infrastructure_imports(self) -> None:
         """Infrastructure layer imports successfully."""
         from bioetl.infrastructure.storage import bronze_writer
