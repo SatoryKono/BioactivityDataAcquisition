@@ -2,7 +2,9 @@ Set-StrictMode -Version Latest
 
 function Write-McpTokenWarning {
     param([string]$Message)
-    Write-Warning $Message
+    # Never write to PowerShell warning/output streams that can leak onto
+    # process stdout — MCP stdio transport requires pure JSON on stdout.
+    [Console]::Error.WriteLine("warning: $Message")
 }
 
 function Test-McpRequiredToken {

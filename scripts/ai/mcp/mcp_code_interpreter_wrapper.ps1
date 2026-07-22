@@ -8,58 +8,61 @@ $env:BIOETL_SKIP_ENV_LOCAL = "1"
 Import-BioetlRepoEnv -RepoRoot $repoRoot
 Remove-Item Env:BIOETL_SKIP_ENV_LOCAL -ErrorAction SilentlyContinue
 . (Join-Path $PSScriptRoot "support/token_validation.ps1")
+. (Join-Path $PSScriptRoot "support/uv_resolver.ps1")
 
-if (-not $env:NPM_CONFIG_CACHE) {
-    $env:NPM_CONFIG_CACHE = Join-Path $repoRoot ".cache/npm-cache"
-}
 if (-not $env:UV_CACHE_DIR) {
     $env:UV_CACHE_DIR = Join-Path $repoRoot ".cache/uv-cache"
 }
 if (-not $env:UV_TOOL_DIR) {
     $env:UV_TOOL_DIR = Join-Path $repoRoot ".cache/uv-tools"
 }
+New-Item -ItemType Directory -Force -Path $env:UV_CACHE_DIR | Out-Null
+New-Item -ItemType Directory -Force -Path $env:UV_TOOL_DIR | Out-Null
+
+# mcp-run-python sandboxes execution with Deno — ensure it is on PATH.
+$denoBin = Join-Path $env:USERPROFILE ".deno\bin"
+if (Test-Path $denoBin) {
+    $env:PATH = "$denoBin$([IO.Path]::PathSeparator)$env:PATH"
+}
+# Persist Deno module cache across launches (pyodide + npm deps are heavy).
+if (-not $env:DENO_DIR) {
+    $env:DENO_DIR = Join-Path $env:USERPROFILE ".cache\deno"
+}
+New-Item -ItemType Directory -Force -Path $env:DENO_DIR | Out-Null
 
 Exit-McpValidateOnly -ServerName "mcp-code-interpreter"
+
+if (-not (Get-Command deno -ErrorAction SilentlyContinue)) {
+    Write-Error @"
+mcp-code-interpreter requires Deno (used by mcp-run-python sandbox).
+Install deno into %USERPROFILE%\.deno\bin\ (e.g. download
+deno-x86_64-pc-windows-msvc.zip with curl --ssl-no-revoke).
+"@
+    exit 1
+}
 
 # 1) Local Python module if installed
 $python = Get-Command python -ErrorAction SilentlyContinue
 if ($python) {
-    $hasModule = & python -c "import importlib.util; raise SystemExit(0 if importlib.util.find_spec('mcp_server_code_interpreter') else 1)" 2>$null
+    & python -c "import importlib.util; raise SystemExit(0 if importlib.util.find_spec('mcp_server_code_interpreter') else 1)" 2>$null
     if ($LASTEXITCODE -eq 0) {
         & python -m mcp_server_code_interpreter
         exit $LASTEXITCODE
     }
 }
 
-# 2) uvx when available
-if (Get-Command uvx -ErrorAction SilentlyContinue) {
-    try {
-        & uvx mcp-server-code-interpreter --stdio
-        if ($LASTEXITCODE -eq 0) { exit 0 }
-    } catch {
-        # fall through
-    }
-}
-
-# 3) npm fallback candidates (package names vary by publisher)
-$npmCandidates = @(
-    "mcp-server-code-interpreter",
-    "@e2b/mcp-server"
-)
-foreach ($pkg in $npmCandidates) {
-    try {
-        & npx -y $pkg --stdio
-        exit $LASTEXITCODE
-    } catch {
-        continue
-    }
+# 2) Canonical: PyPI mcp-run-python (sandboxed Python code execution MCP)
+$uvx = Resolve-BioetlUvxBin
+if (Test-BioetlUvxAvailable) {
+    Enable-BioetlUvxNetworkBypass
+    # Mode is a positional arg: stdio | streamable-http | ...
+    & $uvx --from "mcp-run-python==0.0.22" mcp-run-python stdio
+    exit $LASTEXITCODE
 }
 
 Write-Error @"
 mcp-code-interpreter could not start.
-Install one of:
-  - pip/uv tool: mcp-server-code-interpreter
-  - or ensure uvx is on PATH
-  - or provide a local python module mcp_server_code_interpreter
+Install uv (https://docs.astral.sh/uv/) so uvx is on PATH, then the wrapper
+will run: uvx --from mcp-run-python==0.0.22 mcp-run-python stdio
 "@
 exit 1
