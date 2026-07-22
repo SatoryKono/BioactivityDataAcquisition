@@ -2,10 +2,8 @@
 
 - mode: fail-fast
 - targets: 5
-- total_duplicate_clusters: 14
+- total_duplicate_clusters: 13
 - max_duplicate_clusters: 0
-- previous_snapshot_date: 2026-07-17
-- total_duplicate_cluster_delta_vs_previous: +4
 
 > Interpretation note: this is a visibility baseline. `R0801` can over-report
 > around facades, export barrels, and compatibility shims, so use it as
@@ -16,7 +14,7 @@
 | `src/bioetl/application/core` | 6 |
 | `src/bioetl/composition/bootstrap/runtime` | 1 |
 | `src/bioetl/composition/factories/pipeline` | 1 |
-| `src/bioetl/application/services/control_plane` | 1 |
+| `src/bioetl/application/services/control_plane` | 0 |
 | `src/bioetl/composition/runtime_builders` | 5 |
 
 ## src/bioetl/application/core
@@ -78,19 +76,8 @@
 
 ## src/bioetl/application/services/control_plane
 
-- duplicate clusters: 1
-
-| Actionability category | Duplicate clusters |
-| --- | ---: |
-| `export_facade_or_package_barrel` | 1 |
-
-| Top recurring module pairs | Duplicate clusters |
-| --- | ---: |
-| `bioetl.application.services.control_plane.manifest.diagnostics.replay_projection` <-> `bioetl.application.services.control_plane.manifest.diagnostics.resume_contract` | 1 |
-
-| Cluster path | Compared modules |
-| --- | --- |
-| `src\bioetl\application\services\control_plane\workflow\__init__.py:1` | `bioetl.application.services.control_plane.manifest.diagnostics.replay_projection`[103:109], `bioetl.application.services.control_plane.manifest.diagnostics.resume_contract`[83:89] |
+- duplicate clusters: 0
+- no `R0801` findings
 
 ## src/bioetl/composition/runtime_builders
 
@@ -115,28 +102,15 @@
 | `src\bioetl\composition\runtime_builders\_snapshot_mapping_support.py:1` | `bioetl.composition.runtime_builders._runner_control_plane_policy`[108:127], `bioetl.composition.runtime_builders._runner_control_plane_policy_support`[153:171] |
 | `src\bioetl\composition\runtime_builders\_snapshot_mapping_support.py:1` | `bioetl.composition.runtime_builders._manifest_publication_context_support`[158:163], `bioetl.composition.runtime_builders.run_manifest_builder`[185:190] |
 
-## Trend vs Previous Snapshot
-
-- previous snapshot: `2026-07-17`
-- total duplicate cluster delta: +4
-
-| Target | Current | Previous | Delta |
-| --- | ---: | ---: | ---: |
-| `src/bioetl/application/core` | 6 | 2 | +4 |
-| `src/bioetl/composition/bootstrap/runtime` | 1 | 1 | +0 |
-| `src/bioetl/composition/factories/pipeline` | 1 | 1 | +0 |
-| `src/bioetl/application/services/control_plane` | 1 | 1 | +0 |
-| `src/bioetl/composition/runtime_builders` | 5 | 5 | +0 |
-
 ## Reduction Leverage Ranking
 
 | Target | Duplicate clusters | Dominant actionability | Low-risk share | Recommended first wave |
 | --- | ---: | --- | ---: | --- |
 | `src/bioetl/application/core` | 6 | `export_facade_or_package_barrel` | 1.00 | yes |
 | `src/bioetl/composition/runtime_builders` | 5 | `composition_runtime_wiring_pattern` | 1.00 | yes |
-| `src/bioetl/application/services/control_plane` | 1 | `export_facade_or_package_barrel` | 1.00 | yes |
 | `src/bioetl/composition/bootstrap/runtime` | 1 | `composition_runtime_wiring_pattern` | 1.00 | yes |
 | `src/bioetl/composition/factories/pipeline` | 1 | `composition_runtime_wiring_pattern` | 1.00 | yes |
+| `src/bioetl/application/services/control_plane` | 0 | `n/a` | 0.00 | no |
 
 ## First Wave Selection
 

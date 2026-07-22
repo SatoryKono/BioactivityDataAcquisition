@@ -203,6 +203,6 @@
   "normalization_profile": {
     "ref": "chembl.assay_parameters",
     "version": "1.0.0",
-    "hash": "2858207c83f416c842e84cca4f31ae29316bcd579005c275733652f6fa065890"
+    "hash": "49c2eaf04353bcec9f87e75439b5e753d166fc5daf5de4974200d83bc7e3df72"
   }
 }

@@ -21,13 +21,13 @@ DEFAULT_PAIR_MATRIX = (
     REPO_ROOT
     / "reports"
     / "semantic_pipeline_audit"
-    / "semantic_pair_matrix_2026-05-21.csv"
+    / "semantic_pair_matrix_2026-07-01.csv"
 )
 DEFAULT_CLUSTER_REGISTRY = (
     REPO_ROOT
     / "reports"
     / "semantic_pipeline_audit"
-    / "semantic_cluster_registry_2026-05-21.json"
+    / "semantic_cluster_registry_2026-07-01.json"
 )
 DEFAULT_GENERIC_OWNERSHIP = (
     REPO_ROOT / "configs" / "field_registry" / "generic_field_ownership.yaml"
