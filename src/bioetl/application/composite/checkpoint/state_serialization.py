@@ -37,7 +37,7 @@ def serialize_dependency_results(
             "error_message": result.error_message,
             "resumed": result.resumed,
         }
-        for name, result in results.items()
+        for name, result in sorted(results.items())
     }
 
 
@@ -57,7 +57,7 @@ def serialize_enrichment_results(
             "duration_seconds": result.duration_seconds,
             "error_message": result.error_message,
         }
-        for name, result in results.items()
+        for name, result in sorted(results.items())
     }
 
 

@@ -8,20 +8,128 @@ from __future__ import annotations
 import os
 import socket
 import threading
+import asyncio
+import contextlib
 from functools import lru_cache
+from time import monotonic
 
 import pytest
+import httpx
+import pytest_asyncio
+from bioetl.domain.types import JsonDict
 
 # Register Semantic Scholar live fixtures once for the whole contract package.
-# Keep the implementation in ``_semanticscholar_contract_support`` but do not
-# declare ``pytest_plugins`` from multiple test modules — that imports the
-# support module before pytest can rewrite it and raises
-# PytestAssertRewriteWarning on the second suite (pilot vs baseline).
-from tests.contract._semanticscholar_contract_support import (  # noqa: F401
-    semanticscholar_batch_payload,
-    semanticscholar_client,
-    semanticscholar_search_payload,
-)
+# Keep live Semantic Scholar fixtures in conftest so the support module is not
+# imported during test collection, which avoids ``PytestAssertRewriteWarning``.
+SEMANTICSCHOLAR_API_BASE = "https://api.semanticscholar.org/graph/v1"
+SEARCH_TITLE = "SARS-CoV-2"
+SEARCH_FIELDS = "paperId,title,externalIds,year"
+JSON_ACCEPT_HEADER = "application/json"
+JSON_CONTENT_TYPE_HEADER = JSON_ACCEPT_HEADER
+REQUEST_SPACING_SECONDS = 8.0
+RATE_LIMIT_RETRY_SECONDS = 8.0
+MAX_RATE_LIMIT_ATTEMPTS = 6
+
+_SEARCH_PAYLOAD_CACHE: dict[str, object] | None = None
+_BATCH_PAYLOAD_CACHE: list[dict[str, object] | None] | None = None
+_LAST_REQUEST_AT = 0.0
+
+
+def _retry_after_seconds(response: httpx.Response) -> float:
+    raw_retry_after = response.headers.get("Retry-After", "").strip()
+    if raw_retry_after:
+        with contextlib.suppress(ValueError):
+            parsed = float(raw_retry_after)
+            if parsed > 0:
+                return parsed
+    return RATE_LIMIT_RETRY_SECONDS
+
+
+def _backoff_seconds(response: httpx.Response, attempt: int) -> float:
+    base_delay = _retry_after_seconds(response)
+    multiplier = max(1, attempt + 1)
+    return base_delay * multiplier
+
+
+async def _request_or_skip(
+    client: httpx.AsyncClient,
+    method: str,
+    url: str,
+    **kwargs: object,
+) -> httpx.Response:
+    global _LAST_REQUEST_AT
+    for attempt in range(MAX_RATE_LIMIT_ATTEMPTS):
+        elapsed = monotonic() - _LAST_REQUEST_AT
+        if elapsed < REQUEST_SPACING_SECONDS:
+            await asyncio.sleep(REQUEST_SPACING_SECONDS - elapsed)
+
+        try:
+            response = await client.request(method, url, **kwargs)
+        except (httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadTimeout) as exc:
+            pytest.skip(f"Semantic Scholar endpoint not reachable: {exc}")
+
+        _LAST_REQUEST_AT = monotonic()
+        if response.status_code == 429 and attempt < (MAX_RATE_LIMIT_ATTEMPTS - 1):
+            await asyncio.sleep(_backoff_seconds(response, attempt))
+            continue
+        if response.status_code in {429, 500, 502, 503, 504}:
+            pytest.skip(
+                f"Semantic Scholar temporary server error: HTTP {response.status_code}"
+            )
+        return response
+    pytest.skip("Semantic Scholar temporary server error: exhausted 429 retry budget")
+
+
+@pytest_asyncio.fixture
+async def semanticscholar_client() -> httpx.AsyncClient:
+    """Shared AsyncClient to avoid needless connection churn in live runs."""
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        yield client
+
+
+@pytest_asyncio.fixture
+async def semanticscholar_search_payload(
+    semanticscholar_client: httpx.AsyncClient,
+) -> JsonDict:
+    """Cached free-text search response for shape assertions."""
+    global _SEARCH_PAYLOAD_CACHE
+    if _SEARCH_PAYLOAD_CACHE is None:
+        response = await _request_or_skip(
+            semanticscholar_client,
+            "GET",
+            f"{SEMANTICSCHOLAR_API_BASE}/paper/search",
+            params={
+                "query": SEARCH_TITLE,
+                "limit": 1,
+                "offset": 0,
+                "fields": SEARCH_FIELDS,
+            },
+            headers={"Accept": JSON_ACCEPT_HEADER},
+        )
+        _SEARCH_PAYLOAD_CACHE = response.json()
+    return _SEARCH_PAYLOAD_CACHE
+
+
+@pytest_asyncio.fixture
+async def semanticscholar_batch_payload(
+    semanticscholar_client: httpx.AsyncClient,
+) -> list[JsonDict | None]:
+    """Cached DOI batch lookup response reused across batch assertions."""
+    global _BATCH_PAYLOAD_CACHE
+    if _BATCH_PAYLOAD_CACHE is None:
+        response = await _request_or_skip(
+            semanticscholar_client,
+            "POST",
+            f"{SEMANTICSCHOLAR_API_BASE}/paper/batch",
+            params={"fields": SEARCH_FIELDS},
+            json={"ids": ["DOI:10.1038/s41586-020-2649-2"]},
+            headers={
+                "Accept": JSON_ACCEPT_HEADER,
+                "Content-Type": JSON_CONTENT_TYPE_HEADER,
+            },
+        )
+        _BATCH_PAYLOAD_CACHE = response.json()
+    return _BATCH_PAYLOAD_CACHE
 
 _CONTRACT_PATH_TOKEN_POSIX = "/contract/"
 _CONTRACT_PATH_TOKEN_WINDOWS = "\\contract\\"

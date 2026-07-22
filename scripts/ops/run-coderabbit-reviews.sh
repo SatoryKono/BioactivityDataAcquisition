@@ -5,8 +5,11 @@ set -euo pipefail
 BASE_COMMIT="${CODERABBIT_BASE_COMMIT:-}"
 RUN_CODERABBIT_ONLY=0
 LOG_DIR="${CODERABBIT_REVIEW_LOG_DIR:-/tmp/coderabbit-reviews}"
-TOPIC="${1:-all}"
-shift || true
+TOPIC="all"
+if [[ $# -gt 0 && "$1" != --* ]]; then
+  TOPIC="$1"
+  shift
+fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
 
@@ -156,10 +159,20 @@ while [[ $# -gt 0 ]]; do
         exit 1
       fi
       BASE_COMMIT="$2"
+      if [[ -z "$BASE_COMMIT" ]]; then
+        echo "[ERROR] --base value cannot be empty"
+        usage
+        exit 1
+      fi
       shift
       ;;
     --base=*)
       BASE_COMMIT="${1#*=}"
+      if [[ -z "$BASE_COMMIT" ]]; then
+        echo "[ERROR] --base value cannot be empty"
+        usage
+        exit 1
+      fi
       ;;
     --log-dir)
       if [[ $# -lt 2 ]]; then
@@ -168,10 +181,20 @@ while [[ $# -gt 0 ]]; do
         exit 1
       fi
       LOG_DIR="$2"
+      if [[ -z "$LOG_DIR" ]]; then
+        echo "[ERROR] --log-dir value cannot be empty"
+        usage
+        exit 1
+      fi
       shift
       ;;
     --log-dir=*)
       LOG_DIR="${1#*=}"
+      if [[ -z "$LOG_DIR" ]]; then
+        echo "[ERROR] --log-dir value cannot be empty"
+        usage
+        exit 1
+      fi
       ;;
     *)
       echo "[ERROR] Unknown argument: $1"
