@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-05'
+  Last verified: '2026-07-22'
 
 ______________________________________________________________________
 
@@ -27,11 +27,11 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `main`
-- Source commit: `51979de96630ce1eff88b6a2b82df04a5c9be157`
-- Source run id: `local-issues-5710-5711-20260630`
+- Source branch: `codex/issues-6392-6401-clean`
+- Source commit: `460eb53be1`
+- Source run id: `local-pre-ci-issues-6392-6401-20260722`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-06-30T13:06:54.324571+00:00`
+- Refreshed at (UTC): `2026-07-22T17:03:50.836383+00:00`
 
 ## Coverage
 
@@ -41,38 +41,38 @@ trend evidence only.
 
 ## Duration Telemetry
 
-- Total collected test cases: `8507`
+- Total collected test cases: `11721`
 - Freshness guard: `<=45 days` via `refreshed_at_utc`
 
 ### Top Slowest Tests
 
 | Rank | Duration (s) | Test | Source |
 |---:|---:|---|---|
-| 1 | `42.785` | `tests.architecture.test_checkpoint_compatibility_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_tests` | `S7-crosscutting-architecture-a2.xml` |
-| 2 | `28.12` | `tests.architecture.test_checkpoint_compatibility_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_src` | `S7-crosscutting-architecture-a2.xml` |
-| 3 | `24.051` | `tests.architecture.test_config_discrepancy_metrics_ratchets::test_config_discrepancy_baseline_matches_live_generator` | `S7-crosscutting-architecture-a2.xml` |
-| 4 | `23.018` | `tests.architecture.test_config_discrepancy_report_drift::test_config_discrepancy_report_matches_deterministic_generator` | `S7-crosscutting-architecture-a2.xml` |
-| 5 | `16.691` | `tests.architecture.test_checkpoint_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_tests` | `S7-crosscutting-architecture-guardrails.xml` |
-| 6 | `16.084` | `tests.architecture.test_cli_command_import_guards::test_non_cli_source_keeps_retained_public_cli_seams_outside_runtime_code` | `S7-crosscutting-architecture-a2.xml` |
-| 7 | `15.28` | `tests.architecture.test_config_root_governance::test_runtime_config_discovery_does_not_use_source_parent_arithmetic` | `S7-crosscutting-architecture-a2.xml` |
-| 8 | `14.498` | `tests.architecture.test_cli_command_import_guards::test_non_cli_source_avoids_interfaces_package_root_convenience_imports` | `S7-crosscutting-architecture-a2.xml` |
-| 9 | `14.129` | `tests.architecture.test_adr_enforcement_matrix::test_adr_enforcement_matrix_artifact_matches_live_generator` | `S7-crosscutting-architecture-a.xml` |
-| 10 | `13.15` | `tests.architecture.test_add_svg_text_fallback::test_build_fallback_text_emits_multiline_tspans` | `S7-crosscutting-architecture-a.xml` |
+| 1 | `12.016` | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers::test_processed_records_distinguishes_empty_and_backend_unavailable` | `unit-parallel-safe.xml` |
+| 2 | `5.874` | `tests.architecture.test_config_discrepancy_report_drift::test_config_discrepancy_report_matches_deterministic_generator` | `architecture-current-change.xml` |
+| 3 | `4.581` | `tests.unit.scripts.ops.observability.test_grafana_dashboard_audit_cycle::test_grafana_gate_rejects_cross_occurrence_source_artifacts` | `unit-parallel-safe.xml` |
+| 4 | `4.264` | `tests.unit.scripts.ops.observability.test_grafana_dashboard_audit_cycle::test_grafana_gate_rejects_render_source_without_valid_panel_scope[empty_panel_states]` | `unit-parallel-safe.xml` |
+| 5 | `3.826` | `tests.contract.test_gold_entity_coverage_complete::test_each_gold_entity_is_strict_with_published_contract[chembl_activity]` | `serial-maintained.xml` |
+| 6 | `3.618` | `tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures::test_cached_populated_isolated_registry_contains_pipeline_factories` | `serial-maintained.xml` |
+| 7 | `3.4` | `tests.unit.scripts.ops.observability.test_grafana_dashboard_audit_cycle::test_grafana_gate_rejects_render_source_without_valid_panel_scope[missing]` | `unit-parallel-safe.xml` |
+| 8 | `3.086` | `tests.unit.domain.schemas.openalex.test_publication_schema.TestOpenAlexPublicationSchema::test_year_range_validation` | `unit-parallel-safe.xml` |
+| 9 | `2.451` | `tests.contract.test_gold_pk_consistency.TestGoldPkConsistency::test_pipeline_configs_use_new_pk_naming` | `serial-maintained.xml` |
+| 10 | `2.381` | `tests.unit.scripts.test_report_observability_metric_inventory::test_collect_metric_inventory_records_static_prometheus_collector_emitters` | `unit-parallel-safe.xml` |
 
 ### Top Slow Zones
 
 | Rank | Zone | Tests | Total Duration (s) | Max Duration (s) |
 |---:|---|---:|---:|---:|
-| 1 | `tests.architecture.test_checkpoint_compatibility_runtime_facade_usage` | 2 | 70.905 | 42.785 |
-| 2 | `tests.architecture.test_config_discrepancy_metrics_ratchets` | 2 | 35.379 | 24.051 |
-| 3 | `tests.architecture.test_cli_command_import_guards` | 2 | 30.582 | 16.084 |
-| 4 | `tests.architecture.test_checkpoint_runtime_facade_usage` | 2 | 27.114 | 16.691 |
-| 5 | `tests.architecture.test_config_discrepancy_report_drift` | 1 | 23.018 | 23.018 |
-| 6 | `tests.architecture.test_config_root_governance` | 1 | 15.28 | 15.28 |
-| 7 | `tests.architecture.test_adr_enforcement_matrix` | 1 | 14.129 | 14.129 |
-| 8 | `tests.architecture.test_add_svg_text_fallback` | 1 | 13.15 | 13.15 |
-| 9 | `tests.architecture.test_compatibility_freeze_guards` | 1 | 12.274 | 12.274 |
-| 10 | `tests.architecture.test_config_surface_entity_residual_plateau` | 2 | 11.72 | 7.029 |
+| 1 | `tests.unit.scripts.ops.observability.test_grafana_dashboard_audit_cycle` | 5 | 16.636 | 4.581 |
+| 2 | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers` | 1 | 12.016 | 12.016 |
+| 3 | `tests.contract.test_normalization_cross_layer_contracts` | 4 | 8.136 | 2.303 |
+| 4 | `tests.architecture.test_config_discrepancy_report_drift` | 1 | 5.874 | 5.874 |
+| 5 | `tests.unit.domain.schemas.openalex.test_publication_schema.TestOpenAlexPublicationSchema` | 2 | 4.876 | 3.086 |
+| 6 | `tests.unit.scripts.test_report_observability_metric_inventory` | 2 | 4.697 | 2.381 |
+| 7 | `tests.unit.scripts.qa.test_run_observability_closure_campaign` | 2 | 4.02 | 2.082 |
+| 8 | `tests.unit.repo_backed.scripts.test_generate_pipeline_normalization_field_matrix` | 2 | 3.839 | 2.023 |
+| 9 | `tests.contract.test_gold_entity_coverage_complete` | 1 | 3.826 | 3.826 |
+| 10 | `tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures` | 1 | 3.618 | 3.618 |
 
 ## Refresh Procedure
 

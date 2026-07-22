@@ -1,0 +1,127 @@
+{
+  "comparison": {
+    "execution_order_changed": true,
+    "generated_artifact_fingerprint_stable": true,
+    "non_passed_nodes": {},
+    "replay_fingerprint_stable": true,
+    "unstable_node_count": 0,
+    "unstable_nodes": {},
+    "untriaged_unstable_nodes": []
+  },
+  "curated_inventory_reconciliation": {
+    "inventory_sha256": "a15f2b7fd6925b5c7307f5b50cb72558135ba665b9e71d28aa4ad6971cae347c",
+    "quarantine": [],
+    "untriaged_count": 0
+  },
+  "generated_by": "scripts.engineering.qa.report_flaky_test_burndown_review",
+  "run_count": 3,
+  "runs": [
+    {
+      "artifact_hashes": {
+        "generated_artifacts_after_sha256": "4208c9c1379c87590f750fa6d42d43102b163b35d4f0ba363f22cde040c60d7f",
+        "generated_artifacts_before_sha256": "4208c9c1379c87590f750fa6d42d43102b163b35d4f0ba363f22cde040c60d7f",
+        "node_outcomes_sha256": "a5f37ab6ba83c2e7f21878d832db699c6c24cfe44633d6dba9a68d8162dea300",
+        "replay_tree_after_sha256": "9ecca2fdedc0434b89a1c2b901a226689eb1b2e0a5ae000d768d79dd80f31486",
+        "replay_tree_before_sha256": "9ecca2fdedc0434b89a1c2b901a226689eb1b2e0a5ae000d768d79dd80f31486"
+      },
+      "executed_count": 8,
+      "execution_order": [
+        "tests/architecture/test_determinism_identity_policy.py::test_uuid4_identity_generators_are_policy_allowlisted",
+        "tests/architecture/test_determinism_identity_policy.py::test_semantic_identity_anchors_forbid_all_occurrence_fields",
+        "tests/contract/test_semanticscholar_contract.py::TestSemanticScholarContract::test_paper_batch_lookup_by_doi",
+        "tests/architecture/test_determinism_identity_policy.py::test_legacy_config_hash_cannot_become_execution_identity_anchor",
+        "tests/architecture/test_determinism_identity_policy.py::test_determinism_identity_policy_has_expected_shape",
+        "tests/architecture/test_determinism_identity_policy.py::test_policy_entries_still_match_source_files",
+        "tests/architecture/test_determinism_identity_policy.py::test_runtime_timestamps_and_durations_are_excluded_from_identity",
+        "tests/contract/test_semanticscholar_contract.py::TestSemanticScholarContract::test_paper_search_endpoint"
+      ],
+      "order_mode": "seeded-random",
+      "outcomes": {
+        "tests.architecture.test_determinism_identity_policy::test_determinism_identity_policy_has_expected_shape": "passed",
+        "tests.architecture.test_determinism_identity_policy::test_legacy_config_hash_cannot_become_execution_identity_anchor": "passed",
+        "tests.architecture.test_determinism_identity_policy::test_policy_entries_still_match_source_files": "passed",
+        "tests.architecture.test_determinism_identity_policy::test_runtime_timestamps_and_durations_are_excluded_from_identity": "passed",
+        "tests.architecture.test_determinism_identity_policy::test_semantic_identity_anchors_forbid_all_occurrence_fields": "passed",
+        "tests.architecture.test_determinism_identity_policy::test_uuid4_identity_generators_are_policy_allowlisted": "passed",
+        "tests.contract.test_semanticscholar_contract.TestSemanticScholarContract::test_paper_batch_lookup_by_doi": "passed",
+        "tests.contract.test_semanticscholar_contract.TestSemanticScholarContract::test_paper_search_endpoint": "passed"
+      },
+      "run_id": "seed-113",
+      "seed": 113,
+      "shard_id": "determinism-critical",
+      "source_sha": "460eb53be1"
+    },
+    {
+      "artifact_hashes": {
+        "generated_artifacts_after_sha256": "4208c9c1379c87590f750fa6d42d43102b163b35d4f0ba363f22cde040c60d7f",
+        "generated_artifacts_before_sha256": "4208c9c1379c87590f750fa6d42d43102b163b35d4f0ba363f22cde040c60d7f",
+        "node_outcomes_sha256": "a5f37ab6ba83c2e7f21878d832db699c6c24cfe44633d6dba9a68d8162dea300",
+        "replay_tree_after_sha256": "9ecca2fdedc0434b89a1c2b901a226689eb1b2e0a5ae000d768d79dd80f31486",
+        "replay_tree_before_sha256": "9ecca2fdedc0434b89a1c2b901a226689eb1b2e0a5ae000d768d79dd80f31486"
+      },
+      "executed_count": 8,
+      "execution_order": [
+        "tests/architecture/test_determinism_identity_policy.py::test_uuid4_identity_generators_are_policy_allowlisted",
+        "tests/contract/test_semanticscholar_contract.py::TestSemanticScholarContract::test_paper_batch_lookup_by_doi",
+        "tests/contract/test_semanticscholar_contract.py::TestSemanticScholarContract::test_paper_search_endpoint",
+        "tests/architecture/test_determinism_identity_policy.py::test_semantic_identity_anchors_forbid_all_occurrence_fields",
+        "tests/architecture/test_determinism_identity_policy.py::test_runtime_timestamps_and_durations_are_excluded_from_identity",
+        "tests/architecture/test_determinism_identity_policy.py::test_determinism_identity_policy_has_expected_shape",
+        "tests/architecture/test_determinism_identity_policy.py::test_legacy_config_hash_cannot_become_execution_identity_anchor",
+        "tests/architecture/test_determinism_identity_policy.py::test_policy_entries_still_match_source_files"
+      ],
+      "order_mode": "seeded-random",
+      "outcomes": {
+        "tests.architecture.test_determinism_identity_policy::test_determinism_identity_policy_has_expected_shape": "passed",
+        "tests.architecture.test_determinism_identity_policy::test_legacy_config_hash_cannot_become_execution_identity_anchor": "passed",
+        "tests.architecture.test_determinism_identity_policy::test_policy_entries_still_match_source_files": "passed",
+        "tests.architecture.test_determinism_identity_policy::test_runtime_timestamps_and_durations_are_excluded_from_identity": "passed",
+        "tests.architecture.test_determinism_identity_policy::test_semantic_identity_anchors_forbid_all_occurrence_fields": "passed",
+        "tests.architecture.test_determinism_identity_policy::test_uuid4_identity_generators_are_policy_allowlisted": "passed",
+        "tests.contract.test_semanticscholar_contract.TestSemanticScholarContract::test_paper_batch_lookup_by_doi": "passed",
+        "tests.contract.test_semanticscholar_contract.TestSemanticScholarContract::test_paper_search_endpoint": "passed"
+      },
+      "run_id": "seed-17",
+      "seed": 17,
+      "shard_id": "determinism-critical",
+      "source_sha": "460eb53be1"
+    },
+    {
+      "artifact_hashes": {
+        "generated_artifacts_after_sha256": "4208c9c1379c87590f750fa6d42d43102b163b35d4f0ba363f22cde040c60d7f",
+        "generated_artifacts_before_sha256": "4208c9c1379c87590f750fa6d42d43102b163b35d4f0ba363f22cde040c60d7f",
+        "node_outcomes_sha256": "a5f37ab6ba83c2e7f21878d832db699c6c24cfe44633d6dba9a68d8162dea300",
+        "replay_tree_after_sha256": "9ecca2fdedc0434b89a1c2b901a226689eb1b2e0a5ae000d768d79dd80f31486",
+        "replay_tree_before_sha256": "9ecca2fdedc0434b89a1c2b901a226689eb1b2e0a5ae000d768d79dd80f31486"
+      },
+      "executed_count": 8,
+      "execution_order": [
+        "tests/architecture/test_determinism_identity_policy.py::test_policy_entries_still_match_source_files",
+        "tests/architecture/test_determinism_identity_policy.py::test_determinism_identity_policy_has_expected_shape",
+        "tests/architecture/test_determinism_identity_policy.py::test_runtime_timestamps_and_durations_are_excluded_from_identity",
+        "tests/contract/test_semanticscholar_contract.py::TestSemanticScholarContract::test_paper_batch_lookup_by_doi",
+        "tests/architecture/test_determinism_identity_policy.py::test_uuid4_identity_generators_are_policy_allowlisted",
+        "tests/architecture/test_determinism_identity_policy.py::test_legacy_config_hash_cannot_become_execution_identity_anchor",
+        "tests/contract/test_semanticscholar_contract.py::TestSemanticScholarContract::test_paper_search_endpoint",
+        "tests/architecture/test_determinism_identity_policy.py::test_semantic_identity_anchors_forbid_all_occurrence_fields"
+      ],
+      "order_mode": "seeded-random",
+      "outcomes": {
+        "tests.architecture.test_determinism_identity_policy::test_determinism_identity_policy_has_expected_shape": "passed",
+        "tests.architecture.test_determinism_identity_policy::test_legacy_config_hash_cannot_become_execution_identity_anchor": "passed",
+        "tests.architecture.test_determinism_identity_policy::test_policy_entries_still_match_source_files": "passed",
+        "tests.architecture.test_determinism_identity_policy::test_runtime_timestamps_and_durations_are_excluded_from_identity": "passed",
+        "tests.architecture.test_determinism_identity_policy::test_semantic_identity_anchors_forbid_all_occurrence_fields": "passed",
+        "tests.architecture.test_determinism_identity_policy::test_uuid4_identity_generators_are_policy_allowlisted": "passed",
+        "tests.contract.test_semanticscholar_contract.TestSemanticScholarContract::test_paper_batch_lookup_by_doi": "passed",
+        "tests.contract.test_semanticscholar_contract.TestSemanticScholarContract::test_paper_search_endpoint": "passed"
+      },
+      "run_id": "seed-73",
+      "seed": 73,
+      "shard_id": "determinism-critical",
+      "source_sha": "460eb53be1"
+    }
+  ],
+  "schema_version": "flaky-test-empirical-v2",
+  "source_sha": "460eb53be1"
+}

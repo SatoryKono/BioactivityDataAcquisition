@@ -2,6 +2,12 @@ schema_version: 1
 audit_date: '2026-05-26'
 source: configs/quality/test_governance_audit.yaml
 issues:
+- id: '6399'
+  priority: P2
+  title: assertion branch reachability and reviewed bypass inventory
+  evidence_paths:
+  - scripts/engineering/qa/report_test_governance_audit.py
+  - tests/architecture/test_test_governance_audit.py
 - id: '4159'
   priority: P0
   title: main-branch test audit reproducibility with git-lfs
@@ -67,6 +73,8 @@ budgets:
   markerless_test_functions_max: 0
   uuid4_call_sites_max: 0
   date_today_call_sites_max: 0
+  unreviewed_assertion_bypass_max: 0
+assertion_bypass_allowlist: []
 budget_ratchet:
   linked_issue: '#4901'
   mode: fail-fast-no-growth
@@ -353,6 +361,7 @@ budget_ratchet:
   - markerless_test_functions_max
   - uuid4_call_sites_max
   - date_today_call_sites_max
+  - unreviewed_assertion_bypass_max
 current_issue_closeout:
   issue_set:
   - '#4483'
@@ -797,7 +806,7 @@ oversized_test_module_inventory:
   completed_splits:
   - issue_ref: '#4505'
     source: tests/integration/test_grafana_config.py
-    source_lines_after_split: 1562
+    source_lines_after_split: 1563
     extracted_surface: tests/integration/test_grafana_surface_contracts.py
     extracted_surface_lines: 731
     owner: observability-dashboards

@@ -1,4 +1,32 @@
 {
+  "assertion_branch_reachability": {
+    "finding_count": 0,
+    "findings": [],
+    "metric_percent": 100.0,
+    "scan_paths": [
+      "tests/architecture/test_determinism_identity_policy.py",
+      "tests/architecture/test_replay_time_seam_inventory.py",
+      "tests/architecture/test_test_governance_audit.py",
+      "tests/contract/test_gold_dq_golden_snapshots.py",
+      "tests/contract/test_gold_entity_coverage_complete.py",
+      "tests/contract/test_gold_pk_consistency.py",
+      "tests/contract/test_gold_schema_strict_violations.py",
+      "tests/integration/test_dashboard_required_panel_links.py",
+      "tests/integration/test_grafana_config.py",
+      "tests/integration/test_grafana_dashboard_links.py",
+      "tests/integration/test_grafana_layout_and_metadata.py",
+      "tests/integration/test_grafana_navigation_matrix.py",
+      "tests/unit/application/services/test_checkpoint_execution_identity_alignment.py",
+      "tests/unit/application/services/test_run_manifest_service.py",
+      "tests/unit/domain/aggregates/test_quarantine_entry.py",
+      "tests/unit/domain/aggregates/test_quarantine_entry_invariant_properties.py",
+      "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py",
+      "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
+    ],
+    "scanned_test_count": 279,
+    "unreviewed_count": 0
+  },
+  "assertion_branch_reachability_percent": 100.0,
   "assertless_candidates": [
     {
       "category": "architecture_helper_guard",
@@ -1172,25 +1200,25 @@
       "test_count": 44
     },
     "test_governance": {
-      "assertion_backed_tests": 35,
+      "assertion_backed_tests": 39,
       "assertion_examples": [
-        "tests/architecture/test_test_governance_audit.py:92",
-        "tests/architecture/test_test_governance_audit.py:110",
-        "tests/architecture/test_test_governance_audit.py:121",
+        "tests/architecture/test_test_governance_audit.py:106",
+        "tests/architecture/test_test_governance_audit.py:125",
+        "tests/architecture/test_test_governance_audit.py:137",
+        "tests/architecture/test_test_governance_audit.py:153",
         "tests/architecture/test_test_governance_audit.py:162",
-        "tests/architecture/test_test_governance_audit.py:225",
-        "tests/architecture/test_test_governance_audit.py:317",
-        "tests/architecture/test_test_governance_audit.py:345",
-        "tests/architecture/test_test_governance_audit.py:385",
-        "tests/architecture/test_test_governance_audit.py:406",
-        "tests/architecture/test_test_governance_audit.py:421"
+        "tests/architecture/test_test_governance_audit.py:181",
+        "tests/architecture/test_test_governance_audit.py:192",
+        "tests/architecture/test_test_governance_audit.py:233",
+        "tests/architecture/test_test_governance_audit.py:296",
+        "tests/architecture/test_test_governance_audit.py:388"
       ],
       "assertless_tests": [],
       "intentional_no_exception_tests": 0,
       "paths": [
         "tests/architecture/test_test_governance_audit.py"
       ],
-      "test_count": 35
+      "test_count": 39
     }
   },
   "date_today_call_sites": 0,
@@ -1237,6 +1265,34 @@
     "unmarked_test_files": []
   },
   "report": {
+    "assertion_branch_reachability": {
+      "finding_count": 0,
+      "findings": [],
+      "metric_percent": 100.0,
+      "scan_paths": [
+        "tests/architecture/test_determinism_identity_policy.py",
+        "tests/architecture/test_replay_time_seam_inventory.py",
+        "tests/architecture/test_test_governance_audit.py",
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/contract/test_gold_entity_coverage_complete.py",
+        "tests/contract/test_gold_pk_consistency.py",
+        "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/integration/test_dashboard_required_panel_links.py",
+        "tests/integration/test_grafana_config.py",
+        "tests/integration/test_grafana_dashboard_links.py",
+        "tests/integration/test_grafana_layout_and_metadata.py",
+        "tests/integration/test_grafana_navigation_matrix.py",
+        "tests/unit/application/services/test_checkpoint_execution_identity_alignment.py",
+        "tests/unit/application/services/test_run_manifest_service.py",
+        "tests/unit/domain/aggregates/test_quarantine_entry.py",
+        "tests/unit/domain/aggregates/test_quarantine_entry_invariant_properties.py",
+        "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py",
+        "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
+      ],
+      "scanned_test_count": 279,
+      "unreviewed_count": 0
+    },
+    "assertion_branch_reachability_percent": 100.0,
     "assertless_candidates": [
       {
         "category": "architecture_helper_guard",
@@ -2107,25 +2163,25 @@
         "test_count": 44
       },
       "test_governance": {
-        "assertion_backed_tests": 35,
+        "assertion_backed_tests": 39,
         "assertion_examples": [
-          "tests/architecture/test_test_governance_audit.py:92",
-          "tests/architecture/test_test_governance_audit.py:110",
-          "tests/architecture/test_test_governance_audit.py:121",
+          "tests/architecture/test_test_governance_audit.py:106",
+          "tests/architecture/test_test_governance_audit.py:125",
+          "tests/architecture/test_test_governance_audit.py:137",
+          "tests/architecture/test_test_governance_audit.py:153",
           "tests/architecture/test_test_governance_audit.py:162",
-          "tests/architecture/test_test_governance_audit.py:225",
-          "tests/architecture/test_test_governance_audit.py:317",
-          "tests/architecture/test_test_governance_audit.py:345",
-          "tests/architecture/test_test_governance_audit.py:385",
-          "tests/architecture/test_test_governance_audit.py:406",
-          "tests/architecture/test_test_governance_audit.py:421"
+          "tests/architecture/test_test_governance_audit.py:181",
+          "tests/architecture/test_test_governance_audit.py:192",
+          "tests/architecture/test_test_governance_audit.py:233",
+          "tests/architecture/test_test_governance_audit.py:296",
+          "tests/architecture/test_test_governance_audit.py:388"
         ],
         "assertless_tests": [],
         "intentional_no_exception_tests": 0,
         "paths": [
           "tests/architecture/test_test_governance_audit.py"
         ],
-        "test_count": 35
+        "test_count": 39
       }
     },
     "date_today_call_sites": 0,
@@ -2176,8 +2232,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2026,
-      "test_python_file_count": 2237,
+      "test_glob_file_count": 2031,
+      "test_python_file_count": 2242,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2217,13 +2273,15 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 2026,
-    "total_test_functions": 22615,
+    "total_test_files": 2031,
+    "total_test_functions": 22646,
+    "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "4e8e05f5fb977a4edc11068d7944156cd6cd78b4d6308a852ef659f88795e4e4",
+  "source_tree_sha256": "216e06385cb9b43a64aaaed1fc32461ea48dff29bf6b16dea789b754baa02476",
   "summary": {
+    "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 105,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
@@ -2233,6 +2291,7 @@
     "markerless_examples": [],
     "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
+    "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "test_file_inventory": {
@@ -2240,8 +2299,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2026,
-    "test_python_file_count": 2237,
+    "test_glob_file_count": 2031,
+    "test_python_file_count": 2242,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2281,7 +2340,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 2026,
-  "total_test_functions": 22615,
+  "total_test_files": 2031,
+  "total_test_functions": 22646,
+  "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

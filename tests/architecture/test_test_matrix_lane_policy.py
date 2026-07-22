@@ -270,6 +270,14 @@ class TestCanonicalTestLanes:
             == "repo_backed and not slow and not benchmark and not memory"
         )
         assert lanes["repo-backed-unit"]["paths"] == ["tests/unit/repo_backed/"]
+
+        workflow = (ROOT / ".github/workflows/tests.yml").read_text(encoding="utf-8")
+        assert "repo-backed-unit:" in workflow
+        assert "pytest tests/unit/repo_backed/" in workflow
+        assert (
+            '-m "repo_backed and not slow and not benchmark and not memory"' in workflow
+        )
+        assert "-p no:xdist" in workflow
         assert lanes["unit-parallel-safe"]["runner_backend"] == "run_pytest_sharded"
         assert (
             lanes["unit-parallel-safe"]["marker_expression"]

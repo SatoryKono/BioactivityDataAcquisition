@@ -214,8 +214,13 @@ metadata-catalog and sanitizer checks, and uses `git lfs pull` as the local
 remediation path.
 `report_test_governance_audit --check` enforces the current ratcheting
 budgets for assert-less candidates, duplicate test names, compatibility/legacy
-surface, marker/path drift, and deterministic-time/UUID call sites tracked in
-`configs/quality/test_governance_audit.yaml`.
+surface, marker/path drift, deterministic-time/UUID call sites, and assertion
+paths bypassed by early return, loop continue, empty parametrization, or a
+conditional branch. Branch reachability is intentionally limited to the
+critical-path test inventory defined by the collector; its zero budget and
+allowlist live in `configs/quality/test_governance_audit.yaml`. Intentional no-exception paths
+must carry a reviewed allowlist entry with owner and disposition. The
+`unreviewed_assertion_bypass_max: 0` budget is a no-growth fail-closed gate.
 
 Test function names are globally governed, not only file-local. New and renamed
 tests must use descriptive, globally unique node IDs in the form
@@ -251,6 +256,15 @@ The tracked flaky-test review is generated from
 it with `--check`. The curated inventory records reviewed intermittent failures;
 static test-governance evidence supplies source identity and suite size, but does
 not replace repeated-run CI telemetry for discovering flakiness.
+
+The blocking `flaky-telemetry` CI job is the empirical discovery surface. It
+runs the same replay-only selection three times with seeds `17`, `73`, and
+`113`; `BIOETL_RANDOM_ORDER_SEED` changes collection order only when explicitly
+set. The reporter joins each run metadata file with its JUnit results, requires
+one source commit, persists seed/order/shard identity plus the replay-tree
+fingerprint, and fails when a node changes outcome without a matching curated
+inventory entry. Curated inventory remains the review/ownership record; the
+empirical artifact is the repeated-run observation and cannot replace it.
 
 Failure classifications are informational and come from
 `configs/quality/test_health_classifiers.yaml`; pytest exit codes and quality
@@ -419,6 +433,18 @@ Repo-backed contract tests могут оставаться в unit ownership sur
   а не в `unit-fast`;
 - файл явно перечислен в `configs/quality/test_governance_audit.yaml` и помечен
   `pytest.mark.repo_backed`.
+
+CI ownership is explicit: `.github/workflows/tests.yml` runs the complete
+`repo-backed-unit` lane serially from `tests/unit/repo_backed/`; the parallel
+`unit-fast` and `unit-other` surfaces exclude `repo_backed`. The owning team is
+`test-governance`, and failures are blocking because these tests validate
+checked-in repository contracts.
+
+For a local promotion-confidence pass, run `make test-confidence-local`. It
+keeps incompatible execution modes separate: pure unit first, the canonical
+fast architecture shard, serial offline contract replay, and finally the
+canonical 85% coverage gate. The existing focused commands remain available
+for shorter feedback loops.
 
 Surface должен быть перенесён из `tests/unit/`, если тест в первую очередь
 проверяет не модульный контракт, а более широкую integration behavior:
@@ -998,9 +1024,11 @@ tests.yml
 ├── governance-preflight
 ├── config-schema-preflight
 ├── test-fast
+├── repo-backed-unit
 ├── test-matrix
 ├── performance-budgets
 ├── coverage-verify
+├── flaky-telemetry
 ├── duration-telemetry
 ├── control-plane-e2e
 ├── track-d-gates
@@ -1026,7 +1054,14 @@ provider-contract-drift.yml
 - `provider-contract-drift.yml` генерирует machine-readable artifact
   `reports/quality/provider-contract-drift-report.json` и hard-fail'ит только на `breaking`
   drift; `warning` остаётся видимым в artifact для PR review;
+- `repo-backed-unit` serially owns the complete checked-in artifact contract
+  subtree and is excluded from parallel pure-unit jobs;
+- `flaky-telemetry` performs replay-only repeated and order-randomized runs and
+  blocks untriaged outcome drift;
 - `duration-telemetry` собирает JUnit telemetry и публикует slow-test artifact.
+  Its committed snapshot records source-tree identity, contributing JUnit
+  files, executed/collected counts, worker mode, lane wall times, and explicit
+  exclusions for live-provider, performance, and manual e2e tests.
 
 ## 7. Воспроизводимость и Проверка Зависимостей
 

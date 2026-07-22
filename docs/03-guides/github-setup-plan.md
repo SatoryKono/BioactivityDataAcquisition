@@ -212,6 +212,8 @@ tests.yml workflow structure:
 ├── config-schema-preflight   # Config validation + schema checks
 ├── control-plane-e2e         # E2E smoke для completeness
 ├── contract-confidence       # Offline contract surfaces
+├── flaky-telemetry           # Repeated seeded determinism evidence
+├── repo-backed-unit          # Serial checked-in artifact contracts
 ├── track-d-gates            # Runtime linkage fail-fast
 ├── dq-consistency-gate      # DQ validation
 ├── quality-metrics-gate     # Debt scores + observability

@@ -1,201 +1,286 @@
 version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
-source_branch: main
-refreshed_at_utc: '2026-06-30T13:06:54.324571+00:00'
+source_branch: codex/issues-6392-6401-clean
+refreshed_at_utc: '2026-07-22T17:03:50.836383+00:00'
 refresh_status: captured
-source_commit: 51979de96630ce1eff88b6a2b82df04a5c9be157
-source_run_id: local-issues-5710-5711-20260630
+source_commit: 460eb53be1
+source_run_id: local-pre-ci-issues-6392-6401-20260722
+source_tree_sha256: 238b3b5ad90bcbe8544905b8e47cea919950eb731adb7d1c307e1a5c1f1cee73
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
 artifact_inputs:
   coverage_xml: reports/coverage/coverage.xml
   coverage_log: .
-  coverage_percent_fallback: null
-  slowest_tests_json: reports/test-telemetry/slowest-tests.json
+  coverage_percent_fallback: 95.61
+  slowest_tests_json: /tmp/issues-6394-junit/no-prebuilt-slowest.json
   junit_inputs:
-  - reports/quality/test-runs/junit/issues-5710-5711/S1-domain-core.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/S1-domain-services.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/S2-comp-iface.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/S3-app-foundation.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/S4-app-services.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/S5-infra-adapters.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/S6-crosscutting-unit.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/S7-crosscutting-architecture-a.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/S7-crosscutting-architecture-a2.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/S7-crosscutting-architecture-a3.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/S7-crosscutting-architecture-b.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/S7-crosscutting-architecture-c.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/S7-crosscutting-architecture-d.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/S8-crosscutting-governance.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/coverage-tail-owner-addendum.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/export-execution-addendum.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/infrastructure-owner-addendum.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/repo-backed-storage-addendum.xml
+  - /tmp/issues-6394-junit/unit-parallel-safe.xml
+  - /tmp/issues-6394-junit/serial-maintained.xml
+  - /tmp/issues-6394-junit/architecture-current-change.xml
+  - /tmp/issues-6394-junit/integration-grafana.xml
+  - /tmp/issues-6394-junit/bootstrap.xml
 coverage:
   threshold_percent: 85.0
   actual_percent: 95.61
   threshold_satisfied: true
 duration_telemetry:
-  total_cases: 8507
+  total_cases: 11721
   top_slowest:
-  - source: S7-crosscutting-architecture-a2.xml
-    test: tests.architecture.test_checkpoint_compatibility_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_tests
-    duration_s: 42.785
-  - source: S7-crosscutting-architecture-a2.xml
-    test: tests.architecture.test_checkpoint_compatibility_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_src
-    duration_s: 28.12
-  - source: S7-crosscutting-architecture-a2.xml
-    test: tests.architecture.test_config_discrepancy_metrics_ratchets::test_config_discrepancy_baseline_matches_live_generator
-    duration_s: 24.051
-  - source: S7-crosscutting-architecture-a2.xml
+  - source: unit-parallel-safe.xml
+    test: tests.unit.interfaces.http.test_health_server_routing_pure_helpers::test_processed_records_distinguishes_empty_and_backend_unavailable
+    duration_s: 12.016
+  - source: architecture-current-change.xml
     test: tests.architecture.test_config_discrepancy_report_drift::test_config_discrepancy_report_matches_deterministic_generator
-    duration_s: 23.018
-  - source: S7-crosscutting-architecture-guardrails.xml
-    test: tests.architecture.test_checkpoint_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_tests
-    duration_s: 16.691
-  - source: S7-crosscutting-architecture-a2.xml
-    test: tests.architecture.test_cli_command_import_guards::test_non_cli_source_keeps_retained_public_cli_seams_outside_runtime_code
-    duration_s: 16.084
-  - source: S7-crosscutting-architecture-a2.xml
-    test: tests.architecture.test_config_root_governance::test_runtime_config_discovery_does_not_use_source_parent_arithmetic
-    duration_s: 15.28
-  - source: S7-crosscutting-architecture-a2.xml
-    test: tests.architecture.test_cli_command_import_guards::test_non_cli_source_avoids_interfaces_package_root_convenience_imports
-    duration_s: 14.498
-  - source: S7-crosscutting-architecture-a.xml
-    test: tests.architecture.test_adr_enforcement_matrix::test_adr_enforcement_matrix_artifact_matches_live_generator
-    duration_s: 14.129
-  - source: S7-crosscutting-architecture-a.xml
-    test: tests.architecture.test_add_svg_text_fallback::test_build_fallback_text_emits_multiline_tspans
-    duration_s: 13.15
-  - source: S7-crosscutting-architecture-a2.xml
-    test: tests.architecture.test_compatibility_freeze_guards::test_cli_run_orchestration_singleton_stays_private_compat_owner
-    duration_s: 12.274
-  - source: S7-crosscutting-architecture-a2.xml
-    test: tests.architecture.test_config_discrepancy_metrics_ratchets::test_config_discrepancy_metrics_within_scorecard_budget
-    duration_s: 11.328
-  - source: S7-crosscutting-architecture-guardrails.xml
-    test: tests.architecture.test_checkpoint_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_src
-    duration_s: 10.423
-  - source: S7-crosscutting-architecture-a.xml
-    test: tests.architecture.test_adapter_contracts.TestAdapterMixinPolicy::test_src_does_not_import_legacy_adapter_mixin_modules
-    duration_s: 8.951
-  - source: S7-crosscutting-architecture-a2.xml
-    test: tests.architecture.test_contract_registry_loader_boundary::test_contract_registry_path_literal_is_confined_to_reviewed_surfaces
-    duration_s: 8.577
-  - source: S7-crosscutting-architecture-a.xml
-    test: tests.architecture.test_adapter_contracts.TestAdapterHealthCheck::test_adapters_have_health_check
-    duration_s: 8.48
-  - source: S7-crosscutting-architecture-a2.xml
-    test: tests.architecture.test_config_ci_invariants.TestEffectiveOptionalityResolution::test_resolved_optionality_matches_current_config_surface
-    duration_s: 8.158
-  - source: S7-crosscutting-architecture-a2.xml
-    test: tests.architecture.test_config_ci_invariants.TestConfigFilesExist::test_runtime_config_primary_keys_match_contract_policy
-    duration_s: 7.149
-  - source: S7-crosscutting-architecture-a2.xml
-    test: tests.architecture.test_config_surface_entity_residual_plateau::test_entity_residual_backlog_matches_live_metrics_and_scorecard
-    duration_s: 7.029
-  - source: S1-domain-core.xml
-    test: tests.unit.domain.schemas.openalex.test_openalex_publication_validation.TestPmcIdBaseValidation::test_pmc_id_base_validation__id_invalid_format__d060aeb5[]
-    duration_s: 6.109
-  - source: S2-comp-iface.xml
-    test: tests.unit.composition.test_canonical_module_paths::test_execution_api_reexports_pipeline_runner_service
-    duration_s: 5.742
-  - source: S7-crosscutting-architecture-a.xml
-    test: tests.architecture.test_adapter_contracts.TestAdapterPortCompliance::test_primary_adapter_classes_use_package_root_imports
-    duration_s: 5.141
-  - source: S2-comp-iface.xml
-    test: tests.unit.interfaces.cli.commands.test_observability_backend_runtime::test_ensure_backend_fails_when_required_paths_never_become_ready
-    duration_s: 5.019
-  - source: S7-crosscutting-architecture-a2.xml
-    test: tests.architecture.test_config_surface_entity_residual_plateau::test_config_surface_duplication_audit_matches_live_backlog
-    duration_s: 4.691
-  - source: S2-comp-iface.xml
-    test: tests.unit.composition.bootstrap.test_bootstrap_entrypoints.TestBootstrapPipeline::test_bootstrap_pipeline_creates_runner_without_starting_server
-    duration_s: 4.272
+    duration_s: 5.874
+  - source: unit-parallel-safe.xml
+    test: tests.unit.scripts.ops.observability.test_grafana_dashboard_audit_cycle::test_grafana_gate_rejects_cross_occurrence_source_artifacts
+    duration_s: 4.581
+  - source: unit-parallel-safe.xml
+    test: tests.unit.scripts.ops.observability.test_grafana_dashboard_audit_cycle::test_grafana_gate_rejects_render_source_without_valid_panel_scope[empty_panel_states]
+    duration_s: 4.264
+  - source: serial-maintained.xml
+    test: tests.contract.test_gold_entity_coverage_complete::test_each_gold_entity_is_strict_with_published_contract[chembl_activity]
+    duration_s: 3.826
+  - source: serial-maintained.xml
+    test: tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures::test_cached_populated_isolated_registry_contains_pipeline_factories
+    duration_s: 3.618
+  - source: unit-parallel-safe.xml
+    test: tests.unit.scripts.ops.observability.test_grafana_dashboard_audit_cycle::test_grafana_gate_rejects_render_source_without_valid_panel_scope[missing]
+    duration_s: 3.4
+  - source: unit-parallel-safe.xml
+    test: tests.unit.domain.schemas.openalex.test_publication_schema.TestOpenAlexPublicationSchema::test_year_range_validation
+    duration_s: 3.086
+  - source: serial-maintained.xml
+    test: tests.contract.test_gold_pk_consistency.TestGoldPkConsistency::test_pipeline_configs_use_new_pk_naming
+    duration_s: 2.451
+  - source: unit-parallel-safe.xml
+    test: tests.unit.scripts.test_report_observability_metric_inventory::test_collect_metric_inventory_records_static_prometheus_collector_emitters
+    duration_s: 2.381
+  - source: unit-parallel-safe.xml
+    test: tests.unit.scripts.test_report_observability_metric_inventory::test_collect_metric_inventory_detects_runtime_metric_without_registry
+    duration_s: 2.316
+  - source: serial-maintained.xml
+    test: tests.contract.test_normalization_cross_layer_contracts::test_profile_matrix_distinguishes_provider_universe_from_project_policy_scope
+    duration_s: 2.303
+  - source: unit-parallel-safe.xml
+    test: tests.unit.scripts.ops.observability.test_grafana_dashboard_audit_cycle::test_grafana_audit_cycle_runs_preflight_rerender_and_live_audit
+    duration_s: 2.242
+  - source: unit-parallel-safe.xml
+    test: tests.unit.scripts.ops.observability.test_grafana_dashboard_audit_cycle::test_grafana_audit_cycle_keeps_render_gate_after_semantic_preflight_failure
+    duration_s: 2.149
+  - source: unit-parallel-safe.xml
+    test: tests.unit.scripts.qa.test_run_observability_closure_campaign::test_execute_returns_nonzero_when_campaign_is_incomplete
+    duration_s: 2.082
+  - source: serial-maintained.xml
+    test: tests.security.test_security.TestNoHardcodedSecrets::test_no_hardcoded_secrets__no_hardcoded_secrets__bd2bd2d3
+    duration_s: 2.036
+  - source: serial-maintained.xml
+    test: tests.unit.repo_backed.scripts.test_generate_pipeline_normalization_field_matrix::test_pipeline_normalization_field_matrix_1223__c8b0b2c2
+    duration_s: 2.023
+  - source: serial-maintained.xml
+    test: tests.contract.test_normalization_cross_layer_contracts::test_chembl_publication_prefixed_identifiers_and_raw_type_are_schema_visible
+    duration_s: 1.975
+  - source: serial-maintained.xml
+    test: tests.contract.test_normalization_cross_layer_contracts::test_chembl_activity_meta_passthrough_contract_is_aligned_across_profile_matrix_and_processor
+    duration_s: 1.958
+  - source: unit-parallel-safe.xml
+    test: tests.unit.scripts.qa.test_run_observability_closure_campaign::test_execute_then_finalize_writes_complete_report_only_when_every_gate_is_satisfied
+    duration_s: 1.938
+  - source: serial-maintained.xml
+    test: tests.contract.test_normalization_cross_layer_contracts::test_chembl_activity_business_and_set_like_fields_follow_profile_family_contracts
+    duration_s: 1.9
+  - source: unit-parallel-safe.xml
+    test: tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing
+    duration_s: 1.89
+  - source: bootstrap.xml
+    test: tests.unit.composition.bootstrap.test_runner_bootstrap.TestBootstrapPipelineRunnerServiceIntegration::test_bootstrapped_service_can_list_pipelines
+    duration_s: 1.888
+  - source: serial-maintained.xml
+    test: tests.unit.repo_backed.scripts.test_generate_pipeline_normalization_field_matrix::test_build_field_matrix_rows_covers_entity_profile_and_generic_rules
+    duration_s: 1.816
+  - source: unit-parallel-safe.xml
+    test: tests.unit.domain.schemas.openalex.test_publication_schema.TestOpenAlexPublicationSchema::test_citations_made_non_negative
+    duration_s: 1.79
   top_slowest_zones:
-  - zone: tests.architecture.test_checkpoint_compatibility_runtime_facade_usage
-    test_count: 2
-    total_duration_s: 70.905
-    max_duration_s: 42.785
-  - zone: tests.architecture.test_config_discrepancy_metrics_ratchets
-    test_count: 2
-    total_duration_s: 35.379
-    max_duration_s: 24.051
-  - zone: tests.architecture.test_cli_command_import_guards
-    test_count: 2
-    total_duration_s: 30.582
-    max_duration_s: 16.084
-  - zone: tests.architecture.test_checkpoint_runtime_facade_usage
-    test_count: 2
-    total_duration_s: 27.114
-    max_duration_s: 16.691
+  - zone: tests.unit.scripts.ops.observability.test_grafana_dashboard_audit_cycle
+    test_count: 5
+    total_duration_s: 16.636
+    max_duration_s: 4.581
+  - zone: tests.unit.interfaces.http.test_health_server_routing_pure_helpers
+    test_count: 1
+    total_duration_s: 12.016
+    max_duration_s: 12.016
+  - zone: tests.contract.test_normalization_cross_layer_contracts
+    test_count: 4
+    total_duration_s: 8.136
+    max_duration_s: 2.303
   - zone: tests.architecture.test_config_discrepancy_report_drift
     test_count: 1
-    total_duration_s: 23.018
-    max_duration_s: 23.018
-  - zone: tests.architecture.test_config_root_governance
-    test_count: 1
-    total_duration_s: 15.28
-    max_duration_s: 15.28
-  - zone: tests.architecture.test_adr_enforcement_matrix
-    test_count: 1
-    total_duration_s: 14.129
-    max_duration_s: 14.129
-  - zone: tests.architecture.test_add_svg_text_fallback
-    test_count: 1
-    total_duration_s: 13.15
-    max_duration_s: 13.15
-  - zone: tests.architecture.test_compatibility_freeze_guards
-    test_count: 1
-    total_duration_s: 12.274
-    max_duration_s: 12.274
-  - zone: tests.architecture.test_config_surface_entity_residual_plateau
+    total_duration_s: 5.874
+    max_duration_s: 5.874
+  - zone: tests.unit.domain.schemas.openalex.test_publication_schema.TestOpenAlexPublicationSchema
     test_count: 2
-    total_duration_s: 11.72
-    max_duration_s: 7.029
-  - zone: tests.architecture.test_adapter_contracts.TestAdapterMixinPolicy
+    total_duration_s: 4.876
+    max_duration_s: 3.086
+  - zone: tests.unit.scripts.test_report_observability_metric_inventory
+    test_count: 2
+    total_duration_s: 4.697
+    max_duration_s: 2.381
+  - zone: tests.unit.scripts.qa.test_run_observability_closure_campaign
+    test_count: 2
+    total_duration_s: 4.02
+    max_duration_s: 2.082
+  - zone: tests.unit.repo_backed.scripts.test_generate_pipeline_normalization_field_matrix
+    test_count: 2
+    total_duration_s: 3.839
+    max_duration_s: 2.023
+  - zone: tests.contract.test_gold_entity_coverage_complete
     test_count: 1
-    total_duration_s: 8.951
-    max_duration_s: 8.951
-  - zone: tests.architecture.test_contract_registry_loader_boundary
+    total_duration_s: 3.826
+    max_duration_s: 3.826
+  - zone: tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures
     test_count: 1
-    total_duration_s: 8.577
-    max_duration_s: 8.577
-  - zone: tests.architecture.test_adapter_contracts.TestAdapterHealthCheck
+    total_duration_s: 3.618
+    max_duration_s: 3.618
+  top_files:
+  - file: tests/unit/repo_backed/scripts/test_generate_pipeline_normalization_field_matrix.py
+    test_count: 59
+    total_duration_s: 37.018
+    max_duration_s: 2.023
+  - file: tests/unit/scripts/ops/observability/test_grafana_dashboard_audit_cycle.py
+    test_count: 46
+    total_duration_s: 28.801
+    max_duration_s: 4.581
+  - file: tests/unit/domain/schemas/openalex/test_publication_schema.py
+    test_count: 34
+    total_duration_s: 23.809
+    max_duration_s: 3.086
+  - file: tests/contract/test_normalization_cross_layer_contracts.py
+    test_count: 97
+    total_duration_s: 15.237
+    max_duration_s: 2.303
+  - file: tests/unit/scripts/test_report_observability_metric_inventory.py
+    test_count: 53
+    total_duration_s: 12.436
+    max_duration_s: 2.381
+  - file: tests/unit/interfaces/http/test_health_server_routing_pure_helpers.py
+    test_count: 8
+    total_duration_s: 12.036
+    max_duration_s: 12.016
+  - file: tests/contract/silver_schemas/test_validations.py
+    test_count: 137
+    total_duration_s: 7.644
+    max_duration_s: 1.483
+  - file: tests/architecture/test_config_discrepancy_report_drift.py
     test_count: 1
-    total_duration_s: 8.48
-    max_duration_s: 8.48
-  - zone: tests.architecture.test_config_ci_invariants.TestEffectiveOptionalityResolution
+    total_duration_s: 5.874
+    max_duration_s: 5.874
+  - file: tests/unit/scripts/qa/test_run_observability_closure_campaign.py
+    test_count: 28
+    total_duration_s: 5.546
+    max_duration_s: 2.082
+  - file: tests/unit/scripts/qa/test_report_debt_governance_gates.py
+    test_count: 39
+    total_duration_s: 5.508
+    max_duration_s: 1.89
+  top_markers:
+  - marker: unit
+    test_count: 10189
+    total_duration_s: 195.624
+    max_duration_s: 12.016
+  - marker: contract
+    test_count: 1152
+    total_duration_s: 53.271
+    max_duration_s: 3.826
+  - marker: architecture
+    test_count: 66
+    total_duration_s: 11.759
+    max_duration_s: 5.874
+  - marker: security
+    test_count: 40
+    total_duration_s: 5.085
+    max_duration_s: 2.036
+  - marker: smoke
+    test_count: 71
+    total_duration_s: 4.343
+    max_duration_s: 0.794
+  - marker: integration
+    test_count: 202
+    total_duration_s: 0.775
+    max_duration_s: 0.182
+  - marker: unknown
     test_count: 1
-    total_duration_s: 8.158
-    max_duration_s: 8.158
-  - zone: tests.architecture.test_config_ci_invariants.TestConfigFilesExist
-    test_count: 1
-    total_duration_s: 7.149
-    max_duration_s: 7.149
-  - zone: tests.unit.domain.schemas.openalex.test_openalex_publication_validation.TestPmcIdBaseValidation
-    test_count: 1
-    total_duration_s: 6.109
-    max_duration_s: 6.109
-  - zone: tests.unit.composition.test_canonical_module_paths
-    test_count: 1
-    total_duration_s: 5.742
-    max_duration_s: 5.742
-  - zone: tests.architecture.test_adapter_contracts.TestAdapterPortCompliance
-    test_count: 1
-    total_duration_s: 5.141
-    max_duration_s: 5.141
-  - zone: tests.unit.interfaces.cli.commands.test_observability_backend_runtime
-    test_count: 1
-    total_duration_s: 5.019
-    max_duration_s: 5.019
-  - zone: tests.unit.composition.bootstrap.test_bootstrap_entrypoints.TestBootstrapPipeline
-    test_count: 1
-    total_duration_s: 4.272
-    max_duration_s: 4.272
+    total_duration_s: 0.0
+    max_duration_s: 0.0
+  top_families:
+  - family: unit/scripts
+    test_count: 376
+    total_duration_s: 56.286
+    max_duration_s: 4.581
+  - family: contract
+    test_count: 1152
+    total_duration_s: 53.271
+    max_duration_s: 3.826
+  - family: unit/repo_backed
+    test_count: 565
+    total_duration_s: 52.718
+    max_duration_s: 3.618
+  - family: unit/domain
+    test_count: 4208
+    total_duration_s: 37.576
+    max_duration_s: 3.086
+  - family: unit/interfaces
+    test_count: 315
+    total_duration_s: 13.093
+    max_duration_s: 12.016
+  - family: unit/composition
+    test_count: 876
+    total_duration_s: 12.328
+    max_duration_s: 1.888
+  - family: architecture
+    test_count: 66
+    total_duration_s: 11.759
+    max_duration_s: 5.874
+  - family: unit/infrastructure
+    test_count: 1423
+    total_duration_s: 10.482
+    max_duration_s: 0.493
+  - family: unit/application
+    test_count: 2238
+    total_duration_s: 10.074
+    max_duration_s: 0.599
+  - family: security
+    test_count: 40
+    total_duration_s: 5.085
+    max_duration_s: 2.036
+  execution_context:
+    junit_source_count: 5
+    junit_sources:
+    - unit-parallel-safe.xml
+    - serial-maintained.xml
+    - architecture-current-change.xml
+    - integration-grafana.xml
+    - bootstrap.xml
+    executed_count: 11721
+    collected_count: 11721
+    excluded_count: 0
+    worker_mode: caller-declared; see source run metadata
+    lane_wall_time_s:
+      unit-parallel-safe.xml: 138.678
+      architecture-current-change.xml: 11.759
+      serial-maintained.xml: 115.417
+      bootstrap.xml: 4.228
+      integration-grafana.xml: 0.775
+    explicit_exclusions:
+    - markers:
+      - network
+      - memory
+      - benchmark
+      - pilot_soak
+      owner: test-infrastructure
+      reason: environment-bound lanes are profiled independently
 slow_governance_cache_probe:
   issue_ref: '#4663'
   refreshed_at_utc: '2026-05-26T04:32:00+00:00'

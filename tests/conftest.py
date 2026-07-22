@@ -1,6 +1,7 @@
 import enum
 import gc
 import inspect
+import json
 import os
 import asyncio
 import sys
@@ -10,6 +11,7 @@ from functools import cache
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 import pathlib
+import random
 from typing import Any
 from collections.abc import Generator
 
@@ -43,6 +45,39 @@ _RUNTIME_BOOTSTRAP_PIPELINE_PATH = (
     / "runtime"
     / "pipeline.py"
 )
+
+
+def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
+    """Apply deterministic opt-in order randomization for flaky telemetry runs."""
+    raw_seed = os.environ.get("BIOETL_RANDOM_ORDER_SEED")
+    if raw_seed is None:
+        return
+    seed = int(raw_seed)
+    random.Random(seed).shuffle(items)
+
+
+_EMPIRICAL_EXECUTION_ORDER: list[str] = []
+
+
+def pytest_runtest_logstart(
+    nodeid: str,
+    location: tuple[str, int | None, str],
+) -> None:
+    """Capture actual node execution order for opt-in flaky telemetry."""
+    del location
+    if os.environ.get("BIOETL_ORDER_MANIFEST"):
+        _EMPIRICAL_EXECUTION_ORDER.append(nodeid)
+
+
+def _write_empirical_order_manifest() -> None:
+    """Persist opt-in execution order after the run completes."""
+    manifest = os.environ.get("BIOETL_ORDER_MANIFEST")
+    if not manifest:
+        return
+    path = Path(manifest)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(_EMPIRICAL_EXECUTION_ORDER), encoding="utf-8")
+    _EMPIRICAL_EXECUTION_ORDER.clear()
 
 
 def _async_timeout_diagnostics_enabled() -> bool:
@@ -308,6 +343,7 @@ def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:
     Keep genuine "no tests here" failures intact by only normalizing runs that
     collected tests before the `--last-failed` deselection step.
     """
+    _write_empirical_order_manifest()
     if _should_treat_last_failed_empty_suite_as_success(
         config=session.config,
         collected_count=_last_failed_collected_count(session.config),
@@ -744,27 +780,27 @@ def populated_isolated_registry(isolated_registry: Any) -> Any:
 
 
 @pytest.fixture(scope="session")
-def cached_bootstrap_registries(project_root: Path) -> Any:
-    """Cache populated registries for opt-in repo-backed bootstrap tests."""
-    from tests.helpers.bootstrap_cache import BootstrapRegistryCache
+def cached_bootstrap_metadata(project_root: Path) -> Any:
+    """Cache immutable catalog metadata for repo-backed bootstrap tests."""
+    from tests.helpers.bootstrap_cache import BootstrapMetadataCache
 
-    return BootstrapRegistryCache().get_or_build(configs_root=project_root / "configs")
+    return BootstrapMetadataCache().get_or_build(configs_root=project_root / "configs")
 
 
 @pytest.fixture
-def cached_populated_isolated_registry(cached_bootstrap_registries: Any) -> Any:
+def cached_populated_isolated_registry(cached_bootstrap_metadata: Any) -> Any:
     """Return a per-test clone of the cached populated pipeline registry."""
     from tests.helpers.bootstrap_cache import clone_pipeline_registry
 
-    return clone_pipeline_registry(cached_bootstrap_registries.pipeline_registry)
+    return clone_pipeline_registry(cached_bootstrap_metadata)
 
 
 @pytest.fixture
-def cached_provider_registry(cached_bootstrap_registries: Any) -> Any:
+def cached_provider_registry(cached_bootstrap_metadata: Any) -> Any:
     """Return a per-test clone of the cached populated provider registry."""
     from tests.helpers.bootstrap_cache import clone_provider_registry
 
-    return clone_provider_registry(cached_bootstrap_registries.provider_registry)
+    return clone_provider_registry(cached_bootstrap_metadata)
 
 
 @pytest.fixture(autouse=True)

@@ -5,10 +5,13 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import io
 import json
 import os
+from dataclasses import dataclass
 from datetime import date
+from functools import cache
 from pathlib import Path
 from typing import Any
 
@@ -142,6 +145,32 @@ _DERIVED_ENTITY_PARAMETER_PREFIXES: tuple[str, ...] = (
     "contracts.rollout",
     "filters.gold_filters.columns.organism_class",
 )
+
+
+@dataclass(frozen=True)
+class ConfigDiscrepancyEvidence:
+    """Immutable, byte-stable evidence shared by generator checks in one worker."""
+
+    fingerprint: str
+    matrix_content: str
+    report_content: str
+    parameter_count: int
+    config_count: int
+    raw_partial_count: int
+    actionable_count: int
+    sanctioned_count: int
+    baseline_metrics_json: str
+    family_metrics_json: str
+    parameter_taxonomy_json: str
+
+    def baseline_metrics(self) -> dict[str, int]:
+        return dict(json.loads(self.baseline_metrics_json))
+
+    def family_metrics(self) -> dict[str, dict[str, int]]:
+        return dict(json.loads(self.family_metrics_json))
+
+    def parameter_taxonomy(self) -> dict[str, Any]:
+        return dict(json.loads(self.parameter_taxonomy_json))
 
 
 def flatten_dict(d: dict[str, Any], parent_key: str = "") -> dict[str, Any]:
@@ -417,13 +446,15 @@ def _collect_configs() -> dict[str, dict[str, Any]]:
     return configs
 
 
-def _collect_family_configs() -> dict[str, dict[str, dict[str, Any]]]:
-    all_configs = _collect_configs()
+def _collect_family_configs(
+    all_configs: dict[str, dict[str, Any]] | None = None,
+) -> dict[str, dict[str, dict[str, Any]]]:
+    active_configs = _collect_configs() if all_configs is None else all_configs
     families: dict[str, dict[str, dict[str, Any]]] = {
         "entity_effective": {},
         "composite_runtime": {},
     }
-    for name, payload in all_configs.items():
+    for name, payload in active_configs.items():
         if name.startswith("entity/"):
             families["entity_effective"][name] = payload
         elif name.startswith("composite/"):
@@ -473,7 +504,9 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def _build_artifact_state() -> tuple[
+def _build_artifact_state(
+    configs: dict[str, dict[str, Any]] | None = None,
+) -> tuple[
     str,
     str,
     int,
@@ -485,15 +518,17 @@ def _build_artifact_state() -> tuple[
     dict[str, Any],
 ]:
     """Build matrix/report contents plus reused family/taxonomy state."""
-    configs = _collect_configs()
-    family_configs = _collect_family_configs()
+    active_configs = _collect_configs() if configs is None else configs
+    family_configs = _collect_family_configs(active_configs)
     all_keys = sorted(
-        {key for values in configs.values() for key in values}, key=_sort_key
+        {key for values in active_configs.values() for key in values}, key=_sort_key
     )
-    config_names = sorted(configs.keys())
+    config_names = sorted(active_configs.keys())
 
-    if configs:
-        common = set.intersection(*(set(values.keys()) for values in configs.values()))
+    if active_configs:
+        common = set.intersection(
+            *(set(values.keys()) for values in active_configs.values())
+        )
     else:
         common = set()
 
@@ -520,13 +555,13 @@ def _build_artifact_state() -> tuple[
     for key in all_keys:
         row = [key]
         for cfg_name in config_names:
-            row.append(configs[cfg_name].get(key, "—"))
+            row.append(active_configs[cfg_name].get(key, "—"))
         writer.writerow(row)
 
     report_lines = [
         "# Config Discrepancies Report",
         "",
-        f"Total configs: {len(configs)}",
+        f"Total configs: {len(active_configs)}",
         f"Total unique parameters: {len(all_keys)}",
         f"Actionable inconsistent parameters: {actionable_count}",
         f"Sanctioned partial variance parameters: {sanctioned_count}",
@@ -613,7 +648,7 @@ def _build_artifact_state() -> tuple[
         matrix_handle.getvalue(),
         "\n".join(report_lines),
         len(all_keys),
-        len(configs),
+        len(active_configs),
         family_raw_count,
         actionable_count,
         sanctioned_count,
@@ -622,27 +657,90 @@ def _build_artifact_state() -> tuple[
     )
 
 
-def _build_artifact_contents() -> tuple[str, str, int, int, int, int, int]:
-    """Build matrix/report contents without writing files."""
+def _config_evidence_fingerprint() -> str:
+    """Fingerprint generator sources and all governed YAML inputs."""
+    paths = [
+        Path(__file__),
+        Path("scripts/engineering/qa/config_surface_governance.py"),
+        Path("src/bioetl/infrastructure/config/filter_config_loader.py"),
+        Path("src/bioetl/infrastructure/config/entity_filter_metadata_registry.py"),
+    ]
+    paths.extend(sorted(Path("configs/base").rglob("*.yaml")))
+    paths.extend(sorted(Path("configs/entities").rglob("*.yaml")))
+    paths.extend(sorted(Path("configs/composites").glob("*.yaml")))
+    paths.extend(sorted(Path("configs/providers").rglob("*.yaml")))
+    paths.append(Path("configs/quality/entity_filter_metadata_registry.yaml"))
+    paths = sorted({path for path in paths if path.exists()})
+    digest = hashlib.sha256()
+    for path in paths:
+        digest.update(path.as_posix().encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(path.read_bytes())
+        digest.update(b"\0")
+    return digest.hexdigest()
+
+
+@cache
+def _build_config_discrepancy_evidence_cached(
+    fingerprint: str,
+) -> ConfigDiscrepancyEvidence:
+    configs = _collect_configs()
     (
         matrix_content,
         report_content,
         parameter_count,
         config_count,
-        partial_count,
+        raw_partial_count,
         actionable_count,
         sanctioned_count,
-        _family_configs,
-        _parameter_taxonomy,
-    ) = _build_artifact_state()
+        family_configs,
+        parameter_taxonomy,
+    ) = _build_artifact_state(configs)
+    baseline_metrics = _live_baseline_metrics(
+        config_count=config_count,
+        unique_parameter_count=parameter_count,
+        _cross_family_raw_inconsistent=raw_partial_count,
+        family_config_map=family_configs,
+    )
+    family_metrics = {
+        family_name: _family_metrics(family_config)
+        for family_name, family_config in family_configs.items()
+    }
+
+    def canonical(payload: dict[str, Any]) -> str:
+        return json.dumps(payload, sort_keys=True, separators=(",", ":"))
+
+    return ConfigDiscrepancyEvidence(
+        fingerprint=fingerprint,
+        matrix_content=matrix_content,
+        report_content=report_content,
+        parameter_count=parameter_count,
+        config_count=config_count,
+        raw_partial_count=raw_partial_count,
+        actionable_count=actionable_count,
+        sanctioned_count=sanctioned_count,
+        baseline_metrics_json=canonical(baseline_metrics),
+        family_metrics_json=canonical(family_metrics),
+        parameter_taxonomy_json=canonical(parameter_taxonomy),
+    )
+
+
+def build_config_discrepancy_evidence() -> ConfigDiscrepancyEvidence:
+    """Return one immutable evidence payload per source/config fingerprint."""
+    return _build_config_discrepancy_evidence_cached(_config_evidence_fingerprint())
+
+
+def _build_artifact_contents() -> tuple[str, str, int, int, int, int, int]:
+    """Build matrix/report contents without writing files."""
+    evidence = build_config_discrepancy_evidence()
     return (
-        matrix_content,
-        report_content,
-        parameter_count,
-        config_count,
-        partial_count,
-        actionable_count,
-        sanctioned_count,
+        evidence.matrix_content,
+        evidence.report_content,
+        evidence.parameter_count,
+        evidence.config_count,
+        evidence.raw_partial_count,
+        evidence.actionable_count,
+        evidence.sanctioned_count,
     )
 
 
@@ -774,32 +872,15 @@ def _baseline_taxonomy_match(
 def main(argv: list[str] | None = None) -> int:
     """Generate or check CSV and Markdown comparison outputs."""
     args = _parse_args(argv)
-    (
-        matrix_content,
-        report_content,
-        parameter_count,
-        config_count,
-        partial_count,
-        actionable_count,
-        sanctioned_count,
-        family_configs,
-        parameter_taxonomy,
-    ) = _build_artifact_state()
-    baseline_metrics = _live_baseline_metrics(
-        config_count=config_count,
-        unique_parameter_count=parameter_count,
-        _cross_family_raw_inconsistent=partial_count,
-        family_config_map=family_configs,
-    )
-    family_payload = {
-        family_name: _family_metrics(family_config)
-        for family_name, family_config in family_configs.items()
-    }
+    evidence = build_config_discrepancy_evidence()
+    baseline_metrics = evidence.baseline_metrics()
+    family_payload = evidence.family_metrics()
+    parameter_taxonomy = evidence.parameter_taxonomy()
     if args.check:
         ok = _artifact_matches(
             args.matrix_output,
-            matrix_content,
-        ) and _artifact_matches(args.report_output, report_content)
+            evidence.matrix_content,
+        ) and _artifact_matches(args.report_output, evidence.report_content)
         ok = ok and _baseline_metrics_match(args.baseline_json_out, baseline_metrics)
         ok = ok and _baseline_families_match(args.baseline_json_out, family_payload)
         ok = ok and _baseline_taxonomy_match(args.baseline_json_out, parameter_taxonomy)
@@ -812,8 +893,8 @@ def main(argv: list[str] | None = None) -> int:
     _write_artifacts(
         matrix_path=args.matrix_output,
         report_path=args.report_output,
-        matrix_content=matrix_content,
-        report_content=report_content,
+        matrix_content=evidence.matrix_content,
+        report_content=evidence.report_content,
     )
     _write_baseline_json(
         args.baseline_json_out,
@@ -825,14 +906,14 @@ def main(argv: list[str] | None = None) -> int:
         ),
     )
     print(f"Matrix saved to {args.matrix_output}")
-    print(f"Total parameters: {parameter_count}")
-    print(f"Total configs: {config_count}")
+    print(f"Total parameters: {evidence.parameter_count}")
+    print(f"Total configs: {evidence.config_count}")
     print("\n" + "=" * 80)
     print("PARAMETER PRESENCE SUMMARY")
     print("=" * 80)
-    print(f"Actionable inconsistent parameters: {actionable_count}")
-    print(f"Sanctioned partial variance parameters: {sanctioned_count}")
-    print(f"Raw partial parameter count: {partial_count}")
+    print(f"Actionable inconsistent parameters: {evidence.actionable_count}")
+    print(f"Sanctioned partial variance parameters: {evidence.sanctioned_count}")
+    print(f"Raw partial parameter count: {evidence.raw_partial_count}")
     print(f"Discrepancy report saved to {args.report_output}")
     print(f"Config-surface baseline saved to {args.baseline_json_out}")
     return 0

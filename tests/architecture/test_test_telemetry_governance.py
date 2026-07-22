@@ -10,10 +10,16 @@ from pathlib import Path
 
 import json
 import yaml
+from scripts.engineering.ci.update_test_telemetry_baseline import (
+    compute_test_telemetry_source_tree_sha256,
+)
 
 
 pytestmark = pytest.mark.architecture
-REFERENCE_NOW = datetime(2026, 7, 6, tzinfo=UTC)
+
+
+def _telemetry_age_days(refreshed_at: datetime, *, now: datetime) -> int:
+    return (now - refreshed_at).days
 
 
 def _read(path: str) -> str:
@@ -28,6 +34,7 @@ def test_committed_test_telemetry_baseline_is_populated() -> None:
     assert payload["refresh_status"] == "captured"
     assert payload["source_commit"], "Committed baseline must pin a source commit"
     assert payload["source_run_id"], "Committed baseline must pin a source run id"
+    assert payload["source_tree_sha256"] == compute_test_telemetry_source_tree_sha256()
     assert payload["coverage"]["actual_percent"] is not None, (
         "Committed baseline must preserve current coverage telemetry"
     )
@@ -37,6 +44,19 @@ def test_committed_test_telemetry_baseline_is_populated() -> None:
     assert payload["duration_telemetry"]["top_slowest_zones"], (
         "Committed baseline must expose summarized slow zones for branch review"
     )
+    assert payload["duration_telemetry"]["top_files"]
+    assert payload["duration_telemetry"]["top_markers"]
+    assert payload["duration_telemetry"]["top_families"]
+    context = payload["duration_telemetry"]["execution_context"]
+    assert context["executed_count"] == payload["duration_telemetry"]["total_cases"]
+    assert context["collected_count"] == (
+        context["executed_count"] + context["excluded_count"]
+    )
+    assert context["junit_source_count"] == len(context["junit_sources"])
+    assert context["worker_mode"]
+    assert context["lane_wall_time_s"]
+    assert context["explicit_exclusions"]
+    assert all(row["owner"] for row in context["explicit_exclusions"])
 
 
 def test_committed_test_telemetry_baseline_respects_freshness_guard() -> None:
@@ -44,12 +64,19 @@ def test_committed_test_telemetry_baseline_respects_freshness_guard() -> None:
         Path("configs/quality/test_telemetry_baseline.yaml").read_text(encoding="utf-8")
     )
     refreshed_at = datetime.fromisoformat(payload["refreshed_at_utc"])
-    age = REFERENCE_NOW - refreshed_at
+    age_days = _telemetry_age_days(refreshed_at, now=datetime.now(tz=UTC))
 
-    assert age.days <= int(payload["freshness_guard"]["max_age_days"]), (
+    assert 0 <= age_days <= int(payload["freshness_guard"]["max_age_days"]), (
         "Committed telemetry baseline is stale. Refresh with "
         "python scripts/engineering/ci/update_test_telemetry_baseline.py"
     )
+
+
+def test_test_telemetry_freshness_age_exposes_expired_timestamp() -> None:
+    refreshed_at = datetime(2026, 1, 1, tzinfo=UTC)
+    reference_now = datetime(2026, 3, 1, tzinfo=UTC)
+
+    assert _telemetry_age_days(refreshed_at, now=reference_now) == 59
 
 
 def test_testing_docs_distinguish_authoritative_baseline_from_historical_rollup() -> (
@@ -85,9 +112,15 @@ def test_branch_consumable_test_telemetry_reports_match_committed_baseline() -> 
     assert slowest["total_cases"] == payload["duration_telemetry"]["total_cases"]
     assert slowest["top_slowest"] == payload["duration_telemetry"]["top_slowest"]
     assert (
+        slowest["execution_context"]
+        == payload["duration_telemetry"]["execution_context"]
+    )
+    assert (
         slowest["top_slowest_zones"]
         == payload["duration_telemetry"]["top_slowest_zones"]
     )
+    for dimension in ("top_files", "top_markers", "top_families"):
+        assert slowest[dimension] == payload["duration_telemetry"][dimension]
     assert coverage["source_commit"] == payload["source_commit"]
     assert coverage["source_run_id"] == payload["source_run_id"]
     assert coverage["coverage"] == payload["coverage"]

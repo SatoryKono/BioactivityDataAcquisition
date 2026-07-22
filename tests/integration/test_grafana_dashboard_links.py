@@ -596,13 +596,10 @@ def _assert_dashboard_link_vars_not_forbidden(
 def _assert_dashboard_link_vars_required(
     *,
     dashboard_name: str,
-    current_uid: str,
     target_uid: str,
     url: str,
     passed_vars: set[str],
 ) -> None:
-    if current_uid == target_uid:
-        return
     required_vars = _REQUIRED_LINK_VARS_BY_TARGET_UID.get(target_uid)
     assert required_vars is not None, (
         f"Link target {target_uid} must be declared in required vars map"
@@ -622,8 +619,6 @@ def _assert_preserved_identity_handoff(
     url: str,
     passed_vars: set[str],
 ) -> None:
-    if current_uid == target_uid:
-        return
     spec = _PRESERVED_IDENTITY_HANDOFF
     assert isinstance(spec, dict), "preserved_identity_handoff must be a mapping"
     selector = spec.get("selector")
@@ -663,8 +658,15 @@ def _assert_top_level_cross_dashboard_handoff(
     url: str,
     dashboard_links: object,
 ) -> None:
-    if target_uid == current_uid or link not in dashboard_links:
+    if target_uid == current_uid:
         return
+    assert isinstance(dashboard_links, list), (
+        f"{dashboard_name} top-level links must be a list"
+    )
+    assert link in dashboard_links, (
+        f"{dashboard_name} cross-dashboard link to {target_uid} must be "
+        "present in the dashboard-level link collection"
+    )
     assert link.get("includeVars") is False, (
         f"{dashboard_name} top-level link to {target_uid} must not "
         "use generic includeVars leakage"
@@ -699,28 +701,29 @@ def _assert_cross_dashboard_link_policy(
         url=url,
         passed_vars=passed_vars,
     )
-    _assert_dashboard_link_vars_required(
-        dashboard_name=dashboard_name,
-        current_uid=current_uid,
-        target_uid=target_uid,
-        url=url,
-        passed_vars=passed_vars,
-    )
-    _assert_preserved_identity_handoff(
-        dashboard_name=dashboard_name,
-        current_uid=current_uid,
-        target_uid=target_uid,
-        url=url,
-        passed_vars=passed_vars,
-    )
-    _assert_top_level_cross_dashboard_handoff(
-        dashboard_name=dashboard_name,
-        current_uid=current_uid,
-        target_uid=target_uid,
-        link=link,
-        url=url,
-        dashboard_links=dashboard_links,
-    )
+    if target_uid != current_uid:
+        _assert_dashboard_link_vars_required(
+            dashboard_name=dashboard_name,
+            target_uid=target_uid,
+            url=url,
+            passed_vars=passed_vars,
+        )
+        _assert_preserved_identity_handoff(
+            dashboard_name=dashboard_name,
+            current_uid=current_uid,
+            target_uid=target_uid,
+            url=url,
+            passed_vars=passed_vars,
+        )
+    if isinstance(dashboard_links, list) and link in dashboard_links:
+        _assert_top_level_cross_dashboard_handoff(
+            dashboard_name=dashboard_name,
+            current_uid=current_uid,
+            target_uid=target_uid,
+            link=link,
+            url=url,
+            dashboard_links=dashboard_links,
+        )
 
 
 def _assert_cross_scope_matched_links(
@@ -744,6 +747,25 @@ def _assert_cross_scope_matched_links(
             assert str(token) in tooltip, (
                 f"Link tooltip for transition {transition} must include '{token}': {tooltip}"
             )
+
+
+def test_top_level_handoff_fails_closed_when_required_link_is_removed() -> None:
+    """A removed dashboard-level link must fail before URL policy checks pass."""
+    link: dict[str, object] = {
+        "title": "Open Runtime",
+        "url": "/d/bioetl-runtime?var-pipeline=$pipeline&from=$__from&to=$__to",
+        "includeVars": False,
+    }
+
+    with pytest.raises(AssertionError, match="must be present"):
+        _assert_top_level_cross_dashboard_handoff(
+            dashboard_name="bioetl-overview-v2.json",
+            current_uid="bioetl-overview-v2",
+            target_uid="bioetl-runtime",
+            link=link,
+            url=str(link["url"]),
+            dashboard_links=[],
+        )
 
 
 def test_dashboard_to_dashboard_links_are_not_duplicated() -> None:
@@ -1460,7 +1482,11 @@ def test_navigation_panel_renders_full_visual_bus_with_disabled_current_item() -
         "5. Workflow",
         "6. Alerts & SLO",
     )
-    optional_visual_titles = ("Silver Reject Explorer", "Explore Logs", "Explore Traces")
+    optional_visual_titles = (
+        "Silver Reject Explorer",
+        "Explore Logs",
+        "Explore Traces",
+    )
 
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
@@ -1531,22 +1557,29 @@ def test_navigation_panel_renders_full_visual_bus_with_disabled_current_item() -
                 "Silver Reject Explorer" in visible_optional_titles
                 and "Explore Logs" in visible_optional_titles
             ):
-                assert visible_optional_titles.index("Silver Reject Explorer") < visible_optional_titles.index(
+                assert visible_optional_titles.index(
+                    "Silver Reject Explorer"
+                ) < visible_optional_titles.index("Explore Logs")
+            if (
+                "Explore Logs" in visible_optional_titles
+                and "Explore Traces" in visible_optional_titles
+            ):
+                assert visible_optional_titles.index(
                     "Explore Logs"
-                )
-            if "Explore Logs" in visible_optional_titles and "Explore Traces" in visible_optional_titles:
-                assert visible_optional_titles.index("Explore Logs") < visible_optional_titles.index(
-                    "Explore Traces"
-                )
+                ) < visible_optional_titles.index("Explore Traces")
 
 
 def test_explore_links_use_drilldown_routes_and_time_range() -> None:
     """Every dashboard Explore link should target Drilldown apps and preserve time range."""
-    for dashboard_path in get_dashboard_files():
+    dashboard_paths = [
+        path
+        for path in get_dashboard_files()
+        if load_dashboard(path).get("uid") not in _DRILLDOWN_TOP_LEVEL_EXEMPT_UIDS
+    ]
+    assert dashboard_paths, "at least one dashboard must own Drilldown navigation"
+    for dashboard_path in dashboard_paths:
         dashboard_name = dashboard_path.name
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        if dashboard.get("uid") in _DRILLDOWN_TOP_LEVEL_EXEMPT_UIDS:
-            continue
         drilldown_links = [
             link
             for link in get_dashboard_navigation_links(dashboard)
@@ -1598,10 +1631,13 @@ def test_explore_traces_navigation_is_explicitly_traced_run_only() -> None:
 
 def test_tempo_drilldown_routes_to_traces_drilldown_app() -> None:
     """Tempo drilldown links should route to Grafana Traces Drilldown app."""
-    for dashboard_name in (path.name for path in get_dashboard_files()):
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        if dashboard.get("uid") in _DRILLDOWN_TOP_LEVEL_EXEMPT_UIDS:
-            continue
+    dashboards = [
+        (path.name, load_dashboard(path))
+        for path in get_dashboard_files()
+        if load_dashboard(path).get("uid") not in _DRILLDOWN_TOP_LEVEL_EXEMPT_UIDS
+    ]
+    assert dashboards, "at least one dashboard must own Tempo Drilldown navigation"
+    for dashboard_name, dashboard in dashboards:
         tempo_links = [
             link
             for link in get_dashboard_navigation_links(dashboard)
@@ -1621,10 +1657,13 @@ def test_tempo_drilldown_routes_to_traces_drilldown_app() -> None:
 
 def test_loki_drilldown_links_use_safe_bioetl_baseline_query() -> None:
     """Loki drilldown links should start from a low-cardinality baseline query."""
-    for dashboard_name in (path.name for path in get_dashboard_files()):
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        if dashboard.get("uid") in _DRILLDOWN_TOP_LEVEL_EXEMPT_UIDS:
-            continue
+    dashboards = [
+        (path.name, load_dashboard(path))
+        for path in get_dashboard_files()
+        if load_dashboard(path).get("uid") not in _DRILLDOWN_TOP_LEVEL_EXEMPT_UIDS
+    ]
+    assert dashboards, "at least one dashboard must own Loki Drilldown navigation"
+    for dashboard_name, dashboard in dashboards:
         loki_links = [
             link
             for link in get_dashboard_navigation_links(dashboard)
@@ -1739,11 +1778,15 @@ def test_explore_drilldown_links_disclose_tracing_profile_dependency() -> None:
     """Loki/Tempo drilldowns should warn that tracing profile is required."""
     for dashboard_name in (path.name for path in get_dashboard_files()):
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        for link in get_dashboard_navigation_links(dashboard):
-            url = link.get("url", "")
+        drilldown_links = [
+            link
+            for link in get_dashboard_navigation_links(dashboard)
+            if _is_logs_drilldown_url(link.get("url", ""))
+            or _is_traces_drilldown_url(link.get("url", ""))
+        ]
+        assert drilldown_links, f"{dashboard_name} must expose Drilldown links"
+        for link in drilldown_links:
             title = link.get("title", "")
-            if not (_is_logs_drilldown_url(url) or _is_traces_drilldown_url(url)):
-                continue
             tooltip = str(link.get("tooltip", ""))
             description = " ".join((title, tooltip)).lower()
             assert "tracing" in description, (

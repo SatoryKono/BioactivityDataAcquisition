@@ -47,6 +47,8 @@ graph TB
     SMOKE --> MATRIX[test-matrix]
     SMOKE --> E2E[control-plane-e2e]
     SMOKE --> CONTRACT[contract-confidence]
+    SMOKE --> FLAKY[flaky-telemetry]
+    SMOKE --> REPO[repo-backed-unit]
     SMOKE --> TRACKD[track-d-gates]
     SMOKE --> MEMORY[memory-tests]
     SMOKE --> PERF[performance-budgets]
@@ -59,6 +61,8 @@ graph TB
     
     COV --> DURATION[duration-telemetry]
     CONTRACT --> DURATION
+    FLAKY --> DURATION
+    REPO --> DURATION
     TRACKD --> DURATION
     MEMORY --> DURATION
     
@@ -237,4 +241,3 @@ graph LR
 ---
 
 **Примечание:** Все диаграммы используют Mermaid синтаксис и совместимы с GitHub, MkDocs, и другими markdown рендерерами с поддержкой Mermaid.
-

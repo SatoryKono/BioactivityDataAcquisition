@@ -59,5 +59,42 @@
     "status": "closed-ready",
     "decision": "profile_before_widening_fixture_scope",
     "rationale": "The bootstrap lane already passes, but the slowest case builds a runner surface with many mutable collaborators. Fixture scope should not be widened until candidate state is proven immutable or reset between tests."
+  },
+  "issue_6401_validation": {
+    "profiled_on": "2026-07-22",
+    "baseline_source_sha": "6cb0ce5ee34af7e7fbc7890d86aaf665bd94cc9b",
+    "candidate_bootstrap_fingerprint": "060a2d737a5ee6eefda557302fe4d6d777173f9176d30abbe884cb80a69d561b",
+    "measurement_mode": "controlled_warmed_repeated_metadata_workload",
+    "command": "warm builders once; repeat uncached metadata builders 5x; compare one cache build plus 5 fresh registry clones",
+    "baseline": {
+      "metadata_build_repeats": 5,
+      "wall_seconds": 0.479522,
+      "status": "pass"
+    },
+    "refreshed": {
+      "metadata_build_count": 1,
+      "registry_clone_repeats": 5,
+      "wall_seconds": 0.102843,
+      "improvement_percent": 78.55,
+      "status": "pass"
+    },
+    "suite_context": {
+      "note": "Whole-suite wall time is retained as context only and is not attributed to an opt-in repo-backed fixture.",
+      "baseline_wall_seconds": 13.78,
+      "observed_candidate_wall_seconds": 9.1
+    },
+    "order_randomized": {
+      "seed": 73,
+      "test_count": 394,
+      "wall_seconds": 7.98,
+      "status": "pass",
+      "outcomes_identical": true
+    },
+    "cache_contract": {
+      "session_scope": "immutable metadata only",
+      "mutable_registry_scope": "function",
+      "shared_mutable_di": false,
+      "defensive_copy_tests": true
+    }
   }
 }

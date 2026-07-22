@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+from copy import deepcopy
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from pathlib import Path
@@ -26,12 +27,35 @@ class BootstrapCacheKey:
 
 
 @dataclass(frozen=True)
-class CachedBootstrapRegistries:
-    """Cached registry payload and the fingerprint that produced it."""
+class FrozenHttpConfig:
+    """Immutable HTTP metadata used to rebuild a provider config."""
+
+    rate: float
+    capacity: int
+    rate_overrides: tuple[tuple[str, float], ...]
+
+
+@dataclass(frozen=True)
+class FrozenProviderDefinition:
+    """Immutable provider definition; it contains no registry/container state."""
+
+    name: str
+    adapter_class: type[Any]
+    http_config: FrozenHttpConfig | None
+    requires_http_client: bool
+    requires_logger: bool
+    default_kwargs: tuple[tuple[str, object], ...]
+    adapter_creator: object | None
+    data_source_creator: object | None
+
+
+@dataclass(frozen=True)
+class CachedBootstrapMetadata:
+    """Immutable bootstrap catalog and the fingerprint that produced it."""
 
     cache_key: BootstrapCacheKey
-    pipeline_registry: Any
-    provider_registry: Any
+    pipeline_names: tuple[str, ...]
+    provider_definitions: tuple[FrozenProviderDefinition, ...]
 
 
 def _iter_existing_files(
@@ -86,18 +110,18 @@ def fingerprint_bootstrap_inputs(
     )
 
 
-def build_pipeline_registry() -> Any:
-    """Build the canonical populated pipeline registry once for cache storage."""
+def build_pipeline_metadata() -> tuple[str, ...]:
+    """Build the canonical immutable pipeline-name catalog."""
     from bioetl.composition.factories.pipeline.registry import register_all_pipelines
     from bioetl.composition.registry_api import create_registry
 
     registry = create_registry()
     register_all_pipelines(registry=registry)
-    return registry
+    return tuple(registry.list_pipelines())
 
 
-def build_provider_registry() -> Any:
-    """Build the canonical populated provider registry once for cache storage."""
+def build_provider_metadata() -> tuple[FrozenProviderDefinition, ...]:
+    """Build immutable provider definitions without retaining the registry."""
     from bioetl.composition.providers.provider_registry import (
         create_provider_registry,
         ensure_provider_registry_ready,
@@ -105,42 +129,100 @@ def build_provider_registry() -> Any:
 
     registry = create_provider_registry()
     ensure_provider_registry_ready(registry)
-    return registry
+    definitions: list[FrozenProviderDefinition] = []
+    for name in registry.list_providers():
+        config = registry.get(name)
+        http_config = config.http_config
+        frozen_http = None
+        if http_config is not None:
+            frozen_http = FrozenHttpConfig(
+                rate=http_config.rate,
+                capacity=http_config.capacity,
+                rate_overrides=tuple(sorted(http_config.rate_overrides.items())),
+            )
+        definitions.append(
+            FrozenProviderDefinition(
+                name=name,
+                adapter_class=config.adapter_class,
+                http_config=frozen_http,
+                requires_http_client=config.requires_http_client,
+                requires_logger=config.requires_logger,
+                default_kwargs=tuple(
+                    sorted(
+                        (key, deepcopy(value))
+                        for key, value in config.default_kwargs.items()
+                    )
+                ),
+                adapter_creator=config.adapter_creator,
+                data_source_creator=config.data_source_creator,
+            )
+        )
+    return tuple(definitions)
 
 
-def clone_pipeline_registry(cached_registry: Any) -> Any:
-    """Return an isolated pipeline registry clone backed by cached definitions."""
+def clone_pipeline_registry(metadata: CachedBootstrapMetadata) -> Any:
+    """Return a fresh pipeline registry rebuilt from immutable catalog metadata."""
+    from bioetl.composition.factories.pipeline.registry import get_factory
     from bioetl.composition.registry_api import create_registry
 
     clone = create_registry()
-    # Tests intentionally clone the immutable registry definitions rather than
-    # re-importing every factory; the clone owns its registry dictionary.
-    clone._registry.update(cached_registry._registry)
+    for pipeline_name in metadata.pipeline_names:
+        clone.register_factory(get_factory(pipeline_name))
     return clone
 
 
-def clone_provider_registry(cached_registry: Any) -> Any:
-    """Return an isolated provider registry clone backed by cached configs."""
-    from bioetl.composition.providers.provider_registry import create_provider_registry
+def clone_provider_registry(metadata: CachedBootstrapMetadata) -> Any:
+    """Return a fresh provider registry rebuilt from immutable metadata."""
+    from bioetl.composition.providers.provider_registry import (
+        HttpConfig,
+        ProviderConfig,
+        create_provider_registry,
+    )
 
     clone = create_provider_registry()
-    for provider_name in cached_registry.list_providers():
-        clone.register(provider_name, cached_registry.get(provider_name))
+    for definition in metadata.provider_definitions:
+        http_config = definition.http_config
+        clone.register(
+            definition.name,
+            ProviderConfig(
+                adapter_class=definition.adapter_class,
+                http_config=(
+                    None
+                    if http_config is None
+                    else HttpConfig(
+                        rate=http_config.rate,
+                        capacity=http_config.capacity,
+                        rate_overrides=dict(http_config.rate_overrides),
+                    )
+                ),
+                requires_http_client=definition.requires_http_client,
+                requires_logger=definition.requires_logger,
+                default_kwargs={
+                    key: deepcopy(value) for key, value in definition.default_kwargs
+                },
+                adapter_creator=definition.adapter_creator,
+                data_source_creator=definition.data_source_creator,
+            ),
+        )
     return clone
 
 
-class BootstrapRegistryCache:
-    """Session-scoped cache with explicit fingerprint invalidation."""
+class BootstrapMetadataCache:
+    """Session-scoped immutable metadata cache with fingerprint invalidation."""
 
     def __init__(
         self,
         *,
-        pipeline_registry_builder: Callable[[], Any] = build_pipeline_registry,
-        provider_registry_builder: Callable[[], Any] = build_provider_registry,
+        pipeline_metadata_builder: Callable[
+            [], tuple[str, ...]
+        ] = build_pipeline_metadata,
+        provider_metadata_builder: Callable[
+            [], tuple[FrozenProviderDefinition, ...]
+        ] = build_provider_metadata,
         fingerprint_builder: Callable[[Path], BootstrapCacheKey] | None = None,
     ) -> None:
-        self._pipeline_registry_builder = pipeline_registry_builder
-        self._provider_registry_builder = provider_registry_builder
+        self._pipeline_metadata_builder = pipeline_metadata_builder
+        self._provider_metadata_builder = provider_metadata_builder
         self._fingerprint_builder = (
             fingerprint_builder
             if fingerprint_builder is not None
@@ -148,19 +230,23 @@ class BootstrapRegistryCache:
                 configs_root=configs_root
             )
         )
-        self._cached: CachedBootstrapRegistries | None = None
+        self._cached: CachedBootstrapMetadata | None = None
         self.build_count = 0
 
-    def get_or_build(self, *, configs_root: Path) -> CachedBootstrapRegistries:
-        """Return cached registries, rebuilding when bootstrap inputs change."""
+    def get_or_build(self, *, configs_root: Path) -> CachedBootstrapMetadata:
+        """Return immutable metadata, rebuilding when bootstrap inputs change."""
         cache_key = self._fingerprint_builder(configs_root)
         if self._cached is not None and self._cached.cache_key == cache_key:
             return self._cached
 
-        self._cached = CachedBootstrapRegistries(
+        self._cached = CachedBootstrapMetadata(
             cache_key=cache_key,
-            pipeline_registry=self._pipeline_registry_builder(),
-            provider_registry=self._provider_registry_builder(),
+            pipeline_names=self._pipeline_metadata_builder(),
+            provider_definitions=self._provider_metadata_builder(),
         )
         self.build_count += 1
         return self._cached
+
+
+# Backward-compatible import name; the cached payload is metadata, never a registry.
+BootstrapRegistryCache = BootstrapMetadataCache

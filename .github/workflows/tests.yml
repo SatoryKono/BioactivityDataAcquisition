@@ -173,6 +173,8 @@ jobs:
         steps:
             -   name: Checkout code
                 uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+                with:
+                    lfs: true
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
@@ -185,10 +187,10 @@ jobs:
             -   name: Run offline contract confidence lane
                 run: |
                     mkdir -p reports/test-telemetry
-                    uv run pytest \
+                    VCR_RECORD_MODE=none uv run pytest \
                       tests/contract/ tests/unit/contracts/ \
                       -m "no_api or not network" \
-                      -q --tb=short \
+                      --record-mode=none -q --tb=short \
                       --junitxml=reports/test-telemetry/junit-contract-confidence.xml
 
             -   name: Upload contract confidence telemetry
@@ -199,6 +201,70 @@ jobs:
                     path: reports/test-telemetry/junit-contract-confidence.xml
                     if-no-files-found: warn
                     retention-days: 14
+
+    flaky-telemetry:
+        runs-on: ubuntu-latest
+        timeout-minutes: 20
+        needs: smoke-check
+        permissions:
+            contents: read
+
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+                with:
+                    lfs: true
+
+            -   name: Setup Python + uv
+                uses: ./.github/actions/setup-python-uv
+                with:
+                    python-version: "3.12"
+
+            -   name: Run repeated and seeded-order determinism telemetry
+                shell: bash
+                run: |
+                    mkdir -p reports/test-telemetry/flaky-runs
+                    for seed in 17 73 113; do
+                      run_id="seed-${seed}"
+                      order_manifest="reports/test-telemetry/flaky-runs/order-${run_id}.json"
+                      uv run python -m scripts.engineering.qa report-flaky-test-burndown-review \
+                        --capture-run-phase start \
+                        --run-metadata-out "reports/test-telemetry/flaky-runs/run-${run_id}.json" \
+                        --run-id "${run_id}" --seed "${seed}" \
+                        --source-sha "${GITHUB_SHA}" \
+                        --shard-id determinism-critical
+                      BIOETL_RANDOM_ORDER_SEED="${seed}" \
+                        BIOETL_ORDER_MANIFEST="${order_manifest}" \
+                        VCR_RECORD_MODE=none \
+                        uv run pytest \
+                          tests/contract/test_semanticscholar_contract.py \
+                          tests/architecture/test_determinism_identity_policy.py \
+                          -m "not pilot_soak and not network" \
+                          -p no:xdist --no-cov -q --tb=short \
+                          --record-mode=none \
+                          --junitxml="reports/test-telemetry/flaky-runs/junit-${run_id}.xml"
+                      uv run python -m scripts.engineering.qa report-flaky-test-burndown-review \
+                        --capture-run-phase finish \
+                        --run-metadata-out "reports/test-telemetry/flaky-runs/run-${run_id}.json" \
+                        --run-id "${run_id}" --seed "${seed}" \
+                        --source-sha "${GITHUB_SHA}" \
+                        --shard-id determinism-critical \
+                        --order-manifest "${order_manifest}"
+                    done
+                    uv run python -m scripts.engineering.qa report-flaky-test-burndown-review \
+                      --empirical-run-dir reports/test-telemetry/flaky-runs \
+                      --empirical-json-out reports/test-telemetry/flaky-test-empirical.json
+
+            -   name: Upload empirical flaky telemetry
+                if: always()
+                uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+                with:
+                    name: flaky-test-empirical
+                    path: |
+                        reports/test-telemetry/flaky-test-empirical.json
+                        reports/test-telemetry/flaky-runs/
+                    if-no-files-found: warn
+                    retention-days: 30
 
     governance-preflight:
         needs: dependency-preflight
@@ -626,6 +692,42 @@ jobs:
                     if-no-files-found: warn
                     retention-days: 7
 
+    # Checked-in repository contracts are unit-owned but intentionally serial.
+    repo-backed-unit:
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+        needs: smoke-check
+        permissions:
+            contents: read
+
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+            -   name: Setup Python + uv
+                uses: ./.github/actions/setup-python-uv
+                with:
+                    enable-pytest-cache: "true"
+                    pytest-cache-prefix: "pytest-repo-backed-unit"
+                    pytest-cache-fingerprint: ${{ hashFiles('tests/unit/repo_backed/**/*.py', 'tests/conftest.py', 'pyproject.toml') }}
+
+            -   name: Run canonical repo-backed-unit lane
+                run: |
+                    mkdir -p reports/test-telemetry
+                    uv run pytest tests/unit/repo_backed/ \
+                      -m "repo_backed and not slow and not benchmark and not memory" \
+                      -p no:xdist -q --tb=short \
+                      --junitxml=reports/test-telemetry/junit-repo-backed-unit.xml
+
+            -   name: Upload repo-backed unit telemetry
+                if: always()
+                uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+                with:
+                    name: test-telemetry-repo-backed-unit
+                    path: reports/test-telemetry/junit-repo-backed-unit.xml
+                    if-no-files-found: warn
+                    retention-days: 7
+
     # Full test matrix runs in parallel for comprehensive coverage
     test-matrix:
         runs-on: ubuntu-latest
@@ -648,7 +750,7 @@ jobs:
                         path: tests/unit/infrastructure/
                         cache_glob: tests/unit/infrastructure/**/*.py
                     -   name: unit-other
-                        path: tests/unit/ --ignore=tests/unit/domain/ --ignore=tests/unit/application/ --ignore=tests/unit/infrastructure/
+                        path: tests/unit/ --ignore=tests/unit/domain/ --ignore=tests/unit/application/ --ignore=tests/unit/infrastructure/ --ignore=tests/unit/repo_backed/
                         cache_glob: tests/unit/**/*.py
                     -   name: integration
                         path: tests/integration/
@@ -824,6 +926,7 @@ jobs:
         needs:
             - smoke-check
             - test-fast
+            - repo-backed-unit
             - test-matrix
         timeout-minutes: 20
         permissions:
@@ -899,6 +1002,8 @@ jobs:
         runs-on: ubuntu-latest
         needs:
             - contract-confidence
+            - flaky-telemetry
+            - repo-backed-unit
             - track-d-gates
             - test-fast
             - test-matrix
@@ -947,6 +1052,15 @@ jobs:
                         --reports-dir reports/quality/test-runs \
                         --command "tests.yml unit-fast shards" \
                         "${junit_args[@]}"
+                    fi
+
+                    if [ -f reports/test-telemetry/raw/junit-repo-backed-unit.xml ]; then
+                      uv run python -m scripts.engineering.qa summarize-junit \
+                        --suite repo-backed-unit \
+                        --run-id "repo-backed-unit-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+                        --reports-dir reports/quality/test-runs \
+                        --junit reports/test-telemetry/raw/junit-repo-backed-unit.xml \
+                        --command "tests.yml repo-backed-unit lane"
                     fi
 
                     if [ -f reports/test-telemetry/raw/junit.integration.xml ]; then
@@ -1014,8 +1128,17 @@ jobs:
 
                     raw_dir = Path("reports/test-telemetry/raw")
                     rows: list[dict[str, object]] = []
-                    for junit_path in sorted(raw_dir.rglob("*.xml")):
+                    junit_paths = sorted(raw_dir.rglob("*.xml"))
+                    lane_wall_time_s: dict[str, float] = {}
+                    for junit_path in junit_paths:
                         root = ET.parse(junit_path).getroot()
+                        lane_wall_time_s[junit_path.name] = round(
+                            sum(
+                                float(case.attrib.get("time", "0") or 0.0)
+                                for case in root.iter("testcase")
+                            ),
+                            3,
+                        )
                         for testcase in root.iter("testcase"):
                             case_name = testcase.attrib.get("name", "")
                             class_name = testcase.attrib.get("classname", "")
@@ -1061,11 +1184,41 @@ jobs:
 
                     markdown = "\n".join(lines) + "\n"
                     md_path.write_text(markdown, encoding="utf-8")
+                    payload = {
+                        "source_commit": os.environ.get("GITHUB_SHA"),
+                        "source_run_id": (
+                            f"github-{os.environ.get('GITHUB_RUN_ID', 'unknown')}-"
+                            f"{os.environ.get('GITHUB_RUN_ATTEMPT', '1')}"
+                        ),
+                        "total_cases": len(rows),
+                        "top_slowest": top_rows,
+                        "execution_context": {
+                            "junit_source_count": len(junit_paths),
+                            "junit_sources": [path.name for path in junit_paths],
+                            "executed_count": len(rows),
+                            "worker_mode": (
+                                "mixed: xdist unit/integration; serial "
+                                "contracts/repo-backed/memory"
+                            ),
+                            "lane_wall_time_s": lane_wall_time_s,
+                            "explicit_exclusions": [
+                                {
+                                    "lane": "live-provider-contracts",
+                                    "reason": "scheduled network-owned workflow",
+                                },
+                                {
+                                    "lane": "performance",
+                                    "reason": "benchmark-owned non-blocking workflow",
+                                },
+                                {
+                                    "lane": "manual-e2e",
+                                    "reason": "operator-triggered external-runtime lane",
+                                },
+                            ],
+                        },
+                    }
                     json_path.write_text(
-                        json.dumps(
-                            {"total_cases": len(rows), "top_slowest": top_rows},
-                            indent=2,
-                        )
+                        json.dumps(payload, indent=2, sort_keys=True)
                         + "\n",
                         encoding="utf-8",
                     )

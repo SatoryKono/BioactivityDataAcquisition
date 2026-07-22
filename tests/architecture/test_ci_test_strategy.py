@@ -166,6 +166,7 @@ def test_tests_workflow_has_dedicated_contract_confidence_lane_outside_coverage(
 ):
     """Offline contract confidence should block independently from coverage."""
     workflow = _read_workflow(".github/workflows/tests.yml")
+    block = _workflow_job_block(workflow, "contract-confidence")
     assert "contract-confidence:" in workflow, (
         "tests workflow should define a blocking offline contract-confidence job"
     )
@@ -175,9 +176,44 @@ def test_tests_workflow_has_dedicated_contract_confidence_lane_outside_coverage(
     assert '-m "no_api or not network"' in workflow, (
         "contract-confidence must avoid live network contract tests"
     )
+    assert "VCR_RECORD_MODE=none" in workflow
+    assert "--record-mode=none" in workflow
     assert (
         "--junitxml=reports/test-telemetry/junit-contract-confidence.xml" in workflow
     ), "contract-confidence must emit JUnit telemetry"
     assert "test-telemetry-contract-confidence" in workflow, (
         "contract-confidence telemetry should be uploaded for test-health rollups"
     )
+    assert "lfs: true" in block, (
+        "contract-confidence must hydrate replay cassettes instead of accepting skips"
+    )
+
+
+def test_local_confidence_gate_keeps_lanes_separate_and_enforces_85_percent() -> None:
+    makefile = _read_workflow("Makefile")
+    target = makefile.split("test-confidence-local:", 1)[1].split("\n\n", 1)[0]
+
+    assert "$(MAKE) test-confidence-unit" in target
+    assert "$(MAKE) qa-arch-fast" in target
+    assert "$(MAKE) test-confidence-contract" in target
+    assert "$(MAKE) test-coverage" in target
+    assert "--cov-fail-under=85" in makefile
+    assert "VCR_RECORD_MODE=none" in makefile
+    assert "check-vcr-replay-preflight --strict" in makefile
+    assert "-p no:xdist" in makefile
+
+
+def test_tests_workflow_publishes_empirical_flaky_telemetry() -> None:
+    workflow = _read_workflow(".github/workflows/tests.yml")
+    block = _workflow_job_block(workflow, "flaky-telemetry")
+
+    assert "for seed in 17 73 113" in block
+    assert "BIOETL_RANDOM_ORDER_SEED" in block
+    assert "VCR_RECORD_MODE=none" in block
+    assert "flaky-test-empirical.json" in block
+    assert "--source-sha" in block and "--shard-id" in block
+    assert "lfs: true" in block
+    assert "--record-mode=none" in block
+
+    duration_block = _workflow_job_block(workflow, "duration-telemetry")
+    assert "- repo-backed-unit" in duration_block
