@@ -806,6 +806,12 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as a bounded manual metric-to-panel audit utility while audit evidence references the direct script; promote it to an active governed command only after CI ownership and deterministic dashboard-contract coverage are established."
     },
+    "scripts/ops/run-coderabbit-reviews.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded manual CodeRabbit review launcher; keep it supporting unless promoted to a governed CI-only review workflow."
+    },
     "scripts/ops/runtime/docker/_rf017_finalize_observation.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
