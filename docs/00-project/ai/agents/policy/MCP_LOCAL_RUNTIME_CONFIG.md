@@ -138,3 +138,19 @@ When AI docs mention these configs, they SHOULD state:
 - Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
 - Agents and contributors **MUST NOT** create, edit, rename, move, overwrite, or delete any `.env` file without explicit per-task user approval.
 - Если задача требует изменения `.env`, исполнитель должен остановиться и сначала запросить явное разрешение пользователя.
+
+## Devin HTTP Header Projection
+
+The canonical MCP server inventory is shared with Devin, but HTTP authentication
+must use Devin-supported configuration. The generated `.devin/config.json`
+projects the `ref` credential as:
+
+```json
+"headers": {
+  "x-ref-api-key": "$REF_TOOL_API_KEY"
+}
+```
+
+`env_http_headers` remains a Codex-specific field and MUST NOT be copied into
+Devin configuration. Store `REF_TOOL_API_KEY` in Devin Secrets; never commit the
+secret value.
