@@ -311,6 +311,6 @@
   "normalization_profile": {
     "ref": "pubchem.compound",
     "version": "1.0.0",
-    "hash": "7969666264dd0bdd8049959dd8380baf4907fe509eda4ee2b89c9530fe0163a6"
+    "hash": "573d1d36353850f703f47747a393c893397ee9fd6ae63d42374481894b86abe4"
   }
 }

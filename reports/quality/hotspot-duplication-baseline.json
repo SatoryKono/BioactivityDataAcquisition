@@ -1,6 +1,6 @@
 {
   "summary": {
-    "snapshot_date": "2026-07-19",
+    "snapshot_date": "2026-07-22",
     "targets": 5,
     "total_duplicate_clusters": 13,
     "total_raw_duplicate_clusters": 13,
@@ -11,42 +11,8 @@
     "exclude_actionability_categories": []
   },
   "trend": {
-    "status": "compared_to_previous",
-    "snapshot_date": "2026-07-19",
-    "previous_snapshot_date": "2026-07-17",
-    "total_duplicate_cluster_delta": 3,
-    "targets": [
-      {
-        "target": "src/bioetl/application/core",
-        "current_duplicate_count": 6,
-        "previous_duplicate_count": 2,
-        "delta_duplicate_count": 4
-      },
-      {
-        "target": "src/bioetl/composition/bootstrap/runtime",
-        "current_duplicate_count": 1,
-        "previous_duplicate_count": 1,
-        "delta_duplicate_count": 0
-      },
-      {
-        "target": "src/bioetl/composition/factories/pipeline",
-        "current_duplicate_count": 1,
-        "previous_duplicate_count": 1,
-        "delta_duplicate_count": 0
-      },
-      {
-        "target": "src/bioetl/application/services/control_plane",
-        "current_duplicate_count": 0,
-        "previous_duplicate_count": 1,
-        "delta_duplicate_count": -1
-      },
-      {
-        "target": "src/bioetl/composition/runtime_builders",
-        "current_duplicate_count": 5,
-        "previous_duplicate_count": 5,
-        "delta_duplicate_count": 0
-      }
-    ]
+    "status": "no_prior_snapshot",
+    "snapshot_date": "2026-07-22"
   },
   "reduction_leverage_ranking": [
     {

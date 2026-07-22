@@ -127,6 +127,6 @@
   "normalization_profile": {
     "ref": "chembl.target_component",
     "version": "1.0.0",
-    "hash": "ff0d59a6f3957dfe095056db2c8cbed3b86c3a4275314bf149393d2d79f99852"
+    "hash": "653ad5fcf9dbad98383a9dabd50f8f29f9c529e1326803a883573cf38074096e"
   }
 }

@@ -119,6 +119,6 @@
   "normalization_profile": {
     "ref": "chembl.protein_class",
     "version": "1.0.0",
-    "hash": "1ac03b69f55107fdab6cec0b941efa2bf119735e9150fc4f3c74035c04f8c149"
+    "hash": "bbe60d25376d451e1adaea0d48eafbee3f5420e33e7a163b502d7e1930be0b90"
   }
 }

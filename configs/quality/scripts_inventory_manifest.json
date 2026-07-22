@@ -1,10 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-21T19:26:04.102313+00:00",
+  "generated_at": "2026-07-22T06:35:35.322142+00:00",
   "summary": {
-    "total_scripts": 501,
+    "total_scripts": 502,
     "status_counts": {
       "active": 345,
+      "orphan": 1,
       "supporting": 156
     },
     "reference_group_coverage": {
@@ -5834,7 +5835,7 @@
         "grafana-dashboard-extension",
         "py-doc-bot"
       ],
-      "reference_count": 162,
+      "reference_count": 165,
       "references": [
         {
           "path": ".codex/skills/grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md",
@@ -6194,7 +6195,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 38,
+      "reference_count": 39,
       "references": [
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
@@ -14929,6 +14930,14 @@
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
       "next_step": "Retain as a bounded manual metric-to-panel audit utility while audit evidence references the direct script; promote it to an active governed command only after CI ownership and deterministic dashboard-contract coverage are established."
+    },
+    {
+      "path": "scripts/ops/run-coderabbit-reviews.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ops/runtime/deploy/deploy-bioetl.sh",
