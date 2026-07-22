@@ -11,12 +11,45 @@ import argparse
 import json
 import os
 import queue
+import shutil
 import subprocess
 import threading
 import time
 import tomllib
 from pathlib import Path
 from typing import Any, TextIO
+
+_WINDOWS_PWSH_CANDIDATES = (
+    Path(r"C:\Program Files\PowerShell\7\pwsh.exe"),
+    Path(r"C:\Program Files\PowerShell\7\7\pwsh.exe"),
+)
+
+
+def _resolve_command(command: str) -> str:
+    """Resolve ``command`` to an executable CreateProcess can launch on Windows.
+
+    ``shutil.which('pwsh')`` may return a ``.bat`` shim that subprocess cannot
+    start without a shell. Prefer real ``pwsh.exe`` / ``powershell.exe``.
+    """
+    lowered = command.lower()
+    if os.name == "nt" and lowered in {"pwsh", "pwsh.exe"}:
+        for candidate in _WINDOWS_PWSH_CANDIDATES:
+            if candidate.is_file():
+                return str(candidate)
+        powershell = shutil.which("powershell") or shutil.which("powershell.exe")
+        if powershell:
+            return powershell
+    resolved = shutil.which(command)
+    if resolved is None:
+        return command
+    if os.name == "nt" and Path(resolved).suffix.lower() in {".bat", ".cmd"}:
+        # Keep .bat only as last resort; prefer bare command via cmd.
+        if lowered.startswith("npx"):
+            node_npx = Path(r"C:\Program Files\nodejs\npx.cmd")
+            if node_npx.is_file():
+                return str(node_npx)
+        return resolved
+    return resolved
 
 
 def _readline(stream: TextIO, timeout: float) -> str:
@@ -61,10 +94,10 @@ def _request(
 
 def _load_server(config_path: Path, server_name: str) -> dict[str, Any]:
     if config_path.suffix.lower() == ".toml":
-        config = tomllib.loads(config_path.read_text(encoding="utf-8"))
+        config = tomllib.loads(config_path.read_text(encoding="utf-8-sig"))
         servers = config.get("mcp_servers", {})
     else:
-        config = json.loads(config_path.read_text(encoding="utf-8"))
+        config = json.loads(config_path.read_text(encoding="utf-8-sig"))
         servers = config.get("mcpServers", config.get("servers", {}))
     server = servers[server_name]
     if not isinstance(server, dict):
@@ -84,19 +117,34 @@ def smoke_server(
     timeout: float = 15.0,
 ) -> dict[str, Any]:
     server = _load_server(config_path, server_name)
-    command = [str(server["command"]), *map(str, server.get("args", []))]
+    resolved_cmd = _resolve_command(str(server["command"]))
+    command = [resolved_cmd, *map(str, server.get("args", []))]
+    # Windows CreateProcess cannot execute .bat/.cmd without a shell/comspec.
+    use_shell = os.name == "nt" and Path(resolved_cmd).suffix.lower() in {
+        ".bat",
+        ".cmd",
+    }
     environment = os.environ.copy()
     environment.update({str(k): str(v) for k, v in server.get("env", {}).items()})
     started = time.monotonic()
+    # Prefer repo root when wrappers use absolute paths outside the config dir.
+    cwd = config_path.parent
+    for candidate in (config_path.parent, Path.cwd(), *config_path.parents):
+        if (candidate / "scripts" / "ai" / "mcp").is_dir() and (
+            candidate / ".mcp.json"
+        ).is_file():
+            cwd = candidate
+            break
     process = subprocess.Popen(
-        command,
-        cwd=config_path.parent,
+        subprocess.list2cmdline(command) if use_shell else command,
+        cwd=str(cwd),
         env=environment,
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
         bufsize=1,
+        shell=use_shell,
     )
     try:
         initialized = _request(

@@ -113,7 +113,7 @@ def test_issue_5752_narrative_reports_match_live_governance_artifacts() -> None:
     assert test_governance["report"]["compatibility_test_files"] == 0
     assert test_governance["report"]["duplicate_test_names"] == 0
     assert test_governance["report"]["markerless_test_functions"] == 0
-    assert test_governance["report"]["total_test_functions"] == 22614
+    assert test_governance["report"]["total_test_functions"] == 22615
     assert test_governance["report"]["total_test_files"] == 2026
     assert test_governance["report"]["assertless_total_candidates"] == 105
     assert scorecard["integral_score"] == 8.92

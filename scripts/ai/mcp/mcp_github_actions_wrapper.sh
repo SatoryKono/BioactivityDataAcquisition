@@ -19,7 +19,7 @@ export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-${REPO_ROOT}/.cache/npm-cache}"
 LOCAL_GITHUB_ACTIONS_MCP="${HOME}/github-actions-mcp/dist/index.js"
 LOCAL_GITHUB_ACTIONS_MAIN="${HOME}/github-actions-mcp/dist/main.js"
 
-exit_mcp_validate_only "github-actions"
+mcp_exit_if_validate_only "github-actions"
 
 if [[ -f "${LOCAL_GITHUB_ACTIONS_MCP}" ]]; then
     exec node "${LOCAL_GITHUB_ACTIONS_MCP}" --stdio

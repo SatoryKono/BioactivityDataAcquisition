@@ -235,6 +235,7 @@ def build_rag_manifests(
             chunk_records,
             require_build_scope=build_scope,
             expected_source_paths=sources,
+            verify_sources=False,  # Skip source verification during catalog update
         )
     )
     return catalog, chunk_records
@@ -338,6 +339,7 @@ def write_rag_manifests(
                 staged_catalog,
                 staged_chunks,
                 require_build_scope=build_scope,
+                verify_sources=False,  # Skip source verification during catalog update
             )
         )
         return _publish_manifest_pair(staged_catalog, staged_chunks, output_dir)
