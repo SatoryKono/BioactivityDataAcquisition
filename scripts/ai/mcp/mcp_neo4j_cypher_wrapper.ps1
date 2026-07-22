@@ -41,28 +41,21 @@ if (-not $env:NEO4J_PASSWORD) {
         throw "NEO4J_PASSWORD is required for Neo4j Cypher MCP"
     }
 }
-if (-not $env:NPM_CONFIG_CACHE) {
-    $env:NPM_CONFIG_CACHE = Join-Path $repoRoot ".cache/npm-cache"
+if (-not $env:NEO4J_DATABASE) {
+    $env:NEO4J_DATABASE = "neo4j"
 }
-
-$managedNodePrefixes = @(
-    (Join-Path $repoRoot ".cache/tools/gemini-cli/npm-global"),
-    (Join-Path $repoRoot ".cache/tools/codex-cli/npm-global")
-)
-foreach ($managedNodePrefix in $managedNodePrefixes) {
-    $managedNode = Join-Path $managedNodePrefix "bin/node"
-    if (Test-Path $managedNode) {
-        $env:PATH = "$(Join-Path $managedNodePrefix "bin")$([IO.Path]::PathSeparator)$env:PATH"
-        break
-    }
-}
-
 if (-not $env:NEO4J_URL) {
     $env:NEO4J_URL = $env:NEO4J_URI
+}
+if (-not $env:NPM_CONFIG_CACHE) {
+    $env:NPM_CONFIG_CACHE = Join-Path $repoRoot ".cache/npm-cache"
 }
 
 Test-McpNeo4jCredentials -Purpose "Neo4j Cypher MCP"
 Exit-McpValidateOnly -ServerName "neo4j-cypher"
 
-& npx -y @daanrongen/neo4j-mcp@1.1.4 @args
+# @daanrongen/neo4j-mcp requires bun on Windows and fails with:
+#   '"bun"' is not recognized...
+# Use the Node-based @alanse/mcp-neo4j-server instead.
+& npx -y "@alanse/mcp-neo4j-server"
 exit $LASTEXITCODE

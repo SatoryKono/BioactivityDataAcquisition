@@ -146,6 +146,22 @@ def smoke_server(
         bufsize=1,
         shell=use_shell,
     )
+    # Drain stderr continuously. Servers like mcp-run-python emit large Deno
+    # install logs; if the pipe fills, the child blocks and initialize hangs.
+    stderr_chunks: list[str] = []
+
+    def _drain_stderr() -> None:
+        assert process.stderr is not None
+        try:
+            for line in process.stderr:
+                stderr_chunks.append(line)
+                if sum(len(part) for part in stderr_chunks) > 200_000:
+                    del stderr_chunks[:-200]
+        except Exception:
+            return
+
+    stderr_thread = threading.Thread(target=_drain_stderr, daemon=True)
+    stderr_thread.start()
     try:
         initialized = _request(
             process,
@@ -162,7 +178,7 @@ def smoke_server(
             timeout=timeout,
         )
         if "error" in initialized or "result" not in initialized:
-            raise RuntimeError("MCP initialize failed")
+            raise RuntimeError(f"MCP initialize failed: {initialized!r}")
         assert process.stdin is not None
         process.stdin.write(
             '{"jsonrpc":"2.0","method":"notifications/initialized","params":{}}\n'
@@ -175,7 +191,7 @@ def smoke_server(
         )
         tool_rows = tools.get("result", {}).get("tools")
         if "error" in tools or not isinstance(tool_rows, list):
-            raise RuntimeError("MCP tools/list failed")
+            raise RuntimeError(f"MCP tools/list failed: {tools!r}")
         return {
             "schema_version": "bioetl-mcp-protocol-smoke-v1",
             "server": server_name,
@@ -185,6 +201,11 @@ def smoke_server(
             "command": command,
             "environment_names": sorted(server.get("env", {})),
         }
+    except Exception as exc:
+        tail = "".join(stderr_chunks)[-1500:]
+        if tail:
+            raise type(exc)(f"{exc} | stderr_tail={tail!r}") from exc
+        raise
     finally:
         process.terminate()
         try:
@@ -192,6 +213,7 @@ def smoke_server(
         except subprocess.TimeoutExpired:
             process.kill()
             process.wait(timeout=2)
+        stderr_thread.join(timeout=1)
 
 
 def _parse_args() -> argparse.Namespace:

@@ -1,20 +1,25 @@
 #!/usr/bin/env bash
+
 set -euo pipefail
 
-script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd -- "${script_dir}/../../.." && pwd)"
-# shellcheck source=./support/docker_cli_resolver.sh
-source "${script_dir}/support/docker_cli_resolver.sh"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../../.." && pwd)"
+
 # shellcheck source=./support/load_repo_env.sh
 export BIOETL_SKIP_ENV_LOCAL=1
-source "${script_dir}/support/load_repo_env.sh"
-
+source "${SCRIPT_DIR}/support/load_repo_env.sh"
 load_repo_env_if_present
 unset BIOETL_SKIP_ENV_LOCAL
+# shellcheck source=./support/token_validation.sh
+source "${SCRIPT_DIR}/support/token_validation.sh"
+
 export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-${REPO_ROOT}/.cache/npm-cache}"
 
-if docker_bin="$(resolve_docker_mcp_gateway_bin)"; then
-    exec "${docker_bin}" mcp gateway run --servers context7 --transport stdio "$@"
-fi
+mcp_validate_optional_token "CONTEXT7_API_KEY" 8 "Context7 MCP (optional higher rate limits)"
+mcp_exit_if_validate_only "context7"
 
-exec npx -y @modelcontextprotocol/server-context7 --stdio "$@"
+# Prefer official npm MCP server over docker gateway (secrets engine flaky on Windows).
+if [[ -n "${CONTEXT7_API_KEY:-}" ]]; then
+  exec npx -y "@upstash/context7-mcp@latest" --api-key "${CONTEXT7_API_KEY}"
+fi
+exec npx -y "@upstash/context7-mcp@latest"

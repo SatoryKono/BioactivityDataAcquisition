@@ -7,6 +7,26 @@ $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "../../..")).Path
 $env:BIOETL_SKIP_ENV_LOCAL = "1"
 Import-BioetlRepoEnv -RepoRoot $repoRoot
 Remove-Item Env:BIOETL_SKIP_ENV_LOCAL -ErrorAction SilentlyContinue
+. (Join-Path $PSScriptRoot "support/token_validation.ps1")
 
-& docker mcp gateway run --servers context7 --transport stdio
+if (-not $env:NPM_CONFIG_CACHE) {
+    $env:NPM_CONFIG_CACHE = Join-Path ([System.IO.Path]::GetTempPath()) "bioetl-npm-cache"
+}
+
+# Optional higher rate limits: CONTEXT7_API_KEY from .env / shell.
+# Warnings go to stderr only (see Write-McpTokenWarning) so MCP stdout stays pure JSON.
+Test-McpOptionalToken `
+    -Name "CONTEXT7_API_KEY" `
+    -MinLength 8 `
+    -Purpose "Context7 MCP (optional higher rate limits)"
+
+Exit-McpValidateOnly -ServerName "context7"
+
+# Official npm MCP server (docker gateway is flaky when secrets engine is down).
+# Do not remap stdout — MCP framing must pass through unmodified.
+if ($env:CONTEXT7_API_KEY) {
+    & npx -y "@upstash/context7-mcp@latest" --api-key $env:CONTEXT7_API_KEY
+} else {
+    & npx -y "@upstash/context7-mcp@latest"
+}
 exit $LASTEXITCODE
