@@ -37189,6 +37189,34 @@
       "canonical_successor": null,
       "catalog_lifecycle": null,
       "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": null,
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "docs/03-guides/development/coderabbit-local-reviews.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "03-guides",
+      "status": "Active",
+      "surface_family": "active",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
       "declared_class": "published",
       "declared_status": "active",
       "diagram_kind": null,
@@ -87051,7 +87079,7 @@
       "archive-after-github-state-check": 121,
       "archive-after-migration": 93,
       "generate-automatically": 723,
-      "keep": 2142,
+      "keep": 2143,
       "reconcile-with-github-state": 4
     },
     "by_section": {
@@ -87060,7 +87088,7 @@
       "01-requirements": 3,
       "02-architecture": 853,
       "03-data-model": 2,
-      "03-guides": 78,
+      "03-guides": 79,
       "04-reference": 193,
       "05-engineering": 9,
       "05-operations": 80,
@@ -87090,14 +87118,14 @@
       "tools": 1
     },
     "by_status": {
-      "Active": 1949,
+      "Active": 1950,
       "Archived": 78,
       "Canonical": 63,
       "Generated": 723,
       "Working": 270
     },
     "by_surface_family": {
-      "active": 1949,
+      "active": 1950,
       "archive": 78,
       "canonical": 63,
       "generated": 723,
@@ -87105,7 +87133,7 @@
     },
     "by_tracking_state": {
       "ignored_local": 1194,
-      "tracked": 1889
+      "tracked": 1890
     },
     "docs_reports_local_count": 1214,
     "duplicate_group_count": 2,
@@ -87126,8 +87154,8 @@
         "path": "docs/reports/evidence/project-legacy-compatibility-remediation/.quarantined-03-synthesis-corrupt-20260521"
       }
     ],
-    "total_doc_like": 3083,
+    "total_doc_like": 3084,
     "total_doc_like_ignored_local": 1194,
-    "total_doc_like_tracked": 1889
+    "total_doc_like_tracked": 1890
   }
 }

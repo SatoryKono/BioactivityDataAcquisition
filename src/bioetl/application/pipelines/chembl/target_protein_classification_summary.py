@@ -224,11 +224,11 @@ def _mark_multifunctional(summary: dict[str, object]) -> None:
 
 def _serialize_classifications(rows: list[dict[str, object]]) -> str:
     payload = [_classification_payload(row) for row in rows]
-    return json.dumps(payload, sort_keys=False, separators=(",", ":"))
+    return json.dumps(payload, sort_keys=True, separators=(",", ":"))
 
 
 def _serialize_string_tuple(values: tuple[str, ...]) -> str:
-    return json.dumps(values, sort_keys=False, separators=(",", ":"))
+    return json.dumps(values, sort_keys=True, separators=(",", ":"))
 
 
 def _classification_payload(row: Mapping[str, object]) -> dict[str, object]:

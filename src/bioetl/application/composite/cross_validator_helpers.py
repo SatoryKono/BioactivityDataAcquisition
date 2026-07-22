@@ -103,7 +103,7 @@ def _build_enricher_detail(
     n = len(mismatch_count)
     if not field_mismatch_bools:
         return pl.Series("_detail", [None] * n, dtype=pl.String)
-    field_names = list(field_mismatch_bools)
+    field_names = sorted(field_mismatch_bools)
     field_rows = [field_mismatch_bools[name].to_list() for name in field_names]
     details: list[str | None] = []
 
@@ -119,6 +119,7 @@ def _build_enricher_detail(
         details.append(
             json.dumps(
                 {"enricher": enricher_pipeline, "field_mismatches": fields},
+                sort_keys=True,
                 ensure_ascii=False,
             )
         )
@@ -145,7 +146,11 @@ def _combine_cv_details(
             merged_details.append(None)
             continue
         merged_details.append(
-            json.dumps([json.loads(part) for part in parts], ensure_ascii=False)
+            json.dumps(
+                [json.loads(part) for part in parts],
+                sort_keys=True,
+                ensure_ascii=False,
+            )
         )
 
     return pl.Series("_cv_details", merged_details, dtype=pl.String)
