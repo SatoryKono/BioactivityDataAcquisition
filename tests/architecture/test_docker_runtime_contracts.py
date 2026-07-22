@@ -554,6 +554,7 @@ def test_docker_cli_resolver_separates_engine_and_desktop_mcp_capabilities() -> 
     assert "Resolve-DockerEngineBin" in powershell
     assert "Resolve-DockerMcpGatewayBin" in powershell
     assert "no incompatible Linux CLI fallback" in shell
+    assert '"${candidate}" version' in shell
     powershell_wrapper = (ROOT / "scripts/ai/mcp/mcp_docker_wrapper.ps1").read_text(
         encoding="utf-8"
     )

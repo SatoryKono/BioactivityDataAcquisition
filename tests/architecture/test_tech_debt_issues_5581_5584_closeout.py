@@ -33,7 +33,6 @@ TOOLING_ROOTS_WITH_OWNER_DECISIONS = {
     ".gemini",
     ".junie",
     ".npm-cache",
-    ".sonarlint",
     ".vibe",
     ".windsurf",
 }

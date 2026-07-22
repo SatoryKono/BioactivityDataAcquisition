@@ -19,6 +19,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 MANAGED_BLOCK_BEGIN = "# === BEGIN MANAGED MCP SERVERS ==="
 MANAGED_BLOCK_END = "# === END MANAGED MCP SERVERS ==="
 CACHE_DIR_NAME = ".cache"
+CODEX_RUNTIME_CACHE_DIR_NAME = "bioetl-mcp"
 REF_API_KEY_ENV_VAR = "REF_TOOL_API_KEY"
 REMOVED_MCP_SERVER_NAMES = frozenset(
     {
@@ -288,8 +289,45 @@ def _canonical_servers(
 
 
 def _codex_runtime_servers(workspace_root: Path) -> dict[str, dict[str, Any]]:
-    """Return local Codex servers with secret values referenced by env name."""
+    """Return local Codex servers with WSL-safe runtime cache paths.
+
+    Tracked MCP projections keep repo-relative cache paths for portability.  The
+    Codex user runtime must not put npm/uv caches on a Windows-mounted workspace,
+    where atomic rename and cleanup operations are unreliable under WSL.
+    """
     servers = deepcopy(_canonical_servers(workspace_root))
+    xdg_cache_home = os.environ.get("XDG_CACHE_HOME")
+    cache_home = (
+        Path(xdg_cache_home).expanduser()
+        if xdg_cache_home
+        else Path.home() / CACHE_DIR_NAME
+    )
+    runtime_cache_root = cache_home / CODEX_RUNTIME_CACHE_DIR_NAME
+    npm_cache_dir = str(runtime_cache_root / "npm-cache")
+    npm_backed_servers = {
+        "memory",
+        "filesystem",
+        "fetch",
+        "github",
+        "context7",
+        "ast-grep",
+        "mcp-code-interpreter",
+        "neo4j-cypher",
+        "neo4j-memory",
+        "mermaid",
+        "deja",
+        "adr-analysis",
+        "mutmut",
+        "code-analyzer",
+        "github-actions",
+    }
+    for server_name in npm_backed_servers:
+        server_env = servers[server_name].setdefault("env", {})
+        server_env["NPM_CONFIG_CACHE"] = npm_cache_dir
+
+    fetch_env = servers["fetch"]["env"]
+    fetch_env["UV_CACHE_DIR"] = str(runtime_cache_root / "uv-cache")
+    fetch_env["UV_TOOL_DIR"] = str(runtime_cache_root / "uv-tools")
     _add_startup_timeouts(servers)
 
     return servers
@@ -469,6 +507,10 @@ def _render_codex_mcp_toml(servers: dict[str, dict[str, Any]]) -> str:
         key = _toml_key(name)
         lines.append("")
         lines.append(f"[mcp_servers.{key}]")
+        if "enabled" in server:
+            lines.append(
+                f"enabled = {'true' if bool(server['enabled']) else 'false'}"
+            )
         if "url" in server:
             lines.append(f"url = {_toml_string(str(server['url']))}")
         else:

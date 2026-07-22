@@ -192,7 +192,7 @@ require_contains "$filesystem_out" "@modelcontextprotocol/server-filesystem@2026
 require_wrapper_path "$fetch_out" "$EXPECTED_FETCH_WRAPPER_PATH" "fetch is routed through the project wrapper" || status=1
 fetch_wrapper_source="$(<"$EXPECTED_FETCH_WRAPPER_PATH")"
 require_contains "$fetch_wrapper_source" 'mcp-server-fetch==2025.4.7' "fetch wrapper pins mcp-server-fetch==2025.4.7" || status=1
-require_contains "$fetch_wrapper_source" 'uvx --python 3.13' "fetch wrapper uses the WSL-compatible CPython 3.13 runtime" || status=1
+require_contains "$fetch_wrapper_source" '--python 3.13' "fetch wrapper uses the WSL-compatible CPython 3.13 runtime" || status=1
 require_wrapper_path "$github_out" "$EXPECTED_GITHUB_WRAPPER_PATH" "github is routed through the project wrapper" || status=1
 require_wrapper_path "$docker_out" "$EXPECTED_DOCKER_WRAPPER_PATH" "docker is routed through the project wrapper" || status=1
 require_wrapper_path "$context7_out" "$EXPECTED_CONTEXT7_WRAPPER_PATH" "context7 is routed through the project wrapper" || status=1
