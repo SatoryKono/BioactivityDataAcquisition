@@ -65,9 +65,7 @@ def _otlp_exporter_is_installed() -> bool:
     return True
 
 
-def _load_otlp_exporter_class() -> (
-    type[Any] | None
-):  # Any: optional dependency type unknown until runtime
+def _load_otlp_exporter_class() -> type[Any] | None:  # Any: optional dep type until import
     """Load and cache the optional OTLP exporter on first runtime use."""
     global OTLP_AVAILABLE, _OtlpExporterClass
 
@@ -84,8 +82,9 @@ def _load_otlp_exporter_class() -> (
         return None
 
     _OtlpExporterClass = cast(
-        type[Any], exporter_module.OTLPSpanExporter
-    )  # Any: optional dependency type
+        type[Any],  # Any: optional dependency type unknown until runtime import
+        exporter_module.OTLPSpanExporter,
+    )
     return _OtlpExporterClass
 
 

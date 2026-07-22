@@ -127,7 +127,11 @@ If `ID` or `Processed Records` is empty, verify the Quarantine Explorer /
 control-plane backend health (`/health/live`) before interpreting the card as
 an absent run, expected empty scope, or zero processed records. The shipped
 cards include no-value copy and backend-health links so backend-down is not
-visually equivalent to valid zero evidence.
+visually equivalent to valid zero evidence. If `run_id` is set and a ledger-backed
+exact lookup is enabled, an empty `ID`/`Processed Records` payload can also mean
+the chosen `run_id` is not yet in the resolved ledger or failed to resolve to a
+manifest entry; this is expected until the run is available in the control-plane
+scope store.
 
 All eight shipped dashboards use one theme-safe navigation composition:
 numbered bus `0..6`, then `Silver Reject Explorer`, `Explore Logs`, and

@@ -9,6 +9,7 @@ import pytest
 
 from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.control_plane.run_ledger import ARTIFACT_PUBLISHED_EVENT
+from bioetl.interfaces.http import _processed_records_prometheus as prom
 from bioetl.interfaces.http import _processed_records_table_support as support
 from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
@@ -287,38 +288,38 @@ def test_query_prometheus_scalar_parses_success_and_missing_values(
         assert timeout == support.PROMETHEUS_QUERY_TIMEOUT_SECONDS
         return _FakeResponse(next(payloads))
 
-    monkeypatch.setattr(support, "_open_url", fake_urlopen)
+    monkeypatch.setattr(prom, "_open_url", fake_urlopen)
 
     assert (
-        support._query_prometheus_scalar(
+        prom._query_prometheus_scalar(
             prometheus_base_url="http://prometheus.example/",
             query='metric{label="value"}',
         )
         == 42.0
     )
     assert (
-        support._query_prometheus_scalar(
+        prom._query_prometheus_scalar(
             prometheus_base_url="http://prometheus.example",
             query="empty",
         )
         is None
     )
     assert (
-        support._query_prometheus_scalar(
+        prom._query_prometheus_scalar(
             prometheus_base_url="http://prometheus.example",
             query="malformed",
         )
         is None
     )
     assert (
-        support._query_prometheus_scalar(
+        prom._query_prometheus_scalar(
             prometheus_base_url="http://prometheus.example",
             query="nan",
         )
         is None
     )
     with pytest.raises(RuntimeError, match="bad query"):
-        support._query_prometheus_scalar(
+        prom._query_prometheus_scalar(
             prometheus_base_url="http://prometheus.example",
             query="error",
         )
@@ -339,10 +340,10 @@ def test_query_prometheus_scalar_with_fallbacks_reports_all_errors(
             raise RuntimeError("first failed")
         return 7.0
 
-    monkeypatch.setattr(support, "_query_prometheus_scalar", flaky_query)
+    monkeypatch.setattr(prom, "_query_prometheus_scalar", flaky_query)
 
     assert (
-        support._query_prometheus_scalar_with_fallbacks(
+        prom._query_prometheus_scalar_with_fallbacks(
             prometheus_base_urls=("http://one", "http://two"),
             query="up",
         )
@@ -353,10 +354,10 @@ def test_query_prometheus_scalar_with_fallbacks_reports_all_errors(
     def always_fails(*, prometheus_base_url: str, query: str) -> float:
         raise RuntimeError(f"{query} failed")
 
-    monkeypatch.setattr(support, "_query_prometheus_scalar", always_fails)
+    monkeypatch.setattr(prom, "_query_prometheus_scalar", always_fails)
 
     with pytest.raises(RuntimeError, match=r"http://one: .*http://two:"):
-        support._query_prometheus_scalar_with_fallbacks(
+        prom._query_prometheus_scalar_with_fallbacks(
             prometheus_base_urls=("http://one", "http://two"),
             query="down",
         )
@@ -384,10 +385,10 @@ def test_query_prometheus_vector_preserves_metric_names_and_missing_values(
         },
     }
     monkeypatch.setattr(
-        support, "_open_url", lambda *_args, **_kwargs: _FakeResponse(payload)
+        prom, "_open_url", lambda *_args, **_kwargs: _FakeResponse(payload)
     )
 
-    values = support._query_prometheus_vector(
+    values = prom._query_prometheus_vector(
         prometheus_base_url="http://prometheus.example",
         query="sum by (__name__) (...) ",
     )

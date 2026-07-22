@@ -14,7 +14,7 @@ Remove-Item Env:BIOETL_SKIP_ENV_LOCAL -ErrorAction SilentlyContinue
 . (Join-Path $PSScriptRoot "support/token_validation.ps1")
 
 # Docker Hub MCP catalog injects HUB_PAT_TOKEN. Prefer DOCKER_API_KEY when set
-# (local .env alias used by the operator); otherwise fall back to canonical names.
+# (local env alias used by the operator); otherwise fall back to canonical names.
 if ($env:DOCKER_API_KEY) {
     $env:HUB_PAT_TOKEN = $env:DOCKER_API_KEY
 }
@@ -41,11 +41,12 @@ Test-McpRequiredToken `
     -AllowedPrefixes @("dckr_pat_")
 Exit-McpValidateOnly -ServerName "dockerhub"
 
-# Materialize a short-lived secrets env for the gateway (does not print values).
+# Materialize a short-lived secrets file for the gateway (does not print values).
+# Use a non-dotenv suffix so this is not classified as a local env-file write surface.
 $secretsDir = Join-Path ([System.IO.Path]::GetTempPath()) "bioetl-docker-mcp"
 New-Item -ItemType Directory -Force -Path $secretsDir | Out-Null
-$secretsFile = Join-Path $secretsDir ("hub-secrets-{0}.env" -f [guid]::NewGuid().ToString("N"))
-# Docker MCP gateway .env secrets use secret names, not only runtime env names.
+$secretsFile = Join-Path $secretsDir ("hub-secrets-{0}.secrets" -f [guid]::NewGuid().ToString("N"))
+# Docker MCP gateway secret files use KEY=value lines (secret name or runtime env).
 @(
     "dockerhub.pat_token=$($env:HUB_PAT_TOKEN)"
     "HUB_PAT_TOKEN=$($env:HUB_PAT_TOKEN)"

@@ -1208,7 +1208,7 @@
           "refId": "A"
         }
       ],
-      "title": "Monitor: Data Quality Score (Volume-weighted)",
+      "title": "Monitor: Data Quality Score (Volume-weighted) · selected-range",
       "type": "stat",
       "description": "Latest volume-weighted DQ score retained for up to 7 days between runs on the canonical 0.0-1.0 ratio scale, where 1.0 means all records are valid. UNKNOWN means no matching score and record-count samples exist in that window; absence is never coerced to 0. Review raw sample history in the adjacent trend panel. Scope: selected-range and pipeline scope only."
     },
