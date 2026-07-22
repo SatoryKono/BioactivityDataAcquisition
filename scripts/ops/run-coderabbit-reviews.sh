@@ -149,6 +149,10 @@ fi
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    -h|--help)
+      usage
+      exit 0
+      ;;
     --coderabbit-only)
       RUN_CODERABBIT_ONLY=1
       ;;

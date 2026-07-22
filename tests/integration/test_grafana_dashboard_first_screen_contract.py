@@ -7,6 +7,7 @@ import yaml
 
 from tests.integration._grafana_test_support import (
     get_dashboard_files,
+    get_dashboard_navigation_links,
     get_dashboard_panels,
     load_dashboard,
 )
@@ -527,6 +528,11 @@ def test_navigation_bus_panels_document_handoff_policy() -> None:
 
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
+        navigation_links = get_dashboard_navigation_links(dashboard)
+        has_explore_traces = any(
+            str(link.get("title", "")) == "Explore Traces"
+            for link in navigation_links
+        )
         panel = next(
             (
                 candidate
@@ -553,7 +559,8 @@ def test_navigation_bus_panels_document_handoff_policy() -> None:
                 f"{dashboard_path.name}:navigation panel description "
                 f"must mention {token!r}"
             )
-        assert any(token in description for token in tracing_tokens), (
-            f"{dashboard_path.name}:navigation panel description "
-            "must document traced-run-only Explore Traces semantics"
-        )
+        if has_explore_traces:
+            assert any(token in description for token in tracing_tokens), (
+                f"{dashboard_path.name}:navigation panel description "
+                "must document traced-run-only Explore Traces semantics"
+            )

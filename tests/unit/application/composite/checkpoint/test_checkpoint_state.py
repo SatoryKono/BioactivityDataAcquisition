@@ -639,7 +639,7 @@ class TestToDict:
         dep_a = _make_dependency_result(pipeline_name="uniprot")
         dep_b = _make_dependency_result(
             pipeline_name="pubmed",
-            status=DependencyStatus.PARTIAL,
+            status=DependencyStatus.TIMEOUT,
         )
         enr_a = _make_enrichment_result(enricher_name="crossref")
         enr_b = _make_enrichment_result(
