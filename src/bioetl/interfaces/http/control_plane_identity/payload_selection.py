@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-
 from bioetl.interfaces.http.control_plane_identity.specs import OVERVIEW_NAMES
+
 
 def _is_actionable_identity_gap(row: dict[str, object]) -> bool:
     return row["identity_gap"] is True and row["name"] != "identity_graph_complete"

@@ -82,7 +82,8 @@ def context():
 @pytest.mark.asyncio
 async def test_generate_bronze_report_error(service, context, mock_bronze_analyzer):
     """Test error handling in _generate_bronze_report."""
-    mock_bronze_analyzer.analyze.side_effect = Exception("Analysis failed")
+    from bioetl.domain.exceptions import DataQualityError
+    mock_bronze_analyzer.analyze.side_effect = DataQualityError("Analysis failed")
 
     config = MagicMock(spec=BronzeDQConfigPort)
     config.enabled = True
@@ -101,7 +102,7 @@ async def test_generate_bronze_report_writer_error(
 ):
     """Test error handling when writer fails."""
     mock_bronze_analyzer.analyze.return_value = MagicMock()
-    mock_writer.write_bronze_report.side_effect = Exception("Write failed")
+    mock_writer.write_bronze_report.side_effect = OSError("Write failed")
 
     config = MagicMock(spec=BronzeDQConfigPort)
     config.enabled = True
