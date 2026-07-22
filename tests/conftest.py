@@ -12,6 +12,7 @@ from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 import pathlib
 import random
+import tempfile
 from typing import Any
 from collections.abc import Generator
 
@@ -52,7 +53,12 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
     raw_seed = os.environ.get("BIOETL_RANDOM_ORDER_SEED")
     if raw_seed is None:
         return
-    seed = int(raw_seed)
+    try:
+        seed = int(raw_seed.strip())
+    except ValueError as exc:
+        raise pytest.UsageError(
+            f"BIOETL_RANDOM_ORDER_SEED must be an integer; got {raw_seed!r}"
+        ) from exc
     random.Random(seed).shuffle(items)
 
 
@@ -76,7 +82,16 @@ def _write_empirical_order_manifest() -> None:
         return
     path = Path(manifest)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(_EMPIRICAL_EXECUTION_ORDER), encoding="utf-8")
+    with tempfile.NamedTemporaryFile(
+        mode="w",
+        encoding="utf-8",
+        dir=path.parent,
+        prefix=f".{path.name}.",
+        delete=False,
+    ) as temporary:
+        temporary.write(json.dumps(_EMPIRICAL_EXECUTION_ORDER))
+        temporary_path = Path(temporary.name)
+    os.replace(temporary_path, path)
     _EMPIRICAL_EXECUTION_ORDER.clear()
 
 
