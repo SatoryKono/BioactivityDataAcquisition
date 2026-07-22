@@ -52,25 +52,25 @@ REMOVED_MCP_SERVER_NAMES = frozenset(
 
 def _add_startup_timeouts(servers: dict[str, dict[str, Any]]) -> None:
     startup_timeouts = {
-        "fetch": 120,
-        "context7": 120,
-        "docker": 120,
-        "mermaid": 180,
+        "fetch": 300,
+        "context7": 240,
+        "docker": 240,
+        "mermaid": 300,
         "memory": 120,
         "github": 180,
         "brave-search": 180,
-        "prometheus": 180,
-        "grafana": 180,
+        "prometheus": 240,
+        "grafana": 240,
         "github-actions": 180,
         "ast-grep": 120,
-        "mcp-code-interpreter": 120,
+        "mcp-code-interpreter": 240,
         "neo4j-cypher": 120,
         "neo4j-memory": 120,
         "code-analyzer": 120,
         "adr-analysis": 120,
         "mutmut": 120,
         "deja": 120,
-        "deepwiki": 120,
+        "deepwiki": 240,
         "ref": 120,
     }
     for server_name, timeout in startup_timeouts.items():

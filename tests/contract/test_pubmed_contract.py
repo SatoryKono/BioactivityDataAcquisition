@@ -22,7 +22,27 @@ from tests.contract._provider_contract_drift import (
 EUTILS_BASE = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
 STABLE_PMID = "33408181"
 UPDATE_SNAPSHOTS = os.environ.get("UPDATE_SNAPSHOTS", "0") == "1"
+TRANSIENT_PROVIDER_STATUSES = frozenset({429, 500, 502, 503, 504})
 pytestmark = pytest.mark.network
+
+
+async def _request_or_skip(
+    client: httpx.AsyncClient,
+    method: str,
+    url: str,
+    **kwargs: object,
+) -> httpx.Response:
+    """Execute request and skip on transient network/provider outages."""
+    try:
+        response = await client.request(method, url, **kwargs)
+    except (httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadTimeout) as exc:
+        pytest.skip(f"PubMed/NCBI E-utilities endpoint not reachable: {exc}")
+
+    if response.status_code in TRANSIENT_PROVIDER_STATUSES:
+        pytest.skip(
+            f"PubMed/NCBI temporary server error: HTTP {response.status_code}"
+        )
+    return response
 
 
 @pytest.mark.pubmed
@@ -33,7 +53,9 @@ class TestPubMedContract:
     async def test_esearch_endpoint(self) -> None:
         """Verify ESearch endpoint for searching PubMed."""
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
+            response = await _request_or_skip(
+                client,
+                "GET",
                 f"{EUTILS_BASE}/esearch.fcgi",
                 params={
                     "db": "pubmed",
@@ -60,7 +82,9 @@ class TestPubMedContract:
         pmid = STABLE_PMID  # Known stable PMID
 
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
+            response = await _request_or_skip(
+                client,
+                "GET",
                 f"{EUTILS_BASE}/efetch.fcgi",
                 params={
                     "db": "pubmed",
@@ -81,7 +105,9 @@ class TestPubMedContract:
         pmid = STABLE_PMID
 
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
+            response = await _request_or_skip(
+                client,
+                "GET",
                 f"{EUTILS_BASE}/esummary.fcgi",
                 params={
                     "db": "pubmed",
@@ -108,7 +134,9 @@ class TestPubMedContract:
     async def test_einfo_database_list(self) -> None:
         """Verify EInfo returns database information."""
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
+            response = await _request_or_skip(
+                client,
+                "GET",
                 f"{EUTILS_BASE}/einfo.fcgi",
                 params={"retmode": "json"},
             )
@@ -126,7 +154,9 @@ class TestPubMedContract:
     async def test_esearch_snapshot_contract(self) -> None:
         """Verify the provider-facing ESearch payload matches the snapshot."""
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
+            response = await _request_or_skip(
+                client,
+                "GET",
                 f"{EUTILS_BASE}/esearch.fcgi",
                 params={
                     "db": "pubmed",
@@ -148,7 +178,9 @@ class TestPubMedContract:
     async def test_esummary_snapshot_contract(self) -> None:
         """Verify the provider-facing ESummary payload matches the snapshot."""
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
+            response = await _request_or_skip(
+                client,
+                "GET",
                 f"{EUTILS_BASE}/esummary.fcgi",
                 params={
                     "db": "pubmed",
@@ -169,7 +201,9 @@ class TestPubMedContract:
     async def test_einfo_database_list_snapshot_contract(self) -> None:
         """Verify the provider-facing EInfo database list payload matches the snapshot."""
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
+            response = await _request_or_skip(
+                client,
+                "GET",
                 f"{EUTILS_BASE}/einfo.fcgi",
                 params={"retmode": "json"},
             )
@@ -186,7 +220,9 @@ class TestPubMedContract:
     async def test_einfo_pubmed_details(self) -> None:
         """Verify EInfo returns PubMed database details."""
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
+            response = await _request_or_skip(
+                client,
+                "GET",
                 f"{EUTILS_BASE}/einfo.fcgi",
                 params={
                     "db": "pubmed",
@@ -214,7 +250,9 @@ class TestPubMedContract:
         pmids = [STABLE_PMID, "33408182"]
 
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
+            response = await _request_or_skip(
+                client,
+                "GET",
                 f"{EUTILS_BASE}/esummary.fcgi",
                 params={
                     "db": "pubmed",
@@ -238,7 +276,9 @@ class TestPubMedContract:
         pmid = STABLE_PMID
 
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
+            response = await _request_or_skip(
+                client,
+                "GET",
                 f"{EUTILS_BASE}/elink.fcgi",
                 params={
                     "dbfrom": "pubmed",
