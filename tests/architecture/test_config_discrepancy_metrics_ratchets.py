@@ -8,13 +8,11 @@ from pathlib import Path
 
 import pytest
 import yaml
+from scripts.schema import generate_config_matrix as generator
 
 from scripts.schema.generate_config_matrix import (
-    _build_artifact_contents,
     _collect_family_configs,
-    _family_metrics,
-    _live_baseline_metrics,
-    build_config_parameter_taxonomy_payload,
+    build_config_discrepancy_evidence,
 )
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -76,27 +74,55 @@ def _load_baseline_taxonomy() -> dict[str, object]:
 
 @cache
 def _live_metrics() -> dict[str, int]:
-    _, _, unique_parameter_count, config_count, raw_partial_count, _, _ = (
-        _build_artifact_contents()
-    )
-    return _live_baseline_metrics(
-        config_count=config_count,
-        unique_parameter_count=unique_parameter_count,
-        _cross_family_raw_inconsistent=raw_partial_count,
-    )
+    return build_config_discrepancy_evidence().baseline_metrics()
 
 
 @cache
 def _live_family_metrics() -> dict[str, dict[str, int]]:
-    return {
-        family_name: _family_metrics(family_configs)
-        for family_name, family_configs in _collect_family_configs().items()
-    }
+    return build_config_discrepancy_evidence().family_metrics()
 
 
 @cache
 def _live_parameter_taxonomy() -> dict[str, object]:
-    return build_config_parameter_taxonomy_payload()
+    return build_config_discrepancy_evidence().parameter_taxonomy()
+
+
+@pytest.mark.architecture
+def test_config_discrepancy_evidence_is_immutable_and_byte_stable() -> None:
+    first = build_config_discrepancy_evidence()
+    second = build_config_discrepancy_evidence()
+
+    assert first is second
+    assert first.fingerprint == second.fingerprint
+    assert first.baseline_metrics_json == second.baseline_metrics_json
+    assert first.family_metrics_json == second.family_metrics_json
+    assert first.parameter_taxonomy_json == second.parameter_taxonomy_json
+
+
+@pytest.mark.architecture
+def test_config_discrepancy_evidence_scans_config_snapshot_once(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = 0
+    configs = {
+        "entity/demo/item": {"pipeline.name": "demo"},
+        "composite/demo": {"composite.seed.pipeline": "demo_item"},
+    }
+
+    def collect_once() -> dict[str, dict[str, object]]:
+        nonlocal calls
+        calls += 1
+        return configs
+
+    generator._build_config_discrepancy_evidence_cached.cache_clear()
+    monkeypatch.setattr(generator, "_collect_configs", collect_once)
+
+    first = generator._build_config_discrepancy_evidence_cached("test-fingerprint")
+    second = generator._build_config_discrepancy_evidence_cached("test-fingerprint")
+
+    assert first is second
+    assert calls == 1
+    generator._build_config_discrepancy_evidence_cached.cache_clear()
 
 
 @pytest.mark.architecture

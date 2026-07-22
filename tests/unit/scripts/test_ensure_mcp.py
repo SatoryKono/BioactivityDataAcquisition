@@ -86,11 +86,14 @@ def _run_helper(
 @pytest.mark.skipif(
     sys.platform == "win32", reason="bash helper is exercised in the WSL runtime"
 )
-def test_ensure_keeps_valid_persisted_config_unchanged(tmp_path: Path) -> None:
+def test_ensure_keeps_valid_persisted_config_unchanged(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     workspace = tmp_path / "workspace"
     home = tmp_path / "home"
     workspace.mkdir()
     home.mkdir()
+    monkeypatch.setattr(setup_mcp.Path, "home", lambda: home)
     _prepare_workspace(workspace)
     config_path = _write_codex_config(home, workspace, valid=True)
     fixed_mtime_ns = 946_684_800_000_000_000

@@ -32,4 +32,4 @@ if ! command -v "${UVX_BIN}" >/dev/null 2>&1 && [[ ! -x "${UVX_BIN}" ]]; then
 fi
 
 bioetl_enable_uvx_network_bypass
-exec "${UVX_BIN}" --from "git+https://github.com/wdm0006/mutmut-mcp" mutmut-mcp --stdio "$@"
+exec "${UVX_BIN}" --from "git+https://github.com/wdm0006/mutmut-mcp@1e3b47ccaaa31f4c651d8e424b90d392d1c1ed90" mutmut-mcp --stdio "$@"

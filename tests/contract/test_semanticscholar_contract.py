@@ -20,6 +20,11 @@ UPDATE_SNAPSHOTS = os.environ.get("UPDATE_SNAPSHOTS", "0") == "1"
 REPLAY_SNAPSHOT_PROBES = ("paper_search_endpoint", "paper_batch_lookup_by_doi")
 pytestmark = pytest.mark.no_api
 
+EXPECTED_BATCH_IDENTITIES = {
+    "10.1038/nature12373": "a88fbdb9b47a8e8aef2b8cabd1fe0adfb96a9f25",
+    "10.1016/j.cell.2019.03.025": "b2c8f1d3e4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9",
+}
+
 
 def _replay_snapshot_update_contract() -> tuple[bool, object, tuple[str, ...]]:
     """Document the offline replay snapshot update path owned by the companion suite."""
@@ -68,9 +73,18 @@ class TestSemanticScholarContract:
         await asyncio.sleep(0)
         data = semanticscholar_batch_payload
         assert isinstance(data, list)
-        assert len(data) == 2
+        assert len(data) == len(EXPECTED_BATCH_IDENTITIES)
+        observed: dict[str, str] = {}
         for paper in data:
             assert isinstance(paper, dict)
-            assert paper["paperId"]
+            paper_id = paper["paperId"]
+            assert isinstance(paper_id, str) and paper_id
             assert paper["title"]
-            assert "externalIds" in paper
+            external_ids = paper["externalIds"]
+            assert isinstance(external_ids, dict)
+            doi = external_ids.get("DOI")
+            assert isinstance(doi, str) and doi
+            assert doi.lower() not in observed, "each requested DOI must map once"
+            observed[doi.lower()] = paper_id
+
+        assert observed == EXPECTED_BATCH_IDENTITIES

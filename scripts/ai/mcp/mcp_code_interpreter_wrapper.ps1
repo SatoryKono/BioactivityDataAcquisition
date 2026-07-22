@@ -19,27 +19,7 @@ if (-not $env:UV_TOOL_DIR) {
 New-Item -ItemType Directory -Force -Path $env:UV_CACHE_DIR | Out-Null
 New-Item -ItemType Directory -Force -Path $env:UV_TOOL_DIR | Out-Null
 
-# mcp-run-python sandboxes execution with Deno — ensure it is on PATH.
-$denoBin = Join-Path $env:USERPROFILE ".deno\bin"
-if (Test-Path $denoBin) {
-    $env:PATH = "$denoBin$([IO.Path]::PathSeparator)$env:PATH"
-}
-# Persist Deno module cache across launches (pyodide + npm deps are heavy).
-if (-not $env:DENO_DIR) {
-    $env:DENO_DIR = Join-Path $env:USERPROFILE ".cache\deno"
-}
-New-Item -ItemType Directory -Force -Path $env:DENO_DIR | Out-Null
-
 Exit-McpValidateOnly -ServerName "mcp-code-interpreter"
-
-if (-not (Get-Command deno -ErrorAction SilentlyContinue)) {
-    Write-Error @"
-mcp-code-interpreter requires Deno (used by mcp-run-python sandbox).
-Install deno into %USERPROFILE%\.deno\bin\ (e.g. download
-deno-x86_64-pc-windows-msvc.zip with curl --ssl-no-revoke).
-"@
-    exit 1
-}
 
 # 1) Local Python module if installed
 $python = Get-Command python -ErrorAction SilentlyContinue
@@ -52,6 +32,25 @@ if ($python) {
 }
 
 # 2) Canonical: PyPI mcp-run-python (sandboxed Python code execution MCP)
+# mcp-run-python requires Deno, but the local Python module above does not.
+$denoBin = Join-Path $env:USERPROFILE ".deno\bin"
+if (Test-Path $denoBin) {
+    $env:PATH = "$denoBin$([IO.Path]::PathSeparator)$env:PATH"
+}
+if (-not $env:DENO_DIR) {
+    $env:DENO_DIR = Join-Path $env:USERPROFILE ".cache\deno"
+}
+New-Item -ItemType Directory -Force -Path $env:DENO_DIR | Out-Null
+
+if (-not (Get-Command deno -ErrorAction SilentlyContinue)) {
+    Write-Error @"
+mcp-code-interpreter requires Deno for the mcp-run-python fallback.
+Install deno into %USERPROFILE%\.deno\bin\ (e.g. download
+deno-x86_64-pc-windows-msvc.zip with curl --ssl-no-revoke).
+"@
+    exit 1
+}
+
 $uvx = Resolve-BioetlUvxBin
 if (Test-BioetlUvxAvailable) {
     Enable-BioetlUvxNetworkBypass

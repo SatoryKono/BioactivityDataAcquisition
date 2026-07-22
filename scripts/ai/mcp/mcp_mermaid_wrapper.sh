@@ -12,4 +12,6 @@ if docker_bin="$(resolve_docker_mcp_gateway_bin)"; then
   exec "${docker_bin}" mcp gateway run --servers mermaid --transport stdio "$@"
 fi
 
-exec npx -y @modelcontextprotocol/server-mermaid --stdio "$@"
+printf '%s\n' \
+  "Mermaid MCP requires the Docker Desktop MCP gateway; enable Docker Desktop WSL integration." >&2
+exit 1

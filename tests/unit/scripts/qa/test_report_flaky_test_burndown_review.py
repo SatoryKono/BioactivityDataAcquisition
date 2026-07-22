@@ -10,6 +10,7 @@ import pytest
 import yaml
 
 from scripts.engineering.qa.report_flaky_test_burndown_review import (
+    build_empirical_payload,
     build_payload,
     main,
 )
@@ -180,3 +181,38 @@ def test_main__tracked_artifact_lifecycle__detects_missing_current_and_stale(
 
 def test_main__missing_canonical_input__returns_input_error(tmp_path: Path) -> None:
     assert main(["--repo-root", str(tmp_path)]) == 2
+
+
+def test_empirical_payload_persists_seeds_and_reconciles_stable_runs(
+    tmp_path: Path,
+) -> None:
+    _write_inputs(tmp_path)
+    run_dir = tmp_path / "runs"
+    run_dir.mkdir()
+    for index, seed in enumerate((17, 73, 113), start=1):
+        run_id = f"r{index}"
+        (run_dir / f"run-{run_id}.json").write_text(
+            json.dumps(
+                {
+                    "run_id": run_id,
+                    "seed": seed,
+                    "source_sha": "abc123",
+                    "order_mode": "seeded-random",
+                    "shard_id": "determinism-critical",
+                }
+            ),
+            encoding="utf-8",
+        )
+        (run_dir / f"junit-{run_id}.xml").write_text(
+            '<testsuite tests="1"><testcase classname="tests.test_x" '
+            'name="test_stable"/></testsuite>',
+            encoding="utf-8",
+        )
+
+    payload = build_empirical_payload(tmp_path, run_dir=Path("runs"))
+
+    assert payload["run_count"] == 3
+    assert [run["seed"] for run in payload["runs"]] == [17, 73, 113]
+    assert payload["comparison"]["unstable_node_count"] == 0
+    assert payload["comparison"]["replay_fingerprint_stable"] is True
+    assert payload["curated_inventory_reconciliation"]["untriaged_count"] == 0

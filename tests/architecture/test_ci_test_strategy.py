@@ -181,3 +181,27 @@ def test_tests_workflow_has_dedicated_contract_confidence_lane_outside_coverage(
     assert "test-telemetry-contract-confidence" in workflow, (
         "contract-confidence telemetry should be uploaded for test-health rollups"
     )
+
+
+def test_local_confidence_gate_keeps_lanes_separate_and_enforces_85_percent() -> None:
+    makefile = _read_workflow("Makefile")
+    target = makefile.split("test-confidence-local:", 1)[1].split("\n\n", 1)[0]
+
+    assert "$(MAKE) test-confidence-unit" in target
+    assert "$(MAKE) qa-arch-fast" in target
+    assert "$(MAKE) test-confidence-contract" in target
+    assert "$(MAKE) test-coverage" in target
+    assert "--cov-fail-under=85" in makefile
+    assert "VCR_RECORD_MODE=none" in makefile
+    assert "-p no:xdist" in makefile
+
+
+def test_tests_workflow_publishes_empirical_flaky_telemetry() -> None:
+    workflow = _read_workflow(".github/workflows/tests.yml")
+    block = _workflow_job_block(workflow, "flaky-telemetry")
+
+    assert "for seed in 17 73 113" in block
+    assert "BIOETL_RANDOM_ORDER_SEED" in block
+    assert "VCR_RECORD_MODE=none" in block
+    assert "flaky-test-empirical.json" in block
+    assert "source_sha" in block and "shard_id" in block

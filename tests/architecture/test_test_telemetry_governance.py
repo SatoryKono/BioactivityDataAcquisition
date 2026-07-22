@@ -10,6 +10,9 @@ from pathlib import Path
 
 import json
 import yaml
+from scripts.engineering.ci.update_test_telemetry_baseline import (
+    compute_test_telemetry_source_tree_sha256,
+)
 
 
 pytestmark = pytest.mark.architecture
@@ -28,6 +31,7 @@ def test_committed_test_telemetry_baseline_is_populated() -> None:
     assert payload["refresh_status"] == "captured"
     assert payload["source_commit"], "Committed baseline must pin a source commit"
     assert payload["source_run_id"], "Committed baseline must pin a source run id"
+    assert payload["source_tree_sha256"] == compute_test_telemetry_source_tree_sha256()
     assert payload["coverage"]["actual_percent"] is not None, (
         "Committed baseline must preserve current coverage telemetry"
     )
@@ -37,6 +41,12 @@ def test_committed_test_telemetry_baseline_is_populated() -> None:
     assert payload["duration_telemetry"]["top_slowest_zones"], (
         "Committed baseline must expose summarized slow zones for branch review"
     )
+    context = payload["duration_telemetry"]["execution_context"]
+    assert context["executed_count"] == payload["duration_telemetry"]["total_cases"]
+    assert context["junit_source_count"] == len(context["junit_sources"])
+    assert context["worker_mode"]
+    assert context["lane_wall_time_s"]
+    assert context["explicit_exclusions"]
 
 
 def test_committed_test_telemetry_baseline_respects_freshness_guard() -> None:
@@ -84,6 +94,10 @@ def test_branch_consumable_test_telemetry_reports_match_committed_baseline() -> 
     assert slowest["source_run_id"] == payload["source_run_id"]
     assert slowest["total_cases"] == payload["duration_telemetry"]["total_cases"]
     assert slowest["top_slowest"] == payload["duration_telemetry"]["top_slowest"]
+    assert (
+        slowest["execution_context"]
+        == payload["duration_telemetry"]["execution_context"]
+    )
     assert (
         slowest["top_slowest_zones"]
         == payload["duration_telemetry"]["top_slowest_zones"]

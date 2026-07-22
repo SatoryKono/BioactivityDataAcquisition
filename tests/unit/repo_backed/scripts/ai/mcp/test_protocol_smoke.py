@@ -33,6 +33,7 @@ class _Process:
     def __init__(self) -> None:
         self.stdin = _Input()
         self.stdout = _Output()
+        self.stderr: list[str] = []
 
     def terminate(self) -> None:
         return None
