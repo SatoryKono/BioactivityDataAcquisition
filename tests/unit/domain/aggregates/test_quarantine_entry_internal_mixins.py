@@ -17,12 +17,6 @@ from datetime import UTC, datetime, timedelta
 import pytest
 
 from bioetl.domain.aggregates._quarantine_aggregate import QuarantineEntry
-from bioetl.domain.aggregates._quarantine_entry_properties_mixin import (
-    QuarantineEntryPropertiesMixin,
-)
-from bioetl.domain.aggregates._quarantine_entry_transitions_mixin import (
-    QuarantineEntryTransitionsMixin,
-)
 from bioetl.domain.aggregates._quarantine_value_objects import (
     QuarantineStatus,
     ResolutionInfo,

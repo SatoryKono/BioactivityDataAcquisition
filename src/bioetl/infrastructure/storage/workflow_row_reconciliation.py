@@ -156,18 +156,27 @@ class StorageRowReconciliationAdapter(RowReconciliationPort):
             log_method(message, **context)
 
 
+def _non_none_kwargs(kwargs: dict[str, object]) -> dict[str, object]:
+    return {key: value for key, value in kwargs.items() if value is not None}
+
+
+def _signature_accepts_var_keyword(signature: inspect.Signature) -> bool:
+    return any(
+        parameter.kind is inspect.Parameter.VAR_KEYWORD
+        for parameter in signature.parameters.values()
+    )
+
+
 def _supported_kwargs(method: object, kwargs: dict[str, object]) -> dict[str, object]:
     try:
         signature = inspect.signature(method)
     except (TypeError, ValueError):
-        return {key: value for key, value in kwargs.items() if value is not None}
-    if any(
-        parameter.kind is inspect.Parameter.VAR_KEYWORD
-        for parameter in signature.parameters.values()
-    ):
-        return {key: value for key, value in kwargs.items() if value is not None}
+        return _non_none_kwargs(kwargs)
+    if _signature_accepts_var_keyword(signature):
+        return _non_none_kwargs(kwargs)
+    allowed = signature.parameters
     return {
         key: value
         for key, value in kwargs.items()
-        if value is not None and key in signature.parameters
+        if value is not None and key in allowed
     }

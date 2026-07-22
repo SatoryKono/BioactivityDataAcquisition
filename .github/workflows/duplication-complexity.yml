@@ -50,33 +50,13 @@ jobs:
       - name: Enforce cyclomatic complexity threshold (CC ≤ 10)
         run: |
           echo "Checking overall code complexity (max CC = 10, grade B)..."
-          # Exempt complex files with justified high complexity:
-          # ChEMBL: _fetch_with_filter and _fetch_batch_with_reduction with batch processing (CC=11-12)
-          # OpenAlex: fetch_filtered_with_fallback with DOI→title fallback (CC=23)
-          # SemanticScholar: fetch_filtered_with_fallback with DOI→ID fallback (CC=22)
-          # CrossRef: fetch_batch with batch DOI resolution and fallback to individual (CC=12)
-          # PubMed: fetch_filtered_with_fallback with PMID→title fallback (CC=17)
-          # DQ analyzers: Multiple validation checks in analyze() methods (CC=11-15)
-          # Merger: _apply_explicit_rules with field conflict resolution (CC=11)
-          # CLI formatters: Presentation logic with multiple display branches (CC=11)
-          # Storage factory: create() with multi-layer config extraction (CC=11)
-          # Composite runner: _run_with_lock orchestration with FSM state transitions (CC=12)
-          # Metadata coordinator: create_silver_metadata, _extract_schema_metadata with schema introspection (CC=12-16)
-          # Metadata builder: _extract_schema_metadata with pandera schema introspection (CC=16)
-          # CSV filter reader: load_filter_with_fallback with DOI→title fallback mapping (CC=12)
-          # UniProt idmapping: _fetch_results with pagination and retry logic (CC=13)
-          # UniProt extractors: extract_isoform_details with multi-field parsing (CC=20), extract_ptm_by_pattern (CC=12)
-          # PubChem: fetch_by_inchikey with InChIKey resolution and fallback (CC=12)
-          # PubChem: fetch_by_inchikey with multi-step InChIKey resolution (CC=11)
-          # UniProt extractors: extract_isoform_details, extract_ptm_by_pattern with complex parsing (CC=11-12)
-          # Config loader: _normalize_source_pagination with legacy pagination promotion (CC=15)
-          # Source config schema: ProviderConfigYaml, _promote_legacy_pagination with backward-compat logic (CC=14-15)
-          # FsAdrService: validate with multi-check ADR validation (CC=13), _extract_from_section with heading parsing (CC=12)
-          # pipeline_normalizers: apply_pipeline_schema_normalization with multi-field schema coercion (CC=12)
-          # quality validation internals: _validate_registry_groups_section (CC=12), _validate_owner_decomposition_targets_section (CC=11), _validate_priority_registry_burndown (CC=11), _validate_grace_window_identity_fields (CC=14), validate_exemptions_registry (CC=12)
-          # metadata_writer: _write_metadata with multi-path coordinator fallback (CC=11)
+          # Path exemptions MUST stay byte-synced with
+          # configs/quality/duplication_complexity_exemptions.yaml (xenon scope).
+          # DQ analyzers, composite orchestration, CLI formatters, runtime builders,
+          # silver storage, control-plane artifacts, quarantine, observability,
+          # quality governance, input adapters, extractor modules, tools, memory.
           xenon --max-absolute B --max-modules B --max-average A \
-            --exclude "tests/*,src/tools/*,src/memory/*,src/bioetl/infrastructure/adapters/chembl/*,src/bioetl/infrastructure/adapters/openalex/*,src/bioetl/infrastructure/adapters/semanticscholar/*,src/bioetl/infrastructure/adapters/crossref/*,src/bioetl/infrastructure/adapters/pubmed/*,src/bioetl/infrastructure/adapters/uniprot/*,src/bioetl/infrastructure/adapters/pubchem/*,src/bioetl/infrastructure/adapters/input/*,src/bioetl/application/services/dq/*,src/bioetl/application/composite/*,src/bioetl/application/pipelines/*/extractors/*,src/bioetl/interfaces/cli/*,src/bioetl/composition/runtime_builders/*,src/bioetl/composition/factories/services/*,src/bioetl/infrastructure/storage/silver/*,src/bioetl/infrastructure/control_plane/*,src/bioetl/infrastructure/quarantine/*,src/bioetl/infrastructure/observability/*,src/bioetl/infrastructure/quality/*" src
+            --exclude "tests/*,src/tools/*,src/memory/*,src/bioetl/infrastructure/adapters/input/*,src/bioetl/application/services/dq/*,src/bioetl/application/composite/*,src/bioetl/application/pipelines/*/extractors/*,src/bioetl/interfaces/cli/*,src/bioetl/composition/runtime_builders/*,src/bioetl/composition/factories/services/*,src/bioetl/infrastructure/storage/silver/*,src/bioetl/infrastructure/control_plane/*,src/bioetl/infrastructure/quarantine/*,src/bioetl/infrastructure/observability/*,src/bioetl/infrastructure/quality/*" src
 
       - name: Strict complexity check for domain layer (CC ≤ 5)
         run: |
@@ -114,37 +94,25 @@ jobs:
           with open(report_path) as f:
               data = json.load(f)
 
-          # Exempted paths (kept in sync with the xenon --exclude list above)
+          # Exempted paths (kept in sync with configs/quality/duplication_complexity_exemptions.yaml)
           EXEMPT_PATHS = {
-              "src/bioetl/infrastructure/adapters/chembl/",  # _fetch_with_filter, _fetch_batch_with_reduction (CC=11-12)
-              "src/bioetl/infrastructure/adapters/openalex/",
-              "src/bioetl/infrastructure/adapters/semanticscholar/",
-              "src/bioetl/infrastructure/adapters/crossref/",  # fetch_batch with fallback (CC=12)
-              "src/bioetl/infrastructure/adapters/pubmed/",  # fetch_filtered_with_fallback PMID→title (CC=17)
-              "src/bioetl/infrastructure/adapters/uniprot/",  # _fetch_results with pagination and retry (CC=13)
-              "src/bioetl/infrastructure/adapters/input/",  # load_filter_with_fallback DOI→title mapping (CC=12)
-              "src/bioetl/infrastructure/adapters/pubchem/",  # fetch_by_inchikey multi-step resolution (CC=11)
-              "src/bioetl/application/services/dq/",  # DQ analyzers with multiple validation checks
-              "src/bioetl/application/composite/",  # Merger with field conflict resolution
-              "src/bioetl/application/pipelines/",  # Extractors with complex parsing logic (CC=11-12)
-              "src/bioetl/interfaces/cli/",  # CLI formatters with presentation logic (CC=11)
-              "src/bioetl/composition/runtime_builders/",  # normalize_snapshot with multi-field extraction (CC=13)
-              "src/bioetl/composition/factories/services/",  # extract_gold_schema_policy_by_version with version dispatch (CC=14)
-              "src/bioetl/infrastructure/storage/silver/",  # _coerce_silver_metadata_write_request with multi-path coercion (CC=14)
-              "src/bioetl/infrastructure/control_plane/",  # _load_fragment_ids, _artifact_id with multi-step resolution (CC=11-14)
-              "src/bioetl/infrastructure/quarantine/",  # _normalize_filtered_row with multi-field normalization (CC=11)
-              "src/bioetl/infrastructure/observability/",  # normalize_metric_dispatch_labels with label policies (CC=12)
-              "src/bioetl/infrastructure/quality/",  # _classify_task, select_symbol_location with debt classification (CC=11-15)
-              "src/memory/",  # Graph sync, validation, RAG chunking with complex multi-branch logic (CC=11-18)
-              "src/tools/",  # Utility scripts with complex reporting logic
-              "src/memory/",  # Memory graph importers with complex record iteration (CC=12-13)
+              "src/tools/",
+              "src/memory/",
+              "src/bioetl/infrastructure/adapters/input/",
+              "src/bioetl/application/services/dq/",
+              "src/bioetl/application/composite/",
+              "src/bioetl/application/pipelines/",
+              "src/bioetl/interfaces/cli/",
+              "src/bioetl/composition/runtime_builders/",
+              "src/bioetl/composition/factories/services/",
+              "src/bioetl/infrastructure/storage/silver/",
+              "src/bioetl/infrastructure/control_plane/",
+              "src/bioetl/infrastructure/quarantine/",
+              "src/bioetl/infrastructure/observability/",
+              "src/bioetl/infrastructure/quality/",
           }
 
-          # Exempted files (specific files with justified complexity)
-          EXEMPT_FILES = {
-          }
-
-          # Exempted functions (with documented reasons)
+          # Exempted functions (with documented reasons; registry function_entries)
           EXEMPT_FUNCTIONS = {
               "fetch_filtered_with_fallback": 25,  # DOI→title fallback with batch processing
               "_request_with_retry": 20,  # HTTP retry logic with circuit breaker
@@ -159,9 +127,6 @@ jobs:
                   continue
               # Skip exempted paths
               if any(filepath.startswith(exempt) for exempt in EXEMPT_PATHS):
-                  continue
-              # Skip exempted files
-              if filepath in EXEMPT_FILES:
                   continue
               for func in functions:
                   cc = func.get("complexity", 0)

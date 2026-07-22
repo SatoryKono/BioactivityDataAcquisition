@@ -12,8 +12,6 @@ from bioetl.application.core import _base_transformer_structural_support  # noqa
 pytestmark = pytest.mark.unit
 
 from bioetl.application.core._base_transformer_structural_support import (
-    apply_silver_filter,
-    apply_structural_policy,
     classify_structural_action,
     classify_structural_shadow_comparison,
     evaluate_semantic_shadow_decision,

@@ -63,27 +63,28 @@ class AnchorSpec:
         implementation_status: str | None = None,
     ) -> None:
         """Initialize canonical specs while accepting legacy HTTP contract names."""
-        resolved_missing_severity = missing_severity or implementation_status
-        if resolved_missing_severity == "SHIPPED":
-            resolved_missing_severity = "INFO"
-        values = {
-            "priority": priority,
-            "name": name or anchor_name,
-            "label": label or display_name,
-            "source": source or source_location,
-            "value_format": value_format or data_type,
-            "why": why or description,
-            "rendering": rendering or display_mode,
-            "copy": copy if copy is not None else is_identifier,
-            "drilldown": drilldown or usage_locations,
-            "missing_severity": resolved_missing_severity,
-        }
-        missing = [key for key, value in values.items() if value is None]
-        if missing:
-            fields = ", ".join(missing)
-            raise TypeError(f"missing required AnchorSpec fields: {fields}")
-        for field_name, value in values.items():
-            object.__setattr__(self, field_name, value)
+        values = _resolve_anchor_spec_values(
+            priority=priority,
+            name=name,
+            label=label,
+            source=source,
+            value_format=value_format,
+            why=why,
+            rendering=rendering,
+            copy=copy,
+            drilldown=drilldown,
+            missing_severity=missing_severity,
+            anchor_name=anchor_name,
+            display_name=display_name,
+            source_location=source_location,
+            data_type=data_type,
+            description=description,
+            display_mode=display_mode,
+            is_identifier=is_identifier,
+            usage_locations=usage_locations,
+            implementation_status=implementation_status,
+        )
+        _apply_anchor_spec_values(self, values)
 
     @property
     def anchor_name(self) -> str:
@@ -133,6 +134,72 @@ class AnchorSpec:
         if self.missing_severity == "WARNING":
             return "DEGRADED"
         return self.missing_severity
+
+
+def _coalesce[T](primary: T | None, legacy: T | None) -> T | None:
+    """Prefer the canonical field, then the legacy alias."""
+    return primary if primary is not None else legacy
+
+
+def _resolve_missing_severity(
+    missing_severity: str | None,
+    implementation_status: str | None,
+) -> str | None:
+    resolved = _coalesce(missing_severity, implementation_status)
+    if resolved == "SHIPPED":
+        return "INFO"
+    return resolved
+
+
+def _resolve_anchor_spec_values(
+    *,
+    priority: str,
+    name: str | None,
+    label: str | None,
+    source: str | None,
+    value_format: str | None,
+    why: str | None,
+    rendering: str | None,
+    copy: bool | None,
+    drilldown: str | None,
+    missing_severity: str | None,
+    anchor_name: str | None,
+    display_name: str | None,
+    source_location: str | None,
+    data_type: str | None,
+    description: str | None,
+    display_mode: str | None,
+    is_identifier: bool | None,
+    usage_locations: str | None,
+    implementation_status: str | None,
+) -> dict[str, object]:
+    return {
+        "priority": priority,
+        "name": _coalesce(name, anchor_name),
+        "label": _coalesce(label, display_name),
+        "source": _coalesce(source, source_location),
+        "value_format": _coalesce(value_format, data_type),
+        "why": _coalesce(why, description),
+        "rendering": _coalesce(rendering, display_mode),
+        "copy": _coalesce(copy, is_identifier),
+        "drilldown": _coalesce(drilldown, usage_locations),
+        "missing_severity": _resolve_missing_severity(
+            missing_severity,
+            implementation_status,
+        ),
+    }
+
+
+def _apply_anchor_spec_values(
+    instance: AnchorSpec,
+    values: dict[str, object],
+) -> None:
+    missing = [key for key, value in values.items() if value is None]
+    if missing:
+        fields = ", ".join(missing)
+        raise TypeError(f"missing required AnchorSpec fields: {fields}")
+    for field_name, value in values.items():
+        object.__setattr__(instance, field_name, value)
 
 
 @dataclass(frozen=True, slots=True)

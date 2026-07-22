@@ -14,7 +14,7 @@ from bioetl.composition.runtime_builders import (
 from bioetl.composition.runtime_builders.effective_config_artifact_builder import (
     create_and_persist_composite_effective_config_artifact,
 )
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import RunID
 from bioetl.infrastructure.config._base import PipelineSettings, Settings
 from bioetl.infrastructure.config._pipeline_settings import ControlPlaneSettings
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger

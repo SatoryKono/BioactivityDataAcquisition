@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from unittest.mock import MagicMock
 
 import pytest
@@ -11,7 +11,6 @@ from bioetl.application.services.lineage.metadata_lineage_node_builders import (
     build_fragment_id,
     build_semantic_fragment_id,
     bronze_batch_node_from_input,
-    bronze_batch_nodes_for_silver,
     dedupe_nodes,
     fragment_timestamp,
     gold_dataset_node,
@@ -44,8 +43,8 @@ class TestFragmentTimestamp:
 
     def test_fragment_timestamp_first_non_none(self):
         """Test that first non-None timestamp is returned."""
-        dt1 = datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
-        dt2 = datetime(2026, 1, 2, 12, 0, 0, tzinfo=timezone.utc)
+        dt1 = datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC)
+        dt2 = datetime(2026, 1, 2, 12, 0, 0, tzinfo=UTC)
         result = fragment_timestamp(dt1, dt2, None)
         assert result == dt1
 
@@ -93,7 +92,7 @@ class TestBuildSemanticFragmentId:
             target=node2,
             run_id="123",
             manifest_id="manifest-1",
-            created_at=datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
+            created_at=datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC),
             attributes={},
         )
 
@@ -154,7 +153,7 @@ class TestRunNode:
             provider="chembl",
             entity="activity",
             run_type=RunType.INCREMENTAL,
-            started_at=datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
+            started_at=datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC),
             execution_fingerprint="abc123",
             config_hash="hash1",
             resolved_config_hash="hash2",
@@ -191,7 +190,7 @@ class TestManifestNode:
             provider="chembl",
             entity="activity",
             run_type=RunType.INCREMENTAL,
-            started_at=datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
+            started_at=datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC),
             execution_fingerprint="abc123",
             config_hash="hash1",
             resolved_config_hash="hash2",
@@ -221,7 +220,7 @@ class TestManifestNode:
             provider="chembl",
             entity="activity",
             run_type=RunType.INCREMENTAL,
-            started_at=datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
+            started_at=datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC),
             execution_fingerprint="abc123",
             config_hash="hash1",
             resolved_config_hash="hash2",
@@ -252,7 +251,7 @@ class TestManifestEdges:
             provider="chembl",
             entity="activity",
             run_type=RunType.INCREMENTAL,
-            started_at=datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
+            started_at=datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC),
             execution_fingerprint="abc123",
             config_hash="hash1",
             resolved_config_hash="hash2",
@@ -277,7 +276,7 @@ class TestManifestEdges:
             label="test_pipeline",
             attributes={},
         )
-        created_at = datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+        created_at = datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC)
 
         result = manifest_edges(
             manifest=manifest_node_ref,
@@ -300,7 +299,7 @@ class TestManifestEdges:
             provider="chembl",
             entity="activity",
             run_type=RunType.INCREMENTAL,
-            started_at=datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
+            started_at=datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC),
             execution_fingerprint="abc123",
             config_hash="hash1",
             resolved_config_hash="hash2",
@@ -319,7 +318,7 @@ class TestManifestEdges:
             label="test_pipeline",
             attributes={},
         )
-        created_at = datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+        created_at = datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC)
 
         result = manifest_edges(
             manifest=None,
@@ -343,7 +342,7 @@ class TestSourceSystemNode:
             provider="chembl",
             entity="activity",
             run_type=RunType.INCREMENTAL,
-            started_at=datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
+            started_at=datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC),
             execution_fingerprint="abc123",
             config_hash="hash1",
             resolved_config_hash="hash2",
@@ -379,7 +378,7 @@ class TestSourceRequestNode:
             provider="chembl",
             entity="activity",
             run_type=RunType.INCREMENTAL,
-            started_at=datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
+            started_at=datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC),
             execution_fingerprint="abc123",
             config_hash="hash1",
             resolved_config_hash="hash2",
@@ -413,7 +412,7 @@ class TestBronzeBatchNodeFromInput:
             provider="chembl",
             entity="activity",
             run_type=RunType.INCREMENTAL,
-            started_at=datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
+            started_at=datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC),
             execution_fingerprint="abc123",
             config_hash="hash1",
             resolved_config_hash="hash2",
@@ -456,7 +455,7 @@ class TestSilverDatasetNode:
             provider="chembl",
             entity="activity",
             run_type=RunType.INCREMENTAL,
-            started_at=datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
+            started_at=datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC),
             execution_fingerprint="abc123",
             config_hash="hash1",
             resolved_config_hash="hash2",
@@ -493,7 +492,7 @@ class TestGoldDatasetNode:
             provider="chembl",
             entity="activity",
             run_type=RunType.INCREMENTAL,
-            started_at=datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
+            started_at=datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC),
             execution_fingerprint="abc123",
             config_hash="hash1",
             resolved_config_hash="hash2",
@@ -558,7 +557,7 @@ class TestTransformNodes:
             provider="chembl",
             entity="activity",
             run_type=RunType.INCREMENTAL,
-            started_at=datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
+            started_at=datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC),
             execution_fingerprint="abc123",
             config_hash="hash1",
             resolved_config_hash="hash2",
@@ -594,7 +593,7 @@ class TestTransformEdges:
             provider="chembl",
             entity="activity",
             run_type=RunType.INCREMENTAL,
-            started_at=datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
+            started_at=datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC),
             execution_fingerprint="abc123",
             config_hash="hash1",
             resolved_config_hash="hash2",
@@ -625,7 +624,7 @@ class TestTransformEdges:
             label="step2",
             attributes={},
         )
-        created_at = datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+        created_at = datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC)
 
         result = transform_edges(
             run_context=run_context,
@@ -658,7 +657,7 @@ class TestResolveTransformMetadata:
             provider="chembl",
             entity="activity",
             run_type=RunType.INCREMENTAL,
-            started_at=datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
+            started_at=datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC),
             execution_fingerprint="abc123",
             config_hash="hash1",
             resolved_config_hash="hash2",

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-# ruff: noqa: F403,F405
+# ruff: noqa: F403
 from tests.unit.application.core.normalization_test_support import *
 
 

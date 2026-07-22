@@ -17,7 +17,7 @@ from bioetl.domain.types import RunType
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
-# ruff: noqa: F403,F405
+# ruff: noqa: F403
 from tests.unit.application.core.normalization_test_support import *
 
 

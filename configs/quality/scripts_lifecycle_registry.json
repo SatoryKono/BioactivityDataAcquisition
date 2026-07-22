@@ -128,6 +128,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the Windows-side companion for the canonical Docker MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
     },
+    "scripts/ai/mcp/mcp_dockerhub_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows-side companion for the canonical DockerHub MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
+    },
     "scripts/ai/mcp/mcp_dockerhub_wrapper.sh": {
       "owner": "@bioetl-platform",
       "decision": "mcp_compatibility_wrapper",

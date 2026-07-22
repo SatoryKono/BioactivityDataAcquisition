@@ -106,7 +106,9 @@ log_test.txt
 /reports/*
 !/reports/semantic_pipeline_audit/
 /reports/semantic_pipeline_audit/*
-!/reports/semantic_pipeline_audit/*_2026-05-15.*
+# Track the reviewed canonical semantic audit snapshot used by CI gates and
+# configs/field_registry/semantic_* authority + budget surfaces.
+!/reports/semantic_pipeline_audit/*_2026-07-01.*
 !/reports/review/
 !/reports/review/**
 !/reports/quality/

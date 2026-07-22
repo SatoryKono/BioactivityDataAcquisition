@@ -11,7 +11,7 @@ def mounted_worktree_skip_reason() -> str | None:
         return "Skipped on Windows due to filesystem performance"
 
     try:
-        with open("/proc/version", "r", encoding="utf-8") as handle:
+        with open("/proc/version", encoding="utf-8") as handle:
             if "microsoft" in handle.read().lower():
                 return "Skipped on WSL due to filesystem performance"
     except OSError:

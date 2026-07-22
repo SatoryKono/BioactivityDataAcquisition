@@ -177,6 +177,46 @@ class PubMedAdapter(
             await self._http_client.__aexit__(None, None, None)
 
 
+def _resolve_pubmed_email(
+    settings: Settings | None,
+    kwargs: dict[str, Any],
+) -> object | None:
+    """Resolve PubMed contact email from kwargs or settings."""
+    email = kwargs.get("email")
+    if email or settings is None:
+        return email
+    return getattr(settings, "default_email", None)
+
+
+def _resolve_pubmed_api_key(
+    settings: Settings | None,
+    kwargs: dict[str, Any],
+) -> object | None:
+    """Resolve PubMed API key from kwargs or settings secrets."""
+    api_key = kwargs.get("api_key")
+    if api_key or settings is None or not hasattr(settings, "pubmed_api_key"):
+        return api_key
+    pubmed_key = settings.pubmed_api_key
+    if not pubmed_key:
+        return None
+    return pubmed_key.get_secret_value()
+
+
+def _require_pubmed_runtime(
+    http_client: UnifiedHTTPClient | None,
+    logger: LoggerPort | None,
+    kwargs: dict[str, Any],
+) -> tuple[UnifiedHTTPClient, LoggerPort]:
+    """Validate required PubMed runtime dependencies."""
+    if http_client is None:
+        raise ValueError("PubMed adapter requires http_client")
+    if logger is None:
+        raise ValueError("PubMed adapter requires logger")
+    if "fallback_fetch_service" not in kwargs:
+        raise ValueError("PubMed adapter requires fallback_fetch_service")
+    return http_client, logger
+
+
 def _create_pubmed_adapter(
     http_client: UnifiedHTTPClient | None,
     logger: LoggerPort | None,
@@ -201,28 +241,18 @@ def _create_pubmed_adapter(
     Raises:
         ValueError: If email, http_client, or logger not provided.
     """
-    email = kwargs.get("email")
-    if not email and settings:
-        email = getattr(settings, "default_email", None)
+    email = _resolve_pubmed_email(settings, kwargs)
     if not email:
         raise ValueError("PubMed adapter requires email")
-
-    api_key = kwargs.get("api_key")
-    if not api_key and settings and hasattr(settings, "pubmed_api_key"):
-        pubmed_key = settings.pubmed_api_key
-        if pubmed_key:
-            api_key = pubmed_key.get_secret_value()
-
-    if http_client is None:
-        raise ValueError("PubMed adapter requires http_client")
-    if logger is None:
-        raise ValueError("PubMed adapter requires logger")
-    if "fallback_fetch_service" not in kwargs:
-        raise ValueError("PubMed adapter requires fallback_fetch_service")
-
+    api_key = _resolve_pubmed_api_key(settings, kwargs)
+    resolved_http_client, resolved_logger = _require_pubmed_runtime(
+        http_client,
+        logger,
+        kwargs,
+    )
     return PubMedAdapter(
-        http_client=http_client,
-        logger=logger,
+        http_client=resolved_http_client,
+        logger=resolved_logger,
         email=email,
         api_key=api_key,
         batch_size=kwargs.get("batch_size", 200),

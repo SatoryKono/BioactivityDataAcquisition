@@ -66,4 +66,4 @@ def test_factory_root_unknown_attribute_raises_attribute_error() -> None:
     import bioetl.composition.factories as factories_pkg
 
     with pytest.raises(AttributeError, match="has no attribute"):
-        getattr(factories_pkg, "not_in_factory_exports")
+        factories_pkg.not_in_factory_exports

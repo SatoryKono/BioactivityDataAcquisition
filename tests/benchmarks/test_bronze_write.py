@@ -5,7 +5,6 @@ Measures JSONL + zstd compression throughput.
 
 import asyncio
 import json
-import os
 import sys
 from collections.abc import Iterator
 from datetime import UTC, datetime
