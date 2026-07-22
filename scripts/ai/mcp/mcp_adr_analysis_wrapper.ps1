@@ -26,7 +26,10 @@ if (-not $env:NPM_CONFIG_CACHE) {
 }
 # tree-sitter-* native modules frequently fail to build on Node 25 + older MSVC.
 # The server supports reduced mode without them (README offline/native fallback).
-$env:npm_config_ignore_scripts = "true"
+# Match bash wrapper: only default to true when the operator has not set a value.
+if (-not $env:npm_config_ignore_scripts) {
+    $env:npm_config_ignore_scripts = "true"
+}
 
 Exit-McpValidateOnly -ServerName "adr-analysis"
 
