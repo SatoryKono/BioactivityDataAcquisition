@@ -6,6 +6,7 @@ BASE_COMMIT="${CODERABBIT_BASE_COMMIT:-}"
 RUN_CODERABBIT_ONLY=0
 LOG_DIR="${CODERABBIT_REVIEW_LOG_DIR:-/tmp/coderabbit-reviews}"
 TOPIC="${1:-all}"
+shift || true
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
 
@@ -41,6 +42,11 @@ run_cmd() {
 
 ensure_base() {
   if [[ -n "$BASE_COMMIT" ]]; then
+    local base_ref
+    base_ref="$(git -C "$ROOT_DIR" rev-parse -q --verify "$BASE_COMMIT^{commit}" 2>/dev/null || true)"
+    if [[ -n "$base_ref" ]]; then
+      BASE_COMMIT="$base_ref"
+    fi
     return
   fi
 
@@ -72,7 +78,7 @@ run_coderabbit() {
   local log_file="$LOG_DIR/coderabbit-${TOPIC}-$(date +%Y%m%d-%H%M%S).log"
 
   run_cmd "CodeRabbit auth/login" coderabbit auth login --api-key "$CODERABBIT_API_KEY"
-  run_cmd "CodeRabbit review against $BASE_COMMIT" coderabbit review --base-commit="$BASE_COMMIT" --plain | tee "$log_file"
+  run_cmd "CodeRabbit review against $BASE_COMMIT" coderabbit review --base-commit="$BASE_COMMIT" | tee "$log_file"
 }
 
 review_architecture() {
@@ -138,22 +144,31 @@ if [[ "$TOPIC" == "-h" || "$TOPIC" == "--help" ]]; then
   exit 0
 fi
 
-shift_counted=0
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --coderabbit-only)
       RUN_CODERABBIT_ONLY=1
       ;;
     --base)
+      if [[ $# -lt 2 ]]; then
+        echo "[ERROR] --base requires argument"
+        usage
+        exit 1
+      fi
       BASE_COMMIT="$2"
-      shift_counted=1
+      shift
       ;;
     --base=*)
       BASE_COMMIT="${1#*=}"
       ;;
     --log-dir)
+      if [[ $# -lt 2 ]]; then
+        echo "[ERROR] --log-dir requires argument"
+        usage
+        exit 1
+      fi
       LOG_DIR="$2"
-      shift_counted=1
+      shift
       ;;
     --log-dir=*)
       LOG_DIR="${1#*=}"
@@ -165,10 +180,6 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
   shift
-  if [[ $shift_counted -eq 1 ]]; then
-    shift_counted=0
-    shift
-  fi
 done
 
 ensure_base
