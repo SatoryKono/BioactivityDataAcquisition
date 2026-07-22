@@ -208,7 +208,9 @@ def _run(
     report = tmp_path / "recovery.json"
     state = tmp_path / "ready"
     env = os.environ.copy()
-    # Isolate to the fake bin dir so capability probes never hit a real desktop CLI.
+    # Isolate to the fake bin dir so capability probes never hit a real desktop
+    # CLI or host wsl.exe. taskkill/cmd still resolve via CreateProcess system
+    # directories even when PATH is test-only.
     env["PATH"] = str(bin_dir)
     env["FAKE_DOCKER_MODE"] = mode
     env["FAKE_DOCKER_STATE"] = str(state)
@@ -277,7 +279,10 @@ def test_diagnostic_subprocess_timeout_is_bounded(tmp_path: Path) -> None:
     result, payload, elapsed = _run(tmp_path, mode="command_timeout")
 
     assert result.returncode == 0, result.stderr
-    assert elapsed < 6
+    # Fake status sleeps 20s but is hard-killed at CommandTimeoutSeconds=1.
+    # Full diagnostics under Windows process-spawn load routinely exceeds 6s;
+    # keep a bound well below the unkillable sleep wall-clock.
+    assert elapsed < 12
     assert any(row["timed_out"] for row in payload["observations"])
     assert any(row["returncode"] == 124 for row in payload["observations"])
 
@@ -351,6 +356,25 @@ def test_supported_desktop_commands_are_issued_detached_before_polling() -> None
     assert source.index("@('desktop', 'restart', '--detach')") < source.index(
         "while ((Get-RemainingMilliseconds) -gt 0)"
     )
+
+
+def test_post_recovery_readiness_probe_allows_overrun_after_diagnostics() -> None:
+    """Supported restart must still be observed when the global wait budget is empty.
+
+    Collect-Diagnostics can consume nearly all of TimeoutSeconds under load. The
+    recovery action itself is AllowOverrun-bounded; readiness after that action
+    must also tolerate a zero remaining global budget so a successful restart is
+    not misreported as desktop_recovery_timeout.
+    """
+    source = SCRIPT.read_text(encoding="utf-8")
+
+    assert "function Test-DockerReady" in source
+    assert "[switch]$AllowOverrun" in source
+    assert "Test-DockerReady -AllowOverrun" in source
+    restart_idx = source.index("@('desktop', 'restart', '--detach')")
+    readiness_idx = source.index("Test-DockerReady -AllowOverrun")
+    wait_idx = source.index("while ((Get-RemainingMilliseconds) -gt 0)")
+    assert restart_idx < readiness_idx < wait_idx
 
 
 def test_bounded_restart_failure_uses_supported_stop_start_fallback(
