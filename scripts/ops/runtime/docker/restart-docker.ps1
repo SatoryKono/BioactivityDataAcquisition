@@ -274,14 +274,24 @@ function Invoke-BoundedCommand {
 }
 
 function Test-DockerReady {
-    $Row = Invoke-BoundedCommand 'docker' @('info', '--format', '{{json .ServerVersion}}')
+    param(
+        # Post-action readiness must still be observable after Collect-Diagnostics
+        # has nearly exhausted the global TimeoutSeconds window; otherwise a
+        # successful desktop restart that already flipped readiness is reported
+        # as a timeout solely because the wait budget is empty.
+        [switch]$AllowOverrun
+    )
+
+    $Row = Invoke-BoundedCommand 'docker' @('info', '--format', '{{json .ServerVersion}}') -AllowOverrun:$AllowOverrun
     return (($Row.returncode -eq 0) -and -not $Row.timed_out)
 }
 
 function Test-DesktopCapability {
     param([Parameter(Mandatory)] [string]$Command)
 
-    $Row = Invoke-BoundedCommand 'docker' @('desktop', $Command, '--help')
+    # Capability probes are metadata-only and must not be starved by the
+    # global recovery wait budget consumed during Collect-Diagnostics.
+    $Row = Invoke-BoundedCommand 'docker' @('desktop', $Command, '--help') -AllowOverrun
     return (($Row.returncode -eq 0) -and -not $Row.timed_out)
 }
 
@@ -316,6 +326,10 @@ function Get-CliOrigins {
 }
 
 function Collect-Diagnostics {
+    # Diagnostics are evidence collection, not the recovery wait. Always honor
+    # CommandTimeoutSeconds per probe even when the global TimeoutSeconds budget
+    # is already low; otherwise mid-suite probes starve and restart/start look
+    # "unavailable" or readiness never sees a successful action.
     $Capabilities = [ordered]@{}
     $DesktopRows = [ordered]@{}
     foreach ($DesktopCommand in @('status', 'restart', 'stop', 'start', 'logs', 'diagnose')) {
@@ -323,7 +337,7 @@ function Collect-Diagnostics {
     }
     foreach ($DesktopCommand in @('status', 'logs', 'diagnose')) {
         if ($Capabilities[$DesktopCommand]) {
-            $DesktopRows[$DesktopCommand] = Invoke-BoundedCommand 'docker' @('desktop', $DesktopCommand)
+            $DesktopRows[$DesktopCommand] = Invoke-BoundedCommand 'docker' @('desktop', $DesktopCommand) -AllowOverrun
         } else {
             $DesktopRows[$DesktopCommand] = [ordered]@{ returncode = 127; timed_out = $false; output = 'unsupported' }
         }
@@ -334,23 +348,23 @@ function Collect-Diagnostics {
         status_returncode = $DesktopRows.status.returncode
     }
 
-    $Version = Invoke-BoundedCommand 'docker' @('version', '--format', '{{json .}}')
-    $Info = Invoke-BoundedCommand 'docker' @('info', '--format', '{{json .}}')
-    $ContextShow = Invoke-BoundedCommand 'docker' @('context', 'show')
-    $ContextList = Invoke-BoundedCommand 'docker' @('context', 'ls', '--format', '{{json .}}')
-    $Compose = Invoke-BoundedCommand 'docker' @('compose', 'ls', '--all', '--format', 'json')
-    $Containers = Invoke-BoundedCommand 'docker' @('ps', '--all', '--format', '{{json .}}')
+    $Version = Invoke-BoundedCommand 'docker' @('version', '--format', '{{json .}}') -AllowOverrun
+    $Info = Invoke-BoundedCommand 'docker' @('info', '--format', '{{json .}}') -AllowOverrun
+    $ContextShow = Invoke-BoundedCommand 'docker' @('context', 'show') -AllowOverrun
+    $ContextList = Invoke-BoundedCommand 'docker' @('context', 'ls', '--format', '{{json .}}') -AllowOverrun
+    $Compose = Invoke-BoundedCommand 'docker' @('compose', 'ls', '--all', '--format', 'json') -AllowOverrun
+    $Containers = Invoke-BoundedCommand 'docker' @('ps', '--all', '--format', '{{json .}}') -AllowOverrun
     $Mounts = Invoke-BoundedCommand 'docker' @('inspect', '--format', '{{range .Mounts}}{{printf "%s|%s|%s\\n" .Type .Source .Destination}}{{end}}', $(
         @((ConvertFrom-JsonLines $Containers.output) | ForEach-Object { $_.ID } | Where-Object { $_ } | Select-Object -First 200)
-    ))
-    $DiskUsage = Invoke-BoundedCommand 'docker' @('system', 'df', '--format', '{{json .}}')
+    )) -AllowOverrun
+    $DiskUsage = Invoke-BoundedCommand 'docker' @('system', 'df', '--format', '{{json .}}') -AllowOverrun
 
     $LocalEngine = $null
     if (
         -not [string]::IsNullOrWhiteSpace($env:WSL_DISTRO_NAME) -and
         (Get-Command systemctl -ErrorAction SilentlyContinue)
     ) {
-        $LocalEngine = Invoke-BoundedCommand 'systemctl' @('is-active', 'docker')
+        $LocalEngine = Invoke-BoundedCommand 'systemctl' @('is-active', 'docker') -AllowOverrun
     }
 
     $CliOrigins = @(Get-CliOrigins)
@@ -395,9 +409,9 @@ function Collect-Diagnostics {
         (($WslResolved -ne 'wsl.exe') -and (Test-Path -LiteralPath $WslResolved))
     )
     if ($WslAvailable) {
-        $WslStatus = Invoke-BoundedCommand 'wsl.exe' @('--status')
-        $WslList = Invoke-BoundedCommand 'wsl.exe' @('--list', '--verbose')
-        $DockerDataDf = Invoke-BoundedCommand 'wsl.exe' @('-d', 'docker-desktop', '--exec', 'df', '-B1', '/var/lib/docker')
+        $WslStatus = Invoke-BoundedCommand 'wsl.exe' @('--status') -AllowOverrun
+        $WslList = Invoke-BoundedCommand 'wsl.exe' @('--list', '--verbose') -AllowOverrun
+        $DockerDataDf = Invoke-BoundedCommand 'wsl.exe' @('-d', 'docker-desktop', '--exec', 'df', '-B1', '/var/lib/docker') -AllowOverrun
         $WslText = @($WslStatus.output, $WslList.output) -join "`n"
         $Diagnostics.wsl_integration = [ordered]@{
             classification = if ($WslList.returncode -ne 0) { 'query_failed' } elseif ($WslText -match '(?i)docker-desktop') { 'docker_desktop_distribution_present' } else { 'docker_desktop_distribution_not_detected' }
@@ -561,6 +575,15 @@ if ($RestartSupported) {
 } else {
     Write-RecoveryReport 'desktop_cli_unavailable' $false $Actions
     throw 'Docker Desktop CLI restart/start is unavailable; no unbounded launcher was invoked.'
+}
+
+# Always attempt at least one readiness probe after a supported recovery action,
+# even when diagnostics consumed the global wait budget. The action itself is
+# bounded; a zero remaining budget must not hide a successful restart.
+if (Test-DockerReady -AllowOverrun) {
+    Write-RecoveryReport 'none' $true $Actions
+    Write-Output 'Docker daemon recovered within the bounded deadline'
+    exit 0
 }
 
 while ((Get-RemainingMilliseconds) -gt 0) {
