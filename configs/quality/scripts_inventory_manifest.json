@@ -1,18 +1,17 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-22T06:35:35.322142+00:00",
+  "generated_at": "2026-07-22T06:37:11.207285+00:00",
   "summary": {
     "total_scripts": 502,
     "status_counts": {
       "active": 345,
-      "orphan": 1,
-      "supporting": 156
+      "supporting": 157
     },
     "reference_group_coverage": {
       "agents": 5,
       "build": 11,
       "ci": 65,
-      "docs": 204,
+      "docs": 205,
       "other": 33,
       "scripts": 389,
       "skills": 16,
@@ -14934,10 +14933,21 @@
     {
       "path": "scripts/ops/run-coderabbit-reviews.sh",
       "type": "sh",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "docs/03-guides/development/coderabbit-local-reviews.md",
+          "line": 7,
+          "source_group": "docs",
+          "text": "- `scripts/ops/run-coderabbit-reviews.sh` — bounded manual launcher for sequential"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded manual CodeRabbit review launcher; keep it supporting unless promoted to a governed CI-only review workflow."
     },
     {
       "path": "scripts/ops/runtime/deploy/deploy-bioetl.sh",

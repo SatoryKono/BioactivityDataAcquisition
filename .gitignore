@@ -454,3 +454,6 @@ data/2026-07-03_20-21-59.gif
 
 # Grok machine-local MCP (absolute Windows paths)
 .grok/config.toml
+
+# Local-only agent scratch (not CI source)
+_local_only_mcp/
