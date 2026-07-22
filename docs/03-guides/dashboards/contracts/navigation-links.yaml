@@ -21,9 +21,6 @@ required_top_level_links_by_uid:
     - 4. Data Quality
     - 5. Workflow
     - 6. Alerts & SLO
-    - Explore Logs
-    - Explore Traces
-    - Silver Reject Explorer
   bioetl-runtime:
     - 0. Control Plane
     - 1. Overview
@@ -31,9 +28,6 @@ required_top_level_links_by_uid:
     - 4. Data Quality
     - 5. Workflow
     - 6. Alerts & SLO
-    - Explore Logs
-    - Explore Traces
-    - Silver Reject Explorer
   bioetl-control-plane-v1:
     - 1. Overview
     - 2. Runtime
@@ -41,9 +35,6 @@ required_top_level_links_by_uid:
     - 4. Data Quality
     - 5. Workflow
     - 6. Alerts & SLO
-    - Explore Logs
-    - Explore Traces
-    - Silver Reject Explorer
   bioetl-provider-health-v2:
     - 0. Control Plane
     - 1. Overview
@@ -51,9 +42,6 @@ required_top_level_links_by_uid:
     - 4. Data Quality
     - 5. Workflow
     - 6. Alerts & SLO
-    - Explore Logs
-    - Explore Traces
-    - Silver Reject Explorer
   bioetl-dq-v2:
     - 0. Control Plane
     - 1. Overview
@@ -61,9 +49,6 @@ required_top_level_links_by_uid:
     - 3. Provider Health
     - 5. Workflow
     - 6. Alerts & SLO
-    - Silver Reject Explorer
-    - Explore Logs
-    - Explore Traces
   bioetl-silver-reject-explorer:
     - 0. Control Plane
     - 1. Overview
@@ -72,8 +57,6 @@ required_top_level_links_by_uid:
     - 4. Data Quality
     - 5. Workflow
     - 6. Alerts & SLO
-    - Explore Logs
-    - Explore Traces
   bioetl-alerts-slo:
     - 0. Control Plane
     - 1. Overview
@@ -81,9 +64,6 @@ required_top_level_links_by_uid:
     - 3. Provider Health
     - 4. Data Quality
     - 5. Workflow
-    - Explore Logs
-    - Explore Traces
-    - Silver Reject Explorer
   bioetl-workflow-overview:
     - 0. Control Plane
     - 1. Overview
@@ -91,9 +71,6 @@ required_top_level_links_by_uid:
     - 3. Provider Health
     - 4. Data Quality
     - 6. Alerts & SLO
-    - Explore Logs
-    - Explore Traces
-    - Silver Reject Explorer
 top_level_link_priority_by_uid:
   bioetl-overview-v2:
     - title: 2. Runtime

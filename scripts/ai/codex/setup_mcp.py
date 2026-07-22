@@ -275,6 +275,9 @@ def _canonical_servers(
         "deepwiki": _http_server("https://mcp.deepwiki.com/mcp"),
         "ref": _http_server("https://api.ref.tools/mcp"),
     }
+    servers["ref"]["env_http_headers"] = {
+        "x-ref-api-key": REF_API_KEY_ENV_VAR,
+    }
 
     # Preserve the committed config shape where the GitHub wrapper receives npm cache.
     servers["github"]["env"] = {"NPM_CONFIG_CACHE": npm_cache_dir}
@@ -293,9 +296,6 @@ def _canonical_servers(
 def _codex_runtime_servers(workspace_root: Path) -> dict[str, dict[str, Any]]:
     """Return local Codex servers with secret values referenced by env name."""
     servers = deepcopy(_canonical_servers(workspace_root))
-    servers["ref"]["env_http_headers"] = {
-        "x-ref-api-key": REF_API_KEY_ENV_VAR,
-    }
     _add_startup_timeouts(servers)
 
     return servers

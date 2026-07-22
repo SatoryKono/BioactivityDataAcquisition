@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 
 def test_load_semanticscholar_replay_payload__delegates_to_replay_registry(
     monkeypatch: pytest.MonkeyPatch,
