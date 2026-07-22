@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-22T08:28:27.818164+00:00",
+  "generated_at": "2026-07-22T09:53:38.426541+00:00",
   "summary": {
     "total_scripts": 502,
     "status_counts": {
@@ -15,7 +15,7 @@
       "other": 33,
       "scripts": 389,
       "skills": 16,
-      "tests": 224
+      "tests": 225
     }
   },
   "scripts": [
@@ -14955,13 +14955,19 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "docs/03-guides/development/coderabbit-local-reviews.md",
           "line": 7,
           "source_group": "docs",
           "text": "- `scripts/ops/run-coderabbit-reviews.sh` — bounded manual launcher for sequential"
+        },
+        {
+          "path": "tests/unit/scripts/ops/test_run_coderabbit_reviews.py",
+          "line": 22,
+          "source_group": "tests",
+          "text": "SCRIPT = ROOT / \"scripts\" / \"ops\" / \"run-coderabbit-reviews.sh\""
         }
       ],
       "owner": "@bioetl-platform",

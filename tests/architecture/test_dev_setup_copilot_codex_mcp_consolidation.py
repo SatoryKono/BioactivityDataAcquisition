@@ -232,7 +232,17 @@ def test_tracked_mcp_projections_reject_workstation_paths() -> None:
 
     expected_servers = workspace_payload["mcpServers"]
     assert scripts_payload["mcpServers"] == expected_servers
-    assert devin_payload["mcpServers"] == expected_servers
+    devin_servers = devin_payload["mcpServers"]
+    assert set(devin_servers) == set(expected_servers)
+    for server_name, server_config in expected_servers.items():
+        if server_name != "ref":
+            assert devin_servers[server_name] == server_config
+    expected_devin_ref = dict(expected_servers["ref"])
+    expected_devin_ref.pop("env_http_headers")
+    expected_devin_ref["headers"] = {
+        "x-ref-api-key": "$REF_TOOL_API_KEY",
+    }
+    assert devin_servers["ref"] == expected_devin_ref
     assert set(devin_payload["mcpServers"]) == EXPECTED_MCP_SERVERS
     assert devin_payload["mcpServers"]["filesystem"]["args"][-1] == "."
     assert devin_payload["devin"]["org_id"]

@@ -348,9 +348,16 @@ def _write_devin_config(output_root: Path, workspace_root: Path) -> Path:
     else:
         existing["shell"].setdefault("setup_complete", True)
 
-    existing["mcpServers"] = deepcopy(
+    servers = deepcopy(
         _canonical_servers(workspace_root, portable_workspace_paths=True)
     )
+    ref_server = servers.get("ref")
+    if isinstance(ref_server, dict):
+        ref_server.pop("env_http_headers", None)
+        ref_server["headers"] = {
+            "x-ref-api-key": f"${REF_API_KEY_ENV_VAR}",
+        }
+    existing["mcpServers"] = servers
     _write_json(settings_path, existing)
     return settings_path
 

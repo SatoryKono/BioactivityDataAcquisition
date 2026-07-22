@@ -10,7 +10,7 @@ Audited branch: `main`
 
 Audited commit SHA: `2d46c3a69e75bf9a79094c071ec84a758f9e0289`
 
-Evidence surface SHA-256: `8aa4bd5ddff3cf166b2726fa3d94479eeebc4a082ab4c7e5422b3b1d612c073a`
+Evidence surface SHA-256: `4d40500d429425b7da8ee215ba786714b222ed8bb123867a3a0a03821982bc9b`
 
 Registry: `configs/quality/technical_debt_audit_registry.yaml`
 
@@ -22,8 +22,8 @@ artifacts.
 
 1. The reviewed quality gate snapshot is passing: architecture score `8.92`,
    `45/45` debt-governance gates passing, with no failures or warnings.
-1. Module coverage inventory contains `2,241` source modules: `1,398` fully
-   covered, `824` partially covered, `19` with no executable lines, and
+1. Module coverage inventory contains `2,244` source modules: `1,398` fully
+   covered, `824` partially covered, `22` with no executable lines, and
    zero uncovered or unmeasured modules. These are module-inventory facts, not
    a claim of complete line or branch coverage.
 1. Compatibility transition debt remains zero. The census contains `12`
@@ -41,7 +41,7 @@ artifacts.
 | --- | --- | --- |
 | Architecture score | Integral score `8.92` | `reports/quality/architecture-quality-scorecard.json` |
 | Debt gates | `45` pass, `0` fail, `0` warn | `reports/quality/debt-governance-gates.json` |
-| Module inventory | `2241` total; `1398` full; `824` partial; `19` no executable lines; `0` uncovered/unmeasured | `reports/quality/module-coverage-inventory.json` |
+| Module inventory | `2244` total; `1398` full; `824` partial; `22` no executable lines; `0` uncovered/unmeasured | `reports/quality/module-coverage-inventory.json` |
 | Test governance | `22614` functions; `2026` files; duplicate/markerless/compatibility counts all `0` | `reports/quality/test-governance-current.json` |
 | Compatibility | `12` retained entrypoints; `4` public export facades; `0` twin pairs | `reports/quality/compatibility-importer-census.json` |
 | Transition compatibility debt | Current/max count `0/0` | `configs/quality/debt_scorecard.yaml` |

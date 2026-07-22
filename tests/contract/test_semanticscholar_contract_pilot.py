@@ -10,7 +10,12 @@ import asyncio
 import pytest
 from bioetl.domain.types import JsonDict
 
-STABLE_DOI = "10.1038/s41586-020-2649-2"
+EXPECTED_DOIS = frozenset(
+    {
+        "10.1038/nature12373",
+        "10.1016/j.cell.2019.03.025",
+    }
+)
 pytestmark = pytest.mark.no_api
 
 
@@ -28,10 +33,16 @@ class TestSemanticScholarPilotContract:
         """Verify batch lookup still surfaces DOI identity metadata."""
         await asyncio.sleep(0)
         data = semanticscholar_batch_payload
-        paper = data[0]
-        external_ids = paper.get("externalIds", {})
-        assert isinstance(external_ids, dict)
-        assert external_ids.get("DOI", "").lower() == STABLE_DOI.lower()
+        observed_dois: set[str] = set()
+        for paper in data:
+            assert isinstance(paper, dict)
+            external_ids = paper.get("externalIds", {})
+            assert isinstance(external_ids, dict)
+            doi = external_ids.get("DOI")
+            assert isinstance(doi, str)
+            observed_dois.add(doi.lower())
+
+        assert observed_dois == EXPECTED_DOIS
 
     @pytest.mark.asyncio
     async def test_semantic_scholar_pilot__health_probe_shape__ffa01178(

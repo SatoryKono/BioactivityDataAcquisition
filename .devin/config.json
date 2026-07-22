@@ -174,10 +174,10 @@
     "ref": {
       "type": "http",
       "url": "https://api.ref.tools/mcp",
-      "env_http_headers": {
-        "x-ref-api-key": "REF_TOOL_API_KEY"
-      },
-      "startup_timeout_sec": 120
+      "startup_timeout_sec": 120,
+      "headers": {
+        "x-ref-api-key": "$REF_TOOL_API_KEY"
+      }
     }
   },
   "devin": {

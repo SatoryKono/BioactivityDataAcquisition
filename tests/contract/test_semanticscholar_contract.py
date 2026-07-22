@@ -64,13 +64,13 @@ class TestSemanticScholarContract:
         self,
         semanticscholar_batch_payload: list[JsonDict | None],
     ) -> None:
-        """Verify DOI batch lookup returns a paper-compatible record."""
+        """Verify DOI batch lookup returns paper-compatible records."""
         await asyncio.sleep(0)
         data = semanticscholar_batch_payload
         assert isinstance(data, list)
-        assert len(data) == 1
-        paper = data[0]
-        assert isinstance(paper, dict)
-        assert paper["paperId"]
-        assert paper["title"]
-        assert "externalIds" in paper
+        assert len(data) == 2
+        for paper in data:
+            assert isinstance(paper, dict)
+            assert paper["paperId"]
+            assert paper["title"]
+            assert "externalIds" in paper

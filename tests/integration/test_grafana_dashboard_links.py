@@ -1545,14 +1545,17 @@ def test_explore_links_use_drilldown_routes_and_time_range() -> None:
     for dashboard_path in get_dashboard_files():
         dashboard_name = dashboard_path.name
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        if dashboard.get("uid") in _DRILLDOWN_TOP_LEVEL_EXEMPT_UIDS:
+            continue
         drilldown_links = [
             link
             for link in get_dashboard_navigation_links(dashboard)
             if _is_logs_drilldown_url(link.get("url", ""))
             or _is_traces_drilldown_url(link.get("url", ""))
         ]
-        if not drilldown_links:
-            continue
+        assert drilldown_links, (
+            f"{dashboard_name} must expose Grafana Drilldown app URLs"
+        )
 
         for link in drilldown_links:
             url = link.get("url", "")

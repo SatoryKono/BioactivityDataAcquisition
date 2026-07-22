@@ -898,9 +898,10 @@ def test_control_plane_exposes_scope_preserving_explore_links() -> None:
         "Explore Traces": "grafana-exploretraces-app",
     }
     for title, route in expected_routes.items():
-        url = links_by_title.get(title, "")
-        if not url:
-            continue
+        assert title in links_by_title, (
+            f"Control Plane must define a URL for {title!r}"
+        )
+        url = links_by_title[title]
         assert route in url
         assert "from=${__from}" in url
         assert "to=${__to}" in url
