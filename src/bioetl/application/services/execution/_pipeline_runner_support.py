@@ -66,6 +66,45 @@ def _seed_gold_removals_from_metrics(
         )
 
 
+def _result_duration_seconds(result: RunResult) -> float | None:
+    try:
+        return result.duration_seconds
+    except Exception:
+        return None
+
+
+def _identity_from_result(
+    result: RunResult,
+    *,
+    options: RunOptions | None,
+    duration: float | None,
+) -> dict[str, Any]:  # Any: report/json payload shape is dynamic
+    identity: dict[str, Any] = {  # Any: report/json payload shape is dynamic
+        "run_id": result.run_id,
+        "manifest_id": result.manifest_id,
+        "pipeline_name": result.pipeline_name,
+        "provider": None,
+        "entity": None,
+        "run_type": result.run_type,
+        "status": result.status.value,
+        "started_at": (
+            result.started_at.isoformat() if result.started_at is not None else None
+        ),
+        "completed_at": (
+            result.completed_at.isoformat() if result.completed_at is not None else None
+        ),
+        "duration_seconds": duration,
+        "workflow_id": options.workflow_id if options is not None else None,
+        "workflow_run_id": options.workflow_run_id if options is not None else None,
+        "workflow_step_id": options.workflow_step_id if options is not None else None,
+    }
+    if "_" in result.pipeline_name:
+        provider, _sep, entity = result.pipeline_name.partition("_")
+        identity["provider"] = provider or None
+        identity["entity"] = entity or None
+    return identity
+
+
 def finalize_pipeline_run_report(
     *,
     result: RunResult,
@@ -86,37 +125,11 @@ def finalize_pipeline_run_report(
     if accounting is not None:
         _seed_gold_removals_from_metrics(accounting, metrics)
 
-    duration: float | None
-    try:
-        duration = result.duration_seconds
-    except Exception:
-        duration = None
-
-    identity: dict[str, Any] = {  # Any: report/json payload shape is dynamic
-        "run_id": result.run_id,
-        "manifest_id": result.manifest_id,
-        "pipeline_name": result.pipeline_name,
-        "provider": None,
-        "entity": None,
-        "run_type": result.run_type,
-        "status": result.status.value,
-        "started_at": (
-            result.started_at.isoformat() if result.started_at is not None else None
-        ),
-        "completed_at": (
-            result.completed_at.isoformat() if result.completed_at is not None else None
-        ),
-        "duration_seconds": duration,
-        "workflow_id": options.workflow_id if options is not None else None,
-        "workflow_run_id": options.workflow_run_id if options is not None else None,
-        "workflow_step_id": options.workflow_step_id if options is not None else None,
-    }
-    # Derive provider/entity from pipeline_name when pattern is provider_entity.
-    if "_" in result.pipeline_name:
-        provider, _sep, entity = result.pipeline_name.partition("_")
-        identity["provider"] = provider or None
-        identity["entity"] = entity or None
-
+    identity = _identity_from_result(
+        result,
+        options=options,
+        duration=_result_duration_seconds(result),
+    )
     try:
         report = build_pipeline_run_report(
             identity=identity,

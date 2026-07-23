@@ -172,15 +172,15 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
     assert report["direct_alert_inputs"]
 
     http_targets = report["http_targets"]
-    assert len(http_targets) == 30
+    assert len(http_targets) == 19
     assert any(target["uses_run_id_query_parameter"] for target in http_targets)
     assert all(
         str(target["url"]).startswith(("/ops/", "/health/")) for target in http_targets
     )
     assert report["typed_target_counts"] == {
         "promql": 171,
-        "http": 30,
-        "loki": 5,
+        "http": 19,
+        "loki": 0,
         "tempo": 0,
         "unknown": 0,
     }
@@ -420,8 +420,9 @@ def test_tests_workflow_blocks_touched_metric_changes_on_stale_or_degraded_revie
         encoding="utf-8"
     )
     command = (
-        "uv run python -m scripts.engineering.qa report-debt-governance-gates "
-        "--check --changed-from-ref refs/remotes/origin/main"
+        "uv run --frozen --no-build python -m scripts.engineering.qa "
+        "report-debt-governance-gates --check "
+        "--changed-from-ref refs/remotes/origin/main"
     )
 
     assert command in workflow

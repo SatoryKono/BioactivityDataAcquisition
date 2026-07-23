@@ -16,6 +16,124 @@ if TYPE_CHECKING:
     from bioetl.domain.types import ErrorType, JsonDict
 
 _FLOW_ACCOUNTING_STAGES = frozenset({"bronze", "silver", "gold", "filtered_out"})
+_SILVER_REMOVAL_REASONS = {
+    "filtered_out": "FILTERED_OUT_SILVER",
+    "quarantined": "SCHEMA_VALIDATION_FAILURE",
+    "skipped": "UNKNOWN_REASON",
+    "deduplicated": "DEDUP_KEY_COLLISION",
+}
+_GOLD_REMOVAL_REASONS = {
+    "excluded_by_contract": "gold_contract_schema_failure",
+    "quarantined": "gold_semantic_business_exclusion",
+    "skipped": "UNKNOWN_REASON",
+    "deduplicated": "DEDUP_KEY_COLLISION",
+}
+
+
+def _record_filtered_out_stage_metrics(
+    pipeline_metrics: PipelineMetricsRecorder,
+    *,
+    run_type_label: str,
+    count: int,
+) -> None:
+    """Project filtered-out counts into transform/silver stage metrics + accounting."""
+    pipeline_metrics.record_stage_records(
+        run_type=run_type_label,
+        stage="transform",
+        outcome="filtered_out",
+        count=count,
+    )
+    pipeline_metrics.record_stage_records(
+        run_type=run_type_label,
+        stage="silver",
+        outcome="filtered_out",
+        count=count,
+    )
+    accounting = get_stage_accounting()
+    if accounting is None or count <= 0:
+        return
+    accounting.record_removal(
+        StageId.SILVER.value,
+        outcome="filtered_out",
+        reason_code="FILTERED_OUT_SILVER",
+        count=count,
+    )
+
+
+def _record_processed_stage_accounting(stage: str, count: int) -> None:
+    """Update stage-accounting projections for processed-record counters."""
+    accounting = get_stage_accounting()
+    if accounting is None or count <= 0:
+        return
+    if stage == "bronze":
+        accounting.record_in(StageId.BRONZE.value, count)
+        accounting.record_out(StageId.BRONZE.value, count)
+        accounting.mark_instrumented(StageId.BRONZE.value)
+        return
+    if stage == "silver":
+        accounting.record_out(StageId.SILVER.value, count)
+        accounting.mark_instrumented(StageId.SILVER.value)
+        return
+    if stage == "gold":
+        accounting.record_out(StageId.GOLD.value, count)
+        accounting.mark_instrumented(StageId.GOLD.value)
+        return
+    if stage not in _SILVER_REMOVAL_REASONS:
+        return
+    accounting.record_removal(
+        StageId.SILVER.value,
+        outcome=stage,
+        reason_code=_SILVER_REMOVAL_REASONS[stage],
+        count=count,
+    )
+
+
+def _record_stage_outcome_accounting(stage: str, outcome: str, count: int) -> None:
+    """Update stage-accounting for one positive stage-model outcome."""
+    accounting = get_stage_accounting()
+    if accounting is None:
+        return
+    stage_l = stage.lower()
+    outcome_l = outcome.lower()
+    if stage_l == "gold":
+        if outcome_l in _GOLD_REMOVAL_REASONS:
+            accounting.record_removal(
+                StageId.GOLD.value,
+                outcome=outcome_l,
+                reason_code=_GOLD_REMOVAL_REASONS[outcome_l],
+                count=count,
+            )
+        elif outcome_l in {"written", "records"}:
+            accounting.record_out(StageId.GOLD.value, count)
+            accounting.mark_instrumented(StageId.GOLD.value)
+        return
+    if stage_l == "silver" and outcome_l in _SILVER_REMOVAL_REASONS:
+        accounting.record_removal(
+            StageId.SILVER.value,
+            outcome=outcome_l,
+            reason_code=_SILVER_REMOVAL_REASONS[outcome_l],
+            count=count,
+        )
+
+
+def _silver_filter_rejection_labels(
+    details: JsonDict | None,
+) -> tuple[str | None, str | None, str | None]:
+    """Extract bounded silver-filter rejection labels from optional details."""
+    if details is None:
+        return None, None, None
+    reason_code = details.get("reason_code")
+    reason = reason_code if isinstance(reason_code, str) else None
+    rule_type_raw = details.get("rule_type")
+    if isinstance(rule_type_raw, str):
+        rule_type: str | None = rule_type_raw
+    elif details.get("policy_stage") == "structural":
+        rule_type = "structural_policy"
+    else:
+        rule_type = None
+    field_raw = details.get("field")
+    field = field_raw if isinstance(field_raw, str) else None
+    return reason, rule_type, field
 
 
 class BatchMetricsRecorderService:
@@ -123,52 +241,13 @@ class BatchMetricsRecorderService:
                 count=count,
             )
         if stage == "filtered_out":
-            self._pipeline_metrics.record_stage_records(
-                run_type=self._run_type_label,
-                stage="transform",
-                outcome="filtered_out",
+            _record_filtered_out_stage_metrics(
+                self._pipeline_metrics,
+                run_type_label=self._run_type_label,
                 count=count,
             )
-            self._pipeline_metrics.record_stage_records(
-                run_type=self._run_type_label,
-                stage="silver",
-                outcome="filtered_out",
-                count=count,
-            )
-            accounting = get_stage_accounting()
-            if accounting is not None and count > 0:
-                accounting.record_removal(
-                    StageId.SILVER.value,
-                    outcome="filtered_out",
-                    reason_code="FILTERED_OUT_SILVER",
-                    count=count,
-                )
-        else:
-            accounting = get_stage_accounting()
-            if accounting is not None and count > 0:
-                if stage == "bronze":
-                    accounting.record_in(StageId.BRONZE.value, count)
-                    accounting.record_out(StageId.BRONZE.value, count)
-                    accounting.mark_instrumented(StageId.BRONZE.value)
-                elif stage == "silver":
-                    accounting.record_out(StageId.SILVER.value, count)
-                    accounting.mark_instrumented(StageId.SILVER.value)
-                elif stage == "gold":
-                    accounting.record_out(StageId.GOLD.value, count)
-                    accounting.mark_instrumented(StageId.GOLD.value)
-                elif stage in {"quarantined", "deduplicated", "skipped"}:
-                    outcome = stage
-                    reason = {
-                        "quarantined": "SCHEMA_VALIDATION_FAILURE",
-                        "deduplicated": "DEDUP_KEY_COLLISION",
-                        "skipped": "UNKNOWN_REASON",
-                    }.get(stage, "UNKNOWN_REASON")
-                    accounting.record_removal(
-                        StageId.SILVER.value,
-                        outcome=outcome,
-                        reason_code=reason,
-                        count=count,
-                    )
+            return
+        _record_processed_stage_accounting(stage, count)
 
     def track_error(self, stage: str, error_type: ErrorType) -> None:
         """Record one stage-scoped error occurrence."""
@@ -210,51 +289,7 @@ class BatchMetricsRecorderService:
             outcome=outcome,
             count=count,
         )
-        accounting = get_stage_accounting()
-        if accounting is None:
-            return
-        stage_l = stage.lower()
-        outcome_l = outcome.lower()
-        if stage_l == "gold":
-            if outcome_l in {
-                "excluded_by_contract",
-                "quarantined",
-                "skipped",
-                "deduplicated",
-            }:
-                reason = {
-                    "excluded_by_contract": "gold_contract_schema_failure",
-                    "quarantined": "gold_semantic_business_exclusion",
-                    "skipped": "UNKNOWN_REASON",
-                    "deduplicated": "DEDUP_KEY_COLLISION",
-                }[outcome_l]
-                accounting.record_removal(
-                    StageId.GOLD.value,
-                    outcome=outcome_l,
-                    reason_code=reason,
-                    count=count,
-                )
-            elif outcome_l in {"written", "records"}:
-                accounting.record_out(StageId.GOLD.value, count)
-                accounting.mark_instrumented(StageId.GOLD.value)
-        elif stage_l == "silver" and outcome_l in {
-            "filtered_out",
-            "quarantined",
-            "skipped",
-            "deduplicated",
-        }:
-            reason = {
-                "filtered_out": "FILTERED_OUT_SILVER",
-                "quarantined": "SCHEMA_VALIDATION_FAILURE",
-                "skipped": "UNKNOWN_REASON",
-                "deduplicated": "DEDUP_KEY_COLLISION",
-            }[outcome_l]
-            accounting.record_removal(
-                StageId.SILVER.value,
-                outcome=outcome_l,
-                reason_code=reason,
-                count=count,
-            )
+        _record_stage_outcome_accounting(stage, outcome, count)
 
     def track_quarantined_records(self, error_type: ErrorType, count: int) -> None:
         """Record quarantined-record counters and flow projections."""
@@ -297,24 +332,7 @@ class BatchMetricsRecorderService:
         """
         if not self._metrics:
             return
-        reason_code: str | None = None
-        rule_type: str | None = None
-        field: str | None = None
-
-        if details is not None:
-            maybe_reason_code = details.get("reason_code")
-            if isinstance(maybe_reason_code, str):
-                reason_code = maybe_reason_code
-
-            maybe_rule_type = details.get("rule_type")
-            if isinstance(maybe_rule_type, str):
-                rule_type = maybe_rule_type
-            elif details.get("policy_stage") == "structural":
-                rule_type = "structural_policy"
-
-            maybe_field = details.get("field")
-            if isinstance(maybe_field, str):
-                field = maybe_field
+        reason_code, rule_type, field = _silver_filter_rejection_labels(details)
         self._pipeline_metrics.record_silver_filter_rejections(
             run_type=self._run_type_label,
             reason_code=reason_code,

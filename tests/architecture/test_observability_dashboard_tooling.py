@@ -182,25 +182,32 @@ def test_ci_dashboard_semantic_gate_covers_declared_release_contracts() -> None:
         if line.strip()
     ]
     report_contract, *pytest_contracts = required_contracts
-    assert any(
-        command[:6]
-        == [
-            "uv",
-            "run",
+
+    def _has_qa_report(command: list[str], report: str) -> bool:
+        # Allow optional uv flags such as --frozen --no-build.
+        if len(command) < 2 or command[0] != "uv" or command[1] != "run":
+            return False
+        try:
+            python_idx = command.index("python")
+        except ValueError:
+            return False
+        return command[python_idx : python_idx + 4] == [
             "python",
             "-m",
             "scripts.engineering.qa",
-            report_contract,
+            report,
         ]
-        for command in logical_commands
-    )
-    pytest_commands = [
-        command
-        for command in logical_commands
-        if command[:3] == ["uv", "run", "pytest"]
-    ]
+
+    assert any(_has_qa_report(command, report_contract) for command in logical_commands)
+
+    def _is_uv_pytest(command: list[str]) -> bool:
+        if len(command) < 2 or command[0] != "uv" or command[1] != "run":
+            return False
+        return "pytest" in command
+
+    pytest_commands = [command for command in logical_commands if _is_uv_pytest(command)]
     assert len(pytest_commands) == 1
-    pytest_arguments = set(pytest_commands[0][3:])
+    pytest_arguments = set(pytest_commands[0])
     for contract in pytest_contracts:
         assert contract in pytest_arguments
 

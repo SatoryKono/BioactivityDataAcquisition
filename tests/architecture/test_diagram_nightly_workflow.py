@@ -28,12 +28,15 @@ def test_nightly_workflow_includes_mermaid_canary_matrix() -> None:
     assert "mermaid_version" in workflow
     assert "continue-on-error: ${{ matrix.allow_failure }}" in workflow
 
-    # Puppeteer chrome install may be inline or in the composite action
+    # Puppeteer chrome install may be inline or in the composite action.
+    # Composite action invokes the local puppeteer binary with an absolute path:
+    #   "${TOOL_DIR}/node_modules/.bin/puppeteer" browsers install chrome-headless-shell
     composite = Path(".github/actions/setup-mermaid/action.yml")
     sources = workflow + (
         composite.read_text(encoding="utf-8") if composite.exists() else ""
     )
-    assert "puppeteer browsers install chrome-headless-shell" in sources
+    assert "browsers install chrome-headless-shell" in sources
+    assert "puppeteer" in sources
 
 
 def test_nightly_workflow_render_requires_svgo() -> None:

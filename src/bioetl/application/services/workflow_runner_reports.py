@@ -3,9 +3,78 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from typing import Any
 
-from bioetl.application.services.workflow_runner_models import WorkflowRunExecutionResult
+from bioetl.application.services.workflow_runner_models import (
+    WorkflowRunExecutionResult,
+    WorkflowStepExecutionResult,
+)
 from bioetl.domain.workflow import WorkflowConfig, WorkflowStepConfig
+
+
+def _plan_steps_from_config(config: WorkflowConfig) -> list[dict[str, Any]]:
+    plan_steps: list[dict[str, Any]] = []
+    for step_id in config.topological_step_ids:
+        step = config.get_step(step_id)
+        if step is None:
+            continue
+        kind = "pipeline" if isinstance(step, WorkflowStepConfig) else "transform"
+        plan_steps.append(
+            {
+                "step_id": step.step_id,
+                "kind": kind,
+                "pipeline_name": getattr(step, "pipeline_name", None),
+                "transform_name": getattr(step, "transform_name", None)
+                or getattr(step, "name", None),
+                "depends_on": list(getattr(step, "depends_on", ()) or ()),
+            }
+        )
+    return plan_steps
+
+
+def _pipeline_name_for_step(
+    step: WorkflowStepExecutionResult,
+    *,
+    plan_steps: list[dict[str, Any]],
+    payload: object | None,
+) -> object | None:
+    pipeline_name = getattr(payload, "pipeline_name", None) if payload is not None else None
+    if pipeline_name is not None:
+        return pipeline_name
+    for planned in plan_steps:
+        if planned["step_id"] == step.step_id:
+            return planned.get("pipeline_name")
+    return None
+
+
+def _execution_rows_from_result(
+    result: WorkflowRunExecutionResult,
+    *,
+    plan_steps: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    execution_rows: list[dict[str, Any]] = []
+    for step in result.steps:
+        payload = step.payload
+        report_ref = (
+            getattr(payload, "run_report_json_path", None) if payload is not None else None
+        )
+        execution_rows.append(
+            {
+                "step_id": step.step_id,
+                "kind": step.step_kind,
+                "status": step.status,
+                "pipeline_name": _pipeline_name_for_step(
+                    step, plan_steps=plan_steps, payload=payload
+                ),
+                "payload": payload,
+                "child_run_id": step.child_run_id,
+                "child_manifest_id": step.child_manifest_id,
+                "pipeline_report_ref": report_ref,
+                "error_type": step.error_type,
+                "error_message": step.error_message,
+            }
+        )
+    return execution_rows
 
 
 def attach_workflow_run_report(
@@ -22,50 +91,8 @@ def attach_workflow_run_report(
             build_workflow_run_report,
         )
 
-        plan_steps = []
-        for step_id in config.topological_step_ids:
-            step = config.get_step(step_id)
-            if step is None:
-                continue
-            kind = "pipeline" if isinstance(step, WorkflowStepConfig) else "transform"
-            plan_steps.append(
-                {
-                    "step_id": step.step_id,
-                    "kind": kind,
-                    "pipeline_name": getattr(step, "pipeline_name", None),
-                    "transform_name": getattr(step, "transform_name", None)
-                    or getattr(step, "name", None),
-                    "depends_on": list(getattr(step, "depends_on", ()) or ()),
-                }
-            )
-        execution_rows = []
-        for step in result.steps:
-            pipeline_name = None
-            report_ref = None
-            payload = step.payload
-            if payload is not None:
-                pipeline_name = getattr(payload, "pipeline_name", None)
-                report_ref = getattr(payload, "run_report_json_path", None)
-            # Prefer plan pipeline name when payload is transform-only.
-            if pipeline_name is None:
-                for planned in plan_steps:
-                    if planned["step_id"] == step.step_id:
-                        pipeline_name = planned.get("pipeline_name")
-                        break
-            execution_rows.append(
-                {
-                    "step_id": step.step_id,
-                    "kind": step.step_kind,
-                    "status": step.status,
-                    "pipeline_name": pipeline_name,
-                    "payload": payload,
-                    "child_run_id": step.child_run_id,
-                    "child_manifest_id": step.child_manifest_id,
-                    "pipeline_report_ref": report_ref,
-                    "error_type": step.error_type,
-                    "error_message": step.error_message,
-                }
-            )
+        plan_steps = _plan_steps_from_config(config)
+        execution_rows = _execution_rows_from_result(result, plan_steps=plan_steps)
         report = build_workflow_run_report(
             identity={
                 "workflow_name": result.workflow_name,

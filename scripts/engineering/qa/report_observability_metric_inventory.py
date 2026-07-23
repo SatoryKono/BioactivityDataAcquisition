@@ -1612,6 +1612,7 @@ def _canonical_datasource_type(raw: str) -> str:
     """Resolve Grafana datasource names to their shipped plugin types."""
     return {
         "Quarantine Explorer": "yesoreyeram-infinity-datasource",
+        "BioETL Ops HTTP": "yesoreyeram-infinity-datasource",
         "Prometheus": "prometheus",
         "Loki": "loki",
         "Tempo": "tempo",
