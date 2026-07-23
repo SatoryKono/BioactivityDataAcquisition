@@ -11,7 +11,7 @@ from tests.integration._grafana_test_support import (
     get_dashboard_panels,
     load_dashboard,
 )
-from tests.integration.test_grafana_dashboard_links import (
+from tests.integration._grafana_dashboard_links_support import (
     _CANONICAL_GITHUB_BLOB_PREFIX,
     _DASHBOARD_TIME_HANDOFF_TOKENS,
     _REQUIRED_LINK_VARS_BY_TARGET_UID,
