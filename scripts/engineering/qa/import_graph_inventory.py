@@ -15,8 +15,12 @@ from scripts.engineering.qa.file_discovery import discover_files
 
 _MIN_PARALLEL_READ_FILES = 64
 _DEFAULT_READ_WORKERS = 8
+# Windows GDrive/cloud mounts are latency-bound; a small worker pool hides
+# round-trips better than pure serial reads without thrashing the client.
+_DEFAULT_WINDOWS_READ_WORKERS = 2
 _MAX_READ_WORKERS = 16
 _MAX_SOURCE_BYTES = 512_000
+_READ_WORKERS_ENV = "BIOETL_IMPORT_GRAPH_READ_WORKERS"
 
 
 @dataclass(frozen=True)
@@ -40,20 +44,28 @@ class ParsedModule:
 
 def _read_worker_count(total_files: int, *, os_name: str = os.name) -> int:
     """Return a conservative worker count for mounted-worktree file reads."""
-    if os_name == "nt":
-        return 1
+    configured = os.getenv(_READ_WORKERS_ENV, "").strip()
+    if configured:
+        try:
+            return max(1, min(int(configured), _MAX_READ_WORKERS, max(total_files, 1)))
+        except ValueError:
+            pass
     if total_files < _MIN_PARALLEL_READ_FILES:
         return 1
+    if os_name == "nt":
+        return min(total_files, _DEFAULT_WINDOWS_READ_WORKERS)
     cpu_count = os.cpu_count() or _DEFAULT_READ_WORKERS
     return min(total_files, _MAX_READ_WORKERS, max(_DEFAULT_READ_WORKERS, cpu_count))
 
 
 def _read_module_source(item: tuple[str, Path]) -> tuple[str, Path, str | None]:
-    """Read one Python module source payload for import-graph parsing."""
+    """Read one Python module source payload for import-graph parsing.
+
+    Uses a single bounded read (no pre-stat) so cloud-synced trees pay one
+    open/read round-trip per file instead of stat+read.
+    """
     module_name, py_file = item
     try:
-        if py_file.stat().st_size > _MAX_SOURCE_BYTES:
-            return module_name, py_file, None
         with py_file.open("rb") as stream:
             source_bytes = stream.read(_MAX_SOURCE_BYTES + 1)
         if len(source_bytes) > _MAX_SOURCE_BYTES:
@@ -77,8 +89,11 @@ def _read_module_sources(
                 rows.append((module_name, py_file, text))
         return rows
 
+    # map() preserves order; chunking keeps memory bounded for large trees.
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        for module_name, py_file, text in executor.map(_read_module_source, modules):
+        for module_name, py_file, text in executor.map(
+            _read_module_source, modules, chunksize=32
+        ):
             if text is not None:
                 rows.append((module_name, py_file, text))
     return rows
@@ -171,12 +186,16 @@ def _collect_parsed_modules(repo_root_str: str) -> tuple[ParsedModule, ...]:
         ):
             importer_is_package = py_file.name in {"__init__.py", "__init__.pyi"}
             try:
-                tree = ast.parse(source_text)
+                tree = ast.parse(source_text, filename=str(py_file), mode="exec")
             except SyntaxError:
                 continue
             candidate_targets: set[str] = set()
             exact_import_usage: dict[str, set[str]] = defaultdict(set)
+            # Only Import/ImportFrom matter for the inventory; avoid paying for
+            # every AST node type on multi-thousand-file trees.
             for node in ast.walk(tree):
+                if not isinstance(node, (ast.Import, ast.ImportFrom)):
+                    continue
                 for target_module in _iter_candidate_import_targets(
                     existing_modules=existing_modules,
                     importer_module=importer_module,
@@ -189,7 +208,7 @@ def _collect_parsed_modules(repo_root_str: str) -> tuple[ParsedModule, ...]:
                     for alias in node.names:
                         if alias.name.startswith("bioetl."):
                             exact_import_usage[alias.name].add("<module>")
-                elif isinstance(node, ast.ImportFrom):
+                else:
                     base_module = _resolve_relative_module(
                         importer_module=importer_module,
                         importer_is_package=importer_is_package,

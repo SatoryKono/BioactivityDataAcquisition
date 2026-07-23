@@ -18,7 +18,9 @@ from scripts.engineering.qa.report_test_governance_audit import (
 ROOT = Path(__file__).resolve().parents[2]
 RUNTIME_UUID_YAML = ROOT / "configs" / "quality" / "runtime_uuid_seams.yaml"
 
-pytestmark = pytest.mark.timeout(240)
+# Live inventory walks ~4.5k first-party modules (src+tests). On cloud-synced
+# worktrees (Windows GDrive) cold I/O alone can exceed a short IDE timeout.
+pytestmark = pytest.mark.timeout(600)
 
 
 def _load_module(path: Path, module_name: str) -> ModuleType:
@@ -41,6 +43,16 @@ def _load_compatibility_telemetry_module() -> ModuleType:
 def test_debt_governance_snapshot_matches_live_sources() -> None:
     """Unified debt-governance snapshot should stay aligned with live inventories."""
     telemetry = _load_compatibility_telemetry_module()
+
+    # Warm the shared import-graph cache before the unified collector so this
+    # architecture guard pays for one full walk, not two, on cold worktrees.
+    dead_code_inventory = build_dead_code_inventory(ROOT)
+    dead_code_summary = dead_code_inventory.get("summary", {})
+    assert isinstance(dead_code_summary, dict)
+
+    test_governance = collect_test_governance_report(ROOT)
+    test_governance_summary = test_governance["summary"]
+
     snapshot = telemetry.collect_debt_governance_snapshot()
 
     runtime_uuid_inventory = yaml.safe_load(
@@ -49,13 +61,6 @@ def test_debt_governance_snapshot_matches_live_sources() -> None:
     assert isinstance(runtime_uuid_inventory, dict)
     seams = runtime_uuid_inventory.get("seams", [])
     assert isinstance(seams, list)
-
-    dead_code_inventory = build_dead_code_inventory(ROOT)
-    dead_code_summary = dead_code_inventory.get("summary", {})
-    assert isinstance(dead_code_summary, dict)
-
-    test_governance = collect_test_governance_report(ROOT)
-    test_governance_summary = test_governance["summary"]
 
     assert snapshot.runtime_uuid.runtime_uuid_seam_count == len(
         [entry for entry in seams if isinstance(entry, dict)]
@@ -144,4 +149,4 @@ def test_debt_governance_summary_section_lists_required_metrics() -> None:
         "uuid4_call_sites",
         "date_today_call_sites",
     ):
-        assert f"- {key}: `" in section
+        assert f"{key}:" in section

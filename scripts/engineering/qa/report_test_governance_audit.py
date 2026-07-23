@@ -6,9 +6,11 @@ import argparse
 import ast
 import hashlib
 import json
+import os
 import re
 import sys
 from collections import Counter, defaultdict
+from concurrent.futures import ThreadPoolExecutor
 from functools import cache
 from pathlib import Path
 from typing import Any, cast
@@ -170,11 +172,9 @@ def _iter_all_test_python_files(root: Path) -> list[Path]:
     tests_root = root / TESTS_ROOT
     if not tests_root.exists():
         return []
-    return [
-        path
-        for path in sorted(tests_root.rglob("*.py"))
-        if path.is_file() and "__pycache__" not in path.parts
-    ]
+    # Prefer the shared discover helper so pruned dirs (__pycache__, .venv, …)
+    # and fixture/snapshot subtrees stay out of the hash/scan inventory.
+    return [tests_root / relative for relative in discover_files(str(tests_root), ".py")]
 
 
 def _read_text_file(path: Path) -> str:
@@ -202,11 +202,36 @@ def _read_text_file(path: Path) -> str:
         return text
 
 
+def _source_tree_hash_workers(total_files: int) -> int:
+    """Bound parallelism for content hashing on cloud-synced worktrees."""
+    if total_files < 64:
+        return 1
+    configured = os.getenv("BIOETL_TEST_GOVERNANCE_HASH_WORKERS", "").strip()
+    if configured:
+        try:
+            return max(1, min(int(configured), 16, total_files))
+        except ValueError:
+            pass
+    if os.name == "nt":
+        return min(4, total_files)
+    return min(8, total_files)
+
+
+def _read_source_tree_bytes(path: Path) -> bytes:
+    """Read one source-tree file for the freshness hash."""
+    with path.open("rb") as handle:
+        return handle.read()
+
+
 @cache
 def _compute_test_governance_source_tree_sha256(root_str: str) -> str:
-    """Hash the report inputs so committed artifacts can be reused when fresh."""
+    """Hash the report inputs so committed artifacts can be reused when fresh.
+
+    Digest bytes and file order match the historical sequential algorithm so
+    committed ``source_tree_sha256`` values stay comparable. Only the file
+    reads are parallelized (latency-bound on cloud-synced Windows trees).
+    """
     root = Path(root_str).resolve()
-    digest = hashlib.sha256()
     governance_files = [
         root / relative_path
         for relative_path in GOVERNANCE_SOURCE_FILES
@@ -220,13 +245,26 @@ def _compute_test_governance_source_tree_sha256(root_str: str) -> str:
         ],
         key=lambda path: path.relative_to(root).as_posix().lower(),
     )
-    for path in files:
+
+    def _read_one(path: Path) -> tuple[str, bytes]:
         relative = path.relative_to(root).as_posix()
+        try:
+            return relative, _read_source_tree_bytes(path)
+        except OSError:
+            return relative, b""
+
+    workers = _source_tree_hash_workers(len(files))
+    if workers == 1:
+        payloads = [_read_one(path) for path in files]
+    else:
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            payloads = list(executor.map(_read_one, files, chunksize=16))
+
+    digest = hashlib.sha256()
+    for relative, content in payloads:
         digest.update(relative.encode("utf-8"))
         digest.update(b"\0")
-        with path.open("rb") as handle:
-            while chunk := handle.read(1024 * 1024):
-                digest.update(chunk)
+        digest.update(content)
         digest.update(b"\0")
     return digest.hexdigest()
 

@@ -218,7 +218,7 @@
     },
     "dead_code_inventory": {
       "path": "reports/quality/dead-code-inventory.json",
-      "snapshot_date": "2026-06-16"
+      "snapshot_date": "2026-07-23"
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",

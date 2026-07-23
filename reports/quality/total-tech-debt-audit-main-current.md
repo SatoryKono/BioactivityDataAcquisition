@@ -2,28 +2,30 @@
 
 Lifecycle status: current
 
-Audit date: 2026-07-20
+Audit date: 2026-07-23
 
 Audited repository: `SatoryKono/BioactivityDataAcquisition`
 
 Audited branch: `main`
 
-Audited commit SHA: `2d46c3a69e75bf9a79094c071ec84a758f9e0289`
+Audited commit SHA: `158f905728789fca7f0cc53dfef11ed168157110`
 
-Evidence surface SHA-256: `1b8be924d349c21dd9e6f45dcbadc34ed140a65e1e836f6cffefc787e658fef6`
+Evidence surface SHA-256: `5c69f8b19354fa8a753eb461e8f47cc72a5dc08e044a93cbf657d8474e599940`
 
 Registry: `configs/quality/technical_debt_audit_registry.yaml`
 
-Refresh reason: #6355 — replace ambiguous/current evidence with a reproducible
-snapshot and correct compatibility claims that drifted from machine-readable
-artifacts.
+Refresh reason: #6482 / tracker #6486 — re-pin the total technical-debt audit to
+HEAD after clearing `generated_artifact_drift` (#6477) and re-running the
+dead-code inventory with `untriaged=0` (#6483). No debt budget, threshold,
+exemption, or exclusion growth.
 
 ## Executive summary
 
 1. The reviewed quality gate snapshot is passing: architecture score `8.92`,
-   `45/45` debt-governance gates passing, with no failures or warnings.
-1. Module coverage inventory contains `2,244` source modules: `1,398` fully
-   covered, `824` partially covered, `22` with no executable lines, and
+   `45/45` debt-governance gates passing, with no failures or warnings and
+   zero stale generated quality artifacts.
+1. Module coverage inventory contains `2,247` source modules: `1,403` fully
+   covered, `819` partially covered, `25` with no executable lines, and
    zero uncovered or unmeasured modules. These are module-inventory facts, not
    a claim of complete line or branch coverage.
 1. Compatibility transition debt remains zero. The census contains `12`
@@ -32,40 +34,47 @@ artifacts.
 1. Test governance reports `22,786` test functions across `2,040` pytest
    files, with zero duplicate test names, markerless tests, compatibility test
    files, and refined assertless residuals.
-1. The largest directly evidenced residual is the `824`-module partial
-   coverage tail. Debt budgets and exclusions are unchanged by this audit.
+1. Dead-code inventory (`snapshot_date: 2026-07-23`) reports
+   `repo_wide_untriaged_zero_import_candidate_count: 0`, with one classified
+   zero-import candidate retained as a module entrypoint.
+1. The largest directly evidenced residual is the `819`-module partial
+   coverage tail (down from `824` in the 2026-07-19 audit). Debt budgets and
+   exclusions are unchanged by this audit.
 
 ## Evidence snapshot
 
 | Area | Current fact | Evidence |
 | --- | --- | --- |
 | Architecture score | Integral score `8.92` | `reports/quality/architecture-quality-scorecard.json` |
-| Debt gates | `45` pass, `0` fail, `0` warn | `reports/quality/debt-governance-gates.json` |
-| Module inventory | `2244` total; `1398` full; `824` partial; `22` no executable lines; `0` uncovered/unmeasured | `reports/quality/module-coverage-inventory.json` |
-| Test governance | `22615` functions; `2026` files; duplicate/markerless/compatibility counts all `0` | `reports/quality/test-governance-current.json` |
+| Debt gates | `45` pass, `0` fail, `0` warn; `stale_artifact_count=0` | `reports/quality/debt-governance-gates.json` |
+| Module inventory | `2247` total; `1403` full; `819` partial; `25` no executable lines; `0` uncovered/unmeasured | `reports/quality/module-coverage-inventory.json` |
+| Test governance | `22786` functions; `2040` files; duplicate/markerless/compatibility/refined-assertless counts all `0` | `reports/quality/test-governance-current.json` |
 | Compatibility | `12` retained entrypoints; `4` public export facades; `0` twin pairs | `reports/quality/compatibility-importer-census.json` |
 | Transition compatibility debt | Current/max count `0/0` | `configs/quality/debt_scorecard.yaml` |
+| Dead code | `untriaged=0`; `1` classified zero-import candidate (`retain_module_entrypoint`); `18` triaged retained entries | `reports/quality/dead-code-inventory.json` |
 
-## Corrected compatibility claims
+## Corrected / preserved compatibility claims
 
 | Surface | Source importers | Test importers | Current disposition |
 | --- | ---: | ---: | --- |
 | `bioetl.domain.composite.config` | 0 | 39 | Retained public entrypoint; no first-party source importer claim |
 | `bioetl.application.composite.merger` | 0 | 5 | Retained public entrypoint; no first-party source importer claim |
-| `src/bioetl/infrastructure/compat/pandera_compat.py` | — | — | File absent; the previous audit's live-shim claim is superseded |
+| `src/bioetl/infrastructure/compat/pandera_compat.py` | — | — | File absent; prior live-shim claim remains superseded |
 
-The earlier audit incorrectly merged test imports into source-importer
-narrative and described a Pandera compatibility file that no longer exists.
-This report keeps source and test evidence separate and makes no removal
-recommendation solely from a zero source-import count.
+Source and test importer evidence stay separated. Zero source-import count alone
+is not a removal recommendation.
 
 ## Prioritized residual work
 
 | Priority | Evidence-backed residual | Action boundary |
 | --- | --- | --- |
-| P0 | `824` partially covered modules | Reduce with focused invariant/regression tests; do not reinterpret module inventory as line/branch closure |
+| P1 | `819` partially covered modules | Reduce with focused invariant/regression tests; do not reinterpret module inventory as line/branch closure |
 | P1 | Retained compatibility entrypoints | Preserve public contracts; removal requires explicit deprecation and external-consumer evidence |
 | P1 | Reviewed hotspot/debt gates | Ratchet downward only; no budget, threshold, exemption, or exclusion growth |
+| P2 | Dead-code review window | `last_reviewed=2026-06-16`, `next_review_by=2026-09-14`; keep untriaged at zero on every inventory refresh |
+
+Linked child issues under tracker #6486 track structural burn-down and docs
+sync after this evidence re-pin.
 
 ## Reproducibility and lifecycle
 
@@ -74,16 +83,20 @@ The evidence hash is computed from the ordered path/content identities listed in
 the current registry record:
 
 ```bash
-python -m scripts.engineering.qa.technical_debt_audit_registry --json
+python -m scripts.engineering.qa validate-technical-debt-audit --json
 ```
 
 If any declared evidence file changes, the registry check fails until a new
-review produces a new hash and, when appropriate, a new current audit. Archived
-reports remain historical evidence and are not edited in place.
+current audit is published and the previous report is archived under
+`docs/99-archive/reports/quality/`.
 
-## Limitations
+Canonical refresh sequence used for this snapshot:
 
-- This audit is non-normative and does not replace `RULES.md`, accepted ADRs,
-  or machine-readable quality gates.
-- A passing gate snapshot does not mean technical debt is absent.
-- Counts are valid only for the pinned commit/evidence surface above.
+```bash
+python -m scripts.engineering.qa.report_architecture_quality_scorecard
+python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --update
+python -m scripts.engineering.qa report-dead-code-inventory --snapshot-date 2026-07-23
+python -m scripts.engineering.qa report-debt-governance-gates --update
+python -m scripts.engineering.qa report-dead-code-inventory --check
+python -m scripts.engineering.qa validate-technical-debt-audit --json
+```

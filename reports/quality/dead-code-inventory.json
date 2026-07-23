@@ -1,5 +1,5 @@
 {
-  "snapshot_date": "2026-06-16",
+  "snapshot_date": "2026-07-23",
   "triage_source": "configs/quality/retirement_candidate_triage.yaml",
   "static_inventory_scope": "src/bioetl",
   "review_window": {
@@ -9,7 +9,7 @@
     "next_review_by": "2026-09-14",
     "review_cycle_days": 90,
     "max_untriaged_zero_import_candidates": 0,
-    "snapshot_matches_last_reviewed": true,
+    "snapshot_matches_last_reviewed": false,
     "guardrail_note": "Zero static importer count is a review signal only; removals must still verify public entrypoints and dynamic/plugin import paths."
   },
   "summary": {
