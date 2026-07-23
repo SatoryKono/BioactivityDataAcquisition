@@ -10,7 +10,7 @@ Audited branch: `main`
 
 Audited commit SHA: `2d46c3a69e75bf9a79094c071ec84a758f9e0289`
 
-Evidence surface SHA-256: `a6b28450bcba29fe1dc1c2c6d0ef5ebe2052315466d05df953166222754b587e`
+Evidence surface SHA-256: `1b8be924d349c21dd9e6f45dcbadc34ed140a65e1e836f6cffefc787e658fef6`
 
 Registry: `configs/quality/technical_debt_audit_registry.yaml`
 
@@ -29,7 +29,7 @@ artifacts.
 1. Compatibility transition debt remains zero. The census contains `12`
    retained public entrypoints, `4` retained public export facades, and zero
    twin pairs; retained public API is not relabelled as removable dead code.
-1. Test governance reports `22,615` test functions across `2,026` pytest
+1. Test governance reports `22,786` test functions across `2,040` pytest
    files, with zero duplicate test names, markerless tests, compatibility test
    files, and refined assertless residuals.
 1. The largest directly evidenced residual is the `824`-module partial

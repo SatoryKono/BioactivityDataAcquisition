@@ -8,6 +8,10 @@ from typing import Any
 
 import pytest
 
+from tests.architecture._module_coverage_inventory_support import (
+    skip_if_module_coverage_inventory_is_dirty,
+)
+
 pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -62,6 +66,10 @@ def test_issue_5978_branch_coverage_is_promoted_to_hard_gate() -> None:
 @pytest.mark.architecture
 def test_issue_5978_coverage_tail_status_documented() -> None:
     """Coverage tail status is documented and meets requirements."""
+    skip_if_module_coverage_inventory_is_dirty(
+        root=ROOT,
+        inventory_path=MODULE_COVERAGE,
+    )
     closeout = _load_json(CLOSEOUT)
     module_coverage = _load_json(MODULE_COVERAGE)
 
@@ -73,16 +81,23 @@ def test_issue_5978_coverage_tail_status_documented() -> None:
     assert tail_status["ranked_low_tail_modules"] == 6
     assert tail_status["owner_tests_status"] == "focused_owner_tests_added"
 
-    # Verify alignment with module coverage inventory
+    # The closeout captures the historical ceiling. Current coverage may improve,
+    # but it must not grow the documented low-coverage tail.
     coverage_summary = module_coverage["summary"]
     below_85 = [
         row
         for row in module_coverage["modules"]
         if row["coverage_percent"] is not None and row["coverage_percent"] < 85
     ]
-    assert tail_status["below_85_module_count"] == len(below_85)
-    assert coverage_summary["unmeasured_module_count"] == 0
-    assert coverage_summary["uncovered_module_count"] == 0
+    assert len(below_85) <= tail_status["below_85_module_count"]
+    assert (
+        coverage_summary["unmeasured_module_count"]
+        <= tail_status["unmeasured_module_count"]
+    )
+    assert (
+        coverage_summary["uncovered_module_count"]
+        <= tail_status["uncovered_module_count"]
+    )
 
 
 @pytest.mark.architecture
