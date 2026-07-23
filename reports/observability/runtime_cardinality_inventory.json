@@ -4177,7 +4177,7 @@
       "src/bioetl/infrastructure/storage/bronze_writer.py"
     ],
     "bioetl_checkpoint_compatibility_events_total": [
-      "src/bioetl/application/services/checkpoint_compatibility_service.py"
+      "src/bioetl/application/services/checkpoint_compatibility_telemetry.py"
     ],
     "bioetl_checkpoint_load_events_total": [
       "src/bioetl/application/composite/checkpoint/_checkpoint_runtime.py",
