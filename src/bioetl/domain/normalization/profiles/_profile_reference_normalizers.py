@@ -146,14 +146,23 @@ def normalize_profile_inchi_key(value: object) -> object:
     return None if normalized is None else str(normalized)
 
 
+def _normalize_openalex_author_reference_id(item: object) -> object:
+    return normalize_openalex_reference_id(item, prefix="A")
+
+
+def _normalize_openalex_institution_reference_id(item: object) -> object:
+    return normalize_openalex_reference_id(item, prefix="I")
+
+
+def _normalize_openalex_topic_reference_id(item: object) -> object:
+    return normalize_openalex_reference_id(item, prefix="T")
+
+
 def normalize_profile_openalex_author_ids(value: object) -> object:
     """Canonicalize OpenAlex author identifier JSON arrays."""
     return normalize_json_string_reference_ids(
         value,
-        item_normalizer=lambda item: normalize_openalex_reference_id(
-            item,
-            prefix="A",
-        ),
+        item_normalizer=_normalize_openalex_author_reference_id,
     )
 
 
@@ -161,10 +170,7 @@ def normalize_profile_openalex_institution_ids(value: object) -> object:
     """Canonicalize OpenAlex institution identifier JSON arrays."""
     return normalize_json_string_reference_ids(
         value,
-        item_normalizer=lambda item: normalize_openalex_reference_id(
-            item,
-            prefix="I",
-        ),
+        item_normalizer=_normalize_openalex_institution_reference_id,
     )
 
 
@@ -274,7 +280,7 @@ def normalize_profile_openalex_topics(value: object) -> object:
     """Canonicalize OpenAlex topic JSON arrays by topic ID."""
     return normalize_json_array_reference_ids(
         value,
-        id_normalizer=lambda item: normalize_openalex_reference_id(item, prefix="T"),
+        id_normalizer=_normalize_openalex_topic_reference_id,
     )
 
 
@@ -282,5 +288,5 @@ def normalize_profile_openalex_topic(value: object) -> object:
     """Canonicalize one OpenAlex primary-topic JSON object by topic ID."""
     return normalize_json_object_reference_id(
         value,
-        id_normalizer=lambda item: normalize_openalex_reference_id(item, prefix="T"),
+        id_normalizer=_normalize_openalex_topic_reference_id,
     )

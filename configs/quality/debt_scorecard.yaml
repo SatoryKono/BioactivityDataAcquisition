@@ -482,7 +482,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 6
       files: 180
-      total_loc: 22262
+      total_loc: 22265
       files_ge_250_loc: 4
       helper_function_ratio: 0.361
       max_internal_fan_in: 7
@@ -511,9 +511,9 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 1
       files: 50
-      total_loc: 6101
+      total_loc: 6139
       files_ge_250_loc: 0
-      helper_function_ratio: 0.309
+      helper_function_ratio: 0.333
       max_internal_fan_in: 2
       max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.tracing_bootstrap
     trend:
@@ -540,11 +540,11 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 1
       files: 35
-      total_loc: 4645
-      files_ge_250_loc: 2
+      total_loc: 4657
+      files_ge_250_loc: 3
       helper_function_ratio: 0.417
-      max_internal_fan_in: 2
-      max_internal_fan_in_module: bioetl.composition.factories.pipeline.transformer_builder
+      max_internal_fan_in: 3
+      max_internal_fan_in_module: bioetl.composition.factories.pipeline.registry_manifest
     trend:
       status: reduced_2026-07-06_pipeline_factories_fan_in_below_reviewed_budget
       next_action: 2026-07-06 refresh aligns the scorecard with the committed hotspot-family
@@ -568,9 +568,9 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 124
-      total_loc: 15316
+      total_loc: 15354
       files_ge_250_loc: 11
-      helper_function_ratio: 0.457
+      helper_function_ratio: 0.451
       max_internal_fan_in: 3
       max_internal_fan_in_module: bioetl.application.services.control_plane.workflow.manifest_models
     trend:
@@ -596,11 +596,11 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 5
       files: 55
-      total_loc: 6842
+      total_loc: 6857
       files_ge_250_loc: 0
-      helper_function_ratio: 0.358
-      max_internal_fan_in: 3
-      max_internal_fan_in_module: bioetl.composition.runtime_builders.run_manifest_support
+      helper_function_ratio: 0.357
+      max_internal_fan_in: 4
+      max_internal_fan_in_module: bioetl.composition.runtime_builders._run_manifest_control_plane_paths
     trend:
       status: reduced_2026-07-08_issue_6060_runtime_builder_fan_in_headroom
       next_action: 2026-07-08 issue 6060 splits contract-identity shape helpers, runtime-input

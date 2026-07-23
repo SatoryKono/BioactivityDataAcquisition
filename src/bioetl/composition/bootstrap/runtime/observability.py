@@ -81,6 +81,21 @@ def _create_runtime_audit_port(
     )
 
 
+def _runtime_audit_bootstrapper(
+    audit_settings: Settings,
+    audit_logger: LoggerPort,
+    audit_metrics: MetricsPort,
+    audit_tracer: TracingPort,
+) -> AuditPort:
+    """Bootstrapper for runtime audit port."""
+    return _create_runtime_audit_port(
+        settings=audit_settings,
+        logger=audit_logger,
+        metrics=audit_metrics,
+        tracing=audit_tracer,
+    )
+
+
 def validate_observability_preflight(
     tracer: TracingPort,
     metrics: MetricsPort,
@@ -175,14 +190,7 @@ def bootstrap_observability_bundle(
         logger_bootstrapper=bootstrap_logger,
         tracer_bootstrapper=bootstrap_tracer,
         metrics_bootstrapper=bootstrap_metrics,
-        audit_bootstrapper=lambda audit_settings, audit_logger, audit_metrics, audit_tracer: (
-            _create_runtime_audit_port(
-                settings=audit_settings,
-                logger=audit_logger,
-                metrics=audit_metrics,
-                tracing=audit_tracer,
-            )
-        ),
+        audit_bootstrapper=_runtime_audit_bootstrapper,
         dq_monitor_bootstrapper=bootstrap_dq_monitor,
         preflight_validator=validate_observability_preflight,
         yaml_config=yaml_config,

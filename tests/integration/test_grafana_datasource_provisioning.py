@@ -254,7 +254,8 @@ def test_grafana_uses_remote_renderer_sidecar() -> None:
         "/usr/local/bin/bioetl-bootstrap-grafana.sh",
     ]
     assert renderer["image"] == RENDERER_IMAGE
-    assert renderer["shm_size"] == "1gb"
+    # Chromium needs >=2gb /dev/shm; 1gb historically caused websocket url timeouts.
+    assert renderer["shm_size"] == "2gb"
     assert renderer["healthcheck"]["test"] == [
         "CMD",
         "grafana-image-renderer",
@@ -265,14 +266,15 @@ def test_grafana_uses_remote_renderer_sidecar() -> None:
         in renderer["environment"]
     )
     assert (
-        "BROWSER_FLAGS=--no-sandbox,--disable-dev-shm-usage" in renderer["environment"]
-    )
-    assert (
-        "BROWSER_READINESS_TIMEOUT=${GRAFANA_IMAGE_RENDERER_READINESS_TIMEOUT:-90s}"
+        "BROWSER_FLAGS=--no-sandbox,--disable-dev-shm-usage,--disable-gpu,--disable-software-rasterizer"
         in renderer["environment"]
     )
     assert (
-        "GOMEMLIMIT=${GRAFANA_IMAGE_RENDERER_GOMEMLIMIT:-1GiB}"
+        "BROWSER_READINESS_TIMEOUT=${GRAFANA_IMAGE_RENDERER_READINESS_TIMEOUT:-120s}"
+        in renderer["environment"]
+    )
+    assert (
+        "GOMEMLIMIT=${GRAFANA_IMAGE_RENDERER_GOMEMLIMIT:-2GiB}"
         in renderer["environment"]
     )
     assert not any(

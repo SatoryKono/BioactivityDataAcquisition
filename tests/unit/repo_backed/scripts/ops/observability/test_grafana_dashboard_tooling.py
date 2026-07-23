@@ -18,6 +18,27 @@ from scripts.ops.observability.grafana import (
 pytestmark = pytest.mark.repo_backed
 
 
+def test_rerender_has_no_committed_default_password() -> None:
+    assert rerender_subject.DEFAULT_PASSWORD == ""
+
+
+def test_rerender_password_resolution_uses_supported_env_order(
+    monkeypatch: Any,
+) -> None:
+    for name in (
+        "GF_SECURITY_ADMIN_PASSWORD",
+        "GRAFANA_PASSWORD",
+        "GRAFANA_ADMIN_PASSWORD",
+    ):
+        monkeypatch.delenv(name, raising=False)
+    assert rerender_subject._resolve_grafana_password() == ""
+
+    monkeypatch.setenv("GRAFANA_PASSWORD", "grafana-password")
+    assert rerender_subject._resolve_grafana_password() == "grafana-password"
+    monkeypatch.setenv("GF_SECURITY_ADMIN_PASSWORD", "gf-security-password")
+    assert rerender_subject._resolve_grafana_password() == "gf-security-password"
+
+
 def _backend_result(
     *,
     backend_available: bool,
@@ -600,8 +621,13 @@ def test_screenshot_runtime_setup_scripts_keep_bootstrap_contract() -> None:
     assert "npm_config_production=false" in shell_script
     assert "BIOETL_PLAYWRIGHT_NODE_MODULES" in shell_script
     assert "BIOETL_PLAYWRIGHT_LIBRARY_PATH" in shell_script
+    assert "BIOETL_PLAYWRIGHT_PREFER_ISOLATED_RUNTIME" in shell_script
+    assert '[[ "${REPO_ROOT}" == /mnt/* ]]' in shell_script
     assert "playwright-runtime" in shell_script
     assert "-type f -o -type l" in shell_script
+    assert "ldconfig_output=" in shell_script
+    assert '$2 != "(none)"' in shell_script
+    assert "grep -Eq 'Candidate: [^(none)]'" not in shell_script
     for package_name in (
         "libatk-bridge2.0-0t64",
         "libatk1.0-0t64",

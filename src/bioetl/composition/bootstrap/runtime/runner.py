@@ -31,6 +31,11 @@ from bioetl.infrastructure.time import SystemClock
 __all__ = ["bootstrap_pipeline_runner_service"]
 
 
+def _pipeline_run_id_factory() -> str:
+    """Factory function for pipeline run IDs."""
+    return create_runtime_occurrence_run_id("pipeline_run")
+
+
 def bootstrap_pipeline_runner_service(
     registry: PipelineRegistry | None = None,
 ) -> PipelineRunnerService:
@@ -73,5 +78,5 @@ def bootstrap_pipeline_runner_service(
         clock=SystemClock(),
         _context_service=PipelineRunContextService(),
         _execution_service=PipelineRunExecutionService(clock=SystemClock()),
-        run_id_factory=lambda: create_runtime_occurrence_run_id("pipeline_run"),
+        run_id_factory=_pipeline_run_id_factory,
     )

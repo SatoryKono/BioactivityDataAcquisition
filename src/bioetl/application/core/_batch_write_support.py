@@ -84,6 +84,41 @@ def emit_batch_failed(
     )
 
 
+async def _execute_layer_write(
+    *,
+    execute_with_span: Callable[..., Awaitable[object]],
+    writer: BatchWriter,
+    layer: str,
+    records: list[dict[str, object]],
+    batch_id: BatchID,
+    ingestion_ts: datetime,
+    bronze_refs: list[BronzeWriteResult] | None,
+    silver_refs: list[SilverWriteResult] | None,
+) -> object:
+    """Execute the layer-specific writer call inside its tracing span."""
+    if layer == "silver":
+        operation = writer.write_silver(
+            records,
+            batch_id,
+            ingestion_ts,
+            bronze_refs=bronze_refs,
+        )
+    else:
+        operation = writer.write_gold(records, silver_refs=silver_refs)
+    return await execute_with_span(
+        f"write_{layer}",
+        operation,
+        batch_id,
+        len(records),
+        on_error=lambda error: writer.log_and_track_write_error(
+            layer,
+            error,
+            batch_id,
+            record_count=len(records),
+        ),
+    )
+
+
 async def safe_write_layer(
     *,
     execute_with_span: Callable[..., Awaitable[object]],
@@ -106,37 +141,16 @@ async def safe_write_layer(
             f"safe_write_layer supports only 'silver' or 'gold' layers, got {layer!r}"
         )
     try:
-        if layer == "silver":
-            write_result = await execute_with_span(
-                "write_silver",
-                writer.write_silver(
-                    records,
-                    batch_id,
-                    ingestion_ts,
-                    bronze_refs=bronze_refs,
-                ),
-                batch_id,
-                len(records),
-                on_error=lambda error: writer.log_and_track_write_error(
-                    "silver",
-                    error,
-                    batch_id,
-                    record_count=len(records),
-                ),
-            )
-        else:
-            write_result = await execute_with_span(
-                "write_gold",
-                writer.write_gold(records, silver_refs=silver_refs),
-                batch_id,
-                len(records),
-                on_error=lambda error: writer.log_and_track_write_error(
-                    "gold",
-                    error,
-                    batch_id,
-                    record_count=len(records),
-                ),
-            )
+        write_result = await _execute_layer_write(
+            execute_with_span=execute_with_span,
+            writer=writer,
+            layer=layer,
+            records=records,
+            batch_id=batch_id,
+            ingestion_ts=ingestion_ts,
+            bronze_refs=bronze_refs,
+            silver_refs=silver_refs,
+        )
         writer._batch_metrics.track_batch_written(stage=layer, count=len(records))
         emit_batch_written(
             emitter=domain_event_emitter,
@@ -148,31 +162,17 @@ async def safe_write_layer(
         )
         return write_result
     except SchemaViolationError as error:
-        writer._batch_metrics.track_batch_failed(stage=layer, count=len(records))
-        emit_batch_failed(
-            emitter=domain_event_emitter,
+        await _quarantine_schema_violation(
+            writer=writer,
+            quarantine_manager=quarantine_manager,
+            logger=logger,
+            domain_event_emitter=domain_event_emitter,
             run_id=run_id,
+            layer=layer,
+            records=records,
             batch_id=batch_id,
-            layer=layer,
-            error=error,
-            occurred_at=ingestion_ts,
-        )
-        logger.warning(
-            "schema_violation_quarantined",
-            layer=layer,
-            errors=error.errors,
-        )
-        await quarantine_manager.quarantine_records(
-            [
-                DQQuarantineEntry(
-                    record=record,
-                    error_type=ErrorType.SCHEMA_VIOLATION,
-                    error_details=f"Schema violation in {layer}: {error.errors}",
-                )
-                for record in records
-            ],
-            batch_id,
             ingestion_ts=ingestion_ts,
+            error=error,
         )
         return None
     except operation_errors as error:
@@ -187,3 +187,45 @@ async def safe_write_layer(
                 occurred_at=ingestion_ts,
             )
         raise
+
+
+async def _quarantine_schema_violation(
+    *,
+    writer: BatchWriter,
+    quarantine_manager: QuarantineRuntimeService,
+    logger: LoggerPort,
+    domain_event_emitter: DomainEventEmitterProtocol | None,
+    run_id: RunID | None,
+    layer: str,
+    records: list[dict[str, object]],
+    batch_id: BatchID,
+    ingestion_ts: datetime,
+    error: SchemaViolationError,
+) -> None:
+    """Track failure metrics and quarantine schema-invalid records."""
+    writer._batch_metrics.track_batch_failed(stage=layer, count=len(records))
+    emit_batch_failed(
+        emitter=domain_event_emitter,
+        run_id=run_id,
+        batch_id=batch_id,
+        layer=layer,
+        error=error,
+        occurred_at=ingestion_ts,
+    )
+    logger.warning(
+        "schema_violation_quarantined",
+        layer=layer,
+        errors=error.errors,
+    )
+    await quarantine_manager.quarantine_records(
+        [
+            DQQuarantineEntry(
+                record=record,
+                error_type=ErrorType.SCHEMA_VIOLATION,
+                error_details=f"Schema violation in {layer}: {error.errors}",
+            )
+            for record in records
+        ],
+        batch_id,
+        ingestion_ts=ingestion_ts,
+    )

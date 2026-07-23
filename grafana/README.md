@@ -1676,7 +1676,7 @@ Server-side screenshots идут через remote `grafana-image-renderer` side
 `grafana/grafana-image-renderer@sha256:c0c920e6974b0d30ae25313051344afcd2054362529968ebd9545a4b2bc8119b`,
 explicit shared token (`GF_RENDERING_RENDERER_TOKEN` в Grafana и `AUTH_TOKEN`
 в renderer), актуальный `BROWSER_FLAGS=--no-sandbox,--disable-dev-shm-usage`,
-`BROWSER_READINESS_TIMEOUT=90s`, `shm_size: 1gb` и renderer metrics scrape
+`BROWSER_READINESS_TIMEOUT=120s`, `shm_size: 2gb` и renderer metrics scrape
 target `grafana-image-renderer`.
 
 ```bash

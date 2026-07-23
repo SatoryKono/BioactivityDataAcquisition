@@ -315,8 +315,10 @@ tracing-backed log hygiene живёт в collapsed row
   navigation bus `0..6`, then `Silver Reject Explorer`, `Explore Logs`,
   `Explore Traces`.
   Panel-level dashboard handoffs запрещены, если target уже доступен в
-  top-level шине. `run_id`, `payload_hash`, `record_id` в runtime dashboard
-  запрещены.
+  top-level шине. Prometheus labels `run_id`, `payload_hash`, and `record_id`
+  remain forbidden on Runtime (and all primary Prometheus surfaces). HTTP-backed
+  Runtime `$run_id` identity selectors for local `ID`/details panels are still
+  allowed and are not Prometheus labels.
 
 - **Runbook routing**:
   `Pipeline Alert Conditions` -> `pipeline-failure-critical.md`,
@@ -682,7 +684,7 @@ QA image, rule fixtures, and monitoring-profile pins in one reviewed change.
      Repo-backed renderer config должен использовать pinned
      `grafana/grafana-image-renderer:5.0.0`, matching
      `GF_RENDERING_RENDERER_TOKEN` / `AUTH_TOKEN`, `BROWSER_FLAGS` вместо
-     legacy `RENDERING_ARGS`, `shm_size: 1gb` и Prometheus target
+     legacy `RENDERING_ARGS`, `shm_size: 2gb` и Prometheus target
      `grafana-image-renderer`.
 - **Дашборд пустой**:
   1. Проверьте, что пайплайн-процесс запущен и не завершился с ошибкой.

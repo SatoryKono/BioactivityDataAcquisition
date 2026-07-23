@@ -1761,6 +1761,45 @@ def _policy_scope(
     return "provider_full_universe"
 
 
+_STRICTNESS_TO_SEMANTIC_CATEGORY: dict[str, str] = {
+    "strict_enum": "strict_enum",
+    "strict_operator": "strict_enum",
+    "strict_boolean": "strict_enum",
+    "strict_flag": "strict_enum",
+    "strict_json": "structured_json",
+    "canonical_ontology_id": "ontology_reference_identifier",
+    "controlled_unit": "controlled_vocabulary",
+    "normalization_only": "free_text",
+}
+
+
+def _chembl_semantic_category(entity: str, field_name: str) -> str | None:
+    policy_surface = chembl_policy_surface(entity, field_name)
+    if policy_surface is not None:
+        return policy_surface.category
+    if field_name in chembl_json_fields(f"chembl_{entity}"):
+        return "structured_json"
+    return None
+
+
+def _structured_policy_semantic_category(
+    *,
+    provider: str,
+    entity: str,
+    field_name: str,
+) -> str | None:
+    structured_policy = _publication_structured_policy(
+        provider=provider,
+        entity=entity,
+        field_name=field_name,
+    )
+    if structured_policy is None:
+        return None
+    if structured_policy.identifier_family:
+        return "ontology_reference_identifier"
+    return "structured_json"
+
+
 def _semantic_category(
     *,
     provider: str,
@@ -1771,39 +1810,19 @@ def _semantic_category(
     if entity == "publication" and _is_publication_taxonomy_field(field_name):
         return "derived_vocabulary"
     if provider == "chembl":
-        policy_surface = chembl_policy_surface(entity, field_name)
-        if policy_surface is not None:
-            return policy_surface.category
-        if field_name in chembl_json_fields(f"{provider}_{entity}"):
-            return "structured_json"
+        chembl_category = _chembl_semantic_category(entity, field_name)
+        if chembl_category is not None:
+            return chembl_category
     if REFERENCE_ID_SOURCES.get((provider, entity, field_name)) is not None:
         return "ontology_reference_identifier"
-    structured_policy = _publication_structured_policy(
+    structured_category = _structured_policy_semantic_category(
         provider=provider,
         entity=entity,
         field_name=field_name,
     )
-    if structured_policy is not None:
-        if structured_policy.identifier_family:
-            return "ontology_reference_identifier"
-        return "structured_json"
-
-    if strictness in {
-        "strict_enum",
-        "strict_operator",
-        "strict_boolean",
-        "strict_flag",
-    }:
-        return "strict_enum"
-    if strictness == "strict_json":
-        return "structured_json"
-    if strictness == "canonical_ontology_id":
-        return "ontology_reference_identifier"
-    if strictness == "controlled_unit":
-        return "controlled_vocabulary"
-    if strictness == "normalization_only":
-        return "free_text"
-    return strictness
+    if structured_category is not None:
+        return structured_category
+    return _STRICTNESS_TO_SEMANTIC_CATEGORY.get(strictness, strictness)
 
 
 def _governed_hash_ordering(

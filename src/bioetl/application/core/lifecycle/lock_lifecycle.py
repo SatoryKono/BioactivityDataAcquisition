@@ -33,6 +33,7 @@ class _LockRuntimeHostProtocol(Protocol):
 
     def get_context(self) -> LockContext | None: ...
 
+
 async def acquire_lock(host: _LockRuntimeHostProtocol) -> FencingToken | None:
     """Acquire the runtime lock and update shared runtime state."""
     token = await host._lock.acquire(
@@ -66,8 +67,7 @@ async def acquire_lock(host: _LockRuntimeHostProtocol) -> FencingToken | None:
 
 async def release_lock(host: _LockRuntimeHostProtocol) -> None:
     """Release the runtime lock, stop heartbeat, and clear context state."""
-    heartbeat = host._heartbeat
-    if heartbeat is not None:
+    if (heartbeat := host._heartbeat) is not None:
         await heartbeat.stop()
         host._heartbeat = None
 
@@ -85,7 +85,7 @@ async def release_lock(host: _LockRuntimeHostProtocol) -> None:
 
 async def start_heartbeat(host: _LockRuntimeHostProtocol) -> None:
     """Start the background heartbeat task for the acquired lock."""
-    heartbeat = host._heartbeat_factory(
+    host._heartbeat = heartbeat = host._heartbeat_factory(
         lock_port=host._lock,
         lock_key=host._config.lock_key,
         owner_id=host._run_id,
@@ -94,7 +94,6 @@ async def start_heartbeat(host: _LockRuntimeHostProtocol) -> None:
         shutdown_signal=host._shutdown_signal,
         logger=host._logger,
     )
-    host._heartbeat = heartbeat
     await heartbeat.start()
 
 
@@ -104,8 +103,6 @@ async def enter_lock_context[LockRuntimeHostT: _LockRuntimeHostProtocol](
     """Acquire the lock for async context-manager usage and start heartbeat."""
     token = await acquire_lock(host)
     if token is None:
-        raise PipelineShutdownError(
-            f"Failed to acquire lock for {host._config.lock_key}"
-        )
+        raise PipelineShutdownError(f"Lock acquisition failed: {host._config.lock_key}")
     await start_heartbeat(host)
     return host

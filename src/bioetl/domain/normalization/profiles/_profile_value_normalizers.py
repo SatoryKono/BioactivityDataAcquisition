@@ -21,6 +21,16 @@ from bioetl.domain.normalization.text import normalize_string
 _UNHANDLED = object()
 
 
+def _preserve_unknown_lexeme(normalized: str) -> str | None:
+    """Keep unknown governed vocabulary tokens as-is."""
+    return normalized
+
+
+def _preserve_unknown_uppercase_lexeme(normalized: str) -> str | None:
+    """Keep unknown governed vocabulary tokens in cross-pipeline uppercase form."""
+    return normalize_cross_pipeline_case(normalized, "uppercase")
+
+
 def _normalize_governed_vocabulary_value(
     value: object,
     *,
@@ -48,7 +58,7 @@ def normalize_profile_governed_vocabulary(
     return _normalize_governed_vocabulary_value(
         value,
         allowed_values=allowed_values,
-        fallback=(lambda normalized: normalized) if preserve_unknown else None,
+        fallback=_preserve_unknown_lexeme if preserve_unknown else None,
     )
 
 
@@ -62,13 +72,7 @@ def normalize_profile_governed_uppercase_vocabulary(
     return _normalize_governed_vocabulary_value(
         value,
         allowed_values=allowed_values,
-        fallback=(
-            lambda normalized: (
-                normalize_cross_pipeline_case(normalized, "uppercase")
-                if preserve_unknown
-                else None
-            )
-        ),
+        fallback=_preserve_unknown_uppercase_lexeme if preserve_unknown else None,
     )
 
 

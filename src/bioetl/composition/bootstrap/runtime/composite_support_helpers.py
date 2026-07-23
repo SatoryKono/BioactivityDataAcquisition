@@ -31,6 +31,12 @@ if TYPE_CHECKING:
 FIELD_GROUP_CONFIG_DIR = Path("configs/composites/field_groups")
 
 
+def _composite_basics_uuid_factory() -> str:
+    """Factory function for composite basics UUID generation."""
+    from bioetl.composition.occurrence_identity import create_runtime_occurrence_uuid
+    return create_runtime_occurrence_uuid("composite_basics")
+
+
 def bootstrap_runtime_basics_facade(
     *,
     config: CompositeConfig,
@@ -48,7 +54,6 @@ def bootstrap_runtime_basics_facade(
         bootstrap_logger,
         bootstrap_tracer,
     )
-    from bioetl.composition.occurrence_identity import create_runtime_occurrence_uuid
     from bioetl.composition.runtime_builders.config_access import get_settings
     from bioetl.infrastructure.locking.memory_lock import MemoryLock
 
@@ -72,7 +77,7 @@ def bootstrap_runtime_basics_facade(
         tracer_bootstrapper=bootstrap_tracer,
         storage_bootstrapper=bootstrap_storage_adapter,
         lock_factory=MemoryLock,
-        uuid_factory=lambda: create_runtime_occurrence_uuid("composite_basics"),
+        uuid_factory=_composite_basics_uuid_factory,
     )
 
 

@@ -11,6 +11,7 @@ TIMEOUT_SECS="${CR_LAYER_TIMEOUT:-1500}"
 TS="$(date +%Y%m%d_%H%M%S)"
 SUMMARY="${OUT}/architecture-layered-remaining_${TS}.md"
 AGENT_ALL="${OUT}/architecture-layered-remaining_${TS}.agent.ndjson"
+CONSOLIDATED="${OUT}/architecture-layered-remaining_${TS}_consolidated.md"
 
 if [[ ! -d "${DST}/.git" ]]; then
   echo "missing worktree ${DST}; run full script first" >&2
@@ -73,6 +74,11 @@ for d in "${DIRS[@]}"; do
   } >>"${SUMMARY}"
 done
 
+python3 "${SRC}/scripts/ops/_build_arch_review_report.py" \
+  "${AGENT_ALL}" \
+  "${CONSOLIDATED}"
+
 echo "SUMMARY_FILE=${SUMMARY}"
 echo "AGENT_FILE=${AGENT_ALL}"
+echo "CONSOLIDATED_FILE=${CONSOLIDATED}"
 echo DONE

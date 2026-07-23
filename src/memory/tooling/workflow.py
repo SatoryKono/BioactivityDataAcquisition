@@ -617,6 +617,118 @@ def pre_task_workflow(
     }
 
 
+def _post_task_base_payload(
+    *,
+    task_id: str,
+    title: str,
+    summary_path: Path,
+) -> dict[str, Any]:
+    return {
+        "kind": "post-task",
+        "task_id": task_id,
+        "title": title,
+        "summary_note": str(summary_path),
+    }
+
+
+def _format_post_task_validation_issue(issue: object) -> dict[str, str]:
+    if isinstance(issue, dict):
+        return {
+            "path": str(issue.get("path", "<unknown>")),
+            "message": str(issue.get("message", issue)),
+        }
+    return {
+        "path": str(getattr(issue, "path", "<unknown>")),
+        "message": str(getattr(issue, "message", issue)),
+    }
+
+
+def _post_task_validation_failure_payload(
+    *,
+    task_id: str,
+    title: str,
+    summary_path: Path,
+    validation_result: dict[str, Any],
+) -> dict[str, Any] | None:
+    validation_issues = validation_result.get("issues", [])
+    validation_status = validation_result.get("status", "completed")
+    base = _post_task_base_payload(
+        task_id=task_id, title=title, summary_path=summary_path
+    )
+    if validation_status != "completed":
+        payload: dict[str, Any] = {
+            **base,
+            "ok": False,
+            "degraded": True,
+            "validation_status": validation_status,
+            "validation_issues": validation_issues,
+        }
+        if "timeout_seconds" in validation_result:
+            payload["validation_timeout_seconds"] = validation_result["timeout_seconds"]
+        for key in ("error", "stderr", "stdout", "returncode"):
+            if value := validation_result.get(key):
+                payload[f"validation_{key}"] = value
+        return payload
+    if not validation_issues:
+        return None
+    return {
+        **base,
+        "ok": False,
+        "validation_issues": [
+            _format_post_task_validation_issue(issue) for issue in validation_issues
+        ],
+    }
+
+
+def _maybe_run_post_task_refresh(
+    *,
+    run_refresh: bool,
+    refresh_timeout_seconds: float | None,
+    repo_root: Path,
+    refresh_repo_root: Path | None,
+    refresh_output_root: Path | None,
+    focus_query: str,
+) -> tuple[Path | None, dict[str, Any] | None]:
+    if not run_refresh:
+        return refresh_output_root, None
+    output_root = refresh_output_root or Path(
+        tempfile.mkdtemp(prefix="memory-post-task-")
+    )
+    refresh_report = _run_post_task_refresh(
+        timeout_seconds=refresh_timeout_seconds,
+        repo_root=(refresh_repo_root or repo_root).resolve(),
+        output_root=output_root.resolve(),
+        focus_query=focus_query,
+    )
+    return output_root, refresh_report
+
+
+def _write_post_task_summary_note(
+    *,
+    task_id: str,
+    title: str,
+    summary: str,
+    source_refs: list[str],
+    summary_note_path: Path | None,
+) -> Path:
+    summary_path = summary_note_path or _default_note_path(task_id, kind="summary")
+    _write_note(
+        path=summary_path,
+        metadata={
+            "id": _slugify_task_id(task_id),
+            "title": title,
+            "task_id": task_id,
+            "created_at": _utc_now(),
+            "ttl_days": 14,
+            "confidence": "episodic",
+            "source_refs": source_refs or ["<add-source-ref>"],
+            "summary": summary,
+        },
+        body=_summary_note_body(title, summary),
+    )
+    return summary_path
+
+
 def post_task_workflow(
     *,
     task_id: str,
@@ -635,100 +747,50 @@ def post_task_workflow(
     refresh_timeout_seconds: float | None = None,
 ) -> dict[str, Any]:
     """Run the standard post-task memory flow."""
-    summary_path = summary_note_path or _default_note_path(task_id, kind="summary")
-    _write_note(
-        path=summary_path,
-        metadata={
-            "id": _slugify_task_id(task_id),
-            "title": title,
-            "task_id": task_id,
-            "created_at": _utc_now(),
-            "ttl_days": 14,
-            "confidence": "episodic",
-            "source_refs": source_refs or ["<add-source-ref>"],
-            "summary": summary,
-        },
-        body=_summary_note_body(title, summary),
+    summary_path = _write_post_task_summary_note(
+        task_id=task_id,
+        title=title,
+        summary=summary,
+        source_refs=source_refs,
+        summary_note_path=summary_note_path,
     )
-
     repo_root = _discover_repo_root() or Path(__file__).resolve().parents[3]
     validation_result = _run_post_task_validation(
         timeout_seconds=validation_timeout_seconds,
         repo_root=repo_root.resolve(),
     )
-    validation_issues = validation_result.get("issues", [])
-    validation_status = validation_result.get("status", "completed")
-    if validation_status != "completed":
-        payload: dict[str, Any] = {
-            "kind": "post-task",
-            "task_id": task_id,
-            "title": title,
-            "summary_note": str(summary_path),
-            "ok": False,
-            "degraded": True,
-            "validation_status": validation_status,
-            "validation_issues": validation_issues,
-        }
-        if "timeout_seconds" in validation_result:
-            payload["validation_timeout_seconds"] = validation_result["timeout_seconds"]
-        for key in ("error", "stderr", "stdout", "returncode"):
-            if value := validation_result.get(key):
-                payload[f"validation_{key}"] = value
-        return payload
+    failure_payload = _post_task_validation_failure_payload(
+        task_id=task_id,
+        title=title,
+        summary_path=summary_path,
+        validation_result=validation_result,
+    )
+    if failure_payload is not None:
+        return failure_payload
 
-    if validation_issues:
-        return {
-            "kind": "post-task",
-            "task_id": task_id,
-            "title": title,
-            "summary_note": str(summary_path),
-            "ok": False,
-            "validation_issues": [
-                {
-                    "path": (
-                        issue.get("path", "<unknown>")
-                        if isinstance(issue, dict)
-                        else issue.path
-                    ),
-                    "message": (
-                        issue.get("message", str(issue))
-                        if isinstance(issue, dict)
-                        else issue.message
-                    ),
-                }
-                for issue in validation_issues
-            ],
-        }
-
-    refresh_report: dict[str, Any] | None = None
-    output_root = refresh_output_root
-    if run_refresh:
-        if output_root is None:
-            output_root = Path(tempfile.mkdtemp(prefix="memory-post-task-"))
-        repo_root = refresh_repo_root or repo_root
-        refresh_report = _run_post_task_refresh(
-            timeout_seconds=refresh_timeout_seconds,
-            repo_root=repo_root.resolve(),
-            output_root=output_root.resolve(),
-            focus_query=title,
-        )
-
+    output_root, refresh_report = _maybe_run_post_task_refresh(
+        run_refresh=run_refresh,
+        refresh_timeout_seconds=refresh_timeout_seconds,
+        repo_root=repo_root,
+        refresh_repo_root=refresh_repo_root,
+        refresh_output_root=refresh_output_root,
+        focus_query=title,
+    )
     prune_report = prune_episodic_notes(apply=False) if run_prune else None
-
-    curated_path: Path | None = None
-    if promote_to is not None:
-        curated_path = promote_note(
+    curated_path = (
+        promote_note(
             summary_path,
             target_kind=promote_to,
             summary=summary,
             move=move_on_promote,
         )
-
+        if promote_to is not None
+        else None
+    )
     return {
-        "kind": "post-task",
-        "task_id": task_id,
-        "title": title,
-        "summary_note": str(summary_path),
+        **_post_task_base_payload(
+            task_id=task_id, title=title, summary_path=summary_path
+        ),
         "refresh_output_root": str(output_root) if output_root else None,
         "refresh_report": refresh_report,
         "prune_report": _compact_prune_report(prune_report),
@@ -976,110 +1038,141 @@ def _payload_exit_code(payload: dict[str, Any]) -> int:
     return 0 if payload.get("ok", True) else 1
 
 
+def _emit_json(payload: dict[str, Any]) -> int:
+    print(json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=True))
+    return _payload_exit_code(payload)
+
+
+def _emit_pre_task_text(payload: dict[str, Any]) -> None:
+    print(f"Pre-task workflow: {payload['task_id']}")
+    if payload.get("session_note"):
+        print(f"- session note: {payload['session_note']}")
+    if payload.get("refresh_output_root"):
+        print(f"- refresh output root: {payload['refresh_output_root']}")
+    results = payload["retrieval"]["results"]
+    print(f"- catalog hits: {len(results['catalog'])}")
+    print(f"- rag hits: {len(results['rag'])}")
+    print(f"- timeline hits: {len(results['timeline'])}")
+    if payload["retrieval"].get("degraded"):
+        print("- degraded: missing retrieval artifacts; refresh was skipped")
+
+
+def _emit_post_task_text(payload: dict[str, Any]) -> None:
+    print(f"Post-task workflow: {payload['task_id']}")
+    print(f"- summary note: {payload['summary_note']}")
+    if payload.get("refresh_output_root"):
+        print(f"- refresh output root: {payload['refresh_output_root']}")
+    if payload.get("promoted_note"):
+        print(f"- promoted note: {payload['promoted_note']}")
+    if not payload.get("degraded"):
+        return
+    validation_status = payload.get("validation_status")
+    if validation_status:
+        print(f"- degraded: validation did not complete ({validation_status})")
+        return
+    print("- degraded: refresh completed with partial artifact failures")
+
+
 def _emit(payload: dict[str, Any], *, as_json: bool) -> int:
     if as_json:
-        print(json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=True))
-    elif payload["kind"] == "pre-task":
-        print(f"Pre-task workflow: {payload['task_id']}")
-        if payload.get("session_note"):
-            print(f"- session note: {payload['session_note']}")
-        if payload.get("refresh_output_root"):
-            print(f"- refresh output root: {payload['refresh_output_root']}")
-        results = payload["retrieval"]["results"]
-        print(f"- catalog hits: {len(results['catalog'])}")
-        print(f"- rag hits: {len(results['rag'])}")
-        print(f"- timeline hits: {len(results['timeline'])}")
-        if payload["retrieval"].get("degraded"):
-            print("- degraded: missing retrieval artifacts; refresh was skipped")
+        return _emit_json(payload)
+    if payload["kind"] == "pre-task":
+        _emit_pre_task_text(payload)
     else:
-        print(f"Post-task workflow: {payload['task_id']}")
-        print(f"- summary note: {payload['summary_note']}")
-        if payload.get("refresh_output_root"):
-            print(f"- refresh output root: {payload['refresh_output_root']}")
-        if payload.get("promoted_note"):
-            print(f"- promoted note: {payload['promoted_note']}")
-        if payload.get("degraded"):
-            validation_status = payload.get("validation_status")
-            if validation_status:
-                print(f"- degraded: validation did not complete ({validation_status})")
-            else:
-                print("- degraded: refresh completed with partial artifact failures")
+        _emit_post_task_text(payload)
+    return _payload_exit_code(payload)
+
+
+def _run_pre_task_command(args: argparse.Namespace) -> int:
+    payload = pre_task_workflow(
+        task_id=args.task_id,
+        title=args.title,
+        query=args.query,
+        source_refs=args.source_ref,
+        create_session_note=not args.skip_session_note,
+        chunks_path=args.chunks_path,
+        events_dir=args.events_dir,
+        refresh_output_root=args.refresh_output_root,
+        run_refresh_if_missing=not args.skip_refresh_if_missing,
+        limit=args.limit,
+        profile=args.profile,
+    )
+    return _emit(payload, as_json=args.json)
+
+
+def _run_post_task_command(args: argparse.Namespace) -> int:
+    payload = post_task_workflow(
+        task_id=args.task_id,
+        title=args.title,
+        summary=args.summary,
+        source_refs=args.source_ref,
+        refresh_output_root=args.refresh_output_root,
+        run_refresh=not args.skip_refresh,
+        run_prune=args.prune,
+        promote_to=args.promote_to,
+        move_on_promote=args.move_on_promote,
+        validation_timeout_seconds=args.validation_timeout_seconds,
+        refresh_timeout_seconds=args.refresh_timeout_seconds,
+    )
+    return _emit(payload, as_json=args.json)
+
+
+def _emit_smoke_text(payload: dict[str, Any]) -> None:
+    print("Memory workflow smoke:")
+    print(f"- python: {payload['python_executable']}")
+    print(f"- pre-task: {'ok' if payload['pre_task_ok'] else 'failed'}")
+    print(f"- post-task: {'ok' if payload['post_task_ok'] else 'failed'}")
+    if payload.get("post_task_degraded"):
+        print(
+            "- post-task degraded: "
+            f"{payload.get('post_task_validation_status', 'unknown')}"
+        )
+
+
+def _run_smoke_command(args: argparse.Namespace) -> int:
+    payload = smoke_workflow(
+        validation_timeout_seconds=args.validation_timeout_seconds,
+    )
+    if args.json:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+        return _payload_exit_code(payload)
+    _emit_smoke_text(payload)
+    return _payload_exit_code(payload)
+
+
+def _emit_review_curated_text(payload: dict[str, Any]) -> None:
+    summary = payload["summary"]
+    print("Curated review ritual:")
+    print(f"- notes: {summary['note_count']}")
+    print(f"- due: {summary['due_count']}")
+    print(f"- stale: {summary['stale_count']}")
+    print(f"- review candidates: {summary['review_candidates']}")
+    print(f"- cadence: {payload['cadence']}")
+    print(f"- next action: {payload['next_action']}")
+
+
+def _run_review_curated_command(args: argparse.Namespace) -> int:
+    payload = review_curated_workflow(curated_root=args.root)
+    if args.json:
+        return _emit_json(payload)
+    _emit_review_curated_text(payload)
     return _payload_exit_code(payload)
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
-
-    if args.command == "pre-task":
-        payload = pre_task_workflow(
-            task_id=args.task_id,
-            title=args.title,
-            query=args.query,
-            source_refs=args.source_ref,
-            create_session_note=not args.skip_session_note,
-            chunks_path=args.chunks_path,
-            events_dir=args.events_dir,
-            refresh_output_root=args.refresh_output_root,
-            run_refresh_if_missing=not args.skip_refresh_if_missing,
-            limit=args.limit,
-            profile=args.profile,
-        )
-        return _emit(payload, as_json=args.json)
-
-    if args.command == "post-task":
-        payload = post_task_workflow(
-            task_id=args.task_id,
-            title=args.title,
-            summary=args.summary,
-            source_refs=args.source_ref,
-            refresh_output_root=args.refresh_output_root,
-            run_refresh=not args.skip_refresh,
-            run_prune=args.prune,
-            promote_to=args.promote_to,
-            move_on_promote=args.move_on_promote,
-            validation_timeout_seconds=args.validation_timeout_seconds,
-            refresh_timeout_seconds=args.refresh_timeout_seconds,
-        )
-        return _emit(payload, as_json=args.json)
-
-    if args.command == "smoke":
-        payload = smoke_workflow(
-            validation_timeout_seconds=args.validation_timeout_seconds,
-        )
-        if args.json:
-            print(json.dumps(payload, indent=2, sort_keys=True))
-            return 0 if payload.get("ok", True) else 1
-
-        print("Memory workflow smoke:")
-        print(f"- python: {payload['python_executable']}")
-        print(f"- pre-task: {'ok' if payload['pre_task_ok'] else 'failed'}")
-        print(f"- post-task: {'ok' if payload['post_task_ok'] else 'failed'}")
-        if payload.get("post_task_degraded"):
-            print(
-                "- post-task degraded: "
-                f"{payload.get('post_task_validation_status', 'unknown')}"
-            )
-        return 0 if payload.get("ok", True) else 1
-
-    if args.command == "review-curated":
-        payload = review_curated_workflow(curated_root=args.root)
-        if args.json:
-            print(json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=True))
-            return 0 if payload.get("ok", True) else 1
-
-        summary = payload["summary"]
-        print("Curated review ritual:")
-        print(f"- notes: {summary['note_count']}")
-        print(f"- due: {summary['due_count']}")
-        print(f"- stale: {summary['stale_count']}")
-        print(f"- review candidates: {summary['review_candidates']}")
-        print(f"- cadence: {payload['cadence']}")
-        print(f"- next action: {payload['next_action']}")
-        return 0 if payload.get("ok", True) else 1
-
-    parser.error(f"unsupported command: {args.command}")
-    return 2
+    handlers = {
+        "pre-task": _run_pre_task_command,
+        "post-task": _run_post_task_command,
+        "smoke": _run_smoke_command,
+        "review-curated": _run_review_curated_command,
+    }
+    handler = handlers.get(args.command)
+    if handler is None:
+        parser.error(f"unsupported command: {args.command}")
+        return 2
+    return handler(args)
 
 
 if __name__ == "__main__":

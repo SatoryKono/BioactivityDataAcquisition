@@ -125,13 +125,13 @@ def is_empty_value(val: object) -> bool:
 
     if val is None:
         return True
-    if isinstance(val, str) and val.strip() == "":
-        return True
-    if isinstance(val, Mapping):
+    if isinstance(val, str):
+        return not val.strip()
+    if isinstance(val, (bytes, bytearray)):
+        return False
+    if isinstance(val, (Mapping, Sequence, set, frozenset)):
         return len(val) == 0
-    if isinstance(val, Sequence) and not isinstance(val, (str, bytes, bytearray)):
-        return len(val) == 0
-    return isinstance(val, (set, frozenset)) and len(val) == 0
+    return False
 
 
 def _is_json_list_candidate(value: str) -> bool:

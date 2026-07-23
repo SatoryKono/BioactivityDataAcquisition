@@ -4,8 +4,9 @@
     "description": "Create a BioETL pipeline configuration",
     "body": [
       "# BioETL Pipeline Configuration",
-      "pipeline_id: ${1:provider}_${2:entity}",
+      "pipeline_name: ${1:provider}.${2:entity}",
       "version: \"1.0.0\"",
+      "idempotency_contract: merge_upsert",
       "",
       "provider:",
       "  name: ${1:provider}",
@@ -32,9 +33,9 @@
       "  validity_threshold: 0.90",
       "",
       "output:",
-      "  format: parquet",
+      "  storage: ${5:delta}",
       "  compression: zstd",
-      "  layer: ${5:silver}"
+      "  layer: ${6:curated}"
     ]
   },
   "BioETL Data Quality Rules": {
@@ -102,19 +103,20 @@
     "body": [
       "# Medallion Architecture Configuration",
       "medallion:",
-      "  bronze:",
-      "    path: data/bronze/${1:provider}",
-      "    format: raw",
+      "  raw:",
+      "    path: storage/raw/${1:provider}",
+      "    storage: object",
       "    compression: none",
       "    append_only: true",
-      "  silver:",
-      "    path: data/silver/${1:provider}",
-      "    format: parquet",
+      "  curated:",
+      "    path: storage/curated/${1:provider}",
+      "    storage: delta",
       "    compression: zstd",
+      "    idempotency_contract: merge_upsert",
       "    idempotency_key: ${2:record_id}",
-      "  gold:",
-      "    path: data/gold/${1:provider}",
-      "    format: parquet",
+      "  serving:",
+      "    path: storage/serving/${1:provider}",
+      "    storage: delta",
       "    compression: zstd",
       "    validation: strict"
     ]
@@ -127,7 +129,7 @@
       "observability:",
       "  logging:",
       "    level: INFO",
-    "    structured: true",
+      "    structured: true",
       "    format: json",
       "  metrics:",
       "    enabled: true",

@@ -70,7 +70,7 @@ def build_merge_dependencies(
     # Create the actual JoinExecutorService first
     join_service = JoinExecutorService(
         logger=logger,
-        join_type_resolver=lambda: resolve_join_how(config.merge.strategy),
+        join_type_resolver=_create_join_type_resolver(config.merge.strategy, resolve_join_how),
     )
     # Wrap it with the real adapter
     join_executor = PolarsJoinBridge(join_service)
@@ -110,3 +110,13 @@ def build_merge_dependencies(
 
 
 __all__ = ["build_merge_dependencies"]
+
+
+def _create_join_type_resolver(
+    merge_strategy: MergeStrategy,
+    resolve_join_how: Callable[[MergeStrategy], JoinHow],
+) -> Callable[[], JoinHow]:
+    """Create a join type resolver function for the given merge strategy."""
+    def _resolver() -> JoinHow:
+        return resolve_join_how(merge_strategy)
+    return _resolver

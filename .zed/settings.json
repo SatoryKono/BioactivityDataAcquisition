@@ -3,8 +3,9 @@
   "tab_size": 4,
   "preferred_line_length": 88,
   "soft_wrap": "preferred_line_length",
-  "autosave": "after_delay",
-  "autosave_delay_ms": 1000,
+  "autosave": "on_focus_change",
+  "file_scan_inclusions": [],
+  "redact_private_values": true,
   "languages": {
     "Python": {
       "format_on_save": "on",
@@ -14,11 +15,10 @@
         }
       },
       "code_actions_on_format": {
-        "source.organizeImports.ruff": true,
-        "source.fixAll.ruff": true
+        "source.organizeImports.ruff": true
       },
       "language_servers": ["basedpyright", "ruff", "!pylsp"],
-      "indent_style": "space",
+      "hard_tabs": false,
       "tab_size": 4
     },
     "YAML": {
@@ -39,52 +39,24 @@
     "ruff": {
       "initialization_options": {
         "settings": {
-          "lineLength": 88,
-          "targetVersion": "py312",
-          "lint": {
-            "select": [
-              "E",
-              "W",
-              "F",
-              "FA",
-              "I",
-              "B",
-              "C4",
-              "UP",
-              "ARG",
-              "SIM",
-              "PTH",
-              "RUF",
-              "T201"
-            ],
-            "ignore": [
-              "RUF001",
-              "RUF002",
-              "RUF003"
-            ]
-          },
-          "format": {
-            "lineLength": 88
-          }
+          "configurationPreference": "filesystemFirst"
         }
       }
     },
     "basedpyright": {
-      "initialization_options": {
-        "analysis": {
+      "settings": {
+        "basedpyright.analysis": {
           "typeCheckingMode": "strict",
           "pythonVersion": "3.12",
           "autoSearchPaths": true,
           "useLibraryCodeForTypes": true,
-          "diagnosticMode": "workspace",
-          "stubPath": "src"
+          "diagnosticMode": "openFilesOnly"
         }
       }
     }
   },
   "terminal": {
     "env": {
-      "PYTHONPATH": "src;.",
       "PYTHONDONTWRITEBYTECODE": "1"
     },
     "font_family": "JetBrains Mono",
@@ -99,13 +71,6 @@
       "env": {
         "NPM_CONFIG_CACHE": ".cache/npm-cache",
         "MEMORY_FILE_PATH": "docs/00-project/ai/memory/mcp-memory.json"
-      }
-    },
-    "filesystem": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem@2026.1.14", "."],
-      "env": {
-        "NPM_CONFIG_CACHE": ".cache/npm-cache"
       }
     },
     "fetch": {
@@ -169,20 +134,25 @@
           "terminal": true,
           "write_file": true
         },
-        "enable_all_context_servers": true,
-        "context_servers": {}
+        "enable_all_context_servers": false,
+        "context_servers": {
+          "memory": {},
+          "fetch": {},
+          "deepwiki": {}
+        }
       }
     },
     "tool_permissions": {
       "default": "allow",
       "tools": {
         "terminal": {
-          "default": "allow",
+          "default": "confirm",
           "always_deny": [
             { "pattern": "\\brm\\s+-rf\\s+(/|~|\\.|\\.\\.|\\*)" },
             { "pattern": "\\bsudo\\s+rm\\b" }
           ],
           "always_confirm": [
+            { "pattern": "\\.env" },
             { "pattern": "\\bgit\\s+push\\b" },
             { "pattern": "\\bsudo\\b" }
           ]
@@ -192,7 +162,7 @@
           "always_deny": [
             { "pattern": "(^|/)\\.env(\\.|$|/)" },
             { "pattern": "(^|/)secrets?/" },
-            { "pattern": "\\.(pem|key)$" }
+            { "pattern": "\\.(pem|key|cert|crt)$" }
           ]
         },
         "write_file": {
@@ -200,7 +170,7 @@
           "always_deny": [
             { "pattern": "(^|/)\\.env(\\.|$|/)" },
             { "pattern": "(^|/)secrets?/" },
-            { "pattern": "\\.(pem|key)$" }
+            { "pattern": "\\.(pem|key|cert|crt)$" }
           ]
         },
         "delete_path": {
@@ -208,7 +178,8 @@
           "always_deny": [
             { "pattern": "(^|/)\\.git(/|$)" },
             { "pattern": "(^|/)\\.env(\\.|$|/)" },
-            { "pattern": "(^|/)secrets?/" }
+            { "pattern": "(^|/)secrets?/" },
+            { "pattern": "\\.(pem|key|cert|crt)$" }
           ]
         },
         "move_path": {
@@ -216,7 +187,8 @@
           "always_deny": [
             { "pattern": "(^|/)\\.git(/|$)" },
             { "pattern": "(^|/)\\.env(\\.|$|/)" },
-            { "pattern": "(^|/)secrets?/" }
+            { "pattern": "(^|/)secrets?/" },
+            { "pattern": "\\.(pem|key|cert|crt)$" }
           ]
         },
         "copy_path": {
