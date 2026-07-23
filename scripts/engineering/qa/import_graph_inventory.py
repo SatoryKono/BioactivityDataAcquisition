@@ -268,6 +268,8 @@ def _collect_parsed_modules(repo_root_str: str) -> tuple[ParsedModule, ...]:
         return cached
 
     parsed_modules: list[ParsedModule] = []
+    # Preserve scan-label grouping: read each scan separately so ParsedModule
+    # labels remain src/tests even though fingerprint covers both trees.
     for scan in scans:
         for importer_module, py_file, source_text in _read_module_sources(
             _iter_import_sources(scan)
