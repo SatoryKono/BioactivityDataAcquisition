@@ -139,11 +139,11 @@ def test_issue_5600_zero_import_inventory_is_owned_and_time_bounded() -> None:
     assert summary["repo_wide_untriaged_zero_import_candidate_count"] == 0
     assert summary["repo_wide_candidates_without_owner_tests_count"] == 0
     assert summary["triaged_retained_without_owner_tests_count"] == 0
-    assert inventory["review_window"]["next_review_by"] == "2026-09-14"
+    assert inventory["review_window"]["next_review_by"] == "2026-10-21"
 
     for row in inventory["repo_wide_zero_import_candidates"]:
         assert row["classification_status"] == "classified"
-        assert row["review_by"] == "2026-09-14"
+        assert row["review_by"] == "2026-10-21"
         assert row["linked_issue"] == "#4541"
         assert row["rationale"]
         assert row["owner_test_count"] >= 1
