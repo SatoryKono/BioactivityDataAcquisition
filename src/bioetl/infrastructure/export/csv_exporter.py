@@ -14,7 +14,7 @@ from __future__ import annotations
 
 __all__ = ["CsvExporter"]
 
-
+import asyncio
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -188,6 +188,23 @@ class CsvExporter:
         Returns:
             Path to the written CSV file.
         """
+        return await asyncio.to_thread(
+            self._export_sync,
+            table_name,
+            data,
+            append,
+            sort_by,
+            primary_keys,
+        )
+
+    def _export_sync(
+        self,
+        table_name: str,
+        data: pa.Table,
+        append: bool,
+        sort_by: list[str] | None,
+        primary_keys: list[str] | None,
+    ) -> Path:
         _ = primary_keys
         csv_full_path = self.base_path / f"{table_name}.csv"
         csv_full_path.parent.mkdir(parents=True, exist_ok=True)
@@ -225,6 +242,16 @@ class CsvExporter:
         Returns:
             Path to the finalized CSV, or *None* if the file does not exist.
         """
+        return await asyncio.to_thread(
+            self._finalize_csv_sync, table_name, sort_by, primary_keys
+        )
+
+    def _finalize_csv_sync(
+        self,
+        table_name: str,
+        sort_by: list[str] | None,
+        primary_keys: list[str] | None,
+    ) -> Path | None:
         csv_full_path = self.base_path / f"{table_name}.csv"
         if not csv_full_path.exists():
             return None

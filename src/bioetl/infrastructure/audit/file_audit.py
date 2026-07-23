@@ -96,7 +96,7 @@ class FileAuditAdapter(FileAuditIOMixin):
             span.set_attribute("bioetl.audit.operation", entry.operation.value)
             span.set_attribute("bioetl.audit.records_count", entry.records_count)
             try:
-                self._write_entry_sync(entry)
+                await asyncio.to_thread(self._write_entry_sync, entry)
             except OSError as exc:
                 duration_seconds = time.perf_counter() - started
                 self._emit_write_metrics(
@@ -177,7 +177,8 @@ class FileAuditAdapter(FileAuditIOMixin):
             )
             span.set_attribute("bioetl.audit.limit", limit)
             try:
-                entries = self._read_entries_sync(
+                entries = await asyncio.to_thread(
+                    self._read_entries_sync,
                     run_id,
                     layer,
                     table_name,
