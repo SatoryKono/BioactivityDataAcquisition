@@ -2,8 +2,8 @@
 
 - snapshot_date: 2026-07-23
 - linked_issue: #4541
-- last_reviewed: 2026-06-16
-- next_review_by: 2026-09-14
+- last_reviewed: 2026-07-23
+- next_review_by: 2026-10-21
 - review_cycle_days: 90
 - triaged_entry_count: 18
 - repo_wide_zero_import_candidate_count: 1
