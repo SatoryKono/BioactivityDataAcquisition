@@ -54,7 +54,15 @@ class MemoryLock(LockPort):
             await self._release_expired_locks()
 
     async def _release_expired_locks(self) -> None:
-        """Release all locks that have exceeded their TTL."""
+        """Drop soft-expired lock entries that are no longer held.
+
+        Process-local MemoryLock must not force-release a still-held
+        ``asyncio.Lock``. Long write stages can delay heartbeats while the
+        owner coroutine is still actively writing; forcibly dropping the
+        entry mid-write surfaces as ``LockNotHeldError`` on the next layer.
+        Abandoned held locks are freed only by explicit ``release()`` or
+        process exit (same lifetime as the in-memory map).
+        """
         current_time = time.monotonic()
         async with self._global_lock:
             expired_keys = [
@@ -62,12 +70,9 @@ class MemoryLock(LockPort):
                 for key, (_, lock, expires_at, _, _) in self._locks.items()
                 if expires_at is not None
                 and current_time > expires_at
-                and lock.locked()
+                and not lock.locked()
             ]
             for key in expired_keys:
-                _, lock, _, _, _ = self._locks[key]
-                if lock.locked():
-                    lock.release()
                 del self._locks[key]
 
     async def _try_acquire(
@@ -255,18 +260,28 @@ class MemoryLock(LockPort):
             if key not in self._locks:
                 return False
 
-            existing_owner, lock, expires_at, _, _ = self._locks[key]
+            existing_owner, lock, expires_at, original_ttl, sequence = self._locks[key]
 
             # Check if lock is still held
             if not lock.locked():
                 return False
 
-            # Check if lock has expired
-            if expires_at is not None and time.monotonic() > expires_at:
+            if existing_owner != str(owner_id):
                 return False
 
-            # Check owner matches
-            return existing_owner == str(owner_id)
+            # Soft-expired but still held by the same owner: renew on validate so
+            # write stages survive delayed heartbeats without dropping ownership.
+            if expires_at is not None and time.monotonic() > expires_at:
+                if original_ttl is None:
+                    return True
+                self._locks[key] = (
+                    existing_owner,
+                    lock,
+                    time.monotonic() + original_ttl,
+                    original_ttl,
+                    sequence,
+                )
+            return True
 
     async def validate_fencing_token(self, key: str, token: FencingToken) -> bool:
         """Validate that the given fencing token is still valid for the lock.
@@ -281,17 +296,28 @@ class MemoryLock(LockPort):
         async with self._global_lock:
             if key not in self._locks:
                 return False
-            existing_owner, lock, expires_at, _, sequence = self._locks[key]
+            existing_owner, lock, expires_at, original_ttl, sequence = self._locks[key]
             if token.key != key:
                 return False
 
             if not lock.locked():
                 return False
-            if expires_at is not None and time.monotonic() > expires_at:
-                return False
             if existing_owner != str(token.owner_id):
                 return False
-            return sequence is not None and token.sequence == sequence
+            if sequence is None or token.sequence != sequence:
+                return False
+
+            # Soft-expired held locks stay valid for the fencing owner and renew.
+            if expires_at is not None and time.monotonic() > expires_at:
+                if original_ttl is not None:
+                    self._locks[key] = (
+                        existing_owner,
+                        lock,
+                        time.monotonic() + original_ttl,
+                        original_ttl,
+                        sequence,
+                    )
+            return True
 
     async def aclose(self) -> None:
         """Close all locks and stop background tasks."""

@@ -2293,7 +2293,7 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
@@ -2309,21 +2309,9 @@
         },
         {
           "path": "tests/unit/scripts/ai/mcp/test_export_mcp_env_from_dotenv.py",
-          "line": 19,
+          "line": 13,
           "source_group": "tests",
-          "text": "script_path = Path(__file__).parent.parent.parent.parent.parent / \"scripts/ai/mcp/export_mcp_env_from_dotenv.ps1\""
-        },
-        {
-          "path": "tests/unit/scripts/ai/mcp/test_export_mcp_env_from_dotenv.py",
-          "line": 45,
-          "source_group": "tests",
-          "text": "script_path = Path(__file__).parent.parent.parent.parent / \"scripts/ai/mcp/export_mcp_env_from_dotenv.ps1\""
-        },
-        {
-          "path": "tests/unit/scripts/ai/mcp/test_export_mcp_env_from_dotenv.py",
-          "line": 123,
-          "source_group": "tests",
-          "text": "script_path = Path(__file__).parent.parent.parent.parent / \"scripts/ai/mcp/export_mcp_env_from_dotenv.ps1\""
+          "text": "EXPORT_SCRIPT = REPO_ROOT / \"scripts/ai/mcp/export_mcp_env_from_dotenv.ps1\""
         }
       ],
       "owner": "@bioetl-platform",
