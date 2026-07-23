@@ -1962,8 +1962,7 @@
       "grafana/README.md",
       "grafana/dashboards/bioetl-dq-v2.json",
       "grafana/dashboards/bioetl-overview-v2.json",
-      "grafana/dashboards/bioetl-runtime.json",
-      "grafana/dashboards/bioetl-silver-reject-explorer.json"
+      "grafana/dashboards/bioetl-runtime.json"
     ],
     "bioetl_replay_drift_events_total": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",

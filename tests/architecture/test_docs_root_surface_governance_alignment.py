@@ -196,8 +196,10 @@ def test_root_governance_ratifies_reviewed_docker_helpers() -> None:
         assert legacy_root_filename in docker_quickstart_text
         assert legacy_root_filename in docker_setup_text
 
-    assert "docker network create bioetl-monitoring" in docker_quickstart_text
-    assert "docker network create bioetl-monitoring" in docker_setup_text
+    # Networks are manager-created (not a manual `docker network create` prerequisite).
+    assert "bioetl-monitoring" in docker_quickstart_text
+    assert "bioetl-monitoring" in docker_setup_text
+    assert "opt-in" in docker_quickstart_text.lower() or "opt-in" in docker_setup_text
 
 
 def test_docker_helper_compose_files_fail_closed_for_credentials_and_ports() -> None:
