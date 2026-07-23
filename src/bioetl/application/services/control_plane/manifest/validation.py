@@ -15,6 +15,7 @@ from bioetl.domain.control_plane.reproducibility_profiles import (
 )
 from bioetl.domain.control_plane.run_manifest import (
     DOCUMENTED_SOURCE_REVISION_STATES,
+    validate_production_provenance,
 )
 
 __all__ = ["validate_run_manifest_request"]
@@ -32,6 +33,31 @@ def validate_run_manifest_request(
     _validate_strict_input_snapshots(request)
     _validate_strict_replay_provenance(request, code_provenance)
     _validate_executable_code_provenance(request, code_provenance)
+    _validate_production_provenance_gate(request, code_provenance)
+
+
+def _validate_production_provenance_gate(
+    request: RunManifestCreateSpec,
+    code_provenance: RunCodeProvenance,
+) -> None:
+    """Fail closed when production runs omit the required provenance set."""
+    launch = request.launch_context if isinstance(request.launch_context, dict) else {}
+    env = str(launch.get("env") or launch.get("environment") or "").strip().lower()
+    execution_context = str(launch.get("execution_context") or "").strip().lower()
+    is_production = env in {"prod", "production"} or execution_context == "production"
+    # Also treat forensic_grade / replay_ready as production-grade evidence paths.
+    required_profile = str(
+        launch.get("required_persistence_profile") or ""
+    ).strip().lower()
+    is_production = is_production or required_profile in {
+        "forensic_grade",
+        "replay_ready",
+        "production",
+    }
+    try:
+        validate_production_provenance(code_provenance, production=is_production)
+    except ValueError as exc:
+        raise RuntimeError(str(exc)) from exc
 
 
 def _validate_executable_code_provenance(

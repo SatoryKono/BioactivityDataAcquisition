@@ -24,16 +24,33 @@ from bioetl.domain.control_plane._run_manifest_serialization import (
 from bioetl.domain.types import RunID, RunType
 
 __all__ = [
+    "PRODUCTION_PROVENANCE_REQUIRED_FIELDS",
     "ReplayCapability",
     "RunArtifactRef",
     "RunCodeProvenance",
     "RunInputSnapshotRef",
     "RunManifest",
     "RunSourceRef",
+    "validate_production_provenance",
 ]
 
 DOCUMENTED_SOURCE_REVISION_STATES = frozenset(
     {"clean", "dirty", "dirty_state_unknown", "git_unavailable"}
+)
+# Production provenance fields required for fail-closed production runs.
+# config_hash is legacy/compatibility-only; resolved + effective hashes are
+# the canonical identity anchors (see manifest validation policy).
+PRODUCTION_PROVENANCE_REQUIRED_FIELDS: frozenset[str] = frozenset(
+    {
+        "pipeline_version",
+        "git_commit",
+        "source_revision_state",
+        "dependency_lock_hash",
+        "resolved_config_hash",
+        "effective_config_hash",
+        "contract_ref",
+        "contract_version",
+    }
 )
 _DEFAULT_RUN_ID = RunID(UUID(int=0))
 _DEFAULT_CREATED_AT = datetime(1970, 1, 1, tzinfo=UTC)
@@ -112,6 +129,34 @@ class RunCodeProvenance:
     # Data Quality integration
     dq_contract_compatibility_hash: str | None = None
     effective_config_artifact_id: str | None = None
+
+    def missing_production_fields(self) -> tuple[str, ...]:
+        """Return required production provenance fields that are empty."""
+        missing: list[str] = []
+        for field_name in sorted(PRODUCTION_PROVENANCE_REQUIRED_FIELDS):
+            value = getattr(self, field_name)
+            if not isinstance(value, str) or not value.strip():
+                missing.append(field_name)
+        return tuple(missing)
+
+
+def validate_production_provenance(
+    provenance: RunCodeProvenance,
+    *,
+    production: bool = True,
+) -> None:
+    """Fail closed when production runs lack required provenance fields.
+
+    Non-production callers pass ``production=False`` to skip enforcement.
+    """
+    if not production:
+        return
+    missing = provenance.missing_production_fields()
+    if missing:
+        raise ValueError(
+            "RunManifest code_provenance is incomplete for production runs: "
+            f"missing {', '.join(missing)}"
+        )
 
 
 @dataclass(frozen=True, slots=True)
