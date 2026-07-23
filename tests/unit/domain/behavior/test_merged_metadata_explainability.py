@@ -21,35 +21,74 @@ pytestmark = pytest.mark.unit
 
 _REPO_ROOT = Path(__file__).resolve().parents[4]
 _SRC_ROOT = _REPO_ROOT / "src"
+# Keep Windows/process essentials only. Inheriting full PyCharm/pytest env is a
+# common source of child-process hangs (debugger hooks, plugin path injection).
+_SUBPROCESS_ENV_KEYS = (
+    "PATH",
+    "PATHEXT",
+    "SYSTEMROOT",
+    "SYSTEMDRIVE",
+    "WINDIR",
+    "COMSPEC",
+    "TEMP",
+    "TMP",
+    "USERPROFILE",
+    "HOMEDRIVE",
+    "HOMEPATH",
+    "NUMBER_OF_PROCESSORS",
+    "PROCESSOR_ARCHITECTURE",
+)
+_SUBPROCESS_TIMEOUT_SECONDS = 30
 
 
-def _run_record_id_subprocess(code: str) -> str:
-    bootstrap = textwrap.dedent(
-        """
-        import sys
-        sys.path[:0] = {bootstrap_paths!r}
-        """
-    ).format(bootstrap_paths=[str(_SRC_ROOT)])
+def _clean_subprocess_env(*, hash_seed: str) -> dict[str, str]:
     env = {
         key: value
-        for key, value in os.environ.items()
-        if key
-        not in {
-            "PYCHARM_HOSTED",
-            "PYTEST_ADDOPTS",
-            "PYTEST_CURRENT_TEST",
-        }
+        for key in _SUBPROCESS_ENV_KEYS
+        if (value := os.environ.get(key))
     }
+    # -I ignores PYTHON* env vars; keep these for non-isolated fallbacks and
+    # explicit documentation of intended isolation policy.
+    env["PYTHONHASHSEED"] = hash_seed
+    env["PYTHONNOUSERSITE"] = "1"
+    env["PYTHONUTF8"] = "1"
+    return env
+
+
+def _run_record_id_subprocess(code: str, *, hash_seed: str = "0") -> str:
+    """Run pure record-id code in an isolated interpreter.
+
+    Uses ``python -I`` so parent PYTHONPATH / PyCharm / pytest env cannot stall
+    child startup. Source tree is injected explicitly via ``sys.path``.
+    """
+    bootstrap = textwrap.dedent(
+        f"""
+        import sys
+        sys.path.insert(0, {str(_SRC_ROOT)!r})
+        """
+    )
     completed = subprocess.run(
-        [sys.executable, "-c", bootstrap + code],
-        check=True,
+        [sys.executable, "-I", "-c", bootstrap + code],
         capture_output=True,
         cwd=_REPO_ROOT,
-        env=env,
+        env=_clean_subprocess_env(hash_seed=hash_seed),
         text=True,
-        timeout=120,  # Increased from 60s to 120s for Windows performance
+        timeout=_SUBPROCESS_TIMEOUT_SECONDS,
     )
-    return completed.stdout.strip()
+    if completed.returncode != 0:
+        raise AssertionError(
+            "record_id subprocess failed "
+            f"(rc={completed.returncode}, seed={hash_seed}):\n"
+            f"stdout={completed.stdout!r}\n"
+            f"stderr={completed.stderr!r}"
+        )
+    record_id = completed.stdout.strip()
+    if not record_id:
+        raise AssertionError(
+            "record_id subprocess produced empty stdout "
+            f"(seed={hash_seed}): stderr={completed.stderr!r}"
+        )
+    return record_id
 
 
 def _metadata() -> CompositeOutputExt:
@@ -146,7 +185,13 @@ def test_record_id_fallback_is_stable_for_equivalent_record_order() -> None:
 
 @pytest.mark.unit
 @pytest.mark.subprocess_backed
+@pytest.mark.timeout(45)
 def test_record_id_fallback_is_stable_across_python_processes() -> None:
+    """Fallback record_id must not depend on interpreter PYTHONHASHSEED.
+
+    Spawns isolated children (``python -I`` + scrubbed env) so PyCharm/pytest
+    parent env cannot hang pipe readers or inject import side-effects.
+    """
     code = textwrap.dedent(
         """
         from bioetl.domain.behavior.merged_metadata_explainability import (
@@ -162,15 +207,17 @@ def test_record_id_fallback_is_stable_across_python_processes() -> None:
                 enrichment_status={},
             ),
         )[0]
-        print(explanation.record_id)
+        print(explanation.record_id, end="")
         """
     )
 
-    first = _run_record_id_subprocess(code)
-    second = _run_record_id_subprocess(code)
+    # Distinct hash seeds prove determinism beyond "same process twice".
+    first = _run_record_id_subprocess(code, hash_seed="0")
+    second = _run_record_id_subprocess(code, hash_seed="1")
 
     assert first == second
     assert len(first) == 64
+    assert all(ch in "0123456789abcdef" for ch in first)
 
 
 def test_summary_reports_empty_and_non_empty_distributions() -> None:
