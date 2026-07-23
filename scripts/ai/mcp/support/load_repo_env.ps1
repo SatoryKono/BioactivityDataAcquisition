@@ -47,11 +47,6 @@ function Normalize-BioetlRepoEnvAliases {
         }
     }
 
-    # ADR analysis uses OpenRouter; many local envs only set OPENAI_API_KEY.
-    if (-not $env:OPENROUTER_API_KEY -and $env:OPENAI_API_KEY) {
-        $env:OPENROUTER_API_KEY = $env:OPENAI_API_KEY
-    }
-
     # Context7 optional key aliases
     if (-not $env:CONTEXT7_API_KEY) {
         if ($env:CONTEXT7_API_TOKEN) {

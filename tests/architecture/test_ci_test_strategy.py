@@ -109,6 +109,12 @@ def test_tests_workflow_publishes_duration_telemetry_artifact() -> None:
     assert "slowest-tests.md" in workflow and "slowest-tests.json" in workflow, (
         "duration telemetry output should include both markdown and JSON summaries"
     )
+    assert "junit_testcase_duration_sum_s" in workflow, (
+        "summed testcase durations must use an aggregate-duration label"
+    )
+    assert "lane_wall_time_s" not in workflow, (
+        "summed xdist testcase durations must not be labeled as lane wall time"
+    )
 
 
 def test_tests_workflow_publishes_test_health_telemetry_artifact() -> None:

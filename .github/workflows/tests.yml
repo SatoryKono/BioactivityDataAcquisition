@@ -1110,10 +1110,10 @@ jobs:
                     raw_dir = Path("reports/test-telemetry/raw")
                     rows: list[dict[str, object]] = []
                     junit_paths = sorted(raw_dir.rglob("*.xml"))
-                    lane_wall_time_s: dict[str, float] = {}
+                    junit_testcase_duration_sum_s: dict[str, float] = {}
                     for junit_path in junit_paths:
                         root = ET.parse(junit_path).getroot()
-                        lane_wall_time_s[junit_path.name] = round(
+                        junit_testcase_duration_sum_s[junit_path.name] = round(
                             sum(
                                 float(case.attrib.get("time", "0") or 0.0)
                                 for case in root.iter("testcase")
@@ -1181,7 +1181,9 @@ jobs:
                                 "mixed: xdist unit/integration; serial "
                                 "contracts/repo-backed/memory"
                             ),
-                            "lane_wall_time_s": lane_wall_time_s,
+                            "junit_testcase_duration_sum_s": (
+                                junit_testcase_duration_sum_s
+                            ),
                             "explicit_exclusions": [
                                 {
                                     "lane": "live-provider-contracts",

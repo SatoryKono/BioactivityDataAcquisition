@@ -38,6 +38,15 @@ starting token-bearing servers. Use `BIOETL_MCP_VALIDATE_ONLY=1` for safe
 preflight checks that validate configuration without launching long-lived stdio
 servers.
 
+OpenAI and OpenRouter credentials are provider-specific and must remain
+separate. The environment loaders do not alias `OPENAI_API_KEY` to
+`OPENROUTER_API_KEY`.
+
+MCP uv/uvx wrappers preserve configured proxy egress by default. Operators may
+set `BIOETL_UVX_DIRECT_NETWORK=1` only as an explicit, host-local workaround
+for broken proxy configuration. This opt-in permits direct package-resolution
+traffic and must not be enabled as a shared default.
+
 ## Активные MCP
 memory, filesystem, fetch, github, context7, ast-grep, mcp-code-interpreter,
 prometheus, grafana, mermaid,
