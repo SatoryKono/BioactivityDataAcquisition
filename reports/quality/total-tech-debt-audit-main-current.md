@@ -8,9 +8,9 @@ Audited repository: `SatoryKono/BioactivityDataAcquisition`
 
 Audited branch: `main`
 
-Audited commit SHA: `465b1cbed6f3632d8b7dad7ca546c1ed78fc70ea`
+Audited commit SHA: `64c7f4a0b5b7c60e29619037e2cb5458ae2a4425`
 
-Evidence surface SHA-256: `1455be6da3bcdfb80b6369d50bdbcc37c571c1ee5b1044d85e139a77cf220891`
+Evidence surface SHA-256: `4f08af7e55e0ae615d974358b472c76f5f1eed417b67edbbd134398a008b5209`
 
 Registry: `configs/quality/technical_debt_audit_registry.yaml`
 
