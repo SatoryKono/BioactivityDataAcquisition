@@ -354,3 +354,8 @@ entries:
     classification: budget_closeout_ratchet
     live_guard: "diagram audit issues #6205-#6211 remain aligned with live diagram governance, Mermaid CLI version parity, atomic renderer writes, embedded validation, visual smoke JSON output, Windows/PowerShell workflow documentation, and MkDocs validation-only target without budget growth."
     rationale: Keeps the diagram audit closeout tied to executable live invariants and flat-or-decreasing debt-budget evidence instead of stale historical signoff.
+  - path: tests/architecture/test_documentation_issues_6487_6488_closeout.py
+    disposition: retain_active
+    classification: active_architecture_guard
+    live_guard: "documentation issues #6487-#6488 keep workflow inventory count/path parity with .github/workflows and prevent Gold contract availability from being inferred as runtime sink enablement from unrelated input-filter flags."
+    rationale: Retains live documentation/config parity guards for CI workflow inventory and Gold runtime enablement semantics instead of historical-only audit signoff.
