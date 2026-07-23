@@ -6606,6 +6606,16 @@
       "source_lines": 47
     },
     {
+      "module": "bioetl.application.services.workflow_runner_reports",
+      "path": "src/bioetl/application/services/workflow_runner_reports.py",
+      "source_lines": 95,
+      "coverage_status": "no_executable_lines",
+      "coverage_percent": null,
+      "executable_lines": 0,
+      "covered_lines": 0,
+      "missing_lines": 0
+    },
+    {
       "coverage_percent": 98.72,
       "coverage_status": "partially_covered",
       "covered_lines": 77,
@@ -6613,7 +6623,7 @@
       "missing_lines": 1,
       "module": "bioetl.application.services.workflow_runner_service",
       "path": "src/bioetl/application/services/workflow_runner_service.py",
-      "source_lines": 483
+      "source_lines": 408
     },
     {
       "coverage_percent": 95.45,
@@ -29218,6 +29228,16 @@
       "source_lines": 47
     },
     {
+      "module": "bioetl.application.services.workflow_runner_reports",
+      "path": "src/bioetl/application/services/workflow_runner_reports.py",
+      "source_lines": 95,
+      "coverage_status": "no_executable_lines",
+      "coverage_percent": null,
+      "executable_lines": 0,
+      "covered_lines": 0,
+      "missing_lines": 0
+    },
+    {
       "coverage_percent": 98.72,
       "coverage_status": "partially_covered",
       "covered_lines": 77,
@@ -29225,7 +29245,7 @@
       "missing_lines": 1,
       "module": "bioetl.application.services.workflow_runner_service",
       "path": "src/bioetl/application/services/workflow_runner_service.py",
-      "source_lines": 483
+      "source_lines": 408
     },
     {
       "coverage_percent": 95.45,
@@ -45230,20 +45250,23 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-13",
-  "source_tree_sha256": "1327c559a81b01067cf93ddaf6da62fa1469f593cc2dcbfc52be93e00475e195",
+  "source_tree_sha256": "290ae872cf73b44819007d16266debf70b1bea6aa2b921c22e4422e23bb28762",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
       "application_core": {
-        "allowlisted_unmeasured_module_count": 0,
-        "allowlisted_unmeasured_modules": [],
-        "coverage_percent_avg": 97.59,
-        "coverage_percent_min": 76.92,
-        "covered_line_percent": 96.34,
-        "covered_module_count": 180,
-        "measured_module_count": 180,
-        "measured_percent": 100.0,
         "module_count": 180,
+        "measured_module_count": 180,
+        "covered_module_count": 180,
+        "unmeasured_module_count": 0,
+        "allowlisted_unmeasured_module_count": 0,
+        "unexpected_unmeasured_module_count": 0,
+        "allowlisted_unmeasured_modules": [],
+        "unexpected_unmeasured_modules": [],
+        "covered_line_percent": 96.34,
+        "measured_percent": 100.0,
+        "coverage_percent_min": 76.92,
+        "coverage_percent_avg": 97.59,
         "status_counts": {
           "coverage_xml_missing": 0,
           "fully_covered": 113,
@@ -45252,58 +45275,28 @@
           "uncovered": 0,
           "unmeasured": 0
         },
-        "threshold_status": "pass",
         "thresholds": {
-          "allowlisted_unmeasured_paths": [],
+          "min_measured_module_count": 180,
           "max_unmeasured_module_count": 0,
-          "min_covered_line_percent": 96.34,
           "min_covered_module_count": 180,
-          "min_measured_module_count": 180
+          "min_covered_line_percent": 96.34,
+          "allowlisted_unmeasured_paths": []
         },
-        "unexpected_unmeasured_module_count": 0,
-        "unexpected_unmeasured_modules": [],
-        "unmeasured_module_count": 0
-      },
-      "application_services_control_plane": {
-        "allowlisted_unmeasured_module_count": 0,
-        "allowlisted_unmeasured_modules": [],
-        "coverage_percent_avg": 97.78,
-        "coverage_percent_min": 82.5,
-        "covered_line_percent": 96.44,
-        "covered_module_count": 124,
-        "measured_module_count": 124,
-        "measured_percent": 100.0,
-        "module_count": 124,
-        "status_counts": {
-          "coverage_xml_missing": 0,
-          "fully_covered": 83,
-          "no_executable_lines": 0,
-          "partially_covered": 41,
-          "uncovered": 0,
-          "unmeasured": 0
-        },
-        "threshold_status": "pass",
-        "thresholds": {
-          "allowlisted_unmeasured_paths": [],
-          "max_unmeasured_module_count": 0,
-          "min_covered_line_percent": 96.44,
-          "min_covered_module_count": 124,
-          "min_measured_module_count": 124
-        },
-        "unexpected_unmeasured_module_count": 0,
-        "unexpected_unmeasured_modules": [],
-        "unmeasured_module_count": 0
+        "threshold_status": "pass"
       },
       "composition_bootstrap_runtime": {
-        "allowlisted_unmeasured_module_count": 0,
-        "allowlisted_unmeasured_modules": [],
-        "coverage_percent_avg": 96.86,
-        "coverage_percent_min": 79.49,
-        "covered_line_percent": 95.65,
-        "covered_module_count": 49,
-        "measured_module_count": 50,
-        "measured_percent": 100.0,
         "module_count": 50,
+        "measured_module_count": 50,
+        "covered_module_count": 49,
+        "unmeasured_module_count": 0,
+        "allowlisted_unmeasured_module_count": 0,
+        "unexpected_unmeasured_module_count": 0,
+        "allowlisted_unmeasured_modules": [],
+        "unexpected_unmeasured_modules": [],
+        "covered_line_percent": 95.65,
+        "measured_percent": 100.0,
+        "coverage_percent_min": 79.49,
+        "coverage_percent_avg": 96.86,
         "status_counts": {
           "coverage_xml_missing": 0,
           "fully_covered": 30,
@@ -45312,28 +45305,28 @@
           "uncovered": 0,
           "unmeasured": 0
         },
-        "threshold_status": "pass",
         "thresholds": {
-          "allowlisted_unmeasured_paths": [],
+          "min_measured_module_count": 50,
           "max_unmeasured_module_count": 0,
-          "min_covered_line_percent": 95.65,
           "min_covered_module_count": 49,
-          "min_measured_module_count": 50
+          "min_covered_line_percent": 95.65,
+          "allowlisted_unmeasured_paths": []
         },
-        "unexpected_unmeasured_module_count": 0,
-        "unexpected_unmeasured_modules": [],
-        "unmeasured_module_count": 0
+        "threshold_status": "pass"
       },
       "composition_factories_pipeline": {
-        "allowlisted_unmeasured_module_count": 0,
-        "allowlisted_unmeasured_modules": [],
-        "coverage_percent_avg": 98.24,
-        "coverage_percent_min": 85.71,
-        "covered_line_percent": 96.97,
-        "covered_module_count": 35,
-        "measured_module_count": 35,
-        "measured_percent": 100.0,
         "module_count": 35,
+        "measured_module_count": 35,
+        "covered_module_count": 35,
+        "unmeasured_module_count": 0,
+        "allowlisted_unmeasured_module_count": 0,
+        "unexpected_unmeasured_module_count": 0,
+        "allowlisted_unmeasured_modules": [],
+        "unexpected_unmeasured_modules": [],
+        "covered_line_percent": 96.97,
+        "measured_percent": 100.0,
+        "coverage_percent_min": 85.71,
+        "coverage_percent_avg": 98.24,
         "status_counts": {
           "coverage_xml_missing": 0,
           "fully_covered": 23,
@@ -45342,28 +45335,58 @@
           "uncovered": 0,
           "unmeasured": 0
         },
-        "threshold_status": "pass",
         "thresholds": {
-          "allowlisted_unmeasured_paths": [],
+          "min_measured_module_count": 35,
           "max_unmeasured_module_count": 0,
-          "min_covered_line_percent": 96.97,
           "min_covered_module_count": 35,
-          "min_measured_module_count": 35
+          "min_covered_line_percent": 96.97,
+          "allowlisted_unmeasured_paths": []
         },
+        "threshold_status": "pass"
+      },
+      "application_services_control_plane": {
+        "module_count": 124,
+        "measured_module_count": 124,
+        "covered_module_count": 124,
+        "unmeasured_module_count": 0,
+        "allowlisted_unmeasured_module_count": 0,
         "unexpected_unmeasured_module_count": 0,
+        "allowlisted_unmeasured_modules": [],
         "unexpected_unmeasured_modules": [],
-        "unmeasured_module_count": 0
+        "covered_line_percent": 96.44,
+        "measured_percent": 100.0,
+        "coverage_percent_min": 82.5,
+        "coverage_percent_avg": 97.78,
+        "status_counts": {
+          "coverage_xml_missing": 0,
+          "fully_covered": 83,
+          "no_executable_lines": 0,
+          "partially_covered": 41,
+          "uncovered": 0,
+          "unmeasured": 0
+        },
+        "thresholds": {
+          "min_measured_module_count": 124,
+          "max_unmeasured_module_count": 0,
+          "min_covered_module_count": 124,
+          "min_covered_line_percent": 96.44,
+          "allowlisted_unmeasured_paths": []
+        },
+        "threshold_status": "pass"
       },
       "composition_runtime_builders": {
-        "allowlisted_unmeasured_module_count": 0,
-        "allowlisted_unmeasured_modules": [],
-        "coverage_percent_avg": 96.41,
-        "coverage_percent_min": 77.78,
-        "covered_line_percent": 95.59,
-        "covered_module_count": 55,
-        "measured_module_count": 55,
-        "measured_percent": 100.0,
         "module_count": 55,
+        "measured_module_count": 55,
+        "covered_module_count": 55,
+        "unmeasured_module_count": 0,
+        "allowlisted_unmeasured_module_count": 0,
+        "unexpected_unmeasured_module_count": 0,
+        "allowlisted_unmeasured_modules": [],
+        "unexpected_unmeasured_modules": [],
+        "covered_line_percent": 95.59,
+        "measured_percent": 100.0,
+        "coverage_percent_min": 77.78,
+        "coverage_percent_avg": 96.41,
         "status_counts": {
           "coverage_xml_missing": 0,
           "fully_covered": 29,
@@ -45372,24 +45395,21 @@
           "uncovered": 0,
           "unmeasured": 0
         },
-        "threshold_status": "pass",
         "thresholds": {
-          "allowlisted_unmeasured_paths": [],
+          "min_measured_module_count": 55,
           "max_unmeasured_module_count": 0,
-          "min_covered_line_percent": 94.9,
           "min_covered_module_count": 55,
-          "min_measured_module_count": 55
+          "min_covered_line_percent": 94.9,
+          "allowlisted_unmeasured_paths": []
         },
-        "unexpected_unmeasured_module_count": 0,
-        "unexpected_unmeasured_modules": [],
-        "unmeasured_module_count": 0
+        "threshold_status": "pass"
       }
     },
-    "source_module_count": 2261,
+    "source_module_count": 2262,
     "status_counts": {
       "coverage_xml_missing": 0,
       "fully_covered": 1406,
-      "no_executable_lines": 39,
+      "no_executable_lines": 40,
       "partially_covered": 816,
       "uncovered": 0,
       "unmeasured": 0

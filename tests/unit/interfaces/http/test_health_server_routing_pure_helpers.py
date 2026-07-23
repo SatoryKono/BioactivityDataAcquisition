@@ -828,7 +828,11 @@ async def test_pipeline_run_report_route_requires_pipeline_selector() -> None:
         query={"run_id": "run-1"},
     )
 
-    assert host.sent[-1] == ("text", 400, "Missing required parameter: pipeline")
+    assert host.sent[-1] == (
+        "text",
+        400,
+        "Missing required query parameter: pipeline",
+    )
 
 
 @pytest.mark.asyncio

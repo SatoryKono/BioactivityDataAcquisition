@@ -1,19 +1,18 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-23T21:55:46.176505+00:00",
+  "generated_at": "2026-07-23T22:16:50.918102+00:00",
   "summary": {
-    "total_scripts": 517,
+    "total_scripts": 518,
     "status_counts": {
       "active": 347,
-      "orphan": 1,
-      "supporting": 168,
-      "unknown": 1
+      "supporting": 169,
+      "unknown": 2
     },
     "reference_group_coverage": {
       "agents": 5,
       "build": 11,
       "ci": 65,
-      "docs": 207,
+      "docs": 208,
       "other": 34,
       "scripts": 397,
       "skills": 16,
@@ -15616,7 +15615,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 764,
+          "line": 760,
           "source_group": "tests",
           "text": "probe = (ROOT / \"scripts/ops/runtime/docker/docker_runtime_probe.py\").read_text("
         }
@@ -15627,12 +15626,37 @@
       "next_step": "Retain as a Docker runtime probe helper for Docker health checks and diagnostics; keep it supporting unless it becomes a governed CI workflow or first-class ops entrypoint."
     },
     {
+      "path": "scripts/ops/runtime/docker/ensure-stable.ps1",
+      "type": "ps1",
+      "status": "unknown",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "docs/DOCKER_QUICKSTART.md",
+          "line": 90,
+          "source_group": "docs",
+          "text": ".\\scripts\\ops\\runtime\\docker\\ensure-stable.ps1 -WithNeo4j"
+        },
+        {
+          "path": "docs/DOCKER_QUICKSTART.md",
+          "line": 93,
+          "source_group": "docs",
+          "text": ".\\scripts\\ops\\runtime\\docker\\ensure-stable.ps1 -RestartWsl -WithNeo4j"
+        }
+      ]
+    },
+    {
       "path": "scripts/ops/runtime/docker/recover-neo4j.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
-      "references": []
+      "references": [],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Deprecated for one release while callers migrate to runtime_manager.py diagnose/recover --stack neo4j; retain only as a historical Windows recovery helper and remove after first-party reference proof."
     },
     {
       "path": "scripts/ops/runtime/docker/recreate_cutover_stacks.py",
@@ -16879,7 +16903,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 701,
+          "line": 697,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
@@ -16947,7 +16971,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 701,
+          "line": 697,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
