@@ -97,23 +97,29 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
             result=result,
             records_processed=records_processed,
         )
+        if self._replace_running_stage(stage, completed):
+            return
+        # Idempotent completion: do not append a second SUCCESS when the
+        # stage was already completed and no RUNNING entry remains.
+        if self._has_stage_status(stage, StageStatus.SUCCESS):
+            return
+        self._stages.append(completed)
+
+    def _replace_running_stage(self, stage: str, completed: StageResult) -> bool:
+        """Replace the latest RUNNING entry for stage; return True if replaced."""
         for index in range(len(self._stages) - 1, -1, -1):
-            if (
-                self._stages[index].stage == stage
-                and self._stages[index].status == StageStatus.RUNNING
-            ):
+            current = self._stages[index]
+            if current.stage == stage and current.status == StageStatus.RUNNING:
                 self._stages[index] = completed
-                break
-        else:
-            # Idempotent completion: do not append a second SUCCESS when the
-            # stage was already completed and no RUNNING entry remains.
-            for existing in reversed(self._stages):
-                if (
-                    existing.stage == stage
-                    and existing.status == StageStatus.SUCCESS
-                ):
-                    return
-            self._stages.append(completed)
+                return True
+        return False
+
+    def _has_stage_status(self, stage: str, status: StageStatus) -> bool:
+        """Return True when any stage entry matches stage/status."""
+        return any(
+            existing.stage == stage and existing.status == status
+            for existing in self._stages
+        )
 
     def record_stage_failure(
         self,

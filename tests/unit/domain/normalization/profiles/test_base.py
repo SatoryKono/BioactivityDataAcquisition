@@ -43,18 +43,25 @@ def test_normalization_profile_detects_schema_coverage_gaps() -> None:
         profile.assert_covers_schema({"title", "missing"})
 
 
+def _operator_normalizer_without_record_param(value: object) -> object:
+    """Named normalizer used to prove keyword-only record context is ignored."""
+    return normalize_profile_operator(
+        value,
+        allowed_values=frozenset({"=", ">", "<"}),
+    )
+
+
 def test_field_rule_apply_does_not_treat_keyword_only_params_as_record_context() -> (
     None
 ):
     rule = FieldRule(
         "standard_relation",
-        normalizer=lambda value: normalize_profile_operator(
-            value,
-            allowed_values=frozenset({"=", ">", "<"}),
-        ),
+        normalizer=_operator_normalizer_without_record_param,
     )
 
     assert rule.apply("=", record={"activity_id": "31864"}) == "="
+    # Identity must also remain available for named callables (no lambda ban).
+    assert "<lambda>" not in rule.identity.normalizer_ref
 
 
 def test_field_rule_identity_is_stable_for_semantically_equal_rules() -> None:

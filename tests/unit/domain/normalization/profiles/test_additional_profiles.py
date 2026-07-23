@@ -603,6 +603,26 @@ def test_chembl_molecule_max_phase_preserves_quasi_enum_numeric_codes() -> None:
     assert "quasi-enum" in (max_phase_rule.notes or "")
 
 
+@pytest.mark.parametrize(
+    ("field_name", "valid_values", "invalid_value"),
+    [
+        ("availability_type", ("-2", "2.0"), "3"),
+        ("chirality", ("-1", "2.0"), "3"),
+    ],
+)
+def test_chembl_molecule_governed_numeric_codes_fail_closed(
+    field_name: str,
+    valid_values: tuple[str, str],
+    invalid_value: str,
+) -> None:
+    rule = CHEMBL_MOLECULE_PROFILE.rule_for(field_name)
+
+    assert rule is not None
+    assert rule.apply(valid_values[0]) == int(float(valid_values[0]))
+    assert rule.apply(valid_values[1]) == int(float(valid_values[1]))
+    assert rule.apply(invalid_value) is None
+
+
 def test_quasi_enum_numeric_helper_rejects_blank_invalid_and_unknown_values() -> None:
     assert coerce_profile_quasi_enum_numeric(object()) is None
     assert coerce_profile_quasi_enum_numeric("   ") is None
@@ -746,6 +766,11 @@ def test_chembl_subcellular_fraction_profiles_preserve_unknown_but_not_blank() -
 
     assert aggregate_fraction_rule is not None
     assert aggregate_fraction_raw_rule is not None
+    aggregate_fraction_identity = CHEMBL_SUBCELLULAR_FRACTION_PROFILE.field_identity(
+        "subcellular_fraction"
+    )
+    assert aggregate_fraction_identity is not None
+    assert "<lambda>" not in aggregate_fraction_identity.normalizer_ref
     assert aggregate_fraction_raw_rule.apply(" nucleus ") == "nucleus"
     assert aggregate_fraction_rule.apply(" nucleus ") == "Nucleus"
     assert (

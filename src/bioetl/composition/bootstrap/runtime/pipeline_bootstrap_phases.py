@@ -48,6 +48,16 @@ __all__ = [
 ]
 
 
+def _noop_ensure_providers_loaded() -> None:
+    """No-op implementation for bootstrap phase."""
+    pass
+
+
+def _noop_register_all_pipelines(registry: object = None) -> None:
+    """No-op implementation for bootstrap phase."""
+    pass
+
+
 def assemble_filter_config(
     *,
     yaml_filter: InputFilterYamlConfig,
@@ -206,8 +216,8 @@ def build_bootstrap_runner_factory_wiring() -> RunnerFactoryWiring:
     )
 
     return RunnerFactoryWiring(
-        ensure_providers_loaded=lambda: None,
-        register_all_pipelines=lambda registry=None: None,
+        ensure_providers_loaded=_noop_ensure_providers_loaded,
+        register_all_pipelines=_noop_register_all_pipelines,
     )
 
 

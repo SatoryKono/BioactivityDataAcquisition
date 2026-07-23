@@ -1,99 +1,114 @@
 [
   {
     "label": "Format code",
-    "command": "ruff",
-    "args": ["format", "."],
+    "command": "uv",
+    "args": ["run", "ruff", "format", "."],
+    "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "always"
   },
   {
     "label": "Lint code",
-    "command": "ruff",
-    "args": ["check", "."],
+    "command": "uv",
+    "args": ["run", "ruff", "check", "."],
+    "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "always"
   },
   {
     "label": "Type check",
-    "command": "mypy",
-    "args": ["src/"],
+    "command": "uv",
+    "args": ["run", "mypy", "src/"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "reveal": "always"
+  },
+  {
+    "label": "Test: current file",
+    "command": "uv",
+    "args": ["run", "pytest", "$ZED_FILE", "-v"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "tags": ["python-test"],
     "reveal": "always"
   },
   {
     "label": "Run unit tests",
-    "command": "pytest",
-    "args": ["tests/unit/", "-v"],
-    "tags": ["python-test"],
+    "command": "uv",
+    "args": ["run", "pytest", "tests/unit/", "-v"],
+    "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "always"
   },
   {
     "label": "Run integration tests",
-    "command": "pytest",
-    "args": ["tests/integration/", "-v"],
-    "tags": ["python-test"],
+    "command": "uv",
+    "args": ["run", "pytest", "tests/integration/", "-v"],
+    "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "always"
   },
   {
     "label": "Run architecture tests",
-    "command": "pytest",
-    "args": ["tests/architecture/", "-v"],
-    "tags": ["python-test"],
+    "command": "uv",
+    "args": ["run", "pytest", "tests/architecture/", "-v"],
+    "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "always"
   },
   {
     "label": "Run E2E smoke tests",
-    "command": "pytest",
-    "args": ["-m", "e2e_smoke", "-v"],
-    "tags": ["python-test"],
-    "reveal": "always"
-  },
-  {
-    "label": "Security scan",
-    "command": "bandit",
-    "args": ["-r", "src/"],
-    "reveal": "always"
-  },
-  {
-    "label": "Coverage report",
-    "command": "pytest",
-    "args": ["--cov=src/bioetl", "--cov-report=html"],
-    "tags": ["python-test"],
-    "reveal": "always"
-  },
-  {
-    "label": "Architecture compliance",
-    "command": "import-linter",
-    "args": ["--config", ".importlinter"],
-    "reveal": "always"
-  },
-  {
-    "label": "Run all tests",
-    "command": "pytest",
-    "args": ["-v", "-m", "not benchmark and not slow"],
-    "tags": ["python-test"],
+    "command": "uv",
+    "args": ["run", "pytest", "-m", "e2e_smoke", "-v"],
+    "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "always"
   },
   {
     "label": "Run fast tests only",
-    "command": "pytest",
-    "args": ["-v", "-m", "unit"],
-    "tags": ["python-test"],
+    "command": "uv",
+    "args": ["run", "pytest", "-v", "-m", "unit"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "reveal": "always"
+  },
+  {
+    "label": "Coverage report",
+    "command": "uv",
+    "args": [
+      "run",
+      "pytest",
+      "--cov=src/bioetl",
+      "--cov-report=html"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "reveal": "always"
+  },
+  {
+    "label": "Architecture compliance",
+    "command": "uv",
+    "args": ["run", "lint-imports", "--config", "pyproject.toml"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "reveal": "always"
+  },
+  {
+    "label": "Security scan",
+    "command": "uv",
+    "args": ["run", "bandit", "-r", "src/"],
+    "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "always"
   },
   {
     "label": "Dependency audit",
-    "command": "pip-audit",
-    "args": [],
+    "command": "uv",
+    "args": ["run", "pip-audit"],
+    "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "always"
   },
   {
     "label": "Dead code detection",
-    "command": "vulture",
-    "args": ["src/bioetl"],
+    "command": "uv",
+    "args": ["run", "vulture", "src/bioetl"],
+    "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "always"
   },
   {
     "label": "Complexity check",
-    "command": "xenon",
+    "command": "uv",
     "args": [
+      "run",
+      "xenon",
       "--max-absolute",
       "B",
       "--max-modules",
@@ -102,64 +117,20 @@
       "A",
       "src/bioetl"
     ],
+    "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "always"
   },
   {
     "label": "Refresh MCP config",
-    "command": "py",
+    "command": "uv",
     "args": [
+      "run",
+      "python",
       "scripts/ai/codex/setup_mcp.py",
       "--skip-codex",
       "--skip-gemini-settings"
     ],
-    "reveal": "always"
-  },
-  {
-    "label": "Run py-audit-bot",
-    "command": "codex",
-    "args": ["agent", "run", "py-audit-bot"],
-    "reveal": "always"
-  },
-  {
-    "label": "Run py-test-bot",
-    "command": "codex",
-    "args": ["agent", "run", "py-test-bot"],
-    "reveal": "always"
-  },
-  {
-    "label": "Run py-doc-bot",
-    "command": "codex",
-    "args": ["agent", "run", "py-doc-bot"],
-    "reveal": "always"
-  },
-  {
-    "label": "Run py-config-bot",
-    "command": "codex",
-    "args": ["agent", "run", "py-config-bot"],
-    "reveal": "always"
-  },
-  {
-    "label": "Run py-debug-bot",
-    "command": "codex",
-    "args": ["agent", "run", "py-debug-bot"],
-    "reveal": "always"
-  },
-  {
-    "label": "Invoke grafana-dashboard-render skill",
-    "command": "devin",
-    "args": ["skill", "invoke", "grafana-dashboard-render"],
-    "reveal": "always"
-  },
-  {
-    "label": "Invoke py-test-swarm skill",
-    "command": "devin",
-    "args": ["skill", "invoke", "py-test-swarm"],
-    "reveal": "always"
-  },
-  {
-    "label": "Invoke documentation-audit skill",
-    "command": "devin",
-    "args": ["skill", "invoke", "documentation-audit"],
+    "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "always"
   }
 ]

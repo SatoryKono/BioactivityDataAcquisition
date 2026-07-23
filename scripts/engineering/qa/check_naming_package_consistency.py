@@ -609,6 +609,72 @@ def _family_freeze_rule_from_config(item: object) -> FamilyFreezeRule | None:
     )
 
 
+def _validate_allowed_symbol_metadata(
+    rule_id: str,
+    symbols: tuple[AllowedSymbol, ...],
+) -> None:
+    for item in symbols:
+        _validate_allowed_metadata(
+            issue=item.issue,
+            owner=item.owner,
+            expires_on=item.expires_on,
+            location=f"{rule_id}:{item.symbol}",
+        )
+
+
+def _validate_allowed_module_metadata(
+    rule_id: str,
+    modules: tuple[AllowedModule, ...],
+) -> None:
+    for item in modules:
+        _validate_allowed_metadata(
+            issue=item.issue,
+            owner=item.owner,
+            expires_on=item.expires_on,
+            location=f"{rule_id}:{item.path}",
+        )
+
+
+def _validate_loaded_suffix_rule_metadata(
+    *,
+    function_rules: list[FunctionSuffixRule],
+    suffix_rules: list[SuffixBoundaryRule],
+    family_rules: list[FamilyFreezeRule],
+) -> None:
+    for rule in function_rules:
+        _validate_allowed_symbol_metadata(rule.rule_id, rule.allowed_symbols)
+    for rule in suffix_rules:
+        _validate_allowed_symbol_metadata(rule.rule_id, rule.allowed_symbols)
+        _validate_allowed_module_metadata(rule.rule_id, rule.allowed_modules)
+    for rule in family_rules:
+        _validate_allowed_symbol_metadata(rule.rule_id, rule.allowed_symbols)
+
+
+def _load_suffix_rule_lists(
+    payload: dict[str, object],
+) -> tuple[
+    list[FunctionSuffixRule],
+    list[SuffixBoundaryRule],
+    list[FamilyFreezeRule],
+]:
+    function_rules = [
+        rule
+        for item in payload.get("function_suffix_rules", [])  # type: ignore[union-attr]
+        if (rule := _function_suffix_rule_from_config(item)) is not None
+    ]
+    suffix_rules = [
+        rule
+        for item in payload.get("suffix_boundary_rules", [])  # type: ignore[union-attr]
+        if (rule := _suffix_boundary_rule_from_config(item)) is not None
+    ]
+    family_rules = [
+        rule
+        for item in payload.get("family_freeze_rules", [])  # type: ignore[union-attr]
+        if (rule := _family_freeze_rule_from_config(item)) is not None
+    ]
+    return function_rules, suffix_rules, family_rules
+
+
 def _load_layer_aware_suffix_policy(repo_root: Path) -> LayerAwareNamingPolicy:
     path = repo_root / LAYER_AWARE_SUFFIX_POLICY_PATH
     payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
@@ -617,69 +683,25 @@ def _load_layer_aware_suffix_policy(repo_root: Path) -> LayerAwareNamingPolicy:
             "configs/quality/layered_suffix_policy.yaml must be a YAML mapping"
         )
 
-    version = int(payload.get("version", 0))
-    policy_scope = str(payload.get("policy_scope", "")).strip()
     layer_suffix_matrix = _load_layer_suffix_matrix(
         payload.get("layer_suffix_matrix", [])
     )
     canonical_family_registry = _load_canonical_family_registry(
         payload.get("canonical_family_registry", [])
     )
-
-    function_rules = [
-        rule
-        for item in payload.get("function_suffix_rules", [])
-        if (rule := _function_suffix_rule_from_config(item)) is not None
-    ]
-    suffix_rules = [
-        rule
-        for item in payload.get("suffix_boundary_rules", [])
-        if (rule := _suffix_boundary_rule_from_config(item)) is not None
-    ]
-    family_rules = [
-        rule
-        for item in payload.get("family_freeze_rules", [])
-        if (rule := _family_freeze_rule_from_config(item)) is not None
-    ]
+    function_rules, suffix_rules, family_rules = _load_suffix_rule_lists(payload)
 
     _validate_layer_suffix_matrix(layer_suffix_matrix)
     _validate_canonical_family_registry(canonical_family_registry)
-
-    for rule in function_rules:
-        for item in rule.allowed_symbols:
-            _validate_allowed_metadata(
-                issue=item.issue,
-                owner=item.owner,
-                expires_on=item.expires_on,
-                location=f"{rule.rule_id}:{item.symbol}",
-            )
-    for rule in suffix_rules:
-        for item in rule.allowed_symbols:
-            _validate_allowed_metadata(
-                issue=item.issue,
-                owner=item.owner,
-                expires_on=item.expires_on,
-                location=f"{rule.rule_id}:{item.symbol}",
-            )
-        for item in rule.allowed_modules:
-            _validate_allowed_metadata(
-                issue=item.issue,
-                owner=item.owner,
-                expires_on=item.expires_on,
-                location=f"{rule.rule_id}:{item.path}",
-            )
-    for rule in family_rules:
-        for item in rule.allowed_symbols:
-            _validate_allowed_metadata(
-                issue=item.issue,
-                owner=item.owner,
-                expires_on=item.expires_on,
-                location=f"{rule.rule_id}:{item.symbol}",
-            )
+    _validate_loaded_suffix_rule_metadata(
+        function_rules=function_rules,
+        suffix_rules=suffix_rules,
+        family_rules=family_rules,
+    )
 
     return LayerAwareNamingPolicy(
-        version=version,
-        policy_scope=policy_scope,
+        version=int(payload.get("version", 0)),
+        policy_scope=str(payload.get("policy_scope", "")).strip(),
         layer_suffix_matrix=layer_suffix_matrix,
         canonical_family_registry=canonical_family_registry,
         function_suffix_rules=tuple(function_rules),

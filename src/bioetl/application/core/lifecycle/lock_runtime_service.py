@@ -138,12 +138,11 @@ class LockRuntimeService:
             run_id=self._run_id,
             fencing_token=self._fencing_token,
         )
-        renewed = await self._lock.heartbeat(
+        if not await self._lock.heartbeat(
             self._config.lock_key,
             self._run_id,
             exclusive=self._config.exclusive,
-        )
-        if not renewed:
+        ):
             return False
         return owned or await validate_lock_ownership(
             lock_port=self._lock,
@@ -152,11 +151,6 @@ class LockRuntimeService:
             fencing_token=self._fencing_token,
         )
 
-    async def __aexit__(
-        self,
-        exc_type: type[BaseException] | None,
-        exc_val: BaseException | None,
-        exc_tb: object,
-    ) -> None:
+    async def __aexit__(self, *_exc_info: object) -> None:
         """Release the lock when leaving the async context manager."""
         await self.release()

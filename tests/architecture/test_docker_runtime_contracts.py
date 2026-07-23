@@ -645,8 +645,17 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     assert (
         'CMD ["health", "server", "--host", "0.0.0.0", "--port", "8000"]' in dockerfile
     )
-    assert main["services"]["bioetl"]["command"][-1] == "8081"
-    assert main["services"]["bioetl"]["ports"] == ["127.0.0.1:8081:8081"]
+    # Main runtime co-locates Prometheus health/metrics (:8000, internal scrape)
+    # with the quarantine explorer backend (:8081, host-published).
+    bioetl_service = main["services"]["bioetl"]
+    assert bioetl_service["entrypoint"] == ["/bin/sh", "-c"]
+    bioetl_command = " ".join(map(str, bioetl_service["command"]))
+    assert "bioetl health server --host 0.0.0.0 --port 8000" in bioetl_command
+    assert "bioetl quarantine serve --host 0.0.0.0 --port 8081" in bioetl_command
+    assert bioetl_service["ports"] == ["127.0.0.1:8081:8081"]
+    bioetl_health = " ".join(map(str, bioetl_service["healthcheck"]["test"]))
+    assert "127.0.0.1:8000/health/ready" in bioetl_health
+    assert "127.0.0.1:8081/health/ready" in bioetl_health
 
 
 def test_warp_is_absent_from_default_and_optional_runtime_surfaces() -> None:

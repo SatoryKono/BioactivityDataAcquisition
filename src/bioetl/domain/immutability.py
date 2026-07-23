@@ -153,11 +153,7 @@ def deep_freeze_json(value: object) -> object:
 
 def _deep_thaw_sequence(value: object) -> object:
     """Thaw supported sequence/set containers or copy a scalar value."""
-    if isinstance(value, FrozenList):
-        return [deep_thaw_json(item) for item in value]
-    if isinstance(value, (list, tuple)):
-        return [deep_thaw_json(item) for item in value]
-    if isinstance(value, (set, frozenset)):
+    if isinstance(value, (FrozenList, list, tuple, set, frozenset)):
         return [deep_thaw_json(item) for item in value]
     return deepcopy(value)
 

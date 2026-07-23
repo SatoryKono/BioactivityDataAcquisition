@@ -11,9 +11,35 @@ Run with: make test-smoke
 
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 import pytest
+
+# Cold imports of native stacks can exceed the global pytest-timeout (60s) on
+# Windows cloud-synced worktrees (e.g. G-drive first hydrate). Keep light
+# modules tight; give heavy ones a longer isolated-process budget.
+_DEFAULT_IMPORT_TIMEOUT_SECONDS = 60
+_HEAVY_IMPORT_TIMEOUT_SECONDS = 180
+_HEAVY_RUNTIME_MODULES = frozenset(
+    {
+        "pandas",
+        "pandera",
+        "polars",
+        "deltalake",
+        "pyarrow",
+    }
+)
+
+
+def _import_timeout_seconds(module_name: str) -> float:
+    """Resolve per-module import timeout, with optional env override."""
+    override = os.getenv("BIOETL_SMOKE_IMPORT_TIMEOUT_SECONDS", "").strip()
+    if override:
+        return max(float(override), 1.0)
+    if module_name in _HEAVY_RUNTIME_MODULES:
+        return float(_HEAVY_IMPORT_TIMEOUT_SECONDS)
+    return float(_DEFAULT_IMPORT_TIMEOUT_SECONDS)
 
 
 @pytest.mark.smoke
@@ -27,18 +53,19 @@ class TestRuntimeDependencies:
             "-c",
             f"import importlib; importlib.import_module({module_name!r})",
         ]
+        timeout_seconds = _import_timeout_seconds(module_name)
         try:
             proc = subprocess.run(
                 command,
                 capture_output=True,
                 text=True,
                 check=False,
-                timeout=60,  # Increased timeout for heavy dependencies (polars, pandas, etc.)
+                timeout=timeout_seconds,
             )
         except subprocess.TimeoutExpired as err:
             pytest.fail(
-                f"Timed out importing runtime dependency {module_name} after 60s in an"
-                f" isolated process.\n{err}"
+                f"Timed out importing runtime dependency {module_name} after "
+                f"{timeout_seconds:g}s in an isolated process.\n{err}"
             )
         assert proc.returncode == 0, (
             f"Failed to import runtime dependency {module_name}: {proc.stdout}"
@@ -48,11 +75,26 @@ class TestRuntimeDependencies:
     @pytest.mark.parametrize(
         "module_name",
         [
-            "pandas",
-            "pandera",
-            "polars",
-            "deltalake",
-            "pyarrow",
+            pytest.param(
+                "pandas",
+                marks=pytest.mark.timeout(_HEAVY_IMPORT_TIMEOUT_SECONDS),
+            ),
+            pytest.param(
+                "pandera",
+                marks=pytest.mark.timeout(_HEAVY_IMPORT_TIMEOUT_SECONDS),
+            ),
+            pytest.param(
+                "polars",
+                marks=pytest.mark.timeout(_HEAVY_IMPORT_TIMEOUT_SECONDS),
+            ),
+            pytest.param(
+                "deltalake",
+                marks=pytest.mark.timeout(_HEAVY_IMPORT_TIMEOUT_SECONDS),
+            ),
+            pytest.param(
+                "pyarrow",
+                marks=pytest.mark.timeout(_HEAVY_IMPORT_TIMEOUT_SECONDS),
+            ),
             "httpx",
             "pydantic",
             "pydantic_settings",
@@ -129,7 +171,7 @@ class TestCoreImports:
         assert base_transformer is not None
         assert runner is not None
 
-    @pytest.mark.timeout(120)  # Extended timeout for polars import
+    @pytest.mark.timeout(_HEAVY_IMPORT_TIMEOUT_SECONDS)  # heavy native stack cold import
     def test_infrastructure_imports(self) -> None:
         """Infrastructure layer imports successfully."""
         from bioetl.infrastructure.storage import bronze_writer

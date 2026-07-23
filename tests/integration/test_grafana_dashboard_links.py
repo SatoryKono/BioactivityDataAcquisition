@@ -28,21 +28,42 @@ _NAV_LINK_CONTRACT_PATH = Path(
 )
 
 
-def _load_navigation_links_contract() -> dict[str, object]:
-    with _NAV_LINK_CONTRACT_PATH.open("r", encoding="utf-8") as stream:
-        raw_contract = yaml.safe_load(stream)
+def _as_frozenset_map(raw_map: object, section_name: str) -> dict[str, frozenset[str]]:
+    assert isinstance(raw_map, dict), f"{section_name} must be a mapping"
+    result: dict[str, frozenset[str]] = {}
+    for uid, values in raw_map.items():
+        assert isinstance(uid, str), f"{section_name} keys must be strings"
+        assert isinstance(values, list), f"{section_name}.{uid} must be a list"
+        result[uid] = frozenset(str(v) for v in values)
+    return result
 
-    def _as_frozenset_map(section_name: str) -> dict[str, frozenset[str]]:
-        raw_map = raw_contract.get(section_name, {})
-        assert isinstance(raw_map, dict), f"{section_name} must be a mapping"
-        result: dict[str, frozenset[str]] = {}
-        for uid, values in raw_map.items():
-            assert isinstance(uid, str), f"{section_name} keys must be strings"
-            assert isinstance(values, list), f"{section_name}.{uid} must be a list"
-            result[uid] = frozenset(str(v) for v in values)
-        return result
 
-    raw_required_panel_links = raw_contract.get("required_panel_links_by_uid", {})
+def _normalize_required_panel_entry(uid: str, entry: object) -> dict[str, object]:
+    assert isinstance(entry, dict), (
+        f"required_panel_links_by_uid.{uid} entries must be mappings"
+    )
+    panel_id = entry.get("panel_id")
+    target_uid = entry.get("target_uid")
+    link_titles = entry.get("link_titles", [])
+    assert isinstance(panel_id, int), (
+        f"required_panel_links_by_uid.{uid}.panel_id must be integer"
+    )
+    assert isinstance(target_uid, str), (
+        f"required_panel_links_by_uid.{uid}.target_uid must be string"
+    )
+    assert isinstance(link_titles, list), (
+        f"required_panel_links_by_uid.{uid}.link_titles must be a list"
+    )
+    return {
+        "panel_id": panel_id,
+        "target_uid": target_uid,
+        "link_titles": tuple(str(title) for title in link_titles),
+    }
+
+
+def _normalize_required_panel_links(
+    raw_required_panel_links: object,
+) -> dict[str, tuple[dict[str, object], ...]]:
     assert isinstance(raw_required_panel_links, dict), (
         "required_panel_links_by_uid must be a mapping"
     )
@@ -52,47 +73,39 @@ def _load_navigation_links_contract() -> dict[str, object]:
         assert isinstance(entries, list), (
             f"required_panel_links_by_uid.{uid} must be a list"
         )
-        normalized_entries: list[dict[str, object]] = []
-        for entry in entries:
-            assert isinstance(entry, dict), (
-                f"required_panel_links_by_uid.{uid} entries must be mappings"
-            )
-            panel_id = entry.get("panel_id")
-            target_uid = entry.get("target_uid")
-            link_titles = entry.get("link_titles", [])
-            assert isinstance(panel_id, int), (
-                f"required_panel_links_by_uid.{uid}.panel_id must be integer"
-            )
-            assert isinstance(target_uid, str), (
-                f"required_panel_links_by_uid.{uid}.target_uid must be string"
-            )
-            assert isinstance(link_titles, list), (
-                f"required_panel_links_by_uid.{uid}.link_titles must be a list"
-            )
-            normalized_entries.append(
-                {
-                    "panel_id": panel_id,
-                    "target_uid": target_uid,
-                    "link_titles": tuple(str(title) for title in link_titles),
-                }
-            )
-        required_panel_links_by_uid[uid] = tuple(normalized_entries)
+        required_panel_links_by_uid[uid] = tuple(
+            _normalize_required_panel_entry(uid, entry) for entry in entries
+        )
+    return required_panel_links_by_uid
+
+
+def _load_navigation_links_contract() -> dict[str, object]:
+    with _NAV_LINK_CONTRACT_PATH.open("r", encoding="utf-8") as stream:
+        raw_contract = yaml.safe_load(stream)
 
     return {
-        "allowed_dashboard_link_vars": _as_frozenset_map("allowed_dashboard_link_vars"),
+        "allowed_dashboard_link_vars": _as_frozenset_map(
+            raw_contract.get("allowed_dashboard_link_vars", {}),
+            "allowed_dashboard_link_vars",
+        ),
         "forbidden_dashboard_link_vars_by_target_uid": _as_frozenset_map(
-            "forbidden_dashboard_link_vars_by_target_uid"
+            raw_contract.get("forbidden_dashboard_link_vars_by_target_uid", {}),
+            "forbidden_dashboard_link_vars_by_target_uid",
         ),
         "required_link_vars_by_target_uid": _as_frozenset_map(
-            "required_link_vars_by_target_uid"
+            raw_contract.get("required_link_vars_by_target_uid", {}),
+            "required_link_vars_by_target_uid",
         ),
         "required_top_level_links_by_uid": _as_frozenset_map(
-            "required_top_level_links_by_uid"
+            raw_contract.get("required_top_level_links_by_uid", {}),
+            "required_top_level_links_by_uid",
         ),
         "required_discoverable_inbound_paths": raw_contract.get(
             "required_discoverable_inbound_paths", {}
         ),
-        "required_panel_links_by_uid": required_panel_links_by_uid,
+        "required_panel_links_by_uid": _normalize_required_panel_links(
+            raw_contract.get("required_panel_links_by_uid", {})
+        ),
         "cross_scope_marker_contract": raw_contract.get(
             "cross_scope_marker_contract", {}
         ),
@@ -208,19 +221,23 @@ _OVERVIEW_STATUS_PANEL_IDS_BY_TARGET_UID: tuple[tuple[int, str], ...] = (
 )
 
 
+def _extend_link_dicts(
+    result: list[dict[str, object]], container: object, key: str
+) -> None:
+    if not isinstance(container, dict):
+        return
+    links = container.get(key, [])
+    if not isinstance(links, list):
+        return
+    result.extend(link for link in links if isinstance(link, dict))
+
+
 def _iter_panel_data_links(panel: dict[str, object]) -> list[dict[str, object]]:
     result: list[dict[str, object]] = []
-    options = panel.get("options")
-    if isinstance(options, dict):
-        links = options.get("dataLinks", [])
-        if isinstance(links, list):
-            result.extend(link for link in links if isinstance(link, dict))
-
-    defaults = panel.get("fieldConfig", {}).get("defaults", {})
-    if isinstance(defaults, dict):
-        field_links = defaults.get("links", [])
-        if isinstance(field_links, list):
-            result.extend(link for link in field_links if isinstance(link, dict))
+    _extend_link_dicts(result, panel.get("options"), "dataLinks")
+    field_config = panel.get("fieldConfig")
+    defaults = field_config.get("defaults") if isinstance(field_config, dict) else None
+    _extend_link_dicts(result, defaults, "links")
     return result
 
 
@@ -802,15 +819,11 @@ def test_empty_navigation_bus_fails_closed_for_required_top_level_contract() -> 
             }
         ],
     }
-    required_links = _REQUIRED_TOP_LEVEL_LINKS_BY_UID["bioetl-overview-v2"]
-    titles = {
-        link.get("title")
-        for link in get_dashboard_navigation_links(partial_bus)
-        if isinstance(link.get("title"), str)
-    }
-    missing = required_links - titles
-    assert missing, "fixture must leave at least one required top-level title missing"
-    assert missing == required_links - {"Explore Logs"}
+    with pytest.raises(AssertionError, match="missing required top-level links"):
+        _assert_dashboard_top_level_navigation_contract(
+            dashboard_name="bioetl-overview-v2.json",
+            dashboard=partial_bus,
+        )
 
 
 def test_empty_drilldown_collection_fails_closed() -> None:
@@ -830,24 +843,16 @@ def test_empty_drilldown_collection_fails_closed() -> None:
             }
         ],
     }
-    links = require_dashboard_navigation_links(
-        dashboard, dashboard_name="bioetl-overview-v2.json"
-    )
-    titles = {link.get("title") for link in links if link.get("title")}
-    urls = [link.get("url", "") for link in links]
     with pytest.raises(AssertionError, match="logs drilldown"):
-        assert any("Logs" in str(title) for title in titles), (
-            "bioetl-overview-v2.json must expose a logs drilldown link"
-        )
-    with pytest.raises(AssertionError, match="Logs Drilldown app"):
-        assert any("/a/grafana-lokiexplore-app/" in str(url) for url in urls), (
-            "bioetl-overview-v2.json must point logs drilldown to Logs Drilldown app"
+        _assert_dashboard_exposes_explore_drilldown_links(
+            dashboard_name="bioetl-overview-v2.json",
+            dashboard=dashboard,
         )
 
 
 def test_missing_critical_panel_data_link_fails_closed() -> None:
     """Critical panel contract must fail when the expected data link is removed."""
-    with pytest.raises(AssertionError, match="must define dataLinks|must include"):
+    with pytest.raises(AssertionError, match=r"must define dataLinks|must include"):
         _assert_critical_panel_entry(
             dashboard_path=Path("grafana/dashboards/bioetl-overview-v2.json"),
             uid="bioetl-overview-v2",
@@ -880,100 +885,125 @@ def test_malformed_navigation_links_collection_fails_closed() -> None:
         get_dashboard_navigation_links({"uid": "bioetl-overview-v2", "panels": []})
 
 
+def _collect_cross_dashboard_target_locations(
+    dashboard: dict[str, object], *, source_uid: str
+) -> dict[str, list[str]]:
+    target_locations: dict[str, list[str]] = {}
+    for link in _collect_dashboard_links(dashboard):
+        url = str(link.get("url", ""))
+        target_uid = _extract_dashboard_uid(url)
+        if target_uid is None or target_uid == source_uid:
+            continue
+        title = str(link.get("title", ""))
+        target_locations.setdefault(target_uid, []).append(f"{title} -> {url}")
+    return target_locations
+
+
+def _assert_no_duplicate_dashboard_targets(
+    *, dashboard_name: str, uid: str, target_locations: dict[str, list[str]]
+) -> None:
+    allowed_duplicate_targets = {
+        str(entry["target_uid"]) for entry in _REQUIRED_PANEL_LINKS_BY_UID.get(uid, ())
+    }
+    duplicates = {
+        target_uid: links
+        for target_uid, links in target_locations.items()
+        if len(links) > 1 and target_uid not in allowed_duplicate_targets
+    }
+    assert not duplicates, (
+        f"{dashboard_name} duplicates dashboard links by target UID: {duplicates}"
+    )
+
+
 def test_dashboard_to_dashboard_links_are_not_duplicated() -> None:
     """Dashboards should not duplicate target UIDs outside explicit panel CTAs."""
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
         uid = dashboard.get("uid")
         assert isinstance(uid, str), f"{dashboard_path.name} must declare string uid"
+        target_locations = _collect_cross_dashboard_target_locations(
+            dashboard, source_uid=uid
+        )
+        _assert_no_duplicate_dashboard_targets(
+            dashboard_name=dashboard_path.name,
+            uid=uid,
+            target_locations=target_locations,
+        )
 
-        target_locations: dict[str, list[str]] = {}
-        for link in _collect_dashboard_links(dashboard):
-            url = str(link.get("url", ""))
-            target_uid = _extract_dashboard_uid(url)
-            if target_uid is None or target_uid == uid:
-                continue
-            title = str(link.get("title", ""))
-            target_locations.setdefault(target_uid, []).append(f"{title} -> {url}")
 
-        allowed_duplicate_targets = {
-            str(entry["target_uid"])
-            for entry in _REQUIRED_PANEL_LINKS_BY_UID.get(uid, ())
-        }
-        duplicates = {
-            target_uid: links
-            for target_uid, links in target_locations.items()
-            if len(links) > 1 and target_uid not in allowed_duplicate_targets
-        }
-        assert not duplicates, (
-            f"{dashboard_path.name} duplicates dashboard links by target UID: {duplicates}"
+def _assert_kpi_mirror_panel_canonical_link(
+    *,
+    kpi_name: str,
+    mirror: object,
+    canonical_uid: str,
+    dashboards_by_uid: dict[str, dict[str, object]],
+) -> None:
+    assert isinstance(mirror, dict), (
+        f"kpi_ownership.{kpi_name}.mirror_panels entries must be mappings"
+    )
+    dashboard_uid = mirror.get("dashboard_uid")
+    panel_id = mirror.get("panel_id")
+    assert isinstance(dashboard_uid, str), "mirror dashboard_uid must be string"
+    assert isinstance(panel_id, int), "mirror panel_id must be integer"
+
+    dashboard = dashboards_by_uid.get(dashboard_uid)
+    assert dashboard is not None, (
+        f"kpi_ownership.{kpi_name} references unknown dashboard {dashboard_uid}"
+    )
+    panel = _find_panel_by_id(dashboard, panel_id)
+    assert isinstance(panel, dict), (
+        f"kpi_ownership.{kpi_name} panel id={panel_id} not found in {dashboard_uid}"
+    )
+    links = _iter_panel_data_links(panel)
+    canonical_link = next(
+        (link for link in links if link.get("title") == "Open canonical KPI view"),
+        None,
+    )
+    assert isinstance(canonical_link, dict), (
+        f"{dashboard_uid} panel id={panel_id} must define data link "
+        "'Open canonical KPI view'"
+    )
+    url = canonical_link.get("url", "")
+    assert isinstance(url, str) and url.startswith(f"/d/{canonical_uid}/"), (
+        f"{dashboard_uid} panel id={panel_id} canonical link must target "
+        f"/d/{canonical_uid}/, got {url!r}"
+    )
+
+
+def _assert_kpi_ownership_entry(
+    *,
+    kpi_name: object,
+    spec: object,
+    dashboards_by_uid: dict[str, dict[str, object]],
+) -> None:
+    assert isinstance(spec, dict), f"kpi_ownership.{kpi_name} must be a mapping"
+    canonical_uid = spec.get("canonical_uid")
+    assert isinstance(canonical_uid, str), (
+        f"kpi_ownership.{kpi_name}.canonical_uid must be string"
+    )
+    mirror_panels = spec.get("mirror_panels", [])
+    assert isinstance(mirror_panels, list), (
+        f"kpi_ownership.{kpi_name}.mirror_panels must be a list"
+    )
+    for mirror in mirror_panels:
+        _assert_kpi_mirror_panel_canonical_link(
+            kpi_name=str(kpi_name),
+            mirror=mirror,
+            canonical_uid=canonical_uid,
+            dashboards_by_uid=dashboards_by_uid,
         )
 
 
 def test_kpi_mirror_panels_link_to_canonical_kpi_view() -> None:
     """Mirror KPI panels must include canonical fallback data link."""
     assert isinstance(_KPI_OWNERSHIP, dict), "kpi_ownership must be a mapping"
-
-    dashboards_by_uid: dict[str, dict[str, object]] = {}
-    for dashboard_path in get_dashboard_files():
-        dashboard = load_dashboard(dashboard_path)
-        uid = dashboard.get("uid")
-        assert isinstance(uid, str), f"{dashboard_path.name} must define string uid"
-        dashboards_by_uid[uid] = dashboard
-
+    dashboards_by_uid = _load_dashboards_by_uid()
     for kpi_name, spec in _KPI_OWNERSHIP.items():
-        assert isinstance(spec, dict), f"kpi_ownership.{kpi_name} must be a mapping"
-        canonical_uid = spec.get("canonical_uid")
-        assert isinstance(canonical_uid, str), (
-            f"kpi_ownership.{kpi_name}.canonical_uid must be string"
+        _assert_kpi_ownership_entry(
+            kpi_name=kpi_name,
+            spec=spec,
+            dashboards_by_uid=dashboards_by_uid,
         )
-
-        mirror_panels = spec.get("mirror_panels", [])
-        assert isinstance(mirror_panels, list), (
-            f"kpi_ownership.{kpi_name}.mirror_panels must be a list"
-        )
-        for mirror in mirror_panels:
-            assert isinstance(mirror, dict), (
-                f"kpi_ownership.{kpi_name}.mirror_panels entries must be mappings"
-            )
-            dashboard_uid = mirror.get("dashboard_uid")
-            panel_id = mirror.get("panel_id")
-            assert isinstance(dashboard_uid, str), "mirror dashboard_uid must be string"
-            assert isinstance(panel_id, int), "mirror panel_id must be integer"
-
-            dashboard = dashboards_by_uid.get(dashboard_uid)
-            assert dashboard is not None, (
-                f"kpi_ownership.{kpi_name} references unknown dashboard {dashboard_uid}"
-            )
-            panel = next(
-                (
-                    panel
-                    for panel in get_dashboard_panels(dashboard)
-                    if panel.get("id") == panel_id
-                ),
-                None,
-            )
-            assert isinstance(panel, dict), (
-                f"kpi_ownership.{kpi_name} panel id={panel_id} not found in {dashboard_uid}"
-            )
-            links = _iter_panel_data_links(panel)
-            canonical_link = next(
-                (
-                    link
-                    for link in links
-                    if link.get("title") == "Open canonical KPI view"
-                ),
-                None,
-            )
-            assert isinstance(canonical_link, dict), (
-                f"{dashboard_uid} panel id={panel_id} must define data link "
-                "'Open canonical KPI view'"
-            )
-            url = canonical_link.get("url", "")
-            assert isinstance(url, str) and url.startswith(f"/d/{canonical_uid}/"), (
-                f"{dashboard_uid} panel id={panel_id} canonical link must target "
-                f"/d/{canonical_uid}/, got {url!r}"
-            )
 
 
 @pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
@@ -1038,9 +1068,8 @@ def test_dashboard_queries_do_not_filter_by_high_cardinality_identity_labels(
     )
 
 
-def test_exact_identifier_variables_do_not_leak_into_other_dashboards() -> None:
-    """Exact-id variables must remain isolated to explicitly contracted dashboards."""
-    local_identity_dashboards = {
+_LOCAL_IDENTITY_DASHBOARDS = frozenset(
+    {
         "bioetl-control-plane-v1.json",
         "bioetl-overview-v2.json",
         "bioetl-runtime.json",
@@ -1048,30 +1077,64 @@ def test_exact_identifier_variables_do_not_leak_into_other_dashboards() -> None:
         "bioetl-dq-v2.json",
         "bioetl-workflow-overview.json",
     }
+)
+
+
+def _dashboard_template_variable_names(dashboard: dict[str, object]) -> set[object]:
+    return {
+        variable.get("name")
+        for variable in dashboard.get("templating", {}).get("list", [])
+        if variable.get("name")
+    }
+
+
+def _assert_silver_explorer_identity_variables(variables: set[object]) -> None:
+    assert {"quarantine_run_id", "payload_hash"} <= variables
+    assert "run_id" not in variables
+
+
+def _assert_local_identity_variables(variables: set[object]) -> None:
+    assert "run_id" in variables
+    assert "quarantine_run_id" not in variables
+    assert "payload_hash" not in variables
+
+
+def _assert_no_uncontracted_identity_variables(
+    *, dashboard_name: str, variables: set[object]
+) -> None:
+    assert "run_id" not in variables, (
+        f"{dashboard_name} must not define uncontracted variable run_id"
+    )
+    assert "quarantine_run_id" not in variables, (
+        f"{dashboard_name} must not define uncontracted variable quarantine_run_id"
+    )
+    assert "payload_hash" not in variables, (
+        f"{dashboard_name} must not define uncontracted variable payload_hash"
+    )
+
+
+def _assert_exact_identifier_variable_isolation(
+    *, dashboard_name: str, dashboard: dict[str, object]
+) -> None:
+    variables = _dashboard_template_variable_names(dashboard)
+    if dashboard_name == "bioetl-silver-reject-explorer.json":
+        _assert_silver_explorer_identity_variables(variables)
+        return
+    if dashboard_name in _LOCAL_IDENTITY_DASHBOARDS:
+        _assert_local_identity_variables(variables)
+        return
+    _assert_no_uncontracted_identity_variables(
+        dashboard_name=dashboard_name, variables=variables
+    )
+
+
+def test_exact_identifier_variables_do_not_leak_into_other_dashboards() -> None:
+    """Exact-id variables must remain isolated to explicitly contracted dashboards."""
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
-        variables = {
-            variable.get("name")
-            for variable in dashboard.get("templating", {}).get("list", [])
-            if variable.get("name")
-        }
-        if dashboard_path.name == "bioetl-silver-reject-explorer.json":
-            assert {"quarantine_run_id", "payload_hash"} <= variables
-            assert "run_id" not in variables
-            continue
-        if dashboard_path.name in local_identity_dashboards:
-            assert "run_id" in variables
-            assert "quarantine_run_id" not in variables
-            assert "payload_hash" not in variables
-            continue
-        assert "run_id" not in variables, (
-            f"{dashboard_path.name} must not define uncontracted variable run_id"
-        )
-        assert "quarantine_run_id" not in variables, (
-            f"{dashboard_path.name} must not define uncontracted variable quarantine_run_id"
-        )
-        assert "payload_hash" not in variables, (
-            f"{dashboard_path.name} must not define uncontracted variable payload_hash"
+        _assert_exact_identifier_variable_isolation(
+            dashboard_name=dashboard_path.name,
+            dashboard=dashboard,
         )
 
 
@@ -1119,28 +1182,36 @@ def test_dashboard_owned_dashboard_links_pin_include_vars_false() -> None:
     )
 
 
+def _assert_dashboard_top_level_navigation_contract(
+    *, dashboard_name: str, dashboard: dict[str, object]
+) -> None:
+    uid = dashboard.get("uid")
+    assert isinstance(uid, str), f"{dashboard_name} must declare string uid"
+
+    required_links = _REQUIRED_TOP_LEVEL_LINKS_BY_UID.get(uid)
+    assert required_links is not None, f"Unknown dashboard uid in contract: {uid}"
+
+    navigation_links = require_dashboard_navigation_links(
+        dashboard, dashboard_name=dashboard_name
+    )
+    titles = {
+        link.get("title")
+        for link in navigation_links
+        if isinstance(link.get("title"), str)
+    }
+    missing = required_links - titles
+    assert not missing, (
+        f"{dashboard_name} ({uid}) is missing required top-level links: "
+        f"{sorted(missing)}"
+    )
+
+
 def test_dashboard_top_level_navigation_contract_by_uid() -> None:
     """Each dashboard UID must expose required top-level navigation links."""
     for dashboard_path in get_dashboard_files():
-        dashboard = load_dashboard(dashboard_path)
-        uid = dashboard.get("uid")
-        assert isinstance(uid, str), f"{dashboard_path.name} must declare string uid"
-
-        required_links = _REQUIRED_TOP_LEVEL_LINKS_BY_UID.get(uid)
-        assert required_links is not None, f"Unknown dashboard uid in contract: {uid}"
-
-        navigation_links = require_dashboard_navigation_links(
-            dashboard, dashboard_name=dashboard_path.name
-        )
-        titles = {
-            link.get("title")
-            for link in navigation_links
-            if isinstance(link.get("title"), str)
-        }
-        missing = required_links - titles
-        assert not missing, (
-            f"{dashboard_path.name} ({uid}) is missing required top-level links: "
-            f"{sorted(missing)}"
+        _assert_dashboard_top_level_navigation_contract(
+            dashboard_name=dashboard_path.name,
+            dashboard=load_dashboard(dashboard_path),
         )
 
 
@@ -1271,6 +1342,175 @@ def _load_dashboards_by_uid() -> dict[str, dict[str, object]]:
     return dashboards
 
 
+def _parse_first_action_spec(
+    source_uid: object, spec: object
+) -> tuple[int, str, int, int, list[object]]:
+    assert isinstance(spec, dict), f"first_action_contract.{source_uid} must be mapping"
+    panel_id = spec.get("panel_id")
+    panel_title = spec.get("panel_title", "First Action")
+    min_cta = spec.get("min_cta", 0)
+    max_cta = spec.get("max_cta", 0)
+    ctas = spec.get("ctas", [])
+    assert isinstance(panel_id, int), (
+        f"first_action_contract.{source_uid}.panel_id must be integer"
+    )
+    assert isinstance(panel_title, str), (
+        f"first_action_contract.{source_uid}.panel_title must be string"
+    )
+    assert isinstance(min_cta, int), (
+        f"first_action_contract.{source_uid}.min_cta must be integer"
+    )
+    assert isinstance(max_cta, int), (
+        f"first_action_contract.{source_uid}.max_cta must be integer"
+    )
+    assert isinstance(ctas, list) and ctas, (
+        f"first_action_contract.{source_uid}.ctas must be a non-empty list"
+    )
+    assert min_cta <= max_cta, (
+        f"first_action_contract.{source_uid} has invalid CTA bounds: {min_cta}>{max_cta}"
+    )
+    return panel_id, panel_title, min_cta, max_cta, ctas
+
+
+def _assert_first_action_panel_shape(
+    *,
+    source_uid: str,
+    dashboard: dict[str, object],
+    panel_id: int,
+    panel_title: str,
+    min_cta: int,
+    max_cta: int,
+    ctas: list[object],
+) -> list[object]:
+    panel = _find_panel_by_id(dashboard, panel_id)
+    assert panel is not None, (
+        f"{source_uid} missing First Action panel with id={panel_id}"
+    )
+    assert panel.get("title") == panel_title, (
+        f"{source_uid} first action panel id={panel_id} must be titled {panel_title!r}"
+    )
+    links = panel.get("links")
+    assert isinstance(links, list) and links, (
+        f"{source_uid} first action panel id={panel_id} must define row links"
+    )
+    assert min_cta <= len(links) <= max_cta, (
+        f"{source_uid} first action panel id={panel_id} must include "
+        f"{min_cta}-{max_cta} links, got {len(links)}"
+    )
+    required_titles = {str(arrow.get("title")) for arrow in ctas}
+    actual_titles = {str(link.get("title", "")) for link in links}
+    assert required_titles.issubset(actual_titles), (
+        f"{source_uid} first action panel id={panel_id} missing CTAs: "
+        f"{sorted(required_titles - actual_titles)}"
+    )
+    return links
+
+
+def _assert_first_action_app_cta(
+    *, source_uid: str, title: str, expected_target_uid: str, url: str
+) -> None:
+    assert url.startswith(f"/a/{expected_target_uid}/"), (
+        f"{source_uid} First Action CTA '{title}' must target app {expected_target_uid}"
+    )
+    _assert_required_time_tokens(
+        url,
+        tokens=_EXPLORE_TIME_HANDOFF_TOKENS,
+        context=f"{source_uid} first action CTA '{title}'",
+    )
+
+
+def _assert_first_action_dashboard_cta(
+    *, source_uid: str, title: str, expected_target_uid: str, url: str
+) -> None:
+    assert url.startswith(f"/d/{expected_target_uid}/"), (
+        f"{source_uid} First Action CTA '{title}' must target /d/{expected_target_uid}/"
+    )
+    required_vars = _REQUIRED_LINK_VARS_BY_TARGET_UID.get(expected_target_uid)
+    assert required_vars is not None, (
+        f"Unknown target UID {expected_target_uid} in first_action_contract"
+    )
+    allowed_vars = _ALLOWED_DASHBOARD_LINK_VARS[expected_target_uid]
+    passed_vars = _extract_link_vars(url)
+    assert required_vars <= passed_vars, (
+        f"{source_uid} first action CTA '{title}' missing required vars "
+        f"{sorted(required_vars - passed_vars)}"
+    )
+    assert passed_vars <= allowed_vars, (
+        f"{source_uid} first action CTA '{title}' passes non-allowlisted vars "
+        f"{sorted(passed_vars - allowed_vars)}"
+    )
+    _assert_required_time_tokens(
+        url,
+        tokens=_DASHBOARD_TIME_HANDOFF_TOKENS,
+        context=f"{source_uid} first action CTA '{title}'",
+    )
+
+
+def _assert_first_action_cta_entry(
+    *, source_uid: str, entry: object, links: list[object]
+) -> None:
+    title = entry.get("title") if isinstance(entry, dict) else None
+    expected_target_uid = (
+        entry.get("expected_target_uid") if isinstance(entry, dict) else None
+    )
+    assert isinstance(title, str), (
+        f"first_action_contract.{source_uid}.ctas entry missing title"
+    )
+    assert isinstance(expected_target_uid, str), (
+        f"first_action_contract.{source_uid}.{title} missing expected_target_uid"
+    )
+    link = next((item for item in links if item.get("title") == title), None)
+    assert link is not None, f"{source_uid} first action must define CTA link '{title}'"
+    assert link.get("includeVars") is False, (
+        f"{source_uid} First Action CTA '{title}' must keep includeVars=false"
+    )
+    url = str(link.get("url", ""))
+    assert url, f"{source_uid} First Action CTA '{title}' must define URL"
+    if expected_target_uid.startswith("grafana-"):
+        _assert_first_action_app_cta(
+            source_uid=source_uid,
+            title=title,
+            expected_target_uid=expected_target_uid,
+            url=url,
+        )
+        return
+    _assert_first_action_dashboard_cta(
+        source_uid=source_uid,
+        title=title,
+        expected_target_uid=expected_target_uid,
+        url=url,
+    )
+
+
+def _assert_first_action_source_contract(
+    *,
+    source_uid: object,
+    spec: object,
+    dashboards_by_uid: dict[str, dict[str, object]],
+) -> None:
+    panel_id, panel_title, min_cta, max_cta, ctas = _parse_first_action_spec(
+        source_uid, spec
+    )
+    source_uid_str = str(source_uid)
+    dashboard = dashboards_by_uid.get(source_uid_str)
+    assert isinstance(dashboard, dict), (
+        f"first_action_contract references unknown uid {source_uid_str}"
+    )
+    links = _assert_first_action_panel_shape(
+        source_uid=source_uid_str,
+        dashboard=dashboard,
+        panel_id=panel_id,
+        panel_title=panel_title,
+        min_cta=min_cta,
+        max_cta=max_cta,
+        ctas=ctas,
+    )
+    for entry in ctas:
+        _assert_first_action_cta_entry(
+            source_uid=source_uid_str, entry=entry, links=links
+        )
+
+
 def test_first_action_rows_match_navigation_contract() -> None:
     """First Action rows must match contract-defined panel ids and outgoing CTAs."""
     transition_contract = _NAV_LINK_CONTRACT.get("navigation_transition_contract")
@@ -1281,188 +1521,115 @@ def test_first_action_rows_match_navigation_contract() -> None:
     assert isinstance(first_action_contract, dict), (
         "first_action_contract must be mapping"
     )
-
     dashboards_by_uid = _load_dashboards_by_uid()
-
     for source_uid, spec in first_action_contract.items():
-        assert isinstance(spec, dict), (
-            f"first_action_contract.{source_uid} must be mapping"
-        )
-        panel_id = spec.get("panel_id")
-        panel_title = spec.get("panel_title", "First Action")
-        min_cta = spec.get("min_cta", 0)
-        max_cta = spec.get("max_cta", 0)
-        ctas = spec.get("ctas", [])
-        assert isinstance(panel_id, int), (
-            f"first_action_contract.{source_uid}.panel_id must be integer"
-        )
-        assert isinstance(panel_title, str), (
-            f"first_action_contract.{source_uid}.panel_title must be string"
-        )
-        assert isinstance(min_cta, int), (
-            f"first_action_contract.{source_uid}.min_cta must be integer"
-        )
-        assert isinstance(max_cta, int), (
-            f"first_action_contract.{source_uid}.max_cta must be integer"
-        )
-        assert isinstance(ctas, list) and ctas, (
-            f"first_action_contract.{source_uid}.ctas must be a non-empty list"
-        )
-        assert min_cta <= max_cta, (
-            f"first_action_contract.{source_uid} has invalid CTA bounds: {min_cta}>{max_cta}"
+        _assert_first_action_source_contract(
+            source_uid=source_uid,
+            spec=spec,
+            dashboards_by_uid=dashboards_by_uid,
         )
 
-        dashboard = dashboards_by_uid.get(source_uid)
-        assert isinstance(dashboard, dict), (
-            f"first_action_contract references unknown uid {source_uid}"
+
+_FORBIDDEN_UNIVERSAL_HANDOFF_TOKENS = ("includeVars=true", "/explore?left=")
+
+
+def _assert_link_forbids_universal_handoff(
+    *,
+    dashboard_name: str,
+    link: dict[str, object],
+    navigation_links: list[dict[str, object]],
+) -> None:
+    url = str(link.get("url", ""))
+    assert not any(token in url for token in _FORBIDDEN_UNIVERSAL_HANDOFF_TOKENS), (
+        f"{dashboard_name} link uses forbidden universal handoff pattern: {url}"
+    )
+    if url.startswith("/d/") and link in navigation_links:
+        assert link.get("includeVars") is False, (
+            f"{dashboard_name} top-level cross-dashboard link must pin includeVars=false: {url}"
         )
-
-        panels_by_id = {
-            panel.get("id"): panel
-            for panel in get_dashboard_panels(dashboard)
-            if isinstance(panel.get("id"), int)
-        }
-        panel = panels_by_id.get(panel_id)
-        assert panel is not None, (
-            f"{source_uid} missing First Action panel with id={panel_id}"
-        )
-        assert panel.get("title") == panel_title, (
-            f"{source_uid} first action panel id={panel_id} must be titled {panel_title!r}"
-        )
-
-        links = panel.get("links")
-        assert isinstance(links, list) and links, (
-            f"{source_uid} first action panel id={panel_id} must define row links"
-        )
-        assert min_cta <= len(links) <= max_cta, (
-            f"{source_uid} first action panel id={panel_id} must include "
-            f"{min_cta}-{max_cta} links, got {len(links)}"
-        )
-
-        required_titles = {str(arrow.get("title")) for arrow in ctas}
-        actual_titles = {str(link.get("title", "")) for link in links}
-        assert required_titles.issubset(actual_titles), (
-            f"{source_uid} first action panel id={panel_id} missing CTAs: "
-            f"{sorted(required_titles - actual_titles)}"
-        )
-
-        for entry in ctas:
-            title = entry.get("title")
-            expected_target_uid = entry.get("expected_target_uid")
-            assert isinstance(title, str), (
-                f"first_action_contract.{source_uid}.ctas entry missing title"
-            )
-            assert isinstance(expected_target_uid, str), (
-                f"first_action_contract.{source_uid}.{title} missing expected_target_uid"
-            )
-            link = next(
-                (item for item in links if item.get("title") == title),
-                None,
-            )
-            assert link is not None, (
-                f"{source_uid} first action must define CTA link '{title}'"
-            )
-            assert link.get("includeVars") is False, (
-                f"{source_uid} First Action CTA '{title}' must keep includeVars=false"
-            )
-
-            url = str(link.get("url", ""))
-            assert url, f"{source_uid} First Action CTA '{title}' must define URL"
-
-            if expected_target_uid.startswith("grafana-"):
-                assert url.startswith(f"/a/{expected_target_uid}/"), (
-                    f"{source_uid} First Action CTA '{title}' must target app {expected_target_uid}"
-                )
-                _assert_required_time_tokens(
-                    url,
-                    tokens=_EXPLORE_TIME_HANDOFF_TOKENS,
-                    context=f"{source_uid} first action CTA '{title}'",
-                )
-                continue
-
-            assert url.startswith(f"/d/{expected_target_uid}/"), (
-                f"{source_uid} First Action CTA '{title}' must target /d/{expected_target_uid}/"
-            )
-            required_vars = _REQUIRED_LINK_VARS_BY_TARGET_UID.get(expected_target_uid)
-            assert required_vars is not None, (
-                f"Unknown target UID {expected_target_uid} in first_action_contract"
-            )
-            allowed_vars = _ALLOWED_DASHBOARD_LINK_VARS[expected_target_uid]
-            passed_vars = _extract_link_vars(url)
-            assert required_vars <= passed_vars, (
-                f"{source_uid} first action CTA '{title}' missing required vars "
-                f"{sorted(required_vars - passed_vars)}"
-            )
-            assert passed_vars <= allowed_vars, (
-                f"{source_uid} first action CTA '{title}' passes non-allowlisted vars "
-                f"{sorted(passed_vars - allowed_vars)}"
-            )
-            _assert_required_time_tokens(
-                url,
-                tokens=_DASHBOARD_TIME_HANDOFF_TOKENS,
-                context=f"{source_uid} first action CTA '{title}'",
-            )
 
 
 def test_dashboard_links_forbid_universal_handoff_patterns() -> None:
     """Dashboard links must avoid generic includeVars and legacy Explore payloads."""
-    forbidden_tokens = ("includeVars=true", "/explore?left=")
-
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
         navigation_links = get_dashboard_navigation_links(dashboard)
         for link in _collect_dashboard_links(dashboard):
-            url = str(link.get("url", ""))
-            assert not any(token in url for token in forbidden_tokens), (
-                f"{dashboard_path.name} link uses forbidden universal handoff pattern: {url}"
+            _assert_link_forbids_universal_handoff(
+                dashboard_name=dashboard_path.name,
+                link=link,
+                navigation_links=navigation_links,
             )
 
-            if url.startswith("/d/") and link in navigation_links:
-                assert link.get("includeVars") is False, (
-                    f"{dashboard_path.name} top-level cross-dashboard link must pin includeVars=false: {url}"
-                )
+
+def _assert_navigation_has_logs_and_traces_titles(
+    *, dashboard_name: str, titles: set[object]
+) -> None:
+    assert any("Logs" in str(title) for title in titles), (
+        f"{dashboard_name} must expose a logs drilldown link"
+    )
+    assert any("Traces" in str(title) for title in titles), (
+        f"{dashboard_name} must expose a traces drilldown link"
+    )
+
+
+def _assert_navigation_has_drilldown_app_urls(
+    *, dashboard_name: str, urls: list[object]
+) -> list[object]:
+    assert any("/a/grafana-lokiexplore-app/" in str(url) for url in urls), (
+        f"{dashboard_name} must point logs drilldown to Logs Drilldown app"
+    )
+    assert any("/a/grafana-exploretraces-app/" in str(url) for url in urls), (
+        f"{dashboard_name} must point traces drilldown to Traces Drilldown app"
+    )
+    drilldown_urls = [
+        url
+        for url in urls
+        if "/a/grafana-lokiexplore-app/" in str(url)
+        or "/a/grafana-exploretraces-app/" in str(url)
+    ]
+    assert drilldown_urls, f"{dashboard_name} must expose Grafana Drilldown app URLs"
+    return drilldown_urls
+
+
+def _assert_drilldown_urls_time_and_no_legacy(
+    *, dashboard_name: str, drilldown_urls: list[object]
+) -> None:
+    for url in drilldown_urls:
+        _assert_required_time_tokens(
+            str(url),
+            tokens=_EXPLORE_TIME_HANDOFF_TOKENS,
+            context=f"{dashboard_name} drilldown URL",
+        )
+        assert "/explore?left=" not in str(url), (
+            f"{dashboard_name} drilldown URL must not use legacy /explore payload links"
+        )
+
+
+def _assert_dashboard_exposes_explore_drilldown_links(
+    *, dashboard_name: str, dashboard: dict[str, object]
+) -> None:
+    links = require_dashboard_navigation_links(dashboard, dashboard_name=dashboard_name)
+    urls = [link.get("url", "") for link in links]
+    titles = {link.get("title") for link in links if link.get("title")}
+    _assert_navigation_has_logs_and_traces_titles(
+        dashboard_name=dashboard_name, titles=titles
+    )
+    drilldown_urls = _assert_navigation_has_drilldown_app_urls(
+        dashboard_name=dashboard_name, urls=urls
+    )
+    _assert_drilldown_urls_time_and_no_legacy(
+        dashboard_name=dashboard_name, drilldown_urls=drilldown_urls
+    )
 
 
 def test_navigation_dashboards_expose_explore_drilldown_links() -> None:
     """Every navigation panel should expose Logs and Traces drilldowns."""
     for dashboard_path in get_dashboard_files():
-        dashboard_name = dashboard_path.name
-        dashboard = load_dashboard(dashboard_path)
-        links = require_dashboard_navigation_links(
-            dashboard, dashboard_name=dashboard_name
+        _assert_dashboard_exposes_explore_drilldown_links(
+            dashboard_name=dashboard_path.name,
+            dashboard=load_dashboard(dashboard_path),
         )
-        urls = [link.get("url", "") for link in links]
-        titles = {link.get("title") for link in links if link.get("title")}
-        assert any("Logs" in title for title in titles), (
-            f"{dashboard_name} must expose a logs drilldown link"
-        )
-        assert any("Traces" in title for title in titles), (
-            f"{dashboard_name} must expose a traces drilldown link"
-        )
-        assert any("/a/grafana-lokiexplore-app/" in url for url in urls), (
-            f"{dashboard_name} must point logs drilldown to Logs Drilldown app"
-        )
-        assert any("/a/grafana-exploretraces-app/" in url for url in urls), (
-            f"{dashboard_name} must point traces drilldown to Traces Drilldown app"
-        )
-        drilldown_urls = [
-            url
-            for url in urls
-            if "/a/grafana-lokiexplore-app/" in url
-            or "/a/grafana-exploretraces-app/" in url
-        ]
-        assert drilldown_urls, (
-            f"{dashboard_name} must expose Grafana Drilldown app URLs"
-        )
-        for url in drilldown_urls:
-            _assert_required_time_tokens(
-                url,
-                tokens=_EXPLORE_TIME_HANDOFF_TOKENS,
-                context=f"{dashboard_name} drilldown URL",
-            )
-            assert "/explore?left=" not in url, (
-                f"{dashboard_name} drilldown URL must not use legacy /explore payload links"
-            )
 
 
 def test_dashboard_bus_self_links_are_omitted() -> None:
@@ -1498,53 +1665,85 @@ def test_navigation_panel_html_links_open_in_same_window() -> None:
         )
 
 
+_PRIMARY_IDENTITY_HANDOFF_VARS = frozenset(
+    {"workflow", "pipeline", "run_type", "run_id"}
+)
+
+
+def _navigation_panel_by_id_1000(
+    dashboard: dict[str, object], *, dashboard_name: str
+) -> dict[str, object]:
+    panel = next(
+        (item for item in dashboard.get("panels", []) if item.get("id") == 1000),
+        None,
+    )
+    assert panel is not None, f"{dashboard_name} must define navigation panel id=1000"
+    assert isinstance(panel, dict), (
+        f"{dashboard_name} navigation panel id=1000 must be a mapping"
+    )
+    return panel
+
+
+def _html_hrefs_from_panel_content(
+    panel: dict[str, object], *, prefix: str | None = None
+) -> list[str]:
+    content = str((panel.get("options") or {}).get("content", ""))
+    hrefs = [unescape(match) for match in re.findall(r'href="([^"]+)"', content)]
+    if prefix is None:
+        return hrefs
+    return [href for href in hrefs if href.startswith(prefix)]
+
+
+def _query_var_values(url: str) -> dict[str, str]:
+    return {
+        key[4:]: value
+        for key, value in parse_qsl(urlsplit(url).query, keep_blank_values=True)
+        if key.startswith("var-")
+    }
+
+
+def _assert_primary_identity_href(
+    *, dashboard_name: str, source_uid: str, href: str
+) -> None:
+    target_uid = _extract_dashboard_uid(href)
+    if target_uid not in _PRIMARY_DASHBOARD_UIDS or target_uid == source_uid:
+        return
+    query_vars = _query_var_values(href)
+    missing = _PRIMARY_IDENTITY_HANDOFF_VARS - set(query_vars)
+    assert not missing, (
+        f"{dashboard_name} visible navigation link to {target_uid} "
+        f"must preserve {sorted(_PRIMARY_IDENTITY_HANDOFF_VARS)}; "
+        f"missing {sorted(missing)}: {href}"
+    )
+
+
+def _assert_primary_identity_handoff_for_dashboard(
+    *, dashboard_name: str, dashboard: dict[str, object]
+) -> None:
+    source_uid = dashboard.get("uid")
+    assert isinstance(source_uid, str), f"{dashboard_name} must declare string uid"
+    if source_uid not in _PRIMARY_DASHBOARD_UIDS:
+        return
+    panel = _navigation_panel_by_id_1000(dashboard, dashboard_name=dashboard_name)
+    hrefs = _html_hrefs_from_panel_content(panel, prefix="/d/")
+    assert hrefs, f"{dashboard_name} navigation HTML bus must expose links"
+    for href in hrefs:
+        _assert_primary_identity_href(
+            dashboard_name=dashboard_name, source_uid=source_uid, href=href
+        )
+
+
 def test_navigation_panel_html_bus_preserves_primary_identity_handoff() -> None:
     """Visible id=1000 HTML bus must preserve the same primary vars as panel.links."""
-    required_vars = {"workflow", "pipeline", "run_type", "run_id"}
     for dashboard_path in get_dashboard_files():
-        dashboard = load_dashboard(dashboard_path)
-        source_uid = dashboard.get("uid")
-        assert isinstance(source_uid, str), (
-            f"{dashboard_path.name} must declare string uid"
+        _assert_primary_identity_handoff_for_dashboard(
+            dashboard_name=dashboard_path.name,
+            dashboard=load_dashboard(dashboard_path),
         )
-        if source_uid not in _PRIMARY_DASHBOARD_UIDS:
-            continue
-        panel = next(
-            (item for item in dashboard.get("panels", []) if item.get("id") == 1000),
-            None,
-        )
-        assert panel is not None, (
-            f"{dashboard_path.name} must define navigation panel id=1000"
-        )
-        content = str((panel.get("options") or {}).get("content", ""))
-        hrefs = [
-            unescape(match)
-            for match in re.findall(r'href="([^"]+)"', content)
-            if match.startswith("/d/")
-        ]
-        assert hrefs, f"{dashboard_path.name} navigation HTML bus must expose links"
-        for href in hrefs:
-            target_uid = _extract_dashboard_uid(href)
-            if target_uid not in _PRIMARY_DASHBOARD_UIDS or target_uid == source_uid:
-                continue
-            query_vars = {
-                key[4:]: value
-                for key, value in parse_qsl(
-                    urlsplit(href).query,
-                    keep_blank_values=True,
-                )
-                if key.startswith("var-")
-            }
-            missing = required_vars - set(query_vars)
-            assert not missing, (
-                f"{dashboard_path.name} visible navigation link to {target_uid} "
-                f"must preserve {sorted(required_vars)}; missing {sorted(missing)}: {href}"
-            )
 
 
-def test_navigation_panel_html_bus_keeps_silver_explorer_forensic_boundary() -> None:
-    """Visible links into Silver Reject Explorer must not receive shared run scope."""
-    allowed_vars = {
+_SILVER_EXPLORER_ALLOWED_HTML_VARS = frozenset(
+    {
         "pipeline",
         "run_type",
         "reason_code",
@@ -1552,142 +1751,212 @@ def test_navigation_panel_html_bus_keeps_silver_explorer_forensic_boundary() -> 
         "quarantine_run_id",
         "payload_hash",
     }
+)
+
+
+def _assert_silver_explorer_href_forensic_boundary(
+    *, dashboard_name: str, href: str
+) -> None:
+    unexpected = set(_query_var_values(href)) - _SILVER_EXPLORER_ALLOWED_HTML_VARS
+    assert not unexpected, (
+        f"{dashboard_name} visible navigation link to Silver Reject "
+        f"Explorer leaks unsupported vars {sorted(unexpected)}: {href}"
+    )
+
+
+def _assert_silver_explorer_html_bus_forensic_boundary(
+    *, dashboard_name: str, dashboard: dict[str, object]
+) -> None:
+    panel = _navigation_panel_by_id_1000(dashboard, dashboard_name=dashboard_name)
+    hrefs = _html_hrefs_from_panel_content(
+        panel, prefix="/d/bioetl-silver-reject-explorer/"
+    )
+    for href in hrefs:
+        _assert_silver_explorer_href_forensic_boundary(
+            dashboard_name=dashboard_name, href=href
+        )
+
+
+def test_navigation_panel_html_bus_keeps_silver_explorer_forensic_boundary() -> None:
+    """Visible links into Silver Reject Explorer must not receive shared run scope."""
     for dashboard_path in get_dashboard_files():
-        dashboard = load_dashboard(dashboard_path)
-        panel = next(
-            (item for item in dashboard.get("panels", []) if item.get("id") == 1000),
-            None,
+        _assert_silver_explorer_html_bus_forensic_boundary(
+            dashboard_name=dashboard_path.name,
+            dashboard=load_dashboard(dashboard_path),
         )
-        assert panel is not None, (
-            f"{dashboard_path.name} must define navigation panel id=1000"
+
+
+_EXPECTED_CURRENT_NAV_TITLE = {
+    "bioetl-control-plane-v1": "0. Control Plane",
+    "bioetl-overview-v2": "1. Overview",
+    "bioetl-runtime": "2. Runtime",
+    "bioetl-provider-health-v2": "3. Provider Health",
+    "bioetl-dq-v2": "4. Data Quality",
+    "bioetl-workflow-overview": "5. Workflow",
+    "bioetl-alerts-slo": "6. Alerts & SLO",
+    "bioetl-silver-reject-explorer": "Silver Reject Explorer",
+}
+_BASE_VISUAL_NAV_TITLES = (
+    "0. Control Plane",
+    "1. Overview",
+    "2. Runtime",
+    "3. Provider Health",
+    "4. Data Quality",
+    "5. Workflow",
+    "6. Alerts & SLO",
+)
+_OPTIONAL_VISUAL_NAV_TITLES = (
+    "Silver Reject Explorer",
+    "Explore Logs",
+    "Explore Traces",
+)
+_SANITIZER_SAFE_NAV_TOKENS = (
+    "display:flex",
+    "flex-wrap:wrap",
+    "overflow:visible",
+    "flex:1 1 145px",
+    "text-align:center",
+    "color:#f8fafc",
+    "background:#334155",
+    "border:1px solid #94a3b8",
+    "background:#1d4ed8",
+    "border:2px solid #7dd3fc",
+)
+
+
+def _assert_titles_in_order(
+    content: str, titles: tuple[str, ...], *, dashboard_name: str
+) -> None:
+    positions = [content.index(title) for title in titles]
+    assert positions == sorted(positions), (
+        f"{dashboard_name} must preserve canonical navigation order"
+    )
+
+
+def _assert_visual_bus_base_content(
+    *, dashboard_name: str, content: str, panel: dict[str, object]
+) -> None:
+    for title in _BASE_VISUAL_NAV_TITLES:
+        assert title in content, (
+            f"{dashboard_name} visual navigation bus must render '{title}'"
         )
-        content = str((panel.get("options") or {}).get("content", ""))
-        for href in [
-            unescape(match)
-            for match in re.findall(r'href="([^"]+)"', content)
-            if match.startswith("/d/bioetl-silver-reject-explorer/")
-        ]:
-            query_vars = {
-                key[4:]: value
-                for key, value in parse_qsl(
-                    urlsplit(href).query,
-                    keep_blank_values=True,
-                )
-                if key.startswith("var-")
-            }
-            unexpected = set(query_vars) - allowed_vars
-            assert not unexpected, (
-                f"{dashboard_path.name} visible navigation link to Silver Reject "
-                f"Explorer leaks unsupported vars {sorted(unexpected)}: {href}"
-            )
+    _assert_titles_in_order(
+        content, _BASE_VISUAL_NAV_TITLES, dashboard_name=dashboard_name
+    )
+    assert "<style" not in content.lower(), (
+        f"{dashboard_name} navigation must survive Grafana Text-panel "
+        "sanitization without a style block"
+    )
+    for token in _SANITIZER_SAFE_NAV_TOKENS:
+        assert token in content, (
+            f"{dashboard_name} navigation must define sanitizer-safe {token}"
+        )
+    description = str(panel.get("description", ""))
+    assert "Sanitizer-compatible" in description
+    assert "native keyboard focus" in description
+
+
+def _assert_current_dashboard_disabled_in_visual_bus(
+    *, dashboard_name: str, uid: str, content: str
+) -> None:
+    current_title = _EXPECTED_CURRENT_NAV_TITLE[uid]
+    disabled_pattern = re.compile(
+        rf'<span[^>]*aria-current="page"[^>]*>{re.escape(current_title)}</span>'
+    )
+    assert disabled_pattern.search(content), (
+        f"{dashboard_name} must render current dashboard '{current_title}' as disabled item"
+    )
+    assert re.search(rf"<a[^>]*>{re.escape(current_title)}</a>", content) is None, (
+        f"{dashboard_name} must not render current dashboard '{current_title}' as active anchor"
+    )
+
+
+def _assert_optional_visual_title_order(visible_optional_titles: list[str]) -> None:
+    if (
+        "Silver Reject Explorer" in visible_optional_titles
+        and "Explore Logs" in visible_optional_titles
+    ):
+        assert visible_optional_titles.index(
+            "Silver Reject Explorer"
+        ) < visible_optional_titles.index("Explore Logs")
+    if (
+        "Explore Logs" in visible_optional_titles
+        and "Explore Traces" in visible_optional_titles
+    ):
+        assert visible_optional_titles.index(
+            "Explore Logs"
+        ) < visible_optional_titles.index("Explore Traces")
+
+
+def _assert_visual_bus_optional_order(*, dashboard_name: str, content: str) -> None:
+    visible_optional_titles = [
+        title for title in _OPTIONAL_VISUAL_NAV_TITLES if title in content
+    ]
+    all_expected_titles = _BASE_VISUAL_NAV_TITLES + tuple(visible_optional_titles)
+    _assert_titles_in_order(content, all_expected_titles, dashboard_name=dashboard_name)
+    # Optional adjunct links may be excluded by deployment profile; when present,
+    # they should stay in the canonical relative order.
+    if visible_optional_titles:
+        _assert_optional_visual_title_order(visible_optional_titles)
+
+
+def _assert_navigation_panel_visual_bus(
+    *, dashboard_name: str, dashboard: dict[str, object]
+) -> None:
+    uid = dashboard.get("uid")
+    assert isinstance(uid, str), f"{dashboard_name} must declare string uid"
+    panel = _navigation_panel_by_id_1000(dashboard, dashboard_name=dashboard_name)
+    content = unescape(str((panel.get("options") or {}).get("content", "")))
+    _assert_visual_bus_base_content(
+        dashboard_name=dashboard_name, content=content, panel=panel
+    )
+    _assert_current_dashboard_disabled_in_visual_bus(
+        dashboard_name=dashboard_name, uid=uid, content=content
+    )
+    _assert_visual_bus_optional_order(dashboard_name=dashboard_name, content=content)
 
 
 def test_navigation_panel_renders_full_visual_bus_with_disabled_current_item() -> None:
     """Visual id=1000 bus should show all titles and render current dashboard as disabled."""
-    expected_current_title = {
-        "bioetl-control-plane-v1": "0. Control Plane",
-        "bioetl-overview-v2": "1. Overview",
-        "bioetl-runtime": "2. Runtime",
-        "bioetl-provider-health-v2": "3. Provider Health",
-        "bioetl-dq-v2": "4. Data Quality",
-        "bioetl-workflow-overview": "5. Workflow",
-        "bioetl-alerts-slo": "6. Alerts & SLO",
-        "bioetl-silver-reject-explorer": "Silver Reject Explorer",
-    }
-    base_visual_titles = (
-        "0. Control Plane",
-        "1. Overview",
-        "2. Runtime",
-        "3. Provider Health",
-        "4. Data Quality",
-        "5. Workflow",
-        "6. Alerts & SLO",
-    )
-    optional_visual_titles = (
-        "Silver Reject Explorer",
-        "Explore Logs",
-        "Explore Traces",
-    )
-
     for dashboard_path in get_dashboard_files():
-        dashboard = load_dashboard(dashboard_path)
-        uid = dashboard.get("uid")
-        assert isinstance(uid, str), f"{dashboard_path.name} must declare string uid"
-        panel = next(
-            (item for item in dashboard.get("panels", []) if item.get("id") == 1000),
-            None,
-        )
-        assert panel is not None, (
-            f"{dashboard_path.name} must define navigation panel id=1000"
-        )
-        content = unescape(str((panel.get("options") or {}).get("content", "")))
-        for title in base_visual_titles:
-            assert title in content, (
-                f"{dashboard_path.name} visual navigation bus must render '{title}'"
-            )
-        positions = [content.index(title) for title in base_visual_titles]
-        assert positions == sorted(positions), (
-            f"{dashboard_path.name} must preserve canonical navigation order"
-        )
-        assert "<style" not in content.lower(), (
-            f"{dashboard_path.name} navigation must survive Grafana Text-panel "
-            "sanitization without a style block"
-        )
-        for token in (
-            "display:flex",
-            "flex-wrap:wrap",
-            "overflow:visible",
-            "flex:1 1 145px",
-            "text-align:center",
-            "color:#f8fafc",
-            "background:#334155",
-            "border:1px solid #94a3b8",
-            "background:#1d4ed8",
-            "border:2px solid #7dd3fc",
-        ):
-            assert token in content, (
-                f"{dashboard_path.name} navigation must define sanitizer-safe {token}"
-            )
-        description = str(panel.get("description", ""))
-        assert "Sanitizer-compatible" in description
-        assert "native keyboard focus" in description
-
-        current_title = expected_current_title[uid]
-        disabled_pattern = re.compile(
-            rf'<span[^>]*aria-current="page"[^>]*>{re.escape(current_title)}</span>'
-        )
-        assert disabled_pattern.search(content), (
-            f"{dashboard_path.name} must render current dashboard '{current_title}' as disabled item"
-        )
-        assert re.search(rf"<a[^>]*>{re.escape(current_title)}</a>", content) is None, (
-            f"{dashboard_path.name} must not render current dashboard '{current_title}' as active anchor"
+        _assert_navigation_panel_visual_bus(
+            dashboard_name=dashboard_path.name,
+            dashboard=load_dashboard(dashboard_path),
         )
 
-        visible_optional_titles = [
-            title for title in optional_visual_titles if title in content
-        ]
-        all_expected_titles = base_visual_titles + tuple(visible_optional_titles)
-        positions = [content.index(title) for title in all_expected_titles]
-        assert positions == sorted(positions), (
-            f"{dashboard_path.name} must preserve canonical navigation order"
-        )
-        # Optional adjunct links may be excluded by deployment profile; when present,
-        # they should stay in the canonical relative order.
-        if visible_optional_titles:
-            if (
-                "Silver Reject Explorer" in visible_optional_titles
-                and "Explore Logs" in visible_optional_titles
-            ):
-                assert visible_optional_titles.index(
-                    "Silver Reject Explorer"
-                ) < visible_optional_titles.index("Explore Logs")
-            if (
-                "Explore Logs" in visible_optional_titles
-                and "Explore Traces" in visible_optional_titles
-            ):
-                assert visible_optional_titles.index(
-                    "Explore Logs"
-                ) < visible_optional_titles.index("Explore Traces")
+
+def _navigation_drilldown_links(
+    dashboard: dict[str, object],
+) -> list[dict[str, object]]:
+    return [
+        link
+        for link in get_dashboard_navigation_links(dashboard)
+        if _is_logs_drilldown_url(link.get("url", ""))
+        or _is_traces_drilldown_url(link.get("url", ""))
+    ]
+
+
+def _assert_drilldown_link_time_and_route(
+    *, dashboard_name: str, link: dict[str, object]
+) -> None:
+    url = str(link.get("url", ""))
+    _assert_required_time_tokens(
+        url,
+        tokens=_EXPLORE_TIME_HANDOFF_TOKENS,
+        context=f"{dashboard_name} drilldown link",
+    )
+    assert "/explore?left=" not in url, (
+        f"{dashboard_name} drilldown link must not use legacy Explore payload URL"
+    )
+
+
+def _assert_dashboard_drilldown_routes_and_time(
+    *, dashboard_name: str, dashboard: dict[str, object]
+) -> None:
+    drilldown_links = _navigation_drilldown_links(dashboard)
+    assert drilldown_links, f"{dashboard_name} must expose Grafana Drilldown app URLs"
+    for link in drilldown_links:
+        _assert_drilldown_link_time_and_route(dashboard_name=dashboard_name, link=link)
 
 
 def test_explore_links_use_drilldown_routes_and_time_range() -> None:
@@ -1699,28 +1968,10 @@ def test_explore_links_use_drilldown_routes_and_time_range() -> None:
     ]
     assert dashboard_paths, "at least one dashboard must own Drilldown navigation"
     for dashboard_path in dashboard_paths:
-        dashboard_name = dashboard_path.name
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        drilldown_links = [
-            link
-            for link in get_dashboard_navigation_links(dashboard)
-            if _is_logs_drilldown_url(link.get("url", ""))
-            or _is_traces_drilldown_url(link.get("url", ""))
-        ]
-        assert drilldown_links, (
-            f"{dashboard_name} must expose Grafana Drilldown app URLs"
+        _assert_dashboard_drilldown_routes_and_time(
+            dashboard_name=dashboard_path.name,
+            dashboard=load_dashboard(Path("grafana/dashboards") / dashboard_path.name),
         )
-
-        for link in drilldown_links:
-            url = link.get("url", "")
-            _assert_required_time_tokens(
-                url,
-                tokens=_EXPLORE_TIME_HANDOFF_TOKENS,
-                context=f"{dashboard_name} drilldown link",
-            )
-            assert "/explore?left=" not in url, (
-                f"{dashboard_name} drilldown link must not use legacy Explore payload URL"
-            )
 
 
 def test_explore_traces_navigation_is_explicitly_traced_run_only() -> None:
@@ -1776,6 +2027,47 @@ def test_tempo_drilldown_routes_to_traces_drilldown_app() -> None:
             )
 
 
+def _navigation_logs_drilldown_links(
+    dashboard: dict[str, object],
+) -> list[dict[str, object]]:
+    return [
+        link
+        for link in get_dashboard_navigation_links(dashboard)
+        if _is_logs_drilldown_url(link.get("url", ""))
+    ]
+
+
+def _assert_loki_drilldown_link_safe_baseline(
+    *, dashboard_name: str, link: dict[str, object]
+) -> None:
+    url = str(link.get("url", ""))
+    assert "%7Bjob%3D%22bioetl%22%7D" in url or '{job="bioetl"}' in url, (
+        f"{dashboard_name} Loki drilldown must prepopulate safe bioetl baseline"
+    )
+    assert "${pipeline" not in url and "${provider" not in url, (
+        f"{dashboard_name} Loki drilldown must not bake dashboard variables "
+        "into encoded query payload"
+    )
+    tooltip = str(link.get("tooltip", ""))
+    assert "Zero lines can legitimately mean" in tooltip, (
+        f"{dashboard_name} Loki drilldown must disclose that empty results can be legitimate"
+    )
+    assert "refine in Explore" in tooltip or "refinement inside Explore" in tooltip, (
+        f"{dashboard_name} Loki drilldown must disclose baseline-first refinement workflow"
+    )
+
+
+def _assert_dashboard_loki_safe_baseline(
+    *, dashboard_name: str, dashboard: dict[str, object]
+) -> None:
+    loki_links = _navigation_logs_drilldown_links(dashboard)
+    assert loki_links, f"{dashboard_name} must expose Loki drilldown links"
+    for link in loki_links:
+        _assert_loki_drilldown_link_safe_baseline(
+            dashboard_name=dashboard_name, link=link
+        )
+
+
 def test_loki_drilldown_links_use_safe_bioetl_baseline_query() -> None:
     """Loki drilldown links should start from a low-cardinality baseline query."""
     dashboards = [
@@ -1785,81 +2077,60 @@ def test_loki_drilldown_links_use_safe_bioetl_baseline_query() -> None:
     ]
     assert dashboards, "at least one dashboard must own Loki Drilldown navigation"
     for dashboard_name, dashboard in dashboards:
-        loki_links = [
-            link
-            for link in get_dashboard_navigation_links(dashboard)
-            if _is_logs_drilldown_url(link.get("url", ""))
-        ]
-        assert loki_links, f"{dashboard_name} must expose Loki drilldown links"
-        for link in loki_links:
-            url = link.get("url", "")
-            assert "%7Bjob%3D%22bioetl%22%7D" in url or '{job="bioetl"}' in url, (
-                f"{dashboard_name} Loki drilldown must prepopulate safe bioetl baseline"
-            )
-            assert "${pipeline" not in url and "${provider" not in url, (
-                f"{dashboard_name} Loki drilldown must not bake dashboard variables "
-                "into encoded query payload"
-            )
-            tooltip = str(link.get("tooltip", ""))
-            assert "Zero lines can legitimately mean" in tooltip, (
-                f"{dashboard_name} Loki drilldown must disclose that empty results can be legitimate"
-            )
-            assert (
-                "refine in Explore" in tooltip or "refinement inside Explore" in tooltip
-            ), (
-                f"{dashboard_name} Loki drilldown must disclose baseline-first refinement workflow"
-            )
+        _assert_dashboard_loki_safe_baseline(
+            dashboard_name=dashboard_name, dashboard=dashboard
+        )
 
 
-def test_tempo_drilldown_links_are_contextual() -> None:
-    """Tempo drilldown links should carry explicit TraceQL context."""
-    pipeline_scoped = (
-        "bioetl-dq-v2.json",
-        "bioetl-overview-v2.json",
-        "bioetl-runtime.json",
-        "bioetl-silver-reject-explorer.json",
+def _navigation_traces_drilldown_links(
+    dashboard: dict[str, object],
+) -> list[dict[str, object]]:
+    return [
+        link
+        for link in get_dashboard_navigation_links(dashboard)
+        if _is_traces_drilldown_url(link.get("url", ""))
+    ]
+
+
+def _assert_pipeline_scoped_tempo_link(*, dashboard_name: str, url: str) -> None:
+    assert "queryType=traceqlSearch" in url, (
+        f"{dashboard_name} Tempo drilldown must declare TraceQL search mode"
+    )
+    assert "query=%7B%7D" not in url and "query={}" not in url, (
+        f"{dashboard_name} Tempo drilldown must not use empty trace query payload"
+    )
+    assert "bioetl.pipeline" in url, (
+        f"{dashboard_name} Tempo drilldown must scope by pipeline"
+    )
+    if dashboard_name == "bioetl-runtime.json":
+        assert "bioetl.run_type" not in url, (
+            "bioetl-runtime.json Tempo drilldown must stay safe for "
+            "include-all run_type selectors"
+        )
+    else:
+        assert "bioetl.run_type" in url, (
+            f"{dashboard_name} Tempo drilldown must scope by run_type"
+        )
+    assert "bioetl.provider" not in url, (
+        f"{dashboard_name} pipeline drilldown must not switch to provider-only scope"
     )
 
-    for dashboard_name in pipeline_scoped:
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        tempo_links = [
-            link
-            for link in get_dashboard_navigation_links(dashboard)
-            if _is_traces_drilldown_url(link.get("url", ""))
-        ]
-        assert tempo_links, f"{dashboard_name} must expose Tempo drilldown links"
-        for link in tempo_links:
-            url = link.get("url", "")
-            assert "queryType=traceqlSearch" in url, (
-                f"{dashboard_name} Tempo drilldown must declare TraceQL search mode"
-            )
-            assert "query=%7B%7D" not in url and "query={}" not in url, (
-                f"{dashboard_name} Tempo drilldown must not use empty trace query payload"
-            )
-            assert "bioetl.pipeline" in url, (
-                f"{dashboard_name} Tempo drilldown must scope by pipeline"
-            )
-            if dashboard_name == "bioetl-runtime.json":
-                assert "bioetl.run_type" not in url, (
-                    "bioetl-runtime.json Tempo drilldown must stay safe for "
-                    "include-all run_type selectors"
-                )
-            else:
-                assert "bioetl.run_type" in url, (
-                    f"{dashboard_name} Tempo drilldown must scope by run_type"
-                )
-            assert "bioetl.provider" not in url, (
-                f"{dashboard_name} pipeline drilldown must not switch to provider-only scope"
-            )
 
+def _assert_pipeline_scoped_tempo_dashboard(dashboard_name: str) -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+    tempo_links = _navigation_traces_drilldown_links(dashboard)
+    assert tempo_links, f"{dashboard_name} must expose Tempo drilldown links"
+    for link in tempo_links:
+        _assert_pipeline_scoped_tempo_link(
+            dashboard_name=dashboard_name, url=str(link.get("url", ""))
+        )
+
+
+def _assert_provider_tempo_drilldown() -> None:
     provider_dashboard = load_dashboard(
         Path("grafana/dashboards/bioetl-provider-health-v2.json")
     )
-    provider_links = [
-        link
-        for link in get_dashboard_navigation_links(provider_dashboard)
-        if _is_traces_drilldown_url(link.get("url", ""))
-    ]
+    provider_links = _navigation_traces_drilldown_links(provider_dashboard)
     assert provider_links, (
         "bioetl-provider-health-v2.json must expose Tempo drilldown links"
     )
@@ -1873,14 +2144,12 @@ def test_tempo_drilldown_links_are_contextual() -> None:
             "bioetl-provider-health-v2.json Tempo drilldown must not use pipeline/run_type scope"
         )
 
+
+def _assert_workflow_tempo_drilldown() -> None:
     workflow_dashboard = load_dashboard(
         Path("grafana/dashboards/bioetl-workflow-overview.json")
     )
-    workflow_links = [
-        link
-        for link in get_dashboard_navigation_links(workflow_dashboard)
-        if _is_traces_drilldown_url(link.get("url", ""))
-    ]
+    workflow_links = _navigation_traces_drilldown_links(workflow_dashboard)
     assert workflow_links, (
         "bioetl-workflow-overview.json must expose Tempo drilldown links"
     )
@@ -1893,6 +2162,20 @@ def test_tempo_drilldown_links_are_contextual() -> None:
         assert "bioetl.pipeline" in url and "bioetl.run_type" in url, (
             "bioetl-workflow-overview.json Tempo drilldown should use workflow handoff pipeline/run_type scope"
         )
+
+
+def test_tempo_drilldown_links_are_contextual() -> None:
+    """Tempo drilldown links should carry explicit TraceQL context."""
+    pipeline_scoped = (
+        "bioetl-dq-v2.json",
+        "bioetl-overview-v2.json",
+        "bioetl-runtime.json",
+        "bioetl-silver-reject-explorer.json",
+    )
+    for dashboard_name in pipeline_scoped:
+        _assert_pipeline_scoped_tempo_dashboard(dashboard_name)
+    _assert_provider_tempo_drilldown()
+    _assert_workflow_tempo_drilldown()
 
 
 def test_explore_drilldown_links_disclose_tracing_profile_dependency() -> None:
@@ -1915,31 +2198,36 @@ def test_explore_drilldown_links_disclose_tracing_profile_dependency() -> None:
             )
 
 
+def _assert_sample_structured_log_fields(sample_line: str) -> None:
+    assert re.search(r'"pipeline"\s*:\s*"chembl_activity"', sample_line)
+    assert re.search(r'"provider"\s*:\s*"chembl"', sample_line)
+    assert re.search(r'"stage"\s*:\s*"extract"', sample_line)
+
+
+def _assert_dashboard_loki_entrypoint(
+    *, dashboard_name: str, dashboard: dict[str, object]
+) -> None:
+    if dashboard.get("uid") in _DRILLDOWN_TOP_LEVEL_EXEMPT_UIDS:
+        return
+    loki_links = _navigation_logs_drilldown_links(dashboard)
+    assert loki_links, f"{dashboard_name} must expose at least one Logs Drilldown link"
+    assert all(
+        "/explore?left=" not in str(link.get("url", "")) for link in loki_links
+    ), f"{dashboard_name} must not keep legacy Loki Explore payload links"
+
+
 def test_loki_drilldown_uses_grafana_logs_drilldown_entrypoint() -> None:
     """Loki drilldown should route to Grafana Logs Drilldown app entrypoint."""
     sample_line = _emit_sample_structured_log(
         pipeline="chembl_activity",
         provider="chembl",
     )
-    assert re.search(r'"pipeline"\s*:\s*"chembl_activity"', sample_line)
-    assert re.search(r'"provider"\s*:\s*"chembl"', sample_line)
-    assert re.search(r'"stage"\s*:\s*"extract"', sample_line)
-
+    _assert_sample_structured_log_fields(sample_line)
     for dashboard_name in (path.name for path in get_dashboard_files()):
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        if dashboard.get("uid") in _DRILLDOWN_TOP_LEVEL_EXEMPT_UIDS:
-            continue
-        loki_links = [
-            link
-            for link in get_dashboard_navigation_links(dashboard)
-            if _is_logs_drilldown_url(link.get("url", ""))
-        ]
-        assert loki_links, (
-            f"{dashboard_name} must expose at least one Logs Drilldown link"
+        _assert_dashboard_loki_entrypoint(
+            dashboard_name=dashboard_name,
+            dashboard=load_dashboard(Path("grafana/dashboards") / dashboard_name),
         )
-        assert all(
-            "/explore?left=" not in link.get("url", "") for link in loki_links
-        ), f"{dashboard_name} must not keep legacy Loki Explore payload links"
 
 
 def test_loki_baseline_guidance_matches_shipped_structured_log_fields() -> None:
@@ -1976,132 +2264,128 @@ def test_loki_baseline_guidance_matches_shipped_structured_log_fields() -> None:
     )
 
 
-def test_overview_and_runtime_dashboards_expose_data_quality_handoff() -> None:
-    """Overview and Runtime should offer an explicit handoff into DQ triage."""
-    expectations = (
-        "bioetl-overview-v2.json",
-        "bioetl-runtime.json",
+def _assert_named_dashboard_handoff(
+    *,
+    dashboard_name: str,
+    expected_title: str,
+    url_prefix: str,
+    scope_tokens: tuple[str, str] = (
+        "var-pipeline=$pipeline",
+        "var-run_type=$run_type",
+    ),
+) -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+    navigation_links = get_dashboard_navigation_links(dashboard)
+    titles = {link.get("title") for link in navigation_links if link.get("title")}
+    urls = [str(link.get("url", "")) for link in navigation_links]
+    assert expected_title in titles, (
+        f"{dashboard_name} must expose a {expected_title} dashboard handoff"
+    )
+    matching_urls = [url for url in urls if url.startswith(url_prefix)]
+    assert matching_urls, f"{dashboard_name} handoff must target {url_prefix}"
+    token_a, token_b = scope_tokens
+    assert any(token_a in url and token_b in url for url in matching_urls), (
+        f"{dashboard_name} handoff must preserve pipeline/run_type scope"
     )
 
-    for dashboard_name in expectations:
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        navigation_links = get_dashboard_navigation_links(dashboard)
-        titles = {link.get("title") for link in navigation_links if link.get("title")}
-        urls = [link.get("url", "") for link in navigation_links]
 
-        assert "4. Data Quality" in titles, (
-            f"{dashboard_name} must expose a Data Quality dashboard handoff"
-        )
-        matching_urls = [url for url in urls if url.startswith("/d/bioetl-dq-v2")]
-        assert matching_urls, (
-            f"{dashboard_name} Data Quality handoff must target /d/bioetl-dq-v2"
-        )
-        assert any(
-            "var-pipeline=$pipeline" in url and "var-run_type=$run_type" in url
-            for url in matching_urls
-        ), (
-            f"{dashboard_name} Data Quality handoff must preserve pipeline/run_type scope"
+def test_overview_and_runtime_dashboards_expose_data_quality_handoff() -> None:
+    """Overview and Runtime should offer an explicit handoff into DQ triage."""
+    for dashboard_name in ("bioetl-overview-v2.json", "bioetl-runtime.json"):
+        _assert_named_dashboard_handoff(
+            dashboard_name=dashboard_name,
+            expected_title="4. Data Quality",
+            url_prefix="/d/bioetl-dq-v2",
         )
 
 
 def test_runtime_and_dq_dashboards_expose_control_plane_handoff() -> None:
     """Runtime and DQ should offer an explicit handoff into control-plane triage."""
-    expectations = (
-        "bioetl-runtime.json",
-        "bioetl-dq-v2.json",
+    for dashboard_name in ("bioetl-runtime.json", "bioetl-dq-v2.json"):
+        _assert_named_dashboard_handoff(
+            dashboard_name=dashboard_name,
+            expected_title="0. Control Plane",
+            url_prefix="/d/bioetl-control-plane-v1/bioetl-control-plane-v1",
+        )
+
+
+_SILVER_EXPLORER_EXPLICIT_EXPECTATIONS: dict[str, dict[str, object]] = {
+    "bioetl-dq-v2.json": {
+        "url_tokens": ("var-pipeline=$pipeline", "var-run_type=$run_type"),
+        "tooltip_token": "bounded pipeline/run_type",
+    },
+    "bioetl-provider-health-v2.json": {
+        "url_tokens": ("var-pipeline=$pipeline_context", "var-run_type=$run_type"),
+        "tooltip_token": "Context mapping",
+    },
+    "bioetl-workflow-overview.json": {
+        "url_tokens": (
+            "var-pipeline=$pipeline_context_exact",
+            "var-run_type=$run_type_context_exact",
+        ),
+        "tooltip_token": "Context mapping",
+    },
+}
+
+
+def _assert_silver_explorer_presence_for_dashboard(
+    *, dashboard_name: str, dashboard: dict[str, object]
+) -> None:
+    uid = dashboard.get("uid")
+    assert isinstance(uid, str), f"{dashboard_name} must declare string uid"
+    links = require_dashboard_navigation_links(dashboard, dashboard_name=dashboard_name)
+    titles = {link.get("title") for link in links if link.get("title")}
+    urls = [str(link.get("url", "")) for link in links]
+    if uid == "bioetl-silver-reject-explorer":
+        assert "Silver Reject Explorer" not in titles, (
+            "bioetl-silver-reject-explorer.json must omit top-level self-link"
+        )
+        return
+    assert "Silver Reject Explorer" in titles, (
+        f"{dashboard_name} must expose a Silver Reject Explorer handoff"
+    )
+    assert any(url.startswith("/d/bioetl-silver-reject-explorer") for url in urls), (
+        f"{dashboard_name} handoff must target /d/bioetl-silver-reject-explorer"
     )
 
-    for dashboard_name in expectations:
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        navigation_links = get_dashboard_navigation_links(dashboard)
-        titles = {link.get("title") for link in navigation_links if link.get("title")}
-        urls = [link.get("url", "") for link in navigation_links]
 
-        assert "0. Control Plane" in titles, (
-            f"{dashboard_name} must expose a Control Plane dashboard handoff"
+def _assert_explicit_silver_explorer_policy(
+    *, dashboard_name: str, expected: dict[str, object]
+) -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+    links = get_dashboard_navigation_links(dashboard)
+    silver_link = next(
+        (
+            link
+            for link in links
+            if str(link.get("url", "")).startswith("/d/bioetl-silver-reject-explorer")
+        ),
+        None,
+    )
+    assert silver_link is not None, (
+        f"Silver Reject Explorer link must exist on {dashboard_name}"
+    )
+    assert silver_link.get("includeVars") is False, (
+        f"{dashboard_name} handoff must not pass generic Grafana includeVars into Silver Reject Explorer"
+    )
+    url = str(silver_link.get("url", ""))
+    for token in expected["url_tokens"]:
+        assert token in url, (
+            f"{dashboard_name} handoff must preserve expected bounded Silver explorer vars via token {token!r}"
         )
-        matching_urls = [
-            url
-            for url in urls
-            if url.startswith("/d/bioetl-control-plane-v1/bioetl-control-plane-v1")
-        ]
-        assert matching_urls, (
-            f"{dashboard_name} Control Plane handoff must target /d/bioetl-control-plane-v1/bioetl-control-plane-v1"
-        )
-        assert any(
-            "var-pipeline=$pipeline" in url and "var-run_type=$run_type" in url
-            for url in matching_urls
-        ), (
-            f"{dashboard_name} Control Plane handoff must preserve pipeline/run_type scope"
-        )
+    assert expected["tooltip_token"] in str(silver_link.get("tooltip", "")), (
+        f"{dashboard_name} handoff tooltip should document {expected['tooltip_token']!r} policy"
+    )
 
 
 def test_navigation_dashboards_expose_silver_reject_explorer_handoff() -> None:
     """Every navigation panel should expose a Silver Reject Explorer handoff."""
     for dashboard_name in (path.name for path in get_dashboard_files()):
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        uid = dashboard.get("uid")
-        assert isinstance(uid, str), f"{dashboard_name} must declare string uid"
-        links = require_dashboard_navigation_links(
-            dashboard, dashboard_name=dashboard_name
+        _assert_silver_explorer_presence_for_dashboard(
+            dashboard_name=dashboard_name,
+            dashboard=load_dashboard(Path("grafana/dashboards") / dashboard_name),
         )
-        titles = {link.get("title") for link in links if link.get("title")}
-        urls = [link.get("url", "") for link in links]
-
-        if uid == "bioetl-silver-reject-explorer":
-            assert "Silver Reject Explorer" not in titles, (
-                "bioetl-silver-reject-explorer.json must omit top-level self-link"
-            )
-            continue
-
-        assert "Silver Reject Explorer" in titles, (
-            f"{dashboard_name} must expose a Silver Reject Explorer handoff"
-        )
-        assert any(
-            url.startswith("/d/bioetl-silver-reject-explorer") for url in urls
-        ), f"{dashboard_name} handoff must target /d/bioetl-silver-reject-explorer"
-
-    explicit_expectations = {
-        "bioetl-dq-v2.json": {
-            "url_tokens": ("var-pipeline=$pipeline", "var-run_type=$run_type"),
-            "tooltip_token": "bounded pipeline/run_type",
-        },
-        "bioetl-provider-health-v2.json": {
-            "url_tokens": ("var-pipeline=$pipeline_context", "var-run_type=$run_type"),
-            "tooltip_token": "Context mapping",
-        },
-        "bioetl-workflow-overview.json": {
-            "url_tokens": (
-                "var-pipeline=$pipeline_context_exact",
-                "var-run_type=$run_type_context_exact",
-            ),
-            "tooltip_token": "Context mapping",
-        },
-    }
-    for dashboard_name, expected in explicit_expectations.items():
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        links = get_dashboard_navigation_links(dashboard)
-        silver_link = next(
-            (
-                link
-                for link in links
-                if str(link.get("url", "")).startswith(
-                    "/d/bioetl-silver-reject-explorer"
-                )
-            ),
-            None,
-        )
-        assert silver_link is not None, (
-            f"Silver Reject Explorer link must exist on {dashboard_name}"
-        )
-        assert silver_link.get("includeVars") is False, (
-            f"{dashboard_name} handoff must not pass generic Grafana includeVars into Silver Reject Explorer"
-        )
-        url = str(silver_link.get("url", ""))
-        for token in expected["url_tokens"]:
-            assert token in url, (
-                f"{dashboard_name} handoff must preserve expected bounded Silver explorer vars via token {token!r}"
-            )
-        assert expected["tooltip_token"] in str(silver_link.get("tooltip", "")), (
-            f"{dashboard_name} handoff tooltip should document {expected['tooltip_token']!r} policy"
+    for dashboard_name, expected in _SILVER_EXPLORER_EXPLICIT_EXPECTATIONS.items():
+        _assert_explicit_silver_explorer_policy(
+            dashboard_name=dashboard_name, expected=expected
         )

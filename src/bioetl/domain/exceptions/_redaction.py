@@ -142,6 +142,16 @@ def _redact(
     """Recursively redact secrets from structured data."""
     if _is_secret_key(key):
         return "[REDACTED]"
+    return _redact_value(value, key, seen=seen)
+
+
+def _redact_value(
+    value: object,
+    key: str,
+    *,
+    seen: set[int] | None,
+) -> object:
+    """Dispatch redaction by value type after secret-key filtering."""
     if isinstance(value, BaseException):
         return _redact_exception(value)
     if isinstance(value, str):

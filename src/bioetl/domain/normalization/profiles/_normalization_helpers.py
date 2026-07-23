@@ -29,6 +29,17 @@ def _identity(value: object) -> object:
 
 def _normalizer_ref(normalizer: FieldNormalizer) -> str:
     """Return a deterministic reference string for one field normalizer."""
+    module_name, qualname = _require_stable_normalizer_identity(normalizer)
+    semantics = _extract_normalizer_semantics(normalizer)
+    if any(semantics.values()):
+        return f"{module_name}:{qualname}:{_sha256_hex(semantics)}"
+    return f"{module_name}:{qualname}"
+
+
+def _require_stable_normalizer_identity(
+    normalizer: FieldNormalizer,
+) -> tuple[str, str]:
+    """Validate and return deterministic module/qualname for one normalizer."""
     module_name = getattr(normalizer, "__module__", None)
     qualname = getattr(normalizer, "__qualname__", None)
     if not (isinstance(module_name, str) and isinstance(qualname, str)):
@@ -41,11 +52,7 @@ def _normalizer_ref(normalizer: FieldNormalizer) -> str:
             "lambda normalizers are not supported; provide a named callable "
             "with stable module/qualname identity"
         )
-
-    semantics = _extract_normalizer_semantics(normalizer)
-    if any(semantics.values()):
-        return f"{module_name}:{qualname}:{_sha256_hex(semantics)}"
-    return f"{module_name}:{qualname}"
+    return module_name, qualname
 
 
 def _extract_normalizer_semantics(normalizer: FieldNormalizer) -> dict[str, object]:
