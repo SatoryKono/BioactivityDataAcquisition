@@ -13,6 +13,8 @@ Stable commands:
     audit-live-grafana Run reviewed live Grafana datasource/frame audit
     check-grafana-audit-preflight
                        Check local stack readiness for a full Grafana dashboard audit
+    check-bioetl-prometheus-scrape
+                       Fail-closed smoke: BioETL Prometheus scrape target must be UP
     ensure-quarantine-explorer
                        Start or reuse Quarantine Explorer on :8081 for Grafana HTTP panels
     run-grafana-audit-cycle
@@ -47,6 +49,9 @@ COMMAND_SPECS = {
     "audit-live-grafana": "observability/grafana/audit_live_grafana_panels.py",
     "check-grafana-audit-preflight": (
         "observability/grafana/check_grafana_dashboard_audit_preflight.py"
+    ),
+    "check-bioetl-prometheus-scrape": (
+        "observability/check_bioetl_prometheus_scrape.py"
     ),
     "ensure-quarantine-explorer": (
         "observability/grafana/ensure_quarantine_explorer.py"

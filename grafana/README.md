@@ -85,8 +85,15 @@ ______________________________________________________________________
 > `PATH`, so a global Node installation is no longer required on Windows.
 > It also uses the active `python` command or the repo-local
 > `.venv-win\Scripts\python.exe`, so a global `uv` install is not required.
-> For the local screenshot smoke it defaults to the common local Grafana creds
-> `admin/changeme` unless `GRAFANA_USERNAME` and `GRAFANA_PASSWORD` are already set.
+> For local screenshot smoke, set Grafana credentials from the supported runtime
+> env only: `GF_SECURITY_ADMIN_PASSWORD` / `GRAFANA_PASSWORD` (and optional
+> `GRAFANA_USERNAME` / `GF_SECURITY_ADMIN_USER`). Prefer `GRAFANA_PASSWORD` for
+> the password that already exists on the Grafana volume — `GF_SECURITY_ADMIN_PASSWORD`
+> is first-boot only and may not match a long-lived volume. Do not commit or
+> document a default password; preflight fails closed when auth material is missing.
+> When host Chromium launch is flaky (common on Windows GDrive/WSL `/mnt` paths),
+> use the Docker Playwright capture path:
+> `bash scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh`.
 > To render every shipped dashboard after bootstrap on Windows, use
 > `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1`.
 > That helper also reuses or auto-downloads the same portable Node.js LTS
@@ -238,7 +245,7 @@ ______________________________________________________________________
 │  └────────┬────────────────────────────────────────────────┘    │
 └───────────┼──────────────────────────────────────────────────────┘
             │
-            │  HTTP GET /metrics (каждые 15 секунд)
+            │  HTTP GET /metrics (каждые 30 секунд)
             │
 ┌───────────┴──────────────────────────────────────────────────────┐
 │  Prometheus Server (порт 9090)                                   │
@@ -322,6 +329,7 @@ grafana/
     ├── bioetl-provider-health-v2.json # 3. Provider Health (v2)
     ├── bioetl-dq-v2.json              # 4. Data Quality (v2)
     ├── bioetl-workflow-overview.json  # 5. Declarative workflow run/step overview
+    ├── bioetl-alerts-slo.json         # 6. Alerts & SLO triage surface
     └── bioetl-silver-reject-explorer.json # Record-level Silver reject explorer
 
 docker-compose.monitoring.yml          # Docker Compose для стека мониторинга
@@ -602,14 +610,18 @@ make run-local
 ### 3.3 Проверка работоспособности
 
 ```bash
-# 1. Проверить метрики приложения
-curl -s http://localhost:8000/metrics | grep bioetl_
+# 1. Проверить, что Prometheus scrapes BioETL (canonical target: bioetl:8000)
+curl -sS 'http://localhost:9090/api/v1/targets' | python -c "import sys,json; ts=json.load(sys.stdin)['data']['activeTargets']; print([(t['labels'].get('job'), t['health']) for t in ts if t['labels'].get('job')=='bioetl'])"
+# Host-side /metrics is only available if the BioETL metrics port is published.
+# Inside the monitoring compose network the scrape URL is http://bioetl:8000/metrics:
+# docker exec bioetl curl -sS http://127.0.0.1:8000/metrics | grep bioetl_ | head
 
 # 2. Проверить Prometheus targets
-# Открыть http://localhost:9090/targets — target должен быть "UP"
+# Открыть http://localhost:9090/targets — job=bioetl должен быть "UP"
 
 # 3. Открыть Grafana
-# http://localhost:3000 (`admin`; пароль из `GF_SECURITY_ADMIN_PASSWORD`)
+# http://localhost:3000 (`admin`; runtime password via GRAFANA_PASSWORD /
+# GF_SECURITY_ADMIN_PASSWORD — first-boot only for the Grafana volume)
 # Перейти: Home → Dashboards → BioETL → выбрать дашборд
 ```
 
@@ -623,10 +635,12 @@ curl -s http://localhost:8000/metrics | grep bioetl_
 | `BIOETL_OBSERVABILITY__METRICS_FAIL_FAST`      | `false`               | Падать при ошибке запуска сервера                       |
 | `BIOETL_OBSERVABILITY__METRICS_RETRY_COUNT`    | `3`                   | Количество попыток запуска (1-10)                       |
 | `BIOETL_OBSERVABILITY__METRICS_RETRY_DELAY`    | `1.0`                 | Задержка между попытками (0.1-10.0 с)                   |
-| `GF_SECURITY_ADMIN_PASSWORD`                   | обязательная          | Пароль администратора Grafana                           |
+| `GF_SECURITY_ADMIN_PASSWORD`                   | обязательная          | Пароль admin **только при первом** создании Grafana volume; позже audit tools use `GRAFANA_PASSWORD` for the live instance password |
+| `GRAFANA_PASSWORD`                             | runtime               | Live audit/render password for the running Grafana instance (may differ from the first-boot env once the volume exists) |
+| `GRAFANA_SERVICE_ACCOUNT_TOKEN`                | optional              | Preferred machine auth for render/audit when basic auth is undesirable |
 | `GF_RENDERING_RENDERER_TOKEN`                  | обязательная          | Общий secret для Grafana и renderer `AUTH_TOKEN`; задаётся локально до запуска |
-| `GRAFANA_IMAGE_RENDERER_GOMEMLIMIT`            | `1GiB`                | Go memory soft limit for the remote image renderer      |
-| `GRAFANA_IMAGE_RENDERER_READINESS_TIMEOUT`     | `90s`                 | Maximum wait for heavy dashboard pages before the remote renderer returns a timeout |
+| `GRAFANA_IMAGE_RENDERER_GOMEMLIMIT`            | `2GiB`                | Go memory soft limit for the remote image renderer      |
+| `GRAFANA_IMAGE_RENDERER_READINESS_TIMEOUT`     | `120s`                | Maximum wait for heavy dashboard pages before the remote renderer returns a timeout |
 | `BIOETL_ENABLE_TRACING_DATASOURCES`            | `auto`                | Авто-подключать Loki/Tempo datasource в Grafana provisioning по live reachability (`true`/`false` override доступны) |
 | `BIOETL_OBSERVABILITY__TRACING_ENABLED`        | `false`               | Включить OpenTelemetry spans и log-trace correlation    |
 | `BIOETL_OBSERVABILITY__DQ_MONITOR_ENABLED`     | `true`                | Включить DQ anomaly monitor для всех pipeline runs       |
@@ -1744,18 +1758,24 @@ network alias на monitoring network даже при container name
 переопредели переменную на `http://host.docker.internal:8081`; такой backend
 должен слушать `0.0.0.0:8081`, не только `127.0.0.1`.
 Не публикуй Quarantine Explorer на host `:8000`: этот порт зарезервирован для
-BioETL `/metrics`, который Prometheus скрейпит как `host.docker.internal:8000`.
+BioETL `/metrics`. Canonical Prometheus scrape is `bioetl:8000` on the monitoring
+compose network (job interval 30s). Host-side override `host.docker.internal:8000`
+is optional only when metrics run on the Docker host.
 Quarantine Explorer Prometheus target использует `/metrics`; не возвращай
 `metrics_path` на `/health/live`, потому что этот endpoint отдаёт JSON.
 
 ### 15.2 Prometheus Target DOWN
 
 ```bash
-# Проверить, что BioETL слушает на нужном порту
+# Canonical compose-network target (Prometheus API):
+# up{job="bioetl",instance="bioetl:8000"} == 1
+curl -sS 'http://localhost:9090/api/v1/query?query=up{job="bioetl"}'
+
+# Optional host-side check when metrics are published on the Docker host:
 curl http://localhost:8000/metrics
 
-# Если порт другой, обновить grafana/prometheus.yml:
-# targets: ['host.docker.internal:<правильный_порт>']
+# Host override only (not the shipped default) in grafana/prometheus.yml:
+# targets: ['host.docker.internal:8000']  # or host.docker.internal:<port>
 
 # Перезапустить Prometheus
 docker compose -f docker-compose.monitoring.yml restart prometheus
@@ -2322,7 +2342,7 @@ Grafana автоматически обнаружит новый файл в т�
 | Trend-анализ                                       | `[15m]` или `[30m]` | Сглаженные тренды без шума        |
 | Долгосрочный анализ                                | `[1h]`              | Дневные и недельные паттерны      |
 
-Правило: интервал rate() должен быть как минимум в 4 раза больше scrape_interval Prometheus (15s × 4 = 60s = 1m).
+Правило: интервал `rate()` должен быть как минимум в 4 раза больше scrape interval цели. Global Prometheus defaults remain `15s` (→ prefer `rate(...[1m])`), while the canonical BioETL job scrapes every **30s** (→ prefer `rate(...[2m])` or longer for bioetl series).
 
 ______________________________________________________________________
 
@@ -2338,17 +2358,21 @@ curl -s http://localhost:8000/metrics | grep "^bioetl_" | awk '{print $1}' | sor
 
 ### Почему shipped dashboards обновляются каждые 30 секунд?
 
-Текущий shipped pack использует единый `refresh: 30s` для всех операторских
-дашбордов. Это снижает нагрузку на Prometheus и сохраняет предсказуемое
-поведение для тяжёлых запросов (`histogram_quantile`, `rate`, агрегаты по
-labels, Loki log-hygiene queries).
+Primary operator dashboards `0..6` use `refresh: 30s`. That reduces Prometheus
+load and keeps heavy queries (`histogram_quantile`, `rate`, multi-label
+aggregates, Loki hygiene) predictable.
+
+**Exception:** `Silver Reject Explorer` (`bioetl-silver-reject-explorer`) uses
+`refresh: 1m` and default time range `24h` for forensic/record-level work. Do not
+document a single global 30s refresh for every shipped dashboard.
 
 ### Где legacy v1 dashboards?
 
 Legacy v1 dashboards сохранены только как archived comparison surface. Они не
-являются operator entrypoints; текущая эксплуатация использует
-`bioetl-overview-v2`, `bioetl-runtime`, `bioetl-provider-health-v2`,
-`bioetl-dq-v2`, `bioetl-control-plane-v1` и
+являются operator entrypoints; текущая эксплуатация использует восемь shipped
+JSON surfaces: `bioetl-control-plane-v1`, `bioetl-overview-v2`,
+`bioetl-runtime`, `bioetl-provider-health-v2`, `bioetl-dq-v2`,
+`bioetl-workflow-overview`, `bioetl-alerts-slo`, and
 `bioetl-silver-reject-explorer`.
 
 ### Как добавить новую метрику?
@@ -2542,7 +2566,7 @@ ______________________________________________________________________
 | **Histogram**              | Тип метрики Prometheus. Распределение значений по бакетам. Позволяет вычислять перцентили.                                    |
 | **PromQL**                 | Prometheus Query Language. Функциональный язык запросов для агрегации и анализа time series.                                  |
 | **Scrape**                 | Процесс сбора метрик. Prometheus выполняет HTTP GET к targets каждые `scrape_interval` секунд.                                |
-| **Target**                 | Endpoint, с которого Prometheus собирает метрики. В BioETL: `host.docker.internal:8000`.                                      |
+| **Target**                 | Endpoint, с которого Prometheus собирает метрики. Canonical BioETL: `bioetl:8000` (job interval 30s); host override optional. |
 | **Time Series**            | Уникальная комбинация имени метрики и набора labels. Каждая time series хранит набор пар (timestamp, value).                  |
 | **Label**                  | Ключ-значение пара, добавляющая измерение к метрике. Позволяет фильтровать и группировать данные.                             |
 | **Template Variable**      | Переменная Grafana, значения которой определяются PromQL-запросом. Используется для динамической фильтрации дашбордов.        |
@@ -2563,14 +2587,19 @@ ______________________________________________________________________
 
 ## 26. Сводная таблица дашбордов
 
+Panel counts below are non-row panels / row panels from shipped JSON
+(`python -m scripts.engineering.qa report-dashboard-inventory --check`).
+
 | Dashboard                 | UID                             | JSON version | Panels / rows | Refresh | Time Range | Primary surface | Purpose |
 | ------------------------- | ------------------------------- | ------------ | ------------- | ------- | ---------- | --------------- | ------- |
+| 0. Control Plane          | `bioetl-control-plane-v1`       | 2            | 52 / 5        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Replay/resume trust, manifest/ledger/checkpoint evidence, shared identity shell |
 | 1. Overview               | `bioetl-overview-v2`            | 1            | 21 / 4        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | L0 answer, compact L1 current-state cards, side-by-side Inputs/Workflow matrices, collapsed alert and historical detail |
+| 2. Runtime                | `bioetl-runtime`                | 3            | 38 / 4        | 30s     | 12h        | Prometheus + Loki + Quarantine Explorer identity | Incident triage: blockers, latency, backlog, logs/traces row, handoffs |
 | 3. Provider Health        | `bioetl-provider-health-v2`     | 6            | 28 / 1        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Provider latency, health, retries, failure ratios |
 | 4. Data Quality           | `bioetl-dq-v2`                  | 4            | 34 / 2        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | CURRENT/SELECTED RUN/TIME RANGE scopes; freshness hours SLA 24/72; collapsed forensics |
 | 5. Workflow               | `bioetl-workflow-overview`      | 2            | 15 / 1        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Neutral zero counts, explicit outcome terminal states, collapsed step detail |
 | 6. Alerts & SLO           | `bioetl-alerts-slo`             | 1            | 7 / 0         | 30s     | 24h        | Prometheus `ALERTS` | First-class firing alert and SLO/SLA pressure triage surface; does not implement alert rules in dashboard queries |
-| Silver Reject Explorer | `bioetl-silver-reject-explorer` | 1001         | 14 / 2        | 1m      | 24h        | Quarantine Explorer API | Backend-health-gated progressive sequence with collapsed trends and narrowed record detail |
+| Silver Reject Explorer    | `bioetl-silver-reject-explorer` | 1001         | 14 / 2        | 1m      | 24h        | Quarantine Explorer API | Backend-health-gated progressive sequence with collapsed trends and narrowed record detail |
 
 ______________________________________________________________________
 
@@ -2657,7 +2686,7 @@ scrape_configs:
       username: 'prometheus'
       password_file: '/etc/prometheus/password'
     static_configs:
-      - targets: ['host.docker.internal:8000']
+      - targets: ['bioetl:8000']  # host.docker.internal:8000 only as host override
 ```
 
 ### 28.3 Label cardinality контроль

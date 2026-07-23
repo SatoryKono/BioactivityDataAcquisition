@@ -31,6 +31,8 @@ DEFAULT_GRAFANA_USERNAME = "admin"
 # Never ship a default password. Prefer env / service-account token.
 DEFAULT_GRAFANA_PASSWORD = ""
 DEFAULT_TIMEOUT_SECONDS = 5.0
+# Chromium launch on cold Windows/WSL hosts often exceeds the short HTTP probe budget.
+DEFAULT_PLAYWRIGHT_PROBE_TIMEOUT_SECONDS = 60.0
 DEFAULT_SCREENSHOT_DIR = Path("reports/observability/grafana/screenshots")
 _DASHBOARD_DIR = Path("grafana/dashboards")
 
@@ -170,7 +172,12 @@ def _check_grafana_render_auth(
 def _check_playwright_runtime(
     timeout_seconds: float = DEFAULT_TIMEOUT_SECONDS,
 ) -> PreflightCheck:
-    ok, detail = rerender_screenshots.check_playwright_runtime(timeout_seconds)
+    # HTTP/API probes can stay short; Chromium launch needs a floor timeout.
+    playwright_timeout = max(
+        float(timeout_seconds),
+        DEFAULT_PLAYWRIGHT_PROBE_TIMEOUT_SECONDS,
+    )
+    ok, detail = rerender_screenshots.check_playwright_runtime(playwright_timeout)
     return PreflightCheck(
         name="playwright-runtime",
         status="ok" if ok else "error",
@@ -855,7 +862,10 @@ def main(argv: list[str] | None = None) -> int:
             detail=(
                 "Grafana render auth requires GF_SECURITY_ADMIN_PASSWORD / "
                 "GRAFANA_PASSWORD / GRAFANA_ADMIN_PASSWORD or "
-                "GRAFANA_SERVICE_ACCOUNT_TOKEN; no committed default password is used"
+                "GRAFANA_SERVICE_ACCOUNT_TOKEN; no committed default password is "
+                "used. Prefer GRAFANA_PASSWORD for the password that already "
+                "exists on the Grafana volume (GF_SECURITY_ADMIN_PASSWORD is "
+                "first-boot only and may not match a long-lived volume)."
             ),
         )
         if args.json:
