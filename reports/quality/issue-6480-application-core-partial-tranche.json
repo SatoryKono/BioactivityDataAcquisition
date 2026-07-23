@@ -1,0 +1,56 @@
+{
+  "hotspot_family_partially_covered": {
+    "application_core": {
+      "after": 67,
+      "before": 70,
+      "delta": -3
+    },
+    "application_services_control_plane": {
+      "after": 41,
+      "before": 41,
+      "delta": 0
+    },
+    "composition_bootstrap_runtime": {
+      "after": 19,
+      "before": 19,
+      "delta": 0
+    },
+    "composition_factories_pipeline": {
+      "after": 12,
+      "before": 12,
+      "delta": 0
+    },
+    "composition_runtime_builders": {
+      "after": 26,
+      "before": 26,
+      "delta": 0
+    }
+  },
+  "issue": 6480,
+  "partially_covered_total": {
+    "after": 816,
+    "before": 819,
+    "delta": -3
+  },
+  "tranche": "application_core_high_leverage_unit_gaps",
+  "updated_modules": [
+    {
+      "coverage_percent": 100.0,
+      "executable_lines": 30,
+      "path": "src/bioetl/application/core/entity_id.py",
+      "previous_status": "partially_covered"
+    },
+    {
+      "coverage_percent": 100.0,
+      "executable_lines": 12,
+      "path": "src/bioetl/application/core/preflight/_observability.py",
+      "previous_status": "partially_covered"
+    },
+    {
+      "coverage_percent": 100.0,
+      "executable_lines": 37,
+      "path": "src/bioetl/application/core/span_helpers.py",
+      "previous_status": "partially_covered"
+    }
+  ]
+}

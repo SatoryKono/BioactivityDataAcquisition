@@ -22,6 +22,11 @@ from bioetl.application.services.checkpoint_compatibility_results import (
     build_lenient_checkpoint_compatibility_result,
     build_strict_checkpoint_compatibility_result,
 )
+from bioetl.application.services.checkpoint_compatibility_telemetry import (
+    emit_checkpoint_compatibility_metric,
+    log_lenient_checkpoint_compatibility_result,
+    log_strict_checkpoint_compatibility_result,
+)
 from bioetl.domain.types.checkpoint_metadata import (
     CheckpointCompatibilityResult,
     CheckpointMetadata,
@@ -29,53 +34,6 @@ from bioetl.domain.types.checkpoint_metadata import (
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort
-
-
-def _emit_checkpoint_metric(
-    metrics: MetricsPort | None,
-    *,
-    pipeline_name: str | None,
-    disposition: str,
-) -> None:
-    """Emit one checkpoint compatibility event metric when metrics are enabled."""
-    if metrics is None:
-        return
-    metrics.increment_counter(
-        "bioetl_checkpoint_compatibility_events_total",
-        1,
-        {
-            "pipeline": pipeline_name or "unknown",
-            "disposition": disposition,
-        },
-    )
-
-
-def _log_result(logger: LoggerPort, *, compatible: bool, messages: list[str]) -> None:
-    if compatible:
-        logger.info(
-            "Checkpoint compatibility validation passed",
-            messages=messages,
-        )
-        return
-    logger.warning(
-        "Checkpoint compatibility validation failed",
-        messages=messages,
-    )
-
-
-def _log_lenient_result(
-    logger: LoggerPort, *, compatible: bool, messages: list[str]
-) -> None:
-    if compatible:
-        logger.info(
-            "Checkpoint minimum compatibility validation passed (lenient mode)",
-            messages=messages,
-        )
-        return
-    logger.warning(
-        "Checkpoint minimum compatibility validation failed (lenient mode)",
-        messages=messages,
-    )
 
 
 class CheckpointCompatibilityService:
@@ -144,8 +102,12 @@ class CheckpointCompatibilityService:
             and pipeline_compatible
             and execution_identity_compatible
         )
-        _log_result(self._logger, compatible=compatible, messages=messages)
-        _emit_checkpoint_metric(
+        log_strict_checkpoint_compatibility_result(
+            self._logger,
+            compatible=compatible,
+            messages=messages,
+        )
+        emit_checkpoint_compatibility_metric(
             self._metrics,
             pipeline_name=self._pipeline_name,
             disposition=("strict_compatible" if compatible else "strict_incompatible"),
@@ -194,8 +156,12 @@ class CheckpointCompatibilityService:
             else ()
         )
         messages = [*messages, *degraded_messages]
-        _log_lenient_result(self._logger, compatible=compatible, messages=messages)
-        _emit_checkpoint_metric(
+        log_lenient_checkpoint_compatibility_result(
+            self._logger,
+            compatible=compatible,
+            messages=messages,
+        )
+        emit_checkpoint_compatibility_metric(
             self._metrics,
             pipeline_name=self._pipeline_name,
             disposition=(

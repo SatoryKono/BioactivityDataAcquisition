@@ -8,9 +8,9 @@ Audited repository: `SatoryKono/BioactivityDataAcquisition`
 
 Audited branch: `main`
 
-Audited commit SHA: `64c7f4a0b5b7c60e29619037e2cb5458ae2a4425`
+Audited commit SHA: `05c71e882f3035332e7024196e98490fb9ef8352`
 
-Evidence surface SHA-256: `4f08af7e55e0ae615d974358b472c76f5f1eed417b67edbbd134398a008b5209`
+Evidence surface SHA-256: `cbc7857c33b10bc1e8cc8d72d4c0a2f7e424e8a7698864d07bbc94db74625a0a`
 
 Registry: `configs/quality/technical_debt_audit_registry.yaml`
 
@@ -25,7 +25,7 @@ exemption, or exclusion growth.
    `45/45` debt-governance gates passing, with no failures or warnings and
    zero stale generated quality artifacts.
 1. Module coverage inventory contains `2,247` source modules: `1,403` fully
-   covered, `819` partially covered, `25` with no executable lines, and
+   covered, `816` partially covered, `25` with no executable lines, and
    zero uncovered or unmeasured modules. These are module-inventory facts, not
    a claim of complete line or branch coverage.
 1. Compatibility transition debt remains zero. The census contains `12`
@@ -68,7 +68,7 @@ is not a removal recommendation.
 
 | Priority | Evidence-backed residual | Action boundary |
 | --- | --- | --- |
-| P1 | `819` partially covered modules | Reduce with focused invariant/regression tests; do not reinterpret module inventory as line/branch closure |
+| P1 | `816` partially covered modules | Reduce with focused invariant/regression tests; do not reinterpret module inventory as line/branch closure |
 | P1 | Retained compatibility entrypoints | Preserve public contracts; removal requires explicit deprecation and external-consumer evidence |
 | P1 | Reviewed hotspot/debt gates | Ratchet downward only; no budget, threshold, exemption, or exclusion growth |
 | P2 | Dead-code review window | `last_reviewed=2026-06-16`, `next_review_by=2026-09-14`; keep untriaged at zero on every inventory refresh |
