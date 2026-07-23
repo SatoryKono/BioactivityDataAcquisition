@@ -64,8 +64,8 @@
       "limit": {
         "source_module_count": 2244,
         "source_tree_sha256": "e8d68d992f993154a43467232f551849ac43616ccb7a24b5a9da33f3f0682241",
-        "uncovered_module_count": 0,
-        "unmeasured_module_count": 21
+        "uncovered_module_count": 21,
+        "unmeasured_module_count": 0
       },
       "metric": "module_coverage_scorecard_alignment",
       "name": "module_coverage_scorecard_coherence",
@@ -74,22 +74,22 @@
       "status": "fail"
     },
     {
-      "current": 21,
+      "current": 0,
       "limit": 0,
       "metric": "unmeasured_module_count",
       "name": "module_coverage_unmeasured_modules",
       "remediation": "Keep reviewed unmeasured-module residual at or below the committed no-growth ratchet.",
       "source_artifact": "configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets",
-      "status": "fail"
+      "status": "pass"
     },
     {
-      "current": 0,
+      "current": 21,
       "limit": 0,
       "metric": "uncovered_module_count",
       "name": "module_coverage_uncovered_modules",
       "remediation": "Keep reviewed uncovered-module residual at or below the committed no-growth ratchet.",
       "source_artifact": "configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": 0,
@@ -406,7 +406,7 @@
       "status": "pass"
     },
     {
-      "current": "55cbf5f99005448dac5e33bae3832caffa99e27a62ab1f4709153821c9d792ba",
+      "current": "e816c04f273f4986a6fd8a818a14a8df8f52328095c2671e97aa073555b686c4",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
@@ -415,7 +415,7 @@
       "status": "pass"
     },
     {
-      "current": 3,
+      "current": 1,
       "limit": 0,
       "metric": "stale_artifact_count",
       "name": "generated_artifact_drift",
@@ -431,9 +431,9 @@
     "architecture_quality_scorecard": true,
     "config_surface_backlog": false,
     "dq_contract_registry_diagnostics": false,
-    "hotspot_family_baseline": true,
+    "hotspot_family_baseline": false,
     "module_coverage_inventory": false,
-    "remote_main_baseline": true
+    "remote_main_baseline": false
   },
   "status_counts": {
     "fail": 3,
@@ -446,7 +446,7 @@
     "fail_count": 3,
     "failing_gates": [
       "module_coverage_scorecard_coherence",
-      "module_coverage_unmeasured_modules",
+      "module_coverage_uncovered_modules",
       "generated_artifact_drift"
     ],
     "gate_count": 45,
