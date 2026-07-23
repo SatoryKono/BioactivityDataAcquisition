@@ -1,9 +1,17 @@
 schema_version: 1
 policy_scope: internal_compatibility_shim_inventory
 linked_issue: "#5573"
-reviewed_on: "2026-06-26"
-review_by: "2026-09-30"
+reviewed_on: "2026-07-23"
+review_by: "2026-10-21"
 owner: "@bioetl-architecture"
+last_hygiene_review:
+  reviewed_on: "2026-07-23"
+  linked_issue: "#6485"
+  result: caps_satisfied
+  summary: >-
+    Retained external-identity facades keep max_src_importer_count=0;
+    no first-party src importer growth accepted this cycle.
+  next_review_by: "2026-10-21"
 new_src_import_policy: fail_fast_review_required
 rationale: >-
   Internal storage/config compatibility shims may remain only while importer

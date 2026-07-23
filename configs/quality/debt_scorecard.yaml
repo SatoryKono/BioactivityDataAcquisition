@@ -480,9 +480,9 @@ hotspot_family_ratchets:
       files_ge_250_loc: 7
       max_internal_fan_in: 10
     metrics:
-      duplication_clusters: 6
+      duplication_clusters: 0
       files: 180
-      total_loc: 22265
+      total_loc: 22268
       files_ge_250_loc: 4
       helper_function_ratio: 0.361
       max_internal_fan_in: 7
@@ -594,7 +594,7 @@ hotspot_family_ratchets:
       files_ge_250_loc: 3
       max_internal_fan_in: 5
     metrics:
-      duplication_clusters: 5
+      duplication_clusters: 4
       files: 55
       total_loc: 6857
       files_ge_250_loc: 0
@@ -1100,3 +1100,19 @@ program_done_criteria:
   max_total_exemptions: 0
   min_integral_score: 100
   max_expired_entries: 0
+  # min_integral_score is the exemption-debt integral (0..100) from
+  # compute_integral_debt_score — NOT the architecture-quality-scorecard
+  # integral (0..10). With zero exemptions the debt integral is already 100.
+  score_semantics:
+    exemption_debt_integral:
+      scale: 0_to_100
+      function: bioetl.infrastructure.quality.scoring.compute_integral_debt_score
+      current_when_zero_exemptions: 100.0
+    architecture_quality_integral:
+      scale: 0_to_10
+      artifact: reports/quality/architecture-quality-scorecard.json
+      tracked_separately: true
+      note: >-
+        Architecture quality lift remains a parallel residual track under
+        tracker #6486 (partial coverage, hotspots, naming/test/debt categories).
+        Do not confuse 8.x/9.x architecture scores with the 0..100 debt integral.
