@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 
 import pyarrow as pa
@@ -74,7 +75,7 @@ async def get_table_schema(base_path: str | Path, table_name: str) -> pa.Schema 
             # Handle other potential errors (permission issues, corrupt tables, etc.)
             return None
 
-    return _sync_get_schema()
+    return await asyncio.to_thread(_sync_get_schema)
 
 
 def prepare_arrow_data(

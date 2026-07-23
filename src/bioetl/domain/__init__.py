@@ -101,29 +101,36 @@ _MODULE_EXPORTS = {
     "observability_metric_names": "bioetl.domain.observability_metric_names",
     "ports": "bioetl.domain.ports",
     "pubchem_standardization_catalog": "bioetl.domain.pubchem_standardization_catalog",
-    "runtime_observability_publication_contract": "bioetl.domain.runtime_observability_publication_contract",
+    "runtime_observability_publication_contract": (
+        "bioetl.domain.runtime_observability_publication_contract"
+    ),
     "types": "bioetl.domain.types",
     "types_config_validation": "bioetl.domain.types_config_validation",
     "workflow": "bioetl.domain.workflow",
 }
 
+_OBSERVABILITY_EVENT_MAPPING_MODULE = "bioetl.domain.observability_event_mapping"
+_RUNTIME_OBSERVABILITY_PUBLICATION_CONTRACT_MODULE = (
+    "bioetl.domain.runtime_observability_publication_contract"
+)
+
 _ATTRIBUTE_EXPORTS = {
     "DomainEventObservabilityEnvelope": (
-        "bioetl.domain.observability_event_mapping",
+        _OBSERVABILITY_EVENT_MAPPING_MODULE,
         "DomainEventObservabilityEnvelope",
     ),
     "PipelineEvent": ("bioetl.domain.events", "PipelineEvent"),
     "get_runtime_observability_publication_contract": (
-        "bioetl.domain.runtime_observability_publication_contract",
+        _RUNTIME_OBSERVABILITY_PUBLICATION_CONTRACT_MODULE,
         "get_runtime_observability_publication_contract",
     ),
     "get_version": ("bioetl.domain.version", "get_version"),
     "is_canonical_runtime_observability_emitter": (
-        "bioetl.domain.runtime_observability_publication_contract",
+        _RUNTIME_OBSERVABILITY_PUBLICATION_CONTRACT_MODULE,
         "is_canonical_runtime_observability_emitter",
     ),
     "map_domain_event_to_observability_event": (
-        "bioetl.domain.observability_event_mapping",
+        _OBSERVABILITY_EVENT_MAPPING_MODULE,
         "map_domain_event_to_observability_event",
     ),
 }

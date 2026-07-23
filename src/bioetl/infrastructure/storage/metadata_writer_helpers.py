@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from datetime import datetime
 from pathlib import Path
 
@@ -146,43 +147,49 @@ async def _execute_atomic_metadata_write(
     context: _MetadataWriteTelemetryContext,
 ) -> int:
     """Write prepared metadata atomically and emit retry/final telemetry."""
-    retry_state = _MetadataWriteRetryState()
-    on_retry = _build_retry_callback(
-        logger=logger,
-        metrics=metrics,
-        context=context,
-        retry_state=retry_state,
-    )
 
-    try:
-        atomic_write_text(
-            prepared_write.metadata_path,
-            prepared_write.yaml_content,
-            retry_policy=retry_policy,
-            on_retry=on_retry,
+    def _write() -> int:
+        retry_state = _MetadataWriteRetryState()
+        on_retry = _build_retry_callback(
+            logger=logger,
+            metrics=metrics,
+            context=context,
+            retry_state=retry_state,
         )
-    except AtomicWriteError as exc:
+
+        try:
+            atomic_write_text(
+                prepared_write.metadata_path,
+                prepared_write.yaml_content,
+                retry_policy=retry_policy,
+                on_retry=on_retry,
+            )
+        except AtomicWriteError as exc:
+            _emit_atomic_write_final_telemetry(
+                logger=logger,
+                metrics=metrics,
+                context=context,
+                retry_state=retry_state,
+                status="failed",
+                final_reason=exc.reason or "atomic_write_error",
+            )
+            raise
+
         _emit_atomic_write_final_telemetry(
             logger=logger,
             metrics=metrics,
             context=context,
             retry_state=retry_state,
-            status="failed",
-            final_reason=exc.reason or "atomic_write_error",
+            status="succeeded",
+            final_reason=(
+                "success_after_retry"
+                if retry_state.count > 0
+                else "success_without_retry"
+            ),
         )
-        raise
+        return int(retry_state.count)
 
-    _emit_atomic_write_final_telemetry(
-        logger=logger,
-        metrics=metrics,
-        context=context,
-        retry_state=retry_state,
-        status="succeeded",
-        final_reason=(
-            "success_after_retry" if retry_state.count > 0 else "success_without_retry"
-        ),
-    )
-    return int(retry_state.count)
+    return await asyncio.to_thread(_write)
 
 
 def _finalize_metadata_write_operation(

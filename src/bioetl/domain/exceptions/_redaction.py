@@ -28,6 +28,7 @@ _INLINE_SECRET = re.compile(
     r'\s*[:=]\s*("(?:\\.|[^"])*"|\'(?:\\.|[^\'])*\'|[^\s,;&]+)'
 )
 _BEARER_SECRET = re.compile(r"(?i)\bBearer\s+[A-Za-z0-9._~+/=-]+")
+_REDACTED_PLACEHOLDER = "[REDACTED]"
 _PREFIXED_SECRET = re.compile(
     r"(?i)(?<![A-Za-z0-9])(?:sk[-_]|gh[pousr]_|xox[baprs]-)[A-Za-z0-9._-]+"
 )
@@ -38,10 +39,12 @@ _CYCLE_SENTINEL = "[REDACTED CYCLE]"
 def _redact_inline_secrets(value: str) -> str:
     """Redact inline secret patterns like password=xyz."""
     redacted = _SECRET_HEADER.sub(
-        lambda match: f"{match.group(1)}=[REDACTED]",
+        lambda match: f"{match.group(1)}={_REDACTED_PLACEHOLDER}",
         value,
     )
-    return _INLINE_SECRET.sub(lambda match: f"{match.group(1)}=[REDACTED]", redacted)
+    return _INLINE_SECRET.sub(
+        lambda match: f"{match.group(1)}={_REDACTED_PLACEHOLDER}", redacted
+    )
 
 
 def _redact_url_hostname(parsed: SplitResult) -> str:
@@ -62,7 +65,7 @@ def _redact_url(value: str) -> str:
         return "[REDACTED URL]"
     if not parsed.scheme or not parsed.netloc:
         return value
-    query = "[REDACTED]" if parsed.query else ""
+    query = _REDACTED_PLACEHOLDER if parsed.query else ""
     return urlunsplit((parsed.scheme, hostname, parsed.path, query, ""))
 
 
@@ -81,12 +84,12 @@ def _redact_embedded_urls(value: str) -> str:
 
 def _redact_bearer_tokens(value: str) -> str:
     """Redact Bearer tokens in string values."""
-    return _BEARER_SECRET.sub("Bearer [REDACTED]", value)
+    return _BEARER_SECRET.sub(f"Bearer {_REDACTED_PLACEHOLDER}", value)
 
 
 def _redact_prefixed_secrets(value: str) -> str:
     """Redact prefixed secret patterns in string values."""
-    return _PREFIXED_SECRET.sub("[REDACTED]", value)
+    return _PREFIXED_SECRET.sub(_REDACTED_PLACEHOLDER, value)
 
 
 def _is_secret_key(key: str) -> bool:
@@ -141,7 +144,7 @@ def _redact(
 ) -> object:
     """Recursively redact secrets from structured data."""
     if _is_secret_key(key):
-        return "[REDACTED]"
+        return _REDACTED_PLACEHOLDER
     return _redact_value(value, key, seen=seen)
 
 

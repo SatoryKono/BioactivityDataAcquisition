@@ -8,6 +8,7 @@ from __future__ import annotations
 
 __all__ = ["CsvFilterReader"]
 
+import asyncio
 from pathlib import Path
 from typing import TYPE_CHECKING
 
