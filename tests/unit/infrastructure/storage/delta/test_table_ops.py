@@ -70,7 +70,7 @@ def test_read_delta_records_uses_dataset_scanner_off_windows(
     assert dataset.requested_columns == ["entity_id"]
 
 
-def test_read_delta_records_skips_dataset_scanner_on_windows(
+def test_read_delta_records_uses_active_parquet_files_when_scanner_disabled(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(
@@ -82,17 +82,50 @@ def test_read_delta_records_skips_dataset_scanner_on_windows(
     observed: dict[str, object] = {}
 
     class _FakeTable:
+        def file_uris(self) -> list[str]:
+            observed["file_uris"] = True
+            return ["file:///C:/tmp/part-0.parquet"]
+
         def to_pyarrow_dataset(self) -> _FakeDataset:
             raise AssertionError("Windows path must not import dataset scanner")
 
         def to_pyarrow_table(
             self, *, columns: list[str] | None = None
         ) -> _FakeArrowTable:
-            observed["columns"] = columns
-            return _FakeArrowTable(rows)
+            raise AssertionError(
+                f"native full-table scan must not be used: columns={columns}"
+            )
+
+    def _fake_read_table(
+        path: object,
+        columns: list[str] | None = None,
+        *,
+        use_threads: bool = True,
+    ) -> _FakeArrowTable:
+        observed["path"] = path
+        observed["columns"] = columns
+        observed["use_threads"] = use_threads
+        return _FakeArrowTable(rows)
+
+    monkeypatch.setattr(table_ops.pq, "read_table", _fake_read_table)
 
     assert table_ops.read_delta_records(_FakeTable(), columns=["entity_id"]) == rows
-    assert observed == {"columns": ["entity_id"]}
+    assert observed == {
+        "file_uris": True,
+        "path": "C:/tmp/part-0.parquet",
+        "columns": ["entity_id"],
+        "use_threads": False,
+    }
+
+
+def test_resolve_parquet_file_uri_strips_windows_file_uri_prefix() -> None:
+    assert (
+        table_ops.resolve_parquet_file_uri("file:///C:/tmp/part.parquet")
+        == "C:/tmp/part.parquet"
+    )
+    assert table_ops.resolve_parquet_file_uri("relative/part.parquet") == (
+        "relative/part.parquet"
+    )
 
 
 def test_resolve_delta_table_path_uses_pathlib_join() -> None:

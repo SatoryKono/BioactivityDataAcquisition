@@ -114,22 +114,16 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-dq-v2.json | 153 | Track: Data Quality Score Trend (Volume-weighted) |
 | bioetl-dq-v2.json | 116 | Review: Lineage Handoff to Control Plane |
 | bioetl-dq-v2.json | 150 | Review: Aggregate Control-plane Handoff |
+| bioetl-overview-v2.json | 9600 | Alert/SLO Triage |
+| bioetl-overview-v2.json | 9601 | Triage Alert State |
 | bioetl-overview-v2.json | 1000 | Navigation |
 | bioetl-overview-v2.json | 99 | Provenance |
 | bioetl-overview-v2.json | 214 | Status |
 | bioetl-overview-v2.json | 9300 | ID |
 | bioetl-overview-v2.json | 9301 | Processed Records |
 | bioetl-overview-v2.json | 215 | First Action |
-| bioetl-overview-v2.json | 9600 | Alert/SLO Triage |
-| bioetl-overview-v2.json | 9601 | Triage Alert State |
 | bioetl-overview-v2.json | 9002 | Inputs |
 | bioetl-overview-v2.json | 9014 | L1 Historical Trends |
-| bioetl-overview-v2.json | 9006 | Control Plane |
-| bioetl-overview-v2.json | 9003 | Runtime |
-| bioetl-overview-v2.json | 9004 | Data Quality |
-| bioetl-overview-v2.json | 9007 | Provider |
-| bioetl-overview-v2.json | 9005 | Data Validation |
-| bioetl-overview-v2.json | 9013 | Workflow |
 | bioetl-overview-v2.json | 9018 | Runtime Blockers Trend |
 | bioetl-overview-v2.json | 9019 | DQ Status Trend |
 | bioetl-overview-v2.json | 9020 | Gold Lifecycle Trend |
@@ -139,6 +133,12 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-overview-v2.json | 9015 | Silver Rejects + Rate |
 | bioetl-overview-v2.json | 9012 | Diagnostics & Docs (Logs / Traces / Raw Metrics) |
 | bioetl-overview-v2.json | 9021 | Diagnostics Navigation |
+| bioetl-overview-v2.json | 9006 | Control Plane |
+| bioetl-overview-v2.json | 9003 | Runtime |
+| bioetl-overview-v2.json | 9004 | Data Quality |
+| bioetl-overview-v2.json | 9007 | Provider |
+| bioetl-overview-v2.json | 9005 | Data Validation |
+| bioetl-overview-v2.json | 9013 | Workflow |
 | bioetl-provider-health-v2.json | 1000 | Review Dashboard Navigation |
 | bioetl-provider-health-v2.json | 9400 | Provenance |
 | bioetl-provider-health-v2.json | 9401 | Status |

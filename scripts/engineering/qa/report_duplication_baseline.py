@@ -75,9 +75,21 @@ def _zero_actionability_category(target: str) -> str | None:
     return None
 
 
+def _is_self_module_cluster(cluster: DuplicateCluster) -> bool:
+    """Return True when a finding only restates the same module against itself.
+
+    Pylint duplicate-code occasionally emits same-module pairs for facade /
+    barrel surfaces; those are noise for hotspot residual-debt ratchets.
+    """
+    module_names = {module.module for module in cluster.modules}
+    return len(module_names) <= 1
+
+
 def _cluster_actionability_category(cluster: DuplicateCluster) -> str:
     """Classify duplicate-code findings by likely remediation path."""
     module_names = [module.module for module in cluster.modules]
+    if _is_self_module_cluster(cluster):
+        return "self_module_scanner_noise"
     normalized_path = cluster.path.replace("\\", "/")
     if any(
         token in module
@@ -478,6 +490,11 @@ def _scan_target(
         raw_clusters,
         exclude_module_patterns=exclude_module_patterns,
     )
+    # Drop same-module self-pairs before actionability filters so hotspot family
+    # residual counts only include multi-module structural findings.
+    clusters = [
+        cluster for cluster in clusters if not _is_self_module_cluster(cluster)
+    ]
     clusters = _filter_clusters_by_actionability_categories(
         clusters,
         exclude_actionability_categories=exclude_actionability_categories,

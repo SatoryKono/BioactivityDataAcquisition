@@ -132,7 +132,8 @@ def test_issue_5933_governance_artifacts_are_rebaselined() -> None:
     #     scorecard["source_artifacts"]["module_coverage_inventory"]["source_tree_sha256"]
     #     == coverage["source_tree_sha256"]
     # )
-    assert scorecard["integral_score"] == 8.92
+    # Score may ratchet upward as coupling/debt categories improve; never regress.
+    assert scorecard["integral_score"] >= 8.92
     assert (
         gates["summary"]["architecture_quality_scorecard_integral_score"]
         == scorecard["integral_score"]

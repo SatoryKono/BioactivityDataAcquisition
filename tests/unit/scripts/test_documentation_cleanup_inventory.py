@@ -189,3 +189,14 @@ def test_generated_route_violations_reports_unowned_generated_rows() -> None:
     assert inventory._generated_route_violations(payload) == [
         "docs/generated/unowned.md"
     ]
+
+
+def test_historical_docs_report_is_retained_without_repeated_migration() -> None:
+    """An explicit historical marker resolves a report's cleanup disposition."""
+    assert inventory._classify(
+        "docs/reports/documentation-audit-report-2026-07-13.md",
+        "Status: historical\nClass: internal-published\n",
+        duplicate_group=None,
+        route=None,
+        lifecycle="docs_reports_curated_or_historical_report",
+    ) == ("Archived", "historical", "keep")

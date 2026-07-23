@@ -1,6 +1,7 @@
 # Contract Coverage Matrix
 
-- snapshot_date: 2026-07-13
+- schema_version: `contract-coverage-matrix-v2`
+- snapshot_date: 2026-07-23
 - row_count: 27
 - gold_enabled_count: 27
 - covered_gold_enabled_count: 27
@@ -8,6 +9,12 @@
 - constraint_completeness_missing_count: 0
 - golden_test_evidence_count: 27
 - excluded_count: 0
+
+## Metric semantics
+
+- `gold_enabled` is the effective runtime state of `pipeline.sink.gold.enabled` after hierarchical configuration resolution; an omitted `enabled` value defaults to `true`.
+- Contract or Pandera schema availability is reported by the contract, registry, source, and published-artifact fields. It must not be inferred from `gold_enabled`.
+- Disabled Gold rows remain in the matrix with `parity_status=excluded` and `exclusion_reason=gold_runtime_disabled`; their contract artifacts are not reported as missing solely because runtime output is disabled.
 
 | pipeline_name | layer | contract_ref | gold_enabled | parity_status | constraint_status | strict | properties | required | checks | pk_fields | tests | golden | missing_surfaces | missing_constraints |
 | --- | --- | --- | ---: | --- | --- | ---: | ---: | ---: | ---: | --- | ---: | ---: | --- | --- |

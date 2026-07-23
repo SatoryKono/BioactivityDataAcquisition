@@ -62,8 +62,8 @@ def build_runtime_overrides_snapshot(
         }
     )
     silver_filter_compatibility = current_silver_filter_compatibility_snapshot()
-    silver_filter_mode = silver_filter_compatibility["mode"]
-    cli_overrides["silver_filter_compatibility_mode"] = silver_filter_mode
+    silver_filter_compatibility_mode = silver_filter_compatibility["mode"]
+    cli_overrides["silver_filter_compatibility_mode"] = silver_filter_compatibility_mode
     runtime_fields = build_runtime_launch_field_snapshot(
         ctx,
         run_type_value=run_type_value,
@@ -83,7 +83,7 @@ def build_runtime_overrides_snapshot(
             ),
             "settings_snapshot": build_execution_settings_snapshot(settings),
             "silver_filter_compatibility": silver_filter_compatibility,
-            "silver_filter_compatibility_mode": silver_filter_mode,
+            "silver_filter_compatibility_mode": silver_filter_compatibility_mode,
         }
     )
     return {

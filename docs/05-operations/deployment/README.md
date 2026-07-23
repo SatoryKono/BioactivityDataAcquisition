@@ -37,6 +37,19 @@ BioETL's supported runtime profile remains:
 - no Kubernetes, Redis, or Docker-based runtime orchestration in the standard
   development/operations path
 
+## Support Classification
+
+| Surface | Classification | Support / release contract |
+| --- | --- | --- |
+| Root Quick Start, CLI, and `docs/05-operations/runbooks/` | **Supported** | ADR-010 Local-Only, single-instance runtime |
+| `deployment/deployment-guide.md` and `deployment/k8s-*.{md,yaml}` | **Unsupported experiment** | No CI deployment gate, release qualification, incident-response SLA, or compatibility guarantee |
+| Neo4j/MCP pages in this subtree | **Optional auxiliary tooling** | Outside the BioETL data-pipeline runtime contract |
+
+The Kubernetes files are retained as research material, not as a deployable
+product profile. Commands in those pages are examples for an explicitly
+isolated evaluation environment. They MUST NOT be presented as installation,
+bootstrap, production, staging, or disaster-recovery instructions for BioETL.
+
 ### Supported Bootstrap Path
 
 Этот subtree не дублирует поддерживаемый bootstrap. Для локальной установки и

@@ -537,7 +537,24 @@ def build_payload(*, snapshot_date: str | None = None) -> dict[str, Any]:
         if row["gold_enabled"] and row["constraint_completeness_status"] != "covered"
     ]
     return {
+        "schema_version": "contract-coverage-matrix-v2",
         "snapshot_date": snapshot_date or date.today().isoformat(),
+        "semantics": {
+            "gold_enabled": (
+                "Effective runtime state of pipeline.sink.gold.enabled after "
+                "hierarchical config resolution; omitted enabled defaults to true."
+            ),
+            "covered_gold_enabled_count": (
+                "Runtime-enabled Gold rows whose contract parity_status is covered."
+            ),
+            "missing_gold_enabled_count": (
+                "Runtime-enabled Gold rows whose contract parity_status is not covered."
+            ),
+            "excluded": (
+                "Rows excluded from runtime-enabled coverage because the effective "
+                "Gold sink is disabled; contract artifacts may still exist."
+            ),
+        },
         "row_count": len(rows),
         "gold_enabled_count": gold_enabled_count,
         "covered_gold_enabled_count": covered_gold_enabled_count,
@@ -565,6 +582,8 @@ def _render_markdown(payload: dict[str, Any]) -> str:
     lines = [
         "# Contract Coverage Matrix",
         "",
+        "- schema_version: "
+        f"`{payload['schema_version']}`",
         f"- snapshot_date: {payload['snapshot_date']}",
         f"- row_count: {payload['row_count']}",
         f"- gold_enabled_count: {payload['gold_enabled_count']}",
@@ -574,6 +593,18 @@ def _render_markdown(payload: dict[str, Any]) -> str:
         f"{payload['constraint_completeness_missing_count']}",
         f"- golden_test_evidence_count: {payload['golden_test_evidence_count']}",
         f"- excluded_count: {payload['excluded_count']}",
+        "",
+        "## Metric semantics",
+        "",
+        "- `gold_enabled` is the effective runtime state of "
+        "`pipeline.sink.gold.enabled` after hierarchical configuration resolution; "
+        "an omitted `enabled` value defaults to `true`.",
+        "- Contract or Pandera schema availability is reported by the contract, "
+        "registry, source, and published-artifact fields. It must not be inferred "
+        "from `gold_enabled`.",
+        "- Disabled Gold rows remain in the matrix with `parity_status=excluded` and "
+        "`exclusion_reason=gold_runtime_disabled`; their contract artifacts are not "
+        "reported as missing solely because runtime output is disabled.",
         "",
         "| pipeline_name | layer | contract_ref | gold_enabled | parity_status | "
         "constraint_status | strict | properties | required | checks | pk_fields | "

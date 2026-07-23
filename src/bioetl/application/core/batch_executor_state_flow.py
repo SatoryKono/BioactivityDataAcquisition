@@ -8,6 +8,9 @@ from bioetl.application.core.batch_execution import (
     BatchExecutionRunService,
     prepare_execution_context,
 )
+from bioetl.application.core.batch_execution.contracts import (
+    BatchExecutionCountersSnapshot,
+)
 from bioetl.application.core.batch_executor_protocols import (
     BatchStateCommitProtocol,
     PipelineProcessingProtocol,
@@ -29,13 +32,13 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
 
 
-class _BatchExecutorHostProtocol(Protocol):
-    records_fetched: int
-    records_bronze: int
-    records_silver: int
-    records_gold: int
-    records_gold_excluded_by_contract: int
-    records_quarantined: int
+class _BatchExecutorHostProtocol(BatchExecutionCountersSnapshot, Protocol):
+    """Host surface required by batch state-transition helpers.
+
+    Counter fields are owned by :class:`BatchExecutionCountersSnapshot` so the
+    executor protocol does not restate the shared batch counter contract.
+    """
+
     _resume_offset: int
     _query_string: str | None
     _fsm: BatchExecutionFSM

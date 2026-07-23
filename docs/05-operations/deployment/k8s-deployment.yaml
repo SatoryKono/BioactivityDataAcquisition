@@ -1,3 +1,7 @@
+# UNSUPPORTED EXPERIMENT — NOT A BIOETL DEPLOYMENT PROFILE.
+# ADR-010 supports Local-Only, single-instance execution only. This manifest is
+# retained as research material; it is not release-qualified or covered by
+# BioETL incident procedures. Do not apply it as an installation/bootstrap step.
 apiVersion: apps/v1
 kind: Deployment
 metadata:

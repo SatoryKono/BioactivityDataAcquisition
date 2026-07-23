@@ -16,9 +16,9 @@
       "path_prefixes": [
         "src/bioetl/application/core/"
       ],
-      "duplication_clusters": 6,
+      "duplication_clusters": 0,
       "files": 180,
-      "total_loc": 22265,
+      "total_loc": 22268,
       "files_ge_250_loc": 4,
       "helper_function_ratio": 0.361,
       "max_internal_fan_in": 7,
@@ -111,7 +111,7 @@
       "path_prefixes": [
         "src/bioetl/composition/runtime_builders/"
       ],
-      "duplication_clusters": 5,
+      "duplication_clusters": 4,
       "files": 55,
       "total_loc": 6857,
       "files_ge_250_loc": 0,

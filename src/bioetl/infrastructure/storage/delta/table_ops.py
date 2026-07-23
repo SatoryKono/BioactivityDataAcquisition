@@ -5,8 +5,10 @@ from __future__ import annotations
 import shutil
 import sys
 from pathlib import Path
+from urllib.parse import unquote, urlparse
 
 import pyarrow as pa
+import pyarrow.parquet as pq
 from deltalake import DeltaTable
 
 from bioetl.domain.types import BronzeRecord
@@ -20,6 +22,48 @@ def _can_use_pyarrow_dataset_scanner(*, platform: str = sys.platform) -> bool:
     return platform != "win32"
 
 
+def resolve_parquet_file_uri(file_uri: str) -> str:
+    """Resolve a Delta active-file URI to a local filesystem path when needed."""
+    if not file_uri.startswith("file://"):
+        return file_uri
+    parsed_path = unquote(urlparse(file_uri).path)
+    # Windows file URIs look like file:///C:/path -> /C:/path
+    if len(parsed_path) >= 3 and parsed_path[0] == "/" and parsed_path[2] == ":":
+        return parsed_path[1:]
+    return parsed_path
+
+
+def _read_records_from_active_parquet_files(
+    table: DeltaTable,
+    columns: list[str] | None = None,
+) -> list[BronzeRecord]:
+    """Read active Delta files via parquet without native full-table Arrow scans.
+
+    ``DeltaTable.to_pyarrow_table()`` / dataset scanners have been observed to
+    hang indefinitely on Windows and some mixed/cloud-synced checkouts. Active
+    ``file_uris()`` + ``pyarrow.parquet.read_table`` stays bounded and reliable.
+    """
+    file_uris = list(table.file_uris())
+    if not file_uris:
+        return []
+
+    tables = [
+        pq.read_table(
+            resolve_parquet_file_uri(file_uri),
+            columns=columns,
+            # Threaded parquet reads have hung on some Windows checkouts during
+            # first-touch native library bring-up; keep single-thread IO here.
+            use_threads=False,
+        )
+        for file_uri in file_uris
+    ]
+    if len(tables) == 1:
+        rows: list[BronzeRecord] = tables[0].to_pylist()
+        return rows
+    concatenated = pa.concat_tables(tables)
+    return concatenated.to_pylist()
+
+
 def read_delta_records(
     table: DeltaTable,
     columns: list[str] | None = None,
@@ -27,7 +71,8 @@ def read_delta_records(
     """Read Delta rows into generic record dictionaries.
 
     Prefer RecordBatchReader iteration to reduce peak memory compared to
-    materializing a full Arrow table before conversion.
+    materializing a full Arrow table before conversion. On Windows, prefer
+    active parquet file reads over native ``to_pyarrow_table`` scans.
     """
     to_dataset = getattr(table, "to_pyarrow_dataset", None)
     if _can_use_pyarrow_dataset_scanner() and callable(to_dataset):
@@ -39,10 +84,10 @@ def read_delta_records(
             for batch in to_reader():
                 records.extend(batch.to_pylist())
             return records
+        # Dataset path available but no reader — fall through carefully.
+        return _read_records_from_active_parquet_files(table, columns=columns)
 
-    arrow_table = table.to_pyarrow_table(columns=columns)
-    rows: list[BronzeRecord] = arrow_table.to_pylist()
-    return rows
+    return _read_records_from_active_parquet_files(table, columns=columns)
 
 
 def load_delta_table(table_path: str) -> DeltaTable:
