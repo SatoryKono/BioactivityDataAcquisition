@@ -72,17 +72,22 @@ def test_quarantine_explorer_compose_uses_service_dns_backend() -> None:
         "name": "bioetl-monitoring",
     }
     assert monitoring["networks"]["monitoring"] == root["networks"]["monitoring"]
-    assert bioetl["command"] == [
-        "quarantine",
-        "serve",
-        "--host",
-        "0.0.0.0",
-        "--port",
-        "8081",
-    ]
+    # Dual-process container: Prometheus scrapes bioetl:8000 (health/metrics),
+    # Grafana Infinity uses service alias quarantine-explorer:8081.
+    assert bioetl["entrypoint"] == ["/bin/sh", "-c"]
+    command = bioetl["command"]
+    assert isinstance(command, list) and len(command) == 1
+    command_script = str(command[0])
+    assert "bioetl health server --host 0.0.0.0 --port 8000" in command_script
+    assert "bioetl quarantine serve --host 0.0.0.0 --port 8081" in command_script
     assert "127.0.0.1:8081:8081" in bioetl["ports"]
     assert "8000:8000" not in bioetl["ports"], (
         "Quarantine Explorer must not occupy the BioETL /metrics host port."
+    )
+    # Host must not publish :8000; Prometheus scrapes over the compose network.
+    assert not any(
+        str(port).endswith(":8000") or str(port).startswith("8000:")
+        for port in bioetl["ports"]
     )
 
 
