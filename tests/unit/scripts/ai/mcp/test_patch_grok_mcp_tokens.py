@@ -40,6 +40,7 @@ def test_main_never_prints_configuration_content(
     main()
 
     output = capsys.readouterr().out
+    # Path separators differ on Windows; match status markers only.
     assert "updated" in output
     assert "config.toml" in output
     assert secret_marker not in output
