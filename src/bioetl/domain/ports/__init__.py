@@ -150,6 +150,7 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
         "PipelineCreateWithServicesRequest",
     ),
     "bioetl.domain.ports.serialization": ("JsonEncoderPort",),
+    "bioetl.domain.ports.stage_accounting": ("StageAccountingPort",),
     "bioetl.domain.ports.storage": (
         "BronzeStoragePort",
         "GoldStoragePort",

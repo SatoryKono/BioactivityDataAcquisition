@@ -68,9 +68,7 @@ def test_run_context_factory_preserves_distinct_config_hash_surfaces() -> None:
         runtime=runtime,
         started_at=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
         yaml_config=yaml_config,
-        config_hash="legacy-config-hash",
-        resolved_config_hash="resolved-config-hash",
-        effective_config_hash="effective-config-hash",
+        config_hashes=("legacy-config-hash", "resolved-config-hash", "effective-config-hash"),
     )
 
     assert context.config_hash == "legacy-config-hash"
@@ -90,9 +88,7 @@ def test_run_context_factory_does_not_alias_missing_effective_hash() -> None:
         runtime=runtime,
         started_at=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
         yaml_config=yaml_config,
-        config_hash="legacy-config-hash",
-        resolved_config_hash="resolved-config-hash",
-        effective_config_hash=None,
+        config_hashes=("legacy-config-hash", "resolved-config-hash", None),
     )
 
     assert context.config_hash == "legacy-config-hash"

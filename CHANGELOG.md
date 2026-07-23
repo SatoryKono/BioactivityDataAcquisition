@@ -18,15 +18,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Grafana render-first remediation program (#6246-#6253):** Unified all
-  eight shipped dashboards on a theme-safe wrapping navigation bus (`0..6`
-  plus Silver/Logs/Traces); added evidence-aware Control Plane and Runtime
-  trust gates; made DQ scope/units explicit; neutralized Workflow zero
-  evidence; added alert row scope badges; and collapsed forensic detail behind
-  progressive disclosure. Silver Reject Explorer now exposes explicit backend
-  and terminal-state semantics. The screenshot workflow records/verifies theme
-  and viewport, supports the dark/light × 1600/1024 evidence matrix, and fails
-  on blank/loading/contradictory required panels.
+- **Monitoring surface reduction (2026-07-23, strategy A soft + hard removals):**
+  Opt-in monitoring stack is Prometheus / Pushgateway / Grafana / image-renderer
+  only (`make docker-start-monitoring`). **Removed** from shipping Docker/UI:
+  Loki, Promtail, Tempo, Quarantine Explorer default coupling, Silver Reject
+  Explorer dashboard, scrape job `quarantine-explorer`, and
+  `BioETLQuarantineExplorerUnavailable`. Main compose runs
+  `bioetl health server` on `:8000` only. Identity HTTP panels use Infinity
+  datasource **BioETL Ops HTTP** → `http://bioetl:8000`
+  (`BIOETL_OPS_HTTP_URL`). Record-level quarantine forensics: CLI
+  `bioetl quarantine inspect` (domain quarantine write-path retained).
+  Operator docs/runbooks/contracts/tests updated; decision log:
+  `docs/05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md`.
+
+- **Grafana render-first remediation program (#6246-#6253):** Unified shipped
+  dashboards on a theme-safe wrapping navigation bus (`0..6`); added
+  evidence-aware Control Plane and Runtime trust gates; made DQ scope/units
+  explicit; neutralized Workflow zero evidence; added alert row scope badges;
+  and collapsed forensic detail behind progressive disclosure. The screenshot
+  workflow records/verifies theme and viewport, supports the dark/light ×
+  1600/1024 evidence matrix, and fails on blank/loading/contradictory required
+  panels. *(Later reduced: Silver/Logs/Traces adjuncts and Explorer UI removed
+  in monitoring surface reduction 2026-07-23.)*
 
 - **Removed control-plane `run_manifest_diagnostics_*` compatibility shims (Stream C post-sunset):** Deleted nine thin re-export wrappers under `bioetl.application.services.control_plane`; import `bioetl.application.services.control_plane.manifest.diagnostics.*` instead (`base`, `base_summary_helpers`, `checkpoint_projection`, `finalization`, `replay`, `replay_projection`, `snapshot_support`, `source_refs`, `artifact_support`).
 

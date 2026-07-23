@@ -2193,6 +2193,9 @@ def _parser() -> argparse.ArgumentParser:
 
 
 def _read_text(path: Path) -> str:
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    path = resolve_output_path(path, root=REPO_ROOT)
     return path.read_text(encoding="utf-8")
 
 
@@ -16384,11 +16387,17 @@ def _expected_group_counts(
 
 
 def _write_export(path: Path, snapshot: GraphSnapshot) -> None:
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    path = resolve_output_path(path, root=REPO_ROOT)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(snapshot.to_dict(), indent=2) + "\n", encoding="utf-8")
 
 
 def _write_json(path: Path, payload: JsonValue) -> None:
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    path = resolve_output_path(path, root=REPO_ROOT)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 

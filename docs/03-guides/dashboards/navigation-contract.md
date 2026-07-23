@@ -4,16 +4,17 @@
 
 Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yaml`.
 
-The visual contract is one identical, theme-safe composition on all eight
-shipped dashboards: numbered bus `0. Control Plane` through `6. Alerts & SLO`,
-followed by `Silver Reject Explorer`, `Explore Logs`, and `Explore Traces`.
+The visual contract is one identical, theme-safe composition on all **seven**
+shipped dashboards: numbered bus `0. Control Plane` through `6. Alerts & SLO`.
+Adjunct Explore handoffs for Loki/Tempo and the Silver Reject Explorer dashboard
+were **removed 2026-07-23** (see
+[monitoring-surface-reduction](../../05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md)).
 The current surface remains visible but disabled. Links use solid
 contrast-safe colors and wrap at `1024px`; horizontal clipping and
 light-theme white-on-white states are defects.
 
 YAML также фиксирует time handoff policy в `time_handoff_requirements`:
 - `dashboard_links.required_tokens`: `${__url_time_range}`
-- `explore_links.required_tokens`: `from=${__from}`, `to=${__to}`
 
 ## Нормативный источник
 

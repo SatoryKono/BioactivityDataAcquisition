@@ -1,5 +1,10 @@
 # Предложение по расширению тестов для дашбордов BioETL
 
+> **Removed 2026-07-23:** Silver Reject Explorer dashboard, Loki/Tempo Explore adjuncts, Quarantine Explorer datasource (replaced by BioETL Ops HTTP on :8000).
+> Use CLI ioetl quarantine inspect for record-level forensics. See [monitoring-surface-reduction](../../05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md).
+
+
+
 **Дата**: 2026-05-11  
 **Источник**: dashboard-checklist-per-dashboard.md, существующие тесты  
 **Версия**: 1.0.0
@@ -105,7 +110,7 @@ def test_dashboard_time_refresh_by_level():
         "bioetl-provider-health-v2.json": ("now-12h", "30s"),
         "bioetl-dq-v2.json": ("now-12h", "30s"),
         "bioetl-workflow-overview.json": ("now-12h", "30s"),
-        "bioetl-silver-reject-explorer.json": ("now-24h", "1m"),
+        "CLI quarantine inspect.json": ("now-24h", "1m"),
     }
     for dashboard_name, (expected_time, expected_refresh) in expectations.items():
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
@@ -509,14 +514,14 @@ def test_workflow_overview_no_visible_pipeline_run_type_selectors():
     assert "run_type" not in variables
 ```
 
-#### bioetl-silver-reject-explorer
+#### CLI quarantine inspect
 
 ```python
 # test_grafana_silver_reject_config.py (существующий, расширить)
 
 def test_silver_reject_first_action_cta_contract():
     """Panel 10 должна иметь 2 CTA."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-silver-reject-explorer.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/CLI quarantine inspect.json"))
     panel = _find_panel_by_id(dashboard, 10)
     assert panel is not None
     assert panel.get("title") == "Review: First Action / No-Data Semantics"
@@ -532,7 +537,7 @@ def test_silver_reject_first_action_cta_contract():
 
 def test_silver_reject_requires_single_select_pipeline():
     """Pipeline selector должен быть single-select."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-silver-reject-explorer.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/CLI quarantine inspect.json"))
     variables = {
         v.get("name"): v
         for v in dashboard.get("templating", {}).get("list", [])
@@ -545,7 +550,7 @@ def test_silver_reject_requires_single_select_pipeline():
 
 def test_silver_reject_payload_hash_is_textbox():
     """payload_hash должен быть textbox."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-silver-reject-explorer.json"))
+    dashboard = load_dashboard(Path("grafana/dashboards/CLI quarantine inspect.json"))
     variables = {
         v.get("name"): v
         for v in dashboard.get("templating", {}).get("list", [])
@@ -579,7 +584,7 @@ def test_silver_reject_payload_hash_is_textbox():
    - bioetl-runtime (panel 9991)
    - bioetl-provider-health-v2 (panel 9002)
    - bioetl-dq-v2 (panel 9103)
-   - bioetl-silver-reject-explorer (panel 10)
+   - CLI quarantine inspect (panel 10)
    - bioetl-workflow-overview (panel 9)
 
 ### Medium Priority (неделя 3-4)

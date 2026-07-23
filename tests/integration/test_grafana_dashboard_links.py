@@ -507,6 +507,7 @@ def test_dashboard_links_forbid_universal_handoff_patterns() -> None:
             )
 
 
+@pytest.mark.skip(reason="Loki/Tempo Explore drilldowns removed 2026-07-23")
 def test_navigation_dashboards_expose_explore_drilldown_links() -> None:
     """Every navigation panel should expose Logs and Traces drilldowns."""
     for dashboard_path in get_dashboard_files():
@@ -576,6 +577,7 @@ def test_navigation_panel_renders_full_visual_bus_with_disabled_current_item() -
         )
 
 
+@pytest.mark.skip(reason="Loki/Tempo Explore drilldowns removed 2026-07-23")
 def test_explore_links_use_drilldown_routes_and_time_range() -> None:
     """Every dashboard Explore link should target Drilldown apps and preserve time range."""
     dashboard_paths = [
@@ -591,6 +593,7 @@ def test_explore_links_use_drilldown_routes_and_time_range() -> None:
         )
 
 
+@pytest.mark.skip(reason="Loki/Tempo Explore drilldowns removed 2026-07-23")
 def test_explore_traces_navigation_is_explicitly_traced_run_only() -> None:
     """Explore Traces must be described as traced-run-only in shipped navigation."""
     for dashboard_path in get_dashboard_files():
@@ -618,6 +621,7 @@ def test_explore_traces_navigation_is_explicitly_traced_run_only() -> None:
         )
 
 
+@pytest.mark.skip(reason="Loki/Tempo Explore drilldowns removed 2026-07-23")
 def test_tempo_drilldown_routes_to_traces_drilldown_app() -> None:
     """Tempo drilldown links should route to Grafana Traces Drilldown app."""
     dashboards = [
@@ -644,6 +648,7 @@ def test_tempo_drilldown_routes_to_traces_drilldown_app() -> None:
             )
 
 
+@pytest.mark.skip(reason="Loki/Tempo Explore drilldowns removed 2026-07-23")
 def test_loki_drilldown_links_use_safe_bioetl_baseline_query() -> None:
     """Loki drilldown links should start from a low-cardinality baseline query."""
     dashboards = [
@@ -658,6 +663,7 @@ def test_loki_drilldown_links_use_safe_bioetl_baseline_query() -> None:
         )
 
 
+@pytest.mark.skip(reason="Loki/Tempo Explore drilldowns removed 2026-07-23")
 def test_tempo_drilldown_links_are_contextual() -> None:
     """Tempo drilldown links should carry explicit TraceQL context."""
     pipeline_scoped = (
@@ -671,6 +677,7 @@ def test_tempo_drilldown_links_are_contextual() -> None:
     _assert_workflow_tempo_drilldown()
 
 
+@pytest.mark.skip(reason="Loki/Tempo Explore drilldowns removed 2026-07-23")
 def test_explore_drilldown_links_disclose_tracing_profile_dependency() -> None:
     """Loki/Tempo drilldowns should warn that tracing profile is required."""
     for dashboard_name in (path.name for path in get_dashboard_files()):
@@ -691,6 +698,7 @@ def test_explore_drilldown_links_disclose_tracing_profile_dependency() -> None:
             )
 
 
+@pytest.mark.skip(reason="Loki/Tempo Explore drilldowns removed 2026-07-23")
 def test_loki_drilldown_uses_grafana_logs_drilldown_entrypoint() -> None:
     """Loki drilldown should route to Grafana Logs Drilldown app entrypoint."""
     sample_line = _emit_sample_structured_log(
@@ -759,14 +767,13 @@ def test_runtime_and_dq_dashboards_expose_control_plane_handoff() -> None:
         )
 
 
-def test_navigation_dashboards_expose_silver_reject_explorer_handoff() -> None:
-    """Every navigation panel should expose a Silver Reject Explorer handoff."""
+def test_navigation_dashboards_do_not_expose_removed_silver_reject_explorer() -> None:
+    """Silver Reject Explorer was removed; no handoff must remain."""
     for dashboard_name in (path.name for path in get_dashboard_files()):
         _assert_silver_explorer_presence_for_dashboard(
             dashboard_name=dashboard_name,
             dashboard=load_dashboard(Path("grafana/dashboards") / dashboard_name),
         )
-    for dashboard_name, expected in _SILVER_EXPLORER_EXPLICIT_EXPECTATIONS.items():
         _assert_explicit_silver_explorer_policy(
-            dashboard_name=dashboard_name, expected=expected
+            dashboard_name=dashboard_name, expected={}
         )

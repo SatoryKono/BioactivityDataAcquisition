@@ -138,16 +138,17 @@ bioetl quarantine purge --pipeline {pipeline-name}
 - `dq-records-quarantined-total`: Total records sent to quarantine.
 - `dq-quarantine-size-bytes`: Storage size of quarantine table.
 
-### Grafana
+### Grafana + CLI
 
-- Use Grafana first for summary/trend investigation:
+- Use Grafana (opt-in monitoring) for summary/trend investigation:
   - `bioetl-overview-v2`: high-level `filtered_out` volume.
   - `bioetl-runtime`: runtime triage and warning correlation.
   - `bioetl-dq-v2`: DQ/quarantine summary for selected `$pipeline` and `$run_type`,
     включая bounded panels `Top Silver Reject Reasons` и `Top Silver Reject Fields`.
-  - `bioetl-silver-reject-explorer`: record-level browsing с фильтрами
-    `$pipeline/$run_type/$reason_code/$field/$run_id` и detail по `payload_hash`.
-- CLI/quarantine остаётся action surface для `resolve/replay/purge`.
+- **Record-level** browsing is **CLI-only** after 2026-07-23 (Silver Reject
+  Explorer Grafana dashboard removed):
+  `bioetl quarantine inspect --pipeline <pipeline> ...`
+- CLI remains the action surface for `resolve/replay/purge`.
 
 ### Silver Structural Rejects Triage Sequence
 
@@ -157,9 +158,9 @@ bioetl quarantine purge --pipeline {pipeline-name}
    contract/semantic rejection.
 1. Pivot to `4. Data Quality` and inspect `Top Silver Reject Reasons` plus
    `Top Silver Reject Fields` to reduce the issue to a bounded cause summary.
-1. Open `Silver Reject Explorer` for exact record-level evidence and selected-record context.
-1. Run `bioetl quarantine inspect ... --error-code FILTERED_OUT_SILVER` /
-   `bioetl quarantine resolve ...` when you need operator action in CLI.
+1. Run `bioetl quarantine inspect ... --error-code FILTERED_OUT_SILVER` for
+   exact record-level evidence and selected-record context.
+1. Run `bioetl quarantine resolve ...` / `replay` when you need operator action.
 1. For Gold contract/semantic rejects, stay in `4. Data Quality` and inspect
    `Inspect: Gold Reject Outcomes by Pipeline` plus processed-records surfaces.
 

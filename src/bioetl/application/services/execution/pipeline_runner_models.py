@@ -7,6 +7,7 @@ from datetime import datetime
 from enum import StrEnum
 
 from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP
+from bioetl.domain.run_reports.models import StageFunnelRow
 
 
 class PipelineRunResult(StrEnum):
@@ -40,6 +41,10 @@ class RunResult:
     error_type: str | None = None
     debug_export_uri: str | None = None
     debug_export_hash: str | None = None
+    run_report_json_path: str | None = None
+    run_report_markdown_path: str | None = None
+    run_report_funnel: tuple[StageFunnelRow, ...] = ()
+    run_report_error: str | None = None
 
     @property
     def duration_seconds(self) -> float:

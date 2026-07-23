@@ -164,18 +164,21 @@ def write_export_manifests_if_enabled(
         export_format=options.format,
         output_path=output_path,
         row_count=row_count,
-        generated_at=options.manifest_generated_at,
-        allow_nondeterministic_generated_at=(
-            options.allow_nondeterministic_manifest_timestamp
+        timestamp_opts=(
+            options.manifest_generated_at,
+            options.allow_nondeterministic_manifest_timestamp,
+            None,
         ),
         run_ids=options.run_ids,
         code_revision=options.code_revision,
-        requester=options.requester,
-        role=options.role,
-        filters_hash=options.filters_hash,
-        expires_at=options.expires_at,
-        redaction_profile=options.redaction_profile,
-        audit_ref=audit_ref,
+        access=(
+            options.requester,
+            options.role,
+            options.filters_hash,
+            options.expires_at,
+            options.redaction_profile,
+            audit_ref,
+        ),
         redacted_columns=redacted_columns,
         strict=options.manifest_strict,
     )

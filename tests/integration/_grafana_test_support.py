@@ -1,7 +1,8 @@
-import pytest
 """Shared helper utilities for Grafana dashboard integration tests."""
 
 from __future__ import annotations
+
+import pytest
 
 import io
 import json
@@ -475,7 +476,7 @@ def _assert_run_id_infinity_shell(
     dashboard_path: Path, run_id_var: dict[str, object]
 ) -> None:
     assert run_id_var.get("type") == "query"
-    assert run_id_var.get("datasource") == "Quarantine Explorer"
+    assert run_id_var.get("datasource") == "BioETL Ops HTTP"
     assert run_id_var.get("includeAll") is False
     assert run_id_var.get("multi") is False
     run_id_query = run_id_var.get("query", {})
@@ -669,9 +670,9 @@ def _assert_silver_reject_infinity_variable(
     assert variable is not None, (
         f"Dashboard {dashboard_path.name} must define '{variable_name}' variable"
     )
-    assert variable.get("datasource") == "Quarantine Explorer", (
+    assert variable.get("datasource") == "BioETL Ops HTTP", (
         f"Dashboard {dashboard_path.name} '{variable_name}' must use "
-        "Quarantine Explorer datasource"
+        "BioETL Ops HTTP datasource"
     )
     query = variable.get("query", {})
     assert isinstance(query, dict), (

@@ -210,13 +210,12 @@ def test_start_and_verify_routes_grafana_backend_to_requested_root(
     assert result.item_count == 0
     command = captured["command"]
     assert isinstance(command, tuple)
-    assert str(subject.AUDIT_COMPOSE) in command
-    assert command[-7:] == (
+    # Loki/Promtail/Quarantine audit overlays were removed from the opt-in stack.
+    assert str(subject.BASE_COMPOSE) in command
+    assert str(subject.AUDIT_COMPOSE) not in command
+    assert command[-4:] == (
         "prometheus",
         "pushgateway",
-        "quarantine-explorer-audit",
-        "loki",
-        "promtail-audit",
         "grafana",
         "renderer",
     )

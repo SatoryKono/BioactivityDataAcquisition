@@ -78,6 +78,9 @@ def main():
     custom_patterns = None
     if args.custom_patterns:
         try:
+            from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_cli_path
+
+            args.custom_patterns = str(resolve_cli_path(args.custom_patterns, root=REPO_ROOT))
             with open(args.custom_patterns, "r", encoding="utf-8") as f:
                 custom_patterns = json.load(f)
         except Exception as e:

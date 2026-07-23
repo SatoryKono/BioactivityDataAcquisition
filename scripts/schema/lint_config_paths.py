@@ -85,7 +85,10 @@ def _scan_file(filepath: Path) -> list[tuple[int, str, str, str]]:
     """
     hits: list[tuple[int, str, str, str]] = []
     try:
-        text = filepath.read_text(encoding="utf-8", errors="replace")
+        from scripts.engineering.common.repo_paths import resolve_output_path
+
+        safe_path = resolve_output_path(filepath)
+        text = safe_path.read_text(encoding="utf-8", errors="replace")
     except OSError:
         return hits
 

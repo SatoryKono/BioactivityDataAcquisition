@@ -45,6 +45,9 @@ def _load_json(path: Path) -> dict[str, Any]:
 
 def _load_observations(path: Path) -> dict[str, dict[str, list[float]]]:
     grouped: dict[str, dict[str, list[float]]] = {}
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_cli_path
+
+    path = resolve_cli_path(path, root=REPO_ROOT)
     for line in path.read_text(encoding="utf-8").splitlines():
         line = line.strip()
         if not line:

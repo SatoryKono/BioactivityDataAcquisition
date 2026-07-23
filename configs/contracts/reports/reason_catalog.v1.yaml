@@ -1,0 +1,93 @@
+# BioETL run-report reason catalog (v1)
+# Stable codes for pipeline stage removals. Free-text messages must not be used as keys.
+version: "reason_catalog_v1"
+unknown_code: UNKNOWN_REASON
+
+families:
+  extract: Extract / adapter intake losses
+  structural: Structural / schema policy rejects
+  dq: Data-quality quarantine
+  contract: Gold contract rejects
+  semantic: Gold semantic exclusions
+  dedup: Deduplication
+  operator: Operator / skip paths
+  system: System / unmapped
+
+reasons:
+  - code: FILTERED_OUT_SILVER
+    family: structural
+    default_outcome: filtered_out
+    layer: silver
+    description: Silver structural filter rejection (legacy aggregate code)
+
+  - code: structural_policy_required_missing
+    family: structural
+    default_outcome: filtered_out
+    layer: silver
+    description: Required field missing under structural policy
+
+  - code: structural_policy_null_optional_forbidden
+    family: structural
+    default_outcome: filtered_out
+    layer: silver
+    description: Optional field null when policy forbids nulls
+
+  - code: structural_policy_type_mismatch
+    family: structural
+    default_outcome: filtered_out
+    layer: silver
+    description: Structural policy type mismatch
+
+  - code: SCHEMA_VALIDATION_FAILURE
+    family: dq
+    default_outcome: quarantined
+    layer: silver
+    description: Pandera / schema validation failure
+
+  - code: DQ_THRESHOLD_VIOLATION
+    family: dq
+    default_outcome: quarantined
+    layer: silver
+    description: DQ threshold hard-fail quarantine
+
+  - code: DEDUP_KEY_COLLISION
+    family: dedup
+    default_outcome: deduplicated
+    layer: silver
+    description: Duplicate primary key dropped
+
+  - code: gold_contract_schema_failure
+    family: contract
+    default_outcome: excluded_by_contract
+    layer: gold
+    description: Gold contract schema failure
+
+  - code: gold_contract_required_failure
+    family: contract
+    default_outcome: excluded_by_contract
+    layer: gold
+    description: Gold required field failure
+
+  - code: gold_contract_reference_failure
+    family: contract
+    default_outcome: excluded_by_contract
+    layer: gold
+    description: Gold reference integrity failure
+
+  - code: gold_semantic_business_exclusion
+    family: semantic
+    default_outcome: quarantined
+    layer: gold
+    description: Gold semantic business exclusion
+
+  - code: gold_semantic_profile_exclusion
+    family: semantic
+    default_outcome: quarantined
+    layer: gold
+    description: Gold semantic profile exclusion
+
+  - code: UNKNOWN_REASON
+    family: system
+    default_outcome: other
+    layer: silver
+    description: Unmapped or missing reason code

@@ -162,8 +162,12 @@ def _load_yaml_from_git_ref(
     ref: str,
     rel_path: str,
 ) -> dict[str, Any] | None:
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
     result = subprocess.run(
-        ["git", "-C", repo_root.as_posix(), "show", f"{ref}:{rel_path}"],
+        ensure_safe_cli_argv(
+            ["git", "-C", repo_root.as_posix(), "show", f"{ref}:{rel_path}"]
+        ),
         capture_output=True,
         text=True,
         encoding="utf-8",
@@ -1623,10 +1627,10 @@ def _write_artifacts(
     root: Path | None = None,
 ) -> None:
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_cli_path
+        from scripts.engineering.common.repo_paths import resolve_output_path
 
-        json_out = resolve_cli_path(json_out, root=root)
-        md_out = resolve_cli_path(md_out, root=root)
+        json_out = resolve_output_path(json_out, root=root)
+        md_out = resolve_output_path(md_out, root=root)
     json_out.parent.mkdir(parents=True, exist_ok=True)
     md_out.parent.mkdir(parents=True, exist_ok=True)
     json_out.write_text(
@@ -1645,10 +1649,10 @@ def _check_artifacts(
     root: Path | None = None,
 ) -> list[str]:
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_cli_path
+        from scripts.engineering.common.repo_paths import resolve_output_path
 
-        json_out = resolve_cli_path(json_out, root=root)
-        md_out = resolve_cli_path(md_out, root=root)
+        json_out = resolve_output_path(json_out, root=root)
+        md_out = resolve_output_path(md_out, root=root)
     errors: list[str] = []
     if compare_artifacts:
         expected_json = json.dumps(payload, indent=2, sort_keys=True) + "\n"

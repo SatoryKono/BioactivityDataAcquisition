@@ -27,6 +27,7 @@ from bioetl.application.runtime_timestamps import capture_runtime_timing_anchor
 from bioetl.application.services.execution._pipeline_runner_support import (
     build_dry_run_result,
     build_pipeline_run_result,
+    finalize_pipeline_run_report,
 )
 from bioetl.application.services.execution.pipeline_run_context_service import (
     PipelineRunContextService,
@@ -42,6 +43,11 @@ from bioetl.application.services.execution.pipeline_runner_models import (
     RunResult,
 )
 from bioetl.domain.context import PipelineRunContext
+from bioetl.domain.run_reports.accounting import StageAccountingAccumulator
+from bioetl.domain.run_reports.context import (
+    bind_stage_accounting,
+    reset_stage_accounting,
+)
 from bioetl.domain.types import RunID
 
 if TYPE_CHECKING:
@@ -206,18 +212,27 @@ class PipelineRunnerService:
                 status=dry_run_result.status.value,
                 timestamp=dry_run_result.completed_at,
             )
-            return dry_run_result
+            return finalize_pipeline_run_report(
+                result=dry_run_result,
+                options=effective_options,
+            )
 
         runner = _require_execution_runner(self.runner_factory.create(context))
-        return await self._execute_pipeline(
-            runner=runner,
-            run_logger=run_logger,
-            pipeline_name=pipeline_name,
-            run_id=effective_run_id,
-            run_type=effective_options.run_type,
-            started_at=started_at,
-            started_monotonic=started_monotonic,
-        )
+        accounting = StageAccountingAccumulator()
+        accounting_token = bind_stage_accounting(accounting)
+        try:
+            return await self._execute_pipeline(
+                runner=runner,
+                run_logger=run_logger,
+                pipeline_name=pipeline_name,
+                run_id=effective_run_id,
+                run_type=effective_options.run_type,
+                started_at=started_at,
+                started_monotonic=started_monotonic,
+                options=effective_options,
+            )
+        finally:
+            reset_stage_accounting(accounting_token)
 
     def _ensure_pipeline_exists(self, pipeline_name: str) -> None:
         if self.runner_factory.contains(pipeline_name):
@@ -315,6 +330,7 @@ class PipelineRunnerService:
         run_type: str,
         started_at: datetime,
         started_monotonic: float,
+        options: RunOptions | None = None,
     ) -> RunResult:
         """Execute pipeline and build normalized RunResult."""
         outcome = await self._execution_service.execute(
@@ -331,6 +347,7 @@ class PipelineRunnerService:
             run_id=run_id,
             run_type=run_type,
             started_at=started_at,
+            options=options,
         )
         _record_pipeline_run_metric(
             self.metrics,
@@ -360,6 +377,7 @@ class PipelineRunnerService:
         run_id: RunID,
         run_type: str,
         started_at: datetime,
+        options: RunOptions | None = None,
     ) -> RunResult:
         """Convert execution outcome to public RunResult contract."""
         return build_pipeline_run_result(
@@ -369,6 +387,7 @@ class PipelineRunnerService:
             run_id=run_id,
             run_type=run_type,
             started_at=started_at,
+            options=options,
         )
 
 

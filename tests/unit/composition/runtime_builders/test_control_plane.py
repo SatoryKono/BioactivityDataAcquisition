@@ -267,9 +267,11 @@ def test_attach_manifest_id_accepts_explicit_replay_parentage_kwargs() -> None:
     updated = control_plane.attach_manifest_id(
         ctx,
         manifest_id="manifest-2",
-        replay_of_run_id="run-parent-2",
-        replay_of_manifest_id="manifest-parent-2",
-        input_snapshot_fingerprint="snapshot-fingerprint-2",
+        optional_fields={
+            "replay_of_run_id": "run-parent-2",
+            "replay_of_manifest_id": "manifest-parent-2",
+            "input_snapshot_fingerprint": "snapshot-fingerprint-2",
+        },
     )
 
     assert updated is ctx

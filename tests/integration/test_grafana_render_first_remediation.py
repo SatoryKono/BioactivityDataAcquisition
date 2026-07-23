@@ -181,25 +181,8 @@ def test_rf002_terminal_states_are_explicit() -> None:
     assert _mapping_text(outcomes, "-1").startswith("NO MATCHING SCOPE")
     assert _mapping_text(outcomes, "0").startswith("VALID EMPTY")
 
-    health = _panel(silver, 13)
-    health_text = " ".join(
-        (
-            str(health.get("description", "")),
-            str(health.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")),
-        )
-    )
-    for state in ("HEALTHY", "ERROR", "VALID EMPTY"):
-        assert state in health_text
-    assert "blank" in health_text and "loading" in health_text
-
-    runtime = _load("bioetl-runtime.json")
-    for panel_id in (250, 251, 257, 258):
-        panel = _panel(runtime, panel_id)
-        no_value = str(
-            panel.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
-        )
-        assert no_value.startswith("VALID EMPTY")
-        assert "ERROR" in no_value
+    # Silver Reject Explorer terminal-state panels and Loki log-hygiene cards
+    # (runtime ids 250/251/257/258) were removed 2026-07-23.
 
 
 def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
@@ -240,7 +223,8 @@ def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
             for tag, attrs in parser.elements
             if tag == "span" and attrs.get("aria-current") == "page"
         ]
-        assert len(links) >= 7, path.name
+        # Bus 0..6 without Explore/Silver adjuncts: 6 peer links + current span.
+        assert len(links) >= 6, path.name
         assert len(current) == 1, path.name
         for attrs in links:
             style = attrs.get("style", "")
@@ -291,8 +275,7 @@ def test_rf003_1024_layout_prioritizes_actions_and_readability() -> None:
     assert _panel(workflow, 9)["gridPos"]["w"] == 24
     provider = _load("bioetl-provider-health-v2.json")
     assert _panel(provider, 9103)["gridPos"]["w"] >= 10
-    for panel_id in (10, 2, 3, 4, 5, 6, 7):
-        assert _panel(silver, panel_id)["gridPos"]["w"] == 24
+    # Silver Reject Explorer full-width progressive panels removed 2026-07-23.
 
     alerts = _load("bioetl-alerts-slo.json")
     alert_table = _panel(alerts, 5)
@@ -358,12 +341,7 @@ def test_rf004_identity_and_scope_are_persistent() -> None:
     )
     mapped_scopes = scope_mapping[0].get("options", {})
     assert {"Global", "Pipeline", "Run"} <= set(mapped_scopes)
-
-    assert "Reset once" in str(_panel(silver, 1).get("options", {}).get("content"))
-    for variable in silver.get("templating", {}).get("list", []):
-        description = str(variable.get("description", ""))
-        assert "Warning reason" in description
-        assert "Recovery:" in description
+    # Silver Reject Explorer scope-recovery copy removed with the dashboard.
 
 
 def test_rf005_incident_hierarchy_and_semantic_encoding() -> None:
@@ -445,15 +423,13 @@ def test_rf006_progressive_disclosure_reduces_first_path() -> None:
     ] == [23, 24, 30, 31, 32]
 
     runtime = _load("bioetl-runtime.json")
-    for row_id in (252, 253, 254, 255):
+    # Tracing-only row 255 and Loki hygiene panels were removed; keep detect/localize/escalate.
+    for row_id in (252, 253, 254):
         assert _panel(runtime, row_id).get("collapsed") is True
 
     alerts = _load("bioetl-alerts-slo.json")
     assert _panel(alerts, 5)["gridPos"]["h"] == 6
-
-    assert _panel(silver, 16).get("type") == "row"
-    assert _panel(silver, 15).get("type") == "row"
-    assert _panel(silver, 10)["gridPos"]["h"] == 3
+    # Silver Reject Explorer progressive-disclosure rows removed 2026-07-23.
 
 
 def test_rf007_counts_and_dense_legends_are_bounded() -> None:

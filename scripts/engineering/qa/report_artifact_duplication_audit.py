@@ -182,6 +182,9 @@ def _check_json_artifact(path: Path, payload: dict[str, Any]) -> bool:
     if not path.exists():
         print(f"[drift] missing: {path}")
         return False
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    path = resolve_output_path(path, root=REPO_ROOT)
     actual = path.read_text(encoding="utf-8")
     if actual == expected:
         return True

@@ -504,9 +504,12 @@ def main() -> int:
     report = generate_report(all_gaps)
 
     if args.output:
-        Path(args.output).parent.mkdir(parents=True, exist_ok=True)
-        Path(args.output).write_text(report)
-        print(f"Report written to: {args.output}")  # noqa: T201
+        from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+        output_path = resolve_output_path(args.output, root=REPO_ROOT)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(report)
+        print(f"Report written to: {output_path}")  # noqa: T201
     else:
         print(report)  # noqa: T201
 

@@ -89,5 +89,6 @@ def test_dq_dashboard_gold_reject_panel_is_not_silver_alias_surface() -> None:
         *panel.get("options", {}).get("dataLinks", []),
     ]
     assert all(
+        "bioetl-silver-reject-explorer" not in str(link.get("url", ""))
         for link in links
     )

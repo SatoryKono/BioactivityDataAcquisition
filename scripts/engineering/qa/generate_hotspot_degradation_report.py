@@ -63,9 +63,9 @@ class BenchmarkDegradation:
 
 def _load_budgets(path: Path, *, root: Path | None = None) -> dict[str, HotspotBudget]:
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_cli_path
+        from scripts.engineering.common.repo_paths import resolve_output_path
 
-        path = resolve_cli_path(path, root=root)
+        path = resolve_output_path(path, root=root)
     payload = json.loads(path.read_text(encoding="utf-8"))
     raw_map: dict[str, Any] = payload.get("benchmarks", {})
     return {
@@ -85,9 +85,9 @@ def _load_observations(
     path: Path, *, root: Path | None = None
 ) -> dict[str, list[HotspotObservation]]:
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_cli_path
+        from scripts.engineering.common.repo_paths import resolve_output_path
 
-        path = resolve_cli_path(path, root=root)
+        path = resolve_output_path(path, root=root)
     if not path.exists():
         return {}
 
@@ -296,9 +296,9 @@ def _write_json_report(
     root: Path | None = None,
 ) -> None:
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_cli_path
+        from scripts.engineering.common.repo_paths import resolve_output_path
 
-        path = resolve_cli_path(path, root=root)
+        path = resolve_output_path(path, root=root)
     payload = {
         "window_size": window_size,
         "summary": summary,
@@ -313,9 +313,9 @@ def _write_markdown_report(
 ) -> None:
     """Write markdown degradation report."""
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_cli_path
+        from scripts.engineering.common.repo_paths import resolve_output_path
 
-        path = resolve_cli_path(path, root=root)
+        path = resolve_output_path(path, root=root)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(markdown, encoding="utf-8")
 

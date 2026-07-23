@@ -146,6 +146,9 @@ def build_report_payload(
 def write_json_report(path: Path, payload: dict[str, Any]) -> None:
     """Write visual smoke report JSON, creating parent directories."""
     path.parent.mkdir(parents=True, exist_ok=True)
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    path = resolve_output_path(path, root=REPO_ROOT)
     path.write_text(
         json.dumps(payload, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",

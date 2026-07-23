@@ -13,15 +13,24 @@ ______________________________________________________________________
 
 # BioETL Dashboards v2: Usage
 
+> **Removed 2026-07-23:** Silver Reject Explorer dashboard, Loki/Tempo Explore adjuncts, Quarantine Explorer datasource (replaced by BioETL Ops HTTP on :8000).
+> Use CLI ioetl quarantine inspect for record-level forensics. See [monitoring-surface-reduction](../../05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md).
+
+
+
 Дата сверки: **2026-07-23**
 Источник истины: `grafana/dashboards/*.json`
 
-Shipped inventory (8 dashboards): Control Plane, Overview, Runtime, Provider
-Health, Data Quality, Workflow, Alerts & SLO, Silver Reject Explorer. Primary
-`0..6` refresh is `30s`; Silver Reject Explorer is the forensic exception at
-`1m` / default range `24h`. Generic primary handoffs preserve HTTP `$run_id`
-but **never** map it into Silver `$quarantine_run_id` (forensic IDs stay on
-the explorer only).
+> **Surface reduction 2026-07-23:** 7 shipped dashboards (bus `0..6` only).
+> Removed: Silver Reject Explorer UI, Loki/Tempo Explore adjuncts, Quarantine
+> Explorer datasource. Record-level quarantine forensics → CLI
+> `bioetl quarantine inspect`. Details:
+> [monitoring-surface-reduction](../../05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md).
+
+Shipped inventory (**7 dashboards**): Control Plane, Overview, Runtime, Provider
+Health, Data Quality, Workflow, Alerts & SLO. Primary `0..6` refresh is `30s`.
+Generic primary handoffs preserve HTTP `$run_id` for identity panels only
+(not Prometheus labels).
 
 Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navigation-links.yaml` (docs/tests должны соответствовать ему).
 
@@ -35,16 +44,16 @@ Human-readable selector references:
 - `docs/03-guides/dashboards/variable-reference.md`
 - `docs/03-guides/dashboards/selector-architecture.md`
 
-Detached audit backend contract:
-- HTTP-backed panels (`ID`, `Processed Records`, checkpoint freshness, Silver
-  Reject Explorer summaries) are served by `bioetl quarantine serve`, usually
-  on `http://127.0.0.1:8081`.
+HTTP identity backend contract:
+- HTTP-backed panels (`ID`, `Processed Records`, checkpoint freshness) are
+  served by **`bioetl health server`** (default Docker main: `:8000`) via
+  datasource **BioETL Ops HTTP**.
 - The shared above-the-fold `ID` and `Processed Records` cards on primary
-  dashboards now carry explicit no-value copy plus a Quarantine Explorer health
-  link. Generic Grafana `No data` on those cards is never acceptance evidence:
-  check `/health/live`, selector scope, and backend datasource errors before
-  declaring an exact run absent or a zero-record state valid.
-- That backend reads Prometheus through `BIOETL_PROMETHEUS_URL` when set.
+  dashboards carry explicit no-value copy. Generic Grafana `No data` on those
+  cards is never acceptance evidence: check `/health/live`, selector scope,
+  and backend datasource errors before declaring an exact run absent or a
+  zero-record state valid.
+- Optional Prometheus URL for backend-side joins: `BIOETL_PROMETHEUS_URL` when set.
   Configure the URL reachable from the backend process: host/WSL runs usually
   use `http://127.0.0.1:9090`, while Docker-adjacent backends may need
   `http://host.docker.internal:9090`. Do not assume `localhost:9090` is
@@ -60,7 +69,7 @@ Detached audit backend contract:
 | 2. Runtime                | `bioetl-runtime`                | L2 diagnostic runtime triage: blockers, latency, backlog, error localization, handoffs     |
 | 3. Provider Health        | `bioetl-provider-health-v2`     | Incident triage по provider health: latency/failures/degraded/retries exhausted            |
 | 4. Data Quality           | `bioetl-dq-v2`                  | Качество данных, карантин, аномалии, freshness                                             |
-| Silver Reject Explorer    | `bioetl-silver-reject-explorer` | Record-level explorer для Silver structural `filtered_out`/legacy `FILTERED_OUT_SILVER` записей (quarantine-backed); Gold contract/semantic rejects остаются в `4. Data Quality` Gold panels |
+| Silver Reject Explorer    | `CLI quarantine inspect` | Record-level explorer для Silver structural `filtered_out`/legacy `FILTERED_OUT_SILVER` записей (quarantine-backed); Gold contract/semantic rejects остаются в `4. Data Quality` Gold panels |
 | 5. Workflow               | `bioetl-workflow-overview`      | Selected-range declarative workflow run/step evidence and transform-step latency handoff   |
 | 6. Alerts & SLO           | `bioetl-alerts-slo`             | Active alert state, critical/page pressure, SLO/SLA pressure, and scope-badged alert rows  |
 
@@ -75,7 +84,7 @@ Detached audit backend contract:
 | `bioetl-dq-v2` | canonical navigation bus `4. Data Quality` from every primary dashboard except itself |
 | `bioetl-workflow-overview` | canonical navigation bus `5. Workflow` from every primary dashboard except itself |
 | `bioetl-alerts-slo` | canonical navigation bus `6. Alerts & SLO` from every shipped dashboard except itself |
-| `bioetl-silver-reject-explorer` | canonical global adjunct link `Silver Reject Explorer` from every shipped dashboard except itself |
+| `CLI quarantine inspect` | canonical global adjunct link `Silver Reject Explorer` from every shipped dashboard except itself |
 
 ## Фильтрация
 
@@ -90,7 +99,7 @@ Detached audit backend contract:
   `$workflow_context`, `$pipeline_context`, `$pipeline_context_exact`,
   `$run_type_context`, `$run_type_context_exact`, `$provider_context`,
   `$provider_context_exact`
-- `bioetl-silver-reject-explorer`: bounded forensic `$pipeline`, `$run_type`,
+- `CLI quarantine inspect`: bounded forensic `$pipeline`, `$run_type`,
   `$reason_code`, `$field`, `$quarantine_run_id`, `$payload_hash`; it does not
   own the shared `$workflow` / `$run_id` shell
 - `bioetl-alerts-slo`: `$workflow`, `$pipeline`, `$run_type`
@@ -118,11 +127,11 @@ Detached audit backend contract:
   `$pipeline_context` для обратного перехода и fail-close'ятся к
   `$provider=unknown`, если source scope не доказывает валидный provider label
   для target dashboard.
-- Для `bioetl-silver-reject-explorer` `$pipeline` также остаётся scoped
+- Для `CLI quarantine inspect` `$pipeline` также остаётся scoped
   single-select, потому что quarantine API fail-closed требует явный
   `pipeline` параметр.
 - Переменная `execution` не используется; `$quarantine_run_id` и
-  `$payload_hash` остаются только в `bioetl-silver-reject-explorer`.
+  `$payload_hash` остаются только в `CLI quarantine inspect`.
   `$run_id` в primary dashboards `0..5` сохраняется как HTTP-backed identity
   context для `ID`/details panels и не становится Prometheus label.
   Generic handoffs into `Silver Reject Explorer` MUST NOT map primary
@@ -317,7 +326,7 @@ Explorer health probe and monitoring setup docs for that reason.
 В `2. Runtime` cross-dashboard routing выполняется через полный top-level bus:
 `0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`,
 `4. Data Quality`, `5. Workflow`, `6. Alerts & SLO`, затем
-`Silver Reject Explorer`, `Explore Logs`, `Explore Traces`; текущий Runtime item
+`0..6` bus only (adjuncts removed); текущий Runtime item
 остаётся видимым disabled.
 
 Panel-level dashboard handoffs и `First Action` dashboard CTAs намеренно
@@ -399,7 +408,7 @@ Compact evidence ниже первого экрана:
      severity и первое действие.
   1. **L1 cause narrowing:** раскройте collapsed-by-default rows `Silver Structural / Gold Contract-Semantic Rejects` и `Validation Failures / Runtime Diagnostics / Trends`. В reject row сначала проверьте trust guard `Monitor: Silver Filter Reject Accounting Mismatch`, затем `Inspect: Top Silver Reject Reasons (Pareto)` / `Inspect: Top Silver Reject Fields`, и только после этого переходите к pipeline distribution через `Inspect: Silver Filter Rejects by Pipeline`.
   1. **L2 explorer:** откройте `Silver Reject Explorer` через top-level link в `4. Data Quality` для Silver structural record-level списка, выбора `reason_code/field/quarantine_run_id` и detail по `payload_hash`. Для Gold contract/semantic rejects используйте Gold reject panel в `4. Data Quality`; `FILTERED_OUT_SILVER` является legacy alias только для Silver structural rejects.
-  1. **L2 no-data gate:** считайте `0` rejects нормой только когда `Review: First Action / No-Data Semantics` подтверждает конкретный pipeline, доступный Quarantine Explorer и ненулевой Bronze denominator; zero-reject workflow run is a valid empty explorer state only after those checks pass. Zero matching rows остаются empty-result состоянием, а plugin errors, unsupported filter chains, `unknown` pipeline или `bronze_records=0` остаются UNKNOWN/error.
+  1. **L2 no-data gate:** считайте `0` rejects нормой только когда `Review: First Action / No-Data Semantics` подтверждает конкретный pipeline, доступный BioETL Ops HTTP и ненулевой Bronze denominator; zero-reject workflow run is a valid empty explorer state only after those checks pass. Zero matching rows остаются empty-result состоянием, а plugin errors, unsupported filter chains, `unknown` pipeline или `bronze_records=0` остаются UNKNOWN/error.
   1. Используйте quarantine CLI для action-операций (`replay/resolve/purge`) и финального подтверждения remediation.
 - Эти панели отвечают на вопросы:
   - растёт ли объём `filtered_out`;
@@ -413,7 +422,7 @@ Compact evidence ниже первого экрана:
   ```
 - Grafana в shipped конфигурации разделена по ролям:
   `1-4` dashboards дают summary/trend и bounded breakdown на Prometheus.
-  `Silver Reject Explorer` даёт row-level browsing через datasource `Quarantine Explorer`.
+  `Silver Reject Explorer` даёт row-level browsing через datasource `BioETL Ops HTTP`.
 - Record-level drilldown больше не ограничен только CLI.
   CLI остаётся execution surface для replay/resolve/purge.
 
@@ -499,7 +508,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
 Цель сценария: root-cause направление должно быть определено максимум за 2 клика без обязательной прокрутки по нечастым CTA.
 - `bioetl-runtime`: top-level links `0. Control Plane`, `1. Overview`,
   `3. Provider Health`, `4. Data Quality`, `5. Workflow`, `6. Alerts & SLO`,
-  `Silver Reject Explorer`, `Explore Logs`, `Explore Traces` дают явный
+  `0..6` bus only (adjuncts removed) дают явный
   routing path из L2 runtime triage. Cross-dashboard handoffs передают только
   target-scoped variables; forensic IDs в runtime dashboard запрещены.
 - `bioetl-control-plane-v1`: `0. Control Plane` отвечает на один
@@ -554,7 +563,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
   `BIOETL_OBSERVABILITY__TRACING_ENABLED=true`, если ожидаете Tempo evidence.
   Handoff в Explorer передаёт только bounded `$pipeline/$run_type`
   scope, а не generic `includeVars` leakage.
-- `bioetl-silver-reject-explorer`: dashboard bus links `0..6` plus global
+- `CLI quarantine inspect`: dashboard bus links `0..6` plus global
   adjunct links `Explore Logs` и `Explore Traces`; self-link to
   `Silver Reject Explorer` intentionally omitted. Main table поддерживает data
   links для self-drilldown по `payload_hash` и CLI handoff; self-drilldown
@@ -606,7 +615,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
   panel remains the sole first-screen workflow CTA and therefore exposes
   bounded `Open ...` dataLinks to neighboring dashboards while preserving the
   time range and resetting unsupported workflow-only state filters.
-- `bioetl-silver-reject-explorer`: `Review: First Action / No-Data Semantics`
+- `CLI quarantine inspect`: `Review: First Action / No-Data Semantics`
   now also carries bounded CTA row links (`Review total rejects`,
   `Review scoped summary`, `Open Data Quality`) so the first-screen forensic
   interpretation panel remains actionable without leaking `quarantine_run_id` or
@@ -764,7 +773,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
    или `bioetl_health_check_failures_total` в metrics endpoint.
 1. Пустой `$run_type`:
    нет метрик `bioetl_records_processed_total` для выбранного `$pipeline`.
-1. `bioetl-silver-reject-explorer` показывает plugin error или `No data`:
+1. `CLI quarantine inspect` показывает plugin error или `No data`:
    сначала различите zero matching rows и backend failure. Затем проверьте, что
    выбран конкретный `$pipeline` (не `All`) и что backend отвечает на
    `/ops/quarantine/filter-options?pipeline=<pipeline_name>`.

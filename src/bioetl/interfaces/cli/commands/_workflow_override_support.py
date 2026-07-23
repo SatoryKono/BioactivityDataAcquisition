@@ -77,69 +77,17 @@ def _optional_str_tuple(values: Mapping[str, object], key: str) -> tuple[str, ..
     return tuple(str(item) for item in value)
 
 
-def build_workflow_run_options_override(
-    *,
-    dry_run: bool,
-    run_type: str | None,
-    start_offset: int | None,
-    limit: int | None,
-    input_csv: str | None,
-    filter_column: str | None,
-    filter_field: str | None,
-    vacuum_after_run: bool | None,
-    vacuum_retention_days: int | None,
-    log_level: str | None,
-    ignore_yaml_filter: bool | None,
-    skip_gold: bool | None,
-    execution_context: str | None,
-    use_cached_bronze: bool | None,
-    cached_bronze_path: str | None,
-    cached_bronze_date: str | None,
-    exact_replay: bool | None,
-    required_persistence_profile: str | None,
-    replay_of_run_id: str | None,
-    replay_of_manifest_id: str | None,
-    enable_tracing: bool | None,
-    debug_export_enabled: bool | None,
-    debug_export_formats: tuple[str, ...],
-    debug_export_dir: str | None,
-) -> WorkflowRunOptionsConfig:
-    """Build one workflow override config from CLI flags."""
-    return WorkflowRunOptionsConfig(
-        dry_run=True if dry_run else None,
-        run_type=run_type,
-        start_offset=start_offset,
-        limit=limit,
-        input_csv=input_csv,
-        filter_column=filter_column,
-        filter_field=filter_field,
-        vacuum_after_run=vacuum_after_run,
-        vacuum_retention_days=vacuum_retention_days,
-        log_level=log_level,
-        ignore_yaml_filter=ignore_yaml_filter,
-        skip_gold=skip_gold,
-        execution_context=execution_context,
-        use_cached_bronze=use_cached_bronze,
-        cached_bronze_path=cached_bronze_path,
-        cached_bronze_date=cached_bronze_date,
-        exact_replay=exact_replay,
-        required_persistence_profile=required_persistence_profile,
-        replay_of_run_id=replay_of_run_id,
-        replay_of_manifest_id=replay_of_manifest_id,
-        enable_tracing=enable_tracing,
-        debug_export_enabled=debug_export_enabled,
-        debug_export_formats=debug_export_formats or None,
-        debug_export_dir=debug_export_dir,
-    )
-
-
 def build_workflow_run_options_override_from_mapping(
     values: Mapping[str, object],
 ) -> WorkflowRunOptionsConfig:
     """Build one workflow override config from a CLI/local variable mapping."""
     override_values = _build_override_values(values)
-    return build_workflow_run_options_override(
-        dry_run=bool(override_values["dry_run"]),
+    debug_export_formats = _optional_str_tuple(
+        override_values,
+        "debug_export_formats",
+    )
+    return WorkflowRunOptionsConfig(
+        dry_run=True if bool(override_values.get("dry_run")) else None,
         run_type=_optional_str(override_values, "run_type"),
         start_offset=_optional_int(override_values, "start_offset"),
         limit=_optional_int(override_values, "limit"),
@@ -173,12 +121,20 @@ def build_workflow_run_options_override_from_mapping(
             override_values,
             "debug_export_enabled",
         ),
-        debug_export_formats=_optional_str_tuple(
-            override_values,
-            "debug_export_formats",
-        ),
+        debug_export_formats=debug_export_formats or None,
         debug_export_dir=_optional_str(override_values, "debug_export_dir"),
     )
+
+
+def build_workflow_run_options_override(
+    **fields: object,
+) -> WorkflowRunOptionsConfig:
+    """Build one workflow override config from CLI flags (kwargs form).
+
+    Prefer ``build_workflow_run_options_override_from_mapping`` for large
+    call sites. This kwargs wrapper keeps the public API under Sonar S107.
+    """
+    return build_workflow_run_options_override_from_mapping(fields)
 
 
 def apply_cli_override_config(
@@ -210,32 +166,12 @@ def apply_cli_override_config(
 
 def apply_cli_overrides(
     config: WorkflowConfig,
-    *,
-    dry_run: bool,
-    run_type: str | None,
-    start_offset: int | None,
-    limit: int | None,
-    input_csv: str | None,
-    filter_column: str | None,
-    filter_field: str | None,
-    vacuum_after_run: bool | None,
-    vacuum_retention_days: int | None,
-    log_level: str | None,
-    ignore_yaml_filter: bool | None,
-    skip_gold: bool | None,
-    execution_context: str | None,
-    use_cached_bronze: bool | None,
-    cached_bronze_path: str | None,
-    cached_bronze_date: str | None,
-    exact_replay: bool | None,
-    required_persistence_profile: str | None,
-    replay_of_run_id: str | None,
-    replay_of_manifest_id: str | None,
-    enable_tracing: bool | None,
-    debug_export_enabled: bool | None,
-    debug_export_formats: tuple[str, ...],
-    debug_export_dir: str | None,
+    **cli_flags: object,
 ) -> WorkflowConfig:
-    """Apply CLI overrides to workflow defaults and pipeline steps."""
-    override = build_workflow_run_options_override_from_mapping(locals())
+    """Apply CLI overrides to workflow defaults and pipeline steps.
+
+    Accepts the same flag names as ``WorkflowRunOptionsConfig`` via kwargs so
+    the public signature stays under the Sonar S107 parameter budget.
+    """
+    override = build_workflow_run_options_override_from_mapping(cli_flags)
     return apply_cli_override_config(config, override)

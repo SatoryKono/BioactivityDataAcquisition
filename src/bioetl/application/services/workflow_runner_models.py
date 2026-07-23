@@ -37,6 +37,9 @@ class WorkflowRunExecutionResult:
     error_type: str | None = None
     error_message: str | None = None
     resumed: bool = False
+    run_report_json_path: str | None = None
+    run_report_markdown_path: str | None = None
+    run_report_error: str | None = None
 
     @property
     def is_success(self) -> bool:

@@ -99,6 +99,9 @@ def run_command(
     else:  # pragma: no cover - defensive guard for invalid local usage
         raise ValueError(f"Unsupported command runner: {spec.runner}")
 
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+    command = ensure_safe_cli_argv([str(token) for token in command])
     return subprocess.run(command, check=False).returncode
 
 

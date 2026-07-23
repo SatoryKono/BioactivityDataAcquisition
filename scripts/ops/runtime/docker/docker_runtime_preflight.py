@@ -64,6 +64,8 @@ def _repo_root() -> Path:
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
+    # Intentionally load the given path as-is (may be a pytest tmp fixture).
+    # Callers that need CLI path confinement must resolve before invoking.
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         raise ValueError(f"Expected a YAML mapping: {path}")

@@ -253,7 +253,10 @@ def _render_markdown(payload: dict[str, object], *, limit: int) -> str:
     return "\n".join(lines)
 
 
-def _write_text(path: Path, content: str) -> None:
+def _write_text(path: Path, content: str, *, root: Path | None = None) -> None:
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    path = resolve_output_path(path, root=root or REPO_ROOT)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
 

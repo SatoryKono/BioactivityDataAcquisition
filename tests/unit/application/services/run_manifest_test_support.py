@@ -224,13 +224,15 @@ def expected_canonical_execution_identity(
         dq_contract_compatibility_hash=(
             manifest.code_provenance.dq_contract_compatibility_hash
         ),
-        contract_ref=manifest.code_provenance.contract_ref,
-        contract_version=manifest.code_provenance.contract_version,
-        normalization_profile_ref=manifest.code_provenance.normalization_profile_ref,
-        normalization_profile_version=(
-            manifest.code_provenance.normalization_profile_version
+        contract=(
+            manifest.code_provenance.contract_ref,
+            manifest.code_provenance.contract_version,
         ),
-        normalization_profile_hash=manifest.code_provenance.normalization_profile_hash,
+        normalization_profile=(
+            manifest.code_provenance.normalization_profile_ref,
+            manifest.code_provenance.normalization_profile_version,
+            manifest.code_provenance.normalization_profile_hash,
+        ),
         effective_config_artifact_id=(
             manifest.code_provenance.effective_config_artifact_id
         ),

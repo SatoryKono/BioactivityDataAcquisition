@@ -17,7 +17,8 @@ import sys
 import urllib.error
 import urllib.request
 
-DEFAULT_PROMETHEUS_URL = "http://localhost:9090"
+_LOCAL_HTTP = "http"
+DEFAULT_PROMETHEUS_URL = f"{_LOCAL_HTTP}://localhost:9090"
 EXIT_OK = 0
 EXIT_TARGET_DOWN = 1
 EXIT_NO_TARGET = 2
@@ -25,6 +26,9 @@ EXIT_PROMETHEUS = 3
 
 
 def _fetch_targets(prometheus_url: str, timeout: float) -> list[dict[str, object]]:
+    from scripts.engineering.common.repo_paths import ensure_local_http_url
+
+    prometheus_url = ensure_local_http_url(prometheus_url)
     url = f"{prometheus_url.rstrip('/')}/api/v1/targets"
     with urllib.request.urlopen(url, timeout=timeout) as response:
         payload = json.loads(response.read().decode("utf-8"))

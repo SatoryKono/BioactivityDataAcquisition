@@ -794,6 +794,44 @@ async def test_processed_records_distinguishes_empty_and_backend_unavailable(
 
 
 @pytest.mark.asyncio
+async def test_pipeline_run_report_route_returns_versioned_payload(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    host = _RoutingHost()
+    writer = _Writer()
+    payload = {"schema_version": "pipeline_run_report_v1", "identity": {}}
+    monkeypatch.setattr(
+        observability_routing,
+        "load_pipeline_run_report_payload",
+        lambda **_kwargs: payload,
+    )
+
+    await observability_routing.dispatch_observability_request(
+        host,
+        writer=writer,
+        path="/ops/observability/pipeline-run-report",
+        query={"pipeline": "chembl_activity", "run_id": "run-1"},
+    )
+
+    assert host.sent[-1] == ("payload", 200, payload)
+
+
+@pytest.mark.asyncio
+async def test_pipeline_run_report_route_requires_pipeline_selector() -> None:
+    host = _RoutingHost()
+    writer = _Writer()
+
+    await observability_routing.dispatch_observability_request(
+        host,
+        writer=writer,
+        path="/ops/observability/pipeline-run-report",
+        query={"run_id": "run-1"},
+    )
+
+    assert host.sent[-1] == ("text", 400, "Missing required parameter: pipeline")
+
+
+@pytest.mark.asyncio
 async def test_http_mixin_processes_requests_responses_and_close_errors() -> None:
     host = _HTTPHost()
     writer = _Writer()

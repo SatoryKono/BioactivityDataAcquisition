@@ -539,6 +539,9 @@ def main() -> int:
         if not output_path.exists():
             print(f"[report-vcr-metadata-catalog] missing artifact: {output_path}")
             return 1
+        from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+        output_path = resolve_output_path(output_path, root=REPO_ROOT)
         actual = output_path.read_text(encoding="utf-8")
         if actual != rendered:
             print(
@@ -549,6 +552,9 @@ def main() -> int:
         return 0
 
     if args.update or not output_path.exists():
+        from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+        output_path = resolve_output_path(output_path, root=REPO_ROOT)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(rendered, encoding="utf-8")
         print(f"[report-vcr-metadata-catalog] wrote {output_path}")

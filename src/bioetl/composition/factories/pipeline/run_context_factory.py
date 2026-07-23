@@ -88,9 +88,7 @@ class RunContextFactory:
         yaml_config: PipelineYamlConfig,
         manifest_id: str | None = None,
         execution_fingerprint: str | None = None,
-        config_hash: str | None = None,
-        resolved_config_hash: str | None = None,
-        effective_config_hash: str | None = None,
+        config_hashes: tuple[str | None, str | None, str | None] = (None, None, None),
         dq_contract_compatibility_hash: str | None = None,
         effective_config_artifact_id: str | None = None,
         exact_replay: bool | None = None,
@@ -98,7 +96,12 @@ class RunContextFactory:
         replay_of_manifest_id: str | None = None,
         input_snapshot_fingerprint: str | None = None,
     ) -> RunContext:
-        """Create metadata ``RunContext`` from runtime and resolved YAML."""
+        """Create metadata ``RunContext`` from runtime and resolved YAML.
+
+        ``config_hashes`` is ``(config_hash, resolved_config_hash,
+        effective_config_hash)`` packed under the Sonar S107 budget.
+        """
+        config_hash, resolved_config_hash, effective_config_hash = config_hashes
         entity = self.entity_type_extractor(self.pipeline_name) or self.pipeline_name
         strict_contract_identity = runtime_requires_strict_contract_identity(runtime)
         contract_identity = resolve_contract_identity_for_runtime(

@@ -48,9 +48,9 @@ def _write_text_atomically(
     path: Path, text: str, *, root: Path | None = None
 ) -> None:
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_cli_path
+        from scripts.engineering.common.repo_paths import resolve_output_path
 
-        path = resolve_cli_path(path, root=root)
+        path = resolve_output_path(path, root=root)
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp_path = path.with_name(f".{path.name}.{os.getpid()}.tmp")
     try:
@@ -759,9 +759,9 @@ def build_module_coverage_inventory(
 
 
 def _load_module_coverage_gates(repo_root: Path, gates_config: Path) -> dict[str, Any]:
-    from scripts.engineering.common.repo_paths import resolve_cli_path
+    from scripts.engineering.common.repo_paths import resolve_output_path
 
-    path = resolve_cli_path(gates_config, root=repo_root)
+    path = resolve_output_path(gates_config, root=repo_root)
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         raise ValueError(f"Invalid module coverage gates config: {path}")
@@ -1165,9 +1165,9 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     if args.check:
-        from scripts.engineering.common.repo_paths import resolve_cli_path
+        from scripts.engineering.common.repo_paths import resolve_output_path
 
-        json_out = resolve_cli_path(args.json_out, root=repo_root)
+        json_out = resolve_output_path(args.json_out, root=repo_root)
         if not json_out.exists():
             print(f"[module-coverage-inventory] missing artifact: {json_out}")
             return 1

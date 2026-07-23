@@ -292,6 +292,9 @@ def load_manifest(manifest_path: Path) -> ChecksumManifest | None:
         return None
 
     try:
+        from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+        manifest_path = resolve_output_path(manifest_path, root=REPO_ROOT)
         with open(manifest_path) as f:
             data = json.load(f)
         return ChecksumManifest.from_dict(data)
@@ -307,6 +310,9 @@ def save_manifest(manifest: ChecksumManifest, manifest_path: Path) -> None:
         manifest: Manifest to save.
         manifest_path: Output path.
     """
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    manifest_path = resolve_output_path(manifest_path, root=REPO_ROOT)
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
 
     with open(manifest_path, "w") as f:

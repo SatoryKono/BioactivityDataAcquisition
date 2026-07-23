@@ -404,7 +404,7 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
 
     identity = panels["ID"]
     identity_description = str(identity.get("description", "")).lower()
-    assert identity.get("datasource") == "Quarantine Explorer"
+    assert identity.get("datasource") == "BioETL Ops HTTP"
     identity_target = identity.get("targets", [])[0]
     assert identity_target.get("format") == "table"
     assert identity_target.get("parser") == "backend"
@@ -422,7 +422,7 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
     processed = panels["Processed Records"]
     processed_expressions = get_panel_expressions({"panels": [processed]})
     processed_description = str(processed.get("description", "")).lower()
-    assert processed.get("datasource") == "Quarantine Explorer"
+    assert processed.get("datasource") == "BioETL Ops HTTP"
     assert processed_expressions == []
     processed_target = processed.get("targets", [])[0]
     assert processed_target.get("format") == "table"
@@ -466,7 +466,7 @@ def test_control_plane_identity_evidence_uses_http_not_prometheus_labels() -> No
     ]
 
     for panel in identity_panels:
-        assert panel.get("datasource") == "Quarantine Explorer"
+        assert panel.get("datasource") == "BioETL Ops HTTP"
         assert get_panel_expressions({"panels": [panel]}) == []
         target = panel.get("targets", [])[0]
         assert "/ops/control-plane/identity-evidence?" in target.get("url", "")
@@ -716,13 +716,13 @@ def test_silver_reject_explorer_custom_no_value_copy_is_intentional_http_forensi
     )
     expected_panels = {
         "Monitor Filtered Records Total": (
-            "Verify Quarantine Explorer before treating this as OK.",
+            "Verify BioETL Ops HTTP before treating this as OK.",
         ),
         "Track Reject Rate vs Bronze": (
             "Treat as UNKNOWN until Bronze denominator and quarantine API are confirmed.",
         ),
         "Inspect Run Scope Summary": (
-            "Check pipeline selection and Quarantine Explorer availability.",
+            "Check pipeline selection and BioETL Ops HTTP availability.",
         ),
         "Inspect Filtered Records Table": (
             "VALID EMPTY",
@@ -975,6 +975,12 @@ def test_dq_first_screen_panels_expose_actionable_datalinks() -> None:
         "Monitor DQ Threshold State",
         "Inspect DQ Current Reasons",
     }
+    # Silver Reject Explorer handoffs were removed; keep actionability on the
+    # status/threshold cards while the reasons table remains diagnostic-only.
+    panels_requiring_links = {
+        "Monitor DQ Current Status",
+        "Monitor DQ Threshold State",
+    }
     panels = {
         panel.get("title"): panel
         for panel in get_dashboard_panels(dashboard)
@@ -982,7 +988,8 @@ def test_dq_first_screen_panels_expose_actionable_datalinks() -> None:
     }
     assert set(panels) == expected_panels
 
-    for panel_title, panel in panels.items():
+    for panel_title in panels_requiring_links:
+        panel = panels[panel_title]
         data_links = panel.get("options", {}).get("dataLinks", [])
         assert data_links, f"{panel_title} must expose at least one actionable dataLink"
         assert all(link.get("title") for link in data_links), (
@@ -991,6 +998,13 @@ def test_dq_first_screen_panels_expose_actionable_datalinks() -> None:
         assert all(link.get("url") for link in data_links), (
             f"{panel_title} dataLinks must target a dashboard or runbook URL"
         )
+
+    reasons_links = (
+        panels["Inspect DQ Current Reasons"].get("options", {}).get("dataLinks", [])
+    )
+    assert not any(
+        "Silver Reject Explorer" in str(link.get("title", "")) for link in reasons_links
+    )
 
 
 def test_dq_threshold_state_panel_uses_bounded_reason_severity_with_ok_fallback() -> (
@@ -1599,6 +1613,11 @@ def test_dq_problem_panels_expose_actionable_datalinks() -> None:
         "Time Range · Worst Freshness Age (hours; SLA 24/72)",
         "Track: Silver Filter Rejects in Range",
     }
+    # Silver Reject Explorer handoffs were removed; reject accounting stays on-panel.
+    panels_requiring_links = {
+        "Monitor: Worst-Entity DQ Score",
+        "Time Range · Worst Freshness Age (hours; SLA 24/72)",
+    }
     panels = {
         panel.get("title"): panel
         for panel in get_dashboard_panels(dashboard)
@@ -1606,15 +1625,21 @@ def test_dq_problem_panels_expose_actionable_datalinks() -> None:
     }
     assert set(panels) == expected_panels
 
-    for panel_title, panel in panels.items():
+    for panel_title in panels_requiring_links:
+        panel = panels[panel_title]
         data_links = panel.get("options", {}).get("dataLinks", [])
         assert data_links, f"{panel_title} must expose at least one actionable dataLink"
         assert all(
             str(link.get("title", "")).startswith("Open ") for link in data_links
         ), f"{panel_title} must use canonical Open ... dataLink titles"
 
-    assert not panels["Track: Silver Filter Rejects in Range"].get("links"), (
-        "Track: Silver Filter Rejects in Range should use options.dataLinks, not legacy panel links"
+    reject_panel = panels["Track: Silver Filter Rejects in Range"]
+    reject_links = reject_panel.get("options", {}).get("dataLinks", [])
+    assert not any(
+        "Silver Reject Explorer" in str(link.get("title", "")) for link in reject_links
+    )
+    assert not reject_panel.get("links"), (
+        "Track: Silver Filter Rejects in Range should not use legacy panel links"
     )
 
 
@@ -1816,7 +1841,7 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     }
     processed = panels["Processed Records"]
     targets = processed.get("targets", [])
-    assert processed.get("datasource") == "Quarantine Explorer"
+    assert processed.get("datasource") == "BioETL Ops HTTP"
     assert len(targets) == 1
     assert targets[0] == {
         "format": "table",

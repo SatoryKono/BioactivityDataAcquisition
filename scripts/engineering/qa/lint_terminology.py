@@ -346,6 +346,9 @@ def _collect_context_sensitive_violations(
 def _read_file_content(filepath: Path) -> str | None:
     """Read file content while preserving stderr warning behavior."""
     try:
+        from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_cli_path
+
+        filepath = resolve_cli_path(filepath, root=REPO_ROOT)
         return filepath.read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError) as exc:
         print(f"Warning: Could not read {filepath}: {exc}", file=sys.stderr)

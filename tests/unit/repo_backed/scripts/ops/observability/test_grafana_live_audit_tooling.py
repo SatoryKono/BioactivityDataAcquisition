@@ -48,9 +48,7 @@ def test_live_audit_reviewed_specs_cover_semantically_sensitive_panels() -> None
     )
     assert covered[("bioetl-dq-v2", 9402)] == "ID"
     assert covered[("bioetl-dq-v2", 9403)] == "Processed Records"
-    assert (
-        covered[("bioetl-silver-reject-explorer", 3)] == "Track Reject Rate vs Bronze"
-    )
+    assert ("bioetl-silver-reject-explorer", 3) not in covered
     assert covered[("bioetl-overview-v2", 9301)] == "Processed Records"
     assert covered[("bioetl-runtime", 9403)] == "Processed Records"
     assert covered[("bioetl-provider-health-v2", 9403)] == "Processed Records"
@@ -728,6 +726,16 @@ def test_live_audit_loki_fixtures_execute_positive_and_empty_paths(
     )
     monkeypatch.setattr(audit_subject, "_fetch_text", lambda *_args, **_kwargs: "ready")
 
+    # Shipped runtime Loki panels were removed; drive audit path via synthetic
+    # panel targets so fixture payloads remain exerciseable.
+    synthetic_panel = {
+        "targets": [
+            {
+                "refId": "A",
+                "expr": '{job="bioetl"} | json',
+            }
+        ]
+    }
     positive_cases = (("warning", 250), ("warning", 257), ("malformed", 251))
     for kind, panel_id in positive_cases:
         spec = audit_subject.PanelAuditSpec(
@@ -737,8 +745,8 @@ def test_live_audit_loki_fixtures_execute_positive_and_empty_paths(
             source_kind="loki",
             semantic_kind="loki_query",
             target_ref_id="A",
+            required=False,
         )
-        panel = audit_subject._find_panel(spec)
         panel_result = fixtures[kind]["panel_results"][str(panel_id)]
         monkeypatch.setattr(
             audit_subject,
@@ -749,7 +757,7 @@ def test_live_audit_loki_fixtures_execute_positive_and_empty_paths(
             },
         )
 
-        result = audit_subject._audit_loki_panel(spec, panel, config)
+        result = audit_subject._audit_loki_panel(spec, synthetic_panel, config)
 
         assert result.status == "ok"
         assert result.classification == "nonempty_result"
@@ -762,8 +770,8 @@ def test_live_audit_loki_fixtures_execute_positive_and_empty_paths(
             source_kind="loki",
             semantic_kind="loki_query",
             target_ref_id="A",
+            required=False,
         )
-        panel = audit_subject._find_panel(spec)
         panel_result = fixtures["empty"]["panel_results"][str(panel_id)]
         monkeypatch.setattr(
             audit_subject,
@@ -774,7 +782,7 @@ def test_live_audit_loki_fixtures_execute_positive_and_empty_paths(
             },
         )
 
-        result = audit_subject._audit_loki_panel(spec, panel, config)
+        result = audit_subject._audit_loki_panel(spec, synthetic_panel, config)
 
         assert result.status == "ok"
         assert result.classification == "expected_empty"
@@ -782,17 +790,16 @@ def test_live_audit_loki_fixtures_execute_positive_and_empty_paths(
 
 def test_live_audit_effective_specs_include_generated_loki_and_tempo_coverage() -> None:
     specs = audit_subject.effective_panel_specs()
-    keys = {
-        (spec.dashboard_uid, spec.panel_id, spec.source_kind, spec.target_ref_id)
-        for spec in specs
-    }
+    source_kinds = {spec.source_kind for spec in specs}
 
-    assert ("bioetl-runtime", 250, "loki", "A") in keys
-    assert any(
-        spec.source_kind == "tempo" and spec.dashboard_uid == "bioetl-runtime"
+    # Discovery always covers Prometheus/HTTP. Loki/Tempo appear only when the
+    # shipped dashboard JSON still contains those datasources.
+    assert {"prometheus", "http"}.issubset(source_kinds)
+    assert len(specs) >= len(audit_subject.REVIEWED_PANEL_SPECS)
+    assert not any(
+        spec.dashboard_uid == "bioetl-runtime" and spec.source_kind == "loki"
         for spec in specs
     )
-    assert len(specs) > len(audit_subject.REVIEWED_PANEL_SPECS)
 
 
 def test_live_audit_requires_curated_runtime_loki_panels() -> None:
@@ -804,7 +811,8 @@ def test_live_audit_requires_curated_runtime_loki_panels() -> None:
         and spec.required
     }
 
-    assert required_loki_panel_ids == {250, 251, 257}
+    # Runtime Loki log-hygiene panels were removed from the shipped dashboard.
+    assert required_loki_panel_ids == set()
 
 
 def test_live_audit_required_reviewed_specs_use_concrete_target_refs() -> None:
@@ -843,13 +851,10 @@ def test_alerts_slo_dashboard_is_first_class_shipped_surface() -> None:
 def test_silver_reject_explorer_keeps_shared_shell_context_outside_forensic_scope() -> (
     None
 ):
-    dashboard = json.loads(
-        if not Path("grafana/dashboards/bioetl-silver-reject-explorer.json").exists():
-            pytest.skip("Silver Reject Explorer removed 2026-07-23")
-        Path("grafana/dashboards/bioetl-silver-reject-explorer.json") if Path("grafana/dashboards/bioetl-silver-reject-explorer.json").exists() else (_ for _ in ()).throw(pytest.skip.Exception("Silver Reject Explorer removed 2026-07-23")).read_text(
-            encoding="utf-8"
-        )
-    )
+    dashboard_path = Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
+    if not dashboard_path.exists():
+        pytest.skip("Silver Reject Explorer removed 2026-07-23")
+    dashboard = json.loads(dashboard_path.read_text(encoding="utf-8"))
     variables = {
         item.get("name") for item in dashboard.get("templating", {}).get("list", [])
     }
@@ -913,8 +918,17 @@ def test_runtime_log_hygiene_trend_uses_aggregated_loki_range_queries() -> None:
         return result
 
     panel = next(
-        panel for panel in walk_panels(dashboard["panels"]) if panel.get("id") == 258
+        (
+            item
+            for item in walk_panels(dashboard["panels"])
+            if item.get("id") == 258
+        ),
+        None,
     )
+    if panel is None:
+        pytest.skip(
+            "Runtime Loki log-hygiene trend panel (id=258) removed from shipped dashboard"
+        )
     expressions = {target["refId"]: target["expr"] for target in panel["targets"]}
 
     assert expressions["A"].startswith("sum(count_over_time(")

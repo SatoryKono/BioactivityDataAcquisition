@@ -28,7 +28,7 @@
       },
       "id": 1000,
       "options": {
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:11px\"><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">0. Control Plane</a><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">1. Overview</a><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=$stage&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">2. Runtime</a><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id\">3. Provider Health</a><span aria-current=\"page\" style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#fff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default\">4. Data Quality</span><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}&amp;var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id\">5. Workflow</a><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-alerts-slo/bioetl-alerts-slo?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\">6. Alerts &amp; SLO</a><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\">Silver Reject Explorer</a><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&amp;to=${__to}&amp;query=%7Bjob%3D%22bioetl%22%7D\">Explore Logs</a><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/a/grafana-exploretraces-app/explore?actionView=search&amp;from=${__from}&amp;to=${__to}&amp;var-ds=tempo&amp;var-groupBy=resource.service.name&amp;queryType=traceqlSearch&amp;query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D%20%22${run_type}%22%20%7D\">Explore Traces</a></div>",
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:11px\"><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">0. Control Plane</a><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">1. Overview</a><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=$stage&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">2. Runtime</a><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id\">3. Provider Health</a><span aria-current=\"page\" style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#fff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default\">4. Data Quality</span><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}&amp;var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id\">5. Workflow</a><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-alerts-slo/bioetl-alerts-slo?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\">6. Alerts &amp; SLO</a></div>",
         "mode": "html"
       },
       "title": "Review Dashboard Navigation",
@@ -73,27 +73,6 @@
           "targetBlank": false,
           "includeVars": false,
           "tooltip": "Open the alert surface in the same tab. Global alerts remain explicitly badged and are not attributed to the selected pipeline."
-        },
-        {
-          "title": "Silver Reject Explorer",
-          "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
-          "targetBlank": false,
-          "includeVars": false,
-          "tooltip": "Cross-scope handoff: bounded pipeline/run_type explorer scope. Reset scope: record-level filters remain explorer-owned. Opens in the same tab."
-        },
-        {
-          "title": "Explore Logs",
-          "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D",
-          "targetBlank": false,
-          "includeVars": false,
-          "tooltip": "Optional tracing profile adjunct evidence. Zero lines can legitimately mean shipping is disabled or no BioETL streams exist; refine in Explore."
-        },
-        {
-          "title": "Explore Traces",
-          "url": "/a/grafana-exploretraces-app/explore?actionView=search&from=${__from}&to=${__to}&var-ds=tempo&var-groupBy=resource.service.name&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D%20%22${run_type}%22%20%7D",
-          "targetBlank": false,
-          "includeVars": false,
-          "tooltip": "Available only for traced runs. Enable the optional tracing profile with --tracing; this is adjunct evidence, not a headline verdict."
         }
       ]
     },
@@ -234,8 +213,8 @@
         "x": 0,
         "y": 7
       },
-      "datasource": "Quarantine Explorer",
-      "description": "Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. No data/datasource errors on this HTTP-backed card mean the Quarantine Explorer/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty.",
+      "datasource": "BioETL Ops HTTP",
+      "description": "Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -249,7 +228,7 @@
           "noValue": "Not resolved — no identity rows for the selected run/scope. Check backend health (/health/live), then select or reset run_id; this is not a valid empty run.",
           "links": [
             {
-              "title": "Check Quarantine Explorer health",
+              "title": "Check BioETL Ops HTTP health",
               "url": "http://localhost:8081/health/live",
               "targetBlank": true
             },
@@ -359,8 +338,8 @@
         "x": 10,
         "y": 7
       },
-      "datasource": "Quarantine Explorer",
-      "description": "Current Bronze/Silver/Gold stage/outcome accounting evidence for the shared pipeline/run_type context. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the Quarantine Explorer/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty.",
+      "datasource": "BioETL Ops HTTP",
+      "description": "Current Bronze/Silver/Gold stage/outcome accounting evidence for the shared pipeline/run_type context. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -375,7 +354,7 @@
           "noValue": "Not resolved — no processed-record rows. Check backend health and selector scope; backend unavailable is not a valid zero-record state.",
           "links": [
             {
-              "title": "Check Quarantine Explorer health",
+              "title": "Check BioETL Ops HTTP health",
               "url": "http://localhost:8081/health/live",
               "targetBlank": true
             },
@@ -837,12 +816,6 @@
           "url": "/d/bioetl-dq-v2/bioetl-dq-v2?viewPanel=9102&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}&var-workflow=$workflow",
           "targetBlank": false,
           "includeVars": false
-        },
-        {
-          "title": "Open Silver Reject Explorer",
-          "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
-          "targetBlank": false,
-          "includeVars": false
         }
       ],
       "pluginVersion": "12.2.0",
@@ -1102,14 +1075,6 @@
       "id": 9102,
       "options": {
         "cellHeight": "sm",
-        "dataLinks": [
-          {
-            "targetBlank": false,
-            "title": "Open Silver Reject Explorer",
-            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&${__url_time_range}",
-            "includeVars": false
-          }
-        ],
         "footer": {
           "countRows": false,
           "fields": "",
@@ -1440,12 +1405,6 @@
             "targetBlank": true,
             "title": "Open DQ Investigation Runbook",
             "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/dq-failure-investigation.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
-          },
-          {
-            "targetBlank": false,
-            "title": "Open Silver Reject Explorer",
-            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&${__url_time_range}",
-            "includeVars": false
           }
         ],
         "graphMode": "none",
@@ -1525,14 +1484,6 @@
       "id": 117,
       "options": {
         "colorMode": "value",
-        "dataLinks": [
-          {
-            "targetBlank": false,
-            "title": "Open Silver Reject Explorer",
-            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&${__url_time_range}",
-            "includeVars": false
-          }
-        ],
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
@@ -1612,14 +1563,6 @@
       "id": 154,
       "options": {
         "colorMode": "value",
-        "dataLinks": [
-          {
-            "targetBlank": false,
-            "title": "Open Silver Reject Explorer",
-            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&${__url_time_range}",
-            "includeVars": false
-          }
-        ],
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
@@ -1720,12 +1663,6 @@
             "colorMode": "backgroundSolid",
             "dataLinks": [
               {
-                "targetBlank": false,
-                "title": "Open Silver Reject Explorer",
-                "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&${__url_time_range}",
-                "includeVars": false
-              },
-              {
                 "targetBlank": true,
                 "title": "Open Traceability Signal Ownership Runbook",
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/traceability-signal-ownership.md?pipeline=${pipeline:queryparam}&${__url_time_range}"
@@ -1806,14 +1743,6 @@
           },
           "id": 121,
           "options": {
-            "dataLinks": [
-              {
-                "targetBlank": false,
-                "title": "Open Silver Reject Explorer for this reason",
-                "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&var-reason_code=${__series.name}&${__url_time_range}",
-                "includeVars": false
-              }
-            ],
             "displayMode": "gradient",
             "orientation": "horizontal",
             "reduceOptions": {
@@ -1891,14 +1820,6 @@
           },
           "id": 122,
           "options": {
-            "dataLinks": [
-              {
-                "targetBlank": false,
-                "title": "Open Silver Reject Explorer for this field",
-                "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&var-field=${__series.name}&${__url_time_range}",
-                "includeVars": false
-              }
-            ],
             "displayMode": "gradient",
             "orientation": "horizontal",
             "reduceOptions": {
@@ -1977,14 +1898,6 @@
           },
           "id": 118,
           "options": {
-            "dataLinks": [
-              {
-                "targetBlank": false,
-                "title": "Open Silver Reject Explorer for this pipeline scope",
-                "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${__series.name}&var-run_type=${run_type:queryparam}&${__url_time_range}",
-                "includeVars": false
-              }
-            ],
             "displayMode": "gradient",
             "orientation": "horizontal",
             "reduceOptions": {
@@ -2175,22 +2088,7 @@
             "tooltip": {
               "mode": "multi",
               "sort": "desc"
-            },
-            "dataLinks": [
-              {
-                "title": "Open Logs in Loki Explore (tracing profile)",
-                "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
-              },
-              {
-                "title": "Open Traces in Tempo Explore (tracing profile)",
-                "url": "/a/grafana-exploretraces-app/explore?actionView=search&from=${__from}&to=${__to}&var-ds=tempo&var-groupBy=resource.service.name&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%7D"
-              },
-              {
-                "title": "Open Logs (Loki, contextual scope marker, tracing)",
-                "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D%20%7C%20json%20%7C%20scope_marker%3D%22dashboard_context%22",
-                "targetBlank": true
-              }
-            ]
+            }
           },
           "targets": [
             {
@@ -3235,7 +3133,7 @@
           "text": "-",
           "value": "-"
         },
-        "datasource": "Quarantine Explorer",
+        "datasource": "BioETL Ops HTTP",
         "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}",
         "description": "Shared operator identity context sourced from the local control-plane run-manifest catalog. The selector defaults to - and affects only local HTTP identity panels; it MUST NOT be used in Prometheus labels or cross-dashboard handoffs.",
         "hide": 0,

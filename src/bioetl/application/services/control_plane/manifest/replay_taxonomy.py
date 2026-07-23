@@ -12,89 +12,16 @@ from bioetl.application.services.control_plane.manifest.replay_taxonomy_fields i
 
 
 def build_replay_taxonomy_projection(
-    *,
-    replay_capability: object,
-    requested_exact_replay: object,
-    exact_replay_support_boundary: object,
-    replay_family_contract: object,
-    replay_support_state: object,
-    post_capture_replayable_parent_supported: object,
-    post_capture_replayable_parent_boundary: object,
-    historical_live_run_upgrade_policy: object,
-    historical_live_run_upgrade_boundary: object,
-    historical_live_run_upgrade_reason: object,
-    broader_historical_exact_replay_policy: object,
-    broader_historical_exact_replay_boundary: object,
-    broader_historical_exact_replay_reason: object,
-    broader_historical_exact_replay_state: object,
-    historical_live_run_upgrade_state: object,
-    replay_occurrence_kind: object,
-    source_posture: object,
-    input_snapshot_missing_source_refs: object,
-    replay_capability_reason: object,
-    replay_mode: object,
-    continuation_mode: object,
-    operator_replay_mode: object,
-    replay_resume_rebuild_verdict: object,
-    replay_next_action: object,
-    exact_replay_eligible: object,
-    exact_replay_blockers: object,
-    replay_readiness_verdict: object,
-    append_mode_semantic_sinks: object,
-    resume_contract: object,
-    resume_diagnostics: object,
-    lineage_closure_boundary: object = None,
+    **fields: object,
 ) -> dict[str, object]:
-    """Build the canonical replay-taxonomy projection payload."""
-    return resolve_replay_taxonomy_projection(
-        {
-            "replay_capability": replay_capability,
-            "requested_exact_replay": requested_exact_replay,
-            "exact_replay_support_boundary": exact_replay_support_boundary,
-            "replay_family_contract": replay_family_contract,
-            "replay_support_state": replay_support_state,
-            "post_capture_replayable_parent_supported": (
-                post_capture_replayable_parent_supported
-            ),
-            "post_capture_replayable_parent_boundary": (
-                post_capture_replayable_parent_boundary
-            ),
-            "historical_live_run_upgrade_policy": historical_live_run_upgrade_policy,
-            "historical_live_run_upgrade_boundary": (
-                historical_live_run_upgrade_boundary
-            ),
-            "historical_live_run_upgrade_reason": historical_live_run_upgrade_reason,
-            "broader_historical_exact_replay_policy": (
-                broader_historical_exact_replay_policy
-            ),
-            "broader_historical_exact_replay_boundary": (
-                broader_historical_exact_replay_boundary
-            ),
-            "broader_historical_exact_replay_reason": (
-                broader_historical_exact_replay_reason
-            ),
-            "broader_historical_exact_replay_state": (
-                broader_historical_exact_replay_state
-            ),
-            "historical_live_run_upgrade_state": historical_live_run_upgrade_state,
-            "replay_occurrence_kind": replay_occurrence_kind,
-            "source_posture": source_posture,
-            "input_snapshot_missing_source_refs": input_snapshot_missing_source_refs,
-            "replay_capability_reason": replay_capability_reason,
-            "replay_mode": replay_mode,
-            "continuation_mode": continuation_mode,
-            "operator_replay_mode": operator_replay_mode,
-            "replay_resume_rebuild_verdict": replay_resume_rebuild_verdict,
-            "replay_next_action": replay_next_action,
-            "exact_replay_eligible": exact_replay_eligible,
-            "exact_replay_blockers": exact_replay_blockers,
-            "replay_readiness_verdict": replay_readiness_verdict,
-            "append_mode_semantic_sinks": append_mode_semantic_sinks,
-            "resume_contract": resume_contract,
-            "resume_diagnostics": resume_diagnostics,
-            "lineage_closure_boundary": lineage_closure_boundary,
-        }
-    )
+    """Build the canonical replay-taxonomy projection payload.
+
+    Accepts REPLAY_TAXONOMY_FIELDS as kwargs so the public surface stays under
+    the Sonar S107 parameter budget. Prefer ``resolve_replay_taxonomy_projection``
+    with a mapping for bulk assembly.
+    """
+    return resolve_replay_taxonomy_projection(fields)
+
 
 
 def resolve_replay_taxonomy_projection(

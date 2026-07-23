@@ -45,6 +45,9 @@ def _run(
     env: Mapping[str, str] | None = None,
     timeout: float = 600.0,
 ) -> subprocess.CompletedProcess[str]:
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+    command = ensure_safe_cli_argv([str(token) for token in command])
     print("+", " ".join(command), flush=True)
     return subprocess.run(
         command,

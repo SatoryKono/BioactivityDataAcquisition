@@ -763,8 +763,10 @@ def _run_phase_command(
     started_at = _utc_now()
     timed_out = False
     try:
+        from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
         completed = subprocess.run(  # nosec B603
-            command,
+            ensure_safe_cli_argv([str(token) for token in command]),
             cwd=phase_root if isolated_workdir else repo_root,
             env=env,
             capture_output=True,

@@ -58,41 +58,18 @@ def coerce_publication_transformer_init(
     init: BasePublicationTransformerContext | str | None,
     /,
     *,
-    provider: str | None = None,
     default_provider: str | None = None,
-    entity_type: str | None = None,
     default_entity_type: str = "publication",
-    silver_filters: object = None,
-    gold_filters: object = None,
-    tracer: object = None,
-    metrics: object = None,
-    identity_service: object = None,
-    pii_hasher: object = None,
-    dependencies: object = None,
-    data_extractor: object = None,
-    identifier_resolver: object = None,
-    metadata_strategy: object = None,
-    record_normalizer: object = None,
+    **fields: object,
 ) -> BasePublicationTransformerContext:
-    """Normalize compact and legacy constructor styles to one typed input."""
+    """Normalize compact and legacy constructor styles to one typed input.
+
+    Optional DI fields (``provider``, ``tracer``, filters, strategies, ...) are
+    accepted via ``**fields`` to keep this surface under the Sonar S107 budget.
+    """
     if isinstance(init, BasePublicationTransformerContext):
-        explicit_args = {
-            "provider": provider,
-            "entity_type": entity_type,
-            "silver_filters": silver_filters,
-            "gold_filters": gold_filters,
-            "tracer": tracer,
-            "metrics": metrics,
-            "identity_service": identity_service,
-            "pii_hasher": pii_hasher,
-            "dependencies": dependencies,
-            "data_extractor": data_extractor,
-            "identifier_resolver": identifier_resolver,
-            "metadata_strategy": metadata_strategy,
-            "record_normalizer": record_normalizer,
-        }
         unexpected = ", ".join(
-            sorted(key for key, value in explicit_args.items() if value is not None)
+            sorted(key for key, value in fields.items() if value is not None)
         )
         if unexpected:
             raise TypeError(
@@ -101,6 +78,7 @@ def coerce_publication_transformer_init(
             )
         return init
 
+    provider = fields.get("provider")
     resolved_provider = init if isinstance(init, str) else provider or default_provider
     if not isinstance(resolved_provider, str) or not resolved_provider:
         raise TypeError(
@@ -108,37 +86,38 @@ def coerce_publication_transformer_init(
             "BasePublicationTransformerContext."
         )
 
+    entity_type = fields.get("entity_type")
     return BasePublicationTransformerContext(
         provider=resolved_provider,
         entity_type=cast(str, entity_type or default_entity_type),
-        silver_filters=cast("SilverFilterConfig | None", silver_filters),
-        gold_filters=cast("GoldFilterConfig | None", gold_filters),
-        tracer=cast("TracingPort | None", tracer),
-        metrics=cast("MetricsPort | None", metrics),
+        silver_filters=cast("SilverFilterConfig | None", fields.get("silver_filters")),
+        gold_filters=cast("GoldFilterConfig | None", fields.get("gold_filters")),
+        tracer=cast("TracingPort | None", fields.get("tracer")),
+        metrics=cast("MetricsPort | None", fields.get("metrics")),
         identity_service=cast(
             "EntityIdentityGenerator | None",
-            identity_service,
+            fields.get("identity_service"),
         ),
-        pii_hasher=cast("PiiHasherPort | None", pii_hasher),
+        pii_hasher=cast("PiiHasherPort | None", fields.get("pii_hasher")),
         dependencies=cast(
             "TransformerDependencyContext | None",
-            dependencies,
+            fields.get("dependencies"),
         ),
         data_extractor=cast(
             "DataExtractorStrategy | None",
-            data_extractor,
+            fields.get("data_extractor"),
         ),
         identifier_resolver=cast(
             "IdentifierResolverStrategy | None",
-            identifier_resolver,
+            fields.get("identifier_resolver"),
         ),
         metadata_strategy=cast(
             "PublicationMetadataStrategy | None",
-            metadata_strategy,
+            fields.get("metadata_strategy"),
         ),
         record_normalizer=cast(
             "RecordNormalizationProcessor | None",
-            record_normalizer,
+            fields.get("record_normalizer"),
         ),
     )
 

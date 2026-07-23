@@ -246,6 +246,9 @@ def merge_files(
     total_bytes = 0
     extension_counts: dict[str, int] = {}
 
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    output_file = resolve_output_path(output_file, root=REPO_ROOT)
     with output_file.open("w", encoding=encoding) as outf:
         for file_path in files:
             try:

@@ -449,9 +449,11 @@ def inject_growth_node(lines: list[str]) -> list[str]:
 
 
 def run_command(cmd: list[str]) -> tuple[int, str]:
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
     try:
         completed = subprocess.run(
-            cmd,
+            ensure_safe_cli_argv([str(token) for token in cmd]),
             check=False,
             capture_output=True,
             text=True,

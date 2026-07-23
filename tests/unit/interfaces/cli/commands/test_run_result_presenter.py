@@ -12,6 +12,11 @@ from bioetl.application.services.execution.pipeline_runner_models import (
     PipelineRunResult,
     RunResult,
 )
+from bioetl.domain.run_reports.models import (
+    BalanceStatus,
+    StageFunnelRow,
+    TrackingCoverage,
+)
 from bioetl.interfaces.cli.commands.domains.run.result_presenter import (
     echo_run_result,
 )
@@ -63,6 +68,28 @@ class TestEchoRunResultSuccess:
         echo_run_result(result)
         out = capsys.readouterr().out
         assert "short" in out
+
+    def test_success_prints_stage_funnel(
+        self, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        result = _make_result(
+            run_report_funnel=(
+                StageFunnelRow(
+                    stage_id="silver",
+                    records_in=10,
+                    records_out=8,
+                    removed_total=2,
+                    removals=(),
+                    balance_status=BalanceStatus.OK,
+                    tracking=TrackingCoverage.FULL,
+                ),
+            )
+        )
+        echo_run_result(result)
+        out = capsys.readouterr().out
+        assert "Stage funnel" in out
+        assert "silver: in=10, out=8, removed=2" in out
+        assert "balance=OK, tracking=full" in out
 
     def test_success_records_gold_nonzero_is_printed(
         self, capsys: pytest.CaptureFixture[str]

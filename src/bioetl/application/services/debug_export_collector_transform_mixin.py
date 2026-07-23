@@ -57,17 +57,28 @@ class DebugExportTransformRowsMixin:
         for offset, raw_record in enumerate(records):
             raw_payload = _record_payload(raw_record)
             row = _base_row(
-                run_id=self._run_id,
-                workflow_id=self._workflow_id,
-                pipeline_id=self._pipeline_id,
-                provider_id=self._provider_id,
+                identity=(
+                    self._run_id,
+                    self._workflow_id,
+                    self._pipeline_id,
+                    self._provider_id,
+                ),
                 stage="bronze",
                 record_index=start_index + offset,
-                raw_record=raw_payload,
-                normalized_record=raw_payload,
+                records=(raw_payload, raw_payload),
                 status="included",
-                action="extract",
                 created_at=created_at,
+                failure=(
+                    "extract",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                ),
             )
             row["batch_id"] = str(batch_id)
             row["source_metadata"] = _jsonable_payload(source_attrs)
@@ -88,17 +99,13 @@ class DebugExportTransformRowsMixin:
         silver_payload = _record_payload(silver_record)
         self._silver_full_rows.append(
             _base_row(
-                run_id=self._run_id,
-                workflow_id=self._workflow_id,
-                pipeline_id=self._pipeline_id,
-                provider_id=self._provider_id,
+                identity=(self._run_id, self._workflow_id, self._pipeline_id, self._provider_id),
                 stage="silver",
                 record_index=record_index,
-                raw_record=raw_payload,
-                normalized_record=silver_payload,
+                records=(raw_payload, silver_payload),
                 status="included",
-                action="include",
                 created_at=created_at,
+                failure=("include", "", "", "", "", "", "", "", ""),
             )
         )
         if gold_record is not None:
@@ -127,17 +134,13 @@ class DebugExportTransformRowsMixin:
         ] = record_index
         self._gold_full_rows.append(
             _base_row(
-                run_id=self._run_id,
-                workflow_id=self._workflow_id,
-                pipeline_id=self._pipeline_id,
-                provider_id=self._provider_id,
+                identity=(self._run_id, self._workflow_id, self._pipeline_id, self._provider_id),
                 stage="gold",
                 record_index=record_index,
-                raw_record=raw_payload,
-                normalized_record=gold_payload,
+                records=(raw_payload, gold_payload),
                 status="included",
-                action="include",
                 created_at=created_at,
+                failure=("include", "", "", "", "", "", "", "", ""),
             )
         )
 
@@ -159,25 +162,13 @@ class DebugExportTransformRowsMixin:
         )
         self._gold_rejected_rows.append(
             _base_row(
-                run_id=self._run_id,
-                workflow_id=self._workflow_id,
-                pipeline_id=self._pipeline_id,
-                provider_id=self._provider_id,
+                identity=(self._run_id, self._workflow_id, self._pipeline_id, self._provider_id),
                 stage="gold",
                 record_index=record_index,
-                raw_record=raw_payload,
-                normalized_record=silver_payload,
+                records=(raw_payload, silver_payload),
                 status="rejected",
-                action="filter",
                 created_at=created_at,
-                reason_code=_gold_filter_reason_code(detail_mapping),
-                reason_message=_gold_filter_message(detail_mapping),
-                rule_id=_gold_filter_rule_id(detail_mapping),
-                rule_layer="gold",
-                failed_field=failed_field,
-                failed_value=failed_value,
-                expected_constraint=expected_constraint,
-                contract_version=_gold_filter_contract_version(detail_mapping),
+                failure=("filter", _gold_filter_reason_code(detail_mapping), _gold_filter_message(detail_mapping), _gold_filter_rule_id(detail_mapping), "gold", failed_field, failed_value, expected_constraint, _gold_filter_contract_version(detail_mapping)),
             )
         )
 
@@ -211,24 +202,13 @@ class DebugExportTransformRowsMixin:
         )
         target_rows.append(
             _base_row(
-                run_id=self._run_id,
-                workflow_id=self._workflow_id,
-                pipeline_id=self._pipeline_id,
-                provider_id=self._provider_id,
+                identity=(self._run_id, self._workflow_id, self._pipeline_id, self._provider_id),
                 stage="silver",
                 record_index=record_index,
-                raw_record=raw_payload,
-                normalized_record=raw_payload,
+                records=(raw_payload, raw_payload),
                 status="quarantined" if policy == "quarantine" else "rejected",
-                action=policy or reason_code,
                 created_at=created_at,
-                reason_code=reason_code,
-                reason_message=reason_message,
-                rule_id=_extract_rule_id(details),
-                rule_layer="silver",
-                failed_field=failed_field,
-                failed_value=failed_value,
-                expected_constraint=expected_constraint,
+                failure=(policy or reason_code, reason_code, reason_message, _extract_rule_id(details), "silver", failed_field, failed_value, expected_constraint, ""),
             )
         )
 

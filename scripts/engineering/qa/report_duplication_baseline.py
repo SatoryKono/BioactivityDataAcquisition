@@ -337,9 +337,9 @@ def _load_history_records(
 ) -> list[dict[str, object]]:
     """Load prior JSONL history records when present."""
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_cli_path
+        from scripts.engineering.common.repo_paths import resolve_output_path
 
-        path = resolve_cli_path(path, root=root)
+        path = resolve_output_path(path, root=root)
     if not path.exists():
         return []
 
@@ -476,8 +476,10 @@ def _scan_target(
         "--enable=duplicate-code",
         target,
     ]
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
     result = subprocess.run(
-        cmd,
+        ensure_safe_cli_argv([str(token) for token in cmd]),
         capture_output=True,
         text=True,
         encoding="utf-8",
@@ -854,9 +856,9 @@ def _trend_markdown_section(trend_summary: dict[str, object] | None) -> list[str
 
 def _write_text(path: Path, content: str, *, root: Path | None = None) -> None:
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_cli_path
+        from scripts.engineering.common.repo_paths import resolve_output_path
 
-        path = resolve_cli_path(path, root=root)
+        path = resolve_output_path(path, root=root)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
 
@@ -866,9 +868,9 @@ def _append_history_jsonl(
 ) -> None:
     """Append a compact observation record for later trend comparisons."""
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_cli_path
+        from scripts.engineering.common.repo_paths import resolve_output_path
 
-        path = resolve_cli_path(path, root=root)
+        path = resolve_output_path(path, root=root)
     path.parent.mkdir(parents=True, exist_ok=True)
     targets = payload.get("targets", [])
     record = {

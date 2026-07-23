@@ -197,9 +197,9 @@ def _write_json_report(
 ) -> None:
     """Write JSON debt snapshot report."""
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_cli_path
+        from scripts.engineering.common.repo_paths import resolve_output_path
 
-        path = resolve_cli_path(path, root=root)
+        path = resolve_output_path(path, root=root)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         json.dumps(asdict(snapshot), ensure_ascii=False, indent=2, sort_keys=True)
@@ -213,9 +213,9 @@ def _write_markdown_report(
 ) -> None:
     """Write markdown debt snapshot report."""
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_cli_path
+        from scripts.engineering.common.repo_paths import resolve_output_path
 
-        path = resolve_cli_path(path, root=root)
+        path = resolve_output_path(path, root=root)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(_render_markdown(snapshot), encoding="utf-8")
 
@@ -225,9 +225,9 @@ def _write_summary_append(
 ) -> None:
     """Append compact summary block for CI step summary usage."""
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_cli_path
+        from scripts.engineering.common.repo_paths import resolve_output_path
 
-        path = resolve_cli_path(path, root=root)
+        path = resolve_output_path(path, root=root)
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as stream:
         stream.write(
@@ -256,15 +256,15 @@ def _should_fail(args: argparse.Namespace, snapshot: WeeklyDebtSnapshot) -> bool
 
 
 def main() -> int:
-    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_cli_path
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
     args = _parse_args()
     today = date.today()
     root = REPO_ROOT
 
     snapshot = _build_snapshot(
-        registry_path=resolve_cli_path(args.registry, root=root),
-        scorecard_path=resolve_cli_path(args.scorecard, root=root),
+        registry_path=resolve_output_path(args.registry, root=root),
+        scorecard_path=resolve_output_path(args.scorecard, root=root),
         today=today,
     )
     _write_json_report(Path(args.json_out), snapshot, root=root)

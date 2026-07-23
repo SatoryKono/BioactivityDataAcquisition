@@ -67,8 +67,10 @@ def _git_stdout(repo_root: Path, *args: str) -> str:
     for executable in candidates:
         if not executable:
             continue
+        from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
         completed = subprocess.run(
-            [executable, *args],
+            ensure_safe_cli_argv([executable, *[str(a) for a in args]]),
             cwd=repo_root,
             check=False,
             capture_output=True,

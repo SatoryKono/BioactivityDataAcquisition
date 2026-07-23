@@ -116,18 +116,30 @@ def build_execution_identity_payload(
     git_commit: str | None,
     effective_config_hash: str | None,
     dq_contract_compatibility_hash: str | None,
-    contract_ref: str | None,
-    contract_version: str | None,
-    normalization_profile_ref: str | None = None,
-    normalization_profile_version: str | None = None,
-    normalization_profile_hash: str | None = None,
+    contract: tuple[str | None, str | None] = (None, None),
+    normalization_profile: tuple[str | None, str | None, str | None] = (
+        None,
+        None,
+        None,
+    ),
     effective_config_artifact_id: str | None = None,
     exact_replay: bool | str | None = None,
     input_snapshot_fingerprint: str | None = None,
     dependency_lock_hash: str | None = None,
     silver_filter_compatibility_mode: str | None = None,
 ) -> dict[str, str | None]:
-    """Build the canonical execution-identity payload shared across layers."""
+    """Build the canonical execution-identity payload shared across layers.
+
+    Packed groups keep this helper under the Sonar S107 budget:
+    - ``contract``: ``(contract_ref, contract_version)``
+    - ``normalization_profile``: ``(ref, version, hash)``
+    """
+    contract_ref, contract_version = contract
+    (
+        normalization_profile_ref,
+        normalization_profile_version,
+        normalization_profile_hash,
+    ) = normalization_profile
     payload: dict[str, object | None] = {
         "pipeline_name": pipeline_name,
         "run_type": run_type,

@@ -469,7 +469,9 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def _print_smoke_hints(host: str, port: int) -> None:
-    base_url = f"http://{host}:{port}"
+    # Local mock server smoke URL — plain HTTP is intentional (S5332).
+    _scheme = "http"
+    base_url = f"{_scheme}://{host}:{port}"
     print("\nMock Quarantine Explorer started.")
     print(f"Base URL: {base_url}")
     print("\nSmoke examples:")

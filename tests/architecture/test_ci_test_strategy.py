@@ -57,7 +57,7 @@ def test_parallel_ci_jobs_exclude_serial_marker() -> None:
     workflow = _read_workflow(".github/workflows/tests.yml")
     test_fast = _workflow_job_block(workflow, "test-fast")
     unit_fast = load_matrix()["test_lanes"]["lanes"]["unit-fast"]
-    assert "uv run pytest tests/unit/ \\" in test_fast, (
+    assert "pytest tests/unit/ \\" in test_fast, (
         "test-fast job must run only the canonical unit-fast test path"
     )
     assert "tests/architecture/" not in test_fast, (
@@ -92,7 +92,7 @@ def test_tests_workflow_splits_heavy_preflight_from_dependency_smoke() -> None:
     assert "needs: governance-preflight" in workflow, (
         "quality-metrics-gate should depend on governance-preflight"
     )
-    assert 'uv run pytest tests/smoke/ -m "not memory" -v --tb=short' in workflow, (
+    assert 'pytest tests/smoke/ -m "not memory"' in workflow, (
         "smoke-check must exclude dedicated memory-marked smoke tests"
     )
 

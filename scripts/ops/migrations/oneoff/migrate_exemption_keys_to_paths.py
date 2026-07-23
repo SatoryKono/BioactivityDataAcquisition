@@ -197,6 +197,9 @@ def _write_or_report_dry_run(
     migrated: dict[str, Any],
 ) -> None:
     if args.write:
+        from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+        registry_path = resolve_output_path(registry_path, root=REPO_ROOT)
         registry_path.write_text(
             yaml.safe_dump(migrated, sort_keys=False, allow_unicode=True),
             encoding="utf-8",

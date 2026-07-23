@@ -608,15 +608,15 @@ def write_baseline_outputs(
 
 
 def main() -> int:
-    from scripts.engineering.common.repo_paths import resolve_cli_path
+    from scripts.engineering.common.repo_paths import resolve_output_path
 
     args = _parse_args()
-    coverage_xml_path = resolve_cli_path(args.coverage_xml)
-    coverage_log_path = resolve_cli_path(args.coverage_log)
-    slowest_json_path = resolve_cli_path(args.slowest_json)
-    junit_paths = [resolve_cli_path(path) for path in args.junit]
-    output_yaml_path = resolve_cli_path(args.output_yaml)
-    output_md_path = resolve_cli_path(args.output_md)
+    coverage_xml_path = resolve_output_path(args.coverage_xml)
+    coverage_log_path = resolve_output_path(args.coverage_log)
+    slowest_json_path = resolve_output_path(args.slowest_json)
+    junit_paths = [resolve_output_path(path) for path in args.junit]
+    output_yaml_path = resolve_output_path(args.output_yaml)
+    output_md_path = resolve_output_path(args.output_md)
     payload = build_baseline_payload(
         coverage_xml_path=coverage_xml_path,
         coverage_percent=args.coverage_percent,

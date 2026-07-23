@@ -39,19 +39,12 @@ PROGRESSIVE_DISCLOSURE_ROWS = {
     ("bioetl-runtime.json", "Localize"),
     ("bioetl-runtime.json", "Escalate"),
     (
-        "bioetl-runtime.json",
-        "Tracing-only Log Hygiene (requires optional tracing profile)",
-    ),
-    (
         "bioetl-provider-health-v2.json",
         "Selected Provider Detail",
     ),
     ("bioetl-dq-v2.json", "Silver Structural / Gold Contract-Semantic Rejects"),
     ("bioetl-dq-v2.json", "Validation Failures / Runtime Diagnostics / Trends"),
     ("bioetl-workflow-overview.json", "Step Diagnostics"),
-    (
-        "Records and selected detail · expand after narrowing",
-    ),
 }
 
 

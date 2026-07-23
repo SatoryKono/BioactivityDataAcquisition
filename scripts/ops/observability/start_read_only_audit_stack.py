@@ -85,23 +85,19 @@ def require_absolute_directory(value: str, *, option_name: str) -> Path:
 
 
 def build_compose_command() -> tuple[str, ...]:
-    """Build the only supported compose invocation for the audit profile."""
+    """Build the compose invocation for the opt-in monitoring stack.
+
+    Loki/Promtail/Tempo/Quarantine Explorer audit overlays were removed.
+    """
     return (
         "docker",
         "compose",
         "-f",
         str(BASE_COMPOSE),
-        "-f",
-        str(AUDIT_COMPOSE),
-        "--profile",
-        "audit",
         "up",
         "-d",
         "prometheus",
         "pushgateway",
-        "quarantine-explorer-audit",
-        "loki",
-        "promtail-audit",
         "grafana",
         "renderer",
     )

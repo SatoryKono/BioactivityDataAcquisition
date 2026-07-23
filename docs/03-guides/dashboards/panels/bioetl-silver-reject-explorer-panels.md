@@ -1,10 +1,15 @@
 # BioETL Silver Reject Explorer - Panels Documentation
 
-**Dashboard file:** `grafana/dashboards/bioetl-silver-reject-explorer.json`
+> **REMOVED 2026-07-23.** Dashboard JSON is no longer shipped.
+> Use CLI: `bioetl quarantine inspect --pipeline <pipeline> ...`
+> Aggregate Silver reject panels remain on `bioetl-dq-v2`.
+> See [monitoring-surface-reduction](../../../05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md).
 
-## Overview
+**Former dashboard file:** `grafana/dashboards/bioetl-silver-reject-explorer.json` (deleted)
 
-Dashboard `Silver Reject Explorer` provides detailed Silver structural reject evidence with reject reason/field breakdowns and pipeline-specific filtering. Shipped dashboard JSON is the source of truth.
+## Overview (historical)
+
+Dashboard `Silver Reject Explorer` provided detailed Silver structural reject evidence with reject reason/field breakdowns and pipeline-specific filtering.
 
 The shipped reading order is progressive: scope → backend health → one action →
 summary → top causes → optional trends → narrowed record/detail evidence.

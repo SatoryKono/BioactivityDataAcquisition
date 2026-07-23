@@ -635,6 +635,9 @@ def _check_file_sync(path: Path, expected: str) -> bool:
     if not path.exists():
         print(f"[drift] missing file: {_display_path(path)}")
         return False
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    path = resolve_output_path(path, root=REPO_ROOT)
     actual = path.read_text(encoding="utf-8")
     if path.suffix == ".md":
         _, actual = _split_frontmatter(actual)
@@ -648,6 +651,9 @@ def _check_file_sync(path: Path, expected: str) -> bool:
 
 def _markdown_to_write(path: Path, markdown: str) -> str:
     """Preserve frontmatter from existing markdown output when present."""
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    path = resolve_output_path(path, root=REPO_ROOT)
     current_markdown = path.read_text(encoding="utf-8") if path.exists() else ""
     frontmatter, _ = _split_frontmatter(current_markdown)
     return f"{frontmatter}{markdown}" if frontmatter else markdown
@@ -694,6 +700,9 @@ def _load_cached_snapshot(
     src_root: Path,
 ) -> DependencySnapshot | None:
     """Return one cached snapshot when source fingerprint still matches."""
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    json_output = resolve_output_path(json_output, root=REPO_ROOT)
     if not json_output.exists():
         return None
     try:

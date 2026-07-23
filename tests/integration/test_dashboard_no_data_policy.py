@@ -81,7 +81,7 @@ def test_http_identity_cards_distinguish_backend_down_from_expected_empty() -> N
                 or "no selected run" in no_value.lower()
             )
             assert any(
-                link.get("title") == "Check Quarantine Explorer health"
+                link.get("title") == "Check BioETL Ops HTTP health"
                 for link in links
                 if isinstance(link, dict)
             ), f"{dashboard_path.name}:{panel.get('title')} must link backend health"

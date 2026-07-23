@@ -425,6 +425,9 @@ def _render_csv(rows: list[dict[str, object]]) -> str:
 
 
 def _write(path: Path, content: str) -> None:
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    path = resolve_output_path(path, root=REPO_ROOT)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
 

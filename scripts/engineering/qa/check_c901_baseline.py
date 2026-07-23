@@ -89,8 +89,10 @@ def _run_ruff_c901(target: str) -> list[Violation]:
         "--output-format",
         "json",
     ]
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
     proc = subprocess.run(
-        cmd,
+        ensure_safe_cli_argv([str(token) for token in cmd]),
         cwd=PROJECT_ROOT,
         capture_output=True,
         text=True,

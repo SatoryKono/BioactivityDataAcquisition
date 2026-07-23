@@ -205,27 +205,6 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-runtime.json | 2543 | Review Process-level signals (GLOBAL) |
 | bioetl-runtime.json | 209 | Track GLOBAL Shutdown Initiated by Reason / Interval |
 | bioetl-runtime.json | 210 | Track GLOBAL Shutdown Completed by Reason / Interval |
-| bioetl-runtime.json | 255 | Tracing-only Log Hygiene (requires optional tracing profile) |
-| bioetl-runtime.json | 250 | Inspect Warning Logs |
-| bioetl-runtime.json | 251 | Inspect GLOBAL Unstructured Logs |
-| bioetl-runtime.json | 257 | Inspect Top Warning Events by Event / Logger / Range |
-| bioetl-runtime.json | 258 | Track GLOBAL Log Hygiene Trend |
-| bioetl-silver-reject-explorer.json | 1000 | Review Dashboard Navigation |
-| bioetl-silver-reject-explorer.json | 1 | Inspect Explorer Scope |
-| bioetl-silver-reject-explorer.json | 13 | Monitor Explorer Backend Health |
-| bioetl-silver-reject-explorer.json | 10 | Review: First Action / No-Data Semantics |
-| bioetl-silver-reject-explorer.json | 2 | Monitor Filtered Records Total |
-| bioetl-silver-reject-explorer.json | 3 | Track Reject Rate vs Bronze |
-| bioetl-silver-reject-explorer.json | 4 | Inspect Run Scope Summary |
-| bioetl-silver-reject-explorer.json | 16 | Trends · expand when rejects exist |
-| bioetl-silver-reject-explorer.json | 11 | Track Filtered Rejects Over Time |
-| bioetl-silver-reject-explorer.json | 12 | Track Reject Ratio vs Bronze Over Time |
-| bioetl-silver-reject-explorer.json | 5 | Inspect Top Reject Reasons |
-| bioetl-silver-reject-explorer.json | 6 | Inspect Top Reject Fields |
-| bioetl-silver-reject-explorer.json | 7 | Inspect Top Reason Signatures |
-| bioetl-silver-reject-explorer.json | 15 | Records and selected detail · expand after narrowing |
-| bioetl-silver-reject-explorer.json | 8 | Inspect Filtered Records Table |
-| bioetl-silver-reject-explorer.json | 9 | Inspect Selected Record Details |
 | bioetl-workflow-overview.json | 1000 | Review Dashboard Navigation |
 | bioetl-workflow-overview.json | 9400 | Provenance |
 | bioetl-workflow-overview.json | 9401 | Status |

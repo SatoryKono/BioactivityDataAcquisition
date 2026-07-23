@@ -46,7 +46,7 @@ MANDATORY_LINK_UIDS: dict[str, set[str]] = {
     },
     "bioetl-runtime": {"bioetl-overview-v2", "bioetl-dq-v2", "bioetl-control-plane-v1"},
     "bioetl-provider-health-v2": {"bioetl-overview-v2", "bioetl-runtime"},
-    "bioetl-dq-v2": {"bioetl-overview-v2", "bioetl-silver-reject-explorer"},
+    "bioetl-dq-v2": {"bioetl-overview-v2"},
     "bioetl-workflow-overview": {
         "bioetl-overview-v2",
         "bioetl-runtime",

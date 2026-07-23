@@ -580,7 +580,7 @@ def test_data_quality_lineage_handoff_panel_points_to_canonical_control_plane_ro
 
 
 def test_silver_reject_explorer_record_level_panels_do_not_use_prometheus() -> None:
-    """Record-level explorer panels must use the Quarantine Explorer datasource."""
+    """Record-level explorer panels must use the BioETL Ops HTTP datasource."""
     dashboard = load_dashboard(
             pytest.skip("Silver Reject Explorer removed 2026-07-23")
     )
@@ -598,8 +598,8 @@ def test_silver_reject_explorer_record_level_panels_do_not_use_prometheus() -> N
     )
     for title, panel in panels.items():
         datasource = panel.get("datasource")
-        assert datasource == "Quarantine Explorer", (
-            f"Panel {title!r} must use Quarantine Explorer datasource"
+        assert datasource == "BioETL Ops HTTP", (
+            f"Panel {title!r} must use BioETL Ops HTTP datasource"
         )
 
 
@@ -1093,7 +1093,7 @@ def test_provider_health_first_action_cta_contract() -> None:
 
 
 def test_dq_first_action_cta_contract() -> None:
-    """bioetl-dq-v2 First Action panel (9103) must have exactly 3 CTAs."""
+    """bioetl-dq-v2 First Action panel (9103) after Silver Reject Explorer removal."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     panels_by_id = {
         panel.get("id"): panel
@@ -1104,15 +1104,14 @@ def test_dq_first_action_cta_contract() -> None:
     first_action_panel = panels_by_id[9103]
     links = first_action_panel.get("links", [])
 
-    assert len(links) == 3, (
-        f"DQ First Action panel must have exactly 3 CTAs, got {len(links)}"
+    assert len(links) == 2, (
+        f"DQ First Action panel must have exactly 2 CTAs, got {len(links)}"
     )
 
     link_titles = {link.get("title") for link in links}
     required_titles = {
         "Review current status",
         "Inspect current reasons",
-        "Open Silver Reject Explorer",
     }
     assert required_titles.issubset(link_titles), (
         f"DQ First Action panel missing required CTAs. "

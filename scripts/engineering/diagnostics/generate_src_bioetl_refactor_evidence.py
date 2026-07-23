@@ -476,6 +476,9 @@ def _yaml_dump(path: Path, payload: dict[str, object]) -> None:
     for key, value in payload.items():
         lines.extend(_yaml_lines(key, value, 0))
     path.parent.mkdir(parents=True, exist_ok=True)
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    path = resolve_output_path(path, root=REPO_ROOT)
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 

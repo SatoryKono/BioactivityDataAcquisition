@@ -62,21 +62,36 @@ def build_export_sidecar_payloads(
     row_count: int,
     columns: tuple[str, ...],
     data_fingerprint: ExportFileFingerprint,
-    generated_at: str | None = None,
-    allow_nondeterministic_generated_at: bool = False,
-    clock: ClockPort | None = None,
+    timestamp_opts: tuple[str | None, bool, ClockPort | None] = (None, False, None),
     run_ids: tuple[str, ...] = (),
     code_revision: str | None = None,
-    requester: str | None = None,
-    role: str = "viewer",
-    filters_hash: str | None = None,
-    expires_at: str | None = None,
-    redaction_profile: str = "default",
-    audit_ref: str | None = None,
+    access: tuple[str | None, str, str | None, str | None, str, str | None] = (
+        None,
+        "viewer",
+        None,
+        None,
+        "default",
+        None,
+    ),
     redacted_columns: tuple[str, ...] = (),
     strict: bool = False,
 ) -> ExportSidecarPayloads:
-    """Build deterministic provenance and licensing payloads for one export."""
+    """Build deterministic provenance and licensing payloads for one export.
+
+    Packed groups under Sonar S107:
+    - ``timestamp_opts``: ``(generated_at, allow_nondeterministic, clock)``
+    - ``access``: ``(requester, role, filters_hash, expires_at,
+      redaction_profile, audit_ref)``
+    """
+    generated_at, allow_nondeterministic_generated_at, clock = timestamp_opts
+    (
+        requester,
+        role,
+        filters_hash,
+        expires_at,
+        redaction_profile,
+        audit_ref,
+    ) = access
     providers = _providers_for_table(table_name)
     provider_entries = tuple(
         _provider_attribution_payload(provider, strict=strict) for provider in providers
@@ -99,25 +114,21 @@ def build_export_sidecar_payloads(
     return ExportSidecarPayloadsRecord(
         dataset_bundle_id=dataset_bundle_id,
         provenance_manifest=_build_export_provenance_manifest(
-            table_name=table_name,
-            layer=layer,
-            export_format=export_format,
-            row_count=row_count,
-            columns=columns,
-            providers=providers,
-            provider_entries=provider_entries,
+            table_ctx=(table_name, layer, export_format, row_count, columns),
+            providers_ctx=(providers, provider_entries),
             dataset_bundle_id=dataset_bundle_id,
             timestamp=timestamp,
-            data_fingerprint=data_fingerprint,
-            exported_data_file=exported_data_file,
+            file_ctx=(data_fingerprint, exported_data_file),
             code_revision=code_revision,
             run_ids=run_ids,
-            requester=requester,
-            role=role,
-            filters_hash=filters_hash,
-            expires_at=expires_at,
-            redaction_profile=redaction_profile,
-            audit_ref=audit_ref,
+            access=(
+                requester,
+                role,
+                filters_hash,
+                expires_at,
+                redaction_profile,
+                audit_ref,
+            ),
             redacted_columns=redacted_columns,
         ),
         licensing_manifest=_build_export_licensing_manifest(
@@ -131,28 +142,36 @@ def build_export_sidecar_payloads(
 
 def _build_export_provenance_manifest(
     *,
-    table_name: str,
-    layer: str,
-    export_format: str,
-    row_count: int,
-    columns: tuple[str, ...],
-    providers: tuple[str, ...],
-    provider_entries: tuple[dict[str, object], ...],
+    table_ctx: tuple[str, str, str, int, tuple[str, ...]],
+    providers_ctx: tuple[tuple[str, ...], tuple[dict[str, object], ...]],
     dataset_bundle_id: str,
     timestamp: str,
-    data_fingerprint: ExportFileFingerprint,
-    exported_data_file: dict[str, object],
+    file_ctx: tuple[ExportFileFingerprint, dict[str, object]],
     code_revision: str | None,
     run_ids: tuple[str, ...],
-    requester: str | None,
-    role: str,
-    filters_hash: str | None,
-    expires_at: str | None,
-    redaction_profile: str,
-    audit_ref: str | None,
+    access: tuple[str | None, str, str | None, str | None, str, str | None],
     redacted_columns: tuple[str, ...],
 ) -> dict[str, object]:
-    """Build the deterministic export provenance sidecar payload."""
+    """Build the deterministic export provenance sidecar payload.
+
+    Packed groups under Sonar S107:
+    - ``table_ctx``: ``(table_name, layer, export_format, row_count, columns)``
+    - ``providers_ctx``: ``(providers, provider_entries)``
+    - ``file_ctx``: ``(data_fingerprint, exported_data_file)``
+    - ``access``: ``(requester, role, filters_hash, expires_at,
+      redaction_profile, audit_ref)``
+    """
+    table_name, layer, export_format, row_count, columns = table_ctx
+    providers, provider_entries = providers_ctx
+    data_fingerprint, exported_data_file = file_ctx
+    (
+        requester,
+        role,
+        filters_hash,
+        expires_at,
+        redaction_profile,
+        audit_ref,
+    ) = access
     return {
         "schema_version": MANIFEST_SCHEMA_VERSION,
         "manifest_type": "bioetl.dataset_snapshot.provenance",
@@ -266,21 +285,27 @@ def write_export_sidecar_manifests(
     export_format: str,
     output_path: Path | str,
     row_count: int,
-    generated_at: str | None = None,
-    allow_nondeterministic_generated_at: bool = False,
-    clock: ClockPort | None = None,
+    timestamp_opts: tuple[str | None, bool, ClockPort | None] = (None, False, None),
     run_ids: tuple[str, ...] = (),
     code_revision: str | None = None,
-    requester: str | None = None,
-    role: str = "viewer",
-    filters_hash: str | None = None,
-    expires_at: str | None = None,
-    redaction_profile: str = "default",
-    audit_ref: str | None = None,
+    access: tuple[str | None, str, str | None, str | None, str, str | None] = (
+        None,
+        "viewer",
+        None,
+        None,
+        "default",
+        None,
+    ),
     redacted_columns: tuple[str, ...] = (),
     strict: bool = False,
 ) -> tuple[Path, ...]:
-    """Write deterministic provenance, licensing, and checksum manifests."""
+    """Write deterministic provenance, licensing, and checksum manifests.
+
+    Packed groups under Sonar S107:
+    - ``timestamp_opts``: ``(generated_at, allow_nondeterministic, clock)``
+    - ``access``: ``(requester, role, filters_hash, expires_at,
+      redaction_profile, audit_ref)``
+    """
     output_path_str = output_path if isinstance(output_path, str) else str(output_path)
     data_fingerprint = writer.fingerprint_file(path=output_path_str)
     sidecars = build_export_sidecar_payloads(
@@ -290,17 +315,10 @@ def write_export_sidecar_manifests(
         row_count=row_count,
         columns=tuple(field.name for field in table.schema),
         data_fingerprint=data_fingerprint,
-        generated_at=generated_at,
-        allow_nondeterministic_generated_at=allow_nondeterministic_generated_at,
-        clock=clock,
+        timestamp_opts=timestamp_opts,
         run_ids=run_ids,
         code_revision=code_revision,
-        requester=requester,
-        role=role,
-        filters_hash=filters_hash,
-        expires_at=expires_at,
-        redaction_profile=redaction_profile,
-        audit_ref=audit_ref,
+        access=access,
         redacted_columns=redacted_columns,
         strict=strict,
     )

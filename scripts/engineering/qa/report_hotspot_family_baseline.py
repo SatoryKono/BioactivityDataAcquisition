@@ -260,9 +260,9 @@ def _write_text(path: Path, content: str, *, root: Path | None = None) -> None:
     When ``root`` is provided (CLI path mode), confine ``path`` under that root.
     """
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_cli_path
+        from scripts.engineering.common.repo_paths import resolve_output_path
 
-        path = resolve_cli_path(path, root=root)
+        path = resolve_output_path(path, root=root)
     path.parent.mkdir(parents=True, exist_ok=True)
     if path.exists():
         try:
@@ -302,9 +302,9 @@ def _write_text(path: Path, content: str, *, root: Path | None = None) -> None:
 
 def _check_file_sync(path: Path, expected: str, *, root: Path | None = None) -> bool:
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_cli_path
+        from scripts.engineering.common.repo_paths import resolve_output_path
 
-        path = resolve_cli_path(path, root=root)
+        path = resolve_output_path(path, root=root)
     if not path.exists():
         print(f"[drift] missing file: {_display_path(path)}")
         return False
@@ -351,11 +351,11 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> int:
-    from scripts.engineering.common.repo_paths import resolve_cli_path
+    from scripts.engineering.common.repo_paths import resolve_output_path
 
     args = parse_args()
-    args.json_output = resolve_cli_path(args.json_output, root=PROJECT_ROOT)
-    args.md_output = resolve_cli_path(args.md_output, root=PROJECT_ROOT)
+    args.json_output = resolve_output_path(args.json_output, root=PROJECT_ROOT)
+    args.md_output = resolve_output_path(args.md_output, root=PROJECT_ROOT)
     if args.active_only:
         scorecard = load_scorecard()
         snapshot_date = _resolve_snapshot_date(scorecard)

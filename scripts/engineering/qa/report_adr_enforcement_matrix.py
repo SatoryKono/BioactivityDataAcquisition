@@ -470,10 +470,10 @@ def _write_artifacts(
     root: Path | None = None,
 ) -> None:
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_cli_path
+        from scripts.engineering.common.repo_paths import resolve_output_path
 
-        json_out = resolve_cli_path(json_out, root=root)
-        md_out = resolve_cli_path(md_out, root=root)
+        json_out = resolve_output_path(json_out, root=root)
+        md_out = resolve_output_path(md_out, root=root)
     json_out.parent.mkdir(parents=True, exist_ok=True)
     md_out.parent.mkdir(parents=True, exist_ok=True)
     json_out.write_text(
@@ -491,10 +491,10 @@ def _check_artifacts(
     root: Path | None = None,
 ) -> list[str]:
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_cli_path
+        from scripts.engineering.common.repo_paths import resolve_output_path
 
-        json_out = resolve_cli_path(json_out, root=root)
-        md_out = resolve_cli_path(md_out, root=root)
+        json_out = resolve_output_path(json_out, root=root)
+        md_out = resolve_output_path(md_out, root=root)
     errors: list[str] = []
     expected_json = json.dumps(payload, indent=2, sort_keys=True) + "\n"
     expected_md = render_markdown(payload)

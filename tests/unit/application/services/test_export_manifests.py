@@ -40,7 +40,7 @@ def test_build_export_sidecar_payloads_is_deterministic_for_stable_inputs() -> N
         row_count=2,
         columns=("activity_id", "molecule_id"),
         data_fingerprint=_fingerprint(),
-        generated_at="2026-04-28T00:00:00Z",
+        timestamp_opts=("2026-04-28T00:00:00Z", False, None),
         run_ids=("run-1",),
         code_revision="abc123",
     )
@@ -51,7 +51,7 @@ def test_build_export_sidecar_payloads_is_deterministic_for_stable_inputs() -> N
         row_count=2,
         columns=("activity_id", "molecule_id"),
         data_fingerprint=_fingerprint(),
-        generated_at="2026-04-28T00:00:00Z",
+        timestamp_opts=("2026-04-28T00:00:00Z", False, None),
         run_ids=("run-1",),
         code_revision="abc123",
     )
@@ -75,7 +75,7 @@ def test_build_export_sidecar_payloads_includes_composite_provider_licenses() ->
         row_count=3,
         columns=("publication_id", "title"),
         data_fingerprint=_fingerprint("exports/gold_composite_publication.csv"),
-        generated_at="2026-04-28T00:00:00Z",
+        timestamp_opts=("2026-04-28T00:00:00Z", False, None),
     )
 
     providers = [
@@ -98,13 +98,15 @@ def test_build_export_sidecar_payloads_records_governed_export_metadata() -> Non
         row_count=2,
         columns=("activity_id", "molecule_id"),
         data_fingerprint=_fingerprint(),
-        generated_at="2026-04-28T00:00:00Z",
-        requester="operator@example.test",
-        role="viewer",
-        filters_hash="filters-sha256",
-        expires_at="2026-05-01T00:00:00Z",
-        redaction_profile="default",
-        audit_ref="export-audit:abc123",
+        timestamp_opts=("2026-04-28T00:00:00Z", False, None),
+        access=(
+            "operator@example.test",
+            "viewer",
+            "filters-sha256",
+            "2026-05-01T00:00:00Z",
+            "default",
+            "export-audit:abc123",
+        ),
         redacted_columns=("raw_payload",),
     )
 
@@ -130,7 +132,7 @@ def test_build_export_sidecar_payloads_unknown_provider_strict_mode_fails() -> N
             row_count=1,
             columns=("id",),
             data_fingerprint=_fingerprint("exports/silver_unknown_entity.csv"),
-            generated_at="2026-04-28T00:00:00Z",
+            timestamp_opts=("2026-04-28T00:00:00Z", False, None),
             strict=True,
         )
 
@@ -155,7 +157,7 @@ def test_build_export_sidecar_payloads_allows_operator_timestamp_opt_in() -> Non
         row_count=2,
         columns=("activity_id",),
         data_fingerprint=_fingerprint(),
-        allow_nondeterministic_generated_at=True,
+        timestamp_opts=(None, True, None),
     )
 
     assert isinstance(sidecars.provenance_manifest["generated_at"], str)
@@ -205,8 +207,7 @@ def test_operator_timestamp_opt_in_can_use_clock_port() -> None:
         row_count=2,
         columns=("activity_id",),
         data_fingerprint=_fingerprint(),
-        allow_nondeterministic_generated_at=True,
-        clock=_FixedClock(),
+        timestamp_opts=(None, True, _FixedClock()),
     )
 
     assert sidecars.provenance_manifest["generated_at"] == "2026-05-01T02:03:04Z"

@@ -49,11 +49,8 @@ def _normalize_execution_identity_payload(
     effective_config_hash: str | None,
     dq_contract_compatibility_hash: str | None,
     manifest_id: str | None,
-    contract_ref: str | None,
-    contract_version: str | None,
-    normalization_profile_ref: str | None,
-    normalization_profile_version: str | None,
-    normalization_profile_hash: str | None,
+    contract: tuple[str | None, str | None],
+    normalization_profile: tuple[str | None, str | None, str | None],
     effective_config_artifact_id: str | None,
     exact_replay: bool,
     input_snapshot_fingerprint: str | None,
@@ -69,11 +66,8 @@ def _normalize_execution_identity_payload(
         dependency_lock_hash=dependency_lock_hash,
         effective_config_hash=effective_config_hash,
         dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-        contract_ref=contract_ref,
-        contract_version=contract_version,
-        normalization_profile_ref=normalization_profile_ref,
-        normalization_profile_version=normalization_profile_version,
-        normalization_profile_hash=normalization_profile_hash,
+        contract=contract,
+        normalization_profile=normalization_profile,
         effective_config_artifact_id=effective_config_artifact_id,
         exact_replay=exact_replay,
         input_snapshot_fingerprint=input_snapshot_fingerprint,
@@ -260,7 +254,9 @@ def _build_checkpoint_metadata_from_identity(
         contract_ref=identity_payload["contract_ref"],
         contract_version=identity_payload["contract_version"],
         normalization_profile_ref=identity_payload["normalization_profile_ref"],
-        normalization_profile_version=identity_payload["normalization_profile_version"],
+        normalization_profile_version=identity_payload[
+            "normalization_profile_version"
+        ],
         normalization_profile_hash=identity_payload["normalization_profile_hash"],
         exact_replay=exact_replay,
         required_persistence_profile=run_context_metadata[
@@ -305,13 +301,15 @@ def build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetad
             "dq_contract_compatibility_hash"
         ],
         manifest_id=run_context_metadata["manifest_id"],
-        contract_ref=run_context_metadata["contract_ref"],
-        contract_version=run_context_metadata["contract_version"],
-        normalization_profile_ref=run_context_metadata["normalization_profile_ref"],
-        normalization_profile_version=run_context_metadata[
-            "normalization_profile_version"
-        ],
-        normalization_profile_hash=run_context_metadata["normalization_profile_hash"],
+        contract=(
+            run_context_metadata["contract_ref"],
+            run_context_metadata["contract_version"],
+        ),
+        normalization_profile=(
+            run_context_metadata["normalization_profile_ref"],
+            run_context_metadata["normalization_profile_version"],
+            run_context_metadata["normalization_profile_hash"],
+        ),
         effective_config_artifact_id=run_context_metadata[
             "effective_config_artifact_id"
         ],

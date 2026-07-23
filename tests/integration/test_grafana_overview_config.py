@@ -95,7 +95,7 @@ def test_overview_uses_frozen_v3_selector_set() -> None:
     assert variables["run_type"].get("multi") is True
 
     run_id = variables["run_id"]
-    assert run_id.get("datasource") == "Quarantine Explorer"
+    assert run_id.get("datasource") == "BioETL Ops HTTP"
     assert run_id.get("includeAll") is False
     assert run_id.get("multi") is False
     assert run_id.get("current", {}).get("text") == "-"
@@ -211,7 +211,7 @@ def test_status_and_next_action_preserve_current_status_semantics() -> None:
 def test_identity_panel_uses_run_id_without_leaking_to_prometheus_queries() -> None:
     identity = _panels_by_title()["ID"]
 
-    assert identity.get("datasource") == "Quarantine Explorer"
+    assert identity.get("datasource") == "BioETL Ops HTTP"
     assert identity.get("targets", [{}])[0].get("parser") == "backend"
     assert identity.get("targets", [{}])[0].get("root_selector") == "rows"
     assert identity.get("targets", [{}])[0].get("url") == (

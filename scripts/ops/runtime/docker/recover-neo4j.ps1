@@ -21,7 +21,8 @@ param(
     [int]$BootWaitSeconds = 90
 )
 
-$ErrorActionPreference = 'Stop'
+# Docker CLI writes progress to stderr; do not treat that as a terminating error.
+$ErrorActionPreference = 'Continue'
 $Root = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..\..')).Path
 Set-Location $Root
 
@@ -63,15 +64,16 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host 'Stopping neo4j (data volume kept)...'
-docker compose -f docker-compose.neo4j.yml stop 2>$null
-docker compose -f docker-compose.neo4j.yml rm -f 2>$null
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml stop 2>$null
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml rm -f 2>$null
 
 Write-Host 'Clearing auth/store_lock so NEO4J_AUTH can re-seed (databases kept)...'
+# One-shot helper container (not the bioetl-neo4j service owner).
 docker run --rm -v bioetl-neo4j_neo4j_data:/data alpine:3.20 `
     sh -c 'rm -f /data/dbms/auth /data/dbms/auth.ini /data/databases/store_lock; echo cleared'
 
 Write-Host 'Starting neo4j...'
-docker compose -f docker-compose.neo4j.yml up -d
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d
 Write-Host "Waiting ${BootWaitSeconds}s for boot..."
 Start-Sleep -Seconds $BootWaitSeconds
 

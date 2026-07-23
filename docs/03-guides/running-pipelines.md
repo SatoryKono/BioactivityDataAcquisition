@@ -123,12 +123,12 @@ bioetl workflow run chembl_publication --limit 1000 --required-persistence-profi
 published family default, поэтому этот флаг не является обходом exact-replay
 guardrails.
 
-По умолчанию `bioetl workflow run`, `bioetl run`, `bioetl run-all` и
-`bioetl run-composite` также пытаются автоматически поднять detached
-Quarantine Explorer backend на `127.0.0.1:8081`, чтобы Grafana `ID`/detail
-панели могли читать `/ops/control-plane/*` без отдельного ручного запуска
-`bioetl quarantine serve`. Для opt-out используйте
-`--no-ensure-observability-backend`.
+HTTP identity helpers for Grafana (`ID` / control-plane selectors) are served by
+the main **`bioetl health server`** (Docker default `:8000`, datasource
+**BioETL Ops HTTP**). The former detached Quarantine Explorer on `:8081` and
+auto-ensure path for `quarantine serve` are **not** part of the default surface
+after 2026-07-23. For opt-out of any remaining observability-backend helpers use
+`--no-ensure-observability-backend` where the CLI still exposes that flag.
 
 Для inspection используются команды:
 
@@ -489,8 +489,8 @@ export BIOETL_METRICS_ENABLED=false
 При выполнении пайплайна доступен HTTP health server:
 
 ```bash
-# Включён по умолчанию на порту 8081
-bioetl run --pipeline chembl_activity --health-port 8081
+# Docker main / Grafana Ops HTTP identity: :8000
+bioetl run --pipeline chembl_activity --health-port 8000
 
 # Отключить
 bioetl run --pipeline chembl_activity --no-health-server
@@ -505,13 +505,13 @@ bioetl run --pipeline chembl_activity --no-health-server
 ### Standalone Health Server
 
 ```bash
-bioetl health server --host 0.0.0.0 --port 8081
+bioetl health server --host 0.0.0.0 --port 8000
 ```
 
-> Примечание: для `Silver Reject Explorer` этот сервер должен быть доступен
-> из Grafana container (`host.docker.internal:8081`). Если поднять его только на
-> `127.0.0.1`, datasource `Quarantine Explorer` не сможет получить данные и
-> панели будут показывать `No data`.
+> Примечание: Grafana identity panels use datasource **BioETL Ops HTTP** →
+> health server (`http://bioetl:8000` in compose, or host override via
+> `BIOETL_OPS_HTTP_URL`). Record-level quarantine forensics use CLI
+> `bioetl quarantine inspect`, not a Grafana explorer.
 
 ______________________________________________________________________
 

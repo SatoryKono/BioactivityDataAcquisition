@@ -4,39 +4,48 @@ from __future__ import annotations
 
 import ast
 from pathlib import Path
-import shutil
-import subprocess
 
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
-SRC_ROOT = ROOT / "src"
 TARGET_MODULE = "bioetl.infrastructure.storage.bronze.metadata_builders"
 ALLOWED_IMPORTERS = {
     "src/bioetl/infrastructure/storage/bronze/metadata_mixin.py",
 }
 
+# Narrow scan: only the bronze storage package (and its package root).
+# Full-tree scans hang on cloud-synced checkouts with large __pycache__ trees.
+_SCAN_DIRS = (
+    ROOT / "src" / "bioetl" / "infrastructure" / "storage" / "bronze",
+)
+
+
+def _iter_python_files(directory: Path) -> list[Path]:
+    if not directory.is_dir():
+        return []
+    return sorted(
+        path
+        for path in directory.glob("*.py")
+        if path.is_file() and path.name != "__pycache__"
+    )
+
 
 def _candidate_import_paths(pattern: str) -> list[Path]:
-    if shutil.which("rg") is None:
-        return sorted(
-            path
-            for path in SRC_ROOT.rglob("*.py")
-            if pattern in path.read_text(encoding="utf-8")
-        )
-
-    result = subprocess.run(
-        ["rg", "-l", pattern, str(SRC_ROOT), "-g", "*.py"],
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    if result.returncode not in {0, 1}:
-        raise RuntimeError(result.stderr.strip() or f"rg failed for {pattern!r}")
-    return [Path(line) for line in result.stdout.splitlines() if line.strip()]
+    """Return bronze package paths that contain *pattern* as text."""
+    needle = pattern.encode("utf-8")
+    matches: list[Path] = []
+    for scan_dir in _SCAN_DIRS:
+        for path in _iter_python_files(scan_dir):
+            try:
+                if needle in path.read_bytes():
+                    matches.append(path)
+            except OSError:
+                continue
+    return matches
 
 
 @pytest.mark.architecture
+@pytest.mark.timeout(30)
 def test_runtime_code_does_not_import_legacy_bronze_metadata_builders_directly() -> (
     None
 ):

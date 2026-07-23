@@ -142,6 +142,9 @@ def _render_markdown(
 
 def _write_text(path: Path, content: str) -> None:
     """Write UTF-8 text, creating parent directories as needed."""
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
+    path = resolve_output_path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
 

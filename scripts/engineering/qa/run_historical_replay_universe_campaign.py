@@ -62,7 +62,9 @@ def _load_external_records(
 ) -> tuple[HistoricalReplayUniverseExternalRecord, ...]:
     records: list[HistoricalReplayUniverseExternalRecord] = []
     for raw_path in paths:
-        path = Path(raw_path)
+        from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+        path = resolve_output_path(Path(raw_path), root=REPO_ROOT)
         payload = json.loads(path.read_text(encoding="utf-8"))
         pack_ref = str(payload.get("pack_id") or path.name)
         raw_records = payload.get("records")

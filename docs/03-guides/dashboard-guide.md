@@ -38,10 +38,13 @@ Detailed monitoring setup remains in `grafana/README.md` and
 | --- | --- |
 | Dashboard provisioning | `grafana/provisioning/dashboards/bioetl.yaml` |
 | Prometheus datasource | `grafana/provisioning/datasources-core/prometheus.yml` |
-| Quarantine Explorer datasource | `grafana/provisioning/datasources-core/quarantine-explorer.yml` |
-| Loki datasource | `grafana/provisioning/datasources-tracing/loki.yml` |
-| Tempo datasource | `grafana/provisioning/datasources-tracing/tempo.yml` |
+| BioETL Ops HTTP datasource | `grafana/provisioning/datasources-core/bioetl-ops-http.yml` |
 | Prometheus rules | `grafana/prometheus-rules/*.yml` |
+
+> Monitoring stack is **opt-in** (`make docker-start-monitoring`).
+> Removed 2026-07-23: Loki, Tempo, Quarantine Explorer datasource, Silver Reject
+> Explorer dashboard — see
+> [monitoring-surface-reduction](../05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md).
 
 ## Validation
 

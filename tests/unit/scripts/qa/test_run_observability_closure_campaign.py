@@ -965,7 +965,8 @@ def test_execute_then_finalize_writes_complete_report_only_when_every_gate_is_sa
 ) -> None:
     audit_root = tmp_path / "audit"
     data_root, log_root = _canonical_roots(tmp_path)
-    revision = campaign._source_revision(campaign._repo_root())
+    # Avoid real git status on large/cloud-synced dirty trees (hangs unit suite).
+    revision = "test-revision-deadbeef"
     monkeypatch.setattr(
         campaign,
         "_source_provenance",
@@ -976,6 +977,7 @@ def test_execute_then_finalize_writes_complete_report_only_when_every_gate_is_sa
             "dirty_entries": (),
         },
     )
+    monkeypatch.setattr(campaign, "_source_revision", lambda _repo_root: revision)
 
     def fake_attempt(**kwargs: object) -> campaign.AttemptEvidence:
         pipeline = str(kwargs["pipeline"])
@@ -1075,7 +1077,8 @@ def test_execute_returns_nonzero_when_campaign_is_incomplete(
 ) -> None:
     audit_root = tmp_path / "audit"
     data_root, log_root = _canonical_roots(tmp_path)
-    revision = campaign._source_revision(campaign._repo_root())
+    # Avoid real git status on large/cloud-synced dirty trees (hangs unit suite).
+    revision = "test-revision-deadbeef"
     monkeypatch.setattr(
         campaign,
         "_source_provenance",
@@ -1086,6 +1089,7 @@ def test_execute_returns_nonzero_when_campaign_is_incomplete(
             "dirty_entries": (),
         },
     )
+    monkeypatch.setattr(campaign, "_source_revision", lambda _repo_root: revision)
 
     def fake_failed_attempt(**kwargs: object) -> campaign.AttemptEvidence:
         pipeline = str(kwargs["pipeline"])

@@ -747,10 +747,10 @@ def _write_artifacts(
     root: Path | None = None,
 ) -> None:
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_cli_path
+        from scripts.engineering.common.repo_paths import resolve_output_path
 
-        matrix_path = resolve_cli_path(matrix_path, root=root)
-        report_path = resolve_cli_path(report_path, root=root)
+        matrix_path = resolve_output_path(matrix_path, root=root)
+        report_path = resolve_output_path(report_path, root=root)
     matrix_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.parent.mkdir(parents=True, exist_ok=True)
     matrix_path.write_text(matrix_content, encoding="utf-8", newline="")
@@ -761,9 +761,9 @@ def _artifact_matches(
     path: Path, expected: str, *, root: Path | None = None
 ) -> bool:
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_cli_path
+        from scripts.engineering.common.repo_paths import resolve_output_path
 
-        path = resolve_cli_path(path, root=root)
+        path = resolve_output_path(path, root=root)
     if not path.exists():
         print(f"[drift] missing: {path}")
         return False
@@ -830,9 +830,9 @@ def _write_baseline_json(
     path: Path, payload: dict[str, Any], *, root: Path | None = None
 ) -> None:
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_cli_path
+        from scripts.engineering.common.repo_paths import resolve_output_path
 
-        path = resolve_cli_path(path, root=root)
+        path = resolve_output_path(path, root=root)
     path.parent.mkdir(parents=True, exist_ok=True)
     content = _canonical_baseline_json(payload)
     tmp = path.with_suffix(path.suffix + ".tmp")
@@ -844,9 +844,9 @@ def _baseline_metrics_match(
     path: Path, expected_metrics: dict[str, int], *, root: Path | None = None
 ) -> bool:
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_cli_path
+        from scripts.engineering.common.repo_paths import resolve_output_path
 
-        path = resolve_cli_path(path, root=root)
+        path = resolve_output_path(path, root=root)
     if not path.exists():
         print(f"[drift] missing: {path}")
         return False
@@ -865,9 +865,9 @@ def _baseline_families_match(
     root: Path | None = None,
 ) -> bool:
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_cli_path
+        from scripts.engineering.common.repo_paths import resolve_output_path
 
-        path = resolve_cli_path(path, root=root)
+        path = resolve_output_path(path, root=root)
     if not path.exists():
         print(f"[drift] missing: {path}")
         return False
@@ -886,9 +886,9 @@ def _baseline_taxonomy_match(
     root: Path | None = None,
 ) -> bool:
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_cli_path
+        from scripts.engineering.common.repo_paths import resolve_output_path
 
-        path = resolve_cli_path(path, root=root)
+        path = resolve_output_path(path, root=root)
     if not path.exists():
         print(f"[drift] missing: {path}")
         return False

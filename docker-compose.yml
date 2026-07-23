@@ -41,10 +41,13 @@ services:
       # Optional join so an opt-in monitoring stack can scrape bioetl:8000.
       monitoring: {}
       runtime: {}
-    restart: "on-failure:3"
-    mem_limit: 1536m
-    mem_reservation: 768m
-    cpus: 2.0
+    # Prefer process restart over OOM-kill of the whole Desktop backend.
+    restart: "unless-stopped"
+    # Sized for co-tenancy with Neo4j on ~32 GiB hosts that also run IDE/WSL.
+    # Avoid --build thrash: large image builds are a common Desktop crash trigger.
+    mem_limit: 1024m
+    mem_reservation: 512m
+    cpus: 1.5
     pids_limit: 512
     init: true
     stop_grace_period: 30s

@@ -426,6 +426,9 @@ def main() -> int:
         md_path.write_text(markdown, encoding="utf-8")
     if args.summary_out:
         summary_path = Path(args.summary_out)
+        from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+        summary_path = resolve_output_path(summary_path, root=REPO_ROOT)
         summary_path.parent.mkdir(parents=True, exist_ok=True)
         with summary_path.open("a", encoding="utf-8") as handle:
             handle.write(markdown)

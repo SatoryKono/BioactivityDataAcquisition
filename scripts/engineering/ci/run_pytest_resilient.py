@@ -110,6 +110,9 @@ def _run_pass(
     timeout_seconds: float | None = None,
 ) -> PassResult:
     """Run pytest pass and persist logs/artifacts."""
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    reports_dir = resolve_output_path(reports_dir, root=REPO_ROOT)
     reports_dir.mkdir(parents=True, exist_ok=True)
     junit_path = reports_dir / f"junit_{name}.xml"
     log_path = reports_dir / f"{name}.log"
@@ -128,8 +131,10 @@ def _run_pass(
     sys.stdout.write(f"Command: {' '.join(command)}\n")
     timed_out = False
     try:
+        from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
         completed = subprocess.run(  # nosec B603
-            command,
+            ensure_safe_cli_argv([str(token) for token in command]),
             capture_output=True,
             text=True,
             check=False,
@@ -165,6 +170,9 @@ def _run_pass(
 
 def _write_summary(path: Path, lines: list[str]) -> None:
     """Write plain-text summary to disk."""
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    path = resolve_output_path(path, root=REPO_ROOT)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 

@@ -23,6 +23,9 @@ def dedupe_preserve_order(values: list[str]) -> list[str]:
 def write_jsonl(path: Path, rows: list[dict[str, Any]]) -> Path:
     """Write a deterministic JSONL artifact."""
     path.parent.mkdir(parents=True, exist_ok=True)
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    path = resolve_output_path(path, root=REPO_ROOT)
     with path.open("w", encoding="utf-8") as handle:
         for row in rows:
             handle.write(json.dumps(row, sort_keys=True, ensure_ascii=True))

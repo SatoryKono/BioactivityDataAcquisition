@@ -34,13 +34,13 @@ is `SELECTED RUN`, and score/count/freshness evidence below the answer row is
 ### 4. ID
 - **Type:** Table
 - **Purpose:** Show run ID, pipeline, run type, and timestamp.
-- **Data sources:** Quarantine Explorer HTTP control-plane identity endpoint
+- **Data sources:** BioETL Ops HTTP control-plane identity endpoint
   `/ops/control-plane/identity-table`; this is not a Prometheus panel.
 
 ### 5. Processed Records
 - **Type:** Table
 - **Purpose:** Show records processed by stage.
-- **Data sources:** Quarantine Explorer HTTP
+- **Data sources:** BioETL Ops HTTP
   `/ops/observability/processed-records`; this is not a Prometheus panel.
 
 ### 6. Track Range Evidence: Bronze -> Silver -> Gold

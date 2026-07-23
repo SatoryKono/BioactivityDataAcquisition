@@ -122,13 +122,13 @@ multiple runs; use RunLedger for exact reconciliation.
 ### 22. ID
 - **Type:** Table
 - **Purpose:** Show run ID, pipeline, run type, and timestamp.
-- **Data sources:** Quarantine Explorer HTTP control-plane identity endpoint
+- **Data sources:** BioETL Ops HTTP control-plane identity endpoint
   `/ops/control-plane/identity-table`; this is not a Prometheus panel.
 
 ### 23. Processed Records
 - **Type:** Table
 - **Purpose:** Show records processed by stage.
-- **Data sources:** Quarantine Explorer HTTP
+- **Data sources:** BioETL Ops HTTP
   `/ops/observability/processed-records`; this is not a Prometheus panel.
 
 ### 24. Alert/SLO Triage

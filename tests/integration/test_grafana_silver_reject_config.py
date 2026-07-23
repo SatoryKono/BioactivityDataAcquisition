@@ -1,7 +1,3 @@
-import pytest
-
-pytestmark = pytest.mark.skip(reason="Silver Reject Explorer removed 2026-07-23")
-
 """Focused Grafana contract checks for Silver reject summary surfaces."""
 
 from pathlib import Path
@@ -14,8 +10,10 @@ from tests.integration._grafana_test_support import (
     load_dashboard,
 )
 
-
-pytestmark = pytest.mark.integration
+pytestmark = [
+    pytest.mark.integration,
+    pytest.mark.skip(reason="Silver Reject Explorer removed 2026-07-23"),
+]
 
 
 def test_silver_filter_reject_accounting_mismatch_panel_uses_reconciliation_rule() -> (
@@ -369,9 +367,9 @@ def test_silver_reject_explorer_pipeline_scope_is_single_select_and_fail_closed(
     None
 ):
     """Explorer must enforce one concrete pipeline for quarantine-backed reads."""
+    if not Path("grafana/dashboards/bioetl-silver-reject-explorer.json").exists():
+        pytest.skip("Silver Reject Explorer removed 2026-07-23")
     dashboard = load_dashboard(
-        if not Path("grafana/dashboards/bioetl-silver-reject-explorer.json").exists():
-            pytest.skip("Silver Reject Explorer removed 2026-07-23")
         Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
     )
     variable_map = {
@@ -498,9 +496,9 @@ def test_silver_filter_rejects_summary_panels_use_instant_queries(
 
 def test_silver_reject_explorer_payload_link_preserves_time_scope() -> None:
     """Payload-hash self-link should keep the active time range."""
+    if not Path("grafana/dashboards/bioetl-silver-reject-explorer.json").exists():
+        pytest.skip("Silver Reject Explorer removed 2026-07-23")
     dashboard = load_dashboard(
-        if not Path("grafana/dashboards/bioetl-silver-reject-explorer.json").exists():
-            pytest.skip("Silver Reject Explorer removed 2026-07-23")
         Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
     )
     panel = next(
@@ -549,9 +547,9 @@ def test_silver_reject_explorer_payload_link_preserves_time_scope() -> None:
 
 def test_silver_reject_explorer_backend_health_marker_uses_live_health_probe() -> None:
     """Explorer must expose a first-screen backend trust marker via /health/live."""
+    if not Path("grafana/dashboards/bioetl-silver-reject-explorer.json").exists():
+        pytest.skip("Silver Reject Explorer removed 2026-07-23")
     dashboard = load_dashboard(
-        if not Path("grafana/dashboards/bioetl-silver-reject-explorer.json").exists():
-            pytest.skip("Silver Reject Explorer removed 2026-07-23")
         Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
     )
     panel = next(
@@ -587,9 +585,9 @@ def test_silver_reject_explorer_backend_health_marker_uses_live_health_probe() -
 
 def test_silver_reject_explorer_first_action_documents_no_data_semantics() -> None:
     """Explorer must make 0-vs-no-data interpretation visible on first screen."""
+    if not Path("grafana/dashboards/bioetl-silver-reject-explorer.json").exists():
+        pytest.skip("Silver Reject Explorer removed 2026-07-23")
     dashboard = load_dashboard(
-        if not Path("grafana/dashboards/bioetl-silver-reject-explorer.json").exists():
-            pytest.skip("Silver Reject Explorer removed 2026-07-23")
         Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
     )
     panel = next(
@@ -617,9 +615,9 @@ def test_silver_reject_explorer_scope_banner_documents_zero_reject_workflow_case
     None
 ):
     """Scope note must explain the intentional zero-reject workflow empty state."""
+    if not Path("grafana/dashboards/bioetl-silver-reject-explorer.json").exists():
+        pytest.skip("Silver Reject Explorer removed 2026-07-23")
     dashboard = load_dashboard(
-        if not Path("grafana/dashboards/bioetl-silver-reject-explorer.json").exists():
-            pytest.skip("Silver Reject Explorer removed 2026-07-23")
         Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
     )
     panel = next(
@@ -658,9 +656,9 @@ def test_silver_reject_explorer_panels_have_specific_triage_descriptions(
     panel_title: str,
 ) -> None:
     """Panel descriptions should explain selected-range triage semantics, not generic status copy."""
+    if not Path("grafana/dashboards/bioetl-silver-reject-explorer.json").exists():
+        pytest.skip("Silver Reject Explorer removed 2026-07-23")
     dashboard = load_dashboard(
-        if not Path("grafana/dashboards/bioetl-silver-reject-explorer.json").exists():
-            pytest.skip("Silver Reject Explorer removed 2026-07-23")
         Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
     )
     panel = next(
@@ -694,9 +692,9 @@ def test_silver_reject_explorer_datasource_trust_copy_distinguishes_empty_scope_
     panel_title: str,
 ) -> None:
     """HTTP-backed explorer panels must explain empty-result vs backend-failure semantics."""
+    if not Path("grafana/dashboards/bioetl-silver-reject-explorer.json").exists():
+        pytest.skip("Silver Reject Explorer removed 2026-07-23")
     dashboard = load_dashboard(
-        if not Path("grafana/dashboards/bioetl-silver-reject-explorer.json").exists():
-            pytest.skip("Silver Reject Explorer removed 2026-07-23")
         Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
     )
     panel = next(
@@ -740,9 +738,9 @@ def test_silver_reject_explorer_datasource_trust_copy_distinguishes_empty_scope_
 
 def test_silver_reject_summary_panels_use_quarantine_explorer_stats_endpoint() -> None:
     """Summary panels must validate the real Quarantine Explorer stats path."""
+    if not Path("grafana/dashboards/bioetl-silver-reject-explorer.json").exists():
+        pytest.skip("Silver Reject Explorer removed 2026-07-23")
     dashboard = load_dashboard(
-        if not Path("grafana/dashboards/bioetl-silver-reject-explorer.json").exists():
-            pytest.skip("Silver Reject Explorer removed 2026-07-23")
         Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
     )
     expected_titles = {
@@ -771,9 +769,9 @@ def test_silver_reject_summary_panels_use_quarantine_explorer_stats_endpoint() -
 
 def test_silver_reject_summary_panels_tie_zero_state_to_datasource_response() -> None:
     """Explorer copy must distinguish real zero-reject results from datasource UNKNOWN."""
+    if not Path("grafana/dashboards/bioetl-silver-reject-explorer.json").exists():
+        pytest.skip("Silver Reject Explorer removed 2026-07-23")
     dashboard = load_dashboard(
-        if not Path("grafana/dashboards/bioetl-silver-reject-explorer.json").exists():
-            pytest.skip("Silver Reject Explorer removed 2026-07-23")
         Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
     )
     expected_phrases = {
@@ -1036,9 +1034,9 @@ def test_dq_breakdown_panels_document_no_data_as_absence_of_observations(
 
 def test_silver_reject_trend_panels_use_filtered_timeseries_endpoint() -> None:
     """Trend panels must use the dedicated filtered-timeseries backend path."""
+    if not Path("grafana/dashboards/bioetl-silver-reject-explorer.json").exists():
+        pytest.skip("Silver Reject Explorer removed 2026-07-23")
     dashboard = load_dashboard(
-        if not Path("grafana/dashboards/bioetl-silver-reject-explorer.json").exists():
-            pytest.skip("Silver Reject Explorer removed 2026-07-23")
         Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
     )
     expected_titles = {

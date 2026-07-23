@@ -283,7 +283,9 @@ def _junit_suites(root: ET.Element) -> list[ET.Element]:
 def _run_architecture_tests(pytest_path: str) -> ArchitectureTestStats:
     with tempfile.TemporaryDirectory(prefix="quality-arch-") as tmp_dir:
         junit_path = Path(tmp_dir) / "architecture.junit.xml"
-        cmd = _architecture_test_cmd(pytest_path, junit_path)
+        from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+        cmd = ensure_safe_cli_argv(_architecture_test_cmd(pytest_path, junit_path))
         result = subprocess.run(
             cmd,
             capture_output=True,
@@ -393,6 +395,9 @@ def _coverage_percent(coverage_xml_path: Path) -> float | None:
 
 
 def _load_yaml_mapping(path: Path) -> dict[str, object]:
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    path = resolve_output_path(path, root=REPO_ROOT)
     if not path.exists():
         return {}
     raw = yaml.safe_load(path.read_text(encoding="utf-8"))
@@ -993,6 +998,9 @@ def _summary_lines(
 
 def _write_output(path: Path, output: dict[str, object]) -> None:
     """Write JSON quality gate payload."""
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    path = resolve_output_path(path, root=REPO_ROOT)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         json.dumps(output, ensure_ascii=False, indent=2) + "\n",
@@ -1002,6 +1010,9 @@ def _write_output(path: Path, output: dict[str, object]) -> None:
 
 def _append_summary(path: Path, summary_lines: list[str]) -> None:
     """Append markdown summary to the requested file."""
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    path = resolve_output_path(path, root=REPO_ROOT)
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as stream:
         stream.write("\n".join(summary_lines) + "\n")

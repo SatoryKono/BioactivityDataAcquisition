@@ -489,6 +489,9 @@ def render_markdown_note(metadata: dict[str, Any], body: str) -> str:
 
 def write_markdown_note(path: Path, metadata: dict[str, Any], body: str) -> Path:
     """Write a markdown note with YAML frontmatter."""
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
+    path = resolve_output_path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(render_markdown_note(metadata, body), encoding="utf-8")
     return path

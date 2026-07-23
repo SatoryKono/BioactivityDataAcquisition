@@ -209,30 +209,9 @@ def semantic_gate_evidence(results: list[AuditResult]) -> dict[str, Any]:
 
 
 REVIEWED_PANEL_SPECS: tuple[PanelAuditSpec, ...] = (
-    PanelAuditSpec(
-        dashboard_uid="bioetl-runtime",
-        panel_id=250,
-        title="Inspect Warning Logs",
-        source_kind="loki",
-        semantic_kind="loki_query",
-        target_ref_id="A",
-    ),
-    PanelAuditSpec(
-        dashboard_uid="bioetl-runtime",
-        panel_id=251,
-        title="Inspect GLOBAL Unstructured Logs",
-        source_kind="loki",
-        semantic_kind="loki_query",
-        target_ref_id="A",
-    ),
-    PanelAuditSpec(
-        dashboard_uid="bioetl-runtime",
-        panel_id=257,
-        title="Inspect Top Warning Events by Event / Logger / Range",
-        source_kind="loki",
-        semantic_kind="loki_query",
-        target_ref_id="A",
-    ),
+    # Runtime Loki log-hygiene panels (250/251/257) were removed from the
+    # shipped bioetl-runtime surface (2026-07). Keep HTTP/Prometheus reviewed
+    # panels only; Loki coverage is optional via discovered specs when present.
     PanelAuditSpec(
         dashboard_uid="bioetl-control-plane-v1",
         panel_id=9402,
@@ -302,13 +281,6 @@ REVIEWED_PANEL_SPECS: tuple[PanelAuditSpec, ...] = (
         title="Monitor: Checkpoint Freshness Lag (seconds)",
         source_kind="http",
         semantic_kind="freshness",
-    ),
-    PanelAuditSpec(
-        dashboard_uid="bioetl-silver-reject-explorer",
-        panel_id=3,
-        title="Track Reject Rate vs Bronze",
-        source_kind="http",
-        semantic_kind="http_summary",
     ),
     PanelAuditSpec(
         dashboard_uid="bioetl-runtime",

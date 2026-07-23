@@ -88,18 +88,18 @@ Pushgateway publication на завершении run. Это позволяет
 метрики после завершения процесса и уменьшает зависимость operator-поверхностей
 от удачного scrape-окна.
 
-Для Loki в shipped конфигурации уже включён `limits_config.volume_enabled: true`
-в файле `grafana/loki-config.yml`.
-Это полезно для live validation и Explore-side log volume inspection, даже если
-сами Prometheus dashboards не зависят от этой опции напрямую.
+Loki/Tempo **не** входят в shipping monitoring surface (removed 2026-07-23).
+Use structured application logs and Prometheus metrics for local ops; optional
+external log/trace backends are BYO.
 
 ## 2. Использование дашбордов
 
 Этот guide владеет operator workflow, но не повторяет panel inventory. JSON,
 версии и datasources принадлежат
 [Dashboard Inventory](../03-guides/dashboards/dashboard-inventory.md); точные
-панели, формулы, queries и no-data semantics принадлежат восьми canonical
-файлам `docs/03-guides/dashboards/panels/*-panels.md`.
+панели, формулы, queries и no-data semantics принадлежат seven canonical
+файлам `docs/03-guides/dashboards/panels/*-panels.md` (Silver Reject Explorer
+panel guide is historical only).
 
 ### Маршрутизация расследования
 
@@ -112,7 +112,7 @@ Pushgateway publication на завершении run. Это позволяет
 | DQ contract | `4. Data Quality` | Разделить Silver и Gold rejects. |
 | Composite workflow | `5. Workflow` | Проверить состояния шагов. |
 | Alerts и SLO | `6. Alerts & SLO` | Перейти к alert-backed процедуре ниже. |
-| Silver rejects | `Silver Reject Explorer` | Read-only inspect; actions остаются в CLI. |
+| Silver rejects | CLI `bioetl quarantine inspect` (+ aggregates in `4. Data Quality`) | Explorer UI removed; actions остаются в CLI. |
 
 `OK/WARN/CRIT` — business severity; `INCOMPLETE` — неполное evidence;
 `UNKNOWN` — отсутствие честного verdict; `ERROR` — query/datasource/backend
@@ -224,39 +224,22 @@ QA image, rule fixtures, and monitoring-profile pins in one reviewed change.
   1. Подтвердите spike в `1. Overview` или `2. Runtime`.
   1. Перейдите в `4. Data Quality` и проверьте `Inspect: Top Silver Reject Reasons (Pareto)` /
      `Inspect: Top Silver Reject Fields`.
-  1. Перейдите в `Silver Reject Explorer` для списка записей и detail по `payload_hash`.
-  1. Если нужны action-операции, используйте quarantine CLI (`inspect/resolve/replay`).
-- **`Silver Reject Explorer` показывает `No data` во всех панелях**:
-  1. Проверьте, что backend доступен и `pipeline` явно задан:
-     `curl "http://127.0.0.1:8081/ops/quarantine/filter-options?pipeline=<pipeline_name>"`.
-  1. Убедитесь, что в dashboard выбран конкретный `$pipeline` (single-select),
-     а не общий scope.
-  1. Проверьте, что сервер поднят с внешним bind для Grafana container:
-     `bioetl quarantine serve --host 0.0.0.0 --port 8081`.
-  1. Проверьте наличие Infinity plugin и datasource:
-     `curl -u admin:<password> http://localhost:3000/api/datasources` должен содержать `Quarantine Explorer`,
-     а `curl -u admin:<password> http://localhost:3000/api/plugins/yesoreyeram-infinity-datasource/settings`
-     должен возвращать `200`.
-  1. Для закреплённого Grafana 12 используйте только
-     `GF_PLUGINS_PREINSTALL=yesoreyeram-infinity-datasource`. Не задавайте одновременно
-     legacy `GF_INSTALL_PLUGINS`: старый startup helper повторно запускает CLI installer,
-     задерживает readiness и может вызвать restart-loop после восстановления volume.
-  1. Убедитесь, что Grafana datasource `Quarantine Explorer` указывает на
-     Docker-default `http://quarantine-explorer:8081` через monitoring-network
-     alias или на ваш explicit override `BIOETL_QUARANTINE_EXPLORER_URL`.
-  1. Если используется host-side override `http://host.docker.internal:8081`,
-     проверьте, что backend запущен как
-     `bioetl quarantine serve --host 0.0.0.0 --port 8081`.
+  1. Для record-level списка используйте CLI:
+     `bioetl quarantine inspect --pipeline <pipeline> --silver-filter-only ...`
+     (Grafana Silver Reject Explorer UI removed 2026-07-23).
+  1. Action-операции: quarantine CLI (`inspect/resolve/replay/purge`).
+- **Identity / Processed Records cards показывают `No data`**:
+  1. Проверьте main health server: `curl http://127.0.0.1:8000/health/live`.
+  1. Убедитесь, что Grafana datasource **BioETL Ops HTTP** указывает на
+     `http://bioetl:8000` (или `BIOETL_OPS_HTTP_URL` override).
+  1. Infinity plugin must be available for HTTP panels
+     (`yesoreyeram-infinity-datasource`).
   1. Если Grafana уходит в restart loop, проверьте `docker logs bioetl-grafana`:
      shipped bootstrap entrypoint удаляет stale local `grafana-image-renderer`
      plugin из persistent volume, когда включён remote renderer sidecar.
   1. Если Grafana Render API (`/render/...`) возвращает `500`, пересоздайте
-     `renderer` и `grafana` из текущего `docker-compose.monitoring.yml`.
-     Repo-backed renderer config должен использовать pinned
-     `grafana/grafana-image-renderer:5.0.0`, matching
-     `GF_RENDERING_RENDERER_TOKEN` / `AUTH_TOKEN`, `BROWSER_FLAGS` вместо
-     legacy `RENDERING_ARGS`, `shm_size: 2gb` и Prometheus target
-     `grafana-image-renderer`.
+     `renderer` и `grafana` из текущего `docker-compose.monitoring.yml`
+     (opt-in monitoring stack).
 - **Дашборд пустой**:
   1. Проверьте, что пайплайн-процесс запущен и не завершился с ошибкой.
   1. Убедитесь, что пайплайн запущен с метриками (`BIOETL_METRICS_ENABLED=true`).
