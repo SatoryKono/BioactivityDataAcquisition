@@ -207,6 +207,17 @@ ______________________________________________________________________
 | RULES-§4.2 | No print()/sentinel  | Fix uses structured logging               |
 | ADR-014    | Deterministic writes | Fix doesn't break sort_by/UTC/atomic      |
 
+### Docker Desktop flaps (Windows)
+
+When `docker info` fails with missing `dockerDesktopLinuxEngine` npipe:
+
+1. Check free host RAM (need ≥4 GiB before thrash).
+2. Prefer `.\scripts\ops\runtime\docker\ensure-stable.ps1 -RestartWsl -WithNeo4j`
+   — not multi-stack `compose --build` / `--force-recreate`.
+3. Confirm default surface is main `:8000` only; do not auto-start monitoring.
+4. See curated lesson `src/memory/curated/lessons/docker-desktop-wsl-stability-32gib.md`
+   and `docs/DOCKER_QUICKSTART.md` Stability section.
+
 ______________________________________________________________________
 
 ## 9. Common Fix Patterns

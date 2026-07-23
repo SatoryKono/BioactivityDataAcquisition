@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.15
+Version: 1.0.16
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-16'
+  Last verified: '2026-07-24'
 
 ______________________________________________________________________
 
@@ -15,7 +15,7 @@ ______________________________________________________________________
 
 *Статус: internal-published (Internal / Extended)*
 
-*Версия: 1.0.15 | Дата: 2026-07-16 | Синхронизировано с Codex ORCHESTRATION.md v4.2, RULES.md v6.1.5*
+*Версия: 1.0.16 | Дата: 2026-07-24 | Синхронизировано с Codex ORCHESTRATION.md v4.2, RULES.md v6.1.5*
 
 > **Runtime note:** для Codex source-of-truth orchestration живёт в `.codex/agents/ORCHESTRATION.md`; другие runtimes могут сохранять отдельные runtime-specific copies и не обязаны совпадать побайтно с Codex surface.
 
@@ -62,7 +62,7 @@ ______________________________________________________________________
 | Аспект          | Значение                                                                          |
 | --------------- | --------------------------------------------------------------------------------- |
 | Архитектура     | Hexagonal (Ports & Adapters) + Medallion (Bronze→Silver→Gold) + DDD               |
-| Deployment      | Local-Only (ADR-010) — без Docker/Redis в runtime                                 |
+| Deployment      | Local-Only (ADR-010) — Docker optional adjunct, not required runtime              |
 | Провайдеры      | ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar (7 шт.)     |
 | ADR             | Текущий набор в `docs/02-architecture/decisions/`; ADR-008 исторически superseded |
 | Coverage target | ≥85% overall, ≥90% domain                                                         |
@@ -89,6 +89,11 @@ ______________________________________________________________________
 | Configs (unified)                           | `configs/entities/{provider}/{entity}.yaml`            |
 | Configs (composite)                         | `configs/composites/{entity}.yaml`                     |
 | Dashboard extension guide (LLM)             | `docs/03-guides/dashboards/dashboard-extension-llm.md` |
+| Docker quickstart (optional)                | `docs/DOCKER_QUICKSTART.md`                            |
+| Docker setup / recovery (optional)          | `docs/DOCKER_SETUP.md`                                 |
+| Stable Docker launcher (Windows)            | `scripts/ops/runtime/docker/ensure-stable.ps1`         |
+| Pipeline/workflow run reports               | `docs/04-reference/reports/run-reports.md`             |
+| Run-report contracts                        | `configs/contracts/reports/`                           |
 
 ### Evidence anchors
 
@@ -167,6 +172,30 @@ Qodo IDs после deduplication. Это не полный export: endpoint
   `UnifiedHTTPClient`;
 - Silver/Gold используют Delta Lake; exact final DataFrame проходит Pandera
   validation непосредственно перед write, Gold validation strict/fail-closed.
+
+### Docker / WSL (optional adjunct, Windows hosts)
+
+- Docker is **not** required for ordinary tests/runtime (ADR-010). When used:
+  default surface = **main** health server `:8000`; monitoring opt-in;
+  Loki/Tempo/Quarantine Explorer UI removed from compose.
+- Crash pattern: free host RAM &lt; ~4 GiB + thrash → `docker-desktop` WSL
+  **Stopped** → missing `dockerDesktopLinuxEngine` npipe.
+- Prefer:
+  `.\scripts\ops\runtime\docker\ensure-stable.ps1 -WithNeo4j`
+  after flap: add `-RestartWsl`.
+- Host class defaults: WSL `memory=6GB`, main/neo4j mem_limit **768m**,
+  never multi-stack `--build` / `--force-recreate` thrash.
+- Curated lesson: `src/memory/curated/lessons/docker-desktop-wsl-stability-32gib.md`
+
+### Run reports + governance closeouts
+
+- Post-run reports: `pipeline_run_report_v1` / `workflow_run_report_v1` under
+  `reports/run-reports/`; guide `docs/04-reference/reports/run-reports.md`.
+- After `src/bioetl/**` writes: refresh module-coverage inventory hash, topology
+  SUMMARY, debt gates, then pin `evidence_surface_sha256` (last), and if tests
+  changed pin `test_telemetry_baseline.yaml` `source_tree_sha256`.
+- Curated lesson: `src/memory/curated/lessons/run-reports-and-governance-hash-refresh.md`
+- **ЗАПРЕЩЕНО** поднимать tech-debt budgets, чтобы закрыть stale-hash gates.
 
 ### Быстрые команды
 
