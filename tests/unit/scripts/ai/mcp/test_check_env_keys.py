@@ -8,6 +8,8 @@ import pytest
 
 from scripts.ai.mcp._check_env_keys import load_dotenv
 
+pytestmark = pytest.mark.unit
+
 
 class TestLoadDotenv:
     """Test .env file parsing logic."""
