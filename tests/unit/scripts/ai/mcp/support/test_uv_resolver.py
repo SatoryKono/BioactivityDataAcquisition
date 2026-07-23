@@ -6,11 +6,13 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 
 class TestUvResolverStructure:
     """Test uv_resolver.sh script structure and behavior."""
 
-    def test_script_exists(self) -> None:
+    def test_uv_resolver_script_exists(self) -> None:
         """Test that the resolver script exists."""
         script_path = Path("E:/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/support/uv_resolver.sh")
         assert script_path.exists()

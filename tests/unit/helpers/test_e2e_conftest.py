@@ -366,7 +366,9 @@ def test_windows_e2e_timeout_exceeds_inner_merge_budget() -> None:
 
     assert outer_timeout > inner_timeout
     assert inner_timeout == 300
-    assert outer_timeout == 420
+    # Windows needs headroom for bootstrap/Bronze before the 300s inner Delta
+    # budget; keep outer pytest timeout above that envelope (currently 720s).
+    assert outer_timeout == 720
 
 
 def test_windows_two_pipeline_timeout_exceeds_single_run_budget() -> None:

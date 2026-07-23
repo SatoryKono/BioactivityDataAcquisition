@@ -70,13 +70,13 @@ class TestLoadYamlFile:
 class TestBaseConfigLoader:
     """Test BaseConfigLoader abstract class."""
 
-    def test_initialization(self, tmp_path: Path) -> None:
+    def test_base_config_loader_initialization(self, tmp_path: Path) -> None:
         """Test that loader initializes with configs root."""
         loader = ConcreteConfigLoader(tmp_path)
         assert loader._configs_root == tmp_path
         assert loader._cache == {}
 
-    def test_clear_cache(self, tmp_path: Path) -> None:
+    def test_base_config_loader_clear_cache(self, tmp_path: Path) -> None:
         """Test that cache can be cleared."""
         loader = ConcreteConfigLoader(tmp_path)
         loader._cache["test"] = {"data": "value"}

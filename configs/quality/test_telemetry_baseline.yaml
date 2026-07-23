@@ -219,6 +219,7 @@ duration_telemetry:
     - repo-backed-storage-addendum.xml
     executed_count: 8507
     worker_mode: 'mixed: xdist unit/integration; serial contracts/repo-backed/memory'
+    junit_testcase_duration_sum_s: 4543.53
     lane_wall_time_s:
       S1-domain-core.xml: 274.486
       S1-domain-services.xml: 35.982
@@ -271,4 +272,4 @@ slow_governance_cache_probe:
       cache_path: .cache/bioetl-architecture-governance
       cache_key: source_tree_sha256 from module-coverage-inventory.json
       workflow_owner: .github/workflows/tests.yml#test-fast
-source_tree_sha256: f7ca484ecd7fb68d23c5165320ef011d7f9a3bd4db2407178b681bc6887663cc
+source_tree_sha256: f24da406077709eac730c84085674c41be14018bbd1e0645ca74efc595b70bb8
