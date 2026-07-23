@@ -1,161 +1,110 @@
 {
-  "schema_version": "tech-debt-issues-5707-5715-closeout-v1",
-  "generated_on": "2026-07-05",
-  "generated_by": "codex",
   "debt_budget_outcome": "reduced_or_unchanged",
+  "generated_by": "codex",
+  "generated_on": "2026-07-05",
   "issues": [
     {
-      "number": 5707,
-      "title": "P0 governance drift",
-      "status": "closed-ready",
       "evidence": [
         "reports/quality/debt-governance-gates.json",
         "reports/quality/module-coverage-inventory.json",
         "reports/quality/architecture-quality-scorecard.json"
-      ]
+      ],
+      "number": 5707,
+      "status": "closed-ready",
+      "title": "P0 governance drift"
     },
     {
-      "number": 5708,
-      "title": "P1 adapter duplication",
-      "status": "closed-ready",
       "evidence": [
         "src/bioetl/infrastructure/adapters/decorators/_data_source_delegation.py",
         "src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py",
         "src/bioetl/infrastructure/adapters/decorators/retry.py",
         "reports/quality/full-app-duplication-baseline.json"
-      ]
+      ],
+      "number": 5708,
+      "status": "closed-ready",
+      "title": "P1 adapter duplication"
     },
     {
-      "number": 5709,
-      "title": "P1 pipeline transformer duplication",
-      "status": "closed-ready",
       "evidence": [
         "src/bioetl/application/pipelines/uniprot/extractors/_comment_facets_data.py",
         "src/bioetl/application/pipelines/uniprot/transformer_business_data_mixin.py",
         "reports/quality/full-app-duplication-baseline.json",
         "reports/quality/full-app-duplication-baseline.md"
-      ]
+      ],
+      "number": 5709,
+      "status": "closed-ready",
+      "title": "P1 pipeline transformer duplication"
     },
     {
-      "number": 5710,
-      "title": "P1 architecture test performance",
-      "status": "closed-ready",
       "evidence": [
         "configs/quality/test_telemetry_baseline.yaml",
         "configs/quality/test_matrix.yaml",
         "reports/test-telemetry/slowest-tests.json"
-      ]
+      ],
+      "number": 5710,
+      "status": "closed-ready",
+      "title": "P1 architecture test performance"
     },
     {
-      "number": 5711,
-      "title": "P1 coverage tail",
-      "status": "closed-ready",
       "evidence": [
         "configs/quality/module_coverage_gates.yaml",
         "reports/quality/module-coverage-inventory.json",
         "reports/quality/architecture-quality-scorecard.json"
-      ]
+      ],
+      "number": 5711,
+      "status": "closed-ready",
+      "title": "P1 coverage tail"
     },
     {
-      "number": 5712,
-      "title": "P1 retained public compatibility seams",
-      "status": "closed-ready",
       "evidence": [
         "configs/quality/compatibility_facade_inventory.yaml",
         "reports/quality/compatibility-importer-census.json",
         "reports/quality/debt-governance-gates.json"
-      ]
+      ],
+      "number": 5712,
+      "status": "closed-ready",
+      "title": "P1 retained public compatibility seams"
     },
     {
-      "number": 5713,
-      "title": "P2 compatibility test cleanup",
-      "status": "closed-ready",
       "evidence": [
         "configs/quality/test_governance_audit.yaml",
         "reports/quality/test-governance-current.json"
-      ]
+      ],
+      "number": 5713,
+      "status": "closed-ready",
+      "title": "P2 compatibility test cleanup"
     },
     {
-      "number": 5714,
-      "title": "P2 dead-code governance",
-      "status": "closed-ready",
       "evidence": [
         "configs/quality/retirement_candidate_triage.yaml",
         "reports/quality/dead-code-inventory.json"
-      ]
+      ],
+      "number": 5714,
+      "status": "closed-ready",
+      "title": "P2 dead-code governance"
     },
     {
-      "number": 5715,
-      "title": "P2 architecture enforcement/no-growth guards",
-      "status": "closed-ready",
       "evidence": [
         "configs/quality/debt_scorecard.yaml",
         "configs/quality/module_coverage_gates.yaml",
         "configs/quality/test_governance_audit.yaml",
         "reports/quality/debt-governance-gates.json"
-      ]
+      ],
+      "number": 5715,
+      "status": "closed-ready",
+      "title": "P2 architecture enforcement/no-growth guards"
     }
   ],
-  "ratchets": {
-    "governance_fail_count": {
-      "current": 0,
-      "max": 0
-    },
-    "generated_artifact_drift_count": {
-      "current": 0,
-      "max": 0
-    },
-    "full_app_duplicate_clusters": {
-      "current": 0,
-      "max": 0
-    },
-    "adapter_duplicate_clusters": {
-      "current": 0,
-      "max": 0
-    },
-    "pipeline_duplicate_clusters": {
-      "current": 0,
-      "max": 0
-    },
-    "compatibility_test_files": {
-      "current": 0,
-      "max": 0
-    },
-    "duplicate_test_names": {
-      "current": 0,
-      "max": 0
-    },
-    "duplicate_test_name_occurrences": {
-      "current": 0,
-      "max": 0
-    },
-    "markerless_test_functions": {
-      "current": 0,
-      "max": 0
-    },
-    "coverage_unmeasured_modules": {
-      "current": 0,
-      "max": 0
-    },
-    "coverage_uncovered_modules": {
-      "current": 0,
-      "max": 0
-    },
-    "dead_code_untriaged_zero_import_candidates": {
-      "current": 0,
-      "max": 0
-    },
-    "retained_public_export_facade_conflicts": {
-      "current": 0,
-      "max": 0
-    }
-  },
   "outcomes": {
     "5707": {
-      "release_gate_status": "failing",
+      "architecture_quality_score": 8.66,
+      "architecture_quality_scorecard_source_tree_sha256": "29ac149740746d6d6eac2ccbf68607d047b1400e1a83629b34041f7fb5f79070",
       "fail_count": 2,
-      "warn_count": 0,
       "generated_artifact_drift_count": 1,
+      "integral_score": 8.66,
+      "module_coverage_source_tree_sha256": "5ef949891ade248c2553e54996c1e21622e603b9c52b0ada23a645720a19806a",
+      "release_gate_status": "failing",
+      "remote_main_baseline_fingerprint": "fdcb0d409d81267179b18f694b11497e4903525f4eb56a879cc12b2b61e8ade1",
       "stale_artifacts": {
         "adr_enforcement_matrix": false,
         "architecture_quality_scorecard": false,
@@ -164,51 +113,47 @@
         "module_coverage_inventory": true,
         "remote_main_baseline": false
       },
-      "module_coverage_source_tree_sha256": "5ef949891ade248c2553e54996c1e21622e603b9c52b0ada23a645720a19806a",
-      "architecture_quality_score": 8.66,
-      "remote_main_baseline_fingerprint": "fdcb0d409d81267179b18f694b11497e4903525f4eb56a879cc12b2b61e8ade1",
-      "architecture_quality_scorecard_source_tree_sha256": "29ac149740746d6d6eac2ccbf68607d047b1400e1a83629b34041f7fb5f79070",
-      "integral_score": 8.66
+      "warn_count": 0
     },
     "5708": {
-      "shared_delegation_helper": "src/bioetl/infrastructure/adapters/decorators/_data_source_delegation.py",
+      "adapter_duplicate_clusters": 0,
+      "adapter_duplicate_clusters_no_growth_max": 0,
+      "bounded_actionability_categories": [],
       "decorators_using_helper": [
         "src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py",
         "src/bioetl/infrastructure/adapters/decorators/retry.py"
       ],
-      "adapter_duplicate_clusters": 0,
-      "adapter_duplicate_clusters_no_growth_max": 0,
-      "bounded_actionability_categories": []
+      "shared_delegation_helper": "src/bioetl/infrastructure/adapters/decorators/_data_source_delegation.py"
     },
     "5709": {
+      "decision": "reduced_shared_uniprot_comment_annotation_output_keys",
+      "dominant_actionability_category": null,
       "opening_pipeline_duplicate_clusters": 15,
       "pipeline_duplicate_clusters": 0,
-      "pipeline_duplicate_clusters_no_growth_max": 0,
-      "dominant_actionability_category": null,
-      "decision": "reduced_shared_uniprot_comment_annotation_output_keys"
+      "pipeline_duplicate_clusters_no_growth_max": 0
     },
     "5710": {
-      "telemetry_source_commit": "51979de96630ce1eff88b6a2b82df04a5c9be157",
-      "telemetry_source_run_id": "local-issues-5710-5711-20260630",
-      "refreshed_at_utc": "2026-06-30T13:06:54.324571+00:00",
       "architecture_runner_backend": "run_pytest_sharded",
-      "slow_governance_lane": "S7-architecture-slow-governance",
       "cache_probe": {
-        "name": "collect_test_governance_report",
         "first_duration_s": 28.676,
-        "second_duration_s": 0.001,
-        "improvement_factor": 34900.14
-      }
+        "improvement_factor": 34900.14,
+        "name": "collect_test_governance_report",
+        "second_duration_s": 0.001
+      },
+      "refreshed_at_utc": "2026-07-23T08:11:54.191358+00:00",
+      "slow_governance_lane": "S7-architecture-slow-governance",
+      "telemetry_source_commit": "7038c078bd23b9c9810eb370793e75b2a0d63cbd",
+      "telemetry_source_run_id": "local-duration-rebuild-2026-07-23"
     },
     "5711": {
-      "source_module_count": 2241,
-      "unmeasured_module_count": 0,
+      "no_executable_line_modules": 22,
+      "source_module_count": 2244,
+      "source_tree_sha256": "e8d68d992f993154a43467232f551849ac43616ccb7a24b5a9da33f3f0682241",
       "uncovered_module_count": 0,
-      "no_executable_line_modules": 2,
-      "source_tree_sha256": "ca81217edb2aabe51ecbdb390070a8112e551b17400d9f381f5f3b2e6d44d803",
-      "under70_module_count_before": 18,
       "under70_module_count_after": 9,
-      "under85_module_count_after": 80
+      "under70_module_count_before": 18,
+      "under85_module_count_after": 80,
+      "unmeasured_module_count": 0
     },
     "5712": {
       "retained_entrypoint_count": 12,
@@ -219,32 +164,87 @@
       "twin_pair_count": 0
     },
     "5713": {
-      "compatibility_test_files": 0,
       "compatibility_test_file_max": 0,
-      "duplicate_test_names": 0,
+      "compatibility_test_files": 0,
       "duplicate_test_name_occurrences": 0,
-      "refined_assertless_tests": 0,
+      "duplicate_test_names": 0,
       "markerless_test_functions": 0,
+      "refined_assertless_tests": 0,
       "uuid4_call_sites": 0
     },
     "5714": {
-      "repo_wide_zero_import_candidate_count": 1,
-      "repo_wide_classified_zero_import_candidate_count": 1,
-      "repo_wide_untriaged_zero_import_candidate_count": 0,
-      "repo_wide_owner_test_anchored_candidate_count": 1,
       "repo_wide_candidates_without_owner_tests_count": 0,
+      "repo_wide_classified_zero_import_candidate_count": 1,
+      "repo_wide_owner_test_anchored_candidate_count": 1,
+      "repo_wide_untriaged_zero_import_candidate_count": 0,
+      "repo_wide_zero_import_candidate_count": 1,
       "review_window_next_review_by": "2026-09-14"
     },
     "5715": {
+      "compatibility_test_file_max": 0,
       "debt_budget_growth_allowed": false,
       "debt_scorecard_budget_violations": 0,
-      "module_coverage_unmeasured_limit": 0,
-      "module_coverage_uncovered_limit": 0,
-      "compatibility_test_file_max": 0,
-      "duplicate_test_names_max": 0,
       "duplicate_test_name_occurrences_max": 0,
+      "duplicate_test_names_max": 0,
       "markerless_test_functions_max": 0,
+      "module_coverage_uncovered_limit": 0,
+      "module_coverage_unmeasured_limit": 0,
       "production_uuid4_budget": 0
     }
-  }
+  },
+  "ratchets": {
+    "adapter_duplicate_clusters": {
+      "current": 0,
+      "max": 0
+    },
+    "compatibility_test_files": {
+      "current": 0,
+      "max": 0
+    },
+    "coverage_uncovered_modules": {
+      "current": 0,
+      "max": 0
+    },
+    "coverage_unmeasured_modules": {
+      "current": 0,
+      "max": 0
+    },
+    "dead_code_untriaged_zero_import_candidates": {
+      "current": 0,
+      "max": 0
+    },
+    "duplicate_test_name_occurrences": {
+      "current": 0,
+      "max": 0
+    },
+    "duplicate_test_names": {
+      "current": 0,
+      "max": 0
+    },
+    "full_app_duplicate_clusters": {
+      "current": 0,
+      "max": 0
+    },
+    "generated_artifact_drift_count": {
+      "current": 0,
+      "max": 0
+    },
+    "governance_fail_count": {
+      "current": 0,
+      "max": 0
+    },
+    "markerless_test_functions": {
+      "current": 0,
+      "max": 0
+    },
+    "pipeline_duplicate_clusters": {
+      "current": 0,
+      "max": 0
+    },
+    "retained_public_export_facade_conflicts": {
+      "current": 0,
+      "max": 0
+    }
+  },
+  "schema_version": "tech-debt-issues-5707-5715-closeout-v1"
 }
