@@ -148,8 +148,7 @@ class WorkflowRunnerService:
                 dry_run=effective_dry_run,
                 workflow_run_id=workflow_run_id,
                 manifest_id=manifest_id,
-                debug_export_enabled=debug_export_enabled,
-                debug_export_dir=debug_export_dir,
+                debug_export=(debug_export_enabled, debug_export_dir),
                 created_at_factory=created_at_factory,
             )
             _apply_workflow_step_transition(
@@ -190,11 +189,11 @@ class WorkflowRunnerService:
         dry_run: bool,
         workflow_run_id: str | None,
         manifest_id: str | None,
-        debug_export_enabled: bool,
-        debug_export_dir: str | None,
+        debug_export: tuple[bool, str | None],
         created_at_factory: Callable[[], datetime] | None,
     ) -> ResolvedWorkflowStepTransitionRecord:
         """Resolve whether a step should run, resume-skip, or failure-skip."""
+        debug_export_enabled, debug_export_dir = debug_export
         policy = resolve_step_transition_policy(
             step,
             failed_step_id=state.failed_step_id,
