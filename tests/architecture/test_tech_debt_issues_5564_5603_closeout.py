@@ -155,15 +155,13 @@ def test_issue_5603_wall_clock_seams_are_canonical_registry_owned() -> None:
     registry = _load_yaml(TIME_SEAM_REGISTRY)
     seams = registry["seams"]
 
-    assert len(seams) == 13
+    assert len(seams) == 11
     assert {
         row["path"]
         for row in seams
         if row["path"].startswith("src/bioetl/application/")
     } == {
         "src/bioetl/application/runtime_clock.py",
-        "src/bioetl/application/services/debug_export_helpers.py",
-        "src/bioetl/application/services/export_manifest_identity.py",
     }
     assert all(row["replay_critical"] is False for row in seams)
     assert all(row["category"] != "replay_time_forbidden" for row in seams)

@@ -122,7 +122,7 @@ def test_h2_pandera_silver_validator_defaults_to_strict() -> None:
 
 
 def test_h3_gold_replay_matrix_covers_all_pipelines() -> None:
-    doc = _load_yaml("reports/architecture/gold_replay_matrix.yaml")
+    doc = _load_yaml("configs/quality/architecture/gold_replay_matrix.yaml")
     assert doc["invariant"] == 14
     rows = doc["rows"]
     assert isinstance(rows, list)
@@ -154,7 +154,7 @@ def test_h3_gold_replay_matrix_covers_all_pipelines() -> None:
 
 
 def test_m1_bronze_append_only_enforcement_present() -> None:
-    doc = _load_yaml("reports/architecture/bronze_append_only_inventory.yaml")
+    doc = _load_yaml("configs/quality/architecture/bronze_append_only_inventory.yaml")
     assert "io_mixin.py" in str(doc["enforcement"]["primary"])  # type: ignore[index]
     source = (
         ROOT / "src/bioetl/infrastructure/storage/bronze/io_mixin.py"
@@ -246,7 +246,7 @@ def test_m4_governance_refresh_recipe_surfaces_exist() -> None:
 
 
 def test_m5_composition_ownership_map_and_no_business_transformers() -> None:
-    doc = _load_yaml("reports/architecture/composition_ownership_map.yaml")
+    doc = _load_yaml("configs/quality/architecture/composition_ownership_map.yaml")
     packages = {row["package"] for row in doc["packages"] if isinstance(row, dict)}  # type: ignore[union-attr]
     assert "factories" in packages
     assert "bootstrap" in packages
@@ -279,7 +279,7 @@ def test_m5_composition_ownership_map_and_no_business_transformers() -> None:
 
 
 def test_m6_quarantine_storage_is_append_only() -> None:
-    doc = _load_yaml("reports/architecture/quarantine_immutability_proof.yaml")
+    doc = _load_yaml("configs/quality/architecture/quarantine_immutability_proof.yaml")
     assert doc["storage"]["write_mode"] == "append"  # type: ignore[index]
     source = (
         ROOT / "src/bioetl/infrastructure/quarantine/unified.py"
