@@ -1751,6 +1751,110 @@ def test_runtime_cardinality_review_fails_on_current_forbidden_series(
     ]
 
 
+def test_runtime_cardinality_review_keeps_failed_status_when_another_label_query_errors(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        inventory,
+        "_load_runtime_cardinality_thresholds",
+        lambda _repo_root: {"bioetl_hotspot_total": 42},
+    )
+    monkeypatch.setattr(
+        inventory,
+        "REGISTERED_PROMETHEUS_METRIC_LABELS",
+        {"bioetl_hotspot_total": frozenset()},
+    )
+    monkeypatch.setattr(inventory, "_query_prometheus_scalar", lambda **_kwargs: 1)
+    monkeypatch.setattr(
+        inventory, "_query_prometheus_label_values", lambda **_kwargs: {}
+    )
+    monkeypatch.setattr(
+        inventory,
+        "_build_forbidden_label_live_evidence",
+        lambda **_kwargs: {
+            "current_series": {"run_id": 2},
+            "retained_series": {},
+            "query_errors": {"filesystem_path": "retained: timeout"},
+        },
+    )
+
+    summary = inventory._build_runtime_cardinality_review_summary(
+        {
+            "runtime_cardinality_reviewed": ["bioetl_hotspot_total"],
+            "runtime_cardinality_review_required": [],
+            "runtime_cardinality_threshold_violations": [],
+        },
+        repo_root=tmp_path,
+        prometheus_base_url="http://prometheus.example",
+    )
+
+    assert summary["status"] == "failed"
+    assert summary["mode"] == "live_review_unavailable"
+    assert summary["forbidden_label_current_violations"] == [
+        "run_id current_series_count=2"
+    ]
+
+
+def test_runtime_cardinality_review_audits_forbidden_labels_without_reviewed_metrics(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        inventory, "_load_runtime_cardinality_thresholds", lambda _repo_root: {}
+    )
+    monkeypatch.setattr(
+        inventory,
+        "_build_forbidden_label_live_evidence",
+        lambda **_kwargs: {
+            "current_series": {"run_id": 1},
+            "retained_series": {},
+            "query_errors": {},
+        },
+    )
+
+    summary = inventory._build_runtime_cardinality_review_summary(
+        {
+            "runtime_cardinality_reviewed": [],
+            "runtime_cardinality_review_required": [],
+            "runtime_cardinality_threshold_violations": [],
+        },
+        repo_root=tmp_path,
+        prometheus_base_url="http://prometheus.example",
+    )
+
+    assert summary["status"] == "failed"
+    assert summary["mode"] == "live_review"
+    assert summary["forbidden_label_current_violations"] == [
+        "run_id current_series_count=1"
+    ]
+
+
+def test_forbidden_label_evidence_preserves_current_when_retained_query_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        inventory, "FORBIDDEN_PROMETHEUS_LABEL_NAMES", frozenset({"run_id"})
+    )
+    monkeypatch.setattr(inventory, "_query_prometheus_scalar", lambda **_kwargs: 3)
+
+    def fail_retained_query(**_kwargs):
+        raise RuntimeError("timeout")
+
+    monkeypatch.setattr(
+        inventory, "_query_prometheus_retained_series", fail_retained_query
+    )
+
+    evidence = inventory._build_forbidden_label_live_evidence(
+        prometheus_base_url="http://prometheus.example",
+        bearer_token="",
+    )
+
+    assert evidence["current_series"] == {"run_id": 3}
+    assert evidence["retained_series"] == {}
+    assert evidence["query_errors"] == {"run_id": "retained: timeout"}
+
+
 def test_query_prometheus_scalar_parses_vector_response(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

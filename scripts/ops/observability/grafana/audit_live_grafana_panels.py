@@ -92,6 +92,7 @@ class AuditConfig:
     output_path: Path
     request_timeout_seconds: float = DEFAULT_REQUEST_TIMEOUT_SECONDS
     occurrence_id: str = ""
+    grafana_service_account_token: str = ""
 
 
 @dataclass(frozen=True)
@@ -396,6 +397,11 @@ def _parse_args(argv: list[str] | None) -> AuditConfig:
             "GF_SECURITY_ADMIN_PASSWORD; no built-in password is used."
         ),
     )
+    parser.add_argument(
+        "--grafana-service-account-token",
+        default=_read_env("GRAFANA_SERVICE_ACCOUNT_TOKEN", ""),
+        help="Grafana service-account token; preferred over Basic authentication.",
+    )
     parser.add_argument("--workflow", default=DEFAULT_WORKFLOW)
     parser.add_argument("--pipeline", default=DEFAULT_PIPELINE)
     parser.add_argument("--run-type", default=DEFAULT_RUN_TYPE)
@@ -433,6 +439,7 @@ def _parse_args(argv: list[str] | None) -> AuditConfig:
         output_path=args.output,
         request_timeout_seconds=max(float(args.request_timeout_seconds), 0.1),
         occurrence_id=str(args.occurrence_id).strip(),
+        grafana_service_account_token=str(args.grafana_service_account_token).strip(),
     )
 
 
@@ -753,10 +760,21 @@ def _fetch_text(url: str, *, timeout_seconds: float) -> str:
         return response.read().decode("utf-8")
 
 
-def _request_json(url: str, *, auth_header: str, timeout_seconds: float) -> object:
-    request = Request(url, headers={"Authorization": auth_header})
+def _request_json(
+    url: str, *, auth_header: str | None, timeout_seconds: float
+) -> object:
+    headers = {"Authorization": auth_header} if auth_header else {}
+    request = Request(url, headers=headers)
     with urlopen(request, timeout=timeout_seconds) as response:
         return json.loads(response.read().decode("utf-8"))
+
+
+def _grafana_auth_header(config: AuditConfig) -> str | None:
+    if config.grafana_service_account_token:
+        return f"Bearer {config.grafana_service_account_token}"
+    if config.grafana_password:
+        return _auth_header(config.grafana_username, config.grafana_password)
+    return None
 
 
 def _auth_header_for_url(url: str, config: AuditConfig) -> str | None:
@@ -765,7 +783,7 @@ def _auth_header_for_url(url: str, config: AuditConfig) -> str | None:
         return _auth_header(parts.username or "", parts.password or "")
     grafana_base = config.grafana_base_url.rstrip("/")
     if url.startswith(f"{grafana_base}/api/datasources/proxy/"):
-        return _auth_header(config.grafana_username, config.grafana_password)
+        return _grafana_auth_header(config)
     return None
 
 
@@ -830,9 +848,16 @@ def _discover_http_datasource_url(
         f"{config.grafana_base_url}/api/datasources/name/"
         f"{quote(datasource_name, safe='')}"
     )
+    auth_header = _grafana_auth_header(config)
+    if auth_header is None:
+        raise RuntimeError(
+            "Grafana credentials are not configured; set "
+            "GRAFANA_SERVICE_ACCOUNT_TOKEN, GRAFANA_PASSWORD, or "
+            "GF_SECURITY_ADMIN_PASSWORD"
+        )
     payload = _request_json(
         url,
-        auth_header=_auth_header(config.grafana_username, config.grafana_password),
+        auth_header=auth_header,
         timeout_seconds=config.request_timeout_seconds,
     )
     if not isinstance(payload, dict):

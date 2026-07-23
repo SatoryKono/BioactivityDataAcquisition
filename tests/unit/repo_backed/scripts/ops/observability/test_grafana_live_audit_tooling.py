@@ -309,6 +309,37 @@ def test_live_audit_parse_args_uses_grafana_env_defaults(
     assert config.run_id == "run-123"
 
 
+def test_live_audit_prefers_service_account_token_for_grafana_api(
+    monkeypatch: Any,
+) -> None:
+    monkeypatch.setenv("GRAFANA_SERVICE_ACCOUNT_TOKEN", "service-token")
+    config = audit_subject._parse_args([])
+    observed_headers: list[str | None] = []
+
+    def fake_request_json(
+        _url: str, *, auth_header: str | None, timeout_seconds: float
+    ) -> object:
+        observed_headers.append(auth_header)
+        assert timeout_seconds == config.request_timeout_seconds
+        return {"url": "http://host.docker.internal:8081"}
+
+    monkeypatch.setattr(audit_subject, "_request_json", fake_request_json)
+
+    assert config.grafana_service_account_token == "service-token"
+    assert (
+        audit_subject._auth_header_for_url(
+            f"{config.grafana_base_url}/api/datasources/proxy/uid/quarantine-explorer",
+            config,
+        )
+        == "Bearer service-token"
+    )
+    assert (
+        audit_subject._discover_http_datasource_url(config)
+        == "http://host.docker.internal:8081"
+    )
+    assert observed_headers == ["Bearer service-token"]
+
+
 def test_live_audit_substitutes_workflow_and_run_id_tokens() -> None:
     config = audit_subject.AuditConfig(
         prometheus_base_url="http://localhost:9090",

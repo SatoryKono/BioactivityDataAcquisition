@@ -422,6 +422,24 @@ async function tryExpandCollapsedRow(page, title, index, total, uid) {
       try {
         await candidate.scrollIntoViewIfNeeded().catch(() => {});
         await candidate.click({ timeout: 5000, force: attempt === 3 });
+        if (attempt === 3) {
+          const expandedState = await candidate
+            .evaluate((node) => {
+              let current = node;
+              while (current) {
+                const value = current.getAttribute?.("aria-expanded");
+                if (value !== null && value !== undefined) {
+                  return value;
+                }
+                current = current.parentElement;
+              }
+              return null;
+            })
+            .catch(() => null);
+          if (expandedState !== "true") {
+            continue;
+          }
+        }
         console.log(`[${index}/${total}] expanded row '${title}' in ${uid}`);
         return true;
       } catch {

@@ -2425,6 +2425,7 @@ def _build_forbidden_label_live_evidence(
     retained: dict[str, dict[str, object]] = {}
     errors: dict[str, str] = {}
     for label_name in sorted(FORBIDDEN_PROMETHEUS_LABEL_NAMES):
+        label_errors: list[str] = []
         try:
             current[label_name] = _query_prometheus_scalar(
                 prometheus_base_url=prometheus_base_url,
@@ -2433,21 +2434,26 @@ def _build_forbidden_label_live_evidence(
                 ),
                 bearer_token=bearer_token,
             )
+        except RuntimeError as exc:
+            label_errors.append(f"current: {exc}")
+        try:
             retained_series = _query_prometheus_retained_series(
                 prometheus_base_url=prometheus_base_url,
                 label_name=label_name,
                 bearer_token=bearer_token,
             )
         except RuntimeError as exc:
-            errors[label_name] = str(exc)
-            continue
-        metric_counts = Counter(
-            labelset.get("__name__", "<unknown>") for labelset in retained_series
-        )
-        retained[label_name] = {
-            "series_count": len(retained_series),
-            "metric_series": dict(sorted(metric_counts.items())),
-        }
+            label_errors.append(f"retained: {exc}")
+        else:
+            metric_counts = Counter(
+                labelset.get("__name__", "<unknown>") for labelset in retained_series
+            )
+            retained[label_name] = {
+                "series_count": len(retained_series),
+                "metric_series": dict(sorted(metric_counts.items())),
+            }
+        if label_errors:
+            errors[label_name] = "; ".join(label_errors)
     return {
         "current_series": current,
         "retained_series": retained,
@@ -2603,7 +2609,7 @@ def _build_runtime_cardinality_review_summary(
         "forbidden_label_query_errors": {},
         **_git_source_provenance(repo_root),
     }
-    if not reviewed_metrics:
+    if not reviewed_metrics and resolved_base_url is None:
         summary["mode"] = "no_reviewed_metrics"
         degraded_reasons.append(
             "no reviewed runtime-cardinality metrics require live evidence"
@@ -2710,7 +2716,7 @@ def _build_runtime_cardinality_review_summary(
         )
 
     if query_errors or degraded_reasons:
-        summary["status"] = "degraded"
+        summary["status"] = "failed" if current_violations else "degraded"
         summary["mode"] = "live_review_unavailable"
         if query_errors:
             degraded_reasons.append(
