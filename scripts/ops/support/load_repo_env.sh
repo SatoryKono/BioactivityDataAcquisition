@@ -210,10 +210,6 @@ normalize_repo_env_aliases() {
     export GITHUB_PERSONAL_ACCESS_TOKEN="${GITHUB_ANY_PERSONAL_ADjCCESS_TOKEN}"
   fi
 
-  if [[ -z "${OPENROUTER_API_KEY:-}" && -n "${OPENAI_API_KEY:-}" ]]; then
-    export OPENROUTER_API_KEY="${OPENAI_API_KEY}"
-  fi
-
   if [[ -z "${CONTEXT7_API_KEY:-}" ]]; then
     if [[ -n "${CONTEXT7_API_TOKEN:-}" ]]; then
       export CONTEXT7_API_KEY="${CONTEXT7_API_TOKEN}"

@@ -28,6 +28,8 @@ ENV_NAMES = (
     "BIOETL_ENV_FILE",
     "BIOETL_REPO_ENV_LOADED",
     "BIOETL_SKIP_ENV_LOCAL",
+    "OPENAI_API_KEY",
+    "OPENROUTER_API_KEY",
     "NEO4J_AUTH",
     "NEO4J_USERNAME",
     "NEO4J_PASSWORD",
@@ -48,13 +50,72 @@ def _clean_env(**updates: str | None) -> dict[str, str]:
     return env
 
 
+def _bash_path(path: Path) -> str:
+    """Return a path form that Git Bash / WSL bash can source on Windows."""
+    resolved = path.resolve()
+    if os.name != "nt":
+        return str(resolved)
+
+    wslpath = shutil.which("wslpath")
+    if wslpath is not None:
+        result = subprocess.run(
+            [wslpath, "-u", str(resolved)],
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            return result.stdout.strip()
+
+    cygpath = shutil.which("cygpath")
+    if cygpath is not None:
+        result = subprocess.run(
+            [cygpath, "-u", str(resolved)],
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            return result.stdout.strip()
+
+    drive = resolved.drive.rstrip(":").lower()
+    tail = resolved.as_posix()[len(resolved.drive) :]
+    wsl_candidate = f"/mnt/{drive}{tail}"
+    probe = subprocess.run(
+        ["bash", "-c", f"test -e {shlex.quote(wsl_candidate)}"],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if probe.returncode == 0:
+        return wsl_candidate
+    return f"/{drive}{tail}"
+
+
 def _run_bash(
     body: str, *, env: dict[str, str] | None = None
 ) -> subprocess.CompletedProcess[str]:
+    selected_env = env or _clean_env()
+    # WSL bash often does not inherit Windows process env cleanly; inject the
+    # contract-relevant variables into the shell command itself.
+    setup: list[str] = []
+    tracked_names = set(ENV_NAMES) | {
+        name for name in selected_env if name.startswith("NEO4J_")
+    }
+    for name in sorted(tracked_names):
+        if name in selected_env:
+            value = selected_env[name]
+            if name == "BIOETL_ENV_FILE":
+                value = _bash_path(Path(value))
+            setup.append(f"export {name}={shlex.quote(value)}")
+        else:
+            setup.append(f"unset {name}")
+    setup.append(f"source {shlex.quote(_bash_path(BASH_LOADER))}")
+    setup.append(body)
     return subprocess.run(
-        ["bash", "-c", f"source {shlex.quote(str(BASH_LOADER))}\n{body}"],
+        ["bash", "-c", "\n".join(setup)],
         cwd=ROOT,
-        env=env or _clean_env(),
+        env=selected_env,
         text=True,
         capture_output=True,
         check=False,
@@ -111,6 +172,15 @@ def _run_powershell(
     return result
 
 
+def _bash_printenv(*names: str) -> str:
+    """Print env values via printenv (WSL bash -c can fail to expand $VAR)."""
+    parts = [
+        f'printenv {shlex.quote(name)} 2>/dev/null || printf "%s\\n" "unset"'
+        for name in names
+    ]
+    return "; ".join(parts)
+
+
 def _bash_values(result: subprocess.CompletedProcess[str]) -> tuple[str, str]:
     assert result.returncode == 0, result.stderr
     username, password = result.stdout.splitlines()
@@ -123,6 +193,57 @@ def _powershell_values(result: subprocess.CompletedProcess[str]) -> tuple[str, s
     return username, password
 
 
+def test_bash_keeps_openai_and_openrouter_credentials_separate() -> None:
+    result = _run_bash(
+        "normalize_repo_env_aliases; "
+        + _bash_printenv("OPENAI_API_KEY", "OPENROUTER_API_KEY"),
+        env=_clean_env(
+            OPENAI_API_KEY="synthetic-openai-key",
+            OPENROUTER_API_KEY=None,
+        ),
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.splitlines() == ["synthetic-openai-key", "unset"]
+
+
+@POWERSHELL_MARK
+def test_powershell_keeps_openai_and_openrouter_credentials_separate() -> None:
+    result = _run_powershell(
+        "Normalize-BioetlRepoEnvAliases; "
+        "[Console]::Out.WriteLine($env:OPENAI_API_KEY); "
+        "[Console]::Out.WriteLine($(if ($env:OPENROUTER_API_KEY) "
+        "{ $env:OPENROUTER_API_KEY } else { 'unset' }))",
+        env=_clean_env(
+            OPENAI_API_KEY="synthetic-openai-key",
+            OPENROUTER_API_KEY=None,
+        ),
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.splitlines() == ["synthetic-openai-key", "unset"]
+
+
+@pytest.mark.parametrize(
+    ("openai_key", "openrouter_key"),
+    [("synthetic-openai-key", "synthetic-openrouter-key")],
+)
+def test_bash_preserves_distinct_provider_credentials(
+    openai_key: str, openrouter_key: str
+) -> None:
+    result = _run_bash(
+        "normalize_repo_env_aliases; "
+        + _bash_printenv("OPENAI_API_KEY", "OPENROUTER_API_KEY"),
+        env=_clean_env(
+            OPENAI_API_KEY=openai_key,
+            OPENROUTER_API_KEY=openrouter_key,
+        ),
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.splitlines() == [openai_key, openrouter_key]
+
+
 @pytest.mark.parametrize(
     ("auth", "expected"),
     [
@@ -132,7 +253,8 @@ def _powershell_values(result: subprocess.CompletedProcess[str]) -> tuple[str, s
 )
 def test_bash_neo4j_auth_normalization(auth: str, expected: tuple[str, str]) -> None:
     result = _run_bash(
-        "normalize_repo_env_aliases && printf '%s\\n%s\\n' \"$NEO4J_USERNAME\" \"$NEO4J_PASSWORD\"",
+        "normalize_repo_env_aliases && "
+        + _bash_printenv("NEO4J_USERNAME", "NEO4J_PASSWORD"),
         env=_clean_env(NEO4J_AUTH=auth),
     )
 
@@ -201,7 +323,8 @@ def test_powershell_rejects_malformed_neo4j_auth_without_leaking(
 
 def test_bash_explicit_neo4j_credentials_take_precedence() -> None:
     result = _run_bash(
-        "normalize_repo_env_aliases && printf '%s\\n%s\\n' \"$NEO4J_USERNAME\" \"$NEO4J_PASSWORD\"",
+        "normalize_repo_env_aliases && "
+        + _bash_printenv("NEO4J_USERNAME", "NEO4J_PASSWORD"),
         env=_clean_env(
             NEO4J_AUTH="packed-user/packed-password",
             NEO4J_USERNAME="explicit-user",
@@ -228,11 +351,14 @@ def test_powershell_explicit_neo4j_credentials_take_precedence() -> None:
     assert _powershell_values(result) == ("explicit-user", "explicit-password")
 
 
-def test_bash_loader_reads_explicit_fixture_and_skips_local_overlay(tmp_path: Path) -> None:
+def test_bash_loader_reads_explicit_fixture_and_skips_local_overlay(
+    tmp_path: Path,
+) -> None:
     fixture = tmp_path / "fixture.envdata"
     fixture.write_text("NEO4J_AUTH=file-user/file/password\n", encoding="utf-8")
     result = _run_bash(
-        "load_repo_env_if_present && printf '%s\\n%s\\n' \"$NEO4J_USERNAME\" \"$NEO4J_PASSWORD\"",
+        "load_repo_env_if_present && "
+        + _bash_printenv("NEO4J_USERNAME", "NEO4J_PASSWORD"),
         env=_clean_env(
             BIOETL_ENV_FILE=str(fixture),
             BIOETL_SKIP_ENV_LOCAL="1",
@@ -261,11 +387,15 @@ def test_powershell_loader_reads_explicit_fixture_and_skips_local_overlay(
     assert _powershell_values(result) == ("file-user", "file/password")
 
 
-def test_loader_sources_govern_missing_credentials_and_local_skip_consistently() -> None:
+def test_loader_sources_govern_missing_credentials_and_local_skip_consistently() -> (
+    None
+):
     shell_source = BASH_LOADER.read_text(encoding="utf-8")
     powershell_source = POWERSHELL_LOADER.read_text(encoding="utf-8")
 
     assert 'env_local_file=""' in shell_source
-    assert "$envLocalFile = if ($env:BIOETL_SKIP_ENV_LOCAL -eq \"1\")" in powershell_source
+    assert (
+        '$envLocalFile = if ($env:BIOETL_SKIP_ENV_LOCAL -eq "1")' in powershell_source
+    )
     assert 'if [[ -z "${NEO4J_AUTH:-}"' in shell_source
     assert "if ($env:NEO4J_AUTH" in powershell_source

@@ -38,7 +38,7 @@
 | `runner_support_runtime_active` | `retain_active` | 1 | `satisfied` |
 | `runner_support_types_active` | `retain_active` | 4 | `satisfied` |
 | `runtime_models_active` | `retain_active` | 38 | `satisfied` |
-| `runtime_wiring_api_active` | `retain_active` | 19 | `satisfied` |
+| `runtime_wiring_api_active` | `retain_active` | 18 | `satisfied` |
 
 ## Repo-wide Zero-import Candidates
 

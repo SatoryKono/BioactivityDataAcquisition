@@ -45,6 +45,11 @@ Supported aliases:
 | `DOCKERHUB_USERNAME` | `DOCKER_USERNAME` |
 | `NEO4J_USERNAME` / `NEO4J_PASSWORD` | `NEO4J_AUTH`, `NEO4J_AUTH_USERNAME`, `NEO4J_AUTH_PASSWORD` |
 
+Provider credentials are intentionally isolated. `OPENAI_API_KEY` and
+`OPENROUTER_API_KEY` identify different providers and MUST be configured separately;
+the repository environment loaders never project one into the
+other.
+
 Run a non-secret status check:
 
 ```bash
@@ -60,6 +65,7 @@ The script reports `SET` / `NOT SET` only and must not print secret values.
 | GitHub | `GITHUB_PERSONAL_ACCESS_TOKEN` | Yes for GitHub MCP | GitHub fine-grained PAT or classic PAT | Repository read access needed for the task | 90 days |
 | Brave Search | `BRAVE_API_KEY` | Yes for Brave MCP | Brave Search API console | Web Search API quota | 90 days |
 | Ref Tools | `REF_TOOL_API_KEY` or OAuth | No when OAuth is used | Ref Tools key console or interactive OAuth | Documentation search only | 90 days |
+| OpenRouter | `OPENROUTER_API_KEY` | Only for OpenRouter-backed tooling | OpenRouter key console | Models explicitly selected by the local tool | 90 days |
 | Prometheus | `PROMETHEUS_TOKEN` or username/password | No | Local protected Prometheus endpoint | Read/query only | 90 days for shared service accounts |
 | Grafana | `GRAFANA_SERVICE_ACCOUNT_TOKEN` or username/password | No | Grafana service account preferred | Viewer/read-only dashboard and datasource access | 90 days |
 | Neo4j Cypher | `NEO4J_*` | No for local defaults | Local Neo4j memory instance | Local memory database only | Rotate default before shared-host use |
@@ -107,6 +113,7 @@ bash scripts/ai/mcp/check.sh
 | Grafana MCP starts but queries fail | Set `GRAFANA_SERVICE_ACCOUNT_TOKEN` or local username/password; confirm `GRAFANA_URL`. |
 | Prometheus MCP cannot query | Confirm `PROMETHEUS_URL`; add token or username/password only if the endpoint is protected. |
 | Neo4j MCP authentication fails | Confirm `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD`, or `NEO4J_AUTH`. Rotate the documented local default before shared-host use. |
+| OpenRouter authentication fails | Set a dedicated `OPENROUTER_API_KEY`; never reuse or alias `OPENAI_API_KEY`. |
 | Docker-backed MCP cannot start | Confirm Docker is installed and available through the wrapper resolver. |
 
 ## CI/CD Stance
