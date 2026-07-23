@@ -14,7 +14,7 @@ if (-not $env:NPM_CONFIG_CACHE) {
 }
 
 # Auto-recall path configuration
-$env:DEJA_AUTO_RECALL_PATH = Join-Path $repoRoot ".codex/AGENTS.md"
+$env:DEJA_AUTO_RECALL_PATH = Join-Path $repoRoot "AGENTS.md"
 
 Exit-McpValidateOnly -ServerName "deja"
 
