@@ -16,10 +16,15 @@ from tests.integration._grafana_test_support import (
     require_dashboard_navigation_links,
 )
 from tests.integration._grafana_dashboard_links_support import (
+    # Re-export shared helpers for sibling test modules that historically imported
+    # private symbols from this file (e.g. test_grafana_dashboard_cta_links).
+    _CANONICAL_GITHUB_BLOB_PREFIX,
+    _DASHBOARD_TIME_HANDOFF_TOKENS,
     _DRILLDOWN_TOP_LEVEL_EXEMPT_UIDS,
     _EXPLORE_TIME_HANDOFF_TOKENS,
     _KPI_OWNERSHIP,
     _NAV_LINK_CONTRACT,
+    _REQUIRED_LINK_VARS_BY_TARGET_UID,
     _REQUIRED_PANEL_LINKS_BY_UID,
     _SILVER_EXPLORER_EXPLICIT_EXPECTATIONS,
     _TOP_LEVEL_LINK_TITLE_RE,
@@ -52,9 +57,13 @@ from tests.integration._grafana_dashboard_links_support import (
     _collect_cross_dashboard_target_locations,
     _cross_scope_marker_specs,
     _extract_dashboard_uid,
+    _extract_link_vars,
+    _find_panel_by_id,
     _is_logs_drilldown_url,
     _is_traces_drilldown_url,
+    _iter_panel_data_links,
     _load_dashboards_by_uid,
+    _local_repo_path_from_canonical_github_blob_url,
     _matching_cross_scope_links,
 )
 
