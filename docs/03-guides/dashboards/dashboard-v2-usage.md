@@ -7,14 +7,21 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-13'
+  Last verified: '2026-07-23'
 
 ______________________________________________________________________
 
 # BioETL Dashboards v2: Usage
 
-Дата сверки: **2026-07-13**
+Дата сверки: **2026-07-23**
 Источник истины: `grafana/dashboards/*.json`
+
+Shipped inventory (8 dashboards): Control Plane, Overview, Runtime, Provider
+Health, Data Quality, Workflow, Alerts & SLO, Silver Reject Explorer. Primary
+`0..6` refresh is `30s`; Silver Reject Explorer is the forensic exception at
+`1m` / default range `24h`. Generic primary handoffs preserve HTTP `$run_id`
+but **never** map it into Silver `$quarantine_run_id` (forensic IDs stay on
+the explorer only).
 
 Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navigation-links.yaml` (docs/tests должны соответствовать ему).
 
@@ -117,10 +124,11 @@ Detached audit backend contract:
 - Переменная `execution` не используется; `$quarantine_run_id` и
   `$payload_hash` остаются только в `bioetl-silver-reject-explorer`.
   `$run_id` в primary dashboards `0..5` сохраняется как HTTP-backed identity
-  context для `ID`/details panels и не становится Prometheus label. Handoffs
-  into `Silver Reject Explorer` additionally pass `$run_id` into
-  `$quarantine_run_id` so exact-run forensic review keeps the selected run
-  scope; generic handoffs out of the explorer do not export primary `$run_id`.
+  context для `ID`/details panels и не становится Prometheus label.
+  Generic handoffs into `Silver Reject Explorer` MUST NOT map primary
+  `$run_id` into `$quarantine_run_id`; forensic `quarantine_run_id` /
+  `payload_hash` stay explorer/CLI concerns. Generic handoffs out of the
+  explorer do not export primary `$run_id` either.
 
 ## Что смотреть в первую очередь
 

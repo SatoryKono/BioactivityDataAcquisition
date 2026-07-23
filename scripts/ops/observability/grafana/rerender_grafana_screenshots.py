@@ -25,7 +25,7 @@ from bioetl.infrastructure.storage.support.atomic_ops import (
 
 DEFAULT_BASE_URL = "http://localhost:3000"
 DEFAULT_USERNAME = "admin"
-DEFAULT_PASSWORD = "changeme"
+DEFAULT_PASSWORD = ""
 DEFAULT_OUTPUT_DIR = Path("reports/observability/grafana/screenshots")
 DEFAULT_WIDTH = 1600
 DEFAULT_HEIGHT = 2200
@@ -38,6 +38,7 @@ DEFAULT_TOOL_PLAYWRIGHT_BROWSERS = Path("/tmp/playwright-browsers")
 LOCAL_PLAYWRIGHT_LIB_DIR = Path(
     ".cache/grafana-screenshot-runtime/root/usr/lib/x86_64-linux-gnu"
 )
+EXIT_CREDENTIALS = 9
 
 
 @dataclass(frozen=True)
@@ -86,6 +87,19 @@ class RenderApiFailure(RuntimeError):
 def _read_env(name: str, default: str) -> str:
     value = os.getenv(name, "").strip()
     return value or default
+
+
+def _resolve_grafana_password() -> str:
+    """Resolve supported runtime credentials without a committed password."""
+    for name in (
+        "GF_SECURITY_ADMIN_PASSWORD",
+        "GRAFANA_PASSWORD",
+        "GRAFANA_ADMIN_PASSWORD",
+    ):
+        value = _read_env(name, "")
+        if value:
+            return value
+    return DEFAULT_PASSWORD
 
 
 def _auth_header(username: str, password: str) -> str:
@@ -145,8 +159,12 @@ def _describe_grafana_auth_failure(config: RenderConfig) -> str:
     return (
         "Grafana auth failed for dashboard rendering. Verify GRAFANA_BASE_URL and "
         f"the configured {auth_mode}. If the live instance uses different local "
-        "credentials, reload repo env via scripts/ops/support/load_repo_env.sh or "
-        "pass --username/--password explicitly."
+        "credentials, set GRAFANA_PASSWORD (or GRAFANA_SERVICE_ACCOUNT_TOKEN) to "
+        "the password that was active when the Grafana volume was first "
+        "initialized — GF_SECURITY_ADMIN_PASSWORD is applied only on first boot "
+        "and may not match a long-lived container volume. Reload env via "
+        "scripts/ops/support/load_repo_env.sh or pass --username/--password "
+        "explicitly. Never commit or log the password."
     )
 
 
@@ -226,8 +244,11 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
     )
     parser.add_argument(
         "--password",
-        default=_read_env("GRAFANA_PASSWORD", DEFAULT_PASSWORD),
-        help="Grafana password. Defaults to GRAFANA_PASSWORD or changeme.",
+        default=_resolve_grafana_password(),
+        help=(
+            "Grafana password. Defaults to GF_SECURITY_ADMIN_PASSWORD / "
+            "GRAFANA_PASSWORD / GRAFANA_ADMIN_PASSWORD. No password is hard-coded."
+        ),
     )
     parser.add_argument(
         "--service-account-token",
@@ -485,9 +506,16 @@ def _default_playwright_node_modules() -> str:
 
 
 def _default_playwright_browsers_path() -> str:
+    # Prefer a local non-network drive for browser binaries when available.
+    # GDrive/WSL /mnt paths make Chromium launch flaky/slow on Windows hosts.
     configured = os.getenv("PLAYWRIGHT_BROWSERS_PATH", "").strip()
     if configured:
         return configured
+    local_app_data = os.getenv("LOCALAPPDATA", "").strip()
+    if local_app_data:
+        local_ms = Path(local_app_data) / "ms-playwright"
+        if local_ms.exists():
+            return str(local_ms)
     if DEFAULT_TOOL_PLAYWRIGHT_BROWSERS.exists():
         return str(DEFAULT_TOOL_PLAYWRIGHT_BROWSERS)
     return ""
@@ -943,6 +971,13 @@ def _render_via_api(config: RenderConfig) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     config = _parse_args(argv)
+    if not config.service_account_token and not config.password:
+        print(
+            "Grafana render credentials are missing. Set "
+            "GF_SECURITY_ADMIN_PASSWORD / GRAFANA_PASSWORD / "
+            "GRAFANA_ADMIN_PASSWORD or GRAFANA_SERVICE_ACCOUNT_TOKEN."
+        )
+        return EXIT_CREDENTIALS
     config.output_dir.mkdir(parents=True, exist_ok=True)
 
     try:

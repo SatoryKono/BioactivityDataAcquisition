@@ -186,14 +186,19 @@ services:
 
   renderer:
     image: grafana/grafana-image-renderer@sha256:c0c920e6974b0d30ae25313051344afcd2054362529968ebd9545a4b2bc8119b
-    shm_size: "1gb"
+    # Chromium needs ample /dev/shm; without this, render fails with
+    # "failed to run browser: websocket url timeout reached".
+    shm_size: "2gb"
     environment:
       - ENABLE_METRICS=true
       - HTTP_HOST=0.0.0.0
       - AUTH_TOKEN=${GF_RENDERING_RENDERER_TOKEN:?GF_RENDERING_RENDERER_TOKEN is required}
-      - BROWSER_FLAGS=--no-sandbox,--disable-dev-shm-usage
-      - BROWSER_READINESS_TIMEOUT=${GRAFANA_IMAGE_RENDERER_READINESS_TIMEOUT:-90s}
-      - GOMEMLIMIT=${GRAFANA_IMAGE_RENDERER_GOMEMLIMIT:-1GiB}
+      - BROWSER_FLAGS=--no-sandbox,--disable-dev-shm-usage,--disable-gpu,--disable-software-rasterizer
+      - BROWSER_READINESS_TIMEOUT=${GRAFANA_IMAGE_RENDERER_READINESS_TIMEOUT:-120s}
+      - RENDERING_MODE=${GRAFANA_IMAGE_RENDERER_MODE:-default}
+      - RENDERING_CLUSTERING_MODE=${GRAFANA_IMAGE_RENDERER_CLUSTERING_MODE:-browser}
+      - RENDERING_CLUSTERING_MAX_CONCURRENCY=${GRAFANA_IMAGE_RENDERER_MAX_CONCURRENCY:-2}
+      - GOMEMLIMIT=${GRAFANA_IMAGE_RENDERER_GOMEMLIMIT:-2GiB}
     networks:
       - monitoring
     restart: unless-stopped
