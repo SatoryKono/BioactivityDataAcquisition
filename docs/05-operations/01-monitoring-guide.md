@@ -63,6 +63,15 @@ live in [../03-guides/dashboards/dashboard-inventory.md](../03-guides/dashboards
 - Pushgateway snapshots are grouped only by bounded `pipeline` and `run_type`,
   so short-lived ChEMBL runs remain queryable after process exit without
   introducing occurrence-scoped labels such as `run_id`;
+- Forbidden Prometheus label names (including aliases such as
+  `filesystem_path` and `raw_exception_message`) are denied by registry policy
+  in `prometheus_metric_label_policy_sets.FORBIDDEN_PROMETHEUS_LABEL_NAMES`.
+  Instant-query emptiness for forbidden labels proves **current** compliance
+  only. Retained historical series (for example older `run_id`-bearing
+  `bioetl_records_processed_*` samples) may still exist until Prometheus
+  retention expires them. Operators must report current violations separately
+  from retained stale series and must not perform destructive TSDB cleanup
+  unless an explicitly approved, recoverable procedure is used;
 - `bioetl diagnostics metrics` — canonical operator summary для этих
   auto-managed observability behaviors.
 

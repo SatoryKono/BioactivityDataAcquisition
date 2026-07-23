@@ -313,6 +313,8 @@ class CompositeCheckpointLoadService:
         except CheckpointConflictError:
             self._emit_checkpoint_load_status("replay_conflict")
             raise
+        # Explicit constructor path via _merge_replay_projection_state keeps
+        # the type as CompositeCheckpointState (not DataclassInstance/replace).
         replayed_state: CompositeCheckpointState = _merge_replay_projection_state(
             state=state,
             replay_projection=replay_projection,

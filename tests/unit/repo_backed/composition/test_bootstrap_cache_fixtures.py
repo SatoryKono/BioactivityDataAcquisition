@@ -79,6 +79,30 @@ def test_cached_bootstrap_metadata_is_order_stable_across_rebuilds(
 
     assert first.cache_key == second.cache_key
     assert first.pipeline_names == second.pipeline_names
-    assert first.provider_definitions == second.provider_definitions
+    # Compare stable catalog fields only: callables are re-bound on rebuild and
+    # must not be treated as shared mutable registry identity.
+    first_providers = tuple(
+        (
+            item.name,
+            item.adapter_class,
+            item.http_config,
+            item.requires_http_client,
+            item.requires_logger,
+            item.default_kwargs,
+        )
+        for item in first.provider_definitions
+    )
+    second_providers = tuple(
+        (
+            item.name,
+            item.adapter_class,
+            item.http_config,
+            item.requires_http_client,
+            item.requires_logger,
+            item.default_kwargs,
+        )
+        for item in second.provider_definitions
+    )
+    assert first_providers == second_providers
     assert first_cache.build_count == 1
     assert second_cache.build_count == 1

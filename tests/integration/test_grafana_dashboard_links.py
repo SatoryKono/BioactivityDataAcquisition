@@ -15,6 +15,7 @@ from tests.integration._grafana_test_support import (
     get_dashboard_panels,
     get_panel_expressions,
     load_dashboard,
+    require_dashboard_navigation_links,
 )
 
 pytestmark = pytest.mark.integration
@@ -775,6 +776,110 @@ def test_top_level_handoff_fails_closed_when_required_link_is_removed() -> None:
         )
 
 
+def test_empty_navigation_bus_fails_closed_for_required_top_level_contract() -> None:
+    """Empty panel id=1000 links must not satisfy required top-level navigation."""
+    empty_bus = {
+        "uid": "bioetl-overview-v2",
+        "panels": [{"id": 1000, "type": "text", "links": []}],
+    }
+    with pytest.raises(AssertionError, match="non-empty navigation link bus"):
+        require_dashboard_navigation_links(
+            empty_bus, dashboard_name="bioetl-overview-v2.json"
+        )
+
+    partial_bus = {
+        "uid": "bioetl-overview-v2",
+        "panels": [
+            {
+                "id": 1000,
+                "type": "text",
+                "links": [
+                    {
+                        "title": "Explore Logs",
+                        "url": "/a/grafana-lokiexplore-app/",
+                    }
+                ],
+            }
+        ],
+    }
+    required_links = _REQUIRED_TOP_LEVEL_LINKS_BY_UID["bioetl-overview-v2"]
+    titles = {
+        link.get("title")
+        for link in get_dashboard_navigation_links(partial_bus)
+        if isinstance(link.get("title"), str)
+    }
+    missing = required_links - titles
+    assert missing, "fixture must leave at least one required top-level title missing"
+    assert missing == required_links - {"Explore Logs"}
+
+
+def test_empty_drilldown_collection_fails_closed() -> None:
+    """Drilldown validation must not pass when Logs/Traces links are absent."""
+    dashboard = {
+        "uid": "bioetl-overview-v2",
+        "panels": [
+            {
+                "id": 1000,
+                "type": "text",
+                "links": [
+                    {
+                        "title": "2. Runtime",
+                        "url": "/d/bioetl-runtime?var-pipeline=$pipeline",
+                    }
+                ],
+            }
+        ],
+    }
+    links = require_dashboard_navigation_links(
+        dashboard, dashboard_name="bioetl-overview-v2.json"
+    )
+    titles = {link.get("title") for link in links if link.get("title")}
+    urls = [link.get("url", "") for link in links]
+    with pytest.raises(AssertionError, match="logs drilldown"):
+        assert any("Logs" in str(title) for title in titles), (
+            "bioetl-overview-v2.json must expose a logs drilldown link"
+        )
+    with pytest.raises(AssertionError, match="Logs Drilldown app"):
+        assert any("/a/grafana-lokiexplore-app/" in str(url) for url in urls), (
+            "bioetl-overview-v2.json must point logs drilldown to Logs Drilldown app"
+        )
+
+
+def test_missing_critical_panel_data_link_fails_closed() -> None:
+    """Critical panel contract must fail when the expected data link is removed."""
+    with pytest.raises(AssertionError, match="must define dataLinks|must include"):
+        _assert_critical_panel_entry(
+            dashboard_path=Path("grafana/dashboards/bioetl-overview-v2.json"),
+            uid="bioetl-overview-v2",
+            panels_by_id={215: {"id": 215, "title": "Status", "options": {}}},
+            entry={
+                "panel_id": 215,
+                "target_uid": "bioetl-runtime",
+                "link_titles": ("Open Runtime",),
+            },
+        )
+
+
+def test_malformed_navigation_links_collection_fails_closed() -> None:
+    """Navigation bus shape errors must raise rather than silently yield zero links."""
+    with pytest.raises(AssertionError, match="must be a list"):
+        get_dashboard_navigation_links(
+            {
+                "uid": "bioetl-overview-v2",
+                "panels": [{"id": 1000, "type": "text", "links": "not-a-list"}],
+            }
+        )
+    with pytest.raises(AssertionError, match="must be a mapping"):
+        get_dashboard_navigation_links(
+            {
+                "uid": "bioetl-overview-v2",
+                "panels": [{"id": 1000, "type": "text", "links": ["bad-entry"]}],
+            }
+        )
+    with pytest.raises(AssertionError, match="navigation panel id=1000"):
+        get_dashboard_navigation_links({"uid": "bioetl-overview-v2", "panels": []})
+
+
 def test_dashboard_to_dashboard_links_are_not_duplicated() -> None:
     """Dashboards should not duplicate target UIDs outside explicit panel CTAs."""
     for dashboard_path in get_dashboard_files():
@@ -978,7 +1083,9 @@ def test_cross_dashboard_links_pass_only_target_scoped_variables() -> None:
         assert isinstance(current_uid, str), (
             f"Dashboard {dashboard_path.name} must define a uid"
         )
-        dashboard_links = get_dashboard_navigation_links(dashboard)
+        dashboard_links = require_dashboard_navigation_links(
+            dashboard, dashboard_name=dashboard_path.name
+        )
 
         for link in _collect_dashboard_links(dashboard):
             _assert_cross_dashboard_link_policy(
@@ -1022,9 +1129,12 @@ def test_dashboard_top_level_navigation_contract_by_uid() -> None:
         required_links = _REQUIRED_TOP_LEVEL_LINKS_BY_UID.get(uid)
         assert required_links is not None, f"Unknown dashboard uid in contract: {uid}"
 
+        navigation_links = require_dashboard_navigation_links(
+            dashboard, dashboard_name=dashboard_path.name
+        )
         titles = {
             link.get("title")
-            for link in get_dashboard_navigation_links(dashboard)
+            for link in navigation_links
             if isinstance(link.get("title"), str)
         }
         missing = required_links - titles
@@ -1067,7 +1177,9 @@ def test_critical_top_level_links_follow_title_allowlist_and_scope_reset_suffix(
     )
     for dashboard_name in critical_dashboards:
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        for link in get_dashboard_navigation_links(dashboard):
+        for link in require_dashboard_navigation_links(
+            dashboard, dashboard_name=dashboard_name
+        ):
             title = str(link.get("title", ""))
             assert _TOP_LEVEL_LINK_TITLE_RE.match(title), (
                 f"{dashboard_name} contains non-conforming top-level link title: {title}"
@@ -1316,7 +1428,9 @@ def test_navigation_dashboards_expose_explore_drilldown_links() -> None:
     for dashboard_path in get_dashboard_files():
         dashboard_name = dashboard_path.name
         dashboard = load_dashboard(dashboard_path)
-        links = get_dashboard_navigation_links(dashboard)
+        links = require_dashboard_navigation_links(
+            dashboard, dashboard_name=dashboard_name
+        )
         urls = [link.get("url", "") for link in links]
         titles = {link.get("title") for link in links if link.get("title")}
         assert any("Logs" in title for title in titles), (
@@ -1928,7 +2042,9 @@ def test_navigation_dashboards_expose_silver_reject_explorer_handoff() -> None:
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
         uid = dashboard.get("uid")
         assert isinstance(uid, str), f"{dashboard_name} must declare string uid"
-        links = get_dashboard_navigation_links(dashboard)
+        links = require_dashboard_navigation_links(
+            dashboard, dashboard_name=dashboard_name
+        )
         titles = {link.get("title") for link in links if link.get("title")}
         urls = [link.get("url", "") for link in links]
 

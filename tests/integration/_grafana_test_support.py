@@ -36,6 +36,7 @@ __all__ = [
     "get_panel_expressions",
     "get_row_child_panels",
     "load_dashboard",
+    "require_dashboard_navigation_links",
 ]
 
 
@@ -286,14 +287,45 @@ def _collect_dashboard_links(dashboard: dict) -> list[dict]:
 
 
 def get_dashboard_navigation_links(dashboard: dict) -> list[dict]:
-    """Collect canonical dashboard-bus links from the navigation surface."""
+    """Collect canonical dashboard-bus links from the navigation surface.
+
+    Fail-closed: panel ``id=1000`` must exist, ``links`` must be a list, and
+    every entry must be a mapping. Callers that require a non-empty bus should
+    also call :func:`require_dashboard_navigation_links`.
+    """
+    navigation_panels = [
+        panel for panel in get_dashboard_panels(dashboard) if panel.get("id") == 1000
+    ]
+    assert navigation_panels, "dashboard must define navigation panel id=1000"
+    assert len(navigation_panels) == 1, (
+        "dashboard must define exactly one navigation panel id=1000"
+    )
+    panel_links = navigation_panels[0].get("links", [])
+    assert isinstance(panel_links, list), (
+        "navigation panel id=1000 links must be a list, "
+        f"got {type(panel_links).__name__}"
+    )
     links: list[dict] = []
-    for panel in get_dashboard_panels(dashboard):
-        if panel.get("id") != 1000:
-            continue
-        panel_links = panel.get("links", [])
-        if isinstance(panel_links, list):
-            links.extend(link for link in panel_links if isinstance(link, dict))
+    for index, link in enumerate(panel_links):
+        assert isinstance(link, dict), (
+            f"navigation panel id=1000 links[{index}] must be a mapping, "
+            f"got {type(link).__name__}"
+        )
+        links.append(link)
+    return links
+
+
+def require_dashboard_navigation_links(
+    dashboard: dict,
+    *,
+    dashboard_name: str,
+) -> list[dict]:
+    """Return navigation links and fail closed when the bus is empty."""
+    links = get_dashboard_navigation_links(dashboard)
+    assert links, (
+        f"{dashboard_name} must expose a non-empty navigation link bus "
+        "(panel id=1000 links[])"
+    )
     return links
 
 

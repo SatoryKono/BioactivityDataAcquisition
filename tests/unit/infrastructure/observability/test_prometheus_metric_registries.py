@@ -88,11 +88,16 @@ def test_high_cardinality_label_denylist_covers_forensic_identifiers() -> None:
         "payload_hash",
         "request_id",
         "message",
+        "raw_message",
+        "raw_exception_message",
         "path",
+        "raw_path",
         "file_path",
+        "filesystem_path",
         "url",
         "raw_url",
         "query",
+        "query_string",
         "source_batch_id",
     }
 
