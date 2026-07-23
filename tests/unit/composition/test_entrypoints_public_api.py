@@ -52,6 +52,63 @@ def test_entrypoints_retains_start_metrics_server_only_as_compatibility_wrapper(
 
 
 @pytest.mark.unit
+def test_entrypoints_start_metrics_server_wrapper_delegates_to_observability_api(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Compatibility wrapper must forward kwargs to observability-owned startup."""
+    entrypoints = _reload_entrypoints_module()
+    calls: list[dict[str, object]] = []
+
+    def _fake_start(
+        port: int = 8000,
+        addr: str = "0.0.0.0",
+        *,
+        fail_fast: bool = False,
+        retry_count: int = 3,
+        retry_delay: float = 1.0,
+        logger: object | None = None,
+    ) -> bool:
+        calls.append(
+            {
+                "port": port,
+                "addr": addr,
+                "fail_fast": fail_fast,
+                "retry_count": retry_count,
+                "retry_delay": retry_delay,
+                "logger": logger,
+            }
+        )
+        return True
+
+    monkeypatch.setattr(
+        "bioetl.composition.observability_api.start_metrics_server",
+        _fake_start,
+    )
+    logger = object()
+    assert (
+        entrypoints.start_metrics_server(
+            9100,
+            "127.0.0.1",
+            fail_fast=True,
+            retry_count=2,
+            retry_delay=0.5,
+            logger=logger,  # type: ignore[arg-type]
+        )
+        is True
+    )
+    assert calls == [
+        {
+            "port": 9100,
+            "addr": "127.0.0.1",
+            "fail_fast": True,
+            "retry_count": 2,
+            "retry_delay": 0.5,
+            "logger": logger,
+        }
+    ]
+
+
+@pytest.mark.unit
 def test_entrypoints_retains_load_pipeline_config_only_as_compatibility_wrapper() -> (
     None
 ):
@@ -60,6 +117,27 @@ def test_entrypoints_retains_load_pipeline_config_only_as_compatibility_wrapper(
 
     assert "load_pipeline_config" not in entrypoints.__all__
     assert callable(entrypoints.load_pipeline_config)
+
+
+@pytest.mark.unit
+def test_entrypoints_load_pipeline_config_wrapper_delegates_to_composite_api(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Compatibility wrapper must forward pipeline names to composite-owned loader."""
+    entrypoints = _reload_entrypoints_module()
+    sentinel = object()
+    seen: list[str] = []
+
+    def _fake_load(pipeline_name: str) -> object:
+        seen.append(pipeline_name)
+        return sentinel
+
+    monkeypatch.setattr(
+        "bioetl.composition.composite_api.load_pipeline_config",
+        _fake_load,
+    )
+    assert entrypoints.load_pipeline_config("chembl_activity") is sentinel
+    assert seen == ["chembl_activity"]
 
 
 @pytest.mark.unit

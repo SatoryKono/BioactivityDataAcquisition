@@ -28,10 +28,10 @@ trend evidence only.
 ## Baseline Snapshot
 
 - Source branch: `main`
-- Source commit: `51979de96630ce1eff88b6a2b82df04a5c9be157`
-- Source run id: `local-issues-5710-5711-20260630`
+- Source commit: `7038c078bd23b9c9810eb370793e75b2a0d63cbd`
+- Source run id: `local-duration-rebuild-2026-07-23`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-06-30T13:06:54.324571+00:00`
+- Refreshed at (UTC): `2026-07-23T08:11:54.191358+00:00`
 
 ## Coverage
 
@@ -41,38 +41,38 @@ trend evidence only.
 
 ## Duration Telemetry
 
-- Total collected test cases: `8507`
+- Total collected test cases: `23360`
 - Freshness guard: `<=45 days` via `refreshed_at_utc`
 
 ### Top Slowest Tests
 
 | Rank | Duration (s) | Test | Source |
 |---:|---:|---|---|
-| 1 | `42.785` | `tests.architecture.test_checkpoint_compatibility_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_tests` | `S7-crosscutting-architecture-a2.xml` |
-| 2 | `28.12` | `tests.architecture.test_checkpoint_compatibility_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_src` | `S7-crosscutting-architecture-a2.xml` |
-| 3 | `24.051` | `tests.architecture.test_config_discrepancy_metrics_ratchets::test_config_discrepancy_baseline_matches_live_generator` | `S7-crosscutting-architecture-a2.xml` |
-| 4 | `23.018` | `tests.architecture.test_config_discrepancy_report_drift::test_config_discrepancy_report_matches_deterministic_generator` | `S7-crosscutting-architecture-a2.xml` |
-| 5 | `16.691` | `tests.architecture.test_checkpoint_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_tests` | `S7-crosscutting-architecture-guardrails.xml` |
-| 6 | `16.084` | `tests.architecture.test_cli_command_import_guards::test_non_cli_source_keeps_retained_public_cli_seams_outside_runtime_code` | `S7-crosscutting-architecture-a2.xml` |
-| 7 | `15.28` | `tests.architecture.test_config_root_governance::test_runtime_config_discovery_does_not_use_source_parent_arithmetic` | `S7-crosscutting-architecture-a2.xml` |
-| 8 | `14.498` | `tests.architecture.test_cli_command_import_guards::test_non_cli_source_avoids_interfaces_package_root_convenience_imports` | `S7-crosscutting-architecture-a2.xml` |
-| 9 | `14.129` | `tests.architecture.test_adr_enforcement_matrix::test_adr_enforcement_matrix_artifact_matches_live_generator` | `S7-crosscutting-architecture-a.xml` |
-| 10 | `13.15` | `tests.architecture.test_add_svg_text_fallback::test_build_fallback_text_emits_multiline_tspans` | `S7-crosscutting-architecture-a.xml` |
+| 1 | `192.078` | `tests.architecture.test_naming_ambiguity_classifier::test_build_ambiguity_groups_is_deterministic` | `S7-crosscutting-architecture-c.xml` |
+| 2 | `76.218` | `tests.architecture.test_provider_registry_decomposition::test_private_default_registry_module_imports_stay_confined_to_sanctioned_seams` | `S7-crosscutting-architecture-c.xml` |
+| 3 | `64.276` | `tests.architecture.test_debt_governance_telemetry_reporting::test_debt_governance_snapshot_matches_live_sources` | `S7-crosscutting-architecture-a3.xml` |
+| 4 | `55.574` | `tests.architecture.test_provider_registry_decomposition::test_default_provider_registry_raw_calls_stay_confined_to_known_src_baseline` | `S7-crosscutting-architecture-c.xml` |
+| 5 | `40.649` | `tests.architecture.test_quality_exemptions_registry::test_exemption_registry_targets_are_live` | `S7-crosscutting-architecture-c.xml` |
+| 6 | `38.963` | `tests.architecture.test_naming_ambiguity_classifier::test_build_ambiguity_groups_reports_expected_ok_families` | `S7-crosscutting-architecture-c.xml` |
+| 7 | `37.074` | `tests.architecture.test_mounted_worktree_skip_policy::test_tests_do_not_reintroduce_hardcoded_network_drive_skips` | `S7-crosscutting-architecture-c.xml` |
+| 8 | `35.843` | `tests.architecture.test_private_module_imports::test_owner_aware_private_module_imports` | `S7-crosscutting-architecture-c.xml` |
+| 9 | `35.412` | `tests.architecture.test_import_graph_invariants::test_import_graph_respects_layer_matrix` | `S7-crosscutting-architecture-b.xml` |
+| 10 | `34.348` | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline::test_chembl_activity_happy_path` | `S8-crosscutting-governance.xml` |
 
 ### Top Slow Zones
 
 | Rank | Zone | Tests | Total Duration (s) | Max Duration (s) |
 |---:|---|---:|---:|---:|
-| 1 | `tests.architecture.test_checkpoint_compatibility_runtime_facade_usage` | 2 | 70.905 | 42.785 |
-| 2 | `tests.architecture.test_config_discrepancy_metrics_ratchets` | 2 | 35.379 | 24.051 |
-| 3 | `tests.architecture.test_cli_command_import_guards` | 2 | 30.582 | 16.084 |
-| 4 | `tests.architecture.test_checkpoint_runtime_facade_usage` | 2 | 27.114 | 16.691 |
-| 5 | `tests.architecture.test_config_discrepancy_report_drift` | 1 | 23.018 | 23.018 |
-| 6 | `tests.architecture.test_config_root_governance` | 1 | 15.28 | 15.28 |
-| 7 | `tests.architecture.test_adr_enforcement_matrix` | 1 | 14.129 | 14.129 |
-| 8 | `tests.architecture.test_add_svg_text_fallback` | 1 | 13.15 | 13.15 |
-| 9 | `tests.architecture.test_compatibility_freeze_guards` | 1 | 12.274 | 12.274 |
-| 10 | `tests.architecture.test_config_surface_entity_residual_plateau` | 2 | 11.72 | 7.029 |
+| 1 | `tests.architecture.test_naming_ambiguity_classifier` | 2 | 231.041 | 192.078 |
+| 2 | `tests.architecture.test_provider_registry_decomposition` | 2 | 131.792 | 76.218 |
+| 3 | `tests.architecture.test_quality_exemptions_registry` | 2 | 69.7 | 40.649 |
+| 4 | `tests.architecture.test_debt_governance_telemetry_reporting` | 1 | 64.276 | 64.276 |
+| 5 | `tests.architecture.test_vcr_metadata_catalog_drift` | 2 | 59.262 | 33.691 |
+| 6 | `tests.architecture.test_mounted_worktree_skip_policy` | 1 | 37.074 | 37.074 |
+| 7 | `tests.architecture.test_private_module_imports` | 1 | 35.843 | 35.843 |
+| 8 | `tests.architecture.test_import_graph_invariants` | 1 | 35.412 | 35.412 |
+| 9 | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline` | 1 | 34.348 | 34.348 |
+| 10 | `tests.architecture.test_tech_debt_issues_5670_5675_closeout` | 1 | 31.733 | 31.733 |
 
 ## Refresh Procedure
 

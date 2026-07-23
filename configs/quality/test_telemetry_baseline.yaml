@@ -2,10 +2,10 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: main
-refreshed_at_utc: '2026-06-30T13:06:54.324571+00:00'
+refreshed_at_utc: '2026-07-23T08:11:54.191358+00:00'
 refresh_status: captured
-source_commit: 51979de96630ce1eff88b6a2b82df04a5c9be157
-source_run_id: local-issues-5710-5711-20260630
+source_commit: 7038c078bd23b9c9810eb370793e75b2a0d63cbd
+source_run_id: local-duration-rebuild-2026-07-23
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
@@ -38,167 +38,131 @@ coverage:
   actual_percent: 95.61
   threshold_satisfied: true
 duration_telemetry:
-  total_cases: 8507
+  total_cases: 23360
   top_slowest:
-  - source: S7-crosscutting-architecture-a2.xml
-    test: tests.architecture.test_checkpoint_compatibility_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_tests
-    duration_s: 42.785
-  - source: S7-crosscutting-architecture-a2.xml
-    test: tests.architecture.test_checkpoint_compatibility_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_src
-    duration_s: 28.12
-  - source: S7-crosscutting-architecture-a2.xml
-    test: tests.architecture.test_config_discrepancy_metrics_ratchets::test_config_discrepancy_baseline_matches_live_generator
-    duration_s: 24.051
-  - source: S7-crosscutting-architecture-a2.xml
-    test: tests.architecture.test_config_discrepancy_report_drift::test_config_discrepancy_report_matches_deterministic_generator
-    duration_s: 23.018
-  - source: S7-crosscutting-architecture-guardrails.xml
-    test: tests.architecture.test_checkpoint_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_tests
-    duration_s: 16.691
-  - source: S7-crosscutting-architecture-a2.xml
-    test: tests.architecture.test_cli_command_import_guards::test_non_cli_source_keeps_retained_public_cli_seams_outside_runtime_code
-    duration_s: 16.084
-  - source: S7-crosscutting-architecture-a2.xml
-    test: tests.architecture.test_config_root_governance::test_runtime_config_discovery_does_not_use_source_parent_arithmetic
-    duration_s: 15.28
-  - source: S7-crosscutting-architecture-a2.xml
-    test: tests.architecture.test_cli_command_import_guards::test_non_cli_source_avoids_interfaces_package_root_convenience_imports
-    duration_s: 14.498
-  - source: S7-crosscutting-architecture-a.xml
-    test: tests.architecture.test_adr_enforcement_matrix::test_adr_enforcement_matrix_artifact_matches_live_generator
-    duration_s: 14.129
-  - source: S7-crosscutting-architecture-a.xml
-    test: tests.architecture.test_add_svg_text_fallback::test_build_fallback_text_emits_multiline_tspans
-    duration_s: 13.15
-  - source: S7-crosscutting-architecture-a2.xml
-    test: tests.architecture.test_compatibility_freeze_guards::test_cli_run_orchestration_singleton_stays_private_compat_owner
-    duration_s: 12.274
-  - source: S7-crosscutting-architecture-a2.xml
-    test: tests.architecture.test_config_discrepancy_metrics_ratchets::test_config_discrepancy_metrics_within_scorecard_budget
-    duration_s: 11.328
-  - source: S7-crosscutting-architecture-guardrails.xml
-    test: tests.architecture.test_checkpoint_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_src
-    duration_s: 10.423
-  - source: S7-crosscutting-architecture-a.xml
-    test: tests.architecture.test_adapter_contracts.TestAdapterMixinPolicy::test_src_does_not_import_legacy_adapter_mixin_modules
-    duration_s: 8.951
-  - source: S7-crosscutting-architecture-a2.xml
-    test: tests.architecture.test_contract_registry_loader_boundary::test_contract_registry_path_literal_is_confined_to_reviewed_surfaces
-    duration_s: 8.577
-  - source: S7-crosscutting-architecture-a.xml
-    test: tests.architecture.test_adapter_contracts.TestAdapterHealthCheck::test_adapters_have_health_check
-    duration_s: 8.48
-  - source: S7-crosscutting-architecture-a2.xml
-    test: tests.architecture.test_config_ci_invariants.TestEffectiveOptionalityResolution::test_resolved_optionality_matches_current_config_surface
-    duration_s: 8.158
-  - source: S7-crosscutting-architecture-a2.xml
-    test: tests.architecture.test_config_ci_invariants.TestConfigFilesExist::test_runtime_config_primary_keys_match_contract_policy
-    duration_s: 7.149
-  - source: S7-crosscutting-architecture-a2.xml
-    test: tests.architecture.test_config_surface_entity_residual_plateau::test_entity_residual_backlog_matches_live_metrics_and_scorecard
-    duration_s: 7.029
-  - source: S1-domain-core.xml
-    test: tests.unit.domain.schemas.openalex.test_openalex_publication_validation.TestPmcIdBaseValidation::test_pmc_id_base_validation__id_invalid_format__d060aeb5[]
-    duration_s: 6.109
-  - source: S2-comp-iface.xml
-    test: tests.unit.composition.test_canonical_module_paths::test_execution_api_reexports_pipeline_runner_service
-    duration_s: 5.742
-  - source: S7-crosscutting-architecture-a.xml
-    test: tests.architecture.test_adapter_contracts.TestAdapterPortCompliance::test_primary_adapter_classes_use_package_root_imports
-    duration_s: 5.141
-  - source: S2-comp-iface.xml
-    test: tests.unit.interfaces.cli.commands.test_observability_backend_runtime::test_ensure_backend_fails_when_required_paths_never_become_ready
-    duration_s: 5.019
-  - source: S7-crosscutting-architecture-a2.xml
-    test: tests.architecture.test_config_surface_entity_residual_plateau::test_config_surface_duplication_audit_matches_live_backlog
-    duration_s: 4.691
+  - source: S7-crosscutting-architecture-c.xml
+    test: tests.architecture.test_naming_ambiguity_classifier::test_build_ambiguity_groups_is_deterministic
+    duration_s: 192.078
+  - source: S7-crosscutting-architecture-c.xml
+    test: tests.architecture.test_provider_registry_decomposition::test_private_default_registry_module_imports_stay_confined_to_sanctioned_seams
+    duration_s: 76.218
+  - source: S7-crosscutting-architecture-a3.xml
+    test: tests.architecture.test_debt_governance_telemetry_reporting::test_debt_governance_snapshot_matches_live_sources
+    duration_s: 64.276
+  - source: S7-crosscutting-architecture-c.xml
+    test: tests.architecture.test_provider_registry_decomposition::test_default_provider_registry_raw_calls_stay_confined_to_known_src_baseline
+    duration_s: 55.574
+  - source: S7-crosscutting-architecture-c.xml
+    test: tests.architecture.test_quality_exemptions_registry::test_exemption_registry_targets_are_live
+    duration_s: 40.649
+  - source: S7-crosscutting-architecture-c.xml
+    test: tests.architecture.test_naming_ambiguity_classifier::test_build_ambiguity_groups_reports_expected_ok_families
+    duration_s: 38.963
+  - source: S7-crosscutting-architecture-c.xml
+    test: tests.architecture.test_mounted_worktree_skip_policy::test_tests_do_not_reintroduce_hardcoded_network_drive_skips
+    duration_s: 37.074
+  - source: S7-crosscutting-architecture-c.xml
+    test: tests.architecture.test_private_module_imports::test_owner_aware_private_module_imports
+    duration_s: 35.843
+  - source: S7-crosscutting-architecture-b.xml
+    test: tests.architecture.test_import_graph_invariants::test_import_graph_respects_layer_matrix
+    duration_s: 35.412
+  - source: S8-crosscutting-governance.xml
+    test: tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline::test_chembl_activity_happy_path
+    duration_s: 34.348
+  - source: S7-crosscutting-architecture-d.xml
+    test: tests.architecture.test_vcr_metadata_catalog_drift::test_vcr_metadata_catalog_tracks_cassettes_not_sidecars
+    duration_s: 33.691
+  - source: S7-crosscutting-architecture-d.xml
+    test: tests.architecture.test_tech_debt_issues_5670_5675_closeout::test_issue_5674_internal_compatibility_shims_have_current_expiry_guards
+    duration_s: 31.733
+  - source: S7-crosscutting-architecture-d.xml
+    test: tests.architecture.test_value_object_run_manifest_deprecation::test_deprecated_value_object_run_manifest_is_not_used_in_tests
+    duration_s: 30.766
+  - source: S7-crosscutting-architecture-a3.xml
+    test: tests.architecture.test_deterministic_sort_policy_coverage::test_entity_pipeline_sink_sort_policy_coverage_is_full
+    duration_s: 29.077
+  - source: S7-crosscutting-architecture-c.xml
+    test: tests.architecture.test_quality_exemptions_registry::test_exemption_registry_metadata_is_complete
+    duration_s: 29.051
+  - source: S7-crosscutting-architecture-d.xml
+    test: tests.architecture.test_tech_debt_issues_5565_5569_closeout::test_issue_5566_semantic_seams_have_roles_and_no_new_src_callers
+    duration_s: 28.619
+  - source: S7-crosscutting-architecture-c.xml
+    test: tests.architecture.test_naming_package_consistency_gate::test_consistency_gate_script_runs_clean_in_check_mode
+    duration_s: 28.062
   - source: S2-comp-iface.xml
     test: tests.unit.composition.bootstrap.test_bootstrap_entrypoints.TestBootstrapPipeline::test_bootstrap_pipeline_creates_runner_without_starting_server
-    duration_s: 4.272
+    duration_s: 26.574
+  - source: S5-infra-adapters.xml
+    test: tests.integration.interfaces.test_cli_shutdown_integration.TestCliGracefulShutdownExitCode::test_shutdown_error_returns_exit_code_130
+    duration_s: 26.306
+  - source: S2-comp-iface.xml
+    test: tests.unit.interfaces.cli.test_cli_main_module.TestCliMainModule::test_module_runnable_with_help
+    duration_s: 26.301
+  - source: S7-crosscutting-architecture-c.xml
+    test: tests.architecture.test_retirement_candidate_triage::test_repo_wide_zero_import_candidate_count_does_not_grow
+    duration_s: 26.227
+  - source: S7-crosscutting-architecture-d.xml
+    test: tests.architecture.test_test_governance_audit::test_test_audit_closeout_2026_06_19_tracks_issue_pack_evidence
+    duration_s: 26.086
+  - source: S1-domain-services.xml
+    test: tests.unit.domain.test_exceptions.TestErrorClassifier::test_classify_unknown_exception
+    duration_s: 25.914
+  - source: S7-crosscutting-architecture-d.xml
+    test: tests.architecture.test_vcr_metadata_catalog_drift::test_vcr_metadata_catalog_drift_check_passes_current_repo
+    duration_s: 25.571
+  - source: S5-infra-adapters.xml
+    test: tests.unit.infrastructure.adapters.common.test_fetch_retry_policy::test_split_filter_ids_for_fallback_partition_property
+    duration_s: 24.535
   top_slowest_zones:
-  - zone: tests.architecture.test_checkpoint_compatibility_runtime_facade_usage
+  - zone: tests.architecture.test_naming_ambiguity_classifier
     test_count: 2
-    total_duration_s: 70.905
-    max_duration_s: 42.785
-  - zone: tests.architecture.test_config_discrepancy_metrics_ratchets
+    total_duration_s: 231.041
+    max_duration_s: 192.078
+  - zone: tests.architecture.test_provider_registry_decomposition
     test_count: 2
-    total_duration_s: 35.379
-    max_duration_s: 24.051
-  - zone: tests.architecture.test_cli_command_import_guards
+    total_duration_s: 131.792
+    max_duration_s: 76.218
+  - zone: tests.architecture.test_quality_exemptions_registry
     test_count: 2
-    total_duration_s: 30.582
-    max_duration_s: 16.084
-  - zone: tests.architecture.test_checkpoint_runtime_facade_usage
+    total_duration_s: 69.7
+    max_duration_s: 40.649
+  - zone: tests.architecture.test_debt_governance_telemetry_reporting
+    test_count: 1
+    total_duration_s: 64.276
+    max_duration_s: 64.276
+  - zone: tests.architecture.test_vcr_metadata_catalog_drift
     test_count: 2
-    total_duration_s: 27.114
-    max_duration_s: 16.691
-  - zone: tests.architecture.test_config_discrepancy_report_drift
+    total_duration_s: 59.262
+    max_duration_s: 33.691
+  - zone: tests.architecture.test_mounted_worktree_skip_policy
     test_count: 1
-    total_duration_s: 23.018
-    max_duration_s: 23.018
-  - zone: tests.architecture.test_config_root_governance
+    total_duration_s: 37.074
+    max_duration_s: 37.074
+  - zone: tests.architecture.test_private_module_imports
     test_count: 1
-    total_duration_s: 15.28
-    max_duration_s: 15.28
-  - zone: tests.architecture.test_adr_enforcement_matrix
+    total_duration_s: 35.843
+    max_duration_s: 35.843
+  - zone: tests.architecture.test_import_graph_invariants
     test_count: 1
-    total_duration_s: 14.129
-    max_duration_s: 14.129
-  - zone: tests.architecture.test_add_svg_text_fallback
+    total_duration_s: 35.412
+    max_duration_s: 35.412
+  - zone: tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline
     test_count: 1
-    total_duration_s: 13.15
-    max_duration_s: 13.15
-  - zone: tests.architecture.test_compatibility_freeze_guards
+    total_duration_s: 34.348
+    max_duration_s: 34.348
+  - zone: tests.architecture.test_tech_debt_issues_5670_5675_closeout
     test_count: 1
-    total_duration_s: 12.274
-    max_duration_s: 12.274
-  - zone: tests.architecture.test_config_surface_entity_residual_plateau
-    test_count: 2
-    total_duration_s: 11.72
-    max_duration_s: 7.029
-  - zone: tests.architecture.test_adapter_contracts.TestAdapterMixinPolicy
-    test_count: 1
-    total_duration_s: 8.951
-    max_duration_s: 8.951
-  - zone: tests.architecture.test_contract_registry_loader_boundary
-    test_count: 1
-    total_duration_s: 8.577
-    max_duration_s: 8.577
-  - zone: tests.architecture.test_adapter_contracts.TestAdapterHealthCheck
-    test_count: 1
-    total_duration_s: 8.48
-    max_duration_s: 8.48
-  - zone: tests.architecture.test_config_ci_invariants.TestEffectiveOptionalityResolution
-    test_count: 1
-    total_duration_s: 8.158
-    max_duration_s: 8.158
-  - zone: tests.architecture.test_config_ci_invariants.TestConfigFilesExist
-    test_count: 1
-    total_duration_s: 7.149
-    max_duration_s: 7.149
-  - zone: tests.unit.domain.schemas.openalex.test_openalex_publication_validation.TestPmcIdBaseValidation
-    test_count: 1
-    total_duration_s: 6.109
-    max_duration_s: 6.109
-  - zone: tests.unit.composition.test_canonical_module_paths
-    test_count: 1
-    total_duration_s: 5.742
-    max_duration_s: 5.742
-  - zone: tests.architecture.test_adapter_contracts.TestAdapterPortCompliance
-    test_count: 1
-    total_duration_s: 5.141
-    max_duration_s: 5.141
-  - zone: tests.unit.interfaces.cli.commands.test_observability_backend_runtime
-    test_count: 1
-    total_duration_s: 5.019
-    max_duration_s: 5.019
-  - zone: tests.unit.composition.bootstrap.test_bootstrap_entrypoints.TestBootstrapPipeline
-    test_count: 1
-    total_duration_s: 4.272
-    max_duration_s: 4.272
+    total_duration_s: 31.733
+    max_duration_s: 31.733
   execution_context:
     junit_source_count: 18
     junit_sources:
+    - coverage-tail-owner-addendum.xml
+    - export-execution-addendum.xml
+    - infrastructure-owner-addendum.xml
+    - repo-backed-storage-addendum.xml
     - S1-domain-core.xml
     - S1-domain-services.xml
     - S2-comp-iface.xml
@@ -213,14 +177,14 @@ duration_telemetry:
     - S7-crosscutting-architecture-c.xml
     - S7-crosscutting-architecture-d.xml
     - S8-crosscutting-governance.xml
-    - coverage-tail-owner-addendum.xml
-    - export-execution-addendum.xml
-    - infrastructure-owner-addendum.xml
-    - repo-backed-storage-addendum.xml
-    executed_count: 8507
+    executed_count: 23360
     worker_mode: 'mixed: xdist unit/integration; serial contracts/repo-backed/memory'
     junit_testcase_duration_sum_s: 4543.53
     lane_wall_time_s:
+      coverage-tail-owner-addendum.xml: 3.648
+      export-execution-addendum.xml: 0.051
+      infrastructure-owner-addendum.xml: 20.994
+      repo-backed-storage-addendum.xml: 178.555
       S1-domain-core.xml: 274.486
       S1-domain-services.xml: 35.982
       S2-comp-iface.xml: 158.724
@@ -235,10 +199,6 @@ duration_telemetry:
       S7-crosscutting-architecture-c.xml: 1261.941
       S7-crosscutting-architecture-d.xml: 675.427
       S8-crosscutting-governance.xml: 268.474
-      coverage-tail-owner-addendum.xml: 3.648
-      export-execution-addendum.xml: 0.051
-      infrastructure-owner-addendum.xml: 20.994
-      repo-backed-storage-addendum.xml: 178.555
     explicit_exclusions:
     - lane: live-provider-contracts
       reason: scheduled network-owned workflow
@@ -246,6 +206,12 @@ duration_telemetry:
       reason: benchmark-owned non-blocking workflow
     - lane: manual-e2e
       reason: operator-triggered external-runtime lane
+    - lane: deleted-or-renamed-nodes-filtered
+      reason: dropped 248 timed cases whose owning test modules no longer exist on
+        current HEAD
+    ranking_filter:
+      dropped_deleted_module_cases: 248
+      retained_for_ranking: 23112
 slow_governance_cache_probe:
   issue_ref: '#4663'
   refreshed_at_utc: '2026-05-26T04:32:00+00:00'
@@ -272,4 +238,4 @@ slow_governance_cache_probe:
       cache_path: .cache/bioetl-architecture-governance
       cache_key: source_tree_sha256 from module-coverage-inventory.json
       workflow_owner: .github/workflows/tests.yml#test-fast
-source_tree_sha256: f24da406077709eac730c84085674c41be14018bbd1e0645ca74efc595b70bb8
+source_tree_sha256: d98620ba66379921bab9919994840bcf34145461e2c263680e58cb5f47fb39ef
