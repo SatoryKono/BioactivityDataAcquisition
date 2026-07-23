@@ -9,6 +9,9 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+REPO_ROOT = Path(__file__).resolve().parents[5]
+EXPORT_SCRIPT = REPO_ROOT / "scripts/ai/mcp/export_mcp_env_from_dotenv.ps1"
+
 
 def run_export_script(
     repo_root: Path,
@@ -16,14 +19,11 @@ def run_export_script(
     env: dict[str, str] | None = None,
 ) -> subprocess.CompletedProcess[str]:
     """Run the export script and return the result."""
-    # Test is in tests/unit/scripts/ai/mcp/, script is in scripts/ai/mcp/
-    # Need to go up 5 levels to reach repo root, then into scripts
-    script_path = Path(__file__).parent.parent.parent.parent.parent / "scripts/ai/mcp/export_mcp_env_from_dotenv.ps1"
     cmd = [
         "pwsh",
         "-NoProfile",
         "-File",
-        str(script_path),
+        str(EXPORT_SCRIPT),
         "-RepoRoot",
         str(repo_root),
     ]
@@ -44,8 +44,7 @@ class TestExportMcpEnvFromDotenv:
 
     def test_script_exists(self) -> None:
         """Test that the export script exists."""
-        script_path = Path(__file__).parent.parent.parent.parent.parent / "scripts/ai/mcp/export_mcp_env_from_dotenv.ps1"
-        assert script_path.exists()
+        assert EXPORT_SCRIPT.exists()
 
     def test_script_runs_without_errors(self, tmp_path: Path) -> None:
         """Test that the script runs without syntax errors."""
@@ -100,7 +99,7 @@ class TestExportMcpEnvFromDotenv:
             "OPENAI_API_KEY=test1\n"
             "NEO4J_URI=bolt://localhost:7687\n"
             "GITHUB_TOKEN=ghp_test\n",
-            encoding="utf-8"
+            encoding="utf-8",
         )
 
         result = run_export_script(tmp_path)
@@ -122,8 +121,7 @@ class TestExportMcpEnvFromDotenv:
 
     def test_known_mcp_keys_listed(self) -> None:
         """Test that the script lists known MCP keys."""
-        script_path = Path(__file__).parent.parent.parent.parent.parent / "scripts/ai/mcp/export_mcp_env_from_dotenv.ps1"
-        content = script_path.read_text(encoding="utf-8")
+        content = EXPORT_SCRIPT.read_text(encoding="utf-8")
 
         # Check for known MCP keys in the script
         known_keys = [

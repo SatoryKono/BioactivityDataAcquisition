@@ -2,7 +2,7 @@
   "source_branch": "main",
   "source_commit": "51979de96630ce1eff88b6a2b82df04a5c9be157",
   "source_run_id": "local-issues-5710-5711-20260630",
-  "source_tree_sha256": "987608dfd4a5f34ca55db9b52e8ec88f276238a950ac4c8f9bd76ab88337cdf3",
+  "source_tree_sha256": "f7ca484ecd7fb68d23c5165320ef011d7f9a3bd4db2407178b681bc6887663cc",
   "refreshed_at_utc": "2026-06-30T13:06:54.324571+00:00",
   "refresh_status": "captured",
   "coverage_percent": 95.61,

@@ -183,15 +183,52 @@ class TestLockRuntimeService:
     async def test_validate_uses_fencing_token(
         self, lock_manager: LockRuntimeService, mock_lock_port: AsyncMock
     ) -> None:
-        """Test validate uses fencing token when available."""
+        """Test validate uses fencing token when available and renews lease."""
         lock_manager._fencing_token = _TEST_TOKEN
         mock_lock_port.validate_fencing_token.return_value = True
+        mock_lock_port.heartbeat.return_value = True
 
         result = await lock_manager.validate()
 
         assert result is True
         mock_lock_port.validate_fencing_token.assert_called_once_with(
             "lock:test_pipeline", _TEST_TOKEN
+        )
+        mock_lock_port.heartbeat.assert_called_once_with(
+            "lock:test_pipeline", TEST_RUN_ID, exclusive=False
+        )
+
+    async def test_validate_renews_soft_expired_owned_lock(
+        self, lock_manager: LockRuntimeService, mock_lock_port: AsyncMock
+    ) -> None:
+        """Soft-expired owned locks are revived via heartbeat then re-checked."""
+        lock_manager._fencing_token = _TEST_TOKEN
+        # First ownership probe fails (TTL elapsed), recovery heartbeat succeeds,
+        # second ownership probe passes after lease extension.
+        mock_lock_port.validate_fencing_token.side_effect = [False, True]
+        mock_lock_port.heartbeat.return_value = True
+
+        result = await lock_manager.validate()
+
+        assert result is True
+        assert mock_lock_port.validate_fencing_token.await_count == 2
+        mock_lock_port.heartbeat.assert_called_once_with(
+            "lock:test_pipeline", TEST_RUN_ID, exclusive=False
+        )
+
+    async def test_validate_fails_when_ownership_and_heartbeat_fail(
+        self, lock_manager: LockRuntimeService, mock_lock_port: AsyncMock
+    ) -> None:
+        """Validate returns False when the lock is no longer owned."""
+        lock_manager._fencing_token = _TEST_TOKEN
+        mock_lock_port.validate_fencing_token.return_value = False
+        mock_lock_port.heartbeat.return_value = False
+
+        result = await lock_manager.validate()
+
+        assert result is False
+        mock_lock_port.heartbeat.assert_called_once_with(
+            "lock:test_pipeline", TEST_RUN_ID, exclusive=False
         )
 
 
