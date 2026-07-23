@@ -57,6 +57,12 @@ def test_contract_coverage_matrix_declares_gold_enabled_semantics() -> None:
     assert isinstance(gold_enabled, str)
     assert "effective runtime state" in gold_enabled.lower()
     assert "hierarchical config resolution" in gold_enabled
+    gold_contract_available = semantics.get("gold_contract_available")
+    assert isinstance(gold_contract_available, str)
+    assert "independent" in gold_contract_available.lower()
+    assert payload.get("gold_contract_available_count") == sum(
+        1 for row in _load_rows() if row.get("gold_contract_available") is True
+    )
 
 
 @pytest.mark.architecture
