@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3087 |
-| Tracked doc-like files | 1891 |
+| Doc-like files | 3090 |
+| Tracked doc-like files | 1894 |
 | Ignored local docs/reports files | 1196 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
@@ -19,7 +19,7 @@
 | Tracking State | Count |
 | --- | --- |
 | ignored_local | 1196 |
-| tracked | 1891 |
+| tracked | 1894 |
 
 ## Lifecycle Counts
 
@@ -43,7 +43,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 36 |
 | supporting_context | 12 |
-| working_report | 49 |
+| working_report | 50 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -59,30 +59,30 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 1950 |
+| Active | 1952 |
 | Archived | 80 |
 | Canonical | 63 |
 | Generated | 723 |
-| Working | 271 |
+| Working | 272 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 1950 |
+| active | 1952 |
 | archive | 80 |
 | canonical | 63 |
 | generated | 723 |
-| working | 271 |
+| working | 272 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 121 |
-| archive-after-migration | 94 |
+| archive-after-migration | 95 |
 | generate-automatically | 723 |
-| keep | 2145 |
+| keep | 2147 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -157,6 +157,7 @@
 | `reports/quality/domain-aggregate-invariant-registry.json` | Working | 0 | archive-after-migration |
 | `reports/quality/domain-composite-config-importer-map.md` | Working | 0 | archive-after-migration |
 | `reports/quality/hotspot-coverage-tail-owner-map.json` | Working | 0 | archive-after-migration |
+| `reports/quality/issue-6480-application-core-partial-tranche.json` | Working | 0 | archive-after-migration |
 | `reports/quality/low-coverage-targeted-tests-6045.json` | Working | 0 | archive-after-migration |
 | `reports/quality/port-adapter-factory-coverage.json` | Working | 0 | archive-after-migration |
 | `reports/quality/port-adapter-factory-coverage.md` | Working | 0 | archive-after-migration |
@@ -168,7 +169,6 @@
 | `reports/quality/test-support-helper-ownership-map.json` | Working | 0 | archive-after-migration |
 | `reports/quality/total-tech-debt-audit-main-current.md` | Working | 0 | archive-after-migration |
 | `reports/review/S1-domain.md` | Working | 0 | archive-after-migration |
-| `reports/review/S1.1-contracts-ports.md` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
