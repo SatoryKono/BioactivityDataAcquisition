@@ -70,6 +70,36 @@ This policy applies to:
    `~/.codex/config.toml` block first, regenerate only missing or stale state,
    and reserve force-refresh for an explicit setup command.
 
+## Materialization profiles (least privilege)
+
+The tracked portable inventory remains the full sanctioned server set
+(currently 21 servers). Local materialization may use a **profile** so high-
+privilege servers are not always-on:
+
+| Profile | Membership intent | Default for daily coding? |
+| --- | --- | --- |
+| `core` | memory, filesystem, fetch, github, context7, ast-grep, mermaid, deja, adr-analysis, code-analyzer | **yes** |
+| `ops` | `core` + prometheus, grafana, github-actions | observability / dashboard work |
+| `graph` | `ops` + neo4j-cypher, neo4j-memory, brave-search, deepwiki, ref, mutmut, mcp-code-interpreter, docker | research / graph / mutation work |
+| `full` | entire sanctioned inventory (same as tracked portable set) | only when explicitly needed |
+
+Generator:
+
+```bash
+python scripts/ai/codex/setup_mcp.py --profile core --skip-codex-validation
+python scripts/ai/codex/setup_mcp.py --profile full --skip-codex-validation
+```
+
+Rules:
+
+1. Tracked `.mcp.json` / `scripts/ai/.mcp.json` / `.zed/mcp.json` remain the
+   portable **full** inventory SSOT unless a separate reviewed change says
+   otherwise.
+2. Profiles filter **local** projections (`.cursor/mcp.json`, `.vscode/mcp.json`,
+   workspace `.codex/settings.json`, optional local-only targets).
+3. Retired servers in `REMOVED_MCP_SERVER_NAMES` must never reappear.
+4. Do not increase tech-debt budgets to paper over privilege sprawl.
+
 ## Token Configuration
 
 MCP tokens are local runtime inputs, not portable workspace configuration. The

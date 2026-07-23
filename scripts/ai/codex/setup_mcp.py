@@ -39,6 +39,43 @@ REMOVED_MCP_SERVER_NAMES = frozenset(
     }
 )
 
+# Least-privilege local materialization profiles. Tracked portable inventory
+# stays full unless a separate reviewed change says otherwise.
+MCP_PROFILE_CORE = (
+    "memory",
+    "filesystem",
+    "fetch",
+    "github",
+    "context7",
+    "ast-grep",
+    "mermaid",
+    "deja",
+    "adr-analysis",
+    "code-analyzer",
+)
+MCP_PROFILE_OPS = MCP_PROFILE_CORE + (
+    "prometheus",
+    "grafana",
+    "github-actions",
+)
+MCP_PROFILE_GRAPH = MCP_PROFILE_OPS + (
+    "neo4j-cypher",
+    "neo4j-memory",
+    "brave-search",
+    "deepwiki",
+    "ref",
+    "mutmut",
+    "mcp-code-interpreter",
+    "docker",
+)
+MCP_PROFILES: dict[str, tuple[str, ...] | None] = {
+    "core": MCP_PROFILE_CORE,
+    "ops": MCP_PROFILE_OPS,
+    "graph": MCP_PROFILE_GRAPH,
+    # full = entire sanctioned inventory from _canonical_servers
+    "full": None,
+}
+
 
 def _add_startup_timeouts(servers: dict[str, dict[str, Any]]) -> None:
     startup_timeouts = {
@@ -130,10 +167,44 @@ def _npx_server(*args: str, npm_cache_dir: str) -> dict[str, Any]:
     }
 
 
+def _filter_servers_for_profile(
+    servers: dict[str, dict[str, Any]],
+    *,
+    profile: str,
+) -> dict[str, dict[str, Any]]:
+    """Return a profile-filtered copy of *servers* (never emits retired names)."""
+    if profile not in MCP_PROFILES:
+        raise ValueError(
+            f"Unknown MCP profile {profile!r}; expected one of "
+            f"{sorted(MCP_PROFILES)}"
+        )
+    allowed = MCP_PROFILES[profile]
+    if allowed is None:
+        filtered = {
+            name: cfg
+            for name, cfg in servers.items()
+            if name not in REMOVED_MCP_SERVER_NAMES
+        }
+    else:
+        allowed_set = set(allowed)
+        missing = sorted(allowed_set - set(servers))
+        if missing:
+            raise ValueError(
+                f"MCP profile {profile!r} references unknown servers: {missing}"
+            )
+        filtered = {
+            name: cfg
+            for name, cfg in servers.items()
+            if name in allowed_set and name not in REMOVED_MCP_SERVER_NAMES
+        }
+    return filtered
+
+
 def _canonical_servers(
     workspace_root: Path,
     *,
     portable_workspace_paths: bool = False,
+    profile: str = "full",
 ) -> dict[str, dict[str, Any]]:
     workspace_root_str = _config_path(
         workspace_root,
@@ -282,20 +353,24 @@ def _canonical_servers(
         "PROJECT_PATH": workspace_root_str,
         "ADR_PATH": adr_path,
     }
-    servers["mutmut"]["env"] = {"MUTMUT_PROJECT_PATH": workspace_root_str}
-    servers["code-analyzer"]["env"] = {"PROJECT_PATH": workspace_root_str}
+    if "mutmut" in servers:
+        servers["mutmut"]["env"] = {"MUTMUT_PROJECT_PATH": workspace_root_str}
+    if "code-analyzer" in servers:
+        servers["code-analyzer"]["env"] = {"PROJECT_PATH": workspace_root_str}
     _add_startup_timeouts(servers)
-    return servers
+    return _filter_servers_for_profile(servers, profile=profile)
 
 
-def _codex_runtime_servers(workspace_root: Path) -> dict[str, dict[str, Any]]:
+def _codex_runtime_servers(
+    workspace_root: Path, *, profile: str = "full"
+) -> dict[str, dict[str, Any]]:
     """Return local Codex servers with WSL-safe runtime cache paths.
 
     Tracked MCP projections keep repo-relative cache paths for portability.  The
     Codex user runtime must not put npm/uv caches on a Windows-mounted workspace,
     where atomic rename and cleanup operations are unreliable under WSL.
     """
-    servers = deepcopy(_canonical_servers(workspace_root))
+    servers = deepcopy(_canonical_servers(workspace_root, profile=profile))
     xdg_cache_home = os.environ.get("XDG_CACHE_HOME")
     cache_home = (
         Path(xdg_cache_home).expanduser()
@@ -322,12 +397,15 @@ def _codex_runtime_servers(workspace_root: Path) -> dict[str, dict[str, Any]]:
         "github-actions",
     }
     for server_name in npm_backed_servers:
+        if server_name not in servers:
+            continue
         server_env = servers[server_name].setdefault("env", {})
         server_env["NPM_CONFIG_CACHE"] = npm_cache_dir
 
-    fetch_env = servers["fetch"]["env"]
-    fetch_env["UV_CACHE_DIR"] = str(runtime_cache_root / "uv-cache")
-    fetch_env["UV_TOOL_DIR"] = str(runtime_cache_root / "uv-tools")
+    if "fetch" in servers:
+        fetch_env = servers["fetch"].setdefault("env", {})
+        fetch_env["UV_CACHE_DIR"] = str(runtime_cache_root / "uv-cache")
+        fetch_env["UV_TOOL_DIR"] = str(runtime_cache_root / "uv-tools")
     _add_startup_timeouts(servers)
 
     return servers
@@ -353,19 +431,24 @@ def _load_existing_json_object(path: Path, *, label: str) -> dict[str, Any]:
     return existing
 
 
-def _write_workspace_codex_settings(output_root: Path, workspace_root: Path) -> Path:
+def _write_workspace_codex_settings(
+    output_root: Path, workspace_root: Path, *, profile: str = "full"
+) -> Path:
     settings_path = output_root / ".codex" / "settings.json"
     settings_path.parent.mkdir(parents=True, exist_ok=True)
 
     existing = _load_existing_json_object(
         settings_path, label="Codex workspace settings"
     )
-    existing["mcpServers"] = deepcopy(_codex_runtime_servers(workspace_root))
+    existing["mcpServers"] = deepcopy(
+        _codex_runtime_servers(workspace_root, profile=profile)
+    )
     _write_json(settings_path, existing)
     return settings_path
 
 
 def _write_devin_config(output_root: Path, workspace_root: Path) -> Path:
+    """Write tracked Devin portable MCP projection (always full inventory)."""
     settings_path = output_root / ".devin" / "config.json"
     settings_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -380,8 +463,11 @@ def _write_devin_config(output_root: Path, workspace_root: Path) -> Path:
     else:
         existing["shell"].setdefault("setup_complete", True)
 
+    # Tracked Devin config always materializes the full portable inventory.
     servers = deepcopy(
-        _canonical_servers(workspace_root, portable_workspace_paths=True)
+        _canonical_servers(
+            workspace_root, portable_workspace_paths=True, profile="full"
+        )
     )
     ref_server = servers.get("ref")
     if isinstance(ref_server, dict):
@@ -395,18 +481,30 @@ def _write_devin_config(output_root: Path, workspace_root: Path) -> Path:
 
 
 def _write_configs(
-    output_root: Path, workspace_root: Path, *, qodo_only: bool = False
+    output_root: Path,
+    workspace_root: Path,
+    *,
+    qodo_only: bool = False,
+    profile: str = "full",
 ) -> tuple[
     Path | None, Path | None, Path | None, Path, Path | None, Path | None, Path | None
 ]:
-    workspace_servers = _canonical_servers(
+    # Tracked portable SSOT stays full. Local IDE projections may be profiled.
+    full_servers = _canonical_servers(
         workspace_root,
         portable_workspace_paths=True,
+        profile="full",
     )
-    codex_payload = {"mcpServers": deepcopy(workspace_servers)}
-    vscode_payload = {"servers": deepcopy(workspace_servers)}
-    qodo_payload = {"mcpServers": deepcopy(workspace_servers)}
-    zed_payload = {"mcpServers": deepcopy(workspace_servers)}
+    local_servers = _canonical_servers(
+        workspace_root,
+        portable_workspace_paths=True,
+        profile=profile,
+    )
+    codex_payload = {"mcpServers": deepcopy(full_servers)}
+    vscode_payload = {"servers": deepcopy(local_servers)}
+    cursor_payload = {"mcpServers": deepcopy(local_servers)}
+    qodo_payload = {"mcpServers": deepcopy(local_servers)}
+    zed_payload = {"mcpServers": deepcopy(full_servers)}
 
     mcp_path = output_root / ".mcp.json"
     scripts_ai_mcp_path = output_root / "scripts" / "ai" / ".mcp.json"
@@ -418,14 +516,14 @@ def _write_configs(
     devin_config_path: Path | None = None
     if not qodo_only:
         codex_settings_path = _write_workspace_codex_settings(
-            output_root, workspace_root
+            output_root, workspace_root, profile=profile
         )
         devin_config_path = _write_devin_config(output_root, workspace_root)
         _write_json(mcp_path, codex_payload)
         if output_root.resolve() == workspace_root.resolve():
             _write_json(scripts_ai_mcp_path, codex_payload)
         _write_json(vscode_path, vscode_payload)
-        _write_json(cursor_path, codex_payload)
+        _write_json(cursor_path, cursor_payload)
         _write_json(zed_path, zed_payload)
     _write_json(qodo_path, qodo_payload)
     return (
@@ -447,7 +545,9 @@ def _gemini_server_config(server: dict[str, Any]) -> dict[str, Any]:
     return rendered
 
 
-def _write_gemini_settings(output_root: Path, workspace_root: Path) -> Path:
+def _write_gemini_settings(
+    output_root: Path, workspace_root: Path, *, profile: str = "full"
+) -> Path:
     settings_path = output_root / ".gemini" / "settings.json"
     settings_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -461,8 +561,14 @@ def _write_gemini_settings(output_root: Path, workspace_root: Path) -> Path:
         for name, server in existing_servers.items()
         if name not in REMOVED_MCP_SERVER_NAMES
     }
-    for name, server in _canonical_servers(workspace_root).items():
+    for name, server in _canonical_servers(workspace_root, profile=profile).items():
         merged_servers[name] = _gemini_server_config(server)
+    # Drop servers that are not in the selected profile (local projection only).
+    if profile != "full":
+        allowed = set(_canonical_servers(workspace_root, profile=profile))
+        merged_servers = {
+            name: cfg for name, cfg in merged_servers.items() if name in allowed
+        }
 
     existing["mcpServers"] = merged_servers
     _write_json(settings_path, existing)
@@ -572,8 +678,8 @@ def _strip_managed_mcp_blocks(content: str, managed_server_names: set[str]) -> s
     return "\n".join(kept)
 
 
-def _write_codex_config(workspace_root: Path) -> Path:
-    servers = _codex_runtime_servers(workspace_root)
+def _write_codex_config(workspace_root: Path, *, profile: str = "full") -> Path:
+    servers = _codex_runtime_servers(workspace_root, profile=profile)
     config_dir = Path.home() / ".codex"
     config_dir.mkdir(parents=True, exist_ok=True)
     config_path = config_dir / "config.toml"
@@ -661,6 +767,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         action="store_true",
         help="Write only .qodo/mcp.json and skip Codex/Gemini side effects.",
     )
+    parser.add_argument(
+        "--profile",
+        choices=sorted(MCP_PROFILES),
+        default="full",
+        help=(
+            "Least-privilege local materialization profile for IDE/Codex local "
+            "projections (core|ops|graph|full). Tracked portable inventory "
+            "(.mcp.json, scripts/ai/.mcp.json, .zed/mcp.json, .devin/config.json) "
+            "always stays full."
+        ),
+    )
     args = parser.parse_args(list(argv) if argv is not None else None)
 
     output_root = args.root.absolute()
@@ -680,7 +797,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         zed_path,
         codex_settings_path,
         devin_config_path,
-    ) = _write_configs(output_root, workspace_root, qodo_only=args.qodo_only)
+    ) = _write_configs(
+        output_root,
+        workspace_root,
+        qodo_only=args.qodo_only,
+        profile=args.profile,
+    )
     if mcp_path is not None and not args.qodo_only:
         print(f"Wrote {mcp_path}")
     if vscode_path is not None and not args.qodo_only:
@@ -695,10 +817,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     if devin_config_path is not None and not args.qodo_only:
         print(f"Wrote {devin_config_path}")
     if not args.skip_codex_config:
-        codex_config_path = _write_codex_config(workspace_root)
+        codex_config_path = _write_codex_config(
+            workspace_root, profile=args.profile
+        )
         print(f"Wrote {codex_config_path}")
     if not args.skip_gemini_settings:
-        gemini_settings_path = _write_gemini_settings(output_root, workspace_root)
+        gemini_settings_path = _write_gemini_settings(
+            output_root, workspace_root, profile=args.profile
+        )
         print(f"Wrote {gemini_settings_path}")
 
     if not args.skip_codex and not args.skip_codex_validation:

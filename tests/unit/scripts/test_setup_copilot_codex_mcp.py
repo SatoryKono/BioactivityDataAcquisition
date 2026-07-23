@@ -48,6 +48,52 @@ def _seed_workspace_mcp(
     return workspace_root, fake_home
 
 
+def test_core_profile_omits_high_privilege_servers_from_local_projections(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """--profile core must shrink local IDE projections but keep tracked full inventory."""
+    monkeypatch.delenv("XDG_CACHE_HOME", raising=False)
+    workspace_root = tmp_path / "workspace-root"
+    output_root = tmp_path / "output-root"
+    workspace_root.mkdir()
+
+    exit_code = setup_mcp.main(
+        [
+            "--root",
+            str(output_root),
+            "--workspace-root",
+            str(workspace_root),
+            "--skip-codex",
+            "--skip-codex-config",
+            "--skip-gemini-settings",
+            "--profile",
+            "core",
+        ]
+    )
+    assert exit_code == 0
+
+    tracked = json.loads((output_root / ".mcp.json").read_text(encoding="utf-8"))
+    cursor = json.loads(
+        (output_root / ".cursor" / "mcp.json").read_text(encoding="utf-8")
+    )
+    vscode = json.loads(
+        (output_root / ".vscode" / "mcp.json").read_text(encoding="utf-8")
+    )
+    tracked_names = set(tracked["mcpServers"])
+    cursor_names = set(cursor["mcpServers"])
+    vscode_names = set(vscode["servers"])
+
+    assert "docker" in tracked_names
+    assert "neo4j-memory" in tracked_names
+    assert "docker" not in cursor_names
+    assert "neo4j-memory" not in cursor_names
+    assert "docker" not in vscode_names
+    assert "memory" in cursor_names
+    assert "github" in cursor_names
+    assert not (tracked_names & setup_mcp.REMOVED_MCP_SERVER_NAMES)
+    assert not (cursor_names & setup_mcp.REMOVED_MCP_SERVER_NAMES)
+
+
 def test_main_uses_workspace_root_for_generated_server_paths(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
