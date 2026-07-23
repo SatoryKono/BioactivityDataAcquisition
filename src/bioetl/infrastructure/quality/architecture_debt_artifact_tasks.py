@@ -6,10 +6,6 @@ from pathlib import Path
 from typing import cast
 
 from bioetl.infrastructure.quality.architecture_debt_task_policy import (
-
-_ARCHITECTURE_OWNER = "@bioetl-architecture"
-_COMPATIBILITY_CENSUS_PATH = "reports/quality/compatibility-importer-census.json"
-
     COMMON_ACCEPTANCE_CRITERIA,
     COMMON_ALLOWED_PATHS,
     COMMON_FORBIDDEN_PATHS,
@@ -17,6 +13,9 @@ _COMPATIBILITY_CENSUS_PATH = "reports/quality/compatibility-importer-census.json
     load_json_if_present,
     load_yaml_if_present,
 )
+
+_ARCHITECTURE_OWNER = "@bioetl-architecture"
+_COMPATIBILITY_CENSUS_PATH = "reports/quality/compatibility-importer-census.json"
 
 
 def artifact_defaults(project_root: Path) -> dict[str, Path]:

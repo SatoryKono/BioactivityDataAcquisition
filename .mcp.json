@@ -168,6 +168,15 @@
       "url": "https://mcp.deepwiki.com/mcp",
       "startup_timeout_sec": 240
     },
+    "devin": {
+      "type": "http",
+      "url": "https://mcp.devin.ai/mcp",
+      "headers": {
+        "Authorization": "Bearer cog_4bu3jwjuig7b4i37rq55rfgbklwenjo7eptkoxjapr3flldohl5a",
+        "X-Org-Id": "org-5fa73a1fb0e845a0aa91127d0615fc44"
+      },
+      "startup_timeout_sec": 240
+    },
     "ref": {
       "type": "http",
       "url": "https://api.ref.tools/mcp",

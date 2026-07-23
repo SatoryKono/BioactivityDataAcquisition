@@ -9,10 +9,12 @@ from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
     chembl_pseudo_null_fields,
 )
 from bioetl.domain.schemas.chembl.target_protein_classification import (
-
-_TRIM_COLLAPSE_JSON_PIPE_NOTE = "Trim and collapse blank textual values to None where applicable. JSON pipe-delimited list field."
-
     TargetProteinClassificationSchema,
+)
+
+_TRIM_COLLAPSE_JSON_PIPE_NOTE = (
+    "Trim and collapse blank textual values to None where applicable. "
+    "JSON pipe-delimited list field."
 )
 
 __all__ = [

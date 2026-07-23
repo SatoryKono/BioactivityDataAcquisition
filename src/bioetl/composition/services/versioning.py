@@ -29,6 +29,7 @@ if TYPE_CHECKING:
 _FULL_GIT_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 _RUNTIME_PATH_CLS = type(Path())
 _REPO_ROOT = Path(__file__).resolve().parents[4]
+_DEPENDENCY_LOCKFILE_NAMES = ("uv.lock", "poetry.lock")
 
 __all__ = [
     "CodeRevisionProvenance",
@@ -151,7 +152,7 @@ def get_dependency_lock_hash() -> str | None:
     """Return the content hash for the active dependency lockfile, if present."""
     cwd = _RUNTIME_PATH_CLS.cwd()
     for directory in (cwd, *cwd.parents):
-        for lockfile_name in ("uv.lock", "poetry.lock"):
+        for lockfile_name in _DEPENDENCY_LOCKFILE_NAMES:
             lockfile = directory / lockfile_name
             if lockfile.is_file():
                 digest = hashlib.sha256(lockfile.read_bytes()).hexdigest()
@@ -161,12 +162,12 @@ def get_dependency_lock_hash() -> str | None:
 
 def _get_repo_dependency_lock_hash() -> str | None:
     """Return the checkout lockfile hash for provenance when cwd is external."""
-    for lockfile_name in ("uv.lock", "poetry.lock"):
+    for lockfile_name in _DEPENDENCY_LOCKFILE_NAMES:
         lockfile = _REPO_ROOT / lockfile_name
         if lockfile.is_file():
             digest = hashlib.sha256(lockfile.read_bytes()).hexdigest()
             return f"sha256:{digest}"
-    for lockfile_name in ("uv.lock", "poetry.lock"):
+    for lockfile_name in _DEPENDENCY_LOCKFILE_NAMES:
         result = _run_git_command("show", f"HEAD:{lockfile_name}")
         if result is None or result.returncode != 0:
             continue
