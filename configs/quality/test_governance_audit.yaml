@@ -596,7 +596,7 @@ test_audit_closeout_2026_07_08:
     test_file_count_definition: tests/**/test_*.py from pyproject python_files
     repo_backed_unit_lane: repo-backed-unit
     repo_backed_unit_subtree: tests/unit/repo_backed/
-    repo_backed_unit_test_files: 40
+    repo_backed_unit_test_files: 41
     performance_baseline_reports:
     - reports/test-telemetry/slowest-tests.json
     - reports/test-telemetry/slowest-tests.md
@@ -726,7 +726,7 @@ assertless_triage:
         calls.
       next_review: '2026-09-30'
     intentional_no_exception_contract:
-      count: 89
+      count: 90
       decision: retained-with-rationale
       rationale: No-op, close/aclose, smoke, or does-not-raise behavior is the contract
         under test.
@@ -806,7 +806,7 @@ oversized_test_module_inventory:
   completed_splits:
   - issue_ref: '#4505'
     source: tests/integration/test_grafana_config.py
-    source_lines_after_split: 1558
+    source_lines_after_split: 1695
     extracted_surface: tests/integration/test_grafana_surface_contracts.py
     extracted_surface_lines: 731
     owner: observability-dashboards
@@ -818,17 +818,17 @@ oversized_test_module_inventory:
     owner: observability-dashboards
   - issue_ref: '#6326'
     source: tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py
-    source_lines_after_split: 983
+    source_lines_after_split: 1009
     extracted_surface: tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_tooling.py
     extracted_surface_lines: 1234
     owner: observability-dashboards
   - issue_ref: '#6364'
     source: tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py
-    source_lines_after_split: 983
+    source_lines_after_split: 1009
     extracted_surface: tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_tooling.py
     extracted_surface_lines: 1234
     owner: observability-dashboards
-    note: Oversized test module inventory updated to reflect completed split from #6326. The source file is now 983 lines (within 2000 LOC limit) and the extracted surface is 1234 lines (tracked in top_modules).
+    note: Oversized test module inventory updated to reflect completed split from #6326. The source file is now 1009 lines (within 2000 LOC limit) and the extracted surface is 1234 lines (tracked in top_modules).
   - issue_ref: '#4506'
     source: tests/unit/composition/runtime_builders/test_runner_builder_profiles.py
     source_lines_after_split: 1097
@@ -1116,6 +1116,9 @@ repo_backed_unit_test_exceptions:
   - path: tests/unit/repo_backed/scripts/ops/test_migrate_gold_parquet_to_delta.py
     target_lane: repo-backed-unit
     protected_surface: scripts/ops/migrations/active/migrate_gold_parquet_to_delta.py
+  - path: tests/unit/repo_backed/coverage_gap/test_unmeasured_module_smoke.py
+    target_lane: repo-backed-unit
+    protected_surface: src/bioetl modules missing from the committed coverage XML snapshot
 mixed_scope_unit_path_policy:
   issue_ref: '#4665'
   decision: logical_unit_ownership_with_dedicated_repo_backed_subtree
