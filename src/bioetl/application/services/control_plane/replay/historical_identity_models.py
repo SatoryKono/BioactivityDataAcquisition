@@ -114,6 +114,12 @@ def build_historical_certified_identity_payload_from_record(
             "blocking_reasons": list(record.blocking_reasons),
         }
     )
+    conflicting_fields = set(extra_fields).intersection(payload)
+    if conflicting_fields:
+        raise ValueError(
+            "Extra fields cannot override certified identity fields: "
+            f"{sorted(conflicting_fields)}"
+        )
     payload.update(extra_fields)
     return payload
 

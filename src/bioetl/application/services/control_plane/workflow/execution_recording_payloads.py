@@ -51,7 +51,12 @@ def build_step_completion_details(
         return _pipeline_child_details(result, fingerprint=fingerprint)
     if result.status != "success":
         return _fingerprint_details(fingerprint)
-    output = getattr(result.payload, "output", None)
+    payload = result.payload
+    output = (
+        payload.get("output")
+        if isinstance(payload, dict)
+        else getattr(payload, "output", None)
+    )
     if not isinstance(output, dict):
         return _fingerprint_details(fingerprint)
     details: dict[str, object] = {}
@@ -81,7 +86,12 @@ def _pipeline_child_details(
     ):
         value = getattr(result, direct_field, None)
         if value is None:
-            value = getattr(result.payload, payload_field, None)
+            payload = result.payload
+            value = (
+                payload.get(payload_field)
+                if isinstance(payload, dict)
+                else getattr(payload, payload_field, None)
+            )
         if value is not None:
             details[detail_field] = str(value)
     return details or None

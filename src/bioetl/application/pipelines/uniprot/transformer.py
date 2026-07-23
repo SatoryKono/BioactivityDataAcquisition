@@ -39,7 +39,6 @@ class UniProtProteinTransformer(
     """Transformer for UniProt protein records."""
 
     entity_class = UniprotTarget
-    __init__ = build_runtime_transformer_init("uniprot", "protein")
 
     async def _transform_impl(
         self,
@@ -91,3 +90,10 @@ class UniProtProteinTransformer(
                 "Missing required field: uniProtkbId", field="uniProtkbId"
             )
         return str(entry_name)
+
+
+UniProtProteinTransformer.__init__ = build_runtime_transformer_init(
+    "uniprot",
+    "protein",
+    owner_type=UniProtProteinTransformer,
+)

@@ -52,6 +52,9 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
     "bioetl.domain.ports.export": (
         "ExportCatalogPort",
         "ExportFileFingerprint",
+        "ExportJobStatus",
+        "ExportRedactionProfile",
+        "ExportRole",
         "ExportWriterPort",
     ),
     "bioetl.domain.ports.filtering": ("InputFilterPort",),
@@ -158,6 +161,8 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
         "coerce_silver_write_request",
     ),
     "bioetl.domain.ports.workflow_foreign_key_reconciliation": (
+        "ForeignKeyReconciliationLayer",
+        "ForeignKeyReconciliationMutationMode",
         "ForeignKeyReconciliationPort",
         "ForeignKeyReconciliationRequest",
         "ForeignKeyReconciliationResult",

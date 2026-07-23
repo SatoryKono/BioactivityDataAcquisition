@@ -240,4 +240,5 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
 CrossRefPublicationTransformer.__init__ = build_runtime_publication_transformer_init(
     default_provider=CrossRefPublicationTransformer.DEFAULT_PROVIDER,
     default_entity_type=CrossRefPublicationTransformer.DEFAULT_ENTITY_TYPE,
+    owner_type=CrossRefPublicationTransformer,
 )

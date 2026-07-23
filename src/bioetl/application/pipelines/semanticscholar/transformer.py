@@ -292,5 +292,6 @@ SemanticScholarPublicationTransformer.__init__ = (
     build_runtime_publication_transformer_init(
         default_provider=SemanticScholarPublicationTransformer.DEFAULT_PROVIDER,
         default_entity_type=SemanticScholarPublicationTransformer.DEFAULT_ENTITY_TYPE,
+        owner_type=SemanticScholarPublicationTransformer,
     )
 )

@@ -199,6 +199,17 @@ class RowReconciliationResult:
     report_only: bool = True
     mutated: bool = False
 
+    def __post_init__(self) -> None:
+        from bioetl.domain.immutability import deep_freeze_json
+
+        frozen_rows = tuple(
+            deep_freeze_json(dict(row) if not isinstance(row, dict) else row)
+            if isinstance(row, Mapping)
+            else deep_freeze_json(row)
+            for row in self.rows
+        )
+        object.__setattr__(self, "rows", frozen_rows)
+
 
 @runtime_checkable
 class RowReconciliationPort(Protocol):

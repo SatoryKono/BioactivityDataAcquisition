@@ -107,7 +107,11 @@ def _validate_identity_fields(latest_state: WorkflowExecutionState) -> None:
 def _validate_step_integrity(latest_state: WorkflowExecutionState) -> tuple[str, ...]:
     """Validate step identities and return step IDs."""
     step_ids = tuple(step.step_id for step in latest_state.steps)
-    if not step_ids or len(step_ids) != len(set(step_ids)):
+    if (
+        not step_ids
+        or any(not str(step_id).strip() for step_id in step_ids)
+        or len(step_ids) != len(set(step_ids))
+    ):
         raise RuntimeError(
             "Workflow resume state is damaged: step identities are missing or duplicated"
         )

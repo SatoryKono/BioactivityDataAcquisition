@@ -16,12 +16,7 @@ from bioetl.domain.locking import FencingToken, LockContext, LockContextHolder
 from bioetl.domain.ports import LockPort, LoggerPort
 from bioetl.domain.types import RunID
 
-__all__ = [
-    "acquire_lock",
-    "enter_lock_context",
-    "release_lock",
-    "start_heartbeat",
-]
+__all__ = ["acquire_lock", "enter_lock_context", "release_lock", "start_heartbeat"]
 
 
 class _LockRuntimeHostProtocol(Protocol):
@@ -38,24 +33,6 @@ class _LockRuntimeHostProtocol(Protocol):
 
     def get_context(self) -> LockContext | None: ...
 
-
-def _publish_lock_context(host: _LockRuntimeHostProtocol) -> None:
-    """Push the current lock context into the shared holder when present."""
-    holder = host._context_holder
-    if holder is None:
-        return
-    context = host.get_context()
-    if context is not None:
-        holder.set(context)
-
-
-def _clear_lock_context(host: _LockRuntimeHostProtocol) -> None:
-    """Clear the shared lock context holder when present."""
-    holder = host._context_holder
-    if holder is not None:
-        holder.clear()
-
-
 async def acquire_lock(host: _LockRuntimeHostProtocol) -> FencingToken | None:
     """Acquire the runtime lock and update shared runtime state."""
     token = await host._lock.acquire(
@@ -69,7 +46,9 @@ async def acquire_lock(host: _LockRuntimeHostProtocol) -> FencingToken | None:
     if token is not None:
         host._acquired_at = time.monotonic()
         host._fencing_token = token
-        _publish_lock_context(host)
+        context = host.get_context()
+        if host._context_holder is not None and context is not None:
+            host._context_holder.set(context)
         host._logger.info(
             "lock_acquired",
             lock_key=host._config.lock_key,
@@ -99,14 +78,14 @@ async def release_lock(host: _LockRuntimeHostProtocol) -> None:
     )
     host._acquired_at = None
     host._fencing_token = None
-    _clear_lock_context(host)
+    if host._context_holder is not None:
+        host._context_holder.clear()
     host._logger.info("Lock released", stage="cleanup")
 
 
 async def start_heartbeat(host: _LockRuntimeHostProtocol) -> None:
     """Start the background heartbeat task for the acquired lock."""
-    factory: Callable[..., HeartbeatTask] = host._heartbeat_factory
-    heartbeat: HeartbeatTask = factory(
+    heartbeat = host._heartbeat_factory(
         lock_port=host._lock,
         lock_key=host._config.lock_key,
         owner_id=host._run_id,

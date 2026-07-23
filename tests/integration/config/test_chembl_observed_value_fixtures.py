@@ -399,21 +399,39 @@ def test_policy_values_can_extend_beyond_observed_samples(
     )
 
 
+def _assert_dq_only_field_within_policy(
+    entity: str,
+    field: str,
+    values: list[Any],
+    policy_entity: dict[str, list[Any]],
+) -> None:
+    assert field in policy_entity
+    dq_values = frozenset(str(value) for value in values)
+    policy_set = frozenset(str(value) for value in policy_entity[field])
+    assert dq_values <= policy_set, (
+        f"chembl.{entity}.{field} DQ-only subset exceeds declared policy set: "
+        f"{sorted(dq_values - policy_set)}"
+    )
+
+
+def _assert_dq_only_entity_within_policy(
+    entity: str,
+    fields: dict[str, list[Any]],
+    policy_values: dict[str, dict[str, list[Any]]],
+) -> None:
+    assert entity in policy_values
+    policy_entity = policy_values[entity]
+    for field, values in fields.items():
+        _assert_dq_only_field_within_policy(entity, field, values, policy_entity)
+
+
 @pytest.mark.integration
 def test_dq_only_subsets_remain_within_declared_policy_sets(
     policy_values: dict[str, dict[str, list[Any]]],
     dq_only_subsets: dict[str, dict[str, list[Any]]],
 ) -> None:
     for entity, fields in dq_only_subsets.items():
-        assert entity in policy_values
-        for field, values in fields.items():
-            assert field in policy_values[entity]
-            dq_values = frozenset(str(value) for value in values)
-            policy_set = frozenset(str(value) for value in policy_values[entity][field])
-            assert dq_values <= policy_set, (
-                f"chembl.{entity}.{field} DQ-only subset exceeds declared policy set: "
-                f"{sorted(dq_values - policy_set)}"
-            )
+        _assert_dq_only_entity_within_policy(entity, fields, policy_values)
 
 
 def _iter_case_matrix(
