@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from bioetl.interfaces.http.control_plane_identity.types import AnchorSpec
 
+_DETAILS_ONLY = "details only"
+
+
 P1_ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
     AnchorSpec(
         "P1",
@@ -132,7 +135,7 @@ P1_ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         "RunLedger.lineage_fragment_id",
         "array of ids",
         "Lineage closure emitted by run.",
-        "details only",
+        _DETAILS_ONLY,
         True,
         "Lineage panel",
         "DEGRADED",
@@ -144,7 +147,7 @@ P1_ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         "RunLedger artifact_published details; planned_artifacts",
         "artifact refs / paths",
         "Links identity graph to produced artifacts.",
-        "details only",
+        _DETAILS_ONLY,
         True,
         "Artifact details",
         "DEGRADED",
@@ -156,7 +159,7 @@ P1_ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         "RunLedger latest event",
         "opaque event id",
         "Checkpoint snapshot plus ledger suffix reconstruction anchor.",
-        "details only",
+        _DETAILS_ONLY,
         True,
         "Run Ledger event table",
         "INFO",

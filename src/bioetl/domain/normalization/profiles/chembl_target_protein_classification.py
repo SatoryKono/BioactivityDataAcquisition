@@ -9,6 +9,9 @@ from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
     chembl_pseudo_null_fields,
 )
 from bioetl.domain.schemas.chembl.target_protein_classification import (
+
+_TRIM_COLLAPSE_JSON_PIPE_NOTE = "Trim and collapse blank textual values to None where applicable. JSON pipe-delimited list field."
+
     TargetProteinClassificationSchema,
 )
 
@@ -66,15 +69,15 @@ CHEMBL_TARGET_PROTEIN_CLASSIFICATION_PROFILE = build_standard_profile(
     null_fields=chembl_pseudo_null_fields("target_protein_classification"),
     field_rule_overrides={
         "path_ids": {
-            "notes": "Trim and collapse blank textual values to None where applicable. JSON pipe-delimited list field.",
+            "notes": _TRIM_COLLAPSE_JSON_PIPE_NOTE,
             "set_like": True,
         },
         "path_names": {
-            "notes": "Trim and collapse blank textual values to None where applicable. JSON pipe-delimited list field.",
+            "notes": _TRIM_COLLAPSE_JSON_PIPE_NOTE,
             "set_like": True,
         },
         "path_labels": {
-            "notes": "Trim and collapse blank textual values to None where applicable. JSON pipe-delimited list field.",
+            "notes": _TRIM_COLLAPSE_JSON_PIPE_NOTE,
             "set_like": True,
         },
     },

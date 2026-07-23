@@ -28,6 +28,9 @@ from bioetl.interfaces.cli.commands._workflow_support import (
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error
 
+_INVALID_OPTIONS_MSG = "Invalid options"
+
+
 _WORKFLOW_PUBLICATION_METRIC_NAMES = (
     "bioetl_workflow_expected",
     "bioetl_workflow_pipeline_expected",
@@ -109,31 +112,31 @@ def _validate_run_workflow_options(
     )
     if resume_last and resume_manifest_id is not None:
         echo_error(
-            "Invalid options",
+            _INVALID_OPTIONS_MSG,
             "--resume-last cannot be used together with --resume-manifest-id",
         )
         raise click.exceptions.Exit(ExitCode.CONFIG_ERROR)
     if resume_last and resume_run_id is not None:
         echo_error(
-            "Invalid options",
+            _INVALID_OPTIONS_MSG,
             "--resume-last cannot be used together with --resume-run-id",
         )
         raise click.exceptions.Exit(ExitCode.CONFIG_ERROR)
     if resume_manifest_id is not None and resume_run_id is not None:
         echo_error(
-            "Invalid options",
+            _INVALID_OPTIONS_MSG,
             "--resume-manifest-id cannot be used together with --resume-run-id",
         )
         raise click.exceptions.Exit(ExitCode.CONFIG_ERROR)
     if incremental and explicit_resume_requested:
         echo_error(
-            "Invalid options",
+            _INVALID_OPTIONS_MSG,
             "--incremental cannot be used together with resume selectors",
         )
         raise click.exceptions.Exit(ExitCode.CONFIG_ERROR)
     if incremental and start_offset is not None:
         echo_error(
-            "Invalid options",
+            _INVALID_OPTIONS_MSG,
             "--incremental cannot be used when --start-offset is explicitly set. "
             "Either use --incremental for auto-increment or --start-offset for "
             "manual control.",

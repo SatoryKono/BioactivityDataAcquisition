@@ -39,6 +39,9 @@ from bioetl.interfaces.cli.commands.domains.shared.inspection_output import (
 )
 from bioetl.interfaces.cli.formatters import echo_error
 
+_RUN_MANIFEST_NOT_FOUND_MSG = "Run manifest not found"
+
+
 __all__ = [
     "COMMANDS",
     "certify_historical_bulk_command",
@@ -97,7 +100,7 @@ def show_command(identifier: str, output_format: str) -> None:
         echo_error(RUN_MANIFEST_STORE_CORRUPTION, str(exc))
         return
     except ValueError as exc:
-        echo_error("Run manifest not found", str(exc))
+        echo_error(_RUN_MANIFEST_NOT_FOUND_MSG, str(exc))
         return
     _emit_payload(result.to_dict(), output_format)
 
@@ -120,7 +123,7 @@ def score_command(identifier: str, output_format: str) -> None:
         echo_error(RUN_MANIFEST_STORE_CORRUPTION, str(exc))
         return
     except ValueError as exc:
-        echo_error("Run manifest not found", str(exc))
+        echo_error(_RUN_MANIFEST_NOT_FOUND_MSG, str(exc))
         return
     payload = {
         "identifier": identifier,
@@ -212,7 +215,7 @@ def replay_bundle_command(identifier: str, output_format: str) -> None:
         echo_error(RUN_MANIFEST_STORE_CORRUPTION, str(exc))
         return
     except ValueError as exc:
-        echo_error("Run manifest not found", str(exc))
+        echo_error(_RUN_MANIFEST_NOT_FOUND_MSG, str(exc))
         return
     _emit_payload(build_run_replay_bundle_descriptor(result).to_dict(), output_format)
 

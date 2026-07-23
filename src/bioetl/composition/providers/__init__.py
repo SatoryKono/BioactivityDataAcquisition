@@ -10,6 +10,9 @@ from __future__ import annotations
 from importlib import import_module
 from typing import TYPE_CHECKING
 
+_PROVIDER_REGISTRY_MODULE = "bioetl.composition.providers.provider_registry"
+
+
 if TYPE_CHECKING:
     from bioetl.composition.providers.decorators import (
         register_provider as register_provider,
@@ -32,23 +35,23 @@ if TYPE_CHECKING:
 
 _PUBLIC_EXPORTS = {
     "DataSourceCreatorProtocol": (
-        "bioetl.composition.providers.provider_registry",
+        _PROVIDER_REGISTRY_MODULE,
         "DataSourceCreatorProtocol",
     ),
     "HttpConfig": (
-        "bioetl.composition.providers.provider_registry",
+        _PROVIDER_REGISTRY_MODULE,
         "HttpConfig",
     ),
     "ProviderConfig": (
-        "bioetl.composition.providers.provider_registry",
+        _PROVIDER_REGISTRY_MODULE,
         "ProviderConfig",
     ),
     "ProviderRegistry": (
-        "bioetl.composition.providers.provider_registry",
+        _PROVIDER_REGISTRY_MODULE,
         "ProviderRegistry",
     ),
     "create_provider_registry": (
-        "bioetl.composition.providers.provider_registry",
+        _PROVIDER_REGISTRY_MODULE,
         "create_provider_registry",
     ),
     "ensure_providers_loaded": (
@@ -56,7 +59,7 @@ _PUBLIC_EXPORTS = {
         "ensure_providers_loaded",
     ),
     "get_default_provider_registry": (
-        "bioetl.composition.providers.provider_registry",
+        _PROVIDER_REGISTRY_MODULE,
         "get_default_provider_registry",
     ),
     "load_providers": (

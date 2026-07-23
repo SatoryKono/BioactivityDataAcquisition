@@ -21,6 +21,9 @@ See Also:
 
 from __future__ import annotations
 
+_REGISTRY_API_MODULE = "bioetl.composition.registry_api"
+
+
 __all__: list[str] = []
 
 _LAZY_MODULE_EXPORTS = {
@@ -38,19 +41,19 @@ _LAZY_MODULE_EXPORTS = {
 
 _LAZY_ATTR_EXPORTS = {
     "PipelineDefinition": (
-        "bioetl.composition.registry_api",
+        _REGISTRY_API_MODULE,
         "PipelineDefinition",
     ),
     "PipelineRegistry": (
-        "bioetl.composition.registry_api",
+        _REGISTRY_API_MODULE,
         "PipelineRegistry",
     ),
     "create_registry": (
-        "bioetl.composition.registry_api",
+        _REGISTRY_API_MODULE,
         "create_registry",
     ),
     "get_default_registry": (
-        "bioetl.composition.registry_api",
+        _REGISTRY_API_MODULE,
         "get_default_registry",
     ),
 }

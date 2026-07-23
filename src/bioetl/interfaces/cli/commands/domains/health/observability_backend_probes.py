@@ -8,6 +8,9 @@ from typing import TYPE_CHECKING, Protocol, Self
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 
+_HEALTH_PATH_SUFFIX = "/health"
+
+
 if TYPE_CHECKING:
     from collections.abc import Callable
 
@@ -43,7 +46,7 @@ def _build_observability_backend_probe_urls(health_url: str) -> tuple[str, ...]:
     """Return canonical readiness probe URLs for one backend base health URL."""
     return (
         (f"{health_url}/live", health_url)
-        if health_url.endswith("/health")
+        if health_url.endswith(_HEALTH_PATH_SUFFIX)
         else (health_url,)
     )
 
@@ -76,8 +79,8 @@ def probe_observability_backend_required_paths(
     if not required_probe_paths:
         return True
     base_url = (
-        health_url[: -len("/health")]
-        if health_url.endswith("/health")
+        health_url[: -len(_HEALTH_PATH_SUFFIX)]
+        if health_url.endswith(_HEALTH_PATH_SUFFIX)
         else health_url.rstrip("/")
     )
     for raw_path in required_probe_paths:

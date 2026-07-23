@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from bioetl.interfaces.http.control_plane_identity.types import AnchorSpec
 
+_DETAILS_ONLY = "details only"
+
+
 P2_ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
     AnchorSpec(
         "P2",
@@ -36,7 +39,7 @@ P2_ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         "RunManifest.planned_artifacts",
         "layer/path refs",
         "Compare planned outputs with published outputs.",
-        "details only",
+        _DETAILS_ONLY,
         True,
         "Artifact table",
         "WARNING",
@@ -48,7 +51,7 @@ P2_ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         "RunLedger artifact_published details",
         "artifact refs / paths",
         "Actual output artifacts.",
-        "details only",
+        _DETAILS_ONLY,
         True,
         "Artifact table",
         "DEGRADED",
@@ -84,7 +87,7 @@ P2_ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         "runtime lock metadata",
         "opaque string",
         "Concurrency forensic anchor.",
-        "details only",
+        _DETAILS_ONLY,
         True,
         "Runtime locks panel",
         "WARNING",
@@ -96,7 +99,7 @@ P2_ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         "RunLedger details/runtime_config",
         "path refs",
         "Open DQ reports without metrics-label pollution.",
-        "details only",
+        _DETAILS_ONLY,
         True,
         "DQ report view",
         "INFO",
@@ -108,7 +111,7 @@ P2_ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         "runtime_config/resolved_config",
         "list of string ids",
         "Composite cross-validation/nullification context.",
-        "details only",
+        _DETAILS_ONLY,
         False,
         "Cross-validation details",
         "INFO",

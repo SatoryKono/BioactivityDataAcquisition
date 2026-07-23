@@ -13,6 +13,9 @@ from typing import TYPE_CHECKING
 
 from bioetl.composition.lazy_exports import build_lazy_export_hooks
 
+_OBSERVABILITY_MODULE = "bioetl.composition.bootstrap.runtime.observability"
+
+
 if TYPE_CHECKING:
     from bioetl.domain.ports import AdrServicePort
     from bioetl.composition.bootstrap.runtime.composite import (
@@ -39,19 +42,19 @@ _PUBLIC_EXPORTS = {
         "bootstrap_composite_runner",
     ),
     "bootstrap_dq_monitor": (
-        "bioetl.composition.bootstrap.runtime.observability",
+        _OBSERVABILITY_MODULE,
         "bootstrap_dq_monitor",
     ),
     "bootstrap_logger": (
-        "bioetl.composition.bootstrap.runtime.observability",
+        _OBSERVABILITY_MODULE,
         "bootstrap_logger",
     ),
     "bootstrap_metrics": (
-        "bioetl.composition.bootstrap.runtime.observability",
+        _OBSERVABILITY_MODULE,
         "bootstrap_metrics",
     ),
     "bootstrap_observability_bundle": (
-        "bioetl.composition.bootstrap.runtime.observability",
+        _OBSERVABILITY_MODULE,
         "bootstrap_observability_bundle",
     ),
     "bootstrap_pipeline_runner": (
@@ -59,7 +62,7 @@ _PUBLIC_EXPORTS = {
         "bootstrap_pipeline_runner",
     ),
     "bootstrap_tracer": (
-        "bioetl.composition.bootstrap.runtime.observability",
+        _OBSERVABILITY_MODULE,
         "bootstrap_tracer",
     ),
     "load_composite_config": (
@@ -71,7 +74,7 @@ _PUBLIC_EXPORTS = {
         "load_pipeline_config",
     ),
     "maybe_start_metrics_server": (
-        "bioetl.composition.bootstrap.runtime.observability",
+        _OBSERVABILITY_MODULE,
         "maybe_start_metrics_server",
     ),
 }
