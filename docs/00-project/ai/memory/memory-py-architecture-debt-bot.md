@@ -35,7 +35,27 @@ ______________________________________________________________________
    - affected unit/integration tests
    - dependency-doc drift checks when topology changed
 
-## 4. Non-Negotiable Constraints
+## 4. Governance hash closeouts (after src/bioetl writes)
+
+Stale-hash architecture tests (examples: #5752 evidence surface, #6027 topology
+SUMMARY, test-telemetry `source_tree_sha256`) require coordinated refresh — not
+budget increases:
+
+1. `python -m scripts.engineering.qa.report_module_coverage_inventory --allow-missing-coverage-xml`
+1. Update `docs/reports/evidence/project-package-topology/SUMMARY.md` to match
+   inventory `source_module_count` + `source_tree_sha256`
+1. `python -m scripts.engineering.qa.report_debt_governance_gates`
+1. Recompute and pin `evidence_surface_sha256` in
+   `configs/quality/technical_debt_audit_registry.yaml` **and** the current
+   audit report marker (pin **after** the last evidence-path write)
+1. If `tests/**` changed: pin
+   `configs/quality/test_telemetry_baseline.yaml` via
+   `compute_test_telemetry_source_tree_sha256()` and sync
+   `reports/test-telemetry/{slowest-tests,coverage-summary}.json`
+
+Lesson: `src/memory/curated/lessons/run-reports-and-governance-hash-refresh.md`
+
+## 5. Non-Negotiable Constraints
 
 - Do not import infrastructure from domain.
 - Do not add I/O to domain.

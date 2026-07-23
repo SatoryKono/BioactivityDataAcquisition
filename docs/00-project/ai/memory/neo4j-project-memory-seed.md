@@ -175,6 +175,10 @@ Prompt 10:
 - the wrapper runs @knowall-ai/mcp-neo4j-agent-memory@0.2.5
 - in WSL, Neo4j is accessed via bolt://host.docker.internal:7687
 - Docker container name is bioetl-neo4j
+- compose project flag is required: docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml
+- optional Windows recovery helper: scripts/ops/runtime/docker/recover-neo4j.ps1
+  (auth reseeds system/auth files; keep graph data volume; prefer ensure-stable.ps1 for engine flaps)
+- co-tenant mem defaults: container ~768m, heap max ~384m, pagecache ~96m
 
 Свяжи эти факты с BioETL and WSL runtime usage.
 ```
