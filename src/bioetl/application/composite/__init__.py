@@ -69,7 +69,7 @@ _EXPORTS: dict[str, tuple[str, str]] = {
         "CompositePipelineState",
     ),
     "CompositePreflightValidationService": (
-        "bioetl.application.composite.preflight_validator",
+        _PREFLIGHT_VALIDATOR_MODULE,
         "CompositePreflightValidationService",
     ),
     "CompositeRuntimeConfig": (
