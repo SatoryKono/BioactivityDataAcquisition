@@ -28,10 +28,24 @@ DEFAULT_GRAFANA_BASE_URL = "http://localhost:3000"
 DEFAULT_PROMETHEUS_BASE_URL = "http://localhost:9090"
 DEFAULT_APP_BASE_URL = "http://localhost:8081"
 DEFAULT_GRAFANA_USERNAME = "admin"
-DEFAULT_GRAFANA_PASSWORD = "changeme"
+# Never ship a default password. Prefer env / service-account token.
+DEFAULT_GRAFANA_PASSWORD = ""
 DEFAULT_TIMEOUT_SECONDS = 5.0
 DEFAULT_SCREENSHOT_DIR = Path("reports/observability/grafana/screenshots")
 _DASHBOARD_DIR = Path("grafana/dashboards")
+
+# Distinct non-zero outcomes so operators can separate readiness classes.
+EXIT_OK = 0
+EXIT_GENERIC = 1
+EXIT_GRAFANA_HEALTH = 2
+EXIT_RENDER_AUTH = 3
+EXIT_PLAYWRIGHT = 4
+EXIT_EXPANDED_ROW = 5
+EXIT_PROMETHEUS = 6
+EXIT_QUARANTINE = 7
+EXIT_SCREENSHOTS = 8
+EXIT_CREDENTIALS = 9
+EXIT_BIOETL_TARGET = 10
 
 
 @dataclass(frozen=True)
@@ -43,9 +57,35 @@ class PreflightCheck:
     detail: str
 
 
-def _read_env(name: str, default: str) -> str:
+def _read_env(name: str, default: str = "") -> str:
     value = os.getenv(name, "").strip()
     return value or default
+
+
+def _resolve_grafana_password() -> str:
+    """Resolve Grafana password from supported runtime env only (no committed default)."""
+    for name in (
+        "GF_SECURITY_ADMIN_PASSWORD",
+        "GRAFANA_PASSWORD",
+        "GRAFANA_ADMIN_PASSWORD",
+    ):
+        value = _read_env(name)
+        if value:
+            return value
+    return ""
+
+
+def _resolve_grafana_username() -> str:
+    for name in ("GRAFANA_USERNAME", "GF_SECURITY_ADMIN_USER"):
+        value = _read_env(name)
+        if value:
+            return value
+    return DEFAULT_GRAFANA_USERNAME
+
+
+def _has_grafana_auth_material(*, username: str, password: str) -> bool:
+    token = _read_env("GRAFANA_SERVICE_ACCOUNT_TOKEN")
+    return bool(token) or bool(password)
 
 
 def _fetch_json(url: str, timeout_seconds: float) -> object:
@@ -620,13 +660,20 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--grafana-username",
-        default=_read_env("GRAFANA_USERNAME", DEFAULT_GRAFANA_USERNAME),
-        help="Grafana username used for datasource discovery.",
+        default=_resolve_grafana_username(),
+        help=(
+            "Grafana username. Defaults to GRAFANA_USERNAME / "
+            "GF_SECURITY_ADMIN_USER / admin. No password is ever hard-coded."
+        ),
     )
     parser.add_argument(
         "--grafana-password",
-        default=_read_env("GRAFANA_PASSWORD", DEFAULT_GRAFANA_PASSWORD),
-        help="Grafana password used for datasource discovery.",
+        default=_resolve_grafana_password(),
+        help=(
+            "Grafana password. Defaults to GF_SECURITY_ADMIN_PASSWORD / "
+            "GRAFANA_PASSWORD / GRAFANA_ADMIN_PASSWORD. Prefer "
+            "GRAFANA_SERVICE_ACCOUNT_TOKEN when available."
+        ),
     )
     parser.add_argument(
         "--prometheus-base-url",
@@ -691,35 +738,160 @@ def _format_text(checks: Iterable[PreflightCheck]) -> str:
     )
 
 
+def _exit_code_for_checks(checks: list[PreflightCheck]) -> int:
+    """Map failed checks to distinct non-zero outcomes for operator triage."""
+    if all(check.status == "ok" for check in checks):
+        return EXIT_OK
+    by_name = {check.name: check for check in checks}
+    if by_name.get("credentials", PreflightCheck("", "ok", "")).status != "ok":
+        return EXIT_CREDENTIALS
+    if by_name.get("grafana", PreflightCheck("", "ok", "")).status != "ok":
+        return EXIT_GRAFANA_HEALTH
+    if by_name.get("grafana-render-auth", PreflightCheck("", "ok", "")).status != "ok":
+        return EXIT_RENDER_AUTH
+    if by_name.get("playwright-runtime", PreflightCheck("", "ok", "")).status != "ok":
+        return EXIT_PLAYWRIGHT
+    if by_name.get("expanded-row-capture", PreflightCheck("", "ok", "")).status != "ok":
+        return EXIT_EXPANDED_ROW
+    if by_name.get("prometheus", PreflightCheck("", "ok", "")).status != "ok":
+        return EXIT_PROMETHEUS
+    if by_name.get("bioetl-prometheus-target", PreflightCheck("", "ok", "")).status != "ok":
+        return EXIT_BIOETL_TARGET
+    if by_name.get("quarantine-explorer", PreflightCheck("", "ok", "")).status != "ok":
+        return EXIT_QUARANTINE
+    if by_name.get("screenshots", PreflightCheck("", "ok", "")).status != "ok":
+        return EXIT_SCREENSHOTS
+    return EXIT_GENERIC
+
+
+def _check_bioetl_prometheus_target(
+    *,
+    prometheus_base_url: str,
+    timeout_seconds: float,
+) -> PreflightCheck:
+    """Fail closed when the configured BioETL scrape target is not UP."""
+    url = f"{prometheus_base_url.rstrip('/')}/api/v1/targets"
+    try:
+        payload = _fetch_json(url, timeout_seconds)
+    except error.HTTPError as exc:
+        return PreflightCheck(
+            name="bioetl-prometheus-target",
+            status="error",
+            detail=f"{url} returned HTTP {exc.code}",
+        )
+    except Exception as exc:  # pragma: no cover - exercised by callers
+        return PreflightCheck(
+            name="bioetl-prometheus-target",
+            status="error",
+            detail=f"{url} failed: {exc}",
+        )
+    if not isinstance(payload, dict):
+        return PreflightCheck(
+            name="bioetl-prometheus-target",
+            status="error",
+            detail=f"{url} did not return a JSON object",
+        )
+    data = payload.get("data")
+    active = []
+    if isinstance(data, dict):
+        raw_active = data.get("activeTargets")
+        if isinstance(raw_active, list):
+            active = raw_active
+    bioetl_targets = [
+        target
+        for target in active
+        if isinstance(target, dict)
+        and (
+            str(target.get("labels", {}).get("job", "")) == "bioetl"
+            or "bioetl:8000" in str(target.get("scrapeUrl", ""))
+            or "bioetl:8000" in str(target.get("labels", {}).get("instance", ""))
+        )
+    ]
+    if not bioetl_targets:
+        return PreflightCheck(
+            name="bioetl-prometheus-target",
+            status="error",
+            detail=(
+                "Prometheus has no active bioetl scrape target; "
+                "canonical config expects job=bioetl scraping bioetl:8000"
+            ),
+        )
+    unhealthy = [
+        target
+        for target in bioetl_targets
+        if str(target.get("health", "")).lower() != "up"
+    ]
+    if unhealthy:
+        details = ", ".join(
+            f"{target.get('scrapeUrl', '<unknown>')} health={target.get('health')!r} "
+            f"lastError={target.get('lastError')!r}"
+            for target in unhealthy
+        )
+        return PreflightCheck(
+            name="bioetl-prometheus-target",
+            status="error",
+            detail=f"BioETL Prometheus target is not UP: {details}",
+        )
+    return PreflightCheck(
+        name="bioetl-prometheus-target",
+        status="ok",
+        detail="active bioetl scrape target health=up",
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
+    username = str(args.grafana_username)
+    password = str(args.grafana_password)
+    include_render_checks = not args.skip_render_checks
+
+    if include_render_checks and not _has_grafana_auth_material(
+        username=username, password=password
+    ):
+        missing = PreflightCheck(
+            name="credentials",
+            status="error",
+            detail=(
+                "Grafana render auth requires GF_SECURITY_ADMIN_PASSWORD / "
+                "GRAFANA_PASSWORD / GRAFANA_ADMIN_PASSWORD or "
+                "GRAFANA_SERVICE_ACCOUNT_TOKEN; no committed default password is used"
+            ),
+        )
+        if args.json:
+            print(json.dumps({"checks": [asdict(missing)]}, indent=2))
+        else:
+            print(_format_text([missing]))
+        return EXIT_CREDENTIALS
+
     checks = run_checks(
         grafana_base_url=args.grafana_base_url,
         prometheus_base_url=args.prometheus_base_url,
         app_base_url=args.app_base_url,
-        grafana_username=args.grafana_username,
-        grafana_password=args.grafana_password,
+        grafana_username=username,
+        grafana_password=password,
         timeout_seconds=args.timeout_seconds,
         screenshot_dir=args.screenshot_dir,
         include_screenshot_check=not args.skip_screenshot_check,
-        include_render_checks=not args.skip_render_checks,
+        include_render_checks=include_render_checks,
         include_semantic_checks=not args.skip_semantic_checks,
         screenshot_uids=tuple(str(uid) for uid in args.screenshot_uids),
     )
+    if not args.skip_semantic_checks:
+        checks.append(
+            _check_bioetl_prometheus_target(
+                prometheus_base_url=args.prometheus_base_url,
+                timeout_seconds=args.timeout_seconds,
+            )
+        )
 
     if args.json:
         print(json.dumps({"checks": [asdict(check) for check in checks]}, indent=2))
     else:
         print(_format_text(checks))
 
-    return 0 if all(check.status == "ok" for check in checks) else 1
+    return _exit_code_for_checks(checks)
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
-
-def _read_env(name: str, default: str) -> str:
-    value = os.getenv(name, "").strip()
-    return value or default

@@ -251,8 +251,10 @@ ______________________________________________________________________
 │  └──────────────────────────────────────────────────────────┘    │
 │                                                                   │
 │  Конфигурация: grafana/prometheus.yml                            │
-│  - scrape_interval: 15s                                          │
-│  - target: host.docker.internal:8000                             │
+│  - global scrape_interval: 15s                                   │
+│  - bioetl job scrape_interval: 30s                               │
+│  - bioetl target: bioetl:8000 (canonical compose network)        │
+│  - host override (optional): host.docker.internal:8000           │
 └───────────┬──────────────────────────────────────────────────────┘
             │
             │  PromQL запросы (HTTP API)
@@ -463,22 +465,30 @@ bioetl_pipeline_duration_seconds_count{pipeline="chembl",stage="fetch",status="s
 
 ### 2.4 Шаг 4: Prometheus scraping
 
-Prometheus скрейпит endpoint `/metrics` каждые 15 секунд (настраивается в `grafana/prometheus.yml`):
+Canonical local-only topology scrapes BioETL over the monitoring compose network
+at `bioetl:8000` every **30s** (`grafana/prometheus.yml`). Global Prometheus
+defaults remain 15s for other jobs.
 
 ```yaml
-# grafana/prometheus.yml
+# grafana/prometheus.yml (canonical defaults)
 global:
   scrape_interval: 15s
   evaluation_interval: 15s
 
 scrape_configs:
   - job_name: 'bioetl'
+    scrape_interval: 30s
     static_configs:
-      - targets: ['host.docker.internal:8000']
+      - targets: ['bioetl:8000']
     metrics_path: /metrics
 ```
 
-`host.docker.internal` — специальный DNS, резолвящийся на хост-машину из Docker-контейнера. На Windows и macOS работает из коробки. На Linux может потребоваться `--add-host=host.docker.internal:host-gateway`.
+**Host override (optional, not the default):** when BioETL metrics run on the
+Docker host instead of the `bioetl` service, operators may temporarily point the
+job at `host.docker.internal:8000`. On Windows/macOS that DNS works out of the
+box; on Linux it may need `--add-host=host.docker.internal:host-gateway`.
+Document any host override explicitly so it is not confused with the shipped
+compose-network default.
 
 Prometheus сохраняет каждый скрейп как набор time series (метрика + labels + timestamp + value) в локальную TSDB. Данные хранятся в Docker volume `prometheus-data` и переживают перезапуск контейнера.
 
@@ -697,20 +707,22 @@ live log-volume inspection. Это не влияет напрямую на Prome
 ### 4.2 Сетевая топология
 
 ```
-Host Machine (Windows/macOS/Linux)
-├── BioETL App           → localhost:8000 (/metrics)
-│
-└── Docker
-    └── Network: monitoring (bridge)
-        ├── bioetl-prometheus → :9090  (scrapes host.docker.internal:8000)
-        ├── bioetl-pushgateway → :9091
-        ├── bioetl-grafana    → :3000  (queries prometheus:9090)
-        ├── bioetl-loki       → :3100  (optional, tracing profile)
-        ├── bioetl-promtail   → :9080  (optional, tracing profile)
-        └── bioetl-tempo      → :3200/:4317 (optional, tracing profile)
+Docker Network: monitoring (bridge) — canonical local topology
+├── bioetl            → :8000 (/metrics)     [scraped every 30s]
+├── bioetl-prometheus → :9090                [scrapes bioetl:8000]
+├── bioetl-pushgateway → :9091
+├── bioetl-grafana    → :3000                [queries prometheus:9090]
+├── bioetl-loki       → :3100                (optional, tracing profile)
+├── bioetl-promtail   → :9080                (optional, tracing profile)
+└── bioetl-tempo      → :3200/:4317          (optional, tracing profile)
+
+Host override (optional):
+└── BioETL App on host → localhost:8000
+    Prometheus may scrape host.docker.internal:8000 only when operators
+    intentionally replace the canonical bioetl:8000 job target.
 ```
 
-Внутри Docker-сети Grafana обращается к Prometheus по имени сервиса `prometheus` (порт 9090). Prometheus скрейпит BioETL-приложение на хосте через `host.docker.internal:8000`.
+Внутри Docker-сети Grafana обращается к Prometheus по имени сервиса `prometheus` (порт 9090). По умолчанию Prometheus скрейпит BioETL-приложение по compose-service DNS `bioetl:8000` (интервал 30s).
 
 ### 4.3 URL и порты
 
@@ -721,7 +733,7 @@ Host Machine (Windows/macOS/Linux)
 | Prometheus Targets | `http://localhost:9090/targets`    | 9090 | Статус scrape targets                   |
 | Prometheus API     | `http://localhost:9090/api/v1/...` | 9090 | HTTP API для PromQL                     |
 | Pushgateway        | `http://localhost:9091`            | 9091 | Push endpoint для ad-hoc/ephemeral jobs |
-| Grafana UI         | `http://localhost:3000`            | 3000 | Дашборды, логин: admin/admin            |
+| Grafana UI         | `http://localhost:3000`            | 3000 | Дашборды; password from `GF_SECURITY_ADMIN_PASSWORD` |
 | Grafana Explore    | `http://localhost:3000/explore`    | 3000 | Ad-hoc PromQL запросы                   |
 | Grafana Dashboards | `http://localhost:3000/dashboards` | 3000 | Список дашбордов                        |
 | Loki API           | `http://localhost:3100`            | 3100 | Log query/search backend                |

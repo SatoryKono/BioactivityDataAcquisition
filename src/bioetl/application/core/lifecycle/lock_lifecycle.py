@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import time
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Protocol
+from typing import Protocol
 
 from bioetl.application.core.config import LockConfig
 from bioetl.application.core.lifecycle.heartbeat import HeartbeatTask
@@ -12,9 +12,16 @@ from bioetl.application.core.lifecycle.shutdown import (
     PipelineShutdownError,
     ShutdownSignal,
 )
-from bioetl.domain.locking import LockContext, LockContextHolder
+from bioetl.domain.locking import FencingToken, LockContext, LockContextHolder
 from bioetl.domain.ports import LockPort, LoggerPort
 from bioetl.domain.types import RunID
+
+__all__ = [
+    "acquire_lock",
+    "enter_lock_context",
+    "release_lock",
+    "start_heartbeat",
+]
 
 
 class _LockRuntimeHostProtocol(Protocol):
@@ -32,15 +39,21 @@ class _LockRuntimeHostProtocol(Protocol):
     def get_context(self) -> LockContext | None: ...
 
 
-if TYPE_CHECKING:
-    from bioetl.domain.locking import FencingToken
+def _publish_lock_context(host: _LockRuntimeHostProtocol) -> None:
+    """Push the current lock context into the shared holder when present."""
+    holder = host._context_holder
+    if holder is None:
+        return
+    context = host.get_context()
+    if context is not None:
+        holder.set(context)
 
-__all__ = [
-    "acquire_lock",
-    "enter_lock_context",
-    "release_lock",
-    "start_heartbeat",
-]
+
+def _clear_lock_context(host: _LockRuntimeHostProtocol) -> None:
+    """Clear the shared lock context holder when present."""
+    holder = host._context_holder
+    if holder is not None:
+        holder.clear()
 
 
 async def acquire_lock(host: _LockRuntimeHostProtocol) -> FencingToken | None:
@@ -56,10 +69,7 @@ async def acquire_lock(host: _LockRuntimeHostProtocol) -> FencingToken | None:
     if token is not None:
         host._acquired_at = time.monotonic()
         host._fencing_token = token
-        if host._context_holder is not None:
-            context = host.get_context()
-            if context is not None:
-                host._context_holder.set(context)
+        _publish_lock_context(host)
         host._logger.info(
             "lock_acquired",
             lock_key=host._config.lock_key,
@@ -77,8 +87,9 @@ async def acquire_lock(host: _LockRuntimeHostProtocol) -> FencingToken | None:
 
 async def release_lock(host: _LockRuntimeHostProtocol) -> None:
     """Release the runtime lock, stop heartbeat, and clear context state."""
-    if host._heartbeat:
-        await host._heartbeat.stop()
+    heartbeat = host._heartbeat
+    if heartbeat is not None:
+        await heartbeat.stop()
         host._heartbeat = None
 
     await host._lock.release(
@@ -88,14 +99,14 @@ async def release_lock(host: _LockRuntimeHostProtocol) -> None:
     )
     host._acquired_at = None
     host._fencing_token = None
-    if host._context_holder is not None:
-        host._context_holder.clear()
+    _clear_lock_context(host)
     host._logger.info("Lock released", stage="cleanup")
 
 
 async def start_heartbeat(host: _LockRuntimeHostProtocol) -> None:
     """Start the background heartbeat task for the acquired lock."""
-    host._heartbeat = host._heartbeat_factory(
+    factory: Callable[..., HeartbeatTask] = host._heartbeat_factory
+    heartbeat: HeartbeatTask = factory(
         lock_port=host._lock,
         lock_key=host._config.lock_key,
         owner_id=host._run_id,
@@ -104,7 +115,8 @@ async def start_heartbeat(host: _LockRuntimeHostProtocol) -> None:
         shutdown_signal=host._shutdown_signal,
         logger=host._logger,
     )
-    await host._heartbeat.start()
+    host._heartbeat = heartbeat
+    await heartbeat.start()
 
 
 async def enter_lock_context[LockRuntimeHostT: _LockRuntimeHostProtocol](

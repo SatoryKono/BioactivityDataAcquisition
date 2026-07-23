@@ -28,7 +28,10 @@ scrape_configs:
       - targets: ['host.docker.internal:9323']
     scrape_interval: 30s
 
+  # Canonical local-only BioETL metrics scrape (monitoring compose network).
+  # Host-side override example (not default): host.docker.internal:8000
   - job_name: 'bioetl'
+    scrape_interval: 30s
     static_configs:
       - targets: ['bioetl:8000']
 

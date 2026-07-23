@@ -166,17 +166,24 @@ def _panel_link_variable_violations(
     panel: dict, declared_variables: set[str]
 ) -> list[str]:
     links = panel.get("links", [])
+    panel_title = panel.get("title", "<untitled>")
     if not isinstance(links, list):
-        return []
+        return [
+            f"panel={panel_title} links must be a list, got {type(links).__name__}"
+        ]
 
     violations: list[str] = []
-    for link in links:
+    for index, link in enumerate(links):
         if not isinstance(link, dict):
+            violations.append(
+                f"panel={panel_title} links[{index}] must be a mapping, "
+                f"got {type(link).__name__}"
+            )
             continue
         url = str(link.get("url", ""))
         for variable_name in _undeclared_link_variables(url, declared_variables):
             violations.append(
-                f"panel={panel.get('title', '<untitled>')} link={link.get('title', '<untitled>')} "
+                f"panel={panel_title} link={link.get('title', '<untitled>')} "
                 f"uses ${variable_name} not declared in templating.list"
             )
     return violations
@@ -185,14 +192,11 @@ def _panel_link_variable_violations(
 def _dashboard_link_variable_violations(
     dashboard: dict, declared_variables: set[str]
 ) -> list[str]:
+    # Fail-closed navigation bus validation lives in get_dashboard_navigation_links.
     links = get_dashboard_navigation_links(dashboard)
-    if not isinstance(links, list):
-        return []
 
     violations: list[str] = []
     for link in links:
-        if not isinstance(link, dict):
-            continue
         url = str(link.get("url", ""))
         for variable_name in _undeclared_link_variables(url, declared_variables):
             violations.append(
