@@ -191,7 +191,7 @@ def _derive_slowest_summary_from_junit_paths(
             "junit_sources": [path.name for path in junit_paths if path.exists()],
             "executed_count": len(rows),
             "worker_mode": "caller-declared; see source run metadata",
-            "lane_wall_time_s": {},
+            "junit_testcase_duration_sum_s": {},
             "explicit_exclusions": [],
         },
     }

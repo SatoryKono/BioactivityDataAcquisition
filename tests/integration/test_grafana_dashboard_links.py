@@ -715,7 +715,13 @@ def _assert_cross_dashboard_link_policy(
             url=url,
             passed_vars=passed_vars,
         )
-    if isinstance(dashboard_links, list) and link in dashboard_links:
+    required_top_level_titles = _REQUIRED_TOP_LEVEL_LINKS_BY_UID.get(
+        current_uid, frozenset()
+    )
+    is_required_top_level_link = link.get("title") in required_top_level_titles
+    if is_required_top_level_link or (
+        isinstance(dashboard_links, list) and link in dashboard_links
+    ):
         _assert_top_level_cross_dashboard_handoff(
             dashboard_name=dashboard_name,
             current_uid=current_uid,
@@ -750,20 +756,21 @@ def _assert_cross_scope_matched_links(
 
 
 def test_top_level_handoff_fails_closed_when_required_link_is_removed() -> None:
-    """A removed dashboard-level link must fail before URL policy checks pass."""
+    """The real policy path must reject a removed required dashboard link."""
     link: dict[str, object] = {
-        "title": "Open Runtime",
-        "url": "/d/bioetl-runtime?var-pipeline=$pipeline&from=$__from&to=$__to",
+        "title": "2. Runtime",
+        "url": (
+            "/d/bioetl-runtime?var-workflow=$workflow&var-pipeline=$pipeline"
+            "&var-run_type=$run_type&var-run_id=$run_id&from=$__from&to=$__to"
+        ),
         "includeVars": False,
     }
 
     with pytest.raises(AssertionError, match="must be present"):
-        _assert_top_level_cross_dashboard_handoff(
+        _assert_cross_dashboard_link_policy(
             dashboard_name="bioetl-overview-v2.json",
             current_uid="bioetl-overview-v2",
-            target_uid="bioetl-runtime",
             link=link,
-            url=str(link["url"]),
             dashboard_links=[],
         )
 
