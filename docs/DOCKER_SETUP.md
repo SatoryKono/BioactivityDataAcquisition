@@ -106,6 +106,42 @@ monitoring **не** удалять routine stop'ом (`stop` без `-v`).
 
 ## Docker Desktop / WSL recovery
 
+### Preferred crash-resistant path (Windows host)
+
+On 32 GiB Windows hosts with PyCharm + Docker Desktop, engine flaps usually
+mean **host free RAM collapsed**, not a broken compose contract. Prefer:
+
+```powershell
+# Free-RAM check, dual docker info stability, stop foreign containers,
+# start main without rebuild; optional Neo4j.
+.\scripts\ops\runtime\docker\ensure-stable.ps1 -WithNeo4j
+
+# After OOM / missing npipe dockerDesktopLinuxEngine:
+.\scripts\ops\runtime\docker\ensure-stable.ps1 -RestartWsl -WithNeo4j
+```
+
+Operator-reviewed host defaults for this class of machine (not auto-written by
+repo scripts; apply once per workstation):
+
+| Knob | Recommended |
+| --- | --- |
+| `%USERPROFILE%\.wslconfig` `memory` | **6 GiB** (avoid 16 GiB on 32 GiB hosts) |
+| free host RAM before thrash | **≥ 4 GiB** |
+| main `bioetl` mem_limit | **768 m** (health server only) |
+| neo4j mem_limit / heap max | **768 m** / **384 m** |
+
+Hard rules for agents and operators:
+
+- Prefer `--no-build`; rebuild only when Dockerfile/deps change.
+- One stack at a time; monitoring is **opt-in**.
+- Never thrash `compose --force-recreate` / multi-stack rebuild under low free RAM.
+- Never use `docker compose down -v`, volume prune, or VHDX deletion for recovery.
+- Compose project flags: `-p bioetl-main`, `-p bioetl-neo4j`, `-p bioetl-monitoring`.
+- PowerShell: do **not** name parameters `$Args` (automatic variable); use
+  `$DockerArgs` in wrappers.
+
+### Desktop diagnostic restart
+
 Сначала соберите evidence и выполните поддерживаемый restart:
 
 ```powershell
@@ -122,14 +158,15 @@ Force termination не является обычным recovery. Он досту
 одновременном указании `-ConfirmLastResort`, точной строки
 `I_UNDERSTAND_FORCE_TERMINATION_IS_DESTRUCTIVE` через
 `-LastResortConfirmation` и подтверждении PowerShell `ShouldProcess`. Скрипт
-никогда не выполняет `wsl --shutdown`.
+`restart-docker.ps1` не выполняет `wsl --shutdown` by default; bounded WSL
+reclaim is explicit via `ensure-stable.ps1 -RestartWsl`.
 
 ## Resource Saver и WSL memory reclaim
 
 Resource Saver и `autoMemoryReclaim=gradual` могут быть полезны на конкретной
 рабочей станции, но это operator-reviewed host settings. Автоматизация BioETL
-не изменяет `.wslconfig`; включайте их только после отдельной проверки Desktop/
-WSL версии, latency восстановления и отсутствия потери volumes.
+не изменяет `.wslconfig` сама; operator may set a modest `memory=` cap after
+checking Desktop/WSL version, recovery latency, and volume safety.
 
 ## Promotion evidence
 
