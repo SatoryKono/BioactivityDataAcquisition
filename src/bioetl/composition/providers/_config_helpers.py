@@ -5,7 +5,6 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
-from bioetl.application.core.data_sources.filtered import FilteredDataSource
 from bioetl.composition.bootstrap_contexts import (
     CircuitBreakerConfig,
     RateLimitContext,
@@ -226,6 +225,7 @@ def _wrap_with_filter(
     _wire_composable_fallback(data_source)
 
     if filter_config and filter_config.enabled:
+        from bioetl.application.core.data_sources.filtered import FilteredDataSource
         from bioetl.infrastructure.adapters.input.csv_filter_reader import (
             CsvFilterReader,
         )

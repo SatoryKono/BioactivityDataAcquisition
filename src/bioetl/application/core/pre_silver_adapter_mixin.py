@@ -12,7 +12,7 @@ from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import GoldRecord, SilverRecord
+    from bioetl.domain.types import SilverRecord
 
 
 class _PreSilverRecordAdapterMixin:
@@ -32,7 +32,7 @@ class _PreSilverRecordAdapterMixin:
             **business_data: object,
         ) -> EntityT: ...
 
-        def entity_to_silver_record(self, entity: object) -> GoldRecord: ...
+        def entity_to_silver_record(self, entity: object) -> SilverRecord: ...
 
         def _apply_structural_policy(
             self,

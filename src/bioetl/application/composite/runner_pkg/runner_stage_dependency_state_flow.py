@@ -87,8 +87,7 @@ async def handle_dependencies_phase_exception(
     }
     if isinstance(error, BioETLError):
         reason_code = error.get_reason_code()
-        if reason_code is not None:
-            log_kwargs["reason_code"] = reason_code
+        log_kwargs["reason_code"] = reason_code or "unexpected_bioetl_error"
     host._logger.error("Dependencies phase failed", **log_kwargs)
     await host._persist_failed_state(
         state,

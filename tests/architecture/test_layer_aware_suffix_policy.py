@@ -586,6 +586,82 @@ def test_layer_aware_suffix_policy_stays_clean_on_current_baseline() -> None:
     )
 
 
+def _collect_naming_exception_symbols(policy: object) -> list[object]:
+    allowed_symbols: list[object] = []
+    for rule in policy.function_suffix_rules:  # type: ignore[attr-defined]
+        allowed_symbols.extend(rule.allowed_symbols)
+    for rule in policy.suffix_boundary_rules:  # type: ignore[attr-defined]
+        allowed_symbols.extend(rule.allowed_symbols)
+    for rule in policy.family_freeze_rules:  # type: ignore[attr-defined]
+        allowed_symbols.extend(rule.allowed_symbols)
+    return allowed_symbols
+
+
+def _collect_naming_exception_modules(policy: object) -> list[object]:
+    return [
+        item
+        for rule in policy.suffix_boundary_rules  # type: ignore[attr-defined]
+        for item in rule.allowed_modules
+    ]
+
+
+def _assert_naming_symbol_exception_metadata(
+    item: object,
+    *,
+    today: date,
+) -> None:
+    symbol = item.symbol  # type: ignore[attr-defined]
+    path = item.path  # type: ignore[attr-defined]
+    assert item.issue.startswith("#"), (  # type: ignore[attr-defined]
+        f"Naming exception issue must be an explicit tracker reference: "
+        f"{symbol} ({path})"
+    )
+    assert item.owner.startswith("@"), (  # type: ignore[attr-defined]
+        f"Naming exception owner must be an explicit handle: {symbol} ({path})"
+    )
+    assert item.removal_step.strip(), (  # type: ignore[attr-defined]
+        f"Naming exception removal_step must be non-empty: {symbol} ({path})"
+    )
+    assert date.fromisoformat(item.expires_on) >= today, (  # type: ignore[attr-defined]
+        "Naming exception expiry is stale and must be refreshed or removed: "
+        f"{symbol} ({path}) expires_on={item.expires_on}"  # type: ignore[attr-defined]
+    )
+
+
+def _assert_naming_module_exception_metadata(
+    item: object,
+    *,
+    today: date,
+) -> None:
+    path = item.path  # type: ignore[attr-defined]
+    assert item.issue.startswith("#"), (  # type: ignore[attr-defined]
+        f"Naming module exception issue must be an explicit tracker reference: "
+        f"{path}"
+    )
+    assert item.owner.startswith("@"), (  # type: ignore[attr-defined]
+        f"Naming module exception owner must be an explicit handle: {path}"
+    )
+    assert item.removal_step.strip(), (  # type: ignore[attr-defined]
+        f"Naming module exception removal_step must be non-empty: {path}"
+    )
+    assert date.fromisoformat(item.expires_on) >= today, (  # type: ignore[attr-defined]
+        "Naming module exception expiry is stale and must be refreshed or "
+        f"removed: {path} expires_on={item.expires_on}"  # type: ignore[attr-defined]
+    )
+
+
+def _assert_all_naming_exception_metadata(
+    symbols: list[object],
+    modules: list[object],
+    *,
+    today: date,
+) -> None:
+    for item in symbols:
+        _assert_naming_symbol_exception_metadata(item, today=today)
+    for item in modules:
+        _assert_naming_module_exception_metadata(item, today=today)
+
+
 def test_layer_aware_suffix_policy_exceptions_require_structured_expiry_metadata() -> (
     None
 ):
@@ -593,48 +669,12 @@ def test_layer_aware_suffix_policy_exceptions_require_structured_expiry_metadata
     module = _load_gate_module()
     policy = module._load_layer_aware_suffix_policy(ROOT)
 
-    allowed_symbols = []
-    for rule in policy.function_suffix_rules:
-        allowed_symbols.extend(rule.allowed_symbols)
-    for rule in policy.suffix_boundary_rules:
-        allowed_symbols.extend(rule.allowed_symbols)
-    for rule in policy.family_freeze_rules:
-        allowed_symbols.extend(rule.allowed_symbols)
-    allowed_modules = [
-        item for rule in policy.suffix_boundary_rules for item in rule.allowed_modules
-    ]
+    allowed_symbols = _collect_naming_exception_symbols(policy)
+    allowed_modules = _collect_naming_exception_modules(policy)
 
     assert allowed_symbols, "Expected at least one reviewed naming exception symbol"
-    today = POLICY_REVIEW_DATE
-    for item in allowed_symbols:
-        assert item.issue.startswith("#"), (
-            f"Naming exception issue must be an explicit tracker reference: "
-            f"{item.symbol} ({item.path})"
-        )
-        assert item.owner.startswith("@"), (
-            f"Naming exception owner must be an explicit handle: {item.symbol} "
-            f"({item.path})"
-        )
-        assert item.removal_step.strip(), (
-            f"Naming exception removal_step must be non-empty: {item.symbol} "
-            f"({item.path})"
-        )
-        assert date.fromisoformat(item.expires_on) >= today, (
-            "Naming exception expiry is stale and must be refreshed or removed: "
-            f"{item.symbol} ({item.path}) expires_on={item.expires_on}"
-        )
-    for item in allowed_modules:
-        assert item.issue.startswith("#"), (
-            f"Naming module exception issue must be an explicit tracker reference: "
-            f"{item.path}"
-        )
-        assert item.owner.startswith("@"), (
-            f"Naming module exception owner must be an explicit handle: {item.path}"
-        )
-        assert item.removal_step.strip(), (
-            f"Naming module exception removal_step must be non-empty: {item.path}"
-        )
-        assert date.fromisoformat(item.expires_on) >= today, (
-            "Naming module exception expiry is stale and must be refreshed or "
-            f"removed: {item.path} expires_on={item.expires_on}"
-        )
+    _assert_all_naming_exception_metadata(
+        allowed_symbols,
+        allowed_modules,
+        today=POLICY_REVIEW_DATE,
+    )

@@ -9,11 +9,12 @@ import pytest
 
 
 @pytest.mark.unit
-def test_config_helpers_defer_csv_filter_reader_import() -> None:
-    """Polars-backed filter I/O must load only when a filter is enabled."""
+def test_config_helpers_defer_filter_implementation_imports() -> None:
+    """Filter implementation dependencies must load only for enabled filters."""
     from bioetl.composition.providers import _config_helpers as helpers
 
     assert not hasattr(helpers, "CsvFilterReader")
+    assert not hasattr(helpers, "FilteredDataSource")
 
 
 @pytest.mark.unit

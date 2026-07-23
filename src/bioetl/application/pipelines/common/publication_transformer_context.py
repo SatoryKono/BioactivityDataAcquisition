@@ -147,14 +147,17 @@ def build_runtime_publication_transformer_init(
     *,
     default_provider: str,
     default_entity_type: str = "publication",
-):
+    owner_type: type[object] | None = None,
+) -> object:
     """Return a shared runtime ``__init__`` for thin publication transformers.
 
     The returned method preserves an explicit DI signature for architecture
     checks while avoiding duplicated constructor bodies in provider modules.
     """
     _runtime_init = build_runtime_transformer_init(
-        default_provider, default_entity_type
+        default_provider,
+        default_entity_type,
+        owner_type=owner_type,
     )
     _runtime_init.__doc__ = (
         "Shared runtime-generated publication transformer constructor."

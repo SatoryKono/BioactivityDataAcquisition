@@ -101,6 +101,10 @@ async def safe_write_layer(
     operation_errors: tuple[type[BaseException], ...],
 ) -> object | None:
     """Execute one layer write and quarantine schema-invalid outputs."""
+    if layer not in {"silver", "gold"}:
+        raise ValueError(
+            f"safe_write_layer supports only 'silver' or 'gold' layers, got {layer!r}"
+        )
     try:
         if layer == "silver":
             write_result = await execute_with_span(

@@ -15,6 +15,17 @@ services:
       - "8081"
     ports:
       - "127.0.0.1:8081:8081"
+      # Port 8000 is intentionally not published to the host: Prometheus scrapes
+      # bioetl:8000 over the monitoring compose network. Host-side metrics runs
+      # use host.docker.internal:8000 as an explicit override, not the default.
+    volumes:
+      # Writable local artifacts for quarantine explorer and pipeline runs.
+      # Without these, quarantine serve panics on data/output/quarantine and
+      # pipelines fail creating reports/ under the non-root bioetl user.
+      - ./data:/app/data
+      - ./reports:/app/reports
+      - ./logs:/app/logs
+      - ./configs:/app/configs:ro
     environment:
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - NEO4J_USERNAME=${NEO4J_USERNAME:-neo4j}

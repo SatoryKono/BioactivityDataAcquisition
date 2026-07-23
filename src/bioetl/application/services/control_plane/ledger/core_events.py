@@ -98,7 +98,7 @@ def record_artifact_published(
             "Artifact publication requires dataset_ref or lineage_fragment_id"
         )
     payload: dict[str, object] = {
-        "artifact_path": artifact_path,
+        "artifact_path": _required_text(artifact_path, "artifact_path"),
         "artifact_content_hash": _required_text(
             artifact_content_hash, "artifact_content_hash"
         ),

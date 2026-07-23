@@ -93,6 +93,45 @@ def _env_var_refs(node: ast.AST) -> set[str]:
     return refs
 
 
+_FixtureMeta = tuple[str | None, bool, set[str]]
+_NAMED_DQ_FIXTURES = frozenset({"relaxed_dq_env", "strict_dq_env"})
+
+
+def _collect_integration_fixtures(
+    tree: ast.Module,
+) -> dict[str, _FixtureMeta]:
+    fixtures: dict[str, _FixtureMeta] = {}
+    for node in tree.body:
+        if not isinstance(node, ast.FunctionDef):
+            continue
+        is_fixture, scope, autouse = _fixture_metadata(node)
+        if not is_fixture:
+            continue
+        fixtures[node.name] = (scope, autouse, _env_var_refs(node))
+    return fixtures
+
+
+def _assert_named_dq_fixture_policy(name: str, meta: _FixtureMeta) -> None:
+    scope, autouse, refs = meta
+    assert scope != "session", f"{name} must not be session-scoped"
+    assert autouse is False, f"{name} must not be autouse"
+    assert TARGET_ENV_VARS <= refs, f"{name} must reference all target DQ env vars"
+
+
+def _assert_no_extra_dq_env_fixtures(
+    fixtures: dict[str, _FixtureMeta],
+) -> None:
+    extras = [
+        fixture_name
+        for fixture_name, (_scope, _autouse, refs) in fixtures.items()
+        if refs and fixture_name not in _NAMED_DQ_FIXTURES
+    ]
+    assert not extras, (
+        "Relaxed DQ env vars must be controlled only by explicit fixtures: "
+        f"{sorted(extras)}"
+    )
+
+
 @pytest.mark.architecture
 def test_dq_fixture_policy__global_mutation__14c6d573() -> None:
     tree = _read_tree(INTEGRATION_CONFTEST)
@@ -114,36 +153,10 @@ def test_dq_fixture_policy__global_mutation__14c6d573() -> None:
 
 @pytest.mark.architecture
 def test_dq_fixture_policy__named_fixtures__d3fbe63c() -> None:
-    tree = _read_tree(INTEGRATION_CONFTEST)
-
-    fixtures: dict[str, tuple[str | None, bool, set[str]]] = {}
-    for node in tree.body:
-        if not isinstance(node, ast.FunctionDef):
-            continue
-        is_fixture, scope, autouse = _fixture_metadata(node)
-        if not is_fixture:
-            continue
-        fixtures[node.name] = (scope, autouse, _env_var_refs(node))
+    fixtures = _collect_integration_fixtures(_read_tree(INTEGRATION_CONFTEST))
 
     assert "relaxed_dq_env" in fixtures
     assert "strict_dq_env" in fixtures
-
-    relaxed_scope, relaxed_autouse, relaxed_refs = fixtures["relaxed_dq_env"]
-    strict_scope, strict_autouse, strict_refs = fixtures["strict_dq_env"]
-
-    assert relaxed_scope != "session"
-    assert strict_scope != "session"
-    assert relaxed_autouse is False
-    assert strict_autouse is False
-    assert TARGET_ENV_VARS <= relaxed_refs
-    assert TARGET_ENV_VARS <= strict_refs
-
-    extras = [
-        fixture_name
-        for fixture_name, (_scope, _autouse, refs) in fixtures.items()
-        if refs and fixture_name not in {"relaxed_dq_env", "strict_dq_env"}
-    ]
-    assert not extras, (
-        "Relaxed DQ env vars must be controlled only by explicit fixtures: "
-        f"{sorted(extras)}"
-    )
+    _assert_named_dq_fixture_policy("relaxed_dq_env", fixtures["relaxed_dq_env"])
+    _assert_named_dq_fixture_policy("strict_dq_env", fixtures["strict_dq_env"])
+    _assert_no_extra_dq_env_fixtures(fixtures)

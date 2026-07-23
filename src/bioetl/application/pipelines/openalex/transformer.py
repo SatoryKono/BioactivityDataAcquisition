@@ -296,4 +296,5 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
 OpenAlexPublicationTransformer.__init__ = build_runtime_publication_transformer_init(
     default_provider=OpenAlexPublicationTransformer.DEFAULT_PROVIDER,
     default_entity_type=OpenAlexPublicationTransformer.DEFAULT_ENTITY_TYPE,
+    owner_type=OpenAlexPublicationTransformer,
 )

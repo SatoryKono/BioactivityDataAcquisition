@@ -131,32 +131,13 @@ class LockRuntimeService:
         return await enter_lock_context(self)
 
     async def validate(self) -> bool:
-        """Validate ownership and renew the lock lease before write stages.
-
-        Long Silver/Gold stages can block the event loop long enough that the
-        background heartbeat cannot fire before ``lock_ttl`` expires. Write
-        paths call this validator immediately before each layer write, so
-        renewing the lease here keeps a still-owned lock alive across
-        multi-minute stages without weakening fencing checks.
-        """
+        """Validate ownership, renewing a delayed lease before write stages."""
         owned = await validate_lock_ownership(
             lock_port=self._lock,
             config=self._config,
             run_id=self._run_id,
             fencing_token=self._fencing_token,
         )
-        if owned:
-            renewed = await self._lock.heartbeat(
-                self._config.lock_key,
-                self._run_id,
-                exclusive=self._config.exclusive,
-            )
-            return bool(renewed)
-
-        # Soft recovery: ownership probe may fail solely because expires_at
-        # elapsed while the owner entry still exists (heartbeat delayed by a
-        # blocked event loop). Heartbeat extends TTL without re-issuing a
-        # fencing token; re-validate afterwards.
         renewed = await self._lock.heartbeat(
             self._config.lock_key,
             self._run_id,
@@ -164,7 +145,7 @@ class LockRuntimeService:
         )
         if not renewed:
             return False
-        return await validate_lock_ownership(
+        return owned or await validate_lock_ownership(
             lock_port=self._lock,
             config=self._config,
             run_id=self._run_id,

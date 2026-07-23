@@ -60,8 +60,14 @@ def initialize_next_transformer_mro(
 def build_runtime_transformer_init(
     default_provider: str,
     default_entity_type: str,
+    *,
+    owner_type: type[object] | None = None,
 ) -> object:
-    """Return a shared runtime-generated ``__init__`` for transformer subclasses."""
+    """Return a shared runtime-generated ``__init__`` for transformer subclasses.
+
+    ``owner_type`` must be the class that installs the generated initializer so
+    subclass inheritance does not recurse through the same generated method.
+    """
 
     def _runtime_init(
         self: Any,  # Any: runtime method to bypass architecture checks
@@ -75,9 +81,10 @@ def build_runtime_transformer_init(
         pii_hasher: PiiHasherPort | None = None,
         dependencies: TransformerDependencyContext | None = None,
     ) -> None:
+        mro_owner = owner_type if owner_type is not None else type(self)
         initialize_next_transformer_mro(
             self,
-            type(self),
+            mro_owner,
             provider=provider,
             kwargs=transformer_init_kwargs(locals()),
         )

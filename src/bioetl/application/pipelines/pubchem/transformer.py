@@ -44,7 +44,6 @@ class PubChemCompoundTransformer(PreSilverAdapterMixin, BaseTransformer):
     """
 
     entity_class = PubchemMolecule
-    __init__ = build_runtime_transformer_init("pubchem", "compound")
 
     async def _transform_impl(
         self,
@@ -134,3 +133,10 @@ class PubChemCompoundTransformer(PreSilverAdapterMixin, BaseTransformer):
                 },
             )
         return prepared
+
+
+PubChemCompoundTransformer.__init__ = build_runtime_transformer_init(
+    "pubchem",
+    "compound",
+    owner_type=PubChemCompoundTransformer,
+)

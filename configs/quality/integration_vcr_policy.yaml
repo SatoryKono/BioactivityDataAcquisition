@@ -190,6 +190,7 @@ tracked_suite_inventory:
       - tests/integration/test_grafana_dashboard_links.py
       - tests/integration/test_grafana_dashboard_metric_semantics.py
       - tests/integration/test_grafana_dashboard_promql_reuse.py
+      - tests/integration/test_grafana_dashboard_provisioning.py
       - tests/integration/test_grafana_dashboard_query_governance.py
       - tests/integration/test_grafana_datasource_provisioning.py
       - tests/integration/test_grafana_layout_and_metadata.py
@@ -205,6 +206,7 @@ tracked_suite_inventory:
       prometheus:
       - tests/integration/test_observability_emission_integration.py
       - tests/integration/test_prometheus_rules_config.py
+      - tests/integration/test_prometheus_scrape_topology.py
     composite_config_and_merge:
     - tests/integration/composite/test_column_naming_integration.py
     - tests/integration/composite/test_composite_config_schema_contract.py

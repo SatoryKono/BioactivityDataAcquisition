@@ -43,7 +43,6 @@ class IDMappingTransformer(PreSilverAdapterMixin, BaseTransformer):
     """
 
     entity_class = IDMappingResult
-    __init__ = build_runtime_transformer_init("uniprot", "idmapping")
 
     async def _transform_impl(
         self,
@@ -144,3 +143,10 @@ class IDMappingTransformer(PreSilverAdapterMixin, BaseTransformer):
         """Mark unmapped ID-mapping results with the staged DQ warning flag."""
         silver_record["_dq_warn"] = business_data.get("mapping_status") == "not_found"
         return cast("SilverRecord", silver_record)
+
+
+IDMappingTransformer.__init__ = build_runtime_transformer_init(
+    "uniprot",
+    "idmapping",
+    owner_type=IDMappingTransformer,
+)

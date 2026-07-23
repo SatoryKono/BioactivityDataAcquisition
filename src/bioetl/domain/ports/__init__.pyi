@@ -90,6 +90,15 @@ from bioetl.domain.ports.export import (
     ExportFileFingerprint as ExportFileFingerprint,
 )
 from bioetl.domain.ports.export import (
+    ExportJobStatus as ExportJobStatus,
+)
+from bioetl.domain.ports.export import (
+    ExportRedactionProfile as ExportRedactionProfile,
+)
+from bioetl.domain.ports.export import (
+    ExportRole as ExportRole,
+)
+from bioetl.domain.ports.export import (
     ExportWriterPort as ExportWriterPort,
 )
 from bioetl.domain.ports.filtering import InputFilterPort as InputFilterPort
@@ -334,6 +343,12 @@ from bioetl.domain.ports.storage import (
 )
 from bioetl.domain.ports.storage import (
     coerce_silver_write_request as coerce_silver_write_request,
+)
+from bioetl.domain.ports.workflow_foreign_key_reconciliation import (
+    ForeignKeyReconciliationLayer as ForeignKeyReconciliationLayer,
+)
+from bioetl.domain.ports.workflow_foreign_key_reconciliation import (
+    ForeignKeyReconciliationMutationMode as ForeignKeyReconciliationMutationMode,
 )
 from bioetl.domain.ports.workflow_foreign_key_reconciliation import (
     ForeignKeyReconciliationPort as ForeignKeyReconciliationPort,
