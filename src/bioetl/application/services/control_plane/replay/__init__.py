@@ -64,67 +64,51 @@ if TYPE_CHECKING:
         HistoricalReplayUniverseService as HistoricalReplayUniverseService,
     )
 
+_BUNDLE_DESCRIPTOR_MODULE = (
+    "bioetl.application.services.control_plane.replay.bundle_descriptor_service"
+)
+_CERTIFICATION_SERVICE_MODULE = (
+    "bioetl.application.services.control_plane.replay.historical_certification_service"
+)
+_CLOSURE_MODELS_MODULE = (
+    "bioetl.application.services.control_plane.replay.historical_closure_models"
+)
+_CLOSURE_SERVICE_MODULE = (
+    "bioetl.application.services.control_plane.replay.historical_closure_service"
+)
+_CORPUS_MODELS_MODULE = (
+    "bioetl.application.services.control_plane.replay.historical_corpus_models"
+)
+_CORPUS_SERVICE_MODULE = (
+    "bioetl.application.services.control_plane.replay.historical_corpus_service"
+)
+_UNIVERSE_SERVICE_MODULE = (
+    "bioetl.application.services.control_plane.replay.historical_universe_service"
+)
+
 _PUBLIC_EXPORTS = {
-    "HistoricalReplayBulkCertificationRecord": (
-        "bioetl.application.services.control_plane.replay.historical_corpus_models"
-    ),
-    "HistoricalReplayBulkCertificationResult": (
-        "bioetl.application.services.control_plane.replay.historical_corpus_models"
-    ),
-    "HistoricalReplayBulkCertificationSpec": (
-        "bioetl.application.services.control_plane.replay.historical_corpus_models"
-    ),
-    "HistoricalReplayCertifiabilityInventory": (
-        "bioetl.application.services.control_plane.replay.historical_corpus_models"
-    ),
-    "HistoricalReplayCertifiabilityRecord": (
-        "bioetl.application.services.control_plane.replay.historical_corpus_models"
-    ),
-    "HistoricalReplayCertificationResult": (
-        "bioetl.application.services.control_plane.replay.historical_certification_service"
-    ),
-    "HistoricalReplayCertificationService": (
-        "bioetl.application.services.control_plane.replay.historical_certification_service"
-    ),
-    "HistoricalReplayClosureReportRecord": (
-        "bioetl.application.services.control_plane.replay.historical_closure_models"
-    ),
-    "HistoricalReplayClosureService": (
-        "bioetl.application.services.control_plane.replay.historical_closure_service"
-    ),
-    "HistoricalReplayCorpusService": (
-        "bioetl.application.services.control_plane.replay.historical_corpus_service"
-    ),
-    "HistoricalReplayResidualDispositionRecord": (
-        "bioetl.application.services.control_plane.replay.historical_closure_models"
-    ),
-    "HistoricalReplaySnapshotCertification": (
-        "bioetl.application.services.control_plane.replay.historical_certification_service"
-    ),
-    "HistoricalReplayUniverseClosureReportRecord": (
-        "bioetl.application.services.control_plane.replay.historical_universe_service"
-    ),
-    "HistoricalReplayUniverseExternalRecord": (
-        "bioetl.application.services.control_plane.replay.historical_universe_service"
-    ),
-    "HistoricalReplayUniverseInventorySnapshot": (
-        "bioetl.application.services.control_plane.replay.historical_universe_service"
-    ),
-    "HistoricalReplayUniverseRecord": (
-        "bioetl.application.services.control_plane.replay.historical_universe_service"
-    ),
-    "HistoricalReplayUniverseService": (
-        "bioetl.application.services.control_plane.replay.historical_universe_service"
-    ),
-    "RunReplayBundleDescriptorRecord": (
-        "bioetl.application.services.control_plane.replay.bundle_descriptor_service"
-    ),
-    "build_run_replay_bundle_descriptor": (
-        "bioetl.application.services.control_plane.replay.bundle_descriptor_service"
-    ),
+    "HistoricalReplayBulkCertificationRecord": _CORPUS_MODELS_MODULE,
+    "HistoricalReplayBulkCertificationResult": _CORPUS_MODELS_MODULE,
+    "HistoricalReplayBulkCertificationSpec": _CORPUS_MODELS_MODULE,
+    "HistoricalReplayCertifiabilityInventory": _CORPUS_MODELS_MODULE,
+    "HistoricalReplayCertifiabilityRecord": _CORPUS_MODELS_MODULE,
+    "HistoricalReplayCertificationResult": _CERTIFICATION_SERVICE_MODULE,
+    "HistoricalReplayCertificationService": _CERTIFICATION_SERVICE_MODULE,
+    "HistoricalReplayClosureReportRecord": _CLOSURE_MODELS_MODULE,
+    "HistoricalReplayClosureService": _CLOSURE_SERVICE_MODULE,
+    "HistoricalReplayCorpusService": _CORPUS_SERVICE_MODULE,
+    "HistoricalReplayResidualDispositionRecord": _CLOSURE_MODELS_MODULE,
+    "HistoricalReplaySnapshotCertification": _CERTIFICATION_SERVICE_MODULE,
+    "HistoricalReplayUniverseClosureReportRecord": _UNIVERSE_SERVICE_MODULE,
+    "HistoricalReplayUniverseExternalRecord": _UNIVERSE_SERVICE_MODULE,
+    "HistoricalReplayUniverseInventorySnapshot": _UNIVERSE_SERVICE_MODULE,
+    "HistoricalReplayUniverseRecord": _UNIVERSE_SERVICE_MODULE,
+    "HistoricalReplayUniverseService": _UNIVERSE_SERVICE_MODULE,
+    "RunReplayBundleDescriptorRecord": _BUNDLE_DESCRIPTOR_MODULE,
+    "build_run_replay_bundle_descriptor": _BUNDLE_DESCRIPTOR_MODULE,
 }
 
-__all__ = list(_PUBLIC_EXPORTS)
+__all__ = [*_PUBLIC_EXPORTS]
 
 
 def __getattr__(name: str) -> object:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Callable
 from datetime import datetime
 
@@ -23,21 +24,25 @@ async def load_time_travel_table(
     """Read a Delta table snapshot at a specific version or timestamp."""
     if version is not None and timestamp is not None:
         raise ValueError("Specify either version or timestamp, not both")
+    if version is None and timestamp is None:
+        raise ValueError("Must specify either version or timestamp")
 
     table_path = get_table_path(base_path, table_name)
 
-    try:
-        if version is not None:
-            return delta_table_factory(table_path, version=version)
-        if timestamp is not None:
+    def _load() -> DeltaTable:
+        try:
+            if version is not None:
+                return delta_table_factory(table_path, version=version)
+            assert timestamp is not None
             timestamp_str = timestamp.isoformat()
             return delta_table_factory(
                 table_path,
                 storage_options={"time_travel": timestamp_str},
             )
-        raise ValueError("Must specify either version or timestamp")
-    except DeltaTableNotFoundError as exc:
-        raise TableNotFoundError(table_path) from exc
+        except DeltaTableNotFoundError as exc:
+            raise TableNotFoundError(table_path) from exc
+
+    return await asyncio.to_thread(_load)
 
 
 __all__ = ["load_time_travel_table"]

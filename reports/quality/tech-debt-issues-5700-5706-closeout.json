@@ -191,7 +191,7 @@
       "under_70_count": 15,
       "under_85_count": 68,
       "unmeasured_count": 0,
-      "zero_coverage_count": 7
+      "zero_coverage_count": 0
     }
   },
   "schema_version": "tech-debt-issues-5700-5706-closeout-v1"

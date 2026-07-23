@@ -7,6 +7,7 @@ import json
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
+from bioetl.application.runtime_clock import RuntimeClock
 from bioetl.domain.ports import ExportFileFingerprint
 
 if TYPE_CHECKING:
@@ -59,15 +60,20 @@ def resolve_generated_at(
     allow_nondeterministic: bool,
     clock: ClockPort | None,
 ) -> str:
-    """Resolve export manifest timestamp without implicit wall-clock drift."""
+    """Resolve export manifest timestamp without implicit wall-clock drift.
+
+    Deterministic path (default): requires an explicit ``generated_at``.
+    Operator opt-in path: uses injected ``ClockPort`` only (never raw
+    ``datetime.now``). When opt-in is set without a clock, ``RuntimeClock``
+    is used as the sole classified wall-clock adapter seam.
+    """
     if generated_at is not None:
         timestamp = generated_at.strip()
         if timestamp:
             return timestamp
     if allow_nondeterministic:
-        if clock is not None:
-            return format_utc(clock.now())
-        return utc_now()
+        resolved_clock = clock if clock is not None else RuntimeClock()
+        return format_utc(resolved_clock.now())
     raise ValueError(
         "generated_at must be provided for deterministic export manifests; "
         "operator-only exports must opt into non-deterministic generated_at"
@@ -75,8 +81,12 @@ def resolve_generated_at(
 
 
 def utc_now() -> str:
-    """Return the current UTC time in manifest timestamp format."""
-    return format_utc(datetime.now(UTC))
+    """Return the current UTC time via the RuntimeClock adapter seam.
+
+    Operator-only helper. Prefer :func:`resolve_generated_at` with an injected
+    ``ClockPort`` for identity-bearing timestamps.
+    """
+    return format_utc(RuntimeClock().now())
 
 
 def format_utc(value: datetime) -> str:

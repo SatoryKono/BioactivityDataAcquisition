@@ -4,6 +4,7 @@ from __future__ import annotations
 
 __all__ = ["RetentionPolicy"]
 
+import asyncio
 import time
 from typing import TYPE_CHECKING, Any
 
@@ -89,9 +90,13 @@ class RetentionPolicy:
         dry_run: bool = False,
     ) -> list[str]:
         """Remove old files that are no longer referenced by the Delta log."""
-        table_path = get_table_path(self.base_path, table_name)
-        dt = _load_delta_table(table_path)
-        return dt.vacuum(retention_hours=retention_hours, dry_run=dry_run)
+
+        def _vacuum() -> list[str]:
+            table_path = get_table_path(self.base_path, table_name)
+            dt = _load_delta_table(table_path)
+            return dt.vacuum(retention_hours=retention_hours, dry_run=dry_run)
+
+        return await asyncio.to_thread(_vacuum)
 
     async def optimize(
         self,
@@ -124,10 +129,13 @@ class RetentionPolicy:
         """
         # Note: target_size reserved for future delta-rs API support
         _ = target_size  # Suppress unused variable warning
-        table_path = get_table_path(self.base_path, table_name)
-        filters = partition_filters  # Capture for lambda closure
-        dt = _load_delta_table(table_path)
-        return dt.optimize.compact(partition_filters=filters)
+
+        def _optimize() -> JsonDict:
+            table_path = get_table_path(self.base_path, table_name)
+            dt = _load_delta_table(table_path)
+            return dt.optimize.compact(partition_filters=partition_filters)
+
+        return await asyncio.to_thread(_optimize)
 
     async def get_table_info(
         self, table_name: str
@@ -147,9 +155,13 @@ class RetentionPolicy:
         Raises:
             TableNotFoundError: If table does not exist.
         """
-        table_path = get_table_path(self.base_path, table_name)
-        dt = _load_delta_table(table_path)
-        return build_table_info(dt)
+
+        def _info() -> JsonDict:
+            table_path = get_table_path(self.base_path, table_name)
+            dt = _load_delta_table(table_path)
+            return build_table_info(dt)
+
+        return await asyncio.to_thread(_info)
 
     async def deduplicate_silver(
         self,
@@ -179,8 +191,11 @@ class RetentionPolicy:
             TableNotFoundError: If table does not exist.
         """
         table_path = get_table_path(self.base_path, table_name)
+        primary_key_tuple = tuple(primary_keys)
         started_at = time.perf_counter()
-        result = deduplicate_delta_rows(table_path, tuple(primary_keys))
+        result = await asyncio.to_thread(
+            deduplicate_delta_rows, table_path, primary_key_tuple
+        )
         elapsed = time.perf_counter() - started_at
         if elapsed > self._deduplicate_timeout_seconds:
             raise TimeoutError(

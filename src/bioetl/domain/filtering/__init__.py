@@ -74,7 +74,7 @@ _EXPORT_MODULES = {
     for export_name in export_names
 }
 
-__all__ = list(_EXPORT_MODULES)
+__all__ = [*_EXPORT_MODULES]
 
 
 def __getattr__(name: str) -> object:  # pragma: no cover

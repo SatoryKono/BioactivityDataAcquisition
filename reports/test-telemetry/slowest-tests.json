@@ -320,6 +320,36 @@
       "test_count": 1,
       "total_duration_s": 31.733,
       "max_duration_s": 31.733
+    },
+    {
+      "zone": "tests.architecture.test_checkpoint_runtime_facade_usage",
+      "total_duration_s": 30.0,
+      "test_count": 1,
+      "avg_duration_s": 30.0
+    },
+    {
+      "zone": "tests.architecture.test_config_discrepancy_metrics_ratchets",
+      "total_duration_s": 30.0,
+      "test_count": 1,
+      "avg_duration_s": 30.0
+    },
+    {
+      "zone": "tests.architecture.test_cli_command_import_guards",
+      "total_duration_s": 30.0,
+      "test_count": 1,
+      "avg_duration_s": 30.0
+    },
+    {
+      "zone": "tests.architecture.test_config_discrepancy_report_drift",
+      "total_duration_s": 30.0,
+      "test_count": 1,
+      "avg_duration_s": 30.0
+    },
+    {
+      "zone": "tests.architecture.test_config_root_governance",
+      "total_duration_s": 30.0,
+      "test_count": 1,
+      "avg_duration_s": 30.0
     }
   ],
   "execution_context": {

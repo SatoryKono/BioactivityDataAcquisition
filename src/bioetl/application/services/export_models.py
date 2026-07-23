@@ -55,7 +55,9 @@ class ExportOptions:
     include_manifests: bool = True
     manifest_strict: bool = False
     manifest_generated_at: str | None = None
-    allow_nondeterministic_manifest_timestamp: bool = True
+    # Deterministic by default: identity-bearing timestamps must be supplied
+    # explicitly or via injected ClockPort under an opt-in flag.
+    allow_nondeterministic_manifest_timestamp: bool = False
     run_ids: tuple[str, ...] = ()
     code_revision: str | None = None
     requester: str | None = None

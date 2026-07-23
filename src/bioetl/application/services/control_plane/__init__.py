@@ -26,97 +26,109 @@ RESPONSIBILITY_SEAMS = MappingProxyType(
     }
 )
 
+_EFFECTIVE_CONFIG_MODULE = (
+    "bioetl.application.services.control_plane.effective_config"
+)
+_FORENSIC_MODULE = "bioetl.application.services.control_plane.forensic"
+_LEDGER_MODULE = "bioetl.application.services.control_plane.ledger"
+_MANIFEST_MODULE = "bioetl.application.services.control_plane.manifest"
+_MANIFEST_DIAGNOSTICS_MODULE = (
+    "bioetl.application.services.control_plane.manifest.diagnostics"
+)
+_REPLAY_MODULE = "bioetl.application.services.control_plane.replay"
+_WORKFLOW_MODULE = "bioetl.application.services.control_plane.workflow"
+
 _LAZY_ATTR_EXPORTS = {
     "EffectiveConfigService": (
-        "bioetl.application.services.control_plane.effective_config",
+        _EFFECTIVE_CONFIG_MODULE,
         "EffectiveConfigService",
     ),
     "ForensicRunDiffResult": (
-        "bioetl.application.services.control_plane.forensic",
+        _FORENSIC_MODULE,
         "ForensicRunDiffResult",
     ),
     "ForensicRunDiffService": (
-        "bioetl.application.services.control_plane.forensic",
+        _FORENSIC_MODULE,
         "ForensicRunDiffService",
     ),
     "HistoricalReplayCertificationResult": (
-        "bioetl.application.services.control_plane.replay",
+        _REPLAY_MODULE,
         "HistoricalReplayCertificationResult",
     ),
     "HistoricalReplayCertificationService": (
-        "bioetl.application.services.control_plane.replay",
+        _REPLAY_MODULE,
         "HistoricalReplayCertificationService",
     ),
     "HistoricalReplaySnapshotCertification": (
-        "bioetl.application.services.control_plane.replay",
+        _REPLAY_MODULE,
         "HistoricalReplaySnapshotCertification",
     ),
     "RunLedgerService": (
-        "bioetl.application.services.control_plane.ledger",
+        _LEDGER_MODULE,
         "RunLedgerService",
     ),
     "RunManifestCreateSpec": (
-        "bioetl.application.services.control_plane.manifest",
+        _MANIFEST_MODULE,
         "RunManifestCreateSpec",
     ),
     "RunManifestDiffEntry": (
-        "bioetl.application.services.control_plane.manifest",
+        _MANIFEST_MODULE,
         "RunManifestDiffEntry",
     ),
     "RunManifestDiffResult": (
-        "bioetl.application.services.control_plane.manifest",
+        _MANIFEST_MODULE,
         "RunManifestDiffResult",
     ),
     "RunManifestInspectionResult": (
-        "bioetl.application.services.control_plane.manifest",
+        _MANIFEST_MODULE,
         "RunManifestInspectionResult",
     ),
     "RunManifestInspectionService": (
-        "bioetl.application.services.control_plane.manifest",
+        _MANIFEST_MODULE,
         "RunManifestInspectionService",
     ),
     "RunManifestService": (
-        "bioetl.application.services.control_plane.manifest",
+        _MANIFEST_MODULE,
         "RunManifestService",
     ),
     "RunManifestVerifyResult": (
-        "bioetl.application.services.control_plane.manifest",
+        _MANIFEST_MODULE,
         "RunManifestVerifyResult",
     ),
     "RunReplayBundleDescriptorRecord": (
-        "bioetl.application.services.control_plane.replay",
+        _REPLAY_MODULE,
         "RunReplayBundleDescriptorRecord",
     ),
     "WorkflowExecutionService": (
-        "bioetl.application.services.control_plane.workflow",
+        _WORKFLOW_MODULE,
         "WorkflowExecutionService",
     ),
     "WorkflowInspectionResult": (
-        "bioetl.application.services.control_plane.workflow",
+        _WORKFLOW_MODULE,
         "WorkflowInspectionResult",
     ),
     "WorkflowInspectionService": (
-        "bioetl.application.services.control_plane.workflow",
+        _WORKFLOW_MODULE,
         "WorkflowInspectionService",
     ),
     "WorkflowLedgerService": (
-        "bioetl.application.services.control_plane.workflow",
+        _WORKFLOW_MODULE,
         "WorkflowLedgerService",
     ),
     "WorkflowManifestCreateSpec": (
-        "bioetl.application.services.control_plane.workflow",
+        _WORKFLOW_MODULE,
         "WorkflowManifestCreateSpec",
     ),
     "WorkflowManifestService": (
-        "bioetl.application.services.control_plane.workflow",
+        _WORKFLOW_MODULE,
         "WorkflowManifestService",
     ),
     "build_diagnostics_summary": (
-        "bioetl.application.services.control_plane.manifest.diagnostics",
+        _MANIFEST_DIAGNOSTICS_MODULE,
         "build_diagnostics_summary",
     ),
     "build_run_replay_bundle_descriptor": (
-        "bioetl.application.services.control_plane.replay",
+        _REPLAY_MODULE,
         "build_run_replay_bundle_descriptor",
     ),
 }

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -232,7 +233,8 @@ class DeltaReader:
             except DeltaTableNotFoundError:
                 return False
 
-        return _check_exists()
+        return await asyncio.to_thread(_check_exists)
 
     async def aclose(self) -> None:
         """Gracefully close the reader (no-op, no persistent resources)."""
+        await asyncio.sleep(0)

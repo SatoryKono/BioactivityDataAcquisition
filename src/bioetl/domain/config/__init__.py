@@ -72,31 +72,40 @@ __all__ = [
     "resolve_loading_strategy",
 ]
 
+_BASE_PROVIDER_MODULE = "bioetl.domain.config.base_provider"
+_CONVERTERS_MODULE = "bioetl.domain.config._converters"
+_DQ_MODULE = "bioetl.domain.config.dq"
+_MEMORY_MODULE = "bioetl.domain.config.memory"
+_PIPELINE_MODULE = "bioetl.domain.config.pipeline"
+_RUNTIME_MODULE = "bioetl.domain.config.runtime"
+_TABLE_MODULE = "bioetl.domain.config.table"
+_VALIDATION_MODULE = "bioetl.domain.config.validation"
+
 _EXPORT_MODULES = {
-    "APPEND_SAFE_IDEMPOTENCY_CONTRACTS": "bioetl.domain.config.table",
-    "DEFAULT_VALIDATION_CONFIG": "bioetl.domain.config.validation",
-    "IDEMPOTENCY_CONTRACT_VALUES": "bioetl.domain.config.table",
-    "BaseClientConfig": "bioetl.domain.config.base_provider",
-    "BaseProviderConfig": "bioetl.domain.config.base_provider",
-    "ConditionalValidation": "bioetl.domain.config.validation",
-    "CrossFieldValidation": "bioetl.domain.config.validation",
-    "DQConfig": "bioetl.domain.config.dq",
-    "DQReportConfig": "bioetl.domain.config.dq",
-    "FieldCoercionPolicy": "bioetl.domain.config.pipeline",
-    "FieldPolicyConfig": "bioetl.domain.config.pipeline",
-    "FieldValidation": "bioetl.domain.config.validation",
-    "IdempotencyContract": "bioetl.domain.config.table",
-    "KeyNullabilityRule": "bioetl.domain.config.dq",
-    "MemoryConfig": "bioetl.domain.config.memory",
-    "PipelineConfig": "bioetl.domain.config.pipeline",
-    "RateLimitConfig": "bioetl.domain.config.base_provider",
-    "RuntimeConfig": "bioetl.domain.config.runtime",
-    "SilverFilterCompatibilityMode": "bioetl.domain.config.runtime",
-    "TableConfig": "bioetl.domain.config.table",
-    "ValidationConfig": "bioetl.domain.config.validation",
-    "convert_write_mode": "bioetl.domain.config._converters",
-    "freeze_sequences": "bioetl.domain.config._converters",
-    "resolve_loading_strategy": "bioetl.domain.config._converters",
+    "APPEND_SAFE_IDEMPOTENCY_CONTRACTS": _TABLE_MODULE,
+    "DEFAULT_VALIDATION_CONFIG": _VALIDATION_MODULE,
+    "IDEMPOTENCY_CONTRACT_VALUES": _TABLE_MODULE,
+    "BaseClientConfig": _BASE_PROVIDER_MODULE,
+    "BaseProviderConfig": _BASE_PROVIDER_MODULE,
+    "ConditionalValidation": _VALIDATION_MODULE,
+    "CrossFieldValidation": _VALIDATION_MODULE,
+    "DQConfig": _DQ_MODULE,
+    "DQReportConfig": _DQ_MODULE,
+    "FieldCoercionPolicy": _PIPELINE_MODULE,
+    "FieldPolicyConfig": _PIPELINE_MODULE,
+    "FieldValidation": _VALIDATION_MODULE,
+    "IdempotencyContract": _TABLE_MODULE,
+    "KeyNullabilityRule": _DQ_MODULE,
+    "MemoryConfig": _MEMORY_MODULE,
+    "PipelineConfig": _PIPELINE_MODULE,
+    "RateLimitConfig": _BASE_PROVIDER_MODULE,
+    "RuntimeConfig": _RUNTIME_MODULE,
+    "SilverFilterCompatibilityMode": _RUNTIME_MODULE,
+    "TableConfig": _TABLE_MODULE,
+    "ValidationConfig": _VALIDATION_MODULE,
+    "convert_write_mode": _CONVERTERS_MODULE,
+    "freeze_sequences": _CONVERTERS_MODULE,
+    "resolve_loading_strategy": _CONVERTERS_MODULE,
 }
 
 

@@ -359,3 +359,8 @@ entries:
     classification: active_architecture_guard
     live_guard: "documentation issues #6487-#6488 keep workflow inventory count/path parity with .github/workflows and prevent Gold contract availability from being inferred as runtime sink enablement from unrelated input-filter flags."
     rationale: Retains live documentation/config parity guards for CI workflow inventory and Gold runtime enablement semantics instead of historical-only audit signoff.
+  - path: tests/architecture/test_documentation_issues_6497_6498_closeout.py
+    disposition: retain_active
+    classification: active_architecture_guard
+    live_guard: "documentation issues #6494-#6495 and #6497-#6499 keep domain facade symbol traceability aligned with live public exports."
+    rationale: Retains live documentation parity guards for domain/public facade symbol documentation instead of historical-only audit signoff.
