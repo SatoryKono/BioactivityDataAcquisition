@@ -114,6 +114,11 @@ Rules:
   `-KeepForeignContainers`).
 - Do not thrash `--force-recreate` / multi-stack rebuild under low free RAM.
 
+Agent memory anchors:
+
+- `docs/00-project/ai/memory/agent-memory.md` (Docker / WSL section)
+- `src/memory/curated/lessons/docker-desktop-wsl-stability-32gib.md`
+
 Запрещено: `down -v`, volume/system prune, удаление VHDX/data root.
 
 Подробнее: `docs/DOCKER_SETUP.md`.
