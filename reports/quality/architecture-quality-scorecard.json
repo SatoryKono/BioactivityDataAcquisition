@@ -25,7 +25,7 @@
     },
     {
       "evidence_metrics": {
-        "source_module_count": 2247,
+        "source_module_count": 2248,
         "uncovered_module_count": 0
       },
       "id": "ddd_invariants",
@@ -185,7 +185,7 @@
     "retained_public_export_facade_count": 4,
     "runtime_cardinality_review_required_count": 0,
     "runtime_cardinality_threshold_violation_count": 0,
-    "source_module_count": 2247,
+    "source_module_count": 2248,
     "sunset_compat_count": 0,
     "total_duplicate_clusters": 0,
     "transition_compat_count": 0,
@@ -236,7 +236,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "3938fbd2bc1a5654e5ad56d4084713831e21cda7abb131fd30b87a83ffe16cd2",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "7dcbebc26b465c1a57156e7244aa5820227f574b3bd008bc475348faa21c94a3"
+      "source_tree_sha256": "048134ebec6adf94254b974fab93d7ad537dee7be9a5b0dd70394058c255ff4f"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

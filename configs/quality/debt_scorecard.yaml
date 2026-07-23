@@ -688,7 +688,7 @@ oversized_source_module_inventory:
     target_split: separate publication normalization, persistence shaping, and provenance
       helpers
   - path: src/bioetl/application/services/checkpoint_compatibility_service.py
-    lines: 216
+    lines: 182
     owner: '@bioetl-control-plane'
     target_split: split checkpoint policy evaluation from diagnostic payload assembly
   - path: src/bioetl/infrastructure/config/_base.py
@@ -739,6 +739,14 @@ oversized_source_module_inventory:
     extracted_surface_lines: 0
     rationale: Active top-list entry retired after prior extractions left the module
       well under the practical split threshold (44 lines); no further split required.
+  - issue: '#6478'
+    source: src/bioetl/application/services/checkpoint_compatibility_service.py
+    extracted_surface: src/bioetl/application/services/checkpoint_compatibility_telemetry.py
+    source_lines_after_split: 182
+    extracted_surface_lines: 71
+    rationale: Checkpoint compatibility orchestration remains in the service while
+      metric/log emission helpers moved to a focused telemetry module (216 -> 182
+      lines on the owner service).
 hotspot_family_coverage_thresholds:
   snapshot_date: '2026-07-13'
   linked_issue: '#4567'
