@@ -132,3 +132,53 @@ def test_slow_governance_cache_probe_is_captured_and_isolated() -> None:
         "tests.architecture.conftest.cached_subprocess_run",
         "tests.architecture.conftest._run_cached_subprocess",
     ]
+
+
+def _module_path_from_telemetry_node(node_id: str) -> Path | None:
+    """Resolve a telemetry node id to a tracked tests/*.py module when possible."""
+    module = str(node_id).split("::", 1)[0].strip()
+    if not module.startswith("tests."):
+        return None
+    parts = module.split(".")
+    while parts and parts[-1][:1].isupper():
+        parts.pop()
+    if not parts:
+        return None
+    candidate = Path(*parts).with_suffix(".py")
+    return candidate if candidate.exists() else None
+
+
+def test_duration_telemetry_top_list_only_references_existing_test_modules() -> None:
+    """Stale rankings must not advertise deleted or renamed test modules."""
+    payload = yaml.safe_load(
+        Path("configs/quality/test_telemetry_baseline.yaml").read_text(encoding="utf-8")
+    )
+    top_slowest = payload["duration_telemetry"]["top_slowest"]
+    assert top_slowest, "Duration telemetry must publish a top-slowest ranking"
+
+    missing: list[str] = []
+    for row in top_slowest:
+        node = str(row.get("test", ""))
+        if _module_path_from_telemetry_node(node) is None:
+            missing.append(node)
+    assert not missing, (
+        "Duration telemetry top list references missing test modules: "
+        + ", ".join(missing[:10])
+    )
+
+
+def test_duration_telemetry_execution_context_accounts_for_lane_exclusions() -> None:
+    """Full-suite telemetry must either cover lanes or list explicit exclusions."""
+    payload = yaml.safe_load(
+        Path("configs/quality/test_telemetry_baseline.yaml").read_text(encoding="utf-8")
+    )
+    context = payload["duration_telemetry"]["execution_context"]
+    exclusions = context["explicit_exclusions"]
+    assert isinstance(exclusions, list) and exclusions
+    assert context["executed_count"] == payload["duration_telemetry"]["total_cases"]
+    assert context["lane_wall_time_s"]
+    assert context["junit_testcase_duration_sum_s"]
+    exclusion_lanes = {str(item.get("lane", "")) for item in exclusions}
+    assert "live-provider-contracts" in exclusion_lanes
+    assert "performance" in exclusion_lanes
+    assert "manual-e2e" in exclusion_lanes

@@ -1,51 +1,51 @@
 # Slowest Tests
 
-Source commit: `51979de96630ce1eff88b6a2b82df04a5c9be157`
-Source run id: `local-issues-5710-5711-20260630`
+Source commit: `7038c078bd23b9c9810eb370793e75b2a0d63cbd`
+Source run id: `local-duration-rebuild-2026-07-23`
 Refresh status: `captured`
-Collected test cases: `8507`
+Collected test cases: `23360`
 Freshness guard: `<=45 days`
 
 | Rank | Duration (s) | Test | Source |
 |---:|---:|---|---|
-| 1 | 42.785 | `tests.architecture.test_checkpoint_compatibility_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_tests` | `S7-crosscutting-architecture-a2.xml` |
-| 2 | 28.12 | `tests.architecture.test_checkpoint_compatibility_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_src` | `S7-crosscutting-architecture-a2.xml` |
-| 3 | 24.051 | `tests.architecture.test_config_discrepancy_metrics_ratchets::test_config_discrepancy_baseline_matches_live_generator` | `S7-crosscutting-architecture-a2.xml` |
-| 4 | 23.018 | `tests.architecture.test_config_discrepancy_report_drift::test_config_discrepancy_report_matches_deterministic_generator` | `S7-crosscutting-architecture-a2.xml` |
-| 5 | 16.691 | `tests.architecture.test_checkpoint_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_tests` | `S7-crosscutting-architecture-guardrails.xml` |
-| 6 | 16.084 | `tests.architecture.test_cli_command_import_guards::test_non_cli_source_keeps_retained_public_cli_seams_outside_runtime_code` | `S7-crosscutting-architecture-a2.xml` |
-| 7 | 15.28 | `tests.architecture.test_config_root_governance::test_runtime_config_discovery_does_not_use_source_parent_arithmetic` | `S7-crosscutting-architecture-a2.xml` |
-| 8 | 14.498 | `tests.architecture.test_cli_command_import_guards::test_non_cli_source_avoids_interfaces_package_root_convenience_imports` | `S7-crosscutting-architecture-a2.xml` |
-| 9 | 14.129 | `tests.architecture.test_adr_enforcement_matrix::test_adr_enforcement_matrix_artifact_matches_live_generator` | `S7-crosscutting-architecture-a.xml` |
-| 10 | 13.15 | `tests.architecture.test_add_svg_text_fallback::test_build_fallback_text_emits_multiline_tspans` | `S7-crosscutting-architecture-a.xml` |
-| 11 | 12.274 | `tests.architecture.test_compatibility_freeze_guards::test_cli_run_orchestration_singleton_stays_private_compat_owner` | `S7-crosscutting-architecture-a2.xml` |
-| 12 | 11.328 | `tests.architecture.test_config_discrepancy_metrics_ratchets::test_config_discrepancy_metrics_within_scorecard_budget` | `S7-crosscutting-architecture-a2.xml` |
-| 13 | 10.423 | `tests.architecture.test_checkpoint_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_src` | `S7-crosscutting-architecture-guardrails.xml` |
-| 14 | 8.951 | `tests.architecture.test_adapter_contracts.TestAdapterMixinPolicy::test_src_does_not_import_legacy_adapter_mixin_modules` | `S7-crosscutting-architecture-a.xml` |
-| 15 | 8.577 | `tests.architecture.test_contract_registry_loader_boundary::test_contract_registry_path_literal_is_confined_to_reviewed_surfaces` | `S7-crosscutting-architecture-a2.xml` |
-| 16 | 8.48 | `tests.architecture.test_adapter_contracts.TestAdapterHealthCheck::test_adapters_have_health_check` | `S7-crosscutting-architecture-a.xml` |
-| 17 | 8.158 | `tests.architecture.test_config_ci_invariants.TestEffectiveOptionalityResolution::test_resolved_optionality_matches_current_config_surface` | `S7-crosscutting-architecture-a2.xml` |
-| 18 | 7.149 | `tests.architecture.test_config_ci_invariants.TestConfigFilesExist::test_runtime_config_primary_keys_match_contract_policy` | `S7-crosscutting-architecture-a2.xml` |
-| 19 | 7.029 | `tests.architecture.test_config_surface_entity_residual_plateau::test_entity_residual_backlog_matches_live_metrics_and_scorecard` | `S7-crosscutting-architecture-a2.xml` |
-| 20 | 6.109 | `tests.unit.domain.schemas.openalex.test_openalex_publication_validation.TestPmcIdBaseValidation::test_pmc_id_base_validation__id_invalid_format__d060aeb5[]` | `S1-domain-core.xml` |
-| 21 | 5.742 | `tests.unit.composition.test_canonical_module_paths::test_execution_api_reexports_pipeline_runner_service` | `S2-comp-iface.xml` |
-| 22 | 5.141 | `tests.architecture.test_adapter_contracts.TestAdapterPortCompliance::test_primary_adapter_classes_use_package_root_imports` | `S7-crosscutting-architecture-a.xml` |
-| 23 | 5.019 | `tests.unit.interfaces.cli.commands.test_observability_backend_runtime::test_ensure_backend_fails_when_required_paths_never_become_ready` | `S2-comp-iface.xml` |
-| 24 | 4.691 | `tests.architecture.test_config_surface_entity_residual_plateau::test_config_surface_duplication_audit_matches_live_backlog` | `S7-crosscutting-architecture-a2.xml` |
-| 25 | 4.272 | `tests.unit.composition.bootstrap.test_bootstrap_entrypoints.TestBootstrapPipeline::test_bootstrap_pipeline_creates_runner_without_starting_server` | `S2-comp-iface.xml` |
+| 1 | 192.078 | `tests.architecture.test_naming_ambiguity_classifier::test_build_ambiguity_groups_is_deterministic` | `S7-crosscutting-architecture-c.xml` |
+| 2 | 76.218 | `tests.architecture.test_provider_registry_decomposition::test_private_default_registry_module_imports_stay_confined_to_sanctioned_seams` | `S7-crosscutting-architecture-c.xml` |
+| 3 | 64.276 | `tests.architecture.test_debt_governance_telemetry_reporting::test_debt_governance_snapshot_matches_live_sources` | `S7-crosscutting-architecture-a3.xml` |
+| 4 | 55.574 | `tests.architecture.test_provider_registry_decomposition::test_default_provider_registry_raw_calls_stay_confined_to_known_src_baseline` | `S7-crosscutting-architecture-c.xml` |
+| 5 | 40.649 | `tests.architecture.test_quality_exemptions_registry::test_exemption_registry_targets_are_live` | `S7-crosscutting-architecture-c.xml` |
+| 6 | 38.963 | `tests.architecture.test_naming_ambiguity_classifier::test_build_ambiguity_groups_reports_expected_ok_families` | `S7-crosscutting-architecture-c.xml` |
+| 7 | 37.074 | `tests.architecture.test_mounted_worktree_skip_policy::test_tests_do_not_reintroduce_hardcoded_network_drive_skips` | `S7-crosscutting-architecture-c.xml` |
+| 8 | 35.843 | `tests.architecture.test_private_module_imports::test_owner_aware_private_module_imports` | `S7-crosscutting-architecture-c.xml` |
+| 9 | 35.412 | `tests.architecture.test_import_graph_invariants::test_import_graph_respects_layer_matrix` | `S7-crosscutting-architecture-b.xml` |
+| 10 | 34.348 | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline::test_chembl_activity_happy_path` | `S8-crosscutting-governance.xml` |
+| 11 | 33.691 | `tests.architecture.test_vcr_metadata_catalog_drift::test_vcr_metadata_catalog_tracks_cassettes_not_sidecars` | `S7-crosscutting-architecture-d.xml` |
+| 12 | 31.733 | `tests.architecture.test_tech_debt_issues_5670_5675_closeout::test_issue_5674_internal_compatibility_shims_have_current_expiry_guards` | `S7-crosscutting-architecture-d.xml` |
+| 13 | 30.766 | `tests.architecture.test_value_object_run_manifest_deprecation::test_deprecated_value_object_run_manifest_is_not_used_in_tests` | `S7-crosscutting-architecture-d.xml` |
+| 14 | 29.077 | `tests.architecture.test_deterministic_sort_policy_coverage::test_entity_pipeline_sink_sort_policy_coverage_is_full` | `S7-crosscutting-architecture-a3.xml` |
+| 15 | 29.051 | `tests.architecture.test_quality_exemptions_registry::test_exemption_registry_metadata_is_complete` | `S7-crosscutting-architecture-c.xml` |
+| 16 | 28.619 | `tests.architecture.test_tech_debt_issues_5565_5569_closeout::test_issue_5566_semantic_seams_have_roles_and_no_new_src_callers` | `S7-crosscutting-architecture-d.xml` |
+| 17 | 28.062 | `tests.architecture.test_naming_package_consistency_gate::test_consistency_gate_script_runs_clean_in_check_mode` | `S7-crosscutting-architecture-c.xml` |
+| 18 | 26.574 | `tests.unit.composition.bootstrap.test_bootstrap_entrypoints.TestBootstrapPipeline::test_bootstrap_pipeline_creates_runner_without_starting_server` | `S2-comp-iface.xml` |
+| 19 | 26.306 | `tests.integration.interfaces.test_cli_shutdown_integration.TestCliGracefulShutdownExitCode::test_shutdown_error_returns_exit_code_130` | `S5-infra-adapters.xml` |
+| 20 | 26.301 | `tests.unit.interfaces.cli.test_cli_main_module.TestCliMainModule::test_module_runnable_with_help` | `S2-comp-iface.xml` |
+| 21 | 26.227 | `tests.architecture.test_retirement_candidate_triage::test_repo_wide_zero_import_candidate_count_does_not_grow` | `S7-crosscutting-architecture-c.xml` |
+| 22 | 26.086 | `tests.architecture.test_test_governance_audit::test_test_audit_closeout_2026_06_19_tracks_issue_pack_evidence` | `S7-crosscutting-architecture-d.xml` |
+| 23 | 25.914 | `tests.unit.domain.test_exceptions.TestErrorClassifier::test_classify_unknown_exception` | `S1-domain-services.xml` |
+| 24 | 25.571 | `tests.architecture.test_vcr_metadata_catalog_drift::test_vcr_metadata_catalog_drift_check_passes_current_repo` | `S7-crosscutting-architecture-d.xml` |
+| 25 | 24.535 | `tests.unit.infrastructure.adapters.common.test_fetch_retry_policy::test_split_filter_ids_for_fallback_partition_property` | `S5-infra-adapters.xml` |
 
 ## Top Slow Zones
 
 | Rank | Zone | Tests | Total Duration (s) | Max Duration (s) |
 |---:|---|---:|---:|---:|
-| 1 | `tests.architecture.test_checkpoint_compatibility_runtime_facade_usage` | 2 | 70.905 | 42.785 |
-| 2 | `tests.architecture.test_config_discrepancy_metrics_ratchets` | 2 | 35.379 | 24.051 |
-| 3 | `tests.architecture.test_cli_command_import_guards` | 2 | 30.582 | 16.084 |
-| 4 | `tests.architecture.test_checkpoint_runtime_facade_usage` | 2 | 27.114 | 16.691 |
-| 5 | `tests.architecture.test_config_discrepancy_report_drift` | 1 | 23.018 | 23.018 |
-| 6 | `tests.architecture.test_config_root_governance` | 1 | 15.28 | 15.28 |
-| 7 | `tests.architecture.test_adr_enforcement_matrix` | 1 | 14.129 | 14.129 |
-| 8 | `tests.architecture.test_add_svg_text_fallback` | 1 | 13.15 | 13.15 |
-| 9 | `tests.architecture.test_compatibility_freeze_guards` | 1 | 12.274 | 12.274 |
-| 10 | `tests.architecture.test_config_surface_entity_residual_plateau` | 2 | 11.72 | 7.029 |
+| 1 | `tests.architecture.test_naming_ambiguity_classifier` | 2 | 231.041 | 192.078 |
+| 2 | `tests.architecture.test_provider_registry_decomposition` | 2 | 131.792 | 76.218 |
+| 3 | `tests.architecture.test_quality_exemptions_registry` | 2 | 69.7 | 40.649 |
+| 4 | `tests.architecture.test_debt_governance_telemetry_reporting` | 1 | 64.276 | 64.276 |
+| 5 | `tests.architecture.test_vcr_metadata_catalog_drift` | 2 | 59.262 | 33.691 |
+| 6 | `tests.architecture.test_mounted_worktree_skip_policy` | 1 | 37.074 | 37.074 |
+| 7 | `tests.architecture.test_private_module_imports` | 1 | 35.843 | 35.843 |
+| 8 | `tests.architecture.test_import_graph_invariants` | 1 | 35.412 | 35.412 |
+| 9 | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline` | 1 | 34.348 | 34.348 |
+| 10 | `tests.architecture.test_tech_debt_issues_5670_5675_closeout` | 1 | 31.733 | 31.733 |
 

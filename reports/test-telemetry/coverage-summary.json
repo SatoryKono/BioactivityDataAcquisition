@@ -1,9 +1,9 @@
 {
   "source_branch": "main",
-  "source_commit": "51979de96630ce1eff88b6a2b82df04a5c9be157",
-  "source_run_id": "local-issues-5710-5711-20260630",
-  "source_tree_sha256": "f24da406077709eac730c84085674c41be14018bbd1e0645ca74efc595b70bb8",
-  "refreshed_at_utc": "2026-06-30T13:06:54.324571+00:00",
+  "source_commit": "7038c078bd23b9c9810eb370793e75b2a0d63cbd",
+  "source_run_id": "local-duration-rebuild-2026-07-23",
+  "source_tree_sha256": "d98620ba66379921bab9919994840bcf34145461e2c263680e58cb5f47fb39ef",
+  "refreshed_at_utc": "2026-07-23T08:11:54.191358+00:00",
   "refresh_status": "captured",
   "coverage_percent": 95.61,
   "coverage": {
