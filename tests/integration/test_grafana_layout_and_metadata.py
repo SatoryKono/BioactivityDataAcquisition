@@ -877,7 +877,6 @@ def test_dashboard_design_system_documents_metadata_policy() -> None:
         "`schemaVersion` MAY remain `30` or `39`",
         "`iteration` is optional",
         "`tags` MUST include the baseline suite tag `bioetl`",
-        "`bioetl-silver-reject-explorer`",
         "`refresh=30s`",
         "`refresh=1m`",
     }

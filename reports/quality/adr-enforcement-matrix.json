@@ -583,6 +583,7 @@
       "decision_path": "docs/02-architecture/decisions/ADR-018-gold-strict-validation.md",
       "enforcement_owner_paths": [
         "scripts/engineering/qa/audit_pipeline_semantics.py",
+        "tests/architecture/test_architecture_audit_closeout_gates.py",
         "tests/architecture/test_explicit_gold_scd2_policy.py",
         "tests/architecture/test_gold_schema_contracts.py",
         "tests/architecture/test_gold_strict_validation_policy.py",
@@ -606,6 +607,8 @@
         "docs/04-reference/contracts/dq-contracts.md",
         "docs/04-reference/contracts/gold-schemas.md",
         "scripts/engineering/qa/audit_pipeline_semantics.py",
+        "src/bioetl/domain/contracts/gold/_composite_gold_common_schema.py",
+        "tests/architecture/test_architecture_audit_closeout_gates.py",
         "tests/architecture/test_explicit_gold_scd2_policy.py",
         "tests/architecture/test_gold_schema_contracts.py",
         "tests/architecture/test_gold_strict_validation_policy.py",

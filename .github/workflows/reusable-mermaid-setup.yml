@@ -31,14 +31,20 @@ jobs:
           MERMAID_VERSION: ${{ inputs.mermaid-version }}
           INSTALL_LIBRSVG: ${{ inputs.install-librsvg }}
         run: |
-          npm install -g "@mermaid-js/mermaid-cli@$MERMAID_VERSION"  --ignore-scripts
+          set -euo pipefail
+          TOOL_DIR="${RUNNER_TEMP}/mermaid-cli"
+          mkdir -p "${TOOL_DIR}"
+          cd "${TOOL_DIR}"
+          npm init -y >/dev/null
+          npm install --ignore-scripts --no-fund --no-audit \
+            "@mermaid-js/mermaid-cli@${MERMAID_VERSION}"
           if [ "$INSTALL_LIBRSVG" = "true" ]; then
-            npm install -g svgo --ignore-scripts
+            npm install --ignore-scripts --no-fund --no-audit svgo@3.3.2
             sudo apt-get update -qq && sudo apt-get install -y -qq librsvg2-bin
           fi
-
-      - name: Install Chrome headless shell for Puppeteer
-        run: npx -y puppeteer browsers install chrome-headless-shell
+          echo "${TOOL_DIR}/node_modules/.bin" >> "$GITHUB_PATH"
+          npm install --ignore-scripts --no-fund --no-audit puppeteer@24.2.0
+          "${TOOL_DIR}/node_modules/.bin/puppeteer" browsers install chrome-headless-shell
 
       - name: Create Puppeteer config
         run: |

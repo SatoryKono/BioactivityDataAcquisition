@@ -33,17 +33,27 @@ ENTRY_TEXT_FIELDS = ("nodeid", "owner", "cause", "remediation")
 
 
 def _resolve_path(repo_root: Path, path: Path) -> Path:
-    return path if path.is_absolute() else repo_root / path
+    from scripts.engineering.common.repo_paths import resolve_cli_path
+
+    return resolve_cli_path(path, root=repo_root)
 
 
-def _load_yaml_mapping(path: Path) -> dict[str, Any]:
+def _load_yaml_mapping(path: Path, *, root: Path | None = None) -> dict[str, Any]:
+    if root is not None:
+        from scripts.engineering.common.repo_paths import ensure_path_within_root
+
+        path = ensure_path_within_root(path, root)
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         raise ValueError(f"Expected YAML object: {path}")
     return payload
 
 
-def _load_json_mapping(path: Path) -> dict[str, Any]:
+def _load_json_mapping(path: Path, *, root: Path | None = None) -> dict[str, Any]:
+    if root is not None:
+        from scripts.engineering.common.repo_paths import ensure_path_within_root
+
+        path = ensure_path_within_root(path, root)
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         raise ValueError(f"Expected JSON object: {path}")
@@ -426,7 +436,11 @@ def _canonical_json(payload: dict[str, object]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
 
-def _write_text_atomically(path: Path, content: str) -> None:
+def _write_text_atomically(path: Path, content: str, *, root: Path | None = None) -> None:
+    if root is not None:
+        from scripts.engineering.common.repo_paths import ensure_path_within_root
+
+        path = ensure_path_within_root(path, root)
     path.parent.mkdir(parents=True, exist_ok=True)
     descriptor, temporary_name = tempfile.mkstemp(
         dir=path.parent,
@@ -472,7 +486,9 @@ def main(argv: list[str] | None = None) -> int:
                 inventory_path=args.inventory,
             )
             output_path = _resolve_path(repo_root, args.empirical_json_out)
-            _write_text_atomically(output_path, _canonical_json(payload))
+            _write_text_atomically(
+                output_path, _canonical_json(payload), root=repo_root
+            )
             untriaged = payload["curated_inventory_reconciliation"]["untriaged_count"]  # type: ignore[index]
             replay_stable = payload["comparison"]["replay_fingerprint_stable"]  # type: ignore[index]
             print(f"[flaky-test-empirical] wrote {output_path}")
@@ -504,7 +520,7 @@ def main(argv: list[str] | None = None) -> int:
         print("[flaky-test-burndown-review] artifact is current")
         return 0
 
-    _write_text_atomically(output_path, expected)
+    _write_text_atomically(output_path, expected, root=repo_root)
     print(f"[flaky-test-burndown-review] wrote {output_path}")
     return 0
 

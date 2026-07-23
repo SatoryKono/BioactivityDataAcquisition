@@ -41,7 +41,6 @@ from bioetl.interfaces.cli.formatters import echo_error
 
 _RUN_MANIFEST_NOT_FOUND_MSG = "Run manifest not found"
 
-
 __all__ = [
     "COMMANDS",
     "certify_historical_bulk_command",

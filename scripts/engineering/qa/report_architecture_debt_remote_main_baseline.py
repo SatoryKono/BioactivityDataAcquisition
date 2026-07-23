@@ -259,8 +259,17 @@ def render_markdown(payload: dict[str, object]) -> str:
 
 
 def _write_artifacts(
-    payload: dict[str, object], *, json_out: Path, md_out: Path
+    payload: dict[str, object],
+    *,
+    json_out: Path,
+    md_out: Path,
+    root: Path | None = None,
 ) -> None:
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        json_out = resolve_cli_path(json_out, root=root)
+        md_out = resolve_cli_path(md_out, root=root)
     json_out.parent.mkdir(parents=True, exist_ok=True)
     md_out.parent.mkdir(parents=True, exist_ok=True)
     json_out.write_text(
@@ -271,8 +280,17 @@ def _write_artifacts(
 
 
 def _check_artifacts(
-    payload: dict[str, object], *, json_out: Path, md_out: Path
+    payload: dict[str, object],
+    *,
+    json_out: Path,
+    md_out: Path,
+    root: Path | None = None,
 ) -> list[str]:
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        json_out = resolve_cli_path(json_out, root=root)
+        md_out = resolve_cli_path(md_out, root=root)
     errors: list[str] = []
     expected_json = json.dumps(payload, indent=2, sort_keys=True) + "\n"
     expected_md = render_markdown(payload)
@@ -317,7 +335,9 @@ def main(argv: list[str] | None = None) -> int:
     md_out = Path(args.md_out)
 
     if args.check:
-        errors = _check_artifacts(payload, json_out=json_out, md_out=md_out)
+        errors = _check_artifacts(
+            payload, json_out=json_out, md_out=md_out, root=repo_root
+        )
         if errors:
             for error in errors:
                 print(error, file=sys.stderr)
@@ -325,7 +345,9 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.update:
-        _write_artifacts(payload, json_out=json_out, md_out=md_out)
+        _write_artifacts(
+            payload, json_out=json_out, md_out=md_out, root=repo_root
+        )
         return 0
 
     print(json.dumps(payload, indent=2, sort_keys=True))

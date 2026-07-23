@@ -61,7 +61,11 @@ class BenchmarkDegradation:
     within_budget: bool
 
 
-def _load_budgets(path: Path) -> dict[str, HotspotBudget]:
+def _load_budgets(path: Path, *, root: Path | None = None) -> dict[str, HotspotBudget]:
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        path = resolve_cli_path(path, root=root)
     payload = json.loads(path.read_text(encoding="utf-8"))
     raw_map: dict[str, Any] = payload.get("benchmarks", {})
     return {
@@ -77,7 +81,13 @@ def _load_budgets(path: Path) -> dict[str, HotspotBudget]:
     }
 
 
-def _load_observations(path: Path) -> dict[str, list[HotspotObservation]]:
+def _load_observations(
+    path: Path, *, root: Path | None = None
+) -> dict[str, list[HotspotObservation]]:
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        path = resolve_cli_path(path, root=root)
     if not path.exists():
         return {}
 
@@ -283,7 +293,12 @@ def _write_json_report(
     summary: dict[str, int],
     *,
     window_size: int,
+    root: Path | None = None,
 ) -> None:
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        path = resolve_cli_path(path, root=root)
     payload = {
         "window_size": window_size,
         "summary": summary,
@@ -293,8 +308,14 @@ def _write_json_report(
     path.write_text(json.dumps(payload, ensure_ascii=True, indent=2) + "\n", "utf-8")
 
 
-def _write_markdown_report(path: Path, markdown: str) -> None:
+def _write_markdown_report(
+    path: Path, markdown: str, *, root: Path | None = None
+) -> None:
     """Write markdown degradation report."""
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        path = resolve_cli_path(path, root=root)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(markdown, encoding="utf-8")
 
@@ -332,9 +353,11 @@ def main() -> int:
         help="Output path for markdown degradation report.",
     )
     args = parser.parse_args()
+    from scripts.engineering.common.repo_paths import REPO_ROOT
 
-    budgets = _load_budgets(args.budgets)
-    observations = _load_observations(args.observations)
+    root = REPO_ROOT
+    budgets = _load_budgets(args.budgets, root=root)
+    observations = _load_observations(args.observations, root=root)
     report = _compute_degradation(
         budgets,
         observations,
@@ -349,8 +372,9 @@ def main() -> int:
         report,
         summary,
         window_size=normalized_window_size,
+        root=root,
     )
-    _write_markdown_report(args.markdown_out, markdown)
+    _write_markdown_report(args.markdown_out, markdown, root=root)
     print(
         "hotspot_degradation_report_generated",
         f"benchmarks={summary['total']}",

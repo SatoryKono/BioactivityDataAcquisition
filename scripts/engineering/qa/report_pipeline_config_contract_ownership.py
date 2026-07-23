@@ -260,7 +260,11 @@ def _collect_entity_rows() -> list[dict[str, Any]]:
     return rows
 
 
-def _existing_snapshot_date(path: Path) -> str | None:
+def _existing_snapshot_date(path: Path, *, root: Path | None = None) -> str | None:
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        path = resolve_cli_path(path, root=root)
     if not path.is_file():
         return None
     payload = json.loads(path.read_text(encoding="utf-8"))
@@ -316,7 +320,18 @@ def build_payload(*, snapshot_date: str) -> dict[str, Any]:
     }
 
 
-def write_artifacts(*, json_out: Path, md_out: Path, snapshot_date: str) -> None:
+def write_artifacts(
+    *,
+    json_out: Path,
+    md_out: Path,
+    snapshot_date: str,
+    root: Path | None = None,
+) -> None:
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        json_out = resolve_cli_path(json_out, root=root)
+        md_out = resolve_cli_path(md_out, root=root)
     payload = build_payload(snapshot_date=snapshot_date)
     json_out.parent.mkdir(parents=True, exist_ok=True)
     md_out.parent.mkdir(parents=True, exist_ok=True)
@@ -351,19 +366,25 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Fail when committed artifacts drift from the generator output.",
     )
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_cli_path
+
     args = parser.parse_args(argv)
+    root = REPO_ROOT
     snapshot_date = date.today().isoformat()
     if args.check:
-        snapshot_date = _existing_snapshot_date(args.json_out) or snapshot_date
+        snapshot_date = (
+            _existing_snapshot_date(args.json_out, root=root) or snapshot_date
+        )
 
     if args.check:
+        json_out = resolve_cli_path(args.json_out, root=root)
         expected = (
             json.dumps(
                 build_payload(snapshot_date=snapshot_date), indent=2, sort_keys=True
             )
             + "\n"
         )
-        actual = args.json_out.read_text(encoding="utf-8")
+        actual = json_out.read_text(encoding="utf-8")
         if actual != expected:
             print(
                 "[pipeline-config-contract-ownership-map] artifact drift detected; "
@@ -379,6 +400,7 @@ def main(argv: list[str] | None = None) -> int:
         json_out=args.json_out,
         md_out=args.md_out,
         snapshot_date=snapshot_date,
+        root=root,
     )
     payload = build_payload(snapshot_date=snapshot_date)
     print(

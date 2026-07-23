@@ -32,16 +32,16 @@ jobs:
       - name: Run replay-lane matrix
         run: |
           mkdir -p reports/nightly-replay
-          uv run pytest tests/integration/determinism -q \
+          uv run --frozen --no-build pytest tests/integration/determinism -q \
             --junitxml=reports/nightly-replay/determinism.xml \
             --basetemp .artifacts/nightly-replay/determinism/run1
-          uv run pytest tests/integration/idempotency -q \
+          uv run --frozen --no-build pytest tests/integration/idempotency -q \
             --junitxml=reports/nightly-replay/idempotency.xml \
             --basetemp .artifacts/nightly-replay/idempotency/run1
-          uv run pytest tests/integration/composite_resume -q \
+          uv run --frozen --no-build pytest tests/integration/composite_resume -q \
             --junitxml=reports/nightly-replay/composite_resume.xml \
             --basetemp .artifacts/nightly-replay/composite_resume/run1
-          uv run pytest tests/integration/determinism -q \
+          uv run --frozen --no-build pytest tests/integration/determinism -q \
             --junitxml=reports/nightly-replay/determinism-recheck.xml \
             --basetemp .artifacts/nightly-replay/determinism/run2
 

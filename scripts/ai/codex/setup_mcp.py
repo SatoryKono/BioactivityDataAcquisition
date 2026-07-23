@@ -411,10 +411,26 @@ def _codex_runtime_servers(
     return servers
 
 
-def _write_json(path: Path, payload: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
+def _write_json(
+    path: Path,
+    payload: dict[str, Any],
+    *,
+    allowed_root: Path | None = None,
+) -> None:
+    """Write JSON under ``allowed_root`` (defaults to the repository root).
+
+    Tests and ``--root`` projections may intentionally target an output
+    directory outside the checkout; pass that directory as ``allowed_root``.
+    """
+    from scripts.engineering.common.repo_paths import (
+        REPO_ROOT,
+        ensure_path_within_root,
+    )
+
+    safe_path = ensure_path_within_root(path, allowed_root or REPO_ROOT)
+    safe_path.parent.mkdir(parents=True, exist_ok=True)
     rendered = json.dumps(payload, indent=2, ensure_ascii=True) + "\n"
-    path.write_text(rendered, encoding="utf-8")
+    safe_path.write_text(rendered, encoding="utf-8")
 
 
 def _load_existing_json_object(path: Path, *, label: str) -> dict[str, Any]:
@@ -443,7 +459,7 @@ def _write_workspace_codex_settings(
     existing["mcpServers"] = deepcopy(
         _codex_runtime_servers(workspace_root, profile=profile)
     )
-    _write_json(settings_path, existing)
+    _write_json(settings_path, existing, allowed_root=output_root)
     return settings_path
 
 
@@ -476,7 +492,7 @@ def _write_devin_config(output_root: Path, workspace_root: Path) -> Path:
             "x-ref-api-key": f"${REF_API_KEY_ENV_VAR}",
         }
     existing["mcpServers"] = servers
-    _write_json(settings_path, existing)
+    _write_json(settings_path, existing, allowed_root=output_root)
     return settings_path
 
 
@@ -519,13 +535,15 @@ def _write_configs(
             output_root, workspace_root, profile=profile
         )
         devin_config_path = _write_devin_config(output_root, workspace_root)
-        _write_json(mcp_path, codex_payload)
+        _write_json(mcp_path, codex_payload, allowed_root=output_root)
         if output_root.resolve() == workspace_root.resolve():
-            _write_json(scripts_ai_mcp_path, codex_payload)
-        _write_json(vscode_path, vscode_payload)
-        _write_json(cursor_path, cursor_payload)
-        _write_json(zed_path, zed_payload)
-    _write_json(qodo_path, qodo_payload)
+            _write_json(
+                scripts_ai_mcp_path, codex_payload, allowed_root=output_root
+            )
+        _write_json(vscode_path, vscode_payload, allowed_root=output_root)
+        _write_json(cursor_path, cursor_payload, allowed_root=output_root)
+        _write_json(zed_path, zed_payload, allowed_root=output_root)
+    _write_json(qodo_path, qodo_payload, allowed_root=output_root)
     return (
         mcp_path,
         vscode_path,
@@ -571,7 +589,7 @@ def _write_gemini_settings(
         }
 
     existing["mcpServers"] = merged_servers
-    _write_json(settings_path, existing)
+    _write_json(settings_path, existing, allowed_root=output_root)
     return settings_path
 
 

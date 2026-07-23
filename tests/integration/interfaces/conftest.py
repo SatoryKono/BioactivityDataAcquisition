@@ -184,8 +184,7 @@ def create_local_storage_context(
             base_path=str(storage_paths["bronze"]),
             logger=logger,
             metrics=NoOpMetrics(),
-            save_json=save_json,
-            json_path=str(storage_paths["json"]) if save_json else None,
+            json_export=(save_json, str(storage_paths["json"]) if save_json else None),
             # Lock validation at Application layer
         ),
         silver_writer=SilverWriter(

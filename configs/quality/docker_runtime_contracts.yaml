@@ -97,25 +97,25 @@ stacks:
     required_secret_environment_names:
       - NEO4J_PASSWORD
     readiness:
-      bioetl: http://127.0.0.1:8081/health/ready
+      bioetl: http://127.0.0.1:8000/health/ready
     restart_policy:
       bioetl: on-failure:3
     migration:
       legacy_project_name: bioactivitydataacquisition2
       volume_map: {}
+  # OPTIONAL operator stack — not part of the default release bundle.
+  # Loki, Promtail, Tempo, and Quarantine Explorer were removed from this surface.
   monitoring:
     compose_file: docker-compose.monitoring.yml
     project_name: bioetl-monitoring
     owner: observability-helper
+    default_release_bundle: false
     required_services:
       - prometheus
       - pushgateway
       - grafana
       - renderer
-    optional_services:
-      - loki
-      - promtail
-      - tempo
+    optional_services: []
     required_environment_names:
       - GF_SECURITY_ADMIN_PASSWORD
       - GF_RENDERING_RENDERER_TOKEN
@@ -131,8 +131,7 @@ stacks:
       volume_map:
         bioactivitydataacquisition2_prometheus-data: bioetl-monitoring_prometheus-data
         bioactivitydataacquisition2_grafana-data: bioetl-monitoring_grafana-data
-        bioactivitydataacquisition2_loki-data: bioetl-monitoring_loki-data
-        bioactivitydataacquisition2_tempo-data: bioetl-monitoring_tempo-data
+
   neo4j:
     compose_file: docker-compose.neo4j.yml
     project_name: bioetl-neo4j
@@ -227,9 +226,6 @@ service_ownership:
   pushgateway: monitoring
   grafana: monitoring
   renderer: monitoring
-  loki: monitoring
-  promtail: monitoring
-  tempo: monitoring
   neo4j: neo4j
   neo4j-audit: neo4j-audit
   redis: redis
@@ -241,14 +237,11 @@ service_ownership:
 
 host_ports:
   3000: {stack: monitoring, service: grafana, bind: 127.0.0.1}
-  3100: {stack: monitoring, service: loki, bind: 127.0.0.1}
-  3200: {stack: monitoring, service: tempo, bind: 127.0.0.1}
-  4317: {stack: monitoring, service: tempo, bind: 127.0.0.1}
   7474: {stack: neo4j, service: neo4j, bind: 127.0.0.1}
   7475: {stack: neo4j-audit, service: neo4j-audit, bind: 127.0.0.1}
   7687: {stack: neo4j, service: neo4j, bind: 127.0.0.1}
   7688: {stack: neo4j-audit, service: neo4j-audit, bind: 127.0.0.1}
-  8081: {stack: main, service: bioetl, bind: 127.0.0.1}
+  8000: {stack: main, service: bioetl, bind: 127.0.0.1}
   6379: {stack: redis, service: redis, bind: 127.0.0.1}
   9000: {stack: minio, service: minio, bind: 127.0.0.1}
   9001: {stack: minio, service: minio, bind: 127.0.0.1}

@@ -79,7 +79,7 @@ jobs:
 
           # Run tests and capture exit code
           mkdir -p reports/junit
-          uv run pytest $PYTEST_ARGS --junit-xml=reports/junit/contract-results.xml || echo "TESTS_FAILED=true" >> "$GITHUB_OUTPUT"
+          uv run --frozen --no-build pytest $PYTEST_ARGS --junit-xml=reports/junit/contract-results.xml || echo "TESTS_FAILED=true" >> "$GITHUB_OUTPUT"
 
       - name: Upload Test Results
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4

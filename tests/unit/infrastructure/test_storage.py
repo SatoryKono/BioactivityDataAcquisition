@@ -195,7 +195,7 @@ class TestBronzeWriter:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            save_json=True,
+            json_export=(True, None),
         )
 
         records = [b'{"id": 1}\n']

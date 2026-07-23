@@ -555,6 +555,8 @@ def test_rerender_builds_playwright_env_with_default_sidecar_runtime(
     monkeypatch.delenv("BIOETL_PLAYWRIGHT_NODE_MODULES", raising=False)
     monkeypatch.delenv("PLAYWRIGHT_BROWSERS_PATH", raising=False)
     monkeypatch.delenv("BIOETL_PLAYWRIGHT_LIBRARY_PATH", raising=False)
+    # Force the tool defaults path: ignore host-local AppData installs.
+    monkeypatch.delenv("LOCALAPPDATA", raising=False)
     monkeypatch.setattr(rerender_subject, "_repo_root", lambda: tmp_path)
     monkeypatch.setattr(
         rerender_subject, "DEFAULT_TOOL_PLAYWRIGHT_NODE_MODULES", node_modules
@@ -664,7 +666,8 @@ def test_playwright_screenshot_script_uses_multiple_panel_readiness_selectors() 
         "dashboard.terminalStateValidation = await validateDashboardTerminalStates"
     )
     assert "window.scrollTo" in script
-    assert "const browser = await chromium.launch({ headless: true });" in script
+    assert "chromium.launch" in script
+    assert "headless: true" in script
     assert "page = await context.newPage();" in script
     assert "await page.close();" in script
     assert "GRAFANA_SCREENSHOT_EXPAND_COLLAPSED_ROWS" in script
@@ -679,7 +682,6 @@ def test_playwright_screenshot_script_uses_multiple_panel_readiness_selectors() 
     assert "requiredTerminalPanelIds" in script
     assert "Math.min(CONFIG.timeoutMs, 60000)" in script
     assert 'refresh: "off"' in script
-    assert "bioetl-silver-reject-explorer" in script
     assert 'classification: "contradictory"' in script
     assert 'classification: "valid-empty"' in script
     assert "screenshotEvidence" in script
@@ -822,7 +824,10 @@ def test_rerender_playwright_fallback_streams_output_from_repo_root(
         "from=now-12h&to=now&timezone=UTC&theme=dark",
     ]
     assert captured["kwargs"]["check"] is False
-    assert captured["kwargs"]["cwd"] == str(tmp_path)
+    # Playwright uses a local temp cwd by default (GDrive repo cwd can hang Chromium).
+    import tempfile
+
+    assert captured["kwargs"]["cwd"] == tempfile.gettempdir()
     assert "capture_output" not in captured["kwargs"]
     assert captured["kwargs"]["env"]["GRAFANA_BASE_URL"] == "http://localhost:3000"
     assert captured["kwargs"]["env"]["GRAFANA_SCREENSHOT_UIDS"] == "bioetl-dq-v2"
@@ -961,6 +966,7 @@ def test_rerender_resolves_node_from_repo_local_bin(
 def test_rerender_falls_back_to_playwright_on_render_failure(
     monkeypatch: Any, tmp_path: Path
 ) -> None:
+    monkeypatch.setenv("GF_SECURITY_ADMIN_PASSWORD", "changeme")
     monkeypatch.setattr(rerender_subject, "_load_dashboards", lambda *_: [])
     monkeypatch.setattr(
         rerender_subject,
@@ -984,6 +990,7 @@ def test_rerender_falls_back_to_playwright_on_render_failure(
 def test_rerender_auto_fallback_skips_frontend_probe_on_render_failure(
     monkeypatch: Any, tmp_path: Path
 ) -> None:
+    monkeypatch.setenv("GF_SECURITY_ADMIN_PASSWORD", "changeme")
     monkeypatch.setattr(rerender_subject, "_load_dashboards", lambda *_: [])
     monkeypatch.setattr(
         rerender_subject,

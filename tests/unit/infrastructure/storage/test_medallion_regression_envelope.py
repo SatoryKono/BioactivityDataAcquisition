@@ -47,7 +47,7 @@ async def test_bronze_append_only_writes_keep_prior_batches_readable(
         base_path=tmp_path,
         logger=NoOpLogger(),
         metrics=NoOpMetrics(),
-        save_json=True,
+        json_export=(True, None),
     )
     date = datetime(2024, 1, 15, tzinfo=UTC)
     ingestion_ts = datetime(2024, 1, 15, 12, 0, tzinfo=UTC)
@@ -98,7 +98,7 @@ async def test_bronze_write_captures_raw_payload_before_caller_mutation(
         base_path=tmp_path,
         logger=NoOpLogger(),
         metrics=NoOpMetrics(),
-        save_json=True,
+        json_export=(True, None),
     )
     date = datetime(2024, 1, 15, tzinfo=UTC)
     ingestion_ts = datetime(2024, 1, 15, 12, 0, tzinfo=UTC)
@@ -135,7 +135,7 @@ async def test_bronze_same_batch_retry_with_same_payload_is_noop(
         base_path=tmp_path,
         logger=NoOpLogger(),
         metrics=NoOpMetrics(),
-        save_json=True,
+        json_export=(True, None),
     )
     date = datetime(2024, 1, 15, tzinfo=UTC)
     ingestion_ts = datetime(2024, 1, 15, 12, 0, tzinfo=UTC)
@@ -195,7 +195,7 @@ async def test_bronze_same_batch_retry_with_different_payload_is_rejected(
         base_path=tmp_path,
         logger=NoOpLogger(),
         metrics=NoOpMetrics(),
-        save_json=True,
+        json_export=(True, None),
     )
     date = datetime(2024, 1, 15, tzinfo=UTC)
     ingestion_ts = datetime(2024, 1, 15, 12, 0, tzinfo=UTC)

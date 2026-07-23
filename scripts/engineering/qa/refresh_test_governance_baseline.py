@@ -72,25 +72,29 @@ def _parse_args() -> argparse.Namespace:
 
 
 def main() -> int:
+    from scripts.engineering.common.repo_paths import resolve_cli_path
+
     args = _parse_args()
 
-    root = Path(args.config).resolve().parents[2]
-    output_path = Path(args.output)
+    config_path = resolve_cli_path(args.config)
+    root = config_path.resolve().parents[2]
+    output_path = resolve_cli_path(args.output, root=root)
     duplicate_name_path = (
-        Path(args.duplicate_name_inventory) if args.duplicate_name_inventory else None
+        resolve_cli_path(args.duplicate_name_inventory, root=root)
+        if args.duplicate_name_inventory
+        else None
     )
-    fixture_duplication_path = Path(args.fixture_duplication)
+    fixture_duplication_path = resolve_cli_path(args.fixture_duplication, root=root)
 
     if args.verbose:
         print(f"Root: {root}")
-        print(f"Config: {args.config}")
+        print(f"Config: {config_path}")
         print(f"Output: {output_path}")
         print(f"Duplicate name inventory: {duplicate_name_path or '<embedded-only>'}")
         print(f"Fixture duplication: {fixture_duplication_path}")
 
     # Collect the report (this is the expensive operation)
     payload = collect_test_governance_report(root)
-    config_path = Path(args.config)
     if config_path.exists():
         payload["budget_violations"] = evaluate_budgets(
             payload["report"],

@@ -3,8 +3,50 @@
 > BIOETL_DOCKER_HELPER_ADR010_ADJUNCT — Local-Only Docker helpers governed by ADR-010.
 > Contract: `configs/quality/docker_helper_contracts.yaml`
 
-Docker — optional local adjunct. Выполняйте команды из Linux filesystem mirror,
-не из `/mnt/*` или `/tmp`, и не создавайте/не изменяйте `.env`.
+Docker — optional local adjunct. Канонический runtime: Python/venv.
+Выполняйте команды из Linux filesystem mirror, не из `/mnt/*` или `/tmp`,
+и не создавайте/не изменяйте `.env`.
+
+## Default release surface
+
+| Stack | Default? | Назначение |
+| --- | --- | --- |
+| `main` (`bioetl-main`) | **Yes** (if Docker used) | Health/metrics endpoint only (`:8000`) |
+| `neo4j` | Optional helper | Graph store |
+| `monitoring` | **No** — opt-in only | Prometheus, Pushgateway, Grafana, renderer |
+
+**Removed from shipping Docker surface:** Loki, Promtail, Tempo, Quarantine Explorer
+HTTP UI (`quarantine serve` / Infinity datasource / Silver Reject Explorer dashboard).
+
+Domain quarantine write-path inside BioETL pipelines remains (Medallion DQ);
+only the **operator Explorer UI + Loki/Tempo stacks** were deleted.
+
+## Main stack (default)
+
+```bash
+python scripts/ops/runtime/docker/runtime_manager.py check --stack main
+python scripts/ops/runtime/docker/runtime_manager.py start --stack main --timeout 180
+python scripts/ops/runtime/docker/runtime_manager.py status --stack main
+```
+
+Readiness: `http://127.0.0.1:8000/health/ready`
+
+## Monitoring stack (opt-in only)
+
+Do **not** start monitoring unless you explicitly need Grafana screenshots or
+local PromQL debugging.
+
+```bash
+python scripts/ops/runtime/docker/runtime_manager.py check --stack monitoring
+python scripts/ops/runtime/docker/runtime_manager.py start --stack monitoring --timeout 180
+python scripts/ops/runtime/docker/runtime_manager.py status --stack monitoring
+```
+
+Stop without deleting volumes:
+
+```bash
+python scripts/ops/runtime/docker/runtime_manager.py stop --stack monitoring --timeout 60
+```
 
 ## Reviewed helper Compose adjuncts
 
@@ -15,31 +57,6 @@ Docker — optional local adjunct. Выполняйте команды из Linu
 | `docker-compose.redis.yml` | `scripts/ops/runtime/docker/compose/redis.yml` |
 | `docker-compose.sonarqube.yml` | `scripts/ops/runtime/docker/compose/sonarqube.yml` |
 
-В обычном workflow manager сам выполняет эквивалент управляемой операции
-`docker network create bioetl-monitoring`; вручную создавать сеть не требуется.
-
-## Main stack
-
-После передачи обязательных environment values в текущий процесс:
-
-```bash
-python scripts/ops/runtime/docker/runtime_manager.py check --stack main
-python scripts/ops/runtime/docker/runtime_manager.py start --stack main --timeout 180
-python scripts/ops/runtime/docker/runtime_manager.py status --stack main
-```
-
-## Monitoring stack
-
-```bash
-python scripts/ops/runtime/docker/runtime_manager.py check --stack monitoring
-python scripts/ops/runtime/docker/runtime_manager.py start --stack monitoring --timeout 180
-python scripts/ops/runtime/docker/runtime_manager.py status --stack monitoring
-```
-
-Manager сам создаёт отсутствующую contracted external network и отклоняет
-конфликтующий owner. Не запускайте параллельный raw Compose проект из другого
-origin.
-
 ## Logs, diagnostics, recovery, stop
 
 ```bash
@@ -49,15 +66,15 @@ python scripts/ops/runtime/docker/runtime_manager.py recover --stack main --time
 python scripts/ops/runtime/docker/runtime_manager.py stop --stack main --timeout 60
 ```
 
-Для Desktop/WSL recovery используйте evidence-first wrapper:
+Desktop/WSL recovery:
 
 ```powershell
 .\scripts\ops\runtime\docker\restart-docker.ps1 -TimeoutSeconds 180
 ```
 
-Запрещённые routine recovery действия: `down -v`, volume/system prune, удаление
-VHDX/data root, force-kill без двухфакторного last-resort подтверждения и
-`wsl --shutdown`.
+If `DockerDesktop/Wsl/CommandTimedOut`: run `wsl --shutdown`, start Docker Desktop,
+wait until `docker info` is stable, then retry **one** stack at a time.
 
-Подробнее: `docs/DOCKER_SETUP.md` и
-`docs/05-operations/runbooks/docker-stability.md`.
+Запрещено: `down -v`, volume/system prune, удаление VHDX/data root.
+
+Подробнее: `docs/DOCKER_SETUP.md`.

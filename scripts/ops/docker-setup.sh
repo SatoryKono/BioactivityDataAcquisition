@@ -36,12 +36,12 @@ Usage: scripts/ops/docker-setup.sh <command> [argument]
 
 Commands:
   check [stack]       Read-only preflight (default: main)
-  start|basic         Start and verify main
+  start|basic         Start and verify main (default surface; no monitoring)
   recover [stack]     Bounded recovery (default: main)
-  start-full|full     Start all maintained helper stacks
-  monitoring          Start and verify monitoring
+  start-full|full     Start helper stacks EXCEPT monitoring (opt-in separately)
+  monitoring          Opt-in: start and verify monitoring (Grafana/Prom only)
   stop [stack]        Stop without deleting volumes (default: main)
-  stop-full           Stop all maintained helper stacks without deleting volumes
+  stop-full           Stop helper stacks without deleting volumes
   status|health       Structured main-stack readiness
   diagnose [stack]    Write a redacted diagnostic report
   logs [stack]        Print bounded recent logs
@@ -65,7 +65,8 @@ case "${command}" in
     run_manager start --stack monitoring
     ;;
   start-full|full)
-    run_for_stacks start main neo4j redis minio monitoring
+    # Monitoring is opt-in (Loki/Tempo/Quarantine Explorer removed).
+    run_for_stacks start main neo4j redis minio
     ;;
   stop-full)
     run_for_stacks stop monitoring minio redis neo4j main

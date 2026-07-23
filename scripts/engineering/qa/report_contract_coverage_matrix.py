@@ -525,7 +525,11 @@ def _collect_rows() -> list[dict[str, Any]]:
     return rows
 
 
-def _existing_snapshot_date(path: Path) -> str | None:
+def _existing_snapshot_date(path: Path, *, root: Path | None = None) -> str | None:
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        path = resolve_cli_path(path, root=root)
     if not path.exists():
         return None
     payload = json.loads(path.read_text(encoding="utf-8"))
@@ -666,7 +670,14 @@ def _render_markdown(payload: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def write_artifacts(*, json_out: Path, md_out: Path) -> dict[str, Any]:
+def write_artifacts(
+    *, json_out: Path, md_out: Path, root: Path | None = None
+) -> dict[str, Any]:
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        json_out = resolve_cli_path(json_out, root=root)
+        md_out = resolve_cli_path(md_out, root=root)
     payload = build_payload()
     json_out.parent.mkdir(parents=True, exist_ok=True)
     md_out.parent.mkdir(parents=True, exist_ok=True)
@@ -679,6 +690,8 @@ def write_artifacts(*, json_out: Path, md_out: Path) -> dict[str, Any]:
 
 
 def main(argv: list[str] | None = None) -> int:
+    from scripts.engineering.common.repo_paths import REPO_ROOT
+
     parser = argparse.ArgumentParser(
         description="Generate contract coverage matrix artifacts."
     )
@@ -700,16 +713,22 @@ def main(argv: list[str] | None = None) -> int:
         help="Fail when committed artifacts drift from generator output.",
     )
     args = parser.parse_args(argv)
-    snapshot_date = _existing_snapshot_date(args.json_out) if args.check else None
+    root = REPO_ROOT
+    snapshot_date = (
+        _existing_snapshot_date(args.json_out, root=root) if args.check else None
+    )
 
     if args.check:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        json_out = resolve_cli_path(args.json_out, root=root)
         expected = (
             json.dumps(
                 build_payload(snapshot_date=snapshot_date), indent=2, sort_keys=True
             )
             + "\n"
         )
-        actual = args.json_out.read_text(encoding="utf-8")
+        actual = json_out.read_text(encoding="utf-8")
         if actual != expected:
             print(
                 "[contract-coverage-matrix] artifact drift detected; regenerate with: "
@@ -720,7 +739,7 @@ def main(argv: list[str] | None = None) -> int:
         print("[ok] contract coverage matrix is up to date")
         return 0
 
-    payload = write_artifacts(json_out=args.json_out, md_out=args.md_out)
+    payload = write_artifacts(json_out=args.json_out, md_out=args.md_out, root=root)
     print(
         "[contract-coverage-matrix] "
         f"rows={payload['row_count']}; gold_enabled={payload['gold_enabled_count']}; "

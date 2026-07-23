@@ -744,14 +744,26 @@ def _write_artifacts(
     report_path: Path,
     matrix_content: str,
     report_content: str,
+    root: Path | None = None,
 ) -> None:
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        matrix_path = resolve_cli_path(matrix_path, root=root)
+        report_path = resolve_cli_path(report_path, root=root)
     matrix_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.parent.mkdir(parents=True, exist_ok=True)
     matrix_path.write_text(matrix_content, encoding="utf-8", newline="")
     report_path.write_text(report_content, encoding="utf-8", newline="")
 
 
-def _artifact_matches(path: Path, expected: str) -> bool:
+def _artifact_matches(
+    path: Path, expected: str, *, root: Path | None = None
+) -> bool:
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        path = resolve_cli_path(path, root=root)
     if not path.exists():
         print(f"[drift] missing: {path}")
         return False
@@ -814,7 +826,13 @@ def _canonical_baseline_json(payload: dict[str, Any]) -> str:
     return json.dumps(payload, indent=2, sort_keys=True) + "\n"
 
 
-def _write_baseline_json(path: Path, payload: dict[str, Any]) -> None:
+def _write_baseline_json(
+    path: Path, payload: dict[str, Any], *, root: Path | None = None
+) -> None:
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        path = resolve_cli_path(path, root=root)
     path.parent.mkdir(parents=True, exist_ok=True)
     content = _canonical_baseline_json(payload)
     tmp = path.with_suffix(path.suffix + ".tmp")
@@ -822,7 +840,13 @@ def _write_baseline_json(path: Path, payload: dict[str, Any]) -> None:
     os.replace(tmp, path)
 
 
-def _baseline_metrics_match(path: Path, expected_metrics: dict[str, int]) -> bool:
+def _baseline_metrics_match(
+    path: Path, expected_metrics: dict[str, int], *, root: Path | None = None
+) -> bool:
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        path = resolve_cli_path(path, root=root)
     if not path.exists():
         print(f"[drift] missing: {path}")
         return False
@@ -837,7 +861,13 @@ def _baseline_metrics_match(path: Path, expected_metrics: dict[str, int]) -> boo
 def _baseline_families_match(
     path: Path,
     expected_families: dict[str, dict[str, int]],
+    *,
+    root: Path | None = None,
 ) -> bool:
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        path = resolve_cli_path(path, root=root)
     if not path.exists():
         print(f"[drift] missing: {path}")
         return False
@@ -852,7 +882,13 @@ def _baseline_families_match(
 def _baseline_taxonomy_match(
     path: Path,
     expected_taxonomy: dict[str, Any],
+    *,
+    root: Path | None = None,
 ) -> bool:
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        path = resolve_cli_path(path, root=root)
     if not path.exists():
         print(f"[drift] missing: {path}")
         return False
@@ -865,7 +901,10 @@ def _baseline_taxonomy_match(
 
 def main(argv: list[str] | None = None) -> int:
     """Generate or check CSV and Markdown comparison outputs."""
+    from scripts.engineering.common.repo_paths import REPO_ROOT
+
     args = _parse_args(argv)
+    root = REPO_ROOT
     evidence = build_config_discrepancy_evidence()
     baseline_metrics = evidence.baseline_metrics()
     family_payload = evidence.family_metrics()
@@ -874,10 +913,19 @@ def main(argv: list[str] | None = None) -> int:
         ok = _artifact_matches(
             args.matrix_output,
             evidence.matrix_content,
-        ) and _artifact_matches(args.report_output, evidence.report_content)
-        ok = ok and _baseline_metrics_match(args.baseline_json_out, baseline_metrics)
-        ok = ok and _baseline_families_match(args.baseline_json_out, family_payload)
-        ok = ok and _baseline_taxonomy_match(args.baseline_json_out, parameter_taxonomy)
+            root=root,
+        ) and _artifact_matches(
+            args.report_output, evidence.report_content, root=root
+        )
+        ok = ok and _baseline_metrics_match(
+            args.baseline_json_out, baseline_metrics, root=root
+        )
+        ok = ok and _baseline_families_match(
+            args.baseline_json_out, family_payload, root=root
+        )
+        ok = ok and _baseline_taxonomy_match(
+            args.baseline_json_out, parameter_taxonomy, root=root
+        )
         if ok:
             print("[ok] config matrix artifacts are up to date")
             return 0
@@ -889,6 +937,7 @@ def main(argv: list[str] | None = None) -> int:
         report_path=args.report_output,
         matrix_content=evidence.matrix_content,
         report_content=evidence.report_content,
+        root=root,
     )
     _write_baseline_json(
         args.baseline_json_out,
@@ -898,6 +947,7 @@ def main(argv: list[str] | None = None) -> int:
             families=family_payload,
             parameter_taxonomy=parameter_taxonomy,
         ),
+        root=root,
     )
     print(f"Matrix saved to {args.matrix_output}")
     print(f"Total parameters: {evidence.parameter_count}")

@@ -184,12 +184,15 @@ def _read_text_file(path: Path) -> str:
     Governance scanning must not crash on those files; when recovery succeeds the
     file is rewritten as UTF-8 so subsequent tooling stays stable.
     """
-    raw = path.read_bytes()
+    from scripts.engineering.common.repo_paths import ensure_repo_path
+
+    safe_path = ensure_repo_path(path)
+    raw = safe_path.read_bytes()
     if not raw:
         return ""
     if raw.startswith(b"\xff\xfe") or raw.startswith(b"\xfe\xff"):
         text = raw.decode("utf-16")
-        path.write_bytes(text.encode("utf-8"))
+        safe_path.write_bytes(text.encode("utf-8"))
         return text
     if raw.startswith(b"\xef\xbb\xbf"):
         return raw.decode("utf-8-sig")
@@ -198,7 +201,7 @@ def _read_text_file(path: Path) -> str:
     except UnicodeDecodeError:
         # Last-resort recovery for UTF-16 without a reliable BOM prefix.
         text = raw.decode("utf-16")
-        path.write_bytes(text.encode("utf-8"))
+        safe_path.write_bytes(text.encode("utf-8"))
         return text
 
 

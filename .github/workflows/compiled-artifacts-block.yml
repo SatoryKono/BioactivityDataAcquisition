@@ -48,4 +48,4 @@ jobs:
           echo "No compiled artifacts found"
 
       - name: Validate root-level allowlist
-        run: uv run python -m scripts.engineering.repo check-cleanliness
+        run: uv run --frozen --no-build python -m scripts.engineering.repo check-cleanliness

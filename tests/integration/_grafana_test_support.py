@@ -1,3 +1,4 @@
+import pytest
 """Shared helper utilities for Grafana dashboard integration tests."""
 
 from __future__ import annotations
@@ -413,7 +414,6 @@ def _assert_standard_variable_contract(
     expected_pipeline_metric_by_dashboard = {
         "bioetl-control-plane-v1.json": "bioetl_control_plane_run_type_universe",
         "bioetl-runtime.json": "bioetl_runtime_pipeline_run_type_universe",
-        "bioetl-silver-reject-explorer.json": "bioetl_records_processed_total",
     }
     expected_pipeline_metric = expected_pipeline_metric_by_dashboard.get(
         dashboard_path.name,

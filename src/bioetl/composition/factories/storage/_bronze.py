@@ -70,8 +70,7 @@ def create_bronze_writer(
         base_path=base_path,
         logger=logger,
         metrics=metrics,
-        save_json=save_json,
-        json_path=None,
+        json_export=(save_json, None),
         runtime_services=BronzeWriterRuntimeServices(
             tracing=tracing,
             audit=audit,

@@ -63,6 +63,7 @@ def _run_checker(root: Path) -> subprocess.CompletedProcess[str]:
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -82,13 +83,18 @@ catalog_entry_pattern = re.compile(
 def relative_files(directory: Path) -> set[str]:
     if not directory.is_dir():
         return set()
-    return {
-        path.relative_to(directory).as_posix()
-        for path in directory.rglob("*")
-        if path.is_file()
-        and "__pycache__" not in path.parts
-        and path.suffix not in {".pyc", ".pyo"}
-    }
+    files: set[str] = set()
+    for current_root, directory_names, file_names in os.walk(directory):
+        directory_names[:] = [
+            name for name in directory_names if name != "__pycache__"
+        ]
+        current = Path(current_root)
+        files.update(
+            (current / name).relative_to(directory).as_posix()
+            for name in file_names
+            if Path(name).suffix not in {".pyc", ".pyo"}
+        )
+    return files
 
 
 def entrypoints(files: set[str]) -> set[str]:

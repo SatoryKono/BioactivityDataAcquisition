@@ -961,7 +961,6 @@ FORBIDDEN_RELATION_KEYS: tuple[RelationKey, ...] = (
         "composite_activity",
         "OBSERVED_BY",
         "dashboard_surface",
-        "bioetl-silver-reject-explorer",
     ),
     (
         "alert_surface",

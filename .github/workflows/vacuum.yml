@@ -64,7 +64,7 @@ jobs:
           echo "  Layer: ${LAYER}"
           echo ""
 
-          uv run bioetl maintenance vacuum-all \
+          uv run --frozen --no-build bioetl maintenance vacuum-all \
             --retention-days "${RETENTION_DAYS}" \
             --layer "${LAYER}" \
             ${DRY_RUN_FLAG}

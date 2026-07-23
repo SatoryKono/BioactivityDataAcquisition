@@ -33,7 +33,7 @@ jobs:
         with:
           python-version: "3.13"
       - name: Install detect-secrets
-        run: pip install detect-secrets pytest pytest-asyncio
+        run: "pip install --only-binary=:all: detect-secrets pytest pytest-asyncio"
       - name: Run detect-secrets baseline check
         run: pytest tests/architecture/test_antipatterns.py::test_no_hardcoded_secrets -q --noconftest -o "addopts=" -o "filterwarnings=" -o "timeout=0"
 
@@ -52,7 +52,7 @@ jobs:
       - name: Run pip-audit
         run: |
           UV_CACHE_DIR=/tmp/.uv-cache uv export --no-hashes --no-emit-project --extra dev > /tmp/pip-audit-requirements.txt
-          UV_CACHE_DIR=/tmp/.uv-cache uv run pip-audit --strict --ignore-vuln CVE-2026-3219 -r /tmp/pip-audit-requirements.txt --cache-dir /tmp/.pip-audit-cache
+          UV_CACHE_DIR=/tmp/.uv-cache uv run --frozen --no-build pip-audit --strict --ignore-vuln CVE-2026-3219 -r /tmp/pip-audit-requirements.txt --cache-dir /tmp/.pip-audit-cache
 
   bandit:
     runs-on: ubuntu-latest
@@ -67,4 +67,4 @@ jobs:
           uv-extras: "dev"
 
       - name: Run Bandit
-        run: uv run bandit -c pyproject.toml -r src/bioetl
+        run: uv run --frozen --no-build bandit -c pyproject.toml -r src/bioetl

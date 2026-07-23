@@ -185,8 +185,7 @@ class IntegrationPipelineTestCase:
             base_path=self.bronze_path,
             logger=logger,
             metrics=metrics,
-            save_json=save_json,
-            json_path=self.json_path if save_json else None,
+            json_export=(save_json, self.json_path if save_json else None),
             flat_structure=False,
             # Lock validation at Application layer
         )

@@ -35,9 +35,21 @@ CONTEXT7_SH = MCP_DIR / "mcp_context7_wrapper.sh"
 CONTEXT7_PS1 = MCP_DIR / "mcp_context7_wrapper.ps1"
 MCP_GOVERNANCE = ROOT / "docs" / "00-project" / "ai" / "mcp-governance.md"
 
-POWERSHELL = (
-    shutil.which("pwsh") or shutil.which("powershell") or shutil.which("powershell.exe")
-)
+
+def _resolve_powershell() -> str | None:
+    """Prefer real PowerShell executables over broken ``pwsh.bat`` shims."""
+    for candidate in (
+        shutil.which("powershell"),
+        shutil.which("powershell.exe"),
+        shutil.which("pwsh"),
+        shutil.which("pwsh.exe"),
+    ):
+        if candidate and not candidate.lower().endswith((".bat", ".cmd")):
+            return candidate
+    return None
+
+
+POWERSHELL = _resolve_powershell()
 POWERSHELL_MARK = pytest.mark.skipif(
     POWERSHELL is None,
     reason="PowerShell is required for the Windows MCP wrapper contracts",
@@ -105,14 +117,147 @@ def _clean_env(**updates: str | None) -> dict[str, str]:
 def _run_bash(
     script: str, *, env: dict[str, str] | None = None
 ) -> subprocess.CompletedProcess[str]:
+    run_env = env or _clean_env()
+    # On Windows the default ``bash`` is often WSL. Write the probe to a file so
+    # ``$`` / ``$?`` expansions are not mangled by interop layers, and use
+    # ``env -i`` so host/WSL PATH/HOME installs cannot leak into uvx contracts.
+    if os.name == "nt" and shutil.which("wsl") is not None:
+        import tempfile
+
+        fd, raw_script_path = tempfile.mkstemp(prefix="bioetl-bash-", suffix=".sh")
+        os.close(fd)
+        script_path = Path(raw_script_path)
+        normalized = (
+            "#!/usr/bin/env bash\n"
+            "set +e\n" + script.replace("\r\n", "\n").replace("\r", "\n") + "\n"
+        )
+        script_path.write_bytes(normalized.encode("utf-8"))
+        try:
+            subprocess.run(
+                ["wsl", "chmod", "+x", _bash_path(script_path)],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            # Always keep a minimal POSIX PATH so ``env -i`` can still find bash
+            # utilities even when a test injects a Windows-only PATH value.
+            raw_path = run_env.get("PATH", "/usr/bin:/bin")
+            # Windows PATH uses ';' while POSIX PATH uses ':'. Never split on
+            # ':' first — that corrupts drive letters like ``E:\...``.
+            if ";" in raw_path or "\\" in raw_path:
+                separators = [part for part in raw_path.split(";") if part]
+            else:
+                separators = [part for part in raw_path.split(":") if part]
+            path_parts: list[str] = []
+            for part in separators:
+                is_windows_path = "\\" in part or (
+                    len(part) >= 2 and part[1] == ":" and part[0].isalpha()
+                )
+                if is_windows_path:
+                    try:
+                        path_parts.append(_bash_path(Path(part)))
+                    except OSError:
+                        continue
+                else:
+                    path_parts.append(part)
+            if "/usr/bin" not in path_parts:
+                path_parts.extend(["/usr/bin", "/bin"])
+            path_value = ":".join(path_parts)
+            allow_keys = {
+                "PATH",
+                "HOME",
+                "LOCALAPPDATA",
+                "BIOETL_REPO_ENV_LOADED",
+                "BIOETL_ENV_FILE",
+                "BIOETL_UVX_DIRECT_NETWORK",
+                "BIOETL_TEST_CAPTURE",
+                "BIOETL_TEST_EXIT_CODE",
+                "BIOETL_TEST_PYTHON_PROBE",
+                "BIOETL_MCP_VALIDATE_ONLY",
+                "HTTP_PROXY",
+                "HTTPS_PROXY",
+                "ALL_PROXY",
+                "NO_PROXY",
+                "http_proxy",
+                "https_proxy",
+                "all_proxy",
+                "no_proxy",
+                "KEEP_ME",
+                "XDG_DATA_HOME",
+                "NEO4J_URI",
+                "NEO4J_USERNAME",
+                "NEO4J_PASSWORD",
+                "NEO4J_DATABASE",
+                "NEO4J_AUTH",
+                "CONTEXT7_API_KEY",
+                "CONTEXT7_API_TOKEN",
+                "UPSTASH_CONTEXT7_API_KEY",
+                "EXECUTION_MODE",
+                "ADR_PATH",
+            }
+            assignments = [f"PATH={path_value}"]
+            for key in sorted(allow_keys - {"PATH"}):
+                if key not in run_env:
+                    continue
+                value = run_env[key]
+                # Skip Windows drive paths that are invalid inside WSL except PATH.
+                if "\\" in value or (len(value) >= 2 and value[1] == ":"):
+                    try:
+                        value = _bash_path(Path(value))
+                    except OSError:
+                        continue
+                assignments.append(f"{key}={value}")
+            command = [
+                "wsl",
+                "env",
+                "-i",
+                *assignments,
+                "/bin/bash",
+                "--noprofile",
+                "--norc",
+                _bash_path(script_path),
+            ]
+            return subprocess.run(
+                command,
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+        finally:
+            script_path.unlink(missing_ok=True)
     return subprocess.run(
-        ["bash", "-c", script],
+        ["bash", "--noprofile", "--norc", "-c", script],
         cwd=ROOT,
-        env=env or _clean_env(),
+        env=run_env,
         text=True,
         capture_output=True,
         check=False,
     )
+
+
+def _bash_path(path: Path) -> str:
+    """Return a path form that the selected bash runtime can open.
+
+    On Windows the active ``bash`` is often WSL, which expects ``/mnt/<drive>/...``
+    rather than raw ``E:\\...`` or Git-Bash ``/e/...`` forms.
+    """
+    resolved = path.resolve()
+    if os.name != "nt":
+        return str(resolved)
+    try:
+        result = subprocess.run(
+            ["wslpath", "-u", str(resolved)],
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        posix = resolved.as_posix()
+        if len(posix) >= 2 and posix[1] == ":":
+            return f"/mnt/{posix[0].lower()}{posix[2:]}"
+        return posix
+    return result.stdout.strip()
 
 
 def _powershell_path(path: Path) -> str:
@@ -218,8 +363,7 @@ def windows_fixture_dir(request: pytest.FixtureRequest) -> Iterator[Path]:
 
 
 def _write_bash_launcher(path: Path) -> None:
-    path.write_text(
-        """#!/usr/bin/env bash
+    content = """#!/usr/bin/env bash
 set -eu
 capture_file="${BIOETL_TEST_CAPTURE:?}"
 printf 'executable=%s\n' "$0" >"${capture_file}"
@@ -234,10 +378,39 @@ fi
 printf 'neo4j_username=%s\n' "${NEO4J_USERNAME:-}" >>"${capture_file}"
 printf 'neo4j_password=%s\n' "${NEO4J_PASSWORD:-}" >>"${capture_file}"
 exit "${BIOETL_TEST_EXIT_CODE:-0}"
-""",
-        encoding="utf-8",
-    )
+"""
+    # Always write LF endings so WSL shebang execution works from /mnt/e.
+    path.write_bytes(content.replace("\r\n", "\n").encode("utf-8"))
     path.chmod(0o755)
+    if os.name == "nt" and shutil.which("wsl") is not None:
+        # DrvFs often ignores POSIX mode bits unless chmod is applied from WSL.
+        subprocess.run(
+            ["wsl", "chmod", "+x", _bash_path(path)],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+
+def _bash_lf_script(path: Path) -> str:
+    """Return a WSL path to an LF-normalized copy of ``path`` when needed."""
+    if os.name != "nt" or shutil.which("wsl") is None:
+        return _bash_path(path)
+    raw = path.read_bytes()
+    normalized = raw.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+    if normalized == raw:
+        return _bash_path(path)
+    fd, tmp_name = tempfile.mkstemp(prefix="bioetl-lf-", suffix=path.suffix or ".sh")
+    os.close(fd)
+    tmp_path = Path(tmp_name)
+    tmp_path.write_bytes(normalized)
+    subprocess.run(
+        ["wsl", "chmod", "+x", _bash_path(tmp_path)],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    return _bash_path(tmp_path)
 
 
 def _write_windows_launcher(path: Path) -> None:
@@ -329,15 +502,15 @@ def test_bash_uv_resolver_prefers_uvx_on_path(tmp_path: Path) -> None:
     fake_bin.mkdir()
     fake_uvx = fake_bin / "uvx"
     _write_bash_launcher(fake_uvx)
-    env = _clean_env(PATH=f"{fake_bin}:/usr/bin:/bin")
+    env = _clean_env(PATH=f"{_bash_path(fake_bin)}:/usr/bin:/bin")
 
     result = _run_bash(
-        f"source {shlex.quote(str(UV_RESOLVER_SH))}; bioetl_resolve_uvx_bin",
+        f"source {shlex.quote(_bash_path(UV_RESOLVER_SH))}; bioetl_resolve_uvx_bin",
         env=env,
     )
 
     assert result.returncode == 0, result.stderr
-    assert result.stdout.strip() == str(fake_uvx)
+    assert result.stdout.strip() == _bash_path(fake_uvx)
 
 
 @BASH_MARK
@@ -348,26 +521,51 @@ def test_bash_uv_resolver_finds_uv_sibling(tmp_path: Path) -> None:
     fake_uvx = fake_bin / "uvx"
     _write_bash_launcher(fake_uv)
     _write_bash_launcher(fake_uvx)
-    env = _clean_env(PATH="/usr/bin:/bin")
-    script = f"""
-source {shlex.quote(str(UV_RESOLVER_SH))}
-command() {{
-  if [[ "$1" == "-v" && "$2" == "uvx" ]]; then
-    return 1
-  fi
-  if [[ "$1" == "-v" && "$2" == "uv" ]]; then
-    printf '%s\n' {shlex.quote(str(fake_uv))}
-    return 0
-  fi
-  builtin command "$@"
-}}
-bioetl_resolve_uvx_bin
-"""
+    # Put only a ``uv`` wrapper on PATH; keep ``uvx`` as a true sibling of the
+    # resolved uv binary so the dirname(...)/uvx branch is exercised without
+    # overriding the special ``command`` builtin.
+    path_bin = tmp_path / "path-bin"
+    path_bin.mkdir()
+    uv_wrapper = path_bin / "uv"
+    uv_wrapper.write_text(
+        f'#!/usr/bin/env bash\nexec {shlex.quote(_bash_path(fake_uv))} "$@"\n',
+        encoding="utf-8",
+    )
+    uv_wrapper.chmod(0o755)
+    if os.name == "nt" and shutil.which("wsl") is not None:
+        subprocess.run(
+            [
+                "wsl",
+                "chmod",
+                "+x",
+                _bash_path(uv_wrapper),
+                _bash_path(fake_uv),
+                _bash_path(fake_uvx),
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+    # PATH must resolve ``uv`` through the wrapper, but sibling detection uses
+    # the real ``uv`` path printed by a tiny probe below.
+    env = _clean_env(PATH=f"{_bash_path(path_bin)}:/usr/bin:/bin")
+    script = (
+        f"source {shlex.quote(_bash_path(UV_RESOLVER_SH))}; "
+        # Force sibling path: pretend command -v uv returns the real uv path
+        # while uvx is not on PATH.
+        f"command() {{ "
+        f'if [ "$1" = "-v" ] && [ "$2" = "uvx" ]; then return 1; fi; '
+        f'if [ "$1" = "-v" ] && [ "$2" = "uv" ]; then '
+        f"printf '%s\\n' {shlex.quote(_bash_path(fake_uv))}; return 0; fi; "
+        f"return 1; }}; "
+        f"enable -n command 2>/dev/null || true; "
+        "bioetl_resolve_uvx_bin"
+    )
 
     result = _run_bash(script, env=env)
 
     assert result.returncode == 0, result.stderr
-    assert result.stdout.strip() == str(fake_uvx)
+    assert result.stdout.strip() == _bash_path(fake_uvx)
 
 
 @BASH_MARK
@@ -375,26 +573,35 @@ def test_bash_uv_resolver_uses_home_fallback(tmp_path: Path) -> None:
     fake_uvx = tmp_path / ".local" / "bin" / "uvx"
     fake_uvx.parent.mkdir(parents=True)
     _write_bash_launcher(fake_uvx)
-    env = _clean_env(PATH="/usr/bin:/bin", HOME=str(tmp_path), LOCALAPPDATA="")
+    env = _clean_env(
+        PATH="/usr/bin:/bin",
+        HOME=_bash_path(tmp_path),
+        LOCALAPPDATA="",
+    )
 
     result = _run_bash(
-        f"source {shlex.quote(str(UV_RESOLVER_SH))}; bioetl_resolve_uvx_bin",
+        f"source {shlex.quote(_bash_path(UV_RESOLVER_SH))}; bioetl_resolve_uvx_bin",
         env=env,
     )
 
     assert result.returncode == 0, result.stderr
-    assert result.stdout.strip() == str(fake_uvx)
+    assert result.stdout.strip() == _bash_path(fake_uvx)
 
 
 @BASH_MARK
 def test_bash_uv_resolver_reports_unavailable(tmp_path: Path) -> None:
-    env = _clean_env(PATH="/usr/bin:/bin", HOME=str(tmp_path), LOCALAPPDATA="")
-    script = f"""
-source {shlex.quote(str(UV_RESOLVER_SH))}
-resolved="$(bioetl_resolve_uvx_bin)"
-status=$?
-printf '%s\n%s\n' "${{resolved}}" "${{status}}"
-"""
+    env = _clean_env(
+        PATH="/usr/bin:/bin",
+        HOME=_bash_path(tmp_path),
+        LOCALAPPDATA=None,
+    )
+    # Keep the probe on one line so Windows/WSL argument marshalling cannot
+    # mangle multi-line $? / $() expansions.
+    script = (
+        f"source {shlex.quote(_bash_path(UV_RESOLVER_SH))}; "
+        "out=$(bioetl_resolve_uvx_bin); code=$?; "
+        'printf \'%s\\n%s\\n\' "$out" "$code"'
+    )
 
     result = _run_bash(script, env=env)
 
@@ -404,10 +611,16 @@ printf '%s\n%s\n' "${{resolved}}" "${{status}}"
 
 @BASH_MARK
 def test_bash_uv_resolver_handles_unset_home() -> None:
-    env = _clean_env(PATH="/usr/bin:/bin", HOME=None, LOCALAPPDATA=None)
+    # Isolate from the host/WSL home uvx install when HOME is unset.
+    env = _clean_env(
+        PATH="/usr/bin:/bin",
+        HOME=None,
+        LOCALAPPDATA=None,
+        XDG_DATA_HOME="/tmp/bioetl-no-xdg",
+    )
 
     result = _run_bash(
-        f"source {shlex.quote(str(UV_RESOLVER_SH))}; bioetl_resolve_uvx_bin",
+        f"source {shlex.quote(_bash_path(UV_RESOLVER_SH))}; bioetl_resolve_uvx_bin",
         env=env,
     )
 
@@ -427,7 +640,7 @@ def test_bash_uv_network_bypass_requires_explicit_opt_in() -> None:
         KEEP_ME="preserved",
     )
     script = f"""
-source {shlex.quote(str(UV_RESOLVER_SH))}
+source {shlex.quote(_bash_path(UV_RESOLVER_SH))}
 bioetl_enable_uvx_network_bypass
 printf '%s\n' "${{HTTP_PROXY}}" "${{https_proxy}}"
 export BIOETL_UVX_DIRECT_NETWORK=1
@@ -666,13 +879,18 @@ def test_bash_fetch_wrapper_executes_resolved_uvx(tmp_path: Path) -> None:
         BIOETL_TEST_EXIT_CODE="17",
     )
 
-    result = _run_bash(shlex.quote(str(FETCH_SH)), env=env)
+    result = _run_bash(f"bash {shlex.quote(_bash_lf_script(FETCH_SH))}", env=env)
 
     assert result.returncode == 17
     assert result.stdout == ""
     captured = capture_file.read_text(encoding="utf-8").splitlines()
-    assert captured[:5] == [
+    # WSL may report the launcher path in /mnt/<drive>/... form.
+    assert captured[0] in {
         f"executable={fake_uvx}",
+        f"executable={_bash_path(fake_uvx)}",
+        f"executable={fake_uvx.as_posix()}",
+    }
+    assert captured[1:5] == [
         "arg=--python",
         "arg=3.13",
         "arg=--from",
@@ -797,7 +1015,7 @@ def test_neo4j_wrapper_rejects_malformed_combined_auth(
         BIOETL_MCP_VALIDATE_ONLY="1",
     )
 
-    result = _run_bash(shlex.quote(str(NEO4J_CYPHER_SH)), env=env)
+    result = _run_bash(f"bash {shlex.quote(_bash_lf_script(NEO4J_CYPHER_SH))}", env=env)
 
     assert result.returncode != 0
     assert result.stdout == ""
@@ -817,7 +1035,7 @@ def test_neo4j_wrapper_rejects_malformed_auth_loaded_from_repo_env(
         BIOETL_MCP_VALIDATE_ONLY="1",
     )
 
-    result = _run_bash(shlex.quote(str(NEO4J_CYPHER_SH)), env=env)
+    result = _run_bash(f"bash {shlex.quote(_bash_lf_script(NEO4J_CYPHER_SH))}", env=env)
 
     assert result.returncode != 0
     assert result.stdout == ""
@@ -835,7 +1053,7 @@ def test_neo4j_wrapper_accepts_valid_combined_auth(neo4j_auth: str) -> None:
         BIOETL_MCP_VALIDATE_ONLY="1",
     )
 
-    result = _run_bash(shlex.quote(str(NEO4J_CYPHER_SH)), env=env)
+    result = _run_bash(f"bash {shlex.quote(_bash_lf_script(NEO4J_CYPHER_SH))}", env=env)
 
     assert result.returncode == 0, result.stderr
     assert result.stdout == "[OK] neo4j-cypher MCP wrapper validation completed\n"
@@ -857,7 +1075,9 @@ def test_neo4j_explicit_credentials_take_precedence(tmp_path: Path) -> None:
         BIOETL_TEST_CAPTURE=str(capture_file),
     )
 
-    result = _run_bash(f"{shlex.quote(str(NEO4J_CYPHER_SH))} --example", env=env)
+    result = _run_bash(
+        f"bash {shlex.quote(_bash_lf_script(NEO4J_CYPHER_SH))} --example", env=env
+    )
 
     assert result.returncode == 0, result.stderr
     captured = capture_file.read_text(encoding="utf-8")
@@ -945,7 +1165,7 @@ def test_bash_context7_uses_env_auth_without_argv(
         BIOETL_TEST_CAPTURE=str(capture_file),
     )
 
-    result = _run_bash(shlex.quote(str(CONTEXT7_SH)), env=env)
+    result = _run_bash(f"bash {shlex.quote(_bash_lf_script(CONTEXT7_SH))}", env=env)
 
     assert result.returncode == 0, result.stderr
     assert result.stdout == ""

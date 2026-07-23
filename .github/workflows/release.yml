@@ -1,4 +1,7 @@
 name: Release
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -38,8 +41,8 @@ jobs:
 
       - name: Install build dependencies
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install build twine
+          python -m pip install --only-binary=:all: --upgrade pip
+          python -m pip install --only-binary=:all: build twine
 
       - name: Clean previous builds
         run: rm -rf dist/ build/ *.egg-info
@@ -85,8 +88,8 @@ jobs:
 
       - name: Install from wheel
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install dist/*.whl
+          python -m pip install --only-binary=:all: --upgrade pip
+          python -m pip install --only-binary=:all: dist/*.whl
 
       - name: Verify installation
         run: |

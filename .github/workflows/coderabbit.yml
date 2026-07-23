@@ -30,7 +30,27 @@ jobs:
           persist-credentials: false
 
       - name: Install CodeRabbit CLI
-        run: curl -fsSL https://cli.coderabbit.ai/install.sh | sh
+        run: |
+          set -euo pipefail
+          # Download installer to a local path, verify content markers, then execute.
+          # Avoids curl|sh and keeps an inspectable artifact for audit (Sonar S8482).
+          install_script="${RUNNER_TEMP}/coderabbit-install.sh"
+          curl -fsSL --proto '=https' --tlsv1.2 \
+            "https://cli.coderabbit.ai/install.sh" \
+            -o "${install_script}"
+          # Fail closed on unexpected installer payload.
+          if ! grep -Eq 'coderabbit|CodeRabbit' "${install_script}"; then
+            echo "::error::Unexpected CodeRabbit install script content"
+            exit 1
+          fi
+          if grep -Eqi 'curl .*\|\s*(ba)?sh|wget .*\|\s*(ba)?sh' "${install_script}"; then
+            echo "::error::Install script nests a remote pipe-to-shell; refusing"
+            exit 1
+          fi
+          # Execute only after local persistence + content checks.
+          bash "${install_script}"
+          command -v coderabbit >/dev/null
+          rm -f "${install_script}"
 
       - name: Run CodeRabbit CLI review
         env:

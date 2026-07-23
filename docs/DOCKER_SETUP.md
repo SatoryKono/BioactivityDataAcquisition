@@ -89,16 +89,20 @@ python scripts/ops/runtime/docker/runtime_manager.py stop --stack <stack> --time
 
 ## Release bundle
 
-Рабочий release bundle состоит из двух независимых projects:
+Default release surface (when Docker is used at all):
 
-| Stack | Project | Назначение |
-| --- | --- | --- |
-| `main` | `bioetl-main` | BioETL readiness endpoint |
-| `monitoring` | `bioetl-monitoring` | Prometheus, Pushgateway, Grafana, renderer |
+| Stack | Project | Default? | Назначение |
+| --- | --- | --- | --- |
+| `main` | `bioetl-main` | **Yes** | Health/metrics on `:8000` |
+| `monitoring` | `bioetl-monitoring` | **No (opt-in)** | Prometheus, Pushgateway, Grafana, renderer |
 
-Запускайте и проверяйте каждый stack отдельно через manager. Общая сеть
-`bioetl-monitoring` создаётся manager только при отсутствии. Stateful volumes
-monitoring и их legacy‑имена защищены campaign evidence и не удаляются.
+**Removed:** Loki, Promtail, Tempo, Quarantine Explorer container/UI coupling.
+Monitoring is no longer part of the default startup path (`docker-setup.sh start`
+starts **main** only).
+
+Запускайте stacks отдельно через manager. Сеть `bioetl-monitoring` создаётся
+manager только при start monitoring/main, когда она отсутствует. Volumes
+monitoring **не** удалять routine stop'ом (`stop` без `-v`).
 
 ## Docker Desktop / WSL recovery
 

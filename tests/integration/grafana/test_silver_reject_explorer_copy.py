@@ -1,3 +1,7 @@
+import pytest
+
+pytestmark = pytest.mark.skip(reason="Silver Reject Explorer removed 2026-07-23")
+
 """Integration copy/assert checks for Silver Reject Explorer dashboard."""
 
 from __future__ import annotations
