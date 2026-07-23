@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-22T16:33:16.427499+00:00",
+  "generated_at": "2026-07-23T07:11:40.408416+00:00",
   "summary": {
     "total_scripts": 509,
     "status_counts": {
@@ -15,7 +15,7 @@
       "other": 33,
       "scripts": 392,
       "skills": 16,
-      "tests": 236
+      "tests": 240
     }
   },
   "scripts": [
@@ -544,7 +544,7 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 448,
+          "line": 454,
           "source_group": "tests",
           "text": "ensure_script = _to_bash_path(root / \"scripts/ai/codex/helper/ensure-mcp.sh\")"
         }
@@ -664,7 +664,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 13,
       "references": [
         {
           "path": "docs/05-operations/verification/root-hygiene-refactoring-plan-2026-07-08.md",
@@ -995,7 +995,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 136,
+      "reference_count": 132,
       "references": [
         {
           "path": "docs/00-project/governance/03-file-policy.md",
@@ -1109,7 +1109,7 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 22,
+      "reference_count": 20,
       "references": [
         {
           "path": "docs/05-operations/verification/root-hygiene-refactoring-plan-2026-07-08.md",
@@ -1202,7 +1202,7 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 8,
       "references": [
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md",
@@ -2137,8 +2137,15 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/unit/scripts/ai/mcp/test_check_env_keys.py",
+          "line": 1,
+          "source_group": "tests",
+          "text": "\"\"\"Tests for _check_env_keys.py .env parsing logic.\"\"\""
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
@@ -2149,8 +2156,15 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/unit/scripts/ai/mcp/test_patch_grok_mcp_tokens.py",
+          "line": 1,
+          "source_group": "tests",
+          "text": "\"\"\"Tests for _patch_grok_mcp_tokens.py token patching logic.\"\"\""
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
@@ -2165,13 +2179,13 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 96,
+          "line": 102,
           "source_group": "docs",
           "text": "bash scripts/ai/mcp/check.sh"
         },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 103,
+          "line": 109,
           "source_group": "docs",
           "text": "| GitHub MCP says token missing | Set `GITHUB_PERSONAL_ACCESS_TOKEN` or `GITHUB_TOKEN`; verify alias normalization with `test_env_loading.sh` or `check.sh`. |"
         },
@@ -2279,13 +2293,37 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 5,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
           "line": 86,
           "source_group": "docs",
           "text": "`scripts/ai/mcp/export_mcp_env_from_dotenv.ps1` can export already configured"
+        },
+        {
+          "path": "tests/unit/scripts/ai/mcp/test_export_mcp_env_from_dotenv.py",
+          "line": 1,
+          "source_group": "tests",
+          "text": "\"\"\"Tests for export_mcp_env_from_dotenv.ps1 MCP env export logic.\"\"\""
+        },
+        {
+          "path": "tests/unit/scripts/ai/mcp/test_export_mcp_env_from_dotenv.py",
+          "line": 19,
+          "source_group": "tests",
+          "text": "script_path = Path(__file__).parent.parent.parent.parent.parent / \"scripts/ai/mcp/export_mcp_env_from_dotenv.ps1\""
+        },
+        {
+          "path": "tests/unit/scripts/ai/mcp/test_export_mcp_env_from_dotenv.py",
+          "line": 45,
+          "source_group": "tests",
+          "text": "script_path = Path(__file__).parent.parent.parent.parent / \"scripts/ai/mcp/export_mcp_env_from_dotenv.ps1\""
+        },
+        {
+          "path": "tests/unit/scripts/ai/mcp/test_export_mcp_env_from_dotenv.py",
+          "line": 123,
+          "source_group": "tests",
+          "text": "script_path = Path(__file__).parent.parent.parent.parent / \"scripts/ai/mcp/export_mcp_env_from_dotenv.ps1\""
         }
       ],
       "owner": "@bioetl-platform",
@@ -2308,7 +2346,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 52,
+          "line": 55,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.ps1\": \"Test-McpRequiredToken\","
         }
@@ -2323,7 +2361,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 88,
+          "line": 94,
           "source_group": "docs",
           "text": "BIOETL_MCP_VALIDATE_ONLY=1 scripts/ai/mcp/github-mcp-wrapper.sh"
         },
@@ -2347,7 +2385,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 38,
+          "line": 41,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.sh\": \"mcp_validate_required_token\","
         }
@@ -2358,19 +2396,25 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 66,
+          "line": 75,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_adr_analysis_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_adr_analysis_wrapper.ps1` (Windows)"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 32,
+          "line": 33,
           "source_group": "tests",
           "text": "ADR_ANALYSIS_PS1 = MCP_DIR / \"mcp_adr_analysis_wrapper.ps1\""
+        },
+        {
+          "path": "tests/unit/scripts/ai/mcp/test_adr_analysis_wrapper_contracts.py",
+          "line": 10,
+          "source_group": "tests",
+          "text": "PS1 = ROOT / \"scripts/ai/mcp/mcp_adr_analysis_wrapper.ps1\""
         }
       ],
       "owner": "@bioetl-platform",
@@ -2383,11 +2427,11 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 66,
+          "line": 75,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_adr_analysis_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_adr_analysis_wrapper.ps1` (Windows)"
         },
@@ -2396,6 +2440,12 @@
           "line": 131,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_adr_analysis_wrapper.sh\""
+        },
+        {
+          "path": "tests/unit/scripts/ai/mcp/test_adr_analysis_wrapper_contracts.py",
+          "line": 11,
+          "source_group": "tests",
+          "text": "SH = ROOT / \"scripts/ai/mcp/mcp_adr_analysis_wrapper.sh\""
         }
       ],
       "owner": "@bioetl-platform",
@@ -2445,7 +2495,7 @@
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 53,
+          "line": 56,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.ps1\": \"Test-McpRequiredToken\","
         }
@@ -2464,7 +2514,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 89,
+          "line": 95,
           "source_group": "docs",
           "text": "BIOETL_MCP_VALIDATE_ONLY=1 scripts/ai/mcp/mcp_brave_search_wrapper.sh"
         },
@@ -2482,7 +2532,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 39,
+          "line": 42,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\": \"mcp_validate_required_token\","
         }
@@ -2497,7 +2547,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 80,
+          "line": 95,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_code_analyzer_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1` (Windows)"
         }
@@ -2516,7 +2566,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 80,
+          "line": 95,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_code_analyzer_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1` (Windows)"
         },
@@ -2541,7 +2591,7 @@
       "references": [
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 28,
+          "line": 29,
           "source_group": "tests",
           "text": "CODE_INTERPRETER_PS1 = MCP_DIR / \"mcp_code_interpreter_wrapper.ps1\""
         }
@@ -2581,7 +2631,7 @@
       "references": [
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 34,
+          "line": 35,
           "source_group": "tests",
           "text": "CONTEXT7_PS1 = MCP_DIR / \"mcp_context7_wrapper.ps1\""
         }
@@ -2612,7 +2662,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 33,
+          "line": 34,
           "source_group": "tests",
           "text": "CONTEXT7_SH = MCP_DIR / \"mcp_context7_wrapper.sh\""
         }
@@ -2627,7 +2677,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 60,
+          "line": 69,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_deja_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_deja_wrapper.ps1` (Windows)"
         }
@@ -2646,7 +2696,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 60,
+          "line": 69,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_deja_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_deja_wrapper.ps1` (Windows)"
         },
@@ -2671,7 +2721,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 109,
+          "line": 124,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/mcp_docker_docs_wrapper.sh`"
         }
@@ -2730,7 +2780,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 111,
+          "line": 126,
           "source_group": "docs",
           "text": "`scripts/ai/mcp/mcp_dockerhub_wrapper.ps1` (Windows)"
         }
@@ -2749,7 +2799,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 110,
+          "line": 125,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/mcp_dockerhub_wrapper.sh` (Linux/WSL),"
         }
@@ -2768,7 +2818,7 @@
       "references": [
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 26,
+          "line": 27,
           "source_group": "tests",
           "text": "FETCH_PS1 = MCP_DIR / \"mcp_fetch_wrapper.ps1\""
         }
@@ -2799,7 +2849,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 25,
+          "line": 26,
           "source_group": "tests",
           "text": "FETCH_SH = MCP_DIR / \"mcp_fetch_wrapper.sh\""
         }
@@ -2814,7 +2864,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 86,
+          "line": 101,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_github_actions_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_github_actions_wrapper.ps1` (Windows)"
         }
@@ -2833,7 +2883,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 86,
+          "line": 101,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_github_actions_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_github_actions_wrapper.ps1` (Windows)"
         },
@@ -2858,7 +2908,7 @@
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 54,
+          "line": 57,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.ps1\": \"Test-McpOptionalToken\","
         }
@@ -2877,7 +2927,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 90,
+          "line": 96,
           "source_group": "docs",
           "text": "BIOETL_MCP_VALIDATE_ONLY=1 scripts/ai/mcp/mcp_grafana_wrapper.sh"
         },
@@ -2895,7 +2945,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 40,
+          "line": 43,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.sh\": \"mcp_validate_optional_token\","
         }
@@ -2947,13 +2997,13 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 73,
+          "line": 82,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_mutmut_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_mutmut_wrapper.ps1` (Windows)"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 31,
+          "line": 32,
           "source_group": "tests",
           "text": "MUTMUT_PS1 = MCP_DIR / \"mcp_mutmut_wrapper.ps1\""
         }
@@ -2972,7 +3022,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 73,
+          "line": 82,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_mutmut_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_mutmut_wrapper.ps1` (Windows)"
         },
@@ -2984,7 +3034,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 30,
+          "line": 31,
           "source_group": "tests",
           "text": "MUTMUT_SH = MCP_DIR / \"mcp_mutmut_wrapper.sh\""
         }
@@ -3003,7 +3053,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 112,
+          "line": 127,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/mcp_needle_wrapper.sh`"
         }
@@ -3018,13 +3068,19 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 56,
+          "line": 59,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1\": \"Test-McpNeo4jCredentials\","
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
+          "line": 873,
+          "source_group": "tests",
+          "text": "powershell_source = (MCP_DIR / \"mcp_neo4j_cypher_wrapper.ps1\").read_text("
         }
       ],
       "owner": "@bioetl-platform",
@@ -3053,13 +3109,13 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 42,
+          "line": 45,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\": \"mcp_validate_neo4j_credentials\","
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 29,
+          "line": 30,
           "source_group": "tests",
           "text": "NEO4J_CYPHER_SH = MCP_DIR / \"mcp_neo4j_cypher_wrapper.sh\""
         },
@@ -3080,7 +3136,7 @@
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 57,
+          "line": 60,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1\": \"Test-McpNeo4jCredentials\","
         }
@@ -3156,7 +3212,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 113,
+          "line": 128,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/mcp_paper_search_wrapper.sh`"
         }
@@ -3175,7 +3231,7 @@
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 55,
+          "line": 58,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.ps1\": \"Test-McpOptionalToken\","
         }
@@ -3206,7 +3262,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 41,
+          "line": 44,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.sh\": \"mcp_validate_optional_token\","
         }
@@ -3396,7 +3452,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 22,
+      "reference_count": 23,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
@@ -3508,7 +3564,7 @@
         },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 74,
+          "line": 80,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/token_validation.ps1`"
         },
@@ -3565,7 +3621,7 @@
         },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 73,
+          "line": 79,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/token_validation.sh`"
         },
@@ -3634,7 +3690,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 24,
+          "line": 25,
           "source_group": "tests",
           "text": "UV_RESOLVER_PS1 = MCP_DIR / \"support\" / \"uv_resolver.ps1\""
         }
@@ -3649,7 +3705,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 24,
       "references": [
         {
           "path": "scripts/ai/mcp/mcp_code_interpreter_wrapper.sh",
@@ -3689,9 +3745,15 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 23,
+          "line": 24,
           "source_group": "tests",
           "text": "UV_RESOLVER_SH = MCP_DIR / \"support\" / \"uv_resolver.sh\""
+        },
+        {
+          "path": "tests/unit/scripts/ai/mcp/support/test_uv_resolver.py",
+          "line": 1,
+          "source_group": "tests",
+          "text": "\"\"\"Tests for uv_resolver.sh uv/uvx resolution logic.\"\"\""
         }
       ],
       "owner": "@bioetl-platform",
@@ -3708,13 +3770,13 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 51,
+          "line": 56,
           "source_group": "docs",
           "text": "bash scripts/ai/mcp/test_env_loading.sh"
         },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 103,
+          "line": 109,
           "source_group": "docs",
           "text": "| GitHub MCP says token missing | Set `GITHUB_PERSONAL_ACCESS_TOKEN` or `GITHUB_TOKEN`; verify alias normalization with `test_env_loading.sh` or `check.sh`. |"
         },
@@ -3726,7 +3788,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 67,
+          "line": 70,
           "source_group": "tests",
           "text": "text = _read(\"scripts/ai/mcp/test_env_loading.sh\")"
         }
@@ -3847,7 +3909,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 14,
       "references": [
         {
           "path": "Makefile",
@@ -4999,16 +5061,10 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 11,
       "references": [
         {
           "path": "Makefile",
-          "line": 256,
-          "source_group": "build",
-          "text": "$(RUN) python scripts/diagrams/generate_all_bundles.py"
-        },
-        {
-          "path": "makefile",
           "line": 256,
           "source_group": "build",
           "text": "$(RUN) python scripts/diagrams/generate_all_bundles.py"
@@ -5048,6 +5104,12 @@
           "line": 92,
           "source_group": "scripts",
           "text": "\"generate_all_bundles.py\", \"--collection\", \"architecture\""
+        },
+        {
+          "path": "scripts/diagrams/__main__.py",
+          "line": 96,
+          "source_group": "scripts",
+          "text": "\"render-views\": python_command(\"generate_all_bundles.py\", \"--collection\", \"views\"),"
         }
       ]
     },
@@ -5602,7 +5664,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 25,
+      "reference_count": 24,
       "references": [
         {
           "path": ".codex/agents/py-doc-bot.md",
@@ -7446,7 +7508,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 25,
+      "reference_count": 24,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -8147,7 +8209,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 45,
+      "reference_count": 43,
       "references": [
         {
           "path": "docs/00-project/governance/03-file-policy.md",
@@ -8759,7 +8821,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 22,
+      "reference_count": 21,
       "references": [
         {
           "path": "Makefile",
@@ -9080,7 +9142,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 20,
+      "reference_count": 17,
       "references": [
         {
           "path": ".github/workflows/root-hygiene.yml",
@@ -12441,7 +12503,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 79,
+      "reference_count": 76,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-016-Enforce-Zero-Reference-Script-Governance.md",
@@ -12944,7 +13006,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/05-operations/verification/root-hygiene-refactoring-plan-2026-07-08.md",
@@ -12967,12 +13029,6 @@
         {
           "path": "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",
           "line": 149,
-          "source_group": "tests",
-          "text": "ROOT / \"scripts\" / \"engineering\" / \"repo\" / \"cleanup_root_local_clutter.py\""
-        },
-        {
-          "path": "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py~",
-          "line": 147,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"repo\" / \"cleanup_root_local_clutter.py\""
         }
@@ -13489,25 +13545,25 @@
         },
         {
           "path": ".codex/skills/grafana-dashboard-render/SKILL.md",
-          "line": 90,
+          "line": 94,
           "source_group": "skills",
           "text": "uv run python -m scripts.ops rerender-grafana --timeout-seconds 90 --output-dir <dir>"
         },
         {
           "path": ".codex/skills/grafana-dashboard-render/SKILL.md",
-          "line": 96,
+          "line": 100,
           "source_group": "skills",
           "text": "uv run python -m scripts.ops rerender-grafana --uids bioetl-control-plane-v1 --fallback none --output-dir <dir>"
         },
         {
           "path": ".codex/skills/grafana-dashboard-render/SKILL.md",
-          "line": 97,
+          "line": 101,
           "source_group": "skills",
           "text": "uv run python -m scripts.ops rerender-grafana --uids bioetl-overview-v2 bioetl-runtime --output-dir <dir>"
         },
         {
           "path": ".codex/skills/grafana-dashboard-render/SKILL.md",
-          "line": 116,
+          "line": 120,
           "source_group": "skills",
           "text": "uv run python -m scripts.ops audit-live-grafana \\"
         }
@@ -13575,7 +13631,7 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 73,
+      "reference_count": 72,
       "references": [
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
@@ -13872,7 +13928,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 56,
+      "reference_count": 40,
       "references": [
         {
           "path": "Makefile",
@@ -14296,7 +14352,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 18,
+      "reference_count": 17,
       "references": [
         {
           "path": "Makefile",
@@ -14315,12 +14371,6 @@
           "line": 299,
           "source_group": "docs",
           "text": "`scripts/ops/launchers/codex/setup_plugins.sh --pytest-only` перед запуском pytest."
-        },
-        {
-          "path": "makefile",
-          "line": 203,
-          "source_group": "build",
-          "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only"
         },
         {
           "path": "scripts/engineering/dev/README.md",
@@ -14345,6 +14395,12 @@
           "line": 570,
           "source_group": "scripts",
           "text": "# setup_plugins.sh may provision a temporary pytest runtime under /tmp when"
+        },
+        {
+          "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
+          "line": 109,
+          "source_group": "scripts",
+          "text": "Candidate(\"scripts/ops/launchers/codex/setup_plugins.sh\", BOOTSTRAP_HELPER_ROLE),"
         }
       ]
     },
@@ -14826,7 +14882,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 91,
+          "line": 93,
           "source_group": "other",
           "text": "> `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1`."
         }
@@ -14884,7 +14940,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_audit_cycle.py",
-          "line": 796,
+          "line": 975,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/run_grafana_dashboard_audit_cycle.py\","
         }
@@ -14948,13 +15004,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 806,
+          "line": 824,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` to install repo-local \""
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 887,
+          "line": 905,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` or \""
         },
@@ -14991,7 +15047,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 1709,
+          "line": 1719,
           "source_group": "other",
           "text": "powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/start_quarantine_explorer.ps1"
         }
@@ -15465,7 +15521,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 56,
+      "reference_count": 55,
       "references": [
         {
           "path": "Makefile",
@@ -15848,7 +15904,7 @@
       "references": [
         {
           "path": ".codex/skills/grafana-dashboard-render/SKILL.md",
-          "line": 153,
+          "line": 157,
           "source_group": "skills",
           "text": "- Repo env bootstrap: `scripts/ops/support/load_repo_env.sh`"
         },
@@ -15866,7 +15922,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/grafana-dashboard-render/SKILL.md",
-          "line": 160,
+          "line": 164,
           "source_group": "docs",
           "text": "- Repo env bootstrap: `scripts/ops/support/load_repo_env.sh`"
         },
@@ -15878,7 +15934,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 148,
+          "line": 163,
           "source_group": "scripts",
           "text": "\"credentials, reload repo env via scripts/ops/support/load_repo_env.sh or \""
         },
