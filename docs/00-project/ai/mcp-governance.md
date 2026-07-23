@@ -64,8 +64,8 @@ generated MCP configuration.
 
 ### deja (deja-vu v0.13.1)
 - **Статус:** ✅ Работает
-- **Описание:** Auto-recall настроен в `.codex/AGENTS.md`
-- **Настройка:** `DEJA_AUTO_RECALL_PATH` указывает на `.codex/AGENTS.md`
+- **Описание:** Auto-recall настроен на root runtime contract `AGENTS.md`
+- **Настройка:** `DEJA_AUTO_RECALL_PATH` указывает на `AGENTS.md` (repo root)
 - **Обёртки:** `scripts/ai/mcp/mcp_deja_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_deja_wrapper.ps1` (Windows)
 
 ### adr-analysis
@@ -114,6 +114,14 @@ pdf
 paper-search
 biomoltechDocs
 mintlify
+
+These servers are **retired** from the sanctioned portable inventory. Do **not**
+re-enable them in recommended local defaults (`.devin/config.local.json`,
+`.codex/settings.json`, `.cursor/mcp.json`, `.vscode/mcp.json`, or generated
+overlays). `scripts/ai/codex/setup_mcp.py` keeps
+`REMOVED_MCP_SERVER_NAMES` and will not emit them into tracked or generated
+projections. Local operators who still have retired keys must remove them on
+the next setup regeneration.
 
 ## Retired wrapper artifacts
 

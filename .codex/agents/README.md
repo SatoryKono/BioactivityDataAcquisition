@@ -26,7 +26,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-13'
+  Last verified: '2026-07-23'
 
 ______________________________________________________________________
 
@@ -52,40 +52,52 @@ It must not define runtime behavior independently from tracked runtime trees
 such as `.codex/agents/**`. Edit the active runtime profile first, then refresh this
 mirror when behavior or contributor guidance changes.
 
-## BioETL Core (8 active agents)
+## BioETL Core (9 active Codex runtime agents)
 
-| Agent                    | Model  | Role                                         |
-| ------------------------ | ------ | -------------------------------------------- |
-| `py-audit-bot`           | opus   | Code/architecture audit, RULES.md compliance |
-| `py-plan-bot`            | opus   | Task planning, RF-\* decomposition           |
-| `py-test-bot`            | sonnet | Tests (baseline/final/retest), coverage      |
-| `py-config-bot`          | sonnet | YAML configs (pipeline/DQ/filter)            |
-| `py-debug-bot`           | opus   | RCA, bug fixes, regression debugging         |
-| `py-doc-bot`             | sonnet | Docs, ADR, CHANGELOG, Mermaid diagrams       |
-| `py-test-swarm`          | opus   | Hierarchical testing (L1->L2->L3)            |
-| `py-review-orchestrator` | opus   | Code review (S1-S8 stages)                   |
+Active set **MUST** match `.codex/agents/ORCHESTRATION.md` and the tracked
+`py-*.md` profiles under `.codex/agents/`.
+
+| Agent                        | Model  | Role                                                                                   |
+| ---------------------------- | ------ | -------------------------------------------------------------------------------------- |
+| `py-audit-bot`               | opus   | Baseline/final audit, code review, architecture guardian                               |
+| `py-architecture-debt-bot`   | opus   | Architecture-debt workflow: generate → plan → execute → verify                         |
+| `py-plan-bot`                | opus   | Task planning, RF-\* decomposition, composite design                                   |
+| `py-test-bot`                | sonnet | Tests (baseline/final/retest), coverage                                                |
+| `py-config-bot`              | sonnet | YAML configs (pipeline/DQ/filter/composite)                                            |
+| `py-debug-bot`               | opus   | RCA, bug fixes, regression debugging                                                   |
+| `py-doc-bot`                 | sonnet | Docs, ADR, CHANGELOG, Mermaid diagrams                                                 |
+| `py-test-swarm`              | opus   | Hierarchical testing (L1→L2→L3)                                                        |
+| `py-review-orchestrator`     | opus   | Hierarchical code review (S1–S8)                                                       |
+
+Runtime mapping: `.codex/agents/CODEX-RUNTIME.md`. Production code is written by
+the orchestrator directly (`py-code-bot` skill is a deprecated tombstone only).
 
 Repo-wide documentation audits are no longer routed through a dedicated
 documentation-only agent entry in active orchestration docs; use the
 `documentation-audit` / `documentation-cascade-audit` skill surfaces for that
 workflow.
 
-## Generic Utilities (12 agents)
+## Docs-only generic utilities (non-runtime)
 
-| Agent                                 | Model  | Role                               |
-| ------------------------------------- | ------ | ---------------------------------- |
-| `sp-code-reviewer`                    | sonnet | General-purpose code review        |
-| `sp-debugger`                         | sonnet | Bug diagnosis, root cause analysis |
-| `sp-refactoring-specialist`           | sonnet | Code refactoring                   |
-| `sp-architect-reviewer`               | sonnet | Architecture evaluation            |
-| `sp-test-automator`                   | sonnet | Test framework automation          |
-| `sp-api-designer`                     | sonnet | API design, OpenAPI specs          |
-| `sp-data-engineer`                    | sonnet | Data pipelines, ETL patterns       |
-| `sp-database-optimizer`               | sonnet | Query optimization, indexing       |
-| `sp-dependency-manager`               | sonnet | CVE audit, version conflicts       |
-| `sp-git-workflow-manager`             | sonnet | Git branching strategies           |
-| `sp-prompt-engineer`                  | sonnet | LLM prompt design and testing      |
-| `sp-scientific-literature-researcher` | sonnet | Scientific paper search (BGPT MCP) |
+The following `sp-*` profiles live only under
+`docs/00-project/ai/agents/agents/sp-*.md`. They are **not** Codex runtime
+agents: there is no `.codex/agents/sp-*.md` profile and they **MUST NOT** be
+spawned as if they were part of `ORCHESTRATION.md`.
+
+| Agent                                 | Model  | Role                               | Runtime status |
+| ------------------------------------- | ------ | ---------------------------------- | -------------- |
+| `sp-code-reviewer`                    | sonnet | General-purpose code review        | docs-only      |
+| `sp-debugger`                         | sonnet | Bug diagnosis, root cause analysis | docs-only      |
+| `sp-refactoring-specialist`           | sonnet | Code refactoring                   | docs-only      |
+| `sp-architect-reviewer`               | sonnet | Architecture evaluation            | docs-only      |
+| `sp-test-automator`                   | sonnet | Test framework automation          | docs-only      |
+| `sp-api-designer`                     | sonnet | API design, OpenAPI specs          | docs-only      |
+| `sp-data-engineer`                    | sonnet | Data pipelines, ETL patterns       | docs-only      |
+| `sp-database-optimizer`               | sonnet | Query optimization, indexing       | docs-only      |
+| `sp-dependency-manager`               | sonnet | CVE audit, version conflicts       | docs-only      |
+| `sp-git-workflow-manager`             | sonnet | Git branching strategies           | docs-only      |
+| `sp-prompt-engineer`                  | sonnet | LLM prompt design and testing      | docs-only      |
+| `sp-scientific-literature-researcher` | sonnet | Scientific paper search (BGPT MCP) | docs-only      |
 
 ## Orchestration Workflow
 

@@ -53,6 +53,13 @@ below.
 - If uncertain, state uncertainty and suggest verification steps.
 - Keep code changes minimal and evidence-based; avoid speculative refactors.
 
+## Path-Scoped Instructions
+
+Layer/path adapters live under `.github/instructions/*.instructions.md` and
+apply only to matching globs (domain, application, infrastructure, composition,
+configs, tests). Prefer those packs for path-local guidance; keep this root file
+as the global profile.
+
 ## Suggestion Quality Checklist
 
 - Includes type annotations for public interfaces.
