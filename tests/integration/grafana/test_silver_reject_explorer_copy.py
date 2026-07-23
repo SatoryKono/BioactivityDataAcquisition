@@ -1,7 +1,3 @@
-import pytest
-
-pytestmark = pytest.mark.skip(reason="Silver Reject Explorer removed 2026-07-23")
-
 """Integration copy/assert checks for Silver Reject Explorer dashboard."""
 
 from __future__ import annotations
@@ -11,7 +7,10 @@ from pathlib import Path
 
 import pytest
 
-pytestmark = pytest.mark.integration
+pytestmark = [
+    pytest.mark.integration,
+    pytest.mark.skip(reason="Silver Reject Explorer removed 2026-07-23"),
+]
 
 
 def _load_dashboard() -> dict[str, object]:

@@ -88,6 +88,9 @@ def load_debt_scorecard(
     if not scorecard_path.exists():
         raise FileNotFoundError(f"Debt scorecard not found: {scorecard_path}")
 
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
+    scorecard_path = resolve_output_path(scorecard_path)
     raw = yaml.safe_load(scorecard_path.read_text(encoding="utf-8")) or {}
     if not isinstance(raw, dict):
         raise ValueError(f"Debt scorecard must be a mapping: {scorecard_path}")

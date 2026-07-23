@@ -112,13 +112,13 @@ def redact(value: Any) -> Any:
 
 def atomic_json(path: Path, payload: dict[str, Any], *, replace: bool = True) -> None:
     """Write redacted JSON atomically; optionally refuse replacement."""
-    from scripts.engineering.common.repo_paths import ensure_repo_path
+    from scripts.engineering.common.repo_paths import resolve_output_path
 
-    safe_path = ensure_repo_path(path)
+    safe_path = resolve_output_path(path)
     if not replace and safe_path.exists():
         raise FileExistsError(f"Refusing to replace campaign evidence: {safe_path}")
     safe_path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = ensure_repo_path(safe_path.with_suffix(safe_path.suffix + ".tmp"))
+    temporary = resolve_output_path(safe_path.with_suffix(safe_path.suffix + ".tmp"))
     temporary.write_text(
         json.dumps(redact(payload), indent=2, sort_keys=True) + "\n",
         encoding="utf-8",

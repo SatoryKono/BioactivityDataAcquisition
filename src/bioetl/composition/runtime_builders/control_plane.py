@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import is_dataclass, replace
 from typing import TYPE_CHECKING, cast
 
@@ -36,26 +37,14 @@ def attach_manifest_id(
     manifest_id: str | None = None,
     *,
     control_plane_refs: _ManifestControlPlaneRefs | None = None,
-    execution_fingerprint: str | None = None,
-    config_hash: str | None = None,
-    resolved_config_hash: str | None = None,
-    effective_config_hash: str | None = None,
-    source_fingerprint: str | None = None,
-    dq_contract_compatibility_hash: str | None = None,
-    effective_config_artifact_id: str | None = None,
-    replay_of_run_id: str | None = None,
-    replay_of_manifest_id: str | None = None,
-    input_snapshot_fingerprint: str | None = None,
-    contract_ref: str | None = None,
-    contract_version: str | None = None,
-    contract_schema_hash: str | None = None,
-    dq_policy_ref: str | None = None,
-    rule_bundle_version: str | None = None,
-    normalization_profile_ref: str | None = None,
-    normalization_profile_version: str | None = None,
-    normalization_profile_hash: str | None = None,
+    optional_fields: Mapping[str, object] | None = None,
 ) -> PipelineRunContext:
-    """Return context carrying manifest/control-plane provenance values."""
+    """Return context carrying manifest/control-plane provenance values.
+
+    Prefer ``control_plane_refs`` for full provenance. ``optional_fields`` is a
+    compact mapping of residual control-plane anchors when refs are unavailable
+    (keeps this surface under Sonar S107).
+    """
     if control_plane_refs is not None:
         manifest_id = control_plane_refs.manifest_id
         optional_updates = extract_optional_updates_from_refs(control_plane_refs)
@@ -64,7 +53,9 @@ def attach_manifest_id(
             raise TypeError(
                 "attach_manifest_id requires either manifest_id or control_plane_refs"
             )
-        optional_updates = iter_optional_control_plane_updates_from_mapping(locals())
+        optional_updates = iter_optional_control_plane_updates_from_mapping(
+            optional_fields or {}
+        )
     if is_dataclass(ctx):
         return cast(
             "PipelineRunContext",

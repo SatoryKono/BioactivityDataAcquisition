@@ -328,8 +328,12 @@ def _git_tracked_files(root: Path, relative_dir: Path) -> list[Path] | None:
     if not (root / ".git").exists():
         return None
     try:
+        from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
         completed = subprocess.run(
-            ["git", "-C", str(root), "ls-files", "--", relative_dir.as_posix()],
+            ensure_safe_cli_argv(
+                ["git", "-C", str(root), "ls-files", "--", relative_dir.as_posix()]
+            ),
             check=False,
             capture_output=True,
             text=True,

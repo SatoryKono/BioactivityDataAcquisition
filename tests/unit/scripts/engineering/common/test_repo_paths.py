@@ -48,3 +48,46 @@ def test_argparse_repo_path_accepts_repo_relative() -> None:
     assert resolved == (
         REPO_ROOT / "scripts" / "engineering" / "common" / "repo_paths.py"
     ).resolve()
+
+
+def test_ensure_local_http_url_accepts_loopback() -> None:
+    from scripts.engineering.common.repo_paths import ensure_local_http_url
+
+    assert ensure_local_http_url("http://localhost:9090/") == "http://localhost:9090"
+    assert ensure_local_http_url("http://prometheus:9090") == "http://prometheus:9090"
+
+
+def test_ensure_local_http_url_rejects_remote() -> None:
+    from scripts.engineering.common.repo_paths import ensure_local_http_url
+
+    with pytest.raises(ValueError, match="refusing non-local URL host"):
+        ensure_local_http_url("http://evil.example/metrics")
+
+
+def test_ensure_safe_cli_argv_accepts_clean_tokens() -> None:
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+    assert ensure_safe_cli_argv(["python", "-m", "pytest"]) == [
+        "python",
+        "-m",
+        "pytest",
+    ]
+
+
+def test_ensure_safe_cli_argv_accepts_windows_paths() -> None:
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+    root = r"E:\g-drive\05_AI\github\BioactivityDataAcquisition2"
+    assert ensure_safe_cli_argv(["git", "-C", root, "ls-files"]) == [
+        "git",
+        "-C",
+        root,
+        "ls-files",
+    ]
+
+
+def test_ensure_safe_cli_argv_rejects_metacharacters() -> None:
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+    with pytest.raises(ValueError, match="shell metacharacters"):
+        ensure_safe_cli_argv(["python", "-c", "print(1); rm -rf /"])

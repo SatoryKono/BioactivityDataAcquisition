@@ -250,3 +250,53 @@ def test_refresh_clusters_attaches_tracked_weak_decision_metadata() -> None:
         assay_type["promotion_policy"]
         == "require_canonical_assay_metadata_registry_before_exact"
     )
+
+
+def test_dedicated_authority_registries_override_review_projections(
+    tmp_path: Path,
+) -> None:
+    review_path = tmp_path / "review.yaml"
+    review_path.write_text(
+        "partial_cluster_policies:\n"
+        "  - cluster_id: identifier\n"
+        "    owner: stale\n"
+        "weak_cluster_decisions:\n"
+        "  - cluster_id: assay\n"
+        "    decision: source_owned_same_name\n"
+        "    owner: stale\n",
+        encoding="utf-8",
+    )
+    assay_path = tmp_path / "assay.yaml"
+    assay_path.write_text(
+        "fields:\n  - cluster_id: assay\n    owner: canonical-assay-owner\n",
+        encoding="utf-8",
+    )
+    partial_path = tmp_path / "partial.yaml"
+    partial_path.write_text(
+        "clusters:\n  - cluster_id: identifier\n    owner: canonical-id-owner\n",
+        encoding="utf-8",
+    )
+
+    payload = audit._load_governance_review_payload(
+        review_path,
+        assay_metadata_registry=assay_path,
+        partial_identifier_registry=partial_path,
+    )
+
+    assert payload["partial_cluster_policies"][0]["owner"] == "canonical-id-owner"
+    assay = payload["weak_cluster_decisions"][0]
+    assert assay["owner"] == "canonical-assay-owner"
+    assert assay["decision"] == "source_owned_same_name"
+
+
+def test_chembl_target_organism_keeps_custom_validator_evidence() -> None:
+    seed_registry = json.loads(
+        Path(
+            "reports/semantic_pipeline_audit/semantic_cluster_registry_2026-07-01.json"
+        ).read_text(encoding="utf-8")
+    )
+
+    facts = audit._build_current_member_facts(seed_registry)
+
+    organism = facts[("chembl_target", "organism")]
+    assert organism["dq_coverage"] == "custom:error"

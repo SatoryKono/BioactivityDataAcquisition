@@ -252,7 +252,12 @@ def build_payload(repo_root: Path = PROJECT_ROOT) -> dict[str, object]:
     }
 
 
-def _write_json(path: Path, payload: dict[str, object]) -> None:
+def _write_json(
+    path: Path, payload: dict[str, object], *, root: Path | None = None
+) -> None:
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    path = resolve_output_path(path, root=root or REPO_ROOT)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         json.dumps(payload, indent=2, sort_keys=True) + "\n",

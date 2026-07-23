@@ -52,7 +52,10 @@ def _canonical(value: Any) -> str:
     return json.dumps(_json_ready(value), sort_keys=True, separators=(",", ":"))
 
 
-def _read_json(path: Path) -> JsonDict:
+def _read_json(path: Path, *, root: Path | None = None) -> JsonDict:
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    path = resolve_output_path(path, root=root or REPO_ROOT)
     with path.open("r", encoding="utf-8") as handle:
         payload = json.load(handle)
     if not isinstance(payload, dict):

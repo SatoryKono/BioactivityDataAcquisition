@@ -50,6 +50,9 @@ def default_expanded_graph_path(root: Path) -> Path:
 
 def load_expanded_graph(path: Path) -> dict[str, Any]:
     """Load an expanded graph snapshot and validate its coarse shape."""
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
+    path = resolve_output_path(path)
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         raise ValueError("expanded graph snapshot must be a JSON object")
@@ -1178,6 +1181,9 @@ def write_expanded_graph_relation_artifacts(
 
 
 def _write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
+    path = resolve_output_path(path)
     with path.open("w", encoding="utf-8") as handle:
         for row in rows:
             handle.write(json.dumps(row, sort_keys=True, ensure_ascii=True))
@@ -1186,6 +1192,9 @@ def _write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
 
 def load_file_relation_index(path: Path) -> dict[str, Any]:
     """Load a generated file relation lookup index."""
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
+    path = resolve_output_path(path)
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict) or payload.get("kind") != "file_relation_index":
         raise ValueError(f"invalid file relation index: {path}")
@@ -1194,6 +1203,9 @@ def load_file_relation_index(path: Path) -> dict[str, Any]:
 
 def load_module_relation_index(path: Path) -> dict[str, Any]:
     """Load a generated module relation lookup index."""
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
+    path = resolve_output_path(path)
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict) or payload.get("kind") != "module_relation_index":
         raise ValueError(f"invalid module relation index: {path}")
@@ -1202,6 +1214,9 @@ def load_module_relation_index(path: Path) -> dict[str, Any]:
 
 def load_entity_relation_index(path: Path) -> dict[str, Any]:
     """Load a generated generic entity relation lookup index."""
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
+    path = resolve_output_path(path)
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict) or payload.get("kind") != "entity_relation_index":
         raise ValueError(f"invalid entity relation index: {path}")

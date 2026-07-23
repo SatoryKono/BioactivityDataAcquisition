@@ -30,6 +30,12 @@ DEFAULT_OUT_DIR = REPO_ROOT / "reports" / "semantic_pipeline_audit"
 DEFAULT_REVIEW_REGISTRY = (
     REPO_ROOT / "configs" / "field_registry" / "semantic_audit_review_registry.yaml"
 )
+DEFAULT_ASSAY_METADATA_REGISTRY = (
+    REPO_ROOT / "configs" / "field_registry" / "assay_metadata_semantic_registry.yaml"
+)
+DEFAULT_PARTIAL_IDENTIFIER_REGISTRY = (
+    REPO_ROOT / "configs" / "field_registry" / "partial_identifier_owner_roles.yaml"
+)
 DEFAULT_CANONICAL_REGISTRY = (
     REPO_ROOT / "configs" / "field_registry" / "canonical_registry.json"
 )
@@ -225,7 +231,10 @@ BASE_CONFIG_SEMANTIC_KEYS = frozenset(
 )
 
 
-def _load_json(path: Path) -> dict[str, Any]:
+def _load_json(path: Path, *, root: Path | None = None) -> dict[str, Any]:
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    path = resolve_output_path(path, root=root or REPO_ROOT)
     payload = json.loads(path.read_text(encoding="utf-8"))
     if isinstance(payload, dict):
         return payload
@@ -499,6 +508,61 @@ def _weak_decision_lookup(review_registry: dict[str, Any]) -> dict[str, dict[str
         if isinstance(cluster_id, str) and cluster_id:
             lookup[cluster_id] = entry
     return lookup
+
+
+def _load_governance_review_payload(
+    review_registry: Path,
+    *,
+    assay_metadata_registry: Path = DEFAULT_ASSAY_METADATA_REGISTRY,
+    partial_identifier_registry: Path = DEFAULT_PARTIAL_IDENTIFIER_REGISTRY,
+) -> dict[str, Any]:
+    """Load review policy with dedicated authority registries as canonical data."""
+    payload = _load_yaml(review_registry)
+    assay_payload = _load_yaml(assay_metadata_registry)
+    partial_payload = _load_yaml(partial_identifier_registry)
+
+    assay_entries = assay_payload.get("fields")
+    partial_entries = partial_payload.get("clusters")
+    if not isinstance(assay_entries, list):
+        raise ValueError("assay metadata registry must define a fields list")
+    if not isinstance(partial_entries, list):
+        raise ValueError("partial identifier registry must define a clusters list")
+
+    existing_partial = {
+        str(entry.get("cluster_id")): entry
+        for entry in payload.get("partial_cluster_policies", [])
+        if isinstance(entry, dict) and entry.get("cluster_id")
+    }
+    payload["partial_cluster_policies"] = [
+        {**existing_partial.get(str(entry.get("cluster_id")), {}), **entry}
+        if isinstance(entry, dict)
+        else entry
+        for entry in partial_entries
+    ]
+    assay_ids = {
+        str(entry.get("cluster_id"))
+        for entry in assay_entries
+        if isinstance(entry, dict) and entry.get("cluster_id")
+    }
+    weak_entries = payload.get("weak_cluster_decisions", [])
+    if not isinstance(weak_entries, list):
+        raise ValueError("semantic review registry must define weak_cluster_decisions")
+    existing_assay = {
+        str(entry.get("cluster_id")): entry
+        for entry in weak_entries
+        if isinstance(entry, dict) and entry.get("cluster_id") in assay_ids
+    }
+    payload["weak_cluster_decisions"] = [
+        entry
+        for entry in weak_entries
+        if not isinstance(entry, dict) or entry.get("cluster_id") not in assay_ids
+    ] + [
+        {**existing_assay.get(str(entry.get("cluster_id")), {}), **entry}
+        if isinstance(entry, dict)
+        else entry
+        for entry in assay_entries
+    ]
+    return payload
 
 
 def _weak_decision_metadata(entry: dict[str, Any]) -> dict[str, Any]:
@@ -1571,7 +1635,7 @@ def build_artifacts(
     review_registry: Path = DEFAULT_REVIEW_REGISTRY,
 ) -> dict[str, str]:
     seed_registry = _load_json(seed_cluster_registry)
-    review_payload = _load_yaml(review_registry)
+    review_payload = _load_governance_review_payload(review_registry)
     review_lookup = _risk_cap_lookup(review_payload)
     facts = _build_current_member_facts(seed_registry)
     base_config_coverage = _build_base_config_coverage()

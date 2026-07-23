@@ -154,38 +154,33 @@ def _resolve_missing_severity(
 def _resolve_anchor_spec_values(
     *,
     priority: str,
-    name: str | None,
-    label: str | None,
-    source: str | None,
-    value_format: str | None,
-    why: str | None,
-    rendering: str | None,
-    copy: bool | None,
-    drilldown: str | None,
-    missing_severity: str | None,
-    anchor_name: str | None,
-    display_name: str | None,
-    source_location: str | None,
-    data_type: str | None,
-    description: str | None,
-    display_mode: str | None,
-    is_identifier: bool | None,
-    usage_locations: str | None,
-    implementation_status: str | None,
+    **fields: object,
 ) -> dict[str, object]:
+    """Resolve canonical AnchorSpec fields from current or legacy aliases.
+
+    Accepts both canonical names (``name``, ``label``, ...) and legacy HTTP
+    contract aliases (``anchor_name``, ``display_name``, ...) via kwargs so the
+    helper stays under the Sonar S107 parameter budget.
+    """
     return {
         "priority": priority,
-        "name": _coalesce(name, anchor_name),
-        "label": _coalesce(label, display_name),
-        "source": _coalesce(source, source_location),
-        "value_format": _coalesce(value_format, data_type),
-        "why": _coalesce(why, description),
-        "rendering": _coalesce(rendering, display_mode),
-        "copy": _coalesce(copy, is_identifier),
-        "drilldown": _coalesce(drilldown, usage_locations),
+        "name": _coalesce(fields.get("name"), fields.get("anchor_name")),
+        "label": _coalesce(fields.get("label"), fields.get("display_name")),
+        "source": _coalesce(fields.get("source"), fields.get("source_location")),
+        "value_format": _coalesce(fields.get("value_format"), fields.get("data_type")),
+        "why": _coalesce(fields.get("why"), fields.get("description")),
+        "rendering": _coalesce(fields.get("rendering"), fields.get("display_mode")),
+        "copy": _coalesce(fields.get("copy"), fields.get("is_identifier")),
+        "drilldown": _coalesce(fields.get("drilldown"), fields.get("usage_locations")),
         "missing_severity": _resolve_missing_severity(
-            missing_severity,
-            implementation_status,
+            fields.get("missing_severity")  # type: ignore[arg-type]
+            if fields.get("missing_severity") is None
+            or isinstance(fields.get("missing_severity"), str)
+            else None,
+            fields.get("implementation_status")  # type: ignore[arg-type]
+            if fields.get("implementation_status") is None
+            or isinstance(fields.get("implementation_status"), str)
+            else None,
         ),
     }
 

@@ -189,7 +189,19 @@ def test_checkpoint_execution_identity_payload_matches_domain_contract() -> None
         "input_snapshot_fingerprint": " FACE ",
         "silver_filter_compatibility_mode": " structural_only_compat ",
     }
-    expected_payload = build_execution_identity_payload(**raw_inputs)
+    expected_payload = build_execution_identity_payload(
+        pipeline_name=raw_inputs["pipeline_name"],
+        run_type=raw_inputs["run_type"],
+        pipeline_version=raw_inputs["pipeline_version"],
+        git_commit=raw_inputs["git_commit"],
+        effective_config_hash=raw_inputs["effective_config_hash"],
+        dq_contract_compatibility_hash=raw_inputs["dq_contract_compatibility_hash"],
+        contract=(raw_inputs["contract_ref"], raw_inputs["contract_version"]),
+        effective_config_artifact_id=raw_inputs["effective_config_artifact_id"],
+        exact_replay=raw_inputs["exact_replay"],
+        input_snapshot_fingerprint=raw_inputs["input_snapshot_fingerprint"],
+        silver_filter_compatibility_mode=raw_inputs["silver_filter_compatibility_mode"],
+    )
 
     metadata = CheckpointMetadata(
         records_processed=1,

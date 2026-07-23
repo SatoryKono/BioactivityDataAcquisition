@@ -23,6 +23,11 @@ ______________________________________________________________________
 
 # Dashboard v2 Updates (Shipped Surface 2026-05-19)
 
+> **Removed 2026-07-23:** Silver Reject Explorer dashboard, Loki/Tempo Explore adjuncts, Quarantine Explorer datasource (replaced by BioETL Ops HTTP on :8000).
+> Use CLI ioetl quarantine inspect for record-level forensics. See [monitoring-surface-reduction](../../05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md).
+
+
+
 Источник истины: `grafana/dashboards/bioetl-*.json`
 
 Этот changelog описывает **текущий shipped contract**, а не historical patch
@@ -36,14 +41,14 @@ notes. Если prose ниже расходится с JSON, править ну
 - `bioetl-dq-v2`
 - `bioetl-provider-health-v2`
 - `bioetl-runtime`
-- `bioetl-silver-reject-explorer`
+- `CLI quarantine inspect`
 - `bioetl-workflow-overview`
 
 ## Current shipped baseline
 
 - Все primary operator dashboards `0..5` используют `refresh: 30s` и
   `time.from=now-12h`.
-- `bioetl-silver-reject-explorer` остаётся forensic exception с `refresh: 1m`
+- `CLI quarantine inspect` остаётся forensic exception с `refresh: 1m`
   и `time.from=now-24h`.
 - Primary dashboards `0..5` используют shared context shell
   `$workflow`, `$pipeline`, `$run_type`, `$run_id`.
@@ -59,7 +64,7 @@ notes. Если prose ниже расходится с JSON, править ну
 - `bioetl-workflow-overview` добавляет visible `$status`, `$step_status`,
   `$step_kind` и hidden handoff vars `$pipeline_context`, `$run_type_context`,
   `$provider_context`.
-- `bioetl-silver-reject-explorer` остаётся единственным shipped dashboard с
+- `CLI quarantine inspect` остаётся единственным shipped dashboard с
   exact forensic narrowing selectors `$quarantine_run_id` и `$payload_hash`.
 
 ## Navigation contract now in force
@@ -113,7 +118,7 @@ notes. Если prose ниже расходится с JSON, править ну
   `1`, `2`, `7`, `31`, `32`, `102`, `104..114`
 - `bioetl-workflow-overview`: `id=9400..9403`, `1..9`,
   collapsed `Step Diagnostics (collapsed)`
-- `bioetl-silver-reject-explorer`: `id=1..10`
+- `CLI quarantine inspect`: `id=1..10`
 
 ## 2026-05-19 remediation set
 

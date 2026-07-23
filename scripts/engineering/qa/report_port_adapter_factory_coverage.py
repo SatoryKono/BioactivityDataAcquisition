@@ -333,10 +333,10 @@ def write_artifacts(
     *, json_out: Path, md_out: Path, root: Path | None = None
 ) -> None:
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_cli_path
+        from scripts.engineering.common.repo_paths import resolve_output_path
 
-        json_out = resolve_cli_path(json_out, root=root)
-        md_out = resolve_cli_path(md_out, root=root)
+        json_out = resolve_output_path(json_out, root=root)
+        md_out = resolve_output_path(md_out, root=root)
     payload = build_payload()
     json_out.parent.mkdir(parents=True, exist_ok=True)
     md_out.parent.mkdir(parents=True, exist_ok=True)
@@ -364,9 +364,9 @@ def main(argv: list[str] | None = None) -> int:
     root = REPO_ROOT
 
     if args.check:
-        from scripts.engineering.common.repo_paths import resolve_cli_path
+        from scripts.engineering.common.repo_paths import resolve_output_path
 
-        json_out = resolve_cli_path(args.json_out, root=root)
+        json_out = resolve_output_path(args.json_out, root=root)
         expected = json.dumps(build_payload(), indent=2, sort_keys=True) + "\n"
         actual = json_out.read_text(encoding="utf-8")
         if actual != expected:

@@ -76,6 +76,7 @@ ______________________________________________________________________
 | Runbook                                                                  | Description                                                                                     | Priority |
 | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- | -------- |
 | [Observability Checklist](observability-checklist.md)                    | Operator validation checklist for metrics, log correlation, dashboards, and diagnostics routing | P2       |
+| [Monitoring Surface Reduction (2026-07-23)](monitoring-surface-reduction-2026-07-23.md) | Opt-in monitoring; Loki/Tempo/Quarantine Explorer UI removed; BioETL Ops HTTP identity | P2 |
 | [Run Manifest Inspection](run-manifest-inspection.md)                    | Mandatory runbook for the supported RunManifest / RunLedger inspection surface                  | P1       |
 | [Workflow Control-Plane Recovery](workflow-control-plane.md)             | Workflow manifest/ledger/state triage, resume, repair, and force procedures                     | P1       |
 | [Traceability Signal Ownership](traceability-signal-ownership.md)        | Ownership and escalation matrix for traceability signals                                        | P1       |

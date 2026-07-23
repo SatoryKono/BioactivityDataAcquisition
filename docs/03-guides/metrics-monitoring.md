@@ -582,7 +582,7 @@ ______________________________________________________________________
 При выполнении пайплайна автоматически запускается HTTP health server:
 
 ```bash
-# По умолчанию на порту 8081
+# Pipeline health/metrics server (default host/port per CLI; Docker main uses :8000)
 bioetl run --pipeline chembl_activity
 
 # Кастомный порт
@@ -606,8 +606,13 @@ bioetl run --pipeline chembl_activity --no-health-server
 Для отдельного мониторинга без запуска пайплайна:
 
 ```bash
-bioetl health server --host 0.0.0.0 --port 8081
+bioetl health server --host 0.0.0.0 --port 8000
 ```
+
+Grafana identity panels (opt-in monitoring) use datasource **BioETL Ops HTTP**
+against this server. Loki/Tempo/Quarantine Explorer are not part of the shipping
+stack — see
+`docs/05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md`.
 
 ### CLI Health Check
 
@@ -831,7 +836,8 @@ ______________________________________________________________________
    ```
 
 1. Для `bioetl workflow run ...` включить workflow step tracing явно, если
-   нужен непустой `Explore Traces` handoff:
+   нужен OTLP export (in-process / external collector). Grafana Tempo Explore
+   handoff **removed** from shipping dashboards (2026-07-23):
 
    ```bash
    bioetl workflow run chembl_assay --tracing --limit 1000

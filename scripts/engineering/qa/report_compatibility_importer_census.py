@@ -283,9 +283,9 @@ def _parse_args() -> argparse.Namespace:
 
 
 def _existing_snapshot_date(path: Path) -> str | None:
-    from scripts.engineering.common.repo_paths import resolve_cli_path
+    from scripts.engineering.common.repo_paths import resolve_output_path
 
-    safe_path = resolve_cli_path(path)
+    safe_path = resolve_output_path(path)
     if not safe_path.exists():
         return None
     payload = json.loads(safe_path.read_text(encoding="utf-8"))
@@ -1319,12 +1319,12 @@ def _render_markdown(payload: dict[str, object]) -> str:
 
 
 def main() -> int:
-    from scripts.engineering.common.repo_paths import resolve_cli_path
+    from scripts.engineering.common.repo_paths import resolve_output_path
 
     args = _parse_args()
-    repo_root = resolve_cli_path(args.repo_root)
-    json_out = resolve_cli_path(args.json_out, root=repo_root)
-    md_out = resolve_cli_path(args.md_out, root=repo_root)
+    repo_root = resolve_output_path(args.repo_root)
+    json_out = resolve_output_path(args.json_out, root=repo_root)
+    md_out = resolve_output_path(args.md_out, root=repo_root)
     snapshot_date = args.snapshot_date
     payload = build_compatibility_importer_census(
         repo_root,

@@ -104,8 +104,8 @@ bioetl workflow status <NAME> [OPTIONS]
 | `--force-steps a,b` | Явно форсировать указанные шаги при resume вместо обычного skip поведения |
 | `--repair-steps a,b` | Явно пометить шаги как repair path для destructive ambiguity recovery |
 | `--incremental` | Автоматически продвинуть `start_offset` от последнего успешного workflow execution; несовместим с resume selectors и явным `--start-offset` |
-| `--ensure-observability-backend/--no-ensure-observability-backend` | Автозапуск detached Quarantine Explorer backend для Grafana ID/detail panels |
-| `--observability-backend-port` | Порт detached observability backend, запускаемого для Grafana ID/detail panels |
+| `--ensure-observability-backend/--no-ensure-observability-backend` | Legacy flag; default Docker main surface no longer auto-starts Quarantine Explorer (`:8081`). Identity panels use `bioetl health server` / BioETL Ops HTTP on `:8000` |
+| `--observability-backend-port` | Legacy port for detached observability helper (prefer health server `:8000` for Grafana identity) |
 
 **`workflow status` опции:**
 
@@ -122,11 +122,11 @@ bioetl workflow status <NAME> [OPTIONS]
   workflow execution state.
 - `workflow status` использует persisted workflow state, если он существует;
   если нет, команда честно возвращает bounded topology-only surface.
-- `workflow run --tracing` нужен, если оператор ожидает непустой handoff в
-  `Explore Traces`; без него runtime может использовать `NoOpTracing`.
-- `Explore Logs` для workflow runs опирается на CLI structured logs в
-  `reports/logs/bioetl.log`, которые должен ingest-ить optional `tracing`
-  profile через `promtail`.
+- `workflow run --tracing` включает OTLP/export path when configured; Grafana
+  Tempo **Explore Traces** handoff was removed from shipped dashboards
+  (2026-07-23). Without `--tracing`, runtime may use `NoOpTracing`.
+- Structured workflow logs remain in `reports/logs/bioetl.log` (file-based;
+  Loki/Promtail no longer shipped).
 - `workflow run` starts the local metrics HTTP server on demand and performs a
   best-effort metrics publication flush on command completion so shipped
   Prometheus/Grafana workflow surfaces can observe completed workflow runs.
@@ -181,11 +181,11 @@ bioetl workflow status chembl_core --run-id 00000000-0000-0000-0000-000000000111
 bioetl workflow status chembl_core --format json
 ```
 
-`workflow run`, `run`, `run-all` и `run-composite` по умолчанию также
-используют `--ensure-observability-backend`, то есть пытаются автоматически
-запустить detached `bioetl quarantine serve --host 0.0.0.0 --port 8081` для
-Grafana `ID`/detail panels. Для отключения используйте
-`--no-ensure-observability-backend`.
+Grafana identity panels (`ID`, processed-records) use **BioETL Ops HTTP** against
+the main health server (`bioetl:8000` in Docker / `BIOETL_OPS_HTTP_URL`).
+Default main compose does **not** start `bioetl quarantine serve` on `:8081`.
+Record-level quarantine forensics: `bioetl quarantine inspect`. Flag
+`--no-ensure-observability-backend` remains for legacy local helpers when present.
 
 ______________________________________________________________________
 
@@ -225,7 +225,7 @@ bioetl run --pipeline <NAME> [OPTIONS]
 | `--debug`                                | flag   | False         | Включить DEBUG логирование                                                                |
 | `--checkpoint-compatibility`             | choice | None          | Политика совместимости checkpoint (`observe`, `soft_fail`, `hard_fail`) |
 | `--health-server/--no-health-server`     | flag   | True          | Включить HTTP health server                                                               |
-| `--health-port`                          | int    | 8081          | Порт для health server                                                                    |
+| `--health-port`                          | int    | 8000          | Порт для health/metrics server (Docker main default)                                      |
 | `--use-cached-bronze/--no-cached-bronze` | flag   | False         | Читать Bronze cache вместо API                                                            |
 | `--cached-bronze-date`                   | str    | None          | Фильтровать Bronze cache по дате `YYYY-MM-DD`                                             |
 | `--cached-bronze-path`                   | path   | None          | Явный путь к каталогу Bronze cache                                                        |
@@ -381,7 +381,7 @@ bioetl run-all --source <PROVIDER> [OPTIONS]
 | `--list-only`                        | flag   | False         | Только показать список пайплайнов               |
 | `--debug`                            | flag   | False         | DEBUG логирование                               |
 | `--health-server/--no-health-server` | flag   | True          | Включить HTTP health server                     |
-| `--health-port`                      | int    | 8081          | Порт для health server                          |
+| `--health-port`                      | int    | 8000          | Порт для health/metrics server                  |
 
 **Примеры:**
 
@@ -429,7 +429,7 @@ bioetl run-composite --composite <NAME> [OPTIONS]
 | `--cached-bronze-dependencies/--no-cached-bronze-dependencies` | flag | False        | Override cached Bronze для dependency pipelines      |
 | `--debug`                                                      | flag | False        | DEBUG логирование                                    |
 | `--health-server/--no-health-server`                           | flag | True         | Включить HTTP health server                          |
-| `--health-port`                                                | int  | 8081         | Порт для health server                               |
+| `--health-port`                                                | int  | 8000         | Порт для health/metrics server                       |
 
 **Примеры:**
 
@@ -1166,14 +1166,13 @@ ______________________________________________________________________
 #### `health server` — HTTP health server
 
 ```bash
-bioetl health server [--host 127.0.0.1] [--port 8081]
+bioetl health server [--host 127.0.0.1] [--port 8000]
 ```
 
-Для Grafana `5. Silver Reject Explorer` используйте:
-
-```bash
-bioetl health server --host 0.0.0.0 --port 8081
-```
+Docker main stack publishes health/metrics on `127.0.0.1:8000`. Grafana
+identity panels use datasource **BioETL Ops HTTP** → this server (not
+Quarantine Explorer / `:8081`). Control-plane helpers live under
+`/ops/control-plane/*`.
 
 **Endpoints:**
 
@@ -1181,6 +1180,7 @@ bioetl health server --host 0.0.0.0 --port 8081
 - `GET /health/live` — Kubernetes liveness probe
 - `GET /health/ready` — Kubernetes readiness probe
 - `GET /health/providers` — детальный статус провайдеров
+- `GET /ops/control-plane/*` — identity / filter-options for Grafana Ops HTTP
 
 #### `health check` — Проверка провайдеров
 

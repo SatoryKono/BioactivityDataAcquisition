@@ -22,9 +22,10 @@ PROMETHEUS_IMAGE = (
 )
 PROMETHEUS_COMPATIBILITY_SERIES = "3.13.x"
 PUSHGATEWAY_COMPATIBILITY_SERIES = "1.11.x"
-EXPECTED_ALERT_DEFINITIONS = 55
+EXPECTED_ALERT_DEFINITIONS = 54
 EXPECTED_RECORD_DEFINITIONS = 103
-MIN_TESTED_ALERTS = 36
+# Floor after 2026-07-23: BioETLQuarantineExplorerUnavailable alert removed.
+MIN_TESTED_ALERTS = 35
 MIN_DIRECTLY_TESTED_RECORDS = 28
 
 
@@ -71,6 +72,9 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def _run(command: list[str]) -> int:
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+    command = ensure_safe_cli_argv(command)
     print("+ " + " ".join(command))
     completed = subprocess.run(command, check=False)
     return int(completed.returncode)
@@ -99,6 +103,9 @@ def collect_rule_test_coverage(
                     if rules_file == CONTROL_PLANE_RULES_FILE:
                         control_plane_records.add(record_name)
 
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    test_file = resolve_output_path(test_file, root=REPO_ROOT)
     fixture = yaml.safe_load(test_file.read_text(encoding="utf-8"))
     tested_alerts: set[str] = set()
     firing_alerts: set[str] = set()

@@ -267,26 +267,45 @@ def _lineage_sort_key(row: Mapping[str, object]) -> tuple[str, str, str]:
 
 def _base_row(
     *,
-    run_id: str,
-    workflow_id: str,
-    pipeline_id: str,
-    provider_id: str,
+    identity: tuple[str, str, str, str],
     stage: str,
     record_index: int | None,
-    raw_record: Mapping[str, object] | None,
-    normalized_record: Mapping[str, object] | None,
+    records: tuple[Mapping[str, object] | None, Mapping[str, object] | None],
     status: str,
     created_at: datetime,
-    action: str = "",
-    reason_code: str = "",
-    reason_message: str = "",
-    rule_id: str = "",
-    rule_layer: str = "",
-    failed_field: str = "",
-    failed_value: str = "",
-    expected_constraint: str = "",
-    contract_version: str = "",
+    failure: tuple[str, str, str, str, str, str, str, str, str] = (
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+    ),
 ) -> dict[str, object]:
+    """Build one debug-export row.
+
+    Packed groups under Sonar S107:
+    - ``identity``: ``(run_id, workflow_id, pipeline_id, provider_id)``
+    - ``records``: ``(raw_record, normalized_record)``
+    - ``failure``: ``(action, reason_code, reason_message, rule_id, rule_layer,
+      failed_field, failed_value, expected_constraint, contract_version)``
+    """
+    run_id, workflow_id, pipeline_id, provider_id = identity
+    raw_record, normalized_record = records
+    (
+        action,
+        reason_code,
+        reason_message,
+        rule_id,
+        rule_layer,
+        failed_field,
+        failed_value,
+        expected_constraint,
+        contract_version,
+    ) = failure
     return {
         "run_id": run_id,
         "workflow_id": workflow_id,

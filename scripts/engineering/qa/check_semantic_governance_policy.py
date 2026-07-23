@@ -32,6 +32,12 @@ DEFAULT_CLUSTER_REGISTRY = (
 DEFAULT_GENERIC_OWNERSHIP = (
     REPO_ROOT / "configs" / "field_registry" / "generic_field_ownership.yaml"
 )
+DEFAULT_ASSAY_METADATA_REGISTRY = (
+    REPO_ROOT / "configs" / "field_registry" / "assay_metadata_semantic_registry.yaml"
+)
+DEFAULT_PARTIAL_IDENTIFIER_REGISTRY = (
+    REPO_ROOT / "configs" / "field_registry" / "partial_identifier_owner_roles.yaml"
+)
 ALLOWED_WEAK_DECISIONS = frozenset(
     {"promotable_candidate", "source_owned_same_name", "permanent_weak_inventory"}
 )
@@ -51,9 +57,9 @@ class GovernanceFinding:
 
 def _load_yaml(path: Path, *, root: Path | None = None) -> dict[str, Any]:
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_cli_path
+        from scripts.engineering.common.repo_paths import resolve_output_path
 
-        path = resolve_cli_path(path, root=root)
+        path = resolve_output_path(path, root=root)
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))
     if isinstance(payload, dict):
         return payload
@@ -62,9 +68,9 @@ def _load_yaml(path: Path, *, root: Path | None = None) -> dict[str, Any]:
 
 def _load_json(path: Path, *, root: Path | None = None) -> dict[str, Any]:
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_cli_path
+        from scripts.engineering.common.repo_paths import resolve_output_path
 
-        path = resolve_cli_path(path, root=root)
+        path = resolve_output_path(path, root=root)
     payload = json.loads(path.read_text(encoding="utf-8"))
     if isinstance(payload, dict):
         return payload
@@ -73,9 +79,9 @@ def _load_json(path: Path, *, root: Path | None = None) -> dict[str, Any]:
 
 def _load_rows(path: Path, *, root: Path | None = None) -> tuple[dict[str, str], ...]:
     if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_cli_path
+        from scripts.engineering.common.repo_paths import resolve_output_path
 
-        path = resolve_cli_path(path, root=root)
+        path = resolve_output_path(path, root=root)
     with path.open(encoding="utf-8", newline="") as handle:
         return tuple(csv.DictReader(handle))
 
@@ -103,6 +109,89 @@ def _cluster_counts(rows: tuple[dict[str, str], ...], status: str) -> Counter[st
 def _non_empty_str(mapping: dict[str, Any], key: str) -> bool:
     value = mapping.get(key)
     return isinstance(value, str) and bool(value.strip())
+
+
+def _dedicated_authority_findings(
+    review_payload: dict[str, Any],
+    *,
+    assay_payload: dict[str, Any],
+    partial_payload: dict[str, Any],
+) -> list[GovernanceFinding]:
+    """Ensure review inventory cannot drift from dedicated authority registries."""
+    findings: list[GovernanceFinding] = []
+    review_partial = {
+        str(entry.get("cluster_id")): entry
+        for entry in review_payload.get("partial_cluster_policies", [])
+        if isinstance(entry, dict) and entry.get("cluster_id")
+    }
+    review_weak = {
+        str(entry.get("cluster_id")): entry
+        for entry in review_payload.get("weak_cluster_decisions", [])
+        if isinstance(entry, dict) and entry.get("cluster_id")
+    }
+    required_keys = {
+        "owner",
+        "business_owner_role",
+        "composite_role",
+        "lineage_role",
+        "promotion_policy",
+        "authority_scope",
+        "rationale",
+    }
+    projected_role_keys = {
+        "owner",
+        "business_owner_role",
+        "composite_role",
+        "lineage_role",
+        "promotion_policy",
+    }
+    for section, payload, review_lookup in (
+        ("assay_metadata", assay_payload.get("fields"), review_weak),
+        ("partial_identifier", partial_payload.get("clusters"), review_partial),
+    ):
+        if not isinstance(payload, list):
+            findings.append(
+                GovernanceFinding(
+                    kind="invalid_dedicated_authority_registry",
+                    subject=section,
+                    message=f"{section} authority registry must define a list",
+                )
+            )
+            continue
+        for entry in payload:
+            if not isinstance(entry, dict):
+                continue
+            cluster_id = str(entry.get("cluster_id") or "<unknown>")
+            review_entry = review_lookup.get(cluster_id)
+            if review_entry is None:
+                findings.append(
+                    GovernanceFinding(
+                        kind="missing_dedicated_authority_projection",
+                        subject=cluster_id,
+                        message=f"{cluster_id} is missing from semantic review policy",
+                    )
+                )
+                continue
+            for key in required_keys:
+                if not _non_empty_str(entry, key):
+                    findings.append(
+                        GovernanceFinding(
+                            kind="missing_dedicated_authority_metadata",
+                            subject=cluster_id,
+                            message=f"{cluster_id} dedicated authority is missing {key}",
+                        )
+                    )
+                elif key in projected_role_keys and review_entry.get(key) != entry.get(
+                    key
+                ):
+                    findings.append(
+                        GovernanceFinding(
+                            kind="dedicated_authority_drift",
+                            subject=cluster_id,
+                            message=f"{cluster_id} review projection differs for {key}",
+                        )
+                    )
+    return findings
 
 
 def _required_evidence_findings(
@@ -653,6 +742,8 @@ def validate_semantic_governance_policy(
     pair_matrix_path: Path = DEFAULT_PAIR_MATRIX,
     cluster_registry_path: Path = DEFAULT_CLUSTER_REGISTRY,
     generic_ownership_path: Path = DEFAULT_GENERIC_OWNERSHIP,
+    assay_metadata_path: Path = DEFAULT_ASSAY_METADATA_REGISTRY,
+    partial_identifier_path: Path = DEFAULT_PARTIAL_IDENTIFIER_REGISTRY,
     root: Path | None = None,
 ) -> tuple[GovernanceFinding, ...]:
     """Return semantic governance policy findings for the current repository."""
@@ -660,8 +751,17 @@ def validate_semantic_governance_policy(
     rows = _load_rows(pair_matrix_path, root=root)
     cluster_lookup = _cluster_lookup(_load_json(cluster_registry_path, root=root))
     generic_ownership = _load_yaml(generic_ownership_path, root=root)
+    assay_metadata = _load_yaml(assay_metadata_path, root=root)
+    partial_identifiers = _load_yaml(partial_identifier_path, root=root)
 
     findings: list[GovernanceFinding] = []
+    findings.extend(
+        _dedicated_authority_findings(
+            payload,
+            assay_payload=assay_metadata,
+            partial_payload=partial_identifiers,
+        )
+    )
     findings.extend(_required_evidence_findings(payload))
     findings.extend(
         _partial_policy_findings(payload, rows=rows, cluster_lookup=cluster_lookup)
@@ -716,6 +816,18 @@ def _build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_GENERIC_OWNERSHIP,
         help="generic field ownership registry YAML",
     )
+    parser.add_argument(
+        "--assay-metadata-path",
+        type=Path,
+        default=DEFAULT_ASSAY_METADATA_REGISTRY,
+        help="dedicated assay metadata semantic registry YAML",
+    )
+    parser.add_argument(
+        "--partial-identifier-path",
+        type=Path,
+        default=DEFAULT_PARTIAL_IDENTIFIER_REGISTRY,
+        help="dedicated PARTIAL identifier owner-role registry YAML",
+    )
     return parser
 
 
@@ -729,6 +841,8 @@ def main(argv: list[str] | None = None) -> int:
         pair_matrix_path=args.pair_matrix_path,
         cluster_registry_path=args.cluster_registry_path,
         generic_ownership_path=args.generic_ownership_path,
+        assay_metadata_path=args.assay_metadata_path,
+        partial_identifier_path=args.partial_identifier_path,
         root=REPO_ROOT,
     )
     if args.json:

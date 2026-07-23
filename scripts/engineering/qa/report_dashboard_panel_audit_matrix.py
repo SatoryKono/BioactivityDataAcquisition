@@ -11,7 +11,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 DASHBOARD_DIR = ROOT / "grafana" / "dashboards"
-HTTP_DATASOURCE_HINTS = ("quarantine explorer", "infinity")
+HTTP_DATASOURCE_HINTS = (
+    "quarantine explorer",
+    "bioetl ops http",
+    "bioetl-ops-http",
+    "infinity",
+)
 
 
 def _iter_panels(payload: dict[str, object]) -> list[dict[str, object]]:
@@ -119,7 +124,9 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     rows = _collect_rows()
-    expected_panel_count = 228  # includes collapsed row headers in shipped JSON
+    # Includes collapsed row headers in shipped JSON. Updated after
+    # 2026-07-23 surface reduction (Silver Reject Explorer + Loki/Tempo panels).
+    expected_panel_count = 207
     if args.check and len(rows) != expected_panel_count:
         print(
             f"panel count mismatch: expected {expected_panel_count}, got {len(rows)}",

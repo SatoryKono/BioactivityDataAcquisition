@@ -25,6 +25,7 @@ TESTS_WORKFLOW_PATH = ROOT / ".github" / "workflows" / "tests.yml"
 CHECK_COMMAND = (
     "python -m scripts.engineering.qa report-artifact-duplication-audit --check"
 )
+UV_CHECK_COMMAND = f"uv run --frozen --no-build {CHECK_COMMAND}"
 
 pytestmark = pytest.mark.architecture
 
@@ -33,7 +34,7 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     return cast(dict[str, Any], yaml.safe_load(path.read_text(encoding="utf-8")))
 
 
-def енtest_artifact_duplication_audit_report_matches_live_collector() -> None:
+def test_artifact_duplication_audit_report_matches_live_collector() -> None:
     payload = json.loads(REPORT_PATH.read_text(encoding="utf-8"))
     report = collect_artifact_duplication_report(ROOT)
 
@@ -94,4 +95,4 @@ def test_governance_preflight_runs_artifact_duplication_audit_gate() -> None:
     ]
 
     assert len(matching_steps) == 1
-    assert matching_steps[0]["run"] == f"uv run {CHECK_COMMAND}"
+    assert matching_steps[0]["run"] == UV_CHECK_COMMAND

@@ -28,7 +28,7 @@ def test_import_linter_contracts_are_declared_as_blocking_workflow_step() -> Non
 
     assert "arch-tests:" in workflow
     assert "Run import-linter architecture contracts" in workflow
-    assert "uv run lint-imports --config .importlinter" in workflow
+    assert "lint-imports --config .importlinter" in workflow
 
 
 def test_c901_baseline_manifest_contains_expected_count() -> None:

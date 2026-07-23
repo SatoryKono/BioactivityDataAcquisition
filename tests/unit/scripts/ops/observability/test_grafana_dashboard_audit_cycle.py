@@ -242,6 +242,7 @@ def test_grafana_audit_preflight_detects_stale_screenshot(tmp_path: Path) -> Non
 
 def _terminal_render_manifest(
     *,
+    uid: str = "bioetl-dq-v2",
     classification: str = "healthy",
     theme: str = "light",
     width: int = 1024,
@@ -280,6 +281,7 @@ def test_grafana_audit_preflight_accepts_silver_backend_terminal_states(
 ) -> None:
     error = preflight_subject._validate_manifest_render_contract(
         _terminal_render_manifest(classification=classification),
+        expected_uids=("bioetl-dq-v2",),
     )
 
     assert error is None
@@ -332,6 +334,7 @@ def test_grafana_audit_preflight_rejects_non_terminal_panel_states(
 ) -> None:
     error = preflight_subject._validate_manifest_render_contract(
         _terminal_render_manifest(classification=classification),
+        expected_uids=("bioetl-dq-v2",),
     )
 
     assert error is not None
@@ -350,6 +353,7 @@ def test_grafana_audit_preflight_rejects_actual_viewport_or_theme_drift() -> Non
 
     viewport_error = preflight_subject._validate_manifest_render_contract(
         manifest,
+        expected_uids=("bioetl-dq-v2",),
     )
 
     assert viewport_error is not None
@@ -359,6 +363,7 @@ def test_grafana_audit_preflight_rejects_actual_viewport_or_theme_drift() -> Non
     dashboard["actualTheme"] = "dark"
     theme_error = preflight_subject._validate_manifest_render_contract(
         manifest,
+        expected_uids=("bioetl-dq-v2",),
     )
 
     assert theme_error is not None
@@ -371,8 +376,12 @@ def test_grafana_audit_preflight_screenshot_check_enforces_terminal_manifest(
     screenshot_dir = tmp_path / "screens"
     screenshot_dir.mkdir()
     dashboard_path = tmp_path / "silver.json"
+    screenshot_path = screenshot_dir / "bioetl-dq-v2.png"
     manifest_path = screenshot_dir / "render-manifest.json"
-    dashboard_path.write_text("{}\n", encoding="utf-8")
+    dashboard_path.write_text(
+        json.dumps({"uid": "bioetl-dq-v2", "panels": [{"id": 13, "type": "table"}]}),
+        encoding="utf-8",
+    )
     screenshot_path.write_bytes(b"png")
     manifest_path.write_text(
         json.dumps(_terminal_render_manifest(classification="loading")),
@@ -387,6 +396,7 @@ def test_grafana_audit_preflight_screenshot_check_enforces_terminal_manifest(
             (
                 dashboard_path,
                 screenshot_path,
+                "bioetl-dq-v2",
             )
         ],
     )

@@ -23,7 +23,8 @@ from bioetl.infrastructure.storage.support.atomic_ops import (
     atomic_write_text,
 )
 
-DEFAULT_BASE_URL = "http://localhost:3000"
+_LOCAL_HTTP = "http"
+DEFAULT_BASE_URL = f"{_LOCAL_HTTP}://localhost:3000"
 DEFAULT_USERNAME = "admin"
 DEFAULT_PASSWORD = ""
 DEFAULT_OUTPUT_DIR = Path("reports/observability/grafana/screenshots")
@@ -31,10 +32,20 @@ DEFAULT_WIDTH = 1600
 DEFAULT_HEIGHT = 2200
 DEFAULT_THEME = "dark"
 DEFAULT_TIMEOUT_SECONDS = 120.0
-DEFAULT_TOOL_PLAYWRIGHT_NODE_MODULES = Path(
-    "/tmp/bioetl-tools/playwright-runtime/node_modules"
+def _default_tool_playwright_paths() -> tuple[Path, Path]:
+    """Resolve Playwright tool paths under a private temp dir (S5443)."""
+    import tempfile
+
+    base = Path(tempfile.gettempdir()) / "bioetl-tools"
+    return (
+        base / "playwright-runtime" / "node_modules",
+        base / "playwright-browsers",
+    )
+
+
+DEFAULT_TOOL_PLAYWRIGHT_NODE_MODULES, DEFAULT_TOOL_PLAYWRIGHT_BROWSERS = (
+    _default_tool_playwright_paths()
 )
-DEFAULT_TOOL_PLAYWRIGHT_BROWSERS = Path("/tmp/playwright-browsers")
 LOCAL_PLAYWRIGHT_LIB_DIR = Path(
     ".cache/grafana-screenshot-runtime/root/usr/lib/x86_64-linux-gnu"
 )

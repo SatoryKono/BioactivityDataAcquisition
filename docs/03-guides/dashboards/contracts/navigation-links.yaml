@@ -1,388 +1,507 @@
 normative_source:
   scope: link_vars_time_semantics
   authority: single_source_of_truth
-  narrative_minimal: |
-    This YAML is the only normative contract for dashboard link semantics,
+  narrative_minimal: 'This YAML is the only normative contract for dashboard link semantics,
+
     allowed/required/forbidden var-* handoff, and time handoff policy.
+
     Markdown guides are explanatory mirrors and MUST reference this file
+
     instead of redefining normative rules.
+
     Required "top-level" link titles refer to the canonical machine-readable
+
     navigation bus surface and do not require dashboard root `links[]`
+
     specifically; shipped dashboards MAY surface the visible bus through panel
+
     `id=1000` HTML while omitting machine-readable self-links to avoid
+
     duplicating header-row links next to Grafana variables.
 
+    '
 version: 1
 required_top_level_links_by_uid:
   bioetl-overview-v2:
-    - 0. Control Plane
-    - 2. Runtime
-    - 3. Provider Health
-    - 4. Data Quality
-    - 5. Workflow
-    - 6. Alerts & SLO
+  - 0. Control Plane
+  - 2. Runtime
+  - 3. Provider Health
+  - 4. Data Quality
+  - 5. Workflow
+  - 6. Alerts & SLO
   bioetl-runtime:
-    - 0. Control Plane
-    - 1. Overview
-    - 3. Provider Health
-    - 4. Data Quality
-    - 5. Workflow
-    - 6. Alerts & SLO
+  - 0. Control Plane
+  - 1. Overview
+  - 3. Provider Health
+  - 4. Data Quality
+  - 5. Workflow
+  - 6. Alerts & SLO
   bioetl-control-plane-v1:
-    - 1. Overview
-    - 2. Runtime
-    - 3. Provider Health
-    - 4. Data Quality
-    - 5. Workflow
-    - 6. Alerts & SLO
+  - 1. Overview
+  - 2. Runtime
+  - 3. Provider Health
+  - 4. Data Quality
+  - 5. Workflow
+  - 6. Alerts & SLO
   bioetl-provider-health-v2:
-    - 0. Control Plane
-    - 1. Overview
-    - 2. Runtime
-    - 4. Data Quality
-    - 5. Workflow
-    - 6. Alerts & SLO
+  - 0. Control Plane
+  - 1. Overview
+  - 2. Runtime
+  - 4. Data Quality
+  - 5. Workflow
+  - 6. Alerts & SLO
   bioetl-dq-v2:
-    - 0. Control Plane
-    - 1. Overview
-    - 2. Runtime
-    - 3. Provider Health
-    - 5. Workflow
-    - 6. Alerts & SLO
-  bioetl-silver-reject-explorer:
-    - 0. Control Plane
-    - 1. Overview
-    - 2. Runtime
-    - 3. Provider Health
-    - 4. Data Quality
-    - 5. Workflow
-    - 6. Alerts & SLO
+  - 0. Control Plane
+  - 1. Overview
+  - 2. Runtime
+  - 3. Provider Health
+  - 5. Workflow
+  - 6. Alerts & SLO
   bioetl-alerts-slo:
-    - 0. Control Plane
-    - 1. Overview
-    - 2. Runtime
-    - 3. Provider Health
-    - 4. Data Quality
-    - 5. Workflow
+  - 0. Control Plane
+  - 1. Overview
+  - 2. Runtime
+  - 3. Provider Health
+  - 4. Data Quality
+  - 5. Workflow
   bioetl-workflow-overview:
-    - 0. Control Plane
-    - 1. Overview
-    - 2. Runtime
-    - 3. Provider Health
-    - 4. Data Quality
-    - 6. Alerts & SLO
+  - 0. Control Plane
+  - 1. Overview
+  - 2. Runtime
+  - 3. Provider Health
+  - 4. Data Quality
+  - 6. Alerts & SLO
 top_level_link_priority_by_uid:
   bioetl-overview-v2:
-    - title: 2. Runtime
-      target_uid: bioetl-runtime
-      priority: primary
-      semantics: scoped_runtime_handoff
-    - title: 0. Control Plane
-      target_uid: bioetl-control-plane-v1
-      priority: secondary
-      semantics: scoped_control_plane_handoff
-    - title: 3. Provider Health
-      target_uid: bioetl-provider-health-v2
-      priority: contextual
-      semantics: provider_health_cross_scope
+  - title: 2. Runtime
+    target_uid: bioetl-runtime
+    priority: primary
+    semantics: scoped_runtime_handoff
+  - title: 0. Control Plane
+    target_uid: bioetl-control-plane-v1
+    priority: secondary
+    semantics: scoped_control_plane_handoff
+  - title: 3. Provider Health
+    target_uid: bioetl-provider-health-v2
+    priority: contextual
+    semantics: provider_health_cross_scope
   bioetl-provider-health-v2:
-    - title: 2. Runtime
-      target_uid: bioetl-runtime
-      priority: primary
-      semantics: runtime_cross_scope_all_defaults
-
+  - title: 2. Runtime
+    target_uid: bioetl-runtime
+    priority: primary
+    semantics: runtime_cross_scope_all_defaults
 required_link_vars_by_target_uid:
-  bioetl-overview-v2: [workflow, pipeline, run_type]
-  bioetl-control-plane-v1: [workflow, pipeline, run_type]
-  bioetl-runtime: [workflow, pipeline, run_type]
-  bioetl-dq-v2: [workflow, pipeline, run_type]
-  bioetl-provider-health-v2: [workflow, pipeline, run_type, provider, pipeline_context]
-  bioetl-silver-reject-explorer: [pipeline, run_type]
-  bioetl-workflow-overview: [workflow, pipeline, run_type]
-  bioetl-alerts-slo: [workflow, pipeline, run_type]
+  bioetl-overview-v2:
+  - workflow
+  - pipeline
+  - run_type
+  bioetl-control-plane-v1:
+  - workflow
+  - pipeline
+  - run_type
+  bioetl-runtime:
+  - workflow
+  - pipeline
+  - run_type
+  bioetl-dq-v2:
+  - workflow
+  - pipeline
+  - run_type
+  bioetl-provider-health-v2:
+  - workflow
+  - pipeline
+  - run_type
+  - provider
+  - pipeline_context
+  bioetl-workflow-overview:
+  - workflow
+  - pipeline
+  - run_type
+  bioetl-alerts-slo:
+  - workflow
+  - pipeline
+  - run_type
 allowed_dashboard_link_vars:
-  bioetl-overview-v2: [workflow, pipeline, run_type, run_id]
-  bioetl-dq-v2: [workflow, pipeline, run_type, run_id, stage]
-  bioetl-runtime: [workflow, pipeline, run_type, run_id, stage]
-  bioetl-provider-health-v2: [workflow, pipeline, run_type, run_id, provider, pipeline_context, adapter]
-  bioetl-control-plane-v1: [workflow, pipeline, run_type, run_id]
-  bioetl-workflow-overview: [workflow, pipeline, run_type, run_id, status, step_status, step_kind, pipeline_context, run_type_context, provider_context]
-  bioetl-silver-reject-explorer: [pipeline, run_type, reason_code, field, quarantine_run_id, payload_hash]
-  bioetl-alerts-slo: [workflow, pipeline, run_type]
+  bioetl-overview-v2:
+  - workflow
+  - pipeline
+  - run_type
+  - run_id
+  bioetl-dq-v2:
+  - workflow
+  - pipeline
+  - run_type
+  - run_id
+  - stage
+  bioetl-runtime:
+  - workflow
+  - pipeline
+  - run_type
+  - run_id
+  - stage
+  bioetl-provider-health-v2:
+  - workflow
+  - pipeline
+  - run_type
+  - run_id
+  - provider
+  - pipeline_context
+  - adapter
+  bioetl-control-plane-v1:
+  - workflow
+  - pipeline
+  - run_type
+  - run_id
+  bioetl-workflow-overview:
+  - workflow
+  - pipeline
+  - run_type
+  - run_id
+  - status
+  - step_status
+  - step_kind
+  - pipeline_context
+  - run_type_context
+  - provider_context
+  bioetl-alerts-slo:
+  - workflow
+  - pipeline
+  - run_type
 forbidden_dashboard_link_vars_by_target_uid:
-  bioetl-overview-v2: [quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
-  bioetl-control-plane-v1: [quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
-  bioetl-runtime: [quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
-  bioetl-dq-v2: [quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
-  bioetl-provider-health-v2: [quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
-  bioetl-workflow-overview: [quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
-  bioetl-silver-reject-explorer: [workflow, run_id, manifest_id, execution_fingerprint]
-  bioetl-alerts-slo: [run_id, quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
-
+  bioetl-overview-v2:
+  - quarantine_run_id
+  - payload_hash
+  - manifest_id
+  - execution_fingerprint
+  bioetl-control-plane-v1:
+  - quarantine_run_id
+  - payload_hash
+  - manifest_id
+  - execution_fingerprint
+  bioetl-runtime:
+  - quarantine_run_id
+  - payload_hash
+  - manifest_id
+  - execution_fingerprint
+  bioetl-dq-v2:
+  - quarantine_run_id
+  - payload_hash
+  - manifest_id
+  - execution_fingerprint
+  bioetl-provider-health-v2:
+  - quarantine_run_id
+  - payload_hash
+  - manifest_id
+  - execution_fingerprint
+  bioetl-workflow-overview:
+  - quarantine_run_id
+  - payload_hash
+  - manifest_id
+  - execution_fingerprint
+  bioetl-alerts-slo:
+  - run_id
+  - quarantine_run_id
+  - payload_hash
+  - manifest_id
+  - execution_fingerprint
 preserved_identity_handoff:
   selector: run_id
-  required_value: "$run_id"
+  required_value: $run_id
   source_uids:
-    - bioetl-control-plane-v1
-    - bioetl-dq-v2
-    - bioetl-overview-v2
-    - bioetl-provider-health-v2
-    - bioetl-runtime
-    - bioetl-workflow-overview
+  - bioetl-control-plane-v1
+  - bioetl-dq-v2
+  - bioetl-overview-v2
+  - bioetl-provider-health-v2
+  - bioetl-runtime
+  - bioetl-workflow-overview
   target_uids:
-    - bioetl-control-plane-v1
-    - bioetl-dq-v2
-    - bioetl-overview-v2
-    - bioetl-provider-health-v2
-    - bioetl-runtime
-    - bioetl-workflow-overview
+  - bioetl-control-plane-v1
+  - bioetl-dq-v2
+  - bioetl-overview-v2
+  - bioetl-provider-health-v2
+  - bioetl-runtime
+  - bioetl-workflow-overview
   excluded_source_uids:
-    - bioetl-silver-reject-explorer
-    - bioetl-alerts-slo
+  - bioetl-alerts-slo
   excluded_target_uids: []
-  semantics: |
-    Preserve exact primary Run ID when both source and target dashboards expose
-    the primary control-plane `run_id` selector. The handoff keeps HTTP
-    identity/details panels focused on the selected run; Prometheus status and
-    current-state panels remain pipeline/run_type scoped. Generic links into
-    Silver Reject Explorer do not map primary `run_id` to `quarantine_run_id`;
-    exact reject filters are forensic-only selectors and require an explicit
-    record/payload drilldown. Links out of the explorer and alert dashboard do
-    not preserve primary `run_id` because those dashboards do not own the
-    primary identity selector.
-
+  semantics: Preserve exact primary Run ID when both source and target dashboards expose the primary control-plane
+    run_id selector. Alert dashboard does not preserve primary run_id when it does not own the primary
+    identity selector. Record-level quarantine forensics use CLI bioetl quarantine inspect (Silver Reject
+    Explorer dashboard removed 2026-07-23).
 required_discoverable_inbound_paths:
   L1:
     bioetl-runtime:
-      - source_uid: bioetl-overview-v2
-        source_panel_id: 215
-        source_panel_title: First Action
-        source_status_row_panel_title_matcher: ^Provenance$
+    - source_uid: bioetl-overview-v2
+      source_panel_id: 215
+      source_panel_title: First Action
+      source_status_row_panel_title_matcher: ^Provenance$
     bioetl-control-plane-v1:
-      - source_uid: bioetl-overview-v2
-        source_panel_id: 215
-        source_panel_title: First Action
-        source_status_row_panel_title_matcher: ^Provenance$
+    - source_uid: bioetl-overview-v2
+      source_panel_id: 215
+      source_panel_title: First Action
+      source_status_row_panel_title_matcher: ^Provenance$
     bioetl-provider-health-v2:
-      - source_uid: bioetl-overview-v2
-        source_panel_id: 215
-        source_panel_title: First Action
-        source_status_row_panel_title_matcher: ^Provenance$
+    - source_uid: bioetl-overview-v2
+      source_panel_id: 215
+      source_panel_title: First Action
+      source_status_row_panel_title_matcher: ^Provenance$
     bioetl-dq-v2:
-      - source_uid: bioetl-overview-v2
-        source_panel_id: 215
-        source_panel_title: First Action
-        source_status_row_panel_title_matcher: ^Provenance$
+    - source_uid: bioetl-overview-v2
+      source_panel_id: 215
+      source_panel_title: First Action
+      source_status_row_panel_title_matcher: ^Provenance$
     bioetl-workflow-overview:
-      - source_uid: bioetl-overview-v2
-        source_panel_id: 215
-        source_panel_title: First Action
-        source_status_row_panel_title_matcher: ^Provenance$
-
+    - source_uid: bioetl-overview-v2
+      source_panel_id: 215
+      source_panel_title: First Action
+      source_status_row_panel_title_matcher: ^Provenance$
 required_panel_links_by_uid:
   bioetl-overview-v2:
-    - panel_id: 214
-      target_uid: bioetl-runtime
-      link_titles: [Open Runtime]
-    - panel_id: 214
-      target_uid: bioetl-control-plane-v1
-      link_titles: [Open Control Plane]
-    - panel_id: 214
-      target_uid: bioetl-dq-v2
-      link_titles: [Open Data Quality]
-    - panel_id: 214
-      target_uid: bioetl-provider-health-v2
-      link_titles: [Open Provider Health]
-    - panel_id: 214
-      target_uid: bioetl-workflow-overview
-      link_titles: [Open Workflow]
-    - panel_id: 215
-      target_uid: bioetl-runtime
-      link_titles: [Open Runtime]
-    - panel_id: 215
-      target_uid: bioetl-control-plane-v1
-      link_titles: [Open Control Plane]
-    - panel_id: 215
-      target_uid: bioetl-dq-v2
-      link_titles: [Open Data Quality]
-    - panel_id: 215
-      target_uid: bioetl-provider-health-v2
-      link_titles: [Open Provider Health]
-    - panel_id: 215
-      target_uid: bioetl-workflow-overview
-      link_titles: [Open Workflow]
-    - panel_id: 9002
-      target_uid: bioetl-runtime
-      link_titles: [Open Runtime]
-    - panel_id: 9002
-      target_uid: bioetl-control-plane-v1
-      link_titles: [Open Control Plane]
-    - panel_id: 9002
-      target_uid: bioetl-dq-v2
-      link_titles: [Open Data Quality]
-    - panel_id: 9002
-      target_uid: bioetl-provider-health-v2
-      link_titles: [Open Provider Health]
-    - panel_id: 9002
-      target_uid: bioetl-workflow-overview
-      link_titles: [Open Workflow]
-    - panel_id: 9003
-      target_uid: bioetl-runtime
-      link_titles: [Open Runtime]
-    - panel_id: 9004
-      target_uid: bioetl-dq-v2
-      link_titles: [Open Data Quality]
-    - panel_id: 9005
-      target_uid: bioetl-runtime
-      link_titles: [Open Runtime]
-    - panel_id: 9006
-      target_uid: bioetl-control-plane-v1
-      link_titles: [Open Control Plane]
-    - panel_id: 9007
-      target_uid: bioetl-provider-health-v2
-      link_titles: [Open Provider Health]
-    - panel_id: 9013
-      target_uid: bioetl-workflow-overview
-      link_titles: [Open Workflow]
-    - panel_id: 9601
-      target_uid: bioetl-alerts-slo
-      link_titles: [Open 6. Alerts & SLO]
+  - panel_id: 214
+    target_uid: bioetl-runtime
+    link_titles:
+    - Open Runtime
+  - panel_id: 214
+    target_uid: bioetl-control-plane-v1
+    link_titles:
+    - Open Control Plane
+  - panel_id: 214
+    target_uid: bioetl-dq-v2
+    link_titles:
+    - Open Data Quality
+  - panel_id: 214
+    target_uid: bioetl-provider-health-v2
+    link_titles:
+    - Open Provider Health
+  - panel_id: 214
+    target_uid: bioetl-workflow-overview
+    link_titles:
+    - Open Workflow
+  - panel_id: 215
+    target_uid: bioetl-runtime
+    link_titles:
+    - Open Runtime
+  - panel_id: 215
+    target_uid: bioetl-control-plane-v1
+    link_titles:
+    - Open Control Plane
+  - panel_id: 215
+    target_uid: bioetl-dq-v2
+    link_titles:
+    - Open Data Quality
+  - panel_id: 215
+    target_uid: bioetl-provider-health-v2
+    link_titles:
+    - Open Provider Health
+  - panel_id: 215
+    target_uid: bioetl-workflow-overview
+    link_titles:
+    - Open Workflow
+  - panel_id: 9002
+    target_uid: bioetl-runtime
+    link_titles:
+    - Open Runtime
+  - panel_id: 9002
+    target_uid: bioetl-control-plane-v1
+    link_titles:
+    - Open Control Plane
+  - panel_id: 9002
+    target_uid: bioetl-dq-v2
+    link_titles:
+    - Open Data Quality
+  - panel_id: 9002
+    target_uid: bioetl-provider-health-v2
+    link_titles:
+    - Open Provider Health
+  - panel_id: 9002
+    target_uid: bioetl-workflow-overview
+    link_titles:
+    - Open Workflow
+  - panel_id: 9003
+    target_uid: bioetl-runtime
+    link_titles:
+    - Open Runtime
+  - panel_id: 9004
+    target_uid: bioetl-dq-v2
+    link_titles:
+    - Open Data Quality
+  - panel_id: 9005
+    target_uid: bioetl-runtime
+    link_titles:
+    - Open Runtime
+  - panel_id: 9006
+    target_uid: bioetl-control-plane-v1
+    link_titles:
+    - Open Control Plane
+  - panel_id: 9007
+    target_uid: bioetl-provider-health-v2
+    link_titles:
+    - Open Provider Health
+  - panel_id: 9013
+    target_uid: bioetl-workflow-overview
+    link_titles:
+    - Open Workflow
+  - panel_id: 9601
+    target_uid: bioetl-alerts-slo
+    link_titles:
+    - Open 6. Alerts & SLO
   bioetl-dq-v2:
-    - panel_id: 116
-      target_uid: bioetl-control-plane-v1
-      link_titles: [Open Control Plane lineage diagnostics]
-    - panel_id: 9102
-      target_uid: bioetl-silver-reject-explorer
-      link_titles: [Open Silver Reject Explorer]
-    - panel_id: 117
-      target_uid: bioetl-silver-reject-explorer
-      link_titles: [Open Silver Reject Explorer]
-    - panel_id: 121
-      target_uid: bioetl-silver-reject-explorer
-      link_titles: [Open Silver Reject Explorer for this reason]
-    - panel_id: 122
-      target_uid: bioetl-silver-reject-explorer
-      link_titles: [Open Silver Reject Explorer for this field]
+  - panel_id: 116
+    target_uid: bioetl-control-plane-v1
+    link_titles:
+    - Open Control Plane lineage diagnostics
   bioetl-runtime:
-    - panel_id: 230
-      target_uid: bioetl-runtime
-      link_titles: [Inspect active runtime blocker]
-    - panel_id: 4
-      target_uid: bioetl-dq-v2
-      link_titles: [Open 4. Data Quality]
-    - panel_id: 6
-      target_uid: bioetl-provider-health-v2
-      link_titles: [Open 3. Provider Health]
-    - panel_id: 7
-      target_uid: bioetl-dq-v2
-      link_titles: [Open 4. Data Quality]
-    - panel_id: 236
-      target_uid: bioetl-runtime
-      link_titles: [Inspect stage expectedness]
+  - panel_id: 230
+    target_uid: bioetl-runtime
+    link_titles:
+    - Inspect active runtime blocker
+  - panel_id: 4
+    target_uid: bioetl-dq-v2
+    link_titles:
+    - Open 4. Data Quality
+  - panel_id: 6
+    target_uid: bioetl-provider-health-v2
+    link_titles:
+    - Open 3. Provider Health
+  - panel_id: 7
+    target_uid: bioetl-dq-v2
+    link_titles:
+    - Open 4. Data Quality
+  - panel_id: 236
+    target_uid: bioetl-runtime
+    link_titles:
+    - Inspect stage expectedness
   bioetl-provider-health-v2:
-    - panel_id: 110
-      target_uid: bioetl-runtime
-      link_titles: [Open 2. Runtime]
-    - panel_id: 110
-      target_uid: bioetl-control-plane-v1
-      link_titles: [Open 0. Control Plane]
+  - panel_id: 110
+    target_uid: bioetl-runtime
+    link_titles:
+    - Open 2. Runtime
+  - panel_id: 110
+    target_uid: bioetl-control-plane-v1
+    link_titles:
+    - Open 0. Control Plane
   bioetl-workflow-overview:
-    - panel_id: 9
-      target_uid: bioetl-runtime
-      link_titles: [Open 2. Runtime]
-    - panel_id: 9
-      target_uid: bioetl-dq-v2
-      link_titles: [Open 4. Data Quality]
-    - panel_id: 9
-      target_uid: bioetl-provider-health-v2
-      link_titles: [Open 3. Provider Health]
-    - panel_id: 9
-      target_uid: bioetl-control-plane-v1
-      link_titles: [Open 0. Control Plane]
-    - panel_id: 9
-      target_uid: bioetl-overview-v2
-      link_titles: [Open 1. Overview]
-
+  - panel_id: 9
+    target_uid: bioetl-runtime
+    link_titles:
+    - Open 2. Runtime
+  - panel_id: 9
+    target_uid: bioetl-dq-v2
+    link_titles:
+    - Open 4. Data Quality
+  - panel_id: 9
+    target_uid: bioetl-provider-health-v2
+    link_titles:
+    - Open 3. Provider Health
+  - panel_id: 9
+    target_uid: bioetl-control-plane-v1
+    link_titles:
+    - Open 0. Control Plane
+  - panel_id: 9
+    target_uid: bioetl-overview-v2
+    link_titles:
+    - Open 1. Overview
 default_time_refresh_policy:
   L0:
-    dashboards: [bioetl-overview-v2]
+    dashboards:
+    - bioetl-overview-v2
     time_from: now-12h
     refresh: 30s
   L1:
-    dashboards: [bioetl-runtime, bioetl-control-plane-v1, bioetl-provider-health-v2, bioetl-dq-v2, bioetl-workflow-overview]
+    dashboards:
+    - bioetl-runtime
+    - bioetl-control-plane-v1
+    - bioetl-provider-health-v2
+    - bioetl-dq-v2
+    - bioetl-workflow-overview
     time_from: now-12h
     refresh: 30s
   Alerts:
-    dashboards: [bioetl-alerts-slo]
+    dashboards:
+    - bioetl-alerts-slo
     time_from: now-24h
     refresh: 30s
   L2:
-    dashboards: [bioetl-silver-reject-explorer]
+    dashboards: []
     time_from: now-24h
     refresh: 1m
-
 default_time_refresh_policy_exceptions: {}
-
 time_handoff_requirements:
   dashboard_links:
     required_tokens:
-      - ${__url_time_range}
+    - ${__url_time_range}
   explore_links:
     required_tokens:
-      - from=${__from}
-      - to=${__to}
-
-
+    - from=${__from}
+    - to=${__to}
 navigation_transition_contract:
   dashboard_levels:
     L0:
-      dashboards: [bioetl-overview-v2]
-      required_outbound: [bioetl-runtime, bioetl-control-plane-v1, bioetl-provider-health-v2, bioetl-dq-v2, bioetl-workflow-overview, bioetl-alerts-slo]
+      dashboards:
+      - bioetl-overview-v2
+      required_outbound:
+      - bioetl-runtime
+      - bioetl-control-plane-v1
+      - bioetl-provider-health-v2
+      - bioetl-dq-v2
+      - bioetl-workflow-overview
+      - bioetl-alerts-slo
       required_inbound: []
     L1:
-      dashboards: [bioetl-runtime, bioetl-control-plane-v1, bioetl-provider-health-v2, bioetl-dq-v2, bioetl-workflow-overview, bioetl-alerts-slo]
-      required_outbound: [bioetl-overview-v2]
-      required_inbound: [bioetl-overview-v2]
+      dashboards:
+      - bioetl-runtime
+      - bioetl-control-plane-v1
+      - bioetl-provider-health-v2
+      - bioetl-dq-v2
+      - bioetl-workflow-overview
+      - bioetl-alerts-slo
+      required_outbound:
+      - bioetl-overview-v2
+      required_inbound:
+      - bioetl-overview-v2
     L2:
-      dashboards: [bioetl-silver-reject-explorer]
-      required_outbound: [bioetl-overview-v2, bioetl-dq-v2]
-      required_inbound: [bioetl-dq-v2]
+      dashboards: []
+      required_outbound:
+      - bioetl-overview-v2
+      - bioetl-dq-v2
+      required_inbound:
+      - bioetl-dq-v2
   default_semantics_by_route_class:
     global_navigation:
-      allowed_default_values: [unknown, All]
+      allowed_default_values:
+      - unknown
+      - All
     scoped_handoff:
       allowed_default_values: []
       inherit_scoped_values: true
     context_mapping:
-      allowed_default_values: [unknown, All]
+      allowed_default_values:
+      - unknown
+      - All
       inherit_scoped_values: true
   route_class_by_transition:
     bioetl-control-plane-v1->bioetl-overview-v2: scoped_handoff
     bioetl-control-plane-v1->bioetl-runtime: scoped_handoff
     bioetl-control-plane-v1->bioetl-provider-health-v2: context_mapping
     bioetl-control-plane-v1->bioetl-dq-v2: scoped_handoff
-    bioetl-control-plane-v1->bioetl-silver-reject-explorer: context_mapping
     bioetl-control-plane-v1->bioetl-workflow-overview: context_mapping
     bioetl-control-plane-v1->bioetl-alerts-slo: scoped_handoff
     bioetl-overview-v2->bioetl-control-plane-v1: scoped_handoff
     bioetl-overview-v2->bioetl-runtime: scoped_handoff
     bioetl-overview-v2->bioetl-provider-health-v2: context_mapping
     bioetl-overview-v2->bioetl-dq-v2: scoped_handoff
-    bioetl-overview-v2->bioetl-silver-reject-explorer: context_mapping
     bioetl-overview-v2->bioetl-workflow-overview: context_mapping
     bioetl-overview-v2->bioetl-alerts-slo: scoped_handoff
     bioetl-runtime->bioetl-control-plane-v1: scoped_handoff
     bioetl-runtime->bioetl-overview-v2: scoped_handoff
     bioetl-runtime->bioetl-provider-health-v2: context_mapping
     bioetl-runtime->bioetl-dq-v2: scoped_handoff
-    bioetl-runtime->bioetl-silver-reject-explorer: context_mapping
     bioetl-runtime->bioetl-workflow-overview: context_mapping
     bioetl-runtime->bioetl-alerts-slo: scoped_handoff
     bioetl-provider-health-v2->bioetl-control-plane-v1: context_mapping
     bioetl-provider-health-v2->bioetl-overview-v2: context_mapping
     bioetl-provider-health-v2->bioetl-runtime: context_mapping
     bioetl-provider-health-v2->bioetl-dq-v2: context_mapping
-    bioetl-provider-health-v2->bioetl-silver-reject-explorer: context_mapping
     bioetl-provider-health-v2->bioetl-workflow-overview: context_mapping
     bioetl-provider-health-v2->bioetl-alerts-slo: context_mapping
     bioetl-dq-v2->bioetl-control-plane-v1: scoped_handoff
@@ -390,33 +509,24 @@ navigation_transition_contract:
     bioetl-dq-v2->bioetl-runtime: scoped_handoff
     bioetl-dq-v2->bioetl-provider-health-v2: context_mapping
     bioetl-dq-v2->bioetl-workflow-overview: context_mapping
-    bioetl-dq-v2->bioetl-silver-reject-explorer: context_mapping
     bioetl-dq-v2->bioetl-alerts-slo: scoped_handoff
-    bioetl-silver-reject-explorer->bioetl-control-plane-v1: context_mapping
-    bioetl-silver-reject-explorer->bioetl-overview-v2: context_mapping
-    bioetl-silver-reject-explorer->bioetl-runtime: context_mapping
-    bioetl-silver-reject-explorer->bioetl-provider-health-v2: context_mapping
-    bioetl-silver-reject-explorer->bioetl-dq-v2: context_mapping
-    bioetl-silver-reject-explorer->bioetl-workflow-overview: context_mapping
-    bioetl-silver-reject-explorer->bioetl-alerts-slo: context_mapping
     bioetl-workflow-overview->bioetl-control-plane-v1: scoped_handoff
     bioetl-workflow-overview->bioetl-overview-v2: scoped_handoff
     bioetl-workflow-overview->bioetl-runtime: scoped_handoff
     bioetl-workflow-overview->bioetl-provider-health-v2: context_mapping
     bioetl-workflow-overview->bioetl-dq-v2: scoped_handoff
-    bioetl-workflow-overview->bioetl-silver-reject-explorer: context_mapping
     bioetl-workflow-overview->bioetl-alerts-slo: scoped_handoff
     bioetl-alerts-slo->bioetl-control-plane-v1: scoped_handoff
     bioetl-alerts-slo->bioetl-overview-v2: scoped_handoff
     bioetl-alerts-slo->bioetl-runtime: scoped_handoff
     bioetl-alerts-slo->bioetl-provider-health-v2: context_mapping
     bioetl-alerts-slo->bioetl-dq-v2: scoped_handoff
-    bioetl-alerts-slo->bioetl-silver-reject-explorer: context_mapping
     bioetl-alerts-slo->bioetl-workflow-overview: context_mapping
   incident_critical_reciprocal_paths:
-    - [bioetl-runtime, bioetl-control-plane-v1]
-    - [bioetl-control-plane-v1, bioetl-dq-v2]
-    - [bioetl-dq-v2, bioetl-silver-reject-explorer]
+  - - bioetl-runtime
+    - bioetl-control-plane-v1
+  - - bioetl-control-plane-v1
+    - bioetl-dq-v2
   first_action_contract:
     bioetl-runtime:
       panel_id: 9991
@@ -424,67 +534,55 @@ navigation_transition_contract:
       min_cta: 4
       max_cta: 4
       ctas:
-        - title: Review current status
-          expected_target_uid: bioetl-runtime
-        - title: Review range evidence
-          expected_target_uid: bioetl-runtime
-        - title: Inspect top blockers
-          expected_target_uid: bioetl-runtime
-        - title: Inspect active blocker
-          expected_target_uid: bioetl-runtime
+      - title: Review current status
+        expected_target_uid: bioetl-runtime
+      - title: Review range evidence
+        expected_target_uid: bioetl-runtime
+      - title: Inspect top blockers
+        expected_target_uid: bioetl-runtime
+      - title: Inspect active blocker
+        expected_target_uid: bioetl-runtime
     bioetl-provider-health-v2:
       panel_id: 9002
       panel_title: First Action
       min_cta: 3
       max_cta: 3
       ctas:
-        - title: Review severity matrix
-          expected_target_uid: bioetl-provider-health-v2
-        - title: Inspect critical providers
-          expected_target_uid: bioetl-provider-health-v2
-        - title: Inspect provider top causes
-          expected_target_uid: bioetl-provider-health-v2
+      - title: Review severity matrix
+        expected_target_uid: bioetl-provider-health-v2
+      - title: Inspect critical providers
+        expected_target_uid: bioetl-provider-health-v2
+      - title: Inspect provider top causes
+        expected_target_uid: bioetl-provider-health-v2
     bioetl-dq-v2:
       panel_id: 9103
-      panel_title: "Review: First Action"
-      min_cta: 3
-      max_cta: 3
+      panel_title: 'Review: First Action'
+      min_cta: 2
+      max_cta: 2
       ctas:
-        - title: Review current status
-          expected_target_uid: bioetl-dq-v2
-        - title: Inspect current reasons
-          expected_target_uid: bioetl-dq-v2
-        - title: Open Silver Reject Explorer
-          expected_target_uid: bioetl-silver-reject-explorer
+      - title: Review current status
+        expected_target_uid: bioetl-dq-v2
+      - title: Inspect current reasons
+        expected_target_uid: bioetl-dq-v2
     bioetl-workflow-overview:
       panel_id: 9
       panel_title: First Action
       min_cta: 5
       max_cta: 5
       ctas:
-        - title: Open 2. Runtime
-          expected_target_uid: bioetl-runtime
-        - title: Open 4. Data Quality
-          expected_target_uid: bioetl-dq-v2
-        - title: Open 3. Provider Health
-          expected_target_uid: bioetl-provider-health-v2
-        - title: Open 0. Control Plane
-          expected_target_uid: bioetl-control-plane-v1
-        - title: Open 1. Overview
-          expected_target_uid: bioetl-overview-v2
-    bioetl-silver-reject-explorer:
-      panel_id: 10
-      panel_title: "Review: First Action / No-Data Semantics"
-      min_cta: 2
-      max_cta: 2
-      ctas:
-        - title: Review total rejects
-          expected_target_uid: bioetl-silver-reject-explorer
-        - title: Review scoped summary
-          expected_target_uid: bioetl-silver-reject-explorer
+      - title: Open 2. Runtime
+        expected_target_uid: bioetl-runtime
+      - title: Open 4. Data Quality
+        expected_target_uid: bioetl-dq-v2
+      - title: Open 3. Provider Health
+        expected_target_uid: bioetl-provider-health-v2
+      - title: Open 0. Control Plane
+        expected_target_uid: bioetl-control-plane-v1
+      - title: Open 1. Overview
+        expected_target_uid: bioetl-overview-v2
   cross_scope_marker_contract:
     required_markers:
-      context_mapping: "Context mapping"
+      context_mapping: Context mapping
     required_titles_by_transition:
       bioetl-control-plane-v1->bioetl-provider-health-v2: context_mapping
       bioetl-provider-health-v2->bioetl-overview-v2: context_mapping
@@ -495,8 +593,6 @@ navigation_transition_contract:
       bioetl-overview-v2->bioetl-provider-health-v2: context_mapping
       bioetl-runtime->bioetl-provider-health-v2: context_mapping
       bioetl-dq-v2->bioetl-provider-health-v2: context_mapping
-      bioetl-provider-health-v2->bioetl-silver-reject-explorer: context_mapping
-      bioetl-silver-reject-explorer->bioetl-provider-health-v2: context_mapping
       bioetl-workflow-overview->bioetl-provider-health-v2: context_mapping
   provider_context_mapping_contract:
     source_dashboards:
@@ -512,12 +608,10 @@ navigation_transition_contract:
       bioetl-dq-v2:
         provider_value: unknown
         adapter_value: unknown
-      bioetl-silver-reject-explorer:
-        provider_value: unknown
-        adapter_value: unknown
       bioetl-workflow-overview->bioetl-provider-health-v2: context_mapping
     required_tooltip_tokens:
-      context_mapping: ["Context mapping"]
+      context_mapping:
+      - Context mapping
   kpi_ownership:
     failed_runs_in_range:
       canonical_uid: bioetl-overview-v2

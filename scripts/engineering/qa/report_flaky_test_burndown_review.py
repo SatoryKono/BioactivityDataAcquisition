@@ -33,9 +33,9 @@ ENTRY_TEXT_FIELDS = ("nodeid", "owner", "cause", "remediation")
 
 
 def _resolve_path(repo_root: Path, path: Path) -> Path:
-    from scripts.engineering.common.repo_paths import resolve_cli_path
+    from scripts.engineering.common.repo_paths import resolve_output_path
 
-    return resolve_cli_path(path, root=repo_root)
+    return resolve_output_path(path, root=repo_root)
 
 
 def _load_yaml_mapping(path: Path, *, root: Path | None = None) -> dict[str, Any]:

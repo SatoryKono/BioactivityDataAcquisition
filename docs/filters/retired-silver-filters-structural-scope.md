@@ -156,7 +156,8 @@ gold_filters:
   outcome. Metric remains, documentation updated.
 - `silver_filter_rejects` metric, `FILTERED_OUT_SILVER` error code,
   `quarantine_category=silver_filter`, CLI `--silver-filter-only` flag,
-  Grafana `bioetl-silver-reject-explorer.json` dashboard — all preserved with
+  Grafana `bioetl-silver-reject-explorer.json` dashboard was removed 2026-07-23;
+  CLI `--silver-filter-only` and DQ aggregates preserved with
   narrowed semantics ("structural rejects").
 - 8 transformer classes — receive `SilverFilterConfig` via DI; type-narrowing
   is invisible to them.

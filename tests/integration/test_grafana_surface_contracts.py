@@ -66,17 +66,13 @@ def test_runtime_dashboard_contains_runtime_hygiene_and_alert_condition_metrics(
             return True
         return isinstance(datasource, dict) and datasource.get("type") == "loki"
 
-    loki_exprs = [
-        target.get("expr", "")
+    loki_panels = [
+        panel
         for panel in get_dashboard_panels(dashboard)
-        for target in panel.get("targets", [])
         if is_loki_datasource(panel)
     ]
-    assert any("| json" in expr for expr in loki_exprs), (
-        "Runtime dashboard Loki panels must parse structured JSON logs"
-    )
-    assert any('__error__!=""' in expr for expr in loki_exprs), (
-        "Runtime dashboard must expose unstructured-log hygiene signal"
+    assert not loki_panels, (
+        "Runtime dashboard must not ship Loki datasource panels after 2026-07-23"
     )
 
 
@@ -93,7 +89,7 @@ def test_dq_dashboard_surfaces_record_flow_invariant_metrics() -> None:
 
 
 def test_runtime_dashboard_keeps_loki_log_hygiene_in_collapsed_tracing_row() -> None:
-    """Runtime should stay Prometheus-first when tracing datasources are disabled."""
+    """Loki log-hygiene row was removed with Loki/Tempo (2026-07-23)."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     row_panel = next(
         (
@@ -104,29 +100,24 @@ def test_runtime_dashboard_keeps_loki_log_hygiene_in_collapsed_tracing_row() -> 
         ),
         None,
     )
-    assert row_panel is not None, (
-        "Runtime dashboard must group Loki-only panels under an explicit tracing row"
-    )
-    assert row_panel.get("type") == "row"
-    assert row_panel.get("collapsed") is True, (
-        "Tracing-only log hygiene row must stay collapsed by default because "
-        "Loki/Tempo datasources are optional in the default runtime profile"
+    assert row_panel is None, (
+        "Runtime dashboard must not ship Loki-only Tracing-only Log Hygiene row"
     )
     nested_titles = {
         panel.get("title")
-        for panel in get_row_child_panels(
-            dashboard, "Tracing-only Log Hygiene (requires optional tracing profile)"
-        )
+        for panel in get_dashboard_panels(dashboard)
         if isinstance(panel.get("title"), str)
     }
-    assert nested_titles == {
+    for removed in (
         "Inspect Warning Logs",
         "Inspect GLOBAL Unstructured Logs",
         "Inspect Top Warning Events by Event / Logger / Range",
         "Track GLOBAL Log Hygiene Trend",
-    }
+    ):
+        assert removed not in nested_titles
 
 
+@pytest.mark.skip(reason="Loki log-hygiene panels removed 2026-07-23")
 def test_runtime_warning_loki_queries_filter_parsed_fields_after_json() -> None:
     """Warning log panels must not filter parsed JSON fields in the Loki selector."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
@@ -172,6 +163,7 @@ def test_runtime_warning_loki_queries_filter_parsed_fields_after_json() -> None:
     assert "__line__" not in unstructured_expr
 
 
+@pytest.mark.skip(reason="Loki log-hygiene panels removed 2026-07-23")
 def test_runtime_loki_panel_fixtures_cover_warning_and_malformed_paths() -> None:
     fixture_path = Path("tests/fixtures/grafana/loki_runtime_panel_events.jsonl")
     fixtures = [
@@ -219,11 +211,8 @@ def test_runtime_loki_panel_fixtures_cover_warning_and_malformed_paths() -> None
 
 
 def test_runtime_dashboard_describes_tracing_optional_mode() -> None:
-    """Runtime dashboard should keep tracing guidance in dashboard/row metadata."""
+    """Runtime remains Prometheus-first; Loki/Tempo hygiene row is gone."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
-    description = dashboard.get("description", "")
-    assert "Prometheus-first" in description
-    assert "optional tracing profile" in description
 
     note_panel = next(
         (
@@ -246,10 +235,7 @@ def test_runtime_dashboard_describes_tracing_optional_mode() -> None:
         ),
         None,
     )
-    assert tracing_row is not None, (
-        "Runtime dashboard must expose optional tracing diagnostics as a collapsed row"
-    )
-    assert tracing_row.get("collapsed") is True
+    assert tracing_row is None
 
 
 def test_control_plane_dashboard_contains_checkpoint_and_replay_metrics() -> None:
@@ -281,7 +267,7 @@ def test_control_plane_dashboard_contains_checkpoint_and_replay_metrics() -> Non
         None,
     )
     assert checkpoint_panel is not None
-    assert checkpoint_panel.get("datasource") == "Quarantine Explorer"
+    assert checkpoint_panel.get("datasource") == "BioETL Ops HTTP"
     target = checkpoint_panel.get("targets", [])[0]
     assert target.get("parser") == "backend"
     assert (
@@ -628,7 +614,7 @@ def test_runtime_alert_condition_panels_use_recording_rules(
 
 
 def test_runtime_tracing_row_orders_log_hygiene_panels() -> None:
-    """Runtime tracing row should keep log-hygiene panels in canonical order."""
+    """Loki Tracing-only Log Hygiene row must stay removed."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     tracing_row = next(
         (
@@ -640,24 +626,7 @@ def test_runtime_tracing_row_orders_log_hygiene_panels() -> None:
         ),
         None,
     )
-    assert tracing_row is not None, "Runtime tracing row not found"
-    nested = get_row_child_panels(
-        dashboard, "Tracing-only Log Hygiene (requires optional tracing profile)"
-    )
-    titles = [panel.get("title") for panel in nested]
-    expected_sequence = [
-        "Inspect Warning Logs",
-        "Inspect GLOBAL Unstructured Logs",
-        "Inspect Top Warning Events by Event / Logger / Range",
-        "Track GLOBAL Log Hygiene Trend",
-    ]
-    for title in expected_sequence:
-        assert title in titles, f"Runtime tracing row missing panel '{title}'"
-
-    indices = [titles.index(title) for title in expected_sequence]
-    assert indices == sorted(indices), (
-        "Runtime tracing row log-hygiene panels must appear in the canonical order"
-    )
+    assert tracing_row is None
 
 
 @pytest.mark.parametrize(
@@ -667,7 +636,6 @@ def test_runtime_tracing_row_orders_log_hygiene_panels() -> None:
         ("bioetl-dq-v2.json", "Track: DQ Check Duration (p95)"),
         ("bioetl-dq-v2.json", "Track: Anomalies Detected"),
         ("bioetl-runtime.json", "Track Records by Stage / Interval"),
-        ("bioetl-runtime.json", "Track GLOBAL Log Hygiene Trend"),
     ],
 )
 def test_adaptive_trend_panels_use_selected_interval(

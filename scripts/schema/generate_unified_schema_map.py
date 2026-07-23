@@ -896,6 +896,9 @@ def build_unified_schema_row(
 
 def write_csv(rows: list[dict[str, str]], output_path: Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    output_path = resolve_output_path(output_path, root=REPO_ROOT)
     with output_path.open("w", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=list(CSV_COLUMNS))
         writer.writeheader()

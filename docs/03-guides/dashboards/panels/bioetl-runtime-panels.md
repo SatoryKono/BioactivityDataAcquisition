@@ -32,13 +32,13 @@ snapshot evidence, a snapshot denominator, or a presence gate. Event deltas use
 ### 4. ID
 - **Type:** Table
 - **Purpose:** Show run ID, pipeline, run type, and timestamp for selected scope.
-- **Data sources:** Quarantine Explorer HTTP control-plane identity endpoint
+- **Data sources:** BioETL Ops HTTP control-plane identity endpoint
   `/ops/control-plane/identity-table`; this is not a Prometheus panel.
 
 ### 5. Processed Records
 - **Type:** Table
 - **Purpose:** Show records processed by stage for selected runs.
-- **Data sources:** Quarantine Explorer HTTP
+- **Data sources:** BioETL Ops HTTP
   `/ops/observability/processed-records`; this is not a Prometheus panel.
 
 ### 6. Runtime Status
@@ -203,32 +203,6 @@ snapshot evidence, a snapshot denominator, or a presence gate. Event deltas use
 - **Type:** Timeseries
 - **Purpose:** Show shutdown completions by reason.
 - **Data sources:** `bioetl_shutdown_completed_total`
-
-### 38. Tracing-only Log Hygiene (requires optional tracing profile)
-- **Type:** Row
-- **Purpose:** Collapsed optional log-hygiene evidence; never required for the
-  Prometheus-first headline.
-- **Data sources:** `{job="bioetl"} | json`
-
-### 39. Inspect Warning Logs
-- **Type:** Table
-- **Purpose:** Show warning log entries.
-- **Data sources:** `{job="bioetl"} | json`
-
-### 40. Inspect GLOBAL Unstructured Logs
-- **Type:** Table
-- **Purpose:** Show unstructured log entries.
-- **Data sources:** `{job="bioetl"} | json`
-
-### 41. Inspect Top Warning Events by Event / Logger / Range
-- **Type:** Table
-- **Purpose:** Show top warning events by event type and logger.
-- **Data sources:** `{job="bioetl"} | json`
-
-### 42. Track GLOBAL Log Hygiene Trend
-- **Type:** Timeseries
-- **Purpose:** Show log hygiene trend over time.
-- **Data sources:** `{job="bioetl"} | json`
 
 ## Variables
 

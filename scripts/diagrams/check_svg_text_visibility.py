@@ -162,6 +162,9 @@ def load_manifest(manifest_path: Path) -> list[str]:
         raise FileNotFoundError(f"Manifest not found: {manifest_path}")
 
     paths: list[str] = []
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_cli_path
+
+    manifest_path = resolve_cli_path(manifest_path, root=REPO_ROOT)
     for raw in manifest_path.read_text(encoding="utf-8").splitlines():
         line = raw.strip()
         if not line or line.startswith("#"):

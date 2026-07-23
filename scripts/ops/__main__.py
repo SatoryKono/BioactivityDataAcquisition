@@ -16,7 +16,7 @@ Stable commands:
     check-bioetl-prometheus-scrape
                        Fail-closed smoke: BioETL Prometheus scrape target must be UP
     ensure-quarantine-explorer
-                       Start or reuse Quarantine Explorer on :8081 for Grafana HTTP panels
+                       REMOVED stub (exit 2): Quarantine Explorer UI no longer shipped
     run-grafana-audit-cycle
                        Run preflight, screenshot refresh, and live Grafana audit
     wsl-proxy          Start WSL proxy helper

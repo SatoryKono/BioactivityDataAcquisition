@@ -16,7 +16,10 @@ from bioetl.infrastructure.schemas.silver_common_field_blocks import (
     build_silver_system_prefix_fields,
 )
 from scripts.engineering.qa.check_semantic_governance_policy import (
+    DEFAULT_ASSAY_METADATA_REGISTRY,
+    DEFAULT_PARTIAL_IDENTIFIER_REGISTRY,
     DEFAULT_REVIEW_REGISTRY,
+    _dedicated_authority_findings,
     validate_semantic_governance_policy,
 )
 
@@ -39,6 +42,29 @@ def test_semantic_governance_policy_gate_passes_current_repo() -> None:
     findings = validate_semantic_governance_policy()
 
     assert not findings, "\n".join(finding.message for finding in findings)
+
+
+def test_dedicated_semantic_authorities_are_bound_to_review_projections() -> None:
+    review = yaml.safe_load(DEFAULT_REVIEW_REGISTRY.read_text(encoding="utf-8"))
+    assay = yaml.safe_load(DEFAULT_ASSAY_METADATA_REGISTRY.read_text(encoding="utf-8"))
+    partial = yaml.safe_load(
+        DEFAULT_PARTIAL_IDENTIFIER_REGISTRY.read_text(encoding="utf-8")
+    )
+
+    assert not _dedicated_authority_findings(
+        review,
+        assay_payload=assay,
+        partial_payload=partial,
+    )
+
+    assay["fields"][0]["owner"] = "drifted-owner"
+    findings = _dedicated_authority_findings(
+        review,
+        assay_payload=assay,
+        partial_payload=partial,
+    )
+
+    assert any(finding.kind == "dedicated_authority_drift" for finding in findings)
 
 
 def test_partial_cluster_policies_cover_current_reviewed_identity_clusters() -> None:

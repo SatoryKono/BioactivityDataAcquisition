@@ -1,5 +1,10 @@
 # Dashboard Audit Checklist
 
+> **Removed 2026-07-23:** Silver Reject Explorer dashboard, Loki/Tempo Explore adjuncts, Quarantine Explorer datasource (replaced by BioETL Ops HTTP on :8000).
+> Use CLI ioetl quarantine inspect for record-level forensics. See [monitoring-surface-reduction](../../05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md).
+
+
+
 **Version**: 1.2.0
 **Status**: active
 **Date**: 2026-07-13
@@ -56,10 +61,10 @@ uv run python -m scripts.engineering.qa report-dashboard-inventory --check --jso
 - [ ] Bus remains readable in dark/light themes, has visible focus/hover states, and wraps without clipping at `1024px`
 
 ### 2.2 Global Adjunct Links (MUST)
-- [ ] After bus `0..6`, includes `Silver Reject Explorer`
-- [ ] Includes `Explore Logs` with safe baseline `{job="bioetl"}`
-- [ ] Includes `Explore Traces` (adjunct, traced-run-only)
-- [ ] Explore Traces tooltip mentions traced-run-only requirement
+- [x] After bus `0..6` only (Silver/Logs/Traces adjuncts removed 2026-07-23)
+- [x] Explore Logs removed from shipping surface (2026-07-23)
+- [x] Explore Traces removed from shipping surface (2026-07-23)
+- [x] Explore Traces tooltips N/A (removed)
 
 ### 2.3 Link Semantics (MUST)
 - [ ] No duplicate dashboard-to-dashboard links to same target
@@ -75,14 +80,14 @@ uv run python -m scripts.engineering.qa report-dashboard-inventory --check --jso
 
 ### 2.5 Required Top-Level Links by UID (MUST)
 Check against `contracts/navigation-links.yaml` → `required_top_level_links_by_uid`:
-- [ ] `bioetl-overview-v2`: 0. Control Plane, 2. Runtime, 3. Provider Health, 4. Data Quality, 5. Workflow, 6. Alerts & SLO, Explore Logs, Explore Traces, Silver Reject Explorer
-- [ ] `bioetl-runtime`: 0. Control Plane, 1. Overview, 3. Provider Health, 4. Data Quality, 5. Workflow, 6. Alerts & SLO, Explore Logs, Explore Traces, Silver Reject Explorer
-- [ ] `bioetl-control-plane-v1`: 1. Overview, 2. Runtime, 3. Provider Health, 4. Data Quality, 5. Workflow, 6. Alerts & SLO, Silver Reject Explorer, Explore Logs, Explore Traces
-- [ ] `bioetl-provider-health-v2`: 0. Control Plane, 1. Overview, 2. Runtime, 4. Data Quality, 5. Workflow, 6. Alerts & SLO, Explore Logs, Explore Traces, Silver Reject Explorer
-- [ ] `bioetl-dq-v2`: 0. Control Plane, 1. Overview, 2. Runtime, 3. Provider Health, 5. Workflow, 6. Alerts & SLO, Silver Reject Explorer, Explore Logs, Explore Traces
-- [ ] `bioetl-silver-reject-explorer`: 0. Control Plane, 1. Overview, 2. Runtime, 3. Provider Health, 4. Data Quality, 5. Workflow, 6. Alerts & SLO, Explore Logs, Explore Traces
-- [ ] `bioetl-workflow-overview`: 0. Control Plane, 1. Overview, 2. Runtime, 3. Provider Health, 4. Data Quality, 6. Alerts & SLO, Explore Logs, Explore Traces, Silver Reject Explorer
-- [ ] `bioetl-alerts-slo`: 0. Control Plane, 1. Overview, 2. Runtime, 3. Provider Health, 4. Data Quality, 5. Workflow, Silver Reject Explorer, Explore Logs, Explore Traces
+- [ ] `bioetl-overview-v2`: 0. Control Plane, 2. Runtime, 3. Provider Health, 4. Data Quality, 5. Workflow, 6. Alerts & SLO
+- [ ] `bioetl-runtime`: 0. Control Plane, 1. Overview, 3. Provider Health, 4. Data Quality, 5. Workflow, 6. Alerts & SLO
+- [ ] `bioetl-control-plane-v1`: 1. Overview, 2. Runtime, 3. Provider Health, 4. Data Quality, 5. Workflow, 6. Alerts & SLO
+- [ ] `bioetl-provider-health-v2`: 0. Control Plane, 1. Overview, 2. Runtime, 4. Data Quality, 5. Workflow, 6. Alerts & SLO
+- [ ] `bioetl-dq-v2`: 0. Control Plane, 1. Overview, 2. Runtime, 3. Provider Health, 5. Workflow, 6. Alerts & SLO
+- [x] Silver Reject Explorer dashboard removed — use CLI `bioetl quarantine inspect`
+- [ ] `bioetl-workflow-overview`: 0. Control Plane, 1. Overview, 2. Runtime, 3. Provider Health, 4. Data Quality, 6. Alerts & SLO
+- [ ] `bioetl-alerts-slo`: 0. Control Plane, 1. Overview, 2. Runtime, 3. Provider Health, 4. Data Quality, 5. Workflow
 
 ---
 
@@ -109,7 +114,7 @@ Check against `contracts/selector-contracts.yaml` → `shipped_selector_registry
 - [ ] Hidden context selectors: `pipeline_context`, `run_type_context`, `provider_context`
 - [ ] No visible `pipeline` / `run_type` selectors
 
-**Forensic explorer** (`bioetl-silver-reject-explorer`):
+**Forensic explorer** (`CLI quarantine inspect`):
 - [ ] Visible selectors: `pipeline`, `run_type`, `reason_code`, `field`, `quarantine_run_id`, `payload_hash`
 - [ ] Forensic selectors do NOT leak into Prometheus dashboards
 
@@ -129,7 +134,7 @@ Check against `contracts/selector-contracts.yaml` → `shipped_selector_registry
 - [ ] `bioetl-runtime`: `$run_type` depends on `$pipeline`, `$stage` depends on runtime-selected scope
 - [ ] `bioetl-dq-v2`: `$run_type` depends on `$pipeline`, `$stage` depends on `$pipeline` and `$run_type`
 - [ ] `bioetl-provider-health-v2`: `$pipeline_context` preserved from source, `$adapter` optional
-- [ ] `bioetl-silver-reject-explorer`: `$pipeline` required before Quarantine Explorer reads
+- [x] Silver Reject Explorer dashboard removed — use CLI `bioetl quarantine inspect`
 - [ ] `bioetl-workflow-overview`: workflow variables local, hidden context preserves single-pipeline handoff
 
 ---
@@ -296,7 +301,7 @@ For each panel:
 - [ ] If scope does not change, tooltip: `Preserves selected scope and time range.`
 
 ### 8.3 Role-Based Runbook CTA Policy (MUST)
-- [ ] Operator/forensic surfaces (`runtime`, `control-plane`, `provider-health`, `dq`, `silver-reject-explorer`): critical panels SHOULD have actionable CTA
+- [x] Operator forensic record-level surface is CLI quarantine inspect
 - [ ] Dashboard-routing-first surface (`overview`): panel-level CTA MAY remain dashboard-only
 - [ ] Selected-range evidence surface (`workflow-overview`): selected-range evidence counters do NOT require panel-level runbook links
 - [ ] If runbook link used, URL follows canonical GitHub blob pattern: `https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/<name>.md`
@@ -383,7 +388,7 @@ Check against `contracts/navigation-links.yaml` → `required_panel_links_by_uid
 - [ ] Panel `9013` (Workflow Global) → dataLink to: Open Workflow
 
 **bioetl-dq-v2**:
-- [ ] Panel `9102` (Inspect DQ Current Reasons) → dataLink to: Open Silver Reject Explorer
+- [x] Open Silver Reject Explorer CTA removed — use CLI quarantine inspect
 
 **bioetl-workflow-overview**:
 - [ ] Panel `9` (First Action) → dataLinks to: Open 2. Runtime, Open 4. Data Quality, Open 3. Provider Health, Open 0. Control Plane, Open 1. Overview
@@ -403,9 +408,9 @@ Check against `contracts/navigation-links.yaml` → `first_action_contract`:
 
 **bioetl-dq-v2** (panel `9103`):
 - [ ] Min CTA: 3, Max CTA: 3
-- [ ] CTAs: Review current status, Inspect current reasons, Open Silver Reject Explorer
+- [x] Open Silver Reject Explorer CTA removed — use CLI quarantine inspect
 
-**bioetl-silver-reject-explorer** (panel `10`):
+**CLI quarantine inspect** (panel `10`):
 - [ ] Min CTA: 2, Max CTA: 2
 - [ ] CTAs: Review total rejects, Review scoped summary
 
@@ -485,8 +490,8 @@ Check against `contracts/navigation-links.yaml` → `cross_scope_marker_contract
 - [ ] `bioetl-runtime -> bioetl-workflow-overview`: reset scope
 - [ ] `bioetl-dq-v2 -> bioetl-provider-health-v2`: context mapping
 - [ ] `bioetl-dq-v2 -> bioetl-workflow-overview`: reset scope
-- [ ] `bioetl-provider-health-v2 -> bioetl-silver-reject-explorer`: context mapping
-- [ ] `bioetl-silver-reject-explorer -> bioetl-provider-health-v2`: context mapping
+- [ ] `bioetl-provider-health-v2 -> CLI quarantine inspect`: context mapping
+- [ ] `CLI quarantine inspect -> bioetl-provider-health-v2`: context mapping
 - [ ] `bioetl-workflow-overview -> bioetl-provider-health-v2`: context mapping
 
 ### 17.3 Required Tooltip Tokens
@@ -503,7 +508,7 @@ Check against `contracts/navigation-links.yaml` → `provider_context_mapping_co
 - [ ] `bioetl-overview-v2`: provider_value=unknown, adapter_value=unknown
 - [ ] `bioetl-runtime`: provider_value=unknown, adapter_value=unknown
 - [ ] `bioetl-dq-v2`: provider_value=unknown, adapter_value=unknown
-- [ ] `bioetl-silver-reject-explorer`: provider_value=unknown, adapter_value=unknown
+- [x] Silver Reject Explorer dashboard removed — use CLI `bioetl quarantine inspect`
 
 ---
 

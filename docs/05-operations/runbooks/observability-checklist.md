@@ -124,10 +124,11 @@ cat reports/logs/bioetl.log | jq 'select(.run_id and .pipeline and .pipeline_nam
 
 Service ownership for this section is `@bioetl-observability`.
 
-- `BioETLQuarantineExplorerUnavailable`: verify
-  `up{job="quarantine-explorer"}`, then `/health/live` and `/metrics`. Until the
-  alert clears, classify HTTP-backed identity, processed-record, and quarantine
-  panels as backend unavailable rather than valid-empty.
+- HTTP identity panels (datasource **BioETL Ops HTTP**): verify main health
+  server `up{job="bioetl"}` and `GET http://127.0.0.1:8000/health/live` (Docker
+  scrape target `bioetl:8000`). Until healthy, classify HTTP-backed identity and
+  processed-record panels as backend unavailable rather than valid-empty.
+  Quarantine Explorer scrape/alert was removed 2026-07-23.
 - `BioETLGrafanaRendererUnavailable`: verify
   `up{job="grafana-image-renderer"}`, Grafana `rendererAvailable`, and one
   server-side render probe. Until it clears, mark screenshot evidence as render

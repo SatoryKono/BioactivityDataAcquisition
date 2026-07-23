@@ -33,7 +33,7 @@ dashboards:
     navigation_id: 0
     data_sources:
       - Prometheus
-      - Quarantine Explorer
+      - BioETL Ops HTTP
       - Grafana
     panel_count: 57
     key_panels:
@@ -71,7 +71,7 @@ dashboards:
     navigation_id: 1
     data_sources:
       - Prometheus
-      - Quarantine Explorer
+      - BioETL Ops HTTP
       - Grafana
     panel_count: 25
     key_panels:
@@ -101,10 +101,9 @@ dashboards:
     navigation_id: 2
     data_sources:
       - Prometheus
-      - Loki
-      - Quarantine Explorer
+      - BioETL Ops HTTP
       - Grafana
-    panel_count: 42
+    panel_count: 37
     key_panels:
       - id: 9100
         title: "Runtime Status"
@@ -138,7 +137,7 @@ dashboards:
     navigation_id: 3
     data_sources:
       - Prometheus
-      - Quarantine Explorer
+      - BioETL Ops HTTP
       - Grafana
     panel_count: 29
     key_panels:
@@ -167,7 +166,7 @@ dashboards:
     navigation_id: 4
     data_sources:
       - Prometheus
-      - Quarantine Explorer
+      - BioETL Ops HTTP
       - Grafana
     panel_count: 36
     key_panels:
@@ -202,7 +201,7 @@ dashboards:
     navigation_id: 5
     data_sources:
       - Prometheus
-      - Quarantine Explorer
+      - BioETL Ops HTTP
       - Grafana
     panel_count: 16
     key_panels:
@@ -229,38 +228,6 @@ dashboards:
       - run_type_context_exact
       - provider_context
       - provider_context_exact
-
-  - uid: bioetl-silver-reject-explorer
-    title: "Silver Reject Explorer"
-    owner: "@bioetl-observability"
-    owner_route: docs/05-operations/runbooks/quarantine-management.md
-    family: explorer
-    navigation_id: null
-    data_sources:
-      - Prometheus
-      - Quarantine Explorer
-      - Grafana
-    panel_count: 16
-    key_panels:
-      - id: 2
-        title: "Monitor Filtered Records Total"
-        type: table
-        description: "Quarantined/silver-rejected records table"
-      - id: 16
-        title: "Trends · expand when rejects exist"
-        type: row
-        description: "Collapsed progressive-disclosure trend row"
-      - id: 15
-        title: "Records and selected detail · expand after narrowing"
-        type: row
-        description: "Collapsed record-level row opened after scope narrowing"
-    selector_variables:
-      - pipeline
-      - run_type
-      - reason_code
-      - field
-      - quarantine_run_id
-      - payload_hash
 
   - uid: bioetl-alerts-slo
     title: "6. Alerts & SLO"
@@ -297,10 +264,10 @@ contract_metadata:
     - "grafana/dashboards/bioetl-provider-health-v2.json"
     - "grafana/dashboards/bioetl-dq-v2.json"
     - "grafana/dashboards/bioetl-workflow-overview.json"
-    - "grafana/dashboards/bioetl-silver-reject-explorer.json"
     - "grafana/dashboards/bioetl-alerts-slo.json"
   governance:
-    - All eight shipped dashboards must include navigation panel id=1000
-    - Navigation bus 0-6 plus Silver/Logs/Traces must be identical, theme-safe, and wrap at 1024px
+    - All seven shipped dashboards must include navigation panel id=1000
+    - Navigation bus 0-6 (Logs/Traces explore links residual; Loki/Tempo stack removed)
     - KPI ownership mirrors must be documented in navigation-links.yaml
     - Selector contracts must match selector-contracts.yaml
+    - Quarantine Explorer UI and Silver Reject Explorer dashboard were removed 2026-07-23

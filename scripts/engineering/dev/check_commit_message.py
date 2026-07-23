@@ -17,6 +17,10 @@ MAX_CONVENTIONAL_HEADER_LENGTH = 100
 
 
 def _read_header(commit_msg_path: Path) -> str:
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    # Commit-msg hooks may pass .git/COMMIT_EDITMSG under the repo root.
+    commit_msg_path = resolve_output_path(commit_msg_path, root=REPO_ROOT)
     lines = commit_msg_path.read_text(encoding="utf-8").splitlines()
     return lines[0] if lines else ""
 

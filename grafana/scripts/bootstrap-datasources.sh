@@ -1,7 +1,6 @@
 #!/bin/sh
-# Grafana datasource bootstrap (Prometheus / Pushgateway only).
-# Loki, Tempo, and Quarantine Explorer datasources were removed from the
-# shipping monitoring surface.
+# Grafana datasource bootstrap (Prometheus + BioETL Ops HTTP).
+# Loki, Tempo, and Quarantine Explorer were removed from the shipping surface.
 set -eu
 
 TARGET_DIR="/etc/grafana/provisioning/datasources"
@@ -23,7 +22,7 @@ deleteDatasources:
   - name: Quarantine Explorer
 EOF
 
-echo "[bioetl-grafana] provisioned core datasources only (no Loki/Tempo/Quarantine Explorer)"
+echo "[bioetl-grafana] provisioned Prometheus + BioETL Ops HTTP (no Loki/Tempo/Quarantine Explorer)"
 
 if [ -n "${RENDERING_SERVER_URL}" ] && [ -d "${STALE_RENDERER_PLUGIN_DIR}" ]; then
   rm -rf "${STALE_RENDERER_PLUGIN_DIR}"

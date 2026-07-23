@@ -36,19 +36,23 @@ def build_pipeline_create_runner_request(
     control_plane: ControlPlaneArtifacts | None = None,
     manifest_id: str | None = None,
     execution_fingerprint: str | None = None,
-    config_hash: str | None = None,
-    resolved_config_hash: str | None = None,
-    effective_config_hash: str | None = None,
+    config_hashes: tuple[str | None, str | None, str | None] = (None, None, None),
     dq_contract_compatibility_hash: str | None = None,
     effective_config_artifact_id: str | None = None,
-    replay_of_run_id: str | None = None,
-    replay_of_manifest_id: str | None = None,
+    replay_parentage: tuple[str | None, str | None] = (None, None),
     input_snapshot_fingerprint: str | None = None,
     filter_config: InputFilterConfig | None = None,
     config: PipelineYamlConfig | None = None,
     cached_bronze: CachedBronzeContext | None = None,
 ) -> PipelineCreateRunnerRequest:
-    """Build the canonical public runner request from explicit runtime inputs."""
+    """Build the canonical public runner request from explicit runtime inputs.
+
+    Packed groups keep this helper under the Sonar S107 budget:
+    - ``config_hashes``: ``(config_hash, resolved_config_hash, effective_config_hash)``
+    - ``replay_parentage``: ``(replay_of_run_id, replay_of_manifest_id)``
+    """
+    config_hash, resolved_config_hash, effective_config_hash = config_hashes
+    replay_of_run_id, replay_of_manifest_id = replay_parentage
     resolved_control_plane = control_plane or build_control_plane_artifacts(
         manifest_id=manifest_id,
         execution_fingerprint=execution_fingerprint,
@@ -90,9 +94,17 @@ def build_pipeline_create_runner_request_from_kwargs(
         ),
         manifest_id=cast(str | None, kwargs.get("manifest_id")),
         execution_fingerprint=cast(str | None, kwargs.get("execution_fingerprint")),
-        config_hash=cast(str | None, kwargs.get("config_hash")),
-        resolved_config_hash=cast(str | None, kwargs.get("resolved_config_hash")),
-        effective_config_hash=cast(str | None, kwargs.get("effective_config_hash")),
+        config_hashes=cast(
+            "tuple[str | None, str | None, str | None]",
+            kwargs.get(
+                "config_hashes",
+                (
+                    kwargs.get("config_hash"),
+                    kwargs.get("resolved_config_hash"),
+                    kwargs.get("effective_config_hash"),
+                ),
+            ),
+        ),
         dq_contract_compatibility_hash=cast(
             str | None,
             kwargs.get("dq_contract_compatibility_hash"),
@@ -101,8 +113,16 @@ def build_pipeline_create_runner_request_from_kwargs(
             str | None,
             kwargs.get("effective_config_artifact_id"),
         ),
-        replay_of_run_id=cast(str | None, kwargs.get("replay_of_run_id")),
-        replay_of_manifest_id=cast(str | None, kwargs.get("replay_of_manifest_id")),
+        replay_parentage=cast(
+            "tuple[str | None, str | None]",
+            kwargs.get(
+                "replay_parentage",
+                (
+                    kwargs.get("replay_of_run_id"),
+                    kwargs.get("replay_of_manifest_id"),
+                ),
+            ),
+        ),
         input_snapshot_fingerprint=cast(
             str | None,
             kwargs.get("input_snapshot_fingerprint"),

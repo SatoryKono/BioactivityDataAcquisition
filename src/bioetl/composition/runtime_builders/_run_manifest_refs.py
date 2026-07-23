@@ -71,6 +71,7 @@ class ManifestControlPlaneRefs:
 
 
 def create_control_plane_refs(
+    *,
     manifest_id: str,
     execution_fingerprint: str,
     resolved_config_hash: str,
@@ -78,22 +79,44 @@ def create_control_plane_refs(
     source_fingerprint: str | None,
     dq_contract_compatibility_hash: str,
     effective_config_artifact_id: str,
-    replay_of_run_id: str | None,
-    replay_of_manifest_id: str | None,
-    input_snapshot_fingerprint: str | None,
-    contract_ref: str,
-    contract_version: str | None,
-    contract_schema_hash: str | None,
-    dq_policy_ref: str | None,
-    rule_bundle_version: str | None,
-    normalization_profile_ref: str | None,
-    normalization_profile_version: str | None,
-    normalization_profile_hash: str | None,
-    required_persistence_profile: str | None,
+    replay_parentage: tuple[str | None, str | None] = (None, None),
+    input_snapshot_fingerprint: str | None = None,
+    contract: tuple[str | None, str | None, str | None] = (None, None, None),
+    policy: tuple[str | None, str | None] = (None, None),
+    normalization_profile: tuple[str | None, str | None, str | None] = (
+        None,
+        None,
+        None,
+    ),
+    required_persistence_profile: str | None = None,
 ) -> ManifestControlPlaneRefs:
-    """Build the compact control-plane refs bundle returned to callers."""
+    """Build the compact control-plane refs bundle returned to callers.
+
+    Packed groups under Sonar S107:
+    - ``replay_parentage``: ``(replay_of_run_id, replay_of_manifest_id)``
+    - ``contract``: ``(contract_ref, contract_version, contract_schema_hash)``
+    - ``policy``: ``(dq_policy_ref, rule_bundle_version)``
+    - ``normalization_profile``: ``(ref, version, hash)``
+    """
+    replay_of_run_id, replay_of_manifest_id = replay_parentage
+    contract_ref, contract_version, contract_schema_hash = contract
+    dq_policy_ref, rule_bundle_version = policy
+    (
+        normalization_profile_ref,
+        normalization_profile_version,
+        normalization_profile_hash,
+    ) = normalization_profile
     contract_identity_values = build_contract_identity_field_values_from_mapping(
-        locals()
+        {
+            "contract_ref": contract_ref,
+            "contract_version": contract_version,
+            "contract_schema_hash": contract_schema_hash,
+            "dq_policy_ref": dq_policy_ref,
+            "rule_bundle_version": rule_bundle_version,
+            "normalization_profile_ref": normalization_profile_ref,
+            "normalization_profile_version": normalization_profile_version,
+            "normalization_profile_hash": normalization_profile_hash,
+        }
     )
     return ManifestControlPlaneRefs(
         manifest_id=manifest_id,

@@ -1,16 +1,7 @@
+# Auto-refreshed not-in-nav baseline for docs outside mkdocs nav.
+# Paths are relative to docs/.
 00-project/ai/README.md
-00-project/ai/audit/observability-issues/OBS-002-metric-to-panel-runtime.md
-00-project/ai/audit/observability-issues/OBS-002-validation-findings.md
-00-project/ai/audit/observability-issues/OBS-003-live-validation.md
-00-project/ai/audit/observability-issues/OBS-003-validation-findings.md
-00-project/ai/audit/observability-issues/OBS-004-emitter-bypass-proof.md
-00-project/ai/audit/observability-issues/OBS-004-validation-findings.md
-00-project/ai/audit/observability-issues/OBS-006-live-datasource-compliance.md
-00-project/ai/audit/observability-issues/OBS-006-validation-findings.md
-00-project/ai/audit/observability-issues/README.md
-00-project/ai/audit/observability-issues/VALIDATION-SUMMARY.md
 00-project/ai/agents/CLAUDE.md
-00-project/ai/mcp-token-configuration.md
 00-project/ai/agents/agents/py-audit-bot.md
 00-project/ai/agents/agents/py-config-bot.md
 00-project/ai/agents/agents/py-debug-bot.md
@@ -31,6 +22,7 @@
 00-project/ai/agents/agents/sp-refactoring-specialist.md
 00-project/ai/agents/agents/sp-scientific-literature-researcher.md
 00-project/ai/agents/agents/sp-test-automator.md
+00-project/ai/agents/guides/GOVERNANCE_ARTIFACT_REFRESH.md
 00-project/ai/agents/guides/MEMORY_USAGE.md
 00-project/ai/agents/orchestration/ORCHESTRATION.md
 00-project/ai/agents/orchestration/py-team-orchestration.md
@@ -39,7 +31,18 @@
 00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md
 00-project/ai/agents/policy/SPECIALIST_PROFILE_TEMPLATE.md
 00-project/ai/agents/runtime/orchestration/py-team-orchestration.md
+00-project/ai/audit/observability-issues/OBS-002-metric-to-panel-runtime.md
+00-project/ai/audit/observability-issues/OBS-002-validation-findings.md
+00-project/ai/audit/observability-issues/OBS-003-live-validation.md
+00-project/ai/audit/observability-issues/OBS-003-validation-findings.md
+00-project/ai/audit/observability-issues/OBS-004-emitter-bypass-proof.md
+00-project/ai/audit/observability-issues/OBS-004-validation-findings.md
+00-project/ai/audit/observability-issues/OBS-006-live-datasource-compliance.md
+00-project/ai/audit/observability-issues/OBS-006-validation-findings.md
+00-project/ai/audit/observability-issues/README.md
+00-project/ai/audit/observability-issues/VALIDATION-SUMMARY.md
 00-project/ai/mcp-governance.md
+00-project/ai/mcp-token-configuration.md
 00-project/ai/memory/README.md
 00-project/ai/memory/memory-py-architecture-debt-bot.md
 00-project/ai/memory/memory-py-audit-bot.md
@@ -104,9 +107,9 @@
 00-project/ai/skills/_references/local/py-test-swarm/references/telemetry-and-flaky-db.md
 00-project/ai/skills/_references/local/technical-designer-mermaid/references/patterns.md
 00-project/ai/skills/global/.system/skill-creator/SKILL.md
-00-project/ai/skills/global/public/architecture-guardian/SKILL.md
 00-project/ai/skills/global/.system/skill-creator/references/openai_yaml.md
 00-project/ai/skills/global/.system/skill-installer/SKILL.md
+00-project/ai/skills/global/public/architecture-guardian/SKILL.md
 00-project/ai/skills/local/collecting-evidence/references/evidence-decision-contract.md
 00-project/ai/skills/local/collecting-evidence/references/evidence-object-schema.md
 00-project/ai/skills/local/collecting-evidence/references/id-generation-rules.md
@@ -139,6 +142,7 @@
 00-project/ai/skills/local/suggest-users/references/scoring.md
 00-project/ai/skills/local/suggest-users/references/workflow.md
 00-project/ai/skills/local/synthesizing-pillars/references/synthesis-template.md
+01-requirements/REQUIREMENTS.md
 02-architecture/adr-registry/README.md
 02-architecture/adr-registry/index.md
 02-architecture/adr-registry/status-dashboard.md
@@ -183,10 +187,12 @@
 03-guides/dashboards/panel-title-inventory.md
 03-guides/dashboards/selector-architecture.md
 03-guides/dashboards/variable-reference.md
+03-guides/development/coderabbit-local-reviews.md
 03-guides/development/mistral-vibe-wsl2-setup.md
 03-guides/github-quick-reference.md
 03-guides/github-setup-plan.md
 03-guides/github-workflow-diagrams.md
+03-guides/gold-contract-v1-1-migration.md
 03-guides/script-management/README.md
 03-guides/script-management/script-analysis-prompt.md
 04-reference/api/application/core.md
@@ -205,6 +211,7 @@
 04-reference/api/infrastructure/unified-http-client.md
 04-reference/contracts/canonical-field-registry.md
 04-reference/contracts/reproducibility-scoring-rubric.md
+04-reference/domain/symbol-invariant-traceability.md
 04-reference/internalextended/composition-internal.md
 04-reference/internalextended/extended-ports.md
 04-reference/internalextended/implementation-patterns.md
@@ -215,6 +222,7 @@
 04-reference/observability/logging-guide.md
 04-reference/observability/tracing-guide.md
 04-reference/pipelines/chembl/11-target-protein-classification-spec.md
+04-reference/pipelines/contract-facet-matrix.md
 04-reference/providers/publication-normalization.md
 04-reference/schemas/domain/chembl/observed-vocab-inventory.md
 04-reference/schemas/domain/chembl/ontology-governance.md
@@ -246,8 +254,10 @@
 05-operations/runbooks/docker-stability.md
 05-operations/runbooks/generated-artifact-drift-workflow.md
 05-operations/runbooks/merge-campaign.md
+05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md
 05-operations/runbooks/neo4j-backend-recovery-quick-start.md
 05-operations/runbooks/neo4j-complete-recovery-guide.md
+05-operations/runbooks/windows-c-to-d-migration.md
 05-operations/runbooks/workflow-control-plane.md
 05-operations/sli-slo-baseline.md
 05-operations/tooling/scripts-ops/00_START_HERE.md
@@ -265,18 +275,10 @@
 05-operations/verification/neo4j-memory-qa-examples.md
 05-operations/verification/neo4j-memory-windows-verification.md
 05-operations/verification/root-hygiene-refactoring-plan-2026-07-08.md
-D-01 Governance & Style Guide.md
-D-02 Provider Integration Handbook.md
-D-03 Data Contracts & Schema Specification.md
-D-04 Data Model, IDs & Lineage Specification.md
-D-05 Pipelines & Config Specification.md
-D-06 Data Quality и Quarantine Handbook.md
-D-07 Observability Specification.md
-D-08 Security & Compliance dossier.md
-D-09 Requirements Traceability.md
 DOCKER_QUICKSTART.md
 DOCKER_SETUP.md
 config-discrepancies-report.md
+development/pycharm.md
 filters/README.md
 filters/inventory-baseline.md
 filters/migration-plan.md
@@ -292,3 +294,4 @@ ru/INDEX.md
 ru/README.md
 security/export-policy.md
 security/rbac-matrix.md
+tools/grok-cli.md

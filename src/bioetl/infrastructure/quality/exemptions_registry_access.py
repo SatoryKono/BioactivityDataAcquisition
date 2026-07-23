@@ -24,6 +24,9 @@ def load_exemptions_registry(
     if not registry_path.exists():
         raise FileNotFoundError(f"Exemptions registry not found: {registry_path}")
 
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
+    registry_path = resolve_output_path(registry_path)
     raw = yaml.safe_load(registry_path.read_text(encoding="utf-8")) or {}
     if not isinstance(raw, dict):
         raise ValueError(f"Exemptions registry must be a mapping: {registry_path}")

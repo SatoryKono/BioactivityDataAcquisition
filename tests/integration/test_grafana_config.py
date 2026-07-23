@@ -13,7 +13,7 @@ from tests.integration._grafana_test_support import (
     _PROMQL_METRIC_SELECTOR_RE,
     _assert_operator_context_shell_contract,
     _assert_provider_health_variable_contract,
-    _assert_silver_reject_explorer_variable_contract,
+
     _assert_standard_variable_contract,
     _extract_selector_labels,
     _unknown_metrics_for_query,
@@ -464,7 +464,7 @@ def _assert_workflow_overview_variable_sources(
 
 def _assert_overview_run_id_variable_flags(run_id_var: dict) -> None:
     assert run_id_var.get("type") == "query"
-    assert run_id_var.get("datasource") == "Quarantine Explorer"
+    assert run_id_var.get("datasource") == "BioETL Ops HTTP"
     assert run_id_var.get("includeAll") is False
     assert run_id_var.get("multi") is False
     assert run_id_var.get("current", {}).get("text") == "-"
@@ -509,7 +509,7 @@ def _assert_overview_identity_panel(dashboard: dict) -> None:
         None,
     )
     assert identity_panel is not None
-    assert identity_panel.get("datasource") == "Quarantine Explorer"
+    assert identity_panel.get("datasource") == "BioETL Ops HTTP"
     identity_targets = identity_panel.get("targets", [])
     assert isinstance(identity_targets, list) and len(identity_targets) == 1
     identity_target = identity_targets[0]
@@ -607,7 +607,7 @@ def _assert_latency_panel_has_quantiles(panel_title: str, panel: dict | None) ->
 def _assert_identity_evidence_panel(panels: dict, title: str, view: str) -> None:
     panel = panels.get(title)
     assert panel is not None, f"Control-plane dashboard missing {title!r}"
-    assert panel.get("datasource") == "Quarantine Explorer"
+    assert panel.get("datasource") == "BioETL Ops HTTP"
     targets = panel.get("targets", [])
     assert len(targets) == 1
     target = targets[0]
@@ -818,15 +818,16 @@ def test_dashboard_prometheus_datasource_contract(dashboard_path: Path) -> None:
 
 
 @pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
-def test_explore_traces_links_use_safe_search_first_handoff(
+def test_explore_traces_links_absent_after_tempo_removal(
     dashboard_path: Path,
 ) -> None:
-    """Explore Traces links must preserve the dashboard range in the safe handoff."""
+    """Tempo was removed from the shipping stack; dashboards must not require it."""
     dashboard = load_dashboard(dashboard_path)
     trace_urls = _collect_explore_traces_urls(dashboard)
-    assert trace_urls, f"{dashboard_path.name} must expose an Explore Traces URL"
-    for url in trace_urls:
-        _assert_safe_explore_traces_url(dashboard_path.name, url)
+    assert not trace_urls, (
+        f"{dashboard_path.name} still exposes Tempo Explore Traces URLs after removal: "
+        f"{trace_urls}"
+    )
 
 
 @pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
@@ -983,8 +984,6 @@ def test_variable_query_sources(dashboard_path):
     variable_map = _variable_map(dashboard)
     name = dashboard_path.name
 
-        _assert_silver_reject_explorer_variable_contract(dashboard_path, variable_map)
-        return
     if name == "bioetl-alerts-slo.json":
         _assert_alerts_slo_variable_sources(variable_map)
         return
@@ -1281,7 +1280,7 @@ def test_control_plane_no_missing_metric_promql() -> None:
 
     assert "bioetl_replay_duplicate_records_total" not in expressions
     checkpoint_panel = panels["Monitor: Checkpoint Freshness Lag (seconds)"]
-    assert checkpoint_panel.get("datasource") == "Quarantine Explorer"
+    assert checkpoint_panel.get("datasource") == "BioETL Ops HTTP"
     target = checkpoint_panel.get("targets", [])[0]
     assert target.get("parser") == "backend"
     assert (

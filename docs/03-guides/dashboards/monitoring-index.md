@@ -30,7 +30,7 @@ For the authoritative shipped dashboard mapping
 | Runtime latency, logs, memory, or alert-condition concern? | `bioetl-runtime` | `bioetl diagnostics guide`; [Observability Checklist](../../05-operations/runbooks/observability-checklist.md) | [Monitoring Guide](../../05-operations/01-monitoring-guide.md) |
 | Provider retries, slowness, or failures? | `bioetl-provider-health-v2` | `bioetl diagnostics health --json`; provider incident runbook | [Incident Response](../../05-operations/runbooks/incident-response.md) |
 | DQ/freshness/quarantine signal concern? | `bioetl-dq-v2` | `bioetl diagnostics quarantine --pipeline <pipeline>` | [DQ Failure Investigation](../../05-operations/runbooks/dq-failure-investigation.md) |
-| Need exact Silver structural rejected record evidence? | `bioetl-silver-reject-explorer` | `bioetl quarantine inspect --pipeline <pipeline> --silver-filter-only ...` (`FILTERED_OUT_SILVER` legacy alias only) | [Quarantine Management](../../05-operations/runbooks/quarantine-management.md) |
+| Need exact Silver structural rejected record evidence? | CLI (Explorer UI removed) | `bioetl quarantine inspect --pipeline <pipeline> --silver-filter-only ...` (`FILTERED_OUT_SILVER` legacy alias only); DQ aggregates stay in `bioetl-dq-v2` | [Quarantine Management](../../05-operations/runbooks/quarantine-management.md) |
 | Need Gold contract/semantic reject evidence? | `bioetl-dq-v2` Gold reject panels / processed-records surfaces | Start from `Inspect: Gold Reject Outcomes by Pipeline`; do not use `--silver-filter-only` | [Quarantine Management](../../05-operations/runbooks/quarantine-management.md) |
 | Replay/recovery trust question for run family? | `bioetl-control-plane-v1` | `Track: Replay / Resume Blockers in Range`, `bioetl checkpoint inspect`, `bioetl checkpoint audit-run`, then `bioetl run-manifest show <run-id|manifest-id>` for exact manifest/ledger evidence | [Checkpoint Debugging](../../05-operations/runbooks/checkpoint-debugging.md) |
 | Declarative workflow step failed or skipped? | `bioetl-workflow-overview` | `bioetl_workflow_*` metrics | [Dashboard v2 Usage](dashboard-v2-usage.md) |
@@ -53,14 +53,14 @@ scopes resolve from RunLedger artifact/metrics evidence; aggregate scopes are
 backed by `bioetl_processed_records_*` recording rules with `value` and
 formatted `percintage` columns, including zero-valued outcome rows and not
 acting as a `$__range` throughput summary.
-All eight shipped dashboards share one theme-safe navigation panel: numbered
-bus `0..6` plus `Silver Reject Explorer`, `Explore Logs`, and `Explore Traces`.
-The bus wraps at `1024px` and stays readable in dark and light themes.
+All **seven** shipped dashboards share one theme-safe navigation panel: numbered
+bus `0..6`. Loki/Tempo Explore adjuncts and Silver Reject Explorer were removed
+2026-07-23. The bus wraps at `1024px` and stays readable in dark and light themes.
 
-The shared `ID` and `Processed Records` cards are HTTP-backed. Their empty
-state must be interpreted only after the Quarantine Explorer/control-plane
-backend responds on `/health/live`; backend-down, invalid scope, and true
-zero/absent run are distinct operator states.
+The shared `ID` and `Processed Records` cards are HTTP-backed via
+**BioETL Ops HTTP** (main `bioetl health server` `:8000`). Their empty state must
+be interpreted only after `/health/live` (and control-plane readiness) respond;
+backend-down, invalid scope, and true zero/absent run are distinct operator states.
 
 For `0. Control Plane`, exact identity graph evidence is available by expanding
 the collapsed-by-default `Identity evidence and remaining replay-safety signals` row. Those
@@ -71,10 +71,9 @@ they are HTTP-backed forensic surfaces, not Prometheus label filters.
 Current canonical Overview baseline:
 
 - `bioetl-overview-v2` materializes the explicit header contract
-- it remains aggregate-first and routes exact run forensics to Control Plane /
-  Silver Reject Explorer; its primary `run_id` selector feeds HTTP identity
-  panels and is mapped to Silver `quarantine_run_id` only for explicit
-  explorer handoff, not for Prometheus labels or primary-dashboard queries
+- it remains aggregate-first and routes exact run forensics to Control Plane and
+  CLI quarantine inspect; its primary `run_id` selector feeds HTTP identity
+  panels only (not Prometheus labels)
 
 ## If X symptom → open dashboard Y → panel Z
 
@@ -85,7 +84,7 @@ Current canonical Overview baseline:
 | Provider degradation, retry exhaustion, or provider telemetry gap | `bioetl-provider-health-v2` | `Monitor GLOBAL Provider Severity Matrix`, `Inspect Provider Top Causes`, `Monitor Provider Telemetry Freshness` |
 | DQ quality or quarantine increase | `bioetl-dq-v2` | `Monitor DQ Current Status`, `Monitor DQ Threshold State`, `Inspect DQ Current Reasons`, then TIME RANGE freshness in hours (SLA 24h/72h) |
 | Replay confidence / checkpoint issues | `bioetl-control-plane-v1` | evidence-aware `Status`; `INCOMPLETE` blocks replay/resume approval, then inspect the four trust cards |
-| Exact rejected record evidence | `bioetl-silver-reject-explorer` | `Monitor Filtered Records Total`, then filtered records by `payload_hash` |
+| Exact rejected record evidence | CLI `bioetl quarantine inspect` | use `--pipeline` / filters; Grafana holds aggregate DQ only (`bioetl-dq-v2`) |
 
 ## Architecture Map
 

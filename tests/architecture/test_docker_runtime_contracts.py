@@ -581,7 +581,11 @@ def test_retained_services_use_immutable_images_and_complete_envelopes() -> None
             assert not missing, (
                 f"{stack_name}/{service_name}: missing {sorted(missing)}"
             )
-            assert service["init"] is True
+            # Neo4j official image already uses tini; compose init:true double-inits.
+            if stack_name == "neo4j" or service_name == "neo4j":
+                assert service["init"] is False
+            else:
+                assert service["init"] is True
             logging = service["logging"]
             assert logging["driver"] in {"local", "json-file"}
             assert logging["options"]["max-size"]
@@ -609,25 +613,18 @@ def test_readiness_and_build_tools_fail_closed() -> None:
 
     assert "/health/ready" in main_health
     assert "/health/live" not in main_health
+    # Opt-in monitoring is Prom/Grafana/renderer only (Loki/Promtail/Tempo removed).
+    assert "loki" not in monitoring["services"]
+    assert "promtail" not in monitoring["services"]
+    assert "tempo" not in monitoring["services"]
     assert (
         monitoring["services"]["grafana"]["depends_on"]["renderer"]["condition"]
         == "service_healthy"
     )
-    # The distroless Loki image cannot use wget, but its own binary can perform
-    # a fail-closed configuration check. Promtail and Tempo still expose no
-    # executable in-container health probe, so their healthchecks remain disabled.
     assert (
-        monitoring["services"]["promtail"]["depends_on"]["loki"]["condition"]
+        monitoring["services"]["grafana"]["depends_on"]["prometheus"]["condition"]
         == "service_healthy"
     )
-    assert monitoring["services"]["loki"]["healthcheck"]["test"] == [
-        "CMD",
-        "/usr/bin/loki",
-        "-config.file=/etc/loki/config.yml",
-        "-verify-config=true",
-    ]
-    for service_name in ("promtail", "tempo"):
-        assert monitoring["services"][service_name]["healthcheck"] == {"disable": True}
     assert renderer_health == [
         "CMD",
         "grafana-image-renderer",
@@ -645,17 +642,16 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     assert (
         'CMD ["health", "server", "--host", "0.0.0.0", "--port", "8000"]' in dockerfile
     )
-    # Main runtime co-locates Prometheus health/metrics (:8000, internal scrape)
-    # with the quarantine explorer backend (:8081, host-published).
+    # Default main surface is health/metrics only on :8000 (Quarantine Explorer UI removed).
     bioetl_service = main["services"]["bioetl"]
     assert bioetl_service["entrypoint"] == ["/bin/sh", "-c"]
     bioetl_command = " ".join(map(str, bioetl_service["command"]))
     assert "bioetl health server --host 0.0.0.0 --port 8000" in bioetl_command
-    assert "bioetl quarantine serve --host 0.0.0.0 --port 8081" in bioetl_command
-    assert bioetl_service["ports"] == ["127.0.0.1:8081:8081"]
+    assert "quarantine serve" not in bioetl_command
+    assert bioetl_service["ports"] == ["127.0.0.1:8000:8000"]
     bioetl_health = " ".join(map(str, bioetl_service["healthcheck"]["test"]))
     assert "127.0.0.1:8000/health/ready" in bioetl_health
-    assert "127.0.0.1:8081/health/ready" in bioetl_health
+    assert "8081" not in bioetl_health
 
 
 def test_warp_is_absent_from_default_and_optional_runtime_surfaces() -> None:

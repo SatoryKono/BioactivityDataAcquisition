@@ -381,11 +381,6 @@ _TUNED_ALERT_EXPECTATIONS: dict[str, dict[str, object]] = {
         "for": "5m",
         "fragments": ['up{job="pushgateway"}', "== 0"],
     },
-    "BioETLQuarantineExplorerUnavailable": {
-        "severity": "critical",
-        "for": "2m",
-        "fragments": ['up{job="quarantine-explorer"}', "== 0"],
-    },
     "BioETLGrafanaRendererUnavailable": {
         "severity": "warning",
         "for": "2m",
@@ -733,9 +728,10 @@ def test_monitoring_stack_scrape_jobs_and_grafana_metrics_are_enabled() -> None:
         "prometheus",
         "grafana",
         "pushgateway",
-        "quarantine-explorer",
         "grafana-image-renderer",
     } <= scrape_jobs
+    assert "quarantine-explorer" not in scrape_jobs
+    assert "loki" not in scrape_jobs
 
     grafana_service = compose.get("services", {}).get("grafana", {})
     environment = grafana_service.get("environment", [])
@@ -1527,7 +1523,6 @@ def test_monitoring_stack_alerts_reference_up_metric_and_checklist_runbook() -> 
         "BioETLPrometheusUnavailable": ("2m", "up"),
         "BioETLGrafanaUnavailable": ("2m", "up"),
         "BioETLPushgatewayUnavailable": ("5m", "up"),
-        "BioETLQuarantineExplorerUnavailable": ("2m", "up"),
         "BioETLGrafanaRendererUnavailable": ("2m", "up"),
     }
 
@@ -1550,7 +1545,7 @@ def test_monitoring_stack_contract_declares_service_ownership_before_thresholds(
 
     assert contract["owner"] == "@bioetl-observability"
     boundaries = contract["service_boundaries"]
-    assert set(boundaries) == {"quarantine_explorer", "grafana_image_renderer"}
+    assert set(boundaries) == {"bioetl_ops_http", "grafana_image_renderer"}
     for boundary in boundaries.values():
         assert boundary["owner"] == "@bioetl-observability"
         assert str(boundary["slo_intent"]).strip()

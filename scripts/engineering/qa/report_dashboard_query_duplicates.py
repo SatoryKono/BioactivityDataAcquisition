@@ -274,6 +274,9 @@ def _build_payload(
 def _load_allowlist(path: Path) -> dict[str, object]:
     import yaml
 
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    path = resolve_output_path(path, root=REPO_ROOT)
     if not path.exists():
         return {}
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))

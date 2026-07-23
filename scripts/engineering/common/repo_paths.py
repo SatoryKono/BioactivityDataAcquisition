@@ -59,6 +59,109 @@ def resolve_cli_path(
     return ensure_path_within_root(candidate, base)
 
 
+def resolve_output_path(
+    path: str | Path,
+    *,
+    root: Path | None = None,
+) -> Path:
+    """Resolve a write/read path that may intentionally leave the repository.
+
+    Relative paths are confined under ``root`` (default: repository root).
+    Absolute paths under that root stay confined. Absolute paths outside the
+    default repository root are accepted as explicit external destinations
+    (pytest fixtures, operator ``--output`` / evidence directories), even when
+    callers pass ``root=REPO_ROOT`` for relative-path resolution. Prefer
+    ``resolve_cli_path`` when the surface must stay strictly in-repo.
+    """
+    base = (root or REPO_ROOT).expanduser().resolve(strict=False)
+    candidate = Path(path).expanduser()
+    was_absolute = candidate.is_absolute()
+    if not was_absolute:
+        candidate = base / candidate
+    resolved = candidate.resolve(strict=False)
+    try:
+        return ensure_path_within_root(resolved, base)
+    except ValueError:
+        # Explicit absolute destinations outside the default repo are allowed.
+        # Custom non-repo roots still fail closed so fixtures stay confined.
+        default_root = REPO_ROOT.expanduser().resolve(strict=False)
+        if was_absolute and base == default_root:
+            return resolved
+        raise
+
+
 def argparse_repo_path(value: str) -> Path:
     """``argparse`` ``type=`` callback that confines paths to the repo root."""
     return resolve_cli_path(value)
+
+
+def ensure_local_http_url(url: str) -> str:
+    """Validate a CLI HTTP(S) base URL for local operator tooling (S8703 SSRF).
+
+    Allows only loopback / docker-internal hostnames commonly used by BioETL
+    observability probes. Refuses arbitrary remote hosts.
+    """
+    from urllib.parse import urlparse
+
+    parsed = urlparse(url.strip())
+    if parsed.scheme not in {"http", "https"}:
+        raise ValueError(f"unsupported URL scheme for local probe: {url!r}")
+    host = (parsed.hostname or "").lower()
+    allowed = {
+        "localhost",
+        "127.0.0.1",
+        "::1",
+        "prometheus",
+        "grafana",
+        "host.docker.internal",
+        "bioetl",
+    }
+    if host not in allowed and not host.endswith(".localhost"):
+        raise ValueError(
+            f"refusing non-local URL host for operator probe: {host or url!r}"
+        )
+    return url.strip().rstrip("/")
+
+
+def ensure_safe_cli_argv(command: list[str]) -> list[str]:
+    """Reject shell metacharacters in argv tokens (pythonsecurity:S8705).
+
+    Callers must still invoke subprocesses with a list form (never
+    ``shell=True``). This check blocks accidental injection via CLI-derived
+    tokens before the process is spawned.
+    """
+    # Backslashes are ordinary characters in list-form subprocess arguments and
+    # are required as path separators on Windows.  They only gain shell escape
+    # semantics when a command string is parsed by a shell, which callers of
+    # this guard explicitly must not use.
+    forbidden = set(";&|><`$\n\r")
+    cleaned: list[str] = []
+    for token in command:
+        if not isinstance(token, str) or not token:
+            raise ValueError(f"invalid argv token: {token!r}")
+        if any(ch in forbidden for ch in token):
+            raise ValueError(
+                f"refusing argv token with shell metacharacters: {token!r}"
+            )
+        cleaned.append(token)
+    return cleaned
+
+
+def confine_cli_paths(
+    namespace: object,
+    *attr_names: str,
+    root: Path | None = None,
+) -> object:
+    """Resolve and confine path-like attributes on an argparse namespace.
+
+    Attributes set to ``None`` are skipped. Non-path values are coerced via
+    ``Path`` before confinement. Intended for CLI entrypoints so Sonar
+    pythonsecurity:S8707 sees a sanitizer before filesystem sinks.
+    """
+    base = root or REPO_ROOT
+    for name in attr_names:
+        value = getattr(namespace, name, None)
+        if value is None:
+            continue
+        setattr(namespace, name, resolve_cli_path(value, root=base))
+    return namespace

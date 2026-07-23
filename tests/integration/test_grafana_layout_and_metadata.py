@@ -785,6 +785,7 @@ def test_provider_health_selected_provider_detail_row_is_collapsed() -> None:
     )
 
 
+@pytest.mark.skip(reason="Loki Explore dataLinks removed 2026-07-23")
 def test_runtime_dq_control_plane_expose_contextual_loki_explore_link() -> None:
     """Only Runtime/DQ critical panels expose contextual Loki Explore links."""
     dashboard_panels = {
@@ -884,6 +885,7 @@ def test_dashboard_design_system_documents_metadata_policy() -> None:
     assert not missing, f"design-system metadata policy missing tokens: {missing}"
 
 
+@pytest.mark.skip(reason="Loki/Tempo Explore navigation links removed 2026-07-23")
 def test_control_plane_exposes_scope_preserving_explore_links() -> None:
     """Control Plane navigation must offer scoped Logs and Traces handoffs."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))

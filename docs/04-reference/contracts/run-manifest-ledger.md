@@ -153,44 +153,21 @@ must not be treated as a strict reproducibility anchor.
 
 ### Isolated read-only observability root
 
-For local forensic inspection, `bioetl quarantine serve --data-root
-/absolute/path` injects one explicit absolute data root into checkpoint,
-run-manifest, run-ledger, workflow-manifest, and quarantine read adapters. The
-CLI rejects relative paths and does not require or mutate any `.env` file. The
-`/ops/control-plane/ready` response publishes the resolved `data_root`, so an
-operator can distinguish a reachable backend serving the wrong root from the
-intended backend. A reachable empty catalog remains a valid empty response;
-connection failure and timeout remain transport failures rather than empty
-evidence.
-
-The monitoring compose `audit` profile is published only through the
-fail-closed
-`scripts/ops/observability/docker-compose.monitoring.audit.yml` override. The
-supported launcher is:
+For local forensic inspection of quarantine/control-plane artifacts, prefer CLI:
 
 ```bash
-python scripts/ops/observability/start_read_only_audit_stack.py \
-  --data-root /absolute/data/root \
-  --log-root /absolute/log/root
+bioetl quarantine inspect --pipeline <pipeline> ...
+bioetl run-manifest show <run-id|manifest-id>
 ```
 
-The launcher rejects missing, relative, or non-directory roots before invoking
-Docker. The override requires both selectors through Compose `:?` guards,
-mounts them read-only, points Grafana explicitly at
-`http://quarantine-explorer-audit:8081`, and makes Grafana wait for that backend.
-After startup the launcher probes `/ops/control-plane/ready` and fails unless
-the served `data_root` exactly equals the requested root. It also writes one
-unique JSONL sentinel into a launcher-managed OS temporary probe directory,
-mounts that directory separately from the operator's read-only log root, probes
-Promtail's loopback-only `/ready` endpoint, and fails unless that exact sentinel
-becomes visible through Loki within the bounded post-Compose verification
-timeout. The sentinel is written atomically after `compose up` returns, and the
-bounded Loki query range starts from that write timestamp with a clock-skew
-margin. `BIOETL_AUDIT_PROBE_LOG_ROOT` is launcher-managed internal wiring;
-direct invocation of the override is not a supported operator interface. The
-launcher writes no `.env` file and does not modify the requested data or log roots.
-`promtail-audit` publishes only the bounded `job=bioetl-audit` Loki label; the
-sentinel identity remains log content and is never promoted to a label.
+Optional long-lived HTTP helpers historically used
+`bioetl quarantine serve --data-root /absolute/path`. After the 2026-07-23
+monitoring reduction, default Docker/main surface runs
+`bioetl health server` on `:8000` with Grafana **BioETL Ops HTTP** for identity
+panels. Quarantine Explorer, Loki, and Promtail audit overlays are **not**
+shipped; `scripts/ops/observability/docker-compose.monitoring.audit.yml` is an
+empty placeholder. See
+`docs/05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md`.
 
 ## Lifecycle Management
 

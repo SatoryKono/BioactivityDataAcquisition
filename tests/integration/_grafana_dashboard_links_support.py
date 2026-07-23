@@ -906,8 +906,6 @@ def _assert_exact_identifier_variable_isolation(
     *, dashboard_name: str, dashboard: dict[str, object]
 ) -> None:
     variables = _dashboard_template_variable_names(dashboard)
-    if dashboard_name ==        _assert_silver_explorer_identity_variables(variables)
-        return
     if dashboard_name in _LOCAL_IDENTITY_DASHBOARDS:
         _assert_local_identity_variables(variables)
         return
@@ -1289,13 +1287,13 @@ def _assert_silver_explorer_href_forensic_boundary(
 def _assert_silver_explorer_html_bus_forensic_boundary(
     *, dashboard_name: str, dashboard: dict[str, object]
 ) -> None:
+    """Silver Reject Explorer was removed; assert no residual handoff hrefs."""
     panel = _navigation_panel_by_id_1000(dashboard, dashboard_name=dashboard_name)
-    hrefs = _html_hrefs_from_panel_content(
+    hrefs = _html_hrefs_from_panel_content(panel)
+    residual = [href for href in hrefs if "silver-reject" in href]
+    assert not residual, (
+        f"{dashboard_name} still links to removed Silver Reject Explorer: {residual}"
     )
-    for href in hrefs:
-        _assert_silver_explorer_href_forensic_boundary(
-            dashboard_name=dashboard_name, href=href
-        )
 
 _EXPECTED_CURRENT_NAV_TITLE = {
     "bioetl-control-plane-v1": "0. Control Plane",
@@ -1650,43 +1648,26 @@ _SILVER_EXPLORER_EXPLICIT_EXPECTATIONS: dict[str, dict[str, object]] = {
 def _assert_silver_explorer_presence_for_dashboard(
     *, dashboard_name: str, dashboard: dict[str, object]
 ) -> None:
-    uid = dashboard.get("uid")
-    assert isinstance(uid, str), f"{dashboard_name} must declare string uid"
-    links = require_dashboard_navigation_links(dashboard, dashboard_name=dashboard_name)
-    titles = {link.get("title") for link in links if link.get("title")}
-    urls = [str(link.get("url", "")) for link in links]
-    if uid ==        assert "Silver Reject Explorer" not in titles, (
-        )
-        return
-    assert "Silver Reject Explorer" in titles, (
-        f"{dashboard_name} must expose a Silver Reject Explorer handoff"
-    )
+    """Silver Reject Explorer dashboard was removed from the shipping surface."""
+    del dashboard  # presence check is path-based after removal
+    assert not Path("grafana/dashboards/bioetl-silver-reject-explorer.json").exists(), (
+        f"{dashboard_name}: silver reject explorer JSON must stay removed"
     )
 
 
 def _assert_explicit_silver_explorer_policy(
     *, dashboard_name: str, expected: dict[str, object]
 ) -> None:
+    """No explicit Silver Reject Explorer handoff policy remains after removal."""
+    del expected
     dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
     links = get_dashboard_navigation_links(dashboard)
-    silver_link = next(
-        (
-            link
-            for link in links
-        ),
-        None,
-    )
-    assert silver_link is not None, (
-        f"Silver Reject Explorer link must exist on {dashboard_name}"
-    )
-    assert silver_link.get("includeVars") is False, (
-        f"{dashboard_name} handoff must not pass generic Grafana includeVars into Silver Reject Explorer"
-    )
-    url = str(silver_link.get("url", ""))
-    for token in expected["url_tokens"]:
-        assert token in url, (
-            f"{dashboard_name} handoff must preserve expected bounded Silver explorer vars via token {token!r}"
-        )
-    assert expected["tooltip_token"] in str(silver_link.get("tooltip", "")), (
-        f"{dashboard_name} handoff tooltip should document {expected['tooltip_token']!r} policy"
+    residual = [
+        link
+        for link in links
+        if "silver-reject" in str(link.get("url", ""))
+        or "Silver Reject" in str(link.get("title", ""))
+    ]
+    assert not residual, (
+        f"{dashboard_name} still exposes Silver Reject Explorer handoff: {residual}"
     )

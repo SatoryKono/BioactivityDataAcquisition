@@ -52,6 +52,9 @@ def _write_text_atomic(path: Path, payload: str) -> None:
     ) as temp_file:
         temp_file.write(payload)
         temp_path = Path(temp_file.name)
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    path = resolve_output_path(path, root=REPO_ROOT)
     temp_path.replace(path)
 
 

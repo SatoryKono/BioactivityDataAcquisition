@@ -75,6 +75,31 @@ Desktop/WSL recovery:
 If `DockerDesktop/Wsl/CommandTimedOut`: run `wsl --shutdown`, start Docker Desktop,
 wait until `docker info` is stable, then retry **one** stack at a time.
 
+### Stability (Windows / Docker Desktop)
+
+Typical crash pattern on 32 GiB hosts: **host free RAM < 3 GiB** while WSL
+was capped at 16 GiB and IDE + multi-stack `--build` run together. Engine pipe
+(`dockerDesktopLinuxEngine`) disappears; `docker-desktop` WSL distro shows
+**Stopped**.
+
+Crash-resistant path:
+
+```powershell
+# Applies host free-RAM check, waits for stable engine, starts main without rebuild.
+# Stops leftover monitoring containers unless -WithMonitoring.
+.\scripts\ops\runtime\docker\ensure-stable.ps1 -WithNeo4j
+
+# After OOM / pipe gone:
+.\scripts\ops\runtime\docker\ensure-stable.ps1 -RestartWsl -WithNeo4j
+```
+
+Rules:
+
+- Prefer `--no-build`; rebuild images only when Dockerfile/deps actually change.
+- One stack at a time; **do not** start monitoring by default.
+- Keep `%USERPROFILE%\.wslconfig` `memory=` modest (8 GiB recommended on 32 GiB hosts).
+- Do not thrash `--force-recreate` / multi-stack rebuild under low free RAM.
+
 Запрещено: `down -v`, volume/system prune, удаление VHDX/data root.
 
 Подробнее: `docs/DOCKER_SETUP.md`.

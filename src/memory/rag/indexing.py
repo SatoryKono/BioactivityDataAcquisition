@@ -278,6 +278,14 @@ def _publish_manifest_pair(
     output_dir: Path,
 ) -> tuple[Path, Path]:
     """Publish a validated pair transactionally and restore old files on failure."""
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
+    # resolve_output_path keeps relative paths under the repo root while still
+    # accepting absolute temporary/workflow destinations used by tests and
+    # workflow-scoped builds.
+    staged_catalog = resolve_output_path(staged_catalog)
+    staged_chunks = resolve_output_path(staged_chunks)
+    output_dir = resolve_output_path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     targets = (
         (staged_catalog, output_dir / "corpus_catalog.json"),

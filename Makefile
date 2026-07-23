@@ -60,9 +60,11 @@ help:
 	@echo "  make docker-check           Check Docker installation"
 	@echo "  make docker-build           Build BioETL image"
 	@echo "  make docker-start           Start the main BioETL adjunct"
-	@echo "  make docker-start-full      Start all services (+ Neo4j, Redis, MinIO, monitoring)"
+	@echo "  make docker-start-full      Start helpers (+ Neo4j, Redis, MinIO; monitoring opt-in)"
+	@echo "  make docker-start-monitoring  Opt-in Prometheus/Grafana/renderer only"
 	@echo "  make docker-stop            Stop main services"
-	@echo "  make docker-stop-full       Stop all services"
+	@echo "  make docker-stop-full       Stop helper services"
+	@echo "  make docker-stop-monitoring Stop opt-in monitoring stack"
 	@echo "  make docker-logs            View logs (all services)"
 	@echo "  make docker-logs-bioetl     View BioETL logs only"
 	@echo "  make docker-health          Check service health"
@@ -137,25 +139,24 @@ docker-build: docker-check
 docker-start: docker-check
 	bash scripts/ops/docker-setup.sh start main
 
-# Start full stack
+# Start full helper stack (monitoring is opt-in)
 docker-start-full: docker-check docker-build
-	bash scripts/ops/docker-setup.sh start neo4j
-	bash scripts/ops/docker-setup.sh start redis
-	bash scripts/ops/docker-setup.sh start minio
-	bash scripts/ops/docker-setup.sh start monitoring
-	bash scripts/ops/docker-setup.sh start main
+	bash scripts/ops/docker-setup.sh start-full
+
+# Opt-in monitoring (Prometheus/Grafana/renderer only; no Loki/Tempo/Quarantine UI)
+docker-start-monitoring: docker-check
+	bash scripts/ops/docker-setup.sh monitoring
+
+docker-stop-monitoring: docker-check
+	bash scripts/ops/docker-setup.sh stop monitoring
 
 # Stop services (main only)
 docker-stop: docker-check
 	bash scripts/ops/docker-setup.sh stop main
 
-# Stop full stack
+# Stop full helper stack (also stops monitoring if it was started)
 docker-stop-full: docker-check
-	bash scripts/ops/docker-setup.sh stop main
-	bash scripts/ops/docker-setup.sh stop neo4j
-	bash scripts/ops/docker-setup.sh stop redis
-	bash scripts/ops/docker-setup.sh stop minio
-	bash scripts/ops/docker-setup.sh stop monitoring
+	bash scripts/ops/docker-setup.sh stop-full
 
 # View logs
 docker-logs: docker-check

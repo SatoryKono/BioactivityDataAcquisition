@@ -9,6 +9,8 @@ from __future__ import annotations
 import polars as pl
 
 from bioetl.domain.ports import LoggerPort
+from bioetl.domain.run_reports.context import get_stage_accounting
+from bioetl.domain.run_reports.models import StageId
 
 __all__ = ["EnricherDeduplicatorService"]
 
@@ -77,6 +79,7 @@ class EnricherDeduplicatorService:
 
         if not non_key_columns:
             result = df.select(key_columns).unique(maintain_order=True)
+            self._record_deduplicated(records_before - len(result))
             self._log_deduplication(
                 enricher_name, key_columns, records_before, len(result), []
             )
@@ -91,6 +94,7 @@ class EnricherDeduplicatorService:
         )
 
         result = df.group_by(key_columns, maintain_order=True).agg(agg_exprs)
+        self._record_deduplicated(records_before - len(result))
 
         self._log_deduplication(
             enricher_name,
@@ -100,6 +104,18 @@ class EnricherDeduplicatorService:
             columns_with_conflicts,
         )
         return result
+
+    @staticmethod
+    def _record_deduplicated(count: int) -> None:
+        """Record composite deduplication in the active pipeline report."""
+        accounting = get_stage_accounting()
+        if accounting is not None and count > 0:
+            accounting.record_removal(
+                StageId.SILVER.value,
+                outcome="deduplicated",
+                reason_code="DEDUP_KEY_COLLISION",
+                count=count,
+            )
 
     def _classify_columns(
         self,

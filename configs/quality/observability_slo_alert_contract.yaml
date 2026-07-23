@@ -23,11 +23,11 @@ slo_contracts:
         runbook: docs/05-operations/runbooks/pipeline-failure-critical.md
   monitoring_stack_health:
     owner: "@bioetl-observability"
-    target: "Monitoring stack must keep BioETL, Prometheus, Grafana, Pushgateway, Quarantine Explorer, and the Grafana renderer observable"
+    target: "Monitoring stack must keep BioETL, Prometheus, Grafana, Pushgateway, and the Grafana renderer observable (Quarantine Explorer removed 2026-07-23; identity via BioETL Ops HTTP on health server)"
     service_boundaries:
-      quarantine_explorer:
+      bioetl_ops_http:
         owner: "@bioetl-observability"
-        slo_intent: "HTTP-backed identity and forensic evidence remains available before dashboard data is treated as trustworthy"
+        slo_intent: "HTTP-backed identity on bioetl health server remains available before dashboard data is treated as trustworthy"
       grafana_image_renderer:
         owner: "@bioetl-observability"
         slo_intent: "Reviewed screenshot and render evidence remains available; an outage blocks render acceptance but not Prometheus collection"
@@ -54,10 +54,6 @@ slo_contracts:
       - name: BioETLPushgatewayUnavailable
         severity: warning
         for: 5m
-        runbook: docs/05-operations/runbooks/observability-checklist.md
-      - name: BioETLQuarantineExplorerUnavailable
-        severity: critical
-        for: 2m
         runbook: docs/05-operations/runbooks/observability-checklist.md
       - name: BioETLGrafanaRendererUnavailable
         severity: warning

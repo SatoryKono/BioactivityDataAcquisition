@@ -98,23 +98,23 @@ def build_gold_rejected_row(
 ) -> dict[str, object]:
     """Build one canonical Gold rejection row."""
     return _base_row(
-        run_id=run_id,
-        workflow_id=workflow_id,
-        pipeline_id=pipeline_id,
-        provider_id=provider_id,
+        identity=(run_id, workflow_id, pipeline_id, provider_id),
         stage="gold",
         record_index=record_index,
-        raw_record=normalized_record,
-        normalized_record=normalized_record,
+        records=(normalized_record, normalized_record),
         status="rejected",
-        action=action,
         created_at=created_at,
-        reason_code=reason_code,
-        reason_message=reason_message,
-        rule_id=rule_id,
-        rule_layer="gold",
-        failed_field=failed_field,
-        contract_version=contract_version,
+        failure=(
+            action,
+            reason_code,
+            reason_message,
+            rule_id,
+            "gold",
+            failed_field,
+            "",
+            "",
+            contract_version,
+        ),
     )
 
 

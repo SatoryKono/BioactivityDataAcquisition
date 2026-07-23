@@ -250,7 +250,7 @@ def workflow() -> None:
     show_default=True,
 )
 @typed_pass_obj
-def run_workflow_command(
+def run_workflow_command(  # NOSONAR python:S107 - Click injects option params; cannot pack without breaking CLI
     registry: PipelineRegistry | None,
     name: str,
     dry_run: bool,

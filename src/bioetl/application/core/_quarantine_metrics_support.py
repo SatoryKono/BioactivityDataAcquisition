@@ -108,3 +108,14 @@ def record_filtered_quarantine_metrics(
         reason=FILTERED_OUT_SILVER,
         count=count,
     )
+    from bioetl.domain.run_reports.context import get_stage_accounting
+    from bioetl.domain.run_reports.models import StageId
+
+    accounting = get_stage_accounting()
+    if accounting is not None and count > 0:
+        accounting.record_removal(
+            StageId.SILVER.value,
+            outcome="filtered_out",
+            reason_code=FILTERED_OUT_SILVER,
+            count=count,
+        )

@@ -1,17 +1,23 @@
 # BioETL Dashboard And Export RBAC Matrix
 
-Last verified: 2026-06-30
+Last verified: 2026-07-24
 
-This matrix governs the local-only Grafana, drilldown, and export surfaces used
+This matrix governs the local-only Grafana, identity HTTP, and export surfaces used
 by the observability rollout. It does not replace backend authorization; hidden
 panels are not considered a security boundary.
 
-| Role | Dashboard folders | Prometheus datasource | Quarantine Explorer drilldown | Governed export | Raw payload access |
+> **2026-07-23:** Grafana Silver Reject Explorer UI and Quarantine Explorer
+> datasource were removed. Record-level quarantine forensics use CLI
+> `bioetl quarantine inspect`. Identity panels use **BioETL Ops HTTP**
+> (health server). See
+> `docs/05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md`.
+
+| Role | Dashboard folders | Prometheus datasource | BioETL Ops HTTP / identity | Governed export | Raw payload access |
 | --- | --- | --- | --- | --- | --- |
-| `viewer` | Read aggregate dashboards | Read aggregate metrics only | Summary selectors only | Redacted CSV/TSV/XLSX only | No |
-| `investigator` | Read aggregate and forensic dashboards | Read aggregate metrics only | Record-level drilldown with audit | Export with default redaction; raw profile allowed by backend policy | Audited backend only |
+| `viewer` | Read aggregate dashboards | Read aggregate metrics only | Summary identity selectors only | Redacted CSV/TSV/XLSX only | No |
+| `investigator` | Read aggregate dashboards | Read aggregate metrics only | Identity context + CLI record forensics with audit | Export with default redaction; raw profile allowed by backend policy | Audited backend only |
 | `exporter` | Read aggregate dashboards | Read aggregate metrics only | Summary selectors only | Export with raw profile when authorized | Audited backend only |
-| `admin` | Manage local dashboards/provisioning | Manage datasource provisioning | Manage drilldown backend | Full governed export policy | Audited backend only |
+| `admin` | Manage local dashboards/provisioning | Manage datasource provisioning | Manage Ops HTTP / health server wiring | Full governed export policy | Audited backend only |
 
 Security rules:
 
@@ -19,8 +25,10 @@ Security rules:
   filesystem paths as datasources.
 - Prometheus labels MUST NOT include `run_id`, `record_id`, `payload_hash`,
   manifest IDs, execution fingerprints, file paths, or raw payload identifiers.
-- `$run_id`, `$quarantine_run_id`, and `$payload_hash` are backend drilldown
-  selectors, not global Prometheus labels.
+- `$run_id` is an HTTP identity selector (BioETL Ops HTTP / control-plane
+  filter-options), not a global Prometheus label. Forensic record selectors
+  (`quarantine_run_id`, `payload_hash`) live on CLI inspect surfaces only after
+  Silver Reject Explorer removal.
 - Direct raw payload access must be authorized by the backend/export surface and
   audited there; hiding a panel is not authorization.
 - Service account tokens and secrets MUST NOT be committed in dashboard JSON,

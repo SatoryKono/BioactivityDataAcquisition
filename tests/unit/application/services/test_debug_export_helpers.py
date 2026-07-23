@@ -245,19 +245,13 @@ def test_reason_hash_and_sort_helpers_cover_branch_variants() -> None:
 def test_base_row_contains_json_payloads_and_hashes() -> None:
     created_at = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
     row = helpers._base_row(
-        run_id="run-1",
-        workflow_id="wf-1",
-        pipeline_id="chembl_activity",
-        provider_id="chembl",
+        identity=("run-1", "wf-1", "chembl_activity", "chembl"),
         stage="silver",
         record_index=7,
-        raw_record={"activity_id": "ACT-1"},
-        normalized_record={"entity_id": "entity-1"},
+        records=({"activity_id": "ACT-1"}, {"entity_id": "entity-1"}),
         status="success",
         created_at=created_at,
-        reason_code="OK",
-        reason_message="done",
-        action="keep",
+        failure=("keep", "OK", "done", "", "", "", "", "", ""),
     )
 
     assert row["source_record_id"] == "ACT-1"

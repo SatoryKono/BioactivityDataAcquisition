@@ -93,8 +93,10 @@ def rewrite_image_links(markdown_text: str, *, base_dir: Path) -> str:
 
 
 def run(cmd: list[str], cwd: Path | None = None) -> None:
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
     completed = subprocess.run(
-        cmd,
+        ensure_safe_cli_argv([str(token) for token in cmd]),
         cwd=str(cwd) if cwd else None,
         capture_output=True,
         text=True,
@@ -114,6 +116,9 @@ def render_one(input_md: Path, reference_doc: Path | None) -> Path:
         raise FileNotFoundError(f"Input markdown not found: {input_md}")
 
     output_docx = input_md.with_suffix(".docx")
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_cli_path
+
+    input_md = resolve_cli_path(input_md, root=REPO_ROOT)
     markdown_text = input_md.read_text(encoding="utf-8")
     markdown_text = rewrite_image_links(markdown_text, base_dir=input_md.parent)
 

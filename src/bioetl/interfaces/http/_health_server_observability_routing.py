@@ -18,6 +18,10 @@ from bioetl.interfaces.http.processed_records_table import (
     build_processed_records_table_payload_from_prometheus,
     read_processed_records_run_id,
 )
+from bioetl.interfaces.http.run_report_ops import (
+    load_pipeline_run_report_payload,
+    load_workflow_run_report_payload,
+)
 
 _NOT_FOUND_MESSAGE = "Not Found"
 
@@ -70,11 +74,95 @@ async def dispatch_observability_request(
         if path == "/ops/observability/processed-records":
             await handle_processed_records_table(host, writer, query)
             return
+        if path == "/ops/observability/pipeline-run-report":
+            await handle_pipeline_run_report(host, writer, query)
+            return
+        if path == "/ops/observability/workflow-run-report":
+            await handle_workflow_run_report(host, writer, query)
+            return
         await host._send_response(writer, 404, _NOT_FOUND_MESSAGE)
     except ValueError as exc:
         await host._send_response(writer, 400, str(exc))
     except RuntimeError as exc:
         await host._send_response(writer, 502, str(exc))
+
+
+async def handle_pipeline_run_report(
+    host: _HealthObservabilityRoutingHost,
+    writer: asyncio.StreamWriter,
+    query: dict[str, str],
+) -> None:
+    """Serve stored pipeline_run_report_v1 JSON for a completed run."""
+    run_id = host._read_required_param(query, "run_id")
+    pipeline = host._read_required_param(query, "pipeline")
+    try:
+        payload = await run_bounded_forensic_operation(
+            limiter=host._forensic_endpoint_limiter,
+            operation_factory=lambda: asyncio.to_thread(
+                load_pipeline_run_report_payload,
+                run_id=run_id,
+                pipeline_name=pipeline,
+            ),
+        )
+    except ForensicEndpointUnavailable as exc:
+        await host._send_payload_response(
+            writer,
+            503,
+            forensic_unavailable_payload(exc),
+        )
+        return
+    if payload is None:
+        await host._send_payload_response(
+            writer,
+            404,
+            {
+                "status": "not_found",
+                "message": "pipeline run report not found",
+                "run_id": run_id,
+                "pipeline": pipeline,
+            },
+        )
+        return
+    await host._send_payload_response(writer, 200, payload)
+
+
+async def handle_workflow_run_report(
+    host: _HealthObservabilityRoutingHost,
+    writer: asyncio.StreamWriter,
+    query: dict[str, str],
+) -> None:
+    """Serve stored workflow_run_report_v1 JSON for a completed workflow run."""
+    workflow_run_id = host._read_required_param(query, "workflow_run_id")
+    workflow_name = host._read_required_param(query, "workflow")
+    try:
+        payload = await run_bounded_forensic_operation(
+            limiter=host._forensic_endpoint_limiter,
+            operation_factory=lambda: asyncio.to_thread(
+                load_workflow_run_report_payload,
+                workflow_run_id=workflow_run_id,
+                workflow_name=workflow_name,
+            ),
+        )
+    except ForensicEndpointUnavailable as exc:
+        await host._send_payload_response(
+            writer,
+            503,
+            forensic_unavailable_payload(exc),
+        )
+        return
+    if payload is None:
+        await host._send_payload_response(
+            writer,
+            404,
+            {
+                "status": "not_found",
+                "message": "workflow run report not found",
+                "workflow_run_id": workflow_run_id,
+                "workflow": workflow_name,
+            },
+        )
+        return
+    await host._send_payload_response(writer, 200, payload)
 
 
 async def handle_processed_records_table(

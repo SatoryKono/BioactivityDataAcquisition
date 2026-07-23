@@ -164,11 +164,7 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
     assert (
         workflow["provider_context_exact"].get("current", {}).get("value") == "unknown"
     )
-
-    assert explorer["quarantine_run_id"].get("multi") is False
-    assert explorer["quarantine_run_id"].get("includeAll") is False
-    assert explorer["payload_hash"].get("type") == "textbox"
-    assert explorer["payload_hash"].get("current", {}).get("value") == ""
+    # Silver Reject Explorer variables removed with the dashboard (2026-07-23).
 
 
 def test_variable_reference_explains_role_specific_exceptions() -> None:

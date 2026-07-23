@@ -460,10 +460,15 @@ class TestRealConfigValidation:
 
         for path in contract_paths:
             payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+            if not isinstance(payload, dict):
+                continue
+            # Catalog/index contracts are not DQ policy documents.
             if payload.get("schema_version") == "error-catalog-v1":
                 continue
-            assert "strict_dq_validation" in payload
-            assert "strict_validation" not in payload
+            if payload.get("version") == "reason_catalog_v1" or "reasons" in payload:
+                continue
+            assert "strict_dq_validation" in payload, path
+            assert "strict_validation" not in payload, path
 
     def test_provider_configs_have_correct_metadata(
         self, dq_loader: DQConfigLoader

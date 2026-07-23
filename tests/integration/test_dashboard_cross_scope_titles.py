@@ -47,11 +47,7 @@ def test_cross_scope_links_use_required_titles():
             "Inspect Provider",
             "3. Provider Health",
         ],
-        # From DQ to other dashboards
-            "Open Silver Reject Explorer",
-            "Inspect Rejects",
-            "Silver Reject Explorer",
-        ],
+        # Silver Reject Explorer removed 2026-07-23 — no DQ handoff transition remains.
     }
 
     for (source_uid, target_uid), allowed_titles in required_transitions.items():

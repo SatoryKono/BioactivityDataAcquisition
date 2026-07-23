@@ -189,20 +189,20 @@ def test_http_identity_panel_docs_match_shipped_datasource_contract(
     processed_target = processed_panel["targets"][0]
 
     for panel in (identity_panel, processed_panel):
-        assert panel["datasource"] == "Quarantine Explorer"
+        assert panel["datasource"] == "BioETL Ops HTTP"
     assert str(identity_target["url"]).startswith("/ops/control-plane/identity-table")
     assert str(processed_target["url"]).startswith(
         "/ops/observability/processed-records"
     )
 
     for token in (
-        "Quarantine Explorer HTTP control-plane identity endpoint",
+        "BioETL Ops HTTP control-plane identity endpoint",
         "/ops/control-plane/identity-table",
         "this is not a Prometheus panel",
     ):
         assert token in identity_section
     for token in (
-        "Quarantine Explorer HTTP",
+        "BioETL Ops HTTP",
         "/ops/observability/processed-records",
         "this is not a Prometheus panel",
     ):

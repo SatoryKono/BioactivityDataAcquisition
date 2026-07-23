@@ -147,35 +147,6 @@ tests:
               description: No host-side Docker stability probe sample was observed for 10m; Docker adjunct state is unknown.
               runbook: docs/05-operations/runbooks/docker-stability.md
 
-  - name: quarantine-explorer-unavailable
-    interval: 1m
-    input_series:
-      - series: 'up{job="quarantine-explorer",instance="quarantine-explorer:8081"}'
-        values: '0 0 0 0 0'
-    alert_rule_test:
-      - eval_time: 3m
-        alertname: BioETLQuarantineExplorerUnavailable
-        exp_alerts:
-          - exp_labels:
-              severity: critical
-              owner: bioetl-observability
-              job: quarantine-explorer
-              instance: quarantine-explorer:8081
-            exp_annotations:
-              summary: Quarantine Explorer is unavailable
-              description: Quarantine Explorer metrics/health surface is not reachable for instance=quarantine-explorer:8081; HTTP-backed identity and forensic panels are not trustworthy.
-              runbook: docs/05-operations/runbooks/observability-checklist.md
-
-  - name: quarantine-explorer-healthy
-    interval: 1m
-    input_series:
-      - series: 'up{job="quarantine-explorer",instance="quarantine-explorer:8081"}'
-        values: '1 1 1 1 1'
-    alert_rule_test:
-      - eval_time: 3m
-        alertname: BioETLQuarantineExplorerUnavailable
-        exp_alerts: []
-
   - name: grafana-renderer-unavailable
     interval: 1m
     input_series:

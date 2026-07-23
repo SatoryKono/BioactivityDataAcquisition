@@ -35,11 +35,8 @@ def build_checkpoint_execution_identity_payload(
     dependency_lock_hash: str | None,
     effective_config_hash: str | None,
     dq_contract_compatibility_hash: str | None,
-    contract_ref: str | None,
-    contract_version: str | None,
-    normalization_profile_ref: str | None,
-    normalization_profile_version: str | None,
-    normalization_profile_hash: str | None,
+    contract: tuple[str | None, str | None],
+    normalization_profile: tuple[str | None, str | None, str | None],
     effective_config_artifact_id: str | None,
     exact_replay: bool | None,
     input_snapshot_fingerprint: str | None,
@@ -47,7 +44,18 @@ def build_checkpoint_execution_identity_payload(
         CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE
     ),
 ) -> JsonDict:
-    """Build the canonical checkpoint execution-identity fallback payload."""
+    """Build the canonical checkpoint execution-identity fallback payload.
+
+    Packed groups keep this helper under the Sonar S107 budget:
+    - ``contract``: ``(contract_ref, contract_version)``
+    - ``normalization_profile``: ``(ref, version, hash)``
+    """
+    contract_ref, contract_version = contract
+    (
+        normalization_profile_ref,
+        normalization_profile_version,
+        normalization_profile_hash,
+    ) = normalization_profile
     if all(
         value is None
         for value in (
@@ -76,11 +84,12 @@ def build_checkpoint_execution_identity_payload(
             dependency_lock_hash=dependency_lock_hash,
             effective_config_hash=effective_config_hash,
             dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-            contract_ref=contract_ref,
-            contract_version=contract_version,
-            normalization_profile_ref=normalization_profile_ref,
-            normalization_profile_version=normalization_profile_version,
-            normalization_profile_hash=normalization_profile_hash,
+            contract=(contract_ref, contract_version),
+            normalization_profile=(
+                normalization_profile_ref,
+                normalization_profile_version,
+                normalization_profile_hash,
+            ),
             effective_config_artifact_id=effective_config_artifact_id,
             exact_replay=exact_replay,
             input_snapshot_fingerprint=input_snapshot_fingerprint,

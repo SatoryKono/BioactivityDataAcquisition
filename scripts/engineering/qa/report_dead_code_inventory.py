@@ -737,12 +737,12 @@ def _existing_snapshot_date(path: Path) -> str | None:
 
 
 def main() -> int:
-    from scripts.engineering.common.repo_paths import resolve_cli_path
+    from scripts.engineering.common.repo_paths import resolve_output_path
 
     args = _parse_args()
-    repo_root = resolve_cli_path(args.repo_root, root=PROJECT_ROOT)
-    json_out = resolve_cli_path(args.json_out, root=repo_root)
-    md_out = resolve_cli_path(args.md_out, root=repo_root)
+    repo_root = resolve_output_path(args.repo_root, root=PROJECT_ROOT)
+    json_out = resolve_output_path(args.json_out, root=repo_root)
+    md_out = resolve_output_path(args.md_out, root=repo_root)
     snapshot_date = args.snapshot_date
     if args.check and snapshot_date is None:
         snapshot_date = _existing_snapshot_date(json_out)

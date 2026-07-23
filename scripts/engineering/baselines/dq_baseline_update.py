@@ -474,6 +474,9 @@ def save_baselines(
 
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    output_file = resolve_output_path(output_file, root=REPO_ROOT)
     with open(output_file, "w") as f:
         json.dump(baselines, f, indent=2)
 

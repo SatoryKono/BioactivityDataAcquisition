@@ -505,7 +505,10 @@ def build_invariant_audit_rebaseline(repo_root: Path = PROJECT_ROOT) -> dict[str
     }
 
 
-def _load_json(path: Path) -> Any:
+def _load_json(path: Path, *, root: Path | None = None) -> Any:
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    path = resolve_output_path(path, root=root or REPO_ROOT)
     return json.loads(path.read_text(encoding="utf-8"))
 
 

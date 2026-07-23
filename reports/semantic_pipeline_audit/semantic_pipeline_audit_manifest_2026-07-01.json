@@ -395,8 +395,8 @@
     "clusters": 290,
     "fields": 1266,
     "normalization": {
-      "COMPATIBLE": 887,
-      "IDENTICAL": 2358
+      "COMPATIBLE": 889,
+      "IDENTICAL": 2356
     },
     "pairs": 3245,
     "pipelines": 26,
@@ -404,8 +404,8 @@
       "blocking_task_count": 0,
       "clusters": 290,
       "normalization_counts": {
-        "COMPATIBLE": 887,
-        "IDENTICAL": 2358
+        "COMPATIBLE": 889,
+        "IDENTICAL": 2356
       },
       "pair_rows": 3245,
       "risk_counts": {

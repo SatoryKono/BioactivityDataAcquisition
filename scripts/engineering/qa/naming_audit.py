@@ -1631,6 +1631,9 @@ def _load_validated_registry() -> NamingRegistry | None:
 def _emit_report(report: str, output: str | None) -> None:
     if output:
         output_path = Path(output)
+        from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+        output_path = resolve_output_path(output_path, root=REPO_ROOT)
         output_path.write_text(report, encoding="utf-8")
         logger.info("Report saved to %s", output_path)
         return

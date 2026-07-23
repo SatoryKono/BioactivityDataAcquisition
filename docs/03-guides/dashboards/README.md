@@ -13,8 +13,9 @@ ______________________________________________________________________
 
 # Dashboards Docs Index
 
-Дата сверки: **2026-07-17**
-Источник истины: `grafana/dashboards/*.json`
+Дата сверки: **2026-07-24**
+Источник истины: `grafana/dashboards/*.json` (7 shipped dashboards after
+monitoring surface reduction 2026-07-23)
 
 ## Актуальные документы
 
@@ -39,16 +40,19 @@ ______________________________________________________________________
   detection and audit tooling;
 - panel docs и usage guides не должны конкурировать с inventory role.
 
-Текущий shipped Explore handoff:
+Текущий shipped surface (после reduction 2026-07-23):
 
-- Loki использует безопасный baseline `{job="bioetl"}`.
-- Tempo использует contextual TraceQL filters по текущему dashboard scope (`pipeline` или `provider`); runtime `run_type` не шиппится в TraceQL handoff из-за include-all selector semantics.
-- `bioetl-runtime` остаётся Prometheus-first в tracing-off режиме: Loki log-hygiene panels живут в collapsed below-fold row `Tracing-only Log Hygiene`, а базовый triage path не требует Loki/Tempo datasource.
+- **7 dashboards**, navigation bus `0..6` only (no Silver Reject Explorer, no
+  Loki/Tempo Explore adjuncts).
+- Identity HTTP panels use datasource **BioETL Ops HTTP** → main health server
+  `:8000` (`BIOETL_OPS_HTTP_URL`).
+- Record-level quarantine forensics: CLI `bioetl quarantine inspect` (not Grafana).
+- Monitoring stack is **opt-in**: `make docker-start-monitoring`.
+- See [monitoring-surface-reduction](../../05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md).
 - Runtime zero-count cards fail closed: selected pipeline/run_type cards anchor
   `0` to `bioetl_runtime_pipeline_run_type_universe`, GLOBAL provider handoff
   anchors `0` to `bioetl_provider_current_status`, and missing scope remains
-  `UNKNOWN`. Unstructured Loki hygiene renders only parsed `.__error__`; the
-  raw source line is never emitted because it may contain secret-bearing data.
+  `UNKNOWN`.
 
 Текущий reproducible render contract:
 
@@ -73,7 +77,7 @@ ______________________________________________________________________
   `reports/observability/grafana/dashboard-release-gates.json`. Semantic
   validation runs even when Playwright or screenshot capture is unavailable;
   render validation still runs when semantic validation fails. The render-only
-  preflight excludes Prometheus and Quarantine Explorer readiness, so neither
+  preflight excludes full Prometheus readiness when render-only, so neither
   gate can mask or contaminate the other.
 - Every full-cycle occurrence has one `occurrence_id`. The semantic report,
   Playwright manifest, and combined receipt must carry the same value; the

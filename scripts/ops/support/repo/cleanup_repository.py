@@ -1498,6 +1498,9 @@ def write_cleanup_classification_report(
 ) -> Path:
     target = report_path if report_path.is_absolute() else repo_root / report_path
     target.parent.mkdir(parents=True, exist_ok=True)
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    target = resolve_output_path(target, root=REPO_ROOT)
     target.write_text(
         json.dumps(report, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",

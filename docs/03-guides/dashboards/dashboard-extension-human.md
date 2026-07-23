@@ -13,6 +13,11 @@ ______________________________________________________________________
 
 # Dashboard Extension Guide (Human)
 
+> **Removed 2026-07-23:** Silver Reject Explorer dashboard, Loki/Tempo Explore adjuncts, Quarantine Explorer datasource (replaced by BioETL Ops HTTP on :8000).
+> Use CLI ioetl quarantine inspect for record-level forensics. See [monitoring-surface-reduction](../../05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md).
+
+
+
 Дата сверки: **2026-07-13**
 Источник истины: `grafana/dashboards/*.json`
 
@@ -55,10 +60,9 @@ ______________________________________________________________________
   themes и переносится без обрезки на viewport `1024px`.
 - Любые дубли dashboard-to-dashboard links из одного dashboard в один target
   dashboard запрещены.
-- Во всех восьми shipped navigation panels `id=1000` после bus `0..6`
-  закреплены
-  global adjunct links `Silver Reject Explorer`, `Explore Logs`,
-  `Explore Traces`.
+- Во всех **семи** shipped navigation panels `id=1000` после bus `0..6`
+  **не** добавляйте removed adjuncts (`Silver Reject Explorer`,
+  `Explore Logs`, `Explore Traces` — removed 2026-07-23).
 - Navigation panel links должны открываться в том же окне; не используйте
   `target="_blank"` в HTML top navigation.
 - Иерархия layout следует design system tiers:

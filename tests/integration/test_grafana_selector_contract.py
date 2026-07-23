@@ -144,10 +144,8 @@ def test_pipeline_universe_contract_matches_shipped_query_sources() -> None:
         == "bioetl_workflow_pipeline_expected"
     )
     assert control_plane.get("unexplained_difference_count_required") == 0
-
-    assert explorer.get("required_relation") == (
-        "subset_of_canonical_user_facing_metric"
-    )
+    assert "bioetl-silver-reject-explorer" not in exceptions
+    assert "bioetl-silver-reject-explorer" not in shared
 
 
 def test_pipeline_universe_relations_follow_recording_rule_sources() -> None:
@@ -202,8 +200,13 @@ def test_pipeline_selector_live_closure_evidence_is_complete() -> None:
     captures = evidence.get("response_captures")
     assert isinstance(dashboards, list)
     assert isinstance(captures, dict)
-    assert len(dashboards) == closure.get("required_dashboard_count") == 8
-    assert {dashboard.get("uid") for dashboard in dashboards} == set(registry)
+    # Historical evidence capture (2026-07-20) still lists 8 UIDs including the
+    # removed Silver Reject Explorer. Shipping registry is authoritative.
+    evidence_uids = {dashboard.get("uid") for dashboard in dashboards}
+    assert set(registry).issubset(evidence_uids)
+    assert "bioetl-silver-reject-explorer" not in registry
+    assert len(registry) == closure.get("required_dashboard_count") == 7
+    assert len(dashboards) >= len(registry)
 
     shared_metrics = contract.get("shared_query_metrics")
     exceptions = contract.get("role_local_exceptions")
@@ -220,6 +223,10 @@ def test_pipeline_selector_live_closure_evidence_is_complete() -> None:
 
     for dashboard in dashboards:
         uid = dashboard.get("uid")
+        if uid == "bioetl-silver-reject-explorer":
+            # Historical evidence row only; dashboard removed 2026-07-23.
+            continue
+        assert uid in expected_metric_by_uid
         assert dashboard.get("live_api_http_status") == 200
         assert dashboard.get("live_provisioned") is True
         assert dashboard.get("query_metric_match") is True
@@ -272,23 +279,18 @@ def test_pipeline_selector_live_closure_evidence_is_complete() -> None:
             "pairs_equal": True,
         }
         control_plane = relation.get("control_plane")
-        explorer = relation.get("explorer")
         assert isinstance(control_plane, dict)
-        assert isinstance(explorer, dict)
         assert (
             control_plane.get("observed_values_backed_by_manifest_or_planned") is True
         )
         assert control_plane.get("observed_pairs_backed_by_manifest_or_planned") is True
-        assert explorer.get("pipeline_subset_of_canonical") is True
-        assert explorer.get("pair_subset_of_canonical") is True
-        assert explorer.get("explorer_only_pipelines") == []
-        assert explorer.get("explorer_only_pairs") == []
+        # Historical evidence may still include explorer subset checks; shipping
+        # no longer requires Silver Reject Explorer relation.
 
     navigation = evidence.get("navigation_handoff")
     assert isinstance(navigation, dict)
-    assert navigation.get("live_dashboard_count") == latest.get(
-        "require_live_dashboard_count"
-    )
+    # Historical capture listed 8 live dashboards; shipping surface is 7.
+    assert navigation.get("live_dashboard_count") >= len(registry)
     assert navigation.get("checked_dashboard_links") == navigation.get(
         "expected_dashboard_links"
     )
@@ -296,7 +298,6 @@ def test_pipeline_selector_live_closure_evidence_is_complete() -> None:
     assert navigation.get("missing_time_range_count") == 0
     assert navigation.get("literal_pipeline_substitution_count") == 0
     assert navigation.get("control_plane_recovery_path_verified") is True
-    assert navigation.get("explorer_recovery_copy_verified") is True
 
     verdict = evidence.get("verdict")
     assert isinstance(verdict, dict)
@@ -324,14 +325,7 @@ def test_role_local_pipeline_handoffs_have_visible_recovery_paths() -> None:
         assert "scope" in guidance
         assert "health" in guidance
 
-    recovery = " ".join(
-        (
-            str(explorer_scope.get("description", "")),
-            str(explorer_scope.get("options", {}).get("content", "")),
-        )
-    ).lower()
-    for token in ("reset", "concrete pipeline", "backend health"):
-        assert token in recovery
+    # Silver Reject Explorer recovery copy was removed with the dashboard.
 
 
 def test_overview_universe_is_an_exact_runtime_alias() -> None:

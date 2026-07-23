@@ -57,14 +57,20 @@ class GenericFieldFinding:
         }
 
 
-def _load_yaml(path: Path) -> dict[str, Any]:
+def _load_yaml(path: Path, *, root: Path | None = None) -> dict[str, Any]:
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    path = resolve_output_path(path, root=root or REPO_ROOT)
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))
     if isinstance(payload, dict):
         return payload
     raise ValueError(f"Expected YAML mapping in {path}")
 
 
-def _load_json(path: Path) -> dict[str, Any]:
+def _load_json(path: Path, *, root: Path | None = None) -> dict[str, Any]:
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    path = resolve_output_path(path, root=root or REPO_ROOT)
     payload = json.loads(path.read_text(encoding="utf-8"))
     if isinstance(payload, dict):
         return payload

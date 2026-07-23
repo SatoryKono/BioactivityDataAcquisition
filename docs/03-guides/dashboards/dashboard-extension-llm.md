@@ -13,6 +13,11 @@ ______________________________________________________________________
 
 # Dashboard Extension Guide (LLM)
 
+> **Removed 2026-07-23:** Silver Reject Explorer dashboard, Loki/Tempo Explore adjuncts, Quarantine Explorer datasource (replaced by BioETL Ops HTTP on :8000).
+> Use CLI ioetl quarantine inspect for record-level forensics. See [monitoring-surface-reduction](../../05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md).
+
+
+
 Дата сверки: **2026-07-13**
 Источник истины: `grafana/dashboards/*.json`
 
@@ -45,10 +50,10 @@ Grafana dashboards в BioETL.
   dashboard запрещены, если только machine-readable contract в
   `contracts/navigation-links.yaml` явно не требует repeated panel-level CTAs
   для critical surfaces.
-- Во всех shipped navigation panels `id=1000` после bus `0..6` должны
-  присутствовать global adjunct links `Silver Reject Explorer`,
-  `Explore Logs`, `Explore Traces`. Current dashboard item MUST stay visible
-  and disabled instead of disappearing from the visual bus.
+- Во всех shipped navigation panels `id=1000` bus `0..6` only.
+  Do **not** reintroduce `Silver Reject Explorer`, `Explore Logs`, or
+  `Explore Traces` (removed 2026-07-23). Current dashboard item MUST stay
+  visible and disabled instead of disappearing from the visual bus.
 - Navigation panel links MUST open in the same window; do not ship
   `target="_blank"` in panel `id=1000` HTML.
 - Layout hierarchy follows the dashboard design system:
@@ -94,7 +99,7 @@ Grafana dashboards в BioETL.
 - Не добавляй high-cardinality filters/labels в summary-panels без необходимости.
 - Для нового operator dashboard или first-screen redesign сохраняй contract:
   `ONE BIG QUESTION`, current scope, provenance summary и `First action`.
-- `Silver Reject Explorer` does not own the shared `workflow` / `run_id`
+- Silver Reject Explorer removed; forensic IDs stay on CLI quarantine inspect only
   context shell. It stays bounded to forensic `pipeline/run_type` plus
   `reason_code`, `field`, `quarantine_run_id`, and `payload_hash` selectors.
   Generic links into the explorer MUST NOT map primary `$run_id` into
@@ -135,31 +140,12 @@ sum(increase(metric_name[24h])) or vector(0)
 `0s latency`. `or vector(0)` допустим для count-like healthy-zero panels, но не
 для p95 latency unless issue body explicitly justifies zero-as-valid semantics.
 
-### Loki
+### Loki / Tempo
 
-Используй безопасный baseline:
-
-```logql
-{job="bioetl"}
-```
-
-Для log-hygiene и warnings работай через `| json` и `__error__`.
-
-### Tempo
-
-Используй explicit search-first, но contextual handoff:
-
-```text
-route = /a/grafana-exploretraces-app/explore?actionView=search&from=${__from}&to=${__to}&var-ds=tempo&var-groupBy=resource.service.name
-queryType = traceqlSearch
-query = { span."bioetl.pipeline" =~ "${pipeline:regex}" }
-```
-
-Для provider-only dashboards замени pipeline/run_type filter на:
-
-```text
-query = { span."bioetl.provider" =~ "${provider:regex}" }
-```
+**Do not ship** Loki LogQL panels, Tempo TraceQL panels, or Explore Logs/Traces
+navigation links. Those stacks were removed from the BioETL monitoring surface
+on 2026-07-23. Prefer Prometheus metrics and structured log files under
+`reports/logs/` / operator CLI.
 
 ## 5. Docs cascade rule
 
@@ -174,14 +160,11 @@ query = { span."bioetl.provider" =~ "${provider:regex}" }
 
 Проверь также:
 
-- Loki drilldown links стартуют с `{job="bioetl"}` и не encode'ят
-  `$pipeline/$provider` в query payload.
-- Tempo drilldown links используют explicit search-first route
-  `/a/grafana-exploretraces-app/explore?actionView=search`, сохраняют active
-  dashboard range через `from=${__from}&to=${__to}`, pin'ят `var-ds=tempo`, задают
-  `var-groupBy=resource.service.name` и сохраняют contextual TraceQL scope
-  (`bioetl.pipeline` либо `bioetl.provider`). Не привязывай shipped
-  TraceQL handoff к `${run_type:regex}` для `includeAll` variables: Grafana
+- Loki/Tempo drilldown links must **not** be reintroduced.
+- HTTP identity panels use datasource **BioETL Ops HTTP** (`bioetl:8000`), not
+  Quarantine Explorer. Note for legacy text that still mentions Grafana TraceQL
+  handoffs: those handoffs are retired; do not bind `${run_type:regex}` for
+  `includeAll` variables. Grafana
   может схлопнуть `All` в пустой regex `()`.
 - Runtime condition-summary panels не теряют direct runbook links.
 
@@ -230,7 +213,7 @@ uv run python -m pytest -q tests/integration/test_grafana_config.py
 - [ ] Для терминов статусов применяется единая таблица mapping из `docs/03-guides/dashboards/design-system.md` (раздел **1.1 Canonical mapping: L0 vs diagnostic dashboards**).
 - [ ] В L0 dashboards используется только `OK/WARN/CRIT/UNKNOWN`; alias-термины (`DEGRADED/BROKEN/HEALTHY`) допустимы только в диагностических deep-dive поверхностях и с явным alias mapping в description.
 - [ ] Для Prometheus current-status/current-cause panels отсутствует invalid zero-fallback (`or vector(0)`); zero fallback допустим только для true event counters.
-- [ ] Для HTTP-backed forensic panels (`Quarantine Explorer`) descriptions/noValue copy различают zero matching rows, invalid scope/filter chain и backend failure.
+- [ ] Для HTTP-backed forensic panels (`BioETL Ops HTTP`) descriptions/noValue copy различают zero matching rows, invalid scope/filter chain и backend failure.
 - [ ] Заголовки и описания новых панелей соответствуют шаблонам из design system.
 - [ ] Пройдена автоматическая проверка:
 

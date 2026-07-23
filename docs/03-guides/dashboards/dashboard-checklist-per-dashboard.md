@@ -1,5 +1,10 @@
 # Чек-лист проверок для дашбордов BioETL
 
+> **Removed 2026-07-23:** Silver Reject Explorer dashboard, Loki/Tempo Explore adjuncts, Quarantine Explorer datasource (replaced by BioETL Ops HTTP on :8000).
+> Use CLI ioetl quarantine inspect for record-level forensics. See [monitoring-surface-reduction](../../05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md).
+
+
+
 **Дата**: 2026-07-13
 **Источник**: docs/03-guides/dashboards/*, contracts/*.yaml, grafana/dashboards/*.json
 **Версия**: 1.1.0
@@ -13,7 +18,7 @@
 - [ ] Панель навигации с `id=1000` существует и содержит полную шину
 - [ ] Шина включает: `0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`, `6. Alerts & SLO`
 - [ ] Текущий дашборд отображается как disabled theme-safe item
-- [ ] После шины включены глобальные adjunct links: `Silver Reject Explorer`, `Explore Logs`, `Explore Traces`
+- [x] После шины adjunct links не требуются (removed 2026-07-23)
 - [ ] Шина сохраняет контраст в dark/light themes, visible focus/hover и переносится без clipping на `1024px`
 - [ ] Все ссылки открываются в том же окне (`targetBlank: false`)
 - [ ] Нет дублирующих dashboard-to-dashboard ссылок в один target
@@ -135,7 +140,7 @@
 
 #### Metadata policy
 - [ ] L0/L1 dashboards: `time.from=now-12h`, `refresh=30s`
-- [ ] L2 forensic (`silver-reject-explorer`): `time.from=now-24h`, `refresh=1m`
+- [x] L2 forensic explorer removed — use CLI quarantine inspect
 - [ ] `schemaVersion` является `30` или `39` (или актуальной версией)
 - [ ] Если `iteration` присутствует, то positive integer
 - [ ] `tags` включает `bioetl`
@@ -173,8 +178,8 @@
 - [ ] Query sources: `prometheus_records_processed_total`
 
 ### Навигация
-- [ ] Required top-level links: `0. Control Plane`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`, `6. Alerts & SLO`
-- [ ] Required top-level links: `Explore Logs`, `Explore Traces`, `Silver Reject Explorer`
+- [x] Required top-level links: bus `0..6` only (Explore/Silver removed)
+- [x] Required top-level links: bus `0..6` only (Explore/Silver removed)
 - [ ] Panel `214` (System Status) имеет dataLinks: Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow
 - [ ] Panel `215` (First Action) имеет dataLinks: Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow
 - [ ] Panel `9002` (L0 Inputs) имеет dataLinks: Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow
@@ -221,8 +226,8 @@
 - [ ] Query sources: `prometheus_control_plane_universe`
 
 ### Навигация
-- [ ] Required top-level links: `1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`, `6. Alerts & SLO`
-- [ ] Required top-level links: `Silver Reject Explorer`, `Explore Logs`, `Explore Traces`
+- [x] Required top-level links: bus `0..6` only (Explore/Silver removed)
+- [x] Required top-level links: bus `0..6` only (Explore/Silver removed)
 
 ### First-screen структура
 - [ ] Tier 1 включает trusted `Status`, Monitor: Replay Safety State, Monitor: Checkpoint Freshness Lag (seconds), Monitor: Manifest / Ledger Integrity, Inspect: Telemetry Missing
@@ -265,8 +270,8 @@
 - [ ] Dependency: `$stage` зависит от runtime-selected scope
 
 ### Навигация
-- [ ] Required top-level links: `0. Control Plane`, `1. Overview`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`, `6. Alerts & SLO`
-- [ ] Required top-level links: `Explore Logs`, `Explore Traces`, `Silver Reject Explorer`
+- [x] Required top-level links: bus `0..6` only (Explore/Silver removed)
+- [x] Required top-level links: bus `0..6` only (Explore/Silver removed)
 
 ### First Action Contract (panel `9991`)
 - [ ] Panel `9991` (First Action) существует
@@ -323,8 +328,8 @@
 - [ ] Dependency: `$adapter` optional
 
 ### Навигация
-- [ ] Required top-level links: `0. Control Plane`, `1. Overview`, `2. Runtime`, `4. Data Quality`, `5. Workflow`, `6. Alerts & SLO`
-- [ ] Required top-level links: `Explore Logs`, `Explore Traces`, `Silver Reject Explorer`
+- [x] Required top-level links: bus `0..6` only (Explore/Silver removed)
+- [x] Required top-level links: bus `0..6` only (Explore/Silver removed)
 
 ### First Action Contract (panel `9002`)
 - [ ] Panel `9002` (First Action) существует
@@ -373,18 +378,18 @@
 - [ ] Dependency: `$stage` зависит от `$pipeline` и `$run_type`
 
 ### Навигация
-- [ ] Required top-level links: `0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`, `5. Workflow`, `6. Alerts & SLO`
-- [ ] Required top-level links: `Silver Reject Explorer`, `Explore Logs`, `Explore Traces`
+- [x] Required top-level links: bus `0..6` only (Explore/Silver removed)
+- [x] Required top-level links: bus `0..6` only (Explore/Silver removed)
 
 ### Required panel links
-- [ ] Panel `9102` (Inspect DQ Current Reasons) имеет dataLink: Open Silver Reject Explorer
+- [x] Open Silver Reject Explorer CTA removed — use CLI quarantine inspect
 
 ### First Action Contract (panel `9103`)
 - [ ] Panel `9103` (Review: First Action) существует
 - [ ] Min CTA: 3, Max CTA: 3
 - [ ] CTA: Review current status
 - [ ] CTA: Inspect current reasons
-- [ ] CTA: Open Silver Reject Explorer
+- [x] Open Silver Reject Explorer CTA removed — use CLI quarantine inspect
 
 ### First-screen структура
 - [ ] Tier 1 включает: Monitor DQ Current Status, Monitor DQ Threshold State, Inspect DQ Current Reasons, Review: First Action
@@ -429,8 +434,8 @@
 - [ ] Dependency: hidden context preserves single-pipeline handoff
 
 ### Навигация
-- [ ] Required top-level links: `0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `6. Alerts & SLO`
-- [ ] Required top-level links: `Explore Logs`, `Explore Traces`, `Silver Reject Explorer`
+- [x] Required top-level links: bus `0..6` only (Explore/Silver removed)
+- [x] Required top-level links: bus `0..6` only (Explore/Silver removed)
 
 ### Required panel links
 - [ ] Panel `9` (First Action) имеет dataLinks: Open 2. Runtime, Open 4. Data Quality, Open 3. Provider Health, Open 0. Control Plane, Open 1. Overview
@@ -464,7 +469,9 @@
 
 ---
 
-## 7. bioetl-silver-reject-explorer (Silver Reject Explorer)
+## 7. Silver Reject Explorer (REMOVED 2026-07-23)
+
+> Historical section. Use CLI `bioetl quarantine inspect` instead of a Grafana dashboard.
 
 ### Переменные
 - [ ] `pipeline` visible, single-select, required
@@ -475,12 +482,12 @@
 - [ ] `payload_hash` visible textbox, empty string
 - [ ] Семейство: forensic_explorer
 - [ ] Query sources: `prometheus_records_processed_total` (pipeline), `quarantine_filter_options_api` (run_type, reason_code, field, quarantine_run_id backed by `dimension=run_id`), `textbox_forensic_selector` (payload_hash)
-- [ ] Dependency: `$pipeline` required before Quarantine Explorer reads
+- [ ] Dependency: `$pipeline` required before BioETL Ops HTTP reads
 - [ ] Dependency: forensic selectors local only
 
 ### Навигация
-- [ ] Required top-level links: `0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`, `6. Alerts & SLO`
-- [ ] Required top-level links: `Explore Logs`, `Explore Traces`
+- [x] Required top-level links: bus `0..6` only (Explore/Silver removed)
+- [x] Required top-level links: bus `0..6` only (Explore/Silver removed)
 - [ ] НЕ включает: self-link to `Silver Reject Explorer`
 
 ### First Action Contract (panel `10`)
@@ -507,7 +514,7 @@
 - [ ] Self-drilldown stays same-tab
 - [ ] Requires single-select `$pipeline` потому что quarantine API fail-closed требует явный `pipeline` параметр
 - [ ] `Review: First Action / No-Data Semantics` carries bounded CTA row links
-- [ ] `Monitor Explorer Backend Health` читает `/health/live` через datasource `Quarantine Explorer`
+- [ ] `Monitor Explorer Backend Health` читает `/health/live` через datasource `BioETL Ops HTTP`
 
 ### No-data semantics
 - [ ] Valid empty result → empty result / no matching rows
@@ -529,8 +536,8 @@
 - [ ] Alert queries use bounded labels from Prometheus `ALERTS`; no synthetic `run_id` label is introduced
 
 ### Навигация
-- [ ] Required top-level links: `0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`
-- [ ] Required adjunct links: `Silver Reject Explorer`, `Explore Logs`, `Explore Traces`
+- [x] Required top-level links: bus `0..6` only (Explore/Silver removed)
+- [x] Required adjunct links: none (removed 2026-07-23)
 - [ ] НЕ включает self-link to `6. Alerts & SLO`
 
 ### Incident hierarchy и scope

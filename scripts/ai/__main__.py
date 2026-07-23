@@ -17,6 +17,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 
 _DIR = Path(__file__).parent
 SURFACES = ("codex", "mcp", "vibe")
@@ -100,7 +101,7 @@ def main(argv: list[str] | None = None) -> int:
     else:
         command = _module_command(surface, rest)
 
-    return subprocess.run(command, check=False).returncode
+    return subprocess.run(ensure_safe_cli_argv([str(x) for x in command]), check=False).returncode
 
 
 if __name__ == "__main__":

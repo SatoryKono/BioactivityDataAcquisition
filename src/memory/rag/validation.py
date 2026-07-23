@@ -163,6 +163,10 @@ def validate_rag_manifest_files(
     verify_sources: bool = True,
 ) -> RagValidationReport:
     """Load and semantically validate a catalog/chunk manifest pair."""
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
+    catalog_path = resolve_output_path(catalog_path, root=root)
+    chunks_path = resolve_output_path(chunks_path, root=root)
     try:
         catalog_payload = json.loads(catalog_path.read_text(encoding="utf-8"))
     except (OSError, UnicodeError, json.JSONDecodeError) as exc:

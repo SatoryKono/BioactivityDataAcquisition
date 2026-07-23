@@ -211,10 +211,16 @@ def test_write_export_manifests_if_enabled_delegates_with_deterministic_options(
 
     assert paths == (Path("exports/activity.manifest.json"),)
     assert disabled == ()
-    assert calls[0]["generated_at"] == "2026-06-30T00:00:00Z"
-    assert calls[0]["allow_nondeterministic_generated_at"] is False
+    assert calls[0]["timestamp_opts"] == ("2026-06-30T00:00:00Z", False, None)
     assert calls[0]["run_ids"] == ("run-1",)
-    assert calls[0]["audit_ref"] == "export-audit:abc"
+    assert calls[0]["access"] == (
+        "analyst@example.test",
+        "investigator",
+        None,
+        None,
+        "default",
+        "export-audit:abc",
+    )
 
 
 async def test_export_existing_table_redacts_writes_and_logs_manifest_paths(

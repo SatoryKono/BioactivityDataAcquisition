@@ -72,19 +72,19 @@ def _parse_args() -> argparse.Namespace:
 
 
 def main() -> int:
-    from scripts.engineering.common.repo_paths import resolve_cli_path
+    from scripts.engineering.common.repo_paths import resolve_output_path
 
     args = _parse_args()
 
-    config_path = resolve_cli_path(args.config)
+    config_path = resolve_output_path(args.config)
     root = config_path.resolve().parents[2]
-    output_path = resolve_cli_path(args.output, root=root)
+    output_path = resolve_output_path(args.output, root=root)
     duplicate_name_path = (
-        resolve_cli_path(args.duplicate_name_inventory, root=root)
+        resolve_output_path(args.duplicate_name_inventory, root=root)
         if args.duplicate_name_inventory
         else None
     )
-    fixture_duplication_path = resolve_cli_path(args.fixture_duplication, root=root)
+    fixture_duplication_path = resolve_output_path(args.fixture_duplication, root=root)
 
     if args.verbose:
         print(f"Root: {root}")

@@ -1,5 +1,10 @@
 # Исчерпывающий список требований к дашбордам BioETL
 
+> **Removed 2026-07-23:** Silver Reject Explorer dashboard, Loki/Tempo Explore adjuncts, Quarantine Explorer datasource (replaced by BioETL Ops HTTP on :8000).
+> Use CLI ioetl quarantine inspect for record-level forensics. See [monitoring-surface-reduction](../../05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md).
+
+
+
 **Дата**: 2026-07-13
 **Источник**: docs/03-guides/dashboards/*, contracts/*.yaml, grafana/dashboards/*.json
 **Версия**: 1.2.0
@@ -48,7 +53,7 @@
 - Навигационная панель с `id=1000` включает полную шину: `0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`, `6. Alerts & SLO`
 - Текущий дашборд отображается как disabled theme-safe item
 - Machine-readable `panel.links` omit self-links (no duplicate navigation)
-- После шины `0..6` включены глобальные adjunct links: `Silver Reject Explorer`, `Explore Logs`, `Explore Traces`
+- После шины `0..6` adjunct links не шиппятся (Silver/Logs/Traces removed 2026-07-23)
 - Шина сохраняет контраст и visible focus/hover в dark/light themes и переносится без clipping на viewport `1024px`
 - Все ссылки открываются в том же окне (`targetBlank: false`)
 - Запрещены дублирующие dashboard-to-dashboard ссылки в один и тот же target dashboard
@@ -75,7 +80,7 @@
 - **hybrid_overview**: `bioetl-overview-v2` (canonical frozen Overview v3 baseline)
 - **provider_first**: `bioetl-provider-health-v2`
 - **workflow_evidence**: `bioetl-workflow-overview`
-- **forensic_explorer**: `bioetl-silver-reject-explorer`
+- **forensic_explorer**: `CLI quarantine inspect`
 - **alert_slo**: `bioetl-alerts-slo`
 
 **Источник:** `contracts/selector-contracts.yaml`, `variable-reference.md`, `selector-architecture.md`
@@ -291,7 +296,7 @@ Canonical L0 answer-first hub using the frozen `1. Overview v3` layout as the ba
 
 ### Навигация (required_top_level_links)
 - `0. Control Plane`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`, `6. Alerts & SLO`
-- `Explore Logs`, `Explore Traces`, `Silver Reject Explorer`
+- `0..6` bus only (adjuncts removed)
 
 ### Required panel links (dataLinks)
 - Panel `214` (Status) → Open Runtime, Open Control Plane, Open Data Quality, Open Provider Health, Open Workflow
@@ -344,7 +349,7 @@ L1/L2 replay/resume safety: manifest, ledger, checkpoint, replay, lineage, globa
 
 ### Навигация (required_top_level_links)
 - `1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`, `6. Alerts & SLO`
-- `Silver Reject Explorer`, `Explore Logs`, `Explore Traces`
+- `0..6` bus only (adjuncts removed)
 
 ### Required panel links
 - Нет обязательных panel-level dataLinks в контракте
@@ -389,7 +394,7 @@ L2 diagnostic runtime triage: blockers, latency, backlog, error localization, ha
 
 ### Навигация (required_top_level_links)
 - `0. Control Plane`, `1. Overview`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`, `6. Alerts & SLO`
-- `Explore Logs`, `Explore Traces`, `Silver Reject Explorer`
+- `0..6` bus only (adjuncts removed)
 
 ### First Action Contract (panel `9991`)
 - **Min CTA**: 4, **Max CTA**: 4
@@ -445,7 +450,7 @@ Incident triage по provider health: latency/failures/degraded/retries exhauste
 
 ### Навигация (required_top_level_links)
 - `0. Control Plane`, `1. Overview`, `2. Runtime`, `4. Data Quality`, `5. Workflow`, `6. Alerts & SLO`
-- `Explore Logs`, `Explore Traces`, `Silver Reject Explorer`
+- `0..6` bus only (adjuncts removed)
 
 ### First Action Contract (panel `9002`)
 - **Min CTA**: 3, **Max CTA**: 3
@@ -496,7 +501,7 @@ Incident triage по provider health: latency/failures/degraded/retries exhauste
 
 ### Навигация (required_top_level_links)
 - `0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`, `5. Workflow`, `6. Alerts & SLO`
-- `Silver Reject Explorer`, `Explore Logs`, `Explore Traces`
+- `0..6` bus only (adjuncts removed)
 
 ### Required panel links
 - Panel `9102` (Inspect DQ Current Reasons) → Open Silver Reject Explorer
@@ -546,7 +551,7 @@ Selected-range declarative workflow run/step evidence and transform-step latency
 
 ### Навигация (required_top_level_links)
 - `0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `6. Alerts & SLO`
-- `Explore Logs`, `Explore Traces`, `Silver Reject Explorer`
+- `0..6` bus only (adjuncts removed)
 
 ### Required panel links
 - Panel `9` (First Action) → Open 2. Runtime, Open 4. Data Quality, Open 3. Provider Health, Open 0. Control Plane, Open 1. Overview
@@ -579,7 +584,9 @@ Selected-range declarative workflow run/step evidence and transform-step latency
 
 ---
 
-## 7. bioetl-silver-reject-explorer (Silver Reject Explorer)
+## 7. Silver Reject Explorer (REMOVED 2026-07-23)
+
+> Historical section. Use CLI `bioetl quarantine inspect` instead of a Grafana dashboard.
 
 ### Назначение
 Record-level explorer для Silver structural `filtered_out`/legacy
@@ -591,7 +598,7 @@ processed-records surfaces.
 - **Видимые**: `pipeline` (single-select, required), `run_type` (multi-select with Include All, default `All`), `reason_code` (multi-select with Include All, default `All`), `field` (multi-select with Include All, default `All`), `quarantine_run_id` (single-select, empty until selected; backend `dimension=run_id`), `payload_hash` (visible textbox, empty string)
 - **Семейство**: forensic_explorer
 - **Query sources**: `prometheus_records_processed_total` (pipeline), `quarantine_filter_options_api` (run_type, reason_code, field, quarantine_run_id backed by `dimension=run_id`), `textbox_forensic_selector` (payload_hash)
-- **Dependency chains**: `$pipeline` required before Quarantine Explorer reads, forensic selectors local only
+- **Dependency chains**: `$pipeline` required before BioETL Ops HTTP reads, forensic selectors local only
 
 ### Навигация (required_top_level_links)
 - `0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`, `6. Alerts & SLO`
@@ -613,7 +620,7 @@ processed-records surfaces.
 - Forensic selectors (`quarantine_run_id`, `payload_hash`) НЕ leak в Prometheus dashboards или dashboard-to-dashboard links
 - Default 24h forensic window (explicit explanatory banner)
 - HTTP-backed surface MUST различать: valid empty result vs invalid filter chain vs backend failure
-- `Monitor Explorer Backend Health` MUST read `/health/live` through `Quarantine Explorer` and act as first-screen backend trust marker before empty tables are treated as evidence
+- `Monitor Explorer Backend Health` MUST read `/health/live` through `BioETL Ops HTTP` and act as first-screen backend trust marker before empty tables are treated as evidence
 - First-screen CTA includes bounded row links: `Review total rejects`, `Review scoped summary`, `Open Data Quality`
 - Main table поддерживает dataLinks для self-drilldown по `payload_hash` и CLI handoff
 - CLI handoff links открываются в новой tab (`data:text/plain`)
@@ -626,7 +633,7 @@ processed-records surfaces.
 - Unsupported filter chain, empty denominator, invalid scope, backend failure → UNKNOWN/error
 - `unknown` pipeline или `bronze_records=0` → UNKNOWN
 - Zero matching rows → empty-result state
-- Zero-reject workflow run is valid empty explorer state только после подтверждения конкретного pipeline, доступного Quarantine Explorer и ненулевого Bronze denominator
+- Zero-reject workflow run is valid empty explorer state только после подтверждения конкретного pipeline, доступного BioETL Ops HTTP и ненулевого Bronze denominator
 
 ### Cross-scope marker contract
 - Переходы из `bioetl-provider-health-v2` используют маркер `Context mapping`
@@ -647,7 +654,7 @@ pressure и scope-aware alert detail.
 
 ### Навигация (required_top_level_links)
 - `0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`
-- `Silver Reject Explorer`, `Explore Logs`, `Explore Traces`
+- `0..6` bus only (adjuncts removed)
 - **НЕ включает**: self-link to `6. Alerts & SLO`
 
 ### First-screen и semantic encoding
