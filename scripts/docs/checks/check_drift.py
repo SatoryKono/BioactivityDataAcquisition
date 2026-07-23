@@ -862,6 +862,37 @@ def check_modules(report: DriftReport) -> None:
                 )
 
 
+def _bioetl_terms_from_list(raw_terms: object) -> set[str]:
+    if not isinstance(raw_terms, list):
+        return set()
+    return {
+        raw_term
+        for raw_term in raw_terms
+        if isinstance(raw_term, str) and raw_term.startswith("bioetl.")
+    }
+
+
+def _bioetl_terms_from_file_entry(file_entry: object) -> set[str]:
+    if not isinstance(file_entry, dict):
+        return set()
+    terms: set[str] = set()
+    for key in ("required_terms", "forbidden_terms"):
+        terms.update(_bioetl_terms_from_list(file_entry.get(key, [])))
+    return terms
+
+
+def _bioetl_terms_from_surface(surface: object) -> set[str]:
+    if not isinstance(surface, dict):
+        return set()
+    files = surface.get("files")
+    if not isinstance(files, list):
+        return set()
+    terms: set[str] = set()
+    for file_entry in files:
+        terms.update(_bioetl_terms_from_file_entry(file_entry))
+    return terms
+
+
 def _collect_observability_attribute_terms() -> frozenset[str]:
     """Return documented tracing attributes that are intentionally not modules."""
     if not MANDATORY_TRACING_COVERAGE_PATH.exists():
@@ -873,28 +904,13 @@ def _collect_observability_attribute_terms() -> frozenset[str]:
     if not isinstance(payload, dict):
         return frozenset()
 
-    terms: set[str] = set()
     surfaces = payload.get("surfaces")
     if not isinstance(surfaces, dict):
         return frozenset()
 
+    terms: set[str] = set()
     for surface in surfaces.values():
-        if not isinstance(surface, dict):
-            continue
-        files = surface.get("files")
-        if not isinstance(files, list):
-            continue
-        for file_entry in files:
-            if not isinstance(file_entry, dict):
-                continue
-            for key in ("required_terms", "forbidden_terms"):
-                raw_terms = file_entry.get(key, [])
-                if not isinstance(raw_terms, list):
-                    continue
-                for raw_term in raw_terms:
-                    if isinstance(raw_term, str) and raw_term.startswith("bioetl."):
-                        terms.add(raw_term)
-
+        terms.update(_bioetl_terms_from_surface(surface))
     return frozenset(terms)
 
 
@@ -1513,12 +1529,9 @@ def _check_ai_surface_forbidden_patterns(
             )
 
 
-def _iter_ai_docs_runtime_mirror_targets(
-    project_root: Path,
-) -> tuple[AIDocsMirrorTarget, ...]:
-    targets: list[AIDocsMirrorTarget] = []
-
+def _agent_docs_mirror_targets(project_root: Path) -> list[AIDocsMirrorTarget]:
     agents_root = project_root / "docs" / "00-project" / "ai" / "agents" / "agents"
+    targets: list[AIDocsMirrorTarget] = []
     for path in sorted(agents_root.glob("*.md")):
         if path.name == "README.md":
             continue
@@ -1530,43 +1543,61 @@ def _iter_ai_docs_runtime_mirror_targets(
             )
             if (project_root / candidate).exists()
         )
-        if canonical_sources:
-            targets.append(
-                AIDocsMirrorTarget(
-                    relative_path=path.relative_to(project_root),
-                    canonical_sources=canonical_sources,
-                )
-            )
-
-    local_skills_root = project_root / "docs" / "00-project" / "ai" / "skills" / "local"
-    for path in sorted(local_skills_root.rglob(SKILL_FILE_NAME)):
-        relative_skill_path = path.parent.relative_to(local_skills_root)
-        canonical = Path(".codex/skills") / relative_skill_path / SKILL_FILE_NAME
-        if (project_root / canonical).exists():
-            targets.append(
-                AIDocsMirrorTarget(
-                    relative_path=path.relative_to(project_root),
-                    canonical_sources=(canonical,),
-                )
-            )
-
-    global_skills_root = (
-        project_root / "docs" / "00-project" / "ai" / "skills" / "global"
-    )
-    for path in sorted(global_skills_root.rglob(SKILL_FILE_NAME)):
-        if ".system" in path.parts:
+        if not canonical_sources:
             continue
-        relative_skill_path = path.parent.relative_to(global_skills_root)
-        canonical = Path(".gemini/skills") / relative_skill_path / SKILL_FILE_NAME
-        if (project_root / canonical).exists():
-            targets.append(
-                AIDocsMirrorTarget(
-                    relative_path=path.relative_to(project_root),
-                    canonical_sources=(canonical,),
-                )
+        targets.append(
+            AIDocsMirrorTarget(
+                relative_path=path.relative_to(project_root),
+                canonical_sources=canonical_sources,
             )
+        )
+    return targets
 
-    return tuple(targets)
+
+def _skill_docs_mirror_targets(
+    project_root: Path,
+    *,
+    docs_subdir: str,
+    canonical_root: str,
+    skip_system_parts: bool = False,
+) -> list[AIDocsMirrorTarget]:
+    skills_root = project_root / "docs" / "00-project" / "ai" / "skills" / docs_subdir
+    targets: list[AIDocsMirrorTarget] = []
+    for path in sorted(skills_root.rglob(SKILL_FILE_NAME)):
+        if skip_system_parts and ".system" in path.parts:
+            continue
+        relative_skill_path = path.parent.relative_to(skills_root)
+        canonical = Path(canonical_root) / relative_skill_path / SKILL_FILE_NAME
+        if not (project_root / canonical).exists():
+            continue
+        targets.append(
+            AIDocsMirrorTarget(
+                relative_path=path.relative_to(project_root),
+                canonical_sources=(canonical,),
+            )
+        )
+    return targets
+
+
+def _iter_ai_docs_runtime_mirror_targets(
+    project_root: Path,
+) -> tuple[AIDocsMirrorTarget, ...]:
+    return tuple(
+        [
+            *_agent_docs_mirror_targets(project_root),
+            *_skill_docs_mirror_targets(
+                project_root,
+                docs_subdir="local",
+                canonical_root=".codex/skills",
+            ),
+            *_skill_docs_mirror_targets(
+                project_root,
+                docs_subdir="global",
+                canonical_root=".gemini/skills",
+                skip_system_parts=True,
+            ),
+        ]
+    )
 
 
 def _check_ai_docs_runtime_mirror_headers(

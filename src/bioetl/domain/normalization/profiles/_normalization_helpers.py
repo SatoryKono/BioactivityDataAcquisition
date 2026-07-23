@@ -36,7 +36,7 @@ def _normalizer_ref(normalizer: FieldNormalizer) -> str:
             "normalizer must expose deterministic __module__ and __qualname__; "
             "unstable callables without an identity contract are not supported"
         )
-    if qualname == "<lambda>":
+    if qualname == "<lambda>" or qualname.endswith(".<lambda>"):
         raise TypeError(
             "lambda normalizers are not supported; provide a named callable "
             "with stable module/qualname identity"

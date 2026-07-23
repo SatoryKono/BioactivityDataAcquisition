@@ -1,46 +1,48 @@
-"""Shared helper utilities for Grafana dashboard integration tests."""
+﻿from pathlib import Path
 
-from __future__ import annotations
+path = Path("tests/integration/_grafana_test_support.py")
+text = path.read_text(encoding="utf-8")
 
-import io
-import json
-import logging
-import re
-from functools import cache
-from pathlib import Path
-from typing import Any
+old_get = '''@cache
+def get_all_valid_metric_names() -> set[str]:
+    """Extract all valid Prometheus metric names including suffixes for histograms."""
+    from bioetl.infrastructure.observability import metrics
 
-import yaml
+    all_valid_names: set[str] = set()
+    all_valid_names.add("ALERTS")
 
-_PROMQL_METRIC_SELECTOR_RE = re.compile(r"([a-zA-Z_:][a-zA-Z0-9_:]*)\{([^{}]*)\}")
-_PROMQL_LABEL_MATCHER_RE = re.compile(r'([a-zA-Z_]\w*)\s*(=~|=|!=|!~)\s*"')
-_PROMETHEUS_RULE_FILES = tuple(Path("grafana/prometheus-rules").glob("*.yml"))
+    for item_name in dir(metrics):
+        item = getattr(metrics, item_name)
+        if not hasattr(item, "_name"):
+            continue
+        base_name = item._name
+        all_valid_names.add(base_name)
+        all_valid_names.add(f"{base_name}_created")
 
-__all__ = [
-    "_PROMQL_METRIC_SELECTOR_RE",
-    "_assert_operator_context_shell_contract",
-    "_assert_provider_health_variable_contract",
-    "_assert_silver_reject_explorer_variable_contract",
-    "_assert_standard_variable_contract",
-    "_collect_dashboard_links",
-    "_emit_sample_structured_log",
-    "_extract_selector_labels",
-    "_infer_recording_rule_labels",
-    "_unknown_metrics_for_query",
-    "get_all_valid_metric_names",
-    "get_dashboard_files",
-    "get_dashboard_navigation_links",
-    "get_dashboard_panels",
-    "get_dashboard_prometheus_queries",
-    "get_metric_label_sets",
-    "get_panel_expressions",
-    "get_row_child_panels",
-    "load_dashboard",
-    "require_dashboard_navigation_links",
-]
+        class_name = type(item).__name__
+        if "Histogram" in class_name or "Summary" in class_name:
+            all_valid_names.update(
+                {
+                    f"{base_name}_bucket",
+                    f"{base_name}_sum",
+                    f"{base_name}_count",
+                }
+            )
+        elif "Counter" in class_name:
+            all_valid_names.add(f"{base_name}_total")
 
+    for rules_path in _PROMETHEUS_RULE_FILES:
+        rules_payload = yaml.safe_load(rules_path.read_text(encoding="utf-8"))
+        for group in rules_payload.get("groups", []):
+            for rule in group.get("rules", []):
+                record_name = rule.get("record")
+                if isinstance(record_name, str):
+                    all_valid_names.add(record_name)
 
-def _add_metric_name_suffixes(
+    return all_valid_names
+'''
+
+new_get = '''def _add_metric_name_suffixes(
     all_valid_names: set[str], *, base_name: str, class_name: str
 ) -> None:
     """Register base metric name plus Prometheus type suffixes."""
@@ -96,73 +98,31 @@ def get_all_valid_metric_names() -> set[str]:
     _register_runtime_metric_names(all_valid_names)
     _register_recording_rule_metric_names(all_valid_names)
     return all_valid_names
+'''
 
-
-def _register_runtime_metric_label_sets(
+old_reg = '''def _register_recording_rule_label_sets(
     label_sets: dict[str, frozenset[str]],
 ) -> None:
-    from bioetl.infrastructure.observability.prometheus_metric_registries import (
-        COUNTERS,
-        GAUGES,
-        HISTOGRAMS,
-    )
+    for rules_path in _PROMETHEUS_RULE_FILES:
+        rules_payload = yaml.safe_load(rules_path.read_text(encoding="utf-8"))
+        for group in rules_payload.get("groups", []):
+            for rule in group.get("rules", []):
+                record_name = rule.get("record")
+                expr = rule.get("expr")
+                if isinstance(record_name, str) and isinstance(expr, str):
+                    static_labels = frozenset(
+                        str(label_name)
+                        for label_name in rule.get("labels", {})
+                        if isinstance(label_name, str)
+                    )
+                    label_sets[record_name] = (
+                        label_sets.get(record_name, frozenset())
+                        | _recording_rule_labels(expr, label_sets)
+                        | static_labels
+                    )
+'''
 
-    _register_simple_metric_label_sets(label_sets, COUNTERS)
-    _register_simple_metric_label_sets(label_sets, GAUGES)
-    _register_histogram_label_sets(label_sets, HISTOGRAMS)
-
-
-def _register_simple_metric_label_sets(
-    label_sets: dict[str, frozenset[str]], metrics: dict[str, Any]
-) -> None:
-    for name, metric in metrics.items():
-        label_sets[name] = frozenset(metric._labelnames)
-
-
-def _register_histogram_label_sets(
-    label_sets: dict[str, frozenset[str]], histograms: dict[str, Any]
-) -> None:
-    for name, metric in histograms.items():
-        _register_histogram_label_set(
-            label_sets, name=name, label_names=metric._labelnames
-        )
-
-
-def _register_histogram_label_set(
-    label_sets: dict[str, frozenset[str]], *, name: str, label_names: tuple[str, ...]
-) -> None:
-    base_labels = frozenset(label_names)
-    label_sets[name] = base_labels
-    label_sets[f"{name}_bucket"] = base_labels | {"le"}
-    label_sets[f"{name}_sum"] = base_labels
-    label_sets[f"{name}_count"] = base_labels
-
-
-def _fallback_recording_rule_labels(
-    expr: str, label_sets: dict[str, frozenset[str]]
-) -> frozenset[str]:
-    referenced_label_sets = [
-        label_sets[metric_name]
-        for metric_name in re.findall(r"\b(bioetl_[a-z0-9_]+)\b", expr)
-        if metric_name in label_sets
-    ]
-    if not referenced_label_sets:
-        return frozenset()
-
-    shared_labels = set(referenced_label_sets[0])
-    for candidate in referenced_label_sets[1:]:
-        shared_labels &= set(candidate)
-    return frozenset(shared_labels)
-
-
-def _recording_rule_labels(
-    expr: str, label_sets: dict[str, frozenset[str]]
-) -> frozenset[str]:
-    inferred_labels = _infer_recording_rule_labels(expr)
-    return inferred_labels or _fallback_recording_rule_labels(expr, label_sets)
-
-
-def _static_labels_from_rule(rule: dict[str, Any]) -> frozenset[str]:
+new_reg = '''def _static_labels_from_rule(rule: dict[str, Any]) -> frozenset[str]:
     return frozenset(
         str(label_name)
         for label_name in rule.get("labels", {})
@@ -198,250 +158,16 @@ def _register_recording_rule_label_sets(
 ) -> None:
     for rules_path in _PROMETHEUS_RULE_FILES:
         _register_recording_rule_label_sets_from_file(label_sets, rules_path)
+'''
 
+assert old_get in text, "old_get missing"
+assert old_reg in text, "old_reg missing"
+text = text.replace(old_get, new_get).replace(old_reg, new_reg)
 
-@cache
-def get_metric_label_sets() -> dict[str, frozenset[str]]:
-    """Return the effective label set for shipped metrics and recording rules."""
-    label_sets: dict[str, frozenset[str]] = {
-        "ALERTS": frozenset({"alertname", "alertstate", "severity"}),
-        "up": frozenset({"job", "instance"}),
-    }
-
-    _register_runtime_metric_label_sets(label_sets)
-    _register_recording_rule_label_sets(label_sets)
-
-    return label_sets
-
-
-@cache
-def get_dashboard_files() -> tuple[Path, ...]:
-    """Get all Grafana dashboard JSON files."""
-    return tuple(Path("grafana/dashboards").glob("*.json"))
-
-
-@cache
-def load_dashboard(dashboard_path: Path) -> dict:
-    """Load one dashboard JSON payload."""
-    with open(dashboard_path, encoding="utf-8-sig") as f:
-        return json.load(f)
-
-
-@cache
-def _load_logging_helpers() -> tuple[Any, Any]:
-    """Import logging helpers lazily so collection does not bootstrap observability."""
-    from bioetl.infrastructure.observability.logging_config import configure_logging
-    from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
-
-    return configure_logging, UnifiedLogger
-
-
-def _walk_panels(panels: list[dict]) -> list[dict]:
-    """Flatten dashboard panels, including row-contained nested panels."""
-    flattened: list[dict] = []
-    for panel in panels:
-        flattened.append(panel)
-        nested = panel.get("panels", [])
-        if isinstance(nested, list):
-            flattened.extend(_walk_panels(nested))
-    return flattened
-
-
-def get_dashboard_panels(dashboard: dict) -> list[dict]:
-    """Get all panels, including nested row panels."""
-    panels = _walk_panels(list(dashboard.get("panels", [])))
-    for row in dashboard.get("rows", []):
-        panels.extend(_walk_panels(row.get("panels", [])))
-    return panels
-
-
-def get_row_child_panels(dashboard: dict, row_title: str) -> list[dict]:
-    """Return panels that belong to a row in nested or expanded Grafana JSON."""
-    panels = list(dashboard.get("panels", []))
-    for index, panel in enumerate(panels):
-        if panel.get("type") != "row" or panel.get("title") != row_title:
-            continue
-        nested = panel.get("panels")
-        if isinstance(nested, list) and nested:
-            return list(nested)
-        children: list[dict] = []
-        for candidate in panels[index + 1 :]:
-            if candidate.get("type") == "row":
-                break
-            children.append(candidate)
-        return children
-    return []
-
-
-def get_panel_expressions(dashboard: dict) -> list[str]:
-    """Get all PromQL expressions from dashboard panels."""
-    expressions: list[str] = []
-    for panel in get_dashboard_panels(dashboard):
-        for target in panel.get("targets", []):
-            expr = target.get("expr")
-            if isinstance(expr, str) and expr:
-                expressions.append(expr)
-    return expressions
-
-
-def get_dashboard_prometheus_queries(dashboard: dict) -> list[str]:
-    """Collect Prometheus-backed queries from panels and variables."""
-    queries = get_panel_expressions(dashboard)
-
-    for variable in dashboard.get("templating", {}).get("list", []):
-        datasource = variable.get("datasource")
-        is_prometheus = datasource == "Prometheus" or datasource == {
-            "type": "prometheus",
-            "uid": "prometheus",
-        }
-        if not is_prometheus:
-            continue
-        query = variable.get("query", {})
-        if isinstance(query, dict):
-            query_text = query.get("query")
-            if isinstance(query_text, str) and query_text:
-                queries.append(query_text)
-
-    return queries
-
-
-def _collect_dashboard_links(dashboard: dict) -> list[dict]:
-    """Collect top-level, panel, data, and field links."""
-    links = list(dashboard.get("links", []))
-    for panel in get_dashboard_panels(dashboard):
-        links.extend(panel.get("links", []))
-        links.extend(panel.get("options", {}).get("dataLinks", []))
-        defaults = panel.get("fieldConfig", {}).get("defaults", {})
-        if isinstance(defaults, dict):
-            links.extend(defaults.get("links", []))
-        for override in panel.get("fieldConfig", {}).get("overrides", []):
-            for prop in override.get("properties", []):
-                if prop.get("id") == "links":
-                    links.extend(prop.get("value", []))
-    return links
-
-
-def get_dashboard_navigation_links(dashboard: dict) -> list[dict]:
-    """Collect canonical dashboard-bus links from the navigation surface.
-
-    Fail-closed: panel ``id=1000`` must exist, ``links`` must be a list, and
-    every entry must be a mapping. Callers that require a non-empty bus should
-    also call :func:`require_dashboard_navigation_links`.
-    """
-    navigation_panels = [
-        panel for panel in get_dashboard_panels(dashboard) if panel.get("id") == 1000
-    ]
-    assert navigation_panels, "dashboard must define navigation panel id=1000"
-    assert len(navigation_panels) == 1, (
-        "dashboard must define exactly one navigation panel id=1000"
-    )
-    panel_links = navigation_panels[0].get("links", [])
-    assert isinstance(panel_links, list), (
-        "navigation panel id=1000 links must be a list, "
-        f"got {type(panel_links).__name__}"
-    )
-    links: list[dict] = []
-    for index, link in enumerate(panel_links):
-        assert isinstance(link, dict), (
-            f"navigation panel id=1000 links[{index}] must be a mapping, "
-            f"got {type(link).__name__}"
-        )
-        links.append(link)
-    return links
-
-
-def require_dashboard_navigation_links(
-    dashboard: dict,
-    *,
-    dashboard_name: str,
-) -> list[dict]:
-    """Return navigation links and fail closed when the bus is empty."""
-    links = get_dashboard_navigation_links(dashboard)
-    assert links, (
-        f"{dashboard_name} must expose a non-empty navigation link bus "
-        "(panel id=1000 links[])"
-    )
-    return links
-
-
-def _unknown_metrics_for_query(query: str, valid_metrics: set[str]) -> list[str]:
-    """Return metric-like tokens that are not present in the known metric set."""
-    unknown_metrics: list[str] = []
-    query_without_strings = re.sub(r'"[^"]*"', '""', query)
-    for metric in re.findall(r"(bioetl_[a-z0-9_]+)", query_without_strings):
-        if metric in valid_metrics:
-            continue
-        base = re.sub(r"(_total|_bucket|_sum|_count|_created)$", "", metric)
-        if base not in valid_metrics:
-            unknown_metrics.append(metric)
-    return unknown_metrics
-
-
-def _infer_recording_rule_labels(expr: str) -> frozenset[str]:
-    """Infer the exported label set for simple recording-rule aggregations."""
-    match = re.search(r"\b(?:sum|max|min|avg|count)\s+by\s*\(([^)]*)\)", expr)
-    if not match:
-        return frozenset()
-    return frozenset(
-        label.strip() for label in match.group(1).split(",") if label.strip()
-    )
-
-
-def _extract_selector_labels(selector_body: str) -> set[str]:
-    """Extract explicit label matchers from a PromQL metric selector body."""
-    labels: set[str] = set()
-    for label_name, _operator in _PROMQL_LABEL_MATCHER_RE.findall(selector_body):
-        if label_name != "__name__":
-            labels.add(label_name)
-    return labels
-
-
-def _assert_standard_variable_contract(
-    dashboard_path: Path, variable_map: dict[str, dict[str, object]]
-) -> None:
-    """Assert the variable contract for standard dashboards."""
-    _assert_operator_context_shell_contract(dashboard_path, variable_map)
-
-    pipeline_var = variable_map.get("pipeline")
-    assert pipeline_var is not None, (
-        f"Dashboard {dashboard_path.name} must define 'pipeline' variable"
-    )
-    pipeline_query = pipeline_var.get("query", {})
-    pipeline_query_text = (
-        pipeline_query.get("query", "") if isinstance(pipeline_query, dict) else ""
-    )
-    expected_pipeline_metric_by_dashboard = {
-        "bioetl-control-plane-v1.json": "bioetl_control_plane_run_type_universe",
-        "bioetl-runtime.json": "bioetl_runtime_pipeline_run_type_universe",
-        "bioetl-silver-reject-explorer.json": "bioetl_records_processed_total",
-    }
-    expected_pipeline_metric = expected_pipeline_metric_by_dashboard.get(
-        dashboard_path.name,
-        "bioetl_overview_pipeline_run_type_universe",
-    )
-    assert expected_pipeline_metric in pipeline_query_text, (
-        f"Dashboard {dashboard_path.name} 'pipeline' query must use "
-        f"{expected_pipeline_metric}"
-    )
-
-    run_type_var = variable_map.get("run_type")
-    assert run_type_var is not None, (
-        f"Dashboard {dashboard_path.name} must define 'run_type' variable"
-    )
-    run_type_query = run_type_var.get("query", {})
-    run_type_query_text = (
-        run_type_query.get("query", "") if isinstance(run_type_query, dict) else ""
-    )
-    assert expected_pipeline_metric in run_type_query_text, (
-        f"Dashboard {dashboard_path.name} 'run_type' query must use "
-        f"{expected_pipeline_metric}"
-    )
-    assert "run_type" in run_type_query_text, (
-        f"Dashboard {dashboard_path.name} 'run_type' query must select run_type label"
-    )
-
-
-def _query_text(variable: dict[str, object] | None) -> str:
+# Replace assert contracts from operator through silver end (before _emit_sample)
+start = text.index("def _assert_operator_context_shell_contract(")
+end = text.index("\ndef _emit_sample_structured_log(")
+contracts = r'''def _query_text(variable: dict[str, object] | None) -> str:
     if variable is None:
         return ""
     query = variable.get("query", {})
@@ -726,26 +452,13 @@ def _assert_silver_reject_explorer_variable_contract(
         f"Dashboard {dashboard_path.name} 'payload_hash' must be a textbox"
     )
 
-def _emit_sample_structured_log(*, pipeline: str, provider: str) -> str:
-    """Emit one JSON log line through the shipped structlog pipeline."""
-    configure_logging, unified_logger_cls = _load_logging_helpers()
-    configure_logging(json_format=True, force=True)
-    stream = io.StringIO()
-    root = logging.getLogger()
-    for handler in root.handlers:
-        try:
-            handler.setStream(stream)
-        except AttributeError:
-            continue
+'''
 
-    logger = unified_logger_cls(
-        pipeline=pipeline,
-        run_id="123e4567-e89b-12d3-a456-426614174000",
-    )
-    logger.info(
-        "sample-event",
-        stage="extract",
-        provider=provider,
-        operation="health_check",
-    )
-    return stream.getvalue().strip().splitlines()[-1]
+# Keep standard variable contract that comes before operator
+std_start = text.index("def _assert_standard_variable_contract(")
+# operator starts later - standard stays
+# Actually start was operator - but standard is before operator. Good.
+text = text[:start] + contracts + text[end+1:]
+path.write_text(text, encoding="utf-8")
+print("wrote", path.stat().st_size)
+print("has helpers", "_assert_run_id_filter_options_url" in path.read_text(encoding="utf-8"))

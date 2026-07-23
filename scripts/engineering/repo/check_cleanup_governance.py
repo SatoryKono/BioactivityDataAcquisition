@@ -85,26 +85,27 @@ def _load_yaml_object(path: Path) -> dict[str, Any]:
     return payload
 
 
+def _parse_allowed_example_entry(entry: object) -> tuple[str, tuple[str, ...]]:
+    if not isinstance(entry, dict):
+        raise RuntimeError("allowed broad cleanup entries must be objects")
+    path = entry.get("path")
+    patterns = entry.get("patterns")
+    if not isinstance(path, str) or not path:
+        raise RuntimeError("allowed broad cleanup entry path must be non-empty")
+    if not isinstance(patterns, list) or not patterns:
+        raise RuntimeError(f"{path}: patterns must be a non-empty list")
+    string_patterns = [pattern for pattern in patterns if isinstance(pattern, str)]
+    if len(string_patterns) != len(patterns):
+        raise RuntimeError(f"{path}: patterns must be strings")
+    return path, tuple(string_patterns)
+
+
 def _load_allowed_examples(repo_root: Path) -> dict[str, tuple[str, ...]]:
     payload = _load_yaml_object(repo_root / CONFIG_PATH)
     entries = payload.get("allowed_broad_cleanup_examples")
     if not isinstance(entries, list):
         raise RuntimeError("allowed_broad_cleanup_examples must be a list")
-
-    allowed: dict[str, list[str]] = {}
-    for entry in entries:
-        if not isinstance(entry, dict):
-            raise RuntimeError("allowed broad cleanup entries must be objects")
-        path = entry.get("path")
-        patterns = entry.get("patterns")
-        if not isinstance(path, str) or not path:
-            raise RuntimeError("allowed broad cleanup entry path must be non-empty")
-        if not isinstance(patterns, list) or not patterns:
-            raise RuntimeError(f"{path}: patterns must be a non-empty list")
-        allowed[path] = [pattern for pattern in patterns if isinstance(pattern, str)]
-        if len(allowed[path]) != len(patterns):
-            raise RuntimeError(f"{path}: patterns must be strings")
-    return {path: tuple(patterns) for path, patterns in allowed.items()}
+    return dict(_parse_allowed_example_entry(entry) for entry in entries)
 
 
 def _is_skipped_dir(relative_path: Path) -> bool:
