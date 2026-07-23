@@ -1111,7 +1111,6 @@
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
-      "docs/05-operations/01-monitoring-guide.md",
       "docs/05-operations/runbooks/observability-checklist.md"
     ],
     "bioetl_checkpoint_operator_operations_total": [
@@ -1121,7 +1120,6 @@
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
-      "docs/05-operations/01-monitoring-guide.md",
       "docs/05-operations/runbooks/observability-checklist.md",
       "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
@@ -1320,7 +1318,6 @@
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
-      "docs/05-operations/01-monitoring-guide.md",
       "docs/05-operations/sli-slo-baseline.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-provider-health-v2.json"
@@ -1347,7 +1344,6 @@
       "docs/03-guides/publication-validation-guide.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "docs/04-reference/publication-validation-index.md",
-      "docs/05-operations/runbooks/publication-validation-runbook.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-dq-v2.json"
     ],
@@ -1405,7 +1401,6 @@
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "docs/04-reference/publication-validation-index.md",
-      "docs/05-operations/runbooks/publication-validation-runbook.md",
       "docs/05-operations/sli-slo-baseline.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-dq-v2.json"
@@ -1433,7 +1428,6 @@
       "docs/03-guides/publication-validation-guide.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "docs/04-reference/publication-validation-index.md",
-      "docs/05-operations/runbooks/publication-validation-runbook.md",
       "docs/05-operations/sli-slo-baseline.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-dq-v2.json"
@@ -1454,7 +1448,6 @@
       "docs/04-reference/observability/metrics-catalog.md",
       "docs/04-reference/publication-validation-index.md",
       "docs/04-reference/templates/pipeline-review-checklist.md",
-      "docs/05-operations/runbooks/publication-validation-runbook.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-dq-v2.json"
     ],
@@ -1876,7 +1869,6 @@
       "docs/03-guides/dashboards/variables-guide.md",
       "docs/04-reference/observability/alerting-guide.md",
       "docs/04-reference/observability/metrics-catalog.md",
-      "docs/05-operations/01-monitoring-guide.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-provider-health-v2.json",
       "grafana/dashboards/bioetl-runtime.json"
@@ -1891,7 +1883,6 @@
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
-      "docs/05-operations/01-monitoring-guide.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-provider-health-v2.json"
     ],
@@ -1914,14 +1905,12 @@
     "bioetl_quarantine_operator_duration_seconds": [
       "docs/02-architecture/observability-layers.md",
       "docs/04-reference/contracts/observability.md",
-      "docs/04-reference/observability/metrics-catalog.md",
-      "docs/05-operations/01-monitoring-guide.md"
+      "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_quarantine_operator_operations_total": [
       "docs/02-architecture/observability-layers.md",
       "docs/04-reference/contracts/observability.md",
-      "docs/04-reference/observability/metrics-catalog.md",
-      "docs/05-operations/01-monitoring-guide.md"
+      "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_quarantine_records_total": [
       "docs/04-reference/observability/metrics-catalog.md"
@@ -1969,7 +1958,6 @@
       "docs/03-guides/running-pipelines.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
-      "docs/05-operations/runbooks/publication-validation-runbook.md",
       "docs/05-operations/sli-slo-baseline.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-dq-v2.json",
@@ -2359,7 +2347,6 @@
       "docs/03-guides/dashboards/panels/bioetl-workflow-overview-panels.md",
       "docs/03-guides/dashboards/variable-reference.md",
       "docs/04-reference/observability/metrics-catalog.md",
-      "docs/05-operations/01-monitoring-guide.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-workflow-overview.json"
     ],
@@ -2367,8 +2354,7 @@
       "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_workflow_step_duration_seconds": [
-      "docs/04-reference/observability/metrics-catalog.md",
-      "docs/05-operations/01-monitoring-guide.md"
+      "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_workflow_step_events_total": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
