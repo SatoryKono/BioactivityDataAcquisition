@@ -277,7 +277,10 @@ class GoldWriter(
 
     async def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
         """Implement ``GoldStoragePort`` clear for rebuild/backfill paths."""
-        return _clear_delta_tables(
+        import asyncio
+
+        return await asyncio.to_thread(
+            _clear_delta_tables,
             base_path=Path(str(self.base_path)),
             table_path=Path(self._resolve_table_path(table_name)),
             dry_run=dry_run,

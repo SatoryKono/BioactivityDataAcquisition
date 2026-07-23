@@ -152,41 +152,46 @@ if TYPE_CHECKING:
     from bioetl.domain.entities.uniprot import UniprotTarget as UniprotTarget
 
 
+_CHEMBL_MODULE = "bioetl.domain.entities.chembl"
+_CHEMBL_STRUCTURES_MODULE = "bioetl.domain.entities.chembl_structures"
+_CHEMBL_ACTIVITY_MODULE = "bioetl.domain.entities.chembl_activity"
+_CHEMBL_ASSAY_PARAMETERS_MODULE = "bioetl.domain.entities.chembl_assay_parameters"
+
 _ENTITY_IMPORTS = {
-    "ActivityRecord": ("bioetl.domain.entities.chembl", "ActivityRecord"),
+    "ActivityRecord": (_CHEMBL_MODULE, "ActivityRecord"),
     "ArticleRecord": ("bioetl.domain.entities.pubmed", "ArticleRecord"),
-    "Assay": ("bioetl.domain.entities.chembl_activity", "Assay"),
+    "Assay": (_CHEMBL_ACTIVITY_MODULE, "Assay"),
     "AssayParameters": (
-        "bioetl.domain.entities.chembl_assay_parameters",
+        _CHEMBL_ASSAY_PARAMETERS_MODULE,
         "AssayParameters",
     ),
-    "AssayRecord": ("bioetl.domain.entities.chembl", "AssayRecord"),
+    "AssayRecord": (_CHEMBL_MODULE, "AssayRecord"),
     "BaseEntity": ("bioetl.domain.entities.base", "BaseEntity"),
     "Bioactivity": ("bioetl.domain.entities.bioactivity", "Bioactivity"),
     "BioactivityState": ("bioetl.domain.entities.bioactivity", "BioactivityState"),
-    "CellLine": ("bioetl.domain.entities.chembl_structures", "CellLine"),
-    "CellLineRecord": ("bioetl.domain.entities.chembl", "CellLineRecord"),
+    "CellLine": (_CHEMBL_STRUCTURES_MODULE, "CellLine"),
+    "CellLineRecord": (_CHEMBL_MODULE, "CellLineRecord"),
     "ChemblPublication": (
-        "bioetl.domain.entities.chembl_structures",
+        _CHEMBL_STRUCTURES_MODULE,
         "ChemblPublication",
     ),
     "ChemblPublicationRecord": (
-        "bioetl.domain.entities.chembl",
+        _CHEMBL_MODULE,
         "ChemblPublicationRecord",
     ),
     "ChemblPublicationSimilarity": (
-        "bioetl.domain.entities.chembl_structures",
+        _CHEMBL_STRUCTURES_MODULE,
         "ChemblPublicationSimilarity",
     ),
     "ChemblPublicationTerm": (
-        "bioetl.domain.entities.chembl_structures",
+        _CHEMBL_STRUCTURES_MODULE,
         "ChemblPublicationTerm",
     ),
     "ChemblPublicationTermRecord": (
-        "bioetl.domain.entities.chembl",
+        _CHEMBL_MODULE,
         "ChemblPublicationTermRecord",
     ),
-    "CompoundLinkRecord": ("bioetl.domain.entities.chembl", "CompoundLinkRecord"),
+    "CompoundLinkRecord": (_CHEMBL_MODULE, "CompoundLinkRecord"),
     "CompoundRecord": (
         "bioetl.domain.entities.chembl_compound_record",
         "CompoundRecord",
@@ -195,14 +200,14 @@ _ENTITY_IMPORTS = {
         "bioetl.domain.entities.crossref",
         "CrossRefPublicationEntity",
     ),
-    "Molecule": ("bioetl.domain.entities.chembl_structures", "Molecule"),
-    "MoleculeRecord": ("bioetl.domain.entities.chembl", "MoleculeRecord"),
+    "Molecule": (_CHEMBL_STRUCTURES_MODULE, "Molecule"),
+    "MoleculeRecord": (_CHEMBL_MODULE, "MoleculeRecord"),
     "OpenAlexPublicationEntity": (
         "bioetl.domain.entities.openalex",
         "OpenAlexPublicationEntity",
     ),
     "ProteinClassification": (
-        "bioetl.domain.entities.chembl_structures",
+        _CHEMBL_STRUCTURES_MODULE,
         "ProteinClassification",
     ),
     "PubMedPublicationEntity": (
@@ -220,7 +225,7 @@ _ENTITY_IMPORTS = {
     ),
     "PublicationRecord": ("bioetl.domain.entities.crossref", "PublicationRecord"),
     "PublicationSimilarityRecord": (
-        "bioetl.domain.entities.chembl",
+        _CHEMBL_MODULE,
         "PublicationSimilarityRecord",
     ),
     "SemanticScholarPublicationEntity": (
@@ -231,16 +236,16 @@ _ENTITY_IMPORTS = {
         "bioetl.domain.entities.chembl_subcellular_fraction",
         "SubcellularFraction",
     ),
-    "Target": ("bioetl.domain.entities.chembl_structures", "Target"),
-    "TargetComponent": ("bioetl.domain.entities.chembl_structures", "TargetComponent"),
-    "TargetComponentRecord": ("bioetl.domain.entities.chembl", "TargetComponentRecord"),
+    "Target": (_CHEMBL_STRUCTURES_MODULE, "Target"),
+    "TargetComponent": (_CHEMBL_STRUCTURES_MODULE, "TargetComponent"),
+    "TargetComponentRecord": (_CHEMBL_MODULE, "TargetComponentRecord"),
     "TargetProteinClassification": (
-        "bioetl.domain.entities.chembl_structures",
+        _CHEMBL_STRUCTURES_MODULE,
         "TargetProteinClassification",
     ),
-    "TargetRecord": ("bioetl.domain.entities.chembl", "TargetRecord"),
+    "TargetRecord": (_CHEMBL_MODULE, "TargetRecord"),
     "Tissue": ("bioetl.domain.entities.chembl_tissue", "Tissue"),
-    "TissueRecord": ("bioetl.domain.entities.chembl", "TissueRecord"),
+    "TissueRecord": (_CHEMBL_MODULE, "TissueRecord"),
     "UniprotTarget": ("bioetl.domain.entities.uniprot", "UniprotTarget"),
 }
 

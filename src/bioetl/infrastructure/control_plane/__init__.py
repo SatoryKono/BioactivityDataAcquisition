@@ -48,21 +48,28 @@ if TYPE_CHECKING:
         FileWorkflowTransformArtifactStore,
     )
 
+_CONTRACT_REGISTRY_STORE_MODULE = (
+    "bioetl.infrastructure.control_plane.file_contract_registry_store"
+)
+_EFFECTIVE_CONFIG_ARTIFACT_STORE_MODULE = (
+    "bioetl.infrastructure.control_plane.file_effective_config_artifact_store"
+)
+
 _EXPORT_MODULES = {
     "EffectiveConfigArtifactConflictError": (
-        "bioetl.infrastructure.control_plane.file_effective_config_artifact_store"
+        _EFFECTIVE_CONFIG_ARTIFACT_STORE_MODULE
     ),
     "FileArtifactByteComparisonAdapter": (
         "bioetl.infrastructure.control_plane.artifact_byte_comparison"
     ),
     "FileContractRegistryStore": (
-        "bioetl.infrastructure.control_plane.file_contract_registry_store"
+        _CONTRACT_REGISTRY_STORE_MODULE
     ),
     "FileControlPlaneArtifactLifecycleStore": (
         "bioetl.infrastructure.control_plane.file_artifact_lifecycle_store"
     ),
     "FileEffectiveConfigArtifactStore": (
-        "bioetl.infrastructure.control_plane.file_effective_config_artifact_store"
+        _EFFECTIVE_CONFIG_ARTIFACT_STORE_MODULE
     ),
     "FileHistoricalReplayClosureStore": (
         "bioetl.infrastructure.control_plane.file_historical_replay_closure_store"
@@ -88,13 +95,13 @@ _EXPORT_MODULES = {
         "bioetl.infrastructure.control_plane.file_workflow_transform_artifact_store"
     ),
     "RegistryLoadError": (
-        "bioetl.infrastructure.control_plane.file_contract_registry_store"
+        _CONTRACT_REGISTRY_STORE_MODULE
     ),
     "RunManifestStoreCorruptionError": (
         "bioetl.infrastructure.control_plane.file_run_manifest_store"
     ),
     "create_contract_registry": (
-        "bioetl.infrastructure.control_plane.file_contract_registry_store"
+        _CONTRACT_REGISTRY_STORE_MODULE
     ),
 }
 

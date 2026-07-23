@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections import Counter
 from collections.abc import Callable, Mapping, Sequence
 from typing import TYPE_CHECKING, TypeVar, cast
@@ -221,7 +222,7 @@ async def persist_lineage_fragment_if_present(
             )
         return
     try:
-        lineage_store.save(lineage_fragment)
+        await asyncio.to_thread(lineage_store.save, lineage_fragment)
     except (OSError, TypeError, ValueError):
         _emit_lineage_fragment_metric(
             metrics,

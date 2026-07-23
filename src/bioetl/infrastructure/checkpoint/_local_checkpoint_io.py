@@ -11,9 +11,11 @@ from uuid import UUID
 from bioetl.domain.serialization import deserialize_from_json
 from bioetl.domain.types import JsonDict, RunID
 
+_HISTORY_DIR_NAME = ".history"
+
 
 def history_run_dir(base_path: Path, pipeline: str, run_id: RunID) -> Path:
-    return base_path / ".history" / "by_pipeline" / pipeline / str(run_id)
+    return base_path / _HISTORY_DIR_NAME / "by_pipeline" / pipeline / str(run_id)
 
 
 def build_history_entry_path(base_path: Path, pipeline: str, run_id: RunID) -> Path:
@@ -21,7 +23,7 @@ def build_history_entry_path(base_path: Path, pipeline: str, run_id: RunID) -> P
 
 
 def manifest_index_path(base_path: Path, manifest_id: str) -> Path:
-    return base_path / ".history" / "by_manifest" / f"{manifest_id}.json"
+    return base_path / _HISTORY_DIR_NAME / "by_manifest" / f"{manifest_id}.json"
 
 
 def history_path_from_manifest_index(base_path: Path, history_path: str) -> Path:
@@ -70,7 +72,7 @@ def load_checkpoint_tuple(path: Path) -> tuple[RunID, JsonDict]:
 
 
 def latest_history_checkpoint_path(base_path: Path, pipeline: str) -> Path | None:
-    history_root = base_path / ".history" / "by_pipeline" / pipeline
+    history_root = base_path / _HISTORY_DIR_NAME / "by_pipeline" / pipeline
     if not history_root.exists():
         return None
     candidates: list[Path] = []

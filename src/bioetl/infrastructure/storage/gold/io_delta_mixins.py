@@ -43,7 +43,7 @@ class _GoldWriterExecutorArrowMixin:
         *args: object,
     ) -> T:
         """Run a local blocking helper behind the async writer facade."""
-        return func(*args)
+        return await asyncio.to_thread(func, *args)
 
     def _to_arrow_table(
         self, records: list[GoldRecord], column_order: list[str] | None = None

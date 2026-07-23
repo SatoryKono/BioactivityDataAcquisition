@@ -80,13 +80,15 @@ if TYPE_CHECKING:
         ValueValidator as ValueValidator,
     )
 
+_CHEMICAL_STANDARDIZATION_MODULE = "bioetl.domain.behavior.chemical_standardization"
+
 _PUBLIC_EXPORTS = {
     "CHEMICAL_STANDARDIZATION_POLICY_VERSION": (
-        "bioetl.domain.behavior.chemical_standardization",
+        _CHEMICAL_STANDARDIZATION_MODULE,
         "CHEMICAL_STANDARDIZATION_POLICY_VERSION",
     ),
     "CHEMICAL_STANDARDIZATION_STATUSES": (
-        "bioetl.domain.behavior.chemical_standardization",
+        _CHEMICAL_STANDARDIZATION_MODULE,
         "CHEMICAL_STANDARDIZATION_STATUSES",
     ),
     "ActivityAggregator": (
@@ -102,11 +104,11 @@ _PUBLIC_EXPORTS = {
         "BioactivityNormalizer",
     ),
     "ChemicalStandardizationResult": (
-        "bioetl.domain.behavior.chemical_standardization",
+        _CHEMICAL_STANDARDIZATION_MODULE,
         "ChemicalStandardizationResult",
     ),
     "ChemicalStandardizationStatus": (
-        "bioetl.domain.behavior.chemical_standardization",
+        _CHEMICAL_STANDARDIZATION_MODULE,
         "ChemicalStandardizationStatus",
     ),
     "ClassificationStats": (
@@ -178,7 +180,7 @@ _PUBLIC_EXPORTS = {
         "normalize_text",
     ),
     "standardize_chemical_structure": (
-        "bioetl.domain.behavior.chemical_standardization",
+        _CHEMICAL_STANDARDIZATION_MODULE,
         "standardize_chemical_structure",
     ),
 }

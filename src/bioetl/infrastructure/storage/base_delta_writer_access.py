@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -18,11 +19,14 @@ class BaseDeltaWriterTableAccessMixin:
         """Open one Delta table by name and return None when it is missing."""
         from bioetl.infrastructure.storage import base_delta_writer as _base
 
-        table_path = self._resolve_table_path(table_name)
-        try:
-            return _base._load_delta_table(table_path)
-        except _base.DeltaTableNotFoundError:
-            return None
+        def _open() -> DeltaTable | None:
+            table_path = self._resolve_table_path(table_name)
+            try:
+                return _base._load_delta_table(table_path)
+            except _base.DeltaTableNotFoundError:
+                return None
+
+        return await asyncio.to_thread(_open)
 
     async def _get_table_schema(self, table_name: str) -> pa.Schema | None:
         """Get the existing table schema when the Delta table exists."""

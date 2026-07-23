@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import inspect
 from collections.abc import Awaitable, Callable, Sequence
 from typing import TYPE_CHECKING, Protocol, TypeGuard
@@ -298,7 +299,8 @@ async def compute_dq_metrics_from_arrow_data(
     validation_errors: Sequence[str] | None = None,
 ) -> BatchDQMetrics:
     """Compute data quality metrics for Silver write."""
-    if metadata_ops._dq_calculator is None:
+    calculator = metadata_ops._dq_calculator
+    if calculator is None:
         best_effort_log(
             metadata_ops._logger,
             "warning",
@@ -306,20 +308,23 @@ async def compute_dq_metrics_from_arrow_data(
         )
         return BatchDQMetrics()
 
-    records_dict = (
-        [dict(record) for record in arrow_data.to_pylist()] if arrow_data else []
-    )
-    existing_schema_fields = set(arrow_data.column_names) if arrow_data else set()
+    def _compute() -> BatchDQMetrics:
+        records_dict = (
+            [dict(record) for record in arrow_data.to_pylist()] if arrow_data else []
+        )
+        existing_schema_fields = set(arrow_data.column_names) if arrow_data else set()
 
-    dq_input = DQMetricsInput(
-        records=records_dict,
-        existing_schema_fields=existing_schema_fields,
-        quarantined_count=quarantined_count or 0,
-        validation_errors=(
-            list(validation_errors) if validation_errors is not None else None
-        ),
-    )
-    return metadata_ops._dq_calculator.calculate(dq_input)
+        dq_input = DQMetricsInput(
+            records=records_dict,
+            existing_schema_fields=existing_schema_fields,
+            quarantined_count=quarantined_count or 0,
+            validation_errors=(
+                list(validation_errors) if validation_errors is not None else None
+            ),
+        )
+        return calculator.calculate(dq_input)
+
+    return await asyncio.to_thread(_compute)
 
 
 def should_skip_silver_metadata_write(

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import tempfile
 from collections.abc import Callable, Iterator
 from pathlib import Path
@@ -127,7 +128,7 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
                     h.update(block)
             return h.hexdigest()
 
-        return _compute()
+        return await asyncio.to_thread(_compute)
 
     async def _write_json_copy(
         self,
@@ -138,23 +139,28 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
         batch_id: BatchID,
     ) -> None:
         """Write uncompressed JSONL copy atomically."""
-        json_filename = f"batch_{date_str}_{batch_id}.jsonl"
-        json_relative_path = self._resolve_bronze_path(
-            provider, entity, date_str, json_filename
-        )
 
-        jsonl_content = b"".join(records)
-
-        json_full_path = self.base_path / json_relative_path
-        json_full_path.parent.mkdir(parents=True, exist_ok=True)
-        if json_full_path.exists():
-            if json_full_path.read_bytes() == jsonl_content:
-                return
-            raise FileExistsError(
-                f"Bronze JSON copy already exists with different payload: {json_full_path}"
+        def _write() -> None:
+            json_filename = f"batch_{date_str}_{batch_id}.jsonl"
+            json_relative_path = self._resolve_bronze_path(
+                provider, entity, date_str, json_filename
             )
 
-        atomic_write_bytes(json_full_path, jsonl_content)
+            jsonl_content = b"".join(records)
+
+            json_full_path = self.base_path / json_relative_path
+            json_full_path.parent.mkdir(parents=True, exist_ok=True)
+            if json_full_path.exists():
+                if json_full_path.read_bytes() == jsonl_content:
+                    return
+                raise FileExistsError(
+                    "Bronze JSON copy already exists with different payload: "
+                    f"{json_full_path}"
+                )
+
+            atomic_write_bytes(json_full_path, jsonl_content)
+
+        await asyncio.to_thread(_write)
 
 
 __all__ = ["BronzeWriterIOMixin"]
