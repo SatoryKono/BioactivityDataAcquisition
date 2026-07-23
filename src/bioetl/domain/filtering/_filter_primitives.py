@@ -121,11 +121,17 @@ def check_single_list_contains(
 
 def is_empty_value(val: object) -> bool:
     """Check whether a value is considered 'empty'."""
+    from collections.abc import Mapping, Sequence
+
     if val is None:
         return True
     if isinstance(val, str) and val.strip() == "":
         return True
-    return isinstance(val, (list, dict, set)) and len(val) == 0
+    if isinstance(val, Mapping):
+        return len(val) == 0
+    if isinstance(val, Sequence) and not isinstance(val, (str, bytes, bytearray)):
+        return len(val) == 0
+    return isinstance(val, (set, frozenset)) and len(val) == 0
 
 
 def _is_json_list_candidate(value: str) -> bool:

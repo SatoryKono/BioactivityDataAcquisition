@@ -49,6 +49,16 @@ _TITLE_FIELDS = frozenset({"subcellular_fraction"})
 _INT_FIELDS = frozenset({"assay_count"})
 _REFERENCE_IDENTIFIER_RULES = chembl_reference_identifier_rules("subcellular_fraction")
 
+
+def normalize_chembl_subcellular_fraction(value: object) -> object:
+    """Normalize a ChEMBL subcellular-fraction label with stable identity."""
+    return normalize_profile_governed_vocabulary(
+        normalize_profile_title(value),
+        allowed_values=SUBCELLULAR_FRACTIONS,
+        preserve_unknown=True,
+    )
+
+
 CHEMBL_SUBCELLULAR_FRACTION_PROFILE = build_standard_profile(
     profile_name="chembl.subcellular_fraction",
     description="Canonical field-level normalization policy for the ChEMBL Subcellular Fraction Silver schema.",
@@ -64,11 +74,7 @@ CHEMBL_SUBCELLULAR_FRACTION_PROFILE = build_standard_profile(
             "before canonical controlled-vocabulary normalization.",
         ),
         "subcellular_fraction": (
-            lambda value: normalize_profile_governed_vocabulary(
-                normalize_profile_title(value),
-                allowed_values=SUBCELLULAR_FRACTIONS,
-                preserve_unknown=True,
-            ),
+            normalize_chembl_subcellular_fraction,
             "Normalize subcellular_fraction against the shared ChEMBL "
             "subcellular-fraction vocabulary while preserving unknown observed "
             "lexemes for review; the provider-native lexeme is retained "

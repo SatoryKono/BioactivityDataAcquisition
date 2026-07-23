@@ -85,6 +85,31 @@ _STRICT_JSON_FIELDS = chembl_json_fields("chembl_molecule")
 _NULL_FIELDS = chembl_pseudo_null_fields("molecule")
 _REFERENCE_IDENTIFIER_RULES = chembl_reference_identifier_rules("molecule")
 
+
+def normalize_molecule_max_phase(value: object) -> object:
+    """Normalize max_phase against the reviewed quasi-enum numeric universe."""
+    return normalize_profile_quasi_enum_numeric(
+        value,
+        allowed_values=MAX_PHASE_VALUES,
+    )
+
+
+def normalize_molecule_availability_type(value: object) -> object:
+    """Normalize availability_type against the reviewed provider-code universe."""
+    return normalize_profile_quasi_enum_numeric(
+        value,
+        allowed_values=AVAILABILITY_TYPE_VALUES,
+    )
+
+
+def normalize_molecule_chirality(value: object) -> object:
+    """Normalize chirality against the reviewed provider-code universe."""
+    return normalize_profile_quasi_enum_numeric(
+        value,
+        allowed_values=CHIRALITY_VALUES,
+    )
+
+
 _SPECIAL_RULES = {
     **_REFERENCE_IDENTIFIER_RULES,
     "canonical_smiles": (
@@ -96,29 +121,20 @@ _SPECIAL_RULES = {
         "Validate InChIKey through the canonical domain value-object contract, then emit uppercase canonical text.",
     ),
     "max_phase": (
-        lambda value: normalize_profile_quasi_enum_numeric(
-            value,
-            allowed_values=MAX_PHASE_VALUES,
-        ),
+        normalize_molecule_max_phase,
         "Normalize max_phase as a reviewed quasi-enum numeric provider code; "
         "preserve canonical values including 0.5 and collapse out-of-universe "
         "inputs to None.",
     ),
     "availability_type": (
-        lambda value: normalize_profile_quasi_enum_numeric(
-            value,
-            allowed_values=AVAILABILITY_TYPE_VALUES,
-        ),
+        normalize_molecule_availability_type,
         "Normalize availability_type as a reviewed ChEMBL molecule provider-code "
         "enum-like surface with the canonical enum universe {-2, -1, 0, 1, 2}; "
         "out-of-universe inputs collapse to None instead of flowing through as "
         "open numerics.",
     ),
     "chirality": (
-        lambda value: normalize_profile_quasi_enum_numeric(
-            value,
-            allowed_values=CHIRALITY_VALUES,
-        ),
+        normalize_molecule_chirality,
         "Normalize chirality as a reviewed ChEMBL molecule provider-code "
         "enum-like surface with the canonical enum universe {-1, 0, 1, 2}; "
         "out-of-universe inputs collapse to None instead of flowing through as "
