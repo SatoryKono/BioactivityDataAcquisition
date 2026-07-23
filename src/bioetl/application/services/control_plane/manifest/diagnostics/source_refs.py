@@ -156,17 +156,18 @@ def _build_snapshot_ref(snapshot: dict[str, object]) -> RunInputSnapshotRef:
     captured_at = None
     if isinstance(captured_at_value, str) and captured_at_value.strip():
         captured_at = datetime.fromisoformat(captured_at_value)
+    optional_str = "str | None"
     return RunInputSnapshotRef(
         snapshot_id=str(snapshot.get("snapshot_id") or ""),
         content_hash=str(snapshot.get("content_hash") or ""),
-        immutable_uri=cast("str | None", snapshot.get("immutable_uri")),
-        query_fingerprint=cast("str | None", snapshot.get("query_fingerprint")),
-        storage_provider=cast("str | None", snapshot.get("storage_provider")),
-        object_bucket=cast("str | None", snapshot.get("object_bucket")),
-        object_key=cast("str | None", snapshot.get("object_key")),
-        object_version_id=cast("str | None", snapshot.get("object_version_id")),
-        etag=cast("str | None", snapshot.get("etag")),
-        last_modified=cast("str | None", snapshot.get("last_modified")),
+        immutable_uri=cast(optional_str, snapshot.get("immutable_uri")),
+        query_fingerprint=cast(optional_str, snapshot.get("query_fingerprint")),
+        storage_provider=cast(optional_str, snapshot.get("storage_provider")),
+        object_bucket=cast(optional_str, snapshot.get("object_bucket")),
+        object_key=cast(optional_str, snapshot.get("object_key")),
+        object_version_id=cast(optional_str, snapshot.get("object_version_id")),
+        etag=cast(optional_str, snapshot.get("etag")),
+        last_modified=cast(optional_str, snapshot.get("last_modified")),
         captured_at=captured_at,
     )
 

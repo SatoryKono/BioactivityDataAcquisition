@@ -361,19 +361,20 @@ def _resolve_step_option(
     ],
 ) -> bool | str | None:
     """Resolve one workflow step run option with workflow defaults fallback."""
+    optional_bool_str = "bool | str | None"
     if field_name == "exact_replay":
         step_value = step.run_options.exact_replay
         return cast(
-            "bool | str | None",
+            optional_bool_str,
             step_value if step_value is not None else config.defaults.exact_replay,
         )
     if field_name == "use_cached_bronze":
         step_value = step.run_options.use_cached_bronze
         return cast(
-            "bool | str | None",
+            optional_bool_str,
             step_value if step_value is not None else config.defaults.use_cached_bronze,
         )
     profile_value = step.run_options.required_persistence_profile
     if profile_value is not None:
-        return cast("bool | str | None", profile_value)
-    return cast("bool | str | None", config.defaults.required_persistence_profile)
+        return cast(optional_bool_str, profile_value)
+    return cast(optional_bool_str, config.defaults.required_persistence_profile)
