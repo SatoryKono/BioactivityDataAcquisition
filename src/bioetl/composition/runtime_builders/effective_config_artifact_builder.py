@@ -47,17 +47,14 @@ def _create_and_persist_effective_config_artifact_payload(
     entity: str,
     required_persistence_profile: str,
     resolution_policy: ConfigResolutionPolicy | None,
-    normalization_profile: tuple[str | None, str | None, str | None],
+    normalization_profile_ref: str | None,
+    normalization_profile_version: str | None,
+    normalization_profile_hash: str | None,
     settings: Settings,
     logger: object,
     run_id: RunID,
 ) -> tuple[str, str, str, str, str]:
     """Persist one effective-config artifact and return its provenance anchors."""
-    (
-        normalization_profile_ref,
-        normalization_profile_version,
-        normalization_profile_hash,
-    ) = normalization_profile
     service = create_effective_config_service()
     artifact = service.create_effective_config_artifact(
         pipeline_name=pipeline_name,
@@ -150,11 +147,9 @@ def create_and_persist_effective_config_artifact(
                 )
             )
         ),
-        normalization_profile=(
-            contract_identity.normalization_profile_ref,
-            contract_identity.normalization_profile_version,
-            contract_identity.normalization_profile_hash,
-        ),
+        normalization_profile_ref=contract_identity.normalization_profile_ref,
+        normalization_profile_version=contract_identity.normalization_profile_version,
+        normalization_profile_hash=contract_identity.normalization_profile_hash,
         settings=inputs.settings,
         logger=inputs.observability.logger,
         run_id=ctx.run_id,
@@ -197,11 +192,9 @@ def create_and_persist_composite_effective_config_artifact(
                 )
             )
         ),
-        normalization_profile=(
-            normalization_profile_ref,
-            normalization_profile_version,
-            normalization_profile_hash,
-        ),
+        normalization_profile_ref=normalization_profile_ref,
+        normalization_profile_version=normalization_profile_version,
+        normalization_profile_hash=normalization_profile_hash,
         settings=settings,
         logger=logger,
         run_id=run_id,

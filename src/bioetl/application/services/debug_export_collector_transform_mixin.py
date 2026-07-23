@@ -15,9 +15,6 @@ from bioetl.domain.types import (
 
 from .debug_export_collector_helpers import source_metadata_attrs
 from .debug_export_helpers import (
-
-_GOLD_SEMANTIC_FILTER_EXCLUDED_MSG = "Gold semantic filter excluded the record."
-
     _base_row,
     _extract_rejection_details_mapping,
     _extract_rejection_diagnostics,
@@ -28,6 +25,8 @@ _GOLD_SEMANTIC_FILTER_EXCLUDED_MSG = "Gold semantic filter excluded the record."
     _payload_hash,
     _record_payload,
 )
+
+_GOLD_SEMANTIC_FILTER_EXCLUDED_MSG = "Gold semantic filter excluded the record."
 
 
 class DebugExportTransformRowsMixin:

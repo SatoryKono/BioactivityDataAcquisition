@@ -43,6 +43,8 @@ __all__ = [
     "PreflightValidationResult",
 ]
 
+_PREFLIGHT_VALIDATOR_MODULE = "bioetl.application.composite.preflight_validator"
+
 _EXPORTS: dict[str, tuple[str, str]] = {
     "ColumnOrderService": (
         "bioetl.application.composite.column_service",
@@ -93,11 +95,11 @@ _EXPORTS: dict[str, tuple[str, str]] = {
         "MergeService",
     ),
     "PreflightValidationError": (
-        "bioetl.application.composite.preflight_validator",
+        _PREFLIGHT_VALIDATOR_MODULE,
         "PreflightValidationError",
     ),
     "PreflightValidationResult": (
-        "bioetl.application.composite.preflight_validator",
+        _PREFLIGHT_VALIDATOR_MODULE,
         "PreflightValidationResult",
     ),
 }
