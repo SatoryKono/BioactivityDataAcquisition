@@ -71,6 +71,10 @@ must be updated together with that artifact.
 | `REQ-TEST-*`, `REQ-GOV-*` | Deterministic tests and change-set gates (`RULES.md` §4.2–§4.5) | ADR-042, ADR-049 | `pyproject.toml`, quality configs and reports | architecture, unit, integration, contract, golden and replay suites |
 | `REQ-CONTRACT-*` | Versioned schemas and synchronized generated artifacts (`RULES.md` §8.1) | ADR-037, ADR-038, ADR-039, ADR-048 | contract registry, Pandera sources, published JSON schemas | contract-registry and generated-artifact drift tests |
 
+`REQ-DQ-002`: Метрика `bioetl_dq_validation_score` с bounded labels `pipeline`, `entity`
+MUST сохранять этот label contract; детализация по columns/checks публикуется
+отдельными метриками или reports.
+
 ## ADR coverage
 
 The catalog explicitly covers the current architecture through ADR-050,
