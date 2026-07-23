@@ -1333,30 +1333,53 @@ def _planned_attempts(
     ]
 
 
+def _run_git(
+    args: list[str],
+    *,
+    repo_root: Path,
+    timeout_seconds: float,
+) -> subprocess.CompletedProcess[str]:
+    """Run a bounded git command; re-raise timeouts as SubprocessError."""
+    try:
+        return subprocess.run(  # nosec B603
+            ["git", *args],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            timeout=timeout_seconds,
+            check=True,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise subprocess.SubprocessError(
+            f"git {' '.join(args)} timed out after {timeout_seconds:.0f}s "
+            f"(repo={repo_root})"
+        ) from exc
+
+
 def _source_provenance(repo_root: Path) -> dict[str, object]:
-    revision = subprocess.run(  # nosec B603
-        ["git", "rev-parse", "HEAD"],
-        cwd=repo_root,
-        capture_output=True,
-        text=True,
-        timeout=30,
-        check=True,
+    """Return revision/tree/cleanliness for campaign gates.
+
+    Cleanliness uses ``git status --porcelain --untracked-files=normal`` so
+    untracked *paths* still fail the gate without expanding every file inside
+    untracked directories. ``--untracked-files=all`` is pathologically slow on
+    large/cloud-synced worktrees and has hung unit/plan mode on Windows GDrive.
+    """
+    revision = _run_git(
+        ["rev-parse", "HEAD"],
+        repo_root=repo_root,
+        timeout_seconds=15,
     )
-    tree = subprocess.run(  # nosec B603
-        ["git", "rev-parse", "HEAD^{tree}"],
-        cwd=repo_root,
-        capture_output=True,
-        text=True,
-        timeout=30,
-        check=True,
+    tree = _run_git(
+        ["rev-parse", "HEAD^{tree}"],
+        repo_root=repo_root,
+        timeout_seconds=15,
     )
-    status = subprocess.run(  # nosec B603
-        ["git", "status", "--porcelain", "--untracked-files=all"],
-        cwd=repo_root,
-        capture_output=True,
-        text=True,
-        timeout=60,
-        check=True,
+    # ``-uno`` would ignore untracked entirely and weaken the execute gate.
+    # ``normal`` lists untracked files and directories without deep expansion.
+    status = _run_git(
+        ["status", "--porcelain", "--untracked-files=normal"],
+        repo_root=repo_root,
+        timeout_seconds=20,
     )
     dirty_entries = tuple(line for line in status.stdout.splitlines() if line.strip())
     return {
