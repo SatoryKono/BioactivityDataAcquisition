@@ -205,3 +205,5 @@ def test_tests_workflow_publishes_empirical_flaky_telemetry() -> None:
     assert "VCR_RECORD_MODE=none" in block
     assert "flaky-test-empirical.json" in block
     assert "source_sha" in block and "shard_id" in block
+    assert "compute_replay_tree_sha256" in block
+    assert "replay_tree_sha256" in block
