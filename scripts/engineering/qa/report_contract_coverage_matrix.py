@@ -427,6 +427,16 @@ def _build_row(
     elif missing_surfaces:
         parity_status = "missing_surfaces"
 
+    # Contract/schema availability is independent of runtime sink enablement.
+    gold_contract_available = bool(
+        contract_yaml_exists
+        and registry_entry_exists
+        and source_exists
+        and published_artifacts
+        and not published_artifact_missing_paths
+        and schema_source_summary["pandera_contract_declared"]
+    )
+
     return {
         "pipeline_name": pipeline_name,
         "provider": provider,
@@ -435,6 +445,7 @@ def _build_row(
         "dataset_layer": "gold",
         "config_path": _relativize(config_path),
         "gold_enabled": gold_enabled,
+        "gold_contract_available": gold_contract_available,
         "parity_status": parity_status,
         "exclusion_reason": exclusion_reason,
         "contract_yaml_path": (
@@ -530,6 +541,9 @@ def build_payload(*, snapshot_date: str | None = None) -> dict[str, Any]:
         1 for row in rows if row["gold_enabled"] and row["parity_status"] == "covered"
     )
     gold_enabled_count = sum(1 for row in rows if row["gold_enabled"])
+    gold_contract_available_count = sum(
+        1 for row in rows if row["gold_contract_available"]
+    )
     excluded_rows = [row for row in rows if row["parity_status"] == "excluded"]
     constraint_missing_rows = [
         row
@@ -542,7 +556,14 @@ def build_payload(*, snapshot_date: str | None = None) -> dict[str, Any]:
         "semantics": {
             "gold_enabled": (
                 "Effective runtime state of pipeline.sink.gold.enabled after "
-                "hierarchical config resolution; omitted enabled defaults to true."
+                "hierarchical config resolution; omitted enabled defaults to true. "
+                "Never infer this from contract/Pandera availability or from unrelated "
+                "flags such as filters.input_filter.enabled."
+            ),
+            "gold_contract_available": (
+                "Whether strict Gold contract/schema governance surfaces exist "
+                "(contract YAML, registry entry, schema source, published artifact, "
+                "Pandera declaration), independent of runtime sink enablement."
             ),
             "covered_gold_enabled_count": (
                 "Runtime-enabled Gold rows whose contract parity_status is covered."
@@ -557,6 +578,7 @@ def build_payload(*, snapshot_date: str | None = None) -> dict[str, Any]:
         },
         "row_count": len(rows),
         "gold_enabled_count": gold_enabled_count,
+        "gold_contract_available_count": gold_contract_available_count,
         "covered_gold_enabled_count": covered_gold_enabled_count,
         "missing_gold_enabled_count": gold_enabled_count - covered_gold_enabled_count,
         "constraint_completeness_review_count": gold_enabled_count,
@@ -587,6 +609,7 @@ def _render_markdown(payload: dict[str, Any]) -> str:
         f"- snapshot_date: {payload['snapshot_date']}",
         f"- row_count: {payload['row_count']}",
         f"- gold_enabled_count: {payload['gold_enabled_count']}",
+        f"- gold_contract_available_count: {payload['gold_contract_available_count']}",
         f"- covered_gold_enabled_count: {payload['covered_gold_enabled_count']}",
         f"- missing_gold_enabled_count: {payload['missing_gold_enabled_count']}",
         "- constraint_completeness_missing_count: "
@@ -598,18 +621,22 @@ def _render_markdown(payload: dict[str, Any]) -> str:
         "",
         "- `gold_enabled` is the effective runtime state of "
         "`pipeline.sink.gold.enabled` after hierarchical configuration resolution; "
-        "an omitted `enabled` value defaults to `true`.",
-        "- Contract or Pandera schema availability is reported by the contract, "
-        "registry, source, and published-artifact fields. It must not be inferred "
-        "from `gold_enabled`.",
+        "an omitted `enabled` value defaults to `true`. Do not confuse this with "
+        "unrelated flags such as `filters.input_filter.enabled`.",
+        "- `gold_contract_available` is independent contract/schema availability "
+        "(YAML + registry + Pandera source + published artifact).",
+        "- Contract or Pandera schema availability must not be inferred from "
+        "`gold_enabled`, and runtime enablement must not be inferred from "
+        "`gold_contract_available`.",
         "- Disabled Gold rows remain in the matrix with `parity_status=excluded` and "
         "`exclusion_reason=gold_runtime_disabled`; their contract artifacts are not "
         "reported as missing solely because runtime output is disabled.",
         "",
-        "| pipeline_name | layer | contract_ref | gold_enabled | parity_status | "
-        "constraint_status | strict | properties | required | checks | pk_fields | "
-        "tests | golden | missing_surfaces | missing_constraints |",
-        "| --- | --- | --- | ---: | --- | --- | ---: | ---: | ---: | ---: | --- | ---: | ---: | --- | --- |",
+        "| pipeline_name | layer | contract_ref | gold_enabled | gold_contract_available | "
+        "parity_status | constraint_status | strict | properties | required | checks | "
+        "pk_fields | tests | golden | missing_surfaces | missing_constraints |",
+        "| --- | --- | --- | ---: | ---: | --- | --- | ---: | ---: | ---: | ---: | --- | "
+        "---: | ---: | --- | --- |",
     ]
     for row in rows:
         render_row = dict(row)
@@ -624,7 +651,8 @@ def _render_markdown(payload: dict[str, Any]) -> str:
         )
         lines.append(
             "| `{pipeline_name}` | `{dataset_layer}` | `{contract_ref}` | "
-            "{gold_enabled} | `{parity_status}` | `{constraint_completeness_status}` | "
+            "{gold_enabled} | {gold_contract_available} | `{parity_status}` | "
+            "`{constraint_completeness_status}` | "
             "{gold_strict_validation_declared} | {published_contract_property_count} | "
             "{published_contract_required_count} | {published_contract_check_constraint_count} | "
             "`{primary_keys_rendered}` | {contract_test_count} | {golden_test_count} | "
