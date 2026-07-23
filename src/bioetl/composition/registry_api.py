@@ -6,6 +6,9 @@ from typing import TYPE_CHECKING
 
 from bioetl.composition.lazy_exports import install_lazy_exports
 
+_PIPELINE_REGISTRY_CORE_MODULE = "bioetl.composition.factories.pipeline.registry_core"
+
+
 if TYPE_CHECKING:
     from bioetl.composition.factories.pipeline.registry import (
         register_all_pipelines as register_all_pipelines,
@@ -19,19 +22,19 @@ if TYPE_CHECKING:
 
 _PUBLIC_EXPORTS = {
     "PipelineDefinition": (
-        "bioetl.composition.factories.pipeline.registry_core",
+        _PIPELINE_REGISTRY_CORE_MODULE,
         "PipelineDefinition",
     ),
     "PipelineRegistry": (
-        "bioetl.composition.factories.pipeline.registry_core",
+        _PIPELINE_REGISTRY_CORE_MODULE,
         "PipelineRegistry",
     ),
     "create_registry": (
-        "bioetl.composition.factories.pipeline.registry_core",
+        _PIPELINE_REGISTRY_CORE_MODULE,
         "create_registry",
     ),
     "get_default_registry": (
-        "bioetl.composition.factories.pipeline.registry_core",
+        _PIPELINE_REGISTRY_CORE_MODULE,
         "get_default_registry",
     ),
     "register_all_pipelines": (

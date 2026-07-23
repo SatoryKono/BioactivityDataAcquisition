@@ -5,6 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import StrEnum
 
+_UNIPROT_PROTEIN_ENTITY = "uniprot.protein"
+_UNIPROT_SEMANTIC_PAYLOADS_CONFIG = "configs/vocab/uniprot_semantic_payloads.yaml"
+
+
 __all__ = [
     "StructuredPayloadCollectionSemantics",
     "StructuredPayloadPolicy",
@@ -204,7 +208,7 @@ _POLICIES: tuple[StructuredPayloadPolicy, ...] = (
         ),
     ),
     StructuredPayloadPolicy(
-        profile_name="uniprot.protein",
+        profile_name=_UNIPROT_PROTEIN_ENTITY,
         field_name="alternative_products",
         representation=StructuredPayloadRepresentation.CANONICAL_JSON_STRING,
         collection_semantics=StructuredPayloadCollectionSemantics.ORDERED_SEQUENCE,
@@ -216,10 +220,10 @@ _POLICIES: tuple[StructuredPayloadPolicy, ...] = (
             "later split into dedicated entities; retain raw provider comments plus "
             "deterministic canonical companions before any semantic promotion."
         ),
-        controlled_vocabulary_source="configs/vocab/uniprot_semantic_payloads.yaml",
+        controlled_vocabulary_source=_UNIPROT_SEMANTIC_PAYLOADS_CONFIG,
     ),
     StructuredPayloadPolicy(
-        profile_name="uniprot.protein",
+        profile_name=_UNIPROT_PROTEIN_ENTITY,
         field_name="biophysicochemical_properties",
         representation=StructuredPayloadRepresentation.CANONICAL_JSON_STRING,
         collection_semantics=StructuredPayloadCollectionSemantics.ORDERED_SEQUENCE,
@@ -231,10 +235,10 @@ _POLICIES: tuple[StructuredPayloadPolicy, ...] = (
             "note semantics; retain raw comment envelopes plus canonical companions "
             "before future semantic extraction expands the contract."
         ),
-        controlled_vocabulary_source="configs/vocab/uniprot_semantic_payloads.yaml",
+        controlled_vocabulary_source=_UNIPROT_SEMANTIC_PAYLOADS_CONFIG,
     ),
     StructuredPayloadPolicy(
-        profile_name="uniprot.protein",
+        profile_name=_UNIPROT_PROTEIN_ENTITY,
         field_name="cofactors",
         representation=StructuredPayloadRepresentation.CANONICAL_JSON_STRING,
         collection_semantics=StructuredPayloadCollectionSemantics.UNORDERED_SET,
@@ -246,10 +250,10 @@ _POLICIES: tuple[StructuredPayloadPolicy, ...] = (
             "provider envelope plus canonical set-like companions before semantic "
             "splits or vocabulary enrichment."
         ),
-        controlled_vocabulary_source="configs/vocab/uniprot_semantic_payloads.yaml",
+        controlled_vocabulary_source=_UNIPROT_SEMANTIC_PAYLOADS_CONFIG,
     ),
     StructuredPayloadPolicy(
-        profile_name="uniprot.protein",
+        profile_name=_UNIPROT_PROTEIN_ENTITY,
         field_name="features_json",
         representation=StructuredPayloadRepresentation.CANONICAL_JSON_STRING,
         collection_semantics=StructuredPayloadCollectionSemantics.ORDERED_SEQUENCE,
@@ -260,10 +264,10 @@ _POLICIES: tuple[StructuredPayloadPolicy, ...] = (
             "UniProt features are forensic sequence annotations; derived feature "
             "projections must keep the raw feature envelope."
         ),
-        controlled_vocabulary_source="configs/vocab/uniprot_semantic_payloads.yaml",
+        controlled_vocabulary_source=_UNIPROT_SEMANTIC_PAYLOADS_CONFIG,
     ),
     StructuredPayloadPolicy(
-        profile_name="uniprot.protein",
+        profile_name=_UNIPROT_PROTEIN_ENTITY,
         field_name="reactions",
         representation=StructuredPayloadRepresentation.CANONICAL_JSON_STRING,
         collection_semantics=StructuredPayloadCollectionSemantics.ORDERED_SEQUENCE,
@@ -275,7 +279,7 @@ _POLICIES: tuple[StructuredPayloadPolicy, ...] = (
             "provider comments plus canonical companions before expanding reaction "
             "semantics or downstream derived entities."
         ),
-        controlled_vocabulary_source="configs/vocab/uniprot_semantic_payloads.yaml",
+        controlled_vocabulary_source=_UNIPROT_SEMANTIC_PAYLOADS_CONFIG,
     ),
 )
 

@@ -6,6 +6,10 @@ from pathlib import Path
 from typing import cast
 
 from bioetl.infrastructure.quality.architecture_debt_task_policy import (
+
+_ARCHITECTURE_OWNER = "@bioetl-architecture"
+_COMPATIBILITY_CENSUS_PATH = "reports/quality/compatibility-importer-census.json"
+
     COMMON_ACCEPTANCE_CRITERIA,
     COMMON_ALLOWED_PATHS,
     COMMON_FORBIDDEN_PATHS,
@@ -102,7 +106,7 @@ def _append_reviewed_metric_task(
             task_id=task_id,
             task_family="compatibility_surface",
             registry_key=registry_key,
-            owner=policy.get("owner", "@bioetl-architecture"),
+            owner=policy.get("owner", _ARCHITECTURE_OWNER),
             current_value=current_value,
             limit_value=limit_value,
             target_file=None,
@@ -188,7 +192,7 @@ def _append_public_surface_tasks(
             f"live_public_entrypoint_count={public_entrypoint_count}",
             "Reviewed permanent public API remains informational while count is flat.",
         ],
-        source_artifact="reports/quality/compatibility-importer-census.json",
+        source_artifact=_COMPATIBILITY_CENSUS_PATH,
     )
 
     public_export_count = _count_value(
@@ -211,7 +215,7 @@ def _append_public_surface_tasks(
             f"live_public_export_facade_count={public_export_count}",
             "Reviewed permanent public export facades are not compatibility debt.",
         ],
-        source_artifact="reports/quality/compatibility-importer-census.json",
+        source_artifact=_COMPATIBILITY_CENSUS_PATH,
     )
 
     conflict_count = max(
@@ -237,7 +241,7 @@ def _append_public_surface_tasks(
         limit_field="current_count",
         goal="Устранить конфликт или drift в санкционированном public export facade.",
         notes=[f"live_public_export_facade_conflict_count={conflict_count}"],
-        source_artifact="reports/quality/compatibility-importer-census.json",
+        source_artifact=_COMPATIBILITY_CENSUS_PATH,
     )
 
 
@@ -297,7 +301,7 @@ def build_duplication_tasks(
                 task_id=f"ARD-DUP-{ordinal:03d}",
                 task_family="duplication_cluster",
                 registry_key=target,
-                owner="@bioetl-architecture",
+                owner=_ARCHITECTURE_OWNER,
                 current_value=duplicate_count,
                 limit_value=0,
                 target_file=target,
@@ -344,7 +348,7 @@ def build_hotspot_family_tasks(
                 task_id=f"ARD-HOT-{ordinal:03d}",
                 task_family="hotspot_family",
                 registry_key=str(row.get("name", f"family-{ordinal}")),
-                owner=row.get("owner", "@bioetl-architecture"),
+                owner=row.get("owner", _ARCHITECTURE_OWNER),
                 current_value=len(warnings),
                 limit_value=0,
                 target_file=target_file,
@@ -396,7 +400,7 @@ def build_dead_code_review_tasks(
             task_id="ARD-DEAD-001",
             task_family="dead_code_review",
             registry_key="repo_wide_untriaged_zero_import_candidate_count",
-            owner=policy.get("owner", "@bioetl-architecture"),
+            owner=policy.get("owner", _ARCHITECTURE_OWNER),
             current_value=untriaged_candidates,
             limit_value=limit_value,
             target_file=None,

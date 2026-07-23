@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from bioetl.interfaces.http.control_plane_identity.types import AnchorSpec
 
+_OVERVIEW_SHORT_DETAILS_FULL = "overview: short; details: full"
+
+
 P0_ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
     AnchorSpec(
         "P0",
@@ -12,7 +15,7 @@ P0_ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         "RunManifest.run_id; identity graph",
         "UUID v4",
         "Primary correlation anchor for manifest, ledger, logs, and traces.",
-        "overview: short; details: full",
+        _OVERVIEW_SHORT_DETAILS_FULL,
         True,
         "Run Manifest details; ledger by run_id; Loki/Tempo links",
         "FAILING",
@@ -24,7 +27,7 @@ P0_ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         "RunManifest.manifest_id; identity graph",
         "opaque string / UUID-like",
         "Immutable control-plane artifact anchor.",
-        "overview: short; details: full",
+        _OVERVIEW_SHORT_DETAILS_FULL,
         True,
         "Manifest JSON; run-manifest CLI show; ledger events",
         "DEGRADED",
@@ -72,7 +75,7 @@ P0_ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         "RunManifest.execution_fingerprint; identity graph",
         "sha256 hex / opaque fingerprint",
         "Semantic reproducibility and compatibility anchor.",
-        "overview: short; details: full",
+        _OVERVIEW_SHORT_DETAILS_FULL,
         True,
         "Identity graph; manifest diff; replay diagnostics",
         "DEGRADED",
@@ -84,7 +87,7 @@ P0_ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         "RunManifest.code_provenance.git_commit",
         "git SHA",
         "Shows which code produced the result.",
-        "overview: short; details: full",
+        _OVERVIEW_SHORT_DETAILS_FULL,
         True,
         "Repository commit / release notes",
         "DEGRADED",
@@ -108,7 +111,7 @@ P0_ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         "RunCodeProvenance.effective_config_hash; checkpoint metadata",
         "sha256 hex",
         "Resolved config actually used by the run.",
-        "overview: short; details: full",
+        _OVERVIEW_SHORT_DETAILS_FULL,
         True,
         "Effective config artifact; config diff",
         "DEGRADED",
@@ -120,7 +123,7 @@ P0_ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         "RunCodeProvenance.effective_config_artifact_id; base_summary",
         "artifact ref",
         "Direct handoff to resolved config.",
-        "overview: short; details: full",
+        _OVERVIEW_SHORT_DETAILS_FULL,
         True,
         "Resolved config artifact view",
         "DEGRADED",
@@ -156,7 +159,7 @@ P0_ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         "RunCodeProvenance.contract_schema_hash; registry identity.schema_hash",
         "sha256 hex",
         "Protects against schema drift.",
-        "overview: short; details: full",
+        _OVERVIEW_SHORT_DETAILS_FULL,
         True,
         "Contract artifact diff",
         "DEGRADED",
@@ -168,7 +171,7 @@ P0_ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         "RunManifest.source_refs[*].input_snapshots",
         "sha256 / opaque fingerprint",
         "Fixes the immutable input closure.",
-        "overview: short; details: full",
+        _OVERVIEW_SHORT_DETAILS_FULL,
         True,
         "Input snapshots details",
         "DEGRADED",
