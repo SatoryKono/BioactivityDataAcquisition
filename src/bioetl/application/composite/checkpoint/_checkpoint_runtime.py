@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 
 CHECKPOINT_READ_ERRORS = (
     json.JSONDecodeError,
+    KeyError,
     OSError,
     TypeError,
     ValueError,
@@ -45,12 +46,26 @@ def latest_checkpoint_filename(
             state = CompositeCheckpointState.from_dict(json.loads(payload))
             stamp = state.updated_at or state.created_at
             if stamp is not None:
-                ranked.append((stamp, path))
+                ranked.append((_as_utc_comparable(stamp), path))
         except (CHECKPOINT_READ_ERRORS, BioETLError):
             continue
     if ranked:
-        return max(ranked, key=lambda item: (item[0], item[1]))[1]
+        try:
+            return max(ranked, key=lambda item: (item[0], item[1]))[1]
+        except TypeError:
+            # Mixed naive/aware timestamps: fall back to deterministic filename order.
+            return sorted(matches)[-1]
     return sorted(matches)[-1]
+
+
+def _as_utc_comparable(value: datetime) -> datetime:
+    """Normalize timestamps so naive/aware values can be ordered safely."""
+    from datetime import timezone
+
+    if value.tzinfo is None:
+        # Treat naive timestamps as UTC for deterministic ranking only.
+        return value.replace(tzinfo=timezone.utc)
+    return value.astimezone(timezone.utc)
 
 
 def _emit_checkpoint_saved_at_from_state(

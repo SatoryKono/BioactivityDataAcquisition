@@ -20,20 +20,28 @@ _SECRET_MARKERS = (
     "credential",
     "private_key",
 )
+_SECRET_HEADER = re.compile(
+    r"(?im)\b(authorization|cookie|credential|private[_-]?key)\b\s*[:=]\s*[^\r\n]*"
+)
 _INLINE_SECRET = re.compile(
-    r"(?i)\b(password|passwd|token|secret|api[_-]?key|authorization)\b"
-    r"\s*[:=]\s*([^\s,;&]+)"
+    r"(?i)\b(password|passwd|token|secret|api[_-]?key|credential|private[_-]?key)\b"
+    r'\s*[:=]\s*("(?:\\.|[^"])*"|\'(?:\\.|[^\'])*\'|[^\s,;&]+)'
 )
 _BEARER_SECRET = re.compile(r"(?i)\bBearer\s+[A-Za-z0-9._~+/=-]+")
 _PREFIXED_SECRET = re.compile(
     r"(?i)(?<![A-Za-z0-9])(?:sk[-_]|gh[pousr]_|xox[baprs]-)[A-Za-z0-9._-]+"
 )
 _EMBEDDED_URL = re.compile(r"[A-Za-z][A-Za-z0-9+.-]*://[^\s<>'\"]+")
+_CYCLE_SENTINEL = "[REDACTED CYCLE]"
 
 
 def _redact_inline_secrets(value: str) -> str:
     """Redact inline secret patterns like password=xyz."""
-    return _INLINE_SECRET.sub(lambda match: f"{match.group(1)}=[REDACTED]", value)
+    redacted = _SECRET_HEADER.sub(
+        lambda match: f"{match.group(1)}=[REDACTED]",
+        value,
+    )
+    return _INLINE_SECRET.sub(lambda match: f"{match.group(1)}=[REDACTED]", redacted)
 
 
 def _redact_url_hostname(parsed: SplitResult) -> str:
@@ -87,22 +95,33 @@ def _is_secret_key(key: str) -> bool:
     return any(marker in normalized_key for marker in _SECRET_MARKERS)
 
 
-def _redact_dict(value: dict[object, object]) -> dict[str, object]:
+def _redact_dict(
+    value: dict[object, object],
+    *,
+    seen: set[int],
+) -> dict[str, object]:
     """Redact dictionary values recursively."""
-    return {str(k): _redact(v, str(k)) for k, v in value.items()}
+    return {str(k): _redact(v, str(k), seen=seen) for k, v in value.items()}
 
 
 def _redact_sequence(
     value: list[object] | tuple[object, ...],
     key: str,
+    *,
+    seen: set[int],
 ) -> list[object] | tuple[object, ...]:
     """Redact sequence values recursively."""
-    return type(value)(_redact(v, key) for v in value)
+    return type(value)(_redact(v, key, seen=seen) for v in value)
 
 
-def _redact_set(value: set[object] | frozenset[object], key: str) -> list[object]:
+def _redact_set(
+    value: set[object] | frozenset[object],
+    key: str,
+    *,
+    seen: set[int],
+) -> list[object]:
     """Redact unordered values into a deterministic JSON-safe list."""
-    redacted = [_redact(item, key) for item in value]
+    redacted = [_redact(item, key, seen=seen) for item in value]
     return sorted(redacted, key=repr)
 
 
@@ -114,7 +133,12 @@ def _redact_exception(value: BaseException) -> dict[str, object]:
     }
 
 
-def _redact(value: object, key: str = "") -> object:
+def _redact(
+    value: object,
+    key: str = "",
+    *,
+    seen: set[int] | None = None,
+) -> object:
     """Recursively redact secrets from structured data."""
     if _is_secret_key(key):
         return "[REDACTED]"
@@ -123,16 +147,28 @@ def _redact(value: object, key: str = "") -> object:
     if isinstance(value, str):
         return _redact_string(value)
     if isinstance(value, (dict, list, tuple, set, frozenset)):
-        return _redact_structured(value, key)
+        return _redact_structured(value, key, seen=seen if seen is not None else set())
     return value
 
 
-def _redact_structured(value: object, key: str) -> object:
+def _redact_structured(
+    value: object,
+    key: str,
+    *,
+    seen: set[int],
+) -> object:
     """Redact structured types (dict, list, tuple, set)."""
-    if isinstance(value, dict):
-        return _redact_dict(value)
-    if isinstance(value, (list, tuple)):
-        return _redact_sequence(value, key)
-    if isinstance(value, (set, frozenset)):
-        return _redact_set(value, key)
-    return value
+    object_id = id(value)
+    if object_id in seen:
+        return _CYCLE_SENTINEL
+    seen.add(object_id)
+    try:
+        if isinstance(value, dict):
+            return _redact_dict(value, seen=seen)
+        if isinstance(value, (list, tuple)):
+            return _redact_sequence(value, key, seen=seen)
+        if isinstance(value, (set, frozenset)):
+            return _redact_set(value, key, seen=seen)
+        return value
+    finally:
+        seen.discard(object_id)

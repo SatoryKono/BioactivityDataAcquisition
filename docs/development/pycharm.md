@@ -2,6 +2,33 @@
 
 Версия: 2026.01.4 stable, Python: 3.13.7 (Windows), проект: BioactivityDataAcquisition2.
 
+Полный operator guide: [docs/03-guides/development/pycharm-setup.md](../03-guides/development/pycharm-setup.md).
+
+## Post-clone sync (canonical)
+
+```powershell
+.\scripts\engineering\dev\sync_pycharm_ide_templates.ps1
+```
+
+```bash
+bash scripts/engineering/dev/sync_pycharm_ide_templates.sh
+```
+
+Скрипт копирует только portable surfaces из `configs/ide/pycharm/` в локальный
+`.idea/` (codeStyles, inspectionProfiles, runConfigurations, `pyLspTools.xml`),
+прогоняет policy check shared run-config и **не** трогает machine-local
+`workspace.xml` / shelves / SDK paths (без `-ForceAll` / `--force-all`).
+
+## Path model (важно)
+
+| Surface | Типичное расположение | Примечание |
+| ------- | --------------------- | ---------- |
+| JetBrains config / system / index | `%APPDATA%` / `%LOCALAPPDATA%\JetBrains` (диск C:) | Обычно уже на SSD |
+| Project root + `.venv-win` | checkout path | I/O risk, если tree на cloud-sync volume |
+| UV / tool caches | `%LOCALAPPDATA%` или `%TEMP%` | Не класть под GDrive project tree |
+
+«IDE на C:» **не** снимает hangs от чтения/записи project tree на synced disk.
+
 ## Зафиксированные настройки IDE
 
 - PyCharm: stable 2026.1.4 (EAP 2026.2 отдельно, не для ежедневной работы).
@@ -11,7 +38,7 @@
 - `Xmx` подбирается по измерениям и настраивается только через UI Memory Usage.
 - `custom GC flags` отсутствуют по умолчанию; новые `-XX` флаги не вводятся без
   диагностики memory pressure/GC.
-- Работа на локальном SSD для project root/venv/system cache; `.env` не коммитится.
+- Предпочтительно: project root / `.venv-win` / tool caches на локальном SSD; IDE system cache уже на C: в default Windows layout. `.env` не коммитится.
 - Activity Monitor используется для оценки нагрузки; функции IDE не отключаются без измерений.
 
 ## Quality tools
@@ -29,18 +56,24 @@
   coverage используется только в `pytest-coverage`.
  - Для CI/IDE quality gate `coverage` не ставится глобальным default-флагом в `pytest-fast`, `pytest-full`, `pytest-debug` — покрытие включается только в `pytest-coverage`-конфигурации.
   - Чек-лист по coverage: нет `--cov` в `pytest-fast/full/debug`, нет global `--cov` в addopts/IDE defaults, `pytest-coverage` держит `--cov*` и пороги в одном месте.
-- Run/debug конфигурации:
+- Run/debug конфигурации (shared):
   - `pytest-fast`
   - `pytest-full`
   - `pytest-coverage`
   - `pytest-debug`
+  - `pytest-architecture` (offline lane `tests/architecture`)
   - `mypy-full`
   - `ruff-check`
   - `ruff-format-check`
   - `quality-gate`
+  - `BioETL smoke (offline fixture)`
+- Policy shared configs: no `PYTHONPATH`, `ADD_*_ROOTS=false`, `--no-cov` на
+  non-coverage pytest lanes; `--cov*` только в `pytest-coverage`.
 - Все shared run/debug конфигурации воспроизводимы на `clean clone` и не содержат
   ручного `PYTHONPATH`.
 - Параметры и проверки не дублируются между UI, `pyproject.toml` и CI без необходимости.
+- Local-only Live / compound configs **MUST NOT** публиковаться в
+  `configs/ide/pycharm/`; см. anti-patterns в setup guide.
 
 ## AI
 

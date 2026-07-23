@@ -258,54 +258,8 @@ def test_dashboard_prometheus_datasource_contract(dashboard_path: Path) -> None:
     """Prometheus panel and target datasources must use explicit provisioned UID."""
     dashboard = load_dashboard(dashboard_path)
     errors: list[str] = []
-
     for panel in get_dashboard_panels(dashboard):
-        panel_id = panel.get("id", "<unknown>")
-        panel_title = panel.get("title", "<untitled>")
-        datasource = panel.get("datasource")
-
-        if datasource == "Prometheus":
-            errors.append(
-                f"panel id={panel_id} title={panel_title!r} uses string "
-                "datasource 'Prometheus'; use explicit object format"
-            )
-        elif isinstance(datasource, dict):
-            is_prometheus = (
-                datasource.get("type") == "prometheus"
-                or datasource.get("uid") == "prometheus"
-            )
-            if is_prometheus and datasource != {
-                "type": "prometheus",
-                "uid": "prometheus",
-            }:
-                errors.append(
-                    f"panel id={panel_id} title={panel_title!r} has non-canonical "
-                    f"Prometheus datasource object: {datasource}"
-                )
-
-        for target in panel.get("targets", []):
-            target_ref = target.get("refId", "<unknown>")
-            target_datasource = target.get("datasource")
-            if not isinstance(target_datasource, dict):
-                continue
-            if target_datasource.get("uid") == "${DS_PROMETHEUS}":
-                errors.append(
-                    f"panel id={panel_id} title={panel_title!r} target={target_ref} "
-                    "still uses ${DS_PROMETHEUS}"
-                )
-            is_prometheus_target = (
-                target_datasource.get("type") == "prometheus"
-                or target_datasource.get("uid") == "prometheus"
-            )
-            if is_prometheus_target and target_datasource != {
-                "type": "prometheus",
-                "uid": "prometheus",
-            }:
-                errors.append(
-                    f"panel id={panel_id} title={panel_title!r} target={target_ref} "
-                    f"has non-canonical Prometheus datasource object: "
-                    f"{target_datasource}"
-                )
+        errors.extend(_panel_prometheus_datasource_errors(panel))
 
     assert not errors, (
         f"Dashboard {dashboard_path.name} violates Prometheus datasource "
@@ -319,60 +273,10 @@ def test_explore_traces_links_use_safe_search_first_handoff(
 ) -> None:
     """Explore Traces links must preserve the dashboard range in the safe handoff."""
     dashboard = load_dashboard(dashboard_path)
-
-    def _iter_structured_urls(value: object) -> Iterator[str]:
-        if isinstance(value, dict):
-            url = value.get("url")
-            if isinstance(url, str):
-                yield url
-            for child in value.values():
-                yield from _iter_structured_urls(child)
-        elif isinstance(value, list):
-            for child in value:
-                yield from _iter_structured_urls(child)
-
-    trace_urls = [
-        unescape(url)
-        for url in _iter_structured_urls(dashboard)
-        if "grafana-exploretraces-app" in url
-    ]
-    for panel in dashboard.get("panels", []):
-        nav_content = unescape(str(panel.get("options", {}).get("content", "")))
-        trace_urls.extend(
-            re.findall(r'href="([^"]*grafana-exploretraces-app[^"]*)"', nav_content)
-        )
-
+    trace_urls = _collect_explore_traces_urls(dashboard)
     assert trace_urls, f"{dashboard_path.name} must expose an Explore Traces URL"
-
     for url in trace_urls:
-        assert "/a/grafana-exploretraces-app/explore?actionView=search" in url, (
-            f"{dashboard_path.name} must use the explicit Explore Traces route: {url}"
-        )
-        assert "from=${__from}" in url and "to=${__to}" in url, (
-            f"{dashboard_path.name} must preserve the active dashboard range: {url}"
-        )
-        assert "var-ds=tempo" in url, (
-            f"{dashboard_path.name} must pin the Tempo datasource: {url}"
-        )
-        assert "var-groupBy=resource.service.name" in url, (
-            f"{dashboard_path.name} must use a safe default groupBy: {url}"
-        )
-        assert (
-            "span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22" not in url
-        ), (
-            f"{dashboard_path.name} must not couple Explore Traces to "
-            f"${{run_type:regex}}: {url}"
-        )
-        assert (
-            "span.%22bioetl.run_type%22%20%3D~%20%22${run_type_context:regex}%22"
-            not in url
-        ), (
-            f"{dashboard_path.name} must not couple Explore Traces to "
-            f"${{run_type_context:regex}}: {url}"
-        )
-        assert "/a/grafana-exploretraces-app/?from=" not in url
-        assert "from=now-150m&to=now" not in url
-        assert "var-groupBy=undefined" not in url
+        _assert_safe_explore_traces_url(dashboard_path.name, url)
 
 
 @pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
@@ -382,31 +286,8 @@ def test_panel_title_vocabulary_matches_group_by_vocabulary(
     """Panel titles should describe aggregation vocabulary in PromQL group-by labels."""
     dashboard = load_dashboard(dashboard_path)
     errors: list[str] = []
-
     for panel in get_dashboard_panels(dashboard):
-        if panel.get("type") == "row":
-            # Collapsed rows own nested panels. Their titles describe the disclosure
-            # group, while aggregation vocabulary belongs to each child panel.
-            continue
-        title = panel.get("title", "")
-        if not isinstance(title, str):
-            continue
-
-        expressions = get_panel_expressions(panel)
-        grouped_by_provider = any("by (provider" in expr for expr in expressions)
-        grouped_by_adapter = any("by (adapter" in expr for expr in expressions)
-
-        if grouped_by_provider and "by Provider" not in title:
-            errors.append(
-                f"{dashboard_path.name}: panel '{title}' groups by provider but title "
-                "does not contain 'by Provider'"
-            )
-        if grouped_by_adapter and "by Adapter" not in title:
-            errors.append(
-                f"{dashboard_path.name}: panel '{title}' groups by adapter but title "
-                "does not contain 'by Adapter'"
-            )
-
+        errors.extend(_panel_title_vocabulary_errors(dashboard_path, panel))
     assert not errors, "Panel title vocabulary drift detected:\n" + "\n".join(errors)
 
 
@@ -463,23 +344,9 @@ def test_dashboard_queries_use_real_metric_label_schemas(dashboard_path: Path) -
 
 def test_dashboard_recording_rule_queries_are_backed_by_shipped_rules_config() -> None:
     """Dashboard recording-rule references must resolve to shipped rule records."""
-    recording_rules = _load_recording_rule_names()
-    used_recording_rules: set[str] = set()
-    errors: list[str] = []
-
-    for dashboard_path in get_dashboard_files():
-        dashboard = load_dashboard(dashboard_path)
-        for query in get_dashboard_prometheus_queries(dashboard):
-            for token in _BIOETL_METRIC_TOKEN_RE.findall(query):
-                if token in recording_rules:
-                    used_recording_rules.add(token)
-                    continue
-                if token.startswith("bioetl_runtime_alert_condition_"):
-                    errors.append(
-                        f"{dashboard_path.name} references missing recording rule "
-                        f"{token}: {query}"
-                    )
-
+    used_recording_rules, errors = _collect_recording_rule_usage_errors(
+        _load_recording_rule_names()
+    )
     assert not errors, "Dashboard recording-rule drift:\n" + "\n".join(errors)
     assert used_recording_rules, (
         "At least one shipped dashboard must consume recording rules; otherwise "
@@ -563,192 +430,25 @@ def test_dashboard_links_only_reference_declared_variables(
 def test_variable_query_sources(dashboard_path):
     """Ensure templating variables use the intended metric sources."""
     dashboard = load_dashboard(dashboard_path)
-    variable_map = {
-        var.get("name"): var
-        for var in dashboard.get("templating", {}).get("list", [])
-        if var.get("name")
-    }
+    variable_map = _variable_map(dashboard)
+    name = dashboard_path.name
 
-    if dashboard_path.name == "bioetl-silver-reject-explorer.json":
+    if name == "bioetl-silver-reject-explorer.json":
         _assert_silver_reject_explorer_variable_contract(dashboard_path, variable_map)
         return
-
-    if dashboard_path.name == "bioetl-alerts-slo.json":
-        assert variable_map["workflow"].get("type") == "textbox"
-        assert "bioetl_overview_pipeline_run_type_universe" in str(
-            variable_map["pipeline"].get("query", {})
-        )
-        assert "bioetl_overview_pipeline_run_type_universe" in str(
-            variable_map["run_type"].get("query", {})
-        )
+    if name == "bioetl-alerts-slo.json":
+        _assert_alerts_slo_variable_sources(variable_map)
         return
-
-    if dashboard_path.name == "bioetl-workflow-overview.json":
-        _assert_operator_context_shell_contract(dashboard_path, variable_map)
-        workflow_query = variable_map["workflow"].get("query", {})
-        pipeline_query = variable_map["pipeline"].get("query", {})
-        run_type_query = variable_map["run_type"].get("query", {})
-        status_query = variable_map["status"].get("query", {})
-        workflow_context_query = variable_map["workflow_context"].get("query", {})
-        pipeline_context_query = variable_map["pipeline_context"].get("query", {})
-        pipeline_context_exact_query = variable_map["pipeline_context_exact"].get(
-            "query", {}
-        )
-        run_type_context_query = variable_map["run_type_context"].get("query", {})
-        run_type_context_exact_query = variable_map["run_type_context_exact"].get(
-            "query", {}
-        )
-        provider_context_query = variable_map["provider_context"].get("query", {})
-        provider_context_exact_query = variable_map["provider_context_exact"].get(
-            "query", {}
-        )
-        step_status_query = variable_map["step_status"].get("query", {})
-        step_kind_query = variable_map["step_kind"].get("query", {})
-        assert isinstance(workflow_query, dict)
-        assert isinstance(pipeline_query, dict)
-        assert isinstance(run_type_query, dict)
-        assert isinstance(status_query, dict)
-        assert isinstance(workflow_context_query, dict)
-        assert isinstance(pipeline_context_query, dict)
-        assert isinstance(pipeline_context_exact_query, dict)
-        assert isinstance(run_type_context_query, dict)
-        assert isinstance(run_type_context_exact_query, dict)
-        assert isinstance(provider_context_query, dict)
-        assert isinstance(provider_context_exact_query, dict)
-        assert isinstance(step_status_query, dict)
-        assert isinstance(step_kind_query, dict)
-        assert "bioetl_workflow_universe" in workflow_query.get("query", "")
-        assert "bioetl_overview_pipeline_run_type_universe" in pipeline_query.get(
-            "query", ""
-        )
-        assert "bioetl_overview_pipeline_run_type_universe" in run_type_query.get(
-            "query", ""
-        )
-        assert "bioetl_workflow_runs_total" in status_query.get("query", "")
-        assert workflow_context_query.get("queryType") == "infinity"
-        assert "bioetl_workflow_runs_total" in pipeline_context_query.get("query", "")
-        pipeline_context_exact_infinity = pipeline_context_exact_query.get(
-            "infinityQuery", {}
-        )
-        assert "bioetl_workflow_runs_total" in run_type_context_query.get("query", "")
-        run_type_context_exact_infinity = run_type_context_exact_query.get(
-            "infinityQuery", {}
-        )
-        assert "bioetl_workflow_runs_total" in provider_context_query.get("query", "")
-        provider_context_exact_infinity = provider_context_exact_query.get(
-            "infinityQuery", {}
-        )
-        workflow_context_infinity = workflow_context_query.get("infinityQuery", {})
-        assert "/ops/control-plane/filter-options" in str(
-            workflow_context_infinity.get("url", "")
-        )
-        assert "dimension=workflow" in str(workflow_context_infinity.get("url", ""))
-        assert "exact_run_only=1" in str(workflow_context_infinity.get("url", ""))
-        assert "fallback_value=${workflow:text}" in str(
-            workflow_context_infinity.get("url", "")
-        )
-        assert "/ops/control-plane/filter-options" in str(
-            pipeline_context_exact_infinity.get("url", "")
-        )
-        assert "dimension=pipeline" in str(
-            pipeline_context_exact_infinity.get("url", "")
-        )
-        assert "exact_run_only=1" in str(pipeline_context_exact_infinity.get("url", ""))
-        assert "/ops/control-plane/filter-options" in str(
-            run_type_context_exact_infinity.get("url", "")
-        )
-        assert "dimension=run_type" in str(
-            run_type_context_exact_infinity.get("url", "")
-        )
-        assert "exact_run_only=1" in str(run_type_context_exact_infinity.get("url", ""))
-        assert "/ops/control-plane/filter-options" in str(
-            provider_context_exact_infinity.get("url", "")
-        )
-        assert "dimension=provider" in str(
-            provider_context_exact_infinity.get("url", "")
-        )
-        assert "exact_run_only=1" in str(provider_context_exact_infinity.get("url", ""))
-        assert "bioetl_workflow_step_events_total" in step_status_query.get("query", "")
-        assert "bioetl_workflow_step_events_total" in step_kind_query.get("query", "")
+    if name == "bioetl-workflow-overview.json":
+        _assert_workflow_overview_variable_sources(dashboard_path, variable_map)
         return
-
-    if dashboard_path.name == "bioetl-overview-v2.json":
-        workflow_var = variable_map["workflow"]
-        workflow_query = workflow_var.get("query", {})
-        workflow_query_text = (
-            workflow_query.get("query", "") if isinstance(workflow_query, dict) else ""
-        )
-        assert workflow_var.get("datasource") == {
-            "type": "prometheus",
-            "uid": "prometheus",
-        }
-        assert "bioetl_workflow_universe" in workflow_query_text
-
-        pipeline_var = variable_map["pipeline"]
-        pipeline_query = pipeline_var.get("query", {})
-        pipeline_query_text = (
-            pipeline_query.get("query", "") if isinstance(pipeline_query, dict) else ""
-        )
-        assert "bioetl_overview_pipeline_run_type_universe" in pipeline_query_text
-
-        run_type_var = variable_map["run_type"]
-        run_type_query = run_type_var.get("query", {})
-        run_type_query_text = (
-            run_type_query.get("query", "") if isinstance(run_type_query, dict) else ""
-        )
-        assert "bioetl_overview_pipeline_run_type_universe" in run_type_query_text
-        assert "run_type" in run_type_query_text
-
-        run_id_var = variable_map["run_id"]
-        assert run_id_var.get("type") == "query"
-        assert run_id_var.get("datasource") == "Quarantine Explorer"
-        assert run_id_var.get("includeAll") is False
-        assert run_id_var.get("multi") is False
-        assert run_id_var.get("current", {}).get("text") == "-"
-        assert run_id_var.get("current", {}).get("value") == "-"
-        run_id_query = run_id_var.get("query", {})
-        assert isinstance(run_id_query, dict)
-        assert run_id_query.get("queryType") == "infinity"
-        assert run_id_query.get("refId") == "variable"
-        infinity_query = run_id_query.get("infinityQuery", {})
-        assert isinstance(infinity_query, dict)
-        assert infinity_query.get("format") == "table"
-        assert infinity_query.get("parser") == "backend"
-        assert infinity_query.get("root_selector") == "$.items"
-        assert infinity_query.get("url_options", {}).get("method") == "GET"
-        run_id_query_url = str(infinity_query.get("url", ""))
-        assert "/ops/control-plane/filter-options" in run_id_query_url
-        assert "dimension=run_id" in run_id_query_url
-        assert "response_shape=list" in run_id_query_url
-        assert "workflow=${workflow}" in run_id_query_url
-        assert "pipeline=${pipeline}" in run_id_query_url
-        assert "run_type=${run_type:csv}" in run_id_query_url
-
-        identity_panel = next(
-            (
-                panel
-                for panel in get_dashboard_panels(dashboard)
-                if panel.get("id") == 9300 and panel.get("title") == "ID"
-            ),
-            None,
-        )
-        assert identity_panel is not None
-        assert identity_panel.get("datasource") == "Quarantine Explorer"
-        identity_targets = identity_panel.get("targets", [])
-        assert isinstance(identity_targets, list) and len(identity_targets) == 1
-        identity_target = identity_targets[0]
-        assert identity_target.get("parser") == "backend"
-        assert identity_target.get("root_selector") == "rows"
-        assert (
-            str(identity_target.get("url", ""))
-            == "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
-        )
+    if name == "bioetl-overview-v2.json":
+        _assert_overview_variable_sources(dashboard, variable_map)
         return
-
-    if dashboard_path.name == "bioetl-provider-health-v2.json":
+    if name == "bioetl-provider-health-v2.json":
         _assert_provider_health_variable_contract(dashboard_path, variable_map)
-    else:
-        _assert_standard_variable_contract(dashboard_path, variable_map)
+        return
+    _assert_standard_variable_contract(dashboard_path, variable_map)
 
 
 def test_production_dashboard_provisioning_disables_ui_updates() -> None:
@@ -964,14 +664,11 @@ def test_control_plane_lookup_panels_disclose_global_scope() -> None:
 
 def test_control_plane_read_panels_do_not_filter_on_missing_pipeline_label() -> None:
     """Control-plane read panels must not filter global metrics by pipeline."""
-    expectations = CONTROL_PLANE_GLOBAL_READ_PANEL_TITLES
-
     forbidden_metrics = (
         "bioetl_control_plane_reads_total",
         "bioetl_control_plane_read_duration_seconds",
     )
-
-    for dashboard_name, panel_titles in expectations.items():
+    for dashboard_name, panel_titles in CONTROL_PLANE_GLOBAL_READ_PANEL_TITLES.items():
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
         panels = {
             panel.get("title"): panel
@@ -979,27 +676,12 @@ def test_control_plane_read_panels_do_not_filter_on_missing_pipeline_label() -> 
             if panel.get("title")
         }
         for panel_title in panel_titles:
-            panel = panels.get(panel_title)
-            assert panel is not None, (
-                f"{dashboard_name} missing control-plane panel {panel_title!r}"
+            _assert_control_plane_read_panel_no_pipeline_filter(
+                dashboard_name,
+                panel_title,
+                panels.get(panel_title),
+                forbidden_metrics,
             )
-            expressions = [
-                target.get("expr", "")
-                for target in panel.get("targets", [])
-                if isinstance(target.get("expr"), str)
-            ]
-            for expr in expressions:
-                if any(metric in expr for metric in forbidden_metrics):
-                    assert '{pipeline=~"$pipeline"' not in expr, (
-                        f"{dashboard_name} panel {panel_title!r} filters a "
-                        "global control-plane metric by nonexistent pipeline label:\n"
-                        f"{expr}"
-                    )
-                    assert '{run_type=~"$run_type"' not in expr, (
-                        f"{dashboard_name} panel {panel_title!r} filters a "
-                        "global control-plane metric by nonexistent run_type label:\n"
-                        f"{expr}"
-                    )
 
 
 def test_control_plane_global_panels_are_marked_global() -> None:
@@ -1035,19 +717,8 @@ def test_control_plane_latency_panels_have_p50_p95_p99() -> None:
         "Track: GLOBAL Audit Write Latency p50/p95/p99",
         "Track: GLOBAL Audit Query Latency p50/p95/p99",
     )
-
     for panel_title in latency_panels:
-        panel = panels.get(panel_title)
-        assert panel is not None, f"Control-plane dashboard missing {panel_title!r}"
-        expressions = "\n".join(
-            target.get("expr", "")
-            for target in panel.get("targets", [])
-            if isinstance(target.get("expr"), str)
-        )
-        assert "histogram_quantile(0.50" in expressions
-        assert "histogram_quantile(0.95" in expressions
-        assert "histogram_quantile(0.99" in expressions
-        assert "or vector(0)" not in expressions
+        _assert_latency_panel_has_quantiles(panel_title, panels.get(panel_title))
 
 
 def test_control_plane_no_missing_metric_promql() -> None:
@@ -1077,7 +748,6 @@ def test_control_plane_identity_evidence_panels_exist() -> None:
         for panel in get_dashboard_panels(dashboard)
         if panel.get("title")
     }
-
     for title, view in {
         "Inspect: Overview Identity Anchors": "view=overview",
         "Inspect: Identity Gaps": "view=gaps",
@@ -1086,18 +756,7 @@ def test_control_plane_identity_evidence_panels_exist() -> None:
         "Inspect: P1 Replay and Evidence Anchors": "view=anchors",
         "Inspect: P2 Forensic Anchors": "view=anchors",
     }.items():
-        panel = panels.get(title)
-        assert panel is not None, f"Control-plane dashboard missing {title!r}"
-        assert panel.get("datasource") == "Quarantine Explorer"
-        targets = panel.get("targets", [])
-        assert len(targets) == 1
-        target = targets[0]
-        assert target.get("parser") == "backend"
-        assert target.get("root_selector") == "rows"
-        url = str(target.get("url", ""))
-        assert "/ops/control-plane/identity-evidence?" in url
-        assert view in url
-        assert "run_id=${run_id}" in url
+        _assert_identity_evidence_panel(panels, title, view)
 
     assert "priority=P1" in str(
         panels["Inspect: P1 Replay and Evidence Anchors"]["targets"][0]["url"]
@@ -1149,12 +808,7 @@ def test_control_plane_dashboard_links_are_scoped() -> None:
     assert "Back to Overview" not in links
     assert "0. Control Plane" not in links
     for title in ("1. Overview", "2. Runtime", "4. Data Quality"):
-        url = str(links[title].get("url", ""))
-        assert "var-workflow=$workflow" in url
-        assert "var-pipeline=$pipeline" in url
-        assert "var-run_type=$run_type" in url
-        assert "var-run_id=$run_id" in url
-        assert "${__url_time_range}" in url
+        _assert_scoped_control_plane_nav_link(title, links[title])
 
 
 def test_silver_validation_panels_use_explicit_pipeline_label() -> None:
@@ -1268,28 +922,11 @@ def test_provider_health_status_mappings_match_description_enum() -> None:
         None,
     )
     assert value_mapping is not None, "panel id=114 must define value mappings"
-    options = value_mapping.get("options", {})
-    assert set(options) == set(expected_pairs)
     description = str(panel.get("description", ""))
-    for status_code, label in expected_pairs.items():
-        text = str(options[status_code].get("text", "")).upper()
-        assert text == label
-        assert f"{status_code}={label}" in description
-
-    null_mappings = [
-        mapping
-        for mapping in mappings
-        if mapping.get("type") == "special"
-        and mapping.get("options", {}).get("match") == "null"
-    ]
-    assert len(null_mappings) == 1, "panel id=114 must map null exactly once"
-    assert (
-        str(null_mappings[0]["options"]["result"].get("text", "")).upper()
-        == expected_null
+    _assert_provider_health_value_mappings(
+        value_mapping.get("options", {}), description, expected_pairs
     )
-    assert expected_null in description
-    assert "null/NaN=UNKNOWN" in description or "null=UNKNOWN" in description
-    assert "raw status is absent" in description
+    _assert_provider_health_null_mapping(mappings, description, expected_null)
 
 
 def test_runtime_provider_alert_conditions_do_not_filter_on_missing_pipeline_labels():
@@ -1352,17 +989,7 @@ def test_workflow_step_panels_apply_status_variable() -> None:
         if panel.get("title")
     }
     for title, required_snippets in expected.items():
-        panel = panels.get(title)
-        assert panel is not None, f"Workflow dashboard missing panel {title!r}"
-        expressions = [
-            target.get("expr", "")
-            for target in panel.get("targets", [])
-            if isinstance(target.get("expr"), str)
-        ]
-        for required_snippet in required_snippets:
-            assert any(required_snippet in expr for expr in expressions), (
-                f"{title!r} must apply workflow selector {required_snippet!r}"
-            )
+        _assert_workflow_step_panel_selectors(panels, title, required_snippets)
 
 
 def test_workflow_pipeline_status_fails_closed_without_runtime_fallback() -> None:
@@ -1447,60 +1074,8 @@ def test_workflow_dashboard_descriptions_explain_selected_range_limits() -> None
 
 def test_workflow_dashboard_collapses_step_diagnostics_below_first_screen() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-workflow-overview.json"))
-
-    panels = dashboard.get("panels", [])
-    row_panel = next(
-        (panel for panel in panels if panel.get("title") == "Step Diagnostics"),
-        None,
-    )
-    assert row_panel is not None, "Workflow dashboard must expose step diagnostics row"
-    assert row_panel.get("type") == "row"
-    assert row_panel.get("collapsed") is True
-
-    row_titles = {
-        panel.get("title")
-        for panel in get_row_child_panels(dashboard, "Step Diagnostics")
-        if panel.get("title")
-    }
-    assert "Step Outcomes by Kind / Step Status / Range" in row_titles
-    assert "Step Duration p95 by Kind / Step Status / Range" in row_titles
-
-    root_titles = {
-        panel.get("title") for panel in panels if isinstance(panel.get("title"), str)
-    }
-    assert "Step Outcomes by Kind / Step Status / Range" not in root_titles
-    assert "Step Duration p95 by Kind / Step Status / Range" not in root_titles
-    row_y = row_panel.get("gridPos", {}).get("y", 0)
-    assert all(
-        panel.get("gridPos", {}).get("y", 0) > row_y
-        for panel in get_row_child_panels(dashboard, "Step Diagnostics")
-    )
-
-    next_panel = next(
-        (panel for panel in panels if panel.get("title") == "First Action"),
-        None,
-    )
-    assert next_panel is not None
-    next_grid = next_panel.get("gridPos", {})
-    assert next_grid == {"x": 0, "y": 17, "w": 24, "h": 5}
-    data_links = next_panel.get("options", {}).get("dataLinks", [])
-    assert data_links, "Workflow First Action must expose actionable dataLinks"
-    observed_titles = {
-        str(link.get("title"))
-        for link in data_links
-        if isinstance(link, dict) and link.get("title")
-    }
-    expected_titles = {
-        "Open 2. Runtime",
-        "Open 4. Data Quality",
-        "Open 3. Provider Health",
-        "Open 0. Control Plane",
-        "Open 1. Overview",
-    }
-    assert expected_titles <= observed_titles
-    for link in data_links:
-        assert link.get("targetBlank") is False
-        assert "${__url_time_range}" in str(link.get("url", ""))
+    _assert_workflow_step_diagnostics_layout(dashboard)
+    _assert_workflow_first_action_panel(dashboard)
 
 
 @pytest.mark.parametrize(

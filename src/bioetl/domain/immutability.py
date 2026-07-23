@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable, Iterator, Mapping, Sequence
 from copy import deepcopy
-from typing import Never
+from typing import Never, overload
 
 __all__ = [
     "FrozenDict",
@@ -18,21 +19,44 @@ def _immutable(*_args: object, **_kwargs: object) -> Never:
     raise TypeError("nested state is immutable")
 
 
-class FrozenList(list[object]):
-    """List-compatible snapshot that rejects mutation."""
+class FrozenList(Sequence[object]):
+    """Immutable sequence snapshot that cannot be mutated via list APIs."""
 
-    __setitem__ = _immutable
-    __delitem__ = _immutable
-    append = _immutable
-    clear = _immutable
-    extend = _immutable
-    insert = _immutable
-    pop = _immutable
-    remove = _immutable
-    reverse = _immutable
-    sort = _immutable
-    __iadd__ = _immutable
-    __imul__ = _immutable
+    __slots__ = ("_items",)
+
+    def __init__(self, iterable: Iterable[object] = ()) -> None:
+        object.__setattr__(self, "_items", tuple(iterable))
+
+    @overload
+    def __getitem__(self, index: int) -> object: ...
+
+    @overload
+    def __getitem__(self, index: slice) -> FrozenList: ...
+
+    def __getitem__(self, index: int | slice) -> object:
+        items = self._items
+        if isinstance(index, slice):
+            return FrozenList(items[index])
+        return items[index]
+
+    def __len__(self) -> int:
+        return len(self._items)
+
+    def __iter__(self) -> Iterator[object]:
+        return iter(self._items)
+
+    def __repr__(self) -> str:
+        return f"FrozenList({list(self._items)!r})"
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, FrozenList):
+            return self._items == other._items
+        if isinstance(other, Sequence) and not isinstance(other, (str, bytes, bytearray)):
+            return list(self._items) == list(other)
+        return NotImplemented
+
+    def __hash__(self) -> int:
+        return hash(self._items)
 
     def __copy__(self) -> FrozenList:
         return self
@@ -42,17 +66,45 @@ class FrozenList(list[object]):
         return self
 
 
-class FrozenDict(dict[str, object]):
-    """Dict-compatible snapshot that rejects mutation."""
+class FrozenDict(Mapping[str, object]):
+    """Immutable mapping snapshot that cannot be mutated via dict APIs."""
 
-    __setitem__ = _immutable
-    __delitem__ = _immutable
-    clear = _immutable
-    pop = _immutable
-    popitem = _immutable
-    setdefault = _immutable
-    update = _immutable
-    __ior__ = _immutable
+    __slots__ = ("_data",)
+
+    def __init__(
+        self,
+        mapping: Mapping[str, object] | Iterable[tuple[str, object]] | None = None,
+        **kwargs: object,
+    ) -> None:
+        data: dict[str, object] = {}
+        if mapping is not None:
+            if isinstance(mapping, Mapping):
+                data.update(mapping)
+            else:
+                data.update(dict(mapping))
+        if kwargs:
+            data.update(kwargs)
+        object.__setattr__(self, "_data", dict(data))
+
+    def __getitem__(self, key: str) -> object:
+        return self._data[key]
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(self._data)
+
+    def __len__(self) -> int:
+        return len(self._data)
+
+    def __repr__(self) -> str:
+        return f"FrozenDict({self._data!r})"
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, Mapping):
+            return dict(self._data) == dict(other)
+        return NotImplemented
+
+    def __hash__(self) -> int:
+        return hash(tuple(sorted(self._data.items(), key=lambda item: item[0])))
 
     def __copy__(self) -> FrozenDict:
         return self
@@ -87,15 +139,22 @@ def _deep_freeze_sequence(value: object) -> object:
 
 def deep_freeze_json(value: object) -> object:
     """Snapshot JSON-like nested state into mutation-resistant containers."""
+    if isinstance(value, FrozenDict | FrozenList):
+        return value
     if isinstance(value, dict):
-        return FrozenDict(
-            {str(key): deep_freeze_json(item) for key, item in value.items()}
-        )
+        frozen: dict[str, object] = {}
+        for key, item in value.items():
+            if not isinstance(key, str):
+                raise TypeError("JSON object keys must be strings")
+            frozen[key] = deep_freeze_json(item)
+        return FrozenDict(frozen)
     return _deep_freeze_sequence(value)
 
 
 def _deep_thaw_sequence(value: object) -> object:
     """Thaw supported sequence/set containers or copy a scalar value."""
+    if isinstance(value, FrozenList):
+        return [deep_thaw_json(item) for item in value]
     if isinstance(value, (list, tuple)):
         return [deep_thaw_json(item) for item in value]
     if isinstance(value, (set, frozenset)):
@@ -105,6 +164,8 @@ def _deep_thaw_sequence(value: object) -> object:
 
 def deep_thaw_json(value: object) -> object:
     """Return a detached mutable JSON-compatible copy of a frozen snapshot."""
+    if isinstance(value, FrozenDict):
+        return {key: deep_thaw_json(item) for key, item in value.items()}
     if isinstance(value, dict):
         return {str(key): deep_thaw_json(item) for key, item in value.items()}
     return _deep_thaw_sequence(value)

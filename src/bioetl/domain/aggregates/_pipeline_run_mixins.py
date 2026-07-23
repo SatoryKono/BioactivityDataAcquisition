@@ -105,6 +105,14 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
                 self._stages[index] = completed
                 break
         else:
+            # Idempotent completion: do not append a second SUCCESS when the
+            # stage was already completed and no RUNNING entry remains.
+            for existing in reversed(self._stages):
+                if (
+                    existing.stage == stage
+                    and existing.status == StageStatus.SUCCESS
+                ):
+                    return
             self._stages.append(completed)
 
     def record_stage_failure(

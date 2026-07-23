@@ -21,7 +21,13 @@ def normalize_profile_target_organism_class(
     """Derive the governed target cellularity class from sibling organism fields."""
     if record is not None:
         taxonomy_raw = record.get("taxonomy_id", record.get("tax_id"))
-        taxonomy_id = taxonomy_raw if isinstance(taxonomy_raw, (int, str)) else None
+        # bool is a subclass of int; reject it explicitly for taxonomy ids.
+        if isinstance(taxonomy_raw, bool):
+            taxonomy_id = None
+        elif isinstance(taxonomy_raw, (int, str)):
+            taxonomy_id = taxonomy_raw
+        else:
+            taxonomy_id = None
         classification = classify_organism(
             _record_string(record, "organism"),
             taxonomy_id,
