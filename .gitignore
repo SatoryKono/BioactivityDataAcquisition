@@ -460,3 +460,8 @@ _local_only_mcp/
 
 # Auto-generated MCP server context (added automatically)
 .mcp-server-context.md
+
+# Local agent temp scratch (never commit)
+_tmp_*.py
+tmp_sub_*.txt
+
