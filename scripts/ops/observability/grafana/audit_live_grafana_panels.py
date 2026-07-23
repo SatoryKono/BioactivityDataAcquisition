@@ -24,7 +24,7 @@ DEFAULT_GRAFANA_BASE_URL = "http://localhost:3000"
 DEFAULT_LOKI_BASE_URL = "http://localhost:3100"
 DEFAULT_TEMPO_BASE_URL = "http://localhost:3200"
 DEFAULT_GRAFANA_USERNAME = "admin"
-DEFAULT_GRAFANA_PASSWORD = "changeme"
+DEFAULT_GRAFANA_PASSWORD = ""
 DEFAULT_HTTP_DATASOURCE_NAME = "Quarantine Explorer"
 DEFAULT_OUTPUT_PATH = Path("reports/observability/grafana/live-panel-audit.json")
 DEFAULT_WORKFLOW = "All"
@@ -339,6 +339,13 @@ def _read_env(name: str, default: str) -> str:
     return value or default
 
 
+def _grafana_password_from_env() -> str:
+    return _read_env(
+        "GRAFANA_PASSWORD",
+        _read_env("GF_SECURITY_ADMIN_PASSWORD", DEFAULT_GRAFANA_PASSWORD),
+    )
+
+
 def _auth_header(username: str, password: str) -> str:
     token = base64.b64encode(f"{username}:{password}".encode()).decode("ascii")
     return f"Basic {token}"
@@ -383,8 +390,11 @@ def _parse_args(argv: list[str] | None) -> AuditConfig:
     )
     parser.add_argument(
         "--grafana-password",
-        default=_read_env("GRAFANA_PASSWORD", DEFAULT_GRAFANA_PASSWORD),
-        help="Grafana password used for datasource discovery.",
+        default=_grafana_password_from_env(),
+        help=(
+            "Grafana password from GRAFANA_PASSWORD or "
+            "GF_SECURITY_ADMIN_PASSWORD; no built-in password is used."
+        ),
     )
     parser.add_argument("--workflow", default=DEFAULT_WORKFLOW)
     parser.add_argument("--pipeline", default=DEFAULT_PIPELINE)

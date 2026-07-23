@@ -143,6 +143,137 @@ def test_grafana_audit_preflight_parser_uses_grafana_env_defaults(
     assert args.skip_screenshot_check is True
 
 
+def test_grafana_audit_preflight_password_falls_back_to_compose_credential(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("GRAFANA_PASSWORD", raising=False)
+    monkeypatch.setenv("GF_SECURITY_ADMIN_PASSWORD", "runtime-secret")
+
+    args = preflight_subject._build_parser().parse_args([])
+
+    assert args.grafana_password == "runtime-secret"
+
+
+def test_grafana_audit_preflight_has_no_password_default(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("GRAFANA_PASSWORD", raising=False)
+    monkeypatch.delenv("GF_SECURITY_ADMIN_PASSWORD", raising=False)
+    monkeypatch.delenv("GRAFANA_SERVICE_ACCOUNT_TOKEN", raising=False)
+
+    args = preflight_subject._build_parser().parse_args([])
+    result = preflight_subject._check_grafana_render_auth(
+        grafana_base_url=args.grafana_base_url,
+        grafana_username=args.grafana_username,
+        grafana_password=args.grafana_password,
+        timeout_seconds=args.timeout_seconds,
+    )
+
+    assert args.grafana_password == ""
+    assert result.status == "error"
+    assert "not configured" in result.detail
+
+
+def test_grafana_audit_preflight_separates_http_and_playwright_timeouts() -> None:
+    args = preflight_subject._build_parser().parse_args(
+        [
+            "--timeout-seconds",
+            "5",
+            "--playwright-timeout-seconds",
+            "45",
+        ]
+    )
+
+    assert args.timeout_seconds == 5.0
+    assert args.playwright_timeout_seconds == 45.0
+
+
+def test_prometheus_bioetl_target_check_requires_one_up_target(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        preflight_subject,
+        "_fetch_json",
+        lambda *_args, **_kwargs: {
+            "status": "success",
+            "data": {
+                "activeTargets": [
+                    {
+                        "scrapePool": "bioetl",
+                        "labels": {"job": "bioetl"},
+                        "scrapeUrl": "http://host.docker.internal:8000/metrics",
+                        "health": "up",
+                        "lastError": "",
+                    }
+                ]
+            },
+        },
+    )
+
+    result = preflight_subject._check_prometheus_bioetl_target(
+        prometheus_base_url="http://localhost:9090",
+        timeout_seconds=5.0,
+    )
+
+    assert result.status == "ok"
+    assert "host.docker.internal:8000" in result.detail
+
+
+def test_prometheus_bioetl_target_check_fails_closed_when_target_is_down(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        preflight_subject,
+        "_fetch_json",
+        lambda *_args, **_kwargs: {
+            "status": "success",
+            "data": {
+                "activeTargets": [
+                    {
+                        "scrapePool": "bioetl",
+                        "labels": {"job": "bioetl"},
+                        "scrapeUrl": "http://host.docker.internal:8000/metrics",
+                        "health": "down",
+                        "lastError": "connection refused",
+                    }
+                ]
+            },
+        },
+    )
+
+    result = preflight_subject._check_prometheus_bioetl_target(
+        prometheus_base_url="http://localhost:9090",
+        timeout_seconds=5.0,
+    )
+
+    assert result.status == "error"
+    assert "connection refused" in result.detail
+
+
+def test_grafana_renderer_check_is_distinct_from_auth(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        rerender_subject,
+        "_request_json",
+        lambda *_args, **_kwargs: {
+            "rendererAvailable": True,
+            "rendererVersion": "4.0.0",
+        },
+    )
+
+    result = preflight_subject._check_grafana_renderer_health(
+        grafana_base_url="http://localhost:3000",
+        grafana_username="admin",
+        grafana_password="runtime-secret",
+        timeout_seconds=5.0,
+    )
+
+    assert result.name == "grafana-renderer"
+    assert result.status == "ok"
+    assert "4.0.0" in result.detail
+
+
 def test_grafana_audit_preflight_render_auth_reports_unauthorized(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -427,6 +558,20 @@ def test_grafana_audit_preflight_run_checks_collects_ok_results(
     )
     monkeypatch.setattr(
         preflight_subject,
+        "_check_grafana_renderer_health",
+        lambda **_kwargs: preflight_subject.PreflightCheck(
+            name="grafana-renderer", status="ok", detail="renderer ready"
+        ),
+    )
+    monkeypatch.setattr(
+        preflight_subject,
+        "_check_prometheus_bioetl_target",
+        lambda **_kwargs: preflight_subject.PreflightCheck(
+            name="prometheus-bioetl-target", status="ok", detail="target up"
+        ),
+    )
+    monkeypatch.setattr(
+        preflight_subject,
         "_check_playwright_runtime",
         lambda *_args, **_kwargs: preflight_subject.PreflightCheck(
             name="playwright-runtime",
@@ -462,7 +607,9 @@ def test_grafana_audit_preflight_run_checks_collects_ok_results(
     assert [check.name for check in checks] == [
         "grafana",
         "grafana-render-auth",
+        "grafana-renderer",
         "prometheus",
+        "prometheus-bioetl-target",
         "playwright-runtime",
         "expanded-row-capture",
         "quarantine-explorer",
@@ -490,6 +637,20 @@ def test_grafana_audit_preflight_can_skip_screenshot_check(
             name="grafana-render-auth",
             status="ok",
             detail="frontend settings auth probe succeeded",
+        ),
+    )
+    monkeypatch.setattr(
+        preflight_subject,
+        "_check_grafana_renderer_health",
+        lambda **_kwargs: preflight_subject.PreflightCheck(
+            name="grafana-renderer", status="ok", detail="renderer ready"
+        ),
+    )
+    monkeypatch.setattr(
+        preflight_subject,
+        "_check_prometheus_bioetl_target",
+        lambda **_kwargs: preflight_subject.PreflightCheck(
+            name="prometheus-bioetl-target", status="ok", detail="target up"
         ),
     )
     monkeypatch.setattr(
@@ -539,7 +700,9 @@ def test_grafana_audit_preflight_can_skip_screenshot_check(
     assert [check.name for check in checks] == [
         "grafana",
         "grafana-render-auth",
+        "grafana-renderer",
         "prometheus",
+        "prometheus-bioetl-target",
         "playwright-runtime",
         "expanded-row-capture",
         "quarantine-explorer",
@@ -568,6 +731,13 @@ def test_grafana_audit_preflight_can_run_semantic_checks_without_render_runtime(
         lambda *_args, **_kwargs: pytest.fail("Playwright must be skipped"),
     )
     monkeypatch.setattr(
+        preflight_subject,
+        "_check_prometheus_bioetl_target",
+        lambda **_kwargs: preflight_subject.PreflightCheck(
+            name="prometheus-bioetl-target", status="ok", detail="target up"
+        ),
+    )
+    monkeypatch.setattr(
         audit_subject,
         "_resolve_app_base_url",
         lambda *_args, **_kwargs: "http://localhost:8081",
@@ -588,6 +758,7 @@ def test_grafana_audit_preflight_can_run_semantic_checks_without_render_runtime(
     assert [check.name for check in checks] == [
         "grafana",
         "prometheus",
+        "prometheus-bioetl-target",
         "quarantine-explorer",
     ]
 
@@ -607,6 +778,13 @@ def test_preflight_can_run_render_checks_without_semantic_checks(
         "_check_grafana_render_auth",
         lambda **_kwargs: preflight_subject.PreflightCheck(
             name="grafana-render-auth", status="ok", detail="ok"
+        ),
+    )
+    monkeypatch.setattr(
+        preflight_subject,
+        "_check_grafana_renderer_health",
+        lambda **_kwargs: preflight_subject.PreflightCheck(
+            name="grafana-renderer", status="ok", detail="renderer ready"
         ),
     )
     monkeypatch.setattr(
@@ -646,6 +824,7 @@ def test_preflight_can_run_render_checks_without_semantic_checks(
     assert [check.name for check in checks] == [
         "grafana",
         "grafana-render-auth",
+        "grafana-renderer",
         "playwright-runtime",
         "expanded-row-capture",
     ]

@@ -6,6 +6,7 @@ from pathlib import Path
 import subprocess
 from types import SimpleNamespace
 from urllib.error import URLError
+from urllib.parse import parse_qs, urlparse
 
 import pytest
 
@@ -1561,6 +1562,15 @@ def test_build_runtime_cardinality_review_summary_passes_with_live_prometheus_re
         "_query_prometheus_label_values",
         lambda **_kwargs: {"pipeline": ["chembl_activity", "pubchem_compound"]},
     )
+    monkeypatch.setattr(
+        inventory,
+        "_build_forbidden_label_live_evidence",
+        lambda **_kwargs: {
+            "current_series": {"run_id": 0},
+            "retained_series": {"run_id": {"series_count": 0, "metric_series": {}}},
+            "query_errors": {},
+        },
+    )
 
     summary = inventory._build_runtime_cardinality_review_summary(
         {
@@ -1607,6 +1617,15 @@ def test_build_runtime_cardinality_review_summary_fails_on_live_threshold_violat
         "_query_prometheus_label_values",
         lambda **_kwargs: {},
     )
+    monkeypatch.setattr(
+        inventory,
+        "_build_forbidden_label_live_evidence",
+        lambda **_kwargs: {
+            "current_series": {"run_id": 0},
+            "retained_series": {"run_id": {"series_count": 0, "metric_series": {}}},
+            "query_errors": {},
+        },
+    )
 
     summary = inventory._build_runtime_cardinality_review_summary(
         {
@@ -1621,6 +1640,114 @@ def test_build_runtime_cardinality_review_summary_fails_on_live_threshold_violat
     assert summary["status"] == "failed"
     assert summary["live_threshold_violations"] == [
         "bioetl_hotspot_total observed_series_count=5 approved_max_series=3"
+    ]
+
+
+def test_runtime_cardinality_review_separates_current_and_retained_forbidden_series(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        inventory,
+        "_load_runtime_cardinality_thresholds",
+        lambda _repo_root: {"bioetl_hotspot_total": 42},
+    )
+    monkeypatch.setattr(
+        inventory,
+        "REGISTERED_PROMETHEUS_METRIC_LABELS",
+        {"bioetl_hotspot_total": frozenset({"pipeline"})},
+    )
+    monkeypatch.setattr(inventory, "_query_prometheus_scalar", lambda **_kwargs: 1)
+    monkeypatch.setattr(
+        inventory,
+        "_query_prometheus_label_values",
+        lambda **_kwargs: {"pipeline": ["chembl_activity"]},
+    )
+    monkeypatch.setattr(
+        inventory,
+        "_build_forbidden_label_live_evidence",
+        lambda **_kwargs: {
+            "current_series": {"run_id": 0, "filesystem_path": 0},
+            "retained_series": {
+                "run_id": {
+                    "series_count": 96,
+                    "metric_series": {
+                        "bioetl_records_processed_total": 48,
+                        "bioetl_records_processed_created": 48,
+                    },
+                }
+            },
+            "query_errors": {},
+        },
+    )
+
+    summary = inventory._build_runtime_cardinality_review_summary(
+        {
+            "runtime_cardinality_reviewed": ["bioetl_hotspot_total"],
+            "runtime_cardinality_review_required": [],
+            "runtime_cardinality_threshold_violations": [],
+        },
+        repo_root=tmp_path,
+        prometheus_base_url="http://prometheus.example",
+    )
+
+    assert summary["status"] == "passed"
+    assert summary["forbidden_label_current_violations"] == []
+    assert summary["forbidden_label_retained_contamination"] == [
+        "run_id retained_series_count=96"
+    ]
+    assert summary["forbidden_label_retained_series"] == {
+        "run_id": {
+            "series_count": 96,
+            "metric_series": {
+                "bioetl_records_processed_total": 48,
+                "bioetl_records_processed_created": 48,
+            },
+        }
+    }
+
+
+def test_runtime_cardinality_review_fails_on_current_forbidden_series(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        inventory,
+        "_load_runtime_cardinality_thresholds",
+        lambda _repo_root: {"bioetl_hotspot_total": 42},
+    )
+    monkeypatch.setattr(
+        inventory,
+        "REGISTERED_PROMETHEUS_METRIC_LABELS",
+        {"bioetl_hotspot_total": frozenset()},
+    )
+    monkeypatch.setattr(inventory, "_query_prometheus_scalar", lambda **_kwargs: 1)
+    monkeypatch.setattr(
+        inventory, "_query_prometheus_label_values", lambda **_kwargs: {}
+    )
+    monkeypatch.setattr(
+        inventory,
+        "_build_forbidden_label_live_evidence",
+        lambda **_kwargs: {
+            "current_series": {"raw_exception_message": 2},
+            "retained_series": {},
+            "query_errors": {},
+        },
+    )
+
+    summary = inventory._build_runtime_cardinality_review_summary(
+        {
+            "runtime_cardinality_reviewed": ["bioetl_hotspot_total"],
+            "runtime_cardinality_review_required": [],
+            "runtime_cardinality_threshold_violations": [],
+        },
+        repo_root=tmp_path,
+        prometheus_base_url="http://prometheus.example",
+    )
+
+    assert summary["status"] == "failed"
+    assert summary["forbidden_label_current_violations"] == [
+        "raw_exception_message current_series_count=2"
     ]
 
 
@@ -1646,6 +1773,47 @@ def test_query_prometheus_scalar_parses_vector_response(
     )
 
     assert observed == 7
+
+
+def test_query_prometheus_retained_series_includes_created_companions(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    requested_urls: list[str] = []
+
+    class FakeResponse:
+        def __enter__(self) -> FakeResponse:
+            return self
+
+        def __exit__(self, exc_type, exc, tb) -> None:
+            return None
+
+        def read(self, *_args: object, **_kwargs: object) -> bytes:
+            return (
+                b'{"status":"success","data":['
+                b'{"__name__":"bioetl_records_processed_total","run_id":"old"},'
+                b'{"__name__":"bioetl_records_processed_created","run_id":"old"}'
+                b"]}"
+            )
+
+    def fake_urlopen(request, *_args, **_kwargs):
+        requested_urls.append(request.full_url)
+        return FakeResponse()
+
+    monkeypatch.setattr(inventory, "urlopen", fake_urlopen)
+
+    observed = inventory._query_prometheus_retained_series(
+        prometheus_base_url="http://prometheus.example",
+        label_name="run_id",
+        bearer_token="",
+    )
+
+    assert [row["__name__"] for row in observed] == [
+        "bioetl_records_processed_total",
+        "bioetl_records_processed_created",
+    ]
+    query = parse_qs(urlparse(requested_urls[0]).query)
+    assert query["match[]"] == ['{__name__=~"bioetl_.*",run_id=~".+"}']
+    assert query["start"] == ["0"]
 
 
 def test_query_prometheus_label_values_records_watch_list_dimensions(

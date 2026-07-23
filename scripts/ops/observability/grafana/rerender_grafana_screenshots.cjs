@@ -8,7 +8,10 @@ function parseArgs(argv) {
   const config = {
     baseUrl: process.env.GRAFANA_BASE_URL || "http://localhost:3000",
     username: process.env.GRAFANA_USERNAME || "admin",
-    password: process.env.GRAFANA_PASSWORD || "changeme",
+    password:
+      process.env.GRAFANA_PASSWORD ||
+      process.env.GF_SECURITY_ADMIN_PASSWORD ||
+      "",
     serviceAccountToken: process.env.GRAFANA_SERVICE_ACCOUNT_TOKEN || "",
     outputDir: path.resolve(
       process.env.GRAFANA_SCREENSHOT_OUTPUT_DIR ||
@@ -328,18 +331,12 @@ async function createBrowserContext(browser) {
       api: null,
     };
   }
-  let api = null;
-  try {
-    api = await createAuthenticatedApiContext();
-  } catch (error) {
-    console.warn(
-      `warning: Grafana login failed for Playwright fallback; continuing anonymously (${String(error && error.message ? error.message : error)})`,
+  if (!CONFIG.password) {
+    throw new Error(
+      "Grafana auth is not configured. Set GRAFANA_SERVICE_ACCOUNT_TOKEN, GRAFANA_PASSWORD, or GF_SECURITY_ADMIN_PASSWORD.",
     );
-    return {
-      context: await browser.newContext({ viewport: CONFIG.viewport }),
-      api: null,
-    };
   }
+  const api = await createAuthenticatedApiContext();
   const storageState = await api.storageState();
   return {
     context: await browser.newContext({
@@ -410,21 +407,29 @@ async function tryExpandCollapsedRow(page, title, index, total, uid) {
     page.getByText(title, { exact: true }).first(),
   ];
 
-  for (const candidate of candidates) {
-    if ((await candidate.count()) === 0) {
-      continue;
+  // Grafana can mount lower rows a moment after the dashboard-level settle
+  // completes. Retry the dynamic locators so a transient virtualization race
+  // does not make expanded-row evidence non-deterministic.
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    for (const candidate of candidates) {
+      if ((await candidate.count()) === 0) {
+        continue;
+      }
+      const visible = await candidate.isVisible().catch(() => false);
+      if (!visible) {
+        continue;
+      }
+      try {
+        await candidate.scrollIntoViewIfNeeded().catch(() => {});
+        await candidate.click({ timeout: 5000, force: attempt === 3 });
+        console.log(`[${index}/${total}] expanded row '${title}' in ${uid}`);
+        return true;
+      } catch {
+        continue;
+      }
     }
-    const visible = await candidate.isVisible().catch(() => false);
-    if (!visible) {
-      continue;
-    }
-    try {
-      await candidate.scrollIntoViewIfNeeded().catch(() => {});
-      await candidate.click({ timeout: 5000 });
-      console.log(`[${index}/${total}] expanded row '${title}' in ${uid}`);
-      return true;
-    } catch {
-      continue;
+    if (attempt < 3) {
+      await page.waitForTimeout(1000);
     }
   }
 

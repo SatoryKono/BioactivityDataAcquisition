@@ -42,7 +42,13 @@ $ToolsRoot = if ($env:BIOETL_TOOLS_DIR) { $env:BIOETL_TOOLS_DIR } else { Join-Pa
 $NodeToolsRoot = Join-Path $ToolsRoot "nodejs"
 $GrafanaBaseUrl = if ($env:GRAFANA_BASE_URL) { $env:GRAFANA_BASE_URL } else { "http://localhost:3000" }
 $GrafanaUsername = if ($env:GRAFANA_USERNAME) { $env:GRAFANA_USERNAME } else { "admin" }
-$GrafanaPassword = if ($env:GRAFANA_PASSWORD) { $env:GRAFANA_PASSWORD } else { "changeme" }
+$GrafanaPassword = if ($env:GRAFANA_PASSWORD) {
+    $env:GRAFANA_PASSWORD
+} elseif ($env:GF_SECURITY_ADMIN_PASSWORD) {
+    $env:GF_SECURITY_ADMIN_PASSWORD
+} else {
+    ""
+}
 
 function Ensure-Directory {
     param([Parameter(Mandatory = $true)][string]$Path)
@@ -228,5 +234,5 @@ Write-Host "PowerShell example:"
 Write-Host "  `$env:PLAYWRIGHT_BROWSERS_PATH = '$PlaywrightBrowsersPath'"
 Write-Host "  `$env:GRAFANA_BASE_URL = '$GrafanaBaseUrl'"
 Write-Host "  `$env:GRAFANA_USERNAME = '$GrafanaUsername'"
-Write-Host "  `$env:GRAFANA_PASSWORD = '$GrafanaPassword'"
+Write-Host "  # Set GRAFANA_PASSWORD, GF_SECURITY_ADMIN_PASSWORD, or GRAFANA_SERVICE_ACCOUNT_TOKEN in the current session."
 Write-Host "  & '$PythonCommand' -m scripts.ops rerender-grafana --uids bioetl-control-plane-v1"

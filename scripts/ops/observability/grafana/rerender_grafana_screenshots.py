@@ -25,7 +25,7 @@ from bioetl.infrastructure.storage.support.atomic_ops import (
 
 DEFAULT_BASE_URL = "http://localhost:3000"
 DEFAULT_USERNAME = "admin"
-DEFAULT_PASSWORD = "changeme"
+DEFAULT_PASSWORD = ""
 DEFAULT_OUTPUT_DIR = Path("reports/observability/grafana/screenshots")
 DEFAULT_WIDTH = 1600
 DEFAULT_HEIGHT = 2200
@@ -88,6 +88,14 @@ def _read_env(name: str, default: str) -> str:
     return value or default
 
 
+def _grafana_password_from_env() -> str:
+    """Resolve the supported runtime password without a hard-coded fallback."""
+    return _read_env(
+        "GRAFANA_PASSWORD",
+        _read_env("GF_SECURITY_ADMIN_PASSWORD", DEFAULT_PASSWORD),
+    )
+
+
 def _auth_header(username: str, password: str) -> str:
     token = base64.b64encode(f"{username}:{password}".encode()).decode("ascii")
     return f"Basic {token}"
@@ -97,7 +105,7 @@ def _auth_headers(config: RenderConfig) -> dict[str, str]:
     headers = {"Accept": "application/json"}
     if config.service_account_token:
         headers["Authorization"] = f"Bearer {config.service_account_token}"
-    else:
+    elif config.password:
         headers["Authorization"] = _auth_header(config.username, config.password)
     return headers
 
@@ -137,6 +145,13 @@ def _dashboard_dir() -> Path:
 
 
 def _describe_grafana_auth_failure(config: RenderConfig) -> str:
+    if not config.service_account_token and not config.password:
+        return (
+            "Grafana auth is not configured for dashboard rendering. Set "
+            "GRAFANA_SERVICE_ACCOUNT_TOKEN, GRAFANA_PASSWORD, or the compose "
+            "credential source GF_SECURITY_ADMIN_PASSWORD; secrets are never "
+            "read from a committed default."
+        )
     auth_mode = (
         "service-account token"
         if config.service_account_token
@@ -226,8 +241,11 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
     )
     parser.add_argument(
         "--password",
-        default=_read_env("GRAFANA_PASSWORD", DEFAULT_PASSWORD),
-        help="Grafana password. Defaults to GRAFANA_PASSWORD or changeme.",
+        default=_grafana_password_from_env(),
+        help=(
+            "Grafana password. Defaults to GRAFANA_PASSWORD, then "
+            "GF_SECURITY_ADMIN_PASSWORD; there is no built-in password."
+        ),
     )
     parser.add_argument(
         "--service-account-token",

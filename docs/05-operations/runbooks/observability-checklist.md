@@ -236,6 +236,15 @@ adapter parity.
 - Keep assertions low-cardinality: use canonical event names and bounded labels,
   not free-form message text.
 
+For forbidden-label review, do not conflate current emitter compliance with
+retained TSDB history. Run the metric inventory live review and inspect both
+`forbidden_label_current_violations` and
+`forbidden_label_retained_contamination`. Current violations fail the gate.
+Retained-only series, including generated `*_created` companions, are tracked
+until the configured Prometheus retention boundary expires. Do not call the
+admin delete API unless the operator has separately approved an exact matcher,
+a verified snapshot, and the recovery procedure.
+
 Targeted regression commands for lifecycle/control-plane observability changes:
 
 ```bash
