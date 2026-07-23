@@ -69,7 +69,10 @@ class StagedEnforcementEngine:
     """Engine for managing staged CI enforcement."""
 
     def __init__(self, policies: dict[str, EnforcementPolicy] | None = None) -> None:
-        self.policies = policies or _build_default_policies()
+        # Defaults only when policies is None; explicit {} disables all policies.
+        self.policies = (
+            _build_default_policies() if policies is None else dict(policies)
+        )
         self.results: list[CheckResult] = []
         self._contract_policies = {
             name: self.policies[name]
@@ -98,13 +101,30 @@ class StagedEnforcementEngine:
         effective_stage = _stage_allowed_by_current_policy(
             threshold_stage, policy.current_stage
         )
+        rollout_capped = threshold_stage != effective_stage
 
         if effective_stage == EnforcementStage.HARD_FAIL:
-            message = f"Hard fail threshold exceeded ({failure_rate:.1%} >= {policy.failure_threshold:.1%})"
+            message = (
+                f"Hard fail threshold exceeded "
+                f"({failure_rate:.1%} >= {policy.failure_threshold:.1%})"
+            )
         elif effective_stage == EnforcementStage.SOFT_FAIL:
-            message = f"Soft fail threshold exceeded ({failure_rate:.1%} >= {policy.warning_threshold:.1%})"
+            message = (
+                f"Soft fail threshold exceeded "
+                f"({failure_rate:.1%} >= {policy.warning_threshold:.1%})"
+            )
+        elif rollout_capped:
+            message = (
+                f"Observation mode due to rollout cap "
+                f"(threshold_stage={threshold_stage.value}, "
+                f"current_stage={policy.current_stage.value}, "
+                f"failure_rate={failure_rate:.1%})"
+            )
         else:
-            message = f"Observation mode ({failure_rate:.1%} < {policy.warning_threshold:.1%})"
+            message = (
+                f"Observation mode "
+                f"({failure_rate:.1%} < {policy.warning_threshold:.1%})"
+            )
 
         return effective_stage, message
 

@@ -8,19 +8,19 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Protocol, TypeGuard, runtime_checkable
 
 from bioetl.application.services.export_execution import (
-    create_failed_result as _create_failed_result,
+    create_failed_result as _build_failed_result,
 )
 from bioetl.application.services.export_execution import (
-    create_missing_table_result as _create_missing_table_result,
+    create_missing_table_result as _build_missing_table_result,
 )
 from bioetl.application.services.export_execution import (
-    create_success_result as _create_success_result,
+    create_success_result as _build_success_result,
 )
 from bioetl.application.services.export_execution import (
     export_existing_table as _export_existing_table,
 )
 from bioetl.application.services.export_execution import (
-    get_layer_base_path as _get_layer_base_path,
+    get_layer_base_path as _build_layer_base_path,
 )
 from bioetl.application.services.export_models import (
     ColumnInfo,
@@ -140,10 +140,7 @@ class ExportService:
             TablePreview with schema columns, row count, and sample row data.
         """
         table_path = self._get_table_path(table_name, layer)
-
-        table_path_ref = (
-            table_path if isinstance(table_path, str) else table_path.as_posix()
-        )
+        table_path_ref = _as_posix_str(table_path)
         schema = await self.reader.get_schema(table_path_ref)
         if not isinstance(schema, _PreviewSchema):
             raise TypeError("Delta reader returned a non-iterable preview schema")
@@ -187,9 +184,7 @@ class ExportService:
         table_path = self._get_table_path(table_name, layer)
 
         try:
-            table_path_str = (
-                table_path if isinstance(table_path, str) else table_path.as_posix()
-            )
+            table_path_str = _as_posix_str(table_path)
             if not await self.reader.table_exists(table_path_str):
                 return self._create_missing_table_result(
                     table_name=table_name,
@@ -227,7 +222,7 @@ class ExportService:
         table_path: Path | str,
     ) -> ExportResult:
         """Build result payload for missing table case."""
-        return _create_missing_table_result(
+        return _build_missing_table_result(
             table_name=table_name,
             layer=layer,
             options=options,
@@ -247,7 +242,7 @@ class ExportService:
         redacted_columns: tuple[str, ...] = (),
     ) -> ExportResult:
         """Build result payload for successful export case."""
-        return _create_success_result(
+        return _build_success_result(
             table_name=table_name,
             layer=layer,
             options=options,
@@ -267,7 +262,7 @@ class ExportService:
         error: str,
     ) -> ExportResult:
         """Build result payload for failed export case."""
-        return _create_failed_result(
+        return _build_failed_result(
             table_name=table_name,
             layer=layer,
             options=options,
@@ -286,11 +281,16 @@ class ExportService:
 
     def _get_layer_base_path(self, layer: str) -> Path:
         """Resolve the root path for one export layer."""
-        return _get_layer_base_path(
+        return _build_layer_base_path(
             layer=layer,
             silver_path=self.silver_path,
             gold_path=self.gold_path,
         )
+
+
+def _as_posix_str(path: Path | str) -> str:
+    """Normalize path-like export references to POSIX strings."""
+    return path if isinstance(path, str) else path.as_posix()
 
 
 __all__ = [

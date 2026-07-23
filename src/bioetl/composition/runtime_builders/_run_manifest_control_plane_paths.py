@@ -20,7 +20,7 @@ def control_plane_root(settings: Settings, leaf: str) -> Path:
 def _resolve_data_root(settings: Settings) -> Path:
     """Resolve a writable data root for control-plane artifacts."""
     configured_root = getattr(settings, "data_dir", None)
-    if configured_root:
+    if configured_root and str(configured_root).strip():
         return Path(configured_root)
 
     candidate = Path("data")

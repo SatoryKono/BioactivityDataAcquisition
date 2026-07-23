@@ -15,11 +15,16 @@ def _dict_or_empty(value: object) -> dict[str, object]:
     return dict(value) if isinstance(value, Mapping) else {}
 
 
-def _artifact_refs(diagnostics: dict[str, object]) -> list[dict[str, object]]:
+def artifact_refs(diagnostics: dict[str, object]) -> list[dict[str, object]]:
+    """Return artifact ref mappings from diagnostics payloads."""
     refs = diagnostics.get("artifact_refs")
     if not isinstance(refs, list):
         return []
     return [dict(ref) for ref in refs if isinstance(ref, Mapping)]
+
+
+# Backward-compatible private alias (prefer public name for cross-module use).
+_artifact_refs = artifact_refs
 
 
 def _coerce_int(value: object) -> int:
@@ -57,9 +62,12 @@ def _string_list_or_empty(value: object) -> list[str]:
     return [str(item) for item in value]
 
 
-def _string_list(value: tuple[str, ...]) -> list[str]:
+def string_list(value: tuple[str, ...]) -> list[str]:
     """Return a concrete list for tuple-backed string fields."""
     return list(value)
+
+
+_string_list = string_list
 
 
 def _trace_complete(diagnostics: dict[str, object]) -> bool:
@@ -67,7 +75,7 @@ def _trace_complete(diagnostics: dict[str, object]) -> bool:
     return bool(trace.get("complete", False))
 
 
-def _lineage_closure_payload(result: RunManifestInspectionResult) -> dict[str, object]:
+def lineage_closure_payload(result: RunManifestInspectionResult) -> dict[str, object]:
     diagnostics = result.diagnostics
     boundary = _dict_or_empty(diagnostics.get("lineage_closure_boundary"))
     supported = boundary.get("supported")
@@ -206,9 +214,19 @@ def _missing_evidence(result: RunManifestInspectionResult) -> tuple[str, ...]:
         missing.append("metadata_sidecars_missing")
     if not _trace_complete(diagnostics):
         missing.append("produced_artifact_trace_incomplete")
-    lineage_closure = _lineage_closure_payload(result)
+    lineage_closure = lineage_closure_payload(result)
     if lineage_closure["status"] == "missing":
         missing.append("lineage_closure_boundary_missing")
     elif lineage_closure["status"] == "unsupported":
         missing.append("lineage_closure_boundary_unsupported")
     return tuple(missing)
+
+
+# Public shared API for forensic consumers (cross-module intentional surface).
+artifact_completeness = _artifact_completeness
+checkpoint_compatibility_payload = _checkpoint_compatibility_payload
+diagnostic_snapshot = _diagnostic_snapshot
+forensic_diff_payload = _forensic_diff_payload
+missing_evidence = _missing_evidence
+replay_capability_payload = _replay_capability_payload
+_lineage_closure_payload = lineage_closure_payload

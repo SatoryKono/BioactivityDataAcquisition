@@ -34,7 +34,7 @@ def _coerce_numeric_value(value: object) -> float | None:
         return None
     try:
         numeric_value = float(value)
-    except ValueError:
+    except (ValueError, OverflowError):
         return None
     return numeric_value if math.isfinite(numeric_value) else None
 

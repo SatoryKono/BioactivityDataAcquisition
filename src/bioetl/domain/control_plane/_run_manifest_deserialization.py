@@ -68,6 +68,13 @@ def _load_object_mapping(raw_mapping: object) -> dict[str, object]:
     return {str(key): value for key, value in raw_mapping.items()}
 
 
+def _require_key(item: dict[str, object], field_name: str, *, context: str) -> object:
+    """Return a required mapping field or raise a descriptive ValueError."""
+    if field_name not in item:
+        raise ValueError(f"Missing required field {field_name!r} in {context}")
+    return item[field_name]
+
+
 def _load_source_refs[SourceRefT, SnapshotRefT](
     raw_sources: object,
     *,
@@ -76,20 +83,24 @@ def _load_source_refs[SourceRefT, SnapshotRefT](
 ) -> tuple[SourceRefT, ...]:
     if not isinstance(raw_sources, list):
         return ()
-    return tuple(
-        source_ref_type(
-            provider=str(item["provider"]),
-            entity=str(item["entity"]),
-            pipeline_name=str(item["pipeline_name"]),
-            query=(None if item.get("query") is None else str(item["query"])),
-            input_snapshots=_load_input_snapshots(
-                item.get("input_snapshots"),
-                snapshot_ref_type=snapshot_ref_type,
-            ),
+    loaded: list[SourceRefT] = []
+    for index, item in enumerate(raw_sources):
+        if not isinstance(item, dict):
+            continue
+        context = f"source_refs[{index}]"
+        loaded.append(
+            source_ref_type(
+                provider=str(_require_key(item, "provider", context=context)),
+                entity=str(_require_key(item, "entity", context=context)),
+                pipeline_name=str(_require_key(item, "pipeline_name", context=context)),
+                query=(None if item.get("query") is None else str(item["query"])),
+                input_snapshots=_load_input_snapshots(
+                    item.get("input_snapshots"),
+                    snapshot_ref_type=snapshot_ref_type,
+                ),
+            )
         )
-        for item in raw_sources
-        if isinstance(item, dict)
-    )
+    return tuple(loaded)
 
 
 def _load_input_snapshots[SnapshotRefT](
@@ -111,9 +122,10 @@ def _load_input_snapshot_ref[SnapshotRefT](
     *,
     snapshot_ref_type: Callable[..., SnapshotRefT],
 ) -> SnapshotRefT:
+    context = "input_snapshot_ref"
     return snapshot_ref_type(
-        snapshot_id=str(item["snapshot_id"]),
-        content_hash=str(item["content_hash"]),
+        snapshot_id=str(_require_key(item, "snapshot_id", context=context)),
+        content_hash=str(_require_key(item, "content_hash", context=context)),
         immutable_uri=_load_optional_snapshot_text(item, "immutable_uri"),
         query_fingerprint=_load_optional_snapshot_text(item, "query_fingerprint"),
         storage_provider=_load_optional_snapshot_text(item, "storage_provider"),
@@ -149,8 +161,15 @@ def _load_artifacts[ArtifactRefT](
 ) -> tuple[ArtifactRefT, ...]:
     if not isinstance(raw_artifacts, list):
         return ()
-    return tuple(
-        artifact_type(layer=str(item["layer"]), path=str(item["path"]))
-        for item in raw_artifacts
-        if isinstance(item, dict)
-    )
+    loaded: list[ArtifactRefT] = []
+    for index, item in enumerate(raw_artifacts):
+        if not isinstance(item, dict):
+            continue
+        context = f"artifacts[{index}]"
+        loaded.append(
+            artifact_type(
+                layer=str(_require_key(item, "layer", context=context)),
+                path=str(_require_key(item, "path", context=context)),
+            )
+        )
+    return tuple(loaded)

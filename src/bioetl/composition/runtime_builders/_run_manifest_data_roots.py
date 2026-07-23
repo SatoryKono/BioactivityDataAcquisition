@@ -87,7 +87,7 @@ def resolve_data_root_mode(settings: Settings) -> DataRootMode:
 def _resolve_data_root(settings: Settings) -> Path:
     """Resolve a writable data root for legacy run-manifest facade callers."""
     configured_root = getattr(settings, "data_dir", None)
-    if configured_root:
+    if configured_root and str(configured_root).strip():
         return Path(configured_root)
 
     candidate = Path("data")

@@ -75,18 +75,21 @@ def test_issue_5811_closeout_artifact_covers_all_child_issues() -> None:
 
 
 def test_issue_5812_phased_migration_support_is_retired_compat_shim() -> None:
-    # PhasedMigrationCoordinator removed - retired shim (2026-07-03)
-    # Verify module file is removed
-    assert not (
+    # Compatibility facade restored for deprecation window (#6473 / docs).
+    assert (
         ROOT / "src" / "bioetl" / "domain" / "behavior" / "phased_migration_support.py"
     ).exists()
 
-    # Verify import fails
-    with pytest.raises(ImportError):
-        __import__(
-            "bioetl.domain.behavior.phased_migration_support",
-            fromlist=["PhasedMigrationCoordinator"],
-        )
+    from bioetl.domain.behavior import PhasedMigrationCoordinator
+    from bioetl.domain.behavior.phased_migration_support import (
+        PhasedMigrationCoordinator as DirectCoordinator,
+    )
+
+    assert PhasedMigrationCoordinator is DirectCoordinator
+    with pytest.warns(DeprecationWarning, match="retired compatibility shim"):
+        coordinator = PhasedMigrationCoordinator()
+    status = coordinator.get_current_migration_status()
+    assert status.current_phase == "retired"
 
 
 def test_issue_5813_staged_enforcement_registry_is_single_and_externalized() -> None:
