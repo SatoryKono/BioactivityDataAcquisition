@@ -63,3 +63,22 @@ def test_two_registry_clones_do_not_share_mutable_provider_config(
     assert second_config.http_config is None or (
         "leak" not in second_config.http_config.rate_overrides
     )
+
+
+def test_cached_bootstrap_metadata_is_order_stable_across_rebuilds(
+    project_root: Any,
+) -> None:
+    """Rebuilding from the same inputs yields identical immutable catalogs."""
+    from tests.helpers.bootstrap_cache import BootstrapMetadataCache
+
+    configs_root = project_root / "configs"
+    first_cache = BootstrapMetadataCache()
+    second_cache = BootstrapMetadataCache()
+    first = first_cache.get_or_build(configs_root=configs_root)
+    second = second_cache.get_or_build(configs_root=configs_root)
+
+    assert first.cache_key == second.cache_key
+    assert first.pipeline_names == second.pipeline_names
+    assert first.provider_definitions == second.provider_definitions
+    assert first_cache.build_count == 1
+    assert second_cache.build_count == 1
