@@ -250,13 +250,19 @@ def _render_markdown(
     return "\n".join(lines)
 
 
-def _write_text(path: Path, content: str) -> None:
+def _write_text(path: Path, content: str, *, root: Path | None = None) -> None:
     """Write UTF-8 text with retries for flaky WSL/Google-Drive mounts.
 
     Some ``/mnt/<drive>`` mounts reject certain open modes intermittently
     (``OSError: [Errno 22] Invalid argument``). Prefer atomic replace, then
     fall back to direct overwrite without the ``newline=`` kwarg.
+
+    When ``root`` is provided (CLI path mode), confine ``path`` under that root.
     """
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        path = resolve_cli_path(path, root=root)
     path.parent.mkdir(parents=True, exist_ok=True)
     if path.exists():
         try:
@@ -294,7 +300,11 @@ def _write_text(path: Path, content: str) -> None:
     ) from last_error
 
 
-def _check_file_sync(path: Path, expected: str) -> bool:
+def _check_file_sync(path: Path, expected: str, *, root: Path | None = None) -> bool:
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        path = resolve_cli_path(path, root=root)
     if not path.exists():
         print(f"[drift] missing file: {_display_path(path)}")
         return False
@@ -322,14 +332,14 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--json-output",
-        type=Path,
-        default=DEFAULT_JSON_OUTPUT,
+        type=str,
+        default=str(DEFAULT_JSON_OUTPUT),
         help="JSON output path.",
     )
     parser.add_argument(
         "--md-output",
-        type=Path,
-        default=DEFAULT_MD_OUTPUT,
+        type=str,
+        default=str(DEFAULT_MD_OUTPUT),
         help="Markdown output path.",
     )
     parser.add_argument(
@@ -341,7 +351,11 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> int:
+    from scripts.engineering.common.repo_paths import resolve_cli_path
+
     args = parse_args()
+    args.json_output = resolve_cli_path(args.json_output, root=PROJECT_ROOT)
+    args.md_output = resolve_cli_path(args.md_output, root=PROJECT_ROOT)
     if args.active_only:
         scorecard = load_scorecard()
         snapshot_date = _resolve_snapshot_date(scorecard)
@@ -360,8 +374,10 @@ def main() -> int:
     json_text = json.dumps(json_payload, ensure_ascii=False, indent=2) + "\n"
 
     if args.check:
-        json_ok = _check_file_sync(args.json_output, json_text)
-        md_ok = _check_file_sync(args.md_output, markdown)
+        json_ok = _check_file_sync(
+            args.json_output, json_text, root=PROJECT_ROOT
+        )
+        md_ok = _check_file_sync(args.md_output, markdown, root=PROJECT_ROOT)
         if json_ok and md_ok:
             print("[ok] hotspot-family baseline artifacts are up to date")
             return 0
@@ -372,8 +388,8 @@ def main() -> int:
         print(f"[hint] run: {hint}")
         return 1
 
-    _write_text(args.json_output, json_text)
-    _write_text(args.md_output, markdown)
+    _write_text(args.json_output, json_text, root=PROJECT_ROOT)
+    _write_text(args.md_output, markdown, root=PROJECT_ROOT)
     print(
         "[updated] wrote hotspot-family baseline artifacts:\n"
         f"  - {_display_path(args.json_output)}\n"

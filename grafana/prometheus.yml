@@ -39,11 +39,6 @@ scrape_configs:
     static_configs:
       - targets: ['grafana:3000']
 
-  - job_name: 'quarantine-explorer'
-    metrics_path: /metrics
-    static_configs:
-      - targets: ['quarantine-explorer:8081']
-
   - job_name: 'grafana-image-renderer'
     metrics_path: /metrics
     static_configs:

@@ -1,4 +1,7 @@
 name: Duplication and Complexity Checks
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -37,7 +40,7 @@ jobs:
           python-version: "3.13"
 
       - name: Install Python tooling
-        run: python -m pip install radon==6.0.1 xenon==0.9.3 pylint==3.3.4
+        run: "python -m pip install --only-binary=:all: radon==6.0.1 xenon==0.9.3 pylint==3.3.4"
 
       - name: Prepare report directory
         run: mkdir -p reports
@@ -152,8 +155,20 @@ jobs:
 
       - name: Run jscpd for duplication detection
         run: |
+          set -euo pipefail
           mkdir -p reports/jscpd
-          npx jscpd@4.0.8 src tests --config .jscpd.json --threshold 5 --format python --reporters "console,html,json" --output reports/jscpd
+          TOOL_DIR="${RUNNER_TEMP}/jscpd-cli"
+          mkdir -p "${TOOL_DIR}"
+          cd "${TOOL_DIR}"
+          npm init -y >/dev/null
+          # Pin + local install (no npx on-demand install; Sonar S6505/S8543).
+          npm install --ignore-scripts --no-fund --no-audit jscpd@4.0.8
+          "${TOOL_DIR}/node_modules/.bin/jscpd" \
+            "${GITHUB_WORKSPACE}/src" "${GITHUB_WORKSPACE}/tests" \
+            --config "${GITHUB_WORKSPACE}/.jscpd.json" \
+            --threshold 5 --format python \
+            --reporters "console,html,json" \
+            --output "${GITHUB_WORKSPACE}/reports/jscpd"
 
       - name: Enforce BioETL hotspot duplication zero ratchet
         run: |
@@ -187,7 +202,7 @@ jobs:
           python-version: "3.13"
 
       - name: Install required dependencies
-        run: pip install pyyaml
+        run: "pip install --only-binary=:all: pyyaml"
 
       - name: Check constructor argument counts
         run: python -m scripts.engineering.qa check-constructor-args
@@ -206,7 +221,7 @@ jobs:
           python-version: "3.13"
 
       - name: Install tooling
-        run: python -m pip install radon==6.0.1 xenon==0.9.3
+        run: "python -m pip install --only-binary=:all: radon==6.0.1 xenon==0.9.3"
 
       - name: Check batch_executor.py complexity (max CC = 10)
         run: |

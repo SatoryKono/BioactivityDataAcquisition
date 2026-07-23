@@ -95,6 +95,16 @@ runs:
         echo "Running: ${CMD}"
         ${CMD}
 
+    - name: Pin locked/no-build defaults for subsequent uv run steps
+      shell: bash
+      run: |
+        # Defense-in-depth for CI steps that call `uv run` without flags.
+        # Workflows also pass --frozen/--no-build explicitly for Sonar S8544/S8541.
+        {
+          echo "UV_FROZEN=1"
+          echo "UV_NO_BUILD=1"
+        } >> "$GITHUB_ENV"
+
     - name: Cache pytest and hypothesis
       if: inputs.enable-pytest-cache == 'true'
       uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v4

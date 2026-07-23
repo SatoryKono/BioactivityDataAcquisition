@@ -115,7 +115,6 @@ def test_pipeline_universe_contract_matches_shipped_query_sources() -> None:
         "bioetl-provider-health-v2": "bioetl-provider-health-v2.json",
         "bioetl-dq-v2": "bioetl-dq-v2.json",
         "bioetl-workflow-overview": "bioetl-workflow-overview.json",
-        "bioetl-silver-reject-explorer": "bioetl-silver-reject-explorer.json",
         "bioetl-alerts-slo": "bioetl-alerts-slo.json",
     }
     for uid, metric in shared.items():
@@ -146,7 +145,6 @@ def test_pipeline_universe_contract_matches_shipped_query_sources() -> None:
     )
     assert control_plane.get("unexplained_difference_count_required") == 0
 
-    explorer = exceptions["bioetl-silver-reject-explorer"]
     assert explorer.get("required_relation") == (
         "subset_of_canonical_user_facing_metric"
     )
@@ -326,7 +324,6 @@ def test_role_local_pipeline_handoffs_have_visible_recovery_paths() -> None:
         assert "scope" in guidance
         assert "health" in guidance
 
-    explorer_scope = _panel_by_id("bioetl-silver-reject-explorer.json", 1)
     recovery = " ".join(
         (
             str(explorer_scope.get("description", "")),
@@ -383,7 +380,6 @@ def test_dashboard_families_cover_all_shipped_dashboards() -> None:
         ("bioetl-provider-health-v2.json", "bioetl-provider-health-v2"),
         ("bioetl-dq-v2.json", "bioetl-dq-v2"),
         ("bioetl-workflow-overview.json", "bioetl-workflow-overview"),
-        ("bioetl-silver-reject-explorer.json", "bioetl-silver-reject-explorer"),
     ],
 )
 def test_shipped_selector_registry_matches_dashboard_variables(

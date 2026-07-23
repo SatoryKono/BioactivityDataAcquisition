@@ -26,7 +26,7 @@
 | `ADR-015` | `enforced` | 8 | 1 | - |
 | `ADR-016` | `enforced` | 4 | 1 | - |
 | `ADR-017` | `enforced` | 26 | 1 | - |
-| `ADR-018` | `enforced` | 20 | 7 | - |
+| `ADR-018` | `enforced` | 22 | 8 | - |
 | `ADR-019` | `enforced` | 6 | 1 | - |
 | `ADR-020` | `enforced` | 4 | 1 | - |
 | `ADR-021` | `enforced` | 5 | 1 | - |

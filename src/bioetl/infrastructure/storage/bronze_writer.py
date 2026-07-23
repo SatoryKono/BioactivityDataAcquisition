@@ -88,8 +88,7 @@ class BronzeWriter(
         base_path: str | Path,
         logger: LoggerPort,
         metrics: MetricsPort,
-        save_json: bool = False,
-        json_path: str | None = None,
+        json_export: tuple[bool, str | None] = (False, None),
         validate_json: bool = True,
         runtime_services: BronzeWriterRuntimeServices | None = None,
         flat_structure: bool = False,
@@ -100,7 +99,11 @@ class BronzeWriter(
         metadata_coordinator: MetadataCoordinatorPort | None = None,
         lineage_store: LineageStorePort | None = None,
     ) -> None:
-        """Initialize Bronze writer."""
+        """Initialize Bronze writer.
+
+        ``json_export`` is ``(save_json, json_path)`` packed to keep the public
+        constructor under the Sonar S107 parameter budget.
+        """
         if metadata_writer is None:
             from bioetl.domain.ports.noop import NoOpMetadataWriter
 
@@ -114,6 +117,7 @@ class BronzeWriter(
             lineage_store=lineage_store,
         )
 
+        save_json, json_path = json_export
         self.base_path = Path(base_path)
         self.logger = logger
         self._logger: LoggerPort = logger

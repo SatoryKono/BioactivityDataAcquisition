@@ -906,8 +906,7 @@ def _assert_exact_identifier_variable_isolation(
     *, dashboard_name: str, dashboard: dict[str, object]
 ) -> None:
     variables = _dashboard_template_variable_names(dashboard)
-    if dashboard_name == "bioetl-silver-reject-explorer.json":
-        _assert_silver_explorer_identity_variables(variables)
+    if dashboard_name ==        _assert_silver_explorer_identity_variables(variables)
         return
     if dashboard_name in _LOCAL_IDENTITY_DASHBOARDS:
         _assert_local_identity_variables(variables)
@@ -1292,7 +1291,6 @@ def _assert_silver_explorer_html_bus_forensic_boundary(
 ) -> None:
     panel = _navigation_panel_by_id_1000(dashboard, dashboard_name=dashboard_name)
     hrefs = _html_hrefs_from_panel_content(
-        panel, prefix="/d/bioetl-silver-reject-explorer/"
     )
     for href in hrefs:
         _assert_silver_explorer_href_forensic_boundary(
@@ -1307,7 +1305,6 @@ _EXPECTED_CURRENT_NAV_TITLE = {
     "bioetl-dq-v2": "4. Data Quality",
     "bioetl-workflow-overview": "5. Workflow",
     "bioetl-alerts-slo": "6. Alerts & SLO",
-    "bioetl-silver-reject-explorer": "Silver Reject Explorer",
 }
 
 _BASE_VISUAL_NAV_TITLES = (
@@ -1658,16 +1655,12 @@ def _assert_silver_explorer_presence_for_dashboard(
     links = require_dashboard_navigation_links(dashboard, dashboard_name=dashboard_name)
     titles = {link.get("title") for link in links if link.get("title")}
     urls = [str(link.get("url", "")) for link in links]
-    if uid == "bioetl-silver-reject-explorer":
-        assert "Silver Reject Explorer" not in titles, (
-            "bioetl-silver-reject-explorer.json must omit top-level self-link"
+    if uid ==        assert "Silver Reject Explorer" not in titles, (
         )
         return
     assert "Silver Reject Explorer" in titles, (
         f"{dashboard_name} must expose a Silver Reject Explorer handoff"
     )
-    assert any(url.startswith("/d/bioetl-silver-reject-explorer") for url in urls), (
-        f"{dashboard_name} handoff must target /d/bioetl-silver-reject-explorer"
     )
 
 
@@ -1680,7 +1673,6 @@ def _assert_explicit_silver_explorer_policy(
         (
             link
             for link in links
-            if str(link.get("url", "")).startswith("/d/bioetl-silver-reject-explorer")
         ),
         None,
     )

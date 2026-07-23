@@ -237,7 +237,13 @@ def _render_markdown(payload: dict[str, object], *, limit: int) -> str:
     return "\n".join(lines)
 
 
-def _write_json(path: Path, payload: dict[str, object]) -> None:
+def _write_json(
+    path: Path, payload: dict[str, object], *, root: Path | None = None
+) -> None:
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        path = resolve_cli_path(path, root=root)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
@@ -262,12 +268,22 @@ def _render_csv(rows: list[dict[str, object]]) -> str:
     return buffer.getvalue()
 
 
-def _write_csv(path: Path, rows: list[dict[str, object]]) -> None:
+def _write_csv(
+    path: Path, rows: list[dict[str, object]], *, root: Path | None = None
+) -> None:
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        path = resolve_cli_path(path, root=root)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(_render_csv(rows), encoding="utf-8")
 
 
-def _write_text(path: Path, content: str) -> None:
+def _write_text(path: Path, content: str, *, root: Path | None = None) -> None:
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        path = resolve_cli_path(path, root=root)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
 
@@ -335,9 +351,12 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         return 0
 
-    _write_json(args.json_out, payload)
-    _write_csv(args.csv_out, csv_rows)
-    _write_text(args.markdown_out, markdown)
+    from scripts.engineering.common.repo_paths import REPO_ROOT
+
+    root = REPO_ROOT
+    _write_json(args.json_out, payload, root=root)
+    _write_csv(args.csv_out, csv_rows, root=root)
+    _write_text(args.markdown_out, markdown, root=root)
     return 0
 
 

@@ -48,8 +48,10 @@ def main() -> int:
     if len(sys.argv) < 3:
         print("usage: build_arch_review_report.py <agent.ndjson> <out.md>", file=sys.stderr)
         return 2
-    src = Path(sys.argv[1])
-    out = Path(sys.argv[2])
+    from scripts.engineering.common.repo_paths import resolve_cli_path
+
+    src = resolve_cli_path(sys.argv[1])
+    out = resolve_cli_path(sys.argv[2])
     findings: list[dict[str, str]] = []
     completes: list[tuple[str, int]] = []
     current: str | None = None

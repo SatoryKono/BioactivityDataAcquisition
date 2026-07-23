@@ -21,12 +21,19 @@ def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
-def _atomic_copy(source: Path, target: Path) -> None:
-    target.parent.mkdir(parents=True, exist_ok=True)
-    content = source.read_text(encoding="utf-8")
-    tmp = target.with_suffix(target.suffix + ".tmp")
+def _atomic_copy(source: Path, target: Path, *, allowed_root: Path) -> None:
+    from scripts.engineering.common.repo_paths import ensure_path_within_root
+
+    safe_source = ensure_path_within_root(source, allowed_root)
+    safe_target = ensure_path_within_root(target, allowed_root)
+    safe_target.parent.mkdir(parents=True, exist_ok=True)
+    content = safe_source.read_text(encoding="utf-8")
+    tmp = ensure_path_within_root(
+        safe_target.with_suffix(safe_target.suffix + ".tmp"),
+        allowed_root,
+    )
     tmp.write_text(content, encoding="utf-8")
-    os.replace(tmp, target)
+    os.replace(tmp, safe_target)
 
 
 def sync_cursor_rules(
@@ -61,7 +68,7 @@ def sync_cursor_rules(
             if source.read_bytes() != target.read_bytes():
                 issues.append(f"{target.relative_to(root)}: out of sync with canonical")
             continue
-        _atomic_copy(source, target)
+        _atomic_copy(source, target, allowed_root=root)
 
     if check_only or not deploy:
         extra_deploy_files = sorted(

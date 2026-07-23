@@ -724,9 +724,12 @@ def _render_markdown(payload: dict[str, object]) -> str:
 
 
 def _existing_snapshot_date(path: Path) -> str | None:
-    if not path.exists():
+    from scripts.engineering.common.repo_paths import ensure_path_within_root
+
+    safe_path = ensure_path_within_root(path, PROJECT_ROOT)
+    if not safe_path.exists():
         return None
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload = json.loads(safe_path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         return None
     snapshot_date = payload.get("snapshot_date")
@@ -734,10 +737,12 @@ def _existing_snapshot_date(path: Path) -> str | None:
 
 
 def main() -> int:
+    from scripts.engineering.common.repo_paths import resolve_cli_path
+
     args = _parse_args()
-    repo_root = Path(args.repo_root)
-    json_out = Path(args.json_out)
-    md_out = Path(args.md_out)
+    repo_root = resolve_cli_path(args.repo_root, root=PROJECT_ROOT)
+    json_out = resolve_cli_path(args.json_out, root=repo_root)
+    md_out = resolve_cli_path(args.md_out, root=repo_root)
     snapshot_date = args.snapshot_date
     if args.check and snapshot_date is None:
         snapshot_date = _existing_snapshot_date(json_out)

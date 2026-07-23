@@ -49,21 +49,33 @@ class GovernanceFinding:
         return {"kind": self.kind, "subject": self.subject, "message": self.message}
 
 
-def _load_yaml(path: Path) -> dict[str, Any]:
+def _load_yaml(path: Path, *, root: Path | None = None) -> dict[str, Any]:
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        path = resolve_cli_path(path, root=root)
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))
     if isinstance(payload, dict):
         return payload
     raise ValueError(f"Expected YAML mapping in {path}")
 
 
-def _load_json(path: Path) -> dict[str, Any]:
+def _load_json(path: Path, *, root: Path | None = None) -> dict[str, Any]:
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        path = resolve_cli_path(path, root=root)
     payload = json.loads(path.read_text(encoding="utf-8"))
     if isinstance(payload, dict):
         return payload
     raise ValueError(f"Expected JSON mapping in {path}")
 
 
-def _load_rows(path: Path) -> tuple[dict[str, str], ...]:
+def _load_rows(path: Path, *, root: Path | None = None) -> tuple[dict[str, str], ...]:
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        path = resolve_cli_path(path, root=root)
     with path.open(encoding="utf-8", newline="") as handle:
         return tuple(csv.DictReader(handle))
 
@@ -641,12 +653,13 @@ def validate_semantic_governance_policy(
     pair_matrix_path: Path = DEFAULT_PAIR_MATRIX,
     cluster_registry_path: Path = DEFAULT_CLUSTER_REGISTRY,
     generic_ownership_path: Path = DEFAULT_GENERIC_OWNERSHIP,
+    root: Path | None = None,
 ) -> tuple[GovernanceFinding, ...]:
     """Return semantic governance policy findings for the current repository."""
-    payload = _load_yaml(review_registry_path)
-    rows = _load_rows(pair_matrix_path)
-    cluster_lookup = _cluster_lookup(_load_json(cluster_registry_path))
-    generic_ownership = _load_yaml(generic_ownership_path)
+    payload = _load_yaml(review_registry_path, root=root)
+    rows = _load_rows(pair_matrix_path, root=root)
+    cluster_lookup = _cluster_lookup(_load_json(cluster_registry_path, root=root))
+    generic_ownership = _load_yaml(generic_ownership_path, root=root)
 
     findings: list[GovernanceFinding] = []
     findings.extend(_required_evidence_findings(payload))
@@ -707,6 +720,8 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    from scripts.engineering.common.repo_paths import REPO_ROOT
+
     parser = _build_parser()
     args = parser.parse_args(argv)
     findings = validate_semantic_governance_policy(
@@ -714,6 +729,7 @@ def main(argv: list[str] | None = None) -> int:
         pair_matrix_path=args.pair_matrix_path,
         cluster_registry_path=args.cluster_registry_path,
         generic_ownership_path=args.generic_ownership_path,
+        root=REPO_ROOT,
     )
     if args.json:
         print(

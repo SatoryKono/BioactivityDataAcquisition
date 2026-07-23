@@ -65,11 +65,11 @@ jobs:
                     pytest-cache-fingerprint: ${{ hashFiles('tests/**/*.py', 'tests/conftest.py', 'pyproject.toml') }}
 
             -   name: Cyclomatic complexity check
-                run: uv run radon cc src/bioetl --min C --show-closures
+                run: uv run --frozen --no-build radon cc src/bioetl --min C --show-closures
 
             -   name: Run heavy scan with coverage
                 run: |
-                    uv run pytest tests/ -m "not e2e and not benchmark and not serial" \
+                    uv run --frozen --no-build pytest tests/ -m "not e2e and not benchmark and not serial" \
                       --ignore=tests/e2e --ignore=tests/contract \
                       -n auto --dist loadscope --max-worker-restart=0 \
                       --cov=src/bioetl \
@@ -90,7 +90,7 @@ jobs:
 
             -   name: Run Windows atomic lock stress tests
                 run: |
-                    uv run pytest tests/unit/infrastructure/storage/test_atomic.py \
+                    uv run --frozen --no-build pytest tests/unit/infrastructure/storage/test_atomic.py \
                       -k "windows_lock_stress" \
                       -m "slow and serial" \
                       -q --tb=short

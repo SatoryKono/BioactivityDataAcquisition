@@ -533,7 +533,7 @@ class TestBronzeWriterInit:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            save_json=True,
+            json_export=(True, None),
         )
 
         assert writer.save_json is True
@@ -548,8 +548,7 @@ class TestBronzeWriterInit:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            save_json=True,
-            json_path=custom_path,
+            json_export=(True, custom_path),
         )
 
         assert writer.json_path == custom_path
@@ -691,7 +690,7 @@ class TestBronzeWriterWriteLocal:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            save_json=True,
+            json_export=(True, None),
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
@@ -1096,7 +1095,7 @@ class TestBronzeWriterAtomicWrite:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            save_json=True,
+            json_export=(True, None),
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 

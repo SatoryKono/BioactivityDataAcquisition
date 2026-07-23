@@ -40,7 +40,7 @@ class TestCreateBronzeWriter:
 
         assert result is expected
         call_kwargs = writer_cls.call_args[1]
-        assert call_kwargs["save_json"] is False
+        assert call_kwargs["json_export"] == (False, None)
         runtime_services = call_kwargs["runtime_services"]
         assert runtime_services.save_metadata is False
         assert isinstance(runtime_services.tracing, NoOpTracing)
@@ -66,7 +66,7 @@ class TestCreateBronzeWriter:
         )
 
         call_kwargs = writer_cls.call_args[1]
-        assert call_kwargs["save_json"] is True
+        assert call_kwargs["json_export"] == (True, None)
         assert call_kwargs["runtime_services"].save_metadata is True
         assert call_kwargs["runtime_services"].lineage_store is not None
 

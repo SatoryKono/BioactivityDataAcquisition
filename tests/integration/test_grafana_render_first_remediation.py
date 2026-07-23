@@ -181,7 +181,6 @@ def test_rf002_terminal_states_are_explicit() -> None:
     assert _mapping_text(outcomes, "-1").startswith("NO MATCHING SCOPE")
     assert _mapping_text(outcomes, "0").startswith("VALID EMPTY")
 
-    silver = _load("bioetl-silver-reject-explorer.json")
     health = _panel(silver, 13)
     health_text = " ".join(
         (
@@ -292,7 +291,6 @@ def test_rf003_1024_layout_prioritizes_actions_and_readability() -> None:
     assert _panel(workflow, 9)["gridPos"]["w"] == 24
     provider = _load("bioetl-provider-health-v2.json")
     assert _panel(provider, 9103)["gridPos"]["w"] >= 10
-    silver = _load("bioetl-silver-reject-explorer.json")
     for panel_id in (10, 2, 3, 4, 5, 6, 7):
         assert _panel(silver, panel_id)["gridPos"]["w"] == 24
 
@@ -361,7 +359,6 @@ def test_rf004_identity_and_scope_are_persistent() -> None:
     mapped_scopes = scope_mapping[0].get("options", {})
     assert {"Global", "Pipeline", "Run"} <= set(mapped_scopes)
 
-    silver = _load("bioetl-silver-reject-explorer.json")
     assert "Reset once" in str(_panel(silver, 1).get("options", {}).get("content"))
     for variable in silver.get("templating", {}).get("list", []):
         description = str(variable.get("description", ""))
@@ -454,7 +451,6 @@ def test_rf006_progressive_disclosure_reduces_first_path() -> None:
     alerts = _load("bioetl-alerts-slo.json")
     assert _panel(alerts, 5)["gridPos"]["h"] == 6
 
-    silver = _load("bioetl-silver-reject-explorer.json")
     assert _panel(silver, 16).get("type") == "row"
     assert _panel(silver, 15).get("type") == "row"
     assert _panel(silver, 10)["gridPos"]["h"] == 3

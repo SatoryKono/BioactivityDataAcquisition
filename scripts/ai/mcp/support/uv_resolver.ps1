@@ -157,13 +157,19 @@ function Resolve-BioetlUvxBin {
 
     $localAppData = [Environment]::GetFolderPath("LocalApplicationData")
     $userProfile = $env:USERPROFILE
-    $candidates += @(
-        (Join-Path $localAppData "Programs\Python\Python313\Scripts\uvx.exe"),
-        (Join-Path $localAppData "Programs\Python\Python312\Scripts\uvx.exe"),
-        (Join-Path $localAppData "Programs\Python\Python311\Scripts\uvx.exe"),
-        (Join-Path $userProfile ".local\bin\uvx.exe"),
-        (Join-Path $userProfile ".cargo\bin\uvx.exe")
-    )
+    if (-not [string]::IsNullOrWhiteSpace($localAppData)) {
+        $candidates += @(
+            (Join-Path $localAppData "Programs\Python\Python313\Scripts\uvx.exe"),
+            (Join-Path $localAppData "Programs\Python\Python312\Scripts\uvx.exe"),
+            (Join-Path $localAppData "Programs\Python\Python311\Scripts\uvx.exe")
+        )
+    }
+    if (-not [string]::IsNullOrWhiteSpace($userProfile)) {
+        $candidates += @(
+            (Join-Path $userProfile ".local\bin\uvx.exe"),
+            (Join-Path $userProfile ".cargo\bin\uvx.exe")
+        )
+    }
 
     foreach ($candidate in $candidates) {
         if ($candidate -and (Test-Path -LiteralPath $candidate)) {

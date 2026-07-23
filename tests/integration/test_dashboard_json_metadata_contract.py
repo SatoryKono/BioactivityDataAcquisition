@@ -27,7 +27,6 @@ def test_dashboard_time_refresh_by_level():
         "bioetl-provider-health-v2.json": ("now-12h", "30s"),
         "bioetl-dq-v2.json": ("now-12h", "30s"),
         "bioetl-workflow-overview.json": ("now-12h", "30s"),
-        "bioetl-silver-reject-explorer.json": ("now-24h", "1m"),
     }
     for dashboard_name, (expected_time, expected_refresh) in expectations.items():
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)

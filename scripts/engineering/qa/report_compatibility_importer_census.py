@@ -283,9 +283,12 @@ def _parse_args() -> argparse.Namespace:
 
 
 def _existing_snapshot_date(path: Path) -> str | None:
-    if not path.exists():
+    from scripts.engineering.common.repo_paths import resolve_cli_path
+
+    safe_path = resolve_cli_path(path)
+    if not safe_path.exists():
         return None
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload = json.loads(safe_path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         return None
     snapshot_date = payload.get("snapshot_date")
@@ -1316,17 +1319,19 @@ def _render_markdown(payload: dict[str, object]) -> str:
 
 
 def main() -> int:
+    from scripts.engineering.common.repo_paths import resolve_cli_path
+
     args = _parse_args()
-    repo_root = Path(args.repo_root).resolve()
+    repo_root = resolve_cli_path(args.repo_root)
+    json_out = resolve_cli_path(args.json_out, root=repo_root)
+    md_out = resolve_cli_path(args.md_out, root=repo_root)
     snapshot_date = args.snapshot_date
     payload = build_compatibility_importer_census(
         repo_root,
         snapshot_date=snapshot_date
-        or (_existing_snapshot_date(Path(args.json_out)) if args.check else None)
+        or (_existing_snapshot_date(json_out) if args.check else None)
         or date.today().isoformat(),
     )
-    json_out = Path(args.json_out)
-    md_out = Path(args.md_out)
     rendered_json = json.dumps(payload, indent=2) + "\n"
     rendered_markdown = _render_markdown(payload)
     semantic_violations = validate_compatibility_metadata_consistency(

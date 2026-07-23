@@ -608,20 +608,27 @@ def write_baseline_outputs(
 
 
 def main() -> int:
+    from scripts.engineering.common.repo_paths import resolve_cli_path
+
     args = _parse_args()
+    coverage_xml_path = resolve_cli_path(args.coverage_xml)
+    coverage_log_path = resolve_cli_path(args.coverage_log)
+    slowest_json_path = resolve_cli_path(args.slowest_json)
+    junit_paths = [resolve_cli_path(path) for path in args.junit]
+    output_yaml_path = resolve_cli_path(args.output_yaml)
+    output_md_path = resolve_cli_path(args.output_md)
     payload = build_baseline_payload(
-        coverage_xml_path=Path(args.coverage_xml),
+        coverage_xml_path=coverage_xml_path,
         coverage_percent=args.coverage_percent,
-        coverage_log_path=Path(args.coverage_log),
-        slowest_json_path=Path(args.slowest_json),
-        junit_paths=[Path(path) for path in args.junit],
+        coverage_log_path=coverage_log_path,
+        slowest_json_path=slowest_json_path,
+        junit_paths=junit_paths,
         source_branch=args.source_branch,
         source_commit=args.source_commit,
         source_run_id=args.source_run_id,
         coverage_threshold=args.coverage_threshold,
         source_tree_sha256=compute_test_telemetry_source_tree_sha256(),
     )
-    output_yaml_path = Path(args.output_yaml)
     payload = merge_existing_baseline_supplemental_fields(
         payload,
         existing_yaml_path=output_yaml_path,
@@ -629,7 +636,7 @@ def main() -> int:
     write_baseline_outputs(
         payload=payload,
         output_yaml_path=output_yaml_path,
-        output_md_path=Path(args.output_md),
+        output_md_path=output_md_path,
     )
     return 0
 

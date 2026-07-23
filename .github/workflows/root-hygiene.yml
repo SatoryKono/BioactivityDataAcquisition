@@ -1,4 +1,7 @@
 name: Root Hygiene
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -23,24 +26,24 @@ jobs:
           uv-extras: "dev"
 
       - name: Validate repository root allowlist
-        run: uv run python -m scripts.engineering.repo check-cleanliness --strict-untracked --check-local-forbidden-outputs
+        run: uv run --frozen --no-build python -m scripts.engineering.repo check-cleanliness --strict-untracked --check-local-forbidden-outputs
 
       - name: Validate cleanup governance guidance
-        run: uv run python -m scripts.engineering.repo check-cleanup-governance
+        run: uv run --frozen --no-build python -m scripts.engineering.repo check-cleanup-governance
 
       - name: Validate root governance docs
-        run: uv run python -m scripts.engineering.repo check-root-governance-docs
+        run: uv run --frozen --no-build python -m scripts.engineering.repo check-root-governance-docs
 
       - name: Validate root-hygiene review registry
-        run: uv run python -m scripts.engineering.repo check-root-review-registry
+        run: uv run --frozen --no-build python -m scripts.engineering.repo check-root-review-registry
 
       - name: Validate structure audit
-        run: uv run python -m scripts.engineering.diagnostics audit-structure --path .
+        run: uv run --frozen --no-build python -m scripts.engineering.diagnostics audit-structure --path .
 
       - name: Export cleanup classification evidence
         run: >
           mkdir -p reports/quality &&
-          uv run python scripts/ops/support/repo/cleanup_repository.py
+          uv run --frozen --no-build python scripts/ops/support/repo/cleanup_repository.py
           --dry-run
           --detail-limit 0
           --report-json reports/quality/root-hygiene-cleanup-classification.json
@@ -67,7 +70,7 @@ jobs:
 
       - name: Run root hygiene unit tests
         run: >
-          uv run pytest
+          uv run --frozen --no-build pytest
           tests/unit/scripts/repo/test_audit_root_cleanliness.py
           tests/unit/scripts/repo/test_check_cleanup_governance.py
           tests/unit/scripts/repo/test_check_root_governance_docs.py

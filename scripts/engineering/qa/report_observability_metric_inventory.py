@@ -2676,17 +2676,34 @@ def _initial_cardinality_review_summary(
     review_required: list[str],
     static_threshold_violations: list[str],
     thresholds: dict[str, int],
-    resolved_base_url: str | None,
-    url_source: str,
+    prometheus: tuple[str | None, str],
     allow_local_cardinality_fallback: bool,
-    local_observed_series: dict[str, int],
-    local_threshold_violations: list[str],
-    query_results: dict[str, int],
-    live_threshold_violations: list[str],
-    degraded_reasons: list[str],
-    query_errors: dict[str, str],
-    observed_label_values: dict[str, dict[str, list[str]]],
+    local_series: tuple[dict[str, int], list[str]],
+    live_series: tuple[
+        dict[str, int],
+        list[str],
+        list[str],
+        dict[str, str],
+        dict[str, dict[str, list[str]]],
+    ],
 ) -> RuntimeCardinalityReviewSummary:
+    """Build the initial cardinality review summary.
+
+    Packed groups keep this helper under the Sonar S107 parameter budget:
+    - ``prometheus``: ``(resolved_base_url, url_source)``
+    - ``local_series``: ``(local_observed_series, local_threshold_violations)``
+    - ``live_series``: ``(query_results, live_threshold_violations,
+      degraded_reasons, query_errors, observed_label_values)``
+    """
+    resolved_base_url, url_source = prometheus
+    local_observed_series, local_threshold_violations = local_series
+    (
+        query_results,
+        live_threshold_violations,
+        degraded_reasons,
+        query_errors,
+        observed_label_values,
+    ) = live_series
     return {
         "generated_at": datetime.now(UTC)
         .replace(microsecond=0)
@@ -2746,8 +2763,8 @@ def _apply_local_cardinality_fallback(
     degraded_reasons: list[str],
     missing_thresholds: list[str],
     allow_local_cardinality_fallback: bool,
-) -> bool:
-    """Apply local fallback when Prometheus URL is missing. Returns True if done."""
+) -> None:
+    """Apply local fallback when Prometheus URL is missing."""
     if allow_local_cardinality_fallback and not missing_thresholds:
         missing_local_observations = [
             metric_name
@@ -2765,7 +2782,7 @@ def _apply_local_cardinality_fallback(
             )
             if local_threshold_violations or static_threshold_violations:
                 summary["status"] = "failed"
-            return True
+            return
         degraded_reasons.append(
             "missing local cardinality observations for reviewed metrics: "
             + ", ".join(missing_local_observations)
@@ -2774,7 +2791,6 @@ def _apply_local_cardinality_fallback(
     degraded_reasons.append(
         f"missing {_PROMETHEUS_BASE_URL_ENV_VAR}; falling back to static cardinality evidence only"
     )
-    return True
 
 
 def _query_live_cardinality_metrics(
@@ -2872,16 +2888,16 @@ def _build_runtime_cardinality_review_summary(
         review_required=review_required,
         static_threshold_violations=static_threshold_violations,
         thresholds=thresholds,
-        resolved_base_url=resolved_base_url,
-        url_source=url_source,
+        prometheus=(resolved_base_url, url_source),
         allow_local_cardinality_fallback=allow_local_cardinality_fallback,
-        local_observed_series=local_observed_series,
-        local_threshold_violations=local_threshold_violations,
-        query_results=query_results,
-        live_threshold_violations=live_threshold_violations,
-        degraded_reasons=degraded_reasons,
-        query_errors=query_errors,
-        observed_label_values=observed_label_values,
+        local_series=(local_observed_series, local_threshold_violations),
+        live_series=(
+            query_results,
+            live_threshold_violations,
+            degraded_reasons,
+            query_errors,
+            observed_label_values,
+        ),
     )
     if not reviewed_metrics:
         summary["mode"] = "no_reviewed_metrics"

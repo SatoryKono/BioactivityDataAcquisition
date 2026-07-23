@@ -45,8 +45,6 @@ typed_observability_views:
   target_kinds:
     - promql
     - http
-    - loki
-    - tempo
   identity_boundary: >
     HTTP run_id query parameters are operator identity context and must never
     appear in Prometheus selectors or metric labels.

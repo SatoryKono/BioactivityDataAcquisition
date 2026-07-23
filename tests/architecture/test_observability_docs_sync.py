@@ -220,7 +220,6 @@ def test_monitoring_index_is_concise_operator_entrypoint() -> None:
         "bioetl-provider-health-v2",
         "bioetl-dq-v2",
         "bioetl-control-plane-v1",
-        "bioetl-silver-reject-explorer",
         "bioetl diagnostics guide",
         "bioetl checkpoint inspect",
         "report-observability-metric-inventory --json",

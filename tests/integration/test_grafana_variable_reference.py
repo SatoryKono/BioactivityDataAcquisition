@@ -51,7 +51,6 @@ def test_variable_reference_documents_all_shipped_dashboard_variables() -> None:
         "bioetl-runtime",
         "bioetl-provider-health-v2",
         "bioetl-dq-v2",
-        "bioetl-silver-reject-explorer",
         "bioetl-workflow-overview",
     }
     missing = sorted(token for token in required_tokens if token not in text)
@@ -90,7 +89,6 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
         "bioetl-control-plane-v1.json",
         "bioetl-runtime.json",
         "bioetl-dq-v2.json",
-        "bioetl-silver-reject-explorer.json",
     ):
         variables = _variables(dashboard_name)
         pipeline = variables["pipeline"]
@@ -167,7 +165,6 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
         workflow["provider_context_exact"].get("current", {}).get("value") == "unknown"
     )
 
-    explorer = _variables("bioetl-silver-reject-explorer.json")
     assert explorer["quarantine_run_id"].get("multi") is False
     assert explorer["quarantine_run_id"].get("includeAll") is False
     assert explorer["payload_hash"].get("type") == "textbox"
@@ -185,9 +182,6 @@ def test_variable_reference_explains_role_specific_exceptions() -> None:
         "`$run_type_context_exact` | `bioetl-workflow-overview` | Hidden exact-run handoff var",
         "`$provider_context` | `bioetl-workflow-overview` | Hidden context var",
         "`$provider_context_exact` | `bioetl-workflow-overview` | Hidden exact-run handoff var",
-        "`bioetl-silver-reject-explorer` requires single-select `$pipeline`",
-        "`$quarantine_run_id` | `bioetl-silver-reject-explorer` | Single-select",
-        "`$payload_hash` | `bioetl-silver-reject-explorer` | Visible textbox",
         "run_type` always uses include-all fallback",
         "Primary operator dashboards `0..5` expose the shared context shell",
         "single-select with Include All across primary dashboards",

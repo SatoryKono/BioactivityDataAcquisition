@@ -81,6 +81,10 @@ Minimum expectation:
 
 ## Dashboard Skill Routing
 
+- Monitoring/Grafana is **optional** (ADR-010). Do **not** start
+  `docker-compose.monitoring.yml` unless the user explicitly requests
+  dashboard/render work. Default Docker surface is **main only** (health on
+  `:8000`). Loki, Tempo, and Quarantine Explorer UI were removed.
 - For BioETL Grafana screenshot refresh, render preflight, live reviewed panel
   audit, or render-blocker diagnosis work, agents **SHOULD** use the local
   skill `.codex/skills/grafana-dashboard-render/`.

@@ -91,14 +91,6 @@ EXPECTED_VARS_BY_DASHBOARD = {
         "step_status",
         "step_kind",
     },
-    "bioetl-silver-reject-explorer.json": {
-        "pipeline",
-        "run_type",
-        "reason_code",
-        "field",
-        "quarantine_run_id",
-        "payload_hash",
-    },
 }
 _OPTIONAL_LOCAL_PANEL_TYPES = {"bioetl-selectorshell-panel"}
 
@@ -991,7 +983,6 @@ def test_variable_query_sources(dashboard_path):
     variable_map = _variable_map(dashboard)
     name = dashboard_path.name
 
-    if name == "bioetl-silver-reject-explorer.json":
         _assert_silver_reject_explorer_variable_contract(dashboard_path, variable_map)
         return
     if name == "bioetl-alerts-slo.json":

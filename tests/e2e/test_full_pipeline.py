@@ -47,8 +47,7 @@ def _create_test_storage_context(storage_paths: dict[str, object]) -> StorageCon
             base_path=str(bronze_path),
             logger=logger,
             metrics=NoOpMetrics(),
-            save_json=True,
-            json_path=str(bronze_path / "json"),
+            json_export=(True, str(bronze_path / "json")),
         ),
         silver_writer=SilverWriter(
             base_path=str(silver_path),

@@ -9,6 +9,9 @@ on:
     pull_request:
     workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
@@ -29,22 +32,22 @@ jobs:
                 uses: ./.github/actions/setup-python-uv
 
             -   name: Ruff (strict staged profile - domain)
-                run: uv run ruff check src/bioetl/domain --output-format=github
+                run: uv run --frozen --no-build ruff check src/bioetl/domain --output-format=github
 
             -   name: Ruff (strict staged profile - application)
-                run: uv run ruff check src/bioetl/application --output-format=github
+                run: uv run --frozen --no-build ruff check src/bioetl/application --output-format=github
 
             -   name: Ruff (strict staged profile - infrastructure)
-                run: uv run ruff check src/bioetl/infrastructure --output-format=github
+                run: uv run --frozen --no-build ruff check src/bioetl/infrastructure --output-format=github
 
             -   name: Ruff format (strict full gate - src + tests)
-                run: uv run ruff format --check src tests
+                run: uv run --frozen --no-build ruff format --check src tests
 
             -   name: Ruff isort (strict full gate - src + tests)
-                run: uv run ruff check --select I src tests --output-format=github
+                run: uv run --frozen --no-build ruff check --select I src tests --output-format=github
 
             -   name: Ruff (strict full gate - src + tests)
-                run: uv run ruff check src tests --output-format=github
+                run: uv run --frozen --no-build ruff check src tests --output-format=github
 
             -   name: Detect changed Python files
                 id: changed-python
@@ -96,7 +99,7 @@ jobs:
                       [[ -n "$file" ]] && changed_py+=("$file")
                     done <<< "$CHANGED_FILES"
 
-                    uv run ruff format "${changed_py[@]}"
+                    uv run --frozen --no-build ruff format "${changed_py[@]}"
 
                     if ! git diff --quiet -- "${changed_py[@]}"; then
                       echo "::error::Ruff autoformat changed Python files. Run 'ruff format' locally and commit."
@@ -118,7 +121,7 @@ jobs:
                 uses: ./.github/actions/setup-python-uv
 
             -   name: Ruff C901 snapshot (src/bioetl)
-                run: uv run ruff check src/bioetl --select C901 --output-format github --exit-zero
+                run: uv run --frozen --no-build ruff check src/bioetl --select C901 --output-format github --exit-zero
 
             -   name: Enforce C901 baseline policy (new violations forbidden)
                 env:
@@ -126,7 +129,7 @@ jobs:
                 run: |
                     mode="${C901_GOVERNANCE_MODE:-block}"
                     echo "C901 governance mode: ${mode}"
-                    uv run python -m scripts.engineering.qa check-c901 \
+                    uv run --frozen --no-build python -m scripts.engineering.qa check-c901 \
                       --target src/bioetl \
                       --baseline-file scripts/engineering/baselines/c901_baseline.json \
                       --mode "${mode}"
@@ -146,10 +149,10 @@ jobs:
                 uses: ./.github/actions/setup-python-uv
 
             -   name: Run import-linter architecture contracts
-                run: uv run lint-imports --config .importlinter
+                run: uv run --frozen --no-build lint-imports --config .importlinter
 
             -   name: Run canonical full architecture gate
-                run: uv run pytest tests/architecture/ -m "not slow and not benchmark and not memory"
+                run: uv run --frozen --no-build pytest tests/architecture/ -m "not slow and not benchmark and not memory"
 
     checks-complete:
         needs:

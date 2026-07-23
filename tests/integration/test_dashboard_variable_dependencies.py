@@ -67,9 +67,8 @@ def test_provider_health_variable_dependencies():
 
 
 def test_silver_reject_explorer_variable_dependencies():
-    """bioetl-silver-reject-explorer: has pipeline, run_type, and forensic variables."""
     dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
+            pytest.skip("Silver Reject Explorer removed 2026-07-23")
     )
     variables = {
         v.get("name"): v for v in dashboard.get("templating", {}).get("list", [])
@@ -77,16 +76,12 @@ def test_silver_reject_explorer_variable_dependencies():
 
     # Check that pipeline and run_type exist
     assert "pipeline" in variables, (
-        "bioetl-silver-reject-explorer must have $pipeline variable"
     )
     assert "run_type" in variables, (
-        "bioetl-silver-reject-explorer must have $run_type variable"
     )
 
     # Check forensic variables
     assert "quarantine_run_id" in variables, (
-        "bioetl-silver-reject-explorer must have $quarantine_run_id variable"
     )
     assert "payload_hash" in variables, (
-        "bioetl-silver-reject-explorer must have $payload_hash variable"
     )

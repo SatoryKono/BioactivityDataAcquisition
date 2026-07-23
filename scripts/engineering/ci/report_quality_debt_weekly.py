@@ -192,8 +192,14 @@ def _debt_governance_section(snapshot: WeeklyDebtSnapshot, *, heading: str) -> s
     )
 
 
-def _write_json_report(path: Path, snapshot: WeeklyDebtSnapshot) -> None:
+def _write_json_report(
+    path: Path, snapshot: WeeklyDebtSnapshot, *, root: Path | None = None
+) -> None:
     """Write JSON debt snapshot report."""
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        path = resolve_cli_path(path, root=root)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         json.dumps(asdict(snapshot), ensure_ascii=False, indent=2, sort_keys=True)
@@ -202,14 +208,26 @@ def _write_json_report(path: Path, snapshot: WeeklyDebtSnapshot) -> None:
     )
 
 
-def _write_markdown_report(path: Path, snapshot: WeeklyDebtSnapshot) -> None:
+def _write_markdown_report(
+    path: Path, snapshot: WeeklyDebtSnapshot, *, root: Path | None = None
+) -> None:
     """Write markdown debt snapshot report."""
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        path = resolve_cli_path(path, root=root)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(_render_markdown(snapshot), encoding="utf-8")
 
 
-def _write_summary_append(path: Path, snapshot: WeeklyDebtSnapshot) -> None:
+def _write_summary_append(
+    path: Path, snapshot: WeeklyDebtSnapshot, *, root: Path | None = None
+) -> None:
     """Append compact summary block for CI step summary usage."""
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        path = resolve_cli_path(path, root=root)
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as stream:
         stream.write(
@@ -238,19 +256,22 @@ def _should_fail(args: argparse.Namespace, snapshot: WeeklyDebtSnapshot) -> bool
 
 
 def main() -> int:
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_cli_path
+
     args = _parse_args()
     today = date.today()
+    root = REPO_ROOT
 
     snapshot = _build_snapshot(
-        registry_path=Path(args.registry),
-        scorecard_path=Path(args.scorecard),
+        registry_path=resolve_cli_path(args.registry, root=root),
+        scorecard_path=resolve_cli_path(args.scorecard, root=root),
         today=today,
     )
-    _write_json_report(Path(args.json_out), snapshot)
-    _write_markdown_report(Path(args.markdown_out), snapshot)
+    _write_json_report(Path(args.json_out), snapshot, root=root)
+    _write_markdown_report(Path(args.markdown_out), snapshot, root=root)
 
     if args.summary_out:
-        _write_summary_append(Path(args.summary_out), snapshot)
+        _write_summary_append(Path(args.summary_out), snapshot, root=root)
 
     if _should_fail(args, snapshot):
         return 1

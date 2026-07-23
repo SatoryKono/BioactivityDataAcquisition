@@ -235,9 +235,14 @@ def _reopen_issue(*, token: str, number: int, comment: str) -> IssueRecord:
 
 
 def _update_issue_pack(*, issue_pack: Path, records: list[IssueRecord]) -> None:
-    if not records or not issue_pack.exists():
+    from scripts.engineering.common.repo_paths import ensure_repo_path
+
+    if not records:
         return
-    content = issue_pack.read_text(encoding="utf-8")
+    safe_pack = ensure_repo_path(issue_pack, root=REPO_ROOT)
+    if not safe_pack.exists():
+        return
+    content = safe_pack.read_text(encoding="utf-8")
     for record in records:
         code_match = re.search(r"\[(TDX-AUDIT-\d{3})\]", record.title)
         if not code_match:
@@ -251,7 +256,7 @@ def _update_issue_pack(*, issue_pack: Path, records: list[IssueRecord]) -> None:
         )
         if count == 0:
             content += f"\n- {link} `{code}` {record.title}"
-    issue_pack.write_text(content, encoding="utf-8")
+    safe_pack.write_text(content, encoding="utf-8")
 
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:

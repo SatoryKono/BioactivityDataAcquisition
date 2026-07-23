@@ -17,7 +17,9 @@ import subprocess
 import sys
 import urllib.parse
 from collections import Counter, defaultdict
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
+from functools import lru_cache
 from hashlib import sha256
 from pathlib import Path
 from typing import Any
@@ -257,6 +259,12 @@ def _read_text(path: str) -> str:
     if len(data) > MAX_TEXT_SCAN_BYTES:
         return ""
     return data.decode("utf-8", errors="ignore")
+
+
+def _read_texts(paths: list[str]) -> dict[str, str]:
+    """Read bounded documentation texts concurrently on slow synced filesystems."""
+    with ThreadPoolExecutor(max_workers=min(8, len(paths) or 1)) as executor:
+        return dict(zip(paths, executor.map(_read_text, paths), strict=True))
 
 
 def _read_declared_metadata(path: str) -> str:
@@ -542,6 +550,7 @@ def _outgoing_links(text: str) -> list[str]:
     return links
 
 
+@lru_cache(maxsize=1)
 def _project_root_aliases() -> tuple[str, ...]:
     root = PROJECT_ROOT.resolve().as_posix().rstrip("/")
     aliases = {root}
@@ -748,7 +757,8 @@ def _build_inventory() -> dict[str, Any]:
     catalog = _load_structure_catalog()
     plan_lifecycle = _plan_lifecycle_map(catalog)
     docs_draft_successors = _docs_draft_successor_map(catalog)
-    texts = {path: _read_text(path) for path in source_paths if _should_scan_text(path)}
+    text_paths = [path for path in source_paths if _should_scan_text(path)]
+    texts = _read_texts(text_paths)
     duplicate_groups = _duplicate_groups(texts)
     routes = _load_routes()
     incoming: Counter[str] = Counter()

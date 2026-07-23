@@ -48,7 +48,6 @@ def test_cross_scope_links_use_required_titles():
             "3. Provider Health",
         ],
         # From DQ to other dashboards
-        ("bioetl-dq-v2", "bioetl-silver-reject-explorer"): [
             "Open Silver Reject Explorer",
             "Inspect Rejects",
             "Silver Reject Explorer",

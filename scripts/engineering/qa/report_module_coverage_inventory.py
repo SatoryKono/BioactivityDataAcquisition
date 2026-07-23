@@ -44,7 +44,13 @@ MOUNTED_SOURCE_TREE_STABILIZATION_ATTEMPTS = 12
 MOUNTED_SOURCE_TREE_STABILIZATION_SLEEP_SECONDS = 0.25
 
 
-def _write_text_atomically(path: Path, text: str) -> None:
+def _write_text_atomically(
+    path: Path, text: str, *, root: Path | None = None
+) -> None:
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        path = resolve_cli_path(path, root=root)
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp_path = path.with_name(f".{path.name}.{os.getpid()}.tmp")
     try:
@@ -753,7 +759,9 @@ def build_module_coverage_inventory(
 
 
 def _load_module_coverage_gates(repo_root: Path, gates_config: Path) -> dict[str, Any]:
-    path = gates_config if gates_config.is_absolute() else repo_root / gates_config
+    from scripts.engineering.common.repo_paths import resolve_cli_path
+
+    path = resolve_cli_path(gates_config, root=repo_root)
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         raise ValueError(f"Invalid module coverage gates config: {path}")
@@ -1157,17 +1165,20 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     if args.check:
-        if not args.json_out.exists():
-            print(f"[module-coverage-inventory] missing artifact: {args.json_out}")
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        json_out = resolve_cli_path(args.json_out, root=repo_root)
+        if not json_out.exists():
+            print(f"[module-coverage-inventory] missing artifact: {json_out}")
             return 1
-        current = args.json_out.read_text(encoding="utf-8")
+        current = json_out.read_text(encoding="utf-8")
         if current != rendered:
-            print(f"[module-coverage-inventory] stale artifact: {args.json_out}")
+            print(f"[module-coverage-inventory] stale artifact: {json_out}")
             return 1
         print("[module-coverage-inventory] artifact is current")
         return gate_exit
 
-    _write_text_atomically(args.json_out, rendered)
+    _write_text_atomically(args.json_out, rendered, root=repo_root)
     print(
         "[module-coverage-inventory] "
         f"modules={payload['summary']['source_module_count']}; json={args.json_out}"

@@ -51,11 +51,15 @@ def _composite_paths() -> list[Path]:
 
 
 def _read(path: Path) -> str:
-    return path.read_text(encoding="utf-8")
+    from scripts.engineering.common.repo_paths import ensure_repo_path
+
+    return ensure_repo_path(path).read_text(encoding="utf-8")
 
 
 def _write(path: Path, text: str) -> None:
-    path.write_text(text, encoding="utf-8")
+    from scripts.engineering.common.repo_paths import ensure_repo_path
+
+    ensure_repo_path(path).write_text(text, encoding="utf-8")
 
 
 def _replace(path: Path, old: str, new: str) -> bool:

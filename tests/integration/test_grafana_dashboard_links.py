@@ -416,7 +416,6 @@ def test_dashboard_titles_match_home_dashboard_navigation_names() -> None:
         "bioetl-dq-v2": "4. Data Quality",
         "bioetl-workflow-overview": "5. Workflow",
         "bioetl-alerts-slo": "6. Alerts & SLO",
-        "bioetl-silver-reject-explorer": "Silver Reject Explorer",
     }
 
     for dashboard_path in get_dashboard_files():
@@ -665,7 +664,6 @@ def test_tempo_drilldown_links_are_contextual() -> None:
         "bioetl-dq-v2.json",
         "bioetl-overview-v2.json",
         "bioetl-runtime.json",
-        "bioetl-silver-reject-explorer.json",
     )
     for dashboard_name in pipeline_scoped:
         _assert_pipeline_scoped_tempo_dashboard(dashboard_name)

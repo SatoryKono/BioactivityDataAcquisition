@@ -329,7 +329,14 @@ def _render_markdown(payload: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def write_artifacts(*, json_out: Path, md_out: Path) -> None:
+def write_artifacts(
+    *, json_out: Path, md_out: Path, root: Path | None = None
+) -> None:
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        json_out = resolve_cli_path(json_out, root=root)
+        md_out = resolve_cli_path(md_out, root=root)
     payload = build_payload()
     json_out.parent.mkdir(parents=True, exist_ok=True)
     md_out.parent.mkdir(parents=True, exist_ok=True)
@@ -341,6 +348,8 @@ def write_artifacts(*, json_out: Path, md_out: Path) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
+    from scripts.engineering.common.repo_paths import REPO_ROOT
+
     parser = argparse.ArgumentParser(
         description="Generate port-adapter-factory coverage artifacts."
     )
@@ -352,10 +361,14 @@ def main(argv: list[str] | None = None) -> int:
         help="Fail when committed JSON artifact drifts from generator output.",
     )
     args = parser.parse_args(argv)
+    root = REPO_ROOT
 
     if args.check:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        json_out = resolve_cli_path(args.json_out, root=root)
         expected = json.dumps(build_payload(), indent=2, sort_keys=True) + "\n"
-        actual = args.json_out.read_text(encoding="utf-8")
+        actual = json_out.read_text(encoding="utf-8")
         if actual != expected:
             print(
                 "[port-adapter-factory-coverage] artifact drift detected; "
@@ -367,7 +380,7 @@ def main(argv: list[str] | None = None) -> int:
         print("[ok] port adapter factory coverage is up to date")
         return 0
 
-    write_artifacts(json_out=args.json_out, md_out=args.md_out)
+    write_artifacts(json_out=args.json_out, md_out=args.md_out, root=root)
     payload = build_payload()
     print(
         "[port-adapter-factory-coverage] "

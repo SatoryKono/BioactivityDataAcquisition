@@ -28,7 +28,7 @@ jobs:
       - name: Run all performance benchmarks
         run: |
           mkdir -p reports/performance
-          uv run pytest tests/performance/ tests/benchmarks/ \
+          uv run --frozen --no-build pytest tests/performance/ tests/benchmarks/ \
             -m "benchmark or performance" \
             -p no:xdist \
             -v --tb=short \
@@ -40,7 +40,7 @@ jobs:
         run: |
           mkdir -p reports/performance
           if [ -f reports/performance/hotspot-observations.jsonl ]; then
-            uv run python -m scripts.engineering.qa report-hotspots \
+            uv run --frozen --no-build python -m scripts.engineering.qa report-hotspots \
               --observations reports/performance/hotspot-observations.jsonl \
               --budgets tests/performance/hotspot_budgets.json \
               --window-size 5 \

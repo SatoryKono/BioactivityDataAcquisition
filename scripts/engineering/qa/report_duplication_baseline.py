@@ -332,8 +332,14 @@ def _filter_clusters_by_actionability_categories(
     ]
 
 
-def _load_history_records(path: Path) -> list[dict[str, object]]:
+def _load_history_records(
+    path: Path, *, root: Path | None = None
+) -> list[dict[str, object]]:
     """Load prior JSONL history records when present."""
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        path = resolve_cli_path(path, root=root)
     if not path.exists():
         return []
 
@@ -846,13 +852,23 @@ def _trend_markdown_section(trend_summary: dict[str, object] | None) -> list[str
     return lines
 
 
-def _write_text(path: Path, content: str) -> None:
+def _write_text(path: Path, content: str, *, root: Path | None = None) -> None:
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        path = resolve_cli_path(path, root=root)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
 
 
-def _append_history_jsonl(path: Path, *, payload: dict[str, object]) -> None:
+def _append_history_jsonl(
+    path: Path, *, payload: dict[str, object], root: Path | None = None
+) -> None:
     """Append a compact observation record for later trend comparisons."""
+    if root is not None:
+        from scripts.engineering.common.repo_paths import resolve_cli_path
+
+        path = resolve_cli_path(path, root=root)
     path.parent.mkdir(parents=True, exist_ok=True)
     targets = payload.get("targets", [])
     record = {
@@ -939,7 +955,10 @@ def _parse_args() -> argparse.Namespace:
 
 
 def main() -> int:
+    from scripts.engineering.common.repo_paths import REPO_ROOT
+
     args = _parse_args()
+    root = REPO_ROOT
     snapshot_date = args.snapshot_date or date.today().isoformat()
     exclude_module_patterns = _compile_patterns(args.exclude_module_pattern)
     reports = [
@@ -974,7 +993,9 @@ def main() -> int:
         for report in reports
     ]
     history_records = (
-        _load_history_records(Path(args.history_jsonl)) if args.history_jsonl else []
+        _load_history_records(Path(args.history_jsonl), root=root)
+        if args.history_jsonl
+        else []
     )
     trend_summary = _build_trend_summary(
         history_records=history_records,
@@ -992,7 +1013,11 @@ def main() -> int:
     )
     json_path = Path(args.json_out)
     md_path = Path(args.md_out)
-    _write_text(json_path, json.dumps(payload, ensure_ascii=True, indent=2) + "\n")
+    _write_text(
+        json_path,
+        json.dumps(payload, ensure_ascii=True, indent=2) + "\n",
+        root=root,
+    )
     _write_text(
         md_path,
         _render_markdown(
@@ -1002,9 +1027,10 @@ def main() -> int:
             trend_summary=trend_summary,
             max_duplicate_clusters=args.max_duplicate_clusters,
         ),
+        root=root,
     )
     if args.history_jsonl:
-        _append_history_jsonl(Path(args.history_jsonl), payload=payload)
+        _append_history_jsonl(Path(args.history_jsonl), payload=payload, root=root)
 
     total = sum(report.duplicate_count for report in reports)
     raw_total = sum(

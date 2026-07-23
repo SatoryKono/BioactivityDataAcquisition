@@ -338,7 +338,10 @@ def _apply_default_rule(
 
 
 def fix_file(path: Path) -> bool:
-    text = path.read_text()
+    from scripts.engineering.common.repo_paths import ensure_repo_path
+
+    safe_path = ensure_repo_path(path)
+    text = safe_path.read_text(encoding="utf-8")
     lines = text.splitlines()
     lines = fix_link002(lines)
     lines = fix_link001(lines)
@@ -348,7 +351,7 @@ def fix_file(path: Path) -> bool:
         new_text += "\n"
 
     if new_text != text:
-        path.write_text(new_text)
+        safe_path.write_text(new_text, encoding="utf-8")
         return True
     return False
 

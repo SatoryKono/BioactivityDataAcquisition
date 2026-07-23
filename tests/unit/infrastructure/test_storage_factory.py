@@ -321,10 +321,10 @@ class TestStorageFactoryLocal:
                 audit=mock_audit,
             )
 
-            # Verify BronzeWriter was called with save_json
+            # Verify BronzeWriter was called with packed json_export flags
             mock_bronze.assert_called_once()
             call_kwargs = mock_bronze.call_args[1]
-            assert call_kwargs["save_json"] is True
+            assert call_kwargs["json_export"] == (True, None)
 
     def test_local_run_with_csv_exports(
         self,
@@ -404,10 +404,10 @@ class TestStorageFactoryEdgeCases:
 
             # Should still create context with default settings
             assert isinstance(result, StorageContext)
-            # BronzeWriter should be called with save_json=False
+            # BronzeWriter should be called with json_export disabled
             mock_bronze.assert_called_once()
             call_kwargs = mock_bronze.call_args[1]
-            assert call_kwargs["save_json"] is False
+            assert call_kwargs["json_export"] == (False, None)
 
     def test_adapter_is_properly_composed(
         self,

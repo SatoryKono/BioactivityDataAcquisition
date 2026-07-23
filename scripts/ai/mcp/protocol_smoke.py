@@ -115,33 +115,68 @@ def _load_server(config_path: Path, server_name: str) -> dict[str, Any]:
     return server
 
 
+def _validate_command_argv(command: list[str]) -> list[str]:
+    """Reject shell-metacharacter injection in MCP command argv."""
+    if not command or not command[0].strip():
+        raise ValueError("MCP server command must be a non-empty executable path")
+    # Never pass a shell string; keep argv as a list of discrete tokens.
+    dangerous = set("|&;<>`$(){}")
+    for token in command:
+        if any(char in token for char in dangerous):
+            raise ValueError(
+                "MCP protocol smoke refuses shell metacharacters in command argv: "
+                f"{token!r}"
+            )
+    return command
+
+
 def smoke_server(
     config_path: Path,
     server_name: str,
     *,
     timeout: float = 15.0,
 ) -> dict[str, Any]:
-    server = _load_server(config_path, server_name)
+    from scripts.engineering.common.repo_paths import (
+        REPO_ROOT,
+        ensure_path_within_root,
+    )
+
+    # Prefer confining to the repo root, but allow temporary fixture configs
+    # used by unit tests to live outside the checkout.
+    resolved_config = config_path.expanduser().resolve(strict=False)
+    try:
+        safe_config = ensure_path_within_root(resolved_config, REPO_ROOT)
+    except ValueError:
+        safe_config = ensure_path_within_root(
+            resolved_config, resolved_config.parent
+        )
+    server = _load_server(safe_config, server_name)
     resolved_cmd = _resolve_command(str(server["command"]))
-    command = [resolved_cmd, *map(str, server.get("args", []))]
+    # Prefer absolute resolved executable when available.
+    command = _validate_command_argv(
+        [resolved_cmd, *map(str, server.get("args", []))]
+    )
     # Windows CreateProcess cannot execute .bat/.cmd without a shell/comspec.
-    use_shell = os.name == "nt" and Path(resolved_cmd).suffix.lower() in {
-        ".bat",
-        ".cmd",
-    }
+    # Keep argv as a list and use shell only with an explicit comspec invocation
+    # so the child is not launched from a concatenated user-controlled string.
+    use_shell = False
+    popen_command: list[str] | str = command
+    if os.name == "nt" and Path(resolved_cmd).suffix.lower() in {".bat", ".cmd"}:
+        comspec = os.environ.get("ComSpec") or "cmd.exe"
+        popen_command = [comspec, "/c", *command]
     environment = os.environ.copy()
     environment.update({str(k): str(v) for k, v in server.get("env", {}).items()})
     started = time.monotonic()
     # Prefer repo root when wrappers use absolute paths outside the config dir.
-    cwd = config_path.parent
-    for candidate in (config_path.parent, Path.cwd(), *config_path.parents):
+    cwd = safe_config.parent
+    for candidate in (safe_config.parent, Path.cwd(), *safe_config.parents):
         if (candidate / "scripts" / "ai" / "mcp").is_dir() and (
             candidate / ".mcp.json"
         ).is_file():
             cwd = candidate
             break
     process = subprocess.Popen(
-        subprocess.list2cmdline(command) if use_shell else command,
+        popen_command,
         cwd=str(cwd),
         env=environment,
         stdin=subprocess.PIPE,

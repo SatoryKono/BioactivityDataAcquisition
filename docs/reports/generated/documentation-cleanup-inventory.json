@@ -4766,6 +4766,34 @@
       "catalog_lifecycle": null,
       "commit_policy": null,
       "declared_class": null,
+      "declared_status": "internal-published (architecture audit M4 #6513)",
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": null,
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "docs/00-project/ai/agents/guides/GOVERNANCE_ARTIFACT_REFRESH.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "00-project",
+      "status": "Active",
+      "surface_family": "active",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
       "declared_status": "internal-published (AI runtime guidance)",
       "diagram_kind": null,
       "duplicate_group": null,
@@ -87247,12 +87275,12 @@
       "archive-after-github-state-check": 121,
       "archive-after-migration": 95,
       "generate-automatically": 723,
-      "keep": 2147,
+      "keep": 2148,
       "reconcile-with-github-state": 4
     },
     "by_section": {
       ".github": 131,
-      "00-project": 290,
+      "00-project": 291,
       "01-requirements": 3,
       "02-architecture": 853,
       "03-data-model": 2,
@@ -87286,14 +87314,14 @@
       "tools": 1
     },
     "by_status": {
-      "Active": 1952,
+      "Active": 1953,
       "Archived": 80,
       "Canonical": 63,
       "Generated": 723,
       "Working": 272
     },
     "by_surface_family": {
-      "active": 1952,
+      "active": 1953,
       "archive": 80,
       "canonical": 63,
       "generated": 723,
@@ -87301,7 +87329,7 @@
     },
     "by_tracking_state": {
       "ignored_local": 1196,
-      "tracked": 1894
+      "tracked": 1895
     },
     "docs_reports_local_count": 1216,
     "duplicate_group_count": 2,
@@ -87322,8 +87350,8 @@
         "path": "docs/reports/evidence/project-legacy-compatibility-remediation/.quarantined-03-synthesis-corrupt-20260521"
       }
     ],
-    "total_doc_like": 3090,
+    "total_doc_like": 3091,
     "total_doc_like_ignored_local": 1196,
-    "total_doc_like_tracked": 1894
+    "total_doc_like_tracked": 1895
   }
 }
