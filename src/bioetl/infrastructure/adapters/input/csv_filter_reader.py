@@ -109,6 +109,19 @@ class CsvFilterReader:
         Returns:
             Tuple of (FilterLoadResult, fallback_mapping).
         """
+        return await asyncio.to_thread(
+            self._load_filter_with_fallback_sync,
+            source_path,
+            primary_column,
+            fallback_column,
+        )
+
+    def _load_filter_with_fallback_sync(
+        self,
+        source_path: str,
+        primary_column: str,
+        fallback_column: str,
+    ) -> tuple[FilterLoadResult, dict[str, str]]:
         df = self._read_csv_dataframe(source_path)
 
         # Build fallback mapping and collect IDs (including empty placeholders)
@@ -197,6 +210,15 @@ class CsvFilterReader:
         Returns:
             FilterLoadResult with column_ids and valid_combinations.
         """
+        return await asyncio.to_thread(
+            self._load_multi_column_filter_sync, source_path, columns
+        )
+
+    def _load_multi_column_filter_sync(
+        self,
+        source_path: str,
+        columns: list[FilterColumn],
+    ) -> FilterLoadResult:
         df = self._read_csv_dataframe(source_path)
         column_ids = self._processor.extract_column_ids_map(df, columns)
 

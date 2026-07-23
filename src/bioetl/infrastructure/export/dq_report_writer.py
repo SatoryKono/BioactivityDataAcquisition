@@ -6,6 +6,7 @@ Implements DQReportWriterPort from domain/ports.
 
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -250,6 +251,16 @@ class DQReportWriter:
         Returns:
             Path to the written report file.
         """
+        return await asyncio.to_thread(
+            self._write_report_sync, report, output_path, report_format
+        )
+
+    def _write_report_sync(
+        self,
+        report: BronzeDQReport | SilverDQReport | GoldDQReport,
+        output_path: Path,
+        report_format: DQReportFormat,
+    ) -> Path:
         # Ensure parent directory exists
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
