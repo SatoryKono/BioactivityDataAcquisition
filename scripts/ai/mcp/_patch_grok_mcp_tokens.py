@@ -36,7 +36,7 @@ def bump_timeouts(text: str) -> str:
 
 
 def wire_ref(text: str) -> str:
-    if 'x-ref-api-key' in text and "REF_TOOL_API_KEY" in text:
+    if "x-ref-api-key" in text and "REF_TOOL_API_KEY" in text:
         return text
     pattern = re.compile(
         r"(\[mcp_servers\.ref\]\s*\n"
@@ -82,8 +82,6 @@ def main() -> None:
             print("updated", path)
         else:
             print("unchanged", path)
-        idx = updated.find("[mcp_servers.ref]")
-        print(updated[idx : idx + 250] if idx >= 0 else "no ref section")
 
 
 if __name__ == "__main__":

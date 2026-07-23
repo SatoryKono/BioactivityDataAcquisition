@@ -1092,6 +1092,15 @@ repo_backed_unit_test_exceptions:
   - path: tests/unit/repo_backed/scripts/ai/mcp/test_protocol_smoke.py
     target_lane: repo-backed-unit
     protected_surface: scripts/ai/mcp/protocol_smoke.py
+  - path: tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/ai/mcp/{mcp_*_wrapper.sh,mcp_*_wrapper.ps1,support/**,check.sh}
+  - path: tests/unit/repo_backed/scripts/ai/mcp/test_repo_env_loaders.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/ops/support/load_repo_env.sh + scripts/ai/mcp/support/load_repo_env.ps1
+  - path: tests/unit/repo_backed/scripts/test_zed_workspace_config.py
+    target_lane: repo-backed-unit
+    protected_surface: .zed/{settings.json,tasks.json,mcp.json,snippets/**}
   - path: tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py
     target_lane: repo-backed-unit
     protected_surface: scripts/ops/runtime/docker/runtime_manager.py

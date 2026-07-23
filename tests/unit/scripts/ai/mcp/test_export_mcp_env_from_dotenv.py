@@ -7,6 +7,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 
 def run_export_script(
     repo_root: Path,
@@ -42,7 +44,7 @@ class TestExportMcpEnvFromDotenv:
 
     def test_script_exists(self) -> None:
         """Test that the export script exists."""
-        script_path = Path(__file__).parent.parent.parent.parent / "scripts/ai/mcp/export_mcp_env_from_dotenv.ps1"
+        script_path = Path(__file__).parent.parent.parent.parent.parent / "scripts/ai/mcp/export_mcp_env_from_dotenv.ps1"
         assert script_path.exists()
 
     def test_script_runs_without_errors(self, tmp_path: Path) -> None:
@@ -50,7 +52,7 @@ class TestExportMcpEnvFromDotenv:
         # Create minimal .env
         env_file = tmp_path / ".env"
         env_file.write_text("OPENAI_API_KEY=test_key\n", encoding="utf-8")
-        
+
         result = run_export_script(tmp_path)
         # Script should run without crashing (may have warnings but no errors)
         assert result.returncode == 0
@@ -59,7 +61,7 @@ class TestExportMcpEnvFromDotenv:
         """Test that process scope exports keys from .env."""
         env_file = tmp_path / ".env"
         env_file.write_text("OPENAI_API_KEY=test_key\n", encoding="utf-8")
-        
+
         result = run_export_script(tmp_path)
         assert result.returncode == 0
         assert "OPENAI_API_KEY" in result.stdout
@@ -69,7 +71,7 @@ class TestExportMcpEnvFromDotenv:
         """Test that -UserScope flag is accepted."""
         env_file = tmp_path / ".env"
         env_file.write_text("OPENAI_API_KEY=test_key\n", encoding="utf-8")
-        
+
         result = run_export_script(tmp_path, user_scope=True)
         assert result.returncode == 0
         assert "User-scope updates applied" in result.stdout
@@ -78,7 +80,7 @@ class TestExportMcpEnvFromDotenv:
         """Test that empty .env reports zero exported keys."""
         env_file = tmp_path / ".env"
         env_file.write_text("", encoding="utf-8")
-        
+
         result = run_export_script(tmp_path)
         assert result.returncode == 0
         assert "0 MCP-related keys present" in result.stdout
@@ -87,7 +89,7 @@ class TestExportMcpEnvFromDotenv:
         """Test that script uses the provided repo root."""
         env_file = tmp_path / ".env"
         env_file.write_text("OPENAI_API_KEY=test_key\n", encoding="utf-8")
-        
+
         result = run_export_script(tmp_path)
         assert result.returncode == 0
 
@@ -100,7 +102,7 @@ class TestExportMcpEnvFromDotenv:
             "GITHUB_TOKEN=ghp_test\n",
             encoding="utf-8"
         )
-        
+
         result = run_export_script(tmp_path)
         assert result.returncode == 0
         # Should export at least 3 keys
@@ -112,7 +114,7 @@ class TestExportMcpEnvFromDotenv:
         """Test that process-only message is shown without -UserScope."""
         env_file = tmp_path / ".env"
         env_file.write_text("OPENAI_API_KEY=test_key\n", encoding="utf-8")
-        
+
         result = run_export_script(tmp_path, user_scope=False)
         assert result.returncode == 0
         assert "Process-only" in result.stdout
@@ -120,9 +122,9 @@ class TestExportMcpEnvFromDotenv:
 
     def test_known_mcp_keys_listed(self) -> None:
         """Test that the script lists known MCP keys."""
-        script_path = Path(__file__).parent.parent.parent.parent / "scripts/ai/mcp/export_mcp_env_from_dotenv.ps1"
+        script_path = Path(__file__).parent.parent.parent.parent.parent / "scripts/ai/mcp/export_mcp_env_from_dotenv.ps1"
         content = script_path.read_text(encoding="utf-8")
-        
+
         # Check for known MCP keys in the script
         known_keys = [
             "GITHUB_TOKEN",

@@ -2,6 +2,7 @@
   "source_branch": "main",
   "source_commit": "51979de96630ce1eff88b6a2b82df04a5c9be157",
   "source_run_id": "local-issues-5710-5711-20260630",
+  "source_tree_sha256": "d6600c94c3e4fae1d262d14cfdc7e229c5a2099bc244417380d3414f65264f1d",
   "refreshed_at_utc": "2026-06-30T13:06:54.324571+00:00",
   "refresh_status": "captured",
   "total_cases": 8507,
@@ -380,5 +381,64 @@
       "total_duration_s": 4.272,
       "max_duration_s": 4.272
     }
-  ]
+  ],
+  "execution_context": {
+    "junit_source_count": 18,
+    "junit_sources": [
+      "S1-domain-core.xml",
+      "S1-domain-services.xml",
+      "S2-comp-iface.xml",
+      "S3-app-foundation.xml",
+      "S4-app-services.xml",
+      "S5-infra-adapters.xml",
+      "S6-crosscutting-unit.xml",
+      "S7-crosscutting-architecture-a.xml",
+      "S7-crosscutting-architecture-a2.xml",
+      "S7-crosscutting-architecture-a3.xml",
+      "S7-crosscutting-architecture-b.xml",
+      "S7-crosscutting-architecture-c.xml",
+      "S7-crosscutting-architecture-d.xml",
+      "S8-crosscutting-governance.xml",
+      "coverage-tail-owner-addendum.xml",
+      "export-execution-addendum.xml",
+      "infrastructure-owner-addendum.xml",
+      "repo-backed-storage-addendum.xml"
+    ],
+    "executed_count": 8507,
+    "worker_mode": "mixed: xdist unit/integration; serial contracts/repo-backed/memory",
+    "lane_wall_time_s": {
+      "S1-domain-core.xml": 274.486,
+      "S1-domain-services.xml": 35.982,
+      "S2-comp-iface.xml": 158.724,
+      "S3-app-foundation.xml": 27.407,
+      "S4-app-services.xml": 33.052,
+      "S5-infra-adapters.xml": 136.002,
+      "S6-crosscutting-unit.xml": 30.191,
+      "S7-crosscutting-architecture-a.xml": 265.502,
+      "S7-crosscutting-architecture-a2.xml": 419.688,
+      "S7-crosscutting-architecture-a3.xml": 553.6,
+      "S7-crosscutting-architecture-b.xml": 199.806,
+      "S7-crosscutting-architecture-c.xml": 1261.941,
+      "S7-crosscutting-architecture-d.xml": 675.427,
+      "S8-crosscutting-governance.xml": 268.474,
+      "coverage-tail-owner-addendum.xml": 3.648,
+      "export-execution-addendum.xml": 0.051,
+      "infrastructure-owner-addendum.xml": 20.994,
+      "repo-backed-storage-addendum.xml": 178.555
+    },
+    "explicit_exclusions": [
+      {
+        "lane": "live-provider-contracts",
+        "reason": "scheduled network-owned workflow"
+      },
+      {
+        "lane": "performance",
+        "reason": "benchmark-owned non-blocking workflow"
+      },
+      {
+        "lane": "manual-e2e",
+        "reason": "operator-triggered external-runtime lane"
+      }
+    ]
+  }
 }

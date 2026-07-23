@@ -29,6 +29,9 @@ def test_repo_env_loaders_preserve_mcp_token_aliases() -> None:
         assert "GRAFANA_SERVICE_ACCOUNT_TOKEN" in text
         assert "HUB_PAT_TOKEN" in text
 
+    assert 'export OPENROUTER_API_KEY="${OPENAI_API_KEY}"' not in shell_loader
+    assert "$env:OPENROUTER_API_KEY = $env:OPENAI_API_KEY" not in powershell_loader
+
 
 def test_token_validation_helpers_are_used_by_token_bearing_wrappers() -> None:
     assert (ROOT / "scripts/ai/mcp/support/token_validation.sh").exists()
@@ -87,6 +90,9 @@ def test_mcp_token_docs_cover_sources_rotation_validation_and_ci_stance() -> Non
         "CI/CD Stance",
         "GITHUB_PERSONAL_ACCESS_TOKEN",
         "BRAVE_API_KEY",
+        "OPENAI_API_KEY",
+        "OPENROUTER_API_KEY",
+        "configured separately",
         "90 days",
         "historical `.env` / `.env.local` path entries",
         "treated as exposed and rotated before use",
@@ -95,6 +101,7 @@ def test_mcp_token_docs_cover_sources_rotation_validation_and_ci_stance() -> Non
 
     assert "mcp-token-configuration.md" in governance
     assert "BIOETL_MCP_VALIDATE_ONLY=1" in governance
+    assert "BIOETL_UVX_DIRECT_NETWORK=1" in governance
     assert "token_validation.sh" in runtime_config
     assert "CI must not require personal MCP tokens" in runtime_config
     assert "third-party service tokens" in runtime_config
