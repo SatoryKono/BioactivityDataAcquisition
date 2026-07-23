@@ -2711,6 +2711,8 @@ def _build_runtime_cardinality_review_summary(
 
     if query_errors or degraded_reasons:
         summary["status"] = "degraded"
+        if current_violations:
+            summary["status"] = "failed"
         summary["mode"] = "live_review_unavailable"
         if query_errors:
             degraded_reasons.append(
