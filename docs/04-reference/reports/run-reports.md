@@ -82,3 +82,11 @@ records_in = records_out + sum(removals[*].count) + unaccounted
 - `full` — stage instrumented with reason maps
 - `partial` — coarse metrics / incomplete hooks
 - `not_tracked` — no accounting for stage
+
+## Related agent memory
+
+- Curated lesson: `src/memory/curated/lessons/run-reports-and-governance-hash-refresh.md`
+- Project memory entry: `docs/00-project/ai/memory/agent-memory.md` (Run reports + governance closeouts)
+- After `src/bioetl/**` changes, refresh inventory / topology SUMMARY / debt gates /
+  evidence_surface_sha256 (and test-telemetry hash if tests changed) before
+  architecture closeout.
