@@ -119,11 +119,11 @@ class FileWorkflowManifestStore(WorkflowManifestPort):
         started_at = perf_counter()
         status = "success"
         try:
-            manifests = tuple(
+            manifests = [
                 manifest
-                for path in sorted(self.base_path.glob("*.json"))
+                for path in self.base_path.glob("*.json")
                 if (manifest := self._load_manifest(path.stem)) is not None
-            )
+            ]
             return tuple(
                 sorted(
                     manifests,

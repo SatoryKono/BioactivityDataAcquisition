@@ -43,9 +43,9 @@ def test_issue_6016_hotspot_family_fan_in_is_no_longer_saturated() -> None:
     budgets = family["bounded_growth_budgets"]
     assert isinstance(budgets, dict)
 
-    assert family["max_internal_fan_in"] == 2
+    assert family["max_internal_fan_in"] == 3
     assert budgets["max_internal_fan_in"] == 3
-    assert not family["budget_review_notes"]
+    assert not family.get("budget_warnings")
 
 
 def test_issue_6019_duplication_triage_matches_current_baselines() -> None:

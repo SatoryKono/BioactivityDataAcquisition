@@ -56,7 +56,7 @@ class TestExportOptionsAndTableModels:
         assert options.include_manifests is True
         assert options.manifest_strict is False
         assert options.manifest_generated_at is None
-        assert options.allow_nondeterministic_manifest_timestamp is True
+        assert options.allow_nondeterministic_manifest_timestamp is False
         assert options.run_ids == ()
         assert options.code_revision is None
         assert options.requester is None

@@ -353,11 +353,16 @@ class TestBaseDeltaWriterAsync:
         assert result == expected_records
         mock_dataset.scanner.assert_called_once_with(columns=["id", "name"])
 
-    async def test_read_table_falls_back_to_arrow_table_when_dataset_reader_missing(
+    async def test_read_table_falls_back_to_active_parquet_when_dataset_reader_missing(
         self,
         writer: BaseDeltaWriter,
     ) -> None:
-        """Fallback to legacy full-table conversion when scanner reader is unavailable."""
+        """Fallback to active parquet file reads when scanner reader is unavailable.
+
+        Native ``to_pyarrow_table`` / full dataset scans can hang on Windows and
+        mixed checkouts, so ``read_delta_records`` uses ``file_uris`` +
+        ``pyarrow.parquet.read_table`` instead of a full Arrow table conversion.
+        """
         expected_records = [{"id": "1", "name": "test"}]
         mock_arrow_table = MagicMock()
         mock_arrow_table.to_pylist.return_value = expected_records
@@ -367,15 +372,35 @@ class TestBaseDeltaWriterAsync:
         mock_dataset.scanner.return_value = mock_scanner
         mock_delta_table = MagicMock()
         mock_delta_table.to_pyarrow_dataset.return_value = mock_dataset
-        mock_delta_table.to_pyarrow_table.return_value = mock_arrow_table
+        mock_delta_table.file_uris.return_value = [
+            "file:///C:/tmp/part-0.parquet",
+        ]
+        mock_delta_table.to_pyarrow_table.side_effect = AssertionError(
+            "native full-table scan must not be used"
+        )
 
-        with patch(
-            "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
-            return_value=mock_delta_table,
+        with (
+            patch(
+                "bioetl.infrastructure.storage.delta.table_ops."
+                "_can_use_pyarrow_dataset_scanner",
+                return_value=True,
+            ),
+            patch(
+                "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
+                return_value=mock_delta_table,
+            ),
+            patch(
+                "bioetl.infrastructure.storage.delta.table_ops.pq.read_table",
+                return_value=mock_arrow_table,
+            ) as mock_pq_read,
         ):
             result = await writer.read_table("existing_table", columns=["id", "name"])
 
         assert result == expected_records
-        mock_delta_table.to_pyarrow_table.assert_called_once_with(
-            columns=["id", "name"]
+        mock_dataset.scanner.assert_called_once_with(columns=["id", "name"])
+        mock_pq_read.assert_called_once_with(
+            "C:/tmp/part-0.parquet",
+            columns=["id", "name"],
+            use_threads=False,
         )
+        mock_delta_table.to_pyarrow_table.assert_not_called()

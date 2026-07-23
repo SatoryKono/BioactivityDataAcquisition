@@ -34,62 +34,71 @@ if TYPE_CHECKING:
         register_transformer,
     )
 
+_DATASOURCE_MODULE = "bioetl.composition.factories.datasource"
+_DATASOURCE_FACTORY_MODULE = (
+    "bioetl.composition.factories.datasource.data_source_factory"
+)
+_DQ_FACTORY_MODULE = "bioetl.composition.factories.dq.factory"
+_SERVICES_FACTORY_MODULE = "bioetl.composition.factories.services.factory"
+_STORAGE_MODULE = "bioetl.composition.factories.storage"
+_TRANSFORMER_FACTORY_MODULE = "bioetl.composition.factories.transformer_factory"
+
 _EXPORT_MAP: dict[str, tuple[str, str | None]] = {
     "BaseServicesFactory": (
-        "bioetl.composition.factories.services.factory",
+        _SERVICES_FACTORY_MODULE,
         "BaseServicesFactory",
     ),
     "DQServicesFactory": (
-        "bioetl.composition.factories.dq.factory",
+        _DQ_FACTORY_MODULE,
         "DQServicesFactory",
     ),
     "DataSourceCreatorProtocol": (
-        "bioetl.composition.factories.datasource.data_source_factory",
+        _DATASOURCE_FACTORY_MODULE,
         "DataSourceCreatorProtocol",
     ),
     "DataSourceFactory": (
-        "bioetl.composition.factories.datasource.data_source_factory",
+        _DATASOURCE_FACTORY_MODULE,
         "DataSourceFactory",
     ),
     "ServicesBuilder": (
-        "bioetl.composition.factories.services.factory",
+        _SERVICES_FACTORY_MODULE,
         "ServicesBuilder",
     ),
     "StorageBundle": (
-        "bioetl.composition.factories.storage",
+        _STORAGE_MODULE,
         "StorageBundle",
     ),
     "StorageContext": (
-        "bioetl.composition.factories.storage",
+        _STORAGE_MODULE,
         "StorageContext",
     ),
     "StorageFactory": (
-        "bioetl.composition.factories.storage",
+        _STORAGE_MODULE,
         "StorageFactory",
     ),
     "create_data_normalization_service": (
-        "bioetl.composition.factories.services.factory",
+        _SERVICES_FACTORY_MODULE,
         "create_data_normalization_service",
     ),
     "create_transformer": (
-        "bioetl.composition.factories.transformer_factory",
+        _TRANSFORMER_FACTORY_MODULE,
         "create_transformer",
     ),
-    "datasource": ("bioetl.composition.factories.datasource", None),
+    "datasource": (_DATASOURCE_MODULE, None),
     "get_data_source_creator": (
-        "bioetl.composition.factories.datasource.data_source_factory",
+        _DATASOURCE_FACTORY_MODULE,
         "get_data_source_creator",
     ),
     "get_transformer_class": (
-        "bioetl.composition.factories.transformer_factory",
+        _TRANSFORMER_FACTORY_MODULE,
         "get_transformer_class",
     ),
     "register_all_transformers": (
-        "bioetl.composition.factories.transformer_factory",
+        _TRANSFORMER_FACTORY_MODULE,
         "register_all_transformers",
     ),
     "register_transformer": (
-        "bioetl.composition.factories.transformer_factory",
+        _TRANSFORMER_FACTORY_MODULE,
         "register_transformer",
     ),
 }

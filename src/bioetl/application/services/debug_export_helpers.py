@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from datetime import UTC, date, datetime
+from datetime import date, datetime
 from pathlib import PurePath
 from typing import SupportsIndex, SupportsInt
 from uuid import UUID
 
+from bioetl.application.runtime_clock import RuntimeClock
 from bioetl.domain.behavior.identity_service import EntityIdentityGenerator
 from bioetl.domain.types import ErrorType
 
@@ -25,7 +26,8 @@ _SOURCE_ID_FIELDS = (
 
 
 def _utc_now() -> datetime:
-    return datetime.now(UTC)
+    """Operator/debug timestamp factory via RuntimeClock (not replay identity)."""
+    return RuntimeClock().now()
 
 
 def _normalize_text(value: object | None) -> str:

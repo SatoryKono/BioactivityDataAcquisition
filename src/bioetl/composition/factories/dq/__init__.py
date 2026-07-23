@@ -22,7 +22,7 @@ _PUBLIC_EXPORTS = {
     ),
 }
 
-__all__ = list(_PUBLIC_EXPORTS)
+__all__ = [*_PUBLIC_EXPORTS]
 
 
 def __getattr__(name: str) -> object:

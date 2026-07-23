@@ -43,7 +43,7 @@ _RUNTIME_MODULE_EXPORTS: dict[str, str] = dict(
 )
 _RUNTIME_MODULE_REGISTRY_ENTRY_COUNT = len(COMPOSITE_BOOTSTRAP_BUILDER_MODULES)
 
-__all__ = list(RUNTIME_PACKAGE_EXPORT_NAMES)
+__all__ = [*RUNTIME_PACKAGE_EXPORT_NAMES]
 
 _PUBLIC_EXPORTS: dict[str, str] = RUNTIME_PACKAGE_PUBLIC_EXPORTS
 # Includes apply_runtime_compatibility_patches as an explicit lazy bootstrap seam.

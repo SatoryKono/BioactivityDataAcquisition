@@ -221,16 +221,23 @@ class PanderaSilverValidator(BasePanderaValidator):
     Implements SilverValidatorPort protocol.
 
     In strict mode, validation fails if no schema is provided.
+    Production Silver writes default to strict (fail-closed) binding.
 
     Args:
         schema: Pandera DataFrameSchema for validation. If None and strict=False,
             validation is skipped. If None and strict=True, validation fails.
-        strict: If True, requires schema to be provided. Default False for
-            backward compatibility.
+        strict: If True, requires schema to be provided. Default True so unbound
+            Silver contracts fail closed unless an explicit opt-out is chosen.
 
     """
 
     layer_name: ClassVar[str] = "Silver"
+
+    def __init__(
+        self, schema: pa.DataFrameSchema | None = None, *, strict: bool = True
+    ) -> None:
+        """Initialize Silver validator with strict schema binding by default."""
+        super().__init__(schema=schema, strict=strict)
 
 
 class PanderaGoldValidator(BasePanderaValidator):

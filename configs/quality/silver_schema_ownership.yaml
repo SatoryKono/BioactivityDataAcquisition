@@ -1,0 +1,82 @@
+schema_version: 1
+description: 'First-class Silver Pandera contract ownership map (architecture audit
+  H2 #6507).'
+write_path_gate:
+  validator_default_strict: true
+  production_factory_requires_validator: ServicesFactory._ensure_prod_silver_validator
+  creation_wiring: composition/factories/pipeline/_creation_wiring._create_silver_validator
+  allowlisted_bypass: NoOpValidator only for non-prod/test wiring when silver_validator
+    is None
+providers:
+- provider: chembl
+  pipeline_package: src/bioetl/application/pipelines/chembl
+  schema_package: src/bioetl/domain/schemas/chembl
+  schema_modules:
+  - chembl/activity.py
+  - chembl/assay.py
+  - chembl/assay_parameters.py
+  - chembl/cell_line.py
+  - chembl/compound_record.py
+  - chembl/molecule.py
+  - chembl/protein_classification.py
+  - chembl/publication.py
+  - chembl/publication_similarity.py
+  - chembl/publication_term.py
+  - chembl/subcellular_fraction.py
+  - chembl/target.py
+  - chembl/target_component.py
+  - chembl/target_protein_classification.py
+  - chembl/tissue.py
+  owner: application.pipelines + domain.schemas
+  write_path_binding: ContractAwareSilverValidator via composition factories; PanderaSilverValidator
+    strict=True by default
+- provider: crossref
+  pipeline_package: src/bioetl/application/pipelines/crossref
+  schema_package: src/bioetl/domain/schemas/crossref
+  schema_modules:
+  - crossref/publication.py
+  - crossref/work.py
+  owner: application.pipelines + domain.schemas
+  write_path_binding: ContractAwareSilverValidator via composition factories; PanderaSilverValidator
+    strict=True by default
+- provider: openalex
+  pipeline_package: src/bioetl/application/pipelines/openalex
+  schema_package: src/bioetl/domain/schemas/openalex
+  schema_modules:
+  - openalex/publication.py
+  owner: application.pipelines + domain.schemas
+  write_path_binding: ContractAwareSilverValidator via composition factories; PanderaSilverValidator
+    strict=True by default
+- provider: pubchem
+  pipeline_package: src/bioetl/application/pipelines/pubchem
+  schema_package: src/bioetl/domain/schemas/pubchem
+  schema_modules:
+  - pubchem/compound.py
+  owner: application.pipelines + domain.schemas
+  write_path_binding: ContractAwareSilverValidator via composition factories; PanderaSilverValidator
+    strict=True by default
+- provider: pubmed
+  pipeline_package: src/bioetl/application/pipelines/pubmed
+  schema_package: src/bioetl/domain/schemas/pubmed
+  schema_modules:
+  - pubmed/publication.py
+  owner: application.pipelines + domain.schemas
+  write_path_binding: ContractAwareSilverValidator via composition factories; PanderaSilverValidator
+    strict=True by default
+- provider: semanticscholar
+  pipeline_package: src/bioetl/application/pipelines/semanticscholar
+  schema_package: src/bioetl/domain/schemas/semanticscholar
+  schema_modules:
+  - semanticscholar/publication.py
+  owner: application.pipelines + domain.schemas
+  write_path_binding: ContractAwareSilverValidator via composition factories; PanderaSilverValidator
+    strict=True by default
+- provider: uniprot
+  pipeline_package: src/bioetl/application/pipelines/uniprot
+  schema_package: src/bioetl/domain/schemas/uniprot
+  schema_modules:
+  - uniprot/idmapping.py
+  - uniprot/protein.py
+  owner: application.pipelines + domain.schemas
+  write_path_binding: ContractAwareSilverValidator via composition factories; PanderaSilverValidator
+    strict=True by default

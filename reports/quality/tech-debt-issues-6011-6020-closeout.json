@@ -108,9 +108,9 @@
       ],
       "outcome": "Duplication clusters were classified for actionability without mechanical deduplication: hotspot duplication is 13 clusters (within budget), full-app duplication remains governed at 40 clusters, and broader application/composition report-only duplication remains triaged as facade/wiring/contract-pattern work.",
       "triage": {
-        "hotspot_duplicate_clusters": 13,
+        "hotspot_duplicate_clusters": 6,
         "full_app_duplicate_clusters": 0,
-        "broad_report_only_duplicate_clusters": 106,
+        "broad_report_only_duplicate_clusters": 103,
         "recommended_follow_up": [
           "Keep hotspot families at zero duplicate clusters.",
           "Treat infrastructure adapter export-facade clusters as low-risk governance visibility, not immediate mechanical deduplication.",

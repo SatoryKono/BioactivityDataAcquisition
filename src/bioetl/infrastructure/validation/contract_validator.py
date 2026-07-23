@@ -303,10 +303,10 @@ class ContractAwareSilverValidator(PanderaSilverValidator):
         self,
         schema: pa.DataFrameSchema | None = None,
         *,
-        strict: bool = False,
+        strict: bool = True,
         dq_config: DQConfig | None = None,
     ) -> None:
-        """Initialize contract-aware Silver validator."""
+        """Initialize contract-aware Silver validator (strict binding by default)."""
         super().__init__(schema=schema, strict=strict)
         self._dq_config = dq_config
         self._policy_resolver = DQPolicyResolver(dq_config) if dq_config else None
