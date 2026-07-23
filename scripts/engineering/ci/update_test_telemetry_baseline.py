@@ -163,11 +163,14 @@ def _derive_slowest_summary_from_junit_paths(
     junit_paths: list[Path],
 ) -> dict[str, object]:
     rows: list[dict[str, object]] = []
-    for junit_path in junit_paths:
+    junit_testcase_duration_sum_s: dict[str, float] = {}
+    for junit_path in sorted(junit_paths, key=lambda path: path.as_posix()):
         if not junit_path.exists():
             continue
         root = ET.parse(junit_path).getroot()
+        duration_sum = 0.0
         for testcase in root.iter("testcase"):
+            duration_sum += float(testcase.attrib.get("time", "0") or 0.0)
             duration = float(testcase.attrib.get("time", "0") or 0.0)
             if duration <= 0:
                 continue
@@ -181,6 +184,7 @@ def _derive_slowest_summary_from_junit_paths(
                     "duration_s": round(duration, 3),
                 }
             )
+        junit_testcase_duration_sum_s[junit_path.as_posix()] = round(duration_sum, 3)
 
     rows.sort(key=lambda row: float(row["duration_s"]), reverse=True)
     return {
@@ -188,10 +192,14 @@ def _derive_slowest_summary_from_junit_paths(
         "top_slowest": rows[:25],
         "execution_context": {
             "junit_source_count": len([path for path in junit_paths if path.exists()]),
-            "junit_sources": [path.name for path in junit_paths if path.exists()],
+            "junit_sources": [
+                path.name
+                for path in sorted(junit_paths, key=lambda path: path.as_posix())
+                if path.exists()
+            ],
             "executed_count": len(rows),
             "worker_mode": "caller-declared; see source run metadata",
-            "junit_testcase_duration_sum_s": {},
+            "junit_testcase_duration_sum_s": junit_testcase_duration_sum_s,
             "explicit_exclusions": [],
         },
     }
