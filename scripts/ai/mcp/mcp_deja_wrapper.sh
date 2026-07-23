@@ -14,7 +14,7 @@ unset BIOETL_SKIP_ENV_LOCAL
 source "${SCRIPT_DIR}/support/token_validation.sh"
 
 export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-${REPO_ROOT}/.cache/npm-cache}"
-export DEJA_AUTO_RECALL_PATH="${REPO_ROOT}/.codex/AGENTS.md"
+export DEJA_AUTO_RECALL_PATH="${REPO_ROOT}/AGENTS.md"
 
 mcp_exit_if_validate_only "deja"
 
