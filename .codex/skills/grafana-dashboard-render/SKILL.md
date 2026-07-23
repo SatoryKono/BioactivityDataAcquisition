@@ -74,6 +74,10 @@ Interpretation:
 
 - `grafana: ok` means Grafana API is reachable
 - `grafana-render-auth: ok` means render-sensitive auth is valid
+- `grafana-renderer: ok` means the authenticated Grafana instance advertises
+  its remote renderer as available
+- `prometheus-bioetl-target: ok` means exactly one BioETL scrape target is
+  active and `UP`
 - `playwright-runtime: ok/error` tells you whether browser fallback can work on
   this host
 - `quarantine-explorer: ok/error` tells you whether HTTP-backed dashboard panels
@@ -151,8 +155,9 @@ When blocked:
 ## Host And Env Notes
 
 - Repo env bootstrap: `scripts/ops/support/load_repo_env.sh`
-- The canonical local Grafana default is `admin/changeme` unless repo env says
-  otherwise.
+- Grafana rendering has no built-in password. Set `GRAFANA_PASSWORD`, fall back
+  to the compose-compatible `GF_SECURITY_ADMIN_PASSWORD`, or provide a service
+  account token at runtime. Never log the resolved secret.
 - Service-account auth may be provided through `GRAFANA_SERVICE_ACCOUNT_TOKEN`.
 - Quarantine Explorer-backed dashboards may require a live BioETL HTTP backend
   on `127.0.0.1:8081`.

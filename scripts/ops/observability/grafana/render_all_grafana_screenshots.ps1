@@ -20,7 +20,7 @@ Usage:
 Options:
   -BaseUrl                 Grafana base URL. Default: GRAFANA_BASE_URL or http://localhost:3000
   -Username                Grafana username. Default: GRAFANA_USERNAME or admin
-  -Password                Grafana password. Default: GRAFANA_PASSWORD or changeme
+  -Password                Grafana password. Default: GRAFANA_PASSWORD, then GF_SECURITY_ADMIN_PASSWORD; no built-in password
   -PlaywrightBrowsersPath  Browser cache path. Default: PLAYWRIGHT_BROWSERS_PATH or %TEMP%\playwright-browsers
   -OutputDir               Screenshot output dir. Default: reports/observability/grafana/screenshots
   -TimeoutSeconds          Per-dashboard timeout. Default: 60
@@ -136,7 +136,15 @@ function Resolve-PythonCommand {
 
 $ResolvedBaseUrl = if ($BaseUrl) { $BaseUrl } elseif ($env:GRAFANA_BASE_URL) { $env:GRAFANA_BASE_URL } else { "http://localhost:3000" }
 $ResolvedUsername = if ($Username) { $Username } elseif ($env:GRAFANA_USERNAME) { $env:GRAFANA_USERNAME } else { "admin" }
-$ResolvedPassword = if ($Password) { $Password } elseif ($env:GRAFANA_PASSWORD) { $env:GRAFANA_PASSWORD } else { "changeme" }
+$ResolvedPassword = if ($Password) {
+    $Password
+} elseif ($env:GRAFANA_PASSWORD) {
+    $env:GRAFANA_PASSWORD
+} elseif ($env:GF_SECURITY_ADMIN_PASSWORD) {
+    $env:GF_SECURITY_ADMIN_PASSWORD
+} else {
+    ""
+}
 $ResolvedBrowsersPath = if ($PlaywrightBrowsersPath) {
     $PlaywrightBrowsersPath
 } elseif ($env:PLAYWRIGHT_BROWSERS_PATH) {

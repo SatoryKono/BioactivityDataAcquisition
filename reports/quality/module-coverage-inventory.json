@@ -18683,7 +18683,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.observability.prometheus_metric_label_policy_sets",
       "path": "src/bioetl/infrastructure/observability/prometheus_metric_label_policy_sets.py",
-      "source_lines": 159
+      "source_lines": 161
     },
     {
       "coverage_percent": 100.0,
@@ -41125,7 +41125,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.observability.prometheus_metric_label_policy_sets",
       "path": "src/bioetl/infrastructure/observability/prometheus_metric_label_policy_sets.py",
-      "source_lines": 159
+      "source_lines": 161
     },
     {
       "coverage_percent": 100.0,
@@ -44890,7 +44890,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-13",
-  "source_tree_sha256": "41af286d6f714a7268cbc6e4406433d3ea6172a508af5acf36721fd341c2a24d",
+  "source_tree_sha256": "ea304d4b0c6a93dcb1bb38643bf06b270123b076e9ef1635a3a194a63e3b7df3",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

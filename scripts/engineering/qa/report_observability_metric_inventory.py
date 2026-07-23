@@ -22,7 +22,7 @@ import re
 import subprocess
 import sys
 import types
-from collections import defaultdict
+from collections import Counter, defaultdict
 from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Final, Protocol, TypedDict
@@ -47,6 +47,9 @@ from bioetl.infrastructure.observability import (  # noqa: E402
 )
 from bioetl.infrastructure.observability.metrics_export_names import (  # noqa: E402
     METRICS_DEFINITION_EXPORT_NAMES,
+)
+from bioetl.infrastructure.observability.prometheus_metric_label_policy_sets import (  # noqa: E402
+    FORBIDDEN_PROMETHEUS_LABEL_NAMES,
 )
 from bioetl.infrastructure.observability.prometheus_metric_registries import (  # noqa: E402
     COUNTERS,
@@ -2373,6 +2376,85 @@ def _query_prometheus_label_values(
     }
 
 
+def _query_prometheus_retained_series(
+    *,
+    prometheus_base_url: str,
+    label_name: str,
+    bearer_token: str,
+) -> list[dict[str, str]]:
+    """Return retained labelsets, including inactive TSDB series and companions."""
+    matcher = '{__name__=~"bioetl_.*",' + label_name + '=~".+"}'
+    request = Request(
+        url=prometheus_base_url.rstrip("/")
+        + "/api/v1/series?"
+        + urlencode(
+            {
+                "match[]": matcher,
+                "start": "0",
+                "end": str(int(datetime.now(UTC).timestamp())),
+            }
+        ),
+        headers={"Accept": "application/json"},
+    )
+    if bearer_token:
+        request.add_header("Authorization", f"Bearer {bearer_token}")
+    try:
+        with urlopen(request, timeout=_PROMETHEUS_QUERY_TIMEOUT_SECONDS) as response:
+            payload = json.load(response)
+    except HTTPError as exc:  # pragma: no cover - exercised via mocked failures
+        raise RuntimeError(f"HTTP {exc.code}") from exc
+    except URLError as exc:  # pragma: no cover - exercised via mocked failures
+        raise RuntimeError(str(exc.reason)) from exc
+    if not isinstance(payload, dict) or payload.get("status") != "success":
+        raise RuntimeError("unexpected Prometheus series API response")
+    data = payload.get("data")
+    if not isinstance(data, list):
+        raise RuntimeError("missing Prometheus series API data payload")
+    return [
+        {str(key): str(value) for key, value in labelset.items()}
+        for labelset in data
+        if isinstance(labelset, dict)
+    ]
+
+
+def _build_forbidden_label_live_evidence(
+    *, prometheus_base_url: str, bearer_token: str
+) -> dict[str, object]:
+    """Separate current forbidden-label violations from retained contamination."""
+    current: dict[str, int] = {}
+    retained: dict[str, dict[str, object]] = {}
+    errors: dict[str, str] = {}
+    for label_name in sorted(FORBIDDEN_PROMETHEUS_LABEL_NAMES):
+        try:
+            current[label_name] = _query_prometheus_scalar(
+                prometheus_base_url=prometheus_base_url,
+                query=(
+                    f'count({{__name__=~"bioetl_.*",{label_name}=~".+"}}) or vector(0)'
+                ),
+                bearer_token=bearer_token,
+            )
+            retained_series = _query_prometheus_retained_series(
+                prometheus_base_url=prometheus_base_url,
+                label_name=label_name,
+                bearer_token=bearer_token,
+            )
+        except RuntimeError as exc:
+            errors[label_name] = str(exc)
+            continue
+        metric_counts = Counter(
+            labelset.get("__name__", "<unknown>") for labelset in retained_series
+        )
+        retained[label_name] = {
+            "series_count": len(retained_series),
+            "metric_series": dict(sorted(metric_counts.items())),
+        }
+    return {
+        "current_series": current,
+        "retained_series": retained,
+        "query_errors": errors,
+    }
+
+
 def _git_source_provenance(repo_root: Path) -> dict[str, object]:
     """Capture revision and dirty state without coupling the two git probes."""
 
@@ -2514,6 +2596,11 @@ def _build_runtime_cardinality_review_summary(
             for metric_name in reviewed_metrics
         },
         "observed_label_values": observed_label_values,
+        "forbidden_label_current_series": {},
+        "forbidden_label_current_violations": [],
+        "forbidden_label_retained_series": {},
+        "forbidden_label_retained_contamination": [],
+        "forbidden_label_query_errors": {},
         **_git_source_provenance(repo_root),
     }
     if not reviewed_metrics:
@@ -2591,6 +2678,37 @@ def _build_runtime_cardinality_review_summary(
         except RuntimeError as exc:
             query_errors[metric_name] = str(exc)
 
+    forbidden_evidence = _build_forbidden_label_live_evidence(
+        prometheus_base_url=resolved_base_url,
+        bearer_token=bearer_token,
+    )
+    forbidden_current = forbidden_evidence["current_series"]
+    forbidden_retained = forbidden_evidence["retained_series"]
+    forbidden_errors = forbidden_evidence["query_errors"]
+    assert isinstance(forbidden_current, dict)
+    assert isinstance(forbidden_retained, dict)
+    assert isinstance(forbidden_errors, dict)
+    summary["forbidden_label_current_series"] = forbidden_current
+    summary["forbidden_label_retained_series"] = forbidden_retained
+    summary["forbidden_label_query_errors"] = forbidden_errors
+    current_violations = [
+        f"{label_name} current_series_count={count}"
+        for label_name, count in sorted(forbidden_current.items())
+        if isinstance(count, int) and count > 0
+    ]
+    retained_contamination = [
+        f"{label_name} retained_series_count={details.get('series_count')}"
+        for label_name, details in sorted(forbidden_retained.items())
+        if isinstance(details, dict) and details.get("series_count", 0) > 0
+    ]
+    summary["forbidden_label_current_violations"] = current_violations
+    summary["forbidden_label_retained_contamination"] = retained_contamination
+    if forbidden_errors:
+        query_errors["forbidden-label-audit"] = ", ".join(
+            f"{label_name}: {message}"
+            for label_name, message in sorted(forbidden_errors.items())
+        )
+
     if query_errors or degraded_reasons:
         summary["status"] = "degraded"
         summary["mode"] = "live_review_unavailable"
@@ -2610,6 +2728,8 @@ def _build_runtime_cardinality_review_summary(
                 f"{metric_name} observed_series_count={observed_series_count} approved_max_series={approved_max_series}"
             )
     if live_threshold_violations:
+        summary["status"] = "failed"
+    if current_violations:
         summary["status"] = "failed"
     return summary
 
@@ -3247,6 +3367,16 @@ def _render_runtime_cardinality_review_summary(
     if isinstance(live_threshold_violations, list) and live_threshold_violations:
         lines.append("- Live threshold violations:")
         lines.extend(f"  - `{row}`" for row in live_threshold_violations)
+
+    current_forbidden = summary.get("forbidden_label_current_violations", [])
+    if isinstance(current_forbidden, list) and current_forbidden:
+        lines.append("- Current forbidden-label violations:")
+        lines.extend(f"  - `{row}`" for row in current_forbidden)
+
+    retained_forbidden = summary.get("forbidden_label_retained_contamination", [])
+    if isinstance(retained_forbidden, list) and retained_forbidden:
+        lines.append("- Retained historical forbidden-label series:")
+        lines.extend(f"  - `{row}`" for row in retained_forbidden)
 
     query_errors = summary.get("query_errors", {})
     if isinstance(query_errors, dict) and query_errors:

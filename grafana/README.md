@@ -85,8 +85,10 @@ ______________________________________________________________________
 > `PATH`, so a global Node installation is no longer required on Windows.
 > It also uses the active `python` command or the repo-local
 > `.venv-win\Scripts\python.exe`, so a global `uv` install is not required.
-> For the local screenshot smoke it defaults to the common local Grafana creds
-> `admin/changeme` unless `GRAFANA_USERNAME` and `GRAFANA_PASSWORD` are already set.
+> Screenshot and audit commands never provide a password default. They use a
+> service-account token when `GRAFANA_SERVICE_ACCOUNT_TOKEN` is set; otherwise
+> they resolve the password from `GRAFANA_PASSWORD`, then the compose-compatible
+> `GF_SECURITY_ADMIN_PASSWORD`. Credentials are not printed in audit output.
 > To render every shipped dashboard after bootstrap on Windows, use
 > `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1`.
 > That helper also reuses or auto-downloads the same portable Node.js LTS
@@ -314,6 +316,7 @@ grafana/
 │   └── dashboards/
 │       └── bioetl.yaml                # Dashboard provisioning config
 └── dashboards/
+    ├── bioetl-alerts-slo.json         # 6. Alerts & SLO triage
     ├── bioetl-control-plane-v1.json   # 0. Control Plane, replay/resume safety
     ├── bioetl-overview-v2.json        # 1. Overview, canonical frozen v3 baseline
     ├── bioetl-runtime.json            # 2. Runtime triage: blockers, latency, backlog, handoffs
@@ -721,7 +724,7 @@ Host Machine (Windows/macOS/Linux)
 | Prometheus Targets | `http://localhost:9090/targets`    | 9090 | Статус scrape targets                   |
 | Prometheus API     | `http://localhost:9090/api/v1/...` | 9090 | HTTP API для PromQL                     |
 | Pushgateway        | `http://localhost:9091`            | 9091 | Push endpoint для ad-hoc/ephemeral jobs |
-| Grafana UI         | `http://localhost:3000`            | 3000 | Дашборды, логин: admin/admin            |
+| Grafana UI         | `http://localhost:3000`            | 3000 | Дашборды; пользователь `admin`, пароль из `GF_SECURITY_ADMIN_PASSWORD` |
 | Grafana Explore    | `http://localhost:3000/explore`    | 3000 | Ad-hoc PromQL запросы                   |
 | Grafana Dashboards | `http://localhost:3000/dashboards` | 3000 | Список дашбордов                        |
 | Loki API           | `http://localhost:3100`            | 3100 | Log query/search backend                |
@@ -1379,7 +1382,14 @@ collapsed row `Tracing-only Log Hygiene (requires optional tracing profile)`.
 - **Audience:** SRE, developer, data engineer
 - **Primary question:** где runtime теряет время, падает, копит backlog или даёт warning/error signals
 - **Variables:** shared `$workflow`, `$pipeline`, `$run_type`, `$run_id` plus bounded `$stage`
-- **Forbidden Prometheus labels:** `run_id`, `quarantine_run_id`, `payload_hash`, `manifest_id`, `execution_fingerprint`, `record_id`
+- **Forbidden Prometheus labels:** `run_id`, `quarantine_run_id`, `payload_hash`, `manifest_id`, `execution_fingerprint`, `record_id`, `filesystem_path`, `raw_exception_message`. The visible `$run_id` variable is an HTTP-backed Control Plane identity selector, never a Prometheus label.
+- **Current vs retained evidence:** the runtime cardinality review uses an
+  instant query to fail on current forbidden-label samples and the Prometheus
+  `/api/v1/series` retention view to report stale labelsets separately. The
+  retained view groups every metric name, including generated `*_created`
+  companions. Historical contamination is not evidence of a current emitter
+  violation; it must expire under the configured retention boundary or be
+  removed only through an explicitly approved, snapshot-first TSDB procedure.
 - **Top links:** navigation bus `0..6`, then `Silver Reject Explorer`,
   `Explore Logs`, `Explore Traces`; current Runtime stays disabled
 - **Known blocked panels:** `Retry vs Failure` и `Batch Size Distribution`
@@ -2326,10 +2336,11 @@ curl -s http://localhost:8000/metrics | grep "^bioetl_" | awk '{print $1}' | sor
 
 ### Почему shipped dashboards обновляются каждые 30 секунд?
 
-Текущий shipped pack использует единый `refresh: 30s` для всех операторских
-дашбордов. Это снижает нагрузку на Prometheus и сохраняет предсказуемое
-поведение для тяжёлых запросов (`histogram_quantile`, `rate`, агрегаты по
-labels, Loki log-hygiene queries).
+Операторские dashboards `0..6` используют `refresh: 30s`. Forensic
+`Silver Reject Explorer` намеренно использует `refresh: 1m` и окно `24h`,
+потому что его HTTP/Quarantine evidence разрежено и дороже aggregate PromQL.
+Остальные primary dashboards используют окно `12h`, кроме `6. Alerts & SLO`
+с окном `24h`.
 
 ### Где legacy v1 dashboards?
 
@@ -2553,7 +2564,9 @@ ______________________________________________________________________
 
 | Dashboard                 | UID                             | JSON version | Panels / rows | Refresh | Time Range | Primary surface | Purpose |
 | ------------------------- | ------------------------------- | ------------ | ------------- | ------- | ---------- | --------------- | ------- |
+| 0. Control Plane          | `bioetl-control-plane-v1`       | 2            | 52 / 5        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Replay/resume safety, checkpoints, manifests, ledger and identity evidence |
 | 1. Overview               | `bioetl-overview-v2`            | 1            | 21 / 4        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | L0 answer, compact L1 current-state cards, side-by-side Inputs/Workflow matrices, collapsed alert and historical detail |
+| 2. Runtime                | `bioetl-runtime`                | 3            | 38 / 4        | 30s     | 12h        | Prometheus + Quarantine Explorer identity; optional Loki | Runtime blockers, latency, backlog and bounded diagnostics |
 | 3. Provider Health        | `bioetl-provider-health-v2`     | 6            | 28 / 1        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Provider latency, health, retries, failure ratios |
 | 4. Data Quality           | `bioetl-dq-v2`                  | 4            | 34 / 2        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | CURRENT/SELECTED RUN/TIME RANGE scopes; freshness hours SLA 24/72; collapsed forensics |
 | 5. Workflow               | `bioetl-workflow-overview`      | 2            | 15 / 1        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Neutral zero counts, explicit outcome terminal states, collapsed step detail |
@@ -2617,14 +2630,18 @@ ______________________________________________________________________
 
 ### 28.1 Ограничение доступа к Grafana
 
-По умолчанию Grafana доступна без аутентификации (`GF_AUTH_ANONYMOUS_ENABLED=true`). Это подходит для локальной разработки, но в production необходимо включить аутентификацию:
+Shipped compose требует `GF_SECURITY_ADMIN_PASSWORD` и не задаёт пароль по
+умолчанию. Перед запуском экспортируйте секрет в текущей shell/session или
+используйте поддерживаемый локальный secret manager. Не сохраняйте пароль в
+репозитории и не передавайте его в командной строке, если доступна переменная
+окружения или service-account token.
 
 ```yaml
 # docker-compose.monitoring.yml — production конфигурация
 environment:
   GF_AUTH_ANONYMOUS_ENABLED: "false"
   GF_SECURITY_ADMIN_USER: "admin"
-  GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_ADMIN_PASSWORD}"  # Из .env файла
+  GF_SECURITY_ADMIN_PASSWORD: "${GF_SECURITY_ADMIN_PASSWORD:?required}"
   GF_USERS_ALLOW_SIGN_UP: "false"
 ```
 

@@ -5,23 +5,32 @@ Addresses OBS-003: Live Grafana/Prometheus Validation Gap
 """
 
 import argparse
+import base64
 import json
+import os
 import sys
-from dataclasses import dataclass, asdict
-from datetime import datetime, UTC
+from dataclasses import asdict, dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
-import base64
 
 # Configuration
 DEFAULT_PROMETHEUS_URL = "http://localhost:9090"
 DEFAULT_GRAFANA_URL = "http://localhost:3000"
 DEFAULT_GRAFANA_USERNAME = "admin"
-DEFAULT_GRAFANA_PASSWORD = "changeme"
+DEFAULT_GRAFANA_PASSWORD = ""
 DEFAULT_OUTPUT_DIR = Path("reports/observability/live-validation")
 DEFAULT_TIMEOUT = 5.0
+
+
+def _grafana_password_from_env() -> str:
+    return (
+        os.getenv("GRAFANA_PASSWORD", "").strip()
+        or os.getenv("GF_SECURITY_ADMIN_PASSWORD", "").strip()
+        or DEFAULT_GRAFANA_PASSWORD
+    )
 
 
 @dataclass
@@ -286,7 +295,10 @@ def check_grafana_dashboards(
         return ValidationResult(
             check_name="grafana_dashboards",
             status="pass" if len(bioetl_dashboards) >= 8 else "partial",
-            message=f"Grafana has {len(dashboard_uids)} dashboards, {len(bioetl_dashboards)} BioETL dashboards (expected 8)",
+            message=(
+                f"Grafana has {len(dashboard_uids)} dashboards, "
+                f"{len(bioetl_dashboards)} BioETL dashboards (expected 8)"
+            ),
             details={
                 "total_dashboards": len(dashboard_uids),
                 "bioetl_dashboards": len(bioetl_dashboards),
@@ -419,7 +431,12 @@ def main():
         "--grafana-username", default=DEFAULT_GRAFANA_USERNAME, help="Grafana username"
     )
     parser.add_argument(
-        "--grafana-password", default=DEFAULT_GRAFANA_PASSWORD, help="Grafana password"
+        "--grafana-password",
+        default=_grafana_password_from_env(),
+        help=(
+            "Grafana password from GRAFANA_PASSWORD or "
+            "GF_SECURITY_ADMIN_PASSWORD; no built-in password is used"
+        ),
     )
     parser.add_argument(
         "--timeout",

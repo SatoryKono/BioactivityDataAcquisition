@@ -28,8 +28,9 @@ DEFAULT_GRAFANA_BASE_URL = "http://localhost:3000"
 DEFAULT_PROMETHEUS_BASE_URL = "http://localhost:9090"
 DEFAULT_APP_BASE_URL = "http://localhost:8081"
 DEFAULT_GRAFANA_USERNAME = "admin"
-DEFAULT_GRAFANA_PASSWORD = "changeme"
+DEFAULT_GRAFANA_PASSWORD = ""
 DEFAULT_TIMEOUT_SECONDS = 5.0
+DEFAULT_PLAYWRIGHT_TIMEOUT_SECONDS = 30.0
 DEFAULT_SCREENSHOT_DIR = Path("reports/observability/grafana/screenshots")
 _DASHBOARD_DIR = Path("grafana/dashboards")
 
@@ -46,6 +47,14 @@ class PreflightCheck:
 def _read_env(name: str, default: str) -> str:
     value = os.getenv(name, "").strip()
     return value or default
+
+
+def _grafana_password_from_env() -> str:
+    """Resolve the compose-compatible Grafana password without a secret default."""
+    return _read_env(
+        "GRAFANA_PASSWORD",
+        _read_env("GF_SECURITY_ADMIN_PASSWORD", DEFAULT_GRAFANA_PASSWORD),
+    )
 
 
 def _fetch_json(url: str, timeout_seconds: float) -> object:
@@ -97,6 +106,12 @@ def _check_grafana_render_auth(
         selected_uids=(),
         fallback="auto",
     )
+    if not config.service_account_token and not config.password:
+        return PreflightCheck(
+            name="grafana-render-auth",
+            status="error",
+            detail=rerender_screenshots._describe_grafana_auth_failure(config),
+        )
     try:
         rerender_screenshots._request_json(
             f"{config.base_url}/api/frontend/settings",
@@ -124,6 +139,114 @@ def _check_grafana_render_auth(
         name="grafana-render-auth",
         status="ok",
         detail="frontend settings auth probe succeeded",
+    )
+
+
+def _check_grafana_renderer_health(
+    *,
+    grafana_base_url: str,
+    grafana_username: str,
+    grafana_password: str,
+    timeout_seconds: float,
+) -> PreflightCheck:
+    """Verify the authenticated Grafana instance advertises a renderer."""
+    config = rerender_screenshots.RenderConfig(
+        base_url=grafana_base_url.rstrip("/"),
+        username=grafana_username,
+        password=grafana_password,
+        service_account_token=_read_env("GRAFANA_SERVICE_ACCOUNT_TOKEN", ""),
+        output_dir=DEFAULT_SCREENSHOT_DIR,
+        width=rerender_screenshots.DEFAULT_WIDTH,
+        height=rerender_screenshots.DEFAULT_HEIGHT,
+        timeout_seconds=timeout_seconds,
+        selected_uids=(),
+        fallback="auto",
+    )
+    try:
+        payload = rerender_screenshots._request_json(
+            f"{config.base_url}/api/frontend/settings",
+            headers=rerender_screenshots._auth_headers(config),
+            timeout_seconds=timeout_seconds,
+        )
+    except Exception as exc:  # pragma: no cover - exercised by auth probe/tests
+        return PreflightCheck(
+            name="grafana-renderer",
+            status="error",
+            detail=f"renderer settings probe failed: {exc}",
+        )
+    if not isinstance(payload, dict) or payload.get("rendererAvailable") is not True:
+        return PreflightCheck(
+            name="grafana-renderer",
+            status="error",
+            detail="Grafana frontend settings report rendererAvailable != true",
+        )
+    return PreflightCheck(
+        name="grafana-renderer",
+        status="ok",
+        detail=(
+            "Grafana renderer is available"
+            + (
+                f" (version {payload['rendererVersion']})"
+                if payload.get("rendererVersion")
+                else ""
+            )
+        ),
+    )
+
+
+def _check_prometheus_bioetl_target(
+    *, prometheus_base_url: str, timeout_seconds: float
+) -> PreflightCheck:
+    """Fail closed unless the configured BioETL scrape target is present and UP."""
+    url = f"{prometheus_base_url.rstrip('/')}/api/v1/targets"
+    try:
+        payload = _fetch_json(url, timeout_seconds)
+    except Exception as exc:  # pragma: no cover - exercised by callers
+        return PreflightCheck(
+            name="prometheus-bioetl-target",
+            status="error",
+            detail=f"{url} failed: {exc}",
+        )
+    if not isinstance(payload, dict) or payload.get("status") != "success":
+        return PreflightCheck(
+            name="prometheus-bioetl-target",
+            status="error",
+            detail="Prometheus targets API returned an invalid response",
+        )
+    data = payload.get("data", {})
+    active_targets = data.get("activeTargets", []) if isinstance(data, dict) else []
+    bioetl_targets = [
+        target
+        for target in active_targets
+        if isinstance(target, dict)
+        and (
+            target.get("scrapePool") == "bioetl"
+            or (
+                isinstance(target.get("labels"), dict)
+                and target["labels"].get("job") == "bioetl"
+            )
+        )
+    ]
+    if len(bioetl_targets) != 1:
+        return PreflightCheck(
+            name="prometheus-bioetl-target",
+            status="error",
+            detail=f"expected exactly one active BioETL target, found {len(bioetl_targets)}",
+        )
+    target = bioetl_targets[0]
+    if target.get("health") != "up":
+        return PreflightCheck(
+            name="prometheus-bioetl-target",
+            status="error",
+            detail=(
+                f"BioETL target {target.get('scrapeUrl', '<unknown>')} is "
+                f"{target.get('health', 'unknown')}: {target.get('lastError', '')}"
+            ).rstrip(),
+        )
+    return PreflightCheck(
+        name="prometheus-bioetl-target",
+        status="ok",
+        detail=f"BioETL target {target.get('scrapeUrl', '<unknown>')} is UP",
     )
 
 
@@ -522,6 +645,7 @@ def run_checks(
     grafana_username: str,
     grafana_password: str,
     timeout_seconds: float,
+    playwright_timeout_seconds: float = DEFAULT_PLAYWRIGHT_TIMEOUT_SECONDS,
     screenshot_dir: Path,
     include_screenshot_check: bool = True,
     include_render_checks: bool = True,
@@ -545,6 +669,14 @@ def run_checks(
                 timeout_seconds=timeout_seconds,
             )
         )
+        checks.append(
+            _check_grafana_renderer_health(
+                grafana_base_url=grafana_base_url,
+                grafana_username=grafana_username,
+                grafana_password=grafana_password,
+                timeout_seconds=timeout_seconds,
+            )
+        )
     if include_semantic_checks:
         checks.append(
             _check_http_json(
@@ -553,8 +685,14 @@ def run_checks(
                 timeout_seconds=timeout_seconds,
             )
         )
+        checks.append(
+            _check_prometheus_bioetl_target(
+                prometheus_base_url=prometheus_base_url,
+                timeout_seconds=timeout_seconds,
+            )
+        )
     if include_render_checks:
-        playwright_check = _check_playwright_runtime(timeout_seconds)
+        playwright_check = _check_playwright_runtime(playwright_timeout_seconds)
         checks.extend([playwright_check, _check_expanded_row_capture(playwright_check)])
 
     if include_semantic_checks:
@@ -625,8 +763,11 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--grafana-password",
-        default=_read_env("GRAFANA_PASSWORD", DEFAULT_GRAFANA_PASSWORD),
-        help="Grafana password used for datasource discovery.",
+        default=_grafana_password_from_env(),
+        help=(
+            "Grafana password from GRAFANA_PASSWORD or "
+            "GF_SECURITY_ADMIN_PASSWORD; no built-in password is used."
+        ),
     )
     parser.add_argument(
         "--prometheus-base-url",
@@ -643,6 +784,12 @@ def _build_parser() -> argparse.ArgumentParser:
         type=float,
         default=DEFAULT_TIMEOUT_SECONDS,
         help="Per-endpoint timeout.",
+    )
+    parser.add_argument(
+        "--playwright-timeout-seconds",
+        type=float,
+        default=DEFAULT_PLAYWRIGHT_TIMEOUT_SECONDS,
+        help="Independent timeout for launching the Playwright Chromium probe.",
     )
     parser.add_argument(
         "--screenshot-dir",
@@ -701,6 +848,7 @@ def main(argv: list[str] | None = None) -> int:
         grafana_username=args.grafana_username,
         grafana_password=args.grafana_password,
         timeout_seconds=args.timeout_seconds,
+        playwright_timeout_seconds=args.playwright_timeout_seconds,
         screenshot_dir=args.screenshot_dir,
         include_screenshot_check=not args.skip_screenshot_check,
         include_render_checks=not args.skip_render_checks,

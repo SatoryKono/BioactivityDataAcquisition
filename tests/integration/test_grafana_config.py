@@ -40,7 +40,11 @@ PROMETHEUS_RULE_FILES = tuple(Path("grafana/prometheus-rules").glob("*.yml"))
 GRAFANA_DASHBOARD_PROVISIONING_PATH = Path(
     "grafana/provisioning/dashboards/bioetl.yaml"
 )
+GRAFANA_DASHBOARD_PROVISIONING_DIR = Path("grafana/provisioning/dashboards")
 GRAFANA_README_PATH = Path("grafana/README.md")
+PROMETHEUS_CONFIG_PATH = Path("grafana/prometheus.yml")
+MONITORING_COMPOSE_PATH = Path("docker-compose.monitoring.yml")
+DASHBOARD_USAGE_PATH = Path("docs/03-guides/dashboards/dashboard-v2-usage.md")
 _BIOETL_METRIC_TOKEN_RE = re.compile(r"\b(bioetl_[a-z0-9_]+)\b")
 _GRAFANA_VAR_TOKEN_RE = re.compile(r"\$(\{)?([\w]+)(?(1)\})")
 
@@ -767,6 +771,62 @@ def test_production_dashboard_provisioning_disables_ui_updates() -> None:
     )
 
 
+def test_dashboard_provisioning_has_one_owner_per_effective_path() -> None:
+    """A dashboard directory must not be loaded by competing file providers."""
+    providers_by_path: dict[str, list[str]] = {}
+    for provisioning_path in sorted(GRAFANA_DASHBOARD_PROVISIONING_DIR.glob("*.y*ml")):
+        payload = yaml.safe_load(provisioning_path.read_text(encoding="utf-8"))
+        providers = payload.get("providers", []) if isinstance(payload, dict) else []
+        for provider in providers:
+            if not isinstance(provider, dict) or provider.get("type") != "file":
+                continue
+            options = provider.get("options", {})
+            effective_path = (
+                str(options.get("path", "")).rstrip("/")
+                if isinstance(options, dict)
+                else ""
+            )
+            assert effective_path, (
+                f"{provisioning_path} file provider lacks options.path"
+            )
+            providers_by_path.setdefault(effective_path, []).append(
+                f"{provisioning_path.name}:{provider.get('name', '<unnamed>')}"
+            )
+
+    duplicates = {
+        path: owners for path, owners in providers_by_path.items() if len(owners) > 1
+    }
+    assert duplicates == {}, (
+        "Each effective dashboard directory must have exactly one provisioning owner: "
+        f"{duplicates}"
+    )
+    assert providers_by_path == {"/var/lib/grafana/dashboards": ["bioetl.yaml:BioETL"]}
+
+
+def test_default_prometheus_topology_scrapes_host_run_bioetl() -> None:
+    """The local-only monitoring stack must scrape the host-run application."""
+    payload = yaml.safe_load(PROMETHEUS_CONFIG_PATH.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    assert payload.get("global", {}).get("scrape_interval") == "15s"
+    jobs = {
+        job.get("job_name"): job
+        for job in payload.get("scrape_configs", [])
+        if isinstance(job, dict)
+    }
+    bioetl_job = jobs.get("bioetl")
+    assert isinstance(bioetl_job, dict), "Prometheus bioetl scrape job is missing"
+    targets = [
+        target
+        for static_config in bioetl_job.get("static_configs", [])
+        if isinstance(static_config, dict)
+        for target in static_config.get("targets", [])
+    ]
+    assert targets == ["host.docker.internal:8000"]
+
+    compose_text = MONITORING_COMPOSE_PATH.read_text(encoding="utf-8")
+    assert '"host.docker.internal:host-gateway"' in compose_text
+
+
 def test_monitoring_readme_dashboard_inventory_matches_shipped_json() -> None:
     """README dashboard inventory must not drift from shipped dashboard JSON files."""
     dashboard_names = sorted(path.name for path in get_dashboard_files())
@@ -778,6 +838,54 @@ def test_monitoring_readme_dashboard_inventory_matches_shipped_json() -> None:
         assert dashboard_name.removesuffix(".json") in readme, (
             f"grafana/README.md must mention shipped dashboard {dashboard_name}"
         )
+
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        root_panels = dashboard.get("panels", [])
+        row_count = sum(
+            1
+            for panel in root_panels
+            if isinstance(panel, dict) and panel.get("type") == "row"
+        )
+        panel_count = sum(
+            1
+            for panel in root_panels
+            if isinstance(panel, dict) and panel.get("type") != "row"
+        ) + sum(
+            len(panel.get("panels", []))
+            for panel in root_panels
+            if isinstance(panel, dict) and panel.get("type") == "row"
+        )
+        uid = str(dashboard.get("uid"))
+        summary_row = next(
+            (
+                line
+                for line in readme.splitlines()
+                if line.lstrip().startswith("|") and f"`{uid}`" in line
+            ),
+            None,
+        )
+        assert summary_row is not None, f"grafana/README.md summary lacks UID {uid}"
+        cells = [cell.strip() for cell in summary_row.strip().strip("|").split("|")]
+        assert cells[1:6] == [
+            f"`{uid}`",
+            str(dashboard.get("version")),
+            f"{panel_count} / {row_count}",
+            str(dashboard.get("refresh")),
+            str(dashboard.get("time", {}).get("from", "")).removeprefix("now-"),
+        ], (
+            f"grafana/README.md summary metadata drift for {dashboard_path.name}: "
+            f"actual cells={cells[1:6]}"
+        )
+
+
+def test_dashboard_usage_forbids_generic_run_id_to_forensic_mapping() -> None:
+    """Primary identity context must not leak into Explorer forensic selectors."""
+    usage = " ".join(DASHBOARD_USAGE_PATH.read_text(encoding="utf-8").split())
+    assert (
+        "Generic primary-dashboard handoffs MUST NOT map `run_id` into "
+        "`quarantine_run_id`."
+    ) in usage
 
 
 def test_dq_dashboard_contains_core_dq_metrics():

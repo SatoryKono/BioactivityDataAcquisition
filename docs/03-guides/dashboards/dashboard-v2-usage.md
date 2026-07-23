@@ -117,10 +117,11 @@ Detached audit backend contract:
 - Переменная `execution` не используется; `$quarantine_run_id` и
   `$payload_hash` остаются только в `bioetl-silver-reject-explorer`.
   `$run_id` в primary dashboards `0..5` сохраняется как HTTP-backed identity
-  context для `ID`/details panels и не становится Prometheus label. Handoffs
-  into `Silver Reject Explorer` additionally pass `$run_id` into
-  `$quarantine_run_id` so exact-run forensic review keeps the selected run
-  scope; generic handoffs out of the explorer do not export primary `$run_id`.
+  context для `ID`/details panels и не становится Prometheus label. Generic
+  primary-dashboard handoffs MUST NOT map `run_id` into `quarantine_run_id`.
+  Explorer receives only its target-owned bounded scope; exact forensic
+  identifiers may be supplied only by an explicit record/payload drilldown
+  whose source already owns that evidence.
 
 ## Что смотреть в первую очередь
 

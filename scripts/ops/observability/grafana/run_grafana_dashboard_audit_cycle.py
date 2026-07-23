@@ -58,6 +58,7 @@ SHIPPED_DASHBOARD_DIR = (
     Path(__file__).resolve().parents[4] / "grafana" / "dashboards"
 ).resolve()
 DEFAULT_PREFLIGHT_TIMEOUT_SECONDS = 5.0
+DEFAULT_PLAYWRIGHT_STARTUP_TIMEOUT_SECONDS = 30.0
 DEFAULT_RENDER_TIMEOUT_SECONDS = 60.0
 DEFAULT_PIPELINE = live_audit.DEFAULT_PIPELINE
 DEFAULT_RUN_TYPE = live_audit.DEFAULT_RUN_TYPE
@@ -76,6 +77,7 @@ class AuditCycleConfig:
     semantic_output_path: Path
     occurrence_id: str
     preflight_timeout_seconds: float
+    playwright_startup_timeout_seconds: float
     render_timeout_seconds: float
     ensure_observability_backend: bool
     refresh_observability_backend: bool
@@ -111,9 +113,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--grafana-password",
-        default=preflight._read_env(
-            "GRAFANA_PASSWORD", preflight.DEFAULT_GRAFANA_PASSWORD
-        ),
+        default=preflight._grafana_password_from_env(),
     )
     parser.add_argument("--prometheus-base-url", default=DEFAULT_PROMETHEUS_BASE_URL)
     parser.add_argument("--app-base-url", default=DEFAULT_APP_BASE_URL)
@@ -149,6 +149,12 @@ def _build_parser() -> argparse.ArgumentParser:
         "--render-timeout-seconds",
         type=float,
         default=DEFAULT_RENDER_TIMEOUT_SECONDS,
+    )
+    parser.add_argument(
+        "--playwright-startup-timeout-seconds",
+        type=float,
+        default=DEFAULT_PLAYWRIGHT_STARTUP_TIMEOUT_SECONDS,
+        help="Independent timeout for the Chromium launch preflight.",
     )
     parser.add_argument(
         "--ensure-observability-backend",
@@ -215,6 +221,7 @@ def _parse_args(argv: list[str] | None) -> AuditCycleConfig:
         semantic_output_path=semantic_output,
         occurrence_id=str(args.occurrence_id or uuid.uuid4()),
         preflight_timeout_seconds=args.preflight_timeout_seconds,
+        playwright_startup_timeout_seconds=args.playwright_startup_timeout_seconds,
         render_timeout_seconds=args.render_timeout_seconds,
         ensure_observability_backend=args.ensure_observability_backend,
         refresh_observability_backend=args.refresh_observability_backend,
@@ -250,6 +257,8 @@ def _run_preflight(
         app_base_url,
         "--timeout-seconds",
         str(config.preflight_timeout_seconds),
+        "--playwright-timeout-seconds",
+        str(config.playwright_startup_timeout_seconds),
         "--screenshot-dir",
         str(config.screenshot_dir),
     ]

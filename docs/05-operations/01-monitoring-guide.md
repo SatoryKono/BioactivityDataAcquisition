@@ -306,8 +306,10 @@ tracing-backed log hygiene живёт в collapsed row
   navigation bus `0..6`, then `Silver Reject Explorer`, `Explore Logs`,
   `Explore Traces`.
   Panel-level dashboard handoffs запрещены, если target уже доступен в
-  top-level шине. `run_id`, `payload_hash`, `record_id` в runtime dashboard
-  запрещены.
+  top-level шине. `run_id`, `payload_hash`, `record_id` запрещены как
+  Prometheus labels. Runtime `$run_id` остаётся разрешённым HTTP-backed
+  identity selector для Control Plane/RunLedger-backed panels; payload/record
+  forensics остаётся в Quarantine/CLI surfaces.
 
 - **Runbook routing**:
   `Pipeline Alert Conditions` -> `pipeline-failure-critical.md`,
