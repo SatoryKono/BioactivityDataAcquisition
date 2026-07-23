@@ -10,6 +10,7 @@ UV_CACHE_DIR="${UV_CACHE_DIR:-/tmp/uv-cache}"
 BIOETL_TOOLS_DIR="${BIOETL_TOOLS_DIR:-/tmp/bioetl-tools}"
 PLAYWRIGHT_RUNTIME_ROOT="${PLAYWRIGHT_RUNTIME_ROOT:-${BIOETL_TOOLS_DIR}/playwright-runtime}"
 PLAYWRIGHT_NODE_MODULES_DIR="${PLAYWRIGHT_NODE_MODULES_DIR:-${PLAYWRIGHT_RUNTIME_ROOT}/node_modules}"
+PREFER_ISOLATED_RUNTIME="${BIOETL_PLAYWRIGHT_PREFER_ISOLATED_RUNTIME:-auto}"
 LOCAL_SYSTEM_LIB_ROOT="${LOCAL_SYSTEM_LIB_ROOT:-${REPO_ROOT}/.cache/grafana-screenshot-runtime/root}"
 LOCAL_SYSTEM_DEB_DIR="${LOCAL_SYSTEM_DEB_DIR:-${REPO_ROOT}/.cache/grafana-screenshot-runtime/debs}"
 LOCAL_SYSTEM_LIB_DIR="${LOCAL_SYSTEM_LIB_DIR:-${LOCAL_SYSTEM_LIB_ROOT}/usr/lib/x86_64-linux-gnu}"
@@ -73,6 +74,9 @@ Environment:
   PLAYWRIGHT_BROWSERS_PATH  Browser download directory. Default: /tmp/playwright-browsers
   UV_CACHE_DIR              uv cache directory for smoke command. Default: /tmp/uv-cache
   BIOETL_TOOLS_DIR          Tool cache root. Default: /tmp/bioetl-tools
+  BIOETL_PLAYWRIGHT_PREFER_ISOLATED_RUNTIME
+                            true/false/auto. Auto uses the isolated /tmp tool
+                            runtime for WSL /mnt checkouts.
   LOCAL_SYSTEM_LIB_ROOT     User-space extracted Chromium libs root.
                             Default: .cache/grafana-screenshot-runtime/root
   LOCAL_SYSTEM_DEB_DIR      User-space downloaded .deb cache.
@@ -137,13 +141,17 @@ local_lib_available() {
 
 collect_missing_libs() {
   local missing=()
-  local lib
+  local lib ldconfig_output
   if ! have_command ldconfig; then
     printf '%s\n' "${missing[@]}"
     return 0
   fi
+  # Do not combine `grep -q` with `ldconfig -p` under `set -o pipefail`.
+  # `grep -q` exits on the first match and can make ldconfig receive SIGPIPE,
+  # which incorrectly classifies an installed library as missing.
+  ldconfig_output="$(ldconfig -p 2>/dev/null || true)"
   for lib in "${REQUIRED_LIBS[@]}"; do
-    if ! ldconfig -p 2>/dev/null | grep -Fq "${lib}" \
+    if ! grep -F "${lib}" >/dev/null <<<"${ldconfig_output}" \
       && ! local_lib_available "${lib}"; then
       missing+=("${lib}")
     fi
@@ -176,7 +184,8 @@ print_install_hint() {
 resolve_apt_package() {
   local candidate
   for candidate in "$@"; do
-    if apt-cache policy "${candidate}" 2>/dev/null | grep -Eq 'Candidate: [^(none)]'; then
+    if apt-cache policy "${candidate}" 2>/dev/null \
+      | awk '$1 == "Candidate:" && $2 != "(none)" { found = 1 } END { exit !found }'; then
       printf '%s\n' "${candidate}"
       return 0
     fi
@@ -300,7 +309,31 @@ install_playwright_tool_runtime() {
   PLAYWRIGHT_INSTALL_ROOT="${PLAYWRIGHT_RUNTIME_ROOT}"
 }
 
+prefer_isolated_runtime() {
+  case "${PREFER_ISOLATED_RUNTIME,,}" in
+    1|true|yes)
+      return 0
+      ;;
+    0|false|no)
+      return 1
+      ;;
+    auto)
+      [[ "${REPO_ROOT}" == /mnt/* ]]
+      return
+      ;;
+    *)
+      log "Invalid BIOETL_PLAYWRIGHT_PREFER_ISOLATED_RUNTIME=${PREFER_ISOLATED_RUNTIME}; expected true, false, or auto."
+      exit 2
+      ;;
+  esac
+}
+
 install_node_dependencies() {
+  if prefer_isolated_runtime; then
+    log "Using isolated Playwright runtime for mounted checkout ${REPO_ROOT}."
+    install_playwright_tool_runtime
+    return 0
+  fi
   log "Installing repo-local Node dependencies..."
   local npm_command=(npm install --include=dev --no-bin-links)
   if [[ -f "${REPO_ROOT}/package-lock.json" ]]; then

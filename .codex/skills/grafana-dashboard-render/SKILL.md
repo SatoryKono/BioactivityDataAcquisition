@@ -151,8 +151,10 @@ When blocked:
 ## Host And Env Notes
 
 - Repo env bootstrap: `scripts/ops/support/load_repo_env.sh`
-- The canonical local Grafana default is `admin/changeme` unless repo env says
-  otherwise.
+- Grafana auth must come from runtime env only:
+  `GF_SECURITY_ADMIN_PASSWORD` / `GRAFANA_PASSWORD` (optional
+  `GRAFANA_USERNAME` / `GF_SECURITY_ADMIN_USER`). Do not document or commit a
+  default password; preflight fails closed when auth material is missing.
 - Service-account auth may be provided through `GRAFANA_SERVICE_ACCOUNT_TOKEN`.
 - Quarantine Explorer-backed dashboards may require a live BioETL HTTP backend
   on `127.0.0.1:8081`.
