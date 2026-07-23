@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from bioetl.application.composite.runtime_wiring_api import (
+from bioetl.domain.normalization.join_keys import (
     JOIN_KEY_NORMALIZATION_POLICIES,
     JoinKeyNormalizationPolicy,
     stringify_join_key_value,
