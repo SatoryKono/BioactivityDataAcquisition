@@ -549,9 +549,23 @@ def test_discovered_chembl_pipeline_universe_matches_closure_contract() -> None:
 
 
 def test_plan_mode_is_non_mutating_and_lists_both_tracing_modes(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
     audit_root = tmp_path / "audit"
+    # Plan mode still reads source provenance; do not call real git status on
+    # the (possibly huge/cloud-synced) worktree from unit tests.
+    monkeypatch.setattr(
+        campaign,
+        "_source_provenance",
+        lambda _repo_root: {
+            "revision": "unit-test-revision",
+            "tree": "unit-test-tree",
+            "clean": True,
+            "dirty_entries": (),
+        },
+    )
 
     exit_code = campaign.main(
         ["--audit-root", str(audit_root), "--tracing-mode", "both"]
