@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-23T07:11:40.408416+00:00",
+  "generated_at": "2026-07-23T08:01:41.208205+00:00",
   "summary": {
     "total_scripts": 509,
     "status_counts": {
@@ -14882,7 +14882,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 93,
+          "line": 95,
           "source_group": "other",
           "text": "> `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1`."
         }
@@ -15047,7 +15047,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 1719,
+          "line": 1721,
           "source_group": "other",
           "text": "powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/start_quarantine_explorer.ps1"
         }
