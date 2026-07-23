@@ -102,7 +102,7 @@ Dev tools (`ruff`, `mypy`, `pytest`, `black` при необходимости) 
 
 Архивные копии/legacy-копии (`backup`, `old-*`, `archive*`, старые
 `BioactivityDataAcquisition*`-клонии) выносите вне active `Project content root`
-или явно mark as Excluded, чтобы они не индексировались и не влияли на search/indexing.  
+или явно mark as Excluded, чтобы они не индексировались и не влияли на search/indexing.
 Активный project root не должен содержать архивные копии и крупные generated datasets.
 
 ## 2. Настроить производительность IDE
@@ -159,9 +159,36 @@ machine-specific roots и runtime state. Для active checkout держите �
 
 ### 2.4 Локальные диски для производительности
 
-- Проверьте, что project root, `.venv`/`.venv-win`, и каталоги PyCharm System/Cache
-  (IDE settings) находятся на локальном SSD, а не на network/cloud-synced path.
+- **Path model (Windows):** JetBrains config/system/index обычно уже на `C:`
+  (`%APPDATA%` / `%LOCALAPPDATA%\JetBrains`). Это **не** гарантирует быстрый I/O
+  для Python, если project root и `.venv-win` лежат на cloud-synced volume
+  (например Google Drive mount).
+- Проверьте, что project root, `.venv`/`.venv-win` и tool caches (`UV_CACHE_DIR`,
+  pip/uv) находятся на локальном SSD, а не на network/cloud-synced path.
+- IDE system/cache path: default AppData on `C:` is fine; move only if custom
+  `idea.properties` pointed caches at a slow volume.
 - Для Windows это проверяется через path-реестр/ссылки в интерпретаторе и IDE settings.
+
+#### 2.4.1 Optional: local SSD layout for project / venv / caches
+
+Не обязательно для всех contributors. Используйте, если hangs / slow git /
+pytest I/O остаются после того, как IDE уже на `C:`.
+
+| Surface | Preferred |
+| ------- | --------- |
+| JetBrains config/system | `%APPDATA%` / `%LOCALAPPDATA%\JetBrains` (default) |
+| Canonical clone | local SSD path (e.g. `C:\dev\BioactivityDataAcquisition`) or git worktree |
+| `.venv-win` | same volume as clone |
+| UV / pip caches | `%LOCALAPPDATA%` or `%TEMP%` — not under a GDrive project tree |
+
+Steps when relocating:
+
+1. Clone or `git worktree add` on local SSD; open **that** path as the only active PyCharm project.
+2. Bootstrap `.\scripts\engineering\dev\setup_env_windows.ps1` on the new path.
+3. Point Project Interpreter at the new `.venv-win`.
+4. Run `.\scripts\engineering\dev\sync_pycharm_ide_templates.ps1`.
+5. Clean duplicate SDK entries and MCP env paths that still point at the old tree.
+6. Leave the cloud copy as backup/sync-only; do not commit path-specific SDK XML.
 
 ### 2.5 Windows Defender и security policy (по согласованию)
 
@@ -298,24 +325,40 @@ margin. Универсальный пример `100` из исходного п
 В `configs/ide/pycharm/runConfigurations/` публикуются только переносимые
 configuration templates:
 
-| Имя | Назначение |
-| --- | --- |
-| `pytest-fast` | unit/smoke набор: быстрый локальный прогон `tests/unit` без `coverage` |
-| `pytest-full` | весь локальный набор `tests` без `network` и `benchmark` |
-| `pytest-coverage` | отдельный прогон coverage: `--cov=bioetl`, отчёты `term-missing` и `xml`, порог `85` |
-| `pytest-debug` | текущий файл теста без `coverage` (обязательное `--no-cov` при необходимости), с `-s`, без `xdist` |
-| `ruff-check` | `ruff check src tests` |
-| `ruff-format-check` | `ruff format --check src tests` |
-| `mypy-full` | `mypy src tests` с project config |
-| `quality-gate` | `python -m scripts.engineering.ci quality-gate` |
-| `BioETL smoke (offline fixture)` | `chembl_activity` на трёх tracked Bronze records, без API |
+| Имя | Назначение | Shared? |
+| --- | --- | --- |
+| `pytest-fast` | unit lane `tests/unit`, без coverage | yes |
+| `pytest-full` | `tests`, exclude `network`/`benchmark`, без coverage | yes |
+| `pytest-coverage` | `--cov=bioetl`, reports + `--cov-fail-under=85` | yes |
+| `pytest-debug` | `$FilePath$`, `--no-cov -s -p no:xdist` | yes |
+| `pytest-architecture` | offline `tests/architecture`, `--no-cov` | yes |
+| `ruff-check` | `ruff check src tests` | yes |
+| `ruff-format-check` | `ruff format --check src tests` | yes |
+| `mypy-full` | `mypy src tests` | yes |
+| `quality-gate` | `python -m scripts.engineering.ci quality-gate` | yes |
+| `BioETL smoke (offline fixture)` | offline Bronze fixture, no live API | yes |
+| `Live_*` pipeline runs | real/network API, limit N | **local only** |
+| `Mypy Strict` / `Pytest All` compounds | non-canonical gates | **local only / discouraged** |
 
-Все configurations используют project interpreter, working directory
-`$PROJECT_DIR$`, package/module entry points и не содержат secrets или
-абсолютных пользовательских путей. Coverage не включён в fast/debug и не является
-глобальным дефолтом в `Run/Debug`/`On Save` для pytest.
-Каждая configuration должна запускаться после `clean clone` без ручного `PYTHONPATH`
-и без user-specific path overrides.
+**Policy for every shared run config:**
+
+- no manual `PYTHONPATH`
+- `ADD_CONTENT_ROOTS` / `ADD_SOURCE_ROOTS` = `false`
+- project interpreter + `$PROJECT_DIR$` working directory
+- `--no-cov` on all pytest lanes except `pytest-coverage`
+- no secrets / absolute user paths in XML
+
+После clean clone синхронизируйте templates (не raw `Copy-Item` всего `.idea`):
+
+```powershell
+.\scripts\engineering\dev\sync_pycharm_ide_templates.ps1
+# optional: -DryRun
+```
+
+```bash
+bash scripts/engineering/dev/sync_pycharm_ide_templates.sh
+# optional: --dry-run
+```
 
 Для CLI-проверки тех же поверхностей используйте поддерживаемые Windows
 wrappers:
@@ -327,6 +370,19 @@ wrappers:
 .\.venv-win\Scripts\python.exe -m ruff format --check src tests
 .\.venv-win\Scripts\python.exe -m scripts.engineering.ci quality-gate
 ```
+
+### 4.3.1 Local-only anti-patterns (replace with shared)
+
+| Anti-pattern | Why bad | Replace with |
+| --- | --- | --- |
+| `PYTHONPATH=$PROJECT_DIR$/src` | breaks editable-install contract | project SDK / `.venv-win` only |
+| `ADD_CONTENT_ROOTS` / `ADD_SOURCE_ROOTS` = true on quality runs | non-portable import roots | shared templates (`false`) |
+| `Mypy Strict` (`--strict --no-incremental src/bioetl/`) as daily gate | not CI authority | `mypy-full` |
+| `Pytest All` with empty `-m ""` | overrides `addopts` markers, may pull network/slow | `pytest-fast` / `pytest-full` |
+| Compound «CI Local Precommit» chaining Live limit-10 pipelines | expensive + live side effects | `quality-gate` + offline smoke |
+| Live contract env (`BIOETL_LIVE_API_TESTS=true`) without `Live_` name | easy accidental API hits | rename `Live_*`, keep local-only |
+| Black + Ruff format both active On Save | dual formatter drift | Ruff format only |
+| Multiple inline AI completion providers | lag / shortcut fights | one inline provider |
 
 ### 4.4 Debugger и smoke safety
 
@@ -350,6 +406,29 @@ wrappers:
 - Live API runs остаются локальными и должны явно называться `Live`; их нельзя
   публиковать с credentials или включать в общий quality gate.
 
+### 4.4.1 Hang / timeout playbook (`pytest-debug`)
+
+Repo default: `pytest-timeout` **60s**, `timeout_method = thread` in
+`pyproject.toml` (CI hang prevention). Do **not** raise the global default
+without a separate CI evidence issue / without increasing tech-debt budgets.
+
+When a test or IDE run looks “stuck”:
+
+1. Prefer shared `pytest-debug` (`--no-cov -s -p no:xdist`, `VCR_RECORD_MODE=none`).
+2. Confirm path model: project / `.venv-win` on cloud-sync volume can dominate I/O
+   even when JetBrains config/index is on `C:`.
+3. Confirm you did not enable coverage or xdist on the debug config.
+4. Hang diagnosis only — optional **local** override on that run config or CLI:
+   - `--timeout=0` (disable per-test timeout for attach), or
+   - elevated `--timeout=300` for a single debug session.
+5. Decision tree: disk/path → wrong run config → heavy import graph →
+   per-test `@pytest.mark.timeout(N)`.
+6. CLI equivalent:
+
+```powershell
+.\scripts\engineering\dev\run_pytest.ps1 path\to\test_file.py -s -p no:xdist --timeout=0
+```
+
 ### 4.5 AI plugins
 
 Для inline completion активен ровно один provider (в baseline — GitHub Copilot).
@@ -358,6 +437,10 @@ Codeium и DeepSeek inline completion должны быть выключены; 
 plugins также не должны конкурировать за inline UI. Один отдельный ручной
 chat/agent integration допустим, если он не включает inline completion и его
 политика передачи project context проверена.
+
+Project AI prompts **SHOULD** point at `AGENTS.md` →
+`docs/00-project/NORMATIVE_SOURCES.md` → `RULES.md` / `REQUIREMENTS.md`.
+Avoid stale CLAUDE/`make lint`-only prompts as the sole context source.
 
 ## 5. Разделить test configurations
 
@@ -453,8 +536,11 @@ trim_trailing_whitespace = true
 [*.py]
 indent_style = space
 indent_size = 4
-max_line_length = 100
+max_line_length = 88
 ```
+
+> BioETL formatter authority is **88** (`ruff` `line-length` in `pyproject.toml`
+> and root `.editorconfig`). Do not reintroduce `100` examples for Python format.
 
 2. Добавить `.gitattributes`:
 
@@ -520,30 +606,49 @@ profiles/
 Root `.gitignore` полностью игнорирует локальный `.idea/`. В Git публикуются
 переносимые templates с той же относительной структурой:
 
-- `configs/ide/pycharm/runConfigurations/` — только перечисленные выше
-  configurations;
+- `configs/ide/pycharm/runConfigurations/` — только shared configurations из §4.3;
 - `configs/ide/pycharm/codeStyles/`;
 - `configs/ide/pycharm/inspectionProfiles/`;
 - `configs/ide/pycharm/pyLspTools.xml`.
 
-После clean clone скопируйте templates в локальный `.idea/`:
+### 12.1 Canonical post-clone sync
 
 ```powershell
-New-Item -ItemType Directory -Force .\.idea | Out-Null
-Copy-Item -Recurse -Force .\configs\ide\pycharm\* .\.idea\
+.\scripts\engineering\dev\sync_pycharm_ide_templates.ps1
+.\scripts\engineering\dev\sync_pycharm_ide_templates.ps1 -DryRun
 ```
-
-или в Bash/WSL:
 
 ```bash
-mkdir -p .idea
-cp -R configs/ide/pycharm/. .idea/
+bash scripts/engineering/dev/sync_pycharm_ide_templates.sh
+bash scripts/engineering/dev/sync_pycharm_ide_templates.sh --dry-run
 ```
 
+Скрипт:
+
+- копирует только portable surfaces (не весь хаос machine-local `.idea`);
+- прогоняет policy check shared run-config (no `PYTHONPATH`, roots false, cov policy);
+- печатает post-sync checklist.
+
 Не публикуются `workspace.xml`, `.iml`, shelves, Local History, data sources,
-plugin state, MCP/AI tokens и локальные SDK paths; `.idea` в tracked shared templates
-не содержит secrets/credentials. Любые `.env`/`.env.*` остаются secret-bearing
+plugin state, MCP/AI tokens и локальные SDK paths; shared templates
+не содержат secrets/credentials. Любые `.env`/`.env.*` остаются secret-bearing
 machine-local files и не изменяются этим workflow.
+
+### 12.2 Local `.idea` hygiene checklist (operator process)
+
+Выполняется локально; **не** коммитить результат:
+
+1. Run template sync (`sync_pycharm_ide_templates.*`).
+2. Move legacy run configs to UI folder `zz_legacy` or delete after backup **outside** the repo
+   (`Mypy Strict`, `Pytest All`, Live compounds masquerading as CI).
+3. Disable Black as active formatter; keep Ruff format + import optimizer only.
+4. Exactly one inline completion provider; other AI tools chat/agent-only or off.
+5. MCP for daily work: prefer `autoStart=false`, `debugLoggingEnabled=false`.
+6. Short AI project prompt → `AGENTS.md` / `NORMATIVE_SOURCES.md` (no stale make-only CLAUDE dump as sole context).
+7. Close accidental PyCharm windows opened on `.claude` / `scripts` subdirs.
+8. Exclude heavy dirs: `data`, `output`, `logs`, `reports`, `htmlcov`, `.venv*`.
+9. Remove `.idea/_backup_*` / old shelves when no longer needed (local only).
+10. Daily defaults: `pytest-fast`, `pytest-debug`, `mypy-full`, offline smoke — not Live compounds.
 
 ## 13. Приёмка
 
@@ -575,8 +680,9 @@ machine-local files и не изменяются этим workflow.
 13. `-Xmx` выбран по RAM и изменялся только через UI `Memory Usage`; остальные JVM flags (`-XX:*`) не добавлялись без диагностики.
 14. `pyproject.toml` и `uv.lock` соответствуют установленным dev tools; в окружении
    нет глобальных `pip install`-инстансов для `ruff/mypy/pytest`.
-15. Проект, `.venv-win` и пути IDE system/cache используются на локальном SSD и
-   не находятся на cloud/network sync path.
+15. IDE system/cache на локальном SSD (default AppData на `C:` ok). Project root,
+   `.venv-win` и tool caches предпочтительно на локальном SSD; cloud-sync tree
+   допустим только при приемлемом I/O (см. §2.4.1).
 16. Для Windows Microsoft Defender exclusion для project directory разрешён только для
    доверенного каталога и только при наличии разрешения security policy.
 17. В процессе работы пайплайна и локальной разработки не используются устаревшие

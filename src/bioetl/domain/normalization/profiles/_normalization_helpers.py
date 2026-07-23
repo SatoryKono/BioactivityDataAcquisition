@@ -6,12 +6,10 @@ import hashlib
 import inspect
 import json
 from collections.abc import Callable, Mapping
-from functools import cache
 
 FieldNormalizer = Callable[..., object]
 
 
-@cache
 def _normalizer_accepts_record_context(normalizer: FieldNormalizer) -> bool:
     """Check if normalizer accepts record context parameter."""
     try:
@@ -34,7 +32,15 @@ def _normalizer_ref(normalizer: FieldNormalizer) -> str:
     module_name = getattr(normalizer, "__module__", None)
     qualname = getattr(normalizer, "__qualname__", None)
     if not (isinstance(module_name, str) and isinstance(qualname, str)):
-        return repr(normalizer)
+        raise TypeError(
+            "normalizer must expose deterministic __module__ and __qualname__; "
+            "unstable callables without an identity contract are not supported"
+        )
+    if qualname == "<lambda>":
+        raise TypeError(
+            "lambda normalizers are not supported; provide a named callable "
+            "with stable module/qualname identity"
+        )
 
     semantics = _extract_normalizer_semantics(normalizer)
     if any(semantics.values()):

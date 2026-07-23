@@ -68,7 +68,9 @@ def build_execution_settings_snapshot(settings: Settings) -> dict[str, object]:
                 settings, "pii_salt_rotation_active", False
             ),
             "json_encoder": _setting_attr(settings, "json_encoder"),
-            "default_email": _setting_attr(settings, "default_email"),
+            "default_email_hash": _hashed_optional_text(
+                _setting_attr(settings, "default_email")
+            ),
         },
         "pipeline": {
             "batch_size": _setting_attr(pipeline, "batch_size", None),
@@ -131,6 +133,15 @@ def build_execution_environment_snapshot(settings: Settings) -> dict[str, object
 
 def _setting_attr(host: object, name: str, default: object = None) -> object:
     return getattr(host, name, default)
+
+
+def _hashed_optional_text(value: object) -> str | None:
+    if value is None:
+        return None
+    text = str(value).strip()
+    if not text:
+        return None
+    return _sha256_text(text)
 
 
 def _sha256_text(value: str) -> str:

@@ -26,7 +26,7 @@ def check_exclude_if_present(
     record: JsonDict,
 ) -> bool:
     """Check that exclusion fields are absent or empty."""
-    return all(record.get(field) in (None, "") for field in exclude_if_present)
+    return all(is_empty_value(record.get(field)) for field in exclude_if_present)
 
 
 def check_column_filters(

@@ -12,7 +12,6 @@ from bioetl.composition.bootstrap_contexts import (
 )
 from bioetl.composition.providers._models import ProviderSettingsProtocol
 from bioetl.domain.resilience import AdapterConfig
-from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterReader
 from bioetl.infrastructure.config.source_config_loader import load_source_config
 
 if TYPE_CHECKING:
@@ -227,6 +226,10 @@ def _wrap_with_filter(
     _wire_composable_fallback(data_source)
 
     if filter_config and filter_config.enabled:
+        from bioetl.infrastructure.adapters.input.csv_filter_reader import (
+            CsvFilterReader,
+        )
+
         return FilteredDataSource(
             data_source=data_source,
             filter_reader=CsvFilterReader(logger=logger),

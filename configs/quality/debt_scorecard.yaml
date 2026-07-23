@@ -482,16 +482,16 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 6
       files: 180
-      total_loc: 22218
+      total_loc: 22262
       files_ge_250_loc: 4
-      helper_function_ratio: 0.36
+      helper_function_ratio: 0.361
       max_internal_fan_in: 7
       max_internal_fan_in_module: bioetl.application.core.span_helpers
     trend:
-      status: reviewed_2026-07-18_application_core_live_metric_refresh
-      next_action: 2026-07-18 refreshes measured application_core metrics against
-        the committed hotspot-family baseline at 180 files, 22218 LOC, 4 files_ge_250_loc,
-        helper_function_ratio 0.357, and max_internal_fan_in 7. Bounded-growth budgets
+      status: reviewed_2026-07-22_application_core_live_metric_refresh
+      next_action: 2026-07-22 refreshes measured application_core metrics against
+        the committed hotspot-family baseline at 180 files, 22262 LOC, 4 files_ge_250_loc,
+        helper_function_ratio 0.361, and max_internal_fan_in 7. Bounded-growth budgets
         remain flat at 7 files_ge_250_loc and max_internal_fan_in 10; no technical-debt
         budget is increased.
   - name: composition_bootstrap_runtime

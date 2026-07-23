@@ -36,6 +36,23 @@ Bootstrap commands:
 bash scripts/engineering/dev/setup_env_wsl.sh
 ```
 
+### PyCharm portable templates
+
+After clean clone (or when local `.idea` drifted), sync shared IDE templates:
+
+```powershell
+.\scripts\engineering\dev\sync_pycharm_ide_templates.ps1
+.\scripts\engineering\dev\sync_pycharm_ide_templates.ps1 -DryRun
+```
+
+```bash
+bash scripts/engineering/dev/sync_pycharm_ide_templates.sh
+bash scripts/engineering/dev/sync_pycharm_ide_templates.sh --dry-run
+```
+
+Source of truth: `configs/ide/pycharm/`. Do not commit machine-local `.idea/` state.
+Full guide: `docs/03-guides/development/pycharm-setup.md`.
+
 Preferred runners automatically select the OS-appropriate environment:
 
 ```powershell
