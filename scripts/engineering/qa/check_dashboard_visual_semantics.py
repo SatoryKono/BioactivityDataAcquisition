@@ -181,54 +181,76 @@ def iter_panels(panels: list[dict]) -> list[dict]:
     return collected
 
 
-def _stat_panel_visual_semantics_errors(dashboard_path: Path, panel: dict) -> list[str]:
-    title = panel.get("title", "<untitled>")
-    defaults = panel.get("fieldConfig", {}).get("defaults", {})
-    errors: list[str] = []
+def _stat_color_mode_error(dashboard_path: Path, title: str, defaults: dict) -> str | None:
+    if defaults.get("color", {}).get("mode") == "thresholds":
+        return None
+    return f"{dashboard_path}: panel '{title}' must use color.mode=thresholds"
 
-    color_mode = defaults.get("color", {}).get("mode")
-    if color_mode != "thresholds":
-        errors.append(
-            f"{dashboard_path}: panel '{title}' must use color.mode=thresholds"
-        )
 
+def _stat_threshold_steps_error(
+    dashboard_path: Path, title: str, defaults: dict
+) -> str | None:
     expected_steps = _expected_threshold_steps(dashboard_path, str(title))
     steps = defaults.get("thresholds", {}).get("steps")
-    if expected_steps is not None and steps != expected_steps:
-        errors.append(
-            f"{dashboard_path}: panel '{title}' must use standardized threshold steps"
-        )
+    if expected_steps is None or steps == expected_steps:
+        return None
+    return f"{dashboard_path}: panel '{title}' must use standardized threshold steps"
 
-    mappings = defaults.get("mappings", [])
-    if _requires_unknown_mapping(panel) and EXPECTED_UNKNOWN_MAPPING not in mappings:
-        errors.append(
-            f"{dashboard_path}: panel '{title}' must map null to UNKNOWN/gray"
-        )
 
-    if (dashboard_path.name, str(title)) in BACKGROUND_SEVERITY_STAT_PANELS:
-        panel_color_mode = panel.get("options", {}).get("colorMode")
-        if panel_color_mode != "background":
-            errors.append(
-                f"{dashboard_path}: panel '{title}' must use options.colorMode=background"
-            )
+def _stat_unknown_mapping_error(
+    dashboard_path: Path, title: str, panel: dict, mappings: list
+) -> str | None:
+    if not _requires_unknown_mapping(panel):
+        return None
+    if EXPECTED_UNKNOWN_MAPPING in mappings:
+        return None
+    return f"{dashboard_path}: panel '{title}' must map null to UNKNOWN/gray"
 
+
+def _stat_background_color_mode_error(
+    dashboard_path: Path, title: str, panel: dict
+) -> str | None:
+    if (dashboard_path.name, str(title)) not in BACKGROUND_SEVERITY_STAT_PANELS:
+        return None
+    if panel.get("options", {}).get("colorMode") == "background":
+        return None
+    return f"{dashboard_path}: panel '{title}' must use options.colorMode=background"
+
+
+def _stat_value_mapping_error(
+    dashboard_path: Path, title: str, mappings: list
+) -> str | None:
     expected_value_mapping = EXPLICIT_VALUE_MAPPING_STAT_PANELS.get(
         (dashboard_path.name, str(title))
     )
-    if expected_value_mapping is not None:
-        value_mapping = next(
-            (mapping for mapping in mappings if mapping.get("type") == "value"),
-            None,
-        )
-        if (
-            value_mapping is None
-            or value_mapping.get("options") != expected_value_mapping
-        ):
-            errors.append(
-                f"{dashboard_path}: panel '{title}' must use explicit canonical value mappings"
-            )
+    if expected_value_mapping is None:
+        return None
+    value_mapping = next(
+        (mapping for mapping in mappings if mapping.get("type") == "value"),
+        None,
+    )
+    if (
+        value_mapping is not None
+        and value_mapping.get("options") == expected_value_mapping
+    ):
+        return None
+    return (
+        f"{dashboard_path}: panel '{title}' must use explicit canonical value mappings"
+    )
 
-    return errors
+
+def _stat_panel_visual_semantics_errors(dashboard_path: Path, panel: dict) -> list[str]:
+    title = panel.get("title", "<untitled>")
+    defaults = panel.get("fieldConfig", {}).get("defaults", {})
+    mappings = defaults.get("mappings", [])
+    candidates = (
+        _stat_color_mode_error(dashboard_path, title, defaults),
+        _stat_threshold_steps_error(dashboard_path, title, defaults),
+        _stat_unknown_mapping_error(dashboard_path, title, panel, mappings),
+        _stat_background_color_mode_error(dashboard_path, title, panel),
+        _stat_value_mapping_error(dashboard_path, title, mappings),
+    )
+    return [error for error in candidates if error is not None]
 
 
 def _gauge_panel_visual_semantics_errors(
@@ -416,38 +438,52 @@ def _panel_errors(dashboard_path: Path, panel: dict) -> list[str]:
     )
 
 
-def _dashboard_errors(dashboard_path: Path) -> list[str]:
-    payload = json.loads(dashboard_path.read_text(encoding="utf-8"))
-    errors = [
+def _collapsed_row_errors(dashboard_path: Path, panels: list) -> list[str]:
+    return [
         error
-        for panel in iter_panels(payload.get("panels", []))
-        for error in _panel_errors(dashboard_path, panel)
-    ]
-    errors.extend(
-        error
-        for panel in payload.get("panels", [])
+        for panel in panels
         if panel.get("type") == "row" and isinstance(panel.get("panels"), list)
         for error in _collapsed_row_grid_overlap_errors(dashboard_path, panel)
-    )
+    ]
+
+
+def _trust_marker_is_above_fold(panel: dict) -> bool:
+    grid_pos = panel.get("gridPos", {})
+    # Trust markers must stay on the first screen, including the dedicated
+    # first-screen evidence row used by the Runtime dashboard at y=23.
+    return isinstance(grid_pos, dict) and int(grid_pos.get("y", 999)) <= 23
+
+
+def _trust_marker_panel_errors(dashboard_path: Path, panels: list) -> list[str]:
     required_panels = REQUIRED_TRUST_MARKER_PANELS.get(dashboard_path.name, set())
-    if required_panels:
-        top_level_panels = {
-            str(panel.get("title", "")): panel for panel in payload.get("panels", [])
-        }
-        for title in required_panels:
-            panel = top_level_panels.get(title)
-            if panel is None:
-                errors.append(
-                    f"{dashboard_path}: required trust marker panel '{title}' is missing"
-                )
-                continue
-            grid_pos = panel.get("gridPos", {})
-            # Trust markers must stay on the first screen, including the dedicated
-            # first-screen evidence row used by the Runtime dashboard at y=23.
-            if not isinstance(grid_pos, dict) or int(grid_pos.get("y", 999)) > 23:
-                errors.append(
-                    f"{dashboard_path}: trust marker panel '{title}' must stay above fold"
-                )
+    if not required_panels:
+        return []
+    top_level_panels = {str(panel.get("title", "")): panel for panel in panels}
+    errors: list[str] = []
+    for title in required_panels:
+        panel = top_level_panels.get(title)
+        if panel is None:
+            errors.append(
+                f"{dashboard_path}: required trust marker panel '{title}' is missing"
+            )
+            continue
+        if not _trust_marker_is_above_fold(panel):
+            errors.append(
+                f"{dashboard_path}: trust marker panel '{title}' must stay above fold"
+            )
+    return errors
+
+
+def _dashboard_errors(dashboard_path: Path) -> list[str]:
+    payload = json.loads(dashboard_path.read_text(encoding="utf-8"))
+    panels = payload.get("panels", [])
+    errors = [
+        error
+        for panel in iter_panels(panels)
+        for error in _panel_errors(dashboard_path, panel)
+    ]
+    errors.extend(_collapsed_row_errors(dashboard_path, panels))
+    errors.extend(_trust_marker_panel_errors(dashboard_path, panels))
     return errors
 
 

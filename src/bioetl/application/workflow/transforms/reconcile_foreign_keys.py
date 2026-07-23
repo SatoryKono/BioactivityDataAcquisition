@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Mapping
 
 from bioetl.application.services.workflow_transform_artifacts import (
@@ -96,7 +97,7 @@ def build_reconcile_foreign_keys_executor(
                 fingerprint=spec.fingerprint,
                 details=payload,
             )
-        artifact_refs = _persist_reconcile_result_artifact(
+        artifact_refs = await _persist_reconcile_result_artifact(
             runtime_context,
             spec=spec,
             payload=payload,
@@ -160,7 +161,7 @@ def _optional_runtime_str(
     return None if value is None else str(value)
 
 
-def _persist_reconcile_result_artifact(
+async def _persist_reconcile_result_artifact(
     runtime_context: WorkflowTransformRuntimeContext | None,
     *,
     spec: WorkflowTransformSpec,
@@ -175,11 +176,21 @@ def _persist_reconcile_result_artifact(
     workflow_run_id = getattr(runtime_context, "workflow_run_id", None)
     manifest_id = getattr(runtime_context, "manifest_id", None)
     if workflow_name is None or workflow_run_id is None or manifest_id is None:
+        logger = getattr(runtime_context, "logger", None)
+        if logger is not None:
+            logger.debug(
+                "Skipping reconcile_foreign_keys artifact persistence: missing identifiers",
+                workflow_name=workflow_name,
+                workflow_run_id=workflow_run_id,
+                manifest_id=manifest_id,
+                step_id=spec.step_id,
+            )
         return ()
     writer = getattr(sink, "write_reconcile_result_artifact", None)
     if not callable(writer):
         return ()
-    refs = writer(
+    refs = await asyncio.to_thread(
+        writer,
         context=WorkflowTransformArtifactContext(
             workflow_name=str(workflow_name),
             workflow_run_id=str(workflow_run_id),

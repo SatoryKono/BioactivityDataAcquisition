@@ -4,6 +4,10 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 
+from bioetl.application.services.workflow_transform_artifacts import (
+    WorkflowTransformArtifactContext,
+    artifact_refs_as_dicts,
+)
 from bioetl.application.workflow.transforms import WorkflowTransformRuntimeContext
 from bioetl.domain.ports import (
     RowReconciliationConfig,
@@ -31,7 +35,15 @@ def build_reconcile_rows_executor(reconciliation_port: RowReconciliationPort):
         )
         config = _build_config(spec, workflow_name=workflow_name)
         result = await reconciliation_port.reconcile_rows(config)
-        return _build_report_payload(spec, result)
+        payload = _build_report_payload(spec, result)
+        artifact_refs = await _persist_reconcile_rows_artifact(
+            runtime_context,
+            spec=spec,
+            payload=payload,
+        )
+        if artifact_refs:
+            payload["artifact_refs"] = list(artifact_refs)
+        return payload
 
     return _executor
 
@@ -42,13 +54,26 @@ def _build_config(
     workflow_name: str | None = None,
 ) -> RowReconciliationConfig:
     config = spec.config or {}
+    left_columns = _required_str_tuple(config, "left_columns")
+    right_columns = _required_str_tuple(config, "right_columns")
+    left_primary_keys = _required_str_tuple(config, "left_primary_keys")
+    if len(left_columns) != len(right_columns):
+        raise ValueError(
+            "reconcile_rows requires left_columns and right_columns "
+            "to have matching lengths"
+        )
+    if len(left_primary_keys) > len(left_columns):
+        raise ValueError(
+            "reconcile_rows requires left_primary_keys length "
+            "to be <= left_columns length"
+        )
     return RowReconciliationConfig(
         layer=_required_str(config, "layer"),
         left_table=_required_str(config, "left_table"),
         right_table=_required_str(config, "right_table"),
-        left_columns=_required_str_tuple(config, "left_columns"),
-        right_columns=_required_str_tuple(config, "right_columns"),
-        left_primary_keys=_required_str_tuple(config, "left_primary_keys"),
+        left_columns=left_columns,
+        right_columns=right_columns,
+        left_primary_keys=left_primary_keys,
         nulls_equal=bool(config.get("nulls_equal", False)),
         type_policy=str(config.get("type_policy", "strict")),
         preserve_order=bool(config.get("preserve_order", True)),
@@ -103,7 +128,76 @@ def _required_str_tuple(
         str | bytes | bytearray,
     ):
         raise ValueError(f"reconcile_rows requires config.{key} as a non-empty list")
-    names = tuple(str(item).strip() for item in value if str(item).strip())
+    names: list[str] = []
+    for index, item in enumerate(value):
+        text = str(item).strip()
+        if not text:
+            raise ValueError(
+                f"reconcile_rows config.{key}[{index}] cannot be empty or whitespace"
+            )
+        names.append(text)
     if not names:
         raise ValueError(f"reconcile_rows requires config.{key} as a non-empty list")
-    return names
+    return tuple(names)
+
+
+async def _persist_reconcile_rows_artifact(
+    runtime_context: WorkflowTransformRuntimeContext | None,
+    *,
+    spec: WorkflowTransformSpec,
+    payload: Mapping[str, object],
+) -> tuple[dict[str, object], ...]:
+    if runtime_context is None:
+        return ()
+    sink = getattr(runtime_context, "artifact_sink", None)
+    if sink is None:
+        return ()
+    workflow_name = getattr(runtime_context, "workflow_name", None)
+    workflow_run_id = getattr(runtime_context, "workflow_run_id", None)
+    manifest_id = getattr(runtime_context, "manifest_id", None)
+    if workflow_name is None or workflow_run_id is None or manifest_id is None:
+        logger = getattr(runtime_context, "logger", None)
+        if logger is not None:
+            logger.debug(
+                "Skipping reconcile_rows artifact persistence: missing identifiers",
+                workflow_name=workflow_name,
+                workflow_run_id=workflow_run_id,
+                manifest_id=manifest_id,
+                step_id=spec.step_id,
+            )
+        return ()
+    writer = getattr(sink, "write_reconcile_result_artifact", None)
+    if not callable(writer):
+        return ()
+    import asyncio
+
+    refs = await asyncio.to_thread(
+        writer,
+        context=WorkflowTransformArtifactContext(
+            workflow_name=str(workflow_name),
+            workflow_run_id=str(workflow_run_id),
+            manifest_id=str(manifest_id),
+            step_id=spec.step_id,
+            transform_name=spec.transform_name,
+            debug_export_enabled=bool(
+                getattr(runtime_context, "debug_export_enabled", False)
+            ),
+            debug_export_dir=_optional_runtime_str(
+                runtime_context,
+                "debug_export_dir",
+            ),
+            created_at=getattr(runtime_context, "created_at", None),
+        ),
+        payload=payload,
+    )
+    return artifact_refs_as_dicts(tuple(refs))
+
+
+def _optional_runtime_str(
+    runtime_context: WorkflowTransformRuntimeContext | None,
+    attribute_name: str,
+) -> str | None:
+    if runtime_context is None:
+        return None
+    value = getattr(runtime_context, attribute_name, None)
+    return None if value is None else str(value)

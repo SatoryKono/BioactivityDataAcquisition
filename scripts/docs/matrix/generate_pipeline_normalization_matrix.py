@@ -827,6 +827,32 @@ def _composite_field_type(pipeline_name: str, field_name: str) -> str:
     return "unknown"
 
 
+def _authority_entry_lookup(
+    entry: object,
+) -> dict[tuple[str, str], dict[str, str]]:
+    if not isinstance(entry, dict):
+        return {}
+    authority_id = entry.get("id")
+    pipelines = entry.get("pipelines")
+    field_types = entry.get("field_types")
+    if not isinstance(authority_id, str):
+        return {}
+    if not isinstance(pipelines, list) or not isinstance(field_types, dict):
+        return {}
+    lookup: dict[tuple[str, str], dict[str, str]] = {}
+    for pipeline_name in pipelines:
+        if not isinstance(pipeline_name, str) or not pipeline_name:
+            continue
+        for field_name, field_type in field_types.items():
+            if not isinstance(field_name, str) or not isinstance(field_type, str):
+                continue
+            lookup[(pipeline_name, field_name)] = {
+                "authority_id": authority_id,
+                "field_type": field_type,
+            }
+    return lookup
+
+
 @cache
 def _composite_schema_authority_lookup() -> dict[tuple[str, str], dict[str, str]]:
     payload = yaml.safe_load(
@@ -837,28 +863,9 @@ def _composite_schema_authority_lookup() -> dict[tuple[str, str], dict[str, str]
     entries = payload.get("authorities", [])
     if not isinstance(entries, list):
         return {}
-
     lookup: dict[tuple[str, str], dict[str, str]] = {}
     for entry in entries:
-        if not isinstance(entry, dict):
-            continue
-        authority_id = entry.get("id")
-        pipelines = entry.get("pipelines")
-        field_types = entry.get("field_types")
-        if not isinstance(authority_id, str):
-            continue
-        if not isinstance(pipelines, list) or not isinstance(field_types, dict):
-            continue
-        for pipeline_name in pipelines:
-            if not isinstance(pipeline_name, str) or not pipeline_name:
-                continue
-            for field_name, field_type in field_types.items():
-                if not isinstance(field_name, str) or not isinstance(field_type, str):
-                    continue
-                lookup[(pipeline_name, field_name)] = {
-                    "authority_id": authority_id,
-                    "field_type": field_type,
-                }
+        lookup.update(_authority_entry_lookup(entry))
     return lookup
 
 
@@ -886,27 +893,54 @@ def _entity_schema_field_type(pipeline_name: str, field_name: str) -> str:
         return "unknown"
 
 
+def _pipeline_name_from_entry(entry: object) -> str | None:
+    if not isinstance(entry, dict):
+        return None
+    pipeline = entry.get("pipeline")
+    if isinstance(pipeline, str) and pipeline:
+        return pipeline
+    return None
+
+
+def _pipeline_names_from_entries(entries: object) -> list[str]:
+    if not isinstance(entries, list):
+        return []
+    names: list[str] = []
+    for entry in entries:
+        pipeline = _pipeline_name_from_entry(entry)
+        if pipeline is not None:
+            names.append(pipeline)
+    return names
+
+
 def _composite_source_pipeline_names(payload: dict[str, object]) -> tuple[str, ...]:
     composite = payload.get("composite")
     if not isinstance(composite, dict):
         return ()
     names: list[str] = []
-    seed = composite.get("seed")
-    if isinstance(seed, dict):
-        pipeline = seed.get("pipeline")
-        if isinstance(pipeline, str) and pipeline:
-            names.append(pipeline)
+    seed_pipeline = _pipeline_name_from_entry(composite.get("seed"))
+    if seed_pipeline is not None:
+        names.append(seed_pipeline)
     for key in ("dependencies", "enrichers"):
-        entries = composite.get(key)
-        if not isinstance(entries, list):
-            continue
-        for entry in entries:
-            if not isinstance(entry, dict):
-                continue
-            pipeline = entry.get("pipeline")
-            if isinstance(pipeline, str) and pipeline:
-                names.append(pipeline)
+        names.extend(_pipeline_names_from_entries(composite.get(key)))
     return tuple(dict.fromkeys(names))
+
+
+def _provider_order_from_column_group(
+    entry: object, field_name: str
+) -> tuple[str, ...] | None:
+    if not isinstance(entry, dict):
+        return None
+    fields = entry.get("fields")
+    if not isinstance(fields, list) or field_name not in fields:
+        return None
+    provider_order = entry.get("provider_order")
+    if not isinstance(provider_order, list):
+        return ()
+    providers = [
+        provider for provider in provider_order if isinstance(provider, str) and provider
+    ]
+    return tuple(dict.fromkeys(providers))
 
 
 def _composite_field_provider_order(
@@ -923,21 +957,46 @@ def _composite_field_provider_order(
     if not isinstance(column_groups, list):
         return ()
     for entry in column_groups:
-        if not isinstance(entry, dict):
-            continue
-        fields = entry.get("fields")
-        if not isinstance(fields, list) or field_name not in fields:
-            continue
-        provider_order = entry.get("provider_order")
-        if not isinstance(provider_order, list):
-            return ()
-        providers = [
-            provider
-            for provider in provider_order
-            if isinstance(provider, str) and provider
-        ]
-        return tuple(dict.fromkeys(providers))
+        result = _provider_order_from_column_group(entry, field_name)
+        if result is not None:
+            return result
     return ()
+
+
+def _lineage_field_alias(
+    composite: dict[str, object], *, field_name: str, provider_name: str
+) -> str | None:
+    lineage = composite.get("lineage")
+    if not isinstance(lineage, dict):
+        return None
+    provider_lookup_fields = lineage.get("provider_lookup_fields")
+    if not isinstance(provider_lookup_fields, dict):
+        return None
+    provider_entry = provider_lookup_fields.get(provider_name)
+    if not isinstance(provider_entry, dict):
+        return None
+    alias = provider_entry.get(field_name)
+    if isinstance(alias, str) and alias:
+        return alias
+    return None
+
+
+def _mapped_source_fields(
+    merge: object, *, field_name: str, provider_name: str
+) -> list[str]:
+    if not isinstance(merge, dict):
+        return []
+    field_mappings = merge.get("field_mappings")
+    if not isinstance(field_mappings, dict):
+        return []
+    mapped: list[str] = []
+    for source_ref, target_field in field_mappings.items():
+        if target_field != field_name or not isinstance(source_ref, str):
+            continue
+        parts = source_ref.split(".")
+        if len(parts) == 3 and parts[0] == provider_name and parts[2]:
+            mapped.append(parts[2])
+    return mapped
 
 
 def _composite_source_field_candidates(
@@ -951,33 +1010,68 @@ def _composite_source_field_candidates(
     if not isinstance(composite, dict):
         return (field_name,)
     candidates: list[str] = [field_name]
-    merge = composite.get("merge")
-
-    provider_lookup_fields = None
-    lineage = composite.get("lineage")
-    if isinstance(lineage, dict):
-        provider_lookup_fields = lineage.get("provider_lookup_fields")
-    if isinstance(provider_lookup_fields, dict):
-        provider_entry = provider_lookup_fields.get(provider_name)
-        if isinstance(provider_entry, dict):
-            alias = provider_entry.get(field_name)
-            if isinstance(alias, str) and alias:
-                candidates.append(alias)
-
-    if isinstance(merge, dict):
-        field_mappings = merge.get("field_mappings")
-        if isinstance(field_mappings, dict):
-            for source_ref, target_field in field_mappings.items():
-                if target_field != field_name or not isinstance(source_ref, str):
-                    continue
-                parts = source_ref.split(".")
-                if len(parts) == 3 and parts[0] == provider_name and parts[2]:
-                    candidates.append(parts[2])
-
+    alias = _lineage_field_alias(
+        composite, field_name=field_name, provider_name=provider_name
+    )
+    if alias is not None:
+        candidates.append(alias)
+    candidates.extend(
+        _mapped_source_fields(
+            composite.get("merge"), field_name=field_name, provider_name=provider_name
+        )
+    )
     candidates.extend(
         COMPOSITE_SOURCE_FIELD_TYPE_ALIAS_HINTS.get((pipeline_name, field_name), ())
     )
     return tuple(dict.fromkeys(candidate for candidate in candidates if candidate))
+
+
+def _first_known_source_field_type(
+    *,
+    source_pipeline: str,
+    pipeline_name: str,
+    field_name: str,
+    payload: dict[str, object],
+    provider_name: str,
+) -> str | None:
+    for candidate_field in _composite_source_field_candidates(
+        payload,
+        pipeline_name=pipeline_name,
+        field_name=field_name,
+        provider_name=provider_name,
+    ):
+        field_type = _entity_schema_field_type(source_pipeline, candidate_field)
+        if field_type != "unknown":
+            return field_type
+    return None
+
+
+def _inherited_types_from_sources(
+    *,
+    pipeline_name: str,
+    field_name: str,
+    payload: dict[str, object],
+    provider_order: tuple[str, ...],
+    single_provider_field: bool,
+) -> str | set[str]:
+    inherited_types: set[str] = set()
+    for source_pipeline in _composite_source_pipeline_names(payload):
+        provider_name = source_pipeline.split("_", maxsplit=1)[0]
+        if provider_order and provider_name not in provider_order:
+            continue
+        field_type = _first_known_source_field_type(
+            source_pipeline=source_pipeline,
+            pipeline_name=pipeline_name,
+            field_name=field_name,
+            payload=payload,
+            provider_name=provider_name,
+        )
+        if field_type is None:
+            continue
+        if single_provider_field:
+            return field_type
+        inherited_types.add(field_type)
+    return inherited_types
 
 
 def _composite_inherited_field_type(
@@ -996,27 +1090,18 @@ def _composite_inherited_field_type(
     if authority_override is not None:
         return authority_override["field_type"]
     provider_order = _composite_field_provider_order(payload, field_name)
-    single_provider_field = len(provider_order) == 1
-    inherited_types: set[str] = set()
-    for source_pipeline in _composite_source_pipeline_names(payload):
-        provider_name = source_pipeline.split("_", maxsplit=1)[0]
-        if provider_order and provider_name not in provider_order:
-            continue
-        for candidate_field in _composite_source_field_candidates(
-            payload,
-            pipeline_name=pipeline_name,
-            field_name=field_name,
-            provider_name=provider_name,
-        ):
-            field_type = _entity_schema_field_type(source_pipeline, candidate_field)
-            if field_type != "unknown":
-                if single_provider_field:
-                    return field_type
-                inherited_types.add(field_type)
-                break
-    inherited_types.discard("unknown")
-    if len(inherited_types) == 1:
-        return next(iter(inherited_types))
+    result = _inherited_types_from_sources(
+        pipeline_name=pipeline_name,
+        field_name=field_name,
+        payload=payload,
+        provider_order=provider_order,
+        single_provider_field=len(provider_order) == 1,
+    )
+    if isinstance(result, str):
+        return result
+    result.discard("unknown")
+    if len(result) == 1:
+        return next(iter(result))
     return "unknown"
 
 
@@ -1559,18 +1644,35 @@ def _matching_dq_enum_rules(
     ]
 
 
+def _csv_filter_values(raw: str) -> frozenset[str]:
+    result: set[str] = set()
+    for part in raw.split(","):
+        stripped = part.strip()
+        if stripped:
+            result.add(stripped)
+    return frozenset(result)
+
+
+def _sequence_filter_values(raw: list | tuple | set) -> frozenset[str]:
+    result: set[str] = set()
+    for item in raw:
+        stripped = str(item).strip()
+        if stripped:
+            result.add(stripped)
+    return frozenset(result)
+
+
 def _filter_value_set(raw_values: object) -> frozenset[str]:
     if raw_values is None:
         return frozenset()
     if isinstance(raw_values, str):
-        return frozenset(
-            value for value in (v.strip() for v in raw_values.split(",")) if value
-        )
+        return _csv_filter_values(raw_values)
     if isinstance(raw_values, (list, tuple, set)):
-        return frozenset(
-            value for value in (str(v).strip() for v in raw_values) if value
-        )
-    return frozenset({str(raw_values).strip()})
+        return _sequence_filter_values(raw_values)
+    stripped = str(raw_values).strip()
+    if not stripped:
+        return frozenset()
+    return frozenset({stripped})
 
 
 def _filter_mapping(config: dict[str, object]) -> dict[str, object]:
