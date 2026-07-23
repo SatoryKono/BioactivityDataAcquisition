@@ -45,7 +45,7 @@ def test_committed_test_telemetry_baseline_is_populated() -> None:
     assert context["executed_count"] == payload["duration_telemetry"]["total_cases"]
     assert context["junit_source_count"] == len(context["junit_sources"])
     assert context["worker_mode"]
-    assert context["lane_wall_time_s"]
+    assert context["junit_testcase_duration_sum_s"]
     assert context["explicit_exclusions"]
 
 

@@ -2,9 +2,45 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
-from scripts.ai.mcp._patch_grok_mcp_tokens import bump_timeouts, wire_ref
+from scripts.ai.mcp._patch_grok_mcp_tokens import bump_timeouts, main, wire_ref
+
+
+def test_main_never_prints_configuration_content(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Status output must not expose MCP configuration or literal secrets."""
+    config_dir = tmp_path / ".grok"
+    config_dir.mkdir()
+    config_path = config_dir / "config.toml"
+    secret_marker = "literal-secret-marker-must-not-be-logged"
+    config_path.write_text(
+        "\n".join(
+            (
+                "[mcp_servers.ref]",
+                "enabled = true",
+                'url = "https://api.ref.tools/mcp"',
+                "startup_timeout_sec = 60",
+                f'literal_token = "{secret_marker}"',
+                "",
+            )
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(Path, "home", lambda: tmp_path / "missing-home")
+
+    main()
+
+    output = capsys.readouterr().out
+    assert "updated .grok/config.toml" in output
+    assert secret_marker not in output
+    assert "[mcp_servers.ref]" not in output
 
 
 class TestBumpTimeouts:
@@ -70,7 +106,7 @@ startup_timeout_sec = 60
 """
         result = wire_ref(text)
         assert 'headers = { "x-ref-api-key" = "${REF_TOOL_API_KEY}" }' in result
-        assert "url = \"https://api.ref.tools/mcp\"" in result
+        assert 'url = "https://api.ref.tools/mcp"' in result
 
     def test_wire_ref_single_quoted_url(self) -> None:
         """Test header wiring with single-quoted URL."""
