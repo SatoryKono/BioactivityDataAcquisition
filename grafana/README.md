@@ -89,6 +89,8 @@ ______________________________________________________________________
 > service-account token when `GRAFANA_SERVICE_ACCOUNT_TOKEN` is set; otherwise
 > they resolve the password from `GRAFANA_PASSWORD`, then the compose-compatible
 > `GF_SECURITY_ADMIN_PASSWORD`. Credentials are not printed in audit output.
+> Token-only audit runs use Bearer authentication for datasource discovery and
+> Grafana datasource-proxy probes.
 > To render every shipped dashboard after bootstrap on Windows, use
 > `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1`.
 > That helper also reuses or auto-downloads the same portable Node.js LTS
