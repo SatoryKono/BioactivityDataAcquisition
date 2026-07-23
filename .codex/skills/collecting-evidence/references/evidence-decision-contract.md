@@ -85,4 +85,3 @@ Parent evidence waves must keep child shard output roots disjoint and report:
 
 Use `hierarchical-evidence-orchestration/references/orchestration-contract.md`
 for the parent artifact.
-
