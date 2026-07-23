@@ -5,6 +5,14 @@
   "refreshed_at_utc": "2026-06-30T13:06:54.324571+00:00",
   "refresh_status": "captured",
   "total_cases": 8507,
+  "execution_context": {
+    "junit_source_count": 17,
+    "junit_sources": ["S1-domain-core.xml", "S2-comp-iface.xml", "S3-app-foundation.xml", "S4-app-services.xml", "S5-infra-adapters.xml", "S6-crosscutting-unit.xml", "S7-crosscutting-architecture-a.xml", "S7-crosscutting-architecture-a2.xml", "S7-crosscutting-architecture-a3.xml", "S7-crosscutting-architecture-b.xml", "S7-crosscutting-architecture-c.xml", "S7-crosscutting-architecture-d.xml", "S8-crosscutting-governance.xml", "coverage-tail-owner-addendum.xml", "export-execution-addendum.xml", "infrastructure-owner-addendum.xml", "repo-backed-storage-addendum.xml"],
+    "executed_count": 8507,
+    "worker_mode": "mixed: xdist unit/integration; serial contracts/repo-backed/memory",
+    "junit_testcase_duration_sum_s": {"S1-domain-core.xml": 0.0},
+    "explicit_exclusions": [{"lane": "live-provider-contracts", "reason": "scheduled network-owned workflow"}]
+  },
   "top_slowest": [
     {
       "source": "S7-crosscutting-architecture-a2.xml",

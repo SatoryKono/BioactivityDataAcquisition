@@ -4,6 +4,7 @@ Source commit: `51979de96630ce1eff88b6a2b82df04a5c9be157`
 Source run id: `local-issues-5710-5711-20260630`
 Refresh status: `captured`
 Collected test cases: `8507`
+Execution context: `17` JUnit sources, `8507` executed cases
 Freshness guard: `<=45 days`
 
 | Rank | Duration (s) | Test | Source |
