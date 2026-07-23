@@ -8,36 +8,36 @@ Audited repository: `SatoryKono/BioactivityDataAcquisition`
 
 Audited branch: `main`
 
-Audited commit SHA: `591558e813eb1f706ea7c75a6a12815dd625711d`
+Audited commit SHA: `47cec629cd3067b5812bd81ef62c36d7ce5d6db3`
 
-Evidence surface SHA-256: `1d17931ed436e9f100918c8626e4df5d6786b1f6998134baa0fc5a943815a3e9`
+Evidence surface SHA-256: `8b10e24becc6064e6ca70dfa5a393c5694ff17a2d33f9e0c03a36fb750a21d02`
 
 Registry: `configs/quality/technical_debt_audit_registry.yaml`
 
-Refresh reason: #6482 / tracker #6486 — re-pin the total technical-debt audit to
-HEAD after clearing `generated_artifact_drift` (#6477) and re-running the
-dead-code inventory with `untriaged=0` (#6483). No debt budget, threshold,
-exemption, or exclusion growth.
+Refresh reason: re-pin after dead-code inventory review-window alignment
+(`last_reviewed` / `next_review_by` = `2026-07-23` / `2026-10-21`) and live
+scorecard pin at `9.11`. No debt budget, threshold, exemption, or exclusion
+growth.
 
 ## Executive summary
 
 1. The reviewed quality gate snapshot is passing: architecture score `9.11`,
    `45/45` debt-governance gates passing, with no failures or warnings and
    zero stale generated quality artifacts.
-1. Module coverage inventory contains `2,247` source modules: `1,403` fully
-   covered, `816` partially covered, `25` with no executable lines, and
+1. Module coverage inventory contains `2,248` source modules: `1,406` fully
+   covered, `816` partially covered, `26` with no executable lines, and
    zero uncovered or unmeasured modules. These are module-inventory facts, not
    a claim of complete line or branch coverage.
 1. Compatibility transition debt remains zero. The census contains `12`
    retained public entrypoints, `4` retained public export facades, and zero
    twin pairs; retained public API is not relabelled as removable dead code.
-1. Test governance reports `22,786` test functions across `2,040` pytest
+1. Test governance reports `22,854` test functions across `2,053` pytest
    files, with zero duplicate test names, markerless tests, compatibility test
    files, and refined assertless residuals.
 1. Dead-code inventory (`snapshot_date: 2026-07-23`) reports
    `repo_wide_untriaged_zero_import_candidate_count: 0`, with one classified
    zero-import candidate retained as a module entrypoint.
-1. The largest directly evidenced residual is the `819`-module partial
+1. The largest directly evidenced residual is the `816`-module partial
    coverage tail (down from `824` in the 2026-07-19 audit). Debt budgets and
    exclusions are unchanged by this audit.
 
@@ -48,7 +48,7 @@ exemption, or exclusion growth.
 | Architecture score | Integral score `9.11` | `reports/quality/architecture-quality-scorecard.json` |
 | Debt gates | `45` pass, `0` fail, `0` warn; `stale_artifact_count=0` | `reports/quality/debt-governance-gates.json` |
 | Module inventory | `2247` total; `1403` full; `819` partial; `25` no executable lines; `0` uncovered/unmeasured | `reports/quality/module-coverage-inventory.json` |
-| Test governance | `22786` functions; `2040` files; duplicate/markerless/compatibility/refined-assertless counts all `0` | `reports/quality/test-governance-current.json` |
+| Test governance | `22854` functions; `2053` files; duplicate/markerless/compatibility/refined-assertless counts all `0` | `reports/quality/test-governance-current.json` |
 | Compatibility | `12` retained entrypoints; `4` public export facades; `0` twin pairs | `reports/quality/compatibility-importer-census.json` |
 | Transition compatibility debt | Current/max count `0/0` | `configs/quality/debt_scorecard.yaml` |
 | Dead code | `untriaged=0`; `1` classified zero-import candidate (`retain_module_entrypoint`); `18` triaged retained entries | `reports/quality/dead-code-inventory.json` |
@@ -71,7 +71,7 @@ is not a removal recommendation.
 | P1 | `816` partially covered modules | Reduce with focused invariant/regression tests; do not reinterpret module inventory as line/branch closure |
 | P1 | Retained compatibility entrypoints | Preserve public contracts; removal requires explicit deprecation and external-consumer evidence |
 | P1 | Reviewed hotspot/debt gates | Ratchet downward only; no budget, threshold, exemption, or exclusion growth |
-| P2 | Dead-code review window | `last_reviewed=2026-06-16`, `next_review_by=2026-09-14`; keep untriaged at zero on every inventory refresh |
+| P2 | Dead-code review window | `last_reviewed=2026-07-23`, `next_review_by=2026-10-21`; keep untriaged at zero on every inventory refresh |
 
 Linked child issues under tracker #6486 track structural burn-down and docs
 sync after this evidence re-pin.

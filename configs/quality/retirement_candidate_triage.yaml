@@ -38,8 +38,8 @@ repo_wide_zero_import_classification:
   - module_path: src/bioetl/__main__.py
     module_name: bioetl.__main__
     disposition: retain_module_entrypoint
-    reviewed_on: '2026-06-16'
-    review_by: '2026-09-14'
+    reviewed_on: '2026-07-23'
+    review_by: '2026-10-21'
     linked_issue: '#4541'
     rationale: Module entrypoint for `python -m bioetl`; static import scans stay
       at zero because the interpreter dispatches the module directly.
