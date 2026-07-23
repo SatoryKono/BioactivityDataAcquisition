@@ -56,6 +56,7 @@ families, invariants, and workflow state-machine semantics.
 | Invariants | Cross-cutting domain, workflow, replay, and schema-boundary rules | [invariants.md](invariants.md) |
 | Aggregate State Machines | Formal lifecycle transitions for `Batch`, `PipelineRun`, and `QuarantineEntry` | [aggregate-state-machines.md](aggregate-state-machines.md) |
 | Workflow State Machine | Formal workflow lifecycle and artifact ownership model | [workflow-state-machine.md](workflow-state-machine.md) |
+| Symbol Traceability | Public aggregate, value-object, and control-plane symbols mapped to roles, invariants, events, and tests | [symbol-invariant-traceability.md](symbol-invariant-traceability.md) |
 
 ## Reading Order
 
