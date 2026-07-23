@@ -1,79 +1,78 @@
 {
-  "schema_version": "tech-debt-issues-5700-5706-closeout-v1",
-  "generated_on": "2026-06-30",
-  "generated_by": "codex",
   "debt_budget_outcome": "reduced_or_unchanged",
+  "generated_by": "codex",
+  "generated_on": "2026-06-30",
   "issues": [
     {
-      "number": 5700,
-      "title": "tests/audit: restore reproducible main-branch test audit preflight for VCR/LFS-backed suites",
-      "status": "closed-ready",
       "evidence": [
         "scripts/engineering/qa/check_test_audit_preflight.py",
         "docs/03-guides/testing.md",
         ".github/workflows/tests.yml"
-      ]
+      ],
+      "number": 5700,
+      "status": "closed-ready",
+      "title": "tests/audit: restore reproducible main-branch test audit preflight for VCR/LFS-backed suites"
     },
     {
-      "number": 5701,
-      "title": "tests/telemetry: refresh committed coverage and slowest-test evidence against current HEAD",
-      "status": "closed-ready",
       "evidence": [
         "configs/quality/test_telemetry_baseline.yaml",
         "docs/05-engineering/test-telemetry-baseline.md",
         "reports/test-telemetry/coverage-summary.json",
         "reports/test-telemetry/slowest-tests.json",
         "reports/test-telemetry/slowest-tests.md"
-      ]
+      ],
+      "number": 5701,
+      "status": "closed-ready",
+      "title": "tests/telemetry: refresh committed coverage and slowest-test evidence against current HEAD"
     },
     {
-      "number": 5702,
-      "title": "tests/unit-lanes: move file-backed unit modules out of fast deterministic unit lanes",
-      "status": "closed-ready",
       "evidence": [
         "tests/unit/helpers/test_e2e_conftest.py",
         "tests/architecture/test_test_topology_canonical_paths.py"
-      ]
+      ],
+      "number": 5702,
+      "status": "closed-ready",
+      "title": "tests/unit-lanes: move file-backed unit modules out of fast deterministic unit lanes"
     },
     {
-      "number": 5703,
-      "title": "tests/architecture-performance: collapse repeated repo-wide governance scans into fewer inventory-driven passes",
-      "status": "closed-ready",
       "evidence": [
         "configs/quality/test_governance_audit.yaml",
         "configs/quality/test_matrix.yaml",
         "tests/architecture/test_test_governance_audit.py",
         "tests/architecture/test_test_matrix_lane_policy.py"
-      ]
+      ],
+      "number": 5703,
+      "status": "closed-ready",
+      "title": "tests/architecture-performance: collapse repeated repo-wide governance scans into fewer inventory-driven passes"
     },
     {
-      "number": 5704,
-      "title": "tests/topology: remove empty legacy test surfaces and normalize misplaced policy modules",
-      "status": "closed-ready",
       "evidence": [
         "tests/architecture/test_test_topology_canonical_paths.py",
         "tests/unit/helpers/test_e2e_conftest.py"
-      ]
+      ],
+      "number": 5704,
+      "status": "closed-ready",
+      "title": "tests/topology: remove empty legacy test surfaces and normalize misplaced policy modules"
     },
     {
-      "number": 5705,
-      "title": "tests/vcr-governance: close metadata-reviewed cassette reachability and ownership backlog",
-      "status": "closed-ready",
       "evidence": [
         "scripts/engineering/qa/report_vcr_metadata_catalog.py",
         "reports/quality/vcr-metadata-catalog.json",
         "tests/architecture/test_vcr_metadata_catalog_drift.py"
-      ]
+      ],
+      "number": 5705,
+      "status": "closed-ready",
+      "title": "tests/vcr-governance: close metadata-reviewed cassette reachability and ownership backlog"
     },
     {
-      "number": 5706,
-      "title": "tests/coverage-tail: reduce low-coverage module tail hidden by high repo-wide percentage",
-      "status": "closed-ready",
       "evidence": [
         "reports/quality/module-coverage-inventory.json",
         "reports/quality/tech-debt-issues-5700-5706-closeout.json",
         "tests/architecture/test_tech_debt_issues_5700_5706_closeout.py"
-      ]
+      ],
+      "number": 5706,
+      "status": "closed-ready",
+      "title": "tests/coverage-tail: reduce low-coverage module tail hidden by high repo-wide percentage"
     }
   ],
   "outcomes": {
@@ -87,38 +86,38 @@
         "missing_telemetry_baseline",
         "telemetry_baseline_without_coverage"
       ],
-      "workflow_contains_strict_preflight": true,
-      "testing_guide_mentions_preflight": true
+      "testing_guide_mentions_preflight": true,
+      "workflow_contains_strict_preflight": true
     },
     "5701": {
-      "source_commit": "51979de96630ce1eff88b6a2b82df04a5c9be157",
-      "source_run_id": "local-issues-5710-5711-20260630",
-      "refreshed_at_utc": "2026-06-30T13:06:54.324571+00:00",
-      "coverage_xml_present": false,
-      "coverage_percent_fallback_used": true,
       "coverage_actual_percent": 95.61,
-      "slowest_total_cases": 8507,
+      "coverage_percent_fallback_used": true,
+      "coverage_xml_present": false,
+      "refreshed_at_utc": "2026-07-23T08:11:54.191358+00:00",
+      "slowest_total_cases": 23360,
+      "source_commit": "7038c078bd23b9c9810eb370793e75b2a0d63cbd",
+      "source_run_id": "local-duration-rebuild-2026-07-23",
       "top_slow_zone": {
-        "zone": "tests.architecture.test_checkpoint_compatibility_runtime_facade_usage",
+        "max_duration_s": 192.078,
         "test_count": 2,
-        "total_duration_s": 70.905,
-        "max_duration_s": 42.785
+        "total_duration_s": 231.041,
+        "zone": "tests.architecture.test_naming_ambiguity_classifier"
       }
     },
     "5702": {
-      "retired_legacy_path": "tests/unit/e2e/test_e2e_timeout_contract.py",
-      "retired_legacy_path_absent": true,
+      "helper_owner_contains_timeout_contracts": true,
       "helper_owner_path": "tests/unit/helpers/test_e2e_conftest.py",
-      "helper_owner_contains_timeout_contracts": true
+      "retired_legacy_path": "tests/unit/e2e/test_e2e_timeout_contract.py",
+      "retired_legacy_path_absent": true
     },
     "5703": {
+      "architecture_runner_backend": "run_pytest_sharded",
       "cache_policy_decision": "retained_cached_scanner",
       "cache_policy_issue_ref": "#4663",
       "isolated_lanes": [
         "architecture-fast-boundary",
         "architecture-slow-governance"
       ],
-      "architecture_runner_backend": "run_pytest_sharded",
       "slow_lane_runner_options": [
         "--shard",
         "S7-architecture-slow-governance"
@@ -130,64 +129,70 @@
       "topology_guard_owner": "tests/architecture/test_test_topology_canonical_paths.py"
     },
     "5705": {
-      "metadata_reviewed_count": 0,
-      "generated_reachable_cassette_count": 70,
       "direct_reachable_cassette_count": 128,
+      "generated_reachable_cassette_count": 70,
       "metadata_review_required_cassette_count": 0,
+      "metadata_reviewed_count": 0,
       "unowned_cassette_count": 0
     },
     "5706": {
-      "under_85_count": 82,
-      "under_70_count": 9,
-      "zero_coverage_count": 0,
-      "unmeasured_count": 0,
       "top_under_70_modules": [
         {
-          "path": "src/bioetl/infrastructure/serialization/encoders.py",
-          "coverage_percent": 45.59,
-          "missing_lines": 37
+          "coverage_percent": 0.0,
+          "missing_lines": 18,
+          "path": "src/bioetl/composition/bootstrap/runtime/_pipeline_bootstrap_lazy_dependencies.py"
         },
         {
-          "path": "src/bioetl/domain/workflow/_run_options_support.py",
+          "coverage_percent": 0.0,
+          "missing_lines": 9,
+          "path": "src/bioetl/domain/normalization/profiles/_chembl_policy_family_mapping.py"
+        },
+        {
+          "coverage_percent": 0.0,
+          "missing_lines": 56,
+          "path": "src/bioetl/domain/normalization/profiles/_normalization_helpers.py"
+        },
+        {
+          "coverage_percent": 0.0,
+          "missing_lines": 31,
+          "path": "src/bioetl/domain/normalization/profiles/_profile_validation.py"
+        },
+        {
+          "coverage_percent": 0.0,
+          "missing_lines": 39,
+          "path": "src/bioetl/infrastructure/schemas/workflow_config_fk.py"
+        },
+        {
+          "coverage_percent": 0.0,
+          "missing_lines": 61,
+          "path": "src/bioetl/interfaces/cli/commands/domains/health/_observability_backend_startup_types.py"
+        },
+        {
+          "coverage_percent": 0.0,
+          "missing_lines": 15,
+          "path": "src/bioetl/interfaces/cli/commands/domains/health/failure_handling.py"
+        },
+        {
+          "coverage_percent": 26.92,
+          "missing_lines": 38,
+          "path": "src/bioetl/interfaces/http/control_plane_identity/payload_selection.py"
+        },
+        {
           "coverage_percent": 51.61,
-          "missing_lines": 15
+          "missing_lines": 15,
+          "path": "src/bioetl/domain/workflow/_run_options_support.py"
         },
         {
-          "path": "src/bioetl/domain/entities/bioactivity/_converters.py",
-          "coverage_percent": 62.16,
-          "missing_lines": 14
-        },
-        {
-          "path": "src/bioetl/infrastructure/observability/metrics_collector.py",
-          "coverage_percent": 63.64,
-          "missing_lines": 4
-        },
-        {
-          "path": "src/bioetl/infrastructure/adapters/_health_check_policy.py",
-          "coverage_percent": 65.12,
-          "missing_lines": 15
-        },
-        {
-          "path": "src/bioetl/composition/maintenance_api.py",
-          "coverage_percent": 65.22,
-          "missing_lines": 8
-        },
-        {
-          "path": "src/bioetl/infrastructure/export/debug_export_adapter.py",
-          "coverage_percent": 66.41,
-          "missing_lines": 43
-        },
-        {
-          "path": "src/bioetl/domain/normalization/_reference_id_openalex.py",
-          "coverage_percent": 68.75,
-          "missing_lines": 5
-        },
-        {
-          "path": "src/bioetl/infrastructure/observability/__init__.py",
-          "coverage_percent": 68.75,
-          "missing_lines": 5
+          "coverage_percent": 56.52,
+          "missing_lines": 30,
+          "path": "src/bioetl/domain/immutability.py"
         }
-      ]
+      ],
+      "under_70_count": 15,
+      "under_85_count": 68,
+      "unmeasured_count": 0,
+      "zero_coverage_count": 7
     }
-  }
+  },
+  "schema_version": "tech-debt-issues-5700-5706-closeout-v1"
 }
