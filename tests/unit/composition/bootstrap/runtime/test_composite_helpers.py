@@ -39,17 +39,51 @@ def _import_helpers():
 
     Functions that were previously compat-wrappers in composite.py now
     resolve to their canonical locations in extracted service modules.
+
+    Heavy ``composite`` facade imports stay lazy so filter-extractor unit
+    tests do not pay the full pipeline-registry/pandera import graph on
+    Windows cloud-synced checkouts (prior source of pytest-timeout hangs).
     """
-    from bioetl.composition.bootstrap.runtime.composite import (
-        _resolve_composite_config_path,
-        _resolve_composite_gold_schema,
-    )
     from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
         CompositeFilterExtractor,
     )
-    from bioetl.composition.bootstrap.runtime.runner_factory_builder_service import (
-        resolve_bronze_opts,
-    )
+
+    def _resolve_bronze_opts(*args: object, **kwargs: object) -> object:
+        from bioetl.composition.bootstrap.runtime.runner_factory_builder_service import (
+            resolve_bronze_opts as resolve_opts,
+        )
+
+        return resolve_opts(*args, **kwargs)
+
+    def _resolve_composite_config_path(*args: object, **kwargs: object) -> object:
+        # Prefer infrastructure API over the composite facade: the facade imports
+        # the full runner/pipeline registry graph.
+        from bioetl.infrastructure.config.composite_config_api import (
+            DEFAULT_COMPOSITE_CONFIG_DIR,
+            resolve_composite_config_path as resolve_config_path,
+        )
+        from bioetl.infrastructure.config.config_root import resolve_configs_root
+
+        name = args[0] if args else kwargs["name"]
+        return resolve_config_path(
+            str(name),
+            config_dir=DEFAULT_COMPOSITE_CONFIG_DIR,
+            configs_root=resolve_configs_root(),
+        )
+
+    def _resolve_composite_gold_schema(*args: object, **kwargs: object) -> object:
+        # Prefer infrastructure API over the composite facade (avoids pipeline
+        # registry import). First materialization still loads gold contracts.
+        from bioetl.infrastructure.config.composite_config_api import (
+            DEFAULT_COMPOSITE_GOLD_SCHEMA_REGISTRY,
+            resolve_composite_gold_schema as resolve_gold_schema,
+        )
+
+        composite_name = args[0] if args else kwargs["composite_name"]
+        return resolve_gold_schema(
+            str(composite_name),
+            schema_registry=DEFAULT_COMPOSITE_GOLD_SCHEMA_REGISTRY,
+        )
 
     return {
         "_build_fallback_mapping": lambda keys, filter_key, join_keys: (
@@ -75,7 +109,7 @@ def _import_helpers():
             )
         ),
         "_find_filter_key": CompositeFilterExtractor.find_filter_key,
-        "_resolve_bronze_opts": resolve_bronze_opts,
+        "_resolve_bronze_opts": _resolve_bronze_opts,
         "_resolve_composite_config_path": _resolve_composite_config_path,
         "_resolve_composite_gold_schema": _resolve_composite_gold_schema,
     }
@@ -87,8 +121,13 @@ def _import_helpers():
 
 
 @pytest.mark.unit
+@pytest.mark.timeout(180)
 class TestResolveCompositeGoldSchema:
-    """Tests for _resolve_composite_gold_schema function."""
+    """Tests for _resolve_composite_gold_schema function.
+
+    First call materializes lazy gold contracts (pandera/pandas). On Windows
+    cloud-synced checkouts that cold import can exceed the default 60s budget.
+    """
 
     def test_resolves_composite_activity_schema(self) -> None:
         """Test that composite_activity returns CompositeActivityGoldSchema."""
@@ -181,7 +220,7 @@ class TestResolveCompositeConfigPath:
         fn = helpers["_resolve_composite_config_path"]
 
         with patch(
-            "bioetl.composition.bootstrap.runtime.composite.DEFAULT_COMPOSITE_CONFIG_DIR",
+            "bioetl.infrastructure.config.composite_config_api.DEFAULT_COMPOSITE_CONFIG_DIR",
             tmp_path / "composites",
         ):
             with pytest.raises(FileNotFoundError, match="Composite config not found"):
@@ -198,7 +237,7 @@ class TestResolveCompositeConfigPath:
         config_file.write_text("composite: {}")
 
         with patch(
-            "bioetl.composition.bootstrap.runtime.composite.DEFAULT_COMPOSITE_CONFIG_DIR",
+            "bioetl.infrastructure.config.composite_config_api.DEFAULT_COMPOSITE_CONFIG_DIR",
             primary_dir,
         ):
             result = fn("my_pipeline")
