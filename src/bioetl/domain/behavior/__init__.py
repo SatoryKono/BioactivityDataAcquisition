@@ -63,6 +63,9 @@ if TYPE_CHECKING:
     from bioetl.domain.behavior.organism_classification_service import (
         OrganismClassifier as OrganismClassifier,
     )
+    from bioetl.domain.behavior.phased_migration_support import (
+        PhasedMigrationCoordinator as PhasedMigrationCoordinator,
+    )
     from bioetl.domain.behavior.preflight_governance import (
         PreflightGovernor as PreflightGovernor,
     )
@@ -76,7 +79,6 @@ if TYPE_CHECKING:
     from bioetl.domain.behavior.value_validator import (
         ValueValidator as ValueValidator,
     )
-    # PhasedMigrationCoordinator removed - retired shim (2026-07-03)
 
 _PUBLIC_EXPORTS = {
     "CHEMICAL_STANDARDIZATION_POLICY_VERSION": (
@@ -151,7 +153,10 @@ _PUBLIC_EXPORTS = {
         "bioetl.domain.behavior.organism_classification_service",
         "OrganismClassifier",
     ),
-    # PhasedMigrationCoordinator removed - retired shim (2026-07-03)
+    "PhasedMigrationCoordinator": (
+        "bioetl.domain.behavior.phased_migration_support",
+        "PhasedMigrationCoordinator",
+    ),
     "PreflightGovernor": (
         "bioetl.domain.behavior.preflight_governance",
         "PreflightGovernor",

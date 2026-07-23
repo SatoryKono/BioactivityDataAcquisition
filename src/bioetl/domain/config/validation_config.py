@@ -58,6 +58,16 @@ class ValidationConfig:
 
     def _validate_ranges(self) -> None:
         """Validate that min/max ranges are valid."""
+        from math import isfinite
+
+        for name, value in (
+            ("min_molecular_weight", self.min_molecular_weight),
+            ("max_molecular_weight", self.max_molecular_weight),
+            ("min_pchembl_value", self.min_pchembl_value),
+            ("max_pchembl_value", self.max_pchembl_value),
+        ):
+            if not isfinite(value):
+                raise ValueError(f"{name} must be finite")
         validations = [
             (
                 self.min_publication_year >= self.max_publication_year,

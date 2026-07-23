@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from importlib import import_module
 from typing import TYPE_CHECKING
 
 from bioetl.composition.runtime_builders._run_manifest_data_roots import (
@@ -17,24 +16,31 @@ from bioetl.composition.runtime_builders._run_manifest_identity_ref_values impor
 )
 
 
+def control_plane_root(*args: object, **kwargs: object) -> object:
+    """Typed forwarding wrapper for the control-plane root helper."""
+    from bioetl.composition.runtime_builders._run_manifest_control_plane_paths import (
+        control_plane_root as impl,
+    )
+
+    return impl(*args, **kwargs)  # type: ignore[misc]
+
+
+def build_planned_artifacts(*args: object, **kwargs: object) -> object:
+    """Typed forwarding wrapper for planned-artifact materialization."""
+    from bioetl.composition.runtime_builders._run_manifest_planned_artifacts import (
+        build_planned_artifacts as impl,
+    )
+
+    return impl(*args, **kwargs)  # type: ignore[misc]
+
+
 def __getattr__(name: str) -> object:  # pragma: no cover
     """Lazily expose legacy path helpers without raising their static fan-in."""
     if TYPE_CHECKING:
         raise AttributeError
-    if name == "control_plane_root":
-        return getattr(
-            import_module(
-                "bioetl.composition.runtime_builders._run_manifest_control_plane_paths"
-            ),
-            name,
-        )
-    if name == "build_planned_artifacts":
-        return getattr(
-            import_module(
-                "bioetl.composition.runtime_builders._run_manifest_planned_artifacts"
-            ),
-            name,
-        )
+    if name in {"control_plane_root", "build_planned_artifacts"}:
+        # Prefer explicit wrappers above; keep __getattr__ for symmetry.
+        return globals()[name]
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 

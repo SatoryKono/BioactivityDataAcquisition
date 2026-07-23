@@ -6,15 +6,15 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 
 from bioetl.application.services.control_plane.forensic.diagnostics_support import (
-    _artifact_completeness,
-    _artifact_refs,
-    _checkpoint_compatibility_payload,
-    _diagnostic_snapshot,
-    _forensic_diff_payload,
-    _lineage_closure_payload,
-    _missing_evidence,
-    _replay_capability_payload,
-    _string_list,
+    artifact_completeness,
+    artifact_refs,
+    checkpoint_compatibility_payload,
+    diagnostic_snapshot,
+    forensic_diff_payload,
+    lineage_closure_payload,
+    missing_evidence,
+    replay_capability_payload,
+    string_list,
 )
 from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestDiffResult,
@@ -66,13 +66,13 @@ class ForensicRunDiffResult:
 
     def to_dict(self) -> dict[str, object]:
         """Return JSON/YAML-safe payload for CLI/API presentation."""
-        semantic_difference_fields = _string_list(
+        semantic_difference_fields = string_list(
             self.manifest_diff.semantic_difference_fields
         )
-        occurrence_difference_fields = _string_list(
+        occurrence_difference_fields = string_list(
             self.manifest_diff.occurrence_difference_fields
         )
-        noncanonical_difference_fields = _string_list(
+        noncanonical_difference_fields = string_list(
             self.manifest_diff.noncanonical_difference_fields
         )
         return {
@@ -123,7 +123,7 @@ class ForensicRunDiffService:
         left = inspection.show(left_identifier)
         right = inspection.show(right_identifier)
         manifest_diff = inspection.diff(left_identifier, right_identifier)
-        forensic_diff = _forensic_diff_payload(manifest_diff)
+        forensic_diff = forensic_diff_payload(manifest_diff)
         artifact_byte_equivalence = self._build_artifact_byte_equivalence(
             left=left,
             right=right,
@@ -133,24 +133,24 @@ class ForensicRunDiffService:
             right_manifest_id=right.manifest.manifest_id,
             manifest_diff=manifest_diff,
             forensic_diff=forensic_diff,
-            left_diagnostics=_diagnostic_snapshot(left),
-            right_diagnostics=_diagnostic_snapshot(right),
-            replay_capability=_replay_capability_payload(left=left, right=right),
-            checkpoint_compatibility=_checkpoint_compatibility_payload(
+            left_diagnostics=diagnostic_snapshot(left),
+            right_diagnostics=diagnostic_snapshot(right),
+            replay_capability=replay_capability_payload(left=left, right=right),
+            checkpoint_compatibility=checkpoint_compatibility_payload(
                 forensic_diff,
             ),
             artifact_byte_equivalence=artifact_byte_equivalence,
             artifact_completeness={
-                "left": _artifact_completeness(left),
-                "right": _artifact_completeness(right),
+                "left": artifact_completeness(left),
+                "right": artifact_completeness(right),
             },
             lineage_closure={
-                "left": _lineage_closure_payload(left),
-                "right": _lineage_closure_payload(right),
+                "left": lineage_closure_payload(left),
+                "right": lineage_closure_payload(right),
             },
             missing_evidence={
-                "left": _missing_evidence(left),
-                "right": _missing_evidence(right),
+                "left": missing_evidence(left),
+                "right": missing_evidence(right),
             },
         )
 
@@ -161,8 +161,8 @@ class ForensicRunDiffService:
         right: RunManifestInspectionResult,
     ) -> dict[str, object]:
         """Return byte-level artifact equivalence when a comparison port exists."""
-        left_refs = _artifact_refs(left.diagnostics)
-        right_refs = _artifact_refs(right.diagnostics)
+        left_refs = artifact_refs(left.diagnostics)
+        right_refs = artifact_refs(right.diagnostics)
         if self.artifact_byte_comparison_port is None:
             return {
                 "available": False,

@@ -29,12 +29,12 @@ if TYPE_CHECKING:
         LoggerPort,
     )
 
+# Programmer errors (TypeError/ValueError) must propagate; only operational
+# failures are absorbed into unhealthy component results.
 _HEALTH_CHECK_ERRORS = (
     BioETLError,
     OSError,
     RuntimeError,
-    ValueError,
-    TypeError,
 )
 
 

@@ -16,7 +16,6 @@ from bioetl.composition.runtime_builders._effective_config_runtime_snapshot_supp
     add_silver_filter_compatibility_defaults,
     build_execution_environment_snapshot,
     build_execution_settings_snapshot,
-    current_silver_filter_compatibility_mode,
     current_silver_filter_compatibility_snapshot,
 )
 from bioetl.composition.runtime_builders._runtime_launch_context_fields import (
@@ -60,12 +59,11 @@ def build_runtime_overrides_snapshot(
             "vacuum": _to_serializable_mapping(getattr(ctx, "vacuum", None)),
             "replay_of_run_id": getattr(ctx, "replay_of_run_id", None),
             "replay_of_manifest_id": getattr(ctx, "replay_of_manifest_id", None),
-            "silver_filter_compatibility_mode": (
-                current_silver_filter_compatibility_mode()
-            ),
         }
     )
     silver_filter_compatibility = current_silver_filter_compatibility_snapshot()
+    silver_filter_mode = silver_filter_compatibility["mode"]
+    cli_overrides["silver_filter_compatibility_mode"] = silver_filter_mode
     runtime_fields = build_runtime_launch_field_snapshot(
         ctx,
         run_type_value=run_type_value,
@@ -85,7 +83,7 @@ def build_runtime_overrides_snapshot(
             ),
             "settings_snapshot": build_execution_settings_snapshot(settings),
             "silver_filter_compatibility": silver_filter_compatibility,
-            "silver_filter_compatibility_mode": silver_filter_compatibility["mode"],
+            "silver_filter_compatibility_mode": silver_filter_mode,
         }
     )
     return {
