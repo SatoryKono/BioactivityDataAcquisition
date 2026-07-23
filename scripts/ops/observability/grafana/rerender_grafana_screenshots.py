@@ -497,6 +497,13 @@ def _default_playwright_node_modules() -> str:
     configured = os.getenv("BIOETL_PLAYWRIGHT_NODE_MODULES", "").strip()
     if configured:
         return configured
+    # Prefer a local (non-GDrive) install when present — Chromium launch from
+    # network/cloud-synced repo paths is flaky on Windows.
+    local_app_data = os.getenv("LOCALAPPDATA", "").strip()
+    if local_app_data:
+        local_nm = Path(local_app_data) / "bioetl-playwright" / "node_modules"
+        if _path_has_playwright_package(local_nm):
+            return str(local_nm)
     repo_node_modules = _repo_root() / "node_modules"
     if _path_has_playwright_package(repo_node_modules):
         return str(repo_node_modules)
@@ -519,6 +526,54 @@ def _default_playwright_browsers_path() -> str:
     if DEFAULT_TOOL_PLAYWRIGHT_BROWSERS.exists():
         return str(DEFAULT_TOOL_PLAYWRIGHT_BROWSERS)
     return ""
+
+
+def _discover_playwright_chromium_executable(browsers_path: str = "") -> str:
+    """Locate a Chromium binary under the Playwright browsers cache."""
+    configured = (
+        os.getenv("PLAYWRIGHT_EXECUTABLE_PATH", "").strip()
+        or os.getenv("CHROME_EXE", "").strip()
+        or os.getenv("CHROMIUM_PATH", "").strip()
+    )
+    if configured and Path(configured).exists():
+        return configured
+
+    root = Path(browsers_path or _default_playwright_browsers_path())
+    if not root.exists():
+        return ""
+
+    patterns = (
+        "chromium-*/chrome-win/chrome.exe",
+        "chromium-*/chrome-win64/chrome.exe",
+        "chromium_headless_shell-*/chrome-win/headless_shell.exe",
+        "chromium_headless_shell-*/chrome-win64/headless_shell.exe",
+        "chromium-*/chrome-linux/chrome",
+        "chromium-*/chrome-linux64/chrome",
+        "chromium_headless_shell-*/chrome-linux/headless_shell",
+        "chromium_headless_shell-*/chrome-linux64/headless_shell",
+    )
+    candidates: list[Path] = []
+    for pattern in patterns:
+        candidates.extend(path for path in root.glob(pattern) if path.is_file())
+    if not candidates:
+        return ""
+    # Prefer older stable revisions first when multiple caches exist — the
+    # package-pinned revision (e.g. 1148 for playwright 1.49) is more reliable
+    # than tip-of-tree builds that may not match the installed package.
+    candidates.sort(key=lambda item: item.as_posix())
+    return str(candidates[0])
+
+
+def _playwright_process_cwd() -> str:
+    """Use a local temp cwd for Playwright/Chromium; GDrive cwd can hang launch."""
+    configured = os.getenv("BIOETL_PLAYWRIGHT_CWD", "").strip()
+    if configured:
+        path = Path(configured)
+        path.mkdir(parents=True, exist_ok=True)
+        return str(path)
+    import tempfile
+
+    return tempfile.gettempdir()
 
 
 def _default_playwright_library_path() -> str:
@@ -549,6 +604,10 @@ def _apply_playwright_runtime_env(env: dict[str, str]) -> None:
     browsers_path = _default_playwright_browsers_path()
     if browsers_path:
         env["PLAYWRIGHT_BROWSERS_PATH"] = browsers_path
+
+    executable = _discover_playwright_chromium_executable(browsers_path)
+    if executable:
+        env["PLAYWRIGHT_EXECUTABLE_PATH"] = executable
 
     library_path = _default_playwright_library_path()
     if library_path:
@@ -632,10 +691,12 @@ def _run_playwright_process(config: RenderConfig) -> int:
     if scope_query:
         node_command.extend(["--scope-query", scope_query])
     try:
+        # Keep Chromium launch off GDrive paths; the .cjs script resolves the
+        # repo from its own __dirname so repo-relative inventory still works.
         result = subprocess.run(
             node_command,
             check=False,
-            cwd=str(_repo_root()),
+            cwd=_playwright_process_cwd(),
             env=_playwright_env(config),
             timeout=_playwright_process_timeout_seconds(config),
         )
@@ -868,6 +929,8 @@ def check_playwright_runtime(timeout_seconds: float = 30.0) -> tuple[bool, str]:
     try:
         env = os.environ.copy()
         _apply_playwright_runtime_env(env)
+        # Launch from a local temp cwd: GDrive/repo cwd can hang Chromium on Windows.
+        probe_cwd = _playwright_process_cwd()
         result = subprocess.run(
             [
                 node_path,
@@ -875,8 +938,12 @@ def check_playwright_runtime(timeout_seconds: float = 30.0) -> tuple[bool, str]:
                 (
                     "const { chromium } = require('playwright');"
                     "(async () => {"
-                    " const browser = await chromium.launch({ headless: true });"
-                    " process.stdout.write(chromium.executablePath());"
+                    " const opts = { headless: true, args: "
+                    "['--no-sandbox','--disable-dev-shm-usage','--disable-gpu'] };"
+                    " const exe = process.env.PLAYWRIGHT_EXECUTABLE_PATH || '';"
+                    " if (exe) { opts.executablePath = exe; }"
+                    " const browser = await chromium.launch(opts);"
+                    " process.stdout.write(exe || chromium.executablePath());"
                     " await browser.close();"
                     "})().catch((error) => {"
                     " console.error(String(error && error.message ? error.message : error));"
@@ -885,7 +952,7 @@ def check_playwright_runtime(timeout_seconds: float = 30.0) -> tuple[bool, str]:
                 ),
             ],
             check=False,
-            cwd=str(_repo_root()),
+            cwd=probe_cwd,
             capture_output=True,
             text=True,
             env=env,

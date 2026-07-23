@@ -8,7 +8,7 @@ function parseArgs(argv) {
   const config = {
     baseUrl: process.env.GRAFANA_BASE_URL || "http://localhost:3000",
     username: process.env.GRAFANA_USERNAME || "admin",
-    password: process.env.GRAFANA_PASSWORD || "changeme",
+    password: process.env.GRAFANA_PASSWORD || "",
     serviceAccountToken: process.env.GRAFANA_SERVICE_ACCOUNT_TOKEN || "",
     outputDir: path.resolve(
       process.env.GRAFANA_SCREENSHOT_OUTPUT_DIR ||
@@ -1175,7 +1175,19 @@ async function main() {
   const dashboards = listDashboardsFromRepo();
   let renderFailure = null;
   for (const [index, dashboard] of dashboards.entries()) {
-    const browser = await chromium.launch({ headless: true });
+    const launchOptions = {
+      headless: true,
+      args: ["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"],
+    };
+    const executablePath =
+      process.env.PLAYWRIGHT_EXECUTABLE_PATH ||
+      process.env.CHROME_EXE ||
+      process.env.CHROMIUM_PATH ||
+      "";
+    if (executablePath) {
+      launchOptions.executablePath = executablePath;
+    }
+    const browser = await chromium.launch(launchOptions);
     let contextBundle = null;
     let context = null;
     try {

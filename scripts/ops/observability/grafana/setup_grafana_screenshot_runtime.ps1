@@ -42,7 +42,11 @@ $ToolsRoot = if ($env:BIOETL_TOOLS_DIR) { $env:BIOETL_TOOLS_DIR } else { Join-Pa
 $NodeToolsRoot = Join-Path $ToolsRoot "nodejs"
 $GrafanaBaseUrl = if ($env:GRAFANA_BASE_URL) { $env:GRAFANA_BASE_URL } else { "http://localhost:3000" }
 $GrafanaUsername = if ($env:GRAFANA_USERNAME) { $env:GRAFANA_USERNAME } else { "admin" }
-$GrafanaPassword = if ($env:GRAFANA_PASSWORD) { $env:GRAFANA_PASSWORD } else { "changeme" }
+$GrafanaPassword = if ($env:GRAFANA_PASSWORD) { $env:GRAFANA_PASSWORD } else { "" }
+if (-not $GrafanaPassword -and -not $env:GRAFANA_SERVICE_ACCOUNT_TOKEN) {
+  Write-Error "Set GRAFANA_PASSWORD or GRAFANA_SERVICE_ACCOUNT_TOKEN (no default password)."
+  exit 9
+}
 
 function Ensure-Directory {
     param([Parameter(Mandatory = $true)][string]$Path)
