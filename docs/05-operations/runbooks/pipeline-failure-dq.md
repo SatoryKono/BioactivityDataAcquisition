@@ -70,14 +70,14 @@ The hierarchical configuration takes precedence when available.
    - Update source-aligned contract/schema code in `src/bioetl/domain/contracts/gold/` or related validation/config modules.
    - Update Pandera-based validation surfaces used by the pipeline.
    - Deploy new version.
-1. **If Threshold is Too Strict**:
-   - Temporarily increase threshold in `configs/entities/{provider}/{entity}.yaml`:
-     ```yaml
-     pipeline:
-       dq_overrides:
-         hard_fail_threshold: 0.30  # Increase to 30%
-     ```
-   - **Warning**: This degrades data quality in Silver/Gold.
+1. **If evidence indicates the governed threshold is wrong**:
+   - Do not raise a threshold to make the failed run green.
+   - Preserve the failed run, DQ report, quarantine distribution, effective
+     config, and contract version.
+   - Open a separate policy change with the affected pipelines, historical
+     baseline, before/after disposition counts, and contract-owner approval.
+   - Validate the proposed value against persisted inputs and perform a
+     deterministic replay. The original failed run remains immutable evidence.
 
 ### Quarantine Management
 

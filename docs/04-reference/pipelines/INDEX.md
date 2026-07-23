@@ -19,6 +19,10 @@ ______________________________________________________________________
 > `27` active pipeline surfaces (`22` provider entity pipelines and `5`
 > composite entity pipelines). The config-backed inventory remains
 > [pipeline-catalog.md](../pipeline-catalog.md).
+>
+> Primary keys, effective merge mode, nullability counts, and Gold contract
+> ownership are maintained in
+> [Contract Facet Matrix](contract-facet-matrix.md).
 
 ## Operational Facet Coverage
 

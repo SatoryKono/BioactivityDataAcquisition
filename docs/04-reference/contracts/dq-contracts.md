@@ -233,6 +233,24 @@ every DQ surface.
 | --- | --- | --- | --- |
 | Hierarchical `quality:` config | `configs/base/quality.yaml` | `soft_fail=0.05`, `hard_fail=0.25` | Base provider/entity DQ hierarchy |
 | Contract-backed DQ runtime fallback | `configs/contracts/**`, `src/bioetl/infrastructure/config/dq_contract_config_loader.py` | `soft_fail=0.05`, `hard_fail=0.20` | Used when a contract-backed config omits explicit threshold values |
+
+### Governed threshold changes
+
+Thresholds are policy, not an incident bypass. Operators must not raise
+`soft_fail_threshold` or `hard_fail_threshold` merely to convert a failed run
+to success.
+
+A proposed change requires:
+
+- the failed run, DQ report, quarantine distribution, effective config, and
+  contract version as evidence;
+- the affected pipeline set and historical baseline;
+- before/after disposition counts and explicit data-risk impact;
+- contract-owner review;
+- validation against persisted inputs followed by deterministic replay.
+
+The replay creates new manifest and ledger evidence. It never changes the
+original failed run or its quarantine payloads in place.
 | Inline pipeline DQ override normalization | `src/bioetl/infrastructure/config/pipeline_dq_resolution.py` | `soft_fail=0.05`, `hard_fail=0.20` | Baseline used to detect whether inline `pipeline.dq_overrides` changed the defaults |
 | Silver DQ request contract | `src/bioetl/domain/ports/quality/silver_dq_request.py` | `soft_fail=0.05`, `hard_fail=0.20` | Request-shape default for Silver DQ analysis |
 
