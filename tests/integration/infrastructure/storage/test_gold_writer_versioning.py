@@ -5,13 +5,11 @@ from __future__ import annotations
 from datetime import datetime
 from pathlib import Path
 from typing import cast
-from urllib.parse import unquote, urlparse
 from unittest.mock import MagicMock
 from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 
-from deltalake import DeltaTable
 from pandera.pandas import Column, DataFrameSchema
 
 from bioetl.domain.ports import LoggerPort
@@ -21,6 +19,10 @@ from bioetl.domain.types import (
     GoldSchemaVersionPolicy,
 )
 from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
+from bioetl.infrastructure.storage.delta.table_ops import (
+    load_delta_table,
+    read_delta_records,
+)
 from bioetl.infrastructure.storage.gold.runtime_helpers import (
     GoldWriterRuntimeServices,
     build_gold_writer_runtime_services,
@@ -77,18 +79,10 @@ def _versioned_table_path(base_path: Path, table_name: str) -> Path:
     return base_path / provider / entity
 
 
-def _resolve_parquet_file_uri(file_uri: str) -> str:
-    if not file_uri.startswith("file://"):
-        return file_uri
-    parsed_path = unquote(urlparse(file_uri).path)
-    if len(parsed_path) >= 4 and parsed_path[0] == "/" and parsed_path[2] == ":":
-        return parsed_path[1:]
-    return parsed_path
-
-
 def _load_delta_rows(table_path: Path) -> list[dict[str, object]]:
-    table = DeltaTable(str(table_path))
-    return cast(list[dict[str, object]], table.to_pyarrow_table().to_pylist())
+    # Use the shared helper: native ``to_pyarrow_table()`` can hang on Windows.
+    table = load_delta_table(str(table_path))
+    return cast(list[dict[str, object]], read_delta_records(table))
 
 
 def _load_gold_rows(base_path: Path, table_name: str) -> list[dict[str, object]]:
@@ -97,7 +91,9 @@ def _load_gold_rows(base_path: Path, table_name: str) -> list[dict[str, object]]
 
 @pytest.mark.integration
 @pytest.mark.asyncio
-@pytest.mark.timeout(120)
+# Cold deltalake/pyarrow bring-up on Windows regularly exceeds 2 minutes for
+# dual-write of two versioned tables; keep a generous bound for local GDrive hosts.
+@pytest.mark.timeout(300)
 async def test_gold_writer_dual_write_projects_version_specific_schema(
     tmp_path: Path,
     noop_logger: object,
@@ -244,6 +240,7 @@ async def test_gold_writer_dual_write_validation_failure_carries_contract_versio
 
 @pytest.mark.integration
 @pytest.mark.asyncio
+@pytest.mark.timeout(300)
 async def test_gold_writer_overwrite_is_idempotent_for_identical_records(
     tmp_path: Path,
     noop_logger: object,

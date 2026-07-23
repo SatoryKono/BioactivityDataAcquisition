@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import ast
+import hashlib
 import os
+import pickle
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
@@ -21,6 +23,8 @@ _DEFAULT_WINDOWS_READ_WORKERS = 2
 _MAX_READ_WORKERS = 16
 _MAX_SOURCE_BYTES = 512_000
 _READ_WORKERS_ENV = "BIOETL_IMPORT_GRAPH_READ_WORKERS"
+_PARSED_CACHE_VERSION = 2
+_PARSED_CACHE_ENV = "BIOETL_IMPORT_GRAPH_CACHE_DIR"
 
 
 @dataclass(frozen=True)
@@ -172,14 +176,98 @@ def _collect_existing_modules(scan: PackageScan) -> frozenset[str]:
     return frozenset(module_name for module_name, _ in _iter_python_modules(scan))
 
 
+def _parsed_modules_cache_dir(repo_root: Path) -> Path:
+    """Prefer a local non-network cache dir when available (Windows GDrive)."""
+    configured = os.getenv(_PARSED_CACHE_ENV, "").strip()
+    if configured:
+        return Path(configured)
+    local_app_data = os.getenv("LOCALAPPDATA", "").strip()
+    if local_app_data:
+        repo_key = hashlib.sha256(str(repo_root.resolve()).encode("utf-8")).hexdigest()[
+            :16
+        ]
+        return Path(local_app_data) / "bioetl-import-graph-cache" / repo_key
+    return repo_root / ".cache" / "import-graph"
+
+
+def _import_sources_fingerprint(modules: list[tuple[str, Path]]) -> str:
+    """Fingerprint import sources by path + size + mtime (no content read)."""
+
+    def _stat_one(item: tuple[str, Path]) -> tuple[str, str]:
+        module_name, path = item
+        try:
+            stat_result = path.stat()
+            return module_name, f"{stat_result.st_size}\0{stat_result.st_mtime_ns}"
+        except OSError:
+            return module_name, "missing"
+
+    workers = _read_worker_count(len(modules))
+    if workers == 1:
+        rows = [_stat_one(item) for item in modules]
+    else:
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            rows = list(executor.map(_stat_one, modules, chunksize=64))
+
+    digest = hashlib.sha256()
+    digest.update(f"v{_PARSED_CACHE_VERSION}".encode("utf-8"))
+    for module_name, signature in rows:
+        digest.update(module_name.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(signature.encode("utf-8"))
+        digest.update(b"\0")
+    return digest.hexdigest()
+
+
+def _load_parsed_modules_disk_cache(
+    cache_path: Path,
+) -> tuple[ParsedModule, ...] | None:
+    try:
+        with cache_path.open("rb") as handle:
+            payload = pickle.load(handle)
+    except (OSError, pickle.PickleError, EOFError):
+        return None
+    if not isinstance(payload, tuple):
+        return None
+    if not all(isinstance(item, ParsedModule) for item in payload):
+        return None
+    return payload
+
+
+def _store_parsed_modules_disk_cache(
+    cache_path: Path,
+    parsed_modules: tuple[ParsedModule, ...],
+) -> None:
+    try:
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        temp_path = cache_path.with_suffix(cache_path.suffix + ".tmp")
+        with temp_path.open("wb") as handle:
+            pickle.dump(parsed_modules, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        temp_path.replace(cache_path)
+    except OSError:
+        # Cache is best-effort; inventory correctness must not depend on it.
+        return
+
+
 @cache
 def _collect_parsed_modules(repo_root_str: str) -> tuple[ParsedModule, ...]:
     """Parse first-party Python modules once per repo path for reuse across checks."""
     repo_root = Path(repo_root_str)
     scans = default_scan_roots(repo_root)
     existing_modules = _collect_existing_modules(scans[0])
-    parsed_modules: list[ParsedModule] = []
+    import_sources: list[tuple[str, Path]] = []
+    for scan in scans:
+        import_sources.extend(_iter_import_sources(scan))
 
+    fingerprint = _import_sources_fingerprint(import_sources)
+    cache_path = (
+        _parsed_modules_cache_dir(repo_root)
+        / f"parsed-v{_PARSED_CACHE_VERSION}-{fingerprint[:24]}.pkl"
+    )
+    cached = _load_parsed_modules_disk_cache(cache_path)
+    if cached is not None:
+        return cached
+
+    parsed_modules: list[ParsedModule] = []
     for scan in scans:
         for importer_module, py_file, source_text in _read_module_sources(
             _iter_import_sources(scan)
@@ -233,7 +321,9 @@ def _collect_parsed_modules(repo_root_str: str) -> tuple[ParsedModule, ...]:
                 )
             )
 
-    return tuple(parsed_modules)
+    result = tuple(parsed_modules)
+    _store_parsed_modules_disk_cache(cache_path, result)
+    return result
 
 
 def _resolve_relative_module(

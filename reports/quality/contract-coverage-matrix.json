@@ -2512,5 +2512,12 @@
       "uniqueness_constraint_source": "pipeline.business_primary_keys"
     }
   ],
-  "snapshot_date": "2026-07-13"
+  "schema_version": "contract-coverage-matrix-v2",
+  "semantics": {
+    "covered_gold_enabled_count": "Runtime-enabled Gold rows whose contract parity_status is covered.",
+    "excluded": "Rows excluded from runtime-enabled coverage because the effective Gold sink is disabled; contract artifacts may still exist.",
+    "gold_enabled": "Effective runtime state of pipeline.sink.gold.enabled after hierarchical config resolution; omitted enabled defaults to true.",
+    "missing_gold_enabled_count": "Runtime-enabled Gold rows whose contract parity_status is not covered."
+  },
+  "snapshot_date": "2026-07-23"
 }

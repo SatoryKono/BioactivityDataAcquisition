@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.0.1
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-16'
+  Last verified: '2026-07-23'
 
 ______________________________________________________________________
 
@@ -16,7 +16,8 @@ ______________________________________________________________________
 ## Purpose
 
 This page is the canonical published inventory of the **38** live GitHub Actions
-workflows shipped under `.github/workflows/`.
+workflows shipped under `.github/workflows/`. The count is derived from the
+tracked `*.yml` files; it is not a separately maintained target.
 
 Use it when you need to answer:
 
@@ -30,6 +31,10 @@ Use it when you need to answer:
 - Governance policy: `docs/00-project/governance/05-github-policy.md`
 - Syntax and policy guards: `tests/architecture/test_workflow_yaml_syntax.py`
   plus the workflow-specific architecture tests under `tests/architecture/`
+- Inventory parity guard:
+  `tests/architecture/test_check_doc_links_guardrails.py::test_github_actions_workflow_inventory_matches_live_repo`
+- Focused local parity command:
+  `python -m scripts.docs check-links --workflow-inventory`
 
 ## Classification
 
@@ -111,7 +116,9 @@ Use it when you need to answer:
 - The reusable setup workflows are retained for compatibility but are explicitly
   marked deprecated in the workflow files themselves.
 - If a workflow file is added, removed, renamed, or materially repurposed,
-  update this page together with any workflow-specific governance docs.
+  update this page together with any workflow-specific governance docs. The
+  focused parity command above must report neither missing nor extra workflow
+  files.
 
 ## Related References
 

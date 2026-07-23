@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-17'
+  Last verified: '2026-07-23'
 
 ______________________________________________________________________
 
@@ -43,35 +43,41 @@ shared control-plane contract in every individual pipeline spec.
 
 ## Entity Pipeline Catalog
 
-| Pipeline | Config | Provider | Entity | Description | Gold enabled |
+`Gold runtime` is the effective value after config loading, not a literal-only
+scan of entity YAML. `pipeline.sink.gold.enabled` defaults to `true` through
+`SinkLayerConfig`; `default` below means that the YAML omits the flag and uses
+that runtime default. This column does not describe Gold contract availability
+and must not be inferred from other `enabled` keys such as input filters.
+
+| Pipeline | Config | Provider | Entity | Description | Gold runtime |
 | --- | --- | --- | --- | --- | --- |
-| `chembl_activity` | `configs/entities/chembl/activity.yaml` | ChEMBL | activity | Extract biological activity records from ChEMBL API. | yes |
-| `chembl_assay` | `configs/entities/chembl/assay.yaml` | ChEMBL | assay | Extract bioassay definitions from ChEMBL API. | yes |
-| `chembl_assay_parameters` | `configs/entities/chembl/assay_parameters.yaml` | ChEMBL | assay_parameters | Extract experimental assay parameters from ChEMBL API. | config-dependent |
-| `chembl_cell_line` | `configs/entities/chembl/cell_line.yaml` | ChEMBL | cell_line | Extract cell lines from ChEMBL API. | config-dependent |
-| `chembl_compound_record` | `configs/entities/chembl/compound_record.yaml` | ChEMBL | compound_record | Extract compound records from ChEMBL API. | config-dependent |
-| `chembl_molecule` | `configs/entities/chembl/molecule.yaml` | ChEMBL | molecule | Extract molecules/compounds from ChEMBL API. | config-dependent |
-| `chembl_protein_class` | `configs/entities/chembl/protein_class.yaml` | ChEMBL | protein_class | ChEMBL protein classification hierarchy. | config-dependent |
-| `chembl_publication` | `configs/entities/chembl/publication.yaml` | ChEMBL | publication | Extract scientific publications from ChEMBL API. | yes |
-| `chembl_publication_similarity` | `configs/entities/chembl/publication_similarity.yaml` | ChEMBL | publication_similarity | Extract publication similarity data from ChEMBL API. | config-dependent |
-| `chembl_publication_term` | `configs/entities/chembl/publication_term.yaml` | ChEMBL | publication_term | Extract publication terms from ChEMBL publication records. | config-dependent |
-| `chembl_subcellular_fraction` | `configs/entities/chembl/subcellular_fraction.yaml` | ChEMBL | subcellular_fraction | Extract unique subcellular fractions from ChEMBL assay records. | config-dependent |
-| `chembl_target` | `configs/entities/chembl/target.yaml` | ChEMBL | target | Extract biological targets from ChEMBL API. | yes |
-| `chembl_target_component` | `configs/entities/chembl/target_component.yaml` | ChEMBL | target_component | Extract target components and protein sequences. | config-dependent |
-| `chembl_target_protein_classification` | `configs/entities/chembl/target_protein_classification.yaml` | ChEMBL | target_protein_classification | Path-first target-to-protein-classification relation rows from local snapshots. | config-dependent |
-| `chembl_tissue` | `configs/entities/chembl/tissue.yaml` | ChEMBL | tissue | Extract tissues from ChEMBL API. | config-dependent |
-| `crossref_publication` | `configs/entities/crossref/publication.yaml` | CrossRef | publication | Enrich publication records with CrossRef metadata via DOI. | config-dependent |
-| `openalex_publication` | `configs/entities/openalex/publication.yaml` | OpenAlex | publication | Batch DOI resolution via OpenAlex with title fallback. | config-dependent |
-| `pubchem_compound` | `configs/entities/pubchem/compound.yaml` | PubChem | compound | Ingest PubChem compounds. | config-dependent |
-| `pubmed_publication` | `configs/entities/pubmed/publication.yaml` | PubMed | publication | Extract publication metadata from PubMed Entrez. | config-dependent |
-| `semanticscholar_publication` | `configs/entities/semanticscholar/publication.yaml` | Semantic Scholar | publication | Batch DOI resolution via Semantic Scholar with title fallback. | config-dependent |
-| `uniprot_idmapping` | `configs/entities/uniprot/idmapping.yaml` | UniProt | idmapping | Map ChEMBL target IDs to UniProt accessions. | config-dependent |
-| `uniprot_protein` | `configs/entities/uniprot/protein.yaml` | UniProt | protein | Ingest UniProt proteins. | config-dependent |
-| `composite_activity` | `configs/entities/composite/activity.yaml` | Composite | activity | Composite activity entity merging data from multiple providers. | yes |
-| `composite_assay` | `configs/entities/composite/assay.yaml` | Composite | assay | Composite assay entity merging data from multiple providers. | yes |
-| `composite_molecule` | `configs/entities/composite/molecule.yaml` | Composite | molecule | Composite molecule entity merging data from multiple providers. | yes |
-| `composite_publication` | `configs/entities/composite/publication.yaml` | Composite | publication | Composite publication entity merging data from multiple providers. | yes |
-| `composite_target` | `configs/entities/composite/target.yaml` | Composite | target | Composite target entity merging data from multiple providers. | yes |
+| `chembl_activity` | `configs/entities/chembl/activity.yaml` | ChEMBL | activity | Extract biological activity records from ChEMBL API. | enabled (explicit) |
+| `chembl_assay` | `configs/entities/chembl/assay.yaml` | ChEMBL | assay | Extract bioassay definitions from ChEMBL API. | enabled (explicit) |
+| `chembl_assay_parameters` | `configs/entities/chembl/assay_parameters.yaml` | ChEMBL | assay_parameters | Extract experimental assay parameters from ChEMBL API. | enabled (default) |
+| `chembl_cell_line` | `configs/entities/chembl/cell_line.yaml` | ChEMBL | cell_line | Extract cell lines from ChEMBL API. | enabled (default) |
+| `chembl_compound_record` | `configs/entities/chembl/compound_record.yaml` | ChEMBL | compound_record | Extract compound records from ChEMBL API. | enabled (default) |
+| `chembl_molecule` | `configs/entities/chembl/molecule.yaml` | ChEMBL | molecule | Extract molecules/compounds from ChEMBL API. | enabled (default) |
+| `chembl_protein_class` | `configs/entities/chembl/protein_class.yaml` | ChEMBL | protein_class | ChEMBL protein classification hierarchy. | enabled (default) |
+| `chembl_publication` | `configs/entities/chembl/publication.yaml` | ChEMBL | publication | Extract scientific publications from ChEMBL API. | enabled (explicit) |
+| `chembl_publication_similarity` | `configs/entities/chembl/publication_similarity.yaml` | ChEMBL | publication_similarity | Extract publication similarity data from ChEMBL API. | enabled (default) |
+| `chembl_publication_term` | `configs/entities/chembl/publication_term.yaml` | ChEMBL | publication_term | Extract publication terms from ChEMBL publication records. | enabled (default) |
+| `chembl_subcellular_fraction` | `configs/entities/chembl/subcellular_fraction.yaml` | ChEMBL | subcellular_fraction | Extract unique subcellular fractions from ChEMBL assay records. | enabled (default) |
+| `chembl_target` | `configs/entities/chembl/target.yaml` | ChEMBL | target | Extract biological targets from ChEMBL API. | enabled (explicit) |
+| `chembl_target_component` | `configs/entities/chembl/target_component.yaml` | ChEMBL | target_component | Extract target components and protein sequences. | enabled (default) |
+| `chembl_target_protein_classification` | `configs/entities/chembl/target_protein_classification.yaml` | ChEMBL | target_protein_classification | Path-first target-to-protein-classification relation rows from local snapshots. | enabled (default) |
+| `chembl_tissue` | `configs/entities/chembl/tissue.yaml` | ChEMBL | tissue | Extract tissues from ChEMBL API. | enabled (default) |
+| `crossref_publication` | `configs/entities/crossref/publication.yaml` | CrossRef | publication | Enrich publication records with CrossRef metadata via DOI. | enabled (default) |
+| `openalex_publication` | `configs/entities/openalex/publication.yaml` | OpenAlex | publication | Batch DOI resolution via OpenAlex with title fallback. | enabled (default) |
+| `pubchem_compound` | `configs/entities/pubchem/compound.yaml` | PubChem | compound | Ingest PubChem compounds. | enabled (default) |
+| `pubmed_publication` | `configs/entities/pubmed/publication.yaml` | PubMed | publication | Extract publication metadata from PubMed Entrez. | enabled (default) |
+| `semanticscholar_publication` | `configs/entities/semanticscholar/publication.yaml` | Semantic Scholar | publication | Batch DOI resolution via Semantic Scholar with title fallback. | enabled (default) |
+| `uniprot_idmapping` | `configs/entities/uniprot/idmapping.yaml` | UniProt | idmapping | Map ChEMBL target IDs to UniProt accessions. | enabled (default) |
+| `uniprot_protein` | `configs/entities/uniprot/protein.yaml` | UniProt | protein | Ingest UniProt proteins. | enabled (default) |
+| `composite_activity` | `configs/entities/composite/activity.yaml` | Composite | activity | Composite activity entity merging data from multiple providers. | enabled (default) |
+| `composite_assay` | `configs/entities/composite/assay.yaml` | Composite | assay | Composite assay entity merging data from multiple providers. | enabled (default) |
+| `composite_molecule` | `configs/entities/composite/molecule.yaml` | Composite | molecule | Composite molecule entity merging data from multiple providers. | enabled (default) |
+| `composite_publication` | `configs/entities/composite/publication.yaml` | Composite | publication | Composite publication entity merging data from multiple providers. | enabled (default) |
+| `composite_target` | `configs/entities/composite/target.yaml` | Composite | target | Composite target entity merging data from multiple providers. | enabled (default) |
 
 ## Composite Merge Catalog
 

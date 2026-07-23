@@ -20,15 +20,16 @@ _DEFAULT_RULE_COMPONENT: RuleComponent = (
 )
 
 __all__ = [
+    "_DEFAULT_RULE_COMPONENT",
     "FieldNormalizer",
     "RuleComponent",
     "RuleComponentSpec",
-    "_DEFAULT_RULE_COMPONENT",
     "_RuleComponentContext",
     "_build_rule_component_context",
     "_handle_special_rules",
     "_normalize_special_rules",
 ]
+# RUF022: keep public names before private underscore helpers.
 
 
 @dataclass(frozen=True, slots=True)

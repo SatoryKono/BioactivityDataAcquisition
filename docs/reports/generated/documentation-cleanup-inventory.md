@@ -7,9 +7,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3084 |
-| Tracked doc-like files | 1890 |
-| Ignored local docs/reports files | 1194 |
+| Doc-like files | 3087 |
+| Tracked doc-like files | 1891 |
+| Ignored local docs/reports files | 1196 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
 | Generated routes | 64 |
@@ -18,8 +18,8 @@
 
 | Tracking State | Count |
 | --- | --- |
-| ignored_local | 1194 |
-| tracked | 1890 |
+| ignored_local | 1196 |
+| tracked | 1891 |
 
 ## Lifecycle Counts
 
@@ -30,7 +30,7 @@
 | active_quality_baseline | 20 |
 | closeout_evidence | 32 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 36 |
+| docs_reports_curated_or_historical_report | 38 |
 | docs_reports_generated_or_route_owned | 23 |
 | docs_reports_retention_sensitive_evidence | 1153 |
 | generated_skill_license_mirror | 5 |
@@ -60,29 +60,29 @@
 | Status | Count |
 | --- | --- |
 | Active | 1950 |
-| Archived | 78 |
+| Archived | 80 |
 | Canonical | 63 |
 | Generated | 723 |
-| Working | 270 |
+| Working | 271 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
 | active | 1950 |
-| archive | 78 |
+| archive | 80 |
 | canonical | 63 |
 | generated | 723 |
-| working | 270 |
+| working | 271 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 121 |
-| archive-after-migration | 93 |
+| archive-after-migration | 94 |
 | generate-automatically | 723 |
-| keep | 2143 |
+| keep | 2145 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -121,7 +121,8 @@
 | `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
 | `docs/reports/docs-link-check-report.json` | Working | 0 | archive-after-migration |
 | `docs/reports/docs-parity-report.json` | Working | 0 | archive-after-migration |
-| `docs/reports/documentation-audit-report-2026-07-13.md` | Working | 0 | archive-after-migration |
+| `docs/reports/documentation/full-documentation-audit-2026-07-23.md` | Working | 0 | archive-after-migration |
+| `docs/reports/documentation/github-issue-drafts-2026-07-23.md` | Working | 0 | archive-after-migration |
 | `docs/reports/documentation/quick_wins_documentation_and_rollback.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dq/gold_foreign_key_dq_fail_closed_enforcement_analysis.md` | Working | 0 | archive-after-migration |
 | `docs/reports/governance/contract_governance_corrections_analysis.md` | Working | 0 | archive-after-migration |
@@ -168,7 +169,6 @@
 | `reports/quality/total-tech-debt-audit-main-current.md` | Working | 0 | archive-after-migration |
 | `reports/review/S1-domain.md` | Working | 0 | archive-after-migration |
 | `reports/review/S1.1-contracts-ports.md` | Working | 0 | archive-after-migration |
-| `reports/review/S1.2-logic-models.md` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -321,7 +321,9 @@
 | `docs/reports/dashboard-ux-checks/README.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/docs-link-check-report.json` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/docs-parity-report.json` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/documentation-audit-report-2026-07-13.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
+| `docs/reports/documentation-audit-report-2026-07-13.md` | ignored_local | docs_reports_curated_or_historical_report | keep |
+| `docs/reports/documentation/full-documentation-audit-2026-07-23.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
+| `docs/reports/documentation/github-issue-drafts-2026-07-23.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/documentation/quick_wins_documentation_and_rollback.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dq/gold_foreign_key_dq_fail_closed_enforcement_analysis.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/evidence/INDEX.md` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
@@ -342,8 +344,6 @@
 | `docs/reports/evidence/adapter-interface-alignment/04-decisions/MATRIX-adapter-seams-current-to-target.md` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/adapter-interface-alignment/05-risks/RISKS.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/adapter-interface-alignment/summary.md` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/architecture-doc-drift/SUMMARY.md` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/architecture-foundations/01-pillars/PILLARS.md` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
 
 ## Generated Route Registry
 

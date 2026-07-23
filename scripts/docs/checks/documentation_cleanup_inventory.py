@@ -259,6 +259,17 @@ def _read_text(path: str) -> str:
     return data.decode("utf-8", errors="ignore")
 
 
+def _read_declared_metadata(path: str) -> str:
+    """Read only the bounded header needed for lifecycle declarations."""
+    full = PROJECT_ROOT / path
+    try:
+        with full.open("rb") as handle:
+            data = handle.read(1500)
+    except OSError:
+        return ""
+    return data.decode("utf-8", errors="ignore")
+
+
 def _should_scan_text(path: str) -> bool:
     suffix = Path(path).suffix.lower()
     if suffix not in TEXT_SCAN_EXTENSIONS:
@@ -693,6 +704,8 @@ def _classify(
     if lifecycle == "active_quality_baseline":
         return "Working", "current", "keep"
     if lifecycle == "docs_reports_curated_or_historical_report":
+        if declared in {"historical", "superseded", "archived"}:
+            return "Archived", "historical", "keep"
         return "Working", "review-required", "archive-after-migration"
     if declared in {"deprecated", "retired"}:
         return "Deprecated", "migration-required", "replace-with-link"
@@ -766,8 +779,13 @@ def _build_inventory() -> dict[str, Any]:
         route = _route_for(path, routes)
         duplicate_group = duplicate_groups.get(path)
         lifecycle = _path_lifecycle(path, plan_lifecycle, docs_draft_successors)
+        classification_text = (
+            _read_declared_metadata(path)
+            if lifecycle == "docs_reports_curated_or_historical_report"
+            else text
+        )
         status, freshness, action = _classify(
-            path, text, duplicate_group, route, lifecycle
+            path, classification_text, duplicate_group, route, lifecycle
         )
         diagram_kind = _diagram_kind(path)
         route_exception = _generated_route_exception(

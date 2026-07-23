@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
@@ -60,12 +60,10 @@ def latest_checkpoint_filename(
 
 def _as_utc_comparable(value: datetime) -> datetime:
     """Normalize timestamps so naive/aware values can be ordered safely."""
-    from datetime import timezone
-
     if value.tzinfo is None:
         # Treat naive timestamps as UTC for deterministic ranking only.
-        return value.replace(tzinfo=timezone.utc)
-    return value.astimezone(timezone.utc)
+        return value.replace(tzinfo=UTC)
+    return value.astimezone(UTC)
 
 
 def _emit_checkpoint_saved_at_from_state(

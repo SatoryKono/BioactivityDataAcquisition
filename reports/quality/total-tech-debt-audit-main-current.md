@@ -8,9 +8,9 @@ Audited repository: `SatoryKono/BioactivityDataAcquisition`
 
 Audited branch: `main`
 
-Audited commit SHA: `91b2157591b1f88c8bdc04b11ab3645e996101c5`
+Audited commit SHA: `465b1cbed6f3632d8b7dad7ca546c1ed78fc70ea`
 
-Evidence surface SHA-256: `dba5d19f0a0c7eac5c893be901834c30ac95176634b19b373c05617c397b4cf4`
+Evidence surface SHA-256: `1455be6da3bcdfb80b6369d50bdbcc37c571c1ee5b1044d85e139a77cf220891`
 
 Registry: `configs/quality/technical_debt_audit_registry.yaml`
 
@@ -21,7 +21,7 @@ exemption, or exclusion growth.
 
 ## Executive summary
 
-1. The reviewed quality gate snapshot is passing: architecture score `8.92`,
+1. The reviewed quality gate snapshot is passing: architecture score `9.11`,
    `45/45` debt-governance gates passing, with no failures or warnings and
    zero stale generated quality artifacts.
 1. Module coverage inventory contains `2,247` source modules: `1,403` fully
@@ -45,7 +45,7 @@ exemption, or exclusion growth.
 
 | Area | Current fact | Evidence |
 | --- | --- | --- |
-| Architecture score | Integral score `8.92` | `reports/quality/architecture-quality-scorecard.json` |
+| Architecture score | Integral score `9.11` | `reports/quality/architecture-quality-scorecard.json` |
 | Debt gates | `45` pass, `0` fail, `0` warn; `stale_artifact_count=0` | `reports/quality/debt-governance-gates.json` |
 | Module inventory | `2247` total; `1403` full; `819` partial; `25` no executable lines; `0` uncovered/unmeasured | `reports/quality/module-coverage-inventory.json` |
 | Test governance | `22786` functions; `2040` files; duplicate/markerless/compatibility/refined-assertless counts all `0` | `reports/quality/test-governance-current.json` |

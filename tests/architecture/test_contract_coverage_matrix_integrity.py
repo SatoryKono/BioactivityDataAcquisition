@@ -47,6 +47,19 @@ def test_contract_coverage_matrix_rows_cover_all_entity_configs() -> None:
 
 
 @pytest.mark.architecture
+def test_contract_coverage_matrix_declares_gold_enabled_semantics() -> None:
+    """The public metric must not conflate runtime state with schema availability."""
+    payload = _load_payload()
+    assert payload.get("schema_version") == "contract-coverage-matrix-v2"
+    semantics = payload.get("semantics")
+    assert isinstance(semantics, dict)
+    gold_enabled = semantics.get("gold_enabled")
+    assert isinstance(gold_enabled, str)
+    assert "effective runtime state" in gold_enabled.lower()
+    assert "hierarchical config resolution" in gold_enabled
+
+
+@pytest.mark.architecture
 def test_contract_coverage_matrix_gold_enabled_rows_have_full_governance_surfaces() -> (
     None
 ):

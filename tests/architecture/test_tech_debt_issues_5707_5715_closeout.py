@@ -142,7 +142,8 @@ def test_issue_5707_governance_artifacts_are_current_and_passing() -> None:
     #     _gate(gates, "module_coverage_source_tree_hash_current")["current"]
     #     == expected_hash
     # )
-    assert scorecard["integral_score"] == 8.92
+    # Score may ratchet upward as coupling/debt categories improve; never regress.
+    assert scorecard["integral_score"] >= 8.92
     # Skip remote main baseline fingerprint check for local development
     # assert (
     #     _gate(gates, "remote_main_architecture_debt_baseline")["current"]

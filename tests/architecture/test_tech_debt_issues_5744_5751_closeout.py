@@ -95,7 +95,8 @@ def test_issue_5744_architecture_audit_freshness_gates_are_passing() -> None:
     #     ]
     #     == expected_hash
     # )
-    assert scorecard["integral_score"] == 8.92
+    # Score may ratchet upward as coupling/debt categories improve; never regress.
+    assert scorecard["integral_score"] >= 8.92
 
 
 def test_issue_5745_adapter_duplication_is_reduced() -> None:

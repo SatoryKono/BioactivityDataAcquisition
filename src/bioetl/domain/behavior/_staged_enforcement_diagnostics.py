@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from bioetl.domain.types import JsonDict
 
-from .staged_enforcement import CheckResult, EnforcementPolicy
+if TYPE_CHECKING:
+    from .staged_enforcement import CheckResult, EnforcementPolicy
 
 
 def _serialize_policies(policies: dict[str, EnforcementPolicy]) -> JsonDict:
