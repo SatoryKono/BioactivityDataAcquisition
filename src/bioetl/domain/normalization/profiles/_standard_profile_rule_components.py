@@ -139,13 +139,35 @@ def _handle_special_rules(
     return None
 
 
+def _bound_enum_normalizer(allowed_values: frozenset[str]) -> FieldNormalizer:
+    """Return a named enum normalizer with stable module/qualname identity."""
+    values = frozenset(allowed_values)
+
+    def normalize_bound_enum(value: object) -> object:
+        return normalize_profile_enum(value, allowed_values=values)
+
+    return normalize_bound_enum
+
+
+def _bound_case_normalizer(
+    allowed_values: frozenset[str] | None,
+) -> FieldNormalizer:
+    """Return a named case normalizer with stable module/qualname identity."""
+    values = None if allowed_values is None else frozenset(allowed_values)
+
+    def normalize_bound_case(value: object) -> object:
+        return normalize_profile_case(value, allowed_values=values)
+
+    return normalize_bound_case
+
+
 def _handle_enum_fields(
     field_name: str, enum_fields: Mapping[str, frozenset[str]]
 ) -> RuleComponent | None:
     if field_name in enum_fields:
         allowed_values = enum_fields[field_name]
         return (
-            lambda value: normalize_profile_enum(value, allowed_values=allowed_values),
+            _bound_enum_normalizer(allowed_values),
             (
                 f"Normalize enum field '{field_name}' against allowed values, "
                 "preserving canonical allowed-value casing and uppercase values "
@@ -161,7 +183,7 @@ def _handle_case_fields(
     if field_name in case_fields:
         allowed_values = case_fields[field_name]
         return (
-            lambda value: normalize_profile_case(value, allowed_values=allowed_values),
+            _bound_case_normalizer(allowed_values),
             f"Normalize case for field '{field_name}'.",
         )
     return None

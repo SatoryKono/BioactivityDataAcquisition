@@ -113,6 +113,19 @@ def normalize_activity_action_type(value: object) -> object:
     )
 
 
+def normalize_activity_standard_relation(value: object) -> object:
+    """Normalize activity standard_relation to canonical ASCII operator enum."""
+    return normalize_profile_operator(
+        value,
+        allowed_values=STANDARD_RELATIONS,
+    )
+
+
+def normalize_activity_assay_type(value: object) -> object:
+    """Normalize activity assay_type to uppercase enum value."""
+    return normalize_profile_enum(value, allowed_values=ASSAY_TYPES)
+
+
 _SPECIAL_RULE_COMPONENTS = {
     **_REFERENCE_IDENTIFIER_RULES,
     "canonical_smiles": (
@@ -135,14 +148,11 @@ _SPECIAL_RULE_COMPONENTS = {
         ),
     ),
     "standard_relation": (
-        lambda value: normalize_profile_operator(
-            value,
-            allowed_values=STANDARD_RELATIONS,
-        ),
+        normalize_activity_standard_relation,
         "Normalize standard_relation to a canonical ASCII operator enum.",
     ),
     "assay_type": (
-        lambda value: normalize_profile_enum(value, allowed_values=ASSAY_TYPES),
+        normalize_activity_assay_type,
         "Normalize assay_type to uppercase enum value and collapse unknown values to None.",
     ),
     "standard_units": (

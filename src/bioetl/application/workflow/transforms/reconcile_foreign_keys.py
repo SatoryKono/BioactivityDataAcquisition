@@ -218,8 +218,14 @@ def _require_delete_orphans_action(config: Mapping[str, object]) -> None:
 
 
 def _required_primary_keys(config: Mapping[str, object]) -> tuple[str, ...]:
+    from collections.abc import Sequence
+
     raw_primary_keys = config.get("primary_keys")
-    if not isinstance(raw_primary_keys, list) or not raw_primary_keys:
+    if (
+        not isinstance(raw_primary_keys, Sequence)
+        or isinstance(raw_primary_keys, (str, bytes, bytearray))
+        or not raw_primary_keys
+    ):
         raise ValueError(
             "reconcile_foreign_keys requires config.primary_keys as a non-empty list"
         )
@@ -285,10 +291,16 @@ def _optional_key_tuple(
     config: Mapping[str, object],
     key: str,
 ) -> tuple[str, ...] | None:
+    from collections.abc import Sequence
+
     value = config.get(key)
     if value is None:
         return None
-    if not isinstance(value, list) or not value:
+    if (
+        not isinstance(value, Sequence)
+        or isinstance(value, (str, bytes, bytearray))
+        or not value
+    ):
         raise ValueError(
             f"reconcile_foreign_keys requires config.{key} as a non-empty list"
         )

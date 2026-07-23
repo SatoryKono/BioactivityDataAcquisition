@@ -111,6 +111,33 @@ def create_case_normalizer(strategy: str = "uppercase") -> Callable[[str], str |
     return normalizer
 
 
+def normalize_assay_subcellular_fraction(value: object) -> object:
+    """Normalize assay_subcellular_fraction against the shared ChEMBL subcellular-fraction vocabulary."""
+    return normalize_profile_governed_vocabulary(
+        value,
+        allowed_values=SUBCELLULAR_FRACTIONS,
+        preserve_unknown=True,
+    )
+
+
+def normalize_assay_category(value: object) -> object:
+    """Normalize assay_category against the governed ChEMBL controlled vocabulary registry."""
+    return normalize_profile_governed_vocabulary(
+        value,
+        allowed_values=ASSAY_CATEGORIES,
+        preserve_unknown=False,
+    )
+
+
+def normalize_assay_confidence_description(value: object) -> object:
+    """Normalize confidence_description against the governed ChEMBL controlled vocabulary registry."""
+    return normalize_profile_governed_vocabulary(
+        value,
+        allowed_values=CONFIDENCE_DESCRIPTIONS,
+        preserve_unknown=False,
+    )
+
+
 # Strict assay enums canonicalize case-insensitively to the registry-defined
 # representation and fail closed on unknown values.
 _ENUM_FIELDS = {
@@ -178,11 +205,7 @@ _SPECIAL_RULE_COMPONENTS = {
     **dict.fromkeys(
         sorted(_CONTROLLED_FRACTION_FIELDS),
         (
-            lambda value: normalize_profile_governed_vocabulary(
-                value,
-                allowed_values=SUBCELLULAR_FRACTIONS,
-                preserve_unknown=True,
-            ),
+            normalize_assay_subcellular_fraction,
             "Normalize assay_subcellular_fraction against the shared ChEMBL "
             "subcellular-fraction vocabulary while preserving unknown observed "
             "lexemes for review; the provider-native lexeme is retained "
@@ -192,11 +215,7 @@ _SPECIAL_RULE_COMPONENTS = {
     **dict.fromkeys(
         sorted(_CONTROLLED_CATEGORY_FIELDS),
         (
-            lambda value: normalize_profile_governed_vocabulary(
-                value,
-                allowed_values=ASSAY_CATEGORIES,
-                preserve_unknown=False,
-            ),
+            normalize_assay_category,
             "Normalize assay_category against the governed ChEMBL controlled "
             "vocabulary registry, preserving canonical allowed-value casing, "
             "and fail closed on unknown values.",
@@ -205,11 +224,7 @@ _SPECIAL_RULE_COMPONENTS = {
     **dict.fromkeys(
         sorted(_CONTROLLED_CONFIDENCE_FIELDS),
         (
-            lambda value: normalize_profile_governed_vocabulary(
-                value,
-                allowed_values=CONFIDENCE_DESCRIPTIONS,
-                preserve_unknown=False,
-            ),
+            normalize_assay_confidence_description,
             "Normalize confidence_description against the governed ChEMBL "
             "controlled vocabulary registry, preserving canonical allowed-value "
             "casing and failing closed on unknown values to stay aligned with DQ "
