@@ -2,7 +2,15 @@
   "schema_version": "tech-debt-issues-5790-5796-closeout-v1",
   "generated_on": "2026-07-10",
   "debt_budget_policy": "flat_or_decreasing_only",
-  "issues": [5790, 5791, 5792, 5793, 5794, 5795, 5796],
+  "issues": [
+    5790,
+    5791,
+    5792,
+    5793,
+    5794,
+    5795,
+    5796
+  ],
   "metrics": {
     "retained_entrypoint_count": 12,
     "retained_public_export_facade_count": 4,
@@ -28,7 +36,7 @@
       "targeted_closeout_proof": 100.0
     },
     "zero_reference_supporting_scripts": {
-      "current": 34,
+      "current": 32,
       "max": 47,
       "entries_without_owner_metadata": 0,
       "source": "configs/quality/scripts_inventory_manifest.json"

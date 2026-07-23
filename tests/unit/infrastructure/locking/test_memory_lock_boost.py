@@ -177,18 +177,21 @@ class TestValidateOwnerEdgeCases:
         assert result is False
 
     @pytest.mark.asyncio
-    async def test_validate_owner_returns_false_expired(self) -> None:
-        """Lines 264-265: expired lock returns False."""
+    async def test_validate_owner_renews_soft_expired_held_lock(self) -> None:
+        """Soft-expired held locks remain valid and renew their lease."""
         lock = MemoryLock()
 
-        # Manually insert an expired lock
+        # Manually insert a soft-expired but still held lock
         inner = asyncio.Lock()
         await inner.acquire()
         expired_time = time.monotonic() - 1.0  # Already expired
-        lock._locks["key"] = ("owner_1", inner, expired_time, 1, 1)
+        lock._locks["key"] = ("owner_1", inner, expired_time, 30, 1)
 
         result = await lock.validate_owner("key", "owner_1")
-        assert result is False
+        assert result is True
+        _, _, expires_at, _, _ = lock._locks["key"]
+        assert expires_at is not None
+        assert expires_at > time.monotonic()
 
         await lock.aclose()
 
@@ -260,14 +263,14 @@ class TestValidateFencingToken:
         assert result is False
 
     @pytest.mark.asyncio
-    async def test_validate_fencing_token_expired_returns_false(self) -> None:
-        """Lines 289-290: expired token returns False."""
+    async def test_validate_fencing_token_renews_soft_expired_held_lock(self) -> None:
+        """Soft-expired held fencing tokens renew and stay valid for the owner."""
         lock = MemoryLock()
 
         inner = asyncio.Lock()
         await inner.acquire()
         expired_at = time.monotonic() - 1.0
-        lock._locks["key"] = ("owner_1", inner, expired_at, 1, 5)
+        lock._locks["key"] = ("owner_1", inner, expired_at, 30, 5)
 
         token = FencingToken(
             sequence=5,
@@ -277,7 +280,10 @@ class TestValidateFencingToken:
         )
 
         result = await lock.validate_fencing_token("key", token)
-        assert result is False
+        assert result is True
+        _, _, new_expires_at, _, _ = lock._locks["key"]
+        assert new_expires_at is not None
+        assert new_expires_at > time.monotonic()
 
         await lock.aclose()
 
@@ -345,12 +351,29 @@ class TestReleasedExpiredLocks:
     """Tests for _release_expired_locks."""
 
     @pytest.mark.asyncio
-    async def test_release_expired_locks_removes_expired(self) -> None:
-        """Expired locks are released and removed from dict."""
+    async def test_release_expired_locks_keeps_held_soft_expired(self) -> None:
+        """Still-held soft-expired locks are not force-released."""
         lock = MemoryLock(ttl_check_interval=0.1)
 
         inner = asyncio.Lock()
         await inner.acquire()
+        expired_at = time.monotonic() - 0.1
+        lock._locks["expired_key"] = ("owner_1", inner, expired_at, 1, 1)
+
+        await lock._release_expired_locks()
+
+        assert "expired_key" in lock._locks
+        assert inner.locked()
+
+        await lock.aclose()
+
+    @pytest.mark.asyncio
+    async def test_release_expired_locks_removes_unlocked_expired(self) -> None:
+        """Soft-expired unlocked entries are reaped from the map."""
+        lock = MemoryLock(ttl_check_interval=0.1)
+
+        inner = asyncio.Lock()
+        # Leave unlocked so the TTL sweep can reap the stale map entry.
         expired_at = time.monotonic() - 0.1
         lock._locks["expired_key"] = ("owner_1", inner, expired_at, 1, 1)
 

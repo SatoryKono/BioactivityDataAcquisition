@@ -8,6 +8,8 @@ import pytest
 
 from scripts.ai.mcp._patch_grok_mcp_tokens import bump_timeouts, main, wire_ref
 
+pytestmark = pytest.mark.unit
+
 
 def test_main_never_prints_configuration_content(
     tmp_path: Path,
@@ -38,7 +40,9 @@ def test_main_never_prints_configuration_content(
     main()
 
     output = capsys.readouterr().out
-    assert "updated .grok/config.toml" in output
+    # Path separators differ on Windows; match status markers only.
+    assert "updated" in output
+    assert "config.toml" in output
     assert secret_marker not in output
     assert "[mcp_servers.ref]" not in output
 

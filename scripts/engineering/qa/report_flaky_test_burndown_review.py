@@ -95,6 +95,23 @@ def _file_tree_sha256(paths: list[Path], *, root: Path) -> str:
     return digest.hexdigest()
 
 
+def compute_replay_tree_sha256(repo_root: Path) -> str:
+    """Return the current deterministic VCR replay-tree fingerprint."""
+    resolved_root = repo_root.resolve()
+    replay_files = list((resolved_root / "tests/fixtures/vcr").rglob("*.yaml"))
+    return _file_tree_sha256(replay_files, root=resolved_root)
+
+
+def _sha256_digest(value: object, *, label: str) -> str:
+    if (
+        not isinstance(value, str)
+        or len(value) != 64
+        or any(character not in "0123456789abcdef" for character in value)
+    ):
+        raise ValueError(f"Invalid SHA-256 at {label}")
+    return value
+
+
 def _junit_outcomes(path: Path) -> dict[str, str]:
     root = ET.parse(path).getroot()
     outcomes: dict[str, str] = {}
@@ -112,6 +129,24 @@ def _junit_outcomes(path: Path) -> dict[str, str]:
     return dict(sorted(outcomes.items()))
 
 
+def _validate_identical_node_coverage(
+    node_sets: list[tuple[str, frozenset[str]]],
+) -> None:
+    reference_run_id, reference_nodes = node_sets[0]
+    deltas: list[str] = []
+    for run_id, nodes in node_sets[1:]:
+        missing = sorted(reference_nodes - nodes)
+        extra = sorted(nodes - reference_nodes)
+        if missing or extra:
+            deltas.append(f"{run_id}: missing={missing!r}, extra={extra!r}")
+    if deltas:
+        details = "; ".join(deltas)
+        raise ValueError(
+            "Empirical runs must execute an identical set of test nodes; "
+            f"reference={reference_run_id}; {details}"
+        )
+
+
 def build_empirical_payload(
     repo_root: Path,
     *,
@@ -127,16 +162,20 @@ def build_empirical_payload(
         for entry in inventory.get("reviewed_flaky_tests", [])
         if isinstance(entry, dict) and isinstance(entry.get("nodeid"), str)
     }
-    replay_files = list((repo_root / "tests/fixtures/vcr").rglob("*.yaml"))
-    replay_fingerprint = _file_tree_sha256(replay_files, root=repo_root)
     runs: list[dict[str, object]] = []
     outcomes_by_node: dict[str, set[str]] = {}
+    node_sets: list[tuple[str, frozenset[str]]] = []
+    replay_fingerprints: set[str] = set()
     source_shas: set[str] = set()
     for metadata_path in sorted(resolved_run_dir.glob("run-*.json")):
         metadata = _load_json_mapping(metadata_path)
         run_id = metadata.get("run_id")
         seed = metadata.get("seed")
         source_sha = metadata.get("source_sha")
+        replay_fingerprint = _sha256_digest(
+            metadata.get("replay_tree_sha256"),
+            label=f"{metadata_path}.replay_tree_sha256",
+        )
         if not isinstance(run_id, str) or not run_id:
             raise ValueError(f"Invalid run_id in {metadata_path}")
         if isinstance(seed, bool) or not isinstance(seed, int):
@@ -149,9 +188,11 @@ def build_empirical_payload(
         outcomes = _junit_outcomes(junit_path)
         if not outcomes:
             raise ValueError(f"Empirical run executed zero tests: {run_id}")
+        node_sets.append((run_id, frozenset(outcomes)))
         for nodeid, status in outcomes.items():
             outcomes_by_node.setdefault(nodeid, set()).add(status)
         outcome_sha = _semantic_sha256(outcomes)
+        replay_fingerprints.add(replay_fingerprint)
         source_shas.add(source_sha)
         runs.append(
             {
@@ -172,6 +213,7 @@ def build_empirical_payload(
         raise ValueError("Empirical flaky telemetry requires at least three runs")
     if len(source_shas) != 1:
         raise ValueError("Empirical runs must use one source SHA")
+    _validate_identical_node_coverage(node_sets)
 
     unstable = {
         nodeid: sorted(statuses)
@@ -199,13 +241,7 @@ def build_empirical_payload(
             "unstable_node_count": len(unstable),
             "unstable_nodes": unstable,
             "untriaged_unstable_nodes": untriaged,
-            "replay_fingerprint_stable": len(
-                {
-                    run["artifact_hashes"]["replay_tree_sha256"]  # type: ignore[index]
-                    for run in runs
-                }
-            )
-            == 1,
+            "replay_fingerprint_stable": len(replay_fingerprints) == 1,
         },
         "curated_inventory_reconciliation": {
             "inventory_sha256": _semantic_sha256(inventory),
@@ -438,8 +474,9 @@ def main(argv: list[str] | None = None) -> int:
             output_path = _resolve_path(repo_root, args.empirical_json_out)
             _write_text_atomically(output_path, _canonical_json(payload))
             untriaged = payload["curated_inventory_reconciliation"]["untriaged_count"]  # type: ignore[index]
+            replay_stable = payload["comparison"]["replay_fingerprint_stable"]  # type: ignore[index]
             print(f"[flaky-test-empirical] wrote {output_path}")
-            return 1 if untriaged else 0
+            return 1 if untriaged or not replay_stable else 0
         payload = build_payload(
             repo_root,
             inventory_path=args.inventory,

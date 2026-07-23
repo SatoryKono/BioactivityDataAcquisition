@@ -229,7 +229,7 @@ jobs:
                           -m "not pilot_soak and not network" \
                           -p no:xdist --no-cov -q --tb=short \
                           --junitxml="reports/test-telemetry/flaky-runs/junit-${run_id}.xml"
-                      uv run python -c 'import json,pathlib,sys; pathlib.Path(sys.argv[1]).write_text(json.dumps({"run_id":sys.argv[2],"seed":int(sys.argv[3]),"source_sha":sys.argv[4],"order_mode":"seeded-random","shard_id":"determinism-critical"}),encoding="utf-8")' \
+                      uv run python -c 'import json,pathlib,sys; from scripts.engineering.qa.report_flaky_test_burndown_review import compute_replay_tree_sha256; payload={"run_id":sys.argv[2],"seed":int(sys.argv[3]),"source_sha":sys.argv[4],"order_mode":"seeded-random","shard_id":"determinism-critical","replay_tree_sha256":compute_replay_tree_sha256(pathlib.Path.cwd())}; pathlib.Path(sys.argv[1]).write_text(json.dumps(payload,sort_keys=True)+"\n",encoding="utf-8")' \
                         "reports/test-telemetry/flaky-runs/run-${run_id}.json" \
                         "${run_id}" "${seed}" "${GITHUB_SHA}"
                     done

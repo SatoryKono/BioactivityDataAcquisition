@@ -2303,7 +2303,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.core.lifecycle.lock_runtime_service",
       "path": "src/bioetl/application/core/lifecycle/lock_runtime_service.py",
-      "source_lines": 149
+      "source_lines": 181
     },
     {
       "coverage_percent": 97.78,
@@ -18173,7 +18173,7 @@
       "missing_lines": 3,
       "module": "bioetl.infrastructure.locking.memory_lock",
       "path": "src/bioetl/infrastructure/locking/memory_lock.py",
-      "source_lines": 311
+      "source_lines": 234
     },
     {
       "coverage_percent": 68.75,
@@ -24745,7 +24745,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.core.lifecycle.lock_runtime_service",
       "path": "src/bioetl/application/core/lifecycle/lock_runtime_service.py",
-      "source_lines": 149
+      "source_lines": 181
     },
     {
       "coverage_percent": 97.78,
@@ -40615,7 +40615,7 @@
       "missing_lines": 3,
       "module": "bioetl.infrastructure.locking.memory_lock",
       "path": "src/bioetl/infrastructure/locking/memory_lock.py",
-      "source_lines": 311
+      "source_lines": 234
     },
     {
       "coverage_percent": 68.75,
@@ -44890,7 +44890,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-13",
-  "source_tree_sha256": "ea304d4b0c6a93dcb1bb38643bf06b270123b076e9ef1635a3a194a63e3b7df3",
+  "source_tree_sha256": "d532d378ca671db770c5a601fc8309a4b357029a44e14378c71f22f2720e1aca",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

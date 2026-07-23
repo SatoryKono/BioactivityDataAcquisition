@@ -1,10 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-23T08:01:41.208205+00:00",
+  "generated_at": "2026-07-23T08:16:32.660722+00:00",
   "summary": {
-    "total_scripts": 509,
+    "total_scripts": 512,
     "status_counts": {
       "active": 341,
+      "orphan": 3,
       "supporting": 168
     },
     "reference_group_coverage": {
@@ -2293,7 +2294,7 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
@@ -2309,21 +2310,15 @@
         },
         {
           "path": "tests/unit/scripts/ai/mcp/test_export_mcp_env_from_dotenv.py",
-          "line": 19,
+          "line": 15,
           "source_group": "tests",
-          "text": "script_path = Path(__file__).parent.parent.parent.parent.parent / \"scripts/ai/mcp/export_mcp_env_from_dotenv.ps1\""
+          "text": "EXPORT_SCRIPT = REPO_ROOT / \"scripts\" / \"ai\" / \"mcp\" / \"export_mcp_env_from_dotenv.ps1\""
         },
         {
           "path": "tests/unit/scripts/ai/mcp/test_export_mcp_env_from_dotenv.py",
-          "line": 45,
+          "line": 80,
           "source_group": "tests",
-          "text": "script_path = Path(__file__).parent.parent.parent.parent / \"scripts/ai/mcp/export_mcp_env_from_dotenv.ps1\""
-        },
-        {
-          "path": "tests/unit/scripts/ai/mcp/test_export_mcp_env_from_dotenv.py",
-          "line": 123,
-          "source_group": "tests",
-          "text": "script_path = Path(__file__).parent.parent.parent.parent / \"scripts/ai/mcp/export_mcp_env_from_dotenv.ps1\""
+          "text": "reason=\"PowerShell (pwsh or powershell) is required to run export_mcp_env_from_dotenv.ps1\","
         }
       ],
       "owner": "@bioetl-platform",
@@ -13570,6 +13565,22 @@
       ]
     },
     {
+      "path": "scripts/ops/_parse_cr_arch_findings.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ops/_run_cr_arch_review_wsl.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/ops/codex-exec.bat",
       "type": "bat",
       "status": "active",
@@ -15261,6 +15272,14 @@
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
       "next_step": "Retain as a bounded manual CodeRabbit review launcher; keep it supporting unless promoted to a governed CI-only review workflow."
+    },
+    {
+      "path": "scripts/ops/run_coderabbit_architecture_review.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ops/runtime/deploy/deploy-bioetl.sh",
