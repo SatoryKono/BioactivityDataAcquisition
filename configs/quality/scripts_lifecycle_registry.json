@@ -410,17 +410,17 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded historical docs-generation utility while no governed caller references it; either route it through the canonical scripts.docs matrix/reporting surface or retire it after caller audit."
     },
-    "scripts/docs/report_docs_kpi.py": {
-      "owner": "@bioetl-docs",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-09-30",
-      "next_step": "Retain as a top-level docs KPI reporting compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs check-kpi."
-    },
     "scripts/docs/matrix/_bootstrap.py": {
       "owner": "@bioetl-docs",
       "decision": "internal_helper_orphan",
       "review_by": "2026-07-15",
       "next_step": "Retain only as an internal bootstrap helper for scripts.docs.matrix modules while matrix-generation internals still share repo-root/path setup; fold it into a broader canonical scripts bootstrap layer if that consolidation lands."
+    },
+    "scripts/docs/report_docs_kpi.py": {
+      "owner": "@bioetl-docs",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a top-level docs KPI reporting compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs check-kpi."
     },
     "scripts/engineering/ci/apply-ci-optimizations-fixed.ps1": {
       "owner": "@bioetl-platform",
@@ -901,6 +901,12 @@
       "decision": "shared_helper_module",
       "review_by": "2026-09-30",
       "next_step": "Retain as a Docker runtime probe helper for Docker health checks and diagnostics; keep it supporting unless it becomes a governed CI workflow or first-class ops entrypoint."
+    },
+    "scripts/ops/runtime/docker/recover-neo4j.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Deprecated for one release while callers migrate to runtime_manager.py diagnose/recover --stack neo4j; retain only as a historical Windows recovery helper and remove after first-party reference proof."
     },
     "scripts/ops/runtime/docker/recreate_cutover_stacks.py": {
       "owner": "@bioetl-platform",

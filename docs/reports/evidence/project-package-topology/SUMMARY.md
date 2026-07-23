@@ -1,6 +1,6 @@
 # Сводка evidence: project-package-topology
 
-Дата: 2026-07-22
+Дата: 2026-07-24
 Статус: refreshed
 
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see
@@ -15,14 +15,15 @@ module-coverage producer. The inventory retains its `2026-07-13` coverage-data
 snapshot date because no newer canonical coverage run was substituted for the
 tracked coverage measurements.
 
-Current-baseline note (2026-07-22): architectural planning and GitHub issues
+Current-baseline note (2026-07-24): architectural planning and GitHub issues
 MUST cite this summary or a newer regenerated package-topology pack for current
 counts. The current source baseline is
-`source_module_count=2248` with
-`source_tree_sha256=4da4dab7f778e3c623a8e1515d888521f9a812c770103db5f3c978a72fa20790`.
+`source_module_count=2262` with
+`source_tree_sha256=290ae872cf73b44819007d16266debf70b1bea6aa2b921c22e4422e23bb28762`.
 Raw files dated before `2026-07-19` are retained only as historical detailed
 inputs and must be refreshed before they are used for line-item topology
-evidence.
+evidence. Refresh (2026-07-24) followed run-reports domain/application surface
+additions and related module-coverage inventory hash-only reconcile.
 
 Pandera bootstrap ownership remains reconciled with the current runtime:
 `apply_runtime_compatibility_patches` is a no-op compatibility seam, while the
@@ -39,7 +40,7 @@ absent.
 1. `EV-project-package-topology-top-level-repo-zones-are-separated`
 1. `EV-project-package-topology-application-layer-has-six-subpackages`
 1. `EV-project-package-topology-composition-layer-has-six-subpackages`
-1. `EV-project-package-topology-domain-layer-has-twenty-two-subpackages`
+1. `EV-project-package-topology-domain-layer-has-twenty-three-subpackages`
 1. `EV-project-package-topology-infrastructure-layer-has-twenty-subpackages`
 1. `EV-project-package-topology-interfaces-layer-has-two-subpackages`
 
@@ -57,11 +58,11 @@ Collected: `6`
   for source, config, tests, scripts, docs, and reports.
 - `src/bioetl/` reflects the intended layered architecture through distinct
   first-order package groups.
-- Current Python file count under `src/bioetl` is `2248`, including two
+- Current Python file count under `src/bioetl` is `2262`, including two
   top-level package modules outside the five first-order architecture layers.
-- Current layer file counts are: `domain=575`, `application=664`,
-  `infrastructure=585`, `composition=276`, `interfaces=142`.
-- Current first-order package counts are: `domain=22`, `application=6`,
+- Current layer file counts are: `domain=587`, `application=669`,
+  `infrastructure=585`, `composition=276`, `interfaces=143`.
+- Current first-order package counts are: `domain=23`, `application=6`,
   `infrastructure=20`, `composition=5`, `interfaces=2`.
 - `application` and `infrastructure` remain the broadest package surfaces by
   Python file count; `infrastructure` remains the broadest adapter and

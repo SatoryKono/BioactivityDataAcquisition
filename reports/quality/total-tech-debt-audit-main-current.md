@@ -10,7 +10,7 @@ Audited branch: `main`
 
 Audited commit SHA: `0b45de173fb869e1295abdffe9688c5c46ec544f`
 
-Evidence surface SHA-256: `cf2bb90c8758eeb1bc7ebd8ea286ef80935d59f8c152e2aaddd19655714956c4`
+Evidence surface SHA-256: `abbb97860f3a38eee6897e26bdcbc30261524cef94233e06d428f0fdc66ecbd4`
 
 Registry: `configs/quality/technical_debt_audit_registry.yaml`
 
@@ -24,8 +24,8 @@ growth.
 1. The reviewed quality gate snapshot is passing: architecture score `9.11`,
    `45/45` debt-governance gates passing, with no failures or warnings and
    zero stale generated quality artifacts.
-1. Module coverage inventory contains `2,248` source modules: `1,406` fully
-   covered, `816` partially covered, `26` with no executable lines, and
+1. Module coverage inventory contains `2,261` source modules: `1,406` fully
+   covered, `816` partially covered, `39` with no executable lines, and
    zero uncovered or unmeasured modules. These are module-inventory facts, not
    a claim of complete line or branch coverage.
 1. Compatibility transition debt remains zero. The census contains `12`
