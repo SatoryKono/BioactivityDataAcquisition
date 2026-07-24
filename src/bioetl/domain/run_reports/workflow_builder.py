@@ -9,8 +9,7 @@ from typing import Any
 from bioetl.domain.run_reports.models import WorkflowExecutionRow, WorkflowRunReport
 from bioetl.domain.run_reports.workflow_reasons import (
     build_reasons_rollup,
-    load_child_top_reasons,
-    normalize_top_reasons,
+    resolve_top_reasons,
 )
 
 _COUNT_FIELDS = (
@@ -177,7 +176,7 @@ def _normalized_row(
         run_id,
         name,
     )
-    reasons = _resolve_top_reasons(top_reasons, report_ref)
+    reasons = resolve_top_reasons(top_reasons, report_ref)
     row = WorkflowExecutionRow(
         step_id=str(step_id or ""),
         kind=_optional_text(kind),
@@ -196,16 +195,6 @@ def _normalized_row(
         skip_reason=_optional_text(skip_reason),
     )
     return _NormalizedExecution(row=row, pipeline_name=name)
-
-
-def _resolve_top_reasons(
-    raw_reasons: object,
-    report_ref: str | None,
-) -> tuple[dict[str, Any], ...]:
-    reasons = normalize_top_reasons(raw_reasons)
-    if reasons or report_ref is None:
-        return reasons
-    return load_child_top_reasons(report_ref)
 
 
 def _normalize_execution(

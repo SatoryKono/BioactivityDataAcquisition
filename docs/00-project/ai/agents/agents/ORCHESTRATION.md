@@ -6,18 +6,6 @@
 > Edit the runtime source first, then refresh this mirror.
 ______________________________________________________________________
 
-Version: 4.3.0
-Status: active
-Class: internal-published
-Owner: BioETL Team
-Reviewers:
-
-- BioETL Team
-  Last verified: '2026-07-24'
-
-______________________________________________________________________
-
-
 ## Canonical Sources
 
 Read before planning or editing:
@@ -49,32 +37,32 @@ spawn_agent(
 
 > Runtime mapping: см. `.codex/agents/CODEX-RUNTIME.md`.
 
-||  #   | Субагент (`subagent_type`)   | Model  | Роль                                                                                   | Артефакт                                               |
+|  #   | Субагент (`subagent_type`)   | Model  | Роль                                                                                   | Артефакт                                               |
 | :--: | ---------------------------- | ------ | -------------------------------------------------------------------------------------- | ------------------------------------------------------ |
-||  I   | **py-audit-bot**             | opus   | Baseline/final аудит, code review, arch guardian, API validation                       | `review_py-audit-bot_{YYYYMMDD}_{HHMM}_{phase}.md`     |
-||  II  | **py-architecture-debt-bot** | opus   | Полный workflow устранения архитектурного долга: generate -> plan -> execute -> verify | `review_py-architecture-debt-bot_{YYYYMMDD}_{HHMM}.md` |
-|| III  | **py-plan-bot**              | opus   | Планирование, декомпозиция, composite design                                           | `review_py-plan-bot_{YYYYMMDD}_{HHMM}.md`              |
-||  IV  | **py-test-bot**              | sonnet | Тестирование                                                                           | `review_py-test-bot_{YYYYMMDD}_{HHMM}.md`              |
-||  V   | **py-config-bot**            | sonnet | Конфигурации (pipeline, DQ, filter, composite)                                         | `review_py-config-bot_{YYYYMMDD}_{HHMM}.md`            |
-||  VI  | **py-debug-bot**             | opus   | Отладка падений                                                                        | `review_py-debug-bot_{YYYYMMDD}_{HHMM}.md`             |
-|| VII  | **py-doc-bot**               | sonnet | Документация, ADR, диаграммы (Mermaid)                                                 | `review_py-doc-bot_{YYYYMMDD}_{HHMM}.md`               |
-|| VIII | **py-test-swarm**            | opus   | Иерархическое тестирование (L1→L2→L3)                                                  | test reports                                           |
-||  IX  | **py-review-orchestrator**   | opus   | Иерархический code review (S1-S8)                                                      | review reports                                         |
+|  I   | **py-audit-bot**             | opus   | Baseline/final аудит, code review, arch guardian, API validation                       | `review_py-audit-bot_{YYYYMMDD}_{HHMM}_{phase}.md`     |
+|  II  | **py-architecture-debt-bot** | opus   | Полный workflow устранения архитектурного долга: generate -> plan -> execute -> verify | `review_py-architecture-debt-bot_{YYYYMMDD}_{HHMM}.md` |
+| III  | **py-plan-bot**              | opus   | Планирование, декомпозиция, composite design                                           | `review_py-plan-bot_{YYYYMMDD}_{HHMM}.md`              |
+|  IV  | **py-test-bot**              | sonnet | Тестирование                                                                           | `review_py-test-bot_{YYYYMMDD}_{HHMM}.md`              |
+|  V   | **py-config-bot**            | sonnet | Конфигурации (pipeline, DQ, filter, composite)                                         | `review_py-config-bot_{YYYYMMDD}_{HHMM}.md`            |
+|  VI  | **py-debug-bot**             | opus   | Отладка падений                                                                        | `review_py-debug-bot_{YYYYMMDD}_{HHMM}.md`             |
+| VII  | **py-doc-bot**               | sonnet | Документация, ADR, диаграммы (Mermaid)                                                 | `review_py-doc-bot_{YYYYMMDD}_{HHMM}.md`               |
+| VIII | **py-test-swarm**            | opus   | Иерархическое тестирование (L1→L2→L3)                                                  | test reports                                           |
+|  IX  | **py-review-orchestrator**   | opus   | Иерархический code review (S1-S8)                                                      | review reports                                         |
 
 > **Note:** `py-code-bot` removed in v4.0 — production code is written directly by the orchestrator. `py-diagram-bot` merged into `py-doc-bot`. Repo-wide documentation audits now route through the `documentation-audit` / `documentation-cascade-audit` skills rather than a dedicated documentation-only subagent profile.
 
 ### Разделение ответственности (файловые зоны)
 
-|| Субагент                 | Зона записи                                                           | Только чтение                         |
+| Субагент                 | Зона записи                                                           | Только чтение                         |
 | ------------------------ | --------------------------------------------------------------------- | ------------------------------------- |
-|| orchestrator (direct)    | `src/bioetl/`, `tests/`                                               | `configs/`, `docs/`                   |
-|| py-architecture-debt-bot | `src/bioetl/`, `tests/`, `reports/quality/`, root task JSON artifacts | `configs/`, `docs/` (edits delegated) |
-|| py-config-bot            | `configs/`                                                            | `src/bioetl/`, `docs/`                |
-|| py-doc-bot               | `docs/`, docstrings, `docs/00-project/ai/agents/scripts/diagrams/`    | `configs/`, `tests/`                  |
-|| py-test-bot              | `tests/`                                                              | `src/bioetl/`, `configs/`             |
-|| py-debug-bot             | `src/bioetl/`, `tests/` (fixes)                                       | `configs/`, `docs/`                   |
-|| py-audit-bot             | — (read-only)                                                         | всё                                   |
-|| py-plan-bot              | — (read-only)                                                         | всё                                   |
+| orchestrator (direct)    | `src/bioetl/`, `tests/`                                               | `configs/`, `docs/`                   |
+| py-architecture-debt-bot | `src/bioetl/`, `tests/`, `reports/quality/`, root task JSON artifacts | `configs/`, `docs/` (edits delegated) |
+| py-config-bot            | `configs/`                                                            | `src/bioetl/`, `docs/`                |
+| py-doc-bot               | `docs/`, docstrings, `docs/00-project/ai/agents/scripts/diagrams/`    | `configs/`, `tests/`                  |
+| py-test-bot              | `tests/`                                                              | `src/bioetl/`, `configs/`             |
+| py-debug-bot             | `src/bioetl/`, `tests/` (fixes)                                       | `configs/`, `docs/`                   |
+| py-audit-bot             | — (read-only)                                                         | всё                                   |
+| py-plan-bot              | — (read-only)                                                         | всё                                   |
 
 ### Определения субагентов
 
@@ -249,14 +237,14 @@ ______________________________________________________________________
 
 ## 3. Матрица взаимодействий
 
-||   Отправитель →   |   py-plan-bot    |  py-test-bot   | py-config-bot | py-debug-bot |    py-doc-bot     |   py-audit-bot    |
+|   Отправитель →   |   py-plan-bot    |  py-test-bot   | py-config-bot | py-debug-bot |    py-doc-bot     |   py-audit-bot    |
 | :---------------: | :--------------: | :------------: | :-----------: | :----------: | :---------------: | :---------------: |
-|| **py-audit-bot**  | findings → RF-\* |       —        |  config gaps  |      —       |  drift findings   |         —         |
-||  **py-plan-bot**  |        —         |  scope RF-\*   | config RF-\*  |      —       |         —         |       scope       |
-|| **py-test-bot**  |        —         |       —        |       —       | FAIL report  |         —         |         —         |
-|| **py-config-bot** |        —         |  config tests  |       —       |      —       | DQ migration docs |         —         |
-|| **py-debug-bot**  |   plan update    | retest trigger |  fix config   |      —       |     fix → doc     |  fix → re-audit   |
-|| **py-doc-bot**   |        —         |       —        |       —       |      —       |         —         | terminology check |
+| **py-audit-bot**  | findings → RF-\* |       —        |  config gaps  |      —       |  drift findings   |         —         |
+|  **py-plan-bot**  |        —         |  scope RF-\*   | config RF-\*  |      —       |         —         |       scope       |
+| **py-test-bot**  |        —         |       —        |       —       | FAIL report  |         —         |         —         |
+| **py-config-bot** |        —         |  config tests  |       —       |      —       | DQ migration docs |         —         |
+| **py-debug-bot**  |   plan update    | retest trigger |  fix config   |      —       |     fix → doc     |  fix → re-audit   |
+| **py-doc-bot**   |        —         |       —        |       —       |      —       |         —         | terminology check |
 
 ### Ключевые потоки данных
 
@@ -307,36 +295,36 @@ ______________________________________________________________________
 
 ### 5.1. Когда пропустить шаг
 
-|| Шаг                   | Можно пропустить если                                 |
+| Шаг                   | Можно пропустить если                                 |
 | --------------------- | ----------------------------------------------------- |
-|| py-audit-bot baseline | Задача = чистый bugfix одного файла, scope очевиден   |
-|| py-plan-bot           | Задача = single-file doc update                       |
-|| py-test-bot baseline  | Нет существующих тестов для scope (→ сразу new_tests) |
-|| orchestrator code     | Задача = чистый config/doc change                     |
-|| py-config-bot         | Задача не затрагивает configs/                        |
-|| py-debug-bot          | Все тесты проходят                                    |
-|| py-doc-bot            | Задача не меняет публичный API / поведение            |
-|| py-audit-bot final    | Задача = чистый doc update без code changes           |
+| py-audit-bot baseline | Задача = чистый bugfix одного файла, scope очевиден   |
+| py-plan-bot           | Задача = single-file doc update                       |
+| py-test-bot baseline  | Нет существующих тестов для scope (→ сразу new_tests) |
+| orchestrator code     | Задача = чистый config/doc change                     |
+| py-config-bot         | Задача не затрагивает configs/                        |
+| py-debug-bot          | Все тесты проходят                                    |
+| py-doc-bot            | Задача не меняет публичный API / поведение            |
+| py-audit-bot final    | Задача = чистый doc update без code changes           |
 
 ### 5.2. Маршрутизация RF-\* по типу
 
-|| RF type    |      Primary subagent       |                Secondary                |
+| RF type    |      Primary subagent       |                Secondary                |
 | ---------- | :-------------------------: | :-------------------------------------: |
-|| `refactor` |        orchestrator         |   py-config-bot (если config impact)    |
-|| `feature`  |        orchestrator         |    py-config-bot (если новый entity)    |
-|| `bugfix`   | orchestrator / py-debug-bot | py-config-bot (если config-related bug) |
-|| `config`   |        py-config-bot        |                    —                    |
-|| `doc`      |         py-doc-bot          |                    —                    |
+| `refactor` |        orchestrator         |   py-config-bot (если config impact)    |
+| `feature`  |        orchestrator         |    py-config-bot (если новый entity)    |
+| `bugfix`   | orchestrator / py-debug-bot | py-config-bot (если config-related bug) |
+| `config`   |        py-config-bot        |                    —                    |
+| `doc`      |         py-doc-bot          |                    —                    |
 
 ### 5.3. Эскалация
 
-|| Ситуация                                 | Действие                                           |
+| Ситуация                                 | Действие                                           |
 | ---------------------------------------- | -------------------------------------------------- |
-|| py-debug-bot: 5 итераций без fix         | → `Requires Manual Review`, уведомить пользователя |
-|| py-audit-bot final: новый MUST           | → Блокер, возврат к py-debug-bot/py-plan-bot       |
-|| py-test-bot: coverage < 85%              | → MUST: разработка тестов (phase=new_tests)        |
-|| py-plan-bot: цикл зависимостей RF-\*     | → Пересмотр декомпозиции задачи                    |
-|| py-config-bot: gap_analysis critical > 0 | → Блокер, возврат к py-config-bot/py-plan-bot      |
+| py-debug-bot: 5 итераций без fix         | → `Requires Manual Review`, уведомить пользователя |
+| py-audit-bot final: новый MUST           | → Блокер, возврат к py-debug-bot/py-plan-bot       |
+| py-test-bot: coverage < 85%              | → MUST: разработка тестов (phase=new_tests)        |
+| py-plan-bot: цикл зависимостей RF-\*     | → Пересмотр декомпозиции задачи                    |
+| py-config-bot: gap_analysis critical > 0 | → Блокер, возврат к py-config-bot/py-plan-bot      |
 
 ### 5.4. Параллелизация
 
@@ -350,14 +338,14 @@ ______________________________________________________________________
 
 ## 6. ID-системы
 
-|| Prefix  | Subagent      | Формат     | Пример   | Описание                |
+| Prefix  | Subagent      | Формат     | Пример   | Описание                |
 | ------- | ------------- | ---------- | -------- | ----------------------- |
-|| `RF-`   | py-plan-bot   | `RF-001`   | RF-001   | Рефакторинг / изменение |
-|| `DBG-`  | py-debug-bot  | `DBG-001`  | DBG-001  | Debug-итерация          |
-|| `AUD-`  | py-audit-bot  | `AUD-001`  | AUD-001  | Audit finding           |
-|| `DOC-`  | py-doc-bot    | `DOC-001`  | DOC-001  | Обновление документации |
-|| `FAIL-` | py-test-bot   | `FAIL-001` | FAIL-001 | Упавший тест (в отчёте) |
-|| `CFG-`  | py-config-bot | `CFG-001`  | CFG-001  | Изменение конфигурации  |
+| `RF-`   | py-plan-bot   | `RF-001`   | RF-001   | Рефакторинг / изменение |
+| `DBG-`  | py-debug-bot  | `DBG-001`  | DBG-001  | Debug-итерация          |
+| `AUD-`  | py-audit-bot  | `AUD-001`  | AUD-001  | Audit finding           |
+| `DOC-`  | py-doc-bot    | `DOC-001`  | DOC-001  | Обновление документации |
+| `FAIL-` | py-test-bot   | `FAIL-001` | FAIL-001 | Упавший тест (в отчёте) |
+| `CFG-`  | py-config-bot | `CFG-001`  | CFG-001  | Изменение конфигурации  |
 
 Все ID уникальны в пределах `task_id`. Cross-references: `DBG-001 → RF-002`, `DOC-003 → RF-001`, `CFG-001 → RF-003`.
 
@@ -430,10 +418,10 @@ ______________________________________________________________________
 
 ## 9. Опорные документы
 
-|| Документ                                               | Описание                                 |
+| Документ                                               | Описание                                 |
 | ------------------------------------------------------ | ---------------------------------------- |
-|| `.codex/agents/py-*.md`                                | Спецификации субагентов для Codex CLI    |
-|| `.codex/agents/ORCHESTRATION.md`                       | Каноническая orchestration карта рантайма |
-|| `docs/00-project/RULES.md`                             | Архитектурные правила проекта            |
-|| `docs/02-architecture/decisions/`                      | ADR-001..ADR-047                         |
-|| `docs/00-project/glossary.md`                          | Терминология                             |
+| `.codex/agents/py-*.md`                                | Спецификации субагентов для Codex CLI    |
+| `.codex/agents/ORCHESTRATION.md`                       | Каноническая orchestration карта рантайма |
+| `docs/00-project/RULES.md`                             | Архитектурные правила проекта            |
+| `docs/02-architecture/decisions/`                      | ADR-001..ADR-047                         |
+| `docs/00-project/glossary.md`                          | Терминология                             |

@@ -18,8 +18,18 @@ def normalize_top_reasons(raw: object) -> tuple[dict[str, Any], ...]:
     return tuple(item for item in items if item is not None)[:3]
 
 
-def load_child_top_reasons(report_ref: str) -> tuple[dict[str, Any], ...]:
-    """Best-effort load top reasons from a child pipeline report."""
+def resolve_top_reasons(
+    raw: object,
+    report_ref: str | None,
+) -> tuple[dict[str, Any], ...]:
+    """Prefer inline reasons and fall back to a child report reference."""
+    reasons = normalize_top_reasons(raw)
+    if reasons or report_ref is None:
+        return reasons
+    return _load_child_top_reasons(report_ref)
+
+
+def _load_child_top_reasons(report_ref: str) -> tuple[dict[str, Any], ...]:
     try:
         path = Path(report_ref)
         if not path.is_file():
