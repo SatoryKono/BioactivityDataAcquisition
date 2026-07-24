@@ -27,6 +27,7 @@ def test_commands_package_exports_reviewed_public_command_whitelist() -> None:
         "lock",
         "maintenance",
         "quarantine",
+        "report",
         "run",
         "run_all",
         "run_composite",

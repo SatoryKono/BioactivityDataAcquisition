@@ -114,6 +114,8 @@ def test_main_uses_workspace_root_for_generated_server_paths(
             str(workspace_root),
             "--skip-codex",
             "--skip-codex-config",
+            "--profile",
+            "full",
         ]
     )
 
