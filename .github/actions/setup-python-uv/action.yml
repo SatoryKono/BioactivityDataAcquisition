@@ -102,7 +102,6 @@ runs:
         # Workflows also pass --frozen/--no-build explicitly for Sonar S8544/S8541.
         {
           echo "UV_FROZEN=1"
-          echo "UV_NO_BUILD=1"
         } >> "$GITHUB_ENV"
 
     - name: Cache pytest and hypothesis
