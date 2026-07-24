@@ -97,6 +97,34 @@ def test_overcount_is_failing_not_silently_balanced() -> None:
     assert silver.balance_status.value == "FAILING"
 
 
+def test_gold_layer_defaults_repair_bucket_overcount() -> None:
+    """Coarse gold_written repairs inflated batch records_out when removals match."""
+    acc = StageAccountingAccumulator()
+    acc.record_in(StageId.GOLD.value, 1000)
+    acc.record_out(StageId.GOLD.value, 1976)
+    acc.record_removal(
+        StageId.GOLD.value,
+        outcome="excluded_by_contract",
+        reason_code="gold_contract_schema_failure",
+        count=12,
+        sample_ref="assay-1",
+    )
+    layers = acc.snapshot_layers_from_metrics(
+        {
+            "records_bronze": 1000,
+            "records_silver": 1000,
+            "records_gold": 988,
+            "records_gold_excluded_by_contract": 12,
+        }
+    )
+    gold = next(row for row in acc.snapshot_funnel(layers) if row.stage_id == "gold")
+    assert gold.records_in == 1000
+    assert gold.records_out == 988
+    assert gold.removed_total == 12
+    assert gold.balance_status.value == "OK"
+    assert gold.removals[0].sample_refs == ("assay-1",)
+
+
 def test_pipeline_report_builder_from_instrumented_accounting() -> None:
     acc = StageAccountingAccumulator()
     acc.record_in(StageId.EXTRACT.value, 1000)

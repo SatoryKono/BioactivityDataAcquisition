@@ -36,6 +36,10 @@ def test_write_pipeline_run_report(tmp_path: Path) -> None:
             "pipeline_name": "chembl_activity",
             "run_type": "incremental",
             "status": "success",
+            "started_at": "2026-07-24T00:00:00+00:00",
+            "duration_seconds": 12.5,
+            "provider": "chembl",
+            "entity": "activity",
         },
         metrics={
             "records_fetched": 10,
@@ -46,14 +50,26 @@ def test_write_pipeline_run_report(tmp_path: Path) -> None:
             "records_quarantined": 0,
         },
         accounting=acc,
+        schema_versions={
+            "reason_catalog_version": "reason_catalog_v1",
+            "bioetl_version": "6.1.0",
+        },
     )
     written = write_pipeline_run_report(report, root=tmp_path)
     assert written.json_path.is_file()
     assert written.markdown_path.is_file()
+    assert written.latest_path is not None and written.latest_path.is_file()
     payload = json.loads(written.json_path.read_text(encoding="utf-8"))
     assert payload["schema_version"] == "pipeline_run_report_v1"
+    kinds = {item["kind"] for item in payload["artifacts"]}
+    assert "pipeline_run_report_json" in kinds
+    assert "pipeline_run_report_md" in kinds
+    latest = json.loads(written.latest_path.read_text(encoding="utf-8"))
+    assert latest["run_id"] == "abc"
     md = written.markdown_path.read_text(encoding="utf-8")
     assert "Funnel" in md
+    assert "duration_seconds" in md
+    assert "Artifacts" in md
     assert "bronze" in md.lower() or "Bronze" in md
 
 

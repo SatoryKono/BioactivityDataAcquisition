@@ -203,6 +203,48 @@
     "tracking_coverage": {
       "type": "string",
       "enum": ["full", "partial", "not_tracked"]
+    },
+    "failure": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "error_type": { "type": ["string", "null"] },
+        "error_message": { "type": ["string", "null"] },
+        "failed_stage": { "type": ["string", "null"] },
+        "exit_hint": { "type": ["string", "null"] }
+      }
+    },
+    "io": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "quarantine": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "dq_summary": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "contract_summary": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "schema_versions": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "stage_timings": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "http_summary": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "performance": {
+      "type": "object",
+      "additionalProperties": true
     }
   }
 }
