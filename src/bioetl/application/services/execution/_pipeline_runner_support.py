@@ -12,6 +12,16 @@ from bioetl.application.services.execution.pipeline_runner_models import (
     RunOptions,
     RunResult,
 )
+from bioetl.application.services.run_reports.enrichment import (
+    build_artifacts_from_result,
+    build_dq_summary,
+    build_failure_block,
+    build_http_summary,
+    build_io_block,
+    build_quarantine_block,
+    build_schema_versions,
+    build_stage_timings,
+)
 from bioetl.application.services.run_reports.writer import write_pipeline_run_report
 from bioetl.domain.run_reports.accounting import StageAccountingAccumulator
 from bioetl.domain.run_reports.context import (
@@ -110,6 +120,8 @@ def finalize_pipeline_run_report(
     result: RunResult,
     options: RunOptions | None = None,
     report_root: Path | None = None,
+    stage_timings: dict[str, float | int | None] | None = None,
+    http_summary: dict[str, Any] | None = None,
 ) -> RunResult:
     """Build and persist pipeline run report; attach paths onto result."""
     accounting = get_stage_accounting()
@@ -131,10 +143,30 @@ def finalize_pipeline_run_report(
         duration=_result_duration_seconds(result),
     )
     try:
+        package_version = _package_version()
+        # Build a preliminary report to materialize reasons, then enrich.
+        draft = build_pipeline_run_report(
+            identity=identity,
+            metrics=metrics,
+            accounting=accounting,
+            artifacts=build_artifacts_from_result(result),
+        )
+        reasons = draft.reasons_top_n
         report = build_pipeline_run_report(
             identity=identity,
             metrics=metrics,
             accounting=accounting,
+            artifacts=build_artifacts_from_result(result),
+            failure=build_failure_block(result),
+            io=build_io_block(result, options=options),
+            quarantine=build_quarantine_block(result, reasons_top_n=reasons),
+            dq_summary=build_dq_summary(result, reasons_top_n=reasons),
+            schema_versions=build_schema_versions(
+                reason_catalog_version=draft.reason_catalog_version,
+                package_version=package_version,
+            ),
+            stage_timings=build_stage_timings(stage_timings),
+            http_summary=build_http_summary(http_summary),
         )
         written = write_pipeline_run_report(report, root=report_root)
     except Exception as exc:
@@ -149,6 +181,15 @@ def finalize_pipeline_run_report(
         run_report_markdown_path=str(written.markdown_path),
         run_report_funnel=report.funnel,
     )
+
+
+def _package_version() -> str | None:
+    try:
+        from bioetl import __version__
+
+        return str(__version__)
+    except Exception:
+        return None
 
 
 def build_pipeline_run_result(

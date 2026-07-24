@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import os
 import tempfile
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
 
@@ -24,6 +24,7 @@ class RunReportWriteResult:
 
     json_path: Path
     markdown_path: Path
+    latest_path: Path | None = None
 
 
 def _safe_segment(value: str) -> str:
@@ -84,13 +85,48 @@ def write_json(path: Path, payload: dict[str, Any]) -> None:  # Any: report/json
     )
 
 
+def _with_self_artifacts(
+    artifacts: tuple[dict[str, Any], ...],  # Any: artifact payload
+    *,
+    json_path: Path,
+    markdown_path: Path,
+) -> tuple[dict[str, Any], ...]:
+    kinds = {str(item.get("kind")) for item in artifacts}
+    items = list(artifacts)
+    if "pipeline_run_report_json" not in kinds and "workflow_run_report_json" not in kinds:
+        kind = (
+            "workflow_run_report_json"
+            if json_path.name.startswith("workflow")
+            else "pipeline_run_report_json"
+        )
+        items.append({"kind": kind, "ref": str(json_path.as_posix())})
+    if "pipeline_run_report_md" not in kinds and "workflow_run_report_md" not in kinds:
+        kind = (
+            "workflow_run_report_md"
+            if markdown_path.name.startswith("workflow")
+            else "pipeline_run_report_md"
+        )
+        items.append({"kind": kind, "ref": str(markdown_path.as_posix())})
+    return tuple(items)
+
+
+def _write_latest_pointer(
+    *,
+    owner_dir: Path,
+    payload: dict[str, Any],  # Any: latest pointer payload
+) -> Path:
+    latest_path = owner_dir / "_latest.json"
+    write_json(latest_path, payload)
+    return latest_path
+
+
 def write_pipeline_run_report(
     report: PipelineRunReport,
     *,
     root: Path | None = None,
     directory: Path | None = None,
 ) -> RunReportWriteResult:
-    """Write JSON + markdown pipeline run report artifacts."""
+    """Write JSON + markdown pipeline run report artifacts and `_latest` pointer."""
     identity = report.identity
     out_dir = directory or resolve_pipeline_report_dir(
         pipeline_name=str(identity.get("pipeline_name", "pipeline")),
@@ -100,9 +136,33 @@ def write_pipeline_run_report(
     out_dir.mkdir(parents=True, exist_ok=True)
     json_path = out_dir / "pipeline-run-report.json"
     md_path = out_dir / "pipeline-run-report.md"
-    write_json(json_path, report.to_dict())
-    _atomic_write_text(md_path, render_pipeline_run_report_markdown(report))
-    return RunReportWriteResult(json_path=json_path, markdown_path=md_path)
+    enriched = replace(
+        report,
+        artifacts=_with_self_artifacts(
+            report.artifacts,
+            json_path=json_path,
+            markdown_path=md_path,
+        ),
+    )
+    write_json(json_path, enriched.to_dict())
+    _atomic_write_text(md_path, render_pipeline_run_report_markdown(enriched))
+    latest_path = _write_latest_pointer(
+        owner_dir=out_dir.parent,
+        payload={
+            "kind": "pipeline_run_report",
+            "pipeline_name": identity.get("pipeline_name"),
+            "run_id": identity.get("run_id"),
+            "status": identity.get("status"),
+            "completed_at": identity.get("completed_at"),
+            "json_path": str(json_path.as_posix()),
+            "markdown_path": str(md_path.as_posix()),
+        },
+    )
+    return RunReportWriteResult(
+        json_path=json_path,
+        markdown_path=md_path,
+        latest_path=latest_path,
+    )
 
 
 def write_workflow_run_report(
@@ -111,7 +171,7 @@ def write_workflow_run_report(
     root: Path | None = None,
     directory: Path | None = None,
 ) -> RunReportWriteResult:
-    """Write JSON + markdown workflow run report artifacts."""
+    """Write JSON + markdown workflow run report artifacts and `_latest` pointer."""
     identity = report.identity
     out_dir = directory or resolve_workflow_report_dir(
         workflow_name=str(identity.get("workflow_name", "workflow")),
@@ -123,4 +183,20 @@ def write_workflow_run_report(
     md_path = out_dir / "workflow-run-report.md"
     write_json(json_path, report.to_dict())
     _atomic_write_text(md_path, render_workflow_run_report_markdown(report))
-    return RunReportWriteResult(json_path=json_path, markdown_path=md_path)
+    latest_path = _write_latest_pointer(
+        owner_dir=out_dir.parent,
+        payload={
+            "kind": "workflow_run_report",
+            "workflow_name": identity.get("workflow_name"),
+            "workflow_run_id": identity.get("workflow_run_id"),
+            "status": identity.get("status"),
+            "completed_at": identity.get("completed_at"),
+            "json_path": str(json_path.as_posix()),
+            "markdown_path": str(md_path.as_posix()),
+        },
+    )
+    return RunReportWriteResult(
+        json_path=json_path,
+        markdown_path=md_path,
+        latest_path=latest_path,
+    )
