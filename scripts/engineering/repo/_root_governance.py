@@ -19,6 +19,7 @@ BASE_ALLOWED_ROOT_DIRECTORIES: frozenset[str] = frozenset(
         ".gemini",
         ".github",
         ".vibe",
+        ".claude",
         ".vscode",
         "assets",
         "configs",
