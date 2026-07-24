@@ -44,6 +44,15 @@ def build_pipeline_run_report(
     accounting: StageAccountingAccumulator | None = None,
     artifacts: tuple[dict[str, Any], ...] = (),  # Any: report/json payload shape is dynamic
     reason_catalog_version: str | None = None,
+    failure: Mapping[str, Any] | None = None,  # Any: optional failure block
+    io: Mapping[str, Any] | None = None,  # Any: optional IO summary
+    quarantine: Mapping[str, Any] | None = None,  # Any: optional quarantine
+    dq_summary: Mapping[str, Any] | None = None,  # Any: optional DQ
+    contract_summary: Mapping[str, Any] | None = None,  # Any: optional contract
+    schema_versions: Mapping[str, Any] | None = None,  # Any: optional fingerprints
+    stage_timings: Mapping[str, Any] | None = None,  # Any: optional timings
+    http_summary: Mapping[str, Any] | None = None,  # Any: optional HTTP
+    performance: Mapping[str, Any] | None = None,  # Any: optional throughput
 ) -> PipelineRunReport:
     """Project a deterministic pipeline run report.
 
@@ -60,11 +69,18 @@ def build_pipeline_run_report(
     )
     layers = acc.snapshot_layers_from_metrics(metrics_map)
     funnel = acc.snapshot_funnel(layers)
+    reasons = _resolve_top_reasons(acc, layers)
+    resolved_contract = _resolve_contract_summary(contract_summary, reasons, layers)
+    resolved_performance = performance or _derive_performance(
+        identity=identity,
+        metrics_map=metrics_map,
+        stage_timings=stage_timings,
+    )
     return PipelineRunReport(
         identity=dict(identity),
         funnel=funnel,
         layers=layers,
-        reasons_top_n=_resolve_top_reasons(acc, layers),
+        reasons_top_n=reasons,
         reconciliation=_build_reconciliation(layers),
         tracking_coverage=_resolve_tracking(acc, funnel, accounting),
         reason_catalog_version=_resolve_catalog_version(
@@ -73,7 +89,56 @@ def build_pipeline_run_report(
             reason_catalog_version,
         ),
         artifacts=artifacts,
+        failure=dict(failure) if failure else None,
+        io=dict(io) if io else None,
+        quarantine=dict(quarantine) if quarantine else None,
+        dq_summary=dict(dq_summary) if dq_summary else None,
+        contract_summary=resolved_contract,
+        schema_versions=dict(schema_versions) if schema_versions else None,
+        stage_timings=dict(stage_timings) if stage_timings else None,
+        http_summary=dict(http_summary) if http_summary else None,
+        performance=resolved_performance,
     )
+
+
+def _resolve_contract_summary(
+    contract_summary: Mapping[str, Any] | None,  # Any: optional contract
+    reasons: tuple[dict[str, Any], ...],  # Any: reasons payload
+    layers: LayerCounts,
+) -> dict[str, Any] | None:  # Any: optional contract
+    if contract_summary is not None:
+        return dict(contract_summary)
+    excluded = layers.gold_excluded_by_contract
+    contract_reasons = [
+        dict(item)
+        for item in reasons
+        if item.get("reason_family") == "contract" or item.get("outcome") == "excluded_by_contract"
+    ]
+    if excluded <= 0 and not contract_reasons:
+        return None
+    return {
+        "gold_excluded_by_contract": excluded,
+        "reasons": contract_reasons,
+    }
+
+
+def _derive_performance(
+    *,
+    identity: Mapping[str, Any],  # Any: identity payload
+    metrics_map: Mapping[str, int],
+    stage_timings: Mapping[str, Any] | None,  # Any: optional timings
+) -> dict[str, Any] | None:  # Any: optional performance
+    duration = identity.get("duration_seconds")
+    if not isinstance(duration, (int, float)) or duration <= 0:
+        return None
+    fetched = int(metrics_map.get("records_fetched", 0) or 0)
+    payload: dict[str, Any] = {  # Any: optional performance
+        "duration_seconds": float(duration),
+        "records_per_second": round(fetched / float(duration), 4) if fetched else None,
+    }
+    if stage_timings:
+        payload["stage_timings_present"] = True
+    return payload
 
 
 def _resolve_tracking(

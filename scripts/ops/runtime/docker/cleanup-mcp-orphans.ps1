@@ -50,15 +50,19 @@ if (-not $ids) {
 }
 
 foreach ($id in $ids) {
-    $meta = docker inspect --format '{{.Name}}|{{.Config.Image}}|{{index .Config.Labels "docker-mcp"}}|{{index .Config.Labels "docker-mcp-name"}}' $id 2>$null
+    $meta = docker inspect --format '{{.Name}}|{{.Config.Image}}|{{index .Config.Labels "docker-mcp"}}|{{index .Config.Labels "docker-mcp-name"}}|{{index .Config.Labels "com.docker.compose.project"}}' $id 2>$null
     if (-not $meta) { continue }
-    $parts = $meta -split '\|', 4
+    $parts = $meta -split '\|', 5
     $name = ([string]$parts[0]).TrimStart('/')
     $image = [string]$parts[1]
     $dockerMcp = [string]$parts[2]
     $mcpName = [string]$parts[3]
+    $composeProject = [string]$parts[4]
 
+    # Hard allowlist: never touch BioETL compose stacks.
     if (Test-IsBioetlName $name) { continue }
+    if ($composeProject -match '^bioetl-') { continue }
+    if ($image -match 'bioetl-main-bioetl|neo4j:5\.15') { continue }
 
     $isMcp = $false
     if ($dockerMcp -eq 'true' -or -not [string]::IsNullOrWhiteSpace($mcpName)) { $isMcp = $true }
