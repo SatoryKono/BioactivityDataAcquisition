@@ -27,7 +27,7 @@ jobs:
         uses: ./.github/actions/setup-python-uv
         with:
           uv-extras: "dev tracing"
-          uv-sync-args: "--frozen --all-extras"
+          uv-sync-args: "--frozen"
 
       - name: Run replay-lane matrix
         run: |
