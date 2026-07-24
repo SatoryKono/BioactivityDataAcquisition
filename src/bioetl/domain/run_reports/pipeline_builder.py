@@ -16,6 +16,11 @@ from bioetl.domain.run_reports.models import (
 from bioetl.domain.run_reports.reason_catalog import default_reason_catalog
 
 
+def _optional_mapping(value: Mapping[str, Any] | None) -> dict[str, Any] | None:
+    """Copy an optional dynamic mapping without leaking caller mutation."""
+    return dict(value) if value else None
+
+
 def _status_from_layers(layers: LayerCounts) -> tuple[BalanceStatus, BalanceStatus, int, int]:
     silver_delta = layers.bronze_records - layers.silver_accounted
     gold_delta = layers.silver_valid - layers.gold_accounted
@@ -71,7 +76,8 @@ def build_pipeline_run_report(
     funnel = acc.snapshot_funnel(layers)
     reasons = _resolve_top_reasons(acc, layers)
     resolved_contract = _resolve_contract_summary(contract_summary, reasons, layers)
-    resolved_performance = performance or _derive_performance(
+    resolved_performance = _resolve_performance(
+        performance=performance,
         identity=identity,
         metrics_map=metrics_map,
         stage_timings=stage_timings,
@@ -89,14 +95,14 @@ def build_pipeline_run_report(
             reason_catalog_version,
         ),
         artifacts=artifacts,
-        failure=dict(failure) if failure else None,
-        io=dict(io) if io else None,
-        quarantine=dict(quarantine) if quarantine else None,
-        dq_summary=dict(dq_summary) if dq_summary else None,
+        failure=_optional_mapping(failure),
+        io=_optional_mapping(io),
+        quarantine=_optional_mapping(quarantine),
+        dq_summary=_optional_mapping(dq_summary),
         contract_summary=resolved_contract,
-        schema_versions=dict(schema_versions) if schema_versions else None,
-        stage_timings=dict(stage_timings) if stage_timings else None,
-        http_summary=dict(http_summary) if http_summary else None,
+        schema_versions=_optional_mapping(schema_versions),
+        stage_timings=_optional_mapping(stage_timings),
+        http_summary=_optional_mapping(http_summary),
         performance=resolved_performance,
     )
 
@@ -109,17 +115,43 @@ def _resolve_contract_summary(
     if contract_summary is not None:
         return dict(contract_summary)
     excluded = layers.gold_excluded_by_contract
-    contract_reasons = [
-        dict(item)
-        for item in reasons
-        if item.get("reason_family") == "contract" or item.get("outcome") == "excluded_by_contract"
-    ]
-    if excluded <= 0 and not contract_reasons:
+    contract_reasons = [dict(item) for item in reasons if _is_contract_reason(item)]
+    if not _has_contract_activity(excluded, contract_reasons):
         return None
     return {
         "gold_excluded_by_contract": excluded,
         "reasons": contract_reasons,
     }
+
+
+def _is_contract_reason(item: Mapping[str, Any]) -> bool:
+    return (
+        item.get("reason_family") == "contract"
+        or item.get("outcome") == "excluded_by_contract"
+    )
+
+
+def _has_contract_activity(
+    excluded: int,
+    contract_reasons: list[dict[str, Any]],
+) -> bool:
+    return excluded > 0 or bool(contract_reasons)
+
+
+def _resolve_performance(
+    *,
+    performance: Mapping[str, Any] | None,
+    identity: Mapping[str, Any],
+    metrics_map: Mapping[str, int],
+    stage_timings: Mapping[str, Any] | None,
+) -> dict[str, Any] | None:
+    if performance:
+        return dict(performance)
+    return _derive_performance(
+        identity=identity,
+        metrics_map=metrics_map,
+        stage_timings=stage_timings,
+    )
 
 
 def _derive_performance(
@@ -134,11 +166,17 @@ def _derive_performance(
     fetched = int(metrics_map.get("records_fetched", 0) or 0)
     payload: dict[str, Any] = {  # Any: optional performance
         "duration_seconds": float(duration),
-        "records_per_second": round(fetched / float(duration), 4) if fetched else None,
+        "records_per_second": _records_per_second(fetched, float(duration)),
     }
     if stage_timings:
         payload["stage_timings_present"] = True
     return payload
+
+
+def _records_per_second(fetched: int, duration: float) -> float | None:
+    if fetched == 0:
+        return None
+    return round(fetched / duration, 4)
 
 
 def _resolve_tracking(

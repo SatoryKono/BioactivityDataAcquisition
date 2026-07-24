@@ -90,7 +90,7 @@ def _with_self_artifacts(
     *,
     json_path: Path,
     markdown_path: Path,
-) -> tuple[dict[str, Any], ...]:
+) -> tuple[dict[str, Any], ...]:  # Any: dynamic artifact payload
     kinds = {str(item.get("kind")) for item in artifacts}
     items = list(artifacts)
     if "pipeline_run_report_json" not in kinds and "workflow_run_report_json" not in kinds:

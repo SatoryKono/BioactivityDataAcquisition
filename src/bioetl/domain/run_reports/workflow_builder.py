@@ -215,7 +215,7 @@ def _load_child_top_reasons(
 
 
 def _normalize_execution(
-    raw: Mapping[str, Any] | object,
+    raw: Mapping[str, Any] | object,  # Any: external workflow result payload
 ) -> _NormalizedExecution:  # Any: report/json payload shape is dynamic
     if isinstance(raw, Mapping):
         return _mapping_execution(raw)
@@ -223,7 +223,7 @@ def _normalize_execution(
 
 
 def _normalize_plan_step(
-    step: Mapping[str, Any],
+    step: Mapping[str, Any],  # Any: dynamic workflow plan payload
 ) -> dict[str, Any]:  # Any: report/json payload shape is dynamic
     return {
         "step_id": str(step.get("step_id", "")),

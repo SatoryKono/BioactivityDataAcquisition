@@ -203,7 +203,10 @@ def render_workflow_run_report_markdown(report: WorkflowRunReport) -> str:
     return "\n".join(lines)
 
 
-def _append_identity_details(lines: list[str], identity: Mapping[str, Any]) -> None:
+def _append_identity_details(
+    lines: list[str],
+    identity: Mapping[str, Any],  # Any: dynamic report identity payload
+) -> None:
     if identity.get("manifest_id"):
         lines.append(f"- **manifest_id:** `{identity.get('manifest_id')}`")
     if identity.get("provider") or identity.get("entity"):
@@ -244,7 +247,7 @@ def _append_samples_section(lines: list[str], report: PipelineRunReport) -> None
 def _append_optional_mapping_section(
     lines: list[str],
     title: str,
-    payload: Mapping[str, Any] | None,
+    payload: Mapping[str, Any] | None,  # Any: dynamic optional report block
 ) -> None:
     if not payload:
         return
