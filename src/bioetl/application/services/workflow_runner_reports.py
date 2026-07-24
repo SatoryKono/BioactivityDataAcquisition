@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import json
+from collections.abc import Mapping
 from dataclasses import replace
+from pathlib import Path
 
 from bioetl.application.services.workflow_runner_models import (
     WorkflowRunExecutionResult,
@@ -47,6 +50,22 @@ def _pipeline_name_for_step(
     return None
 
 
+def _load_child_top_reasons(report_ref: object) -> object:
+    """Best-effort load of reason rows at the application filesystem boundary."""
+    if not isinstance(report_ref, str) or not report_ref:
+        return ()
+    try:
+        path = Path(report_ref)
+        if not path.is_file():
+            return ()
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError, TypeError, ValueError):
+        return ()
+    if not isinstance(payload, Mapping):
+        return ()
+    return payload.get("reasons_top_n") or ()
+
+
 def _execution_rows_from_result(
     result: WorkflowRunExecutionResult,
     *,
@@ -70,6 +89,7 @@ def _execution_rows_from_result(
                 "child_run_id": step.child_run_id,
                 "child_manifest_id": step.child_manifest_id,
                 "pipeline_report_ref": report_ref,
+                "top_reasons": _load_child_top_reasons(report_ref),
                 "error_type": step.error_type,
                 "error_message": step.error_message,
             }

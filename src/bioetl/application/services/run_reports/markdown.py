@@ -32,9 +32,10 @@ def render_pipeline_run_report_markdown(report: PipelineRunReport) -> str:
         ]
     )
     for row in report.funnel:
-        top = ", ".join(
-            f"{item.reason_code}={item.count}" for item in row.removals[:3]
-        ) or "—"
+        top = (
+            ", ".join(f"{item.reason_code}={item.count}" for item in row.removals[:3])
+            or "—"
+        )
         lines.append(
             f"| {row.stage_id} | {row.records_in} | {row.records_out} | "
             f"{row.removed_total} | {row.balance_status.value} | "
@@ -110,21 +111,37 @@ def render_pipeline_run_report_markdown(report: PipelineRunReport) -> str:
 
 def render_workflow_run_report_markdown(report: WorkflowRunReport) -> str:
     """Render a compact workflow extraction rollup."""
+    lines = _workflow_header(report)
+    _append_workflow_steps(lines, report)
+    _append_workflow_plan(lines, report)
+    _append_workflow_totals(lines, report)
+    _append_workflow_reasons(lines, report)
+    lines.append("")
+    return "\n".join(lines)
+
+
+def _workflow_header(report: WorkflowRunReport) -> list[str]:
     identity = report.identity
-    lines: list[str] = [
+    lines = [
         f"# Workflow run report: {identity.get('workflow_name', '?')}",
         "",
         f"- **workflow_run_id:** `{identity.get('workflow_run_id') or ''}`",
         f"- **status:** {identity.get('status', '')}",
         f"- **extracted total:** {report.totals.get('records_extracted_sum', 0)}",
     ]
-    if identity.get("resumed") is not None:
-        lines.append(f"- **resumed:** {identity.get('resumed')}")
-    if identity.get("execution_fingerprint"):
-        lines.append(f"- **fingerprint:** `{identity.get('execution_fingerprint')}`")
-    if identity.get("duration_seconds") is not None:
-        lines.append(f"- **duration_seconds:** {identity.get('duration_seconds')}")
+    _append_identity_value(lines, identity, "resumed")
+    _append_identity_value(
+        lines,
+        identity,
+        "execution_fingerprint",
+        label="fingerprint",
+        code=True,
+    )
+    _append_identity_value(lines, identity, "duration_seconds")
+    return lines
 
+
+def _append_workflow_steps(lines: list[str], report: WorkflowRunReport) -> None:
     lines.extend(
         [
             "",
@@ -153,26 +170,38 @@ def render_workflow_run_report_markdown(report: WorkflowRunReport) -> str:
         if row.skip_reason:
             lines.append(f"  - skip_reason: `{row.skip_reason}`")
 
-    if report.plan_steps:
-        lines.extend(["", "## Plan / DAG", ""])
-        for step in report.plan_steps:
-            deps = step.get("depends_on") or []
-            dep_text = ", ".join(f"`{dep}`" for dep in deps) if deps else "—"
-            lines.append(
-                f"- `{step.get('step_id')}` ({step.get('kind')}) depends_on: {dep_text}"
-            )
-        lines.extend(["", "```mermaid", "flowchart TD"])
-        for step in report.plan_steps:
-            step_id = str(step.get("step_id") or "step")
-            safe = _mermaid_id(step_id)
-            lines.append(f'  {safe}["{step_id}"]')
-        for step in report.plan_steps:
-            step_id = str(step.get("step_id") or "step")
-            safe = _mermaid_id(step_id)
-            for dep in step.get("depends_on") or []:
-                lines.append(f"  {_mermaid_id(str(dep))} --> {safe}")
-        lines.append("```")
 
+def _append_workflow_plan(lines: list[str], report: WorkflowRunReport) -> None:
+    if not report.plan_steps:
+        return
+    lines.extend(["", "## Plan / DAG", ""])
+    for step in report.plan_steps:
+        deps = step.get("depends_on") or []
+        dep_text = ", ".join(f"`{dep}`" for dep in deps) if deps else "—"
+        lines.append(
+            f"- `{step.get('step_id')}` ({step.get('kind')}) depends_on: {dep_text}"
+        )
+    lines.extend(["", "```mermaid", "flowchart TD"])
+    _append_mermaid_nodes(lines, report)
+    _append_mermaid_edges(lines, report)
+    lines.append("```")
+
+
+def _append_mermaid_nodes(lines: list[str], report: WorkflowRunReport) -> None:
+    for step in report.plan_steps:
+        step_id = str(step.get("step_id") or "step")
+        lines.append(f'  {_mermaid_id(step_id)}["{step_id}"]')
+
+
+def _append_mermaid_edges(lines: list[str], report: WorkflowRunReport) -> None:
+    for step in report.plan_steps:
+        step_id = str(step.get("step_id") or "step")
+        safe = _mermaid_id(step_id)
+        for dep in step.get("depends_on") or []:
+            lines.append(f"  {_mermaid_id(str(dep))} --> {safe}")
+
+
+def _append_workflow_totals(lines: list[str], report: WorkflowRunReport) -> None:
     totals = report.totals
     lines.extend(
         [
@@ -191,41 +220,68 @@ def render_workflow_run_report_markdown(report: WorkflowRunReport) -> str:
     if totals.get("records_gold_sum") is not None:
         lines.append(f"- records_gold_sum: **{totals.get('records_gold_sum')}**")
 
-    if report.reasons_rollup:
-        lines.extend(["", "## Reasons rollup", ""])
-        for item in report.reasons_rollup:
-            lines.append(
-                f"- `{item.get('reason_code')}` "
-                f"({item.get('outcome')}): {item.get('count')}"
-            )
 
-    lines.append("")
-    return "\n".join(lines)
+def _append_workflow_reasons(lines: list[str], report: WorkflowRunReport) -> None:
+    if not report.reasons_rollup:
+        return
+    lines.extend(["", "## Reasons rollup", ""])
+    for item in report.reasons_rollup:
+        lines.append(
+            f"- `{item.get('reason_code')}` "
+            f"({item.get('outcome')}): {item.get('count')}"
+        )
 
 
 def _append_identity_details(
     lines: list[str],
     identity: Mapping[str, Any],  # Any: dynamic report identity payload
 ) -> None:
-    if identity.get("manifest_id"):
-        lines.append(f"- **manifest_id:** `{identity.get('manifest_id')}`")
-    if identity.get("provider") or identity.get("entity"):
-        lines.append(
-            f"- **provider/entity:** {identity.get('provider') or '—'} / "
-            f"{identity.get('entity') or '—'}"
-        )
-    if identity.get("started_at"):
-        lines.append(f"- **started_at:** {identity.get('started_at')}")
-    if identity.get("completed_at"):
-        lines.append(f"- **completed_at:** {identity.get('completed_at')}")
-    if identity.get("duration_seconds") is not None:
-        lines.append(f"- **duration_seconds:** {identity.get('duration_seconds')}")
-    if identity.get("workflow_run_id"):
-        lines.append(
-            f"- **workflow:** `{identity.get('workflow_id') or '—'}` / "
-            f"`{identity.get('workflow_run_id')}` / "
-            f"`{identity.get('workflow_step_id') or '—'}`"
-        )
+    _append_identity_value(lines, identity, "manifest_id", code=True)
+    _append_provider_entity(lines, identity)
+    _append_identity_value(lines, identity, "started_at")
+    _append_identity_value(lines, identity, "completed_at")
+    _append_identity_value(lines, identity, "duration_seconds")
+    _append_workflow_identity(lines, identity)
+
+
+def _append_identity_value(
+    lines: list[str],
+    identity: Mapping[str, Any],
+    key: str,
+    *,
+    label: str | None = None,
+    code: bool = False,
+) -> None:
+    value = identity.get(key)
+    if value is None:
+        return
+    rendered = f"`{value}`" if code else str(value)
+    lines.append(f"- **{label or key}:** {rendered}")
+
+
+def _append_provider_entity(
+    lines: list[str],
+    identity: Mapping[str, Any],
+) -> None:
+    if not identity.get("provider") and not identity.get("entity"):
+        return
+    lines.append(
+        f"- **provider/entity:** {identity.get('provider') or '—'} / "
+        f"{identity.get('entity') or '—'}"
+    )
+
+
+def _append_workflow_identity(
+    lines: list[str],
+    identity: Mapping[str, Any],
+) -> None:
+    if not identity.get("workflow_run_id"):
+        return
+    lines.append(
+        f"- **workflow:** `{identity.get('workflow_id') or '—'}` / "
+        f"`{identity.get('workflow_run_id')}` / "
+        f"`{identity.get('workflow_step_id') or '—'}`"
+    )
 
 
 def _append_samples_section(lines: list[str], report: PipelineRunReport) -> None:
@@ -235,9 +291,7 @@ def _append_samples_section(lines: list[str], report: PipelineRunReport) -> None
             if not removal.sample_refs:
                 continue
             joined = ", ".join(f"`{ref}`" for ref in removal.sample_refs[:5])
-            samples.append(
-                f"- `{row.stage_id}` / `{removal.reason_code}`: {joined}"
-            )
+            samples.append(f"- `{row.stage_id}` / `{removal.reason_code}`: {joined}")
     if not samples:
         return
     lines.extend(["", "## Top samples", ""])

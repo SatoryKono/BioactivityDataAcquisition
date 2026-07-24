@@ -49,6 +49,8 @@ if (-not $SkipHostHarden) {
     }
 }
 
+# Names to keep when stopping foreign containers. Prefix bioetl- also covers
+# shared MCP plane containers (bioetl-mcp-*) if Docker path is used later.
 $BioetlNames = @(
     'bioetl',
     'bioetl-neo4j',

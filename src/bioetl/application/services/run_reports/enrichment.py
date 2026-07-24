@@ -29,10 +29,16 @@ def build_artifacts_from_result(
     return tuple(items)
 
 
-def build_failure_block(result: RunResult) -> dict[str, Any] | None:  # Any: failure block
+def build_failure_block(
+    result: RunResult,
+) -> dict[str, Any] | None:  # Any: failure block
     """Surface failure details when the run did not complete cleanly."""
     status = result.status.value
-    if status in {"success", "dry_run"} and not result.error_type and not result.error_message:
+    if (
+        status in {"success", "dry_run"}
+        and not result.error_type
+        and not result.error_message
+    ):
         return None
     if status in {"success", "dry_run"}:
         return None
@@ -48,7 +54,9 @@ def _exit_hint(status: str, error_type: str | None) -> str:
     if status == "shutdown":
         return "Run interrupted by shutdown signal; inspect checkpoint/resume options."
     if error_type:
-        return f"Investigate {error_type}; check quarantine and gold contract exclusions."
+        return (
+            f"Investigate {error_type}; check quarantine and gold contract exclusions."
+        )
     return "Inspect pipeline logs, quarantine artifacts, and stage funnel removals."
 
 
@@ -63,24 +71,48 @@ def build_io_block(
             "pipeline_name": result.pipeline_name,
             "run_type": result.run_type,
         }
-    filter_ids = options.filter_ids or ()
-    multi = options.multi_filter_ids or {}
-    multi_counts = {key: len(values) for key, values in multi.items()}
     payload: dict[str, Any] = {  # Any: io block
         "pipeline_name": result.pipeline_name,
-        "run_type": options.run_type or result.run_type,
+        "run_type": _resolved_run_type(options.run_type, result.run_type),
         "limit": options.limit,
         "start_offset": options.start_offset,
         "input_csv": options.input_csv,
-        "filter_column": options.filter_column or options.filter_field,
-        "filter_id_count": len(filter_ids) if filter_ids else None,
-        "filter_id_hash": _hash_ids(filter_ids) if filter_ids else None,
-        "multi_filter_id_counts": multi_counts or None,
+        "filter_column": _resolved_filter_column(
+            options.filter_column,
+            options.filter_field,
+        ),
         "skip_gold": options.skip_gold,
         "dry_run": options.dry_run,
         "use_cached_bronze": options.use_cached_bronze,
         "cached_bronze_path": options.cached_bronze_path,
     }
+    payload.update(_filter_metadata(options.filter_ids, options.multi_filter_ids))
+    return _without_none(payload)
+
+
+def _resolved_run_type(option_value: str | None, result_value: str) -> str:
+    return option_value or result_value
+
+
+def _resolved_filter_column(column: str | None, field: str | None) -> str | None:
+    return column or field
+
+
+def _filter_metadata(
+    filter_ids: Sequence[str] | None,
+    multi_filter_ids: Mapping[str, Sequence[str]] | None,
+) -> dict[str, Any]:
+    ids = filter_ids or ()
+    multi = multi_filter_ids or {}
+    multi_counts = {key: len(values) for key, values in multi.items()}
+    return {
+        "filter_id_count": len(ids) if ids else None,
+        "filter_id_hash": _hash_ids(ids) if ids else None,
+        "multi_filter_id_counts": multi_counts or None,
+    }
+
+
+def _without_none(payload: Mapping[str, Any]) -> dict[str, Any]:
     return {key: value for key, value in payload.items() if value is not None}
 
 

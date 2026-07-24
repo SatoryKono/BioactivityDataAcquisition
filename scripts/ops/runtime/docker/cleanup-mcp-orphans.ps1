@@ -10,7 +10,8 @@
   inside the WSL VM and thrash Docker Desktop on 32 GiB hosts.
 
   This script removes those orphans only. It never touches:
-    bioetl, bioetl-neo4j, or any container whose name starts with bioetl-
+    bioetl, bioetl-neo4j, any container whose name starts with bioetl-
+    (includes future bioetl-mcp-* shared plane), or label bioetl.mcp.shared=true.
 
 .EXAMPLE
   .\scripts\ops\runtime\docker\cleanup-mcp-orphans.ps1
@@ -37,6 +38,18 @@ function Test-IsBioetlName {
     return ($Name -eq 'bioetl' -or $Name -eq 'bioetl-neo4j' -or $Name.StartsWith('bioetl-'))
 }
 
+function Test-IsSharedMcpProtected {
+    param(
+        [string]$Name,
+        [string]$SharedLabel,
+        [string]$ComposeProject
+    )
+    if (Test-IsBioetlName $Name) { return $true }
+    if ($SharedLabel -eq 'true') { return $true }
+    if ($ComposeProject -eq 'bioetl-mcp-shared') { return $true }
+    return $false
+}
+
 if (-not (Test-EngineUp)) {
     Write-Warning 'Docker engine is not reachable; nothing to clean.'
     exit 1
@@ -50,17 +63,18 @@ if (-not $ids) {
 }
 
 foreach ($id in $ids) {
-    $meta = docker inspect --format '{{.Name}}|{{.Config.Image}}|{{index .Config.Labels "docker-mcp"}}|{{index .Config.Labels "docker-mcp-name"}}|{{index .Config.Labels "com.docker.compose.project"}}' $id 2>$null
+    $meta = docker inspect --format '{{.Name}}|{{.Config.Image}}|{{index .Config.Labels "docker-mcp"}}|{{index .Config.Labels "docker-mcp-name"}}|{{index .Config.Labels "com.docker.compose.project"}}|{{index .Config.Labels "bioetl.mcp.shared"}}' $id 2>$null
     if (-not $meta) { continue }
-    $parts = $meta -split '\|', 5
+    $parts = $meta -split '\|', 6
     $name = ([string]$parts[0]).TrimStart('/')
     $image = [string]$parts[1]
     $dockerMcp = [string]$parts[2]
     $mcpName = [string]$parts[3]
     $composeProject = [string]$parts[4]
+    $sharedLabel = [string]$parts[5]
 
-    # Hard allowlist: never touch BioETL compose stacks.
-    if (Test-IsBioetlName $name) { continue }
+    # Hard allowlist: never touch BioETL compose stacks or shared MCP plane.
+    if (Test-IsSharedMcpProtected -Name $name -SharedLabel $sharedLabel -ComposeProject $composeProject) { continue }
     if ($composeProject -match '^bioetl-') { continue }
     if ($image -match 'bioetl-main-bioetl|neo4j:5\.15') { continue }
 

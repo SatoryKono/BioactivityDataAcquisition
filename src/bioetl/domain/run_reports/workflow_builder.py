@@ -2,13 +2,16 @@
 
 from __future__ import annotations
 
-import json
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any
 
 from bioetl.domain.run_reports.models import WorkflowExecutionRow, WorkflowRunReport
+from bioetl.domain.run_reports.workflow_reasons import (
+    build_reasons_rollup,
+    load_child_top_reasons,
+    normalize_top_reasons,
+)
 
 _COUNT_FIELDS = (
     "records_extracted",
@@ -46,9 +49,7 @@ def _payload_mapping(payload: object) -> Mapping[str, object]:
     if payload is None:
         return {}
     return {
-        name: getattr(payload, name)
-        for name in _COUNT_FIELDS
-        if hasattr(payload, name)
+        name: getattr(payload, name) for name in _COUNT_FIELDS if hasattr(payload, name)
     }
 
 
@@ -69,7 +70,9 @@ def _extract_counts(payload: object) -> dict[str, int | None]:
 
 
 def _first_present(source: Mapping[str, object], *names: str) -> object:
-    return next((source.get(name) for name in names if source.get(name) is not None), None)
+    return next(
+        (source.get(name) for name in names if source.get(name) is not None), None
+    )
 
 
 def _first_attribute(source: object, *names: str) -> object:
@@ -152,16 +155,6 @@ def _default_report_ref(
     )
 
 
-def _resolve_top_reasons(
-    raw_reasons: object,
-    report_ref: str | None,
-) -> tuple[dict[str, Any], ...]:
-    reasons = _normalize_top_reasons(raw_reasons)
-    if reasons or report_ref is None:
-        return reasons
-    return _load_child_top_reasons(report_ref)
-
-
 def _normalized_row(
     *,
     step_id: object,
@@ -205,43 +198,14 @@ def _normalized_row(
     return _NormalizedExecution(row=row, pipeline_name=name)
 
 
-def _normalize_top_reasons(
-    raw: object,
-) -> tuple[dict[str, Any], ...]:  # Any: reason payload
-    if not isinstance(raw, Sequence) or isinstance(raw, (str, bytes)):
-        return ()
-    items = (_normalize_reason(entry) for entry in raw)
-    return tuple(item for item in items if item is not None)[:3]
-
-
-def _normalize_reason(entry: object) -> dict[str, Any] | None:
-    if not isinstance(entry, Mapping):
-        return None
-    code = entry.get("reason_code")
-    if code in (None, ""):
-        return None
-    return {
-        "reason_code": str(code),
-        "outcome": entry.get("outcome"),
-        "reason_family": entry.get("reason_family"),
-        "count": _as_int(entry.get("count")),
-    }
-
-
-def _load_child_top_reasons(
-    report_ref: str,
-) -> tuple[dict[str, Any], ...]:  # Any: reason payload
-    """Best-effort load of top reasons from a child pipeline report path."""
-    try:
-        path = Path(report_ref)
-        if not path.is_file():
-            return ()
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError, TypeError, ValueError):
-        return ()
-    if not isinstance(payload, Mapping):
-        return ()
-    return _normalize_top_reasons(payload.get("reasons_top_n") or ())
+def _resolve_top_reasons(
+    raw_reasons: object,
+    report_ref: str | None,
+) -> tuple[dict[str, Any], ...]:
+    reasons = normalize_top_reasons(raw_reasons)
+    if reasons or report_ref is None:
+        return reasons
+    return load_child_top_reasons(report_ref)
 
 
 def _normalize_execution(
@@ -264,7 +228,9 @@ def _normalize_plan_step(
     }
 
 
-def _status_count(rows: Sequence[WorkflowExecutionRow], statuses: frozenset[str]) -> int:
+def _status_count(
+    rows: Sequence[WorkflowExecutionRow], statuses: frozenset[str]
+) -> int:
     return sum(row.status.lower() in statuses for row in rows)
 
 
@@ -309,15 +275,21 @@ def _append_index_row(
         pipeline_name,
         {"records_extracted": 0, "step_ids": []},
     )
-    bucket["records_extracted"] = int(bucket["records_extracted"]) + row.records_extracted
+    bucket["records_extracted"] = (
+        int(bucket["records_extracted"]) + row.records_extracted
+    )
     bucket["step_ids"] = [*bucket["step_ids"], row.step_id]
 
 
 def build_workflow_run_report(
     *,
     identity: Mapping[str, Any],  # Any: report/json payload shape is dynamic
-    plan_steps: Sequence[Mapping[str, Any]],  # Any: report/json payload shape is dynamic
-    execution_steps: Sequence[Mapping[str, Any] | object],  # Any: report/json payload shape is dynamic
+    plan_steps: Sequence[
+        Mapping[str, Any]
+    ],  # Any: report/json payload shape is dynamic
+    execution_steps: Sequence[
+        Mapping[str, Any] | object
+    ],  # Any: report/json payload shape is dynamic
 ) -> WorkflowRunReport:
     """Project a deterministic workflow report with extraction rollups."""
     plan = tuple(_normalize_plan_step(step) for step in plan_steps)
@@ -329,39 +301,5 @@ def build_workflow_run_report(
         execution=execution,
         totals=_build_totals(execution, planned=len(plan) or len(execution)),
         index=_build_index(normalized),
-        reasons_rollup=_build_reasons_rollup(execution),
+        reasons_rollup=build_reasons_rollup(execution),
     )
-
-
-def _build_reasons_rollup(
-    rows: Sequence[WorkflowExecutionRow],
-) -> tuple[dict[str, Any], ...]:  # Any: reason payload
-    totals: dict[tuple[str, str | None, str | None], int] = {}
-    for row in rows:
-        for item in row.top_reasons:
-            key = _reason_key(item)
-            totals[key] = totals.get(key, 0) + _as_int(item.get("count"))
-    ranked = sorted(totals.items(), key=lambda entry: (-entry[1], entry[0][0]))
-    return tuple(
-        {
-            "reason_code": code,
-            "outcome": outcome,
-            "reason_family": family,
-            "count": count,
-        }
-        for (code, outcome, family), count in ranked[:10]
-    )
-
-
-def _reason_key(
-    item: Mapping[str, Any],
-) -> tuple[str, str | None, str | None]:
-    return (
-        str(item.get("reason_code")),
-        _optional_reason_text(item.get("outcome")),
-        _optional_reason_text(item.get("reason_family")),
-    )
-
-
-def _optional_reason_text(value: object) -> str | None:
-    return value if isinstance(value, str) else None

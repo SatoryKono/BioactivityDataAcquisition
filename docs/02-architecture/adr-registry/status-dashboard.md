@@ -2,7 +2,7 @@
 
 Quick overview of ADR status and distribution.
 
-**Last Updated**: 2026-07-08 20:17:28
+**Last Updated**: 2026-07-24
 
 ## 📈 Status Distribution
 

@@ -60,6 +60,8 @@ MCP_PROFILE_STABLE = (
     "deepwiki",
     "ref",
 )
+# Multi-client daily: stable membership + brave (shared HTTP when transport-mode shared).
+MCP_PROFILE_SHARED = MCP_PROFILE_STABLE + ("brave-search",)
 MCP_PROFILE_CORE = MCP_PROFILE_STABLE + (
     # mermaid still uses docker mcp gateway (heavier than pure host MCP).
     "mermaid",
@@ -79,12 +81,24 @@ MCP_PROFILE_GRAPH = MCP_PROFILE_OPS + (
 )
 MCP_PROFILES: dict[str, tuple[str, ...] | None] = {
     "stable": MCP_PROFILE_STABLE,
+    "shared": MCP_PROFILE_SHARED,
     "core": MCP_PROFILE_CORE,
     "ops": MCP_PROFILE_OPS,
     "graph": MCP_PROFILE_GRAPH,
     # full = entire sanctioned inventory from _canonical_servers
     "full": None,
 }
+
+# Localhost Streamable HTTP endpoints for multi-client shared plane (#6563).
+# Keep in sync with scripts/ops/runtime/mcp/shared-servers.json.
+MCP_SHARED_SERVER_ENDPOINTS: dict[str, str] = {
+    "adr-analysis": "http://127.0.0.1:8813/mcp",
+    "deja": "http://127.0.0.1:8814/mcp",
+    "context7": "http://127.0.0.1:8815/mcp",
+    "ast-grep": "http://127.0.0.1:8816/mcp",
+    "brave-search": "http://127.0.0.1:8811/mcp",
+}
+TRANSPORT_MODES = frozenset({"stdio", "shared", "hybrid"})
 
 
 def _add_startup_timeouts(servers: dict[str, dict[str, Any]]) -> None:
@@ -122,6 +136,12 @@ APPROVED_REMOTE_MCP_BASE_URLS = frozenset(
         "https://mcp.deepwiki.com/mcp",
         "https://api.ref.tools/mcp",
     }
+)
+
+# Local shared plane only — never treat these as remote SaaS MCP.
+APPROVED_LOCAL_MCP_BASE_URL_PREFIXES = (
+    "http://127.0.0.1:",
+    "http://localhost:",
 )
 
 
@@ -167,6 +187,45 @@ def _http_server(url: str) -> dict[str, Any]:
             "Add new remote MCP servers to APPROVED_REMOTE_MCP_BASE_URLS after security review."
         )
     return {"type": "http", "url": url}
+
+
+def _local_http_server(url: str, *, startup_timeout_sec: int = 30) -> dict[str, Any]:
+    """Emit a localhost shared-plane HTTP MCP entry (not remote SaaS)."""
+    if not url.startswith(APPROVED_LOCAL_MCP_BASE_URL_PREFIXES):
+        raise ValueError(
+            f"Local shared MCP URL not under approved localhost prefixes: {url}. "
+            f"Allowed prefixes: {APPROVED_LOCAL_MCP_BASE_URL_PREFIXES}"
+        )
+    return {
+        "type": "http",
+        "url": url,
+        "startup_timeout_sec": startup_timeout_sec,
+    }
+
+
+def _apply_shared_transport(
+    servers: dict[str, dict[str, Any]],
+    *,
+    transport_mode: str,
+) -> dict[str, dict[str, Any]]:
+    """Rewrite shared-capable servers to localhost HTTP when mode is shared/hybrid.
+
+    Tracked portable projections must call this with transport_mode='stdio' only.
+    """
+    if transport_mode not in TRANSPORT_MODES:
+        raise ValueError(
+            f"Unknown transport mode {transport_mode!r}; expected one of "
+            f"{sorted(TRANSPORT_MODES)}"
+        )
+    if transport_mode == "stdio":
+        return servers
+    rewritten = deepcopy(servers)
+    for name, url in MCP_SHARED_SERVER_ENDPOINTS.items():
+        if name not in rewritten:
+            continue
+        timeout = int(rewritten[name].get("startup_timeout_sec", 30))
+        rewritten[name] = _local_http_server(url, startup_timeout_sec=timeout)
+    return rewritten
 
 
 def _npx_server(*args: str, npm_cache_dir: str) -> dict[str, Any]:
@@ -372,7 +431,10 @@ def _canonical_servers(
 
 
 def _codex_runtime_servers(
-    workspace_root: Path, *, profile: str = "full"
+    workspace_root: Path,
+    *,
+    profile: str = "full",
+    transport_mode: str = "stdio",
 ) -> dict[str, dict[str, Any]]:
     """Return local Codex servers with WSL-safe runtime cache paths.
 
@@ -380,7 +442,10 @@ def _codex_runtime_servers(
     Codex user runtime must not put npm/uv caches on a Windows-mounted workspace,
     where atomic rename and cleanup operations are unreliable under WSL.
     """
-    servers = deepcopy(_canonical_servers(workspace_root, profile=profile))
+    servers = _apply_shared_transport(
+        deepcopy(_canonical_servers(workspace_root, profile=profile)),
+        transport_mode=transport_mode,
+    )
     xdg_cache_home = os.environ.get("XDG_CACHE_HOME")
     cache_home = (
         Path(xdg_cache_home).expanduser()
@@ -458,7 +523,11 @@ def _load_existing_json_object(path: Path, *, label: str) -> dict[str, Any]:
 
 
 def _write_workspace_codex_settings(
-    output_root: Path, workspace_root: Path, *, profile: str = "full"
+    output_root: Path,
+    workspace_root: Path,
+    *,
+    profile: str = "full",
+    transport_mode: str = "stdio",
 ) -> Path:
     settings_path = output_root / ".codex" / "settings.json"
     settings_path.parent.mkdir(parents=True, exist_ok=True)
@@ -467,7 +536,9 @@ def _write_workspace_codex_settings(
         settings_path, label="Codex workspace settings"
     )
     existing["mcpServers"] = deepcopy(
-        _codex_runtime_servers(workspace_root, profile=profile)
+        _codex_runtime_servers(
+            workspace_root, profile=profile, transport_mode=transport_mode
+        )
     )
     _write_json(settings_path, existing, allowed_root=output_root)
     return settings_path
@@ -512,19 +583,24 @@ def _write_configs(
     *,
     qodo_only: bool = False,
     profile: str = "full",
+    transport_mode: str = "stdio",
 ) -> tuple[
     Path | None, Path | None, Path | None, Path, Path | None, Path | None, Path | None
 ]:
-    # Tracked portable SSOT stays full. Local IDE projections may be profiled.
+    # Tracked portable SSOT stays full stdio. Local IDE projections may be
+    # profiled and optionally rewritten to localhost shared HTTP.
     full_servers = _canonical_servers(
         workspace_root,
         portable_workspace_paths=True,
         profile="full",
     )
-    local_servers = _canonical_servers(
-        workspace_root,
-        portable_workspace_paths=True,
-        profile=profile,
+    local_servers = _apply_shared_transport(
+        _canonical_servers(
+            workspace_root,
+            portable_workspace_paths=True,
+            profile=profile,
+        ),
+        transport_mode=transport_mode,
     )
     codex_payload = {"mcpServers": deepcopy(full_servers)}
     vscode_payload = {"servers": deepcopy(local_servers)}
@@ -542,7 +618,10 @@ def _write_configs(
     devin_config_path: Path | None = None
     if not qodo_only:
         codex_settings_path = _write_workspace_codex_settings(
-            output_root, workspace_root, profile=profile
+            output_root,
+            workspace_root,
+            profile=profile,
+            transport_mode=transport_mode,
         )
         devin_config_path = _write_devin_config(output_root, workspace_root)
         _write_json(mcp_path, codex_payload, allowed_root=output_root)
@@ -574,7 +653,11 @@ def _gemini_server_config(server: dict[str, Any]) -> dict[str, Any]:
 
 
 def _write_gemini_settings(
-    output_root: Path, workspace_root: Path, *, profile: str = "full"
+    output_root: Path,
+    workspace_root: Path,
+    *,
+    profile: str = "full",
+    transport_mode: str = "stdio",
 ) -> Path:
     settings_path = output_root / ".gemini" / "settings.json"
     settings_path.parent.mkdir(parents=True, exist_ok=True)
@@ -589,13 +672,21 @@ def _write_gemini_settings(
         for name, server in existing_servers.items()
         if name not in REMOVED_MCP_SERVER_NAMES
     }
-    for name, server in _canonical_servers(workspace_root, profile=profile).items():
+    local_servers = _apply_shared_transport(
+        _canonical_servers(workspace_root, profile=profile),
+        transport_mode=transport_mode,
+    )
+    for name, server in local_servers.items():
         merged_servers[name] = _gemini_server_config(server)
-    # Drop servers that are not in the selected profile (local projection only).
+    # Drop only managed servers that are outside the selected local profile.
+    # User-defined Gemini servers are outside our inventory and must survive.
     if profile != "full":
-        allowed = set(_canonical_servers(workspace_root, profile=profile))
+        allowed = set(local_servers)
+        managed = set(_canonical_servers(workspace_root, profile="full"))
         merged_servers = {
-            name: cfg for name, cfg in merged_servers.items() if name in allowed
+            name: cfg
+            for name, cfg in merged_servers.items()
+            if name not in managed or name in allowed
         }
 
     existing["mcpServers"] = merged_servers
@@ -706,8 +797,15 @@ def _strip_managed_mcp_blocks(content: str, managed_server_names: set[str]) -> s
     return "\n".join(kept)
 
 
-def _write_codex_config(workspace_root: Path, *, profile: str = "full") -> Path:
-    servers = _codex_runtime_servers(workspace_root, profile=profile)
+def _write_codex_config(
+    workspace_root: Path,
+    *,
+    profile: str = "full",
+    transport_mode: str = "stdio",
+) -> Path:
+    servers = _codex_runtime_servers(
+        workspace_root, profile=profile, transport_mode=transport_mode
+    )
     config_dir = Path.home() / ".codex"
     config_dir.mkdir(parents=True, exist_ok=True)
     config_path = config_dir / "config.toml"
@@ -803,10 +901,21 @@ def main(argv: Sequence[str] | None = None) -> int:
         default="core",
         help=(
             "Least-privilege local materialization profile for IDE/Codex local "
-            "projections (stable|core|ops|graph|full). Default: core. "
+            "projections (stable|shared|core|ops|graph|full). Default: core. "
             "Tracked portable inventory (.mcp.json, scripts/ai/.mcp.json, "
             ".zed/mcp.json, .devin/config.json) always stays full. "
-            "Use stable on 32 GiB Docker Desktop hosts to drop gateway MCP."
+            "Use stable on 32 GiB Docker Desktop hosts to drop gateway MCP. "
+            "Use shared + --transport-mode shared for multi-client HTTP plane."
+        ),
+    )
+    parser.add_argument(
+        "--transport-mode",
+        choices=sorted(TRANSPORT_MODES),
+        default="stdio",
+        help=(
+            "Local projection transport: stdio (default wrappers), shared "
+            "(localhost HTTP for shared-servers catalog), hybrid (same rewrite "
+            "for catalog servers). Tracked portable inventory always stays stdio."
         ),
     )
     args = parser.parse_args(list(argv) if argv is not None else None)
@@ -833,6 +942,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         workspace_root,
         qodo_only=args.qodo_only,
         profile=args.profile,
+        transport_mode=args.transport_mode,
     )
     if mcp_path is not None and not args.qodo_only:
         print(f"Wrote {mcp_path}")
@@ -849,12 +959,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"Wrote {devin_config_path}")
     if not args.skip_codex_config:
         codex_config_path = _write_codex_config(
-            workspace_root, profile=args.profile
+            workspace_root,
+            profile=args.profile,
+            transport_mode=args.transport_mode,
         )
         print(f"Wrote {codex_config_path}")
     if not args.skip_gemini_settings:
         gemini_settings_path = _write_gemini_settings(
-            output_root, workspace_root, profile=args.profile
+            output_root,
+            workspace_root,
+            profile=args.profile,
+            transport_mode=args.transport_mode,
         )
         print(f"Wrote {gemini_settings_path}")
 

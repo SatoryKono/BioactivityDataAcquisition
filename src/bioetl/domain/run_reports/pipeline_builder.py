@@ -16,12 +16,16 @@ from bioetl.domain.run_reports.models import (
 from bioetl.domain.run_reports.reason_catalog import default_reason_catalog
 
 
-def _optional_mapping(value: Mapping[str, Any] | None) -> dict[str, Any] | None:
+def _optional_mapping(
+    value: Mapping[str, Any] | None,  # Any: dynamic optional report block
+) -> dict[str, Any] | None:  # Any: copied dynamic report block
     """Copy an optional dynamic mapping without leaking caller mutation."""
     return dict(value) if value else None
 
 
-def _status_from_layers(layers: LayerCounts) -> tuple[BalanceStatus, BalanceStatus, int, int]:
+def _status_from_layers(
+    layers: LayerCounts,
+) -> tuple[BalanceStatus, BalanceStatus, int, int]:
     silver_delta = layers.bronze_records - layers.silver_accounted
     gold_delta = layers.silver_valid - layers.gold_accounted
 
@@ -47,7 +51,9 @@ def build_pipeline_run_report(
     identity: Mapping[str, Any],  # Any: report/json payload shape is dynamic
     metrics: Mapping[str, int],
     accounting: StageAccountingAccumulator | None = None,
-    artifacts: tuple[dict[str, Any], ...] = (),  # Any: report/json payload shape is dynamic
+    artifacts: tuple[
+        dict[str, Any], ...
+    ] = (),  # Any: report/json payload shape is dynamic
     reason_catalog_version: str | None = None,
     failure: Mapping[str, Any] | None = None,  # Any: optional failure block
     io: Mapping[str, Any] | None = None,  # Any: optional IO summary
@@ -124,7 +130,9 @@ def _resolve_contract_summary(
     }
 
 
-def _is_contract_reason(item: Mapping[str, Any]) -> bool:
+def _is_contract_reason(
+    item: Mapping[str, Any],  # Any: dynamic reason payload
+) -> bool:
     return (
         item.get("reason_family") == "contract"
         or item.get("outcome") == "excluded_by_contract"
@@ -133,18 +141,18 @@ def _is_contract_reason(item: Mapping[str, Any]) -> bool:
 
 def _has_contract_activity(
     excluded: int,
-    contract_reasons: list[dict[str, Any]],
+    contract_reasons: list[dict[str, Any]],  # Any: dynamic reason payload
 ) -> bool:
     return excluded > 0 or bool(contract_reasons)
 
 
 def _resolve_performance(
     *,
-    performance: Mapping[str, Any] | None,
-    identity: Mapping[str, Any],
+    performance: Mapping[str, Any] | None,  # Any: optional performance payload
+    identity: Mapping[str, Any],  # Any: dynamic report identity payload
     metrics_map: Mapping[str, int],
-    stage_timings: Mapping[str, Any] | None,
-) -> dict[str, Any] | None:
+    stage_timings: Mapping[str, Any] | None,  # Any: optional timing payload
+) -> dict[str, Any] | None:  # Any: dynamic performance payload
     if performance:
         return dict(performance)
     return _derive_performance(
@@ -189,7 +197,9 @@ def _resolve_tracking(
     return accumulator.overall_tracking_coverage(funnel)
 
 
-def _build_reconciliation(layers: LayerCounts) -> dict[str, Any]:  # Any: report/json payload shape is dynamic
+def _build_reconciliation(
+    layers: LayerCounts,
+) -> dict[str, Any]:  # Any: report/json payload shape is dynamic
     silver_status, gold_status, silver_delta, gold_delta = _status_from_layers(layers)
     return {
         "silver_vs_bronze_status": silver_status.value,

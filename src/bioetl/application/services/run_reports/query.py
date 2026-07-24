@@ -54,17 +54,7 @@ def load_pipeline_report(
 ) -> dict[str, Any] | None:  # Any: report payload
     base = _root(root)
     if latest or run_id is None:
-        pointer = load_latest_pointer(kind="pipeline", owner=pipeline_name, root=base)
-        if pointer is None:
-            return None
-        path = Path(str(pointer.get("json_path") or ""))
-        if not path.is_file():
-            # fallback relative to repo
-            path = Path(str(pointer.get("json_path") or ""))
-        if not path.is_file():
-            return None
-        payload = json.loads(path.read_text(encoding="utf-8"))
-        return payload if isinstance(payload, dict) else None
+        return _load_latest_report(kind="pipeline", owner=pipeline_name, root=base)
     path = (
         base
         / "pipeline"
@@ -72,10 +62,7 @@ def load_pipeline_report(
         / _safe_segment(run_id)
         / "pipeline-run-report.json"
     )
-    if not path.is_file():
-        return None
-    payload = json.loads(path.read_text(encoding="utf-8"))
-    return payload if isinstance(payload, dict) else None
+    return _load_json_dict(path)
 
 
 def load_workflow_report(
@@ -87,14 +74,7 @@ def load_workflow_report(
 ) -> dict[str, Any] | None:  # Any: report payload
     base = _root(root)
     if latest or workflow_run_id is None:
-        pointer = load_latest_pointer(kind="workflow", owner=workflow_name, root=base)
-        if pointer is None:
-            return None
-        path = Path(str(pointer.get("json_path") or ""))
-        if not path.is_file():
-            return None
-        payload = json.loads(path.read_text(encoding="utf-8"))
-        return payload if isinstance(payload, dict) else None
+        return _load_latest_report(kind="workflow", owner=workflow_name, root=base)
     path = (
         base
         / "workflow"
@@ -102,6 +82,22 @@ def load_workflow_report(
         / _safe_segment(workflow_run_id)
         / "workflow-run-report.json"
     )
+    return _load_json_dict(path)
+
+
+def _load_latest_report(
+    *,
+    kind: str,
+    owner: str,
+    root: Path,
+) -> dict[str, Any] | None:
+    pointer = load_latest_pointer(kind=kind, owner=owner, root=root)
+    if pointer is None:
+        return None
+    return _load_json_dict(Path(str(pointer.get("json_path") or "")))
+
+
+def _load_json_dict(path: Path) -> dict[str, Any] | None:
     if not path.is_file():
         return None
     payload = json.loads(path.read_text(encoding="utf-8"))
@@ -114,40 +110,12 @@ def list_pipeline_reports(
     limit: int = 20,
     root: Path | None = None,
 ) -> list[ReportIndexEntry]:
-    base = _root(root) / "pipeline"
-    if not base.is_dir():
-        return []
-    owners = (
-        [base / _safe_segment(pipeline_name)]
-        if pipeline_name
-        else [path for path in base.iterdir() if path.is_dir()]
+    return _list_reports(
+        kind="pipeline",
+        owner=pipeline_name,
+        limit=limit,
+        root=root,
     )
-    entries: list[ReportIndexEntry] = []
-    for owner_dir in owners:
-        if not owner_dir.is_dir():
-            continue
-        for run_dir in owner_dir.iterdir():
-            if not run_dir.is_dir() or run_dir.name.startswith("."):
-                continue
-            json_path = run_dir / "pipeline-run-report.json"
-            if not json_path.is_file():
-                continue
-            status, completed_at = _read_identity_meta(json_path)
-            md_path = run_dir / "pipeline-run-report.md"
-            entries.append(
-                ReportIndexEntry(
-                    kind="pipeline",
-                    owner=owner_dir.name,
-                    run_id=run_dir.name,
-                    json_path=json_path,
-                    markdown_path=md_path if md_path.is_file() else None,
-                    status=status,
-                    completed_at=completed_at,
-                    mtime=json_path.stat().st_mtime,
-                )
-            )
-    entries.sort(key=lambda item: item.mtime, reverse=True)
-    return entries[: max(0, limit)]
 
 
 def list_workflow_reports(
@@ -156,40 +124,69 @@ def list_workflow_reports(
     limit: int = 20,
     root: Path | None = None,
 ) -> list[ReportIndexEntry]:
-    base = _root(root) / "workflow"
+    return _list_reports(
+        kind="workflow",
+        owner=workflow_name,
+        limit=limit,
+        root=root,
+    )
+
+
+def _list_reports(
+    *,
+    kind: str,
+    owner: str | None,
+    limit: int,
+    root: Path | None,
+) -> list[ReportIndexEntry]:
+    base = _root(root) / kind
     if not base.is_dir():
         return []
-    owners = (
-        [base / _safe_segment(workflow_name)]
-        if workflow_name
-        else [path for path in base.iterdir() if path.is_dir()]
-    )
+    owners = _owner_directories(base, owner)
     entries: list[ReportIndexEntry] = []
     for owner_dir in owners:
-        if not owner_dir.is_dir():
-            continue
-        for run_dir in owner_dir.iterdir():
-            if not run_dir.is_dir() or run_dir.name.startswith("."):
-                continue
-            json_path = run_dir / "workflow-run-report.json"
-            if not json_path.is_file():
-                continue
-            status, completed_at = _read_identity_meta(json_path)
-            md_path = run_dir / "workflow-run-report.md"
-            entries.append(
-                ReportIndexEntry(
-                    kind="workflow",
-                    owner=owner_dir.name,
-                    run_id=run_dir.name,
-                    json_path=json_path,
-                    markdown_path=md_path if md_path.is_file() else None,
-                    status=status,
-                    completed_at=completed_at,
-                    mtime=json_path.stat().st_mtime,
-                )
-            )
+        entries.extend(_owner_entries(kind, owner_dir))
     entries.sort(key=lambda item: item.mtime, reverse=True)
     return entries[: max(0, limit)]
+
+
+def _owner_directories(base: Path, owner: str | None) -> list[Path]:
+    if owner:
+        return [base / _safe_segment(owner)]
+    return [path for path in base.iterdir() if path.is_dir()]
+
+
+def _owner_entries(kind: str, owner_dir: Path) -> list[ReportIndexEntry]:
+    if not owner_dir.is_dir():
+        return []
+    entries = (
+        _report_entry(kind, owner_dir, run_dir) for run_dir in owner_dir.iterdir()
+    )
+    return [entry for entry in entries if entry is not None]
+
+
+def _report_entry(
+    kind: str,
+    owner_dir: Path,
+    run_dir: Path,
+) -> ReportIndexEntry | None:
+    if not run_dir.is_dir() or run_dir.name.startswith("."):
+        return None
+    json_path = run_dir / f"{kind}-run-report.json"
+    if not json_path.is_file():
+        return None
+    status, completed_at = _read_identity_meta(json_path)
+    md_path = run_dir / f"{kind}-run-report.md"
+    return ReportIndexEntry(
+        kind=kind,
+        owner=owner_dir.name,
+        run_id=run_dir.name,
+        json_path=json_path,
+        markdown_path=md_path if md_path.is_file() else None,
+        status=status,
+        completed_at=completed_at,
+        mtime=json_path.stat().st_mtime,
+    )
 
 
 def diff_pipeline_reports(
@@ -199,56 +196,74 @@ def diff_pipeline_reports(
     """Compute funnel and reason deltas between two pipeline report payloads."""
     left_payload = _as_mapping(left)
     right_payload = _as_mapping(right)
-    left_funnel = {
-        str(row.get("stage_id")): row
-        for row in left_payload.get("funnel") or []
-        if isinstance(row, dict)
-    }
-    right_funnel = {
-        str(row.get("stage_id")): row
-        for row in right_payload.get("funnel") or []
-        if isinstance(row, dict)
-    }
-    stages = sorted(set(left_funnel) | set(right_funnel))
-    funnel_delta = []
-    for stage in stages:
-        lrow = left_funnel.get(stage, {})
-        rrow = right_funnel.get(stage, {})
-        funnel_delta.append(
-            {
-                "stage_id": stage,
-                "records_in_delta": _int(rrow.get("records_in"))
-                - _int(lrow.get("records_in")),
-                "records_out_delta": _int(rrow.get("records_out"))
-                - _int(lrow.get("records_out")),
-                "removed_total_delta": _int(rrow.get("removed_total"))
-                - _int(lrow.get("removed_total")),
-            }
-        )
-    left_reasons = {
-        str(item.get("reason_code")): _int(item.get("count"))
-        for item in left_payload.get("reasons_top_n") or []
-        if isinstance(item, dict)
-    }
-    right_reasons = {
-        str(item.get("reason_code")): _int(item.get("count"))
-        for item in right_payload.get("reasons_top_n") or []
-        if isinstance(item, dict)
-    }
-    reason_codes = sorted(set(left_reasons) | set(right_reasons))
-    reasons_delta = [
-        {
-            "reason_code": code,
-            "count_delta": right_reasons.get(code, 0) - left_reasons.get(code, 0),
-        }
-        for code in reason_codes
-    ]
+    funnel_delta = _funnel_delta(left_payload, right_payload)
+    reasons_delta = _reasons_delta(left_payload, right_payload)
     return {
         "left_run_id": (left_payload.get("identity") or {}).get("run_id"),
         "right_run_id": (right_payload.get("identity") or {}).get("run_id"),
         "funnel_delta": funnel_delta,
         "reasons_delta": reasons_delta,
     }
+
+
+def _funnel_rows(payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    return {
+        str(row.get("stage_id")): row
+        for row in payload.get("funnel") or []
+        if isinstance(row, dict)
+    }
+
+
+def _funnel_delta(
+    left: dict[str, Any],
+    right: dict[str, Any],
+) -> list[dict[str, Any]]:
+    left_rows = _funnel_rows(left)
+    right_rows = _funnel_rows(right)
+    stages = sorted(set(left_rows) | set(right_rows))
+    return [
+        _stage_delta(stage, left_rows.get(stage, {}), right_rows.get(stage, {}))
+        for stage in stages
+    ]
+
+
+def _stage_delta(
+    stage: str,
+    left: dict[str, Any],
+    right: dict[str, Any],
+) -> dict[str, Any]:
+    return {
+        "stage_id": stage,
+        "records_in_delta": _int(right.get("records_in"))
+        - _int(left.get("records_in")),
+        "records_out_delta": _int(right.get("records_out"))
+        - _int(left.get("records_out")),
+        "removed_total_delta": _int(right.get("removed_total"))
+        - _int(left.get("removed_total")),
+    }
+
+
+def _reason_counts(payload: dict[str, Any]) -> dict[str, int]:
+    return {
+        str(item.get("reason_code")): _int(item.get("count"))
+        for item in payload.get("reasons_top_n") or []
+        if isinstance(item, dict)
+    }
+
+
+def _reasons_delta(
+    left: dict[str, Any],
+    right: dict[str, Any],
+) -> list[dict[str, Any]]:
+    left_counts = _reason_counts(left)
+    right_counts = _reason_counts(right)
+    return [
+        {
+            "reason_code": code,
+            "count_delta": right_counts.get(code, 0) - left_counts.get(code, 0),
+        }
+        for code in sorted(set(left_counts) | set(right_counts))
+    ]
 
 
 def prune_reports(
@@ -261,23 +276,52 @@ def prune_reports(
     dry_run: bool = True,
 ) -> list[str]:
     """Delete old report directories. Returns removed paths (or candidates if dry_run)."""
+    _validate_prune_options(kind, max_count, max_age_days)
+    entries = _reports_for_prune(kind, owner, root)
+    victims = _prune_candidates(entries, max_count, max_age_days)
+    return _remove_report_directories(victims, dry_run=dry_run)
+
+
+def _validate_prune_options(
+    kind: str,
+    max_count: int | None,
+    max_age_days: int | None,
+) -> None:
     if kind not in {"pipeline", "workflow"}:
         raise ValueError("kind must be 'pipeline' or 'workflow'")
     if max_count is None and max_age_days is None:
         raise ValueError("provide max_count and/or max_age_days")
-    entries = (
-        list_pipeline_reports(pipeline_name=owner, limit=10_000, root=root)
-        if kind == "pipeline"
-        else list_workflow_reports(workflow_name=owner, limit=10_000, root=root)
-    )
-    now = datetime.now(tz=UTC).timestamp()
+
+
+def _reports_for_prune(
+    kind: str,
+    owner: str | None,
+    root: Path | None,
+) -> list[ReportIndexEntry]:
+    if kind == "pipeline":
+        return list_pipeline_reports(pipeline_name=owner, limit=10_000, root=root)
+    return list_workflow_reports(workflow_name=owner, limit=10_000, root=root)
+
+
+def _prune_candidates(
+    entries: list[ReportIndexEntry],
+    max_count: int | None,
+    max_age_days: int | None,
+) -> list[ReportIndexEntry]:
     victims: list[ReportIndexEntry] = []
     if max_age_days is not None:
-        cutoff = now - (max_age_days * 86400)
+        cutoff = datetime.now(tz=UTC).timestamp() - (max_age_days * 86400)
         victims.extend(item for item in entries if item.mtime < cutoff)
-    if max_count is not None and len(entries) > max_count:
+    if max_count is not None:
         victims.extend(entries[max_count:])
-    # unique by path
+    return victims
+
+
+def _remove_report_directories(
+    victims: list[ReportIndexEntry],
+    *,
+    dry_run: bool,
+) -> list[str]:
     seen: set[Path] = set()
     removed: list[str] = []
     for item in victims:

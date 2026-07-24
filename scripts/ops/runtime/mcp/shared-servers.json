@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "proxy_package": "mcp-proxy@6.5.4",
+  "bind_note": "mcp-proxy CLI binds the chosen port; clients MUST use http://127.0.0.1:<port>/mcp only. Prefer host firewall for non-loopback.",
+  "servers": {
+    "adr-analysis": {
+      "port": 8813,
+      "path": "/mcp",
+      "wrapper": "mcp_adr_analysis_wrapper",
+      "class": "T2",
+      "priority": 1
+    },
+    "deja": {
+      "port": 8814,
+      "path": "/mcp",
+      "wrapper": "mcp_deja_wrapper",
+      "class": "T2",
+      "priority": 1
+    },
+    "context7": {
+      "port": 8815,
+      "path": "/mcp",
+      "wrapper": "mcp_context7_wrapper",
+      "class": "T2",
+      "priority": 2
+    },
+    "ast-grep": {
+      "port": 8816,
+      "path": "/mcp",
+      "wrapper": "mcp_ast_grep_wrapper",
+      "class": "T2",
+      "priority": 2
+    },
+    "brave-search": {
+      "port": 8811,
+      "path": "/mcp",
+      "wrapper": "mcp_brave_search_wrapper",
+      "class": "T2",
+      "priority": 3
+    }
+  }
+}

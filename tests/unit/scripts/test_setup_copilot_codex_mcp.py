@@ -94,6 +94,55 @@ def test_core_profile_omits_high_privilege_servers_from_local_projections(
     assert not (cursor_names & setup_mcp.REMOVED_MCP_SERVER_NAMES)
 
 
+def test_shared_transport_mode_rewrites_local_projections_only(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """--transport-mode shared emits localhost HTTP for catalog servers on local IDE only."""
+    monkeypatch.delenv("XDG_CACHE_HOME", raising=False)
+    workspace_root = tmp_path / "workspace-root"
+    output_root = tmp_path / "output-root"
+    workspace_root.mkdir()
+
+    exit_code = setup_mcp.main(
+        [
+            "--root",
+            str(output_root),
+            "--workspace-root",
+            str(workspace_root),
+            "--skip-codex",
+            "--skip-codex-config",
+            "--skip-gemini-settings",
+            "--profile",
+            "shared",
+            "--transport-mode",
+            "shared",
+        ]
+    )
+    assert exit_code == 0
+
+    tracked = json.loads((output_root / ".mcp.json").read_text(encoding="utf-8"))
+    cursor = json.loads(
+        (output_root / ".cursor" / "mcp.json").read_text(encoding="utf-8")
+    )
+    # Portable SSOT stays stdio wrappers for thrash servers.
+    assert "command" in tracked["mcpServers"]["adr-analysis"]
+    assert tracked["mcpServers"]["adr-analysis"].get("type") != "http"
+    # Local projection uses shared HTTP URL.
+    adr = cursor["mcpServers"]["adr-analysis"]
+    assert adr["type"] == "http"
+    assert adr["url"] == setup_mcp.MCP_SHARED_SERVER_ENDPOINTS["adr-analysis"]
+    assert adr["url"].startswith(setup_mcp.APPROVED_LOCAL_MCP_BASE_URL_PREFIXES)
+    assert "brave-search" in cursor["mcpServers"]
+    assert cursor["mcpServers"]["brave-search"]["type"] == "http"
+    # Non-catalog servers remain command-based.
+    assert "command" in cursor["mcpServers"]["memory"]
+
+
+def test_local_http_server_rejects_non_localhost_url() -> None:
+    with pytest.raises(ValueError, match="localhost prefixes"):
+        setup_mcp._local_http_server("https://evil.example/mcp")
+
+
 def test_main_uses_workspace_root_for_generated_server_paths(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
