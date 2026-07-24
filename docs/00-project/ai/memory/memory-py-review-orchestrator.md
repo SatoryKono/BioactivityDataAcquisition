@@ -2,7 +2,7 @@
 
 *Статус: internal-only (agent memory)*
 
-*Version: 1.0.0 | Date: 2026-05-02 | Parent: agent-memory.md*
+*Version: 1.0.1 | Date: 2026-07-24 | Parent: agent-memory.md*
 
 > **Focus**: hierarchical L1/L2/L3 review orchestration, severity calibration,
 > evidence-backed findings rollup.

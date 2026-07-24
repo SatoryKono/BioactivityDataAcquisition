@@ -15,7 +15,7 @@ Run the role-specific workflow as defined in the py-audit-bot profile.
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
 - Accepted ADRs: `../../../docs/02-architecture/decisions`
 - Primary profile: `../../agents/py-audit-bot.md`
-- Team orchestration: `../../agents/ORCHESTRATION.md`
+- Team orchestration: `.codex/agents/ORCHESTRATION.md` (v4.3)
 - Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 - Shared project context: `../../../docs/00-project/ai/memory/agent-memory.md`
 - Role-specific memory: matching `../../../docs/00-project/ai/memory/memory-py-*.md`

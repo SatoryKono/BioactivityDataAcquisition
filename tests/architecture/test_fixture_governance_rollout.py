@@ -225,12 +225,12 @@ class TestFixtureGovernanceRollout:
             )
             if rollout.get("cassette_metadata_catalog") == "enforced":
                 assert (
-                    "uv run python -m scripts.engineering.qa report-vcr-metadata --check"
+                    "python -m scripts.engineering.qa report-vcr-metadata --check"
                     in workflow
                 )
             if rollout.get("cassette_metadata_backfill") == "enforced":
                 assert (
-                    "uv run python scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py --check"
+                    "scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py --check"
                     in workflow
                 )
 

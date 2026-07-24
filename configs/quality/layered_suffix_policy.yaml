@@ -178,6 +178,18 @@ suffix_boundary_rules:
         expires_on: "2026-12-31"
         removal_step: Rename module when Bronze metadata payload helpers move behind storage-owned role-neutral naming.
         reason: Existing storage metadata helper module with no public *Builder symbol; retained as reviewed naming debt.
+      - path: src/bioetl/domain/run_reports/pipeline_builder.py
+        issue: "#3722"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Rename module when pipeline run-report assembly helpers move behind role-neutral domain naming.
+        reason: Existing domain helper module with build_* functions and no public *Builder symbol; retained as reviewed naming debt.
+      - path: src/bioetl/domain/run_reports/workflow_builder.py
+        issue: "#3722"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Rename module when workflow run-report assembly helpers move behind role-neutral domain naming.
+        reason: Existing domain helper module with build_* functions and no public *Builder symbol; retained as reviewed naming debt.
   - rule_id: composition_infrastructure_service_suffix
     description: >
       Composition and infrastructure layers must not expose new first-party

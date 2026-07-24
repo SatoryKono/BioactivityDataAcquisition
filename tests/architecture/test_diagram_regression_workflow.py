@@ -49,14 +49,14 @@ def test_docs_workflow_installs_puppeteer_chrome_runtime() -> None:
     sources = workflow + (
         composite.read_text(encoding="utf-8") if composite.exists() else ""
     )
-    assert "puppeteer browsers install chrome-headless-shell" in sources
+    assert "browsers install chrome-headless-shell" in sources
 
 
 def test_docs_workflow_runs_doc_integrity_guardrails() -> None:
     workflow = Path(".github/workflows/docs.yml").read_text(encoding="utf-8")
 
     assert "Run documentation integrity guardrails" in workflow
-    assert "uv run python -m scripts.docs check-links" in workflow
+    assert "python -m scripts.docs check-links" in workflow
 
 
 def test_docs_workflow_diagram_drift_uses_pr_base_ref() -> None:

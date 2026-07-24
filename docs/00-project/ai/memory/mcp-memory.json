@@ -8,7 +8,106 @@
         "Purpose: canonical LLM playbook for extending shipped Grafana dashboards in BioETL",
         "Use when task touches grafana/dashboards JSON, dashboard navigation, Loki/Tempo drilldown, or dashboard-related docs cascade"
       ]
+    },
+    {
+      "name": "agent-memory",
+      "entityType": "document",
+      "observations": [
+        "Path: docs/00-project/ai/memory/agent-memory.md",
+        "Purpose: project memory entry point for AI agents",
+        "Version: 1.0.16 (2026-07-24)",
+        "Contains: project overview, architecture invariants, key files, evidence anchors, technical debt tracking defaults",
+        "Critical rule: ЗАПРЕЩЕНО УВЕЛИЧИВАТЬ ЛИМИТЫ ТЕХ. ДОЛГА",
+        "Use at session start for quick onboarding"
+      ]
+    },
+    {
+      "name": "memory-usage-policy",
+      "entityType": "document",
+      "observations": [
+        "Path: docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+        "Purpose: defines how AI agents should use BioETL memory surfaces",
+        "Key workflow: python -m memory.tooling.workflow pre-task/post-task",
+        "Retrieval order: catalog -> graph -> rag -> source",
+        "Critical rule: ЗАПРЕЩЕНО УВЕЛИЧИВАТЬ ЛИМИТЫ ТЕХ. ДОЛГА",
+        "Env file guardrail: .env edits require explicit per-task user approval"
+      ]
+    },
+    {
+      "name": "daily-workflow",
+      "entityType": "document",
+      "observations": [
+        "Path: src/memory/DAILY_WORKFLOW.md",
+        "Purpose: canonical daily memory workflow for AI agents and engineers",
+        "Standard loop: pre-task -> inspect -> confirm -> perform -> post-task -> promote",
+        "Pre-task: python -m memory.tooling.workflow pre-task --task-id <id> --title <task>",
+        "Post-task: python -m memory.tooling.workflow post-task --task-id <id> --title <task> --summary <result>",
+        "Curated review: python -m memory.tooling.workflow review-curated",
+        "Memory is source-first: runtime truth stays in src/bioetl/, docs/, configs/, tests/"
+      ]
+    },
+    {
+      "name": "orchestration-map",
+      "entityType": "document",
+      "observations": [
+        "Path: .codex/agents/ORCHESTRATION.md",
+        "Purpose: canonical orchestration map for BioETL multi-agent workflow",
+        "Version: 4.2 (2026-03-26)",
+        "Active subagents: 9 (py-audit-bot, py-architecture-debt-bot, py-plan-bot, py-test-bot, py-config-bot, py-debug-bot, py-doc-bot, py-test-swarm, py-review-orchestrator)",
+        "Standard workflow: audit(baseline) -> plan -> test(baseline) -> implementation -> test(final) -> doc -> audit(final)",
+        "Critical rule: ЗАПРЕЩЕНО УВЕЛИЧИВАТЬ ЛИМИТЫ ТЕХ. ДОЛГА",
+        "Artifact pattern: reports/{LLM}/review_{agent}_{YYYYMMDD}_{HHMM}[_{phase}].md"
+      ]
+    },
+    {
+      "name": "normative-sources",
+      "entityType": "document",
+      "observations": [
+        "Path: docs/00-project/NORMATIVE_SOURCES.md",
+        "Purpose: unified entry point to full normative stack",
+        "Version: 1.1.0 (2026-07-16)",
+        "Layers: RULES.md (Constitution), decisions/ (Accepted ADR)",
+        "Precedence: active runtime source > NORMATIVE_SOURCES.md > RULES.md > REQUIREMENTS.md > ADRs",
+        "AI runtime precedence defined in AGENTS.md"
+      ]
     }
   ],
-  "relations": []
+  "relations": [
+    {
+      "from": "agent-memory",
+      "to": "memory-usage-policy",
+      "relation": "references",
+      "description": "agent-memory references MEMORY_USAGE.md for memory workflow policy"
+    },
+    {
+      "from": "agent-memory",
+      "to": "daily-workflow",
+      "relation": "references",
+      "description": "agent-memory references DAILY_WORKFLOW.md for canonical memory workflow"
+    },
+    {
+      "from": "memory-usage-policy",
+      "to": "daily-workflow",
+      "relation": "implements",
+      "description": "MEMORY_USAGE.md implements the workflow defined in DAILY_WORKFLOW.md"
+    },
+    {
+      "from": "orchestration-map",
+      "to": "agent-memory",
+      "relation": "uses",
+      "description": "ORCHESTRATION.md uses agent-memory for subagent context"
+    },
+    {
+      "from": "orchestration-map",
+      "to": "normative-sources",
+      "relation": "references",
+      "description": "ORCHESTRATION.md references NORMATIVE_SOURCES.md for canonical sources"
+    },
+    {
+      "from": "agent-memory",
+      "to": "normative-sources",
+      "relation": "references",
+      "description": "agent-memory references NORMATIVE_SOURCES.md for source priority"
+    }
+  ]
 }

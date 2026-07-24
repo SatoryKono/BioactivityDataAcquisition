@@ -2,7 +2,7 @@
 
 *Статус: internal-only (agent memory)*
 
-*Version: 1.0.0 | Date: 2026-05-02 | Parent: agent-memory.md*
+*Version: 1.0.1 | Date: 2026-07-24 | Parent: agent-memory.md*
 
 > **Focus**: hierarchical test-swarm orchestration, failure telemetry,
 > flakiness isolation, deterministic validation closure.

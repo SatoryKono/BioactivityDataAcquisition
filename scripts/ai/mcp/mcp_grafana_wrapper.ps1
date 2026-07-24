@@ -20,10 +20,14 @@ if ((-not $env:GRAFANA_SERVICE_ACCOUNT_TOKEN) -and (-not $env:GRAFANA_PASSWORD))
 }
 Exit-McpValidateOnly -ServerName "grafana"
 
+. (Join-Path $PSScriptRoot "support/mcp_docker_prune.ps1")
+Remove-McpExitedContainers -ImageMatch "mcp/grafana"
+
 $dockerArgs = @(
     "run",
     "--rm",
     "-i",
+    "--label", "bioetl.mcp=grafana",
     "-e",
     "GRAFANA_URL=$grafanaUrl"
 )

@@ -28,7 +28,11 @@ def build_execution_identity_payload_from_code_provenance(
             effective_config_hash=code_provenance.effective_config_hash,
             dq_contract_compatibility_hash=code_provenance.dq_contract_compatibility_hash,
             contract=(code_provenance.contract_ref, code_provenance.contract_version),
-            normalization_profile=(code_provenance.normalization_profile_ref, code_provenance.normalization_profile_version, code_provenance.normalization_profile_hash),
+            normalization_profile=(
+                code_provenance.normalization_profile_ref,
+                code_provenance.normalization_profile_version,
+                code_provenance.normalization_profile_hash,
+            ),
             effective_config_artifact_id=code_provenance.effective_config_artifact_id,
             exact_replay=exact_replay,
             input_snapshot_fingerprint=input_snapshot_fingerprint,

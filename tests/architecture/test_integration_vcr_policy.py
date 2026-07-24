@@ -293,7 +293,7 @@ class TestIntegrationVcrPolicy:
         assert 'record_mode="once"' not in conftest
         assert "control-plane-e2e:" in tests_workflow
         assert policy["supported_scopes"]["e2e"]["ci_smoke_target"] in tests_workflow
-        assert "VCR_RECORD_MODE=none uv run pytest" in tests_workflow
+        assert "VCR_RECORD_MODE=none uv run --frozen --no-build pytest" in tests_workflow
         assert "--vcr-record=none" in tests_workflow
         assert "python -m scripts.engineering.qa.vcr check-placement" in tests_workflow
         assert "python -m scripts.engineering.qa.vcr check-naming" in tests_workflow

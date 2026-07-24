@@ -81,6 +81,14 @@ ZERO_IMPORT_OWNER_TEST_EVIDENCE: dict[str, dict[str, object]] = {
         "evidence_lane": "canonical_owner_contract",
         "owner_tests": DOMAIN_PORT_OWNER_TESTS,
     },
+    "src/bioetl/domain/ports/stage_accounting.py": {
+        "evidence_lane": "canonical_owner_contract",
+        "owner_tests": (
+            *DOMAIN_PORT_OWNER_TESTS,
+            "tests/unit/domain/run_reports/test_stage_accounting.py",
+            "tests/architecture/test_runtime_checkable_completeness.py",
+        ),
+    },
     "src/bioetl/infrastructure/adapters/_cached_bronze_support.py": {
         "evidence_lane": "retained_module_owner_suite",
         "owner_tests": (

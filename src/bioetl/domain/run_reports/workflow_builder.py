@@ -156,13 +156,17 @@ def _normalized_row(
     return _NormalizedExecution(row=row, pipeline_name=name)
 
 
-def _normalize_execution(raw: Mapping[str, Any] | object) -> _NormalizedExecution:  # Any: report/json payload shape is dynamic
+def _normalize_execution(
+    raw: Mapping[str, Any] | object,
+) -> _NormalizedExecution:  # Any: report/json payload shape is dynamic
     if isinstance(raw, Mapping):
         return _mapping_execution(raw)
     return _object_execution(raw)
 
 
-def _normalize_plan_step(step: Mapping[str, Any]) -> dict[str, Any]:  # Any: report/json payload shape is dynamic
+def _normalize_plan_step(
+    step: Mapping[str, Any],
+) -> dict[str, Any]:  # Any: report/json payload shape is dynamic
     return {
         "step_id": str(step.get("step_id", "")),
         "kind": str(step.get("kind", "pipeline")),

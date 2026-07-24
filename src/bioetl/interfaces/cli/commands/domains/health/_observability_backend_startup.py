@@ -18,12 +18,8 @@ from bioetl.interfaces.cli.commands.domains.health._observability_backend_startu
     _ObservabilityBackendRuntimeHooks,
     _ObservabilityBackendStartupKwargs,
     _ProbeFn,
-    _PythonExecutableToTupleFn,
     _RequiredProbeFn,
     _StartedBackendProcess,
-    _StartFn,
-    _WaitFn,
-    _WaitRequiredPathsFn,
 )
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_probes import (
     DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PATHS_READY_TIMEOUT_SECONDS,

@@ -346,7 +346,15 @@ def _collect_context_sensitive_violations(
 def _read_file_content(filepath: Path) -> str | None:
     """Read file content while preserving stderr warning behavior."""
     try:
-        from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_cli_path
+        try:
+            from scripts.engineering.common.repo_paths import (
+                REPO_ROOT,
+                resolve_cli_path,
+            )
+        except ModuleNotFoundError:
+            # Script path execution (python scripts/.../lint_terminology.py) may
+            # not have the repo root on sys.path; fall back to direct read.
+            return filepath.read_text(encoding="utf-8")
 
         filepath = resolve_cli_path(filepath, root=REPO_ROOT)
         return filepath.read_text(encoding="utf-8")

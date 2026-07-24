@@ -3,17 +3,17 @@
 from __future__ import annotations
 
 from dataclasses import replace
-from typing import Any
 
 from bioetl.application.services.workflow_runner_models import (
     WorkflowRunExecutionResult,
     WorkflowStepExecutionResult,
 )
+from bioetl.domain.types import JsonDict
 from bioetl.domain.workflow import WorkflowConfig, WorkflowStepConfig
 
 
-def _plan_steps_from_config(config: WorkflowConfig) -> list[dict[str, Any]]:
-    plan_steps: list[dict[str, Any]] = []
+def _plan_steps_from_config(config: WorkflowConfig) -> list[JsonDict]:
+    plan_steps: list[JsonDict] = []
     for step_id in config.topological_step_ids:
         step = config.get_step(step_id)
         if step is None:
@@ -35,7 +35,7 @@ def _plan_steps_from_config(config: WorkflowConfig) -> list[dict[str, Any]]:
 def _pipeline_name_for_step(
     step: WorkflowStepExecutionResult,
     *,
-    plan_steps: list[dict[str, Any]],
+    plan_steps: list[JsonDict],
     payload: object | None,
 ) -> object | None:
     pipeline_name = getattr(payload, "pipeline_name", None) if payload is not None else None
@@ -50,9 +50,9 @@ def _pipeline_name_for_step(
 def _execution_rows_from_result(
     result: WorkflowRunExecutionResult,
     *,
-    plan_steps: list[dict[str, Any]],
-) -> list[dict[str, Any]]:
-    execution_rows: list[dict[str, Any]] = []
+    plan_steps: list[JsonDict],
+) -> list[JsonDict]:
+    execution_rows: list[JsonDict] = []
     for step in result.steps:
         payload = step.payload
         report_ref = (

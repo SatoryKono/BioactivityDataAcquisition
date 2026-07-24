@@ -144,3 +144,43 @@ entries:
     vcr_related: false
     review_date: "2026-06-02"
     rationale: Dashboard UX freshness validation is only meaningful when Grafana dashboard JSON changed in the current diff scope.
+  - path: tests/integration/test_dashboard_variable_dependencies.py
+    suite: integration
+    category: optional_local_fixture_absence
+    owner: "@bioetl-observability"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 1
+    vcr_related: false
+    review_date: "2026-07-23"
+    rationale: Silver Reject Explorer dashboard was removed; remaining variable-dependency assertions skip the retired surface.
+  - path: tests/integration/test_grafana_dashboard_cta_links.py
+    suite: integration
+    category: optional_local_fixture_absence
+    owner: "@bioetl-observability"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 4
+    vcr_related: false
+    review_date: "2026-07-23"
+    rationale: CTA link assertions for Silver Reject Explorer skip because that dashboard was removed from the shipping path.
+  - path: tests/integration/test_grafana_dashboard_metric_semantics.py
+    suite: integration
+    category: optional_local_fixture_absence
+    owner: "@bioetl-observability"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 1
+    vcr_related: false
+    review_date: "2026-07-23"
+    rationale: Metric semantics checks for Silver Reject Explorer skip after that dashboard was removed.
+  - path: tests/integration/test_grafana_silver_reject_config.py
+    suite: integration
+    category: optional_local_fixture_absence
+    owner: "@bioetl-observability"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 10
+    vcr_related: false
+    review_date: "2026-07-23"
+    rationale: Silver Reject Explorer config integration tests skip the retired dashboard surface pending full retirement of residual fixtures.

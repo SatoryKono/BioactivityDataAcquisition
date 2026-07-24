@@ -38,6 +38,15 @@ ______________________________________________________________________
   `.\scripts\ops\runtime\docker\ensure-stable.ps1 -WithNeo4j`
   and after flap:
   `.\scripts\ops\runtime\docker\ensure-stable.ps1 -RestartWsl -WithNeo4j`
+- One-time per machine:
+  `.\scripts\ops\runtime\docker\harden-desktop-host.ps1 -RegisterWatchdog`
+  (Resource Saver effectively off, AutoStart, no Extensions/AI; Task Scheduler
+  watchdog every 5 min → soft/hard ensure, rate-limited).
+- MCP thrash: duplicate `mcp/*` containers come from stdio MCP clients, not
+  BioETL compose. Apply
+  `.\scripts\ops\runtime\docker\apply-docker-stable-mcp.ps1 -Profile stable`
+  and/or `cleanup-mcp-orphans.ps1`; local `setup_mcp.py --profile stable|core`
+  (default generator profile is `core`).
 - Operator host defaults for this class: WSL `memory=6GB`, free host RAM ≥4 GiB,
   main mem_limit 768 m, neo4j mem_limit 768 m / heap max 384 m.
 - Start **one** stack at a time; use project flags

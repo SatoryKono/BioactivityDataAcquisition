@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.application.services.checkpoint_compatibility_telemetry import (
     emit_checkpoint_compatibility_metric,
     log_lenient_checkpoint_compatibility_result,
     log_strict_checkpoint_compatibility_result,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class _Logger:
@@ -40,6 +44,7 @@ def test_emit_checkpoint_compatibility_metric_noop_without_metrics() -> None:
         pipeline_name="chembl_activity",
         disposition="strict_compatible",
     )
+    assert True
 
 
 def test_emit_checkpoint_compatibility_metric_uses_unknown_pipeline_fallback() -> None:

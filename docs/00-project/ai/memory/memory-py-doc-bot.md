@@ -2,7 +2,7 @@
 
 *Статус: internal-only (agent memory)*
 
-*Version: 1.0.1 | Date: 2026-04-06 | Parent: agent-memory.md*
+*Version: 1.0.2 | Date: 2026-07-24 | Parent: agent-memory.md*
 
 > **Focus**: Documentation, ADR management, CHANGELOG, docstrings, glossary sync, doc-code consistency.
 

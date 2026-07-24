@@ -16,7 +16,7 @@ Historical compatibility entry retained only to interpret older references to `p
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
 - Accepted ADRs: `../../../docs/02-architecture/decisions`
-- Current orchestration: `../../agents/ORCHESTRATION.md`
+- Current orchestration: `.codex/agents/ORCHESTRATION.md` (v4.3)
 - Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 - Historical mirror context: `../../../docs/00-project/ai/skills/global/py-code-bot/SKILL.md`
 - Shared project context: `../../../docs/00-project/ai/memory/agent-memory.md`

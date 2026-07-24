@@ -28,6 +28,7 @@ param(
     [switch]$WithMonitoring,
     [switch]$RestartWsl,
     [switch]$KeepForeignContainers,
+    [switch]$SkipHostHarden,
     [int]$MinFreeGb = 4,
     [int]$EngineWaitMinutes = 6
 )
@@ -35,6 +36,18 @@ param(
 $ErrorActionPreference = 'Continue'
 $Root = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..\..')).Path
 Set-Location $Root
+
+# Apply machine-local Desktop/.wslconfig hardening (no watchdog registration here).
+if (-not $SkipHostHarden) {
+    $harden = Join-Path $PSScriptRoot 'harden-desktop-host.ps1'
+    if (Test-Path $harden) {
+        try {
+            & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $harden 2>&1 | ForEach-Object { Write-Host $_ }
+        } catch {
+            Write-Warning "host harden skipped: $($_.Exception.Message)"
+        }
+    }
+}
 
 $BioetlNames = @(
     'bioetl',
@@ -84,6 +97,14 @@ function Stop-ForeignContainers {
         if ($keep) { continue }
         Write-Host "Stopping foreign container $n (frees host/WSL RAM)..."
         docker stop $n 2>$null | Out-Null
+        # Remove so MCP Toolkit random-name orphans do not accumulate.
+        docker rm -f $n 2>$null | Out-Null
+    }
+    # Explicit MCP pass (labels/images) in case name-based filter missed any.
+    $mcpClean = Join-Path $PSScriptRoot 'cleanup-mcp-orphans.ps1'
+    if (Test-Path $mcpClean) {
+        & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $mcpClean 2>&1 |
+            ForEach-Object { Write-Host $_ }
     }
 }
 
@@ -94,9 +115,15 @@ function Start-ComposeRetry {
         [int]$Attempts = 3
     )
     for ($i = 1; $i -le $Attempts; $i++) {
-        & docker @DockerArgs 2>&1 | Out-Host
-        if ($LASTEXITCODE -eq 0) { return $true }
-        Write-Warning "docker $($DockerArgs -join ' ') failed (attempt $i/$Attempts); retrying..."
+        # Capture stderr without turning docker progress lines into terminating errors.
+        $prevEap = $ErrorActionPreference
+        $ErrorActionPreference = 'SilentlyContinue'
+        $out = & docker @DockerArgs 2>&1
+        $code = $LASTEXITCODE
+        $ErrorActionPreference = $prevEap
+        if ($out) { $out | ForEach-Object { Write-Host ([string]$_) } }
+        if ($code -eq 0) { return $true }
+        Write-Warning "docker $($DockerArgs -join ' ') failed exit=$code (attempt $i/$Attempts); retrying..."
         Start-Sleep -Seconds (5 * $i)
     }
     return $false
@@ -220,4 +247,20 @@ Stability rules (this host):
   - Keep %USERPROFILE%\.wslconfig memory=6GB (not 16GB)
   - Keep free RAM >= 4 GiB before heavy Docker work
   - Monitoring is opt-in only
+  - Auto-recover: harden-desktop-host.ps1 -RegisterWatchdog
 '@
+
+# Explicit success so callers/watchdog do not inherit a stale $LASTEXITCODE.
+$mainRunning = (docker inspect --format '{{.State.Running}}' bioetl 2>$null) -eq 'true'
+if (-not $mainRunning) {
+    Write-Error 'bioetl container is not running after ensure-stable'
+    exit 1
+}
+if ($WithNeo4j -and $env:NEO4J_PASSWORD) {
+    $neoRunning = (docker inspect --format '{{.State.Running}}' bioetl-neo4j 2>$null) -eq 'true'
+    if (-not $neoRunning) {
+        Write-Warning 'bioetl-neo4j is not running (main is up)'
+        exit 1
+    }
+}
+exit 0

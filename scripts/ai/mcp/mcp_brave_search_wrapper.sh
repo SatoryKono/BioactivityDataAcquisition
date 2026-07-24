@@ -16,7 +16,12 @@ unset BIOETL_SKIP_ENV_LOCAL
 mcp_validate_required_token "BRAVE_API_KEY" 31 "Brave Search MCP"
 mcp_exit_if_validate_only "brave-search"
 
+# shellcheck source=./support/mcp_docker_prune.sh
+source "${script_dir}/support/mcp_docker_prune.sh"
+remove_mcp_exited_containers "mcp/brave-search"
+
 docker_bin="$(resolve_docker_bin)"
 exec "${docker_bin}" run --rm -i \
+  --label "bioetl.mcp=brave-search" \
   -e "BRAVE_API_KEY=${BRAVE_API_KEY}" \
   mcp/brave-search "$@"

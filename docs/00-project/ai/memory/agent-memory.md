@@ -15,7 +15,7 @@ ______________________________________________________________________
 
 *Статус: internal-published (Internal / Extended)*
 
-*Версия: 1.0.16 | Дата: 2026-07-24 | Синхронизировано с Codex ORCHESTRATION.md v4.2, RULES.md v6.1.5*
+*Версия: 1.0.17 | Дата: 2026-07-24 | Синхронизировано с Codex ORCHESTRATION.md v4.3, RULES.md v6.1.5*
 
 > **Runtime note:** для Codex source-of-truth orchestration живёт в `.codex/agents/ORCHESTRATION.md`; другие runtimes могут сохранять отдельные runtime-specific copies и не обязаны совпадать побайтно с Codex surface.
 
@@ -92,6 +92,7 @@ ______________________________________________________________________
 | Docker quickstart (optional)                | `docs/DOCKER_QUICKSTART.md`                            |
 | Docker setup / recovery (optional)          | `docs/DOCKER_SETUP.md`                                 |
 | Stable Docker launcher (Windows)            | `scripts/ops/runtime/docker/ensure-stable.ps1`         |
+| Docker host harden + watchdog (Windows)     | `scripts/ops/runtime/docker/harden-desktop-host.ps1` / `watchdog-docker-stable.ps1` |
 | Pipeline/workflow run reports               | `docs/04-reference/reports/run-reports.md`             |
 | Run-report contracts                        | `configs/contracts/reports/`                           |
 
@@ -417,16 +418,18 @@ ______________________________________________________________________
 **Специализированная память (фокус на области работы агента):**
 
 ```
-docs/00-project/ai/memory/memory-py-audit-bot.md   — import matrix, anti-patterns, naming, scoring, valid exceptions
-docs/00-project/ai/memory/memory-py-plan-bot.md    — RF-* routing, DAG, composite design, parallelization, ADR
-docs/00-project/ai/memory/memory-py-test-bot.md    — test structure, thresholds, VCR, failure classification
-docs/00-project/ai/memory/memory-py-config-bot.md  — config hierarchy, templates, ADR compliance, composite rules
-docs/00-project/ai/memory/memory-py-debug-bot.md   — error classification, debugging methodology, fix patterns
-docs/00-project/ai/memory/memory-py-doc-bot.md     — doc structure, ADR management, CHANGELOG, docstrings, diagrams
-docs/00-project/ai/memory/memory-py-architecture-debt-bot.md — architecture debt waves, exemption governance, closure gates
-docs/00-project/ai/memory/memory-py-review-orchestrator.md   — sector review map, evidence rollup, severity calibration
-docs/00-project/ai/memory/memory-py-test-swarm.md            — swarm decomposition, failure telemetry, flakiness protocol
+docs/00-project/ai/memory/memory-py-audit-bot.md   (v1.0.3) — import matrix, anti-patterns, naming, scoring, valid exceptions
+docs/00-project/ai/memory/memory-py-plan-bot.md    (v1.0.2) — RF-* routing, DAG, composite design, parallelization, ADR
+docs/00-project/ai/memory/memory-py-test-bot.md    (v1.0.2) — test structure, thresholds, VCR, failure classification
+docs/00-project/ai/memory/memory-py-config-bot.md  (v1.0.2) — config hierarchy, templates, ADR compliance, composite rules
+docs/00-project/ai/memory/memory-py-debug-bot.md   (v1.0.2) — error classification, debugging methodology, fix patterns
+docs/00-project/ai/memory/memory-py-doc-bot.md     (v1.0.2) — doc structure, ADR management, CHANGELOG, docstrings, diagrams
+docs/00-project/ai/memory/memory-py-architecture-debt-bot.md (v1.0.1) — architecture debt waves, exemption governance, closure gates
+docs/00-project/ai/memory/memory-py-review-orchestrator.md   (v1.0.1) — sector review map, evidence rollup, severity calibration
+docs/00-project/ai/memory/memory-py-test-swarm.md            (v1.0.1) — swarm decomposition, failure telemetry, flakiness protocol
 ```
+
+Все memory sheets обновлены до версий v1.0.1-v1.0.3 на 2026-07-24 с синхронизированными guardrails по тех. долгу и evidence anchors.
 
 ### 3.3 Входы субагентов (обязательные параметры)
 
@@ -640,4 +643,4 @@ ______________________________________________________________________
 
 *Этот файл — живой документ. Обновляй при изменении архитектуры, добавлении новых агентов или правил.*
 
-Синхронизировано с ORCHESTRATION.md v4.2
+Синхронизировано с ORCHESTRATION.md v4.3

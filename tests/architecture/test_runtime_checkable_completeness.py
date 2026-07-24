@@ -31,7 +31,7 @@ def _discover_all_port_classes() -> list[str]:
 
 
 ALL_PORT_NAMES = _discover_all_port_classes()
-EXPECTED_PORT_COUNT = 82
+EXPECTED_PORT_COUNT = 83
 RULES_PATH = Path("docs/00-project/RULES.md")
 
 

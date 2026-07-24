@@ -726,7 +726,7 @@ assertless_triage:
         calls.
       next_review: '2026-09-30'
     intentional_no_exception_contract:
-      count: 90
+      count: 89
       decision: retained-with-rationale
       rationale: No-op, close/aclose, smoke, or does-not-raise behavior is the contract
         under test.
@@ -800,33 +800,33 @@ oversized_test_module_inventory:
     owner: application-pipelines
     target_split: PubMed transformer classification and normalization scenarios
   - path: tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_tooling.py
-    lines: 1234
+    lines: 1250
     owner: observability-dashboards
     target_split: Grafana live audit tooling functional families
   completed_splits:
   - issue_ref: '#4505'
     source: tests/integration/test_grafana_config.py
-    source_lines_after_split: 1695
+    source_lines_after_split: 1685
     extracted_surface: tests/integration/test_grafana_surface_contracts.py
-    extracted_surface_lines: 731
+    extracted_surface_lines: 699
     owner: observability-dashboards
   - issue_ref: '#4505'
     source: tests/integration/test_grafana_surface_contracts.py
-    source_lines_after_split: 731
+    source_lines_after_split: 699
     extracted_surface: tests/integration/test_grafana_technical_policy.py
     extracted_surface_lines: 52
     owner: observability-dashboards
   - issue_ref: '#6326'
     source: tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py
-    source_lines_after_split: 1009
+    source_lines_after_split: 1016
     extracted_surface: tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_tooling.py
-    extracted_surface_lines: 1234
+    extracted_surface_lines: 1250
     owner: observability-dashboards
   - issue_ref: '#6364'
     source: tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py
-    source_lines_after_split: 1009
+    source_lines_after_split: 1016
     extracted_surface: tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_tooling.py
-    extracted_surface_lines: 1234
+    extracted_surface_lines: 1250
     owner: observability-dashboards
     note: Oversized test module inventory updated to reflect completed split from #6326. The source file is now 1009 lines (within 2000 LOC limit) and the extracted surface is 1234 lines (tracked in top_modules).
   - issue_ref: '#4506'
