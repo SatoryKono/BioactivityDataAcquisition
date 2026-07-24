@@ -464,3 +464,5 @@ _local_only_mcp/
 # Local agent temp scratch (never commit)
 _tmp_*.py
 tmp_sub_*.txt
+/tmp_*.txt
+/tmp_*.log
