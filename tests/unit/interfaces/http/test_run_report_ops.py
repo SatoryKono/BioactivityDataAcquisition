@@ -10,6 +10,7 @@ import json
 from pathlib import Path
 
 from bioetl.interfaces.http.run_report_ops import (
+    list_pipeline_run_report_payloads,
     load_pipeline_run_report_payload,
     load_workflow_run_report_payload,
 )
@@ -17,11 +18,7 @@ from bioetl.interfaces.http.run_report_ops import (
 
 def test_load_pipeline_report(tmp_path: Path) -> None:
     target = (
-        tmp_path
-        / "pipeline"
-        / "chembl_activity"
-        / "run1"
-        / "pipeline-run-report.json"
+        tmp_path / "pipeline" / "chembl_activity" / "run1" / "pipeline-run-report.json"
     )
     target.parent.mkdir(parents=True)
     target.write_text(
@@ -38,9 +35,7 @@ def test_load_pipeline_report(tmp_path: Path) -> None:
 
 
 def test_load_missing_returns_none(tmp_path: Path) -> None:
-    assert (
-        load_pipeline_run_report_payload(run_id="missing", root=tmp_path) is None
-    )
+    assert load_pipeline_run_report_payload(run_id="missing", root=tmp_path) is None
     assert (
         load_workflow_run_report_payload(workflow_run_id="missing", root=tmp_path)
         is None
@@ -49,11 +44,7 @@ def test_load_missing_returns_none(tmp_path: Path) -> None:
 
 def test_load_requires_explicit_owner_selector(tmp_path: Path) -> None:
     target = (
-        tmp_path
-        / "pipeline"
-        / "chembl_activity"
-        / "run1"
-        / "pipeline-run-report.json"
+        tmp_path / "pipeline" / "chembl_activity" / "run1" / "pipeline-run-report.json"
     )
     target.parent.mkdir(parents=True)
     target.write_text(
@@ -63,14 +54,31 @@ def test_load_requires_explicit_owner_selector(tmp_path: Path) -> None:
     assert load_pipeline_run_report_payload(run_id="run1", root=tmp_path) is None
 
 
-def test_load_rejects_wrong_schema_version(tmp_path: Path) -> None:
+def test_list_pipeline_run_reports(tmp_path: Path) -> None:
     target = (
-        tmp_path
-        / "workflow"
-        / "demo"
-        / "wf1"
-        / "workflow-run-report.json"
+        tmp_path / "pipeline" / "chembl_activity" / "run1" / "pipeline-run-report.json"
     )
+    target.parent.mkdir(parents=True)
+    target.write_text(
+        json.dumps(
+            {
+                "schema_version": "pipeline_run_report_v1",
+                "identity": {"run_id": "run1", "status": "success"},
+            }
+        ),
+        encoding="utf-8",
+    )
+    payload = list_pipeline_run_report_payloads(
+        pipeline_name="chembl_activity",
+        limit=5,
+        root=tmp_path,
+    )
+    assert payload["count"] == 1
+    assert payload["items"][0]["run_id"] == "run1"
+
+
+def test_load_rejects_wrong_schema_version(tmp_path: Path) -> None:
+    target = tmp_path / "workflow" / "demo" / "wf1" / "workflow-run-report.json"
     target.parent.mkdir(parents=True)
     target.write_text(
         json.dumps({"schema_version": "pipeline_run_report_v1"}),

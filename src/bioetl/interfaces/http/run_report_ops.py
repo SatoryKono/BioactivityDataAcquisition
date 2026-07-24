@@ -6,6 +6,10 @@ import json
 from pathlib import Path
 from typing import Any
 
+from bioetl.application.services.run_reports.query import (
+    list_pipeline_reports,
+    list_workflow_reports,
+)
 from bioetl.application.services.run_reports.writer import DEFAULT_REPORT_ROOT
 
 
@@ -54,6 +58,68 @@ def load_workflow_run_report_payload(
     return _load_versioned_payload(path, expected_schema="workflow_run_report_v1")
 
 
+def list_pipeline_run_report_payloads(
+    *,
+    pipeline_name: str | None = None,
+    limit: int = 20,
+    root: Path | None = None,
+) -> dict[str, Any]:  # Any: list payload
+    """List recent pipeline run reports (index only, not full bodies)."""
+    entries = list_pipeline_reports(
+        pipeline_name=pipeline_name,
+        limit=limit,
+        root=root,
+    )
+    return {
+        "status": "ok",
+        "count": len(entries),
+        "items": [
+            {
+                "pipeline": item.owner,
+                "run_id": item.run_id,
+                "status": item.status,
+                "completed_at": item.completed_at,
+                "json_path": str(item.json_path.as_posix()),
+                "markdown_path": (
+                    str(item.markdown_path.as_posix()) if item.markdown_path else None
+                ),
+            }
+            for item in entries
+        ],
+    }
+
+
+def list_workflow_run_report_payloads(
+    *,
+    workflow_name: str | None = None,
+    limit: int = 20,
+    root: Path | None = None,
+) -> dict[str, Any]:  # Any: list payload
+    """List recent workflow run reports (index only)."""
+    entries = list_workflow_reports(
+        workflow_name=workflow_name,
+        limit=limit,
+        root=root,
+    )
+    return {
+        "status": "ok",
+        "count": len(entries),
+        "items": [
+            {
+                "workflow": item.owner,
+                "workflow_run_id": item.run_id,
+                "status": item.status,
+                "completed_at": item.completed_at,
+                "json_path": str(item.json_path.as_posix()),
+                "markdown_path": (
+                    str(item.markdown_path.as_posix()) if item.markdown_path else None
+                ),
+            }
+            for item in entries
+        ],
+    }
+
+
 def _load_versioned_payload(
     path: Path,
     *,
@@ -63,7 +129,9 @@ def _load_versioned_payload(
     if not path.is_file():
         return None
     payload = json.loads(path.read_text(encoding="utf-8"))
-    if not isinstance(payload, dict) or payload.get("schema_version") != expected_schema:
+    if (
+        not isinstance(payload, dict)
+        or payload.get("schema_version") != expected_schema
+    ):
         return None
     return payload
-    return None

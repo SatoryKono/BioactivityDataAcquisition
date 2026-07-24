@@ -95,6 +95,11 @@ _LAZY_COMMAND_SPECS: dict[str, tuple[str, str, str]] = {
         "quarantine",
         "Manage quarantine records",
     ),
+    "report": (
+        "bioetl.interfaces.cli.commands.report",
+        "report",
+        "Inspect pipeline and workflow run reports",
+    ),
     "run": (
         "bioetl.interfaces.cli.commands.run",
         "run",

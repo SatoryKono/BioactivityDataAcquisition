@@ -6,6 +6,14 @@ from bioetl.application.services.run_reports.markdown import (
     render_pipeline_run_report_markdown,
     render_workflow_run_report_markdown,
 )
+from bioetl.application.services.run_reports.query import (
+    diff_pipeline_reports,
+    list_pipeline_reports,
+    list_workflow_reports,
+    load_pipeline_report,
+    load_workflow_report,
+    prune_reports,
+)
 from bioetl.application.services.run_reports.writer import (
     RunReportWriteResult,
     write_pipeline_run_report,
@@ -14,6 +22,12 @@ from bioetl.application.services.run_reports.writer import (
 
 __all__ = [
     "RunReportWriteResult",
+    "diff_pipeline_reports",
+    "list_pipeline_reports",
+    "list_workflow_reports",
+    "load_pipeline_report",
+    "load_workflow_report",
+    "prune_reports",
     "render_pipeline_run_report_markdown",
     "render_workflow_run_report_markdown",
     "write_pipeline_run_report",

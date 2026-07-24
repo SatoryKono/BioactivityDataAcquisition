@@ -51,6 +51,7 @@ _PUBLIC_COMMAND_MODULES = frozenset(
         "lock",
         "maintenance",
         "quarantine",
+        "report",
         "run",
         "run_all",
         "run_composite",

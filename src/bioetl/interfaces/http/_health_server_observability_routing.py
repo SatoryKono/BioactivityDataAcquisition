@@ -19,6 +19,8 @@ from bioetl.interfaces.http.processed_records_table import (
     read_processed_records_run_id,
 )
 from bioetl.interfaces.http.run_report_ops import (
+    list_pipeline_run_report_payloads,
+    list_workflow_run_report_payloads,
     load_pipeline_run_report_payload,
     load_workflow_run_report_payload,
 )
@@ -79,6 +81,12 @@ async def dispatch_observability_request(
             return
         if path == "/ops/observability/workflow-run-report":
             await handle_workflow_run_report(host, writer, query)
+            return
+        if path == "/ops/observability/pipeline-run-reports":
+            await handle_pipeline_run_reports_list(host, writer, query)
+            return
+        if path == "/ops/observability/workflow-run-reports":
+            await handle_workflow_run_reports_list(host, writer, query)
             return
         await host._send_response(writer, 404, _NOT_FOUND_MESSAGE)
     except ValueError as exc:
@@ -160,6 +168,68 @@ async def handle_workflow_run_report(
                 "workflow_run_id": workflow_run_id,
                 "workflow": workflow_name,
             },
+        )
+        return
+    await host._send_payload_response(writer, 200, payload)
+
+
+async def handle_pipeline_run_reports_list(
+    host: _HealthObservabilityRoutingHost,
+    writer: asyncio.StreamWriter,
+    query: dict[str, str],
+) -> None:
+    """List recent pipeline run reports for a pipeline (or all)."""
+    pipeline = host._read_optional_param(query, "pipeline")
+    limit_raw = host._read_optional_param(query, "limit") or "20"
+    try:
+        limit = max(1, min(100, int(limit_raw)))
+    except ValueError as exc:
+        raise ValueError("limit must be an integer") from exc
+    try:
+        payload = await run_bounded_forensic_operation(
+            limiter=host._forensic_endpoint_limiter,
+            operation_factory=lambda: asyncio.to_thread(
+                list_pipeline_run_report_payloads,
+                pipeline_name=pipeline,
+                limit=limit,
+            ),
+        )
+    except ForensicEndpointUnavailable as exc:
+        await host._send_payload_response(
+            writer,
+            503,
+            forensic_unavailable_payload(exc),
+        )
+        return
+    await host._send_payload_response(writer, 200, payload)
+
+
+async def handle_workflow_run_reports_list(
+    host: _HealthObservabilityRoutingHost,
+    writer: asyncio.StreamWriter,
+    query: dict[str, str],
+) -> None:
+    """List recent workflow run reports for a workflow (or all)."""
+    workflow = host._read_optional_param(query, "workflow")
+    limit_raw = host._read_optional_param(query, "limit") or "20"
+    try:
+        limit = max(1, min(100, int(limit_raw)))
+    except ValueError as exc:
+        raise ValueError("limit must be an integer") from exc
+    try:
+        payload = await run_bounded_forensic_operation(
+            limiter=host._forensic_endpoint_limiter,
+            operation_factory=lambda: asyncio.to_thread(
+                list_workflow_run_report_payloads,
+                workflow_name=workflow,
+                limit=limit,
+            ),
+        )
+    except ForensicEndpointUnavailable as exc:
+        await host._send_payload_response(
+            writer,
+            503,
+            forensic_unavailable_payload(exc),
         )
         return
     await host._send_payload_response(writer, 200, payload)

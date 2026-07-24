@@ -79,7 +79,15 @@
           "pipeline_manifest_id": { "type": ["string", "null"] },
           "pipeline_report_ref": { "type": ["string", "null"] },
           "error_type": { "type": ["string", "null"] },
-          "error_message": { "type": ["string", "null"] }
+          "error_message": { "type": ["string", "null"] },
+          "skip_reason": { "type": ["string", "null"] },
+          "top_reasons": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
         }
       }
     },
@@ -114,6 +122,13 @@
             "items": { "type": "string" }
           }
         }
+      }
+    },
+    "reasons_rollup": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
       }
     }
   }
