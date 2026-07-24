@@ -10,6 +10,8 @@ from typing import Any
 import pytest
 import yaml
 
+from tests.helpers.git_index_scan import git_grep_fixed
+
 
 pytestmark = pytest.mark.architecture
 
@@ -36,7 +38,17 @@ def _load_yaml(path: Path) -> dict[str, Any]:
 
 def _collect_exact_importers(target_module: str) -> set[str]:
     importers: set[str] = set()
-    for path in sorted((ROOT / "src" / "bioetl").rglob("*.py")):
+    candidate_paths = {
+        match.path
+        for match in git_grep_fixed(
+            root=ROOT,
+            patterns=(target_module,),
+            paths=("src/bioetl",),
+            suffixes=(".py",),
+        )
+    }
+    for relative_path in sorted(candidate_paths):
+        path = ROOT / relative_path
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         for node in ast.walk(tree):
             modules: list[str] = []

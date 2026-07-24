@@ -37,6 +37,10 @@ plans:
       lifecycle: supporting_context
     - path: docs/plans/chembl-baseline-refactor-plan-2026-06-01.md
       lifecycle: supporting_context
+    - path: docs/plans/mcp-shared-http-multi-client-plan-2026-07-24.md
+      lifecycle: supporting_context
+    - path: docs/plans/mcp-shared-http-multi-client-issue-pack-2026-07-24.md
+      lifecycle: supporting_context
 
 src_sidecars:
   path_prefix: src/

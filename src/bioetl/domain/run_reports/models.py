@@ -7,6 +7,40 @@ from enum import StrEnum
 from typing import Any
 
 
+def _copy_present_attributes(
+    payload: dict[str, Any],
+    source: object,
+    names: tuple[str, ...],
+) -> None:
+    """Copy non-null attributes into a dynamic report payload."""
+    for name in names:
+        value = getattr(source, name)
+        if value is not None:
+            payload[name] = value
+
+
+def _copy_present_mappings(
+    payload: dict[str, Any],
+    source: object,
+    names: tuple[str, ...],
+) -> None:
+    """Copy non-null mapping attributes into a dynamic report payload."""
+    for name in names:
+        value = getattr(source, name)
+        if value is not None:
+            payload[name] = dict(value)
+
+
+def _copy_reason_items(
+    payload: dict[str, Any],
+    name: str,
+    items: tuple[dict[str, Any], ...],
+) -> None:
+    """Copy a non-empty tuple of dynamic reason mappings."""
+    if items:
+        payload[name] = [dict(item) for item in items]
+
+
 class BalanceStatus(StrEnum):
     """Stage or layer balance status."""
 
@@ -169,7 +203,10 @@ class PipelineRunReport:
             "reconciliation": dict(self.reconciliation),
             "tracking_coverage": self.tracking_coverage.value,
         }
-        for key in (
+        _copy_present_mappings(
+            payload,
+            self,
+            (
             "failure",
             "io",
             "quarantine",
@@ -179,10 +216,8 @@ class PipelineRunReport:
             "stage_timings",
             "http_summary",
             "performance",
-        ):
-            value = getattr(self, key)
-            if value is not None:
-                payload[key] = dict(value)
+            ),
+        )
         return payload
 
 
@@ -212,24 +247,24 @@ class WorkflowExecutionRow:
             "status": self.status,
             "records_extracted": self.records_extracted,
         }
-        for key in (
-            "kind",
-            "pipeline_name",
-            "records_bronze",
-            "records_silver",
-            "records_gold",
-            "pipeline_run_id",
-            "pipeline_manifest_id",
-            "pipeline_report_ref",
-            "error_type",
-            "error_message",
-            "skip_reason",
-        ):
-            value = getattr(self, key)
-            if value is not None:
-                payload[key] = value
-        if self.top_reasons:
-            payload["top_reasons"] = [dict(item) for item in self.top_reasons]
+        _copy_present_attributes(
+            payload,
+            self,
+            (
+                "kind",
+                "pipeline_name",
+                "records_bronze",
+                "records_silver",
+                "records_gold",
+                "pipeline_run_id",
+                "pipeline_manifest_id",
+                "pipeline_report_ref",
+                "error_type",
+                "error_message",
+                "skip_reason",
+            ),
+        )
+        _copy_reason_items(payload, "top_reasons", self.top_reasons)
         return payload
 
 
@@ -254,6 +289,5 @@ class WorkflowRunReport:
             "totals": dict(self.totals),
             "index": dict(self.index),
         }
-        if self.reasons_rollup:
-            payload["reasons_rollup"] = [dict(item) for item in self.reasons_rollup]
+        _copy_reason_items(payload, "reasons_rollup", self.reasons_rollup)
         return payload

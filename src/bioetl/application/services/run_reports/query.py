@@ -314,10 +314,12 @@ def _int(value: object) -> int:
         return 0
 
 
-MappingLike = dict[str, Any] | Any
+MappingLike = dict[str, Any] | Any  # Any: decoded external JSON payload
 
 
-def _as_mapping(value: MappingLike) -> dict[str, Any]:
+def _as_mapping(
+    value: MappingLike,  # Any: decoded external JSON payload
+) -> dict[str, Any]:  # Any: validated dynamic report mapping
     if isinstance(value, dict):
         return value
     raise TypeError("report payload must be a mapping")

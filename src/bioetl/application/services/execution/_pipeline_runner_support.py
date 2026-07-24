@@ -121,7 +121,7 @@ def finalize_pipeline_run_report(
     options: RunOptions | None = None,
     report_root: Path | None = None,
     stage_timings: dict[str, float | int | None] | None = None,
-    http_summary: dict[str, Any] | None = None,
+    http_summary: dict[str, Any] | None = None,  # Any: dynamic HTTP report payload
 ) -> RunResult:
     """Build and persist pipeline run report; attach paths onto result."""
     accounting = get_stage_accounting()

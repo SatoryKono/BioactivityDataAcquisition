@@ -198,7 +198,7 @@ def prune_command(
 
 
 def _emit_report(
-    payload: dict[str, Any],
+    payload: dict[str, Any],  # Any: decoded report JSON payload
     *,
     as_json: bool,
     markdown_hint: str,
