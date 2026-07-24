@@ -95,14 +95,17 @@ runs:
         echo "Running: ${CMD}"
         ${CMD}
 
-    - name: Pin locked/no-build defaults for subsequent uv run steps
+    - name: Pin locked/no-build/no-sync defaults for subsequent uv run steps
       shell: bash
       run: |
-        # Defense-in-depth for CI steps that call `uv run` without flags.
+        # Dependencies and the editable project were installed by the sync step.
+        # Prevent every later `uv run --no-build` from trying to re-resolve the
+        # editable project, which uv rejects because it has no binary distribution.
         # Workflows also pass --frozen/--no-build explicitly for Sonar S8544/S8541.
         {
           echo "UV_FROZEN=1"
           echo "UV_NO_BUILD=1"
+          echo "UV_NO_SYNC=1"
         } >> "$GITHUB_ENV"
 
     - name: Cache pytest and hypothesis
