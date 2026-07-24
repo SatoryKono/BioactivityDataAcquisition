@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import json
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 from bioetl.domain.run_reports.models import WorkflowExecutionRow, WorkflowRunReport
@@ -95,6 +97,8 @@ def _mapping_execution(raw: Mapping[str, object]) -> _NormalizedExecution:
         pipeline_report_ref=raw.get("pipeline_report_ref"),
         error_type=raw.get("error_type"),
         error_message=raw.get("error_message"),
+        top_reasons=raw.get("top_reasons") or (),
+        skip_reason=raw.get("skip_reason"),
     )
 
 
@@ -117,6 +121,8 @@ def _object_execution(raw: object) -> _NormalizedExecution:
         pipeline_report_ref=getattr(raw, "pipeline_report_ref", None),
         error_type=getattr(raw, "error_type", None),
         error_message=getattr(raw, "error_message", None),
+        top_reasons=getattr(raw, "top_reasons", ()) or (),
+        skip_reason=getattr(raw, "skip_reason", None),
     )
 
 
@@ -136,8 +142,19 @@ def _normalized_row(
     pipeline_report_ref: object,
     error_type: object,
     error_message: object,
+    top_reasons: object = (),
+    skip_reason: object = None,
 ) -> _NormalizedExecution:
     name = _optional_text(pipeline_name)
+    report_ref = _optional_text(pipeline_report_ref)
+    run_id = _optional_text(pipeline_run_id)
+    if report_ref is None and run_id and name:
+        report_ref = (
+            f"reports/run-reports/pipeline/{name}/{run_id}/pipeline-run-report.json"
+        )
+    reasons = _normalize_top_reasons(top_reasons)
+    if not reasons and report_ref:
+        reasons = _load_child_top_reasons(report_ref)
     row = WorkflowExecutionRow(
         step_id=str(step_id or ""),
         kind=_optional_text(kind),
@@ -147,13 +164,54 @@ def _normalized_row(
         records_bronze=counts.get("records_bronze"),
         records_silver=counts.get("records_silver"),
         records_gold=counts.get("records_gold"),
-        pipeline_run_id=_optional_text(pipeline_run_id),
+        pipeline_run_id=run_id,
         pipeline_manifest_id=_optional_text(pipeline_manifest_id),
-        pipeline_report_ref=_optional_text(pipeline_report_ref),
+        pipeline_report_ref=report_ref,
         error_type=_optional_text(error_type),
         error_message=_optional_text(error_message),
+        top_reasons=reasons,
+        skip_reason=_optional_text(skip_reason),
     )
     return _NormalizedExecution(row=row, pipeline_name=name)
+
+
+def _normalize_top_reasons(
+    raw: object,
+) -> tuple[dict[str, Any], ...]:  # Any: reason payload
+    if not isinstance(raw, Sequence) or isinstance(raw, (str, bytes)):
+        return ()
+    items: list[dict[str, Any]] = []  # Any: reason payload
+    for entry in raw:
+        if not isinstance(entry, Mapping):
+            continue
+        code = entry.get("reason_code")
+        if code in (None, ""):
+            continue
+        items.append(
+            {
+                "reason_code": str(code),
+                "outcome": entry.get("outcome"),
+                "reason_family": entry.get("reason_family"),
+                "count": _as_int(entry.get("count")),
+            }
+        )
+    return tuple(items[:3])
+
+
+def _load_child_top_reasons(
+    report_ref: str,
+) -> tuple[dict[str, Any], ...]:  # Any: reason payload
+    """Best-effort load of top reasons from a child pipeline report path."""
+    try:
+        path = Path(report_ref)
+        if not path.is_file():
+            return ()
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError, TypeError, ValueError):
+        return ()
+    if not isinstance(payload, Mapping):
+        return ()
+    return _normalize_top_reasons(payload.get("reasons_top_n") or ())
 
 
 def _normalize_execution(
@@ -241,4 +299,31 @@ def build_workflow_run_report(
         execution=execution,
         totals=_build_totals(execution, planned=len(plan) or len(execution)),
         index=_build_index(normalized),
+        reasons_rollup=_build_reasons_rollup(execution),
+    )
+
+
+def _build_reasons_rollup(
+    rows: Sequence[WorkflowExecutionRow],
+) -> tuple[dict[str, Any], ...]:  # Any: reason payload
+    totals: dict[tuple[str, str | None, str | None], int] = {}
+    for row in rows:
+        for item in row.top_reasons:
+            key = (
+                str(item.get("reason_code")),
+                item.get("outcome") if isinstance(item.get("outcome"), str) else None,
+                item.get("reason_family")
+                if isinstance(item.get("reason_family"), str)
+                else None,
+            )
+            totals[key] = totals.get(key, 0) + _as_int(item.get("count"))
+    ranked = sorted(totals.items(), key=lambda entry: (-entry[1], entry[0][0]))
+    return tuple(
+        {
+            "reason_code": code,
+            "outcome": outcome,
+            "reason_family": family,
+            "count": count,
+        }
+        for (code, outcome, family), count in ranked[:10]
     )
