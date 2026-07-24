@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
-from bioetl.domain.run_reports.models import LayerCounts, StageFunnelRow
+if TYPE_CHECKING:
+    from bioetl.domain.run_reports.models import LayerCounts, StageFunnelRow
 
 
 @runtime_checkable

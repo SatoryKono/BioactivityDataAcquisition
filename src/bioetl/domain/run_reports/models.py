@@ -146,10 +146,19 @@ class PipelineRunReport:
     tracking_coverage: TrackingCoverage
     reason_catalog_version: str
     artifacts: tuple[dict[str, Any], ...] = ()  # Any: report/json payload shape is dynamic
+    failure: dict[str, Any] | None = None  # Any: optional failure block
+    io: dict[str, Any] | None = None  # Any: optional IO summary
+    quarantine: dict[str, Any] | None = None  # Any: optional quarantine rollup
+    dq_summary: dict[str, Any] | None = None  # Any: optional DQ aggregate
+    contract_summary: dict[str, Any] | None = None  # Any: optional contract aggregate
+    schema_versions: dict[str, Any] | None = None  # Any: optional fingerprints
+    stage_timings: dict[str, Any] | None = None  # Any: optional stage durations
+    http_summary: dict[str, Any] | None = None  # Any: optional HTTP rollup
+    performance: dict[str, Any] | None = None  # Any: optional throughput
     schema_version: str = "pipeline_run_report_v1"
 
     def to_dict(self) -> dict[str, Any]:  # Any: report/json payload shape is dynamic
-        return {
+        payload: dict[str, Any] = {  # Any: report/json payload shape is dynamic
             "schema_version": self.schema_version,
             "reason_catalog_version": self.reason_catalog_version,
             "identity": dict(self.identity),
@@ -160,6 +169,21 @@ class PipelineRunReport:
             "reconciliation": dict(self.reconciliation),
             "tracking_coverage": self.tracking_coverage.value,
         }
+        for key in (
+            "failure",
+            "io",
+            "quarantine",
+            "dq_summary",
+            "contract_summary",
+            "schema_versions",
+            "stage_timings",
+            "http_summary",
+            "performance",
+        ):
+            value = getattr(self, key)
+            if value is not None:
+                payload[key] = dict(value)
+        return payload
 
 
 @dataclass(frozen=True, slots=True)
@@ -179,6 +203,8 @@ class WorkflowExecutionRow:
     pipeline_report_ref: str | None = None
     error_type: str | None = None
     error_message: str | None = None
+    top_reasons: tuple[dict[str, Any], ...] = ()  # Any: optional child reasons
+    skip_reason: str | None = None
 
     def to_dict(self) -> dict[str, Any]:  # Any: report/json payload shape is dynamic
         payload: dict[str, Any] = {  # Any: report/json payload shape is dynamic
@@ -197,10 +223,13 @@ class WorkflowExecutionRow:
             "pipeline_report_ref",
             "error_type",
             "error_message",
+            "skip_reason",
         ):
             value = getattr(self, key)
             if value is not None:
                 payload[key] = value
+        if self.top_reasons:
+            payload["top_reasons"] = [dict(item) for item in self.top_reasons]
         return payload
 
 
@@ -213,10 +242,11 @@ class WorkflowRunReport:
     execution: tuple[WorkflowExecutionRow, ...]
     totals: dict[str, Any]  # Any: report/json payload shape is dynamic
     index: dict[str, Any] = field(default_factory=dict)  # Any: report/json payload shape is dynamic
+    reasons_rollup: tuple[dict[str, Any], ...] = ()  # Any: aggregated child reasons
     schema_version: str = "workflow_run_report_v1"
 
     def to_dict(self) -> dict[str, Any]:  # Any: report/json payload shape is dynamic
-        return {
+        payload: dict[str, Any] = {  # Any: report/json payload shape is dynamic
             "schema_version": self.schema_version,
             "identity": dict(self.identity),
             "plan": {"steps": [dict(step) for step in self.plan_steps]},
@@ -224,3 +254,6 @@ class WorkflowRunReport:
             "totals": dict(self.totals),
             "index": dict(self.index),
         }
+        if self.reasons_rollup:
+            payload["reasons_rollup"] = [dict(item) for item in self.reasons_rollup]
+        return payload

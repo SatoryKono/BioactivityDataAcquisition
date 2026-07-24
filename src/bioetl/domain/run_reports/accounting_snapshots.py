@@ -71,11 +71,20 @@ class StageAccountingSnapshotsMixin:
         layers: LayerCounts,
     ) -> StageFunnelRow:
         removals = self._removals_for_bucket(bucket)
-        removed_total = sum(item.count for item in removals)
+        removed_mapped = sum(item.count for item in removals)
         default_in, default_out, default_removed = self._stage_defaults(stage_id, layers)
         records_in = bucket.records_in or default_in
         records_out = bucket.records_out or default_out
-        removed_total = removed_total or default_removed
+        removed_total = removed_mapped or default_removed
+        records_in, records_out, removed_total = self._prefer_conserving_projection(
+            records_in=records_in,
+            records_out=records_out,
+            removed_total=removed_total,
+            default_in=default_in,
+            default_out=default_out,
+            default_removed=default_removed,
+            removed_mapped=removed_mapped,
+        )
         unaccounted = max(0, records_in - records_out - removed_total)
         tracking = self._tracking_for(stage_id, bucket)
         return StageFunnelRow(
@@ -94,6 +103,30 @@ class StageAccountingSnapshotsMixin:
             tracking=tracking,
             unaccounted=unaccounted,
         )
+
+    @staticmethod
+    def _prefer_conserving_projection(
+        *,
+        records_in: int,
+        records_out: int,
+        removed_total: int,
+        default_in: int,
+        default_out: int,
+        default_removed: int,
+        removed_mapped: int,
+    ) -> tuple[int, int, int]:
+        """Prefer layer-aligned in/out when bucket values break conservation.
+
+        High-volume hooks may over-count ``records_out`` (e.g. gold batch
+        metrics). Layer totals from RunResult remain the coarse SoT for
+        funnel geometry; removal reason maps still come from the bucket.
+        """
+        if records_in == records_out + removed_total:
+            return records_in, records_out, removed_total
+        layer_removed = removed_mapped if removed_mapped > 0 else default_removed
+        if default_in > 0 and default_in == default_out + layer_removed:
+            return default_in, default_out, layer_removed
+        return records_in, records_out, removed_total
 
     @staticmethod
     def _stage_defaults(
