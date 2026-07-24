@@ -42,11 +42,14 @@ ______________________________________________________________________
   `.\scripts\ops\runtime\docker\harden-desktop-host.ps1 -RegisterWatchdog`
   (Resource Saver effectively off, AutoStart, no Extensions/AI; Task Scheduler
   watchdog every 5 min → soft/hard ensure, rate-limited).
-- MCP thrash: duplicate `mcp/*` containers come from stdio MCP clients, not
-  BioETL compose. Apply
-  `.\scripts\ops\runtime\docker\apply-docker-stable-mcp.ps1 -Profile stable`
-  and/or `cleanup-mcp-orphans.ps1`; local `setup_mcp.py --profile stable|core`
-  (default generator profile is `core`).
+- MCP thrash: duplicate `mcp/*` / host npx children come from **stdio** MCP
+  clients (and Desktop Toolkit jetbrains/sandbox), not BioETL compose. Mitigate
+  with (a) one heavy client + `apply-docker-stable-mcp.ps1 -Profile stable` +
+  `cleanup-mcp-orphans.ps1`, or (b) multi-client **shared HTTP plane**:
+  `scripts/ops/runtime/mcp/start-shared.ps1` then
+  `setup_mcp.py --profile shared --transport-mode shared`. Default generator
+  profile remains `core` / transport `stdio`. Policy:
+  `docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md`.
 - Operator host defaults for this class: WSL `memory=6GB`, free host RAM ≥4 GiB,
   main mem_limit 768 m, neo4j mem_limit 768 m / heap max 384 m.
 - Start **one** stack at a time; use project flags

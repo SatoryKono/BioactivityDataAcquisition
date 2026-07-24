@@ -101,6 +101,16 @@ Crash-resistant path (preferred):
 # MCP container thrash (duplicate mcp/brave-search, grafana, gateways):
 .\scripts\ops\runtime\docker\apply-docker-stable-mcp.ps1 -Profile stable -WithNeo4j
 .\scripts\ops\runtime\docker\cleanup-mcp-orphans.ps1 -IncludeGatewayHint
+
+# Report-only host reset (orphans / optional extra grok) — never kills bioetl-*:
+.\scripts\ops\runtime\docker\reset-mcp-host-sessions.ps1
+# Apply: -Execute -KillHostGateways [-KillExtraGrok]
+
+# Multi-client shared HTTP plane (one process per migrated server):
+.\scripts\ops\runtime\mcp\start-shared.ps1
+.\scripts\ops\runtime\docker\apply-docker-stable-mcp.ps1 -Profile shared -TransportMode shared -WithSharedMcp -SkipEnsureStable
+.\scripts\ops\runtime\mcp\health-shared.ps1
+# Then restart AI clients once.
 ```
 
 `harden-desktop-host.ps1` sets Resource Saver effectively off
@@ -108,10 +118,13 @@ Crash-resistant path (preferred):
 `.wslconfig memory=6GB`. The watchdog re-runs soft/hard ensure when the
 engine pipe dies (rate-limited; refuses hard restart if free RAM &lt; 3 GiB).
 
-Docker-backed MCP servers spawn **one container per AI session**. Use MCP
-profile `stable` (no gateway/`docker run` MCP) on 32 GiB hosts; keep tracked
-`.mcp.json` full for portable SSOT. See
-`docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md`.
+Docker-backed MCP servers spawn **one container per AI session** under stdio.
+Use MCP profile `stable` (no gateway/`docker run` MCP) on 32 GiB hosts, **or**
+the shared Streamable HTTP plane (`start-shared` + `--profile shared
+--transport-mode shared`) so multiple clients share one process per migrated
+server. Keep tracked `.mcp.json` full for portable SSOT. See
+`docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md` and
+`docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md`.
 
 Hardening defaults on this host class:
 

@@ -264,15 +264,15 @@ Fallback: `--profile stable --transport-mode stdio`.
 
 ## PR / issue sequence
 
-| ID | Scope |
-| --- | --- |
-| **ISSUE-0** | Umbrella program + evidence |
-| **ISSUE-OPS** | Operator thrash playbook + optional single-client cleanup script |
-| **ISSUE-P0** | Phase 0 matrix + `MCP_SHARED_RUNTIME.md` |
-| **ISSUE-P1A** | Shared runtime skeleton + cleanup/ensure-stable protect |
-| **ISSUE-P1B** | `setup_mcp --transport-mode` + localhost allowlist |
-| **ISSUE-P1C** | First shared server MVP (host high-thrash and/or brave) |
-| **ISSUE-P2** | Expand set, profile `shared`, apply helper, lesson/quickstart |
+| ID | GitHub | Scope |
+| --- | --- | --- |
+| **ISSUE-0** | [#6563](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6563) | Umbrella program + evidence |
+| **ISSUE-OPS** | [#6567](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6567) | Operator thrash playbook + optional single-client cleanup script |
+| **ISSUE-P0** | [#6565](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6565) | Phase 0 matrix + `MCP_SHARED_RUNTIME.md` |
+| **ISSUE-P1A** | [#6566](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6566) | Shared runtime skeleton + cleanup/ensure-stable protect |
+| **ISSUE-P1B** | [#6568](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6568) | `setup_mcp --transport-mode` + localhost allowlist |
+| **ISSUE-P1C** | [#6564](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6564) | First shared server MVP (host high-thrash and/or brave) |
+| **ISSUE-P2** | [#6569](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6569) | Expand set, profile `shared`, apply helper, lesson/quickstart |
 
 ## Open decisions (resolve in Phase 0)
 

@@ -7,7 +7,7 @@ description: Full audit and update of BioETL project documentation for v5.23+. U
 
 ## Objective
 
-Perform a full documentation audit of BioETL and bring docs in sync with code and ADRs (v5.23+). Produce a clear audit report, a prioritized plan, and updated documentation changes.
+Perform a full documentation audit of BioETL and bring docs in sync with code and ADRs (v6.1.4+). Produce a clear audit report, a prioritized plan, and updated documentation changes.
 
 
 
@@ -29,7 +29,7 @@ Perform a full documentation audit of BioETL and bring docs in sync with code an
 
 ### 1. Intake and scope
 
-- Confirm repo root and target version (v5.23+).
+- Confirm repo root and target version (v6.1.4+).
 - Identify doc entry points: README.md, mkdocs.yml.
 - List files under `docs/`: `rg --files docs`.
 

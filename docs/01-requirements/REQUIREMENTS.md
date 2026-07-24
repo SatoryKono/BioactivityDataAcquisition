@@ -2,7 +2,7 @@
 
 Version: 1.12
 Status: active
-Aligned with: RULES.md v6.1.5 ([source](../00-project/RULES.md))
+Aligned with: RULES.md v6.1.4 ([source](../00-project/RULES.md))
 Last verified: 2026-07-23
 
 ## Purpose and authority

@@ -106,6 +106,8 @@ def _load_workspace_mcp_config(
         "--root",
         str(tmp_path),
         "--skip-codex",
+        "--profile",
+        "full",
         cwd=root,
     )
     if result.returncode == 0:

@@ -79,10 +79,16 @@ privilege servers are not always-on:
 | Profile | Membership intent | Default for daily coding? |
 | --- | --- | --- |
 | `stable` | host/HTTP MCP only (no `docker run` / `docker mcp gateway` servers) | **yes on 32 GiB Docker Desktop hosts** |
+| `shared` | `stable` + `brave-search`; use with `--transport-mode shared` for multi-client HTTP | multi-client hosts after shared plane start |
 | `core` | `stable` + mermaid (gateway) | default generator profile |
 | `ops` | `core` + prometheus, grafana, github-actions | observability / dashboard work |
 | `graph` | `ops` + neo4j-*, brave-search, mutmut, mcp-code-interpreter, docker | research / graph / mutation work |
 | `full` | entire sanctioned inventory (same as tracked portable set) | only when explicitly needed |
+
+Shared Streamable HTTP plane (multi-client, localhost): see
+[`MCP_SHARED_RUNTIME.md`](./MCP_SHARED_RUNTIME.md). Tracked portable inventory
+stays stdio; only **local** projections may emit `http://127.0.0.1:…/mcp` when
+`--transport-mode shared` is set.
 
 ### Why Docker MCP multiplies containers
 
@@ -124,8 +130,11 @@ Rules:
    default profile is **`core`** (not `full`).
 3. Retired servers in `REMOVED_MCP_SERVER_NAMES` must never reappear.
 4. Do not increase tech-debt budgets to paper over privilege sprawl.
-5. Prefer **one** AI client with a heavy Docker MCP profile at a time; after
-   reconnects run `cleanup-mcp-orphans.ps1` or `ensure-stable.ps1`.
+5. Prefer **one** AI client with a heavy **stdio**/Docker MCP profile at a time;
+   after reconnects run `cleanup-mcp-orphans.ps1` or `ensure-stable.ps1`.
+   Alternatively run the **shared HTTP plane** (`start-shared.ps1` +
+   `--profile shared --transport-mode shared`) so multiple clients share one
+   process per migrated server — see `MCP_SHARED_RUNTIME.md`.
 
 ## Token Configuration
 
@@ -198,6 +207,8 @@ When AI docs mention these configs, they SHOULD state:
 - `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 - `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 - `docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md`
+- `docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md`
+- `scripts/ops/runtime/mcp/README.md`
 
 ## Env File Guardrail
 

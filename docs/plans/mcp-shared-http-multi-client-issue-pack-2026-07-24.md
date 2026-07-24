@@ -203,3 +203,15 @@ Add more servers; profile `shared`; wire `apply-docker-stable-mcp`; update lesso
 | P1B + P1C | PR3 |
 | P2 | PR4–PR5 |
 | OPS | can land anytime |
+
+## Created GitHub issues (2026-07-24)
+
+| Pack | GitHub | Title |
+| --- | --- | --- |
+| Umbrella | [#6563](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6563) | Shared HTTP plane for multi-client AI sessions |
+| OPS | [#6567](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6567) | Operator playbook |
+| P0 | [#6565](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6565) | Transport matrix + MCP_SHARED_RUNTIME.md |
+| P1A | [#6566](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6566) | Runtime skeleton + protect bioetl-mcp-* |
+| P1B | [#6568](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6568) | setup_mcp --transport-mode shared |
+| P1C | [#6564](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6564) | First shared server MVP |
+| P2 | [#6569](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6569) | Expand + profile shared + docs |

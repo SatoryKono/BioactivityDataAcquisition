@@ -13,7 +13,7 @@ ______________________________________________________________________
 
 # Current State Inventory
 
-This inventory is synchronized against the current worktree on 2026-07-08.
+This inventory is synchronized against the current worktree on 2026-07-24.
 Code, configs, domain contracts, ADRs, and tests are the source of
 truth; existing documentation is evidence only when it matches those sources.
 

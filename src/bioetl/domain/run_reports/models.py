@@ -8,7 +8,7 @@ from typing import Any
 
 
 def _copy_present_attributes(
-    payload: dict[str, Any],
+    payload: dict[str, Any],  # Any: dynamic report serialization payload
     source: object,
     names: tuple[str, ...],
 ) -> None:
@@ -20,7 +20,7 @@ def _copy_present_attributes(
 
 
 def _copy_present_mappings(
-    payload: dict[str, Any],
+    payload: dict[str, Any],  # Any: dynamic report serialization payload
     source: object,
     names: tuple[str, ...],
 ) -> None:
@@ -32,9 +32,9 @@ def _copy_present_mappings(
 
 
 def _copy_reason_items(
-    payload: dict[str, Any],
+    payload: dict[str, Any],  # Any: dynamic report serialization payload
     name: str,
-    items: tuple[dict[str, Any], ...],
+    items: tuple[dict[str, Any], ...],  # Any: dynamic reason payload
 ) -> None:
     """Copy a non-empty tuple of dynamic reason mappings."""
     if items:
@@ -175,11 +175,15 @@ class PipelineRunReport:
     identity: dict[str, Any]  # Any: report/json payload shape is dynamic
     funnel: tuple[StageFunnelRow, ...]
     layers: LayerCounts
-    reasons_top_n: tuple[dict[str, Any], ...]  # Any: report/json payload shape is dynamic
+    reasons_top_n: tuple[
+        dict[str, Any], ...
+    ]  # Any: report/json payload shape is dynamic
     reconciliation: dict[str, Any]  # Any: report/json payload shape is dynamic
     tracking_coverage: TrackingCoverage
     reason_catalog_version: str
-    artifacts: tuple[dict[str, Any], ...] = ()  # Any: report/json payload shape is dynamic
+    artifacts: tuple[
+        dict[str, Any], ...
+    ] = ()  # Any: report/json payload shape is dynamic
     failure: dict[str, Any] | None = None  # Any: optional failure block
     io: dict[str, Any] | None = None  # Any: optional IO summary
     quarantine: dict[str, Any] | None = None  # Any: optional quarantine rollup
@@ -207,15 +211,15 @@ class PipelineRunReport:
             payload,
             self,
             (
-            "failure",
-            "io",
-            "quarantine",
-            "dq_summary",
-            "contract_summary",
-            "schema_versions",
-            "stage_timings",
-            "http_summary",
-            "performance",
+                "failure",
+                "io",
+                "quarantine",
+                "dq_summary",
+                "contract_summary",
+                "schema_versions",
+                "stage_timings",
+                "http_summary",
+                "performance",
             ),
         )
         return payload
@@ -276,7 +280,9 @@ class WorkflowRunReport:
     plan_steps: tuple[dict[str, Any], ...]  # Any: report/json payload shape is dynamic
     execution: tuple[WorkflowExecutionRow, ...]
     totals: dict[str, Any]  # Any: report/json payload shape is dynamic
-    index: dict[str, Any] = field(default_factory=dict)  # Any: report/json payload shape is dynamic
+    index: dict[str, Any] = field(
+        default_factory=dict
+    )  # Any: report/json payload shape is dynamic
     reasons_rollup: tuple[dict[str, Any], ...] = ()  # Any: aggregated child reasons
     schema_version: str = "workflow_run_report_v1"
 
