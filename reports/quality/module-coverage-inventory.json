@@ -14053,7 +14053,17 @@
       "missing_lines": 0,
       "module": "bioetl.domain.run_reports.workflow_builder",
       "path": "src/bioetl/domain/run_reports/workflow_builder.py",
-      "source_lines": 305
+      "source_lines": 294
+    },
+    {
+      "coverage_percent": null,
+      "coverage_status": "no_executable_lines",
+      "covered_lines": 0,
+      "executable_lines": 0,
+      "missing_lines": 0,
+      "module": "bioetl.domain.run_reports.workflow_reasons",
+      "path": "src/bioetl/domain/run_reports/workflow_reasons.py",
+      "source_lines": 102
     },
     {
       "coverage_percent": 100.0,
@@ -36715,7 +36725,17 @@
       "missing_lines": 0,
       "module": "bioetl.domain.run_reports.workflow_builder",
       "path": "src/bioetl/domain/run_reports/workflow_builder.py",
-      "source_lines": 305
+      "source_lines": 294
+    },
+    {
+      "coverage_percent": null,
+      "coverage_status": "no_executable_lines",
+      "covered_lines": 0,
+      "executable_lines": 0,
+      "missing_lines": 0,
+      "module": "bioetl.domain.run_reports.workflow_reasons",
+      "path": "src/bioetl/domain/run_reports/workflow_reasons.py",
+      "source_lines": 102
     },
     {
       "coverage_percent": 100.0,
@@ -45330,7 +45350,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-13",
-  "source_tree_sha256": "1479fe77b99c9211b2996a8e7f2cc0dfc5c78ffe08e2811e2b01724c7b4f09d5",
+  "source_tree_sha256": "05b6fc69b19a45230d80b51d1088448e6de940381f660dcc4f7ce01f3995a0d3",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -45485,11 +45505,11 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2266,
+    "source_module_count": 2267,
     "status_counts": {
       "coverage_xml_missing": 0,
       "fully_covered": 1406,
-      "no_executable_lines": 44,
+      "no_executable_lines": 45,
       "partially_covered": 816,
       "uncovered": 0,
       "unmeasured": 0

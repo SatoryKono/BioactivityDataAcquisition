@@ -851,7 +851,7 @@
   ],
   "domain_root": "src/bioetl/domain",
   "generated_by": "scripts.engineering.qa.report_domain_io_taint_inventory",
-  "scanned_file_count": 588,
+  "scanned_file_count": 589,
   "schema_version": 1,
   "violation_count": 0,
   "violations": []
