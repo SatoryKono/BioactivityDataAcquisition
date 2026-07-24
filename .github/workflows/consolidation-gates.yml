@@ -33,7 +33,7 @@ jobs:
         uses: ./.github/actions/setup-python-uv
         with:
           uv-extras: "dev tracing"
-          uv-sync-args: "--frozen --all-extras --dev"
+          uv-sync-args: "--frozen --all-extras"
 
       - name: Ruff check
         run: uv run --frozen --no-build ruff check .
