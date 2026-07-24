@@ -2,7 +2,7 @@
 
 *Статус: internal-only (agent memory)*
 
-*Version: 1.0.2 | Date: 2026-06-03 | Parent: agent-memory.md*
+*Version: 1.0.3 | Date: 2026-07-24 | Parent: agent-memory.md*
 
 > **Focus**: Architecture compliance, code review, import boundaries, DI violations, naming, scoring.
 

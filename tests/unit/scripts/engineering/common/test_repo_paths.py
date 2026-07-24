@@ -14,6 +14,8 @@ from scripts.engineering.common.repo_paths import (
     resolve_cli_path,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def test_ensure_repo_path_accepts_in_tree_path() -> None:
     target = REPO_ROOT / "scripts" / "engineering" / "common" / "repo_paths.py"
@@ -77,7 +79,7 @@ def test_ensure_safe_cli_argv_accepts_clean_tokens() -> None:
 def test_ensure_safe_cli_argv_accepts_windows_paths() -> None:
     from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 
-    root = r"E:\g-drive\05_AI\github\BioactivityDataAcquisition2"
+    root = r"E:\workspace\example\BioactivityDataAcquisition2"
     assert ensure_safe_cli_argv(["git", "-C", root, "ls-files"]) == [
         "git",
         "-C",

@@ -15,10 +15,14 @@ Test-McpOptionalToken `
     -AllowedPrefixes @("eyJ")
 Exit-McpValidateOnly -ServerName "prometheus"
 
+. (Join-Path $PSScriptRoot "support/mcp_docker_prune.ps1")
+Remove-McpExitedContainers -ImageMatch "prometheus-mcp-server"
+
 $dockerArgs = @(
     "run",
     "--rm",
     "-i",
+    "--label", "bioetl.mcp=prometheus",
     "-e",
     "PROMETHEUS_URL=$prometheusUrl"
 )

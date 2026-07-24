@@ -1,5 +1,5 @@
 {
-  "allowed_exception_count": 116,
+  "allowed_exception_count": 121,
   "allowed_exceptions": [
     {
       "kind": "import:pandera",
@@ -224,6 +224,41 @@
       "path": "src/bioetl/domain/contracts/gold/uniprot.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
       "symbol": "<module>"
+    },
+    {
+      "kind": "attribute_call:resolve",
+      "line": 143,
+      "path": "src/bioetl/domain/run_reports/accounting_snapshots.py",
+      "reason": "Catalog lookup method named resolve (not filesystem Path.resolve).",
+      "symbol": "StageAccountingSnapshotsMixin._removals_for_bucket"
+    },
+    {
+      "kind": "attribute_call:resolve",
+      "line": 119,
+      "path": "src/bioetl/domain/run_reports/reason_catalog.py",
+      "reason": "Catalog lookup method named resolve (not filesystem Path.resolve).",
+      "symbol": "ReasonCatalog.family_for"
+    },
+    {
+      "kind": "attribute_call:resolve",
+      "line": 122,
+      "path": "src/bioetl/domain/run_reports/reason_catalog.py",
+      "reason": "Catalog lookup method named resolve (not filesystem Path.resolve).",
+      "symbol": "ReasonCatalog.default_outcome_for"
+    },
+    {
+      "kind": "attribute_call:read_text",
+      "line": 170,
+      "path": "src/bioetl/domain/run_reports/reason_catalog.py",
+      "reason": "Loads package-local run-report reason catalog YAML from an explicit Path.",
+      "symbol": "_read_yaml_mapping"
+    },
+    {
+      "kind": "attribute_call:resolve",
+      "line": 216,
+      "path": "src/bioetl/domain/run_reports/reason_catalog.py",
+      "reason": "Locates package-root relative reason catalog path candidates.",
+      "symbol": "default_reason_catalog"
     },
     {
       "kind": "import:pandera",
@@ -816,7 +851,7 @@
   ],
   "domain_root": "src/bioetl/domain",
   "generated_by": "scripts.engineering.qa.report_domain_io_taint_inventory",
-  "scanned_file_count": 578,
+  "scanned_file_count": 588,
   "schema_version": 1,
   "violation_count": 0,
   "violations": []

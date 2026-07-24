@@ -12,7 +12,7 @@ Read before planning or editing:
 
 # ORCHESTRATION.md — Оркестрация команды subagent-ов BioETL
 
-*Версия: 4.2 | Дата: 2026-03-26 | Supersedes v4.1 | Платформа: Codex CLI*
+*Версия: 4.3 | Дата: 2026-07-24 | Supersedes v4.2 | Платформа: Codex CLI*
 
 ## 1. Обзор
 
@@ -577,6 +577,19 @@ ______________________________________________________________________
 ### v1.0 (2026-02-07)
 
 - Initial release: py-audit-bot, py-plan-bot, py-test-bot, py-debug-bot, py-doc-bot
+
+### v4.3 (2026-07-24)
+
+- **UPDATED**: Memory sheets synchronization — all `memory-py-*.md` updated to v1.0.1-v1.0.3
+- **UPDATED**: MCP memory configuration extended with new entities (agent-memory, memory-usage-policy, daily-workflow, orchestration-map, normative-sources)
+- **UPDATED**: Skill documentation (agent-orchestration) now references memory sheets and daily workflow
+- **UPDATED**: agent-memory.md synchronized to v1.0.17 with ORCHESTRATION.md v4.3
+- **CHANGED**: Memory workflow integration in agent-orchestration skill
+- **CHANGED**: Version references in memory sheets updated to 2026-07-24
+
+### v4.2 (2026-03-26)
+
+- Env file guardrail added (moved to end of changelog in v4.3)
 
 ## Env File Guardrail
 

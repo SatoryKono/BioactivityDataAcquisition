@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Protocol
+from typing import Protocol, runtime_checkable
 
 from bioetl.domain.run_reports.models import LayerCounts, StageFunnelRow
 
 
+@runtime_checkable
 class StageAccountingPort(Protocol):
     """Record and project bounded per-run funnel accounting."""
 

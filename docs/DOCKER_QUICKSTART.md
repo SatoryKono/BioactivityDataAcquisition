@@ -89,12 +89,29 @@ pipe (`dockerDesktopLinuxEngine`) disappears; `docker-desktop` WSL shows
 Crash-resistant path (preferred):
 
 ```powershell
-# Free-RAM check, dual engine stability, stop foreign containers, main --no-build.
+# One-shot: harden Desktop settings + .wslconfig, start main (+ neo4j).
 .\scripts\ops\runtime\docker\ensure-stable.ps1 -WithNeo4j
 
 # After OOM / pipe gone:
 .\scripts\ops\runtime\docker\ensure-stable.ps1 -RestartWsl -WithNeo4j
+
+# Permanent host harden + auto-recover every 5 min (Task Scheduler):
+.\scripts\ops\runtime\docker\harden-desktop-host.ps1 -RegisterWatchdog
+
+# MCP container thrash (duplicate mcp/brave-search, grafana, gateways):
+.\scripts\ops\runtime\docker\apply-docker-stable-mcp.ps1 -Profile stable -WithNeo4j
+.\scripts\ops\runtime\docker\cleanup-mcp-orphans.ps1 -IncludeGatewayHint
 ```
+
+`harden-desktop-host.ps1` sets Resource Saver effectively off
+(`AutoPauseTimeoutSeconds=604800`), AutoStart on, Extensions/AI off, and
+`.wslconfig memory=6GB`. The watchdog re-runs soft/hard ensure when the
+engine pipe dies (rate-limited; refuses hard restart if free RAM &lt; 3 GiB).
+
+Docker-backed MCP servers spawn **one container per AI session**. Use MCP
+profile `stable` (no gateway/`docker run` MCP) on 32 GiB hosts; keep tracked
+`.mcp.json` full for portable SSOT. See
+`docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md`.
 
 Hardening defaults on this host class:
 

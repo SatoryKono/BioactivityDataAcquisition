@@ -68,6 +68,33 @@ ALLOWED_CALL_EXCEPTIONS = {
         "Canonical DomainContext clock seam; production injection must override "
         "it for replay-sensitive flows."
     ),
+    # run_reports: catalog method name `resolve` is not Path.resolve; YAML load is
+    # a package-local reason map (bounded shipped asset), not general Domain I/O.
+    (
+        "src/bioetl/domain/run_reports/reason_catalog.py",
+        "ReasonCatalog.family_for",
+        "self.resolve",
+    ): "Catalog lookup method named resolve (not filesystem Path.resolve).",
+    (
+        "src/bioetl/domain/run_reports/reason_catalog.py",
+        "ReasonCatalog.default_outcome_for",
+        "self.resolve",
+    ): "Catalog lookup method named resolve (not filesystem Path.resolve).",
+    (
+        "src/bioetl/domain/run_reports/reason_catalog.py",
+        "_read_yaml_mapping",
+        "path.read_text",
+    ): "Loads package-local run-report reason catalog YAML from an explicit Path.",
+    (
+        "src/bioetl/domain/run_reports/reason_catalog.py",
+        "default_reason_catalog",
+        "resolve",
+    ): "Locates package-root relative reason catalog path candidates.",
+    (
+        "src/bioetl/domain/run_reports/accounting_snapshots.py",
+        "StageAccountingSnapshotsMixin._removals_for_bucket",
+        "self._catalog.resolve",
+    ): "Catalog lookup method named resolve (not filesystem Path.resolve).",
 }
 
 

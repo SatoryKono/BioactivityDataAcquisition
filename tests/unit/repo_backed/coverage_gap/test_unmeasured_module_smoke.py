@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-pytestmark = [pytest.mark.unit]
+pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
 
 
 def test_chembl_policy_family_mapping_indexes_by_name() -> None:

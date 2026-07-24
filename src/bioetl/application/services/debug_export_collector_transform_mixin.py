@@ -168,7 +168,17 @@ class DebugExportTransformRowsMixin:
                 records=(raw_payload, silver_payload),
                 status="rejected",
                 created_at=created_at,
-                failure=("filter", _gold_filter_reason_code(detail_mapping), _gold_filter_message(detail_mapping), _gold_filter_rule_id(detail_mapping), "gold", failed_field, failed_value, expected_constraint, _gold_filter_contract_version(detail_mapping)),
+                failure=(
+                    "filter",
+                    _gold_filter_reason_code(detail_mapping),
+                    _gold_filter_message(detail_mapping),
+                    _gold_filter_rule_id(detail_mapping),
+                    "gold",
+                    failed_field,
+                    failed_value,
+                    expected_constraint,
+                    _gold_filter_contract_version(detail_mapping),
+                ),
             )
         )
 
@@ -208,7 +218,17 @@ class DebugExportTransformRowsMixin:
                 records=(raw_payload, raw_payload),
                 status="quarantined" if policy == "quarantine" else "rejected",
                 created_at=created_at,
-                failure=(policy or reason_code, reason_code, reason_message, _extract_rule_id(details), "silver", failed_field, failed_value, expected_constraint, ""),
+                failure=(
+                    policy or reason_code,
+                    reason_code,
+                    reason_message,
+                    _extract_rule_id(details),
+                    "silver",
+                    failed_field,
+                    failed_value,
+                    expected_constraint,
+                    "",
+                ),
             )
         )
 

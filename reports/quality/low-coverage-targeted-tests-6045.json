@@ -1,80 +1,85 @@
 {
-  "schema_version": "low-coverage-targeted-tests-6045-v1",
-  "issue": 6045,
-  "reviewed_on": "2026-07-20",
-  "debt_budget_policy": "flat_or_decreasing_only",
-  "module_coverage_inventory_source_tree_sha256": "22ea10c83c34dabd0d4ce47add3908431f24dfca0492ffe2b8ffff6aa13545b7",
   "baseline": {
-    "partially_covered_modules_below_50_percent": 13,
-    "inventory_path": "reports/quality/module-coverage-inventory.json"
+    "inventory_path": "reports/quality/module-coverage-inventory.json",
+    "partially_covered_modules_below_50_percent": 13
   },
+  "closeout_decision": {
+    "decision": "target_lowest_pure_helper_modules_first",
+    "rationale": "The change adds focused tests for five modules from the below-50-percent inventory without widening fixtures or increasing architecture debt budgets.",
+    "status": "closed-ready"
+  },
+  "debt_budget_policy": "flat_or_decreasing_only",
+  "issue": 6045,
+  "module_coverage_inventory_source_tree_sha256": "f736e25ff320af2b03ec3216160cf5cd631646c6dd481ecd94e35e9aef9d48d6",
+  "reviewed_on": "2026-07-20",
+  "schema_version": "low-coverage-targeted-tests-6045-v1",
   "targeted_modules": [
     {
-      "module": "bioetl.infrastructure.quarantine.filtered_reads",
-      "path": "src/bioetl/infrastructure/quarantine/filtered_reads.py",
       "baseline_coverage_percent": 18.03,
-      "targeted_tests": [
-        "tests/unit/infrastructure/quarantine/test_filtered_reads_timeseries.py"
-      ],
       "covered_behaviors": [
         "partitioned and non-partitioned Delta filter construction",
         "unscoped lookup validation and missing-table fallback",
         "record pagination, sorting, option collection, and detailed CLI hint"
+      ],
+      "module": "bioetl.infrastructure.quarantine.filtered_reads",
+      "path": "src/bioetl/infrastructure/quarantine/filtered_reads.py",
+      "targeted_tests": [
+        "tests/unit/infrastructure/quarantine/test_filtered_reads_timeseries.py"
       ]
     },
     {
-      "module": "bioetl.infrastructure.quarantine._timeseries",
-      "path": "src/bioetl/infrastructure/quarantine/_timeseries.py",
       "baseline_coverage_percent": 21.74,
-      "targeted_tests": [
-        "tests/unit/infrastructure/quarantine/test_filtered_reads_timeseries.py"
-      ],
       "covered_behaviors": [
         "bucket aggregation",
         "invalid timestamp skipping",
         "run-id normalization and deterministic ordering"
+      ],
+      "module": "bioetl.infrastructure.quarantine._timeseries",
+      "path": "src/bioetl/infrastructure/quarantine/_timeseries.py",
+      "targeted_tests": [
+        "tests/unit/infrastructure/quarantine/test_filtered_reads_timeseries.py"
       ]
     },
     {
-      "module": "bioetl.infrastructure.quarantine._statistics_helpers",
-      "path": "src/bioetl/infrastructure/quarantine/_statistics_helpers.py",
       "baseline_coverage_percent": 27.78,
-      "targeted_tests": [
-        "tests/unit/infrastructure/quarantine/test_filtered_reads_timeseries.py"
-      ],
       "covered_behaviors": [
         "bucket parsing",
         "bucket start normalization",
         "unsupported bucket rejection"
+      ],
+      "module": "bioetl.infrastructure.quarantine._statistics_helpers",
+      "path": "src/bioetl/infrastructure/quarantine/_statistics_helpers.py",
+      "targeted_tests": [
+        "tests/unit/infrastructure/quarantine/test_filtered_reads_timeseries.py"
       ]
     },
     {
-      "module": "bioetl.interfaces.http._control_plane_selector_filters",
-      "path": "src/bioetl/interfaces/http/_control_plane_selector_filters.py",
       "baseline_coverage_percent": 42.86,
-      "targeted_tests": [
-        "tests/unit/interfaces/http/test_control_plane_selector_filters.py"
-      ],
       "covered_behaviors": [
         "exact run-id short-circuit",
         "multi-dimensional workflow/pipeline/run-type/status filtering",
         "latest record tie breaking"
+      ],
+      "module": "bioetl.interfaces.http._control_plane_selector_filters",
+      "path": "src/bioetl/interfaces/http/_control_plane_selector_filters.py",
+      "targeted_tests": [
+        "tests/unit/interfaces/http/test_control_plane_selector_filters.py"
       ]
     },
     {
-      "module": "bioetl.infrastructure.quarantine.record_encoding",
-      "path": "src/bioetl/infrastructure/quarantine/record_encoding.py",
       "baseline_coverage_percent": 46.67,
-      "targeted_tests": [
-        "tests/unit/infrastructure/quarantine/test_filtered_reads_timeseries.py"
-      ],
       "covered_behaviors": [
         "string escaping",
         "boolean literal regression",
         "numeric literal handling",
         "SHA256 payload hash calculation"
       ],
-      "production_fix": "quote_literal now checks bool before int/float so Delta predicates receive true/false instead of Python True/False."
+      "module": "bioetl.infrastructure.quarantine.record_encoding",
+      "path": "src/bioetl/infrastructure/quarantine/record_encoding.py",
+      "production_fix": "quote_literal now checks bool before int/float so Delta predicates receive true/false instead of Python True/False.",
+      "targeted_tests": [
+        "tests/unit/infrastructure/quarantine/test_filtered_reads_timeseries.py"
+      ]
     }
   ],
   "validation": [
@@ -85,13 +90,8 @@
     },
     {
       "command": ".venv/bin/python -m pytest tests/unit/infrastructure/quarantine/test_filtered_reads_timeseries.py tests/unit/interfaces/http/test_control_plane_selector_filters.py -q --cov=...",
-      "status": "not_recorded",
-      "reason": "Local pytest-cov collection hit deltalake/pandas import instability: numpy cannot load module more than once per process. Functional targeted tests pass and the canonical full-suite coverage inventory remains the authoritative coverage source."
+      "reason": "Local pytest-cov collection hit deltalake/pandas import instability: numpy cannot load module more than once per process. Functional targeted tests pass and the canonical full-suite coverage inventory remains the authoritative coverage source.",
+      "status": "not_recorded"
     }
-  ],
-  "closeout_decision": {
-    "status": "closed-ready",
-    "decision": "target_lowest_pure_helper_modules_first",
-    "rationale": "The change adds focused tests for five modules from the below-50-percent inventory without widening fixtures or increasing architecture debt budgets."
-  }
+  ]
 }

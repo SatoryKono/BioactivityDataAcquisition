@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
 from bioetl.application.core.entity_id import (
     compute_publication_term_entity_id,
     compute_subcellular_fraction_entity_id,

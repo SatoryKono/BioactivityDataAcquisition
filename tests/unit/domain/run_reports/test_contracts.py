@@ -5,14 +5,17 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
 from jsonschema.validators import validator_for
+
+pytestmark = pytest.mark.unit
 
 ROOT = Path(__file__).resolve().parents[4]
 CONTRACT_ROOT = ROOT / "configs" / "contracts" / "reports"
 FIXTURE_ROOT = ROOT / "tests" / "fixtures" / "reports"
 
 
-def _validate_fixture(*, schema_name: str, fixture_name: str) -> None:
+def validate_fixture(*, schema_name: str, fixture_name: str) -> None:
     schema = json.loads((CONTRACT_ROOT / schema_name).read_text(encoding="utf-8"))
     payload = json.loads((FIXTURE_ROOT / fixture_name).read_text(encoding="utf-8"))
     validator_class = validator_for(schema)
@@ -21,14 +24,14 @@ def _validate_fixture(*, schema_name: str, fixture_name: str) -> None:
 
 
 def test_pipeline_run_report_golden_matches_v1_schema() -> None:
-    _validate_fixture(
+    validate_fixture(
         schema_name="pipeline_run_report.v1.json",
         fixture_name="pipeline_run_report_golden.json",
     )
 
 
 def test_workflow_run_report_golden_matches_v1_schema() -> None:
-    _validate_fixture(
+    validate_fixture(
         schema_name="workflow_run_report.v1.json",
         fixture_name="workflow_run_report_golden.json",
     )

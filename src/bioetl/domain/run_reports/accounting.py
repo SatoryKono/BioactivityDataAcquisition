@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from collections import defaultdict
 
+from bioetl.domain.ports import StageAccountingPort
+from bioetl.domain.run_reports._stage_bucket import _StageBucket
 from bioetl.domain.run_reports.accounting_snapshots import (
     StageAccountingSnapshotsMixin,
 )
@@ -29,20 +31,7 @@ _DEFAULT_INSTRUMENTED_STAGES = frozenset(
 )
 
 
-class _StageBucket:
-    """Private mutable accumulator cell (not a domain value object)."""
-
-    __slots__ = ("instrumented", "records_in", "records_out", "removals", "samples")
-
-    def __init__(self) -> None:
-        self.records_in = 0
-        self.records_out = 0
-        self.removals: dict[tuple[str, str], int] = {}
-        self.samples: dict[tuple[str, str], list[str]] = {}
-        self.instrumented = False
-
-
-class StageAccountingAccumulator(StageAccountingSnapshotsMixin):
+class StageAccountingAccumulator(StageAccountingSnapshotsMixin, StageAccountingPort):
     """Mutable per-run accumulator; snapshot methods are pure projections."""
 
     def __init__(

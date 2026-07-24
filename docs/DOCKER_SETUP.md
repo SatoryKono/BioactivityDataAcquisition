@@ -118,6 +118,10 @@ mean **host free RAM collapsed**, not a broken compose contract. Prefer:
 
 # After OOM / missing npipe dockerDesktopLinuxEngine:
 .\scripts\ops\runtime\docker\ensure-stable.ps1 -RestartWsl -WithNeo4j
+
+# Host harden + scheduled auto-recover (recommended once per machine):
+.\scripts\ops\runtime\docker\harden-desktop-host.ps1 -RegisterWatchdog
+# Remove: .\scripts\ops\runtime\docker\harden-desktop-host.ps1 -UnregisterWatchdog
 ```
 
 Operator-reviewed host defaults for this class of machine (not auto-written by

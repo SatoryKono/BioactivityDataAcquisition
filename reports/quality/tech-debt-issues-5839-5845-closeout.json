@@ -1,35 +1,30 @@
 {
-  "schema_version": "tech-debt-issues-5839-5845-closeout-v1",
-  "generated_on": "2026-07-04",
   "debt_budget_policy": "flat_or_decreasing_only",
-  "parent_theme": "tdx-audit-2026-07-01",
+  "generated_on": "2026-07-04",
   "issues": [
     {
-      "number": 5839,
-      "title": "TDX-AUDIT-001 Ratchet retained public entrypoints and lazy export facades to canonical imports",
-      "status": "closed-ready",
       "evidence": [
         "reports/quality/compatibility-importer-census.json",
         "reports/quality/compatibility-importer-census.md",
         "docs/02-architecture/07-compatibility-facade-snapshot.md",
         "configs/quality/compatibility_facade_inventory.yaml"
-      ]
+      ],
+      "number": 5839,
+      "status": "closed-ready",
+      "title": "TDX-AUDIT-001 Ratchet retained public entrypoints and lazy export facades to canonical imports"
     },
     {
-      "number": 5840,
-      "title": "TDX-AUDIT-002 Collapse adapter fetch and resilience duplication under canonical template owners",
-      "status": "closed-ready",
       "evidence": [
         "reports/quality/full-app-duplication-baseline.json",
         "src/bioetl/infrastructure/adapters/common/error_bundles.py",
         "src/bioetl/infrastructure/adapters/pubmed/_errors.py",
         "src/bioetl/infrastructure/adapters/common/fetch_resilience_template.py"
-      ]
+      ],
+      "number": 5840,
+      "status": "closed-ready",
+      "title": "TDX-AUDIT-002 Collapse adapter fetch and resilience duplication under canonical template owners"
     },
     {
-      "number": 5841,
-      "title": "TDX-AUDIT-003 Consolidate pipeline transformer contract duplication across provider families",
-      "status": "closed-ready",
       "evidence": [
         "reports/quality/full-app-duplication-baseline.json",
         "src/bioetl/application/pipelines/common/base_publication_transformer.py",
@@ -37,22 +32,22 @@
         "src/bioetl/application/pipelines/crossref/transformer.py",
         "src/bioetl/application/pipelines/openalex/transformer.py",
         "src/bioetl/application/pipelines/semanticscholar/transformer.py"
-      ]
+      ],
+      "number": 5841,
+      "status": "closed-ready",
+      "title": "TDX-AUDIT-003 Consolidate pipeline transformer contract duplication across provider families"
     },
     {
-      "number": 5842,
-      "title": "TDX-AUDIT-004 Remove classified zero-import domain ports after importer proof",
-      "status": "closed-ready",
       "evidence": [
         "reports/quality/dead-code-inventory.json",
         "reports/quality/dead-code-inventory.md",
         "configs/quality/retirement_candidate_triage.yaml"
-      ]
+      ],
+      "number": 5842,
+      "status": "closed-ready",
+      "title": "TDX-AUDIT-004 Remove classified zero-import domain ports after importer proof"
     },
     {
-      "number": 5843,
-      "title": "TDX-AUDIT-005 Extract shared composite config policy blocks into a canonical authority surface",
-      "status": "closed-ready",
       "evidence": [
         "reports/quality/config-surface-backlog.json",
         "configs/composites/field_groups/shared_policy.yaml",
@@ -61,32 +56,60 @@
         "configs/composites/molecule.yaml",
         "configs/composites/publication.yaml",
         "configs/composites/target.yaml"
-      ]
+      ],
+      "number": 5843,
+      "status": "closed-ready",
+      "title": "TDX-AUDIT-005 Extract shared composite config policy blocks into a canonical authority surface"
     },
     {
-      "number": 5844,
-      "title": "TDX-AUDIT-006 Reopen hotspot tail coverage ratchet for replay-sensitive runtime seams",
-      "status": "closed-ready",
       "evidence": [
         "reports/quality/module-coverage-inventory.json",
         "reports/quality/hotspot-coverage-tail-owner-map.json",
         "reports/quality/coverage-tail-branch-gate-plan.md",
         "reports/coverage/runtime-basics-targeted-5795.xml",
         "tests/unit/composition/bootstrap/runtime/test_runtime_basics.py"
-      ]
+      ],
+      "number": 5844,
+      "status": "closed-ready",
+      "title": "TDX-AUDIT-006 Reopen hotspot tail coverage ratchet for replay-sensitive runtime seams"
     },
     {
-      "number": 5845,
-      "title": "TDX-AUDIT-007 Turn zero-reference supporting scripts into explicit owner-or-removal governance",
-      "status": "closed-ready",
       "evidence": [
         "configs/quality/scripts_inventory_manifest.json",
         "configs/quality/scripts_lifecycle_registry.json",
         "reports/quality/scripts_deprecation_backlog.md"
-      ]
+      ],
+      "number": 5845,
+      "status": "closed-ready",
+      "title": "TDX-AUDIT-007 Turn zero-reference supporting scripts into explicit owner-or-removal governance"
     }
   ],
   "metrics": {
+    "adapter_duplicate_clusters": {
+      "current": 0,
+      "max": 0,
+      "previous_audit_baseline": 54,
+      "source": "reports/quality/full-app-duplication-baseline.json"
+    },
+    "config_surface_duplicate_clusters": {
+      "current": 22,
+      "max": 23,
+      "previous_audit_baseline": 24,
+      "source": "reports/quality/config-surface-backlog.json"
+    },
+    "pipeline_duplicate_clusters": {
+      "current": 0,
+      "max": 10,
+      "previous_audit_baseline": 11,
+      "source": "reports/quality/full-app-duplication-baseline.json"
+    },
+    "repo_wide_zero_import_candidates": {
+      "classified": 2,
+      "current": 2,
+      "owner_test_anchored": 2,
+      "source": "reports/quality/dead-code-inventory.json",
+      "untriaged": 0
+    },
     "retained_public_entrypoints": {
       "current": 12,
       "max": 12,
@@ -97,35 +120,10 @@
       "max": 4,
       "source": "reports/quality/compatibility-importer-census.json"
     },
-    "adapter_duplicate_clusters": {
-      "current": 0,
-      "max": 0,
-      "previous_audit_baseline": 54,
-      "source": "reports/quality/full-app-duplication-baseline.json"
-    },
-    "pipeline_duplicate_clusters": {
-      "current": 0,
-      "max": 10,
-      "previous_audit_baseline": 11,
-      "source": "reports/quality/full-app-duplication-baseline.json"
-    },
-    "repo_wide_zero_import_candidates": {
-      "current": 1,
-      "classified": 1,
-      "owner_test_anchored": 1,
-      "untriaged": 0,
-      "source": "reports/quality/dead-code-inventory.json"
-    },
-    "config_surface_duplicate_clusters": {
-      "current": 22,
-      "max": 23,
-      "previous_audit_baseline": 24,
-      "source": "reports/quality/config-surface-backlog.json"
-    },
     "runtime_basics_coverage_percent": {
       "current": 76.32,
-      "targeted_line_rate": 1.0,
-      "source": "reports/quality/module-coverage-inventory.json"
+      "source": "reports/quality/module-coverage-inventory.json",
+      "targeted_line_rate": 1.0
     },
     "zero_reference_supporting_scripts": {
       "current": 32,
@@ -135,39 +133,41 @@
   },
   "outcomes": {
     "5839": {
-      "status": "closeable",
+      "debt_outcome": "unchanged_but_governed",
       "outcome": "Retained compatibility seams have owner, consumer class, sunset status, and zero first-party src importer burden.",
-      "debt_outcome": "unchanged_but_governed"
+      "status": "closeable"
     },
     "5840": {
-      "status": "closeable",
+      "debt_outcome": "improved",
       "outcome": "Adapter duplicate clusters are below the 2026-07-01 audit baseline and point to canonical resilience/error bundle owners.",
-      "debt_outcome": "improved"
+      "status": "closeable"
     },
     "5841": {
-      "status": "closeable",
+      "debt_outcome": "improved",
       "outcome": "Pipeline duplicate clusters are below the 2026-07-01 audit baseline and publication transformers delegate shared defaults to common owners.",
-      "debt_outcome": "improved"
+      "status": "closeable"
     },
     "5842": {
-      "status": "closeable",
+      "debt_outcome": "unchanged_but_governed",
       "outcome": "Repo-wide zero-import candidates are fully classified, owner-test anchored, and have no untriaged residue.",
-      "debt_outcome": "unchanged_but_governed"
+      "status": "closeable"
     },
     "5843": {
-      "status": "closeable",
+      "debt_outcome": "improved",
       "outcome": "Composite configs reference a canonical shared_policy.yaml authority and retain entity-specific deltas only for merge/lineage policy.",
-      "debt_outcome": "improved"
+      "status": "closeable"
     },
     "5844": {
-      "status": "closeable",
+      "debt_outcome": "improved",
       "outcome": "Replay-sensitive runtime tail has committed targeted coverage evidence and remains anchored in the hotspot owner map.",
-      "debt_outcome": "improved"
+      "status": "closeable"
     },
     "5845": {
-      "status": "closeable",
+      "debt_outcome": "unchanged_but_governed",
       "outcome": "Zero-reference supporting scripts have explicit owner, lifecycle decision, review date, and next step metadata.",
-      "debt_outcome": "unchanged_but_governed"
+      "status": "closeable"
     }
-  }
+  },
+  "parent_theme": "tdx-audit-2026-07-01",
+  "schema_version": "tech-debt-issues-5839-5845-closeout-v1"
 }

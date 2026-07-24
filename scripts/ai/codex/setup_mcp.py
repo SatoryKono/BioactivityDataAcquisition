@@ -41,17 +41,28 @@ REMOVED_MCP_SERVER_NAMES = frozenset(
 
 # Least-privilege local materialization profiles. Tracked portable inventory
 # stays full unless a separate reviewed change says otherwise.
-MCP_PROFILE_CORE = (
+#
+# Docker-backed MCP (stdio `docker run` / `docker mcp gateway`) multiplies
+# containers per AI client session and is a primary thrash source on 32 GiB
+# hosts. Prefer `stable` or `core` for daily work; enable graph/full only when
+# the task needs those tools.
+MCP_PROFILE_STABLE = (
+    # No Docker/gateway/stdio container MCP — host process or remote HTTP only.
     "memory",
     "filesystem",
     "fetch",
     "github",
     "context7",
     "ast-grep",
-    "mermaid",
     "deja",
     "adr-analysis",
     "code-analyzer",
+    "deepwiki",
+    "ref",
+)
+MCP_PROFILE_CORE = MCP_PROFILE_STABLE + (
+    # mermaid still uses docker mcp gateway (heavier than pure host MCP).
+    "mermaid",
 )
 MCP_PROFILE_OPS = MCP_PROFILE_CORE + (
     "prometheus",
@@ -62,13 +73,12 @@ MCP_PROFILE_GRAPH = MCP_PROFILE_OPS + (
     "neo4j-cypher",
     "neo4j-memory",
     "brave-search",
-    "deepwiki",
-    "ref",
     "mutmut",
     "mcp-code-interpreter",
     "docker",
 )
 MCP_PROFILES: dict[str, tuple[str, ...] | None] = {
+    "stable": MCP_PROFILE_STABLE,
     "core": MCP_PROFILE_CORE,
     "ops": MCP_PROFILE_OPS,
     "graph": MCP_PROFILE_GRAPH,
@@ -788,12 +798,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--profile",
         choices=sorted(MCP_PROFILES),
-        default="full",
+        # Default local projections to core (not full) so Docker MCP gateways
+        # and multi-client container thrash are opt-in via graph/full.
+        default="core",
         help=(
             "Least-privilege local materialization profile for IDE/Codex local "
-            "projections (core|ops|graph|full). Tracked portable inventory "
-            "(.mcp.json, scripts/ai/.mcp.json, .zed/mcp.json, .devin/config.json) "
-            "always stays full."
+            "projections (stable|core|ops|graph|full). Default: core. "
+            "Tracked portable inventory (.mcp.json, scripts/ai/.mcp.json, "
+            ".zed/mcp.json, .devin/config.json) always stays full. "
+            "Use stable on 32 GiB Docker Desktop hosts to drop gateway MCP."
         ),
     )
     args = parser.parse_args(list(argv) if argv is not None else None)

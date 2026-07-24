@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
 from types import SimpleNamespace
 
 from bioetl.application.core.preflight._observability import emit_preflight_health_results

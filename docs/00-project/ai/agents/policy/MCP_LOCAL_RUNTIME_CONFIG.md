@@ -78,16 +78,40 @@ privilege servers are not always-on:
 
 | Profile | Membership intent | Default for daily coding? |
 | --- | --- | --- |
-| `core` | memory, filesystem, fetch, github, context7, ast-grep, mermaid, deja, adr-analysis, code-analyzer | **yes** |
+| `stable` | host/HTTP MCP only (no `docker run` / `docker mcp gateway` servers) | **yes on 32 GiB Docker Desktop hosts** |
+| `core` | `stable` + mermaid (gateway) | default generator profile |
 | `ops` | `core` + prometheus, grafana, github-actions | observability / dashboard work |
-| `graph` | `ops` + neo4j-cypher, neo4j-memory, brave-search, deepwiki, ref, mutmut, mcp-code-interpreter, docker | research / graph / mutation work |
+| `graph` | `ops` + neo4j-*, brave-search, mutmut, mcp-code-interpreter, docker | research / graph / mutation work |
 | `full` | entire sanctioned inventory (same as tracked portable set) | only when explicitly needed |
 
-Generator:
+### Why Docker MCP multiplies containers
+
+Stdio MCP transport starts **one process/container per client session**. Each
+AI host (Grok, Cursor, WSL gateway, etc.) that loads docker-backed servers
+(`brave-search`, `docker`, `mermaid`, `grafana`, `prometheus`, …) can leave
+orphans with random names (`elastic_*`, labels `docker-mcp=true`). On 32 GiB
+hosts this thrash is a primary Docker Desktop failure mode — not a BioETL
+compose bug.
+
+### Generator
 
 ```bash
+# Daily / Docker-stable (recommended on this host class):
+python scripts/ai/codex/setup_mcp.py --profile stable --skip-codex-validation
+
+# Default generator profile (core):
 python scripts/ai/codex/setup_mcp.py --profile core --skip-codex-validation
+
+# Full local enablement:
 python scripts/ai/codex/setup_mcp.py --profile full --skip-codex-validation
+```
+
+One-shot host apply (profile + orphan cleanup + ensure-stable):
+
+```powershell
+.\scripts\ops\runtime\docker\apply-docker-stable-mcp.ps1 -Profile stable -WithNeo4j
+# orphans only:
+.\scripts\ops\runtime\docker\cleanup-mcp-orphans.ps1 -IncludeGatewayHint
 ```
 
 Rules:
@@ -96,9 +120,12 @@ Rules:
    portable **full** inventory SSOT unless a separate reviewed change says
    otherwise.
 2. Profiles filter **local** projections (`.cursor/mcp.json`, `.vscode/mcp.json`,
-   workspace `.codex/settings.json`, optional local-only targets).
+   workspace `.codex/settings.json`, optional local-only targets). Generator
+   default profile is **`core`** (not `full`).
 3. Retired servers in `REMOVED_MCP_SERVER_NAMES` must never reappear.
 4. Do not increase tech-debt budgets to paper over privilege sprawl.
+5. Prefer **one** AI client with a heavy Docker MCP profile at a time; after
+   reconnects run `cleanup-mcp-orphans.ps1` or `ensure-stable.ps1`.
 
 ## Token Configuration
 

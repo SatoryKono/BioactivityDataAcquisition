@@ -26,7 +26,7 @@ Decompose work into L2/L3 agents, enforce constraints, aggregate evidence, and p
 - `../../../docs/00-project/ai/memory/agent-memory.md`
 - `../../../docs/00-project/ai/memory/memory-py-test-swarm.md`
 - `../../../docs/00-project/ai/memory/memory-py-test-bot.md`
-- `../../../.codex/agents/ORCHESTRATION.md` (sections 2-7)
+- `../../../.codex/agents/ORCHESTRATION.md` (v4.3, sections 2-7)
 
 3. Read profile:
 

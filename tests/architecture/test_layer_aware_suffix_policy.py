@@ -293,6 +293,8 @@ def test_non_composition_builder_suffix_policy_is_exception_free() -> None:
         "src/bioetl/application/composite/dependency_join_context_builders.py",
         "src/bioetl/application/services/dq/dq_report_builders.py",
         "src/bioetl/application/services/lineage/metadata_lineage_node_builders.py",
+        "src/bioetl/domain/run_reports/pipeline_builder.py",
+        "src/bioetl/domain/run_reports/workflow_builder.py",
         "src/bioetl/domain/value_objects/dq_report_builder.py",
         "src/bioetl/infrastructure/adapters/crossref/client_builders.py",
         "src/bioetl/infrastructure/adapters/crossref/query_builder.py",

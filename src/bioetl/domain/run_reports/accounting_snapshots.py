@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
+from bioetl.domain.run_reports._stage_bucket import _StageBucket
 from bioetl.domain.run_reports.models import (
     BalanceStatus,
     LayerCounts,
@@ -12,9 +11,6 @@ from bioetl.domain.run_reports.models import (
     StageId,
     TrackingCoverage,
 )
-
-if TYPE_CHECKING:
-    from bioetl.domain.run_reports.accounting import _StageBucket
 
 
 class StageAccountingSnapshotsMixin:
@@ -53,8 +49,6 @@ class StageAccountingSnapshotsMixin:
 
     def snapshot_funnel(self, layers: LayerCounts) -> tuple[StageFunnelRow, ...]:
         """Project ordered funnel rows with conservation checks."""
-        from bioetl.domain.run_reports.accounting import _StageBucket
-
         order = (
             StageId.EXTRACT.value,
             StageId.BRONZE.value,
