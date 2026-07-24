@@ -72,6 +72,13 @@ def _first_present(source: Mapping[str, object], *names: str) -> object:
     return next((source.get(name) for name in names if source.get(name) is not None), None)
 
 
+def _first_attribute(source: object, *names: str) -> object:
+    return next(
+        (getattr(source, name, None) for name in names if getattr(source, name, None)),
+        None,
+    )
+
+
 def _mapping_counts(raw: Mapping[str, object]) -> dict[str, int | None]:
     explicit = _extract_counts(raw)
     if explicit["records_extracted"] != 0 or raw.get("payload") is None:
@@ -110,14 +117,16 @@ def _object_execution(raw: object) -> _NormalizedExecution:
     )
     return _normalized_row(
         step_id=getattr(raw, "step_id", None),
-        kind=getattr(raw, "step_kind", None) or getattr(raw, "kind", None),
+        kind=_first_attribute(raw, "step_kind", "kind"),
         status=getattr(raw, "status", None),
         pipeline_name=getattr(raw, "pipeline_name", None),
         counts=counts,
-        pipeline_run_id=getattr(raw, "child_run_id", None)
-        or getattr(raw, "pipeline_run_id", None),
-        pipeline_manifest_id=getattr(raw, "child_manifest_id", None)
-        or getattr(raw, "pipeline_manifest_id", None),
+        pipeline_run_id=_first_attribute(raw, "child_run_id", "pipeline_run_id"),
+        pipeline_manifest_id=_first_attribute(
+            raw,
+            "child_manifest_id",
+            "pipeline_manifest_id",
+        ),
         pipeline_report_ref=getattr(raw, "pipeline_report_ref", None),
         error_type=getattr(raw, "error_type", None),
         error_message=getattr(raw, "error_message", None),
@@ -128,6 +137,29 @@ def _object_execution(raw: object) -> _NormalizedExecution:
 
 def _optional_text(value: object) -> str | None:
     return None if value in (None, "") else str(value)
+
+
+def _default_report_ref(
+    report_ref: str | None,
+    run_id: str | None,
+    pipeline_name: str | None,
+) -> str | None:
+    if report_ref is not None or not run_id or not pipeline_name:
+        return report_ref
+    return (
+        f"reports/run-reports/pipeline/{pipeline_name}/{run_id}/"
+        "pipeline-run-report.json"
+    )
+
+
+def _resolve_top_reasons(
+    raw_reasons: object,
+    report_ref: str | None,
+) -> tuple[dict[str, Any], ...]:
+    reasons = _normalize_top_reasons(raw_reasons)
+    if reasons or report_ref is None:
+        return reasons
+    return _load_child_top_reasons(report_ref)
 
 
 def _normalized_row(
@@ -146,15 +178,13 @@ def _normalized_row(
     skip_reason: object = None,
 ) -> _NormalizedExecution:
     name = _optional_text(pipeline_name)
-    report_ref = _optional_text(pipeline_report_ref)
     run_id = _optional_text(pipeline_run_id)
-    if report_ref is None and run_id and name:
-        report_ref = (
-            f"reports/run-reports/pipeline/{name}/{run_id}/pipeline-run-report.json"
-        )
-    reasons = _normalize_top_reasons(top_reasons)
-    if not reasons and report_ref:
-        reasons = _load_child_top_reasons(report_ref)
+    report_ref = _default_report_ref(
+        _optional_text(pipeline_report_ref),
+        run_id,
+        name,
+    )
+    reasons = _resolve_top_reasons(top_reasons, report_ref)
     row = WorkflowExecutionRow(
         step_id=str(step_id or ""),
         kind=_optional_text(kind),
@@ -180,22 +210,22 @@ def _normalize_top_reasons(
 ) -> tuple[dict[str, Any], ...]:  # Any: reason payload
     if not isinstance(raw, Sequence) or isinstance(raw, (str, bytes)):
         return ()
-    items: list[dict[str, Any]] = []  # Any: reason payload
-    for entry in raw:
-        if not isinstance(entry, Mapping):
-            continue
-        code = entry.get("reason_code")
-        if code in (None, ""):
-            continue
-        items.append(
-            {
-                "reason_code": str(code),
-                "outcome": entry.get("outcome"),
-                "reason_family": entry.get("reason_family"),
-                "count": _as_int(entry.get("count")),
-            }
-        )
-    return tuple(items[:3])
+    items = (_normalize_reason(entry) for entry in raw)
+    return tuple(item for item in items if item is not None)[:3]
+
+
+def _normalize_reason(entry: object) -> dict[str, Any] | None:
+    if not isinstance(entry, Mapping):
+        return None
+    code = entry.get("reason_code")
+    if code in (None, ""):
+        return None
+    return {
+        "reason_code": str(code),
+        "outcome": entry.get("outcome"),
+        "reason_family": entry.get("reason_family"),
+        "count": _as_int(entry.get("count")),
+    }
 
 
 def _load_child_top_reasons(
@@ -309,13 +339,7 @@ def _build_reasons_rollup(
     totals: dict[tuple[str, str | None, str | None], int] = {}
     for row in rows:
         for item in row.top_reasons:
-            key = (
-                str(item.get("reason_code")),
-                item.get("outcome") if isinstance(item.get("outcome"), str) else None,
-                item.get("reason_family")
-                if isinstance(item.get("reason_family"), str)
-                else None,
-            )
+            key = _reason_key(item)
             totals[key] = totals.get(key, 0) + _as_int(item.get("count"))
     ranked = sorted(totals.items(), key=lambda entry: (-entry[1], entry[0][0]))
     return tuple(
@@ -327,3 +351,17 @@ def _build_reasons_rollup(
         }
         for (code, outcome, family), count in ranked[:10]
     )
+
+
+def _reason_key(
+    item: Mapping[str, Any],
+) -> tuple[str, str | None, str | None]:
+    return (
+        str(item.get("reason_code")),
+        _optional_reason_text(item.get("outcome")),
+        _optional_reason_text(item.get("reason_family")),
+    )
+
+
+def _optional_reason_text(value: object) -> str | None:
+    return value if isinstance(value, str) else None
