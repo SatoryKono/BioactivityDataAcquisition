@@ -106,13 +106,13 @@ jobs:
 
       - name: Check generated pipeline dataflow drift
         run: |
-          uv run --frozen --no-build python -m scripts.diagrams generate-dataflows \
+          uv run --frozen python -m scripts.diagrams generate-dataflows \
             --pipeline chembl_activity \
             --check
 
       - name: Run docs-governance architecture tests
         run: |
-          uv run --frozen --no-build pytest \
+          uv run --frozen pytest \
             tests/architecture/test_architecture_dependency_docs_drift.py::test_dependency_map_drift_check_passes_current_repo \
             tests/architecture/test_config_topology_docs_drift.py \
             tests/architecture/test_control_plane_runtime_docs_alignment.py \
@@ -147,18 +147,18 @@ jobs:
 
       - name: Validate xwalk missing backlog
         run: |
-          uv run --frozen --no-build python -m scripts.engineering.qa check-xwalk-missing-backlog \
+          uv run --frozen python -m scripts.engineering.qa check-xwalk-missing-backlog \
             --json-out reports/quality/xwalk-missing-backlog.json \
             --markdown-out reports/quality/xwalk-missing-backlog.md
 
       - name: Check dashboard inventory parity
-        run: uv run --frozen --no-build python -m scripts.engineering.qa report-dashboard-inventory --check --json
+        run: uv run --frozen python -m scripts.engineering.qa report-dashboard-inventory --check --json
 
       - name: Check dashboard panel audit matrix parity
-        run: uv run --frozen --no-build python -m scripts.engineering.qa report-dashboard-panel-audit-matrix --check
+        run: uv run --frozen python -m scripts.engineering.qa report-dashboard-panel-audit-matrix --check
 
       - name: Check dashboard panel title inventory parity
-        run: uv run --frozen --no-build python -m scripts.engineering.qa report-panel-title-inventory --check
+        run: uv run --frozen python -m scripts.engineering.qa report-panel-title-inventory --check
 
   validate-mkdocs:
     needs: docs-governance
@@ -175,10 +175,10 @@ jobs:
           uv-extras: "docs"
 
       - name: Validate version consistency
-        run: uv run --frozen --no-build python -m scripts.engineering.repo check-versions
+        run: uv run --frozen python -m scripts.engineering.repo check-versions
 
       - name: Run documentation integrity guardrails
-        run: uv run --frozen --no-build python -m scripts.docs check-links --links --specs --configs --report-json docs/reports/docs-link-check-report.json
+        run: uv run --frozen python -m scripts.docs check-links --links --specs --configs --report-json docs/reports/docs-link-check-report.json
 
       - name: Upload docs link-check report artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
@@ -187,17 +187,17 @@ jobs:
           path: docs/reports/docs-link-check-report.json
 
       - name: Run docs-config parity gate
-        run: uv run --frozen --no-build python scripts/check_entity_config_parity.py
+        run: uv run --frozen python scripts/check_entity_config_parity.py
 
       - name: Run canonical docs verification chain
-        run: uv run --frozen --no-build python -m scripts.docs verify
+        run: uv run --frozen python -m scripts.docs verify
 
       - name: Check architecture dependency docs drift
-        run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check
+        run: uv run --frozen python scripts/engineering/qa/generate_architecture_dependency_map.py --check
 
       - name: Regenerate architecture dependency docs (PR preflight)
         if: github.event_name == 'pull_request'
-        run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --update
+        run: uv run --frozen python scripts/engineering/qa/generate_architecture_dependency_map.py --update
 
       - name: Assert regenerated dependency docs are committed
         if: github.event_name == 'pull_request'

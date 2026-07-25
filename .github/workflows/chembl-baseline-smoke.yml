@@ -87,7 +87,7 @@ jobs:
       - name: Run ChemblBaseline CLI + runner smoke
         run: |
           mkdir -p reports/junit
-          uv run --frozen --no-build pytest \
+          uv run --frozen pytest \
             tests/unit/infrastructure/config/test_workflow_config_api.py \
             tests/unit/application/services/test_workflow_runner_service.py \
             tests/unit/application/services/test_workflow_transform_service.py \
@@ -132,7 +132,7 @@ jobs:
       - name: Run ChemblBaseline reconciliation integration smoke
         run: |
           mkdir -p reports/junit
-          uv run --frozen --no-build pytest \
+          uv run --frozen pytest \
             tests/integration/workflow/test_workflow_foreign_key_reconciliation.py \
             -q --tb=short \
             --junitxml=reports/junit/chembl-baseline-reconciliation.xml
@@ -171,8 +171,8 @@ jobs:
       - name: Validate ChemblBaseline config and workflow architecture
         run: |
           mkdir -p reports/junit
-          uv run --frozen --no-build python -m scripts.schema validate-configs
-          uv run --frozen --no-build pytest \
+          uv run --frozen python -m scripts.schema validate-configs
+          uv run --frozen pytest \
             tests/architecture/test_chembl_baseline_smoke_workflow.py \
             tests/architecture/test_github_actions_runtime_policy.py \
             -q --tb=short \

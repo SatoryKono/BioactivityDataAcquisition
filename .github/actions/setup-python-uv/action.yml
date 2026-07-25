@@ -95,11 +95,11 @@ runs:
         echo "Running: ${CMD}"
         ${CMD}
 
-    - name: Pin locked/no-build defaults for subsequent uv run steps
+    - name: Pin locked defaults for subsequent uv run steps
       shell: bash
       run: |
         # Defense-in-depth for CI steps that call `uv run` without flags.
-        # Workflows also pass --frozen/--no-build explicitly for Sonar S8544/S8541.
+        # Workflows also pass --frozen explicitly for Sonar S8544/S8541.
         {
           echo "UV_FROZEN=1"
         } >> "$GITHUB_ENV"

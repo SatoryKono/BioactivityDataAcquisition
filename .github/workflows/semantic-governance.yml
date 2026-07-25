@@ -82,29 +82,29 @@ jobs:
           uv-extras: "dev"
 
       - name: Verify semantic audit generated artifacts
-        run: uv run --frozen --no-build python -m scripts.engineering.qa report-semantic-pipeline-audit --check
+        run: uv run --frozen python -m scripts.engineering.qa report-semantic-pipeline-audit --check
 
       - name: Verify semantic pair-matrix budget
-        run: uv run --frozen --no-build python -m scripts.engineering.qa check-semantic-pair-budget --check --json
+        run: uv run --frozen python -m scripts.engineering.qa check-semantic-pair-budget --check --json
 
       - name: Verify semantic registry drift
-        run: uv run --frozen --no-build python -m scripts.engineering.qa check-semantic-registry-drift --check --json
+        run: uv run --frozen python -m scripts.engineering.qa check-semantic-registry-drift --check --json
 
       - name: Verify semantic governance policy
-        run: uv run --frozen --no-build python -m scripts.engineering.qa check-semantic-governance-policy --check --json
+        run: uv run --frozen python -m scripts.engineering.qa check-semantic-governance-policy --check --json
 
       - name: Verify semantic anchor parity
-        run: uv run --frozen --no-build python -m scripts.engineering.qa check-semantic-anchor-parity --check --json
+        run: uv run --frozen python -m scripts.engineering.qa check-semantic-anchor-parity --check --json
 
       - name: Verify generic field ownership
-        run: uv run --frozen --no-build python -m scripts.engineering.qa check-generic-field-ownership --check --json
+        run: uv run --frozen python -m scripts.engineering.qa check-generic-field-ownership --check --json
 
       - name: Verify ontology/unit semantic separation
-        run: uv run --frozen --no-build python -m scripts.engineering.qa check-ontology-unit-semantics --check --json
+        run: uv run --frozen python -m scripts.engineering.qa check-ontology-unit-semantics --check --json
 
       - name: Run semantic governance regression tests
         run: |
-          uv run --frozen --no-build pytest -p no:benchmark --noconftest \
+          uv run --frozen pytest -p no:benchmark --noconftest \
             tests/integration/config/test_semantic_field_unification_contract.py \
             tests/integration/config/test_semantic_governance_policy.py \
             tests/integration/config/test_semantic_pair_matrix_budget.py \

@@ -64,7 +64,7 @@ jobs:
 
       - name: Run replay contract suites
         run: |
-          uv run --frozen --no-build python -m pytest \
+          uv run --frozen python -m pytest \
             tests/contract/test_provider_contract_drift_helper.py \
             tests/contract/test_provider_contract_snapshot_registry.py \
             tests/contract/test_provider_contract_replay_registry.py \
@@ -74,12 +74,12 @@ jobs:
 
       - name: Run xwalk and generated normalization artifact drift gates
         run: |
-          uv run --frozen --no-build python -m scripts.engineering.qa check-xwalk-missing-backlog
-          uv run --frozen --no-build python -m scripts.docs generate-pipeline-normalization-matrix --check
+          uv run --frozen python -m scripts.engineering.qa check-xwalk-missing-backlog
+          uv run --frozen python -m scripts.docs generate-pipeline-normalization-matrix --check
 
       - name: Generate provider drift artifact
         run: |
-          uv run --frozen --no-build python -m scripts.engineering.qa report-provider-contract-drift \
+          uv run --frozen python -m scripts.engineering.qa report-provider-contract-drift \
             --output reports/quality/provider-contract-drift-report.json \
             --fail-on breaking
 

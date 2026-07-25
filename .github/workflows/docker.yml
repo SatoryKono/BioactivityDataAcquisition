@@ -64,7 +64,7 @@ jobs:
 
       - name: Run Docker runtime static and unit contracts
         run: |
-          uv run --frozen --no-build pytest -q --tb=line \
+          uv run --frozen pytest -q --tb=line \
             tests/architecture/test_docker_runtime_contracts.py \
             tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py \
             tests/unit/repo_backed/scripts/ops/docker/test_docker_runtime_probe.py \
@@ -99,11 +99,13 @@ jobs:
         env:
           # Placeholder only for `compose config` interpolation; not a real secret.
           NEO4J_PASSWORD: ci-compose-validation-placeholder
+          GF_SECURITY_ADMIN_PASSWORD: ci-compose-validation-placeholder
         run: docker compose config > /dev/null
 
       - name: Validate docker-compose.monitoring.yml syntax
         env:
           NEO4J_PASSWORD: ci-compose-validation-placeholder
+          GF_SECURITY_ADMIN_PASSWORD: ci-compose-validation-placeholder
         run: docker compose -f docker-compose.monitoring.yml config > /dev/null
 
   docker-build:

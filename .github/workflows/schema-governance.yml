@@ -62,7 +62,7 @@ jobs:
           uv-extras: "dev"
 
       - name: Verify generated schema artifacts are up-to-date
-        run: uv run --frozen --no-build python -m scripts.schema generate-artifacts --check
+        run: uv run --frozen python -m scripts.schema generate-artifacts --check
 
   contracts-export:
     name: Contracts Export (blocking)
@@ -83,7 +83,7 @@ jobs:
 
       - name: Verify contract schema imports
         run: |
-          uv run --frozen --no-build python -c "
+          uv run --frozen python -c "
           from bioetl.domain.contracts.gold import (
               ChEMBLActivityGoldSchema,
               ChEMBLAssayGoldSchema,
@@ -114,10 +114,10 @@ jobs:
           uv-extras: "dev"
 
       - name: Verify schema parity (Domain → Silver → Gold)
-        run: uv run --frozen --no-build python src/tools/verify_schema_parity.py --mode blocking
+        run: uv run --frozen python src/tools/verify_schema_parity.py --mode blocking
 
       - name: Rebuild JSON field typing inventory
-        run: uv run --frozen --no-build python src/tools/generate_json_field_typing_inventory.py
+        run: uv run --frozen python src/tools/generate_json_field_typing_inventory.py
 
       - name: Ensure JSON field typing inventory is up-to-date
         run: git diff --exit-code docs/03-data-model/json-field-typing-inventory.md
@@ -142,7 +142,7 @@ jobs:
       - name: Run representative Silver schema drift checks
         run: |
           mkdir -p reports/schema-governance
-          uv run --frozen --no-build pytest \
+          uv run --frozen pytest \
             tests/contract/silver_schemas/test_selected_pipeline_schema_drift.py \
             -m contracts \
             -q --tb=short --maxfail=1 \

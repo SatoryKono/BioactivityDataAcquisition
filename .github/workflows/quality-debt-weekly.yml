@@ -31,7 +31,7 @@ jobs:
 
       - name: Generate weekly debt report
         run: |
-          uv run --frozen --no-build python scripts/engineering/ci/report_quality_debt_weekly.py \
+          uv run --frozen python scripts/engineering/ci/report_quality_debt_weekly.py \
             --registry "${QUALITY_EXEMPTIONS_REGISTRY}" \
             --scorecard "${QUALITY_EXEMPTIONS_SCORECARD}" \
             --json-out reports/quality/debt-weekly.json \
@@ -40,7 +40,7 @@ jobs:
 
       - name: Run config gap analysis
         run: |
-          uv run --frozen --no-build python -m scripts.schema analyze-gaps
+          uv run --frozen python -m scripts.schema analyze-gaps
 
       - name: Upload weekly debt artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
