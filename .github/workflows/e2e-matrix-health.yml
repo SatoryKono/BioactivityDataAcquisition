@@ -53,7 +53,7 @@ jobs:
                     mkdir -p reports/e2e
                     for run in 1 2 3; do
                       set +e
-                      VCR_RECORD_MODE=none uv run --frozen --no-build pytest \
+                      VCR_RECORD_MODE=none uv run --frozen  pytest \
                         tests/e2e/test_pipeline_matrix_e2e.py \
                         -k "test_pipeline_matrix_smoke" \
                         --vcr-record=none \
@@ -64,7 +64,7 @@ jobs:
 
             -   name: Enforce matrix smoke skip-rate SLO (run3)
                 run: |
-                    uv run --frozen --no-build python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \
+                    uv run --frozen  python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \
                       --junit reports/e2e/matrix-smoke-run3.xml \
                       --expected-total-from-configs \
                       --configs-root configs/entities \
@@ -75,7 +75,7 @@ jobs:
 
             -   name: Enforce rerun stability gate (3x)
                 run: |
-                    uv run --frozen --no-build python scripts/engineering/ci/check_e2e_rerun_stability.py \
+                    uv run --frozen  python scripts/engineering/ci/check_e2e_rerun_stability.py \
                       --junit-glob "reports/e2e/matrix-smoke-run*.xml" \
                       --required-runs 3 \
                       --max-recurrent-infra-flaky 0 \
@@ -132,7 +132,7 @@ jobs:
                 run: |
                     mkdir -p reports/e2e
                     set +e
-                    VCR_RECORD_MODE=new_episodes uv run --frozen --no-build pytest \
+                    VCR_RECORD_MODE=new_episodes uv run --frozen  pytest \
                       tests/e2e/test_pipeline_matrix_e2e.py \
                       -k "test_pipeline_matrix_smoke" \
                       --vcr-record=new_episodes \
@@ -143,7 +143,7 @@ jobs:
             -   name: Build nightly health summary
                 run: |
                     set +e
-                    uv run --frozen --no-build python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \
+                    uv run --frozen  python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \
                       --junit reports/e2e/matrix-smoke-live.xml \
                       --expected-total-from-configs \
                       --configs-root configs/entities \

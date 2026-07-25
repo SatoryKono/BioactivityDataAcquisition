@@ -52,7 +52,7 @@ jobs:
       - name: Run pip-audit
         run: |
           UV_CACHE_DIR=/tmp/.uv-cache uv export --no-hashes --no-emit-project --extra dev > /tmp/pip-audit-requirements.txt
-          UV_CACHE_DIR=/tmp/.uv-cache uv run --frozen --no-build pip-audit --strict --ignore-vuln CVE-2026-3219 -r /tmp/pip-audit-requirements.txt --cache-dir /tmp/.pip-audit-cache
+          UV_CACHE_DIR=/tmp/.uv-cache uv run --frozen  pip-audit --strict --ignore-vuln CVE-2026-3219 -r /tmp/pip-audit-requirements.txt --cache-dir /tmp/.pip-audit-cache
 
   bandit:
     runs-on: ubuntu-latest
@@ -67,4 +67,4 @@ jobs:
           uv-extras: "dev"
 
       - name: Run Bandit
-        run: uv run --frozen --no-build bandit -c pyproject.toml -r src/bioetl
+        run: uv run --frozen  bandit -c pyproject.toml -r src/bioetl

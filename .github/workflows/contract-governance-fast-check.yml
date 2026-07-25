@@ -78,7 +78,7 @@ jobs:
         run: |
           echo "::group::Contract Identity Validation"
           set +e
-          uv run --frozen --no-build python scripts/engineering/ci/validate_contract_identity.py
+          uv run --frozen  python scripts/engineering/ci/validate_contract_identity.py
           IDENTITY_EXIT_CODE=$?
           set -e
           echo "::endgroup::"
@@ -94,7 +94,7 @@ jobs:
         run: |
           echo "::group::Registry Consistency Validation"
           set +e
-          uv run --frozen --no-build python scripts/engineering/ci/validate_contract_registry.py
+          uv run --frozen  python scripts/engineering/ci/validate_contract_registry.py
           REGISTRY_EXIT_CODE=$?
           set -e
           echo "::endgroup::"
@@ -110,7 +110,7 @@ jobs:
         run: |
           echo "::group::Pipeline Config Contract Ownership Matrix"
           set +e
-          uv run --frozen --no-build python -m scripts.engineering.qa report-pipeline-config-contract-ownership-map --check
+          uv run --frozen  python -m scripts.engineering.qa report-pipeline-config-contract-ownership-map --check
           OWNERSHIP_EXIT_CODE=$?
           set -e
           echo "::endgroup::"
@@ -126,7 +126,7 @@ jobs:
         run: |
           echo "::group::Contract Coverage Matrix"
           set +e
-          uv run --frozen --no-build python -m scripts.engineering.qa report-contract-coverage-matrix --check
+          uv run --frozen  python -m scripts.engineering.qa report-contract-coverage-matrix --check
           COVERAGE_EXIT_CODE=$?
           set -e
           echo "::endgroup::"
@@ -145,9 +145,9 @@ jobs:
           HEAD_SHA="${{ github.sha }}"
           set +e
           if [ -n "$BASE_SHA" ]; then
-            uv run --frozen --no-build python scripts/engineering/ci/validate_schema_classifier_gate.py --base-sha "$BASE_SHA" --head-sha "$HEAD_SHA"
+            uv run --frozen  python scripts/engineering/ci/validate_schema_classifier_gate.py --base-sha "$BASE_SHA" --head-sha "$HEAD_SHA"
           else
-            uv run --frozen --no-build python scripts/engineering/ci/validate_schema_classifier_gate.py --head-sha "$HEAD_SHA"
+            uv run --frozen  python scripts/engineering/ci/validate_schema_classifier_gate.py --head-sha "$HEAD_SHA"
           fi
           CLASSIFIER_EXIT_CODE=$?
           set -e
@@ -164,7 +164,7 @@ jobs:
         run: |
           echo "::group::Registry DQ Reference Validation"
           set +e
-          uv run --frozen --no-build python scripts/engineering/ci/validate_registry_dq_refs.py
+          uv run --frozen  python scripts/engineering/ci/validate_registry_dq_refs.py
           REGISTRY_DQ_EXIT_CODE=$?
           set -e
           echo "::endgroup::"

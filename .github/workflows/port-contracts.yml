@@ -65,7 +65,7 @@ jobs:
       - name: Run Port Contract Tests
         run: |
           mkdir -p reports/junit
-          uv run --frozen --no-build pytest \
+          uv run --frozen  pytest \
             tests/architecture/test_port_contracts.py \
             tests/architecture/test_adapter_contracts.py \
             tests/architecture/test_registry_contracts.py \
@@ -105,7 +105,7 @@ jobs:
       - name: Run Hypothesis Contract Tests
         run: |
           mkdir -p reports/junit
-          uv run --frozen --no-build pytest \
+          uv run --frozen  pytest \
             tests/architecture/test_port_contracts_hypothesis.py \
             -v --tb=short \
             --junit-xml=reports/junit/hypothesis-contracts-results.xml

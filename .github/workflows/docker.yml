@@ -64,7 +64,7 @@ jobs:
 
       - name: Run Docker runtime static and unit contracts
         run: |
-          uv run --frozen --no-build pytest -q --tb=line \
+          uv run --frozen  pytest -q --tb=line \
             tests/architecture/test_docker_runtime_contracts.py \
             tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py \
             tests/unit/repo_backed/scripts/ops/docker/test_docker_runtime_probe.py \

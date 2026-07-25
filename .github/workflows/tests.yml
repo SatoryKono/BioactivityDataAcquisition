@@ -105,26 +105,26 @@ jobs:
                     python-version: "3.12"
 
             -   name: Validate VCR cassette placement
-                run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-placement
+                run: uv run --frozen  python -m scripts.engineering.qa.vcr check-placement
 
             -   name: Validate VCR filename policy
-                run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-naming
+                run: uv run --frozen  python -m scripts.engineering.qa.vcr check-naming
 
             -   name: Validate full VCR metadata inventory
-                run: uv run --frozen --no-build python scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py --check
+                run: uv run --frozen  python scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py --check
 
             -   name: Validate VCR metadata stale-age policy
-                run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90
+                run: uv run --frozen  python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90
 
             -   name: Validate VCR metadata catalog
-                run: uv run --frozen --no-build python -m scripts.engineering.qa report-vcr-metadata --check
+                run: uv run --frozen  python -m scripts.engineering.qa report-vcr-metadata --check
 
             -   name: Validate version consistency
-                run: uv run --frozen --no-build python -m scripts.engineering.repo check-versions
+                run: uv run --frozen  python -m scripts.engineering.repo check-versions
 
             -   name: Smoke check (dependencies + core imports)
                 run: |
-                    uv run --frozen --no-build pytest tests/smoke/ -m "not memory" -v --tb=short
+                    uv run --frozen  pytest tests/smoke/ -m "not memory" -v --tb=short
 
     control-plane-e2e:
         runs-on: ubuntu-latest
@@ -148,7 +148,7 @@ jobs:
             -   name: Run control-plane completeness smoke
                 run: |
                     mkdir -p reports/e2e
-                    VCR_RECORD_MODE=none uv run --frozen --no-build pytest \
+                    VCR_RECORD_MODE=none uv run --frozen  pytest \
                       tests/e2e/test_pubchem_compound_e2e.py::test_pubchem_compound_full_cycle \
                       --vcr-record=none \
                       -q --tb=short \
@@ -188,7 +188,7 @@ jobs:
             -   name: Run offline contract confidence lane
                 run: |
                     mkdir -p reports/test-telemetry
-                    uv run --frozen --no-build pytest \
+                    uv run --frozen  pytest \
                       tests/contract/ tests/unit/contracts/ \
                       -m "no_api or not network" \
                       -q --tb=short \
@@ -226,17 +226,17 @@ jobs:
                     for seed in 17 73 113; do
                       run_id="seed-${seed}"
                       BIOETL_RANDOM_ORDER_SEED="${seed}" VCR_RECORD_MODE=none \
-                        uv run --frozen --no-build pytest \
+                        uv run --frozen  pytest \
                           tests/contract/test_semanticscholar_contract.py \
                           tests/architecture/test_determinism_identity_policy.py \
                           -m "not pilot_soak and not network" \
                           -p no:xdist --no-cov -q --tb=short \
                           --junitxml="reports/test-telemetry/flaky-runs/junit-${run_id}.xml"
-                      uv run --frozen --no-build python -c 'import json,pathlib,sys; from scripts.engineering.qa.report_flaky_test_burndown_review import compute_replay_tree_sha256; payload={"run_id":sys.argv[2],"seed":int(sys.argv[3]),"source_sha":sys.argv[4],"order_mode":"seeded-random","shard_id":"determinism-critical","replay_tree_sha256":compute_replay_tree_sha256(pathlib.Path.cwd())}; pathlib.Path(sys.argv[1]).write_text(json.dumps(payload,sort_keys=True)+"\n",encoding="utf-8")' \
+                      uv run --frozen  python -c 'import json,pathlib,sys; from scripts.engineering.qa.report_flaky_test_burndown_review import compute_replay_tree_sha256; payload={"run_id":sys.argv[2],"seed":int(sys.argv[3]),"source_sha":sys.argv[4],"order_mode":"seeded-random","shard_id":"determinism-critical","replay_tree_sha256":compute_replay_tree_sha256(pathlib.Path.cwd())}; pathlib.Path(sys.argv[1]).write_text(json.dumps(payload,sort_keys=True)+"\n",encoding="utf-8")' \
                         "reports/test-telemetry/flaky-runs/run-${run_id}.json" \
                         "${run_id}" "${seed}" "${GITHUB_SHA}"
                     done
-                    uv run --frozen --no-build python -m scripts.engineering.qa report-flaky-test-burndown-review \
+                    uv run --frozen  python -m scripts.engineering.qa report-flaky-test-burndown-review \
                       --empirical-run-dir reports/test-telemetry/flaky-runs \
                       --empirical-json-out reports/test-telemetry/flaky-test-empirical.json
 
@@ -269,7 +269,7 @@ jobs:
 
             -   name: Validate quality exemptions registry (owner/reason/expiry metadata)
                 run: |
-                    uv run --frozen --no-build python -m scripts.engineering.qa check-exemptions \
+                    uv run --frozen  python -m scripts.engineering.qa check-exemptions \
                       --registry "${QUALITY_EXEMPTIONS_REGISTRY}" \
                       --scorecard "${QUALITY_EXEMPTIONS_SCORECARD}" \
                       --mode "${QUALITY_EXEMPTIONS_GATE_MODE}" \
@@ -280,7 +280,7 @@ jobs:
 
             -   name: Validate scripts inventory + lifecycle governance
                 run: |
-                    uv run --frozen --no-build python -m scripts.engineering.repo check-inventory \
+                    uv run --frozen  python -m scripts.engineering.repo check-inventory \
                       --check \
                       --manifest configs/quality/scripts_inventory_manifest.json \
                       --check-lifecycle \
@@ -288,48 +288,48 @@ jobs:
                       --lifecycle-registry configs/quality/scripts_lifecycle_registry.json
 
             -   name: Validate scripts catalog governance policy
-                run: uv run --frozen --no-build python -m scripts.engineering.repo check-catalog --catalog scripts/engineering/repo/catalog.yaml
+                run: uv run --frozen  python -m scripts.engineering.repo check-catalog --catalog scripts/engineering/repo/catalog.yaml
 
             -   name: Test governance closeout preflight (VCR/LFS fail-fast)
-                run: uv run --frozen --no-build python scripts/engineering/qa/check_test_audit_preflight.py --strict
+                run: uv run --frozen  python scripts/engineering/qa/check_test_audit_preflight.py --strict
 
             -   name: Validate committed test-governance snapshots
                 run: |
-                    uv run --frozen --no-build python -m scripts.engineering.qa.report_test_governance_audit \
+                    uv run --frozen  python -m scripts.engineering.qa.report_test_governance_audit \
                       --check \
                       --json-out reports/quality/test-governance-current.json \
                       --fixture-duplication-out reports/quality/test-fixture-asset-duplication.json
 
             -   name: Validate flaky-test burndown review evidence
-                run: uv run --frozen --no-build python -m scripts.engineering.qa report-flaky-test-burndown-review --check
+                run: uv run --frozen  python -m scripts.engineering.qa report-flaky-test-burndown-review --check
 
             -   name: Validate config/contract/registry artifact duplication audit
-                run: uv run --frozen --no-build python -m scripts.engineering.qa report-artifact-duplication-audit --check
+                run: uv run --frozen  python -m scripts.engineering.qa report-artifact-duplication-audit --check
 
             -   name: Validate deterministic Neo4j memory ontology invariants
-                run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory
+                run: uv run --frozen  python -m scripts.engineering.ci neo4j-memory
 
             -   name: Validate hotspot-family baseline artifacts
-                run: uv run --frozen --no-build python -m scripts.engineering.qa report-family-baseline --check
+                run: uv run --frozen  python -m scripts.engineering.qa report-family-baseline --check
 
             -   name: Validate contract coverage matrix artifact
-                run: uv run --frozen --no-build python -m scripts.engineering.qa report-contract-coverage-matrix --check
+                run: uv run --frozen  python -m scripts.engineering.qa report-contract-coverage-matrix --check
 
             -   name: Validate Domain I/O taint inventory artifact
-                run: uv run --frozen --no-build python -m scripts.engineering.qa report-domain-io-taint-inventory --check
+                run: uv run --frozen  python -m scripts.engineering.qa report-domain-io-taint-inventory --check
 
             -   name: Validate port-adapter-factory coverage map artifact
-                run: uv run --frozen --no-build python -m scripts.engineering.qa report-port-adapter-factory-coverage --check
+                run: uv run --frozen  python -m scripts.engineering.qa report-port-adapter-factory-coverage --check
 
             -   name: Validate domain aggregate invariant registry
-                run: uv run --frozen --no-build pytest tests/architecture/test_domain_aggregate_invariant_registry.py -q --tb=short
+                run: uv run --frozen  pytest tests/architecture/test_domain_aggregate_invariant_registry.py -q --tb=short
 
             -   name: Validate compatibility importer census artifacts
-                run: uv run --frozen --no-build python -m scripts.engineering.qa report-compatibility-importer-census --check
+                run: uv run --frozen  python -m scripts.engineering.qa report-compatibility-importer-census --check
 
             -   name: Validate technical-debt freeze ratchets
                 run: |
-                    uv run --frozen --no-build pytest \
+                    uv run --frozen  pytest \
                       tests/architecture/test_removed_surface_freeze_guards.py \
                       tests/architecture/test_public_surface_importer_census_governance.py \
                       tests/architecture/test_runtime_uuid_seam_inventory.py \
@@ -338,37 +338,37 @@ jobs:
                       -q --tb=short
 
             -   name: Validate dead-code inventory artifacts
-                run: uv run --frozen --no-build python -m scripts.engineering.qa report-dead-code-inventory --check
+                run: uv run --frozen  python -m scripts.engineering.qa report-dead-code-inventory --check
 
             -   name: Validate config discrepancy baseline artifacts
-                run: uv run --frozen --no-build python -m scripts.schema generate-config-matrix --check
+                run: uv run --frozen  python -m scripts.schema generate-config-matrix --check
 
             -   name: Validate Silver/Gold filter parity artifact
-                run: uv run --frozen --no-build python scripts/data_quality/run_silver_gold_filter_parity.py --check
+                run: uv run --frozen  python scripts/data_quality/run_silver_gold_filter_parity.py --check
 
             -   name: Validate xwalk missing backlog
-                run: uv run --frozen --no-build python -m scripts.engineering.qa check-xwalk-missing-backlog
+                run: uv run --frozen  python -m scripts.engineering.qa check-xwalk-missing-backlog
 
             -   name: Pre-merge naming/package consistency gate
-                run: uv run --frozen --no-build python -m scripts.engineering.qa check-naming-pkg --check
+                run: uv run --frozen  python -m scripts.engineering.qa check-naming-pkg --check
 
             -   name: DQ consistency validation (fail-fast)
-                run: uv run --frozen --no-build python -m scripts.engineering.qa validate-dq-consistency
+                run: uv run --frozen  python -m scripts.engineering.qa validate-dq-consistency
 
             -   name: Validate ADR enforcement matrix artifacts
-                run: uv run --frozen --no-build python -m scripts.engineering.qa report-adr-enforcement-matrix --check
+                run: uv run --frozen  python -m scripts.engineering.qa report-adr-enforcement-matrix --check
 
             -   name: Validate remote-main architecture debt baseline
                 run: |
                     git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main
-                    uv run --frozen --no-build python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --check
+                    uv run --frozen  python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --check
 
             -   name: Validate debt-governance fail-fast gates
-                run: uv run --frozen --no-build python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref refs/remotes/origin/main
+                run: uv run --frozen  python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref refs/remotes/origin/main
 
             -   name: Dashboard navigation contract sync gate
                 run: |
-                    uv run --frozen --no-build pytest \
+                    uv run --frozen  pytest \
                       tests/integration/test_grafana_dashboard_links.py::test_cross_dashboard_links_pass_only_target_scoped_variables \
                       tests/integration/test_grafana_dashboard_links.py::test_dashboard_top_level_navigation_contract_by_uid \
                       tests/integration/test_dashboard_navigation_contract_sync.py \
@@ -377,12 +377,12 @@ jobs:
             -   name: Dashboard semantic release policy gate (token-free)
                 run: |
                     mkdir -p reports/observability/ci
-                    uv run --frozen --no-build python -m scripts.engineering.qa report-observability-metric-inventory \
+                    uv run --frozen  python -m scripts.engineering.qa report-observability-metric-inventory \
                       --check \
                       --json \
                       --review-json-out reports/observability/runtime_cardinality_review_pr.json \
                       --allow-local-cardinality-fallback
-                    uv run --frozen --no-build pytest \
+                    uv run --frozen  pytest \
                       tests/architecture/test_observability_dashboard_contracts.py \
                       tests/architecture/test_observability_dashboard_tooling.py \
                       tests/architecture/test_observability_docs_drift.py \
@@ -408,25 +408,25 @@ jobs:
                     if-no-files-found: error
 
             -   name: Prometheus rules syntax + promtool test vectors
-                run: uv run --frozen --no-build python -m scripts.engineering.qa check-prometheus-rules --runner docker
+                run: uv run --frozen  python -m scripts.engineering.qa check-prometheus-rules --runner docker
 
             -   name: "Quality ratchet (fail-fast: domain)"
                 run: |
-                    uv run --frozen --no-build pytest \
+                    uv run --frozen  pytest \
                       tests/architecture/test_code_metrics.py::TestFileSizeLimits::test_domain_files_under_limit \
                       tests/architecture/test_code_metrics.py::TestFunctionComplexity::test_domain_complexity \
                       -q --tb=short
 
             -   name: "Quality ratchet (fail-fast: application)"
                 run: |
-                    uv run --frozen --no-build pytest \
+                    uv run --frozen  pytest \
                       tests/architecture/test_code_metrics.py::TestFileSizeLimits::test_application_files_under_limit \
                       tests/architecture/test_code_metrics.py::TestFunctionComplexity::test_application_complexity \
                       -q --tb=short
 
             -   name: "Quality ratchet (fail-fast: infrastructure)"
                 run: |
-                    uv run --frozen --no-build pytest \
+                    uv run --frozen  pytest \
                       tests/architecture/test_code_metrics.py::TestFileSizeLimits::test_infrastructure_files_under_limit \
                       tests/architecture/test_code_metrics.py::TestFunctionComplexity::test_infrastructure_complexity \
                       -q --tb=short
@@ -462,7 +462,7 @@ jobs:
                     exit 1
 
             -   name: Apply sync and validate live Neo4j audit
-                run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory-live
+                run: uv run --frozen  python -m scripts.engineering.ci neo4j-memory-live
 
             -   name: Stop local Neo4j
                 if: always()
@@ -484,19 +484,19 @@ jobs:
                     python-version: "3.12"
 
             -   name: Validate pipeline configs + schema links (blocking)
-                run: uv run --frozen --no-build python -m scripts.schema validate-configs
+                run: uv run --frozen  python -m scripts.schema validate-configs
 
             -   name: Validate config invariants (blocking)
-                run: uv run --frozen --no-build python -m scripts.schema check-invariants
+                run: uv run --frozen  python -m scripts.schema check-invariants
 
             -   name: Validate silver required_fields coverage (blocking)
-                run: uv run --frozen --no-build python -m scripts.schema check-required-fields --verbose
+                run: uv run --frozen  python -m scripts.schema check-required-fields --verbose
 
             -   name: Validate effective_optional_v1 resolution (blocking)
-                run: uv run --frozen --no-build python -m scripts.schema audit-optionality --check
+                run: uv run --frozen  python -m scripts.schema audit-optionality --check
 
             -   name: Check matrix structural contract export freshness (blocking)
-                run: uv run --frozen --no-build python -m scripts.docs export-matrix-structural-contract --check
+                run: uv run --frozen  python -m scripts.docs export-matrix-structural-contract --check
 
             -   name: Check matrix structural workbook sync freshness (blocking)
                 run: |
@@ -505,16 +505,16 @@ jobs:
                       echo "Skipping matrix structural workbook sync check: $workbook is not present in repository checkout."
                       exit 0
                     fi
-                    uv run --frozen --no-build python -m scripts.docs sync-matrix-structural-policy --check --input "$workbook" --output "$workbook"
+                    uv run --frozen  python -m scripts.docs sync-matrix-structural-policy --check --input "$workbook" --output "$workbook"
 
             -   name: Check generated config schemas are up to date
-                run: uv run --frozen --no-build python -m scripts.schema generate-pipeline --check
+                run: uv run --frozen  python -m scripts.schema generate-pipeline --check
 
             -   name: Check architecture dependency docs drift
-                run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check
+                run: uv run --frozen  python scripts/engineering/qa/generate_architecture_dependency_map.py --check
 
             -   name: Check docs drift (forbidden patterns)
-                run: uv run --frozen --no-build python -m scripts.engineering.qa check-docs-drift
+                run: uv run --frozen  python -m scripts.engineering.qa check-docs-drift
 
             -   name: Validate docker-compose.yml syntax
                 run: docker compose config > /dev/null
@@ -545,7 +545,7 @@ jobs:
             -   name: Run Track D fail-fast gate (runtime linkage)
                 run: |
                     mkdir -p reports/test-telemetry
-                    uv run --frozen --no-build pytest \
+                    uv run --frozen  pytest \
                       tests/integration/ci/test_track_d_fixture_control_plane_linkage.py \
                       -q --tb=short --maxfail=1 \
                       --junitxml=reports/test-telemetry/junit-track-d.xml
@@ -576,7 +576,7 @@ jobs:
                     python-version: "3.12"
 
             -   name: Run DQ consistency validation
-                run: uv run --frozen --no-build python -m scripts.engineering.qa validate-dq-consistency
+                run: uv run --frozen  python -m scripts.engineering.qa validate-dq-consistency
 
     quality-metrics-gate:
         runs-on: ubuntu-latest
@@ -605,7 +605,7 @@ jobs:
                     BIOETL_OBSERVABILITY_PROMETHEUS_URL: ${{ vars.BIOETL_OBSERVABILITY_PROMETHEUS_URL }}
                     BIOETL_OBSERVABILITY_PROMETHEUS_TOKEN: ${{ secrets.BIOETL_OBSERVABILITY_PROMETHEUS_TOKEN }}
                 run: |
-                    uv run --frozen --no-build python -m scripts.engineering.qa report-observability-metric-inventory \
+                    uv run --frozen  python -m scripts.engineering.qa report-observability-metric-inventory \
                       --check \
                       --write-evidence reports/observability/runtime_cardinality_inventory.json \
                       --review-json-out reports/observability/runtime_cardinality_review.json \
@@ -662,7 +662,7 @@ jobs:
                     # Quick feedback: run the canonical unit-fast lane from test_matrix.yaml.
                     # Uses HYPOTHESIS_PROFILE=fast for minimal property-based examples
                     HYPOTHESIS_PROFILE=fast \
-                    uv run --frozen --no-build pytest tests/unit/ \
+                    uv run --frozen  pytest tests/unit/ \
                       -m "not repo_backed and not slow and not benchmark and not memory" \
                       -n auto --dist loadscope --max-worker-restart=0 \
                       -q --tb=short \
@@ -699,7 +699,7 @@ jobs:
             -   name: Run canonical repo-backed-unit lane
                 run: |
                     mkdir -p reports/test-telemetry
-                    uv run --frozen --no-build pytest tests/unit/repo_backed/ \
+                    uv run --frozen  pytest tests/unit/repo_backed/ \
                       -m "repo_backed and not slow and not benchmark and not memory" \
                       -p no:xdist -q --tb=short \
                       --junitxml=reports/test-telemetry/junit-repo-backed-unit.xml
@@ -764,7 +764,7 @@ jobs:
                     mkdir -p reports/coverage
                     mkdir -p reports/test-telemetry
                     export COVERAGE_FILE="reports/coverage/.coverage.${{ matrix.test-group.name }}"
-                    uv run --frozen --no-build pytest ${{ matrix.test-group.path }} \
+                    uv run --frozen  pytest ${{ matrix.test-group.path }} \
                       -m "not serial and not memory" \
                       -n auto --dist loadscope --max-worker-restart=0 \
                       -q --tb=short \
@@ -814,7 +814,7 @@ jobs:
             -   name: Run dedicated Neo4j memory test lane
                 run: |
                     mkdir -p reports/test-telemetry
-                    uv run --frozen --no-build pytest tests/smoke/test_neo4j_memory_mcp_smoke.py \
+                    uv run --frozen  pytest tests/smoke/test_neo4j_memory_mcp_smoke.py \
                       -m "memory" \
                       -q --tb=short \
                       --junitxml=reports/test-telemetry/junit-memory.xml
@@ -847,7 +847,7 @@ jobs:
             -   name: Run performance budget gates (hotspots)
                 run: |
                     mkdir -p reports/performance
-                    uv run --frozen --no-build pytest tests/performance/test_hotspot_budgets.py \
+                    uv run --frozen  pytest tests/performance/test_hotspot_budgets.py \
                       -m "benchmark and performance" \
                       -p no:xdist \
                       -q --tb=short \
@@ -859,7 +859,7 @@ jobs:
                 run: |
                     mkdir -p reports/performance
                     if [ -f reports/performance/hotspot-observations.jsonl ]; then
-                      uv run --frozen --no-build python scripts/engineering/qa/generate_hotspot_degradation_report.py \
+                      uv run --frozen  python scripts/engineering/qa/generate_hotspot_degradation_report.py \
                         --observations reports/performance/hotspot-observations.jsonl \
                         --budgets tests/performance/hotspot_budgets.json \
                         --window-size 5 \
@@ -939,7 +939,7 @@ jobs:
                 run: |
                     mkdir -p reports/coverage
                     # Canonical serial subset: -m "serial and not e2e and not benchmark"
-                    COVERAGE_FILE=reports/coverage/.coverage.serial uv run --frozen --no-build python \
+                    COVERAGE_FILE=reports/coverage/.coverage.serial uv run --frozen  python \
                       scripts/engineering/ci/run_pytest_resilient.py \
                       --target tests/ \
                       --reports-dir reports/pytest/coverage-verify \
@@ -949,13 +949,13 @@ jobs:
 
             -   name: Combine coverage shards and enforce threshold
                 run: |
-                    uv run --frozen --no-build python -m coverage combine reports/coverage --keep
-                    uv run --frozen --no-build python -m coverage report --show-missing --fail-under=85
-                    uv run --frozen --no-build python -m coverage xml -o reports/coverage/coverage.xml
-                    uv run --frozen --no-build python -m scripts.engineering.qa check-branch-coverage \
+                    uv run --frozen  python -m coverage combine reports/coverage --keep
+                    uv run --frozen  python -m coverage report --show-missing --fail-under=85
+                    uv run --frozen  python -m coverage xml -o reports/coverage/coverage.xml
+                    uv run --frozen  python -m scripts.engineering.qa check-branch-coverage \
                       --coverage-xml reports/coverage/coverage.xml \
                       --min-percent 85
-                    uv run --frozen --no-build python -m scripts.engineering.qa report-module-coverage \
+                    uv run --frozen  python -m scripts.engineering.qa report-module-coverage \
                       --coverage-xml reports/coverage/coverage.xml \
                       --json-out reports/quality/module-coverage-inventory.json \
                       --refresh-from-coverage-xml \
@@ -964,7 +964,7 @@ jobs:
 
             -   name: Verify committed module coverage inventory is current
                 run: |
-                    uv run --frozen --no-build python -m scripts.engineering.qa report-module-coverage \
+                    uv run --frozen  python -m scripts.engineering.qa report-module-coverage \
                       --coverage-xml reports/coverage/coverage.xml \
                       --json-out reports/quality/module-coverage-inventory.json \
                       --refresh-from-coverage-xml \
@@ -1030,7 +1030,7 @@ jobs:
                       for junit_path in "${unit_junit[@]}"; do
                         junit_args+=(--junit "$junit_path")
                       done
-                      uv run --frozen --no-build python -m scripts.engineering.qa summarize-junit \
+                      uv run --frozen  python -m scripts.engineering.qa summarize-junit \
                         --suite unit-fast \
                         --run-id "unit-fast-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
                         --reports-dir reports/quality/test-runs \
@@ -1039,7 +1039,7 @@ jobs:
                     fi
 
                     if [ -f reports/test-telemetry/raw/junit-repo-backed-unit.xml ]; then
-                      uv run --frozen --no-build python -m scripts.engineering.qa summarize-junit \
+                      uv run --frozen  python -m scripts.engineering.qa summarize-junit \
                         --suite repo-backed-unit \
                         --run-id "repo-backed-unit-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
                         --reports-dir reports/quality/test-runs \
@@ -1048,7 +1048,7 @@ jobs:
                     fi
 
                     if [ -f reports/test-telemetry/raw/junit.integration.xml ]; then
-                      uv run --frozen --no-build python -m scripts.engineering.qa summarize-junit \
+                      uv run --frozen  python -m scripts.engineering.qa summarize-junit \
                         --suite integration-replay \
                         --run-id "integration-replay-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
                         --reports-dir reports/quality/test-runs \
@@ -1057,7 +1057,7 @@ jobs:
                     fi
 
                     if [ -f reports/test-telemetry/raw/junit.security.xml ]; then
-                      uv run --frozen --no-build python -m scripts.engineering.qa summarize-junit \
+                      uv run --frozen  python -m scripts.engineering.qa summarize-junit \
                         --suite security \
                         --run-id "security-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
                         --reports-dir reports/quality/test-runs \
@@ -1066,7 +1066,7 @@ jobs:
                     fi
 
                     if [ -f reports/test-telemetry/raw/junit-memory.xml ]; then
-                      uv run --frozen --no-build python -m scripts.engineering.qa summarize-junit \
+                      uv run --frozen  python -m scripts.engineering.qa summarize-junit \
                         --suite memory \
                         --run-id "memory-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
                         --reports-dir reports/quality/test-runs \
@@ -1075,7 +1075,7 @@ jobs:
                     fi
 
                     if [ -f reports/test-telemetry/raw/junit-contract-confidence.xml ]; then
-                      uv run --frozen --no-build python -m scripts.engineering.qa summarize-junit \
+                      uv run --frozen  python -m scripts.engineering.qa summarize-junit \
                         --suite contracts \
                         --run-id "contracts-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
                         --reports-dir reports/quality/test-runs \
@@ -1084,7 +1084,7 @@ jobs:
                     fi
 
                     if [ -f reports/test-telemetry/raw/junit-track-d.xml ]; then
-                      uv run --frozen --no-build python -m scripts.engineering.qa summarize-junit \
+                      uv run --frozen  python -m scripts.engineering.qa summarize-junit \
                         --suite track-d \
                         --run-id "track-d-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
                         --reports-dir reports/quality/test-runs \
@@ -1092,7 +1092,7 @@ jobs:
                         --command "tests.yml track-d gates"
                     fi
 
-                    uv run --frozen --no-build python -m scripts.engineering.qa test-health \
+                    uv run --frozen  python -m scripts.engineering.qa test-health \
                       --reports-dir reports/quality/test-runs \
                       --last 100 \
                       --markdown-out reports/quality/test-runs/rollup.md \

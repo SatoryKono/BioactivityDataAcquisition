@@ -91,7 +91,7 @@ jobs:
 
           set +e
           timeout --signal=TERM --kill-after=30s 30m \
-            uv run --frozen --no-build mypy --config-file pyproject.toml --strict --no-incremental src/bioetl \
+            uv run --frozen  mypy --config-file pyproject.toml --strict --no-incremental src/bioetl \
             2>&1 | tee -a reports/mypy_strict.log
           status=${PIPESTATUS[0]}
           set -e
@@ -108,7 +108,7 @@ jobs:
       - name: Verify NewType and Protocol usage in domain layer
         run: |
           echo "Checking for proper type definitions in domain layer..."
-          uv run --frozen --no-build python - <<'PY'
+          uv run --frozen  python - <<'PY'
           import ast
           import sys
           from pathlib import Path
@@ -166,7 +166,7 @@ jobs:
       - name: Check for Any type usage in domain/application layers
         run: |
           echo "Checking for explicit Any type usage (should be minimized)..."
-          uv run --frozen --no-build python - <<'PY'
+          uv run --frozen  python - <<'PY'
           import re
           import sys
           from pathlib import Path

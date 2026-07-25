@@ -27,7 +27,7 @@ jobs:
 
       - name: Generate docs KPI report
         run: |
-          uv run --frozen --no-build python -m scripts.docs check-kpi \
+          uv run --frozen  python -m scripts.docs check-kpi \
             --kpi-target-not-in-nav 120 \
             --hard-limit-not-in-nav 135 \
             --max-orphans 0 \
