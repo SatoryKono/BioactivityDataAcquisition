@@ -15,16 +15,18 @@
   "summary": {
     "triaged_entry_count": 18,
     "triaged_entries_below_min_importers": 0,
-    "repo_wide_zero_import_candidate_count": 1,
-    "repo_wide_classified_zero_import_candidate_count": 1,
+    "repo_wide_zero_import_candidate_count": 2,
+    "repo_wide_classified_zero_import_candidate_count": 2,
     "repo_wide_untriaged_zero_import_candidate_count": 0,
-    "repo_wide_owner_test_anchored_candidate_count": 1,
+    "repo_wide_owner_test_anchored_candidate_count": 2,
     "repo_wide_candidates_without_owner_tests_count": 0,
     "repo_wide_non_static_reachability_candidate_count": 1,
     "repo_wide_disposition_counts": {
+      "retain_canonical_owner_module": 1,
       "retain_module_entrypoint": 1
     },
     "repo_wide_evidence_lane_counts": {
+      "canonical_owner_contract": 1,
       "module_entrypoint_owner_suite": 1
     },
     "triaged_retained_owner_test_anchored_count": 14,
@@ -361,6 +363,30 @@
       ],
       "owner_test_count": 1,
       "owner_test_paths_exist_count": 1
+    },
+    {
+      "module_name": "bioetl.domain.ports.stage_accounting",
+      "path": "src/bioetl/domain/ports/stage_accounting.py",
+      "is_private_module": false,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "classified",
+      "disposition": "retain_canonical_owner_module",
+      "reviewed_on": "2026-07-23",
+      "review_by": "2026-10-21",
+      "linked_issue": "#4541",
+      "rationale": "Canonical owner for the lazily exported StageAccountingPort protocol; first-party consumers must import it through the bioetl.domain.ports facade.",
+      "owner": "@bioetl-architecture",
+      "evidence_lane": "canonical_owner_contract",
+      "owner_tests": [
+        "tests/architecture/test_domain_public_api.py",
+        "tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py",
+        "tests/architecture/test_port_contracts.py",
+        "tests/unit/domain/run_reports/test_stage_accounting.py",
+        "tests/architecture/test_runtime_checkable_completeness.py"
+      ],
+      "owner_test_count": 5,
+      "owner_test_paths_exist_count": 5
     }
   ]
 }

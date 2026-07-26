@@ -19,4 +19,4 @@ export DEJA_AUTO_RECALL_PATH="${REPO_ROOT}/AGENTS.md"
 mcp_exit_if_validate_only "deja"
 
 # Package: @vshulcz/deja-vu (bin: deja). MCP transport is the `mcp` subcommand.
-exec npx -y "@vshulcz/deja-vu@0.15.0" mcp
+exec npx -y "@vshulcz/deja-vu@0.15.7" mcp

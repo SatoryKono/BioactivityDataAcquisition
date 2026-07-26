@@ -10,7 +10,7 @@ Audited branch: `main`
 
 Audited commit SHA: `0b45de173fb869e1295abdffe9688c5c46ec544f`
 
-Evidence surface SHA-256: `16d3382bab6ee98d4492e26c849050b4cee76037659d7ad13a6f751ff663d056`
+Evidence surface SHA-256: `45eaece25628eb1cbf13212753f4bab7c38896cca58473195e009a68a5a6d40d`
 
 Registry: `configs/quality/technical_debt_audit_registry.yaml`
 
@@ -35,8 +35,8 @@ growth.
    files, with zero duplicate test names, markerless tests, compatibility test
    files, and refined assertless residuals.
 1. Dead-code inventory (`snapshot_date: 2026-07-23`) reports
-   `repo_wide_untriaged_zero_import_candidate_count: 0`, with one classified
-   zero-import candidate retained as a module entrypoint.
+   `repo_wide_untriaged_zero_import_candidate_count: 0`, with two classified
+   zero-import candidates retained as a module entrypoint and a canonical owner.
 1. The largest directly evidenced residual is the `816`-module partial
    coverage tail (down from `824` in the 2026-07-19 audit). Debt budgets and
    exclusions are unchanged by this audit.
@@ -51,7 +51,7 @@ growth.
 | Test governance | `22854` functions; `2053` files; duplicate/markerless/compatibility/refined-assertless counts all `0` | `reports/quality/test-governance-current.json` |
 | Compatibility | `12` retained entrypoints; `4` public export facades; `0` twin pairs | `reports/quality/compatibility-importer-census.json` |
 | Transition compatibility debt | Current/max count `0/0` | `configs/quality/debt_scorecard.yaml` |
-| Dead code | `untriaged=0`; `1` classified zero-import candidate (`retain_module_entrypoint`); `18` triaged retained entries | `reports/quality/dead-code-inventory.json` |
+| Dead code | `untriaged=0`; `2` classified zero-import candidates (`retain_module_entrypoint`, `retain_canonical_owner_module`); `18` triaged retained entries | `reports/quality/dead-code-inventory.json` |
 
 ## Corrected / preserved compatibility claims
 

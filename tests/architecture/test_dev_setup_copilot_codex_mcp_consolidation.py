@@ -244,9 +244,24 @@ def test_tracked_mcp_projections_reject_workstation_paths() -> None:
     assert zed_payload["mcpServers"] == expected_servers
     devin_servers = devin_payload["mcpServers"]
     assert set(devin_servers) == set(expected_servers)
-    for server_name, server_config in expected_servers.items():
-        if server_name != "ref":
-            assert devin_servers[server_name] == server_config
+    shared_catalog = json.loads(
+        (root / "scripts/ops/runtime/mcp/shared-servers.json").read_text(
+            encoding="utf-8"
+        )
+    )["servers"]
+    for server_name, entry in shared_catalog.items():
+        server = devin_servers[server_name]
+        assert server["type"] == "http"
+        assert server["url"] == f"http://127.0.0.1:{entry['port']}{entry['path']}"
+        # Shared-plane Devin projection uses startup_timeout_sec (not request_timeout_sec).
+        assert set(server) == {"type", "url", "startup_timeout_sec"}
+        assert isinstance(server["startup_timeout_sec"], int)
+        assert server["startup_timeout_sec"] > 0
+        portable = expected_servers.get(server_name, {})
+        portable_timeout = portable.get("startup_timeout_sec")
+        if isinstance(portable_timeout, int):
+            assert server["startup_timeout_sec"] == portable_timeout
+    assert devin_servers["deepwiki"] == expected_servers["deepwiki"]
     expected_devin_ref = dict(expected_servers["ref"])
     expected_devin_ref.pop("env_http_headers")
     expected_devin_ref["headers"] = {
@@ -254,10 +269,6 @@ def test_tracked_mcp_projections_reject_workstation_paths() -> None:
     }
     assert devin_servers["ref"] == expected_devin_ref
     assert set(devin_payload["mcpServers"]) == EXPECTED_MCP_SERVERS
-    wrapper_suffix = ".ps1" if os.name == "nt" else ".sh"
-    assert devin_payload["mcpServers"]["filesystem"]["args"][0] == (
-        f"scripts/ai/mcp/mcp_filesystem_wrapper{wrapper_suffix}"
-    )
     assert devin_payload["devin"]["org_id"]
     assert devin_payload["shell"] == {"setup_complete": True}
 

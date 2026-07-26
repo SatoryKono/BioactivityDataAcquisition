@@ -1383,7 +1383,7 @@
       "missing_lines": 8,
       "module": "bioetl.application.core.base",
       "path": "src/bioetl/application/core/base.py",
-      "source_lines": 249
+      "source_lines": 246
     },
     {
       "coverage_percent": 100.0,
@@ -20053,7 +20053,7 @@
       "missing_lines": 1,
       "module": "bioetl.infrastructure.storage.gold.io_delta_protocols",
       "path": "src/bioetl/infrastructure/storage/gold/io_delta_protocols.py",
-      "source_lines": 91
+      "source_lines": 87
     },
     {
       "coverage_percent": 95.83,
@@ -24055,7 +24055,7 @@
       "missing_lines": 8,
       "module": "bioetl.application.core.base",
       "path": "src/bioetl/application/core/base.py",
-      "source_lines": 249
+      "source_lines": 246
     },
     {
       "coverage_percent": 100.0,
@@ -42725,7 +42725,7 @@
       "missing_lines": 1,
       "module": "bioetl.infrastructure.storage.gold.io_delta_protocols",
       "path": "src/bioetl/infrastructure/storage/gold/io_delta_protocols.py",
-      "source_lines": 91
+      "source_lines": 87
     },
     {
       "coverage_percent": 95.83,
@@ -45350,7 +45350,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-13",
-  "source_tree_sha256": "5724a71559a7257fd83828b97be8d33ed0be7fe90ed625e294cb57d7b17c9e62",
+  "source_tree_sha256": "8a36027636f0b0ae52f8f081151f9d66eb0e1d3563440e5a69e26b01de1798c7",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

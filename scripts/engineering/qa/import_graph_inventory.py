@@ -209,7 +209,7 @@ def _import_sources_fingerprint(modules: list[tuple[str, Path]]) -> str:
             rows = list(executor.map(_stat_one, modules, chunksize=64))
 
     digest = hashlib.sha256()
-    digest.update(f"v{_PARSED_CACHE_VERSION}".encode("utf-8"))
+    digest.update(f"v{_PARSED_CACHE_VERSION}".encode())
     for module_name, signature in rows:
         digest.update(module_name.encode("utf-8"))
         digest.update(b"\0")
