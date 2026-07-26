@@ -113,12 +113,12 @@ def test_zed_tasks_use_venv_python_without_path_uv() -> None:
     assert all(task["command"] != "uv" for task in tasks)
     assert "uv run" not in json.dumps(tasks)
 
+    lane_script = "scripts/engineering/dev/zed_pytest_lane.py"
     tagged = [task for task in tasks if "python-test" in task.get("tags", [])]
     assert [task["label"] for task in tagged] == ["Test: current file"]
     assert tagged[0]["command"] == venv_python
-    assert tagged[0]["args"][:2] == ["-m", "pytest"]
+    assert tagged[0]["args"][:2] == [lane_script, "file"]
     assert "$ZED_FILE" in tagged[0]["args"]
-    assert "--no-cov" in tagged[0]["args"]
     assert tagged[0].get("env", {}).get("VCR_RECORD_MODE") == "none"
 
     required_test_labels = {
@@ -131,15 +131,29 @@ def test_zed_tasks_use_venv_python_without_path_uv() -> None:
     }
     assert required_test_labels <= set(labels)
 
+    # Marker expressions with spaces must not appear in task args: PowerShell -C
+    # re-tokenizes them into bare paths (``and`` / ``not``), breaking pytest.
+    for task in tasks:
+        if task["label"].startswith("Test:"):
+            assert lane_script in task["args"]
+            for arg in task["args"]:
+                if arg.startswith("$"):
+                    continue
+                assert " and " not in arg
+                assert " or " not in arg
+
     nearest = next(task for task in tasks if task["label"] == "Test: nearest symbol")
+    assert nearest["args"][:2] == [lane_script, "nearest"]
+    assert "$ZED_FILE" in nearest["args"]
     assert "$ZED_SYMBOL" in nearest["args"]
-    assert "-k" in nearest["args"]
+
+    architecture = next(task for task in tasks if task["label"] == "Test: architecture")
+    assert architecture["args"] == [lane_script, "architecture"]
 
     coverage = next(
         task for task in tasks if task["label"] == "Test: coverage (gate 85%)"
     )
-    assert any(arg.startswith("--cov=") or arg == "--cov" for arg in coverage["args"])
-    assert "--cov-fail-under=85" in coverage["args"]
+    assert coverage["args"] == [lane_script, "coverage"]
 
     arch = next(task for task in tasks if task["label"] == "Architecture compliance")
     assert arch["command"] == venv_lint_imports

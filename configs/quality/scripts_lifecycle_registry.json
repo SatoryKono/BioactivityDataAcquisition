@@ -548,6 +548,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the internal Conventional Commit validator invoked by the local pre-commit commit-msg hook; keep it dependency-light and avoid promoting it into a broader public CLI unless additional governed callers emerge."
     },
+    "scripts/engineering/dev/zed_task.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-10-21",
+      "next_step": "Retain as a bounded Zed editor task launcher helper for local Windows development; promote only if Zed task automation becomes a governed first-class developer workflow entrypoint."
+    },
     "scripts/engineering/diagnostics/generate_src_bioetl_refactor_evidence.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
@@ -1060,7 +1066,7 @@
     },
     "scripts/ops/runtime/mcp/tests/apply-shared-to-grok.fixture.ps1": {
       "owner": "@bioetl-platform",
-      "decision": "test_fixture_helper",
+      "decision": "legacy_manual_utility",
       "review_by": "2026-10-21",
       "next_step": "Retain as the isolated PowerShell fixture used by apply-shared-to-grok.ps1 unit tests; do not promote to an operator entrypoint and retire only if the Grok shared-plane apply tests are removed."
     },

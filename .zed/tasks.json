@@ -1,16 +1,10 @@
 [
   {
     "label": "Format code",
-    "command": "powershell",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
-      "-NoProfile",
-      "-ExecutionPolicy",
-      "Bypass",
-      "-File",
-      "$ZED_WORKTREE_ROOT/scripts/engineering/dev/zed_task.ps1",
-      "-Module",
+      "-m",
       "ruff",
-      "--",
       "format",
       "."
     ],
@@ -47,15 +41,9 @@
     "label": "Test: current file",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
-      "-m",
-      "pytest",
-      "$ZED_FILE",
-      "-v",
-      "--tb=short",
-      "--no-cov",
-      "-p",
-      "no:benchmark",
-      "--maxfail=1"
+      "scripts/engineering/dev/zed_pytest_lane.py",
+      "file",
+      "$ZED_FILE"
     ],
     "env": {
       "VCR_RECORD_MODE": "none",
@@ -73,17 +61,10 @@
     "label": "Test: nearest symbol",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
-      "-m",
-      "pytest",
+      "scripts/engineering/dev/zed_pytest_lane.py",
+      "nearest",
       "$ZED_FILE",
-      "-k",
-      "$ZED_SYMBOL",
-      "-v",
-      "--tb=short",
-      "--no-cov",
-      "-p",
-      "no:benchmark",
-      "--maxfail=1"
+      "$ZED_SYMBOL"
     ],
     "env": {
       "VCR_RECORD_MODE": "none",
@@ -98,15 +79,8 @@
     "label": "Test: smoke",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
-      "-m",
-      "pytest",
-      "tests/smoke/",
-      "-v",
-      "--tb=short",
-      "--no-cov",
-      "-p",
-      "no:benchmark",
-      "--maxfail=1"
+      "scripts/engineering/dev/zed_pytest_lane.py",
+      "smoke"
     ],
     "env": {
       "VCR_RECORD_MODE": "none",
@@ -120,17 +94,8 @@
     "label": "Test: unit-fast",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
-      "-m",
-      "pytest",
-      "tests/unit/",
-      "-q",
-      "-m",
-      "not repo_backed and not slow and not serial and not benchmark and not memory",
-      "--tb=short",
-      "--no-cov",
-      "-p",
-      "no:benchmark",
-      "--maxfail=1"
+      "scripts/engineering/dev/zed_pytest_lane.py",
+      "unit-fast"
     ],
     "env": {
       "VCR_RECORD_MODE": "none",
@@ -144,15 +109,8 @@
     "label": "Test: unit",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
-      "-m",
-      "pytest",
-      "tests/unit/",
-      "-q",
-      "--tb=short",
-      "--no-cov",
-      "-p",
-      "no:benchmark",
-      "--maxfail=1"
+      "scripts/engineering/dev/zed_pytest_lane.py",
+      "unit"
     ],
     "env": {
       "VCR_RECORD_MODE": "none",
@@ -166,17 +124,8 @@
     "label": "Test: architecture",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
-      "-m",
-      "pytest",
-      "tests/architecture/",
-      "-q",
-      "-m",
-      "architecture and not slow and not benchmark and not memory",
-      "--tb=short",
-      "--no-cov",
-      "-p",
-      "no:benchmark",
-      "--maxfail=1"
+      "scripts/engineering/dev/zed_pytest_lane.py",
+      "architecture"
     ],
     "env": {
       "VCR_RECORD_MODE": "none",
@@ -190,17 +139,8 @@
     "label": "Test: integration-replay",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
-      "-m",
-      "pytest",
-      "tests/integration/",
-      "-q",
-      "-m",
-      "not e2e and not live and not slow and not benchmark and not memory",
-      "--tb=short",
-      "--no-cov",
-      "-p",
-      "no:benchmark",
-      "--maxfail=1"
+      "scripts/engineering/dev/zed_pytest_lane.py",
+      "integration-replay"
     ],
     "env": {
       "VCR_RECORD_MODE": "none",
@@ -214,20 +154,8 @@
     "label": "Test: contracts",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
-      "-m",
-      "pytest",
-      "tests/contract/",
-      "tests/unit/contracts/",
-      "-q",
-      "-m",
-      "no_api or not network",
-      "--tb=short",
-      "--no-cov",
-      "-p",
-      "no:benchmark",
-      "-p",
-      "no:xdist",
-      "--maxfail=1"
+      "scripts/engineering/dev/zed_pytest_lane.py",
+      "contracts"
     ],
     "env": {
       "VCR_RECORD_MODE": "none",
@@ -241,15 +169,8 @@
     "label": "Test: security",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
-      "-m",
-      "pytest",
-      "tests/security/",
-      "-q",
-      "--tb=short",
-      "--no-cov",
-      "-p",
-      "no:benchmark",
-      "--maxfail=1"
+      "scripts/engineering/dev/zed_pytest_lane.py",
+      "security"
     ],
     "env": {
       "VCR_RECORD_MODE": "none",
@@ -263,17 +184,8 @@
     "label": "Test: e2e-smoke",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
-      "-m",
-      "pytest",
-      "tests/e2e/",
-      "-m",
-      "e2e_smoke",
-      "-v",
-      "--tb=short",
-      "--no-cov",
-      "-p",
-      "no:benchmark",
-      "--maxfail=1"
+      "scripts/engineering/dev/zed_pytest_lane.py",
+      "e2e-smoke"
     ],
     "env": {
       "VCR_RECORD_MODE": "none",
@@ -287,16 +199,8 @@
     "label": "Test: failed last run",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
-      "-m",
-      "pytest",
-      "tests/",
-      "--lf",
-      "-x",
-      "-v",
-      "--tb=short",
-      "--no-cov",
-      "-p",
-      "no:benchmark"
+      "scripts/engineering/dev/zed_pytest_lane.py",
+      "failed"
     ],
     "env": {
       "VCR_RECORD_MODE": "none",
@@ -310,19 +214,8 @@
     "label": "Test: coverage (gate 85%)",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
-      "-m",
-      "pytest",
-      "tests/",
-      "--ignore=tests/e2e",
-      "--ignore=tests/contract",
-      "-m",
-      "not memory and not benchmark and not slow",
-      "--cov=src/bioetl",
-      "--cov-report=term-missing",
-      "--cov-report=html:reports/coverage/htmlcov",
-      "--cov-fail-under=85",
-      "-q",
-      "--tb=short"
+      "scripts/engineering/dev/zed_pytest_lane.py",
+      "coverage"
     ],
     "env": {
       "VCR_RECORD_MODE": "none",
