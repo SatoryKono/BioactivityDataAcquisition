@@ -79,7 +79,6 @@ non_aggregate_clusters:
   - {name: registry, path: src/bioetl/domain/registry, <<: *support_cluster}
   - {name: run_reports, path: src/bioetl/domain/run_reports, <<: *support_cluster}
   - {name: schemas, path: src/bioetl/domain/schemas, <<: *support_cluster}
-  - {name: services, path: src/bioetl/domain/services, <<: *support_cluster}
   - {name: transformations, path: src/bioetl/domain/transformations, <<: *support_cluster}
   - {name: types, path: src/bioetl/domain/types, <<: *support_cluster}
   - {name: validation, path: src/bioetl/domain/validation, <<: *support_cluster}
