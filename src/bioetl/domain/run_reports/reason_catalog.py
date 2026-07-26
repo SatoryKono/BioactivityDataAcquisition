@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
@@ -188,8 +189,8 @@ def _entry_from_object(item: object) -> ReasonCatalogEntry:
 
 
 def _entry_from_mapping(
-    item: dict[str, Any],
-) -> ReasonCatalogEntry:  # Any: report/json payload shape is dynamic
+    item: Mapping[str, object],
+) -> ReasonCatalogEntry:
     code = _text_default(item.get("code"), "").strip()
     return ReasonCatalogEntry(
         code=code,

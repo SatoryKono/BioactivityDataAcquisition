@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import ast
 import subprocess
-import sys
 from dataclasses import fields
 from pathlib import Path
 
@@ -27,17 +26,23 @@ def _read(relative_path: str) -> str:
 
 
 def _find_markdown_phrase_hits(*phrases: str) -> list[str]:
+    """Scan tracked docs for fixed-string phrase hits via git grep.
+
+    Prefer git grep over ripgrep so CI/docs-governance runners do not need an
+    extra binary; fall back to a bounded pure-Python walk when git is unavailable.
+    """
     command = [
-        "rg",
-        "--files-with-matches",
-        "--fixed-strings",
-        "--ignore-case",
-        "--glob",
-        "*.md",
-        "--glob",
-        "!**/.quarantined-*/**",
+        "git",
+        "-C",
+        str(ROOT),
+        "grep",
+        "-I",
+        "-l",
+        "-i",
+        "-F",
         *[flag for phrase in phrases for flag in ("-e", phrase)],
-        "docs",
+        "--",
+        ":(glob)docs/**/*.md",
     ]
     result = subprocess.run(
         command,
@@ -47,18 +52,43 @@ def _find_markdown_phrase_hits(*phrases: str) -> list[str]:
         text=True,
         encoding="utf-8",
     )
-    if result.returncode not in (0, 1):
-        raise AssertionError(
-            "Failed to scan docs for reproducibility drift phrases:\n"
-            f"{result.stderr.strip()}"
-        )
+    if result.returncode in (0, 1):
+        hits: list[str] = []
+        for line in result.stdout.splitlines():
+            relative_path = Path(line).as_posix()
+            if any(
+                part.startswith(".quarantined-") for part in Path(relative_path).parts
+            ):
+                continue
+            hits.append(relative_path)
+        return sorted(hits)
 
+    # Fallback for non-git checkouts: scan active docs while skipping archives
+    # and large generated report trees.
+    skip_parts = {
+        "99-archive",
+        "generated",
+        "site",
+        "node_modules",
+        ".venv",
+    }
+    lowered_phrases = tuple(phrase.casefold() for phrase in phrases)
     hits: list[str] = []
-    for line in result.stdout.splitlines():
-        relative_path = Path(line).as_posix()
-        if any(part.startswith(".quarantined-") for part in Path(relative_path).parts):
+    docs_root = ROOT / "docs"
+    for path in docs_root.rglob("*.md"):
+        if any(part.startswith(".quarantined-") for part in path.parts):
             continue
-        hits.append(relative_path)
+        if any(part in skip_parts for part in path.parts):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore").casefold()
+        except OSError as exc:
+            raise AssertionError(
+                "Failed to scan docs for reproducibility drift phrases:\n"
+                f"git grep: {result.stderr.strip()}\n{path}: {exc}"
+            ) from exc
+        if any(phrase in text for phrase in lowered_phrases):
+            hits.append(path.relative_to(ROOT).as_posix())
     return sorted(hits)
 
 
@@ -261,9 +291,6 @@ def test_run_manifest_docs_define_replay_equivalence_levels() -> None:
 @pytest.mark.architecture
 def test_universal_exact_replay_claims_are_bound_to_full_universe_evidence() -> None:
     """Universal exact-replay wording must remain gated by certified evidence."""
-    if sys.platform == "win32":
-        pytest.skip("ripgrep not available on Windows")
-
     contract = _read("docs/04-reference/contracts/run-manifest-ledger.md")
     runbook = _read("docs/05-operations/runbooks/run-manifest-inspection.md")
 

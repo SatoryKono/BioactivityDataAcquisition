@@ -127,6 +127,26 @@ validate_gemini_mcp_list() {
     return 0
 }
 
+ensure_shared_plane() {
+    if [[ "${GEMINI_MCP_ENSURE_SHARED_PLANE:-1}" != "1" ]]; then
+        return 0
+    fi
+    local launcher="${REPO_ROOT}/scripts/ops/runtime/mcp/start-shared.sh"
+    local health="${REPO_ROOT}/scripts/ops/runtime/mcp/health-shared.sh"
+    if [[ ! -x "${launcher}" || ! -x "${health}" ]]; then
+        warn "Shared MCP launcher/health helper unavailable; config-only ensure"
+        return 0
+    fi
+    if bash "${health}" daily >/dev/null 2>&1; then
+        return 0
+    fi
+    local timeout_seconds="${GEMINI_MCP_SHARED_START_TIMEOUT:-360}"
+    timeout "${timeout_seconds}" bash "${launcher}" --daily || \
+        fail "Shared MCP plane failed to become ready"
+    bash "${health}" daily >/dev/null || \
+        fail "Shared MCP plane health check failed after start"
+}
+
 sync_required_server_enablement() {
     if [[ "${GEMINI_RESPECT_MCP_DISABLES:-0}" == "1" ]]; then
         return 0
@@ -192,6 +212,7 @@ esac
 check_workspace_settings
 if [[ "${MODE}" == "ensure" ]]; then
     sync_required_server_enablement
+    ensure_shared_plane
 fi
 validate_gemini_mcp_list
 

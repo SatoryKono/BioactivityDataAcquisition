@@ -40,10 +40,11 @@ for name, entry in sorted(catalog["servers"].items(), key=lambda kv: kv[0]):
                 ping_ok = 200 <= r.status < 500
         except Exception:
             ping_ok = False
-    if not up and required:
+    ready = up and ping_ok
+    if not ready and required:
         failed += 1
         mark = "DOWN"
-    elif not up:
+    elif not ready:
         warned += 1
         mark = "WARN"
     else:
@@ -56,6 +57,7 @@ for name, entry in sorted(catalog["servers"].items(), key=lambda kv: kv[0]):
             "url": url,
             "port_open": up,
             "ping_ok": ping_ok,
+            "ready": ready,
             "daily": is_daily,
             "required": required,
             "status": mark,
@@ -64,20 +66,19 @@ for name, entry in sorted(catalog["servers"].items(), key=lambda kv: kv[0]):
 
 out = root / "logs/mcp-shared/health.json"
 out.parent.mkdir(parents=True, exist_ok=True)
-out.write_text(
-    json.dumps(
-        {
-            "checked_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
-            "mode": mode,
-            "failed": failed,
-            "warned": warned,
-            "results": results,
-        },
-        indent=2,
-    )
-    + "\n",
-    encoding="utf-8",
-)
+payload = json.dumps(
+    {
+        "checked_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+        "mode": mode,
+        "failed": failed,
+        "warned": warned,
+        "results": results,
+    },
+    indent=2,
+) + "\n"
+temp = out.with_suffix(out.suffix + ".tmp")
+temp.write_text(payload, encoding="utf-8")
+temp.replace(out)
 print(f"Wrote {out} failed={failed} warned={warned}")
 sys.exit(1 if failed else 0)
 PY

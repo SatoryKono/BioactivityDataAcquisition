@@ -13,9 +13,15 @@ for f in "$PID_DIR"/*.pid; do
   name="$(basename "$f" .pid)"
   if [[ "$pid" =~ ^[0-9]+$ ]] && kill -0 "$pid" 2>/dev/null; then
     echo "Stopping $name pid=$pid"
-    kill "$pid" 2>/dev/null || true
-    sleep 0.2
-    kill -9 "$pid" 2>/dev/null || true
+    # start-shared creates a dedicated process group per logical server.
+    kill -- "-$pid" 2>/dev/null || kill "$pid" 2>/dev/null || true
+    for _ in {1..20}; do
+      kill -0 "$pid" 2>/dev/null || break
+      sleep 0.25
+    done
+    if kill -0 "$pid" 2>/dev/null; then
+      kill -9 -- "-$pid" 2>/dev/null || kill -9 "$pid" 2>/dev/null || true
+    fi
   fi
   rm -f "$f"
 done

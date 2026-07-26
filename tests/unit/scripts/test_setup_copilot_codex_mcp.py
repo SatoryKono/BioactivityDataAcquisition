@@ -146,8 +146,9 @@ def test_shared_transport_mode_rewrites_local_projections_only(
         assert entry["type"] == "http"
         assert entry["url"] == setup_mcp.MCP_SHARED_SERVER_ENDPOINTS[thrash]
         assert "command" not in entry
-    # Non-catalog servers remain command-based.
-    assert "command" in cursor["mcpServers"]["memory"]
+    # Stateful servers use the same singleton plane with an explicit state model.
+    assert cursor["mcpServers"]["memory"]["type"] == "http"
+    assert cursor["mcpServers"]["filesystem"]["type"] == "http"
 
 
 def test_local_http_server_rejects_non_localhost_url() -> None:
@@ -292,7 +293,7 @@ def test_hybrid_transport_mode_rewrites_catalog_only(
         (output_root / ".cursor" / "mcp.json").read_text(encoding="utf-8")
     )
     assert cursor["mcpServers"]["adr-analysis"]["type"] == "http"
-    assert "command" in cursor["mcpServers"]["memory"]
+    assert cursor["mcpServers"]["memory"]["type"] == "http"
 
 
 def test_main_uses_workspace_root_for_generated_server_paths(
@@ -410,10 +411,9 @@ def test_main_uses_workspace_root_for_generated_server_paths(
             workspace_root / f"scripts/ai/mcp/mcp_filesystem_wrapper{wrapper_suffix}"
         ).resolve()
     )
-    assert servers["memory"]["args"] == [
-        "-y",
-        "@modelcontextprotocol/server-memory@2026.1.26",
-    ]
+    assert servers["memory"]["args"][0].endswith(
+        ("mcp_memory_wrapper.sh", "mcp_memory_wrapper.ps1")
+    )
     assert (
         servers["memory"]["env"]["MEMORY_FILE_PATH"]
         == "docs/00-project/ai/memory/mcp-memory.json"
@@ -525,23 +525,19 @@ def test_main_recreates_empty_workspace_json_configs(tmp_path: Path) -> None:
     )
 
     assert exit_code == 0
-    wrapper_suffix = ".ps1" if os.name == "nt" else ".sh"
-    portable_fs = f"scripts/ai/mcp/mcp_filesystem_wrapper{wrapper_suffix}"
-    runtime_fs = str(
-        (workspace_root / f"scripts/ai/mcp/mcp_filesystem_wrapper{wrapper_suffix}").resolve()
-    )
+    shared_fs_url = setup_mcp.MCP_SHARED_SERVER_ENDPOINTS["filesystem"]
     assert json.loads(
         (output_root / ".codex" / "settings.json").read_text(encoding="utf-8")
-    )["mcpServers"]["filesystem"]["args"][0] == runtime_fs
+    )["mcpServers"]["filesystem"]["url"] == shared_fs_url
     assert (
         json.loads(
             (output_root / ".devin" / "config.json").read_text(encoding="utf-8")
-        )["mcpServers"]["filesystem"]["args"][0]
-        == portable_fs
+        )["mcpServers"]["filesystem"]["url"]
+        == shared_fs_url
     )
     assert json.loads(
         (output_root / ".gemini" / "settings.json").read_text(encoding="utf-8")
-    )["mcpServers"]["filesystem"]["args"][0] == runtime_fs
+    )["mcpServers"]["filesystem"]["httpUrl"] == shared_fs_url
 
 
 def test_devin_projection_is_portable_across_workspace_roots(
@@ -588,9 +584,8 @@ def test_devin_projection_is_portable_across_workspace_roots(
     assert generated[0]["devin"] == {"org_id": "org-test"}
     assert generated[0]["shell"] == {"setup_complete": True}
     assert generated[0]["theme_mode"] == "light"
-    wrapper_suffix = ".ps1" if os.name == "nt" else ".sh"
-    assert generated[0]["mcpServers"]["filesystem"]["args"][0] == (
-        f"scripts/ai/mcp/mcp_filesystem_wrapper{wrapper_suffix}"
+    assert generated[0]["mcpServers"]["filesystem"]["url"] == (
+        setup_mcp.MCP_SHARED_SERVER_ENDPOINTS["filesystem"]
     )
 
 

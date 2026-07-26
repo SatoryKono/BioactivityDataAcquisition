@@ -1,10 +1,9 @@
 {
   "mcpServers": {
     "memory": {
-      "command": "npx",
+      "command": "bash",
       "args": [
-        "-y",
-        "@modelcontextprotocol/server-memory@2026.1.26"
+        "scripts/ai/mcp/mcp_memory_wrapper.sh"
       ],
       "env": {
         "NPM_CONFIG_CACHE": ".cache/npm-cache",

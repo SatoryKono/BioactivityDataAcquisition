@@ -266,6 +266,9 @@ nav:
             -   "Cleanup Guide": 03-guides/cleanup.md
             -   "Cleanup Policy": 03-guides/cleanup-policy.md
             -   "Registry Pattern": 03-guides/registry-pattern.md
+            -   "Cheatsheets":
+                    -   "Overview": 03-guides/cheatsheets/README.md
+                    -   "CLI Commands": 03-guides/cheatsheets/cli-commands.md
             -   Development:
                     -   "Config Schema Guidelines": 03-guides/development/config-schema-guidelines.md
                     -   "Codex Launcher Paths": 03-guides/development/codex-paths.md

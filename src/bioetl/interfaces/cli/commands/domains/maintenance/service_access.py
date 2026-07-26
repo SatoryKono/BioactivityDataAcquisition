@@ -18,7 +18,7 @@ if TYPE_CHECKING:
         ContractMigrationService,
     )
     from bioetl.application.services.vacuum_service import VacuumService
-    from bioetl.composition._resource_management import (
+    from bioetl.composition.maintenance_service_access import (
         MedallionLifecycleServiceProtocol,
     )
 

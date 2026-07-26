@@ -10,11 +10,15 @@ from bioetl.composition._services import (
 )
 from bioetl.composition._services import get_vacuum_service as get_vacuum_service
 from bioetl.composition._resource_management import (
+    MedallionLifecycleServiceProtocol as MedallionLifecycleServiceProtocol,
+)
+from bioetl.composition._resource_management import (
     get_lifecycle_service as get_lifecycle_service,
 )
 from bioetl.composition._resource_management import preview_cleanup as preview_cleanup
 
 __all__ = [
+    "MedallionLifecycleServiceProtocol",
     "get_bronze_cleanup_service",
     "get_contract_migration_service",
     "get_lifecycle_service",

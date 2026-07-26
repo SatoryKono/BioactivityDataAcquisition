@@ -60,12 +60,20 @@ MCP_PROFILE_STABLE = (
     "deepwiki",
     "ref",
 )
-# Multi-client daily: host-stable set + docker thrash servers that live on the
-# shared HTTP plane (must match scripts/ops/runtime/mcp/shared-servers.json).
+# Multi-client default: every sanctioned local server is projected to the
+# shared HTTP plane. Remote HTTP servers remain remote and are naturally
+# multi-client. Keep membership explicit so profile drift is reviewable.
 MCP_PROFILE_SHARED = MCP_PROFILE_STABLE + (
     "brave-search",
     "prometheus",
     "grafana",
+    "docker",
+    "mermaid",
+    "mcp-code-interpreter",
+    "neo4j-cypher",
+    "neo4j-memory",
+    "mutmut",
+    "github-actions",
 )
 MCP_PROFILE_CORE = MCP_PROFILE_STABLE + (
     # mermaid still uses docker mcp gateway under stdio; HTTP when shared plane.
@@ -94,19 +102,38 @@ MCP_PROFILES: dict[str, tuple[str, ...] | None] = {
     "full": None,
 }
 
+SHARED_SERVER_CATALOG_PATH = (
+    REPO_ROOT / "scripts/ops/runtime/mcp/shared-servers.json"
+)
+
+
+def _load_shared_server_endpoints(
+    catalog_path: Path = SHARED_SERVER_CATALOG_PATH,
+) -> dict[str, str]:
+    """Load localhost endpoints from the shared runtime SSOT."""
+    payload = json.loads(catalog_path.read_text(encoding="utf-8"))
+    servers = payload.get("servers")
+    if not isinstance(servers, dict) or not servers:
+        raise ValueError(f"Shared MCP catalog has no servers: {catalog_path}")
+    endpoints: dict[str, str] = {}
+    ports: set[int] = set()
+    for name, entry in servers.items():
+        if not isinstance(name, str) or not isinstance(entry, dict):
+            raise ValueError(f"Invalid shared MCP catalog entry: {name!r}")
+        port = int(entry["port"])
+        if port in ports:
+            raise ValueError(f"Duplicate shared MCP port {port}")
+        ports.add(port)
+        path = str(entry.get("path") or "/mcp")
+        if not path.startswith("/"):
+            raise ValueError(f"Shared MCP path must start with '/': {name}={path!r}")
+        endpoints[name] = f"http://127.0.0.1:{port}{path}"
+    return endpoints
+
+
 # Localhost Streamable HTTP endpoints for multi-client shared plane (#6563/#6589).
-# Keep in sync with scripts/ops/runtime/mcp/shared-servers.json (unit-tested).
-MCP_SHARED_SERVER_ENDPOINTS: dict[str, str] = {
-    "brave-search": "http://127.0.0.1:8811/mcp",
-    "adr-analysis": "http://127.0.0.1:8813/mcp",
-    "deja": "http://127.0.0.1:8814/mcp",
-    "context7": "http://127.0.0.1:8815/mcp",
-    "ast-grep": "http://127.0.0.1:8816/mcp",
-    "github": "http://127.0.0.1:8820/mcp",
-    "fetch": "http://127.0.0.1:8821/mcp",
-    "prometheus": "http://127.0.0.1:8822/mcp",
-    "grafana": "http://127.0.0.1:8823/mcp",
-}
+# The JSON catalog is the single source of truth for names, ports, and paths.
+MCP_SHARED_SERVER_ENDPOINTS = _load_shared_server_endpoints()
 TRANSPORT_MODES = frozenset({"stdio", "shared", "hybrid"})
 # Multi-client daily defaults for Codex ensure / local projections.
 DEFAULT_LOCAL_PROFILE = "shared"
@@ -334,9 +361,10 @@ def _canonical_servers(
         portable_workspace_paths=portable_workspace_paths,
     )
     servers: dict[str, dict[str, Any]] = {
-        "memory": _npx_server(
-            "@modelcontextprotocol/server-memory@2026.1.26",
-            npm_cache_dir=npm_cache_dir,
+        "memory": _wrapper_command(
+            "mcp_memory_wrapper",
+            workspace_root,
+            portable_workspace_paths=portable_workspace_paths,
         ),
         # Resolve repo root inside the wrapper so portable configs never pass
         # client-rewritten "." / foreign-OS absolute paths into Node path.resolve.
@@ -445,7 +473,10 @@ def _canonical_servers(
         "NPM_CONFIG_CACHE": npm_cache_dir,
     }
     servers["github"]["env"] = {"NPM_CONFIG_CACHE": npm_cache_dir}
-    servers["memory"]["env"]["MEMORY_FILE_PATH"] = str(memory_file_path)
+    servers["memory"]["env"] = {
+        "NPM_CONFIG_CACHE": npm_cache_dir,
+        "MEMORY_FILE_PATH": str(memory_file_path),
+    }
     servers["deja"]["env"] = {"NPM_CONFIG_CACHE": npm_cache_dir}
     servers["adr-analysis"]["env"] = {
         "PROJECT_PATH": workspace_root_str,
@@ -586,8 +617,14 @@ def _write_workspace_codex_settings(
     return settings_path
 
 
-def _write_devin_config(output_root: Path, workspace_root: Path) -> Path:
-    """Write tracked Devin portable MCP projection (always full inventory)."""
+def _write_devin_config(
+    output_root: Path,
+    workspace_root: Path,
+    *,
+    profile: str = "full",
+    transport_mode: str = "stdio",
+) -> Path:
+    """Write the portable Devin projection for the selected local runtime."""
     settings_path = output_root / ".devin" / "config.json"
     settings_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -602,11 +639,13 @@ def _write_devin_config(output_root: Path, workspace_root: Path) -> Path:
     else:
         existing["shell"].setdefault("setup_complete", True)
 
-    # Tracked Devin config always materializes the full portable inventory.
-    servers = deepcopy(
+    servers = _apply_shared_transport(
         _canonical_servers(
-            workspace_root, portable_workspace_paths=True, profile="full"
-        )
+            workspace_root,
+            portable_workspace_paths=True,
+            profile=profile,
+        ),
+        transport_mode=transport_mode,
     )
     ref_server = servers.get("ref")
     if isinstance(ref_server, dict):
@@ -665,7 +704,12 @@ def _write_configs(
             profile=profile,
             transport_mode=transport_mode,
         )
-        devin_config_path = _write_devin_config(output_root, workspace_root)
+        devin_config_path = _write_devin_config(
+            output_root,
+            workspace_root,
+            profile=profile,
+            transport_mode=transport_mode,
+        )
         _write_json(mcp_path, codex_payload, allowed_root=output_root)
         if output_root.resolve() == workspace_root.resolve():
             _write_json(

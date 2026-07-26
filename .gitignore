@@ -137,6 +137,7 @@ log_test.txt
 !/reports/quality/config-compatibility-legacy-taxonomy-review.json
 !/reports/quality/tech-debt-issues-5253-5264-closeout.json
 !/reports/quality/tech-debt-issues-5581-5584-closeout.json
+!/reports/quality/diagram-issues-6205-6211-closeout.json
 !/reports/quality/tech-debt-issues-5626-5637-closeout.json
 !/reports/quality/tech-debt-issues-5639-5644-closeout.json
 !/reports/quality/tech-debt-issues-5642-5645-closeout.json
@@ -409,12 +410,15 @@ scripts/docs/build/**/*.pyc
 !/docs/reports/generated/documentation-cleanup-inventory.json
 !/docs/reports/generated/documentation-cleanup-inventory.md
 !/docs/reports/generated/chembl_matrix_structural_contract_v1.json
+!/docs/reports/generated/pipeline_normalization_field_matrix/
+!/docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md
 !/docs/reports/evidence/
 /docs/reports/evidence/*
 !/docs/reports/evidence/project-test-health/
 /docs/reports/evidence/project-test-health/*
 !/docs/reports/evidence/project-test-health/metadata.yaml
 !/docs/reports/evidence/project-test-health/shard_registry.yaml
+!/docs/reports/evidence/project-test-health/SUMMARY.md
 !/docs/reports/evidence/project-legacy-compatibility-remediation/
 /docs/reports/evidence/project-legacy-compatibility-remediation/*
 !/docs/reports/evidence/project-legacy-compatibility-remediation/SUMMARY.md

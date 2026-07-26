@@ -67,9 +67,17 @@ python3 scripts/ai/codex/setup_mcp.py \
 | Server | Port | Daily | Notes |
 | --- | --- | --- | --- |
 | deja | 8814 | **no** | Needs `deja` binary (`go install github.com/vshulcz/deja-vu/cmd/deja@latest`). Start with `./start-shared.sh deja` when installed. |
-| docker / mermaid | — | **disabled** on Devin daily | Gateway thrash; enable only via graph/full / explicit local edit |
+| docker | 8817 | **no** | Gateway thrash leader. Single proxy: `./start-shared.sh docker`. Keep off daily unless needed; Devin daily still omits. |
+| mermaid | 8818 | **no** | Same pattern: `./start-shared.sh mermaid` (or `docker mermaid dockerhub`). |
+| dockerhub | 8819 | **no** | Same pattern: `./start-shared.sh dockerhub`. |
 
 Catalog SSOT: `scripts/ops/runtime/mcp/shared-servers.json` (`daily: false` = optional).
+
+## Ready gate (start-shared)
+
+- Success = HTTP `GET http://127.0.0.1:<port>/ping` (not TCP-only).
+- Default settle ≈25s host / 45s docker-backed; retries **never** double-bind (kill tree + wait free, or accept already-ready).
+- Idempotent re-run: already-ready servers report `already_up` and exit 0 when all selected are healthy.
 
 ## Toolkit / gateway
 

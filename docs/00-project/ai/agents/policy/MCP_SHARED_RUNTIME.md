@@ -51,17 +51,17 @@ Classes:
 | filesystem | T2 | npx stdio | **deferred** (stateful roots) |
 | fetch | T2 | uvx wrapper | **Phase 2** port 8821 |
 | github | T2 | wrapper | **Phase 2** port 8820 |
-| docker | T2 | docker mcp gateway stdio | **Phase 2** port 8817 |
-| context7 | T2 | wrapper | **Phase 1** port 8815 |
-| ast-grep | T2 | wrapper | **Phase 1** port 8816 |
+| docker | T2 | docker mcp gateway stdio | **catalog optional** port 8817 (`daily=false`) |
+| context7 | T2 | wrapper | **daily** port 8815 |
+| ast-grep | T2 | wrapper | **daily** port 8816 |
 | mcp-code-interpreter | T2 | uvx stdio | later |
-| prometheus | T2 | docker/wrapper | **Phase 2** port 8822 |
-| grafana | T2 | docker/wrapper | **Phase 2** port 8823 |
-| brave-search | T2 | docker run stdio | **Phase 1** port 8811 |
+| prometheus | T2 | docker/wrapper | **daily** port 8822 |
+| grafana | T2 | docker/wrapper | **daily** port 8823 |
+| brave-search | T2 | docker run stdio | **daily** port 8811 |
 | neo4j-cypher | T2 | wrapper | **catalog** port 8824 (needs healthy neo4j auth) |
 | neo4j-memory | T2 | wrapper | **catalog** port 8825 (needs healthy neo4j auth) |
-| mermaid | T2 | gateway stdio | **Phase 2** port 8818 |
-| dockerhub | T2 | gateway stdio | **Phase 2** port 8819 |
+| mermaid | T2 | gateway stdio | **catalog optional** port 8818 (`daily=false`) |
+| dockerhub | T2 | gateway stdio | **catalog optional** port 8819 (`daily=false`) |
 | deja | T2 | npx stdio | **Phase 1** port 8814 |
 | adr-analysis | T2 | npx stdio | **Phase 1 MVP** port 8813 |
 | mutmut | T2 | wrapper | later |
@@ -93,9 +93,9 @@ Bridge pin: **`mcp-proxy@6.5.4`** (stdio → Streamable HTTP `/mcp`).
 | deja | `http://127.0.0.1:8814/mcp` | yes |
 | context7 | `http://127.0.0.1:8815/mcp` | yes |
 | ast-grep | `http://127.0.0.1:8816/mcp` | yes |
-| docker | `http://127.0.0.1:8817/mcp` | yes |
-| mermaid | `http://127.0.0.1:8818/mcp` | yes |
-| dockerhub | `http://127.0.0.1:8819/mcp` | yes |
+| docker | `http://127.0.0.1:8817/mcp` | optional (`daily=false`; start explicitly) |
+| mermaid | `http://127.0.0.1:8818/mcp` | optional (`daily=false`; start explicitly) |
+| dockerhub | `http://127.0.0.1:8819/mcp` | optional (`daily=false`; start explicitly) |
 | github | `http://127.0.0.1:8820/mcp` | yes |
 | fetch | `http://127.0.0.1:8821/mcp` | yes |
 | prometheus | `http://127.0.0.1:8822/mcp` | yes |
