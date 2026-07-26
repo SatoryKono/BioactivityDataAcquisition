@@ -700,6 +700,10 @@ def _load_cached_snapshot(
     src_root: Path,
 ) -> DependencySnapshot | None:
     """Return one cached snapshot when source fingerprint still matches."""
+    # Script may be invoked as ``python path/to/file.py`` (CI preflight) without
+    # package context; ensure repo root is importable for ``scripts.*``.
+    if str(PROJECT_ROOT) not in sys.path:
+        sys.path.insert(0, str(PROJECT_ROOT))
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
     json_output = resolve_output_path(json_output, root=REPO_ROOT)

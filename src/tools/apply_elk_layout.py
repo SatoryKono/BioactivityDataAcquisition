@@ -6,7 +6,7 @@ retained temporarily for existing direct invocations and architecture tests.
 
 from __future__ import annotations
 
-from scripts.diagrams.apply_elk_layout import *  # noqa: F403
+from scripts.diagrams.apply_elk_layout import *
 from scripts.diagrams.apply_elk_layout import main
 
 if __name__ == "__main__":

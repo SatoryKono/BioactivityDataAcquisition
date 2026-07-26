@@ -6,7 +6,7 @@ retained temporarily for existing direct invocations.
 
 from __future__ import annotations
 
-from scripts.diagrams.harmonize_link_styles import *  # noqa: F403
+from scripts.diagrams.harmonize_link_styles import *
 from scripts.diagrams.harmonize_link_styles import main
 
 if __name__ == "__main__":

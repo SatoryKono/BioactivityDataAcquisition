@@ -105,8 +105,10 @@ def _usage() -> str:
 
 def _run_pytest(argv_tail: Sequence[str]) -> int:
     # Ensure interactive Zed runs stay offline for VCR by default.
-    os.environ.setdefault("VCR_RECORD_MODE", "none")
-    os.environ.setdefault("PYTHONDONTWRITEBYTECODE", "1")
+    if "VCR_RECORD_MODE" not in os.environ:
+        os.environ["VCR_RECORD_MODE"] = "none"
+    if "PYTHONDONTWRITEBYTECODE" not in os.environ:
+        os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
 
     import pytest
 
@@ -116,14 +118,14 @@ def _run_pytest(argv_tail: Sequence[str]) -> int:
 def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if not args or args[0] in {"-h", "--help", "help"}:
-        sys.stderr.write(_usage())
+        print(_usage(), file=sys.stderr, end="")
         return 2
 
     mode = args[0]
 
     if mode == "file":
         if len(args) < 2:
-            sys.stderr.write("file lane requires a path argument\n")
+            print("file lane requires a path argument", file=sys.stderr)
             return 2
         path = args[1]
         extra = args[2:]
@@ -131,7 +133,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if mode == "nearest":
         if len(args) < 3:
-            sys.stderr.write("nearest lane requires <path> <symbol>\n")
+            print("nearest lane requires <path> <symbol>", file=sys.stderr)
             return 2
         path = args[1]
         symbol = args[2]
@@ -139,7 +141,7 @@ def main(argv: list[str] | None = None) -> int:
         return _run_pytest((path, "-k", symbol, "-v", *_COMMON, *extra))
 
     if mode not in LANES:
-        sys.stderr.write(f"Unknown lane: {mode!r}\n{_usage()}")
+        print(f"Unknown lane: {mode!r}\n{_usage()}", file=sys.stderr, end="")
         return 2
 
     extra = args[1:]

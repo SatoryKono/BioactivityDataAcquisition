@@ -1,4 +1,3 @@
-# ruff: noqa: UP049
 """Pure helper functions for metadata coordinator orchestration."""
 
 from __future__ import annotations
@@ -29,12 +28,12 @@ def validate_records_present(
         raise ValueError(f"Cannot create {layer_name} metadata without records")
 
 
-def create_metadata_bundle[_MetadataT: (BronzeMetadata, SilverMetadata, GoldMetadata)](
+def create_metadata_bundle[MetadataT: (BronzeMetadata, SilverMetadata, GoldMetadata)](
     *,
-    metadata: _MetadataT,
+    metadata: MetadataT,
     lineage_fragment: LineageGraphFragment,
     strict_manifest_id_required: bool = False,
-) -> MetadataLineageBundleResult[_MetadataT]:
+) -> MetadataLineageBundleResult[MetadataT]:
     """Bundle sidecar metadata with its canonical lineage fragment."""
     return MetadataLineageBundleResult(
         metadata=metadata,

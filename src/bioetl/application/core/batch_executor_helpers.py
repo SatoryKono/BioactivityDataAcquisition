@@ -1,4 +1,3 @@
-# ruff: noqa: UP049
 """Internal helper functions for batch execution state updates."""
 
 from __future__ import annotations
@@ -129,14 +128,14 @@ def apply_processed_batch_outcome(
     )
 
 
-def build_batch_result_snapshot[_BatchResultT](
+def build_batch_result_snapshot[BatchResultT](
     *,
-    batch_result_type: BatchResultBuilderProtocol[_BatchResultT],
+    batch_result_type: BatchResultBuilderProtocol[BatchResultT],
     records_bronze: int,
     records_silver: int,
     records_gold: int,
     records_quarantined: int,
-) -> _BatchResultT:
+) -> BatchResultT:
     """Build the public batch-result snapshot from cumulative executor counters."""
     return batch_result_type(
         bronze_count=records_bronze,

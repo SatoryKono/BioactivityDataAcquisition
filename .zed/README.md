@@ -149,16 +149,26 @@ All tasks: `cwd: $ZED_WORKTREE_ROOT`, interpreter/tool binaries under
 **Quality**
 
 - Format code — `python -m ruff format .`
-- Lint code — `python -m ruff check .`
+- Lint code — `python -m ruff check src tests scripts`
+  (uses `[tool.ruff]` from `pyproject.toml`; CI full gate is `src tests`,
+  scripts match pre-commit advisory scope)
 - Type check — `python -m mypy src/`
-- Architecture compliance — `lint-imports.exe --config pyproject.toml`
+- Architecture compliance — `python scripts/engineering/dev/zed_lint_imports.py` (contracts in `.importlinter`)
 - Refresh MCP config — `python scripts/ai/codex/setup_mcp.py ...`
 
 **Tests** — see table above.
 
 **Security / hygiene**
 
-- Security scan, dependency audit, dead code, complexity
+- Security scan — `python -m bandit -c pyproject.toml -r src/bioetl`
+  (same as pre-commit; skips B101/B104/B311; not bare `bandit -r src/`)
+- Dependency audit — `python -m pip_audit --skip-editable --cache-dir .cache/pip-audit`
+- Dead code — `python scripts/engineering/dev/zed_vulture.py`
+  (same filter as architecture `test_dead_code_vulture`: min confidence 80,
+  ignore private names / dunders / reserved API params; not bare `vulture`)
+- Complexity check — `python scripts/engineering/dev/zed_xenon.py`
+  (CI thresholds B/B/A + xenon excludes from
+  `configs/quality/duplication_complexity_exemptions.yaml`)
 
 CLI agents (Codex, Devin, Grok) run from a **Terminal thread** in Agent Panel — not as project tasks.
 
@@ -213,5 +223,7 @@ Python snippets require `from __future__ import annotations` and avoid retired A
 - `docs/00-project/ai/mcp-governance.md`
 - `scripts/ai/codex/setup_mcp.py`
 - `scripts/engineering/dev/run_pytest.ps1` / `run_pytest.sh`
+- `scripts/engineering/dev/zed_task.ps1` — optional Windows helper to run
+  `pytest`/`ruff`/`mypy` via `.venv-win` without requiring `uv` on PATH
 - https://zed.dev/docs/tasks
 - https://zed.dev/docs/languages/python

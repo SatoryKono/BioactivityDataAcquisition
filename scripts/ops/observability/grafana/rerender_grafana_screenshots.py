@@ -32,6 +32,8 @@ DEFAULT_WIDTH = 1600
 DEFAULT_HEIGHT = 2200
 DEFAULT_THEME = "dark"
 DEFAULT_TIMEOUT_SECONDS = 120.0
+
+
 def _default_tool_playwright_paths() -> tuple[Path, Path]:
     """Resolve Playwright tool paths under a private temp dir (S5443)."""
     import tempfile

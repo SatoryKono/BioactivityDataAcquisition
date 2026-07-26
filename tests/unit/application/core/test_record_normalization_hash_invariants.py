@@ -7,7 +7,6 @@ import json
 import pytest
 from hypothesis import HealthCheck, given, settings, strategies as st
 
-# ruff: noqa: F403
 from tests.unit.application.core.normalization_test_support import *
 
 

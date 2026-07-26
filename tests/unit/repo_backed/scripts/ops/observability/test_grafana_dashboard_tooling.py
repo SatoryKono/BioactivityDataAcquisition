@@ -758,14 +758,24 @@ if (markerWithoutEvidence !== "loading") throw new Error(markerWithoutEvidence);
     env = os.environ.copy()
     rerender_subject._apply_playwright_runtime_env(env)
 
-    result = subprocess.run(
-        [node_path, "-e", program, str(script_path)],
-        check=False,
-        capture_output=True,
-        text=True,
-        cwd=Path.cwd(),
-        env=env,
-    )
+    # Classifier path must not load Playwright. Bound the subprocess so a
+    # regression to eager require("playwright") fails fast instead of hanging
+    # the whole unit suite (pytest-timeout thread mode cannot always kill it).
+    try:
+        result = subprocess.run(
+            [node_path, "-e", program, str(script_path)],
+            check=False,
+            capture_output=True,
+            text=True,
+            cwd=Path.cwd(),
+            env=env,
+            timeout=15,
+        )
+    except subprocess.TimeoutExpired as exc:
+        pytest.fail(
+            "Node classifier probe timed out; the .cjs module likely loads "
+            f"Playwright at import time. stdout={exc.stdout!r} stderr={exc.stderr!r}"
+        )
 
     assert result.returncode == 0, result.stderr
 

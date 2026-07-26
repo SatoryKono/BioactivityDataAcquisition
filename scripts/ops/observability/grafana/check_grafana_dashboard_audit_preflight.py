@@ -86,6 +86,8 @@ def _resolve_grafana_username() -> str:
 
 
 def _has_grafana_auth_material(*, username: str, password: str) -> bool:
+    # Username is part of the call-site auth pair; presence is token or password.
+    _ = username
     token = _read_env("GRAFANA_SERVICE_ACCOUNT_TOKEN")
     return bool(token) or bool(password)
 
@@ -762,7 +764,10 @@ def _exit_code_for_checks(checks: list[PreflightCheck]) -> int:
         return EXIT_EXPANDED_ROW
     if by_name.get("prometheus", PreflightCheck("", "ok", "")).status != "ok":
         return EXIT_PROMETHEUS
-    if by_name.get("bioetl-prometheus-target", PreflightCheck("", "ok", "")).status != "ok":
+    if (
+        by_name.get("bioetl-prometheus-target", PreflightCheck("", "ok", "")).status
+        != "ok"
+    ):
         return EXIT_BIOETL_TARGET
     if by_name.get("quarantine-explorer", PreflightCheck("", "ok", "")).status != "ok":
         return EXIT_QUARANTINE

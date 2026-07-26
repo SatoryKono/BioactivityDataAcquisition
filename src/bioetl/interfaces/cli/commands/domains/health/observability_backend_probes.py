@@ -31,8 +31,8 @@ class _HttpProbeResponse(Protocol):
     def __exit__(
         self,
         exc_type: type[BaseException] | None,
-        exc_value: BaseException | None,
-        traceback: TracebackType | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
     ) -> bool | None: ...
 
 

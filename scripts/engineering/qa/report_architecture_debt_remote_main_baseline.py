@@ -347,9 +347,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.update:
-        _write_artifacts(
-            payload, json_out=json_out, md_out=md_out, root=repo_root
-        )
+        _write_artifacts(payload, json_out=json_out, md_out=md_out, root=repo_root)
         return 0
 
     print(json.dumps(payload, indent=2, sort_keys=True))

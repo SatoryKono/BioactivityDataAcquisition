@@ -757,9 +757,7 @@ def _write_artifacts(
     report_path.write_text(report_content, encoding="utf-8", newline="")
 
 
-def _artifact_matches(
-    path: Path, expected: str, *, root: Path | None = None
-) -> bool:
+def _artifact_matches(path: Path, expected: str, *, root: Path | None = None) -> bool:
     if root is not None:
         from scripts.engineering.common.repo_paths import resolve_output_path
 
@@ -914,9 +912,7 @@ def main(argv: list[str] | None = None) -> int:
             args.matrix_output,
             evidence.matrix_content,
             root=root,
-        ) and _artifact_matches(
-            args.report_output, evidence.report_content, root=root
-        )
+        ) and _artifact_matches(args.report_output, evidence.report_content, root=root)
         ok = ok and _baseline_metrics_match(
             args.baseline_json_out, baseline_metrics, root=root
         )

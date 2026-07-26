@@ -12,7 +12,6 @@ from bioetl.composition.runtime_builders._runner_builder_orchestration import (
     attach_runner_control_plane_collaborators,
 )
 
-# ruff: noqa: F403
 from tests.unit.composition.runtime_builders.runner_builder_test_support import *
 
 

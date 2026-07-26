@@ -500,9 +500,7 @@ def _scan_target(
     )
     # Drop same-module self-pairs before actionability filters so hotspot family
     # residual counts only include multi-module structural findings.
-    clusters = [
-        cluster for cluster in clusters if not _is_self_module_cluster(cluster)
-    ]
+    clusters = [cluster for cluster in clusters if not _is_self_module_cluster(cluster)]
     clusters = _filter_clusters_by_actionability_categories(
         clusters,
         exclude_actionability_categories=exclude_actionability_categories,

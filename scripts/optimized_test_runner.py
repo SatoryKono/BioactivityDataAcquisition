@@ -10,7 +10,6 @@ import argparse
 import subprocess
 import sys
 from pathlib import Path
-from typing import List, Optional
 
 # Test categories and their typical execution times
 TEST_CATEGORIES = {

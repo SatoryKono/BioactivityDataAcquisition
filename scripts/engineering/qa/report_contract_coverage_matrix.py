@@ -641,8 +641,7 @@ def _render_markdown(payload: dict[str, Any]) -> str:
     lines = [
         "# Contract Coverage Matrix",
         "",
-        "- schema_version: "
-        f"`{payload['schema_version']}`",
+        f"- schema_version: `{payload['schema_version']}`",
         f"- snapshot_date: {payload['snapshot_date']}",
         f"- row_count: {payload['row_count']}",
         f"- gold_enabled_count: {payload['gold_enabled_count']}",

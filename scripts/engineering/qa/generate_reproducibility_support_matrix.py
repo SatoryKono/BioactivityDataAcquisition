@@ -15,7 +15,7 @@ DEFAULT_OUTPUT = (
 if str(ROOT / "src") not in sys.path:
     sys.path.insert(0, str(ROOT / "src"))
 
-from bioetl.domain.control_plane.reproducibility_profiles import (  # noqa: E402
+from bioetl.domain.control_plane.reproducibility_profiles import (
     published_reproducibility_family_inventory,
 )
 

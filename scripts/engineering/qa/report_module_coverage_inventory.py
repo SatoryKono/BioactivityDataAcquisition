@@ -44,9 +44,7 @@ MOUNTED_SOURCE_TREE_STABILIZATION_ATTEMPTS = 12
 MOUNTED_SOURCE_TREE_STABILIZATION_SLEEP_SECONDS = 0.25
 
 
-def _write_text_atomically(
-    path: Path, text: str, *, root: Path | None = None
-) -> None:
+def _write_text_atomically(path: Path, text: str, *, root: Path | None = None) -> None:
     if root is not None:
         from scripts.engineering.common.repo_paths import resolve_output_path
 

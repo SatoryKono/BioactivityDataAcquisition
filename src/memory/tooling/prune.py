@@ -67,9 +67,11 @@ def _coerce_created_at(value: object) -> datetime | None:
 
 def _extract_metadata(path: Path) -> dict[str, Any]:
     if path.suffix == ".json":
-        return json.loads(path.read_text(encoding="utf-8"))
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        return payload if isinstance(payload, dict) else {}
     if path.suffix in {".yaml", ".yml"}:
-        return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        return payload if isinstance(payload, dict) else {}
     if path.suffix == ".md":
         return _extract_markdown_metadata(path)
     return {}

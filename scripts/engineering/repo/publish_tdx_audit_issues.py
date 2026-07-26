@@ -30,7 +30,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.engineering.qa.technical_debt_audit_registry import (  # noqa: E402
+from scripts.engineering.qa.technical_debt_audit_registry import (
     resolve_current_technical_debt_audit,
 )
 

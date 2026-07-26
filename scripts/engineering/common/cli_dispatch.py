@@ -9,7 +9,7 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Mapping
+from collections.abc import Mapping
 
 
 @dataclass(frozen=True)

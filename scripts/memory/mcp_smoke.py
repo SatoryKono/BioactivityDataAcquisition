@@ -5,8 +5,10 @@ implementation now lives under ``scripts.ai.mcp.neo4j_memory_mcp_smoke``.
 Keep this shim so older tests and entry points continue to import cleanly.
 """
 
+from __future__ import annotations
+
 from importlib import import_module
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 _EXPORTS = frozenset(
     {
@@ -18,6 +20,17 @@ _EXPORTS = frozenset(
         "run_smoke_command",
     }
 )
+
+if TYPE_CHECKING:
+    # Declare lazy re-exports for static analysis (F822) without importing at runtime.
+    from scripts.ai.mcp.neo4j_memory_mcp_smoke import (
+        SmokeResult as SmokeResult,
+        _encode_frame as _encode_frame,
+        _parse_frames as _parse_frames,
+        build_arg_parser as build_arg_parser,
+        main as main,
+        run_smoke_command as run_smoke_command,
+    )
 
 
 def _impl() -> Any:

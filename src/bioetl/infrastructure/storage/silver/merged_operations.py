@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol
 
-import pandera as pandera
+import pandera.pandas as pandera_pandas
 import pyarrow as pa
 from deltalake import write_deltalake
 
@@ -140,9 +140,13 @@ def _prepare_merged_silver_write(
     """Prepare normalized Arrow payload and resolved table path for merged writes."""
     if request.schema is not None:
         schema = request.schema
-        if hasattr(schema, "to_schema"):
-            schema = schema.to_schema()
-        if not isinstance(schema, pandera.DataFrameSchema):
+        # SchemaModel / class-style contracts expose ``to_schema()``.
+        to_schema = getattr(schema, "to_schema", None)
+        if callable(to_schema):
+            schema = to_schema()
+        # Prefer pandera.pandas (current API). Top-level pandera.DataFrameSchema is
+        # the deprecated pandas shim and is a different class under pandera 0.31+.
+        if not isinstance(schema, pandera_pandas.DataFrameSchema):
             raise TypeError("Merged Silver schema must resolve to DataFrameSchema")
         result = PanderaSilverValidator(schema=schema, strict=False).validate(
             request.records

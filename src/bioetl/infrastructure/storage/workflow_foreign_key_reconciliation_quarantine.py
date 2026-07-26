@@ -53,6 +53,7 @@ class ReconciliationMutationHost(Protocol):
 
     quarantine: QuarantinePort | None
     quarantine_pipeline_name: str | None
+
     @property
     def silver_writer(self) -> SilverWriter: ...
 

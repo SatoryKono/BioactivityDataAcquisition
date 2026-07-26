@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import runpy
 from pathlib import Path
 from typing import Any
 
@@ -18,6 +19,20 @@ ZED_ROOT = ROOT / ".zed"
 def _load_json(relative_path: str) -> Any:
     """Load a tracked Zed JSON document."""
     return json.loads((ZED_ROOT / relative_path).read_text(encoding="utf-8"))
+
+
+def test_zed_xenon_adapts_ci_excludes_to_windows_paths() -> None:
+    """Windows Xenon should receive patterns matching its backslash paths."""
+    namespace = runpy.run_path(
+        str(ROOT / "scripts" / "engineering" / "dev" / "zed_xenon.py")
+    )
+    assert (
+        namespace["_platform_xenon_exclude"](
+            "tests/*,src/memory/*",
+            separator="\\",
+        )
+        == r"tests\*,src\memory\*"
+    )
 
 
 @pytest.mark.parametrize(
@@ -156,14 +171,45 @@ def test_zed_tasks_use_venv_python_without_path_uv() -> None:
     assert coverage["args"] == [lane_script, "coverage"]
 
     arch = next(task for task in tasks if task["label"] == "Architecture compliance")
-    assert arch["command"] == venv_lint_imports
-    assert "pyproject.toml" in arch["args"]
+    assert arch["command"] == venv_python
+    assert arch["args"] == ["scripts/engineering/dev/zed_lint_imports.py"]
+    # Must not point import-linter at pyproject.toml (contracts live in .importlinter).
+    assert "pyproject.toml" not in arch["args"]
+    assert "lint-imports.exe" not in arch["command"]
+
+    complexity = next(task for task in tasks if task["label"] == "Complexity check")
+    assert complexity["command"] == venv_python
+    assert complexity["args"] == ["scripts/engineering/dev/zed_xenon.py"]
+    # Raw xenon without excludes is not the project gate (see exemption registry).
+    assert "-m" not in complexity["args"]
+    assert "xenon" not in complexity["args"]
+
+    dead_code = next(task for task in tasks if task["label"] == "Dead code detection")
+    assert dead_code["command"] == venv_python
+    assert dead_code["args"] == ["scripts/engineering/dev/zed_vulture.py"]
+    # Bare vulture at conf 60 floods Pandera schema fields as false positives.
+    assert "vulture" not in dead_code["args"]
+
+    security = next(task for task in tasks if task["label"] == "Security scan")
+    assert security["command"] == venv_python
+    assert security["args"] == [
+        "-m",
+        "bandit",
+        "-c",
+        "pyproject.toml",
+        "-r",
+        "src/bioetl",
+    ]
+    # Bare ``bandit -r src/`` ignores [tool.bandit] skips and scans non-product trees.
+    assert "src/" not in security["args"]
 
     serialized = json.dumps(tasks)
     assert "codex agent run" not in serialized
     assert "devin skill invoke" not in serialized
     assert '"import-linter"' not in serialized
-    assert "lint-imports" in serialized
+    assert "zed_lint_imports.py" in serialized
+    assert "zed_xenon.py" in serialized
+    assert "zed_vulture.py" in serialized
 
 
 def test_zed_terminal_prefers_windows_venv_and_offline_vcr() -> None:

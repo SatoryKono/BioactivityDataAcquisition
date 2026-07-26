@@ -29,7 +29,7 @@ from bioetl.domain.types.dq_contracts import DQDisposition
 
 pytestmark = pytest.mark.unit
 
-from tests.unit.application.services.test_run_manifest_inspection_service import *  # noqa: F403
+from tests.unit.application.services.test_run_manifest_inspection_service import *
 from tests.unit.application.services.test_run_manifest_inspection_service import (
     _InMemoryEffectiveConfigArtifactStore,
     _InMemoryRunLedgerStore,

@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.engineering.qa.file_discovery import discover_files  # noqa: E402
+from scripts.engineering.qa.file_discovery import discover_files
 
 DEFAULT_CONFIG = Path("configs/quality/test_governance_audit.yaml")
 DEFAULT_JSON_ARTIFACT = Path("reports/quality/test-governance-current.json")
@@ -174,7 +174,9 @@ def _iter_all_test_python_files(root: Path) -> list[Path]:
         return []
     # Prefer the shared discover helper so pruned dirs (__pycache__, .venv, …)
     # and fixture/snapshot subtrees stay out of the hash/scan inventory.
-    return [tests_root / relative for relative in discover_files(str(tests_root), ".py")]
+    return [
+        tests_root / relative for relative in discover_files(str(tests_root), ".py")
+    ]
 
 
 def _read_text_file(path: Path) -> str:

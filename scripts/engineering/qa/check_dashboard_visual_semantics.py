@@ -181,7 +181,9 @@ def iter_panels(panels: list[dict]) -> list[dict]:
     return collected
 
 
-def _stat_color_mode_error(dashboard_path: Path, title: str, defaults: dict) -> str | None:
+def _stat_color_mode_error(
+    dashboard_path: Path, title: str, defaults: dict
+) -> str | None:
     if defaults.get("color", {}).get("mode") == "thresholds":
         return None
     return f"{dashboard_path}: panel '{title}' must use color.mode=thresholds"

@@ -101,7 +101,9 @@ def main(argv: list[str] | None = None) -> int:
     else:
         command = _module_command(surface, rest)
 
-    return subprocess.run(ensure_safe_cli_argv([str(x) for x in command]), check=False).returncode
+    return subprocess.run(
+        ensure_safe_cli_argv([str(x) for x in command]), check=False
+    ).returncode
 
 
 if __name__ == "__main__":

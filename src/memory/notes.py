@@ -45,10 +45,10 @@ def _read_text_with_timeout(
             raise exc
 
     # Use timeout for network drives or test scenarios with small timeouts
-    text = None
-    exception = None
+    text: str | None = None
+    exception: BaseException | None = None
 
-    def _target():
+    def _target() -> None:
         nonlocal text, exception
         try:
             text = path.read_text(encoding="utf-8")
@@ -84,21 +84,15 @@ def _read_text_from_git_object(path: Path) -> str | None:
 
     relative_path = os.path.relpath(path, repo_root).replace(os.sep, "/")
     try:
-        completed = subprocess.run(
+        completed = _run_hidden_subprocess(
             ["git", "-C", str(repo_root), "show", f"HEAD:{relative_path}"],
-            check=False,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
             timeout=GIT_FALLBACK_TIMEOUT_SECONDS,
-            **_hidden_windows_subprocess_kwargs(),
         )
     except (OSError, subprocess.SubprocessError):
         return None
     if completed.returncode != 0:
         return None
-    return completed.stdout
+    return str(completed.stdout)
 
 
 def _read_frontmatter_metadata_from_text(text: str, path: Path) -> dict[str, Any]:
@@ -142,7 +136,7 @@ def _is_likely_network_drive(path: Path) -> bool:
         kernel32.GetDriveTypeW.argtypes = [wintypes.LPCWSTR]
         kernel32.GetDriveTypeW.restype = wintypes.DWORD
 
-        drive_type = kernel32.GetDriveTypeW(drive + "\\")
+        drive_type = int(kernel32.GetDriveTypeW(drive + "\\"))
         return drive_type == DRIVE_REMOTE
     except Exception:
         # If detection fails, assume local to avoid false positives
@@ -184,7 +178,7 @@ def _read_markdown_metadata_with_timeout(
 
     # Use timeout for network drives or test scenarios with small timeouts
     metadata: dict[str, Any] | None = None
-    exception = None
+    exception: BaseException | None = None
 
     def _target() -> None:
         nonlocal metadata, exception
@@ -230,21 +224,15 @@ def _git_repo_root(path: Path) -> Path | None:
         return packaged_root
 
     try:
-        completed = subprocess.run(
+        completed = _run_hidden_subprocess(
             ["git", "-C", str(path.parent), "rev-parse", "--show-toplevel"],
-            check=False,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
             timeout=GIT_FALLBACK_TIMEOUT_SECONDS,
-            **_hidden_windows_subprocess_kwargs(),
         )
     except (OSError, subprocess.SubprocessError):
         return None
     if completed.returncode != 0:
         return None
-    repo_root = completed.stdout.strip()
+    repo_root = str(completed.stdout).strip()
     return Path(repo_root) if repo_root else None
 
 
@@ -263,12 +251,12 @@ def _hidden_windows_subprocess_kwargs(
     *,
     os_name: str = os.name,
     subprocess_module: object = subprocess,
-) -> dict[str, object]:
+) -> dict[str, Any]:
     """Build subprocess kwargs that prevent Windows console popups."""
     if os_name != "nt":
         return {}
 
-    kwargs: dict[str, object] = {}
+    kwargs: dict[str, Any] = {}
     create_no_window = int(getattr(subprocess_module, "CREATE_NO_WINDOW", 0))
     if create_no_window:
         kwargs["creationflags"] = create_no_window
@@ -287,6 +275,26 @@ def _hidden_windows_subprocess_kwargs(
             startupinfo.wShowWindow = int(getattr(subprocess_module, "SW_HIDE", 0))
         kwargs["startupinfo"] = startupinfo
     return kwargs
+
+
+def _run_hidden_subprocess(
+    args: list[str],
+    *,
+    timeout: float,
+) -> subprocess.CompletedProcess[str]:
+    """Run a subprocess with Windows-hidden console kwargs when available."""
+    # Unpack via Any so platform-only kwargs (creationflags/startupinfo) type-check.
+    extra: Any = _hidden_windows_subprocess_kwargs()
+    return subprocess.run(
+        args,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        timeout=timeout,
+        **extra,
+    )
 
 
 @dataclass(frozen=True, slots=True)

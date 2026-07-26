@@ -41,7 +41,9 @@ def main() -> int:
 
     target_python = _preferred_python()
     command = [target_python, *sys.argv[1:]]
-    completed = subprocess.run(ensure_safe_cli_argv(command), cwd=REPO_ROOT, check=False)
+    completed = subprocess.run(
+        ensure_safe_cli_argv(command), cwd=REPO_ROOT, check=False
+    )
     return int(completed.returncode)
 
 

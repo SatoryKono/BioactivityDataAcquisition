@@ -60,6 +60,7 @@ class ChemblFetchResilienceMixin:
     _compute_composite_key: Callable[[BronzeRecord, tuple[str, ...]], str]
 
     if TYPE_CHECKING:
+
         def _get_health_status(self) -> HealthStatus: ...
 
     def _handle_error(

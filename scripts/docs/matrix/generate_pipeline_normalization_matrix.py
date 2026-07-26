@@ -938,7 +938,9 @@ def _provider_order_from_column_group(
     if not isinstance(provider_order, list):
         return ()
     providers = [
-        provider for provider in provider_order if isinstance(provider, str) and provider
+        provider
+        for provider in provider_order
+        if isinstance(provider, str) and provider
     ]
     return tuple(dict.fromkeys(providers))
 
@@ -2942,7 +2944,11 @@ def _control_plane_surface_statuses() -> list[dict[str, object]]:
         effective_config_hash=CANONICAL_EFFECTIVE_CONFIG_HASH_RAW,
         dq_contract_compatibility_hash=" DEADBEEF ",
         contract=(CANONICAL_CONTRACT_REF_RAW, " v2 "),
-        normalization_profile=(CANONICAL_NORMALIZATION_PROFILE_REF_RAW, CANONICAL_NORMALIZATION_PROFILE_VERSION_RAW, CANONICAL_NORMALIZATION_PROFILE_HASH_RAW),
+        normalization_profile=(
+            CANONICAL_NORMALIZATION_PROFILE_REF_RAW,
+            CANONICAL_NORMALIZATION_PROFILE_VERSION_RAW,
+            CANONICAL_NORMALIZATION_PROFILE_HASH_RAW,
+        ),
         effective_config_artifact_id=" artifact-42 ",
         exact_replay=True,
         input_snapshot_fingerprint=" FACE ",

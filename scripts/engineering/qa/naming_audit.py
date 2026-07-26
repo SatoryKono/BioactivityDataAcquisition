@@ -703,8 +703,7 @@ def _iter_python_modules_with_trees(
     if module_trees is not None:
         yield from module_trees
         return
-    for py_file, tree in _build_python_module_tree_cache(base_path):
-        yield py_file, tree
+    yield from _build_python_module_tree_cache(base_path)
 
 
 def _class_naming_violation(py_file: Path, node: ast.ClassDef) -> Violation | None:

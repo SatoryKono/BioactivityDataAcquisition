@@ -23,26 +23,26 @@ if str(PROJECT_ROOT) not in sys.path:
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from bioetl.infrastructure.quality.architecture_quality_scorecard import (  # noqa: E402
+from bioetl.infrastructure.quality.architecture_quality_scorecard import (
     build_architecture_quality_scorecard,
 )
-from bioetl.infrastructure.quality.debt_scorecard import (  # noqa: E402
+from bioetl.infrastructure.quality.debt_scorecard import (
     evaluate_debt_scorecard,
     load_debt_scorecard,
 )
-from scripts.engineering.ci.validate_registry_dq_refs import (  # noqa: E402
+from scripts.engineering.ci.validate_registry_dq_refs import (
     build_diagnostics_payload as build_contract_registry_dq_diagnostics,
 )
-from scripts.engineering.qa import (  # noqa: E402
+from scripts.engineering.qa import (
     report_adr_enforcement_matrix,
     report_architecture_debt_remote_main_baseline,
     report_hotspot_family_baseline,
     report_observability_metric_inventory,
 )
-from scripts.engineering.qa.report_config_surface_backlog import (  # noqa: E402
+from scripts.engineering.qa.report_config_surface_backlog import (
     build_backlog,
 )
-from scripts.engineering.qa.report_module_coverage_inventory import (  # noqa: E402
+from scripts.engineering.qa.report_module_coverage_inventory import (
     _refresh_existing_inventory_source_tree,
 )
 
@@ -1698,9 +1698,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.update:
-        _write_artifacts(
-            payload, json_out=json_out, md_out=md_out, root=repo_root
-        )
+        _write_artifacts(payload, json_out=json_out, md_out=md_out, root=repo_root)
         return 0
 
     print(json.dumps(payload, indent=2, sort_keys=True))

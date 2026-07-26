@@ -554,6 +554,24 @@
       "review_by": "2026-10-21",
       "next_step": "Retain as a bounded Zed editor task launcher helper for local Windows development; promote only if Zed task automation becomes a governed first-class developer workflow entrypoint."
     },
+    "scripts/engineering/dev/zed_lint_imports.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded Zed editor adapter for the canonical import-linter contracts; keep it supporting unless editor-specific execution becomes a governed first-class developer workflow."
+    },
+    "scripts/engineering/dev/zed_xenon.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded Zed editor adapter for the canonical Xenon complexity gate; keep it supporting unless editor-specific execution becomes a governed first-class developer workflow."
+    },
+    "scripts/engineering/dev/zed_vulture.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded Zed editor adapter for the canonical Vulture dead-code gate; keep it supporting unless editor-specific execution becomes a governed first-class developer workflow."
+    },
     "scripts/engineering/diagnostics/generate_src_bioetl_refactor_evidence.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
@@ -1063,12 +1081,6 @@
       "decision": "shared_helper_module",
       "review_by": "2026-09-30",
       "next_step": "Retain as the Linux/WSL companion shutdown helper for the shared MCP runtime plane while cross-platform local tooling depends on it; remove it together with the shared-plane launcher if that workflow is retired."
-    },
-    "scripts/ops/runtime/mcp/tests/apply-shared-to-grok.fixture.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-10-21",
-      "next_step": "Retain as the isolated PowerShell fixture used by apply-shared-to-grok.ps1 unit tests; do not promote to an operator entrypoint and retire only if the Grok shared-plane apply tests are removed."
     },
     "scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1": {
       "owner": "@bioetl-platform",

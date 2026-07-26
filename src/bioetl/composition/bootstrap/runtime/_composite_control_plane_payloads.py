@@ -143,9 +143,7 @@ def _build_composite_input_snapshots(
     replay_of_run_id = getattr(runtime, "replay_of_run_id", None)
     if replay_of_manifest_id or replay_of_run_id:
         if settings is None:
-            raise ValueError(
-                "Composite replay source refs require runtime Settings"
-            )
+            raise ValueError("Composite replay source refs require runtime Settings")
         return resolve_manifest_input_snapshot_refs(
             settings=settings,
             manifest_id=replay_of_manifest_id,
@@ -154,9 +152,7 @@ def _build_composite_input_snapshots(
     if not runtime.use_cached_bronze:
         return ()
     if settings is None:
-        raise ValueError(
-            "Composite cached Bronze source refs require runtime Settings"
-        )
+        raise ValueError("Composite cached Bronze source refs require runtime Settings")
     bronze_root = _resolve_composite_bronze_root(
         runtime=runtime,
         settings=settings,

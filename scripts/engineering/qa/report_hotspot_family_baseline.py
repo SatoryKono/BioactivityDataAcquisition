@@ -374,9 +374,7 @@ def main() -> int:
     json_text = json.dumps(json_payload, ensure_ascii=False, indent=2) + "\n"
 
     if args.check:
-        json_ok = _check_file_sync(
-            args.json_output, json_text, root=PROJECT_ROOT
-        )
+        json_ok = _check_file_sync(args.json_output, json_text, root=PROJECT_ROOT)
         md_ok = _check_file_sync(args.md_output, markdown, root=PROJECT_ROOT)
         if json_ok and md_ok:
             print("[ok] hotspot-family baseline artifacts are up to date")

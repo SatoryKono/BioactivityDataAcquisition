@@ -206,8 +206,7 @@ class RecordNormalizationHashSupportMixin:
         profile_include, profile_exclude = self._profile_hash_fields()
         policy = self._select_hash_policy(contract_version=contract_version)
         datetime_policy = (
-            getattr(policy, "datetime_policy", "v2_datetime_utc")
-            or "v2_datetime_utc"
+            getattr(policy, "datetime_policy", "v2_datetime_utc") or "v2_datetime_utc"
         )
         if datetime_policy not in {"v1_date", "v2_datetime_utc"}:
             raise ValueError(

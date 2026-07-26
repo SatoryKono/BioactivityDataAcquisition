@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-26T17:02:44.130922+00:00",
+  "generated_at": "2026-07-26T17:34:35.173349+00:00",
   "summary": {
-    "total_scripts": 542,
+    "total_scripts": 545,
     "status_counts": {
       "active": 349,
-      "supporting": 193
+      "supporting": 196
     },
     "reference_group_coverage": {
       "agents": 5,
       "build": 11,
       "ci": 65,
       "docs": 219,
-      "other": 59,
+      "other": 63,
       "scripts": 417,
       "skills": 16,
-      "tests": 245
+      "tests": 248
     }
   },
   "scripts": [
@@ -1360,13 +1360,13 @@
         },
         {
           "path": ".zed/README.md",
-          "line": 176,
+          "line": 184,
           "source_group": "other",
           "text": "uv run python scripts/ai/codex/setup_mcp.py --skip-codex --skip-gemini-settings"
         },
         {
           "path": ".zed/README.md",
-          "line": 214,
+          "line": 222,
           "source_group": "other",
           "text": "- `scripts/ai/codex/setup_mcp.py`"
         }
@@ -9339,7 +9339,7 @@
         },
         {
           "path": ".zed/README.md",
-          "line": 199,
+          "line": 207,
           "source_group": "other",
           "text": "| Missing `.venv-win` | `.\\scripts\\engineering\\dev\\setup_env_windows.ps1` |"
         },
@@ -9562,6 +9562,43 @@
       ]
     },
     {
+      "path": "scripts/engineering/dev/zed_lint_imports.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 4,
+      "references": [
+        {
+          "path": ".zed/README.md",
+          "line": 154,
+          "source_group": "other",
+          "text": "- Architecture compliance — `python scripts/engineering/dev/zed_lint_imports.py` (contracts in `.importlinter`)"
+        },
+        {
+          "path": ".zed/tasks.json",
+          "line": 234,
+          "source_group": "other",
+          "text": "\"scripts/engineering/dev/zed_lint_imports.py\""
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
+          "line": 175,
+          "source_group": "tests",
+          "text": "assert arch[\"args\"] == [\"scripts/engineering/dev/zed_lint_imports.py\"]"
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
+          "line": 210,
+          "source_group": "tests",
+          "text": "assert \"zed_lint_imports.py\" in serialized"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded Zed editor adapter for the canonical import-linter contracts; keep it supporting unless editor-specific execution becomes a governed first-class developer workflow."
+    },
+    {
       "path": "scripts/engineering/dev/zed_pytest_lane.py",
       "type": "py",
       "status": "active",
@@ -9576,43 +9613,43 @@
         },
         {
           "path": ".zed/tasks.json",
-          "line": 44,
+          "line": 46,
           "source_group": "other",
           "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
         },
         {
           "path": ".zed/tasks.json",
-          "line": 64,
+          "line": 66,
           "source_group": "other",
           "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
         },
         {
           "path": ".zed/tasks.json",
-          "line": 82,
+          "line": 84,
           "source_group": "other",
           "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
         },
         {
           "path": ".zed/tasks.json",
-          "line": 97,
+          "line": 99,
           "source_group": "other",
           "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
         },
         {
           "path": ".zed/tasks.json",
-          "line": 112,
+          "line": 114,
           "source_group": "other",
           "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
         },
         {
           "path": ".zed/tasks.json",
-          "line": 127,
+          "line": 129,
           "source_group": "other",
           "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
         },
         {
           "path": ".zed/tasks.json",
-          "line": 142,
+          "line": 144,
           "source_group": "other",
           "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
         }
@@ -9623,12 +9660,99 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": ".zed/README.md",
+          "line": 224,
+          "source_group": "other",
+          "text": "- `scripts/engineering/dev/zed_task.ps1` — optional Windows helper to run"
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-10-21",
       "next_step": "Retain as a bounded Zed editor task launcher helper for local Windows development; promote only if Zed task automation becomes a governed first-class developer workflow entrypoint."
+    },
+    {
+      "path": "scripts/engineering/dev/zed_vulture.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 4,
+      "references": [
+        {
+          "path": ".zed/README.md",
+          "line": 164,
+          "source_group": "other",
+          "text": "- Dead code — `python scripts/engineering/dev/zed_vulture.py`"
+        },
+        {
+          "path": ".zed/tasks.json",
+          "line": 270,
+          "source_group": "other",
+          "text": "\"scripts/engineering/dev/zed_vulture.py\""
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
+          "line": 189,
+          "source_group": "tests",
+          "text": "assert dead_code[\"args\"] == [\"scripts/engineering/dev/zed_vulture.py\"]"
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
+          "line": 212,
+          "source_group": "tests",
+          "text": "assert \"zed_vulture.py\" in serialized"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded Zed editor adapter for the canonical Vulture dead-code gate; keep it supporting unless editor-specific execution becomes a governed first-class developer workflow."
+    },
+    {
+      "path": "scripts/engineering/dev/zed_xenon.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 5,
+      "references": [
+        {
+          "path": ".zed/README.md",
+          "line": 167,
+          "source_group": "other",
+          "text": "- Complexity check — `python scripts/engineering/dev/zed_xenon.py`"
+        },
+        {
+          "path": ".zed/tasks.json",
+          "line": 279,
+          "source_group": "other",
+          "text": "\"scripts/engineering/dev/zed_xenon.py\""
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
+          "line": 27,
+          "source_group": "tests",
+          "text": "str(ROOT / \"scripts\" / \"engineering\" / \"dev\" / \"zed_xenon.py\")"
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
+          "line": 182,
+          "source_group": "tests",
+          "text": "assert complexity[\"args\"] == [\"scripts/engineering/dev/zed_xenon.py\"]"
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
+          "line": 211,
+          "source_group": "tests",
+          "text": "assert \"zed_xenon.py\" in serialized"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded Zed editor adapter for the canonical Xenon complexity gate; keep it supporting unless editor-specific execution becomes a governed first-class developer workflow."
     },
     {
       "path": "scripts/engineering/diagnostics/__main__.py",
@@ -9897,7 +10021,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 286,
+      "reference_count": 287,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -14107,9 +14231,9 @@
       "references": [
         {
           "path": "scripts/ops/_build_arch_review_report.py",
-          "line": 207,
+          "line": 229,
           "source_group": "scripts",
-          "text": "lines.append(\"- Helper scripts: `scripts/ops/_run_cr_arch_review_wsl.sh`, `scripts/ops/_run_cr_arch_review_remaining.sh`\")"
+          "text": "\"- Helper scripts: `scripts/ops/_run_cr_arch_review_wsl.sh`, `scripts/ops/_run_cr_arch_review_remaining.sh`\""
         }
       ]
     },
@@ -15582,13 +15706,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 906,
+          "line": 908,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` to install repo-local \""
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 993,
+          "line": 995,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` or \""
         },
@@ -17116,7 +17240,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 177,
+          "line": 179,
           "source_group": "scripts",
           "text": "\"scripts/ops/support/load_repo_env.sh or pass --username/--password \""
         },

@@ -411,20 +411,21 @@ def _emit_cache_target_section(
     root: Path,
     cache_targets: list[CleanupTarget],
     apply: bool,
-) -> None:
+) -> list[str]:
     typer.echo("\n-- Очистка артефактов --")
     typer.echo(f"Кандидатов: {len(cache_targets)}")
     for target in cache_targets:
         typer.echo(f"  - {format_path(target.path, root)} [{target.category}]")
 
     if not apply or not cache_targets:
-        return
+        return []
 
     errors = delete_targets(cache_targets)
     if errors:
         typer.echo("Ошибки при удалении:")
         for err in errors:
             typer.echo(f"  - {err}")
+    return errors
 
 
 @app.command()
@@ -456,7 +457,9 @@ def main(
 
     unused_deps = find_unused_dependencies(root, root / "pyproject.toml")
 
-    _emit_cache_target_section(root=root, cache_targets=cache_targets, apply=apply)
+    errors = _emit_cache_target_section(
+        root=root, cache_targets=cache_targets, apply=apply
+    )
 
     typer.echo("\n-- YAML конфиги без ссылок --")
     typer.echo(f"Кандидатов: {len(unused_yaml)}")

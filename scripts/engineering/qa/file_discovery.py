@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import os
-from functools import lru_cache
+from functools import lru_cache, cache
 from pathlib import Path
 
 __all__ = ["discover_files"]
@@ -36,7 +36,7 @@ def _should_prune(relative_path: str) -> bool:
     return any(relative_path.startswith(prefix) for prefix in _PRUNED_RELATIVE_PREFIXES)
 
 
-@lru_cache(maxsize=None)
+@cache
 def discover_files(
     root_str: str,
     suffix: str,

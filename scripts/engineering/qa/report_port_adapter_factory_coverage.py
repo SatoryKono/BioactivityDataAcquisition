@@ -329,9 +329,7 @@ def _render_markdown(payload: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def write_artifacts(
-    *, json_out: Path, md_out: Path, root: Path | None = None
-) -> None:
+def write_artifacts(*, json_out: Path, md_out: Path, root: Path | None = None) -> None:
     if root is not None:
         from scripts.engineering.common.repo_paths import resolve_output_path
 
