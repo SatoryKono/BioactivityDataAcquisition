@@ -49,6 +49,7 @@ for published contracts, CLI surfaces, and specs.
 | Shipped dashboard inventory        | [dashboard-guide.md](dashboard-guide.md)               |
 | Dashboard usage and extension      | [dashboards/README.md](dashboards/README.md)           |
 | Configure development tools        | [development/pycharm-setup.md](development/pycharm-setup.md) |
+| CLI commands quick reference       | [cheatsheets/cli-commands.md](cheatsheets/cli-commands.md) |
 
 ## Role Boundaries
 
@@ -90,6 +91,8 @@ for published contracts, CLI surfaces, and specs.
 - [Troubleshooting](troubleshooting.md): symptom-oriented problem solving.
 - [Development Setup](development/pycharm-setup.md): IDE-specific local setup
   and repository integration notes.
+- [CLI Commands Cheatsheet](cheatsheets/cli-commands.md): quick reference for all
+  BioETL CLI commands organized by category with common examples.
 
 ## Related Published Surfaces
 

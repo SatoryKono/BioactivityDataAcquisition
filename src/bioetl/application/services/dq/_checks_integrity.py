@@ -62,25 +62,25 @@ def _count_scd_overlaps(
     valid_to: str,
 ) -> int:
     """Count overlapping SCD validity periods for a bounded entity sample."""
-    overlaps = 0
     try:
-        for entity in df[entity_key].unique().to_list()[:100]:
-            entity_records = df.filter(pl.col(entity_key) == entity).sort(valid_from)
-            if len(entity_records) <= 1:
-                continue
-            for index in range(len(entity_records) - 1):
-                current_to = entity_records[valid_to][index]
-                next_from = entity_records[valid_from][index + 1]
-                if (
-                    current_to is not None
-                    and next_from is not None
-                    and current_to > next_from
-                ):
-                    overlaps += 1
+        # Limit to 100 entities to match original bounded sample behavior
+        entities = df[entity_key].unique().head(100)
+        bounded_df = df.filter(pl.col(entity_key).is_in(entities.implode()))
+
+        sorted_df = bounded_df.sort([entity_key, valid_from])
+
+        # Use vectorized window function to compare current valid_to with next valid_from within each entity
+        overlaps = sorted_df.select(
+            (
+                (pl.col(valid_to) > pl.col(valid_from).shift(-1).over(entity_key))
+                & pl.col(valid_to).is_not_null()
+                & pl.col(valid_from).shift(-1).over(entity_key).is_not_null()
+            ).sum()
+        ).item()
+        return int(overlaps) if overlaps is not None else 0
     except _SCD_INTEGRITY_ERRORS:
         # Skip malformed partitions during overlap analysis.
-        return overlaps
-    return overlaps
+        return 0
 
 
 def _materialize_entity_key(

@@ -331,7 +331,8 @@ configuration templates:
 | `pytest-full` | `tests`, exclude `network`/`benchmark`, без coverage | yes |
 | `pytest-coverage` | `--cov=bioetl`, reports + `--cov-fail-under=85` | yes |
 | `pytest-debug` | `$FilePath$`, `--no-cov -s -p no:xdist` | yes |
-| `pytest-architecture` | offline `tests/architecture`, `--no-cov` | yes |
+| `pytest-architecture` | daily arch gate: `tests/architecture` + `-m "architecture and not slow and not benchmark and not memory"`, `--no-cov` | yes |
+| `pytest-architecture-full` | full offline `tests/architecture` sweep (includes slow), `--no-cov -v` | yes |
 | `ruff-check` | `ruff check src tests` | yes |
 | `ruff-format-check` | `ruff format --check src tests` | yes |
 | `mypy-full` | `mypy src tests` | yes |

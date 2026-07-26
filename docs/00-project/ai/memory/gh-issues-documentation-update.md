@@ -10,6 +10,8 @@ Generated issues for documentation improvement initiative.
 
 **Labels:** documentation, good first issue, enhancement
 
+**Status:** ✅ COMPLETED (2026-07-24)
+
 **Body:**
 ```markdown
 ## Summary
@@ -44,12 +46,20 @@ Develop a single-page CLI commands reference cheatsheet covering:
 - `python -m memory.tooling.workflow review-curated`
 
 ## Acceptance Criteria
-- [ ] Cheatsheet created in `docs/03-guides/cheatsheets/cli-commands.md`
-- [ ] Commands organized by category (Core, Scripts, OS-specific, Memory)
-- [ ] Each command includes brief description and common use cases
-- [ ] Cross-references to detailed documentation where applicable
-- [ ] Table of contents for quick navigation
-- [ ] Verified against current Makefile and script entry points
+- [x] Cheatsheet created in `docs/03-guides/cheatsheets/cli-commands.md`
+- [x] Commands organized by category (Core, Scripts, OS-specific, Memory)
+- [x] Each command includes brief description and common use cases
+- [x] Cross-references to detailed documentation where applicable
+- [x] Table of contents for quick navigation
+- [x] Verified against current Makefile and script entry points
+
+## Implementation Details
+- Created comprehensive CLI cheatsheet covering BioETL application commands, Makefile build/test commands, and development scripts
+- Organized into three main sections: BioETL Application CLI, Build & Test CLI, Development Scripts
+- Added table of contents for quick navigation
+- Included cross-references to detailed documentation
+- Updated guides index to include cheatsheet reference
+- Created cheatsheets README with usage guidelines
 
 ## References
 - `src/memory/DAILY_WORKFLOW.md`

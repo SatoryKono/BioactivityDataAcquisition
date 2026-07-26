@@ -101,6 +101,11 @@ bash scripts/engineering/dev/sync_pycharm_ide_templates.sh
   - `configs/ide/pycharm/codeStyles/`
   - `configs/ide/pycharm/inspectionProfiles/`
   - `configs/ide/pycharm/pyLspTools.xml`
+- Architecture tests (Run/Debug):
+  - **pytest-architecture** — daily gate (`tests/architecture`, marker filter, offline)
+  - **pytest-architecture-full** — полный sweep `tests/architecture`
+  - CLI: `make test-architecture` или `pytest tests/architecture/ -m "architecture and not slow and not benchmark and not memory" --no-cov`
+  - Sync в локальный `.idea/`: `bash scripts/engineering/dev/sync_pycharm_ide_templates.sh`
 - `.idea` в VCS не публикуется целиком; только выбранные shared артефакты выше.
 - `secrets` не хранятся в `.idea/` и не вшиваются в shared run/debug конфигурации.
 - В `.gitignore` и `.gitattributes` зафиксированы line endings и исключения.

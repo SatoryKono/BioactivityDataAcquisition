@@ -42,6 +42,8 @@ REQUIRED_RUN_CONFIGS=(
   "Pytest_Full.xml"
   "Pytest_Coverage.xml"
   "Pytest_Debug.xml"
+  "Pytest_Architecture.xml"
+  "Pytest_Architecture_Full.xml"
   "Mypy_Full.xml"
   "Ruff_Check.xml"
   "Ruff_Format_Check.xml"
@@ -192,7 +194,7 @@ fi
 echo
 log hint "Post-sync checklist:"
 echo "  1. Interpreter: \$PROJECT_DIR/.venv-win/Scripts/python.exe (editable install, no PYTHONPATH)"
-echo "  2. Run Configurations: pytest-fast, pytest-debug, pytest-coverage, mypy-full, ruff-check, quality-gate, BioETL smoke (offline fixture)"
+echo "  2. Run Configurations: pytest-fast, pytest-architecture, pytest-architecture-full, pytest-debug, pytest-coverage, mypy-full, ruff-check, quality-gate, BioETL smoke (offline fixture)"
 echo "  3. Formatter: Ruff only (Black disabled in Actions on Save)"
 echo "  4. AI: exactly one inline completion provider"
 echo "  5. Do not commit .idea/workspace.xml, shelves, SDK paths, MCP tokens, or .env"

@@ -47,6 +47,21 @@ class _BundleCoordinator:
         self.lineage_fragment = lineage_fragment
         self.last_input: object | None = None
 
+    def create_bronze_lineage_sidecar(
+        self,
+        *,
+        provider: str,
+        entity: str,
+        batch_id: BatchID,
+        ingestion_ts: datetime,
+    ) -> dict[str, str]:
+        return {
+            "provider": provider,
+            "entity": entity,
+            "batch_id": str(batch_id),
+            "ingestion_ts": ingestion_ts.isoformat(),
+        }
+
     def create_bronze_metadata_bundle(self, input_data: object) -> object:
         self.last_input = input_data
         return SimpleNamespace(
