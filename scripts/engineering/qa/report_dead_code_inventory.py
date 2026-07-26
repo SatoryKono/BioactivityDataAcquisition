@@ -484,7 +484,29 @@ def build_dead_code_inventory(
     repo_wide_disposition_counts: dict[str, int] = {}
     repo_wide_evidence_lane_counts: dict[str, int] = {}
     untriaged_candidates: list[dict[str, object]] = []
-    for row in collect_zero_import_bioetl_modules(repo_root):
+    zero_import_rows = collect_zero_import_bioetl_modules(repo_root)
+    discovered_paths = {str(row["path"]) for row in zero_import_rows}
+    for module_path, classification in repo_wide_classifications.items():
+        module_name = classification.get("module_name")
+        importers = importer_map.get(str(module_name), {"src": (), "tests": ()})
+        importer_paths = (*importers.get("src", ()), *importers.get("tests", ()))
+        if (
+            classification.get("disposition") == "retain_canonical_owner_module"
+            and module_path not in discovered_paths
+            and importer_paths
+            and all(path.endswith(".pyi") for path in importer_paths)
+        ):
+            zero_import_rows.append(
+                {
+                    "module_name": module_name,
+                    "path": module_path,
+                    "is_private_module": Path(module_path).name.startswith("_"),
+                    "src_importer_count": 0,
+                    "test_importer_count": 0,
+                }
+            )
+
+    for row in zero_import_rows:
         module_path = str(row["path"])
         if module_path in retained_entrypoint_paths:
             continue

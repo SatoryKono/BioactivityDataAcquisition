@@ -1,9 +1,6 @@
 """Base ETL Pipeline class.
 
-Defines the structure and logic of a pipeline (config, transformations, filters).
-Does NOT handle execution orchestration.
-
-Refactored per ADR-005.
+Defines pipeline structure without execution orchestration (ADR-005).
 """
 
 from __future__ import annotations

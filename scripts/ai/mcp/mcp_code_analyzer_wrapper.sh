@@ -21,11 +21,7 @@ export PROJECT_PATH="${REPO_ROOT}"
 
 mcp_exit_if_validate_only "code-analyzer"
 
-# Prefer published npm MCP package (legacy mcp-server-analyzer packages are 404).
-if command -v uvx >/dev/null 2>&1; then
-  if uvx mcp-server-analyzer --stdio "$@"; then
-    exit 0
-  fi
-fi
-
-exec npx -y "@darient/code-analyzer-mcp" --stdio "$@"
+# The published npm MCP is the deterministic cross-client runtime. The
+# similarly named PyPI package has a much larger cold install and can exceed
+# shared-plane readiness deadlines on mounted WSL workspaces.
+exec npx -y "@darient/code-analyzer-mcp@0.0.3" --stdio "$@"

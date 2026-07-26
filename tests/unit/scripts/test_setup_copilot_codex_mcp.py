@@ -60,7 +60,6 @@ def test_core_profile_omits_high_privilege_servers_from_local_projections(
     workspace_root = tmp_path / "workspace-root"
     output_root = tmp_path / "output-root"
     workspace_root.mkdir()
-
     exit_code = setup_mcp.main(
         [
             "--root",
@@ -321,7 +320,6 @@ def test_main_uses_workspace_root_for_generated_server_paths(
             "stdio",
         ]
     )
-
     assert exit_code == 0
 
     payload = json.loads((output_root / ".mcp.json").read_text(encoding="utf-8"))

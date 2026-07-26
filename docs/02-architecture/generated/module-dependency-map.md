@@ -6,7 +6,7 @@
 ## Summary
 
 - Scanned modules: `2265`
-- Internal import edges (raw): `7080`
+- Internal import edges (raw): `7082`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `306`
@@ -28,8 +28,8 @@ flowchart LR
     composition -->|279 OK| domain
     composition -->|229 OK| infrastructure
     domain -->|1170 OK| domain
-    infrastructure -->|717 OK| domain
-    infrastructure -->|1109 OK| infrastructure
+    infrastructure -->|718 OK| domain
+    infrastructure -->|1110 OK| infrastructure
     interfaces -->|41 OK| application
     interfaces -->|53 OK| composition
     interfaces -->|59 OK| domain
@@ -47,8 +47,8 @@ flowchart LR
 | `composition`    | `domain`         |     279 | allowed |
 | `composition`    | `infrastructure` |     229 | allowed |
 | `domain`         | `domain`         |    1170 | allowed |
-| `infrastructure` | `domain`         |     717 | allowed |
-| `infrastructure` | `infrastructure` |    1109 | allowed |
+| `infrastructure` | `domain`         |     718 | allowed |
+| `infrastructure` | `infrastructure` |    1110 | allowed |
 | `interfaces`     | `application`    |      41 | allowed |
 | `interfaces`     | `composition`    |      53 | allowed |
 | `interfaces`     | `domain`         |      59 | allowed |
@@ -63,7 +63,7 @@ flowchart LR
 | `application.composite`        | `domain.composite`                         |      91 |
 | `application.core`             | `domain.types`                             |      82 |
 | `application.services`         | `domain.types`                             |      77 |
-| `infrastructure.storage`       | `domain.types`                             |      70 |
+| `infrastructure.storage`       | `domain.types`                             |      71 |
 | `infrastructure.storage`       | `domain.ports`                             |      60 |
 | `application.pipelines`        | `domain.types`                             |      58 |
 | `application.composite`        | `domain.ports`                             |      44 |

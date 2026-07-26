@@ -157,6 +157,18 @@ for name, entry in items:
         continue
     if ping_ready(port):
         existing_pid = read_pid(pid_path)
+        if existing_pid is None:
+            print(
+                f"FAIL {name}: ready listener is not owned by this launcher",
+                file=sys.stderr,
+            )
+            server_status[name] = {
+                "port": port,
+                "url": url,
+                "state": "unmanaged_ready",
+            }
+            failed += 1
+            continue
         print(f"OK already ready 127.0.0.1:{port} ({name}) pid={existing_pid}")
         server_status[name] = {
             "port": port,
