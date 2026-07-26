@@ -18,15 +18,15 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(REPO_ROOT))
     sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from bioetl.domain.mapping.molecule_fields import MOLECULE_FIELD_MAPPING  # noqa: E402
-from bioetl.domain.mapping.publication_fields import (  # noqa: E402
+from bioetl.domain.mapping.molecule_fields import MOLECULE_FIELD_MAPPING
+from bioetl.domain.mapping.publication_fields import (
     PUBLICATION_FIELD_MAPPING,
 )
-from bioetl.domain.registry.field_aliases import MOLECULE_FIELD_ALIASES  # noqa: E402
-from bioetl.domain.registry.semantic_fields import (  # noqa: E402
+from bioetl.domain.registry.field_aliases import MOLECULE_FIELD_ALIASES
+from bioetl.domain.registry.semantic_fields import (
     SemanticFieldRegistry,
 )
-from bioetl.infrastructure.config.semantic_field_registry_loader import (  # noqa: E402
+from bioetl.infrastructure.config.semantic_field_registry_loader import (
     SemanticFieldRegistryLoader,
 )
 

@@ -7,7 +7,6 @@ from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
-# ruff: noqa: F403
 from bioetl.composition.runtime_builders.runner_builder_wiring import (
     LegacyRunnerBuilderOverrides,
     resolve_runner_builder_wiring,

@@ -1,4 +1,3 @@
-# ruff: noqa: UP049
 """Runtime validation helpers for the CrossRef adapter."""
 
 from __future__ import annotations
@@ -44,11 +43,11 @@ class CrossRefRuntimeServices:
     fallback_handler: CrossRefTitleFallbackHandler
 
 
-def _require_runtime_service[_RuntimeService](
-    value: _RuntimeService | None,
+def _require_runtime_service[RuntimeService](
+    value: RuntimeService | None,
     *,
     name: str,
-) -> _RuntimeService:
+) -> RuntimeService:
     """Fail fast when a mandatory runtime collaborator was not injected."""
     if value is None:
         raise ValueError(f"CrossRef adapter requires injected {name}")

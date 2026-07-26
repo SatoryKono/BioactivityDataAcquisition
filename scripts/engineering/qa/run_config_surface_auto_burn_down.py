@@ -38,7 +38,7 @@ DENY_KEY_PREFIXES: tuple[str, ...] = (
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.schema.generate_config_matrix import (  # noqa: E402
+from scripts.schema.generate_config_matrix import (
     _collect_family_configs,
 )
 

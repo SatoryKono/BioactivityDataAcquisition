@@ -6,7 +6,7 @@ Public wrappers:
 - scripts/engineering/dev/run_tests.ps1
 """
 
-# ruff: noqa: E402 -- keep the help path import-light on slow Windows mounts.
+
 
 from __future__ import annotations
 

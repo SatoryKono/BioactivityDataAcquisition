@@ -36,20 +36,20 @@ _SRC_ROOT = _REPO_ROOT / "src"
 if str(_SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(_SRC_ROOT))
 
-from bioetl.domain.events import (  # noqa: E402
+from bioetl.domain.events import (
     ORDINARY_PIPELINE_STAGE_NAMES,
     PipelineEvent,
 )
-from bioetl.domain.runtime_observability_publication_contract import (  # noqa: E402
+from bioetl.domain.runtime_observability_publication_contract import (
     get_runtime_observability_publication_contract,
 )
-from bioetl.infrastructure.observability import (  # noqa: E402
+from bioetl.infrastructure.observability import (
     metrics_definitions as _metric_defs,
 )
-from bioetl.infrastructure.observability.metrics_export_names import (  # noqa: E402
+from bioetl.infrastructure.observability.metrics_export_names import (
     METRICS_DEFINITION_EXPORT_NAMES,
 )
-from bioetl.infrastructure.observability.prometheus_metric_registries import (  # noqa: E402
+from bioetl.infrastructure.observability.prometheus_metric_registries import (
     COUNTERS,
     GAUGES,
     HISTOGRAMS,
@@ -120,6 +120,8 @@ class _RiskyLabelReviewFields(TypedDict):
     contract_bounded_risky_labels: set[str]
     declared_risky_label_reviewed: list[str]
     declared_risky_label_review_required: list[str]
+
+
 _TEXT_FILE_DISCOVERY_CACHE: dict[str, tuple[Path, ...]] = {}
 _METRIC_INVENTORY_CACHE: dict[str, MetricInventoryReport] = {}
 _SOURCE_TEXT_CACHE: dict[str, str | None] = {}

@@ -71,7 +71,8 @@ def iter_file_reference_records(
     """Return normalized ``file -> references_file -> file`` relation records."""
     nodes: dict[str, dict[str, Any]] = payload["nodes"]
     edges: dict[str, dict[str, Any]] = payload["edges"]
-    meta = payload.get("meta") if isinstance(payload.get("meta"), dict) else {}
+    raw_meta = payload.get("meta")
+    meta: dict[str, Any] = raw_meta if isinstance(raw_meta, dict) else {}
     snapshot_generated_at = str(meta.get("generated_at") or "unknown")
     records: list[dict[str, Any]] = []
 
@@ -84,6 +85,10 @@ def iter_file_reference_records(
         target_path = _node_source_path(target_node)
         if not source_path or not target_path:
             continue
+        raw_evidence = edge.get("meta")
+        evidence: dict[str, Any] = (
+            raw_evidence if isinstance(raw_evidence, dict) else {}
+        )
         records.append(
             {
                 "id": f"{source_path}|references_file|{target_path}",
@@ -98,9 +103,7 @@ def iter_file_reference_records(
                 "source_generated_at": snapshot_generated_at,
                 "edge_id": str(edge_id),
                 "description": str(edge.get("description") or ""),
-                "evidence": edge.get("meta")
-                if isinstance(edge.get("meta"), dict)
-                else {},
+                "evidence": evidence,
             }
         )
     records.sort(key=lambda item: (item["source_path"], item["target_path"]))
@@ -115,7 +118,8 @@ def iter_module_reference_records(
     """Return normalized ``module -> references -> module`` relation records."""
     nodes: dict[str, dict[str, Any]] = payload["nodes"]
     edges: dict[str, dict[str, Any]] = payload["edges"]
-    meta = payload.get("meta") if isinstance(payload.get("meta"), dict) else {}
+    raw_meta = payload.get("meta")
+    meta: dict[str, Any] = raw_meta if isinstance(raw_meta, dict) else {}
     snapshot_generated_at = str(meta.get("generated_at") or "unknown")
     records: list[dict[str, Any]] = []
 
@@ -250,7 +254,8 @@ def iter_graph_semantic_relation_records(
     """Import existing expanded graph edges into the generic entity relation index."""
     nodes: dict[str, dict[str, Any]] = payload["nodes"]
     edges: dict[str, dict[str, Any]] = payload["edges"]
-    meta = payload.get("meta") if isinstance(payload.get("meta"), dict) else {}
+    raw_meta = payload.get("meta")
+    meta: dict[str, Any] = raw_meta if isinstance(raw_meta, dict) else {}
     snapshot_generated_at = str(meta.get("generated_at") or "unknown")
     records: list[dict[str, Any]] = []
 
@@ -265,6 +270,10 @@ def iter_graph_semantic_relation_records(
         target_node = nodes.get(target_id) or {}
         if not _is_supported_graph_semantic_edge(edge_type, source_node, target_node):
             continue
+        raw_evidence = edge.get("meta")
+        evidence: dict[str, Any] = (
+            raw_evidence if isinstance(raw_evidence, dict) else {}
+        )
         records.append(
             _entity_relation_record(
                 source_node=source_node,
@@ -277,7 +286,7 @@ def iter_graph_semantic_relation_records(
                 source_snapshot=source_snapshot,
                 source_generated_at=snapshot_generated_at,
                 edge_id=str(edge_id),
-                evidence=edge.get("meta") if isinstance(edge.get("meta"), dict) else {},
+                evidence=evidence,
                 description=str(edge.get("description") or ""),
             )
         )
@@ -435,7 +444,8 @@ def iter_pipeline_artifact_relation_records(
     """Derive ``pipeline -> emits_artifact -> artifact`` from write edges."""
     nodes: dict[str, dict[str, Any]] = payload["nodes"]
     edges: dict[str, dict[str, Any]] = payload["edges"]
-    meta = payload.get("meta") if isinstance(payload.get("meta"), dict) else {}
+    raw_meta = payload.get("meta")
+    meta: dict[str, Any] = raw_meta if isinstance(raw_meta, dict) else {}
     snapshot_generated_at = str(meta.get("generated_at") or "unknown")
     records: list[dict[str, Any]] = []
     for edge_id, edge in edges.items():
@@ -755,7 +765,8 @@ def _pipeline_nodes_by_name(payload: dict[str, Any]) -> dict[str, dict[str, Any]
 
 def _pipeline_doc_paths(source_node: dict[str, Any], repo_root: Path) -> list[str]:
     label = str(source_node.get("label") or "")
-    meta = source_node.get("meta") if isinstance(source_node.get("meta"), dict) else {}
+    raw_meta = source_node.get("meta")
+    meta: dict[str, Any] = raw_meta if isinstance(raw_meta, dict) else {}
     provider = str(meta.get("provider") or "")
     entity = str(meta.get("entity") or "")
     if not entity and label.startswith("composite_"):
@@ -1455,7 +1466,7 @@ def _pipeline_artifact_relation_record(
     }
 
 
-def _adr_paths_by_number(decisions_dir: Path) -> dict[int, Path]:
+def _adr_paths_by_number(decisions_dir: Path) -> dict[str, Path]:
     return {
         adr_number: path
         for path in sorted(decisions_dir.glob(ADR_DOC_GLOB))
@@ -1466,10 +1477,10 @@ def _adr_paths_by_number(decisions_dir: Path) -> dict[int, Path]:
 def _adr_lifecycle_relation_record(
     *,
     adr_path: Path,
-    adr_paths: dict[int, Path],
+    adr_paths: dict[str, Path],
     declaring_path: str,
     field: str,
-    target_number: int,
+    target_number: str,
     repo_root: Path,
     source_snapshot: str,
 ) -> dict[str, Any] | None:
@@ -1646,27 +1657,21 @@ def query_entity_neighborhood(
 
 
 def _file_relation_neighbor(relation: dict[str, Any], current: str) -> str:
-    return (
-        relation["target_path"]
-        if relation["source_path"] == current
-        else relation["source_path"]
-    )
+    if relation["source_path"] == current:
+        return str(relation["target_path"])
+    return str(relation["source_path"])
 
 
 def _module_relation_neighbor(relation: dict[str, Any], current: str) -> str:
-    return (
-        relation["target_name"]
-        if relation["source_name"] == current
-        else relation["source_name"]
-    )
+    if relation["source_name"] == current:
+        return str(relation["target_name"])
+    return str(relation["source_name"])
 
 
 def _entity_relation_neighbor(relation: dict[str, Any], current: str) -> str:
-    return (
-        relation["target_id"]
-        if relation["source_id"] == current
-        else relation["source_id"]
-    )
+    if relation["source_id"] == current:
+        return str(relation["target_id"])
+    return str(relation["source_id"])
 
 
 def _relations_for_entry(entry: dict[str, Any]) -> list[dict[str, Any]]:
@@ -1709,13 +1714,15 @@ def _entity_relations_for_entry(entry: dict[str, Any]) -> list[dict[str, Any]]:
 def resolve_index_file_path(index: dict[str, Any], query: str) -> str | None:
     """Resolve exact, normalized, or unique suffix file query to index path."""
     normalized_query = query.replace("\\", "/").lstrip("./")
-    by_file = index.get("by_file", {})
+    raw_by_file = index.get("by_file", {})
+    by_file = raw_by_file if isinstance(raw_by_file, dict) else {}
     if normalized_query in by_file:
         return normalized_query
     suffix_matches = [
-        path
+        str(path)
         for path in by_file
-        if path.endswith(f"/{normalized_query}") or path.endswith(normalized_query)
+        if str(path).endswith(f"/{normalized_query}")
+        or str(path).endswith(normalized_query)
     ]
     if len(suffix_matches) == 1:
         return suffix_matches[0]
@@ -1725,14 +1732,15 @@ def resolve_index_file_path(index: dict[str, Any], query: str) -> str | None:
 def resolve_index_module_name(index: dict[str, Any], query: str) -> str | None:
     """Resolve exact or unique suffix module query to index module name."""
     normalized_query = query.removeprefix("mod:")
-    by_module = index.get("by_module", {})
+    raw_by_module = index.get("by_module", {})
+    by_module = raw_by_module if isinstance(raw_by_module, dict) else {}
     if normalized_query in by_module:
         return normalized_query
     suffix_matches = [
-        module_name
+        str(module_name)
         for module_name in by_module
-        if module_name.endswith(f".{normalized_query}")
-        or module_name.endswith(normalized_query)
+        if str(module_name).endswith(f".{normalized_query}")
+        or str(module_name).endswith(normalized_query)
     ]
     if len(suffix_matches) == 1:
         return suffix_matches[0]
@@ -1742,18 +1750,21 @@ def resolve_index_module_name(index: dict[str, Any], query: str) -> str | None:
 def resolve_index_entity(index: dict[str, Any], query: str) -> str | None:
     """Resolve exact, path, name, or unique suffix entity query to index entity id."""
     normalized_query = query.replace("\\", "/").lstrip("./")
-    by_entity = index.get("by_entity", {})
+    raw_by_entity = index.get("by_entity", {})
+    by_entity = raw_by_entity if isinstance(raw_by_entity, dict) else {}
     if normalized_query in by_entity:
         return normalized_query
-    matches = []
+    matches: list[str] = []
     for entity_id, entry in by_entity.items():
-        name = str(entry.get("name") or "")
-        path = str(entry.get("path") or "")
+        entry_map = entry if isinstance(entry, dict) else {}
+        name = str(entry_map.get("name") or "")
+        path = str(entry_map.get("path") or "")
+        entity_key = str(entity_id)
         if normalized_query in {name, path}:
-            matches.append(entity_id)
+            matches.append(entity_key)
             continue
-        if entity_id.endswith(normalized_query) or path.endswith(normalized_query):
-            matches.append(entity_id)
+        if entity_key.endswith(normalized_query) or path.endswith(normalized_query):
+            matches.append(entity_key)
     if len(matches) == 1:
         return matches[0]
     return None

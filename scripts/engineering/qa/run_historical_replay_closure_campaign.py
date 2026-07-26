@@ -533,7 +533,9 @@ def main() -> int:
         written_dispositions_path.parent.mkdir(parents=True, exist_ok=True)
         from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
-        written_dispositions_path = resolve_output_path(written_dispositions_path, root=REPO_ROOT)
+        written_dispositions_path = resolve_output_path(
+            written_dispositions_path, root=REPO_ROOT
+        )
         written_dispositions_path.write_text(
             json.dumps(
                 {

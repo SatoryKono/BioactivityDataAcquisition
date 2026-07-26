@@ -102,9 +102,7 @@ def build_replay_assessment(
         strict_exact_replay_supported=(
             reproducibility_context.strict_exact_replay_supported
         ),
-        exact_replay_requested=bool(
-            getattr(request_inputs.ctx, "exact_replay", False)
-        ),
+        exact_replay_requested=bool(getattr(request_inputs.ctx, "exact_replay", False)),
         resume_requested=bool(getattr(request_inputs.ctx, "resume", False)),
         replay_capability=replay_capability,
         run_type=request_inputs.run_type_value,

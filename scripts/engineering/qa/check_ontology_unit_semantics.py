@@ -18,7 +18,7 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(REPO_ROOT))
     sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from bioetl.infrastructure.config.semantic_field_registry_loader import (  # noqa: E402
+from bioetl.infrastructure.config.semantic_field_registry_loader import (
     SemanticFieldRegistryLoader,
 )
 

@@ -8,7 +8,7 @@ import json
 import subprocess
 import sys
 from dataclasses import asdict, dataclass
-from typing import Callable, Iterable
+from collections.abc import Callable, Iterable
 from urllib import error, request
 
 

@@ -522,7 +522,7 @@ def _log_report_mode(dry_run: bool) -> None:
     logger.info("")
 
 
-def _log_successful_updates(successful: list[UpdateResult]) -> None:
+def _log_successful_updates(successful: list[BaselineUpdateResult]) -> None:
     """Log successful updates."""
     logger.info("## SUCCESSFUL (%d pipelines)", len(successful))
     logger.info("")
@@ -547,7 +547,7 @@ def _log_successful_updates(successful: list[UpdateResult]) -> None:
             logger.info("")
 
 
-def _log_failed_updates(failed: list[UpdateResult]) -> None:
+def _log_failed_updates(failed: list[BaselineUpdateResult]) -> None:
     """Log failed updates."""
     logger.info("## FAILED (%d pipelines)", len(failed))
     for result in failed:

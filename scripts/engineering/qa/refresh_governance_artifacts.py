@@ -62,10 +62,7 @@ def refresh(*, check_only: bool) -> None:
         _run([sys.executable, str(refresh_helper)])
 
     print("REFRESH complete. Recommended verification:")
-    print(
-        "  pytest tests/architecture/test_module_coverage_inventory.py "
-        "-q --tb=no"
-    )
+    print("  pytest tests/architecture/test_module_coverage_inventory.py -q --tb=no")
     print(
         "  pytest tests/architecture/test_architecture_audit_closeout_gates.py "
         "-q --tb=short"

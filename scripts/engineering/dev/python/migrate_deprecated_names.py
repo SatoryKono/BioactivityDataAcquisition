@@ -9,7 +9,6 @@ with their new equivalents.
 import re
 import sys
 from pathlib import Path
-from typing import Dict, List, Tuple
 
 # Mapping of deprecated names to new names
 DEPRECATED_MAPPING = {

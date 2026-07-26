@@ -18,7 +18,7 @@ classifiers = [
 dependencies = [
     "httpx>=0.27",
     "pydantic>=2.0",
-    "pydantic-settings>=2.0",
+    "pydantic-settings>=2.14.2",
     "pyyaml>=6.0",
     "polars>=1.0",
     "deltalake>=0.18,<1.0",
@@ -80,7 +80,7 @@ tests = [
     # Property-based testing (required by domain tests)
     "hypothesis>=6.100",
     # VCR.py for API testing (RULES.md Section 4.2)
-    "vcrpy>=6.0",
+    "vcrpy>=8.2.1",
     "pytest-recording>=0.13",
     # Code formatting (required by architecture tests) - ruff replaces black+isort
     "ruff>=0.4",
@@ -121,7 +121,7 @@ dev = [
     # Note: osv-scanner is the primary scanner (Go binary, not Python package)
     # safety removed: requires paid API key for scan command
     # VCR.py for API testing (RULES.md Section 4.2)
-    "vcrpy>=6.0",
+    "vcrpy>=8.2.1",
     "pytest-recording>=0.13",
     # Code formatting and linting - ruff replaces black+isort
     "import-linter>=2.13",
@@ -382,6 +382,9 @@ warn_unused_ignores = false
 line-length = 88
 target-version = "py312"
 src = ["src", "tests"]
+# Docs trees include vendor skill scripts, site mirrors, and one-off evidence
+# extractors — not production surfaces for the repo-wide ruff gate.
+extend-exclude = ["docs"]
 
 [tool.ruff.lint]
 select = [
@@ -417,9 +420,9 @@ known-first-party = ["bioetl", "tests"]
 # Test lint governance is directory-scoped rather than suite-wide so new debt
 # stays localized to the test families that actually need each waiver.
 "tests/conftest.py" = ["E402", "I001"]
-# F405: split owner suites re-export fixtures/helpers via intentional star imports.
+# F403/F405: split owner suites re-export fixtures/helpers via intentional star imports.
 # F841/RUF043/B018/RUF015: common test scaffolding noise kept localized to tests.
-"tests/unit/**/*.py" = ["ARG001", "ARG002", "ARG005", "B017", "B018", "E402", "E501", "F405", "F841", "I001", "PTH", "RUF012", "RUF015", "RUF043", "RUF059", "SIM", "T201"]
+"tests/unit/**/*.py" = ["ARG001", "ARG002", "ARG005", "B017", "B018", "E402", "E501", "F403", "F405", "F841", "I001", "PTH", "RUF012", "RUF015", "RUF043", "RUF059", "SIM", "T201"]
 "tests/integration/**/*.py" = ["ARG001", "ARG002", "ARG005", "B011", "B017", "E402", "E501", "F405", "F841", "I001", "PTH", "SIM", "T201"]
 "tests/e2e/**/*.py" = ["ARG001", "ARG002", "ARG005", "E501", "F405", "I001", "SIM"]
 "tests/architecture/**/*.py" = ["ARG002", "ARG005", "B017", "C901", "E402", "E501", "F405", "F841", "I001", "PTH", "RUF012", "RUF059", "SIM", "T201"]
@@ -445,9 +448,13 @@ known-first-party = ["bioetl", "tests"]
 # Entrypoints uses semantic grouping with comments in __all__ (not alphabetical)
 "src/bioetl/composition/entrypoints.py" = ["RUF022"]
 # Tools scripts use print() for output, may have simpler patterns, and are not production code
-"src/tools/**/*.py" = ["PTH", "SIM", "T201", "F401", "F541", "UP015", "RUF005", "B007", "F841"]
-# Scripts are CLI utilities: print() is expected, pathlib not required
-"scripts/**/*.py" = ["PTH", "SIM", "T201", "F401", "F541", "UP015", "RUF005", "B007", "F841"]
+# F403: thin re-export shims wrap scripts.diagrams entrypoints.
+"src/tools/**/*.py" = ["PTH", "SIM", "T201", "F401", "F403", "F541", "UP015", "RUF005", "B007", "F841"]
+# Scripts are CLI utilities: print() is expected, pathlib not required.
+# E501/I001/E402: operator scripts prioritize readability and bootstrap imports.
+# B008: Typer/Click Option defaults are the standard CLI pattern.
+# F822: lazy-export shims list public names in __all__ without binding them at import time.
+"scripts/**/*.py" = ["PTH", "SIM", "T201", "F401", "F541", "UP015", "RUF005", "B007", "F841", "E501", "I001", "E402", "B008", "F822"]
 # Infrastructure adapters implement Protocol interfaces, may not use all args
 "src/bioetl/infrastructure/adapters/**/*.py" = ["ARG001", "ARG002", "SIM102", "SIM113"]
 # Infrastructure may have unused args for interface consistency, use open() is fine

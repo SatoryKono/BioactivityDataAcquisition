@@ -157,9 +157,7 @@ def smoke_http_server(
     import urllib.error
     import urllib.request
 
-    if not (
-        url.startswith("http://127.0.0.1:") or url.startswith("http://localhost:")
-    ):
+    if not (url.startswith("http://127.0.0.1:") or url.startswith("http://localhost:")):
         raise ValueError(
             f"HTTP protocol smoke only allows localhost URLs (got {url!r})"
         )
@@ -303,19 +301,13 @@ def smoke_server(
     try:
         safe_config = ensure_path_within_root(resolved_config, REPO_ROOT)
     except ValueError:
-        safe_config = ensure_path_within_root(
-            resolved_config, resolved_config.parent
-        )
+        safe_config = ensure_path_within_root(resolved_config, resolved_config.parent)
     server = _load_server(safe_config, server_name)
     if _is_http_server(server):
-        return smoke_http_server(
-            server_name, str(server["url"]), timeout=timeout
-        )
+        return smoke_http_server(server_name, str(server["url"]), timeout=timeout)
     resolved_cmd = _resolve_command(str(server["command"]))
     # Prefer absolute resolved executable when available.
-    command = _validate_command_argv(
-        [resolved_cmd, *map(str, server.get("args", []))]
-    )
+    command = _validate_command_argv([resolved_cmd, *map(str, server.get("args", []))])
     # Windows CreateProcess cannot execute .bat/.cmd without a shell/comspec.
     # Keep argv as a list and use shell only with an explicit comspec invocation
     # so the child is not launched from a concatenated user-controlled string.

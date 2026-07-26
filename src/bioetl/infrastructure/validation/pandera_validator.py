@@ -21,7 +21,9 @@ from bioetl.domain.types import JsonDict, ValidationResult
 
 if TYPE_CHECKING:
     import pandas as pd
-    import pandera as pa
+    # Prefer pandera.pandas: top-level pandera.DataFrameSchema is the deprecated
+    # shim (pandera._pandas_deprecated) and is a different type under 0.31+.
+    import pandera.pandas as pa
 
 
 class BasePanderaValidator:

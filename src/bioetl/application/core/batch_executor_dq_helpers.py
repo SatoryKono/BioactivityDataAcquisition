@@ -1,4 +1,3 @@
-# ruff: noqa: UP049
 """Pure helpers for BatchExecutor DQ context construction."""
 
 from __future__ import annotations
@@ -53,8 +52,8 @@ def stringify_value(value: object, keys_to_stringify: set[str], key: str) -> obj
     return str(value)
 
 
-def normalize_records_for_polars[_RecordT: dict[str, object]](
-    records: list[_RecordT],
+def normalize_records_for_polars[RecordT: dict[str, object]](
+    records: list[RecordT],
 ) -> list[dict[str, object]] | None:
     """Normalize mixed nested/string columns to stable string representation."""
     nested_keys: set[str] = set()

@@ -42,9 +42,7 @@ class _MetadataWriterOperations:
         logger: LoggerPort,
         metrics: MetricsPort | None,
         retry_policy: AdaptiveRetryPolicy,
-        artifact_recorder_provider: Callable[
-            [], ArtifactPublicationRecorder | None
-        ],
+        artifact_recorder_provider: Callable[[], ArtifactPublicationRecorder | None],
     ) -> None:
         self._logger = logger
         self._metrics = metrics

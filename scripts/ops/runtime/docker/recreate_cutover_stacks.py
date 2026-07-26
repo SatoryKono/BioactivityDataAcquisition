@@ -19,7 +19,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Mapping
+from collections.abc import Mapping
 
 SECRET_KEY = re.compile(r"(?:password|secret|token|credential|auth|key)", re.I)
 
@@ -290,6 +290,6 @@ def main() -> int:
 if __name__ == "__main__":
     try:
         raise SystemExit(main())
-    except Exception as exc:  # noqa: BLE001 - operator script surface
+    except Exception as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         raise SystemExit(1) from exc

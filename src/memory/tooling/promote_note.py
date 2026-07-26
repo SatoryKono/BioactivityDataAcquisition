@@ -24,14 +24,22 @@ def _curated_targets() -> dict[str, Path]:
     }
 
 
-def _promotion_policy() -> dict:
+def _promotion_policy() -> dict[str, object]:
     memory_root = discover_memory_root()
-    return load_yaml_resource(memory_root / "policy" / "promotion.yaml")
+    payload = load_yaml_resource(memory_root / "policy" / "promotion.yaml")
+    if not isinstance(payload, dict):
+        raise TypeError("promotion policy must be a mapping")
+    return payload
 
 
 def _placeholder_markers() -> list[str]:
     policy = _promotion_policy()
-    markers = policy.get("global", {}).get("placeholder_markers", [])
+    global_section = policy.get("global", {})
+    if not isinstance(global_section, dict):
+        return []
+    markers = global_section.get("placeholder_markers", [])
+    if not isinstance(markers, list):
+        return []
     return [str(marker).lower() for marker in markers if isinstance(marker, str)]
 
 

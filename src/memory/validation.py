@@ -471,7 +471,7 @@ def _iter_note_paths(
                 )
                 note_paths = _bounded_episodic_note_paths(directory, limit=limit)
             else:
-                note_paths = _iter_markdown_note_paths(directory, limit=None)
+                note_paths = list(_iter_markdown_note_paths(directory, limit=None))
             for path in note_paths:
                 yield (artifact_class, path)
 

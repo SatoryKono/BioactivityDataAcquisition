@@ -35,7 +35,10 @@ def write_jsonl(path: Path, rows: list[dict[str, Any]]) -> Path:
 
 def read_json(path: Path) -> dict[str, Any]:
     """Load a JSON object from disk."""
-    return json.loads(path.read_text(encoding="utf-8"))
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise TypeError(f"Expected JSON object in {path}")
+    return payload
 
 
 def read_jsonl(path: Path) -> list[dict[str, Any]]:

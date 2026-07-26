@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.engineering.qa.report_test_governance_audit import (  # noqa: E402
+from scripts.engineering.qa.report_test_governance_audit import (
     DEFAULT_CONFIG,
     DEFAULT_FIXTURE_DUPLICATION_ARTIFACT,
     DEFAULT_JSON_ARTIFACT,

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Grok CLI для BioETL проекта.
 Обеспечивает CLI интерфейс для работы с Grok паттернами через pygrok.

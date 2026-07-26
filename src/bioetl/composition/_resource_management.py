@@ -1,4 +1,3 @@
-# ruff: noqa: UP049
 """Resource management entrypoints.
 
 Runtime services, maintenance operations (vacuum, archive),
@@ -155,12 +154,12 @@ def load_pipeline_config(pipeline: str) -> PipelineYamlConfig:
     return impl(pipeline)
 
 
-def _bootstrap_registered_resource[**_P, _T](
-    bootstrap_fn: Callable[_P, _T],
+def _bootstrap_registered_resource[**P, T](
+    bootstrap_fn: Callable[P, T],
     /,
-    *args: _P.args,
-    **kwargs: _P.kwargs,
-) -> _T:
+    *args: P.args,
+    **kwargs: P.kwargs,
+) -> T:
     """Run registration bootstrap before delegating to a resource builder."""
     _ensure_registrations()
     return bootstrap_fn(*args, **kwargs)

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Build consolidated architecture review markdown from CodeRabbit agent NDJSON."""
+
 from __future__ import annotations
 
 import collections
@@ -46,7 +47,10 @@ def parse_body(text: str, file_name: str) -> tuple[str, str, str]:
 
 def main() -> int:
     if len(sys.argv) < 3:
-        print("usage: build_arch_review_report.py <agent.ndjson> <out.md>", file=sys.stderr)
+        print(
+            "usage: build_arch_review_report.py <agent.ndjson> <out.md>",
+            file=sys.stderr,
+        )
         return 2
     from scripts.engineering.common.repo_paths import resolve_output_path
 
@@ -68,7 +72,9 @@ def main() -> int:
             current = obj.get("workingDirectory")
         elif kind == "finding":
             file_name = str(obj.get("fileName") or "?")
-            fpath, loc, body = parse_body(str(obj.get("codegenInstructions") or ""), file_name)
+            fpath, loc, body = parse_body(
+                str(obj.get("codegenInstructions") or ""), file_name
+            )
             findings.append(
                 {
                     "layer": layer_of(current),
@@ -101,7 +107,7 @@ def main() -> int:
     lines.append("")
     lines.append("| Layer | Agent findings | Complete event |")
     lines.append("| --- | ---: | --- |")
-    complete_map = {name: n for name, n in completes}
+    complete_map = dict(completes)
     for layer in (
         "domain",
         "application",
@@ -112,7 +118,11 @@ def main() -> int:
         "docs/02-architecture",
     ):
         n = by_layer.get(layer, 0)
-        done = "yes" if layer in complete_map else ("partial" if n else "not run / incomplete")
+        done = (
+            "yes"
+            if layer in complete_map
+            else ("partial" if n else "not run / incomplete")
+        )
         lines.append(f"| `{layer}` | {n} | {done} |")
     lines.append("")
     lines.append("## Сводка")
@@ -123,8 +133,7 @@ def main() -> int:
         + ", ".join(f"`{k}`={by_sev[k]}" for k in order if by_sev.get(k))
     )
     lines.append(
-        "- **По слоям:** "
-        + ", ".join(f"`{k}`={by_layer[k]}" for k in sorted(by_layer))
+        "- **По слоям:** " + ", ".join(f"`{k}`={by_layer[k]}" for k in sorted(by_layer))
     )
     lines.append("")
     lines.append("### Архитектурные темы (сводка)")
@@ -191,12 +200,24 @@ def main() -> int:
     lines.append("")
     lines.append("## Рекомендуемый порядок remediation")
     lines.append("")
-    lines.append("1. **Security:** redaction Authorization/Cookie; redact `default_email` in effective-config snapshot.")
-    lines.append("2. **Correctness/stability:** transformer MRO owner_type; Frozen* composition; stage complete idempotency; checkpoint timestamp compare.")
-    lines.append("3. **Contract stability:** FK reconciliation field order/keyword-only; ports facade exports; wiring `__all__`.")
-    lines.append("4. **Async integrity:** `run_storage_blocking` → `asyncio.to_thread`; reconcile artifact writes off event loop.")
-    lines.append("5. **Data integrity:** row reconcile validation; persist reconcile_rows artifacts; reject blank step IDs.")
-    lines.append("6. **DX/maintainability:** remove `@cache` on unhashable normalizers; OverflowError in coercion; deprecation aliases.")
+    lines.append(
+        "1. **Security:** redaction Authorization/Cookie; redact `default_email` in effective-config snapshot."
+    )
+    lines.append(
+        "2. **Correctness/stability:** transformer MRO owner_type; Frozen* composition; stage complete idempotency; checkpoint timestamp compare."
+    )
+    lines.append(
+        "3. **Contract stability:** FK reconciliation field order/keyword-only; ports facade exports; wiring `__all__`."
+    )
+    lines.append(
+        "4. **Async integrity:** `run_storage_blocking` → `asyncio.to_thread`; reconcile artifact writes off event loop."
+    )
+    lines.append(
+        "5. **Data integrity:** row reconcile validation; persist reconcile_rows artifacts; reject blank step IDs."
+    )
+    lines.append(
+        "6. **DX/maintainability:** remove `@cache` on unhashable normalizers; OverflowError in coercion; deprecation aliases."
+    )
     lines.append("")
     lines.append("## Артефакты")
     lines.append("")
@@ -204,7 +225,9 @@ def main() -> int:
     lines.append(
         "- Layered summary MD: `reports/quality/coderabbit/architecture-layered_20260723_101412.md`"
     )
-    lines.append("- Helper scripts: `scripts/ops/_run_cr_arch_review_wsl.sh`, `scripts/ops/_run_cr_arch_review_remaining.sh`")
+    lines.append(
+        "- Helper scripts: `scripts/ops/_run_cr_arch_review_wsl.sh`, `scripts/ops/_run_cr_arch_review_remaining.sh`"
+    )
     lines.append("")
 
     out.write_text("\n".join(lines) + "\n", encoding="utf-8")

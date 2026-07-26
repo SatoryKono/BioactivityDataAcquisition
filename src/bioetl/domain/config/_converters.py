@@ -1,4 +1,3 @@
-# ruff: noqa: UP049
 """Internal converters for domain configuration objects.
 
 Provides type conversion utilities used by config dataclasses during
@@ -25,10 +24,10 @@ def require_literal[T](value: T, *, field_name: str, allowed: frozenset[T]) -> T
     return value
 
 
-def convert_write_mode[_WM: (SilverWriteMode, GoldWriteMode)](
-    mode: _WM | str,
-    enum_cls: type[_WM],
-) -> _WM:
+def convert_write_mode[WM: (SilverWriteMode, GoldWriteMode)](
+    mode: WM | str,
+    enum_cls: type[WM],
+) -> WM:
     """Convert a string or enum value to the target write-mode enum.
 
     Generic replacement for the former ``_convert_silver_write_mode``

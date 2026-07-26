@@ -87,7 +87,7 @@ def test_smoke_http_shared_plane_ping(
         def read(self) -> bytes:
             return self._body
 
-        def __enter__(self) -> "_Resp":
+        def __enter__(self) -> _Resp:
             return self
 
         def __exit__(self, *args: object) -> None:

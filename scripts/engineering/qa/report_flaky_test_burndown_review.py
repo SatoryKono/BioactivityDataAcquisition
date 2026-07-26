@@ -436,7 +436,9 @@ def _canonical_json(payload: dict[str, object]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
 
-def _write_text_atomically(path: Path, content: str, *, root: Path | None = None) -> None:
+def _write_text_atomically(
+    path: Path, content: str, *, root: Path | None = None
+) -> None:
     if root is not None:
         from scripts.engineering.common.repo_paths import ensure_path_within_root
 

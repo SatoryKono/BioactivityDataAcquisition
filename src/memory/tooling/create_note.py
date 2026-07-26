@@ -5,7 +5,13 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from memory.notes import parse_markdown_note, slugify, utc_now_iso, write_markdown_note
+from memory.notes import (
+    MemoryNote,
+    parse_markdown_note,
+    slugify,
+    utc_now_iso,
+    write_markdown_note,
+)
 from memory.resources import discover_memory_root
 
 NOTE_KINDS: dict[str, dict[str, str]] = {
@@ -42,7 +48,7 @@ NOTE_KINDS: dict[str, dict[str, str]] = {
 }
 
 
-def _template_note(memory_root: Path, template_rel_path: str):
+def _template_note(memory_root: Path, template_rel_path: str) -> MemoryNote:
     return parse_markdown_note(memory_root / template_rel_path)
 
 

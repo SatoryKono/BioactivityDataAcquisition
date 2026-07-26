@@ -18,10 +18,10 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(REPO_ROOT))
     sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from bioetl.domain.normalization.join_keys import (  # noqa: E402
+from bioetl.domain.normalization.join_keys import (
     get_join_key_normalization_policy,
 )
-from bioetl.infrastructure.config._composite_shared_policy_externalization import (  # noqa: E402
+from bioetl.infrastructure.config._composite_shared_policy_externalization import (
     merge_external_shared_policy,
 )
 

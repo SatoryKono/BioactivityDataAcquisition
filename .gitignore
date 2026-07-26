@@ -147,6 +147,8 @@ log_test.txt
 !/reports/quality/tech-debt-issues-5707-5715-closeout.json
 !/reports/quality/tech-debt-issues-5729-5733-closeout.json
 !/reports/quality/tech-debt-issues-5744-5751-closeout.json
+!/reports/quality/tech-debt-issues-5790-5796-closeout.json
+!/reports/quality/tech-debt-issues-6159-6169-closeout.json
 !/reports/quality/tech-debt-issues-5834-5838-closeout.json
 !/reports/quality/tech-debt-issues-5839-5845-closeout.json
 !/reports/quality/tech-debt-issues-5861-5864-closeout.json
@@ -456,8 +458,8 @@ data/2026-07-03_20-21-59.gif
 .xml
 /_loop_*
 
-# Grok machine-local MCP (absolute Windows paths)
-.grok/config.toml
+# Grok machine-local runtime (never track root .grok/ — root hygiene + absolute paths)
+.grok/
 
 # Local-only agent scratch (not CI source)
 _local_only_mcp/
@@ -468,11 +470,3 @@ _local_only_mcp/
 # Local agent temp scratch (never commit)
 _tmp_*.py
 tmp_sub_*.txt
-<<<<<<< Updated upstream
-Eg-drive05_AIgithubBioactivityDataAcquisition2.cachenpm-cache/_cacache/content-v2/sha512/a7/85/b7a25a7dbf9e5ec8a2dadf8a880bc3c8a9d3b92457a17f80f414900aae7f5e29b5a96b14f4f83a97643f06122b94924bf91c3e7bc4d10987aec6b173f24a
-Eg-drive05_AIgithubBioactivityDataAcquisition2.cachenpm-cache/_cacache/index-v5/89/bb/a1ddde305bb0b095e3f3a47f636ce1168bedaf8237fd4815644613ebd303
-Eg-drive05_AIgithubBioactivityDataAcquisition2.cachenpm-cache/_update-notifier-last-checked
-||||||| Stash base
-=======
-/Eg-drive05_AIgithubBioactivityDataAcquisition2.cachenpm-cache
->>>>>>> Stashed changes

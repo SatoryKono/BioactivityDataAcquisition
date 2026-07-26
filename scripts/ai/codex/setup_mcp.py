@@ -102,9 +102,7 @@ MCP_PROFILES: dict[str, tuple[str, ...] | None] = {
     "full": None,
 }
 
-SHARED_SERVER_CATALOG_PATH = (
-    REPO_ROOT / "scripts/ops/runtime/mcp/shared-servers.json"
-)
+SHARED_SERVER_CATALOG_PATH = REPO_ROOT / "scripts/ops/runtime/mcp/shared-servers.json"
 
 
 def _load_shared_server_endpoints(
@@ -297,8 +295,7 @@ def _filter_servers_for_profile(
     """Return a profile-filtered copy of *servers* (never emits retired names)."""
     if profile not in MCP_PROFILES:
         raise ValueError(
-            f"Unknown MCP profile {profile!r}; expected one of "
-            f"{sorted(MCP_PROFILES)}"
+            f"Unknown MCP profile {profile!r}; expected one of {sorted(MCP_PROFILES)}"
         )
     allowed = MCP_PROFILES[profile]
     if allowed is None:
@@ -531,6 +528,7 @@ def _codex_runtime_servers(
         "code-analyzer",
         "github-actions",
     }
+
     def _is_http_server(server: dict[str, Any]) -> bool:
         """Streamable HTTP / remote entries must not carry stdio env tables.
 
@@ -712,9 +710,7 @@ def _write_configs(
         )
         _write_json(mcp_path, codex_payload, allowed_root=output_root)
         if output_root.resolve() == workspace_root.resolve():
-            _write_json(
-                scripts_ai_mcp_path, codex_payload, allowed_root=output_root
-            )
+            _write_json(scripts_ai_mcp_path, codex_payload, allowed_root=output_root)
         _write_json(vscode_path, vscode_payload, allowed_root=output_root)
         _write_json(cursor_path, cursor_payload, allowed_root=output_root)
         _write_json(zed_path, zed_payload, allowed_root=output_root)
@@ -819,9 +815,7 @@ def _render_codex_mcp_toml(servers: dict[str, dict[str, Any]]) -> str:
         lines.append("")
         lines.append(f"[mcp_servers.{key}]")
         if "enabled" in server:
-            lines.append(
-                f"enabled = {'true' if bool(server['enabled']) else 'false'}"
-            )
+            lines.append(f"enabled = {'true' if bool(server['enabled']) else 'false'}")
         if "url" in server:
             lines.append(f"url = {_toml_string(str(server['url']))}")
         else:

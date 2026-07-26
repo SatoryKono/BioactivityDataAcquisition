@@ -1,4 +1,3 @@
-# ruff: noqa: UP049
 """Prometheus Metrics adapter implementing MetricsPort.
 
 Provides concrete implementation of the MetricsPort interface using
@@ -78,12 +77,12 @@ def _reject_unexpected_labels(name: str, labels: MetricLabels) -> None:
         )
 
 
-def _require_registered_metric[_MetricT](
+def _require_registered_metric[MetricT](
     *,
     name: str,
-    registry: Mapping[str, _MetricT],
+    registry: Mapping[str, MetricT],
     metric_kind: str,
-) -> _MetricT:
+) -> MetricT:
     """Return a registered metric or fail loudly on contract drift."""
     metric = registry.get(name)
     if metric is None:

@@ -54,7 +54,12 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         targets = _fetch_targets(args.prometheus_url, args.timeout_seconds)
-    except (urllib.error.URLError, TimeoutError, RuntimeError, json.JSONDecodeError) as exc:
+    except (
+        urllib.error.URLError,
+        TimeoutError,
+        RuntimeError,
+        json.JSONDecodeError,
+    ) as exc:
         detail = f"prometheus unreachable or invalid: {exc}"
         if args.json:
             print(json.dumps({"status": "error", "detail": detail}, indent=2))

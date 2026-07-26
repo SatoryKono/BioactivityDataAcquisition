@@ -19,7 +19,9 @@
       "-m",
       "ruff",
       "check",
-      "."
+      "src",
+      "tests",
+      "scripts"
     ],
     "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "always",
@@ -227,10 +229,9 @@
   },
   {
     "label": "Architecture compliance",
-    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/lint-imports.exe",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
-      "--config",
-      "pyproject.toml"
+      "scripts/engineering/dev/zed_lint_imports.py"
     ],
     "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "always"
@@ -241,8 +242,10 @@
     "args": [
       "-m",
       "bandit",
+      "-c",
+      "pyproject.toml",
       "-r",
-      "src/"
+      "src/bioetl"
     ],
     "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "always"
@@ -252,7 +255,10 @@
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
       "-m",
-      "pip_audit"
+      "pip_audit",
+      "--skip-editable",
+      "--cache-dir",
+      ".cache/pip-audit"
     ],
     "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "always"
@@ -261,9 +267,7 @@
     "label": "Dead code detection",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
-      "-m",
-      "vulture",
-      "src/bioetl"
+      "scripts/engineering/dev/zed_vulture.py"
     ],
     "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "always"
@@ -272,15 +276,7 @@
     "label": "Complexity check",
     "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
-      "-m",
-      "xenon",
-      "--max-absolute",
-      "B",
-      "--max-modules",
-      "B",
-      "--max-average",
-      "A",
-      "src/bioetl"
+      "scripts/engineering/dev/zed_xenon.py"
     ],
     "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "always"

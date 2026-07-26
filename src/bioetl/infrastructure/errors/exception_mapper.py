@@ -1,4 +1,3 @@
-# ruff: noqa: UP049
 """Unified mapping layer between infrastructure and domain exceptions."""
 
 from __future__ import annotations
@@ -56,12 +55,12 @@ class InfraErrorDisposition:
     retryable: bool
 
 
-def _decorate_mapped_error[_MappedExternalError: ExternalServiceError](
+def _decorate_mapped_error[MappedExternalError: ExternalServiceError](
     *,
-    error: _MappedExternalError,
+    error: MappedExternalError,
     reason_code: str,
     payload: DomainErrorMappingInput,
-) -> _MappedExternalError:
+) -> MappedExternalError:
     """Attach standardized reason code, context, and root cause metadata."""
     error.with_context(
         reason_code=reason_code,

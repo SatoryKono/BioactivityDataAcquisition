@@ -1582,21 +1582,19 @@ def _skill_docs_mirror_targets(
 def _iter_ai_docs_runtime_mirror_targets(
     project_root: Path,
 ) -> tuple[AIDocsMirrorTarget, ...]:
-    return tuple(
-        [
-            *_agent_docs_mirror_targets(project_root),
-            *_skill_docs_mirror_targets(
-                project_root,
-                docs_subdir="local",
-                canonical_root=".codex/skills",
-            ),
-            *_skill_docs_mirror_targets(
-                project_root,
-                docs_subdir="global",
-                canonical_root=".gemini/skills",
-                skip_system_parts=True,
-            ),
-        ]
+    return (
+        *_agent_docs_mirror_targets(project_root),
+        *_skill_docs_mirror_targets(
+            project_root,
+            docs_subdir="local",
+            canonical_root=".codex/skills",
+        ),
+        *_skill_docs_mirror_targets(
+            project_root,
+            docs_subdir="global",
+            canonical_root=".gemini/skills",
+            skip_system_parts=True,
+        ),
     )
 
 

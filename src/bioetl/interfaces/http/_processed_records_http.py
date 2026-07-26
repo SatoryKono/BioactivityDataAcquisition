@@ -15,8 +15,8 @@ class _UrlResponse(Protocol):
     def __exit__(
         self,
         exc_type: type[BaseException] | None,
-        exc_value: BaseException | None,
-        traceback: TracebackType | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
     ) -> None: ...
 
     def read(self) -> bytes: ...
