@@ -22,7 +22,7 @@ class ChemblErrorHost(Protocol):
     """Host contract needed to wrap fetch errors."""
 
     provider_name: str
-    _http_client: UnifiedHTTPClient
+    http_client: UnifiedHTTPClient
     _error_handler: ErrorHandlerPort
 
     def _get_health_status(self) -> HealthStatus: ...
@@ -34,10 +34,10 @@ def handle_fetch_error(
     context: str,
 ) -> NoReturn:
     """Handle errors with unified classification."""
-    failure_count = host._http_client.circuit_breaker.get_failure_count()
+    failure_count = host.http_client.circuit_breaker.get_failure_count()
     health_status = host._get_health_status()
     error_context = {
-        "circuit_breaker_state": host._http_client.circuit_breaker.get_state().value,
+        "circuit_breaker_state": host.http_client.circuit_breaker.get_state().value,
         "circuit_breaker_failures": failure_count,
         "health_status": health_status.value,
     }

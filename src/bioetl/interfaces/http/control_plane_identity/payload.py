@@ -370,5 +370,3 @@ def build_summary(
         "replay_mode": None if manifest is None else replay_mode(manifest),
         "resolved_via": resolved_via,
     }
-
-

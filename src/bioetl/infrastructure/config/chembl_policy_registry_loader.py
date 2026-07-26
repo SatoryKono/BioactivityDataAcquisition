@@ -41,14 +41,11 @@ class ChemblPolicyRegistryLoader:
                 registry_key="strict_flag_families",
             ),
             controlled_vocabularies=tuple(
-                ChemblControlledVocabularyFamily(
-                    family_name=str(family_name),
-                    invalid_value_mode=str(payload["invalid_value_mode"]),
-                    fields=tuple(str(field_ref) for field_ref in payload["fields"]),
-                )
-                for family_name, payload in controlled[  # type: ignore[attr-defined]
-                    "controlled_vocabularies"
-                ].items()  # type: ignore[attr-defined]
+                _controlled_vocabulary_family(family_name, payload)
+                for family_name, payload in _require_mapping(
+                    controlled["controlled_vocabularies"],
+                    field_name="controlled_vocabularies",
+                ).items()
             ),
             ontology_families=self._load_ontology_families(ontology),
             publication_classification_fields=(
@@ -57,15 +54,11 @@ class ChemblPolicyRegistryLoader:
                 "publication_class",
             ),
             reference_identifier_families=tuple(
-                ChemblReferenceIdentifierFamily(
-                    family_name=str(family_name),
-                    reference_family=str(payload["reference_family"]),
-                    invalid_value_mode=str(payload["invalid_value_mode"]),
-                    fields=tuple(str(field_ref) for field_ref in payload["fields"]),
-                )
-                for family_name, payload in reference_identifiers[  # type: ignore[attr-defined]
-                    "reference_identifier_families"
-                ].items()  # type: ignore[attr-defined]
+                _reference_identifier_family(family_name, payload)
+                for family_name, payload in _require_mapping(
+                    reference_identifiers["reference_identifier_families"],
+                    field_name="reference_identifier_families",
+                ).items()
             ),
         )
 
@@ -82,13 +75,13 @@ class ChemblPolicyRegistryLoader:
             )
 
         augmented_families = {
-            str(family_name): dict(family_payload)  # type: ignore[arg-type]
-            for family_name, family_payload in families.items()  # type: ignore[attr-defined]
+            str(family_name): dict(family_payload)
+            for family_name, family_payload in families.items()
             if isinstance(family_payload, dict)
         }
         ChemblPolicyRegistryLoader._merge_unit_companion_policies(
             augmented_families,
-            payload.get("unit_companion_policies", {}),  # type: ignore[arg-type]
+            payload.get("unit_companion_policies", {}),
         )
 
         return tuple(
@@ -169,21 +162,34 @@ class ChemblPolicyRegistryLoader:
         base_suffix = f".{family_name}_units"
         family_fields = [
             str(field_ref)
-            for field_ref in family_payload.get("fields", ())  # type: ignore[arg-type]
+            for field_ref in _require_sequence(
+                family_payload.get("fields", ()), field_name="fields"
+            )
         ]
-        companion_fields = family_payload.setdefault("companion_fields", {})  # type: ignore[arg-type]
+        companion_fields = family_payload.setdefault("companion_fields", {})
         if not isinstance(companion_fields, dict):
             companion_fields = {}
-            family_payload["companion_fields"] = companion_fields  # type: ignore[index]
+            family_payload["companion_fields"] = companion_fields
 
-        iri_fields = [str(field_ref) for field_ref in companion_fields.get("iri", ())]  # type: ignore[arg-type]
+        iri_fields = [
+            str(field_ref)
+            for field_ref in _require_sequence(
+                companion_fields.get("iri", ()), field_name="companion_fields.iri"
+            )
+        ]
         mapping_status_fields = [
             str(field_ref)
-            for field_ref in companion_fields.get("mapping_status", ())  # type: ignore[arg-type]
+            for field_ref in _require_sequence(
+                companion_fields.get("mapping_status", ()),
+                field_name="companion_fields.mapping_status",
+            )
         ]
         version_fields = [
             str(field_ref)
-            for field_ref in companion_fields.get("version", ())  # type: ignore[arg-type]
+            for field_ref in _require_sequence(
+                companion_fields.get("version", ()),
+                field_name="companion_fields.version",
+            )
         ]
 
         for field_ref in policy_fields:
@@ -245,3 +251,54 @@ class ChemblPolicyRegistryLoader:
         if not isinstance(payload, dict):
             raise TypeError(f"{path} must decode to a mapping; got {type(payload)!r}")
         return payload
+
+
+def _require_sequence(
+    value: object, *, field_name: str
+) -> list[object] | tuple[object, ...]:
+    """Validate a heterogeneous YAML sequence before iterating over it."""
+    if isinstance(value, (list, tuple)):
+        return value
+    raise TypeError(f"{field_name} must decode to a sequence; got {type(value)!r}")
+
+
+def _require_mapping(value: object, *, field_name: str) -> dict[object, object]:
+    """Validate a heterogeneous YAML mapping before reading its entries."""
+    if isinstance(value, dict):
+        return value
+    raise TypeError(f"{field_name} must decode to a mapping; got {type(value)!r}")
+
+
+def _controlled_vocabulary_family(
+    family_name: object,
+    value: object,
+) -> ChemblControlledVocabularyFamily:
+    payload = _require_mapping(value, field_name=str(family_name))
+    return ChemblControlledVocabularyFamily(
+        family_name=str(family_name),
+        invalid_value_mode=str(payload["invalid_value_mode"]),
+        fields=tuple(
+            str(field_ref)
+            for field_ref in _require_sequence(
+                payload["fields"], field_name=f"{family_name}.fields"
+            )
+        ),
+    )
+
+
+def _reference_identifier_family(
+    family_name: object,
+    value: object,
+) -> ChemblReferenceIdentifierFamily:
+    payload = _require_mapping(value, field_name=str(family_name))
+    return ChemblReferenceIdentifierFamily(
+        family_name=str(family_name),
+        reference_family=str(payload["reference_family"]),
+        invalid_value_mode=str(payload["invalid_value_mode"]),
+        fields=tuple(
+            str(field_ref)
+            for field_ref in _require_sequence(
+                payload["fields"], field_name=f"{family_name}.fields"
+            )
+        ),
+    )

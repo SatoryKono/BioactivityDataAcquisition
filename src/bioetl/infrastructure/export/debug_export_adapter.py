@@ -192,6 +192,10 @@ class DebugExportAdapter:
                 )[:31]
                 if first_sheet:
                     worksheet = workbook.active
+                    if worksheet is None:
+                        raise RuntimeError(
+                            "new workbook must contain an active worksheet"
+                        )
                     worksheet.title = sheet_name
                     first_sheet = False
                 else:

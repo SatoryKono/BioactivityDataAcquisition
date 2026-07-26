@@ -1,0 +1,395 @@
+---
+title: Error Recovery State Machine
+version: 1.0.0
+status: active
+author: BioETL Team
+last_verified: 2026-07-24
+adr_references:
+  - ADR-016: Error Handling Strategy
+  - ADR-032: Unified HTTP Client
+  - ADR-040: Diagram Governance
+description: |
+  State machine diagram showing error recovery flow including error detection,
+  classification (transient/permanent), retry decision, escalation, and manual intervention.
+  Covers comprehensive error recovery strategy for pipeline failures.
+---
+
+```mermaid
+%% @version 1.0.0
+%% @date 2026-07-24
+%% @type state
+%% @level system
+stateDiagram-v2
+    [*] --> ErrorDetected: Error occurs
+    
+    ErrorDetected --> Classify: Classify error type
+    ErrorDetected --> Failed: Critical error
+    
+    Classify --> Transient: Transient error
+    Classify --> Permanent: Permanent error
+    Classify --> Unknown: Unknown error type
+    
+    Transient --> RetryDecision: Evaluate retry eligibility
+    Permanent --> NoRetry: No retry
+    Unknown --> UnknownStrategy: Unknown strategy
+    
+    RetryDecision --> Retry: Retry with backoff
+    RetryDecision --> NoRetry: Max retries exceeded
+    RetryDecision --> Escalate: Retry count threshold
+    
+    Retry --> Success: Retry successful
+    Retry --> Failed: Retry failed
+    
+    Success --> RecoveryComplete: Recovery successful
+    RecoveryComplete --> [*]: Resume execution
+    
+    NoRetry --> Escalate: Escalate for review
+    UnknownStrategy --> Escalate: Escalate for review
+    
+    Escalate --> ManualIntervention: Manual intervention required
+    Escalate --> AutoRecovery: Auto-recovery possible
+    
+    AutoRecovery --> AutoFix: Apply auto-fix rules
+    AutoFix --> AutoValidate: Validate auto-fix
+    
+    AutoValidate --> RecoveryComplete: Auto-fix successful
+    AutoValidate --> ManualIntervention: Auto-fix failed
+    
+    ManualIntervention --> ManualReview: Operator review
+    ManualReview --> ManualFix: Operator applies fix
+    ManualReview --> ManualFail: Operator gives up
+    
+    ManualFix --> ManualValidate: Validate manual fix
+    ManualValidate --> RecoveryComplete: Manual fix successful
+    ManualValidate --> ManualIntervention: Manual fix failed
+    
+    ManualFail --> Failed: Manual recovery failed
+    Failed --> [*]: Recovery failed
+    
+    note right of ErrorDetected
+        Error detected in pipeline execution
+        Error details captured
+    end note
+    
+    note right of Classify
+        Error classification
+        Transient vs Permanent
+    end note
+    
+    note right of Transient
+        Temporary error
+        Retry with backoff
+    end note
+    
+    note right of Permanent
+        Permanent error
+        No retry possible
+    end note
+    
+    note right of RetryDecision
+        Evaluate retry eligibility
+        Check retry count
+    end note
+    
+    note right of Retry
+        Retry with exponential backoff
+        Monitor retry success
+    end note
+    
+    note right of Escalate
+        Escalate for review
+        Threshold exceeded
+    end note
+    
+    note right of AutoRecovery
+        Auto-recovery possible
+        Apply auto-fix rules
+    end note
+    
+    note right of ManualIntervention
+        Manual intervention required
+        Operator review needed
+    end note
+    
+    note right of RecoveryComplete
+        Recovery successful
+        Resume execution
+    end note
+    
+    note right of Failed
+        Recovery failed
+        Terminal state
+    end note
+```
+
+## State Definitions
+
+### ErrorDetected
+- **Description**: Error detected in pipeline execution, error details captured
+- **Trigger**: Error occurs during pipeline execution
+- **Terminal**: No
+
+### Classify
+- **Description**: Error classification into transient, permanent, or unknown
+- **Trigger**: Error detection completed
+- **Terminal**: No
+
+### Transient
+- **Description**: Temporary error that can be retried
+- **Trigger**: Error classified as transient
+- **Terminal**: No
+
+### Permanent
+- **Description**: Permanent error that cannot be retried
+- **Trigger**: Error classified as permanent
+- **Terminal**: No
+
+### Unknown
+- **Description**: Unknown error type, requires investigation
+- **Trigger**: Error classification failed
+- **Terminal**: No
+
+### RetryDecision
+- **Description**: Evaluate retry eligibility and check retry count
+- **Trigger**: Transient error detected
+- **Terminal**: No
+
+### Retry
+- **Description**: Retry with exponential backoff, monitor success
+- **Trigger**: Retry decision positive
+- **Terminal**: No
+
+### Success
+- **Description**: Retry successful, operation completed
+- **Trigger**: Retry operation succeeded
+- **Terminal**: No
+
+### NoRetry
+- **Description**: No retry possible (max retries exceeded or permanent error)
+- **Trigger**: Retry decision negative or permanent error
+- **Terminal**: No
+
+### Escalate
+- **Description**: Escalate for review when threshold exceeded
+- **Trigger**: No retry or unknown strategy
+- **Terminal**: No
+
+### AutoRecovery
+- **Description**: Auto-recovery possible with auto-fix rules
+- **Trigger**: Escalation with auto-recovery path
+- **Terminal**: No
+
+### AutoFix
+- **Description**: Apply auto-fix rules for recovery
+- **Trigger**: Auto-recovery path selected
+- **Terminal**: No
+
+### AutoValidate
+- **Description**: Validate auto-fix results
+- **Trigger**: Auto-fix applied
+- **Terminal**: No
+
+### ManualIntervention
+- **Description**: Manual intervention required, operator review needed
+- **Trigger**: Auto-fix failed or manual intervention required
+- **Terminal**: No
+
+### ManualReview
+- **Description**: Operator reviews error and applies fix
+- **Trigger**: Manual intervention required
+- **Terminal**: No
+
+### ManualFix
+- **Description**: Operator applies manual fix
+- **Trigger**: Manual review completed
+- **Terminal**: No
+
+### ManualValidate
+- **Description**: Validate manual fix results
+- **Trigger**: Manual fix applied
+- **Terminal**: No
+
+### ManualFail
+- **Description**: Operator gives up on manual recovery
+- **Trigger**: Manual recovery failed repeatedly
+- **Terminal**: No
+
+### RecoveryComplete
+- **Description**: Recovery successful, resume execution
+- **Trigger**: Auto-fix or manual fix validated
+- **Terminal**: No
+
+### Failed
+- **Description**: Recovery failed, terminal state
+- **Trigger**: Manual fail or unrecoverable error
+- **Terminal**: Yes
+
+## Transition Triggers
+
+### ErrorDetected → Classify
+- **Trigger**: Error occurs during pipeline execution
+- **Condition**: Error details captured
+
+### ErrorDetected → Failed
+- **Trigger**: Critical error detected
+- **Condition**: Error is unrecoverable
+
+### Classify → Transient
+- **Trigger**: Error classified as transient
+- **Condition**: Temporary error (rate limit, network issue)
+
+### Classify → Permanent
+- **Trigger**: Error classified as permanent
+- **Condition**: Permanent error (authentication, configuration)
+
+### Classify → Unknown
+- **Trigger**: Error classification failed
+- **Condition**: Unknown error type
+
+### Transient → RetryDecision
+- **Trigger**: Transient error detected
+- **Condition**: Evaluate retry eligibility
+
+### Permanent → NoRetry
+- **Trigger**: Permanent error detected
+- **Condition**: No retry possible
+
+### Unknown → UnknownStrategy
+- **Trigger**: Unknown error type
+- **Condition**: Requires investigation
+
+### RetryDecision → Retry
+- **Trigger**: Retry decision positive
+- **Condition**: Retry count not exceeded
+
+### RetryDecision → NoRetry
+- **Trigger**: Max retries exceeded
+- **Condition**: Retry limit reached
+
+### RetryDecision → Escalate
+- **Trigger**: Retry count threshold exceeded
+- **Condition**: Too many retries
+
+### Retry → Success
+- **Trigger**: Retry successful
+- **Condition**: Operation completed successfully
+
+### Retry → Failed
+- **Trigger**: Retry failed
+- **Condition**: Retry operation failed
+
+### Success → RecoveryComplete
+- **Trigger**: Retry successful
+- **Condition**: Recovery completed
+
+### NoRetry → Escalate
+- **Trigger**: No retry possible
+- **Condition**: Escalate for review
+
+### UnknownStrategy → Escalate
+- **Trigger**: Unknown strategy
+- **Condition**: Escalate for investigation
+
+### Escalate → ManualIntervention
+- **Trigger**: Manual intervention required
+- **Condition**: Auto-recovery not possible
+
+### Escalate → AutoRecovery
+- **Trigger**: Auto-recovery possible
+- **Condition**: Auto-fix rules available
+
+### AutoRecovery → AutoFix
+- **Trigger**: Auto-recovery path selected
+- **Condition**: Apply auto-fix rules
+
+### AutoFix → AutoValidate
+- **Trigger**: Auto-fix applied
+- **Condition**: Validate results
+
+### AutoValidate → RecoveryComplete
+- **Trigger**: Auto-fix successful
+- **Condition**: Validation passed
+
+### AutoValidate → ManualIntervention
+- **Trigger**: Auto-fix failed
+- **Condition**: Validation failed
+
+### ManualIntervention → ManualReview
+- **Trigger**: Manual intervention required
+- **Condition**: Operator review needed
+
+### ManualReview → ManualFix
+- **Trigger**: Operator applies fix
+- **Condition**: Manual fix strategy
+
+### ManualReview → ManualFail
+- **Trigger**: Operator gives up
+- **Condition**: Manual recovery failed
+
+### ManualFix → ManualValidate
+- **Trigger**: Manual fix applied
+- **Condition**: Validate manual fix
+
+### ManualValidate → RecoveryComplete
+- **Trigger**: Manual fix successful
+- **Condition**: Validation passed
+
+### ManualValidate → ManualIntervention
+- **Trigger**: Manual fix failed
+- **Condition**: Validation failed
+
+### ManualFail → Failed
+- **Trigger**: Manual recovery failed
+- **Condition**: Terminal failure
+
+## ADR References
+
+- **ADR-016**: Error Handling Strategy — error classification and handling
+- **ADR-032**: Unified HTTP Client — HTTP error handling
+- **ADR-040**: Diagram Governance — diagram metadata and quality standards
+
+## Error Classification
+
+### Transient Errors
+- **Rate Limit (429)**: Temporary API rate limit
+- **Network Errors**: Connection or timeout issues
+- **Server Errors (5xx)**: Temporary server issues
+- **Resource Temporarily Unavailable**: Temporary resource issues
+
+### Permanent Errors
+- **Authentication Errors**: Invalid credentials
+- **Authorization Errors**: Insufficient permissions
+- **Configuration Errors**: Invalid configuration
+- **Data Errors**: Invalid or corrupted data
+- **Resource Not Found**: Missing resources
+
+### Unknown Errors
+- **Unexpected Error Types**: New error patterns
+- **Unclassified Errors**: Errors not fitting known patterns
+
+## Recovery Strategies
+
+### Auto-Recovery
+- **Data Cleaning**: Remove or fix invalid values
+- **Default Value Substitution**: Replace missing values
+- **Format Normalization**: Convert to standard format
+- **Rule Adjustment**: Modify rules for edge cases
+
+### Manual Recovery
+- **Data Investigation**: Manual review of errors
+- **Source System Fixes**: Address issues at source
+- **Configuration Adjustment**: Modify pipeline parameters
+- **Rule Updates**: Update business rules
+
+## Metrics Emitted
+
+- `error_recovery_start` — Error recovery initiated
+- `error_recovery_complete` — Error recovery completed
+- `error_recovery_failed` — Error recovery failed
+- `error_retry_attempt` — Retry attempt
+- `error_auto_recovery` — Auto-recovery attempted
+- `error_auto_recovery_success` — Auto-recovery successful
+- `error_auto_recovery_failed` — Auto-recovery failed
+- `error_manual_intervention` — Manual intervention required
+- `error_manual_recovery_success` — Manual recovery successful
+- `error_manual_recovery_failed` — Manual recovery failed

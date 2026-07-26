@@ -26,7 +26,7 @@ class _SilverMergedWriteProtocol(Protocol):
         records: list[JsonDict],
         primary_keys: list[str] | None = None,
         *,
-        schema: object | None = None,
+        schema: DataFrameSchema | None = None,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
@@ -55,7 +55,7 @@ class StorageBundleMergedMixin:
 
     silver: SilverWriter
     gold: GoldWriter
-    _COMPOSITE_GOLD_SCHEMAS: ClassVar[dict[str, object]]
+    _COMPOSITE_GOLD_SCHEMAS: ClassVar[dict[str, DataFrameSchema]]
 
     def get_table_path(
         self,
@@ -106,7 +106,7 @@ class StorageBundleMergedMixin:
         ],
         primary_keys: list[str] | None = None,
         *,
-        schema: object | None = None,
+        schema: DataFrameSchema | None = None,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
@@ -157,7 +157,7 @@ class StorageBundleMergedMixin:
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
-        schema: object | None = None,
+        schema: DataFrameSchema | None = None,
     ) -> None:
         """Write merged records to Gold layer with a required composite schema.
 

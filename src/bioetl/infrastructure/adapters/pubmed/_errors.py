@@ -8,6 +8,6 @@ from bioetl.infrastructure.adapters.common.error_bundles import (
 
 __all__ = ["PUBMED_COMMON_ERRORS", "PUBMED_RECORD_ERRORS"]
 
-PUBMED_COMMON_ERRORS = build_common_network_error_bundle()
+PUBMED_COMMON_ERRORS: tuple[type[Exception], ...] = build_common_network_error_bundle()
 
-PUBMED_RECORD_ERRORS = (*PUBMED_COMMON_ERRORS, KeyError)
+PUBMED_RECORD_ERRORS: tuple[type[Exception], ...] = (*PUBMED_COMMON_ERRORS, KeyError)

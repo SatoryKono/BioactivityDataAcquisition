@@ -48,7 +48,7 @@ from bioetl.domain.control_plane.reproducibility_policy import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.domain.context import PipelineRunContext
+    from bioetl.domain.context import CachedBronzeContext, PipelineRunContext
     from bioetl.infrastructure.config.settings_api import Settings
 
 __all__ = [
@@ -110,7 +110,7 @@ def build_run_manifest_provenance_bundle(
 def build_run_source_refs(
     *,
     ctx: PipelineRunContext,
-    cached_bronze: object | None,
+    cached_bronze: CachedBronzeContext | None,
     settings: Settings,
     provider: str,
     entity: str,

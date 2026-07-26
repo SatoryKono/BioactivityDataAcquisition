@@ -17,7 +17,7 @@ Read before planning or editing:
 
 # py-review-orchestrator — Hierarchical Code Review Agent
 
-*Версия: 1.0.0 | Совместимо с RULES.md v6.1.5 (2026-07-16)*
+*Версия: 1.0.0 | Совместимо с RULES.md v6.1.4 (2026-07-24)*
 
 ## Debt Guardrail
 

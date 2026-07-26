@@ -35,7 +35,9 @@ class CheckpointValidationProtocol(Protocol):
     _compatibility_policy: CheckpointCompatibilityPolicy
     _compatibility_service: CheckpointCompatibilityService | None
     _current_metadata: CheckpointMetadata | None
-    _operation_errors: OperationErrors
+
+    @property
+    def _operation_errors(self) -> OperationErrors: ...
 
     def _emit_checkpoint_load_status(self, status: str) -> None: ...
 
@@ -117,6 +119,7 @@ def validate_loaded_checkpoint(
             True,
         )
 
+    assert effective_current_metadata is not None
     assert host._compatibility_service is not None
     compatibility_result = (
         host._compatibility_service.validate_checkpoint_compatibility(

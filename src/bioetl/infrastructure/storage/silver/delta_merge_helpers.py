@@ -126,14 +126,14 @@ def _build_merge_execute_callable(
         if not _delta_table_has_parquet_data(table_path):
             from deltalake import write_deltalake
 
-            write_kwargs: dict[str, object] = {
-                "table_or_uri": table_path,
-                "data": records,
-                "mode": "append",
-            }
             if merge_schema:
-                write_kwargs["schema_mode"] = "merge"
-            return write_deltalake(**write_kwargs)
+                return write_deltalake(
+                    table_path,
+                    records,
+                    mode="append",
+                    schema_mode="merge",
+                )
+            return write_deltalake(table_path, records, mode="append")
 
         update_predicate = _build_merge_update_predicate(records)
         return (

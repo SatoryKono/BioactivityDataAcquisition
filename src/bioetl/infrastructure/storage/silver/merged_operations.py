@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol
 
+import pandera as pandera
 import pyarrow as pa
 from deltalake import write_deltalake
 
@@ -141,6 +142,8 @@ def _prepare_merged_silver_write(
         schema = request.schema
         if hasattr(schema, "to_schema"):
             schema = schema.to_schema()
+        if not isinstance(schema, pandera.DataFrameSchema):
+            raise TypeError("Merged Silver schema must resolve to DataFrameSchema")
         result = PanderaSilverValidator(schema=schema, strict=False).validate(
             request.records
         )

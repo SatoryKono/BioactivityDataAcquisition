@@ -6,14 +6,11 @@ import re
 from urllib.parse import parse_qsl, urlsplit
 import yaml
 
-import pytest
 from tests.integration._grafana_test_support import (
     _collect_dashboard_links,
-    _emit_sample_structured_log,
     get_dashboard_navigation_links,
     get_dashboard_files,
     get_dashboard_panels,
-    get_panel_expressions,
     load_dashboard,
     require_dashboard_navigation_links,
 )
@@ -121,6 +118,7 @@ def _load_navigation_links_contract() -> dict[str, object]:
         "kpi_ownership": raw_contract.get("kpi_ownership", {}),
     }
 
+
 _NAV_LINK_CONTRACT = _load_navigation_links_contract()
 
 _ALLOWED_DASHBOARD_LINK_VARS = _NAV_LINK_CONTRACT["allowed_dashboard_link_vars"]
@@ -183,6 +181,7 @@ def _assert_required_time_tokens(
     for token in tokens:
         assert token in url, f"{context} must include time token '{token}': {url}"
 
+
 _DASHBOARD_TIME_HANDOFF_TOKENS = _extract_required_time_tokens("dashboard_links")
 
 _EXPLORE_TIME_HANDOFF_TOKENS = _extract_required_time_tokens("explore_links")
@@ -225,6 +224,7 @@ def _is_logs_drilldown_url(url: str) -> bool:
 
 def _is_traces_drilldown_url(url: str) -> bool:
     return "/a/grafana-exploretraces-app/" in url
+
 
 _OVERVIEW_STATUS_PANEL_IDS_BY_TARGET_UID: tuple[tuple[int, str], ...] = (
     (215, "bioetl-runtime"),
@@ -857,6 +857,7 @@ def _assert_kpi_ownership_entry(
             dashboards_by_uid=dashboards_by_uid,
         )
 
+
 _LOCAL_IDENTITY_DASHBOARDS = frozenset(
     {
         "bioetl-control-plane-v1.json",
@@ -1116,6 +1117,7 @@ def _assert_first_action_source_contract(
             source_uid=source_uid_str, entry=entry, links=links
         )
 
+
 _FORBIDDEN_UNIVERSAL_HANDOFF_TOKENS = ("includeVars=true", "/explore?left=")
 
 
@@ -1195,6 +1197,7 @@ def _assert_dashboard_exposes_explore_drilldown_links(
         dashboard_name=dashboard_name, drilldown_urls=drilldown_urls
     )
 
+
 _PRIMARY_IDENTITY_HANDOFF_VARS = frozenset(
     {"workflow", "pipeline", "run_type", "run_id"}
 )
@@ -1262,6 +1265,7 @@ def _assert_primary_identity_handoff_for_dashboard(
             dashboard_name=dashboard_name, source_uid=source_uid, href=href
         )
 
+
 _SILVER_EXPLORER_ALLOWED_HTML_VARS = frozenset(
     {
         "pipeline",
@@ -1294,6 +1298,7 @@ def _assert_silver_explorer_html_bus_forensic_boundary(
     assert not residual, (
         f"{dashboard_name} still links to removed Silver Reject Explorer: {residual}"
     )
+
 
 _EXPECTED_CURRENT_NAV_TITLE = {
     "bioetl-control-plane-v1": "0. Control Plane",
@@ -1625,6 +1630,7 @@ def _assert_named_dashboard_handoff(
     assert any(token_a in url and token_b in url for url in matching_urls), (
         f"{dashboard_name} handoff must preserve pipeline/run_type scope"
     )
+
 
 _SILVER_EXPLORER_EXPLICIT_EXPECTATIONS: dict[str, dict[str, object]] = {
     "bioetl-dq-v2.json": {

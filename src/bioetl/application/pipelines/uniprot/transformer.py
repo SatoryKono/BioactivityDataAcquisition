@@ -6,7 +6,7 @@ the UniprotTarget domain entity for validation and invariant checking.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from bioetl.application.core.base_transformer import (
     BaseTransformer,
@@ -18,13 +18,12 @@ from bioetl.application.core.pre_silver_adapter_mixin import (
 )
 from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.application.pipelines.common.publication_transformer_context import (
-    build_runtime_transformer_init,
+    install_runtime_transformer_init,
 )
 from bioetl.application.pipelines.uniprot.transformer_business_data_mixin import (
     UniProtBusinessDataMixin,
 )
 from bioetl.domain.entities import UniprotTarget
-from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -56,7 +55,7 @@ class UniProtProteinTransformer(
                 source_id=accession,
                 identity_field="accession",
                 index=index,
-                business_data=cast(JsonDict, business_data),
+                business_data=business_data,
             )
         except (FilteredOutError, ValueError) as e:
             context.logger.warning(
@@ -79,7 +78,7 @@ class UniProtProteinTransformer(
         return self._stage_identity_business_data(
             source_id=accession,
             identity_field="accession",
-            business_data=cast(JsonDict, business_data),
+            business_data=business_data,
         )
 
     def _get_entry_name(self, record: BronzeRecord) -> str:
@@ -92,8 +91,8 @@ class UniProtProteinTransformer(
         return str(entry_name)
 
 
-UniProtProteinTransformer.__init__ = build_runtime_transformer_init(
+install_runtime_transformer_init(
+    UniProtProteinTransformer,
     "uniprot",
     "protein",
-    owner_type=UniProtProteinTransformer,
 )

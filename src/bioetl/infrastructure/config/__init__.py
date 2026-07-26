@@ -60,25 +60,25 @@ def __getattr__(name: str) -> type:  # pragma: no cover
             load_pipeline_config,
         )
 
-        return load_pipeline_config  # type: ignore[return-value]
+        return load_pipeline_config
     if name == "load_composite_config":
         from bioetl.infrastructure.config.composite_config_api import (
             load_composite_config,
         )
 
-        return load_composite_config  # type: ignore[return-value]
+        return load_composite_config
     if name == "load_workflow_config":
         from bioetl.infrastructure.config.workflow_config_api import (
             load_workflow_config,
         )
 
-        return load_workflow_config  # type: ignore[return-value]
+        return load_workflow_config
     if name == "load_source_config":
         from bioetl.infrastructure.config.source_config_loader import (
             load_source_config,
         )
 
-        return load_source_config  # type: ignore[return-value]
+        return load_source_config
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 

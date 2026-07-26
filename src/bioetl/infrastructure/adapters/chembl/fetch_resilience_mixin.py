@@ -30,6 +30,7 @@ from bioetl.infrastructure.adapters.common.fetch_resilience_template import (
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import ErrorHandlerPort, LoggerPort
+    from bioetl.domain.types import HealthStatus
     from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
     from bioetl.infrastructure.adapters.chembl.entity_mapper import (
         ChemblEntityMapper,
@@ -54,10 +55,12 @@ class ChemblFetchResilienceMixin:
     _mapper: ChemblEntityMapper
     _adapter_metrics: AdapterMetricsRecorder
     http_client: UnifiedHTTPClient
-    _http_client: UnifiedHTTPClient
     _request_collector: APIRequestCollector
     _error_handler: ErrorHandlerPort
     _compute_composite_key: Callable[[BronzeRecord, tuple[str, ...]], str]
+
+    if TYPE_CHECKING:
+        def _get_health_status(self) -> HealthStatus: ...
 
     def _handle_error(
         self,

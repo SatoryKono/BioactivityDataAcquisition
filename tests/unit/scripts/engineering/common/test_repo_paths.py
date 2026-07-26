@@ -47,9 +47,12 @@ def test_resolve_cli_path_rejects_escape(tmp_path: Path) -> None:
 
 def test_argparse_repo_path_accepts_repo_relative() -> None:
     resolved = argparse_repo_path("scripts/engineering/common/repo_paths.py")
-    assert resolved == (
-        REPO_ROOT / "scripts" / "engineering" / "common" / "repo_paths.py"
-    ).resolve()
+    assert (
+        resolved
+        == (
+            REPO_ROOT / "scripts" / "engineering" / "common" / "repo_paths.py"
+        ).resolve()
+    )
 
 
 def test_ensure_local_http_url_accepts_loopback() -> None:

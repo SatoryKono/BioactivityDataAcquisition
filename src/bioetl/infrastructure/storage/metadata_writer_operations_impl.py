@@ -6,9 +6,13 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bioetl.infrastructure.storage.delta.resilience import AdaptiveRetryPolicy
 from bioetl.infrastructure.storage.metadata.writer_operations import (
     _MetadataWriteRequest,
     _prepare_metadata_write_operation,
+)
+from bioetl.infrastructure.storage.metadata_artifact_publication import (
+    ArtifactPublicationRecorder,
 )
 
 from .metadata_writer_helpers import (
@@ -37,10 +41,9 @@ class _MetadataWriterOperations:
         *,
         logger: LoggerPort,
         metrics: MetricsPort | None,
-        retry_policy: object,
+        retry_policy: AdaptiveRetryPolicy,
         artifact_recorder_provider: Callable[
-            [],
-            object | None,
+            [], ArtifactPublicationRecorder | None
         ],
     ) -> None:
         self._logger = logger

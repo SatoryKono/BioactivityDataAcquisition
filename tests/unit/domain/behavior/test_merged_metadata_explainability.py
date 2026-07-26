@@ -42,11 +42,7 @@ _SUBPROCESS_TIMEOUT_SECONDS = 30
 
 
 def _clean_subprocess_env(*, hash_seed: str) -> dict[str, str]:
-    env = {
-        key: value
-        for key in _SUBPROCESS_ENV_KEYS
-        if (value := os.environ.get(key))
-    }
+    env = {key: value for key in _SUBPROCESS_ENV_KEYS if (value := os.environ.get(key))}
     # -I ignores PYTHON* env vars; keep these for non-isolated fallbacks and
     # explicit documentation of intended isolation policy.
     env["PYTHONHASHSEED"] = hash_seed

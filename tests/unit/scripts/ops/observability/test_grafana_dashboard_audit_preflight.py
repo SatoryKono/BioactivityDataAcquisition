@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
-from urllib import error
 
 import pytest
 
-from scripts.ops.observability.grafana import check_grafana_dashboard_audit_preflight as preflight
+from scripts.ops.observability.grafana import (
+    check_grafana_dashboard_audit_preflight as preflight,
+)
 
 pytestmark = pytest.mark.unit
 

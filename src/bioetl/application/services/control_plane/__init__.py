@@ -26,9 +26,7 @@ RESPONSIBILITY_SEAMS = MappingProxyType(
     }
 )
 
-_EFFECTIVE_CONFIG_MODULE = (
-    "bioetl.application.services.control_plane.effective_config"
-)
+_EFFECTIVE_CONFIG_MODULE = "bioetl.application.services.control_plane.effective_config"
 _FORENSIC_MODULE = "bioetl.application.services.control_plane.forensic"
 _LEDGER_MODULE = "bioetl.application.services.control_plane.ledger"
 _MANIFEST_MODULE = "bioetl.application.services.control_plane.manifest"

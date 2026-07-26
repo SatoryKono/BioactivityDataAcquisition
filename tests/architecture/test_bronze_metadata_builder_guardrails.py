@@ -15,9 +15,7 @@ ALLOWED_IMPORTERS = {
 
 # Narrow scan: only the bronze storage package (and its package root).
 # Full-tree scans hang on cloud-synced checkouts with large __pycache__ trees.
-_SCAN_DIRS = (
-    ROOT / "src" / "bioetl" / "infrastructure" / "storage" / "bronze",
-)
+_SCAN_DIRS = (ROOT / "src" / "bioetl" / "infrastructure" / "storage" / "bronze",)
 
 
 def _iter_python_files(directory: Path) -> list[Path]:

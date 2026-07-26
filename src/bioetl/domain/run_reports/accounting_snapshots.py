@@ -11,10 +11,20 @@ from bioetl.domain.run_reports.models import (
     StageId,
     TrackingCoverage,
 )
+from bioetl.domain.run_reports.reason_catalog import ReasonCatalog
 
 
 class StageAccountingSnapshotsMixin:
     """Projection methods shared by StageAccountingAccumulator."""
+
+    _catalog: ReasonCatalog
+    _instrumented_stages: frozenset[str]
+    _stages: dict[str, _StageBucket]
+    _touched_instrumented: bool
+
+    def _sum_outcome(self, stage: str, outcome: str) -> int:
+        """Return a stage/outcome total supplied by the accumulator."""
+        raise NotImplementedError
 
     def snapshot_layers_from_metrics(self, metrics: dict[str, int]) -> LayerCounts:
         """Build layer rollup from coarse metrics + removal maps."""
@@ -72,7 +82,9 @@ class StageAccountingSnapshotsMixin:
     ) -> StageFunnelRow:
         removals = self._removals_for_bucket(bucket)
         removed_mapped = sum(item.count for item in removals)
-        default_in, default_out, default_removed = self._stage_defaults(stage_id, layers)
+        default_in, default_out, default_removed = self._stage_defaults(
+            stage_id, layers
+        )
         records_in = bucket.records_in or default_in
         records_out = bucket.records_out or default_out
         removed_total = removed_mapped or default_removed
@@ -204,9 +216,7 @@ class StageAccountingSnapshotsMixin:
     @staticmethod
     def _configured_tracking(bucket: _StageBucket) -> TrackingCoverage:
         return (
-            TrackingCoverage.FULL
-            if bucket.instrumented
-            else TrackingCoverage.PARTIAL
+            TrackingCoverage.FULL if bucket.instrumented else TrackingCoverage.PARTIAL
         )
 
     @staticmethod
@@ -245,12 +255,12 @@ class StageAccountingSnapshotsMixin:
                 totals[key] = totals.get(key, 0) + count
         ranked = sorted(totals.items(), key=lambda item: (-item[1], item[0][0]))
         result: list[dict[str, object]] = []
-        for (code, outcome, family), count in ranked[:limit]:
+        for (code, outcome, reason_family), count in ranked[:limit]:
             result.append(
                 {
                     "reason_code": code,
                     "outcome": outcome,
-                    "reason_family": family,
+                    "reason_family": reason_family,
                     "count": count,
                 }
             )

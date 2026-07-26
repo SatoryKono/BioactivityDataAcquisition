@@ -47,7 +47,7 @@ def get_health_service() -> HealthService:
     """Load the health service through one composition owner seam."""
     from bioetl.composition._services import get_health_service as _impl
 
-    return cast("HealthService", _impl())
+    return _impl()
 
 
 def get_quarantine_runtime_service(
@@ -58,7 +58,7 @@ def get_quarantine_runtime_service(
         get_quarantine_runtime_service as _impl,
     )
 
-    return cast("QuarantineRuntimeServiceProtocol", _impl(pipeline))
+    return _impl(pipeline)
 
 
 def get_quarantine_service(*, data_root: Path | None = None) -> QuarantineService:
@@ -66,5 +66,5 @@ def get_quarantine_service(*, data_root: Path | None = None) -> QuarantineServic
     from bioetl.composition._services import get_quarantine_service as _impl
 
     if data_root is None:
-        return cast("QuarantineService", _impl())
-    return cast("QuarantineService", _impl(data_root=data_root))
+        return _impl()
+    return _impl(data_root=data_root)

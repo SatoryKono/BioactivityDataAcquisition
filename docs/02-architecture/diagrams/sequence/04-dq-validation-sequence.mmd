@@ -1,0 +1,230 @@
+---
+title: DQ Validation Sequence
+version: 1.0.0
+status: active
+author: BioETL Team
+last_verified: 2026-07-24
+adr_references:
+  - ADR-027: DQ Rules Externalization
+  - ADR-028: Filter Rules Externalization
+  - ADR-045: DQ Contract System
+  - ADR-050: Silver Structural and Gold Semantic Filter Boundary
+  - ADR-040: Diagram Governance
+description: |
+  Sequence diagram showing data quality validation flow including schema validation,
+  DQ rule application, threshold evaluation, quarantine routing, and success/failure handling.
+  Covers DQ contract system and filter boundary rules.
+---
+
+```mermaid
+%% @version 1.0.0
+%% @date 2026-07-24
+%% @type sequence
+%% @level system
+sequenceDiagram
+    autonumber
+    participant Pipeline as Pipeline Service
+    participant Validator as DQ Validator
+    participant Schema as Schema Validator
+    participant DQEngine as DQ Rules Engine
+    participant Threshold as Threshold Evaluator
+    participant Router as Data Router
+    participant Quarantine as Quarantine Handler
+    participant Storage as Storage Writer
+    participant Metrics as Metrics/Tracing
+    participant Logger as Structured Logger
+
+    Note over Pipeline, Logger: DQ Validation Sequence
+
+    %% Initial Validation Request
+    Pipeline->>Validator: Validate data batch
+    Validator->>Metrics: Emit dq_validation_start metric
+    Validator->>Metrics: Start dq_validation span
+    Validator->>Logger: Log validation start (batch_id, record_count)
+
+    %% Schema Validation Phase
+    Validator->>Schema: Validate schema
+    Schema->>Schema: Load Pydantic schema
+    Schema->>Schema: Validate data types
+    Schema->>Schema: Validate required fields
+    Schema->>Schema: Validate field constraints
+    
+    alt Schema validation passes
+        Schema-->>Validator: Schema valid
+        Validator->>Metrics: Emit schema_validation_success metric
+    else Schema validation fails
+        Schema->>Metrics: Emit schema_validation_failed metric
+        Schema->>Logger: Log schema validation errors
+        Schema-->>Validator: Schema invalid
+        Validator->>Metrics: Emit dq_validation_failed metric
+        Validator-->>Pipeline: Schema validation failure
+    end
+
+    %% DQ Rules Application Phase
+    Validator->>DQEngine: Load DQ rules (ADR-027)
+    DQEngine->>DQEngine: Load DQ contract (ADR-045)
+    DQEngine->>DQEngine: Apply completeness rules
+    DQEngine->>DQEngine: Apply accuracy rules
+    DQEngine->>DQEngine: Apply consistency rules
+    DQEngine->>DQEngine: Apply timeliness rules
+    DQEngine->>DQEngine: Apply uniqueness rules
+    DQEngine->>Metrics: Emit dq_rules_applied metric
+    DQEngine-->>Validator: DQ rule results
+
+    %% Threshold Evaluation Phase
+    Validator->>Threshold: Evaluate DQ thresholds
+    Threshold->>Threshold: Compare actual vs threshold values
+    Threshold->>Threshold: Evaluate rule severity (MUST/SHOULD/MAY)
+    Threshold->>Threshold: Calculate overall DQ score
+    
+    alt All MUST thresholds pass
+        Threshold-->>Validator: Thresholds passed
+        Validator->>Metrics: Emit dq_threshold_passed metric
+    else MUST threshold fails
+        Threshold->>Metrics: Emit dq_threshold_failed metric
+        Threshold->>Logger: Log threshold violation details
+        Threshold-->>Validator: Thresholds failed
+    end
+
+    %% Data Routing Decision
+    Validator->>Router: Determine data routing
+    Router->>Router: Evaluate overall DQ score
+    Router->>Router: Check quarantine rules (ADR-050)
+    
+    alt High DQ score (passes all critical rules)
+        Router->>Router: Route to standard storage
+        Router-->>Validator: Standard routing
+        Validator->>Metrics: Emit dq_validation_success metric
+    else Low DQ score (fails critical rules)
+        Router->>Router: Route to quarantine
+        Router-->>Validator: Quarantine routing
+        Validator->>Metrics: Emit dq_quarantine_routing metric
+    else Medium DQ score (passes SHOULD, fails MAY)
+        Router->>Router: Route to standard storage with warning
+        Router-->>Validator: Standard routing with warning
+        Validator->>Metrics: Emit dq_validation_warning metric
+    end
+
+    %% Success Path (Standard Storage)
+    alt Standard routing
+        Validator->>Storage: Write validated data
+        Storage->>Metrics: Emit dq_validated_write_start metric
+        Storage->>Metrics: Start dq_validated_write span
+        Storage->>Storage: Write to Silver/Gold
+        Storage->>Metrics: Emit dq_validated_write_complete metric
+        Storage-->>Validator: Write complete
+        Validator->>Logger: Log successful validation and write
+        Validator-->>Pipeline: DQ validation success
+    end
+
+    %% Quarantine Path
+    alt Quarantine routing
+        Validator->>Quarantine: Handle quarantined data
+        Quarantine->>Metrics: Emit quarantine_handling_start metric
+        Quarantine->>Metrics: Start quarantine_handling span
+        Quarantine->>Quarantine: Create quarantine record
+        Quarantine->>Quarantine: Record DQ violations
+        Quarantine->>Quarantine: Record root cause analysis
+        Quarantine->>Quarantine: Generate alert
+        Quarantine->>Metrics: Emit quarantine_alert metric
+        Quarantine->>Storage: Write to quarantine storage
+        Storage->>Metrics: Emit quarantine_write metric
+        Storage-->>Quarantine: Quarantine write complete
+        Quarantine->>Logger: Log quarantine details
+        Quarantine-->>Validator: Quarantine handling complete
+        Validator->>Metrics: Emit dq_validation_quarantined metric
+        Validator-->>Pipeline: DQ validation quarantined
+    end
+
+    %% Cleanup and Completion
+    Validator->>Metrics: Finish dq_validation span
+    Validator->>Metrics: Emit dq_validation_complete metric
+    Validator->>Logger: Log validation completion summary
+
+    Note over Pipeline, Logger: End of DQ Validation Sequence
+```
+
+## Key Components
+
+### DQ Validator
+- **DQ Validator**: Orchestrates the complete DQ validation process
+- **Schema Validator**: Validates data against Pydantic schemas
+- **DQ Rules Engine**: Applies DQ rules from external configuration
+- **Threshold Evaluator**: Evaluates DQ thresholds and severity levels
+
+### Data Routing
+- **Data Router**: Determines data routing based on DQ score
+- **Quarantine Handler**: Manages quarantined data with detailed logging
+
+### Storage
+- **Storage Writer**: Handles writes to standard storage or quarantine
+
+### Observability
+- **Metrics/Tracing**: Comprehensive DQ validation metrics and tracing
+- **Structured Logger**: Detailed logging for debugging and monitoring
+
+## ADR References
+
+- **ADR-027**: DQ Rules Externalization — DQ rules from external configuration
+- **ADR-028**: Filter Rules Externalization — Filter rules from external configuration
+- **ADR-045**: DQ Contract System — DQ contract structure and validation
+- **ADR-050**: Silver Structural and Gold Semantic Filter Boundary — Quarantine routing rules
+- **ADR-040**: Diagram Governance — diagram metadata and quality standards
+
+## DQ Rule Categories
+
+### Completeness Rules
+- Required field presence
+- Null value checks
+- Missing data thresholds
+
+### Accuracy Rules
+- Format validation
+- Range validation
+- Pattern matching
+- Reference data validation
+
+### Consistency Rules
+- Cross-field consistency
+- Historical consistency
+- Business rule validation
+
+### Timeliness Rules
+- Data freshness checks
+- Update frequency validation
+- Timestamp validation
+
+### Uniqueness Rules
+- Duplicate detection
+- Primary key validation
+- Unique constraint validation
+
+## Threshold Severity Levels
+
+- **MUST**: Critical threshold — failure blocks data write
+- **SHOULD**: Important threshold — failure generates warning
+- **MAY**: Optional threshold — failure logged only
+
+## Routing Logic
+
+- **High DQ score**: All MUST thresholds pass → standard storage
+- **Medium DQ score**: SHOULD thresholds fail → standard storage with warning
+- **Low DQ score**: MUST thresholds fail → quarantine routing
+
+## Metrics Emitted
+
+- `dq_validation_start` — DQ validation initiated
+- `dq_validation_complete` — DQ validation completed
+- `dq_validation_success` — DQ validation passed
+- `dq_validation_failed` — DQ validation failed
+- `dq_validation_warning` — DQ validation passed with warnings
+- `dq_validation_quarantined` — Data routed to quarantine
+- `schema_validation_success` — Schema validation passed
+- `schema_validation_failed` — Schema validation failed
+- `dq_rules_applied` — DQ rules applied to data
+- `dq_threshold_passed` — DQ thresholds passed
+- `dq_threshold_failed` — DQ thresholds failed
+- `dq_quarantine_routing` — Data routed to quarantine
+- `quarantine_handling_start` — Quarantine handling initiated
+- `quarantine_alert` — Quarantine alert generated
+- `quarantine_write` — Data written to quarantine

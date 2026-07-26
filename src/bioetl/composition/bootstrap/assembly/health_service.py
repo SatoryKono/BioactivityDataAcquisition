@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from bioetl.application.services.health_service import HealthService
 from bioetl.composition.bootstrap.assembly.health_server import (
@@ -15,9 +16,12 @@ from bioetl.composition.factories.datasource.data_source_factory import (
 from bioetl.composition.providers.registration import (
     resolve_provider_assembly_support,
 )
-from bioetl.domain.ports import MetricsPort
+from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 from bioetl.infrastructure.time import SystemClock
+
+if TYPE_CHECKING:
+    from bioetl.infrastructure.config.settings_api import Settings
 
 __all__ = [
     "HealthServerDependencies",
@@ -30,15 +34,15 @@ __all__ = [
 class _HealthCheckDataSourceFactory:
     """Composition-aware factory wrapper for CLI/server health probes."""
 
-    logger: object
+    logger: LoggerPort
     metrics: MetricsPort
-    settings: object
+    settings: Settings
 
     @staticmethod
     def list_providers() -> list[str]:
         return DataSourceFactory.list_providers()
 
-    def create(self, provider: str) -> object:
+    def create(self, provider: str) -> DataSourcePort:
         support = resolve_provider_assembly_support(None)
         http_client = support.create_http_client(
             provider,
@@ -56,8 +60,8 @@ class _HealthCheckDataSourceFactory:
 
 def create_health_service(
     *,
-    logger: object,
-    settings: object,
+    logger: LoggerPort,
+    settings: Settings,
     metrics: MetricsPort | None = None,
 ) -> HealthService:
     """Build a HealthService through the canonical composition assembly path."""

@@ -13,7 +13,7 @@ from collections.abc import Callable
 from contextlib import suppress
 from dataclasses import replace
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, Protocol, cast
 
 import pyarrow as pa
 from deltalake import DeltaTable as DeltaTableType
@@ -140,7 +140,7 @@ def _serialize_arrow_table_for_subprocess(table: pa.Table) -> bytes:
     sink = pa.BufferOutputStream()
     with pa.ipc.new_stream(sink, table.schema) as writer:
         writer.write_table(table)
-    return sink.getvalue().to_pybytes()
+    return bytes(sink.getvalue())
 
 
 def _write_arrow_payload_for_subprocess(*, table_path: str, table: pa.Table) -> Path:
@@ -238,9 +238,14 @@ def _should_execute_delta_table_load_inline(
     return _should_execute_plain_write_inline(table_path=table_path, module=module)
 
 
+class _DeltaWriteModule(Protocol):
+    def write_deltalake(self, **kwargs: Any) -> None:
+        """Write a Delta table using the runtime module."""
+
+
 def _run_plain_delta_write_inline(
     *,
-    module: object,
+    module: _DeltaWriteModule,
     kwargs: dict[str, Any],  # Any: Delta Lake write kwargs are heterogeneous
     timeout_seconds: float,
 ) -> None:
@@ -330,10 +335,7 @@ async def _evolve_delta_schema_with_empty_append(
             )
         ),
     )
-    updated_request: _DeltaWriteRequest = cast(  # type: ignore[redundant-cast]
-        _DeltaWriteRequest,
-        replace(request, merge_schema=False),
-    )
+    updated_request = replace(request, merge_schema=False)
     return updated_request
 
 
@@ -345,8 +347,11 @@ async def _load_delta_table(
     """Load a Delta table asynchronously for merge execution."""
     module = load_module()
     if _should_execute_delta_table_load_inline(table_path=table_path, module=module):
-        return module.DeltaTable(table_path)
-    return await _await_blocking_deltalake_call(
-        operation_name="load-table",
-        call=lambda: module.DeltaTable(table_path),
+        return cast("DeltaTableType", module.DeltaTable(table_path))
+    return cast(
+        "DeltaTableType",
+        await _await_blocking_deltalake_call(
+            operation_name="load-table",
+            call=lambda: module.DeltaTable(table_path),
+        ),
     )

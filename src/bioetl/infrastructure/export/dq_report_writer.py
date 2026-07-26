@@ -21,6 +21,7 @@ from bioetl.infrastructure.storage.atomic import atomic_write_bytes
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.types import LocationReference
 
 
 class DQReportWriter:
@@ -62,7 +63,7 @@ class DQReportWriter:
     async def write_bronze_report(
         self,
         report: BronzeDQReport,
-        output_path: Path | None = None,
+        output_path: LocationReference | None = None,
         report_format: DQReportFormat | None = None,
         *,
         provider: str | None = None,
@@ -98,7 +99,7 @@ class DQReportWriter:
                 ).parent.parent  # Go up from date dir
                 output_path = self._base_path / source_dir / filename
         else:
-            output_path = Path(output_path)
+            output_path = Path(str(output_path))
             # Treat explicit output_path as a directory and append filename.
             # Using is_dir() here is unsafe for not-yet-created directories:
             # Path(".../target").is_dir() == False before mkdir, which caused
@@ -137,7 +138,7 @@ class DQReportWriter:
     def _resolve_layer_output_path(
         self,
         layer: str,
-        output_path: Path | None,
+        output_path: LocationReference | None,
         extension: str,
         provider: str | None,
         entity: str | None,
@@ -153,7 +154,7 @@ class DQReportWriter:
         )
 
         if output_path is not None:
-            output_path = Path(output_path)
+            output_path = Path(str(output_path))
             output_path.mkdir(parents=True, exist_ok=True)
             return output_path / filename
 
@@ -172,7 +173,7 @@ class DQReportWriter:
     async def write_silver_report(
         self,
         report: SilverDQReport,
-        output_path: Path | None = None,
+        output_path: LocationReference | None = None,
         report_format: DQReportFormat | None = None,
         *,
         provider: str | None = None,
@@ -205,7 +206,7 @@ class DQReportWriter:
     async def write_gold_report(
         self,
         report: GoldDQReport,
-        output_path: Path | None = None,
+        output_path: LocationReference | None = None,
         report_format: DQReportFormat | None = None,
         *,
         provider: str | None = None,

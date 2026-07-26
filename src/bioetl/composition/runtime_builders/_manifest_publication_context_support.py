@@ -146,23 +146,7 @@ def build_manifest_publication_identity_kwargs(
     }
 
 
-def resolve_manifest_publication_identity(
-    ctx: PipelineRunContext,
-    inputs: RunnerInputs,
-    provider: str,
-    entity: str,
-    reproducibility_context: ManifestReproducibilityContext | None = None,
-    contract_identity: RunManifestContractIdentity | None = None,
-) -> tuple[ManifestReproducibilityContext, RunManifestContractIdentity]:
-    """Resolve missing manifest publication identity inputs in one call."""
-    return ensure_manifest_publication_identity(
-        ctx=ctx,
-        inputs=inputs,
-        provider=provider,
-        entity=entity,
-        reproducibility_context=reproducibility_context,
-        contract_identity=contract_identity,
-    )
+resolve_manifest_publication_identity = ensure_manifest_publication_identity
 
 
 __all__ = [

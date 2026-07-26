@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING, Protocol, cast
 from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort, TracingPort
 
 if TYPE_CHECKING:
+    from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
     from bioetl.domain.ports import DQMonitorPort
 
 
@@ -145,10 +146,10 @@ class _LoggerBindableObservability(Protocol):
     logger: object
 
 
-def bind_manifest_logger_context[RunnerInputsT](
-    inputs: RunnerInputsT,
+def bind_manifest_logger_context(
+    inputs: RunnerInputs,
     manifest_id: str,
-) -> RunnerInputsT:
+) -> RunnerInputs:
     """Bind ``manifest_id`` into a runtime observability bundle when present."""
     observability = getattr(inputs, "observability", None)
     rebound_observability = _rebind_observability_logger(
@@ -160,10 +161,7 @@ def bind_manifest_logger_context[RunnerInputsT](
     if not isinstance(rebound_observability, ObservabilityBundle):
         return inputs
     try:
-        return cast(
-            "RunnerInputsT",
-            replace(inputs, observability=rebound_observability),
-        )
+        return replace(inputs, observability=rebound_observability)
     except (TypeError, AttributeError):
         return inputs
 

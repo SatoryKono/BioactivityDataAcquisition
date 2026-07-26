@@ -123,7 +123,9 @@ def test_issue_5847_root_baseline_is_reduced_without_new_root_directory() -> Non
     payload = _load_json(CLOSEOUT)
     tracked = _git_ls_files()
     root_files = {path for path in tracked if "/" not in path}
-    root_dirs = {path.split("/", maxsplit=1)[0].strip('"') for path in tracked if "/" in path}
+    root_dirs = {
+        path.split("/", maxsplit=1)[0].strip('"') for path in tracked if "/" in path
+    }
     allowlist_entries = {
         line.strip()
         for line in ROOT_ALLOWLIST.read_text(encoding="utf-8").splitlines()

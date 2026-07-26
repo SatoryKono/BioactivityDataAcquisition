@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
 
 import io
 import json
@@ -726,6 +725,7 @@ def _assert_silver_reject_explorer_variable_contract(
     assert payload_hash_var.get("type") == "textbox", (
         f"Dashboard {dashboard_path.name} 'payload_hash' must be a textbox"
     )
+
 
 def _emit_sample_structured_log(*, pipeline: str, provider: str) -> str:
     """Emit one JSON log line through the shipped structlog pipeline."""

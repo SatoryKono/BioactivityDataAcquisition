@@ -187,7 +187,12 @@ def _build_manifest_create_request(
     contract_identity: _manifest_support.RunManifestContractIdentity,
 ) -> RunManifestCreateSpec:
     reproducibility_context, contract_identity = resolve_manifest_publication_identity(
-        ctx, inputs, provider, entity, reproducibility_context, contract_identity
+        ctx=ctx,
+        inputs=inputs,
+        provider=provider,
+        entity=entity,
+        reproducibility_context=reproducibility_context,
+        contract_identity=contract_identity,
     )
     return build_manifest_create_request(
         RunManifestCreateRequestInputs(

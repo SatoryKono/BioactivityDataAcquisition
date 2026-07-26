@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 from bioetl.composition.runtime_builders.cached_bronze_snapshot_support import (
@@ -15,6 +16,10 @@ from bioetl.domain.control_plane import RunInputSnapshotRef, RunManifest
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane import FileRunManifestStore
 
+if TYPE_CHECKING:
+    from bioetl.domain.context import CachedBronzeContext, PipelineRunContext
+    from bioetl.infrastructure.config.settings_api import Settings
+
 __all__ = [
     "collect_manifest_input_snapshot_refs",
     "resolve_cached_bronze_input_snapshot_refs",
@@ -25,8 +30,8 @@ __all__ = [
 
 def resolve_cached_bronze_input_snapshot_refs(
     *,
-    cached_bronze: object | None,
-    settings: object,
+    cached_bronze: CachedBronzeContext | None,
+    settings: Settings,
     provider: str,
     entity: str,
 ) -> tuple[RunInputSnapshotRef, ...]:
@@ -59,7 +64,7 @@ def collect_manifest_input_snapshot_refs(
 
 def resolve_manifest_input_snapshot_refs(
     *,
-    settings: object,
+    settings: Settings,
     manifest_id: str | None = None,
     run_id: str | None = None,
 ) -> tuple[RunInputSnapshotRef, ...]:
@@ -76,9 +81,9 @@ def resolve_manifest_input_snapshot_refs(
 
 def resolve_pipeline_input_snapshot_refs(
     *,
-    ctx: object,
-    cached_bronze: object | None,
-    settings: object,
+    ctx: PipelineRunContext,
+    cached_bronze: CachedBronzeContext | None,
+    settings: Settings,
     provider: str,
     entity: str,
 ) -> tuple[RunInputSnapshotRef, ...]:
@@ -104,7 +109,7 @@ def resolve_pipeline_input_snapshot_refs(
 
 def _load_manifest(
     *,
-    settings: object,
+    settings: Settings,
     manifest_id: str | None,
     run_id: str | None,
 ) -> RunManifest | None:

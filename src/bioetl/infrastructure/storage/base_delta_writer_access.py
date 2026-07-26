@@ -6,6 +6,8 @@ import asyncio
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     import pyarrow as pa
     from deltalake import DeltaTable
 
@@ -14,6 +16,11 @@ if TYPE_CHECKING:
 
 class BaseDeltaWriterTableAccessMixin:
     """Delta table read/schema/cleanup helpers for ``BaseDeltaWriter``."""
+
+    base_path: str
+
+    def _resolve_table_path(self, table_name: str) -> str:
+        raise NotImplementedError
 
     async def _open_delta_table(self, table_name: str) -> DeltaTable | None:
         """Open one Delta table by name and return None when it is missing."""
@@ -37,7 +44,7 @@ class BaseDeltaWriterTableAccessMixin:
             return None
         return _base._get_delta_table_arrow_schema(dt)
 
-    def get_table_path(self, table_name: str):
+    def get_table_path(self, table_name: str) -> Path:
         """Return the filesystem path for a Delta table."""
         from pathlib import Path
 

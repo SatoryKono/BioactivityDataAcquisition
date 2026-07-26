@@ -206,8 +206,7 @@ class DataSourceFactoryPort(Protocol):
     Abstracts data source creation for health checking.
     """
 
-    @staticmethod
-    def list_providers() -> list[str]:
+    def list_providers(self) -> list[str]:
         """List available provider names.
 
         Returns:
@@ -215,8 +214,8 @@ class DataSourceFactoryPort(Protocol):
         """
         ...
 
-    @staticmethod
     def create(
+        self,
         provider: str,
     ) -> Any:  # Any: returns different adapter types per provider
         """Create a data source adapter for the given provider.

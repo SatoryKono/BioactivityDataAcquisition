@@ -6,6 +6,9 @@ from functools import cache
 from pathlib import Path
 
 from bioetl.domain.mapping.classification_data import ClassificationData
+from bioetl.domain.mapping.protein_class_target_type import (
+    ProteinClassTargetTypeMappingData,
+)
 
 
 @cache
@@ -29,7 +32,9 @@ def initialize_publication_type_classification(configs_root: Path) -> None:
 
 
 @cache
-def _load_protein_class_target_type_mapping_data(configs_root_key: str) -> object:
+def _load_protein_class_target_type_mapping_data(
+    configs_root_key: str,
+) -> ProteinClassTargetTypeMappingData:
     """Load protein-class target type mapping once per configs root key."""
     import bioetl.infrastructure.config.protein_class_target_type_loader as protein_class_target_type_loader
 

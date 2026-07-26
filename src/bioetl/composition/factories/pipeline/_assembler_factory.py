@@ -189,13 +189,13 @@ class GenericPipelineFactory[TPipeline: "BasePipeline"]:
             _public_assembler_callable("build_factory_services")(
                 factory_context=build_factory_context(cast(_FactoryLike, self)),
                 request=_BuildFactoryServicesRequest(
-                    settings,
-                    logger,
-                    audit,
-                    config,
-                    filter_config,
-                    tracer,
-                    dq_monitor,
+                    settings=settings,
+                    logger=logger,
+                    config=config,
+                    tracer=tracer,
+                    filter_config=filter_config,
+                    dq_monitor=dq_monitor,
+                    audit=audit,
                 ),
             ),
         )

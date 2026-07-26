@@ -18,8 +18,8 @@ tracked coverage measurements.
 Current-baseline note (2026-07-24): architectural planning and GitHub issues
 MUST cite this summary or a newer regenerated package-topology pack for current
 counts. The current source baseline is
-`source_module_count=2263` with
-`source_tree_sha256=f736e25ff320af2b03ec3216160cf5cd631646c6dd481ecd94e35e9aef9d48d6`.
+`source_module_count=2267` with
+`source_tree_sha256=4aaa6d72029a61318a32653d14dd36944bfb115b9c2adea83eda4ad1add26cec`.
 Raw files dated before `2026-07-19` are retained only as historical detailed
 inputs and must be refreshed before they are used for line-item topology
 evidence. Refresh (2026-07-24) followed run-reports domain/application surface
@@ -58,10 +58,10 @@ Collected: `6`
   for source, config, tests, scripts, docs, and reports.
 - `src/bioetl/` reflects the intended layered architecture through distinct
   first-order package groups.
-- Current Python file count under `src/bioetl` is `2263`, including two
+- Current Python file count under `src/bioetl` is `2268`, including two
   top-level package modules outside the five first-order architecture layers.
-- Current layer file counts are: `domain=587`, `application=669`,
-  `infrastructure=585`, `composition=276`, `interfaces=143`.
+- Current layer file counts are: `domain=590`, `application=671`,
+  `infrastructure=585`, `composition=276`, `interfaces=144`.
 - Current first-order package counts are: `domain=23`, `application=6`,
   `infrastructure=20`, `composition=5`, `interfaces=2`.
 - `application` and `infrastructure` remain the broadest package surfaces by

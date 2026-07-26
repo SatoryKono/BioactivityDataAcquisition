@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 from math import isnan
-from typing import Final
+from typing import Final, cast
 
 from bioetl.domain.ports import (
     RowReconciliationConfig,
     RowReconciliationLayer,
     RowReconciliationMissingColumnError,
     RowReconciliationResult,
+    RowReconciliationTypePolicy,
     RowReconciliationTypePolicyError,
 )
 
@@ -56,7 +57,7 @@ def reconcile_loaded_rows(
         rows=tuple(kept_rows),
         implementation=implementation,
         nulls_equal=config.nulls_equal,
-        type_policy=config.type_policy,
+        type_policy=cast("RowReconciliationTypePolicy", config.type_policy),
         preserve_order=config.preserve_order,
         report_only=config.report_only,
         mutated=False,
@@ -87,9 +88,10 @@ def _validate_strict_key_types(
     left_rows: list[dict[str, object]],
     right_rows: list[dict[str, object]],
 ) -> None:
-    if config.type_policy.value != "strict":
+    type_policy = cast("RowReconciliationTypePolicy", config.type_policy)
+    if type_policy.value != "strict":
         raise RowReconciliationTypePolicyError(
-            f"Unsupported reconcile_rows type_policy={config.type_policy.value!r}"
+            f"Unsupported reconcile_rows type_policy={type_policy.value!r}"
         )
     left_types = _column_types(left_rows, config.left_columns)
     right_types = _column_types(right_rows, config.right_columns)

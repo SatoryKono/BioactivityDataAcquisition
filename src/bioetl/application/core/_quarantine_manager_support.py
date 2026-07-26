@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from datetime import datetime
 from typing import TYPE_CHECKING, Protocol
 
@@ -29,14 +30,6 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.ports import MetricsPort, QuarantinePort
     from bioetl.domain.types import BronzeRecord
-
-
-class _DqQuarantineEntryProtocol(Protocol):
-    """Structural DQ-entry shape used by the support mixin."""
-
-    record: BronzeRecord
-    error_type: ErrorType
-    error_details: str
 
 
 class _FilteredQuarantineEntryProtocol(Protocol):
@@ -101,7 +94,7 @@ class QuarantineManagerSupportMixin:
 
     async def quarantine_records(
         self,
-        records: list[_DqQuarantineEntryProtocol],
+        records: Sequence[tuple[BronzeRecord, ErrorType, str]],
         batch_id: BatchID,
         run_id: RunID | None = None,
         *,
@@ -163,7 +156,7 @@ class QuarantineManagerSupportMixin:
 
     async def quarantine_filtered_records(
         self,
-        records: list[_FilteredQuarantineEntryProtocol],
+        records: Sequence[_FilteredQuarantineEntryProtocol],
         batch_id: BatchID,
         run_id: RunID | None = None,
         *,

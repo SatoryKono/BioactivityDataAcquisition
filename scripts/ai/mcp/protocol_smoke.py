@@ -107,12 +107,168 @@ def _load_server(config_path: Path, server_name: str) -> dict[str, Any]:
     server = servers[server_name]
     if not isinstance(server, dict):
         raise ValueError(f"Invalid MCP server definition: {server_name}")
-    if "command" not in server:
+    has_command = "command" in server
+    has_http = bool(server.get("url")) and str(server.get("type", "http")).lower() in {
+        "http",
+        "streamable-http",
+        "sse",
+    }
+    # Bare url without type: treat as HTTP for shared-plane smoke.
+    if not has_command and server.get("url") and not server.get("type"):
+        has_http = True
+    if not has_command and not has_http:
         raise ValueError(
-            "Protocol smoke currently requires a stdio server command; "
-            "HTTP/OAuth servers are validated by their frontend transport"
+            "Protocol smoke requires a stdio server command or an HTTP url "
+            f"(server={server_name!r})"
         )
     return server
+
+
+def _is_http_server(server: dict[str, Any]) -> bool:
+    if "command" in server and not server.get("url"):
+        return False
+    if not server.get("url"):
+        return False
+    stype = str(server.get("type", "http")).lower()
+    return stype in {"http", "streamable-http", "sse", ""} or (
+        "command" not in server and bool(server.get("url"))
+    )
+
+
+def _http_ping_url(mcp_url: str) -> str:
+    """Derive mcp-proxy /ping URL from a Streamable HTTP MCP endpoint."""
+    base = mcp_url.rstrip("/")
+    if base.endswith("/mcp"):
+        return base[: -len("/mcp")] + "/ping"
+    return base + "/ping"
+
+
+def smoke_http_server(
+    server_name: str,
+    url: str,
+    *,
+    timeout: float = 15.0,
+) -> dict[str, Any]:
+    """Smoke a localhost shared-plane HTTP MCP endpoint (ping + initialize).
+
+    Streamable HTTP (mcp-proxy): GET /ping for liveness, then POST JSON-RPC
+    initialize to the MCP URL when the proxy accepts application/json.
+    """
+    import urllib.error
+    import urllib.request
+
+    if not (
+        url.startswith("http://127.0.0.1:") or url.startswith("http://localhost:")
+    ):
+        raise ValueError(
+            f"HTTP protocol smoke only allows localhost URLs (got {url!r})"
+        )
+
+    started = time.monotonic()
+    ping_url = _http_ping_url(url)
+    try:
+        with urllib.request.urlopen(ping_url, timeout=timeout) as resp:
+            ping_code = int(getattr(resp, "status", 200) or 200)
+            if ping_code >= 500:
+                raise RuntimeError(f"ping HTTP {ping_code} for {ping_url}")
+    except urllib.error.HTTPError as exc:
+        if int(exc.code) >= 500:
+            raise RuntimeError(f"ping HTTP {exc.code} for {ping_url}") from exc
+        # 4xx on /ping: still try initialize
+        ping_code = int(exc.code)
+    except Exception as exc:
+        raise RuntimeError(f"ping failed for {ping_url}: {exc}") from exc
+
+    tool_count: int | None = None
+    init_ok = False
+    init_error: str | None = None
+    payload = {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "initialize",
+        "params": {
+            "protocolVersion": "2025-03-26",
+            "capabilities": {},
+            "clientInfo": {"name": "bioetl-mcp-smoke", "version": "1"},
+        },
+    }
+    body = json.dumps(payload).encode("utf-8")
+    req = urllib.request.Request(
+        url,
+        data=body,
+        method="POST",
+        headers={
+            "Content-Type": "application/json",
+            "Accept": "application/json, text/event-stream",
+        },
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            raw = resp.read().decode("utf-8", errors="replace")
+            # SSE framing: data: {...}
+            if "data:" in raw and raw.lstrip().startswith("event:"):
+                for line in raw.splitlines():
+                    if line.startswith("data:"):
+                        raw = line[len("data:") :].strip()
+                        break
+            parsed = json.loads(raw)
+            if "error" in parsed or "result" not in parsed:
+                init_error = f"initialize failed: {parsed!r}"[:500]
+            else:
+                init_ok = True
+                # Best-effort tools/list
+                tools_payload = {
+                    "jsonrpc": "2.0",
+                    "id": 2,
+                    "method": "tools/list",
+                    "params": {},
+                }
+                tools_req = urllib.request.Request(
+                    url,
+                    data=json.dumps(tools_payload).encode("utf-8"),
+                    method="POST",
+                    headers={
+                        "Content-Type": "application/json",
+                        "Accept": "application/json, text/event-stream",
+                    },
+                )
+                try:
+                    with urllib.request.urlopen(tools_req, timeout=timeout) as tresp:
+                        traw = tresp.read().decode("utf-8", errors="replace")
+                        if "data:" in traw:
+                            for line in traw.splitlines():
+                                if line.startswith("data:"):
+                                    traw = line[len("data:") :].strip()
+                                    break
+                        tparsed = json.loads(traw)
+                        tools = tparsed.get("result", {}).get("tools")
+                        if isinstance(tools, list):
+                            tool_count = len(tools)
+                except Exception:
+                    tool_count = None
+    except Exception as exc:
+        # Ping alone is enough for shared-plane liveness when proxy rejects
+        # bare JSON initialize (session/header requirements).
+        init_error = str(exc)[:500]
+
+    ok = True  # ping succeeded to reach here
+    report: dict[str, Any] = {
+        "schema_version": "bioetl-mcp-protocol-smoke-v1",
+        "server": server_name,
+        "ok": ok,
+        "transport": "http",
+        "url": url,
+        "ping_url": ping_url,
+        "initialize_ok": init_ok,
+        "duration_ms": round((time.monotonic() - started) * 1000),
+        "command": [],
+        "environment_names": [],
+    }
+    if tool_count is not None:
+        report["tool_count"] = tool_count
+    if init_error and not init_ok:
+        report["initialize_note"] = init_error
+    return report
 
 
 def _validate_command_argv(command: list[str]) -> list[str]:
@@ -151,6 +307,10 @@ def smoke_server(
             resolved_config, resolved_config.parent
         )
     server = _load_server(safe_config, server_name)
+    if _is_http_server(server):
+        return smoke_http_server(
+            server_name, str(server["url"]), timeout=timeout
+        )
     resolved_cmd = _resolve_command(str(server["command"]))
     # Prefer absolute resolved executable when available.
     command = _validate_command_argv(

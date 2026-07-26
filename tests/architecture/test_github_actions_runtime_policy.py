@@ -14,6 +14,7 @@ pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
 CONTRACT_TESTS_WORKFLOW = ROOT / ".github" / "workflows" / "contract-tests.yml"
+CODERABBIT_WORKFLOW = ROOT / ".github" / "workflows" / "coderabbit.yml"
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
@@ -112,3 +113,10 @@ def test_contract_tests_workflow_declares_boolean_dispatch_input() -> None:
     inputs = cast(dict[str, dict[str, Any]], dispatch["inputs"])
 
     assert inputs["skip_slow"]["type"] == "boolean"
+
+
+def test_coderabbit_installer_guard_ignores_documentation_comments() -> None:
+    workflow = CODERABBIT_WORKFLOW.read_text(encoding="utf-8")
+
+    assert "sed '/^[[:space:]]*#/d' \"${install_script}\"" in workflow
+    assert "Install script nests a remote pipe-to-shell; refusing" in workflow

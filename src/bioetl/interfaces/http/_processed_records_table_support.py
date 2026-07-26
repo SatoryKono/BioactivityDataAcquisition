@@ -23,7 +23,9 @@ from bioetl.interfaces.http._processed_records_value_support import (
     _selector_regex,
     _selector_tokens,
     _sum_metric_values,
-    is_deficit,  # noqa: F401 - re-exported for the table facade
+)
+from bioetl.interfaces.http._processed_records_value_support import (
+    is_deficit as is_deficit,
 )
 
 PROCESSED_RECORDS_TABLE_CONTRACT = "processed_records_table_v1"
@@ -307,4 +309,3 @@ def format_percentage(
     if percent_format == "trimmed_3":
         return f"{percentage:.3f}".rstrip("0").rstrip(".") + "%"
     return "100%"
-

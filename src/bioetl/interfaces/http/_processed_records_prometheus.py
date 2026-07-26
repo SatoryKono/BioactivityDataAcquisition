@@ -20,6 +20,7 @@ DEFAULT_PROMETHEUS_BASE_URL_FALLBACKS = (
 )
 PROMETHEUS_QUERY_TIMEOUT_SECONDS = 3.0
 
+
 def _fetch_prometheus_query_payload(
     *,
     prometheus_base_url: str,

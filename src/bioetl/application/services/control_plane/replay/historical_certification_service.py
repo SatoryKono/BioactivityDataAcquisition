@@ -14,6 +14,9 @@ from bioetl.application.services.control_plane.replay._historical_snapshot_certi
     HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED,
     HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED,
 )
+from bioetl.application.services.control_plane.replay.historical_corpus_models import (
+    HistoricalReplaySnapshotCertification,
+)
 from bioetl.domain.ports import RunLedgerPort, RunManifestPort
 from bioetl.domain.types import RunID
 
@@ -22,25 +25,6 @@ __all__ = [
     "HistoricalReplayCertificationService",
     "HistoricalReplaySnapshotCertification",
 ]
-
-
-@dataclass(frozen=True, slots=True)
-class HistoricalReplaySnapshotCertification:
-    """Immutable snapshot evidence used for historical replay certification."""
-
-    provider: str
-    entity: str
-    pipeline_name: str
-    snapshot_id: str
-    content_hash: str
-    immutable_uri: str
-    bronze_batch_ref: str
-    query: str | None = None
-    query_fingerprint: str | None = None
-    certification_artifact_ref: str | None = None
-    certification_basis: str = "retained_bronze_artifact"
-    upstream_run_id: str | None = None
-    upstream_manifest_id: str | None = None
 
 
 @dataclass(slots=True)

@@ -14,7 +14,6 @@ from bioetl.composition.bootstrap.composite_infrastructure_context import (
 from bioetl.composition.bootstrap.runtime._composite_control_plane_builder_support import (
     CompositeControlPlaneConfigArtifacts,
     _build_composite_control_plane_config_artifacts,
-    _composite_manifest_contract_identity_kwargs,
     _read_composite_control_plane_settings,
 )
 from bioetl.composition.bootstrap.runtime._composite_control_plane_payloads import (
@@ -226,7 +225,14 @@ def _build_composite_manifest_create_request(
         resolved_config_hash=config_artifacts.resolved_config_hash or None,
         effective_config_hash=config_artifacts.effective_config_hash or None,
         source_fingerprint=config_artifacts.source_fingerprint or None,
-        **_composite_manifest_contract_identity_kwargs(config_artifacts),
+        contract_ref=config_artifacts.contract_ref,
+        contract_version=config_artifacts.contract_version,
+        contract_schema_hash=config_artifacts.contract_schema_hash,
+        dq_policy_ref=config_artifacts.dq_policy_ref,
+        rule_bundle_version=config_artifacts.rule_bundle_version,
+        normalization_profile_ref=config_artifacts.normalization_profile_ref,
+        normalization_profile_version=config_artifacts.normalization_profile_version,
+        normalization_profile_hash=config_artifacts.normalization_profile_hash,
         dq_contract_compatibility_hash=(
             config_artifacts.dq_contract_compatibility_hash or None
         ),

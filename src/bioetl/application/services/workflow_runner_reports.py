@@ -41,7 +41,9 @@ def _pipeline_name_for_step(
     plan_steps: list[JsonDict],
     payload: object | None,
 ) -> object | None:
-    pipeline_name = getattr(payload, "pipeline_name", None) if payload is not None else None
+    pipeline_name: object | None = (
+        getattr(payload, "pipeline_name", None) if payload is not None else None
+    )
     if pipeline_name is not None:
         return pipeline_name
     for planned in plan_steps:
@@ -75,7 +77,9 @@ def _execution_rows_from_result(
     for step in result.steps:
         payload = step.payload
         report_ref = (
-            getattr(payload, "run_report_json_path", None) if payload is not None else None
+            getattr(payload, "run_report_json_path", None)
+            if payload is not None
+            else None
         )
         execution_rows.append(
             {

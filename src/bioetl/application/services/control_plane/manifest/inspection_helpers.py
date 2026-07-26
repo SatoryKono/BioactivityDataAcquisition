@@ -182,7 +182,7 @@ def build_run_artifact_diff_payload(
     right_snapshots = manifest_snapshot_ids(right_manifest)
     left_artifacts = planned_artifact_identity(left_manifest)
     right_artifacts = planned_artifact_identity(right_manifest)
-    payload = {
+    payload: dict[str, object] = {
         "input_snapshots_match": left_snapshots == right_snapshots,
         "left_input_snapshot_count": len(left_snapshots),
         "right_input_snapshot_count": len(right_snapshots),

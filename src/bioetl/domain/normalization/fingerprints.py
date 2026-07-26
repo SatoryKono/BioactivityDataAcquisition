@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import hashlib
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from datetime import datetime
 
 from bioetl.domain.normalization.json import serialize_json_canonical
@@ -86,7 +86,7 @@ def _input_snapshot_identity_sort_key(snapshot: Mapping[str, str]) -> tuple[str,
 
 
 def compute_input_snapshot_identity_fingerprint(
-    snapshots: list[object],
+    snapshots: Iterable[object],
 ) -> str | None:
     """Compute a deterministic fingerprint for canonical immutable snapshot refs."""
     normalized_snapshots = sorted(

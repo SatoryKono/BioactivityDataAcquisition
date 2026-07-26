@@ -18,12 +18,23 @@ from bioetl.domain.types import RunID
 
 
 class HistoricalReplayCertificationProtocol(Protocol):
-    provider: str
-    entity: str
-    pipeline_name: str
-    query: str | None
-    upstream_run_id: str | None
-    upstream_manifest_id: str | None
+    @property
+    def provider(self) -> str: ...
+
+    @property
+    def entity(self) -> str: ...
+
+    @property
+    def pipeline_name(self) -> str: ...
+
+    @property
+    def query(self) -> str | None: ...
+
+    @property
+    def upstream_run_id(self) -> str | None: ...
+
+    @property
+    def upstream_manifest_id(self) -> str | None: ...
 
 
 @dataclass(frozen=True, slots=True)

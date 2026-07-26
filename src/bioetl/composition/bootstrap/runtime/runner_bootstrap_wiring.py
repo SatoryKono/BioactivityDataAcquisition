@@ -15,7 +15,6 @@ from bioetl.composition.bootstrap.runtime._runner_assembly_support import (
     create_composite_runner_service_from_inputs,
 )
 from bioetl.domain.composite import CompositeConfig
-from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
 
 if TYPE_CHECKING:
     import polars as pl
@@ -27,8 +26,6 @@ if TYPE_CHECKING:
     from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
         CompositeSupportServices,
     )
-    from bioetl.domain.ports import LockPort
-    from bioetl.infrastructure.config.settings_api import Settings
 
 
 def bootstrap_composite_runner_via_wiring(
@@ -36,11 +33,7 @@ def bootstrap_composite_runner_via_wiring(
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
     run_id: str | None,
-    bootstrap_runtime_basics_fn: Callable[
-        ...,
-        tuple[str, Settings, LoggerPort, MetricsPort, TracingPort, object, LockPort]
-        | CompositeInfrastructureContext,
-    ],
+    bootstrap_runtime_basics_fn: Callable[..., CompositeInfrastructureContext],
     build_runner_factories_fn: Callable[
         ...,
         tuple[

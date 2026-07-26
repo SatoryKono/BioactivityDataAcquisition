@@ -7,6 +7,9 @@ from typing import TYPE_CHECKING, Protocol
 from bioetl.application.core.pre_silver_record import PreSilverRecord
 
 if TYPE_CHECKING:
+    from bioetl.application.core.record_processor_config import (
+        ContentHashPolicyByVersion,
+    )
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import JsonDict
 
@@ -16,7 +19,10 @@ __all__ = ["PreSilverFinalizerProtocol", "finalize_pre_silver_record"]
 class PreSilverFinalizerProtocol(Protocol):
     """Normalization surface required to finalize a staged Silver payload."""
 
-    content_hash_policy_by_version: object | None
+    @property
+    def content_hash_policy_by_version(
+        self,
+    ) -> ContentHashPolicyByVersion | None: ...
 
     def normalize_business_data(self, business_data: JsonDict) -> JsonDict:
         """Normalize extracted business data before Silver finalization."""

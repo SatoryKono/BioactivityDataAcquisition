@@ -13,6 +13,25 @@ from bioetl.application.services.control_plane.replay.historical_identity_models
 
 
 @dataclass(frozen=True, slots=True)
+class HistoricalReplaySnapshotCertification:
+    """Immutable snapshot evidence used for historical replay certification."""
+
+    provider: str
+    entity: str
+    pipeline_name: str
+    snapshot_id: str
+    content_hash: str
+    immutable_uri: str
+    bronze_batch_ref: str
+    query: str | None = None
+    query_fingerprint: str | None = None
+    certification_artifact_ref: str | None = None
+    certification_basis: str = "retained_bronze_artifact"
+    upstream_run_id: str | None = None
+    upstream_manifest_id: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class HistoricalReplayCertifiabilityRecord(HistoricalReplayRunIdentity):
     """One deterministic certifiability record for a retained manifest."""
 
@@ -127,7 +146,7 @@ class HistoricalReplayBulkCertificationSpec:
     """One deterministic bulk-certification unit."""
 
     manifest_id: str
-    certifications: tuple[object, ...]
+    certifications: tuple[HistoricalReplaySnapshotCertification, ...]
 
 
 @dataclass(frozen=True, slots=True)
@@ -188,4 +207,5 @@ __all__ = [
     "HistoricalReplayBulkCertificationSpec",
     "HistoricalReplayCertifiabilityInventory",
     "HistoricalReplayCertifiabilityRecord",
+    "HistoricalReplaySnapshotCertification",
 ]

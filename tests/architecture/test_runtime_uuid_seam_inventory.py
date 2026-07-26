@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import ast
+import shutil
 import subprocess
+import tempfile
 from pathlib import Path
 from typing import Any, cast
 
@@ -18,62 +20,44 @@ UUID4_SCAN_TIMEOUT_SECONDS = 10
 pytestmark = pytest.mark.architecture
 
 
+def _run_bounded_scan(command: list[str]) -> tuple[int, tuple[str, ...]] | None:
+    """Run a scanner without PIPE reader threads that can hang on Windows."""
+    try:
+        with (
+            tempfile.TemporaryFile(mode="w+", encoding="utf-8") as stdout_file,
+            tempfile.TemporaryFile(mode="w+", encoding="utf-8") as stderr_file,
+        ):
+            result = subprocess.run(
+                command,
+                cwd=ROOT,
+                check=False,
+                stdout=stdout_file,
+                stderr=stderr_file,
+                text=True,
+                timeout=UUID4_SCAN_TIMEOUT_SECONDS,
+            )
+            stdout_file.seek(0)
+            return result.returncode, tuple(stdout_file.read().splitlines())
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+
+
 def _uuid4_candidate_files() -> tuple[Path, ...]:
     """Prefilter candidate files so Windows/WSL runs do not parse every module."""
-    try:
-        result = subprocess.run(
-            [
-                "rg",
-                "--files-with-matches",
-                "-F",
-                "uuid4",
-                *SCAN_ROOTS,
-            ],
-            cwd=ROOT,
-            check=False,
-            capture_output=True,
-            text=True,
-            timeout=UUID4_SCAN_TIMEOUT_SECONDS,
-        )
-    except (OSError, subprocess.TimeoutExpired):
-        pass
-    else:
-        if result.returncode == 0:
-            return tuple(
-                ROOT / line
-                for line in result.stdout.splitlines()
-                if line.endswith(".py")
-            )
-        if result.returncode == 1:
+    commands = (
+        ["rg", "--files-with-matches", "-F", "uuid4", *SCAN_ROOTS],
+        [shutil.which("git") or "git", "grep", "-l", "uuid4", "--", *SCAN_ROOTS],
+    )
+    for command in commands:
+        result = _run_bounded_scan(command)
+        if result is None:
+            continue
+        returncode, output_lines = result
+        if returncode == 0:
+            return tuple(ROOT / line for line in output_lines if line.endswith(".py"))
+        if returncode == 1:
             return ()
-
-    try:
-        import shutil
-
-        git_cmd = shutil.which("git") or "git"
-        result = subprocess.run(
-            [git_cmd, "grep", "-l", "uuid4", "--", *SCAN_ROOTS],
-            cwd=ROOT,
-            check=False,
-            capture_output=True,
-            text=True,
-            timeout=UUID4_SCAN_TIMEOUT_SECONDS,
-        )
-        if result.returncode == 0:
-            return tuple(
-                ROOT / line
-                for line in result.stdout.splitlines()
-                if line.endswith(".py")
-            )
-        if result.returncode == 1:
-            return ()
-    except (OSError, subprocess.TimeoutExpired):
-        pass
-
-    files: list[Path] = []
-    for scan_root in SCAN_ROOTS:
-        files.extend((ROOT / scan_root).rglob("*.py"))
-    return tuple(sorted(path for path in files if path.is_file()))
+    raise AssertionError("Runtime UUID seam scanners failed or timed out")
 
 
 def _uuid4_seams() -> set[tuple[str, int, str]]:

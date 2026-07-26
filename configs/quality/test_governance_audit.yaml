@@ -596,7 +596,7 @@ test_audit_closeout_2026_07_08:
     test_file_count_definition: tests/**/test_*.py from pyproject python_files
     repo_backed_unit_lane: repo-backed-unit
     repo_backed_unit_subtree: tests/unit/repo_backed/
-    repo_backed_unit_test_files: 41
+    repo_backed_unit_test_files: 42
     performance_baseline_reports:
     - reports/test-telemetry/slowest-tests.json
     - reports/test-telemetry/slowest-tests.md
@@ -800,19 +800,19 @@ oversized_test_module_inventory:
     owner: application-pipelines
     target_split: PubMed transformer classification and normalization scenarios
   - path: tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_tooling.py
-    lines: 1250
+    lines: 1246
     owner: observability-dashboards
     target_split: Grafana live audit tooling functional families
   completed_splits:
   - issue_ref: '#4505'
     source: tests/integration/test_grafana_config.py
-    source_lines_after_split: 1685
+    source_lines_after_split: 1676
     extracted_surface: tests/integration/test_grafana_surface_contracts.py
-    extracted_surface_lines: 699
+    extracted_surface_lines: 696
     owner: observability-dashboards
   - issue_ref: '#4505'
     source: tests/integration/test_grafana_surface_contracts.py
-    source_lines_after_split: 699
+    source_lines_after_split: 696
     extracted_surface: tests/integration/test_grafana_technical_policy.py
     extracted_surface_lines: 52
     owner: observability-dashboards
@@ -820,13 +820,13 @@ oversized_test_module_inventory:
     source: tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py
     source_lines_after_split: 1016
     extracted_surface: tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_tooling.py
-    extracted_surface_lines: 1250
+    extracted_surface_lines: 1246
     owner: observability-dashboards
   - issue_ref: '#6364'
     source: tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py
     source_lines_after_split: 1016
     extracted_surface: tests/unit/repo_backed/scripts/ops/observability/test_grafana_live_audit_tooling.py
-    extracted_surface_lines: 1250
+    extracted_surface_lines: 1246
     owner: observability-dashboards
     note: Oversized test module inventory updated to reflect completed split from #6326. The source file is now 1009 lines (within 2000 LOC limit) and the extracted surface is 1234 lines (tracked in top_modules).
   - issue_ref: '#4506'
@@ -1074,6 +1074,9 @@ repo_backed_unit_test_exceptions:
     target_lane: repo-backed-unit
     protected_surface: scripts/docs/generate_pipeline_normalization_field_matrix.py
       + docs/05-engineering/normalization_plan_P0_P6.md
+  - path: tests/unit/repo_backed/scripts/test_check_skills_mirror.py
+    target_lane: repo-backed-unit
+    protected_surface: .codex/skills/** + .agents/skills/** mirror parity contract
   - path: tests/unit/repo_backed/tools/test_differentiate_linkstyle_security.py
     target_lane: repo-backed-unit
     protected_surface: src/tools/differentiate_linkstyle.py

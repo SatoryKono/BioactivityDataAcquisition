@@ -13,7 +13,6 @@ from tests.integration._grafana_test_support import (
     _PROMQL_METRIC_SELECTOR_RE,
     _assert_operator_context_shell_contract,
     _assert_provider_health_variable_contract,
-
     _assert_standard_variable_contract,
     _extract_selector_labels,
     _unknown_metrics_for_query,
@@ -160,9 +159,7 @@ def _panel_link_variable_violations(
     links = panel.get("links", [])
     panel_title = panel.get("title", "<untitled>")
     if not isinstance(links, list):
-        return [
-            f"panel={panel_title} links must be a list, got {type(links).__name__}"
-        ]
+        return [f"panel={panel_title} links must be a list, got {type(links).__name__}"]
 
     violations: list[str] = []
     for index, link in enumerate(links):
@@ -299,8 +296,7 @@ def _assert_safe_explore_traces_url(dashboard_name: str, url: str) -> None:
         f"{dashboard_name} must use a safe default groupBy: {url}"
     )
     assert "span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22" not in url, (
-        f"{dashboard_name} must not couple Explore Traces to "
-        f"${{run_type:regex}}: {url}"
+        f"{dashboard_name} must not couple Explore Traces to ${{run_type:regex}}: {url}"
     )
     assert (
         "span.%22bioetl.run_type%22%20%3D~%20%22${run_type_context:regex}%22" not in url
@@ -330,10 +326,7 @@ def _panel_title_vocabulary_errors(dashboard_path: Path, panel: dict) -> list[st
             f"{dashboard_path.name}: panel '{title}' groups by provider but title "
             "does not contain 'by Provider'"
         )
-    if (
-        any("by (adapter" in expr for expr in expressions)
-        and "by Adapter" not in title
-    ):
+    if any("by (adapter" in expr for expr in expressions) and "by Adapter" not in title:
         errors.append(
             f"{dashboard_path.name}: panel '{title}' groups by adapter but title "
             "does not contain 'by Adapter'"
@@ -414,9 +407,7 @@ def _assert_workflow_overview_prom_queries(variable_map: dict[str, dict]) -> Non
 def _assert_filter_options_dimension(
     infinity_query: object, *, dimension: str, require_exact_run: bool = True
 ) -> None:
-    url = str(
-        infinity_query.get("url", "") if isinstance(infinity_query, dict) else ""
-    )
+    url = str(infinity_query.get("url", "") if isinstance(infinity_query, dict) else "")
     assert "/ops/control-plane/filter-options" in url
     assert f"dimension={dimension}" in url
     if require_exact_run:

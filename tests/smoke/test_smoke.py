@@ -171,7 +171,9 @@ class TestCoreImports:
         assert base_transformer is not None
         assert runner is not None
 
-    @pytest.mark.timeout(_HEAVY_IMPORT_TIMEOUT_SECONDS)  # heavy native stack cold import
+    @pytest.mark.timeout(
+        _HEAVY_IMPORT_TIMEOUT_SECONDS
+    )  # heavy native stack cold import
     def test_infrastructure_imports(self) -> None:
         """Infrastructure layer imports successfully."""
         from bioetl.infrastructure.storage import bronze_writer

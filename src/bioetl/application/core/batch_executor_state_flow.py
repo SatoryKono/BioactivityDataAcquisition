@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.core.batch_execution import (
     BatchExecutionRunService,
@@ -28,6 +28,9 @@ from bioetl.application.core.lifecycle.batch_fsm import (
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_execution import BatchExecutionContext
+    from bioetl.application.core.batch_execution.contracts import (
+        BatchResultBuilderProtocol,
+    )
     from bioetl.application.core.batch_executor import BatchResult
     from bioetl.domain.types import BronzeRecord
 
@@ -120,7 +123,10 @@ async def process_explicit_batch(
     await process_stateful_batch(host, records, start_index)
     return host._execution_state_service.build_batch_result(
         state=host,
-        batch_result_type=host._batch_result_type,
+        batch_result_type=cast(
+            "BatchResultBuilderProtocol[BatchResult]",
+            host._batch_result_type,
+        ),
     )
 
 

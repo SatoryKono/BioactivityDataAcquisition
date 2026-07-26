@@ -8,6 +8,7 @@ from typing import Any
 
 import click
 
+from bioetl.application.runtime_clock import current_utc_time
 from bioetl.application.services.run_reports.query import (
     diff_pipeline_reports,
     list_pipeline_reports,
@@ -188,6 +189,7 @@ def prune_command(
         owner=owner,
         max_count=max_count,
         max_age_days=max_age_days,
+        now=current_utc_time(),
         root=root or DEFAULT_REPORT_ROOT,
         dry_run=not apply,
     )

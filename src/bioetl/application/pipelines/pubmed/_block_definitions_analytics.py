@@ -12,7 +12,7 @@ from bioetl.application.pipelines.pubmed.extractors.classification import (
 from bioetl.domain.mapping.pubmed_publication import (
     build_pubmed_publication_type_fields,
 )
-from bioetl.domain.types import BronzeRecord, JsonDict  # type: ignore[misc]
+from bioetl.domain.types import BronzeRecord, JsonDict
 
 
 class _PubMedDateBlock(_PubMedXmlBlock):

@@ -36,7 +36,7 @@ from bioetl.domain.transformations import (
 from bioetl.domain.value_objects.taxonomy_id import validate_taxonomy_id
 
 if TYPE_CHECKING:
-    from bioetl.application.core.pipeline_context import PipelineContext
+    from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import BronzeRecord, PrimaryId
 
 # Mapping for variant sequence fields extraction (from ChEMBL nested structure)

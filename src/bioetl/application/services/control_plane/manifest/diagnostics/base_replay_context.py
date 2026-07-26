@@ -78,6 +78,12 @@ def _resolve_base_summary_replay_context(
         ),
     )
     operator_replay_projection = replay_projection_bundle.operator_projection
+    replay_blockers_payload = operator_replay_projection["exact_replay_blockers"]
+    exact_replay_blockers = (
+        [str(item) for item in replay_blockers_payload]
+        if isinstance(replay_blockers_payload, list)
+        else []
+    )
     return _BaseSummaryReplayContext(
         requested_exact_replay=requested_exact_replay,
         resume_requested=resume_requested,
@@ -97,7 +103,7 @@ def _resolve_base_summary_replay_context(
         exact_replay_support_boundary=str(
             operator_replay_projection["exact_replay_support_boundary"]
         ),
-        exact_replay_blockers=list(operator_replay_projection["exact_replay_blockers"]),
+        exact_replay_blockers=exact_replay_blockers,
         resume_contract=_build_resume_contract(
             manifest=manifest,
             requested_exact_replay=requested_exact_replay,

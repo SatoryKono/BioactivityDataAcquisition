@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, is_dataclass, replace
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.services.control_plane.ledger.service import (
     RunLedgerService,
@@ -28,6 +28,8 @@ from bioetl.domain.control_plane.reproducibility_policy import (
 )
 
 if TYPE_CHECKING:
+    from _typeshed import DataclassInstance
+
     from bioetl.composition.runtime_builders.runner_inputs import (
         RunnerInputs as _RunnerInputs,
     )
@@ -39,14 +41,6 @@ __all__ = [
     "resolve_required_artifact_lineage_layers",
     "validate_required_persistence_profile",
 ]
-
-
-def _set_context_attribute(ctx: object, attr_name: str, attr_value: object) -> object:
-    """Set an attribute on a context object, handling dataclasses and namespaces."""
-    if is_dataclass(ctx):
-        return replace(ctx, **{attr_name: attr_value})
-    setattr(ctx, attr_name, attr_value)
-    return ctx
 
 
 @dataclass(frozen=True, slots=True)
@@ -85,6 +79,29 @@ def _log_effective_required_persistence_profile(
     )
 
 
+def _bind_required_persistence_profile(
+    ctx: PipelineRunContext,
+    *,
+    required_profile: str,
+    opt_down_requested: bool,
+) -> PipelineRunContext:
+    """Return a context carrying the resolved persistence-profile policy."""
+    if is_dataclass(ctx):
+        return cast(
+            "PipelineRunContext",
+            replace(
+                cast("DataclassInstance", ctx),
+                required_persistence_profile=required_profile,
+                required_persistence_profile_opt_down=opt_down_requested,
+            ),
+        )
+    if hasattr(ctx, "__dict__"):
+        ctx.required_persistence_profile = required_profile
+        ctx.required_persistence_profile_opt_down = opt_down_requested
+        return ctx
+    raise TypeError("PipelineRunContext must support persistence-profile attachment")
+
+
 def assemble_runner_control_plane(
     ctx: PipelineRunContext,
     inputs: _RunnerInputs,
@@ -105,15 +122,10 @@ def assemble_runner_control_plane(
         required_profile=control_plane_policy.required_profile,
         exact_replay=bool(getattr(ctx, "exact_replay", False)),
     )
-    ctx = _set_context_attribute(
+    ctx = _bind_required_persistence_profile(
         ctx,
-        "required_persistence_profile",
-        control_plane_policy.required_profile,
-    )
-    ctx = _set_context_attribute(
-        ctx,
-        "required_persistence_profile_opt_down",
-        degraded_profile_opt_down_requested,
+        required_profile=control_plane_policy.required_profile,
+        opt_down_requested=degraded_profile_opt_down_requested,
     )
     run_ledger_service: RunLedgerService | None = None
 

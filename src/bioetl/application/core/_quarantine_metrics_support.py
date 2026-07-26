@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections import Counter
 from typing import TYPE_CHECKING
 
+from bioetl.application.core.batch_metrics import _record_silver_removal_accounting
 from bioetl.domain.types import BronzeRecord, ErrorType
 
 if TYPE_CHECKING:
@@ -108,14 +109,8 @@ def record_filtered_quarantine_metrics(
         reason=FILTERED_OUT_SILVER,
         count=count,
     )
-    from bioetl.domain.run_reports.context import get_stage_accounting
-    from bioetl.domain.run_reports.models import StageId
-
-    accounting = get_stage_accounting()
-    if accounting is not None and count > 0:
-        accounting.record_removal(
-            StageId.SILVER.value,
-            outcome="filtered_out",
-            reason_code=FILTERED_OUT_SILVER,
-            count=count,
-        )
+    _record_silver_removal_accounting(
+        outcome="filtered_out",
+        reason_code=FILTERED_OUT_SILVER,
+        count=count,
+    )

@@ -22,7 +22,7 @@ from bioetl.application.core.pre_silver_adapter_mixin import (
 )
 from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.application.pipelines.common.publication_transformer_context import (
-    build_runtime_transformer_init,
+    install_runtime_transformer_init,
 )
 from bioetl.application.pipelines.pubchem._compound_business_data import (
     build_compound_business_data,
@@ -135,8 +135,8 @@ class PubChemCompoundTransformer(PreSilverAdapterMixin, BaseTransformer):
         return prepared
 
 
-PubChemCompoundTransformer.__init__ = build_runtime_transformer_init(
+install_runtime_transformer_init(
+    PubChemCompoundTransformer,
     "pubchem",
     "compound",
-    owner_type=PubChemCompoundTransformer,
 )

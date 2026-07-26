@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import inspect
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
 from bioetl.domain.ports import (
     LoggerPort,
@@ -15,6 +15,7 @@ from bioetl.domain.ports import (
     RowReconciliationLayer,
     RowReconciliationPort,
     RowReconciliationResult,
+    RowReconciliationTypePolicy,
 )
 from bioetl.infrastructure.storage.workflow_row_reconciliation_support import (
     reconcile_loaded_rows,
@@ -53,7 +54,7 @@ class StorageRowReconciliationAdapter(RowReconciliationPort):
             left_columns=list(config.left_columns),
             right_columns=list(config.right_columns),
             nulls_equal=config.nulls_equal,
-            type_policy=config.type_policy.value,
+            type_policy=cast("RowReconciliationTypePolicy", config.type_policy).value,
         )
         left_rows = await self._read_rows(config, side="left")
         right_rows = await self._read_rows(config, side="right")
@@ -167,7 +168,10 @@ def _signature_accepts_var_keyword(signature: inspect.Signature) -> bool:
     )
 
 
-def _supported_kwargs(method: object, kwargs: dict[str, object]) -> dict[str, object]:
+def _supported_kwargs(
+    method: Any,  # Any: inspect.signature accepts arbitrary runtime callables.
+    kwargs: dict[str, object],
+) -> dict[str, object]:
     try:
         signature = inspect.signature(method)
     except (TypeError, ValueError):

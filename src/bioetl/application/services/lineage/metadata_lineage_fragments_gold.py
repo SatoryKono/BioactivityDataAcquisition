@@ -79,7 +79,7 @@ def _build_gold_nodes(
     return build_dataset_fragment_nodes(
         run_context=run_context,
         dataset_node=gold_dataset_node(run_context=run_context, input_data=input_data),
-        records=input_data.records,
+        records=tuple(input_data.records or ()),
         composite_name=input_data.table_name,
         created_at=created_at,
         composite_run_id=input_data.composite_run_id,

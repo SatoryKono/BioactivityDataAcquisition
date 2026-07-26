@@ -50,4 +50,7 @@ def test_operator_docs_document_canonical_target_and_optional_host_override() ->
     assert "host.docker.internal:8000" in readme
     # Host topology must be marked optional/override, not the primary default.
     assert "Host override" in readme or "host override" in readme.lower()
-    assert "canonical compose network" in readme.lower() or "bioetl:8000 (canonical" in readme
+    assert (
+        "canonical compose network" in readme.lower()
+        or "bioetl:8000 (canonical" in readme
+    )

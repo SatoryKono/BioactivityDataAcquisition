@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 
-from bioetl.domain.ports import StageAccountingPort
+from bioetl.domain.ports.stage_accounting import StageAccountingPort
 from bioetl.domain.run_reports._stage_bucket import _StageBucket
 from bioetl.domain.run_reports.accounting_snapshots import (
     StageAccountingSnapshotsMixin,
@@ -136,8 +136,12 @@ class StageAccountingAccumulator(StageAccountingSnapshotsMixin, StageAccountingP
             records_in=bronze,
             records_out=bronze,
         )
-        self._seed_stage(StageId.SILVER.value, records_in=bronze, records_out=silver_valid)
-        self._seed_stage(StageId.GOLD.value, records_in=silver_valid, records_out=gold_written)
+        self._seed_stage(
+            StageId.SILVER.value, records_in=bronze, records_out=silver_valid
+        )
+        self._seed_stage(
+            StageId.GOLD.value, records_in=silver_valid, records_out=gold_written
+        )
 
     def _seed_stage(self, stage: str, *, records_in: int, records_out: int) -> None:
         bucket = self._stages[stage]

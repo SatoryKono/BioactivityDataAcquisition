@@ -21,7 +21,7 @@ class GoldWriteRequest:
 
     table_name: str
     records: list[GoldRecord]
-    schema: object
+    schema: DataFrameSchema
     primary_keys: list[str] | None = None
     mode: str = "overwrite"
     partition_cols: list[str] | None = None
@@ -60,7 +60,7 @@ class GoldWritePostwriteContext:
     run_id: RunID | None
     scd_config: ScdConfig | None
     silver_refs: list[SilverWriteResult] | None
-    schema: object
+    schema: DataFrameSchema
 
 
 class _GoldWritePreparationHostProtocol(Protocol):

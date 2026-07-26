@@ -171,6 +171,7 @@ class _CompositeRunnerStageSupportMixin:
         *,
         stage: str,
         validate: bool = True,
+        recovery_reason: str | None = None,
         **transition_kwargs: object,
     ) -> CompositeCheckpointState:
         """Transition immutable state and emit FSM log entry.
@@ -184,6 +185,7 @@ class _CompositeRunnerStageSupportMixin:
             to_state,
             stage=stage,
             validate=validate,
+            recovery_reason=recovery_reason,
             **transition_kwargs,
         )
 

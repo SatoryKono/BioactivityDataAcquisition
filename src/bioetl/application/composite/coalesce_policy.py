@@ -69,6 +69,10 @@ class CoalescePolicyService:
         """
         return can_coalesce(df, col1, col2)
 
+    _compatible_columns = staticmethod(compatible_columns)
+    _coalesce_and_drop = staticmethod(coalesce_and_drop)
+    _seed_prefix = staticmethod(seed_prefix)
+
     def coalesce_prefer_seed(
         self,
         df: pl.DataFrame,
@@ -226,8 +230,3 @@ class CoalescePolicyService:
             )
 
         return result
-
-
-CoalescePolicyService._compatible_columns = staticmethod(compatible_columns)
-CoalescePolicyService._coalesce_and_drop = staticmethod(coalesce_and_drop)
-CoalescePolicyService._seed_prefix = staticmethod(seed_prefix)

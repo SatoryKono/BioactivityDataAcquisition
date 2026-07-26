@@ -159,10 +159,10 @@ def _collect_ledger_bronze_dates(
                 "Exact replay parent snapshot entity mismatch between ledger "
                 f"('{entity}') and manifest ('{manifest.entity}')"
             )
-        immutable_uri = _optional_text(details.get("immutable_uri"))
-        if immutable_uri is None:
+        details_immutable_uri = _optional_text(details.get("immutable_uri"))
+        if details_immutable_uri is None:
             continue
-        dates.add(_extract_bronze_date(immutable_uri))
+        dates.add(_extract_bronze_date(details_immutable_uri))
     if dates:
         return tuple(sorted(dates))
     for source_ref in manifest.source_refs:
@@ -174,6 +174,10 @@ def _collect_ledger_bronze_dates(
                 "Exact replay parent source_refs contain mixed provider/entity values"
             )
         for snapshot in source_ref.input_snapshots:
+            if snapshot.immutable_uri is None:
+                raise RuntimeError(
+                    "Exact replay parent input snapshot is missing immutable_uri"
+                )
             dates.add(_extract_bronze_date(snapshot.immutable_uri))
     return tuple(sorted(dates))
 

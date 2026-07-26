@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import sys
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import click
 
@@ -49,21 +49,21 @@ def _load_stage_breakpoint() -> type[StageBreakpoint]:
     """Resolve StageBreakpoint lazily to avoid command import fan-out."""
     from bioetl.domain.ports import StageBreakpoint
 
-    return cast("type[StageBreakpoint]", StageBreakpoint)
+    return StageBreakpoint
 
 
 def _load_run_options_type() -> type[RunOptions]:
     """Resolve RunOptions lazily to keep CLI imports lightweight."""
     from bioetl.application.services.execution.pipeline_runner_models import RunOptions
 
-    return cast("type[RunOptions]", RunOptions)
+    return RunOptions
 
 
 def _load_debug_abort_error_type() -> type[DebugAbortError]:
     """Resolve DebugAbortError lazily to keep CLI imports lightweight."""
     from bioetl.application.services.pipeline_debug_service import DebugAbortError
 
-    return cast("type[DebugAbortError]", DebugAbortError)
+    return DebugAbortError
 
 
 def _resolve_context_registry(

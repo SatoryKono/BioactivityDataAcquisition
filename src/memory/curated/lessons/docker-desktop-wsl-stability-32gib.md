@@ -46,10 +46,16 @@ ______________________________________________________________________
   clients (and Desktop Toolkit jetbrains/sandbox), not BioETL compose. Mitigate
   with (a) one heavy client + `apply-docker-stable-mcp.ps1 -Profile stable` +
   `cleanup-mcp-orphans.ps1`, or (b) multi-client **shared HTTP plane**:
-  `scripts/ops/runtime/mcp/start-shared.ps1` then
-  `setup_mcp.py --profile shared --transport-mode shared`. Default generator
-  profile remains `core` / transport `stdio`. Policy:
-  `docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md`.
+  `start-shared.ps1` → `setup_mcp.py --profile shared --transport-mode shared`
+  → `apply-shared-to-grok.ps1` → **full client restart**. Catalog covers thrash
+  leaders (brave, context7, adr/deja, docker/mermaid gateways, github/fetch,
+  prometheus/grafana). Disable Toolkit `jetbrains` / `node-code-sandbox` and
+  never run `MCP_DOCKER --profile default`. Playbook:
+  `scripts/ops/runtime/mcp/OPERATOR.md`. Policy:
+  `docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md`. Default generator
+  remains `core` / transport `stdio` for portable/single-client paths.
+  Compose `container_name` alone does **not** stop Toolkit thrash (#6293:
+  no long-lived stdio MCP Compose).
 - Operator host defaults for this class: WSL `memory=6GB`, free host RAM ≥4 GiB,
   main mem_limit 768 m, neo4j mem_limit 768 m / heap max 384 m.
 - Start **one** stack at a time; use project flags

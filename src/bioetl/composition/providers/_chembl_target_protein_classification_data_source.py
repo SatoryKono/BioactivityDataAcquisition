@@ -5,7 +5,9 @@ from __future__ import annotations
 import asyncio
 from collections.abc import AsyncIterator
 from types import TracebackType
+from typing import cast
 
+import pyarrow as pa
 from bioetl.application.services.protein_classification_resolution import (
     ProteinClassificationResolutionService,
 )
@@ -276,6 +278,7 @@ class TargetProteinClassificationSnapshotDataSource:
         columns: list[str],
     ) -> list[JsonDict]:
         arrow_table = await self._delta_reader.read_table(table_name, columns=columns)
+        arrow_table = cast("pa.Table", arrow_table)
         return [dict(row) for row in arrow_table.to_pylist()]
 
     def _relation_rows_for_target(self, target_id: str) -> tuple[JsonDict, ...]:

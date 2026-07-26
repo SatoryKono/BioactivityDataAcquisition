@@ -8,6 +8,8 @@ from bioetl.domain.normalization.profiles._standard_profile_rule_components impo
     _build_rule_component_context,
     _normalize_special_rules,
     _rule_components,
+)
+from bioetl.domain.normalization.profiles._standard_profile_rule_context import (
     _RuleComponentContext,
 )
 from bioetl.domain.normalization.profiles._standard_profile_spec import (

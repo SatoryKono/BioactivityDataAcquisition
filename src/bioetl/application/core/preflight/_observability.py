@@ -7,12 +7,17 @@ from typing import TYPE_CHECKING, Protocol
 from bioetl.domain.types import HealthStatus
 
 if TYPE_CHECKING:
+    from bioetl.application.observability.observer import PipelineObserver
+    from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.types import HealthReport
 
 
 class _PreflightObservabilityHostProtocol(Protocol):
-    _runtime: object
-    _observer: object
+    @property
+    def _runtime(self) -> RuntimeConfig: ...
+
+    @property
+    def _observer(self) -> PipelineObserver: ...
 
 
 def emit_preflight_health_results(

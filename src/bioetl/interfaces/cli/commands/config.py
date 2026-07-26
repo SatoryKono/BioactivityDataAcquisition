@@ -7,7 +7,7 @@ Uses ConfigService from composition entrypoints for clean layering.
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import click
 
@@ -48,7 +48,7 @@ def get_configured_pipeline_names() -> list[str]:
         list_configured_pipeline_names as _impl,
     )
 
-    return cast("list[str]", _impl())
+    return _impl()
 
 
 def _config_to_dict(config: object) -> JsonDict:

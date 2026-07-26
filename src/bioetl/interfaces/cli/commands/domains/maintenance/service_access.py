@@ -17,10 +17,10 @@ if TYPE_CHECKING:
     from bioetl.application.services.contract_migration_service import (
         ContractMigrationService,
     )
-    from bioetl.application.services.medallion_lifecycle import (
-        MedallionLifecycleService,
-    )
     from bioetl.application.services.vacuum_service import VacuumService
+    from bioetl.composition._resource_management import (
+        MedallionLifecycleServiceProtocol,
+    )
 
 __all__ = [
     "get_bronze_cleanup_service",
@@ -31,7 +31,7 @@ __all__ = [
 ]
 
 
-def get_lifecycle_service() -> MedallionLifecycleService:
+def get_lifecycle_service() -> MedallionLifecycleServiceProtocol:
     """Load the lifecycle service through composition on demand."""
     from bioetl.composition.maintenance_service_access import (
         get_lifecycle_service as _impl,

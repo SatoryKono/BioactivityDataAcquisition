@@ -37,6 +37,9 @@ class TestCliRunOrchestrationProtocols:
     def test_metrics_flush_callable_signature_keeps_default_arguments(self) -> None:
         params = signature(MetricsFlushCallable.__call__).parameters
 
-        assert list(params) == ["self", "run_label", "pipeline_name"]
+        assert list(params) == ["self", "run_label", "pipeline_name", "run_type"]
         assert params["run_label"].default == "bioetl"
+        assert params["pipeline_name"].kind.name == "KEYWORD_ONLY"
         assert params["pipeline_name"].default is None
+        assert params["run_type"].kind.name == "KEYWORD_ONLY"
+        assert params["run_type"].default is None

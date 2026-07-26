@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections import Counter
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
@@ -47,14 +48,14 @@ class _LedgerEnrichedSummary:
 class _ProcessedLedgerDiagnostics:
     """Structured ledger diagnostics inputs for final summary assembly."""
 
-    family_counter: object
-    type_counter: object
-    artifact_refs: object
-    lineage_fragment_ids: object
+    family_counter: Counter[str]
+    type_counter: Counter[str]
+    artifact_refs: list[dict[str, object]]
+    lineage_fragment_ids: set[str]
     dq_details: DQDetailsSummary
     missing_link_count: int
-    correlation_anchor_gaps: object
-    resume_diagnostics: object
+    correlation_anchor_gaps: dict[str, int]
+    resume_diagnostics: dict[str, object] | None
 
 
 def attach_summary_reproducibility_views(summary: dict[str, object]) -> None:

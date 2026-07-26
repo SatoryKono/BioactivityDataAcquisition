@@ -26,16 +26,24 @@ DEFAULT_OUTPUT = (
 )
 
 
-def _load_json(
-    repo_root: Path, rel_path: str
-) -> dict[str, Any]:  # Any: JSON can have any value type
+def _load_json(repo_root: Path, rel_path: str) -> dict[str, Any]:
+    """Load one JSON object used by the scorecard."""
     path = repo_root / rel_path
-    return json.loads(path.read_text(encoding="utf-8"))
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise TypeError(f"{rel_path} must contain a JSON object")
+    return payload
 
 
-def _load_yaml(
-    repo_root: Path, rel_path: str
-) -> dict[str, Any]:  # Any: YAML can have any value type
+def _as_float(value: object) -> float:
+    """Validate a numeric scorecard value before aggregation."""
+    if isinstance(value, (int, float, str)):
+        return float(value)
+    raise TypeError(f"scorecard metric must be numeric, got {type(value)!r}")
+
+
+def _load_yaml(repo_root: Path, rel_path: str) -> dict[str, Any]:
+    """Load one YAML mapping used by the scorecard."""
     path = repo_root / rel_path
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))
     return payload if isinstance(payload, dict) else {}
@@ -375,11 +383,14 @@ def build_architecture_quality_scorecard(
     )
     categories = _build_categories(metrics)
     integral_score = round(
-        sum(float(category["weighted_score"]) for category in categories),
+        sum(
+            [_as_float(category["weighted_score"]) for category in categories],
+            0.0,
+        ),
         2,
     )
     weights_sum = round(
-        sum(float(category["weight"]) for category in categories),
+        sum([_as_float(category["weight"]) for category in categories], 0.0),
         2,
     )
     source_artifacts = _build_source_artifacts(
@@ -417,10 +428,7 @@ def write_architecture_quality_scorecard(
     """Write and return the deterministic architecture quality scorecard."""
     payload = build_architecture_quality_scorecard(repo_root=repo_root)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return payload
 
 

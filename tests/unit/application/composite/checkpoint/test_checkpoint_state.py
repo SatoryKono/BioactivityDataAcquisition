@@ -682,14 +682,22 @@ class TestToDict:
 
         assert first["completed_dependencies"] == second["completed_dependencies"]
         assert first["completed_enrichers"] == second["completed_enrichers"]
-        assert list(first["dependency_results"]) == list(second["dependency_results"]) == [
-            "pubmed",
-            "uniprot",
-        ]
-        assert list(first["enrichment_results"]) == list(second["enrichment_results"]) == [
-            "chembl",
-            "crossref",
-        ]
+        assert (
+            list(first["dependency_results"])
+            == list(second["dependency_results"])
+            == [
+                "pubmed",
+                "uniprot",
+            ]
+        )
+        assert (
+            list(first["enrichment_results"])
+            == list(second["enrichment_results"])
+            == [
+                "chembl",
+                "crossref",
+            ]
+        )
 
 
 # ---------------------------------------------------------------------------

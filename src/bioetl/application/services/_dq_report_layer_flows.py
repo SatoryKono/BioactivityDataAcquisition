@@ -206,14 +206,18 @@ async def generate_bronze_report(
 
     async def _write_report(report: BronzeDQReport) -> Path:
         assert report_writer is not None
-        return await report_writer.write_bronze_report(
-            report=report,
-            output_path=_resolve_output_path(
-                context.bronze_output_path, config.output_path
-            ),
-            report_format=config.get_format_enum(),
-            provider=context.provider,
-            entity=context.entity,
+        return Path(
+            str(
+                await report_writer.write_bronze_report(
+                    report=report,
+                    output_path=_resolve_output_path(
+                        context.bronze_output_path, config.output_path
+                    ),
+                    report_format=config.get_format_enum(),
+                    provider=context.provider,
+                    entity=context.entity,
+                )
+            )
         )
 
     return await _generate_report_for_stage(
@@ -270,14 +274,18 @@ async def generate_silver_report(
 
     async def _write_report(report: SilverDQReport) -> Path:
         assert report_writer is not None
-        return await report_writer.write_silver_report(
-            report=report,
-            output_path=_resolve_output_path(
-                context.silver_output_path, config.output_path
-            ),
-            report_format=config.get_format_enum(),
-            provider=context.provider,
-            entity=context.entity,
+        return Path(
+            str(
+                await report_writer.write_silver_report(
+                    report=report,
+                    output_path=_resolve_output_path(
+                        context.silver_output_path, config.output_path
+                    ),
+                    report_format=config.get_format_enum(),
+                    provider=context.provider,
+                    entity=context.entity,
+                )
+            )
         )
 
     return await _generate_report_for_stage(
@@ -330,14 +338,18 @@ async def generate_gold_report(
 
     async def _write_report(report: GoldDQReport) -> Path:
         assert report_writer is not None
-        return await report_writer.write_gold_report(
-            report=report,
-            output_path=_resolve_output_path(
-                context.gold_output_path, config.output_path
-            ),
-            report_format=config.get_format_enum(),
-            provider=context.provider,
-            entity=context.entity,
+        return Path(
+            str(
+                await report_writer.write_gold_report(
+                    report=report,
+                    output_path=_resolve_output_path(
+                        context.gold_output_path, config.output_path
+                    ),
+                    report_format=config.get_format_enum(),
+                    provider=context.provider,
+                    entity=context.entity,
+                )
+            )
         )
 
     return await _generate_report_for_stage(

@@ -31,7 +31,9 @@ class TestLoadDotenv:
     def test_load_dotenv_comments(self, tmp_path: Path) -> None:
         """Test that comment lines are ignored."""
         env_file = tmp_path / ".env"
-        env_file.write_text("# comment\nKEY=value\n# another comment\n", encoding="utf-8")
+        env_file.write_text(
+            "# comment\nKEY=value\n# another comment\n", encoding="utf-8"
+        )
         result = load_dotenv(env_file)
         assert result == {"KEY": "value"}
 
@@ -113,7 +115,7 @@ class TestLoadDotenv:
     def test_load_dotenv_mixed_quotes(self, tmp_path: Path) -> None:
         """Test that mixed quotes are handled (only matching quotes unquoted)."""
         env_file = tmp_path / ".env"
-        env_file.write_text('KEY1="value"\nKEY2=\'value\'\n', encoding="utf-8")
+        env_file.write_text("KEY1=\"value\"\nKEY2='value'\n", encoding="utf-8")
         result = load_dotenv(env_file)
         assert result == {"KEY1": "value", "KEY2": "value"}
 

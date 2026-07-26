@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3098 |
-| Tracked doc-like files | 1900 |
+| Doc-like files | 3115 |
+| Tracked doc-like files | 1917 |
 | Ignored local docs/reports files | 1198 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
@@ -19,7 +19,7 @@
 | Tracking State | Count |
 | --- | --- |
 | ignored_local | 1198 |
-| tracked | 1900 |
+| tracked | 1917 |
 
 ## Lifecycle Counts
 
@@ -62,8 +62,8 @@
 | Active | 1956 |
 | Archived | 80 |
 | Canonical | 63 |
-| Generated | 723 |
-| Working | 276 |
+| Generated | 739 |
+| Working | 277 |
 
 ## Surface Families
 
@@ -72,16 +72,16 @@
 | active | 1956 |
 | archive | 80 |
 | canonical | 63 |
-| generated | 723 |
-| working | 276 |
+| generated | 739 |
+| working | 277 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 121 |
-| archive-after-migration | 99 |
-| generate-automatically | 723 |
+| archive-after-migration | 100 |
+| generate-automatically | 739 |
 | keep | 2151 |
 | reconcile-with-github-state | 4 |
 
@@ -96,8 +96,9 @@
 | `docs/plans/architecture-review-and-refactor-plan-2026-03-21.md` | Working | 1 | archive-after-migration |
 | `docs/plans/chembl-baseline-refactor-plan-2026-06-01.md` | Working | 1 | archive-after-migration |
 | `docs/plans/curated-memory-density-governance-plan-2026-04-21.md` | Working | 1 | archive-after-migration |
-| `docs/plans/mcp-shared-http-multi-client-issue-pack-2026-07-24.md` | Working | 0 | archive-after-migration |
-| `docs/plans/mcp-shared-http-multi-client-plan-2026-07-24.md` | Working | 1 | archive-after-migration |
+| `docs/plans/mcp-shared-http-multi-client-issue-pack-2026-07-24.md` | Working | 1 | archive-after-migration |
+| `docs/plans/mcp-shared-http-multi-client-plan-2026-07-24.md` | Working | 2 | archive-after-migration |
+| `docs/plans/mcp-shared-plane-work-plan-2026-07-24.md` | Working | 0 | archive-after-migration |
 | `docs/plans/mcp-wrapper-contract-audit-2026-04-28.md` | Working | 1 | archive-after-migration |
 | `docs/plans/mcp-wrapper-deep-audit-2026-04-29.md` | Working | 1 | archive-after-migration |
 | `docs/plans/mcp-wrapper-redesign-prerequisites-2026-04-29.md` | Working | 1 | archive-after-migration |
@@ -168,7 +169,6 @@
 | `reports/quality/reports-workspace-review.json` | Working | 0 | archive-after-migration |
 | `reports/quality/root-hygiene-cleanup-classification.json` | Working | 0 | archive-after-migration |
 | `reports/quality/root-hygiene-review-evidence.json` | Working | 0 | archive-after-migration |
-| `reports/quality/silver-gold-filter-parity-report.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -203,6 +203,7 @@
 | `docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
 | `docs/00-project/ai/agents/policy/CONSOLIDATION_VALIDATION.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
 | `docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
+| `docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
 | `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
 | `docs/00-project/ai/agents/policy/SPECIALIST_PROFILE_TEMPLATE.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
 | `docs/00-project/ai/agents/policy/agent-orchestration-rules.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py |
@@ -234,6 +235,7 @@
 | `docs/02-architecture/adr-registry/index.md` | adr-registry-generated-docs |  |  | scripts/generate_adr_registry.py |
 | `docs/02-architecture/adr-registry/registry.json` | adr-registry-generated-docs |  |  | scripts/generate_adr_registry.py |
 | `docs/02-architecture/adr-registry/status-dashboard.md` | adr-registry-generated-docs |  |  | scripts/generate_adr_registry.py |
+| `docs/02-architecture/diagrams/README-new-section.md` |  | diagram_kind:diagram_support | diagram_support |  |
 | `docs/02-architecture/diagrams/_template.mmd` |  | diagram_kind:diagram_support | diagram_support |  |
 | `docs/02-architecture/diagrams/architecture/49-chembl-pipeline-activity-dataflow.mmd` | pipeline-dataflow-generated-docs |  | diagram_canonical_source | scripts/diagrams/generate_pipeline_dataflows.py |
 | `docs/02-architecture/diagrams/architecture/50-chembl-pipeline-activity-filter-criteria.mmd` | pipeline-dataflow-generated-docs |  | diagram_canonical_source | scripts/diagrams/generate_pipeline_dataflows.py |
@@ -252,8 +254,6 @@
 | `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-composite-runner-pkg-part2.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/generate_package_family_class_diagrams.py |
 | `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-base-transformer.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/generate_package_family_class_diagrams.py |
 | `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-batch-execution.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/generate_package_family_class_diagrams.py |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-lifecycle.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/generate_package_family_class_diagrams.py |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-postrun.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/generate_package_family_class_diagrams.py |
 
 ## GitHub Issue Evidence Examples
 

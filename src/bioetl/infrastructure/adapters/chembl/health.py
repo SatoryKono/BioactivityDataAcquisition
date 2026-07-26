@@ -74,7 +74,6 @@ class ChemblHealthMixin:
     http_client: UnifiedHTTPClient
     logger: LoggerPort
     provider_name: str
-    _http_client: UnifiedHTTPClient
     _logger: LoggerPort
     _page_size: int
     _adapter_metrics: AdapterMetricsRecorder
@@ -126,7 +125,7 @@ class ChemblHealthMixin:
         try:
             with self._adapter_metrics.measure_request("/status"):
                 response = await asyncio.wait_for(
-                    self._http_client.get_once(CHEMBL_STATUS_URL),
+                    self.http_client.get_once(CHEMBL_STATUS_URL),
                     timeout=CHEMBL_HEALTH_PROBE_TIMEOUT_SECONDS,
                 )
             status = self._handle_health_response(response)
@@ -166,7 +165,7 @@ class ChemblHealthMixin:
         Returns:
             HealthStatus derived from the circuit breaker's current state.
         """
-        return assess_health_from_circuit_breaker(self._http_client.circuit_breaker)
+        return assess_health_from_circuit_breaker(self.http_client.circuit_breaker)
 
     def _get_effective_batch_size(self) -> int:
         """Return the effective ``limit`` parameter for the next API request.
@@ -183,7 +182,7 @@ class ChemblHealthMixin:
           requests.
         """
         health_status = self._get_effective_health_status()
-        failure_count = self._http_client.circuit_breaker.get_failure_count()
+        failure_count = self.http_client.circuit_breaker.get_failure_count()
 
         if health_status == HealthStatus.UNHEALTHY:
             raise CriticalError(
@@ -265,12 +264,12 @@ class ChemblHealthMixin:
             Error stats.
         """
         return {
-            "circuit_breaker_failures": self._http_client.circuit_breaker.get_failure_count(),
-            "circuit_breaker_state": self._http_client.circuit_breaker.get_state().value,
+            "circuit_breaker_failures": self.http_client.circuit_breaker.get_failure_count(),
+            "circuit_breaker_state": self.http_client.circuit_breaker.get_state().value,
             "health_status": self._get_effective_health_status().value,
         }
 
     def reset_circuit_breaker(self) -> None:
         """Reset circuit breaker (e.g., after successful recovery)."""
-        self._http_client.circuit_breaker.reset()
+        self.http_client.circuit_breaker.reset()
         self._logger.info("chembl_circuit_breaker_reset", provider="chembl")

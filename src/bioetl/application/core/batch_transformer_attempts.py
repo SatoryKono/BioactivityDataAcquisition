@@ -10,7 +10,7 @@ from bioetl.application.core.batch_processing_runtime import (
     OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
 )
 from bioetl.application.core.batch_transformer_attempt_failures import (
-    _build_filtered_out_handling_context_from_mapping,
+    _build_filtered_out_handling_context,
     handle_filtered_out_error,
     handle_transform_processing_error,
 )
@@ -91,7 +91,13 @@ async def transform_record_attempt(
     except FilteredOutError as error:
         return handle_filtered_out_error(
             error,
-            _build_filtered_out_handling_context_from_mapping(locals()),
+            _build_filtered_out_handling_context(
+                batch_metrics=batch_metrics,
+                dq_config=dq_config,
+                raw_record=raw_record,
+                debug_export_service=debug_export_service,
+                index=index,
+            ),
         )
     except TRANSFORM_PROCESSING_ERRORS as error:
         return handle_transform_processing_error(

@@ -82,3 +82,38 @@ def test_initialize_runtime_policy_sources_bootstraps_all_registries() -> None:
     mock_classification.assert_called_once_with(configs_root)
     mock_protein_class_mapping.assert_called_once_with(configs_root)
     mock_vocab.assert_called_once_with(configs_root)
+
+
+def test_bootstrap_observability_bundle_executes_lazy_wrapper() -> None:
+    """The lazy wrapper must not evaluate type-only imports at runtime."""
+    expected_bundle = MagicMock()
+    run_id = MagicMock()
+    settings = MagicMock()
+
+    with patch(
+        "bioetl.composition.bootstrap.runtime.observability_bundle."
+        "bootstrap_observability_bundle_impl",
+        return_value=expected_bundle,
+    ) as mock_bootstrap:
+        result = phases.bootstrap_observability_bundle(
+            pipeline="chembl_activity",
+            run_id=run_id,
+            settings=settings,
+            log_level="INFO",
+        )
+
+    assert result is expected_bundle
+    mock_bootstrap.assert_called_once_with(
+        pipeline="chembl_activity",
+        run_id=run_id,
+        settings=settings,
+        log_level="INFO",
+        logger_bootstrapper=None,
+        tracer_bootstrapper=None,
+        metrics_bootstrapper=None,
+        audit_bootstrapper=None,
+        dq_monitor_bootstrapper=None,
+        preflight_validator=None,
+        yaml_config=None,
+        skip_gold=False,
+    )

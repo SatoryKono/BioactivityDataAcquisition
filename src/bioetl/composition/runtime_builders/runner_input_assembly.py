@@ -110,7 +110,7 @@ def _bind_resolved_cached_bronze_context(
 ) -> PipelineRunContext:
     """Propagate resolved cached Bronze replay context back into the run context."""
     current = getattr(ctx, "cached_bronze", None)
-    resolved = getattr(inputs, "cached_bronze", None)
+    resolved = inputs.cached_bronze
     if current == resolved:
         return ctx
     if is_dataclass(ctx):

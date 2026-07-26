@@ -44,6 +44,11 @@ class TestMutationTestingRollout:
         assert "src/bioetl/application/services/workflow_runner_service.py" in workflow
         assert "tests/unit/application/services/" in workflow
         assert "MUTATION_SCORE_THRESHOLD" in workflow
+        assert 'config["source_paths"]' in workflow
+        assert 'config["pytest_add_cli_args_test_selection"]' in workflow
+        assert "          mutmut run\n" in workflow
+        assert "--paths-to-mutate=" not in workflow
+        assert "--tests-dir=" not in workflow
         assert (
             "mutmut run --paths-to-mutate=src/bioetl/domain/ --tests-dir=tests/ || true"
             not in workflow
@@ -52,8 +57,9 @@ class TestMutationTestingRollout:
             "Mutation workflow produced zero mutants; treating this as a broken gate."
             in workflow
         )
-        assert "Could not parse mutmut results" in workflow
-        assert "mutmut results failed" in workflow
+        assert "mutmut export-cicd-stats" in workflow
+        assert "mutmut-cicd-stats.json" in workflow
+        assert "Invalid mutmut CI/CD stats" in workflow
         assert "--paths-to-mutate=src/bioetl/application/" not in workflow
         assert mutation.get("ci_gate_mode") == "partial"
 

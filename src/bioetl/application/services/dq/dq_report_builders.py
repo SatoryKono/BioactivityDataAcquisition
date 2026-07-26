@@ -6,7 +6,7 @@ Extracted to reduce code duplication per refactoring analysis 2026-01-25.
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Sequence, Set
 from dataclasses import fields, is_dataclass
 from datetime import datetime
 from enum import Enum
@@ -77,12 +77,13 @@ class _HasDQStatus(Protocol):
 
 
 def run_serialized_checks[
+    TCheckType,
     TCheckResult: _HasDQStatus,
     TSerializedResult,
 ](
     *,
-    enabled_checks: set[object],
-    dispatch: list[tuple[object, str, Callable[[], TCheckResult]]],
+    enabled_checks: Set[TCheckType],
+    dispatch: Sequence[tuple[TCheckType, str, Callable[[], TCheckResult]]],
     checks: dict[str, TSerializedResult],
     serialize_result: Callable[[TCheckResult], TSerializedResult],
     passed: int,

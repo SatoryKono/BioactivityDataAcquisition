@@ -39,10 +39,17 @@ _PREFLIGHT_STAGE_NAME = ORDINARY_RUN_LEDGER_STAGE_NAMES[0]
 class _PreflightExecutionHostProtocol(Protocol):
     """Runner attributes required by preflight execution."""
 
-    _runtime: RuntimeConfig
-    _services: PipelineHealthServicesProtocol
-    _preflight_service: PreflightService
-    _observer: PipelineObserver
+    @property
+    def _runtime(self) -> RuntimeConfig: ...
+
+    @property
+    def _services(self) -> PipelineHealthServicesProtocol: ...
+
+    @property
+    def _preflight_service(self) -> PreflightService: ...
+
+    @property
+    def _observer(self) -> PipelineObserver: ...
 
 
 async def validate_infrastructure(host: _PreflightExecutionHostProtocol) -> None:

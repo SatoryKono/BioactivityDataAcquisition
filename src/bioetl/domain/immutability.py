@@ -23,6 +23,7 @@ class FrozenList(Sequence[object]):
     """Immutable sequence snapshot that cannot be mutated via list APIs."""
 
     __slots__ = ("_items",)
+    _items: tuple[object, ...]
 
     def __init__(self, iterable: Iterable[object] = ()) -> None:
         object.__setattr__(self, "_items", tuple(iterable))
@@ -51,7 +52,9 @@ class FrozenList(Sequence[object]):
     def __eq__(self, other: object) -> bool:
         if isinstance(other, FrozenList):
             return self._items == other._items
-        if isinstance(other, Sequence) and not isinstance(other, (str, bytes, bytearray)):
+        if isinstance(other, Sequence) and not isinstance(
+            other, (str, bytes, bytearray)
+        ):
             return list(self._items) == list(other)
         return NotImplemented
 
@@ -70,6 +73,7 @@ class FrozenDict(Mapping[str, object]):
     """Immutable mapping snapshot that cannot be mutated via dict APIs."""
 
     __slots__ = ("_data",)
+    _data: dict[str, object]
 
     def __init__(
         self,

@@ -37,6 +37,8 @@ class PipelineDefinition(NamedTuple):
 class PipelineRegistry:
     """Registry for pipeline factories."""
 
+    _bioetl_shared_default_registry: bool = False
+
     def __init__(self) -> None:
         """Initialize a new empty registry."""
         self._registry: dict[str, PipelineDefinition] = {}

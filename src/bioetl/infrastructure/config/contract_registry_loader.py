@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import os
 import threading
+from collections.abc import Mapping
 from pathlib import Path
+from typing import Any, cast
 
 import yaml
 
@@ -35,12 +37,12 @@ def _is_likely_network_drive(path: Path) -> bool:
         from ctypes import wintypes
 
         DRIVE_REMOTE = 4
-        kernel32 = ctypes.windll.kernel32
+        kernel32 = cast("Any", ctypes).windll.kernel32  # Any: dynamic Windows API
         kernel32.GetDriveTypeW.argtypes = [wintypes.LPCWSTR]
         kernel32.GetDriveTypeW.restype = wintypes.DWORD
 
         drive_type = kernel32.GetDriveTypeW(drive + "\\")
-        return drive_type == DRIVE_REMOTE
+        return bool(drive_type == DRIVE_REMOTE)
     except (OSError, AttributeError, TypeError):
         # If detection fails, assume local to avoid false positives
         return False
@@ -52,7 +54,10 @@ def _load_yaml_with_timeout(
     """Load YAML file with timeout protection for network drives."""
     if not _is_likely_network_drive(path):
         # Direct read for local drives
-        return yaml.safe_load(path.read_text(encoding="utf-8"))
+        payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+        if not isinstance(payload, Mapping):
+            raise ValueError(f"YAML root must be a mapping: {path}")
+        return cast("JsonDict", dict(payload))
 
     # Timeout-protected read for network drives
     result: JsonDict | None = None
@@ -61,7 +66,10 @@ def _load_yaml_with_timeout(
     def _target() -> None:
         nonlocal result, exception
         try:
-            result = yaml.safe_load(path.read_text(encoding="utf-8"))
+            payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+            if not isinstance(payload, Mapping):
+                raise ValueError(f"YAML root must be a mapping: {path}")
+            result = cast("JsonDict", dict(payload))
         except (OSError, yaml.YAMLError, ValueError) as e:
             exception = e
 

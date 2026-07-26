@@ -114,6 +114,3 @@ class HistoricalReplayClosureService:
 
 HistoricalReplayClosureReport = HistoricalReplayClosureReportRecord
 HistoricalReplayResidualDisposition = HistoricalReplayResidualDispositionRecord
-
-
-HistoricalReplayClosureReport = HistoricalReplayClosureReportRecord

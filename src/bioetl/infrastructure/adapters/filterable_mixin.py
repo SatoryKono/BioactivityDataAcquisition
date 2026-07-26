@@ -23,7 +23,7 @@ __all__ = [
 ]
 
 
-from typing import TYPE_CHECKING, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, ClassVar, Protocol, runtime_checkable
 
 from bioetl.domain.types import JsonDict
 
@@ -95,7 +95,7 @@ class NotSupportedMultiFilterMixin:
     """
 
     provider_name: str  # Must be defined by the adapter class
-    unsupported_multi_filter_message: str | None = None
+    unsupported_multi_filter_message: ClassVar[str | None] = None
 
     def fetch_multi_filtered(
         self,

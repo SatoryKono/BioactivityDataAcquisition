@@ -6,14 +6,18 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import date, datetime
 from math import isnan
-from typing import Any, Protocol, cast
+from typing import TYPE_CHECKING, Any, Protocol, cast
 from uuid import UUID
 
 import pyarrow as pa
 
 from bioetl.domain.deterministic_identity import deterministic_uuid
-from bioetl.domain.ports import ForeignKeyReconciliationRequest, QuarantinePort
-from bioetl.domain.types import BatchID
+from bioetl.domain.ports import (
+    ForeignKeyReconciliationRequest,
+    QuarantinePort,
+    QuarantineWriteRequest,
+)
+from bioetl.domain.types import BatchID, BronzeRecord, MetaDict
 from bioetl.infrastructure.storage.gold.io_delta_protocols import (
     GoldWriteRetryModuleProtocol,
 )
@@ -22,6 +26,9 @@ from bioetl.infrastructure.storage.gold.io_delta_runtime import (
 )
 from bioetl.infrastructure.storage.gold.io_helpers import load_gold_writer_module
 from bioetl.infrastructure.time.system_clock import current_utc_time
+
+if TYPE_CHECKING:
+    from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 FOREIGN_KEY_ORPHAN_ERROR_CODE = "FILTERED_OUT_SILVER"
 FOREIGN_KEY_ORPHAN_GOLD_ERROR_CODE = "FILTERED_OUT_GOLD"
@@ -46,7 +53,9 @@ class ReconciliationMutationHost(Protocol):
 
     quarantine: QuarantinePort | None
     quarantine_pipeline_name: str | None
-    silver_writer: object
+    @property
+    def silver_writer(self) -> SilverWriter: ...
+
     gold_writer: object | None
 
 
@@ -293,25 +302,28 @@ async def quarantine_orphan_rows(
         f"{source_table}.{request.source_key} has no matching row "
         f"in {reference_table}.{request.reference_key}"
     )
-    quarantine_rows: list[dict[str, object]] = []
+    quarantine_rows: list[QuarantineWriteRequest] = []
     for row in orphan_rows:
         quarantine_rows.append(
             {
                 "pipeline": pipeline_name,
                 "error_code": error_code,
-                "payload": row,
+                "payload": cast("BronzeRecord", row),
                 "bronze_batch_id": batch_id,
                 "run_id": None,
-                "metadata": {
-                    "error_details": {"message": reason},
-                    "classification": "filter_rejection",
-                    "quarantine_category": FOREIGN_KEY_ORPHAN_QUARANTINE_CATEGORY,
-                    "source_table": source_table,
-                    "reference_table": reference_table,
-                    "source_layer": request.source_layer,
-                    "reference_layer": request.reference_layer,
-                    "mutation_layer": request.effective_mutation_layer,
-                },
+                "metadata": cast(
+                    "MetaDict",
+                    {
+                        "error_details": {"message": reason},
+                        "classification": "filter_rejection",
+                        "quarantine_category": FOREIGN_KEY_ORPHAN_QUARANTINE_CATEGORY,
+                        "source_table": source_table,
+                        "reference_table": reference_table,
+                        "source_layer": request.source_layer,
+                        "reference_layer": request.reference_layer,
+                        "mutation_layer": request.effective_mutation_layer,
+                    },
+                ),
                 "ingestion_ts": current_utc_time(),
             }
         )

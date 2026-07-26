@@ -7,6 +7,7 @@ from collections.abc import Mapping
 from typing import TypeVar
 
 import polars as pl
+import pyarrow as pa
 
 from bioetl.application.composite.helpers.resolver_helper import ResolverHelper
 from bioetl.application.composite.join_key_normalization import (
@@ -163,7 +164,11 @@ class ChainedKeyResolver:
                 f"from '{source_table}': {exc}"
             ) from exc
 
-        if pa_table is None or pa_table.num_rows == 0:
+        if pa_table is None:
+            return seed_keys
+        if not isinstance(pa_table, pa.Table):
+            raise TypeError("Delta reader must return a PyArrow table")
+        if pa_table.num_rows == 0:
             self._resolver_helper.log_warning(
                 "Source Silver table is empty, falling back to seed keys",
                 dependency=dependency.pipeline,

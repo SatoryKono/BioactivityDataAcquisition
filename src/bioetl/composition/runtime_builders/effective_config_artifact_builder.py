@@ -28,6 +28,9 @@ from bioetl.domain.control_plane.effective_config_artifact import (
 )
 
 if TYPE_CHECKING:
+    from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
+        ManifestReproducibilityContext,
+    )
     from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
     from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
         RunManifestContractIdentity,
@@ -126,7 +129,7 @@ def create_and_persist_effective_config_artifact(
     inputs: RunnerInputs,
     provider: str,
     entity: str,
-    reproducibility_context: object | None = None,
+    reproducibility_context: ManifestReproducibilityContext | None = None,
     contract_identity: RunManifestContractIdentity | None = None,
 ) -> tuple[str, str, str, str, str]:
     """Create effective config artifact, persist it, and return provenance fields."""

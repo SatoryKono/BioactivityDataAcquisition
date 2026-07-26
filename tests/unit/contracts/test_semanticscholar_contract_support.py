@@ -59,7 +59,9 @@ def test_load_semanticscholar_replay_payload__returns_registered_probe_payload(
     )
 
 
-def test_load_semanticscholar_replay_payload__forwards_errors_for_unknown_probe() -> None:
+def test_load_semanticscholar_replay_payload__forwards_errors_for_unknown_probe() -> (
+    None
+):
     import tests.contract._semanticscholar_contract_support as helper
 
     with pytest.raises(Exception):

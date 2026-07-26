@@ -6,6 +6,7 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+from datetime import UTC, datetime
 from pathlib import Path
 
 from bioetl.application.services.run_reports.query import (
@@ -92,4 +93,19 @@ def test_diff_and_prune_dry_run(tmp_path: Path) -> None:
         root=tmp_path,
         dry_run=True,
     )
+    assert len(victims) == 1
+
+
+def test_prune_by_age_uses_explicit_time_seam(tmp_path: Path) -> None:
+    _write_simple(tmp_path, run_id="run-a", silver=9)
+
+    victims = prune_reports(
+        kind="pipeline",
+        owner="chembl_activity",
+        max_age_days=1,
+        now=datetime(2100, 1, 1, tzinfo=UTC),
+        root=tmp_path,
+        dry_run=True,
+    )
+
     assert len(victims) == 1

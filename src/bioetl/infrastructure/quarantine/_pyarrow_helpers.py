@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 try:
     import pyarrow.compute as pc
 except ImportError:
-    pc = None  # type: ignore[assignment]
+    pc = None
 
 
 class _PyArrowComputeModule(Protocol):

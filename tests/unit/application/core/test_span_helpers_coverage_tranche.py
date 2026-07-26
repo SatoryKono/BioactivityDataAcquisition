@@ -7,7 +7,6 @@ import pytest
 pytestmark = pytest.mark.unit
 
 from types import SimpleNamespace
-from typing import Any
 
 from bioetl.application.core.span_helpers import (
     build_pipeline_span_attributes,

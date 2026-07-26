@@ -14,6 +14,7 @@ from bioetl.domain.normalization import (
     compute_execution_identity_fingerprint,
     compute_input_snapshot_identity_fingerprint,
 )
+from bioetl.domain.control_plane import RunInputSnapshotRef
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 from bioetl.domain.filtering.silver_filter_identity import (
     resolve_silver_filter_compatibility_mode,
@@ -75,7 +76,9 @@ def _normalize_execution_identity_payload(
     )
 
 
-def _serialize_input_snapshot_ref(snapshot: object) -> dict[str, object]:
+def _serialize_input_snapshot_ref(
+    snapshot: RunInputSnapshotRef,
+) -> dict[str, object]:
     """Return one checkpoint-safe serialized snapshot ref mapping."""
     captured_at = getattr(snapshot, "captured_at", None)
     return {
@@ -95,9 +98,7 @@ def _serialize_input_snapshot_ref(snapshot: object) -> dict[str, object]:
         ),
         "etag": _coerce_optional_str(getattr(snapshot, "etag", None)),
         "last_modified": _coerce_optional_str(getattr(snapshot, "last_modified", None)),
-        "captured_at": (
-            captured_at.isoformat() if hasattr(captured_at, "isoformat") else None
-        ),
+        "captured_at": captured_at.isoformat() if captured_at is not None else None,
     }
 
 
@@ -254,9 +255,7 @@ def _build_checkpoint_metadata_from_identity(
         contract_ref=identity_payload["contract_ref"],
         contract_version=identity_payload["contract_version"],
         normalization_profile_ref=identity_payload["normalization_profile_ref"],
-        normalization_profile_version=identity_payload[
-            "normalization_profile_version"
-        ],
+        normalization_profile_version=identity_payload["normalization_profile_version"],
         normalization_profile_hash=identity_payload["normalization_profile_hash"],
         exact_replay=exact_replay,
         required_persistence_profile=run_context_metadata[

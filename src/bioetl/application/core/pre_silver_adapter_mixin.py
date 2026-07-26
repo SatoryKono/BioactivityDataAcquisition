@@ -8,7 +8,7 @@ from bioetl.application.core.pre_silver_finalization_flow import (
     _PreSilverFinalizationFlowMixin,
 )
 from bioetl.application.core.pre_silver_staging_flow import _PreSilverStagingFlowMixin
-from bioetl.domain.types import JsonDict
+from bioetl.domain.types import GoldRecord, JsonDict
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -32,7 +32,7 @@ class _PreSilverRecordAdapterMixin:
             **business_data: object,
         ) -> EntityT: ...
 
-        def entity_to_silver_record(self, entity: object) -> SilverRecord: ...
+        def entity_to_silver_record(self, entity: object) -> GoldRecord: ...
 
         def _apply_structural_policy(
             self,
@@ -55,7 +55,7 @@ class _PreSilverRecordAdapterMixin:
         content_hash: str,
         index: int,
         business_data: JsonDict,
-    ) -> SilverRecord:
+    ) -> GoldRecord:
         entity = self._create_entity(
             self.entity_class,
             context,
@@ -64,7 +64,7 @@ class _PreSilverRecordAdapterMixin:
             index=index,
             **business_data,
         )
-        silver_record = cast("SilverRecord", self.entity_to_silver_record(entity))
+        silver_record = self.entity_to_silver_record(entity)
         return self._postprocess_pre_silver_record(
             silver_record,
             business_data=business_data,
@@ -72,10 +72,10 @@ class _PreSilverRecordAdapterMixin:
 
     def _postprocess_pre_silver_record(
         self,
-        silver_record: SilverRecord,
+        silver_record: GoldRecord,
         *,
         business_data: JsonDict,
-    ) -> SilverRecord:
+    ) -> GoldRecord:
         del business_data
         return silver_record
 
@@ -87,15 +87,12 @@ class _PreSilverRecordAdapterMixin:
         index: int,
         business_data: JsonDict,
     ) -> JsonDict:
-        return cast(
-            JsonDict,
-            self._build_pre_silver_record(
-                context,
-                entity_id,
-                content_hash,
-                index,
-                business_data,
-            ),
+        return self._build_pre_silver_record(
+            context,
+            entity_id,
+            content_hash,
+            index,
+            business_data,
         )
 
     def _apply_pre_silver_structural_policy(

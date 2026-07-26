@@ -7,6 +7,7 @@ from time import perf_counter
 
 from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.control_plane.run_ledger import slice_ledger_entries_after
+from bioetl.domain.ports import MetricsPort
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane._file_run_ledger_helpers import (
     RunLedgerCorruptionError,
@@ -26,7 +27,7 @@ class FileRunLedgerQueriesMixin:
     """Query and load helpers for ``FileRunLedgerStore``."""
 
     base_path: Path
-    metrics: object | None
+    metrics: MetricsPort | None
 
     def list_entries(self, manifest_id: str) -> list[RunLedgerEntry]:
         """Return all entries for one manifest in append order."""

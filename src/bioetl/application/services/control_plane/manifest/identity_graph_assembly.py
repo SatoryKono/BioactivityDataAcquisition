@@ -111,6 +111,7 @@ class RunManifestIdentityGraphAssembler:
         )
         return dict(payload)
 
+    @staticmethod
     def _build_identity_graph_replay_section(
         manifest: RunManifest,
         diagnostics: dict[str, object],

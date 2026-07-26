@@ -23,6 +23,7 @@ import subprocess
 import sys
 import types
 from collections import defaultdict
+from collections.abc import Callable, Sequence
 from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Final, Protocol, TypedDict
@@ -93,6 +94,32 @@ _RUNTIME_EXCLUDE_PARTS = (
 )
 _TEXT_SUFFIXES = {".py", ".md", ".json", ".yml", ".yaml"}
 MetricInventoryReport = dict[str, list[str] | dict[str, list[str]]]
+
+
+class _ObservabilityEventInventory(TypedDict):
+    declared_observability_events: list[str]
+    emitted_observability_events: list[str]
+    retired_declared_observability_events: list[str]
+    retired_declared_observability_events_emitted: list[str]
+    raw_unused_declared_observability_events: list[str]
+    emitted_observability_events_without_contract: list[str]
+    observability_event_emitters: dict[str, list[str]]
+    domain_event_emitters: list[str]
+
+
+class _CardinalityReviewFields(TypedDict):
+    runtime_cardinality_candidates: list[str]
+    runtime_cardinality_reviewed: list[str]
+    runtime_cardinality_review_required: list[str]
+    runtime_cardinality_evidence: dict[str, list[str]]
+    runtime_cardinality_threshold_violations: list[str]
+
+
+class _RiskyLabelReviewFields(TypedDict):
+    declared_risky_label_candidates: list[str]
+    contract_bounded_risky_labels: set[str]
+    declared_risky_label_reviewed: list[str]
+    declared_risky_label_review_required: list[str]
 _TEXT_FILE_DISCOVERY_CACHE: dict[str, tuple[Path, ...]] = {}
 _METRIC_INVENTORY_CACHE: dict[str, MetricInventoryReport] = {}
 _SOURCE_TEXT_CACHE: dict[str, str | None] = {}
@@ -480,18 +507,17 @@ def _run_metric_mention_grep(
 ) -> bool | None:
     """Run one grep chunk. Returns False on hard failure, True on success."""
     try:
-        kwargs: dict[str, object] = {
-            "capture_output": True,
-            "text": True,
-            "encoding": "utf-8",
-            "errors": "replace",
-            "check": False,
-            "timeout": _METRIC_MENTION_GREP_TIMEOUT_SECONDS,
-        }
-        kwargs.update(_hidden_windows_subprocess_kwargs())
-        if cwd is not None:
-            kwargs["cwd"] = cwd
-        result = subprocess.run(command, **kwargs)
+        result = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
+            timeout=_METRIC_MENTION_GREP_TIMEOUT_SECONDS,
+            cwd=cwd,
+            **_hidden_windows_subprocess_kwargs(),
+        )
     except (OSError, subprocess.TimeoutExpired):
         return None
     if result.returncode == 1:
@@ -506,7 +532,7 @@ def _run_metric_mention_grep(
 def _scan_metric_mentions_via_command_chunks(
     relative_paths: list[str],
     *,
-    command_builder,
+    command_builder: Callable[[list[str]], list[str]],
     cwd: Path | None = None,
 ) -> dict[str, list[str]] | None:
     mentions: dict[str, list[str]] = defaultdict(list)
@@ -2027,7 +2053,9 @@ def _build_typed_inventory_report(
         ),
         "policy_aliases_without_catalog": sorted(policy_aliases - catalog_aliases),
         "catalog_aliases_without_declaration": sorted(catalog_aliases - policy_aliases),
-        "http_semantics_violations": sorted(set(_http_semantics_violations(typed_targets))),
+        "http_semantics_violations": sorted(
+            set(_http_semantics_violations(typed_targets))
+        ),
         "prometheus_run_id_selector_violations": sorted(run_id_selector_violations),
     }
     report["panel_contract_drift"] = _panel_contract_drift(repo_root, report)
@@ -2365,7 +2393,9 @@ def _sample_matches_metric(sample_name: str, metric_name: str) -> bool:
     return sample_name == metric_name or sample_name.startswith(f"{metric_name}_")
 
 
-def _observed_labelsets_for_metric(metric: object, metric_name: str) -> set[tuple[tuple[str, str], ...]]:
+def _observed_labelsets_for_metric(
+    metric: object, metric_name: str
+) -> set[tuple[tuple[str, str], ...]]:
     observed_labelsets: set[tuple[tuple[str, str], ...]] = set()
     for family in metric.collect():  # type: ignore[attr-defined]
         for sample in family.samples:
@@ -2613,7 +2643,9 @@ def _git_source_provenance(repo_root: Path) -> dict[str, object]:
 RuntimeCardinalityReviewSummary = dict[str, object]
 
 
-def _parse_observed_series_count_rows(raw_value: list[object]) -> int | None:
+def _parse_observed_series_count_rows(
+    raw_value: Sequence[object],
+) -> int | None:
     prefix = "observed_series_count="
     for row in raw_value:
         if not isinstance(row, str) or not row.startswith(prefix):
@@ -2966,7 +2998,7 @@ def _scan_docs_and_rules_mentions(
 
 def _collect_observability_event_inventory(
     repo_root: Path,
-) -> dict[str, object]:
+) -> _ObservabilityEventInventory:
     declared_pipeline_events = _declared_pipeline_event_names()
     mapped_observability_events, mapped_event_emitters = (
         _scan_domain_mapping_observability_events(repo_root)
@@ -3053,9 +3085,7 @@ def _canonical_runtime_sets(
     )
 
 
-def _allowlisted_metric_diff(
-    raw_set: set[str], allowlist: set[str]
-) -> list[str]:
+def _allowlisted_metric_diff(raw_set: set[str], allowlist: set[str]) -> list[str]:
     return sorted(raw_set - allowlist)
 
 
@@ -3065,7 +3095,7 @@ def _cardinality_review_fields(
     drift_allowlist: dict[str, set[str]],
     cardinality_thresholds: dict[str, int],
     observed_series_counts: dict[str, int],
-) -> dict[str, object]:
+) -> _CardinalityReviewFields:
     reviewed_runtime_cardinality = drift_allowlist.get(
         "runtime_cardinality_review_required", set()
     ) | set(cardinality_thresholds)
@@ -3106,7 +3136,7 @@ def _risky_label_review_fields(
     declared_set: set[str],
     declared_label_contract_metrics: set[str],
     drift_allowlist: dict[str, set[str]],
-) -> dict[str, object]:
+) -> _RiskyLabelReviewFields:
     declared_risky_label_candidates = sorted(
         metric_name
         for metric_name, label_names in REGISTERED_PROMETHEUS_METRIC_LABELS.items()
@@ -3213,7 +3243,7 @@ def collect_metric_inventory(
         drift_allowlist.get("runtime_without_registry", set()),
     )
     unused_declared_observability_events = _allowlisted_metric_diff(
-        set(event_inventory["raw_unused_declared_observability_events"]),  # type: ignore[arg-type]
+        set(event_inventory["raw_unused_declared_observability_events"]),
         drift_allowlist.get("unused_declared_observability_events", set()),
     )
     ruled_without_runtime = _allowlisted_metric_diff(
@@ -3280,7 +3310,7 @@ def collect_metric_inventory(
             "declared_risky_label_candidates"
         ],
         "declared_risky_label_contract_reviewed": sorted(
-            risky_label_fields["contract_bounded_risky_labels"]  # type: ignore[arg-type]
+            risky_label_fields["contract_bounded_risky_labels"]
         ),
         "declared_risky_label_reviewed": risky_label_fields[
             "declared_risky_label_reviewed"

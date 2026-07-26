@@ -30,7 +30,7 @@ from bioetl.domain.value_objects.taxonomy_id import TaxonomyId
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import BronzeRecord, PrimaryId, SilverRecord
+    from bioetl.domain.types import BronzeRecord, PrimaryId
 
 
 class TargetTransformer(BaseChemblTransformer):
@@ -164,10 +164,10 @@ class TargetTransformer(BaseChemblTransformer):
 
     def _postprocess_pre_silver_record(
         self,
-        silver_record: SilverRecord,
+        silver_record: GoldRecord,
         *,
         business_data: JsonDict,
-    ) -> SilverRecord:
+    ) -> GoldRecord:
         """Align silver output with the published target schema field name."""
         target_record: JsonDict = dict(silver_record)
         description = target_record.get("target_description")
@@ -179,7 +179,7 @@ class TargetTransformer(BaseChemblTransformer):
             description = business_data.get("description")
         target_record.pop("description", None)
         target_record["target_description"] = description
-        return cast("SilverRecord", target_record)
+        return target_record
 
     def transform_for_gold(
         self,

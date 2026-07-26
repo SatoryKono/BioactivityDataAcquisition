@@ -264,7 +264,7 @@ class ChemblAdapter(
         url = self._mapper.get_resource_url(entity_type)
         params = {"limit": 1, "format": "json"}
         with self._adapter_metrics.measure_request(f"/{entity_type}/count"):
-            response = await self._http_client.get(url, params=params)
+            response = await self.http_client.get(url, params=params)
         data = response.json()
         page_meta = data.get("page_meta", {})
         total_count: int = page_meta.get("total_count", 0)

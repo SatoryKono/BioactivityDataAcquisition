@@ -21,7 +21,7 @@ from bioetl.domain.ports import ClockPort
 if TYPE_CHECKING:
     from bioetl.application.core.base_transformer import BaseTransformer
     from bioetl.application.core.pipeline_service_protocols import (
-        PipelineLoggingServicesProtocol,
+        PipelineServicesProtocol,
     )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.ports import LoggerPort
@@ -57,7 +57,7 @@ class BasePipeline(ABC):  # noqa: B024
         cls,
         run_id: RunID,
         runtime: RuntimeConfig,
-        services: PipelineLoggingServicesProtocol,
+        services: PipelineServicesProtocol,
         config: PipelineConfig,
         shutdown_signal: ShutdownSignal,
         started_at: datetime | None = None,
@@ -99,7 +99,7 @@ class BasePipeline(ABC):  # noqa: B024
         self,
         config: PipelineConfig,
         runtime: RuntimeConfig,
-        services: PipelineLoggingServicesProtocol,
+        services: PipelineServicesProtocol,
         run_id: RunID,
         shutdown_signal: ShutdownSignal,
         started_at: datetime | None = None,
@@ -158,7 +158,7 @@ class BasePipeline(ABC):  # noqa: B024
         return self._runtime
 
     @property
-    def services(self) -> PipelineLoggingServicesProtocol:
+    def services(self) -> PipelineServicesProtocol:
         """Access injected services."""
         return self._services
 

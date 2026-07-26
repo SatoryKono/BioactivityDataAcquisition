@@ -5,9 +5,11 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-import yaml
 
-from bioetl.infrastructure.config.base_config_loader import BaseConfigLoader, _load_yaml_file
+from bioetl.infrastructure.config.base_config_loader import (
+    BaseConfigLoader,
+    _load_yaml_file,
+)
 
 pytestmark = pytest.mark.timeout(120)  # Extended timeout for heavy imports
 
@@ -47,7 +49,9 @@ class TestLoadYamlFile:
     def test_load_yaml_file_valid_yaml(self, tmp_path: Path) -> None:
         """Test that valid YAML is parsed correctly."""
         file_path = tmp_path / "config.yaml"
-        file_path.write_text("key: value\nlist:\n  - item1\n  - item2\n", encoding="utf-8")
+        file_path.write_text(
+            "key: value\nlist:\n  - item1\n  - item2\n", encoding="utf-8"
+        )
         result = _load_yaml_file(file_path)
         assert result == {"key": "value", "list": ["item1", "item2"]}
 

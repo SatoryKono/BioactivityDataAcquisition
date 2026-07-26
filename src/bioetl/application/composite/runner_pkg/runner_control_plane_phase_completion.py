@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from functools import partial
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.runner_pkg.runner_control_plane_lifecycle import (
@@ -26,7 +27,22 @@ from bioetl.application.observability.pipeline_metrics import PipelineMetricsRec
 
 if TYPE_CHECKING:
     from bioetl.application.composite.runtime_models import CompositeExecutionContext
+    from bioetl.application.services.control_plane.ledger.service import (
+        RunLedgerService,
+    )
     from bioetl.domain.composite.result import DependencyResult, SeedResult
+
+
+def _record_dependency_completion(
+    ledger_service: RunLedgerService,
+    *,
+    name: str,
+    data: dict[str, object],
+) -> object:
+    return ledger_service.record_composite_dependency_completed(
+        dependency_name=name,
+        result=data,
+    )
 
 
 def _build_pipeline_metrics(
@@ -140,11 +156,10 @@ def record_dependencies_stage_completed(
         payload = build_dependency_result_payload(result)
         record_with_ledger_service(
             host,
-            lambda ledger_service, name=dependency_name, data=payload: (
-                ledger_service.record_composite_dependency_completed(
-                    dependency_name=name,
-                    result=data,
-                )
+            partial(
+                _record_dependency_completion,
+                name=dependency_name,
+                data=payload,
             ),
         )
     record_stage_completed(

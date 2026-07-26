@@ -47,20 +47,21 @@ Classes:
 | --- | --- | --- | --- |
 | deepwiki | T4 | remote HTTP | already shared |
 | ref | T4 | remote HTTP | already shared |
-| memory | T2 | npx stdio | later |
-| filesystem | T2 | npx stdio | later (stateful roots) |
-| fetch | T2 | uvx wrapper | later |
-| github | T2 | wrapper | later |
-| docker | T2 | docker mcp gateway stdio | later / ops |
+| memory | T2 | npx stdio | **deferred** (stateful; see §Stateful servers) |
+| filesystem | T2 | npx stdio | **deferred** (stateful roots) |
+| fetch | T2 | uvx wrapper | **Phase 2** port 8821 |
+| github | T2 | wrapper | **Phase 2** port 8820 |
+| docker | T2 | docker mcp gateway stdio | **Phase 2** port 8817 |
 | context7 | T2 | wrapper | **Phase 1** port 8815 |
 | ast-grep | T2 | wrapper | **Phase 1** port 8816 |
 | mcp-code-interpreter | T2 | uvx stdio | later |
-| prometheus | T2 | docker/wrapper | later |
-| grafana | T2 | docker/wrapper | later |
+| prometheus | T2 | docker/wrapper | **Phase 2** port 8822 |
+| grafana | T2 | docker/wrapper | **Phase 2** port 8823 |
 | brave-search | T2 | docker run stdio | **Phase 1** port 8811 |
-| neo4j-cypher | T2 | wrapper | later |
-| neo4j-memory | T2 | wrapper | later |
-| mermaid | T2 | gateway stdio | later |
+| neo4j-cypher | T2 | wrapper | **catalog** port 8824 (needs healthy neo4j auth) |
+| neo4j-memory | T2 | wrapper | **catalog** port 8825 (needs healthy neo4j auth) |
+| mermaid | T2 | gateway stdio | **Phase 2** port 8818 |
+| dockerhub | T2 | gateway stdio | **Phase 2** port 8819 |
 | deja | T2 | npx stdio | **Phase 1** port 8814 |
 | adr-analysis | T2 | npx stdio | **Phase 1 MVP** port 8813 |
 | mutmut | T2 | wrapper | later |
@@ -80,19 +81,36 @@ Classes:
 | Qodo | Yes (mcp.json) | Local profile |
 | Devin | Yes (`type: http` + URL) | Active projection follows the selected local profile |
 
-## Shared endpoints (v1)
+## Shared endpoints (v2)
 
-Catalog: `scripts/ops/runtime/mcp/shared-servers.json`
-
+Catalog: `scripts/ops/runtime/mcp/shared-servers.json`  
 Bridge pin: **`mcp-proxy@6.5.4`** (stdio → Streamable HTTP `/mcp`).
 
-| Server | URL |
-| --- | --- |
-| adr-analysis | `http://127.0.0.1:8813/mcp` |
-| deja | `http://127.0.0.1:8814/mcp` |
-| context7 | `http://127.0.0.1:8815/mcp` |
-| ast-grep | `http://127.0.0.1:8816/mcp` |
-| brave-search | `http://127.0.0.1:8811/mcp` |
+| Server | URL | Daily profile `shared` |
+| --- | --- | --- |
+| brave-search | `http://127.0.0.1:8811/mcp` | yes |
+| adr-analysis | `http://127.0.0.1:8813/mcp` | yes |
+| deja | `http://127.0.0.1:8814/mcp` | yes |
+| context7 | `http://127.0.0.1:8815/mcp` | yes |
+| ast-grep | `http://127.0.0.1:8816/mcp` | yes |
+| docker | `http://127.0.0.1:8817/mcp` | yes |
+| mermaid | `http://127.0.0.1:8818/mcp` | yes |
+| dockerhub | `http://127.0.0.1:8819/mcp` | yes |
+| github | `http://127.0.0.1:8820/mcp` | yes |
+| fetch | `http://127.0.0.1:8821/mcp` | yes |
+| prometheus | `http://127.0.0.1:8822/mcp` | yes |
+| grafana | `http://127.0.0.1:8823/mcp` | yes |
+| neo4j-cypher | `http://127.0.0.1:8824/mcp` | optional (`graph`/`full`) |
+| neo4j-memory | `http://127.0.0.1:8825/mcp` | optional (`graph`/`full`) |
+
+## Stateful servers (design gate — not on plane yet)
+
+| Server | Blocker | Direction |
+| --- | --- | --- |
+| `filesystem` | Per-client roots / sandbox paths | Single shared roots list only after explicit operator config; risk of cross-client write |
+| `memory` | Shared JSON knowledge graph file | One file + flock or accept single-writer; document path SSOT first |
+
+Do **not** add these to `shared-servers.json` until an ADR/note accepts the shared-state model.
 
 ## Generator contract
 
@@ -107,7 +125,11 @@ python scripts/ai/codex/setup_mcp.py --profile shared --transport-mode shared --
 | `--transport-mode stdio` | Explicit single-client fallback; wrappers only |
 | `--transport-mode shared` | Default; shared-capable servers become `type: http` localhost URLs |
 | `--transport-mode hybrid` | Same as shared for catalog servers; others stay stdio |
-| Profile `shared` | Membership = `stable` + `brave-search` (multi-client daily) |
+| Profile `shared` | `stable` + brave + docker/mermaid/dockerhub + prometheus/grafana |
+
+## Compose Mode B (optional — not default)
+
+`container_name: bioetl-mcp-<name>` + published `127.0.0.1:88xx` can guard **one** compose project against a second `compose up`. That does **not** stop Docker MCP Toolkit random `docker run` thrash and must **not** reintroduce long-lived **stdio** Compose (#6293). Prefer host `mcp-proxy` plane (this document). Mode B only for Docker-native HTTP images with protocol healthchecks.
 
 Localhost allowlist (not SaaS remote list):
 
@@ -120,7 +142,10 @@ Localhost allowlist (not SaaS remote list):
 | Client URLs | `127.0.0.1` / `localhost` only in generated config |
 | Secrets | Env loaders + wrappers; never tracked JSON |
 | Trust | Same OS user; not multi-tenant |
-| Auth token | Optional later (mcp-proxy `--apiKey`); none mandatory in v1 |
+| Auth token | Optional: `BIOETL_MCP_SHARED_API_KEY` → mcp-proxy `--apiKey` / client `X-API-Key`; none mandatory in v1 |
+| Bind | mcp-proxy `--host 127.0.0.1` (start-shared default) |
+| Watchdog | `watchdog-shared.ps1 -Daily` restarts DOWN servers only |
+| Mode B | Skeleton `docker-compose.mcp-shared.yml` — empty by default; no stdio Compose |
 | #6293 | No TTY keepalive stdio Compose; readiness via `/ping` + protocol smoke |
 
 ## Ops lifecycle
@@ -128,6 +153,7 @@ Localhost allowlist (not SaaS remote list):
 ```powershell
 .\scripts\ops\runtime\mcp\start-shared.ps1
 .\scripts\ops\runtime\mcp\health-shared.ps1
+.\scripts\ops\runtime\mcp\apply-shared-to-grok.ps1  # optional Grok projection; restart Grok afterward
 .\scripts\ops\runtime\mcp\stop-shared.ps1
 .\scripts\ops\runtime\docker\cleanup-mcp-orphans.ps1   # never kills bioetl-* / shared labels
 .\scripts\ops\runtime\docker\reset-mcp-host-sessions.ps1  # report; -Execute for actions

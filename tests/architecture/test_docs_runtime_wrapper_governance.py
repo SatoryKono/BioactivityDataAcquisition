@@ -7,6 +7,8 @@ import pytest
 import json
 from pathlib import Path
 
+from tests.helpers.git_index_scan import git_grep_fixed
+
 
 pytestmark = pytest.mark.architecture
 
@@ -33,14 +35,14 @@ DOCS_SHIMS = (
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT_LIFECYCLE = ROOT / "configs" / "quality" / "scripts_lifecycle_registry.json"
 ACTIVE_DIRECT_DISPATCH_ROOTS = (
-    ROOT / ".github",
-    ROOT / "docs" / "00-project",
-    ROOT / "docs" / "01-requirements",
-    ROOT / "docs" / "02-architecture",
-    ROOT / "docs" / "03-guides",
-    ROOT / "docs" / "04-reference",
-    ROOT / "docs" / "05-operations",
-    ROOT / "scripts",
+    ".github",
+    "docs/00-project",
+    "docs/01-requirements",
+    "docs/02-architecture",
+    "docs/03-guides",
+    "docs/04-reference",
+    "docs/05-operations",
+    "scripts",
 )
 SKIPPED_DIRECT_DISPATCH_PATH_PARTS = {
     "99-archive",
@@ -64,31 +66,19 @@ def test_docs_shims_delegate_to_shared_compat_helper() -> None:
         assert "Path(__file__).resolve().parents[2]" not in source, relative_path
 
 
-def _iter_active_text_files() -> list[Path]:
-    files: list[Path] = []
-    for root in ACTIVE_DIRECT_DISPATCH_ROOTS:
-        if not root.exists():
-            continue
-        for path in root.rglob("*"):
-            if not path.is_file():
-                continue
-            if any(part in SKIPPED_DIRECT_DISPATCH_PATH_PARTS for part in path.parts):
-                continue
-            if path.suffix not in {".md", ".py", ".yml", ".yaml"}:
-                continue
-            files.append(path)
-    return files
-
-
-def \
-    test_docs_direct_file_dispatch_does_not_regrow_in_active_surfaces() -> None:
+def test_docs_direct_file_dispatch_does_not_regrow_in_active_surfaces() -> None:
     """Active docs/workflows should use module dispatch instead of docs shim files."""
-    violations: list[str] = []
-    for path in _iter_active_text_files():
-        text = path.read_text(encoding="utf-8")
-        if "python scripts/docs/" not in text and "python3 scripts/docs/" not in text:
-            continue
-        violations.append(path.relative_to(ROOT).as_posix())
+    matches = git_grep_fixed(
+        root=ROOT,
+        patterns=("python scripts/docs/", "python3 scripts/docs/"),
+        paths=ACTIVE_DIRECT_DISPATCH_ROOTS,
+        suffixes=(".md", ".py", ".yml", ".yaml"),
+    )
+    violations = {
+        match.path
+        for match in matches
+        if not SKIPPED_DIRECT_DISPATCH_PATH_PARTS.intersection(Path(match.path).parts)
+    }
 
     assert not violations, (
         "Active surfaces must not document direct-file scripts/docs dispatch; "

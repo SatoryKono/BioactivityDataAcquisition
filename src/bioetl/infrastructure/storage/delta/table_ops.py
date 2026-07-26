@@ -5,6 +5,7 @@ from __future__ import annotations
 import shutil
 import sys
 from pathlib import Path
+from typing import cast
 from urllib.parse import unquote, urlparse
 
 import pyarrow as pa
@@ -61,7 +62,7 @@ def _read_records_from_active_parquet_files(
         rows: list[BronzeRecord] = tables[0].to_pylist()
         return rows
     concatenated = pa.concat_tables(tables)
-    return concatenated.to_pylist()
+    return cast("list[BronzeRecord]", concatenated.to_pylist())
 
 
 def read_delta_records(

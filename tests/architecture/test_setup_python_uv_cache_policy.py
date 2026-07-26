@@ -68,6 +68,17 @@ def test_pytest_cache_remains_separate_from_environment_cache_fingerprint() -> N
     assert "environment-cache" not in with_block["key"]
 
 
+def test_uv_run_steps_reuse_the_environment_synced_by_the_action() -> None:
+    step = _step_by_name(
+        "Pin locked/no-build/no-sync defaults for subsequent uv run steps"
+    )
+    script = cast(str, step["run"])
+
+    assert 'echo "UV_FROZEN=1"' in script
+    assert 'echo "UV_NO_BUILD=1"' in script
+    assert 'echo "UV_NO_SYNC=1"' in script
+
+
 def test_ci_cache_contract_is_documented_for_contributors() -> None:
     text = TEST_OPTIMIZATION_GUIDE.read_text(encoding="utf-8")
 
@@ -78,5 +89,6 @@ def test_ci_cache_contract_is_documented_for_contributors() -> None:
         "uv-extras",
         "uv-sync-args",
         "pytest cache",
+        "UV_NO_SYNC",
     ):
         assert token in text

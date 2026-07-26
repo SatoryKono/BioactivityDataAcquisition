@@ -3,23 +3,31 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Protocol
+from typing import TYPE_CHECKING, Any, Protocol
+
+if TYPE_CHECKING:
+    from datetime import datetime
+
+    import pyarrow as pa
+
+    from bioetl.domain.types import GoldRecord, ScdConfig
+    from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterProtocol
 
 
 class GoldWriterSimpleDeltaHostProtocol(Protocol):
     """Structural host contract for simple Gold Delta write helpers."""
 
-    csv_exporter: object | None
+    csv_exporter: CsvExporterProtocol | None
 
-    async def _run_in_executor(
+    async def _run_in_executor[ResultT](
         self,
-        func: Callable[..., object],
+        func: Callable[..., ResultT],
         *args: object,
-    ) -> object: ...
+    ) -> ResultT: ...
 
     def _to_arrow_table(
-        self, records: list[dict[str, object]], column_order: list[str] | None = None
-    ) -> object: ...
+        self, records: list[GoldRecord], column_order: list[str] | None = None
+    ) -> pa.Table: ...
 
 
 class GoldWriteAsyncioProtocol(Protocol):
@@ -54,23 +62,23 @@ class GoldWriterDeltaModuleProtocol(GoldWriteRetryModuleProtocol, Protocol):
 class GoldWriterScd2HostProtocol(Protocol):
     """Structural host contract for SCD2 Gold Delta write helpers."""
 
-    async def _run_in_executor(
+    async def _run_in_executor[ResultT](
         self,
-        func: Callable[..., object],
+        func: Callable[..., ResultT],
         *args: object,
-    ) -> object: ...
+    ) -> ResultT: ...
 
     def _to_arrow_table(
-        self, records: list[dict[str, object]], column_order: list[str] | None = None
-    ) -> object: ...
+        self, records: list[GoldRecord], column_order: list[str] | None = None
+    ) -> pa.Table: ...
 
     async def _merge_scd2(
         self,
-        dt: object,
-        records: list[dict[str, object]],
+        dt: Any,
+        records: list[GoldRecord],
         business_key: str | list[str],
-        scd_config: object,
-        ingestion_ts: object,
+        scd_config: ScdConfig,
+        ingestion_ts: datetime,
         column_order: list[str] | None = None,
     ) -> None: ...
 

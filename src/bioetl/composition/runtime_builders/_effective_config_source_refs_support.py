@@ -3,12 +3,23 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Protocol
 
 from bioetl.domain.control_plane.config_source_hashing import (
     ConfigSourceHashStrategy,
     compute_config_source_hashes,
 )
 from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef
+
+
+class _CandidatePathsFactory(Protocol):
+    def __call__(
+        self,
+        *,
+        provider: str,
+        entity: str,
+        repo_root: Path,
+    ) -> list[str]: ...
 
 
 def _compute_file_hashes(
@@ -52,7 +63,7 @@ def build_effective_config_source_refs(
     *,
     provider: str,
     entity: str,
-    candidate_paths_factory,
+    candidate_paths_factory: _CandidatePathsFactory,
     repo_root: Path,
 ) -> list[ConfigSourceRef]:
     """Build source references used to materialize effective-config artifacts."""

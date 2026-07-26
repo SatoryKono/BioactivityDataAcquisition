@@ -19,8 +19,13 @@ from bioetl.domain.control_plane.reproducibility_policy import (
 if TYPE_CHECKING:
     from bioetl.domain.config import RuntimeConfig
 
-_ContractIdentityTuple = tuple[str, ...]
-_ContractIdentityResult = _ContractIdentityTuple | RunManifestContractIdentity
+_LegacyContractIdentity = tuple[
+    str,
+    str | None,
+    str | None,
+    str | None,
+    str | None,
+]
 NormalizedContractIdentity = tuple[
     str,
     str | None,
@@ -31,6 +36,8 @@ NormalizedContractIdentity = tuple[
     str | None,
     str | None,
 ]
+_ContractIdentityTuple = _LegacyContractIdentity | NormalizedContractIdentity
+_ContractIdentityResult = _ContractIdentityTuple | RunManifestContractIdentity
 ContractIdentityResolver = Callable[..., _ContractIdentityResult]
 
 
@@ -41,10 +48,12 @@ def resolve_contract_identity_snapshot(
     strict: bool = False,
 ) -> NormalizedContractIdentity:
     """Resolve contract identity through the manifest support seam."""
-    return resolve_contract_identity(
-        provider=provider,
-        entity=entity,
-        strict=strict,
+    return _normalize_contract_identity_result(
+        resolve_contract_identity(
+            provider=provider,
+            entity=entity,
+            strict=strict,
+        )
     )
 
 
@@ -81,7 +90,7 @@ def _normalize_contract_identity_result(
             None,
         )
     if len(result) == 8:
-        return result  # type: ignore[return-value]
+        return result
     raise RuntimeError(
         "Contract identity resolver must return either the legacy 5-field "
         "tuple, the canonical 8-field tuple, or RunManifestContractIdentity"

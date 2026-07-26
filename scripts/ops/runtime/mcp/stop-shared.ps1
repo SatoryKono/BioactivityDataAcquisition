@@ -26,7 +26,11 @@ $logDir = Join-Path $Root 'logs\mcp-shared'
 $pidDir = Join-Path $logDir 'pids'
 
 $allNames = @($catalog.servers.PSObject.Properties.Name)
-$selected = if ($Servers.Count -gt 0) { $Servers } else { $allNames }
+$selected = if ($Servers.Count -gt 0) {
+    @($Servers | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+} else {
+    $allNames
+}
 $stopped = 0
 
 foreach ($name in $selected) {
@@ -34,15 +38,16 @@ foreach ($name in $selected) {
     if (Test-Path $pidFile) {
         $pidText = (Get-Content $pidFile -Raw).Trim()
         if ($pidText -match '^\d+$') {
-            $pid = [int]$pidText
-            if ($PSCmdlet.ShouldProcess("pid=$pid ($name)", 'Stop-Process tree')) {
+            # Do not use $PID — PowerShell automatic variable (current process id).
+            $procId = [int]$pidText
+            if ($PSCmdlet.ShouldProcess("pid=$procId ($name)", 'Stop-Process tree')) {
                 try {
-                    Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
-                    & taskkill.exe /PID $pid /F /T 2>$null | Out-Null
-                    Write-Host "Stopped $name pid=$pid"
+                    Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue
+                    & taskkill.exe /PID $procId /F /T 2>$null | Out-Null
+                    Write-Host "Stopped $name pid=$procId"
                     $stopped++
                 } catch {
-                    Write-Warning "Failed to stop $name pid=$pid : $($_.Exception.Message)"
+                    Write-Warning "Failed to stop $name pid=$procId : $($_.Exception.Message)"
                 }
             }
         }

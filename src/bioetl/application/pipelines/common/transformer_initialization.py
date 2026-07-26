@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.base_transformer import BaseTransformer
@@ -62,7 +62,7 @@ def build_runtime_transformer_init(
     default_entity_type: str,
     *,
     owner_type: type[object] | None = None,
-) -> object:
+) -> Callable[..., None]:
     """Return a shared runtime-generated ``__init__`` for transformer subclasses.
 
     ``owner_type`` must be the class that installs the generated initializer so
@@ -95,10 +95,28 @@ def build_runtime_transformer_init(
     return _runtime_init
 
 
+def install_runtime_transformer_init(
+    owner_type: type[object],
+    default_provider: str,
+    default_entity_type: str,
+) -> None:
+    """Install the shared runtime constructor without reassigning a typed method."""
+    type.__setattr__(
+        owner_type,
+        "__init__",
+        build_runtime_transformer_init(
+            default_provider,
+            default_entity_type,
+            owner_type=owner_type,
+        ),
+    )
+
+
 __all__ = [
     "build_runtime_transformer_init",
     "initialize_base_transformer",
     "initialize_next_transformer_mro",
+    "install_runtime_transformer_init",
     "transformer_context_kwargs",
     "transformer_init_kwargs",
 ]

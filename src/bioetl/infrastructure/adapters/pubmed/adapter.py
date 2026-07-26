@@ -173,33 +173,37 @@ class PubMedAdapter(
 
     async def aclose(self) -> None:
         """Close adapter resources."""
-        if self._http_client:
-            await self._http_client.__aexit__(None, None, None)
+        await self._close_http_client_context()
 
 
 def _resolve_pubmed_email(
     settings: Settings | None,
     kwargs: dict[str, Any],  # Any: opaque factory kwargs from adapter registry
-) -> object | None:
+) -> str | None:
     """Resolve PubMed contact email from kwargs or settings."""
     email = kwargs.get("email")
-    if email or settings is None:
-        return email
-    return getattr(settings, "default_email", None)
+    if email is not None:
+        return str(email)
+    if settings is None:
+        return None
+    default_email = getattr(settings, "default_email", None)
+    return str(default_email) if default_email is not None else None
 
 
 def _resolve_pubmed_api_key(
     settings: Settings | None,
     kwargs: dict[str, Any],  # Any: opaque factory kwargs from adapter registry
-) -> object | None:
+) -> str | None:
     """Resolve PubMed API key from kwargs or settings secrets."""
     api_key = kwargs.get("api_key")
-    if api_key or settings is None or not hasattr(settings, "pubmed_api_key"):
-        return api_key
+    if api_key is not None:
+        return str(api_key)
+    if settings is None or not hasattr(settings, "pubmed_api_key"):
+        return None
     pubmed_key = settings.pubmed_api_key
     if not pubmed_key:
         return None
-    return pubmed_key.get_secret_value()
+    return str(pubmed_key.get_secret_value())
 
 
 def _require_pubmed_runtime(

@@ -99,7 +99,12 @@ class DebugExportTransformRowsMixin:
         silver_payload = _record_payload(silver_record)
         self._silver_full_rows.append(
             _base_row(
-                identity=(self._run_id, self._workflow_id, self._pipeline_id, self._provider_id),
+                identity=(
+                    self._run_id,
+                    self._workflow_id,
+                    self._pipeline_id,
+                    self._provider_id,
+                ),
                 stage="silver",
                 record_index=record_index,
                 records=(raw_payload, silver_payload),
@@ -134,7 +139,12 @@ class DebugExportTransformRowsMixin:
         ] = record_index
         self._gold_full_rows.append(
             _base_row(
-                identity=(self._run_id, self._workflow_id, self._pipeline_id, self._provider_id),
+                identity=(
+                    self._run_id,
+                    self._workflow_id,
+                    self._pipeline_id,
+                    self._provider_id,
+                ),
                 stage="gold",
                 record_index=record_index,
                 records=(raw_payload, gold_payload),
@@ -162,7 +172,12 @@ class DebugExportTransformRowsMixin:
         )
         self._gold_rejected_rows.append(
             _base_row(
-                identity=(self._run_id, self._workflow_id, self._pipeline_id, self._provider_id),
+                identity=(
+                    self._run_id,
+                    self._workflow_id,
+                    self._pipeline_id,
+                    self._provider_id,
+                ),
                 stage="gold",
                 record_index=record_index,
                 records=(raw_payload, silver_payload),
@@ -212,7 +227,12 @@ class DebugExportTransformRowsMixin:
         )
         target_rows.append(
             _base_row(
-                identity=(self._run_id, self._workflow_id, self._pipeline_id, self._provider_id),
+                identity=(
+                    self._run_id,
+                    self._workflow_id,
+                    self._pipeline_id,
+                    self._provider_id,
+                ),
                 stage="silver",
                 record_index=record_index,
                 records=(raw_payload, raw_payload),

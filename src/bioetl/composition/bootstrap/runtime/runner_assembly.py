@@ -41,6 +41,9 @@ if TYPE_CHECKING:
         RunLedgerService,
     )
     from bioetl.application.services.dq_report_service import DQReportService
+    from bioetl.composition.bootstrap.composite_infrastructure_context import (
+        CompositeInfrastructureContext,
+    )
     from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
         CompositeSupportServices,
     )
@@ -51,7 +54,6 @@ if TYPE_CHECKING:
         QuarantinePort,
         TracingPort,
     )
-    from bioetl.infrastructure.config.settings_api import Settings
 
 
 __all__ = [
@@ -177,10 +179,7 @@ def bootstrap_composite_runner(
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
     run_id: str | None,
-    bootstrap_runtime_basics_fn: Callable[
-        ...,
-        tuple[str, Settings, LoggerPort, MetricsPort, TracingPort, object, LockPort],
-    ],
+    bootstrap_runtime_basics_fn: Callable[..., CompositeInfrastructureContext],
     build_runner_factories_fn: Callable[
         ...,
         tuple[

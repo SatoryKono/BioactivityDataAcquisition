@@ -219,8 +219,11 @@ def _sum_bronze_records_for_runs(
             except (TypeError, ValueError):
                 resolved = None
         if resolved is None:
+            show_manifest = getattr(run_manifest_service, "show", None)
+            if not callable(show_manifest):
+                continue
             try:
-                inspection = run_manifest_service.show(candidate_run_id)
+                inspection = show_manifest(candidate_run_id)
             except ValueError:
                 continue
             resolved = _resolve_bronze_records_from_inspection(inspection)

@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
-import json
 from collections.abc import Mapping, Sequence
-from pathlib import Path
-from typing import Any
+from typing import Any, SupportsIndex, SupportsInt, TypeGuard
 
 from bioetl.domain.run_reports.models import WorkflowExecutionRow
 
 
-def normalize_top_reasons(raw: object) -> tuple[dict[str, Any], ...]:
+def normalize_top_reasons(
+    raw: object,
+) -> tuple[dict[str, Any], ...]:  # Any: dynamic reason payload
     """Normalize and bound child pipeline reason payloads."""
     if not _is_reason_sequence(raw):
         return ()
@@ -18,33 +18,9 @@ def normalize_top_reasons(raw: object) -> tuple[dict[str, Any], ...]:
     return tuple(item for item in items if item is not None)[:3]
 
 
-def resolve_top_reasons(
-    raw: object,
-    report_ref: str | None,
-) -> tuple[dict[str, Any], ...]:
-    """Prefer inline reasons and fall back to a child report reference."""
-    reasons = normalize_top_reasons(raw)
-    if reasons or report_ref is None:
-        return reasons
-    return _load_child_top_reasons(report_ref)
-
-
-def _load_child_top_reasons(report_ref: str) -> tuple[dict[str, Any], ...]:
-    try:
-        path = Path(report_ref)
-        if not path.is_file():
-            return ()
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError, TypeError, ValueError):
-        return ()
-    if not isinstance(payload, Mapping):
-        return ()
-    return normalize_top_reasons(payload.get("reasons_top_n") or ())
-
-
 def build_reasons_rollup(
     rows: Sequence[WorkflowExecutionRow],
-) -> tuple[dict[str, Any], ...]:
+) -> tuple[dict[str, Any], ...]:  # Any: aggregated reason payload
     """Aggregate bounded child reasons across workflow execution rows."""
     totals: dict[tuple[str, str | None, str | None], int] = {}
     for row in rows:
@@ -63,11 +39,13 @@ def build_reasons_rollup(
     )
 
 
-def _is_reason_sequence(raw: object) -> bool:
+def _is_reason_sequence(raw: object) -> TypeGuard[Sequence[object]]:
     return isinstance(raw, Sequence) and not isinstance(raw, (str, bytes))
 
 
-def _normalize_reason(entry: object) -> dict[str, Any] | None:
+def _normalize_reason(
+    entry: object,
+) -> dict[str, Any] | None:  # Any: normalized reason payload
     if not isinstance(entry, Mapping):
         return None
     code = entry.get("reason_code")
@@ -82,7 +60,7 @@ def _normalize_reason(entry: object) -> dict[str, Any] | None:
 
 
 def _reason_key(
-    item: Mapping[str, Any],
+    item: Mapping[str, Any],  # Any: dynamic reason payload
 ) -> tuple[str, str | None, str | None]:
     return (
         str(item.get("reason_code")),
@@ -96,7 +74,14 @@ def _optional_reason_text(value: object) -> str | None:
 
 
 def _as_int(value: object, default: int = 0) -> int:
+    if value is None:
+        return default
+    if not isinstance(
+        value,
+        (str, bytes, bytearray, SupportsInt, SupportsIndex),
+    ):
+        return default
     try:
-        return default if value is None else int(value)
-    except (TypeError, ValueError):
+        return int(value)
+    except (TypeError, ValueError, OverflowError):
         return default

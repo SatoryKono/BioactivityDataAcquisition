@@ -20,6 +20,7 @@ import polars as pl
 
 from bioetl.domain.types import (
     GOLD_CONTRACT_VERSION_UNKNOWN,
+    GoldRejectReason,
     GoldRejectReasonCode,
     build_gold_contract_reject_reason,
 )
@@ -118,7 +119,7 @@ def check_completeness(
     overall_score = total_rate / count if count > 0 else 0.0
 
     status = DQCheckStatus.PASS if overall_score >= threshold else DQCheckStatus.FAIL
-    reject_reasons = ()
+    reject_reasons: tuple[GoldRejectReason, ...] = ()
     if status == DQCheckStatus.FAIL:
         reject_reasons = tuple(
             build_gold_contract_reject_reason(

@@ -49,12 +49,15 @@ class HeadersProvider(Protocol):
     def __call__(self) -> dict[str, str]: ...
 
 
-CROSSREF_RUNTIME_ERRORS = (
+CROSSREF_RUNTIME_ERRORS: tuple[type[Exception], ...] = (
     *COMMON_TITLE_FALLBACK_ERRORS,
     ConnectionError,
     TimeoutError,
 )
-CROSSREF_FALLBACK_ERRORS = (CrossRefApiError, *CROSSREF_RUNTIME_ERRORS)
+CROSSREF_FALLBACK_ERRORS: tuple[type[Exception], ...] = (
+    CrossRefApiError,
+    *CROSSREF_RUNTIME_ERRORS,
+)
 
 
 def record_response_timing(

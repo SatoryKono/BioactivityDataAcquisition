@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from functools import partial
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.runner_pkg.runner_control_plane_lifecycle import (
@@ -20,7 +21,22 @@ from bioetl.application.composite.runner_pkg.runner_stage_payloads import (
 from bioetl.application.observability.pipeline_metrics import PipelineMetricsRecorder
 
 if TYPE_CHECKING:
+    from bioetl.application.services.control_plane.ledger.service import (
+        RunLedgerService,
+    )
     from bioetl.domain.composite.result import EnrichmentResult, MergeResult
+
+
+def _record_enricher_completion(
+    ledger_service: RunLedgerService,
+    *,
+    name: str,
+    data: dict[str, object],
+) -> object:
+    return ledger_service.record_composite_enricher_completed(
+        enricher_name=name,
+        result=data,
+    )
 
 
 def _build_pipeline_metrics(
@@ -87,11 +103,10 @@ def record_enrichment_stage_completed(
         payload = build_enrichment_result_payload(result)
         record_with_ledger_service(
             host,
-            lambda ledger_service, name=enricher_name, data=payload: (
-                ledger_service.record_composite_enricher_completed(
-                    enricher_name=name,
-                    result=data,
-                )
+            partial(
+                _record_enricher_completion,
+                name=enricher_name,
+                data=payload,
             ),
         )
     record_stage_completed(

@@ -327,6 +327,11 @@ test-result cache inputs. The uv/virtualenv cache is invalidated by changes to
 separate lane-specific cache controlled by `pytest-cache-fingerprint`; do not
 fold pytest cache inputs into the uv environment cache key.
 
+After the action completes `uv sync`, it exports `UV_NO_SYNC=1` together with
+the frozen/no-build defaults. CI steps therefore reuse that prepared
+environment instead of asking `uv run --no-build` to rebuild the editable
+project, which has no binary distribution.
+
 Because of that, the next optimization pass should focus on:
 
 1. reducing unstable or unnecessarily serial tests;

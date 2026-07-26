@@ -115,6 +115,11 @@ def resolve_manifest_reproducibility_context(
         critical_runtime=critical_runtime,
         allow_degraded_opt_down=degraded_opt_down_requested,
     )
+    family = reproducibility_profile.family
+    if family is None:
+        raise RuntimeError(
+            f"Reproducibility profile has no family for {provider}.{entity}"
+        )
     validate_reproducible_sink_modes(
         yaml_config=inputs.yaml_config,
         strict_replay_requested=bool(getattr(ctx, "exact_replay", False))
@@ -133,7 +138,7 @@ def resolve_manifest_reproducibility_context(
         strict_exact_replay_supported=(
             reproducibility_profile.strict_exact_replay_supported
         ),
-        family=reproducibility_profile.family,
+        family=family,
         replay_family_contract=reproducibility_profile.replay_family_contract,
         strict_replay_runtime_verdict=(
             reproducibility_profile.strict_replay_runtime_verdict

@@ -1,6 +1,5 @@
 """Contract tests configuration and fixtures."""
 
-
 import os
 import socket
 import threading
@@ -20,9 +19,7 @@ def _get_replay_probe(provider: str, probe: str) -> ProviderContractReplayProbe:
     for case in PROVIDER_CONTRACT_REPLAY_PROBES:
         if case.provider == provider and case.probe == probe:
             return case
-    raise pytest.UsageError(
-        f"No replay probe configured for {provider}.{probe}"
-    )
+    raise pytest.UsageError(f"No replay probe configured for {provider}.{probe}")
 
 
 def _load_semanticscholar_replay_payload(probe: str) -> object:
@@ -46,10 +43,9 @@ async def semanticscholar_batch_payload() -> list[JsonDict | None]:
     """Replay payload for Semantic Scholar DOI batch lookup contract."""
     payload = _load_semanticscholar_replay_payload("paper_batch_lookup_by_doi")
     if not isinstance(payload, list):
-        raise AssertionError(
-            "Semantic Scholar DOI batch replay payload must be a list"
-        )
+        raise AssertionError("Semantic Scholar DOI batch replay payload must be a list")
     return payload
+
 
 _CONTRACT_PATH_TOKEN_POSIX = "/contract/"
 _CONTRACT_PATH_TOKEN_WINDOWS = "\\contract\\"
@@ -189,14 +185,12 @@ def no_network(pytestconfig: pytest.Config) -> bool:
 @pytest.fixture(autouse=True)
 def _network_guard(request: pytest.FixtureRequest, no_network: bool) -> None:
     """Skip network-marked tests when connectivity guard is active."""
-    pilot_soak_enabled = bool(request.config.getoption("--pilot-soak")) or _is_truthy_env_var(
-        "BIOETL_PILOT_SOAK_TESTS"
-    )
+    pilot_soak_enabled = bool(
+        request.config.getoption("--pilot-soak")
+    ) or _is_truthy_env_var("BIOETL_PILOT_SOAK_TESTS")
 
     should_skip_network = no_network and "network" in request.node.keywords
-    should_skip_pilot = (
-        "pilot_soak" in request.node.keywords and not pilot_soak_enabled
-    )
+    should_skip_pilot = "pilot_soak" in request.node.keywords and not pilot_soak_enabled
     if should_skip_network or should_skip_pilot:
         pytest.skip(
             "Pilot soak tests disabled. Enable via --pilot-soak "

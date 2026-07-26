@@ -65,12 +65,13 @@ def _attach_base_summary_artifact_defaults(
         artifact_refs=[],
         lineage_fragment_ids=frozenset(),
     )
-    summary["produced_artifact_trace"] = _build_produced_artifact_trace(
+    produced_artifact_trace = _build_produced_artifact_trace(
         manifest=manifest,
         ledger_entries_present=False,
         artifact_refs=[],
     )
-    summary["artifact_publication_closure"] = summary["produced_artifact_trace"].get(
+    summary["produced_artifact_trace"] = produced_artifact_trace
+    summary["artifact_publication_closure"] = produced_artifact_trace.get(
         "artifact_publication_closure"
     )
     summary["identity_graph_complete"] = None

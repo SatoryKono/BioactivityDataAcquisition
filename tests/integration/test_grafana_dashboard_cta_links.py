@@ -581,9 +581,7 @@ def test_data_quality_lineage_handoff_panel_points_to_canonical_control_plane_ro
 
 def test_silver_reject_explorer_record_level_panels_do_not_use_prometheus() -> None:
     """Record-level explorer panels must use the BioETL Ops HTTP datasource."""
-    dashboard = load_dashboard(
-            pytest.skip("Silver Reject Explorer removed 2026-07-23")
-    )
+    dashboard = load_dashboard(pytest.skip("Silver Reject Explorer removed 2026-07-23"))
     expected_titles = {
         "Inspect Filtered Records Table",
         "Inspect Selected Record Details",
@@ -605,9 +603,7 @@ def test_silver_reject_explorer_record_level_panels_do_not_use_prometheus() -> N
 
 def test_silver_reject_explorer_summary_panels_use_distinct_projections() -> None:
     """Summary trio should expose total, reject-rate view, and full scope summary separately."""
-    dashboard = load_dashboard(
-            pytest.skip("Silver Reject Explorer removed 2026-07-23")
-    )
+    dashboard = load_dashboard(pytest.skip("Silver Reject Explorer removed 2026-07-23"))
     panel_map = {
         panel.get("title"): panel
         for panel in get_dashboard_panels(dashboard)
@@ -683,9 +679,7 @@ def test_silver_reject_explorer_selected_record_details_uses_safe_payload_filter
     None
 ):
     """Selected Record Details should not depend on path-bound payload hash."""
-    dashboard = load_dashboard(
-            pytest.skip("Silver Reject Explorer removed 2026-07-23")
-    )
+    dashboard = load_dashboard(pytest.skip("Silver Reject Explorer removed 2026-07-23"))
     panel = next(
         (
             candidate
@@ -1120,9 +1114,7 @@ def test_dq_first_action_cta_contract() -> None:
 
 
 def test_silver_reject_explorer_first_action_cta_contract() -> None:
-    dashboard = load_dashboard(
-            pytest.skip("Silver Reject Explorer removed 2026-07-23")
-    )
+    dashboard = load_dashboard(pytest.skip("Silver Reject Explorer removed 2026-07-23"))
     panels_by_id = {
         panel.get("id"): panel
         for panel in get_dashboard_panels(dashboard)

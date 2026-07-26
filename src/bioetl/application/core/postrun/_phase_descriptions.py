@@ -15,10 +15,17 @@ if TYPE_CHECKING:
 
 
 class _PostrunResultProtocol(Protocol):
-    dq: DQResult
-    dq_reports: DQReportResult | None
-    vacuum: VacuumResult
-    compaction: CompactionResult
+    @property
+    def dq(self) -> DQResult: ...
+
+    @property
+    def dq_reports(self) -> DQReportResult | None: ...
+
+    @property
+    def vacuum(self) -> VacuumResult: ...
+
+    @property
+    def compaction(self) -> CompactionResult: ...
 
 
 PostrunLogLevel = Literal["info", "warning", "error"]

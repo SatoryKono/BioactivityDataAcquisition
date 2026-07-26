@@ -39,9 +39,7 @@ async def _request_or_skip(
         pytest.skip(f"PubMed/NCBI E-utilities endpoint not reachable: {exc}")
 
     if response.status_code in TRANSIENT_PROVIDER_STATUSES:
-        pytest.skip(
-            f"PubMed/NCBI temporary server error: HTTP {response.status_code}"
-        )
+        pytest.skip(f"PubMed/NCBI temporary server error: HTTP {response.status_code}")
     return response
 
 

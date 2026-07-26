@@ -30,6 +30,24 @@ _GOLD_REMOVAL_REASONS = {
 }
 
 
+def _record_silver_removal_accounting(
+    *,
+    outcome: str,
+    reason_code: str,
+    count: int,
+) -> None:
+    """Record one positive Silver-stage removal in run accounting."""
+    accounting = get_stage_accounting()
+    if accounting is None or count <= 0:
+        return
+    accounting.record_removal(
+        StageId.SILVER.value,
+        outcome=outcome,
+        reason_code=reason_code,
+        count=count,
+    )
+
+
 def _record_filtered_out_stage_metrics(
     pipeline_metrics: PipelineMetricsRecorder,
     *,
@@ -49,11 +67,7 @@ def _record_filtered_out_stage_metrics(
         outcome="filtered_out",
         count=count,
     )
-    accounting = get_stage_accounting()
-    if accounting is None or count <= 0:
-        return
-    accounting.record_removal(
-        StageId.SILVER.value,
+    _record_silver_removal_accounting(
         outcome="filtered_out",
         reason_code="FILTERED_OUT_SILVER",
         count=count,
@@ -312,14 +326,11 @@ class BatchMetricsRecorderService:
                 flow_stage="quarantined",
                 count=count,
             )
-        accounting = get_stage_accounting()
-        if accounting is not None and count > 0:
-            accounting.record_removal(
-                StageId.SILVER.value,
-                outcome="quarantined",
-                reason_code=getattr(error_type, "value", str(error_type)),
-                count=count,
-            )
+        _record_silver_removal_accounting(
+            outcome="quarantined",
+            reason_code=getattr(error_type, "value", str(error_type)),
+            count=count,
+        )
 
     def track_silver_filter_rejection(
         self,
@@ -340,14 +351,11 @@ class BatchMetricsRecorderService:
             field=field,
             count=count,
         )
-        accounting = get_stage_accounting()
-        if accounting is not None and count > 0:
-            accounting.record_removal(
-                StageId.SILVER.value,
-                outcome="filtered_out",
-                reason_code=reason_code or "FILTERED_OUT_SILVER",
-                count=count,
-            )
+        _record_silver_removal_accounting(
+            outcome="filtered_out",
+            reason_code=reason_code or "FILTERED_OUT_SILVER",
+            count=count,
+        )
 
 
 # Compatibility alias retained for legacy imports.

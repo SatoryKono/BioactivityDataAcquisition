@@ -87,7 +87,7 @@ def first_payload_value(manifest: RunManifest, *keys: str) -> object | None:
         for key in keys:
             value = payload.get(key)
             if is_present(value):
-                return cast("object | None", value)
+                return value
     return None
 
 

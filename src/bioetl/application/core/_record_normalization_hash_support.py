@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Literal, Protocol
 
 from bioetl.application.core.record_processor_config import ContentHashVersionPolicy
 from bioetl.domain.transformations import generate_content_hash
@@ -198,9 +198,21 @@ class RecordNormalizationHashSupportMixin:
         self,
         *,
         contract_version: str | None,
-    ) -> tuple[set[str] | None, set[str], str]:
+    ) -> tuple[
+        set[str] | None,
+        set[str],
+        Literal["v1_date", "v2_datetime_utc"],
+    ]:
         profile_include, profile_exclude = self._profile_hash_fields()
         policy = self._select_hash_policy(contract_version=contract_version)
+        datetime_policy = (
+            getattr(policy, "datetime_policy", "v2_datetime_utc")
+            or "v2_datetime_utc"
+        )
+        if datetime_policy not in {"v1_date", "v2_datetime_utc"}:
+            raise ValueError(
+                f"Unknown content hash datetime policy: {datetime_policy!r}"
+            )
         return (
             self._resolve_hash_include_fields(
                 profile_include=profile_include,
@@ -210,8 +222,5 @@ class RecordNormalizationHashSupportMixin:
                 profile_exclude=profile_exclude,
                 policy=policy,
             ),
-            str(
-                getattr(policy, "datetime_policy", "v2_datetime_utc")
-                or "v2_datetime_utc"
-            ),
+            "v1_date" if datetime_policy == "v1_date" else "v2_datetime_utc",
         )

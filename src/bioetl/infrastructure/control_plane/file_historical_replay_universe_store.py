@@ -15,7 +15,8 @@ __all__ = ["FileHistoricalReplayUniverseStore"]
 class _HistoricalReplayUniverseClosureReportLike(Protocol):
     """Structural contract for persistable historical replay universe reports."""
 
-    report_id: str
+    @property
+    def report_id(self) -> str: ...
 
     def to_dict(self) -> dict[str, object]: ...
 

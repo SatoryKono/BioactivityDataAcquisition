@@ -9,6 +9,7 @@ from __future__ import annotations
 from typing import Protocol, runtime_checkable
 
 from bioetl.domain.types import JsonDict
+from bioetl.domain.types.identifiers import LocationReference
 
 __all__ = [
     "PipelineSettingsPort",
@@ -42,7 +43,7 @@ class SettingsPort(Protocol):
         ...
 
     @property
-    def data_dir(self) -> str:
+    def data_dir(self) -> LocationReference:
         """Base data location reference."""
         ...
 
@@ -72,27 +73,27 @@ class SettingsPort(Protocol):
         ...
 
     @property
-    def bronze_path(self) -> str:
+    def bronze_path(self) -> LocationReference:
         """Location reference for Bronze layer storage."""
         ...
 
     @property
-    def silver_path(self) -> str:
+    def silver_path(self) -> LocationReference:
         """Location reference for Silver layer storage."""
         ...
 
     @property
-    def gold_path(self) -> str:
+    def gold_path(self) -> LocationReference:
         """Location reference for Gold layer storage."""
         ...
 
     @property
-    def checkpoint_path(self) -> str:
+    def checkpoint_path(self) -> LocationReference:
         """Location reference for checkpoint storage."""
         ...
 
     @property
-    def quarantine_path(self) -> str:
+    def quarantine_path(self) -> LocationReference:
         """Location reference for quarantine storage."""
         ...
 

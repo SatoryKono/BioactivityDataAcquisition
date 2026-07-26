@@ -25,6 +25,7 @@ T = TypeVar("T")
 if TYPE_CHECKING:
     from datetime import datetime
 
+    import pyarrow as pa
     from pandera.polars import DataFrameSchema
 
     from bioetl.domain.ports import LoggerPort
@@ -47,7 +48,7 @@ class _GoldWriterExecutorArrowMixin:
 
     def _to_arrow_table(
         self, records: list[GoldRecord], column_order: list[str] | None = None
-    ) -> object:
+    ) -> pa.Table:
         """Convert records to PyArrow table with Delta-safe null handling."""
         from bioetl.infrastructure.storage.delta.arrow_converter import (
             ArrowDataConverter,

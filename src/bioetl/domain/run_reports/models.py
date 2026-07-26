@@ -176,13 +176,13 @@ class PipelineRunReport:
     funnel: tuple[StageFunnelRow, ...]
     layers: LayerCounts
     reasons_top_n: tuple[
-        dict[str, Any], ...
+        dict[str, Any], ...  # Any: dynamic reason payload
     ]  # Any: report/json payload shape is dynamic
     reconciliation: dict[str, Any]  # Any: report/json payload shape is dynamic
     tracking_coverage: TrackingCoverage
     reason_catalog_version: str
     artifacts: tuple[
-        dict[str, Any], ...
+        dict[str, Any], ...  # Any: dynamic artifact payload
     ] = ()  # Any: report/json payload shape is dynamic
     failure: dict[str, Any] | None = None  # Any: optional failure block
     io: dict[str, Any] | None = None  # Any: optional IO summary
@@ -280,7 +280,7 @@ class WorkflowRunReport:
     plan_steps: tuple[dict[str, Any], ...]  # Any: report/json payload shape is dynamic
     execution: tuple[WorkflowExecutionRow, ...]
     totals: dict[str, Any]  # Any: report/json payload shape is dynamic
-    index: dict[str, Any] = field(
+    index: dict[str, Any] = field(  # Any: dynamic workflow index payload
         default_factory=dict
     )  # Any: report/json payload shape is dynamic
     reasons_rollup: tuple[dict[str, Any], ...] = ()  # Any: aggregated child reasons

@@ -46,9 +46,9 @@ def _validate_production_provenance_gate(
     execution_context = str(launch.get("execution_context") or "").strip().lower()
     is_production = env in {"prod", "production"} or execution_context == "production"
     # Also treat forensic_grade / replay_ready as production-grade evidence paths.
-    required_profile = str(
-        launch.get("required_persistence_profile") or ""
-    ).strip().lower()
+    required_profile = (
+        str(launch.get("required_persistence_profile") or "").strip().lower()
+    )
     is_production = is_production or required_profile in {
         "forensic_grade",
         "replay_ready",

@@ -126,6 +126,9 @@ if TYPE_CHECKING:
         JsonDict as JsonDict,
     )
     from bioetl.domain.types.identifiers import (
+        LocationReference as LocationReference,
+    )
+    from bioetl.domain.types.identifiers import (
         MetaDict as MetaDict,
     )
     from bioetl.domain.types.identifiers import (
@@ -190,6 +193,7 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
         "GoldRecord",
         "GoldSchemaType",
         "JsonDict",
+        "LocationReference",
         "MetaDict",
         "PrimaryId",
         "RunID",

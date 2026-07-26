@@ -19,7 +19,10 @@ def _exports(path: str) -> set[str]:
     for node in tree.body:
         if (
             isinstance(node, ast.Assign)
-            and any(isinstance(target, ast.Name) and target.id == "__all__" for target in node.targets)
+            and any(
+                isinstance(target, ast.Name) and target.id == "__all__"
+                for target in node.targets
+            )
             and isinstance(node.value, (ast.List, ast.Tuple))
         ):
             return {
@@ -42,9 +45,9 @@ def test_domain_public_facades_have_documented_classification() -> None:
 
 def test_aggregate_registry_anchors_resolve() -> None:
     registry = json.loads(
-        (
-            ROOT / "reports/quality/domain-aggregate-invariant-registry.json"
-        ).read_text(encoding="utf-8")
+        (ROOT / "reports/quality/domain-aggregate-invariant-registry.json").read_text(
+            encoding="utf-8"
+        )
     )
     assert registry["aggregate_root_count"] == 3
     for row in registry["aggregates"]:
@@ -61,9 +64,9 @@ def test_pipeline_contract_matrix_matches_active_inventory() -> None:
             encoding="utf-8"
         )
     )
-    section = (
-        ROOT / "docs/04-reference/pipelines/contract-facet-matrix.md"
-    ).read_text(encoding="utf-8")
+    section = (ROOT / "docs/04-reference/pipelines/contract-facet-matrix.md").read_text(
+        encoding="utf-8"
+    )
     documented = set(re.findall(r"^\| `([^`]+)` \|", section, re.MULTILINE))
     expected = {row["pipeline_name"] for row in report["rows"]}
     assert report["row_count"] == 27
@@ -77,8 +80,7 @@ def test_pipeline_contract_matrix_matches_active_inventory() -> None:
 
 def test_publication_runbook_uses_supported_read_only_surfaces() -> None:
     runbook = (
-        ROOT
-        / "docs/05-operations/runbooks/publication-validation-runbook.md"
+        ROOT / "docs/05-operations/runbooks/publication-validation-runbook.md"
     ).read_text(encoding="utf-8")
     forbidden = (
         "read_parquet",
@@ -93,9 +95,9 @@ def test_publication_runbook_uses_supported_read_only_surfaces() -> None:
 
 
 def test_dq_recovery_does_not_recommend_threshold_weakening() -> None:
-    runbook = (
-        ROOT / "docs/05-operations/runbooks/pipeline-failure-dq.md"
-    ).read_text(encoding="utf-8")
+    runbook = (ROOT / "docs/05-operations/runbooks/pipeline-failure-dq.md").read_text(
+        encoding="utf-8"
+    )
     assert "Temporarily increase threshold" not in runbook
     assert "hard_fail_threshold: 0.30" not in runbook
     assert "deterministic replay" in runbook
@@ -104,9 +106,7 @@ def test_dq_recovery_does_not_recommend_threshold_weakening() -> None:
 def test_monitoring_guide_routes_panel_detail_to_all_shipped_panel_docs() -> None:
     guide_path = ROOT / "docs/05-operations/01-monitoring-guide.md"
     guide = guide_path.read_text(encoding="utf-8")
-    panel_docs = sorted(
-        (ROOT / "docs/03-guides/dashboards/panels").glob("*-panels.md")
-    )
+    panel_docs = sorted((ROOT / "docs/03-guides/dashboards/panels").glob("*-panels.md"))
     assert len(panel_docs) == 8, (
         "Expected eight shipped panel docs under "
         "docs/03-guides/dashboards/panels/*-panels.md; "

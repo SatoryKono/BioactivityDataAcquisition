@@ -24,7 +24,7 @@ from typing import TYPE_CHECKING
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.common.publication_issn import build_issn_fields
 from bioetl.application.pipelines.common.publication_transformer_context import (
-    build_runtime_publication_transformer_init,
+    install_runtime_transformer_init,
 )
 from bioetl.application.pipelines.openalex.extractors import (
     extract_affiliations,
@@ -293,8 +293,8 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         return OpenAlexPublicationEntity
 
 
-OpenAlexPublicationTransformer.__init__ = build_runtime_publication_transformer_init(
-    default_provider=OpenAlexPublicationTransformer.DEFAULT_PROVIDER,
-    default_entity_type=OpenAlexPublicationTransformer.DEFAULT_ENTITY_TYPE,
-    owner_type=OpenAlexPublicationTransformer,
+install_runtime_transformer_init(
+    OpenAlexPublicationTransformer,
+    OpenAlexPublicationTransformer.DEFAULT_PROVIDER,
+    OpenAlexPublicationTransformer.DEFAULT_ENTITY_TYPE,
 )

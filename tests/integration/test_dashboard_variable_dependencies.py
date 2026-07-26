@@ -67,21 +67,15 @@ def test_provider_health_variable_dependencies():
 
 
 def test_silver_reject_explorer_variable_dependencies():
-    dashboard = load_dashboard(
-            pytest.skip("Silver Reject Explorer removed 2026-07-23")
-    )
+    dashboard = load_dashboard(pytest.skip("Silver Reject Explorer removed 2026-07-23"))
     variables = {
         v.get("name"): v for v in dashboard.get("templating", {}).get("list", [])
     }
 
     # Check that pipeline and run_type exist
-    assert "pipeline" in variables, (
-    )
-    assert "run_type" in variables, (
-    )
+    assert "pipeline" in variables, ()
+    assert "run_type" in variables, ()
 
     # Check forensic variables
-    assert "quarantine_run_id" in variables, (
-    )
-    assert "payload_hash" in variables, (
-    )
+    assert "quarantine_run_id" in variables, ()
+    assert "payload_hash" in variables, ()

@@ -10,11 +10,12 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
     normalize_required_persistence_profile,
 )
+from bioetl.infrastructure.config.settings_api import Settings
 
 
 def validate_strict_data_root_policy(
     *,
-    settings: object,
+    settings: Settings,
     required_profile: object,
     exact_replay: bool = False,
 ) -> None:

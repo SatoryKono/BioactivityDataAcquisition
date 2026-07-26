@@ -3,7 +3,15 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from typing import Protocol
+from datetime import datetime
+from typing import TYPE_CHECKING, Protocol
+
+if TYPE_CHECKING:
+    from pandera.polars import DataFrameSchema
+
+    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.types import GoldRecord
+    from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterProtocol
 
 __all__ = [
     "_GoldMergedMetadataWriterProtocol",
@@ -19,10 +27,10 @@ class _GoldMergedMetadataWriterProtocol(Protocol):
         self,
         table_path: str,
         table_name: str,
-        records: list[dict[str, object]],
-        completed_at: object | None = None,
+        records: list[GoldRecord],
+        completed_at: datetime | None = None,
         run_id: str | None = None,
-        schema: object | None = None,
+        schema: DataFrameSchema | None = None,
     ) -> None: ...
 
 
@@ -55,13 +63,13 @@ class _GoldWriteDispatchTargetProtocol(Protocol):
 class _GoldMergedWriteHostProtocol(Protocol):
     """Structural host contract for merged Gold write helpers."""
 
-    logger: object
-    csv_exporter: object | None
+    logger: LoggerPort
+    csv_exporter: CsvExporterProtocol | None
     _resolve_table_path: Callable[[str], str]
     _validate_records_against_schema: Callable[
-        [list[dict[str, object]], object], Awaitable[None]
+        [list[GoldRecord], DataFrameSchema], Awaitable[None]
     ]
-    _validate_schema_strict: Callable[[object], None]
+    _validate_schema_strict: Callable[[DataFrameSchema], None]
 
     async def _run_in_executor(
         self,

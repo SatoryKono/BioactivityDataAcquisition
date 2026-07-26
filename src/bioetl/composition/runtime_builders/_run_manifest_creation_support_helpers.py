@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
         RunManifestContractIdentity,
     )
-    from bioetl.domain.context import PipelineRunContext
+    from bioetl.domain.context import CachedBronzeContext, PipelineRunContext
     from bioetl.infrastructure.config.settings_api import Settings
 
 
@@ -41,11 +41,11 @@ class _ManifestSourceRefBuilder(Protocol):
         self,
         *,
         ctx: PipelineRunContext,
-        cached_bronze: object | None,
+        cached_bronze: CachedBronzeContext | None,
         settings: Settings,
         provider: str,
         entity: str,
-        required_persistence_profile: str,
+        required_persistence_profile: object,
     ) -> tuple[RunSourceRef, ...]: ...
 
 

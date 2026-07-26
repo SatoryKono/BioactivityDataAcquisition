@@ -6,7 +6,10 @@ from types import SimpleNamespace
 import pytest
 
 from bioetl.composition.runtime_builders import (
-    _run_manifest_control_plane_paths as subject,
+    _run_manifest_control_plane_paths as paths_subject,
+)
+from bioetl.composition.runtime_builders import (
+    _run_manifest_data_roots as subject,
 )
 
 pytestmark = pytest.mark.unit
@@ -15,7 +18,7 @@ pytestmark = pytest.mark.unit
 def test_control_plane_root_uses_explicit_data_dir(tmp_path: Path) -> None:
     settings = SimpleNamespace(data_dir=tmp_path)
 
-    assert subject.control_plane_root(settings, "manifests") == (
+    assert paths_subject.control_plane_root(settings, "manifests") == (
         tmp_path / "output/control/manifests"
     )
 

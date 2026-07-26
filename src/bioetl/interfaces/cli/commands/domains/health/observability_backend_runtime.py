@@ -311,7 +311,7 @@ def ensure_observability_backend_started(
         )
     )
     poll_seconds = float(hook_overrides.pop("poll_seconds", poll_seconds))  # type: ignore[arg-type]
-    runtime_hooks = {**defaults, **hook_overrides}  # type: ignore[arg-type]
+    runtime_hooks = {**defaults, **hook_overrides}
     return ensure_observability_backend_started_impl(
         startup_kwargs=_observability_backend_startup_kwargs(
             enabled=enabled,

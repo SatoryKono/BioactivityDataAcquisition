@@ -1,10 +1,6 @@
 """Retained class-level compatibility helpers for the default provider registry.
-
-This module is the private owner of the lazy default registry singleton used by
-legacy class-level access patterns. New bootstrap logic should resolve
-registries through ``_registry_resolution.py`` or explicit injection instead of
-importing this helper directly.
-"""
+This module is the private owner of the lazy default registry singleton; use
+``_registry_resolution.py`` or explicit injection for new bootstrap logic."""
 
 from __future__ import annotations
 
@@ -20,23 +16,28 @@ R = TypeVar("R")
 
 
 class _SupportsDefaultRegistry(Protocol):
-    """Protocol for registries exposing a lazy default instance."""
-
     @classmethod
     def _get_default(cls) -> Self:
         """Return the lazy default registry instance."""
 
 
 class _SupportsProviderStore(Protocol):
-    """Protocol for provider stores exposing the underlying mapping."""
-
     _providers: dict[str, ProviderConfig]
 
 
 class _SupportsProviderRegistryStore(_SupportsDefaultRegistry, Protocol):
-    """Protocol for registries exposing a provider store."""
-
     _store: _SupportsProviderStore
+
+    def register(self, name: str, config: ProviderConfig) -> None: ...
+
+    def is_registered(self, name: str) -> bool:
+        """Return whether a provider is registered."""
+
+    def list_providers(self) -> list[str]:
+        """Return registered provider names."""
+
+    def clear(self) -> None:
+        """Clear registered providers."""
 
 
 RegistryT = TypeVar("RegistryT", bound=_SupportsDefaultRegistry)

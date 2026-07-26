@@ -43,7 +43,8 @@ jobs:
             echo "::error::Unexpected CodeRabbit install script content"
             exit 1
           fi
-          if grep -Eqi 'curl .*\|\s*(ba)?sh|wget .*\|\s*(ba)?sh' "${install_script}"; then
+          if sed '/^[[:space:]]*#/d' "${install_script}" \
+            | grep -Eqi 'curl .*\|\s*(ba)?sh|wget .*\|\s*(ba)?sh'; then
             echo "::error::Install script nests a remote pipe-to-shell; refusing"
             exit 1
           fi

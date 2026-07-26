@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
@@ -23,11 +23,23 @@ _PUSHGATEWAY_PUBLICATION_TIMEOUT_SECONDS = 5.0
 _PUSHGATEWAY_DELETE_TIMEOUT_SECONDS = 1.0
 
 
+class _BoundPublicationMetric(Protocol):
+    def inc(self) -> object: ...
+
+
+class _PublicationMetric(Protocol):
+    def labels(self, **labels: str) -> _BoundPublicationMetric: ...
+
+
+class _RestrictableRegistry(Protocol):
+    def restricted_registry(self, metric_names: tuple[str, ...]) -> object: ...
+
+
 def _emit_metrics_publication_event(
     *,
     grouping_key: dict[str, str] | None,
     status: str,
-    publication_metric: object,
+    publication_metric: _PublicationMetric,
     target: str = "pushgateway",
 ) -> None:
     """Emit best-effort publication outcomes through the shared registry."""
@@ -55,9 +67,9 @@ def _sanitize_pushgateway_grouping_key(
 
 def publish_metrics_to_gateway(
     *,
-    registry: object,
+    registry: _RestrictableRegistry,
     push_gateway: Callable[..., object],
-    publication_metric: object,
+    publication_metric: _PublicationMetric,
     gateway: str | None = None,
     run_label: str = "bioetl",
     logger: LoggerPort | None = None,
@@ -122,7 +134,7 @@ def publish_metrics_to_gateway(
 def remove_metrics_from_gateway(
     *,
     delete_gateway: Callable[..., object],
-    publication_metric: object,
+    publication_metric: _PublicationMetric,
     gateway: str | None = None,
     run_label: str = "bioetl",
     logger: LoggerPort | None = None,
