@@ -248,7 +248,10 @@ def test_tracked_mcp_projections_reject_workstation_paths() -> None:
     }
     assert devin_servers["ref"] == expected_devin_ref
     assert set(devin_payload["mcpServers"]) == EXPECTED_MCP_SERVERS
-    assert devin_payload["mcpServers"]["filesystem"]["args"][-1] == "."
+    wrapper_suffix = ".ps1" if os.name == "nt" else ".sh"
+    assert devin_payload["mcpServers"]["filesystem"]["args"][0] == (
+        f"scripts/ai/mcp/mcp_filesystem_wrapper{wrapper_suffix}"
+    )
     assert devin_payload["devin"]["org_id"]
     assert devin_payload["shell"] == {"setup_complete": True}
 
