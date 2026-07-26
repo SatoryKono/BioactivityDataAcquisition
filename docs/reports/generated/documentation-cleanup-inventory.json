@@ -83495,7 +83495,7 @@
       "section": "reports",
       "status": "Generated",
       "surface_family": "generated",
-      "tracking_state": "ignored_local"
+      "tracking_state": "tracked"
     },
     {
       "canonical_successor": null,
@@ -83523,7 +83523,7 @@
       "section": "reports",
       "status": "Generated",
       "surface_family": "generated",
-      "tracking_state": "ignored_local"
+      "tracking_state": "tracked"
     },
     {
       "canonical_successor": null,
@@ -88084,8 +88084,8 @@
       "working": 279
     },
     "by_tracking_state": {
-      "ignored_local": 1196,
-      "tracked": 1922
+      "ignored_local": 1194,
+      "tracked": 1924
     },
     "docs_reports_local_count": 1218,
     "duplicate_group_count": 2,
@@ -88107,7 +88107,7 @@
       }
     ],
     "total_doc_like": 3118,
-    "total_doc_like_ignored_local": 1196,
-    "total_doc_like_tracked": 1922
+    "total_doc_like_ignored_local": 1194,
+    "total_doc_like_tracked": 1924
   }
 }
