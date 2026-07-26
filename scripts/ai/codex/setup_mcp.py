@@ -322,10 +322,12 @@ def _canonical_servers(
             "@modelcontextprotocol/server-memory@2026.1.26",
             npm_cache_dir=npm_cache_dir,
         ),
-        "filesystem": _npx_server(
-            "@modelcontextprotocol/server-filesystem@2026.1.14",
-            workspace_root_str,
-            npm_cache_dir=npm_cache_dir,
+        # Resolve repo root inside the wrapper so portable configs never pass
+        # client-rewritten "." / foreign-OS absolute paths into Node path.resolve.
+        "filesystem": _wrapper_command(
+            "mcp_filesystem_wrapper",
+            workspace_root,
+            portable_workspace_paths=portable_workspace_paths,
         ),
         "fetch": _wrapper_command(
             "mcp_fetch_wrapper",
@@ -419,7 +421,8 @@ def _canonical_servers(
         "x-ref-api-key": REF_API_KEY_ENV_VAR,
     }
 
-    # Preserve the committed config shape where the GitHub wrapper receives npm cache.
+    # Preserve the committed config shape where wrappers receive npm cache.
+    servers["filesystem"]["env"] = {"NPM_CONFIG_CACHE": npm_cache_dir}
     servers["fetch"]["env"] = {
         "UV_CACHE_DIR": uv_cache_dir,
         "UV_TOOL_DIR": uv_tool_dir,

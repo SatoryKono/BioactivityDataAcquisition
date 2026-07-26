@@ -39,6 +39,7 @@ EXPECTED_MCP_SERVERS = {
 }
 
 WRAPPER_SCRIPT_STEMS = {
+    "filesystem": "mcp_filesystem_wrapper",
     "fetch": "mcp_fetch_wrapper",
     "github": "github-mcp-wrapper",
     "docker": "mcp_docker_wrapper",
@@ -174,7 +175,7 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
     servers = payload["servers"]
     codex_servers = codex_settings["mcpServers"]
     assert qodo_payload["mcpServers"] == servers
-    assert codex_servers["filesystem"]["args"][-1] != servers["filesystem"]["args"][-1]
+    assert codex_servers["filesystem"]["args"][0] != servers["filesystem"]["args"][0]
     assert "local-extra" in gemini_settings["mcpServers"]
     assert not {
         "sonarqube",
@@ -193,13 +194,14 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
     assert _posix(codex_servers["memory"]["env"]["MEMORY_FILE_PATH"]).endswith(
         "/docs/00-project/ai/memory/mcp-memory.json"
     )
-    assert servers["filesystem"]["args"][-1] == "."
-    filesystem_scope = root / str(servers["filesystem"]["args"][-1])
-    assert filesystem_scope.exists()
-    assert filesystem_scope.resolve().samefile(root.resolve())
-    codex_filesystem_scope = Path(str(codex_servers["filesystem"]["args"][-1]))
-    assert codex_filesystem_scope.exists()
-    assert codex_filesystem_scope.resolve().samefile(root.resolve())
+    wrapper_suffix = ".ps1" if os.name == "nt" else ".sh"
+    portable_fs_wrapper = f"scripts/ai/mcp/mcp_filesystem_wrapper{wrapper_suffix}"
+    assert servers["filesystem"]["args"][0] == portable_fs_wrapper
+    filesystem_wrapper = root / portable_fs_wrapper
+    assert filesystem_wrapper.exists()
+    codex_filesystem_wrapper = Path(str(codex_servers["filesystem"]["args"][0]))
+    assert codex_filesystem_wrapper.exists()
+    assert codex_filesystem_wrapper.resolve().samefile(filesystem_wrapper.resolve())
     assert servers["fetch"]["env"] == {
         "UV_CACHE_DIR": ".cache/uv-cache",
         "UV_TOOL_DIR": ".cache/uv-tools",
