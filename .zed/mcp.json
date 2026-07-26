@@ -13,11 +13,9 @@
       "startup_timeout_sec": 120
     },
     "filesystem": {
-      "command": "npx",
+      "command": "bash",
       "args": [
-        "-y",
-        "@modelcontextprotocol/server-filesystem@2026.1.14",
-        "."
+        "scripts/ai/mcp/mcp_filesystem_wrapper.sh"
       ],
       "env": {
         "NPM_CONFIG_CACHE": ".cache/npm-cache"
