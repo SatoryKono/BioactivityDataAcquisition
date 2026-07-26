@@ -2,7 +2,7 @@
   "version": 4,
   "proxy_package": "mcp-proxy@6.5.4",
   "bind_host": "127.0.0.1",
-  "connection_timeout_ms": 180000,
+  "connection_timeout_ms": 300000,
   "request_timeout_ms": 300000,
   "bind_note": "All local clients use the same loopback Streamable HTTP endpoints. The launcher must pass --host 127.0.0.1.",
   "servers": {
@@ -130,7 +130,9 @@
       "priority": 5,
       "daily": true,
       "readiness_timeout_sec": 300,
-      "state_model": "shared_docker_host"
+      "state_model": "shared_docker_host",
+      "launch_mode": "windows_docker_streaming",
+      "remote_port": 18817
     },
     "mermaid": {
       "port": 8818,
@@ -139,7 +141,9 @@
       "priority": 5,
       "daily": true,
       "readiness_timeout_sec": 300,
-      "state_model": "stateless"
+      "state_model": "stateless",
+      "launch_mode": "windows_docker_streaming",
+      "remote_port": 18818
     },
     "prometheus": {
       "port": 8822,

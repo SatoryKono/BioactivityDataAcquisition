@@ -83,6 +83,13 @@ def ping_ready(port: int, timeout: float = 1.0) -> bool:
         return False
 
 
+def endpoint_ready(entry: dict[str, object]) -> bool:
+    port = int(entry["port"])
+    if entry.get("launch_mode") == "windows_docker_streaming":
+        return port_open(port)
+    return ping_ready(port)
+
+
 def read_pid(path: Path) -> int | None:
     try:
         value = int(path.read_text(encoding="ascii").strip())
@@ -155,7 +162,7 @@ for name, entry in items:
         server_status[name] = {"port": port, "url": url, "state": "missing_wrapper"}
         failed += 1
         continue
-    if ping_ready(port):
+    if endpoint_ready(entry):
         existing_pid = read_pid(pid_path)
         if existing_pid is None:
             print(
@@ -205,24 +212,38 @@ for name, entry in items:
     err_path = log_dir / f"{name}.err.log"
     out_handle = out_path.open("ab")
     err_handle = err_path.open("ab")
-    command = [
-        "npx",
-        "-y",
-        proxy_package,
-        "--host",
-        bind_host,
-        "--port",
-        str(port),
-        "--server",
-        "stream",
-        "--connectionTimeout",
-        str(connection_timeout_ms),
-        "--requestTimeout",
-        str(request_timeout_ms),
-        "--",
-        "bash",
-        str(wrapper),
-    ]
+    if entry.get("launch_mode") == "windows_docker_streaming":
+        command = [
+            sys.executable,
+            str(root / "scripts/ops/runtime/mcp/windows_docker_mcp_bridge.py"),
+            "--server",
+            name,
+            "--local-port",
+            str(port),
+            "--remote-port",
+            str(int(entry["remote_port"])),
+            "--startup-timeout",
+            str(int(entry.get("readiness_timeout_sec") or 180)),
+        ]
+    else:
+        command = [
+            "npx",
+            "-y",
+            proxy_package,
+            "--host",
+            bind_host,
+            "--port",
+            str(port),
+            "--server",
+            "stream",
+            "--connectionTimeout",
+            str(connection_timeout_ms),
+            "--requestTimeout",
+            str(request_timeout_ms),
+            "--",
+            "bash",
+            str(wrapper),
+        ]
     print(f"START {name} 127.0.0.1:{port}")
     process = subprocess.Popen(
         command,
@@ -249,7 +270,7 @@ while pending:
         process, deadline, out_handle, err_handle = pending[name]
         entry = catalog["servers"][name]
         port = int(entry["port"])
-        if ping_ready(port):
+        if endpoint_ready(entry):
             server_status[name]["state"] = "started"
             print(f"OK ready 127.0.0.1:{port} ({name})")
             pending.pop(name)

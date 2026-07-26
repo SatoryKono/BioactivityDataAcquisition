@@ -48,6 +48,11 @@ if (-not (Test-Path $catalogPath)) {
     exit 1
 }
 $catalog = Get-Content $catalogPath -Raw | ConvertFrom-Json
+$nativeStreamingPorts = @(
+    $catalog.servers.PSObject.Properties |
+        Where-Object { [string]$_.Value.launch_mode -eq 'windows_docker_streaming' } |
+        ForEach-Object { [int]$_.Value.port }
+)
 $proxyPkg = [string]$catalog.proxy_package
 if ([string]::IsNullOrWhiteSpace($proxyPkg)) { $proxyPkg = 'mcp-proxy@6.5.4' }
 
@@ -104,6 +109,9 @@ function Test-McpPing {
 
 function Test-McpReady {
     param([int]$Port)
+    if ($nativeStreamingPorts -contains $Port) {
+        return (Test-PortOpen -Port $Port)
+    }
     return (Test-McpPing -Port $Port)
 }
 
@@ -309,7 +317,11 @@ foreach ($name in $selected) {
         $escapedKey = $apiKey.Replace('"', '\"')
         $proxyFlags = "--apiKey `"$escapedKey`" $proxyFlags"
     }
-    $cmdArgs = "/d /c set `"NPM_CONFIG_CACHE=$npmCache`"&& npx -y $proxyPkg $proxyFlags -- powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$wrapper`""
+    if ([string]$entry.launch_mode -eq 'windows_docker_streaming') {
+        $cmdArgs = "/d /c docker mcp gateway run --servers $name --transport streaming --host $BindHost --port $port --allow-unauthenticated"
+    } else {
+        $cmdArgs = "/d /c set `"NPM_CONFIG_CACHE=$npmCache`"&& npx -y $proxyPkg $proxyFlags -- powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$wrapper`""
+    }
 
     if ($WhatIf) {
         Write-Host "WhatIf: $comSpec $cmdArgs"
