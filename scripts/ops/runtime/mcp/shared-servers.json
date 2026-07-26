@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "proxy_package": "mcp-proxy@6.5.4",
   "bind_note": "mcp-proxy CLI binds the chosen port; clients MUST use http://127.0.0.1:<port>/mcp only. Prefer host firewall for non-loopback.",
   "servers": {
@@ -37,6 +37,22 @@
       "wrapper": "mcp_brave_search_wrapper",
       "class": "T2",
       "priority": 3
+    },
+    "prometheus": {
+      "port": 8822,
+      "path": "/mcp",
+      "wrapper": "mcp_prometheus_wrapper",
+      "class": "T2",
+      "priority": 4,
+      "notes": "docker-backed; single shared container"
+    },
+    "grafana": {
+      "port": 8823,
+      "path": "/mcp",
+      "wrapper": "mcp_grafana_wrapper",
+      "class": "T2",
+      "priority": 4,
+      "notes": "docker-backed; single shared container"
     }
   }
 }

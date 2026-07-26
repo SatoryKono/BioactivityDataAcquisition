@@ -5,8 +5,14 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
-REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || (cd "${SCRIPT_DIR}/../../../.." && pwd))}"
+# Package root always follows this helper's checkout (contains `scripts/` package).
+# REPO_ROOT may be overridden in tests to a temp workspace projection.
+PACKAGE_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
+REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || echo "${PACKAGE_ROOT}")}"
 SETUP_MCP="${ROOT_DIR}/setup_mcp.py"
+# setup_mcp imports `scripts.*`; ensure package root is importable even when
+# REPO_ROOT points at an ephemeral projection workspace.
+export PYTHONPATH="${PACKAGE_ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
 
 MODE="ensure"
 CODEX_BIN="${CODEX_BIN:-}"
@@ -119,9 +125,41 @@ if retired_present:
     joined_retired = ", ".join(retired_present)
     errors.append(f"retired MCP servers must not be registered: {joined_retired}")
 
+# Shared multi-client plane URLs (must match setup_mcp.MCP_SHARED_SERVER_ENDPOINTS).
+shared_urls = {
+    "brave-search": "http://127.0.0.1:8811/mcp",
+    "adr-analysis": "http://127.0.0.1:8813/mcp",
+    "deja": "http://127.0.0.1:8814/mcp",
+    "context7": "http://127.0.0.1:8815/mcp",
+    "ast-grep": "http://127.0.0.1:8816/mcp",
+    "prometheus": "http://127.0.0.1:8822/mcp",
+    "grafana": "http://127.0.0.1:8823/mcp",
+}
+
 for server_name, stem in wrapper_stems.items():
-    args = servers.get(server_name, {}).get("args", [])
-    command = str(servers.get(server_name, {}).get("command", "")).strip()
+    # Profiled local projections may omit high-privilege servers.
+    if server_name not in servers:
+        continue
+    entry = servers[server_name]
+    if not isinstance(entry, dict):
+        errors.append(f"{server_name} entry must be an object")
+        continue
+    # Local shared-plane HTTP projections are valid (multi-client).
+    url = str(entry.get("url") or "").strip()
+    entry_type = str(entry.get("type") or "").strip().lower()
+    if url or entry_type == "http":
+        expected_url = shared_urls.get(server_name)
+        if not expected_url:
+            errors.append(f"{server_name} has unapproved shared URL: {url!r}")
+            continue
+        if url != expected_url:
+            errors.append(
+                f"{server_name} shared URL must be {expected_url!r}, got {url!r}"
+            )
+            continue
+        continue
+    args = entry.get("args", [])
+    command = str(entry.get("command", "")).strip()
     expected = tuple(f"scripts/ai/mcp/{stem}{suffix}" for suffix in expected_wrapper_suffixes)
     if not args or args[0] not in expected:
         allowed = " or ".join(repr(path) for path in expected)
@@ -191,8 +229,15 @@ if content.count(begin) != 1 or content.count(end) != 1:
 start = content.index(begin)
 finish = content.index(end, start) + len(end)
 actual = content[start:finish].strip()
+# Multi-client daily: shared profile + localhost HTTP plane (see setup_mcp defaults).
+profile = getattr(module, "DEFAULT_LOCAL_PROFILE", "shared")
+transport_mode = getattr(module, "DEFAULT_LOCAL_TRANSPORT_MODE", "shared")
 expected = module._render_codex_mcp_toml(
-    module._codex_runtime_servers(workspace_root)
+    module._codex_runtime_servers(
+        workspace_root,
+        profile=profile,
+        transport_mode=transport_mode,
+    )
 ).strip()
 if actual != expected:
     raise SystemExit("managed MCP block differs from canonical setup output")
@@ -270,9 +315,15 @@ if [[ "${SHOULD_GENERATE}" -eq 1 ]]; then
     # the structural checks below still fail closed on incomplete output.
     # 30s: WSL mounts of Windows drives pay high Python cold-start cost.
     local_setup_timeout="${CODEX_MCP_SETUP_TIMEOUT:-30}"
+    # Default multi-client plane: shared profile + shared HTTP transport.
+    # Override with CODEX_MCP_PROFILE / CODEX_MCP_TRANSPORT_MODE if needed.
+    local_profile="${CODEX_MCP_PROFILE:-shared}"
+    local_transport="${CODEX_MCP_TRANSPORT_MODE:-shared}"
     timeout "${local_setup_timeout}" python3 "${SETUP_MCP}" \
         --root "${REPO_ROOT}" \
         --workspace-root "${REPO_ROOT}" \
+        --profile "${local_profile}" \
+        --transport-mode "${local_transport}" \
         --skip-codex-validation \
         --skip-gemini-settings >/dev/null 2>&1 || \
         warn "MCP setup timed out or failed; config may be incomplete"
