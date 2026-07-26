@@ -3,7 +3,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
 CATALOG="$ROOT/scripts/ops/runtime/mcp/shared-servers.json"
-python - <<'PY' "$CATALOG" "$ROOT"
+python3 - <<'PY' "$CATALOG" "$ROOT"
 import json, socket, sys, time, urllib.request
 from pathlib import Path
 

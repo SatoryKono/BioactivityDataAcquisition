@@ -60,8 +60,13 @@ MCP_PROFILE_STABLE = (
     "deepwiki",
     "ref",
 )
-# Multi-client daily: stable membership + brave (shared HTTP when transport-mode shared).
-MCP_PROFILE_SHARED = MCP_PROFILE_STABLE + ("brave-search",)
+# Multi-client daily: host-stable set + docker thrash servers that live on the
+# shared HTTP plane (must match scripts/ops/runtime/mcp/shared-servers.json).
+MCP_PROFILE_SHARED = MCP_PROFILE_STABLE + (
+    "brave-search",
+    "prometheus",
+    "grafana",
+)
 MCP_PROFILE_CORE = MCP_PROFILE_STABLE + (
     # mermaid still uses docker mcp gateway (heavier than pure host MCP).
     "mermaid",
@@ -92,13 +97,18 @@ MCP_PROFILES: dict[str, tuple[str, ...] | None] = {
 # Localhost Streamable HTTP endpoints for multi-client shared plane (#6563).
 # Keep in sync with scripts/ops/runtime/mcp/shared-servers.json.
 MCP_SHARED_SERVER_ENDPOINTS: dict[str, str] = {
+    "brave-search": "http://127.0.0.1:8811/mcp",
     "adr-analysis": "http://127.0.0.1:8813/mcp",
     "deja": "http://127.0.0.1:8814/mcp",
     "context7": "http://127.0.0.1:8815/mcp",
     "ast-grep": "http://127.0.0.1:8816/mcp",
-    "brave-search": "http://127.0.0.1:8811/mcp",
+    "prometheus": "http://127.0.0.1:8822/mcp",
+    "grafana": "http://127.0.0.1:8823/mcp",
 }
 TRANSPORT_MODES = frozenset({"stdio", "shared", "hybrid"})
+# Multi-client daily defaults for Codex ensure / local projections.
+DEFAULT_LOCAL_PROFILE = "shared"
+DEFAULT_LOCAL_TRANSPORT_MODE = "shared"
 
 
 def _add_startup_timeouts(servers: dict[str, dict[str, Any]]) -> None:
@@ -471,13 +481,26 @@ def _codex_runtime_servers(
         "code-analyzer",
         "github-actions",
     }
+    def _is_http_server(server: dict[str, Any]) -> bool:
+        """Streamable HTTP / remote entries must not carry stdio env tables.
+
+        Codex rejects ``env`` on ``streamable_http`` (url-based) servers.
+        """
+        if server.get("type") == "http":
+            return True
+        return bool(server.get("url")) and "command" not in server
+
     for server_name in npm_backed_servers:
         if server_name not in servers:
+            continue
+        if _is_http_server(servers[server_name]):
+            # Shared-plane HTTP: cache env belongs to the long-lived proxy, not the client.
+            servers[server_name].pop("env", None)
             continue
         server_env = servers[server_name].setdefault("env", {})
         server_env["NPM_CONFIG_CACHE"] = npm_cache_dir
 
-    if "fetch" in servers:
+    if "fetch" in servers and not _is_http_server(servers["fetch"]):
         fetch_env = servers["fetch"].setdefault("env", {})
         fetch_env["UV_CACHE_DIR"] = str(runtime_cache_root / "uv-cache")
         fetch_env["UV_TOOL_DIR"] = str(runtime_cache_root / "uv-tools")
@@ -896,12 +919,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--profile",
         choices=sorted(MCP_PROFILES),
-        # Default local projections to core (not full) so Docker MCP gateways
-        # and multi-client container thrash are opt-in via graph/full.
-        default="core",
+        # Multi-client daily default: shared plane profile (not full inventory).
+        # Docker thrash servers (grafana/prometheus/brave) ride shared HTTP.
+        default=DEFAULT_LOCAL_PROFILE,
         help=(
             "Least-privilege local materialization profile for IDE/Codex local "
-            "projections (stable|shared|core|ops|graph|full). Default: core. "
+            "projections (stable|shared|core|ops|graph|full). "
+            f"Default: {DEFAULT_LOCAL_PROFILE}. "
             "Tracked portable inventory (.mcp.json, scripts/ai/.mcp.json, "
             ".zed/mcp.json, .devin/config.json) always stays full. "
             "Use stable on 32 GiB Docker Desktop hosts to drop gateway MCP. "
@@ -911,11 +935,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--transport-mode",
         choices=sorted(TRANSPORT_MODES),
-        default="stdio",
+        default=DEFAULT_LOCAL_TRANSPORT_MODE,
         help=(
-            "Local projection transport: stdio (default wrappers), shared "
-            "(localhost HTTP for shared-servers catalog), hybrid (same rewrite "
-            "for catalog servers). Tracked portable inventory always stays stdio."
+            "Local projection transport: shared (default localhost HTTP for "
+            "shared-servers catalog), stdio (wrappers; multiplies docker run per "
+            "client), hybrid (catalog HTTP + others stdio). "
+            "Tracked portable inventory always stays stdio."
         ),
     )
     args = parser.parse_args(list(argv) if argv is not None else None)

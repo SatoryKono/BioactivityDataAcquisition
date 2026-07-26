@@ -78,7 +78,7 @@ Classes:
 | Codex | Yes (url in config.toml / settings) | Workspace + `~/.codex` |
 | Grok | Yes when projection loaded | Restart client after materialize |
 | Qodo | Yes (mcp.json) | Local profile |
-| Devin | Portable tracked stays stdio full | No forced localhost URLs in tracked SSOT |
+| Devin | Yes (`type: http` + URL) | Active projection follows the selected local profile |
 
 ## Shared endpoints (v1)
 
@@ -102,10 +102,10 @@ python scripts/ai/codex/setup_mcp.py --profile shared --transport-mode shared --
 
 | Surface | Behavior |
 | --- | --- |
-| Tracked `.mcp.json` / `scripts/ai/.mcp.json` / `.zed` / `.devin` | Always **full portable stdio** (+ remote HTTP T4) |
-| Local `.cursor` / `.vscode` / `.qodo` / workspace codex / gemini | Profile + **transport-mode** |
-| `--transport-mode stdio` | Default; wrappers only |
-| `--transport-mode shared` | Shared-capable servers become `type: http` localhost URLs |
+| Tracked `.mcp.json` / `scripts/ai/.mcp.json` / `.zed` | Always **full portable stdio** (+ remote HTTP T4) |
+| Active `.devin` + local `.cursor` / `.vscode` / `.qodo` / workspace codex / gemini | Profile + **transport-mode** |
+| `--transport-mode stdio` | Explicit single-client fallback; wrappers only |
+| `--transport-mode shared` | Default; shared-capable servers become `type: http` localhost URLs |
 | `--transport-mode hybrid` | Same as shared for catalog servers; others stay stdio |
 | Profile `shared` | Membership = `stable` + `brave-search` (multi-client daily) |
 

@@ -39,6 +39,10 @@ def _seed_workspace_mcp(
                 str(workspace_root),
                 "--workspace-root",
                 str(workspace_root),
+                "--profile",
+                "shared",
+                "--transport-mode",
+                "shared",
                 "--skip-codex-validation",
                 "--skip-gemini-settings",
             ]
@@ -134,6 +138,14 @@ def test_shared_transport_mode_rewrites_local_projections_only(
     assert adr["url"].startswith(setup_mcp.APPROVED_LOCAL_MCP_BASE_URL_PREFIXES)
     assert "brave-search" in cursor["mcpServers"]
     assert cursor["mcpServers"]["brave-search"]["type"] == "http"
+    # Docker thrash leaders on the shared plane (single container per image).
+    for thrash in ("grafana", "prometheus", "brave-search"):
+        assert thrash in cursor["mcpServers"]
+        assert thrash in setup_mcp.MCP_SHARED_SERVER_ENDPOINTS
+        entry = cursor["mcpServers"][thrash]
+        assert entry["type"] == "http"
+        assert entry["url"] == setup_mcp.MCP_SHARED_SERVER_ENDPOINTS[thrash]
+        assert "command" not in entry
     # Non-catalog servers remain command-based.
     assert "command" in cursor["mcpServers"]["memory"]
 
@@ -165,6 +177,9 @@ def test_main_uses_workspace_root_for_generated_server_paths(
             "--skip-codex-config",
             "--profile",
             "full",
+            # Path assertions compare portable stdio inventory across projections.
+            "--transport-mode",
+            "stdio",
         ]
     )
 
@@ -538,6 +553,7 @@ def test_ensure_mcp_shell_reuses_current_config_and_repairs_drift(
 ) -> None:
     """Shell helper should report unchanged config and repair actual drift."""
     root = Path(__file__).resolve().parents[3]
+    monkeypatch.delenv("XDG_CACHE_HOME", raising=False)
     workspace_root, fake_home = _seed_workspace_mcp(tmp_path, monkeypatch)
 
     runtime_env = os.environ.copy()
@@ -546,13 +562,18 @@ def test_ensure_mcp_shell_reuses_current_config_and_repairs_drift(
             "HOME": _to_bash_path(fake_home),
             "REPO_ROOT": _to_bash_path(workspace_root),
             "CODEX_VALIDATE_MCP_LIST": "0",
+            # Bound but generous: WSL cold-start + shared-plane materialize.
+            "CODEX_MCP_SETUP_TIMEOUT": "90",
+            "CODEX_MCP_PROFILE": "shared",
+            "CODEX_MCP_TRANSPORT_MODE": "shared",
         }
     )
+    runtime_env.pop("XDG_CACHE_HOME", None)
     ensure_script = _to_bash_path(root / "scripts/ai/codex/helper/ensure-mcp.sh")
     codex_config = fake_home / ".codex/config.toml"
     initial_codex_config = codex_config.read_text(encoding="utf-8")
     bash_root = _to_bash_path(root)
-    ensure_timeout_seconds = 60
+    ensure_timeout_seconds = 120
 
     unchanged = subprocess.run(
         ["bash", ensure_script, "--ensure"],
