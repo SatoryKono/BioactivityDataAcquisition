@@ -39,12 +39,8 @@ def attach_manifest_id(
     control_plane_refs: _ManifestControlPlaneRefs | None = None,
     optional_fields: Mapping[str, object] | None = None,
 ) -> PipelineRunContext:
-    """Return context carrying manifest/control-plane provenance values.
+    """Return context with full refs or compact optional provenance (Sonar S107)."""
 
-    Prefer ``control_plane_refs`` for full provenance. ``optional_fields`` is a
-    compact mapping of residual control-plane anchors when refs are unavailable
-    (keeps this surface under Sonar S107).
-    """
     if control_plane_refs is not None:
         manifest_id = control_plane_refs.manifest_id
         optional_updates = extract_optional_updates_from_refs(control_plane_refs)

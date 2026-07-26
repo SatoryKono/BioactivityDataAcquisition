@@ -6,6 +6,8 @@ from collections.abc import Callable
 from datetime import datetime
 from typing import Any, Protocol
 
+import pyarrow as pa
+
 from bioetl.domain.types import GoldRecord, ScdConfig
 from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterProtocol
 
@@ -23,7 +25,7 @@ class GoldWriterSimpleDeltaHostProtocol(Protocol):
 
     def _to_arrow_table(
         self, records: list[GoldRecord], column_order: list[str] | None = None
-    ) -> object: ...
+    ) -> pa.Table: ...
 
 
 class GoldWriteAsyncioProtocol(Protocol):
@@ -66,7 +68,7 @@ class GoldWriterScd2HostProtocol(Protocol):
 
     def _to_arrow_table(
         self, records: list[GoldRecord], column_order: list[str] | None = None
-    ) -> object: ...
+    ) -> pa.Table: ...
 
     async def _merge_scd2(
         self,

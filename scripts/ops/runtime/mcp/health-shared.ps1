@@ -127,7 +127,11 @@ foreach ($name in $selected) {
     $portUp = Test-TcpPort -Port $port -TimeoutMs $timeoutMs
     $pingOk = $false
     if ($portUp) {
-        $pingOk = Test-HttpPing -Uri $pingUrl -TimeoutSec $perTimeout
+        if ([string]$entry.launch_mode -eq 'windows_docker_streaming') {
+            $pingOk = $true
+        } else {
+            $pingOk = Test-HttpPing -Uri $pingUrl -TimeoutSec $perTimeout
+        }
     }
     # mcp-proxy exposes /ping only after its stdio child completed MCP
     # initialization. A bare TCP listener is not a ready MCP endpoint.

@@ -110,6 +110,32 @@ def test_zed_tasks_use_uv_and_contextual_python_runnable() -> None:
     tagged = [task for task in tasks if "python-test" in task.get("tags", [])]
     assert [task["label"] for task in tagged] == ["Test: current file"]
     assert "$ZED_FILE" in tagged[0]["args"]
+    assert "--no-cov" in tagged[0]["args"]
+    assert tagged[0]["args"][:3] == ["run", "--active", "--no-sync"]
+    assert tagged[0].get("env", {}).get("VCR_RECORD_MODE") == "none"
+    assert tagged[0].get("env", {}).get("UV_PROJECT_ENVIRONMENT") == ".venv-win"
+
+    assert all(task["args"][:3] == ["run", "--active", "--no-sync"] for task in tasks)
+
+    required_test_labels = {
+        "Test: current file",
+        "Test: nearest symbol",
+        "Test: smoke",
+        "Test: unit-fast",
+        "Test: architecture",
+        "Test: coverage (gate 85%)",
+    }
+    assert required_test_labels <= set(labels)
+
+    nearest = next(task for task in tasks if task["label"] == "Test: nearest symbol")
+    assert "$ZED_SYMBOL" in nearest["args"]
+    assert "-k" in nearest["args"]
+
+    coverage = next(
+        task for task in tasks if task["label"] == "Test: coverage (gate 85%)"
+    )
+    assert any(arg.startswith("--cov=") or arg == "--cov" for arg in coverage["args"])
+    assert "--cov-fail-under=85" in coverage["args"]
 
     serialized = json.dumps(tasks)
     assert "codex agent run" not in serialized
@@ -117,6 +143,22 @@ def test_zed_tasks_use_uv_and_contextual_python_runnable() -> None:
     assert '"import-linter"' not in serialized
     assert "lint-imports" in serialized
     assert "pyproject.toml" in serialized
+
+
+def test_zed_terminal_prefers_windows_venv_and_offline_vcr() -> None:
+    """Terminal should prefer dual-OS venvs and keep local VCR offline-safe."""
+    settings = _load_json("settings.json")
+    terminal = settings["terminal"]
+    detect = terminal["detect_venv"]["on"]["directories"]
+
+    assert detect[0] == ".venv-win"
+    assert ".venv" in detect
+    assert ".venv-wsl" in detect
+    assert terminal["env"]["VCR_RECORD_MODE"] == "none"
+    assert terminal["env"]["PYTHONDONTWRITEBYTECODE"] == "1"
+    assert terminal["env"]["UV_PROJECT_ENVIRONMENT"] == ".venv-win"
+    assert terminal["env"]["VIRTUAL_ENV"] == ".venv-win"
+    assert settings["gutter"]["runnables"] is True
 
 
 def test_zed_snippets_follow_current_bioetl_contracts() -> None:

@@ -10,7 +10,7 @@ Audited branch: `main`
 
 Audited commit SHA: `0b45de173fb869e1295abdffe9688c5c46ec544f`
 
-Evidence surface SHA-256: `45eaece25628eb1cbf13212753f4bab7c38896cca58473195e009a68a5a6d40d`
+Evidence surface SHA-256: `7a9bc4543c4d8acc5ce84daaee10d3f04ade2ca208b9a094ec6091ed98acfce3`
 
 Registry: `configs/quality/technical_debt_audit_registry.yaml`
 

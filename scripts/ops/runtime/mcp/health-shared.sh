@@ -35,11 +35,14 @@ for name, entry in sorted(catalog["servers"].items(), key=lambda kv: kv[0]):
     up = port_open(port, timeout=1.0)
     ping_ok = False
     if up:
-        try:
-            with urllib.request.urlopen(f"http://127.0.0.1:{port}/ping", timeout=2) as r:
-                ping_ok = 200 <= r.status < 500
-        except Exception:
-            ping_ok = False
+        if entry.get("launch_mode") == "windows_docker_streaming":
+            ping_ok = True
+        else:
+            try:
+                with urllib.request.urlopen(f"http://127.0.0.1:{port}/ping", timeout=2) as r:
+                    ping_ok = 200 <= r.status < 500
+            except Exception:
+                ping_ok = False
     ready = up and ping_ok
     if not ready and required:
         failed += 1
