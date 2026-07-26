@@ -18,9 +18,16 @@ ______________________________________________________________________
 **Версия:** 1.0.0  
 **Дата обновления:** 2026-07-24
 
+**Оглавление:**
+- [BioETL Application CLI](#bioetl-application-cli) — команды запуска пайплайнов
+- [Build & Test CLI](#build--test-cli) — команды сборки и тестирования
+- [Development Scripts](#development-scripts) — скрипты разработки
+
 ______________________________________________________________________
 
-## Запуск CLI
+## BioETL Application CLI
+
+### Запуск CLI
 
 ```bash
 # Рекомендуемый способ (после установки)
@@ -37,9 +44,7 @@ bioetl --help
 bioetl <command> --help
 ```
 
-______________________________________________________________________
-
-## Основные команды запуска
+### Основные команды запуска
 
 ### `workflow` — Декларативные workflow DAG
 
@@ -488,6 +493,174 @@ bioetl lock check --pipeline <NAME> --run-id <UUID>
 ```
 
 > **Внимание:** Используйте `lock release` только если уверены, что пайплайн не выполняется.
+
+______________________________________________________________________
+
+## Build & Test CLI
+
+### Основные команды Makefile
+
+```bash
+# Установка зависимостей
+make install
+
+# Запуск тестов
+make test                    # Запуск стабильных тестов с coverage
+make test-fast               # Быстрые тесты (не slow, не benchmark, не e2e)
+make test-coverage           # Тесты с coverage gate
+make test-architecture       # Архитектурные тесты
+make test-unit               # Unit тесты
+make test-integration        # Integration тесты (не e2e, не live)
+make test-ci-local           # CI-ориентированный набор тестов
+make test-confidence-local   # Unit + архитектура + контракты + 85% coverage
+make test-profile            # Профилирование длительности тестов
+make test-deps               # Проверка тестовых зависимостей
+
+# Линтинг
+make lint                    # ruff + mypy проверки
+
+# Локальный запуск
+make run-local               # Запуск sample pipeline (PIPELINE=chembl_activity по умолчанию)
+
+# Качество и архитектура
+make qa-debt                 # Интегральный quality/debt gate
+make qa-arch-fast            # Быстрые архитектурные проверки
+make security-check          # Security тесты
+
+# Cleanup
+make clean                   # Предпросмотр cleanup targets
+make clean-local-artifacts   # Применить local cleanup
+make clean-preflight         # Release-preflight cleanup
+make clean-all               # Полный cleanup
+
+# Диаграммы
+make render-diagrams         # Рендер SVG/PNG для всех диаграмм
+make render-diagrams-svg     # Только SVG (быстрее)
+make render-diagrams-checks  # Валидация диаграмм (PR profile)
+make render-diagrams-bundles # Регенерация Markdown bundles
+make render-diagrams-all     # Полный рендер + bundles
+```
+
+### Примеры использования
+
+```bash
+# Полный цикл разработки
+make install && make lint && make test
+
+# Быстрая проверка перед коммитом
+make test-fast && make qa-arch-fast
+
+# Запуск конкретного пайплайна
+make run-local PIPELINE=chembl_target
+
+# Cleanup с применением
+make clean-local-artifacts --apply
+
+# Рендер диаграмм для документации
+make render-diagrams-all
+```
+
+______________________________________________________________________
+
+## Development Scripts
+
+### Unified Script Entry Points
+
+```bash
+# QA скрипты (scripts/engineering/qa)
+python -m scripts.engineering.qa naming_check           # Проверка именования C901
+python -m scripts.engineering.qa terminology_check      # Проверка терминологии
+python -m scripts.engineering.qa c901_complexity_check  # Проверка сложности C901
+
+# CI скрипты (scripts/engineering/ci)
+python -m scripts.engineering.ci quality-gate            # Quality gates
+python -m scripts.engineering.ci test_runner             # Test runner
+
+# Schema скрипты (scripts/schema)
+python -m scripts.schema config_validation              # Валидация конфигурации
+python -m scripts.schema config_generation               # Генерация конфигурации
+
+# Docs скрипты (scripts/docs)
+python -m scripts.docs link_check                        # Проверка ссылок
+python -m scripts.docs drift_check                       # Проверка drift
+python -m scripts.docs docstring_check                   # Проверка docstrings
+
+# Diagrams скрипты (scripts/diagrams)
+python -m scripts.diagrams diagram_lint                  # Lint диаграмм
+python -m scripts.diagrams diagram_check                 # Проверка диаграмм
+python -m scripts.diagrams diagram_render                # Рендер диаграмм
+
+# Data operations (scripts/ops/data)
+python -m scripts.ops.data checksums                     # Checksums
+python -m scripts.ops.data delta                         # Delta operations
+python -m scripts.ops.data data_dir                      # Data directory operations
+
+# Repo operations (scripts/engineering/repo)
+python -m scripts.engineering.repo inventory             # Инвентарь репозитория
+python -m scripts.engineering.repo catalog               # Каталог
+python -m scripts.engineering.repo versions              # Версии
+```
+
+### OS-Specific Wrappers
+
+#### Windows PowerShell
+```powershell
+# Setup
+.\setup_env_windows.ps1
+
+# Testing
+.\run_pytest.ps1
+.\run_mypy.ps1
+```
+
+#### WSL/Linux
+```bash
+# Setup
+./setup_env_wsl.sh
+
+# Testing
+./run_pytest.sh
+./run_mypy.sh
+```
+
+### Memory Workflow Commands
+
+```bash
+# Pre-task workflow
+python -m memory.tooling.workflow pre-task
+
+# Post-task workflow
+python -m memory.tooling.workflow post-task
+
+# Review curated
+python -m memory.tooling.workflow review-curated
+```
+
+### Docker Helper Commands
+
+```bash
+# Docker checks
+make docker-check              # Проверка Docker установки
+make docker-compose-check      # Валидация docker-compose.yml
+
+# Docker build
+make docker-build              # Сборка BioETL image
+
+# Docker start/stop
+make docker-start              # Запуск main stack
+make docker-start-full         # Запуск full helper stack
+make docker-start-monitoring   # Запуск monitoring stack (opt-in)
+make docker-stop               # Остановка main stack
+make docker-stop-full          # Остановка full helper stack
+make docker-stop-monitoring    # Остановка monitoring stack
+
+# Docker operations
+make docker-logs               # Просмотр логов (все сервисы)
+make docker-logs-bioetl       # Просмотр логов BioETL
+make docker-health             # Health check сервисов
+make docker-clean              # Очистка контейнеров
+make docker-shell-bioetl       # Shell в bioetl контейнере
+```
 
 ______________________________________________________________________
 
