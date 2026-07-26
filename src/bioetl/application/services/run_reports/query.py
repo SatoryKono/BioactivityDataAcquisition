@@ -90,14 +90,16 @@ def _load_latest_report(
     kind: str,
     owner: str,
     root: Path,
-) -> dict[str, Any] | None:
+) -> dict[str, Any] | None:  # Any: decoded report payload
     pointer = load_latest_pointer(kind=kind, owner=owner, root=root)
     if pointer is None:
         return None
     return _load_json_dict(Path(str(pointer.get("json_path") or "")))
 
 
-def _load_json_dict(path: Path) -> dict[str, Any] | None:
+def _load_json_dict(
+    path: Path,
+) -> dict[str, Any] | None:  # Any: decoded JSON object
     if not path.is_file():
         return None
     payload = json.loads(path.read_text(encoding="utf-8"))
@@ -206,7 +208,9 @@ def diff_pipeline_reports(
     }
 
 
-def _funnel_rows(payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
+def _funnel_rows(
+    payload: dict[str, Any],  # Any: decoded report payload
+) -> dict[str, dict[str, Any]]:  # Any: dynamic funnel rows
     return {
         str(row.get("stage_id")): row
         for row in payload.get("funnel") or []
@@ -215,9 +219,9 @@ def _funnel_rows(payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
 
 
 def _funnel_delta(
-    left: dict[str, Any],
-    right: dict[str, Any],
-) -> list[dict[str, Any]]:
+    left: dict[str, Any],  # Any: decoded report payload
+    right: dict[str, Any],  # Any: decoded report payload
+) -> list[dict[str, Any]]:  # Any: dynamic funnel delta rows
     left_rows = _funnel_rows(left)
     right_rows = _funnel_rows(right)
     stages = sorted(set(left_rows) | set(right_rows))
@@ -229,9 +233,9 @@ def _funnel_delta(
 
 def _stage_delta(
     stage: str,
-    left: dict[str, Any],
-    right: dict[str, Any],
-) -> dict[str, Any]:
+    left: dict[str, Any],  # Any: dynamic funnel row
+    right: dict[str, Any],  # Any: dynamic funnel row
+) -> dict[str, Any]:  # Any: dynamic stage delta payload
     return {
         "stage_id": stage,
         "records_in_delta": _int(right.get("records_in"))
@@ -243,7 +247,9 @@ def _stage_delta(
     }
 
 
-def _reason_counts(payload: dict[str, Any]) -> dict[str, int]:
+def _reason_counts(
+    payload: dict[str, Any],  # Any: decoded report payload
+) -> dict[str, int]:
     return {
         str(item.get("reason_code")): _int(item.get("count"))
         for item in payload.get("reasons_top_n") or []
@@ -252,9 +258,9 @@ def _reason_counts(payload: dict[str, Any]) -> dict[str, int]:
 
 
 def _reasons_delta(
-    left: dict[str, Any],
-    right: dict[str, Any],
-) -> list[dict[str, Any]]:
+    left: dict[str, Any],  # Any: decoded report payload
+    right: dict[str, Any],  # Any: decoded report payload
+) -> list[dict[str, Any]]:  # Any: dynamic reason delta rows
     left_counts = _reason_counts(left)
     right_counts = _reason_counts(right)
     return [
@@ -272,13 +278,14 @@ def prune_reports(
     owner: str | None = None,
     max_count: int | None = None,
     max_age_days: int | None = None,
+    now: datetime | None = None,
     root: Path | None = None,
     dry_run: bool = True,
 ) -> list[str]:
     """Delete old report directories. Returns removed paths (or candidates if dry_run)."""
-    _validate_prune_options(kind, max_count, max_age_days)
+    _validate_prune_options(kind, max_count, max_age_days, now)
     entries = _reports_for_prune(kind, owner, root)
-    victims = _prune_candidates(entries, max_count, max_age_days)
+    victims = _prune_candidates(entries, max_count, max_age_days, now)
     return _remove_report_directories(victims, dry_run=dry_run)
 
 
@@ -286,11 +293,14 @@ def _validate_prune_options(
     kind: str,
     max_count: int | None,
     max_age_days: int | None,
+    now: datetime | None,
 ) -> None:
     if kind not in {"pipeline", "workflow"}:
         raise ValueError("kind must be 'pipeline' or 'workflow'")
     if max_count is None and max_age_days is None:
         raise ValueError("provide max_count and/or max_age_days")
+    if max_age_days is not None and now is None:
+        raise ValueError("now is required when max_age_days is provided")
 
 
 def _reports_for_prune(
@@ -307,10 +317,11 @@ def _prune_candidates(
     entries: list[ReportIndexEntry],
     max_count: int | None,
     max_age_days: int | None,
+    now: datetime | None,
 ) -> list[ReportIndexEntry]:
     victims: list[ReportIndexEntry] = []
-    if max_age_days is not None:
-        cutoff = datetime.now(tz=UTC).timestamp() - (max_age_days * 86400)
+    if max_age_days is not None and now is not None:
+        cutoff = now.astimezone(UTC).timestamp() - (max_age_days * 86400)
         victims.extend(item for item in entries if item.mtime < cutoff)
     if max_count is not None:
         victims.extend(entries[max_count:])
@@ -352,9 +363,13 @@ def _read_identity_meta(path: Path) -> tuple[str | None, str | None]:
 
 
 def _int(value: object) -> int:
+    if value is None:
+        return 0
+    if not isinstance(value, (str, bytes, bytearray, int, float)):
+        return 0
     try:
-        return 0 if value is None else int(value)
-    except (TypeError, ValueError):
+        return int(value)
+    except (TypeError, ValueError, OverflowError):
         return 0
 
 

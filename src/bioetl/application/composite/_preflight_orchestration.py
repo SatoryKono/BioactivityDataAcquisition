@@ -47,12 +47,12 @@ class PreflightSchemaOrchestrationMixin:
             return None
         return provider, entity
 
-    def _register_source_aliases(
+    def _register_source_aliases[AliasValueT](
         self,
-        result: dict[str, SchemaFields],
+        result: dict[str, AliasValueT],
         *,
         pipeline_name: str,
-        fields: SchemaFields,
+        fields: AliasValueT,
         is_seed: bool = False,
     ) -> None:
         """Register canonical and compatibility source aliases for a schema payload."""

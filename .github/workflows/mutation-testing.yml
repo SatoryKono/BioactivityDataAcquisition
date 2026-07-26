@@ -69,18 +69,40 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-mutmut-
 
+      - name: Configure mutation target
+        env:
+          MUTMUT_SOURCE_PATH: ${{ matrix.target.paths_to_mutate }}
+          MUTMUT_TESTS_DIR: ${{ matrix.target.tests_dir }}
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+
+          import tomlkit
+
+          path = Path("pyproject.toml")
+          document = tomlkit.parse(path.read_text(encoding="utf-8"))
+          config = document["tool"]["mutmut"]
+          config["source_paths"] = [os.environ["MUTMUT_SOURCE_PATH"]]
+          config["pytest_add_cli_args_test_selection"] = [
+              os.environ["MUTMUT_TESTS_DIR"]
+          ]
+          path.write_text(tomlkit.dumps(document), encoding="utf-8")
+          PY
+
       - name: Run mutation testing
         run: |
           echo "Running mutation testing for ${{ matrix.target.id }}..."
-          mutmut run \
-            --paths-to-mutate="${{ matrix.target.paths_to_mutate }}" \
-            --tests-dir="${{ matrix.target.tests_dir }}"
+          mutmut run
 
       - name: Generate mutation report
         if: always()
         run: |
           mkdir -p "reports/${{ matrix.target.id }}"
           mutmut results > "reports/${{ matrix.target.id }}/mutmut_results.txt"
+          mutmut export-cicd-stats
+          cp mutants/mutmut-cicd-stats.json \
+            "reports/${{ matrix.target.id }}/mutmut-cicd-stats.json"
           mutmut html
           if [ -d "html" ]; then
             mv html "reports/${{ matrix.target.id }}/mutmut_html"
@@ -92,38 +114,32 @@ jobs:
           MUTATION_SCORE_THRESHOLD: ${{ matrix.target.threshold }}
         run: |
           python - <<'PY'
+          import json
           import os
-          import subprocess
           import sys
-          import re
-
-          result = subprocess.run(
-              ["mutmut", "results"],
-              capture_output=True,
-              text=True
-          )
-          output = result.stdout + result.stderr
+          from pathlib import Path
 
           target = os.environ["MUTATION_TARGET"]
-          if result.returncode != 0:
-              print(f"mutmut results failed for {target}; treating this as a broken gate.")
-              print(output)
-              sys.exit(result.returncode)
-
-          # Parse mutation score
-          # Example output: "Killed: 45, Survived: 5, ..."
-          killed_match = re.search(r'Killed[:\s]+(\d+)', output, re.IGNORECASE)
-          survived_match = re.search(r'Survived[:\s]+(\d+)', output, re.IGNORECASE)
-          timeout_match = re.search(r'Timeout[:\s]+(\d+)', output, re.IGNORECASE)
-
-          if not (killed_match and survived_match and timeout_match):
-              print(f"Could not parse mutmut results for {target}; treating this as a broken gate.")
-              print(output)
+          stats_path = Path("reports") / target / "mutmut-cicd-stats.json"
+          if not stats_path.is_file():
+              print(
+                  f"mutmut CI/CD stats are missing for {target}; "
+                  "treating this as a broken gate."
+              )
               sys.exit(1)
 
-          killed = int(killed_match.group(1)) if killed_match else 0
-          survived = int(survived_match.group(1)) if survived_match else 0
-          timeout = int(timeout_match.group(1)) if timeout_match else 0
+          stats = json.loads(stats_path.read_text(encoding="utf-8"))
+          try:
+              killed = int(stats["killed"])
+              survived = int(stats["survived"])
+              timeout = int(stats["timeout"])
+          except (KeyError, TypeError, ValueError) as exc:
+              print(
+                  f"Invalid mutmut CI/CD stats for {target}; "
+                  f"treating this as a broken gate: {exc}"
+              )
+              print(json.dumps(stats, sort_keys=True))
+              sys.exit(1)
 
           total = killed + survived + timeout
           if total == 0:
@@ -137,13 +153,13 @@ jobs:
           print(f"  Timeout: {timeout}")
           print(f"  Total: {total}")
 
-          THRESHOLD = float(os.environ["MUTATION_SCORE_THRESHOLD"])
-          if score < THRESHOLD:
-              print(f"\n⚠️  Mutation score {score:.1f}% is below threshold {THRESHOLD}%")
+          threshold = float(os.environ["MUTATION_SCORE_THRESHOLD"])
+          if score < threshold:
+              print(f"\n⚠️  Mutation score {score:.1f}% is below threshold {threshold}%")
               print("Consider improving test coverage for the surviving mutants")
               sys.exit(1)
           else:
-              print(f"\n✅ Mutation score {score:.1f}% meets threshold {THRESHOLD}%")
+              print(f"\n✅ Mutation score {score:.1f}% meets threshold {threshold}%")
           PY
 
       - name: Upload mutation reports

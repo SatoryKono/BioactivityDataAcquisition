@@ -23,7 +23,6 @@ def build_replay_taxonomy_projection(
     return resolve_replay_taxonomy_projection(fields)
 
 
-
 def resolve_replay_taxonomy_projection(
     primary: Mapping[str, object] | None = None,
     *,

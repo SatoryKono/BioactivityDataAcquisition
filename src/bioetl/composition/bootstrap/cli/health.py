@@ -32,6 +32,8 @@ from bioetl.infrastructure.time import SystemClock
 if TYPE_CHECKING:
     from bioetl.application.services.health_service import HealthService
     from bioetl.application.services.quarantine_service import QuarantineService
+    from bioetl.domain.ports import LoggerPort, MetricsPort
+    from bioetl.infrastructure.config.settings_api import Settings
 
 __all__ = [
     "HealthServerDependencies",
@@ -41,13 +43,22 @@ __all__ = [
 ]
 
 
-def create_health_service(*args: object, **kwargs: object) -> HealthService:
+def create_health_service(
+    *,
+    logger: LoggerPort,
+    settings: Settings,
+    metrics: MetricsPort | None = None,
+) -> HealthService:
     """Delegate health-service assembly lazily to avoid server startup fan-out."""
     from bioetl.composition.bootstrap.assembly.health_service import (
         create_health_service as _create_health_service,
     )
 
-    return _create_health_service(*args, **kwargs)
+    return _create_health_service(
+        logger=logger,
+        settings=settings,
+        metrics=metrics,
+    )
 
 
 def bootstrap_health_service() -> HealthService:

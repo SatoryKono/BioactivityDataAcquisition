@@ -28,8 +28,8 @@ from bioetl.interfaces.cli.formatters import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.services.medallion_lifecycle import (
-        MedallionLifecycleService,
+    from bioetl.composition._resource_management import (
+        MedallionLifecycleServiceProtocol,
     )
     from bioetl.application.services.vacuum_service import VacuumService
 
@@ -49,7 +49,7 @@ _VACUUM_ALL_UNEXPECTED_ERROR_TITLE = "Unexpected error during maintenance vacuum
 _VACUUM_ALL_INTERRUPTED_MESSAGE = "Maintenance vacuum-all interrupted by user (Ctrl+C)"
 
 
-def get_lifecycle_service() -> MedallionLifecycleService:
+def get_lifecycle_service() -> MedallionLifecycleServiceProtocol:
     """Load the lifecycle service through the owner-only maintenance seam."""
     return service_access.get_lifecycle_service()
 

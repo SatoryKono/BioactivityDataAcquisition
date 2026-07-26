@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Sequence
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING, Literal, cast
+from typing import Literal, cast
 
 import polars as pl
 import pyarrow as pa
@@ -35,17 +35,15 @@ from bioetl.infrastructure.storage.silver.metadata_operations import (
 from bioetl.infrastructure.storage.silver.metadata_write_models import (
     _SilverMetadataWriteRequest,
 )
+from bioetl.infrastructure.storage.silver.operations.metadata_operations import (
+    SilverMetadataOperations,
+)
 from bioetl.infrastructure.storage.silver.operations.metadata_write_support import (
     _SilverMetadataAuditSupportRequest,
 )
 from bioetl.infrastructure.storage.silver.prepared_operation_models import (
     _PreparedSilverWriteFinalizationContext,
 )
-
-if TYPE_CHECKING:
-    from bioetl.infrastructure.storage.silver.operations.metadata_operations import (
-        SilverMetadataOperations,
-    )
 
 
 class SilverWriterMetadataFacade:
@@ -91,6 +89,8 @@ class SilverWriterMetadataFacade:
         validation_errors: Sequence[str] | None = None,
     ) -> BatchDQMetrics:
         """Compute batch DQ metrics with schema drift information."""
+        import polars as pl
+
         frame = (
             records
             if isinstance(records, pl.DataFrame)

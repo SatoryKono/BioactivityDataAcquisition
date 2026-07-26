@@ -27,6 +27,7 @@ from bioetl.infrastructure.config.contract_policy_validation import (
 )
 
 if TYPE_CHECKING:
+    from bioetl.application.core.base_transformer import BaseTransformer
     from bioetl.composition.factories.pipeline._assembler_factory import (
         GenericPipelineFactory,
     )
@@ -67,14 +68,21 @@ def _validate_contract_policy(config: PipelineFactoryConfig) -> None:
 
 def _resolve_transformer_class_ref(
     transformer_class: TransformerClassRef | None,
-) -> type[object] | None:
+) -> type[BaseTransformer] | None:
     """Resolve a manifest transformer reference into the actual class."""
     if transformer_class is None or not isinstance(transformer_class, str):
         return transformer_class
     module_name, _, attr_name = transformer_class.rpartition(".")
     if not module_name or not attr_name:
         raise ValueError(f"Invalid transformer class reference: {transformer_class!r}")
-    return cast(type[object], getattr(import_module(module_name), attr_name))
+    resolved = getattr(import_module(module_name), attr_name)
+    from bioetl.application.core.base_transformer import BaseTransformer
+
+    if not isinstance(resolved, type) or not issubclass(resolved, BaseTransformer):
+        raise TypeError(
+            f"Transformer reference must resolve to BaseTransformer: {transformer_class}"
+        )
+    return resolved
 
 
 def create_factory(
@@ -114,7 +122,7 @@ def create_factory(
         silver_schema=config.silver_schema,
         gold_schema=cast("GoldSchemaType", config.gold_schema),
         pandera_silver_schema=config.pandera_silver_schema,
-        transformer_class=cast(type[object] | None, transformer_class),
+        transformer_class=transformer_class,
         data_source_creator=data_source_creator,
         provider_registry=provider_registry,
     )

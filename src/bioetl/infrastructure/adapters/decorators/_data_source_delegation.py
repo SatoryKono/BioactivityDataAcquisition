@@ -66,5 +66,12 @@ async def iter_delegated_fetch(
     request: DataSourceFetchRequest,
 ) -> AsyncIterator[JsonDict]:
     """Iterate a fetch request through the wrapped data source."""
-    async for record in data_source.fetch(**request.as_kwargs()):
+    async for record in data_source.fetch(
+        entity_type=request.entity_type,
+        limit=request.limit,
+        query=request.query,
+        filter_ids=request.filter_ids,
+        filter_field=request.filter_field,
+        offset=request.offset,
+    ):
         yield record

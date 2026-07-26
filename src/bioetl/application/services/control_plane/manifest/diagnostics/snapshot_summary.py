@@ -18,6 +18,19 @@ from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_ref
 from bioetl.domain.control_plane import RunLedgerEntry
 
 
+def _index_existing_snapshots(
+    snapshots: object,
+) -> dict[str, dict[str, object]]:
+    """Index well-formed existing snapshot mappings by snapshot ID."""
+    if not isinstance(snapshots, list):
+        return {}
+    return {
+        str(snapshot["snapshot_id"]): dict(snapshot)
+        for snapshot in snapshots
+        if isinstance(snapshot, Mapping) and snapshot.get("snapshot_id") is not None
+    }
+
+
 def merge_ledger_input_snapshots_into_summary(
     summary: dict[str, object],
     ledger_entries: tuple[RunLedgerEntry, ...],
@@ -27,11 +40,7 @@ def merge_ledger_input_snapshots_into_summary(
     if not ledger_snapshots:
         return summary
     merged = dict(summary)
-    snapshots_by_id = {
-        str(snapshot.get("snapshot_id")): dict(snapshot)
-        for snapshot in merged.get("input_snapshots", [])
-        if isinstance(snapshot, Mapping) and snapshot.get("snapshot_id") is not None
-    }
+    snapshots_by_id = _index_existing_snapshots(merged.get("input_snapshots", []))
     for snapshot in ledger_snapshots:
         snapshots_by_id[str(snapshot["snapshot_id"])] = snapshot
     input_snapshots = [snapshots_by_id[key] for key in sorted(snapshots_by_id)]

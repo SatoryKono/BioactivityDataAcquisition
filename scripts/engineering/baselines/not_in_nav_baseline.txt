@@ -30,6 +30,7 @@
 00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md
 00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md
 00-project/ai/agents/policy/SPECIALIST_PROFILE_TEMPLATE.md
+00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md
 00-project/ai/agents/runtime/orchestration/py-team-orchestration.md
 00-project/ai/audit/observability-issues/OBS-002-metric-to-panel-runtime.md
 00-project/ai/audit/observability-issues/OBS-002-validation-findings.md
@@ -53,6 +54,7 @@
 00-project/ai/memory/memory-py-review-orchestrator.md
 00-project/ai/memory/memory-py-test-bot.md
 00-project/ai/memory/memory-py-test-swarm.md
+00-project/ai/memory/gh-issues-documentation-update.md
 00-project/ai/memory/neo4j-project-memory-seed.md
 00-project/ai/prompts/README.md
 00-project/ai/prompts/ai_workspace_setup.md

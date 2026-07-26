@@ -60,6 +60,7 @@ MCP_PROFILE_STABLE = (
     "deepwiki",
     "ref",
 )
+<<<<<<< Updated upstream
 # Multi-client daily: host-stable set + docker thrash servers that live on the
 # shared HTTP plane (must match scripts/ops/runtime/mcp/shared-servers.json).
 MCP_PROFILE_SHARED = MCP_PROFILE_STABLE + (
@@ -67,8 +68,25 @@ MCP_PROFILE_SHARED = MCP_PROFILE_STABLE + (
     "prometheus",
     "grafana",
 )
+||||||| Stash base
+# Multi-client daily: stable membership + brave (shared HTTP when transport-mode shared).
+MCP_PROFILE_SHARED = MCP_PROFILE_STABLE + ("brave-search",)
+=======
+# Multi-client daily: thrash-heavy set on shared HTTP when transport-mode shared.
+# Keep membership aligned with scripts/ops/runtime/mcp/shared-servers.json
+# (neo4j-* stay optional via graph/full + shared transport, not forced daily).
+MCP_PROFILE_SHARED = MCP_PROFILE_STABLE + (
+    "brave-search",
+    "docker",
+    "mermaid",
+    # dockerhub remains on the host shared plane catalog, but is not a
+    # BioETL canonical inventory server (see REMOVED_MCP_SERVER_NAMES).
+    "prometheus",
+    "grafana",
+)
+>>>>>>> Stashed changes
 MCP_PROFILE_CORE = MCP_PROFILE_STABLE + (
-    # mermaid still uses docker mcp gateway (heavier than pure host MCP).
+    # mermaid still uses docker mcp gateway under stdio; HTTP when shared plane.
     "mermaid",
 )
 MCP_PROFILE_OPS = MCP_PROFILE_CORE + (
@@ -102,8 +120,22 @@ MCP_SHARED_SERVER_ENDPOINTS: dict[str, str] = {
     "deja": "http://127.0.0.1:8814/mcp",
     "context7": "http://127.0.0.1:8815/mcp",
     "ast-grep": "http://127.0.0.1:8816/mcp",
+<<<<<<< Updated upstream
     "prometheus": "http://127.0.0.1:8822/mcp",
     "grafana": "http://127.0.0.1:8823/mcp",
+||||||| Stash base
+    "brave-search": "http://127.0.0.1:8811/mcp",
+=======
+    "docker": "http://127.0.0.1:8817/mcp",
+    "mermaid": "http://127.0.0.1:8818/mcp",
+    "dockerhub": "http://127.0.0.1:8819/mcp",
+    "github": "http://127.0.0.1:8820/mcp",
+    "fetch": "http://127.0.0.1:8821/mcp",
+    "prometheus": "http://127.0.0.1:8822/mcp",
+    "grafana": "http://127.0.0.1:8823/mcp",
+    "neo4j-cypher": "http://127.0.0.1:8824/mcp",
+    "neo4j-memory": "http://127.0.0.1:8825/mcp",
+>>>>>>> Stashed changes
 }
 TRANSPORT_MODES = frozenset({"stdio", "shared", "hybrid"})
 # Multi-client daily defaults for Codex ensure / local projections.

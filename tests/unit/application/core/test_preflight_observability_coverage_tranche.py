@@ -8,7 +8,9 @@ pytestmark = pytest.mark.unit
 
 from types import SimpleNamespace
 
-from bioetl.application.core.preflight._observability import emit_preflight_health_results
+from bioetl.application.core.preflight._observability import (
+    emit_preflight_health_results,
+)
 from bioetl.domain.types import HealthStatus
 
 

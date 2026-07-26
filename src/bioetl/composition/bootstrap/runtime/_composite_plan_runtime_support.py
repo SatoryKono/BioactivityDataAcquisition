@@ -23,9 +23,6 @@ if TYPE_CHECKING:
     from bioetl.composition.bootstrap.runtime._composite_plan_support import (
         CompositeBootstrapPlan,
     )
-    from bioetl.composition.bootstrap.composite_infrastructure_context import (
-        CompositeRuntimeStorageProtocol,
-    )
     from bioetl.domain.composite import CompositeConfig
     from bioetl.domain.ports import (
         ClockPort,
@@ -35,6 +32,9 @@ if TYPE_CHECKING:
         TracingPort,
     )
     from bioetl.infrastructure.config.settings_api import Settings
+    from bioetl.infrastructure.config.composite_config_api import (
+        ConfigPayloadValidator,
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -80,7 +80,7 @@ def load_runtime_composite_config_impl(
     name: str,
     *,
     resolve_config_path_fn: Callable[[str], Path],
-    validate_payload: Callable[[dict[str, object]], object],
+    validate_payload: ConfigPayloadValidator,
 ) -> CompositeConfig:
     """Load a composite config through the infrastructure owner API."""
     config_path = resolve_config_path_fn(name)
@@ -176,7 +176,7 @@ def _coerce_named_runtime_bundle(
         logger=bundle.logger,
         metrics=bundle.metrics,
         tracer=bundle.tracer,
-        storage=cast("CompositeRuntimeStorageProtocol", bundle.storage),
+        storage=bundle.storage,
         lock=bundle.lock,
         clock=clock,
     )

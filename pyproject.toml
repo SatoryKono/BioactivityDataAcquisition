@@ -467,9 +467,8 @@ known-first-party = ["bioetl", "tests"]
 
 # ============ MUTMUT (Mutation Testing) ============
 [tool.mutmut]
-paths_to_mutate = "src/bioetl/domain/,src/bioetl/application/"
-tests_dir = "tests/"
-runner = "python -m pytest -x --tb=short"
+source_paths = ["src/bioetl/domain/", "src/bioetl/application/"]
+pytest_add_cli_args_test_selection = ["tests/"]
 # Skip infrastructure layer - focus on business logic
 dict_synonyms = "Struct, NamedStruct"
 

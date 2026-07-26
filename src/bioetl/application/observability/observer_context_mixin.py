@@ -53,6 +53,7 @@ class _ObserverContextManagerMixin(_ObserverEventMixinBase):
     """Context-manager lifecycle orchestration for pipeline observability."""
 
     pipeline_name: str
+    provider_name: str
     run_id: str
     run_type: str
     manifest_id: str | None

@@ -89,7 +89,7 @@ def build_pre_silver_publication_record(
 
     def build_silver_record(
         context: PipelineContext,
-        staged_entity_id: str,
+        entity_id: str,
         content_hash: str,
         index: int,
         business_data: JsonDict,
@@ -97,7 +97,7 @@ def build_pre_silver_publication_record(
         return build_publication_silver_record(
             transformer,
             context,
-            staged_entity_id,
+            entity_id,
             content_hash,
             index,
             business_data,
@@ -163,7 +163,7 @@ def assemble_publication_silver_record(
     return cast(
         "SilverRecord",
         transformer._record_normalizer.project_normalization_findings(
-            cast("JsonDict", silver_record),
+            silver_record,
             context=context,
             index=index,
         ),

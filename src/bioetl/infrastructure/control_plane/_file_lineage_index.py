@@ -108,7 +108,7 @@ def append_jsonl_payload(
     bytes_written = 0
     checkpoint_size = 0
     try:
-        checkpoint_size = os_module.fstat(file_descriptor).st_size
+        checkpoint_size = int(os_module.fstat(file_descriptor).st_size)
         while bytes_written < len(payload):
             written = os_module.write(file_descriptor, payload[bytes_written:])
             if written <= 0:

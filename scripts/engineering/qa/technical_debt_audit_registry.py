@@ -120,7 +120,7 @@ def compute_evidence_surface_sha256(
     root: Path,
     evidence_paths: tuple[str, ...] | list[str],
 ) -> str:
-    """Hash ordered path/content identities for audit evidence files."""
+    """Hash ordered path/content identities independent of checkout line endings."""
     identities: list[dict[str, str]] = []
     for relative_path in sorted(set(evidence_paths)):
         normalized = _safe_relative_path(relative_path)
@@ -132,7 +132,9 @@ def compute_evidence_surface_sha256(
         identities.append(
             {
                 "path": normalized,
-                "sha256": hashlib.sha256(evidence_path.read_bytes()).hexdigest(),
+                "sha256": hashlib.sha256(
+                    evidence_path.read_text(encoding="utf-8").encode("utf-8")
+                ).hexdigest(),
             }
         )
     canonical = json.dumps(

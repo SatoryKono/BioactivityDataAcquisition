@@ -13,7 +13,8 @@ __all__ = ["FileHistoricalReplayClosureStore"]
 
 
 class _HistoricalReplayClosureReportLike(Protocol):
-    report_id: str
+    @property
+    def report_id(self) -> str: ...
 
     def to_dict(self) -> dict[str, object]: ...
 

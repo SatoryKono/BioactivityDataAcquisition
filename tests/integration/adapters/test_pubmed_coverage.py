@@ -222,12 +222,11 @@ def test_adapter_factory_missing_args():
 async def test_adapter_aclose(pubmed_adapter: PubMedAdapter):
     from unittest.mock import AsyncMock
 
-    pubmed_adapter._http_client = MagicMock(spec=UnifiedHTTPClient)
-    # Mock __aexit__ which is called by await http_client.__aexit__
-    pubmed_adapter._http_client.__aexit__ = AsyncMock()
+    http_client = AsyncMock(spec=UnifiedHTTPClient)
+    pubmed_adapter._http_client = http_client
 
     await pubmed_adapter.aclose()
-    assert pubmed_adapter._http_client.__aexit__.called
+    http_client.__aexit__.assert_awaited_once_with(None, None, None)
 
 
 @pytest.mark.integration

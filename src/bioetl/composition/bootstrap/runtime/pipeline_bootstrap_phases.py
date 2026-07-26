@@ -102,20 +102,22 @@ def bootstrap_observability_bundle(
         bootstrap_observability_bundle_impl as _bootstrap_observability_bundle,
     )
 
-    return _bootstrap_observability_bundle(
-        pipeline=pipeline,
-        run_id=run_id,
-        settings=settings,
-        log_level=log_level,
-        logger_bootstrapper=logger_bootstrapper,
-        tracer_bootstrapper=tracer_bootstrapper,
-        metrics_bootstrapper=metrics_bootstrapper,
-        audit_bootstrapper=audit_bootstrapper,
-        dq_monitor_bootstrapper=dq_monitor_bootstrapper,
-        preflight_validator=preflight_validator,
-        yaml_config=yaml_config,
-        skip_gold=skip_gold,
-    )
+    bootstrap: Callable[..., ObservabilityBundle] = _bootstrap_observability_bundle
+    bootstrap_kwargs: dict[str, object] = {
+        "pipeline": pipeline,
+        "run_id": run_id,
+        "settings": settings,
+        "log_level": log_level,
+        "logger_bootstrapper": logger_bootstrapper,
+        "tracer_bootstrapper": tracer_bootstrapper,
+        "metrics_bootstrapper": metrics_bootstrapper,
+        "audit_bootstrapper": audit_bootstrapper,
+        "dq_monitor_bootstrapper": dq_monitor_bootstrapper,
+        "preflight_validator": preflight_validator,
+        "yaml_config": yaml_config,
+        "skip_gold": skip_gold,
+    }
+    return bootstrap(**bootstrap_kwargs)
 
 
 def create_pipeline_config_loader(

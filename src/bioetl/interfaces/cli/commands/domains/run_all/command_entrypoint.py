@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Protocol
+from typing import Protocol, cast
 
 import click
 
@@ -59,7 +59,7 @@ def build_run_all_click_command(
         """Run all registered pipelines for one provider sequentially."""
         run_callback(click_context, **kwargs)
 
-    return run_all_command
+    return cast("click.Command", run_all_command)
 
 
 __all__ = ["build_run_all_click_command"]

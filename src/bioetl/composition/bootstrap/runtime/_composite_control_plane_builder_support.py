@@ -75,15 +75,17 @@ def _composite_contract_identity_field_values(
     normalization_profile_hash: str | None,
 ) -> dict[str, object]:
     """Return the shared contract-identity payload for manifest assembly."""
-    return build_contract_identity_field_values(
-        contract_ref=contract_ref,
-        contract_version=contract_version,
-        contract_schema_hash=contract_schema_hash,
-        dq_policy_ref=dq_policy_ref,
-        rule_bundle_version=rule_bundle_version,
-        normalization_profile_ref=normalization_profile_ref,
-        normalization_profile_version=normalization_profile_version,
-        normalization_profile_hash=normalization_profile_hash,
+    return dict(
+        build_contract_identity_field_values(
+            contract_ref=contract_ref,
+            contract_version=contract_version,
+            contract_schema_hash=contract_schema_hash,
+            dq_policy_ref=dq_policy_ref,
+            rule_bundle_version=rule_bundle_version,
+            normalization_profile_ref=normalization_profile_ref,
+            normalization_profile_version=normalization_profile_version,
+            normalization_profile_hash=normalization_profile_hash,
+        )
     )
 
 
@@ -209,16 +211,14 @@ def _build_composite_control_plane_config_artifacts(
         contract_entity=contract_entity,
         pipeline_version=pipeline_version,
         effective_required_profile=effective_required_profile,
-        **_composite_contract_identity_field_values(
-            contract_ref=contract_ref,
-            contract_version=contract_version,
-            contract_schema_hash=contract_schema_hash,
-            dq_policy_ref=dq_policy_ref,
-            rule_bundle_version=rule_bundle_version,
-            normalization_profile_ref=normalization_profile_ref,
-            normalization_profile_version=normalization_profile_version,
-            normalization_profile_hash=normalization_profile_hash,
-        ),
+        contract_ref=contract_ref,
+        contract_version=contract_version,
+        contract_schema_hash=contract_schema_hash,
+        dq_policy_ref=dq_policy_ref,
+        rule_bundle_version=rule_bundle_version,
+        normalization_profile_ref=normalization_profile_ref,
+        normalization_profile_version=normalization_profile_version,
+        normalization_profile_hash=normalization_profile_hash,
     )
 
 

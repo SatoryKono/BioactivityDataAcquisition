@@ -10,13 +10,13 @@ __all__ = [
 
 from bioetl.application.core.batch_operation_errors import OPERATION_ERRORS
 
-PIPELINE_EXECUTION_ERRORS = (
+PIPELINE_EXECUTION_ERRORS: tuple[type[Exception], ...] = (
     *OPERATION_ERRORS,
     KeyError,
     AttributeError,
 )
 
-SOURCE_METADATA_ERRORS = (
+SOURCE_METADATA_ERRORS: tuple[type[Exception], ...] = (
     *OPERATION_ERRORS,
     AttributeError,
 )

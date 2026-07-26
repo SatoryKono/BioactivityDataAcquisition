@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import cast
+from datetime import datetime
+from typing import TYPE_CHECKING, cast
 
 import pyarrow as pa
 
@@ -11,6 +12,9 @@ from bioetl.infrastructure.storage.gold.io_helpers import (
     load_gold_writer_module as _load_gold_writer_module,
 )
 from bioetl.infrastructure.storage.gold.io_protocols import _GoldMergedWriteHostProtocol
+
+if TYPE_CHECKING:
+    from pandera.polars import DataFrameSchema
 
 __all__ = [
     "_GoldMergedWriteRequest",
@@ -28,8 +32,8 @@ class _GoldMergedWriteRequest:
     table_name: str
     records: list[dict[str, object]]
     primary_keys: list[str] | None
-    schema: object
-    completed_at: object | None
+    schema: DataFrameSchema
+    completed_at: datetime | None
     run_id: str | None
     sources_used: list[str] | None
     preserve_column_order: bool = False

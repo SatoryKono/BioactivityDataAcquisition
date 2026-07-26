@@ -79,8 +79,13 @@ def build_run_replay_bundle_descriptor(
         claims,
         produced_artifact_trace,
     )
-    missing_requirements = tuple(
-        str(item) for item in produced_artifact_trace.get("missing_requirements", [])
+    missing_requirement_payload = produced_artifact_trace.get(
+        "missing_requirements", []
+    )
+    missing_requirements = (
+        tuple(str(item) for item in missing_requirement_payload)
+        if isinstance(missing_requirement_payload, list)
+        else ()
     )
     return RunReplayBundleDescriptorRecord(
         manifest_id=manifest.manifest_id,

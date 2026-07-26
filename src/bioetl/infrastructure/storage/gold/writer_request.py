@@ -3,10 +3,14 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from bioetl.domain.types import GoldRecord, RunID, ScdConfig
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.storage.gold.pipeline_helpers import GoldWriteRequest
+
+if TYPE_CHECKING:
+    from pandera.polars import DataFrameSchema
 
 __all__ = ["_build_gold_write_request"]
 
@@ -15,7 +19,7 @@ def _build_gold_write_request(
     *,
     table_name: str,
     records: list[GoldRecord],
-    schema: object,
+    schema: DataFrameSchema,
     primary_keys: list[str] | None,
     mode: str,
     partition_cols: list[str] | None,

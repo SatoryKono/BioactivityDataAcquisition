@@ -245,7 +245,9 @@ def build_pipeline_services(
 ) -> PipelineService:
     """Build the shared pipeline service bundle for one pipeline run."""
     deps = _resolve_service_bundle_dependencies(_deps)
-    pipeline_config = config or deps.load_pipeline_config(pipeline_name)
+    pipeline_config = (
+        config if config is not None else deps.load_pipeline_config(pipeline_name)
+    )
     from bioetl.composition.factories.services.observability_api import (
         create_shared_metrics,
     )

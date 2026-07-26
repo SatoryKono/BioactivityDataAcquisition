@@ -1565,7 +1565,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "src/bioetl/application/core/_quarantine_metrics_support.py",
       "occurrence_count": 4,
-      "first_line": 20,
+      "first_line": 21,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""
@@ -1598,7 +1598,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "src/bioetl/infrastructure/quarantine/filtered_reads.py",
       "occurrence_count": 2,
-      "first_line": 127,
+      "first_line": 123,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""
@@ -1620,7 +1620,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_quarantine.py",
       "occurrence_count": 1,
-      "first_line": 26,
+      "first_line": 33,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""
@@ -1862,7 +1862,7 @@
       "symbol": "_apply_pre_silver_filter",
       "path": "src/bioetl/application/core/pre_silver_adapter_mixin.py",
       "occurrence_count": 1,
-      "first_line": 116,
+      "first_line": 113,
       "role": "Pre-Silver adapter filter callsite",
       "migration_relevance": "Pre-Silver path still delegates to the structural Silver filter gate.",
       "notes": ""
@@ -1872,8 +1872,8 @@
       "surface": "pre_silver_filter_adapter",
       "symbol": "_apply_pre_silver_filter",
       "path": "src/bioetl/application/core/pre_silver_staging_flow.py",
-      "occurrence_count": 1,
-      "first_line": 25,
+      "occurrence_count": 2,
+      "first_line": 37,
       "role": "Pre-Silver adapter filter callsite",
       "migration_relevance": "Pre-Silver path still delegates to the structural Silver filter gate.",
       "notes": ""
@@ -1928,7 +1928,7 @@
       "symbol": "apply_silver_filter",
       "path": "src/bioetl/application/core/pre_silver_staging_flow.py",
       "occurrence_count": 1,
-      "first_line": 25,
+      "first_line": 63,
       "role": "Runtime Silver filter application callsite",
       "migration_relevance": "Any new runtime application gate must remain structural-only or be inventoried.",
       "notes": ""
@@ -2104,7 +2104,7 @@
       "symbol": "source_profile",
       "path": "src/bioetl/infrastructure/config/converters.py",
       "occurrence_count": 2,
-      "first_line": 211,
+      "first_line": 215,
       "role": "Versioned source-profile metadata",
       "migration_relevance": "Explicit source-profile metadata anchors extraction_params widening separately from Silver/Gold filter migration.",
       "notes": ""

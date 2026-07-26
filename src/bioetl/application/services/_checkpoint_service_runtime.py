@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from time import perf_counter
 from typing import TYPE_CHECKING, Protocol
+from uuid import UUID
 
 from bioetl.application.services._checkpoint_service_support import (
     _CHECKPOINT_OPERATOR_ERRORS,
@@ -140,7 +141,7 @@ async def get_checkpoint_for_run_impl(
     try:
         checkpoint_data = await host.checkpoint_port.load_for_run(
             pipeline_name,
-            RunID(run_id),
+            RunID(UUID(run_id)),
         )
         if checkpoint_data is None:
             host.logger.debug(

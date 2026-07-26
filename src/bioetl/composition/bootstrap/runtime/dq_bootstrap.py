@@ -37,11 +37,20 @@ __all__ = [
 ]
 
 
-def _default_monitor_factory(*args: object, **kwargs: object) -> DQMonitorPort:
+def _default_monitor_factory(
+    *,
+    logger: LoggerPort,
+    baseline_window: int,
+    z_score_threshold: float,
+) -> DQMonitorPort:
     """Create the DQ monitor adapter only when DQ monitoring is enabled."""
     from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
 
-    return DataQualityMonitor(*args, **kwargs)
+    return DataQualityMonitor(
+        logger=logger,
+        baseline_window=baseline_window,
+        z_score_threshold=z_score_threshold,
+    )
 
 
 def _default_noop_logger_factory() -> LoggerPort:

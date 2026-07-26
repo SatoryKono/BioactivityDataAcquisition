@@ -26,11 +26,12 @@ from bioetl.application.core.target_data_source_mixins import (
     _FilterableTargetDelegationMixin,
     _TargetEntityFetchDelegationMixin,
 )
+from bioetl.domain.ports import HealthCheckResult
 
 if TYPE_CHECKING:
     from types import TracebackType
 
-    from bioetl.domain.ports import DataSourcePort, HealthCheckResult
+    from bioetl.domain.ports import DataSourcePort
     from bioetl.domain.types import HealthStatus
 
 WrappedDataSourceT = TypeVar("WrappedDataSourceT", bound="_HasWrappedDataSource")
@@ -40,6 +41,7 @@ class _HasWrappedDataSource(Protocol):
     """Structural protocol for wrappers that delegate to a data source adapter."""
 
     _data_source: DataSourcePort
+    provider_name: str
 
     def _after_wrapped_data_source_enter(self) -> None:
         """Reset wrapper-local state after entering the wrapped data source."""
@@ -71,7 +73,10 @@ class _WrappedAdapterHealthDelegationMixin:
 
         check_health = getattr(self._data_source, "check_health", None)
         if check_health is not None and callable(check_health):
-            return await check_health()  # type: ignore[no-any-return]
+            result = await check_health()
+            if isinstance(result, HealthCheckResult):
+                return result
+            raise TypeError("Data source check_health() must return HealthCheckResult")
         return HealthCheckResult(
             status=await self._data_source.health_check(),
             latency_ms=0.0,

@@ -9,7 +9,7 @@ from pathlib import Path
 from time import perf_counter
 
 from bioetl.domain.control_plane import WorkflowManifest
-from bioetl.domain.ports import WorkflowManifestPort
+from bioetl.domain.ports import MetricsPort, WorkflowManifestPort
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane._read_metrics import (
     emit_control_plane_read_metrics,
@@ -25,7 +25,7 @@ class FileWorkflowManifestStore(WorkflowManifestPort):
     """Persist workflow manifests as JSON files under the control-plane tree."""
 
     base_path: Path
-    metrics: object | None = None
+    metrics: MetricsPort | None = None
 
     def save(self, manifest: WorkflowManifest) -> None:
         """Persist one workflow manifest and its run-id index."""

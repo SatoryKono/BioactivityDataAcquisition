@@ -24,7 +24,10 @@ def _build_payload() -> dict[str, str | None]:
         git_commit="abc1234",
         effective_config_hash=normalize_control_plane_sha256("a" * 64),
         dq_contract_compatibility_hash=None,
-        contract=(normalize_contract_ref(" ChemBL.Activity "), normalize_contract_version(" v2 ")),
+        contract=(
+            normalize_contract_ref(" ChemBL.Activity "),
+            normalize_contract_version(" v2 "),
+        ),
         normalization_profile=(None, None, None),
         effective_config_artifact_id=None,
         exact_replay=False,

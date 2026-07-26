@@ -9,7 +9,7 @@ from pathlib import Path
 from time import perf_counter
 
 from bioetl.domain.control_plane import WorkflowLedgerEntry
-from bioetl.domain.ports import WorkflowLedgerPort
+from bioetl.domain.ports import MetricsPort, WorkflowLedgerPort
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane._durability import (
     flush_control_plane_file_descriptor,
@@ -55,7 +55,7 @@ class FileWorkflowLedgerStore(WorkflowLedgerPort):
     """Append workflow-ledger entries to one JSONL file per manifest."""
 
     base_path: Path
-    metrics: object | None = None
+    metrics: MetricsPort | None = None
 
     def append(self, entry: WorkflowLedgerEntry) -> None:
         """Append one workflow-ledger entry and maintain the run-id index."""

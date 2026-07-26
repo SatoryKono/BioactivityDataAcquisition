@@ -174,7 +174,11 @@ def create_factory_runner[TPipeline: "BasePipeline"](
     create_with_services_fn: Callable[..., TPipeline],
     assemble_runner_fn: Callable[..., PipelineRunner],
 ) -> PipelineRunner:
-    yaml_config = request.config or load_pipeline_config(request.pipeline_name)
+    yaml_config = (
+        request.config
+        if request.config is not None
+        else load_pipeline_config(request.pipeline_name)
+    )
     return create_factory_runner_from_request(
         silver_schema=request.silver_schema,
         gold_schema=request.gold_schema,

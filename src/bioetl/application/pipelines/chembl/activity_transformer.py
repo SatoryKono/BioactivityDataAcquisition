@@ -36,7 +36,7 @@ from bioetl.domain.types import GoldRecord, JsonDict
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import BronzeRecord, PrimaryId, SilverRecord
+    from bioetl.domain.types import BronzeRecord, PrimaryId
 
 
 class ActivityTransformer(BaseChemblTransformer):
@@ -208,10 +208,10 @@ class ActivityTransformer(BaseChemblTransformer):
 
     def _postprocess_pre_silver_record(
         self,
-        silver_record: SilverRecord,
+        silver_record: GoldRecord,
         *,
         business_data: JsonDict,
-    ) -> SilverRecord:
+    ) -> GoldRecord:
         """Project canonical original activity fields before structural policy checks."""
         relation = silver_record.get("activity_relation")
         if isinstance(relation, str) and not relation.strip():

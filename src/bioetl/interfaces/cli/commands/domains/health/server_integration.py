@@ -396,6 +396,7 @@ COMMANDS = (add_health_server_options, echo_health_server_info, health_server_co
 
 __all__ = [
     "DEFAULT_HEALTH_SERVER_PORT",
+    "_handle_health_failure",
     "add_health_server_options",
     "echo_health_server_info",
     "get_health_server_dependencies",

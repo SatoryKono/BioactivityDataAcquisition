@@ -6,8 +6,7 @@ Provides commands to list, show, and validate ADR documents.
 from __future__ import annotations
 
 import json
-from collections.abc import Callable
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from bioetl.domain.types import JsonDict
 from bioetl.interfaces.cli.commands.domains.shared.click_options import (
@@ -41,8 +40,7 @@ def get_adr_service() -> AdrServicePort:
         get_adr_service as _impl,
     )
 
-    impl = cast("Callable[[], AdrServicePort]", _impl)
-    return impl()
+    return _impl()
 
 
 @typed_group_command(adr, "list")

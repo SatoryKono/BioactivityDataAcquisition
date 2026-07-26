@@ -68,7 +68,11 @@ def test_run_context_factory_preserves_distinct_config_hash_surfaces() -> None:
         runtime=runtime,
         started_at=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
         yaml_config=yaml_config,
-        config_hashes=("legacy-config-hash", "resolved-config-hash", "effective-config-hash"),
+        config_hashes=(
+            "legacy-config-hash",
+            "resolved-config-hash",
+            "effective-config-hash",
+        ),
     )
 
     assert context.config_hash == "legacy-config-hash"

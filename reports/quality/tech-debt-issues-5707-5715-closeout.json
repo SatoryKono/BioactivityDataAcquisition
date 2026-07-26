@@ -174,10 +174,10 @@
     },
     "5714": {
       "repo_wide_candidates_without_owner_tests_count": 0,
-      "repo_wide_classified_zero_import_candidate_count": 2,
-      "repo_wide_owner_test_anchored_candidate_count": 2,
+      "repo_wide_classified_zero_import_candidate_count": 1,
+      "repo_wide_owner_test_anchored_candidate_count": 1,
       "repo_wide_untriaged_zero_import_candidate_count": 0,
-      "repo_wide_zero_import_candidate_count": 2,
+      "repo_wide_zero_import_candidate_count": 1,
       "review_window_next_review_by": "2026-10-21"
     },
     "5715": {

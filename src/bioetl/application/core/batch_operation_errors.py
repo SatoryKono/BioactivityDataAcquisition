@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from bioetl.domain.exceptions import BioETLError
 
-OperationErrorTypes = tuple[type[BaseException], ...]
+OperationErrorTypes = tuple[type[Exception], ...]
 
 OPERATION_ERRORS: OperationErrorTypes = (
     BioETLError,

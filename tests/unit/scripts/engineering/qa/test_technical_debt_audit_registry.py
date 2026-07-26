@@ -82,3 +82,22 @@ def test_registry_detects_evidence_content_drift(tmp_path: Path) -> None:
     )
 
     assert "current audit evidence_surface_sha256 is stale" in issues
+
+
+def test_evidence_hash_is_independent_of_checkout_line_endings(
+    tmp_path: Path,
+) -> None:
+    evidence = tmp_path / "reports/quality/evidence.json"
+    evidence.parent.mkdir(parents=True)
+    evidence.write_bytes(b'{\r\n  "value": 1\r\n}\r\n')
+    windows_hash = compute_evidence_surface_sha256(
+        tmp_path,
+        ["reports/quality/evidence.json"],
+    )
+
+    evidence.write_bytes(b'{\n  "value": 1\n}\n')
+
+    assert compute_evidence_surface_sha256(
+        tmp_path,
+        ["reports/quality/evidence.json"],
+    ) == windows_hash

@@ -140,7 +140,7 @@ class OpenAlexAdapter(
             openalex_cursor_flow=self.openalex_cursor_flow,
             title_fallback_handler=self.title_fallback_handler,
             openalex_fallback_orchestrator=self.openalex_fallback_orchestrator,
-            http_client=self._http_client,
+            http_client=self.http_client,
             adapter_metrics=self._adapter_metrics,
             request_collector=self._request_collector,
             headers_provider=self._build_headers,
@@ -176,28 +176,34 @@ class OpenAlexAdapter(
 def _resolve_openalex_api_key(
     settings: Settings | None,
     kwargs: dict[str, Any],  # Any: opaque factory kwargs from adapter registry
-) -> object | None:
+) -> str | None:
     """Resolve OpenAlex API key from kwargs or settings secrets."""
     api_key = kwargs.get("api_key")
-    if api_key or settings is None:
-        return api_key
+    if api_key is not None:
+        return str(api_key)
+    if settings is None:
+        return None
     settings_api_key = getattr(settings, "openalex_api_key", None)
     if not settings_api_key:
         return None
     if hasattr(settings_api_key, "get_secret_value"):
-        return settings_api_key.get_secret_value()
+        secret_value = settings_api_key.get_secret_value()
+        return str(secret_value)
     return str(settings_api_key)
 
 
 def _resolve_openalex_mailto(
     settings: Settings | None,
     kwargs: dict[str, Any],  # Any: opaque factory kwargs from adapter registry
-) -> object | None:
+) -> str | None:
     """Resolve legacy OpenAlex mailto attribution from kwargs or settings."""
     mailto = kwargs.get("mailto")
-    if mailto or settings is None:
-        return mailto
-    return getattr(settings, "default_email", None)
+    if mailto is not None:
+        return str(mailto)
+    if settings is None:
+        return None
+    default_email = getattr(settings, "default_email", None)
+    return str(default_email) if default_email is not None else None
 
 
 def _require_openalex_runtime(

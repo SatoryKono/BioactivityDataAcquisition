@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.composition.runtime_builders._run_manifest_data_roots import (
@@ -11,27 +12,49 @@ from bioetl.composition.runtime_builders._run_manifest_data_roots import (
     resolve_data_root_mode as resolve_data_root_mode,
 )
 from bioetl.composition.runtime_builders._run_manifest_identity_ref_values import (
-    build_contract_identity_field_values_from_mapping,
+    build_contract_identity_field_values,
     build_control_plane_identity_ref_values,
 )
 
 
-def control_plane_root(*args: object, **kwargs: object) -> object:
+if TYPE_CHECKING:
+    from bioetl.domain.control_plane import RunArtifactRef
+    from bioetl.infrastructure.config.settings_api import Settings
+
+
+def control_plane_root(settings: Settings, leaf: str) -> Path:
     """Typed forwarding wrapper for the control-plane root helper."""
     from bioetl.composition.runtime_builders._run_manifest_control_plane_paths import (
         control_plane_root as impl,
     )
 
-    return impl(*args, **kwargs)  # type: ignore[misc]
+    return impl(settings, leaf)
 
 
-def build_planned_artifacts(*args: object, **kwargs: object) -> object:
+def build_planned_artifacts(
+    *,
+    settings: Settings,
+    provider: str,
+    entity: str,
+    run_id: str | None = None,
+    pipeline_name: str | None = None,
+    workflow_id: str = "standalone",
+    debug_export_root: str | None = None,
+) -> tuple[RunArtifactRef, ...]:
     """Typed forwarding wrapper for planned-artifact materialization."""
     from bioetl.composition.runtime_builders._run_manifest_planned_artifacts import (
         build_planned_artifacts as impl,
     )
 
-    return impl(*args, **kwargs)  # type: ignore[misc]
+    return impl(
+        settings=settings,
+        provider=provider,
+        entity=entity,
+        run_id=run_id,
+        pipeline_name=pipeline_name,
+        workflow_id=workflow_id,
+        debug_export_root=debug_export_root,
+    )
 
 
 def __getattr__(name: str) -> object:  # pragma: no cover
@@ -106,17 +129,15 @@ def create_control_plane_refs(
         normalization_profile_version,
         normalization_profile_hash,
     ) = normalization_profile
-    contract_identity_values = build_contract_identity_field_values_from_mapping(
-        {
-            "contract_ref": contract_ref,
-            "contract_version": contract_version,
-            "contract_schema_hash": contract_schema_hash,
-            "dq_policy_ref": dq_policy_ref,
-            "rule_bundle_version": rule_bundle_version,
-            "normalization_profile_ref": normalization_profile_ref,
-            "normalization_profile_version": normalization_profile_version,
-            "normalization_profile_hash": normalization_profile_hash,
-        }
+    contract_identity_values = build_contract_identity_field_values(
+        contract_ref=contract_ref,
+        contract_version=contract_version,
+        contract_schema_hash=contract_schema_hash,
+        dq_policy_ref=dq_policy_ref,
+        rule_bundle_version=rule_bundle_version,
+        normalization_profile_ref=normalization_profile_ref,
+        normalization_profile_version=normalization_profile_version,
+        normalization_profile_hash=normalization_profile_hash,
     )
     return ManifestControlPlaneRefs(
         manifest_id=manifest_id,

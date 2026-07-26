@@ -61,9 +61,7 @@ def test_h1_resolve_generated_at_requires_explicit_timestamp_by_default() -> Non
 
 
 def test_h1_resolve_generated_at_uses_clock_port_when_opted_in() -> None:
-    first = resolve_generated_at(
-        None, allow_nondeterministic=True, clock=_FixedClock()
-    )
+    first = resolve_generated_at(None, allow_nondeterministic=True, clock=_FixedClock())
     second = resolve_generated_at(
         None, allow_nondeterministic=True, clock=_FixedClock()
     )
@@ -71,10 +69,7 @@ def test_h1_resolve_generated_at_uses_clock_port_when_opted_in() -> None:
 
 
 def test_h1_export_identity_has_no_direct_datetime_now() -> None:
-    path = (
-        ROOT
-        / "src/bioetl/application/services/export_manifest_identity.py"
-    )
+    path = ROOT / "src/bioetl/application/services/export_manifest_identity.py"
     source = path.read_text(encoding="utf-8")
     tree = ast.parse(source)
     for node in ast.walk(tree):
@@ -131,9 +126,7 @@ def test_h3_gold_replay_matrix_covers_all_pipelines() -> None:
         for path in (ROOT / "src/bioetl/application/pipelines").iterdir()
         if path.is_dir() and path.name not in {"__pycache__", "common"}
     }
-    matrix_pipelines = {
-        row["pipeline"] for row in rows if isinstance(row, dict)
-    }
+    matrix_pipelines = {row["pipeline"] for row in rows if isinstance(row, dict)}
     missing = pipelines - matrix_pipelines
     assert not missing, f"Gold replay matrix missing pipelines: {sorted(missing)}"
     assert "composite" in matrix_pipelines
@@ -156,9 +149,9 @@ def test_h3_gold_replay_matrix_covers_all_pipelines() -> None:
 def test_m1_bronze_append_only_enforcement_present() -> None:
     doc = _load_yaml("configs/quality/architecture/bronze_append_only_inventory.yaml")
     assert "io_mixin.py" in str(doc["enforcement"]["primary"])  # type: ignore[index]
-    source = (
-        ROOT / "src/bioetl/infrastructure/storage/bronze/io_mixin.py"
-    ).read_text(encoding="utf-8")
+    source = (ROOT / "src/bioetl/infrastructure/storage/bronze/io_mixin.py").read_text(
+        encoding="utf-8"
+    )
     assert "FileExistsError" in source
     assert "target_path.exists()" in source
     assert "different payload" in source
@@ -221,8 +214,7 @@ def test_m3_gold_schemas_inherit_strict_base() -> None:
         if not issubclass(cls, StrictGoldContractSchema)
     ]
     assert not non_strict, (
-        "Gold schemas must inherit StrictGoldContractSchema (ADR-018): "
-        f"{non_strict}"
+        f"Gold schemas must inherit StrictGoldContractSchema (ADR-018): {non_strict}"
     )
     assert issubclass(CompositeGoldCommonSchema, StrictGoldContractSchema)
     # Keep gold_root referenced for inventory locality
@@ -233,12 +225,9 @@ def test_m3_gold_schemas_inherit_strict_base() -> None:
 
 
 def test_m4_governance_refresh_recipe_surfaces_exist() -> None:
+    assert (ROOT / "scripts/engineering/qa/refresh_governance_artifacts.py").is_file()
     assert (
-        ROOT / "scripts/engineering/qa/refresh_governance_artifacts.py"
-    ).is_file()
-    assert (
-        ROOT
-        / "docs/00-project/ai/agents/guides/GOVERNANCE_ARTIFACT_REFRESH.md"
+        ROOT / "docs/00-project/ai/agents/guides/GOVERNANCE_ARTIFACT_REFRESH.md"
     ).is_file()
 
 
@@ -281,9 +270,9 @@ def test_m5_composition_ownership_map_and_no_business_transformers() -> None:
 def test_m6_quarantine_storage_is_append_only() -> None:
     doc = _load_yaml("configs/quality/architecture/quarantine_immutability_proof.yaml")
     assert doc["storage"]["write_mode"] == "append"  # type: ignore[index]
-    source = (
-        ROOT / "src/bioetl/infrastructure/quarantine/unified.py"
-    ).read_text(encoding="utf-8")
+    source = (ROOT / "src/bioetl/infrastructure/quarantine/unified.py").read_text(
+        encoding="utf-8"
+    )
     assert 'mode="append"' in source
     assert 'mode="overwrite"' not in source
     assert 'mode="error"' not in source or True  # overwrite/error not used for payload

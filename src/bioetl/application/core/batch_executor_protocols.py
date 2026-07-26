@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-from typing import Protocol, TypeVar, runtime_checkable
+from typing import Protocol, runtime_checkable
 
 from bioetl.application.core.batch_execution.contracts import BatchResultBuilderProtocol
 from bioetl.application.core.batch_processing_contracts import BatchProcessingOutcome
 from bioetl.domain.types import BronzeRecord
-
-_BatchResultT = TypeVar("_BatchResultT", covariant=True)
 
 
 @runtime_checkable
@@ -47,12 +45,12 @@ class BatchStateCommitProtocol(Protocol):
         """Mutate cumulative executor state after one successful batch."""
         ...
 
-    def build_batch_result(
+    def build_batch_result[BatchResultT](
         self,
         *,
         state: object,
-        batch_result_type: BatchResultBuilderProtocol[_BatchResultT],
-    ) -> _BatchResultT:
+        batch_result_type: BatchResultBuilderProtocol[BatchResultT],
+    ) -> BatchResultT:
         """Build the batch-scoped result payload from current state."""
         ...
 

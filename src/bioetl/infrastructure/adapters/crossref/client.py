@@ -205,7 +205,7 @@ class CrossRefAdapter(
             HealthStatus reflecting the current CrossRef API availability.
         """
         return await probe_crossref_health(
-            http_client=self._http_client,
+            http_client=self.http_client,
             query_builder=self._query_builder,
             response_mapper=self._response_mapper,
             adapter_metrics=self._adapter_metrics,
@@ -249,5 +249,5 @@ class CrossRefAdapter(
 
     async def aclose(self) -> None:
         """Close adapter resources via underlying HTTP client context manager."""
-        if self._http_client:
-            await self._http_client.__aexit__(None, None, None)
+        if self.http_client:
+            await self.http_client.__aexit__(None, None, None)

@@ -110,7 +110,9 @@ Crash-resistant path (preferred):
 .\scripts\ops\runtime\mcp\start-shared.ps1
 .\scripts\ops\runtime\docker\apply-docker-stable-mcp.ps1 -Profile shared -TransportMode shared -WithSharedMcp -SkipEnsureStable
 .\scripts\ops\runtime\mcp\health-shared.ps1
-# Then restart AI clients once.
+.\scripts\ops\runtime\mcp\apply-shared-to-grok.ps1 -DisableDockerGateways
+# Then FULL restart AI clients once (Grok/Cursor/Codex/Gemini/VS Code).
+# Operator detail: scripts/ops/runtime/mcp/OPERATOR.md
 ```
 
 `harden-desktop-host.ps1` sets Resource Saver effectively off
@@ -122,9 +124,13 @@ Docker-backed MCP servers spawn **one container per AI session** under stdio.
 Use MCP profile `stable` (no gateway/`docker run` MCP) on 32 GiB hosts, **or**
 the shared Streamable HTTP plane (`start-shared` + `--profile shared
 --transport-mode shared`) so multiple clients share one process per migrated
-server. Keep tracked `.mcp.json` full for portable SSOT. See
-`docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md` and
-`docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md`.
+server (catalog v2: brave, adr, deja, context7, ast-grep, docker, mermaid,
+dockerhub, github, fetch, prometheus, grafana; neo4j-* optional). Keep tracked
+`.mcp.json` full portable stdio SSOT. Do **not** use Compose `container_name`
+as the multi-client strategy (optional Mode B only; see MCP_SHARED_RUNTIME).
+See `docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md`,
+`docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md`, and
+`scripts/ops/runtime/mcp/OPERATOR.md`.
 
 Hardening defaults on this host class:
 

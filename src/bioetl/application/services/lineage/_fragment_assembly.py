@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -24,7 +25,7 @@ def build_dataset_fragment_nodes(
     *,
     run_context: RunContext,
     dataset_node: LineageNodeRef,
-    records: list[dict[str, object]],
+    records: Sequence[Mapping[str, object]],
     composite_name: str,
     created_at: datetime,
     composite_run_id: str | None,

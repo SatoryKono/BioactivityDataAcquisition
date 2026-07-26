@@ -6,7 +6,12 @@ import pytest
 
 from bioetl.domain.exceptions._redaction import _redact, _redact_string
 from bioetl.domain.filtering._filter_primitives import check_exclude_if_present
-from bioetl.domain.immutability import FrozenDict, FrozenList, deep_freeze_json, deep_thaw_json
+from bioetl.domain.immutability import (
+    FrozenDict,
+    FrozenList,
+    deep_freeze_json,
+    deep_thaw_json,
+)
 from bioetl.domain.normalization.profiles._normalization_helpers import (
     _normalizer_accepts_record_context,
     _normalizer_ref,

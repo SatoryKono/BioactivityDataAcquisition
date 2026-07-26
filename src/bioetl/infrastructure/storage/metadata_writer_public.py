@@ -9,6 +9,13 @@ from typing import TYPE_CHECKING
 
 from bioetl.infrastructure.storage.delta.resilience import (
     DEFAULT_ATOMIC_REPLACE_RETRY_POLICY,
+    AdaptiveRetryPolicy,
+)
+from bioetl.infrastructure.storage.metadata.writer_operations import (
+    _MetadataWriteRequest,
+)
+from bioetl.infrastructure.storage.metadata_artifact_publication import (
+    ArtifactPublicationRecorder,
 )
 
 from .metadata_writer_finalizers import (
@@ -33,13 +40,13 @@ class MetadataWriter:
         self,
         logger: LoggerPort,
         *,
-        atomic_replace_retry_policy: object | None = None,
+        atomic_replace_retry_policy: AdaptiveRetryPolicy | None = None,
         metrics: MetricsPort | None = None,
     ) -> None:
         """Initialize metadata writer (logger is mandatory per DI rules)."""
         self._logger = logger
         self._metrics = metrics
-        self._artifact_recorder: object | None = None
+        self._artifact_recorder: ArtifactPublicationRecorder | None = None
         self._atomic_replace_retry_policy = (
             atomic_replace_retry_policy or DEFAULT_ATOMIC_REPLACE_RETRY_POLICY
         )
@@ -52,7 +59,7 @@ class MetadataWriter:
 
     def attach_artifact_recorder(
         self,
-        recorder: object | None,
+        recorder: ArtifactPublicationRecorder | None,
     ) -> None:
         """Attach an optional callback for control-plane artifact publication."""
         self._artifact_recorder = recorder
@@ -241,7 +248,7 @@ class MetadataWriter:
             ),
         )
 
-    async def _write_metadata(self, request: object) -> str:
+    async def _write_metadata(self, request: _MetadataWriteRequest) -> str:
         """Write sidecar metadata for Bronze/Silver/Gold layers and return file path."""
         return await self._operations.write_metadata(request)
 

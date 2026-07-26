@@ -155,6 +155,91 @@ def test_local_http_server_rejects_non_localhost_url() -> None:
         setup_mcp._local_http_server("https://evil.example/mcp")
 
 
+def test_shared_endpoints_sync_with_catalog() -> None:
+    """MCP_SHARED_SERVER_ENDPOINTS must match shared-servers.json ports/paths."""
+    catalog_path = (
+        Path(__file__).resolve().parents[3]
+        / "scripts"
+        / "ops"
+        / "runtime"
+        / "mcp"
+        / "shared-servers.json"
+    )
+    catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+    servers = catalog["servers"]
+    assert set(servers) == set(setup_mcp.MCP_SHARED_SERVER_ENDPOINTS)
+    for name, entry in servers.items():
+        path = entry.get("path") or "/mcp"
+        expected = f"http://127.0.0.1:{int(entry['port'])}{path}"
+        assert setup_mcp.MCP_SHARED_SERVER_ENDPOINTS[name] == expected
+
+
+def test_default_transport_mode_stdio_keeps_wrappers(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Default generation (stdio) must not rewrite catalog servers to HTTP."""
+    monkeypatch.delenv("XDG_CACHE_HOME", raising=False)
+    workspace_root = tmp_path / "workspace-root"
+    output_root = tmp_path / "output-root"
+    workspace_root.mkdir()
+
+    exit_code = setup_mcp.main(
+        [
+            "--root",
+            str(output_root),
+            "--workspace-root",
+            str(workspace_root),
+            "--skip-codex",
+            "--skip-codex-config",
+            "--skip-gemini-settings",
+            "--profile",
+            "shared",
+            # omit --transport-mode → default stdio
+        ]
+    )
+    assert exit_code == 0
+    cursor = json.loads(
+        (output_root / ".cursor" / "mcp.json").read_text(encoding="utf-8")
+    )
+    adr = cursor["mcpServers"]["adr-analysis"]
+    assert "command" in adr
+    assert adr.get("type") != "http"
+    assert "url" not in adr or not str(adr.get("url", "")).startswith(
+        "http://127.0.0.1:"
+    )
+
+
+def test_hybrid_transport_mode_rewrites_catalog_only(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("XDG_CACHE_HOME", raising=False)
+    workspace_root = tmp_path / "workspace-root"
+    output_root = tmp_path / "output-root"
+    workspace_root.mkdir()
+
+    exit_code = setup_mcp.main(
+        [
+            "--root",
+            str(output_root),
+            "--workspace-root",
+            str(workspace_root),
+            "--skip-codex",
+            "--skip-codex-config",
+            "--skip-gemini-settings",
+            "--profile",
+            "shared",
+            "--transport-mode",
+            "hybrid",
+        ]
+    )
+    assert exit_code == 0
+    cursor = json.loads(
+        (output_root / ".cursor" / "mcp.json").read_text(encoding="utf-8")
+    )
+    assert cursor["mcpServers"]["adr-analysis"]["type"] == "http"
+    assert "command" in cursor["mcpServers"]["memory"]
+
+
 def test_main_uses_workspace_root_for_generated_server_paths(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

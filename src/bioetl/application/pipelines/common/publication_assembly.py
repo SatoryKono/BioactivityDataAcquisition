@@ -10,7 +10,7 @@ from bioetl.application.core.base_transformer.errors import FilteredOutError
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.entities import BaseEntity
-    from bioetl.domain.types import BronzeRecord, JsonDict, PrimaryId, SilverRecord
+    from bioetl.domain.types import BronzeRecord, JsonDict, PrimaryId
 
 
 class _PublicationDataExtractor(Protocol):
@@ -38,8 +38,8 @@ class _PublicationMetadataStrategy(Protocol):
 
     def post_process_silver_record(
         self,
-        silver_record: SilverRecord,
-    ) -> SilverRecord: ...
+        silver_record: JsonDict,
+    ) -> JsonDict: ...
 
 
 class _PublicationRecordNormalizer(Protocol):
@@ -89,7 +89,7 @@ class PublicationAssemblyTransformer(Protocol):
         **business_data: object,
     ) -> EntityT: ...
 
-    def entity_to_silver_record(self, entity: BaseEntity) -> SilverRecord:
+    def entity_to_silver_record(self, entity: object) -> JsonDict:
         """Project a domain entity into a serializable Silver-layer record."""
         ...
 
@@ -160,7 +160,7 @@ def build_publication_silver_record(
     content_hash: str,
     index: int,
     business_data: JsonDict,
-) -> SilverRecord:
+) -> JsonDict:
     """Build a finalized Silver record from normalized publication business data."""
     entity_class = transformer._metadata_strategy.get_entity_class()
     entity = transformer._create_entity(

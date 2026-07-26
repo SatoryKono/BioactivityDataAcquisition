@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from bioetl.composition.runtime_builders._runner_control_plane_policy_support import (
     _normalize_required_persistence_profile as _normalize_required_persistence_profile_impl,
@@ -17,6 +18,9 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
     is_critical_reproducibility_runtime,
 )
+
+if TYPE_CHECKING:
+    from bioetl.infrastructure.config.settings_api import Settings
 
 
 @dataclass(frozen=True, slots=True)
@@ -80,7 +84,7 @@ def validate_required_persistence_profile(
 
 def validate_strict_data_root_policy(
     *,
-    settings: object,
+    settings: Settings,
     required_profile: object,
     exact_replay: bool = False,
 ) -> None:

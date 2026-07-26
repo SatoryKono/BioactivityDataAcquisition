@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -65,19 +64,6 @@ def _build_filtered_out_handling_context(
         raw_record=raw_record,
         debug_export_service=debug_export_service,
         index=index,
-    )
-
-
-def _build_filtered_out_handling_context_from_mapping(
-    values: Mapping[str, object],
-) -> _FilteredOutHandlingContext:
-    """Capture filtered-out handling inputs from a same-named locals() mapping."""
-    return _build_filtered_out_handling_context(
-        batch_metrics=values["batch_metrics"],
-        dq_config=values["dq_config"],
-        raw_record=values["raw_record"],
-        debug_export_service=values["debug_export_service"],
-        index=values["index"],
     )
 
 

@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Any
 
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.common.publication_transformer_context import (
-    build_runtime_publication_transformer_init,
+    install_runtime_transformer_init,
 )
 from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_affiliations,
@@ -288,10 +288,8 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         return silver_record
 
 
-SemanticScholarPublicationTransformer.__init__ = (
-    build_runtime_publication_transformer_init(
-        default_provider=SemanticScholarPublicationTransformer.DEFAULT_PROVIDER,
-        default_entity_type=SemanticScholarPublicationTransformer.DEFAULT_ENTITY_TYPE,
-        owner_type=SemanticScholarPublicationTransformer,
-    )
+install_runtime_transformer_init(
+    SemanticScholarPublicationTransformer,
+    SemanticScholarPublicationTransformer.DEFAULT_PROVIDER,
+    SemanticScholarPublicationTransformer.DEFAULT_ENTITY_TYPE,
 )

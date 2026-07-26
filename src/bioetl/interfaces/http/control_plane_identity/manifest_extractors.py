@@ -7,7 +7,6 @@ This module extracts legacy HTTP identity anchor values.
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import cast
 
 from bioetl.domain.control_plane import (
     RunArtifactRef,
@@ -82,7 +81,7 @@ def input_snapshot_fingerprint(
         }
         for item in snapshots
     ]
-    return cast("str | None", compute_input_snapshot_identity_fingerprint(payload))
+    return compute_input_snapshot_identity_fingerprint(payload)
 
 
 def source_ref_values(source_refs: Sequence[RunSourceRef]) -> list[str]:

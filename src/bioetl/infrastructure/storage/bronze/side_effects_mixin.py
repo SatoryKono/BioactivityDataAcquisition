@@ -116,7 +116,7 @@ class BronzeWriterSideEffectsMixin:
             ),
         )
         await host._metadata_writer.write_bronze_metadata(
-            base_path=prepared.metadata_base_path,
+            base_path=str(prepared.metadata_base_path),
             metadata=prepared.metadata,
             provider=provider,
             entity=entity,

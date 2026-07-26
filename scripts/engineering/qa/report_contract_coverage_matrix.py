@@ -5,12 +5,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 from datetime import date
 from pathlib import Path
 from typing import Any
 
 import yaml
+
 from bioetl.infrastructure.config.pipeline_config_api import (
     load_pipeline_config_from_root,
 )
@@ -59,6 +61,7 @@ STRICT_GOLD_VALIDATION_MARKERS = (
     "PublicationGoldCommonSchema",
     "strict = True",
 )
+CONTRACT_TEST_DISCOVERY_TIMEOUT_SECONDS = 30.0
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
@@ -220,11 +223,41 @@ def _primary_key_fields(pipeline: dict[str, Any]) -> list[str]:
 
 
 def _contract_test_index() -> list[tuple[str, str]]:
-    indexed_paths: list[tuple[str, str]] = []
-    for test_path in sorted((PROJECT_ROOT / "tests").rglob("test*.py")):
-        relative_path = _relativize(test_path)
-        indexed_paths.append((relative_path, relative_path.lower()))
-    return indexed_paths
+    """Index test paths through Git without walking cloud-synced directories."""
+    command = [
+        "git",
+        "ls-files",
+        "--cached",
+        "--others",
+        "--exclude-standard",
+        "--",
+        ":(glob)tests/**/test*.py",
+    ]
+    try:
+        result = subprocess.run(
+            command,
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
+            timeout=CONTRACT_TEST_DISCOVERY_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired as exc:
+        msg = (
+            "Contract test discovery timed out after "
+            f"{CONTRACT_TEST_DISCOVERY_TIMEOUT_SECONDS:.0f}s"
+        )
+        raise RuntimeError(msg) from exc
+    if result.returncode != 0:
+        msg = (
+            "Contract test discovery failed with exit code "
+            f"{result.returncode}: {result.stderr.strip()}"
+        )
+        raise RuntimeError(msg)
+    relative_paths = sorted(set(result.stdout.splitlines()))
+    return [(path, path.lower()) for path in relative_paths]
 
 
 def _contract_test_paths(

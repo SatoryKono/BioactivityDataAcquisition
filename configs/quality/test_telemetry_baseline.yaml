@@ -238,4 +238,4 @@ slow_governance_cache_probe:
       cache_path: .cache/bioetl-architecture-governance
       cache_key: source_tree_sha256 from module-coverage-inventory.json
       workflow_owner: .github/workflows/tests.yml#test-fast
-source_tree_sha256: 108ff770e0b798e63890d4c2e2a072cdaf8c3fe7fbac0b67732c50ba4c6afd2f
+source_tree_sha256: a50fdd65bf6bffc54acf8b6f9be2baba8b3f8482eb9151ae5e236cff1fc9f389

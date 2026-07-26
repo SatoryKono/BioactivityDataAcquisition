@@ -320,6 +320,9 @@ from bioetl.domain.ports.runtime.runner import (
     PipelineCreateWithServicesRequest as PipelineCreateWithServicesRequest,
 )
 from bioetl.domain.ports.serialization import JsonEncoderPort as JsonEncoderPort
+from bioetl.domain.ports.stage_accounting import (
+    StageAccountingPort as StageAccountingPort,
+)
 from bioetl.domain.ports.storage import (
     BronzeStoragePort as BronzeStoragePort,
 )

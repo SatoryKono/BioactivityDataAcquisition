@@ -637,8 +637,7 @@ def _assert_naming_module_exception_metadata(
 ) -> None:
     path = item.path  # type: ignore[attr-defined]
     assert item.issue.startswith("#"), (  # type: ignore[attr-defined]
-        f"Naming module exception issue must be an explicit tracker reference: "
-        f"{path}"
+        f"Naming module exception issue must be an explicit tracker reference: {path}"
     )
     assert item.owner.startswith("@"), (  # type: ignore[attr-defined]
         f"Naming module exception owner must be an explicit handle: {path}"

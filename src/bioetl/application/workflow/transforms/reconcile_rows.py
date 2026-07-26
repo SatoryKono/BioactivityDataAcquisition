@@ -8,7 +8,10 @@ from bioetl.application.services.workflow_transform_artifacts import (
     WorkflowTransformArtifactContext,
     artifact_refs_as_dicts,
 )
-from bioetl.application.workflow.transforms import WorkflowTransformRuntimeContext
+from bioetl.application.workflow.transforms import (
+    WorkflowTransformCallable,
+    WorkflowTransformRuntimeContext,
+)
 from bioetl.domain.ports import (
     RowReconciliationConfig,
     RowReconciliationPort,
@@ -19,7 +22,9 @@ from bioetl.domain.workflow import WorkflowTransformSpec
 __all__ = ["build_reconcile_rows_executor"]
 
 
-def build_reconcile_rows_executor(reconciliation_port: RowReconciliationPort):
+def build_reconcile_rows_executor(
+    reconciliation_port: RowReconciliationPort,
+) -> WorkflowTransformCallable:
     """Build a storage-backed executor for `reconcile_rows`."""
 
     async def _executor(

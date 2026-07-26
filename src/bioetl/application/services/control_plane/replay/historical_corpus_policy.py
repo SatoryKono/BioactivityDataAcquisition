@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
 from bioetl.domain.control_plane import RunManifest
 
 CERTIFIED_REPLAY_KINDS = frozenset(
@@ -60,12 +62,12 @@ def classify_certification_status(
     )
 
 
-def resolve_execution_context(manifest: RunManifest) -> str:
+def resolve_execution_context(
+    manifest: RunManifest,
+) -> Literal["source", "composite"]:
     """Resolve deterministic execution context from manifest fields."""
     context = str(manifest.launch_context.get("execution_context") or "").strip()
-    if context:
-        return context
-    if manifest.provider == "composite":
+    if context == "composite" or (not context and manifest.provider == "composite"):
         return "composite"
     return "source"
 

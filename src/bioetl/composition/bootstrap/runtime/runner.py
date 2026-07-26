@@ -33,7 +33,7 @@ __all__ = ["bootstrap_pipeline_runner_service"]
 
 def _pipeline_run_id_factory() -> str:
     """Factory function for pipeline run IDs."""
-    return create_runtime_occurrence_run_id("pipeline_run")
+    return str(create_runtime_occurrence_run_id("pipeline_run"))
 
 
 def bootstrap_pipeline_runner_service(

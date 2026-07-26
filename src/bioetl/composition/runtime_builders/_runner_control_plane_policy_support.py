@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from typing import TYPE_CHECKING
 
 from bioetl.composition.runtime_builders._runner_control_plane_artifact_policy import (
     requires_artifact_publication_closure as _requires_artifact_publication_closure,
@@ -17,6 +18,9 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
     normalize_required_persistence_profile,
 )
+
+if TYPE_CHECKING:
+    from bioetl.infrastructure.config.settings_api import Settings
 
 _PERSISTENCE_PROFILE_ACTIVE_LAYERS = ("bronze", "silver", "gold")
 
@@ -125,7 +129,7 @@ def validate_required_persistence_profile(
 
 def validate_strict_data_root_policy(
     *,
-    settings: object,
+    settings: Settings,
     required_profile: object,
     exact_replay: bool = False,
 ) -> None:
@@ -137,27 +141,8 @@ def validate_strict_data_root_policy(
     )
 
 
-def requires_artifact_publication_closure(required_profile: object) -> bool:
-    """Return ``True`` when artifact publication must be fully wired."""
-    return _requires_artifact_publication_closure(required_profile)
-
-
-def validate_artifact_recorder_attachment(
-    *,
-    required_profile: object,
-    candidate_count: int,
-    attached_count: int,
-    missing_attach_method_count: int,
-    failed_count: int,
-) -> None:
-    """Fail closed when strict profiles cannot guarantee artifact publication."""
-    _validate_artifact_recorder_attachment(
-        required_profile=required_profile,
-        candidate_count=candidate_count,
-        attached_count=attached_count,
-        missing_attach_method_count=missing_attach_method_count,
-        failed_count=failed_count,
-    )
+requires_artifact_publication_closure = _requires_artifact_publication_closure
+validate_artifact_recorder_attachment = _validate_artifact_recorder_attachment
 
 
 def validate_manifest_persistence_requirements(

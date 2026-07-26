@@ -18,9 +18,7 @@ ROOT = Path(__file__).resolve().parents[2]
 WORKFLOW_DIR = ROOT / ".github" / "workflows"
 WORKFLOW_INVENTORY = ROOT / "docs" / "04-reference" / "github-actions-workflows.md"
 PIPELINE_CATALOG = ROOT / "docs" / "04-reference" / "pipeline-catalog.md"
-PIPELINE_COVERAGE = (
-    ROOT / "docs" / "04-reference" / "pipelines" / "INDEX.md"
-)
+PIPELINE_COVERAGE = ROOT / "docs" / "04-reference" / "pipelines" / "INDEX.md"
 
 
 def test_issue_6487_inventory_count_and_docs_workflow_are_source_derived() -> None:
@@ -47,9 +45,12 @@ def test_issue_6488_gold_runtime_is_not_inferred_from_input_filter_flags() -> No
 
     assert molecule_config["filters"]["input_filter"]["enabled"] is False
     assert "enabled" not in molecule_config["pipeline"]["sink"]["gold"]
-    assert SinkLayerConfig.model_validate(
-        molecule_config["pipeline"]["sink"]["gold"]
-    ).enabled is True
+    assert (
+        SinkLayerConfig.model_validate(
+            molecule_config["pipeline"]["sink"]["gold"]
+        ).enabled
+        is True
+    )
 
     catalog = PIPELINE_CATALOG.read_text(encoding="utf-8")
     coverage = PIPELINE_COVERAGE.read_text(encoding="utf-8")
@@ -57,9 +58,7 @@ def test_issue_6488_gold_runtime_is_not_inferred_from_input_filter_flags() -> No
         line for line in catalog.splitlines() if line.startswith("| `chembl_molecule`")
     )
     molecule_coverage_row = next(
-        line
-        for line in coverage.splitlines()
-        if line.startswith("| `chembl_molecule`")
+        line for line in coverage.splitlines() if line.startswith("| `chembl_molecule`")
     )
 
     assert molecule_catalog_row.endswith("| enabled (default) |")

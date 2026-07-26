@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, SupportsIndex, SupportsInt
 
 from bioetl.domain.run_reports.models import WorkflowExecutionRow, WorkflowRunReport
 from bioetl.domain.run_reports.workflow_reasons import (
     build_reasons_rollup,
-    resolve_top_reasons,
+    normalize_top_reasons,
 )
 
 _COUNT_FIELDS = (
@@ -31,9 +31,16 @@ class _NormalizedExecution:
 
 
 def _as_int(value: object, default: int = 0) -> int:
+    if value is None:
+        return default
+    if not isinstance(
+        value,
+        (str, bytes, bytearray, SupportsInt, SupportsIndex),
+    ):
+        return default
     try:
-        return default if value is None else int(value)
-    except (TypeError, ValueError):
+        return int(value)
+    except (TypeError, ValueError, OverflowError):
         return default
 
 
@@ -176,7 +183,7 @@ def _normalized_row(
         run_id,
         name,
     )
-    reasons = resolve_top_reasons(top_reasons, report_ref)
+    reasons = normalize_top_reasons(top_reasons)
     row = WorkflowExecutionRow(
         step_id=str(step_id or ""),
         kind=_optional_text(kind),
@@ -274,10 +281,10 @@ def build_workflow_run_report(
     *,
     identity: Mapping[str, Any],  # Any: report/json payload shape is dynamic
     plan_steps: Sequence[
-        Mapping[str, Any]
+        Mapping[str, Any]  # Any: dynamic workflow plan payload
     ],  # Any: report/json payload shape is dynamic
     execution_steps: Sequence[
-        Mapping[str, Any] | object
+        Mapping[str, Any] | object  # Any: external workflow result payload
     ],  # Any: report/json payload shape is dynamic
 ) -> WorkflowRunReport:
     """Project a deterministic workflow report with extraction rollups."""

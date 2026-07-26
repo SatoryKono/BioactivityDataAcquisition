@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING
 from bioetl.domain.exceptions import MetricsServerError
 from bioetl.infrastructure.observability._metrics_gateway_publication import (
     _emit_metrics_publication_event,
+    _PublicationMetric,
 )
 from bioetl.infrastructure.observability._metrics_server_state import (
     _SERVER_RUNTIME,
@@ -29,7 +30,7 @@ def _handle_port_in_use(
     error: OSError,
     fail_fast: bool,
     logger: LoggerPort,
-    publication_metric: object,
+    publication_metric: _PublicationMetric,
 ) -> bool:
     """Handle port already in use error."""
     logger.warning(
@@ -60,7 +61,7 @@ def _handle_os_error(
     retry_count: int,
     fail_fast: bool,
     logger: LoggerPort,
-    publication_metric: object,
+    publication_metric: _PublicationMetric,
 ) -> bool:
     """Handle transient OS error after all retries are exhausted."""
     logger.error(
@@ -90,7 +91,7 @@ def _handle_unexpected_error(
     error: Exception,
     fail_fast: bool,
     logger: LoggerPort,
-    publication_metric: object,
+    publication_metric: _PublicationMetric,
 ) -> bool:
     """Handle unexpected errors during server startup."""
     logger.error(
@@ -117,7 +118,7 @@ def start_metrics_server_runtime(
     *,
     start_http_server_fn: Callable[..., object],
     sleep_fn: Callable[[float], object],
-    publication_metric: object,
+    publication_metric: _PublicationMetric,
     port: int = 8000,
     addr: str = "0.0.0.0",
     started_at: datetime | None = None,

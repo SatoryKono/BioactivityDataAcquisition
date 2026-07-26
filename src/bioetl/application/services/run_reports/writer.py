@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import tempfile
+from collections.abc import Mapping
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
@@ -77,7 +78,7 @@ def _atomic_write_text(path: Path, content: str) -> None:
         raise
 
 
-def write_json(path: Path, payload: dict[str, Any]) -> None:  # Any: report/json payload shape is dynamic
+def write_json(path: Path, payload: Mapping[str, object]) -> None:
     """Write deterministic JSON through an atomic same-directory replacement."""
     _atomic_write_text(
         path,
@@ -93,7 +94,10 @@ def _with_self_artifacts(
 ) -> tuple[dict[str, Any], ...]:  # Any: dynamic artifact payload
     kinds = {str(item.get("kind")) for item in artifacts}
     items = list(artifacts)
-    if "pipeline_run_report_json" not in kinds and "workflow_run_report_json" not in kinds:
+    if (
+        "pipeline_run_report_json" not in kinds
+        and "workflow_run_report_json" not in kinds
+    ):
         kind = (
             "workflow_run_report_json"
             if json_path.name.startswith("workflow")

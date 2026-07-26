@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from bioetl.application.services._observability_workflow_models import (
     AuditRunWorkflowResult,
     CheckpointAuditWorkflowResult,
@@ -31,6 +33,13 @@ from bioetl.application.services.control_plane.manifest.inspection_service impor
     RunManifestInspectionService,
 )
 
+if TYPE_CHECKING:
+    from bioetl.application.services.lineage.lineage_inspection_service import (
+        LineageInspectionService,
+    )
+    from bioetl.application.services.quarantine_service import QuarantineService
+    from bioetl.domain.ports import TracingPort
+
 
 async def inspect_audit_run(
     *,
@@ -54,9 +63,9 @@ async def inspect_run_dossier(
     audit_service: AuditInspectionService,
     checkpoint_service: CheckpointService,
     run_manifest_service: RunManifestInspectionService | None,
-    lineage_service: object | None,
-    quarantine_service: object | None,
-    tracer: object | None,
+    lineage_service: LineageInspectionService | None,
+    quarantine_service: QuarantineService | None,
+    tracer: TracingPort | None,
     run_id: str,
     audit_limit: int,
     run_manifest: RunManifestInspectionResult | None = None,

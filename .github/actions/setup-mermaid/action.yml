@@ -36,14 +36,19 @@ runs:
         npm init -y >/dev/null
         npm install --ignore-scripts --no-fund --no-audit \
           "@mermaid-js/mermaid-cli@${MERMAID_VERSION}"
+        # `--ignore-scripts` deliberately suppresses lifecycle hooks. Run the
+        # pinned CLI's own Puppeteer installer explicitly, then fail closed if
+        # its exact browser revision is unavailable.
+        node node_modules/puppeteer/install.js
+        PUPPETEER_EXECUTABLE="$(
+          node -e 'process.stdout.write(require("puppeteer").executablePath())'
+        )"
+        test -x "${PUPPETEER_EXECUTABLE}"
         if [ "$INSTALL_LIBRSVG" = "true" ]; then
           npm install --ignore-scripts --no-fund --no-audit svgo@3.3.2
           sudo apt-get update -qq && sudo apt-get install -y -qq librsvg2-bin
         fi
         echo "${TOOL_DIR}/node_modules/.bin" >> "$GITHUB_PATH"
-        # Puppeteer browser install without npx on-demand package fetch.
-        npm install --ignore-scripts --no-fund --no-audit puppeteer@24.2.0
-        "${TOOL_DIR}/node_modules/.bin/puppeteer" browsers install chrome-headless-shell
 
     - name: Create Puppeteer config
       shell: bash

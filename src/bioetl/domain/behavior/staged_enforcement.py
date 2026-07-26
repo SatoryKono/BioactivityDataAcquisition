@@ -235,10 +235,7 @@ def _format_enforcement_message(
             f"current_stage={policy.current_stage.value}, "
             f"failure_rate={failure_rate:.1%})"
         )
-    return (
-        f"Observation mode "
-        f"({failure_rate:.1%} < {policy.warning_threshold:.1%})"
-    )
+    return f"Observation mode ({failure_rate:.1%} < {policy.warning_threshold:.1%})"
 
 
 def _build_default_policies() -> dict[str, EnforcementPolicy]:

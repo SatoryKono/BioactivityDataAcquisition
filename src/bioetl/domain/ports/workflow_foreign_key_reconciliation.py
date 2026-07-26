@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
-from typing import Literal, Protocol, runtime_checkable
+from typing import Literal, Protocol, cast, runtime_checkable
 
 __all__ = [
     "ForeignKeyReconciliationLayer",
@@ -30,7 +30,7 @@ def _normalize_layer(
     normalized = str(value).strip().lower()
     if normalized not in {"silver", "gold"}:
         raise ValueError(f"{field_name} must be 'silver' or 'gold'")
-    return normalized  # type: ignore[return-value]
+    return cast("ForeignKeyReconciliationLayer", normalized)
 
 
 def _require_non_empty_str(value: str, field_name: str) -> None:

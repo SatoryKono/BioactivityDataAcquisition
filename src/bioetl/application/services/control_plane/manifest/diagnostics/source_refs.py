@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from datetime import datetime
-from typing import cast
 
 from bioetl.domain.control_plane import (
     RunInputSnapshotRef,
@@ -156,20 +155,24 @@ def _build_snapshot_ref(snapshot: dict[str, object]) -> RunInputSnapshotRef:
     captured_at = None
     if isinstance(captured_at_value, str) and captured_at_value.strip():
         captured_at = datetime.fromisoformat(captured_at_value)
-    optional_str = "str | None"
     return RunInputSnapshotRef(
         snapshot_id=str(snapshot.get("snapshot_id") or ""),
         content_hash=str(snapshot.get("content_hash") or ""),
-        immutable_uri=cast(optional_str, snapshot.get("immutable_uri")),
-        query_fingerprint=cast(optional_str, snapshot.get("query_fingerprint")),
-        storage_provider=cast(optional_str, snapshot.get("storage_provider")),
-        object_bucket=cast(optional_str, snapshot.get("object_bucket")),
-        object_key=cast(optional_str, snapshot.get("object_key")),
-        object_version_id=cast(optional_str, snapshot.get("object_version_id")),
-        etag=cast(optional_str, snapshot.get("etag")),
-        last_modified=cast(optional_str, snapshot.get("last_modified")),
+        immutable_uri=_optional_text(snapshot.get("immutable_uri")),
+        query_fingerprint=_optional_text(snapshot.get("query_fingerprint")),
+        storage_provider=_optional_text(snapshot.get("storage_provider")),
+        object_bucket=_optional_text(snapshot.get("object_bucket")),
+        object_key=_optional_text(snapshot.get("object_key")),
+        object_version_id=_optional_text(snapshot.get("object_version_id")),
+        etag=_optional_text(snapshot.get("etag")),
+        last_modified=_optional_text(snapshot.get("last_modified")),
         captured_at=captured_at,
     )
+
+
+def _optional_text(value: object) -> str | None:
+    """Return optional textual snapshot metadata without unsafe coercion."""
+    return value if isinstance(value, str) else None
 
 
 def _attach_rich_composite_replay_support(

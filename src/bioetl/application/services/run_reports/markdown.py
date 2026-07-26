@@ -246,7 +246,7 @@ def _append_identity_details(
 
 def _append_identity_value(
     lines: list[str],
-    identity: Mapping[str, Any],
+    identity: Mapping[str, Any],  # Any: dynamic report identity payload
     key: str,
     *,
     label: str | None = None,
@@ -261,7 +261,7 @@ def _append_identity_value(
 
 def _append_provider_entity(
     lines: list[str],
-    identity: Mapping[str, Any],
+    identity: Mapping[str, Any],  # Any: dynamic report identity payload
 ) -> None:
     if not identity.get("provider") and not identity.get("entity"):
         return
@@ -273,7 +273,7 @@ def _append_provider_entity(
 
 def _append_workflow_identity(
     lines: list[str],
-    identity: Mapping[str, Any],
+    identity: Mapping[str, Any],  # Any: dynamic report identity payload
 ) -> None:
     if not identity.get("workflow_run_id"):
         return

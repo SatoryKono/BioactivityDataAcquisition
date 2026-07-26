@@ -95,13 +95,8 @@ class BronzeWriterMetadataMixin:
             "_BronzeLineageSidecarCoordinator | None",
             getattr(self, "_metadata_coordinator", None),
         )
-        create_sidecar = (
-            None
-            if coordinator is None
-            else getattr(coordinator, "create_bronze_lineage_sidecar", None)
-        )
-        if callable(create_sidecar):
-            return create_sidecar(
+        if coordinator is not None:
+            return coordinator.create_bronze_lineage_sidecar(
                 provider=provider,
                 entity=entity,
                 batch_id=batch_id,

@@ -67,7 +67,10 @@ def _seed_gold_removals_from_metrics(
 ) -> None:
     """Backfill gold removals from coarse metrics when hooks did not fire."""
     excluded = int(metrics.get("records_gold_excluded_by_contract", 0) or 0)
-    if excluded > 0 and accounting.sum_outcome(StageId.GOLD.value, "excluded_by_contract") == 0:
+    if (
+        excluded > 0
+        and accounting.sum_outcome(StageId.GOLD.value, "excluded_by_contract") == 0
+    ):
         accounting.record_removal(
             StageId.GOLD.value,
             outcome="excluded_by_contract",

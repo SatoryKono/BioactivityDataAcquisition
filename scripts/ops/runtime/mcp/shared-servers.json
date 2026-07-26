@@ -3,6 +3,14 @@
   "proxy_package": "mcp-proxy@6.5.4",
   "bind_note": "mcp-proxy CLI binds the chosen port; clients MUST use http://127.0.0.1:<port>/mcp only. Prefer host firewall for non-loopback.",
   "servers": {
+    "brave-search": {
+      "port": 8811,
+      "path": "/mcp",
+      "wrapper": "mcp_brave_search_wrapper",
+      "class": "T2",
+      "priority": 3,
+      "notes": "docker run stdio; longer settle"
+    },
     "adr-analysis": {
       "port": 8813,
       "path": "/mcp",
@@ -31,11 +39,12 @@
       "class": "T2",
       "priority": 2
     },
-    "brave-search": {
-      "port": 8811,
+    "docker": {
+      "port": 8817,
       "path": "/mcp",
-      "wrapper": "mcp_brave_search_wrapper",
+      "wrapper": "mcp_docker_wrapper",
       "class": "T2",
+<<<<<<< Updated upstream
       "priority": 3
     },
     "prometheus": {
@@ -53,6 +62,72 @@
       "class": "T2",
       "priority": 4,
       "notes": "docker-backed; single shared container"
+||||||| Stash base
+      "priority": 3
+=======
+      "priority": 4,
+      "notes": "docker mcp gateway stdio; thrash leader"
+    },
+    "mermaid": {
+      "port": 8818,
+      "path": "/mcp",
+      "wrapper": "mcp_mermaid_wrapper",
+      "class": "T2",
+      "priority": 4,
+      "notes": "docker mcp gateway stdio"
+    },
+    "dockerhub": {
+      "port": 8819,
+      "path": "/mcp",
+      "wrapper": "mcp_dockerhub_wrapper",
+      "class": "T2",
+      "priority": 4
+    },
+    "github": {
+      "port": 8820,
+      "path": "/mcp",
+      "wrapper": "github-mcp-wrapper",
+      "class": "T2",
+      "priority": 2
+    },
+    "fetch": {
+      "port": 8821,
+      "path": "/mcp",
+      "wrapper": "mcp_fetch_wrapper",
+      "class": "T2",
+      "priority": 2
+    },
+    "prometheus": {
+      "port": 8822,
+      "path": "/mcp",
+      "wrapper": "mcp_prometheus_wrapper",
+      "class": "T2",
+      "priority": 5,
+      "notes": "ops; longer settle if docker-backed"
+    },
+    "grafana": {
+      "port": 8823,
+      "path": "/mcp",
+      "wrapper": "mcp_grafana_wrapper",
+      "class": "T2",
+      "priority": 5
+    },
+    "neo4j-cypher": {
+      "port": 8824,
+      "path": "/mcp",
+      "wrapper": "mcp_neo4j_cypher_wrapper",
+      "class": "T2",
+      "priority": 6,
+      "notes": "requires healthy neo4j auth; optional daily"
+    },
+    "neo4j-memory": {
+      "port": 8825,
+      "path": "/mcp",
+      "wrapper": "mcp_neo4j_memory_wrapper",
+      "class": "T2",
+      "priority": 6,
+      "notes": "requires healthy neo4j auth; optional daily"
+>>>>>>> Stashed changes
     }
   }
 }

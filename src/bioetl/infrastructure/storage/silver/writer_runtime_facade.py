@@ -8,12 +8,24 @@ services.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, cast
+from typing import cast
 
 from bioetl.domain.ports import SilverWriteRequest
 from bioetl.domain.types import BronzeRecord
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.storage.silver.delta_helpers import _DeltaWriteRequest
+from bioetl.infrastructure.storage.silver.operations.delta_operations import (
+    SilverDeltaOperations,
+)
+from bioetl.infrastructure.storage.silver.operations.merged_operations import (
+    SilverMergedOperations,
+)
+from bioetl.infrastructure.storage.silver.operations.postwrite_operations import (
+    SilverPostwriteOperations,
+)
+from bioetl.infrastructure.storage.silver.operations.validation_operations import (
+    SilverValidationOperations,
+)
 from bioetl.infrastructure.storage.silver.pipeline_helpers import (
     _SilverWriteExecutionContext,
     _SilverWriteInvocation,
@@ -40,20 +52,6 @@ from bioetl.infrastructure.storage.silver.writer_runtime_validation_facade impor
     _SilverWriterRuntimeValidationFacade,
 )
 
-if TYPE_CHECKING:
-    from bioetl.infrastructure.storage.silver.operations.delta_operations import (
-        SilverDeltaOperations,
-    )
-    from bioetl.infrastructure.storage.silver.operations.merged_operations import (
-        SilverMergedOperations,
-    )
-    from bioetl.infrastructure.storage.silver.operations.postwrite_operations import (
-        SilverPostwriteOperations,
-    )
-    from bioetl.infrastructure.storage.silver.operations.validation_operations import (
-        SilverValidationOperations,
-    )
-
 
 class SilverWriterRuntimeFacade(
     SilverWriterMetadataFacade,
@@ -61,17 +59,14 @@ class SilverWriterRuntimeFacade(
 ):
     """Writer-level Silver orchestration delegated to runtime operation services."""
 
+    def _should_dual_write(self) -> bool:
+        raise NotImplementedError
+
     _validation: SilverValidationOperations | None
     _delta: SilverDeltaOperations | None
     _postwrite: SilverPostwriteOperations | None
     _merged: SilverMergedOperations | None
     _host: object | None
-
-    if TYPE_CHECKING:
-
-        def _resolve_table_path(self, table_name: str) -> str: ...
-
-        def _should_dual_write(self) -> bool: ...
 
     async def _write_single_target(
         self,

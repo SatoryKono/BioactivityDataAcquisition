@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 from datetime import datetime
-from typing import TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING, TypeVar, cast
 
 from bioetl.application.core._batch_processing_metrics_support import (
     track_bronze_write_metrics,
@@ -32,6 +32,7 @@ from bioetl.application.core.quarantine_manager import QuarantineRuntimeService
 from bioetl.domain.aggregates.events import DomainEvent
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.types import BatchID, BronzeRecord, RunID
+from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 __all__ = ["BatchProcessingSupportService"]
 
@@ -49,7 +50,6 @@ if TYPE_CHECKING:
     from bioetl.application.services.debug_export_service import DebugExportService
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
-    from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 _ResultT = TypeVar("_ResultT")
 _SHARED_FAILURE_POLICY = _RF005_SHARED_FAILURE_POLICY
@@ -167,19 +167,22 @@ class BatchProcessingSupportService:
         """
         silver_result: SilverWriteResult | None = None
         if transform_result.silver_records:
-            silver_result = await safe_write_layer(
-                execute_with_span=self._execute_with_span,
-                writer=self._writer,
-                quarantine_manager=self._quarantine_manager,
-                logger=self._logger,
-                run_id=self._run_id,
-                domain_event_emitter=self._domain_event_emitter,
-                layer="silver",
-                records=transform_result.silver_records,
-                batch_id=batch_id,
-                ingestion_ts=ingestion_ts,
-                bronze_refs=bronze_refs,
-                operation_errors=_OPERATION_ERRORS,
+            silver_result = cast(
+                "SilverWriteResult | None",
+                await safe_write_layer(
+                    execute_with_span=self._execute_with_span,
+                    writer=self._writer,
+                    quarantine_manager=self._quarantine_manager,
+                    logger=self._logger,
+                    run_id=self._run_id,
+                    domain_event_emitter=self._domain_event_emitter,
+                    layer="silver",
+                    records=transform_result.silver_records,
+                    batch_id=batch_id,
+                    ingestion_ts=ingestion_ts,
+                    bronze_refs=bronze_refs,
+                    operation_errors=_OPERATION_ERRORS,
+                ),
             )
         if transform_result.gold_records:
             await safe_write_layer(

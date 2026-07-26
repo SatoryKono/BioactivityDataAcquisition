@@ -59,10 +59,10 @@ def build_compound_business_data(
 
 def _resolve_compound_identifier(record: BronzeRecord) -> object | None:
     """Return the canonical PubChem compound identifier from Bronze payload."""
-    cid = record.get("cid")
+    cid: object | None = record.get("cid")
     if cid not in (None, ""):
         return cid
-    molecule_id = record.get("molecule_id")
+    molecule_id: object | None = record.get("molecule_id")
     return molecule_id if molecule_id not in (None, "") else None
 
 

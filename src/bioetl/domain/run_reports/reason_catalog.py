@@ -122,7 +122,9 @@ class ReasonCatalog:
         return self.resolve(code).default_outcome
 
 
-def normalize_reason_code(code: str | None, catalog: ReasonCatalog | None = None) -> str:
+def normalize_reason_code(
+    code: str | None, catalog: ReasonCatalog | None = None
+) -> str:
     """Normalize a free reason string to a catalog code."""
     active = _active_catalog(catalog)
     stripped = "" if code is None else str(code).strip()
@@ -162,9 +164,11 @@ def _load_yaml_catalog(path: Path) -> ReasonCatalog | None:
     return ReasonCatalog(version=version, entries=entries, unknown_code=unknown)
 
 
-def _read_yaml_mapping(path: Path) -> dict[str, Any] | None:  # Any: report/json payload shape is dynamic
+def _read_yaml_mapping(
+    path: Path,
+) -> dict[str, Any] | None:  # Any: report/json payload shape is dynamic
     try:
-        import yaml  # type: ignore[import-untyped]
+        import yaml
     except ImportError:
         return None
     raw = yaml.safe_load(path.read_text(encoding="utf-8"))
@@ -183,7 +187,9 @@ def _entry_from_object(item: object) -> ReasonCatalogEntry:
     return _entry_from_mapping(item)
 
 
-def _entry_from_mapping(item: dict[str, Any]) -> ReasonCatalogEntry:  # Any: report/json payload shape is dynamic
+def _entry_from_mapping(
+    item: dict[str, Any],
+) -> ReasonCatalogEntry:  # Any: report/json payload shape is dynamic
     code = _text_default(item.get("code"), "").strip()
     return ReasonCatalogEntry(
         code=code,

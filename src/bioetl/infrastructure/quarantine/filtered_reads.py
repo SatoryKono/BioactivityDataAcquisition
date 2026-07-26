@@ -53,20 +53,16 @@ def _load_scoped_pyarrow_table(
     columns: list[str] | None = None,
 ) -> pa.Table:
     """Read rows scoped by pipeline for partitioned and legacy non-partitioned tables."""
-    kwargs: dict[str, object] = {"filters": filters}
-    if columns is not None:
-        kwargs["columns"] = columns
     if "pipeline" in _delta_partition_columns(dt):
         return dt.to_pyarrow_table(
             partitions=[("pipeline", "=", pipeline_single)],
-            **kwargs,
+            filters=filters,
+            columns=columns,
         )
     return dt.to_pyarrow_table(
         partitions=None,
-        **{
-            **kwargs,
-            "filters": [*filters, ("pipeline", "=", pipeline_single)],
-        },
+        filters=[*filters, ("pipeline", "=", pipeline_single)],
+        columns=columns,
     )
 
 

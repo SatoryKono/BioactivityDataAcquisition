@@ -7,7 +7,6 @@ import pytest
 
 from tests.integration._grafana_test_support import (
     get_dashboard_panels,
-    get_row_child_panels,
     get_panel_expressions,
     load_dashboard,
 )
@@ -67,9 +66,7 @@ def test_runtime_dashboard_contains_runtime_hygiene_and_alert_condition_metrics(
         return isinstance(datasource, dict) and datasource.get("type") == "loki"
 
     loki_panels = [
-        panel
-        for panel in get_dashboard_panels(dashboard)
-        if is_loki_datasource(panel)
+        panel for panel in get_dashboard_panels(dashboard) if is_loki_datasource(panel)
     ]
     assert not loki_panels, (
         "Runtime dashboard must not ship Loki datasource panels after 2026-07-23"

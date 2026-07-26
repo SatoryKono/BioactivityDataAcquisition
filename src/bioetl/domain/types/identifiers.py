@@ -5,7 +5,7 @@ No I/O operations allowed (REQ-ARCH-003).
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, NewType, TypedDict
+from typing import TYPE_CHECKING, Any, NewType, Protocol, TypedDict, runtime_checkable
 from uuid import UUID
 
 if TYPE_CHECKING:
@@ -20,6 +20,7 @@ __all__ = [
     "GoldRecord",
     "GoldSchemaType",
     "JsonDict",
+    "LocationReference",
     "MetaDict",
     "PrimaryId",
     "RunID",
@@ -74,6 +75,15 @@ type PrimaryId = str | int
 
 
 # ── TypedDict ─────────────────────────────────────────────────────────
+
+
+@runtime_checkable
+class LocationReference(Protocol):
+    """Opaque location value representable at infrastructure boundaries."""
+
+    def __str__(self) -> str:
+        """Return the transport-safe textual location."""
+        ...
 
 
 class SilverRecord(TypedDict, total=False):

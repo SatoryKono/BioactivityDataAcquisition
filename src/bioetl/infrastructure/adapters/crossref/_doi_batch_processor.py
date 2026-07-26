@@ -140,9 +140,9 @@ class DoiBatchProcessor:
             request_collector=self._request_collector,
         )
 
-    def _batch_items_from_response(self, response: object) -> list[BronzeRecord]:
+    def _batch_items_from_response(self, response: Response) -> list[BronzeRecord]:
         """Extract Bronze records from a successful CrossRef batch response."""
-        data = response.json()  # type: ignore[union-attr]
+        data = response.json()
         message = data.get("message", {})
         items = message.get("items", []) if isinstance(message, dict) else []
         return [cast(BronzeRecord, item) for item in items if isinstance(item, dict)]
@@ -150,7 +150,7 @@ class DoiBatchProcessor:
     async def _yield_batch_or_fallback(
         self,
         *,
-        response: object | None,
+        response: Response | None,
         original_dois: list[str],
     ) -> AsyncIterator[BronzeRecord]:
         """Yield batch items or fall back to individual DOI fetches."""

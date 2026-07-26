@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta, timezone
 from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
@@ -152,9 +152,7 @@ class TestRunContextValidation:
 
     def test_non_utc_timezone_accepted(self) -> None:
         """Test that non-UTC timezone-aware datetime is also accepted."""
-        import zoneinfo
-
-        tz = zoneinfo.ZoneInfo("Europe/Berlin")
+        tz = timezone(timedelta(hours=1), name="UTC+01:00")
         ctx = RunContext(
             run_id=_make_run_id(),
             run_type=RunType.INCREMENTAL,

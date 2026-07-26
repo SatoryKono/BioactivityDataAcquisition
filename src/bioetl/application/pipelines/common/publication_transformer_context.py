@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, cast
 
 from bioetl.application.pipelines.common.transformer_initialization import (
     build_runtime_transformer_init,
+    install_runtime_transformer_init,
     transformer_init_kwargs,
 )
 
@@ -149,5 +150,6 @@ __all__ = [
     "build_runtime_publication_transformer_init",
     "build_runtime_transformer_init",
     "coerce_publication_transformer_init",
+    "install_runtime_transformer_init",
     "publication_transformer_kwargs",
 ]

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping
 from pathlib import Path
-from typing import cast
+from typing import Protocol, cast
 
 import yaml
 from pydantic import ValidationError
@@ -40,7 +40,12 @@ __all__ = [
     "resolve_composite_gold_schema",
 ]
 
-ConfigPayloadValidator = Callable[[JsonDict], object]
+
+class _CompositeConfigSchema(Protocol):
+    def to_domain(self) -> CompositeConfig: ...
+
+
+ConfigPayloadValidator = Callable[[JsonDict], _CompositeConfigSchema]
 DQOverrideMerger = Callable[[dict[str, object], Path], None]
 SharedPolicyMerger = Callable[[dict[str, object], Path], None]
 

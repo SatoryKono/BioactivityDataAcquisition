@@ -116,9 +116,7 @@ def _start_observability_backend_detached[ResultT](
     warning_printer = hooks["warning_printer"]
     build_startup_failure_detail_fn = hooks["build_startup_failure_detail_fn"]
     describe_required_probe_failure_fn = hooks["describe_required_probe_failure_fn"]
-    append_backend_startup_diagnostic_fn = hooks[
-        "append_backend_startup_diagnostic_fn"
-    ]
+    append_backend_startup_diagnostic_fn = hooks["append_backend_startup_diagnostic_fn"]
     python_executable_to_tuple_fn = hooks["python_executable_to_tuple_fn"]
     try:
         process = start_fn(bind_host=bind_host, port=port)  # type: ignore[operator]

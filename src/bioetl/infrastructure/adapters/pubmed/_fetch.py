@@ -60,7 +60,7 @@ class PubMedFetchMixin(PubMedAdapterStateMixin):
         try:
             start_time = time.perf_counter()
             with self._adapter_metrics.measure_request("/efetch"):
-                response = await self._http_client.get(
+                response = await self.http_client.get(
                     f"{ENTREZ_API_BASE}efetch.fcgi", params=params
                 )
             duration_ms = (time.perf_counter() - start_time) * 1000

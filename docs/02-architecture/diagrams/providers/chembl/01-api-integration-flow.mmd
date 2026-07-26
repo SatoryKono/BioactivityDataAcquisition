@@ -1,0 +1,164 @@
+---
+title: ChEMBL API Integration Flow
+version: 1.0.0
+status: active
+author: BioETL Team
+last_verified: 2026-07-24
+adr_references:
+  - ADR-032: Unified HTTP Client
+  - ADR-010: Local-Only Deployment
+  - ADR-040: Diagram Governance
+description: |
+  API integration flow diagram for ChEMBL provider showing authentication,
+  request construction, pagination handling, rate limiting, and response parsing.
+  Covers ChEMBL-specific API integration patterns.
+---
+
+```mermaid
+%% @version 1.0.0
+%% @date 2026-07-24
+%% @type flowchart
+%% @level system
+flowchart TD
+    Start([ChEMBL API Integration Start]) --> Init[Initialize ChEMBL Adapter]
+    
+    Init --> Auth[Authentication Setup]
+    Auth --> AuthKey{API Key Available?}
+    AuthKey -->|Yes| ConfigKey[Configure API Key]
+    AuthKey -->|No| NoKey[Use No-Auth Mode]
+    ConfigKey --> Request[Request Construction]
+    NoKey --> Request
+    
+    Request --> Endpoint[Select ChEMBL Endpoint]
+    Endpoint --> EndType{Endpoint Type?}
+    EndType -->|Activity| Activity[Activity Endpoint]
+    EndType -->|Target| Target[Target Endpoint]
+    EndType -->|Compound| Compound[Compound Endpoint]
+    EndType -->|Assay| Assay[Assay Endpoint]
+    
+    Activity --> Params[Build Request Parameters]
+    Target --> Params
+    Compound --> Params
+    Assay --> Params
+    
+    Params --> Pagination[Pagination Setup]
+    Pagination --> PagType{Pagination Type?}
+    PagType -->|Cursor| Cursor[Cursor Pagination]
+    PagType -->|Offset| Offset[Offset Pagination]
+    PagType -->|Scroll| Scroll[Scroll Pagination]
+    
+    Cursor --> RateLimit[Rate Limit Check]
+    Offset --> RateLimit
+    Scroll --> RateLimit
+    
+    RateLimit --> RateCheck{Rate Limit OK?}
+    RateCheck -->|Yes| HTTP[Execute HTTP Request]
+    RateCheck -->|No| Wait[Wait for Rate Limit Reset]
+    Wait --> RateLimit
+    
+    HTTP --> Response[Receive Response]
+    Response --> Status{Response Status?}
+    Status -->|200 OK| Parse[Parse Response]
+    Status -->|429 Rate Limit| Wait
+    Status -->|5xx Server Error| Retry[Retry with Backoff]
+    Status -->|4xx Client Error| Error[Handle Error]
+    
+    Retry --> RetryCount{Max Retries?}
+    RetryCount -->|No| Error
+    RetryCount -->|Yes| Backoff[Wait with Backoff]
+    Backoff --> HTTP
+    
+    Parse --> Validate[Validate Response Format]
+    Validate --> Valid{Valid JSON?}
+    Valid -->|Yes| Extract[Extract Data]
+    Valid -->|No| Error
+    
+    Extract --> Transform[Transform to Domain Model]
+    Transform --> Domain[Create ChEMBL Domain Entity]
+    Domain --> NextPage{More Pages?}
+    NextPage -->|Yes| Pagination
+    NextPage -->|No| Complete[API Integration Complete]
+    
+    Error --> Log[Log Error Details]
+    Log --> Metrics[Emit Error Metrics]
+    Metrics --> Fail[API Integration Failed]
+    
+    Complete --> Success[Emit Success Metrics]
+    Success --> End([ChEMBL API Integration End])
+
+    style Start fill:#e1f5ff
+    style End fill:#e1f5ff
+    style Complete fill:#c8e6c9
+    style Fail fill:#ffcccc
+    style AuthKey fill:#fff4e6
+    style RateCheck fill:#fff4e6
+    style Status fill:#fff4e6
+    style Valid fill:#fff4e6
+    style NextPage fill:#fff4e6
+    style RetryCount fill:#fff4e6
+```
+
+## Key Components
+
+### Authentication
+- **API Key Configuration**: ChEMBL API key for authenticated requests
+- **No-Auth Mode**: Fallback for public endpoints without authentication
+
+### Request Construction
+- **Endpoint Selection**: Different ChEMBL endpoints (activity, target, compound, assay)
+- **Parameter Building**: Query parameters for specific data types
+- **Pagination Setup**: Different pagination strategies per endpoint
+
+### Pagination Strategies
+- **Cursor Pagination**: For endpoints supporting cursor-based pagination
+- **Offset Pagination**: Traditional offset/limit pagination
+- **Scroll Pagination**: Scroll-based pagination for large datasets
+
+### Rate Limiting
+- **Rate Limit Check**: Prevents API rate limit violations
+- **Wait Strategy**: Exponential backoff for rate limit handling
+
+### Error Handling
+- **Response Validation**: HTTP status code handling
+- **Retry Logic**: Retry with exponential backoff for transient errors
+- **Error Logging**: Comprehensive error logging and metrics
+
+## ChEMBL-Specific Considerations
+
+### Activity Data
+- **Activity Endpoint**: `/activity` endpoint for bioactivity data
+- **Target Mapping**: Target protein classification and mapping
+- **Activity Types**: Different activity measurements (IC50, Ki, etc.)
+
+### Target Data
+- **Target Endpoint**: `/target` endpoint for protein target data
+- **Target Classification**: Protein family and organism classification
+- **UniProt Integration**: UniProt ID mapping for protein data
+
+### Compound Data
+- **Compound Endpoint**: `/molecule` endpoint for compound data
+- **Standardization**: ChEMBL standard identifiers and names
+- **Structure Data**: Molecular structure information
+
+## ADR References
+
+- **ADR-032**: Unified HTTP Client — centralized HTTP client implementation
+- **ADR-010**: Local-Only Deployment — no external orchestration required
+- **ADR-040**: Diagram Governance — diagram metadata and quality standards
+
+## Error Categories
+
+- **Rate Limit Errors (429)**: Temporary rate limit violations
+- **Server Errors (5xx)**: ChEMBL server-side issues
+- **Client Errors (4xx)**: Invalid requests or authentication issues
+- **Network Errors**: Connection or timeout issues
+- **Parse Errors**: Invalid or unexpected response format
+
+## Metrics Emitted
+
+- `chembl_api_request_start` — ChEMBL API request initiated
+- `chembl_api_request_complete` — ChEMBL API request completed
+- `chembl_api_request_failed` — ChEMBL API request failed
+- `chembl_rate_limit_exceeded` — ChEMBL rate limit violation
+- `chembl_pagination_page` — ChEMBL pagination page number
+- `chembl_retry_attempt` — ChEMBL API retry attempt

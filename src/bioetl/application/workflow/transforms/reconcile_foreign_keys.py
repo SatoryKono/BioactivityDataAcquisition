@@ -4,13 +4,18 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Mapping
+from typing import cast
 
 from bioetl.application.services.workflow_transform_artifacts import (
     WorkflowTransformArtifactContext,
     artifact_refs_as_dicts,
 )
-from bioetl.application.workflow.transforms import WorkflowTransformRuntimeContext
+from bioetl.application.workflow.transforms import (
+    WorkflowTransformCallable,
+    WorkflowTransformRuntimeContext,
+)
 from bioetl.domain.ports import (
+    ForeignKeyReconciliationLayer,
     ForeignKeyReconciliationPort,
     ForeignKeyReconciliationRequest,
 )
@@ -21,7 +26,7 @@ __all__ = ["build_reconcile_foreign_keys_executor"]
 
 def build_reconcile_foreign_keys_executor(
     reconciliation_port: ForeignKeyReconciliationPort,
-):
+) -> WorkflowTransformCallable:
     """Build a storage-backed executor for `reconcile_foreign_keys`."""
 
     async def _executor(
@@ -127,6 +132,9 @@ def _build_request(
     source_key, reference_key, source_keys, reference_keys = _resolve_reference_keys(
         config
     )
+    source_layer = _optional_layer(config, "source_layer", default="silver")
+    reference_layer = _optional_layer(config, "reference_layer", default="silver")
+    assert source_layer is not None and reference_layer is not None
     return ForeignKeyReconciliationRequest(
         source_table=source_table,
         reference_table=reference_table,
@@ -134,8 +142,8 @@ def _build_request(
         reference_key=reference_key,
         primary_keys=primary_keys,
         action="delete_orphans",
-        source_layer=_optional_layer(config, "source_layer", default="silver"),
-        reference_layer=_optional_layer(config, "reference_layer", default="silver"),
+        source_layer=source_layer,
+        reference_layer=reference_layer,
         mutation_layer=_optional_layer(config, "mutation_layer", default=None),
         source_keys=source_keys,
         reference_keys=reference_keys,
@@ -274,8 +282,8 @@ def _optional_layer(
     config: Mapping[str, object],
     key: str,
     *,
-    default: str | None,
-) -> str | None:
+    default: ForeignKeyReconciliationLayer | None,
+) -> ForeignKeyReconciliationLayer | None:
     value = config.get(key, default)
     if value is None:
         return None
@@ -284,7 +292,7 @@ def _optional_layer(
         raise ValueError(
             f"reconcile_foreign_keys requires config.{key} as 'silver' or 'gold'"
         )
-    return rendered
+    return cast("ForeignKeyReconciliationLayer", rendered)
 
 
 def _optional_key_tuple(

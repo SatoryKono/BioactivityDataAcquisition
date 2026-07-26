@@ -1,0 +1,237 @@
+---
+title: Quarantine Handling Sequence
+version: 1.0.0
+status: active
+author: BioETL Team
+last_verified: 2026-07-24
+adr_references:
+  - ADR-050: Silver Structural and Gold Semantic Filter Boundary
+  - ADR-045: DQ Contract System
+  - ADR-027: DQ Rules Externalization
+  - ADR-040: Diagram Governance
+description: |
+  Sequence diagram showing quarantine handling sequence including failure detection,
+  quarantine record creation, root cause logging, alert generation, and remediation workflow.
+  Covers quarantine routing and management for failed data quality checks.
+---
+
+```mermaid
+%% @version 1.0.0
+%% @date 2026-07-24
+%% @type sequence
+%% @level system
+sequenceDiagram
+    autonumber
+    participant Pipeline as Pipeline Service
+    participant DQValidator as DQ Validator
+    participant Quarantine as Quarantine Handler
+    participant RootCause as Root Cause Analyzer
+    participant Alert as Alert Generator
+    participant Storage as Quarantine Storage
+    participant Metrics as Metrics/Tracing
+    participant Logger as Structured Logger
+    participant Operator as Operator/Remediation
+
+    Note over Pipeline, Operator: Quarantine Handling Sequence
+
+    %% Failure Detection
+    Pipeline->>DQValidator: Validate data batch
+    DQValidator->>DQValidator: Apply DQ rules
+    DQValidator->>DQValidator: Evaluate thresholds
+    
+    alt DQ validation fails
+        DQValidator->>Metrics: Emit dq_validation_failed metric
+        DQValidator->>Logger: Log DQ validation failure
+        DQValidator-->>Pipeline: DQ validation failed
+        Pipeline->>Quarantine: Handle quarantine case
+    end
+
+    %% Quarantine Record Creation
+    Quarantine->>Metrics: Emit quarantine_handling_start metric
+    Quarantine->>Metrics: Start quarantine_handling span
+    Quarantine->>Logger: Log quarantine start (batch_id, timestamp)
+    
+    Quarantine->>Quarantine: Create quarantine record
+    Quarantine->>Quarantine: Generate quarantine_id
+    Quarantine->>Quarantine: Record original data source
+    Quarantine->>Quarantine: Record data batch metadata
+    Quarantine->>Quarantine: Record validation timestamp
+    Quarantine->>Metrics: Emit quarantine_record_created metric
+
+    %% Root Cause Analysis
+    Quarantine->>RootCause: Analyze root cause
+    RootCause->>RootCause: Identify failed DQ rules
+    RootCause->>RootCause: Categorize failure type
+    RootCause->>RootCause: Determine severity (critical/warning)
+    RootCause->>RootCause: Identify affected data fields
+    RootCause->>RootCause: Calculate failure impact
+    RootCause->>Metrics: Emit root_cause_analyzed metric
+    RootCause-->>Quarantine: Root cause analysis result
+
+    %% Detailed Violation Recording
+    Quarantine->>Quarantine: Record DQ violations
+    Quarantine->>Quarantine: Store failed rule details
+    Quarantine->>Quarantine: Store threshold violations
+    Quarantine->>Quarantine: Store schema validation errors
+    Quarantine->>Quarantine: Store actual vs expected values
+    Quarantine->>Metrics: Emit violations_recorded metric
+
+    %% Alert Generation
+    Quarantine->>Alert: Generate alert
+    Alert->>Alert: Determine alert severity
+    Alert->>Alert: Create alert message
+    Alert->>Alert: Include quarantine_id
+    Alert->>Alert: Include root cause summary
+    Alert->>Alert: Include affected record count
+    Alert->>Alert: Include remediation suggestions
+    Alert->>Metrics: Emit quarantine_alert metric
+    Alert->>Logger: Log alert details
+    Alert-->>Quarantine: Alert generated
+
+    %% Quarantine Storage
+    Quarantine->>Storage: Write to quarantine storage
+    Storage->>Metrics: Emit quarantine_write_start metric
+    Storage->>Metrics: Start quarantine_write span
+    Storage->>Storage: Write original data (preserved)
+    Storage->>Storage: Write quarantine metadata
+    Storage->>Storage: Write violation details
+    Storage->>Storage: Write root cause analysis
+    Storage->>Metrics: Emit quarantine_write_complete metric
+    Storage-->>Quarantine: Quarantine write complete
+
+    %% Remediation Workflow
+    alt Auto-remediation possible
+        Quarantine->>Quarantine: Check auto-remediation rules
+        Quarantine->>Quarantine: Apply auto-fix rules
+        Quarantine->>Quarantine: Re-validate fixed data
+        alt Re-validation passes
+            Quarantine->>Storage: Move to standard storage
+            Quarantine->>Metrics: Emit auto_remediation_success metric
+            Quarantine->>Logger: Log auto-remediation success
+        else Re-validation fails
+            Quarantine->>Quarantine: Keep in quarantine
+            Quarantine->>Metrics: Emit auto_remediation_failed metric
+            Quarantine->>Logger: Log auto-remediation failure
+        end
+    else Manual remediation required
+        Quarantine->>Operator: Notify operator
+        Operator->>Operator: Review quarantine record
+        Operator->>Operator: Analyze root cause
+        Operator->>Operator: Plan remediation
+        Operator->>Operator: Apply remediation
+        Operator->>Quarantine: Submit remediated data
+        Quarantine->>DQValidator: Re-validate remediated data
+        alt Re-validation passes
+            DQValidator-->>Quarantine: Validation success
+            Quarantine->>Storage: Move to standard storage
+            Quarantine->>Metrics: Emit manual_remediation_success metric
+            Quarantine->>Logger: Log manual remediation success
+        else Re-validation fails
+            DQValidator-->>Quarantine: Validation failed
+            Quarantine->>Quarantine: Keep in quarantine
+            Quarantine->>Metrics: Emit manual_remediation_failed metric
+            Quarantine->>Logger: Log manual remediation failure
+        end
+    end
+
+    %% Quarantine Lifecycle Management
+    alt Quarantine retention expired
+        Quarantine->>Quarantine: Check retention policy
+        Quarantine->>Quarantine: Evaluate retention period
+        Quarantine->>Storage: Archive quarantine record
+        Quarantine->>Metrics: Emit quarantine_archived metric
+        Quarantine->>Logger: Log quarantine archival
+    else Quarantine still relevant
+        Quarantine->>Quarantine: Keep in active quarantine
+        Quarantine->>Metrics: Emit quarantine_retained metric
+    end
+
+    %% Cleanup and Completion
+    Quarantine->>Metrics: Finish quarantine_handling span
+    Quarantine->>Metrics: Emit quarantine_handling_complete metric
+    Quarantine->>Logger: Log quarantine handling completion
+    Quarantine-->>Pipeline: Quarantine handling complete
+
+    Note over Pipeline, Operator: End of Quarantine Handling Sequence
+```
+
+## Key Components
+
+### Quarantine Handler
+- **Quarantine Handler**: Manages the complete quarantine lifecycle
+- **Root Cause Analyzer**: Analyzes DQ failures and determines root causes
+- **Alert Generator**: Creates alerts for operator notification
+
+### Storage
+- **Quarantine Storage**: Preserves quarantined data with metadata
+
+### Observability
+- **Metrics/Tracing**: Comprehensive quarantine metrics and tracing
+- **Structured Logger**: Detailed logging for debugging and monitoring
+
+### Operator
+- **Operator/Remediation**: Manual remediation when auto-remediation fails
+
+## ADR References
+
+- **ADR-050**: Silver Structural and Gold Semantic Filter Boundary — Quarantine routing rules
+- **ADR-045**: DQ Contract System — DQ contract structure and validation
+- **ADR-027**: DQ Rules Externalization — DQ rules from external configuration
+- **ADR-040**: Diagram Governance — diagram metadata and quality standards
+
+## Quarantine Record Structure
+
+Each quarantine record contains:
+- **quarantine_id**: Unique identifier for the quarantine case
+- **original_data_source**: Source pipeline/provider
+- **batch_metadata**: Data batch identification
+- **validation_timestamp**: When DQ validation failed
+- **dq_violations**: Detailed list of failed DQ rules
+- **threshold_violations**: Threshold exceedance details
+- **root_cause_analysis**: Failure categorization and impact
+- **remediation_status**: Current remediation state
+
+## Root Cause Categories
+
+- **Schema violations**: Data type or constraint failures
+- **Completeness issues**: Missing required fields or null values
+- **Accuracy problems**: Invalid values or format mismatches
+- **Consistency failures**: Cross-field or historical inconsistencies
+- **Timeliness issues**: Stale or outdated data
+- **Uniqueness violations**: Duplicate or key constraint failures
+
+## Alert Severity Levels
+
+- **Critical**: Blocks pipeline execution, requires immediate attention
+- **Warning**: Does not block pipeline but needs investigation
+- **Info**: Informational alert for monitoring purposes
+
+## Remediation Strategies
+
+### Auto-remediation
+- **Data cleaning**: Remove or fix invalid values
+- **Default value substitution**: Replace missing values with defaults
+- **Format normalization**: Convert to standard format
+- **Rule adjustment**: Modify DQ rules for edge cases
+
+### Manual remediation
+- **Data investigation**: Manual review of quarantined data
+- **Source system fixes**: Address issues at data source
+- **Pipeline configuration**: Adjust pipeline parameters
+- **DQ rule updates**: Modify DQ rules for business changes
+
+## Metrics Emitted
+
+- `quarantine_handling_start` — Quarantine handling initiated
+- `quarantine_handling_complete` — Quarantine handling completed
+- `quarantine_record_created` — Quarantine record created
+- `root_cause_analyzed` — Root cause analysis completed
+- `violations_recorded` — DQ violations recorded
+- `quarantine_alert` — Quarantine alert generated
+- `quarantine_write` — Data written to quarantine storage
+- `auto_remediation_success` — Auto-remediation succeeded
+- `auto_remediation_failed` — Auto-remediation failed
+- `manual_remediation_success` — Manual remediation succeeded
+- `manual_remediation_failed` — Manual remediation failed
+- `quarantine_archived` — Quarantine record archived
+- `quarantine_retained` — Quarantine record retained

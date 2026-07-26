@@ -23,7 +23,9 @@ param(
     [switch]$WithNeo4j,
     [switch]$SkipEnsureStable,
     [switch]$SkipSetupMcp,
-    [switch]$KillHostGateways
+    [switch]$KillHostGateways,
+    # Remove any non-bioetl container (Toolkit thrash / digest-only images).
+    [switch]$ForceAllForeign
 )
 
 $ErrorActionPreference = 'Continue'
@@ -80,6 +82,7 @@ if (Test-Path $cleanup) {
     Write-Host 'Cleaning MCP orphan containers...'
     $cargs = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $cleanup, '-IncludeGatewayHint')
     if ($KillHostGateways) { $cargs += '-KillHostGateways' }
+    if ($ForceAllForeign) { $cargs += '-ForceAllForeign' }
     & powershell.exe @cargs
 }
 

@@ -5,12 +5,22 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import replace
 from datetime import datetime
-from typing import Any
+from typing import Protocol
 from uuid import UUID
 
 from bioetl.domain.control_plane import WorkflowExecutionState, WorkflowManifest
 from bioetl.domain.ports import WorkflowExecutionStatePort
 from bioetl.domain.types import RunID
+
+
+class _WorkflowManifestPort(Protocol):
+    def get(self, manifest_id: str) -> WorkflowManifest | None: ...
+
+
+class _WorkflowManifestService(Protocol):
+    @property
+    def manifest_port(self) -> _WorkflowManifestPort: ...
+
 
 __all__ = [
     "coerce_resume_run_id",
@@ -178,7 +188,7 @@ def _validate_repair_requirements(
 
 def load_resume_manifest(
     *,
-    manifest_service: Any,  # Any: dynamic service to avoid circular import
+    manifest_service: _WorkflowManifestService,
     latest_state: WorkflowExecutionState,
 ) -> WorkflowManifest:
     """Load the manifest referenced by one persisted execution state."""

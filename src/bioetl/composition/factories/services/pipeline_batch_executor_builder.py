@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.core.batch_execution.state_service import (
     BatchExecutionStateService,
@@ -41,6 +41,14 @@ if TYPE_CHECKING:
         BatchProgressService,
         ShutdownSignal,
     )
+
+
+class _BoundMetric(Protocol):
+    def inc(self) -> object: ...
+
+
+class _MetricWithLabels(Protocol):
+    def labels(self, **labels: str) -> _BoundMetric: ...
 
 
 def create_batch_executor_from_pipeline(
@@ -156,7 +164,7 @@ def _emit_gold_lifecycle_state(
     ).inc()
 
 
-def _gold_lifecycle_state_total() -> object:
+def _gold_lifecycle_state_total() -> _MetricWithLabels:
     """Resolve the Gold lifecycle metric lazily to avoid import-time metric boot."""
     from bioetl.infrastructure.observability.metrics import GOLD_LIFECYCLE_STATE_TOTAL
 

@@ -36,6 +36,9 @@ if TYPE_CHECKING:
         CompositeSupportServices,
         CompositeSupportServicesFactory,
     )
+    from bioetl.composition.bootstrap.composite_infrastructure_context import (
+        CompositeRuntimeStorageProtocol,
+    )
     from bioetl.composition.bootstrap.runtime.runner_factory_builder_service import (
         BronzeRunOptions,
         RunnerFactoryBuilder,
@@ -66,7 +69,7 @@ def bootstrap_runtime_basics(
     settings_provider: Callable[[], Settings],
     logger_bootstrapper: Callable[[str, UUID, str], LoggerPort],
     tracer_bootstrapper: Callable[[Settings], TracingPort],
-    storage_bootstrapper: Callable[..., object],
+    storage_bootstrapper: Callable[..., CompositeRuntimeStorageProtocol],
     lock_factory: Callable[[], LockPort],
     uuid_factory: Callable[[], UUID],
     clock_factory: Callable[[], ClockPort] = SystemClock,

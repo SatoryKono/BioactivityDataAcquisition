@@ -14,9 +14,11 @@ exclude_docs: |
     00-project/ai/agents/agents/sp-*.md
     00-project/ai/agents/orchestration/**
     00-project/ai/agents/policy/SPECIALIST_PROFILE_TEMPLATE.md
+    00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md
     00-project/ai/agents/runtime/orchestration/**
     00-project/ai/memory/README.md
     00-project/ai/memory/memory-*.md
+    00-project/ai/memory/gh-issues-documentation-update.md
     00-project/ai/prompts/README.md
     00-project/ai/prompts/collected/**
     00-project/ai/skills/SKILLS-CATALOG.md
@@ -36,9 +38,11 @@ not_in_nav: |
     00-project/ai/agents/agents/sp-*.md
     00-project/ai/agents/orchestration/**
     00-project/ai/agents/policy/SPECIALIST_PROFILE_TEMPLATE.md
+    00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md
     00-project/ai/agents/runtime/orchestration/**
     00-project/ai/memory/README.md
     00-project/ai/memory/memory-*.md
+    00-project/ai/memory/gh-issues-documentation-update.md
     00-project/ai/prompts/*.md
     00-project/ai/skills/SKILLS-CATALOG.md
     00-project/ai/skills/_references/**

@@ -59,6 +59,9 @@ if TYPE_CHECKING:
         TracingPort,
     )
     from bioetl.infrastructure.config.settings_api import Settings
+    from bioetl.infrastructure.config.composite_config_api import (
+        ConfigPayloadValidator,
+    )
 
     type BootstrapRuntimeBasicsResult = CompositeInfrastructureContext
     type SeedRunnerFactory = Callable[[], PipelineRunner]
@@ -98,7 +101,7 @@ def load_composite_config_impl(
     name: str,
     *,
     resolve_config_path_fn: Callable[[str], Path],
-    validate_payload: Callable[[dict[str, object]], object],
+    validate_payload: ConfigPayloadValidator,
 ) -> CompositeConfig:
     return load_runtime_composite_config_impl(
         name,

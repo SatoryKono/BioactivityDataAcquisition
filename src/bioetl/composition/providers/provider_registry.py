@@ -5,7 +5,7 @@ from __future__ import annotations
 import threading
 from functools import partial
 from importlib import import_module
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.providers._creation import (
     ProviderCreator,
@@ -54,7 +54,7 @@ __all__ = [
 ]
 
 
-def _ensure_registry_loaded(registry: ProviderRegistry) -> None:
+def _ensure_registry_loaded(registry: ProviderRegistrarProtocol) -> None:
     """Late-bind registry loading to avoid hard import coupling into providers."""
     loading_module = import_module("bioetl.composition.providers._loading")
     loading_module.ensure_provider_registry_loaded(registry)
@@ -79,7 +79,7 @@ class ProviderRegistry:
 
     @classmethod
     def _get_default(cls) -> ProviderRegistry:
-        return get_default_provider_registry()
+        return cast("ProviderRegistry", get_default_provider_registry())
 
     def _get_registered_config(
         self,
@@ -234,7 +234,7 @@ def resolve_provider_registry(
     resolved_registry = (
         provider_registry
         if provider_registry is not None
-        else get_default_provider_registry()
+        else cast("ProviderRegistrarProtocol", get_default_provider_registry())
     )
     if ensure_ready:
         return ensure_provider_registry_ready(resolved_registry)

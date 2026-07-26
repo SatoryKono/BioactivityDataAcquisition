@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from bioetl.application.services.audit_inspection_service import (
     AuditInspectionResult,
@@ -13,6 +14,11 @@ from bioetl.application.services.checkpoint_service import (
 from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestInspectionResult,
 )
+
+if TYPE_CHECKING:
+    from bioetl.application.services.lineage.lineage_inspection_service import (
+        LineageRunExplanationResult,
+    )
 
 __all__ = [
     "AuditRunWorkflowResult",
@@ -86,7 +92,7 @@ class RunForensicDossierResult:
     audit: AuditInspectionResult
     run_manifest: RunManifestInspectionResult | None = None
     checkpoint: CheckpointInfo | None = None
-    lineage: object | None = None
+    lineage: LineageRunExplanationResult | None = None
     quarantine_summary: dict[str, object] | None = None
     traceability: dict[str, object] | None = None
     status: dict[str, object] | None = None

@@ -131,11 +131,12 @@ async def handle_filtered_stats(
 ) -> None:
     """Handle aggregate stats endpoint for filtered Silver records."""
     assert host._quarantine_service is not None
+    quarantine_service = host._quarantine_service
     pipeline = host._read_required_param(query, "pipeline")
     try:
         payload = await run_bounded_forensic_operation(
             limiter=host._forensic_endpoint_limiter,
-            operation_factory=lambda: host._quarantine_service.get_filtered_stats(
+            operation_factory=lambda: quarantine_service.get_filtered_stats(
                 pipeline=pipeline,
                 run_type=host._read_optional_param(query, "run_type"),
                 reason_code=host._read_optional_param(query, "reason_code"),

@@ -19,14 +19,14 @@ from bioetl.application.core.pre_silver_adapter_mixin import (
 )
 from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.application.pipelines.common.publication_transformer_context import (
-    build_runtime_transformer_init,
+    install_runtime_transformer_init,
 )
 from bioetl.domain.entities.uniprot import IDMappingResult
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import BronzeRecord, SilverRecord
+    from bioetl.domain.types import BronzeRecord, GoldRecord, SilverRecord
 
 
 class IDMappingTransformer(PreSilverAdapterMixin, BaseTransformer):
@@ -136,17 +136,17 @@ class IDMappingTransformer(PreSilverAdapterMixin, BaseTransformer):
 
     def _postprocess_pre_silver_record(
         self,
-        silver_record: SilverRecord,
+        silver_record: GoldRecord,
         *,
         business_data: JsonDict,
-    ) -> SilverRecord:
+    ) -> GoldRecord:
         """Mark unmapped ID-mapping results with the staged DQ warning flag."""
         silver_record["_dq_warn"] = business_data.get("mapping_status") == "not_found"
-        return cast("SilverRecord", silver_record)
+        return silver_record
 
 
-IDMappingTransformer.__init__ = build_runtime_transformer_init(
+install_runtime_transformer_init(
+    IDMappingTransformer,
     "uniprot",
     "idmapping",
-    owner_type=IDMappingTransformer,
 )

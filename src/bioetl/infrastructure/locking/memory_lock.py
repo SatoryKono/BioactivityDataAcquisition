@@ -194,9 +194,7 @@ class MemoryLock(LockPort):
                 return False
             # Soft-expired held ownership renews on validate so write stages
             # survive delayed heartbeats without dropping the lease.
-            self._locks[key] = _renew_soft_expired_entry(
-                entry, now=time.monotonic()
-            )
+            self._locks[key] = _renew_soft_expired_entry(entry, now=time.monotonic())
             return True
 
     async def validate_fencing_token(self, key: str, token: FencingToken) -> bool:
@@ -213,9 +211,7 @@ class MemoryLock(LockPort):
                 or token.sequence != sequence
             ):
                 return False
-            self._locks[key] = _renew_soft_expired_entry(
-                entry, now=time.monotonic()
-            )
+            self._locks[key] = _renew_soft_expired_entry(entry, now=time.monotonic())
             return True
 
     async def aclose(self) -> None:

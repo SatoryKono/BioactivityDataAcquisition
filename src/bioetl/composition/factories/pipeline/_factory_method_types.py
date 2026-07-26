@@ -50,11 +50,11 @@ class _PipelineFactoryContext:
 class _BuildFactoryServicesRequest:
     settings: Settings
     logger: LoggerPort
-    audit: AuditPort | None = None
     config: PipelineYamlConfig | None = None
-    filter_config: InputFilterConfig | None = None
     tracer: TracingPort | None = None
+    filter_config: InputFilterConfig | None = None
     dq_monitor: DQMonitorPort | None = None
+    audit: AuditPort | None = None
 
 
 _CreatePipelineWithServicesRequest = _PipelineCreationRequest

@@ -173,13 +173,8 @@ def bootstrap_observability_bundle_impl(
     Creates each observability component via the provided bootstrapper callables,
     logs initialization details, and runs preflight validation.
 
+    Bootstrappers receive the run context and settings declared by the signature.
     Args:
-        pipeline: Pipeline name passed to the logger bootstrapper for context.
-        run_id: Run UUID used for log correlation across all components.
-        settings: Application settings forwarded to tracer, metrics, and DQ bootstrappers.
-        log_level: Minimum log level string forwarded to the logger bootstrapper.
-        logger_bootstrapper: Callable that creates a LoggerPort from pipeline, run_id,
-            and log_level.
         tracer_bootstrapper: Callable that creates a TracingPort from settings.
         metrics_bootstrapper: Callable that creates a MetricsPort from settings.
         dq_monitor_bootstrapper: Callable that creates an optional DQMonitorPort
@@ -208,6 +203,11 @@ def bootstrap_observability_bundle_impl(
         )
     if preflight_validator is None:
         preflight_validator = validate_observability_preflight_impl
+
+    assert logger_bootstrapper is not None
+    assert tracer_bootstrapper is not None
+    assert metrics_bootstrapper is not None
+    assert dq_monitor_bootstrapper is not None
 
     components = _build_observability_components(
         pipeline=pipeline,

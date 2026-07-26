@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.control_plane.run_ledger import (
@@ -35,6 +35,17 @@ class _RunLedgerAppender(Protocol):
 
 class RunLedgerRichEventRecordingMixin:
     """Thin service mixin delegating rich ledger events to bounded helpers."""
+
+    if TYPE_CHECKING:
+
+        def _append(
+            self,
+            *,
+            event_type: str,
+            status: str | None,
+            stage: str | None = None,
+            details: dict[str, object] | None = None,
+        ) -> RunLedgerEntry: ...
 
     def record_composite_dependency_completed(
         self,

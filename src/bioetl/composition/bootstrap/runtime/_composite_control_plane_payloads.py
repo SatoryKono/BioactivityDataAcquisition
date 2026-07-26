@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from types import SimpleNamespace
+from typing import TYPE_CHECKING
 
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.composition.runtime_builders.input_snapshot_resolution import (
@@ -20,6 +20,10 @@ from bioetl.domain.control_plane import (
     RunSourceRef,
 )
 from bioetl.domain.types import RunType
+from bioetl.domain.context import CachedBronzeContext
+
+if TYPE_CHECKING:
+    from bioetl.infrastructure.config.settings_api import Settings
 
 __all__ = [
     "build_composite_launch_context_snapshot",
@@ -68,7 +72,7 @@ def build_composite_source_refs(
     config: CompositeConfig,
     *,
     runtime: CompositeRuntimeConfig | None = None,
-    settings: object | None = None,
+    settings: Settings | None = None,
 ) -> tuple[RunSourceRef, ...]:
     """Capture seed, dependency, and enricher sources in manifest payload."""
     pipeline_names = [config.seed.pipeline]
@@ -127,7 +131,7 @@ def _resolve_provider_entity(pipeline_name: str) -> tuple[str, str]:
 def _build_composite_input_snapshots(
     *,
     runtime: CompositeRuntimeConfig | None,
-    settings: object | None,
+    settings: Settings | None,
     provider: str,
     entity: str,
     pipeline_name: str,
@@ -138,6 +142,10 @@ def _build_composite_input_snapshots(
     replay_of_manifest_id = getattr(runtime, "replay_of_manifest_id", None)
     replay_of_run_id = getattr(runtime, "replay_of_run_id", None)
     if replay_of_manifest_id or replay_of_run_id:
+        if settings is None:
+            raise ValueError(
+                "Composite replay source refs require runtime Settings"
+            )
         return resolve_manifest_input_snapshot_refs(
             settings=settings,
             manifest_id=replay_of_manifest_id,
@@ -145,6 +153,10 @@ def _build_composite_input_snapshots(
         )
     if not runtime.use_cached_bronze:
         return ()
+    if settings is None:
+        raise ValueError(
+            "Composite cached Bronze source refs require runtime Settings"
+        )
     bronze_root = _resolve_composite_bronze_root(
         runtime=runtime,
         settings=settings,
@@ -153,7 +165,7 @@ def _build_composite_input_snapshots(
         pipeline_name=pipeline_name,
     )
     return resolve_cached_bronze_input_snapshot_refs(
-        cached_bronze=SimpleNamespace(
+        cached_bronze=CachedBronzeContext(
             enabled=True,
             bronze_path=str(bronze_root),
             bronze_date=runtime.cached_bronze_date,
@@ -167,7 +179,7 @@ def _build_composite_input_snapshots(
 def _resolve_composite_bronze_root(
     *,
     runtime: CompositeRuntimeConfig,
-    settings: object | None,
+    settings: Settings | None,
     provider: str,
     entity: str,
     pipeline_name: str,

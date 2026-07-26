@@ -101,7 +101,7 @@ def _resolved_filter_column(column: str | None, field: str | None) -> str | None
 def _filter_metadata(
     filter_ids: Sequence[str] | None,
     multi_filter_ids: Mapping[str, Sequence[str]] | None,
-) -> dict[str, Any]:
+) -> dict[str, Any]:  # Any: dynamic filter metadata payload
     ids = filter_ids or ()
     multi = multi_filter_ids or {}
     multi_counts = {key: len(values) for key, values in multi.items()}
@@ -112,7 +112,9 @@ def _filter_metadata(
     }
 
 
-def _without_none(payload: Mapping[str, Any]) -> dict[str, Any]:
+def _without_none(
+    payload: Mapping[str, Any],  # Any: dynamic report payload
+) -> dict[str, Any]:  # Any: filtered dynamic report payload
     return {key: value for key, value in payload.items() if value is not None}
 
 

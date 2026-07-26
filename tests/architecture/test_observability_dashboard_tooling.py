@@ -205,7 +205,9 @@ def test_ci_dashboard_semantic_gate_covers_declared_release_contracts() -> None:
             return False
         return "pytest" in command
 
-    pytest_commands = [command for command in logical_commands if _is_uv_pytest(command)]
+    pytest_commands = [
+        command for command in logical_commands if _is_uv_pytest(command)
+    ]
     assert len(pytest_commands) == 1
     pytest_arguments = set(pytest_commands[0])
     for contract in pytest_contracts:

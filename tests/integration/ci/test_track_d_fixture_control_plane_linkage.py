@@ -34,19 +34,31 @@ _PIPELINE_NAME = "chembl_activity"
 
 
 @pytest.fixture(autouse=True)
-def _stub_quarantine_delta_writes_for_cached_fixture_replay(
+def _stub_non_control_plane_writes_for_cached_fixture_replay(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Keep cached-fixture replay tests focused on control-plane persistence, not Delta-backed quarantine I/O."""
+    """Keep cached-fixture replay focused on control-plane persistence."""
 
     async def _write_many_without_delta(self, records):
         stored = getattr(self, "_test_quarantine_records", [])
         stored.extend([self._normalize_record(record) for record in records])
         self._test_quarantine_records = stored
 
+    async def _skip_lineage_fragment_persistence(*_args, **_kwargs) -> None:
+        return None
+
     monkeypatch.setattr(
         "bioetl.infrastructure.quarantine.unified.UnifiedQuarantineAdapter.write_many",
         _write_many_without_delta,
+    )
+    monkeypatch.setattr(
+        "bioetl.infrastructure.storage.bronze.side_effects_mixin."
+        "persist_lineage_fragment_if_present",
+        _skip_lineage_fragment_persistence,
+    )
+    monkeypatch.setattr(
+        "bioetl.composition.factories.services.factory._create_dq_services_impl",
+        lambda *_args, **_kwargs: {},
     )
 
 

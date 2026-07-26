@@ -64,7 +64,9 @@ def test_single_canonical_dashboard_provider_owns_shipped_json_directory() -> No
 
     all_paths: list[str] = []
     for path in yaml_files:
-        all_paths.extend(_provider_paths(yaml.safe_load(path.read_text(encoding="utf-8"))))
+        all_paths.extend(
+            _provider_paths(yaml.safe_load(path.read_text(encoding="utf-8")))
+        )
     assert all_paths == ["/var/lib/grafana/dashboards"]
     assert len(all_paths) == len(set(all_paths)), (
         "two providers must not target the same effective dashboard directory"

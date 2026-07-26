@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
+from typing import cast
 
 from bioetl.domain.context_cached_bronze import CachedBronzeContext
 from bioetl.domain.context_correlation import _normalize_correlation_value
@@ -131,7 +133,8 @@ class PipelineRunContext:
         Accepts the same keyword fields as ``PipelineRunContext`` plus optional
         ``started_at`` / ``clock`` resolution inputs used only at construction.
         """
-        return cls(**_build_pipeline_run_context_kwargs(kwargs))
+        constructor = cast(Callable[..., PipelineRunContext], cls)
+        return constructor(**_build_pipeline_run_context_kwargs(kwargs))
 
     @property
     def has_input_filter(self) -> bool:

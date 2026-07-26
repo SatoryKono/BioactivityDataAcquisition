@@ -61,13 +61,13 @@ def _parse_disposition(value: object) -> DQDisposition:
 
 def _parse_strictness_mode(value: object) -> DQStrictnessMode:
     if value in {"lenient", "moderate", "strict"}:
-        return cast("DQStrictnessMode", value)
+        return value
     raise ValueError(f"Invalid DQ strictness mode: {value!r}")
 
 
 def _parse_snapshot_strictness_mode(value: object) -> DQSnapshotStrictnessMode:
     if value in {"lenient", "moderate", "standard", "strict"}:
-        return cast("DQSnapshotStrictnessMode", value)
+        return value
     raise ValueError(f"Invalid DQ snapshot strictness mode: {value!r}")
 
 
@@ -77,7 +77,7 @@ def _parse_source_hash_strategy(
     if value is None:
         return None
     if value in {"canonical_yaml", "raw_bytes"}:
-        return cast("ConfigSourceHashStrategy", value)
+        return value
     raise ValueError(f"Invalid config source hash strategy: {value!r}")
 
 

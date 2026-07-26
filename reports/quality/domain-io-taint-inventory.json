@@ -227,7 +227,7 @@
     },
     {
       "kind": "attribute_call:resolve",
-      "line": 176,
+      "line": 188,
       "path": "src/bioetl/domain/run_reports/accounting_snapshots.py",
       "reason": "Catalog lookup method named resolve (not filesystem Path.resolve).",
       "symbol": "StageAccountingSnapshotsMixin._removals_for_bucket"
@@ -248,14 +248,14 @@
     },
     {
       "kind": "attribute_call:read_text",
-      "line": 170,
+      "line": 174,
       "path": "src/bioetl/domain/run_reports/reason_catalog.py",
       "reason": "Loads package-local run-report reason catalog YAML from an explicit Path.",
       "symbol": "_read_yaml_mapping"
     },
     {
       "kind": "attribute_call:resolve",
-      "line": 216,
+      "line": 222,
       "path": "src/bioetl/domain/run_reports/reason_catalog.py",
       "reason": "Locates package-root relative reason catalog path candidates.",
       "symbol": "default_reason_catalog"

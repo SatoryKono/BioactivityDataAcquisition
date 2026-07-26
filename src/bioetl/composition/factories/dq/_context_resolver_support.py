@@ -113,9 +113,12 @@ def _trim_relaxed_silver_checks(
     if expensive_check not in checks:
         return silver_config
 
+    model_copy = getattr(silver_config, "model_copy", None)
+    if not callable(model_copy):
+        raise TypeError("Silver DQ config must support immutable model_copy updates")
     return cast(
         "SilverDQConfigPort",
-        silver_config.model_copy(
+        model_copy(
             update={"checks": [check for check in checks if check != expensive_check]}
         ),
     )

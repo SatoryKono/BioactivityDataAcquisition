@@ -10,7 +10,10 @@ from bioetl.application.core.entity_id import (
     compute_publication_term_entity_id,
     compute_subcellular_fraction_entity_id,
 )
-from bioetl.domain.schemas.constants import PUBLICATION_TERM_TYPES, SUBCELLULAR_FRACTIONS
+from bioetl.domain.schemas.constants import (
+    PUBLICATION_TERM_TYPES,
+    SUBCELLULAR_FRACTIONS,
+)
 
 
 def test_publication_term_entity_id_is_stable_for_known_term_types() -> None:

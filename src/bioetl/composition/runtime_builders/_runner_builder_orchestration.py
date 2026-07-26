@@ -22,7 +22,7 @@ from bioetl.composition.runtime_builders.ledger_collaborator import (
     attach_control_plane_collaborators,
 )
 from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP
-from bioetl.domain.ports import PipelineControlPlaneArtifacts
+from bioetl.domain.ports import PipelineControlPlaneArtifacts, PipelineFactoryPort
 
 if TYPE_CHECKING:
     from bioetl.composition.runtime_builders.runner_inputs import (
@@ -33,13 +33,12 @@ if TYPE_CHECKING:
         ExecutionObservabilityPort,
         SettingsPort,
     )
-    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
 @dataclass(frozen=True, slots=True)
 class RunnerFactoryBootstrap:
     registry: PipelineRegistry
-    factory: object
+    factory: PipelineFactoryPort
 
 
 def bootstrap_runner_factory(
@@ -62,7 +61,7 @@ def bootstrap_runner_factory(
 
 def create_runner(
     *,
-    factory: object,
+    factory: PipelineFactoryPort,
     ctx: PipelineRunContext,
     inputs: _RunnerInputs,
 ) -> PipelineRunnerProtocol:
@@ -93,7 +92,7 @@ def create_runner(
             input_snapshot_fingerprint=getattr(ctx, "input_snapshot_fingerprint", None),
         ),
         filter_config=inputs.filter_config,
-        config=cast("PipelineYamlConfig", inputs.yaml_config),
+        config=inputs.yaml_config,
         cached_bronze=inputs.cached_bronze,
     )
     return cast("PipelineRunnerProtocol", factory.create_runner(request))

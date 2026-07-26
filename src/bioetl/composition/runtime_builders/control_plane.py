@@ -63,7 +63,7 @@ def attach_manifest_id(
                 cast("DataclassInstance", ctx),
                 **build_dataclass_manifest_updates(
                     ctx,
-                    cast(str, manifest_id),
+                    manifest_id,
                     optional_updates=optional_updates,
                 ),
             ),

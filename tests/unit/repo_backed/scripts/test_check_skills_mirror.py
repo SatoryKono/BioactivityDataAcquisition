@@ -10,7 +10,7 @@ from scripts.ai import sync_ai_governance
 
 
 pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[4]
 
 
 @pytest.mark.timeout(180)

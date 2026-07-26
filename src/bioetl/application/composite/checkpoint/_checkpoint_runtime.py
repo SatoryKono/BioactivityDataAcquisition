@@ -43,11 +43,13 @@ def latest_checkpoint_filename(
     for path in matches:
         try:
             payload = storage.read(path)
+            if payload is None:
+                continue
             state = CompositeCheckpointState.from_dict(json.loads(payload))
             stamp = state.updated_at or state.created_at
             if stamp is not None:
                 ranked.append((_as_utc_comparable(stamp), path))
-        except (CHECKPOINT_READ_ERRORS, BioETLError):
+        except (*CHECKPOINT_READ_ERRORS, BioETLError):
             continue
     if ranked:
         try:

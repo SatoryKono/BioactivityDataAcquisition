@@ -53,7 +53,7 @@ class PubMedHealthMixin(PubMedAdapterStateMixin):
 
             start_time = time.monotonic()
             with self._adapter_metrics.measure_request("/health"):
-                response = await self._http_client.get_once(
+                response = await self.http_client.get_once(
                     f"{ENTREZ_API_BASE}einfo.fcgi", params=params
                 )
             elapsed = time.monotonic() - start_time

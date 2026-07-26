@@ -40,10 +40,13 @@ def test_workflow_run_report_golden_matches_v1_schema() -> None:
 def test_golden_json_is_canonically_ordered() -> None:
     for path in sorted(FIXTURE_ROOT.glob("*_run_report_golden.json")):
         payload = json.loads(path.read_text(encoding="utf-8"))
-        canonical = json.dumps(
-            payload,
-            indent=2,
-            sort_keys=True,
-            ensure_ascii=False,
-        ) + "\n"
+        canonical = (
+            json.dumps(
+                payload,
+                indent=2,
+                sort_keys=True,
+                ensure_ascii=False,
+            )
+            + "\n"
+        )
         assert json.loads(canonical) == payload

@@ -43,7 +43,7 @@ def build_run_ledger_service(
     dq_contract_compatibility_hash: str,
     effective_config_artifact_id: str,
     contract_ref: str,
-    contract_version: str,
+    contract_version: str | None,
 ) -> RunLedgerService | None:
     """Create composite run-ledger service when feature flag allows it."""
     if not ledger_enabled:

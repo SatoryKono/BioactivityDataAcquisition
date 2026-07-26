@@ -20,7 +20,6 @@ class PubMedAdapterStateMixin:
     logger: LoggerPort
     email: str
     api_key: str | None
-    _http_client: UnifiedHTTPClient
     _logger: LoggerPort
     _adapter_metrics: AdapterMetricsRecorder
     _request_collector: APIRequestCollector

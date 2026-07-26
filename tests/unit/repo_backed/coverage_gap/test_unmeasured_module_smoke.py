@@ -57,7 +57,9 @@ def test_profile_validation_normalizes_and_rejects_shadow_aliases() -> None:
 def test_workflow_config_fk_helpers_validate_pairs() -> None:
     from bioetl.infrastructure.schemas import workflow_config_fk as fk
 
-    assert fk._normalize_fk_required_name(" molecule_id ", "source_key") == "molecule_id"
+    assert (
+        fk._normalize_fk_required_name(" molecule_id ", "source_key") == "molecule_id"
+    )
     assert fk._normalize_fk_optional_name(None, "source_key") is None
     assert fk._normalize_fk_required_names(["a", "b"], "source_keys") == ["a", "b"]
     with pytest.raises(ValueError, match="cannot contain duplicates"):

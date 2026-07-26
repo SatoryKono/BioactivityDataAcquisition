@@ -12,7 +12,7 @@ from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import SilverRecord
+    from bioetl.domain.types import ContentHash, EntityID, GoldRecord, SilverRecord
 
 
 class _PreSilverFinalizationFlowMixin:
@@ -20,6 +20,30 @@ class _PreSilverFinalizationFlowMixin:
 
     provider: str
     entity_type: str
+
+    if TYPE_CHECKING:
+
+        def compute_content_hash(
+            self,
+            business_data: JsonDict,
+            *,
+            exclude_none: bool = True,
+        ) -> ContentHash: ...
+
+        def compute_entity_id(
+            self,
+            source_id: str | None,
+            record: JsonDict,
+        ) -> EntityID: ...
+
+        def _build_pre_silver_record(
+            self,
+            context: PipelineContext,
+            entity_id: str,
+            content_hash: str,
+            index: int,
+            business_data: JsonDict,
+        ) -> GoldRecord: ...
 
     def _build_record_normalizer(self) -> RecordNormalizationProcessor:
         return RecordNormalizationProcessor(
@@ -37,13 +61,10 @@ class _PreSilverFinalizationFlowMixin:
         context: PipelineContext,
         index: int,
     ) -> JsonDict:
-        return cast(
-            JsonDict,
-            self._build_record_normalizer().project_normalization_findings(
-                silver_record,
-                context=context,
-                index=index,
-            ),
+        return self._build_record_normalizer().project_normalization_findings(
+            silver_record,
+            context=context,
+            index=index,
         )
 
     def _finalize_staged_business_data(
@@ -67,7 +88,7 @@ class _PreSilverFinalizationFlowMixin:
             normalized_business_data,
         )
         return self._project_pre_silver_findings(
-            cast(JsonDict, silver_record),
+            silver_record,
             context=context,
             index=index,
         )
@@ -151,7 +172,7 @@ class _PreSilverFinalizationFlowMixin:
             normalized_business_data,
         )
         return self._project_pre_silver_findings(
-            cast(JsonDict, silver_record),
+            silver_record,
             context=context,
             index=index,
         )

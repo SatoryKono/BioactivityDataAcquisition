@@ -12,7 +12,7 @@ from bioetl.infrastructure.adapters.common.retry_reduction_policy import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator
+    from collections.abc import AsyncIterator, Iterable
 
     from bioetl.domain.ports import LoggerPort
 
@@ -51,7 +51,12 @@ class FilteredBatchRecoveryHost(Protocol):
         pk_fields: tuple[str, ...] | None = None,
     ) -> AsyncIterator[BronzeRecord]: ...
 
-    def _batch_ids(self, filter_ids: list[str], *, batch_size: int) -> object: ...
+    def _batch_ids(
+        self,
+        filter_ids: list[str],
+        *,
+        batch_size: int,
+    ) -> Iterable[list[str]]: ...
 
     def _get_api_pk_field(self, entity_type: str) -> str: ...
 

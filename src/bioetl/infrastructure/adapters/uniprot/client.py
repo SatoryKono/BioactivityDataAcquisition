@@ -53,7 +53,7 @@ if TYPE_CHECKING:
 
 UNIPROT_BATCH_SIZE = 100
 
-UNIPROT_FETCH_ERRORS = (
+UNIPROT_FETCH_ERRORS: tuple[type[Exception], ...] = (
     *COMMON_TITLE_FALLBACK_ERRORS,
     HTTPStatusError,
     ConnectionError,
@@ -85,6 +85,7 @@ class UniProtAdapter(
     """UniProt DataSource adapter facade with decomposed internals."""
 
     provider_name: str = "uniprot"
+    http_client: UnifiedHTTPClient
 
     def __init__(
         self,
@@ -215,7 +216,7 @@ class UniProtAdapter(
             return await probe_uniprot_health(
                 base_url=self.base_url,
                 provider_name=self.provider_name,
-                http_client=self._http_client,
+                http_client=self.http_client,
                 logger=self._logger,
                 adapter_metrics=self._adapter_metrics,
                 healthy_status_provider=self._fallback_health_status,

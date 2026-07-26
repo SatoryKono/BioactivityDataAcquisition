@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from bioetl.domain.control_plane import ControlPlaneArtifactSurface
 from bioetl.domain.control_plane.reproducibility_policy import (
@@ -136,12 +136,16 @@ def payload_contract_ref(payload: dict[str, object]) -> str | None:
     return _optional_text(provenance.get("contract_ref"))
 
 
-def payload_execution_context(payload: dict[str, object]) -> str:
+def payload_execution_context(
+    payload: dict[str, object],
+) -> Literal["source", "composite"]:
     launch_context = payload.get("launch_context")
     if isinstance(launch_context, dict):
         execution_context = _optional_text(launch_context.get("execution_context"))
-        if execution_context is not None:
-            return execution_context
+        if execution_context == "composite":
+            return "composite"
+        if execution_context == "source":
+            return "source"
     if _optional_text(payload.get("provider")) == "composite":
         return "composite"
     return "source"

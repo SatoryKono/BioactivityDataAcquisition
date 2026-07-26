@@ -60,6 +60,79 @@ class _Process:
         return None
 
 
+def test_smoke_http_shared_plane_ping(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    """HTTP shared-plane smoke: localhost url → ping (+ optional initialize)."""
+    config = tmp_path / ".cursor-mcp.json"
+    config.write_text(
+        json.dumps(
+            {
+                "mcpServers": {
+                    "adr-analysis": {
+                        "type": "http",
+                        "url": "http://127.0.0.1:8813/mcp",
+                    }
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    class _Resp:
+        def __init__(self, body: bytes = b"ok", status: int = 200) -> None:
+            self._body = body
+            self.status = status
+
+        def read(self) -> bytes:
+            return self._body
+
+        def __enter__(self) -> "_Resp":
+            return self
+
+        def __exit__(self, *args: object) -> None:
+            return None
+
+    calls: list[str] = []
+
+    def fake_urlopen(req: Any, timeout: float = 0) -> _Resp:
+        url = req if isinstance(req, str) else req.full_url
+        calls.append(str(url))
+        if str(url).endswith("/ping"):
+            return _Resp(b"ok")
+        # initialize JSON body
+        return _Resp(
+            json.dumps(
+                {"jsonrpc": "2.0", "id": 1, "result": {"protocolVersion": "1"}}
+            ).encode()
+        )
+
+    import urllib.request
+
+    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
+    report = protocol_smoke.smoke_server(config, "adr-analysis", timeout=1)
+    assert report["ok"] is True
+    assert report["transport"] == "http"
+    assert report["initialize_ok"] is True
+    assert any(c.endswith("/ping") for c in calls)
+
+
+def test_smoke_http_rejects_non_localhost(tmp_path: Path) -> None:
+    config = tmp_path / "mcp.json"
+    config.write_text(
+        json.dumps(
+            {
+                "mcpServers": {
+                    "evil": {"type": "http", "url": "https://evil.example/mcp"}
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="localhost"):
+        protocol_smoke.smoke_server(config, "evil", timeout=1)
+
+
 def test_smoke_performs_initialize_and_tools_list(
     monkeypatch: Any, tmp_path: Path
 ) -> None:

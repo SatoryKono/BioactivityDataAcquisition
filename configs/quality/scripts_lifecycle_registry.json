@@ -2,11 +2,47 @@
   "schema_version": "1.0",
   "description": "Lifecycle and supporting-taxonomy decisions for non-active scripts.",
   "entries": {
+    "scripts/ai/codex/helper/check-env.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows-side environment-check helper invoked by Codex launcher and setup flows; keep it supporting unless it becomes a standalone documented entrypoint."
+    },
+    "scripts/ai/codex/helper/check-env.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the sourced shell environment-check helper used by Codex setup flows; keep it supporting unless it becomes a standalone documented entrypoint."
+    },
+    "scripts/ai/codex/helper/ensure-codex-cli.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal Codex CLI installation check used by governed setup launchers; keep it supporting and route standalone setup through the public launcher surface."
+    },
+    "scripts/ai/codex/helper/ensure-mcp.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal MCP bootstrap helper called by Codex setup flows; keep it supporting and route direct MCP setup through the canonical setup command."
+    },
+    "scripts/ai/codex/helper/run-codex-impl.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the implementation backend shared by public Codex launchers; keep it supporting because callers should use the governed launcher surface."
+    },
     "scripts/ai/codex/helper/run-codex-wsl-noninteractive.sh": {
       "owner": "@bioetl-platform",
       "decision": "internal_helper_orphan",
       "review_by": "2026-07-15",
       "next_step": "Retain only as the bounded non-interactive WSL helper used to avoid Codex launch hangs while the surrounding Windows bootstrap flow is still being consolidated; remove it if launch-codex-wsl.ps1 is retired or rewritten onto a different startup path."
+    },
+    "scripts/ai/codex/helper/setup-env.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the sourced environment bootstrap shared by Codex setup scripts; keep it supporting because it is not a standalone setup entrypoint."
     },
     "scripts/ai/codex/helper/wsl-support.ps1": {
       "owner": "@bioetl-platform",
@@ -38,11 +74,47 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a backward-compatible Gemini launcher while the canonical interactive entrypoint delegates through scripts/ai/gemini/run-gemini.sh; remove it once callers migrate to the canonical launcher surface."
     },
+    "scripts/ai/gemini/helper/check-env.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows wrapper around the Gemini shell environment-check helper; keep it supporting unless it becomes a standalone documented entrypoint."
+    },
     "scripts/ai/gemini/helper/check-env.sh": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
       "review_by": "2026-09-30",
       "next_step": "Retain as the WSL environment-check helper invoked by the Windows Gemini helper wrapper; keep it supporting unless it becomes a standalone documented launcher surface."
+    },
+    "scripts/ai/gemini/helper/ensure-gemini-cli.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal Gemini CLI installation check used by governed setup launchers; keep it supporting and route standalone setup through the public launcher surface."
+    },
+    "scripts/ai/gemini/helper/ensure-mcp.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal MCP bootstrap helper called by Gemini setup flows; keep it supporting and route direct MCP setup through the canonical setup command."
+    },
+    "scripts/ai/gemini/helper/run-gemini-impl.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the implementation backend shared by public Gemini launchers; keep it supporting because callers should use the governed launcher surface."
+    },
+    "scripts/ai/gemini/helper/setup-env.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the sourced environment bootstrap shared by Gemini setup scripts; keep it supporting because it is not a standalone setup entrypoint."
+    },
+    "scripts/ai/gemini/helper/wsl-support.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the shared WSL path and invocation helper imported by the Gemini Windows environment check; keep it supporting unless it becomes a standalone launcher surface."
     },
     "scripts/ai/gemini/setup-bash-alias.sh": {
       "owner": "@bioetl-platform",
@@ -416,6 +488,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as an internal bootstrap helper for scripts.docs.matrix modules while matrix-generation internals still share repo-root/path setup; fold it into a broader canonical scripts bootstrap layer if that consolidation lands."
     },
+    "scripts/docs/matrix/structural_contract.py": {
+      "owner": "@bioetl-docs",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal structural-contract library for documentation matrix generation and its architecture guard; keep it supporting because it is not a standalone command."
+    },
     "scripts/docs/report_docs_kpi.py": {
       "owner": "@bioetl-docs",
       "decision": "compatibility_wrapper",
@@ -433,6 +511,18 @@
       "decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
       "next_step": "Retain only as a bounded manual Windows CI-optimization helper while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow."
+    },
+    "scripts/engineering/ci/_compatibility_registry.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal compatibility-registry loader imported by telemetry and reporting modules; keep it supporting because it has no standalone command surface."
+    },
+    "scripts/engineering/ci/_compatibility_telemetry.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal compatibility telemetry library imported by governed CI reports; keep it supporting because it has no standalone command surface."
     },
     "scripts/engineering/common/cli_dispatch.py": {
       "owner": "@bioetl-platform",
@@ -830,6 +920,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a completed one-off migration helper with explicit sunset review; do not re-run or promote unless VCR extensionless cassette migration is reopened under reviewed governance."
     },
+    "scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as an optional Docker-based screenshot fallback for hosts where the canonical Grafana render flow cannot launch Chromium; keep it supporting and do not make Docker monitoring mandatory."
+    },
     "scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1": {
       "owner": "@bioetl-platform",
       "decision": "windows_compatibility_wrapper",
@@ -896,6 +992,12 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as an RF-017 restore-and-observe helper; keep private underscore modules supporting and do not promote them to public ops commands."
     },
+    "scripts/ops/runtime/docker/apply-docker-stable-mcp.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as an opt-in local host posture utility for MCP profile projection and cleanup; keep it supporting because local-only Docker monitoring and shared MCP remain optional."
+    },
     "scripts/ops/runtime/docker/docker_runtime_probe.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
@@ -914,11 +1016,41 @@
       "review_by": "2026-09-30",
       "next_step": "Retain only as a bounded manual cutover-stack recreate utility for Docker RF-017 evidence runs; keep it supporting unless promoted to a governed ops command."
     },
+    "scripts/ops/runtime/docker/reset-mcp-host-sessions.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a safe-by-default manual host-session recovery utility for local MCP diagnostics; keep it supporting and require its explicit execution switches for process changes."
+    },
     "scripts/ops/runtime/docker/runtime_manager.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
       "review_by": "2026-09-30",
       "next_step": "Retain as a Docker runtime manager helper for container lifecycle management; keep it supporting unless it becomes a governed CI workflow or first-class ops entrypoint."
+    },
+    "scripts/ops/runtime/mcp/apply-shared-to-grok.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded, opt-in local Grok configuration migration helper for the experimental shared MCP plane; keep it supporting and remove it if that client-specific migration path is retired."
+    },
+    "scripts/ops/runtime/mcp/health-shared.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Linux/WSL companion health probe for the shared MCP runtime plane while the governed PowerShell launcher surface remains active; remove it if cross-platform shared-plane support is retired."
+    },
+    "scripts/ops/runtime/mcp/start-shared.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Linux/WSL companion launcher for the shared MCP runtime plane while cross-platform local tooling depends on it; keep it supporting until it gains a governed direct caller or is retired with the shared-plane workflow."
+    },
+    "scripts/ops/runtime/mcp/stop-shared.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Linux/WSL companion shutdown helper for the shared MCP runtime plane while cross-platform local tooling depends on it; remove it together with the shared-plane launcher if that workflow is retired."
     },
     "scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1": {
       "owner": "@bioetl-platform",

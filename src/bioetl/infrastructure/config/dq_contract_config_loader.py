@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Literal, cast
+from typing import Any, Literal
 
 from bioetl.domain.config import DQConfig
 from bioetl.domain.types import JsonDict
@@ -110,7 +110,7 @@ def _parse_strictness_mode(
     value: object,
 ) -> Literal["lenient", "moderate", "strict"]:
     if value in {"lenient", "moderate", "strict"}:
-        return cast("Literal['lenient', 'moderate', 'strict']", value)
+        return value
     raise ValueError(f"Invalid DQ strictness mode: {value!r}")
 
 

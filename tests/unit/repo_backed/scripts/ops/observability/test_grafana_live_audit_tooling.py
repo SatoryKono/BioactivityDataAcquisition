@@ -918,11 +918,7 @@ def test_runtime_log_hygiene_trend_uses_aggregated_loki_range_queries() -> None:
         return result
 
     panel = next(
-        (
-            item
-            for item in walk_panels(dashboard["panels"])
-            if item.get("id") == 258
-        ),
+        (item for item in walk_panels(dashboard["panels"]) if item.get("id") == 258),
         None,
     )
     if panel is None:

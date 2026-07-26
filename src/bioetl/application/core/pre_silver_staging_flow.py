@@ -3,13 +3,51 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.domain.types import JsonDict
 
+if TYPE_CHECKING:
+    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.types import EntityID
+
 
 class _PreSilverStagingFlowMixin:
     """Stage business payloads behind the ``PreSilverRecord`` protocol."""
+
+    if TYPE_CHECKING:
+
+        def _build_pre_silver_json_record(
+            self,
+            context: PipelineContext,
+            entity_id: str,
+            content_hash: str,
+            index: int,
+            business_data: JsonDict,
+        ) -> JsonDict: ...
+
+        def _apply_pre_silver_structural_policy(
+            self,
+            context: PipelineContext,
+            record: JsonDict,
+            index: int,
+        ) -> JsonDict | None: ...
+
+        def _apply_pre_silver_filter(
+            self,
+            context: PipelineContext,
+            record: JsonDict,
+            index: int,
+        ) -> None: ...
+
+        def compute_entity_id(
+            self,
+            source_id: str | None,
+            record: JsonDict,
+        ) -> EntityID: ...
+
+        def _normalize_business_data(self, business_data: JsonDict) -> JsonDict: ...
 
     def _build_pre_silver_payload(
         self,

@@ -59,6 +59,19 @@ class _HttpClientWithCircuitBreaker(Protocol):
 
     circuit_breaker: CircuitBreakerPort
 
+    async def __aenter__(self) -> Self:
+        """Enter the client context."""
+        ...
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        """Exit the client context."""
+        ...
+
 
 def build_json_accept_headers(
     user_agent: str,

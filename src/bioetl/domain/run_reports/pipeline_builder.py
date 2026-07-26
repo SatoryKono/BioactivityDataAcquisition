@@ -52,7 +52,7 @@ def build_pipeline_run_report(
     metrics: Mapping[str, int],
     accounting: StageAccountingAccumulator | None = None,
     artifacts: tuple[
-        dict[str, Any], ...
+        dict[str, Any], ...  # Any: dynamic artifact payload
     ] = (),  # Any: report/json payload shape is dynamic
     reason_catalog_version: str | None = None,
     failure: Mapping[str, Any] | None = None,  # Any: optional failure block

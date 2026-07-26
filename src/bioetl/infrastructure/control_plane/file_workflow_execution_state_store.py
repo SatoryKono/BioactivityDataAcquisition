@@ -10,7 +10,7 @@ from time import perf_counter
 from uuid import UUID
 
 from bioetl.domain.control_plane import WorkflowExecutionState
-from bioetl.domain.ports import WorkflowExecutionStatePort
+from bioetl.domain.ports import MetricsPort, WorkflowExecutionStatePort
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane._read_metrics import (
     emit_control_plane_read_metrics,
@@ -26,7 +26,7 @@ class FileWorkflowExecutionStateStore(WorkflowExecutionStatePort):
     """Persist workflow execution-state owner artifacts as JSON files."""
 
     base_path: Path
-    metrics: object | None = None
+    metrics: MetricsPort | None = None
 
     def save(self, state: WorkflowExecutionState) -> None:
         """Persist workflow execution state and its indexes."""

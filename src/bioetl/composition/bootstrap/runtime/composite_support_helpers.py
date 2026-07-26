@@ -34,7 +34,8 @@ FIELD_GROUP_CONFIG_DIR = Path("configs/composites/field_groups")
 def _composite_basics_uuid_factory() -> str:
     """Factory function for composite basics UUID generation."""
     from bioetl.composition.occurrence_identity import create_runtime_occurrence_uuid
-    return create_runtime_occurrence_uuid("composite_basics")
+
+    return str(create_runtime_occurrence_uuid("composite_basics"))
 
 
 def bootstrap_runtime_basics_facade(

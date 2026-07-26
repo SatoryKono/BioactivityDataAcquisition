@@ -115,8 +115,11 @@ async def handle_pipeline_run_report(
     except ForensicEndpointUnavailable as exc:
         await host._send_payload_response(
             writer,
-            503,
-            forensic_unavailable_payload(exc),
+            exc.status_code,
+            forensic_unavailable_payload(
+                endpoint="pipeline-run-report",
+                reason=exc.reason,
+            ),
         )
         return
     if payload is None:
@@ -154,8 +157,11 @@ async def handle_workflow_run_report(
     except ForensicEndpointUnavailable as exc:
         await host._send_payload_response(
             writer,
-            503,
-            forensic_unavailable_payload(exc),
+            exc.status_code,
+            forensic_unavailable_payload(
+                endpoint="workflow-run-report",
+                reason=exc.reason,
+            ),
         )
         return
     if payload is None:
@@ -197,8 +203,11 @@ async def handle_pipeline_run_reports_list(
     except ForensicEndpointUnavailable as exc:
         await host._send_payload_response(
             writer,
-            503,
-            forensic_unavailable_payload(exc),
+            exc.status_code,
+            forensic_unavailable_payload(
+                endpoint="pipeline-run-reports",
+                reason=exc.reason,
+            ),
         )
         return
     await host._send_payload_response(writer, 200, payload)
@@ -228,8 +237,11 @@ async def handle_workflow_run_reports_list(
     except ForensicEndpointUnavailable as exc:
         await host._send_payload_response(
             writer,
-            503,
-            forensic_unavailable_payload(exc),
+            exc.status_code,
+            forensic_unavailable_payload(
+                endpoint="workflow-run-reports",
+                reason=exc.reason,
+            ),
         )
         return
     await host._send_payload_response(writer, 200, payload)
@@ -247,12 +259,13 @@ async def handle_processed_records_table(
         host._read_optional_param(query, "run_id")
     )
     operation: Callable[[], dict[str, object]]
-    if selected_run_id is not None and host._run_ledger_port is not None:
+    run_ledger = host._run_ledger_port
+    if selected_run_id is not None and run_ledger is not None:
 
         def build_from_ledger() -> dict[str, object]:
             return build_processed_records_table_payload_from_ledger(
                 ledger_entries=tuple(
-                    host._run_ledger_port.list_entries_by_run_id(selected_run_id)
+                    run_ledger.list_entries_by_run_id(selected_run_id)
                 ),
                 pipeline=pipeline,
                 run_type=run_type,

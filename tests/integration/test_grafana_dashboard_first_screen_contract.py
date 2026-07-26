@@ -530,8 +530,7 @@ def test_navigation_bus_panels_document_handoff_policy() -> None:
         dashboard = load_dashboard(dashboard_path)
         navigation_links = get_dashboard_navigation_links(dashboard)
         has_explore_traces = any(
-            str(link.get("title", "")) == "Explore Traces"
-            for link in navigation_links
+            str(link.get("title", "")) == "Explore Traces" for link in navigation_links
         )
         panel = next(
             (

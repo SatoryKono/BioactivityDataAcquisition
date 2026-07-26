@@ -3,16 +3,32 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.domain.ports import MetricsPort
 from bioetl.domain.ports.noop import NoOpMetrics
 
 if TYPE_CHECKING:
+    from bioetl.application.services.metrics_service import MetricsService, StartResult
+    from bioetl.domain.ports import LoggerPort, TracingPort
     from bioetl.infrastructure.config.settings_api import Settings
 
 MetricsFactory = Callable[[], MetricsPort]
-MetricsServiceFactory = Callable[..., object]
+
+
+class _MetricsService(Protocol):
+    def start(
+        self,
+        port: int,
+        addr: str,
+        *,
+        fail_fast: bool,
+        retry_count: int,
+        retry_delay: float,
+    ) -> StartResult: ...
+
+
+MetricsServiceFactory = Callable[[], _MetricsService]
 
 __all__ = [
     "bootstrap_metrics",
@@ -92,13 +108,17 @@ def bootstrap_metrics(
     return factory()
 
 
-def create_metrics_service(*args: object, **kwargs: object) -> object:
+def create_metrics_service(
+    *,
+    logger: LoggerPort | None = None,
+    tracer: TracingPort | None = None,
+) -> MetricsService:
     """Compat seam for runtime tests patching metrics-service creation."""
     from bioetl.composition.bootstrap.assembly.metrics_service import (
         create_metrics_service as _create_metrics_service,
     )
 
-    return _create_metrics_service(*args, **kwargs)
+    return _create_metrics_service(logger=logger, tracer=tracer)
 
 
 def maybe_start_metrics_server(

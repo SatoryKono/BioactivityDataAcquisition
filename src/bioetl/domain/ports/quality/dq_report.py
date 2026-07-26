@@ -31,6 +31,7 @@ from bioetl.domain.ports.quality.silver_dq_request import (
     coerce_silver_dq_analyze_request,
 )
 from bioetl.domain.types import GoldBusinessRuleSpec, ScdConfig
+from bioetl.domain.types.identifiers import LocationReference
 
 DataContainer = Any
 """Opaque tabular payload used at the domain port boundary."""
@@ -176,12 +177,12 @@ class DQReportWriterPort(Protocol):
     async def write_bronze_report(
         self,
         report: BronzeDQReport,
-        output_path: str | None = None,
+        output_path: LocationReference | None = None,
         report_format: DQReportFormat | None = None,
         *,
         provider: str | None = None,
         entity: str | None = None,
-    ) -> str:
+    ) -> LocationReference:
         """Write Bronze DQ report to storage.
 
         Args:
@@ -199,12 +200,12 @@ class DQReportWriterPort(Protocol):
     async def write_silver_report(
         self,
         report: SilverDQReport,
-        output_path: str | None = None,
+        output_path: LocationReference | None = None,
         report_format: DQReportFormat | None = None,
         *,
         provider: str | None = None,
         entity: str | None = None,
-    ) -> str:
+    ) -> LocationReference:
         """Write Silver DQ report to storage.
 
         Args:
@@ -222,12 +223,12 @@ class DQReportWriterPort(Protocol):
     async def write_gold_report(
         self,
         report: GoldDQReport,
-        output_path: str | None = None,
+        output_path: LocationReference | None = None,
         report_format: DQReportFormat | None = None,
         *,
         provider: str | None = None,
         entity: str | None = None,
-    ) -> str:
+    ) -> LocationReference:
         """Write Gold DQ report to storage.
 
         Args:
