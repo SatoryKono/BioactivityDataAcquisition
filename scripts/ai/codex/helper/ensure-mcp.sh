@@ -129,6 +129,8 @@ shared_urls = {
     "deja": "http://127.0.0.1:8814/mcp",
     "context7": "http://127.0.0.1:8815/mcp",
     "ast-grep": "http://127.0.0.1:8816/mcp",
+    "github": "http://127.0.0.1:8820/mcp",
+    "fetch": "http://127.0.0.1:8821/mcp",
     "prometheus": "http://127.0.0.1:8822/mcp",
     "grafana": "http://127.0.0.1:8823/mcp",
 }

@@ -1,133 +1,85 @@
 {
-  "version": 2,
+  "version": 3,
   "proxy_package": "mcp-proxy@6.5.4",
   "bind_note": "mcp-proxy CLI binds the chosen port; clients MUST use http://127.0.0.1:<port>/mcp only. Prefer host firewall for non-loopback.",
   "servers": {
-    "brave-search": {
-      "port": 8811,
-      "path": "/mcp",
-      "wrapper": "mcp_brave_search_wrapper",
-      "class": "T2",
-      "priority": 3,
-      "notes": "docker run stdio; longer settle"
-    },
     "adr-analysis": {
       "port": 8813,
       "path": "/mcp",
       "wrapper": "mcp_adr_analysis_wrapper",
       "class": "T2",
-      "priority": 1
-    },
-    "deja": {
-      "port": 8814,
-      "path": "/mcp",
-      "wrapper": "mcp_deja_wrapper",
-      "class": "T2",
-      "priority": 1
+      "priority": 1,
+      "daily": true
     },
     "context7": {
       "port": 8815,
       "path": "/mcp",
       "wrapper": "mcp_context7_wrapper",
       "class": "T2",
-      "priority": 2
+      "priority": 2,
+      "daily": true
     },
     "ast-grep": {
       "port": 8816,
       "path": "/mcp",
       "wrapper": "mcp_ast_grep_wrapper",
       "class": "T2",
-      "priority": 2
-    },
-    "docker": {
-      "port": 8817,
-      "path": "/mcp",
-      "wrapper": "mcp_docker_wrapper",
-      "class": "T2",
-<<<<<<< Updated upstream
-      "priority": 3
-    },
-    "prometheus": {
-      "port": 8822,
-      "path": "/mcp",
-      "wrapper": "mcp_prometheus_wrapper",
-      "class": "T2",
-      "priority": 4,
-      "notes": "docker-backed; single shared container"
-    },
-    "grafana": {
-      "port": 8823,
-      "path": "/mcp",
-      "wrapper": "mcp_grafana_wrapper",
-      "class": "T2",
-      "priority": 4,
-      "notes": "docker-backed; single shared container"
-||||||| Stash base
-      "priority": 3
-=======
-      "priority": 4,
-      "notes": "docker mcp gateway stdio; thrash leader"
-    },
-    "mermaid": {
-      "port": 8818,
-      "path": "/mcp",
-      "wrapper": "mcp_mermaid_wrapper",
-      "class": "T2",
-      "priority": 4,
-      "notes": "docker mcp gateway stdio"
-    },
-    "dockerhub": {
-      "port": 8819,
-      "path": "/mcp",
-      "wrapper": "mcp_dockerhub_wrapper",
-      "class": "T2",
-      "priority": 4
+      "priority": 2,
+      "daily": true
     },
     "github": {
       "port": 8820,
       "path": "/mcp",
       "wrapper": "github-mcp-wrapper",
       "class": "T2",
-      "priority": 2
+      "priority": 2,
+      "daily": true,
+      "notes": "W4: shared HTTP cuts multi-client stdio thrash"
     },
     "fetch": {
       "port": 8821,
       "path": "/mcp",
       "wrapper": "mcp_fetch_wrapper",
       "class": "T2",
-      "priority": 2
+      "priority": 2,
+      "daily": true,
+      "notes": "W4: shared HTTP cuts multi-client stdio thrash"
+    },
+    "brave-search": {
+      "port": 8811,
+      "path": "/mcp",
+      "wrapper": "mcp_brave_search_wrapper",
+      "class": "T2",
+      "priority": 3,
+      "daily": true,
+      "notes": "docker run stdio; longer settle; single shared container"
     },
     "prometheus": {
       "port": 8822,
       "path": "/mcp",
       "wrapper": "mcp_prometheus_wrapper",
       "class": "T2",
-      "priority": 5,
-      "notes": "ops; longer settle if docker-backed"
+      "priority": 4,
+      "daily": true,
+      "notes": "docker-backed; single shared container"
     },
     "grafana": {
       "port": 8823,
       "path": "/mcp",
       "wrapper": "mcp_grafana_wrapper",
       "class": "T2",
-      "priority": 5
+      "priority": 4,
+      "daily": true,
+      "notes": "docker-backed; single shared container"
     },
-    "neo4j-cypher": {
-      "port": 8824,
+    "deja": {
+      "port": 8814,
       "path": "/mcp",
-      "wrapper": "mcp_neo4j_cypher_wrapper",
+      "wrapper": "mcp_deja_wrapper",
       "class": "T2",
-      "priority": 6,
-      "notes": "requires healthy neo4j auth; optional daily"
-    },
-    "neo4j-memory": {
-      "port": 8825,
-      "path": "/mcp",
-      "wrapper": "mcp_neo4j_memory_wrapper",
-      "class": "T2",
-      "priority": 6,
-      "notes": "requires healthy neo4j auth; optional daily"
->>>>>>> Stashed changes
+      "priority": 1,
+      "daily": false,
+      "notes": "Optional: requires deja binary (go install github.com/vshulcz/deja-vu/cmd/deja@latest). Excluded from daily until host has binary."
     }
   }
 }

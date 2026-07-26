@@ -94,14 +94,16 @@ MCP_PROFILES: dict[str, tuple[str, ...] | None] = {
     "full": None,
 }
 
-# Localhost Streamable HTTP endpoints for multi-client shared plane (#6563).
-# Keep in sync with scripts/ops/runtime/mcp/shared-servers.json.
+# Localhost Streamable HTTP endpoints for multi-client shared plane (#6563/#6589).
+# Keep in sync with scripts/ops/runtime/mcp/shared-servers.json (unit-tested).
 MCP_SHARED_SERVER_ENDPOINTS: dict[str, str] = {
     "brave-search": "http://127.0.0.1:8811/mcp",
     "adr-analysis": "http://127.0.0.1:8813/mcp",
     "deja": "http://127.0.0.1:8814/mcp",
     "context7": "http://127.0.0.1:8815/mcp",
     "ast-grep": "http://127.0.0.1:8816/mcp",
+    "github": "http://127.0.0.1:8820/mcp",
+    "fetch": "http://127.0.0.1:8821/mcp",
     "prometheus": "http://127.0.0.1:8822/mcp",
     "grafana": "http://127.0.0.1:8823/mcp",
 }
@@ -109,6 +111,20 @@ TRANSPORT_MODES = frozenset({"stdio", "shared", "hybrid"})
 # Multi-client daily defaults for Codex ensure / local projections.
 DEFAULT_LOCAL_PROFILE = "shared"
 DEFAULT_LOCAL_TRANSPORT_MODE = "shared"
+# Devin daily multi-client: omit gateway thrash leaders (use graph/full when needed).
+DEVIN_DAILY_DISABLE_SERVERS = frozenset(
+    {
+        "docker",
+        "mermaid",
+        "dockerhub",
+        "mcp-code-interpreter",
+        "neo4j-cypher",
+        "neo4j-memory",
+        "mutmut",
+        "sonarqube",
+        "needle",
+    }
+)
 
 
 def _add_startup_timeouts(servers: dict[str, dict[str, Any]]) -> None:

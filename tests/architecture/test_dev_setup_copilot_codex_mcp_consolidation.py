@@ -109,6 +109,9 @@ def _load_workspace_mcp_config(
         "--skip-codex",
         "--profile",
         "full",
+        # Path/wrapper assertions require stdio inventory, not shared HTTP rewrite.
+        "--transport-mode",
+        "stdio",
         cwd=root,
     )
     if result.returncode == 0:
