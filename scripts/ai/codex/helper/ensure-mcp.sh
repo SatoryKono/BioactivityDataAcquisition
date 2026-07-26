@@ -72,16 +72,13 @@ if not isinstance(servers, dict):
 
 errors: list[str] = []
 
-filesystem_args = servers.get("filesystem", {}).get("args", [])
-if not filesystem_args or filesystem_args[-1] != ".":
-    errors.append("filesystem scope must be repo-relative '.'")
-
 memory_env = servers.get("memory", {}).get("env", {})
 if memory_env.get("MEMORY_FILE_PATH") != "docs/00-project/ai/memory/mcp-memory.json":
     errors.append("memory file path must be repo-relative docs/00-project/ai/memory/mcp-memory.json")
 
 expected_wrapper_suffixes = (".sh", ".ps1")
 wrapper_stems = {
+    "filesystem": "mcp_filesystem_wrapper",
     "fetch": "mcp_fetch_wrapper",
     "github": "github-mcp-wrapper",
     "docker": "mcp_docker_wrapper",
@@ -168,7 +165,6 @@ for server_name, stem in wrapper_stems.items():
         errors.append(f"{server_name} wrapper command is not on PATH: {command!r}")
 
 portable_path_values = [
-    str(filesystem_args[-1]) if filesystem_args else "",
     str(memory_env.get("MEMORY_FILE_PATH", "")),
 ]
 for server in servers.values():

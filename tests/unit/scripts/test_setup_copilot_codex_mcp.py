@@ -259,9 +259,17 @@ def test_main_uses_workspace_root_for_generated_server_paths(
     assert zed_payload["mcpServers"] == servers
     assert not removed_servers.intersection(servers)
     assert not removed_servers.intersection(gemini_settings["mcpServers"])
-    assert servers["filesystem"]["args"][-1] == "."
-    assert devin_servers["filesystem"]["args"][-1] == "."
-    assert runtime_servers["filesystem"]["args"][-1] == str(workspace_root.resolve())
+    assert servers["filesystem"]["args"][0] == (
+        f"scripts/ai/mcp/mcp_filesystem_wrapper{wrapper_suffix}"
+    )
+    assert devin_servers["filesystem"]["args"][0] == (
+        f"scripts/ai/mcp/mcp_filesystem_wrapper{wrapper_suffix}"
+    )
+    assert runtime_servers["filesystem"]["args"][0] == str(
+        (
+            workspace_root / f"scripts/ai/mcp/mcp_filesystem_wrapper{wrapper_suffix}"
+        ).resolve()
+    )
     assert servers["memory"]["args"] == [
         "-y",
         "@modelcontextprotocol/server-memory@2026.1.26",
@@ -377,18 +385,23 @@ def test_main_recreates_empty_workspace_json_configs(tmp_path: Path) -> None:
     )
 
     assert exit_code == 0
+    wrapper_suffix = ".ps1" if os.name == "nt" else ".sh"
+    portable_fs = f"scripts/ai/mcp/mcp_filesystem_wrapper{wrapper_suffix}"
+    runtime_fs = str(
+        (workspace_root / f"scripts/ai/mcp/mcp_filesystem_wrapper{wrapper_suffix}").resolve()
+    )
     assert json.loads(
         (output_root / ".codex" / "settings.json").read_text(encoding="utf-8")
-    )["mcpServers"]["filesystem"]["args"][-1] == str(workspace_root.resolve())
+    )["mcpServers"]["filesystem"]["args"][0] == runtime_fs
     assert (
         json.loads(
             (output_root / ".devin" / "config.json").read_text(encoding="utf-8")
-        )["mcpServers"]["filesystem"]["args"][-1]
-        == "."
+        )["mcpServers"]["filesystem"]["args"][0]
+        == portable_fs
     )
     assert json.loads(
         (output_root / ".gemini" / "settings.json").read_text(encoding="utf-8")
-    )["mcpServers"]["filesystem"]["args"][-1] == str(workspace_root.resolve())
+    )["mcpServers"]["filesystem"]["args"][0] == runtime_fs
 
 
 def test_devin_projection_is_portable_across_workspace_roots(
@@ -435,7 +448,10 @@ def test_devin_projection_is_portable_across_workspace_roots(
     assert generated[0]["devin"] == {"org_id": "org-test"}
     assert generated[0]["shell"] == {"setup_complete": True}
     assert generated[0]["theme_mode"] == "light"
-    assert generated[0]["mcpServers"]["filesystem"]["args"][-1] == "."
+    wrapper_suffix = ".ps1" if os.name == "nt" else ".sh"
+    assert generated[0]["mcpServers"]["filesystem"]["args"][0] == (
+        f"scripts/ai/mcp/mcp_filesystem_wrapper{wrapper_suffix}"
+    )
 
 
 def test_skip_codex_validation_still_updates_codex_config(
@@ -492,8 +508,7 @@ url = "https://retired.invalid/mcp"
     assert 'url = "https://api.ref.tools/mcp"' in rendered
     assert 'env_http_headers = { x-ref-api-key = "REF_TOOL_API_KEY" }' in rendered
     assert "?apiKey=" not in rendered
-    # The workspace root appears in the filesystem server args, either as "." (portable)
-    # or as an absolute path depending on the portable_workspace_paths flag
+    # Filesystem is routed through a host wrapper that resolves REPO_ROOT at runtime.
     assert "filesystem" in rendered
 
 
@@ -524,7 +539,7 @@ def test_setup_mcp_reuses_current_config_and_repairs_drift(
     assert workspace_config.read_text(encoding="utf-8") == initial_workspace_config
 
     drifted = json.loads(workspace_config.read_text(encoding="utf-8"))
-    drifted["mcpServers"]["filesystem"]["args"][-1] = "unexpected-scope"
+    drifted["mcpServers"]["filesystem"]["args"][0] = "unexpected-wrapper"
     workspace_config.write_text(json.dumps(drifted), encoding="utf-8")
 
     assert (
@@ -541,7 +556,10 @@ def test_setup_mcp_reuses_current_config_and_repairs_drift(
         == 0
     )
     repaired_payload = json.loads(workspace_config.read_text(encoding="utf-8"))
-    assert repaired_payload["mcpServers"]["filesystem"]["args"][-1] == "."
+    wrapper_suffix = ".ps1" if os.name == "nt" else ".sh"
+    assert repaired_payload["mcpServers"]["filesystem"]["args"][0] == (
+        f"scripts/ai/mcp/mcp_filesystem_wrapper{wrapper_suffix}"
+    )
 
 
 @pytest.mark.skipif(
@@ -592,7 +610,7 @@ def test_ensure_mcp_shell_reuses_current_config_and_repairs_drift(
 
     workspace_config = workspace_root / ".mcp.json"
     drifted = json.loads(workspace_config.read_text(encoding="utf-8"))
-    drifted["mcpServers"]["filesystem"]["args"][-1] = "unexpected-scope"
+    drifted["mcpServers"]["filesystem"]["args"][0] = "unexpected-wrapper"
     workspace_config.write_text(json.dumps(drifted), encoding="utf-8")
 
     repaired = subprocess.run(
@@ -608,4 +626,7 @@ def test_ensure_mcp_shell_reuses_current_config_and_repairs_drift(
     assert repaired.returncode == 0, repaired.stderr
     assert "[mcp] MCP config is ready (refreshed)" in repaired.stdout
     repaired_payload = json.loads(workspace_config.read_text(encoding="utf-8"))
-    assert repaired_payload["mcpServers"]["filesystem"]["args"][-1] == "."
+    wrapper_suffix = ".ps1" if os.name == "nt" else ".sh"
+    assert repaired_payload["mcpServers"]["filesystem"]["args"][0] == (
+        f"scripts/ai/mcp/mcp_filesystem_wrapper{wrapper_suffix}"
+    )
