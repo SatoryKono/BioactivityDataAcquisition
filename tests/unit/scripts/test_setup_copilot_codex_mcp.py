@@ -174,15 +174,38 @@ def test_shared_endpoints_sync_with_catalog() -> None:
         assert setup_mcp.MCP_SHARED_SERVER_ENDPOINTS[name] == expected
 
 
-def test_default_transport_mode_stdio_keeps_wrappers(
+def test_default_local_transport_is_shared_http(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Default generation (stdio) must not rewrite catalog servers to HTTP."""
+    """Multi-client default: shared profile + shared HTTP for catalog servers."""
     monkeypatch.delenv("XDG_CACHE_HOME", raising=False)
     workspace_root = tmp_path / "workspace-root"
     output_root = tmp_path / "output-root"
     workspace_root.mkdir()
 
+    assert setup_mcp.DEFAULT_LOCAL_TRANSPORT_MODE == "shared"
+    assert setup_mcp.DEFAULT_LOCAL_PROFILE == "shared"
+
+    exit_code = setup_mcp.main(
+        [
+            "--root",
+            str(output_root),
+            "--workspace-root",
+            str(workspace_root),
+            "--skip-codex",
+            "--skip-codex-config",
+            "--skip-gemini-settings",
+            # omit --profile / --transport-mode → multi-client defaults
+        ]
+    )
+    assert exit_code == 0
+    cursor = json.loads(
+        (output_root / ".cursor" / "mcp.json").read_text(encoding="utf-8")
+    )
+    adr = cursor["mcpServers"]["adr-analysis"]
+    assert adr["type"] == "http"
+    assert adr["url"] == setup_mcp.MCP_SHARED_SERVER_ENDPOINTS["adr-analysis"]
+    # Explicit stdio still available for single-client fallback.
     exit_code = setup_mcp.main(
         [
             "--root",
@@ -194,7 +217,8 @@ def test_default_transport_mode_stdio_keeps_wrappers(
             "--skip-gemini-settings",
             "--profile",
             "shared",
-            # omit --transport-mode → default stdio
+            "--transport-mode",
+            "stdio",
         ]
     )
     assert exit_code == 0
@@ -204,9 +228,40 @@ def test_default_transport_mode_stdio_keeps_wrappers(
     adr = cursor["mcpServers"]["adr-analysis"]
     assert "command" in adr
     assert adr.get("type") != "http"
-    assert "url" not in adr or not str(adr.get("url", "")).startswith(
-        "http://127.0.0.1:"
+
+
+def test_codex_http_servers_have_no_env_tables(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Codex rejects env on streamable_http — never emit [mcp_servers.X.env] for HTTP."""
+    monkeypatch.delenv("XDG_CACHE_HOME", raising=False)
+    fake_home = tmp_path / "home"
+    fake_home.mkdir()
+    monkeypatch.setattr(setup_mcp.Path, "home", lambda: fake_home)
+    workspace_root = tmp_path / "workspace"
+    workspace_root.mkdir()
+
+    exit_code = setup_mcp.main(
+        [
+            "--root",
+            str(workspace_root),
+            "--workspace-root",
+            str(workspace_root),
+            "--profile",
+            "shared",
+            "--transport-mode",
+            "shared",
+            "--skip-codex-validation",
+            "--skip-gemini-settings",
+        ]
     )
+    assert exit_code == 0
+    toml = (fake_home / ".codex" / "config.toml").read_text(encoding="utf-8")
+    for name in setup_mcp.MCP_SHARED_SERVER_ENDPOINTS:
+        if f"[mcp_servers.{name}]" not in toml:
+            continue
+        assert f"[mcp_servers.{name}.env]" not in toml, name
+        assert f'url = "{setup_mcp.MCP_SHARED_SERVER_ENDPOINTS[name]}"' in toml
 
 
 def test_hybrid_transport_mode_rewrites_catalog_only(

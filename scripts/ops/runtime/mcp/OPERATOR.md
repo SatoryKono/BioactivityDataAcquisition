@@ -1,94 +1,103 @@
 # Shared MCP plane — operator playbook
 
-Program: GitHub #6563. Policy: `docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md`.
+Program: GitHub #6589 (Phase 3), #6563 (closed).  
+Policy: `docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md`.
 
-## Daily multi-client (recommended on 32 GiB hosts)
+## Goal
 
-```powershell
+Multiple AI clients (Codex, Devin, Grok, Cursor) → **one** long-lived
+Streamable HTTP endpoint per logical MCP server → **≤1** process/container
+per thrash image (no N× `docker run --rm -i` stdio).
+
+## Daily multi-client (recommended)
+
+```bash
 cd <repo>
 
-# 1) Daily subset = catalog minus neo4j-* (auth optional)
-.\scripts\ops\runtime\mcp\start-shared.ps1 -Daily
-.\scripts\ops\runtime\mcp\health-shared.ps1
-# Optional recovery loop:
-# .\scripts\ops\runtime\mcp\watchdog-shared.ps1 -Daily
+# 1) Shared plane (daily servers only; skips daily=false e.g. deja without binary)
+./scripts/ops/runtime/mcp/start-shared.sh
+./scripts/ops/runtime/mcp/health-shared.sh
+# optional full catalog including optional servers:
+# ./scripts/ops/runtime/mcp/start-shared.sh --all
+# ./scripts/ops/runtime/mcp/health-shared.sh all
 
-# 2) Point local IDE projections at localhost URLs
-$env:PYTHONPATH = (Resolve-Path .).Path
-python scripts/ai/codex/setup_mcp.py --profile shared --transport-mode shared --skip-codex-validation
-# Updates BOTH ~/.grok/config.toml and repo .grok/config.toml (project often still has stdio)
-.\scripts\ops\runtime\mcp\apply-shared-to-grok.ps1 -DisableDockerGateways
+# 2) Local projections → localhost HTTP
+export PYTHONPATH=.
+python3 scripts/ai/codex/setup_mcp.py \
+  --profile shared --transport-mode shared --skip-codex-validation
+# Do NOT commit OS-flipped tracked portable .mcp.json from Linux apply.
+git checkout -- .mcp.json .devin/config.json 2>/dev/null || true
 
-# 3) Full restart of AI clients (required — hot reload often keeps old stdio)
-#    Grok: /mcps then r, or restart all windows. Project .grok/config.toml was a common
-#    dual-spawn source (stdio) while user config already had shared HTTP.
-#    Grok, Cursor, Codex, Gemini, VS Code
+# 3) Devin machine-local HTTP projection (gitignored)
+python3 scripts/ops/runtime/mcp/apply-shared-to-devin.py
 
-# 4) Optional one-shot (plane + projections + orphan cleanup)
-# .\scripts\ops\runtime\docker\apply-docker-stable-mcp.ps1 `
-#   -Profile shared -TransportMode shared -WithSharedMcp -SkipEnsureStable -KillHostGateways
+# 4) Grok (Windows path when applicable)
+# .\scripts\ops\runtime\mcp\apply-shared-to-grok.ps1 -DisableDockerGateways
+
+# 5) Full restart of AI clients (required — hot reload often keeps old stdio)
+#    Codex, Devin, Grok, Cursor, VS Code
+```
+
+### Thrash proof
+
+```bash
+# Expect 1 each for thrash docker images while 2+ clients are live
+docker ps --format '{{.Image}}' | grep -E 'grafana|brave-search|prometheus' | sort | uniq -c
+
+# Parent of docker run must be mcp-proxy, not codex/devin
+pgrep -af 'docker run.*(grafana|brave-search|prometheus)' 
+
+codex mcp list --json | python3 -c "import json,sys; d=json.load(sys.stdin);
+for n in ('grafana','brave-search','prometheus','fetch','github'):
+ e=next((x for x in d if x.get('name')==n),None); print(n, (e or {}).get('transport',{}).get('type'), (e or {}).get('transport',{}).get('url'))"
+
+devin mcp list 2>/dev/null | grep -E 'grafana|brave|prometheus|context7|URL:|Command:' | head -40
 ```
 
 ## Fallback (single heavy client, stdio)
 
-```powershell
-python scripts/ai/codex/setup_mcp.py --profile stable --transport-mode stdio --skip-codex-validation
-.\scripts\ops\runtime\docker\cleanup-mcp-orphans.ps1 -KillHostGateways
+```bash
+python3 scripts/ai/codex/setup_mcp.py \
+  --profile stable --transport-mode stdio --skip-codex-validation
+# Prefer one AI client only — stdio multiplies per session
 ```
+
+## Optional servers
+
+| Server | Port | Daily | Notes |
+| --- | --- | --- | --- |
+| deja | 8814 | **no** | Needs `deja` binary (`go install github.com/vshulcz/deja-vu/cmd/deja@latest`). Start with `./start-shared.sh deja` when installed. |
+| docker / mermaid | — | **disabled** on Devin daily | Gateway thrash; enable only via graph/full / explicit local edit |
+
+Catalog SSOT: `scripts/ops/runtime/mcp/shared-servers.json` (`daily: false` = optional).
+
+## Toolkit / gateway
+
+- Do **not** enable Docker Desktop MCP Toolkit full catalog / `MCP_DOCKER --profile default`.
+- Disable Toolkit servers: `jetbrains`, `node-code-sandbox`.
+- `container_name` in Compose is **not** a substitute for shared HTTP.
 
 ## Thrash recovery
 
-Symptoms: many random-name containers (`docker-mcp-name=jetbrains|node-code-sandbox`),
-many `docker mcp gateway` host processes, free RAM collapse.
-
 ```powershell
-# Prefer AI clients idle first — they respawn children after kill.
+# Windows (when clients idle preferred)
 .\scripts\ops\runtime\docker\cleanup-mcp-orphans.ps1 -KillHostGateways
-.\scripts\ops\runtime\docker\reset-mcp-host-sessions.ps1   # report
-# Apply: reset-mcp-host-sessions.ps1 -Execute -KillHostGateways
 ```
 
 **Never** kills `bioetl`, `bioetl-neo4j`, `bioetl-*`, or label `bioetl.mcp.shared=true`.
 
-## Toolkit rules
+## Stop plane
 
-- Do **not** enable Docker Desktop MCP Toolkit full catalog / `MCP_DOCKER --profile default`.
-- Disable Toolkit servers: `jetbrains`, `node-code-sandbox`.
-- `container_name` in Compose is **not** a substitute for shared HTTP (see policy Mode B).
-
-## Partial plane / flaky servers
-
-- Docker-backed entries (brave, docker, mermaid, prometheus, …) need longer settle;
-  `start-shared.ps1` retries and uses ≥45s settle for those names.
-- `neo4j-*` need healthy Neo4j credentials; leave down if auth fails.
-- Run **one** `start-shared` at a time (parallel runs kill each other’s trees).
-
-## Optional loopback auth (W5)
-
-```powershell
-# Server: require X-API-Key on mcp-proxy
-$env:BIOETL_MCP_SHARED_API_KEY = '<secret>'   # do not commit; machine-local only
-.\scripts\ops\runtime\mcp\start-shared.ps1 -Daily
-
-# Clients must send header X-API-Key (generator support TBD; manual for now).
+```bash
+./scripts/ops/runtime/mcp/stop-shared.sh
 ```
 
-Default is **no** API key (same-user localhost trust). Never bind non-loopback.
+## Related issues
 
-## Mode B Compose (optional — not default)
-
-Skeleton only: `docker-compose.mcp-shared.yml` (empty services; profile `mode-b`).
-Do **not** use for stdio MCP. Prefer host `start-shared.ps1 -Daily`.
-
-## Watchdog
-
-```powershell
-.\scripts\ops\runtime\mcp\watchdog-shared.ps1 -Daily
-# logs/mcp-shared/watchdog.json
-```
-
-## Stop
-
-```powershell
-.\scripts\ops\runtime\mcp\stop-shared.ps1
-```
+- #6589 Phase 3 umbrella
+- #6590 generator/ensure
+- #6594 Devin local shared
+- #6593 plane reliability
+- #6592 expand anti-thrash
+- #6591 docs/closeout
+- #6293 no long-lived stdio Compose
