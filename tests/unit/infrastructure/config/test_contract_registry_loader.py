@@ -226,27 +226,65 @@ class TestLoadYamlWithTimeout:
         with pytest.raises(OSError):
             _load_yaml_with_timeout(Path("/nonexistent/path.yaml"))
 
-    def test_raises_value_error_on_none_result(self):
-        """Test ValueError when YAML load returns None."""
-        monkeypatch = pytest.MonkeyPatch()
+    def test_raises_value_error_when_yaml_root_is_not_a_mapping(self, monkeypatch):
+        """Null/empty YAML roots are rejected as non-mapping payloads.
+
+        ``yaml.safe_load("null")`` returns ``None``, which is not a mapping.
+        The loader raises the mapping contract error on both local and
+        network-drive paths (before the defensive ``result is None`` branch).
+        """
         monkeypatch.setattr(
             "bioetl.infrastructure.config.contract_registry_loader._is_likely_network_drive",
             lambda x: True,
         )
+
+        with TemporaryDirectory() as temp_dir:
+            test_file = Path(temp_dir) / "empty.yaml"
+            _ = test_file.write_text("null", encoding="utf-8")
+
+            with pytest.raises(ValueError, match="YAML root must be a mapping"):
+                _ = _load_yaml_with_timeout(test_file)
+
+    def test_raises_value_error_when_network_thread_leaves_empty_result(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Defensive branch: completed network thread with no payload and no error."""
         monkeypatch.setattr(
-            "bioetl.infrastructure.config.contract_registry_loader.yaml.safe_load",
-            lambda _: None,
+            "bioetl.infrastructure.config.contract_registry_loader._is_likely_network_drive",
+            lambda _path: True,
         )
 
-        try:
-            with TemporaryDirectory() as temp_dir:
-                test_file = Path(temp_dir) / "empty.yaml"
-                test_file.write_text("null", encoding="utf-8")
+        with TemporaryDirectory() as temp_dir:
+            test_file = Path(temp_dir) / "empty.yaml"
+            _ = test_file.write_text("key: value", encoding="utf-8")
 
-                with pytest.raises(ValueError, match="YAML load returned None"):
-                    _load_yaml_with_timeout(test_file)
-        finally:
-            monkeypatch.undo()
+            class ImmediateThread:
+                """Stub Thread that finishes immediately without running target."""
+
+                def __init__(
+                    self,
+                    target: object | None = None,
+                    daemon: bool | None = None,
+                ) -> None:
+                    # Intentionally ignore target so result stays None.
+                    del target, daemon
+
+                def start(self) -> None:
+                    return
+
+                def join(self, timeout: float | None = None) -> None:
+                    del timeout
+
+                def is_alive(self) -> bool:
+                    return False
+
+            monkeypatch.setattr(
+                "bioetl.infrastructure.config.contract_registry_loader.threading.Thread",
+                ImmediateThread,
+            )
+
+            with pytest.raises(ValueError, match="YAML load returned None"):
+                _ = _load_yaml_with_timeout(test_file)
 
     def test_reraises_thread_exception_for_network_drive_reads(self, monkeypatch):
         """Exceptions raised inside the timeout thread should be surfaced to callers."""
@@ -332,12 +370,12 @@ class TestLoadContractRegistryPayload:
                     load_contract_registry_payload(registry_path=test_file)
 
     def test_raises_value_error_for_non_dict_root(self):
-        """Test ValueError for non-dict root."""
+        """Non-mapping YAML roots fail during timed YAML load (mapping contract)."""
         with TemporaryDirectory() as temp_dir:
             test_file = Path(temp_dir) / "invalid.yaml"
             test_file.write_text("- item1\n- item2", encoding="utf-8")
 
-            with pytest.raises(ValueError, match="expected mapping root"):
+            with pytest.raises(ValueError, match="YAML root must be a mapping"):
                 load_contract_registry_payload(registry_path=test_file)
 
 

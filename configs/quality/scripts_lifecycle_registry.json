@@ -236,6 +236,12 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as the Windows-side companion for the canonical Fetch MCP wrapper generated on Windows; keep it supporting unless tracked Windows runtime configs become first-class governed artifacts."
     },
+    "scripts/ai/mcp/mcp_filesystem_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the Windows-side companion for the canonical filesystem MCP wrapper; keep it supporting while portable tracked projections may select the POSIX wrapper."
+    },
     "scripts/ai/mcp/mcp_github_actions_wrapper.ps1": {
       "owner": "@bioetl-platform",
       "decision": "windows_compatibility_wrapper",
@@ -500,18 +506,6 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as a top-level docs KPI reporting compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs check-kpi."
     },
-    "scripts/engineering/ci/apply-ci-optimizations-fixed.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a bounded manual Windows CI-optimization variant while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow."
-    },
-    "scripts/engineering/ci/apply-ci-optimizations.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a bounded manual Windows CI-optimization helper while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow."
-    },
     "scripts/engineering/ci/_compatibility_registry.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
@@ -523,6 +517,18 @@
       "decision": "shared_helper_module",
       "review_by": "2026-09-30",
       "next_step": "Retain as the internal compatibility telemetry library imported by governed CI reports; keep it supporting because it has no standalone command surface."
+    },
+    "scripts/engineering/ci/apply-ci-optimizations-fixed.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded manual Windows CI-optimization variant while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow."
+    },
+    "scripts/engineering/ci/apply-ci-optimizations.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded manual Windows CI-optimization helper while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow."
     },
     "scripts/engineering/common/cli_dispatch.py": {
       "owner": "@bioetl-platform",
@@ -1051,6 +1057,12 @@
       "decision": "shared_helper_module",
       "review_by": "2026-09-30",
       "next_step": "Retain as the Linux/WSL companion shutdown helper for the shared MCP runtime plane while cross-platform local tooling depends on it; remove it together with the shared-plane launcher if that workflow is retired."
+    },
+    "scripts/ops/runtime/mcp/tests/apply-shared-to-grok.fixture.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "test_fixture_helper",
+      "review_by": "2026-10-21",
+      "next_step": "Retain as the isolated PowerShell fixture used by apply-shared-to-grok.ps1 unit tests; do not promote to an operator entrypoint and retire only if the Grok shared-plane apply tests are removed."
     },
     "scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1": {
       "owner": "@bioetl-platform",

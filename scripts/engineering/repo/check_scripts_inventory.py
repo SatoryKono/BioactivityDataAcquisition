@@ -46,6 +46,7 @@ SEARCH_ROOTS: Final[tuple[str, ...]] = (
     "AGENTS.md",
     ".github/ISSUES",
     ".github/workflows",
+    ".zed",
     ".codex/agents",
     ".codex/skills",
     ".pre-commit-config.yaml",
@@ -267,6 +268,8 @@ def _iter_script_files_in_base(base: Path) -> list[Path]:
         for filename in filenames:
             file_path = current_path / filename
             if not file_path.is_file():
+                continue
+            if ".fixture." in file_path.name:
                 continue
             if (
                 file_path.suffix not in SCRIPT_EXTENSIONS

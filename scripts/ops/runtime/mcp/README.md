@@ -11,22 +11,25 @@ tools without N× stdio children. See:
 
 Pinned bridge: `mcp-proxy@6.5.4` (stdio → Streamable HTTP `/mcp`).
 
-Server ports and wrappers: `shared-servers.json` (v2 — Phase 1 + W3 expand).
+Server ports, wrappers, state models and launch modes:
+`shared-servers.json` (v4 runtime SSOT).
 
 | Port | Server |
 | --- | --- |
 | 8811 | brave-search |
 | 8813–8816 | adr-analysis, deja, context7, ast-grep |
-| 8817–8819 | docker, mermaid, dockerhub |
+| 8817–8818 | docker, mermaid |
 | 8820–8821 | github, fetch |
 | 8822–8823 | prometheus, grafana |
 | 8824–8825 | neo4j-cypher, neo4j-memory (optional) |
+| 8826–8827 | memory, filesystem |
+| 8828–8831 | code-analyzer, mcp-code-interpreter, mutmut, github-actions |
 
 ## Operator flow
 
 ```powershell
 # 1) Start shared plane (host processes via mcp-proxy)
-# Daily = catalog minus neo4j-*
+# Daily = all local servers except optional neo4j-*
 .\scripts\ops\runtime\mcp\start-shared.ps1 -Daily
 # Optional: .\scripts\ops\runtime\mcp\watchdog-shared.ps1 -Daily
 
@@ -45,6 +48,13 @@ python scripts/ai/codex/setup_mcp.py --profile shared --transport-mode shared --
 # Stop
 .\scripts\ops\runtime\mcp\stop-shared.ps1
 ```
+
+`start-shared.sh --all` is the full acceptance path. A repeated invocation must
+reuse the same managed PID for every endpoint.
+
+On non-mirrored WSL networking, `docker` and `mermaid` are owned by one native
+Windows streaming gateway each and exposed to WSL clients through a binary
+loopback relay. Client URLs remain `127.0.0.1`.
 
 Subset start:
 

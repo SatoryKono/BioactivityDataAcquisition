@@ -47,7 +47,11 @@ if [[ -z "${PYTHON_BIN}" ]]; then
     exit 1
 fi
 
-# The upstream server still speaks line-delimited JSON over stdio. Bridge it to the
-# framed MCP transport expected by Codex and other repo tooling.
+# mcp-proxy and modern MCP stdio use line-delimited JSON directly. The adapter
+# is retained only for legacy direct clients that still expect framed stdio.
+if [[ "${BIOETL_MCP_SHARED:-0}" == "1" ]]; then
+    exec npx -y @knowall-ai/mcp-neo4j-agent-memory@0.2.5 "$@"
+fi
+
 exec "${PYTHON_BIN}" "${REPO_ROOT}/scripts/ai/mcp/neo4j_memory_mcp_adapter.py" -- \
     npx -y @knowall-ai/mcp-neo4j-agent-memory@0.2.5 "$@"

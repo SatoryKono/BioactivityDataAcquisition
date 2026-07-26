@@ -22,10 +22,12 @@ Zed loads `.zed/settings.json` and `.zed/tasks.json` from the worktree root auto
 2. **Cheap diagnostics** — basedpyright `diagnosticMode: openFilesOnly` (full check via tasks/CI).
 3. **Slim agent MCP** — runtime `context_servers`: only `memory`, `fetch`, `deepwiki`.
 4. **Safe defaults** — terminal tool confirms; secrets/certs denied for file tools; `redact_private_values`.
-5. **Tasks via `uv`** — `uv run --active --no-sync ...`; `cwd: $ZED_WORKTREE_ROOT`.
+5. **Tasks without `uv` on PATH** — call
+   `$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe -m pytest ...` directly
+   (Zed GUI PowerShell often has no `uv` in PATH).
 6. **No autosave thrash** — `autosave: on_focus_change` (better on network/GDrive mounts).
 7. **Local pytest defaults** — `VCR_RECORD_MODE=none`, `--no-cov` on non-coverage lanes, gutter runnables on.
-8. **Windows dual-OS env** — `UV_PROJECT_ENVIRONMENT` / `VIRTUAL_ENV` default to `.venv-win` so tasks do not fall into a broken WSL `.venv`.
+8. **Windows dual-OS env** — `VIRTUAL_ENV=.venv-win`; prefer `.venv-win` over broken WSL `.venv`.
 
 ## Python environment
 
@@ -138,15 +140,16 @@ Do **not** put API tokens in `settings.json` as plain text. Rotate any key that 
 
 ## Tasks (Command Palette → Tasks)
 
-All tasks: `command: uv`, `cwd: $ZED_WORKTREE_ROOT`.
+All tasks: `cwd: $ZED_WORKTREE_ROOT`, interpreter/tool binaries under
+`.venv-win/Scripts/` (no PATH dependency on `uv`).
 
 **Quality**
 
-- Format code — `uv run ruff format .`
-- Lint code — `uv run ruff check .`
-- Type check — `uv run mypy src/`
-- Architecture compliance — `uv run lint-imports --config pyproject.toml`
-- Refresh MCP config — `uv run python scripts/ai/codex/setup_mcp.py ...`
+- Format code — `python -m ruff format .`
+- Lint code — `python -m ruff check .`
+- Type check — `python -m mypy src/`
+- Architecture compliance — `lint-imports.exe --config pyproject.toml`
+- Refresh MCP config — `python scripts/ai/codex/setup_mcp.py ...`
 
 **Tests** — see table above.
 
@@ -188,8 +191,9 @@ Python snippets require `from __future__ import annotations` and avoid retired A
 
 | Issue | Action |
 |-------|--------|
-| `uv: command not found` | Install uv and ensure it is on PATH for GUI apps; restart Zed |
+| `uv` not recognized | Expected: tasks no longer call `uv`. Reload window and re-run task |
 | Wrong interpreter | Toolchain selector → `.venv-win` (Windows) or WSL venv |
+| Missing `.venv-win` | `.\scripts\engineering\dev\setup_env_windows.ps1` |
 | LSP quiet / bad imports | Same toolchain; `editor: restart language server` |
 | Slow on GDrive | Expected; prefer local clone; `openFilesOnly` already set |
 | Tasks missing | Reload window; check `.zed/tasks.json` is a JSON array |

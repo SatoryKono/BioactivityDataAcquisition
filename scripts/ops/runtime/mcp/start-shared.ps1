@@ -151,6 +151,7 @@ if ([string]::IsNullOrWhiteSpace($comSpec)) { $comSpec = 'cmd.exe' }
 
 # Prefer dedicated cache so concurrent agents do not corrupt user-global _npx.
 $env:NPM_CONFIG_CACHE = $npmCache
+$env:BIOETL_MCP_SHARED = '1'
 
 $statusPath = Join-Path $logDir 'status.json'
 $status = [ordered]@{
@@ -289,7 +290,7 @@ foreach ($name in $selected) {
             continue
         }
         if ($pre -ne 'free') {
-            Write-Warning "  $name: port $port occupied without healthy /ping; skip"
+            Write-Warning "  ${name}: port $port occupied without healthy /ping; skip"
             $status.servers[$name] = @{
                 port = $port
                 state = 'port_busy'

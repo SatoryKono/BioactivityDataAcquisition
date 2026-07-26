@@ -47,14 +47,14 @@ Classes:
 | --- | --- | --- | --- |
 | deepwiki | T4 | remote HTTP | already shared |
 | ref | T4 | remote HTTP | already shared |
-| memory | T2 | npx stdio | **deferred** (stateful; see §Stateful servers) |
-| filesystem | T2 | npx stdio | **deferred** (stateful roots) |
+| memory | T2 | wrapper stdio | shared port 8826; single-process file owner |
+| filesystem | T2 | wrapper stdio | shared port 8827; repository-root allowlist |
 | fetch | T2 | uvx wrapper | **Phase 2** port 8821 |
 | github | T2 | wrapper | **Phase 2** port 8820 |
 | docker | T2 | docker mcp gateway stdio | **catalog optional** port 8817 (`daily=false`) |
 | context7 | T2 | wrapper | **daily** port 8815 |
 | ast-grep | T2 | wrapper | **daily** port 8816 |
-| mcp-code-interpreter | T2 | uvx stdio | later |
+| mcp-code-interpreter | T2 | uvx stdio | shared port 8829 |
 | prometheus | T2 | docker/wrapper | **daily** port 8822 |
 | grafana | T2 | docker/wrapper | **daily** port 8823 |
 | brave-search | T2 | docker run stdio | **daily** port 8811 |
@@ -64,9 +64,9 @@ Classes:
 | dockerhub | T2 | gateway stdio | **catalog optional** port 8819 (`daily=false`) |
 | deja | T2 | npx stdio | **Phase 1** port 8814 |
 | adr-analysis | T2 | npx stdio | **Phase 1 MVP** port 8813 |
-| mutmut | T2 | wrapper | later |
-| code-analyzer | T2 | wrapper | later |
-| github-actions | T2 | wrapper | later |
+| mutmut | T2 | wrapper | shared port 8830 |
+| code-analyzer | T2 | wrapper | shared port 8828 |
+| github-actions | T2 | wrapper | shared port 8831 |
 | jetbrains | T3 | Desktop Toolkit | disable in Desktop |
 | node-code-sandbox | T3 | Desktop Toolkit | disable in Desktop |
 
@@ -81,36 +81,30 @@ Classes:
 | Qodo | Yes (mcp.json) | Local profile |
 | Devin | Yes (`type: http` + URL) | Active projection follows the selected local profile |
 
-## Shared endpoints (v2)
+## Shared endpoints (v4)
 
 Catalog: `scripts/ops/runtime/mcp/shared-servers.json`  
 Bridge pin: **`mcp-proxy@6.5.4`** (stdio → Streamable HTTP `/mcp`).
 
-| Server | URL | Daily profile `shared` |
+| Server group | Ports | Daily profile `shared` |
 | --- | --- | --- |
-| brave-search | `http://127.0.0.1:8811/mcp` | yes |
-| adr-analysis | `http://127.0.0.1:8813/mcp` | yes |
-| deja | `http://127.0.0.1:8814/mcp` | yes |
-| context7 | `http://127.0.0.1:8815/mcp` | yes |
-| ast-grep | `http://127.0.0.1:8816/mcp` | yes |
-| docker | `http://127.0.0.1:8817/mcp` | optional (`daily=false`; start explicitly) |
-| mermaid | `http://127.0.0.1:8818/mcp` | optional (`daily=false`; start explicitly) |
-| dockerhub | `http://127.0.0.1:8819/mcp` | optional (`daily=false`; start explicitly) |
-| github | `http://127.0.0.1:8820/mcp` | yes |
-| fetch | `http://127.0.0.1:8821/mcp` | yes |
-| prometheus | `http://127.0.0.1:8822/mcp` | yes |
-| grafana | `http://127.0.0.1:8823/mcp` | yes |
-| neo4j-cypher | `http://127.0.0.1:8824/mcp` | optional (`graph`/`full`) |
-| neo4j-memory | `http://127.0.0.1:8825/mcp` | optional (`graph`/`full`) |
+| search/analysis | `8811`, `8813`–`8816` | yes |
+| Docker gateway (`docker`, `mermaid`) | `8817`–`8818` | yes |
+| GitHub/fetch/monitoring | `8820`–`8823` | yes |
+| Neo4j | `8824`–`8825` | optional; included by `--all` |
+| stateful memory/filesystem | `8826`–`8827` | yes |
+| analyzer/interpreter/mutmut/actions | `8828`–`8831` | yes |
 
-## Stateful servers (design gate — not on plane yet)
+Exact names, ports, launch modes and readiness timeouts are owned by
+`shared-servers.json`; `setup_mcp.py` loads that catalog rather than maintaining
+a second endpoint map.
 
-| Server | Blocker | Direction |
-| --- | --- | --- |
-| `filesystem` | Per-client roots / sandbox paths | Single shared roots list only after explicit operator config; risk of cross-client write |
-| `memory` | Shared JSON knowledge graph file | One file + flock or accept single-writer; document path SSOT first |
+## Stateful servers
 
-Do **not** add these to `shared-servers.json` until an ADR/note accepts the shared-state model.
+| Server | Accepted shared-state contract |
+| --- | --- |
+| `filesystem` | One repository-root allowlist shared by every local client; generated client config cannot expand it |
+| `memory` | One server process owns the canonical repository memory JSON, serializing writes inside that process |
 
 ## Generator contract
 
@@ -125,7 +119,7 @@ python scripts/ai/codex/setup_mcp.py --profile shared --transport-mode shared --
 | `--transport-mode stdio` | Explicit single-client fallback; wrappers only |
 | `--transport-mode shared` | Default; shared-capable servers become `type: http` localhost URLs |
 | `--transport-mode hybrid` | Same as shared for catalog servers; others stay stdio |
-| Profile `shared` | `stable` + brave + docker/mermaid/dockerhub + prometheus/grafana |
+| Profile `shared` | Every sanctioned local MCP through the shared plane + remote HTTP MCP |
 
 ## Compose Mode B (optional — not default)
 
@@ -175,6 +169,17 @@ Localhost allowlist (not SaaS remote list):
 | Bridge | Host **mcp-proxy@6.5.4**, not long-lived stdio Compose |
 | Auth on loopback | None in v1 |
 | Grok | Same local projection as Cursor after restart |
+
+## Singleton lifecycle
+
+- Linux/WSL reconciliation holds one global `flock`.
+- A live managed PID receives its full catalog readiness deadline; no competing
+  retry is started.
+- A ready listener without a managed PID fails as `unmanaged_ready`.
+- Every mcp-proxy binds explicitly to `127.0.0.1`.
+- On non-mirrored WSL networking, Docker MCP servers use one native Windows
+  streaming gateway and a binary relay to WSL loopback.
+- Runtime status and health JSON are replaced atomically.
 
 ## Related files
 
