@@ -69,9 +69,6 @@
     "env": {
       "PYTHONDONTWRITEBYTECODE": "1",
       "VCR_RECORD_MODE": "none",
-      "UV_LINK_MODE": "copy",
-      "UV_CACHE_DIR": ".cache/uv-cache",
-      "UV_PROJECT_ENVIRONMENT": ".venv-win",
       "VIRTUAL_ENV": ".venv-win"
     },
     "detect_venv": {

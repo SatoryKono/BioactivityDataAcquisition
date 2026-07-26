@@ -168,10 +168,25 @@ def test_shared_endpoints_sync_with_catalog() -> None:
     catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
     servers = catalog["servers"]
     assert set(servers) == set(setup_mcp.MCP_SHARED_SERVER_ENDPOINTS)
+    canonical = set(setup_mcp._canonical_servers(Path.cwd(), profile="full"))
+    assert set(servers) == canonical - {"deepwiki", "ref"}
     for name, entry in servers.items():
         path = entry.get("path") or "/mcp"
         expected = f"http://127.0.0.1:{int(entry['port'])}{path}"
         assert setup_mcp.MCP_SHARED_SERVER_ENDPOINTS[name] == expected
+
+
+def test_shared_launcher_enforces_singleton_and_loopback() -> None:
+    launcher = (
+        Path(__file__).resolve().parents[3]
+        / "scripts/ops/runtime/mcp/start-shared.sh"
+    ).read_text(encoding="utf-8")
+    assert "flock 9" in launcher
+    assert '"--host",' in launcher
+    assert "bind_host" in launcher
+    assert "start_new_session=True" in launcher
+    assert '"unmanaged_ready"' in launcher
+    assert "readiness_timeout_sec" in launcher
 
 
 def test_default_local_transport_is_shared_http(

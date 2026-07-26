@@ -245,10 +245,12 @@ for name, entry in items:
             str(wrapper),
         ]
     print(f"START {name} 127.0.0.1:{port}")
+    child_env = os.environ.copy()
+    child_env["BIOETL_MCP_SHARED"] = "1"
     process = subprocess.Popen(
         command,
         cwd=root,
-        env=os.environ.copy(),
+        env=child_env,
         stdout=out_handle,
         stderr=err_handle,
         start_new_session=True,

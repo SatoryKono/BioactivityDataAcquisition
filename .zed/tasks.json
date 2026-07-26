@@ -1,50 +1,53 @@
 [
   {
     "label": "Format code",
-    "command": "uv",
-    "args": ["run", "--active", "--no-sync", "ruff", "format", "."],
+    "command": "powershell",
+    "args": [
+      "-NoProfile",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-File",
+      "$ZED_WORKTREE_ROOT/scripts/engineering/dev/zed_task.ps1",
+      "-Module",
+      "ruff",
+      "--",
+      "format",
+      "."
+    ],
     "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "always",
-    "save": "all",
-    "env": {
-      "UV_PROJECT_ENVIRONMENT": ".venv-win",
-      "VIRTUAL_ENV": ".venv-win",
-      "PYTHONDONTWRITEBYTECODE": "1",
-    },
+    "save": "all"
   },
   {
     "label": "Lint code",
-    "command": "uv",
-    "args": ["run", "--active", "--no-sync", "ruff", "check", "."],
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
+    "args": [
+      "-m",
+      "ruff",
+      "check",
+      "."
+    ],
     "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "always",
-    "save": "all",
-    "env": {
-      "UV_PROJECT_ENVIRONMENT": ".venv-win",
-      "VIRTUAL_ENV": ".venv-win",
-      "PYTHONDONTWRITEBYTECODE": "1",
-    },
+    "save": "all"
   },
   {
     "label": "Type check",
-    "command": "uv",
-    "args": ["run", "--active", "--no-sync", "mypy", "src/"],
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
+    "args": [
+      "-m",
+      "mypy",
+      "src/"
+    ],
     "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "always",
-    "save": "all",
-    "env": {
-      "UV_PROJECT_ENVIRONMENT": ".venv-win",
-      "VIRTUAL_ENV": ".venv-win",
-      "PYTHONDONTWRITEBYTECODE": "1",
-    },
+    "save": "all"
   },
   {
     "label": "Test: current file",
-    "command": "uv",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
-      "run",
-      "--active",
-      "--no-sync",
+      "-m",
       "pytest",
       "$ZED_FILE",
       "-v",
@@ -52,26 +55,25 @@
       "--no-cov",
       "-p",
       "no:benchmark",
-      "--maxfail=1",
+      "--maxfail=1"
     ],
     "env": {
       "VCR_RECORD_MODE": "none",
       "PYTHONDONTWRITEBYTECODE": "1",
-      "UV_PROJECT_ENVIRONMENT": ".venv-win",
-      "VIRTUAL_ENV": ".venv-win",
+      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win"
     },
     "cwd": "$ZED_WORKTREE_ROOT",
-    "tags": ["python-test"],
+    "tags": [
+      "python-test"
+    ],
     "reveal": "always",
-    "save": "current",
+    "save": "current"
   },
   {
     "label": "Test: nearest symbol",
-    "command": "uv",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
-      "run",
-      "--active",
-      "--no-sync",
+      "-m",
       "pytest",
       "$ZED_FILE",
       "-k",
@@ -81,25 +83,22 @@
       "--no-cov",
       "-p",
       "no:benchmark",
-      "--maxfail=1",
+      "--maxfail=1"
     ],
     "env": {
       "VCR_RECORD_MODE": "none",
       "PYTHONDONTWRITEBYTECODE": "1",
-      "UV_PROJECT_ENVIRONMENT": ".venv-win",
-      "VIRTUAL_ENV": ".venv-win",
+      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win"
     },
     "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "always",
-    "save": "current",
+    "save": "current"
   },
   {
     "label": "Test: smoke",
-    "command": "uv",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
-      "run",
-      "--active",
-      "--no-sync",
+      "-m",
       "pytest",
       "tests/smoke/",
       "-v",
@@ -107,24 +106,21 @@
       "--no-cov",
       "-p",
       "no:benchmark",
-      "--maxfail=1",
+      "--maxfail=1"
     ],
     "env": {
       "VCR_RECORD_MODE": "none",
       "PYTHONDONTWRITEBYTECODE": "1",
-      "UV_PROJECT_ENVIRONMENT": ".venv-win",
-      "VIRTUAL_ENV": ".venv-win",
+      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win"
     },
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always",
+    "reveal": "always"
   },
   {
     "label": "Test: unit-fast",
-    "command": "uv",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
-      "run",
-      "--active",
-      "--no-sync",
+      "-m",
       "pytest",
       "tests/unit/",
       "-q",
@@ -134,24 +130,21 @@
       "--no-cov",
       "-p",
       "no:benchmark",
-      "--maxfail=1",
+      "--maxfail=1"
     ],
     "env": {
       "VCR_RECORD_MODE": "none",
       "PYTHONDONTWRITEBYTECODE": "1",
-      "UV_PROJECT_ENVIRONMENT": ".venv-win",
-      "VIRTUAL_ENV": ".venv-win",
+      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win"
     },
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always",
+    "reveal": "always"
   },
   {
     "label": "Test: unit",
-    "command": "uv",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
-      "run",
-      "--active",
-      "--no-sync",
+      "-m",
       "pytest",
       "tests/unit/",
       "-q",
@@ -159,24 +152,21 @@
       "--no-cov",
       "-p",
       "no:benchmark",
-      "--maxfail=1",
+      "--maxfail=1"
     ],
     "env": {
       "VCR_RECORD_MODE": "none",
       "PYTHONDONTWRITEBYTECODE": "1",
-      "UV_PROJECT_ENVIRONMENT": ".venv-win",
-      "VIRTUAL_ENV": ".venv-win",
+      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win"
     },
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always",
+    "reveal": "always"
   },
   {
     "label": "Test: architecture",
-    "command": "uv",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
-      "run",
-      "--active",
-      "--no-sync",
+      "-m",
       "pytest",
       "tests/architecture/",
       "-q",
@@ -186,24 +176,21 @@
       "--no-cov",
       "-p",
       "no:benchmark",
-      "--maxfail=1",
+      "--maxfail=1"
     ],
     "env": {
       "VCR_RECORD_MODE": "none",
       "PYTHONDONTWRITEBYTECODE": "1",
-      "UV_PROJECT_ENVIRONMENT": ".venv-win",
-      "VIRTUAL_ENV": ".venv-win",
+      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win"
     },
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always",
+    "reveal": "always"
   },
   {
     "label": "Test: integration-replay",
-    "command": "uv",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
-      "run",
-      "--active",
-      "--no-sync",
+      "-m",
       "pytest",
       "tests/integration/",
       "-q",
@@ -213,24 +200,21 @@
       "--no-cov",
       "-p",
       "no:benchmark",
-      "--maxfail=1",
+      "--maxfail=1"
     ],
     "env": {
       "VCR_RECORD_MODE": "none",
       "PYTHONDONTWRITEBYTECODE": "1",
-      "UV_PROJECT_ENVIRONMENT": ".venv-win",
-      "VIRTUAL_ENV": ".venv-win",
+      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win"
     },
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always",
+    "reveal": "always"
   },
   {
     "label": "Test: contracts",
-    "command": "uv",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
-      "run",
-      "--active",
-      "--no-sync",
+      "-m",
       "pytest",
       "tests/contract/",
       "tests/unit/contracts/",
@@ -243,24 +227,21 @@
       "no:benchmark",
       "-p",
       "no:xdist",
-      "--maxfail=1",
+      "--maxfail=1"
     ],
     "env": {
       "VCR_RECORD_MODE": "none",
       "PYTHONDONTWRITEBYTECODE": "1",
-      "UV_PROJECT_ENVIRONMENT": ".venv-win",
-      "VIRTUAL_ENV": ".venv-win",
+      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win"
     },
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always",
+    "reveal": "always"
   },
   {
     "label": "Test: security",
-    "command": "uv",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
-      "run",
-      "--active",
-      "--no-sync",
+      "-m",
       "pytest",
       "tests/security/",
       "-q",
@@ -268,24 +249,21 @@
       "--no-cov",
       "-p",
       "no:benchmark",
-      "--maxfail=1",
+      "--maxfail=1"
     ],
     "env": {
       "VCR_RECORD_MODE": "none",
       "PYTHONDONTWRITEBYTECODE": "1",
-      "UV_PROJECT_ENVIRONMENT": ".venv-win",
-      "VIRTUAL_ENV": ".venv-win",
+      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win"
     },
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always",
+    "reveal": "always"
   },
   {
     "label": "Test: e2e-smoke",
-    "command": "uv",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
-      "run",
-      "--active",
-      "--no-sync",
+      "-m",
       "pytest",
       "tests/e2e/",
       "-m",
@@ -295,24 +273,21 @@
       "--no-cov",
       "-p",
       "no:benchmark",
-      "--maxfail=1",
+      "--maxfail=1"
     ],
     "env": {
       "VCR_RECORD_MODE": "none",
       "PYTHONDONTWRITEBYTECODE": "1",
-      "UV_PROJECT_ENVIRONMENT": ".venv-win",
-      "VIRTUAL_ENV": ".venv-win",
+      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win"
     },
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always",
+    "reveal": "always"
   },
   {
     "label": "Test: failed last run",
-    "command": "uv",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
-      "run",
-      "--active",
-      "--no-sync",
+      "-m",
       "pytest",
       "tests/",
       "--lf",
@@ -321,24 +296,21 @@
       "--tb=short",
       "--no-cov",
       "-p",
-      "no:benchmark",
+      "no:benchmark"
     ],
     "env": {
       "VCR_RECORD_MODE": "none",
       "PYTHONDONTWRITEBYTECODE": "1",
-      "UV_PROJECT_ENVIRONMENT": ".venv-win",
-      "VIRTUAL_ENV": ".venv-win",
+      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win"
     },
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always",
+    "reveal": "always"
   },
   {
     "label": "Test: coverage (gate 85%)",
-    "command": "uv",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
-      "run",
-      "--active",
-      "--no-sync",
+      "-m",
       "pytest",
       "tests/",
       "--ignore=tests/e2e",
@@ -350,79 +322,64 @@
       "--cov-report=html:reports/coverage/htmlcov",
       "--cov-fail-under=85",
       "-q",
-      "--tb=short",
+      "--tb=short"
     ],
     "env": {
       "VCR_RECORD_MODE": "none",
       "PYTHONDONTWRITEBYTECODE": "1",
-      "UV_PROJECT_ENVIRONMENT": ".venv-win",
-      "VIRTUAL_ENV": ".venv-win",
+      "VIRTUAL_ENV": "$ZED_WORKTREE_ROOT/.venv-win"
     },
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always",
+    "reveal": "always"
   },
   {
     "label": "Architecture compliance",
-    "command": "uv",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/lint-imports.exe",
     "args": [
-      "run",
-      "--active",
-      "--no-sync",
-      "lint-imports",
       "--config",
-      "pyproject.toml",
+      "pyproject.toml"
     ],
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always",
-    "env": {
-      "UV_PROJECT_ENVIRONMENT": ".venv-win",
-      "VIRTUAL_ENV": ".venv-win",
-      "PYTHONDONTWRITEBYTECODE": "1",
-    },
+    "reveal": "always"
   },
   {
     "label": "Security scan",
-    "command": "uv",
-    "args": ["run", "--active", "--no-sync", "bandit", "-r", "src/"],
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
+    "args": [
+      "-m",
+      "bandit",
+      "-r",
+      "src/"
+    ],
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always",
-    "env": {
-      "UV_PROJECT_ENVIRONMENT": ".venv-win",
-      "VIRTUAL_ENV": ".venv-win",
-      "PYTHONDONTWRITEBYTECODE": "1",
-    },
+    "reveal": "always"
   },
   {
     "label": "Dependency audit",
-    "command": "uv",
-    "args": ["run", "--active", "--no-sync", "pip-audit"],
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
+    "args": [
+      "-m",
+      "pip_audit"
+    ],
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always",
-    "env": {
-      "UV_PROJECT_ENVIRONMENT": ".venv-win",
-      "VIRTUAL_ENV": ".venv-win",
-      "PYTHONDONTWRITEBYTECODE": "1",
-    },
+    "reveal": "always"
   },
   {
     "label": "Dead code detection",
-    "command": "uv",
-    "args": ["run", "--active", "--no-sync", "vulture", "src/bioetl"],
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
+    "args": [
+      "-m",
+      "vulture",
+      "src/bioetl"
+    ],
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always",
-    "env": {
-      "UV_PROJECT_ENVIRONMENT": ".venv-win",
-      "VIRTUAL_ENV": ".venv-win",
-      "PYTHONDONTWRITEBYTECODE": "1",
-    },
+    "reveal": "always"
   },
   {
     "label": "Complexity check",
-    "command": "uv",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
-      "run",
-      "--active",
-      "--no-sync",
+      "-m",
       "xenon",
       "--max-absolute",
       "B",
@@ -430,34 +387,20 @@
       "B",
       "--max-average",
       "A",
-      "src/bioetl",
+      "src/bioetl"
     ],
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always",
-    "env": {
-      "UV_PROJECT_ENVIRONMENT": ".venv-win",
-      "VIRTUAL_ENV": ".venv-win",
-      "PYTHONDONTWRITEBYTECODE": "1",
-    },
+    "reveal": "always"
   },
   {
     "label": "Refresh MCP config",
-    "command": "uv",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
-      "run",
-      "--active",
-      "--no-sync",
-      "python",
       "scripts/ai/codex/setup_mcp.py",
       "--skip-codex",
-      "--skip-gemini-settings",
+      "--skip-gemini-settings"
     ],
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always",
-    "env": {
-      "UV_PROJECT_ENVIRONMENT": ".venv-win",
-      "VIRTUAL_ENV": ".venv-win",
-      "PYTHONDONTWRITEBYTECODE": "1",
-    },
-  },
+    "reveal": "always"
+  }
 ]

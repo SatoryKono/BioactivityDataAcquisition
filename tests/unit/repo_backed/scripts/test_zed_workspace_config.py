@@ -98,24 +98,28 @@ def test_zed_runtime_mcp_servers_are_a_generated_manifest_subset() -> None:
     assert settings_servers == {"memory", "fetch", "deepwiki"}
 
 
-def test_zed_tasks_use_uv_and_contextual_python_runnable() -> None:
-    """Project tasks should use uv and bind the Python runnable narrowly."""
+def test_zed_tasks_use_venv_python_without_path_uv() -> None:
+    """Tasks must call .venv-win tools directly so Zed PowerShell works without uv PATH."""
     tasks = _load_json("tasks.json")
     labels = [task["label"] for task in tasks]
 
     assert len(labels) == len(set(labels))
-    assert all(task["command"] == "uv" for task in tasks)
     assert all(task["cwd"] == "$ZED_WORKTREE_ROOT" for task in tasks)
+
+    venv_python = "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe"
+    venv_lint_imports = "$ZED_WORKTREE_ROOT/.venv-win/Scripts/lint-imports.exe"
+    assert all(task["command"] in {venv_python, venv_lint_imports} for task in tasks)
+    # No bare `uv` command — GUI PowerShell often has no uv on PATH.
+    assert all(task["command"] != "uv" for task in tasks)
+    assert "uv run" not in json.dumps(tasks)
 
     tagged = [task for task in tasks if "python-test" in task.get("tags", [])]
     assert [task["label"] for task in tagged] == ["Test: current file"]
+    assert tagged[0]["command"] == venv_python
+    assert tagged[0]["args"][:2] == ["-m", "pytest"]
     assert "$ZED_FILE" in tagged[0]["args"]
     assert "--no-cov" in tagged[0]["args"]
-    assert tagged[0]["args"][:3] == ["run", "--active", "--no-sync"]
     assert tagged[0].get("env", {}).get("VCR_RECORD_MODE") == "none"
-    assert tagged[0].get("env", {}).get("UV_PROJECT_ENVIRONMENT") == ".venv-win"
-
-    assert all(task["args"][:3] == ["run", "--active", "--no-sync"] for task in tasks)
 
     required_test_labels = {
         "Test: current file",
@@ -137,12 +141,15 @@ def test_zed_tasks_use_uv_and_contextual_python_runnable() -> None:
     assert any(arg.startswith("--cov=") or arg == "--cov" for arg in coverage["args"])
     assert "--cov-fail-under=85" in coverage["args"]
 
+    arch = next(task for task in tasks if task["label"] == "Architecture compliance")
+    assert arch["command"] == venv_lint_imports
+    assert "pyproject.toml" in arch["args"]
+
     serialized = json.dumps(tasks)
     assert "codex agent run" not in serialized
     assert "devin skill invoke" not in serialized
     assert '"import-linter"' not in serialized
     assert "lint-imports" in serialized
-    assert "pyproject.toml" in serialized
 
 
 def test_zed_terminal_prefers_windows_venv_and_offline_vcr() -> None:
@@ -156,7 +163,6 @@ def test_zed_terminal_prefers_windows_venv_and_offline_vcr() -> None:
     assert ".venv-wsl" in detect
     assert terminal["env"]["VCR_RECORD_MODE"] == "none"
     assert terminal["env"]["PYTHONDONTWRITEBYTECODE"] == "1"
-    assert terminal["env"]["UV_PROJECT_ENVIRONMENT"] == ".venv-win"
     assert terminal["env"]["VIRTUAL_ENV"] == ".venv-win"
     assert settings["gutter"]["runnables"] is True
 

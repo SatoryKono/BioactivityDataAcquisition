@@ -79,7 +79,7 @@ privilege servers are not always-on:
 | Profile | Membership intent | Default for daily coding? |
 | --- | --- | --- |
 | `stable` | host/HTTP MCP only (no `docker run` / `docker mcp gateway` servers) | **yes on 32 GiB Docker Desktop hosts** |
-| `shared` | `stable` + Docker-backed daily servers over shared HTTP | **default; start shared plane first** |
+| `shared` | all sanctioned local servers over shared HTTP plus remote HTTP MCP | **default; start shared plane first** |
 | `core` | `stable` + mermaid (gateway) | explicit legacy/local profile |
 | `ops` | `core` + prometheus, grafana, github-actions | observability / dashboard work |
 | `graph` | `ops` + neo4j-*, brave-search, mutmut, mcp-code-interpreter, docker | research / graph / mutation work |
