@@ -129,7 +129,9 @@ foreach ($name in $selected) {
     if ($portUp) {
         $pingOk = Test-HttpPing -Uri $pingUrl -TimeoutSec $perTimeout
     }
-    $ok = $portUp
+    # mcp-proxy exposes /ping only after its stdio child completed MCP
+    # initialization. A bare TCP listener is not a ready MCP endpoint.
+    $ok = ($portUp -and $pingOk)
     if (-not $ok) { $failed++ }
     $line = [pscustomobject]@{
         Server = $name

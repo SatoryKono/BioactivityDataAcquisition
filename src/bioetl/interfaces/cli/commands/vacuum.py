@@ -28,10 +28,10 @@ from bioetl.interfaces.cli.formatters import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.composition._resource_management import (
+    from bioetl.application.services.vacuum_service import VacuumService
+    from bioetl.composition.maintenance_service_access import (
         MedallionLifecycleServiceProtocol,
     )
-    from bioetl.application.services.vacuum_service import VacuumService
 
 __all__ = [
     "get_lifecycle_service",

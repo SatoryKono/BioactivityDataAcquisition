@@ -394,9 +394,8 @@ def _emit_check_failure_metrics(
         return
     for check_type, payload in checks.items():
         severity = _metric_severity_for_check_payload(payload)
-        if severity is None:
-            continue
-        emit_check_failure_metric(pipeline, stage, str(check_type), severity)
+        if severity is not None:
+            emit_check_failure_metric(pipeline, stage, str(check_type), severity)
 
 
 def _metric_severity_for_check_payload(payload: object) -> str | None:
@@ -407,10 +406,4 @@ def _metric_severity_for_check_payload(payload: object) -> str | None:
     if raw_status is None:
         return None
     status = str(raw_status).strip().lower()
-    if status == "fail":
-        return "hard_fail"
-    if status == "warn":
-        return "warning"
-    if status == "error":
-        return "error"
-    return None
+    return {"fail": "hard_fail", "warn": "warning", "error": "error"}.get(status)

@@ -29,15 +29,31 @@ SCRIPT = _to_bash_path(ROOT / "scripts" / "ai" / "codex" / "helper" / "ensure-mc
 
 
 def _prepare_workspace(root: Path) -> None:
-    payload = json.loads((ROOT / ".mcp.json").read_text(encoding="utf-8"))
+    full = setup_mcp._canonical_servers(
+        root, portable_workspace_paths=True, profile="full"
+    )
+    shared = setup_mcp._apply_shared_transport(
+        setup_mcp._canonical_servers(
+            root, portable_workspace_paths=True, profile="shared"
+        ),
+        transport_mode="shared",
+    )
     for relative_path in (
         ".mcp.json",
         "scripts/ai/.mcp.json",
-        ".vscode/mcp.json",
-        ".qodo/mcp.json",
         ".zed/mcp.json",
-        ".devin/config.json",
     ):
+        path = root / relative_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(
+            json.dumps({"mcpServers": full}, indent=2) + "\n", encoding="utf-8"
+        )
+    projections = {
+        ".vscode/mcp.json": {"servers": shared},
+        ".qodo/mcp.json": {"mcpServers": shared},
+        ".devin/config.json": {"mcpServers": shared},
+    }
+    for relative_path, payload in projections.items():
         path = root / relative_path
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
@@ -48,7 +64,9 @@ def _write_codex_config(home: Path, workspace: Path, *, valid: bool) -> Path:
     config_path.parent.mkdir(parents=True)
     if valid:
         rendered = setup_mcp._render_codex_mcp_toml(
-            setup_mcp._codex_runtime_servers(workspace)
+            setup_mcp._codex_runtime_servers(
+                workspace, profile="shared", transport_mode="shared"
+            )
         )
     else:
         rendered = f"""[mcp_servers.memory]
@@ -129,4 +147,4 @@ def test_ensure_repairs_stale_persisted_config(tmp_path: Path) -> None:
     rendered = config_path.read_text(encoding="utf-8")
     assert "# === BEGIN MANAGED MCP SERVERS ===" in rendered
     assert "[mcp_servers.filesystem]" in rendered
-    assert str(workspace) in rendered
+    assert setup_mcp.MCP_SHARED_SERVER_ENDPOINTS["filesystem"] in rendered

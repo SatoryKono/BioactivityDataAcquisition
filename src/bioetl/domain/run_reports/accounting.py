@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 
-from bioetl.domain.ports.stage_accounting import StageAccountingPort
+from bioetl.domain.ports import StageAccountingPort
 from bioetl.domain.run_reports._stage_bucket import _StageBucket
 from bioetl.domain.run_reports.accounting_snapshots import (
     StageAccountingSnapshotsMixin,

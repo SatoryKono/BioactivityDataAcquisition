@@ -7,9 +7,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3115 |
-| Tracked doc-like files | 1917 |
-| Ignored local docs/reports files | 1198 |
+| Doc-like files | 3118 |
+| Tracked doc-like files | 1922 |
+| Ignored local docs/reports files | 1196 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
 | Generated routes | 64 |
@@ -18,8 +18,8 @@
 
 | Tracking State | Count |
 | --- | --- |
-| ignored_local | 1198 |
-| tracked | 1917 |
+| ignored_local | 1196 |
+| tracked | 1922 |
 
 ## Lifecycle Counts
 
@@ -28,7 +28,7 @@
 | active_backlog | 1 |
 | active_draft | 108 |
 | active_quality_baseline | 20 |
-| closeout_evidence | 32 |
+| closeout_evidence | 33 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 40 |
 | docs_reports_generated_or_route_owned | 23 |
@@ -59,30 +59,30 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 1956 |
+| Active | 1958 |
 | Archived | 80 |
 | Canonical | 63 |
-| Generated | 739 |
-| Working | 277 |
+| Generated | 738 |
+| Working | 279 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 1956 |
+| active | 1958 |
 | archive | 80 |
 | canonical | 63 |
-| generated | 739 |
-| working | 277 |
+| generated | 738 |
+| working | 279 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 121 |
-| archive-after-migration | 100 |
-| generate-automatically | 739 |
-| keep | 2151 |
+| archive-after-migration | 101 |
+| generate-automatically | 738 |
+| keep | 2154 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -96,6 +96,7 @@
 | `docs/plans/architecture-review-and-refactor-plan-2026-03-21.md` | Working | 1 | archive-after-migration |
 | `docs/plans/chembl-baseline-refactor-plan-2026-06-01.md` | Working | 1 | archive-after-migration |
 | `docs/plans/curated-memory-density-governance-plan-2026-04-21.md` | Working | 1 | archive-after-migration |
+| `docs/plans/mcp-phase3-hardening-issue-pack-2026-07-26.md` | Working | 0 | archive-after-migration |
 | `docs/plans/mcp-shared-http-multi-client-issue-pack-2026-07-24.md` | Working | 1 | archive-after-migration |
 | `docs/plans/mcp-shared-http-multi-client-plan-2026-07-24.md` | Working | 2 | archive-after-migration |
 | `docs/plans/mcp-shared-plane-work-plan-2026-07-24.md` | Working | 0 | archive-after-migration |
@@ -168,7 +169,6 @@
 | `reports/quality/port-adapter-factory-coverage.md` | Working | 0 | archive-after-migration |
 | `reports/quality/reports-workspace-review.json` | Working | 0 | archive-after-migration |
 | `reports/quality/root-hygiene-cleanup-classification.json` | Working | 0 | archive-after-migration |
-| `reports/quality/root-hygiene-review-evidence.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -235,7 +235,6 @@
 | `docs/02-architecture/adr-registry/index.md` | adr-registry-generated-docs |  |  | scripts/generate_adr_registry.py |
 | `docs/02-architecture/adr-registry/registry.json` | adr-registry-generated-docs |  |  | scripts/generate_adr_registry.py |
 | `docs/02-architecture/adr-registry/status-dashboard.md` | adr-registry-generated-docs |  |  | scripts/generate_adr_registry.py |
-| `docs/02-architecture/diagrams/README-new-section.md` |  | diagram_kind:diagram_support | diagram_support |  |
 | `docs/02-architecture/diagrams/_template.mmd` |  | diagram_kind:diagram_support | diagram_support |  |
 | `docs/02-architecture/diagrams/architecture/49-chembl-pipeline-activity-dataflow.mmd` | pipeline-dataflow-generated-docs |  | diagram_canonical_source | scripts/diagrams/generate_pipeline_dataflows.py |
 | `docs/02-architecture/diagrams/architecture/50-chembl-pipeline-activity-filter-criteria.mmd` | pipeline-dataflow-generated-docs |  | diagram_canonical_source | scripts/diagrams/generate_pipeline_dataflows.py |
@@ -254,6 +253,7 @@
 | `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-composite-runner-pkg-part2.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/generate_package_family_class_diagrams.py |
 | `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-base-transformer.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/generate_package_family_class_diagrams.py |
 | `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-batch-execution.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/generate_package_family_class_diagrams.py |
+| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-lifecycle.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/generate_package_family_class_diagrams.py |
 
 ## GitHub Issue Evidence Examples
 

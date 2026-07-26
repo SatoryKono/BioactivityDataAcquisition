@@ -55,8 +55,12 @@ warn() {
 
 check_workspace_mcp_config() {
     local path="$1"
+    local catalog_path="${REPO_ROOT}/scripts/ops/runtime/mcp/shared-servers.json"
+    if [[ ! -f "${catalog_path}" ]]; then
+        catalog_path="${PACKAGE_ROOT}/scripts/ops/runtime/mcp/shared-servers.json"
+    fi
     [[ -f "${path}" ]] || fail "Missing MCP config: ${path}"
-    python3 - "${path}" <<'PY' || fail "Workspace MCP config is not portable/repo-relative: ${path}"
+    python3 - "${path}" "${catalog_path}" <<'PY' || fail "Workspace MCP config is not portable/repo-relative: ${path}"
 import json
 import os
 import re
@@ -65,6 +69,7 @@ import sys
 from pathlib import Path
 
 config_path = Path(sys.argv[1])
+catalog_path = Path(sys.argv[2])
 payload = json.loads(config_path.read_text(encoding="utf-8"))
 servers = payload.get("mcpServers") or payload.get("servers")
 if not isinstance(servers, dict):
@@ -72,12 +77,14 @@ if not isinstance(servers, dict):
 
 errors: list[str] = []
 
-memory_env = servers.get("memory", {}).get("env", {})
-if memory_env.get("MEMORY_FILE_PATH") != "docs/00-project/ai/memory/mcp-memory.json":
+memory_entry = servers.get("memory", {})
+memory_env = memory_entry.get("env", {})
+if not memory_entry.get("url") and memory_env.get("MEMORY_FILE_PATH") != "docs/00-project/ai/memory/mcp-memory.json":
     errors.append("memory file path must be repo-relative docs/00-project/ai/memory/mcp-memory.json")
 
 expected_wrapper_suffixes = (".sh", ".ps1")
 wrapper_stems = {
+    "memory": "mcp_memory_wrapper",
     "filesystem": "mcp_filesystem_wrapper",
     "fetch": "mcp_fetch_wrapper",
     "github": "github-mcp-wrapper",
@@ -122,17 +129,11 @@ if retired_present:
     joined_retired = ", ".join(retired_present)
     errors.append(f"retired MCP servers must not be registered: {joined_retired}")
 
-# Shared multi-client plane URLs (must match setup_mcp.MCP_SHARED_SERVER_ENDPOINTS).
+# Shared multi-client plane URLs come from the runtime SSOT.
+catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
 shared_urls = {
-    "brave-search": "http://127.0.0.1:8811/mcp",
-    "adr-analysis": "http://127.0.0.1:8813/mcp",
-    "deja": "http://127.0.0.1:8814/mcp",
-    "context7": "http://127.0.0.1:8815/mcp",
-    "ast-grep": "http://127.0.0.1:8816/mcp",
-    "github": "http://127.0.0.1:8820/mcp",
-    "fetch": "http://127.0.0.1:8821/mcp",
-    "prometheus": "http://127.0.0.1:8822/mcp",
-    "grafana": "http://127.0.0.1:8823/mcp",
+    name: f"http://127.0.0.1:{int(entry['port'])}{entry.get('path') or '/mcp'}"
+    for name, entry in catalog["servers"].items()
 }
 
 for server_name, stem in wrapper_stems.items():
@@ -263,6 +264,26 @@ validate_codex_mcp_list() {
     return 0
 }
 
+ensure_shared_plane() {
+    if [[ "${CODEX_MCP_ENSURE_SHARED_PLANE:-1}" != "1" ]]; then
+        return 0
+    fi
+    local launcher="${REPO_ROOT}/scripts/ops/runtime/mcp/start-shared.sh"
+    local health="${REPO_ROOT}/scripts/ops/runtime/mcp/health-shared.sh"
+    if [[ ! -x "${launcher}" || ! -x "${health}" ]]; then
+        warn "Shared MCP launcher/health helper unavailable; config-only ensure"
+        return 0
+    fi
+    if bash "${health}" daily >/dev/null 2>&1; then
+        return 0
+    fi
+    local timeout_seconds="${CODEX_MCP_SHARED_START_TIMEOUT:-360}"
+    timeout "${timeout_seconds}" bash "${launcher}" --daily || \
+        fail "Shared MCP plane failed to become ready"
+    bash "${health}" daily >/dev/null || \
+        fail "Shared MCP plane health check failed after start"
+}
+
 current_config_is_ready() {
     # Run structural checks in-process (subshell) instead of re-execing this
     # script. Nested `timeout 15 bash --check` + later `timeout 15 python setup`
@@ -292,6 +313,7 @@ SHOULD_GENERATE=0
 case "${MODE}" in
     ensure)
         if current_config_is_ready; then
+            ensure_shared_plane
             validate_codex_mcp_list
             echo "[mcp] MCP config is ready (unchanged)"
             exit 0
@@ -337,6 +359,9 @@ check_workspace_mcp_config "${REPO_ROOT}/.qodo/mcp.json"
 check_workspace_mcp_config "${REPO_ROOT}/.zed/mcp.json"
 check_workspace_mcp_config "${REPO_ROOT}/.devin/config.json"
 check_codex_config
+if [[ "${MODE}" == "ensure" || "${MODE}" == "refresh" ]]; then
+    ensure_shared_plane
+fi
 validate_codex_mcp_list
 
 if [[ "${SHOULD_GENERATE}" -eq 1 ]]; then

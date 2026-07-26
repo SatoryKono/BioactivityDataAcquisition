@@ -189,7 +189,10 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
         "mintlify",
     } & set(gemini_settings["mcpServers"])
     assert set(servers) == EXPECTED_MCP_SERVERS
-    assert servers["memory"]["command"] == "npx"
+    assert servers["memory"]["command"] in {"bash", "powershell"}
+    assert servers["memory"]["args"][0].endswith(
+        ("mcp_memory_wrapper.sh", "mcp_memory_wrapper.ps1")
+    )
     assert (
         servers["memory"]["env"]["MEMORY_FILE_PATH"]
         == "docs/00-project/ai/memory/mcp-memory.json"
