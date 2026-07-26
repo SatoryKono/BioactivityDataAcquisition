@@ -300,10 +300,8 @@ def test_main_uses_workspace_root_for_generated_server_paths(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Generated server paths should follow the requested workspace root."""
-    # Host runners may export XDG_CACHE_HOME; isolate so the fallback-cache
-    # scenario stays deterministic (#6417).
+    # Isolate host XDG cache so the fallback scenario stays deterministic (#6417).
     monkeypatch.delenv("XDG_CACHE_HOME", raising=False)
-
     workspace_root = tmp_path / "workspace-root"
     output_root = tmp_path / "output-root"
     workspace_root.mkdir()

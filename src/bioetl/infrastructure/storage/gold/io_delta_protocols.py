@@ -3,15 +3,11 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any, Protocol
+from datetime import datetime
+from typing import Any, Protocol
 
-if TYPE_CHECKING:
-    from datetime import datetime
-
-    import pyarrow as pa
-
-    from bioetl.domain.types import GoldRecord, ScdConfig
-    from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterProtocol
+from bioetl.domain.types import GoldRecord, ScdConfig
+from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterProtocol
 
 
 class GoldWriterSimpleDeltaHostProtocol(Protocol):
@@ -27,7 +23,7 @@ class GoldWriterSimpleDeltaHostProtocol(Protocol):
 
     def _to_arrow_table(
         self, records: list[GoldRecord], column_order: list[str] | None = None
-    ) -> pa.Table: ...
+    ) -> object: ...
 
 
 class GoldWriteAsyncioProtocol(Protocol):
@@ -70,11 +66,11 @@ class GoldWriterScd2HostProtocol(Protocol):
 
     def _to_arrow_table(
         self, records: list[GoldRecord], column_order: list[str] | None = None
-    ) -> pa.Table: ...
+    ) -> object: ...
 
     async def _merge_scd2(
         self,
-        dt: Any,
+        dt: Any,  # Any: deltalake DeltaTable has no complete type stubs
         records: list[GoldRecord],
         business_key: str | list[str],
         scd_config: ScdConfig,
