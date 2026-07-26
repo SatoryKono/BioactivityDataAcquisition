@@ -23,11 +23,14 @@ Zed loads `.zed/settings.json` and `.zed/tasks.json` from the worktree root auto
 3. **Slim agent MCP** — runtime `context_servers`: only `memory`, `fetch`, `deepwiki`.
 4. **Safe defaults** — terminal tool confirms; secrets/certs denied for file tools; `redact_private_values`.
 5. **Tasks without `uv` on PATH** — call
-   `$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe -m pytest ...` directly
+   `$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe ...` directly
    (Zed GUI PowerShell often has no `uv` in PATH).
-6. **No autosave thrash** — `autosave: on_focus_change` (better on network/GDrive mounts).
-7. **Local pytest defaults** — `VCR_RECORD_MODE=none`, `--no-cov` on non-coverage lanes, gutter runnables on.
-8. **Windows dual-OS env** — `VIRTUAL_ENV=.venv-win`; prefer `.venv-win` over broken WSL `.venv`.
+6. **PowerShell-safe pytest markers** — multi-word `-m` expressions live in
+   `scripts/engineering/dev/zed_pytest_lane.py` so `and`/`or` are not re-tokenized
+   by `powershell -C` into fake file paths.
+7. **No autosave thrash** — `autosave: on_focus_change` (better on network/GDrive mounts).
+8. **Local pytest defaults** — `VCR_RECORD_MODE=none`, `--no-cov` on non-coverage lanes, gutter runnables on.
+9. **Windows dual-OS env** — `VIRTUAL_ENV=.venv-win`; prefer `.venv-win` over broken WSL `.venv`.
 
 ## Python environment
 

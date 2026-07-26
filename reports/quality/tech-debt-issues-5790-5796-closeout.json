@@ -35,7 +35,7 @@
       "targeted_closeout_proof": 100.0
     },
     "zero_reference_supporting_scripts": {
-      "current": 32,
+      "current": 33,
       "entries_without_owner_metadata": 0,
       "max": 47,
       "source": "configs/quality/scripts_inventory_manifest.json"

@@ -1,12 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-26T16:57:53.684908+00:00",
+  "generated_at": "2026-07-26T17:02:44.130922+00:00",
   "summary": {
-    "total_scripts": 541,
+    "total_scripts": 542,
     "status_counts": {
-      "active": 348,
-      "supporting": 192,
-      "unknown": 1
+      "active": 349,
+      "supporting": 193
     },
     "reference_group_coverage": {
       "agents": 5,
@@ -16,7 +15,7 @@
       "other": 59,
       "scripts": 417,
       "skills": 16,
-      "tests": 244
+      "tests": 245
     }
   },
   "scripts": [
@@ -1355,19 +1354,19 @@
         },
         {
           "path": ".zed/README.md",
-          "line": 152,
+          "line": 155,
           "source_group": "other",
           "text": "- Refresh MCP config — `python scripts/ai/codex/setup_mcp.py ...`"
         },
         {
           "path": ".zed/README.md",
-          "line": 173,
+          "line": 176,
           "source_group": "other",
           "text": "uv run python scripts/ai/codex/setup_mcp.py --skip-codex --skip-gemini-settings"
         },
         {
           "path": ".zed/README.md",
-          "line": 211,
+          "line": 214,
           "source_group": "other",
           "text": "- `scripts/ai/codex/setup_mcp.py`"
         }
@@ -8473,7 +8472,7 @@
       "references": [
         {
           "path": ".zed/README.md",
-          "line": 121,
+          "line": 124,
           "source_group": "other",
           "text": "python -m scripts.engineering.dev run-tests smoke"
         },
@@ -9127,7 +9126,7 @@
         },
         {
           "path": ".zed/README.md",
-          "line": 120,
+          "line": 123,
           "source_group": "other",
           "text": "bash scripts/engineering/dev/run_pytest.sh tests/smoke --narrow --timeout=120"
         }
@@ -9199,7 +9198,7 @@
       "references": [
         {
           "path": ".zed/README.md",
-          "line": 116,
+          "line": 119,
           "source_group": "other",
           "text": ".\\scripts\\engineering\\dev\\run_tests.ps1 quick"
         },
@@ -9334,13 +9333,13 @@
       "references": [
         {
           "path": ".zed/README.md",
-          "line": 38,
+          "line": 41,
           "source_group": "other",
           "text": ".\\scripts\\engineering\\dev\\setup_env_windows.ps1"
         },
         {
           "path": ".zed/README.md",
-          "line": 196,
+          "line": 199,
           "source_group": "other",
           "text": "| Missing `.venv-win` | `.\\scripts\\engineering\\dev\\setup_env_windows.ps1` |"
         },
@@ -9391,7 +9390,7 @@
       "references": [
         {
           "path": ".zed/README.md",
-          "line": 44,
+          "line": 47,
           "source_group": "other",
           "text": "bash scripts/engineering/dev/setup_env_wsl.sh"
         },
@@ -9563,19 +9562,73 @@
       ]
     },
     {
-      "path": "scripts/engineering/dev/zed_task.ps1",
-      "type": "ps1",
-      "status": "unknown",
+      "path": "scripts/engineering/dev/zed_pytest_lane.py",
+      "type": "py",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 14,
       "references": [
         {
-          "path": ".zed/tasks.json",
-          "line": 10,
+          "path": ".zed/README.md",
+          "line": 29,
           "source_group": "other",
-          "text": "\"$ZED_WORKTREE_ROOT/scripts/engineering/dev/zed_task.ps1\","
+          "text": "`scripts/engineering/dev/zed_pytest_lane.py` so `and`/`or` are not re-tokenized"
+        },
+        {
+          "path": ".zed/tasks.json",
+          "line": 44,
+          "source_group": "other",
+          "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
+        },
+        {
+          "path": ".zed/tasks.json",
+          "line": 64,
+          "source_group": "other",
+          "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
+        },
+        {
+          "path": ".zed/tasks.json",
+          "line": 82,
+          "source_group": "other",
+          "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
+        },
+        {
+          "path": ".zed/tasks.json",
+          "line": 97,
+          "source_group": "other",
+          "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
+        },
+        {
+          "path": ".zed/tasks.json",
+          "line": 112,
+          "source_group": "other",
+          "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
+        },
+        {
+          "path": ".zed/tasks.json",
+          "line": 127,
+          "source_group": "other",
+          "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
+        },
+        {
+          "path": ".zed/tasks.json",
+          "line": 142,
+          "source_group": "other",
+          "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
         }
       ]
+    },
+    {
+      "path": "scripts/engineering/dev/zed_task.ps1",
+      "type": "ps1",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": [],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-10-21",
+      "next_step": "Retain as a bounded Zed editor task launcher helper for local Windows development; promote only if Zed task automation becomes a governed first-class developer workflow entrypoint."
     },
     {
       "path": "scripts/engineering/diagnostics/__main__.py",
