@@ -1183,7 +1183,11 @@ def test_adr_analysis_wrapper_startup_contract(
         for line in captured
     )
     assert any(
-        line.startswith("adr_path=") and "docs\\02-architecture\\decisions" in line
+        line.startswith("adr_path=")
+        and (
+            "docs\\02-architecture\\decisions" in line
+            or "docs/02-architecture/decisions" in line
+        )
         for line in captured
     )
 

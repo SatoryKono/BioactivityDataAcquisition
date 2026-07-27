@@ -107,10 +107,11 @@ def test_active_docs_sync_workflow_selector_and_cta_titles() -> None:
     assert "single-select with Include All across primary dashboards" in (
         variable_reference
     )
-    assert "| bioetl-workflow-overview.json | 9 | First Action |" in panel_inventory
-    assert "| bioetl-workflow-overview.json | 2 | Failed Workflow Runs / Range |" in (
-        panel_inventory
-    )
+    # bioetl-workflow-overview.json was retired (#6570/#6647); workflow-band
+    # evidence now ships on bioetl-runtime (see panel-title-inventory).
+    assert "bioetl-workflow-overview.json" not in panel_inventory
+    assert "| bioetl-runtime.json |" in panel_inventory
+    assert "Failed Workflow Runs / Range" in panel_inventory
 
     for token in ("Next Diagnostic Surface", "Workflow Scope"):
         assert token not in panel_inventory

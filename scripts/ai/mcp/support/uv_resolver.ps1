@@ -9,31 +9,58 @@ $script:BioetlProxyEnvironmentNames = @(
 )
 
 function Get-BioetlProxyEnvironmentSnapshot {
-    $snapshot = [ordered]@{}
+    # Use a plain hashtable and suppress enumeration so callers receive one
+    # map (PowerShell otherwise unwraps single-collection returns).
+    $snapshot = @{}
     foreach ($name in $script:BioetlProxyEnvironmentNames) {
         $snapshot[$name] = [Environment]::GetEnvironmentVariable(
             $name,
             [EnvironmentVariableTarget]::Process
         )
     }
-    return $snapshot
+    Write-Output -NoEnumerate $snapshot
 }
 
 function Restore-BioetlProxyEnvironment {
     param(
         [Parameter(Mandatory = $true)]
-        [System.Collections.IDictionary]$Snapshot
+        $Snapshot
     )
 
-    # Prefer Set-Item/Remove-Item over SetEnvironmentVariable(null): on Linux
-    # pwsh the latter can leave bypass values (NO_PROXY=*) sticky across cases.
+    # Normalize to a dictionary whether callers pass Hashtable, OrderedDictionary,
+    # or a PSCustomObject-wrapped map from PowerShell pipeline unwrapping.
+    $map = @{}
+    if ($Snapshot -is [System.Collections.IDictionary]) {
+        foreach ($key in @($Snapshot.Keys)) {
+            $map[[string]$key] = $Snapshot[$key]
+        }
+    }
+    elseif ($null -ne $Snapshot) {
+        foreach ($prop in $Snapshot.PSObject.Properties) {
+            $map[[string]$prop.Name] = $prop.Value
+        }
+    }
+
     foreach ($name in $script:BioetlProxyEnvironmentNames) {
-        $value = $Snapshot[$name]
+        $value = $null
+        if ($map.ContainsKey($name)) {
+            $value = $map[$name]
+        }
         if ($null -eq $value -or $value -eq "") {
             Remove-Item -Path "Env:$name" -ErrorAction SilentlyContinue
+            [Environment]::SetEnvironmentVariable(
+                $name,
+                $null,
+                [EnvironmentVariableTarget]::Process
+            )
         }
         else {
             Set-Item -Path "Env:$name" -Value ([string]$value)
+            [Environment]::SetEnvironmentVariable(
+                $name,
+                [string]$value,
+                [EnvironmentVariableTarget]::Process
+            )
         }
     }
 }
