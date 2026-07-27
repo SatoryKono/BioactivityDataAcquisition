@@ -1,12 +1,12 @@
 # План работ: Shared MCP plane (actualized)
 
-*Status: working execution plan (non-normative)*  
-*Date: 2026-07-24*  
-*Program: GitHub #6563*  
-*Related:*  
-  - [mcp-shared-http-multi-client-plan-2026-07-24.md](./mcp-shared-http-multi-client-plan-2026-07-24.md)  
-  - [mcp-shared-http-multi-client-issue-pack-2026-07-24.md](./mcp-shared-http-multi-client-issue-pack-2026-07-24.md)  
-  - Policy: `docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md`  
+*Status: working execution plan (non-normative)*
+*Date: 2026-07-24*
+*Program: GitHub #6563*
+*Related:*
+  - [mcp-shared-http-multi-client-plan-2026-07-24.md](./mcp-shared-http-multi-client-plan-2026-07-24.md)
+  - [mcp-shared-http-multi-client-issue-pack-2026-07-24.md](./mcp-shared-http-multi-client-issue-pack-2026-07-24.md)
+  - Policy: `docs/00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md`
   - Policy: `docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md`
 
 ---
@@ -15,8 +15,8 @@
 
 ### 1.1 Цель
 
-Один long-lived **Streamable HTTP** endpoint на логический MCP-сервер;  
-Grok + Cursor + Codex + Gemini + VS Code → **один** процесс/контейнер на сервер  
+Один long-lived **Streamable HTTP** endpoint на логический MCP-сервер;
+Grok + Cursor + Codex + Gemini + VS Code → **один** процесс/контейнер на сервер
 (без N× stdio / Docker Toolkit thrash).
 
 ### 1.2 Success metrics (из program plan)
@@ -125,15 +125,15 @@ W5  Optional Mode B / auth / watchdog  ─── only if needed
 | **W0.4** Toolkit regression | Operator | `docker ps` filter `docker-mcp-name=jetbrains\|node-code-sandbox` | count = 0 |
 | **W0.5** No MCP_DOCKER | Operator | home configs Cursor/Codex/Gemini/VS Code | нет `gateway run --profile default` |
 
-**Deps:** plane already up.  
-**Estimate:** 30–60 min.  
+**Deps:** plane already up.
+**Estimate:** 30–60 min.
 **Exit:** checklist W0 signed → можно W1/W2.
 
 **Failure playbook:**
 
-1. Plane down → `start-shared.ps1`  
-2. Client still stdio → re-run `setup_mcp --profile shared --transport-mode shared` + `apply-shared-to-grok.ps1` + restart  
-3. Orphans back → `cleanup-mcp-orphans.ps1 -KillHostGateways` + проверить Toolkit profile  
+1. Plane down → `start-shared.ps1`
+2. Client still stdio → re-run `setup_mcp --profile shared --transport-mode shared` + `apply-shared-to-grok.ps1` + restart
+3. Orphans back → `cleanup-mcp-orphans.ps1 -KillHostGateways` + проверить Toolkit profile
 
 ---
 
@@ -210,7 +210,7 @@ W5  Optional Mode B / auth / watchdog  ─── only if needed
 |------|------------|
 | Capture evidence (process list / port owners) for 2 clients × 1 server | Attached to issue #6564 / #6563 |
 
-**W2 estimate:** 1–2 d.  
+**W2 estimate:** 1–2 d.
 **W2 exit:** issues P0/P1B/P1A/P1C can be closed or marked ready-to-close.
 
 ---
@@ -235,13 +235,13 @@ W5  Optional Mode B / auth / watchdog  ─── only if needed
 
 For each server:
 
-1. Confirm wrapper stdio works standalone.  
-2. Add entry to `shared-servers.json` (port, wrapper, class, priority).  
-3. Keep port map in sync in `setup_mcp.py` SHARED endpoints table.  
-4. `start-shared` starts it; `health-shared` pings.  
-5. Generator emits HTTP in `shared` mode.  
-6. Grok apply catalog-driven (no hardcode list drift).  
-7. Smoke tool call once.  
+1. Confirm wrapper stdio works standalone.
+2. Add entry to `shared-servers.json` (port, wrapper, class, priority).
+3. Keep port map in sync in `setup_mcp.py` SHARED endpoints table.
+4. `start-shared` starts it; `health-shared` pings.
+5. Generator emits HTTP in `shared` mode.
+6. Grok apply catalog-driven (no hardcode list drift).
+7. Smoke tool call once.
 8. Update `MCP_SHARED_RUNTIME.md` matrix row → Phase N.
 
 ### 3.3 Special: docker / mermaid
@@ -252,7 +252,7 @@ For each server:
 | B. One shared gateway process exposing both (if toolkit allows) | Fewer processes | Coupling; not in current catalog model |
 | **Recommend A** for consistency with Phase 1 |
 
-**Constraint:** gateway must speak MCP over stdio to proxy; clients only see HTTP.  
+**Constraint:** gateway must speak MCP over stdio to proxy; clients only see HTTP.
 **Do not** re-enable full `MCP_DOCKER --profile default`.
 
 ### 3.4 W3 batches
@@ -280,7 +280,7 @@ For each server:
 | **W4.5** Close/update GitHub #6563–#6569 | Evidence links, checkboxes | States reflect reality |
 | **W4.6** Inventory scripts registry | If new scripts — lifecycle registry | CI inventory clean |
 
-**Estimate:** 0.5–1.5 d.  
+**Estimate:** 0.5–1.5 d.
 **Deps:** W0–W2 ideally; W4.1–W4.3 can start after W0.
 
 ---
@@ -312,7 +312,7 @@ W0 (verify)
 W5 optional after W3/W4
 ```
 
-Critical path: **W0 → W1 → W2 → W4.5**.  
+Critical path: **W0 → W1 → W2 → W4.5**.
 Value path for thrash: **W0 → W1.2 → W3.1**.
 
 ---
@@ -321,10 +321,10 @@ Value path for thrash: **W0 → W1.2 → W3.1**.
 
 ### Wave 0 — Operator
 
-- [ ] W0.1 Restart all five clients *(operator — required for clients to load HTTP)*  
-- [x] W0.2 `health-shared` daily 12/12 *(plane green 2026-07-24; neo4j excluded)*  
-- [x] W0.3 Single-instance proof *(1 listener/port; evidence `logs/mcp-shared/single-instance-evidence.md`)*  
-- [x] W0.4 No jetbrains/sandbox containers *(0/0)*  
+- [ ] W0.1 Restart all five clients *(operator — required for clients to load HTTP)*
+- [x] W0.2 `health-shared` daily 12/12 *(plane green 2026-07-24; neo4j excluded)*
+- [x] W0.3 Single-instance proof *(1 listener/port; evidence `logs/mcp-shared/single-instance-evidence.md`)*
+- [x] W0.4 No jetbrains/sandbox containers *(0/0)*
 - [x] W0.5 No `MCP_DOCKER` full gateway in home configs *(clean)*
 
 ### Runtime R1
@@ -333,42 +333,42 @@ Value path for thrash: **W0 → W1.2 → W3.1**.
 
 ### Wave 1 — Code fixes
 
-- [x] W1.1 Grok apply enabled=true + safe disable gateways + fixture  
-- [x] W1.2 start-shared sequential/pre-warm/retry  
-- [x] W1.3 health-shared per-server timeout  
+- [x] W1.1 Grok apply enabled=true + safe disable gateways + fixture
+- [x] W1.2 start-shared sequential/pre-warm/retry
+- [x] W1.3 health-shared per-server timeout
   *(implemented 2026-07-24: section-scoped regex, npm-cache prewarm, health timeouts)*
 
 ### Wave 2 — Acceptance
 
-- [x] W2.1 setup_mcp transport-mode unit tests *(stdio/shared/hybrid + localhost reject; 2026-07-24)*  
-- [x] W2.2 cleanup protect proof *(bioetl-mcp-protect-probe + label survives cleanup; 2026-07-24)*  
-- [x] W2.3 protocol_smoke HTTP *(smoke_http_server + unit tests; live optional)*  
+- [x] W2.1 setup_mcp transport-mode unit tests *(stdio/shared/hybrid + localhost reject; 2026-07-24)*
+- [x] W2.2 cleanup protect proof *(bioetl-mcp-protect-probe + label survives cleanup; 2026-07-24)*
+- [x] W2.3 protocol_smoke HTTP *(smoke_http_server + unit tests; live optional)*
 - [ ] W2.4 Dual-client evidence on issues *(operator: restart clients + proof)*
 
 ### Wave 3 — Expand
 
-- [x] W3.1 docker + mermaid (+ dockerhub) *(catalog 8817–8819; 2026-07-24)*  
-- [x] W3.2 github + fetch *(8820–8821)*  
-- [x] W3.3 prometheus + grafana *(8822–8823)*  
-- [x] W3.4 neo4j-* *(catalog 8824–8825; optional daily — auth dependent)*  
-- [x] W3.5 memory/filesystem design gate *(documented deferred in MCP_SHARED_RUNTIME)*  
+- [x] W3.1 docker + mermaid (+ dockerhub) *(catalog 8817–8819; 2026-07-24)*
+- [x] W3.2 github + fetch *(8820–8821)*
+- [x] W3.3 prometheus + grafana *(8822–8823)*
+- [x] W3.4 neo4j-* *(catalog 8824–8825; optional daily — auth dependent)*
+- [x] W3.5 memory/filesystem design gate *(documented deferred in MCP_SHARED_RUNTIME)*
 
 ### Wave 4 — Docs / GH
 
-- [x] W4.1 DOCKER_QUICKSTART  
-- [x] W4.2 Lesson 32 GiB  
-- [x] W4.3 OPS playbook (`scripts/ops/runtime/mcp/OPERATOR.md`)  
-- [x] W4.4 Compose decision note (MCP_SHARED_RUNTIME Mode B)  
-- [ ] W4.5 GitHub issue closeout *(needs `gh` + operator evidence W0/W2.4)*  
-- [ ] W4.6 scripts inventory if required by CI registry 
+- [x] W4.1 DOCKER_QUICKSTART
+- [x] W4.2 Lesson 32 GiB
+- [x] W4.3 OPS playbook (`scripts/ops/runtime/mcp/OPERATOR.md`)
+- [x] W4.4 Compose decision note (MCP_SHARED_RUNTIME Mode B)
+- [ ] W4.5 GitHub issue closeout *(needs `gh` + operator evidence W0/W2.4)*
+- [ ] W4.6 scripts inventory if required by CI registry
 
 ### Wave 5 — Optional hardening
 
-- [x] Auth token *(optional `BIOETL_MCP_SHARED_API_KEY` → mcp-proxy --apiKey; 2026-07-24)*  
-- [ ] Toolkit detector *(still open)*  
-- [x] Plane watchdog *(`watchdog-shared.ps1 -Daily`)*  
-- [x] Mode B compose skeleton *(`docker-compose.mcp-shared.yml`, empty services)*  
-- [x] Loopback bind *(`--host 127.0.0.1` in start-shared)*  
+- [x] Auth token *(optional `BIOETL_MCP_SHARED_API_KEY` → mcp-proxy --apiKey; 2026-07-24)*
+- [ ] Toolkit detector *(still open)*
+- [x] Plane watchdog *(`watchdog-shared.ps1 -Daily`)*
+- [x] Mode B compose skeleton *(`docker-compose.mcp-shared.yml`, empty services)*
+- [x] Loopback bind *(`--host 127.0.0.1` in start-shared)*
 - [x] Daily profile *(`start-shared.ps1 -Daily` excludes neo4j-*)*
 
 ---
@@ -399,10 +399,10 @@ Value path for thrash: **W0 → W1.2 → W3.1**.
 
 Rules:
 
-- One concern per PR where possible.  
-- No debt budget increases.  
-- No `.env` edits without explicit approval.  
-- Tracked `.mcp.json` stays portable stdio.  
+- One concern per PR where possible.
+- No debt budget increases.
+- No `.env` edits without explicit approval.
+- Tracked `.mcp.json` stays portable stdio.
 - Post-change: `health-shared` + relevant tests; report skipped checks.
 
 ---
@@ -411,7 +411,7 @@ Rules:
 
 ```powershell
 # Boot / after reboot
-cd E:\g-drive\05_AI\github\BioactivityDataAcquisition2
+cd E:\g-drive\05_AI\github\BioactivityDataAcquisition
 .\scripts\ops\runtime\mcp\start-shared.ps1
 .\scripts\ops\runtime\mcp\health-shared.ps1
 
@@ -472,23 +472,23 @@ python scripts/ai/codex/setup_mcp.py --profile stable --transport-mode stdio --s
 
 Program slice «multi-client daily» считается done, когда:
 
-1. W0 checklist green on operator host.  
-2. W1 fixes merged.  
-3. W2 tests + dual-client evidence attached to #6564.  
-4. Plane ≥ Phase 1 five servers stable cold-start.  
-5. W3.1 (docker/mermaid) done **or** explicitly deferred with residual thrash accepted.  
-6. Docs (W4.1–W4.3) match commands.  
-7. #6563 children closed or re-scoped with dates.  
+1. W0 checklist green on operator host.
+2. W1 fixes merged.
+3. W2 tests + dual-client evidence attached to #6564.
+4. Plane ≥ Phase 1 five servers stable cold-start.
+5. W3.1 (docker/mermaid) done **or** explicitly deferred with residual thrash accepted.
+6. Docs (W4.1–W4.3) match commands.
+7. #6563 children closed or re-scoped with dates.
 8. No tech-debt budget increase; no #6293 stdio Compose.
 
 ---
 
 ## 13. Immediate next actions (ordered)
 
-1. **Operator:** W0.1–W0.5 (restart + dual-client proof).  
-2. **Dev:** PR-A = W1.1 + W1.2 + W1.3.  
-3. **Dev:** PR-B = W2.1 + W2.3.  
-4. **Dev:** PR-C = W3.1 after spike gateway HTTP wrap.  
+1. **Operator:** W0.1–W0.5 (restart + dual-client proof).
+2. **Dev:** PR-A = W1.1 + W1.2 + W1.3.
+3. **Dev:** PR-B = W2.1 + W2.3.
+4. **Dev:** PR-C = W3.1 after spike gateway HTTP wrap.
 5. **Docs/GH:** W4 in parallel after W0.
 
 ---

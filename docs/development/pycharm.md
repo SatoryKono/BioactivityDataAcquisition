@@ -1,6 +1,6 @@
 # PyCharm configuration baseline (BioETL)
 
-Версия: 2026.01.4 stable, Python: 3.13.7 (Windows), проект: BioactivityDataAcquisition2.
+Версия: 2026.01.4 stable, Python: 3.13.7 (Windows), проект: BioactivityDataAcquisition.
 
 Полный operator guide: [docs/03-guides/development/pycharm-setup.md](../03-guides/development/pycharm-setup.md).
 

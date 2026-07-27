@@ -112,7 +112,7 @@ partial sample.
 | --------- | ----------------- |
 | Engine topology | Single Docker Desktop engine (`desktop-linux`); no parallel named engines for the same projects |
 | Desktop / engine versions | Record live `docker version` / Desktop build in the campaign report (example observed lane: Desktop 4.82 / Engine 29.6.x) |
-| Runtime origin | Absolute Linux path outside `/mnt` and `/tmp` (default campaign origin: `/home/<user>/.local/share/bioetl-runtime/BioactivityDataAcquisition2`) |
+| Runtime origin | Absolute Linux path outside `/mnt` and `/tmp` (default campaign origin: `/home/<user>/.local/share/bioetl-runtime/BioactivityDataAcquisition`) |
 | Compose projects | Canonical `bioetl-main` and `bioetl-monitoring` only for the release bundle |
 | Networks | Required services use contracted networks (e.g. `bioetl-runtime`); residual `warp-network` attachment fails promotion |
 | Resource Saver | Prefer **off** during 100-cycle / 72-hour / recovery campaigns so engine sleep does not inflate recovery latency |

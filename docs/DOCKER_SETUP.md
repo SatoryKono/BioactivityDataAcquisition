@@ -15,7 +15,7 @@ runtime проекта остаётся Python/venv; Docker не требует�
 - Не используйте `docker compose down -v`, `docker volume prune`,
   `docker system prune`, удаление VHDX или Docker data root как способ
   восстановления.
-- Не запускайте один Compose project одновременно из Windows, `/mnt/*`,
+- Не запускайте один Compose project одновременно из Windows, `WSL-mounted Windows paths`,
   `/tmp` и Linux runtime mirror. Поддерживается один origin на Linux filesystem.
 - Все lifecycle операции выполняются через
   `scripts/ops/runtime/docker/runtime_manager.py`.
@@ -41,7 +41,7 @@ runtime проекта остаётся Python/venv; Docker не требует�
 1. Docker Desktop установлен, WSL2 integration включена только для рабочего
    Linux distribution, а `docker info` доступен из него.
 2. Репозиторий для фактического запуска находится на Linux filesystem, например
-   `/home/<user>/.local/share/bioetl-runtime/BioactivityDataAcquisition2`.
+   `/home/<user>/.local/share/bioetl-runtime/BioactivityDataAcquisition`.
 3. Требуемые environment names для выбранного stack заданы в текущем процессе.
    Полный список является частью
    `configs/quality/docker_runtime_contracts.yaml`.

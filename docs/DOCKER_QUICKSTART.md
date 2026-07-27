@@ -4,7 +4,7 @@
 > Contract: `configs/quality/docker_helper_contracts.yaml`
 
 Docker — optional local adjunct. Канонический runtime: Python/venv.
-Выполняйте команды из Linux filesystem mirror, не из `/mnt/*` или `/tmp`,
+Выполняйте команды из Linux filesystem mirror, не из `WSL-mounted Windows paths` или `/tmp`,
 и не создавайте/не изменяйте `.env`.
 
 ## Default release surface

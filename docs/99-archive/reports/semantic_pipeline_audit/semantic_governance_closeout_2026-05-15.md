@@ -13,7 +13,7 @@ Generated: `2026-05-15`
 
 ## Closeout Summary
 
-- Extended [semantic_audit_review_registry.yaml](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/configs/field_registry/semantic_audit_review_registry.yaml:1) from simple review buckets into a machine-readable governance policy surface.
+- Extended [semantic_audit_review_registry.yaml](configs/field_registry/semantic_audit_review_registry.yaml:1) from simple review buckets into a machine-readable governance policy surface.
 - Added explicit ownership metadata for all `PARTIAL` semantic clusters:
   - `canonical_smiles_identifier`
   - `chembl_target_identifier`
@@ -38,9 +38,9 @@ Generated: `2026-05-15`
 ## Enforcement
 
 - New validator command: `python -m scripts.engineering.qa check-semantic-governance-policy --check --json`
-- CLI entry wired in [scripts/engineering/qa/__main__.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/engineering/qa/__main__.py:22)
-- Workflow gate wired in [.github/workflows/semantic-governance.yml](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/.github/workflows/semantic-governance.yml:1)
-- Regression coverage added in [test_semantic_governance_policy.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/integration/config/test_semantic_governance_policy.py:1)
+- CLI entry wired in [scripts/engineering/qa/__main__.py](scripts/engineering/qa/__main__.py:22)
+- Workflow gate wired in [.github/workflows/semantic-governance.yml](.github/workflows/semantic-governance.yml:1)
+- Regression coverage added in [test_semantic_governance_policy.py](tests/integration/config/test_semantic_governance_policy.py:1)
 
 ## Outcome
 

@@ -1,19 +1,20 @@
+import asyncio
+import contextlib
 import enum
 import gc
 import inspect
 import os
-import asyncio
+import pathlib
+import random
 import sys
 import threading
 import traceback
+from collections.abc import Generator
 from functools import cache
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
-import pathlib
-import random
 from types import ModuleType
 from typing import Any, cast
-from collections.abc import Generator
 
 import pytest
 from tests.helpers.vcr_config import (
@@ -249,6 +250,19 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         default=False,
         help="Enable richer pilot-only live contract suites (equivalent to BIOETL_PILOT_SOAK_TESTS=true).",
     )
+    # Workflows pass --vcr-record=...; register a no-op-compatible option when
+    # pytest-recording is not loaded in a given dependency/env matrix cell.
+    with contextlib.suppress(ValueError):
+        # Already registered by pytest-recording or another plugin.
+        parser.addoption(
+            "--vcr-record",
+            action="store",
+            default=None,
+            help=(
+                "VCR record mode compatibility option "
+                "(none|once|new_episodes|all). Prefer VCR_RECORD_MODE env."
+            ),
+        )
 
 
 def pytest_cmdline_main(config):

@@ -740,6 +740,10 @@ printf '%s\n' "$NO_PROXY" "$no_proxy" "${{HTTP_PROXY-unset}}" \
 def test_powershell_uv_resolver_candidate_paths(
     mock_functions: str, expected: str
 ) -> None:
+    if sys.platform != "win32":
+        pytest.skip(
+            "Windows-path uvx candidate contracts require Windows PowerShell path semantics"
+        )
     helper = _ps_quote(_powershell_path(UV_RESOLVER_PS1))
     command = (
         f". {helper}; {mock_functions}; "
