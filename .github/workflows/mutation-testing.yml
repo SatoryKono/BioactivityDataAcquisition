@@ -74,7 +74,7 @@ jobs:
           MUTMUT_SOURCE_PATH: ${{ matrix.target.paths_to_mutate }}
           MUTMUT_TESTS_DIR: ${{ matrix.target.tests_dir }}
         run: |
-          python - <<'PY'
+          uv run --frozen --no-build python - <<'PY'
           import os
           from pathlib import Path
 
@@ -98,7 +98,7 @@ jobs:
           uv run --frozen --no-build mutmut run
 
       - name: Generate mutation report
-        if: always()
+        if: success()
         run: |
           mkdir -p "reports/${{ matrix.target.id }}"
           uv run --frozen --no-build mutmut results > "reports/${{ matrix.target.id }}/mutmut_results.txt"

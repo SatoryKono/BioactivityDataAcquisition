@@ -46,6 +46,7 @@ __all__ = [
     "ProviderDataSourceAccessProtocol",
     "ProviderRegistrarProtocol",
     "ProviderRegistry",
+    "ProviderSettingsProtocol",
     "create_provider_registry",
     "ensure_provider_registry_ready",
     "get_default_provider_registry",

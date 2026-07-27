@@ -25,9 +25,15 @@ def _canonical_script() -> Path:
     )
 
 
-if __name__ == "__main__":
+def main() -> int:
+    """Run the canonical config-gap analyzer through the unified router."""
     script = _canonical_script()
     if not script.exists():
         sys.stderr.write(f"ERROR: canonical script not found: {script}\n")
-        raise SystemExit(2)
+        return 2
     runpy.run_path(str(script), run_name="__main__")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

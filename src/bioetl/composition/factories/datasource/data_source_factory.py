@@ -21,7 +21,8 @@ from bioetl.domain.ports import DataSourcePort
 from bioetl.infrastructure.config.config_root import resolve_config_subdir
 
 if TYPE_CHECKING:
-    from bioetl.composition.providers._models import ProviderSettingsProtocol
+    # Import the public facade re-export — not providers._models (private-module guard).
+    from bioetl.composition.providers.provider_registry import ProviderSettingsProtocol
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient

@@ -146,25 +146,43 @@ def _collect_ledger_bronze_dates(
     for entry in ledger_entries:
         if entry.event_type != INPUT_SNAPSHOT_PUBLISHED_EVENT:
             continue
-        details = entry.details if isinstance(entry.details, Mapping) else {}
-        provider = _optional_text(details.get("provider"))
-        entity = _optional_text(details.get("entity"))
-        if provider is not None and provider != manifest.provider:
-            raise RuntimeError(
-                "Exact replay parent snapshot provider mismatch between ledger "
-                f"('{provider}') and manifest ('{manifest.provider}')"
-            )
-        if entity is not None and entity != manifest.entity:
-            raise RuntimeError(
-                "Exact replay parent snapshot entity mismatch between ledger "
-                f"('{entity}') and manifest ('{manifest.entity}')"
-            )
-        details_immutable_uri = _optional_text(details.get("immutable_uri"))
+        details_immutable_uri = _validated_ledger_snapshot_uri(
+            manifest=manifest,
+            entry=entry,
+        )
         if details_immutable_uri is None:
             continue
         dates.add(_extract_bronze_date(details_immutable_uri))
     if dates:
         return tuple(sorted(dates))
+    return _collect_manifest_bronze_dates(manifest)
+
+
+def _validated_ledger_snapshot_uri(
+    *,
+    manifest: RunManifest,
+    entry: RunLedgerEntry,
+) -> str | None:
+    """Validate one ledger snapshot event and return its immutable URI."""
+    details = entry.details if isinstance(entry.details, Mapping) else {}
+    provider = _optional_text(details.get("provider"))
+    entity = _optional_text(details.get("entity"))
+    if provider is not None and provider != manifest.provider:
+        raise RuntimeError(
+            "Exact replay parent snapshot provider mismatch between ledger "
+            f"('{provider}') and manifest ('{manifest.provider}')"
+        )
+    if entity is not None and entity != manifest.entity:
+        raise RuntimeError(
+            "Exact replay parent snapshot entity mismatch between ledger "
+            f"('{entity}') and manifest ('{manifest.entity}')"
+        )
+    return _optional_text(details.get("immutable_uri"))
+
+
+def _collect_manifest_bronze_dates(manifest: RunManifest) -> tuple[str, ...]:
+    """Collect the compatibility fallback dates from manifest source refs."""
+    dates: set[str] = set()
     for source_ref in manifest.source_refs:
         if (
             source_ref.provider != manifest.provider

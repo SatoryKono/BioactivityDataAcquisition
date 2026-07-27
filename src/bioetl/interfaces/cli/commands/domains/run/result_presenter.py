@@ -25,37 +25,7 @@ def echo_run_result(result: RunResult) -> None:
         echo_warning(f"Run report unavailable: {result.run_report_error}")
 
     if result.status == PipelineRunResult.SUCCESS:
-        echo_info(f"Pipeline completed successfully (run_id: {short_run_id})")
-        echo_info(f"  - Bronze records:      {result.records_fetched}")
-        echo_info(f"  - Silver records:      {result.records_silver}")
-        if result.records_gold > 0:
-            echo_info(f"  - Gold records:        {result.records_gold}")
-        if result.records_filtered_out > 0:
-            echo_info(f"  - Silver structural rejects: {result.records_filtered_out}")
-        else:
-            echo_info("  - Silver structural rejects: 0")
-        if result.records_quarantined > 0:
-            echo_info(f"  - Quarantined (DQ/contract): {result.records_quarantined}")
-        else:
-            echo_info("  - Quarantined (DQ/contract): 0")
-        if result.records_gold_excluded_by_contract > 0:
-            echo_info(
-                f"  - Gold contract excludes: {result.records_gold_excluded_by_contract}"
-            )
-        if result.run_report_funnel:
-            echo_info("  - Stage funnel:")
-            for row in result.run_report_funnel:
-                echo_info(
-                    "    "
-                    f"{row.stage_id}: in={row.records_in}, out={row.records_out}, "
-                    f"removed={row.removed_total}, "
-                    f"balance={row.balance_status.value}, "
-                    f"tracking={row.tracking.value}"
-                )
-        if result.run_report_json_path:
-            echo_info(f"  - Run report (JSON):    {result.run_report_json_path}")
-        if result.run_report_markdown_path:
-            echo_info(f"  - Run report (MD):      {result.run_report_markdown_path}")
+        _echo_success_result(result, short_run_id=short_run_id)
         return
 
     if result.status == PipelineRunResult.DRY_RUN:
@@ -73,3 +43,38 @@ def echo_run_result(result: RunResult) -> None:
             result.error_message or "Unknown error",
         )
         echo_info(f"  - Processed before failure: {result.records_fetched}")
+
+
+def _echo_success_result(result: RunResult, *, short_run_id: str) -> None:
+    """Render counters and report locations for a successful run."""
+    echo_info(f"Pipeline completed successfully (run_id: {short_run_id})")
+    echo_info(f"  - Bronze records:      {result.records_fetched}")
+    echo_info(f"  - Silver records:      {result.records_silver}")
+    if result.records_gold > 0:
+        echo_info(f"  - Gold records:        {result.records_gold}")
+    echo_info(f"  - Silver structural rejects: {result.records_filtered_out}")
+    echo_info(f"  - Quarantined (DQ/contract): {result.records_quarantined}")
+    if result.records_gold_excluded_by_contract > 0:
+        echo_info(
+            f"  - Gold contract excludes: {result.records_gold_excluded_by_contract}"
+        )
+    _echo_stage_funnel(result)
+    if result.run_report_json_path:
+        echo_info(f"  - Run report (JSON):    {result.run_report_json_path}")
+    if result.run_report_markdown_path:
+        echo_info(f"  - Run report (MD):      {result.run_report_markdown_path}")
+
+
+def _echo_stage_funnel(result: RunResult) -> None:
+    """Render the optional stage-funnel section."""
+    if not result.run_report_funnel:
+        return
+    echo_info("  - Stage funnel:")
+    for row in result.run_report_funnel:
+        echo_info(
+            "    "
+            f"{row.stage_id}: in={row.records_in}, out={row.records_out}, "
+            f"removed={row.removed_total}, "
+            f"balance={row.balance_status.value}, "
+            f"tracking={row.tracking.value}"
+        )
