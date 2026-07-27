@@ -738,15 +738,19 @@ class TestHealthServerAsyncExecution:
 
         mock_start_observability.assert_called_once_with()
         # Verify HealthServer was called with correct options
+        from bioetl.interfaces.http.health_server import HealthServerControlPlaneDeps
+
         mock_server_cls.assert_called_once_with(
             host="127.0.0.1",
             port=9000,
-            health_monitor=mock_deps.health_monitor,
-            quarantine_service=None,
-            checkpoint_port=mock_deps.checkpoint_port,
-            run_manifest_port=mock_deps.run_manifest_port,
-            run_ledger_port=mock_deps.run_ledger_port,
-            workflow_manifest_port=mock_deps.workflow_manifest_port,
+            control_plane=HealthServerControlPlaneDeps(
+                health_monitor=mock_deps.health_monitor,
+                quarantine_service=None,
+                checkpoint_port=mock_deps.checkpoint_port,
+                run_manifest_port=mock_deps.run_manifest_port,
+                run_ledger_port=mock_deps.run_ledger_port,
+                workflow_manifest_port=mock_deps.workflow_manifest_port,
+            ),
         )
         mock_server.set_data_root.assert_called_once_with(str(tmp_path))
 
@@ -788,6 +792,8 @@ class TestHealthServerAsyncExecution:
         ):
             cli_runner.invoke(cli, ["health", "server"])
 
+        from bioetl.interfaces.http.health_server import HealthServerControlPlaneDeps
+
         mock_start_observability.assert_called_once_with()
         # Verify entrypoint was called to get dependencies
         mock_get_deps.assert_called_once()
@@ -795,12 +801,14 @@ class TestHealthServerAsyncExecution:
         mock_server_cls.assert_called_once_with(
             host="127.0.0.1",
             port=8081,
-            health_monitor=mock_deps.health_monitor,
-            quarantine_service=None,
-            checkpoint_port=mock_deps.checkpoint_port,
-            run_manifest_port=mock_deps.run_manifest_port,
-            run_ledger_port=mock_deps.run_ledger_port,
-            workflow_manifest_port=mock_deps.workflow_manifest_port,
+            control_plane=HealthServerControlPlaneDeps(
+                health_monitor=mock_deps.health_monitor,
+                quarantine_service=None,
+                checkpoint_port=mock_deps.checkpoint_port,
+                run_manifest_port=mock_deps.run_manifest_port,
+                run_ledger_port=mock_deps.run_ledger_port,
+                workflow_manifest_port=mock_deps.workflow_manifest_port,
+            ),
         )
         mock_server.set_data_root.assert_called_once_with(str(tmp_path))
 

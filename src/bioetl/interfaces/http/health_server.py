@@ -61,12 +61,21 @@ class HealthServer(
         control_plane: HealthServerControlPlaneDeps | None = None,
         prometheus_base_url: str | None = None,
         logger: LoggerPort | None = None,
+        *,
+        # Legacy keyword construction (unit tests / transitional callers).
+        health_monitor: HealthMonitorPort | None = None,
+        quarantine_service: QuarantineService | None = None,
+        checkpoint_port: CheckpointPort | None = None,
+        run_manifest_port: RunManifestPort | None = None,
+        run_ledger_port: RunLedgerPort | None = None,
+        workflow_manifest_port: WorkflowManifestPort | None = None,
     ) -> None:
         """Initialize health server.
 
         Args:
             host: IP address to bind the server to. Defaults to localhost.
             port: TCP port to listen on. Defaults to 8081.
+            control_plane: Preferred collaborator bag for optional ports.
             health_monitor: Optional monitor providing provider health states for
                 /health/ready and /health/providers endpoints. Endpoints report
                 healthy with no provider data when None.
@@ -87,7 +96,35 @@ class HealthServer(
             logger: Optional LoggerPort for structured server event logging.
                 Server events are silently dropped when None.
         """
-        deps = control_plane or HealthServerControlPlaneDeps()
+        base = control_plane or HealthServerControlPlaneDeps()
+        deps = HealthServerControlPlaneDeps(
+            health_monitor=(
+                health_monitor
+                if health_monitor is not None
+                else base.health_monitor
+            ),
+            quarantine_service=(
+                quarantine_service
+                if quarantine_service is not None
+                else base.quarantine_service
+            ),
+            checkpoint_port=(
+                checkpoint_port if checkpoint_port is not None else base.checkpoint_port
+            ),
+            run_manifest_port=(
+                run_manifest_port
+                if run_manifest_port is not None
+                else base.run_manifest_port
+            ),
+            run_ledger_port=(
+                run_ledger_port if run_ledger_port is not None else base.run_ledger_port
+            ),
+            workflow_manifest_port=(
+                workflow_manifest_port
+                if workflow_manifest_port is not None
+                else base.workflow_manifest_port
+            ),
+        )
         self.host = host
         self.port = port
         self._health_monitor = deps.health_monitor

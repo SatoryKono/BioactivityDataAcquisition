@@ -221,7 +221,7 @@ routes:
     output_kind: curated_generated_docs
     commit_policy: tracked_curated_generated_doc
     outputs:
-      - docs/05-engineering/chembl-protein-classification-migration-closeout.md
+      - docs/05-engineering/chembl_protein_classification_migration_closeout.md
     notes: Engineering closeout pages are retained as curated generated evidence
       and should not be treated as canonical process policy.
 

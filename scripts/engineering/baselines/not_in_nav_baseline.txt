@@ -236,7 +236,7 @@
 04-reference/templates/provider-spec-template.md
 04-reference/templates/runbook-template.md
 05-engineering/architecture-refactoring-rf-001-008-closeout-2026-06-17.md
-05-engineering/chembl-protein-classification-migration-closeout.md
+05-engineering/chembl_protein_classification_migration_closeout.md
 05-engineering/normalization-plan-P0-P6.md
 05-engineering/test-telemetry-baseline.md
 05-operations/control-plane-lifecycle.md

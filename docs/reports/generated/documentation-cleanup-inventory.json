@@ -44289,7 +44289,7 @@
       "lifecycle": null,
       "outbound_links": 0,
       "owner": "BioETL Team",
-      "path": "docs/05-engineering/chembl-protein-classification-migration-closeout.md",
+      "path": "docs/05-engineering/chembl_protein_classification_migration_closeout.md",
       "recommended_action": "generate-automatically",
       "root_doc_kind": null,
       "section": "05-engineering",
@@ -87705,7 +87705,7 @@
       "notes": "Engineering closeout pages are retained as curated generated evidence and should not be treated as canonical process policy.",
       "output_kind": "curated_generated_docs",
       "outputs": [
-        "docs/05-engineering/chembl-protein-classification-migration-closeout.md"
+        "docs/05-engineering/chembl_protein_classification_migration_closeout.md"
       ]
     },
     {
