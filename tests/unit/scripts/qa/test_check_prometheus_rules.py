@@ -99,10 +99,11 @@ def test_rule_test_coverage_rejects_new_untested_record(
         test_file=check_prometheus_rules.TESTS_FILE,
     )
 
-    assert coverage["record_definitions"] == 104
+    expected = check_prometheus_rules.EXPECTED_RECORD_DEFINITIONS
+    assert coverage["record_definitions"] == expected + 1
     assert record_name in coverage["untested_records"]
     assert (
-        "record definitions changed from baseline 103: 104"
+        f"record definitions changed from baseline {expected}: {expected + 1}"
         in check_prometheus_rules.validate_rule_test_coverage(coverage)
     )
 
