@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+pytestmark = pytest.mark.unit
+
+
 from datetime import UTC, datetime
 
 from bioetl.domain.ports.health_check import HealthCheckResult

@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+pytestmark = pytest.mark.unit
+
+
 from bioetl.domain.normalization.profiles import (
     _profile_governed_value_normalizers as normalizers,
 )

@@ -7,6 +7,8 @@ import pytest
 from bioetl.domain.behavior.activity_aggregator._aggregator import ActivityAggregator
 from bioetl.domain.behavior.activity_aggregator._methods import AggregationMethod
 
+pytestmark = pytest.mark.unit
+
 
 def test_aggregate_values_methods_and_errors() -> None:
     agg = ActivityAggregator()
@@ -15,7 +17,9 @@ def test_aggregate_values_methods_and_errors() -> None:
     assert agg.aggregate_values(values, AggregationMethod.MEDIAN) == 2.0
     assert agg.aggregate_values(values, "min") == 1.0
     assert agg.aggregate_values(values, "max") == 4.0
-    assert agg.aggregate_values([1.0, 4.0, 16.0], "geometric_mean") == pytest.approx(4.0)
+    assert agg.aggregate_values([1.0, 4.0, 16.0], "geometric_mean") == pytest.approx(
+        4.0
+    )
     with pytest.raises(ValueError, match="empty"):
         agg.aggregate_values([])
     with pytest.raises(ValueError, match="Unknown aggregation method"):
@@ -36,7 +40,9 @@ def test_aggregate_with_uncertainty_branches() -> None:
     assert value == 20.0
     assert uncertainty >= 0.0
 
-    value, uncertainty = agg.aggregate_with_uncertainty([1.0, 10.0, 100.0], "geometric_mean")
+    value, uncertainty = agg.aggregate_with_uncertainty(
+        [1.0, 10.0, 100.0], "geometric_mean"
+    )
     assert value == pytest.approx(10.0)
     assert uncertainty >= 0.0
 

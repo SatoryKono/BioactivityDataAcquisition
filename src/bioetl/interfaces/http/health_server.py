@@ -33,7 +33,6 @@ from bioetl.interfaces.http.processed_records_table import (
 )
 from bioetl.interfaces.http.types import HealthResponse
 
-
 # Pure liveness fallback when no exposition adapter is injected (unit tests).
 _DEFAULT_HEALTH_SCRAPE_UP_EXPOSITION = (
     "# HELP bioetl_health_server_scrape_up Health server /metrics scrape "

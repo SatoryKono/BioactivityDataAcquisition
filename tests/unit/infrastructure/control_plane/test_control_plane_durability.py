@@ -20,7 +20,9 @@ def test_durability_policy_should_fsync_control_plane_writes_by_default(
         durability.get_settings.cache_clear()
 
 
-def test_should_skip_fsync_for_windows_test_mode(monkeypatch) -> None:
+def test_should_skip_fsync_for_windows_test_mode__control_plane_durability(
+    monkeypatch,
+) -> None:
     monkeypatch.setenv("BIOETL_TEST_MODE", "true")
     durability.get_settings.cache_clear()
     try:

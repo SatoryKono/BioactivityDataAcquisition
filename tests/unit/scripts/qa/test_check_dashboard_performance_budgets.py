@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+pytestmark = pytest.mark.unit
+
+
 from pathlib import Path
 
 from scripts.engineering.qa.check_dashboard_performance_budgets import evaluate

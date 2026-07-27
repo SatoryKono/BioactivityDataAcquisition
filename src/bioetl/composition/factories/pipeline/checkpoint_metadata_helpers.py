@@ -21,6 +21,7 @@ from bioetl.domain.filtering.silver_filter_identity import (
 if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
 
+
 def _build_checkpoint_run_context(
     *,
     pipeline_name: str,

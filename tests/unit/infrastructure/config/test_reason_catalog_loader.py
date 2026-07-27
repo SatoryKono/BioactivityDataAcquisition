@@ -4,12 +4,16 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from bioetl.domain.run_reports.reason_catalog import REASON_CATALOG_VERSION
 from bioetl.infrastructure.config.reason_catalog_loader import (
     load_default_reason_catalog,
     load_reason_catalog_from_path,
     load_reason_catalog_from_text,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def test_load_reason_catalog_from_text_parses_entries() -> None:

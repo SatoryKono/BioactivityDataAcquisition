@@ -4,7 +4,7 @@
     "families": 5,
     "scorecard": "configs/quality/debt_scorecard.yaml",
     "budget_warnings": 0,
-    "budget_review_notes": 4
+    "budget_review_notes": 3
   },
   "families": [
     {
@@ -18,18 +18,18 @@
       ],
       "duplication_clusters": 0,
       "files": 183,
-      "total_loc": 22596,
-      "files_ge_250_loc": 5,
+      "total_loc": 22583,
+      "files_ge_250_loc": 4,
       "helper_function_ratio": 0.371,
       "max_internal_fan_in": 7,
-      "max_internal_fan_in_module": "bioetl.application.core.span_helpers",
+      "max_internal_fan_in_module": "bioetl.application.core.pipeline_span_lifecycle",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 5,
         "max_internal_fan_in": 10
       },
       "budget_warnings": [],
       "budget_review_notes": [
-        "at_budget:files_ge_250_loc=5/5"
+        "near_budget:files_ge_250_loc=4/5"
       ]
     },
     {
@@ -65,9 +65,9 @@
         "src/bioetl/composition/factories/pipeline/"
       ],
       "duplication_clusters": 0,
-      "files": 36,
-      "total_loc": 4729,
-      "files_ge_250_loc": 2,
+      "files": 37,
+      "total_loc": 4763,
+      "files_ge_250_loc": 1,
       "helper_function_ratio": 0.417,
       "max_internal_fan_in": 3,
       "max_internal_fan_in_module": "bioetl.composition.factories.pipeline.registry_manifest",
@@ -77,7 +77,6 @@
       },
       "budget_warnings": [],
       "budget_review_notes": [
-        "at_budget:files_ge_250_loc=2/2",
         "at_budget:max_internal_fan_in=3/3"
       ]
     },

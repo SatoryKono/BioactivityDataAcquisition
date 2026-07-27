@@ -8,7 +8,7 @@
   "result": {
     "status": "pass",
     "test_count": 393,
-    "test_file_count": 41,
+    "test_file_count": 42,
     "bootstrap_reference_count": 939,
     "local_conftest_present": false
   },

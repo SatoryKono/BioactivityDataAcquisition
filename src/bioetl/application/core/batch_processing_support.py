@@ -31,7 +31,6 @@ from bioetl.domain.types import BatchID, BronzeRecord, RunID
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 __all__ = ["BatchProcessingSupportService"]
-
 if TYPE_CHECKING:
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
     from bioetl.application.core.batch_tracing import BatchTracingManagerService
