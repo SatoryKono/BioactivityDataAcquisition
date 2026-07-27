@@ -80,6 +80,7 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
     "bioetl.domain.ports.observability": (
         "DQMonitorPort",
         "ExecutorMetricsPort",
+        "HealthMetricsExpositionPort",
         "LoggerPort",
         "MetricLabels",
         "MetricsPort",
