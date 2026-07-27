@@ -328,7 +328,40 @@ def _iter_dir_search_files(root: Path, base: Path) -> list[Path]:
     return files
 
 
+def _iter_git_tracked_search_files(root: Path) -> list[Path] | None:
+    """Return tracked search files when git metadata is available.
+
+    Restricting reference discovery to tracked paths keeps the inventory
+    identical on clean Linux CI checkouts and developer worktrees that carry
+    local untracked reports/docs under SEARCH_ROOTS.
+    """
+    try:
+        completed = __import__("subprocess").run(
+            ["git", "-C", str(root), "ls-files", "-z", "--", *SEARCH_ROOTS],
+            check=False,
+            capture_output=True,
+        )
+    except OSError:
+        return None
+    if completed.returncode != 0:
+        return None
+
+    files: list[Path] = []
+    for raw in completed.stdout.split(b"\0"):
+        if not raw:
+            continue
+        rel = raw.decode("utf-8", errors="surrogateescape").replace("\\", "/")
+        path = root / rel
+        if path.is_file() and _should_include_search_file(root, path):
+            files.append(path)
+    return sorted(set(files))
+
+
 def _iter_search_files(root: Path) -> list[Path]:
+    tracked = _iter_git_tracked_search_files(root)
+    if tracked is not None:
+        return tracked
+
     files: list[Path] = []
     for rel in SEARCH_ROOTS:
         path = root / rel

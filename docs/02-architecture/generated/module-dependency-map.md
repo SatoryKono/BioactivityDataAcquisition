@@ -6,7 +6,7 @@
 ## Summary
 
 - Scanned modules: `2275`
-- Internal import edges (raw): `7120`
+- Internal import edges (raw): `7117`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `307`
@@ -26,10 +26,10 @@ flowchart LR
     composition -->|155 OK| application
     composition -->|691 OK| composition
     composition -->|280 OK| domain
-    composition -->|230 OK| infrastructure
+    composition -->|229 OK| infrastructure
     domain -->|1174 OK| domain
     infrastructure -->|719 OK| domain
-    infrastructure -->|1114 OK| infrastructure
+    infrastructure -->|1112 OK| infrastructure
     interfaces -->|41 OK| application
     interfaces -->|53 OK| composition
     interfaces -->|59 OK| domain
@@ -45,10 +45,10 @@ flowchart LR
 | `composition`    | `application`    |     155 | allowed |
 | `composition`    | `composition`    |     691 | allowed |
 | `composition`    | `domain`         |     280 | allowed |
-| `composition`    | `infrastructure` |     230 | allowed |
+| `composition`    | `infrastructure` |     229 | allowed |
 | `domain`         | `domain`         |    1174 | allowed |
 | `infrastructure` | `domain`         |     719 | allowed |
-| `infrastructure` | `infrastructure` |    1114 | allowed |
+| `infrastructure` | `infrastructure` |    1112 | allowed |
 | `interfaces`     | `application`    |      41 | allowed |
 | `interfaces`     | `composition`    |      53 | allowed |
 | `interfaces`     | `domain`         |      59 | allowed |
@@ -80,7 +80,7 @@ flowchart LR
 | `application.composite`        | `domain.exceptions`                        |      27 |
 | `application.core`             | `domain.ports`                             |      27 |
 | `composition.factories`        | `infrastructure.adapters`                  |      27 |
-| `composition.factories`        | `infrastructure.config`                    |      27 |
+| `composition.factories`        | `infrastructure.config`                    |      26 |
 | `infrastructure.config`        | `domain.types`                             |      25 |
 | `infrastructure.control_plane` | `domain.control_plane`                     |      24 |
 | `application.pipelines`        | `domain.entities`                          |      22 |
