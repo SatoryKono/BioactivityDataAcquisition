@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
+from bioetl.application.core.pre_silver_identity import PreSilverIdentityHost
 from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import EntityID, GoldRecord
 
 
 class _PreSilverStagingFlowMixin:
@@ -41,12 +41,6 @@ class _PreSilverStagingFlowMixin:
             index: int,
         ) -> None: ...
 
-        def compute_entity_id(
-            self,
-            source_id: str | None,
-            record: GoldRecord,
-        ) -> EntityID: ...
-
         def _normalize_business_data(self, business_data: JsonDict) -> JsonDict: ...
 
     def _build_pre_silver_payload(
@@ -70,7 +64,8 @@ class _PreSilverStagingFlowMixin:
         identity_record: JsonDict,
         business_data: JsonDict,
     ) -> PreSilverRecord:
-        entity_id = self.compute_entity_id(
+        identity_host = cast(PreSilverIdentityHost, self)
+        entity_id = identity_host.compute_entity_id(
             source_id=source_id,
             record=identity_record,
         )

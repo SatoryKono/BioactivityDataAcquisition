@@ -92,11 +92,13 @@ def build_components_and_processing_service(
     support_service = BatchProcessingSupportService(
         services=pipeline.services,
         logger=pipeline.context.logger,
-        batch_metrics=components.batch_metrics,
-        transformer=components.transformer,
-        writer=components.writer,
-        tracing=tracing_manager,
-        quarantine_manager=quarantine_manager,
+        batch_runtime={
+            "batch_metrics": components.batch_metrics,
+            "transformer": components.transformer,
+            "writer": components.writer,
+            "tracing": tracing_manager,
+            "quarantine_manager": quarantine_manager,
+        },
         run_id=pipeline.context.run_id,
         domain_event_emitter=domain_event_emitter,
         debug_export_service=writer_debug_export_service,

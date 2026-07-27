@@ -2533,7 +2533,17 @@
       "missing_lines": 0,
       "module": "bioetl.application.core.pre_silver_finalization_flow",
       "path": "src/bioetl/application/core/pre_silver_finalization_flow.py",
-      "source_lines": 204
+      "source_lines": 199
+    },
+    {
+      "coverage_percent": null,
+      "coverage_status": "no_executable_lines",
+      "covered_lines": 0,
+      "executable_lines": 0,
+      "missing_lines": 0,
+      "module": "bioetl.application.core.pre_silver_identity",
+      "path": "src/bioetl/application/core/pre_silver_identity.py",
+      "source_lines": 17
     },
     {
       "coverage_percent": 100.0,
@@ -2553,7 +2563,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.core.pre_silver_staging_flow",
       "path": "src/bioetl/application/core/pre_silver_staging_flow.py",
-      "source_lines": 135
+      "source_lines": 130
     },
     {
       "coverage_percent": 100.0,
@@ -8333,7 +8343,7 @@
       "missing_lines": 0,
       "module": "bioetl.composition.factories.services.pipeline_processing",
       "path": "src/bioetl/composition/factories/services/pipeline_processing.py",
-      "source_lines": 113
+      "source_lines": 115
     },
     {
       "coverage_percent": 100.0,
@@ -8343,7 +8353,7 @@
       "missing_lines": 0,
       "module": "bioetl.composition.factories.services.pipeline_processing_components_builder",
       "path": "src/bioetl/composition/factories/services/pipeline_processing_components_builder.py",
-      "source_lines": 139
+      "source_lines": 143
     },
     {
       "coverage_percent": 96.77,
@@ -13983,7 +13993,17 @@
       "missing_lines": 3,
       "module": "bioetl.domain.resilience",
       "path": "src/bioetl/domain/resilience.py",
-      "source_lines": 326
+      "source_lines": 310
+    },
+    {
+      "coverage_percent": null,
+      "coverage_status": "no_executable_lines",
+      "covered_lines": 0,
+      "executable_lines": 0,
+      "missing_lines": 0,
+      "module": "bioetl.domain.resilience_circuit_breaker",
+      "path": "src/bioetl/domain/resilience_circuit_breaker.py",
+      "source_lines": 13
     },
     {
       "coverage_percent": null,
@@ -25225,7 +25245,17 @@
       "missing_lines": 0,
       "module": "bioetl.application.core.pre_silver_finalization_flow",
       "path": "src/bioetl/application/core/pre_silver_finalization_flow.py",
-      "source_lines": 204
+      "source_lines": 199
+    },
+    {
+      "coverage_percent": null,
+      "coverage_status": "no_executable_lines",
+      "covered_lines": 0,
+      "executable_lines": 0,
+      "missing_lines": 0,
+      "module": "bioetl.application.core.pre_silver_identity",
+      "path": "src/bioetl/application/core/pre_silver_identity.py",
+      "source_lines": 17
     },
     {
       "coverage_percent": 100.0,
@@ -25245,7 +25275,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.core.pre_silver_staging_flow",
       "path": "src/bioetl/application/core/pre_silver_staging_flow.py",
-      "source_lines": 135
+      "source_lines": 130
     },
     {
       "coverage_percent": 100.0,
@@ -31025,7 +31055,7 @@
       "missing_lines": 0,
       "module": "bioetl.composition.factories.services.pipeline_processing",
       "path": "src/bioetl/composition/factories/services/pipeline_processing.py",
-      "source_lines": 113
+      "source_lines": 115
     },
     {
       "coverage_percent": 100.0,
@@ -31035,7 +31065,7 @@
       "missing_lines": 0,
       "module": "bioetl.composition.factories.services.pipeline_processing_components_builder",
       "path": "src/bioetl/composition/factories/services/pipeline_processing_components_builder.py",
-      "source_lines": 139
+      "source_lines": 143
     },
     {
       "coverage_percent": 96.77,
@@ -36675,7 +36705,17 @@
       "missing_lines": 3,
       "module": "bioetl.domain.resilience",
       "path": "src/bioetl/domain/resilience.py",
-      "source_lines": 326
+      "source_lines": 310
+    },
+    {
+      "coverage_percent": null,
+      "coverage_status": "no_executable_lines",
+      "covered_lines": 0,
+      "executable_lines": 0,
+      "missing_lines": 0,
+      "module": "bioetl.domain.resilience_circuit_breaker",
+      "path": "src/bioetl/domain/resilience_circuit_breaker.py",
+      "source_lines": 13
     },
     {
       "coverage_percent": null,
@@ -45390,7 +45430,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-13",
-  "source_tree_sha256": "245e26943da13b661ff0cb02f9f7ddcc26db2a2b5bcb3b4df0e86cc636f38112",
+  "source_tree_sha256": "eecdecd0d5b4faf46b59700add80c4d12b0ac2da166c1eef74913fff1e55ec71",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -45401,13 +45441,13 @@
         "coverage_percent_min": 76.92,
         "covered_line_percent": 96.34,
         "covered_module_count": 180,
-        "measured_module_count": 180,
+        "measured_module_count": 181,
         "measured_percent": 100.0,
-        "module_count": 180,
+        "module_count": 181,
         "status_counts": {
           "coverage_xml_missing": 0,
           "fully_covered": 113,
-          "no_executable_lines": 0,
+          "no_executable_lines": 1,
           "partially_covered": 67,
           "uncovered": 0,
           "unmeasured": 0
@@ -45545,11 +45585,11 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2269,
+    "source_module_count": 2271,
     "status_counts": {
       "coverage_xml_missing": 0,
       "fully_covered": 1406,
-      "no_executable_lines": 47,
+      "no_executable_lines": 49,
       "partially_covered": 816,
       "uncovered": 0,
       "unmeasured": 0
