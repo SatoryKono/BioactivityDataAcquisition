@@ -151,8 +151,13 @@ function Resolve-BioetlUvxBin {
     $pathSeparator = [IO.Path]::PathSeparator
     $pathEntries = @()
     if (-not [string]::IsNullOrWhiteSpace($env:PATH)) {
+        $pathDelimiters = if ($pathSeparator -eq ';') {
+            [char[]]@(';')
+        } else {
+            [char[]]@(':', ';')
+        }
         $pathEntries += $env:PATH.Split(
-            [char[]]@($pathSeparator, ';', ':'),
+            $pathDelimiters,
             [StringSplitOptions]::RemoveEmptyEntries
         )
     }
