@@ -548,12 +548,6 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as a top-level pipeline normalization matrix compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs generate-pipeline-normalization-matrix."
     },
-    "scripts/docs/generate_pipeline_normalization_validation_table.py": {
-      "owner": "@bioetl-docs",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded historical docs-generation utility while no governed caller references it; either route it through the canonical scripts.docs matrix/reporting surface or retire it after caller audit."
-    },
     "scripts/docs/matrix/_bootstrap.py": {
       "owner": "@bioetl-docs",
       "decision": "internal_helper_orphan",
@@ -896,29 +890,11 @@
       "review_by": "2026-09-30",
       "next_step": "Retain only as a bounded manual historical test-issue generator; prefer current GitHub issue creation workflows and keep token-bearing direct script invocation out of active script inventory."
     },
-    "scripts/memory/mcp_smoke.py": {
-      "owner": "@bioetl-platform",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a backward-compatible import shim while the canonical Neo4j memory smoke implementation lives under scripts.ai.mcp.neo4j_memory_mcp_smoke; remove it only after tests and historical import paths stop referencing scripts.memory.mcp_smoke."
-    },
     "scripts/memory/prompts/print_seed.sh": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded manual prompt-printing helper for memory seeding; replace with canonical memory workflow documentation before promoting it to an active command surface."
-    },
-    "scripts/ops/install-codex-cmd.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "windows_compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as an unreferenced Windows compatibility installer during the reviewed retirement window; remove it once external bootstrap docs and local operator flows no longer depend on the old Codex command shim."
-    },
-    "scripts/ops/launchers/codex/codex-fast.bat": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_compatibility_launcher",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a fast Windows launcher variant that skips MCP setup while the primary governed Codex launchers remain codex.bat and codex-exec.bat; remove or fold it into launcher flags after the Windows launcher flow is consolidated."
     },
     "scripts/ops/maintenance/github/update_github_issue.sh": {
       "owner": "@bioetl-platform",
