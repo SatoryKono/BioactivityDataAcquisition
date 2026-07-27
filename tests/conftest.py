@@ -256,6 +256,7 @@ def pytest_configure(config):
     _configure_windows_asyncio(config)
     _configure_windows_pycharm_traceback_style(config)
     _configure_wsl_timeout(config)
+    _configure_windows_local_basetemp(config)
     _configure_windows_test_mode_for_control_plane_durability()
     _configure_isolated_run_report_root(config)
     if _selected_paths_need_hypothesis(config):
@@ -349,6 +350,45 @@ def _configure_windows_test_mode_for_control_plane_durability() -> None:
         pass
 
 
+def _windows_local_temp_root() -> Path | None:
+    """Return a local (non-cloud) temp root for Windows pytest I/O.
+
+    ``TEMP``/``TMP`` may point at a volume shared with a cloud-synced worktree
+    (for example ``E:\\Temp`` next to ``E:\\g-drive\\...``). Long suites then
+    hang on trivial ``mkdir``/write under the 60s pytest-timeout budget.
+    Prefer ``%LOCALAPPDATA%\\Temp`` when present.
+    """
+    if not sys.platform.startswith("win"):
+        return None
+    override = os.environ.get("BIOETL_PYTEST_TEMP_ROOT", "").strip()
+    if override:
+        root = Path(override).expanduser()
+        root.mkdir(parents=True, exist_ok=True)
+        return root
+    local_appdata = os.environ.get("LOCALAPPDATA", "").strip()
+    if not local_appdata:
+        return None
+    root = Path(local_appdata) / "Temp" / "bioetl-pytest"
+    root.mkdir(parents=True, exist_ok=True)
+    return root
+
+
+def _configure_windows_local_basetemp(config: pytest.Config) -> None:
+    """Force pytest basetemp onto a local disk on Windows when unset."""
+    if not sys.platform.startswith("win"):
+        return
+    # Honour explicit operator override (CLI ``--basetemp`` / env).
+    existing = getattr(config.option, "basetemp", None)
+    if existing:
+        return
+    root = _windows_local_temp_root()
+    if root is None:
+        return
+    basetemp = root / f"basetemp-{os.getpid()}"
+    basetemp.mkdir(parents=True, exist_ok=True)
+    config.option.basetemp = basetemp
+
+
 def _configure_isolated_run_report_root(config: pytest.Config) -> None:
     """Redirect incidental run-report writes away from the workspace tree.
 
@@ -366,7 +406,13 @@ def _configure_isolated_run_report_root(config: pytest.Config) -> None:
         # Application package may be unavailable during partial collection setups.
         return
 
-    isolated_root = Path(tempfile.mkdtemp(prefix="bioetl-pytest-run-reports-"))
+    local_root = _windows_local_temp_root()
+    isolated_root = Path(
+        tempfile.mkdtemp(
+            prefix="bioetl-pytest-run-reports-",
+            dir=str(local_root) if local_root is not None else None,
+        )
+    )
     config._bioetl_run_report_root = isolated_root  # type: ignore[attr-defined]
     config._bioetl_run_report_root_previous = (  # type: ignore[attr-defined]
         run_report_writer.DEFAULT_REPORT_ROOT

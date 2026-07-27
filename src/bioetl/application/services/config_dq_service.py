@@ -98,7 +98,9 @@ def _parse_disposition_overrides(overrides: object) -> dict[str, DQDisposition]:
         parsed: dict[str, DQDisposition] = {}
         for pair in overrides:
             if not isinstance(pair, (list, tuple)) or len(pair) != 2:
-                raise ValueError("Disposition overrides entries must be key/value pairs")
+                raise ValueError(
+                    "Disposition overrides entries must be key/value pairs"
+                )
             parsed[str(pair[0])] = _parse_disposition(pair[1])
         return parsed
     raise ValueError("Disposition overrides must be a mapping or sequence of pairs")
@@ -132,7 +134,9 @@ def _logical_config_source_ref(*, relative_path: str, priority: int) -> ConfigSo
 def _default_config_source_refs(*, provider: str, entity: str) -> list[ConfigSourceRef]:
     """Return logical config refs for tests or non-composed service graphs."""
     refs = [
-        _logical_config_source_ref(relative_path="configs/base/pipeline.yaml", priority=1),
+        _logical_config_source_ref(
+            relative_path="configs/base/pipeline.yaml", priority=1
+        ),
         _logical_config_source_ref(
             relative_path=f"configs/providers/{provider}.yaml", priority=2
         ),

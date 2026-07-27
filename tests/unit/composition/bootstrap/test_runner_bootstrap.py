@@ -61,7 +61,9 @@ def light_observability() -> SimpleNamespace:
 def bootstrap_with_light_observability(light_observability: SimpleNamespace):
     """Patch observability + settings for fast, deterministic unit bootstraps."""
     with (
-        patch(_SETTINGS_PATCH, return_value=MagicMock(name="settings")) as mock_settings,
+        patch(
+            _SETTINGS_PATCH, return_value=MagicMock(name="settings")
+        ) as mock_settings,
         patch(
             _OBSERVABILITY_PATCH, return_value=light_observability
         ) as mock_observability,

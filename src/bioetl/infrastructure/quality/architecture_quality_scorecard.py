@@ -55,13 +55,17 @@ def _load_yaml(repo_root: Path, rel_path: str) -> JsonMap:
 
 def _load_scorecard_inputs(repo_root: Path) -> tuple[JsonMap, ...]:
     return (
-        _load_json(repo_root, "docs/02-architecture/generated/module-dependency-map.json"),
+        _load_json(
+            repo_root, "docs/02-architecture/generated/module-dependency-map.json"
+        ),
         _load_json(repo_root, "reports/quality/module-coverage-inventory.json"),
         _load_json(repo_root, "reports/quality/compatibility-importer-census.json"),
         _load_json(repo_root, "reports/quality/dead-code-inventory.json"),
         _load_json(repo_root, "reports/quality/contract-registry-diagnostics.json"),
         build_contract_registry_dq_diagnostics(repo_root),
-        _load_json(repo_root, "reports/observability/runtime_cardinality_inventory.json"),
+        _load_json(
+            repo_root, "reports/observability/runtime_cardinality_inventory.json"
+        ),
         _load_json(repo_root, "reports/quality/full-app-duplication-baseline.json"),
         _load_json(repo_root, "reports/quality/hotspot-family-baseline.json"),
         _load_json(repo_root, "reports/quality/test-governance-current.json"),
@@ -195,15 +199,21 @@ def _build_compatibility_quality_metrics(
         "public_export_facade_count",
     )
     conflict_count = max(
-        int(compatibility_summary.get(
-            "retained_public_export_facades_with_duplicate_exports", 0
-        )),
-        int(compatibility_summary.get(
-            "retained_public_export_facades_with_resolution_conflicts", 0
-        )),
-        int(compatibility_summary.get(
-            "retained_public_export_facades_with_wrapper_contract_drift", 0
-        )),
+        int(
+            compatibility_summary.get(
+                "retained_public_export_facades_with_duplicate_exports", 0
+            )
+        ),
+        int(
+            compatibility_summary.get(
+                "retained_public_export_facades_with_resolution_conflicts", 0
+            )
+        ),
+        int(
+            compatibility_summary.get(
+                "retained_public_export_facades_with_wrapper_contract_drift", 0
+            )
+        ),
     )
     return {
         "retained_entrypoint_count": retained_entrypoint_count,

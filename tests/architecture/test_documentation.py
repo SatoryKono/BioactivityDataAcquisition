@@ -20,7 +20,11 @@ from pathlib import Path
 import pytest
 
 
-pytestmark = pytest.mark.architecture
+# A cold recursive source read on cloud-synced Windows worktrees can exceed the
+# global 60-second per-test guard even though the scan is bounded to src/bioetl.
+# Keep the assertion strict while allowing the supported Windows/GDrive lane to
+# finish its filesystem I/O.
+pytestmark = [pytest.mark.architecture, pytest.mark.timeout(180)]
 
 
 def _iter_parsed_python_modules(
