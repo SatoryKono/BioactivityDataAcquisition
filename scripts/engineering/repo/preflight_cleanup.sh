@@ -262,10 +262,21 @@ if (( ${#DIR_TARGETS[@]} > 0 )); then
 fi
 
 if (( ${#DIR_TARGETS[@]} > 0 )) && (( ${#PROTECTED_BUILD_DIRS[@]} > 0 )); then
-  protected_regex="$(printf '%s\n' "${PROTECTED_BUILD_DIRS[@]}" | sed 's/[.[\*^$()+?{}|]/\\&/g' | paste -sd'|' -)"
-  mapfile -t DIR_TARGETS < <(
-    printf '%s\n' "${DIR_TARGETS[@]}" | rg -v "^(${protected_regex})$"
-  )
+  # Prefer ripgrep when available; fall back to POSIX grep for CI runners
+  # without `rg` installed (unit-preflight runs on stock Ubuntu images).
+  protected_regex="$(printf '%s
+' "${PROTECTED_BUILD_DIRS[@]}" | sed 's/[.[\*^$()+?{}|]/\&/g' | paste -sd'|' -)"
+  if command -v rg >/dev/null 2>&1; then
+    mapfile -t DIR_TARGETS < <(
+      printf '%s
+' "${DIR_TARGETS[@]}" | rg -v "^(${protected_regex})$"
+    )
+  else
+    mapfile -t DIR_TARGETS < <(
+      printf '%s
+' "${DIR_TARGETS[@]}" | grep -Ev "^(${protected_regex})$" || true
+    )
+  fi
 fi
 
 total_targets=$(( ${#DIR_TARGETS[@]} + ${#FILE_TARGETS[@]} ))
