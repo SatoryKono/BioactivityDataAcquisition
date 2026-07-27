@@ -1141,8 +1141,60 @@ def _check(manifest_path: Path, actual: dict[str, object]) -> int:
         return 0
 
     print(f"[FAIL] Scripts inventory drift detected: {manifest_path}")
+    _print_manifest_drift_summary(expected=expected, actual=actual)
     print("Run with --update to refresh manifest.")
     return 1
+
+
+def _print_manifest_drift_summary(
+    *,
+    expected: dict[str, object],
+    actual: dict[str, object],
+) -> None:
+    """Emit a short, actionable summary of inventory drift for CI logs."""
+
+    expected_scripts = expected.get("scripts")
+    actual_scripts = actual.get("scripts")
+    if not isinstance(expected_scripts, list) or not isinstance(actual_scripts, list):
+        print("  - scripts[] type mismatch between expected and actual payloads")
+        return
+
+    def _by_path(items: list[object]) -> dict[str, dict[str, object]]:
+        mapped: dict[str, dict[str, object]] = {}
+        for item in items:
+            if isinstance(item, dict) and isinstance(item.get("path"), str):
+                mapped[str(item["path"])] = item
+        return mapped
+
+    expected_by_path = _by_path(expected_scripts)
+    actual_by_path = _by_path(actual_scripts)
+    only_expected = sorted(set(expected_by_path) - set(actual_by_path))
+    only_actual = sorted(set(actual_by_path) - set(expected_by_path))
+    if only_expected:
+        print(f"  - only in manifest ({len(only_expected)}): {only_expected[:10]}")
+    if only_actual:
+        print(f"  - only in live scan ({len(only_actual)}): {only_actual[:10]}")
+
+    shared = sorted(set(expected_by_path) & set(actual_by_path))
+    changed = 0
+    for path in shared:
+        if expected_by_path[path] != actual_by_path[path]:
+            changed += 1
+            if changed <= 8:
+                exp = expected_by_path[path]
+                act = actual_by_path[path]
+                for key in sorted(set(exp) | set(act)):
+                    if exp.get(key) != act.get(key):
+                        print(
+                            f"  - {path}.{key}: expected={exp.get(key)!r} actual={act.get(key)!r}"
+                        )
+                        break
+    if changed:
+        print(f"  - scripts with field drift: {changed}")
+    expected_summary = expected.get("summary")
+    actual_summary = actual.get("summary")
+    if expected_summary != actual_summary:
+        print(f"  - summary drift: expected={expected_summary!r} actual={actual_summary!r}")
 
 
 def _group_non_active_scripts(

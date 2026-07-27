@@ -9,8 +9,6 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.core.batch_metrics_accounting import (
     _FLOW_ACCOUNTING_STAGES,
-    _GOLD_REMOVAL_REASONS,
-    _SILVER_REMOVAL_REASONS,
     _record_filtered_out_stage_metrics,
     _record_processed_stage_accounting,
     _record_silver_removal_accounting,
@@ -237,4 +235,8 @@ class BatchMetricsRecorderService:
 # Compatibility alias retained for legacy imports.
 BatchMetricsRecorder = BatchMetricsRecorderService
 
-__all__ = ["BatchMetricsRecorder", "BatchMetricsRecorderService", "_record_silver_removal_accounting"]
+__all__ = [
+    "BatchMetricsRecorder",
+    "BatchMetricsRecorderService",
+    "_record_silver_removal_accounting",
+]
