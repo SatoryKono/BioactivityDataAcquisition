@@ -586,7 +586,6 @@
       "decision_date": "2025-12-26",
       "decision_path": "docs/02-architecture/decisions/ADR-018-gold-strict-validation.md",
       "enforcement_owner_paths": [
-        "scripts/engineering/qa/audit_pipeline_semantics.py",
         "tests/architecture/test_architecture_audit_closeout_gates.py",
         "tests/architecture/test_explicit_gold_scd2_policy.py",
         "tests/architecture/test_gold_schema_contracts.py",
@@ -611,7 +610,6 @@
         "docs/04-reference/contracts/canonical-field-registry.md",
         "docs/04-reference/contracts/dq-contracts.md",
         "docs/04-reference/contracts/gold-schemas.md",
-        "scripts/engineering/qa/audit_pipeline_semantics.py",
         "src/bioetl/domain/contracts/gold/_composite_gold_common_schema.py",
         "tests/architecture/test_architecture_audit_closeout_gates.py",
         "tests/architecture/test_explicit_gold_scd2_policy.py",
@@ -825,7 +823,6 @@
       "decision_date": "2026-01-15",
       "decision_path": "docs/02-architecture/decisions/ADR-026-composite-pipeline-pattern.md",
       "enforcement_owner_paths": [
-        "scripts/engineering/qa/audit_pipeline_semantics.py",
         "tests/architecture/test_composite_layer_boundaries.py",
         "tests/integration/composite/test_molecule_pipeline.py",
         "tests/unit/application/composite/test_composite_activity.py",
@@ -869,7 +866,6 @@
         "docs/04-reference/contracts/canonical-field-registry.md",
         "docs/04-reference/pipeline-catalog.md",
         "docs/04-reference/pipelines/README.md",
-        "scripts/engineering/qa/audit_pipeline_semantics.py",
         "src/bioetl/application/composite/__init__.py",
         "src/bioetl/application/composite/aggregator.py",
         "src/bioetl/application/composite/column_renamer.py",
@@ -1181,7 +1177,6 @@
       "decision_date": "2026-02-17",
       "decision_path": "docs/02-architecture/decisions/ADR-035-json-field-typing-policy.md",
       "enforcement_owner_paths": [
-        "scripts/engineering/qa/audit_pipeline_semantics.py",
         "tests/architecture/test_non_chembl_json_field_typing_policy.py",
         "tests/unit/domain/schemas/test_constants_yaml.py",
         "tests/unit/infrastructure/schemas/test_silver.py"
@@ -1193,7 +1188,6 @@
         "docs/00-project/RULES.md",
         "docs/00-project/ai/agents/agents/py-review-orchestrator.md",
         "docs/00-project/ai/rules/windsurf/rules/01-data-quality.md",
-        "scripts/engineering/qa/audit_pipeline_semantics.py",
         "tests/architecture/test_non_chembl_json_field_typing_policy.py",
         "tests/unit/domain/schemas/test_constants_yaml.py",
         "tests/unit/infrastructure/schemas/test_silver.py"
@@ -1326,7 +1320,7 @@
       "decision_date": "2026-02-24",
       "decision_path": "docs/02-architecture/decisions/ADR-039-unified-entity-config-format.md",
       "enforcement_owner_paths": [
-        "scripts/engineering/qa/audit_pipeline_semantics.py"
+        "tests/architecture/test_config_ci_invariants.py"
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
@@ -1345,7 +1339,7 @@
         "docs/03-guides/local-storage-layout.md",
         "docs/04-reference/contracts/canonical-field-registry.md",
         "docs/04-reference/pipelines/chembl/05-activity-spec.md",
-        "scripts/engineering/qa/audit_pipeline_semantics.py"
+        "tests/architecture/test_config_ci_invariants.py"
       ],
       "manual_exception": null,
       "owner": "BioETL Team",
@@ -1517,7 +1511,6 @@
       "decision_path": "docs/02-architecture/decisions/ADR-045-dq-contract-system.md",
       "enforcement_owner_paths": [
         "scripts/documentation_governance_check.py",
-        "scripts/engineering/qa/audit_pipeline_semantics.py",
         "tests/architecture/test_gold_strict_validation_policy.py"
       ],
       "gap_reasons": [],
@@ -1544,7 +1537,6 @@
         "docs/05-operations/runbooks/index.md",
         "docs/05-operations/runbooks/run-manifest-inspection.md",
         "scripts/documentation_governance_check.py",
-        "scripts/engineering/qa/audit_pipeline_semantics.py",
         "tests/architecture/test_gold_strict_validation_policy.py"
       ],
       "manual_exception": null,

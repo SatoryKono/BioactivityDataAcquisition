@@ -36,9 +36,14 @@ from bioetl.domain.value_objects.silver_result import SilverWriteResult
 __all__ = ["BatchProcessingSupportService"]
 
 if TYPE_CHECKING:
+    from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
+    from bioetl.application.core.batch_tracing import BatchTracingManagerService
+    from bioetl.application.core.batch_transformer import BatchTransformer
+    from bioetl.application.core.batch_writer import BatchWriter
     from bioetl.application.core.pipeline_service_protocols import (
         PipelineDataSourceServicesProtocol,
     )
+    from bioetl.application.core.quarantine_manager import QuarantineRuntimeService
     from bioetl.application.observability.domain_event_emitter import (
         DomainEventEmitterProtocol,
     )
@@ -59,18 +64,40 @@ class BatchProcessingSupportService:
         *,
         services: PipelineDataSourceServicesProtocol,
         logger: LoggerPort,
-        batch_runtime: dict[str, object],
+        batch_runtime: dict[str, object] | None = None,
         run_id: RunID | None = None,
         domain_event_emitter: DomainEventEmitterProtocol | None = None,
         debug_export_service: DebugExportService | None = None,
+        # Legacy keyword construction (unit tests / transitional callers).
+        batch_metrics: BatchMetricsRecorderService | None = None,
+        transformer: BatchTransformer | None = None,
+        writer: BatchWriter | None = None,
+        tracing: BatchTracingManagerService | None = None,
+        quarantine_manager: QuarantineRuntimeService | None = None,
     ) -> None:
+        resolved_runtime = dict(batch_runtime or {})
+        if batch_metrics is not None:
+            resolved_runtime["batch_metrics"] = batch_metrics
+        if transformer is not None:
+            resolved_runtime["transformer"] = transformer
+        if writer is not None:
+            resolved_runtime["writer"] = writer
+        if tracing is not None:
+            resolved_runtime["tracing"] = tracing
+        if quarantine_manager is not None:
+            resolved_runtime["quarantine_manager"] = quarantine_manager
+
         self._services = services
         self._logger = logger
-        self._batch_metrics = batch_runtime["batch_metrics"]  # type: ignore[assignment]
-        self._transformer = batch_runtime["transformer"]  # type: ignore[assignment]
-        self._writer = batch_runtime["writer"]  # type: ignore[assignment]
-        self._tracing = batch_runtime["tracing"]  # type: ignore[assignment]
-        self._quarantine_manager = batch_runtime["quarantine_manager"]  # type: ignore[assignment]
+        self._batch_metrics = cast(
+            "BatchMetricsRecorderService", resolved_runtime["batch_metrics"]
+        )
+        self._transformer = cast("BatchTransformer", resolved_runtime["transformer"])
+        self._writer = cast("BatchWriter", resolved_runtime["writer"])
+        self._tracing = cast("BatchTracingManagerService", resolved_runtime["tracing"])
+        self._quarantine_manager = cast(
+            "QuarantineRuntimeService", resolved_runtime["quarantine_manager"]
+        )
         self._run_id = run_id
         self._domain_event_emitter = domain_event_emitter
         self._debug_export_service = debug_export_service

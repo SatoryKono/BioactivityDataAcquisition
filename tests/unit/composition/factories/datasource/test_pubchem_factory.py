@@ -64,7 +64,11 @@ class TestCreatePubChemAdapter:
         strategies_kwargs = mock_fetch_strategies_cls.call_args.kwargs
         assert strategies_kwargs["mapper"] is mapper
         assert strategies_kwargs["request_collector"] is helper_bundle.request_collector
-        assert callable(strategies_kwargs["run_in_executor"])
+        transport = strategies_kwargs["transport"]
+        assert transport["logger"] is logger
+        assert transport["rate_limiter"] is not None
+        assert transport["circuit_breaker"] is not None
+        assert callable(transport["run_in_executor"])
 
         adapter_kwargs = mock_pubchem_adapter_cls.call_args.kwargs
         assert adapter_kwargs["thread_pool"] is thread_pool

@@ -120,8 +120,13 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
         if legacy:
             unexpected = ", ".join(sorted(str(k) for k in legacy))
             raise TypeError(f"BaseSyncAdapter() unexpected kwargs: {unexpected}")
+        from typing import cast
+
+        legacy_metrics = cast("MetricsPort | None", metrics)
         metrics_port = (
-            dependency_context.metrics if dependency_context is not None else metrics  # type: ignore[arg-type]
+            dependency_context.metrics
+            if dependency_context is not None
+            else legacy_metrics
         )
         resolved_error_handler = (
             dependency_context.error_handler

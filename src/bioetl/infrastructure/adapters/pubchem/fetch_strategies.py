@@ -36,11 +36,15 @@ from bioetl.infrastructure.adapters.pubchem.response_mapper import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator
+    from collections.abc import AsyncIterator, Callable
+    from typing import Any
 
+    from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.common.api_request_collector import (
         APIRequestCollector,
     )
+    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
+    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
     from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMapper
 
 
@@ -54,33 +58,54 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
     def __init__(
         self,
         mapper: PubChemEntityMapper,
-        transport: dict[str, object],
+        transport: dict[str, object] | None = None,
         provider_name: str = "pubchem",
         request_collector: APIRequestCollector | None = None,
         response_mapper: PubChemResponseMapper | None = None,
         fetch_flow: PubChemFetchFlow | None = None,
+        *,
+        # Legacy keyword construction (unit tests / transitional callers).
+        logger: LoggerPort | None = None,
+        rate_limiter: TokenBucketRateLimiter | None = None,
+        circuit_breaker: CircuitBreakerGuard | None = None,
+        run_in_executor: Callable[..., Any] | None = None,
     ) -> None:
         """Initialize fetch strategies.
 
-        ``transport`` must provide ``logger``, ``rate_limiter``,
-        ``circuit_breaker``, and ``run_in_executor``.
+        Preferred construction uses ``transport`` with keys ``logger``,
+        ``rate_limiter``, ``circuit_breaker``, and ``run_in_executor``.
+        Legacy keyword arguments remain accepted for unit fixtures.
         """
-        logger = transport["logger"]  # type: ignore[assignment]
-        rate_limiter = transport["rate_limiter"]  # type: ignore[assignment]
-        circuit_breaker = transport["circuit_breaker"]  # type: ignore[assignment]
-        run_in_executor = transport["run_in_executor"]  # type: ignore[assignment]
-        self._logger = logger
-        self._rate_limiter = rate_limiter
-        self._circuit_breaker = circuit_breaker
+        from typing import cast
+
+        resolved_transport = dict(transport or {})
+        if logger is not None:
+            resolved_transport["logger"] = logger
+        if rate_limiter is not None:
+            resolved_transport["rate_limiter"] = rate_limiter
+        if circuit_breaker is not None:
+            resolved_transport["circuit_breaker"] = circuit_breaker
+        if run_in_executor is not None:
+            resolved_transport["run_in_executor"] = run_in_executor
+
+        self._logger = cast("LoggerPort", resolved_transport["logger"])
+        self._rate_limiter = cast(
+            "TokenBucketRateLimiter", resolved_transport["rate_limiter"]
+        )
+        self._circuit_breaker = cast(
+            "CircuitBreakerGuard", resolved_transport["circuit_breaker"]
+        )
+        self._run_in_executor = cast(
+            "Callable[..., Any]", resolved_transport["run_in_executor"]
+        )
         self._mapper = mapper
-        self._run_in_executor = run_in_executor
         self._provider_name = provider_name
         self._request_collector = request_collector
         self._response_mapper = response_mapper or PubChemResponseMapper(mapper)
         self._fetch_flow = fetch_flow or PubChemFetchFlow(
-            rate_limiter=rate_limiter,
-            circuit_breaker=circuit_breaker,
-            run_in_executor=run_in_executor,
+            rate_limiter=self._rate_limiter,
+            circuit_breaker=self._circuit_breaker,
+            run_in_executor=self._run_in_executor,
             record_request=self._record_request,
             normalize_results=self._normalize_results,
         )
