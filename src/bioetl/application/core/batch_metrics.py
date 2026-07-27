@@ -237,4 +237,4 @@ class BatchMetricsRecorderService:
 # Compatibility alias retained for legacy imports.
 BatchMetricsRecorder = BatchMetricsRecorderService
 
-__all__ = ["BatchMetricsRecorder", "BatchMetricsRecorderService"]
+__all__ = ["BatchMetricsRecorder", "BatchMetricsRecorderService", "_record_silver_removal_accounting"]
