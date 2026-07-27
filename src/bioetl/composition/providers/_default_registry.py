@@ -7,7 +7,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from functools import wraps
 from importlib import import_module
-from typing import TYPE_CHECKING, Protocol, Self, TypeVar, overload
+from typing import TYPE_CHECKING, Protocol, Self, TypeVar, cast, overload
 
 if TYPE_CHECKING:
     from bioetl.composition.providers._models import ProviderConfig
@@ -113,7 +113,7 @@ def get_default_provider_registry() -> _SupportsProviderRegistryStore:
     global _default_provider_registry
     if _default_provider_registry is None:
         module = import_module("bioetl.composition.providers.provider_registry")
-        registry = module.ProviderRegistry()
+        registry = cast(_SupportsProviderRegistryStore, module.ProviderRegistry())
         _default_provider_registry = registry
         return registry
     return _default_provider_registry

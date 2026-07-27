@@ -39,6 +39,7 @@ class _FakeDeltaTable:
         self._partition_columns = partition_columns
         self.partitions: list[tuple[str, str, object]] | None = None
         self.filters: list[tuple[str, str, object]] | None = None
+        self.columns: list[str] | None = None
 
     def metadata(self) -> _FakeMetadata:
         return _FakeMetadata(self._partition_columns)
@@ -48,9 +49,11 @@ class _FakeDeltaTable:
         *,
         partitions: list[tuple[str, str, object]] | None,
         filters: list[tuple[str, str, object]] | None,
+        columns: list[str] | None = None,
     ) -> _FakeArrowTable:
         self.partitions = partitions
         self.filters = filters
+        self.columns = columns
         return _FakeArrowTable(self._rows)
 
 
@@ -94,7 +97,9 @@ class _ProjectionDeltaTable(_FakeDeltaTable):
         columns: list[str] | None = None,
     ) -> _FakeArrowTable:
         self.columns = columns
-        return super().to_pyarrow_table(partitions=partitions, filters=filters)
+        return super().to_pyarrow_table(
+            partitions=partitions, filters=filters, columns=columns
+        )
 
 
 def test_record_encoding_quotes_strings_booleans_numbers_and_hashes() -> None:
