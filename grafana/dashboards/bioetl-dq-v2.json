@@ -59,20 +59,6 @@
           "targetBlank": false,
           "includeVars": false,
           "tooltip": "Context mapping: provider=unknown, pipeline_context=$pipeline, adapter=unknown. Visible workflow/pipeline/run_type are preserved; provider remains fail-closed when unknown."
-        },
-        {
-          "title": "5. Workflow",
-          "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id",
-          "targetBlank": false,
-          "includeVars": false,
-          "tooltip": "Preserves selected scope and time range."
-        },
-        {
-          "title": "6. Alerts & SLO",
-          "url": "/d/bioetl-alerts-slo/bioetl-alerts-slo?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
-          "targetBlank": false,
-          "includeVars": false,
-          "tooltip": "Open the alert surface in the same tab. Global alerts remain explicitly badged and are not attributed to the selected pipeline."
         }
       ]
     },

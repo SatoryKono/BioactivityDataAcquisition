@@ -227,8 +227,6 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
     assert servers["code-analyzer"]["env"]["PROJECT_PATH"] == "."
 
 
-
-
 def test_devin_mcp_servers_are_subset_of_sanctioned_inventory() -> None:
     """Tracked Devin MCP keys must stay within the sanctioned full inventory (#6666)."""
     root = repo_root()
@@ -248,7 +246,9 @@ def test_devin_mcp_servers_are_subset_of_sanctioned_inventory() -> None:
     for name, entry in devin["mcpServers"].items():
         url = entry.get("url", "")
         if isinstance(url, str) and url.startswith("https://"):
-            assert url in allowed_remote, f"unexpected remote MCP host for {name}: {url}"
+            assert url in allowed_remote, (
+                f"unexpected remote MCP host for {name}: {url}"
+            )
         elif isinstance(url, str) and url.startswith("http://"):
             assert url.startswith(("http://127.0.0.1:", "http://localhost:")), (
                 f"non-localhost HTTP MCP for {name}: {url}"

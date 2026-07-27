@@ -63,7 +63,9 @@ def assert_gold_records_when_enabled(
     """Medallion-truthful Gold assert: required when gold is enabled, skipped otherwise."""
     if not gold_enabled:
         return
-    assert gold_records is not None, f"{entity_label}: gold_records required when gold enabled"
+    assert gold_records is not None, (
+        f"{entity_label}: gold_records required when gold enabled"
+    )
     assert_records_have_required_fields(
         gold_records,
         required_fields,

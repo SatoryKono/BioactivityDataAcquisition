@@ -214,19 +214,22 @@ def _execute_workflow_and_publish_metrics(
 
     pipeline_name = _workflow_metrics_pipeline_name(config)
     run_type = _workflow_metrics_run_type(config)
-    grouping_key_extra = (
-        {"workflow_run_id": result.workflow_run_id}
-        if result.workflow_run_id is not None
-        else None
-    )
-    metric_names = _WORKFLOW_PUBLICATION_METRIC_NAMES if pipeline_name is None else None
+    # Always publish the bounded workflow metric set (no high-cardinality
+    # workflow_run_id grouping — Pushgateway only allows pipeline/run_type).
     publish_metrics_safely_fn(
         run_label="bioetl",
         pipeline_name=pipeline_name,
         run_type=run_type,
-        grouping_key_extra=grouping_key_extra,
-        metric_names=metric_names,
+        metric_names=_WORKFLOW_PUBLICATION_METRIC_NAMES,
     )
+    # Second push: full registry snapshot for pipeline-scoped run metrics when
+    # the workflow maps to a single pipeline (pipeline_runs_total, etc.).
+    if pipeline_name is not None:
+        publish_metrics_safely_fn(
+            run_label="bioetl",
+            pipeline_name=pipeline_name,
+            run_type=run_type,
+        )
     return result
 
 

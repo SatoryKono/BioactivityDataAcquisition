@@ -64,9 +64,7 @@ def test_normalize_doi_is_idempotent_for_plain_tokens(raw: str) -> None:
     b=_TEXT,
     c=_TEXT,
 )
-def test_extract_field_from_qualified_is_deterministic(
-    a: str, b: str, c: str
-) -> None:
+def test_extract_field_from_qualified_is_deterministic(a: str, b: str, c: str) -> None:
     """Pure coalesce helper: qualified x.y.z extracts z; other shapes are stable."""
     qualified = f"{a}.{b}.{c}"
     assert extract_field_from_qualified(qualified) == c

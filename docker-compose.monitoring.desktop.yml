@@ -1,0 +1,39 @@
+# Desktop-sized resource overlay for the opt-in monitoring stack.
+#
+# Base file `docker-compose.monitoring.yml` targets larger hosts (high CPU/RAM
+# caps). Docker Desktop on typical workstations exposes ~4 CPUs and ~6 GiB.
+#
+# Usage (from repo root, secrets loaded from .env):
+#   docker compose -p bioetl-monitoring \
+#     -f docker-compose.monitoring.yml \
+#     -f docker-compose.monitoring.desktop.yml \
+#     up -d --no-build
+
+services:
+  prometheus:
+    mem_limit: 768m
+    mem_reservation: 256m
+    cpus: 1.0
+    pids_limit: 512
+
+  pushgateway:
+    mem_limit: 128m
+    mem_reservation: 32m
+    cpus: 0.5
+    pids_limit: 256
+
+  grafana:
+    mem_limit: 768m
+    mem_reservation: 256m
+    cpus: 1.0
+    pids_limit: 512
+
+  renderer:
+    shm_size: "256m"
+    mem_limit: 1536m
+    mem_reservation: 384m
+    cpus: 1.5
+    pids_limit: 1024
+    environment:
+      - GOMEMLIMIT=1GiB
+      - RENDERING_CLUSTERING_MAX_CONCURRENCY=1

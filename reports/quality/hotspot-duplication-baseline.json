@@ -2,61 +2,27 @@
   "summary": {
     "snapshot_date": "2026-07-27",
     "targets": 5,
-    "total_duplicate_clusters": 4,
+    "total_duplicate_clusters": 0,
     "total_raw_duplicate_clusters": 8,
-    "total_excluded_duplicate_clusters": 4
+    "total_excluded_duplicate_clusters": 8
   },
   "normalization": {
     "exclude_module_patterns": [],
     "exclude_actionability_categories": []
   },
   "trend": {
-    "status": "compared_to_previous",
-    "snapshot_date": "2026-07-27",
-    "previous_snapshot_date": "2026-07-22",
-    "total_duplicate_cluster_delta": -9,
-    "targets": [
-      {
-        "target": "src/bioetl/application/core",
-        "current_duplicate_count": 4,
-        "previous_duplicate_count": 0,
-        "delta_duplicate_count": 4
-      },
-      {
-        "target": "src/bioetl/composition/bootstrap/runtime",
-        "current_duplicate_count": 0,
-        "previous_duplicate_count": 1,
-        "delta_duplicate_count": -1
-      },
-      {
-        "target": "src/bioetl/composition/factories/pipeline",
-        "current_duplicate_count": 0,
-        "previous_duplicate_count": 1,
-        "delta_duplicate_count": -1
-      },
-      {
-        "target": "src/bioetl/application/services/control_plane",
-        "current_duplicate_count": 0,
-        "previous_duplicate_count": 0,
-        "delta_duplicate_count": 0
-      },
-      {
-        "target": "src/bioetl/composition/runtime_builders",
-        "current_duplicate_count": 0,
-        "previous_duplicate_count": 5,
-        "delta_duplicate_count": -5
-      }
-    ]
+    "status": "no_prior_snapshot",
+    "snapshot_date": "2026-07-27"
   },
   "reduction_leverage_ranking": [
     {
       "target": "src/bioetl/application/core",
-      "duplicate_clusters": 4,
-      "dominant_actionability_category": "export_facade_or_package_barrel",
-      "dominant_actionability_cluster_count": 4,
-      "low_risk_cluster_count": 4,
-      "low_risk_cluster_share": 1.0,
-      "recommended_first_wave": true
+      "duplicate_clusters": 0,
+      "dominant_actionability_category": null,
+      "dominant_actionability_cluster_count": 0,
+      "low_risk_cluster_count": 0,
+      "low_risk_cluster_share": 0.0,
+      "recommended_first_wave": false
     },
     {
       "target": "src/bioetl/application/services/control_plane",
@@ -98,123 +64,20 @@
   "first_wave": {
     "status": "selected",
     "target": "src/bioetl/application/core",
-    "duplicate_clusters": 4,
-    "dominant_actionability_category": "export_facade_or_package_barrel",
+    "duplicate_clusters": 0,
+    "dominant_actionability_category": null,
     "selection_rule": "prefer low-risk actionability families with bounded cluster counts, then maximize duplicate reduction leverage"
   },
   "targets": [
     {
       "target": "src/bioetl/application/core",
       "returncode": 8,
-      "duplicate_count": 4,
+      "duplicate_count": 0,
       "raw_duplicate_count": 8,
-      "excluded_duplicate_count": 4,
-      "actionability": [
-        {
-          "category": "export_facade_or_package_barrel",
-          "duplicate_clusters": 4
-        }
-      ],
-      "top_pairs": [
-        {
-          "modules": [
-            "bioetl.application.core._fetch_forwarding",
-            "bioetl.application.core.filtered_data_source_mixins"
-          ],
-          "duplicate_clusters": 1
-        },
-        {
-          "modules": [
-            "bioetl.application.core._fetch_forwarding",
-            "bioetl.application.core.target_data_source_mixins"
-          ],
-          "duplicate_clusters": 1
-        },
-        {
-          "modules": [
-            "bioetl.application.core.filtered_data_source_mixins",
-            "bioetl.application.core.target_data_source_mixins"
-          ],
-          "duplicate_clusters": 1
-        },
-        {
-          "modules": [
-            "bioetl.application.core.pre_silver_finalization_flow",
-            "bioetl.application.core.pre_silver_staging_flow"
-          ],
-          "duplicate_clusters": 1
-        }
-      ],
-      "clusters": [
-        {
-          "path": "src\\bioetl\\application\\core\\wiring\\__init__.py",
-          "line": 1,
-          "actionability_category": "export_facade_or_package_barrel",
-          "modules": [
-            {
-              "module": "bioetl.application.core._fetch_forwarding",
-              "start_line": 47,
-              "end_line": 54
-            },
-            {
-              "module": "bioetl.application.core.target_data_source_mixins",
-              "start_line": 77,
-              "end_line": 86
-            }
-          ]
-        },
-        {
-          "path": "src\\bioetl\\application\\core\\wiring\\__init__.py",
-          "line": 1,
-          "actionability_category": "export_facade_or_package_barrel",
-          "modules": [
-            {
-              "module": "bioetl.application.core.filtered_data_source_mixins",
-              "start_line": 132,
-              "end_line": 138
-            },
-            {
-              "module": "bioetl.application.core.target_data_source_mixins",
-              "start_line": 76,
-              "end_line": 82
-            }
-          ]
-        },
-        {
-          "path": "src\\bioetl\\application\\core\\wiring\\__init__.py",
-          "line": 1,
-          "actionability_category": "export_facade_or_package_barrel",
-          "modules": [
-            {
-              "module": "bioetl.application.core._fetch_forwarding",
-              "start_line": 47,
-              "end_line": 52
-            },
-            {
-              "module": "bioetl.application.core.filtered_data_source_mixins",
-              "start_line": 133,
-              "end_line": 138
-            }
-          ]
-        },
-        {
-          "path": "src\\bioetl\\application\\core\\wiring\\__init__.py",
-          "line": 1,
-          "actionability_category": "export_facade_or_package_barrel",
-          "modules": [
-            {
-              "module": "bioetl.application.core.pre_silver_finalization_flow",
-              "start_line": 32,
-              "end_line": 38
-            },
-            {
-              "module": "bioetl.application.core.pre_silver_staging_flow",
-              "start_line": 43,
-              "end_line": 49
-            }
-          ]
-        }
-      ]
+      "excluded_duplicate_count": 8,
+      "actionability": [],
+      "top_pairs": [],
+      "clusters": []
     },
     {
       "target": "src/bioetl/composition/bootstrap/runtime",

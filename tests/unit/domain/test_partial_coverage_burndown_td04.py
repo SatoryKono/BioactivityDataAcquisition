@@ -40,7 +40,9 @@ from bioetl.domain.control_plane._reproducibility_policy_verdicts import (
     ReplayCapability,
     resolve_replay_readiness_verdict,
 )
-from bioetl.domain.control_plane._run_ledger_event_family import infer_ledger_event_family
+from bioetl.domain.control_plane._run_ledger_event_family import (
+    infer_ledger_event_family,
+)
 from bioetl.domain.control_plane.artifact_lifecycle import (
     ControlPlaneArtifactLifecyclePolicy,
 )
@@ -61,7 +63,9 @@ from bioetl.domain.control_plane.reproducibility_profiles import (
 )
 from bioetl.domain.entities.uniprot import IDMappingResult
 from bioetl.domain.exceptions.base import BioETLError
-from bioetl.domain.exceptions.network_rate_limit_helpers import resolve_rate_limit_params
+from bioetl.domain.exceptions.network_rate_limit_helpers import (
+    resolve_rate_limit_params,
+)
 from bioetl.domain.exceptions.validation import ValidationError
 from bioetl.domain.filtering.load_result import FilterLoadResult
 from bioetl.domain.filtering.silver_filter_identity import (
@@ -69,7 +73,9 @@ from bioetl.domain.filtering.silver_filter_identity import (
 )
 from bioetl.domain.mapping.organism_classification import OrganismClassificationResult
 from bioetl.domain.normalization._chembl_units import _legacy_qudt_identifier_from_uri
-from bioetl.domain.normalization.fingerprints import compute_manifest_execution_fingerprint
+from bioetl.domain.normalization.fingerprints import (
+    compute_manifest_execution_fingerprint,
+)
 from bioetl.domain.normalization.profiles._chembl_bao_label_normalizers import (
     normalize_profile_bao_label_from_bao_format,
 )
@@ -127,7 +133,9 @@ pytestmark = pytest.mark.unit
 # ---------------------------------------------------------------------------
 
 
-def test_effective_config_artifact__policy_refs_without_hashes__no_dq_policy_hashes() -> None:
+def test_effective_config_artifact__policy_refs_without_hashes__no_dq_policy_hashes() -> (
+    None
+):
     """Cover _compute_dq_compatibility_hash when refs exist but hashes are empty."""
     refs = [
         DQPolicyRef(
@@ -358,9 +366,7 @@ def test_resolve_standard_profile_value__missing_required_without_spec() -> None
 
 def test_legacy_qudt_identifier_from_uri__openphacts_unknown_path() -> None:
     assert (
-        _legacy_qudt_identifier_from_uri(
-            "https://www.openphacts.org/units/micromolar"
-        )
+        _legacy_qudt_identifier_from_uri("https://www.openphacts.org/units/micromolar")
         is None
     )
 

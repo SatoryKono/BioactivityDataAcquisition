@@ -368,7 +368,7 @@ groups:
         labels:
           action_target: workflow
           action_reason: workflow_scope_requires_review
-          action_dashboard_uid: bioetl-workflow-overview
+          action_dashboard_uid: bioetl-runtime
         expr: (bioetl_l0_input_status_selected{input="workflow"} >= bool 1) * 10
       - record: bioetl_l0_next_action_route
         labels:
@@ -509,15 +509,13 @@ groups:
       - record: bioetl_runtime_trust_gap_active_10m
         expr: bioetl_runtime_trust_gap_status_10m > bool 0
 
+      # Scoped aliases intentionally do NOT invent pipeline=workflow_* values.
+      # Workflow identity stays on the dedicated `workflow` label / universe metrics.
       - record: bioetl_runtime_pipeline_run_type_universe_scoped
-        expr: >-
-          bioetl_runtime_pipeline_run_type_universe
-          or label_replace(bioetl_runtime_pipeline_run_type_universe, "pipeline", "workflow_$1", "pipeline", "(.+)")
+        expr: bioetl_runtime_pipeline_run_type_universe
 
       - record: bioetl_runtime_current_status_scoped
-        expr: >-
-          bioetl_runtime_current_status
-          or label_replace(bioetl_runtime_current_status, "pipeline", "workflow_$1", "pipeline", "(.+)")
+        expr: bioetl_runtime_current_status
 
       - record: bioetl_runtime_current_status_trusted
         expr: >-
@@ -597,9 +595,7 @@ groups:
         expr: bioetl_runtime_alert_condition_record_flow_invariant_violated_15m
 
       - record: bioetl_runtime_current_blocker_reason_scoped
-        expr: >-
-          bioetl_runtime_current_blocker_reason
-          or label_replace(bioetl_runtime_current_blocker_reason, "pipeline", "workflow_$1", "pipeline", "(.+)")
+        expr: bioetl_runtime_current_blocker_reason
 
       - record: bioetl_provider_current_status
         expr: ((max by (provider) (bioetl_provider_health_status == bool 0) * 2) + max by (provider) (bioetl_provider_health_status == bool 1) + (max by (provider) (bioetl_provider_health_status == bool 2) * 0)) or ((bioetl_provider_health_check_provider_universe_15m * 0) / (bioetl_provider_health_check_provider_universe_15m * 0))

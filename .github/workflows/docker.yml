@@ -185,16 +185,22 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # GHCR rejects mixed-case owner segments (e.g. SatoryKono).
+      - name: Compute lowercase GHCR image base
+        id: ghcr
+        run: |
+          owner="$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')"
+          echo "image_base=ghcr.io/${owner}/bioactivitydataacquisition" >> "$GITHUB_OUTPUT"
+
       - name: Build and push image to GHCR
         uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
         with:
           context: .
           file: Dockerfile.bioetl
           push: true
-          # GHCR requires lowercase repository names.
           tags: |
-            ghcr.io/${{ github.repository_owner }}/bioactivitydataacquisition:latest
-            ghcr.io/${{ github.repository_owner }}/bioactivitydataacquisition:${{ github.sha }}
-            ghcr.io/${{ github.repository_owner }}/bioactivitydataacquisition:${{ github.ref_name }}
+            ${{ steps.ghcr.outputs.image_base }}:latest
+            ${{ steps.ghcr.outputs.image_base }}:${{ github.sha }}
+            ${{ steps.ghcr.outputs.image_base }}:${{ github.ref_name }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

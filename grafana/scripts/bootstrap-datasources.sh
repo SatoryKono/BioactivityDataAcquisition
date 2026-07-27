@@ -8,11 +8,43 @@ CORE_DIR="/etc/bioetl-grafana/datasources-core"
 RENDERING_SERVER_URL="${GF_RENDERING_SERVER_URL:-}"
 STALE_RENDERER_PLUGIN_DIR="/var/lib/grafana/plugins/grafana-image-renderer"
 
+# Empty BIOETL_OPS_HTTP_URL (e.g. from a blank host env export) must NOT wipe
+# the YAML default — treat empty as unset.
+if [ -z "${BIOETL_OPS_HTTP_URL:-}" ]; then
+  BIOETL_OPS_HTTP_URL="http://bioetl:8000"
+fi
+export BIOETL_OPS_HTTP_URL
+
 mkdir -p "${TARGET_DIR}"
 rm -f "${TARGET_DIR}"/*.yml
 cp "${CORE_DIR}"/*.yml "${TARGET_DIR}/"
 
-# Explicitly drop retired datasources that may still exist in grafana-data volume.
+# Materialize Ops HTTP URL into the provisioned file so Grafana never receives
+# an empty ${BIOETL_OPS_HTTP_URL} expansion (stale volume / empty env edge cases).
+OPS_HTTP_YML="${TARGET_DIR}/bioetl-ops-http.yml"
+if [ -f "${OPS_HTTP_YML}" ]; then
+  cat > "${OPS_HTTP_YML}" <<EOF
+apiVersion: 1
+
+# HTTP Infinity datasource for control-plane identity helpers on the main
+# bioetl health server (:8000). Replaces the removed Quarantine Explorer UI.
+# URL is materialized at bootstrap (not left as an empty env expansion).
+datasources:
+  - name: BioETL Ops HTTP
+    type: yesoreyeram-infinity-datasource
+    uid: bioetl-ops-http
+    access: proxy
+    url: ${BIOETL_OPS_HTTP_URL}
+    editable: false
+    jsonData:
+      allowedHosts:
+        - ${BIOETL_OPS_HTTP_URL}
+      auth_method: none
+EOF
+fi
+
+# Explicitly drop retired / stale datasources that may still exist in grafana-data.
+# Re-delete Ops HTTP so a previously provisioned empty-url row is replaced.
 cat > "${TARGET_DIR}/retired-prune.yml" <<'EOF'
 apiVersion: 1
 
@@ -20,8 +52,20 @@ deleteDatasources:
   - name: Loki
   - name: Tempo
   - name: Quarantine Explorer
+  - name: BioETL Ops HTTP
+    orgId: 1
 EOF
 
+# Re-apply Ops HTTP after delete so provisioning order is: prune, then create.
+# Grafana processes all files in the directory; keep create in bioetl-ops-http.yml
+# and delete in retired-prune.yml. Alphabetical order: bioetl-ops-http.yml runs
+# before retired-prune.yml — so put delete first by name.
+mv "${TARGET_DIR}/retired-prune.yml" "${TARGET_DIR}/00-retired-prune.yml" 2>/dev/null || true
+if [ -f "${TARGET_DIR}/retired-prune.yml" ]; then
+  mv "${TARGET_DIR}/retired-prune.yml" "${TARGET_DIR}/00-retired-prune.yml"
+fi
+
+echo "[bioetl-grafana] Ops HTTP URL=${BIOETL_OPS_HTTP_URL}"
 echo "[bioetl-grafana] provisioned Prometheus + BioETL Ops HTTP (no Loki/Tempo/Quarantine Explorer)"
 
 if [ -n "${RENDERING_SERVER_URL}" ] && [ -d "${STALE_RENDERER_PLUGIN_DIR}" ]; then

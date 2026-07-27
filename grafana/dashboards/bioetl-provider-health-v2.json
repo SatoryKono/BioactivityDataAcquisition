@@ -59,20 +59,6 @@
           "targetBlank": false,
           "includeVars": false,
           "tooltip": "Open the Data Quality dashboard in the same tab."
-        },
-        {
-          "title": "5. Workflow",
-          "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline_context&var-run_type=$run_type&var-run_id=$run_id",
-          "targetBlank": false,
-          "includeVars": false,
-          "tooltip": "Scoped handoff: passes workflow/pipeline/run_type context; Workflow owns its status and step filters."
-        },
-        {
-          "title": "6. Alerts & SLO",
-          "url": "/d/bioetl-alerts-slo/bioetl-alerts-slo?var-workflow=$workflow&var-pipeline=$pipeline_context&var-run_type=$run_type&${__url_time_range}",
-          "targetBlank": false,
-          "includeVars": false,
-          "tooltip": "Open the alert surface in the same tab. Global alerts remain explicitly badged and are not attributed to the selected pipeline."
         }
       ]
     },
