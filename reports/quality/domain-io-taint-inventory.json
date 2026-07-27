@@ -829,13 +829,6 @@
     },
     {
       "kind": "import:pandas",
-      "line": 19,
-      "path": "src/bioetl/domain/schemas/validators.py",
-      "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
-      "symbol": "<module>"
-    },
-    {
-      "kind": "import:pandera",
       "line": 20,
       "path": "src/bioetl/domain/schemas/validators.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
@@ -844,6 +837,13 @@
     {
       "kind": "import:pandera",
       "line": 21,
+      "path": "src/bioetl/domain/schemas/validators.py",
+      "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
+      "symbol": "<module>"
+    },
+    {
+      "kind": "import:pandera",
+      "line": 22,
       "path": "src/bioetl/domain/schemas/validators.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
       "symbol": "<module>"
