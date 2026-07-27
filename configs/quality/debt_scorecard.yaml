@@ -447,7 +447,7 @@ hotspot_budgets:
     class_size: 1
     god_object: 1
 hotspot_family_ratchets:
-  snapshot_date: '2026-07-22'
+  snapshot_date: "2026-07-27"
   mode: fail-fast
   artifact_policy:
     duplication_command: uv run python -m scripts.engineering.qa report-duplication-baseline
@@ -458,7 +458,7 @@ hotspot_family_ratchets:
       --max-duplicate-clusters 0
     baseline_artifact: reports/quality/hotspot-duplication-baseline.json
     history_artifact: reports/quality/hotspot-duplication-history.jsonl
-    latest_reviewed_snapshot: '2026-07-22'
+    latest_reviewed_snapshot: '2026-07-27'
     confirming_clean_snapshots_required: 2
     expected_direction: downward
     ratchet_policy: Enforce a hotspot-level zero-duplication budget in CI after the
@@ -481,7 +481,7 @@ hotspot_family_ratchets:
       max_internal_fan_in: 10
     metrics:
       duplication_clusters: 0
-      files: 180
+      files: 183
       total_loc: 22504
       files_ge_250_loc: 5
       helper_function_ratio: 0.37
@@ -539,7 +539,7 @@ hotspot_family_ratchets:
       max_internal_fan_in: 3
     metrics:
       duplication_clusters: 0
-      files: 35
+      files: 36
       total_loc: 4690
       files_ge_250_loc: 2
       helper_function_ratio: 0.417
@@ -595,7 +595,7 @@ hotspot_family_ratchets:
       max_internal_fan_in: 5
     metrics:
       duplication_clusters: 0
-      files: 55
+      files: 56
       total_loc: 6945
       files_ge_250_loc: 0
       helper_function_ratio: 0.36
