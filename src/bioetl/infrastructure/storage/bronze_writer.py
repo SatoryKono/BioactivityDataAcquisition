@@ -6,7 +6,7 @@ import time
 from collections.abc import Iterator
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
@@ -44,13 +44,8 @@ from bioetl.infrastructure.storage.bronze.write_execution import (
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import SourceMetadata
     from bioetl.domain.ports import (
-        AuditPort,
-        LineageStorePort,
         LoggerPort,
-        MetadataCoordinatorPort,
-        MetadataWriterPort,
         MetricsPort,
-        TracingPort,
     )
 from bioetl.domain.ports.noop import _NoOpSpan
 

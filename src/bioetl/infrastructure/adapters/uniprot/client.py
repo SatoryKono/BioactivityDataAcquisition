@@ -10,14 +10,10 @@ from httpx import HTTPStatusError
 
 from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
-from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
 from bioetl.infrastructure.adapters.common import (
     FallbackDecoratorConfig,
     FallbackFetchOrchestrator,
     FallbackPolicyMixin,
-)
-from bioetl.infrastructure.adapters.common.api_request_collector import (
-    APIRequestCollector,
 )
 from bioetl.infrastructure.adapters.common.error_bundles import (
     COMMON_TITLE_FALLBACK_ERRORS,
@@ -45,7 +41,7 @@ from bioetl.infrastructure.adapters.uniprot.protein_fetch_adapter_mixin import (
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort
+    from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.common.dependency_context import (
         HttpAdapterDependencyContext,
     )

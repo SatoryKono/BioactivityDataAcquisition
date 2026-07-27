@@ -444,6 +444,21 @@ exit [int]$env:BIOETL_TEST_EXIT_CODE
         encoding="utf-8",
         newline="",
     )
+    # Linux pwsh only discovers PATH scripts when the executable bit is set.
+    try:
+        path.chmod(path.stat().st_mode | 0o755)
+    except OSError:
+        pass
+
+
+def _powershell_path_separator() -> str:
+    """Return PATH separator matching the selected PowerShell runtime."""
+    if os.name == "nt":
+        return ";"
+    # Windows PowerShell interop from WSL still expects ';' separators.
+    if POWERSHELL is not None and str(POWERSHELL).lower().endswith(".exe"):
+        return ";"
+    return ":"
 
 
 def _windows_wrapper_env(
@@ -452,13 +467,21 @@ def _windows_wrapper_env(
     **updates: str | None,
 ) -> dict[str, str]:
     windows_dir = _powershell_path(fixture_dir)
+    sep = _powershell_path_separator()
+    if sep == ";":
+        path_value = f"{windows_dir};C:\\Windows\\System32;C:\\Windows"
+        join = "\\"
+    else:
+        # Linux CI runs pwsh with POSIX PATH semantics; keep fakes discoverable.
+        path_value = f"{windows_dir}:/usr/bin:/bin"
+        join = "/"
     env = _clean_env(
-        PATH=f"{windows_dir};C:\\Windows\\System32;C:\\Windows",
+        PATH=path_value,
         USERPROFILE=windows_dir,
-        UV_CACHE_DIR=f"{windows_dir}\\uv-cache",
-        UV_TOOL_DIR=f"{windows_dir}\\uv-tools",
-        DENO_DIR=f"{windows_dir}\\deno-cache",
-        NPM_CONFIG_CACHE=f"{windows_dir}\\npm-cache",
+        UV_CACHE_DIR=f"{windows_dir}{join}uv-cache",
+        UV_TOOL_DIR=f"{windows_dir}{join}uv-tools",
+        DENO_DIR=f"{windows_dir}{join}deno-cache",
+        NPM_CONFIG_CACHE=f"{windows_dir}{join}npm-cache",
         BIOETL_TEST_CAPTURE=_powershell_path(capture_file),
         BIOETL_TEST_EXIT_CODE="0",
     )
@@ -679,9 +702,12 @@ printf '%s\n' "$NO_PROXY" "$no_proxy" "${{HTTP_PROXY-unset}}" \
     ("mock_functions", "expected"),
     [
         (
+            # PATH probes run first; Test-Path must not be always-true or the first
+            # PATH entry wins. Only accept the Get-Command Source candidate.
             "function Get-Command { param($Name, $ErrorAction) "
             "if ($Name -eq 'uvx') { [pscustomobject]@{Source='C:\\fake\\uvx.exe'} } }\n"
-            "function Test-Path { param($LiteralPath, $Path, $ErrorAction) $true }\n"
+            "function Test-Path { param($LiteralPath, $Path, $ErrorAction) "
+            "$LiteralPath -eq 'C:\\fake\\uvx.exe' }\n"
             "function Resolve-Path { param($LiteralPath) "
             "[pscustomobject]@{Path=$LiteralPath} }",
             "C:\\fake\\uvx.exe",
@@ -1157,7 +1183,11 @@ def test_adr_analysis_wrapper_startup_contract(
         for line in captured
     )
     assert any(
-        line.startswith("adr_path=") and "docs\\02-architecture\\decisions" in line
+        line.startswith("adr_path=")
+        and (
+            "docs\\02-architecture\\decisions" in line
+            or "docs/02-architecture/decisions" in line
+        )
         for line in captured
     )
 

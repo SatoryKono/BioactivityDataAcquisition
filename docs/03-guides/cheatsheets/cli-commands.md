@@ -15,7 +15,7 @@ ______________________________________________________________________
 
 Краткий справочник по командам BioETL CLI для быстрого поиска.
 
-**Версия:** 1.0.0  
+**Версия:** 1.0.0
 **Дата обновления:** 2026-07-24
 
 **Оглавление:**
@@ -728,8 +728,8 @@ ______________________________________________________________________
 
 ## См. также
 
-- [CLI Reference](cli.md) — полная документация по CLI
-- [Running Pipelines](../03-guides/running-pipelines.md) — руководство по запуску
-- [Pipeline Configuration](../03-guides/pipeline-configuration.md) — настройка конфигураций
-- [Metrics & Monitoring](../03-guides/metrics-monitoring.md) — метрики и мониторинг
-- [Troubleshooting](../03-guides/troubleshooting.md) — решение проблем
+- [CLI Reference](../../04-reference/cli.md) — полная документация по CLI
+- [Running Pipelines](../running-pipelines.md) — руководство по запуску
+- [Pipeline Configuration](../pipeline-configuration.md) — настройка конфигураций
+- [Metrics & Monitoring](../metrics-monitoring.md) — метрики и мониторинг
+- [Troubleshooting](../troubleshooting.md) — решение проблем

@@ -77,10 +77,16 @@ review_lanes:
     issue_refs:
       - "#6046"
     verification:
-      - git ls-files docker-compose.monitoring.yml docker-compose.neo4j-audit.yml docker-compose.neo4j.yml docker-compose.yml Dockerfile.bioetl scripts/ops/docker-setup.ps1 scripts/ops/docker-setup.sh scripts/ops/runtime/docker/compose grafana/provisioning/datasources-local/grafana-datasource.yml
-      - rg -n "docker-compose(\\.monitoring|\\.neo4j-audit|\\.neo4j)?\\.yml|scripts/ops/runtime/docker/compose/(alertmanager|minio|redis|sonarqube)\\.yml|docker-setup\\.ps1|docker-setup\\.sh|Dockerfile\\.bioetl|grafana/provisioning/datasources-local/grafana-datasource\\.yml" .github docs scripts README.md Makefile pyproject.toml
+      - git ls-files docker-compose.monitoring.desktop.yml docker-compose.monitoring.yml docker-compose.neo4j-audit.yml docker-compose.neo4j.yml docker-compose.yml Dockerfile.bioetl scripts/ops/docker-setup.ps1 scripts/ops/docker-setup.sh scripts/ops/runtime/docker/compose grafana/provisioning/datasources-local/grafana-datasource.yml
+      - test ! -e docker-compose.monitoring.desktop.yml
+      - rg -n "docker-compose(\\.monitoring(\\.desktop)?|\\.neo4j-audit|\\.neo4j)?\\.yml|scripts/ops/runtime/docker/compose/(alertmanager|minio|redis|sonarqube)\\.yml|docker-setup\\.ps1|docker-setup\\.sh|Dockerfile\\.bioetl|grafana/provisioning/datasources-local/grafana-datasource\\.yml" .github docs scripts README.md Makefile pyproject.toml
       - docs/05-operations/verification/docker-helper-root-relocation-audit.md
     candidates:
+      - path: docker-compose.monitoring.desktop.yml
+        current_live_state: absent_from_root_baseline
+        canonical_path: docs/05-operations/verification/docker-helper-root-relocation-audit.md
+        disposition: retired_no_restore
+        action_if_reintroduced: do_not_restore_the_retired_desktop_overlay_without_fresh_runtime_owner_review
       - path: docker-compose.monitoring.yml
         current_live_state: present_approved_root_surface
         canonical_path: docs/05-operations/verification/docker-helper-root-relocation-audit.md
