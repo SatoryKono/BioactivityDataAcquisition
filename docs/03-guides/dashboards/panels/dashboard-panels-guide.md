@@ -11,9 +11,9 @@
 - `bioetl-dq-v2-panels.md` - Data Quality dashboard
 - `bioetl-provider-health-v2-panels.md` - Provider Health dashboard
 - `bioetl-runtime-panels.md` - Runtime dashboard
-- `bioetl-silver-reject-explorer-panels.md` - Silver Reject Explorer dashboard
-- `bioetl-workflow-overview-panels.md` - Workflow Overview dashboard
-- `bioetl-alerts-slo-panels.md` - Alerts SLO dashboard
+- `bioetl-silver-reject-explorer-panels.md` - **REMOVED** (historical)
+- `bioetl-workflow-overview-panels.md` - **REMOVED** (historical; see epic #6647)
+- `bioetl-alerts-slo-panels.md` - **REMOVED** (historical; see epic #6647)
 
 ## Шаблон документации панели
 
@@ -39,6 +39,4 @@ All shipped dashboards now provide 1:1 panel inventory coverage:
 - `bioetl-dq-v2-panels.md` - 1:1 panel inventory
 - `bioetl-provider-health-v2-panels.md` - 1:1 panel inventory
 - `bioetl-runtime-panels.md` - 1:1 panel inventory
-- `bioetl-silver-reject-explorer-panels.md` - 1:1 panel inventory
-- `bioetl-workflow-overview-panels.md` - 1:1 panel inventory
-- `bioetl-alerts-slo-panels.md` - 1:1 panel inventory
+- Removed dashboards are marked **REMOVED** in their panel docs and are not part of the shipping surface (5 primary dashboards only).

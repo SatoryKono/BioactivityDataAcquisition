@@ -1,6 +1,11 @@
 # BioETL Workflow Overview - Panels Documentation
 
-**Dashboard file:** `grafana/dashboards/bioetl-workflow-overview.json`
+> **REMOVED from shipping surface (2026-07-23 / epic #6647).**  
+> Dashboard JSON is no longer shipped under `grafana/dashboards/`.  
+> Workflow band evidence lives on `bioetl-runtime` (Pipeline Diagnostics).  
+> This document is retained as historical panel inventory only.
+
+**Dashboard file:** `grafana/dashboards/bioetl-workflow-overview.json` *(absent — retired)*
 
 ## Обзор
 
