@@ -16,6 +16,9 @@ from bioetl.infrastructure.adapters.common.error_bundles import (
 from bioetl.infrastructure.adapters.pubchem._fetch_strategy_search import (
     _PubChemSearchFetchMixin,
 )
+from bioetl.infrastructure.adapters.pubchem._fetch_strategy_transport import (
+    resolve_transport_bag,
+)
 from bioetl.infrastructure.adapters.pubchem.constants import PUBCHEM_API_BASE
 from bioetl.infrastructure.adapters.pubchem.fetch_flow import PubChemFetchFlow
 from bioetl.infrastructure.adapters.pubchem.policy_helper import (
@@ -34,27 +37,6 @@ from bioetl.infrastructure.adapters.pubchem.response_mapper import (
     PubChemResponseMapper,
     normalize_pubchem_results,
 )
-
-_TRANSPORT_KEYS = ("logger", "rate_limiter", "circuit_breaker", "run_in_executor")
-
-
-def resolve_transport_bag(
-    transport: dict[str, object] | None,
-    legacy: dict[str, object],
-) -> dict[str, object]:
-    """Merge transport dict with transitional kwargs; reject unknown keys."""
-    resolved = dict(transport or {})
-    for key in _TRANSPORT_KEYS:
-        value = legacy.pop(key, None)
-        if value is not None:
-            resolved[key] = value
-    if legacy:
-        raise TypeError(
-            "PubChemFetchStrategies() got unexpected keyword argument(s): "
-            + ", ".join(sorted(str(k) for k in legacy))
-        )
-    return resolved
-
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Callable

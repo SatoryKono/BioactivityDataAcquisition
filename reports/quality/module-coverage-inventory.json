@@ -16706,6 +16706,16 @@
       "source_lines": 92
     },
     {
+      "coverage_percent": null,
+      "coverage_status": "no_executable_lines",
+      "covered_lines": 0,
+      "executable_lines": 0,
+      "missing_lines": 0,
+      "module": "bioetl.infrastructure.adapters.pubchem._fetch_strategy_transport",
+      "path": "src/bioetl/infrastructure/adapters/pubchem/_fetch_strategy_transport.py",
+      "source_lines": 25
+    },
+    {
       "coverage_percent": 92.68,
       "coverage_status": "partially_covered",
       "covered_lines": 38,
@@ -16773,7 +16783,7 @@
       "missing_lines": 2,
       "module": "bioetl.infrastructure.adapters.pubchem.fetch_strategies",
       "path": "src/bioetl/infrastructure/adapters/pubchem/fetch_strategies.py",
-      "source_lines": 305
+      "source_lines": 287
     },
     {
       "coverage_percent": 100.0,
@@ -39428,6 +39438,16 @@
       "source_lines": 92
     },
     {
+      "coverage_percent": null,
+      "coverage_status": "no_executable_lines",
+      "covered_lines": 0,
+      "executable_lines": 0,
+      "missing_lines": 0,
+      "module": "bioetl.infrastructure.adapters.pubchem._fetch_strategy_transport",
+      "path": "src/bioetl/infrastructure/adapters/pubchem/_fetch_strategy_transport.py",
+      "source_lines": 25
+    },
+    {
       "coverage_percent": 92.68,
       "coverage_status": "partially_covered",
       "covered_lines": 38,
@@ -39495,7 +39515,7 @@
       "missing_lines": 2,
       "module": "bioetl.infrastructure.adapters.pubchem.fetch_strategies",
       "path": "src/bioetl/infrastructure/adapters/pubchem/fetch_strategies.py",
-      "source_lines": 305
+      "source_lines": 287
     },
     {
       "coverage_percent": 100.0,
@@ -45450,7 +45470,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-13",
-  "source_tree_sha256": "f7b50866bffe3a80cefebf6843df4c64dcc92433c3789080577e0c262f952f31",
+  "source_tree_sha256": "a0be8b1fa4b14ed44c0d66f8da29d1b08d239ef7dc200bd93f4cc12bc5aec7c3",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -45605,11 +45625,11 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2272,
+    "source_module_count": 2273,
     "status_counts": {
       "coverage_xml_missing": 0,
       "fully_covered": 1406,
-      "no_executable_lines": 50,
+      "no_executable_lines": 51,
       "partially_covered": 816,
       "uncovered": 0,
       "unmeasured": 0
