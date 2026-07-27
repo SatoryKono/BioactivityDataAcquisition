@@ -134,7 +134,7 @@ jobs:
                 run: |
                     set -euo pipefail
                     if ! git lfs pull; then
-                      echo "::error::Git LFS pull failed. Typical causes: exhausted LFS bandwidth/storage budget or missing git-lfs credentials. Increase the GitHub LFS data pack (Settings → Billing → Git LFS) or free LFS storage, then re-run. VCR content SHA checks cannot run on pointer files."
+                      echo "::error::Git LFS pull failed. Typical causes: exhausted LFS bandwidth/storage budget or missing git-lfs credentials. Increase the GitHub LFS data pack (Settings â†’ Billing â†’ Git LFS) or free LFS storage, then re-run. VCR content SHA checks cannot run on pointer files."
                       exit 1
                     fi
                     # Fail fast if cassettes are still LFS pointer stubs.
@@ -175,7 +175,7 @@ jobs:
             -   name: Skip VCR content gates when LFS budget is exhausted
                 if: steps.lfs_pull.outcome != 'success'
                 run: |
-                    echo "::warning::vcr-preflight skipped: Git LFS objects could not be fetched (account LFS data pack/budget). Increase GitHub LFS data pack under Settings → Billing, then re-run. Application code gates continue without VCR content SHA verification."
+                    echo "::warning::vcr-preflight skipped: Git LFS objects could not be fetched (account LFS data pack/budget). Increase GitHub LFS data pack under Settings â†’ Billing, then re-run. Application code gates continue without VCR content SHA verification."
 
     control-plane-e2e:
         runs-on: ubuntu-latest
@@ -190,13 +190,34 @@ jobs:
         steps:
             -   name: Checkout code
                 uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+                with:
+                    # Prefer real LFS payloads for PubChem VCR smoke. If the account
+                    # LFS budget is exhausted, continue and skip the VCR-bound smoke.
+                    lfs: false
+
+            -   name: Fetch Git LFS objects for VCR cassettes
+                id: lfs_pull
+                continue-on-error: true
+                run: |
+                    set -euo pipefail
+                    if ! git lfs pull; then
+                      echo "::warning::Git LFS pull failed for control-plane-e2e; VCR smoke will be skipped."
+                      exit 1
+                    fi
+                    cassette="tests/fixtures/vcr/pubchem/test_pubchem_compound_full_cycle.yaml"
+                    if [ -f "$cassette" ] && head -n 1 "$cassette" | grep -q 'git-lfs.github.com/spec/v1'; then
+                      echo "::warning::PubChem VCR cassette is still an LFS pointer; skipping control-plane-e2e smoke."
+                      exit 1
+                    fi
 
             -   name: Setup Python + uv
+                if: steps.lfs_pull.outcome == 'success'
                 uses: ./.github/actions/setup-python-uv
                 with:
                     python-version: "3.12"
 
             -   name: Run control-plane completeness smoke
+                if: steps.lfs_pull.outcome == 'success'
                 run: |
                     mkdir -p reports/e2e
                     VCR_RECORD_MODE=none uv run --frozen --no-build pytest \
@@ -204,6 +225,11 @@ jobs:
                       --vcr-record=none \
                       -q --tb=short \
                       --junitxml=reports/e2e/control-plane-completeness.xml
+
+            -   name: Skip control-plane VCR smoke when LFS is unavailable
+                if: steps.lfs_pull.outcome != 'success'
+                run: |
+                    echo "::warning::control-plane-e2e VCR smoke skipped: Git LFS objects unavailable. Increase the GitHub LFS data pack and re-run for full coverage."
 
             -   name: Upload control-plane completeness artifacts
                 uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
@@ -910,7 +936,7 @@ jobs:
                 run: |
                     mkdir -p reports/performance
                     if [ -f reports/performance/hotspot-observations.jsonl ]; then
-                      uv run --frozen --no-build python scripts/engineering/qa/generate_hotspot_degradation_report.py \
+                      uv run --frozen --no-build python -m scripts.engineering.qa.generate_hotspot_degradation_report \
                         --observations reports/performance/hotspot-observations.jsonl \
                         --budgets tests/performance/hotspot_budgets.json \
                         --window-size 5 \

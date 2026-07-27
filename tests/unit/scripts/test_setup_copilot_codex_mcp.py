@@ -674,19 +674,19 @@ def test_setup_mcp_reuses_current_config_and_repairs_drift(
     initial_codex_config = codex_config.read_text(encoding="utf-8")
     initial_workspace_config = workspace_config.read_text(encoding="utf-8")
 
-    assert (
-        setup_mcp.main(
-            [
-                "--root",
-                str(workspace_root),
-                "--workspace-root",
-                str(workspace_root),
-                "--skip-codex-validation",
-                "--skip-gemini-settings",
-            ]
-        )
-        == 0
-    )
+    shared_args = [
+        "--root",
+        str(workspace_root),
+        "--workspace-root",
+        str(workspace_root),
+        "--profile",
+        "shared",
+        "--transport-mode",
+        "shared",
+        "--skip-codex-validation",
+        "--skip-gemini-settings",
+    ]
+    assert setup_mcp.main(shared_args) == 0
     assert codex_config.read_text(encoding="utf-8") == initial_codex_config
     assert workspace_config.read_text(encoding="utf-8") == initial_workspace_config
 
@@ -694,19 +694,7 @@ def test_setup_mcp_reuses_current_config_and_repairs_drift(
     drifted["mcpServers"]["filesystem"]["args"][0] = "unexpected-wrapper"
     workspace_config.write_text(json.dumps(drifted), encoding="utf-8")
 
-    assert (
-        setup_mcp.main(
-            [
-                "--root",
-                str(workspace_root),
-                "--workspace-root",
-                str(workspace_root),
-                "--skip-codex-validation",
-                "--skip-gemini-settings",
-            ]
-        )
-        == 0
-    )
+    assert setup_mcp.main(shared_args) == 0
     repaired_payload = json.loads(workspace_config.read_text(encoding="utf-8"))
     wrapper_suffix = ".ps1" if os.name == "nt" else ".sh"
     assert repaired_payload["mcpServers"]["filesystem"]["args"][0] == (
