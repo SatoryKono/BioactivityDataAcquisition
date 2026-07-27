@@ -92,42 +92,31 @@ class PipelineRunner(PipelineRunnerSupportMixin):
 
     @property
     def logger(self) -> LoggerPort:
-        """Get the logger instance."""
         return self._logger
 
     @property
     def shutdown_signal(self) -> ShutdownSignal:
-        """Shutdown signal for graceful termination (RunnablePort contract)."""
         return self._shutdown_signal
 
     @property
     def run_id(self) -> str:
-        """Stable run identifier exposed by the runner contract."""
         return str(self._context.run_id)
 
     @property
     def manifest_id(self) -> str | None:
-        """Control-plane manifest identifier linked to this run."""
         manifest_id = getattr(self._context, "manifest_id", None)
         return None if manifest_id is None else str(manifest_id)
 
     @property
     def services(self) -> PipelineRunnerServicesProtocol:
-        """Access injected services."""
         return self._services
 
     def attach_run_ledger_service(self, service: RunLedgerService) -> None:
-        """Attach a control-plane run-ledger collaborator from composition."""
         self._run_ledger_service = service
 
     @property
     def execution_metrics(self) -> dict[str, int]:
-        """Return execution counters exposed by the concrete pipeline runner."""
-        gold_excluded = getattr(
-            self._executor,
-            "records_gold_excluded_by_contract",
-            0,
-        )
+        gold_excluded = getattr(self._executor, "records_gold_excluded_by_contract", 0)
         if not isinstance(gold_excluded, int):
             gold_excluded = 0
         return {
@@ -140,31 +129,27 @@ class PipelineRunner(PipelineRunnerSupportMixin):
             "records_filtered_out": int(self._executor.records_filtered_out),
         }
 
+    def _debug_export_result(self) -> DebugExportResult | None:
+        result = getattr(self._executor, "debug_export_result", None)
+        return result if isinstance(result, DebugExportResult) else None
+
     @property
     def debug_export_uri(self) -> str | None:
-        """Return the persisted debug export root when available."""
-        result = getattr(self._executor, "debug_export_result", None)
-        if not isinstance(result, DebugExportResult):
-            return None
-        return result.root_path
+        result = self._debug_export_result()
+        return None if result is None else result.root_path
 
     @property
     def debug_export_hash(self) -> str | None:
-        """Return the persisted debug export hash when available."""
-        result = getattr(self._executor, "debug_export_result", None)
-        if not isinstance(result, DebugExportResult):
-            return None
-        return result.debug_export_hash
+        result = self._debug_export_result()
+        return None if result is None else result.debug_export_hash
 
     @property
     def execution_diagnostics(self) -> JsonDict:
-        """Return bounded executor diagnostics for run-ledger projection."""
         diagnostics = getattr(self._executor, "execution_diagnostics", {})
         return diagnostics if isinstance(diagnostics, dict) else {}
 
     @contextmanager
     def _pipeline_span(self) -> Generator[Span, None, None]:
-        """Context manager for the top-level pipeline OTel span."""
         with start_current_span(
             tracing=cast(_TracingProvider, self._tracer),
             tracer_name="bioetl.runner",
@@ -201,7 +186,6 @@ class PipelineRunner(PipelineRunnerSupportMixin):
             await self._cleanup_after_run()
 
     async def _run_pipeline_lifecycle(self) -> bool:
-        """Execute the observed pipeline lifecycle and report shutdown state."""
         shutdown_recorded = False
         with self._pipeline_span(), self._observer:
             try:
@@ -216,18 +200,13 @@ class PipelineRunner(PipelineRunnerSupportMixin):
         return shutdown_recorded
 
     async def _finalize_debug_export(self, status: str) -> None:
-        """Persist and publish debug export artifacts without failing the run."""
         finalize = getattr(self._executor, "finalize_debug_export", None)
         if not callable(finalize):
             return
         try:
             from collections.abc import Awaitable, Callable
-            from typing import cast
 
-            finalize_fn = cast(
-                Callable[..., Awaitable[object]],
-                finalize,
-            )
+            finalize_fn = cast(Callable[..., Awaitable[object]], finalize)
             result = await finalize_fn(status=status, manifest_id=self.manifest_id)
         except _RUN_FAILURE_EXCEPTIONS as error:
             self._logger.warning(
