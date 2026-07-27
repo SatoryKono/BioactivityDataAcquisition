@@ -92,13 +92,24 @@ class BaseTransformer(
         entity_type: str | None = None,
         silver_filters: SilverFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
-        tracer: TracingPort | None = None,
-        metrics: MetricsPort | None = None,
-        identity_service: EntityIdentityGenerator | None = None,
-        pii_hasher: PiiHasherPort | None = None,
         dependencies: TransformerDependencyContext | None = None,
+        **legacy_collaborators: object,
     ) -> None:
-        """Initialize transformer with explicitly wired collaborators."""
+        """Initialize transformer with explicitly wired collaborators.
+
+        Legacy named collaborator kwargs (``tracer``, ``metrics``,
+        ``identity_service``, ``pii_hasher``) remain accepted for older tests
+        and are merged into ``dependencies``.
+        """
+        tracer = legacy_collaborators.pop("tracer", None)
+        metrics = legacy_collaborators.pop("metrics", None)
+        identity_service = legacy_collaborators.pop("identity_service", None)
+        pii_hasher = legacy_collaborators.pop("pii_hasher", None)
+        if legacy_collaborators:
+            unexpected = ", ".join(sorted(str(k) for k in legacy_collaborators))
+            raise TypeError(
+                f"BaseTransformer() got unexpected keyword argument(s): {unexpected}"
+            )
         self.provider = provider
         self.entity_type = entity_type or "unknown"
         self._silver_filters = silver_filters
@@ -106,10 +117,10 @@ class BaseTransformer(
 
         resolved_dependencies = _resolve_transformer_dependencies(
             dependencies=dependencies,
-            tracer=tracer,
-            metrics=metrics,
-            identity_service=identity_service,
-            pii_hasher=pii_hasher,
+            tracer=tracer,  # type: ignore[arg-type]
+            metrics=metrics,  # type: ignore[arg-type]
+            identity_service=identity_service,  # type: ignore[arg-type]
+            pii_hasher=pii_hasher,  # type: ignore[arg-type]
         )
 
         self._tracer = resolved_dependencies.tracer

@@ -75,24 +75,20 @@ class BatchTransformer:
         self,
         context: PipelineContext,
         config: RecordProcessorConfig,
-        error_classifier: ErrorClassifier,
-        quarantine_manager: QuarantineRuntimeService,
-        batch_metrics: BatchMetricsRecorderService,
-        transform_callback: TransformCallback,
-        gold_filter_callback: GoldFilterCallback,
-        gold_transform_callback: GoldTransformCallback,
+        runtime: dict[str, object],
+        callbacks: dict[str, object],
         normalization_processor: RecordNormalizationProcessor | None = None,
         debug_export_service: DebugExportService | None = None,
     ) -> None:
         """Initialize batch transformer."""
         self._context = context
         self._config = config
-        self._error_classifier = error_classifier
-        self._quarantine_manager = quarantine_manager
-        self._batch_metrics = batch_metrics
-        self._transform = transform_callback
-        self._gold_filter = gold_filter_callback
-        self._gold_transform = gold_transform_callback
+        self._error_classifier = runtime["error_classifier"]  # type: ignore[assignment]
+        self._quarantine_manager = runtime["quarantine_manager"]  # type: ignore[assignment]
+        self._batch_metrics = runtime["batch_metrics"]  # type: ignore[assignment]
+        self._transform = callbacks["transform_callback"]  # type: ignore[assignment]
+        self._gold_filter = callbacks["gold_filter_callback"]  # type: ignore[assignment]
+        self._gold_transform = callbacks["gold_transform_callback"]  # type: ignore[assignment]
         self._debug_export_service = debug_export_service
         self._normalization_processor = (
             normalization_processor

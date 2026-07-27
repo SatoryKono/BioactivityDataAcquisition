@@ -82,14 +82,10 @@ class MergeService(
         merge_config: MergeConfig,
         storage: MergedStoragePort,
         logger: LoggerPort,
+        collaborators: MergeCollaboratorGroup,
         delta_reader: DeltaReaderPort | None = None,
         silver_reader: SilverStoragePort | None = None,
-        field_group_registry: FieldGroupRegistry | None = None,
-        cross_validator: EnrichmentCrossValidator | None = None,
-        gold_schema: Any | None = None,  # Any: Pandera DataFrameModel class or instance
-        clock: ClockPort | None = None,
-        *,
-        collaborators: MergeCollaboratorGroup,
+        **runtime: Any,
     ) -> None:
         """Initialise the MergeService with all required and optional collaborators.
 
@@ -111,12 +107,20 @@ class MergeService(
                 semantic groups; enables Gold-layer column filtering and ordering.
             cross_validator: Optional service that validates consistency across
                 enricher data sources after joining; ``None`` disables cross-validation.
-            gold_schema: Optional Pandera ``DataFrameModel`` class used to validate
-                the Gold-layer output schema; type is ``Any`` because it is a class
-                reference rather than an instance.
             collaborators: Dependency bundle containing the merge-time collaborator
                 services.
+            runtime: Optional keyword map with keys ``field_group_registry``,
+                ``cross_validator``, ``gold_schema``, and ``clock``.
         """
+        field_group_registry = runtime.pop("field_group_registry", None)
+        cross_validator = runtime.pop("cross_validator", None)
+        gold_schema = runtime.pop("gold_schema", None)
+        clock = runtime.pop("clock", None)
+        if runtime:
+            unexpected = ", ".join(sorted(str(key) for key in runtime))
+            raise TypeError(
+                f"MergeService() got unexpected keyword argument(s): {unexpected}"
+            )
         self._config = merge_config
         self._storage = storage
         self._logger = logger

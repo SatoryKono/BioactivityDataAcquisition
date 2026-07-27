@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import asyncio
 import time
+from dataclasses import dataclass
 
 from bioetl.application.services.quarantine_service import QuarantineService
 from bioetl.domain.ports import (
@@ -32,6 +33,19 @@ from bioetl.interfaces.http.processed_records_table import (
 from bioetl.interfaces.http.types import HealthResponse
 
 
+
+@dataclass(frozen=True, slots=True)
+class HealthServerControlPlaneDeps:
+    """Collaborator bag for optional health-server control-plane ports."""
+
+    health_monitor: HealthMonitorPort | None = None
+    quarantine_service: QuarantineService | None = None
+    checkpoint_port: CheckpointPort | None = None
+    run_manifest_port: RunManifestPort | None = None
+    run_ledger_port: RunLedgerPort | None = None
+    workflow_manifest_port: WorkflowManifestPort | None = None
+
+
 class HealthServer(
     HealthServerHTTPMixin,
     HealthServerRoutingMixin,
@@ -45,12 +59,7 @@ class HealthServer(
         self,
         host: str = "127.0.0.1",
         port: int = 8081,
-        health_monitor: HealthMonitorPort | None = None,
-        quarantine_service: QuarantineService | None = None,
-        checkpoint_port: CheckpointPort | None = None,
-        run_manifest_port: RunManifestPort | None = None,
-        run_ledger_port: RunLedgerPort | None = None,
-        workflow_manifest_port: WorkflowManifestPort | None = None,
+        control_plane: HealthServerControlPlaneDeps | None = None,
         prometheus_base_url: str | None = None,
         logger: LoggerPort | None = None,
     ) -> None:
@@ -79,14 +88,15 @@ class HealthServer(
             logger: Optional LoggerPort for structured server event logging.
                 Server events are silently dropped when None.
         """
+        deps = control_plane or HealthServerControlPlaneDeps()
         self.host = host
         self.port = port
-        self._health_monitor = health_monitor
-        self._quarantine_service = quarantine_service
-        self._checkpoint_port = checkpoint_port
-        self._run_manifest_port = run_manifest_port
-        self._run_ledger_port = run_ledger_port
-        self._workflow_manifest_port = workflow_manifest_port
+        self._health_monitor = deps.health_monitor
+        self._quarantine_service = deps.quarantine_service
+        self._checkpoint_port = deps.checkpoint_port
+        self._run_manifest_port = deps.run_manifest_port
+        self._run_ledger_port = deps.run_ledger_port
+        self._workflow_manifest_port = deps.workflow_manifest_port
         self._data_root: str | None = None
         self._prometheus_base_url = (
             prometheus_base_url or DEFAULT_PROMETHEUS_BASE_URL
