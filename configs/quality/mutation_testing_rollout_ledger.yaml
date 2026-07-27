@@ -32,7 +32,7 @@ entries:
   owner: "@bioetl-domain"
   min_score: 70
   paths_to_mutate: src/bioetl/domain/
-  tests_dir: tests/
+  tests_dir: tests/unit/domain/
   current_evidence_paths:
   - configs/quality/test_matrix.yaml
   - .github/workflows/mutation-testing.yml

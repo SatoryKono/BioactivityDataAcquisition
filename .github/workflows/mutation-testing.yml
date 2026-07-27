@@ -37,7 +37,9 @@ jobs:
         target:
           - id: domain
             paths_to_mutate: src/bioetl/domain/
-            tests_dir: tests/
+            # Keep mutation pytest selection inside unit/domain to avoid loading
+            # architecture/integration plugin surfaces that require full repo pathing.
+            tests_dir: tests/unit/domain/
             threshold: "70.0"
           - id: application-control-plane
             paths_to_mutate: src/bioetl/application/services/control_plane/
@@ -95,9 +97,12 @@ jobs:
           # mutmut executes pytest from a sandbox; ensure package + repo roots resolve.
           PYTHONPATH: ${{ github.workspace }}/src:${{ github.workspace }}
         run: |
+          set -euo pipefail
           echo "Running mutation testing for ${{ matrix.target.id }}..."
           # mutmut is a dev dependency; invoke via uv so PATH/venv entrypoints resolve
           # under the frozen CI environment (bare `mutmut` is not on runner PATH).
+          export PYTHONPATH="${GITHUB_WORKSPACE}/src:${GITHUB_WORKSPACE}${PYTHONPATH:+:$PYTHONPATH}"
+          uv run --frozen --no-build python -c "import bioetl.domain, scripts; print('mutation import preflight ok')"
           uv run --frozen --no-build mutmut run
 
       - name: Generate mutation report
