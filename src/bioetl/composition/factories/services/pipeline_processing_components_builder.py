@@ -78,26 +78,7 @@ def create_batch_processing_components(
         if config.normalization_enabled
         else None
     )
-    raw_debug_export_config = getattr(config, "debug_export_config", None)
-    debug_export_config = (
-        raw_debug_export_config
-        if isinstance(raw_debug_export_config, DebugExportConfig)
-        else None
-    )
-    debug_export_service = (
-        DebugExportService(
-            config=replace(
-                debug_export_config,
-                workflow_id=getattr(context, "workflow_id", "standalone"),
-            ),
-            run_id=context.run_id,
-            pipeline_id=config.pipeline_name,
-            provider_id=config.provider,
-            writer=DebugExportAdapter(),
-        )
-        if debug_export_config is not None and is_dataclass(debug_export_config)
-        else None
-    )
+    debug_export_service = _build_debug_export_service(config=config, context=context)
     transformer = BatchTransformer(
         context=context,
         config=config,
@@ -137,6 +118,32 @@ def create_batch_processing_components(
         batch_metrics=batch_metrics,
         transformer=transformer,
         writer=writer,
+    )
+
+
+def _build_debug_export_service(
+    *,
+    config: RecordProcessorConfig,
+    context: PipelineContext,
+) -> DebugExportService | None:
+    """Build optional debug export service from processor config."""
+    raw_debug_export_config = getattr(config, "debug_export_config", None)
+    debug_export_config = (
+        raw_debug_export_config
+        if isinstance(raw_debug_export_config, DebugExportConfig)
+        else None
+    )
+    if debug_export_config is None or not is_dataclass(debug_export_config):
+        return None
+    return DebugExportService(
+        config=replace(
+            debug_export_config,
+            workflow_id=getattr(context, "workflow_id", "standalone"),
+        ),
+        run_id=context.run_id,
+        pipeline_id=config.pipeline_name,
+        provider_id=config.provider,
+        writer=DebugExportAdapter(),
     )
 
 

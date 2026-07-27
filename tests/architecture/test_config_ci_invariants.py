@@ -11,7 +11,7 @@ Ensures structural integrity of all YAML configuration files:
 Reference:
     ADR-024 (entity naming), ADR-027 (DQ externalization), ADR-028 (filter
     externalization), ADR-029 (convention-based path resolution), ADR-031
-    (loading strategy).
+    (loading strategy), ADR-039 (unified entity configuration format).
 """
 
 from __future__ import annotations

@@ -68,24 +68,6 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint."
     },
-    "scripts/engineering/qa/py_review_orchestrator.py": {
-      "owner": "@bioetl-platform",
-      "decision": "shared_helper_module",
-      "review_by": "2026-09-30",
-      "next_step": "Retain as the importable implementation helper for review orchestration; expose future standalone execution only through the canonical QA router."
-    },
-    "scripts/ops/observability/grafana/apply_grafana_simplification_6570.py": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-08-31",
-      "next_step": "Remove after the bounded Grafana simplification rollout is applied and its issue-specific validation evidence is finalized."
-    },
-    "scripts/ops/observability/grafana/_full_dashboard_audit_once.py": {
-      "owner": "@bioetl-platform",
-      "decision": "shared_helper_module",
-      "review_by": "2026-09-30",
-      "next_step": "Retain as an internal one-shot implementation helper used by the governed Grafana audit flow; keep it supporting and route operator execution through the canonical dashboard tooling."
-    },
     "scripts/ai/codex/helper/check-env.ps1": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
@@ -668,12 +650,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as the compatibility wrapper for the legacy AST duplicate-function analyzer under src/tools/scripts/duplicate_function_analyzer.py; remove the wrapper when documented callers move to the canonical implementation or the analyzer is retired."
     },
-    "scripts/engineering/qa/audit_pipeline_semantics.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded historical semantic-audit generator while no governed caller references it; either route it through the canonical QA/reporting surface or retire it once the newer semantic governance reports fully supersede this one-off utility."
-    },
     "scripts/engineering/qa/check_duplication_complexity_exemptions.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
@@ -775,12 +751,6 @@
       "decision": "shared_helper_module",
       "review_by": "2026-07-15",
       "next_step": "Retain as the shared first-party import-graph helper consumed by QA inventory reports; fold it into a broader canonical graph helper surface only if the inventory/reporting pipeline is consolidated."
-    },
-    "scripts/engineering/qa/py_review_orchestrator.py": {
-      "owner": "platform-architecture",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a historical standalone review orchestrator snapshot; prefer the governed py-review-orchestrator skill and current reports workflow instead of extending this orphan script."
     },
     "scripts/engineering/qa/refresh_test_governance_baseline.py": {
       "owner": "@bioetl-platform",
@@ -979,12 +949,6 @@
       "decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
       "next_step": "Retain as an optional Docker-based screenshot fallback for hosts where the canonical Grafana render flow cannot launch Chromium; keep it supporting and do not make Docker monitoring mandatory."
-    },
-    "scripts/ops/observability/grafana/publish_simplification_issue_status.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain as a bounded manual publisher for the Grafana simplification issue series; keep GitHub writes opt-in and remove it after the tracked issue campaign is complete."
     },
     "scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1": {
       "owner": "@bioetl-platform",

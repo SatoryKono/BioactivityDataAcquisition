@@ -18,7 +18,7 @@ __all__ = [
 ]
 
 import asyncio
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core._batch_transformer_support import (
     build_default_normalization_processor,
@@ -53,10 +53,18 @@ from bioetl.application.core.transformer_runtime.streaming import (
 from bioetl.domain.types import BronzeRecord
 
 if TYPE_CHECKING:
+    from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
+    from bioetl.application.core.protocols import (
+        GoldFilterCallback,
+        GoldTransformCallback,
+        TransformCallback,
+    )
+    from bioetl.application.core.quarantine_manager import QuarantineRuntimeService
     from bioetl.application.core.record_processor_config import RecordProcessorConfig
     from bioetl.application.core.transformer_runtime.state import RecordTransformOutcome
     from bioetl.application.services.debug_export_service import DebugExportService
     from bioetl.domain.context import PipelineContext
+    from bioetl.domain.error_classifier import ErrorClassifier
     from bioetl.domain.types import BatchID
 
 
@@ -67,20 +75,61 @@ class BatchTransformer:
         self,
         context: PipelineContext,
         config: RecordProcessorConfig,
-        runtime: dict[str, object],
-        callbacks: dict[str, object],
+        runtime: dict[str, object] | None = None,
+        callbacks: dict[str, object] | None = None,
+        *,
         normalization_processor: RecordNormalizationProcessor | None = None,
         debug_export_service: DebugExportService | None = None,
+        # Legacy keyword construction (unit tests / transitional callers).
+        error_classifier: ErrorClassifier | None = None,
+        quarantine_manager: QuarantineRuntimeService | None = None,
+        batch_metrics: BatchMetricsRecorderService | None = None,
+        transform_callback: TransformCallback | None = None,
+        gold_filter_callback: GoldFilterCallback | None = None,
+        gold_transform_callback: GoldTransformCallback | None = None,
     ) -> None:
-        """Initialize batch transformer."""
+        """Initialize batch transformer.
+
+        Preferred construction uses ``runtime`` + ``callbacks`` dicts. Legacy
+        keyword arguments remain accepted for unit fixtures and transitional
+        call sites.
+        """
+        resolved_runtime = dict(runtime or {})
+        if error_classifier is not None:
+            resolved_runtime["error_classifier"] = error_classifier
+        if quarantine_manager is not None:
+            resolved_runtime["quarantine_manager"] = quarantine_manager
+        if batch_metrics is not None:
+            resolved_runtime["batch_metrics"] = batch_metrics
+
+        resolved_callbacks = dict(callbacks or {})
+        if transform_callback is not None:
+            resolved_callbacks["transform_callback"] = transform_callback
+        if gold_filter_callback is not None:
+            resolved_callbacks["gold_filter_callback"] = gold_filter_callback
+        if gold_transform_callback is not None:
+            resolved_callbacks["gold_transform_callback"] = gold_transform_callback
+
         self._context = context
         self._config = config
-        self._error_classifier = runtime["error_classifier"]  # type: ignore[assignment]
-        self._quarantine_manager = runtime["quarantine_manager"]  # type: ignore[assignment]
-        self._batch_metrics = runtime["batch_metrics"]  # type: ignore[assignment]
-        self._transform = callbacks["transform_callback"]  # type: ignore[assignment]
-        self._gold_filter = callbacks["gold_filter_callback"]  # type: ignore[assignment]
-        self._gold_transform = callbacks["gold_transform_callback"]  # type: ignore[assignment]
+        self._error_classifier = cast(
+            "ErrorClassifier", resolved_runtime["error_classifier"]
+        )
+        self._quarantine_manager = cast(
+            "QuarantineRuntimeService", resolved_runtime["quarantine_manager"]
+        )
+        self._batch_metrics = cast(
+            "BatchMetricsRecorderService", resolved_runtime["batch_metrics"]
+        )
+        self._transform = cast(
+            "TransformCallback", resolved_callbacks["transform_callback"]
+        )
+        self._gold_filter = cast(
+            "GoldFilterCallback", resolved_callbacks["gold_filter_callback"]
+        )
+        self._gold_transform = cast(
+            "GoldTransformCallback", resolved_callbacks["gold_transform_callback"]
+        )
         self._debug_export_service = debug_export_service
         self._normalization_processor = (
             normalization_processor
