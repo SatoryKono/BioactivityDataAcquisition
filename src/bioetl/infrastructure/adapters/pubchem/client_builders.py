@@ -70,11 +70,13 @@ def _create_default_pubchem_fetch_strategies(
     )
 
     return PubChemFetchStrategies(
-        logger=logger,
-        rate_limiter=rate_limiter,
-        circuit_breaker=circuit_breaker,
         mapper=mapper,
-        run_in_executor=run_in_executor,
+        transport={
+            'logger': logger,
+            'rate_limiter': rate_limiter,
+            'circuit_breaker': circuit_breaker,
+            'run_in_executor': run_in_executor,
+        },
         provider_name=provider_name,
         request_collector=request_collector,
     )

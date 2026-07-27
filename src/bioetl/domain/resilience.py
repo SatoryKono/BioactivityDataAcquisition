@@ -229,15 +229,37 @@ class AdapterConfig:
         max_retries: int = 3,
         retry_backoff_factor: float = 2.0,
         rate_limit_requests_per_second: float = 5.0,
-        circuit_breaker_failure_threshold: int = 5,
-        circuit_breaker_recovery_timeout: int = 300,
+        circuit_breaker: tuple[int, int] = (5, 300),
         enable_single_id_fallback: bool = False,
-        *,
-        timeout: float | None = None,
+        **legacy_aliases: object,
     ) -> None:
-        """Initialize adapter config while preserving the retired ``timeout`` alias."""
-        self._validate_timeout_alias(timeout, timeout_sec)
-        resolved_timeout = self._resolve_timeout(timeout, timeout_sec)
+        """Initialize adapter config while preserving retired constructor aliases."""
+        timeout = legacy_aliases.pop("timeout", None)
+        failure_threshold = legacy_aliases.pop(
+            "circuit_breaker_failure_threshold", None
+        )
+        recovery_timeout = legacy_aliases.pop(
+            "circuit_breaker_recovery_timeout", None
+        )
+        if legacy_aliases:
+            unexpected = ", ".join(sorted(str(key) for key in legacy_aliases))
+            raise TypeError(
+                f"AdapterConfig() got unexpected keyword argument(s): {unexpected}"
+            )
+        timeout_value = (
+            float(timeout) if isinstance(timeout, (int, float)) else None
+        )
+        self._validate_timeout_alias(timeout_value, timeout_sec)
+        resolved_timeout = self._resolve_timeout(timeout_value, timeout_sec)
+        if failure_threshold is not None or recovery_timeout is not None:
+            circuit_breaker = (
+                int(failure_threshold)
+                if failure_threshold is not None
+                else int(circuit_breaker[0]),
+                int(recovery_timeout)
+                if recovery_timeout is not None
+                else int(circuit_breaker[1]),
+            )
 
         object.__setattr__(self, "batch_size", batch_size)
         object.__setattr__(self, "page_size", page_size)
@@ -252,12 +274,12 @@ class AdapterConfig:
         object.__setattr__(
             self,
             "circuit_breaker_failure_threshold",
-            circuit_breaker_failure_threshold,
+            int(circuit_breaker[0]),
         )
         object.__setattr__(
             self,
             "circuit_breaker_recovery_timeout",
-            circuit_breaker_recovery_timeout,
+            int(circuit_breaker[1]),
         )
         object.__setattr__(
             self,

@@ -92,13 +92,17 @@ class GenericPipelineFactory[TPipeline: "BasePipeline"]:
         pipeline_name: str,
         pipeline_class: type[TPipeline],
         provider: str,
-        silver_schema: pa.Schema | None = None,
-        gold_schema: GoldSchemaType | None = None,
-        pandera_silver_schema: object | None = None,
+        schemas: dict[str, object] | None = None,
         data_source_creator: DataSourceCreatorProtocol | None = None,
         transformer_class: type[BaseTransformer] | None = None,
         provider_registry: ProviderDataSourceAccessProtocol | None = None,
+        **legacy_schemas: object,
     ) -> None:
+        schema_map = dict(schemas or {})
+        schema_map.update(legacy_schemas)
+        silver_schema = schema_map.get("silver_schema")
+        gold_schema = schema_map.get("gold_schema")
+        pandera_silver_schema = schema_map.get("pandera_silver_schema")
         if gold_schema is None:
             raise ValueError(
                 f"gold_schema is required for pipeline '{pipeline_name}' "

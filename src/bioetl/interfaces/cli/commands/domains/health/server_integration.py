@@ -171,15 +171,18 @@ def build_health_server(
     """Construct the HTTP health server from composition dependencies."""
     from bioetl.interfaces.http.health_server import HealthServer
 
+    from bioetl.interfaces.http.health_server import HealthServerControlPlaneDeps
     server = HealthServer(
         host=host,
         port=port,
-        health_monitor=deps.health_monitor,
-        quarantine_service=quarantine_service,
-        checkpoint_port=deps.checkpoint_port,
-        run_manifest_port=deps.run_manifest_port,
-        run_ledger_port=deps.run_ledger_port,
-        workflow_manifest_port=deps.workflow_manifest_port,
+        control_plane=HealthServerControlPlaneDeps(
+            health_monitor=deps.health_monitor,
+            quarantine_service=quarantine_service,
+            checkpoint_port=deps.checkpoint_port,
+            run_manifest_port=deps.run_manifest_port,
+            run_ledger_port=deps.run_ledger_port,
+            workflow_manifest_port=deps.workflow_manifest_port,
+        ),
     )
     data_root = getattr(deps, "data_root", None)
     server.set_data_root(str(data_root) if data_root is not None else None)

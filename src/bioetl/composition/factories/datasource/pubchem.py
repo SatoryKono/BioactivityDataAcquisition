@@ -108,11 +108,13 @@ def _build_runtime_dependencies(
 
     mapper = entity_mapper or PubChemEntityMapper()
     strategies = fetch_strategies or PubChemFetchStrategies(
-        logger=logger,
-        rate_limiter=rate_limiter,
-        circuit_breaker=circuit_breaker,
         mapper=mapper,
-        run_in_executor=_create_executor_runner(thread_pool),
+        transport={
+            'logger': logger,
+            'rate_limiter': rate_limiter,
+            'circuit_breaker': circuit_breaker,
+            'run_in_executor': _create_executor_runner(thread_pool),
+        },
         provider_name=PubChemAdapter.provider_name,
         request_collector=request_collector,
     )
