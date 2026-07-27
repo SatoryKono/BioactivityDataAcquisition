@@ -5,7 +5,9 @@ from __future__ import annotations
 from time import perf_counter
 from typing import TYPE_CHECKING, Protocol
 
-from bioetl.application.observability.tracing_operation_helpers import traced_async_operation
+from bioetl.application.observability.tracing_operation_helpers import (
+    traced_async_operation,
+)
 from bioetl.application.services._quarantine_models import QuarantineRecord
 from bioetl.application.services._quarantine_service_support import (
     _QUARANTINE_OPERATOR_ERRORS,

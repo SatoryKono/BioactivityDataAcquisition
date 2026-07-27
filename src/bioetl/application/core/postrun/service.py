@@ -10,6 +10,10 @@ from typing import TYPE_CHECKING
 from bioetl.application.core.batch_runtime_failure_policy import (
     OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
 )
+from bioetl.application.core.pipeline_span_lifecycle import (
+    build_pipeline_span_attributes,
+    start_current_span,
+)
 from bioetl.application.core.postrun._phase_descriptions import (
     record_run_span_attributes,
 )
@@ -18,10 +22,6 @@ from bioetl.application.core.postrun._service_collaborators import (
 )
 from bioetl.application.core.postrun._service_support import (
     PostrunServiceSupportMixin,
-)
-from bioetl.application.core.pipeline_span_lifecycle import (
-    build_pipeline_span_attributes,
-    start_current_span,
 )
 from bioetl.application.services.data_quality_service import DataQualityService
 from bioetl.application.services.medallion_types import VacuumResult

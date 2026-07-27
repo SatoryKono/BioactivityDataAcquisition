@@ -1,5 +1,5 @@
 {
-  "allowed_exception_count": 121,
+  "allowed_exception_count": 119,
   "allowed_exceptions": [
     {
       "kind": "import:pandera",
@@ -234,31 +234,17 @@
     },
     {
       "kind": "attribute_call:resolve",
-      "line": 120,
+      "line": 117,
       "path": "src/bioetl/domain/run_reports/reason_catalog.py",
       "reason": "Catalog lookup method named resolve (not filesystem Path.resolve).",
       "symbol": "ReasonCatalog.family_for"
     },
     {
       "kind": "attribute_call:resolve",
-      "line": 123,
+      "line": 120,
       "path": "src/bioetl/domain/run_reports/reason_catalog.py",
       "reason": "Catalog lookup method named resolve (not filesystem Path.resolve).",
       "symbol": "ReasonCatalog.default_outcome_for"
-    },
-    {
-      "kind": "attribute_call:read_text",
-      "line": 175,
-      "path": "src/bioetl/domain/run_reports/reason_catalog.py",
-      "reason": "Loads package-local run-report reason catalog YAML from an explicit Path.",
-      "symbol": "_read_yaml_mapping"
-    },
-    {
-      "kind": "attribute_call:resolve",
-      "line": 223,
-      "path": "src/bioetl/domain/run_reports/reason_catalog.py",
-      "reason": "Locates package-root relative reason catalog path candidates.",
-      "symbol": "default_reason_catalog"
     },
     {
       "kind": "import:pandera",

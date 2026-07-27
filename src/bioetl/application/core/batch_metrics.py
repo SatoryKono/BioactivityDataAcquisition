@@ -1,7 +1,4 @@
-"""Batch metrics recording helper.
-
-Encapsulates the logic for recording metrics during batch processing.
-"""
+"""Batch metrics recording helper for batch processing."""
 
 from __future__ import annotations
 
@@ -43,12 +40,24 @@ class BatchMetricsRecorderService:
             if pipeline_metrics is not None
             else PipelineMetricsRecorder(metrics, pipeline_label)
         )
+        # Run-scoped total (observability / diagnostics only).
         self._error_count = 0
+        # Per-batch total used by DQ hard/soft threshold evaluation.
+        self._batch_error_count = 0
 
     @property
     def error_count(self) -> int:
-        """Get the current error count."""
+        """Get the run-scoped error count (not safe as a batch-rate numerator)."""
         return self._error_count
+
+    @property
+    def batch_error_count(self) -> int:
+        """Get the error count for the current transform batch only."""
+        return self._batch_error_count
+
+    def begin_batch(self) -> None:
+        """Reset per-batch error accounting before transform/finalize."""
+        self._batch_error_count = 0
 
     def track_batch_size(self, stage: str, size: int) -> None:
         """Record a batch-size histogram sample for one processing stage."""
@@ -140,6 +149,7 @@ class BatchMetricsRecorderService:
     def track_error(self, stage: str, error_type: ErrorType) -> None:
         """Record one stage-scoped error occurrence."""
         self._error_count += 1
+        self._batch_error_count += 1
         if self._metrics:
             self._metrics.increment_counter(
                 "bioetl_errors_total",

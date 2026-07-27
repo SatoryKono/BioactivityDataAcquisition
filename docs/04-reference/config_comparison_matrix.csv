@@ -178,7 +178,7 @@ quality.report.format,—,—,—,—,—,json,json,json,json,json,json,json,jso
 quality.report.include_sample_failures,—,—,—,—,—,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
 quality.report.output_path,—,—,—,—,—,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
 quality.report.sample_size,—,—,—,—,—,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10
-quality.thresholds.hard_fail,—,—,—,—,—,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.8,0.25
+quality.thresholds.hard_fail,—,—,—,—,—,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.8,0.5
 quality.thresholds.soft_fail,—,—,—,—,—,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.3,0.05
 schema.content_hash.exclude,—,—,—,—,—,[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]
 schema.content_hash.include,—,—,—,—,—,[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]
