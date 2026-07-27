@@ -1,0 +1,5 @@
+# Hadolint policy for BioETL Dockerfiles.
+# DL3008: Debian security packages track moving distro revisions; pinning
+# apt package versions to fixed revisions is not durable on slim base images.
+ignored:
+  - DL3008

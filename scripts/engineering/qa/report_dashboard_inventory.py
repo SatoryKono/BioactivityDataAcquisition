@@ -14,7 +14,7 @@ import argparse
 import json
 import re
 from pathlib import Path
-from typing import Any
+from typing import Any, TypedDict, cast
 
 import yaml
 
@@ -62,6 +62,60 @@ MANDATORY_LINK_UIDS: dict[str, set[str]] = {
 }
 
 
+class DashboardInventoryItem(TypedDict):
+    """Typed metadata extracted from one shipped dashboard."""
+
+    file: str
+    uid: object
+    title: object
+    variables: list[str]
+    link_uids: list[str]
+    tags: list[object]
+    style: object
+    timezone: object
+    refresh: object
+    editable: object
+    graphTooltip: object
+    hideControls: object
+    data_sources: list[str]
+    panel_count: int
+    panel_plugin_versions: list[str]
+
+
+class DashboardHealthItem(DashboardInventoryItem):
+    """Inventory item augmented with local health findings."""
+
+    status: str
+    issues: list[str]
+
+
+class DashboardHealthCounts(TypedDict):
+    """Aggregate dashboard health counters."""
+
+    total_dashboards: int
+    healthy_dashboards: int
+    degraded_dashboards: int
+    provisioning_ok: bool
+    deployed_dir_used: str | None
+
+
+class ProvisioningHealth(TypedDict):
+    """Provisioning health details included in the summary."""
+
+    status: str
+    issues: list[str]
+    provider: dict[str, object]
+
+
+class DashboardHealthSummary(TypedDict):
+    """Machine-readable dashboard health summary."""
+
+    overall_status: str
+    summary: DashboardHealthCounts
+    provisioning: ProvisioningHealth
+    dashboards: list[DashboardHealthItem]
+
+
 def _iter_panels(payload: dict[str, Any]) -> list[dict[str, Any]]:
     panels: list[dict[str, Any]] = []
     stack = list(payload.get("panels", []))
@@ -76,13 +130,13 @@ def _iter_panels(payload: dict[str, Any]) -> list[dict[str, Any]]:
     return panels
 
 
-def _extract_variables(payload: dict) -> list[str]:
+def _extract_variables(payload: dict[str, Any]) -> list[str]:
     templating = payload.get("templating", {}).get("list", [])
     names = [f"${item.get('name')}" for item in templating if item.get("name")]
     return sorted(names)
 
 
-def _extract_link_uids(payload: dict) -> list[str]:
+def _extract_link_uids(payload: dict[str, Any]) -> list[str]:
     links = list(payload.get("links", []))
     for panel in payload.get("panels", []):
         if panel.get("id") != 1000:
@@ -169,8 +223,7 @@ def _extract_datasources(payload: dict[str, Any]) -> list[str]:
 
 def _root_dashboard_payload(payload: dict[str, Any]) -> dict[str, Any]:
     if isinstance(payload.get("dashboard"), dict):
-        dashboard = payload["dashboard"]
-        return dashboard
+        return cast(dict[str, Any], payload["dashboard"])
     return payload
 
 
@@ -191,13 +244,16 @@ def _normalize_dashboard_payload(payload: dict[str, Any]) -> dict[str, Any]:
             return [_normalize(item) for item in node]
         return node
 
-    return _normalize(dashboard, is_root=True)
+    return cast(dict[str, Any], _normalize(dashboard, is_root=True))
 
 
-def _load_inventory() -> list[dict[str, object]]:
-    inventory: list[dict[str, object]] = []
+def _load_inventory() -> list[DashboardInventoryItem]:
+    inventory: list[DashboardInventoryItem] = []
     for path in sorted(DASHBOARDS_DIR.glob("*.json")):
-        payload = json.loads(path.read_text(encoding="utf-8"))
+        payload = cast(
+            dict[str, Any],
+            json.loads(path.read_text(encoding="utf-8")),
+        )
         inventory.append(
             {
                 "file": str(path),
@@ -280,7 +336,9 @@ def _dashboard_inventory_contract_entries() -> tuple[
     return entries, errors
 
 
-def _dashboard_panels_by_id(item: dict[str, object]) -> dict[int, dict[str, Any]]:
+def _dashboard_panels_by_id(
+    item: DashboardInventoryItem,
+) -> dict[int, dict[str, Any]]:
     payload = _load_dashboard_file(Path(str(item["file"])))
     panels_by_id: dict[int, dict[str, Any]] = {}
     for panel in _iter_panels(payload):
@@ -291,7 +349,7 @@ def _dashboard_panels_by_id(item: dict[str, object]) -> dict[int, dict[str, Any]
 
 
 def _check_dashboard_inventory_contract(
-    inventory: list[dict[str, object]],
+    inventory: list[DashboardInventoryItem],
 ) -> tuple[list[str], dict[str, list[str]]]:
     errors: list[str] = []
     per_dashboard: dict[str, list[str]] = {}
@@ -449,7 +507,7 @@ def _register_issue(
 
 
 def _check_parity(
-    inventory: list[dict[str, object]],
+    inventory: list[DashboardInventoryItem],
 ) -> tuple[list[str], dict[str, list[str]]]:
     errors: list[str] = []
     per_dashboard: dict[str, list[str]] = {}
@@ -611,7 +669,7 @@ def _check_provisioning_contract() -> tuple[list[str], dict[str, object]]:
 
 
 def _load_dashboard_file(path: Path) -> dict[str, Any]:
-    return json.loads(path.read_text(encoding="utf-8"))
+    return cast(dict[str, Any], json.loads(path.read_text(encoding="utf-8")))
 
 
 def _load_deployed_dashboards(
@@ -634,7 +692,7 @@ def _load_deployed_dashboards(
 
 
 def _compare_deployed_dashboards(
-    inventory: list[dict[str, object]],
+    inventory: list[DashboardInventoryItem],
     *,
     deployed_dir: Path,
 ) -> tuple[list[str], dict[str, list[str]]]:
@@ -686,15 +744,15 @@ def _compare_deployed_dashboards(
 
 
 def _build_health_summary(
-    inventory: list[dict[str, object]],
+    inventory: list[DashboardInventoryItem],
     *,
     parity_issues: dict[str, list[str]],
     provisioning_issues: list[str],
     provisioning_metadata: dict[str, object],
     deployed_issues: dict[str, list[str]] | None = None,
     deployed_dir: Path | None = None,
-) -> dict[str, object]:
-    dashboards: list[dict[str, object]] = []
+) -> DashboardHealthSummary:
+    dashboards: list[DashboardHealthItem] = []
     healthy = 0
     degraded = 0
     deployed_issues = deployed_issues or {}
@@ -726,13 +784,12 @@ def _build_health_summary(
             healthy += 1
         else:
             degraded += 1
-        dashboards.append(
-            {
-                **item,
-                "status": status,
-                "issues": issues,
-            }
-        )
+        dashboard_health: DashboardHealthItem = {
+            **item,
+            "status": status,
+            "issues": issues,
+        }
+        dashboards.append(dashboard_health)
 
     overall_status = (
         "healthy" if not provisioning_issues and degraded == 0 else "degraded"
@@ -755,7 +812,7 @@ def _build_health_summary(
     }
 
 
-def _render_health_summary(summary: dict[str, object]) -> str:
+def _render_health_summary(summary: DashboardHealthSummary) -> str:
     lines = [
         "Dashboard health summary:",
         (

@@ -4,14 +4,15 @@ FROM python:3.12-slim@sha256:c3d81d25b3154142b0b42eb1e61300024426268edeb5b5a26dd
 
 WORKDIR /app
 
-# Install build dependencies and uv
-# Debian security packages track moving distro revisions.
+# Install build dependencies and uv.
+# Debian security packages track moving distro revisions (no stable =version pins).
 # hadolint ignore=DL3008
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    libssl-dev \
-    libffi-dev \
-    ca-certificates \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        build-essential \
+        libssl-dev \
+        libffi-dev \
+        ca-certificates \
     && rm -rf /var/lib/apt/lists/* \
     && pip install --no-cache-dir uv==0.11.26
 
@@ -26,11 +27,12 @@ FROM python:3.12-slim@sha256:c3d81d25b3154142b0b42eb1e61300024426268edeb5b5a26dd
 
 WORKDIR /app
 
-# Install runtime dependencies and create non-root user for security
-# Debian security packages track moving distro revisions.
+# Install runtime dependencies and create non-root user for security.
+# Debian security packages track moving distro revisions (no stable =version pins).
 # hadolint ignore=DL3008
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        ca-certificates \
     && groupadd -r bioetl \
     && useradd -r -g bioetl bioetl \
     && rm -rf /var/lib/apt/lists/*

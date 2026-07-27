@@ -30,13 +30,6 @@ class _PreSilverFinalizationFlowMixin:
             exclude_none: bool = True,
         ) -> ContentHash: ...
 
-        def compute_entity_id(
-            self,
-            *,
-            source_id: str | None,
-            record: JsonDict,
-        ) -> EntityID: ...
-
         def _build_pre_silver_record(
             self,
             context: PipelineContext,
@@ -103,10 +96,11 @@ class _PreSilverFinalizationFlowMixin:
         index: int,
         business_data: JsonDict,
     ) -> JsonDict:
-        entity_id = self.compute_entity_id(
-            source_id=source_id,
-            record=identity_record,
+        compute_entity_id = cast(
+            "Callable[[str | None, JsonDict], EntityID]",
+            self.compute_entity_id,
         )
+        entity_id = compute_entity_id(source_id, identity_record)
         return self._finalize_staged_business_data(
             context=context,
             entity_id=entity_id,

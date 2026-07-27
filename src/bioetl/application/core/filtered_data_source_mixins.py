@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from abc import ABC
 from typing import TYPE_CHECKING, Self
 
 from bioetl.application.core import (
@@ -26,7 +27,7 @@ else:
         """Runtime placeholder for the type-checking-only state protocol."""
 
 
-class _FilteredDataSourceStateMixin(_FilteredDataSourceStateBase):
+class _FilteredDataSourceStateMixin(_FilteredDataSourceStateBase, ABC):
     """Attribute contract shared by FilteredDataSource mixins."""
 
     def _ensure_filterable_adapter(self, mode: str) -> None:
@@ -34,7 +35,7 @@ class _FilteredDataSourceStateMixin(_FilteredDataSourceStateBase):
         raise NotImplementedError
 
 
-class _FilteredDataSourceLifecycleMixin(_FilteredDataSourceStateMixin):
+class _FilteredDataSourceLifecycleMixin(_FilteredDataSourceStateMixin, ABC):
     """Lifecycle and filter-loading behavior for FilteredDataSource."""
 
     async def __aenter__(self) -> Self:
@@ -55,6 +56,7 @@ class _FilteredDataSourceLifecycleMixin(_FilteredDataSourceStateMixin):
 class _FilteredDataSourceFetchMixin(
     _FilteredDataSourceStateMixin,
     _WrappedAdapterHealthDelegationMixin,
+    ABC,
 ):
     """Fetch and filtering behavior for FilteredDataSource."""
 
@@ -129,5 +131,9 @@ class _FilteredDataSourceFetchMixin(
         return fetch_support.fetch_records(
             self,
             entity_type,
-            *(limit, query, filter_ids, filter_field, offset),
+            limit=limit,
+            query=query,
+            filter_ids=filter_ids,
+            filter_field=filter_field,
+            offset=offset,
         )

@@ -364,6 +364,11 @@ entries:
     classification: active_architecture_guard
     live_guard: architecture audit closeout gates keep governance artifact refresh and hash currency enforceable.
     rationale: Retains live architecture-audit closeout gate coverage for governance refresh recipe instead of historical-only signoff.
+  - path: tests/architecture/test_architecture_closeout_inventory.py
+    disposition: retain_active
+    classification: live_inventory_ratchet
+    live_guard: every architecture closeout test path must stay classified in architecture_closeout_inventory with fold/delete fraction policy.
+    rationale: Keeps the T-05/#6600 closeout inventory governance live so new *closeout* tests cannot land unclassified.
   - path: tests/architecture/test_documentation_issues_6497_6498_closeout.py
     disposition: retain_active
     classification: active_architecture_guard

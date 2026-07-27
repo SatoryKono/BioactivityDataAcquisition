@@ -75,7 +75,11 @@ class _TargetEntityFetchDelegationMixin:
             delegate_factory=lambda: yield_wrapped_fetch_records(
                 self._data_source,
                 entity_type,
-                *target_fetch_args,
+                limit=limit,
+                query=query,
+                filter_ids=filter_ids,
+                filter_field=filter_field,
+                offset=offset,
             ),
         )
 
