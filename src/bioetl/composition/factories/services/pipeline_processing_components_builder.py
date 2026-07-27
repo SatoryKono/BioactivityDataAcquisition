@@ -101,12 +101,16 @@ def create_batch_processing_components(
     transformer = BatchTransformer(
         context=context,
         config=config,
-        error_classifier=error_classifier,
-        quarantine_manager=quarantine_manager,
-        batch_metrics=batch_metrics,
-        transform_callback=transform_callback,
-        gold_filter_callback=gold_filter_callback,
-        gold_transform_callback=gold_transform_callback,
+        runtime={
+            "error_classifier": error_classifier,
+            "quarantine_manager": quarantine_manager,
+            "batch_metrics": batch_metrics,
+        },
+        callbacks={
+            "transform_callback": transform_callback,
+            "gold_filter_callback": gold_filter_callback,
+            "gold_transform_callback": gold_transform_callback,
+        },
         normalization_processor=normalization_processor,
         debug_export_service=debug_export_service,
     )

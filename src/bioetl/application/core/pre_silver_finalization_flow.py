@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, cast
 
+from bioetl.application.core.pre_silver_identity import PreSilverIdentityHost
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
 )
@@ -12,7 +13,7 @@ from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import ContentHash, EntityID, GoldRecord, SilverRecord
+    from bioetl.domain.types import ContentHash, GoldRecord, SilverRecord
 
 
 class _PreSilverFinalizationFlowMixin:
@@ -29,12 +30,6 @@ class _PreSilverFinalizationFlowMixin:
             *,
             exclude_none: bool = True,
         ) -> ContentHash: ...
-
-        def compute_entity_id(
-            self,
-            source_id: str | None,
-            record: GoldRecord,
-        ) -> EntityID: ...
 
         def _build_pre_silver_record(
             self,

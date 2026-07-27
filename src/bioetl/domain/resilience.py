@@ -9,6 +9,8 @@ from __future__ import annotations
 import hashlib
 from dataclasses import dataclass, field
 
+from bioetl.domain.resilience_circuit_breaker import CircuitBreakerConfig
+
 __all__ = [
     "AdapterConfig",
     "CircuitBreakerConfig",
@@ -158,24 +160,6 @@ class RetryConfig:
             else self.max_delay
         )
         return max(0.0, min(retry_after_seconds, upper_bound))
-
-
-@dataclass(frozen=True, slots=True)
-class CircuitBreakerConfig:
-    """Configuration for circuit breaker pattern.
-
-    Implements RULES.md §3.1.4 - Circuit breaker parameters:
-    - State machine: CLOSED -> OPEN (after failures) -> HALF_OPEN -> CLOSED
-    - Configurable failure threshold
-    - Configurable recovery timeout
-
-    Args:
-        failure_threshold: Consecutive failures before opening (default: 5)
-        recovery_timeout: Seconds to wait in OPEN before testing (default: 300 = 5 minutes)
-    """
-
-    failure_threshold: int = 5
-    recovery_timeout: int = 300  # 5 minutes
 
 
 @dataclass(frozen=True, slots=True, init=False)
