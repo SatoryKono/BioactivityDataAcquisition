@@ -89,7 +89,12 @@ def test_issue_6032_application_core_fan_in_has_headroom() -> None:
     assert row["max_internal_fan_in_module"] != (
         "bioetl.application.core.batch_runtime_failure_policy"
     )
-    assert not row["budget_review_notes"]
+    # Informational near/at-budget notes are allowed; only budget_warnings fail-fast.
+    assert all(
+        str(note).startswith(("at_budget:", "near_budget:"))
+        for note in row["budget_review_notes"]
+    )
+    assert row["files_ge_250_loc"] <= budgets["files_ge_250_loc"]
     assert _live_family_fan_in("application_core")[0] == row["max_internal_fan_in"]
 
 

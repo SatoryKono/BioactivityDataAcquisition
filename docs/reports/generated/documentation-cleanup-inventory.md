@@ -11,8 +11,8 @@
 | Tracked doc-like files | 1949 |
 | Ignored local docs/reports files | 1194 |
 | Duplicate groups | 2 |
-| Generated without route or exception | 1 |
-| Generated routes | 64 |
+| Generated without route or exception | 0 |
+| Generated routes | 65 |
 
 ## Tracking State
 
@@ -229,6 +229,7 @@
 | `docs/00-project/ai/skills/global/gh-address-comments/LICENSE.txt` |  | generated_skill_license_mirror |  |  |
 | `docs/00-project/ai/skills/global/gh-fix-ci/LICENSE.txt` |  | generated_skill_license_mirror |  |  |
 | `docs/00-project/ai/skills/global/openai-docs/LICENSE.txt` |  | generated_skill_license_mirror |  |  |
+| `docs/00-project/governance/root-local-clutter-cleanup.md` | root-local-clutter-cleanup-governance-doc |  |  | manual-governance-doc |
 | `docs/02-architecture/07-compatibility-facade-snapshot.md` | compatibility-facade-snapshot-generated-doc |  |  | scripts/engineering/qa/generate_compatibility_facade_snapshot.py |
 | `docs/02-architecture/adr-registry.md` | adr-registry-generated-docs |  |  | scripts/generate_adr_registry.py |
 | `docs/02-architecture/adr-registry/README.md` | adr-registry-generated-docs |  |  | scripts/generate_adr_registry.py |
@@ -253,7 +254,6 @@
 | `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-composite-runner-pkg-part2.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/generate_package_family_class_diagrams.py |
 | `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-base-transformer.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/generate_package_family_class_diagrams.py |
 | `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-batch-execution.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/generate_package_family_class_diagrams.py |
-| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-lifecycle.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/generate_package_family_class_diagrams.py |
 
 ## GitHub Issue Evidence Examples
 
@@ -404,6 +404,7 @@
 | pytest-dev-html-coverage-report | `scripts/engineering/dev/run_tests.py` | ignored_local_output |
 | pytest-resilient-telemetry-report | `scripts/engineering/ci/run_pytest_resilient.py` | working_output |
 | reproducibility-support-matrix-generated-doc | `scripts/engineering/qa/generate_reproducibility_support_matrix.py` | tracked_curated_generated_doc |
+| root-local-clutter-cleanup-governance-doc | `manual-governance-doc` | tracked_curated_generated_doc |
 | runtime-structured-log-file | `src/bioetl/infrastructure/observability/logging_config.py` | ignored_runtime_output |
 | schema-generated-source | `scripts/schema/generate_schema_artifacts.py` | tracked_generated_source |
 | silver-filter-inventory-baseline | `scripts/data_quality/inventory_silver_filters_migration.py` | tracked_curated_generated_doc |

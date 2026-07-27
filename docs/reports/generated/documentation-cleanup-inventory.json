@@ -12128,7 +12128,7 @@
     {
       "canonical_successor": null,
       "catalog_lifecycle": null,
-      "commit_policy": null,
+      "commit_policy": "tracked_curated_generated_doc",
       "declared_class": null,
       "declared_status": null,
       "diagram_kind": null,
@@ -12136,9 +12136,9 @@
       "duplicate_resolution": null,
       "extension": ".md",
       "freshness": "regenerate",
-      "generated_route": null,
+      "generated_route": "root-local-clutter-cleanup-governance-doc",
       "generated_route_exception": null,
-      "generator": null,
+      "generator": "manual-governance-doc",
       "github_issue_number": null,
       "github_issue_url": null,
       "inbound_links": 0,
@@ -88602,6 +88602,16 @@
       ]
     },
     {
+      "commit_policy": "tracked_curated_generated_doc",
+      "generator": "manual-governance-doc",
+      "id": "root-local-clutter-cleanup-governance-doc",
+      "notes": "Root hygiene cleanup plan is a governed curated docs surface for root-allowlist and local clutter triage.",
+      "output_kind": "curated_generated_docs",
+      "outputs": [
+        "docs/00-project/governance/root-local-clutter-cleanup.md"
+      ]
+    },
+    {
       "commit_policy": "ignored_runtime_output",
       "generator": "src/bioetl/infrastructure/observability/logging_config.py",
       "id": "runtime-structured-log-file",
@@ -88789,9 +88799,9 @@
     },
     "docs_reports_local_count": 1218,
     "duplicate_group_count": 2,
-    "generated_route_count": 64,
-    "generated_without_route_count": 190,
-    "generated_without_route_or_exception_count": 1,
+    "generated_route_count": 65,
+    "generated_without_route_count": 189,
+    "generated_without_route_or_exception_count": 0,
     "github_issue_lifecycle_counts": {
       "active_draft": 108,
       "guide": 2,
