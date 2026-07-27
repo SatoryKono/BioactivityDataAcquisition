@@ -215,14 +215,12 @@ async def run_health_server(
     server = HealthServer(
         host=host,
         port=port,
-        control_plane=HealthServerControlPlanePorts(
-            health_monitor=health_monitor,
-            quarantine_service=quarantine_service,
-            checkpoint_port=checkpoint_port,
-            run_manifest_port=run_manifest_port,
-            run_ledger_port=run_ledger_port,
-            workflow_manifest_port=workflow_manifest_port,
-        ),
+        health_monitor=health_monitor,
+        quarantine_service=quarantine_service,
+        checkpoint_port=checkpoint_port,
+        run_manifest_port=run_manifest_port,
+        run_ledger_port=run_ledger_port,
+        workflow_manifest_port=workflow_manifest_port,
         prometheus_base_url=prometheus_base_url,
         logger=logger,
     )
@@ -238,6 +236,5 @@ async def run_health_server(
 __all__ = [
     "HealthResponse",
     "HealthServer",
-    "HealthServerControlPlanePorts",
     "run_health_server",
 ]

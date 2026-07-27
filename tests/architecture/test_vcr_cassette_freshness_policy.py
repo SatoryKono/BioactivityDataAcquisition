@@ -18,7 +18,10 @@ def test_vcr_cassette_freshness_policy_is_complete() -> None:
     payload = yaml.safe_load(_POLICY.read_text(encoding="utf-8"))
     assert payload["lfs_pointer_preflight"]["enabled"] is True
     assert payload["lfs_pointer_preflight"]["reason_code"] == "vcr_lfs_pointer"
-    assert "unit-fast" in payload["lfs_pointer_preflight"]["forbid_live_network_fallback_in"]
+    assert (
+        "unit-fast"
+        in payload["lfs_pointer_preflight"]["forbid_live_network_fallback_in"]
+    )
     assert (_REPO / payload["cassette_root"]).is_dir()
     helper_source = _VCR_HELPER.read_text(encoding="utf-8")
     assert "is_git_lfs_pointer" in helper_source or "lfs" in helper_source.lower()

@@ -85,8 +85,16 @@ jobs:
           path = Path("pyproject.toml")
           document = tomlkit.parse(path.read_text(encoding="utf-8"))
           config = document["tool"]["mutmut"]
-          config["source_paths"] = [os.environ["MUTMUT_SOURCE_PATH"]]
-          config["also_copy"] = ["src/bioetl/"]
+          # mutmut 3.x reads paths_to_mutate (source_paths is ignored).
+          config["paths_to_mutate"] = [os.environ["MUTMUT_SOURCE_PATH"]]
+          if "source_paths" in config:
+              del config["source_paths"]
+          # Subset mutation still needs the full package + tooling imports.
+          config["also_copy"] = [
+              "src/bioetl",
+              "scripts",
+              "configs",
+          ]
           config["pytest_add_cli_args_test_selection"] = [
               os.environ["MUTMUT_TESTS_DIR"]
           ]

@@ -49,16 +49,16 @@ def _merge_runtime_symbols() -> dict[str, object]:
 
 
 def _merge_service_cls() -> type[MergeService]:
-    return _merge_runtime_symbols()["MergeService"]  # type: ignore[return-value]
+    return _merge_runtime_symbols()["MergeService"]  # type: ignore[return-value]  # pyright: ignore[reportReturnType]
 
 
 def _merge_collaborator_group_cls() -> type[MergeCollaboratorGroup]:
-    return _merge_runtime_symbols()["MergeCollaboratorGroup"]  # type: ignore[return-value]
+    return _merge_runtime_symbols()["MergeCollaboratorGroup"]  # type: ignore[return-value]  # pyright: ignore[reportReturnType]
 
 
 def _path_to_table_name_helper(path: str) -> str:
     helper = _merge_runtime_symbols()["_path_to_table_name"]
-    return helper(path)  # type: ignore[misc, operator]
+    return helper(path)  # type: ignore[misc, operator]  # pyright: ignore[reportCallIssue]
 
 
 @pytest.fixture
@@ -81,14 +81,14 @@ def mock_logger():
 def deduplicator(mock_logger):
     """Create an EnricherDeduplicatorService instance."""
     deduplicator_cls = _merge_runtime_symbols()["EnricherDeduplicatorService"]
-    return deduplicator_cls(mock_logger)  # type: ignore[misc, operator]
+    return deduplicator_cls(mock_logger)  # type: ignore[misc, operator]  # pyright: ignore[reportCallIssue]
 
 
 @pytest.fixture
 def aggregator(mock_logger):
     """Create an EnricherAggregator instance."""
     aggregator_cls = _merge_runtime_symbols()["EnricherAggregator"]
-    return aggregator_cls(mock_logger)  # type: ignore[misc, operator]
+    return aggregator_cls(mock_logger)  # type: ignore[misc, operator]  # pyright: ignore[reportCallIssue]
 
 
 @pytest.fixture

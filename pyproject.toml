@@ -486,8 +486,12 @@ known-first-party = ["bioetl", "tests"]
 
 # ============ MUTMUT (Mutation Testing) ============
 [tool.mutmut]
-source_paths = ["src/bioetl/domain/", "src/bioetl/application/"]
-pytest_add_cli_args_test_selection = ["tests/"]
+# mutmut 3.x key is paths_to_mutate (not source_paths).
+paths_to_mutate = ["src/bioetl/domain/", "src/bioetl/application/"]
+# Keep full package + tooling available inside the mutants sandbox when a
+# matrix job narrows paths_to_mutate to a subset of bioetl.
+also_copy = ["src/bioetl", "scripts", "configs"]
+pytest_add_cli_args_test_selection = ["tests/unit/"]
 # Skip infrastructure layer - focus on business logic
 dict_synonyms = "Struct, NamedStruct"
 

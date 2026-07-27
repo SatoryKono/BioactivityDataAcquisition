@@ -1,19 +1,17 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-27T08:25:54.071983+00:00",
+  "generated_at": "2026-07-27T09:07:02.475355+00:00",
   "summary": {
-    "total_scripts": 541,
+    "total_scripts": 539,
     "status_counts": {
       "active": 341,
-      "orphan": 1,
-      "supporting": 198,
-      "temporary_diagnostic": 1
+      "supporting": 198
     },
     "reference_group_coverage": {
       "agents": 5,
       "build": 12,
       "ci": 65,
-      "docs": 219,
+      "docs": 220,
       "other": 66,
       "scripts": 430,
       "skills": 16,
@@ -1316,7 +1314,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 39,
+      "reference_count": 41,
       "references": [
         {
           "path": ".github/ISSUES/AI-AGENT-CONFIG-AUDIT-2026-07-14-ISSUE-PACK.md",
@@ -1388,11 +1386,17 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
+          "path": "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md",
+          "line": 155,
+          "source_group": "docs",
+          "text": "- **Cursor onboarding** -> after clone run `bash scripts/ai/cursor/setup_cursor.sh`"
+        },
+        {
           "path": "scripts/ai/cursor/README.md",
-          "line": 8,
+          "line": 24,
           "source_group": "scripts",
           "text": "bash scripts/ai/cursor/setup_cursor.sh"
         }
@@ -1407,15 +1411,15 @@
       "references": [
         {
           "path": "scripts/ai/cursor/README.md",
-          "line": 24,
+          "line": 44,
           "source_group": "scripts",
           "text": "bash scripts/ai/cursor/setup_skills.sh"
         },
         {
           "path": "scripts/ai/cursor/README.md",
-          "line": 25,
+          "line": 45,
           "source_group": "scripts",
-          "text": "bash scripts/ai/cursor/setup_skills.sh --project-only   # без ~/.cursor/skills"
+          "text": "bash scripts/ai/cursor/setup_skills.sh --project-only"
         },
         {
           "path": "scripts/ai/cursor/setup_cursor.sh",
@@ -2390,7 +2394,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 311,
+          "line": 339,
           "source_group": "tests",
           "text": "ps_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.ps1\").read_text("
         },
@@ -2423,7 +2427,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 308,
+          "line": 336,
           "source_group": "tests",
           "text": "sh_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.sh\").read_text("
         },
@@ -2450,7 +2454,7 @@
         },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 75,
+          "line": 90,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_adr_analysis_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_adr_analysis_wrapper.ps1` (Windows)"
         },
@@ -2487,7 +2491,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 75,
+          "line": 90,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_adr_analysis_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_adr_analysis_wrapper.ps1` (Windows)"
         },
@@ -2616,7 +2620,7 @@
         },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 95,
+          "line": 110,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_code_analyzer_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1` (Windows)"
         },
@@ -2641,7 +2645,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 95,
+          "line": 110,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_code_analyzer_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1` (Windows)"
         }
@@ -2764,7 +2768,7 @@
         },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 69,
+          "line": 84,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_deja_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_deja_wrapper.ps1` (Windows)"
         },
@@ -2789,7 +2793,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 69,
+          "line": 84,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_deja_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_deja_wrapper.ps1` (Windows)"
         }
@@ -2808,7 +2812,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 132,
+          "line": 147,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/mcp_docker_docs_wrapper.sh`"
         }
@@ -2879,7 +2883,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 134,
+          "line": 149,
           "source_group": "docs",
           "text": "`scripts/ai/mcp/mcp_dockerhub_wrapper.ps1` (Windows)"
         }
@@ -2898,7 +2902,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 133,
+          "line": 148,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/mcp_dockerhub_wrapper.sh` (Linux/WSL),"
         }
@@ -3015,7 +3019,7 @@
         },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 101,
+          "line": 116,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_github_actions_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_github_actions_wrapper.ps1` (Windows)"
         },
@@ -3040,7 +3044,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 101,
+          "line": 116,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_github_actions_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_github_actions_wrapper.ps1` (Windows)"
         }
@@ -3221,7 +3225,7 @@
         },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 82,
+          "line": 97,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_mutmut_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_mutmut_wrapper.ps1` (Windows)"
         },
@@ -3252,7 +3256,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 82,
+          "line": 97,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_mutmut_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_mutmut_wrapper.ps1` (Windows)"
         },
@@ -3277,7 +3281,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 135,
+          "line": 150,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/mcp_needle_wrapper.sh`"
         }
@@ -3454,7 +3458,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 136,
+          "line": 151,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/mcp_paper_search_wrapper.sh`"
         }
@@ -4095,7 +4099,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
@@ -4123,15 +4127,21 @@
         },
         {
           "path": "scripts/ai/codex/check_skills_mirror.sh",
-          "line": 23,
+          "line": 33,
           "source_group": "scripts",
-          "text": "exec python3 \"$REPO_ROOT/scripts/ai/sync_ai_governance.py\" \\"
+          "text": "python scripts/ai/sync_ai_governance.py --root . --only skill-mirrors --check"
         },
         {
           "path": "scripts/ai/codex/check_skills_mirror.sh",
-          "line": 27,
+          "line": 41,
           "source_group": "scripts",
-          "text": "exec python3 \"$REPO_ROOT/scripts/ai/sync_ai_governance.py\" \\"
+          "text": "exec \"$PYTHON_BIN\" \"$REPO_ROOT/scripts/ai/sync_ai_governance.py\" \\"
+        },
+        {
+          "path": "scripts/ai/codex/check_skills_mirror.sh",
+          "line": 45,
+          "source_group": "scripts",
+          "text": "exec \"$PYTHON_BIN\" \"$REPO_ROOT/scripts/ai/sync_ai_governance.py\" \\"
         }
       ],
       "owner": "@bioetl-platform",
@@ -10091,7 +10101,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 289,
+      "reference_count": 291,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -12632,13 +12642,13 @@
           "path": ".github/workflows/docker.yml",
           "line": 14,
           "source_group": "ci",
-          "text": "- 'scripts/engineering/qa/run_docker_stability_campaign.py'"
+          "text": "- \"scripts/engineering/qa/run_docker_stability_campaign.py\""
         },
         {
           "path": ".github/workflows/docker.yml",
           "line": 29,
           "source_group": "ci",
-          "text": "- 'scripts/engineering/qa/run_docker_stability_campaign.py'"
+          "text": "- \"scripts/engineering/qa/run_docker_stability_campaign.py\""
         },
         {
           "path": "docs/05-operations/runbooks/docker-image-resource-promotion.md",
@@ -15402,26 +15412,6 @@
           "text": "expected_target=\"observability/check_published_observability_endpoints.py\","
         }
       ]
-    },
-    {
-      "path": "scripts/ops/observability/grafana/_full_dashboard_audit_once.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ops/observability/grafana/apply_grafana_simplification_6570.py",
-      "type": "py",
-      "status": "temporary_diagnostic",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "temporary_diagnostic",
-      "review_by": "2026-08-31",
-      "next_step": "Remove after the bounded Grafana simplification rollout is applied and its issue-specific validation evidence is finalized."
     },
     {
       "path": "scripts/ops/observability/grafana/audit_live_grafana_panels.py",

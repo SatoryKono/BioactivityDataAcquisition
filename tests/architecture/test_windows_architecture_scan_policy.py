@@ -21,6 +21,7 @@ def test_windows_architecture_scan_policy_is_complete() -> None:
     )
     assert payload["session_scan_index"]["network_drive_worker_cap"] == 1
     assert "unit-fast" in payload["local_windows_policy"]["prefer_lanes"]
-    assert "layering_guards_on_linux_ci" in payload["local_windows_policy"][
-        "must_not_weaken"
-    ]
+    assert (
+        "layering_guards_on_linux_ci"
+        in payload["local_windows_policy"]["must_not_weaken"]
+    )
