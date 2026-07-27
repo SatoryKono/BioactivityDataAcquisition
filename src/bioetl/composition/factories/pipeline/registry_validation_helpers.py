@@ -16,7 +16,7 @@ import yaml
 if TYPE_CHECKING:
     from bioetl.composition.factories.pipeline.config_types import PipelineFactoryConfig
 
-__all__ = ["validate_registry_manifest"]
+__all__: list[str] = []
 
 
 def _iter_entity_files(configs_root: Path) -> list[Path]:
