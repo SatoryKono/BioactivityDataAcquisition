@@ -5,7 +5,7 @@ from __future__ import annotations
 __all__ = ["PubChemFetchStrategies"]
 
 import asyncio
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import pubchempy as pcp
 
@@ -34,6 +34,27 @@ from bioetl.infrastructure.adapters.pubchem.response_mapper import (
     PubChemResponseMapper,
     normalize_pubchem_results,
 )
+
+_TRANSPORT_KEYS = ("logger", "rate_limiter", "circuit_breaker", "run_in_executor")
+
+
+def resolve_transport_bag(
+    transport: dict[str, object] | None,
+    legacy: dict[str, object],
+) -> dict[str, object]:
+    """Merge transport dict with transitional kwargs; reject unknown keys."""
+    resolved = dict(transport or {})
+    for key in _TRANSPORT_KEYS:
+        value = legacy.pop(key, None)
+        if value is not None:
+            resolved[key] = value
+    if legacy:
+        raise TypeError(
+            "PubChemFetchStrategies() got unexpected keyword argument(s): "
+            + ", ".join(sorted(str(k) for k in legacy))
+        )
+    return resolved
+
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Callable
@@ -70,27 +91,11 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
         Prefer ``transport`` with keys logger/rate_limiter/circuit_breaker/
         run_in_executor. Transitional/unit callers may pass them as kwargs.
         """
-        from typing import cast
-
-        resolved_transport = dict(transport or {})
-        for key in ("logger", "rate_limiter", "circuit_breaker", "run_in_executor"):
-            if key in legacy and legacy[key] is not None:
-                resolved_transport[key] = legacy.pop(key)
-        if legacy:
-            raise TypeError(
-                "PubChemFetchStrategies() got unexpected keyword argument(s): "
-                + ", ".join(sorted(str(k) for k in legacy))
-            )
-        self._logger = cast("LoggerPort", resolved_transport["logger"])
-        self._rate_limiter = cast(
-            "TokenBucketRateLimiter", resolved_transport["rate_limiter"]
-        )
-        self._circuit_breaker = cast(
-            "CircuitBreakerGuard", resolved_transport["circuit_breaker"]
-        )
-        self._run_in_executor = cast(
-            "Callable[..., Any]", resolved_transport["run_in_executor"]
-        )
+        resolved = resolve_transport_bag(transport, legacy)
+        self._logger = cast("LoggerPort", resolved["logger"])
+        self._rate_limiter = cast("TokenBucketRateLimiter", resolved["rate_limiter"])
+        self._circuit_breaker = cast("CircuitBreakerGuard", resolved["circuit_breaker"])
+        self._run_in_executor = cast("Callable[..., Any]", resolved["run_in_executor"])
         self._mapper = mapper
         self._provider_name = provider_name
         self._request_collector = request_collector

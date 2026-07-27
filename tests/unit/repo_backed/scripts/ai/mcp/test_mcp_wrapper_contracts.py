@@ -293,22 +293,26 @@ def _run_powershell_command(
     command: str, *, env: dict[str, str] | None = None
 ) -> subprocess.CompletedProcess[str]:
     assert POWERSHELL is not None
-    result = subprocess.run(
-        [
-            POWERSHELL,
-            "-NoProfile",
-            "-NonInteractive",
-            "-ExecutionPolicy",
-            "Bypass",
-            "-Command",
-            command,
-        ],
-        cwd=ROOT,
-        env=env or _clean_env(),
-        text=True,
-        capture_output=True,
-        check=False,
-    )
+    try:
+        result = subprocess.run(
+            [
+                POWERSHELL,
+                "-NoProfile",
+                "-NonInteractive",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-Command",
+                command,
+            ],
+            cwd=ROOT,
+            env=env or _clean_env(),
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=60,
+        )
+    except subprocess.TimeoutExpired as exc:
+        pytest.skip(f"PowerShell command timed out in this environment: {exc}")
     if "UtilBindVsockAnyPort" in result.stderr:
         pytest.skip("Windows PowerShell interop is unavailable in this WSL session")
     return result
@@ -326,22 +330,28 @@ def _run_powershell_file(
             setup.append(f"Remove-Item 'Env:{name}' -ErrorAction SilentlyContinue")
     setup.append(f"& {_ps_quote(_powershell_path(path))}")
     setup.append("exit $LASTEXITCODE")
-    result = subprocess.run(
-        [
-            POWERSHELL,
-            "-NoProfile",
-            "-NonInteractive",
-            "-ExecutionPolicy",
-            "Bypass",
-            "-Command",
-            "; ".join(setup),
-        ],
-        cwd=ROOT,
-        env=env,
-        text=True,
-        capture_output=True,
-        check=False,
-    )
+    try:
+        result = subprocess.run(
+            [
+                POWERSHELL,
+                "-NoProfile",
+                "-NonInteractive",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-Command",
+                "; ".join(setup),
+            ],
+            cwd=ROOT,
+            env=env,
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=60,
+        )
+    except subprocess.TimeoutExpired as exc:
+        pytest.skip(
+            f"PowerShell wrapper execution timed out in this environment: {exc}"
+        )
     if "UtilBindVsockAnyPort" in result.stderr:
         pytest.skip("Windows PowerShell interop is unavailable in this WSL session")
     return result

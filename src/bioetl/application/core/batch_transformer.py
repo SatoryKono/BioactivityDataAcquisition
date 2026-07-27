@@ -86,23 +86,9 @@ class BatchTransformer:
         Prefer ``runtime`` + ``callbacks`` dicts. Transitional/unit callers may
         pass individual collaborators via keyword args.
         """
-        resolved_runtime = dict(runtime or {})
-        for key in ("error_classifier", "quarantine_manager", "batch_metrics"):
-            if key in legacy and legacy[key] is not None:
-                resolved_runtime[key] = legacy.pop(key)
-        resolved_callbacks = dict(callbacks or {})
-        for key in (
-            "transform_callback",
-            "gold_filter_callback",
-            "gold_transform_callback",
-        ):
-            if key in legacy and legacy[key] is not None:
-                resolved_callbacks[key] = legacy.pop(key)
-        if legacy:
-            raise TypeError(
-                "BatchTransformer() got unexpected keyword argument(s): "
-                + ", ".join(sorted(str(k) for k in legacy))
-            )
+        resolved_runtime, resolved_callbacks = _resolve_transformer_bags(
+            runtime, callbacks, legacy
+        )
         self._context = context
         self._config = config
         self._error_classifier = cast(
@@ -270,3 +256,41 @@ class BatchTransformer:
             flush_filtered_records=lambda: asyncio.sleep(0),
             flush_dq_records=lambda: asyncio.sleep(0),
         )
+
+
+def _merge_named_keys(
+    base: dict[str, object] | None,
+    legacy: dict[str, object],
+    keys: tuple[str, ...],
+) -> dict[str, object]:
+    """Copy base and overlay non-None legacy values for the given keys."""
+    resolved = dict(base or {})
+    for key in keys:
+        value = legacy.pop(key, None)
+        if value is not None:
+            resolved[key] = value
+    return resolved
+
+
+def _resolve_transformer_bags(
+    runtime: dict[str, object] | None,
+    callbacks: dict[str, object] | None,
+    legacy: dict[str, object],
+) -> tuple[dict[str, object], dict[str, object]]:
+    """Merge runtime/callback dicts with transitional kwargs; reject unknowns."""
+    resolved_runtime = _merge_named_keys(
+        runtime,
+        legacy,
+        ("error_classifier", "quarantine_manager", "batch_metrics"),
+    )
+    resolved_callbacks = _merge_named_keys(
+        callbacks,
+        legacy,
+        ("transform_callback", "gold_filter_callback", "gold_transform_callback"),
+    )
+    if legacy:
+        raise TypeError(
+            "BatchTransformer() got unexpected keyword argument(s): "
+            + ", ".join(sorted(str(k) for k in legacy))
+        )
+    return resolved_runtime, resolved_callbacks

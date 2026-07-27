@@ -1863,7 +1863,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.core.batch_transformer",
       "path": "src/bioetl/application/core/batch_transformer.py",
-      "source_lines": 272
+      "source_lines": 296
     },
     {
       "coverage_percent": 95.08,
@@ -2743,7 +2743,7 @@
       "missing_lines": 4,
       "module": "bioetl.application.core.runner",
       "path": "src/bioetl/application/core/runner.py",
-      "source_lines": 252
+      "source_lines": 231
     },
     {
       "coverage_percent": 100.0,
@@ -16773,7 +16773,7 @@
       "missing_lines": 2,
       "module": "bioetl.infrastructure.adapters.pubchem.fetch_strategies",
       "path": "src/bioetl/infrastructure/adapters/pubchem/fetch_strategies.py",
-      "source_lines": 300
+      "source_lines": 305
     },
     {
       "coverage_percent": 100.0,
@@ -24585,7 +24585,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.core.batch_transformer",
       "path": "src/bioetl/application/core/batch_transformer.py",
-      "source_lines": 272
+      "source_lines": 296
     },
     {
       "coverage_percent": 95.08,
@@ -25465,7 +25465,7 @@
       "missing_lines": 4,
       "module": "bioetl.application.core.runner",
       "path": "src/bioetl/application/core/runner.py",
-      "source_lines": 252
+      "source_lines": 231
     },
     {
       "coverage_percent": 100.0,
@@ -39495,7 +39495,7 @@
       "missing_lines": 2,
       "module": "bioetl.infrastructure.adapters.pubchem.fetch_strategies",
       "path": "src/bioetl/infrastructure/adapters/pubchem/fetch_strategies.py",
-      "source_lines": 300
+      "source_lines": 305
     },
     {
       "coverage_percent": 100.0,
@@ -45450,7 +45450,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-13",
-  "source_tree_sha256": "68fc07f7de24584eac1ca0bd573eb41dc6560147b301c023e8c6ce3848a81db8",
+  "source_tree_sha256": "1822e2dcc828a2486c0153450f16a7c008d0e5418081a2e20af34e5cb47f451e",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
