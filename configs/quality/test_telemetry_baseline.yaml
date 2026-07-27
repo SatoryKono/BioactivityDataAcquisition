@@ -2,10 +2,10 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: main
-refreshed_at_utc: '2026-07-23T08:11:54.191358+00:00'
+refreshed_at_utc: '2026-07-27T10:36:10.763911+00:00'
 refresh_status: captured
-source_commit: 7038c078bd23b9c9810eb370793e75b2a0d63cbd
-source_run_id: local-duration-rebuild-2026-07-23
+source_commit: 2c0415870b2b903e6fb0a84ae0896b07aad74795
+source_run_id: local-ci-epic-6610-2c0415870b2b
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
@@ -238,4 +238,4 @@ slow_governance_cache_probe:
       cache_path: .cache/bioetl-architecture-governance
       cache_key: source_tree_sha256 from module-coverage-inventory.json
       workflow_owner: .github/workflows/tests.yml#test-fast
-source_tree_sha256: d79995027e6c3134e0be4868f52cc1988a6681171ee2fe61eed2bfed135d988b
+source_tree_sha256: 94333df2f994ef0719f99d03bf1e76bcfe2133eb03cca6ae6f3455833aa948f7
