@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-27T09:22:04.114172+00:00",
+  "generated_at": "2026-07-27T09:23:10.817272+00:00",
   "summary": {
     "total_scripts": 542,
     "status_counts": {
@@ -10102,7 +10102,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 295,
+      "reference_count": 290,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
