@@ -10,27 +10,8 @@ exact_duplicates:
       linked_issue: "#6360"
       resolution: queries_now_have_distinct_time_semantics
       rationale: The current stat uses a fixed latest-sample lookback while the trend remains selected-range evidence, so the former exact duplicate no longer exists.
-  allowed_groups:
-    - id: dq-current-status-shared-card
-      owner: "@bioetl-observability"
-      linked_issue: "#6360"
-      disposition: retain_recording_rule_selector
-      recording_rule_decision: already_canonical
-      normalized_expression: 'max(bioetl_dq_current_status{pipeline=~"$pipeline"})'
-      rationale: DQ status intentionally reuses the existing canonical current-status recording rule for top-level and diagnostic cards.
-      panel_refs:
-        - "bioetl-dq-v2.json :: Monitor DQ Current Status"
-        - "bioetl-dq-v2.json :: Status"
-    - id: runtime-current-status-shared-card
-      owner: "@bioetl-observability"
-      linked_issue: "#6360"
-      disposition: retain_recording_rule_selector
-      recording_rule_decision: already_canonical
-      normalized_expression: 'max(bioetl_runtime_current_status_trusted{pipeline=~"$pipeline",run_type=~"$run_type"})'
-      rationale: Runtime status cards intentionally reuse only the trust-gated recording-rule selector.
-      panel_refs:
-        - "bioetl-runtime.json :: Runtime Status"
-        - "bioetl-runtime.json :: Status"
+  allowed_groups: []
+
 near_duplicates:
   max_count: 4
   owner: "@bioetl-observability"

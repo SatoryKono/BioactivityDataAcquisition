@@ -21,12 +21,12 @@ def test_overview_dashboard_required_panel_links():
     panel_214 = panels.get(214)
     assert panel_214 is not None, "Panel 214 (System Status) must exist"
     data_links_214 = panel_214.get("options", {}).get("dataLinks", [])
+    # Workflow overview retired (#6570/#6647); workflow band lives on runtime.
     required_links_214 = [
         "Open Runtime",
         "Open Control Plane",
         "Open Data Quality",
         "Open Provider Health",
-        "Open Workflow",
     ]
     for required_link in required_links_214:
         assert any(required_link in link.get("title", "") for link in data_links_214), (
@@ -58,22 +58,8 @@ def test_dq_dashboard_required_panel_links():
 
 
 def test_workflow_overview_required_panel_links():
-    """bioetl-workflow-overview: Check required panel links by panel ID."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-workflow-overview.json"))
-    panels = {p.get("id"): p for p in get_dashboard_panels(dashboard)}
-
-    # Panel 9 (First Action) should have dataLinks to specific dashboards
-    panel_9 = panels.get(9)
-    assert panel_9 is not None, "Panel 9 (First Action) must exist"
-    data_links_9 = panel_9.get("options", {}).get("dataLinks", [])
-    required_links_9 = [
-        "Open 2. Runtime",
-        "Open 4. Data Quality",
-        "Open 3. Provider Health",
-        "Open 0. Control Plane",
-        "Open 1. Overview",
-    ]
-    for required_link in required_links_9:
-        assert any(required_link in link.get("title", "") for link in data_links_9), (
-            f"Panel 9 must have dataLink '{required_link}'"
-        )
+    """bioetl-workflow-overview retired; workflow-band lives on runtime."""
+    pytest.skip(
+        "bioetl-workflow-overview.json retired in grafana simplification epic "
+        "#6570/#6647; workflow-band evidence lives on bioetl-runtime"
+    )

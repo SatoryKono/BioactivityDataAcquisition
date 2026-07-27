@@ -46,12 +46,13 @@ def test_build_payload_uses_explicit_snapshot_date(
     payload = matrix.build_payload(snapshot_date="2026-06-23")
 
     assert payload["snapshot_date"] == "2026-06-23"
-    assert payload["schema_version"] == "contract-coverage-matrix-v2"
+    assert payload["schema_version"] == "contract-coverage-matrix-v3"
     assert payload["row_count"] == 1
     assert payload["covered_gold_enabled_count"] == 1
     assert payload["gold_contract_available_count"] == 1
     assert "effective runtime state" in payload["semantics"]["gold_enabled"].lower()
     assert "independent" in payload["semantics"]["gold_contract_available"].lower()
+    assert "strict" in payload["semantics"]["gold_contract_available"].lower()
 
 
 def test_build_payload_distinguishes_disabled_runtime_from_contract_coverage(
@@ -144,7 +145,10 @@ def test_build_row_keeps_contract_available_when_gold_runtime_disabled(
     assert row["gold_enabled"] is False
     assert row["parity_status"] == "excluded"
     assert row["exclusion_reason"] == "gold_runtime_disabled"
-    assert row["gold_contract_available"] is True
     assert row["contract_yaml_exists"] is True
     assert row["registry_entry_exists"] is True
     assert row["pandera_contract_declared"] is True
+    # Available only when Pandera + strict Gold validation are both declared.
+    assert row["gold_contract_available"] is (
+        row["pandera_contract_declared"] and row["gold_strict_validation_declared"]
+    )

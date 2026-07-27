@@ -1,3 +1,6 @@
+# Shipped 5-dashboard surface inventory (#6687).
+# Source of truth for panel counts is grafana/dashboards/*.json.
+
 dashboards:
   - uid: bioetl-control-plane-v1
     title: 0. Trust
@@ -9,7 +12,7 @@ dashboards:
       - Prometheus
       - BioETL Ops HTTP
       - Grafana
-    panel_count: 57
+    panel_count: 58
     key_panels:
       - id: 891
         title: "Monitor: Replay Safety State"
@@ -48,7 +51,7 @@ dashboards:
       - Prometheus
       - BioETL Ops HTTP
       - Grafana
-    panel_count: 25
+    panel_count: 26
     key_panels:
       - id: 214
         title: Status
@@ -77,10 +80,10 @@ dashboards:
       - Prometheus
       - BioETL Ops HTTP
       - Grafana
-    panel_count: 37
+    panel_count: 41
     key_panels:
-      - id: 9100
-        title: Runtime Status
+      - id: 9401
+        title: Status
         type: stat
         description: Trust-gated current runtime health status
       - id: 205
@@ -112,7 +115,7 @@ dashboards:
       - Prometheus
       - BioETL Ops HTTP
       - Grafana
-    panel_count: 29
+    panel_count: 31
     key_panels:
       - id: 9101
         title: Monitor GLOBAL Provider Severity Matrix
@@ -140,10 +143,10 @@ dashboards:
       - Prometheus
       - BioETL Ops HTTP
       - Grafana
-    panel_count: 36
+    panel_count: 37
     key_panels:
-      - id: 9100
-        title: Monitor DQ Current Status
+      - id: 9401
+        title: Status
         type: stat
         description: Current DQ status summary
       - id: 9101
@@ -164,21 +167,3 @@ dashboards:
       - run_id
       - run_type
       - stage
-contract_metadata:
-  version: 1.2.0
-  last_updated: "2026-07-27"
-  source_files:
-    - grafana/dashboards/bioetl-control-plane-v1.json
-    - grafana/dashboards/bioetl-overview-v2.json
-    - grafana/dashboards/bioetl-runtime.json
-    - grafana/dashboards/bioetl-provider-health-v2.json
-    - grafana/dashboards/bioetl-dq-v2.json
-  governance:
-    - All five shipped dashboards must include navigation panel id=1000
-    - Navigation bus 0-4 only (workflow-overview and alerts-slo removed from shipping surface)
-    - KPI ownership mirrors must be documented in navigation-links.yaml
-    - Selector contracts must match selector-contracts.yaml
-    - Quarantine Explorer UI, Silver Reject Explorer, Workflow Overview, and Alerts/SLO dashboards were removed (see monitoring-surface-reduction runbook)
-metadata:
-  last_updated: "2026-07-27"
-  epic: "#6647"

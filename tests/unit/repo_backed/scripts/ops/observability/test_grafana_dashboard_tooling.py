@@ -889,13 +889,17 @@ def test_rerender_playwright_fallback_splits_and_merges_multi_dashboard_runs(
         assert isinstance(env, dict)
         uid = str(env["GRAFANA_SCREENSHOT_UIDS"])
         calls.append(uid)
-        png = (
-            b"\x89PNG\r\n\x1a\n"
-            + b"\x00\x00\x00\rIHDR"
-            + (1600).to_bytes(4, "big")
-            + (2200).to_bytes(4, "big")
-        )
-        (tmp_path / f"{uid}.png").write_bytes(png)
+        # Non-trivial PNG payload so blank-screenshot validation does not trip.
+        # Varied PNG-like payload so blank-screenshot validation does not trip
+        # on near-uniform bytes (file size + entropy checks in #6686).
+        png = bytearray(b"PNG
+
+")
+        png.extend(b"   IHDR")
+        png.extend((1600).to_bytes(4, "big"))
+        png.extend((2200).to_bytes(4, "big"))
+        png.extend(bytes(range(256)) * 20)
+        (tmp_path / f"{uid}.png").write_bytes(bytes(png))
         (tmp_path / "render-manifest.json").write_text(
             json.dumps(
                 {

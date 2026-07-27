@@ -18,11 +18,18 @@ def test_cross_scope_links_use_required_titles():
     # Define required title patterns for specific dashboard transitions
     # Based on dashboard-audit-checklist.md section 17.2
     required_transitions = {
-        # From Overview to other dashboards
-        ("bioetl-overview-v2", "bioetl-runtime"): ["2. Runtime", "Open Runtime"],
+        # From Overview (epic #6570/#6647 naming).
+        ("bioetl-overview-v2", "bioetl-runtime"): [
+            "2. Pipeline Diagnostics",
+            "Open Runtime",
+            "Open Pipeline Diagnostics",
+            "Open 2. Runtime",
+            "2. Runtime",
+        ],
         ("bioetl-overview-v2", "bioetl-control-plane-v1"): [
-            "0. Control Plane",
+            "0. Trust",
             "Open Control Plane",
+            "Open Trust",
         ],
         ("bioetl-overview-v2", "bioetl-dq-v2"): [
             "4. Data Quality",
@@ -32,11 +39,7 @@ def test_cross_scope_links_use_required_titles():
             "3. Provider Health",
             "Open Provider Health",
         ],
-        ("bioetl-overview-v2", "bioetl-workflow-overview"): [
-            "5. Workflow",
-            "Open Workflow",
-        ],
-        # From Runtime to other dashboards
+        # From Runtime / Pipeline Diagnostics
         ("bioetl-runtime", "bioetl-dq-v2"): [
             "Open Data Quality",
             "Inspect DQ",
@@ -47,7 +50,7 @@ def test_cross_scope_links_use_required_titles():
             "Inspect Provider",
             "3. Provider Health",
         ],
-        # Silver Reject Explorer removed 2026-07-23 — no DQ handoff transition remains.
+        # Workflow overview + Silver Reject Explorer retired.
     }
 
     for (source_uid, target_uid), allowed_titles in required_transitions.items():
@@ -91,41 +94,17 @@ def test_cross_scope_links_have_required_tooltip_tokens():
 
 
 def test_workflow_dashboard_provenance_banner_makes_scope_split_explicit() -> None:
-    dashboard = json.loads(
-        Path("grafana/dashboards/bioetl-workflow-overview.json").read_text(
-            encoding="utf-8"
-        )
+    pytest.skip(
+        "bioetl-workflow-overview.json retired in grafana simplification epic "
+        "#6570/#6647; workflow-band evidence lives on bioetl-runtime"
     )
-    panel = next((item for item in dashboard["panels"] if item.get("id") == 9400), None)
-
-    assert panel is not None
-    content = str(panel.get("options", {}).get("content", ""))
-    description = str(panel.get("description", ""))
-    assert "Exact run: ID card only" in content
-    assert "Evidence below: selected-range workflow scope" in content
-    assert "Run ID only fills the local ID card" in content
-    assert "run_id is local control-plane identity context only" in description
 
 
 def test_workflow_status_panel_repeats_selected_range_contract() -> None:
-    dashboard = json.loads(
-        Path("grafana/dashboards/bioetl-workflow-overview.json").read_text(
-            encoding="utf-8"
-        )
+    pytest.skip(
+        "bioetl-workflow-overview.json retired in grafana simplification epic "
+        "#6570/#6647; workflow-band evidence lives on bioetl-runtime"
     )
-    panel = next((item for item in dashboard["panels"] if item.get("id") == 9401), None)
-
-    assert panel is not None
-    description = str(panel.get("description", ""))
-    assert "Selected-range workflow evidence status" in description
-    assert "not exact-run evidence" in description
-    assert "run_id remains local ID-only identity context" in description
-    target_expr = str(panel.get("targets", [{}])[0].get("expr", ""))
-    assert 'status="failed"' in target_expr
-    assert 'status="skipped"' in target_expr
-    assert 'status!~"success|failed"' in target_expr
-    assert "CRIT is driven only by the same failed workflow-run evidence" in description
-    assert "If those visible counters are zero" in description
 
 
 def test_provider_health_descriptions_separate_global_and_selected_scope() -> None:

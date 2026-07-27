@@ -6,7 +6,7 @@ import time
 from collections.abc import Iterator
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult

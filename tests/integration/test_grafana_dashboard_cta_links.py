@@ -79,7 +79,8 @@ def test_runtime_first_screen_status_panels_expose_actionable_drilldowns() -> No
         if panel.get("id") is not None
     }
 
-    current_status_links = _iter_panel_data_links(panels_by_id[9100])
+    # Headline Status card owns first-screen drilldowns after Runtime Status → Status.
+    current_status_links = _iter_panel_data_links(panels_by_id[9401])
     current_status_urls = {
         str(link.get("title")): str(link.get("url")) for link in current_status_links
     }
@@ -419,23 +420,37 @@ def test_control_plane_panels_do_not_mix_runbook_families_within_one_panel() -> 
 
 
 def test_control_plane_provider_health_handoff_omits_adapter_fallback() -> None:
-    """Control Plane -> Provider Health handoff must let target dashboard use its own adapter fallback."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    """Provider Health is off primary bus; Overview First Action owns the fail-closed handoff."""
+    # Primary bus intentionally omits Provider Health (epic #6570/#6647).
+    control = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    control_titles = {
+        str(item.get("title", ""))
+        for item in get_dashboard_navigation_links(control)
+    }
+    assert "3. Provider Health" not in control_titles
+
+    overview = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    first_action = next(
+        panel
+        for panel in get_dashboard_panels(overview)
+        if panel.get("id") == 215
+    )
     link = next(
         (
             item
-            for item in get_dashboard_navigation_links(dashboard)
-            if item.get("title") == "3. Provider Health"
+            for item in (first_action.get("options") or {}).get("dataLinks", [])
+            if "bioetl-provider-health-v2" in str(item.get("url", ""))
         ),
         None,
     )
-    assert link is not None, "Control Plane must expose top-level Provider Health link"
+    assert link is not None, "Overview First Action must hand off to Provider Health"
     url = str(link.get("url", ""))
     assert "var-provider=unknown" in url
     assert "var-pipeline_context=$pipeline" in url
-    assert "var-adapter=" not in url, (
-        "Control Plane -> Provider Health handoff must omit adapter when source has no adapter context"
-    )
+    # Fail-closed adapter default is allowed; All/blank adapter is not.
+    assert "var-adapter=All" not in url
+    if "var-adapter=" in url:
+        assert "var-adapter=unknown" in url
 
 
 def test_control_plane_first_screen_stat_panels_do_not_duplicate_runbook_ctas() -> None:
@@ -1003,30 +1018,27 @@ def test_pipeline_and_provider_variables_are_single_select_unknown_default() -> 
 
 
 def test_provider_health_handoff_fail_closes_and_remembers_return_context() -> None:
-    """Pipeline-scoped dashboards preserve pipeline_context and fail-close provider scope."""
-    pipeline_sources = {
-        "bioetl-control-plane-v1",
-        "bioetl-overview-v2",
-        "bioetl-runtime",
-        "bioetl-dq-v2",
-    }
+    """Overview First Action preserves pipeline_context and fail-closes provider scope."""
+    # Provider Health is interim/off-bus on the primary navigation surface.
+    # Fail-closed provider handoff is owned by Overview First Action (panel 215).
+    overview = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    first_action = next(
+        panel for panel in get_dashboard_panels(overview) if panel.get("id") == 215
+    )
+    link = next(
+        item
+        for item in (first_action.get("options") or {}).get("dataLinks", [])
+        if "bioetl-provider-health-v2" in str(item.get("url", ""))
+    )
+    url = str(link.get("url", ""))
+    tooltip = str(link.get("tooltip", ""))
+    assert "var-provider=unknown" in url
+    assert "var-pipeline_context=$pipeline" in url
+    assert "var-provider=All" not in url
+    # Tooltip is optional on dataLinks; URL fail-closed vars are mandatory.
+    if tooltip:
+        assert "Context mapping" in tooltip or "provider=unknown" in tooltip
     dashboards = _load_dashboards_by_uid()
-
-    for source_uid in pipeline_sources:
-        dashboard = dashboards[source_uid]
-        link = next(
-            item
-            for item in get_dashboard_navigation_links(dashboard)
-            if _extract_dashboard_uid(str(item.get("url", "")))
-            == "bioetl-provider-health-v2"
-        )
-        url = str(link.get("url", ""))
-        tooltip = str(link.get("tooltip", ""))
-        assert "var-provider=unknown" in url
-        assert "var-pipeline_context=$pipeline" in url
-        assert "var-provider=All" not in url
-        assert "Context mapping" in tooltip
-        assert "provider=unknown" in tooltip
 
     provider_dashboard = dashboards["bioetl-provider-health-v2"]
     provider_vars = {

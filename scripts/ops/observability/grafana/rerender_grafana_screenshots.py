@@ -494,6 +494,30 @@ def _png_dimensions(path: Path) -> tuple[int, int] | None:
     return int.from_bytes(header[16:20], "big"), int.from_bytes(header[20:24], "big")
 
 
+def _materially_blank_png_problem(path: Path) -> str | None:
+    """Return a problem string when a PNG is too small or near-uniform (#6686)."""
+    try:
+        payload = path.read_bytes()
+    except OSError as exc:
+        return f"screenshot is unreadable: {exc}"
+    if len(payload) < 1000:
+        return "screenshot is materially blank (file too small)"
+    sample_step = max(1, len(payload) // 4000)
+    counts: dict[int, int] = {}
+    samples = 0
+    for index in range(0, len(payload), sample_step):
+        byte = payload[index]
+        counts[byte] = counts.get(byte, 0) + 1
+        samples += 1
+    if samples < 100:
+        return "screenshot is materially blank (insufficient sample)"
+    top = max(counts.values())
+    dominance = top / samples
+    if dominance >= 0.92 and len(counts) <= 24:
+        return "screenshot is materially blank (near-uniform pixels)"
+    return None
+
+
 def _playwright_script_path() -> Path:
     return Path(__file__).with_suffix(".cjs")
 
@@ -855,6 +879,9 @@ def _playwright_manifest_screenshot_problem(
             or evidence.get("height") != dimensions[1]
         ):
             return f"dashboard {uid} screenshot dimension evidence drift"
+        blank_problem = _materially_blank_png_problem(screenshot_path)
+        if blank_problem is not None:
+            return f"dashboard {uid} {blank_problem}"
     return None
 
 

@@ -7,19 +7,19 @@ Canonical live ADR index: `docs/02-architecture/decisions/README.md`.
 This page is a generated governance mirror and MUST be regenerated via
 `python3 scripts/generate_adr_registry.py` after ADR additions or metadata changes.
 
-**Total ADRs**: 50
-**Last Updated**: 2026-07-08
+**Total ADRs**: 51
+**Last Updated**: 2026-07-27
 
 ## 📊 Status Summary
 
 | Status | Count | Percentage |
 |--------|-------|------------|
-| `accepted` | 48 | 96.0% |
-| `superseded` | 2 | 4.0% |
+| `accepted` | 49 | 96.1% |
+| `superseded` | 2 | 3.9% |
 
 ## 🟢 Accepted ADRs
 
-### 48 decisions
+### 49 decisions
 
 ### ADR-001: Delta Lake vs Parquet
 
@@ -591,6 +591,18 @@ they are data contracts for Silver and Gold records, not infrastructure ...
 **Relationships**: Related: ADR-002, ADR-014, ADR-017, ADR-018, ADR-028, ADR-042, ADR-044, ADR-045, ADR-046, ADR-047
 
 [📄 View Full ADR](../decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md)
+
+---
+
+### ADR-051: QuarantineEntry Wide Constructor as Intentional Aggregate Surface
+
+**Status**: `accepted` | **Category**: `Architecture` | **Owner**: `BioETL Team`
+
+**Context**: `QuarantineEntry` is a Domain aggregate root that freezes identity and
+immutability invariants for quarantine records. Its constructor currently
+takes...
+
+[📄 View Full ADR](../decisions/ADR-051-quarantine-entry-aggregate-surface.md)
 
 ---
 

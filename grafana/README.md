@@ -1,7 +1,7 @@
 # BioETL Мониторинг: Prometheus + Grafana
 
-**Версия документа:** 2.2.0
-**Дата обновления:** 2026-07-24
+**Версия документа:** 2.3.0
+**Дата обновления:** 2026-07-27
 **Статус:** Opt-in local adjunct (ADR-010) — not part of the default release bundle
 **Совместимость:** BioETL v6.x (current main), Grafana 12, Prometheus 3.x
 
@@ -18,6 +18,22 @@
 > `retired: workflow/alerts merged.
 
 ______________________________________________________________________
+
+
+## Shipped dashboard surface (2026-07-27)
+
+Exactly **five** primary dashboards under `grafana/dashboards/`:
+
+0. `bioetl-control-plane-v1` — Trust / Control Plane  
+1. `bioetl-overview-v2` — Overview  
+2. `bioetl-runtime` — Pipeline Diagnostics (includes retired Workflow band evidence)  
+3. `bioetl-provider-health-v2` — Provider Health  
+4. `bioetl-dq-v2` — Data Quality  
+
+Retired (do not reintroduce without architecture review): Workflow Overview, Alerts & SLO, Silver Reject Explorer, Loki/Tempo Explore-only surfaces.
+
+Render/audit gates fail closed on blank screenshots and `renderedPanelCount=0` (#6686).  
+Deployed Grafana JSON must match repo after stripping volatile `id` / `version` / `pluginVersion` fields (#6690).
 
 ## Содержание
 

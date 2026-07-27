@@ -32,7 +32,7 @@
         "mode": "html"
       },
       "title": "Review Dashboard Navigation",
-      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus: Trust / Overview / Pipeline Diagnostics / Data Quality. Provider Health remains interim/off-bus.",
+      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus: Trust / Overview / Pipeline Diagnostics / Data Quality. Provider Health remains interim/off-bus. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions.",
       "type": "text",
       "links": [
         {
@@ -385,7 +385,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Only providers observed as DEGRADED or FAILING inside the active Grafana time range. Empty table means no provider exceeded OK in the selected window; providers with missing current-status telemetry remain visible as UNKNOWN in the GLOBAL severity matrix. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id, pipeline, run_type, or selected provider unless the panel title says selected provider.",
+      "description": "Only providers currently observed as DEGRADED or FAILING on the first-screen provider-status recording rule (instant/current semantics, not selected-range history). Empty table means no provider is currently above OK in the active trust window.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -475,7 +475,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Top provider causes from canonical cause recording rules over the active Grafana time range: raw status, failure rate, retry exhaustion, latency, HTTP errors, or rate-limit pressure. This panel can surface early-warning provider causes even while the GLOBAL severity matrix still reads OK, because the cause projection is evaluated independently from the current-status projection. Empty table means no canonical provider cause rose above zero for any provider in the selected window. If the GLOBAL severity matrix is non-OK while this table stays empty, treat that as a provider explainability gap and inspect the raw status matrix plus optional rate-limit/circuit-breaker evidence before leaving the dashboard. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id, pipeline, run_type, or selected provider unless the panel title says selected provider. The wider first-screen table keeps cause, provider and route readable at 1024 px.",
+      "description": "Top provider causes from canonical cause recording rules using current/instant selectors (not selected-range history): raw status, failure rate, retry exhaustion, latency, HTTP errors, or rate-limit pressure.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -589,7 +589,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Selected-range provider telemetry freshness marker for the first screen. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. If no bioetl_provider_current_status samples exist inside the active Grafana time range, this panel returns WARN so the empty severity matrix is treated as a telemetry gap, not proof that providers are healthy.",
+      "description": "Current provider telemetry freshness marker for the first screen (instant status). Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Missing bioetl_provider_current_status remains fail-closed UNKNOWN, not OK.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1770,7 +1770,7 @@
           ],
           "title": "Review Raw Provider Health Enum",
           "type": "table",
-          "description": "Raw provider health enum evidence over the active Grafana time range, not the canonical first-screen verdict. Values are source enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null/NaN=UNKNOWN when the provider exists in the selected-range provider universe but raw status is absent. Use this as supporting evidence when Status is UNKNOWN or when top causes and severity disagree. First-screen severity uses bioetl_provider_current_status in the Status and GLOBAL Provider Severity Matrix panels to avoid inverting raw enum colors."
+          "description": "Raw provider health enum evidence for the current first-screen scope (instant), not the canonical first-screen verdict. Values are source enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY (or dashboard-local mapping). null/NaN=UNKNOWN when raw status is absent (mapping fallback), not healthy."
         },
         {
           "datasource": {
@@ -2163,7 +2163,7 @@
             "y": 0
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. This card is bounded pipeline/run context evidence only and does not prove current provider health. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty.",
+          "description": "Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. This card is bounded pipeline/run context evidence only and does not prove current provider health. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -2288,7 +2288,7 @@
             "y": 0
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "Current stage/outcome accounting evidence for the shared pipeline/run_type context. Provider remains the primary health selector; this table is bounded pipeline/run_type accounting evidence and does not prove current provider health by itself. Missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status, Monitor Provider Telemetry Freshness, and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty.",
+          "description": "Current stage/outcome accounting evidence for the shared pipeline/run_type context. Provider remains the primary health selector; this table is bounded pipeline/run_type accounting evidence and does not prove current provider health by itself. Missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status, Monitor Provider Telemetry Freshness, and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero.",
           "fieldConfig": {
             "defaults": {
               "custom": {

@@ -45,7 +45,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Actual Prometheus alert-state triage for firing and pending BioETL rules. This panel reads the Prometheus `ALERTS` series and does not duplicate alert business logic in dashboard queries; inactive/no-alert state is rendered as an explicit zero row. Critical/page severity is red, warning is amber, and inactive aggregate evidence is neutral. Open 6. Alerts & SLO for row scope.",
+          "description": "Actual Prometheus alert-state triage for firing and pending BioETL rules. This panel reads the Prometheus `ALERTS` series and does not duplicate alert business logic in dashboard queries; inactive/no-alert state is rendered as an explicit zero row. Critical/page severity is red, warning is amber, and inactive aggregate evidence is neutral. Open 2. Runtime for alert-condition and blocker scope (Alerts & SLO dashboard retired).",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -164,7 +164,7 @@
                 "includeVars": false
               },
               {
-                "title": "Open 6. Alerts & SLO",
+                "title": "Open 2. Runtime (alert conditions)",
                 "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
                 "targetBlank": false,
                 "includeVars": false
@@ -210,7 +210,7 @@
         "mode": "html"
       },
       "title": "Navigation",
-      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus: Trust / Overview / Pipeline Diagnostics / Data Quality. Provider Health remains interim/off-bus.",
+      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus: Trust / Overview / Pipeline Diagnostics / Data Quality. Provider Health remains interim/off-bus. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions.",
       "type": "text",
       "links": [
         {
@@ -2629,7 +2629,7 @@
             "x": 0,
             "y": 0
           },
-          "description": "Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty.",
+          "description": "Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero.",
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
             "defaults": {
@@ -2754,7 +2754,7 @@
             "x": 12,
             "y": 0
           },
-          "description": "Current stage/outcome accounting evidence for the selected pipeline/run_type scope. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty.",
+          "description": "Current stage/outcome accounting evidence for the selected pipeline/run_type scope. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero.",
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
             "defaults": {

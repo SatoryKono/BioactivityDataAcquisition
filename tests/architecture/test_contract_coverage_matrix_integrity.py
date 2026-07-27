@@ -50,7 +50,7 @@ def test_contract_coverage_matrix_rows_cover_all_entity_configs() -> None:
 def test_contract_coverage_matrix_declares_gold_enabled_semantics() -> None:
     """The public metric must not conflate runtime state with schema availability."""
     payload = _load_payload()
-    assert payload.get("schema_version") == "contract-coverage-matrix-v2"
+    assert payload.get("schema_version") == "contract-coverage-matrix-v3"
     semantics = payload.get("semantics")
     assert isinstance(semantics, dict)
     gold_enabled = semantics.get("gold_enabled")
@@ -60,9 +60,14 @@ def test_contract_coverage_matrix_declares_gold_enabled_semantics() -> None:
     gold_contract_available = semantics.get("gold_contract_available")
     assert isinstance(gold_contract_available, str)
     assert "independent" in gold_contract_available.lower()
+    assert "strict" in gold_contract_available.lower()
     assert payload.get("gold_contract_available_count") == sum(
         1 for row in _load_rows() if row.get("gold_contract_available") is True
     )
+    for row in _load_rows():
+        if row.get("gold_contract_available") is True:
+            assert row.get("pandera_contract_declared") is True
+            assert row.get("gold_strict_validation_declared") is True
 
 
 @pytest.mark.architecture
