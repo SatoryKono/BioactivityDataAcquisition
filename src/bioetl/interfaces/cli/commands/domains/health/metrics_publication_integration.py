@@ -44,6 +44,9 @@ def publish_metrics_safely(
         RuntimeError,
         ValueError,
         TypeError,
+        AttributeError,
     ):
         # Observability publication must never turn a completed CLI run into failure.
+        # AttributeError included so incomplete metric surfaces cannot skip the
+        # best-effort path's safety net (#6728).
         return False

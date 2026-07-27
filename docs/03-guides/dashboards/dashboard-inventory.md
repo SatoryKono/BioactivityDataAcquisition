@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-15'
+  Last verified: '2026-07-27'
 
 ______________________________________________________________________
 
@@ -32,17 +32,22 @@ policy.
 
 | Dashboard | JSON file | Family | Primary docs | Panel docs | Datasources | Versioning form |
 | --- | --- | --- | --- | --- | --- | --- |
-| `0. Control Plane` | `grafana/dashboards/bioetl-control-plane-v1.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [Monitoring Guide](../../05-operations/01-monitoring-guide.md) | [bioetl-control-plane-v1-panels.md](panels/bioetl-control-plane-v1-panels.md) | Prometheus, BioETL Ops HTTP, Grafana | versioned (`v1`) |
+| `0. Trust` | `grafana/dashboards/bioetl-control-plane-v1.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [Monitoring Guide](../../05-operations/01-monitoring-guide.md) | [bioetl-control-plane-v1-panels.md](panels/bioetl-control-plane-v1-panels.md) | Prometheus, BioETL Ops HTTP, Grafana | versioned (`v1`) |
 | `1. Overview` | `grafana/dashboards/bioetl-overview-v2.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [monitoring-index.md](monitoring-index.md) | [bioetl-overview-v2-panels.md](panels/bioetl-overview-v2-panels.md) | Prometheus, BioETL Ops HTTP, Grafana | versioned (`v2`) |
-| `2. Runtime` | `grafana/dashboards/bioetl-runtime.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [Monitoring Guide](../../05-operations/01-monitoring-guide.md) | [bioetl-runtime-panels.md](panels/bioetl-runtime-panels.md) | Prometheus, BioETL Ops HTTP, Grafana | stable unversioned |
+| `2. Pipeline Diagnostics` | `grafana/dashboards/bioetl-runtime.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [Monitoring Guide](../../05-operations/01-monitoring-guide.md) | [bioetl-runtime-panels.md](panels/bioetl-runtime-panels.md) | Prometheus, BioETL Ops HTTP, Grafana | stable unversioned |
 | `3. Provider Health` | `grafana/dashboards/bioetl-provider-health-v2.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [monitoring-index.md](monitoring-index.md) | [bioetl-provider-health-v2-panels.md](panels/bioetl-provider-health-v2-panels.md) | Prometheus, BioETL Ops HTTP, Grafana | versioned (`v2`) |
 | `4. Data Quality` | `grafana/dashboards/bioetl-dq-v2.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [Monitoring Guide](../../05-operations/01-monitoring-guide.md) | [bioetl-dq-v2-panels.md](panels/bioetl-dq-v2-panels.md) | Prometheus, BioETL Ops HTTP, Grafana | versioned (`v2`) |
-| `5. Workflow` | `grafana/dashboards/bioetl-workflow-overview.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [monitoring-index.md](monitoring-index.md) | [bioetl-workflow-overview-panels.md](panels/bioetl-workflow-overview-panels.md) | Prometheus, BioETL Ops HTTP, Grafana | stable unversioned |
-| `6. Alerts & SLO` | `grafana/dashboards/bioetl-alerts-slo.json` | alert triage | [Monitoring Guide](../../05-operations/01-monitoring-guide.md), [monitoring-index.md](monitoring-index.md) | [bioetl-alerts-slo-panels.md](panels/bioetl-alerts-slo-panels.md) | Prometheus, Grafana | stable unversioned |
 
-> **Removed 2026-07-23:** `bioetl-silver-reject-explorer` (Silver Reject Explorer UI).
-> Record-level quarantine forensics: `bioetl quarantine inspect` — see
-> [monitoring-surface-reduction](../../05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md).
+> **Shipped surface = 5 dashboards** (diet #6570 / #6687 / #6733). Machine inventory:
+> `docs/03-guides/dashboards/contracts/dashboard-inventory.yaml`.
+
+> **Retired (not shipped JSON):**
+>
+> - `bioetl-workflow-overview` — merged into Pipeline Diagnostics workflow band
+> - `bioetl-alerts-slo` — folded into Overview Alert/SLO triage
+> - `bioetl-silver-reject-explorer` — removed 2026-07-23; use `bioetl quarantine inspect`
+>
+> See [monitoring-surface-reduction](../../05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md).
 
 ## Versioning And Naming Policy
 
@@ -65,9 +70,7 @@ currently single-line operational surface without parallel major revisions.
 
 Current examples:
 
-- `bioetl-runtime`
-- `bioetl-workflow-overview`
-- `bioetl-alerts-slo`
+- `bioetl-runtime` (Pipeline Diagnostics)
 
 ### Governance rule
 

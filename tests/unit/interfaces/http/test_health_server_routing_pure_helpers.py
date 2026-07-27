@@ -280,14 +280,12 @@ async def test_routing_mixin_parses_queries_and_routes_without_sockets(
     await host._route_request(writer, "/missing")
 
     assert isinstance(host.sent[0][1], HealthResponse)
-    assert host.sent[-2] == (
-        "text_response",
-        200,
-        (
-            "# BioETL health server scrape endpoint\n",
-            "text/plain; version=0.0.4; charset=utf-8",
-        ),
-    )
+    metrics_payload = host.sent[-2]
+    assert metrics_payload[0] == "text_response"
+    assert metrics_payload[1] == 200
+    body, content_type = metrics_payload[2]
+    assert content_type == "text/plain; version=0.0.4; charset=utf-8"
+    assert "bioetl_health_server_scrape_up 1" in body
     assert routed == [
         ("quarantine", "/ops/quarantine/list", {"pipeline": "chembl"}),
         ("control", "/ops/control-plane/ready", {}),
