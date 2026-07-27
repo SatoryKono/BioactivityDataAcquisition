@@ -264,6 +264,7 @@ def _build_architecture_quality_metrics(
         compatibility_summary,
         scorecard,
     )
+    families_at_budget = _count_hotspot_families_at_budget(hotspot_baseline)
     return {
         "layer_violations": len(dependency_map.get("violations", [])),
         "source_module_count": coverage_summary["source_module_count"],
@@ -271,6 +272,8 @@ def _build_architecture_quality_metrics(
         "uncovered_module_count": status_counts.get("uncovered", 0),
         "hotspot_family_count": len(coverage_summary["hotspot_family_coverage"]),
         "hotspot_budget_warning_count": hotspot_summary["budget_warnings"],
+        "families_at_budget_count": families_at_budget["count"],
+        "families_at_budget": families_at_budget["names"],
         "total_duplicate_clusters": duplication_summary["total_duplicate_clusters"],
         **compatibility_metrics,
         "compatibility_test_file_count": test_governance_summary[
@@ -310,6 +313,30 @@ def _build_debt_budget_policy(scorecard: JsonMap) -> dict[str, object]:
             debt_budgets
         ),
     }
+
+
+def _count_hotspot_families_at_budget(
+    hotspot_baseline: JsonMap,
+) -> dict[str, object]:
+    """Surface at-budget families for narrative honesty (ARCH-RES-06).
+
+    Hard gates still fail only on ``budget_warnings`` (over budget). At-budget
+    families remain non-blocking but must be visible in scorecard metrics so
+    coupling scores are not misread as infinite headroom.
+    """
+    names: list[str] = []
+    for family in hotspot_baseline.get("families", []):
+        if not isinstance(family, dict):
+            continue
+        notes = family.get("budget_review_notes") or []
+        if any(
+            isinstance(note, str) and note.startswith("at_budget:") for note in notes
+        ):
+            name = family.get("name")
+            if isinstance(name, str):
+                names.append(name)
+    names.sort()
+    return {"count": len(names), "names": names}
 
 
 def build_architecture_quality_scorecard(

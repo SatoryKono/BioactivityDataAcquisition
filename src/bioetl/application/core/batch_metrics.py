@@ -1,4 +1,4 @@
-"""Batch metrics recording helper for batch processing."""
+"""Batch metrics recording helper."""
 
 from __future__ import annotations
 

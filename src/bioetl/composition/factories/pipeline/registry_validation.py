@@ -41,7 +41,9 @@ def validate_registry_manifest(
     resolved_configs_root = resolve_configs_root(configs_root)
     repo_root = resolved_configs_root.parent
     if pipeline_configs is None:
-        from bioetl.composition.factories.pipeline.registry_manifest import (
+        # Import via public registry facade to keep family fan-in of
+        # ``registry_manifest`` under the hotspot budget (ARCH-RES-01).
+        from bioetl.composition.factories.pipeline.registry import (
             PIPELINE_CONFIGS,
         )
 

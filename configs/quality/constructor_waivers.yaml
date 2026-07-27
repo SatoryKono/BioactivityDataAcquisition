@@ -1,12 +1,6 @@
 # RF-017 Constructor Waivers
-# ARCH-QA-04 / #6742: 5 -> 3. Shrink-only.
-# AnchorSpec + CompositeCheckpointLoadService removed via collaborator bags / kwargs.
-
-CheckpointRuntimeService:
-  max_args: 13
-  owner: "@bioetl-composite"
-  expiry: "2026-12-31"
-  reason: "Runtime checkpoint service still wires multiple collaborators."
+# ARCH-RES-02 / #6750: 3 -> 2. Shrink-only.
+# CheckpointRuntimeService removed via CheckpointRuntimeIdentity bag.
 
 PipelineObserver:
   max_args: 13

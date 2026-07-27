@@ -1,30 +1,30 @@
 {
   "summary": {
-    "scanned_modules": 2277,
-    "total_internal_imports": 7121,
+    "scanned_modules": 2279,
+    "total_internal_imports": 7126,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 307,
     "violations": 0,
-    "source_fingerprint": "08011187343f3228a7a702403e188d6b47dbfab38f400f28beded36987458000"
+    "source_fingerprint": "92dc1a7311ec4a964d8b304609196a49c8f602f86d5e4f3c92e3bc34b66fb987"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1366,
+      "imports": 1368,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 884,
+      "imports": 887,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "application",
-      "imports": 155,
+      "imports": 157,
       "allowed": true
     },
     {
@@ -36,7 +36,7 @@
     {
       "source": "composition",
       "target": "domain",
-      "imports": 283,
+      "imports": 281,
       "allowed": true
     },
     {
@@ -92,7 +92,7 @@
     {
       "source": "application.services",
       "target": "domain.control_plane",
-      "imports": 105
+      "imports": 108
     },
     {
       "source": "infrastructure.adapters",
@@ -132,7 +132,7 @@
     {
       "source": "composition.factories",
       "target": "application.core",
-      "imports": 45
+      "imports": 46
     },
     {
       "source": "application.composite",
@@ -240,11 +240,6 @@
       "imports": 21
     },
     {
-      "source": "composition.factories",
-      "target": "domain.types",
-      "imports": 21
-    },
-    {
       "source": "interfaces.cli",
       "target": "composition.control_plane_service_access",
       "imports": 21
@@ -252,6 +247,11 @@
     {
       "source": "composition.bootstrap",
       "target": "application.composite",
+      "imports": 20
+    },
+    {
+      "source": "composition.factories",
+      "target": "domain.types",
       "imports": 20
     },
     {
