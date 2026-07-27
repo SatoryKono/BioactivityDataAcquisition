@@ -13,14 +13,14 @@ from bioetl.application.core._batch_tracing_support import (
     set_memory_decision_trace_attributes,
     set_record_result_attributes,
 )
-from bioetl.application.core.span_helpers import close_span, close_span_with_shutdown
+from bioetl.application.core.pipeline_span_lifecycle import close_span, close_span_with_shutdown
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
     from bioetl.application.core.record_processor_config import RecordProcessorConfig
-    from bioetl.application.core.span_helpers import _ClosableSpan
+    from bioetl.application.core.pipeline_span_lifecycle import _ClosableSpan
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import TracingPort
     from bioetl.domain.types import BatchID

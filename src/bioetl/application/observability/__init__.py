@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from bioetl.application.observability.observer import LifecyclePhase, PipelineObserver
 from bioetl.application.observability.pipeline_metrics import PipelineMetricsRecorder
-from bioetl.application.observability.span_helpers import (
+from bioetl.application.observability.tracing_operation_helpers import (
     traced_async_operation,
     traced_operation,
 )

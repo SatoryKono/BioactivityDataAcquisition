@@ -51,14 +51,6 @@ _ALLOWED_RUNTIME_SEAMS: dict[tuple[str, str], str] = {
         "yaml",
     ): "pure canonical-YAML parsing from supplied bytes, not filesystem persistence",
     (
-        "src/bioetl/domain/run_reports/reason_catalog.py",
-        "yaml",
-    ): "run-report reason catalog loads bounded shipped YAML reason maps",
-    (
-        "src/bioetl/domain/run_reports/reason_catalog.py",
-        "read_text",
-    ): "run-report reason catalog reads package-local YAML reason maps",
-    (
         "tests/unit/domain/run_reports/test_contracts.py",
         "read_text",
     ): "run-report contract tests read package-local reason catalog YAML",

@@ -19,7 +19,7 @@ from bioetl.application.core.postrun._service_collaborators import (
 from bioetl.application.core.postrun._service_support import (
     PostrunServiceSupportMixin,
 )
-from bioetl.application.core.span_helpers import (
+from bioetl.application.core.pipeline_span_lifecycle import (
     build_pipeline_span_attributes,
     start_current_span,
 )

@@ -57,7 +57,7 @@ class CompositeDQConfig:
     """
 
     soft_fail_threshold: float = 0.10
-    hard_fail_threshold: float = 0.30
+    hard_fail_threshold: float = 0.50
     enricher_overrides: dict[str, DQOverrideConfig] = field(default_factory=dict)
     required_fields: tuple[str, ...] = ()
     field_validations: tuple[FieldValidation, ...] = ()

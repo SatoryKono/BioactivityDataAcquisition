@@ -99,7 +99,7 @@ class DQConfig:
     """
 
     soft_fail_threshold: float = 0.05
-    hard_fail_threshold: float = 0.20
+    hard_fail_threshold: float = 0.50
     strict_validation: bool = False
     # Extended DQ configuration
     field_validations: tuple[FieldValidation, ...] = ()

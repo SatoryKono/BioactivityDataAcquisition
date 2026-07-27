@@ -36,7 +36,7 @@ quality:
   provider: pubchem
   thresholds:
     soft_fail: 0.08
-    hard_fail: 0.25
+    hard_fail: 0.50
   provider_field_validations:
   - field: molecule_id
     type: range

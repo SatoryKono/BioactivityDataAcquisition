@@ -8,7 +8,7 @@ pytestmark = pytest.mark.unit
 
 from types import SimpleNamespace
 
-from bioetl.application.core.span_helpers import (
+from bioetl.application.core.pipeline_span_lifecycle import (
     build_pipeline_span_attributes,
     close_span,
     close_span_with_shutdown,

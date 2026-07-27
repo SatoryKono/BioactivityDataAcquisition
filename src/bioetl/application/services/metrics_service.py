@@ -16,7 +16,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from bioetl.application.observability.span_helpers import traced_operation
+from bioetl.application.observability.tracing_operation_helpers import traced_operation
 from bioetl.application.services._metrics_service_gateway_support import (
     DeleteResult,
     PushResult,

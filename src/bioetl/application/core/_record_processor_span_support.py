@@ -14,7 +14,7 @@ from bioetl.application.core.batch_processing_runtime import (
 from bioetl.application.core.batch_processing_runtime import (
     _run_transform_batch,
 )
-from bioetl.application.core.span_helpers import close_span
+from bioetl.application.core.pipeline_span_lifecycle import close_span
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
         BatchTransformer,
         TransformResult,
     )
-    from bioetl.application.core.span_helpers import _ClosableSpan
+    from bioetl.application.core.pipeline_span_lifecycle import _ClosableSpan
     from bioetl.domain.ports import TracingPort
     from bioetl.domain.types import BatchID
 
