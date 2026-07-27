@@ -116,7 +116,7 @@
       "files_ge_250_loc": 4,
       "opening_files_ge_250_loc": 7,
       "opening_total_loc": 22600,
-      "total_loc": 22597
+      "total_loc": 22583
     },
     "5749": {
       "assertless_total_candidates": 105,

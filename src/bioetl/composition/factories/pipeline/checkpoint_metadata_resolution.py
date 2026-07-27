@@ -9,14 +9,9 @@ from bioetl.composition.runtime_builders.input_snapshot_resolution import (
 )
 from bioetl.domain.normalization import (
     build_execution_identity_payload,
-    compute_execution_identity_fingerprint,
     compute_input_snapshot_identity_fingerprint,
 )
 from bioetl.domain.control_plane import RunInputSnapshotRef
-from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
-from bioetl.domain.filtering.silver_filter_identity import (
-    resolve_silver_filter_compatibility_mode,
-)
 
 
 

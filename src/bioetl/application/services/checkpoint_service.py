@@ -18,7 +18,9 @@ from typing import TYPE_CHECKING
 from bioetl.application.observability.span_attribute_values import (
     coerce_span_attribute_value,
 )
-from bioetl.application.observability.tracing_operation_helpers import traced_async_operation
+from bioetl.application.observability.tracing_operation_helpers import (
+    traced_async_operation,
+)
 from bioetl.application.services._checkpoint_service_runtime import (
     delete_checkpoint_impl,
     get_checkpoint_for_manifest_id_impl,

@@ -74,7 +74,7 @@
       "source": "reports/quality/hotspot-family-baseline.json"
     },
     "runtime_builders_helper_function_ratio": {
-      "current": 0.358,
+      "current": 0.359,
       "opening": 0.382,
       "source": "reports/quality/hotspot-family-baseline.json"
     },
