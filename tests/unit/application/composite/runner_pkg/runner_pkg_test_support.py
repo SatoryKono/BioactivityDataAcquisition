@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from types import SimpleNamespace
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
@@ -106,7 +107,7 @@ def failed_enrichment(name: str) -> EnrichmentResult:
 
 def make_dependency_lookup(
     dep_cfg: SimpleNamespace,
-) -> callable:
+) -> Callable[[str], SimpleNamespace | None]:
     """Create a simple dependency lookup closure for config stubs."""
 
     def _lookup(name: str) -> SimpleNamespace | None:

@@ -473,13 +473,13 @@ def push_exposition(
     timeout: float,
 ) -> None:
     """Replace one bounded Pushgateway group without changing Docker state."""
-    parsed = urllib.parse.urlsplit(gateway_url)
-    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
-        raise ValueError("Pushgateway URL must use http or https")
+    from scripts.engineering.common.repo_paths import ensure_local_http_url
+
+    safe_gateway_url = ensure_local_http_url(gateway_url)
     stack = urllib.parse.quote(_safe_metric_text(report["stack"]), safe="")
     project = urllib.parse.quote(_safe_metric_text(report["project"]), safe="")
     target = (
-        gateway_url.rstrip("/")
+        safe_gateway_url
         + "/metrics/job/bioetl_docker_runtime/project/"
         + project
         + "/stack/"

@@ -136,6 +136,17 @@ def test_windows_pycharm_traceback_policy_uses_line_style(
     assert config.option.tbstyle == "line"
 
 
+def test_windows_pytest_bootstrap_overrides_disabled_test_mode(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(root_conftest.sys, "platform", "win32")
+    monkeypatch.setenv("BIOETL_TEST_MODE", "false")
+
+    root_conftest._configure_windows_test_mode_for_control_plane_durability()
+
+    assert root_conftest.os.environ["BIOETL_TEST_MODE"] == "true"
+
+
 def test_windows_pycharm_traceback_policy_preserves_safe_style(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

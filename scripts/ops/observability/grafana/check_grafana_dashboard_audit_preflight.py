@@ -93,7 +93,10 @@ def _has_grafana_auth_material(*, username: str, password: str) -> bool:
 
 
 def _fetch_json(url: str, timeout_seconds: float) -> object:
-    with request.urlopen(url, timeout=timeout_seconds) as response:
+    from scripts.engineering.common.repo_paths import ensure_local_http_url
+
+    safe_url = ensure_local_http_url(url)
+    with request.urlopen(safe_url, timeout=timeout_seconds) as response:
         return json.loads(response.read().decode("utf-8"))
 
 

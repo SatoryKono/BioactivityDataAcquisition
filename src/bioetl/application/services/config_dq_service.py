@@ -63,9 +63,7 @@ def _is_strictness_mode(value: object) -> TypeGuard[DQStrictnessMode]:
     return value in {"lenient", "moderate", "strict"}
 
 
-def _is_snapshot_strictness_mode(
-    value: object,
-) -> TypeGuard[DQSnapshotStrictnessMode]:
+def _is_snapshot_strictness_mode(value: object) -> TypeGuard[DQSnapshotStrictnessMode]:
     return value in {"lenient", "moderate", "standard", "strict"}
 
 
@@ -85,9 +83,7 @@ def _parse_snapshot_strictness_mode(value: object) -> DQSnapshotStrictnessMode:
     raise ValueError(f"Invalid DQ snapshot strictness mode: {value!r}")
 
 
-def _parse_source_hash_strategy(
-    value: object,
-) -> ConfigSourceHashStrategy | None:
+def _parse_source_hash_strategy(value: object) -> ConfigSourceHashStrategy | None:
     if value is None:
         return None
     if _is_source_hash_strategy(value):
@@ -102,9 +98,7 @@ def _parse_disposition_overrides(overrides: object) -> dict[str, DQDisposition]:
         parsed: dict[str, DQDisposition] = {}
         for pair in overrides:
             if not isinstance(pair, (list, tuple)) or len(pair) != 2:
-                raise ValueError(
-                    "Disposition overrides entries must be key/value pairs"
-                )
+                raise ValueError("Disposition overrides entries must be key/value pairs")
             parsed[str(pair[0])] = _parse_disposition(pair[1])
         return parsed
     raise ValueError("Disposition overrides must be a mapping or sequence of pairs")
@@ -128,36 +122,25 @@ def _dq_config_to_dict(dq_config: DQConfig) -> JsonDict:
     }
 
 
-def _logical_config_source_ref(
-    *,
-    relative_path: str,
-    priority: int,
-) -> ConfigSourceRef:
+def _logical_config_source_ref(*, relative_path: str, priority: int) -> ConfigSourceRef:
     """Build an in-memory fallback ref without filesystem provenance."""
     return ConfigSourceRef(
-        source_type="file",
-        source_path=relative_path,
-        priority=priority,
+        source_type="file", source_path=relative_path, priority=priority
     )
 
 
 def _default_config_source_refs(*, provider: str, entity: str) -> list[ConfigSourceRef]:
     """Return logical config refs for tests or non-composed service graphs."""
     refs = [
+        _logical_config_source_ref(relative_path="configs/base/pipeline.yaml", priority=1),
         _logical_config_source_ref(
-            relative_path="configs/base/pipeline.yaml",
-            priority=1,
-        ),
-        _logical_config_source_ref(
-            relative_path=f"configs/providers/{provider}.yaml",
-            priority=2,
+            relative_path=f"configs/providers/{provider}.yaml", priority=2
         ),
     ]
     if entity and entity != "unknown":
         refs.append(
             _logical_config_source_ref(
-                relative_path=f"configs/entities/{provider}/{entity}.yaml",
-                priority=3,
+                relative_path=f"configs/entities/{provider}/{entity}.yaml", priority=3
             )
         )
     return refs
@@ -414,4 +397,4 @@ class ConfigDQService:
             dq_compatible=dq_compatible,
             effective_compatible=effective_compatible,
         )
-        return dq_compatible and effective_compatible
+        return bool(dq_compatible and effective_compatible)

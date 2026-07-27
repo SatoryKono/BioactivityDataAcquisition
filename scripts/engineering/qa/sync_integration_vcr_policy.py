@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 import os
 import sys
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from pathlib import Path
 
 import yaml
@@ -257,7 +257,7 @@ def _tracked_inventory_paths(tracked: dict[str, object]) -> set[str]:
 def _add_missing_inventory_paths(
     repo_paths: Iterable[str],
     tracked_paths: set[str],
-    classifier: callable,
+    classifier: Callable[[str, dict[str, object]], None],
     bucket: dict[str, object],
 ) -> None:
     for relative_path in repo_paths:

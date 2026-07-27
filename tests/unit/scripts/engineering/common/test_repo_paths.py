@@ -60,6 +60,7 @@ def test_ensure_local_http_url_accepts_loopback() -> None:
 
     assert ensure_local_http_url("http://localhost:9090/") == "http://localhost:9090"
     assert ensure_local_http_url("http://prometheus:9090") == "http://prometheus:9090"
+    assert ensure_local_http_url("http://pushgateway:9091") == "http://pushgateway:9091"
 
 
 def test_ensure_local_http_url_rejects_remote() -> None:

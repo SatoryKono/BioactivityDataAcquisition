@@ -36,6 +36,9 @@ Server ports, wrappers, state models and launch modes:
 # 2) Materialize local IDE projections to HTTP URLs
 $env:PYTHONPATH = (Resolve-Path .).Path
 python scripts/ai/codex/setup_mcp.py --profile shared --transport-mode shared --skip-codex-validation
+# Optional: rewrite tracked workspace MCP JSON files onto shared HTTP URLs
+# (does not start the plane; do not commit the rewritten local files).
+python scripts/ops/runtime/mcp/_materialize_shared_http_configs.py
 # Rewrites BOTH ~/.grok/config.toml and repo .grok/config.toml when present
 # (project stdio was a common dual-spawn source next to user HTTP).
 .\scripts\ops\runtime\mcp\apply-shared-to-grok.ps1 -DisableDockerGateways

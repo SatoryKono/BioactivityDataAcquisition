@@ -104,6 +104,45 @@ def _list_python_files(root: Path) -> list[Path]:
     return sorted(python_files)
 
 
+def _discover_git_toplevel(start: Path) -> Path | None:
+    """Locate a git worktree root without spawning git.
+
+    Spawning ``git rev-parse`` from a temp directory under a Windows cloud-synced
+    checkout can hang in pipe reader threads even with a timeout (pytest-timeout
+    then kills the whole test). Walking parents for a ``.git`` entry is enough to
+    decide whether ``git ls-files`` is applicable, and respects
+    ``GIT_CEILING_DIRECTORIES`` the same way the test suite isolates tmp trees.
+    """
+    ceilings: set[Path] = set()
+    for part in os.environ.get("GIT_CEILING_DIRECTORIES", "").split(os.pathsep):
+        cleaned = part.strip()
+        if not cleaned:
+            continue
+        try:
+            ceilings.add(Path(cleaned).resolve())
+        except OSError:
+            continue
+
+    try:
+        current = start.resolve()
+    except OSError:
+        return None
+    if current.is_file():
+        current = current.parent
+
+    for candidate in (current, *current.parents):
+        try:
+            if (candidate / ".git").exists():
+                return candidate
+        except OSError:
+            return None
+        if candidate in ceilings:
+            break
+        if candidate.parent == candidate:
+            break
+    return None
+
+
 def _list_markdown_files_via_git(root: Path) -> list[Path] | None:
     """Return tracked ``*.md`` under ``root`` via git, or ``None`` on failure.
 
@@ -115,28 +154,26 @@ def _list_markdown_files_via_git(root: Path) -> list[Path] | None:
     if not root.exists():
         return []
 
-    try:
-        probe = subprocess.run(
-            ["git", "rev-parse", "--show-toplevel"],
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=10,
-            cwd=str(root),
-        )
-        if probe.returncode != 0:
-            return None
-        git_root = Path(probe.stdout.strip())
-        try:
-            rel_root = root.resolve().relative_to(git_root.resolve()).as_posix()
-        except ValueError:
-            return None
+    git_root = _discover_git_toplevel(root)
+    if git_root is None:
+        return None
 
+    try:
+        rel_root = root.resolve().relative_to(git_root.resolve()).as_posix()
+    except (OSError, ValueError):
+        return None
+
+    creationflags = 0
+    if sys.platform.startswith("win") and hasattr(subprocess, "CREATE_NO_WINDOW"):
+        creationflags = subprocess.CREATE_NO_WINDOW
+
+    try:
         result = subprocess.run(
             ["git", "-C", str(git_root), "ls-files", "-z", "--", rel_root],
             capture_output=True,
             check=False,
-            timeout=30,
+            timeout=15,
+            creationflags=creationflags,
         )
         if result.returncode != 0:
             return None

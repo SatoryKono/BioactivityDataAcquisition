@@ -1,7 +1,4 @@
 name: Port Contract Tests
-permissions:
-  contents: read
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -47,6 +44,8 @@ jobs:
     name: Port Contract Tests
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
@@ -84,6 +83,8 @@ jobs:
   hypothesis-contracts:
     name: Property-Based Contract Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     timeout-minutes: 15
     # Skip on workflow_dispatch if hypothesis disabled
     if: github.event_name != 'workflow_dispatch' || github.event.inputs.include_hypothesis == 'true'
@@ -124,6 +125,8 @@ jobs:
   contracts-status:
     name: Contract Tests Status
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs: [port-contracts, hypothesis-contracts]
     if: always()
 

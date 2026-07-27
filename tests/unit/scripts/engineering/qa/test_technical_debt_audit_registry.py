@@ -97,7 +97,10 @@ def test_evidence_hash_is_independent_of_checkout_line_endings(
 
     evidence.write_bytes(b'{\n  "value": 1\n}\n')
 
-    assert compute_evidence_surface_sha256(
-        tmp_path,
-        ["reports/quality/evidence.json"],
-    ) == windows_hash
+    assert (
+        compute_evidence_surface_sha256(
+            tmp_path,
+            ["reports/quality/evidence.json"],
+        )
+        == windows_hash
+    )

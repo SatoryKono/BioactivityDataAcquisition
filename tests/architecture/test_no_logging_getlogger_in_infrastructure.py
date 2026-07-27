@@ -11,6 +11,7 @@ and log correlation difficult.
 from __future__ import annotations
 
 import ast
+from collections.abc import Callable
 from pathlib import Path
 
 import pytest
@@ -205,7 +206,10 @@ class TestNoLoggingGetLoggerInInfrastructure:
         (_check_getlogger_calls, "getLogger calls"),
     ],
 )
-def test_no_logging_getlogger_parametrized(check_fn: callable, check_name: str) -> None:
+def test_no_logging_getlogger_parametrized(
+    check_fn: Callable[[Path, set[str] | None], list[str]],
+    check_name: str,
+) -> None:
     """Parametrized test for logging.getLogger detection.
 
     Args:

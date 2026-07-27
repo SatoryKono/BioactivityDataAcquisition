@@ -9,6 +9,7 @@ pytestmark = pytest.mark.unit
 import json
 from pathlib import Path
 
+from bioetl.application.services.run_reports import writer as run_report_writer
 from bioetl.application.services.run_reports.writer import (
     write_json,
     write_pipeline_run_report,
@@ -123,3 +124,34 @@ def test_write_json_cleans_temporary_file_when_replace_fails(
 
     assert not target.exists()
     assert list(tmp_path.glob(".*.tmp")) == []
+
+
+def test_should_skip_fsync_for_windows_test_mode(monkeypatch) -> None:
+    monkeypatch.setenv("BIOETL_TEST_MODE", "true")
+    assert run_report_writer._should_fsync_report_writes(os_name="nt") is False
+
+
+def test_should_keep_fsync_outside_windows_test_mode(monkeypatch) -> None:
+    monkeypatch.delenv("BIOETL_TEST_MODE", raising=False)
+    assert run_report_writer._should_fsync_report_writes(os_name="nt") is True
+    monkeypatch.setenv("BIOETL_TEST_MODE", "true")
+    assert run_report_writer._should_fsync_report_writes(os_name="posix") is True
+
+
+def test_atomic_write_skips_fsync_when_policy_is_relaxed(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    fsync_calls: list[int] = []
+    monkeypatch.setattr(
+        run_report_writer,
+        "_should_fsync_report_writes",
+        lambda **_kwargs: False,
+    )
+    monkeypatch.setattr(run_report_writer.os, "fsync", fsync_calls.append)
+
+    target = tmp_path / "report.md"
+    run_report_writer._atomic_write_text(target, "hello\n")
+
+    assert target.read_text(encoding="utf-8") == "hello\n"
+    assert fsync_calls == []

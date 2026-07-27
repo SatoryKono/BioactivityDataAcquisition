@@ -67,56 +67,46 @@ def run_repo_command(
     workdir = cwd or REPO_ROOT
     merged_env = None if env is None else os.environ | env
 
-    stdout_handle = tempfile.NamedTemporaryFile(
-        prefix="bioetl_cli_stdout_",
-        suffix=".txt",
-        delete=False,
-    )
-    stderr_handle = tempfile.NamedTemporaryFile(
-        prefix="bioetl_cli_stderr_",
-        suffix=".txt",
-        delete=False,
-    )
-    stdout_path = Path(stdout_handle.name)
-    stderr_path = Path(stderr_handle.name)
-    stdout_handle.close()
-    stderr_handle.close()
+    with tempfile.TemporaryDirectory(prefix="bioetl_cli_") as temp_dir:
+        stdout_path = Path(temp_dir) / "stdout.txt"
+        stderr_path = Path(temp_dir) / "stderr.txt"
 
-    try:
-        with (
-            stdout_path.open("w", encoding="utf-8", errors="replace") as stdout_file,
-            stderr_path.open("w", encoding="utf-8", errors="replace") as stderr_file,
-        ):
-            completed = subprocess.run(
-                command,
-                cwd=workdir,
-                env=merged_env,
-                stdout=stdout_file,
-                stderr=stderr_file,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-                check=False,
-                timeout=timeout,
-                **_windows_subprocess_kwargs(),
+        try:
+            with (
+                stdout_path.open(
+                    "w", encoding="utf-8", errors="replace"
+                ) as stdout_file,
+                stderr_path.open(
+                    "w", encoding="utf-8", errors="replace"
+                ) as stderr_file,
+            ):
+                completed = subprocess.run(
+                    command,
+                    cwd=workdir,
+                    env=merged_env,
+                    stdout=stdout_file,
+                    stderr=stderr_file,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                    check=False,
+                    timeout=timeout,
+                    **_windows_subprocess_kwargs(),
+                )
+            return subprocess.CompletedProcess(
+                args=command,
+                returncode=completed.returncode,
+                stdout=stdout_path.read_text(encoding="utf-8", errors="replace"),
+                stderr=stderr_path.read_text(encoding="utf-8", errors="replace"),
             )
-        return subprocess.CompletedProcess(
-            args=command,
-            returncode=completed.returncode,
-            stdout=stdout_path.read_text(encoding="utf-8", errors="replace"),
-            stderr=stderr_path.read_text(encoding="utf-8", errors="replace"),
-        )
-    except subprocess.TimeoutExpired as exc:
-        # Re-raise with captured partial output when available (no PIPE drain hang).
-        raise subprocess.TimeoutExpired(
-            cmd=command,
-            timeout=exc.timeout,
-            output=stdout_path.read_text(encoding="utf-8", errors="replace"),
-            stderr=stderr_path.read_text(encoding="utf-8", errors="replace"),
-        ) from None
-    finally:
-        stdout_path.unlink(missing_ok=True)
-        stderr_path.unlink(missing_ok=True)
+        except subprocess.TimeoutExpired as exc:
+            # Re-raise with captured partial output when available (no PIPE drain hang).
+            raise subprocess.TimeoutExpired(
+                cmd=command,
+                timeout=exc.timeout,
+                output=stdout_path.read_text(encoding="utf-8", errors="replace"),
+                stderr=stderr_path.read_text(encoding="utf-8", errors="replace"),
+            ) from None
 
 
 def run_repo_python(

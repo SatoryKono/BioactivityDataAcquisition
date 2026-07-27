@@ -59,7 +59,10 @@ def _fetch_json(
     url: str, timeout: float, headers: dict[str, str] | None = None
 ) -> dict[str, Any]:
     """Fetch JSON from URL with optional headers."""
-    request = Request(url, headers=headers or {})
+    from scripts.engineering.common.repo_paths import ensure_local_http_url
+
+    safe_url = ensure_local_http_url(url)
+    request = Request(safe_url, headers=headers or {})
     with urlopen(request, timeout=timeout) as response:
         return json.loads(response.read().decode("utf-8"))
 
@@ -67,7 +70,10 @@ def _fetch_json(
 def check_prometheus_health(prometheus_url: str, timeout: float) -> ValidationResult:
     """Check Prometheus health endpoint."""
     try:
-        health_url = f"{prometheus_url}/-/healthy"
+        from scripts.engineering.common.repo_paths import ensure_local_http_url
+
+        safe_base_url = ensure_local_http_url(prometheus_url)
+        health_url = f"{safe_base_url}/-/healthy"
         response = urlopen(health_url, timeout=timeout)
         content = response.read().decode("utf-8").strip()
 

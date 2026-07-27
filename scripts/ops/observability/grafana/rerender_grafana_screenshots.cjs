@@ -342,7 +342,7 @@ async function createBrowserContext(browser) {
     api = await createAuthenticatedApiContext();
   } catch (error) {
     console.warn(
-      `warning: Grafana login failed for Playwright fallback; continuing anonymously (${String(error && error.message ? error.message : error)})`,
+      `warning: Grafana login failed for Playwright fallback; continuing anonymously (${String(error?.message ?? error)})`,
     );
     return {
       context: await browser.newContext({ viewport: CONFIG.viewport }),
@@ -399,7 +399,7 @@ function listDashboardsFromRepo() {
         uid === "bioetl-silver-reject-explorer" ? [13] : [],
       collapsedRowTitles: CONFIG.expandCollapsedRows
         ? panels
-            .filter((panel) => panel && panel.type === "row" && panel.collapsed === true)
+            .filter((panel) => panel?.type === "row" && panel.collapsed === true)
             .map((panel) => (typeof panel.title === "string" ? panel.title.trim() : ""))
             .filter(Boolean)
         : [],
@@ -498,8 +498,8 @@ async function detectActualTheme(page) {
     const tokens = [
       root ? root.className : "",
       body ? body.className : "",
-      root && root.dataset ? root.dataset.theme || "" : "",
-      body && body.dataset ? body.dataset.theme || "" : "",
+      root?.dataset?.theme || "",
+      body?.dataset?.theme || "",
     ]
       .join(" ")
       .toLowerCase();
@@ -1207,13 +1207,13 @@ async function main() {
         await renderDashboard(page, dashboard, index + 1, dashboards.length);
       } catch (error) {
         dashboard.renderStatus = "error";
-        dashboard.error = String(error && error.message ? error.message : error);
+        dashboard.error = String(error?.message ?? error);
         renderFailure = error;
       } finally {
         await page.close();
       }
     } finally {
-      if (contextBundle && contextBundle.api) {
+      if (contextBundle?.api) {
         await contextBundle.api.dispose();
       }
       if (context) {
@@ -1233,7 +1233,7 @@ async function main() {
 
 if (require.main === module) {
   main().catch((error) => {
-    const message = String(error && error.message ? error.message : error);
+    const message = String(error?.message ?? error);
     if (message.includes("error while loading shared libraries")) {
       console.error(
         "Playwright fallback could not launch Chromium because required shared",

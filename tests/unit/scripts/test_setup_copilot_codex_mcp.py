@@ -178,8 +178,7 @@ def test_shared_endpoints_sync_with_catalog() -> None:
 
 def test_shared_launcher_enforces_singleton_and_loopback() -> None:
     launcher = (
-        Path(__file__).resolve().parents[3]
-        / "scripts/ops/runtime/mcp/start-shared.sh"
+        Path(__file__).resolve().parents[3] / "scripts/ops/runtime/mcp/start-shared.sh"
     ).read_text(encoding="utf-8")
     assert "flock 9" in launcher
     assert '"--host",' in launcher
@@ -537,18 +536,24 @@ def test_main_recreates_empty_workspace_json_configs(tmp_path: Path) -> None:
 
     assert exit_code == 0
     shared_fs_url = setup_mcp.MCP_SHARED_SERVER_ENDPOINTS["filesystem"]
-    assert json.loads(
-        (output_root / ".codex" / "settings.json").read_text(encoding="utf-8")
-    )["mcpServers"]["filesystem"]["url"] == shared_fs_url
+    assert (
+        json.loads(
+            (output_root / ".codex" / "settings.json").read_text(encoding="utf-8")
+        )["mcpServers"]["filesystem"]["url"]
+        == shared_fs_url
+    )
     assert (
         json.loads(
             (output_root / ".devin" / "config.json").read_text(encoding="utf-8")
         )["mcpServers"]["filesystem"]["url"]
         == shared_fs_url
     )
-    assert json.loads(
-        (output_root / ".gemini" / "settings.json").read_text(encoding="utf-8")
-    )["mcpServers"]["filesystem"]["httpUrl"] == shared_fs_url
+    assert (
+        json.loads(
+            (output_root / ".gemini" / "settings.json").read_text(encoding="utf-8")
+        )["mcpServers"]["filesystem"]["httpUrl"]
+        == shared_fs_url
+    )
 
 
 def test_devin_projection_is_portable_across_workspace_roots(
@@ -595,8 +600,9 @@ def test_devin_projection_is_portable_across_workspace_roots(
     assert generated[0]["devin"] == {"org_id": "org-test"}
     assert generated[0]["shell"] == {"setup_complete": True}
     assert generated[0]["theme_mode"] == "light"
-    assert generated[0]["mcpServers"]["filesystem"]["url"] == (
-        setup_mcp.MCP_SHARED_SERVER_ENDPOINTS["filesystem"]
+    assert (
+        generated[0]["mcpServers"]["filesystem"]["url"]
+        == (setup_mcp.MCP_SHARED_SERVER_ENDPOINTS["filesystem"])
     )
 
 

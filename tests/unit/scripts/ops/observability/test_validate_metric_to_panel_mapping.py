@@ -34,7 +34,7 @@ def test_validate_metric_exists_empty_vector_is_not_found(
         },
     )
     ok, message = vmap.validate_metric_exists(
-        "bioetl_missing", set(), "http://prom.example", 1.0
+        "bioetl_missing", set(), "http://prometheus:9090", 1.0
     )
     assert ok is False
     assert "not found" in message
@@ -55,7 +55,7 @@ def test_validate_metric_exists_nonempty_vector_is_queryable(
         },
     )
     ok, message = vmap.validate_metric_exists(
-        "bioetl_ok", set(), "http://prom.example", 1.0
+        "bioetl_ok", set(), "http://prometheus:9090", 1.0
     )
     assert ok is True
     assert "queryable" in message
@@ -73,6 +73,6 @@ def test_validate_panel_query_empty_results_uses_result_type(
         },
     )
     panel = {"targets": [{"expr": "up"}]}
-    ok, message = vmap.validate_panel_query(panel, "http://prom.example", 1.0)
+    ok, message = vmap.validate_panel_query(panel, "http://prometheus:9090", 1.0)
     assert ok is False
     assert "resultType: vector" in message
