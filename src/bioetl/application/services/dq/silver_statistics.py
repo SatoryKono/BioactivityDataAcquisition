@@ -235,8 +235,11 @@ class SilverStatisticsCalculator:
         hash_collision_count: int | None = None
         if "_content_hash" in df.columns:
             hash_counts = df["_content_hash"].value_counts()
-            duplicates = hash_counts.filter(pl.col("count") > 1)
-            hash_collision_count = len(duplicates)
+            # Use select().item() instead of filter() and len() to avoid materializing a new DataFrame,
+            # which eliminates Python loop overhead and drastically speeds up execution.
+            hash_collision_count = int(
+                hash_counts.select((pl.col("count") > 1).sum()).item()
+            )
         return _check_content_hash_integrity_stats(len(df), hash_collision_count)
 
     def distribution_to_dict(
