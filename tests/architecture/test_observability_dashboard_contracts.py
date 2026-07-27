@@ -99,9 +99,7 @@ def test_alerts_slo_panels_one_through_five_link_reviewed_owner_runbook() -> Non
     """The alert decision surface must expose a direct owner/runbook handoff."""
     dashboard_path = DASHBOARD_DIR / "bioetl-alerts-slo.json"
     if not dashboard_path.is_file():
-        pytest.skip(
-            "bioetl-alerts-slo.json retired from shipping surface (epic #6647)"
-        )
+        pytest.skip("bioetl-alerts-slo.json retired from shipping surface (epic #6647)")
     dashboard = json.loads(dashboard_path.read_text(encoding="utf-8"))
     panels = {int(panel["id"]): panel for panel in _iter_panels(dashboard)}
     for panel_id in range(1, 6):
