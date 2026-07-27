@@ -120,6 +120,13 @@ def test_pipeline_observer_success(metrics_mock, logger_mock, run_id):
         if call[0][0] == "bioetl_pipeline_runs_total"
     ]
     assert len(run_counter_calls) == 1
+    # Pipeline success must not contaminate provider health-check counters (#6729).
+    health_success_calls = [
+        call
+        for call in metrics_mock.increment_counter.call_args_list
+        if call[0][0] == "bioetl_health_check_success_total"
+    ]
+    assert health_success_calls == []
 
     # Verify logs: start and finish
     assert logger_mock.info.call_count == 2

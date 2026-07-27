@@ -63,6 +63,7 @@ __all__ = [
 
 _STEP_KIND_PIPELINE = "pipeline"
 _WORKFLOW_STEP_FAILURES = (
+    AttributeError,
     BioETLError,
     KeyError,
     RuntimeError,

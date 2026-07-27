@@ -103,6 +103,21 @@ class _FailingPipelineRunner:
         raise RuntimeError("pipeline boom")
 
 
+class _AttributeErrorPipelineRunner:
+    """Simulates unexpected AttributeError (e.g. incomplete span surface)."""
+
+    async def run(
+        self,
+        pipeline_name: str,
+        dry_run: bool = False,
+        run_id: object | None = None,
+        options: object | None = None,
+    ) -> RunResult:
+        await asyncio.sleep(0)
+        del pipeline_name, dry_run, run_id, options
+        raise AttributeError("'NoneType' object has no attribute 'add_event'")
+
+
 class _IdentifiedPipelineError(RuntimeError):
     """Failure emitted after the child run and manifest identities exist."""
 
@@ -395,6 +410,46 @@ async def test_workflow_runner_returns_failed_step_result_for_pipeline_error() -
     )
     assert result.steps[0].status == "failed"
     assert result.steps[0].error_type == "RuntimeError"
+    assert metrics.counters[-1] == (
+        "bioetl_workflow_runs_total",
+        1,
+        {
+            "workflow": "activity_workflow",
+            "status": "failed",
+            "pipeline_context": "chembl_activity",
+            "run_type_context": "incremental",
+            "provider_context": "chembl",
+        },
+    )
+
+
+@pytest.mark.asyncio
+async def test_workflow_runner_terminalizes_attribute_error_step_failure() -> None:
+    """AttributeError must not bypass step failure recording (#6732 / P1-WF-STATE-002)."""
+    metrics = _RecordingMetrics()
+    service = WorkflowRunnerService(
+        pipeline_runner=_AttributeErrorPipelineRunner(),  # type: ignore[arg-type]
+        transform_service=WorkflowTransformService(
+            registry=WorkflowTransformRegistry(),
+            metrics=metrics,
+        ),
+        metrics=metrics,
+    )
+    config = WorkflowConfig(
+        name="activity_workflow",
+        steps=(
+            WorkflowStepConfig(
+                step_id="extract",
+                pipeline_name="chembl_activity",
+            ),
+        ),
+    )
+
+    result = await service.run_workflow(config)
+
+    assert result.status == "failed"
+    assert result.steps[0].status == "failed"
+    assert result.steps[0].error_type == "AttributeError"
     assert metrics.counters[-1] == (
         "bioetl_workflow_runs_total",
         1,
