@@ -90,18 +90,18 @@
       "workflow_contains_strict_preflight": true
     },
     "5701": {
-      "coverage_actual_percent": 95.61,
+      "coverage_actual_percent": 96.49,
       "coverage_percent_fallback_used": true,
       "coverage_xml_present": false,
-      "refreshed_at_utc": "2026-07-23T08:11:54.191358+00:00",
+      "refreshed_at_utc": "2026-07-27T18:08:35.600453+00:00",
       "slowest_total_cases": 23360,
-      "source_commit": "7038c078bd23b9c9810eb370793e75b2a0d63cbd",
+      "source_commit": "667c3020ce74f87c319f77612c765a5aaf30e6ad",
       "source_run_id": "local-duration-rebuild-2026-07-23",
       "top_slow_zone": {
-        "max_duration_s": 192.078,
+        "zone": "tests.architecture.test_naming_ambiguity_classifier",
         "test_count": 2,
         "total_duration_s": 231.041,
-        "zone": "tests.architecture.test_naming_ambiguity_classifier"
+        "max_duration_s": 192.078
       }
     },
     "5702": {

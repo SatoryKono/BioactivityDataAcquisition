@@ -2,54 +2,6 @@
   "duplication_audit": {
     "clusters": [
       {
-        "block_path": "entries.scripts/docs/matrix/build_matrix_dicts.py",
-        "fingerprint": "c013e36e66f5",
-        "governance": {
-          "decision": "review_required",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 6,
-        "occurrences": [
-          {
-            "block_path": "entries.scripts/docs/matrix/build_matrix_dicts.py",
-            "path": "configs/quality/scripts_lifecycle_registry.json",
-            "surface_kind": "quality_registry"
-          },
-          {
-            "block_path": "entries.scripts/docs/matrix/enrich_normalization_details.py",
-            "path": "configs/quality/scripts_lifecycle_registry.json",
-            "surface_kind": "quality_registry"
-          },
-          {
-            "block_path": "entries.scripts/docs/matrix/export_structural_contract.py",
-            "path": "configs/quality/scripts_lifecycle_registry.json",
-            "surface_kind": "quality_registry"
-          },
-          {
-            "block_path": "entries.scripts/docs/matrix/filter_rows.py",
-            "path": "configs/quality/scripts_lifecycle_registry.json",
-            "surface_kind": "quality_registry"
-          },
-          {
-            "block_path": "entries.scripts/docs/matrix/generate_field_matrix.py",
-            "path": "configs/quality/scripts_lifecycle_registry.json",
-            "surface_kind": "quality_registry"
-          },
-          {
-            "block_path": "entries.scripts/docs/matrix/normalize_values.py",
-            "path": "configs/quality/scripts_lifecycle_registry.json",
-            "surface_kind": "quality_registry"
-          }
-        ],
-        "serialized_bytes": 250,
-        "surface_kind_counts": {
-          "quality_registry": 6
-        }
-      },
-      {
         "block_path": "composite.normalized_anchor_policy",
         "fingerprint": "e46c148477ca",
         "governance": {
@@ -176,49 +128,6 @@
         "serialized_bytes": 296,
         "surface_kind_counts": {
           "composite_config": 5
-        }
-      },
-      {
-        "block_path": "entries.scripts/docs/fixers/fix_links_auto.py",
-        "fingerprint": "bcec48fc5dc5",
-        "governance": {
-          "decision": "review_required",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-architecture",
-          "rationale": "Exact structured config duplication is measured and requires explicit owner review before it can be retained or removed.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 5,
-        "occurrences": [
-          {
-            "block_path": "entries.scripts/docs/fixers/fix_links_auto.py",
-            "path": "configs/quality/scripts_lifecycle_registry.json",
-            "surface_kind": "quality_registry"
-          },
-          {
-            "block_path": "entries.scripts/docs/fixers/fix_links_explicit.py",
-            "path": "configs/quality/scripts_lifecycle_registry.json",
-            "surface_kind": "quality_registry"
-          },
-          {
-            "block_path": "entries.scripts/docs/fixers/link_warnings.py",
-            "path": "configs/quality/scripts_lifecycle_registry.json",
-            "surface_kind": "quality_registry"
-          },
-          {
-            "block_path": "entries.scripts/docs/fixers/repo_identity.py",
-            "path": "configs/quality/scripts_lifecycle_registry.json",
-            "surface_kind": "quality_registry"
-          },
-          {
-            "block_path": "entries.scripts/docs/fixers/sentence_audit.py",
-            "path": "configs/quality/scripts_lifecycle_registry.json",
-            "surface_kind": "quality_registry"
-          }
-        ],
-        "serialized_bytes": 277,
-        "surface_kind_counts": {
-          "quality_registry": 5
         }
       },
       {
@@ -687,34 +596,6 @@
         }
       },
       {
-        "block_path": "entries.scripts/engineering/qa/report_domain_io_taint_inventory.py",
-        "fingerprint": "4820989d76df",
-        "governance": {
-          "decision": "retain_shared_lifecycle_registry_entry",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-architecture",
-          "rationale": "The duplicated script-inventory lifecycle row is a quality registry mirror and stays explicitly architecture-owned.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "entries.scripts/engineering/qa/report_domain_io_taint_inventory.py",
-            "path": "configs/quality/scripts_lifecycle_registry.json",
-            "surface_kind": "quality_registry"
-          },
-          {
-            "block_path": "entries.scripts/engineering/qa/report_port_adapter_factory_coverage.py",
-            "path": "configs/quality/scripts_lifecycle_registry.json",
-            "surface_kind": "quality_registry"
-          }
-        ],
-        "serialized_bytes": 306,
-        "surface_kind_counts": {
-          "quality_registry": 2
-        }
-      },
-      {
         "block_path": "aliases.S7-architecture-fast-boundary",
         "fingerprint": "1bb34d738e78",
         "governance": {
@@ -795,10 +676,10 @@
       "structured_block_min_bytes": 200
     },
     "summary": {
-      "affected_file_count": 14,
-      "duplicate_cluster_count": 23,
-      "duplicate_occurrence_count": 71,
-      "reported_cluster_count": 23
+      "affected_file_count": 13,
+      "duplicate_cluster_count": 20,
+      "duplicate_occurrence_count": 58,
+      "reported_cluster_count": 20
     }
   },
   "entity_effective": {

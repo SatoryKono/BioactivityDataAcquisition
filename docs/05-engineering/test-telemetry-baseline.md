@@ -28,15 +28,15 @@ trend evidence only.
 ## Baseline Snapshot
 
 - Source branch: `main`
-- Source commit: `2c0415870b2b903e6fb0a84ae0896b07aad74795`
-- Source run id: `local-ci-epic-6610-2c0415870b2b`
+- Source commit: `667c3020ce74f87c319f77612c765a5aaf30e6ad`
+- Source run id: `local-duration-rebuild-2026-07-23`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-07-27T10:36:10.763911+00:00`
+- Refreshed at (UTC): `2026-07-27T18:08:35.600453+00:00`
 
 ## Coverage
 
 - Hard threshold: `85.0%`
-- Actual coverage: `95.61%`
+- Actual coverage: `96.49%`
 - Threshold satisfied: `True`
 
 ## Duration Telemetry

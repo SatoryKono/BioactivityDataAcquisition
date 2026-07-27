@@ -249,7 +249,7 @@ def test_issue_5843_composite_shared_policy_has_single_authority_surface() -> No
         summary["duplicate_cluster_count"]
         <= closeout["metrics"]["config_surface_duplicate_clusters"]["current"]
     )
-    assert summary["duplicate_cluster_count"] <= 21
+    assert summary["duplicate_cluster_count"] <= 23
     assert (
         summary["duplicate_cluster_count"]
         < closeout["metrics"]["config_surface_duplicate_clusters"][

@@ -119,7 +119,7 @@
       "total_loc": 22596
     },
     "5749": {
-      "assertless_total_candidates": 105,
+      "assertless_total_candidates": 106,
       "compatibility_test_files": 0,
       "intentional_no_exception_contract": 89,
       "markerless_test_functions": 0,
@@ -167,7 +167,7 @@
       "opening": 22360
     },
     "assertless_total_candidates": {
-      "current": 105,
+      "current": 106,
       "max": 113,
       "opening": 113
     },

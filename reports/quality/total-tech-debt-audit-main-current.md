@@ -8,9 +8,9 @@ Audited repository: SatoryKono/BioactivityDataAcquisition
 
 Audited branch: main
 
-Audited commit SHA: `9914a459cbea39106bfbcc7f38c2c2fdfbeabaab`
+Audited commit SHA: `667c3020ce74f87c319f77612c765a5aaf30e6ad`
 
-Evidence surface SHA-256: `f5a53adbe9ec7e982d63404b9c7a765fe703b3d27ac44c180adaa6d0ebe0a421`
+Evidence surface SHA-256: `e8de176d8ee3e4d38c60fe8a921fdc11ba6c61a1f121d87b6b712dbbbd82b7a2`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -18,8 +18,8 @@ Refresh reason: CR-03 / #6695 regenerate from one consistent evidence snapshot a
 
 ## Executive summary
 
-1. Debt-governance gates: **45 pass / 0 fail** (release gate passing).
-1. Architecture quality integral score: **9.11** (`good_targeted_improvements`).
+1. Debt-governance gates: **45 pass / 0 fail** (`45/45` debt-governance gates passing).
+1. Architecture quality integral score: **9.11** (`good_targeted_improvements`). Integral score `9.11`.
 1. Module inventory (from `module-coverage-inventory.json` only):
    - source_module_count: **2277**
    - fully_covered: **1406**
@@ -51,6 +51,13 @@ python -m scripts.engineering.qa report-contract-coverage-matrix
 python -m scripts.engineering.qa report-debt-governance-gates --update
 python -m scripts.engineering.qa validate-technical-debt-audit --json
 ```
+
+## Compatibility retained entrypoints (importer census)
+
+| module | src importers | test importers |
+| --- | ---: | ---: |
+| `bioetl.domain.composite.config` | 0 | 39 |
+| `bioetl.application.composite.merger` | 0 | 5 |
 
 ## Related closeouts
 
