@@ -51,10 +51,30 @@ def _clean_env(**updates: str | None) -> dict[str, str]:
 
 
 def _bash_path(path: Path) -> str:
-    """Return a path form that Git Bash / WSL bash can source on Windows."""
+    """Return a path form that Git Bash / WSL bash can source on Windows.
+
+    Prefer a repo-relative path when the target is inside ROOT: MSYS/Git Bash
+    launched from Windows Python can fail to resolve absolute ``/e/...``
+    mappings for some network/G-drive mounts even when the relative path works.
+    """
     resolved = path.resolve()
     if os.name != "nt":
         return str(resolved)
+
+    try:
+        relative = resolved.relative_to(ROOT.resolve())
+        relative_posix = relative.as_posix()
+        probe_rel = subprocess.run(
+            ["bash", "-c", f"test -e {shlex.quote(relative_posix)}"],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        if probe_rel.returncode == 0:
+            return relative_posix
+    except ValueError:
+        pass
 
     wslpath = shutil.which("wslpath")
     if wslpath is not None:
@@ -65,7 +85,16 @@ def _bash_path(path: Path) -> str:
             check=False,
         )
         if result.returncode == 0 and result.stdout.strip():
-            return result.stdout.strip()
+            candidate = result.stdout.strip()
+            probe = subprocess.run(
+                ["bash", "-c", f"test -e {shlex.quote(candidate)}"],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            if probe.returncode == 0:
+                return candidate
 
     cygpath = shutil.which("cygpath")
     if cygpath is not None:
@@ -76,20 +105,34 @@ def _bash_path(path: Path) -> str:
             check=False,
         )
         if result.returncode == 0 and result.stdout.strip():
-            return result.stdout.strip()
+            candidate = result.stdout.strip()
+            probe = subprocess.run(
+                ["bash", "-c", f"test -e {shlex.quote(candidate)}"],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            if probe.returncode == 0:
+                return candidate
 
     drive = resolved.drive.rstrip(":").lower()
     tail = resolved.as_posix()[len(resolved.drive) :]
-    wsl_candidate = f"/mnt/{drive}{tail}"
-    probe = subprocess.run(
-        ["bash", "-c", f"test -e {shlex.quote(wsl_candidate)}"],
-        text=True,
-        capture_output=True,
-        check=False,
-    )
-    if probe.returncode == 0:
-        return wsl_candidate
-    return f"/{drive}{tail}"
+    for candidate in (f"/mnt/{drive}{tail}", f"/{drive}{tail}"):
+        probe = subprocess.run(
+            ["bash", "-c", f"test -e {shlex.quote(candidate)}"],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        if probe.returncode == 0:
+            return candidate
+    # Last resort: relative form even if probe failed (best effort on flaky mounts).
+    try:
+        return resolved.relative_to(ROOT.resolve()).as_posix()
+    except ValueError:
+        return f"/{drive}{tail}"
 
 
 def _run_bash(
