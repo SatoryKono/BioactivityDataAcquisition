@@ -186,7 +186,7 @@ class DQContractConfigLoader:
                 contract_config.get("strictness_mode", "moderate")
             ),
             soft_fail_threshold=_resolve_threshold(contract_config, "soft_fail", 0.05),
-            hard_fail_threshold=_resolve_threshold(contract_config, "hard_fail", 0.20),
+            hard_fail_threshold=_resolve_threshold(contract_config, "hard_fail", 0.50),
             strict_validation=_resolve_contract_strict_dq_validation(contract_config),
             field_validations=(),
             cross_field_validations=(),

@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 from bioetl.application.observability.span_attribute_values import (
     coerce_span_attribute_value,
 )
-from bioetl.application.observability.span_helpers import traced_operation
+from bioetl.application.observability.tracing_operation_helpers import traced_operation
 from bioetl.domain.exceptions import BioETLError
 
 if TYPE_CHECKING:

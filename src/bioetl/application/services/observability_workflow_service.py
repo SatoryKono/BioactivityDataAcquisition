@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.application.observability.span_helpers import traced_async_operation
+from bioetl.application.observability.tracing_operation_helpers import traced_async_operation
 from bioetl.application.services._observability_workflow_execution import (
     inspect_audit_run as inspect_audit_run_impl,
 )

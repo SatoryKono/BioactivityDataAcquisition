@@ -24,6 +24,21 @@ class LedgerEntryProvider(Protocol):
     def list_entries(self, manifest_id: str) -> list[RunLedgerEntry]: ...
 
 
+# Positional field order after ``priority`` for call sites that still construct
+# AnchorSpec with the canonical ordered args (p0/p1/p2 specs modules).
+_ANCHOR_SPEC_POSITIONAL_FIELDS: tuple[str, ...] = (
+    "name",
+    "label",
+    "source",
+    "value_format",
+    "why",
+    "rendering",
+    "copy",
+    "drilldown",
+    "missing_severity",
+)
+
+
 @dataclass(frozen=True, slots=True, init=False)
 class AnchorSpec:
     """Static presentation and policy metadata for one identity anchor."""
@@ -39,13 +54,30 @@ class AnchorSpec:
     drilldown: str
     missing_severity: str
 
-    def __init__(self, priority: str, **fields: object) -> None:
+    def __init__(self, priority: str, *args: object, **fields: object) -> None:
         """Initialize canonical specs while accepting legacy HTTP contract names.
 
-        Canonical and legacy field names are accepted as kwargs so the
-        constructor stays under the DI/arg-count gate without dropping
-        HTTP contract aliases.
+        Accepts either:
+        - positional args after ``priority`` in the canonical field order; or
+        - kwargs using canonical names (``name``, ``label``, ...) or legacy
+          HTTP contract aliases (``anchor_name``, ``display_name``, ...).
+
+        Keeping the surface as ``priority + *args + **fields`` stays under the
+        DI/arg-count gate without dropping either construction style.
         """
+        if args:
+            if len(args) > len(_ANCHOR_SPEC_POSITIONAL_FIELDS):
+                raise TypeError(
+                    "AnchorSpec() takes at most "
+                    f"{len(_ANCHOR_SPEC_POSITIONAL_FIELDS) + 1} positional "
+                    f"arguments but {len(args) + 1} were given"
+                )
+            for key, value in zip(_ANCHOR_SPEC_POSITIONAL_FIELDS, args, strict=False):
+                if key in fields:
+                    raise TypeError(
+                        f"AnchorSpec() got multiple values for argument '{key}'"
+                    )
+                fields[key] = value
         values = _resolve_anchor_spec_values(priority=priority, **fields)
         _apply_anchor_spec_values(self, values)
 

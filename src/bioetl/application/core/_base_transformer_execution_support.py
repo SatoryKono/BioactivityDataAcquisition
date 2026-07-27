@@ -5,7 +5,7 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING, Protocol, cast
 
-from bioetl.application.core.span_helpers import _ClosableSpan
+from bioetl.application.core.pipeline_span_lifecycle import _ClosableSpan
 
 if TYPE_CHECKING:
     from bioetl.application.core.base_transformer.errors import TransformationError

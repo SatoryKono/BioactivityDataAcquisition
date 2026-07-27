@@ -12,7 +12,7 @@ from bioetl.application.core._runner_dependency_support import (
 from bioetl.application.core._runner_support import PipelineRunnerSupportMixin
 from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError
 from bioetl.application.core.runner_flow import record_run_failed, record_run_started
-from bioetl.application.core.span_helpers import (
+from bioetl.application.core.pipeline_span_lifecycle import (
     _TracingProvider,
     build_pipeline_span_attributes,
     start_current_span,

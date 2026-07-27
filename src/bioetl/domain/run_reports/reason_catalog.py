@@ -5,13 +5,10 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass
 from functools import lru_cache
-from pathlib import Path
 from typing import Any
 
 REASON_CATALOG_VERSION = "reason_catalog_v1"
 UNKNOWN_REASON = "UNKNOWN_REASON"
-
-_DEFAULT_CATALOG_RELATIVE = Path("configs/contracts/reports/reason_catalog.v1.yaml")
 
 # Built-in fallback when YAML is unavailable (tests / offline).
 _BUILTIN_REASONS: dict[str, dict[str, str]] = {
@@ -152,28 +149,15 @@ def _builtin_catalog() -> ReasonCatalog:
     return ReasonCatalog(version=REASON_CATALOG_VERSION, entries=entries)
 
 
-def _load_yaml_catalog(path: Path) -> ReasonCatalog | None:
-    if not path.is_file():
-        return None
-    raw = _read_yaml_mapping(path)
-    if raw is None:
-        return None
+def catalog_from_mapping(
+    raw: Mapping[str, object],
+) -> ReasonCatalog:
+    """Build a catalog from an already-parsed mapping (no I/O)."""
     version = _text_default(raw.get("version"), REASON_CATALOG_VERSION)
     unknown = _text_default(raw.get("unknown_code"), UNKNOWN_REASON)
     entries = _parse_catalog_entries(raw.get("reasons"))
     entries.setdefault(unknown, _unknown_entry(unknown))
     return ReasonCatalog(version=version, entries=entries, unknown_code=unknown)
-
-
-def _read_yaml_mapping(
-    path: Path,
-) -> dict[str, Any] | None:  # Any: report/json payload shape is dynamic
-    try:
-        import yaml
-    except ImportError:
-        return None
-    raw = yaml.safe_load(path.read_text(encoding="utf-8"))
-    return raw if isinstance(raw, dict) else None
 
 
 def _parse_catalog_entries(raw_reasons: object) -> dict[str, ReasonCatalogEntry]:
@@ -216,16 +200,11 @@ def _unknown_entry(code: str) -> ReasonCatalogEntry:
 
 @lru_cache(maxsize=1)
 def default_reason_catalog() -> ReasonCatalog:
-    """Load catalog from repo configs when present, else builtin."""
-    # Prefer repo-relative path from CWD, then walk parents from this file.
-    candidates = [
-        Path.cwd() / _DEFAULT_CATALOG_RELATIVE,
-        Path(__file__).resolve().parents[4] / _DEFAULT_CATALOG_RELATIVE,
-    ]
-    for candidate in candidates:
-        loaded = _load_yaml_catalog(candidate)
-        if loaded is not None:
-            return loaded
+    """Return the pure built-in catalog (no filesystem I/O).
+
+    Shipped YAML catalogs are loaded by infrastructure
+    (``bioetl.infrastructure.config.reason_catalog_loader``).
+    """
     return _builtin_catalog()
 
 

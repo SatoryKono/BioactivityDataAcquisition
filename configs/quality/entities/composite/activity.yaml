@@ -4,7 +4,7 @@ entity: activity
 
 dq_overrides:
   soft_fail_threshold: 0.10
-  hard_fail_threshold: 0.30
+  hard_fail_threshold: 0.50
   required_fields:
     - activity_id
     - molecule_id

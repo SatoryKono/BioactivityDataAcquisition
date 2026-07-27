@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.application.observability.span_helpers import (
+from bioetl.application.observability.tracing_operation_helpers import (
     traced_async_operation,
     traced_operation,
 )

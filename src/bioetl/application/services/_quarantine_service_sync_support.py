@@ -6,7 +6,7 @@ from collections.abc import Callable
 from datetime import datetime
 from typing import TYPE_CHECKING, Protocol
 
-from bioetl.application.observability.span_helpers import traced_operation
+from bioetl.application.observability.tracing_operation_helpers import traced_operation
 
 if TYPE_CHECKING:
     from opentelemetry.trace import Span

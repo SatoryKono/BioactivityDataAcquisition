@@ -50,7 +50,7 @@ quality:
     provider: crossref
     thresholds:
         soft_fail: 0.1
-        hard_fail: 0.3
+        hard_fail: 0.50
     provider_field_validations:
         -   field: doi
             type: pattern

@@ -1,4 +1,4 @@
-"""Public application-core owner for shared tracing span helpers."""
+"""Pipeline span lifecycle helpers owned by application.core."""
 
 from __future__ import annotations
 
