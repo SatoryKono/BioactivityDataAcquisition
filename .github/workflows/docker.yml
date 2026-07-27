@@ -5,35 +5,35 @@ permissions:
 
 on:
   push:
-    branches: [ main, master, develop ]
+    branches: [main, master, develop]
     paths:
-      - 'Dockerfile.bioetl'
-      - 'docker-compose*.yml'
-      - 'scripts/ops/runtime/docker/**'
-      - 'scripts/engineering/qa/docker_stability_campaign/**'
-      - 'scripts/engineering/qa/run_docker_stability_campaign.py'
-      - 'configs/quality/docker_runtime_contracts.yaml'
-      - 'tests/architecture/test_docker_runtime_contracts.py'
-      - 'tests/unit/repo_backed/scripts/ops/docker/**'
-      - 'tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py'
-      - '.dockerignore'
-      - '.github/workflows/docker.yml'
-      - '.github/actions/setup-python-uv/**'
+      - "Dockerfile.bioetl"
+      - "docker-compose*.yml"
+      - "scripts/ops/runtime/docker/**"
+      - "scripts/engineering/qa/docker_stability_campaign/**"
+      - "scripts/engineering/qa/run_docker_stability_campaign.py"
+      - "configs/quality/docker_runtime_contracts.yaml"
+      - "tests/architecture/test_docker_runtime_contracts.py"
+      - "tests/unit/repo_backed/scripts/ops/docker/**"
+      - "tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py"
+      - ".dockerignore"
+      - ".github/workflows/docker.yml"
+      - ".github/actions/setup-python-uv/**"
   pull_request:
-    branches: [ main, master, develop ]
+    branches: [main, master, develop]
     paths:
-      - 'Dockerfile.bioetl'
-      - 'docker-compose*.yml'
-      - 'scripts/ops/runtime/docker/**'
-      - 'scripts/engineering/qa/docker_stability_campaign/**'
-      - 'scripts/engineering/qa/run_docker_stability_campaign.py'
-      - 'configs/quality/docker_runtime_contracts.yaml'
-      - 'tests/architecture/test_docker_runtime_contracts.py'
-      - 'tests/unit/repo_backed/scripts/ops/docker/**'
-      - 'tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py'
-      - '.dockerignore'
-      - '.github/workflows/docker.yml'
-      - '.github/actions/setup-python-uv/**'
+      - "Dockerfile.bioetl"
+      - "docker-compose*.yml"
+      - "scripts/ops/runtime/docker/**"
+      - "scripts/engineering/qa/docker_stability_campaign/**"
+      - "scripts/engineering/qa/run_docker_stability_campaign.py"
+      - "configs/quality/docker_runtime_contracts.yaml"
+      - "tests/architecture/test_docker_runtime_contracts.py"
+      - "tests/unit/repo_backed/scripts/ops/docker/**"
+      - "tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py"
+      - ".dockerignore"
+      - ".github/workflows/docker.yml"
+      - ".github/actions/setup-python-uv/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -145,22 +145,22 @@ jobs:
         uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
         with:
           image-ref: "bioetl:${{ github.sha }}"
-          format: 'sarif'
-          output: 'reports/security/trivy-results.sarif'
-          severity: 'CRITICAL,HIGH'
+          format: "sarif"
+          output: "reports/security/trivy-results.sarif"
+          severity: "CRITICAL,HIGH"
 
       - name: Upload Trivy results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@8dca8a82e2fa1a2c8908956f711300f9c4a4f4f6 # v2
         if: always()
         with:
-          sarif_file: 'reports/security/trivy-results.sarif'
+          sarif_file: "reports/security/trivy-results.sarif"
 
       - name: Run Trivy on debian:bookworm-slim base image
         uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
         with:
-          image-ref: 'debian:bookworm-slim'
-          format: 'table'
-          severity: 'CRITICAL,HIGH'
+          image-ref: "debian:bookworm-slim"
+          format: "table"
+          severity: "CRITICAL,HIGH"
 
   docker-push:
     runs-on: ubuntu-latest
@@ -191,9 +191,10 @@ jobs:
           context: .
           file: Dockerfile.bioetl
           push: true
+          # GHCR requires lowercase repository names.
           tags: |
-            ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ github.sha }}
-            ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+            ghcr.io/${{ github.repository_owner }}/bioactivitydataacquisition:latest
+            ghcr.io/${{ github.repository_owner }}/bioactivitydataacquisition:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/bioactivitydataacquisition:${{ github.ref_name }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

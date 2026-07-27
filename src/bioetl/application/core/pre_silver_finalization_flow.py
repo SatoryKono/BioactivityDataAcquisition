@@ -102,11 +102,7 @@ class _PreSilverFinalizationFlowMixin:
         index: int,
         business_data: JsonDict,
     ) -> JsonDict:
-        compute_entity_id = cast(
-            "Callable[[str | None, GoldRecord], EntityID]",
-            getattr(self, "compute_entity_id"),
-        )
-        entity_id = compute_entity_id(source_id, identity_record)
+        entity_id = self.compute_entity_id(source_id, identity_record)
         return self._finalize_staged_business_data(
             context=context,
             entity_id=entity_id,

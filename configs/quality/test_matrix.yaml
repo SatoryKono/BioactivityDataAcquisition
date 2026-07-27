@@ -740,7 +740,7 @@ mutation_testing:
   targets:
     domain:
       paths_to_mutate: src/bioetl/domain/
-      tests_dir: tests/
+      tests_dir: tests/unit/domain/
       min_score: 70
       enforced: true
     application_control_plane:
