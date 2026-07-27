@@ -9,28 +9,59 @@ $script:BioetlProxyEnvironmentNames = @(
 )
 
 function Get-BioetlProxyEnvironmentSnapshot {
-    $snapshot = [ordered]@{}
+    # Use a plain hashtable and suppress enumeration so callers receive one
+    # map (PowerShell otherwise unwraps single-collection returns).
+    $snapshot = @{}
     foreach ($name in $script:BioetlProxyEnvironmentNames) {
         $snapshot[$name] = [Environment]::GetEnvironmentVariable(
             $name,
             [EnvironmentVariableTarget]::Process
         )
     }
-    return $snapshot
+    Write-Output -NoEnumerate $snapshot
 }
 
 function Restore-BioetlProxyEnvironment {
     param(
         [Parameter(Mandatory = $true)]
-        [System.Collections.IDictionary]$Snapshot
+        $Snapshot
     )
 
+    # Normalize to a dictionary whether callers pass Hashtable, OrderedDictionary,
+    # or a PSCustomObject-wrapped map from PowerShell pipeline unwrapping.
+    $map = @{}
+    if ($Snapshot -is [System.Collections.IDictionary]) {
+        foreach ($key in @($Snapshot.Keys)) {
+            $map[[string]$key] = $Snapshot[$key]
+        }
+    }
+    elseif ($null -ne $Snapshot) {
+        foreach ($prop in $Snapshot.PSObject.Properties) {
+            $map[[string]$prop.Name] = $prop.Value
+        }
+    }
+
     foreach ($name in $script:BioetlProxyEnvironmentNames) {
-        [Environment]::SetEnvironmentVariable(
-            $name,
-            $Snapshot[$name],
-            [EnvironmentVariableTarget]::Process
-        )
+        $value = $null
+        if ($map.ContainsKey($name)) {
+            $value = $map[$name]
+        }
+        if ($null -eq $value -or $value -eq "") {
+            Remove-Item -Path "Env:$name" -ErrorAction SilentlyContinue
+            [Environment]::SetEnvironmentVariable(
+                $name,
+                $null,
+                [EnvironmentVariableTarget]::Process
+            )
+        }
+        else {
+            Set-Item -Path "Env:$name" -Value ([string]$value)
+            [Environment]::SetEnvironmentVariable(
+                $name,
+                [string]$value,
+                [EnvironmentVariableTarget]::Process
+            )
+        }
     }
 }
 
@@ -141,6 +172,27 @@ function Resolve-BioetlUvxBin {
       Locate uvx even when Scripts/ is not on PATH.
     #>
     $candidates = @()
+
+    # Prefer explicit PATH probes first so test fakes (uvx.ps1) and non-Windows
+    # pwsh path separators are honored before host-wide installs.
+    $pathSeparator = [IO.Path]::PathSeparator
+    $pathEntries = @()
+    if (-not [string]::IsNullOrWhiteSpace($env:PATH)) {
+        $pathEntries += $env:PATH.Split(
+            [char[]]@($pathSeparator, ';', ':'),
+            [StringSplitOptions]::RemoveEmptyEntries
+        )
+    }
+    foreach ($entry in $pathEntries) {
+        foreach ($name in @("uvx.exe", "uvx.cmd", "uvx.ps1", "uvx")) {
+            try {
+                $candidates += [System.IO.Path]::Combine($entry.Trim(), $name)
+            }
+            catch {
+                # Ignore unusable PATH entries.
+            }
+        }
+    }
 
     $fromPath = Get-Command uvx -ErrorAction SilentlyContinue
     if ($fromPath -and $fromPath.Source) {

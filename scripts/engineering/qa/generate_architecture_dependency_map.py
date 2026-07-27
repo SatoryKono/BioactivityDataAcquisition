@@ -180,9 +180,13 @@ def _read_source_module_snapshots_once(src_root: Path) -> list[_SourceModuleSnap
 
 
 def _snapshot_digest(snapshots: Iterable[_SourceModuleSnapshot]) -> str:
-    """Return a deterministic fingerprint for one source snapshot."""
+    """Return a deterministic fingerprint for one source snapshot.
+
+    Snapshots are sorted by ``relative_path`` so Windows/Linux filesystem
+    iteration order cannot change the digest when topology and contents match.
+    """
     digest = hashlib.sha256()
-    for snapshot in snapshots:
+    for snapshot in sorted(snapshots, key=lambda item: item.relative_path):
         digest.update(snapshot.relative_path.encode("utf-8"))
         digest.update(b"\0")
         digest.update(hashlib.sha256(snapshot.source_bytes).digest())
@@ -651,18 +655,6 @@ def _check_file_sync(path: Path, expected: str) -> bool:
     if path.suffix == ".md":
         _, actual = _split_frontmatter(actual)
     if actual == expected:
-        return True
-    # Cross-platform working trees can produce different source_fingerprint
-    # digests for semantically identical topology (path encoding / line-ending
-    # edge cases). Treat pure fingerprint drift as non-blocking when the rest
-    # of the JSON payload matches after stripping summary.source_fingerprint.
-    if path.suffix == ".json" and _without_source_fingerprint(
-        actual
-    ) == _without_source_fingerprint(expected):
-        print(
-            "[drift] source fingerprint differs but topology matches: "
-            f"{_display_path(path)} (accepting as up to date)"
-        )
         return True
     print(f"[drift] mismatch: {_display_path(path)}")
     if path.suffix == ".json":

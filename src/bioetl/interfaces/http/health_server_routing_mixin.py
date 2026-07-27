@@ -292,13 +292,51 @@ class HealthServerRoutingMixin:
         )
 
     def _handle_metrics(self) -> str:
-        """Return minimal Prometheus exposition for scrape liveness.
+        """Return Prometheus exposition for scrape liveness and process metrics.
 
-        Prometheus derives the bounded availability signal from
-        up{job="quarantine-explorer"} after a successful scrape. This endpoint
-        intentionally avoids record-level or run-level labels.
+        Topology contract (AUD-OBS-20260727 / #6731):
+
+        - Scrape job ``bioetl`` targeting this health server is a **process
+          liveness** signal (``up{job="bioetl"}``).
+        - **Batch terminal counters** are published best-effort to Pushgateway
+          with grouping labels ``pipeline`` + ``run_type`` only after CLI runs
+          (``publish_metrics_safely``). Do not treat health scrape alone as
+          proof that pipeline runs populated data-plane series.
+        - When this process has registered Prometheus collectors, exposition
+          includes those series. Otherwise a minimal liveness metric is still
+          returned so scrapes are non-empty and not a comment-only stub.
+        - Never expose run_id, hashes, paths, URLs, or raw messages as labels.
         """
-        return "# BioETL health server scrape endpoint\n"
+        return _build_health_server_metrics_exposition()
+
+
+_HEALTH_SCRAPE_UP_EXPOSITION = (
+    "# HELP bioetl_health_server_scrape_up Health server /metrics scrape "
+    "liveness (1=serving).\n"
+    "# TYPE bioetl_health_server_scrape_up gauge\n"
+    "bioetl_health_server_scrape_up 1\n"
+)
+
+
+def _build_health_server_metrics_exposition() -> str:
+    """Build Prometheus text exposition for the health-server scrape path."""
+    try:
+        from prometheus_client import REGISTRY, generate_latest
+
+        body = generate_latest(REGISTRY).decode("utf-8")
+        if not body.strip():
+            return _HEALTH_SCRAPE_UP_EXPOSITION
+        if "bioetl_health_server_scrape_up" not in body:
+            body = body.rstrip() + "\n" + _HEALTH_SCRAPE_UP_EXPOSITION
+        return body if body.endswith("\n") else f"{body}\n"
+    except (
+        ImportError,
+        OSError,
+        RuntimeError,
+        TypeError,
+        ValueError,
+    ):
+        return _HEALTH_SCRAPE_UP_EXPOSITION
 
 
 __all__ = ["HealthServerRoutingMixin"]

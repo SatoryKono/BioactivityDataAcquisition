@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3132 |
-| Tracked doc-like files | 1938 |
+| Doc-like files | 3138 |
+| Tracked doc-like files | 1944 |
 | Ignored local docs/reports files | 1194 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
@@ -19,7 +19,7 @@
 | Tracking State | Count |
 | --- | --- |
 | ignored_local | 1194 |
-| tracked | 1938 |
+| tracked | 1944 |
 
 ## Lifecycle Counts
 
@@ -28,7 +28,7 @@
 | active_backlog | 1 |
 | active_draft | 108 |
 | active_quality_baseline | 20 |
-| closeout_evidence | 34 |
+| closeout_evidence | 35 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 40 |
 | docs_reports_generated_or_route_owned | 23 |
@@ -38,12 +38,12 @@
 | generated_test_run_evidence | 4 |
 | guide | 2 |
 | index | 4 |
-| issue_pack | 14 |
+| issue_pack | 15 |
 | live_issue_mirror | 4 |
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 36 |
 | supporting_context | 16 |
-| working_report | 50 |
+| working_report | 52 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -52,37 +52,37 @@
 | active_draft | 108 |
 | guide | 2 |
 | index | 4 |
-| issue_pack | 14 |
+| issue_pack | 15 |
 | live_issue_mirror | 4 |
 
 ## Status Counts
 
 | Status | Count |
 | --- | --- |
-| Active | 1963 |
+| Active | 1965 |
 | Archived | 82 |
 | Canonical | 68 |
 | Generated | 738 |
-| Working | 281 |
+| Working | 285 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 1963 |
+| active | 1965 |
 | archive | 82 |
 | canonical | 68 |
 | generated | 738 |
-| working | 281 |
+| working | 285 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-github-state-check | 122 |
-| archive-after-migration | 101 |
+| archive-after-github-state-check | 123 |
+| archive-after-migration | 103 |
 | generate-automatically | 738 |
-| keep | 2167 |
+| keep | 2170 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -148,6 +148,8 @@
 | `docs/reports/test-health/skip_marker_analysis.md` | Working | 0 | archive-after-migration |
 | `docs/reports/test-health/vcr_lifecycle_analysis.md` | Working | 0 | archive-after-migration |
 | `docs/reports/testing/phase2_integration_testing_plan.md` | Working | 0 | archive-after-migration |
+| `reports/observability/grafana/selector-audit-2026-07-20/selector-audit-report.md` | Working | 0 | archive-after-migration |
+| `reports/observability/grafana/selector-audit-2026-07-20/selector-evidence.json` | Working | 0 | archive-after-migration |
 | `reports/observability/runtime_cardinality_allowlist_review_5574.json` | Working | 0 | archive-after-migration |
 | `reports/observability/runtime_cardinality_review.json` | Working | 0 | archive-after-migration |
 | `reports/plans/obs-program-6247-6268/04-refactoring-log.md` | Working | 0 | archive-after-migration |
@@ -167,8 +169,6 @@
 | `reports/quality/low-coverage-targeted-tests-6045.json` | Working | 0 | archive-after-migration |
 | `reports/quality/port-adapter-factory-coverage.json` | Working | 0 | archive-after-migration |
 | `reports/quality/port-adapter-factory-coverage.md` | Working | 0 | archive-after-migration |
-| `reports/quality/reports-workspace-review.json` | Working | 0 | archive-after-migration |
-| `reports/quality/root-hygiene-cleanup-classification.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -291,6 +291,7 @@
 | `.github/ISSUES/CHEMBL-020-Expand-Observed-Value-Inventory-For-Weakly-Covered-ChEMBL-Reference-Pipelines.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/CHEMBL-021-Sync-ChEMBL-Provider-Docs-With-Active-Normalization-Surfaces.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/CHEMBL-ISSUES-INDEX.md` | index |  | keep |
+| `.github/ISSUES/CODERABBIT-REAUDIT-2026-07-27-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
 | `.github/ISSUES/CREATION_GUIDE.md` | guide |  | keep |
 | `.github/ISSUES/CROSS-001-Unified-Enum-Configuration.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/CROSS-002-Case-Canonicalization.md` | active_draft |  | archive-after-github-state-check |
@@ -298,7 +299,6 @@
 | `.github/ISSUES/DOC-AUDIT-002-Refresh-Grafana-Provisioning-Path-Docs.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/DOC-AUDIT-003-Align-Windows-Pytest-Docs-With-Xdist-Policy.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/DOC-AUDIT-004-Repair-Control-Plane-ADR-And-Architecture-Docs.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/DOC-AUDIT-005-Refresh-Inventory-And-Publish-Control-Plane-Domain-Reference.md` | active_draft |  | archive-after-github-state-check |
 
 ## Docs Reports Evidence Examples
 

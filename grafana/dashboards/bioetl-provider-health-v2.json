@@ -385,7 +385,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Only providers currently observed as DEGRADED or FAILING on the first-screen provider-status recording rule (instant/current semantics, not selected-range history). Empty table means no provider is currently above OK in the active trust window.",
+      "description": "Only providers currently observed as DEGRADED or FAILING on the first-screen provider-status recording rule (instant/current semantics, not selected-range history). Empty table means no provider is currently above OK in the active trust window. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -475,7 +475,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Top provider causes from canonical cause recording rules using current/instant selectors (not selected-range history): raw status, failure rate, retry exhaustion, latency, HTTP errors, or rate-limit pressure.",
+      "description": "Top provider causes from canonical cause recording rules using current/instant selectors (not selected-range history): raw status, failure rate, retry exhaustion, latency, HTTP errors, or rate-limit pressure. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1770,7 +1770,7 @@
           ],
           "title": "Review Raw Provider Health Enum",
           "type": "table",
-          "description": "Raw provider health enum evidence for the current first-screen scope (instant), not the canonical first-screen verdict. Values are source enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY (or dashboard-local mapping). null/NaN=UNKNOWN when raw status is absent (mapping fallback), not healthy."
+          "description": "Raw provider health enum evidence for the current first-screen scope (instant), not the canonical first-screen verdict. Values are source enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY (or dashboard-local mapping). null/NaN=UNKNOWN when raw status is absent (mapping fallback), not healthy. When raw status is absent the mapped status is unknown (fail-closed), never synthetic healthy."
         },
         {
           "datasource": {

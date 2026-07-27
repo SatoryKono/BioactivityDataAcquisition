@@ -90,7 +90,8 @@ def test_issue_5995_docker_root_entrypoints_have_reference_map() -> None:
     assert (ROOT / "scripts/ops/docker-setup.ps1").exists()
     assert (ROOT / "scripts/ops/docker-setup.sh").exists()
     assert "Reference Map Verification" in audit
-    assert "root hygiene issue #5995" in audit
+    assert "root hygiene issues #5995 and #6725" in audit
+    assert "Last verified: 2026-07-27" in audit
     assert "retired root script" in audit
     assert "RF-003 Command Compatibility Matrix" in audit
 
@@ -112,3 +113,13 @@ def test_issue_5999_exact_root_review_tooling_has_retention_decisions() -> None:
         "No root review/tooling file should move based only on naming preference"
         in (qodo_readme)
     )
+
+
+def test_issue_6725_local_root_context_and_backup_have_cleanup_guidance() -> None:
+    cleanup_guide = _read("docs/00-project/governance/root-local-clutter-cleanup.md")
+
+    assert ".mcp-server-context.md" in cleanup_guide
+    assert "Keep while an active MCP client uses it" in cleanup_guide
+    assert "MUST NOT be promoted to a tracked source of truth" in cleanup_guide
+    assert ".gitignore~" in cleanup_guide
+    assert "safe to delete" in cleanup_guide

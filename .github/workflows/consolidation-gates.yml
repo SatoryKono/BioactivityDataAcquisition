@@ -32,8 +32,10 @@ jobs:
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
         with:
+          # setup-python-uv always appends --extra for each uv-extras token.
+          # Do not also pass --all-extras (uv rejects the combination).
           uv-extras: "dev tracing"
-          uv-sync-args: "--frozen --all-extras --dev"
+          uv-sync-args: "--frozen --dev"
 
       - name: Ruff check
         run: uv run --frozen --no-build ruff check .

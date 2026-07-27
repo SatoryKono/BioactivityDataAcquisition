@@ -705,6 +705,20 @@ ______________________________________________________________________
   - `./grafana/dashboards` → `/var/lib/grafana/dashboards` (read-only, JSON-дашборды)
 - Restart: `unless-stopped`
 
+**Metrics emission topology (AUD-OBS-20260727 / #6731):**
+
+| Path | Endpoint / job | Role |
+| --- | --- | --- |
+| Health scrape | `job=bioetl` → health `:8000/metrics` | Process **liveness** + in-process Prometheus registry exposition (`bioetl_health_server_scrape_up=1`). |
+| Pushgateway | `job=pushgateway` / push `job=bioetl` | **Canonical batch terminal bridge** for short-lived CLI runs. |
+| Process metrics server | ephemeral during runs when enabled | Optional mid-run scrape; not the long-lived compose default. |
+
+- `up{job="bioetl"}=1` alone does **not** prove data-plane population. After a run,
+  verify `increase(bioetl_pipeline_runs_total[…])` (or Pushgateway residual) and Ops
+  HTTP identity/accounting shells.
+- Control-plane identity (`run_id`, manifests) stays on Ops HTTP / ledger / CLI — never
+  as Prometheus labels.
+
 **Pushgateway:**
 
 - Supported series: `1.11.x`; validate the deployed patch version through
@@ -722,6 +736,8 @@ ______________________________________________________________________
 - Allowed Pushgateway grouping labels are only `pipeline` and `run_type`;
   `run_id`, `record_id`, `payload_hash`, raw paths/URLs, and other forensic
   anchors remain in manifest/ledger/CLI/explorer surfaces, not Prometheus.
+- CLI publishes via `publish_metrics_safely` after `bioetl run` / workflow completion
+  (`best_effort_on_run_completion`).
 
 Опциональный профиль `tracing` добавляет:
 

@@ -23,11 +23,12 @@ scrape_configs:
     static_configs:
       - targets: ["pushgateway:9091"]
 
-  # Canonical local-only BioETL metrics scrape (monitoring compose network).
+  # BioETL health-server scrape (process liveness + in-process registry).
   # Host-side override example (not default): host.docker.internal:8000
-  # NOTE: host curl of 127.0.0.1:8000/metrics is a health-server stub comment
-  # only when the process-local scrape registry is not attached; Prometheus
-  # scrapes the full exposition at bioetl:8000 inside Docker (see metrics docs).
+  # Topology (AUD-OBS-20260727 / #6731):
+  # - job=bioetl → health :8000/metrics is liveness + process registry.
+  # - Batch terminal counters publish best-effort to Pushgateway after CLI runs.
+  # - up{job="bioetl"}=1 alone does NOT prove data-plane population.
   - job_name: "bioetl"
     scrape_interval: 30s
     static_configs:

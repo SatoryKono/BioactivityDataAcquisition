@@ -536,6 +536,7 @@ def test_root_docker_adjunct_lane_tracks_reviewed_root_docker_surfaces() -> None
     }
 
     expected_root_surfaces = {
+        "docker-compose.monitoring.desktop.yml",
         "docker-compose.monitoring.yml",
         "docker-compose.alertmanager.yml",
         "docker-compose.minio.yml",
@@ -560,9 +561,10 @@ def test_root_docker_adjunct_lane_tracks_reviewed_root_docker_surfaces() -> None
         "docker-setup.sh",
         "grafana-datasource.yml",
     }
-    for path in expected_root_surfaces - rehomed_surfaces:
+    retired_surfaces = {"docker-compose.monitoring.desktop.yml"}
+    for path in expected_root_surfaces - rehomed_surfaces - retired_surfaces:
         assert by_path[path]["current_live_state"] == "present_approved_root_surface"
-    for path in rehomed_surfaces:
+    for path in rehomed_surfaces | retired_surfaces:
         assert by_path[path]["current_live_state"] == "absent_from_root_baseline"
 
     expected_dispositions = {
@@ -576,6 +578,12 @@ def test_root_docker_adjunct_lane_tracks_reviewed_root_docker_surfaces() -> None
         assert by_path[path]["disposition"] == disposition
     for path in rehomed_surfaces:
         assert by_path[path]["disposition"] == "moved_to_owned_path"
+    assert by_path["docker-compose.monitoring.desktop.yml"]["disposition"] == (
+        "retired_no_restore"
+    )
+    assert (
+        "test ! -e docker-compose.monitoring.desktop.yml" in docker_lane["verification"]
+    )
 
     assert (
         by_path["docker-setup.ps1"]["canonical_path"] == "scripts/ops/docker-setup.ps1"

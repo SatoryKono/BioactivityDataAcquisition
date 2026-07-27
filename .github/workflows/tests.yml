@@ -594,9 +594,17 @@ jobs:
                 run: uv run --frozen --no-build python -m scripts.engineering.qa check-docs-drift
 
             -   name: Validate docker-compose.yml syntax
+                env:
+                    # Placeholders only for `docker compose config` interpolation.
+                    # Runtime stacks still require real secrets from operator env.
+                    NEO4J_PASSWORD: ci-compose-config-validation
                 run: docker compose config > /dev/null
 
             -   name: Validate docker-compose.monitoring.yml syntax
+                env:
+                    GF_SECURITY_ADMIN_PASSWORD: ci-compose-config-validation
+                    GF_RENDERING_RENDERER_TOKEN: ci-compose-config-validation
+                    BIOETL_OPS_HTTP_URL: http://bioetl:8000
                 run: docker compose -f docker-compose.monitoring.yml config > /dev/null
 
     track-d-gates:

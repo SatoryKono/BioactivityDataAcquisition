@@ -13,7 +13,7 @@ ______________________________________________________________________
 
 # Rules Summary
 
-*Синхронизировано с RULES.md v6.1.5 (2026-07-16)*
+*Синхронизировано с RULES.md v6.1.4 (2026-07-27)*
 
 > **Note**: Этот документ — выжимка из `docs/00-project/RULES.md`. Канонический источник правил — `RULES.md`.
 
@@ -71,13 +71,16 @@ ______________________________________________________________________
 || ------------ | --------------------- | ---------------------------------- |
 || Critical     | Падение пайплайна     | Auth failure, Gold schema mismatch |
 || Recoverable  | Retry N раз (Backoff) | 429, 502/504, сетевой сбой         |
-|| Data Quality | Лог + Пропуск записи  | Невалидный SMILES                  |
+|| Data Quality | Остановить write или направить в `common.quarantine` | Невалидный SMILES |
 
 ### DQ Thresholds
 
 - Soft: >5% DQ errors → Warning
 - Hard: >20% → Fail Batch
 - Quarantine: единая таблица `common.quarantine`, retention 30 дней.
+- Невалидные Silver-строки **MUST NOT** молча отбрасываться: результат
+  validation должен остановить write или явно направить строки в
+  `common.quarantine`.
 
 ### Circuit Breaker
 

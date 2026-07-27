@@ -45,7 +45,8 @@ Reviewed root Docker helper surfaces:
 
 ## Reference Map Verification
 
-Last verified: 2026-07-06 for root hygiene issue #5995.
+Last verified: 2026-07-27 for root hygiene issues #5995 and #6725. The live
+consumer map below was rechecked after the RH-04 decision.
 
 Current root Docker entrypoints remain root-retained because live repository
 consumers still use exact root filenames:
