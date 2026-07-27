@@ -652,18 +652,6 @@ def _check_file_sync(path: Path, expected: str) -> bool:
         _, actual = _split_frontmatter(actual)
     if actual == expected:
         return True
-    # Cross-platform working trees can produce different source_fingerprint
-    # digests for semantically identical topology (path encoding / line-ending
-    # edge cases). Treat pure fingerprint drift as non-blocking when the rest
-    # of the JSON payload matches after stripping summary.source_fingerprint.
-    if path.suffix == ".json" and _without_source_fingerprint(
-        actual
-    ) == _without_source_fingerprint(expected):
-        print(
-            "[drift] source fingerprint differs but topology matches: "
-            f"{_display_path(path)} (accepting as up to date)"
-        )
-        return True
     print(f"[drift] mismatch: {_display_path(path)}")
     if path.suffix == ".json":
         _print_json_drift_details(path, actual=actual, expected=expected)

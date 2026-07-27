@@ -1713,6 +1713,7 @@
         "configs/quality/constructor_waivers.yaml",
         "configs/quality/domain_aggregate_classification.yaml",
         "tests/architecture/test_adr_enforcement_matrix.py",
+        "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/unit/domain/aggregates/test_quarantine_entry.py",
         "tests/unit/scripts/test_documentation_governance_check.py"
       ],
@@ -1722,6 +1723,7 @@
         "configs/quality/domain_aggregate_classification.yaml",
         "docs/00-project/RULES.md",
         "tests/architecture/test_adr_enforcement_matrix.py",
+        "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/unit/domain/aggregates/test_quarantine_entry.py",
         "tests/unit/scripts/test_documentation_governance_check.py"
       ],
