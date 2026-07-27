@@ -1,8 +1,4 @@
-"""Resilience domain types and value objects.
-
-Implements RULES.md §3.1 - Error handling and retry policies.
-Contains pure configuration and logic for retry behavior (no I/O).
-"""
+"""Pure resilience configuration and retry value objects (RULES.md §3.1)."""
 
 from __future__ import annotations
 
@@ -18,8 +14,7 @@ __all__ = [
 ]
 
 
-# Default retryable HTTP status codes per RULES.md §3.1.3
-# 429: Rate Limit, 500: Internal Server Error, 502-504: Gateway errors
+# Default retryable HTTP statuses per RULES.md §3.1.3.
 DEFAULT_RETRYABLE_STATUSES: frozenset[int] = frozenset({429, 500, 502, 503, 504})
 
 

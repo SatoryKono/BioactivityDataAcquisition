@@ -1,8 +1,8 @@
 schema_version: 1
 policy_scope: public_lazy_facades
-linked_issue: "#6220"
-reviewed_on: "2026-07-12"
-review_by: "2026-10-31"
+linked_issue: "#6624"
+reviewed_on: "2026-07-27"
+review_by: "2026-10-27"
 owner: "@bioetl-architecture"
 new_surface_policy: fail_fast_unclassified_lazy_public_facade
 row_count: 52
@@ -48,7 +48,9 @@ row_templates:
     allowed_importers: [external_compatibility_consumers, tests]
     exit_criteria: >-
       Collapse after first-party callers remain at zero and the compatibility
-      owner approves an external sunset or replacement import path.
+      owner approves external sunset per
+      docs/02-architecture/compatibility/infrastructure-config-package-root-sunset.md
+      (TD-08 / #6624).
   infrastructure_package: &infrastructure_package
     classification: owner_package_root
     owner: "@bioetl-infrastructure"

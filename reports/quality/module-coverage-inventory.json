@@ -2533,7 +2533,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.core.pre_silver_finalization_flow",
       "path": "src/bioetl/application/core/pre_silver_finalization_flow.py",
-      "source_lines": 199
+      "source_lines": 200
     },
     {
       "coverage_percent": null,
@@ -13993,7 +13993,7 @@
       "missing_lines": 3,
       "module": "bioetl.domain.resilience",
       "path": "src/bioetl/domain/resilience.py",
-      "source_lines": 310
+      "source_lines": 305
     },
     {
       "coverage_percent": null,
@@ -25245,7 +25245,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.core.pre_silver_finalization_flow",
       "path": "src/bioetl/application/core/pre_silver_finalization_flow.py",
-      "source_lines": 199
+      "source_lines": 200
     },
     {
       "coverage_percent": null,
@@ -36705,7 +36705,7 @@
       "missing_lines": 3,
       "module": "bioetl.domain.resilience",
       "path": "src/bioetl/domain/resilience.py",
-      "source_lines": 310
+      "source_lines": 305
     },
     {
       "coverage_percent": null,
@@ -45430,7 +45430,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-13",
-  "source_tree_sha256": "eecdecd0d5b4faf46b59700add80c4d12b0ac2da166c1eef74913fff1e55ec71",
+  "source_tree_sha256": "2e9294443e6b2296be54a289a58a1a9128f8f7db4ce6e4c3032d71f15924b658",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
