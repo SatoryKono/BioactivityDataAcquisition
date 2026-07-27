@@ -6,12 +6,8 @@ from collections.abc import Awaitable, Callable
 from typing import Protocol
 
 from bioetl.application.core.batch_transformer_dq_thresholds import (
-    DQThresholdCheckResult,
-    ThresholdBreach,
     ThresholdBreachReason,
     check_dq_thresholds,
-    classify_dq_threshold_breach,
-    compute_error_rate,
     resolve_threshold_value,
 )
 from bioetl.application.core.batch_transformer_state import (
@@ -160,13 +156,10 @@ async def _await_flush_count(flush_callback: FlushCountCallback) -> int:
     return flushed if isinstance(flushed, int) and not isinstance(flushed, bool) else 0
 
 
+# Keep DQ threshold types/helpers importable from this module for compatibility,
+# but do not re-list their names in ``__all__`` — that duplicates the export barrel
+# in ``batch_transformer_dq_thresholds`` and trips pylint R0801 on Linux paths.
 __all__ = [
-    "DQThresholdCheckResult",
-    "ThresholdBreach",
-    "ThresholdBreachReason",
-    "check_dq_thresholds",
-    "classify_dq_threshold_breach",
-    "compute_error_rate",
     "finalize_batch_transform_result",
     "finalize_stream_transform_result",
 ]

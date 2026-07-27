@@ -228,9 +228,17 @@ if content.count(begin) != 1 or content.count(end) != 1:
 start = content.index(begin)
 finish = content.index(end, start) + len(end)
 actual = content[start:finish].strip()
-# Multi-client daily: shared profile + localhost HTTP plane (see setup_mcp defaults).
-profile = getattr(module, "DEFAULT_LOCAL_PROFILE", "shared")
-transport_mode = getattr(module, "DEFAULT_LOCAL_TRANSPORT_MODE", "shared")
+# Honor the same profile/transport env overrides used by regeneration below.
+# Fall back to setup_mcp daily defaults (stable profile + shared HTTP plane).
+import os
+profile = (
+    os.environ.get("CODEX_MCP_PROFILE")
+    or getattr(module, "DEFAULT_LOCAL_PROFILE", "stable")
+)
+transport_mode = (
+    os.environ.get("CODEX_MCP_TRANSPORT_MODE")
+    or getattr(module, "DEFAULT_LOCAL_TRANSPORT_MODE", "shared")
+)
 expected = module._render_codex_mcp_toml(
     module._codex_runtime_servers(
         workspace_root,
@@ -335,10 +343,33 @@ if [[ "${SHOULD_GENERATE}" -eq 1 ]]; then
     # the structural checks below still fail closed on incomplete output.
     # 30s: WSL mounts of Windows drives pay high Python cold-start cost.
     local_setup_timeout="${CODEX_MCP_SETUP_TIMEOUT:-30}"
-    # Default multi-client plane: shared profile + shared HTTP transport.
+    # Defaults must match setup_mcp.DEFAULT_LOCAL_* (stable + shared transport).
     # Override with CODEX_MCP_PROFILE / CODEX_MCP_TRANSPORT_MODE if needed.
-    local_profile="${CODEX_MCP_PROFILE:-shared}"
-    local_transport="${CODEX_MCP_TRANSPORT_MODE:-shared}"
+    local_profile="${CODEX_MCP_PROFILE:-}"
+    local_transport="${CODEX_MCP_TRANSPORT_MODE:-}"
+    if [[ -z "${local_profile}" || -z "${local_transport}" ]]; then
+        # Resolve from setup_mcp so bash and Python cannot drift.
+        mapfile -t _mcp_defaults < <(
+            python3 - "${SETUP_MCP}" <<'PY'
+import importlib.util
+import sys
+from pathlib import Path
+setup_path = Path(sys.argv[1])
+spec = importlib.util.spec_from_file_location("bioetl_setup_mcp", setup_path)
+module = importlib.util.module_from_spec(spec)
+assert spec is not None and spec.loader is not None
+spec.loader.exec_module(module)
+print(getattr(module, "DEFAULT_LOCAL_PROFILE", "stable"))
+print(getattr(module, "DEFAULT_LOCAL_TRANSPORT_MODE", "shared"))
+PY
+        )
+        if [[ -z "${local_profile}" ]]; then
+            local_profile="${_mcp_defaults[0]:-stable}"
+        fi
+        if [[ -z "${local_transport}" ]]; then
+            local_transport="${_mcp_defaults[1]:-shared}"
+        fi
+    fi
     timeout "${local_setup_timeout}" python3 "${SETUP_MCP}" \
         --root "${REPO_ROOT}" \
         --workspace-root "${REPO_ROOT}" \

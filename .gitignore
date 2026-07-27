@@ -104,10 +104,11 @@ git_commit_*.txt
 *_gitshow_err.txt
 log_test.txt
 
-# Root-level accidental test dumps (RH-01 / RH-03 / #6701 #6703).
+# Root-level accidental test dumps (RH-01 / RH-03 / CR-02 / #6701 #6703 #6718).
 # JUnit/chunked pytest XML and agent temp dumps must never be tracked at root.
 /uchunk*.xml
 /final_chunk*.xml
+/extra_chunk*.xml
 /tmp_sub_*.txt
 /temp_closeout.json
 /.tmp_test_run.log
@@ -202,7 +203,13 @@ log_test.txt
 /reports/observability/*
 !/reports/observability/runtime_cardinality_inventory.json
 !/reports/observability/runtime_cardinality_review.json
-/reports/Codex/review_documentation-cascade-audit_*.md
+# Tracked selector live-closure evidence referenced by selector-contracts.yaml
+# and tests/integration/test_grafana_selector_contract.py (issue #6359).
+# Un-ignore only this audit snapshot; keep other grafana audit dumps ignored.
+!/reports/observability/grafana/
+/reports/observability/grafana/*
+!/reports/observability/grafana/selector-audit-2026-07-20/
+!/reports/observability/grafana/selector-audit-2026-07-20/**/reports/Codex/review_documentation-cascade-audit_*.md
 /reports/Codex/review_py-test-swarm_*.md
 
 # IDE / Editors

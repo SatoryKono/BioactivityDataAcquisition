@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-27T15:23:11.685022+00:00",
+  "generated_at": "2026-07-27T15:35:16.355390+00:00",
   "summary": {
     "total_scripts": 532,
     "status_counts": {
@@ -3303,7 +3303,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 1108,
+          "line": 1131,
           "source_group": "tests",
           "text": "powershell_source = (MCP_DIR / \"mcp_neo4j_cypher_wrapper.ps1\").read_text("
         }
@@ -8221,7 +8221,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1020,
+          "line": 1028,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -16536,7 +16536,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/helper/ensure-mcp.sh",
-          "line": 272,
+          "line": 280,
           "source_group": "scripts",
           "text": "local health=\"${REPO_ROOT}/scripts/ops/runtime/mcp/health-shared.sh\""
         },
@@ -16630,7 +16630,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/helper/ensure-mcp.sh",
-          "line": 271,
+          "line": 279,
           "source_group": "scripts",
           "text": "local launcher=\"${REPO_ROOT}/scripts/ops/runtime/mcp/start-shared.sh\""
         },
