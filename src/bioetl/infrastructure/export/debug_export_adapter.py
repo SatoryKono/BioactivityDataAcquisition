@@ -172,7 +172,7 @@ class DebugExportAdapter:
         *,
         max_rows_per_sheet: int,
     ) -> None:
-        from openpyxl import Workbook
+        from openpyxl import Workbook  # pyright: ignore[reportMissingModuleSource]
 
         workbook = Workbook()
         workbook.properties.created = None

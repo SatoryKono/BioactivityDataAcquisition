@@ -2,19 +2,18 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.composition.bootstrap.runtime._observability_preflight_support import (
-    requires_forensic_grade_observability_evidence,
-    validate_control_plane_readiness,
-    validate_forensic_grade_observability_evidence,
-    validate_prod_noop_components,
+from bioetl.composition.bootstrap.runtime._observability_bundle_support import (
+    ObservabilityBootstrappers as _ObservabilityBootstrappers,
+    ObservabilityComponents as _ObservabilityComponents,
+    _audit_required,
+    build_observability_components as _build_observability_components,
+    resolve_observability_bootstrappers as _resolve_observability_bootstrappers,
+    validate_observability_preflight_impl,
 )
 from bioetl.composition.bootstrap.runtime.observability_assembly import (
-    control_plane_settings as _control_plane_settings,
     create_observability_bundle as _create_observability_bundle,
-    default_audit_bootstrapper as _default_audit_bootstrapper,
     log_observability_initialized as _log_observability_initialized,
     run_observability_preflight as _run_observability_preflight,
     settings_control_plane as _settings_control_plane,
@@ -28,7 +27,6 @@ from bioetl.domain.ports import (
     MetricsPort,
     TracingPort,
 )
-from bioetl.domain.ports.noop import NoOpAudit
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -41,164 +39,6 @@ __all__ = [
     "bootstrap_observability_bundle_impl",
     "validate_observability_preflight_impl",
 ]
-
-
-@dataclass(frozen=True, slots=True)
-class _ObservabilityComponents:
-    logger: LoggerPort
-    tracer: TracingPort
-    metrics: MetricsPort
-    audit: AuditPort
-    dq_monitor: DQMonitorPort | None
-
-
-def _build_observability_components(
-    *,
-    pipeline: str,
-    run_id: UUID,
-    settings: Settings,
-    log_level: str,
-    logger_bootstrapper: Callable[[str, UUID, str], LoggerPort],
-    tracer_bootstrapper: Callable[[Settings], TracingPort],
-    metrics_bootstrapper: Callable[[Settings], MetricsPort],
-    audit_bootstrapper: Callable[
-        [Settings, LoggerPort, MetricsPort, TracingPort], AuditPort
-    ]
-    | None,
-    dq_monitor_bootstrapper: Callable[
-        [Settings, LoggerPort | None], DQMonitorPort | None
-    ],
-) -> _ObservabilityComponents:
-    """Construct the concrete observability collaborators for one run."""
-    logger = logger_bootstrapper(pipeline, run_id, log_level)
-    tracer = tracer_bootstrapper(settings)
-    metrics = metrics_bootstrapper(settings)
-    audit = (
-        audit_bootstrapper(settings, logger, metrics, tracer)
-        if audit_bootstrapper is not None
-        else NoOpAudit()
-    )
-    return _ObservabilityComponents(
-        logger=logger,
-        tracer=tracer,
-        metrics=metrics,
-        audit=audit,
-        dq_monitor=dq_monitor_bootstrapper(settings, logger),
-    )
-
-
-def validate_observability_preflight_impl(
-    tracer: TracingPort,
-    metrics: MetricsPort,
-    environment: str,
-    logger: LoggerPort,
-    allow_noop_in_prod: bool = False,
-    *,
-    audit: AuditPort | None = None,
-    audit_required: bool = False,
-    control_plane: object | None = None,
-    yaml_config: object | None = None,
-    skip_gold: bool = False,
-) -> None:
-    """Validate observability components for production readiness.
-
-    Emits structured warnings when NoOp implementations are used in production.
-    By default, production fails closed unless explicit override is enabled.
-
-    Args:
-        tracer: TracingPort to validate; warns if NoOpTracing in production.
-        metrics: MetricsPort to validate; warns if NoOpMetrics in production.
-        environment: Deployment environment name (e.g., 'prod', 'staging').
-        logger: LoggerPort used to emit structured preflight warning events.
-    """
-    required_profile = _control_plane_settings(control_plane=control_plane)[0]
-    forensic_grade_required = requires_forensic_grade_observability_evidence(
-        required_persistence_profile=required_profile,
-    )
-    if environment != "prod" and not forensic_grade_required:
-        return
-    if environment == "prod":
-        validate_prod_noop_components(
-            tracer=tracer,
-            metrics=metrics,
-            logger=logger,
-            allow_noop_in_prod=allow_noop_in_prod,
-            audit=audit,
-            audit_required=audit_required,
-            audit_required_fn=_audit_required,
-        )
-    if forensic_grade_required:
-        validate_forensic_grade_observability_evidence(
-            tracer=tracer,
-            metrics=metrics,
-            logger=logger,
-            audit=audit,
-        )
-    validate_control_plane_readiness(
-        logger=logger,
-        control_plane=control_plane,
-        yaml_config=yaml_config,
-        skip_gold=skip_gold,
-        control_plane_settings_fn=_control_plane_settings,
-    )
-
-
-@dataclass(frozen=True, slots=True)
-class _ObservabilityBootstrappers:
-    logger: Callable[[str, UUID, str], LoggerPort]
-    tracer: Callable[[Settings], TracingPort]
-    metrics: Callable[[Settings], MetricsPort]
-    audit: Callable[[Settings, LoggerPort, MetricsPort, TracingPort], AuditPort]
-    dq_monitor: Callable[[Settings, LoggerPort | None], DQMonitorPort | None]
-    preflight: Callable[..., None]
-
-
-def _resolve_observability_bootstrappers(
-    *,
-    logger_bootstrapper: Callable[[str, UUID, str], LoggerPort] | None,
-    tracer_bootstrapper: Callable[[Settings], TracingPort] | None,
-    metrics_bootstrapper: Callable[[Settings], MetricsPort] | None,
-    audit_bootstrapper: (
-        Callable[[Settings, LoggerPort, MetricsPort, TracingPort], AuditPort] | None
-    ),
-    dq_monitor_bootstrapper: (
-        Callable[[Settings, LoggerPort | None], DQMonitorPort | None] | None
-    ),
-    preflight_validator: Callable[..., None] | None,
-) -> _ObservabilityBootstrappers:
-    """Fill optional bootstrapper hooks with default composition collaborators."""
-    if logger_bootstrapper is None:
-        from bioetl.composition.bootstrap.runtime.logger_bootstrap import (
-            bootstrap_logger as logger_bootstrapper,
-        )
-    if tracer_bootstrapper is None:
-        from bioetl.composition.bootstrap.runtime.tracing_bootstrap import (
-            bootstrap_tracer as tracer_bootstrapper,
-        )
-    if metrics_bootstrapper is None:
-        from bioetl.composition.bootstrap.runtime.metrics_bootstrap import (
-            bootstrap_metrics as metrics_bootstrapper,
-        )
-    if dq_monitor_bootstrapper is None:
-        from bioetl.composition.bootstrap.runtime.dq_bootstrap import (
-            bootstrap_dq_monitor as dq_monitor_bootstrapper,
-        )
-    return _ObservabilityBootstrappers(
-        logger=logger_bootstrapper,
-        tracer=tracer_bootstrapper,
-        metrics=metrics_bootstrapper,
-        audit=(
-            _default_audit_bootstrapper
-            if audit_bootstrapper is None
-            else audit_bootstrapper
-        ),
-        dq_monitor=dq_monitor_bootstrapper,
-        preflight=(
-            validate_observability_preflight_impl
-            if preflight_validator is None
-            else preflight_validator
-        ),
-    )
 
 
 def bootstrap_observability_bundle_impl(
@@ -282,7 +122,3 @@ def bootstrap_observability_bundle_impl(
     )
 
     return bundle
-
-
-def _audit_required(*, audit: AuditPort | None, audit_required: bool) -> bool:
-    return audit_required and audit is not None and isinstance(audit, NoOpAudit)

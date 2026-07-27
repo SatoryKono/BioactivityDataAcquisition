@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Protocol, cast, runtime_checkable
+from typing import TYPE_CHECKING, Any, Protocol, cast, runtime_checkable
 
 from bioetl.infrastructure.adapters.uniprot._idmapping_errors import (
     IDMappingJobError,
@@ -13,7 +13,6 @@ from bioetl.infrastructure.adapters.uniprot._idmapping_errors import (
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
-    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 
 @runtime_checkable
@@ -21,7 +20,7 @@ class IDMappingRetryDependencies(Protocol):
     """Host dependency contract for IDMappingRetryMixin."""
 
     logger: LoggerPort
-    http_client: UnifiedHTTPClient
+    http_client: Any  # Any: preserves BaseHttpAdapter-compatible host typing.
     _adapter_metrics: AdapterMetricsRecorder
     POLLING_INTERVAL: float
     MAX_POLL_ATTEMPTS: int
@@ -29,14 +28,11 @@ class IDMappingRetryDependencies(Protocol):
 
 
 class IDMappingRetryMixin:
-    """Retry and polling behavior for async job completion."""
+    """Retry and polling behavior for async job completion.
 
-    logger: LoggerPort
-    http_client: UnifiedHTTPClient
-    _adapter_metrics: AdapterMetricsRecorder
-    POLLING_INTERVAL: float
-    MAX_POLL_ATTEMPTS: int
-    base_url: str
+    Host attributes / class constants come from the concrete client; not
+    re-declared here so MRO types stay compatible with BaseHttpAdapter.
+    """
 
     def _retry_deps(self) -> IDMappingRetryDependencies:
         """Return typed dependency view of the host client.

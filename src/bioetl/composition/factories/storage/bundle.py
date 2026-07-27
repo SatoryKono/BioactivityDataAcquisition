@@ -56,6 +56,7 @@ class StorageBundle(
     Delegates to specialized writers for each layer.
     """
 
+    # Pandera DataFrameModel classes are accepted by writers as schema providers.
     _COMPOSITE_GOLD_SCHEMAS: ClassVar[dict[str, object]] = {
         "composite/activity": CompositeActivityGoldSchema,
         "composite_activity": CompositeActivityGoldSchema,

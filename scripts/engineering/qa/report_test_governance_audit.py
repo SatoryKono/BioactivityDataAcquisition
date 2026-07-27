@@ -186,9 +186,12 @@ def _read_text_file(path: Path) -> str:
     Governance scanning must not crash on those files; when recovery succeeds the
     file is rewritten as UTF-8 so subsequent tooling stays stable.
     """
-    from scripts.engineering.common.repo_paths import ensure_repo_path
+    from scripts.engineering.common.repo_paths import REPO_ROOT, ensure_repo_path
 
-    safe_path = ensure_repo_path(path)
+    safe_root = REPO_ROOT.resolve(strict=False)
+    confined_path = ensure_repo_path(path)
+    relative_path = confined_path.relative_to(safe_root)
+    safe_path = safe_root.joinpath(*relative_path.parts)
     raw = safe_path.read_bytes()
     if not raw:
         return ""

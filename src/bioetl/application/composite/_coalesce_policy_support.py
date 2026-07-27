@@ -45,7 +45,7 @@ class _ColumnPriorityProvider(Protocol):
         df: Any,  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
         field: str,
         ordered_cols: list[str],
-        _can_coalesce_fn: Callable[
+        can_coalesce: Callable[
             [Any, str, str], bool  # Any: DataFrame may be Polars/Pandas-like.
         ],
     ) -> tuple[list[str], list[str]]: ...

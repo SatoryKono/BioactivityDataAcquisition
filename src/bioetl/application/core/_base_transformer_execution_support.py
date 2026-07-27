@@ -35,6 +35,7 @@ class TransformerExecutionOwner(Protocol):
         index: int,
     ) -> SilverRecord | None:
         """Implement entity-specific transformation logic."""
+        ...
 
 
 def start_transform_span(

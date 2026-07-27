@@ -239,7 +239,10 @@ def _update_issue_pack(*, issue_pack: Path, records: list[IssueRecord]) -> None:
 
     if not records:
         return
-    safe_pack = ensure_repo_path(issue_pack, root=REPO_ROOT)
+    safe_root = REPO_ROOT.resolve(strict=False)
+    confined_pack = ensure_repo_path(issue_pack, root=safe_root)
+    relative_pack = confined_pack.relative_to(safe_root)
+    safe_pack = safe_root.joinpath(*relative_pack.parts)
     if not safe_pack.exists():
         return
     content = safe_pack.read_text(encoding="utf-8")

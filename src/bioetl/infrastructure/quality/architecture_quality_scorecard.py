@@ -26,7 +26,9 @@ DEFAULT_OUTPUT = (
 )
 
 
-def _load_json(repo_root: Path, rel_path: str) -> dict[str, Any]:
+def _load_json(
+    repo_root: Path, rel_path: str
+) -> dict[str, Any]:  # Any: JSON artifact values are heterogeneous.
     """Load one JSON object used by the scorecard."""
     path = repo_root / rel_path
     payload = json.loads(path.read_text(encoding="utf-8"))
@@ -42,7 +44,9 @@ def _as_float(value: object) -> float:
     raise TypeError(f"scorecard metric must be numeric, got {type(value)!r}")
 
 
-def _load_yaml(repo_root: Path, rel_path: str) -> dict[str, Any]:
+def _load_yaml(
+    repo_root: Path, rel_path: str
+) -> dict[str, Any]:  # Any: YAML artifact values are heterogeneous.
     """Load one YAML mapping used by the scorecard."""
     path = repo_root / rel_path
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))

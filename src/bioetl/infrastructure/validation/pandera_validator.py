@@ -15,12 +15,13 @@ __all__ = [
     "PanderaSilverValidator",
 ]
 
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, cast
 
 from bioetl.domain.types import JsonDict, ValidationResult
 
 if TYPE_CHECKING:
     import pandas as pd
+
     # Prefer pandera.pandas: top-level pandera.DataFrameSchema is the deprecated
     # shim (pandera._pandas_deprecated) and is a different type under 0.31+.
     import pandera.pandas as pa
@@ -105,7 +106,7 @@ class BasePanderaValidator:
         schema_set = set(schema_cols)
         ordered = [c for c in schema_cols if c in df_cols]
         extra = [c for c in df_cols if c not in schema_set]
-        return df[ordered + extra]
+        return cast("pd.DataFrame", df[ordered + extra])
 
     def _normalize_nullable_integer_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         """Cast nullable integer schema columns away from pandas object dtype.

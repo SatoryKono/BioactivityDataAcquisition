@@ -239,8 +239,12 @@ def _should_execute_delta_table_load_inline(
 
 
 class _DeltaWriteModule(Protocol):
-    def write_deltalake(self, **kwargs: Any) -> None:
+    def write_deltalake(
+        self,
+        **kwargs: Any,  # Any: upstream Delta API accepts heterogeneous values.
+    ) -> None:
         """Write a Delta table using the runtime module."""
+        ...
 
 
 def _run_plain_delta_write_inline(

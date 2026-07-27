@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, TypeGuard
 
 from bioetl.domain.config import DQConfig
 from bioetl.domain.types import JsonDict
@@ -106,10 +106,16 @@ def _create_report_config(
     )
 
 
+def _is_dq_strictness_mode(
+    value: object,
+) -> TypeGuard[Literal["lenient", "moderate", "strict"]]:
+    return value in {"lenient", "moderate", "strict"}
+
+
 def _parse_strictness_mode(
     value: object,
 ) -> Literal["lenient", "moderate", "strict"]:
-    if value in {"lenient", "moderate", "strict"}:
+    if _is_dq_strictness_mode(value):
         return value
     raise ValueError(f"Invalid DQ strictness mode: {value!r}")
 

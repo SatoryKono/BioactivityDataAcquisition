@@ -46,7 +46,11 @@ class PublicationTermExtractionMixin:
         finally:
             aclose = getattr(publications, "aclose", None)
             if callable(aclose):
-                await aclose()
+                from collections.abc import Awaitable, Callable
+                from typing import cast
+
+                aclose_fn = cast(Callable[[], Awaitable[object]], aclose)
+                await aclose_fn()
 
     async def _fetch_publication_terms(
         self: Any,  # Any: mixin self type is provided structurally by composed adapter class

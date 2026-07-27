@@ -1,0 +1,20 @@
+{
+  "_comment": "Merge into %APPDATA%/Zed/settings.json (user-level). Do not commit user secrets. Goal: Zed Agent / External Agents do not spawn stdio MCP thrash; use BioETL shared HTTP plane outside Zed.",
+  "context_servers": {
+    "mcp-server-context7": {
+      "enabled": false
+    },
+    "mcp-server-brave-search": {
+      "enabled": false
+    }
+  },
+  "agent_servers": {
+    "grok-build": {
+      "type": "registry",
+      "enabled": false
+    }
+  },
+  "agent": {
+    "default_profile": "bioetl-ask"
+  }
+}

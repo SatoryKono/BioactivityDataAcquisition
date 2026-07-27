@@ -47,7 +47,8 @@ class _PubMedAuthorBlock(_PubMedXmlBlock):
         self._normalize_author_list = normalize_author_list
         self._normalize_author_keys = normalize_author_keys
 
-    def extract(self, _record: BronzeRecord) -> JsonDict:
+    def extract(self, record: BronzeRecord) -> JsonDict:
+        del record
         article, _, _ = self._resolve_article_context()
         if article is None:
             return {}
@@ -133,7 +134,8 @@ class _PubMedJournalBlock(_PubMedXmlBlock):
             return None
         return get_text(pubmed_data.find("PublicationStatus"))
 
-    def extract(self, _record: BronzeRecord) -> JsonDict:
+    def extract(self, record: BronzeRecord) -> JsonDict:
+        del record
         article, medline, pubmed_data = self._resolve_article_context()
         if article is None:
             return {}

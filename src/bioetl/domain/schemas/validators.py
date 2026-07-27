@@ -15,6 +15,7 @@ Usage in DataFrameModel schemas:
 from __future__ import annotations
 
 import json
+from typing import cast
 
 import pandas as pd
 import pandera.pandas as pa
@@ -63,7 +64,7 @@ def rows_are_valid_json(series: pd.Series) -> pd.Series:
         except (json.JSONDecodeError, TypeError):
             return False
 
-    return series.apply(check)
+    return cast(pd.Series, series.apply(check))
 
 
 def rows_are_valid_json_array(series: pd.Series) -> pd.Series:
@@ -93,7 +94,7 @@ def rows_are_valid_json_array(series: pd.Series) -> pd.Series:
         except (json.JSONDecodeError, TypeError):
             return False
 
-    return series.apply(check)
+    return cast(pd.Series, series.apply(check))
 
 
 def rows_are_valid_json_object(series: pd.Series) -> pd.Series:
@@ -123,7 +124,7 @@ def rows_are_valid_json_object(series: pd.Series) -> pd.Series:
         except (json.JSONDecodeError, TypeError):
             return False
 
-    return series.apply(check)
+    return cast(pd.Series, series.apply(check))
 
 
 # Pre-built checks for use in schema definitions

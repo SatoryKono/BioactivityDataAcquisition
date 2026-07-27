@@ -115,7 +115,14 @@ class StorageRowReconciliationAdapter(RowReconciliationPort):
             value = method(table_name, **_supported_kwargs(method, kwargs))
             if inspect.isawaitable(value):
                 value = await value
-            return [dict(row) for row in value]
+            from collections.abc import Iterable
+            from typing import Any, cast
+
+            rows = cast(
+                Iterable[Any],  # Any: storage result is dynamically dispatched.
+                value,
+            )
+            return [dict(row) for row in rows]
         except RowReconciliationError:
             raise
         except (AttributeError, LookupError, TypeError, ValueError) as exc:

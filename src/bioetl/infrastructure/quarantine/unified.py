@@ -50,6 +50,7 @@ from bioetl.infrastructure.quarantine.status_events import (
 from bioetl.infrastructure.quarantine.status_events import (
     status_events_path as build_status_events_path,
 )
+from bioetl.infrastructure.storage.delta.table_ops import read_delta_records
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -303,9 +304,14 @@ class UnifiedQuarantineAdapter(UnifiedQuarantineFilteredMixin):
         except TableNotFoundError:
             return False
 
-        arrow_table = dt.to_pyarrow_table(filters=[("payload_hash", "=", payload_hash)])
-
-        if len(arrow_table) == 0:
+        # Avoid native to_pyarrow_table filters: they hang on Windows/G-Drive.
+        # Active parquet reads + in-process filter stay bounded (table_ops).
+        records = [
+            row
+            for row in read_delta_records(dt)
+            if str(row.get("payload_hash", "")) == payload_hash
+        ]
+        if not records:
             return False
 
         append_status_event(
@@ -328,25 +334,14 @@ class UnifiedQuarantineAdapter(UnifiedQuarantineFilteredMixin):
         except TableNotFoundError:
             return None
 
-        filters: list[tuple[str, str, object]] = [("payload_hash", "=", payload_hash)]
-        if pipeline:
-            filters.append(("pipeline", "=", pipeline))
-
-        try:
-            arrow_table = dt.to_pyarrow_table(
-                filters=filters,
-            )
-            records: list[JsonDict] = arrow_table.to_pylist()
-        except pa.ArrowNotImplementedError:
-            # Delta updates can materialize string_view columns that pyarrow cannot
-            # filter directly on some local versions. Fall back to a read-only scan
-            # and keep payload filtering in process so status updates remain inspectable.
-            records = [
-                row
-                for row in dt.to_pyarrow_table().to_pylist()
-                if str(row.get("payload_hash", "")) == payload_hash
-                and (pipeline is None or str(row.get("pipeline", "")) == pipeline)
-            ]
+        # Prefer parquet-backed reads over Delta native Arrow dataset scans.
+        # ``to_pyarrow_table(filters=...)`` has hung unit/E2E runs on Windows.
+        records: list[JsonDict] = [
+            dict(row)
+            for row in read_delta_records(dt)
+            if str(row.get("payload_hash", "")) == payload_hash
+            and (pipeline is None or str(row.get("pipeline", "")) == pipeline)
+        ]
         if not records:
             return None
         records.sort(key=lambda row: str(row.get("ingestion_ts", "")), reverse=True)

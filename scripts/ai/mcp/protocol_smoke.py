@@ -28,6 +28,31 @@ _WINDOWS_PWSH_CANDIDATES = (
     Path(r"C:\Program Files\PowerShell\7\pwsh.exe"),
     Path(r"C:\Program Files\PowerShell\7\7\pwsh.exe"),
 )
+_ALLOWED_MCP_LAUNCHERS = frozenset(
+    {
+        "bash",
+        "cmd",
+        "cmd.exe",
+        "docker",
+        "docker.exe",
+        "node",
+        "node.exe",
+        "npx",
+        "npx.cmd",
+        "powershell",
+        "powershell.exe",
+        "pwsh",
+        "pwsh.exe",
+        "python",
+        "python.exe",
+        "python3",
+        "python3.exe",
+        "uv",
+        "uv.exe",
+        "uvx",
+        "uvx.exe",
+    }
+)
 
 
 def _resolve_command(command: str) -> str:
@@ -281,6 +306,9 @@ def _validate_command_argv(command: list[str]) -> list[str]:
                 "MCP protocol smoke refuses shell metacharacters in command argv: "
                 f"{token!r}"
             )
+    launcher = Path(command[0]).name.lower()
+    if launcher not in _ALLOWED_MCP_LAUNCHERS:
+        raise ValueError(f"Unsupported MCP launcher: {launcher!r}")
     return command
 
 

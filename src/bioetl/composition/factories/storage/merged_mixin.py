@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, ClassVar, Literal, Protocol, cast
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, Protocol, cast
 
 from bioetl.domain.types import JsonDict
 
@@ -16,6 +16,9 @@ if TYPE_CHECKING:
 
 __all__ = ["StorageBundleMergedMixin"]
 
+# Pandera DataFrameModel classes (or resolved DataFrameSchema) used as providers.
+CompositeSchemaProvider = Any
+
 
 class _SilverMergedWriteProtocol(Protocol):
     """Minimal bound-method contract for merged Silver writes."""
@@ -26,7 +29,7 @@ class _SilverMergedWriteProtocol(Protocol):
         records: list[JsonDict],
         primary_keys: list[str] | None = None,
         *,
-        schema: DataFrameSchema | None = None,
+        schema: CompositeSchemaProvider | None = None,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
@@ -42,7 +45,7 @@ class _GoldMergedWriteProtocol(Protocol):
         records: list[JsonDict],
         primary_keys: list[str] | None = None,
         *,
-        schema: DataFrameSchema,
+        schema: CompositeSchemaProvider,
         completed_at: datetime | None = None,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
@@ -55,7 +58,7 @@ class StorageBundleMergedMixin:
 
     silver: SilverWriter
     gold: GoldWriter
-    _COMPOSITE_GOLD_SCHEMAS: ClassVar[dict[str, DataFrameSchema]]
+    _COMPOSITE_GOLD_SCHEMAS: ClassVar[dict[str, CompositeSchemaProvider]]
 
     def get_table_path(
         self,

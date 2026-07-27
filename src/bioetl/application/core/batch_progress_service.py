@@ -36,7 +36,11 @@ class BatchProgressService:
 
         get_total = getattr(self._data_source, "get_total_records", None)
         if get_total and callable(get_total):
-            result = await get_total()
+            from collections.abc import Awaitable, Callable
+            from typing import cast
+
+            get_total_fn = cast(Callable[[], Awaitable[object]], get_total)
+            result = await get_total_fn()
             if isinstance(result, int) and result > 0:
                 self._total_records = result
                 self._set_progress_thresholds()

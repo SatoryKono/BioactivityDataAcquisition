@@ -8,19 +8,51 @@ Project-local Zed config for BioETL. Source of truth for contracts:
 
 | File | Purpose |
 |------|---------|
-| `settings.json` | Editor, LSP, agent profiles, slim MCP context servers, terminal/venv |
+| `settings.json` | Editor, LSP, agent profiles (**no agent MCP**), terminal/venv |
 | `tasks.json` | `uv`-based quality/test tasks (pytest lanes + runnables) |
-| `mcp.json` | Generated full MCP inventory (setup_mcp.py) — not all servers are runtime-enabled in Zed |
+| `mcp.json` | Optional workspace MCP inventory (prefer shared HTTP plane; not attached to Agent profiles) |
+| `USER_SETTINGS_NO_AGENT_MCP.overlay.json` | Snippet for user-level Zed settings (disable extension MCP + thrash agents) |
 | `snippets/` | Optional copy-into-user snippets |
 | `README.md` | This guide |
 
 Zed loads `.zed/settings.json` and `.zed/tasks.json` from the worktree root automatically.
 
+## Agent without MCP thrash
+
+**Problem:** Zed External Agent `grok-build` runs `grok agent stdio`, and user-level
+`context_servers` (Brave / Context7 extensions) get started as stdio children —
+often in parallel with the BioETL shared HTTP plane → N× MCP processes.
+
+**Project defaults (this repo):**
+
+- `context_servers: {}`
+- profiles `bioetl-ask` / `bioetl-write`: `enable_all_context_servers: false`, empty `context_servers`
+- default profile: `bioetl-ask`
+
+**User-level (required once on this host):** apply the overlay in
+`USER_SETTINGS_NO_AGENT_MCP.overlay.json` into `%APPDATA%\Zed\settings.json`:
+
+1. Set `context_servers.mcp-server-context7.enabled` / `mcp-server-brave-search.enabled` → `false`
+2. Remove or disable External Agent entries that spawn thrash (`grok-build` registry) if Grok TUI already covers MCP via shared HTTP
+3. Restart Zed fully (quit all windows)
+
+MCP for coding should stay on:
+
+```powershell
+.\scripts\ops\runtime\mcp\start-shared.ps1
+.\scripts\ops\runtime\mcp\health-shared.ps1
+.\scripts\ops\runtime\mcp\apply-shared-to-grok.ps1 -DisableDockerGateways
+```
+
 ## Design principles (optimized)
 
 1. **Delegate tool config to the repo** — Ruff uses `configurationPreference: filesystemFirst` (`pyproject.toml`).
 2. **Cheap diagnostics** — basedpyright `diagnosticMode: openFilesOnly` (full check via tasks/CI).
-3. **Slim agent MCP** — runtime `context_servers`: only `memory`, `fetch`, `deepwiki`.
+3. **No agent-attached MCP by default** — `context_servers: {}` and both
+   BioETL agent profiles set `enable_all_context_servers: false` with empty
+   `context_servers`. MCP runs on the shared HTTP plane (`scripts/ops/runtime/mcp/`)
+   for Grok/Codex CLI, not via Zed Agent / External Agent stdio thrash.
+   Optional: enable specific remote MCP later under a profile only when needed.
 4. **Safe defaults** — terminal tool confirms; secrets/certs denied for file tools; `redact_private_values`.
 5. **Tasks without `uv` on PATH** — call
    `$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe ...` directly
@@ -152,7 +184,8 @@ All tasks: `cwd: $ZED_WORKTREE_ROOT`, interpreter/tool binaries under
 - Lint code — `python -m ruff check src tests scripts`
   (uses `[tool.ruff]` from `pyproject.toml`; CI full gate is `src tests`,
   scripts match pre-commit advisory scope)
-- Type check — `python -m mypy src/`
+- Type check — `python -m mypy --config-file pyproject.toml src/bioetl`
+  (same product gate as `.github/workflows/type-checking.yml`; not bare `mypy src/`)
 - Architecture compliance — `python scripts/engineering/dev/zed_lint_imports.py` (contracts in `.importlinter`)
 - Refresh MCP config — `python scripts/ai/codex/setup_mcp.py ...`
 

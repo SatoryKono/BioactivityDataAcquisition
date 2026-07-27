@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from typing import Any
+from typing import Any, cast
 
 from bioetl.application.composite.checkpoint import (
     CompositeCheckpointService,
@@ -64,9 +64,16 @@ def _get_explicit_merger_method(
     instance_attrs = vars(merger)
     if method_name in instance_attrs:
         method = instance_attrs[method_name]
-        return method if callable(method) else None
+        if not callable(method):
+            return None
+        return cast(Callable[..., Awaitable[MergeResult]], method)
     method = getattr(type(merger), method_name, None)
-    return method.__get__(merger, type(merger)) if callable(method) else None
+    if not callable(method):
+        return None
+    return cast(
+        Callable[..., Awaitable[MergeResult]],
+        method.__get__(merger, type(merger)),
+    )
 
 
 class CompositeRunnerMergeStageMixin:

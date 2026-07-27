@@ -15,3 +15,4 @@ class DomainEventEmitterProtocol(Protocol):
 
     def emit_domain_event(self, event: DomainEvent) -> None:
         """Publish one typed domain event to the canonical observability path."""
+        ...

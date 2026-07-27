@@ -135,10 +135,12 @@ def create_record_processor_from_pipeline(
         pipeline,
         gold_schema=gold_schema,
     )
+    from bioetl.application.core.pipeline_services import PipelineService
+
     return create_record_processor_fn(
         request=_RecordProcessorBuildRequest(
             create_batch_processing_components_fn=build_batch_processing_components,
-            services=pipeline.services,
+            services=cast(PipelineService, pipeline.services),
             context=pipeline.context,
             pipeline_name=pipeline.config.pipeline_name,
             provider=pipeline.config.provider,

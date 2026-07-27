@@ -81,8 +81,15 @@ def read_delta_records(
         scanner = dataset.scanner(columns=columns)
         to_reader = getattr(scanner, "to_reader", None)
         if callable(to_reader):
+            from collections.abc import Iterable
+            from typing import Any, cast
+
             records: list[BronzeRecord] = []
-            for batch in to_reader():
+            batches = cast(
+                Iterable[Any],  # Any: optional Arrow reader is dynamically discovered.
+                to_reader(),
+            )
+            for batch in batches:
                 records.extend(batch.to_pylist())
             return records
         # Dataset path available but no reader — fall through carefully.

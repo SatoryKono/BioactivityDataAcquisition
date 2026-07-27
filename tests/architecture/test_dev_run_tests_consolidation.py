@@ -17,11 +17,18 @@ SUPPORTED_DEV_TEST_WRAPPERS = {
 
 
 def test_run_tests_backend_help_works() -> None:
-    """Canonical backend should provide help output with zero exit code."""
+    """Canonical backend should provide help output with zero exit code.
+
+    ``run_tests.py help`` exits before heavy imports (see early-exit guard in the
+    script). Keep the subprocess budget well under the suite pytest-timeout so a
+    hung child fails the helper quickly instead of the whole PyCharm run.
+    """
     root = repo_root()
-    # Use longer timeout for Windows slow filesystem
     result = run_repo_python(
-        "scripts/engineering/dev/run_tests.py", "help", cwd=root, timeout=120.0
+        "scripts/engineering/dev/run_tests.py",
+        "help",
+        cwd=root,
+        timeout=30.0,
     )
     assert result.returncode == 0, result.stderr
     assert "BioETL Test Runner" in result.stdout

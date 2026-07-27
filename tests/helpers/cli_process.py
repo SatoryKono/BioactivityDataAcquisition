@@ -8,6 +8,7 @@ from io import StringIO
 import os
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from types import ModuleType
 
@@ -35,6 +36,17 @@ def repo_root() -> Path:
     return REPO_ROOT
 
 
+def _windows_subprocess_kwargs() -> dict[str, object]:
+    """Return kwargs that avoid console popups and improve Windows kill behavior."""
+    if sys.platform != "win32":
+        return {}
+    kwargs: dict[str, object] = {}
+    create_no_window = int(getattr(subprocess, "CREATE_NO_WINDOW", 0))
+    if create_no_window:
+        kwargs["creationflags"] = create_no_window
+    return kwargs
+
+
 def run_repo_command(
     *args: str,
     cwd: Path | None = None,
@@ -45,18 +57,66 @@ def run_repo_command(
 
     Subprocess smoke tests should fail locally instead of waiting for the
     suite-level pytest-timeout when a delegated CLI blocks before closing pipes.
+
+    On Windows, stdout/stderr are file-backed (not ``capture_output`` PIPEs).
+    PIPE + ``timeout`` can hang forever in ``communicate()`` cleanup when the
+    child is stuck, which races pytest-timeout and surfaces as a 60s hang under
+    PyCharm even for fast commands like ``run_tests.py help``.
     """
-    return subprocess.run(
-        list(args),
-        cwd=cwd or REPO_ROOT,
-        env=None if env is None else os.environ | env,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        check=False,
-        timeout=timeout,
+    command = list(args)
+    workdir = cwd or REPO_ROOT
+    merged_env = None if env is None else os.environ | env
+
+    stdout_handle = tempfile.NamedTemporaryFile(
+        prefix="bioetl_cli_stdout_",
+        suffix=".txt",
+        delete=False,
     )
+    stderr_handle = tempfile.NamedTemporaryFile(
+        prefix="bioetl_cli_stderr_",
+        suffix=".txt",
+        delete=False,
+    )
+    stdout_path = Path(stdout_handle.name)
+    stderr_path = Path(stderr_handle.name)
+    stdout_handle.close()
+    stderr_handle.close()
+
+    try:
+        with (
+            stdout_path.open("w", encoding="utf-8", errors="replace") as stdout_file,
+            stderr_path.open("w", encoding="utf-8", errors="replace") as stderr_file,
+        ):
+            completed = subprocess.run(
+                command,
+                cwd=workdir,
+                env=merged_env,
+                stdout=stdout_file,
+                stderr=stderr_file,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                check=False,
+                timeout=timeout,
+                **_windows_subprocess_kwargs(),
+            )
+        return subprocess.CompletedProcess(
+            args=command,
+            returncode=completed.returncode,
+            stdout=stdout_path.read_text(encoding="utf-8", errors="replace"),
+            stderr=stderr_path.read_text(encoding="utf-8", errors="replace"),
+        )
+    except subprocess.TimeoutExpired as exc:
+        # Re-raise with captured partial output when available (no PIPE drain hang).
+        raise subprocess.TimeoutExpired(
+            cmd=command,
+            timeout=exc.timeout,
+            output=stdout_path.read_text(encoding="utf-8", errors="replace"),
+            stderr=stderr_path.read_text(encoding="utf-8", errors="replace"),
+        ) from None
+    finally:
+        stdout_path.unlink(missing_ok=True)
+        stderr_path.unlink(missing_ok=True)
 
 
 def run_repo_python(

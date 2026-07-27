@@ -21,6 +21,7 @@ from bioetl.domain.ports import DataSourcePort
 from bioetl.infrastructure.config.config_root import resolve_config_subdir
 
 if TYPE_CHECKING:
+    from bioetl.composition.providers._models import ProviderSettingsProtocol
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
@@ -74,7 +75,7 @@ def get_data_source_creator(
             )
             cached_creator = ready_registry.build_data_source_creator(provider)
         return cached_creator(
-            settings=settings,
+            settings=cast("ProviderSettingsProtocol", settings),
             pipeline_config=pipeline_config,
             logger=logger,
             filter_config=filter_config,

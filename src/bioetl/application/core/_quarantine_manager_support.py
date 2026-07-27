@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from datetime import datetime
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Any, Protocol, cast
 
 from bioetl.application.core._quarantine_request_builders import (
     build_dq_quarantine_request,
@@ -35,9 +35,9 @@ if TYPE_CHECKING:
 class _FilteredQuarantineEntryProtocol(Protocol):
     """Structural filtered-entry shape used by the support mixin."""
 
-    record: JsonDict
+    record: dict[str, Any]  # Any: filtered records carry provider-defined JSON values.
     reason: str
-    details: JsonDict | None
+    details: dict[str, Any] | None  # Any: quarantine details are extensible JSON.
 
 
 class QuarantineManagerSupportMixin:
@@ -156,16 +156,21 @@ class QuarantineManagerSupportMixin:
 
     async def quarantine_filtered_records(
         self,
-        records: Sequence[_FilteredQuarantineEntryProtocol],
+        records: Sequence[Any],  # Any: accepts structural NamedTuple entry variants.
         batch_id: BatchID,
         run_id: RunID | None = None,
         *,
         ingestion_ts: datetime,
     ) -> None:
-        """Persist filtered-out quarantine records in one port call."""
+        """Persist filtered-out quarantine records in one port call.
+
+        ``records`` is ``Sequence[Any]`` so ``FilteredQuarantineEntry``
+        NamedTuples type-check without Protocol/TypeAliasType friction.
+        """
         if not records:
             return
 
+        typed_records = cast(Sequence[_FilteredQuarantineEntryProtocol], records)
         write_requests = [
             build_filtered_quarantine_request(
                 pipeline_name=self._pipeline_name,
@@ -176,12 +181,12 @@ class QuarantineManagerSupportMixin:
                 run_id=run_id,
                 ingestion_ts=ingestion_ts,
             )
-            for entry in records
+            for entry in typed_records
         ]
         await persist_filtered_quarantine_requests(
             self._quarantine_runtime_ports(),
             requests=write_requests,
-            reasons=tuple(entry.reason for entry in records),
+            reasons=tuple(entry.reason for entry in typed_records),
             batch_id=batch_id,
             run_id=run_id,
             ingestion_ts=ingestion_ts,

@@ -166,8 +166,10 @@ class CrossRefPublicationEntity(PublicationEntityBase):
     See: https://api.crossref.org/swagger-ui/index.html
     """
 
-    # Override: DOI is REQUIRED for CrossRef (base has Optional)
-    doi: str
+    # Override: DOI is REQUIRED for CrossRef (base has Optional).
+    # Base field has a default, so the narrowed override keeps a default and
+    # __post_init__ enforces non-empty DOI at runtime.
+    doi: str = ""
 
     # CrossRef domain entities preserve the native ISSN collection. Silver
     # normalization derives scalar issn and JSON issn_list for storage schemas.

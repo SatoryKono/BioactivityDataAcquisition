@@ -9,6 +9,8 @@ registry bootstrap logic directly.
 
 from __future__ import annotations
 
+from typing import cast
+
 from bioetl.composition.providers._loading import (
     ensure_provider_registry_loaded,
     get_provider_registry_loaded_status,
@@ -32,7 +34,7 @@ __all__ = [
 
 def _get_loader_registry() -> ProviderRegistrarProtocol:
     """Resolve the canonical default provider registry for loader entrypoints."""
-    return resolve_provider_registry()
+    return cast(ProviderRegistrarProtocol, resolve_provider_registry())
 
 
 def load_providers(force: bool = False) -> None:

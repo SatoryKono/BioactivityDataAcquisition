@@ -183,9 +183,11 @@ async def _run_gold_write_with_retry(
         try:
             await operation()
             return
-        except retry_errors as error:
+        except Exception as error:
+            if not isinstance(error, retry_errors):
+                raise
             if attempt == 2:
-                raise error
+                raise
             await module.asyncio.sleep(_gold_write_retry_delay(attempt))
 
 

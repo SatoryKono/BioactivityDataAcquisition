@@ -93,9 +93,16 @@ def _latest_terminal_timestamp(
     list_entries_by_run_id = getattr(ledger_port, "list_entries_by_run_id", None)
     if not callable(list_entries_by_run_id):
         return None
+    from collections.abc import Iterable
+    from typing import Any, cast
+
+    listed = cast(
+        Iterable[Any],  # Any: optional ledger extension has no return contract.
+        list_entries_by_run_id(run_id),
+    )
     entries = [
         entry
-        for entry in list_entries_by_run_id(run_id)
+        for entry in listed
         if getattr(entry, "event_type", None) in _TERMINAL_EVENT_TYPES
     ]
     if not entries:

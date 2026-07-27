@@ -89,7 +89,11 @@ async def extract_unique_fraction_records(
     finally:
         aclose = getattr(assays, "aclose", None)
         if callable(aclose):
-            await aclose()
+            from collections.abc import Awaitable, Callable
+            from typing import cast
+
+            aclose_fn = cast(Callable[[], Awaitable[object]], aclose)
+            await aclose_fn()
 
     for record in records.values():
         yield record

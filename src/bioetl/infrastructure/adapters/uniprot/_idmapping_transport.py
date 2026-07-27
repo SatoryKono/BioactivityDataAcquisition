@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Protocol, cast, runtime_checkable
+from typing import TYPE_CHECKING, Any, Protocol, cast, runtime_checkable
 
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.adapters.common.response_shapes import (
@@ -15,7 +15,6 @@ from bioetl.infrastructure.adapters.uniprot._idmapping_errors import IDMappingJo
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
-    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 
 @runtime_checkable
@@ -23,7 +22,7 @@ class IDMappingTransportDependencies(Protocol):
     """Host dependency contract for IDMappingTransportMixin."""
 
     logger: LoggerPort
-    http_client: UnifiedHTTPClient
+    http_client: Any  # Any: preserves BaseHttpAdapter-compatible host typing.
     _adapter_metrics: AdapterMetricsRecorder
     base_url: str
 
@@ -43,12 +42,11 @@ class IDMappingTransportDependencies(Protocol):
 
 
 class IDMappingTransportMixin:
-    """HTTP transport helpers for job submission and result retrieval."""
+    """HTTP transport helpers for job submission and result retrieval.
 
-    logger: LoggerPort
-    http_client: UnifiedHTTPClient
-    _adapter_metrics: AdapterMetricsRecorder
-    base_url: str
+    Host attributes come from the concrete client; they are not re-declared
+    here so MRO types stay compatible with BaseHttpAdapter.
+    """
 
     def _transport_deps(self) -> IDMappingTransportDependencies:
         """Return typed dependency view of the host client.

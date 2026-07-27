@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.chembl.fetch_multi_filter_mixin import (
@@ -19,6 +19,7 @@ from bioetl.infrastructure.adapters.common.deduplication import (
     iter_deduplicated_records,
 )
 from bioetl.infrastructure.adapters.common.fetch_resilience_template import (
+    FilteredBatchRecoveryHost,
     iter_deduplicated_filtered_id_batches,
 )
 
@@ -51,8 +52,9 @@ class ChemblFetchAdapterMixin(
         Returns:
             Async iterator of deduplicated BronzeRecord dicts.
         """
+        host = cast(FilteredBatchRecoveryHost, self)
         async for record in iter_deduplicated_filtered_id_batches(
-            self,
+            host,
             entity_type=entity_type,
             limit=limit,
             filter_ids=filter_ids,

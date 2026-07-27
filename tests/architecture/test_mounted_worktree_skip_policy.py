@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from pathlib import Path
+import os
 import subprocess
+from pathlib import Path
 
 import pytest
 
@@ -15,6 +16,16 @@ FORBIDDEN_MARKERS = (
     "Network drive timeout",
     "E:\\g-drive",
 )
+# Full-suite coverage runs can keep git busy on cloud-synced checkouts; keep a
+# hard ceiling so this guard cannot hang the coverage gate.
+_GIT_GREP_TIMEOUT_SECONDS = 30.0
+
+
+def _hidden_windows_subprocess_kwargs() -> dict[str, int]:
+    if os.name != "nt":
+        return {}
+    create_no_window = int(getattr(subprocess, "CREATE_NO_WINDOW", 0))
+    return {"creationflags": create_no_window} if create_no_window else {}
 
 
 def test_tests_do_not_reintroduce_hardcoded_network_drive_skips() -> None:
@@ -27,22 +38,38 @@ def test_tests_do_not_reintroduce_hardcoded_network_drive_skips() -> None:
 
     # Search index blobs in one process so cloud-backed worktree files are not
     # opened and hydrated one by one on Windows.
-    result = subprocess.run(
-        [
-            "git",
-            "grep",
-            "--cached",
-            "-n",
-            "-F",
-            *(argument for marker in FORBIDDEN_MARKERS for argument in ("-e", marker)),
-            "--",
-            ":(glob)tests/**/test_*.py",
-        ],
-        cwd=ROOT,
-        capture_output=True,
-        check=False,
-        encoding="utf-8",
-    )
+    try:
+        result = subprocess.run(
+            [
+                "git",
+                "grep",
+                "--cached",
+                "-n",
+                "-F",
+                *(
+                    argument
+                    for marker in FORBIDDEN_MARKERS
+                    for argument in ("-e", marker)
+                ),
+                "--",
+                ":(glob)tests/**/test_*.py",
+            ],
+            cwd=ROOT,
+            capture_output=True,
+            check=False,
+            encoding="utf-8",
+            errors="replace",
+            timeout=_GIT_GREP_TIMEOUT_SECONDS,
+            **_hidden_windows_subprocess_kwargs(),
+        )
+    except subprocess.TimeoutExpired as exc:
+        pytest.fail(
+            f"git grep for mounted-worktree skip markers timed out after "
+            f"{_GIT_GREP_TIMEOUT_SECONDS:.0f}s (cwd={ROOT}). "
+            "Re-run tests/architecture separately; avoid coverage lane load on "
+            f"cloud-synced worktrees. partial_stdout={exc.stdout!r}"
+        )
+
     assert result.returncode in (0, 1), result.stderr
 
     this_file_relative = this_file.relative_to(ROOT).as_posix()

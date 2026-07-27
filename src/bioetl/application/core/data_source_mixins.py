@@ -45,6 +45,7 @@ class _HasWrappedDataSource(Protocol):
 
     def _after_wrapped_data_source_enter(self) -> None:
         """Reset wrapper-local state after entering the wrapped data source."""
+        ...
 
 
 class _SourceMetadataDelegationMixin:
@@ -73,7 +74,11 @@ class _WrappedAdapterHealthDelegationMixin:
 
         check_health = getattr(self._data_source, "check_health", None)
         if check_health is not None and callable(check_health):
-            result = await check_health()
+            from collections.abc import Awaitable, Callable
+            from typing import cast
+
+            check_health_fn = cast(Callable[[], Awaitable[object]], check_health)
+            result = await check_health_fn()
             if isinstance(result, HealthCheckResult):
                 return result
             raise TypeError("Data source check_health() must return HealthCheckResult")

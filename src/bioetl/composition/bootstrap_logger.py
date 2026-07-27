@@ -22,6 +22,8 @@ Requirements:
 
 from __future__ import annotations
 
+from typing import cast
+
 import structlog  # Allowed: composition root configures logging before DI container
 
 from bioetl.infrastructure.observability.logging_config import (
@@ -62,12 +64,15 @@ def get_bootstrap_logger() -> structlog.stdlib.BoundLogger:
 
     # Create logger with bootstrap context
     base_logger = structlog.get_logger("bioetl.composition.bootstrap")
-    _bootstrap_logger = base_logger.bind(
-        run_id="bootstrap",
-        stage="bootstrap",
+    bound_logger = cast(
+        structlog.stdlib.BoundLogger,
+        base_logger.bind(
+            run_id="bootstrap",
+            stage="bootstrap",
+        ),
     )
-
-    return _bootstrap_logger
+    _bootstrap_logger = bound_logger
+    return bound_logger
 
 
 def reset_bootstrap_logger() -> None:

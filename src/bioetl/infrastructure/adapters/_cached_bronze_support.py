@@ -137,7 +137,11 @@ async def iter_batch_records(
         finally:
             aclose = getattr(records, "aclose", None)
             if callable(aclose):
-                await aclose()
+                from collections.abc import Awaitable, Callable
+                from typing import cast
+
+                aclose_fn = cast(Callable[[], Awaitable[object]], aclose)
+                await aclose_fn()
 
 
 async def count_batch_records(
@@ -159,6 +163,10 @@ async def count_batch_records(
         finally:
             aclose = getattr(records, "aclose", None)
             if callable(aclose):
-                await aclose()
+                from collections.abc import Awaitable, Callable
+                from typing import cast
+
+                aclose_fn = cast(Callable[[], Awaitable[object]], aclose)
+                await aclose_fn()
     logger.info("Total records estimated", total=total)
     return total

@@ -7,6 +7,7 @@ from deltalake import DeltaTable, write_deltalake
 from deltalake.exceptions import TableNotFoundError
 
 from bioetl.domain.types import JsonDict, QuarantineRecordStatus
+from bioetl.infrastructure.storage.delta.table_ops import read_delta_records
 
 __all__ = [
     "append_status_event",
@@ -28,9 +29,8 @@ def _load_status_events(
         dt = DeltaTable(event_path, storage_options=storage_options)
     except TableNotFoundError:
         return []
-    raw_rows: object = dt.to_pyarrow_table().to_pylist()
-    if not isinstance(raw_rows, list):
-        raise TypeError("Quarantine status event rows must be a list")
+    # Windows-safe path: active parquet files instead of native Arrow dataset.
+    raw_rows = read_delta_records(dt)
     events: list[JsonDict] = []
     for row in raw_rows:
         if not isinstance(row, dict):

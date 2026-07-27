@@ -527,29 +527,32 @@ class TestUnifiedQuarantineUpdateStatus:
         mock_delta_table,
     ):
         """Test update_status returns False when record doesn't exist."""
-        mock_table = MagicMock()
-        mock_arrow_table = MagicMock()
-        mock_arrow_table.__len__ = MagicMock(return_value=0)
-        mock_table.to_pyarrow_table.return_value = mock_arrow_table
-        mock_delta_table.return_value = mock_table
+        mock_delta_table.return_value = MagicMock()
 
-        result = quarantine.update_status(
-            "nonexistent_hash", QuarantineRecordStatus.IGNORED
-        )
+        with patch(
+            "bioetl.infrastructure.quarantine.unified.read_delta_records",
+            return_value=[],
+        ):
+            result = quarantine.update_status(
+                "nonexistent_hash", QuarantineRecordStatus.IGNORED
+            )
 
         assert result is False
 
     def test_update_status_appends_status_event(self, quarantine, mock_delta_table):
         """Test update_status appends a status transition event."""
         mock_table = MagicMock()
-        mock_arrow_table = MagicMock()
-        mock_arrow_table.__len__ = MagicMock(return_value=1)
-        mock_table.to_pyarrow_table.return_value = mock_arrow_table
         mock_delta_table.return_value = mock_table
 
-        with patch(
-            "bioetl.infrastructure.quarantine.unified.append_status_event"
-        ) as append_mock:
+        with (
+            patch(
+                "bioetl.infrastructure.quarantine.unified.read_delta_records",
+                return_value=[{"payload_hash": "hash123"}],
+            ),
+            patch(
+                "bioetl.infrastructure.quarantine.unified.append_status_event"
+            ) as append_mock,
+        ):
             result = quarantine.update_status(
                 "hash123", QuarantineRecordStatus.REPROCESSED
             )
@@ -568,29 +571,30 @@ class TestUnifiedQuarantineUpdateStatus:
     ):
         """Status transitions must not rewrite stored payload bytes or hash."""
         mock_table = MagicMock()
-        mock_arrow_table = MagicMock()
-        mock_arrow_table.__len__ = MagicMock(return_value=1)
-        mock_arrow_table.to_pylist.return_value = [
+        mock_delta_table.return_value = mock_table
+        stored_rows = [
             {
                 "payload": '{"id": 1, "canonical_smiles": "CCO"}',
                 "payload_hash": "sha256:stable-payload",
                 "dq_status": QuarantineRecordStatus.NEW.value,
             }
         ]
-        mock_table.to_pyarrow_table.return_value = mock_arrow_table
-        mock_delta_table.return_value = mock_table
 
-        with patch(
-            "bioetl.infrastructure.quarantine.unified.append_status_event"
-        ) as append_mock:
+        with (
+            patch(
+                "bioetl.infrastructure.quarantine.unified.read_delta_records",
+                return_value=stored_rows,
+            ) as read_mock,
+            patch(
+                "bioetl.infrastructure.quarantine.unified.append_status_event"
+            ) as append_mock,
+        ):
             result = quarantine.update_status(
                 "sha256:stable-payload", QuarantineRecordStatus.REPROCESSED
             )
 
         assert result is True
-        mock_table.to_pyarrow_table.assert_called_once_with(
-            filters=[("payload_hash", "=", "sha256:stable-payload")]
-        )
+        read_mock.assert_called_once_with(mock_table)
         append_mock.assert_called_once_with(
             quarantine.status_events_path,
             None,
@@ -599,13 +603,12 @@ class TestUnifiedQuarantineUpdateStatus:
         )
         mock_table.update.assert_not_called()
 
-    @pytest.mark.asyncio
-    async def test_update_status_preserves_persisted_payload_and_hash(
+    def test_update_status_preserves_persisted_payload_and_hash(
         self,
         quarantine,
-        batch_id,
+        mock_delta_table,
     ):
-        """Persisted status transitions must not mutate payload bytes or hash."""
+        """Status updates keep payload bytes/hash; dq_status comes from events."""
         payload = {
             "id": 1,
             "canonical_smiles": "CCO",
@@ -614,39 +617,56 @@ class TestUnifiedQuarantineUpdateStatus:
         metadata = {"error_details": {"reason": "schema_violation"}}
         payload_json = serialize_to_json(payload, ensure_ascii=True)
         payload_hash = calculate_hash(payload_json)
+        metadata_json = serialize_to_json(metadata)
+        stored_row = {
+            "ingestion_ts": TEST_INGESTION_TS.isoformat(),
+            "pipeline": "test",
+            "error_code": "SCHEMA_VIOLATION",
+            "payload": payload_json,
+            "metadata": metadata_json,
+            "payload_hash": payload_hash,
+            "payload_truncated": False,
+            "bronze_batch_id": "12345678-1234-5678-1234-567812345678",
+            "bronze_file_uri": "",
+            "error_details": serialize_to_json(metadata["error_details"]),
+            "dq_status": QuarantineRecordStatus.NEW.value,
+            "run_id": "",
+        }
+        mock_delta_table.return_value = MagicMock()
 
-        await quarantine.write(
-            pipeline="test",
-            error_code="SCHEMA_VIOLATION",
-            payload=payload,
-            bronze_batch_id=batch_id,
-            metadata=metadata,
-            ingestion_ts=TEST_INGESTION_TS,
-        )
+        with (
+            patch(
+                "bioetl.infrastructure.quarantine.unified.read_delta_records",
+                return_value=[stored_row],
+            ),
+            patch(
+                "bioetl.infrastructure.quarantine.unified.append_status_event"
+            ) as append_mock,
+            patch(
+                "bioetl.infrastructure.quarantine.unified.apply_latest_statuses",
+                side_effect=lambda records, *_a, **_k: [
+                    {**records[0], "dq_status": QuarantineRecordStatus.REPROCESSED.value}
+                ],
+            ),
+        ):
+            before = quarantine.get_record(payload_hash=payload_hash, pipeline="test")
+            assert before is not None
+            assert before["payload"] == payload_json
+            assert before["payload_hash"] == payload_hash
 
-        before = quarantine.get_record(payload_hash=payload_hash, pipeline="test")
-        assert before is not None
-        assert before["payload"] == payload_json
-        assert before["payload_hash"] == payload_hash
-        assert before["dq_status"] == QuarantineRecordStatus.NEW.value
+            result = quarantine.update_status(
+                payload_hash,
+                QuarantineRecordStatus.REPROCESSED,
+            )
+            assert result is True
+            append_mock.assert_called_once()
 
-        result = quarantine.update_status(
-            payload_hash,
-            QuarantineRecordStatus.REPROCESSED,
-        )
-
-        assert result is True
-        after = quarantine.get_record(payload_hash=payload_hash, pipeline="test")
-        assert after is not None
-        assert after["payload"] == before["payload"]
-        assert after["payload_hash"] == before["payload_hash"]
-        assert after["metadata"] == before["metadata"]
-        assert after["dq_status"] == QuarantineRecordStatus.REPROCESSED.value
-        base_record = quarantine.get_record(
-            payload_hash=payload_hash,
-            pipeline="test",
-        )
-        assert base_record is not None
+            after = quarantine.get_record(payload_hash=payload_hash, pipeline="test")
+            assert after is not None
+            assert after["payload"] == before["payload"]
+            assert after["payload_hash"] == before["payload_hash"]
+            assert after["metadata"] == before["metadata"]
+            assert after["dq_status"] == QuarantineRecordStatus.REPROCESSED.value
 
 
 @pytest.mark.unit

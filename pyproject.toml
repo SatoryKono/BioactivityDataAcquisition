@@ -316,6 +316,15 @@ extra_checks = true
 # Exclude tools directory (auxiliary scripts without strict type annotations)
 exclude = ["src/tools/"]
 
+# Sidecar memory subsystem is an approved non-product tree
+# (configs/quality/repo_structure_catalog.yaml). Product typing gate is
+# src/bioetl only (type-checking.yml / run_mypy.* / Zed Type check / zed_mypy.py).
+[[tool.mypy.overrides]]
+module = [
+    "memory",
+    "memory.*",
+]
+ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = [

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.factories.storage._blocking import run_storage_blocking
 from bioetl.domain.types import HealthStatus, JsonDict
@@ -124,7 +124,7 @@ class StorageBundleHealthMixin:
         """
         preview_method = getattr(writer, "preview_cleanup", None)
         if callable(preview_method):
-            preview_result: JsonDict = preview_method(table_name)
+            preview_result = cast(JsonDict, preview_method(table_name))
             if self._is_layer_preview_payload(preview_result):
                 return preview_result
 

@@ -100,15 +100,16 @@ class NoOpTracing:
 
     is_noop = True
 
-    def get_tracer(self, _name: str) -> _NoOpOtelTracer:
+    def get_tracer(self, name: str) -> _NoOpOtelTracer:
         """Return a no-op OTel-compatible tracer.
 
         Args:
-            _name: Tracer name (ignored).
+            name: Tracer name (ignored).
 
         Returns:
             A new no-op tracer instance.
         """
+        del name
         return _NoOpOtelTracer()
 
     def close(self) -> None:
