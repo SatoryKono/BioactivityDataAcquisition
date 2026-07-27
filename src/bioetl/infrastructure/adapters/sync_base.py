@@ -89,12 +89,11 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
         rate_limiter: TokenBucketRateLimiter,
         circuit_breaker: CircuitBreakerGuard,
         thread_pool: ThreadPoolExecutor,
-        strict_error_handling: bool = False,
-        metrics: MetricsPort | None = None,
-        *,
-        dependency_context: SyncAdapterDependencyContext | None = None,
         error_handler: ErrorHandlerPort,
+        strict_error_handling: bool = False,
+        dependency_context: SyncAdapterDependencyContext | None = None,
         owns_thread_pool: bool = False,
+        **legacy: object,
     ) -> None:
         """Initialize Sync Adapter resources.
 
@@ -117,8 +116,14 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
                 ``False`` so externally managed executors are not closed implicitly.
 
         """
+        metrics = legacy.pop("metrics", None)
+        if legacy:
+            unexpected = ", ".join(sorted(str(k) for k in legacy))
+            raise TypeError(f"BaseSyncAdapter() unexpected kwargs: {unexpected}")
         metrics_port = (
-            dependency_context.metrics if dependency_context is not None else metrics
+            dependency_context.metrics
+            if dependency_context is not None
+            else metrics  # type: ignore[arg-type]
         )
         resolved_error_handler = (
             dependency_context.error_handler

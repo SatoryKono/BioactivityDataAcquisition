@@ -64,22 +64,18 @@ class BatchProcessingSupportService:
         *,
         services: PipelineDataSourceServicesProtocol,
         logger: LoggerPort,
-        batch_metrics: BatchMetricsRecorderService,
-        transformer: BatchTransformer,
-        writer: BatchWriter,
-        tracing: BatchTracingManagerService,
-        quarantine_manager: QuarantineRuntimeService,
+        batch_runtime: dict[str, object],
         run_id: RunID | None = None,
         domain_event_emitter: DomainEventEmitterProtocol | None = None,
         debug_export_service: DebugExportService | None = None,
     ) -> None:
         self._services = services
         self._logger = logger
-        self._batch_metrics = batch_metrics
-        self._transformer = transformer
-        self._writer = writer
-        self._tracing = tracing
-        self._quarantine_manager = quarantine_manager
+        self._batch_metrics = batch_runtime["batch_metrics"]  # type: ignore[assignment]
+        self._transformer = batch_runtime["transformer"]  # type: ignore[assignment]
+        self._writer = batch_runtime["writer"]  # type: ignore[assignment]
+        self._tracing = batch_runtime["tracing"]  # type: ignore[assignment]
+        self._quarantine_manager = batch_runtime["quarantine_manager"]  # type: ignore[assignment]
         self._run_id = run_id
         self._domain_event_emitter = domain_event_emitter
         self._debug_export_service = debug_export_service

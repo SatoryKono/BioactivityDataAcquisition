@@ -1,42 +1,454 @@
-# Inventory of issue/closeout-bound architecture tests (T-05 / #6600).
-# Policy: fold durable assertions into generic ratchets; delete only after
-# replacement coverage exists. Debt budgets must stay flat-or-decreasing.
-
 schema_version: 1
-owner: "@bioetl-platform"
+owner: '@bioetl-platform'
 linked_issues:
-  - 6600
-reviewed_on: "2026-07-27"
-
+- 6600
+- 6618
+reviewed_on: '2026-07-27'
 classification:
   keep_as_is: historical freeze still blocking a live risk
   fold_into_generic: assertion belongs in a durable governance ratchet
   delete_after_sunset: legacy surface gone; closeout file may be removed
-
 entries:
-  - path: tests/architecture/test_value_object_run_manifest_deprecation.py
-    classification: keep_as_is
-    owner: "@bioetl-platform"
-    removal_condition: >-
-      Zero remaining imports of deprecated value-object RunManifest symbols in
-      src/ and tests/; then delete this scanner.
-  - path: tests/architecture/test_tech_debt_issues_5670_5675_closeout.py
-    classification: fold_into_generic
-    owner: "@bioetl-platform"
-    target_ratchet: tests/architecture/test_internal_compatibility_shim_governance.py
-    removal_condition: >-
-      Shim expiry guards live only in the generic compatibility ratchet.
-  - path: tests/architecture/test_architecture_scan_index_policy.py
-    classification: keep_as_is
-    owner: "@bioetl-platform"
-    removal_condition: never — durable performance governance for arch scans
-
+- path: tests/architecture/test_architecture_audit_closeout_gates.py
+  classification: keep_as_is
+  owner: '@bioetl-platform'
+  removal_condition: Retain while freeze still guards a live structural risk; reclassify when superseded
+    by a durable ratchet.
+- path: tests/architecture/test_architecture_closeout_inventory.py
+  classification: keep_as_is
+  owner: '@bioetl-platform'
+  removal_condition: Retain while freeze still guards a live structural risk; reclassify when superseded
+    by a durable ratchet.
+- path: tests/architecture/test_closeout_ratchet_triage.py
+  classification: keep_as_is
+  owner: '@bioetl-platform'
+  removal_condition: Retain while freeze still guards a live structural risk; reclassify when superseded
+    by a durable ratchet.
+- path: tests/architecture/test_diagram_issues_6205_6211_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_documentation_issues_6487_6488_closeout.py
+  classification: keep_as_is
+  owner: '@bioetl-platform'
+  removal_condition: Retain while freeze still guards a live structural risk; reclassify when superseded
+    by a durable ratchet.
+- path: tests/architecture/test_documentation_issues_6497_6498_closeout.py
+  classification: keep_as_is
+  owner: '@bioetl-platform'
+  removal_condition: Retain while freeze still guards a live structural risk; reclassify when superseded
+    by a durable ratchet.
+- path: tests/architecture/test_issue_5053_pipeline_transformer_closeout.py
+  classification: keep_as_is
+  owner: '@bioetl-platform'
+  removal_condition: Retain while freeze still guards a live structural risk; reclassify when superseded
+    by a durable ratchet.
+- path: tests/architecture/test_issue_5265_domain_invariants_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_issue_5272_application_core_coverage_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_observability_export_dashboard_rollout_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_p1_config_topology_closeout.py
+  classification: keep_as_is
+  owner: '@bioetl-platform'
+  removal_condition: Retain while freeze still guards a live structural risk; reclassify when superseded
+    by a durable ratchet.
+- path: tests/architecture/test_refactoring_followups_6097_6100_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_rf005_application_core_closeout.py
+  classification: keep_as_is
+  owner: '@bioetl-platform'
+  removal_condition: Retain while freeze still guards a live structural risk; reclassify when superseded
+    by a durable ratchet.
+- path: tests/architecture/test_rf014_composition_bootstrap_closeout.py
+  classification: keep_as_is
+  owner: '@bioetl-platform'
+  removal_condition: Retain while freeze still guards a live structural risk; reclassify when superseded
+    by a durable ratchet.
+- path: tests/architecture/test_rf016_config_ownership_closeout.py
+  classification: keep_as_is
+  owner: '@bioetl-platform'
+  removal_condition: Retain while freeze still guards a live structural risk; reclassify when superseded
+    by a durable ratchet.
+- path: tests/architecture/test_root_hygiene_issues_5992_5999_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issue_5647_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issue_6060_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issue_6062_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5253_5264_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5343_5346_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5387_5394_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5395_5401_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5490_5499_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5507_5509_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5510_5516_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5514_5515_governance.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5518_5523_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5524_5528_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5553_5558_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5559_5563_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5564_5603_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5565_5569_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5570_5578_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5581_5584_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5591_5595_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5618_5625_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5626_5637_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5639_5644_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5642_5645_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5646_5663_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5648_5654_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5651_5655_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5657_5661_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5670_5675_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5677_5685_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5700_5706_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5707_5715_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5729_5733_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5744_5751_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5752_5755_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5790_5796_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5811_5816_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5834_5838_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5839_5845_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5847_5852_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5861_5864_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5866_5872_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5933_5944_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5954_5955_5962_5963_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5956_5961_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5974_5977_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_5978_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_6011_6020_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_6022_6028_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_6032_6034_6037_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_6159_6169_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_tech_debt_issues_6220_6229_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_test_audit_issues_5996_6003_closeout.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_test_infrastructure_refactor_closeout_6042_6044.py
+  classification: fold_into_generic
+  owner: '@bioetl-platform'
+  target_ratchet: configs/quality/debt_scorecard.yaml
+  removal_condition: Fold durable assertions into generic governance ratchets under configs/quality/;
+    delete only after CI proves equivalent guard.
+- path: tests/architecture/test_wave3_adapter_facade_closeout.py
+  classification: keep_as_is
+  owner: '@bioetl-platform'
+  removal_condition: Retain while freeze still guards a live structural risk; reclassify when superseded
+    by a durable ratchet.
+- path: tests/architecture/test_wave3_ownership_closeout.py
+  classification: keep_as_is
+  owner: '@bioetl-platform'
+  removal_condition: Retain while freeze still guards a live structural risk; reclassify when superseded
+    by a durable ratchet.
+- path: tests/architecture/test_wave4_complexity_closeout.py
+  classification: keep_as_is
+  owner: '@bioetl-platform'
+  removal_condition: Retain while freeze still guards a live structural risk; reclassify when superseded
+    by a durable ratchet.
+- path: tests/architecture/test_architecture_scan_index_policy.py
+  classification: keep_as_is
+  owner: '@bioetl-platform'
+  removal_condition: Retain while freeze still guards a live structural risk; reclassify when superseded
+    by a durable ratchet.
+- path: tests/architecture/test_value_object_run_manifest_deprecation.py
+  classification: keep_as_is
+  owner: '@bioetl-platform'
+  removal_condition: Retain while freeze still guards a live structural risk; reclassify when superseded
+    by a durable ratchet.
 summary:
-  inventory_note: >-
-    Full closeout filename inventory is enforced by
-    tests/architecture/test_architecture_closeout_inventory.py which enumerates
-    tests/architecture/test_*closeout*.py and test_tech_debt_issues_*.py and
-    requires each path to appear here or be classified generically via the
-    default_fold policy.
+  inventory_note: 'Full closeout filename inventory for TD-05 / #6618. Unlisted paths still default to
+    fold_into_generic.'
   default_unlisted_classification: fold_into_generic
   minimum_fold_or_delete_fraction: 0.25
+  inventoried_closeout_count: 73
+  fold_or_delete_count: 60
+  fold_or_delete_fraction: 0.8219

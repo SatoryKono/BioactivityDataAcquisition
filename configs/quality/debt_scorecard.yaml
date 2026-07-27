@@ -565,7 +565,7 @@ hotspot_family_ratchets:
         files_ge_250_loc: 0
         max_internal_fan_in: 3
       metrics:
-        duplication_clusters: 1
+        duplication_clusters: 0
         files: 51
         total_loc: 6310
         files_ge_250_loc: 0
@@ -596,7 +596,7 @@ hotspot_family_ratchets:
         files_ge_250_loc: 3
         max_internal_fan_in: 3
       metrics:
-        duplication_clusters: 1
+        duplication_clusters: 0
         files: 35
         total_loc: 4690
         files_ge_250_loc: 3
@@ -645,9 +645,9 @@ hotspot_family_ratchets:
     - name: composition_runtime_builders
       owner: "@bioetl-platform"
       linked_rf: RF-023
-      linked_issue: "#4552"
-      ratchet_stage: reviewed-baseline
-      ratchet_scope: duplication-report-plus-bounded-growth
+      linked_issue: "#6621"
+      ratchet_stage: active
+      ratchet_scope: duplication-non-growth-plus-bounded-growth
       expected_action:
         Keep duplication clusters at 5 while holding file-growth and
         fan-in at the reviewed baseline during runtime-builder changes.
@@ -657,7 +657,7 @@ hotspot_family_ratchets:
         files_ge_250_loc: 3
         max_internal_fan_in: 5
       metrics:
-        duplication_clusters: 4
+        duplication_clusters: 0
         files: 55
         total_loc: 6945
         files_ge_250_loc: 0
