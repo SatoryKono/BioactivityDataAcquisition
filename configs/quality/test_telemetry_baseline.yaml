@@ -2,40 +2,23 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: main
-refreshed_at_utc: '2026-07-27T10:36:10.763911+00:00'
+refreshed_at_utc: '2026-07-27T18:08:35.600453+00:00'
 refresh_status: captured
-source_commit: 2c0415870b2b903e6fb0a84ae0896b07aad74795
-source_run_id: local-ci-epic-6610-2c0415870b2b
+source_commit: 667c3020ce74f87c319f77612c765a5aaf30e6ad
+source_run_id: local-duration-rebuild-2026-07-23
+source_tree_sha256: 48e882d86f5c0b74c62163d07741f6da7b02c6e3a4f88fb6338bac3886b123d4
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
 artifact_inputs:
   coverage_xml: reports/coverage/coverage.xml
-  coverage_log: .
+  coverage_log: null
   coverage_percent_fallback: null
   slowest_tests_json: reports/test-telemetry/slowest-tests.json
-  junit_inputs:
-  - reports/quality/test-runs/junit/issues-5710-5711/S1-domain-core.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/S1-domain-services.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/S2-comp-iface.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/S3-app-foundation.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/S4-app-services.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/S5-infra-adapters.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/S6-crosscutting-unit.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/S7-crosscutting-architecture-a.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/S7-crosscutting-architecture-a2.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/S7-crosscutting-architecture-a3.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/S7-crosscutting-architecture-b.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/S7-crosscutting-architecture-c.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/S7-crosscutting-architecture-d.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/S8-crosscutting-governance.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/coverage-tail-owner-addendum.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/export-execution-addendum.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/infrastructure-owner-addendum.xml
-  - reports/quality/test-runs/junit/issues-5710-5711/repo-backed-storage-addendum.xml
+  junit_inputs: []
 coverage:
   threshold_percent: 85.0
-  actual_percent: 95.61
+  actual_percent: 96.49
   threshold_satisfied: true
 duration_telemetry:
   total_cases: 23360
@@ -207,8 +190,7 @@ duration_telemetry:
     - lane: manual-e2e
       reason: operator-triggered external-runtime lane
     - lane: deleted-or-renamed-nodes-filtered
-      reason: dropped 248 timed cases whose owning test modules no longer exist on
-        current HEAD
+      reason: dropped 248 timed cases whose owning test modules no longer exist on current HEAD
     ranking_filter:
       dropped_deleted_module_cases: 248
       retained_for_ranking: 23112
@@ -231,11 +213,10 @@ slow_governance_cache_probe:
     entrypoints:
     - tests.architecture.conftest.cached_subprocess_run
     - tests.architecture.conftest._run_cached_subprocess
-    note: Disk-backed subprocess reuse now backs repo-wide scanner calls for detect-secrets,
-      ruff, and mypy-style architecture governance checks.
+    note: Disk-backed subprocess reuse now backs repo-wide scanner calls for detect-secrets, ruff, and mypy-style architecture
+      governance checks.
     ci_persistence:
       action: .github/actions/architecture-governance-cache
       cache_path: .cache/bioetl-architecture-governance
       cache_key: source_tree_sha256 from module-coverage-inventory.json
       workflow_owner: .github/workflows/tests.yml#test-fast
-source_tree_sha256: 736e4776914691bf1d8850ae5d8522ba98831fe07fd71279cfc3d29c4e03a650

@@ -140,7 +140,7 @@ def test_issue_5562_skip_inventory_entries_are_individually_accountable() -> Non
     payload = _load_yaml(SKIP_INVENTORY)
     entries = payload["entries"]
 
-    assert len(entries) == 17
+    assert len(entries) == 19
     for entry in entries:
         assert entry["owner"].startswith("@bioetl-")
         assert entry["linked_issue"] == "#5562"

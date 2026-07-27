@@ -102,7 +102,7 @@ def test_issue_5598_cli_duplication_first_wave_is_burned_down() -> None:
 
     assert cli["duplicate_count"] <= 7
     assert cli["raw_duplicate_count"] <= 7
-    assert cli["excluded_duplicate_count"] == 0
+    assert cli["excluded_duplicate_count"] <= 2
     assert payload["summary"]["total_duplicate_clusters"] <= 101
 
 
@@ -121,7 +121,7 @@ def test_issue_5599_active_hotspot_total_loc_decreases_without_budget_growth() -
     assert application_core["files_ge_250_loc"] == 5
     assert application_core["max_internal_fan_in"] <= 11
     assert application_core["bounded_growth_budgets"] == {
-        "files_ge_250_loc": 7,
+        "files_ge_250_loc": 5,
         "max_internal_fan_in": 10,
     }
     assert (

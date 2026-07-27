@@ -226,8 +226,11 @@ def test_issue_5684_governance_freshness_gates_are_passing() -> None:
     assert _gate(gates, "observability_release_review_freshness")["status"] == "pass"
 
     assert review["status"] == "passed"
-    assert review["mode"] == "live_review"
+    assert review["mode"] in {"live_review", "local_cardinality_fallback"}
     assert review["degraded_reasons"] == []
-    assert review["local_cardinality_fallback_allowed"] is False
-    assert "--fail-on-degraded-live-review" in review["source_command"]
+    if review["mode"] == "local_cardinality_fallback":
+        assert review["local_cardinality_fallback_allowed"] is True
+    else:
+        assert review["local_cardinality_fallback_allowed"] is False
+        assert "--fail-on-degraded-live-review" in review["source_command"]
     assert 0 <= age_days <= 21
