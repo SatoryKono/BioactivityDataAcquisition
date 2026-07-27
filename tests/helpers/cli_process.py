@@ -36,15 +36,11 @@ def repo_root() -> Path:
     return REPO_ROOT
 
 
-def _windows_subprocess_kwargs() -> dict[str, object]:
-    """Return kwargs that avoid console popups and improve Windows kill behavior."""
+def _windows_creation_flags() -> int:
+    """Return flags that avoid console popups for Windows subprocesses."""
     if sys.platform != "win32":
-        return {}
-    kwargs: dict[str, object] = {}
-    create_no_window = int(getattr(subprocess, "CREATE_NO_WINDOW", 0))
-    if create_no_window:
-        kwargs["creationflags"] = create_no_window
-    return kwargs
+        return 0
+    return int(getattr(subprocess, "CREATE_NO_WINDOW", 0))
 
 
 def run_repo_command(
@@ -91,7 +87,7 @@ def run_repo_command(
                     errors="replace",
                     check=False,
                     timeout=timeout,
-                    **_windows_subprocess_kwargs(),
+                    creationflags=_windows_creation_flags(),
                 )
             return subprocess.CompletedProcess(
                 args=command,

@@ -51,3 +51,21 @@ def assert_optional_numeric_in_range(
         assert minimum <= float(value) <= maximum, (
             f"{entity_label} record[{index}].{field}={value} outside [{minimum}, {maximum}]"
         )
+
+
+def assert_gold_records_when_enabled(
+    gold_records: Sequence[Mapping[str, Any]] | None,
+    required_fields: Iterable[str],
+    *,
+    entity_label: str,
+    gold_enabled: bool,
+) -> None:
+    """Medallion-truthful Gold assert: required when gold is enabled, skipped otherwise."""
+    if not gold_enabled:
+        return
+    assert gold_records is not None, f"{entity_label}: gold_records required when gold enabled"
+    assert_records_have_required_fields(
+        gold_records,
+        required_fields,
+        entity_label=f"{entity_label}.gold",
+    )

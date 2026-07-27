@@ -96,8 +96,30 @@ bioetl run --pipeline <NAME> [OPTIONS]
 - `--filter-column <COL>` — колонка в CSV
 - `--filter-field <FIELD>` — поле API
 - `--use-cached-bronze` — использовать Bronze cache
-- `--exact-replay` — strict exact replay
-- `--required-persistence-profile` — профиль персистентности
+- `--exact-replay` — strict exact replay (требует snapshot-backed Bronze)
+- `--required-persistence-profile` — `degraded_observable` | `replay_ready` | `forensic_grade`
+
+**Профили персистентности (control-plane):**
+
+| Профиль | Когда использовать | Input snapshots |
+| --- | --- | --- |
+| `degraded_observable` | Первый local/live extract, dev smoke | **не** требуются до старта |
+| `replay_ready` (default) | Run должен быть ready for exact replay | **требуются** (cached Bronze и/или parent manifest) |
+| `forensic_grade` | Максимально строгий control-plane | snapshots + ledger |
+
+Первый live-run без Bronze cache / parent run:
+
+```bash
+bioetl run --pipeline chembl_assay --limit 1000 \
+  --required-persistence-profile degraded_observable
+```
+
+Strict replay:
+
+```bash
+bioetl run --pipeline chembl_activity --use-cached-bronze --exact-replay \
+  --replay-of-run-id <parent_run_id>
+```
 
 **Примеры:**
 ```bash
@@ -106,6 +128,7 @@ bioetl run --pipeline chembl_activity --limit 100
 bioetl run --pipeline chembl_activity --run-type rebuild --yes
 bioetl run --pipeline chembl_activity --resume
 bioetl run --pipeline chembl_activity --use-cached-bronze --exact-replay
+bioetl run --pipeline chembl_assay --limit 1000 --required-persistence-profile degraded_observable
 ```
 
 ### `run-all` — Запуск всех пайплайнов провайдера

@@ -56,12 +56,13 @@ async def test_chembl_assay_full_cycle(e2e_data_dir: Path):
     )
     assert silver_count <= 5
 
-    # Assert - Schema validation
+    # Assert - Schema validation (shared helper; no ad-hoc field loops)
     records = await get_silver_records(e2e_data_dir, "chembl_assay")
-    required_fields = ["assay_id", "assay_type"]
-    for record in records:
-        for field in required_fields:
-            assert field in record, f"Missing required field: {field}"
+    assert_records_have_required_fields(
+        records,
+        ("assay_id", "assay_type"),
+        entity_label="chembl_assay.silver",
+    )
 
     manifest_payload = assert_run_manifest_exists(e2e_data_dir, ctx.run_id)
     assert manifest_payload["pipeline_name"] == "chembl_assay"
