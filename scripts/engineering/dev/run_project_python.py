@@ -7,9 +7,14 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
+# Pre-commit invokes this entrypoint as a bare script path, so ensure the repo
+# root is importable before loading ``scripts.*`` helpers.
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 
 
 def _preferred_python() -> str:
