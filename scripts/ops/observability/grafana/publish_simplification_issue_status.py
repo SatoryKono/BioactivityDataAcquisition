@@ -142,7 +142,7 @@ def main() -> int:
                 _post_with_api(issue, body)
                 print(f"  posted via API")
                 continue
-            except Exception as exc:  # noqa: BLE001 - operator surface
+            except Exception as exc:
                 errors.append(f"api: {exc}")
                 if args.via == "api":
                     print(f"  FAILED {exc}", file=sys.stderr)
@@ -152,7 +152,7 @@ def main() -> int:
                 _post_with_gh(issue, body, root)
                 print(f"  posted via gh")
                 continue
-            except Exception as exc:  # noqa: BLE001 - operator surface
+            except Exception as exc:
                 errors.append(f"gh: {exc}")
                 print(f"  FAILED {'; '.join(errors)}", file=sys.stderr)
                 return 1

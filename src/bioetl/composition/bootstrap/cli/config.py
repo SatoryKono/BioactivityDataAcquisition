@@ -21,7 +21,11 @@ from bioetl.composition.runtime_builders.config_access import (
     get_settings,
     resolve_configs_root,
 )
-from bioetl.domain.ports import DomainConfigMapperPort, SettingsLoaderPort
+from bioetl.domain.ports import (
+    DomainConfigMapperPort,
+    PipelineConfigLoaderPort,
+    SettingsLoaderPort,
+)
 from bioetl.infrastructure.config.converters import yaml_config_to_domain
 
 
@@ -43,7 +47,6 @@ def bootstrap_config_service(
     dq_config_loader = create_dq_config_loader(resolved_configs_root)
 
     from bioetl.application.services.config_dq_service import DQConfigLoaderProtocol
-    from bioetl.domain.ports.config.config_loader_port import PipelineConfigLoaderPort
 
     return build_cli_config_service(
         registry=create_registered_pipeline_registry(registry),
