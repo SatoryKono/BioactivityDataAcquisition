@@ -27,7 +27,7 @@
       },
       "id": 1000,
       "options": {
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:11px\"><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">0. Trust</a><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">1. Overview</a><span aria-current=\"page\" style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#fff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default\">2. Pipeline Diagnostics</span><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">4. Data Quality</a></div>",
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:11px\"><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">0. Control Plane</a><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">1. Overview</a><span aria-current=\"page\" style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#fff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default\">2. Runtime</span><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id\">3. Provider Health</a><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=$stage&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">4. Data Quality</a><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?var-workflow=$workflow&amp;${__url_time_range}&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type\">5. Workflow</a><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-alerts-slo/bioetl-alerts-slo?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\">6. Alerts & SLO</a></div>",
         "mode": "html"
       },
       "title": "Review Dashboard Navigation",
@@ -50,15 +50,25 @@
           "title": "3. Provider Health",
           "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id",
           "targetBlank": false,
-          "includeVars": false,
-          "tooltip": "Context mapping: provider=unknown, pipeline_context=$pipeline, adapter=unknown. Visible workflow/pipeline/run_type are preserved; provider remains fail-closed when unknown."
+          "includeVars": false
         },
         {
           "title": "4. Data Quality",
           "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
           "targetBlank": false,
-          "includeVars": false,
-          "tooltip": "Open the Data Quality dashboard in the same tab."
+          "includeVars": false
+        },
+        {
+          "title": "5. Workflow",
+          "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?var-workflow=$workflow&${__url_time_range}&var-pipeline=$pipeline&var-run_type=$run_type",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "6. Alerts & SLO",
+          "url": "/d/bioetl-alerts-slo/bioetl-alerts-slo?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
         }
       ]
     },
@@ -3428,7 +3438,7 @@
     ]
   },
   "timezone": "browser",
-  "title": "2. Pipeline Diagnostics",
+  "title": "2. Runtime",
   "uid": "bioetl-runtime",
   "version": 3
 }
