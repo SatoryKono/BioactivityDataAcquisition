@@ -10,8 +10,7 @@
   "catalog": "SKILLS-CATALOG.md",
   "codex_devin": {
     "optional_presence_globs": [
-      "*/agents/openai.yaml",
-      "*/references/**"
+      "*/agents/openai.yaml"
     ],
     "allowed_content_variant_globs": [
       "*/SKILL.md",
@@ -19,6 +18,10 @@
     ],
     "required_identical_when_shared_globs": [
       "*/references/**"
-    ]
+    ],
+    "notes": {
+      "references": "Codex and Devin must share the same references/** tree (presence + byte-identical). Platform-specific SKILL.md wording may differ.",
+      "skill_md_variants": "SKILL.md may diverge for platform frontmatter/triggers only; keep semantic core aligned with .codex/skills and do not fork normative rules."
+    }
   }
 }

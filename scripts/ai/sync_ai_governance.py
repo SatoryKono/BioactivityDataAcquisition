@@ -17,6 +17,7 @@ import re
 import shutil
 import sys
 import tempfile
+from collections.abc import Callable
 from pathlib import Path
 
 CANONICAL_SOURCES_BLOCK = """## Canonical Sources
@@ -600,7 +601,21 @@ def sync_skill_mirrors(root: Path, *, check_only: bool) -> list[str]:
             issues.extend(_compare_trees(expected_docs, paths["docs_mirror"]))
         else:
             if paths["docs_mirror"].exists():
-                shutil.rmtree(paths["docs_mirror"])
+                def _onexc(
+                    func: Callable[..., object],
+                    path: str,
+                    exc: BaseException,
+                ) -> None:
+                    import os
+                    import stat
+
+                    try:
+                        os.chmod(path, stat.S_IWRITE)
+                        func(path)
+                    except Exception as retry_error:
+                        raise exc from retry_error
+
+                shutil.rmtree(paths["docs_mirror"], onexc=_onexc)
             shutil.copytree(expected_docs, paths["docs_mirror"])
             issues.extend(_compare_trees(expected_docs, paths["docs_mirror"]))
     return issues
