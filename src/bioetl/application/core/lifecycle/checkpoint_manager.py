@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from bioetl.application.core.batch_runtime_failure_policy import (
     OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
 )
@@ -29,6 +31,20 @@ from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 _OPERATION_ERRORS = SHARED_OPERATION_ERRORS
 
 
+@dataclass(frozen=True, slots=True)
+class CheckpointRuntimeIdentity:
+    """Identity and resume policy bag for :class:`CheckpointRuntimeService`."""
+
+    pipeline_name: str
+    run_id: RunID
+    resume: bool
+    resume_run_id: RunID | None = None
+    resume_manifest_id: str | None = None
+    loading_strategy: LoadingStrategy | None = None
+    current_metadata: CheckpointMetadata | None = None
+    compatibility_policy: CheckpointCompatibilityPolicy = "soft_fail"
+
+
 class CheckpointRuntimeService:
     """Framework-agnostic checkpoint persistence and resume management."""
 
@@ -38,33 +54,28 @@ class CheckpointRuntimeService:
         self,
         checkpoint_port: CheckpointPort,
         logger: LoggerPort,
-        pipeline_name: str,
-        run_id: RunID,
-        resume: bool,
-        resume_run_id: RunID | None = None,
-        resume_manifest_id: str | None = None,
+        identity: CheckpointRuntimeIdentity,
         *,
-        loading_strategy: LoadingStrategy | None = None,
         metrics: MetricsPort | None = None,
         clock: ClockPort | None = None,
         checkpoint_compatibility_service: CheckpointCompatibilityService | None = None,
-        current_metadata: CheckpointMetadata | None = None,
-        compatibility_policy: CheckpointCompatibilityPolicy = "soft_fail",
     ) -> None:
         """Initialize checkpoint management with explicit collaborators."""
         self._checkpoint = checkpoint_port
         self._logger = logger
-        self._pipeline_name = pipeline_name
-        self._run_id = run_id
-        self._resume = resume
-        self._resume_run_id = resume_run_id
-        self._resume_manifest_id = resume_manifest_id
-        self._loading_strategy = loading_strategy
+        self._pipeline_name = identity.pipeline_name
+        self._run_id = identity.run_id
+        self._resume = identity.resume
+        self._resume_run_id = identity.resume_run_id
+        self._resume_manifest_id = identity.resume_manifest_id
+        self._loading_strategy = identity.loading_strategy
         self._metrics = metrics
         self._clock = clock
         self._compatibility_service = checkpoint_compatibility_service
-        self._current_metadata = current_metadata
-        self._compatibility_policy = validate_compatibility_policy(compatibility_policy)
+        self._current_metadata = identity.current_metadata
+        self._compatibility_policy = validate_compatibility_policy(
+            identity.compatibility_policy
+        )
 
     def _emit_checkpoint_load_status(self, status: str) -> None:
         """Emit bounded checkpoint load outcomes for runtime resume decisions."""
@@ -194,5 +205,6 @@ class CheckpointRuntimeService:
 
 
 __all__ = [
+    "CheckpointRuntimeIdentity",
     "CheckpointRuntimeService",
 ]

@@ -6,6 +6,7 @@ from bioetl.application.core.lifecycle._checkpoint_types import (
     CheckpointCompatibilityService,
 )
 from bioetl.application.core.lifecycle.checkpoint_manager import (
+    CheckpointRuntimeIdentity,
     CheckpointRuntimeService,
 )
 from bioetl.application.core.lifecycle.cleanup_service import (
@@ -23,6 +24,7 @@ from bioetl.application.core.lifecycle.shutdown import (
 
 __all__ = [
     "CheckpointCompatibilityService",
+    "CheckpointRuntimeIdentity",
     "CheckpointRuntimeService",
     "CleanupPreview",
     "CleanupResult",

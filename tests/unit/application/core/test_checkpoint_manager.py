@@ -9,6 +9,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.application.core.lifecycle.checkpoint_manager import (
+    CheckpointRuntimeIdentity,
     CheckpointRuntimeService,
 )
 from bioetl.application.services.checkpoint_compatibility_service import (
@@ -19,6 +20,36 @@ from bioetl.domain.types.checkpoint_metadata import (
     CheckpointMetadata,
 )
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
+
+
+def _crs(
+    checkpoint_port=None,
+    logger=None,
+    pipeline_name=None,
+    run_id=None,
+    resume=None,
+    **kwargs,
+):
+    """Test helper wrapping CheckpointRuntimeIdentity bag (ARCH-RES-02)."""
+    identity_keys = {
+        "resume_run_id",
+        "resume_manifest_id",
+        "loading_strategy",
+        "current_metadata",
+        "compatibility_policy",
+    }
+    id_kwargs = {k: kwargs.pop(k) for k in list(kwargs) if k in identity_keys}
+    return CheckpointRuntimeService(
+        checkpoint_port,
+        logger,
+        CheckpointRuntimeIdentity(
+            pipeline_name=pipeline_name,
+            run_id=run_id,
+            resume=resume,
+            **id_kwargs,
+        ),
+        **kwargs,
+    )
 
 
 class _FixedClock:
@@ -68,7 +99,7 @@ def compatible_checkpoint_compatibility_service():
 def checkpoint_manager(mock_checkpoint_port, mock_logger):
     """Create CheckpointRuntimeService instance."""
     run_id = deterministic_uuid_from_callsite("replay-sensitive")
-    return CheckpointRuntimeService(
+    return _crs(
         checkpoint_port=mock_checkpoint_port,
         logger=mock_logger,
         pipeline_name="test_pipeline",
@@ -84,7 +115,7 @@ class TestCheckpointManagerInit:
     def test_init_with_all_params(self, mock_checkpoint_port, mock_logger):
         """Test initialization with all parameters."""
         run_id = deterministic_uuid_from_callsite("replay-sensitive")
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="my_pipeline",
@@ -115,7 +146,7 @@ class TestCheckpointManagerLoadCheckpoint:
         )
 
         run_id = deterministic_uuid_from_callsite("replay-sensitive")
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="test_pipeline",
@@ -165,7 +196,7 @@ class TestCheckpointManagerLoadCheckpoint:
             },
         )
 
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="test_pipeline",
@@ -201,7 +232,7 @@ class TestCheckpointManagerLoadCheckpoint:
             {"records_processed": 1000},
         )
 
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="test_pipeline",
@@ -231,7 +262,7 @@ class TestCheckpointManagerLoadCheckpoint:
         mock_checkpoint_port.load.return_value = None
 
         run_id = deterministic_uuid_from_callsite("replay-sensitive")
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="test_pipeline",
@@ -253,7 +284,7 @@ class TestCheckpointManagerLoadCheckpoint:
             {"records_processed": 1000},
         )
 
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="test_pipeline",
@@ -298,7 +329,7 @@ class TestCheckpointManagerLoadCheckpoint:
         """Missing checkpoint emits bounded missing status."""
         mock_checkpoint_port.load.return_value = None
 
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="test_pipeline",
@@ -321,7 +352,7 @@ class TestCheckpointManagerLoadCheckpoint:
     ):
         """Test load_checkpoint when not resuming."""
         run_id = deterministic_uuid_from_callsite("replay-sensitive")
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="test_pipeline",
@@ -356,7 +387,7 @@ class TestCheckpointManagerSaveCheckpoint:
         self, mock_checkpoint_port, mock_logger, mock_metrics
     ) -> None:
         run_id = deterministic_uuid_from_callsite("replay-sensitive")
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="test_pipeline",
@@ -422,7 +453,7 @@ class TestCheckpointManagerFullScanOnly:
         )
 
         run_id = deterministic_uuid_from_callsite("replay-sensitive")
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_publication",
@@ -445,7 +476,7 @@ class TestCheckpointManagerFullScanOnly:
         """Blocked resume path emits bounded blocked status."""
         from bioetl.domain.medallion import LoadingStrategy
 
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_publication",
@@ -471,7 +502,7 @@ class TestCheckpointManagerFullScanOnly:
         from bioetl.domain.medallion import LoadingStrategy
 
         run_id = deterministic_uuid_from_callsite("replay-sensitive")
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="pubmed_publication",
@@ -499,7 +530,7 @@ class TestCheckpointManagerFullScanOnly:
         )
 
         run_id = deterministic_uuid_from_callsite("replay-sensitive")
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
@@ -525,7 +556,7 @@ class TestCheckpointManagerFullScanOnly:
         from bioetl.domain.medallion import LoadingStrategy
 
         run_id = deterministic_uuid_from_callsite("replay-sensitive")
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_publication",
@@ -553,7 +584,7 @@ class TestCheckpointManagerFullScanOnly:
         )
 
         run_id = deterministic_uuid_from_callsite("replay-sensitive")
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="test_pipeline",
@@ -588,7 +619,7 @@ class TestCheckpointManagerLoadingStrategy:
         )
 
         run_id = deterministic_uuid_from_callsite("replay-sensitive")
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_publication",
@@ -619,7 +650,7 @@ class TestCheckpointManagerLoadingStrategy:
         )
 
         run_id = deterministic_uuid_from_callsite("replay-sensitive")
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="test_pipeline",
@@ -645,7 +676,7 @@ class TestCheckpointManagerLoadingStrategy:
         from bioetl.domain.medallion import LoadingStrategy
 
         run_id = deterministic_uuid_from_callsite("replay-sensitive")
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_publication",
@@ -669,7 +700,7 @@ class TestCheckpointManagerLoadingStrategy:
         run_id = deterministic_uuid_from_callsite("replay-sensitive")
         # Note: CheckpointRuntimeService receives LoadingStrategy enum from PipelineConfig
         # This test verifies the enum-based behavior
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="test_pipeline",
@@ -703,7 +734,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             )
         )
 
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
@@ -746,7 +777,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             )
         )
 
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
@@ -797,7 +828,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             )
         )
 
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
@@ -851,7 +882,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             )
         )
 
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
@@ -901,7 +932,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             )
         )
 
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
@@ -930,7 +961,7 @@ class TestCheckpointManagerCompatibilityPolicy:
     async def test_save_checkpoint_enriches_execution_identity(
         self, mock_checkpoint_port, mock_logger
     ) -> None:
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
@@ -1012,7 +1043,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             )
         )
 
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
@@ -1054,7 +1085,7 @@ class TestCheckpointManagerCompatibilityPolicy:
         )
         compatibility_service = MagicMock()
 
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
@@ -1099,7 +1130,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             {"records_processed": 42},
         )
 
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
@@ -1135,7 +1166,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             {"records_processed": 42},
         )
 
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
@@ -1174,7 +1205,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             {"records_processed": 100, "manifest_id": "manifest-old"},
         )
 
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
@@ -1206,7 +1237,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             },
         )
 
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
@@ -1239,7 +1270,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             },
         )
 
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
@@ -1298,7 +1329,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             },
         )
 
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
@@ -1349,7 +1380,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             },
         )
 
-        manager = CheckpointRuntimeService(
+        manager = _crs(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
