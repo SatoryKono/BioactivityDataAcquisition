@@ -87,7 +87,7 @@ def test_dashboards_do_not_ship_empty_options_data_links_arrays() -> None:
 def test_top_level_handoff_fails_closed_when_required_link_is_removed() -> None:
     """The real policy path must reject a removed required dashboard link."""
     link: dict[str, object] = {
-        "title": "2. Runtime",
+        "title": "2. Pipeline Diagnostics",
         "url": (
             "/d/bioetl-runtime?var-workflow=$workflow&var-pipeline=$pipeline"
             "&var-run_type=$run_type&var-run_id=$run_id&from=$__from&to=$__to"
@@ -378,7 +378,6 @@ def test_critical_top_level_links_follow_title_allowlist_and_scope_reset_suffix(
         "bioetl-provider-health-v2.json",
         "bioetl-dq-v2.json",
         "bioetl-control-plane-v1.json",
-        "bioetl-workflow-overview.json",
     )
     for dashboard_name in critical_dashboards:
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
@@ -399,13 +398,11 @@ def test_critical_top_level_links_follow_title_allowlist_and_scope_reset_suffix(
 def test_dashboard_titles_match_home_dashboard_navigation_names() -> None:
     """Grafana Home > Dashboards uses dashboard.title, so titles must match the navigation map."""
     expected_titles_by_uid = {
-        "bioetl-control-plane-v1": "0. Control Plane",
+        "bioetl-control-plane-v1": "0. Trust",
         "bioetl-overview-v2": "1. Overview",
-        "bioetl-runtime": "2. Runtime",
+        "bioetl-runtime": "2. Pipeline Diagnostics",
         "bioetl-provider-health-v2": "3. Provider Health",
         "bioetl-dq-v2": "4. Data Quality",
-        "bioetl-workflow-overview": "5. Workflow",
-        "bioetl-alerts-slo": "6. Alerts & SLO",
     }
 
     for dashboard_path in get_dashboard_files():
@@ -752,7 +749,7 @@ def test_runtime_and_dq_dashboards_expose_control_plane_handoff() -> None:
     for dashboard_name in ("bioetl-runtime.json", "bioetl-dq-v2.json"):
         _assert_named_dashboard_handoff(
             dashboard_name=dashboard_name,
-            expected_title="0. Control Plane",
+            expected_title="0. Trust",
             url_prefix="/d/bioetl-control-plane-v1/bioetl-control-plane-v1",
         )
 

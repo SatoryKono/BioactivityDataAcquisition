@@ -205,7 +205,7 @@ def test_pipeline_selector_live_closure_evidence_is_complete() -> None:
     evidence_uids = {dashboard.get("uid") for dashboard in dashboards}
     assert set(registry).issubset(evidence_uids)
     assert "bioetl-silver-reject-explorer" not in registry
-    assert len(registry) == closure.get("required_dashboard_count") == 7
+    assert len(registry) == closure.get("required_dashboard_count") == 5
     assert len(dashboards) >= len(registry)
 
     shared_metrics = contract.get("shared_query_metrics")
@@ -223,8 +223,12 @@ def test_pipeline_selector_live_closure_evidence_is_complete() -> None:
 
     for dashboard in dashboards:
         uid = dashboard.get("uid")
-        if uid == "bioetl-silver-reject-explorer":
-            # Historical evidence row only; dashboard removed 2026-07-23.
+        if uid in {
+            "bioetl-silver-reject-explorer",
+            "bioetl-workflow-overview",
+            "bioetl-alerts-slo",
+        }:
+            # Historical evidence rows only; retired shipping surface.
             continue
         assert uid in expected_metric_by_uid
         assert dashboard.get("live_api_http_status") == 200
@@ -373,7 +377,6 @@ def test_dashboard_families_cover_all_shipped_dashboards() -> None:
         ("bioetl-runtime.json", "bioetl-runtime"),
         ("bioetl-provider-health-v2.json", "bioetl-provider-health-v2"),
         ("bioetl-dq-v2.json", "bioetl-dq-v2"),
-        ("bioetl-workflow-overview.json", "bioetl-workflow-overview"),
     ],
 )
 def test_shipped_selector_registry_matches_dashboard_variables(

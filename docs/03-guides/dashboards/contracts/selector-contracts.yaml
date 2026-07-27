@@ -162,7 +162,7 @@ pipeline_universe_contract:
     canonical-only scopes MUST be explainable by data-plane telemetry without a manifest
     artifact.
   closure_evidence:
-    required_dashboard_count: 7
+    required_dashboard_count: 5
     shared_required_chembl_pipeline_count: 15
     shared_required_missing_count: 0
     verify_exact_shared_relation: true
@@ -176,7 +176,7 @@ pipeline_universe_contract:
       captured_at_utc: '2026-07-20T08:05:54Z'
       expected_verdict: pass
       require_relevant_runtime_paths_clean: true
-      require_live_dashboard_count: 7
+      require_live_dashboard_count: 5
       require_complete_navigation_links: true
     require_live_dashboard_count: null
 dashboard_families:
@@ -499,13 +499,7 @@ ship_now_selector_contract_by_uid:
     time_range: grafana_builtin
 hidden_handoff_contract:
   allowed_shipped_vars:
-  - workflow_context
   - pipeline_context
-  - pipeline_context_exact
-  - run_type_context
-  - run_type_context_exact
-  - provider_context
-  - provider_context_exact
   - provider_hint
   detail_only_shipped_vars:
   - adapter

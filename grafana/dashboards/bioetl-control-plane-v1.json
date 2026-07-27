@@ -29,48 +29,45 @@
       },
       "id": 1000,
       "options": {
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:11px\"><span aria-current=\"page\" style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#fff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default\">0. Control Plane</span><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">1. Overview</a><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">2. Runtime</a><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id\">3. Provider Health</a><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">4. Data Quality</a><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?var-workflow=$workflow&amp;${__url_time_range}&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type\">5. Workflow</a><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-alerts-slo/bioetl-alerts-slo?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\">6. Alerts & SLO</a></div>",
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:11px\"><span aria-current=\"page\" style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#fff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default\">0. Trust</span><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">1. Overview</a><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">2. Pipeline Diagnostics</a><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">4. Data Quality</a></div>",
         "mode": "html"
       },
       "title": "Review Dashboard Navigation",
-      "description": "Sanitizer-compatible same-tab navigation bus with identical composition and order across all shipped dashboards. It preserves the current time range and supported scope, uses inline theme-safe tokens with native keyboard focus, and wraps predictably at 1024 px. Explore Logs and Explore Traces require the optional tracing profile; traces are available only for traced runs. Alerts keep explicit Global/Pipeline/Run scope.",
+      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus: Trust / Overview / Pipeline Diagnostics / Data Quality. Provider Health remains interim/off-bus.",
       "type": "text",
       "links": [
         {
           "title": "1. Overview",
           "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+          "type": "link",
+          "icon": "dashboard",
           "targetBlank": false,
-          "includeVars": false
+          "keepTime": false,
+          "includeVars": false,
+          "asDropdown": false,
+          "tags": []
         },
         {
-          "title": "2. Runtime",
+          "title": "2. Pipeline Diagnostics",
           "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+          "type": "link",
+          "icon": "dashboard",
           "targetBlank": false,
-          "includeVars": false
-        },
-        {
-          "title": "3. Provider Health",
-          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id",
-          "targetBlank": false,
-          "includeVars": false
+          "keepTime": false,
+          "includeVars": false,
+          "asDropdown": false,
+          "tags": []
         },
         {
           "title": "4. Data Quality",
           "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+          "type": "link",
+          "icon": "dashboard",
           "targetBlank": false,
-          "includeVars": false
-        },
-        {
-          "title": "5. Workflow",
-          "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?var-workflow=$workflow&${__url_time_range}&var-pipeline=$pipeline&var-run_type=$run_type",
-          "targetBlank": false,
-          "includeVars": false
-        },
-        {
-          "title": "6. Alerts & SLO",
-          "url": "/d/bioetl-alerts-slo/bioetl-alerts-slo?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
-          "targetBlank": false,
-          "includeVars": false
+          "keepTime": false,
+          "includeVars": false,
+          "asDropdown": false,
+          "tags": []
         }
       ]
     },
@@ -4585,7 +4582,7 @@
     ]
   },
   "timezone": "browser",
-  "title": "0. Control Plane",
+  "title": "0. Trust",
   "uid": "bioetl-control-plane-v1",
   "version": 2
 }

@@ -1301,23 +1301,18 @@ def _assert_silver_explorer_html_bus_forensic_boundary(
 
 
 _EXPECTED_CURRENT_NAV_TITLE = {
-    "bioetl-control-plane-v1": "0. Control Plane",
+    "bioetl-control-plane-v1": "0. Trust",
     "bioetl-overview-v2": "1. Overview",
-    "bioetl-runtime": "2. Runtime",
+    "bioetl-runtime": "2. Pipeline Diagnostics",
     "bioetl-provider-health-v2": "3. Provider Health",
     "bioetl-dq-v2": "4. Data Quality",
-    "bioetl-workflow-overview": "5. Workflow",
-    "bioetl-alerts-slo": "6. Alerts & SLO",
 }
 
 _BASE_VISUAL_NAV_TITLES = (
-    "0. Control Plane",
+    "0. Trust",
     "1. Overview",
-    "2. Runtime",
-    "3. Provider Health",
+    "2. Pipeline Diagnostics",
     "4. Data Quality",
-    "5. Workflow",
-    "6. Alerts & SLO",
 )
 
 _OPTIONAL_VISUAL_NAV_TITLES = (
@@ -1363,7 +1358,14 @@ def _assert_visual_bus_base_content(
         f"{dashboard_name} navigation must survive Grafana Text-panel "
         "sanitization without a style block"
     )
-    for token in _SANITIZER_SAFE_NAV_TOKENS:
+    required_tokens = _SANITIZER_SAFE_NAV_TOKENS
+    if dashboard_name == "bioetl-provider-health-v2.json":
+        required_tokens = tuple(
+            token
+            for token in _SANITIZER_SAFE_NAV_TOKENS
+            if token not in {"background:#1d4ed8", "border:2px solid #7dd3fc"}
+        )
+    for token in required_tokens:
         assert token in content, (
             f"{dashboard_name} navigation must define sanitizer-safe {token}"
         )
@@ -1375,6 +1377,11 @@ def _assert_visual_bus_base_content(
 def _assert_current_dashboard_disabled_in_visual_bus(
     *, dashboard_name: str, uid: str, content: str
 ) -> None:
+    if uid == "bioetl-provider-health-v2":
+        assert 'aria-current="page"' not in content, (
+            f"{dashboard_name} is off-bus and must not mark a primary title as current"
+        )
+        return
     current_title = _EXPECTED_CURRENT_NAV_TITLE[uid]
     disabled_pattern = re.compile(
         rf'<span[^>]*aria-current="page"[^>]*>{re.escape(current_title)}</span>'

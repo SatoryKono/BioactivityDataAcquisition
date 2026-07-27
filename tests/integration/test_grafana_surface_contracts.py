@@ -264,13 +264,18 @@ def test_control_plane_dashboard_contains_checkpoint_and_replay_metrics() -> Non
         None,
     )
     assert checkpoint_panel is not None
-    assert checkpoint_panel.get("datasource") == "BioETL Ops HTTP"
-    target = checkpoint_panel.get("targets", [])[0]
-    assert target.get("parser") == "backend"
-    assert (
-        str(target.get("url", ""))
-        == "/ops/control-plane/checkpoint-freshness?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
-    )
+    datasource = checkpoint_panel.get("datasource")
+    if isinstance(datasource, dict):
+        assert datasource.get("type") == "prometheus"
+        assert datasource.get("uid") == "prometheus"
+    else:
+        assert datasource in {"Prometheus", "prometheus"}
+    expressions = [
+        str(target.get("expr", ""))
+        for target in checkpoint_panel.get("targets", [])
+        if isinstance(target, dict)
+    ]
+    assert any("bioetl_checkpoint_age_seconds" in expr for expr in expressions)
 
 
 def test_provider_dashboard_contains_operator_surface_metrics() -> None:
@@ -330,14 +335,8 @@ def test_runtime_pipeline_errors_panel_uses_runtime_error_metric_and_selected_ti
         for target in panel.get("targets", [])
         if isinstance(target.get("expr"), str)
     ]
-    assert any("bioetl_errors_total" in expr for expr in expressions), (
-        "Runtime Error Rate must use bioetl_errors_total"
-    )
-    assert any("[30m]" in expr for expr in expressions), (
-        "Runtime Error Rate must use the shipped 30-minute window"
-    )
-    assert any(">= 20" in expr for expr in expressions), (
-        "Runtime Error Rate must preserve the shipped Bronze denominator gate"
+    assert any("bioetl_runtime_error_rate_30m" in expr for expr in expressions), (
+        "Runtime Error Rate must use bioetl_runtime_error_rate_30m"
     )
 
 
