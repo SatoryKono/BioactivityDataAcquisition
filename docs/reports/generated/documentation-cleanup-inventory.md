@@ -7,11 +7,11 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3138 |
-| Tracked doc-like files | 1944 |
+| Doc-like files | 3142 |
+| Tracked doc-like files | 1948 |
 | Ignored local docs/reports files | 1194 |
 | Duplicate groups | 2 |
-| Generated without route or exception | 0 |
+| Generated without route or exception | 1 |
 | Generated routes | 64 |
 
 ## Tracking State
@@ -19,7 +19,7 @@
 | Tracking State | Count |
 | --- | --- |
 | ignored_local | 1194 |
-| tracked | 1944 |
+| tracked | 1948 |
 
 ## Lifecycle Counts
 
@@ -38,12 +38,12 @@
 | generated_test_run_evidence | 4 |
 | guide | 2 |
 | index | 4 |
-| issue_pack | 15 |
+| issue_pack | 16 |
 | live_issue_mirror | 4 |
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 36 |
 | supporting_context | 16 |
-| working_report | 52 |
+| working_report | 55 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -52,37 +52,37 @@
 | active_draft | 108 |
 | guide | 2 |
 | index | 4 |
-| issue_pack | 15 |
+| issue_pack | 16 |
 | live_issue_mirror | 4 |
 
 ## Status Counts
 
 | Status | Count |
 | --- | --- |
-| Active | 1965 |
+| Active | 1964 |
 | Archived | 82 |
 | Canonical | 68 |
-| Generated | 738 |
-| Working | 285 |
+| Generated | 739 |
+| Working | 289 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 1965 |
+| active | 1964 |
 | archive | 82 |
 | canonical | 68 |
-| generated | 738 |
-| working | 285 |
+| generated | 739 |
+| working | 289 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-github-state-check | 123 |
-| archive-after-migration | 103 |
-| generate-automatically | 738 |
-| keep | 2170 |
+| archive-after-github-state-check | 124 |
+| archive-after-migration | 106 |
+| generate-automatically | 739 |
+| keep | 2169 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -148,6 +148,9 @@
 | `docs/reports/test-health/skip_marker_analysis.md` | Working | 0 | archive-after-migration |
 | `docs/reports/test-health/vcr_lifecycle_analysis.md` | Working | 0 | archive-after-migration |
 | `docs/reports/testing/phase2_integration_testing_plan.md` | Working | 0 | archive-after-migration |
+| `reports/observability/audit-20260727-live-operator-truth/CLOSEOUT.md` | Working | 0 | archive-after-migration |
+| `reports/observability/audit-20260727-live-operator-truth/grafana-live-snapshot.json` | Working | 0 | archive-after-migration |
+| `reports/observability/audit-20260727-live-operator-truth/live-validation-matrix.json` | Working | 0 | archive-after-migration |
 | `reports/observability/grafana/selector-audit-2026-07-20/selector-audit-report.md` | Working | 0 | archive-after-migration |
 | `reports/observability/grafana/selector-audit-2026-07-20/selector-evidence.json` | Working | 0 | archive-after-migration |
 | `reports/observability/runtime_cardinality_allowlist_review_5574.json` | Working | 0 | archive-after-migration |
@@ -166,9 +169,6 @@
 | `reports/quality/domain-composite-config-importer-map.md` | Working | 0 | archive-after-migration |
 | `reports/quality/hotspot-coverage-tail-owner-map.json` | Working | 0 | archive-after-migration |
 | `reports/quality/issue-6480-application-core-partial-tranche.json` | Working | 0 | archive-after-migration |
-| `reports/quality/low-coverage-targeted-tests-6045.json` | Working | 0 | archive-after-migration |
-| `reports/quality/port-adapter-factory-coverage.json` | Working | 0 | archive-after-migration |
-| `reports/quality/port-adapter-factory-coverage.md` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -263,6 +263,7 @@
 | `.github/ISSUES/AI-AGENT-CONFIG-AUDIT-2026-07-14-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
 | `.github/ISSUES/AI-RUNTIME-AUDIT-001-Make-AI-Skill-Mirror-CI-Truthful-And-Enforce-Devin-Parity.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/AI-RUNTIME-AUDIT-002-Eliminate-Tracked-Devin-MCP-Workstation-Paths.md` | active_draft |  | archive-after-github-state-check |
+| `.github/ISSUES/ARCH-QA-2026-07-27-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
 | `.github/ISSUES/ARCHITECTURE-FACADE-4745-Enforce-No-Growth-Bioetl-Infrastructure-Config-Seam.md` | live_issue_mirror | 4745 | reconcile-with-github-state |
 | `.github/ISSUES/ARCHITECTURE_AUDIT_2025-01-30_aggregate_invariants.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/ARCHITECTURE_AUDIT_2025-01-30_batch_fsm_tests.md` | active_draft |  | archive-after-github-state-check |
@@ -298,7 +299,6 @@
 | `.github/ISSUES/DOC-AUDIT-001-Fix-Invalid-CLI-Examples-In-Deployment-And-Bootstrap-Docs.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/DOC-AUDIT-002-Refresh-Grafana-Provisioning-Path-Docs.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/DOC-AUDIT-003-Align-Windows-Pytest-Docs-With-Xdist-Policy.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/DOC-AUDIT-004-Repair-Control-Plane-ADR-And-Architecture-Docs.md` | active_draft |  | archive-after-github-state-check |
 
 ## Docs Reports Evidence Examples
 
