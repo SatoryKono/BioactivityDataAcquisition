@@ -235,18 +235,23 @@ class BatchProcessingSupportService:
         on_error: Callable[[Exception], None] | None = None,
     ) -> object:
         return await execute_with_layer_span(
-            self._tracing, name, coro, batch_id, count, on_error=on_error
+            tracing=self._tracing,
+            name=name,
+            coro=coro,
+            batch_id=batch_id,
+            count=count,
+            on_error=on_error,
         )
 
     async def _execute_transform_with_span(
-        self,
-        *,
-        records: list[BronzeRecord],
-        batch_id: BatchID,
-        start_index: int,
+        self, *, records: list[BronzeRecord], batch_id: BatchID, start_index: int
     ) -> TransformResult:
         return await execute_transform_with_span(
-            self._tracing, self._transformer, records, batch_id, start_index
+            tracing=self._tracing,
+            transformer=self._transformer,
+            records=records,
+            batch_id=batch_id,
+            start_index=start_index,
         )
 
     def emit_domain_event(self, event: DomainEvent) -> None:
