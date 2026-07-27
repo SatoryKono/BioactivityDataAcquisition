@@ -404,7 +404,6 @@
       "decision_path": "docs/02-architecture/decisions/ADR-014-deterministic-writes.md",
       "enforcement_owner_paths": [
         "scripts/docs/fixers/fix_links_explicit.py",
-        "scripts/engineering/qa/py_review_orchestrator.py",
         "scripts/ops/data/vacuum_delta.py",
         "tests/architecture/test_column_order.py",
         "tests/architecture/test_deterministic_identity_documentation_governance.py",
@@ -459,7 +458,6 @@
         "docs/04-reference/templates/adr-template.md",
         "docs/05-operations/performance-baselines.md",
         "scripts/docs/fixers/fix_links_explicit.py",
-        "scripts/engineering/qa/py_review_orchestrator.py",
         "scripts/ops/data/vacuum_delta.py",
         "src/bioetl/composition/factories/storage/write_mixin.py",
         "src/bioetl/domain/entities/base.py",
@@ -911,7 +909,6 @@
       "decision_path": "docs/02-architecture/decisions/ADR-027-dq-rules-externalization.md",
       "enforcement_owner_paths": [
         "scripts/docs/checks/check_links.py",
-        "scripts/engineering/qa/py_review_orchestrator.py",
         "scripts/schema/lint_config_paths.py",
         "tests/architecture/test_composite_dq_externalization.py",
         "tests/architecture/test_config_ci_invariants.py",
@@ -943,7 +940,6 @@
         "docs/04-reference/pipelines/README.md",
         "docs/04-reference/publication-validation-index.md",
         "scripts/docs/checks/check_links.py",
-        "scripts/engineering/qa/py_review_orchestrator.py",
         "scripts/schema/lint_config_paths.py",
         "tests/architecture/test_composite_dq_externalization.py",
         "tests/architecture/test_config_ci_invariants.py",
