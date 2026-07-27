@@ -68,11 +68,23 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint."
     },
+    "scripts/engineering/qa/py_review_orchestrator.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the importable implementation helper for review orchestration; expose future standalone execution only through the canonical QA router."
+    },
     "scripts/ops/observability/grafana/apply_grafana_simplification_6570.py": {
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",
       "review_by": "2026-08-31",
       "next_step": "Remove after the bounded Grafana simplification rollout is applied and its issue-specific validation evidence is finalized."
+    },
+    "scripts/ops/observability/grafana/_full_dashboard_audit_once.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as an internal one-shot implementation helper used by the governed Grafana audit flow; keep it supporting and route operator execution through the canonical dashboard tooling."
     },
     "scripts/ai/codex/helper/check-env.ps1": {
       "owner": "@bioetl-platform",
@@ -656,12 +668,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as the compatibility wrapper for the legacy AST duplicate-function analyzer under src/tools/scripts/duplicate_function_analyzer.py; remove the wrapper when documented callers move to the canonical implementation or the analyzer is retired."
     },
-    "scripts/engineering/qa/apply_universal_entity_filter_stubs.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded manual config-remediation utility for historical entity filter burn-down waves; do not extend it unless the config-surface cleanup program is formally reactivated and governed through a canonical QA workflow."
-    },
     "scripts/engineering/qa/audit_pipeline_semantics.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
@@ -854,53 +860,17 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as a bounded manual test-governance report utility while testing guidance still references the direct script path; promote it into the canonical scripts.engineering.qa surface or retire it after the broader test-governance workflow is consolidated."
     },
-    "scripts/engineering/qa/revert_config_surface_corruption.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded rollback utility for historical config-surface corruption incidents caused by earlier auto burn-down attempts; do not reuse it outside reviewed repair operations."
-    },
-    "scripts/engineering/qa/revert_extraction_params_corruption.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded rollback utility for historical extraction_params corruption introduced by auto burn-down experiments; retire it if the remediation campaign no longer requires manual repair fallbacks."
-    },
-    "scripts/engineering/qa/revert_filter_surface_corruption.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded rollback utility for historical filter-surface corruption introduced by automated config edits; retire it if the reviewed burn-down recovery toolbox is no longer needed."
-    },
     "scripts/engineering/qa/run_architecture_audit_read_only.py": {
       "owner": "@bioetl-architecture",
       "decision": "shared_helper_module",
       "review_by": "2026-09-30",
       "next_step": "Retain as the bounded read-only architecture-audit coordinator; keep it non-active while it is a governance helper rather than a general developer bootstrap entrypoint."
     },
-    "scripts/engineering/qa/run_config_surface_auto_burn_down.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded historical automation script for iterative config-surface burn-down waves; do not re-expose it as an active workflow without fresh governance, dry-run safety, and reviewed rollback coverage."
-    },
-    "scripts/engineering/qa/run_config_surface_burn_down_phases.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded historical phased burn-down utility for surgical config text edits; do not extend it unless the config-surface remediation program is restarted under a governed workflow."
-    },
     "scripts/engineering/qa/run_docker_stability_campaign.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
       "review_by": "2026-10-15",
       "next_step": "Retain as the opt-in resumable Docker stability campaign utility; keep it supporting because Docker is an ADR-010 adjunct and host-disruptive execution remains explicitly scheduled."
-    },
-    "scripts/engineering/qa/scaffold_non_chembl_hash_policy.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded historical scaffolding utility for non-ChEMBL hash_policy rollout; retire it once active normalization/hash-policy governance no longer needs one-off bootstrap helpers."
     },
     "scripts/engineering/qa/technical_debt_audit_registry.py": {
       "owner": "@bioetl-architecture",
@@ -974,29 +944,11 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as an unreferenced Windows compatibility installer during the reviewed retirement window; remove it once external bootstrap docs and local operator flows no longer depend on the old Codex command shim."
     },
-    "scripts/ops/launchers/codex/SETUP_GUIDE.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded manual quick-start guide for the Codex launcher setup flow while launcher documentation is being consolidated; retire it once the canonical docs and launcher help cover the same operator guidance."
-    },
     "scripts/ops/launchers/codex/codex-fast.bat": {
       "owner": "@bioetl-platform",
       "decision": "internal_compatibility_launcher",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a fast Windows launcher variant that skips MCP setup while the primary governed Codex launchers remain codex.bat and codex-exec.bat; remove or fold it into launcher flags after the Windows launcher flow is consolidated."
-    },
-    "scripts/ops/maintenance/git/delete-stale-branches.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded manual maintenance utility after removing the scripts.ops router command; prefer explicit GitHub branch-cleanup runbooks or a reviewed repository-maintenance workflow before re-exposing this destructive branch deletion helper."
-    },
-    "scripts/ops/maintenance/github/triage_cleanup_issue_wave.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded manual GitHub issue triage utility after removing the scripts.ops router command; replace with a governed issue lifecycle workflow before re-exposing it as an active ops command."
     },
     "scripts/ops/maintenance/github/update_github_issue.sh": {
       "owner": "@bioetl-platform",
