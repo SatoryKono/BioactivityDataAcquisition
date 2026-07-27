@@ -59,6 +59,10 @@ ORPHAN_EXCLUDED_PREFIXES = (
 KPI_EXCLUDED_PREFIXES = (
     "reports/",
     "00-project/ai/",
+    # Explicit repo-only / historical surfaces from mkdocs.yml exclude_docs.
+    "99-archive/",
+    "plans/",
+    "ru/",
 )
 KPI_INCLUDED_PREFIXES = ("00-project/ai/skills/global/.system/",)
 

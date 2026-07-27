@@ -92,11 +92,11 @@ async def transform_record_attempt(
         return handle_filtered_out_error(
             error,
             _build_filtered_out_handling_context(
-                batch_metrics=batch_metrics,
-                dq_config=dq_config,
-                raw_record=raw_record,
-                debug_export_service=debug_export_service,
-                index=index,
+                batch_metrics,
+                dq_config,
+                raw_record,
+                debug_export_service,
+                index,
             ),
         )
     except TRANSFORM_PROCESSING_ERRORS as error:

@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Protocol
 
 from bioetl.application.services.control_plane.ledger.diagnostic_support import (
+    RunLedgerCorrelationFieldsProtocol,
     sync_manifest_contract_defaults,
     sync_manifest_runtime_defaults,
 )
@@ -24,20 +25,7 @@ __all__ = [
 ]
 
 
-class _RunLedgerCoreEventAppender(Protocol):
-    pipeline_name: str | None
-    provider: str | None
-    entity: str | None
-    run_type: str | None
-    resolved_config_hash: str | None
-    effective_config_hash: str | None
-    contract_ref: str | None
-    contract_version: str | None
-    dq_policy_ref: str | None
-    rule_bundle_version: str | None
-    dq_contract_compatibility_hash: str | None
-    effective_config_artifact_id: str | None
-
+class _RunLedgerCoreEventAppender(RunLedgerCorrelationFieldsProtocol, Protocol):
     @property
     def manifest_id(self) -> str: ...
 

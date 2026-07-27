@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, is_dataclass, replace
-from typing import TYPE_CHECKING, cast
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.ledger.service import (
     RunLedgerService,
@@ -19,6 +19,9 @@ from bioetl.composition.runtime_builders._runner_control_plane_policy import (
 from bioetl.composition.runtime_builders._runner_control_plane_data_root_policy import (
     validate_strict_data_root_policy as _validate_strict_data_root_policy,
 )
+from bioetl.composition.runtime_builders._context_field_binding import (
+    bind_context_fields,
+)
 from bioetl.composition.runtime_builders.control_plane import (
     attach_manifest_id,
     create_run_manifest_with_effective_config,
@@ -28,8 +31,6 @@ from bioetl.domain.control_plane.reproducibility_policy import (
 )
 
 if TYPE_CHECKING:
-    from _typeshed import DataclassInstance
-
     from bioetl.composition.runtime_builders.runner_inputs import (
         RunnerInputs as _RunnerInputs,
     )
@@ -86,20 +87,16 @@ def _bind_required_persistence_profile(
     opt_down_requested: bool,
 ) -> PipelineRunContext:
     """Return a context carrying the resolved persistence-profile policy."""
-    if is_dataclass(ctx):
-        return cast(
-            "PipelineRunContext",
-            replace(
-                cast("DataclassInstance", ctx),
-                required_persistence_profile=required_profile,
-                required_persistence_profile_opt_down=opt_down_requested,
-            ),
-        )
-    if hasattr(ctx, "__dict__"):
-        ctx.required_persistence_profile = required_profile
-        ctx.required_persistence_profile_opt_down = opt_down_requested
-        return ctx
-    raise TypeError("PipelineRunContext must support persistence-profile attachment")
+    return bind_context_fields(
+        ctx,
+        updates={
+            "required_persistence_profile": required_profile,
+            "required_persistence_profile_opt_down": opt_down_requested,
+        },
+        unsupported_message=(
+            "PipelineRunContext must support persistence-profile attachment"
+        ),
+    )
 
 
 def assemble_runner_control_plane(

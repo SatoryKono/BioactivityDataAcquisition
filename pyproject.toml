@@ -389,6 +389,23 @@ warn_unused_ignores = false
 # RF-007 (2026-03-03): Reduced overrides from 69 to 12 bioetl modules.
 # RF-002 (2026-03-10): Reduced from 11 to 2 bioetl modules (removed 9 with zero type:ignore).
 
+# ============ BASEDPYRIGHT ============
+# Keep CLI/workspace enumeration on the product tree. Zed still diagnoses open
+# files outside this include through its `openFilesOnly` language-server mode.
+[tool.basedpyright]
+include = ["src/bioetl"]
+exclude = [
+    "**/__pycache__",
+    ".venv",
+    ".venv-*",
+    "docs",
+    "reports",
+    "src/memory",
+    "tests",
+]
+typeCheckingMode = "strict"
+pythonVersion = "3.12"
+
 # ============ RUFF ============
 [tool.ruff]
 line-length = 88
