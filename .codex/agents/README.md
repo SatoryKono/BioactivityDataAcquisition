@@ -39,9 +39,12 @@ Consolidated agent registry for published docs navigation.
 ## Surface Note
 
 - This page is a **published mirror index**, not a canonical runtime registry.
-- Claude runtime source of truth remains in its runtime-specific agent registry.
-- Codex keeps its own runtime-specific orchestration and related agent context
-  under `.codex/agents/`.
+- Codex runtime source of truth is `.codex/agents/**` (see `CODEX-RUNTIME.md`,
+  `ORCHESTRATION.md`). Production code is written by the orchestrator.
+- `.claude/**` is **not** an active runtime source for Codex/Gemini behavior on
+  `main` (see `AGENTS.md` and `AI_RUNTIME_MIRROR_OWNERSHIP.md`). Do not treat
+  Claude trees as required for BioETL agent work unless a future task adds and
+  verifies them.
 - Use this catalog for discoverability; verify live runtime behavior in the
   relevant runtime tree before treating any profile note as authoritative.
 

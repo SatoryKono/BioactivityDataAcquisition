@@ -104,10 +104,10 @@ applying changes with the same script.
 The following divergence is intentional and not a bug by itself:
 
 - runtime-specific commands, wrappers, and settings may differ between runtimes
-- Codex and Devin skill bodies and runtime metadata may differ only within the
-  sanctioned patterns in `scripts/ai/codex/skills-mirror-contract.json`; their
-  entrypoint sets, catalog membership, and shared required-identical references
-  remain CI-enforced
+- Codex and Devin skill bodies (`SKILL.md`, optional `agents/openai.yaml`) may
+  differ only within sanctioned patterns in
+  `scripts/ai/codex/skills-mirror-contract.json`; entrypoint sets, catalogs, and
+  **all** `references/**` files remain CI-enforced (presence + byte-identical)
 - docs mirrors may summarize or normalize runtime concepts for navigation
   purposes instead of reproducing every runtime file verbatim
 - local-only Gemini config may exist without a tracked Gemini agent/skill tree
@@ -147,6 +147,13 @@ The following divergence is not acceptable:
 - Skill trigger/runtime behavior for Gemini -> only when a tracked
   `.gemini/skills/**` tree exists on `main`
 - Gemini local config classification -> `MCP_LOCAL_RUNTIME_CONFIG.md`
+- **Devin orchestration context** -> Devin has skills + workflows, **not** a
+  parallel 9-bot agent registry. Use `.codex/agents/ORCHESTRATION.md` and
+  `.codex/agents/CODEX-RUNTIME.md` as authoritative orchestration docs.
+- **GitHub Copilot** -> keep path packs thin; do **not** duplicate Codex/Devin
+  skills into `.github/prompts` without a measured gap and owner.
+- **Cursor onboarding** -> after clone run `bash scripts/ai/cursor/setup_cursor.sh`
+  (see `scripts/ai/cursor/README.md`).
 - Human-readable indexes, mirrors, and onboarding pointers -> `docs/00-project/ai/**`
 
 ## Related Entry Points

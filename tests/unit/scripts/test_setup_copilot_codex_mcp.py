@@ -191,14 +191,14 @@ def test_shared_launcher_enforces_singleton_and_loopback() -> None:
 def test_default_local_transport_is_shared_http(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Multi-client default: shared profile + shared HTTP for catalog servers."""
+    """Daily default: stable profile + shared HTTP for catalog servers in profile."""
     monkeypatch.delenv("XDG_CACHE_HOME", raising=False)
     workspace_root = tmp_path / "workspace-root"
     output_root = tmp_path / "output-root"
     workspace_root.mkdir()
 
     assert setup_mcp.DEFAULT_LOCAL_TRANSPORT_MODE == "shared"
-    assert setup_mcp.DEFAULT_LOCAL_PROFILE == "shared"
+    assert setup_mcp.DEFAULT_LOCAL_PROFILE == "stable"
 
     exit_code = setup_mcp.main(
         [
@@ -209,7 +209,7 @@ def test_default_local_transport_is_shared_http(
             "--skip-codex",
             "--skip-codex-config",
             "--skip-gemini-settings",
-            # omit --profile / --transport-mode → multi-client defaults
+            # omit --profile / --transport-mode → daily least-privilege defaults
         ]
     )
     assert exit_code == 0

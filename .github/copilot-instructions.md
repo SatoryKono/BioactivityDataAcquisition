@@ -60,6 +60,10 @@ apply only to matching globs (domain, application, infrastructure, composition,
 configs, tests). Prefer those packs for path-local guidance; keep this root file
 as the global profile.
 
+**Non-goal:** do not invent a Copilot skill registry or copy `.codex/skills/**`
+/ `.devin/skills/**` bodies into `.github/prompts` unless a measured gap,
+owner, and maintenance cost are documented in the same change.
+
 ## Suggestion Quality Checklist
 
 - Includes type annotations for public interfaces.

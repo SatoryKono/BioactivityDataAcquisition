@@ -227,6 +227,34 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
     assert servers["code-analyzer"]["env"]["PROJECT_PATH"] == "."
 
 
+
+
+def test_devin_mcp_servers_are_subset_of_sanctioned_inventory() -> None:
+    """Tracked Devin MCP keys must stay within the sanctioned full inventory (#6666)."""
+    root = repo_root()
+    from scripts.ai.codex import setup_mcp
+
+    portable = json.loads((root / ".mcp.json").read_text(encoding="utf-8"))
+    devin = json.loads((root / ".devin/config.json").read_text(encoding="utf-8"))
+    portable_names = set(portable["mcpServers"])
+    devin_names = set(devin["mcpServers"])
+
+    assert portable_names == EXPECTED_MCP_SERVERS
+    assert devin_names <= portable_names
+    assert devin_names == portable_names
+    assert not (devin_names & setup_mcp.REMOVED_MCP_SERVER_NAMES)
+
+    allowed_remote = setup_mcp.APPROVED_REMOTE_MCP_BASE_URLS
+    for name, entry in devin["mcpServers"].items():
+        url = entry.get("url", "")
+        if isinstance(url, str) and url.startswith("https://"):
+            assert url in allowed_remote, f"unexpected remote MCP host for {name}: {url}"
+        elif isinstance(url, str) and url.startswith("http://"):
+            assert url.startswith(("http://127.0.0.1:", "http://localhost:")), (
+                f"non-localhost HTTP MCP for {name}: {url}"
+            )
+
+
 def test_tracked_mcp_projections_reject_workstation_paths() -> None:
     """Tracked portable MCP projections must be clone-location independent."""
     root = repo_root()

@@ -7,3 +7,13 @@ src/bioetl/composition/ @SatoryKono
 .github/workflows/ @SatoryKono
 docs/00-project/ @SatoryKono
 docs/02-architecture/ @SatoryKono
+
+# AI runtime and assistant instruction surfaces
+AGENTS.md @SatoryKono
+.codex/ @SatoryKono
+.devin/ @SatoryKono
+.github/copilot-instructions.md @SatoryKono
+.github/instructions/ @SatoryKono
+scripts/ai/ @SatoryKono
+docs/00-project/ai/ @SatoryKono
+

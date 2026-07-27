@@ -139,8 +139,10 @@ def _load_shared_server_endpoints(
 MCP_SHARED_SERVER_ENDPOINTS = _load_shared_server_endpoints()
 TRANSPORT_MODES = frozenset({"stdio", "shared", "hybrid"})
 # Multi-client daily defaults for Codex ensure / local projections.
-DEFAULT_LOCAL_PROFILE = "shared"
+DEFAULT_LOCAL_PROFILE = "stable"
 DEFAULT_LOCAL_TRANSPORT_MODE = "shared"
+# Tracked Devin projection stays full sanctioned inventory.
+DEVIN_TRACKED_PROFILE = "full"
 # Devin daily multi-client: omit gateway thrash leaders (use graph/full when needed).
 DEVIN_DAILY_DISABLE_SERVERS = frozenset(
     {
@@ -645,11 +647,13 @@ def _write_devin_config(
     else:
         existing["shell"].setdefault("setup_complete", True)
 
+    # Membership always full for tracked Devin projection.
+    del profile
     servers = _apply_shared_transport(
         _canonical_servers(
             workspace_root,
             portable_workspace_paths=True,
-            profile=profile,
+            profile=DEVIN_TRACKED_PROFILE,
         ),
         transport_mode=transport_mode,
     )
@@ -984,17 +988,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--profile",
         choices=sorted(MCP_PROFILES),
-        # Multi-client daily default: shared plane profile (not full inventory).
-        # Docker thrash servers (grafana/prometheus/brave) ride shared HTTP.
+        # Daily least-privilege default for local IDE projections.
         default=DEFAULT_LOCAL_PROFILE,
         help=(
             "Least-privilege local materialization profile for IDE/Codex local "
             "projections (stable|shared|core|ops|graph|full). "
-            f"Default: {DEFAULT_LOCAL_PROFILE}. "
+            f"Default: {DEFAULT_LOCAL_PROFILE} (daily least-privilege local IDE). "
             "Tracked portable inventory (.mcp.json, scripts/ai/.mcp.json, "
-            ".zed/mcp.json, .devin/config.json) always stays full. "
-            "Use stable on 32 GiB Docker Desktop hosts to drop gateway MCP. "
-            "Use shared + --transport-mode shared for multi-client HTTP plane."
+            ".zed/mcp.json) and tracked .devin/config.json always stay full. "
+            "Use --profile shared|graph|full when multi-client heavy tools are needed. "
+            "Default transport remains shared HTTP for multi-client localhost plane."
         ),
     )
     parser.add_argument(

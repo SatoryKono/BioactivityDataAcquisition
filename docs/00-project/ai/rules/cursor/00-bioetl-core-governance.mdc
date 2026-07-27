@@ -5,19 +5,21 @@ alwaysApply: true
 
 # BioETL Core Governance
 
-**Canonical references:** `AGENTS.md`, `docs/00-project/NORMATIVE_SOURCES.md`, `docs/00-project/RULES.md` (v6.1.5), `docs/01-requirements/REQUIREMENTS.md` (v1.12, 168 reqs), `docs/02-architecture/decisions/` (ADR-001…ADR-050).
+**Canonical references:** `AGENTS.md`, `docs/00-project/NORMATIVE_SOURCES.md`, `docs/00-project/RULES.md` (read header `Version:`), `docs/01-requirements/REQUIREMENTS.md` (read header `Version:`), `docs/02-architecture/decisions/` (accepted ADRs).
 
-Condensed AI guidance — **does not replace** canonical RULES/ADR. On conflict, canonical text + executable gates win.
+Condensed **IDE guidance** for Cursor — **does not replace** the root runtime contract or RULES/ADR. On conflict, follow `AGENTS.md` precedence, then canonical text + executable gates.
 
-## Source Priority
+## Source Priority (aligned with `AGENTS.md`)
 
-1. Active `docs/00-project/RULES.md` → Accepted ADR (with supersession)
-2. `docs/01-requirements/REQUIREMENTS.md`
-3. Published contracts / configuration schemas
-4. Executable gates (import-linter, architecture tests, CI)
-5. Runtime implementation
+1. Active AI runtime source for this surface (`AGENTS.md`; Codex runtime under `.codex/**` when applicable)
+2. Runtime profiles and skills in the matching runtime tree
+3. `docs/00-project/NORMATIVE_SOURCES.md` → active `docs/00-project/RULES.md` → accepted ADR (with supersession)
+4. `docs/01-requirements/REQUIREMENTS.md`
+5. Published contracts / configuration schemas
+6. Executable gates (import-linter, architecture tests, CI)
+7. Runtime implementation and docs mirrors (`docs/00-project/ai/**` — navigation only)
 
-Governance defect: normative text ≠ executable gate/code. Neither side may silently override the other.
+Governance defect: normative text ≠ executable gate/code. Neither side may silently override the other. Do not hardcode RULES/REQUIREMENTS version literals — read file headers.
 
 ## RFC 2119
 
