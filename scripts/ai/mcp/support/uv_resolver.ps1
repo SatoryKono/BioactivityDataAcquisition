@@ -25,12 +25,16 @@ function Restore-BioetlProxyEnvironment {
         [System.Collections.IDictionary]$Snapshot
     )
 
+    # Prefer Set-Item/Remove-Item over SetEnvironmentVariable(null): on Linux
+    # pwsh the latter can leave bypass values (NO_PROXY=*) sticky across cases.
     foreach ($name in $script:BioetlProxyEnvironmentNames) {
-        [Environment]::SetEnvironmentVariable(
-            $name,
-            $Snapshot[$name],
-            [EnvironmentVariableTarget]::Process
-        )
+        $value = $Snapshot[$name]
+        if ($null -eq $value -or $value -eq "") {
+            Remove-Item -Path "Env:$name" -ErrorAction SilentlyContinue
+        }
+        else {
+            Set-Item -Path "Env:$name" -Value ([string]$value)
+        }
     }
 }
 
@@ -141,6 +145,27 @@ function Resolve-BioetlUvxBin {
       Locate uvx even when Scripts/ is not on PATH.
     #>
     $candidates = @()
+
+    # Prefer explicit PATH probes first so test fakes (uvx.ps1) and non-Windows
+    # pwsh path separators are honored before host-wide installs.
+    $pathSeparator = [IO.Path]::PathSeparator
+    $pathEntries = @()
+    if (-not [string]::IsNullOrWhiteSpace($env:PATH)) {
+        $pathEntries += $env:PATH.Split(
+            [char[]]@($pathSeparator, ';', ':'),
+            [StringSplitOptions]::RemoveEmptyEntries
+        )
+    }
+    foreach ($entry in $pathEntries) {
+        foreach ($name in @("uvx.exe", "uvx.cmd", "uvx.ps1", "uvx")) {
+            try {
+                $candidates += [System.IO.Path]::Combine($entry.Trim(), $name)
+            }
+            catch {
+                # Ignore unusable PATH entries.
+            }
+        }
+    }
 
     $fromPath = Get-Command uvx -ErrorAction SilentlyContinue
     if ($fromPath -and $fromPath.Source) {

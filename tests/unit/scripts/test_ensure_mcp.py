@@ -63,9 +63,12 @@ def _write_codex_config(home: Path, workspace: Path, *, valid: bool) -> Path:
     config_path = home / ".codex" / "config.toml"
     config_path.parent.mkdir(parents=True)
     if valid:
+        # Must match ensure-mcp.sh / DEFAULT_LOCAL_* (stable + shared transport).
         rendered = setup_mcp._render_codex_mcp_toml(
             setup_mcp._codex_runtime_servers(
-                workspace, profile="shared", transport_mode="shared"
+                workspace,
+                profile=setup_mcp.DEFAULT_LOCAL_PROFILE,
+                transport_mode=setup_mcp.DEFAULT_LOCAL_TRANSPORT_MODE,
             )
         )
     else:
