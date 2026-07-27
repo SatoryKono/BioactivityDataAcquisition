@@ -2,6 +2,78 @@
   "schema_version": "1.0",
   "description": "Lifecycle and supporting-taxonomy decisions for non-active scripts.",
   "entries": {
+    "scripts/docs/fixers/fix_links_auto.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as an internal implementation module invoked through the canonical docs command surface; keep it supporting unless it becomes a documented standalone entrypoint."
+    },
+    "scripts/docs/fixers/fix_links_explicit.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as an internal implementation module invoked through the canonical docs command surface; keep it supporting unless it becomes a documented standalone entrypoint."
+    },
+    "scripts/docs/fixers/link_warnings.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as an internal implementation module invoked through the canonical docs command surface; keep it supporting unless it becomes a documented standalone entrypoint."
+    },
+    "scripts/docs/fixers/repo_identity.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as an internal implementation module invoked through the canonical docs command surface; keep it supporting unless it becomes a documented standalone entrypoint."
+    },
+    "scripts/docs/fixers/sentence_audit.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as an internal implementation module invoked through the canonical docs command surface; keep it supporting unless it becomes a documented standalone entrypoint."
+    },
+    "scripts/docs/matrix/build_matrix_dicts.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint."
+    },
+    "scripts/docs/matrix/enrich_normalization_details.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint."
+    },
+    "scripts/docs/matrix/export_structural_contract.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint."
+    },
+    "scripts/docs/matrix/filter_rows.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint."
+    },
+    "scripts/docs/matrix/generate_field_matrix.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint."
+    },
+    "scripts/docs/matrix/normalize_values.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint."
+    },
+    "scripts/ops/observability/grafana/apply_grafana_simplification_6570.py": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-08-31",
+      "next_step": "Remove after the bounded Grafana simplification rollout is applied and its issue-specific validation evidence is finalized."
+    },
     "scripts/ai/codex/helper/check-env.ps1": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",

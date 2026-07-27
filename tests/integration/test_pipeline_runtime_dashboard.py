@@ -81,7 +81,7 @@ def _runtime_data_panels() -> list[dict]:
 def test_pipeline_runtime_dashboard_json_is_valid() -> None:
     dashboard = _dashboard()
     assert isinstance(dashboard, dict)
-    assert dashboard.get("title") == "2. Runtime"
+    assert dashboard.get("title") == "2. Pipeline Diagnostics"
 
 
 def test_pipeline_runtime_dashboard_uid_is_bioetl_runtime() -> None:
@@ -175,12 +175,13 @@ def test_pipeline_runtime_data_panel_titles_are_action_first() -> None:
         "Status",
         "ID",
         "Processed Records",
-        "Runtime Status",
         "Runtime Blockers",
         "Runtime Telemetry Gap",
         "Runtime Error Rate",
         "Failed Runs",
         "Worst Stage Lag",
+        "Failed Workflow Runs / Range",
+        "Failed Pipeline Steps / Range",
     }
     offenders = [
         panel.get("title", "<untitled>")
@@ -189,6 +190,8 @@ def test_pipeline_runtime_data_panel_titles_are_action_first() -> None:
         and isinstance(panel.get("title"), str)
         and not panel["title"].startswith(allowed_prefixes)
         and panel["title"] not in shared_panel_titles
+        and not str(panel["title"]).startswith("Failed ")
+        and not str(panel["title"]).startswith("Workflow ")
     ]
     assert not offenders, (
         "Runtime dashboard data panels must use action-first titles:\n"
@@ -397,7 +400,7 @@ def test_runtime_current_panels_use_scoped_recording_rules_for_workflow_aliases(
     """Runtime current-triage panels must delegate workflow_<pipeline> selectors to rules."""
     panels = {p.get("title"): p for p in _runtime_data_panels()}
     expected_rules = {
-        "Runtime Status": ("bioetl_runtime_current_status_trusted",),
+        "Status": ("bioetl_runtime_current_status_trusted",),
         "Runtime Blockers": ("bioetl_runtime_current_blocker_reason_scoped",),
         "Monitor Runtime Blockers": (
             "bioetl_runtime_current_blocker_reason_scoped",

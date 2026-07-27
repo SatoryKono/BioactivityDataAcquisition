@@ -1708,7 +1708,7 @@
       "symbol": "silver_filter_rejects",
       "path": "src/bioetl/interfaces/cli/commands/domains/quarantine/_run_scope_stats.py",
       "occurrence_count": 1,
-      "first_line": 66,
+      "first_line": 68,
       "role": "Operator summary alias for Silver rejects",
       "migration_relevance": "Summary key is a compatibility alias while semantic/business rejects move to Gold taxonomy.",
       "notes": ""
@@ -2203,7 +2203,7 @@
       "symbol": "extraction_params",
       "path": "scripts/docs/matrix/generate_pipeline_normalization_matrix.py",
       "occurrence_count": 5,
-      "first_line": 1686,
+      "first_line": 1688,
       "role": "Source-profile extraction policy",
       "migration_relevance": "extraction_params are provider request policy and must not be treated as Silver filters.",
       "notes": ""

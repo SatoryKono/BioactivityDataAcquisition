@@ -21,6 +21,10 @@ from .conftest import (
     get_silver_records,
     run_pipeline_or_skip_transient,
 )
+from tests.helpers.e2e_schema_assertions import (
+    assert_optional_numeric_in_range,
+    assert_records_have_required_fields,
+)
 
 pytestmark = pytest.mark.usefixtures("relaxed_dq_env")
 
@@ -67,47 +71,29 @@ async def test_chembl_assay_full_cycle(e2e_data_dir: Path):
 @pytest.mark.vcr
 @pytest.mark.asyncio
 async def test_chembl_assay_metadata_fields(e2e_data_dir: Path):
-    """E2E: Verify assay metadata fields are extracted.
-
-    Assays should have type, description, and target information when available.
-    """
-    # Arrange
+    """E2E: Verify assay metadata fields are extracted with schema-backed asserts."""
     ctx = create_test_context("chembl_assay", limit=5)
-
-    # Act
     await run_pipeline_or_skip_transient(ctx)
-
-    # Assert - Check metadata fields
     records = await get_silver_records(e2e_data_dir, "chembl_assay")
-
-    for record in records:
-        # assay_id must always be present
-        assert record.get("assay_id") is not None
-
-        # assay_type should always be present
-        assert record.get("assay_type") is not None
+    assert_records_have_required_fields(
+        records,
+        ("assay_id", "assay_type"),
+        entity_label="chembl_assay.silver",
+    )
 
 
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
 async def test_chembl_assay_confidence_score(e2e_data_dir: Path):
-    """E2E: Verify confidence_score is within valid range.
-
-    ChEMBL confidence scores range from 0 to 9.
-    """
-    # Arrange
+    """E2E: Verify confidence_score is within valid range when present."""
     ctx = create_test_context("chembl_assay", limit=5)
-
-    # Act
     await run_pipeline_or_skip_transient(ctx)
-
-    # Assert - Check confidence score range
     records = await get_silver_records(e2e_data_dir, "chembl_assay")
-
-    for record in records:
-        confidence = record.get("confidence_score")
-        if confidence is not None:
-            assert 0 <= confidence <= 9, (
-                f"Invalid confidence_score {confidence} for {record.get('assay_id')}"
-            )
+    assert_optional_numeric_in_range(
+        records,
+        "confidence_score",
+        minimum=0,
+        maximum=9,
+        entity_label="chembl_assay.silver",
+    )

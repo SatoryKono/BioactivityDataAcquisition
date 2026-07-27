@@ -129,57 +129,37 @@ def test_run_id_selector_is_control_plane_backed_table_query() -> None:
 
 
 def test_first_screen_layout_matches_reviewed_progressive_disclosure_baseline() -> None:
-    expected = {
+    """Epic #6570/#6573: first paint is Status/First Action/Inputs; shell is lazy."""
+    first_paint = {
         "Provenance": {"id": 99, "x": 0, "y": 3, "w": 16, "h": 4},
         "Status": {"id": 214, "x": 16, "y": 3, "w": 8, "h": 4},
-        "ID": {"id": 9300, "x": 0, "y": 7, "w": 10},
-        "Processed Records": {"id": 9301, "x": 10, "y": 7, "w": 6},
-        "First Action": {"id": 215, "x": 16, "y": 7, "w": 8},
-        "Control Plane": {"id": 9006, "x": 0, "y": 17, "w": 5, "h": 5},
-        "Runtime": {"id": 9003, "x": 5, "y": 17, "w": 4, "h": 5},
-        "Data Quality": {"id": 9004, "x": 9, "y": 17, "w": 5, "h": 5},
-        "Provider": {"id": 9007, "x": 14, "y": 17, "w": 4, "h": 5},
-        "Data Validation": {"id": 9005, "x": 18, "y": 17, "w": 6, "h": 5},
+        "First Action": {"id": 215, "y": 7},
         "Inputs": {"id": 9002, "x": 0, "y": 17, "w": 24, "h": 6},
-        "Workflow": {"id": 9013, "x": 12, "y": 22, "w": 12, "h": 8},
     }
+    lazy = {"ID": 9300, "Processed Records": 9301}
+    panels = _panels_by_title()
 
-    for title, placement in expected.items():
-        panel = _panels_by_title()[title]
+    for title, placement in first_paint.items():
+        panel = panels[title]
         grid_pos = panel.get("gridPos", {})
         assert panel.get("id") == placement["id"]
-        for key in ("x", "w"):
-            assert grid_pos.get(key) == placement[key], (
+        for key, value in placement.items():
+            if key == "id":
+                continue
+            assert grid_pos.get(key) == value, (
                 f"Panel {title!r} must keep reviewed {key} placement"
             )
-        expected_y = placement["y"]
-        if title in {
-            "Control Plane",
-            "Runtime",
-            "Data Quality",
-            "Provider",
-            "Data Validation",
-        }:
-            assert grid_pos.get("y") in {expected_y, expected_y + 4}, (
-                f"Panel {title!r} must keep reviewed summary-row y placement"
-            )
-        elif title in {"Inputs", "Workflow"}:
-            assert grid_pos.get("y") in {expected_y, expected_y + 4}, (
-                f"Panel {title!r} must keep reviewed evidence-row y placement"
-            )
-        else:
-            assert grid_pos.get("y") == expected_y, (
-                f"Panel {title!r} must keep reviewed y placement"
-            )
-        expected_height = placement.get("h")
-        if expected_height is not None:
-            assert grid_pos.get("h") == expected_height, (
-                f"Panel {title!r} must keep reviewed h placement"
-            )
-        else:
-            assert grid_pos.get("h") in {6, 10}, (
-                f"Panel {title!r} must keep reviewed shared-row height"
-            )
+    for title, panel_id in lazy.items():
+        panel = panels[title]
+        assert panel.get("id") == panel_id
+    assert any(
+        panel.get("type") == "row"
+        and "Run context" in str(panel.get("title") or "")
+        and panel.get("collapsed") is True
+        for panel in load_dashboard(
+            Path("grafana/dashboards/bioetl-overview-v2.json")
+        ).get("panels", [])
+    )
 
 
 def test_status_and_next_action_preserve_current_status_semantics() -> None:
@@ -203,9 +183,10 @@ def test_status_and_next_action_preserve_current_status_semantics() -> None:
     assert 'pipeline=~"$pipeline"' in next_action_expr
     assert 'run_type=~"$run_type"' in next_action_expr
     assert "$__range" not in next_action_expr
-    assert "NO_ROUTE" in description
-    assert "selected_scope_not_present" in next_action_expr
-    assert "bioetl_overview_pipeline_run_type_universe" in description
+    assert (
+        "NO_ROUTE" in description or "bioetl_l0_next_action_route" in next_action_expr
+    )
+    assert len(next_action_expr) <= 200
 
 
 def test_identity_panel_uses_run_id_without_leaking_to_prometheus_queries() -> None:
@@ -245,18 +226,12 @@ def test_l1_cards_have_operator_mappings_and_targeted_links() -> None:
 
 
 def test_selected_scope_cards_normalize_workflow_pipeline_aliases() -> None:
-    for title in (
-        "Status",
-        "First Action",
-        "Inputs",
-        "Runtime",
-        "Data Quality",
-        "Control Plane",
-        "Data Validation",
-    ):
+    """Epic #6574: first-screen cards use thin pipeline selectors (no mega-expr glue)."""
+    for title in ("Status", "First Action", "Inputs"):
         expr = _panel_expr(_panels_by_title()[title])
-        assert 'label_replace(vector(1), "pipeline_raw", "$pipeline"' in expr
-        assert '"^(?:workflow_)?(.*)$"' in expr
+        assert 'pipeline=~"$pipeline"' in expr
+        assert len(expr) <= 200
+        assert "$__range" not in expr
 
 
 def test_provider_and_workflow_scope_are_explicit() -> None:

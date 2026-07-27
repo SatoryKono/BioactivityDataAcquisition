@@ -19,6 +19,7 @@ from .conftest import (
     get_silver_records,
     run_pipeline_or_skip_transient,
 )
+from tests.helpers.e2e_schema_assertions import assert_records_have_required_fields
 
 pytestmark = pytest.mark.usefixtures("relaxed_dq_env")
 
@@ -52,29 +53,23 @@ async def test_chembl_molecule_full_cycle(e2e_data_dir: Path):
 
     # Assert - Schema validation
     records = await get_silver_records(e2e_data_dir, "chembl_molecule")
-    required_fields = ["molecule_id"]
-    for record in records:
-        for field in required_fields:
-            assert field in record, f"Missing required field: {field}"
+    assert_records_have_required_fields(
+        records,
+        ("molecule_id",),
+        entity_label="chembl_molecule.silver",
+    )
 
 
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
 async def test_chembl_molecule_structural_fields(e2e_data_dir: Path):
-    """E2E: Verify structural fields are extracted for molecules.
-
-    Molecules should have structural representations when available.
-    """
-    # Arrange
+    """E2E: Verify structural identity fields for molecules (schema-backed)."""
     ctx = create_test_context("chembl_molecule", limit=5)
-
-    # Act
     await run_pipeline_or_skip_transient(ctx)
-
-    # Assert - Check structural fields
     records = await get_silver_records(e2e_data_dir, "chembl_molecule")
-
-    for record in records:
-        # At least molecule_id should always be present
-        assert record.get("molecule_id") is not None
+    assert_records_have_required_fields(
+        records,
+        ("molecule_id",),
+        entity_label="chembl_molecule.structural",
+    )

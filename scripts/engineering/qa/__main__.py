@@ -155,6 +155,9 @@ COMMAND_MODULES: dict[str, str] = {
     "analyze-duplicate-functions": "scripts.engineering.qa.analyze_duplicate_functions",
     "calibrate-hotspots": "scripts.engineering.qa.calibrate_hotspot_budgets",
     "check-dashboard-visual-semantics": "scripts.engineering.qa.check_dashboard_visual_semantics",
+    "check-dashboard-performance-budgets": (
+        "scripts.engineering.qa.check_dashboard_performance_budgets"
+    ),
     "check-prometheus-rules": "scripts.engineering.qa.check_prometheus_rules",
     "report-dashboard-inventory": "scripts.engineering.qa.report_dashboard_inventory",
     "report-dashboard-query-duplicates": "scripts.engineering.qa.report_dashboard_query_duplicates",

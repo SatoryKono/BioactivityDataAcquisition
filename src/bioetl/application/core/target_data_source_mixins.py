@@ -11,7 +11,6 @@ __all__ = [
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Protocol, TypeVar, cast
 
-from bioetl.application.core._fetch_forwarding import build_forwarded_fetch_kwargs
 from bioetl.application.core._target_data_source_fetch_support import (
     ensure_filterable_data_source,
     yield_target_or_delegate_records,
@@ -75,14 +74,8 @@ class _TargetEntityFetchDelegationMixin:
             ),
             delegate_factory=lambda: yield_wrapped_fetch_records(
                 self._data_source,
-                **build_forwarded_fetch_kwargs(
-                    entity_type=entity_type,
-                    limit=limit,
-                    query=query,
-                    filter_ids=filter_ids,
-                    filter_field=filter_field,
-                    offset=offset,
-                ),
+                entity_type,
+                *target_fetch_args,
             ),
         )
 

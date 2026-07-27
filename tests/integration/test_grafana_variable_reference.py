@@ -51,7 +51,6 @@ def test_variable_reference_documents_all_shipped_dashboard_variables() -> None:
         "bioetl-runtime",
         "bioetl-provider-health-v2",
         "bioetl-dq-v2",
-        "bioetl-workflow-overview",
     }
     missing = sorted(token for token in required_tokens if token not in text)
     assert not missing, f"Unified variable reference is missing tokens: {missing}"
@@ -117,6 +116,11 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
     assert provider["pipeline_context"].get("hide") == 2
     assert provider["pipeline_context"].get("current", {}).get("value") == "unknown"
 
+    workflow_path = Path("grafana/dashboards/bioetl-workflow-overview.json")
+    if not workflow_path.exists():
+        pytest.skip(
+            "bioetl-workflow-overview.json retired in grafana simplification epic #6570/#6576"
+        )
     workflow = _variables("bioetl-workflow-overview.json")
     assert set(workflow) == {
         "workflow",

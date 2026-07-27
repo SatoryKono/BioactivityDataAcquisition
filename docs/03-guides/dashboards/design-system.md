@@ -367,7 +367,7 @@ datasource/query failure по роли панели.
   healthy state.
 - First-screen current-status panels generally SHOULD NOT use Grafana-selected
   range as their primary semantics.
-- Provider Health MAY use `$__range` for sparse provider-current telemetry when
+- Provider Health first screen uses current-status gauges only; range evidence is collapsed (epic #6572) when
   the operator explicitly needs the selected time window to recover the last
   observed provider state/cause inside that range instead of a fixed 15m
   snapshot.
@@ -602,7 +602,7 @@ Metadata MUST follow repo policy rather than mechanical suite-wide rewrites:
 - `refresh` and default `time.from` are governed by the machine-readable contract
   in `docs/03-guides/dashboards/contracts/navigation-links.yaml`.
   Operator-facing dashboards keep the L0/L1 baseline `time.from=now-12h` and
-  `refresh=30s`; `bioetl-silver-reject-explorer` is the explicit forensic
+  `refresh=60s`; `bioetl-silver-reject-explorer` is the explicit forensic
   exception with `time.from=now-24h` and `refresh=1m`.
 - `schemaVersion` MAY remain `30` or `39` until an explicit Grafana migration
   decision is approved. Do not bulk-upgrade exported JSON mechanically just to

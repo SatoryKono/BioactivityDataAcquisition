@@ -72,7 +72,8 @@ def test_nightly_workflow_regenerates_dependency_map() -> None:
     assert "workflow_dispatch:" in workflow
     assert "Regenerate architecture dependency map" in workflow
     assert (
-        "scripts/engineering/qa/generate_architecture_dependency_map.py --update"
+        "uv run --frozen --no-build python "
+        "-m scripts.engineering.qa.generate_architecture_dependency_map --update"
         in workflow
     )
     assert "Upload architecture docs artifacts" in workflow

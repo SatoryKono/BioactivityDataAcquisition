@@ -23,175 +23,177 @@
       "id": 9600,
       "type": "row",
       "title": "Alert/SLO Triage",
-      "collapsed": false,
+      "collapsed": true,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
         "y": 23
-      }
-    },
-    {
-      "id": 9601,
-      "type": "table",
-      "title": "Triage Alert State",
-      "gridPos": {
-        "h": 6,
-        "w": 24,
-        "x": 0,
-        "y": 24
       },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Actual Prometheus alert-state triage for firing and pending BioETL rules. This panel reads the Prometheus `ALERTS` series and does not duplicate alert business logic in dashboard queries; inactive/no-alert state is rendered as an explicit zero row. Critical/page severity is red, warning is amber, and inactive aggregate evidence is neutral. Open 6. Alerts & SLO for row scope.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
+      "panels": [
+        {
+          "id": 9601,
+          "type": "table",
+          "title": "Triage Alert State",
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 0
           },
-          "custom": {
-            "align": "left",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "inspect": false
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
           },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
+          "description": "Actual Prometheus alert-state triage for firing and pending BioETL rules. This panel reads the Prometheus `ALERTS` series and does not duplicate alert business logic in dashboard queries; inactive/no-alert state is rendered as an explicit zero row. Critical/page severity is red, warning is amber, and inactive aggregate evidence is neutral. Open 6. Alerts & SLO for row scope.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
               },
-              {
-                "color": "orange",
-                "value": 1
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
               },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Value"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Active Alerts"
-              },
-              {
-                "id": "custom.align",
-                "value": "right"
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-background",
-                  "applyToRow": true
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "severity"
-            },
-            "properties": [
-              {
-                "id": "mappings",
-                "value": [
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
                   {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^(critical|page|p0|p1)$",
-                      "result": {
-                        "text": "$1 · CRITICAL",
-                        "color": "red"
-                      }
-                    }
+                    "color": "green",
+                    "value": null
                   },
                   {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^(warning|warn)$",
-                      "result": {
-                        "text": "$1 · WARNING",
-                        "color": "orange"
-                      }
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Value"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Active Alerts"
+                  },
+                  {
+                    "id": "custom.align",
+                    "value": "right"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-background",
+                      "applyToRow": true
                     }
                   }
                 ]
               },
               {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-background"
-                }
+                "matcher": {
+                  "id": "byName",
+                  "options": "severity"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": "^(critical|page|p0|p1)$",
+                          "result": {
+                            "text": "$1 · CRITICAL",
+                            "color": "red"
+                          }
+                        }
+                      },
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": "^(warning|warn)$",
+                          "result": {
+                            "text": "$1 · WARNING",
+                            "color": "orange"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-background"
+                    }
+                  }
+                ]
               }
             ]
-          }
-        ]
-      },
-      "targets": [
-        {
-          "expr": "sum by (alertname, alertstate, severity) (ALERTS{alertstate=~\"firing|pending\"}) or label_replace(label_replace(label_replace(vector(0), \"alertname\", \"none\", \"\", \"\"), \"alertstate\", \"inactive\", \"\", \"\"), \"severity\", \"none\", \"\", \"\")",
-          "format": "table",
-          "instant": true,
-          "refId": "A"
-        }
-      ],
-      "options": {
-        "showHeader": true,
-        "footer": {
-          "show": false
-        },
-        "dataLinks": [
-          {
-            "title": "Open Runtime Conditions",
-            "url": "/d/bioetl-runtime/bioetl-runtime?${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id",
-            "targetBlank": false,
-            "includeVars": false
           },
-          {
-            "title": "Open 6. Alerts & SLO",
-            "url": "/d/bioetl-alerts-slo/bioetl-alerts-slo?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
-            "targetBlank": false,
-            "includeVars": false
-          }
-        ]
-      },
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true,
-              "__name__": true
-            },
-            "indexByName": {
-              "alertname": 0,
-              "alertstate": 1,
-              "severity": 2,
-              "Value": 3
-            },
-            "renameByName": {
-              "alertname": "Alert",
-              "alertstate": "State",
-              "severity": "Severity",
-              "Value": "Active Alerts"
+          "targets": [
+            {
+              "expr": "count by (alertname, severity) (ALERTS{alertstate=\"firing\"})",
+              "format": "table",
+              "instant": true,
+              "refId": "A"
             }
-          }
+          ],
+          "options": {
+            "showHeader": true,
+            "footer": {
+              "show": false
+            },
+            "dataLinks": [
+              {
+                "title": "Open Runtime Conditions",
+                "url": "/d/bioetl-runtime/bioetl-runtime?${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id",
+                "targetBlank": false,
+                "includeVars": false
+              },
+              {
+                "title": "Open 6. Alerts & SLO",
+                "url": "/d/bioetl-alerts-slo/bioetl-alerts-slo?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
+                "targetBlank": false,
+                "includeVars": false
+              }
+            ]
+          },
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true
+                },
+                "indexByName": {
+                  "alertname": 0,
+                  "alertstate": 1,
+                  "severity": 2,
+                  "Value": 3
+                },
+                "renameByName": {
+                  "alertname": "Alert",
+                  "alertstate": "State",
+                  "severity": "Severity",
+                  "Value": "Active Alerts"
+                }
+              }
+            }
+          ]
         }
       ]
     },
@@ -204,7 +206,7 @@
       },
       "id": 1000,
       "options": {
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:11px\"><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">0. Control Plane</a><span aria-current=\"page\" style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#fff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default\">1. Overview</span><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">2. Runtime</a><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id\">3. Provider Health</a><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">4. Data Quality</a><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?var-workflow=$workflow&amp;${__url_time_range}&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id\">5. Workflow</a><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-alerts-slo/bioetl-alerts-slo?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\">6. Alerts &amp; SLO</a></div>",
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:11px\"><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">0. Trust</a><span aria-current=\"page\" style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#fff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default\">1. Overview</span><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">2. Pipeline Diagnostics</a><a style=\"box-sizing:border-box;flex:1 1 145px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">4. Data Quality</a></div>",
         "mode": "html"
       },
       "title": "Navigation",
@@ -391,7 +393,7 @@
       },
       "targets": [
         {
-          "expr": "max(bioetl_l0_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l0_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or vector(3)",
+          "expr": "max(bioetl_l0_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
           "refId": "A"
         }
       ],
@@ -400,599 +402,13 @@
       "description": "Current L0 operator state for Overview. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). CRIT means runtime, DQ, control-plane, workflow, or gold signals are failing for the selected pipeline/run_type. WARN means non-fatal DQ, provider, or pending-gold conditions. UNKNOWN means the dashboard cannot prove current health for the selected scope."
     },
     {
-      "id": 9300,
-      "type": "table",
-      "title": "ID",
-      "gridPos": {
-        "h": 10,
-        "w": 10,
-        "x": 0,
-        "y": 7
-      },
-      "description": "Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty.",
-      "datasource": "BioETL Ops HTTP",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "align": "left",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "inspect": false
-          },
-          "unit": "none",
-          "noValue": "Not resolved — no identity rows for the selected run/scope. Check backend health (/health/live), then select or reset run_id; this is not a valid empty run.",
-          "links": [
-            {
-              "title": "Check BioETL Ops HTTP health",
-              "url": "http://localhost:8081/health/live",
-              "targetBlank": true
-            },
-            {
-              "title": "Open monitoring backend setup docs",
-              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
-              "targetBlank": true
-            }
-          ]
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "parameter"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 165
-              },
-              {
-                "id": "custom.align",
-                "value": "left"
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": true
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "value"
-            },
-            "properties": [
-              {
-                "id": "custom.align",
-                "value": "left"
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": true
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "targets": [
-        {
-          "format": "table",
-          "parser": "backend",
-          "refId": "A",
-          "root_selector": "rows",
-          "source": "url",
-          "type": "json",
-          "url": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
-          "url_options": {
-            "data": "",
-            "method": "GET"
-          },
-          "expr": ""
-        }
-      ],
-      "options": {
-        "showHeader": true,
-        "footer": {
-          "show": false
-        },
-        "cellHeight": "sm"
-      },
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true,
-              "__name__": true,
-              "Value": true
-            },
-            "indexByName": {
-              "parameter": 0,
-              "value": 1
-            },
-            "renameByName": {
-              "parameter": "parameter",
-              "value": "value"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "id": 9301,
-      "type": "table",
-      "title": "Processed Records",
-      "gridPos": {
-        "h": 10,
-        "w": 6,
-        "x": 10,
-        "y": 7
-      },
-      "description": "Current stage/outcome accounting evidence for the selected pipeline/run_type scope. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty.",
-      "datasource": "BioETL Ops HTTP",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "align": "left",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "inspect": false
-          },
-          "decimals": 0,
-          "unit": "none",
-          "noValue": "Not resolved — no processed-record rows. Check backend health and selector scope; backend unavailable is not a valid zero-record state.",
-          "links": [
-            {
-              "title": "Check BioETL Ops HTTP health",
-              "url": "http://localhost:8081/health/live",
-              "targetBlank": true
-            },
-            {
-              "title": "Open monitoring backend setup docs",
-              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
-              "targetBlank": true
-            }
-          ]
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "parameter"
-            },
-            "properties": [
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "01 bronze_records": {
-                        "text": "bronze [total]",
-                        "color": "#cd7f32"
-                      },
-                      "02 silver_valid_records": {
-                        "text": "silver [valid]",
-                        "color": "#c0c0c0"
-                      },
-                      "03 silver_filtered_out_records": {
-                        "text": "silver [filtered out]"
-                      },
-                      "04 silver_quarantined_records": {
-                        "text": "silver [quarantined]"
-                      },
-                      "05 silver_skipped_records": {
-                        "text": "silver [skipped]"
-                      },
-                      "06 silver_deduplicated_records": {
-                        "text": "silver [deduplicated]"
-                      },
-                      "07 gold_written_records": {
-                        "text": "gold [valid]",
-                        "color": "#d4af37"
-                      },
-                      "08 gold_excluded_by_contract_records": {
-                        "text": "gold [excluded]"
-                      },
-                      "09 gold_quarantined_records": {
-                        "text": "gold [quarantined]"
-                      },
-                      "10 gold_skipped_records": {
-                        "text": "gold [skipped]"
-                      },
-                      "11 gold_deduplicated_records": {
-                        "text": "gold [deduplicated]"
-                      }
-                    }
-                  }
-                ]
-              },
-              {
-                "id": "custom.align",
-                "value": "left"
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text"
-                }
-              },
-              {
-                "id": "custom.width",
-                "value": 165
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "value"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 70
-              },
-              {
-                "id": "custom.align",
-                "value": "right"
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text"
-                }
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^01 bronze_records\\|(.*)$",
-                      "result": {
-                        "text": "$1",
-                        "color": "#cd7f32"
-                      }
-                    }
-                  },
-                  {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^02 silver_valid_records\\|(.*)$",
-                      "result": {
-                        "text": "$1",
-                        "color": "#c0c0c0"
-                      }
-                    }
-                  },
-                  {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^03 silver_filtered_out_records\\|(.*)$",
-                      "result": {
-                        "text": "$1"
-                      }
-                    }
-                  },
-                  {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^04 silver_quarantined_records\\|(.*)$",
-                      "result": {
-                        "text": "$1"
-                      }
-                    }
-                  },
-                  {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^05 silver_skipped_records\\|(.*)$",
-                      "result": {
-                        "text": "$1"
-                      }
-                    }
-                  },
-                  {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^06 silver_deduplicated_records\\|(.*)$",
-                      "result": {
-                        "text": "$1"
-                      }
-                    }
-                  },
-                  {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^07 gold_written_records\\|(.*)$",
-                      "result": {
-                        "text": "$1",
-                        "color": "#d4af37"
-                      }
-                    }
-                  },
-                  {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^08 gold_excluded_by_contract_records\\|(.*)$",
-                      "result": {
-                        "text": "$1"
-                      }
-                    }
-                  },
-                  {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^09 gold_quarantined_records\\|(.*)$",
-                      "result": {
-                        "text": "$1"
-                      }
-                    }
-                  },
-                  {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^10 gold_skipped_records\\|(.*)$",
-                      "result": {
-                        "text": "$1"
-                      }
-                    }
-                  },
-                  {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^11 gold_deduplicated_records\\|(.*)$",
-                      "result": {
-                        "text": "$1"
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "percintage"
-            },
-            "properties": [
-              {
-                "id": "custom.align",
-                "value": "left"
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text"
-                }
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^01 bronze_records\\|(.*)$",
-                      "result": {
-                        "text": "$1",
-                        "color": "#cd7f32"
-                      }
-                    }
-                  },
-                  {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^02 silver_valid_records\\|(.*)$",
-                      "result": {
-                        "text": "$1",
-                        "color": "#c0c0c0"
-                      }
-                    }
-                  },
-                  {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^03 silver_filtered_out_records\\|(.*)$",
-                      "result": {
-                        "text": "$1"
-                      }
-                    }
-                  },
-                  {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^04 silver_quarantined_records\\|(.*)$",
-                      "result": {
-                        "text": "$1"
-                      }
-                    }
-                  },
-                  {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^05 silver_skipped_records\\|(.*)$",
-                      "result": {
-                        "text": "$1"
-                      }
-                    }
-                  },
-                  {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^06 silver_deduplicated_records\\|(.*)$",
-                      "result": {
-                        "text": "$1"
-                      }
-                    }
-                  },
-                  {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^07 gold_written_records\\|(.*)$",
-                      "result": {
-                        "text": "$1",
-                        "color": "#d4af37"
-                      }
-                    }
-                  },
-                  {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^08 gold_excluded_by_contract_records\\|(.*)$",
-                      "result": {
-                        "text": "$1"
-                      }
-                    }
-                  },
-                  {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^09 gold_quarantined_records\\|(.*)$",
-                      "result": {
-                        "text": "$1"
-                      }
-                    }
-                  },
-                  {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^10 gold_skipped_records\\|(.*)$",
-                      "result": {
-                        "text": "$1"
-                      }
-                    }
-                  },
-                  {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^11 gold_deduplicated_records\\|(.*)$",
-                      "result": {
-                        "text": "$1"
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "row_status"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": ""
-              },
-              {
-                "id": "custom.width",
-                "value": 1
-              },
-              {
-                "id": "custom.align",
-                "value": "center"
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-background",
-                  "applyToRow": true
-                }
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "silver_deficit": {
-                        "text": "",
-                        "color": "red"
-                      },
-                      "gold_deficit": {
-                        "text": "",
-                        "color": "red"
-                      },
-                      "": {
-                        "text": "",
-                        "color": "rgba(0,0,0,0)"
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      "targets": [
-        {
-          "format": "table",
-          "parser": "backend",
-          "refId": "A",
-          "root_selector": "rows",
-          "source": "url",
-          "type": "json",
-          "url": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
-          "url_options": {
-            "data": "",
-            "method": "GET"
-          },
-          "expr": ""
-        }
-      ],
-      "options": {
-        "showHeader": true,
-        "sortBy": [
-          {
-            "desc": false,
-            "displayName": "parameter"
-          }
-        ],
-        "footer": {
-          "show": false
-        },
-        "cellHeight": "sm"
-      },
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {},
-            "indexByName": {
-              "parameter": 0,
-              "value": 1,
-              "percintage": 2,
-              "row_status": 3
-            },
-            "renameByName": {
-              "parameter": "parameter",
-              "value": "value",
-              "percintage": "percintage",
-              "row_status": ""
-            }
-          }
-        }
-      ]
-    },
-    {
       "id": 215,
       "type": "table",
       "title": "First Action",
       "gridPos": {
         "h": 10,
-        "w": 8,
-        "x": 16,
+        "w": 14,
+        "x": 0,
         "y": 7
       },
       "datasource": {
@@ -1223,7 +639,7 @@
       },
       "targets": [
         {
-          "expr": "topk(1, (bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l0_next_action_route{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(label_replace(label_replace(label_replace(vector(0), \"action_target\", \"no_route\", \"\", \"\"), \"action_reason\", \"selected_scope_not_present\", \"\", \"\"), \"action_dashboard_uid\", \"bioetl-overview-v2\", \"\", \"\"), \"pipeline\", \"selected scope\", \"\", \"\"))",
+          "expr": "topk(1, bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
           "refId": "A",
           "format": "table",
           "instant": true
@@ -1455,7 +871,7 @@
       },
       "targets": [
         {
-          "expr": "label_replace(max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\",input=\"control_plane\"} or ((bioetl_l0_input_status_selected{run_type=~\"$run_type\",input=\"control_plane\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))), \"input_order\", \"10\", \"input\", \".*\") or label_replace(max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\",input=\"runtime\"} or ((bioetl_l0_input_status_selected{run_type=~\"$run_type\",input=\"runtime\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))), \"input_order\", \"20\", \"input\", \".*\") or label_replace(max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\",input=\"provider\"} or ((bioetl_l0_input_status_selected{run_type=~\"$run_type\",input=\"provider\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))), \"input_order\", \"30\", \"input\", \".*\") or label_replace(max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\",input=\"dq\"} or ((bioetl_l0_input_status_selected{run_type=~\"$run_type\",input=\"dq\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))), \"input_order\", \"40\", \"input\", \".*\") or label_replace(max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\",input=\"gold\"} or ((bioetl_l0_input_status_selected{run_type=~\"$run_type\",input=\"gold\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))), \"input_order\", \"50\", \"input\", \".*\") or label_replace(max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\",input=\"workflow\"} or ((bioetl_l0_input_status_selected{run_type=~\"$run_type\",input=\"workflow\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))), \"input_order\", \"60\", \"input\", \".*\") or label_replace(label_replace(vector(3), \"input\", \"control_plane\", \"\", \"\"), \"input_order\", \"10\", \"\", \"\") or label_replace(label_replace(vector(3), \"input\", \"runtime\", \"\", \"\"), \"input_order\", \"20\", \"\", \"\") or label_replace(label_replace(vector(3), \"input\", \"provider\", \"\", \"\"), \"input_order\", \"30\", \"\", \"\") or label_replace(label_replace(vector(3), \"input\", \"dq\", \"\", \"\"), \"input_order\", \"40\", \"\", \"\") or label_replace(label_replace(vector(3), \"input\", \"gold\", \"\", \"\"), \"input_order\", \"50\", \"\", \"\") or label_replace(label_replace(vector(3), \"input\", \"workflow\", \"\", \"\"), \"input_order\", \"60\", \"\", \"\")",
+          "expr": "max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
           "refId": "A",
           "format": "table",
           "instant": true
@@ -1543,7 +959,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 30
+        "y": 24
       },
       "collapsed": true,
       "panels": [
@@ -1836,7 +1252,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 31
+        "y": 25
       },
       "collapsed": true,
       "panels": [
@@ -2118,7 +1534,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 32
+        "y": 26
       },
       "description": "Optional per-subsystem mirrors, raw metric starting points, and cross-dashboard handoffs retained for one-expand drilldown after the deviation-first Inputs matrix identifies a domain. These repeated cards do not compete with the first-level verdict, impact, scope, or action path.",
       "panels": [
@@ -3197,9 +2613,609 @@
           "description": "Compact selected workflow/pipeline scope retained in the collapsed subsystem detail row, excluding the synthetic `test_pipe` surface. Each row keeps the worst current workflow status per matching pipeline without unrelated pipeline leakage. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Current workflow status is driven by the latest bounded terminal workflow signal, not by cumulative workflow-run counters. `run_type` and `run_id` remain handoff context only for this card."
         }
       ]
+    },
+    {
+      "type": "row",
+      "title": "Run context (identity / processed records)",
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 27
+      },
+      "id": 9602,
+      "panels": [
+        {
+          "id": 9300,
+          "type": "table",
+          "title": "ID",
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 0,
+            "y": 0
+          },
+          "description": "Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty.",
+          "datasource": "BioETL Ops HTTP",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "unit": "none",
+              "noValue": "Not resolved — no identity rows for the selected run/scope. Check backend health (/health/live), then select or reset run_id; this is not a valid empty run.",
+              "links": [
+                {
+                  "title": "Check BioETL Ops HTTP health",
+                  "url": "http://localhost:8081/health/live",
+                  "targetBlank": true
+                },
+                {
+                  "title": "Open monitoring backend setup docs",
+                  "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
+                  "targetBlank": true
+                }
+              ]
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "parameter"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 165
+                  },
+                  {
+                    "id": "custom.align",
+                    "value": "left"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "value"
+                },
+                "properties": [
+                  {
+                    "id": "custom.align",
+                    "value": "left"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "targets": [
+            {
+              "format": "table",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "rows",
+              "source": "url",
+              "type": "json",
+              "url": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              },
+              "expr": ""
+            }
+          ],
+          "options": {
+            "showHeader": true,
+            "footer": {
+              "show": false
+            },
+            "cellHeight": "sm"
+          },
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true,
+                  "Value": true
+                },
+                "indexByName": {
+                  "parameter": 0,
+                  "value": 1
+                },
+                "renameByName": {
+                  "parameter": "parameter",
+                  "value": "value"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": 9301,
+          "type": "table",
+          "title": "Processed Records",
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 12,
+            "y": 0
+          },
+          "description": "Current stage/outcome accounting evidence for the selected pipeline/run_type scope. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty.",
+          "datasource": "BioETL Ops HTTP",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "decimals": 0,
+              "unit": "none",
+              "noValue": "Not resolved — no processed-record rows. Check backend health and selector scope; backend unavailable is not a valid zero-record state.",
+              "links": [
+                {
+                  "title": "Check BioETL Ops HTTP health",
+                  "url": "http://localhost:8081/health/live",
+                  "targetBlank": true
+                },
+                {
+                  "title": "Open monitoring backend setup docs",
+                  "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
+                  "targetBlank": true
+                }
+              ]
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "parameter"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "01 bronze_records": {
+                            "text": "bronze [total]",
+                            "color": "#cd7f32"
+                          },
+                          "02 silver_valid_records": {
+                            "text": "silver [valid]",
+                            "color": "#c0c0c0"
+                          },
+                          "03 silver_filtered_out_records": {
+                            "text": "silver [filtered out]"
+                          },
+                          "04 silver_quarantined_records": {
+                            "text": "silver [quarantined]"
+                          },
+                          "05 silver_skipped_records": {
+                            "text": "silver [skipped]"
+                          },
+                          "06 silver_deduplicated_records": {
+                            "text": "silver [deduplicated]"
+                          },
+                          "07 gold_written_records": {
+                            "text": "gold [valid]",
+                            "color": "#d4af37"
+                          },
+                          "08 gold_excluded_by_contract_records": {
+                            "text": "gold [excluded]"
+                          },
+                          "09 gold_quarantined_records": {
+                            "text": "gold [quarantined]"
+                          },
+                          "10 gold_skipped_records": {
+                            "text": "gold [skipped]"
+                          },
+                          "11 gold_deduplicated_records": {
+                            "text": "gold [deduplicated]"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.align",
+                    "value": "left"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text"
+                    }
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 165
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "value"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 70
+                  },
+                  {
+                    "id": "custom.align",
+                    "value": "right"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text"
+                    }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": "^01 bronze_records\\|(.*)$",
+                          "result": {
+                            "text": "$1",
+                            "color": "#cd7f32"
+                          }
+                        }
+                      },
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": "^02 silver_valid_records\\|(.*)$",
+                          "result": {
+                            "text": "$1",
+                            "color": "#c0c0c0"
+                          }
+                        }
+                      },
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": "^03 silver_filtered_out_records\\|(.*)$",
+                          "result": {
+                            "text": "$1"
+                          }
+                        }
+                      },
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": "^04 silver_quarantined_records\\|(.*)$",
+                          "result": {
+                            "text": "$1"
+                          }
+                        }
+                      },
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": "^05 silver_skipped_records\\|(.*)$",
+                          "result": {
+                            "text": "$1"
+                          }
+                        }
+                      },
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": "^06 silver_deduplicated_records\\|(.*)$",
+                          "result": {
+                            "text": "$1"
+                          }
+                        }
+                      },
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": "^07 gold_written_records\\|(.*)$",
+                          "result": {
+                            "text": "$1",
+                            "color": "#d4af37"
+                          }
+                        }
+                      },
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": "^08 gold_excluded_by_contract_records\\|(.*)$",
+                          "result": {
+                            "text": "$1"
+                          }
+                        }
+                      },
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": "^09 gold_quarantined_records\\|(.*)$",
+                          "result": {
+                            "text": "$1"
+                          }
+                        }
+                      },
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": "^10 gold_skipped_records\\|(.*)$",
+                          "result": {
+                            "text": "$1"
+                          }
+                        }
+                      },
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": "^11 gold_deduplicated_records\\|(.*)$",
+                          "result": {
+                            "text": "$1"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "percintage"
+                },
+                "properties": [
+                  {
+                    "id": "custom.align",
+                    "value": "left"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text"
+                    }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": "^01 bronze_records\\|(.*)$",
+                          "result": {
+                            "text": "$1",
+                            "color": "#cd7f32"
+                          }
+                        }
+                      },
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": "^02 silver_valid_records\\|(.*)$",
+                          "result": {
+                            "text": "$1",
+                            "color": "#c0c0c0"
+                          }
+                        }
+                      },
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": "^03 silver_filtered_out_records\\|(.*)$",
+                          "result": {
+                            "text": "$1"
+                          }
+                        }
+                      },
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": "^04 silver_quarantined_records\\|(.*)$",
+                          "result": {
+                            "text": "$1"
+                          }
+                        }
+                      },
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": "^05 silver_skipped_records\\|(.*)$",
+                          "result": {
+                            "text": "$1"
+                          }
+                        }
+                      },
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": "^06 silver_deduplicated_records\\|(.*)$",
+                          "result": {
+                            "text": "$1"
+                          }
+                        }
+                      },
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": "^07 gold_written_records\\|(.*)$",
+                          "result": {
+                            "text": "$1",
+                            "color": "#d4af37"
+                          }
+                        }
+                      },
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": "^08 gold_excluded_by_contract_records\\|(.*)$",
+                          "result": {
+                            "text": "$1"
+                          }
+                        }
+                      },
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": "^09 gold_quarantined_records\\|(.*)$",
+                          "result": {
+                            "text": "$1"
+                          }
+                        }
+                      },
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": "^10 gold_skipped_records\\|(.*)$",
+                          "result": {
+                            "text": "$1"
+                          }
+                        }
+                      },
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": "^11 gold_deduplicated_records\\|(.*)$",
+                          "result": {
+                            "text": "$1"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "row_status"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": ""
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 1
+                  },
+                  {
+                    "id": "custom.align",
+                    "value": "center"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-background",
+                      "applyToRow": true
+                    }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "silver_deficit": {
+                            "text": "",
+                            "color": "red"
+                          },
+                          "gold_deficit": {
+                            "text": "",
+                            "color": "red"
+                          },
+                          "": {
+                            "text": "",
+                            "color": "rgba(0,0,0,0)"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "targets": [
+            {
+              "format": "table",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "rows",
+              "source": "url",
+              "type": "json",
+              "url": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              },
+              "expr": ""
+            }
+          ],
+          "options": {
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": false,
+                "displayName": "parameter"
+              }
+            ],
+            "footer": {
+              "show": false
+            },
+            "cellHeight": "sm"
+          },
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {},
+                "indexByName": {
+                  "parameter": 0,
+                  "value": 1,
+                  "percintage": 2,
+                  "row_status": 3
+                },
+                "renameByName": {
+                  "parameter": "parameter",
+                  "value": "value",
+                  "percintage": "percintage",
+                  "row_status": ""
+                }
+              }
+            }
+          ]
+        }
+      ]
     }
   ],
-  "refresh": "30s",
+  "refresh": "60s",
   "schemaVersion": 30,
   "style": "dark",
   "tags": [

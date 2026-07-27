@@ -16,10 +16,12 @@ from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_run
 
 from .conftest import (
     assert_bronze_files_exist,
+    assert_gold_table_has_records,
     assert_silver_table_has_records,
     create_test_context,
     get_silver_records,
 )
+from tests.helpers.e2e_schema_assertions import assert_records_have_required_fields
 
 pytestmark = pytest.mark.usefixtures("relaxed_dq_env")
 
@@ -36,11 +38,12 @@ def vcr_cassette_name(request: pytest.FixtureRequest) -> str:
 @pytest.mark.vcr
 @pytest.mark.asyncio
 async def test_uniprot_protein_full_cycle(e2e_data_dir: Path):
-    """E2E: UniProt Protein pipeline from fetch to Silver.
+    """E2E: UniProt Protein pipeline from fetch through Gold.
 
     Verifies:
     1. Protein data is fetched from UniProt
     2. Silver table contains expected records
+    3. Gold SCD2 table is materialized
     """
     # Arrange
     ctx = create_test_context("uniprot_protein", limit=5)
@@ -59,12 +62,19 @@ async def test_uniprot_protein_full_cycle(e2e_data_dir: Path):
     )
     assert silver_count <= 5
 
+    # Assert - Gold layer (sink.gold.mode=scd2)
+    gold_count = await assert_gold_table_has_records(
+        e2e_data_dir, "uniprot_protein", expected_min=1
+    )
+    assert gold_count >= 1
+
     # Assert - Schema validation
     records = await get_silver_records(e2e_data_dir, "uniprot_protein")
-    required_fields = ["accession"]
-    for record in records:
-        for field in required_fields:
-            assert field in record, f"Missing required field: {field}"
+    assert_records_have_required_fields(
+        records,
+        ("accession",),
+        entity_label="uniprot_protein.silver",
+    )
 
 
 @pytest.mark.e2e

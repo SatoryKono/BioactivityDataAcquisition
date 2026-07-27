@@ -139,7 +139,7 @@
 - [ ] Если `hideControls` присутствует, то `false`
 
 #### Metadata policy
-- [ ] L0/L1 dashboards: `time.from=now-12h`, `refresh=30s`
+- [ ] L0/L1 dashboards: `time.from=now-12h`, `refresh=60s`
 - [x] L2 forensic explorer removed — use CLI quarantine inspect
 - [ ] `schemaVersion` является `30` или `39` (или актуальной версией)
 - [ ] Если `iteration` присутствует, то positive integer

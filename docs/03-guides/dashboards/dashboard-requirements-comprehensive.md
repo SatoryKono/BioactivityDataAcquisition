@@ -222,7 +222,7 @@
 - `hideControls`: если присутствует, MUST быть `false`
 
 **Metadata policy:**
-- L0/L1 dashboards: `time.from=now-12h`, `refresh=30s`
+- L0/L1 dashboards: `time.from=now-12h`, `refresh=60s`
 - L2 forensic (`silver-reject-explorer`): `time.from=now-24h`, `refresh=1m`
 - `schemaVersion` MAY remain `30` или `39` до explicit Grafana migration decision
 - `iteration`: если присутствует, MUST быть positive integer

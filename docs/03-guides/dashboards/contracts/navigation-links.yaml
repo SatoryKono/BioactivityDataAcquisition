@@ -1,7 +1,8 @@
 normative_source:
   scope: link_vars_time_semantics
   authority: single_source_of_truth
-  narrative_minimal: 'This YAML is the only normative contract for dashboard link semantics,
+  narrative_minimal: 'This YAML is the only normative contract for dashboard link
+    semantics,
 
     allowed/required/forbidden var-* handoff, and time handoff policy.
 
@@ -22,71 +23,43 @@ normative_source:
     '
 version: 1
 required_top_level_links_by_uid:
-  bioetl-overview-v2:
-  - 0. Control Plane
-  - 2. Runtime
-  - 3. Provider Health
-  - 4. Data Quality
-  - 5. Workflow
-  - 6. Alerts & SLO
-  bioetl-runtime:
-  - 0. Control Plane
-  - 1. Overview
-  - 3. Provider Health
-  - 4. Data Quality
-  - 5. Workflow
-  - 6. Alerts & SLO
   bioetl-control-plane-v1:
   - 1. Overview
-  - 2. Runtime
-  - 3. Provider Health
+  - 2. Pipeline Diagnostics
   - 4. Data Quality
-  - 5. Workflow
-  - 6. Alerts & SLO
-  bioetl-provider-health-v2:
-  - 0. Control Plane
+  bioetl-overview-v2:
+  - 0. Trust
+  - 2. Pipeline Diagnostics
+  - 4. Data Quality
+  bioetl-runtime:
+  - 0. Trust
   - 1. Overview
-  - 2. Runtime
   - 4. Data Quality
-  - 5. Workflow
-  - 6. Alerts & SLO
   bioetl-dq-v2:
-  - 0. Control Plane
+  - 0. Trust
   - 1. Overview
-  - 2. Runtime
-  - 3. Provider Health
-  - 5. Workflow
-  - 6. Alerts & SLO
-  bioetl-alerts-slo:
-  - 0. Control Plane
+  - 2. Pipeline Diagnostics
+  bioetl-provider-health-v2:
+  - 0. Trust
   - 1. Overview
-  - 2. Runtime
-  - 3. Provider Health
+  - 2. Pipeline Diagnostics
   - 4. Data Quality
-  - 5. Workflow
-  bioetl-workflow-overview:
-  - 0. Control Plane
-  - 1. Overview
-  - 2. Runtime
-  - 3. Provider Health
-  - 4. Data Quality
-  - 6. Alerts & SLO
 top_level_link_priority_by_uid:
   bioetl-overview-v2:
-  - title: 2. Runtime
+  - title: 2. Pipeline Diagnostics
     target_uid: bioetl-runtime
     priority: primary
     semantics: scoped_runtime_handoff
-  - title: 0. Control Plane
+  - title: 0. Trust
     target_uid: bioetl-control-plane-v1
     priority: secondary
     semantics: scoped_control_plane_handoff
-  - title: 3. Provider Health
-    target_uid: bioetl-provider-health-v2
+  - title: 4. Data Quality
+    target_uid: bioetl-dq-v2
     priority: contextual
-    semantics: provider_health_cross_scope
+    semantics: scoped_dq_handoff
   bioetl-provider-health-v2:
-  - title: 2. Runtime
+  - title: 2. Pipeline Diagnostics
     target_uid: bioetl-runtime
     priority: primary
     semantics: runtime_cross_scope_all_defaults
@@ -113,14 +86,6 @@ required_link_vars_by_target_uid:
   - run_type
   - provider
   - pipeline_context
-  bioetl-workflow-overview:
-  - workflow
-  - pipeline
-  - run_type
-  bioetl-alerts-slo:
-  - workflow
-  - pipeline
-  - run_type
 allowed_dashboard_link_vars:
   bioetl-overview-v2:
   - workflow
@@ -152,21 +117,6 @@ allowed_dashboard_link_vars:
   - pipeline
   - run_type
   - run_id
-  bioetl-workflow-overview:
-  - workflow
-  - pipeline
-  - run_type
-  - run_id
-  - status
-  - step_status
-  - step_kind
-  - pipeline_context
-  - run_type_context
-  - provider_context
-  bioetl-alerts-slo:
-  - workflow
-  - pipeline
-  - run_type
 forbidden_dashboard_link_vars_by_target_uid:
   bioetl-overview-v2:
   - quarantine_run_id
@@ -193,17 +143,6 @@ forbidden_dashboard_link_vars_by_target_uid:
   - payload_hash
   - manifest_id
   - execution_fingerprint
-  bioetl-workflow-overview:
-  - quarantine_run_id
-  - payload_hash
-  - manifest_id
-  - execution_fingerprint
-  bioetl-alerts-slo:
-  - run_id
-  - quarantine_run_id
-  - payload_hash
-  - manifest_id
-  - execution_fingerprint
 preserved_identity_handoff:
   selector: run_id
   required_value: $run_id
@@ -224,10 +163,11 @@ preserved_identity_handoff:
   excluded_source_uids:
   - bioetl-alerts-slo
   excluded_target_uids: []
-  semantics: Preserve exact primary Run ID when both source and target dashboards expose the primary control-plane
-    run_id selector. Alert dashboard does not preserve primary run_id when it does not own the primary
-    identity selector. Record-level quarantine forensics use CLI bioetl quarantine inspect (Silver Reject
-    Explorer dashboard removed 2026-07-23).
+  semantics: Preserve exact primary Run ID when both source and target dashboards
+    expose the primary control-plane run_id selector. Alert dashboard does not preserve
+    primary run_id when it does not own the primary identity selector. Record-level
+    quarantine forensics use CLI bioetl quarantine inspect (Silver Reject Explorer
+    dashboard removed 2026-07-23).
 required_discoverable_inbound_paths:
   L1:
     bioetl-runtime:
@@ -380,47 +320,24 @@ required_panel_links_by_uid:
     target_uid: bioetl-control-plane-v1
     link_titles:
     - Open 0. Control Plane
-  bioetl-workflow-overview:
-  - panel_id: 9
-    target_uid: bioetl-runtime
-    link_titles:
-    - Open 2. Runtime
-  - panel_id: 9
-    target_uid: bioetl-dq-v2
-    link_titles:
-    - Open 4. Data Quality
-  - panel_id: 9
-    target_uid: bioetl-provider-health-v2
-    link_titles:
-    - Open 3. Provider Health
-  - panel_id: 9
-    target_uid: bioetl-control-plane-v1
-    link_titles:
-    - Open 0. Control Plane
-  - panel_id: 9
-    target_uid: bioetl-overview-v2
-    link_titles:
-    - Open 1. Overview
 default_time_refresh_policy:
   L0:
     dashboards:
     - bioetl-overview-v2
     time_from: now-12h
-    refresh: 30s
+    refresh: 60s
   L1:
     dashboards:
     - bioetl-runtime
     - bioetl-control-plane-v1
     - bioetl-provider-health-v2
     - bioetl-dq-v2
-    - bioetl-workflow-overview
     time_from: now-12h
-    refresh: 30s
+    refresh: 60s
   Alerts:
-    dashboards:
-    - bioetl-alerts-slo
+    dashboards: []
     time_from: now-24h
-    refresh: 30s
+    refresh: 60s
   L2:
     dashboards: []
     time_from: now-24h
@@ -442,10 +359,7 @@ navigation_transition_contract:
       required_outbound:
       - bioetl-runtime
       - bioetl-control-plane-v1
-      - bioetl-provider-health-v2
       - bioetl-dq-v2
-      - bioetl-workflow-overview
-      - bioetl-alerts-slo
       required_inbound: []
     L1:
       dashboards:
@@ -453,8 +367,6 @@ navigation_transition_contract:
       - bioetl-control-plane-v1
       - bioetl-provider-health-v2
       - bioetl-dq-v2
-      - bioetl-workflow-overview
-      - bioetl-alerts-slo
       required_outbound:
       - bioetl-overview-v2
       required_inbound:

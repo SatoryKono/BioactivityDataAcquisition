@@ -101,7 +101,11 @@ test_lanes:
 
     unit-fast:
       suite_name: unit-fast
-      description: "Fast unit lane over canonical pure-unit paths; excludes slow, benchmark, repo-backed, and Neo4j/MCP memory tests."
+      description: >-
+        Fast unit lane over pure-ish unit paths under tests/unit. Excludes slow,
+        benchmark, repo-backed, Neo4j/MCP memory tests, and scripts tooling
+        (see unit-scripts-tooling). scripts/ is still importable path-wise but
+        documented as non-domain tooling (T-12).
       runner_backend: run_pytest
       runner: scripts/engineering/dev/run_pytest.sh
       paths:
@@ -109,6 +113,8 @@ test_lanes:
       marker_expression: "not repo_backed and not slow and not benchmark and not memory"
       pytest_args:
         - tests/unit/
+        - --ignore=tests/unit/scripts
+        - --ignore=tests/unit/repo_backed
         - -m
         - not repo_backed and not slow and not benchmark and not memory
       replay_mode: not_applicable
@@ -129,6 +135,27 @@ test_lanes:
         - tests/unit/repo_backed/
         - -m
         - repo_backed and not slow and not benchmark and not memory
+      replay_mode: not_applicable
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    unit-scripts-tooling:
+      suite_name: unit-scripts-tooling
+      description: >-
+        Tooling/script tests under tests/unit/scripts. These are not pure hexagonal
+        domain unit tests; they exercise repo tooling and may use tmp_path/subprocess.
+        Kept separate from unit-fast mental model (T-12 / #6605).
+      runner_backend: run_pytest
+      runner: scripts/engineering/dev/run_pytest.sh
+      paths:
+        - tests/unit/scripts/
+      marker_expression: "not slow and not benchmark and not memory"
+      pytest_args:
+        - tests/unit/scripts/
+        - -m
+        - not slow and not benchmark and not memory
       replay_mode: not_applicable
       coverage_gate: none
       expected_artifacts:
@@ -510,12 +537,12 @@ layers:
   application:
     unit: MUST
     integration: SHOULD
-    property: SHOULD  # transformers, normalization only
+    property: SHOULD # transformers, normalization only
     description: "Pipelines, services, orchestration."
 
   infrastructure:
     unit: MUST
-    integration: MUST  # VCR-backed
+    integration: MUST # VCR-backed
     contract: MUST
     description: "HTTP adapters, storage, observability."
 
@@ -697,8 +724,8 @@ property_test_boundaries:
     - application/core/normalization*
     - domain/behavior/schema*
   forbidden:
-    - infrastructure/storage  # Use fixtures instead
-    - interfaces/cli  # Use e2e instead
+    - infrastructure/storage # Use fixtures instead
+    - interfaces/cli # Use e2e instead
   # Note: infrastructure/adapters/common is exempt — retry/fallback
   # policies are pure logic tested with property-based approaches.
 
@@ -707,7 +734,7 @@ property_test_boundaries:
 mutation_testing:
   enabled: true
   workflow_present: true
-  ci_gate_mode: partial  # Domain and curated application slices enforced; broad application target staged
+  ci_gate_mode: partial # Domain and curated application slices enforced; broad application target staged
   governance_ledger_location: configs/quality/mutation_testing_rollout_ledger.yaml
   tool: mutmut
   targets:
@@ -736,9 +763,9 @@ mutation_testing:
       min_score: 60
       enforced: false
   excluded:
-    - infrastructure  # I/O-heavy, low mutation value
-    - composition  # Wiring code, tested via e2e
-    - interfaces  # CLI tested via e2e
+    - infrastructure # I/O-heavy, low mutation value
+    - composition # Wiring code, tested via e2e
+    - interfaces # CLI tested via e2e
 
 # ── Coverage inventory ───────────────────────────────────────
 
@@ -921,7 +948,7 @@ fixture_governance:
       - golden
       - vcr
   config_contract_registry_duplication_inventory_contract:
-    issue_ref: '#5409'
+    issue_ref: "#5409"
     scope: exact_byte_duplicate_visibility_for_jscpd_excluded_governance_artifacts
     generator: scripts/engineering/qa/report_artifact_duplication_audit.py
     command: python -m scripts.engineering.qa report-artifact-duplication-audit --check
@@ -999,7 +1026,8 @@ contract_testing:
   replay_gate_mode: ci
   network_opt_in_required: true
   live_api_minimum_baseline:
-    enforced_providers: [chembl, pubchem, uniprot, pubmed, crossref, openalex, semanticscholar]
+    enforced_providers:
+      [chembl, pubchem, uniprot, pubmed, crossref, openalex, semanticscholar]
     pilot_providers: []
     vcr_only_providers: []
   provider_live_api:

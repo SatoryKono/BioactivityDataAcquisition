@@ -274,7 +274,7 @@ For each panel:
 
 ### 8.2 Metadata Policy (MUST)
 - [ ] `refresh` and default `time.from` follow `contracts/navigation-links.yaml`:
-  - [ ] L0/L1 dashboards: `time.from=now-12h`, `refresh=30s`
+  - [ ] L0/L1 dashboards: `time.from=now-12h`, `refresh=60s`
   - [ ] L2 forensic (`silver-reject-explorer`): `time.from=now-24h`, `refresh=1m`
 - [ ] `schemaVersion` MAY remain `30` or `39` until explicit Grafana migration decision
 - [ ] `iteration`: if present, MUST be positive integer

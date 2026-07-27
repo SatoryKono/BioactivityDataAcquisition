@@ -1,0 +1,45 @@
+# E2E skip-rate SLO (T-08 / #6604).
+# Skips must be observed, not healed with retries or assertion weakening.
+
+schema_version: 1
+owner: "@bioetl-platform"
+linked_issues:
+  - 6604
+reviewed_on: "2026-07-27"
+
+policy:
+  forbid_retries_to_heal_flakes: true
+  forbid_assertion_weakening: true
+  authority: configs/quality/flaky_test_inventory.yaml
+
+skip_categories:
+  - transient_upstream
+  - vcr_lfs_pointer
+  - fixture_missing
+  - live_network_opt_in
+  - strict_persistence_snapshot_gap
+
+slo:
+  # Advisory until three consecutive nightly samples establish a baseline.
+  mode: advisory
+  max_skip_rate_percent: 15.0
+  min_executed_tests_for_evaluation: 5
+  evaluation_lanes:
+    - e2e
+    - e2e-smoke
+    - e2e-nightly-full
+
+telemetry:
+  artifact_name: e2e-skip-rate-telemetry
+  reason_field: e2e_skip_reason
+  required_fields:
+    - suite
+    - nodeid
+    - category
+    - reason_code
+
+enforcement:
+  architecture_test: tests/architecture/test_e2e_skip_rate_slo_policy.py
+  promotion_path: >-
+    Collect skip telemetry for three nightly runs; if rate stays under budget,
+    promote mode from advisory to blocking in CI e2e summary job.

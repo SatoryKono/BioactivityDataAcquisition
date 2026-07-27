@@ -1,0 +1,42 @@
+# Inventory of issue/closeout-bound architecture tests (T-05 / #6600).
+# Policy: fold durable assertions into generic ratchets; delete only after
+# replacement coverage exists. Debt budgets must stay flat-or-decreasing.
+
+schema_version: 1
+owner: "@bioetl-platform"
+linked_issues:
+  - 6600
+reviewed_on: "2026-07-27"
+
+classification:
+  keep_as_is: historical freeze still blocking a live risk
+  fold_into_generic: assertion belongs in a durable governance ratchet
+  delete_after_sunset: legacy surface gone; closeout file may be removed
+
+entries:
+  - path: tests/architecture/test_value_object_run_manifest_deprecation.py
+    classification: keep_as_is
+    owner: "@bioetl-platform"
+    removal_condition: >-
+      Zero remaining imports of deprecated value-object RunManifest symbols in
+      src/ and tests/; then delete this scanner.
+  - path: tests/architecture/test_tech_debt_issues_5670_5675_closeout.py
+    classification: fold_into_generic
+    owner: "@bioetl-platform"
+    target_ratchet: tests/architecture/test_internal_compatibility_shim_governance.py
+    removal_condition: >-
+      Shim expiry guards live only in the generic compatibility ratchet.
+  - path: tests/architecture/test_architecture_scan_index_policy.py
+    classification: keep_as_is
+    owner: "@bioetl-platform"
+    removal_condition: never — durable performance governance for arch scans
+
+summary:
+  inventory_note: >-
+    Full closeout filename inventory is enforced by
+    tests/architecture/test_architecture_closeout_inventory.py which enumerates
+    tests/architecture/test_*closeout*.py and test_tech_debt_issues_*.py and
+    requires each path to appear here or be classified generically via the
+    default_fold policy.
+  default_unlisted_classification: fold_into_generic
+  minimum_fold_or_delete_fraction: 0.25

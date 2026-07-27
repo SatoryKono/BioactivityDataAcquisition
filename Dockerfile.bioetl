@@ -5,7 +5,8 @@ FROM python:3.12-slim@sha256:c3d81d25b3154142b0b42eb1e61300024426268edeb5b5a26dd
 WORKDIR /app
 
 # Install build dependencies and uv
-# hadolint ignore=DL3008 -- distro security packages track moving distro revisions
+# Debian security packages track moving distro revisions.
+# hadolint ignore=DL3008
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libssl-dev \
@@ -26,7 +27,8 @@ FROM python:3.12-slim@sha256:c3d81d25b3154142b0b42eb1e61300024426268edeb5b5a26dd
 WORKDIR /app
 
 # Install runtime dependencies and create non-root user for security
-# hadolint ignore=DL3008 -- distro security packages track moving distro revisions
+# Debian security packages track moving distro revisions.
+# hadolint ignore=DL3008
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     && groupadd -r bioetl \

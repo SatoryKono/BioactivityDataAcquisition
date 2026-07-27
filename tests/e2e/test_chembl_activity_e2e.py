@@ -16,10 +16,13 @@ from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_run
 from .conftest import (
     E2E_TWO_SEQUENTIAL_PIPELINE_TIMEOUT,
     assert_bronze_files_exist,
+    assert_gold_table_has_records,
     assert_silver_table_has_records,
     create_test_context,
+    get_gold_records,
     get_silver_records,
 )
+from tests.helpers.e2e_schema_assertions import assert_records_have_required_fields
 
 pytestmark = pytest.mark.usefixtures("relaxed_dq_env")
 
@@ -29,14 +32,15 @@ pytestmark = pytest.mark.usefixtures("relaxed_dq_env")
 @pytest.mark.vcr
 @pytest.mark.asyncio
 async def test_chembl_activity_full_cycle(e2e_data_dir: Path):
-    """E2E: ChEMBL Activity pipeline from fetch to Silver.
+    """E2E: ChEMBL Activity pipeline from fetch through Gold.
 
     Verifies:
     1. Pipeline bootstraps correctly
     2. Data is fetched from ChEMBL API (via VCR cassette)
     3. Bronze files are created
     4. Silver Delta table contains records
-    5. Records have correct schema
+    5. Gold table is materialized when gold sink is enabled
+    6. Records have correct schema
     """
     # Arrange
     ctx = create_test_context("chembl_activity", limit=10)
@@ -55,12 +59,25 @@ async def test_chembl_activity_full_cycle(e2e_data_dir: Path):
     )
     assert silver_count <= 10, f"Expected <= 10 records (limit), got {silver_count}"
 
-    # Assert - Schema validation
-    records = await get_silver_records(e2e_data_dir, "chembl_activity")
-    required_fields = ["activity_id", "molecule_id", "target_id"]
-    for record in records:
-        for field in required_fields:
-            assert field in record, f"Missing required field: {field}"
+    # Assert - Gold layer (config sink.gold.enabled=true)
+    gold_count = await assert_gold_table_has_records(
+        e2e_data_dir, "chembl_activity", expected_min=1
+    )
+    assert gold_count >= 1
+
+    # Assert - Schema validation (silver + gold)
+    silver_records = await get_silver_records(e2e_data_dir, "chembl_activity")
+    assert_records_have_required_fields(
+        silver_records,
+        ("activity_id", "molecule_id", "target_id"),
+        entity_label="chembl_activity.silver",
+    )
+    gold_records = await get_gold_records(e2e_data_dir, "chembl_activity")
+    assert_records_have_required_fields(
+        gold_records,
+        ("activity_id",),
+        entity_label="chembl_activity.gold",
+    )
 
 
 @pytest.mark.e2e

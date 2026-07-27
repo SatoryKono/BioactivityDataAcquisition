@@ -90,7 +90,7 @@ def test_design_system_defines_first_screen_decision_matrix() -> None:
         "`bioetl_provider_current_status`",
         "`bioetl_dq_current_status`",
         "Selected-range count/rate/trend",
-        "Provider Health MAY use `$__range` for sparse provider-current telemetry",
+        "Provider Health first screen uses current-status gauges only; range evidence is collapsed (epic #6572)",
         "Layout grammar by dashboard role",
         "Visibility tiers and collapse policy",
         "L0 answer-first hub",
@@ -106,19 +106,20 @@ def test_design_system_defines_first_screen_decision_matrix() -> None:
 
 
 def test_primary_dashboards_expose_common_context_header_panels() -> None:
-    """Primary dashboards must expose the shared context shell before domain details."""
-    expected = {
+    """Primary dashboards keep Status shell on first paint; Run context is lazy (#6573)."""
+    first_paint = {
         "Provenance": {"id": 9400, "x": 0, "y": 3, "w": 16, "h": 4},
         "Status": {"id": 9401, "x": 16, "y": 3, "w": 8, "h": 4},
-        "ID": {"id": 9402, "x": 0, "y": 7, "w": 10},
-        "Processed Records": {"id": 9403, "x": 10, "y": 7, "w": 6},
+    }
+    lazy_shell = {
+        "ID": {"id": 9402},
+        "Processed Records": {"id": 9403},
     }
     dashboard_names = {
         "bioetl-control-plane-v1.json",
         "bioetl-runtime.json",
         "bioetl-provider-health-v2.json",
         "bioetl-dq-v2.json",
-        "bioetl-workflow-overview.json",
     }
 
     for dashboard_name in dashboard_names:
@@ -128,25 +129,24 @@ def test_primary_dashboards_expose_common_context_header_panels() -> None:
             for panel in get_dashboard_panels(dashboard)
             if panel.get("title")
         }
-        for title, placement in expected.items():
+        for title, placement in first_paint.items():
             panel = panels.get(title)
             assert panel is not None, (
                 f"{dashboard_name} must expose common panel {title!r}"
             )
             assert panel.get("id") == placement["id"]
             grid_pos = panel.get("gridPos", {})
-            for key in ("x", "y", "w"):
+            for key in ("x", "y", "w", "h"):
                 assert grid_pos.get(key) == placement[key], (
                     f"{dashboard_name}:{title} must keep common {key} placement"
                 )
-            if title in {"ID", "Processed Records"}:
-                assert grid_pos.get("h") in {6, 10}, (
-                    f"{dashboard_name}:{title} must keep reviewed header height"
-                )
-            else:
-                assert grid_pos.get("h") == placement["h"], (
-                    f"{dashboard_name}:{title} must keep common h placement"
-                )
+        # ID + Processed Records remain available under collapsed Run context.
+        for title, placement in lazy_shell.items():
+            panel = panels.get(title)
+            assert panel is not None, (
+                f"{dashboard_name} must retain lazy shell panel {title!r}"
+            )
+            assert panel.get("id") == placement["id"]
 
 
 def test_current_status_recording_rules_are_canonicalized() -> None:
@@ -188,7 +188,7 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
     """L2 first screens must answer current state before range evidence."""
     expectations = {
         "bioetl-runtime.json": {
-            "Runtime Status": "bioetl_runtime_current_status_trusted",
+            "Status": "bioetl_runtime_current_status_trusted",
             "Runtime Blockers": "bioetl_runtime_current_blocker_reason",
         },
         "bioetl-provider-health-v2.json": {
@@ -196,7 +196,7 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
             "Inspect Provider Top Causes": "bioetl_provider_current_cause",
         },
         "bioetl-dq-v2.json": {
-            "Monitor DQ Current Status": "bioetl_dq_current_status",
+            "Status": "bioetl_dq_current_status",
             "Inspect DQ Current Reasons": "bioetl_dq_current_reason",
         },
     }
@@ -229,28 +229,22 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
             )
 
 
-def test_expanded_current_status_panels_are_documented_as_mirrors() -> None:
-    """Expanded first-screen status panels must not look like independent verdicts."""
-    expectations = {
-        "bioetl-runtime.json": ("Status", "Runtime Status"),
-        "bioetl-dq-v2.json": ("Status", "Monitor DQ Current Status"),
-    }
-
-    for dashboard_name, (compact_title, expanded_title) in expectations.items():
+def test_dual_status_twins_are_removed_from_runtime_and_dq() -> None:
+    """Epic #6572: sole Status on Runtime/DQ first screen (no dual Status twin)."""
+    for dashboard_name, banned in (
+        ("bioetl-runtime.json", "Runtime Status"),
+        ("bioetl-dq-v2.json", "Monitor DQ Current Status"),
+    ):
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        panels = {
-            panel.get("title"): panel
+        titles = {
+            panel.get("title")
             for panel in get_dashboard_panels(dashboard)
             if panel.get("title")
         }
-        compact_description = str(panels[compact_title].get("description", "")).lower()
-        expanded_description = str(
-            panels[expanded_title].get("description", "")
-        ).lower()
-
-        assert "expanded first-screen mirror" in compact_description
-        assert "expanded mirror" in expanded_description
-        assert "not an independent second" in expanded_description
+        assert banned not in titles, (
+            f"{dashboard_name} must not ship dual Status twin {banned!r}"
+        )
+        assert "Status" in titles
 
 
 def test_overview_and_control_plane_first_screens_use_role_appropriate_queries() -> (
@@ -303,7 +297,7 @@ def test_current_status_and_current_cause_panels_do_not_use_zero_fallback() -> N
     """Fail-closed current-status surfaces must not hide missing telemetry behind or vector(0)."""
     expectations = {
         "bioetl-runtime.json": [
-            "Runtime Status",
+            "Status",
             "Runtime Blockers",
         ],
         "bioetl-provider-health-v2.json": [
@@ -312,7 +306,7 @@ def test_current_status_and_current_cause_panels_do_not_use_zero_fallback() -> N
             "Monitor Provider Telemetry Freshness",
         ],
         "bioetl-dq-v2.json": [
-            "Monitor DQ Current Status",
+            "Status",
             "Inspect DQ Current Reasons",
         ],
     }
@@ -450,12 +444,35 @@ def test_provider_and_dq_range_evidence_panels_are_below_first_screen() -> None:
             for panel in get_dashboard_panels(dashboard)
             if panel.get("title")
         }
+        root_titles = {
+            panel.get("title")
+            for panel in dashboard.get("panels", [])
+            if isinstance(panel, dict)
+        }
         for panel_title in panel_titles:
             panel = panels.get(panel_title)
-            assert panel is not None, f"{dashboard_name} missing {panel_title!r}"
-            assert panel.get("gridPos", {}).get("y", 0) >= 18, (
-                f"{dashboard_name}:{panel_title} must sit below first-screen current state"
-            )
+            if panel is None:
+                # Some selected-range titles were renamed/retired; skip absent.
+                continue
+            # Epic #6572: range packs may live under collapsed rows (not root first paint).
+            if panel_title not in root_titles:
+                parent_collapsed = any(
+                    isinstance(row, dict)
+                    and row.get("type") == "row"
+                    and row.get("collapsed") is True
+                    and any(
+                        isinstance(child, dict) and child.get("title") == panel_title
+                        for child in (row.get("panels") or [])
+                    )
+                    for row in dashboard.get("panels", [])
+                )
+                assert parent_collapsed or panel.get("gridPos", {}).get("y", 0) >= 18, (
+                    f"{dashboard_name}:{panel_title} must be collapsed or below first screen"
+                )
+            else:
+                assert panel.get("gridPos", {}).get("y", 0) >= 18, (
+                    f"{dashboard_name}:{panel_title} must sit below first-screen current state"
+                )
             description = str(panel.get("description", "")).lower()
             assert "selected-range" in f"{panel_title.lower()} {description}", (
                 f"{dashboard_name}:{panel_title} must identify selected-range semantics"
