@@ -1,16 +1,16 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-27T12:09:03.107791+00:00",
+  "generated_at": "2026-07-27T13:22:50.473454+00:00",
   "summary": {
-    "total_scripts": 536,
+    "total_scripts": 532,
     "status_counts": {
       "active": 341,
-      "supporting": 195
+      "supporting": 191
     },
     "reference_group_coverage": {
       "agents": 5,
       "build": 12,
-      "ci": 65,
+      "ci": 64,
       "docs": 220,
       "other": 66,
       "scripts": 418,
@@ -4626,7 +4626,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 423,
+          "line": 424,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/data_quality/run_silver_gold_filter_parity.py --check"
         }
@@ -7304,18 +7304,6 @@
       "next_step": "Retain as a top-level pipeline normalization matrix compatibility shim while legacy direct-file invocations still reference the old path; keep it supporting and prefer python -m scripts.docs generate-pipeline-normalization-matrix."
     },
     {
-      "path": "scripts/docs/generate_pipeline_normalization_validation_table.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "@bioetl-docs",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded historical docs-generation utility while no governed caller references it; either route it through the canonical scripts.docs matrix/reporting surface or retire it after caller audit."
-    },
-    {
       "path": "scripts/docs/matrix/_bootstrap.py",
       "type": "py",
       "status": "supporting",
@@ -7851,13 +7839,13 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 386,
+          "line": 387,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 541,
+          "line": 542,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory-live"
         },
@@ -8233,7 +8221,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1019,
+          "line": 1020,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -10491,7 +10479,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 429,
+          "line": 430,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa check-naming-pkg --check"
         },
@@ -10806,7 +10794,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 370,
+          "line": 371,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/check_test_audit_preflight.py --strict"
         },
@@ -11346,7 +11334,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 590,
+          "line": 591,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
@@ -11444,14 +11432,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
-        {
-          "path": ".github/workflows/tests.yml",
-          "line": 938,
-          "source_group": "ci",
-          "text": "uv run --frozen --no-build python scripts/engineering/qa/generate_hotspot_degradation_report.py \\"
-        },
         {
           "path": "docs/05-operations/performance-baselines.md",
           "line": 27,
@@ -12845,19 +12827,19 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 156,
+          "line": 157,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-placement"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 160,
+          "line": 161,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-naming"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 168,
+          "line": 169,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90"
         },
@@ -12931,7 +12913,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 156,
+          "line": 157,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-placement"
         },
@@ -12982,7 +12964,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 160,
+          "line": 161,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-naming"
         },
@@ -13039,7 +13021,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 168,
+          "line": 169,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90"
         },
@@ -13422,7 +13404,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 367,
+          "line": 368,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo check-catalog --catalog scripts/engineering/repo/catalog.yaml"
         },
@@ -13479,7 +13461,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 359,
+          "line": 360,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.repo check-inventory \\"
         },
@@ -13973,18 +13955,6 @@
       ]
     },
     {
-      "path": "scripts/memory/mcp_smoke.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a backward-compatible import shim while the canonical Neo4j memory smoke implementation lives under scripts.ai.mcp.neo4j_memory_mcp_smoke; remove it only after tests and historical import paths stop referencing scripts.memory.mcp_smoke."
-    },
-    {
       "path": "scripts/memory/prompts/print_seed.sh",
       "type": "sh",
       "status": "supporting",
@@ -14214,7 +14184,7 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 18,
+      "reference_count": 14,
       "references": [
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
@@ -14271,7 +14241,7 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 73,
+      "reference_count": 69,
       "references": [
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
@@ -14642,18 +14612,6 @@
       ]
     },
     {
-      "path": "scripts/ops/install-codex-cmd.ps1",
-      "type": "ps1",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "windows_compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as an unreferenced Windows compatibility installer during the reviewed retirement window; remove it once external bootstrap docs and local operator flows no longer depend on the old Codex command shim."
-    },
-    {
       "path": "scripts/ops/launchers/codex/codex-exec.bat",
       "type": "bat",
       "status": "active",
@@ -14766,18 +14724,6 @@
           "text": "├─ codex-exec.sh ──────├─ npm/Node.js"
         }
       ]
-    },
-    {
-      "path": "scripts/ops/launchers/codex/codex-fast.bat",
-      "type": "bat",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "internal_compatibility_launcher",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a fast Windows launcher variant that skips MCP setup while the primary governed Codex launchers remain codex.bat and codex-exec.bat; remove or fold it into launcher flags after the Windows launcher flow is consolidated."
     },
     {
       "path": "scripts/ops/launchers/codex/codex-wsl.bat",
@@ -14898,7 +14844,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 117,
+      "reference_count": 115,
       "references": [
         {
           "path": "docs/03-guides/development/codex-paths.md",
@@ -15155,7 +15101,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 164,
+          "line": 165,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py --check"
         },
@@ -17412,7 +17358,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 420,
+          "line": 421,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.schema generate-config-matrix --check"
         }

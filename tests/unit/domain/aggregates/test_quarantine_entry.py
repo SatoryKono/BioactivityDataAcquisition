@@ -6,6 +6,8 @@ Tests verify that:
 3. Resolution metadata is required when marking as resolved
 4. payload cannot be modified after creation
 5. error_code is required and immutable
+
+Constructor surface width is governed by ADR-051 (intentional_exception).
 """
 
 from __future__ import annotations

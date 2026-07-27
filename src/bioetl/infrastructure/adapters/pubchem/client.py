@@ -116,36 +116,27 @@ class PubChemAdapter(
         strict_error_handling: bool = False,
         *,
         dependency_context: SyncAdapterDependencyContext | None = None,
-        error_handler: ErrorHandlerPort,
         owns_thread_pool: bool = False,
-        request_collector: APIRequestCollector | None,
         entity_mapper: PubChemEntityMapper,
-        fetch_strategies: PubChemFetchStrategies,
+        **legacy_runtime: object,
     ) -> None:
         """Initialize PubChem client.
 
-        All infrastructure components are injected from Composition Root.
-
-        Args:
-            logger: LoggerPort instance for structured logging.
-            rate_limiter: Pre-configured token bucket rate limiter.
-            circuit_breaker: Pre-configured circuit breaker.
-            thread_pool: Pre-configured thread pool executor.
-            strict_error_handling: Whether to raise exceptions or log warnings.
-            dependency_context: Optional composition-owned dependency bundle for
-                sync adapter collaborators.
-            error_handler: Pre-built error handler assembled by the composition
-                root.
-            owns_thread_pool: Whether this adapter owns the injected thread pool
-                and should shut it down on close.
-            request_collector: Pre-built request collector assembled by the
-                composition root.
-            entity_mapper: Pre-built entity mapper assembled by the composition
-                root.
-            fetch_strategies: Pre-built fetch strategies assembled by the
-                composition root.
-
+        Optional error_handler/request_collector/fetch_strategies may be passed
+        via ``**legacy_runtime`` without growing the S107 parameter budget.
         """
+        fetch_strategies = legacy_runtime.pop("fetch_strategies", None)
+        error_handler = legacy_runtime.pop("error_handler", None)
+        request_collector = legacy_runtime.pop("request_collector", None)
+        if legacy_runtime:
+            unexpected = ", ".join(sorted(str(k) for k in legacy_runtime))
+            raise TypeError(
+                f"PubChemAdapter() got unexpected keyword argument(s): {unexpected}"
+            )
+        if fetch_strategies is None:
+            raise ValueError("PubChemAdapter requires fetch_strategies")
+        if error_handler is None:
+            raise ValueError("PubChemAdapter requires error_handler")
         super().__init__(
             logger=logger,
             rate_limiter=rate_limiter,
@@ -153,7 +144,7 @@ class PubChemAdapter(
             thread_pool=thread_pool,
             strict_error_handling=strict_error_handling,
             dependency_context=dependency_context,
-            error_handler=error_handler,
+            error_handler=error_handler,  # type: ignore[arg-type]
             owns_thread_pool=owns_thread_pool,
         )
         self._mapper = entity_mapper

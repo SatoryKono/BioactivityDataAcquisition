@@ -1705,6 +1705,29 @@
       "owner": "BioETL Team",
       "status": "enforced",
       "title": "Silver Structural and Gold Semantic Filter Boundary"
+    },
+    {
+      "adr_id": "ADR-051",
+      "category": "architecture",
+      "decision_date": "2026-07-27",
+      "decision_path": "docs/02-architecture/decisions/ADR-051-quarantine-entry-aggregate-surface.md",
+      "enforcement_owner_paths": [
+        "configs/quality/constructor_waivers.yaml",
+        "configs/quality/domain_aggregate_classification.yaml",
+        "tests/architecture/test_adr_enforcement_matrix.py",
+        "tests/unit/domain/aggregates/test_quarantine_entry.py"
+      ],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/quality/constructor_waivers.yaml",
+        "configs/quality/domain_aggregate_classification.yaml",
+        "tests/architecture/test_adr_enforcement_matrix.py",
+        "tests/unit/domain/aggregates/test_quarantine_entry.py"
+      ],
+      "manual_exception": null,
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "quarantine entry aggregate surface"
     }
   ],
   "schema_version": 1,
@@ -1714,9 +1737,9 @@
     "tracked_file_discovery": "git grep --untracked with python fallback"
   },
   "summary": {
-    "accepted_adr_count": 48,
+    "accepted_adr_count": 49,
     "blocking_gap_count": 0,
-    "enforced_adr_count": 48,
+    "enforced_adr_count": 49,
     "manual_exception_count": 0,
     "missing_enforcement_owner_count": 0,
     "missing_implementation_owner_count": 0

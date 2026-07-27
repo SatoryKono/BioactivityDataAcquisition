@@ -42,6 +42,7 @@ true_aggregates:
       - tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py
       - tests/unit/domain/aggregates/test_pipeline_run_invariant_properties.py
   - aggregate: QuarantineEntry
+    # ADR-051 freezes the wide constructor as intentional aggregate surface.
     root_module: src/bioetl/domain/aggregates/quarantine_entry.py
     implementation_modules:
       - src/bioetl/domain/aggregates/_quarantine_aggregate.py

@@ -77,37 +77,37 @@ class BaseChemblTransformer(PreSilverAdapterMixin, BaseTransformer):
         entity_type: str | None = None,
         silver_filters: SilverFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
-        tracer: TracingPort | None = None,
-        metrics: MetricsPort | None = None,
-        identity_service: EntityIdentityGenerator | None = None,
-        pii_hasher: PiiHasherPort | None = None,
         dependencies: TransformerDependencyContext | None = None,
+        **legacy_collaborators: object,
     ) -> None:
         """Initialize ChEMBL transformer.
 
-        Args:
-            provider: Data provider identifier. Defaults to 'chembl'.
-            entity_type: Entity type for metrics labels. If None, derived from
-                entity_class name (e.g., Activity → "activity").
-            tracer: Optional tracing port for distributed tracing (O1 observability).
-            metrics: Optional metrics port for duration/error tracking (O1 observability).
-            silver_filters: Optional domain-level filter configuration for Silver layer.
-            gold_filters: Optional filter configuration for Gold layer.
-            identity_service: Service for computing entity IDs and content hashes.
-            pii_hasher: Optional PII hasher for hashing author names (RULES.md §5.4).
-            data_normalizer: Data normalization service for text normalization
-                (DOI, PMID, authors, HTML). Defaults to DefaultDataNormalizer.
-            contract_policy: Optional pipeline contract policy for field renaming
-                and hash include/exclude rules.
-
+        Optional tracer/metrics/identity_service/pii_hasher may be passed as
+        legacy keyword collaborators without growing the S107 parameter budget.
         """
-        # Derive entity_type from entity_class if not provided
+        allowed = {"tracer", "metrics", "identity_service", "pii_hasher"}
+        unexpected = sorted(k for k in legacy_collaborators if k not in allowed)
+        if unexpected:
+            raise TypeError(
+                "BaseChemblTransformer() got unexpected keyword argument(s): "
+                + ", ".join(unexpected)
+            )
         resolved_entity_type = entity_type
         if resolved_entity_type is None and self.default_entity_type is not None:
             resolved_entity_type = self.default_entity_type
         if resolved_entity_type is None and hasattr(self, "entity_class"):
             resolved_entity_type = self.entity_class.__name__.lower()
-        init_kwargs = transformer_init_kwargs(locals())
+        init_locals: dict[str, object] = {
+            "entity_type": resolved_entity_type,
+            "silver_filters": silver_filters,
+            "gold_filters": gold_filters,
+            "dependencies": dependencies,
+            "tracer": legacy_collaborators.get("tracer"),
+            "metrics": legacy_collaborators.get("metrics"),
+            "identity_service": legacy_collaborators.get("identity_service"),
+            "pii_hasher": legacy_collaborators.get("pii_hasher"),
+        }
+        init_kwargs = transformer_init_kwargs(init_locals)
         init_kwargs["entity_type"] = resolved_entity_type
 
         initialize_base_transformer(

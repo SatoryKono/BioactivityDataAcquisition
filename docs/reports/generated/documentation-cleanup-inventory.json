@@ -3014,6 +3014,34 @@
       "github_issue_number": null,
       "github_issue_url": null,
       "inbound_links": 0,
+      "lifecycle": "issue_pack",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": ".github/ISSUES/TECH-DEBT-RESIDUAL-2026-07-27-ISSUE-PACK.md",
+      "recommended_action": "archive-after-github-state-check",
+      "root_doc_kind": null,
+      "section": ".github",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
       "lifecycle": "active_draft",
       "outbound_links": 0,
       "owner": "BioETL Team",
@@ -88188,7 +88216,7 @@
       "generated_test_run_evidence": 4,
       "guide": 2,
       "index": 4,
-      "issue_pack": 13,
+      "issue_pack": 14,
       "live_issue_mirror": 4,
       "plans_governance_entrypoint": 1,
       "published_skill_reference_redirect": 36,
@@ -88196,14 +88224,14 @@
       "working_report": 50
     },
     "by_recommended_action": {
-      "archive-after-github-state-check": 121,
+      "archive-after-github-state-check": 122,
       "archive-after-migration": 101,
       "generate-automatically": 738,
       "keep": 2160,
       "reconcile-with-github-state": 4
     },
     "by_section": {
-      ".github": 131,
+      ".github": 132,
       "00-project": 294,
       "01-requirements": 3,
       "02-architecture": 868,
@@ -88242,18 +88270,18 @@
       "Archived": 81,
       "Canonical": 63,
       "Generated": 738,
-      "Working": 280
+      "Working": 281
     },
     "by_surface_family": {
       "active": 1962,
       "archive": 81,
       "canonical": 63,
       "generated": 738,
-      "working": 280
+      "working": 281
     },
     "by_tracking_state": {
       "ignored_local": 1194,
-      "tracked": 1930
+      "tracked": 1931
     },
     "docs_reports_local_count": 1218,
     "duplicate_group_count": 2,
@@ -88264,7 +88292,7 @@
       "active_draft": 108,
       "guide": 2,
       "index": 4,
-      "issue_pack": 13,
+      "issue_pack": 14,
       "live_issue_mirror": 4
     },
     "scan_error_count": 1,
@@ -88274,8 +88302,8 @@
         "path": "docs/reports/evidence/project-legacy-compatibility-remediation/.quarantined-03-synthesis-corrupt-20260521"
       }
     ],
-    "total_doc_like": 3124,
+    "total_doc_like": 3125,
     "total_doc_like_ignored_local": 1194,
-    "total_doc_like_tracked": 1930
+    "total_doc_like_tracked": 1931
   }
 }
