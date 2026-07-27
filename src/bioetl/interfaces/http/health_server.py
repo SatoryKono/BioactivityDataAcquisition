@@ -13,6 +13,7 @@ from bioetl.application.services.quarantine_service import QuarantineService
 from bioetl.domain.ports import (
     CheckpointPort,
     ClockPort,
+    HealthMetricsExpositionPort,
     HealthMonitorPort,
     LoggerPort,
     RunLedgerPort,
@@ -33,6 +34,22 @@ from bioetl.interfaces.http.processed_records_table import (
 from bioetl.interfaces.http.types import HealthResponse
 
 
+# Pure liveness fallback when no exposition adapter is injected (unit tests).
+_DEFAULT_HEALTH_SCRAPE_UP_EXPOSITION = (
+    "# HELP bioetl_health_server_scrape_up Health server /metrics scrape "
+    "liveness (1=serving).\n"
+    "# TYPE bioetl_health_server_scrape_up gauge\n"
+    "bioetl_health_server_scrape_up 1\n"
+)
+
+
+class _StaticHealthMetricsExposition:
+    """Interfaces-local fallback exposition (no infrastructure import)."""
+
+    def build_exposition(self) -> str:
+        return _DEFAULT_HEALTH_SCRAPE_UP_EXPOSITION
+
+
 @dataclass(frozen=True, slots=True)
 class HealthServerControlPlaneDeps:
     """Collaborator bag for optional health-server control-plane ports."""
@@ -43,6 +60,7 @@ class HealthServerControlPlaneDeps:
     run_manifest_port: RunManifestPort | None = None
     run_ledger_port: RunLedgerPort | None = None
     workflow_manifest_port: WorkflowManifestPort | None = None
+    metrics_exposition: HealthMetricsExpositionPort | None = None
 
 
 class HealthServer(
@@ -76,6 +94,7 @@ class HealthServer(
                 "run_manifest_port",
                 "run_ledger_port",
                 "workflow_manifest_port",
+                "metrics_exposition",
             }
             unknown = set(legacy_ports) - allowed
             if unknown:
@@ -95,6 +114,9 @@ class HealthServer(
         self._run_manifest_port = deps.run_manifest_port
         self._run_ledger_port = deps.run_ledger_port
         self._workflow_manifest_port = deps.workflow_manifest_port
+        self._metrics_exposition: HealthMetricsExpositionPort = (
+            deps.metrics_exposition or _StaticHealthMetricsExposition()
+        )
         self._data_root: str | None = None
         self._prometheus_base_url = (
             prometheus_base_url or DEFAULT_PROMETHEUS_BASE_URL

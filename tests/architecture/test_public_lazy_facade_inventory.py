@@ -84,7 +84,7 @@ def test_public_lazy_facade_inventory_has_policy_shape() -> None:
 
     assert payload["schema_version"] == 1
     assert payload["policy_scope"] == "public_lazy_facades"
-    assert payload["linked_issue"] == "#6220"
+    assert payload["linked_issue"] == "#6624"
     assert payload["new_surface_policy"] == (
         "fail_fast_unclassified_lazy_public_facade"
     )

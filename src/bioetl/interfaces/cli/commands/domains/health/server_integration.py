@@ -174,6 +174,7 @@ def build_health_server(
         HealthServerControlPlaneDeps,
     )
 
+    metrics_exposition = getattr(deps, "metrics_exposition", None)
     server = HealthServer(
         host=host,
         port=port,
@@ -184,6 +185,7 @@ def build_health_server(
             run_manifest_port=deps.run_manifest_port,
             run_ledger_port=deps.run_ledger_port,
             workflow_manifest_port=deps.workflow_manifest_port,
+            metrics_exposition=metrics_exposition,
         ),
     )
     data_root = getattr(deps, "data_root", None)

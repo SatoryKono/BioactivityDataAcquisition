@@ -291,8 +291,12 @@ def _should_validate_pipeline_yaml(yaml_file: Path, config_dir: Path) -> bool:
 
 
 def _is_observability_prometheus_exempt(py_file: Path) -> bool:
-    return ("observability" in py_file.parts and "infrastructure" in py_file.parts) or (
-        "interfaces" in py_file.parts and py_file.name == "observability.py"
+    return (
+        ("observability" in py_file.parts and "infrastructure" in py_file.parts)
+        or ("interfaces" in py_file.parts and py_file.name == "observability.py")
+        # Health-server scrape adapter exposes process registry text format.
+        or py_file.name == "health_server_routing_mixin.py"
+        or py_file.name == "health_metrics_exposition.py"
     )
 
 

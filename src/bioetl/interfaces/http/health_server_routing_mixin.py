@@ -11,6 +11,7 @@ from bioetl.application.services.quarantine_service import QuarantineService
 from bioetl.domain.ports import (
     CheckpointPort,
     ClockPort,
+    HealthMetricsExpositionPort,
     HealthMonitorPort,
     RunLedgerPort,
     RunManifestPort,
@@ -37,6 +38,7 @@ class HealthServerRoutingMixin:
     _run_manifest_port: RunManifestPort | None
     _run_ledger_port: RunLedgerPort | None
     _workflow_manifest_port: WorkflowManifestPort | None
+    _metrics_exposition: HealthMetricsExpositionPort
     _clock: ClockPort | None
     _data_root: str | None
     _prometheus_base_url: str
@@ -307,11 +309,7 @@ class HealthServerRoutingMixin:
           returned so scrapes are non-empty and not a comment-only stub.
         - Never expose run_id, hashes, paths, URLs, or raw messages as labels.
         """
-        from bioetl.infrastructure.observability.health_metrics_exposition import (
-            build_health_server_metrics_exposition,
-        )
-
-        return build_health_server_metrics_exposition()
+        return self._metrics_exposition.build_exposition()
 
 
 __all__ = ["HealthServerRoutingMixin"]

@@ -1,11 +1,6 @@
 # RF-017 Constructor Waivers
-# TD-R-03 / #6679: 10 -> 5. Shrink-only.
-
-CompositeCheckpointLoadService:
-  max_args: 12
-  owner: "@bioetl-composite"
-  expiry: "2026-12-31"
-  reason: "Checkpoint-load orchestration still bundles multiple collaborators."
+# ARCH-QA-04 / #6742: 5 -> 3. Shrink-only.
+# AnchorSpec + CompositeCheckpointLoadService removed via collaborator bags / kwargs.
 
 CheckpointRuntimeService:
   max_args: 13
@@ -29,9 +24,3 @@ QuarantineEntry:
   reason: >-
     Domain aggregate intentionally exposes an explicit multi-field identity surface.
     See ADR-051; max_args frozen (no growth).
-
-AnchorSpec:
-  max_args: 19
-  owner: "@bioetl-http"
-  expiry: "2026-12-31"
-  reason: "HTTP identity surface still exposes many explicit contract fields."

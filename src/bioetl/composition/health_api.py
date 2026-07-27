@@ -77,6 +77,7 @@ class HealthServerDependenciesProtocol(Protocol):
     run_manifest_port: RunManifestPort
     run_ledger_port: RunLedgerPort
     workflow_manifest_port: WorkflowManifestPort
+    metrics_exposition: object
 
 
 def get_runtime_settings() -> object:
