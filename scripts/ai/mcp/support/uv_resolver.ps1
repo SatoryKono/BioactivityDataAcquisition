@@ -143,32 +143,69 @@ function Resolve-BioetlUvxBin {
     $candidates = @()
 
     $fromPath = Get-Command uvx -ErrorAction SilentlyContinue
-    if ($fromPath) {
+    if ($fromPath -and $fromPath.Source) {
         $candidates += $fromPath.Source
     }
 
     $fromUv = Get-Command uv -ErrorAction SilentlyContinue
-    if ($fromUv) {
+    if ($fromUv -and $fromUv.Source) {
         $uvDir = Split-Path -Parent $fromUv.Source
-        $candidates += (Join-Path $uvDir "uvx.exe")
-        $candidates += (Join-Path $uvDir "uvx.cmd")
-        $candidates += (Join-Path $uvDir "uvx")
+        if (-not [string]::IsNullOrWhiteSpace($uvDir)) {
+            foreach ($name in @("uvx.exe", "uvx.cmd", "uvx")) {
+                try {
+                    $candidates += [System.IO.Path]::Combine($uvDir, $name)
+                } catch {
+                    # Ignore unusable uv sibling paths on non-Windows hosts.
+                }
+            }
+        }
     }
 
-    $localAppData = [Environment]::GetFolderPath("LocalApplicationData")
-    $userProfile = $env:USERPROFILE
-    if (-not [string]::IsNullOrWhiteSpace($localAppData)) {
-        $candidates += @(
-            (Join-Path $localAppData "Programs\Python\Python313\Scripts\uvx.exe"),
-            (Join-Path $localAppData "Programs\Python\Python312\Scripts\uvx.exe"),
-            (Join-Path $localAppData "Programs\Python\Python311\Scripts\uvx.exe")
-        )
+    $isWindowsRuntime = $false
+    if ($PSVersionTable.PSEdition -eq "Desktop") {
+        $isWindowsRuntime = $true
+    } elseif (Get-Variable -Name IsWindows -ErrorAction SilentlyContinue) {
+        $isWindowsRuntime = [bool]$IsWindows
+    } elseif ($env:OS -like "*Windows*") {
+        $isWindowsRuntime = $true
     }
-    if (-not [string]::IsNullOrWhiteSpace($userProfile)) {
-        $candidates += @(
-            (Join-Path $userProfile ".local\bin\uvx.exe"),
-            (Join-Path $userProfile ".cargo\bin\uvx.exe")
-        )
+
+    if ($isWindowsRuntime) {
+        $localAppData = [Environment]::GetFolderPath("LocalApplicationData")
+        $userProfile = $env:USERPROFILE
+        if (-not [string]::IsNullOrWhiteSpace($localAppData)) {
+            foreach ($py in @("Python313", "Python312", "Python311")) {
+                try {
+                    $candidates += [System.IO.Path]::Combine(
+                        $localAppData,
+                        "Programs",
+                        "Python",
+                        $py,
+                        "Scripts",
+                        "uvx.exe"
+                    )
+                } catch {
+                }
+            }
+        }
+        if (-not [string]::IsNullOrWhiteSpace($userProfile)) {
+            foreach ($rel in @(".local\bin\uvx.exe", ".cargo\bin\uvx.exe")) {
+                try {
+                    $candidates += [System.IO.Path]::Combine($userProfile, $rel)
+                } catch {
+                }
+            }
+        }
+    } else {
+        $homeDir = $env:HOME
+        if (-not [string]::IsNullOrWhiteSpace($homeDir)) {
+            foreach ($rel in @(".local/bin/uvx", ".cargo/bin/uvx")) {
+                try {
+                    $candidates += [System.IO.Path]::Combine($homeDir, $rel)
+                } catch {
+                }
+            }
+        }
     }
 
     foreach ($candidate in $candidates) {

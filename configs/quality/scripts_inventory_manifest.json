@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-27T09:37:07.548023+00:00",
+  "generated_at": "2026-07-27T10:43:43.792208+00:00",
   "summary": {
     "total_scripts": 536,
     "status_counts": {
@@ -550,7 +550,7 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 742,
+          "line": 730,
           "source_group": "tests",
           "text": "ensure_script = _to_bash_path(root / \"scripts/ai/codex/helper/ensure-mcp.sh\")"
         }
@@ -3303,7 +3303,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 1094,
+          "line": 1104,
           "source_group": "tests",
           "text": "powershell_source = (MCP_DIR / \"mcp_neo4j_cypher_wrapper.ps1\").read_text("
         }

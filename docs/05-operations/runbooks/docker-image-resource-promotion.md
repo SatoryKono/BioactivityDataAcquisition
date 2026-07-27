@@ -70,7 +70,7 @@ origin:
 
 ```bash
 python scripts/engineering/qa/run_docker_stability_campaign.py \
-  --runtime-origin /home/<user>/.local/share/bioetl-runtime/BioactivityDataAcquisition2 \
+  --runtime-origin /home/<user>/.local/share/bioetl-runtime/BioactivityDataAcquisition \
   --contract configs/quality/docker_runtime_contracts.yaml \
   --cycles 100 \
   --soak-hours 72 \

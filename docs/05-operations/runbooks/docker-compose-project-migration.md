@@ -96,9 +96,9 @@ its readiness check and the backup has been retained.
 
 For Docker Desktop under WSL, run the Compose projects from a Linux-filesystem
 runtime mirror such as
-`~/.local/share/bioetl-runtime/BioactivityDataAcquisition2`. A project whose
-working directory or bind sources resolve through `/mnt/c`, `/mnt/d`, or
-`/mnt/e` fails the runtime preflight. Keep the source checkout authoritative,
+`~/.local/share/bioetl-runtime/BioactivityDataAcquisition`. A project whose
+working directory or bind sources resolve through `WSL-mounted-path `WSL-mounted-path or
+`WSL-mounted-path fails the runtime preflight. Keep the source checkout authoritative,
 but synchronize the runtime mirror before a Compose mutation and verify
 `com.docker.compose.project.working_dir` after it.
 
@@ -184,7 +184,7 @@ following:
    campaign 100-cycle / 72-hour soak remains owned by the Docker stability
    program (#6299), not by workstation cutover closeout.
 1. Active Compose origins for `bioetl-main` and `bioetl-monitoring` are
-   Linux-filesystem only. Paths under `/tmp`, `/mnt/*`, and Windows drive
+   Linux-filesystem only. Paths under `/tmp`, `WSL-mounted Windows paths`, and Windows drive
    letters (`E:\`, …) are unsupported and fail preflight/finalize.
 
 Operator helpers for recreate / restore observation (supporting cutover tools):
