@@ -10,7 +10,7 @@ from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import EntityID
+    from bioetl.domain.types import EntityID, GoldRecord
 
 
 class _PreSilverStagingFlowMixin:
@@ -44,7 +44,7 @@ class _PreSilverStagingFlowMixin:
         def compute_entity_id(
             self,
             source_id: str | None,
-            record: JsonDict,
+            record: GoldRecord,
         ) -> EntityID: ...
 
         def _normalize_business_data(self, business_data: JsonDict) -> JsonDict: ...

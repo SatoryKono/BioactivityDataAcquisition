@@ -84,6 +84,8 @@ jobs:
         uses: hadolint/hadolint-action@2332a7b74a6de0dda2e2221d575162eba76ba5e5 # v3.3.0
         with:
           dockerfile: ${{ matrix.dockerfile }}
+          # Repo policy: DL3008 ignored for moving Debian security package revisions.
+          config: .hadolint.yaml
 
   docker-compose-validate:
     runs-on: ubuntu-latest

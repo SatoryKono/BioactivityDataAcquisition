@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-27T08:11:12.152511+00:00",
+  "generated_at": "2026-07-27T08:15:07.296534+00:00",
   "summary": {
-    "total_scripts": 550,
+    "total_scripts": 539,
     "status_counts": {
       "active": 341,
-      "supporting": 208,
+      "supporting": 197,
       "temporary_diagnostic": 1
     },
     "reference_group_coverage": {
@@ -14,7 +14,7 @@
       "ci": 65,
       "docs": 219,
       "other": 66,
-      "scripts": 431,
+      "scripts": 430,
       "skills": 16,
       "tests": 248
     }
@@ -511,7 +511,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 7,
       "references": [
         {
           "path": "docs/03-guides/development/codex-paths.md",
@@ -536,12 +536,6 @@
           "line": 10,
           "source_group": "scripts",
           "text": "ENSURE_MCP_SCRIPT=\"${SCRIPT_DIR}/ensure-mcp.sh\""
-        },
-        {
-          "path": "scripts/ops/launchers/codex/SETUP_GUIDE.sh",
-          "line": 57,
-          "source_group": "scripts",
-          "text": "• scripts/ai/codex/helper/ensure-mcp.sh      (reduced timeout: 30s → 15s)"
         },
         {
           "path": "scripts/ops/launchers/codex/codex-exec.sh",
@@ -10174,18 +10168,6 @@
       "next_step": "Retain only as the compatibility wrapper for the legacy AST duplicate-function analyzer under src/tools/scripts/duplicate_function_analyzer.py; remove the wrapper when documented callers move to the canonical implementation or the analyzer is retired."
     },
     {
-      "path": "scripts/engineering/qa/apply_universal_entity_filter_stubs.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded manual config-remediation utility for historical entity filter burn-down waves; do not extend it unless the config-surface cleanup program is formally reactivated and governed through a canonical QA workflow."
-    },
-    {
       "path": "scripts/engineering/qa/assemble_observability_closure_evidence.py",
       "type": "py",
       "status": "active",
@@ -11691,18 +11673,6 @@
       ]
     },
     {
-      "path": "scripts/engineering/qa/py_review_orchestrator.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "platform-architecture",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a historical standalone review orchestrator snapshot; prefer the governed py-review-orchestrator skill and current reports workflow instead of extending this orphan script."
-    },
-    {
       "path": "scripts/engineering/qa/reduce_architecture_debt.py",
       "type": "py",
       "status": "active",
@@ -12596,42 +12566,6 @@
       ]
     },
     {
-      "path": "scripts/engineering/qa/revert_config_surface_corruption.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded rollback utility for historical config-surface corruption incidents caused by earlier auto burn-down attempts; do not reuse it outside reviewed repair operations."
-    },
-    {
-      "path": "scripts/engineering/qa/revert_extraction_params_corruption.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded rollback utility for historical extraction_params corruption introduced by auto burn-down experiments; retire it if the remediation campaign no longer requires manual repair fallbacks."
-    },
-    {
-      "path": "scripts/engineering/qa/revert_filter_surface_corruption.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded rollback utility for historical filter-surface corruption introduced by automated config edits; retire it if the reviewed burn-down recovery toolbox is no longer needed."
-    },
-    {
       "path": "scripts/engineering/qa/run_architecture_audit_read_only.py",
       "type": "py",
       "status": "supporting",
@@ -12675,30 +12609,6 @@
       "next_step": "Retain as the bounded read-only architecture-audit coordinator; keep it non-active while it is a governance helper rather than a general developer bootstrap entrypoint."
     },
     {
-      "path": "scripts/engineering/qa/run_config_surface_auto_burn_down.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded historical automation script for iterative config-surface burn-down waves; do not re-expose it as an active workflow without fresh governance, dry-run safety, and reviewed rollback coverage."
-    },
-    {
-      "path": "scripts/engineering/qa/run_config_surface_burn_down_phases.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded historical phased burn-down utility for surgical config text edits; do not extend it unless the config-surface remediation program is restarted under a governed workflow."
-    },
-    {
       "path": "scripts/engineering/qa/run_docker_stability_campaign.py",
       "type": "py",
       "status": "supporting",
@@ -12709,13 +12619,13 @@
           "path": ".github/workflows/docker.yml",
           "line": 14,
           "source_group": "ci",
-          "text": "- \"scripts/engineering/qa/run_docker_stability_campaign.py\""
+          "text": "- 'scripts/engineering/qa/run_docker_stability_campaign.py'"
         },
         {
           "path": ".github/workflows/docker.yml",
           "line": 29,
           "source_group": "ci",
-          "text": "- \"scripts/engineering/qa/run_docker_stability_campaign.py\""
+          "text": "- 'scripts/engineering/qa/run_docker_stability_campaign.py'"
         },
         {
           "path": "docs/05-operations/runbooks/docker-image-resource-promotion.md",
@@ -12845,18 +12755,6 @@
           "text": "Path(\"scripts/engineering/qa/run_observability_closure_campaign.py\"),"
         }
       ]
-    },
-    {
-      "path": "scripts/engineering/qa/scaffold_non_chembl_hash_policy.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded historical scaffolding utility for non-ChEMBL hash_policy rollout; retire it once active normalization/hash-policy governance no longer needs one-off bootstrap helpers."
     },
     {
       "path": "scripts/engineering/qa/sync_integration_vcr_policy.py",
@@ -14772,18 +14670,6 @@
       "next_step": "Retain only as an unreferenced Windows compatibility installer during the reviewed retirement window; remove it once external bootstrap docs and local operator flows no longer depend on the old Codex command shim."
     },
     {
-      "path": "scripts/ops/launchers/codex/SETUP_GUIDE.sh",
-      "type": "sh",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded manual quick-start guide for the Codex launcher setup flow while launcher documentation is being consolidated; retire it once the canonical docs and launcher help cover the same operator guidance."
-    },
-    {
       "path": "scripts/ops/launchers/codex/codex-exec.bat",
       "type": "bat",
       "status": "active",
@@ -14902,33 +14788,8 @@
       "type": "bat",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
-      "references": [
-        {
-          "path": "scripts/ops/launchers/codex/SETUP_GUIDE.sh",
-          "line": 16,
-          "source_group": "scripts",
-          "text": "║  2. scripts\\ops\\launchers\\codex\\codex-fast.bat                            ║"
-        },
-        {
-          "path": "scripts/ops/launchers/codex/SETUP_GUIDE.sh",
-          "line": 30,
-          "source_group": "scripts",
-          "text": "• Use codex-fast.bat for instant startup"
-        },
-        {
-          "path": "scripts/ops/launchers/codex/SETUP_GUIDE.sh",
-          "line": 39,
-          "source_group": "scripts",
-          "text": "Use codex-fast.bat to skip setup and work while caching initializes."
-        },
-        {
-          "path": "scripts/ops/launchers/codex/SETUP_GUIDE.sh",
-          "line": 58,
-          "source_group": "scripts",
-          "text": "• scripts/ops/launchers/codex/codex-fast.bat (NEW - fast launcher)"
-        }
-      ],
+      "reference_count": 0,
+      "references": [],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "internal_compatibility_launcher",
       "review_by": "2026-07-15",
@@ -14996,7 +14857,7 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 9,
       "references": [
         {
           "path": "docs/03-guides/development/codex-paths.md",
@@ -15041,10 +14902,10 @@
           "text": "REM Compatibility facade: scripts/ops/codex.bat -> scripts/ops/launchers/codex/codex.bat"
         },
         {
-          "path": "scripts/ops/launchers/codex/SETUP_GUIDE.sh",
+          "path": "scripts/ops/launchers/codex/start-codex.bat",
           "line": 11,
           "source_group": "scripts",
-          "text": "║  1. scripts\\ops\\launchers\\codex\\codex.bat                                 ║"
+          "text": "echo [compat] Delegating to scripts\\ops\\launchers\\codex\\codex.bat"
         }
       ]
     },
@@ -15053,7 +14914,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 118,
+      "reference_count": 117,
       "references": [
         {
           "path": "docs/03-guides/development/codex-paths.md",
@@ -15254,30 +15115,6 @@
           "text": "root / \"scripts\" / \"ops\" / \"launchers\" / \"codex\" / \"verify-setup.ps1\""
         }
       ]
-    },
-    {
-      "path": "scripts/ops/maintenance/git/delete-stale-branches.sh",
-      "type": "sh",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded manual maintenance utility after removing the scripts.ops router command; prefer explicit GitHub branch-cleanup runbooks or a reviewed repository-maintenance workflow before re-exposing this destructive branch deletion helper."
-    },
-    {
-      "path": "scripts/ops/maintenance/github/triage_cleanup_issue_wave.sh",
-      "type": "sh",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded manual GitHub issue triage utility after removing the scripts.ops router command; replace with a governed issue lifecycle workflow before re-exposing it as an active ops command."
     },
     {
       "path": "scripts/ops/maintenance/github/update_github_issue.sh",

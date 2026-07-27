@@ -2533,7 +2533,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.core.pre_silver_finalization_flow",
       "path": "src/bioetl/application/core/pre_silver_finalization_flow.py",
-      "source_lines": 201
+      "source_lines": 196
     },
     {
       "coverage_percent": 100.0,
@@ -25225,7 +25225,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.core.pre_silver_finalization_flow",
       "path": "src/bioetl/application/core/pre_silver_finalization_flow.py",
-      "source_lines": 201
+      "source_lines": 196
     },
     {
       "coverage_percent": 100.0,
@@ -45390,7 +45390,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-13",
-  "source_tree_sha256": "d29bd8c0e05f55e7887fb43d530115a22463d0fa9fcda492573697c7af45c7b7",
+  "source_tree_sha256": "5743bc9efcf25f2cf19d9112fd03ddb859d442c02649d7212ff72973a05fad84",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
