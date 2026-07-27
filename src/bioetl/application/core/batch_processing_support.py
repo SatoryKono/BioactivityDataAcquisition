@@ -55,7 +55,6 @@ _ResultT = TypeVar("_ResultT")
 _SHARED_FAILURE_POLICY = _RF005_SHARED_FAILURE_POLICY
 _OPERATION_ERRORS = SHARED_OPERATION_ERRORS
 
-
 class BatchProcessingSupportService:
     """Encapsulate per-batch transform/write tracing choreography."""
 
