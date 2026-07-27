@@ -143,6 +143,11 @@ multiple runs; use RunLedger for exact reconciliation.
 - **Purpose:** Show alert state for triage.
 - **Data sources:** `ALERTS{alertstate="firing"}` (standard Prometheus metric)
 
+### 26. Run context (identity / processed records)
+- **Type:** Row
+- **Purpose:** Group selected-run identity and processed-record HTTP evidence.
+- **Data sources:** BioETL Ops HTTP.
+
 ## Recording Rules
 
 This dashboard uses Prometheus recording rules to aggregate and transform raw metrics into L0 (level 0) and L1 (level 1) aggregate status metrics. These recording rules enable complex label manipulation and workflow pipeline mapping.

@@ -41,12 +41,6 @@ snapshot evidence, a snapshot denominator, or a presence gate. Event deltas use
 - **Data sources:** BioETL Ops HTTP
   `/ops/observability/processed-records`; this is not a Prometheus panel.
 
-### 6. Runtime Status
-- **Type:** Stat
-- **Purpose:** Expanded mirror of the same trust-gated headline rule; it is not
-  an independent second verdict.
-- **Data sources:** `bioetl_runtime_current_status_trusted`
-
 ### 7. Runtime Telemetry Gap
 - **Type:** Stat
 - **Purpose:** Detect missing/stale scrape or rule-group evidence. Non-zero makes
@@ -203,6 +197,31 @@ snapshot evidence, a snapshot denominator, or a presence gate. Event deltas use
 - **Type:** Timeseries
 - **Purpose:** Show shutdown completions by reason.
 - **Data sources:** `bioetl_shutdown_completed_total`
+
+### 38. Runtime secondary KPIs
+- **Type:** Row
+- **Purpose:** Group secondary selected-range runtime evidence.
+- **Data sources:** Prometheus range evidence from the nested panels.
+
+### 39. Run context (identity / processed records)
+- **Type:** Row
+- **Purpose:** Group selected-run identity and processed-record HTTP evidence.
+- **Data sources:** BioETL Ops HTTP.
+
+### 40. Workflow band (merged from bioetl-workflow-overview)
+- **Type:** Row
+- **Purpose:** Group workflow-level failure evidence retained on Runtime.
+- **Data sources:** Prometheus workflow and pipeline-step counters.
+
+### 41. Failed Workflow Runs / Range
+- **Type:** Stat
+- **Purpose:** Count failed workflow runs in the selected range.
+- **Data sources:** Workflow run failure metrics.
+
+### 42. Failed Pipeline Steps / Range
+- **Type:** Stat
+- **Purpose:** Count failed pipeline steps in the selected range.
+- **Data sources:** Pipeline-step failure metrics.
 
 ## Variables
 

@@ -8763,7 +8763,7 @@
       "missing_lines": 1,
       "module": "bioetl.composition.providers._default_registry",
       "path": "src/bioetl/composition/providers/_default_registry.py",
-      "source_lines": 126
+      "source_lines": 118
     },
     {
       "coverage_percent": 100.0,
@@ -8863,7 +8863,7 @@
       "missing_lines": 0,
       "module": "bioetl.composition.providers.loader",
       "path": "src/bioetl/composition/providers/loader.py",
-      "source_lines": 91
+      "source_lines": 85
     },
     {
       "coverage_percent": 92.63,
@@ -17884,6 +17884,16 @@
       "module": "bioetl.infrastructure.config.publication_type_classification_loader",
       "path": "src/bioetl/infrastructure/config/publication_type_classification_loader.py",
       "source_lines": 62
+    },
+    {
+      "coverage_percent": null,
+      "coverage_status": "no_executable_lines",
+      "covered_lines": 0,
+      "executable_lines": 0,
+      "missing_lines": 0,
+      "module": "bioetl.infrastructure.config.reason_catalog_loader",
+      "path": "src/bioetl/infrastructure/config/reason_catalog_loader.py",
+      "source_lines": 59
     },
     {
       "coverage_percent": 100.0,
@@ -31495,7 +31505,7 @@
       "missing_lines": 1,
       "module": "bioetl.composition.providers._default_registry",
       "path": "src/bioetl/composition/providers/_default_registry.py",
-      "source_lines": 126
+      "source_lines": 118
     },
     {
       "coverage_percent": 100.0,
@@ -31595,7 +31605,7 @@
       "missing_lines": 0,
       "module": "bioetl.composition.providers.loader",
       "path": "src/bioetl/composition/providers/loader.py",
-      "source_lines": 91
+      "source_lines": 85
     },
     {
       "coverage_percent": 92.63,
@@ -40618,6 +40628,16 @@
       "source_lines": 62
     },
     {
+      "coverage_percent": null,
+      "coverage_status": "no_executable_lines",
+      "covered_lines": 0,
+      "executable_lines": 0,
+      "missing_lines": 0,
+      "module": "bioetl.infrastructure.config.reason_catalog_loader",
+      "path": "src/bioetl/infrastructure/config/reason_catalog_loader.py",
+      "source_lines": 59
+    },
+    {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
       "covered_lines": 35,
@@ -45470,7 +45490,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-13",
-  "source_tree_sha256": "a0be8b1fa4b14ed44c0d66f8da29d1b08d239ef7dc200bd93f4cc12bc5aec7c3",
+  "source_tree_sha256": "4ab76877d103bae007833b93e5f212213639d3e42811d1ceb51047afcf9b6bf7",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -45625,11 +45645,11 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2273,
+    "source_module_count": 2274,
     "status_counts": {
       "coverage_xml_missing": 0,
       "fully_covered": 1406,
-      "no_executable_lines": 51,
+      "no_executable_lines": 52,
       "partially_covered": 816,
       "uncovered": 0,
       "unmeasured": 0
