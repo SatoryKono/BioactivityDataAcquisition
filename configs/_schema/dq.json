@@ -417,8 +417,8 @@
           "type": "number"
         },
         "hard_fail": {
-          "default": 0.2,
-          "description": "Failure threshold (0.0-1.0). Default: 0.20 (20%)",
+          "default": 0.5,
+          "description": "Failure threshold (0.0-1.0). Default: 0.50 (50%)",
           "maximum": 1.0,
           "minimum": 0.0,
           "title": "Hard Fail",
