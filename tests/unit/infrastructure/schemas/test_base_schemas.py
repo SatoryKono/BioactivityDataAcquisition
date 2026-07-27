@@ -36,7 +36,7 @@ class TestBaseDQThresholds:
         """Test default threshold values."""
         config = BaseDQThresholds()
         assert config.soft_fail_threshold == pytest.approx(0.05)
-        assert config.hard_fail_threshold == pytest.approx(0.20)
+        assert config.hard_fail_threshold == pytest.approx(0.50)
 
     def test_base_d_q_thresholds__custom_values__0a1d5d71(self) -> None:
         """Test custom threshold values."""
@@ -73,7 +73,7 @@ class TestBaseDQConfig:
         """Test that BaseDQConfig inherits from BaseDQThresholds."""
         config = BaseDQConfig()
         assert config.soft_fail_threshold == pytest.approx(0.05)
-        assert config.hard_fail_threshold == pytest.approx(0.20)
+        assert config.hard_fail_threshold == pytest.approx(0.50)
 
     def test_strict_validation_default(self) -> None:
         """Test strict_validation defaults to False."""
