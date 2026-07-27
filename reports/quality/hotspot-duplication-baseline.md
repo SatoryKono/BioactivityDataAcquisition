@@ -20,8 +20,8 @@
 ## src/bioetl/application/core
 
 - duplicate clusters: 0
-- raw duplicate clusters: 7
-- excluded duplicate clusters: 7
+- raw duplicate clusters: 9
+- excluded duplicate clusters: 9
 - no `R0801` findings
 
 ## src/bioetl/composition/bootstrap/runtime

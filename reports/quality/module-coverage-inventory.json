@@ -1773,7 +1773,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.core.batch_metrics",
       "path": "src/bioetl/application/core/batch_metrics.py",
-      "source_lines": 364
+      "source_lines": 240
     },
     {
       "coverage_percent": null,
@@ -8153,7 +8153,7 @@
       "missing_lines": 15,
       "module": "bioetl.composition.factories.pipeline.registry_validation",
       "path": "src/bioetl/composition/factories/pipeline/registry_validation.py",
-      "source_lines": 255
+      "source_lines": 86
     },
     {
       "coverage_percent": null,
@@ -16753,7 +16753,7 @@
       "missing_lines": 3,
       "module": "bioetl.infrastructure.adapters.pubchem.client",
       "path": "src/bioetl/infrastructure/adapters/pubchem/client.py",
-      "source_lines": 215
+      "source_lines": 218
     },
     {
       "coverage_percent": 75.0,
@@ -24545,7 +24545,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.core.batch_metrics",
       "path": "src/bioetl/application/core/batch_metrics.py",
-      "source_lines": 364
+      "source_lines": 240
     },
     {
       "coverage_percent": null,
@@ -30925,7 +30925,7 @@
       "missing_lines": 15,
       "module": "bioetl.composition.factories.pipeline.registry_validation",
       "path": "src/bioetl/composition/factories/pipeline/registry_validation.py",
-      "source_lines": 255
+      "source_lines": 86
     },
     {
       "coverage_percent": null,
@@ -39525,7 +39525,7 @@
       "missing_lines": 3,
       "module": "bioetl.infrastructure.adapters.pubchem.client",
       "path": "src/bioetl/infrastructure/adapters/pubchem/client.py",
-      "source_lines": 215
+      "source_lines": 218
     },
     {
       "coverage_percent": 75.0,
@@ -45550,7 +45550,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-13",
-  "source_tree_sha256": "09a14b39b3caf9f309f26aed20714e0538c8f4bacb8f36268f883c3996eecb2c",
+  "source_tree_sha256": "6f318738d8a5d17be68e0b9ecfeae50c4dd4c0e121b5ffd3061c428c328d8631",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

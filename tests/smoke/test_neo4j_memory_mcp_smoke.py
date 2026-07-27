@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from scripts.memory.mcp_smoke import (
+from scripts.ai.mcp.neo4j_memory_mcp_smoke import (
     _encode_frame,
     _parse_frames,
     run_smoke_command,
