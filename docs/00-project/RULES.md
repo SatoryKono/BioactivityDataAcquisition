@@ -820,10 +820,12 @@ pmid → pmid → pubmed-id
 ### 3.1.2. Пороги Ошибок Батча (Thresholds)
 
 - **Soft Threshold**: по умолчанию `>5%` ошибок качества данных -> Warning.
-- **Hard Threshold**: не является универсальным для всех DQ surfaces. Иерархический
-  `quality:` config использует `hard_fail=0.25`, а contract-backed fallback,
-  inline pipeline DQ override normalization и Silver DQ request contract используют
-  `hard_fail=0.20`. Каноническая матрица порогов: `docs/04-reference/contracts/dq-contracts.md`.
+- **Hard Threshold**: default `hard_fail=0.50` (50%) for hierarchical `quality:`
+  config (`configs/base/quality.yaml`), domain/contract fallbacks, and standard
+  entity contracts. Some surfaces keep specialized overrides (e.g. stricter or
+  looser entity/provider values). Monitoring alert
+  `BioETLDQQuarantineRateCritical` uses the same 50% hard band. Matrix:
+  `docs/04-reference/contracts/dq-contracts.md`.
 - **Metric Scope**: Отслеживать как `record-error-rate` (доля битых строк), так и `entity-error-rate` (доля битых уникальных сущностей).
 
 ### 3.1.3. Параметры Retry (Backoff)

@@ -35,7 +35,7 @@ class DQEvaluationStatus(StrEnum):
     Attributes:
         PASSED: Error rate is below soft_fail_threshold (< 5% by default).
         WARNING: Error rate is between soft and hard thresholds (5-20%).
-        FAILED: Error rate exceeds hard_fail_threshold (> 20%).
+        FAILED: Error rate exceeds hard_fail_threshold (> 50% default).
 
     Example:
         >>> from bioetl.domain.value_objects import DQEvaluationStatus

@@ -1280,23 +1280,23 @@ groups:
           runbook: "docs/05-operations/runbooks/dq-failure-investigation.md"
 
       - alert: BioETLDQQuarantineRateHigh
-        expr: (((sum by (pipeline, run_type) (max_over_time(bioetl_dq_records_quarantined_total[30m])) / clamp_min(sum by (pipeline, run_type) (max_over_time(bioetl_records_processed_total{stage="bronze"}[30m])), 1)) > 0.05) and ((sum by (pipeline, run_type) (max_over_time(bioetl_dq_records_quarantined_total[30m])) / clamp_min(sum by (pipeline, run_type) (max_over_time(bioetl_records_processed_total{stage="bronze"}[30m])), 1)) <= 0.2)) and (sum by (pipeline, run_type) (max_over_time(bioetl_records_processed_total{stage="bronze"}[30m])) >= 20)
+        expr: (((sum by (pipeline, run_type) (max_over_time(bioetl_dq_records_quarantined_total[30m])) / clamp_min(sum by (pipeline, run_type) (max_over_time(bioetl_records_processed_total{stage="bronze"}[30m])), 1)) > 0.05) and ((sum by (pipeline, run_type) (max_over_time(bioetl_dq_records_quarantined_total[30m])) / clamp_min(sum by (pipeline, run_type) (max_over_time(bioetl_records_processed_total{stage="bronze"}[30m])), 1)) <= 0.5)) and (sum by (pipeline, run_type) (max_over_time(bioetl_records_processed_total{stage="bronze"}[30m])) >= 20)
         for: 10m
         labels:
           severity: warning
         annotations:
           summary: "DQ quarantine rate is elevated"
-          description: "Quarantine rate stayed between 5% and 20% for pipeline={{ $labels.pipeline }} run_type={{ $labels.run_type }} over the last 30m, with at least 20 bronze records observed."
+          description: "Quarantine rate stayed between 5% and 50% for pipeline={{ $labels.pipeline }} run_type={{ $labels.run_type }} over the last 30m, with at least 20 bronze records observed."
           runbook: "docs/05-operations/runbooks/dq-failure-investigation.md"
 
       - alert: BioETLDQQuarantineRateCritical
-        expr: ((sum by (pipeline, run_type) (max_over_time(bioetl_dq_records_quarantined_total[15m])) / clamp_min(sum by (pipeline, run_type) (max_over_time(bioetl_records_processed_total{stage="bronze"}[15m])), 1)) > 0.2) and (sum by (pipeline, run_type) (max_over_time(bioetl_records_processed_total{stage="bronze"}[15m])) >= 20)
+        expr: ((sum by (pipeline, run_type) (max_over_time(bioetl_dq_records_quarantined_total[15m])) / clamp_min(sum by (pipeline, run_type) (max_over_time(bioetl_records_processed_total{stage="bronze"}[15m])), 1)) > 0.5) and (sum by (pipeline, run_type) (max_over_time(bioetl_records_processed_total{stage="bronze"}[15m])) >= 20)
         for: 5m
         labels:
           severity: critical
         annotations:
-          summary: "DQ quarantine rate reached hard-fail territory"
-          description: "Quarantine rate exceeded 20% for pipeline={{ $labels.pipeline }} run_type={{ $labels.run_type }} over the last 15m, with at least 20 bronze records observed."
+          summary: "DQ Hard Threshold exceeded"
+          description: "Quarantine rate exceeded 50% hard threshold for pipeline={{ $labels.pipeline }} run_type={{ $labels.run_type }} over the last 15m, with at least 20 bronze records observed."
           runbook: "docs/05-operations/runbooks/dq-failure-investigation.md"
 
       - alert: BioETLDQValidationFailuresCritical
