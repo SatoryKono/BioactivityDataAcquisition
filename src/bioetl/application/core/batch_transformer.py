@@ -23,8 +23,6 @@ from typing import TYPE_CHECKING
 from bioetl.application.core._batch_transformer_support import (
     build_default_normalization_processor,
 )
-from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
-from bioetl.application.core.quarantine_manager import QuarantineRuntimeService
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
 )
@@ -55,16 +53,10 @@ from bioetl.application.core.transformer_runtime.streaming import (
 from bioetl.domain.types import BronzeRecord
 
 if TYPE_CHECKING:
-    from bioetl.application.core.protocols import (
-        GoldFilterCallback,
-        GoldTransformCallback,
-        TransformCallback,
-    )
     from bioetl.application.core.record_processor_config import RecordProcessorConfig
     from bioetl.application.core.transformer_runtime.state import RecordTransformOutcome
     from bioetl.application.services.debug_export_service import DebugExportService
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.error_classifier import ErrorClassifier
     from bioetl.domain.types import BatchID
 
 

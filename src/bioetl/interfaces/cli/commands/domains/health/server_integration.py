@@ -169,9 +169,11 @@ def build_health_server(
     quarantine_service: QuarantineService | None,
 ) -> HealthServer:
     """Construct the HTTP health server from composition dependencies."""
-    from bioetl.interfaces.http.health_server import HealthServer
+    from bioetl.interfaces.http.health_server import (
+        HealthServer,
+        HealthServerControlPlaneDeps,
+    )
 
-    from bioetl.interfaces.http.health_server import HealthServerControlPlaneDeps
     server = HealthServer(
         host=host,
         port=port,

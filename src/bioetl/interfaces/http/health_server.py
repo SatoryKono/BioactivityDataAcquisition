@@ -33,7 +33,6 @@ from bioetl.interfaces.http.processed_records_table import (
 from bioetl.interfaces.http.types import HealthResponse
 
 
-
 @dataclass(frozen=True, slots=True)
 class HealthServerControlPlaneDeps:
     """Collaborator bag for optional health-server control-plane ports."""

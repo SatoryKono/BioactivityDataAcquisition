@@ -36,14 +36,11 @@ from bioetl.infrastructure.adapters.pubchem.response_mapper import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator, Awaitable, Callable
+    from collections.abc import AsyncIterator
 
-    from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.common.api_request_collector import (
         APIRequestCollector,
     )
-    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
-    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
     from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMapper
 
 

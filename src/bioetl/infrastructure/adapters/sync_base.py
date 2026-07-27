@@ -121,9 +121,7 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
             unexpected = ", ".join(sorted(str(k) for k in legacy))
             raise TypeError(f"BaseSyncAdapter() unexpected kwargs: {unexpected}")
         metrics_port = (
-            dependency_context.metrics
-            if dependency_context is not None
-            else metrics  # type: ignore[arg-type]
+            dependency_context.metrics if dependency_context is not None else metrics  # type: ignore[arg-type]
         )
         resolved_error_handler = (
             dependency_context.error_handler

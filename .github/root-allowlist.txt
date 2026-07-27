@@ -53,6 +53,9 @@ best_practices.md
 # docs/05-operations/verification/docker-helper-root-relocation-audit.md for policy.
 DOCKER_QUICKSTART.md
 docker-compose.monitoring.yml
+# Optional desktop resource overlay for ADR-010 monitoring stack (used with
+# docker-compose.monitoring.yml via `-f ... -f docker-compose.monitoring.desktop.yml`).
+docker-compose.monitoring.desktop.yml
 docker-compose.neo4j-audit.yml
 docker-compose.neo4j.yml
 docker-compose.yml

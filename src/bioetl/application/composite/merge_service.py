@@ -40,17 +40,12 @@ if TYPE_CHECKING:
     from bioetl.application.composite.column_service import (
         ColumnPriorityOrderingPolicy,
     )
-    from bioetl.application.composite.cross_validator import (
-        EnrichmentCrossValidator,
-    )
     from bioetl.domain.composite import (
         DependencyConfig,
         EnricherConfig,
         MergeConfig,
     )
-    from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.ports import (
-        ClockPort,
         DeltaReaderPort,
         LoggerPort,
         MergedStoragePort,

@@ -183,9 +183,9 @@ def _timeout_identity_payload(query: dict[str, str]) -> dict[str, object]:
     """Fail-open identity payload when scope resolution exceeds SLA."""
     pipeline = query.get("pipeline") or "unknown"
     run_type_raw = query.get("run_type") or ""
-    run_types = tuple(
-        part.strip() for part in run_type_raw.split(",") if part.strip()
-    ) or ()
+    run_types = (
+        tuple(part.strip() for part in run_type_raw.split(",") if part.strip()) or ()
+    )
     return build_control_plane_identity_payload(
         requested_pipeline=pipeline,
         resolved_manifest=None,

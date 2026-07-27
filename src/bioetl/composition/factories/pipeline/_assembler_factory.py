@@ -5,7 +5,6 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TypeVar, cast
 
-import pyarrow as pa
 
 from bioetl.application.core.wiring.factory import (
     BasePipeline,
@@ -61,7 +60,6 @@ from bioetl.domain.ports import (
     PipelineCreateRunnerRequest,
     TracingPort,
 )
-from bioetl.domain.types import GoldSchemaType
 from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 

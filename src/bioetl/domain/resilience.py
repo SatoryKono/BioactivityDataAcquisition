@@ -200,49 +200,78 @@ class AdapterConfig:
             return 30.0
         return float(timeout_sec)
 
-    def __init__(
-        self,
-        batch_size: int = 20,
-        page_size: int = 1000,
-        timeout_sec: float | None = None,
-        max_retries: int = 3,
-        retry_backoff_factor: float = 2.0,
-        rate_limit_requests_per_second: float = 5.0,
-        circuit_breaker: tuple[int, int] = (5, 300),
-        enable_single_id_fallback: bool = False,
-        **legacy_aliases: object,
-    ) -> None:
-        """Initialize adapter config while preserving retired constructor aliases."""
-        timeout = legacy_aliases.pop("timeout", None)
-        failure_threshold = legacy_aliases.pop(
-            "circuit_breaker_failure_threshold", None
+    @staticmethod
+    def _as_optional_float(value: object) -> float | None:
+        """Coerce a legacy alias to float when numeric; otherwise None."""
+        if isinstance(value, (int, float)) and not isinstance(value, bool):
+            return float(value)
+        return None
+
+    @staticmethod
+    def _as_optional_int(value: object) -> int | None:
+        """Coerce a legacy alias to int when numeric; otherwise None."""
+        if isinstance(value, bool):
+            return None
+        if isinstance(value, int):
+            return value
+        if isinstance(value, float) and value.is_integer():
+            return int(value)
+        return None
+
+    @classmethod
+    def _extract_legacy_aliases(
+        cls,
+        legacy_aliases: dict[str, object],
+    ) -> tuple[float | None, int | None, int | None]:
+        """Pop known retired constructor aliases; reject unknown keys."""
+        timeout = cls._as_optional_float(legacy_aliases.pop("timeout", None))
+        failure_threshold = cls._as_optional_int(
+            legacy_aliases.pop("circuit_breaker_failure_threshold", None)
         )
-        recovery_timeout = legacy_aliases.pop(
-            "circuit_breaker_recovery_timeout", None
+        recovery_timeout = cls._as_optional_int(
+            legacy_aliases.pop("circuit_breaker_recovery_timeout", None)
         )
         if legacy_aliases:
             unexpected = ", ".join(sorted(str(key) for key in legacy_aliases))
             raise TypeError(
                 f"AdapterConfig() got unexpected keyword argument(s): {unexpected}"
             )
-        timeout_value = (
-            float(timeout) if isinstance(timeout, (int, float)) else None
-        )
-        self._validate_timeout_alias(timeout_value, timeout_sec)
-        resolved_timeout = self._resolve_timeout(timeout_value, timeout_sec)
-        if failure_threshold is not None or recovery_timeout is not None:
-            circuit_breaker = (
-                int(failure_threshold)
-                if failure_threshold is not None
-                else int(circuit_breaker[0]),
-                int(recovery_timeout)
-                if recovery_timeout is not None
-                else int(circuit_breaker[1]),
-            )
+        return timeout, failure_threshold, recovery_timeout
 
+    @staticmethod
+    def _resolve_circuit_breaker(
+        circuit_breaker: tuple[int, int],
+        failure_threshold: int | None,
+        recovery_timeout: int | None,
+    ) -> tuple[int, int]:
+        """Merge legacy circuit-breaker aliases into the canonical tuple."""
+        if failure_threshold is None and recovery_timeout is None:
+            return (int(circuit_breaker[0]), int(circuit_breaker[1]))
+        return (
+            int(failure_threshold)
+            if failure_threshold is not None
+            else int(circuit_breaker[0]),
+            int(recovery_timeout)
+            if recovery_timeout is not None
+            else int(circuit_breaker[1]),
+        )
+
+    def _assign_fields(
+        self,
+        *,
+        batch_size: int,
+        page_size: int,
+        timeout_sec: float,
+        max_retries: int,
+        retry_backoff_factor: float,
+        rate_limit_requests_per_second: float,
+        circuit_breaker: tuple[int, int],
+        enable_single_id_fallback: bool,
+    ) -> None:
+        """Assign frozen dataclass fields via object.__setattr__."""
         object.__setattr__(self, "batch_size", batch_size)
         object.__setattr__(self, "page_size", page_size)
-        object.__setattr__(self, "timeout_sec", float(resolved_timeout))
+        object.__setattr__(self, "timeout_sec", float(timeout_sec))
         object.__setattr__(self, "max_retries", max_retries)
         object.__setattr__(self, "retry_backoff_factor", retry_backoff_factor)
         object.__setattr__(
@@ -264,6 +293,40 @@ class AdapterConfig:
             self,
             "enable_single_id_fallback",
             enable_single_id_fallback,
+        )
+
+    def __init__(
+        self,
+        batch_size: int = 20,
+        page_size: int = 1000,
+        timeout_sec: float | None = None,
+        max_retries: int = 3,
+        retry_backoff_factor: float = 2.0,
+        rate_limit_requests_per_second: float = 5.0,
+        circuit_breaker: tuple[int, int] = (5, 300),
+        enable_single_id_fallback: bool = False,
+        **legacy_aliases: object,
+    ) -> None:
+        """Initialize adapter config while preserving retired constructor aliases."""
+        timeout_value, failure_threshold, recovery_timeout = (
+            self._extract_legacy_aliases(legacy_aliases)
+        )
+        self._validate_timeout_alias(timeout_value, timeout_sec)
+        resolved_timeout = self._resolve_timeout(timeout_value, timeout_sec)
+        resolved_breaker = self._resolve_circuit_breaker(
+            circuit_breaker,
+            failure_threshold,
+            recovery_timeout,
+        )
+        self._assign_fields(
+            batch_size=batch_size,
+            page_size=page_size,
+            timeout_sec=resolved_timeout,
+            max_retries=max_retries,
+            retry_backoff_factor=retry_backoff_factor,
+            rate_limit_requests_per_second=rate_limit_requests_per_second,
+            circuit_breaker=resolved_breaker,
+            enable_single_id_fallback=enable_single_id_fallback,
         )
         self._validate()
 
