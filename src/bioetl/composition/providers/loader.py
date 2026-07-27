@@ -31,11 +31,9 @@ __all__ = [
     "reset_loader",
 ]
 
-
 def _get_loader_registry() -> ProviderRegistrarProtocol:
     """Resolve the canonical default provider registry for loader entrypoints."""
     return cast(ProviderRegistrarProtocol, resolve_provider_registry())
-
 
 def load_providers(force: bool = False) -> None:
     """Load and register all providers.
@@ -62,7 +60,6 @@ def load_providers(force: bool = False) -> None:
         force=force,
     )
 
-
 def ensure_providers_loaded() -> None:
     """Ensure providers are loaded.
 
@@ -73,7 +70,6 @@ def ensure_providers_loaded() -> None:
         _get_loader_registry(),
     )
 
-
 def get_loaded_status() -> bool:
     """Return provider loading status.
 
@@ -82,10 +78,8 @@ def get_loaded_status() -> bool:
     """
     return get_provider_registry_loaded_status(_get_loader_registry())
 
-
 def reset_loader() -> None:
     """Reset loading status. Only for tests."""
     reset_provider_registry_loader(_get_loader_registry())
-
 
 _LOADER_API = (get_loaded_status, reset_loader)
