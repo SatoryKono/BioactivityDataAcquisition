@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-27T07:48:08.589814+00:00",
+  "generated_at": "2026-07-27T08:11:12.152511+00:00",
   "summary": {
     "total_scripts": 550,
     "status_counts": {
@@ -11364,7 +11364,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 28,
+      "reference_count": 27,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -12709,13 +12709,13 @@
           "path": ".github/workflows/docker.yml",
           "line": 14,
           "source_group": "ci",
-          "text": "- 'scripts/engineering/qa/run_docker_stability_campaign.py'"
+          "text": "- \"scripts/engineering/qa/run_docker_stability_campaign.py\""
         },
         {
           "path": ".github/workflows/docker.yml",
           "line": 29,
           "source_group": "ci",
-          "text": "- 'scripts/engineering/qa/run_docker_stability_campaign.py'"
+          "text": "- \"scripts/engineering/qa/run_docker_stability_campaign.py\""
         },
         {
           "path": "docs/05-operations/runbooks/docker-image-resource-promotion.md",

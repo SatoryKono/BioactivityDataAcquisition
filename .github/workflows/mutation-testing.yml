@@ -12,19 +12,19 @@ on:
       - main
       - master
     paths:
-      - 'src/bioetl/domain/**'
-      - 'src/bioetl/application/**'
-      - 'tests/**'
-      - '.github/workflows/mutation-testing.yml'
+      - "src/bioetl/domain/**"
+      - "src/bioetl/application/**"
+      - "tests/**"
+      - ".github/workflows/mutation-testing.yml"
   pull_request:
     paths:
-      - 'src/bioetl/domain/**'
-      - 'src/bioetl/application/**'
-      - 'tests/**'
-      - '.github/workflows/mutation-testing.yml'
+      - "src/bioetl/domain/**"
+      - "src/bioetl/application/**"
+      - "tests/**"
+      - ".github/workflows/mutation-testing.yml"
   schedule:
     # Run weekly on Sundays at 00:00 UTC
-    - cron: '0 0 * * 0'
+    - cron: "0 0 * * 0"
   workflow_dispatch:
 
 jobs:
@@ -91,6 +91,9 @@ jobs:
           PY
 
       - name: Run mutation testing
+        env:
+          # mutmut executes pytest from a sandbox; ensure the package tree resolves.
+          PYTHONPATH: ${{ github.workspace }}/src
         run: |
           echo "Running mutation testing for ${{ matrix.target.id }}..."
           # mutmut is a dev dependency; invoke via uv so PATH/venv entrypoints resolve
@@ -99,12 +102,19 @@ jobs:
 
       - name: Generate mutation report
         if: success()
+        env:
+          PYTHONPATH: ${{ github.workspace }}/src
         run: |
           mkdir -p "reports/${{ matrix.target.id }}"
           uv run --frozen --no-build mutmut results > "reports/${{ matrix.target.id }}/mutmut_results.txt"
           uv run --frozen --no-build mutmut export-cicd-stats
-          cp mutants/mutmut-cicd-stats.json \
-            "reports/${{ matrix.target.id }}/mutmut-cicd-stats.json"
+          if [ -f mutants/mutmut-cicd-stats.json ]; then
+            cp mutants/mutmut-cicd-stats.json \
+              "reports/${{ matrix.target.id }}/mutmut-cicd-stats.json"
+          else
+            echo "Mutation stats missing after run; treating as setup/runtime failure." >&2
+            exit 1
+          fi
           uv run --frozen --no-build mutmut html
           if [ -d "html" ]; then
             mv html "reports/${{ matrix.target.id }}/mutmut_html"
@@ -114,6 +124,7 @@ jobs:
         env:
           MUTATION_TARGET: ${{ matrix.target.id }}
           MUTATION_SCORE_THRESHOLD: ${{ matrix.target.threshold }}
+          PYTHONPATH: ${{ github.workspace }}/src
         run: |
           python - <<'PY'
           import json

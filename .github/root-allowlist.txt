@@ -12,6 +12,8 @@
 .gitleaks.toml
 .importlinter
 .jscpd.json
+# Dockerfile lint policy (DL3008 exception for moving Debian security packages).
+.hadolint.yaml
 # Exact-root workspace MCP entrypoint; must remain repo-relative and generated
 # from scripts/ai/codex/setup_mcp.py together with scripts/ai/.mcp.json.
 .mcp.json
