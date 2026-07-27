@@ -87,19 +87,44 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         entity_type: str = "publication",
         silver_filters: SilverFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
-        tracer: TracingPort | None = None,
-        metrics: MetricsPort | None = None,
-        identity_service: EntityIdentityGenerator | None = None,
-        pii_hasher: PiiHasherPort | None = None,
         dependencies: TransformerDependencyContext | None = None,
-        author_extractor: AuthorExtractor | None = None,
-        date_extractor: DateExtractor | None = None,
+        **legacy_collaborators: object,
     ) -> None:
         """Initialize PubMed publication transformer."""
-        super().__init__(provider, **publication_transformer_kwargs(locals()))
+        allowed = {
+            "tracer",
+            "metrics",
+            "identity_service",
+            "pii_hasher",
+            "author_extractor",
+            "date_extractor",
+        }
+        unexpected = sorted(k for k in legacy_collaborators if k not in allowed)
+        if unexpected:
+            raise TypeError(
+                "PubMedPublicationTransformer() got unexpected keyword argument(s): "
+                + ", ".join(unexpected)
+            )
+        init_locals: dict[str, object] = {
+            "entity_type": entity_type,
+            "silver_filters": silver_filters,
+            "gold_filters": gold_filters,
+            "dependencies": dependencies,
+            "tracer": legacy_collaborators.get("tracer"),
+            "metrics": legacy_collaborators.get("metrics"),
+            "identity_service": legacy_collaborators.get("identity_service"),
+            "pii_hasher": legacy_collaborators.get("pii_hasher"),
+        }
+        super().__init__(provider, **publication_transformer_kwargs(init_locals))
         self._cached_xml_root = None
-        self._author_extractor = author_extractor or AuthorExtractor()
-        self._date_extractor = date_extractor or DateExtractor()
+        author_extractor = legacy_collaborators.get("author_extractor")
+        date_extractor = legacy_collaborators.get("date_extractor")
+        self._author_extractor = (
+            author_extractor if isinstance(author_extractor, AuthorExtractor) else AuthorExtractor()
+        )
+        self._date_extractor = (
+            date_extractor if isinstance(date_extractor, DateExtractor) else DateExtractor()
+        )
 
     def _pre_extract_validation(
         self,

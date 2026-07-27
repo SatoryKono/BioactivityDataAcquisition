@@ -531,7 +531,7 @@ hotspot_family_ratchets:
       path_prefixes:
         - src/bioetl/application/core/
       bounded_growth_budgets:
-        files_ge_250_loc: 7
+        files_ge_250_loc: 5
         max_internal_fan_in: 10
       metrics:
         duplication_clusters: 0
@@ -593,7 +593,7 @@ hotspot_family_ratchets:
       path_prefixes:
         - src/bioetl/composition/factories/pipeline/
       bounded_growth_budgets:
-        files_ge_250_loc: 3
+        files_ge_250_loc: 2
         max_internal_fan_in: 3
       metrics:
         duplication_clusters: 0
@@ -730,8 +730,8 @@ supporting_scripts_governance:
   inventory_source: configs/quality/scripts_inventory_manifest.json
   metrics:
     zero_reference_supporting_script_count:
-      current_count: 21
-      max_count: 21
+      current_count: 17
+      max_count: 17
       owner: "@bioetl-platform"
       linked_issue: "#6623"
       ratchet_policy:

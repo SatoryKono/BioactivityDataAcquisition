@@ -92,29 +92,37 @@ class BronzeWriter(
         validate_json: bool = True,
         runtime_services: BronzeWriterRuntimeServices | None = None,
         flat_structure: bool = False,
-        tracing: TracingPort | None = None,
-        audit: AuditPort | None = None,
-        metadata_writer: MetadataWriterPort | None = None,
-        save_metadata: bool = False,
-        metadata_coordinator: MetadataCoordinatorPort | None = None,
-        lineage_store: LineageStorePort | None = None,
+        **legacy_runtime: object,
     ) -> None:
         """Initialize Bronze writer.
 
         ``json_export`` is ``(save_json, json_path)`` packed to keep the public
-        constructor under the Sonar S107 parameter budget.
+        constructor under the Sonar S107 parameter budget. Optional runtime
+        collaborators may also be passed via ``**legacy_runtime`` or a packed
+        ``runtime_services`` object.
         """
+        tracing = legacy_runtime.pop("tracing", None)
+        audit = legacy_runtime.pop("audit", None)
+        metadata_writer = legacy_runtime.pop("metadata_writer", None)
+        save_metadata = legacy_runtime.pop("save_metadata", False)
+        metadata_coordinator = legacy_runtime.pop("metadata_coordinator", None)
+        lineage_store = legacy_runtime.pop("lineage_store", None)
+        if legacy_runtime:
+            unexpected = ", ".join(sorted(str(k) for k in legacy_runtime))
+            raise TypeError(
+                f"BronzeWriter() got unexpected keyword argument(s): {unexpected}"
+            )
         if metadata_writer is None:
             from bioetl.domain.ports.noop import NoOpMetadataWriter
 
             metadata_writer = NoOpMetadataWriter()
         services = runtime_services or BronzeWriterRuntimeServices(
-            tracing=tracing,
-            audit=audit,
-            metadata_writer=metadata_writer,
+            tracing=tracing,  # type: ignore[arg-type]
+            audit=audit,  # type: ignore[arg-type]
+            metadata_writer=metadata_writer,  # type: ignore[arg-type]
             save_metadata=bool(save_metadata),
-            metadata_coordinator=metadata_coordinator,
-            lineage_store=lineage_store,
+            metadata_coordinator=metadata_coordinator,  # type: ignore[arg-type]
+            lineage_store=lineage_store,  # type: ignore[arg-type]
         )
 
         save_json, json_path = json_export

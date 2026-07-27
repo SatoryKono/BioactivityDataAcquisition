@@ -96,36 +96,31 @@ class UniProtAdapter(
         api_key: str | None = None,
         base_url: str = UNIPROT_API_BASE,
         strict_error_handling: bool = False,
-        metrics: MetricsPort | None = None,
         dependency_context: HttpAdapterDependencyContext | None = None,
-        error_handler: ErrorHandlerPort | None = None,
-        adapter_metrics: AdapterMetricsRecorder | None = None,
-        request_collector: APIRequestCollector | None = None,
+        **legacy_ports: object,
     ) -> None:
         """Initialize UniProt adapter dependencies.
 
-        Args:
-            http_client: HTTP client for making API requests.
-            logger: Logger port for structured logging.
-            api_key: Optional UniProt API key for authenticated access.
-            base_url: Base URL for the UniProt REST API.
-            strict_error_handling: Whether to raise exceptions or log warnings on errors.
-            metrics: Optional metrics port for recording adapter metrics.
-            dependency_context: Optional composition-owned dependency bundle for
-                runtime adapter collaborators.
-            error_handler: Optional error handler for mapping exceptions to domain errors.
-            adapter_metrics: Optional pre-built adapter metrics instance.
-            request_collector: Optional pre-built request collector instance.
-            fallback_fetch_service: Pre-built fallback fetch orchestrator.
+        Optional metrics/error_handler/adapter_metrics/request_collector may be
+        passed via ``**legacy_ports`` without growing the S107 parameter budget.
         """
+        metrics = legacy_ports.pop("metrics", None)
+        error_handler = legacy_ports.pop("error_handler", None)
+        adapter_metrics = legacy_ports.pop("adapter_metrics", None)
+        request_collector = legacy_ports.pop("request_collector", None)
+        if legacy_ports:
+            unexpected = ", ".join(sorted(str(k) for k in legacy_ports))
+            raise TypeError(
+                f"UniProtAdapter() got unexpected keyword argument(s): {unexpected}"
+            )
         super().__init__(
             http_client,
             logger,
-            metrics=metrics,
+            metrics=metrics,  # type: ignore[arg-type]
             dependency_context=dependency_context,
-            error_handler=error_handler,
-            adapter_metrics=adapter_metrics,
-            request_collector=request_collector,
+            error_handler=error_handler,  # type: ignore[arg-type]
+            adapter_metrics=adapter_metrics,  # type: ignore[arg-type]
+            request_collector=request_collector,  # type: ignore[arg-type]
         )
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key

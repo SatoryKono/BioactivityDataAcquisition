@@ -76,7 +76,45 @@ LEGACY_ADR_ENFORCEMENT_ANCHORS = {
         "configs/naming_exceptions.yaml",
         "tests/contract/test_chembl_enum_normalization_policy.py",
     ),
+    "ADR-051": (
+        "configs/quality/constructor_waivers.yaml",
+        "tests/unit/domain/aggregates/test_quarantine_entry.py",
+    ),
 }
+
+
+def _matrix_drift_report(
+    committed: dict[str, object], live: dict[str, object]
+) -> str:
+    """Build a compact drift report for the ADR enforcement matrix artifact."""
+    committed_rows = {
+        str(row["adr_id"]): row
+        for row in committed.get("rows", [])  # type: ignore[union-attr]
+        if isinstance(row, dict) and "adr_id" in row
+    }
+    live_rows = {
+        str(row["adr_id"]): row
+        for row in live.get("rows", [])  # type: ignore[union-attr]
+        if isinstance(row, dict) and "adr_id" in row
+    }
+    only_committed = sorted(set(committed_rows) - set(live_rows))
+    only_live = sorted(set(live_rows) - set(committed_rows))
+    changed = sorted(
+        adr_id
+        for adr_id in set(committed_rows) & set(live_rows)
+        if committed_rows[adr_id] != live_rows[adr_id]
+    )
+    lines = [
+        "ADR enforcement matrix artifact is stale relative to live generator.",
+        f"committed.summary={committed.get('summary')!r}",
+        f"live.summary={live.get('summary')!r}",
+        f"only_in_artifact={only_committed}",
+        f"only_in_live={only_live}",
+        f"changed_rows={changed[:20]}{'...' if len(changed) > 20 else ''}",
+        "Refresh with:",
+        "  python -m scripts.engineering.qa.report_adr_enforcement_matrix --update",
+    ]
+    return "\n".join(lines)
 
 
 def test_adr_enforcement_matrix_artifact_matches_live_generator() -> None:
@@ -85,7 +123,8 @@ def test_adr_enforcement_matrix_artifact_matches_live_generator() -> None:
     committed = json.loads(ARTIFACT.read_text(encoding="utf-8"))
     live = build_payload(repo_root=ROOT)
 
-    assert committed == live
+    if committed != live:
+        raise AssertionError(_matrix_drift_report(committed, live))
 
 
 def test_accepted_adr_enforcement_matrix_has_no_unreviewed_gaps() -> None:

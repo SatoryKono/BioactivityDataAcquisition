@@ -1,17 +1,17 @@
 # RF-017 Constructor Waivers
-# TD-07 / #6626: ratcheted 19 → 10 (2026-07-27). Shrink-only; no budget growth.
+# TD-R-03 / #6679: 10 -> 5. Shrink-only.
 
 CompositeCheckpointLoadService:
   max_args: 12
   owner: "@bioetl-composite"
   expiry: "2026-12-31"
-  reason: "Checkpoint-load orchestration still bundles multiple collaborators pending composite service decomposition."
+  reason: "Checkpoint-load orchestration still bundles multiple collaborators."
 
 CheckpointRuntimeService:
   max_args: 13
   owner: "@bioetl-composite"
   expiry: "2026-12-31"
-  reason: "Runtime checkpoint service still wires multiple checkpoint and health collaborators."
+  reason: "Runtime checkpoint service still wires multiple collaborators."
 
 PipelineObserver:
   max_args: 13
@@ -19,41 +19,16 @@ PipelineObserver:
   expiry: "2026-12-31"
   reason: "Observer currently aggregates multiple sinks and lifecycle reporters."
 
-BaseChemblTransformer:
-  max_args: 9
-  owner: "@bioetl-application"
-  expiry: "2026-12-31"
-  reason: "Provider transformer base remains shared until provider-specific parsing helpers are extracted."
-
-PubMedPublicationTransformer:
-  max_args: 11
-  owner: "@bioetl-application"
-  expiry: "2026-12-31"
-  reason: "Publication transformer still bundles fallback parsing, identity, and metadata collaborators."
-
 QuarantineEntry:
   max_args: 9
   owner: "@bioetl-domain"
   expiry: "2026-12-31"
-  reason: "Domain aggregate still represents a wide state snapshot and is intentionally explicit."
-
-PubChemAdapter:
-  max_args: 11
-  owner: "@bioetl-platform"
-  expiry: "2026-12-31"
-  reason: "Adapter refactoring remains outside the current compatibility tranche."
-
-UniProtAdapter:
-  max_args: 11
-  owner: "@bioetl-platform"
-  expiry: "2026-12-31"
-  reason: "Adapter refactoring remains outside the current compatibility tranche."
-
-BronzeWriter:
-  max_args: 14
-  owner: "@bioetl-storage"
-  expiry: "2026-12-31"
-  reason: "Bronze writer still aggregates IO, metrics, manifest, and checkpoint collaborators."
+  classification: intentional_exception
+  linked_issue: "#6685"
+  linked_adr: "ADR-051-quarantine-entry-aggregate-surface.md"
+  reason: >-
+    Domain aggregate intentionally exposes an explicit multi-field identity surface.
+    See ADR-051; max_args frozen (no growth).
 
 AnchorSpec:
   max_args: 19
