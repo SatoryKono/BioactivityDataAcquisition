@@ -11,6 +11,7 @@ from bioetl.application.composite.checkpoint._anchor_context import (
     create_expected_checkpoint_context,
 )
 from bioetl.application.composite.checkpoint.load_service import (
+    CompositeCheckpointLoadParams,
     CompositeCheckpointLoadService,
 )
 from bioetl.application.composite.checkpoint.persistence_service import (
@@ -91,18 +92,20 @@ class CompositeCheckpointService:
         self._checkpoint_filename = self._make_filename(params.run_id)
         self._glob_pattern_value = self._glob_pattern()
         self._load_service = params.load_service_factory(
-            composite_name=params.composite_name,
-            run_id=params.run_id,
-            storage=params.storage,
-            logger=params.logger,
-            resume=params.resume,
-            stale_threshold_hours=self._stale_threshold_hours,
-            expected_context=self._expected_checkpoint_context,
-            checkpoint_filename=self._checkpoint_filename,
-            glob_pattern=self._glob_pattern_value,
-            run_ledger_port=params.run_ledger_port,
-            metrics=params.metrics,
-            clock=params.clock,
+            CompositeCheckpointLoadParams(
+                composite_name=params.composite_name,
+                run_id=params.run_id,
+                storage=params.storage,
+                logger=params.logger,
+                resume=params.resume,
+                stale_threshold_hours=self._stale_threshold_hours,
+                expected_context=self._expected_checkpoint_context,
+                checkpoint_filename=self._checkpoint_filename,
+                glob_pattern=self._glob_pattern_value,
+                run_ledger_port=params.run_ledger_port,
+                metrics=params.metrics,
+                clock=params.clock,
+            )
         )
         self._persistence_service = params.persistence_service_factory(
             composite_name=params.composite_name,

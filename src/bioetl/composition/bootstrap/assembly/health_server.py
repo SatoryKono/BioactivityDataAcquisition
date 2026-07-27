@@ -10,6 +10,7 @@ from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.domain.ports import (
     CheckpointPort,
     HealthCheckResult,
+    HealthMetricsExpositionPort,
     HealthMonitorPort,
     HealthStatePort,
     MetricsPort,
@@ -26,6 +27,9 @@ from bioetl.infrastructure.control_plane.file_run_manifest_store import (
 )
 from bioetl.infrastructure.control_plane.file_workflow_manifest_store import (
     FileWorkflowManifestStore,
+)
+from bioetl.infrastructure.observability.health_metrics_exposition import (
+    HealthMetricsExpositionAdapter,
 )
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 
@@ -45,6 +49,7 @@ class HealthServerDependencies:
     run_manifest_port: RunManifestPort
     run_ledger_port: RunLedgerPort
     workflow_manifest_port: WorkflowManifestPort
+    metrics_exposition: HealthMetricsExpositionPort
     data_root: Path = Path()
 
 
@@ -126,5 +131,6 @@ def create_health_server_dependencies(
         run_manifest_port=control_plane_ports.manifest_port,
         run_ledger_port=control_plane_ports.ledger_port,
         workflow_manifest_port=control_plane_ports.workflow_manifest_port,
+        metrics_exposition=HealthMetricsExpositionAdapter(),
         data_root=resolved_data_root,
     )

@@ -72,6 +72,7 @@ class TestHealthServerDependencies:
         ledger_store = InMemoryRunLedgerStore()
         workflow_manifest_store = MagicMock()
 
+        exposition = MagicMock(name="metrics_exposition")
         deps = HealthServerDependencies(
             health_monitor=monitor,
             metrics=metrics,
@@ -79,6 +80,7 @@ class TestHealthServerDependencies:
             run_manifest_port=manifest_store,
             run_ledger_port=ledger_store,
             workflow_manifest_port=workflow_manifest_store,
+            metrics_exposition=exposition,
         )
 
         with pytest.raises(AttributeError):
@@ -97,6 +99,7 @@ class TestHealthServerDependencies:
         ledger_store = InMemoryRunLedgerStore()
         workflow_manifest_store = MagicMock()
 
+        exposition = MagicMock(name="metrics_exposition")
         deps = HealthServerDependencies(
             health_monitor=monitor,
             metrics=metrics,
@@ -104,6 +107,7 @@ class TestHealthServerDependencies:
             run_manifest_port=manifest_store,
             run_ledger_port=ledger_store,
             workflow_manifest_port=workflow_manifest_store,
+            metrics_exposition=exposition,
         )
 
         assert deps.health_monitor is monitor
@@ -112,6 +116,7 @@ class TestHealthServerDependencies:
         assert deps.run_manifest_port is manifest_store
         assert deps.run_ledger_port is ledger_store
         assert deps.workflow_manifest_port is workflow_manifest_store
+        assert deps.metrics_exposition is exposition
 
     def test_explicit_data_root_owns_all_control_plane_read_ports(
         self,

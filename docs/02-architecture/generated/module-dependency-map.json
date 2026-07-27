@@ -1,12 +1,12 @@
 {
   "summary": {
-    "scanned_modules": 2276,
+    "scanned_modules": 2275,
     "total_internal_imports": 7118,
-    "layer_edges": 14,
+    "layer_edges": 13,
     "cross_layer_group_edges": 55,
-    "cross_layer_group_edges_total": 308,
-    "violations": 1,
-    "source_fingerprint": "a5eecb5feaec49392d733551f4acd87a9a950bd9611dff8fd894c1c1c958e38e"
+    "cross_layer_group_edges_total": 307,
+    "violations": 0,
+    "source_fingerprint": "88dfad2928db3903a170b4bdde1f61304efa1c76b0a40ac1c25a4e7069dd0b30"
   },
   "layer_edges": [
     {
@@ -42,7 +42,7 @@
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 229,
+      "imports": 230,
       "allowed": true
     },
     {
@@ -80,12 +80,6 @@
       "target": "domain",
       "imports": 59,
       "allowed": true
-    },
-    {
-      "source": "interfaces",
-      "target": "infrastructure",
-      "imports": 1,
-      "allowed": false
     },
     {
       "source": "interfaces",
@@ -321,6 +315,11 @@
       "imports": 15
     },
     {
+      "source": "composition.bootstrap",
+      "target": "infrastructure.observability",
+      "imports": 14
+    },
+    {
       "source": "application.services",
       "target": "domain.behavior",
       "imports": 13
@@ -328,11 +327,6 @@
     {
       "source": "application.services",
       "target": "domain.normalization",
-      "imports": 13
-    },
-    {
-      "source": "composition.bootstrap",
-      "target": "infrastructure.observability",
       "imports": 13
     },
     {
@@ -371,12 +365,5 @@
       "imports": 11
     }
   ],
-  "violations": [
-    {
-      "source": "interfaces",
-      "target": "infrastructure",
-      "imports": 1,
-      "allowed": false
-    }
-  ]
+  "violations": []
 }

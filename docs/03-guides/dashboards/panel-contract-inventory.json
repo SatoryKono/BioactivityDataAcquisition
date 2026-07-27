@@ -12,148 +12,13 @@
   "schema_version": 1,
   "source": "grafana/dashboards/*.json",
   "target_counts": {
-    "http": 19,
+    "http": 16,
     "loki": 0,
-    "promql": 171,
+    "promql": 157,
     "tempo": 0,
     "unknown": 0
   },
   "targets": [
-    {
-      "dashboard_uid": "bioetl-alerts-slo",
-      "datasource_type": "prometheus",
-      "documents_backend_down": false,
-      "documents_valid_empty": false,
-      "formula": "clamp_max(sum(ALERTS{alertstate=\"firing\"}), 1)",
-      "kind": "promql",
-      "panel_id": 1,
-      "panel_title": "Active Alert Status",
-      "query": "clamp_max(sum(ALERTS{alertstate=\"firing\"}), 1)",
-      "query_tokens": [],
-      "ref_id": "A",
-      "runbook_urls": [
-        "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md"
-      ],
-      "thresholds": [
-        {
-          "color": "green",
-          "value": null
-        },
-        {
-          "color": "red",
-          "value": 1
-        }
-      ],
-      "unit": "short"
-    },
-    {
-      "dashboard_uid": "bioetl-alerts-slo",
-      "datasource_type": "prometheus",
-      "documents_backend_down": false,
-      "documents_valid_empty": true,
-      "formula": "sum(ALERTS{alertstate=\"firing\"}) or vector(0)",
-      "kind": "promql",
-      "panel_id": 2,
-      "panel_title": "Firing Alerts / Range",
-      "query": "sum(ALERTS{alertstate=\"firing\"}) or vector(0)",
-      "query_tokens": [],
-      "ref_id": "A",
-      "runbook_urls": [
-        "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md"
-      ],
-      "thresholds": [
-        {
-          "color": "gray",
-          "value": null
-        }
-      ],
-      "unit": "short"
-    },
-    {
-      "dashboard_uid": "bioetl-alerts-slo",
-      "datasource_type": "prometheus",
-      "documents_backend_down": false,
-      "documents_valid_empty": true,
-      "formula": "sum(ALERTS{alertstate=\"firing\",severity=~\"critical|page|p0|p1\"}) or vector(0)",
-      "kind": "promql",
-      "panel_id": 3,
-      "panel_title": "Critical/Page Alerts",
-      "query": "sum(ALERTS{alertstate=\"firing\",severity=~\"critical|page|p0|p1\"}) or vector(0)",
-      "query_tokens": [],
-      "ref_id": "A",
-      "runbook_urls": [
-        "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md"
-      ],
-      "thresholds": [
-        {
-          "color": "gray",
-          "value": null
-        },
-        {
-          "color": "red",
-          "value": 1
-        }
-      ],
-      "unit": "short"
-    },
-    {
-      "dashboard_uid": "bioetl-alerts-slo",
-      "datasource_type": "prometheus",
-      "documents_backend_down": false,
-      "documents_valid_empty": true,
-      "formula": "sum(ALERTS{alertstate=\"firing\",alertname=~\".*SLO.*|.*SLA.*|.*Budget.*|.*Burn.*\"}) or vector(0)",
-      "kind": "promql",
-      "panel_id": 4,
-      "panel_title": "SLO/SLA Alert Pressure",
-      "query": "sum(ALERTS{alertstate=\"firing\",alertname=~\".*SLO.*|.*SLA.*|.*Budget.*|.*Burn.*\"}) or vector(0)",
-      "query_tokens": [],
-      "ref_id": "A",
-      "runbook_urls": [
-        "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md"
-      ],
-      "thresholds": [
-        {
-          "color": "green",
-          "value": null
-        },
-        {
-          "color": "orange",
-          "value": 1
-        },
-        {
-          "color": "red",
-          "value": 3
-        }
-      ],
-      "unit": "short"
-    },
-    {
-      "dashboard_uid": "bioetl-alerts-slo",
-      "datasource_type": "prometheus",
-      "documents_backend_down": false,
-      "documents_valid_empty": false,
-      "formula": "label_replace(label_replace(ALERTS{alertstate=\"firing\"}, \"scope\", \"Global\", \"\", \"\"), \"scope\", \"Pipeline\", \"pipeline\", \".+\")",
-      "kind": "promql",
-      "panel_id": 5,
-      "panel_title": "Firing Alert Details",
-      "query": "label_replace(label_replace(ALERTS{alertstate=\"firing\"}, \"scope\", \"Global\", \"\", \"\"), \"scope\", \"Pipeline\", \"pipeline\", \".+\")",
-      "query_tokens": [],
-      "ref_id": "A",
-      "runbook_urls": [
-        "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md"
-      ],
-      "thresholds": [
-        {
-          "color": "green",
-          "value": null
-        },
-        {
-          "color": "red",
-          "value": 1
-        }
-      ],
-      "unit": ""
-    },
     {
       "dashboard_uid": "bioetl-control-plane-v1",
       "datasource_type": "prometheus",
@@ -1420,11 +1285,11 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "max((bioetl_replay_safety_blockers_15m{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))",
+      "formula": "max(bioetl_replay_safety_blockers_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
       "kind": "promql",
       "panel_id": 891,
       "panel_title": "Monitor: Replay Safety State",
-      "query": "max((bioetl_replay_safety_blockers_15m{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))",
+      "query": "max(bioetl_replay_safety_blockers_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
       "query_tokens": [
         "bioetl_replay_safety_blockers_15m"
       ],
@@ -1448,19 +1313,16 @@
     },
     {
       "dashboard_uid": "bioetl-control-plane-v1",
-      "datasource_type": "yesoreyeram-infinity-datasource",
+      "datasource_type": "prometheus",
       "documents_backend_down": true,
       "documents_valid_empty": true,
-      "formula": "",
-      "kind": "http",
+      "formula": "max(bioetl_checkpoint_age_seconds{pipeline=~\"$pipeline\"})",
+      "kind": "promql",
       "panel_id": 892,
       "panel_title": "Monitor: Checkpoint Freshness Lag (seconds)",
-      "query": "/ops/control-plane/checkpoint-freshness?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+      "query": "max(bioetl_checkpoint_age_seconds{pipeline=~\"$pipeline\"})",
       "query_tokens": [
-        "/ops/control-plane/checkpoint-freshness",
-        "pipeline",
-        "run_type",
-        "run_id"
+        "bioetl_checkpoint_age_seconds"
       ],
       "ref_id": "A",
       "runbook_urls": [
@@ -1487,11 +1349,11 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "max((bioetl_manifest_ledger_failures_15m{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))",
+      "formula": "max(bioetl_manifest_ledger_failures_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
       "kind": "promql",
       "panel_id": 893,
       "panel_title": "Monitor: Manifest / Ledger Integrity",
-      "query": "max((bioetl_manifest_ledger_failures_15m{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))",
+      "query": "max(bioetl_manifest_ledger_failures_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
       "query_tokens": [
         "bioetl_manifest_ledger_failures_15m"
       ],
@@ -1518,11 +1380,11 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "max((bioetl_control_plane_telemetry_missing_5m{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))",
+      "formula": "max(bioetl_control_plane_telemetry_missing_5m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
       "kind": "promql",
       "panel_id": 907,
       "panel_title": "Inspect: Telemetry Missing",
-      "query": "max((bioetl_control_plane_telemetry_missing_5m{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))",
+      "query": "max(bioetl_control_plane_telemetry_missing_5m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
       "query_tokens": [
         "bioetl_control_plane_telemetry_missing_5m"
       ],
@@ -1569,11 +1431,11 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "max((bioetl_control_plane_current_status_trusted{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))",
+      "formula": "max(bioetl_control_plane_current_status_trusted{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
       "kind": "promql",
       "panel_id": 9401,
       "panel_title": "Status",
-      "query": "max((bioetl_control_plane_current_status_trusted{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))",
+      "query": "max(bioetl_control_plane_current_status_trusted{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
       "query_tokens": [
         "bioetl_control_plane_current_status_trusted"
       ],
@@ -1978,11 +1840,11 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "(max(clamp_min(time() - max_over_time(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}[$__range]), 0))) / 3600",
+      "formula": "(max(clamp_min(time() - max_over_time(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}[12h]), 0))) / 3600",
       "kind": "promql",
       "panel_id": 8,
       "panel_title": "Time Range \u00b7 Worst Freshness Age (hours; SLA 24/72)",
-      "query": "(max(clamp_min(time() - max_over_time(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}[$__range]), 0))) / 3600",
+      "query": "(max(clamp_min(time() - max_over_time(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}[12h]), 0))) / 3600",
       "query_tokens": [
         "bioetl_data_freshness_seconds"
       ],
@@ -2407,42 +2269,11 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "max(bioetl_dq_current_status{pipeline=~\"$pipeline\"})",
-      "kind": "promql",
-      "panel_id": 9100,
-      "panel_title": "Monitor DQ Current Status",
-      "query": "max(bioetl_dq_current_status{pipeline=~\"$pipeline\"})",
-      "query_tokens": [
-        "bioetl_dq_current_status"
-      ],
-      "ref_id": "A",
-      "runbook_urls": [],
-      "thresholds": [
-        {
-          "color": "green",
-          "value": null
-        },
-        {
-          "color": "orange",
-          "value": 1
-        },
-        {
-          "color": "red",
-          "value": 2
-        }
-      ],
-      "unit": "short"
-    },
-    {
-      "dashboard_uid": "bioetl-dq-v2",
-      "datasource_type": "prometheus",
-      "documents_backend_down": false,
-      "documents_valid_empty": false,
-      "formula": "((max(bioetl_dq_current_reason{pipeline=~\"$pipeline\",severity=\"crit\"} > 0) * 2) or (max(bioetl_dq_current_reason{pipeline=~\"$pipeline\",severity=\"warn\"} > 0) * 1) or max(bioetl_dq_current_status{pipeline=~\"$pipeline\"} == 0))",
+      "formula": "(max(bioetl_dq_current_reason{pipeline=~\"$pipeline\",severity=\"crit\"}>0)*2) or max(bioetl_dq_current_status{pipeline=~\"$pipeline\"})",
       "kind": "promql",
       "panel_id": 9101,
       "panel_title": "Monitor DQ Threshold State",
-      "query": "((max(bioetl_dq_current_reason{pipeline=~\"$pipeline\",severity=\"crit\"} > 0) * 2) or (max(bioetl_dq_current_reason{pipeline=~\"$pipeline\",severity=\"warn\"} > 0) * 1) or max(bioetl_dq_current_status{pipeline=~\"$pipeline\"} == 0))",
+      "query": "(max(bioetl_dq_current_reason{pipeline=~\"$pipeline\",severity=\"crit\"}>0)*2) or max(bioetl_dq_current_status{pipeline=~\"$pipeline\"})",
       "query_tokens": [
         "bioetl_dq_current_reason",
         "bioetl_dq_current_status"
@@ -2566,11 +2397,11 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "max(bioetl_l0_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l0_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or vector(3)",
+      "formula": "max(bioetl_l0_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
       "kind": "promql",
       "panel_id": 214,
       "panel_title": "Status",
-      "query": "max(bioetl_l0_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l0_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or vector(3)",
+      "query": "max(bioetl_l0_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
       "query_tokens": [
         "bioetl_l0_status"
       ],
@@ -2597,11 +2428,11 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "topk(1, (bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l0_next_action_route{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(label_replace(label_replace(label_replace(vector(0), \"action_target\", \"no_route\", \"\", \"\"), \"action_reason\", \"selected_scope_not_present\", \"\", \"\"), \"action_dashboard_uid\", \"bioetl-overview-v2\", \"\", \"\"), \"pipeline\", \"selected scope\", \"\", \"\"))",
+      "formula": "topk(1, bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
       "kind": "promql",
       "panel_id": 215,
       "panel_title": "First Action",
-      "query": "topk(1, (bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l0_next_action_route{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or label_replace(label_replace(label_replace(label_replace(vector(0), \"action_target\", \"no_route\", \"\", \"\"), \"action_reason\", \"selected_scope_not_present\", \"\", \"\"), \"action_dashboard_uid\", \"bioetl-overview-v2\", \"\", \"\"), \"pipeline\", \"selected scope\", \"\", \"\"))",
+      "query": "topk(1, bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
       "query_tokens": [
         "bioetl_l0_next_action_route"
       ],
@@ -2632,11 +2463,11 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "label_replace(max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\",input=\"control_plane\"} or ((bioetl_l0_input_status_selected{run_type=~\"$run_type\",input=\"control_plane\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))), \"input_order\", \"10\", \"input\", \".*\") or label_replace(max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\",input=\"runtime\"} or ((bioetl_l0_input_status_selected{run_type=~\"$run_type\",input=\"runtime\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))), \"input_order\", \"20\", \"input\", \".*\") or label_replace(max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\",input=\"provider\"} or ((bioetl_l0_input_status_selected{run_type=~\"$run_type\",input=\"provider\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))), \"input_order\", \"30\", \"input\", \".*\") or label_replace(max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\",input=\"dq\"} or ((bioetl_l0_input_status_selected{run_type=~\"$run_type\",input=\"dq\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))), \"input_order\", \"40\", \"input\", \".*\") or label_replace(max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\",input=\"gold\"} or ((bioetl_l0_input_status_selected{run_type=~\"$run_type\",input=\"gold\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))), \"input_order\", \"50\", \"input\", \".*\") or label_replace(max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\",input=\"workflow\"} or ((bioetl_l0_input_status_selected{run_type=~\"$run_type\",input=\"workflow\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))), \"input_order\", \"60\", \"input\", \".*\") or label_replace(label_replace(vector(3), \"input\", \"control_plane\", \"\", \"\"), \"input_order\", \"10\", \"\", \"\") or label_replace(label_replace(vector(3), \"input\", \"runtime\", \"\", \"\"), \"input_order\", \"20\", \"\", \"\") or label_replace(label_replace(vector(3), \"input\", \"provider\", \"\", \"\"), \"input_order\", \"30\", \"\", \"\") or label_replace(label_replace(vector(3), \"input\", \"dq\", \"\", \"\"), \"input_order\", \"40\", \"\", \"\") or label_replace(label_replace(vector(3), \"input\", \"gold\", \"\", \"\"), \"input_order\", \"50\", \"\", \"\") or label_replace(label_replace(vector(3), \"input\", \"workflow\", \"\", \"\"), \"input_order\", \"60\", \"\", \"\")",
+      "formula": "max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
       "kind": "promql",
       "panel_id": 9002,
       "panel_title": "Inputs",
-      "query": "label_replace(max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\",input=\"control_plane\"} or ((bioetl_l0_input_status_selected{run_type=~\"$run_type\",input=\"control_plane\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))), \"input_order\", \"10\", \"input\", \".*\") or label_replace(max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\",input=\"runtime\"} or ((bioetl_l0_input_status_selected{run_type=~\"$run_type\",input=\"runtime\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))), \"input_order\", \"20\", \"input\", \".*\") or label_replace(max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\",input=\"provider\"} or ((bioetl_l0_input_status_selected{run_type=~\"$run_type\",input=\"provider\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))), \"input_order\", \"30\", \"input\", \".*\") or label_replace(max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\",input=\"dq\"} or ((bioetl_l0_input_status_selected{run_type=~\"$run_type\",input=\"dq\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))), \"input_order\", \"40\", \"input\", \".*\") or label_replace(max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\",input=\"gold\"} or ((bioetl_l0_input_status_selected{run_type=~\"$run_type\",input=\"gold\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))), \"input_order\", \"50\", \"input\", \".*\") or label_replace(max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\",input=\"workflow\"} or ((bioetl_l0_input_status_selected{run_type=~\"$run_type\",input=\"workflow\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))), \"input_order\", \"60\", \"input\", \".*\") or label_replace(label_replace(vector(3), \"input\", \"control_plane\", \"\", \"\"), \"input_order\", \"10\", \"\", \"\") or label_replace(label_replace(vector(3), \"input\", \"runtime\", \"\", \"\"), \"input_order\", \"20\", \"\", \"\") or label_replace(label_replace(vector(3), \"input\", \"provider\", \"\", \"\"), \"input_order\", \"30\", \"\", \"\") or label_replace(label_replace(vector(3), \"input\", \"dq\", \"\", \"\"), \"input_order\", \"40\", \"\", \"\") or label_replace(label_replace(vector(3), \"input\", \"gold\", \"\", \"\"), \"input_order\", \"50\", \"\", \"\") or label_replace(label_replace(vector(3), \"input\", \"workflow\", \"\", \"\"), \"input_order\", \"60\", \"\", \"\")",
+      "query": "max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
       "query_tokens": [
         "bioetl_l0_input_status_selected"
       ],
@@ -3082,11 +2913,11 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": true,
-      "formula": "sum by (alertname, alertstate, severity) (ALERTS{alertstate=~\"firing|pending\"}) or label_replace(label_replace(label_replace(vector(0), \"alertname\", \"none\", \"\", \"\"), \"alertstate\", \"inactive\", \"\", \"\"), \"severity\", \"none\", \"\", \"\")",
+      "formula": "count by (alertname, severity) (ALERTS{alertstate=\"firing\"})",
       "kind": "promql",
       "panel_id": 9601,
       "panel_title": "Triage Alert State",
-      "query": "sum by (alertname, alertstate, severity) (ALERTS{alertstate=~\"firing|pending\"}) or label_replace(label_replace(label_replace(vector(0), \"alertname\", \"none\", \"\", \"\"), \"alertstate\", \"inactive\", \"\", \"\"), \"severity\", \"none\", \"\", \"\")",
+      "query": "count by (alertname, severity) (ALERTS{alertstate=\"firing\"})",
       "query_tokens": [],
       "ref_id": "A",
       "runbook_urls": [],
@@ -3653,11 +3484,11 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "max_over_time(bioetl_provider_current_status[${__range_s}s])",
+      "formula": "max by (provider) (bioetl_provider_current_status)",
       "kind": "promql",
       "panel_id": 9101,
       "panel_title": "Monitor GLOBAL Provider Severity Matrix",
-      "query": "max_over_time(bioetl_provider_current_status[${__range_s}s])",
+      "query": "max by (provider) (bioetl_provider_current_status)",
       "query_tokens": [
         "bioetl_provider_current_status"
       ],
@@ -3684,11 +3515,11 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "max_over_time(bioetl_provider_current_status[${__range_s}s]) >= 1",
+      "formula": "max by (provider) (bioetl_provider_current_status) >= 1",
       "kind": "promql",
       "panel_id": 9102,
       "panel_title": "Inspect Critical Providers",
-      "query": "max_over_time(bioetl_provider_current_status[${__range_s}s]) >= 1",
+      "query": "max by (provider) (bioetl_provider_current_status) >= 1",
       "query_tokens": [
         "bioetl_provider_current_status"
       ],
@@ -3715,11 +3546,11 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "topk(5, max_over_time(bioetl_provider_current_cause[${__range_s}s]) > 0)",
+      "formula": "topk(5, max by (provider, cause) (bioetl_provider_current_cause) > 0)",
       "kind": "promql",
       "panel_id": 9103,
       "panel_title": "Inspect Provider Top Causes",
-      "query": "topk(5, max_over_time(bioetl_provider_current_cause[${__range_s}s]) > 0)",
+      "query": "topk(5, max by (provider, cause) (bioetl_provider_current_cause) > 0)",
       "query_tokens": [
         "bioetl_provider_current_cause"
       ],
@@ -3746,14 +3577,13 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "(((count(count_over_time(bioetl_provider_current_status{provider=~\"$provider\"}[${__range_s}s])) > bool 0) or (count(count_over_time(bioetl_provider_range_operational_ok{provider=~\"$provider\"}[${__range_s}s])) > bool 0)) * 0) or ((absent(count_over_time(bioetl_provider_current_status{provider=~\"$provider\"}[${__range_s}s])) and absent(count_over_time(bioetl_provider_range_operational_ok{provider=~\"$provider\"}[${__range_s}s]))) * 1)",
+      "formula": "count(bioetl_provider_current_status{provider=~\"$provider\"}) > bool 0",
       "kind": "promql",
       "panel_id": 9104,
       "panel_title": "Monitor Provider Telemetry Freshness",
-      "query": "(((count(count_over_time(bioetl_provider_current_status{provider=~\"$provider\"}[${__range_s}s])) > bool 0) or (count(count_over_time(bioetl_provider_range_operational_ok{provider=~\"$provider\"}[${__range_s}s])) > bool 0)) * 0) or ((absent(count_over_time(bioetl_provider_current_status{provider=~\"$provider\"}[${__range_s}s])) and absent(count_over_time(bioetl_provider_range_operational_ok{provider=~\"$provider\"}[${__range_s}s]))) * 1)",
+      "query": "count(bioetl_provider_current_status{provider=~\"$provider\"}) > bool 0",
       "query_tokens": [
-        "bioetl_provider_current_status",
-        "bioetl_provider_range_operational_ok"
+        "bioetl_provider_current_status"
       ],
       "ref_id": "A",
       "runbook_urls": [],
@@ -3778,14 +3608,13 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "max(max_over_time(bioetl_provider_current_status{provider=~\"$provider\"}[${__range_s}s]) or max_over_time(bioetl_provider_range_operational_ok{provider=~\"$provider\"}[${__range_s}s]))",
+      "formula": "max(bioetl_provider_current_status{provider=~\"$provider\"})",
       "kind": "promql",
       "panel_id": 9401,
       "panel_title": "Status",
-      "query": "max(max_over_time(bioetl_provider_current_status{provider=~\"$provider\"}[${__range_s}s]) or max_over_time(bioetl_provider_range_operational_ok{provider=~\"$provider\"}[${__range_s}s]))",
+      "query": "max(bioetl_provider_current_status{provider=~\"$provider\"})",
       "query_tokens": [
-        "bioetl_provider_current_status",
-        "bioetl_provider_range_operational_ok"
+        "bioetl_provider_current_status"
       ],
       "ref_id": "A",
       "runbook_urls": [],
@@ -4198,14 +4027,13 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "(((((sum(increase(bioetl_errors_total{pipeline=~\"$pipeline\",stage=~\"$stage\"}[30m])) or sum((increase(bioetl_errors_total{stage=~\"$stage\"}[30m])) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or (0 * ((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"bronze\"}[30m])) or sum((max_over_time(bioetl_records_processed_total{run_type=~\"$run_type\",stage=\"bronze\"}[30m])) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")))))) / clamp_min(((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"bronze\"}[30m])) or sum((max_over_time(bioetl_records_processed_total{run_type=~\"$run_type\",stage=\"bronze\"}[30m])) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")))), 1))) and ((((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"bronze\"}[30m])) or sum((max_over_time(bioetl_records_processed_total{run_type=~\"$run_type\",stage=\"bronze\"}[30m])) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")))) >= 20)))",
+      "formula": "max(bioetl_runtime_error_rate_30m{pipeline=~\"$pipeline\"})",
       "kind": "promql",
       "panel_id": 220,
       "panel_title": "Runtime Error Rate",
-      "query": "(((((sum(increase(bioetl_errors_total{pipeline=~\"$pipeline\",stage=~\"$stage\"}[30m])) or sum((increase(bioetl_errors_total{stage=~\"$stage\"}[30m])) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or (0 * ((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"bronze\"}[30m])) or sum((max_over_time(bioetl_records_processed_total{run_type=~\"$run_type\",stage=\"bronze\"}[30m])) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")))))) / clamp_min(((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"bronze\"}[30m])) or sum((max_over_time(bioetl_records_processed_total{run_type=~\"$run_type\",stage=\"bronze\"}[30m])) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")))), 1))) and ((((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"bronze\"}[30m])) or sum((max_over_time(bioetl_records_processed_total{run_type=~\"$run_type\",stage=\"bronze\"}[30m])) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")))) >= 20)))",
+      "query": "max(bioetl_runtime_error_rate_30m{pipeline=~\"$pipeline\"})",
       "query_tokens": [
-        "bioetl_errors_total",
-        "bioetl_records_processed_total"
+        "bioetl_runtime_error_rate_30m"
       ],
       "ref_id": "A",
       "runbook_urls": [],
@@ -4847,37 +4675,6 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "max(bioetl_runtime_current_status_trusted{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
-      "kind": "promql",
-      "panel_id": 9100,
-      "panel_title": "Runtime Status",
-      "query": "max(bioetl_runtime_current_status_trusted{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
-      "query_tokens": [
-        "bioetl_runtime_current_status_trusted"
-      ],
-      "ref_id": "A",
-      "runbook_urls": [],
-      "thresholds": [
-        {
-          "color": "green",
-          "value": null
-        },
-        {
-          "color": "orange",
-          "value": 1
-        },
-        {
-          "color": "red",
-          "value": 2
-        }
-      ],
-      "unit": "short"
-    },
-    {
-      "dashboard_uid": "bioetl-runtime",
-      "datasource_type": "prometheus",
-      "documents_backend_down": false,
-      "documents_valid_empty": false,
       "formula": "topk(3, bioetl_runtime_current_blocker_reason_scoped{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0)",
       "kind": "promql",
       "panel_id": 9101,
@@ -5009,13 +4806,13 @@
       "unit": "none"
     },
     {
-      "dashboard_uid": "bioetl-workflow-overview",
+      "dashboard_uid": "bioetl-runtime",
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
       "formula": "round(sum(increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=\"failed\"}[$__range]))) or vector(0)",
       "kind": "promql",
-      "panel_id": 2,
+      "panel_id": 9996,
       "panel_title": "Failed Workflow Runs / Range",
       "query": "round(sum(increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=\"failed\"}[$__range]))) or vector(0)",
       "query_tokens": [
@@ -5040,13 +4837,13 @@
       "unit": "short"
     },
     {
-      "dashboard_uid": "bioetl-workflow-overview",
+      "dashboard_uid": "bioetl-runtime",
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
       "formula": "round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"pipeline\",status=\"failed\"}[$__range]))) or vector(0)",
       "kind": "promql",
-      "panel_id": 3,
+      "panel_id": 9997,
       "panel_title": "Failed Pipeline Steps / Range",
       "query": "round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"pipeline\",status=\"failed\"}[$__range]))) or vector(0)",
       "query_tokens": [
@@ -5066,263 +4863,6 @@
         {
           "color": "red",
           "value": 3
-        }
-      ],
-      "unit": "short"
-    },
-    {
-      "dashboard_uid": "bioetl-workflow-overview",
-      "datasource_type": "prometheus",
-      "documents_backend_down": true,
-      "documents_valid_empty": true,
-      "formula": "round(sum(increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=~\"$status\"}[$__range]))) or ((count(bioetl_workflow_runs_total) > 0) * -1) or (absent(bioetl_workflow_runs_total) * -2)",
-      "kind": "promql",
-      "panel_id": 4,
-      "panel_title": "Workflow Run Outcomes / Range",
-      "query": "round(sum(increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=~\"$status\"}[$__range]))) or ((count(bioetl_workflow_runs_total) > 0) * -1) or (absent(bioetl_workflow_runs_total) * -2)",
-      "query_tokens": [
-        "bioetl_workflow_runs_total"
-      ],
-      "ref_id": "A",
-      "runbook_urls": [],
-      "thresholds": [
-        {
-          "color": "gray",
-          "value": null
-        }
-      ],
-      "unit": "short"
-    },
-    {
-      "dashboard_uid": "bioetl-workflow-overview",
-      "datasource_type": "prometheus",
-      "documents_backend_down": false,
-      "documents_valid_empty": false,
-      "formula": "sum by (step_kind, status) (increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=~\"$step_kind\",status=~\"$step_status\"}[$__range]))",
-      "kind": "promql",
-      "panel_id": 5,
-      "panel_title": "Step Outcomes by Kind / Step Status / Range",
-      "query": "sum by (step_kind, status) (increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=~\"$step_kind\",status=~\"$step_status\"}[$__range]))",
-      "query_tokens": [
-        "bioetl_workflow_step_events_total"
-      ],
-      "ref_id": "A",
-      "runbook_urls": [],
-      "thresholds": [],
-      "unit": "short"
-    },
-    {
-      "dashboard_uid": "bioetl-workflow-overview",
-      "datasource_type": "prometheus",
-      "documents_backend_down": false,
-      "documents_valid_empty": false,
-      "formula": "round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"transform\",status=\"failed\"}[$__range]))) or vector(0)",
-      "kind": "promql",
-      "panel_id": 6,
-      "panel_title": "Failed Transform Steps / Range",
-      "query": "round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"transform\",status=\"failed\"}[$__range]))) or vector(0)",
-      "query_tokens": [
-        "bioetl_workflow_step_events_total"
-      ],
-      "ref_id": "A",
-      "runbook_urls": [],
-      "thresholds": [
-        {
-          "color": "gray",
-          "value": null
-        },
-        {
-          "color": "orange",
-          "value": 1
-        },
-        {
-          "color": "red",
-          "value": 3
-        }
-      ],
-      "unit": "short"
-    },
-    {
-      "dashboard_uid": "bioetl-workflow-overview",
-      "datasource_type": "prometheus",
-      "documents_backend_down": false,
-      "documents_valid_empty": false,
-      "formula": "round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",status=\"skipped\"}[$__range]))) or vector(0)",
-      "kind": "promql",
-      "panel_id": 7,
-      "panel_title": "Skipped Step Events / Range",
-      "query": "round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",status=\"skipped\"}[$__range]))) or vector(0)",
-      "query_tokens": [
-        "bioetl_workflow_step_events_total"
-      ],
-      "ref_id": "A",
-      "runbook_urls": [],
-      "thresholds": [
-        {
-          "color": "gray",
-          "value": null
-        },
-        {
-          "color": "orange",
-          "value": 1
-        },
-        {
-          "color": "red",
-          "value": 5
-        }
-      ],
-      "unit": "short"
-    },
-    {
-      "dashboard_uid": "bioetl-workflow-overview",
-      "datasource_type": "prometheus",
-      "documents_backend_down": false,
-      "documents_valid_empty": true,
-      "formula": "histogram_quantile(0.95, sum by (le, step_kind, status) (max_over_time(bioetl_workflow_step_duration_seconds_bucket{workflow=~\"$workflow\",step_kind=~\"$step_kind\",status=~\"$step_status\"}[$__range])))",
-      "kind": "promql",
-      "panel_id": 8,
-      "panel_title": "Step Duration p95 by Kind / Step Status / Range",
-      "query": "histogram_quantile(0.95, sum by (le, step_kind, status) (max_over_time(bioetl_workflow_step_duration_seconds_bucket{workflow=~\"$workflow\",step_kind=~\"$step_kind\",status=~\"$step_status\"}[$__range])))",
-      "query_tokens": [
-        "bioetl_workflow_step_duration_seconds_bucket"
-      ],
-      "ref_id": "A",
-      "runbook_urls": [],
-      "thresholds": [],
-      "unit": "s"
-    },
-    {
-      "dashboard_uid": "bioetl-workflow-overview",
-      "datasource_type": "prometheus",
-      "documents_backend_down": false,
-      "documents_valid_empty": false,
-      "formula": "max(((round(sum(increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=\"failed\"}[$__range]))) > bool 0) * 2) or ((round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",status=\"skipped\"}[$__range]))) > bool 0) * 1) or ((round(sum(increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status!~\"success|failed\"}[$__range]))) > bool 0) * 1))",
-      "kind": "promql",
-      "panel_id": 9401,
-      "panel_title": "Status",
-      "query": "max(((round(sum(increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=\"failed\"}[$__range]))) > bool 0) * 2) or ((round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",status=\"skipped\"}[$__range]))) > bool 0) * 1) or ((round(sum(increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status!~\"success|failed\"}[$__range]))) > bool 0) * 1))",
-      "query_tokens": [
-        "bioetl_workflow_runs_total",
-        "bioetl_workflow_step_events_total"
-      ],
-      "ref_id": "A",
-      "runbook_urls": [],
-      "thresholds": [
-        {
-          "color": "gray",
-          "value": null
-        },
-        {
-          "color": "orange",
-          "value": 1
-        },
-        {
-          "color": "red",
-          "value": 2
-        }
-      ],
-      "unit": "none"
-    },
-    {
-      "dashboard_uid": "bioetl-workflow-overview",
-      "datasource_type": "yesoreyeram-infinity-datasource",
-      "documents_backend_down": true,
-      "documents_valid_empty": true,
-      "formula": "",
-      "kind": "http",
-      "panel_id": 9402,
-      "panel_title": "ID",
-      "query": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
-      "query_tokens": [
-        "/ops/control-plane/identity-table",
-        "pipeline",
-        "run_type",
-        "run_id"
-      ],
-      "ref_id": "A",
-      "runbook_urls": [],
-      "thresholds": [],
-      "unit": "none"
-    },
-    {
-      "dashboard_uid": "bioetl-workflow-overview",
-      "datasource_type": "yesoreyeram-infinity-datasource",
-      "documents_backend_down": true,
-      "documents_valid_empty": true,
-      "formula": "",
-      "kind": "http",
-      "panel_id": 9403,
-      "panel_title": "Processed Records",
-      "query": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
-      "query_tokens": [
-        "/ops/observability/processed-records",
-        "pipeline",
-        "run_type",
-        "run_id"
-      ],
-      "ref_id": "A",
-      "runbook_urls": [],
-      "thresholds": [],
-      "unit": "none"
-    },
-    {
-      "dashboard_uid": "bioetl-workflow-overview",
-      "datasource_type": "prometheus",
-      "documents_backend_down": false,
-      "documents_valid_empty": false,
-      "formula": "max(bioetl_workflow_pipeline_verdict_status{pipeline=~\"$pipeline_context\",run_type=~\"$run_type_context\"})",
-      "kind": "promql",
-      "panel_id": 9404,
-      "panel_title": "Pipeline Status",
-      "query": "max(bioetl_workflow_pipeline_verdict_status{pipeline=~\"$pipeline_context\",run_type=~\"$run_type_context\"})",
-      "query_tokens": [
-        "bioetl_workflow_pipeline_verdict_status"
-      ],
-      "ref_id": "A",
-      "runbook_urls": [],
-      "thresholds": [
-        {
-          "color": "gray",
-          "value": null
-        },
-        {
-          "color": "orange",
-          "value": 1
-        },
-        {
-          "color": "red",
-          "value": 2
-        }
-      ],
-      "unit": "none"
-    },
-    {
-      "dashboard_uid": "bioetl-workflow-overview",
-      "datasource_type": "prometheus",
-      "documents_backend_down": false,
-      "documents_valid_empty": false,
-      "formula": "round(sum(increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline_context\",run_type=~\"$run_type_context\",status=\"failed\"}[$__range]))) or vector(0)",
-      "kind": "promql",
-      "panel_id": 9410,
-      "panel_title": "Failed Entity Pipeline Runs / Range",
-      "query": "round(sum(increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline_context\",run_type=~\"$run_type_context\",status=\"failed\"}[$__range]))) or vector(0)",
-      "query_tokens": [
-        "bioetl_pipeline_runs_total"
-      ],
-      "ref_id": "A",
-      "runbook_urls": [],
-      "thresholds": [
-        {
-          "color": "gray",
-          "value": null
-        },
-        {
-          "color": "orange",
-          "value": 1
-        },
-        {
-          "color": "red",
-          "value": 1
         }
       ],
       "unit": "short"

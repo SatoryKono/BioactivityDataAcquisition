@@ -39,51 +39,14 @@ class AnchorSpec:
     drilldown: str
     missing_severity: str
 
-    def __init__(
-        self,
-        priority: str,
-        name: str | None = None,
-        label: str | None = None,
-        source: str | None = None,
-        value_format: str | None = None,
-        why: str | None = None,
-        rendering: str | None = None,
-        copy: bool | None = None,
-        drilldown: str | None = None,
-        missing_severity: str | None = None,
-        *,
-        anchor_name: str | None = None,
-        display_name: str | None = None,
-        source_location: str | None = None,
-        data_type: str | None = None,
-        description: str | None = None,
-        display_mode: str | None = None,
-        is_identifier: bool | None = None,
-        usage_locations: str | None = None,
-        implementation_status: str | None = None,
-    ) -> None:
-        """Initialize canonical specs while accepting legacy HTTP contract names."""
-        values = _resolve_anchor_spec_values(
-            priority=priority,
-            name=name,
-            label=label,
-            source=source,
-            value_format=value_format,
-            why=why,
-            rendering=rendering,
-            copy=copy,
-            drilldown=drilldown,
-            missing_severity=missing_severity,
-            anchor_name=anchor_name,
-            display_name=display_name,
-            source_location=source_location,
-            data_type=data_type,
-            description=description,
-            display_mode=display_mode,
-            is_identifier=is_identifier,
-            usage_locations=usage_locations,
-            implementation_status=implementation_status,
-        )
+    def __init__(self, priority: str, **fields: object) -> None:
+        """Initialize canonical specs while accepting legacy HTTP contract names.
+
+        Canonical and legacy field names are accepted as kwargs so the
+        constructor stays under the DI/arg-count gate without dropping
+        HTTP contract aliases.
+        """
+        values = _resolve_anchor_spec_values(priority=priority, **fields)
         _apply_anchor_spec_values(self, values)
 
     @property

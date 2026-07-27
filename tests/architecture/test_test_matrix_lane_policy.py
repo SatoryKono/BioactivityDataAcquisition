@@ -92,6 +92,7 @@ class TestCanonicalTestLanes:
         "unit-fast",
         "repo-backed-unit",
         "unit-parallel-safe",
+        "unit-scripts-tooling",
         "integration-replay",
         "security",
         "contracts",

@@ -116,16 +116,16 @@
         "public_entrypoint_growth_count": 0,
         "public_export_facade_conflict_count": 0,
         "public_export_facade_growth_count": 0,
-        "repo_wide_untriaged_zero_import_candidate_count": 1,
+        "repo_wide_untriaged_zero_import_candidate_count": 0,
         "sunset_compat_count": 0,
         "total_duplicate_clusters": 0,
         "transition_compat_count": 0
       },
       "id": "debt_burden_evolution_friction",
       "name": "Debt burden / evolution friction",
-      "score": 8.0,
+      "score": 8.5,
       "weight": 0.06,
-      "weighted_score": 0.48
+      "weighted_score": 0.51
     }
   ],
   "debt_budget_policy": {
@@ -162,7 +162,7 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 8.39,
+  "integral_score": 8.43,
   "interpretation": "satisfactory_system_refactoring_required",
   "metrics": {
     "accepted_adr_count": 49,
@@ -180,7 +180,7 @@
     "public_entrypoint_growth_count": 0,
     "public_export_facade_conflict_count": 0,
     "public_export_facade_growth_count": 0,
-    "repo_wide_untriaged_zero_import_candidate_count": 1,
+    "repo_wide_untriaged_zero_import_candidate_count": 0,
     "retained_entrypoint_count": 12,
     "retained_public_export_facade_count": 4,
     "runtime_cardinality_review_required_count": 0,
@@ -225,7 +225,7 @@
     },
     "duplication_baseline": {
       "path": "reports/quality/full-app-duplication-baseline.json",
-      "snapshot_date": "2026-07-07",
+      "snapshot_date": "2026-07-27",
       "total_duplicate_clusters": 0
     },
     "hotspot_family_baseline": {
@@ -236,7 +236,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "3938fbd2bc1a5654e5ad56d4084713831e21cda7abb131fd30b87a83ffe16cd2",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "e0a64e8b0c4ea03d13a9da7cc1d75d1c07ab6976029a1795b30ef9b9af96c864"
+      "source_tree_sha256": "7d44ada0c1022e25160cb65198c53ef64b89a11f686da32ec460fcc15f9fc957"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

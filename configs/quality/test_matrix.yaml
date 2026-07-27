@@ -49,6 +49,7 @@ test_lanes:
       - smoke
       - unit-fast
       - repo-backed-unit
+      - unit-scripts-tooling
       - integration-replay
       - integration-determinism
       - integration-idempotency

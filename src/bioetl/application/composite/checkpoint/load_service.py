@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from bioetl.application.composite.checkpoint._anchor_context import (
     ExpectedCheckpointContext,
     fresh_checkpoint_state,
@@ -158,37 +160,40 @@ def _ensure_projection_coverage(
     raise CheckpointConflictError(composite_name, detail)
 
 
+@dataclass(frozen=True, slots=True)
+class CompositeCheckpointLoadParams:
+    """Collaborator bag for :class:`CompositeCheckpointLoadService`."""
+
+    composite_name: str
+    run_id: str
+    storage: CompositeCheckpointPort
+    logger: LoggerPort
+    resume: bool
+    stale_threshold_hours: float
+    expected_context: ExpectedCheckpointContext
+    checkpoint_filename: str
+    glob_pattern: str
+    run_ledger_port: RunLedgerPort | None = None
+    metrics: MetricsPort | None = None
+    clock: ClockPort | None = None
+
+
 class CompositeCheckpointLoadService:
     """Coordinate resume-vs-fresh checkpoint loading decisions."""
 
-    def __init__(
-        self,
-        *,
-        composite_name: str,
-        run_id: str,
-        storage: CompositeCheckpointPort,
-        logger: LoggerPort,
-        resume: bool,
-        stale_threshold_hours: float,
-        expected_context: ExpectedCheckpointContext,
-        checkpoint_filename: str,
-        glob_pattern: str,
-        run_ledger_port: RunLedgerPort | None = None,
-        metrics: MetricsPort | None = None,
-        clock: ClockPort | None = None,
-    ) -> None:
-        self._composite_name = composite_name
-        self._run_id = run_id
-        self._storage = storage
-        self._logger = logger
-        self._resume = resume
-        self._stale_threshold_hours = stale_threshold_hours
-        self._expected_context = expected_context
-        self._checkpoint_filename = checkpoint_filename
-        self._glob_pattern = glob_pattern
-        self._run_ledger_port = run_ledger_port
-        self._metrics = metrics
-        self._clock = clock
+    def __init__(self, params: CompositeCheckpointLoadParams) -> None:
+        self._composite_name = params.composite_name
+        self._run_id = params.run_id
+        self._storage = params.storage
+        self._logger = params.logger
+        self._resume = params.resume
+        self._stale_threshold_hours = params.stale_threshold_hours
+        self._expected_context = params.expected_context
+        self._checkpoint_filename = params.checkpoint_filename
+        self._glob_pattern = params.glob_pattern
+        self._run_ledger_port = params.run_ledger_port
+        self._metrics = params.metrics
+        self._clock = params.clock
 
     def _emit_checkpoint_load_status(self, status: str) -> None:
         """Emit bounded composite checkpoint load outcome."""
