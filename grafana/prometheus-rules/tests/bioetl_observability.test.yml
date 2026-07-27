@@ -479,7 +479,7 @@ tests:
               run_type: incremental
             exp_annotations:
               summary: DQ quarantine rate is elevated
-              description: Quarantine rate stayed between 5% and 20% for pipeline=chembl run_type=incremental over the last 30m, with at least 20 bronze records observed.
+              description: Quarantine rate stayed between 5% and 50% for pipeline=chembl run_type=incremental over the last 30m, with at least 20 bronze records observed.
               runbook: docs/05-operations/runbooks/dq-failure-investigation.md
 
   - name: dq-quarantine-rate-critical
@@ -488,7 +488,7 @@ tests:
       - series: 'bioetl_records_processed_total{pipeline="chembl",run_type="incremental",stage="bronze"}'
         values: "0+10x30"
       - series: 'bioetl_dq_records_quarantined_total{pipeline="chembl",run_type="incremental",error_type="schema"}'
-        values: "0+3x30"
+        values: "0+6x30"
     alert_rule_test:
       - eval_time: 20m
         alertname: BioETLDQQuarantineRateCritical
@@ -498,8 +498,8 @@ tests:
               pipeline: chembl
               run_type: incremental
             exp_annotations:
-              summary: DQ quarantine rate reached hard-fail territory
-              description: Quarantine rate exceeded 20% for pipeline=chembl run_type=incremental over the last 15m, with at least 20 bronze records observed.
+              summary: DQ Hard Threshold exceeded
+              description: Quarantine rate exceeded 50% hard threshold for pipeline=chembl run_type=incremental over the last 15m, with at least 20 bronze records observed.
               runbook: docs/05-operations/runbooks/dq-failure-investigation.md
 
   - name: data-freshness-warning
