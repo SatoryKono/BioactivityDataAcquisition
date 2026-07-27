@@ -48,11 +48,6 @@ is `SELECTED RUN`, and score/count/freshness evidence below the answer row is
 - **Purpose:** Compare selected-range record flow and invariant status.
 - **Data sources:** `bioetl_records_processed_total`, `bioetl_record_flow_invariants_total`
 
-### 7. Monitor DQ Current Status
-- **Type:** Stat
-- **Purpose:** Show current DQ status.
-- **Data sources:** `bioetl_dq_current_status`
-
 ### 8. Monitor DQ Threshold State
 - **Type:** Stat
 - **Purpose:** Show DQ threshold state.
@@ -204,6 +199,16 @@ is `SELECTED RUN`, and score/count/freshness evidence below the answer row is
 - **Type:** Stat
 - **Purpose:** Count Gold strict validation failures.
 - **Data sources:** `bioetl_dq_validation_failures_total`
+
+### 37. Range / debug evidence
+- **Type:** Row
+- **Purpose:** Group selected-range score, quarantine, and reject evidence.
+- **Data sources:** Prometheus range evidence from the nested panels.
+
+### 38. Run context (identity / processed records)
+- **Type:** Row
+- **Purpose:** Group selected-run identity and processed-record HTTP evidence.
+- **Data sources:** BioETL Ops HTTP.
 
 ## Variables
 

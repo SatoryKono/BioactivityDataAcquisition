@@ -157,6 +157,16 @@ Dashboard `3. Provider Health` monitors provider current status, health-check la
 - **Purpose:** Show circuit breaker trips over time.
 - **Data sources:** `bioetl_circuit_breaker_trips_total`
 
+### 30. Range / debug evidence
+- **Type:** Row
+- **Purpose:** Group selected-range provider health and transport diagnostics.
+- **Data sources:** Prometheus range evidence from the nested panels.
+
+### 31. Run context (identity / processed records)
+- **Type:** Row
+- **Purpose:** Group selected-run identity and processed-record HTTP evidence.
+- **Data sources:** BioETL Ops HTTP.
+
 ## Variables
 
 - `provider` is the primary selector.
