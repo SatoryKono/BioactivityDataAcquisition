@@ -907,6 +907,26 @@ groups:
           description: 'The BioETL /metrics scrape endpoint is unavailable (up{job="bioetl"} is zero or absent), but BioETL metrics are still being received via Pushgateway. This is expected when using Pushgateway instead of direct scraping.'
           runbook: "docs/05-operations/runbooks/observability-checklist.md"
 
+      # AUD-OBS-DD #6736: up=1 alone is insufficient when exposition is comment-only
+      # stub or missing bioetl_health_server_scrape_up after health process drift.
+      - alert: BioETLMetricsEndpointLivenessMissing
+        expr: |
+          (
+            up{job="bioetl"} == 1
+          )
+          and on()
+          (
+            absent(bioetl_health_server_scrape_up)
+            or max(bioetl_health_server_scrape_up) == 0
+          )
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "BioETL /metrics scrape is up but liveness series is missing"
+          description: 'up{job="bioetl"}=1 while bioetl_health_server_scrape_up is absent or zero. This usually means a stale health process serving a comment-only stub, or a deploy that predates the non-stub /metrics contract (#6731/#6738).'
+          runbook: "docs/05-operations/runbooks/observability-checklist.md"
+
       - alert: BioETLPrometheusUnavailable
         expr: up{job="prometheus"} == 0
         for: 2m
