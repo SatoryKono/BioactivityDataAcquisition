@@ -75,7 +75,8 @@ def _plans_readme_issues(*, catalog: dict[str, Any], readme_text: str) -> list[s
         return ["repo_structure_catalog.plans must be a mapping"]
 
     readme_path = plans.get("readme")
-    if readme_path != str(PLANS_README):
+    # Compare as POSIX so Windows Path str() does not false-fail the catalog.
+    if str(readme_path).replace("\\", "/") != PLANS_README.as_posix():
         issues.append(
             "repo_structure_catalog.plans.readme must point to docs/plans/README.md"
         )

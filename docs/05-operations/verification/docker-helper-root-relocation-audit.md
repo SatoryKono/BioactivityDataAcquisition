@@ -4,6 +4,11 @@ Status: implemented for post-2026-07 candidate adjuncts and RF-003 root setup
 helper retirement. Required root compose entrypoints remain at root; optional
 helper adjuncts and setup helpers are owned by scripts paths.
 
+**RH-04 / #6704 (2026-07-27) decision:** keep `docker-compose.neo4j.yml` and
+`docker-compose.neo4j-audit.yml` at exact root for now. Live consumers include
+`configs/quality/docker_runtime_contracts.yaml` and architecture contract tests.
+Rehome only after a dedicated repoint PR updates contracts, docs, and launchers.
+
 This audit closes the "review before move" requirement for the reviewed root
 Docker helper family. It complements
 `configs/quality/docker_helper_contracts.yaml` and the

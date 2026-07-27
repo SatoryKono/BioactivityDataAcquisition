@@ -103,6 +103,16 @@ project_rules_failures.txt
 git_commit_*.txt
 *_gitshow_err.txt
 log_test.txt
+
+# Root-level accidental test dumps (RH-01 / RH-03 / #6701 #6703).
+# JUnit/chunked pytest XML and agent temp dumps must never be tracked at root.
+/uchunk*.xml
+/final_chunk*.xml
+/tmp_sub_*.txt
+/temp_closeout.json
+/.tmp_test_run.log
+/.mcp-server-context.md
+/.gitignore~
 /reports/*
 !/reports/semantic_pipeline_audit/
 /reports/semantic_pipeline_audit/*

@@ -1,7 +1,7 @@
 version: 1.0.0
 status: active
 owner: Engineering / Architecture
-last_verified: "2026-07-20"
+last_verified: "2026-07-27"
 
 current_live_root_baseline:
   tracked_root_audit_status: pass
@@ -10,13 +10,11 @@ current_live_root_baseline:
     .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py
     --strict-untracked
   note: >-
-    The current local repository root satisfies the published allowlist and
-    approved-root policy. Local AI/editor/cache root directories may exist as
-    untracked local-only surfaces; this registry tracks their live state so the
-    review gate does not drift from the current workspace. Tracked root
-    dispositions are reconciled by family in `.github/root-allowlist.txt`; the
-    2026-07-10 RF root-script tranche retired tracked repository-root script
-    shims and retained maintained command-compatible owners under scripts/**.
+    2026-07-27 RH-01..RH-05: removed accidental root JUnit dumps; restored
+    tracked .pr_agent.toml; dropped allowlist phantoms DOCKER_QUICKSTART.md and
+    docker-compose.monitoring.desktop.yml; neo4j compose remains root (RH-04).
+    Local AI/editor/cache roots may exist untracked. See
+    docs/00-project/governance/root-local-clutter-cleanup.md.
 
 review_lanes:
   - lane_id: root_env_security
@@ -268,13 +266,14 @@ review_lanes:
     retention_action: retain_only_when_the_exact_root_filename_is_part_of_the_documented_tool_contract
     cleanup_policy: move_to_docs_or_archive_when_the_external_contract_no_longer_requires_root_retention
     verification:
-      - git ls-files DOCKER_QUICKSTART.md best_practices.md
+      - git ls-files best_practices.md
+      - git ls-files DOCKER_QUICKSTART.md
       - rg -n "DOCKER_QUICKSTART\\.md|best_practices\\.md" docs/00-project/governance/qodo/README.md docs/DOCKER_QUICKSTART.md .github/root-allowlist.txt docs/00-project/governance/03-file-policy.md
     candidates:
       - path: DOCKER_QUICKSTART.md
         current_live_state: absent_from_root_baseline
         canonical_path: docs/DOCKER_QUICKSTART.md
-        action_if_reintroduced: retain_only_while_the_reviewed_adr010_operator_entrypoint_requires_the_exact_root_filename_otherwise_route_callers_to_docs/DOCKER_QUICKSTART.md_and_drop_the_root_copy
+        action_if_reintroduced: do_not_restore_root_copy_without_fresh_owner_review_route_callers_to_docs/DOCKER_QUICKSTART.md
       - path: best_practices.md
         current_live_state: present_approved_root_surface
         canonical_path: docs/00-project/governance/qodo/README.md
