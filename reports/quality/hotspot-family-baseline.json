@@ -18,9 +18,9 @@
       ],
       "duplication_clusters": 0,
       "files": 183,
-      "total_loc": 22617,
-      "files_ge_250_loc": 4,
-      "helper_function_ratio": 0.37,
+      "total_loc": 22596,
+      "files_ge_250_loc": 5,
+      "helper_function_ratio": 0.371,
       "max_internal_fan_in": 7,
       "max_internal_fan_in_module": "bioetl.application.core.pipeline_span_lifecycle",
       "bounded_growth_budgets": {
@@ -29,7 +29,7 @@
       },
       "budget_warnings": [],
       "budget_review_notes": [
-        "near_budget:files_ge_250_loc=4/5"
+        "at_budget:files_ge_250_loc=5/5"
       ]
     },
     {
