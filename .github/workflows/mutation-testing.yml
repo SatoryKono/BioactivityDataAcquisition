@@ -129,7 +129,11 @@ jobs:
             echo "Mutation stats missing after run; treating as setup/runtime failure." >&2
             exit 1
           fi
-          uv run --frozen --no-build mutmut html
+          # mutmut 3.x no longer ships a stable `html` CLI command on all installs.
+          # Prefer HTML when available; never fail the report step on its absence.
+          if uv run --frozen --no-build mutmut --help 2>/dev/null | grep -Eq '(^|[[:space:]])html([[:space:]]|$)'; then
+            uv run --frozen --no-build mutmut html || true
+          fi
           if [ -d "html" ]; then
             mv html "reports/${{ matrix.target.id }}/mutmut_html"
           fi

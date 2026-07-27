@@ -69,6 +69,7 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-048](ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md) | Domain Schema Boundary and Runtime Pandera Compatibility | Accepted | Architecture | 2026-05-26 |
 | [ADR-049](ADR-049-context-aware-loc-target-policy.md) | Context-Aware LOC Target Policy | Accepted | Architecture | 2026-05-26 |
 | [ADR-050](ADR-050-silver-structural-gold-semantic-filter-boundary.md) | Silver Structural and Gold Semantic Filter Boundary | Accepted | Data Quality | 2026-06-15 |
+| [ADR-051](ADR-051-quarantine-entry-aggregate-surface.md) | QuarantineEntry Wide Constructor as Intentional Aggregate Surface | Accepted | Architecture | 2026-07-27 |
 
 ## ADRs by Category
 
@@ -85,6 +86,7 @@ This directory contains Architecture Decision Records documenting significant ar
 - [ADR-043](ADR-043-documentation-knowledge-management.md): Documentation and Knowledge Management Strategy
 - [ADR-048](ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md): Domain Schema Boundary and Runtime Pandera Compatibility
 - [ADR-049](ADR-049-context-aware-loc-target-policy.md): Context-Aware LOC Target Policy
+- [ADR-051](ADR-051-quarantine-entry-aggregate-surface.md): QuarantineEntry Wide Constructor as Intentional Aggregate Surface
 
 ### Storage
 

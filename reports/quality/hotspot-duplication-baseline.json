@@ -3,8 +3,8 @@
     "snapshot_date": "2026-07-27",
     "targets": 5,
     "total_duplicate_clusters": 0,
-    "total_raw_duplicate_clusters": 7,
-    "total_excluded_duplicate_clusters": 7
+    "total_raw_duplicate_clusters": 9,
+    "total_excluded_duplicate_clusters": 9
   },
   "normalization": {
     "exclude_module_patterns": [],
@@ -73,8 +73,8 @@
       "target": "src/bioetl/application/core",
       "returncode": 8,
       "duplicate_count": 0,
-      "raw_duplicate_count": 7,
-      "excluded_duplicate_count": 7,
+      "raw_duplicate_count": 9,
+      "excluded_duplicate_count": 9,
       "actionability": [],
       "top_pairs": [],
       "clusters": []

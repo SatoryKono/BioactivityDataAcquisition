@@ -25,7 +25,7 @@ from __future__ import annotations
 __all__ = ["PUBCHEM_HEALTH_ERRORS", "PubChemAdapter"]
 
 from concurrent.futures import ThreadPoolExecutor
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import pubchempy as pcp
 
@@ -45,7 +45,10 @@ from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMa
 from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import ErrorHandlerPort, LoggerPort
+    from bioetl.domain.ports import LoggerPort
+    from bioetl.infrastructure.adapters.common.api_request_collector import (
+        APIRequestCollector,
+    )
     from bioetl.infrastructure.adapters.common.dependency_context import (
         SyncAdapterDependencyContext,
     )
@@ -155,8 +158,8 @@ class PubChemAdapter(
         )
         if request_collector_port is None:
             raise ValueError("PubChemAdapter requires request_collector")
-        self._request_collector = request_collector_port
-        self._strategies = fetch_strategies
+        self._request_collector = cast("APIRequestCollector", request_collector_port)
+        self._strategies = cast("PubChemFetchStrategies", fetch_strategies)
 
     # fetch_multi_filtered and fetch_filtered_with_fallback are provided
     # by FilterableStubMixin (see class inheritance)

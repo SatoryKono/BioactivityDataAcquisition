@@ -25,7 +25,7 @@
     },
     {
       "evidence_metrics": {
-        "source_module_count": 2274,
+        "source_module_count": 2277,
         "uncovered_module_count": 0
       },
       "id": "ddd_invariants",
@@ -165,7 +165,7 @@
   "integral_score": 9.11,
   "interpretation": "good_targeted_improvements",
   "metrics": {
-    "accepted_adr_count": 48,
+    "accepted_adr_count": 49,
     "adr_enforcement_blocking_gap_count": 0,
     "adr_enforcement_manual_exception_count": 0,
     "compatibility_test_file_count": 0,
@@ -185,7 +185,7 @@
     "retained_public_export_facade_count": 4,
     "runtime_cardinality_review_required_count": 0,
     "runtime_cardinality_threshold_violation_count": 0,
-    "source_module_count": 2274,
+    "source_module_count": 2277,
     "sunset_compat_count": 0,
     "total_duplicate_clusters": 0,
     "transition_compat_count": 0,
@@ -196,7 +196,7 @@
   "schema_version": 1,
   "source_artifacts": {
     "adr_enforcement_matrix": {
-      "accepted_adr_count": 48,
+      "accepted_adr_count": 49,
       "blocking_gap_count": 0,
       "generated_artifact": "reports/quality/adr-enforcement-matrix.json",
       "path": "scripts/engineering/qa/report_adr_enforcement_matrix.py::build_payload"
@@ -221,7 +221,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "939a67852ee4aae838bd3418c61f95498a0cafb03dcb1e17148339b7e8d84f23"
+      "source_fingerprint": "a493140368c90c45d4cee69dd8ca5b8d494c55a674f94f1a317e89a4e3404d91"
     },
     "duplication_baseline": {
       "path": "reports/quality/full-app-duplication-baseline.json",
@@ -236,7 +236,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "3938fbd2bc1a5654e5ad56d4084713831e21cda7abb131fd30b87a83ffe16cd2",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "4ab76877d103bae007833b93e5f212213639d3e42811d1ceb51047afcf9b6bf7"
+      "source_tree_sha256": "32d551a540247b39b243df74f1aeebad7ece356d311509625b7cd5134398e987"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,
