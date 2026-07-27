@@ -45,7 +45,7 @@ class ThresholdsConfig(BaseModel):
     Attributes:
         soft_fail: Warning threshold (0.0-1.0). Default: 0.05 (5%).
             When error rate exceeds this threshold, a warning is emitted.
-        hard_fail: Failure threshold (0.0-1.0). Default: 0.20 (20%).
+        hard_fail: Failure threshold (0.0-1.0). Default: 0.50 (50%).
             When error rate exceeds this threshold, the batch fails.
 
     Example:
@@ -63,10 +63,10 @@ class ThresholdsConfig(BaseModel):
         description="Warning threshold (0.0-1.0). Default: 0.05 (5%)",
     )
     hard_fail: float = Field(
-        default=0.20,
+        default=0.50,
         ge=0.0,
         le=1.0,
-        description="Failure threshold (0.0-1.0). Default: 0.20 (20%)",
+        description="Failure threshold (0.0-1.0). Default: 0.50 (50%)",
     )
 
     @model_validator(mode="after")

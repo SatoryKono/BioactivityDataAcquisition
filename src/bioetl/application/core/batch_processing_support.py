@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 from datetime import datetime
-from typing import TYPE_CHECKING, TypeVar, cast
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core._batch_processing_metrics_support import (
     track_bronze_write_metrics,
@@ -22,10 +22,7 @@ from bioetl.application.core.batch_processing_runtime import (
     get_source_metadata,
 )
 from bioetl.application.core.batch_runtime_failure_policy import (
-    OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
-)
-from bioetl.application.core.batch_runtime_failure_policy import (
-    PIPELINE_EXECUTION_ERRORS as _RF005_SHARED_FAILURE_POLICY,
+    OPERATION_ERRORS as _OPERATION_ERRORS,
 )
 from bioetl.application.core.batch_transformer import TransformResult
 from bioetl.domain.aggregates.events import DomainEvent
@@ -51,9 +48,6 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 
-_ResultT = TypeVar("_ResultT")
-_SHARED_FAILURE_POLICY = _RF005_SHARED_FAILURE_POLICY
-_OPERATION_ERRORS = SHARED_OPERATION_ERRORS
 
 class BatchProcessingSupportService:
     """Encapsulate per-batch transform/write tracing choreography."""
