@@ -52,7 +52,11 @@ class TestBatchInvariantProperties:
     @settings(
         deadline=None,
         max_examples=30,
-        suppress_health_check=[HealthCheck.too_slow],
+        suppress_health_check=[
+            HealthCheck.too_slow,
+            # mutmut/pytest-xdist style multi-executor discovery trips this check.
+            HealthCheck.differing_executors,
+        ],
     )
     @given(
         start_index=st.integers(min_value=0, max_value=10_000),
@@ -84,7 +88,10 @@ class TestBatchInvariantProperties:
     @settings(
         deadline=None,
         max_examples=30,
-        suppress_health_check=[HealthCheck.too_slow],
+        suppress_health_check=[
+            HealthCheck.too_slow,
+            HealthCheck.differing_executors,
+        ],
     )
     @given(
         payloads=st.lists(_BRONZE_RECORD, min_size=1, max_size=6),

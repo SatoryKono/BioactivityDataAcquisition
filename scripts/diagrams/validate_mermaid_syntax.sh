@@ -215,14 +215,38 @@ if [[ -n "$PUPPETEER_CFG" ]]; then
   mmdc_args+=(-p "$PUPPETEER_CFG")
 fi
 
+# Strip YAML frontmatter (--- ... ---) so mmdc receives pure Mermaid source.
+# Many .mmd sources keep ADR metadata frontmatter for documentation governance.
+prepare_mermaid_input() {
+  local file="$1"
+  local prepared="$2"
+  if [[ "$(head -n 1 "$file" 2>/dev/null || true)" == "---" ]]; then
+    # Drop first frontmatter block, then any residual fence wrappers.
+    awk '
+      BEGIN { in_fm=0; started=0 }
+      NR==1 && $0=="---" { in_fm=1; next }
+      in_fm==1 && $0=="---" { in_fm=0; next }
+      in_fm==1 { next }
+      /^```[[:space:]]*mermaid[[:space:]]*$/ { next }
+      /^```[[:space:]]*$/ { next }
+      { print }
+    ' "$file" >"$prepared"
+  else
+    # Still strip accidental fence wrappers.
+    sed -e '/^```[[:space:]]*mermaid[[:space:]]*$/d' -e '/^```[[:space:]]*$/d' "$file" >"$prepared"
+  fi
+}
+
 run_validation() {
   local file="$1"
   local out="$2"
   local err="$3"
-  if "$MMDC_BIN" -i "$file" -o "$out" "${mmdc_args[@]}" >/dev/null 2>"$err"; then
+  local prepared="$TMP_DIR/prepared_$(basename "$file").mmd"
+  prepare_mermaid_input "$file" "$prepared"
+  if "$MMDC_BIN" -i "$prepared" -o "$out" "${mmdc_args[@]}" >/dev/null 2>"$err"; then
     return 0
   fi
-  "$MMDC_BIN" -i "$file" -o "$out" "${mmdc_args[@]}" >/dev/null 2>"$err"
+  "$MMDC_BIN" -i "$prepared" -o "$out" "${mmdc_args[@]}" >/dev/null 2>"$err"
 }
 
 run_validation_with_docker_fallback() {

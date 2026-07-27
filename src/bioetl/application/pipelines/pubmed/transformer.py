@@ -47,11 +47,9 @@ from bioetl.domain.mapping.pubmed_publication import (
 from bioetl.domain.types import GoldRecord, JsonDict
 
 if TYPE_CHECKING:
-    from bioetl.domain.behavior import EntityIdentityGenerator
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.entities import BaseEntity
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
-    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
     from bioetl.domain.types import BronzeRecord
 
 
@@ -120,10 +118,14 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         author_extractor = legacy_collaborators.get("author_extractor")
         date_extractor = legacy_collaborators.get("date_extractor")
         self._author_extractor = (
-            author_extractor if isinstance(author_extractor, AuthorExtractor) else AuthorExtractor()
+            author_extractor
+            if isinstance(author_extractor, AuthorExtractor)
+            else AuthorExtractor()
         )
         self._date_extractor = (
-            date_extractor if isinstance(date_extractor, DateExtractor) else DateExtractor()
+            date_extractor
+            if isinstance(date_extractor, DateExtractor)
+            else DateExtractor()
         )
 
     def _pre_extract_validation(

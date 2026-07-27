@@ -89,6 +89,7 @@ non_aggregate_root_modules:
   - {module: bioetl.domain.immutability, path: src/bioetl/domain/immutability.py, <<: *support_module}
   - {module: bioetl.domain._observability_contract_core, path: src/bioetl/domain/_observability_contract_core.py, <<: *support_module}
   - {module: bioetl.domain._observability_contract_primitives, path: src/bioetl/domain/_observability_contract_primitives.py, <<: *support_module}
+  - {module: bioetl.domain.adapter_config, path: src/bioetl/domain/adapter_config.py, <<: *support_module}
   - {module: bioetl.domain.constants, path: src/bioetl/domain/constants.py, <<: *support_module}
   - {module: bioetl.domain.context, path: src/bioetl/domain/context.py, <<: *support_module}
   - {module: bioetl.domain.context_cached_bronze, path: src/bioetl/domain/context_cached_bronze.py, <<: *support_module}
@@ -108,6 +109,7 @@ non_aggregate_root_modules:
   - {module: bioetl.domain.observability_metric_names, path: src/bioetl/domain/observability_metric_names.py, <<: *support_module}
   - {module: bioetl.domain.pubchem_standardization_catalog, path: src/bioetl/domain/pubchem_standardization_catalog.py, <<: *support_module}
   - {module: bioetl.domain.resilience, path: src/bioetl/domain/resilience.py, <<: *support_module}
+  - {module: bioetl.domain.resilience_circuit_breaker, path: src/bioetl/domain/resilience_circuit_breaker.py, <<: *support_module}
   - {module: bioetl.domain.runtime_observability_publication_contract, path: src/bioetl/domain/runtime_observability_publication_contract.py, <<: *support_module}
   - {module: bioetl.domain.serialization, path: src/bioetl/domain/serialization.py, <<: *support_module}
   - {module: bioetl.domain.types_config_validation, path: src/bioetl/domain/types_config_validation.py, <<: *support_module}

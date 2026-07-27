@@ -31,7 +31,7 @@ def test_adr_registry_mirrors_track_latest_decision_index() -> None:
         str(entry["adr_number"]).zfill(3) for entry in registry_payload["adrs"]
     }
 
-    assert expected_total == 50
+    assert expected_total == 51
     assert latest_adr == "050"
     assert registry_payload["total_adrs"] == expected_total
     assert len(registry_payload["adrs"]) == expected_total

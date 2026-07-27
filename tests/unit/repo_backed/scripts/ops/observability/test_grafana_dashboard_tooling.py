@@ -889,13 +889,11 @@ def test_rerender_playwright_fallback_splits_and_merges_multi_dashboard_runs(
         assert isinstance(env, dict)
         uid = str(env["GRAFANA_SCREENSHOT_UIDS"])
         calls.append(uid)
-        # Non-trivial PNG payload so blank-screenshot validation does not trip.
         # Varied PNG-like payload so blank-screenshot validation does not trip
         # on near-uniform bytes (file size + entropy checks in #6686).
-        png = bytearray(b"PNG
-
-")
-        png.extend(b"   IHDR")
+        png = bytearray()
+        png.extend(bytes([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]))
+        png.extend(bytes([0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52]))
         png.extend((1600).to_bytes(4, "big"))
         png.extend((2200).to_bytes(4, "big"))
         png.extend(bytes(range(256)) * 20)
