@@ -6,8 +6,12 @@ from collections.abc import Awaitable, Callable
 from typing import Protocol
 
 from bioetl.application.core.batch_transformer_dq_thresholds import (
+    DQThresholdCheckResult,
+    ThresholdBreach,
     ThresholdBreachReason,
     check_dq_thresholds,
+    classify_dq_threshold_breach,
+    compute_error_rate,
     resolve_threshold_value,
 )
 from bioetl.application.core.batch_transformer_state import (
