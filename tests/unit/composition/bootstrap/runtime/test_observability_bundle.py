@@ -366,12 +366,15 @@ class TestBootstrapObservabilityBundleImpl:
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         from bioetl.composition.bootstrap.runtime import observability_bundle
+        from bioetl.composition.bootstrap.runtime._observability_bundle_support import (
+            ObservabilityComponents,
+        )
 
         monkeypatch.setattr(
             observability_bundle,
             "_build_observability_components",
             MagicMock(
-                return_value=observability_bundle._ObservabilityComponents(
+                return_value=ObservabilityComponents(
                     logger=MagicMock(),
                     tracer=MagicMock(),
                     metrics=MagicMock(),
@@ -535,12 +538,12 @@ class TestBootstrapObservabilityBundleImpl:
         from bioetl.composition.bootstrap.runtime.observability_assembly import (
             log_observability_initialized,
         )
-        from bioetl.composition.bootstrap.runtime.observability_bundle import (
-            _ObservabilityComponents,
+        from bioetl.composition.bootstrap.runtime._observability_bundle_support import (
+            ObservabilityComponents,
         )
 
         metrics = MagicMock()
-        components = _ObservabilityComponents(
+        components = ObservabilityComponents(
             logger=NoOpLogger(),
             tracer=NoOpTracing(),
             metrics=metrics,
