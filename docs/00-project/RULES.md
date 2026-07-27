@@ -2112,6 +2112,7 @@ fields:
 | [ADR-048](../02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md) | Domain Schema Boundary and Runtime Pandera Compatibility | Accepted | 2026-05-26 |
 | [ADR-049](../02-architecture/decisions/ADR-049-context-aware-loc-target-policy.md) | Context-Aware LOC Target Policy | Accepted | 2026-05-26 |
 | [ADR-050](../02-architecture/decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md) | Silver Structural and Gold Semantic Filter Boundary | Accepted | 2026-06-15 |
+| [ADR-051](../02-architecture/decisions/ADR-051-quarantine-entry-aggregate-surface.md) | Quarantine Entry Aggregate Surface | Accepted | 2026-07-27 |
 
 ## История Изменений (Changelog)
 

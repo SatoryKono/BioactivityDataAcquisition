@@ -46,4 +46,3 @@ L1-target dashboards MUST be discoverable from first-screen status/KPI area on `
 | `bioetl-control-plane-v1` | `bioetl-overview-v2` | `215` | `First Action` | `^Provenance$` |
 | `bioetl-provider-health-v2` | `bioetl-overview-v2` | `215` | `First Action` | `^Provenance$` |
 | `bioetl-dq-v2` | `bioetl-overview-v2` | `215` | `First Action` | `^Provenance$` |
-| `bioetl-workflow-overview` | `bioetl-overview-v2` | `215` | `First Action` | `^Provenance$` |

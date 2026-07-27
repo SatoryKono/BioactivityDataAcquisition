@@ -50,7 +50,6 @@ def test_required_inbound_paths_match_overview_first_action_mirror() -> None:
         "bioetl-control-plane-v1",
         "bioetl-provider-health-v2",
         "bioetl-dq-v2",
-        "bioetl-workflow-overview",
     )
     route = {
         "source_uid": "bioetl-overview-v2",

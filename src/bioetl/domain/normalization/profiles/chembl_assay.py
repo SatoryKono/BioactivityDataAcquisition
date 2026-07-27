@@ -152,7 +152,7 @@ _SPECIAL_RULE_COMPONENTS = {
     **_REFERENCE_IDENTIFIER_RULES,
     "assay_type": (
         normalize_activity_assay_type,
-        "Normalize assay_type through the shared ChEMBL assay-type enum normalizer.",
+        "Normalize assay_type to uppercase enum value through the shared ChEMBL assay-type enum normalizer.",
     ),
     "assay_description": (
         normalize_profile_text,

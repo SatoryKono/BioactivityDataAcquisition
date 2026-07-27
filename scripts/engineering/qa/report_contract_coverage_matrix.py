@@ -461,6 +461,8 @@ def _build_row(
         parity_status = "missing_surfaces"
 
     # Contract/schema availability is independent of runtime sink enablement.
+    # Strict Gold validation declaration is required so "available" never means
+    # "Pandera present but Gold may be non-strict" (CR-01 / #6693).
     gold_contract_available = bool(
         contract_yaml_exists
         and registry_entry_exists
@@ -468,6 +470,7 @@ def _build_row(
         and published_artifacts
         and not published_artifact_missing_paths
         and schema_source_summary["pandera_contract_declared"]
+        and schema_source_summary["gold_strict_validation_declared"]
     )
 
     return {
@@ -588,7 +591,7 @@ def build_payload(*, snapshot_date: str | None = None) -> dict[str, Any]:
         if row["gold_enabled"] and row["constraint_completeness_status"] != "covered"
     ]
     return {
-        "schema_version": "contract-coverage-matrix-v2",
+        "schema_version": "contract-coverage-matrix-v3",
         "snapshot_date": snapshot_date or date.today().isoformat(),
         "semantics": {
             "gold_enabled": (
@@ -599,8 +602,9 @@ def build_payload(*, snapshot_date: str | None = None) -> dict[str, Any]:
             ),
             "gold_contract_available": (
                 "Whether strict Gold contract/schema governance surfaces exist "
-                "(contract YAML, registry entry, schema source, published artifact, "
-                "Pandera declaration), independent of runtime sink enablement."
+                "(contract YAML, registry entry, gold schema source path/file, "
+                "published artifact, Pandera contract declaration, and gold strict "
+                "validation declaration), independent of runtime sink enablement."
             ),
             "covered_gold_enabled_count": (
                 "Runtime-enabled Gold rows whose contract parity_status is covered."
@@ -660,7 +664,9 @@ def _render_markdown(payload: dict[str, Any]) -> str:
         "an omitted `enabled` value defaults to `true`. Do not confuse this with "
         "unrelated flags such as `filters.input_filter.enabled`.",
         "- `gold_contract_available` is independent contract/schema availability "
-        "(YAML + registry + Pandera source + published artifact).",
+        "across five governance surfaces: contract YAML + registry entry + gold "
+        "schema source + published artifact + Pandera declaration, **and** requires "
+        "gold strict validation declaration (v3).",
         "- Contract or Pandera schema availability must not be inferred from "
         "`gold_enabled`, and runtime enablement must not be inferred from "
         "`gold_contract_available`.",

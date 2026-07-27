@@ -1354,7 +1354,8 @@ def test_control_plane_dashboard_links_are_scoped() -> None:
     assert "includeVars=true" not in json.dumps(links)
     assert "Back to Overview" not in links
     assert "0. Control Plane" not in links
-    for title in ("1. Overview", "2. Runtime", "4. Data Quality"):
+    assert "0. Trust" not in links  # self-link omitted from machine-readable bus
+    for title in ("1. Overview", "2. Pipeline Diagnostics", "4. Data Quality"):
         _assert_scoped_control_plane_nav_link(title, links[title])
 
 

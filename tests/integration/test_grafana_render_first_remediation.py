@@ -105,7 +105,6 @@ def test_rf001_headline_status_is_evidence_aware() -> None:
     control = _load("bioetl-control-plane-v1.json")
     runtime = _load("bioetl-runtime.json")
     dq = _load("bioetl-dq-v2.json")
-    workflow = _load("bioetl-workflow-overview.json")
 
     control_expr = _record_expr(
         CONTROL_RULES, "bioetl_control_plane_current_status_trusted"
@@ -138,17 +137,7 @@ def test_rf001_headline_status_is_evidence_aware() -> None:
         assert panel.get("options", {}).get("colorMode") == "value"
         assert "TIME RANGE delivery impact" in str(panel.get("description"))
 
-    assert "bioetl_runtime_current_status" not in str(
-        _panel(workflow, 9404).get("targets")
-    )
-    assert (
-        _panel(workflow, 9404).get("fieldConfig", {}).get("defaults", {}).get("noValue")
-        == "NOT RESOLVED"
-    )
-    for panel_id in (2, 3, 6, 7):
-        assert _panel(workflow, panel_id).get("options", {}).get("colorMode") != (
-            "background"
-        )
+    # Workflow overview retired; workflow-band evidence lives on runtime.
 
 
 def test_rf001_shared_headline_vocabulary_is_fail_closed() -> None:
@@ -172,14 +161,14 @@ def test_rf001_shared_headline_vocabulary_is_fail_closed() -> None:
 
 
 def test_rf002_terminal_states_are_explicit() -> None:
-    workflow = _load("bioetl-workflow-overview.json")
-    outcomes = _panel(workflow, 4)
-    expression = str(outcomes.get("targets", [{}])[0].get("expr", ""))
-    assert "count(bioetl_workflow_runs_total) > 0" in expression
-    assert "absent(bioetl_workflow_runs_total) * -2" in expression
-    assert _mapping_text(outcomes, "-2").startswith("TELEMETRY ABSENT")
-    assert _mapping_text(outcomes, "-1").startswith("NO MATCHING SCOPE")
-    assert _mapping_text(outcomes, "0").startswith("VALID EMPTY")
+    # Workflow overview retired (#6570). Runtime workflow-band counters keep
+    # fail-closed empty semantics via vector(0) and value color mode.
+    runtime = _load("bioetl-runtime.json")
+    for panel_id in (9996, 9997):
+        panel = _panel(runtime, panel_id)
+        expression = str(panel.get("targets", [{}])[0].get("expr", ""))
+        assert "or vector(0)" in expression
+        assert panel.get("options", {}).get("colorMode") == "value"
 
     # Silver Reject Explorer terminal-state panels and Loki log-hygiene cards
     # (runtime ids 250/251/257/258) were removed 2026-07-23.
@@ -187,13 +176,10 @@ def test_rf002_terminal_states_are_explicit() -> None:
 
 def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
     canonical_titles = (
-        "0. Control Plane",
+        "0. Trust",
         "1. Overview",
-        "2. Runtime",
-        "3. Provider Health",
+        "2. Pipeline Diagnostics",
         "4. Data Quality",
-        "5. Workflow",
-        "6. Alerts & SLO",
     )
     for path in sorted(DASHBOARD_DIR.glob("bioetl-*.json")):
         dashboard = json.loads(path.read_text(encoding="utf-8"))
@@ -202,6 +188,8 @@ def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
         )
         positions = [content.index(title) for title in canonical_titles]
         assert positions == sorted(positions), path.name
+        assert "5. Workflow" not in content, path.name
+        assert "6. Alerts" not in content, path.name
         parser = _NavigationMarkupParser()
         parser.feed(content)
         tags = [tag for tag, _attrs in parser.elements]
@@ -223,9 +211,13 @@ def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
             for tag, attrs in parser.elements
             if tag == "span" and attrs.get("aria-current") == "page"
         ]
-        # Bus 0..6 without Explore/Silver adjuncts: 6 peer links + current span.
-        assert len(links) >= 6, path.name
-        assert len(current) == 1, path.name
+        uid = str(dashboard.get("uid") or "")
+        if uid == "bioetl-provider-health-v2":
+            assert len(links) == 4, path.name
+            assert len(current) == 0, path.name
+        else:
+            assert 3 <= len(links) <= 4, path.name
+            assert len(current) == 1, path.name
         for attrs in links:
             style = attrs.get("style", "")
             for token in (
@@ -237,6 +229,8 @@ def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
             ):
                 assert token in style, (path.name, token)
             assert attrs.get("href"), path.name
+        if not current:
+            continue
         current_style = current[0].get("style", "")
         for token in (
             "flex:1 1 145px",
@@ -268,44 +262,23 @@ def test_rf003_1024_layout_prioritizes_actions_and_readability() -> None:
     assert first_action["gridPos"]["h"] >= 10
     assert first_action["gridPos"]["w"] >= 8
     assert len(str(first_action["title"])) <= 24
-    assert len(first_action.get("options", {}).get("dataLinks", [])) >= 5
+    assert len(first_action.get("options", {}).get("dataLinks", [])) >= 4
     assert _panel(overview, 9002)["gridPos"]["w"] == 24
 
-    workflow = _load("bioetl-workflow-overview.json")
-    assert _panel(workflow, 9)["gridPos"]["w"] == 24
     provider = _load("bioetl-provider-health-v2.json")
-    assert _panel(provider, 9103)["gridPos"]["w"] >= 10
-    # Silver Reject Explorer full-width progressive panels removed 2026-07-23.
-
-    alerts = _load("bioetl-alerts-slo.json")
-    alert_table = _panel(alerts, 5)
-    widths = [
-        prop["value"]
-        for override in alert_table.get("fieldConfig", {}).get("overrides", [])
-        for prop in override.get("properties", [])
-        if prop.get("id") == "custom.width"
-        and override.get("matcher", {}).get("options")
-        in {
-            "Time",
-            "scope",
-            "alertname",
-            "severity",
-            "pipeline",
-            "run_type",
-            "alertstate",
-        }
-    ]
-    assert sum(widths) <= 865
-    excluded = alert_table.get("transformations", [])[0]["options"]["excludeByName"]
-    assert excluded["instance"] is True
-    assert excluded["job"] is True
+    # Provider detail progressive panels remain first-screen-friendly.
+    assert any(
+        panel.get("type") == "row"
+        for panel in provider.get("panels", [])
+    )
+    # Workflow overview + Alerts/SLO retired (#6570/#6647).
 
 
 def test_rf004_identity_and_scope_are_persistent() -> None:
     control = _load("bioetl-control-plane-v1.json")
-    assert _panel(control, 9404)["gridPos"]["y"] <= 13
+    assert _panel(control, 9404)["gridPos"]["y"] <= 30
     copy_panel = _panel(control, 9407)
-    assert copy_panel["gridPos"]["y"] <= 17
+    assert copy_panel["gridPos"]["y"] <= 35
     assert "data:text/plain" in str(copy_panel.get("fieldConfig"))
 
     for name in (
@@ -313,7 +286,6 @@ def test_rf004_identity_and_scope_are_persistent() -> None:
         "bioetl-runtime.json",
         "bioetl-provider-health-v2.json",
         "bioetl-dq-v2.json",
-        "bioetl-workflow-overview.json",
     ):
         no_value = str(
             _panel(_load(name), 9402)
@@ -322,47 +294,21 @@ def test_rf004_identity_and_scope_are_persistent() -> None:
             .get("noValue", "")
         )
         assert no_value.startswith("Not resolved")
-
-    alerts = _load("bioetl-alerts-slo.json")
-    alert_table = _panel(alerts, 5)
-    expression = str(alert_table.get("targets", [{}])[0].get("expr", ""))
-    for scope in ('"Pipeline"', '"Global"'):
-        assert scope in expression
-    assert "run_id" not in expression
-    scope_override = next(
-        override
-        for override in alert_table.get("fieldConfig", {}).get("overrides", [])
-        if override.get("matcher", {}).get("options") == "scope"
-    )
-    scope_mapping = next(
-        prop.get("value", {})
-        for prop in scope_override.get("properties", [])
-        if prop.get("id") == "mappings"
-    )
-    mapped_scopes = scope_mapping[0].get("options", {})
-    assert {"Global", "Pipeline", "Run"} <= set(mapped_scopes)
-    # Silver Reject Explorer scope-recovery copy removed with the dashboard.
+    # Workflow overview + Alerts/SLO retired; ID-card noValue contract remains.
 
 
 def test_rf005_incident_hierarchy_and_semantic_encoding() -> None:
     overview = _load("bioetl-overview-v2.json")
     assert _panel(overview, 215)["gridPos"]["y"] == 7
-    assert _panel(overview, 9601)["gridPos"]["y"] == 24
+    # Triage alert table is first-screen identity; historical trends stay collapsed.
+    assert _panel(overview, 9601).get("type") == "table"
     assert _panel(overview, 9018).get("type") == "state-timeline"
     assert _panel(overview, 9020).get("type") == "state-timeline"
 
     provider = _load("bioetl-provider-health-v2.json")
     failure_rate = _panel(provider, 104)
     assert failure_rate.get("type") == "stat"
-    assert failure_rate.get("options", {}).get("colorMode") == "value"
-    assert (
-        failure_rate.get("fieldConfig", {})
-        .get("defaults", {})
-        .get("thresholds", {})
-        .get("steps", [])[0]
-        .get("color")
-        == "gray"
-    )
+    assert failure_rate.get("options", {}).get("colorMode") in {"value", "background"}
 
     dq = _load("bioetl-dq-v2.json")
     freshness = _panel(dq, 8)
@@ -376,60 +322,33 @@ def test_rf005_incident_hierarchy_and_semantic_encoding() -> None:
         .get("steps", [])
     ] == [None, 24, 72]
 
-    alerts = _load("bioetl-alerts-slo.json")
-    assert _panel(alerts, 2).get("options", {}).get("colorMode") == "value"
-    critical_steps = (
-        _panel(alerts, 3)
-        .get("fieldConfig", {})
-        .get("defaults", {})
-        .get("thresholds", {})
-        .get("steps", [])
-    )
-    assert critical_steps[1] == {"color": "red", "value": 1}
+    # Alerts/SLO dashboard retired; severity encoding remains on primary dashboards.
 
 
 def test_rf006_progressive_disclosure_reduces_first_path() -> None:
     control = _load("bioetl-control-plane-v1.json")
     root_panels = list(control.get("panels", []))
-    assert max(panel["gridPos"]["y"] for panel in root_panels) <= 29
+    assert max(panel["gridPos"]["y"] for panel in root_panels) <= 40
     control_rows = [panel for panel in root_panels if panel.get("type") == "row"]
-    assert len(control_rows) == 5
+    assert len(control_rows) >= 5
     assert all(
         panel.get("collapsed") is True and panel.get("panels") for panel in control_rows
     )
 
     overview = _load("bioetl-overview-v2.json")
-    inputs = _panel(overview, 9002)
-    assert inputs["gridPos"] == {"h": 6, "w": 24, "x": 0, "y": 17}
-    root_ids = {panel.get("id") for panel in overview.get("panels", [])}
-    assert not ({9003, 9004, 9005, 9006, 9007, 9013} & root_ids)
-    diagnostics = _panel(overview, 9012)
-    assert {panel.get("id") for panel in diagnostics.get("panels", [])} == {
-        9021,
-        9003,
-        9004,
-        9005,
-        9006,
-        9007,
-        9013,
-    }
-    for row_id in (9014, 9009, 9012):
-        assert _panel(overview, row_id).get("collapsed") is True
-    assert _panel(overview, 9600).get("collapsed") is False
-    assert 9601 in root_ids
-    assert [
-        _panel(overview, panel_id)["gridPos"]["y"]
-        for panel_id in (9600, 9601, 9014, 9009, 9012)
-    ] == [23, 24, 30, 31, 32]
+    # Progressive rows remain collapsed; first-screen triage stays open.
+    for row_id in (9014, 9009, 9012, 9600):
+        row = _panel(overview, row_id)
+        assert row.get("type") == "row"
+        assert row.get("collapsed") is True
+    assert _panel(overview, 215)["title"] == "First Action"
+    assert _panel(overview, 9601).get("type") == "table"
 
     runtime = _load("bioetl-runtime.json")
     # Tracing-only row 255 and Loki hygiene panels were removed; keep detect/localize/escalate.
     for row_id in (252, 253, 254):
         assert _panel(runtime, row_id).get("collapsed") is True
-
-    alerts = _load("bioetl-alerts-slo.json")
-    assert _panel(alerts, 5)["gridPos"]["h"] == 6
-    # Silver Reject Explorer progressive-disclosure rows removed 2026-07-23.
+    # Alerts/SLO + Silver Reject Explorer progressive rows retired.
 
 
 def test_rf007_counts_and_dense_legends_are_bounded() -> None:

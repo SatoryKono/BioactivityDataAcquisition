@@ -1,28 +1,58 @@
-# Total Tech-Debt Audit — main current
+# Total Technical Debt Audit: GitHub main
 
 Lifecycle status: current
 
-Audited commit SHA: `feab571a144d06137ca968ff1d6c49e9b77d3fab`
+Audit date: 2026-07-27
 
-Evidence surface SHA-256: `937c44477ea42ff168c62d74ae4edec9d7f2c92c9305413b078f969a87ab693f`
+Audited repository: SatoryKono/BioactivityDataAcquisition
 
-- **Audit id:** `total-tech-debt-main-2026-07-27-r1`
-- **Linked issues:** #6677 (TD-R-01), residual epic #6676
-- **Reviewed on:** 2026-07-27
+Audited branch: main
 
-## Gate snapshot
+Audited commit SHA: `9914a459cbea39106bfbcc7f38c2c2fdfbeabaab`
 
-Debt-governance gates regenerated on pin evidence surface after residual
-TD-R wave (#6676–#6685).
+Evidence surface SHA-256: `f5a53adbe9ec7e982d63404b9c7a765fe703b3d27ac44c180adaa6d0ebe0a421`
 
-## Policy
+Registry: configs/quality/technical_debt_audit_registry.yaml
 
-- No debt budget growth
-- Permanent public API is not dead code
-- Constructor waivers shrink-only (residual set ≤5 + intentional QuarantineEntry per ADR-051)
+Refresh reason: CR-03 / #6695 regenerate from one consistent evidence snapshot after CodeRabbit audit remediation (CR-01/CR-02). No debt budget growth.
 
-## Residual tracking
+## Executive summary
 
-Residual epic #6676 children closed with local evidence pack under
-`reports/quality/` (partial-coverage tranche, supporting-scripts disposition,
-architecture closeout wave2 fold metadata).
+1. Debt-governance gates: **45 pass / 0 fail** (release gate passing).
+1. Architecture quality integral score: **9.11** (`good_targeted_improvements`).
+1. Module inventory (from `module-coverage-inventory.json` only):
+   - source_module_count: **2277**
+   - fully_covered: **1406**
+   - partially_covered: **816**
+   - no_executable_lines: **55**
+   - uncovered: **0**
+   - unmeasured: **0**
+   - check: fully + partial + no_exec + uncovered + unmeasured = 2277 == source_module_count
+1. Contract coverage matrix schema: **contract-coverage-matrix-v3** (v3: strict Gold required for availability).
+1. Constructor waivers (shrink-only inventory): **5** entries.
+1. Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**.
+1. Layer violations: **0**.
+
+## Evidence anchors
+
+- `reports/quality/module-coverage-inventory.json`
+- `reports/quality/architecture-quality-scorecard.json`
+- `reports/quality/debt-governance-gates.json`
+- `reports/quality/contract-coverage-matrix.json`
+- `configs/quality/debt_scorecard.yaml`
+- `configs/quality/constructor_waivers.yaml`
+
+## Reproducibility
+
+```bash
+python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml
+python scripts/engineering/qa/report_architecture_quality_scorecard.py
+python -m scripts.engineering.qa report-contract-coverage-matrix
+python -m scripts.engineering.qa report-debt-governance-gates --update
+python -m scripts.engineering.qa validate-technical-debt-audit --json
+```
+
+## Related closeouts
+
+- CodeRabbit epic CR-00 / #6692 (children CR-01..CR-07)
+- Residual tech-debt epic TD-R-00 / #6676

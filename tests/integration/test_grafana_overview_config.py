@@ -212,7 +212,7 @@ def test_l1_cards_have_operator_mappings_and_targeted_links() -> None:
         "Control Plane": {"Open Control Plane"},
         "Provider": {"Open Provider Health"},
         "Data Validation": {"Open Runtime"},
-        "Workflow": {"Open Workflow"},
+        "Workflow": {"Open Pipeline Diagnostics"},
     }
 
     for title in _L1_CARD_TITLES:
@@ -264,7 +264,7 @@ def test_provider_and_workflow_scope_are_explicit() -> None:
     assert "run_type" in str(workflow.get("description", "")).lower()
     assert "run_id" in str(workflow.get("description", "")).lower()
     workflow_links = workflow.get("options", {}).get("dataLinks", [])
-    assert {link.get("title") for link in workflow_links} == {"Open Workflow"}
+    assert {link.get("title") for link in workflow_links} == {"Open Pipeline Diagnostics"}
 
 
 def test_range_evidence_and_trend_rows_are_retained() -> None:

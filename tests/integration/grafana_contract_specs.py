@@ -65,7 +65,8 @@ SUMMARY_ZERO_FALLBACK_EXPECTATIONS = {
         "Monitor: Lineage Fragment Persistence Failures": "or vector(0)",
         "Monitor: Lineage Refs Missing": "or vector(0)",
     },
-    "bioetl-workflow-overview.json": {
+    # retired
+    "bioetl-workflow-overview.json_RETIRED": {
         "Failed Workflow Runs / Range": "or vector(0)",
         "Failed Pipeline Steps / Range": "or vector(0)",
         "Failed Transform Steps / Range": "or vector(0)",

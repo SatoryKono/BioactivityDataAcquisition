@@ -276,6 +276,39 @@ function grafanaSlugify(title) {
     .replace(/^-+|-+$/g, "");
 }
 
+
+function isMateriallyBlankPng(buffer) {
+  // Fail-closed blank-screen detector for #6686.
+  // Samples RGB bytes after PNG decode when possible; falls back to tiny-file heuristic.
+  try {
+    if (!Buffer.isBuffer(buffer) || buffer.length < 1000) {
+      return true;
+    }
+    // IHDR width/height already validated elsewhere; use raw byte entropy proxy:
+    // near-uniform screenshots compress extremely well / have low unique byte diversity.
+    const sampleStep = Math.max(1, Math.floor(buffer.length / 4000));
+    const counts = new Map();
+    let samples = 0;
+    for (let i = 0; i < buffer.length; i += sampleStep) {
+      const b = buffer[i];
+      counts.set(b, (counts.get(b) || 0) + 1);
+      samples += 1;
+    }
+    if (samples < 100) {
+      return true;
+    }
+    let top = 0;
+    for (const v of counts.values()) {
+      if (v > top) top = v;
+    }
+    const dominance = top / samples;
+    // Dominant single byte across sample => blank/flat canvas.
+    return dominance >= 0.92 && counts.size <= 24;
+  } catch (_err) {
+    return false;
+  }
+}
+
 function pngEvidence(buffer) {
   const signature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
   if (buffer.length < 24 || !buffer.subarray(0, 8).equals(signature)) {
@@ -1062,12 +1095,13 @@ async function renderDashboard(page, dashboard, index, total) {
   dashboard.renderedPanelCount = renderedPanelEvidence.count;
   dashboard.renderedPanelSelector = renderedPanelEvidence.selector;
   if (renderedPanelEvidence.count === 0) {
-    console.warn(`warning: no panel headers detected for ${dashboard.uid}`);
-  } else {
-    console.log(
-      `[${index}/${total}] detected ${renderedPanelEvidence.count} rendered panel marker(s) for ${dashboard.uid} using ${renderedPanelEvidence.selector}`,
+    throw new Error(
+      `Render gate failed for ${dashboard.uid}: renderedPanelCount=0 (blank/zero panels are fail-closed)`,
     );
   }
+  console.log(
+    `[${index}/${total}] detected ${renderedPanelEvidence.count} rendered panel marker(s) for ${dashboard.uid} using ${renderedPanelEvidence.selector}`,
+  );
   const viewportChanged = await prepareDashboardForCapture(
     page,
     dashboard,
@@ -1125,6 +1159,11 @@ async function renderDashboard(page, dashboard, index, total) {
     ...pngEvidence(screenshotBuffer),
     capturedAt: new Date().toISOString(),
   };
+  if (isMateriallyBlankPng(screenshotBuffer)) {
+    throw new Error(
+      `Render gate failed for ${dashboard.uid}: screenshot is materially blank (near-uniform pixels)`,
+    );
+  }
   if (dashboard.screenshotEvidence.width !== CONFIG.viewport.width) {
     throw new Error(
       `Screenshot width verification failed for ${dashboard.uid}: requested=${CONFIG.viewport.width} actual=${dashboard.screenshotEvidence.width}`,

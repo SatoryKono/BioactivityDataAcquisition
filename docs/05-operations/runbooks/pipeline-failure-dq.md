@@ -74,6 +74,11 @@ The hierarchical configuration takes precedence when available.
    - Do not raise a threshold to make the failed run green.
    - Preserve the failed run, DQ report, quarantine distribution, effective
      config, and contract version.
+   - Treat the threshold-change evidence gate in
+     `docs/04-reference/contracts/dq-contracts.md` as **mandatory** (not
+     optional guidance). The proposal MUST include:
+     - before/after disposition impact evidence (counts and affected pipelines);
+     - an explicit rollback condition if the new threshold is wrong in production.
    - Open a separate policy change with the affected pipelines, historical
      baseline, before/after disposition counts, and contract-owner approval.
    - Validate the proposed value against persisted inputs and perform a

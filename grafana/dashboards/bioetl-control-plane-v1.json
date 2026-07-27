@@ -33,7 +33,7 @@
         "mode": "html"
       },
       "title": "Review Dashboard Navigation",
-      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus: Trust / Overview / Pipeline Diagnostics / Data Quality. Provider Health remains interim/off-bus.",
+      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus: Trust / Overview / Pipeline Diagnostics / Data Quality. Provider Health remains interim/off-bus. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions.",
       "type": "text",
       "links": [
         {
@@ -3829,7 +3829,7 @@
             "y": 23
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty.",
+          "description": "Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3954,7 +3954,7 @@
             "y": 23
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "Current stage/outcome accounting evidence for the shared pipeline/run_type context. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty.",
+          "description": "Current stage/outcome accounting evidence for the shared pipeline/run_type context. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero.",
           "fieldConfig": {
             "defaults": {
               "custom": {

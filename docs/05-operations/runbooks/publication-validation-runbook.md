@@ -69,13 +69,19 @@ design.
    ```
 
 1. When table-level inspection is required, use the Delta reader against a
-   copied or read-only path:
+   copied or read-only path and keep previews **bounded** (do not materialize
+   the full table via `to_pandas()` / full `to_pyarrow_table()` for a sample):
 
    ```python
    from deltalake import DeltaTable
 
    table = DeltaTable("<silver-or-gold-delta-path>")
-   evidence = table.to_pyarrow_table()
+   # Bounded sample for incident triage (avoid full-table to_pandas / full load).
+   dataset = table.to_pyarrow_dataset()
+   batch = next(dataset.scanner(batch_size=20).to_batches())
+   sample = batch.to_pandas()
+   # Exact row counts: use run DQ report / manifest metrics when available.
+   # Delta metadata row counts are approximate unless validated against ledger.
    ```
 
    Silver and Gold are Delta tables. Raw Parquet reads and in-place dataframe

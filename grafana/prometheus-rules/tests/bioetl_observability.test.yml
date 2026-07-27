@@ -817,11 +817,16 @@ tests:
         exp_samples:
           - labels: '{__name__="bioetl_runtime_current_status",pipeline="chembl_assay",run_type="backfill"}'
             value: 0
-      - expr: bioetl_runtime_current_status_trusted{pipeline="workflow_chembl_assay",run_type="backfill"}
+      # Scoped trusted status does NOT invent pipeline=workflow_* labels.
+      # Workflow identity stays on the dedicated workflow universe metrics.
+      - expr: bioetl_runtime_current_status_trusted{pipeline="chembl_assay",run_type="backfill"}
         eval_time: 19m
         exp_samples:
-          - labels: '{__name__="bioetl_runtime_current_status_trusted",pipeline="workflow_chembl_assay",run_type="backfill"}'
+          - labels: '{__name__="bioetl_runtime_current_status_trusted",pipeline="chembl_assay",run_type="backfill"}'
             value: 0
+      - expr: bioetl_runtime_current_status_trusted{pipeline="workflow_chembl_assay",run_type="backfill"}
+        eval_time: 19m
+        exp_samples: []
       - expr: bioetl_l1_gold_lifecycle_status{pipeline="chembl_assay",run_type="backfill",lifecycle_state="terminal_contract_excluded"}
         eval_time: 19m
         exp_samples:

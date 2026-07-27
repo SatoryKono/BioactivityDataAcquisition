@@ -335,8 +335,9 @@ navigation_transition_contract:
       dashboards:
       - bioetl-runtime
       - bioetl-control-plane-v1
-      - bioetl-provider-health-v2
       - bioetl-dq-v2
+      # Provider Health is interim/off-bus: reachable via First Action dataLinks,
+      # not primary navigation top-level edges.
       required_outbound:
       - bioetl-overview-v2
       required_inbound:

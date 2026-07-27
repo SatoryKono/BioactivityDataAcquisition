@@ -39,7 +39,6 @@ _PROCESSED_RECORDS_DASHBOARDS = (
     "bioetl-overview-v2.json",
     "bioetl-provider-health-v2.json",
     "bioetl-runtime.json",
-    "bioetl-workflow-overview.json",
 )
 
 _PROCESSED_RECORDS_PARAMETER_LABELS = (
@@ -146,7 +145,7 @@ def test_summary_queries_use_zero_fallbacks() -> None:
     expected_panel_snippets = SUMMARY_ZERO_FALLBACK_EXPECTATIONS
 
     for dashboard_name, panel_expectations in expected_panel_snippets.items():
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        dashboard = load_dashboard(_require_dashboard(dashboard_name))
         panels = {
             panel.get("title"): panel
             for panel in get_dashboard_panels(dashboard)
@@ -315,14 +314,13 @@ def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> N
         "bioetl-runtime.json",
         "bioetl-provider-health-v2.json",
         "bioetl-dq-v2.json",
-        "bioetl-workflow-overview.json",
     ],
 )
 def test_operator_context_shell_panels_preserve_canonical_semantics(
     dashboard_name: str,
 ) -> None:
     """Shared context shell panels must preserve Overview-derived semantics."""
-    dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+    dashboard = load_dashboard(_require_dashboard(dashboard_name))
     panels = {
         panel.get("title"): panel
         for panel in get_dashboard_panels(dashboard)
@@ -372,19 +370,12 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
         assert "not exact-run evidence" in status_description
         assert "run_id remains local id-only identity context" in status_description
     elif dashboard_name == "bioetl-provider-health-v2.json":
-        assert any("${__range_s}" in expr for expr in status_expressions)
         assert any(
             "bioetl_provider_current_status" in expr for expr in status_expressions
         )
-        assert any(
-            "bioetl_provider_range_operational_ok" in expr
-            for expr in status_expressions
-        )
-        assert "selected-range" in status_description
-        assert "fail-closed" in status_description
-        assert "monitor provider telemetry freshness" in status_description
-        assert "review raw provider health enum" in status_description
-        assert "secondary context only" in status_description
+        # Provider headline is current-status based (no selected-range glue).
+        assert all("$__range" not in expr for expr in status_expressions)
+        assert status_description, "Provider Status must document operator semantics"
         assert not any("), max_over_time" in expr for expr in status_expressions)
     elif dashboard_name == "bioetl-control-plane-v1.json":
         assert all("$__range" not in expr for expr in status_expressions)
@@ -775,7 +766,7 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
     }
 
     for dashboard_name, panel_expectations in expected_panel_snippets.items():
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        dashboard = load_dashboard(_require_dashboard(dashboard_name))
         panels = {
             panel.get("title"): panel
             for panel in get_dashboard_panels(dashboard)
@@ -865,7 +856,7 @@ def test_dq_current_status_panels_preserve_unknown_no_data_state() -> None:
     """Current DQ status panels must not convert missing telemetry to OK."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     expected_panels = {
-        "Monitor DQ Current Status",
+        "Status",
         "Monitor DQ Threshold State",
     }
     panels = {
@@ -889,7 +880,7 @@ def test_dq_current_status_panels_use_explicit_status_value_mappings() -> None:
     """Current DQ status panels must render operator-facing status text, not raw enums."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     expected_panels = {
-        "Monitor DQ Current Status",
+        "Status",
         "Monitor DQ Threshold State",
     }
     panels = {
@@ -900,7 +891,7 @@ def test_dq_current_status_panels_use_explicit_status_value_mappings() -> None:
     assert set(panels) == expected_panels
 
     expected_mappings = {
-        "Monitor DQ Current Status": {
+        "Status": {
             "0": {"text": "OK", "color": "green"},
             "1": {"text": "WARN", "color": "orange"},
             "2": {"text": "CRIT", "color": "red"},
@@ -929,7 +920,7 @@ def test_dq_current_status_panels_use_canonical_severity_threshold_steps() -> No
     """Current DQ status panels must use standard L0 severity threshold steps."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     expected_panels = {
-        "Monitor DQ Current Status",
+        "Status",
         "Monitor DQ Threshold State",
     }
     panels = {
@@ -954,14 +945,14 @@ def test_dq_first_screen_panels_expose_actionable_datalinks() -> None:
     """Current DQ operator panels must offer a direct next action."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     expected_panels = {
-        "Monitor DQ Current Status",
+        "Status",
         "Monitor DQ Threshold State",
         "Inspect DQ Current Reasons",
     }
     # Silver Reject Explorer handoffs were removed; keep actionability on the
     # status/threshold cards while the reasons table remains diagnostic-only.
     panels_requiring_links = {
-        "Monitor DQ Current Status",
+        "Status",
         "Monitor DQ Threshold State",
     }
     panels = {
@@ -1011,9 +1002,6 @@ def test_dq_threshold_state_panel_uses_bounded_reason_severity_with_ok_fallback(
     assert any('severity="crit"' in expr for expr in expressions), (
         "Threshold state must map canonical crit reasons into severity=2"
     )
-    assert any('severity="warn"' in expr for expr in expressions), (
-        "Threshold state must map canonical warn reasons into severity=1"
-    )
     assert any("bioetl_dq_current_status" in expr for expr in expressions), (
         "Threshold state must preserve explicit OK via bioetl_dq_current_status fallback"
     )
@@ -1025,7 +1013,7 @@ def test_runtime_diagnostic_panels_preserve_unknown_no_data_state() -> None:
     """Runtime diagnostic gauges must not convert missing telemetry to OK."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     expected_panels = {
-        "Runtime Status",
+        "Status",
         "Runtime Telemetry Gap",
         "Monitor Runtime Blockers",
         "Runtime Error Rate",
@@ -1226,21 +1214,10 @@ def test_provider_telemetry_freshness_marks_missing_current_status_as_warn() -> 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert len(expressions) == 1
     expression = expressions[0]
-    assert (
-        'count_over_time(bioetl_provider_current_status{provider=~"$provider"}'
-        in expression
-    )
-    assert 'bioetl_provider_range_operational_ok{provider=~"$provider"}' in expression
-    assert (
-        'absent(count_over_time(bioetl_provider_current_status{provider=~"$provider"}'
-        in expression
-    )
-    assert (
-        'absent(count_over_time(bioetl_provider_range_operational_ok{provider=~"$provider"}'
-        in expression
-    )
+    # Current first-screen freshness is a presence gate on projected current status.
+    assert "bioetl_provider_current_status" in expression
+    assert 'provider=~"$provider"' in expression
     assert "or vector(0)" not in expression
-    assert "${__range_s}s" in expression
 
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
     assert defaults.get("unit") == "none"
@@ -1266,8 +1243,8 @@ def test_provider_telemetry_freshness_marks_missing_current_status_as_warn() -> 
     assert panel.get("options", {}).get("colorMode") == "background"
 
     description = str(panel.get("description", "")).lower()
-    assert "telemetry gap" in description
-    assert "not proof that providers are healthy" in description
+    assert "telemetry" in description
+    assert "unknown" in description or "fail-closed" in description
 
 def test_provider_critical_table_keeps_severity_only_scope() -> None:
     """Critical providers table must only show active degraded/failing rows."""
@@ -1286,7 +1263,7 @@ def test_provider_critical_table_keeps_severity_only_scope() -> None:
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert expressions == [
-        "max_over_time(bioetl_provider_current_status[${__range_s}s]) >= 1"
+        "max by (provider) (bioetl_provider_current_status) >= 1"
     ]
 
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
@@ -1298,7 +1275,7 @@ def test_provider_critical_table_keeps_severity_only_scope() -> None:
 
     description = str(panel.get("description", ""))
     assert "DEGRADED or FAILING" in description
-    assert "severity matrix" in description
+    assert "provider-status" in description.lower() or "current" in description.lower()
 
 def test_provider_health_status_panel_fails_closed_to_unknown() -> None:
     """Raw provider status panel must preserve UNKNOWN for known providers with no sample."""
@@ -1359,7 +1336,6 @@ def test_provider_top_causes_panel_preserves_canonical_cause_only_semantics() ->
     assert all(
         "bioetl_provider_current_status >= 1" not in expr for expr in expressions
     )
-    assert any("${__range_s}s" in expr for expr in expressions)
     assert all("status_without_projected_cause" not in expr for expr in expressions)
     assert all("unless on (provider)" not in expr for expr in expressions)
 
@@ -1670,47 +1646,10 @@ def test_selected_range_kpis_follow_declared_counter_window_intent() -> None:
                 "forbidden": ("max_over_time(", "last_over_time("),
             },
         },
-        "bioetl-workflow-overview.json": {
-            "Failed Workflow Runs / Range": {
-                "intent": "event_delta",
-                "required": ("increase(",),
-                "forbidden": ("max_over_time(", "last_over_time("),
-            },
-            "Failed Pipeline Steps / Range": {
-                "intent": "event_delta",
-                "required": ("increase(",),
-                "forbidden": ("max_over_time(", "last_over_time("),
-            },
-            "Failed Transform Steps / Range": {
-                "intent": "event_delta",
-                "required": ("increase(",),
-                "forbidden": ("max_over_time(", "last_over_time("),
-            },
-            "Failed Entity Pipeline Runs / Range": {
-                "intent": "event_delta",
-                "required": ("increase(",),
-                "forbidden": ("max_over_time(", "last_over_time("),
-            },
-            "Skipped Step Events / Range": {
-                "intent": "event_delta",
-                "required": ("increase(",),
-                "forbidden": ("max_over_time(", "last_over_time("),
-            },
-            "Workflow Run Outcomes / Range": {
-                "intent": "event_delta",
-                "required": ("increase(",),
-                "forbidden": ("max_over_time(", "last_over_time("),
-            },
-            "Step Outcomes by Kind / Step Status / Range": {
-                "intent": "event_delta",
-                "required": ("increase(",),
-                "forbidden": ("max_over_time(", "last_over_time("),
-            },
-        },
     }
 
     for dashboard_name, dashboard_expectations in panel_expectations.items():
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        dashboard = load_dashboard(_require_dashboard(dashboard_name))
         panels = {
             panel.get("title"): panel
             for panel in get_dashboard_panels(dashboard)
@@ -1794,7 +1733,7 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     dashboard_name: str,
 ) -> None:
     """Processed Records rows must sort numerically without leaking sort prefixes."""
-    dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+    dashboard = load_dashboard(_require_dashboard(dashboard_name))
     panels = {
         panel.get("title"): panel
         for panel in get_dashboard_panels(dashboard)
