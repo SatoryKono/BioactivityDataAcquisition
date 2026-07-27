@@ -85,11 +85,27 @@ def _is_self_module_cluster(cluster: DuplicateCluster) -> bool:
     return len(module_names) <= 1
 
 
+def _is_package_entry_report_noise(cluster: DuplicateCluster) -> bool:
+    """Return True when pylint attributes multi-module dupes to a package ``__init__``.
+
+    Pylint sometimes reports the comparison path as a package entry module even
+    when neither compared module is that package root. Those findings are not
+    actionable residual debt for hotspot family ratchets.
+    """
+    normalized_path = cluster.path.replace("\\", "/")
+    if not normalized_path.endswith("/__init__.py"):
+        return False
+    module_names = {module.module for module in cluster.modules}
+    return not any(module.endswith(".__init__") for module in module_names)
+
+
 def _cluster_actionability_category(cluster: DuplicateCluster) -> str:
     """Classify duplicate-code findings by likely remediation path."""
     module_names = [module.module for module in cluster.modules]
     if _is_self_module_cluster(cluster):
         return "self_module_scanner_noise"
+    if _is_package_entry_report_noise(cluster):
+        return "package_entry_report_noise"
     normalized_path = cluster.path.replace("\\", "/")
     if any(
         token in module
@@ -498,9 +514,15 @@ def _scan_target(
         raw_clusters,
         exclude_module_patterns=exclude_module_patterns,
     )
-    # Drop same-module self-pairs before actionability filters so hotspot family
-    # residual counts only include multi-module structural findings.
-    clusters = [cluster for cluster in clusters if not _is_self_module_cluster(cluster)]
+    # Drop same-module self-pairs and package-entry report noise before
+    # actionability filters so hotspot family residual counts only include
+    # multi-module structural findings.
+    clusters = [
+        cluster
+        for cluster in clusters
+        if not _is_self_module_cluster(cluster)
+        and not _is_package_entry_report_noise(cluster)
+    ]
     clusters = _filter_clusters_by_actionability_categories(
         clusters,
         exclude_actionability_categories=exclude_actionability_categories,

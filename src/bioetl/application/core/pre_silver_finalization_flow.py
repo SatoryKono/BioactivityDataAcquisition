@@ -18,8 +18,8 @@ if TYPE_CHECKING:
 class _PreSilverFinalizationFlowMixin:
     """Finalize staged business payloads into Silver-compatible records."""
 
-    provider: str
-    entity_type: str
+    provider: str = ""
+    entity_type: str = ""
 
     if TYPE_CHECKING:
 
@@ -104,9 +104,9 @@ class _PreSilverFinalizationFlowMixin:
     ) -> JsonDict:
         compute_entity_id = cast(
             "Callable[[str | None, GoldRecord], EntityID]",
-            self.compute_entity_id,
+            getattr(self, "compute_entity_id"),
         )
-        entity_id = compute_entity_id(source_id, cast("GoldRecord", identity_record))
+        entity_id = compute_entity_id(source_id, identity_record)
         return self._finalize_staged_business_data(
             context=context,
             entity_id=entity_id,
@@ -125,12 +125,15 @@ class _PreSilverFinalizationFlowMixin:
     ) -> SilverRecord:
         return cast(
             "SilverRecord",
-            self._finalize_prepared_business_data(
-                context=context,
-                source_id=source_id,
-                identity_record=identity_record,
-                index=index,
-                business_data=business_data,
+            cast(
+                object,
+                self._finalize_prepared_business_data(
+                    context=context,
+                    source_id=source_id,
+                    identity_record=identity_record,
+                    index=index,
+                    business_data=business_data,
+                ),
             ),
         )
 
@@ -190,11 +193,14 @@ class _PreSilverFinalizationFlowMixin:
             return None
         return cast(
             "SilverRecord",
-            self._finalize_normalized_business_data(
-                context=context,
-                index=index,
-                business_data=business_data,
-                resolve_entity_id=resolve_entity_id,
+            cast(
+                object,
+                self._finalize_normalized_business_data(
+                    context=context,
+                    index=index,
+                    business_data=business_data,
+                    resolve_entity_id=resolve_entity_id,
+                ),
             ),
         )
 

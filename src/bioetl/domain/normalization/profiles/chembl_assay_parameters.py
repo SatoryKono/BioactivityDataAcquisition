@@ -28,6 +28,7 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 from bioetl.domain.schemas.chembl.assay_parameters import AssayParametersSchema
 
 from ._chembl_vocab import chembl_enum
+from .chembl_activity import normalize_activity_standard_relation
 from .chembl_policy_registry import chembl_controlled_family_fields
 
 __all__ = [
@@ -81,14 +82,6 @@ def normalize_profile_assay_parameter_type_field(value: object) -> object:
     )
 
 
-def normalize_assay_parameter_standard_relation(value: object) -> object:
-    """Normalize assay-parameter standard_relation to canonical ASCII operator enum."""
-    return normalize_profile_operator(
-        value,
-        allowed_values=STANDARD_RELATIONS,
-    )
-
-
 _TYPE_RULE = (
     normalize_profile_assay_parameter_type_field,
     (
@@ -120,7 +113,7 @@ _SPECIAL_RULE_COMPONENTS = {
         "Normalize assay-parameter relation to a canonical ASCII operator enum.",
     ),
     "standard_relation": (
-        normalize_assay_parameter_standard_relation,
+        normalize_activity_standard_relation,
         "Normalize standard_relation to a canonical ASCII operator enum.",
     ),
     "standard_units": (

@@ -30,6 +30,7 @@ from ._chembl_bao_label_normalizers import (
 )
 from ._chembl_reference_identifier_rules import chembl_reference_identifier_rules
 from ._chembl_vocab import chembl_enum
+from .chembl_activity import normalize_activity_assay_type
 from .chembl_json_ordering_policy import chembl_json_fields
 from .chembl_policy_registry import (
     chembl_controlled_family_fields,
@@ -149,6 +150,10 @@ _ENUM_FIELDS = {
 }
 _SPECIAL_RULE_COMPONENTS = {
     **_REFERENCE_IDENTIFIER_RULES,
+    "assay_type": (
+        normalize_activity_assay_type,
+        "Normalize assay_type through the shared ChEMBL assay-type enum normalizer.",
+    ),
     "assay_description": (
         normalize_profile_text,
         "Normalize assay_description as trimmed text under the explicit assay profile contract.",
