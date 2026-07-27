@@ -1,28 +1,21 @@
 {
-  "schema_version": 1,
   "generated_by": "scripts.engineering.qa.report_adr_enforcement_matrix",
-  "source": {
-    "adr_decisions_dir": "docs/02-architecture/decisions",
-    "tracked_file_discovery": "git grep --untracked with python fallback",
-    "manual_exception_marker_prefix": "manual-exception:"
-  },
-  "summary": {
-    "accepted_adr_count": 49,
-    "enforced_adr_count": 49,
-    "manual_exception_count": 0,
-    "blocking_gap_count": 0,
-    "missing_implementation_owner_count": 0,
-    "missing_enforcement_owner_count": 0
-  },
   "rows": [
     {
       "adr_id": "ADR-001",
-      "title": "Delta Lake vs Parquet",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md",
       "category": "Storage",
-      "owner": "BioETL Team",
       "decision_date": "2025-05-20",
+      "decision_path": "docs/02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md",
+      "enforcement_owner_paths": [
+        "scripts/generate_adr_registry.py",
+        "tests/architecture/test_config_topology_docs_drift.py",
+        "tests/unit/infrastructure/adr/test_adr_metadata_extractors.py",
+        "tests/unit/infrastructure/adr/test_fs_adr_service.py",
+        "tests/unit/interfaces/cli/commands/test_adr_commands.py",
+        "tests/unit/memory/graph/importers/test_expanded_json.py",
+        "tests/unit/scripts/test_documentation_cleanup_inventory.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
@@ -42,26 +35,23 @@
         "tests/unit/memory/graph/importers/test_expanded_json.py",
         "tests/unit/scripts/test_documentation_cleanup_inventory.py"
       ],
-      "enforcement_owner_paths": [
-        "scripts/generate_adr_registry.py",
-        "tests/architecture/test_config_topology_docs_drift.py",
-        "tests/unit/infrastructure/adr/test_adr_metadata_extractors.py",
-        "tests/unit/infrastructure/adr/test_fs_adr_service.py",
-        "tests/unit/interfaces/cli/commands/test_adr_commands.py",
-        "tests/unit/memory/graph/importers/test_expanded_json.py",
-        "tests/unit/scripts/test_documentation_cleanup_inventory.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Delta Lake vs Parquet"
     },
     {
       "adr_id": "ADR-002",
-      "title": "Medallion Architecture",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-002-medallion-architecture.md",
       "category": "Architecture",
-      "owner": "BioETL Team",
       "decision_date": "2025-05-20",
+      "decision_path": "docs/02-architecture/decisions/ADR-002-medallion-architecture.md",
+      "enforcement_owner_paths": [
+        "scripts/diagrams/pipeline_dataflow_render.py",
+        "tests/unit/infrastructure/adr/test_fs_adr_service.py",
+        "tests/unit/interfaces/cli/commands/test_adr_commands.py",
+        "tests/unit/memory/graph/importers/test_expanded_json.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/NORMATIVE_SOURCES.md",
@@ -77,42 +67,41 @@
         "tests/unit/interfaces/cli/commands/test_adr_commands.py",
         "tests/unit/memory/graph/importers/test_expanded_json.py"
       ],
-      "enforcement_owner_paths": [
-        "scripts/diagrams/pipeline_dataflow_render.py",
-        "tests/unit/infrastructure/adr/test_fs_adr_service.py",
-        "tests/unit/interfaces/cli/commands/test_adr_commands.py",
-        "tests/unit/memory/graph/importers/test_expanded_json.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Medallion Architecture"
     },
     {
       "adr_id": "ADR-004",
-      "title": "Pydantic vs Dataclasses",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md",
       "category": "Data Modeling",
-      "owner": "BioETL Team",
       "decision_date": "2025-05-20",
+      "decision_path": "docs/02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md",
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_enforcement_matrix.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
         "tests/architecture/test_adr_enforcement_matrix.py"
       ],
-      "enforcement_owner_paths": [
-        "tests/architecture/test_adr_enforcement_matrix.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Pydantic vs Dataclasses"
     },
     {
       "adr_id": "ADR-005",
-      "title": "Composition Layer Separation",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-005-composition-layer-separation.md",
       "category": "Architecture",
-      "owner": "BioETL Team",
       "decision_date": "2025-12-18",
+      "decision_path": "docs/02-architecture/decisions/ADR-005-composition-layer-separation.md",
+      "enforcement_owner_paths": [
+        "tests/architecture/test_interfaces_no_infrastructure.py",
+        "tests/unit/domain/ports/test_port_dtos.py",
+        "tests/unit/interfaces/cli/commands/test_adr_commands.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/NORMATIVE_SOURCES.md",
@@ -131,22 +120,21 @@
         "tests/unit/domain/ports/test_port_dtos.py",
         "tests/unit/interfaces/cli/commands/test_adr_commands.py"
       ],
-      "enforcement_owner_paths": [
-        "tests/architecture/test_interfaces_no_infrastructure.py",
-        "tests/unit/domain/ports/test_port_dtos.py",
-        "tests/unit/interfaces/cli/commands/test_adr_commands.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Composition Layer Separation"
     },
     {
       "adr_id": "ADR-006",
-      "title": "Logger and Metrics Ports",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-006-logger-metrics-ports.md",
       "category": "Observability",
-      "owner": "BioETL Team",
       "decision_date": "2025-12-18",
+      "decision_path": "docs/02-architecture/decisions/ADR-006-logger-metrics-ports.md",
+      "enforcement_owner_paths": [
+        "tests/architecture/test_no_structlog_in_application_interfaces.py",
+        "tests/architecture/test_port_contracts.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
@@ -155,21 +143,24 @@
         "tests/architecture/test_no_structlog_in_application_interfaces.py",
         "tests/architecture/test_port_contracts.py"
       ],
-      "enforcement_owner_paths": [
-        "tests/architecture/test_no_structlog_in_application_interfaces.py",
-        "tests/architecture/test_port_contracts.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Logger and Metrics Ports"
     },
     {
       "adr_id": "ADR-007",
-      "title": "Circuit Breaker Implementation",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-007-circuit-breaker-implementation.md",
       "category": "Resilience",
-      "owner": "BioETL Team",
       "decision_date": "2025-12-22",
+      "decision_path": "docs/02-architecture/decisions/ADR-007-circuit-breaker-implementation.md",
+      "enforcement_owner_paths": [
+        "tests/e2e/test_pipeline_circuit_breaker_e2e.py",
+        "tests/e2e/test_resilience_scenarios_e2e.py",
+        "tests/integration/test_runner_lifecycle.py",
+        "tests/unit/infrastructure/observability/test_prometheus_metrics.py",
+        "tests/unit/infrastructure/test_circuit_breaker_degradation.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
@@ -188,43 +179,48 @@
         "tests/unit/infrastructure/observability/test_prometheus_metrics.py",
         "tests/unit/infrastructure/test_circuit_breaker_degradation.py"
       ],
-      "enforcement_owner_paths": [
-        "tests/e2e/test_pipeline_circuit_breaker_e2e.py",
-        "tests/e2e/test_resilience_scenarios_e2e.py",
-        "tests/integration/test_runner_lifecycle.py",
-        "tests/unit/infrastructure/observability/test_prometheus_metrics.py",
-        "tests/unit/infrastructure/test_circuit_breaker_degradation.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Circuit Breaker Implementation"
     },
     {
       "adr_id": "ADR-009",
-      "title": "PaginatedFetcherMixin Design",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-009-paginated-fetcher-mixin.md",
       "category": "Data Fetching",
-      "owner": "BioETL Team",
       "decision_date": "2025-12-22",
+      "decision_path": "docs/02-architecture/decisions/ADR-009-paginated-fetcher-mixin.md",
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_enforcement_matrix.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
         "tests/architecture/test_adr_enforcement_matrix.py"
       ],
-      "enforcement_owner_paths": [
-        "tests/architecture/test_adr_enforcement_matrix.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "PaginatedFetcherMixin Design"
     },
     {
       "adr_id": "ADR-010",
-      "title": "Local-Only Deployment",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-010-local-only-deployment.md",
       "category": "Deployment",
-      "owner": "BioETL Team",
       "decision_date": "2025-12-23",
+      "decision_path": "docs/02-architecture/decisions/ADR-010-local-only-deployment.md",
+      "enforcement_owner_paths": [
+        "configs/quality/docker_helper_contracts.yaml",
+        "configs/quality/docker_runtime_contracts.yaml",
+        "configs/quality/scripts_inventory_manifest.json",
+        "configs/quality/scripts_lifecycle_registry.json",
+        "scripts/ops/runtime/docker/runtime_manager.py",
+        "tests/architecture/test_docker_runtime_contracts.py",
+        "tests/architecture/test_docs_root_surface_governance_alignment.py",
+        "tests/architecture/test_forbidden_imports.py",
+        "tests/unit/application/test_pipeline_config.py",
+        "tests/unit/scripts/test_generate_adr_registry.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "configs/quality/docker_helper_contracts.yaml",
         "configs/quality/docker_runtime_contracts.yaml",
@@ -335,69 +331,60 @@
         "tests/unit/application/test_pipeline_config.py",
         "tests/unit/scripts/test_generate_adr_registry.py"
       ],
-      "enforcement_owner_paths": [
-        "configs/quality/docker_helper_contracts.yaml",
-        "configs/quality/docker_runtime_contracts.yaml",
-        "configs/quality/scripts_inventory_manifest.json",
-        "configs/quality/scripts_lifecycle_registry.json",
-        "scripts/ops/runtime/docker/runtime_manager.py",
-        "tests/architecture/test_docker_runtime_contracts.py",
-        "tests/architecture/test_docs_root_surface_governance_alignment.py",
-        "tests/architecture/test_forbidden_imports.py",
-        "tests/unit/application/test_pipeline_config.py",
-        "tests/unit/scripts/test_generate_adr_registry.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Local-Only Deployment"
     },
     {
       "adr_id": "ADR-011",
-      "title": "Remove Watermark Mechanism",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-011-remove-watermark-mechanism.md",
       "category": "Data Loading",
-      "owner": "BioETL Team",
       "decision_date": "2025-12-23",
+      "decision_path": "docs/02-architecture/decisions/ADR-011-remove-watermark-mechanism.md",
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_enforcement_matrix.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
         "docs/04-reference/providers/chembl/activity.md",
         "tests/architecture/test_adr_enforcement_matrix.py"
       ],
-      "enforcement_owner_paths": [
-        "tests/architecture/test_adr_enforcement_matrix.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Remove Watermark Mechanism"
     },
     {
       "adr_id": "ADR-012",
-      "title": "Storage Clear Contract and Run ID",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-012-storage-clear-contract-and-run-id.md",
       "category": "Storage",
-      "owner": "BioETL Team",
       "decision_date": "2025-12-23",
+      "decision_path": "docs/02-architecture/decisions/ADR-012-storage-clear-contract-and-run-id.md",
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_enforcement_matrix.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
         "docs/03-guides/pipeline-lifecycle.md",
         "tests/architecture/test_adr_enforcement_matrix.py"
       ],
-      "enforcement_owner_paths": [
-        "tests/architecture/test_adr_enforcement_matrix.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Storage Clear Contract and Run ID"
     },
     {
       "adr_id": "ADR-013",
-      "title": "Async Storage Cleanup",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-013-async-storage-cleanup.md",
       "category": "Storage",
-      "owner": "BioETL Team",
       "decision_date": "2025-12-24",
+      "decision_path": "docs/02-architecture/decisions/ADR-013-async-storage-cleanup.md",
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_enforcement_matrix.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
@@ -405,20 +392,37 @@
         "docs/03-guides/pipeline-lifecycle.md",
         "tests/architecture/test_adr_enforcement_matrix.py"
       ],
-      "enforcement_owner_paths": [
-        "tests/architecture/test_adr_enforcement_matrix.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Async Storage Cleanup"
     },
     {
       "adr_id": "ADR-014",
-      "title": "Deterministic Writes and Retries",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-014-deterministic-writes.md",
       "category": "Reproducibility",
-      "owner": "BioETL Team",
       "decision_date": "2025-12-24",
+      "decision_path": "docs/02-architecture/decisions/ADR-014-deterministic-writes.md",
+      "enforcement_owner_paths": [
+        "scripts/docs/fixers/fix_links_explicit.py",
+        "scripts/ops/data/vacuum_delta.py",
+        "tests/architecture/test_column_order.py",
+        "tests/architecture/test_deterministic_identity_documentation_governance.py",
+        "tests/architecture/test_domain_unit_test_purity.py",
+        "tests/architecture/test_medallion_invariants.py",
+        "tests/architecture/test_no_datetime_now_in_domain.py",
+        "tests/architecture/test_no_datetime_now_in_infrastructure.py",
+        "tests/architecture/test_no_fstring_in_logs.py",
+        "tests/architecture/test_no_random_in_writers.py",
+        "tests/e2e/test_resilience_scenarios_e2e.py",
+        "tests/security/test_security.py",
+        "tests/testing_support/bronze_writer.py",
+        "tests/unit/domain/test_entities.py",
+        "tests/unit/infrastructure/factories/test_factories.py",
+        "tests/unit/infrastructure/factories/test_storage_adapter.py",
+        "tests/unit/infrastructure/storage/test_gold_writer.py",
+        "tests/unit/infrastructure/test_storage.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/NORMATIVE_SOURCES.md",
@@ -484,37 +488,20 @@
         "tests/unit/infrastructure/storage/test_gold_writer.py",
         "tests/unit/infrastructure/test_storage.py"
       ],
-      "enforcement_owner_paths": [
-        "scripts/docs/fixers/fix_links_explicit.py",
-        "scripts/ops/data/vacuum_delta.py",
-        "tests/architecture/test_column_order.py",
-        "tests/architecture/test_deterministic_identity_documentation_governance.py",
-        "tests/architecture/test_domain_unit_test_purity.py",
-        "tests/architecture/test_medallion_invariants.py",
-        "tests/architecture/test_no_datetime_now_in_domain.py",
-        "tests/architecture/test_no_datetime_now_in_infrastructure.py",
-        "tests/architecture/test_no_fstring_in_logs.py",
-        "tests/architecture/test_no_random_in_writers.py",
-        "tests/e2e/test_resilience_scenarios_e2e.py",
-        "tests/security/test_security.py",
-        "tests/testing_support/bronze_writer.py",
-        "tests/unit/domain/test_entities.py",
-        "tests/unit/infrastructure/factories/test_factories.py",
-        "tests/unit/infrastructure/factories/test_storage_adapter.py",
-        "tests/unit/infrastructure/storage/test_gold_writer.py",
-        "tests/unit/infrastructure/test_storage.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Deterministic Writes and Retries"
     },
     {
       "adr_id": "ADR-015",
-      "title": "Pipeline Services Lifecycle",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md",
       "category": "Lifecycle",
-      "owner": "BioETL Team",
       "decision_date": "2025-12-24",
+      "decision_path": "docs/02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md",
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_enforcement_matrix.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
@@ -525,40 +512,40 @@
         "docs/05-operations/runbooks/index.md",
         "tests/architecture/test_adr_enforcement_matrix.py"
       ],
-      "enforcement_owner_paths": [
-        "tests/architecture/test_adr_enforcement_matrix.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Pipeline Services Lifecycle"
     },
     {
       "adr_id": "ADR-016",
-      "title": "Error Handling Strategy",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-016-error-handling-strategy.md",
       "category": "Resilience",
-      "owner": "BioETL Team",
       "decision_date": "2025-12-26",
+      "decision_path": "docs/02-architecture/decisions/ADR-016-error-handling-strategy.md",
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_enforcement_matrix.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
         "docs/01-requirements/REQUIREMENTS.md",
         "tests/architecture/test_adr_enforcement_matrix.py"
       ],
-      "enforcement_owner_paths": [
-        "tests/architecture/test_adr_enforcement_matrix.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Error Handling Strategy"
     },
     {
       "adr_id": "ADR-017",
-      "title": "Observability Architecture",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-017-observability-architecture.md",
       "category": "Observability",
-      "owner": "BioETL Team",
       "decision_date": "2025-12-26",
+      "decision_path": "docs/02-architecture/decisions/ADR-017-observability-architecture.md",
+      "enforcement_owner_paths": [
+        "tests/e2e/test_resilience_scenarios_e2e.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/NORMATIVE_SOURCES.md",
@@ -588,20 +575,26 @@
         "src/bioetl/infrastructure/observability/tracing.py",
         "tests/e2e/test_resilience_scenarios_e2e.py"
       ],
-      "enforcement_owner_paths": [
-        "tests/e2e/test_resilience_scenarios_e2e.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Observability Architecture"
     },
     {
       "adr_id": "ADR-018",
-      "title": "Gold Strict Validation",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-018-gold-strict-validation.md",
       "category": "Data Quality",
-      "owner": "BioETL Team",
       "decision_date": "2025-12-26",
+      "decision_path": "docs/02-architecture/decisions/ADR-018-gold-strict-validation.md",
+      "enforcement_owner_paths": [
+        "tests/architecture/test_architecture_audit_closeout_gates.py",
+        "tests/architecture/test_explicit_gold_scd2_policy.py",
+        "tests/architecture/test_gold_schema_contracts.py",
+        "tests/architecture/test_gold_strict_validation_policy.py",
+        "tests/contract/silver_schemas/README.md",
+        "tests/contract/silver_schemas/test_schema_stability.py",
+        "tests/testing_support/neo4j_memory_sync_support/snapshot_topology.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "configs/field_registry/canonical_registry.json",
         "configs/field_registry/generic_field_ownership.yaml",
@@ -626,26 +619,20 @@
         "tests/contract/silver_schemas/test_schema_stability.py",
         "tests/testing_support/neo4j_memory_sync_support/snapshot_topology.py"
       ],
-      "enforcement_owner_paths": [
-        "tests/architecture/test_architecture_audit_closeout_gates.py",
-        "tests/architecture/test_explicit_gold_scd2_policy.py",
-        "tests/architecture/test_gold_schema_contracts.py",
-        "tests/architecture/test_gold_strict_validation_policy.py",
-        "tests/contract/silver_schemas/README.md",
-        "tests/contract/silver_schemas/test_schema_stability.py",
-        "tests/testing_support/neo4j_memory_sync_support/snapshot_topology.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Gold Strict Validation"
     },
     {
       "adr_id": "ADR-019",
-      "title": "Observability Port Enforcement",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-019-observability-port-enforcement.md",
       "category": "Observability",
-      "owner": "BioETL Team",
       "decision_date": "2025-12-26",
+      "decision_path": "docs/02-architecture/decisions/ADR-019-observability-port-enforcement.md",
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_enforcement_matrix.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/NORMATIVE_SOURCES.md",
@@ -655,40 +642,40 @@
         "docs/03-guides/metrics-monitoring.md",
         "tests/architecture/test_adr_enforcement_matrix.py"
       ],
-      "enforcement_owner_paths": [
-        "tests/architecture/test_adr_enforcement_matrix.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Observability Port Enforcement"
     },
     {
       "adr_id": "ADR-020",
-      "title": "BasePipeline Decomposition",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-020-basepipeline-decomposition.md",
       "category": "Architecture",
-      "owner": "BioETL Team",
       "decision_date": "2025-12-16",
+      "decision_path": "docs/02-architecture/decisions/ADR-020-basepipeline-decomposition.md",
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_enforcement_matrix.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
         "src/bioetl/application/core/pipeline_services.py",
         "tests/architecture/test_adr_enforcement_matrix.py"
       ],
-      "enforcement_owner_paths": [
-        "tests/architecture/test_adr_enforcement_matrix.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "BasePipeline Decomposition"
     },
     {
       "adr_id": "ADR-021",
-      "title": "DDD Aggregates Adoption",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-021-ddd-aggregates-adoption.md",
       "category": "Domain Model",
-      "owner": "BioETL Team",
       "decision_date": "2025-12-29",
+      "decision_path": "docs/02-architecture/decisions/ADR-021-ddd-aggregates-adoption.md",
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_enforcement_matrix.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
@@ -696,20 +683,20 @@
         "docs/04-reference/domain/aggregates.md",
         "tests/architecture/test_adr_enforcement_matrix.py"
       ],
-      "enforcement_owner_paths": [
-        "tests/architecture/test_adr_enforcement_matrix.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "DDD Aggregates Adoption"
     },
     {
       "adr_id": "ADR-022",
-      "title": "NoOp Tracing for Local-Only",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-022-tracing-noop.md",
       "category": "Observability",
-      "owner": "BioETL Team",
       "decision_date": "2025-12-30",
+      "decision_path": "docs/02-architecture/decisions/ADR-022-tracing-noop.md",
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_enforcement_matrix.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
@@ -717,39 +704,48 @@
         "src/bioetl/infrastructure/observability/tracing.py",
         "tests/architecture/test_adr_enforcement_matrix.py"
       ],
-      "enforcement_owner_paths": [
-        "tests/architecture/test_adr_enforcement_matrix.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "NoOp Tracing for Local-Only"
     },
     {
       "adr_id": "ADR-023",
-      "title": "Entity Type Patterns",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-023-entity-type-patterns.md",
       "category": "Observability",
-      "owner": "BioETL Team",
       "decision_date": "2026-01-06",
+      "decision_path": "docs/02-architecture/decisions/ADR-023-entity-type-patterns.md",
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_enforcement_matrix.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
         "tests/architecture/test_adr_enforcement_matrix.py"
       ],
-      "enforcement_owner_paths": [
-        "tests/architecture/test_adr_enforcement_matrix.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Entity Type Patterns"
     },
     {
       "adr_id": "ADR-024",
-      "title": "Entity Naming Unification",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-024-entity-naming-unification.md",
       "category": "Architecture",
-      "owner": "BioETL Team",
       "decision_date": "2026-01-06",
+      "decision_path": "docs/02-architecture/decisions/ADR-024-entity-naming-unification.md",
+      "enforcement_owner_paths": [
+        "scripts/engineering/qa/naming_audit.py",
+        "tests/architecture/test_config_ci_invariants.py",
+        "tests/architecture/test_naming_ambiguity_classifier.py",
+        "tests/contract/silver_schemas/README.md",
+        "tests/contract/silver_schemas/test_naming_conventions.py",
+        "tests/e2e/test_chembl_publication_e2e.py",
+        "tests/e2e/test_chembl_publication_term_e2e.py",
+        "tests/unit/application/core/test_publication_term_data_source.py",
+        "tests/unit/domain/registry/test_publication_registry.py",
+        "tests/unit/domain/schemas/test_year_validation.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "configs/naming_exceptions.yaml",
         "docs/00-project/00-map.md",
@@ -779,29 +775,22 @@
         "tests/unit/domain/registry/test_publication_registry.py",
         "tests/unit/domain/schemas/test_year_validation.py"
       ],
-      "enforcement_owner_paths": [
-        "scripts/engineering/qa/naming_audit.py",
-        "tests/architecture/test_config_ci_invariants.py",
-        "tests/architecture/test_naming_ambiguity_classifier.py",
-        "tests/contract/silver_schemas/README.md",
-        "tests/contract/silver_schemas/test_naming_conventions.py",
-        "tests/e2e/test_chembl_publication_e2e.py",
-        "tests/e2e/test_chembl_publication_term_e2e.py",
-        "tests/unit/application/core/test_publication_term_data_source.py",
-        "tests/unit/domain/registry/test_publication_registry.py",
-        "tests/unit/domain/schemas/test_year_validation.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Entity Naming Unification"
     },
     {
       "adr_id": "ADR-025",
-      "title": "Pipeline Config Unification",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-025-pipeline-config-unification.md",
       "category": "Configuration",
-      "owner": "BioETL Team",
       "decision_date": "2026-01-19",
+      "decision_path": "docs/02-architecture/decisions/ADR-025-pipeline-config-unification.md",
+      "enforcement_owner_paths": [
+        "configs/quality/scripts_inventory_manifest.json",
+        "scripts/docs/fixers/fix_links_explicit.py",
+        "tests/architecture/test_path_contracts.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "configs/quality/scripts_inventory_manifest.json",
         "docs/00-project/00-map.md",
@@ -823,22 +812,25 @@
         "src/bioetl/composition/bootstrap/assembly/storage.py",
         "tests/architecture/test_path_contracts.py"
       ],
-      "enforcement_owner_paths": [
-        "configs/quality/scripts_inventory_manifest.json",
-        "scripts/docs/fixers/fix_links_explicit.py",
-        "tests/architecture/test_path_contracts.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Pipeline Config Unification"
     },
     {
       "adr_id": "ADR-026",
-      "title": "Composite Pipeline Pattern",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-026-composite-pipeline-pattern.md",
       "category": "Architecture",
-      "owner": "BioETL Team",
       "decision_date": "2026-01-15",
+      "decision_path": "docs/02-architecture/decisions/ADR-026-composite-pipeline-pattern.md",
+      "enforcement_owner_paths": [
+        "tests/architecture/test_composite_layer_boundaries.py",
+        "tests/integration/composite/test_molecule_pipeline.py",
+        "tests/unit/application/composite/test_composite_activity.py",
+        "tests/unit/application/composite/test_dependency_coordinator.py",
+        "tests/unit/application/composite/test_runner_robustness.py",
+        "tests/unit/interfaces/cli/commands/test_adr_commands.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "configs/composites/activity.yaml",
         "configs/composites/assay.yaml",
@@ -901,25 +893,25 @@
         "tests/unit/application/composite/test_runner_robustness.py",
         "tests/unit/interfaces/cli/commands/test_adr_commands.py"
       ],
-      "enforcement_owner_paths": [
-        "tests/architecture/test_composite_layer_boundaries.py",
-        "tests/integration/composite/test_molecule_pipeline.py",
-        "tests/unit/application/composite/test_composite_activity.py",
-        "tests/unit/application/composite/test_dependency_coordinator.py",
-        "tests/unit/application/composite/test_runner_robustness.py",
-        "tests/unit/interfaces/cli/commands/test_adr_commands.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Composite Pipeline Pattern"
     },
     {
       "adr_id": "ADR-027",
-      "title": "DQ Rules Externalization",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-027-dq-rules-externalization.md",
       "category": "Data Quality",
-      "owner": "BioETL Team",
       "decision_date": "2026-01-19",
+      "decision_path": "docs/02-architecture/decisions/ADR-027-dq-rules-externalization.md",
+      "enforcement_owner_paths": [
+        "scripts/docs/checks/check_links.py",
+        "scripts/schema/lint_config_paths.py",
+        "tests/architecture/test_composite_dq_externalization.py",
+        "tests/architecture/test_config_ci_invariants.py",
+        "tests/contract/silver_schemas/README.md",
+        "tests/contract/silver_schemas/test_validations.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "configs/composites/activity.yaml",
         "configs/composites/assay.yaml",
@@ -950,25 +942,24 @@
         "tests/contract/silver_schemas/README.md",
         "tests/contract/silver_schemas/test_validations.py"
       ],
-      "enforcement_owner_paths": [
-        "scripts/docs/checks/check_links.py",
-        "scripts/schema/lint_config_paths.py",
-        "tests/architecture/test_composite_dq_externalization.py",
-        "tests/architecture/test_config_ci_invariants.py",
-        "tests/contract/silver_schemas/README.md",
-        "tests/contract/silver_schemas/test_validations.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "DQ Rules Externalization"
     },
     {
       "adr_id": "ADR-028",
-      "title": "Filter Rules Externalization",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-028-filter-rules-externalization.md",
       "category": "Configuration",
-      "owner": "BioETL Team",
       "decision_date": "2026-02-09",
+      "decision_path": "docs/02-architecture/decisions/ADR-028-filter-rules-externalization.md",
+      "enforcement_owner_paths": [
+        "scripts/docs/checks/check_links.py",
+        "scripts/schema/lint_config_paths.py",
+        "tests/architecture/test_config_ci_invariants.py",
+        "tests/unit/domain/models/test_filter.py",
+        "tests/unit/infrastructure/schemas/test_filter_config.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "configs/_schema/pipeline.json",
         "configs/composites/activity.yaml",
@@ -1001,24 +992,27 @@
         "tests/unit/domain/models/test_filter.py",
         "tests/unit/infrastructure/schemas/test_filter_config.py"
       ],
-      "enforcement_owner_paths": [
-        "scripts/docs/checks/check_links.py",
-        "scripts/schema/lint_config_paths.py",
-        "tests/architecture/test_config_ci_invariants.py",
-        "tests/unit/domain/models/test_filter.py",
-        "tests/unit/infrastructure/schemas/test_filter_config.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Filter Rules Externalization"
     },
     {
       "adr_id": "ADR-029",
-      "title": "Output Metadata Unification",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-029-output-metadata-unification.md",
       "category": "Data Modeling",
-      "owner": "BioETL Team",
       "decision_date": "2026-01-23",
+      "decision_path": "docs/02-architecture/decisions/ADR-029-output-metadata-unification.md",
+      "enforcement_owner_paths": [
+        "scripts/schema/lint_config_paths.py",
+        "tests/architecture/test_config_ci_invariants.py",
+        "tests/architecture/test_metadata_output_contract.py",
+        "tests/unit/application/services/test_metadata_coordinator.py",
+        "tests/unit/application/services/test_metadata_coordinator_runtime_profiles.py",
+        "tests/unit/domain/models/test_metadata_output.py",
+        "tests/unit/infrastructure/storage/test_metadata_writer.py",
+        "tests/unit/infrastructure/test_config_dynamic.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "configs/composites/publication.yaml",
         "configs/composites/target.yaml",
@@ -1047,47 +1041,43 @@
         "tests/unit/infrastructure/storage/test_metadata_writer.py",
         "tests/unit/infrastructure/test_config_dynamic.py"
       ],
-      "enforcement_owner_paths": [
-        "scripts/schema/lint_config_paths.py",
-        "tests/architecture/test_config_ci_invariants.py",
-        "tests/architecture/test_metadata_output_contract.py",
-        "tests/unit/application/services/test_metadata_coordinator.py",
-        "tests/unit/application/services/test_metadata_coordinator_runtime_profiles.py",
-        "tests/unit/domain/models/test_metadata_output.py",
-        "tests/unit/infrastructure/storage/test_metadata_writer.py",
-        "tests/unit/infrastructure/test_config_dynamic.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Output Metadata Unification"
     },
     {
       "adr_id": "ADR-030",
-      "title": "Publication Pagination Strategy",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-030-publication-pagination-strategy.md",
       "category": "Data Fetching",
-      "owner": "BioETL Team",
       "decision_date": "2026-01-26",
+      "decision_path": "docs/02-architecture/decisions/ADR-030-publication-pagination-strategy.md",
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_enforcement_matrix.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
         "src/bioetl/application/pipelines/chembl/pipeline_types.py",
         "tests/architecture/test_adr_enforcement_matrix.py"
       ],
-      "enforcement_owner_paths": [
-        "tests/architecture/test_adr_enforcement_matrix.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Publication Pagination Strategy"
     },
     {
       "adr_id": "ADR-031",
-      "title": "Loading Strategy Formalization",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-031-loading-strategy-formalization.md",
       "category": "Data Loading",
-      "owner": "BioETL Team",
       "decision_date": "2026-01-26",
+      "decision_path": "docs/02-architecture/decisions/ADR-031-loading-strategy-formalization.md",
+      "enforcement_owner_paths": [
+        "tests/architecture/test_config_ci_invariants.py",
+        "tests/architecture/test_force_full_scan_publication.py",
+        "tests/unit/application/core/test_checkpoint_manager.py",
+        "tests/unit/domain/test_medallion.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "configs/_schema/pipeline.json",
         "configs/base/pipeline.yaml",
@@ -1105,23 +1095,20 @@
         "tests/unit/application/core/test_checkpoint_manager.py",
         "tests/unit/domain/test_medallion.py"
       ],
-      "enforcement_owner_paths": [
-        "tests/architecture/test_config_ci_invariants.py",
-        "tests/architecture/test_force_full_scan_publication.py",
-        "tests/unit/application/core/test_checkpoint_manager.py",
-        "tests/unit/domain/test_medallion.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Loading Strategy Formalization"
     },
     {
       "adr_id": "ADR-032",
-      "title": "Unified HTTP Client Pattern",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-032-unified-http-client.md",
       "category": "HTTP/Networking",
-      "owner": "BioETL Team",
       "decision_date": "2026-01-28",
+      "decision_path": "docs/02-architecture/decisions/ADR-032-unified-http-client.md",
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_enforcement_matrix.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/NORMATIVE_SOURCES.md",
@@ -1134,20 +1121,20 @@
         "docs/04-reference/pipelines/chembl/05-activity-spec.md",
         "tests/architecture/test_adr_enforcement_matrix.py"
       ],
-      "enforcement_owner_paths": [
-        "tests/architecture/test_adr_enforcement_matrix.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Unified HTTP Client Pattern"
     },
     {
       "adr_id": "ADR-033",
-      "title": "Publication Metadata Validation Strategy",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-033-publication-validation-strategy.md",
       "category": "Data Quality",
-      "owner": "BioETL Team",
       "decision_date": "2026-02-06",
+      "decision_path": "docs/02-architecture/decisions/ADR-033-publication-validation-strategy.md",
+      "enforcement_owner_paths": [
+        "tests/unit/scripts/test_generate_adr_registry.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
@@ -1157,20 +1144,21 @@
         "docs/05-operations/runbooks/publication-validation-runbook.md",
         "tests/unit/scripts/test_generate_adr_registry.py"
       ],
-      "enforcement_owner_paths": [
-        "tests/unit/scripts/test_generate_adr_registry.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Publication Metadata Validation Strategy"
     },
     {
       "adr_id": "ADR-034",
-      "title": "Schema\u2194Domain Configuration Pairs",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-034-schema-domain-pairs.md",
       "category": "Architecture",
-      "owner": "BioETL Team",
       "decision_date": "2026-02-15",
+      "decision_path": "docs/02-architecture/decisions/ADR-034-schema-domain-pairs.md",
+      "enforcement_owner_paths": [
+        "configs/quality/scripts_inventory_manifest.json",
+        "tests/contract/test_gold_pk_consistency.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "configs/quality/scripts_inventory_manifest.json",
         "docs/00-project/00-map.md",
@@ -1178,21 +1166,22 @@
         "docs/00-project/ai/memory/memory-py-doc-bot.md",
         "tests/contract/test_gold_pk_consistency.py"
       ],
-      "enforcement_owner_paths": [
-        "configs/quality/scripts_inventory_manifest.json",
-        "tests/contract/test_gold_pk_consistency.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Schema\u2194Domain Configuration Pairs"
     },
     {
       "adr_id": "ADR-035",
-      "title": "JSON Field Typing Policy (Silver\u2194Gold)",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-035-json-field-typing-policy.md",
       "category": "Data Modeling",
-      "owner": "BioETL Team",
       "decision_date": "2026-02-17",
+      "decision_path": "docs/02-architecture/decisions/ADR-035-json-field-typing-policy.md",
+      "enforcement_owner_paths": [
+        "tests/architecture/test_non_chembl_json_field_typing_policy.py",
+        "tests/unit/domain/schemas/test_constants_yaml.py",
+        "tests/unit/infrastructure/schemas/test_silver.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "configs/naming_exceptions.yaml",
         "docs/00-project/00-map.md",
@@ -1203,22 +1192,20 @@
         "tests/unit/domain/schemas/test_constants_yaml.py",
         "tests/unit/infrastructure/schemas/test_silver.py"
       ],
-      "enforcement_owner_paths": [
-        "tests/architecture/test_non_chembl_json_field_typing_policy.py",
-        "tests/unit/domain/schemas/test_constants_yaml.py",
-        "tests/unit/infrastructure/schemas/test_silver.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "JSON Field Typing Policy (Silver\u2194Gold)"
     },
     {
       "adr_id": "ADR-036",
-      "title": "Gold Contract Versioning Policy",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md",
       "category": "Data Quality",
-      "owner": "BioETL Team",
       "decision_date": "2026-02-18",
+      "decision_path": "docs/02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md",
+      "enforcement_owner_paths": [
+        "scripts/engineering/repo/split_testing_roadmap_issue.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "configs/naming_exceptions.yaml",
         "docs/00-project/00-map.md",
@@ -1275,20 +1262,20 @@
         "docs/04-reference/providers/uniprot/protein.md",
         "scripts/engineering/repo/split_testing_roadmap_issue.py"
       ],
-      "enforcement_owner_paths": [
-        "scripts/engineering/repo/split_testing_roadmap_issue.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Gold Contract Versioning Policy"
     },
     {
       "adr_id": "ADR-037",
-      "title": "Canonical Schema Source and Generation",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-037-canonical-schema-generation.md",
       "category": "Data Contracts",
-      "owner": "BioETL Team",
       "decision_date": "2026-02-18",
+      "decision_path": "docs/02-architecture/decisions/ADR-037-canonical-schema-generation.md",
+      "enforcement_owner_paths": [
+        "configs/quality/scripts_inventory_manifest.json"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "configs/naming_exceptions.yaml",
         "configs/quality/scripts_inventory_manifest.json",
@@ -1299,20 +1286,20 @@
         "docs/01-requirements/REQUIREMENTS.md",
         "docs/04-reference/pipelines/chembl/05-activity-spec.md"
       ],
-      "enforcement_owner_paths": [
-        "configs/quality/scripts_inventory_manifest.json"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Canonical Schema Source and Generation"
     },
     {
       "adr_id": "ADR-038",
-      "title": "ChEMBL Enum Values Externalization to YAML",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-038-enum-externalization.md",
       "category": "Configuration",
-      "owner": "BioETL Team",
       "decision_date": "2026-02-16",
+      "decision_path": "docs/02-architecture/decisions/ADR-038-enum-externalization.md",
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_enforcement_matrix.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "configs/naming_exceptions.yaml",
         "docs/00-project/00-map.md",
@@ -1322,20 +1309,20 @@
         "docs/01-requirements/REQUIREMENTS.md",
         "tests/architecture/test_adr_enforcement_matrix.py"
       ],
-      "enforcement_owner_paths": [
-        "tests/architecture/test_adr_enforcement_matrix.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "ChEMBL Enum Values Externalization to YAML"
     },
     {
       "adr_id": "ADR-039",
-      "title": "Unified Entity Config Format",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-039-unified-entity-config-format.md",
       "category": "Configuration",
-      "owner": "BioETL Team",
       "decision_date": "2026-02-24",
+      "decision_path": "docs/02-architecture/decisions/ADR-039-unified-entity-config-format.md",
+      "enforcement_owner_paths": [
+        "tests/architecture/test_config_ci_invariants.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "configs/field_registry/canonical_registry.json",
         "configs/field_registry/generic_field_ownership.yaml",
@@ -1354,20 +1341,29 @@
         "docs/04-reference/pipelines/chembl/05-activity-spec.md",
         "tests/architecture/test_config_ci_invariants.py"
       ],
-      "enforcement_owner_paths": [
-        "tests/architecture/test_config_ci_invariants.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Unified Entity Config Format"
     },
     {
       "adr_id": "ADR-040",
-      "title": "Diagram Governance and Layout Policy",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
       "category": "Documentation",
-      "owner": "BioETL Team",
       "decision_date": "2026-02-25",
+      "decision_path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
+      "enforcement_owner_paths": [
+        "configs/quality/generated_artifact_routing.yaml",
+        "configs/quality/scripts_inventory_manifest.json",
+        "scripts/diagrams/harmonize_link_styles.py",
+        "scripts/diagrams/lint_diagrams.py",
+        "scripts/diagrams/pipeline_dataflow_render.py",
+        "scripts/diagrams/prune_orphan_nodes.py",
+        "scripts/docs/checks/check_drift.py",
+        "tests/architecture/test_config_topology_docs_drift.py",
+        "tests/architecture/test_diagram_corpus_regression_guards.py",
+        "tests/architecture/test_diagram_lint_policy_rules.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "configs/quality/generated_artifact_routing.yaml",
         "configs/quality/scripts_inventory_manifest.json",
@@ -1392,29 +1388,21 @@
         "tests/architecture/test_diagram_corpus_regression_guards.py",
         "tests/architecture/test_diagram_lint_policy_rules.py"
       ],
-      "enforcement_owner_paths": [
-        "configs/quality/generated_artifact_routing.yaml",
-        "configs/quality/scripts_inventory_manifest.json",
-        "scripts/diagrams/harmonize_link_styles.py",
-        "scripts/diagrams/lint_diagrams.py",
-        "scripts/diagrams/pipeline_dataflow_render.py",
-        "scripts/diagrams/prune_orphan_nodes.py",
-        "scripts/docs/checks/check_drift.py",
-        "tests/architecture/test_config_topology_docs_drift.py",
-        "tests/architecture/test_diagram_corpus_regression_guards.py",
-        "tests/architecture/test_diagram_lint_policy_rules.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Diagram Governance and Layout Policy"
     },
     {
       "adr_id": "ADR-041",
-      "title": "Naming Policy for Skills, Agents, Commands",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-041-naming-policy-skills-agents.md",
       "category": "Architecture",
-      "owner": "BioETL Team",
       "decision_date": "2026-03-04",
+      "decision_path": "docs/02-architecture/decisions/ADR-041-naming-policy-skills-agents.md",
+      "enforcement_owner_paths": [
+        "configs/quality/layered_suffix_policy.yaml",
+        "tests/architecture/test_layer_aware_suffix_policy.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "configs/quality/layered_suffix_policy.yaml",
         "docs/00-project/00-map.md",
@@ -1423,21 +1411,23 @@
         "docs/00-project/governance/02-naming-policy.md",
         "tests/architecture/test_layer_aware_suffix_policy.py"
       ],
-      "enforcement_owner_paths": [
-        "configs/quality/layered_suffix_policy.yaml",
-        "tests/architecture/test_layer_aware_suffix_policy.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Naming Policy for Skills, Agents, Commands"
     },
     {
       "adr_id": "ADR-042",
-      "title": "Testing Strategy Matrix & Fixture Gov.",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-042-testing-strategy-matrix.md",
       "category": "Testing",
-      "owner": "BioETL Team",
       "decision_date": "2026-03-09",
+      "decision_path": "docs/02-architecture/decisions/ADR-042-testing-strategy-matrix.md",
+      "enforcement_owner_paths": [
+        "configs/quality/scripts_inventory_manifest.json",
+        "configs/quality/test_matrix.yaml",
+        "tests/architecture/test_test_matrix_lane_policy.py",
+        "tests/unit/infrastructure/adr/test_fs_adr_service.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "configs/quality/scripts_inventory_manifest.json",
         "configs/quality/test_matrix.yaml",
@@ -1450,23 +1440,21 @@
         "tests/architecture/test_test_matrix_lane_policy.py",
         "tests/unit/infrastructure/adr/test_fs_adr_service.py"
       ],
-      "enforcement_owner_paths": [
-        "configs/quality/scripts_inventory_manifest.json",
-        "configs/quality/test_matrix.yaml",
-        "tests/architecture/test_test_matrix_lane_policy.py",
-        "tests/unit/infrastructure/adr/test_fs_adr_service.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Testing Strategy Matrix & Fixture Gov."
     },
     {
       "adr_id": "ADR-043",
-      "title": "Documentation & Knowledge Management",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-043-documentation-knowledge-management.md",
       "category": "Documentation",
-      "owner": "BioETL Team",
       "decision_date": "2026-03-09",
+      "decision_path": "docs/02-architecture/decisions/ADR-043-documentation-knowledge-management.md",
+      "enforcement_owner_paths": [
+        "tests/architecture/test_doc_crossref_integrity.py",
+        "tests/unit/memory/test_rag_indexing.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
@@ -1474,21 +1462,21 @@
         "tests/architecture/test_doc_crossref_integrity.py",
         "tests/unit/memory/test_rag_indexing.py"
       ],
-      "enforcement_owner_paths": [
-        "tests/architecture/test_doc_crossref_integrity.py",
-        "tests/unit/memory/test_rag_indexing.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Documentation & Knowledge Management"
     },
     {
       "adr_id": "ADR-044",
-      "title": "Run Manifest & Ledger Control Plane",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md",
       "category": "Reproducibility",
-      "owner": "BioETL Team",
       "decision_date": "2026-03-24",
+      "decision_path": "docs/02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md",
+      "enforcement_owner_paths": [
+        "tests/architecture/test_control_plane_runtime_docs_alignment.py",
+        "tests/architecture/test_documentation_audit_remediation.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/NORMATIVE_SOURCES.md",
@@ -1511,21 +1499,21 @@
         "tests/architecture/test_control_plane_runtime_docs_alignment.py",
         "tests/architecture/test_documentation_audit_remediation.py"
       ],
-      "enforcement_owner_paths": [
-        "tests/architecture/test_control_plane_runtime_docs_alignment.py",
-        "tests/architecture/test_documentation_audit_remediation.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Run Manifest & Ledger Control Plane"
     },
     {
       "adr_id": "ADR-045",
-      "title": "Data Quality Contract System",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-045-dq-contract-system.md",
       "category": "Data Quality",
-      "owner": "BioETL Team",
       "decision_date": "2026-03-26",
+      "decision_path": "docs/02-architecture/decisions/ADR-045-dq-contract-system.md",
+      "enforcement_owner_paths": [
+        "scripts/documentation_governance_check.py",
+        "tests/architecture/test_gold_strict_validation_policy.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "configs/base/contract_registry.yaml",
         "configs/field_registry/canonical_registry.json",
@@ -1551,21 +1539,20 @@
         "scripts/documentation_governance_check.py",
         "tests/architecture/test_gold_strict_validation_policy.py"
       ],
-      "enforcement_owner_paths": [
-        "scripts/documentation_governance_check.py",
-        "tests/architecture/test_gold_strict_validation_policy.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Data Quality Contract System"
     },
     {
       "adr_id": "ADR-046",
-      "title": "Checkpoint Versus Ledger-Based Resume",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-046-checkpoint-vs-ledger-resume.md",
       "category": "Reproducibility",
-      "owner": "BioETL Team",
       "decision_date": "2026-05-06",
+      "decision_path": "docs/02-architecture/decisions/ADR-046-checkpoint-vs-ledger-resume.md",
+      "enforcement_owner_paths": [
+        "tests/architecture/test_documentation_audit_remediation.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/NORMATIVE_SOURCES.md",
@@ -1580,20 +1567,20 @@
         "docs/05-operations/runbooks/workflow-control-plane.md",
         "tests/architecture/test_documentation_audit_remediation.py"
       ],
-      "enforcement_owner_paths": [
-        "tests/architecture/test_documentation_audit_remediation.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Checkpoint Versus Ledger-Based Resume"
     },
     {
       "adr_id": "ADR-047",
-      "title": "Workflow Control Plane for Declarative Workflows",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-047-workflow-control-plane.md",
       "category": "Reproducibility",
-      "owner": "BioETL Team",
       "decision_date": "2026-05-08",
+      "decision_path": "docs/02-architecture/decisions/ADR-047-workflow-control-plane.md",
+      "enforcement_owner_paths": [
+        "tests/architecture/test_documentation_audit_remediation.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/NORMATIVE_SOURCES.md",
@@ -1614,20 +1601,22 @@
         "docs/05-operations/runbooks/workflow-control-plane.md",
         "tests/architecture/test_documentation_audit_remediation.py"
       ],
-      "enforcement_owner_paths": [
-        "tests/architecture/test_documentation_audit_remediation.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Workflow Control Plane for Declarative Workflows"
     },
     {
       "adr_id": "ADR-048",
-      "title": "Domain Schema Boundary and Runtime Pandera Compatibility",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md",
       "category": "Architecture",
-      "owner": "BioETL Team",
       "decision_date": "2026-05-26",
+      "decision_path": "docs/02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md",
+      "enforcement_owner_paths": [
+        "scripts/data_quality/inventory_silver_filters_migration.py",
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/architecture/test_pandera_schema_boundary_policy.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/NORMATIVE_SOURCES.md",
@@ -1646,42 +1635,47 @@
         "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/architecture/test_pandera_schema_boundary_policy.py"
       ],
-      "enforcement_owner_paths": [
-        "scripts/data_quality/inventory_silver_filters_migration.py",
-        "tests/architecture/test_adr_registry_governance_sync.py",
-        "tests/architecture/test_pandera_schema_boundary_policy.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Domain Schema Boundary and Runtime Pandera Compatibility"
     },
     {
       "adr_id": "ADR-049",
-      "title": "Context-Aware LOC Target Policy",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-049-context-aware-loc-target-policy.md",
       "category": "Architecture",
-      "owner": "BioETL Team",
       "decision_date": "2026-05-26",
+      "decision_path": "docs/02-architecture/decisions/ADR-049-context-aware-loc-target-policy.md",
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_registry_governance_sync.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
         "docs/01-requirements/REQUIREMENTS.md",
         "tests/architecture/test_adr_registry_governance_sync.py"
       ],
-      "enforcement_owner_paths": [
-        "tests/architecture/test_adr_registry_governance_sync.py"
-      ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Context-Aware LOC Target Policy"
     },
     {
       "adr_id": "ADR-050",
-      "title": "Silver Structural and Gold Semantic Filter Boundary",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md",
       "category": "Data Quality",
-      "owner": "BioETL Team",
       "decision_date": "2026-06-15",
+      "decision_path": "docs/02-architecture/decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md",
+      "enforcement_owner_paths": [
+        "configs/quality/scripts_inventory_manifest.json",
+        "scripts/data_quality/inventory_silver_filters_migration.py",
+        "scripts/data_quality/run_silver_gold_filter_parity.py",
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/architecture/test_silver_filter_boundary_inventory.py",
+        "tests/architecture/test_silver_filter_identity_surface.py",
+        "tests/snapshots/pipeline_configs.json",
+        "tests/unit/infrastructure/config/test_filter_config_loader.py"
+      ],
+      "gap_reasons": [],
       "implementation_owner_paths": [
         "configs/entities/chembl/activity.yaml",
         "configs/entities/chembl/assay.yaml",
@@ -1703,45 +1697,52 @@
         "tests/architecture/test_silver_filter_boundary_inventory.py",
         "tests/architecture/test_silver_filter_identity_surface.py",
         "tests/snapshots/pipeline_configs.json",
-        "tests/unit/infrastructure/config/test_filter_config_loader.py",
-        "tests/unit/scripts/test_documentation_governance_check.py"
-      ],
-      "enforcement_owner_paths": [
-        "configs/quality/scripts_inventory_manifest.json",
-        "scripts/data_quality/inventory_silver_filters_migration.py",
-        "scripts/data_quality/run_silver_gold_filter_parity.py",
-        "tests/architecture/test_adr_registry_governance_sync.py",
-        "tests/architecture/test_silver_filter_boundary_inventory.py",
-        "tests/architecture/test_silver_filter_identity_surface.py",
-        "tests/snapshots/pipeline_configs.json",
-        "tests/unit/infrastructure/config/test_filter_config_loader.py",
-        "tests/unit/scripts/test_documentation_governance_check.py"
+        "tests/unit/infrastructure/config/test_filter_config_loader.py"
       ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Silver Structural and Gold Semantic Filter Boundary"
     },
     {
       "adr_id": "ADR-051",
-      "title": "QuarantineEntry Wide Constructor as Intentional Aggregate Surface",
-      "status": "enforced",
-      "decision_path": "docs/02-architecture/decisions/ADR-051-quarantine-entry-aggregate-surface.md",
       "category": "Architecture",
-      "owner": "BioETL Team",
       "decision_date": "2026-07-27",
-      "implementation_owner_paths": [
-        "configs/quality/constructor_waivers.yaml",
-        "configs/quality/domain_aggregate_classification.yaml",
-        "tests/architecture/test_adr_enforcement_matrix.py",
-        "tests/unit/domain/aggregates/test_quarantine_entry.py"
-      ],
+      "decision_path": "docs/02-architecture/decisions/ADR-051-quarantine-entry-aggregate-surface.md",
       "enforcement_owner_paths": [
         "configs/quality/constructor_waivers.yaml",
         "configs/quality/domain_aggregate_classification.yaml",
         "tests/architecture/test_adr_enforcement_matrix.py",
-        "tests/unit/domain/aggregates/test_quarantine_entry.py"
+        "tests/unit/domain/aggregates/test_quarantine_entry.py",
+        "tests/unit/scripts/test_documentation_governance_check.py"
+      ],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/quality/constructor_waivers.yaml",
+        "configs/quality/domain_aggregate_classification.yaml",
+        "docs/00-project/RULES.md",
+        "tests/architecture/test_adr_enforcement_matrix.py",
+        "tests/unit/domain/aggregates/test_quarantine_entry.py",
+        "tests/unit/scripts/test_documentation_governance_check.py"
       ],
       "manual_exception": null,
-      "gap_reasons": []
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "QuarantineEntry Wide Constructor as Intentional Aggregate Surface"
     }
-  ]
+  ],
+  "schema_version": 1,
+  "source": {
+    "adr_decisions_dir": "docs/02-architecture/decisions",
+    "manual_exception_marker_prefix": "manual-exception:",
+    "tracked_file_discovery": "git grep --untracked with python fallback"
+  },
+  "summary": {
+    "accepted_adr_count": 49,
+    "blocking_gap_count": 0,
+    "enforced_adr_count": 49,
+    "manual_exception_count": 0,
+    "missing_enforcement_owner_count": 0,
+    "missing_implementation_owner_count": 0
+  }
 }

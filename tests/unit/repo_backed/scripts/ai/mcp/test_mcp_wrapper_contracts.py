@@ -702,9 +702,12 @@ printf '%s\n' "$NO_PROXY" "$no_proxy" "${{HTTP_PROXY-unset}}" \
     ("mock_functions", "expected"),
     [
         (
+            # PATH probes run first; Test-Path must not be always-true or the first
+            # PATH entry wins. Only accept the Get-Command Source candidate.
             "function Get-Command { param($Name, $ErrorAction) "
             "if ($Name -eq 'uvx') { [pscustomobject]@{Source='C:\\fake\\uvx.exe'} } }\n"
-            "function Test-Path { param($LiteralPath, $Path, $ErrorAction) $true }\n"
+            "function Test-Path { param($LiteralPath, $Path, $ErrorAction) "
+            "$LiteralPath -eq 'C:\\fake\\uvx.exe' }\n"
             "function Resolve-Path { param($LiteralPath) "
             "[pscustomobject]@{Path=$LiteralPath} }",
             "C:\\fake\\uvx.exe",

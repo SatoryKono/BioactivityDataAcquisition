@@ -110,6 +110,39 @@ STANDARD_OPTIONAL_PARAMS = {
     "pii_hasher",
 }
 
+# Collaborators that may be packed into **legacy_collaborators (S107 / RF-017
+# constructor budget) instead of remaining as named parameters.
+LEGACY_PACKED_OPTIONAL_PARAMS = frozenset(
+    {
+        "tracer",
+        "metrics",
+        "identity_service",
+        "pii_hasher",
+    }
+)
+
+
+def _init_param_names(transformer_class: type[BaseTransformer]) -> set[str]:
+    """Return __init__ parameter names without self."""
+    sig = inspect.signature(transformer_class.__init__)
+    return set(sig.parameters.keys()) - {"self"}
+
+
+def _accepts_optional_collaborator(
+    transformer_class: type[BaseTransformer],
+    name: str,
+) -> bool:
+    """True when the collaborator is a named param or accepted via **legacy packing."""
+    params = inspect.signature(transformer_class.__init__).parameters
+    if name in params:
+        return True
+    if name not in LEGACY_PACKED_OPTIONAL_PARAMS:
+        return False
+    return any(
+        parameter.kind is inspect.Parameter.VAR_KEYWORD
+        for parameter in params.values()
+    )
+
 
 class TestTransformerInheritance:
     """Test that all transformers properly inherit from BaseTransformer."""
@@ -172,11 +205,11 @@ class TestTransformerSignatures:
 
         Tracer enables distributed tracing via OpenTelemetry.
         Default should be None (uses NoOpTracing internally).
+        May be named or accepted via ``**legacy_collaborators`` (S107 budget).
         """
-        sig = inspect.signature(transformer_class.__init__)
-        params = set(sig.parameters.keys()) - {"self"}
-        assert "tracer" in params, (
-            f"{transformer_class.__name__} should have 'tracer' parameter for O1 observability"
+        assert _accepts_optional_collaborator(transformer_class, "tracer"), (
+            f"{transformer_class.__name__} should accept 'tracer' "
+            "(named or **legacy_collaborators) for O1 observability"
         )
 
     @pytest.mark.parametrize("transformer_class", get_all_transformers())
@@ -187,11 +220,11 @@ class TestTransformerSignatures:
 
         Metrics enables duration/error tracking via Prometheus.
         Default should be None (uses NoOpMetrics internally).
+        May be named or accepted via ``**legacy_collaborators`` (S107 budget).
         """
-        sig = inspect.signature(transformer_class.__init__)
-        params = set(sig.parameters.keys()) - {"self"}
-        assert "metrics" in params, (
-            f"{transformer_class.__name__} should have 'metrics' parameter for O1 observability"
+        assert _accepts_optional_collaborator(transformer_class, "metrics"), (
+            f"{transformer_class.__name__} should accept 'metrics' "
+            "(named or **legacy_collaborators) for O1 observability"
         )
 
     @pytest.mark.parametrize("transformer_class", get_all_transformers())
@@ -202,8 +235,7 @@ class TestTransformerSignatures:
 
         Gold filters enable configurable filtering of Silver → Gold records.
         """
-        sig = inspect.signature(transformer_class.__init__)
-        params = set(sig.parameters.keys()) - {"self"}
+        params = _init_param_names(transformer_class)
         assert "gold_filters" in params, (
             f"{transformer_class.__name__} should have 'gold_filters' parameter"
         )
@@ -215,11 +247,13 @@ class TestTransformerSignatures:
         """All transformers SHOULD accept identity_service parameter.
 
         EntityIdentityGenerator provides entity ID and content hash computation.
+        May be named or accepted via ``**legacy_collaborators`` (S107 budget).
         """
-        sig = inspect.signature(transformer_class.__init__)
-        params = set(sig.parameters.keys()) - {"self"}
-        assert "identity_service" in params, (
-            f"{transformer_class.__name__} should have 'identity_service' parameter"
+        assert _accepts_optional_collaborator(
+            transformer_class, "identity_service"
+        ), (
+            f"{transformer_class.__name__} should accept 'identity_service' "
+            "(named or **legacy_collaborators)"
         )
 
     @pytest.mark.parametrize("transformer_class", get_all_transformers())
@@ -231,11 +265,11 @@ class TestTransformerSignatures:
         PiiHasher enables optional hashing of PII fields (e.g., author names).
         Default should be None (uses NoOpPiiHasher internally).
         See RULES.md §5.4 for PII hashing requirements.
+        May be named or accepted via ``**legacy_collaborators`` (S107 budget).
         """
-        sig = inspect.signature(transformer_class.__init__)
-        params = set(sig.parameters.keys()) - {"self"}
-        assert "pii_hasher" in params, (
-            f"{transformer_class.__name__} should have 'pii_hasher' parameter (RULES.md §5.4)"
+        assert _accepts_optional_collaborator(transformer_class, "pii_hasher"), (
+            f"{transformer_class.__name__} should accept 'pii_hasher' "
+            "(named or **legacy_collaborators; RULES.md §5.4)"
         )
 
 

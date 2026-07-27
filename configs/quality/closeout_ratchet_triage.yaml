@@ -2,7 +2,7 @@ schema_version: 1
 linked_issue: '#5931'
 supplementary_linked_issues:
 - '#5500'
-reviewed_on: '2026-07-03'
+reviewed_on: '2026-07-27'
 review_by: '2026-10-03'
 owner: '@bioetl-architecture'
 policy:
@@ -40,12 +40,6 @@ entries:
   live_guard: generic closeout JSON artifact schema guard
   rationale: Durable generic ratchet for closeout JSON artifacts; retain while closeout
     files remain executable.
-- path: tests/architecture/test_closeout_ratchet_triage.py
-  disposition: retain_active
-  classification: budget_closeout_ratchet
-  live_guard: closeout triage completeness guard
-  rationale: Meta-guard that all closeout tests remain classified; retain while closeout
-    inventory policy is enforced.
 - path: tests/architecture/test_diagram_issues_6205_6211_closeout.py
   disposition: retain_active
   classification: budget_closeout_ratchet
