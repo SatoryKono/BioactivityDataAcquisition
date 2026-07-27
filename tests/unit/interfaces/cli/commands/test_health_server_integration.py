@@ -145,9 +145,10 @@ class TestHealthServerContext:
             call_kwargs = mock_server_cls.call_args.kwargs
             assert call_kwargs["host"] == "127.0.0.1"
             assert call_kwargs["port"] == 9090
-            assert call_kwargs["health_monitor"] is mock_deps.health_monitor
-            assert call_kwargs["quarantine_service"] is None
-            assert call_kwargs["checkpoint_port"] is mock_deps.checkpoint_port
+            control_plane = call_kwargs["control_plane"]
+            assert control_plane.health_monitor is mock_deps.health_monitor
+            assert control_plane.quarantine_service is None
+            assert control_plane.checkpoint_port is mock_deps.checkpoint_port
 
     @pytest.mark.asyncio
     @patch(

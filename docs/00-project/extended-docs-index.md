@@ -40,7 +40,7 @@ promoting every specialist page into the primary MkDocs navigation.
 ## Engineering and operations
 
 - [Architecture refactoring closeout](../05-engineering/architecture-refactoring-rf-001-008-closeout-2026-06-17.md)
-- [Protein classification migration closeout](../05-engineering/chembl-protein-classification-migration-closeout.md)
+- [Protein classification migration closeout](../05-engineering/chembl_protein_classification_migration_closeout.md)
 - [Normalization plan](../05-engineering/normalization-plan-P0-P6.md)
 - [WSL Neo4j setup](../05-operations/deployment/WSL-NEO4J-SETUP.md)
 - [Compose project migration](../05-operations/runbooks/docker-compose-project-migration.md)
