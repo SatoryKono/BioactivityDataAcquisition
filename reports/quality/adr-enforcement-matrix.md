@@ -22,7 +22,7 @@
 | `ADR-011` | `enforced` | 4 | 1 | - |
 | `ADR-012` | `enforced` | 4 | 1 | - |
 | `ADR-013` | `enforced` | 5 | 1 | - |
-| `ADR-014` | `enforced` | 64 | 19 | - |
+| `ADR-014` | `enforced` | 63 | 18 | - |
 | `ADR-015` | `enforced` | 8 | 1 | - |
 | `ADR-016` | `enforced` | 4 | 1 | - |
 | `ADR-017` | `enforced` | 27 | 1 | - |
@@ -35,7 +35,7 @@
 | `ADR-024` | `enforced` | 27 | 10 | - |
 | `ADR-025` | `enforced` | 19 | 3 | - |
 | `ADR-026` | `enforced` | 61 | 7 | - |
-| `ADR-027` | `enforced` | 29 | 7 | - |
+| `ADR-027` | `enforced` | 28 | 6 | - |
 | `ADR-028` | `enforced` | 30 | 5 | - |
 | `ADR-029` | `enforced` | 26 | 8 | - |
 | `ADR-030` | `enforced` | 4 | 1 | - |
