@@ -204,15 +204,16 @@ DUPLICATION_CLUSTER_GOVERNANCE: tuple[tuple[str, dict[str, str]], ...] = (
         },
     ),
     (
-        "entries.scripts/engineering/qa/report_domain_io_taint_inventory.py",
+        "entries.scripts/",
         {
             "owner": "@bioetl-architecture",
             "decision": "retain_shared_lifecycle_registry_entry",
             "linked_issue": "#5568",
             "review_date": "2026-09-30",
             "rationale": (
-                "The duplicated script-inventory lifecycle row is a quality "
-                "registry mirror and stays explicitly architecture-owned."
+                "Duplicated script-inventory lifecycle rows are quality-registry "
+                "mirrors for sibling tooling entrypoints and stay explicitly "
+                "architecture-owned rather than unresolved review debt."
             ),
         },
     ),
@@ -409,6 +410,14 @@ def _build_duplication_audit() -> dict[str, Any]:
         ):
             # Ignore same-file contract/hash_policy mirrors; the audit tracks
             # reviewable config-surface duplication, not intentional hash aliases.
+            continue
+        if (
+            str(cluster["block_path"]).startswith("entries.scripts/")
+            and len(unique_paths) == 1
+        ):
+            # Same-file scripts lifecycle registry rows share metadata across
+            # sibling entrypoints; that is intentional registry structure, not
+            # multi-surface config debt.
             continue
         by_kind = Counter(entry["surface_kind"] for entry in occurrences)
         affected_files.update(entry["path"] for entry in occurrences)

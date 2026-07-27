@@ -37,6 +37,7 @@ allowed_output_roots:
     - docs/filters/inventory-baseline.csv
     - docs/filters/inventory-baseline.json
     - docs/filters/inventory-baseline.md
+    - docs/00-project/governance/root-local-clutter-cleanup.md
   ignored_docs_exports:
     - docs/exports/
   local_generated_docs_helpers:
@@ -114,7 +115,8 @@ routes:
     commit_policy: tracked_or_local_curated_generated_doc
     outputs:
       - docs/reports/generated/
-    notes: Fallback ownership route for generated documentation reports that live
+    notes:
+      Fallback ownership route for generated documentation reports that live
       under the governed docs/reports generated namespace. More specific routes
       above this entry remain authoritative for known generators.
 
@@ -129,7 +131,8 @@ routes:
       - docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md
       - docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md
       - docs/00-project/ai/agents/policy/SPECIALIST_PROFILE_TEMPLATE.md
-    notes: AI runtime governance mirrors and deprecated alias pages are generated
+    notes:
+      AI runtime governance mirrors and deprecated alias pages are generated
       or drift-checked against runtime source surfaces; docs mirrors do not own
       runtime behavior.
 
@@ -194,7 +197,8 @@ routes:
     commit_policy: tracked_curated_generated_doc
     outputs:
       - docs/03-guides/dashboards/panel-title-inventory.md
-    notes: Dashboard panel title inventory mirrors shipped Grafana dashboard JSON
+    notes:
+      Dashboard panel title inventory mirrors shipped Grafana dashboard JSON
       for documentation and CI drift checks.
 
   - id: api-reference-generated-docs
@@ -332,7 +336,8 @@ routes:
     outputs:
       - reports/quality/full-app-duplication-baseline.json
       - reports/quality/full-app-duplication-baseline.md
-    notes: Reviewed full-app duplication baseline for adapters, pipelines, bootstrap,
+    notes:
+      Reviewed full-app duplication baseline for adapters, pipelines, bootstrap,
       and CLI visibility route to reports/quality.
 
   - id: test-governance-quality-baseline
@@ -350,7 +355,8 @@ routes:
     commit_policy: tracked_quality_baseline
     outputs:
       - reports/quality/flaky-test-burndown-review.json
-    notes: Deterministic flaky-test review evidence is generated from the curated
+    notes:
+      Deterministic flaky-test review evidence is generated from the curated
       inventory and the current tracked test-governance fingerprint.
 
   - id: domain-io-taint-inventory-quality-baseline
@@ -378,7 +384,8 @@ routes:
     outputs:
       - reports/quality/invariant-audit-rebaseline-2026-06-19.json
       - reports/quality/invariant-audit-rebaseline-2026-06-19.md
-    notes: Stale invariant-audit findings are rebaselined against current source,
+    notes:
+      Stale invariant-audit findings are rebaselined against current source,
       test, and GitHub issue anchors before new remediation issues are opened.
 
   - id: weekly-quality-debt-report
@@ -464,7 +471,8 @@ routes:
     commit_policy: tracked_quality_evidence
     outputs:
       - reports/test-telemetry/s7-governance-hotspots.json
-    notes: Reviewed targeted S7 timing evidence supports the canonical pytest shard
+    notes:
+      Reviewed targeted S7 timing evidence supports the canonical pytest shard
       rebalance without being represented as the full-suite telemetry baseline.
 
   - id: architecture-debt-task-backlog-quality-report
@@ -594,6 +602,15 @@ routes:
       - docs/filters/inventory-baseline.md
     notes: Silver filter migration inventory baseline is a committed generated
       docs/control artifact guarded by architecture tests.
+
+  - id: root-local-clutter-cleanup-governance-doc
+    generator: manual-governance-doc
+    output_kind: curated_generated_docs
+    commit_policy: tracked_curated_generated_doc
+    outputs:
+      - docs/00-project/governance/root-local-clutter-cleanup.md
+    notes: Root hygiene cleanup plan is a governed curated docs surface for
+      root-allowlist and local clutter triage.
 
   - id: debt-governance-gates-quality-baseline
     generator: scripts/engineering/qa/report_debt_governance_gates.py
