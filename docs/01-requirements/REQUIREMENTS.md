@@ -3,7 +3,7 @@
 Version: 1.12
 Status: active
 Aligned with: RULES.md v6.1.4 ([source](../00-project/RULES.md))
-Last verified: 2026-07-23
+Last verified: 2026-07-27
 
 ## Purpose and authority
 
@@ -63,7 +63,7 @@ must be updated together with that artifact.
 | Requirement family | Normative rule | Decision | Runtime/config evidence | Verification evidence |
 | --- | --- | --- | --- | --- |
 | `REQ-ARCH-*` | Pure domain, inward dependencies, ports and composition-only DI (`RULES.md` §1) | ADR-005, ADR-048 | `src/bioetl/domain/ports/`, `src/bioetl/composition/` | `tests/architecture/` import, port, DI, and domain-purity guards |
-| `REQ-DATA-*`, `REQ-DELTA-*` | Bronze append-only; Silver/Gold Delta only (no raw Parquet). Silver validation MUST cover schema, nullability, types, and applicable DQ/business constraints; invalid rows stop the write or enter quarantine. Gold validation is strict/fail-closed (`strict=True`). (`RULES.md` §2.1) | ADR-001, ADR-002, ADR-018 | `src/bioetl/infrastructure/storage/`, `src/bioetl/domain/schemas/` | `tests/contract/test_gold_*.py`, storage integration tests, Silver DQ/contract suites |
+| `REQ-DATA-*`, `REQ-DELTA-*` | Bronze append-only; Silver/Gold Delta only (no raw Parquet). The exact final DataFrame MUST pass Pandera validation after the last transformation and immediately before persistence; any post-validation transformation requires re-validation before write. Silver validation MUST cover schema, nullability, types, and applicable DQ/business constraints; invalid rows stop the write or enter quarantine. Gold validation is strict/fail-closed (`strict=True`). (`RULES.md` §2.1) | ADR-001, ADR-002, ADR-018 | `src/bioetl/infrastructure/storage/`, `src/bioetl/domain/schemas/` | `tests/contract/test_gold_*.py`, storage integration tests, Silver DQ/contract suites |
 | `REQ-DQ-*` | DQ contracts, thresholds, quarantine, and bounded metrics (`RULES.md` §2.8, §3.4) | ADR-027, ADR-045 | `configs/quality/`, `src/bioetl/domain/behavior/dq_rule_evaluator.py`, `src/bioetl/domain/value_objects/dq_report.py` | DQ contract, golden, and observability tests |
 | `REQ-BACKFILL-*`, `REQ-CLEAR-*` | Deterministic replay, exclusive rebuild, explicit clear lifecycle (`RULES.md` §2.4, §6.1) | ADR-014, ADR-044, ADR-046 | run manifest, ledger, checkpoint and replay services | replay, reproducibility, lifecycle, and lock tests |
 | `REQ-COMPOSITE-*` | Composite DAG and deterministic merge policy (`RULES.md` §2.9) | ADR-026 | `configs/composites/`, `src/bioetl/domain/composite/` | composite contract, dependency, and golden tests |
@@ -109,7 +109,7 @@ increased as a documentation remedy.
 ## Version history
 
 - v1.12 (2026-07-23): restored the requirements entry point and explicit
-  traceability to all 168 crosswalk rows, `RULES.md` v6.1.5, ADR-001…ADR-050,
+  traceability to all 168 crosswalk rows, `RULES.md` v6.1.4, ADR-001…ADR-050,
   runtime/configuration surfaces, and executable evidence.
 - v6.1 (historical compact catalog): listed selected ADRs but did not provide
   complete requirement-to-evidence traceability.
