@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-pytestmark = pytest.mark.unit
-
-
 import pytest
 
 from scripts.engineering.repo.check_version_consistency import (
@@ -12,6 +9,8 @@ from scripts.engineering.repo.check_version_consistency import (
     extract_docs_governance_version,
     extract_rules_version,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def test_release_and_governance_versions_are_separate_concepts() -> None:
