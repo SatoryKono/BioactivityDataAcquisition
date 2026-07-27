@@ -94,16 +94,26 @@ def test_cross_scope_links_have_required_tooltip_tokens():
 
 
 def test_workflow_dashboard_provenance_banner_makes_scope_split_explicit() -> None:
-    pytest.skip(
-        "bioetl-workflow-overview.json retired in grafana simplification epic "
-        "#6570/#6647; workflow-band evidence lives on bioetl-runtime"
+    """Retired workflow overview dashboard must not reappear in grafana/dashboards."""
+    workflow_overview = Path("grafana/dashboards/bioetl-workflow-overview.json")
+    runtime = Path("grafana/dashboards/bioetl-runtime.json")
+    assert not workflow_overview.exists(), (
+        "bioetl-workflow-overview.json was retired in grafana simplification "
+        "(#6570/#6647); workflow-band evidence lives on bioetl-runtime"
     )
+    assert runtime.is_file(), "bioetl-runtime.json must host workflow-band evidence"
 
 
 def test_workflow_status_panel_repeats_selected_range_contract() -> None:
-    pytest.skip(
-        "bioetl-workflow-overview.json retired in grafana simplification epic "
-        "#6570/#6647; workflow-band evidence lives on bioetl-runtime"
+    """Retired workflow overview contract is enforced via absence + runtime presence."""
+    workflow_overview = Path("grafana/dashboards/bioetl-workflow-overview.json")
+    runtime = Path("grafana/dashboards/bioetl-runtime.json")
+    assert not workflow_overview.exists()
+    assert runtime.is_file()
+    runtime_payload = json.loads(runtime.read_text(encoding="utf-8"))
+    assert isinstance(runtime_payload.get("panels"), list)
+    assert runtime_payload["panels"], (
+        "runtime dashboard must retain workflow-band panels"
     )
 
 

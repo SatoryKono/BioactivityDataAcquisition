@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+pytestmark = pytest.mark.unit
+
+
 import pytest
 
 from scripts.engineering.repo.check_version_consistency import (

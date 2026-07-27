@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+pytestmark = pytest.mark.unit
+
+
 from bioetl.domain.filtering._base_filter_config import BaseFilterConfig
 from bioetl.domain.filtering.column_filter import GoldColumnFilter
 from bioetl.domain.filtering.list_filters import (
@@ -26,7 +29,9 @@ def test_base_filter_private_checkers_and_empty() -> None:
             GoldListLengthFilter(column="tags", min_length=1, max_length=3),
         ),
         list_contains_filters=(
-            GoldListContainsFilter(column="tags", values=frozenset({"a", "b"}), mode="any"),
+            GoldListContainsFilter(
+                column="tags", values=frozenset({"a", "b"}), mode="any"
+            ),
         ),
     )
     assert config.is_empty() is False

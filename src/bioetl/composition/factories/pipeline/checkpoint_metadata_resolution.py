@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.composition.runtime_builders.input_snapshot_resolution import (
     resolve_cached_bronze_input_snapshot_refs,
@@ -20,11 +18,9 @@ from bioetl.domain.filtering.silver_filter_identity import (
     resolve_silver_filter_compatibility_mode,
 )
 
-if TYPE_CHECKING:
-    from bioetl.application.core.base import BasePipeline
 
 
-def _resolve_run_context_payload(pipeline: BasePipeline) -> object | None:
+def _resolve_run_context_payload(pipeline: object) -> object | None:
     """Resolve metadata run_context from pipeline services when available."""
     metadata_coordinator = getattr(pipeline.services, "metadata_coordinator", None)
     if metadata_coordinator is None:
@@ -103,7 +99,7 @@ def _serialize_input_snapshot_ref(
 
 
 def _resolve_input_snapshot_refs(
-    pipeline: BasePipeline,
+    pipeline: object,
 ) -> tuple[dict[str, object], ...]:
     """Resolve manifest-aligned snapshot identities for replay-safe checkpoints."""
     run_context_metadata = _resolve_run_context_metadata(pipeline)
@@ -138,7 +134,7 @@ def _resolve_input_snapshot_refs(
 
 
 def _resolve_run_context_metadata(
-    pipeline: BasePipeline,
+    pipeline: object,
 ) -> dict[str, str | None]:
     """Resolve string metadata fields from the pipeline run context."""
     run_context = _resolve_run_context_payload(pipeline)
@@ -171,7 +167,7 @@ def _resolve_run_context_metadata(
 
 
 def _resolve_checkpoint_snapshot_identity(
-    pipeline: BasePipeline,
+    pipeline: object,
 ) -> tuple[tuple[dict[str, object], ...], tuple[str, ...], str | None]:
     """Resolve serialized snapshot refs plus their checkpoint identity anchors."""
     input_snapshot_refs = _resolve_input_snapshot_refs(pipeline)

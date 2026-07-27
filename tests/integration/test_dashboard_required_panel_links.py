@@ -59,7 +59,12 @@ def test_dq_dashboard_required_panel_links():
 
 def test_workflow_overview_required_panel_links():
     """bioetl-workflow-overview retired; workflow-band lives on runtime."""
-    pytest.skip(
-        "bioetl-workflow-overview.json retired in grafana simplification epic "
-        "#6570/#6647; workflow-band evidence lives on bioetl-runtime"
+    from pathlib import Path
+
+    workflow_overview = Path("grafana/dashboards/bioetl-workflow-overview.json")
+    runtime = Path("grafana/dashboards/bioetl-runtime.json")
+    assert not workflow_overview.exists(), (
+        "bioetl-workflow-overview.json was retired (#6570/#6647); "
+        "workflow-band evidence lives on bioetl-runtime"
     )
+    assert runtime.is_file()

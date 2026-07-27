@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+pytestmark = pytest.mark.unit
+
+
 import json
 
 import pytest

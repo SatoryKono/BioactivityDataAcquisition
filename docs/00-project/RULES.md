@@ -83,7 +83,7 @@ ______________________________________________________________________
 
   Остальные порты (`LoggerPort`, `MetricsPort`, `TracingPort` и т.д.) **MAY** не иметь `@runtime-checkable`.
 
-  > **Текущее состояние:** Все 83 порт декорированы `@runtime-checkable` (100% coverage).
+  > **Текущее состояние:** Все 84 порт декорированы `@runtime-checkable` (100% coverage).
   > Минимальное требование — 4 критических порта выше; остальные декорированы для единообразия.
 
 - **Импорт**: Порты **MUST** импортироваться из фасада (`from bioetl.domain.ports import ...`), а не из внутренних модулей. Это правило относится и к runtime-oriented контрактам (`LoggerPort`, `RunnerFactoryPort`, `RunnablePort`, `RateLimiterPort`, `CircuitBreakerPort`): они по проектной политике остаются в `domain.ports` как чистые cross-layer abstractions, а не считаются infrastructure leakage. Проверяется архитектурным тестом.
