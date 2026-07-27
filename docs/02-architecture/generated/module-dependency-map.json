@@ -1,18 +1,18 @@
 {
   "summary": {
     "scanned_modules": 2269,
-    "total_internal_imports": 7114,
+    "total_internal_imports": 7109,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 306,
     "violations": 0,
-    "source_fingerprint": "f1fffc85849442537e7ea615fd246fad4242faffa27923c7787556ad3caba2fe"
+    "source_fingerprint": "5b488251757e547dcfa2661697d7a11c69eb2f4d48cd9b1b9f56088cf2a41ba6"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1367,
+      "imports": 1364,
       "allowed": true
     },
     {
@@ -36,7 +36,7 @@
     {
       "source": "composition",
       "target": "domain",
-      "imports": 281,
+      "imports": 280,
       "allowed": true
     },
     {
@@ -84,7 +84,7 @@
     {
       "source": "interfaces",
       "target": "interfaces",
-      "imports": 354,
+      "imports": 353,
       "allowed": true
     }
   ],
@@ -240,11 +240,6 @@
       "imports": 21
     },
     {
-      "source": "composition.factories",
-      "target": "domain.types",
-      "imports": 21
-    },
-    {
       "source": "interfaces.cli",
       "target": "composition.control_plane_service_access",
       "imports": 21
@@ -252,6 +247,11 @@
     {
       "source": "composition.bootstrap",
       "target": "application.composite",
+      "imports": 20
+    },
+    {
+      "source": "composition.factories",
+      "target": "domain.types",
       "imports": 20
     },
     {
