@@ -85,6 +85,16 @@ class _ManifestPort:
         return ("manifest",)
 
 
+class _StaticMetricsExposition:
+    def build_exposition(self) -> str:
+        return (
+            "# HELP bioetl_health_server_scrape_up Health server /metrics scrape "
+            "liveness (1=serving).\n"
+            "# TYPE bioetl_health_server_scrape_up gauge\n"
+            "bioetl_health_server_scrape_up 1\n"
+        )
+
+
 class _RoutingHost(HealthServerRoutingMixin):
     def __init__(self) -> None:
         self.sent: list[tuple[str, object, object | None]] = []
@@ -93,6 +103,8 @@ class _RoutingHost(HealthServerRoutingMixin):
         self._checkpoint_port: object | None = object()
         self._run_manifest_port: object | None = _ManifestPort()
         self._run_ledger_port: object | None = object()
+        self._workflow_manifest_port: object | None = object()
+        self._metrics_exposition = _StaticMetricsExposition()
         self._clock: object | None = _Clock()
         self._prometheus_base_url = "http://prometheus.test"
         self._forensic_endpoint_limiter = asyncio.Semaphore(4)

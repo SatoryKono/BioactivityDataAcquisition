@@ -74,7 +74,7 @@ class TestDQConfigExtended:
     def test_d_q_config_extended__default_values__b30b68aa(self) -> None:
         dq = DQConfig()
         assert dq.soft_fail_threshold == pytest.approx(0.05)
-        assert dq.hard_fail_threshold == pytest.approx(0.20)
+        assert dq.hard_fail_threshold == pytest.approx(0.50)
         assert dq.strict_validation is False
         assert dq.invalid_record_policy == "quarantine"
         assert dq.field_validations == ()

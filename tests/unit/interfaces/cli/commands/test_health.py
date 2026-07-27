@@ -750,6 +750,7 @@ class TestHealthServerAsyncExecution:
                 run_manifest_port=mock_deps.run_manifest_port,
                 run_ledger_port=mock_deps.run_ledger_port,
                 workflow_manifest_port=mock_deps.workflow_manifest_port,
+                metrics_exposition=mock_deps.metrics_exposition,
             ),
         )
         mock_server.set_data_root.assert_called_once_with(str(tmp_path))
@@ -808,6 +809,7 @@ class TestHealthServerAsyncExecution:
                 run_manifest_port=mock_deps.run_manifest_port,
                 run_ledger_port=mock_deps.run_ledger_port,
                 workflow_manifest_port=mock_deps.workflow_manifest_port,
+                metrics_exposition=mock_deps.metrics_exposition,
             ),
         )
         mock_server.set_data_root.assert_called_once_with(str(tmp_path))

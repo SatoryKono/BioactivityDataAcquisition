@@ -21,7 +21,7 @@ class TestDQConfig:
         config = DQConfig()
 
         assert config.soft_fail_threshold == pytest.approx(0.05)
-        assert config.hard_fail_threshold == pytest.approx(0.20)
+        assert config.hard_fail_threshold == pytest.approx(0.50)
 
     def test_dq_config_accepts_custom_threshold_values(self) -> None:
         """Test custom threshold values."""
