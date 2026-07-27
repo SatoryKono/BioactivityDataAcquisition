@@ -104,6 +104,11 @@ specific operator-facing subcommand:
 
 ```bash
 curl http://localhost:8000/metrics | grep bioetl_
+# Non-stub health scrape contract (#6731/#6738): must include liveness series.
+curl -sS http://localhost:8000/metrics | grep -E 'bioetl_health_server_scrape_up'
+# After rebuild/redeploy of the bioetl container, Prom should scrape:
+#   bioetl_health_server_scrape_up{job="bioetl"} == 1
+# Comment-only body "# BioETL health server scrape endpoint" means a stale process.
 ```
 
 ### 2. Log Correlation Contract
