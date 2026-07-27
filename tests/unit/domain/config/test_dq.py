@@ -59,7 +59,7 @@ class TestDQConfig:
     def test_dq_config_default_values(self) -> None:
         config = DQConfig()
         assert config.soft_fail_threshold == pytest.approx(0.05)
-        assert config.hard_fail_threshold == pytest.approx(0.20)
+        assert config.hard_fail_threshold == pytest.approx(0.50)
         assert config.strict_validation is False
         assert config.field_validations == ()
         assert config.cross_field_validations == ()

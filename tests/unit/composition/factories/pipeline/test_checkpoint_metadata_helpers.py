@@ -259,7 +259,7 @@ def test_build_current_checkpoint_metadata_prefers_manifest_snapshot_identity(
         immutable_uri="bronze://chembl/activity/manifest.jsonl.zst",
     )
     monkeypatch.setattr(
-        "bioetl.composition.factories.pipeline.checkpoint_metadata_helpers.resolve_manifest_input_snapshot_refs",
+        "bioetl.composition.factories.pipeline.checkpoint_metadata_resolution.resolve_manifest_input_snapshot_refs",
         lambda **_: (manifest_snapshot,),
     )
 

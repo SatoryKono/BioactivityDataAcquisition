@@ -653,7 +653,8 @@ class TestPostrunServiceIntegrationWithDataQualityService:
         mock_executor,
     ):
         """Test full flow using real DataQualityService (no dq_monitor)."""
-        # Create real DataQualityService
+        # Create real DataQualityService with explicit hard threshold for this scenario
+        pipeline_config.dq.hard_fail_threshold = 0.20
         dq_service = DataQualityService(
             dq_monitor=None,
             config=pipeline_config.dq,
@@ -702,10 +703,13 @@ class TestPostrunServiceIntegrationWithDataQualityService:
         executor.records_gold = 70
         executor.records_quarantined = 25
 
-        # Create real DataQualityService
+        # Create real DataQualityService with explicit hard threshold for this scenario
+        from dataclasses import replace
+
+        dq_config = replace(pipeline_config.dq, hard_fail_threshold=0.20)
         dq_service = DataQualityService(
             dq_monitor=None,
-            config=pipeline_config.dq,
+            config=dq_config,
             logger=mock_logger,
             metrics=mock_metrics,
             pipeline_name=pipeline_config.pipeline_name,
