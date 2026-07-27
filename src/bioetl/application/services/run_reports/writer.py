@@ -18,8 +18,11 @@ from bioetl.domain.run_reports.models import PipelineRunReport, WorkflowRunRepor
 
 DEFAULT_REPORT_ROOT = Path("reports") / "run-reports"
 
-_DISABLED_ENV_VALUES = frozenset({"0", "false", "no", "off"})
-_ENABLED_ENV_VALUES = frozenset({"1", "true", "yes", "on"})
+# Application must not read process env maps or import infrastructure Settings.
+# Tests and composition can inject an explicit override; under pytest the
+# runtime is treated as test mode so Windows cloud-synced worktrees do not
+# stall on fsync during incidental report writes.
+_TEST_MODE_OVERRIDE: bool | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -29,6 +32,21 @@ class RunReportWriteResult:
     json_path: Path
     markdown_path: Path
     latest_path: Path | None = None
+
+
+def set_report_write_test_mode(enabled: bool | None) -> None:
+    """Override test-mode detection for report durability policy."""
+    global _TEST_MODE_OVERRIDE
+    _TEST_MODE_OVERRIDE = enabled
+
+
+def _is_report_write_test_mode() -> bool:
+    if _TEST_MODE_OVERRIDE is not None:
+        return _TEST_MODE_OVERRIDE
+    # Avoid process env maps: detect pytest runtime without Settings.
+    import sys
+
+    return "pytest" in sys.modules
 
 
 def _safe_segment(value: str) -> str:
@@ -73,12 +91,7 @@ def _should_fsync_report_writes(*, os_name: str | None = None) -> bool:
     current_os_name = os.name if os_name is None else os_name
     if current_os_name != "nt":
         return True
-    env_value = os.environ.get("BIOETL_TEST_MODE", "").strip().lower()
-    if env_value in _ENABLED_ENV_VALUES:
-        return False
-    if env_value in _DISABLED_ENV_VALUES:
-        return True
-    return True
+    return not _is_report_write_test_mode()
 
 
 def _flush_report_file_descriptor(file_descriptor: int) -> None:

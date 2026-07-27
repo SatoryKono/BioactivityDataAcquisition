@@ -101,6 +101,7 @@
     "bioetl_runtime_current_failure_signals_15m",
     "bioetl_runtime_current_status",
     "bioetl_runtime_current_status_scoped",
+    "bioetl_runtime_error_rate_30m",
     "bioetl_runtime_pipeline_run_type_universe",
     "bioetl_runtime_pipeline_run_type_universe_scoped",
     "bioetl_runtime_trust_gap_active_10m",
@@ -327,6 +328,7 @@
     "bioetl_runtime_current_blocker_reason_scoped",
     "bioetl_runtime_current_status",
     "bioetl_runtime_current_status_trusted",
+    "bioetl_runtime_error_rate_30m",
     "bioetl_runtime_pipeline_run_type_universe",
     "bioetl_runtime_pipeline_run_type_universe_scoped",
     "bioetl_runtime_status",
@@ -674,6 +676,7 @@
     "bioetl_runtime_current_status",
     "bioetl_runtime_current_status_scoped",
     "bioetl_runtime_current_status_trusted",
+    "bioetl_runtime_error_rate_30m",
     "bioetl_runtime_pipeline_run_type_universe",
     "bioetl_runtime_pipeline_run_type_universe_scoped",
     "bioetl_runtime_status",
@@ -1724,11 +1727,9 @@
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "docs/03-guides/dashboards/variable-reference.md",
       "grafana/README.md",
-      "grafana/dashboards/bioetl-alerts-slo.json",
       "grafana/dashboards/bioetl-dq-v2.json",
       "grafana/dashboards/bioetl-overview-v2.json",
-      "grafana/dashboards/bioetl-provider-health-v2.json",
-      "grafana/dashboards/bioetl-workflow-overview.json"
+      "grafana/dashboards/bioetl-provider-health-v2.json"
     ],
     "bioetl_phase_duration_seconds": [
       "docs/03-guides/metrics-monitoring.md",
@@ -1759,6 +1760,7 @@
     ],
     "bioetl_pipeline_runs_total": [
       "docs/03-guides/dashboards/contracts/selector-contracts.yaml",
+      "docs/03-guides/dashboards/contracts/synthetic-zero-policy.yaml",
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
@@ -1770,8 +1772,7 @@
       "docs/05-operations/sli-slo-baseline.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-overview-v2.json",
-      "grafana/dashboards/bioetl-runtime.json",
-      "grafana/dashboards/bioetl-workflow-overview.json"
+      "grafana/dashboards/bioetl-runtime.json"
     ],
     "bioetl_pipeline_stage_expected": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
@@ -2130,6 +2131,9 @@
       "grafana/README.md",
       "grafana/dashboards/bioetl-runtime.json"
     ],
+    "bioetl_runtime_error_rate_30m": [
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
     "bioetl_runtime_pipeline_run_type_universe": [
       "docs/03-guides/dashboards/README.md",
       "docs/03-guides/dashboards/contracts/selector-contracts.yaml",
@@ -2315,8 +2319,7 @@
       "docs/03-guides/dashboards/panels/bioetl-workflow-overview-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
-      "docs/04-reference/observability/metrics-catalog.md",
-      "grafana/dashboards/bioetl-workflow-overview.json"
+      "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_workflow_reconciliation_rows_deleted_total": [
       "docs/04-reference/observability/metrics-catalog.md"
@@ -2347,7 +2350,7 @@
       "docs/03-guides/dashboards/variable-reference.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md",
-      "grafana/dashboards/bioetl-workflow-overview.json"
+      "grafana/dashboards/bioetl-runtime.json"
     ],
     "bioetl_workflow_status": [
       "docs/04-reference/observability/metrics-catalog.md"
@@ -2360,7 +2363,7 @@
       "docs/03-guides/dashboards/panels/bioetl-workflow-overview-panels.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md",
-      "grafana/dashboards/bioetl-workflow-overview.json"
+      "grafana/dashboards/bioetl-runtime.json"
     ],
     "bioetl_workflow_universe": [
       "docs/03-guides/dashboards/variable-reference.md",
@@ -2369,8 +2372,7 @@
       "grafana/dashboards/bioetl-dq-v2.json",
       "grafana/dashboards/bioetl-overview-v2.json",
       "grafana/dashboards/bioetl-provider-health-v2.json",
-      "grafana/dashboards/bioetl-runtime.json",
-      "grafana/dashboards/bioetl-workflow-overview.json"
+      "grafana/dashboards/bioetl-runtime.json"
     ]
   },
   "documented_only_metrics": [],
@@ -3137,6 +3139,7 @@
     "bioetl_runtime_current_status",
     "bioetl_runtime_current_status_scoped",
     "bioetl_runtime_current_status_trusted",
+    "bioetl_runtime_error_rate_30m",
     "bioetl_runtime_pipeline_run_type_universe",
     "bioetl_runtime_pipeline_run_type_universe_scoped",
     "bioetl_runtime_status",
@@ -3516,6 +3519,9 @@
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
     "bioetl_runtime_current_status_scoped": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_error_rate_30m": [
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
     "bioetl_runtime_pipeline_run_type_universe": [
@@ -4348,7 +4354,6 @@
       "src/bioetl/application/observability/observer_health_mixin.py"
     ],
     "bioetl_health_check_success_total": [
-      "src/bioetl/application/observability/observer_context_mixin.py",
       "src/bioetl/infrastructure/adapters/_health_check_observability.py"
     ],
     "bioetl_http_request_duration_seconds": [

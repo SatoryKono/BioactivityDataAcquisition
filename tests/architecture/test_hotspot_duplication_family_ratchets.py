@@ -15,10 +15,10 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SCORECARD_PATH = PROJECT_ROOT / "configs/quality/debt_scorecard.yaml"
 ISSUE_BACKED_HOTSPOT_FAMILIES = {
     "application_services_control_plane": "#4547",
-    "composition_runtime_builders": "#4552",
 }
 ACTIVE_ISSUE_BACKED_HOTSPOT_FAMILIES = {
     "composition_bootstrap_runtime": "#4548",
+    "composition_runtime_builders": "#6621",
 }
 ACTIVE_HOTSPOT_CLOSEOUT_FAMILIES = {
     "composition_factories_pipeline",

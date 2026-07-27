@@ -11,8 +11,42 @@
     "exclude_actionability_categories": []
   },
   "trend": {
-    "status": "no_prior_snapshot",
-    "snapshot_date": "2026-07-27"
+    "status": "compared_to_previous",
+    "snapshot_date": "2026-07-27",
+    "previous_snapshot_date": "2026-07-22",
+    "total_duplicate_cluster_delta": -13,
+    "targets": [
+      {
+        "target": "src/bioetl/application/core",
+        "current_duplicate_count": 0,
+        "previous_duplicate_count": 0,
+        "delta_duplicate_count": 0
+      },
+      {
+        "target": "src/bioetl/composition/bootstrap/runtime",
+        "current_duplicate_count": 0,
+        "previous_duplicate_count": 1,
+        "delta_duplicate_count": -1
+      },
+      {
+        "target": "src/bioetl/composition/factories/pipeline",
+        "current_duplicate_count": 0,
+        "previous_duplicate_count": 1,
+        "delta_duplicate_count": -1
+      },
+      {
+        "target": "src/bioetl/application/services/control_plane",
+        "current_duplicate_count": 0,
+        "previous_duplicate_count": 0,
+        "delta_duplicate_count": 0
+      },
+      {
+        "target": "src/bioetl/composition/runtime_builders",
+        "current_duplicate_count": 0,
+        "previous_duplicate_count": 5,
+        "delta_duplicate_count": -5
+      }
+    ]
   },
   "reduction_leverage_ranking": [
     {

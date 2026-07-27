@@ -6,369 +6,369 @@
 # Documentation files that are allowed to use UPPER_CASE names.
 # These are conventional files recognized by GitHub and standard tooling.
 documentation_exceptions:
-    - README.md           # Standard project readme
-    - CHANGELOG.md        # Standard changelog (Keep a Changelog format)
-    - REQUIREMENTS.md     # Project requirements document
-    - RULES.md            # Project rules/constitution
-    - CONTRIBUTING.md     # Contribution guidelines
-    - SECURITY.md         # Security policy
-    - LICENSE.md          # License file
-    - CLAUDE.md           # Claude Code instructions
-    - AGENT.md            # Agent instructions (Jules)
-    - SKILL.md            # Skill instruction files
-    - INDEX.md            # Index / navigation hubs
-    - ORCHESTRATION.md    # Runtime orchestration docs
-    - TOOLS.md            # Tool reference docs
-    - CODEX.md            # Codex runtime docs
-    - GEMINI.md           # Gemini runtime docs
-    # Governance-approved legacy docs retained without bulk rename churn.
-    - docs/DOCKER_QUICKSTART.md    # Legacy root setup/troubleshooting entrypoint
-    - docs/DOCKER_SETUP.md         # Legacy root setup/troubleshooting entrypoint
-    - docs/00-project/NORMATIVE_SOURCES.md
-    - docs/99-archive/legacy-05-architecture/COMPLEX_COMPONENTS_DOCUMENTATION.md
-    - docs/99-archive/legacy-05-architecture/EXECUTION_LOG_2024-08-21.md
-    - docs/99-archive/legacy-05-architecture/IMPLEMENTATION_PLAN.md
-    - docs/99-archive/legacy-05-architecture/NEXT_STEPS.md
-    - docs/99-archive/legacy-05-architecture/TECHNICAL_DEBT_REDUCTION_SUMMARY.md
-    - docs/99-archive/legacy-05-architecture/TECHNICAL_DEBT_TRACKING.md
-    - docs/05-engineering/normalization_plan_P0_P6.md
-    - docs/99-archive/legacy-05-architecture/decisions/LEGACY-ADR-035-composite-checkpoint-state-analysis.md
-    - docs/99-archive/legacy-05-architecture/decisions/LEGACY-ADR-036-enrichment-coordinator-architecture.md
-    - docs/99-archive/legacy-05-architecture/decisions/LEGACY-ADR-037-runner-stage-mixin-architecture.md
-    - docs/99-archive/legacy-05-architecture/decisions/LEGACY-ADR-038-http-client-retry-patterns.md
-    - docs/99-archive/legacy-05-architecture/decisions/LEGACY-ADR-039-god-objects-decomposition.md
-    - docs/fixes/cross_platform_test_setup.md
-    - docs/fixes/test_dependency_fixes.md
-    - docs/refactoring_plans/runtime_metadata_factory_refactoring_plan.md
-    - docs/99-archive/legacy-05-architecture/analysis/COORDINATOR_COMPLEXITY_ANALYSIS.md
-    - docs/99-archive/legacy-05-architecture/analysis/GOD_OBJECTS_DECOMPOSITION_ANALYSIS.md
-    - docs/99-archive/legacy-05-architecture/analysis/NEO4J_MEMORY_TECHNICAL_DEBT_ANALYSIS.md
-    - docs/99-archive/legacy-05-architecture/analysis/RUNNER_MIXIN_ARCHITECTURE_ANALYSIS.md
-    - docs/05-operations/tooling/scripts-ops/00_START_HERE.md
-    - docs/05-operations/tooling/scripts-ops/CODEX_QUICK_REF.md
-    - docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md
-    - docs/05-operations/tooling/scripts-ops/CODEX_WSL_QUICK_REF.md
-    - docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md
-    - docs/05-operations/tooling/scripts-ops/HOW_TO_RUN.md
-    - docs/05-operations/tooling/scripts-ops/INSTALLATION_COMPLETE.md
-    - docs/05-operations/tooling/scripts-ops/QUICK_START.md
-    - docs/05-operations/tooling/scripts-ops/SETUP_CHECKLIST.md
-    - docs/05-operations/tooling/scripts-ops/SMOKE_TEST_README.md
-    - docs/05-operations/tooling/scripts-ops/WSL_SETUP_SUMMARY.md
-    - docs/plugins/link_checker/INTEGRATION_GUIDE.md
+  - README.md # Standard project readme
+  - CHANGELOG.md # Standard changelog (Keep a Changelog format)
+  - REQUIREMENTS.md # Project requirements document
+  - RULES.md # Project rules/constitution
+  - CONTRIBUTING.md # Contribution guidelines
+  - SECURITY.md # Security policy
+  - LICENSE.md # License file
+  - CLAUDE.md # Claude Code instructions
+  - AGENT.md # Agent instructions (Jules)
+  - SKILL.md # Skill instruction files
+  - INDEX.md # Index / navigation hubs
+  - ORCHESTRATION.md # Runtime orchestration docs
+  - TOOLS.md # Tool reference docs
+  - CODEX.md # Codex runtime docs
+  - GEMINI.md # Gemini runtime docs
+  # Governance-approved legacy docs retained without bulk rename churn.
+  - docs/DOCKER_QUICKSTART.md # Legacy root setup/troubleshooting entrypoint
+  - docs/DOCKER_SETUP.md # Legacy root setup/troubleshooting entrypoint
+  - docs/00-project/NORMATIVE_SOURCES.md
+  - docs/99-archive/legacy-05-architecture/COMPLEX_COMPONENTS_DOCUMENTATION.md
+  - docs/99-archive/legacy-05-architecture/EXECUTION_LOG_2024-08-21.md
+  - docs/99-archive/legacy-05-architecture/IMPLEMENTATION_PLAN.md
+  - docs/99-archive/legacy-05-architecture/NEXT_STEPS.md
+  - docs/99-archive/legacy-05-architecture/TECHNICAL_DEBT_REDUCTION_SUMMARY.md
+  - docs/99-archive/legacy-05-architecture/TECHNICAL_DEBT_TRACKING.md
+  - docs/05-engineering/normalization_plan_P0_P6.md
+  - docs/99-archive/legacy-05-architecture/decisions/LEGACY-ADR-035-composite-checkpoint-state-analysis.md
+  - docs/99-archive/legacy-05-architecture/decisions/LEGACY-ADR-036-enrichment-coordinator-architecture.md
+  - docs/99-archive/legacy-05-architecture/decisions/LEGACY-ADR-037-runner-stage-mixin-architecture.md
+  - docs/99-archive/legacy-05-architecture/decisions/LEGACY-ADR-038-http-client-retry-patterns.md
+  - docs/99-archive/legacy-05-architecture/decisions/LEGACY-ADR-039-god-objects-decomposition.md
+  - docs/fixes/cross_platform_test_setup.md
+  - docs/fixes/test_dependency_fixes.md
+  - docs/refactoring_plans/runtime_metadata_factory_refactoring_plan.md
+  - docs/99-archive/legacy-05-architecture/analysis/COORDINATOR_COMPLEXITY_ANALYSIS.md
+  - docs/99-archive/legacy-05-architecture/analysis/GOD_OBJECTS_DECOMPOSITION_ANALYSIS.md
+  - docs/99-archive/legacy-05-architecture/analysis/NEO4J_MEMORY_TECHNICAL_DEBT_ANALYSIS.md
+  - docs/99-archive/legacy-05-architecture/analysis/RUNNER_MIXIN_ARCHITECTURE_ANALYSIS.md
+  - docs/05-operations/tooling/scripts-ops/00_START_HERE.md
+  - docs/05-operations/tooling/scripts-ops/CODEX_QUICK_REF.md
+  - docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md
+  - docs/05-operations/tooling/scripts-ops/CODEX_WSL_QUICK_REF.md
+  - docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md
+  - docs/05-operations/tooling/scripts-ops/HOW_TO_RUN.md
+  - docs/05-operations/tooling/scripts-ops/INSTALLATION_COMPLETE.md
+  - docs/05-operations/tooling/scripts-ops/QUICK_START.md
+  - docs/05-operations/tooling/scripts-ops/SETUP_CHECKLIST.md
+  - docs/05-operations/tooling/scripts-ops/SMOKE_TEST_README.md
+  - docs/05-operations/tooling/scripts-ops/WSL_SETUP_SUMMARY.md
+  - docs/plugins/link_checker/INTEGRATION_GUIDE.md
 
 # Root-level files that may use non-standard naming
 root_file_exceptions:
-    - Makefile            # Standard build file
-    - Dockerfile          # Standard container file
-    - pyproject.toml      # Standard Python project config
+  - Makefile # Standard build file
+  - Dockerfile # Standard container file
+  - pyproject.toml # Standard Python project config
 
 # Classes without standard suffixes (domain entities, enums, value objects)
 # These are exempt from the suffix requirement in RULES.md §2.1
 class_suffix_exceptions:
-    # Domain Entities (business objects)
-    domain_entities:
-        - Activity
-        - Assay
-        - Target
-        - TargetComponent
-        - Molecule
-        # Canonical names (v2.0 - ADR-024)
-        - ChemblPublication  # Replaces Document (no alias - direct migration)
-        - PubchemMolecule    # Replaces Compound (no alias - direct migration)
-        - UniprotTarget      # Replaces Protein (no alias - direct migration)
-        # NOTE: Deprecated aliases (Document, Compound, Protein) have no active
-        # domain export shim. Per ADR-024 update (2026-01-21), the codebase was
-        # migrated directly to canonical names without backward compatibility shims.
-        # Other publication entities
-        - Publication
+  # Domain Entities (business objects)
+  domain_entities:
+    - Activity
+    - Assay
+    - Target
+    - TargetComponent
+    - Molecule
+    # Canonical names (v2.0 - ADR-024)
+    - ChemblPublication # Replaces Document (no alias - direct migration)
+    - PubchemMolecule # Replaces Compound (no alias - direct migration)
+    - UniprotTarget # Replaces Protein (no alias - direct migration)
+    # NOTE: Deprecated aliases (Document, Compound, Protein) have no active
+    # domain export shim. Per ADR-024 update (2026-01-21), the codebase was
+    # migrated directly to canonical names without backward compatibility shims.
+    # Other publication entities
+    - Publication
 
-    # Enums (inherently self-describing)
-    enums:
-        - Layer
-        - WriteMode
-        - SilverWriteMode
-        - GoldWriteMode
-        - ClearPolicy
-        - RunType
-        - HealthStatus
-        - DriftLevel
-        - CircuitBreakerState
-        - DataClassification
-        - ErrorType
-        - DQStatus
-        - LifecyclePhase
-        - AuditOperation
-        - AuditLayer
-        - AnomalyType
-        - AnomalySeverity
+  # Enums (inherently self-describing)
+  enums:
+    - Layer
+    - WriteMode
+    - SilverWriteMode
+    - GoldWriteMode
+    - ClearPolicy
+    - RunType
+    - HealthStatus
+    - DriftLevel
+    - CircuitBreakerState
+    - DataClassification
+    - ErrorType
+    - DQStatus
+    - LifecyclePhase
+    - AuditOperation
+    - AuditLayer
+    - AnomalyType
+    - AnomalySeverity
 
-    # TypedDict classes (suffix 'Dict' is implicit)
-    typed_dicts:
-        - BronzeRecord
-        - SilverRecord
-        - RawDate
-        - NormalizedDate
-        - RawAuthor
-        - RawIdentifiers
-        - NormalizedIdentifiers
-        - RawClassification
-        - NormalizedClassification
-        # And all *Dict classes
+  # TypedDict classes (suffix 'Dict' is implicit)
+  typed_dicts:
+    - BronzeRecord
+    - SilverRecord
+    - RawDate
+    - NormalizedDate
+    - RawAuthor
+    - RawIdentifiers
+    - NormalizedIdentifiers
+    - RawClassification
+    - NormalizedClassification
+    # And all *Dict classes
 
-    # Value objects and simple results
-    value_objects:
-        - Anomaly
-        - ClearDecision
-        - ClearResult
-        - CleanupPreview
-        - CleanupResult
-        - LayerInfo
-        - TransformResult
-        - TransformedRecord
-        - BatchResult
-        - DQResult
-        - VacuumResult
-        - ValidationResult
-        - HealthReport
-        - PreflightReport
-        - ComponentHealthResult
-        - FilterLoadResult
-        - MemoryStats
-        - ProviderHealthState
-        - ShutdownSignal
-        - AuditEntry
-        - LockContext
-        - PipelineEvent
-        - RetryPolicy
-        - LineageRecord
-        - BatchLineage
-        - HistoricalReplaySnapshotCertification  # Application-layer value object for certification evidence
-        - HistoricalReplayCertifiabilityInventory  # Application-layer value object for certifiability state
+  # Value objects and simple results
+  value_objects:
+    - Anomaly
+    - ClearDecision
+    - ClearResult
+    - CleanupPreview
+    - CleanupResult
+    - LayerInfo
+    - TransformResult
+    - TransformedRecord
+    - BatchResult
+    - DQResult
+    - VacuumResult
+    - ValidationResult
+    - HealthReport
+    - PreflightReport
+    - ComponentHealthResult
+    - FilterLoadResult
+    - MemoryStats
+    - ProviderHealthState
+    - ShutdownSignal
+    - AuditEntry
+    - LockContext
+    - PipelineEvent
+    - RetryPolicy
+    - LineageRecord
+    - BatchLineage
+    - HistoricalReplaySnapshotCertification # Application-layer value object for certification evidence
+    - HistoricalReplayCertifiabilityInventory # Application-layer value object for certifiability state
 
-    # Context and configuration objects
-    contexts:
-        - InputFilterContext
-        - VacuumConfig
-        - PipelineContext
-        - PipelineRunContext
-        - StorageContext
-        - ObservabilityBundle
-        - RunnerServices
-        - PipelineServices
-        - PipelineDefinition
-        - ProviderConfig
-        - HttpConfig
-        - RunOptions
-        - VacuumOptions
-        - ArchiveOptions
-        - RecordProcessorConfig
-        - MemoryConfig
+  # Context and configuration objects
+  contexts:
+    - InputFilterContext
+    - VacuumConfig
+    - PipelineContext
+    - PipelineRunContext
+    - StorageContext
+    - ObservabilityBundle
+    - RunnerServices
+    - PipelineServices
+    - PipelineDefinition
+    - ProviderConfig
+    - HttpConfig
+    - RunOptions
+    - VacuumOptions
+    - ArchiveOptions
+    - RecordProcessorConfig
+    - MemoryConfig
 
-    # Base classes (prefix 'Base' is sufficient)
-    base_classes:
-        - BaseEntity
-        - BasePipeline
-        - BaseTransformer
-        - BaseHttpAdapter
-        - BaseSyncAdapter
-        - BaseFieldExtractor
-        - BaseChemblTransformer
-        - BaseServicesFactory
-        - RequiredEntityFields
+  # Base classes (prefix 'Base' is sufficient)
+  base_classes:
+    - BaseEntity
+    - BasePipeline
+    - BaseTransformer
+    - BaseHttpAdapter
+    - BaseSyncAdapter
+    - BaseFieldExtractor
+    - BaseChemblTransformer
+    - BaseServicesFactory
+    - RequiredEntityFields
 
-    # Policy classes
-    policies:
-        - MedallionPolicy
-        - WriteModePolicy
+  # Policy classes
+  policies:
+    - MedallionPolicy
+    - WriteModePolicy
 
-    # Filter classes
-    filters:
-        - GoldRangeFilter
-        - GoldColumnFilter
-        - GoldListLengthFilter
-        - GoldListContainsFilter
-        - GoldFilterConfig
-        - InputFilterConfig
-        - FilteredDataSource
+  # Filter classes
+  filters:
+    - GoldRangeFilter
+    - GoldColumnFilter
+    - GoldListLengthFilter
+    - GoldListContainsFilter
+    - GoldFilterConfig
+    - InputFilterConfig
+    - FilteredDataSource
 
 # Function prefix exceptions
 # Functions that don't require standard prefixes (get_, fetch_, create_, etc.)
 function_prefix_exceptions:
-    # CLI entry points
-    - main
-    - cli
-    - run
+  # CLI entry points
+  - main
+  - cli
+  - run
 
-    # Event handlers (naming is descriptive)
-    - vacuum_command
-    - archive_command
-    - quarantine
-    - checkpoint
-    - maintenance
+  # Event handlers (naming is descriptive)
+  - vacuum_command
+  - archive_command
+  - quarantine
+  - checkpoint
+  - maintenance
 
-    # Magic/dunder methods are exempt
-    # - __init__, __call__, etc.
+  # Magic/dunder methods are exempt
+  # - __init__, __call__, etc.
 
 # Canonical role suffix registry.
 # scripts/engineering/qa/naming_audit.py and architecture tests both load this
 # section; update it first when introducing or retiring role suffixes.
 role_suffix_families:
-    Factory: [Factory]
-    Client: [Client]
-    Facade: [Facade]
-    Registry: [Registry]
-    Adapter: [Adapter]
-    Protocol: [Protocol, Port, ABC]
-    Config: [Config, Model, Params, Settings]
-    Error: [Error, Exception]
-    Impl: [Impl]
-    Service: [Service, Services]
-    Writer: [Writer]
-    Manager: [Manager]
-    Monitor: [Monitor]
-    Tracker: [Tracker]
-    Builder: [Builder]
-    Validator: [Validator]
-    Exporter: [Exporter]
-    Transformer: [Transformer]
-    Pipeline: [Pipeline]
-    Observer: [Observer]
-    Handler: [Handler]
-    Processor: [Processor]
-    Recorder: [Recorder]
-    Aggregator: [Aggregator]
-    Orchestrator: [Orchestrator]
-    Collector: [Collector]
-    Assembler: [Assembler]
-    Result: [Result]
-    Extractor: [Extractor]
-    Source: [Source]
-    Callback: [Callback]
-    Analyzer: [Analyzer]
-    Coordinator: [Coordinator]
-    Runner: [Runner]
-    Executor: [Executor]
-    RuntimeService: [RuntimeService]
-    Command: [Command]
-    Orderer: [Orderer]
-    Renamer: [Renamer]
-    Deduplicator: [Deduplicator]
-    Helper: [Helper]
-    Parser: [Parser]
-    Utils: [Utils]
-    Task: [Task]
-    Spec: [Spec]
-    Group: [Group]
-    Context: [Context]
-    Summary: [Summary]
-    Reason: [Reason]
-    Planner: [Planner]
-    Policy: [Policy]
-    Resolver: [Resolver]
-    Generator: [Generator]
-    Calculator: [Calculator]
-    Checker: [Checker]
-    Mixin: [Mixin]
-    Callable: [Callable]
-    ValueObject:
-        [
-            Info,
-            Record,
-            Request,
-            Status,
-            Options,
-            State,
-            Preview,
-            Phase,
-            Issue,
-            Ids,
-            Date,
-            Identifiers,
-            Classification,
-            Signal,
-            Affiliation,
-            Author,
-            Raw,
-            Output,
-            Outcome,
-            Entry,
-            Dependencies,
-            Components,
-            Collaborators,
-            Snapshot,
-            Owner,
-            Completion,
-        ]
+  Factory: [Factory]
+  Client: [Client]
+  Facade: [Facade]
+  Registry: [Registry]
+  Adapter: [Adapter]
+  Protocol: [Protocol, Port, ABC, Host]
+  Config: [Config, Model, Params, Settings]
+  Error: [Error, Exception]
+  Impl: [Impl]
+  Service: [Service, Services]
+  Writer: [Writer]
+  Manager: [Manager]
+  Monitor: [Monitor]
+  Tracker: [Tracker]
+  Builder: [Builder]
+  Validator: [Validator]
+  Exporter: [Exporter]
+  Transformer: [Transformer]
+  Pipeline: [Pipeline]
+  Observer: [Observer]
+  Handler: [Handler]
+  Processor: [Processor]
+  Recorder: [Recorder]
+  Aggregator: [Aggregator]
+  Orchestrator: [Orchestrator]
+  Collector: [Collector]
+  Assembler: [Assembler]
+  Result: [Result]
+  Extractor: [Extractor]
+  Source: [Source]
+  Callback: [Callback]
+  Analyzer: [Analyzer]
+  Coordinator: [Coordinator]
+  Runner: [Runner]
+  Executor: [Executor]
+  RuntimeService: [RuntimeService]
+  Command: [Command]
+  Orderer: [Orderer]
+  Renamer: [Renamer]
+  Deduplicator: [Deduplicator]
+  Helper: [Helper]
+  Parser: [Parser]
+  Utils: [Utils]
+  Task: [Task]
+  Spec: [Spec]
+  Group: [Group]
+  Context: [Context]
+  Summary: [Summary]
+  Reason: [Reason]
+  Planner: [Planner]
+  Policy: [Policy]
+  Resolver: [Resolver]
+  Generator: [Generator]
+  Calculator: [Calculator]
+  Checker: [Checker]
+  Mixin: [Mixin]
+  Callable: [Callable]
+  ValueObject:
+    [
+      Info,
+      Record,
+      Request,
+      Status,
+      Options,
+      State,
+      Preview,
+      Phase,
+      Issue,
+      Ids,
+      Date,
+      Identifiers,
+      Classification,
+      Signal,
+      Affiliation,
+      Author,
+      Raw,
+      Output,
+      Outcome,
+      Entry,
+      Dependencies,
+      Components,
+      Collaborators,
+      Snapshot,
+      Owner,
+      Completion,
+    ]
 
 # Pipeline naming format
 # Pipeline IDs follow the format: {provider}_{entity}
 # They are stable external identifiers for CLI/config/public surfaces and may
 # intentionally differ from canonical domain entity names defined by ADR-024.
 pipeline_id_format:
-    pattern: "{provider}_{entity}"
-    examples:
-        - chembl_activity
-        - chembl_assay
-        - chembl_target
-        - chembl_molecule
-        - chembl_publication  # Renamed from chembl_document per ADR-024
-        - chembl_publication_similarity
-        - chembl_publication_term
-        - chembl_target_component
-        - pubchem_compound   # Uses API term per glossary.md CLI conventions
-        - uniprot_protein    # Uses API term per glossary.md CLI conventions
-        - pubmed_publication
+  pattern: "{provider}_{entity}"
+  examples:
+    - chembl_activity
+    - chembl_assay
+    - chembl_target
+    - chembl_molecule
+    - chembl_publication # Renamed from chembl_document per ADR-024
+    - chembl_publication_similarity
+    - chembl_publication_term
+    - chembl_target_component
+    - pubchem_compound # Uses API term per glossary.md CLI conventions
+    - uniprot_protein # Uses API term per glossary.md CLI conventions
+    - pubmed_publication
 
 # Stable public surface names that intentionally preserve provider API terms.
 # These names are not canonical domain entities, but they are normative for CLI,
 # pipeline classes, transformers, and generated public contracts.
 stable_public_surface:
-    pipeline_ids:
-        -   name: pubchem_compound
-            location: configs/entities/pubchem/compound.yaml
-            reason: Stable external pipeline identifier uses PubChem API term for CLI/config compatibility.
-        -   name: uniprot_protein
-            location: configs/entities/uniprot/protein.yaml
-            reason: Stable external pipeline identifier uses UniProt API term for CLI/config compatibility.
-    pipeline_classes:
-        -   name: PubChemCompoundPipeline
-            location: src/bioetl/application/pipelines/pubchem/__init__.py
-            reason: Public application pipeline surface follows stable pipeline identifier rather than canonical domain entity name.
-        -   name: UniProtProteinPipeline
-            location: src/bioetl/application/pipelines/uniprot/__init__.py
-            reason: Public application pipeline surface follows stable pipeline identifier rather than canonical domain entity name.
-    transformers:
-        -   name: PubChemCompoundTransformer
-            location: src/bioetl/application/pipelines/pubchem/transformer.py
-            reason: Transformer name matches stable external pipeline surface while validating against PubchemMolecule.
-        -   name: UniProtProteinTransformer
-            location: src/bioetl/application/pipelines/uniprot/transformer.py
-            reason: Transformer name matches stable external pipeline surface while validating against UniprotTarget.
-    gold_schemas:
-        -   name: PubChemCompoundGoldSchema
-            location: src/bioetl/domain/contracts/gold/pubchem.py
-            reason: Generated/public Gold contract keeps the stable pipeline surface term Compound.
-        -   name: UniProtProteinGoldSchema
-            location: src/bioetl/domain/contracts/gold/uniprot.py
-            reason: Generated/public Gold contract keeps the stable pipeline surface term Protein.
+  pipeline_ids:
+    - name: pubchem_compound
+      location: configs/entities/pubchem/compound.yaml
+      reason: Stable external pipeline identifier uses PubChem API term for CLI/config compatibility.
+    - name: uniprot_protein
+      location: configs/entities/uniprot/protein.yaml
+      reason: Stable external pipeline identifier uses UniProt API term for CLI/config compatibility.
+  pipeline_classes:
+    - name: PubChemCompoundPipeline
+      location: src/bioetl/application/pipelines/pubchem/__init__.py
+      reason: Public application pipeline surface follows stable pipeline identifier rather than canonical domain entity name.
+    - name: UniProtProteinPipeline
+      location: src/bioetl/application/pipelines/uniprot/__init__.py
+      reason: Public application pipeline surface follows stable pipeline identifier rather than canonical domain entity name.
+  transformers:
+    - name: PubChemCompoundTransformer
+      location: src/bioetl/application/pipelines/pubchem/transformer.py
+      reason: Transformer name matches stable external pipeline surface while validating against PubchemMolecule.
+    - name: UniProtProteinTransformer
+      location: src/bioetl/application/pipelines/uniprot/transformer.py
+      reason: Transformer name matches stable external pipeline surface while validating against UniprotTarget.
+  gold_schemas:
+    - name: PubChemCompoundGoldSchema
+      location: src/bioetl/domain/contracts/gold/pubchem.py
+      reason: Generated/public Gold contract keeps the stable pipeline surface term Compound.
+    - name: UniProtProteinGoldSchema
+      location: src/bioetl/domain/contracts/gold/uniprot.py
+      reason: Generated/public Gold contract keeps the stable pipeline surface term Protein.
 
 # Legacy domain aliases forbidden by ADR-024. These names are not valid
 # replacements for canonical domain entities and must not reappear on export
 # surfaces without an explicit, time-bound compatibility decision.
 forbidden_domain_entity_aliases:
-    -   legacy_name: Document
-        canonical_name: ChemblPublication
-        export_surface: src/bioetl/domain/entities/__init__.py
-        reason: ADR-024 direct migration removed the need for a Document alias in the canonical domain layer.
-    -   legacy_name: Compound
-        canonical_name: PubchemMolecule
-        export_surface: src/bioetl/domain/entities/__init__.py
-        reason: ADR-024 direct migration removed the need for a Compound alias in the canonical domain layer.
-    -   legacy_name: Protein
-        canonical_name: UniprotTarget
-        export_surface: src/bioetl/domain/entities/__init__.py
-        reason: ADR-024 direct migration removed the need for a Protein alias in the canonical domain layer.
+  - legacy_name: Document
+    canonical_name: ChemblPublication
+    export_surface: src/bioetl/domain/entities/__init__.py
+    reason: ADR-024 direct migration removed the need for a Document alias in the canonical domain layer.
+  - legacy_name: Compound
+    canonical_name: PubchemMolecule
+    export_surface: src/bioetl/domain/entities/__init__.py
+    reason: ADR-024 direct migration removed the need for a Compound alias in the canonical domain layer.
+  - legacy_name: Protein
+    canonical_name: UniprotTarget
+    export_surface: src/bioetl/domain/entities/__init__.py
+    reason: ADR-024 direct migration removed the need for a Protein alias in the canonical domain layer.
 
 # Explicitly retained public alias surfaces. These are time-bound compatibility
 # shims and must not be expanded without issue-backed justification.
@@ -379,26 +379,25 @@ public_symbol_aliases: []
 # - Violations against these exceptions should NOT be flagged.
 # - Add new exceptions here with justification and concrete location.
 
-
 # ADR-024 exception registry (audited 2026-03-20)
 adr_024_known_exceptions:
-    derived_entities:
-        -   entity: DocumentSimilarity
-            location: src/bioetl/domain/entities/chembl_structures.py
-            reason: ChEMBL-specific derived entity kept per ADR-024
-        -   entity: DocumentTerm
-            location: src/bioetl/domain/entities/chembl_structures.py
-            reason: ChEMBL-specific derived entity kept per ADR-024
-    pipeline_ids:
-        -   pipeline: pubchem_compound
-            location: configs/entities/pubchem/compound.yaml
-            reason: CLI compatibility uses provider API term per glossary and stable public ID policy.
-        -   pipeline: uniprot_protein
-            location: configs/entities/uniprot/protein.yaml
-            reason: CLI compatibility uses provider API term per glossary and stable public ID policy.
-    legacy_fields:
-        -   field: document_id
-            reason: foreign-key compatibility with ChEMBL API source model
-        -   field: document_chembl_id
-            reason: foreign-key compatibility with ChEMBL API source model
-    backward_compatibility: []  # No Document/Compound/Protein domain export aliases are retained.
+  derived_entities:
+    - entity: DocumentSimilarity
+      location: src/bioetl/domain/entities/chembl_structures.py
+      reason: ChEMBL-specific derived entity kept per ADR-024
+    - entity: DocumentTerm
+      location: src/bioetl/domain/entities/chembl_structures.py
+      reason: ChEMBL-specific derived entity kept per ADR-024
+  pipeline_ids:
+    - pipeline: pubchem_compound
+      location: configs/entities/pubchem/compound.yaml
+      reason: CLI compatibility uses provider API term per glossary and stable public ID policy.
+    - pipeline: uniprot_protein
+      location: configs/entities/uniprot/protein.yaml
+      reason: CLI compatibility uses provider API term per glossary and stable public ID policy.
+  legacy_fields:
+    - field: document_id
+      reason: foreign-key compatibility with ChEMBL API source model
+    - field: document_chembl_id
+      reason: foreign-key compatibility with ChEMBL API source model
+  backward_compatibility: [] # No Document/Compound/Protein domain export aliases are retained.

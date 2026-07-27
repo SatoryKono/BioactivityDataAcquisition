@@ -127,14 +127,14 @@ def test_write_json_cleans_temporary_file_when_replace_fails(
 
 
 def test_should_skip_fsync_for_windows_test_mode(monkeypatch) -> None:
-    monkeypatch.setenv("BIOETL_TEST_MODE", "true")
+    monkeypatch.setattr(run_report_writer, "_TEST_MODE_OVERRIDE", True)
     assert run_report_writer._should_fsync_report_writes(os_name="nt") is False
 
 
 def test_should_keep_fsync_outside_windows_test_mode(monkeypatch) -> None:
-    monkeypatch.delenv("BIOETL_TEST_MODE", raising=False)
+    monkeypatch.setattr(run_report_writer, "_TEST_MODE_OVERRIDE", False)
     assert run_report_writer._should_fsync_report_writes(os_name="nt") is True
-    monkeypatch.setenv("BIOETL_TEST_MODE", "true")
+    monkeypatch.setattr(run_report_writer, "_TEST_MODE_OVERRIDE", True)
     assert run_report_writer._should_fsync_report_writes(os_name="posix") is True
 
 

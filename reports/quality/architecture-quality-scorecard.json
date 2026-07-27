@@ -2,30 +2,30 @@
   "categories": [
     {
       "evidence_metrics": {
-        "layer_violations": 0
+        "layer_violations": 1
       },
       "id": "layer_compliance",
       "name": "Layer compliance",
-      "score": 9.5,
+      "score": 7.0,
       "weight": 0.13,
-      "weighted_score": 1.235
+      "weighted_score": 0.91
     },
     {
       "evidence_metrics": {
         "expired_compat_count": 0,
-        "layer_violations": 0,
+        "layer_violations": 1,
         "sunset_compat_count": 0,
         "transition_compat_count": 0
       },
       "id": "hexagonal_ports_adapters",
       "name": "Hexagonal / Ports & Adapters",
-      "score": 9.2,
+      "score": 7.7,
       "weight": 0.11,
-      "weighted_score": 1.012
+      "weighted_score": 0.847
     },
     {
       "evidence_metrics": {
-        "source_module_count": 2277,
+        "source_module_count": 2278,
         "uncovered_module_count": 0
       },
       "id": "ddd_invariants",
@@ -36,16 +36,16 @@
     },
     {
       "evidence_metrics": {
-        "layer_violations": 0,
+        "layer_violations": 1,
         "public_entrypoint_growth_count": 0,
         "public_export_facade_conflict_count": 0,
         "public_export_facade_growth_count": 0
       },
       "id": "composition_di",
       "name": "Composition root / DI",
-      "score": 9.0,
+      "score": 7.5,
       "weight": 0.1,
-      "weighted_score": 0.9
+      "weighted_score": 0.75
     },
     {
       "evidence_metrics": {
@@ -99,15 +99,15 @@
         "contract_blocking_issue_count": 0,
         "dashboarded_without_declaration_count": 0,
         "dashboarded_without_emission_count": 0,
-        "layer_violations": 0,
+        "layer_violations": 1,
         "runtime_cardinality_review_required_count": 0,
         "runtime_cardinality_threshold_violation_count": 0
       },
       "id": "determinism_replay_observability",
       "name": "Determinism / replay / observability",
-      "score": 9.0,
+      "score": 8.5,
       "weight": 0.08,
-      "weighted_score": 0.72
+      "weighted_score": 0.68
     },
     {
       "evidence_metrics": {
@@ -116,16 +116,16 @@
         "public_entrypoint_growth_count": 0,
         "public_export_facade_conflict_count": 0,
         "public_export_facade_growth_count": 0,
-        "repo_wide_untriaged_zero_import_candidate_count": 0,
+        "repo_wide_untriaged_zero_import_candidate_count": 1,
         "sunset_compat_count": 0,
         "total_duplicate_clusters": 0,
         "transition_compat_count": 0
       },
       "id": "debt_burden_evolution_friction",
       "name": "Debt burden / evolution friction",
-      "score": 8.5,
+      "score": 8.0,
       "weight": 0.06,
-      "weighted_score": 0.51
+      "weighted_score": 0.48
     }
   ],
   "debt_budget_policy": {
@@ -162,8 +162,8 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 9.11,
-  "interpretation": "good_targeted_improvements",
+  "integral_score": 8.39,
+  "interpretation": "satisfactory_system_refactoring_required",
   "metrics": {
     "accepted_adr_count": 49,
     "adr_enforcement_blocking_gap_count": 0,
@@ -176,16 +176,16 @@
     "expired_compat_count": 0,
     "hotspot_budget_warning_count": 0,
     "hotspot_family_count": 5,
-    "layer_violations": 0,
+    "layer_violations": 1,
     "public_entrypoint_growth_count": 0,
     "public_export_facade_conflict_count": 0,
     "public_export_facade_growth_count": 0,
-    "repo_wide_untriaged_zero_import_candidate_count": 0,
+    "repo_wide_untriaged_zero_import_candidate_count": 1,
     "retained_entrypoint_count": 12,
     "retained_public_export_facade_count": 4,
     "runtime_cardinality_review_required_count": 0,
     "runtime_cardinality_threshold_violation_count": 0,
-    "source_module_count": 2277,
+    "source_module_count": 2278,
     "sunset_compat_count": 0,
     "total_duplicate_clusters": 0,
     "transition_compat_count": 0,
@@ -221,7 +221,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "c909fca8d65c72d59ad775e4c68e9371b9174dceee3a7d5a9847551342fbd4bc"
+      "source_fingerprint": "a5eecb5feaec49392d733551f4acd87a9a950bd9611dff8fd894c1c1c958e38e"
     },
     "duplication_baseline": {
       "path": "reports/quality/full-app-duplication-baseline.json",
@@ -231,12 +231,12 @@
     "hotspot_family_baseline": {
       "budget_warnings": 0,
       "path": "reports/quality/hotspot-family-baseline.json",
-      "snapshot_date": "2026-07-22"
+      "snapshot_date": "2026-07-27"
     },
     "module_coverage_inventory": {
       "coverage_xml_sha256": "3938fbd2bc1a5654e5ad56d4084713831e21cda7abb131fd30b87a83ffe16cd2",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "4290ebe09417a934c4b0fcce47dfa5f1535403bcaa50a5053add60cd7d575983"
+      "source_tree_sha256": "e0a64e8b0c4ea03d13a9da7cc1d75d1c07ab6976029a1795b30ef9b9af96c864"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,
