@@ -1,20 +1,18 @@
 {
   "summary": {
-    "snapshot_date": "2026-07-07",
+    "snapshot_date": "2026-07-27",
     "targets": 4,
     "total_duplicate_clusters": 0,
-    "total_raw_duplicate_clusters": 38,
-    "total_excluded_duplicate_clusters": 38
+    "total_raw_duplicate_clusters": 44,
+    "total_excluded_duplicate_clusters": 44
   },
   "normalization": {
     "exclude_module_patterns": [],
-    "exclude_actionability_categories": [
-      "export_facade_or_package_barrel"
-    ]
+    "exclude_actionability_categories": []
   },
   "trend": {
     "status": "no_prior_snapshot",
-    "snapshot_date": "2026-07-07"
+    "snapshot_date": "2026-07-27"
   },
   "reduction_leverage_ranking": [
     {
@@ -66,38 +64,38 @@
       "target": "src/bioetl/infrastructure/adapters",
       "returncode": 8,
       "duplicate_count": 0,
-      "raw_duplicate_count": 38,
-      "excluded_duplicate_count": 38,
+      "raw_duplicate_count": 40,
+      "excluded_duplicate_count": 40,
       "actionability": [],
       "top_pairs": [],
       "clusters": []
     },
     {
       "target": "src/bioetl/application/pipelines",
-      "returncode": 0,
+      "returncode": 8,
       "duplicate_count": 0,
-      "raw_duplicate_count": 0,
-      "excluded_duplicate_count": 0,
+      "raw_duplicate_count": 1,
+      "excluded_duplicate_count": 1,
       "actionability": [],
       "top_pairs": [],
       "clusters": []
     },
     {
       "target": "src/bioetl/composition/bootstrap",
-      "returncode": 0,
+      "returncode": 8,
       "duplicate_count": 0,
-      "raw_duplicate_count": 0,
-      "excluded_duplicate_count": 0,
+      "raw_duplicate_count": 1,
+      "excluded_duplicate_count": 1,
       "actionability": [],
       "top_pairs": [],
       "clusters": []
     },
     {
       "target": "src/bioetl/interfaces/cli",
-      "returncode": 0,
+      "returncode": 8,
       "duplicate_count": 0,
-      "raw_duplicate_count": 0,
-      "excluded_duplicate_count": 0,
+      "raw_duplicate_count": 2,
+      "excluded_duplicate_count": 2,
       "actionability": [
         {
           "category": "cli_command_contract_shell",

@@ -141,6 +141,27 @@
       "test_name": "test_growth_rollout_warns_registry_section_before_cutoff"
     },
     {
+      "category": "weak_no_value",
+      "line": "96",
+      "path": "tests/integration/test_dashboard_cross_scope_titles.py",
+      "rationale": "candidate tests that need later assertion strengthening or removal review",
+      "test_name": "test_workflow_dashboard_provenance_banner_makes_scope_split_explicit"
+    },
+    {
+      "category": "weak_no_value",
+      "line": "103",
+      "path": "tests/integration/test_dashboard_cross_scope_titles.py",
+      "rationale": "candidate tests that need later assertion strengthening or removal review",
+      "test_name": "test_workflow_status_panel_repeats_selected_range_contract"
+    },
+    {
+      "category": "weak_no_value",
+      "line": "60",
+      "path": "tests/integration/test_dashboard_required_panel_links.py",
+      "rationale": "candidate tests that need later assertion strengthening or removal review",
+      "test_name": "test_workflow_overview_required_panel_links"
+    },
+    {
       "category": "intentional_no_exception_contract",
       "line": "74",
       "path": "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py",
@@ -237,6 +258,13 @@
       "path": "tests/unit/composition/factories/storage/test_health_mixin.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_aclose_skips_writers_without_explicit_audit"
+    },
+    {
+      "category": "intentional_no_exception_contract",
+      "line": "453",
+      "path": "tests/unit/domain/test_partial_coverage_burndown_td04.py",
+      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+      "test_name": "test_noop_metadata_writer__attach_artifact_recorder_accepts_none"
     },
     {
       "category": "intentional_no_exception_contract",
@@ -506,7 +534,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "1243",
+      "line": "1266",
       "path": "tests/unit/infrastructure/quarantine/test_unified_quarantine.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_aclose_does_nothing"
@@ -768,8 +796,8 @@
     "architecture_helper_guard": 16,
     "benchmark_or_performance": 0,
     "helper_asserted": 0,
-    "intentional_no_exception_contract": 89,
-    "weak_no_value": 0
+    "intentional_no_exception_contract": 90,
+    "weak_no_value": 3
   },
   "assertless_examples": [
     "tests/architecture/test_antipatterns.py:95",
@@ -788,15 +816,15 @@
     "tests/architecture/test_port_contracts_hypothesis.py:596",
     "tests/architecture/test_port_contracts_resilience_concurrency.py:183",
     "tests/architecture/test_quality_debt_scorecard.py:1117",
+    "tests/integration/test_dashboard_cross_scope_titles.py:96",
+    "tests/integration/test_dashboard_cross_scope_titles.py:103",
+    "tests/integration/test_dashboard_required_panel_links.py:60",
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:74",
     "tests/integration/infrastructure/storage/test_delta_reader.py:576",
     "tests/unit/application/core/test_batch_tracing.py:110",
     "tests/unit/application/core/test_batch_writer_tracing_mixin.py:79",
     "tests/unit/application/core/test_batch_writer_tracing_mixin.py:255",
-    "tests/unit/application/core/test_dq_metrics.py:33",
-    "tests/unit/application/core/test_otel_spans.py:557",
-    "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:102",
-    "tests/unit/application/observability/test_pipeline_metrics.py:270"
+    "tests/unit/application/core/test_dq_metrics.py:33"
   ],
   "assertless_families": {
     "tests/architecture/test_antipatterns.py": {
@@ -851,6 +879,18 @@
       "assertless_tests": 1,
       "categories": {
         "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/integration/test_dashboard_cross_scope_titles.py": {
+      "assertless_tests": 2,
+      "categories": {
+        "weak_no_value": 2
+      }
+    },
+    "tests/integration/test_dashboard_required_panel_links.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "weak_no_value": 1
       }
     },
     "tests/unit/application/core/test_batch_tracing.py": {
@@ -938,6 +978,12 @@
       }
     },
     "tests/unit/domain/schemas/semanticscholar/test_publication_schema.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/domain/test_partial_coverage_burndown_td04.py": {
       "assertless_tests": 1,
       "categories": {
         "intentional_no_exception_contract": 1
@@ -1100,8 +1146,33 @@
       }
     }
   },
-  "assertless_total_candidates": 105,
-  "budget_violations": [],
+  "assertless_total_candidates": 109,
+  "budget_violations": [
+    {
+      "actual": 3,
+      "budget": "refined_assertless_max",
+      "expected_max": 0,
+      "metric": "refined_assertless_tests"
+    },
+    {
+      "actual": 1,
+      "budget": "duplicate_test_names_max",
+      "expected_max": 0,
+      "metric": "duplicate_test_names"
+    },
+    {
+      "actual": 2,
+      "budget": "duplicate_test_name_occurrences_max",
+      "expected_max": 0,
+      "metric": "duplicate_test_name_occurrences"
+    },
+    {
+      "actual": 20,
+      "budget": "markerless_test_functions_max",
+      "expected_max": 0,
+      "metric": "markerless_test_functions"
+    }
+  ],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1180,16 +1251,16 @@
     "quarantine_replay": {
       "assertion_backed_tests": 44,
       "assertion_examples": [
-        "tests/unit/domain/aggregates/test_quarantine_entry.py:67",
-        "tests/unit/domain/aggregates/test_quarantine_entry.py:75",
-        "tests/unit/domain/aggregates/test_quarantine_entry.py:84",
-        "tests/unit/domain/aggregates/test_quarantine_entry.py:94",
-        "tests/unit/domain/aggregates/test_quarantine_entry.py:112",
-        "tests/unit/domain/aggregates/test_quarantine_entry.py:126",
-        "tests/unit/domain/aggregates/test_quarantine_entry.py:140",
-        "tests/unit/domain/aggregates/test_quarantine_entry.py:154",
-        "tests/unit/domain/aggregates/test_quarantine_entry.py:177",
-        "tests/unit/domain/aggregates/test_quarantine_entry.py:182"
+        "tests/unit/domain/aggregates/test_quarantine_entry.py:69",
+        "tests/unit/domain/aggregates/test_quarantine_entry.py:77",
+        "tests/unit/domain/aggregates/test_quarantine_entry.py:86",
+        "tests/unit/domain/aggregates/test_quarantine_entry.py:96",
+        "tests/unit/domain/aggregates/test_quarantine_entry.py:114",
+        "tests/unit/domain/aggregates/test_quarantine_entry.py:128",
+        "tests/unit/domain/aggregates/test_quarantine_entry.py:142",
+        "tests/unit/domain/aggregates/test_quarantine_entry.py:156",
+        "tests/unit/domain/aggregates/test_quarantine_entry.py:179",
+        "tests/unit/domain/aggregates/test_quarantine_entry.py:184"
       ],
       "assertless_tests": [],
       "intentional_no_exception_tests": 0,
@@ -1222,16 +1293,30 @@
     }
   },
   "date_today_call_sites": 0,
-  "duplicate_test_name_inventory": [],
+  "duplicate_test_name_inventory": [
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/application/services/run_reports/test_writer.py:129",
+        "tests/unit/infrastructure/control_plane/test_control_plane_durability.py:23"
+      ],
+      "name": "test_should_skip_fsync_for_windows_test_mode",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    }
+  ],
   "duplicate_test_name_inventory_summary": {
-    "cross_file_groups": 0,
-    "duplicate_occurrences": 0,
+    "cross_file_groups": 1,
+    "duplicate_occurrences": 2,
     "mixed_groups": 0,
     "same_file_groups": 0,
-    "total_duplicate_names": 0
+    "total_duplicate_names": 1
   },
-  "duplicate_test_name_occurrences": 0,
-  "duplicate_test_names": 0,
+  "duplicate_test_name_occurrences": 2,
+  "duplicate_test_names": 1,
   "fixture_asset_duplication": {
     "duplicate_files": 0,
     "duplicate_groups": 0,
@@ -1239,29 +1324,50 @@
     "max_group_size": 0,
     "scan_root": "tests/fixtures",
     "scope_file_counts": {
-      "fixture": 23,
+      "fixture": 25,
       "golden": 30,
       "vcr": 396
     },
-    "total_files": 449,
+    "total_files": 451,
     "tracked_extensions": [
       ".json",
       ".yaml",
       ".yml"
     ]
   },
-  "intentional_no_exception_contract": 89,
-  "markerless_examples": [],
-  "markerless_test_functions": 0,
+  "intentional_no_exception_contract": 90,
+  "markerless_examples": [
+    "tests/unit/domain/behavior/activity_aggregator/test_aggregator_branch_coverage.py:11",
+    "tests/unit/domain/behavior/activity_aggregator/test_aggregator_branch_coverage.py:25",
+    "tests/unit/domain/entities/bioactivity/test_converters_branch_coverage.py:12",
+    "tests/unit/domain/entities/bioactivity/test_converters_branch_coverage.py:21",
+    "tests/unit/domain/entities/bioactivity/test_converters_branch_coverage.py:29",
+    "tests/unit/domain/entities/bioactivity/test_converters_branch_coverage.py:37",
+    "tests/unit/domain/filtering/test_base_filter_config_private_branches.py:14",
+    "tests/unit/domain/normalization/profiles/test_profile_governed_value_normalizers_branches.py:10",
+    "tests/unit/domain/normalization/profiles/test_profile_governed_value_normalizers_branches.py:29",
+    "tests/unit/domain/normalization/profiles/test_profile_governed_value_normalizers_branches.py:36",
+    "tests/unit/domain/normalization/profiles/test_profile_governed_value_normalizers_branches.py:51",
+    "tests/unit/domain/normalization/profiles/test_profile_governed_value_normalizers_branches.py:74",
+    "tests/unit/domain/ports/test_health_check_result_branches.py:11",
+    "tests/unit/domain/registry/test_publication_data_branches.py:8",
+    "tests/unit/domain/registry/test_publication_data_branches.py:20",
+    "tests/unit/domain/registry/test_publication_data_branches.py:30",
+    "tests/unit/domain/registry/test_publication_data_branches.py:43",
+    "tests/unit/scripts/engineering/repo/test_check_version_consistency.py:14",
+    "tests/unit/scripts/engineering/repo/test_check_version_consistency.py:26",
+    "tests/unit/scripts/qa/test_check_dashboard_performance_budgets.py:10"
+  ],
+  "markerless_test_functions": 20,
   "parse_errors": [],
-  "refined_assertless_tests": 0,
+  "refined_assertless_tests": 3,
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
     "lane": "repo-backed-unit",
-    "marked_test_files": 42,
+    "marked_test_files": 43,
     "marker": "pytest.mark.repo_backed",
     "subtree": "tests/unit/repo_backed/",
-    "test_files": 42,
+    "test_files": 43,
     "unmarked_test_files": []
   },
   "report": {
@@ -1407,6 +1513,27 @@
         "test_name": "test_growth_rollout_warns_registry_section_before_cutoff"
       },
       {
+        "category": "weak_no_value",
+        "line": "96",
+        "path": "tests/integration/test_dashboard_cross_scope_titles.py",
+        "rationale": "candidate tests that need later assertion strengthening or removal review",
+        "test_name": "test_workflow_dashboard_provenance_banner_makes_scope_split_explicit"
+      },
+      {
+        "category": "weak_no_value",
+        "line": "103",
+        "path": "tests/integration/test_dashboard_cross_scope_titles.py",
+        "rationale": "candidate tests that need later assertion strengthening or removal review",
+        "test_name": "test_workflow_status_panel_repeats_selected_range_contract"
+      },
+      {
+        "category": "weak_no_value",
+        "line": "60",
+        "path": "tests/integration/test_dashboard_required_panel_links.py",
+        "rationale": "candidate tests that need later assertion strengthening or removal review",
+        "test_name": "test_workflow_overview_required_panel_links"
+      },
+      {
         "category": "intentional_no_exception_contract",
         "line": "74",
         "path": "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py",
@@ -1503,6 +1630,13 @@
         "path": "tests/unit/composition/factories/storage/test_health_mixin.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_aclose_skips_writers_without_explicit_audit"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "453",
+        "path": "tests/unit/domain/test_partial_coverage_burndown_td04.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_noop_metadata_writer__attach_artifact_recorder_accepts_none"
       },
       {
         "category": "intentional_no_exception_contract",
@@ -1772,7 +1906,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "1243",
+        "line": "1266",
         "path": "tests/unit/infrastructure/quarantine/test_unified_quarantine.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_aclose_does_nothing"
@@ -2034,8 +2168,8 @@
       "architecture_helper_guard": 16,
       "benchmark_or_performance": 0,
       "helper_asserted": 0,
-      "intentional_no_exception_contract": 89,
-      "weak_no_value": 0
+      "intentional_no_exception_contract": 90,
+      "weak_no_value": 3
     },
     "assertless_examples": [
       "tests/architecture/test_antipatterns.py:95",
@@ -2054,17 +2188,17 @@
       "tests/architecture/test_port_contracts_hypothesis.py:596",
       "tests/architecture/test_port_contracts_resilience_concurrency.py:183",
       "tests/architecture/test_quality_debt_scorecard.py:1117",
+      "tests/integration/test_dashboard_cross_scope_titles.py:96",
+      "tests/integration/test_dashboard_cross_scope_titles.py:103",
+      "tests/integration/test_dashboard_required_panel_links.py:60",
       "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:74",
       "tests/integration/infrastructure/storage/test_delta_reader.py:576",
       "tests/unit/application/core/test_batch_tracing.py:110",
       "tests/unit/application/core/test_batch_writer_tracing_mixin.py:79",
       "tests/unit/application/core/test_batch_writer_tracing_mixin.py:255",
-      "tests/unit/application/core/test_dq_metrics.py:33",
-      "tests/unit/application/core/test_otel_spans.py:557",
-      "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:102",
-      "tests/unit/application/observability/test_pipeline_metrics.py:270"
+      "tests/unit/application/core/test_dq_metrics.py:33"
     ],
-    "assertless_total_candidates": 105,
+    "assertless_total_candidates": 109,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -2143,16 +2277,16 @@
       "quarantine_replay": {
         "assertion_backed_tests": 44,
         "assertion_examples": [
-          "tests/unit/domain/aggregates/test_quarantine_entry.py:67",
-          "tests/unit/domain/aggregates/test_quarantine_entry.py:75",
-          "tests/unit/domain/aggregates/test_quarantine_entry.py:84",
-          "tests/unit/domain/aggregates/test_quarantine_entry.py:94",
-          "tests/unit/domain/aggregates/test_quarantine_entry.py:112",
-          "tests/unit/domain/aggregates/test_quarantine_entry.py:126",
-          "tests/unit/domain/aggregates/test_quarantine_entry.py:140",
-          "tests/unit/domain/aggregates/test_quarantine_entry.py:154",
-          "tests/unit/domain/aggregates/test_quarantine_entry.py:177",
-          "tests/unit/domain/aggregates/test_quarantine_entry.py:182"
+          "tests/unit/domain/aggregates/test_quarantine_entry.py:69",
+          "tests/unit/domain/aggregates/test_quarantine_entry.py:77",
+          "tests/unit/domain/aggregates/test_quarantine_entry.py:86",
+          "tests/unit/domain/aggregates/test_quarantine_entry.py:96",
+          "tests/unit/domain/aggregates/test_quarantine_entry.py:114",
+          "tests/unit/domain/aggregates/test_quarantine_entry.py:128",
+          "tests/unit/domain/aggregates/test_quarantine_entry.py:142",
+          "tests/unit/domain/aggregates/test_quarantine_entry.py:156",
+          "tests/unit/domain/aggregates/test_quarantine_entry.py:179",
+          "tests/unit/domain/aggregates/test_quarantine_entry.py:184"
         ],
         "assertless_tests": [],
         "intentional_no_exception_tests": 0,
@@ -2185,16 +2319,30 @@
       }
     },
     "date_today_call_sites": 0,
-    "duplicate_test_name_inventory": [],
+    "duplicate_test_name_inventory": [
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/application/services/run_reports/test_writer.py:129",
+          "tests/unit/infrastructure/control_plane/test_control_plane_durability.py:23"
+        ],
+        "name": "test_should_skip_fsync_for_windows_test_mode",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      }
+    ],
     "duplicate_test_name_inventory_summary": {
-      "cross_file_groups": 0,
-      "duplicate_occurrences": 0,
+      "cross_file_groups": 1,
+      "duplicate_occurrences": 2,
       "mixed_groups": 0,
       "same_file_groups": 0,
-      "total_duplicate_names": 0
+      "total_duplicate_names": 1
     },
-    "duplicate_test_name_occurrences": 0,
-    "duplicate_test_names": 0,
+    "duplicate_test_name_occurrences": 2,
+    "duplicate_test_names": 1,
     "fixture_asset_duplication": {
       "duplicate_files": 0,
       "duplicate_groups": 0,
@@ -2202,28 +2350,49 @@
       "max_group_size": 0,
       "scan_root": "tests/fixtures",
       "scope_file_counts": {
-        "fixture": 23,
+        "fixture": 25,
         "golden": 30,
         "vcr": 396
       },
-      "total_files": 449,
+      "total_files": 451,
       "tracked_extensions": [
         ".json",
         ".yaml",
         ".yml"
       ]
     },
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
+    "markerless_examples": [
+      "tests/unit/domain/behavior/activity_aggregator/test_aggregator_branch_coverage.py:11",
+      "tests/unit/domain/behavior/activity_aggregator/test_aggregator_branch_coverage.py:25",
+      "tests/unit/domain/entities/bioactivity/test_converters_branch_coverage.py:12",
+      "tests/unit/domain/entities/bioactivity/test_converters_branch_coverage.py:21",
+      "tests/unit/domain/entities/bioactivity/test_converters_branch_coverage.py:29",
+      "tests/unit/domain/entities/bioactivity/test_converters_branch_coverage.py:37",
+      "tests/unit/domain/filtering/test_base_filter_config_private_branches.py:14",
+      "tests/unit/domain/normalization/profiles/test_profile_governed_value_normalizers_branches.py:10",
+      "tests/unit/domain/normalization/profiles/test_profile_governed_value_normalizers_branches.py:29",
+      "tests/unit/domain/normalization/profiles/test_profile_governed_value_normalizers_branches.py:36",
+      "tests/unit/domain/normalization/profiles/test_profile_governed_value_normalizers_branches.py:51",
+      "tests/unit/domain/normalization/profiles/test_profile_governed_value_normalizers_branches.py:74",
+      "tests/unit/domain/ports/test_health_check_result_branches.py:11",
+      "tests/unit/domain/registry/test_publication_data_branches.py:8",
+      "tests/unit/domain/registry/test_publication_data_branches.py:20",
+      "tests/unit/domain/registry/test_publication_data_branches.py:30",
+      "tests/unit/domain/registry/test_publication_data_branches.py:43",
+      "tests/unit/scripts/engineering/repo/test_check_version_consistency.py:14",
+      "tests/unit/scripts/engineering/repo/test_check_version_consistency.py:26",
+      "tests/unit/scripts/qa/test_check_dashboard_performance_budgets.py:10"
+    ],
+    "markerless_test_functions": 20,
     "parse_errors": [],
-    "refined_assertless_tests": 0,
+    "refined_assertless_tests": 3,
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
       "lane": "repo-backed-unit",
-      "marked_test_files": 42,
+      "marked_test_files": 43,
       "marker": "pytest.mark.repo_backed",
       "subtree": "tests/unit/repo_backed/",
-      "test_files": 42,
+      "test_files": 43,
       "unmarked_test_files": []
     },
     "root": ".",
@@ -2232,8 +2401,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2061,
-      "test_python_file_count": 2273,
+      "test_glob_file_count": 2085,
+      "test_python_file_count": 2300,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2272,25 +2441,55 @@
       "top_level_directory_count": 15,
       "top_level_directory_count_including_pycache": 16
     },
-    "top_duplicate_test_names": [],
-    "total_test_files": 2061,
-    "total_test_functions": 22919,
+    "top_duplicate_test_names": [
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/application/services/run_reports/test_writer.py:129",
+          "tests/unit/infrastructure/control_plane/test_control_plane_durability.py:23"
+        ],
+        "name": "test_should_skip_fsync_for_windows_test_mode"
+      }
+    ],
+    "total_test_files": 2085,
+    "total_test_functions": 23026,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "3521395a6b94af2ab95222aef9d0b6be4f937e04add7f343c5bb9829360db0ef",
+  "source_tree_sha256": "638cb4ae04f4a46a37e6bd9f38e93c33ac6e2973dc0e1dee2c88424187d81f75",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 105,
+    "assertless_total_candidates": 109,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
-    "duplicate_test_name_occurrences": 0,
-    "duplicate_test_names": 0,
-    "intentional_no_exception_contract": 89,
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
-    "refined_assertless_tests": 0,
+    "duplicate_test_name_occurrences": 2,
+    "duplicate_test_names": 1,
+    "intentional_no_exception_contract": 90,
+    "markerless_examples": [
+      "tests/unit/domain/behavior/activity_aggregator/test_aggregator_branch_coverage.py:11",
+      "tests/unit/domain/behavior/activity_aggregator/test_aggregator_branch_coverage.py:25",
+      "tests/unit/domain/entities/bioactivity/test_converters_branch_coverage.py:12",
+      "tests/unit/domain/entities/bioactivity/test_converters_branch_coverage.py:21",
+      "tests/unit/domain/entities/bioactivity/test_converters_branch_coverage.py:29",
+      "tests/unit/domain/entities/bioactivity/test_converters_branch_coverage.py:37",
+      "tests/unit/domain/filtering/test_base_filter_config_private_branches.py:14",
+      "tests/unit/domain/normalization/profiles/test_profile_governed_value_normalizers_branches.py:10",
+      "tests/unit/domain/normalization/profiles/test_profile_governed_value_normalizers_branches.py:29",
+      "tests/unit/domain/normalization/profiles/test_profile_governed_value_normalizers_branches.py:36",
+      "tests/unit/domain/normalization/profiles/test_profile_governed_value_normalizers_branches.py:51",
+      "tests/unit/domain/normalization/profiles/test_profile_governed_value_normalizers_branches.py:74",
+      "tests/unit/domain/ports/test_health_check_result_branches.py:11",
+      "tests/unit/domain/registry/test_publication_data_branches.py:8",
+      "tests/unit/domain/registry/test_publication_data_branches.py:20",
+      "tests/unit/domain/registry/test_publication_data_branches.py:30",
+      "tests/unit/domain/registry/test_publication_data_branches.py:43",
+      "tests/unit/scripts/engineering/repo/test_check_version_consistency.py:14",
+      "tests/unit/scripts/engineering/repo/test_check_version_consistency.py:26",
+      "tests/unit/scripts/qa/test_check_dashboard_performance_budgets.py:10"
+    ],
+    "markerless_test_functions": 20,
+    "refined_assertless_tests": 3,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
@@ -2299,8 +2498,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2061,
-    "test_python_file_count": 2273,
+    "test_glob_file_count": 2085,
+    "test_python_file_count": 2300,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2339,9 +2538,18 @@
     "top_level_directory_count": 15,
     "top_level_directory_count_including_pycache": 16
   },
-  "top_duplicate_test_names": [],
-  "total_test_files": 2061,
-  "total_test_functions": 22919,
+  "top_duplicate_test_names": [
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/application/services/run_reports/test_writer.py:129",
+        "tests/unit/infrastructure/control_plane/test_control_plane_durability.py:23"
+      ],
+      "name": "test_should_skip_fsync_for_windows_test_mode"
+    }
+  ],
+  "total_test_files": 2085,
+  "total_test_functions": 23026,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

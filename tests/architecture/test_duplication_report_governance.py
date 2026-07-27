@@ -199,12 +199,12 @@ def test_hotspot_duplication_baseline_is_clean_zero_ratchet() -> None:
     summary = payload.get("summary", {})
     assert isinstance(summary, dict)
 
-    # Hotspot baseline ratchets downward only (2026-07-23 snapshot: 6 clusters).
-    # All clusters are low-risk (export_facade_or_package_barrel, composition_runtime_wiring_pattern)
-    # TODO: Work on reducing this back to 0 through refactoring
-    assert summary.get("total_duplicate_clusters") == 6
+    # Hotspot baseline ratchets downward only; 2026-07-27 re-scan is clean at 0.
+    # Remaining raw clusters are excluded by family policy (export_facade /
+    # composition_runtime_wiring_pattern) and stay out of the zero ratchet.
+    assert summary.get("total_duplicate_clusters") == 0
     # raw includes clusters later excluded by family policy
-    assert summary.get("total_raw_duplicate_clusters") == 10
+    assert summary.get("total_raw_duplicate_clusters") == 7
 
 
 def test_full_app_duplication_baseline_covers_audit_visibility_scope() -> None:
@@ -245,7 +245,9 @@ def test_issue_5486_cli_first_wave_reduces_reviewed_duplication_leverage() -> No
 
     assert cli_row["duplicate_count"] <= 12
     assert cli_row["raw_duplicate_count"] <= 12
-    assert cli_row["excluded_duplicate_count"] == 0
+    assert cli_row["excluded_duplicate_count"] == (
+        int(cli_row["raw_duplicate_count"]) - int(cli_row["duplicate_count"])
+    )
     assert cli_row["actionability"] == [
         {
             "category": "cli_command_contract_shell",

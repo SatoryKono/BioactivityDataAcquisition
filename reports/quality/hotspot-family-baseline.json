@@ -1,6 +1,6 @@
 {
   "summary": {
-    "snapshot_date": "2026-07-22",
+    "snapshot_date": "2026-07-27",
     "families": 5,
     "scorecard": "configs/quality/debt_scorecard.yaml",
     "budget_warnings": 0,
@@ -18,7 +18,7 @@
       ],
       "duplication_clusters": 0,
       "files": 183,
-      "total_loc": 22598,
+      "total_loc": 22596,
       "files_ge_250_loc": 5,
       "helper_function_ratio": 0.371,
       "max_internal_fan_in": 7,
@@ -66,7 +66,7 @@
       ],
       "duplication_clusters": 0,
       "files": 36,
-      "total_loc": 4737,
+      "total_loc": 4729,
       "files_ge_250_loc": 2,
       "helper_function_ratio": 0.417,
       "max_internal_fan_in": 3,

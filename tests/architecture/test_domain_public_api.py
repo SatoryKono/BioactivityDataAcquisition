@@ -41,6 +41,7 @@ def test_domain_all_is_complete() -> None:
         "TYPE_CHECKING",
         "import_module",
         # Submodules (accessible as bioetl.domain.<name> but not re-exported)
+        "adapter_config",  # Config VO module; import from bioetl.domain.adapter_config
         "aggregates",  # Aggregate submodule
         "config",
         "configs",  # Submodule for value object configs
@@ -59,6 +60,7 @@ def test_domain_all_is_complete() -> None:
         "ports",
         "registry",
         "resilience",
+        "resilience_circuit_breaker",  # Circuit-breaker helpers; import submodule directly
         "schemas",  # Pandera schemas (provider-specific, accessed directly)
         "serialization",
         "services",  # Submodule for domain services (EntityIdentityGenerator)

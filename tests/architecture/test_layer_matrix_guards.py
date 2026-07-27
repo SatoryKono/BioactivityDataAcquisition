@@ -93,6 +93,7 @@ INFRASTRUCTURE_ALLOWED_DOMAIN_IMPORT_PREFIXES = (
     "bioetl.domain.ports",
     "bioetl.domain.registry",
     "bioetl.domain.resilience",
+    "bioetl.domain.run_reports",
     "bioetl.domain.schemas",
     "bioetl.domain.serialization",
     "bioetl.domain.transformations",

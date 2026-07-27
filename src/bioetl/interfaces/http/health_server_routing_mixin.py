@@ -307,36 +307,11 @@ class HealthServerRoutingMixin:
           returned so scrapes are non-empty and not a comment-only stub.
         - Never expose run_id, hashes, paths, URLs, or raw messages as labels.
         """
-        return _build_health_server_metrics_exposition()
+        from bioetl.infrastructure.observability.health_metrics_exposition import (
+            build_health_server_metrics_exposition,
+        )
 
-
-_HEALTH_SCRAPE_UP_EXPOSITION = (
-    "# HELP bioetl_health_server_scrape_up Health server /metrics scrape "
-    "liveness (1=serving).\n"
-    "# TYPE bioetl_health_server_scrape_up gauge\n"
-    "bioetl_health_server_scrape_up 1\n"
-)
-
-
-def _build_health_server_metrics_exposition() -> str:
-    """Build Prometheus text exposition for the health-server scrape path."""
-    try:
-        from prometheus_client import REGISTRY, generate_latest
-
-        body = generate_latest(REGISTRY).decode("utf-8")
-        if not body.strip():
-            return _HEALTH_SCRAPE_UP_EXPOSITION
-        if "bioetl_health_server_scrape_up" not in body:
-            body = body.rstrip() + "\n" + _HEALTH_SCRAPE_UP_EXPOSITION
-        return body if body.endswith("\n") else f"{body}\n"
-    except (
-        ImportError,
-        OSError,
-        RuntimeError,
-        TypeError,
-        ValueError,
-    ):
-        return _HEALTH_SCRAPE_UP_EXPOSITION
+        return build_health_server_metrics_exposition()
 
 
 __all__ = ["HealthServerRoutingMixin"]

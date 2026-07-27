@@ -1,9 +1,10 @@
 # Duplication Baseline Report
 
-- mode: fail-fast
+- mode: report-only
 - targets: 5
 - total_duplicate_clusters: 0
-- max_duplicate_clusters: 0
+- previous_snapshot_date: 2026-07-22
+- total_duplicate_cluster_delta_vs_previous: -13
 
 > Interpretation note: this is a visibility baseline. `R0801` can over-report
 > around facades, export barrels, and compatibility shims, so use it as
@@ -43,6 +44,19 @@
 
 - duplicate clusters: 0
 - no `R0801` findings
+
+## Trend vs Previous Snapshot
+
+- previous snapshot: `2026-07-22`
+- total duplicate cluster delta: -13
+
+| Target | Current | Previous | Delta |
+| --- | ---: | ---: | ---: |
+| `src/bioetl/application/core` | 0 | 0 | +0 |
+| `src/bioetl/composition/bootstrap/runtime` | 0 | 1 | -1 |
+| `src/bioetl/composition/factories/pipeline` | 0 | 1 | -1 |
+| `src/bioetl/application/services/control_plane` | 0 | 0 | +0 |
+| `src/bioetl/composition/runtime_builders` | 0 | 5 | -5 |
 
 ## Reduction Leverage Ranking
 
