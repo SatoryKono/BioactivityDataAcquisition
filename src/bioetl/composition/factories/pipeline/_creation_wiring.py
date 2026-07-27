@@ -260,10 +260,14 @@ def _create_pipeline_with_services_impl(
         extract_entity_type=extract_entity_type,
     )
 
+    from bioetl.application.core.pipeline_service_protocols import (
+        PipelineServicesProtocol,
+    )
+
     return inputs.pipeline_class.create(
         run_id=request.run_id,
         runtime=request.runtime,
-        services=services,
+        services=cast(PipelineServicesProtocol, services),
         config=domain_config,
         shutdown_signal=ShutdownSignal(),
         started_at=request.started_at,

@@ -14,6 +14,7 @@ __all__ = ["get_pipeline_yaml_for_dq"]
 class _ModelDumpProvider(Protocol):
     def model_dump(self) -> object:
         """Return a serializable configuration payload."""
+        ...
 
 
 def get_pipeline_yaml_for_dq(

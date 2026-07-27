@@ -226,13 +226,15 @@ def _identity_health(
     if identity_evidence_summary is not None:
         gap_count = _int_or_zero(identity_evidence_summary.get("identity_gap_count"))
         complete = identity_evidence_summary.get("identity_graph_complete")
-        if complete is True:
-            status = "Complete"
-        elif complete is False or gap_count:
-            status = "Incomplete"
-        else:
-            status = "Unknown"
-        return f"{status} [{gap_count} gaps]"
+        status_by_state = {
+            True: "Complete",
+            False: "Incomplete",
+        }
+        status = status_by_state.get(complete)
+        if status is None:
+            status = "Incomplete" if gap_count else "Unknown"
+        summary = [status, f"[{gap_count} gaps]"]
+        return " ".join(summary)
     gaps = values.get("correlation_anchor_gaps")
     gap_count = _gap_count(gaps)
     complete = values.get("identity_graph_complete")

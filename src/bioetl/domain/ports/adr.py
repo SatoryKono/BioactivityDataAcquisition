@@ -66,6 +66,7 @@ class AdrServicePort(Protocol):
         Returns:
             Collection of adrs.
         """
+        ...
 
     def get_adr(self, number: int) -> AdrDocument:
         """Get full ADR document by number.
@@ -80,6 +81,7 @@ class AdrServicePort(Protocol):
         Returns:
             Adr.
         """
+        ...
 
     def validate(self) -> AdrValidationReport:
         """Validate ADR repository and return a summary report.
@@ -87,6 +89,7 @@ class AdrServicePort(Protocol):
         Returns:
             Validated AdrValidationReport.
         """
+        ...
 
 
 __all__ = [

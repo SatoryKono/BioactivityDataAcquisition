@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.bootstrap_contexts import (
     CircuitBreakerConfig,
     RateLimitContext,
 )
 from bioetl.composition.providers._models import ProviderSettingsProtocol
+from bioetl.domain.ports import DataSourcePort
 from bioetl.domain.resilience import AdapterConfig
 from bioetl.infrastructure.config.source_config_loader import load_source_config
 
@@ -22,7 +23,7 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.models.filter import ExtractionParams
-    from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort
     from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
 ProviderFamilyExtraConfigBuilder = Callable[
@@ -230,13 +231,16 @@ def _wrap_with_filter(
             CsvFilterReader,
         )
 
-        return FilteredDataSource(
-            data_source=data_source,
-            filter_reader=CsvFilterReader(logger=logger),
-            filter_config=filter_config,
-            metrics=metrics,
-            pipeline_name=pipeline_name,
-            logger=logger,
+        return cast(
+            DataSourcePort,
+            FilteredDataSource(
+                data_source=data_source,
+                filter_reader=CsvFilterReader(logger=logger),
+                filter_config=filter_config,
+                metrics=metrics,
+                pipeline_name=pipeline_name,
+                logger=logger,
+            ),
         )
     return data_source
 

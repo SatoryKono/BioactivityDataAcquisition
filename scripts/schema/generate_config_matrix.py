@@ -17,10 +17,6 @@ from typing import Any
 
 import yaml
 
-from bioetl.infrastructure.config.entity_filter_metadata_registry import (
-    apply_shared_filter_metadata,
-)
-from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
 from scripts.engineering.qa.config_surface_governance import is_sanctioned_partial_key
 
 DEFAULT_BASELINE_JSON = Path("reports/quality/config-discrepancy-baseline.json")
@@ -247,11 +243,19 @@ def _load_effective_filters(
     provider: str,
     entity: str,
 ) -> dict[str, Any]:
+    # Lazy import: FilterConfigLoader pulls domain/schema stacks that dominate
+    # cold-start cost of ``python -m scripts.schema generate-config-matrix``.
+    from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
+
     return FilterConfigLoader(Path("configs")).load_as_dict(provider, entity)
 
 
 def _entity_config_effective(path: Path) -> dict[str, Any]:
     """Return entity YAML with runtime-applied defaults merged for governance."""
+    from bioetl.infrastructure.config.entity_filter_metadata_registry import (
+        apply_shared_filter_metadata,
+    )
+
     raw = apply_shared_filter_metadata(
         configs_root=Path("configs"),
         config_path=path,

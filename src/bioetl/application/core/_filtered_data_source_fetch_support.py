@@ -29,6 +29,7 @@ class _FilteredFetchState(Protocol):
 
     def _ensure_filterable_adapter(self, mode: str) -> None:
         """Check adapter supports the requested filtering mode."""
+        ...
 
 
 def matches_valid_combination(

@@ -158,7 +158,11 @@ async def _yield_phase_records(
     finally:
         aclose = getattr(records, "aclose", None)
         if callable(aclose):
-            await aclose()
+            from collections.abc import Awaitable, Callable
+            from typing import cast
+
+            aclose_fn = cast(Callable[[], Awaitable[object]], aclose)
+            await aclose_fn()
 
 
 async def run_fetch_with_fallback_policy(

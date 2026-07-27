@@ -19,6 +19,7 @@ class _SupportsDefaultRegistry(Protocol):
     @classmethod
     def _get_default(cls) -> Self:
         """Return the lazy default registry instance."""
+        ...
 
 
 class _SupportsProviderStore(Protocol):
@@ -32,12 +33,15 @@ class _SupportsProviderRegistryStore(_SupportsDefaultRegistry, Protocol):
 
     def is_registered(self, name: str) -> bool:
         """Return whether a provider is registered."""
+        ...
 
     def list_providers(self) -> list[str]:
         """Return registered provider names."""
+        ...
 
     def clear(self) -> None:
         """Clear registered providers."""
+        ...
 
 
 RegistryT = TypeVar("RegistryT", bound=_SupportsDefaultRegistry)
@@ -109,7 +113,9 @@ def get_default_provider_registry() -> _SupportsProviderRegistryStore:
     global _default_provider_registry
     if _default_provider_registry is None:
         module = import_module("bioetl.composition.providers.provider_registry")
-        _default_provider_registry = module.ProviderRegistry()
+        registry = module.ProviderRegistry()
+        _default_provider_registry = registry
+        return registry
     return _default_provider_registry
 
 

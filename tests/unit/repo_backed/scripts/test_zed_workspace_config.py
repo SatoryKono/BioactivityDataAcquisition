@@ -96,21 +96,23 @@ def test_zed_agent_permissions_preserve_secret_boundaries() -> None:
     write_profile = agent["profiles"]["bioetl-write"]
     assert ask_profile["tools"]["terminal"] is False
     assert write_profile["enable_all_context_servers"] is False
+    assert ask_profile["enable_all_context_servers"] is False
 
-    runtime_servers = set(settings["context_servers"])
-    enabled_servers = set(write_profile["context_servers"])
-    assert runtime_servers == {"memory", "fetch", "deepwiki"}
-    assert enabled_servers == runtime_servers
-    assert "filesystem" not in runtime_servers
+    # Agent must not attach MCP by default (prevents stdio thrash / multi-client
+    # duplicates). MCP lives on the shared HTTP plane outside Zed Agent profiles.
+    runtime_servers = set(settings.get("context_servers") or {})
+    assert runtime_servers == set()
+    assert set(ask_profile.get("context_servers") or {}) == set()
+    assert set(write_profile.get("context_servers") or {}) == set()
 
 
 def test_zed_runtime_mcp_servers_are_a_generated_manifest_subset() -> None:
-    """Native Zed MCP servers should stay within the generated manifest inventory."""
-    settings_servers = set(_load_json("settings.json")["context_servers"])
+    """Agent-attached MCP set is empty; inventory may still list shared servers."""
+    settings_servers = set(_load_json("settings.json").get("context_servers") or {})
     generated_servers = set(_load_json("mcp.json")["mcpServers"])
 
     assert settings_servers <= generated_servers
-    assert settings_servers == {"memory", "fetch", "deepwiki"}
+    assert settings_servers == set()
 
 
 def test_zed_tasks_use_venv_python_without_path_uv() -> None:
@@ -202,6 +204,18 @@ def test_zed_tasks_use_venv_python_without_path_uv() -> None:
     ]
     # Bare ``bandit -r src/`` ignores [tool.bandit] skips and scans non-product trees.
     assert "src/" not in security["args"]
+
+    type_check = next(task for task in tasks if task["label"] == "Type check")
+    assert type_check["command"] == venv_python
+    assert type_check["args"] == [
+        "-m",
+        "mypy",
+        "--config-file",
+        "pyproject.toml",
+        "src/bioetl",
+    ]
+    # Full ``mypy src/`` pulls memory tooling; CI product gate is src/bioetl.
+    assert type_check["args"][-1] == "src/bioetl"
 
     serialized = json.dumps(tasks)
     assert "codex agent run" not in serialized

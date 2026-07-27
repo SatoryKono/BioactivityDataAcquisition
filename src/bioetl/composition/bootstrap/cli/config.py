@@ -42,15 +42,18 @@ def bootstrap_config_service(
     pipeline_config_loader = create_pipeline_config_loader(resolved_configs_root)
     dq_config_loader = create_dq_config_loader(resolved_configs_root)
 
+    from bioetl.application.services.config_dq_service import DQConfigLoaderProtocol
+    from bioetl.domain.ports.config.config_loader_port import PipelineConfigLoaderPort
+
     return build_cli_config_service(
         registry=create_registered_pipeline_registry(registry),
         logger_factory=create_noop_logger,
         settings_loader=cast(SettingsLoaderPort, get_settings),
-        pipeline_config_loader=pipeline_config_loader,
+        pipeline_config_loader=cast(PipelineConfigLoaderPort, pipeline_config_loader),
         domain_config_mapper=cast(DomainConfigMapperPort, yaml_config_to_domain),
         pipeline_yaml_getter=partial(
             get_pipeline_yaml_for_dq, pipeline_config_loader=pipeline_config_loader
         ),
-        dq_config_loader=dq_config_loader,
+        dq_config_loader=cast(DQConfigLoaderProtocol, dq_config_loader),
         effective_config_service_factory=create_effective_config_service,
     )

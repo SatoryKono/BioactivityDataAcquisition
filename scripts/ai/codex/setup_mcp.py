@@ -16,6 +16,11 @@ from pathlib import Path
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
+# ``python scripts/ai/codex/setup_mcp.py`` (Zed task) does not put the repo root
+# on sys.path, so ``import scripts...`` fails without this bootstrap.
+_REPO_ROOT_STR = str(REPO_ROOT)
+if _REPO_ROOT_STR not in sys.path:
+    sys.path.insert(0, _REPO_ROOT_STR)
 MANAGED_BLOCK_BEGIN = "# === BEGIN MANAGED MCP SERVERS ==="
 MANAGED_BLOCK_END = "# === END MANAGED MCP SERVERS ==="
 CACHE_DIR_NAME = ".cache"
@@ -573,7 +578,10 @@ def _write_json(
         ensure_path_within_root,
     )
 
-    safe_path = ensure_path_within_root(path, allowed_root or REPO_ROOT)
+    safe_root = (allowed_root or REPO_ROOT).expanduser().resolve(strict=False)
+    confined_path = ensure_path_within_root(path, safe_root)
+    relative_path = confined_path.relative_to(safe_root)
+    safe_path = safe_root.joinpath(*relative_path.parts)
     safe_path.parent.mkdir(parents=True, exist_ok=True)
     rendered = json.dumps(payload, indent=2, ensure_ascii=True) + "\n"
     safe_path.write_text(rendered, encoding="utf-8")

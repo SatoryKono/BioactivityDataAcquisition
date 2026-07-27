@@ -221,7 +221,14 @@ class PipelineRunner(PipelineRunnerSupportMixin):
         if not callable(finalize):
             return
         try:
-            result = await finalize(status=status, manifest_id=self.manifest_id)
+            from collections.abc import Awaitable, Callable
+            from typing import cast
+
+            finalize_fn = cast(
+                Callable[..., Awaitable[object]],
+                finalize,
+            )
+            result = await finalize_fn(status=status, manifest_id=self.manifest_id)
         except _RUN_FAILURE_EXCEPTIONS as error:
             self._logger.warning(
                 "debug_export_finalize_failed",

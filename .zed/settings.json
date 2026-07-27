@@ -87,35 +87,9 @@
     "line_height": "comfortable"
   },
   "vim_mode": false,
-  "context_servers": {
-    "memory": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-memory@2026.1.26"
-      ],
-      "env": {
-        "NPM_CONFIG_CACHE": ".cache/npm-cache",
-        "MEMORY_FILE_PATH": "docs/00-project/ai/memory/mcp-memory.json"
-      }
-    },
-    "fetch": {
-      "command": "uvx",
-      "args": [
-        "--from",
-        "mcp-server-fetch==2025.4.7",
-        "mcp-server-fetch"
-      ],
-      "env": {
-        "UV_CACHE_DIR": ".cache/uv-cache",
-        "UV_TOOL_DIR": ".cache/uv-tools"
-      }
-    },
-    "deepwiki": {
-      "url": "https://mcp.deepwiki.com/mcp"
-    }
-  },
+  "context_servers": {},
   "agent": {
+    "default_profile": "bioetl-ask",
     "auto_compact": {
       "enabled": true,
       "threshold": "90%"
@@ -165,11 +139,7 @@
           "write_file": true
         },
         "enable_all_context_servers": false,
-        "context_servers": {
-          "memory": {},
-          "fetch": {},
-          "deepwiki": {}
-        }
+        "context_servers": {}
       }
     },
     "tool_permissions": {

@@ -38,6 +38,7 @@ class BatchProcessingServiceProtocol(Protocol):
         offset: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
         """Yield raw Bronze records from the data source."""
+        ...
 
 
 class _BatchStateUpdater(Protocol):
@@ -131,7 +132,11 @@ class BatchExtractionLoopService:
         finally:
             aclose = getattr(records, "aclose", None)
             if callable(aclose):
-                await aclose()
+                from collections.abc import Awaitable, Callable
+                from typing import cast
+
+                aclose_fn = cast(Callable[[], Awaitable[object]], aclose)
+                await aclose_fn()
 
         await flush_remaining_batch(
             loop_state=loop_state,

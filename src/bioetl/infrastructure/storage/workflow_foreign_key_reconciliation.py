@@ -199,7 +199,14 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
         value = read_gold(table_name, columns=columns, current_only=current_only)
         if inspect.isawaitable(value):
             value = await value
-        return [dict(row) for row in value]
+        from collections.abc import Iterable
+        from typing import Any, cast
+
+        rows = cast(
+            Iterable[Any],  # Any: storage reader result is a runtime boundary.
+            value,
+        )
+        return [dict(row) for row in rows]
 
     async def _reconcile_loaded_rows(
         self,

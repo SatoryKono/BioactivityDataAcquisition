@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 from deltalake.exceptions import CommitFailedError, TableNotFoundError  # noqa: F401
 
@@ -217,7 +217,10 @@ class GoldWriter(
                 if isinstance(scd_config, dict)
                 else scd_config
             )
-            active_schema = _resolve_active_gold_schema(schema)
+            active_schema = cast(
+                "DataFrameSchema",
+                _resolve_active_gold_schema(schema),
+            )
             contract_version = (
                 schema.active_version
                 if isinstance(schema, GoldSchemaPolicyByVersion)

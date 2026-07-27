@@ -37,7 +37,7 @@ def _query_defaults() -> tuple[Path, Path]:
     return default_rag_chunks_path(), default_timeline_dir()
 
 
-def _query_runtime() -> tuple[dict[str, object], Any, Any]:
+def _query_runtime() -> tuple[Any, Any, Any]:
     from memory.query import TASK_PROFILES, query_all, query_catalog
 
     return TASK_PROFILES, query_all, query_catalog
@@ -56,11 +56,11 @@ def refresh_all(*args: object, **kwargs: object) -> dict[str, Any]:
     return _refresh_all(*args, **kwargs)
 
 
-def validate_memory_scaffold() -> list[object]:
+def validate_memory_scaffold() -> list[Any]:
     """Module seam for scaffold validation, patchable in integration tests."""
     from memory.validation import validate_memory_scaffold as _validate
 
-    return _validate()
+    return list(_validate())
 
 
 def _format_validation_issues(issues: list[object]) -> list[dict[str, str]]:

@@ -23,7 +23,7 @@ MetadataT = TypeVar("MetadataT", BronzeMetadata, SilverMetadata, GoldMetadata)
 
 def _resolve_primary_artifact_id(fragment: LineageGraphFragment) -> str:
     """Resolve the canonical produced artifact id for one lineage fragment."""
-    unique_artifact_ids = _produced_artifact_ids(fragment)
+    unique_artifact_ids = list(_produced_artifact_ids(fragment))
     if not unique_artifact_ids:
         raise ValueError(
             f"Lineage fragment {fragment.fragment_id} does not expose a produced artifact node"
@@ -32,7 +32,9 @@ def _resolve_primary_artifact_id(fragment: LineageGraphFragment) -> str:
         raise ValueError(
             f"Lineage fragment {fragment.fragment_id} exposes multiple produced artifacts: {unique_artifact_ids}"
         )
-    return unique_artifact_ids[0]
+    primary_artifact_id = unique_artifact_ids[0]
+    assert isinstance(primary_artifact_id, str)
+    return primary_artifact_id
 
 
 def _produced_artifact_ids(fragment: LineageGraphFragment) -> tuple[str, ...]:

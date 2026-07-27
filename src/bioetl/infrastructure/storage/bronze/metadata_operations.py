@@ -81,6 +81,7 @@ class _BronzeMetadataBundleBuilder(Protocol):
         input_data: BronzeMetadataInput,
     ) -> MetadataLineageBundleResult[BronzeMetadata]:
         """Build bundled bronze metadata and lineage."""
+        ...
 
 
 def prepare_bronze_metadata_write(

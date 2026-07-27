@@ -57,9 +57,13 @@ def _read(path: Path) -> str:
 
 
 def _write(path: Path, text: str) -> None:
-    from scripts.engineering.common.repo_paths import ensure_repo_path
+    from scripts.engineering.common.repo_paths import REPO_ROOT, ensure_repo_path
 
-    ensure_repo_path(path).write_text(text, encoding="utf-8")
+    safe_root = REPO_ROOT.resolve(strict=False)
+    confined_path = ensure_repo_path(path)
+    relative_path = confined_path.relative_to(safe_root)
+    safe_path = safe_root.joinpath(*relative_path.parts)
+    safe_path.write_text(text, encoding="utf-8")
 
 
 def _replace(path: Path, old: str, new: str) -> bool:

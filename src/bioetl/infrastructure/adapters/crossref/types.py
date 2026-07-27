@@ -17,6 +17,7 @@ class CrossRefBatchFetcher(Protocol):
 
     def fetch_batch(self, dois: list[str]) -> AsyncIterator[BronzeRecord]:
         """Return an async iterator of CrossRef records for the provided DOIs."""
+        ...
 
 
 class CrossRefSearchPaginator(Protocol):
@@ -29,3 +30,4 @@ class CrossRefSearchPaginator(Protocol):
         cursor: str = "*",
     ) -> AsyncIterator[BronzeRecord]:
         """Return an async iterator of CrossRef records for the given query."""
+        ...

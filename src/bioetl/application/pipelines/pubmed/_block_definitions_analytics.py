@@ -30,7 +30,8 @@ class _PubMedDateBlock(_PubMedXmlBlock):
         super().__init__(root_resolver)
         self._extract_date_data = extract_date_data
 
-    def extract(self, _record: BronzeRecord) -> JsonDict:
+    def extract(self, record: BronzeRecord) -> JsonDict:
+        del record
         article, medline, pubmed_data = self._resolve_article_context()
         if article is None:
             return {}
@@ -51,7 +52,8 @@ class _PubMedClassificationBlock(_PubMedXmlBlock):
         self._serialize_json_list = serialize_json_list
         self._classify_publication_types = classify_publication_types
 
-    def extract(self, _record: BronzeRecord) -> JsonDict:
+    def extract(self, record: BronzeRecord) -> JsonDict:
+        del record
         article, medline, _ = self._resolve_article_context()
         if article is None:
             return {}
@@ -84,7 +86,8 @@ class _PubMedClassificationBlock(_PubMedXmlBlock):
 class _PubMedMetricsBlock(_PubMedXmlBlock):
     """Extract simple count-based PubMed metrics."""
 
-    def extract(self, _record: BronzeRecord) -> JsonDict:
+    def extract(self, record: BronzeRecord) -> JsonDict:
+        del record
         article, _, pubmed_data = self._resolve_article_context()
         if article is None:
             return {}

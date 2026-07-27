@@ -18,6 +18,7 @@ class RunManifestInspectionResultProtocol(Protocol):
     @property
     def ledger_entries(self) -> tuple[object, ...]:
         """Return the associated ledger entries."""
+        ...
 
 
 class RunManifestInspectionServiceProtocol(Protocol):
@@ -25,6 +26,7 @@ class RunManifestInspectionServiceProtocol(Protocol):
 
     def show(self, identifier: str) -> RunManifestInspectionResultProtocol:
         """Resolve one manifest or run identifier."""
+        ...
 
 
 def _resolve_run_scoped_bronze_records(

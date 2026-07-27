@@ -182,8 +182,10 @@ class PubMedPublicationEntity(PublicationEntityBase):
     Note: pmid is required for PubMed publications and validated in __post_init__.
     """
 
-    # Override: PMID is REQUIRED for PubMed (base has Optional)
-    pmid: str
+    # Override: PMID is REQUIRED for PubMed (base has Optional).
+    # Base field has a default, so the narrowed override keeps a default and
+    # __post_init__ enforces non-empty PMID at runtime.
+    pmid: str = ""
 
     # PubMed-specific identifiers (pmc_id is now inherited from PublicationEntityBase)
     # Additional identifiers for cross-referencing with publisher databases

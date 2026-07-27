@@ -24,14 +24,18 @@ def _repo_root() -> Path:
 def _atomic_copy(source: Path, target: Path, *, allowed_root: Path) -> None:
     from scripts.engineering.common.repo_paths import ensure_path_within_root
 
-    safe_source = ensure_path_within_root(source, allowed_root)
-    safe_target = ensure_path_within_root(target, allowed_root)
+    safe_root = allowed_root.expanduser().resolve(strict=False)
+    confined_source = ensure_path_within_root(source, safe_root)
+    confined_target = ensure_path_within_root(target, safe_root)
+    safe_source = safe_root.joinpath(*confined_source.relative_to(safe_root).parts)
+    safe_target = safe_root.joinpath(*confined_target.relative_to(safe_root).parts)
     safe_target.parent.mkdir(parents=True, exist_ok=True)
     content = safe_source.read_text(encoding="utf-8")
-    tmp = ensure_path_within_root(
+    confined_tmp = ensure_path_within_root(
         safe_target.with_suffix(safe_target.suffix + ".tmp"),
-        allowed_root,
+        safe_root,
     )
+    tmp = safe_root.joinpath(*confined_tmp.relative_to(safe_root).parts)
     tmp.write_text(content, encoding="utf-8")
     os.replace(tmp, safe_target)
 

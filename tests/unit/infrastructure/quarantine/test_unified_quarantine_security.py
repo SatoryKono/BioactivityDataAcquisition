@@ -57,17 +57,18 @@ def test_purge_handles_malicious_pipeline_name(mock_delta_table):
 def test_update_status_handles_malicious_hash(mock_delta_table):
     """Test that update_status safely handles payload_hash with quotes."""
     mock_instance = mock_delta_table.return_value
-    # Simulate that a record with the hash exists
-    mock_arrow_table = MagicMock()
-    mock_arrow_table.__len__.return_value = 1
-    mock_instance.to_pyarrow_table.return_value = mock_arrow_table
-
     quarantine = UnifiedQuarantineAdapter(base_path="/fake/path")
     malicious_hash = "abc'; --"
 
-    with patch(
-        "bioetl.infrastructure.quarantine.unified.append_status_event"
-    ) as append_mock:
+    with (
+        patch(
+            "bioetl.infrastructure.quarantine.unified.read_delta_records",
+            return_value=[{"payload_hash": malicious_hash}],
+        ),
+        patch(
+            "bioetl.infrastructure.quarantine.unified.append_status_event"
+        ) as append_mock,
+    ):
         quarantine.update_status(
             payload_hash=malicious_hash, new_status=QuarantineRecordStatus.IGNORED
         )

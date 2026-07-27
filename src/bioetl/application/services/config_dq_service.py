@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Literal, Protocol, cast
+from typing import Literal, Protocol, TypeGuard, cast
 
 from bioetl.application.services.control_plane.effective_config.service import (
     EffectiveConfigService,
@@ -59,14 +59,28 @@ def _parse_disposition(value: object) -> DQDisposition:
     raise ValueError(f"Invalid DQ disposition value: {value!r}")
 
 
+def _is_strictness_mode(value: object) -> TypeGuard[DQStrictnessMode]:
+    return value in {"lenient", "moderate", "strict"}
+
+
+def _is_snapshot_strictness_mode(
+    value: object,
+) -> TypeGuard[DQSnapshotStrictnessMode]:
+    return value in {"lenient", "moderate", "standard", "strict"}
+
+
+def _is_source_hash_strategy(value: object) -> TypeGuard[ConfigSourceHashStrategy]:
+    return value in {"canonical_yaml", "raw_bytes"}
+
+
 def _parse_strictness_mode(value: object) -> DQStrictnessMode:
-    if value in {"lenient", "moderate", "strict"}:
+    if _is_strictness_mode(value):
         return value
     raise ValueError(f"Invalid DQ strictness mode: {value!r}")
 
 
 def _parse_snapshot_strictness_mode(value: object) -> DQSnapshotStrictnessMode:
-    if value in {"lenient", "moderate", "standard", "strict"}:
+    if _is_snapshot_strictness_mode(value):
         return value
     raise ValueError(f"Invalid DQ snapshot strictness mode: {value!r}")
 
@@ -76,7 +90,7 @@ def _parse_source_hash_strategy(
 ) -> ConfigSourceHashStrategy | None:
     if value is None:
         return None
-    if value in {"canonical_yaml", "raw_bytes"}:
+    if _is_source_hash_strategy(value):
         return value
     raise ValueError(f"Invalid config source hash strategy: {value!r}")
 

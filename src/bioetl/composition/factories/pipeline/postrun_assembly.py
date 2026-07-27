@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.postrun import (
     PostrunCleanupService,
@@ -163,6 +163,10 @@ def build_postrun_service(
         logger_port=logger_port,
         dq_configs=dq_configs,
     )
+    from bioetl.application.core.pipeline_aux_service_protocols import (
+        PipelinePostrunServicesProtocol,
+    )
+
     return PostrunService(
         config=pipeline.config,
         runtime=pipeline.runtime,
@@ -170,6 +174,6 @@ def build_postrun_service(
         dq_service=dq_service,
         lifecycle_service=lifecycle_service,
         dependencies=dependencies,
-        services=pipeline.services,
+        services=cast(PipelinePostrunServicesProtocol | None, pipeline.services),
         tracer=resolved_tracer,
     )

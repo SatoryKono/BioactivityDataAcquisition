@@ -21,6 +21,7 @@ class _SupportsNormalizeDoi(Protocol):
 
     def _normalize_doi(self, value: str) -> str:
         """Normalize a DOI string for provider lookup consistency."""
+        ...
 
 
 _SEMANTICSCHOLAR_DEFAULT_FALLBACK_CONFIG = FallbackDecoratorConfig(
