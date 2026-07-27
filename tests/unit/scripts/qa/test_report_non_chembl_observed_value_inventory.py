@@ -39,4 +39,9 @@ def test_build_inventory_payload_covers_expected_non_chembl_sections() -> None:
 
 
 def test_committed_artifacts_match_generator_output() -> None:
+    if not report.DEFAULT_JSON_OUT.is_file() or not report.DEFAULT_MD_OUT.is_file():
+        pytest.skip(
+            "generated non-ChEMBL inventory artifacts are not present in this "
+            "checkout (gitignored docs/reports/generated outputs)"
+        )
     assert report.main(["--check"]) == 0

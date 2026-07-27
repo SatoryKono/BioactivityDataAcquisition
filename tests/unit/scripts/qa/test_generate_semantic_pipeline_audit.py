@@ -135,7 +135,7 @@ def test_resolve_latest_gold_contract_path_returns_default_when_pipeline_missing
 def test_build_current_member_facts_exposes_composite_inherited_field_types() -> None:
     seed_registry = json.loads(
         Path(
-            "reports/semantic_pipeline_audit/semantic_cluster_registry_2026-05-16.json"
+            "tests/fixtures/semantic_pipeline_audit/semantic_cluster_registry_2026-05-16.json"
         ).read_text(encoding="utf-8")
     )
 
@@ -152,7 +152,7 @@ def test_build_current_member_facts_exposes_composite_inherited_field_types() ->
 def test_build_current_member_facts_exposes_composite_authority_shim_types() -> None:
     seed_registry = json.loads(
         Path(
-            "reports/semantic_pipeline_audit/semantic_cluster_registry_2026-05-21.json"
+            "tests/fixtures/semantic_pipeline_audit/semantic_cluster_registry_2026-05-21.json"
         ).read_text(encoding="utf-8")
     )
 
@@ -176,7 +176,7 @@ def test_refresh_clusters_rebuilds_canonical_registry_membership_from_current_re
 ):
     seed_registry = json.loads(
         Path(
-            "reports/semantic_pipeline_audit/semantic_cluster_registry_2026-05-21.json"
+            "tests/fixtures/semantic_pipeline_audit/semantic_cluster_registry_2026-05-21.json"
         ).read_text(encoding="utf-8")
     )
 
@@ -219,7 +219,7 @@ def test_refresh_clusters_rebuilds_canonical_registry_membership_from_current_re
 def test_refresh_clusters_attaches_tracked_weak_decision_metadata() -> None:
     seed_registry = json.loads(
         Path(
-            "reports/semantic_pipeline_audit/semantic_cluster_registry_2026-05-21.json"
+            "tests/fixtures/semantic_pipeline_audit/semantic_cluster_registry_2026-05-21.json"
         ).read_text(encoding="utf-8")
     )
     review_registry_payload = audit._load_yaml(

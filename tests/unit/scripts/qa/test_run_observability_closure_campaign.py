@@ -189,9 +189,31 @@ def test_stage_workflow_fixture_selects_compatible_join_records(
     assert len(list(fixture_root.rglob("*.jsonl.zst"))) == 3
 
 
+def _require_materialized_special_vcr_cassettes() -> None:
+    """Skip when special ChEMBL VCR cassettes are still Git LFS pointers."""
+    repo_root = Path.cwd()
+    for pipeline in campaign._RECORDED_SPECIAL_FIXTURES:
+        path = (
+            repo_root
+            / "tests"
+            / "fixtures"
+            / "vcr"
+            / "chembl"
+            / f"test_pipeline_matrix__{pipeline}.yaml"
+        )
+        if not path.is_file():
+            pytest.skip(f"missing special VCR cassette: {path}")
+        head = path.read_text(encoding="utf-8", errors="replace")[:120]
+        if "git-lfs.github.com/spec/v1" in head:
+            pytest.skip(
+                f"special VCR cassette is an unresolved Git LFS pointer: {path}"
+            )
+
+
 def test_stage_standalone_fixture_cache_covers_canonical_universe(
     tmp_path: Path,
 ) -> None:
+    _require_materialized_special_vcr_cassettes()
     fixture_root, evidence = campaign._stage_standalone_fixture_cache(
         repo_root=Path.cwd(),
         audit_root=tmp_path / "audit",
@@ -963,6 +985,7 @@ def test_execute_then_finalize_writes_complete_report_only_when_every_gate_is_sa
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
+    _require_materialized_special_vcr_cassettes()
     audit_root = tmp_path / "audit"
     data_root, log_root = _canonical_roots(tmp_path)
     # Avoid real git status on large/cloud-synced dirty trees (hangs unit suite).
@@ -1075,6 +1098,7 @@ def test_execute_returns_nonzero_when_campaign_is_incomplete(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
+    _require_materialized_special_vcr_cassettes()
     audit_root = tmp_path / "audit"
     data_root, log_root = _canonical_roots(tmp_path)
     # Avoid real git status on large/cloud-synced dirty trees (hangs unit suite).
