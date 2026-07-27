@@ -1,10 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-27T09:07:02.475355+00:00",
+  "generated_at": "2026-07-27T09:22:04.114172+00:00",
   "summary": {
-    "total_scripts": 539,
+    "total_scripts": 542,
     "status_counts": {
       "active": 341,
+      "orphan": 3,
       "supporting": 198
     },
     "reference_group_coverage": {
@@ -10101,7 +10102,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 291,
+      "reference_count": 295,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -10152,6 +10153,30 @@
           "text": "run: python -m scripts.engineering.qa check-duplication-complexity-exemptions"
         }
       ]
+    },
+    {
+      "path": "scripts/engineering/qa/_td03_pin_audit.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/engineering/qa/_td07_constructor_patch.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/engineering/qa/_td_closeout_batch.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/engineering/qa/analyze_duplicate_functions.py",

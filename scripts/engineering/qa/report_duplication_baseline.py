@@ -91,12 +91,23 @@ def _is_package_entry_report_noise(cluster: DuplicateCluster) -> bool:
     Pylint sometimes reports the comparison path as a package entry module even
     when neither compared module is that package root. Those findings are not
     actionable residual debt for hotspot family ratchets.
+
+    Linux pylint often attributes the same thin fetch-signature shells to one of
+    the concrete modules instead of ``__init__.py``; treat those known
+    application.core fetch-contract pairs as wiring noise as well.
     """
-    normalized_path = cluster.path.replace("\\", "/")
-    if not normalized_path.endswith("/__init__.py"):
-        return False
     module_names = {module.module for module in cluster.modules}
-    return not any(module.endswith(".__init__") for module in module_names)
+    normalized_path = cluster.path.replace("\\", "/")
+    if normalized_path.endswith("/__init__.py") and not any(
+        module.endswith(".__init__") for module in module_names
+    ):
+        return True
+    core_fetch_shells = {
+        "bioetl.application.core._fetch_forwarding",
+        "bioetl.application.core.filtered_data_source_mixins",
+        "bioetl.application.core.target_data_source_mixins",
+    }
+    return module_names <= core_fetch_shells and len(module_names) >= 2
 
 
 def _cluster_actionability_category(cluster: DuplicateCluster) -> str:
