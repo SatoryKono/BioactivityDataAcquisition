@@ -43,6 +43,17 @@
 - Outcome: `improved` / `unchanged` / `worsened`
 - Justification (required for `unchanged` or `worsened`):
 
+## Compatibility / tech-debt prevention (TD-10)
+
+Keep twin / transition / expired compatibility metrics at zero:
+
+- [ ] No new transition shims, twin modules, or package-root compatibility facades
+      without inventory updates and owner review
+- [ ] No first-party `src` imports of `bioetl.infrastructure.config` package root
+      (see `docs/02-architecture/compatibility/infrastructure-config-package-root-sunset.md`)
+- [ ] No debt budget / threshold / exemption growth (shrink-only scorecard)
+- [ ] Permanent public CLI/composition entrypoints stay inventory-listed (not “dead code”)
+
 ## Checklist
 
 - [ ] No new import boundary violations (ARCH-001)

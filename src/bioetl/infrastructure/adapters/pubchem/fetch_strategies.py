@@ -56,17 +56,22 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
 
     def __init__(
         self,
-        logger: LoggerPort,
-        rate_limiter: TokenBucketRateLimiter,
-        circuit_breaker: CircuitBreakerGuard,
         mapper: PubChemEntityMapper,
-        run_in_executor: Callable[..., Awaitable[object]],
+        transport: dict[str, object],
         provider_name: str = "pubchem",
         request_collector: APIRequestCollector | None = None,
         response_mapper: PubChemResponseMapper | None = None,
         fetch_flow: PubChemFetchFlow | None = None,
     ) -> None:
-        """Initialize fetch strategies."""
+        """Initialize fetch strategies.
+
+        ``transport`` must provide ``logger``, ``rate_limiter``,
+        ``circuit_breaker``, and ``run_in_executor``.
+        """
+        logger = transport["logger"]  # type: ignore[assignment]
+        rate_limiter = transport["rate_limiter"]  # type: ignore[assignment]
+        circuit_breaker = transport["circuit_breaker"]  # type: ignore[assignment]
+        run_in_executor = transport["run_in_executor"]  # type: ignore[assignment]
         self._logger = logger
         self._rate_limiter = rate_limiter
         self._circuit_breaker = circuit_breaker

@@ -18,7 +18,7 @@
       ],
       "duplication_clusters": 0,
       "files": 180,
-      "total_loc": 22455,
+      "total_loc": 22458,
       "files_ge_250_loc": 6,
       "helper_function_ratio": 0.37,
       "max_internal_fan_in": 7,
@@ -66,7 +66,7 @@
       ],
       "duplication_clusters": 0,
       "files": 35,
-      "total_loc": 4690,
+      "total_loc": 4694,
       "files_ge_250_loc": 3,
       "helper_function_ratio": 0.417,
       "max_internal_fan_in": 3,
@@ -108,8 +108,8 @@
       "name": "composition_runtime_builders",
       "owner": "@bioetl-platform",
       "linked_rf": "RF-023",
-      "ratchet_stage": "reviewed-baseline",
-      "ratchet_scope": "duplication-report-plus-bounded-growth",
+      "ratchet_stage": "active",
+      "ratchet_scope": "duplication-non-growth-plus-bounded-growth",
       "path_prefixes": [
         "src/bioetl/composition/runtime_builders/"
       ],
