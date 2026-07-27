@@ -6,6 +6,9 @@ import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
+from bioetl.application.composite._coalesce_policy_support import (
+    extract_field_from_qualified,
+)
 from bioetl.domain.behavior.identity_service import EntityIdentityGenerator
 from bioetl.domain.normalization.identifiers import normalize_doi
 
@@ -53,3 +56,19 @@ def test_normalize_doi_is_idempotent_for_plain_tokens(raw: str) -> None:
     once = normalize_doi(raw)
     twice = normalize_doi(once) if once is not None else None
     assert once == twice
+
+
+@_PROPERTY_SETTINGS
+@given(
+    a=_TEXT,
+    b=_TEXT,
+    c=_TEXT,
+)
+def test_extract_field_from_qualified_is_deterministic(
+    a: str, b: str, c: str
+) -> None:
+    """Pure coalesce helper: qualified x.y.z extracts z; other shapes are stable."""
+    qualified = f"{a}.{b}.{c}"
+    assert extract_field_from_qualified(qualified) == c
+    plain = f"{a}_{b}"
+    assert extract_field_from_qualified(plain) == plain

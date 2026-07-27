@@ -3,6 +3,9 @@ schema_version: 1
 owner: "@bioetl-platform"
 linked_issues:
   - 6607
+  - 6643
+  - 6632
+  - 6642
 reviewed_on: "2026-07-27"
 
 roles:
@@ -32,13 +35,34 @@ provider_ownership:
     e2e: full_cycle_with_gold
   chembl_assay:
     integration: primary_happy_path
-    e2e: field_and_confidence_checks
+    e2e: schema_backed_field_and_confidence_checks
+  chembl_molecule:
+    integration: primary_happy_path
+    e2e: schema_backed_structural_fields_only
+  chembl_target:
+    integration: primary_happy_path
+    e2e: full_cycle_medallion_when_enabled
   pubchem_compound:
     integration: primary_happy_path
     e2e: control_plane_completeness_smoke
   uniprot_protein:
     integration: primary_happy_path
     e2e: full_cycle_with_gold
+  uniprot_idmapping:
+    integration: primary_happy_path
+    e2e: full_cycle_medallion_when_enabled
+  pubmed_publication:
+    integration: primary_happy_path
+    e2e: full_cycle_medallion_when_enabled
+  openalex_publication:
+    integration: primary_happy_path
+    e2e: full_cycle_medallion_when_enabled
+  crossref_publication:
+    integration: primary_happy_path
+    e2e: full_cycle_medallion_when_enabled
+  semanticscholar_publication:
+    integration: primary_happy_path
+    e2e: full_cycle_medallion_when_enabled
   composite_publication:
     integration: resume_rebuild_gates
     e2e: matrix_or_advanced_only

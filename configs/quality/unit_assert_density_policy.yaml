@@ -1,0 +1,34 @@
+# Assert-density review policy for table-driven unit suites (test-audit #6646).
+
+schema_version: 1
+owner: "@bioetl-platform"
+linked_issues:
+  - 6646
+reviewed_on: "2026-07-27"
+
+policy:
+  allow_parametrized_external_asserts: true
+  forbid_empty_test_bodies: true
+  review_threshold_asserts_per_test: 0.5
+
+reviewed_modules:
+  - path: tests/unit/domain/schemas/pubmed/test_pubmed_publication_validation.py
+    classification: table_driven_parametrized
+    notes: >-
+      Parametrized schema tables share module-level assertion helpers; low
+      per-function assert count is expected.
+  - path: tests/unit/domain/schemas/openalex/test_openalex_publication_validation.py
+    classification: table_driven_parametrized
+  - path: tests/unit/domain/schemas/crossref/test_crossref_publication_validation.py
+    classification: table_driven_parametrized
+  - path: tests/unit/domain/schemas/semanticscholar/test_semanticscholar_publication_validation.py
+    classification: table_driven_parametrized
+  - path: tests/unit/domain/schemas/chembl/test_chembl_publication_validation.py
+    classification: table_driven_parametrized
+  - path: tests/unit/application/observability/test_pipeline_metrics.py
+    classification: metrics_side_effect_spy
+    notes: Assertions are concentrated on spy call counts rather than per-case bodies.
+
+action: >-
+  Keep table-driven patterns; prefer strengthening shared helpers over
+  duplicating assert lines into every parametrized case.
