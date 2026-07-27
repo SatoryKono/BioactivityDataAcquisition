@@ -1,3 +1,430 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:131b1ff1eb7aca25cc86e801a467d9d745cf3ca0294ed08edaf25f42d0c56623
-size 37936
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - api.crossref.org
+      User-Agent:
+      - BioETL/1.0 (mailto:test@example.com)
+    method: GET
+    uri: https://api.crossref.org/works?query=title%3A%22Crystal+structure+of+rhodopsin%22&rows=3&cursor=*&mailto=test@example.com
+  response:
+    body:
+      string: '{"status":"ok","message-type":"work-list","message-version":"1.0.0","message":{"items-per-page":3,"total-results":15,"next-cursor":null,"items":[{"DOI":"10.1038/nature12373","title":["Crystal
+        structure of rhodopsin bound to arrestin by femtosecond X-ray laser"],"author":[{"given":"Yanyong","family":"Kang"}],"container-title":["Nature"],"publisher":"Springer
+        Science and Business Media LLC","published-print":{"date-parts":[[2015,7,30]]},"is-referenced-by-count":892,"type":"journal-article"},{"DOI":"10.1126/science.1219218","title":["Crystal
+        structure of metarhodopsin II"],"author":[{"given":"Hui-Woog","family":"Choe"}],"container-title":["Science"],"publisher":"American
+        Association for the Advancement of Science (AAAS)","published-print":{"date-parts":[[2011,7,22]]},"is-referenced-by-count":623,"type":"journal-article"},{"DOI":"10.1073/pnas.0804276105","title":["Crystal
+        structure of a photoactivated deprotonated intermediate of rhodopsin"],"author":[{"given":"Midori","family":"Murakami"}],"container-title":["Proceedings
+        of the National Academy of Sciences"],"publisher":"Proceedings of the National
+        Academy of Sciences","published-print":{"date-parts":[[2008,7,8]]},"is-referenced-by-count":201,"type":"journal-article"}]}}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Sun, 05 Jan 2026 12:00:00 GMT
+      X-Rate-Limit-Interval:
+      - 1s
+      X-Rate-Limit-Limit:
+      - '50'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - api.crossref.org
+      User-Agent:
+      - BioETL/1.0 (mailto:default@example.com)
+    method: GET
+    uri: https://api.crossref.org/works?rows=1&mailto=default%40example.com
+  response:
+    body:
+      string: '{"status":"ok","message-type":"work-list","message-version":"1.0.0","message":{"facets":{},"total-results":179629323,"items":[{"indexed":{"date-parts":[[2025,3,28]],"date-time":"2025-03-28T05:01:47Z","timestamp":1743138107987,"version":"3.40.3"},"publisher-location":"Wiesbaden","reference-count":66,"publisher":"Springer
+        Fachmedien Wiesbaden","isbn-type":[{"type":"print","value":"9783658176716"},{"type":"electronic","value":"9783658176716"}],"license":[{"start":{"date-parts":[[2018,11,3]],"date-time":"2018-11-03T00:00:00Z","timestamp":1541203200000},"content-version":"tdm","delay-in-days":0,"URL":"http:\/\/www.springer.com\/tdm"}],"content-domain":{"domain":["link.springer.com"],"crossmark-restriction":false},"published-print":{"date-parts":[[2019]]},"DOI":"10.1007\/978-3-658-17671-6_18-1","type":"book-chapter","created":{"date-parts":[[2018,11,15]],"date-time":"2018-11-15T06:01:17Z","timestamp":1542261677000},"page":"1-17","update-policy":"https:\/\/doi.org\/10.1007\/springer_crossmark_policy","source":"Crossref","is-referenced-by-count":2,"title":["Soziale
+        Innovation"],"prefix":"10.1007","author":[{"given":"J\u00fcrgen","family":"Howaldt","sequence":"first","affiliation":[]},{"given":"Michael","family":"Schwarz","sequence":"additional","affiliation":[]}],"member":"297","published-online":{"date-parts":[[2018,11,3]]},"reference":[{"key":"18-1_CR1","first-page":"14","volume-title":"Neu!
+        Besser! Billiger! Soziale Innovation als leeres Versprechen?","author":"J
+        Aderhold","year":"2016","unstructured":"Aderhold, Jens. 2016. Im Labyrinth
+        sozialer Innovation. Deutungsprobleme politischer EntscheiderInnen, wissenschaftlicher
+        Institutionen und gesellschaftlicher AkteurInnen. In Neu! Besser! Billiger!
+        Soziale Innovation als leeres Versprechen? Hrsg. Katharina Meichenitsch, Michaela
+        Neumayer und Martin Schenk, 14\u201345. Wien: Mandelbaum Verlag."},{"key":"18-1_CR2","doi-asserted-by":"publisher","DOI":"10.1007\/978-3-319-13773-5","volume-title":"Generative
+        mechanisms transforming the social order","author":"MS Archer","year":"2015","unstructured":"Archer,
+        Margaret S. 2015. Generative mechanisms transforming the social order. Cham\/Heidelberg\/New
+        York\/Dordrecht\/London: Springer."},{"key":"18-1_CR3","unstructured":"Avelino,
+        Flor, Julia Wittmayer, Alex Haxeltine, Ren\u00e9 Kemp, Tim O\u2019Riordan,
+        Paul Weaver, Derk Loorbach, und Jan Rotman. 2014. Game-changers and transformative
+        social innovation. The case of the economic crisis and the new economy, TRANSIT
+        working paper. http:\/\/www.transitsocialinnovation.eu\/content\/original\/TRANSIT%20outputs\/91%20Gamechangers_TSI_Avelino_etal_TRANSIT_workingpaper_2014.pdf
+        . Zugegriffen am 08.04.2016."},{"issue":"4","key":"18-1_CR4","doi-asserted-by":"publisher","first-page":"635","DOI":"10.1017\/S004727941600009X","volume":"45","author":"N
+        Ayob","year":"2016","unstructured":"Ayob, Noorseha, Simon Teasdale, und Kylie
+        Fagan. 2016. How social innovation \u201acame to be\u2018: Tracing the evolution
+        of a contested concept. Journal of Social Policy 45(4): 635\u2013653.","journal-title":"Journal
+        of Social Policy"},{"key":"18-1_CR5","unstructured":"BEPA Report. 2010. Empowering
+        people, driving change. Social innovation in the European Union. Bureau of
+        European Policy Advisers, European Commission. http:\/\/www.transitsocialinnovation.eu\/resource-hub\/empowering-people-driving-change-social-innovation-in-the-european-union
+        . Zugegriffen am 08.04.2016."},{"issue":"4","key":"18-1_CR6","doi-asserted-by":"publisher","first-page":"415","DOI":"10.1111\/ijcs.12351","volume":"41","author":"B
+        Bl\u00e4ttel-Mink","year":"2017","unstructured":"Bl\u00e4ttel-Mink, Birgit,
+        Moritz Boddenberg, Lenard Gunkel, Sarah Schmitz, und Franziska Vaessen. 2017.
+        Beyond the market \u2013 New practices of supply in times of crisis: The example
+        community-supported agriculture. International Journal of Consumer Studies
+        41(4): 415\u2013421.","journal-title":"International Journal of Consumer Studies"},{"key":"18-1_CR7","doi-asserted-by":"publisher","first-page":"125","DOI":"10.1007\/978-3-658-16545-1_6","volume-title":"Soziale
+        Innovationen f\u00fcr nachhaltigen Konsum","author":"M Boddenberg","year":"2017","unstructured":"Boddenberg,
+        Moritz, Max H. Frauenlob, Lenard Gunkel, Sarah Schmitz, Franziska Vaessen,
+        und Birgit Bl\u00e4ttel-Mink. 2017. Solidarische Landwirtschaft als innovative
+        Praxis \u2013 Potenziale f\u00fcr einen sozial-\u00f6kologischen Wandel. In
+        Soziale Innovationen f\u00fcr nachhaltigen Konsum, Hrsg. Melanie Jaeger-Erben,
+        Jana R\u00fcckert-John und Martina Sch\u00e4fer, 125\u2013148. Wiesbaden:
+        Springer VS\/Innovation + Gesellschaft."},{"key":"18-1_CR8","doi-asserted-by":"publisher","first-page":"173","DOI":"10.1007\/978-3-531-93097-8_9","volume-title":"Handbuch
+        Umweltsoziologie","author":"K-W Brand","year":"2011","unstructured":"Brand,
+        Karl-Werner. 2011. Umweltsoziologie und der praxistheoretische Zugang. In
+        Handbuch Umweltsoziologie, Hrsg. Matthias Gro\u00df, 173\u2013198. Wiesbaden:
+        Springer VS."},{"key":"18-1_CR9","first-page":"1","volume-title":"Managing
+        innovation","author":"H Brooks","year":"1982","unstructured":"Brooks, Harvey.
+        1982. Social and technological innovation. In Managing innovation, Hrsg. E.
+        William Colglazier und Sven B. Lundtstedt, 1\u201330. Elmsford\/New York:
+        Pergamon Press."},{"key":"18-1_CR10","unstructured":"Bundesministerium f\u00fcr
+        Bildung und Forschung (BMBF). 2014. Die neue Hightech-Strategie. Innovationen
+        f\u00fcr Deutschland. http:\/\/www.bmbf.de\/pub_hts\/HTS_Broschure_Web.pdf
+        . Zugegriffen am 08.07.2015."},{"key":"18-1_CR11","doi-asserted-by":"publisher","first-page":"42","DOI":"10.1016\/j.techfore.2013.05.008","volume":"82","author":"G
+        Cajaiba-Santana","year":"2014","unstructured":"Cajaiba-Santana, Giovany. 2014.
+        Social innovation: Moving the field forward. A conceptual framework. Technological
+        Forecasting and Social Change 82:42\u201351.","journal-title":"Technological
+        Forecasting and Social Change"},{"key":"18-1_CR12","unstructured":"Chiappero-Martinetti,
+        Enrica, und Nadia von Jacobi. 2015. How can Sen\u2019s \u201aCapabilities
+        Approach\u2018 contribute to understanding the role for social innovations
+        for the marginalized? CRESSI Working Papers. http:\/\/www.sbs.ox.ac.uk\/sites\/default\/files\/research-projects\/CRESSI\/docs\/CRESSI_Working_Paper_3_D1.1_Chp3_18Nov2014.pdf
+        . Zugegriffen am 13.07.2015."},{"key":"18-1_CR13","doi-asserted-by":"crossref","first-page":"7","DOI":"10.1007\/978-81-322-2071-8_2","volume-title":"Technology
+        and innovation for social change","author":"N Choi","year":"2015","unstructured":"Choi,
+        Nia, und Satyajit Majumdar. 2015. Social innovation: Towards a conceptualisation.
+        In Technology and innovation for social change, Hrsg. Satyajit Majumdar, Samapti
+        Guha und Nadiya Marakkath, 7\u201334. New Delhi: Springer."},{"key":"18-1_CR14","first-page":"60","volume-title":"Theoretical
+        approaches to social innovation: A critical literature review","author":"A
+        Davies","year":"2014","unstructured":"Davies, Anna. 2014. Social innovation
+        process and social entrepreneurship. In Theoretical approaches to social innovation:
+        A critical literature review, Hrsg. J\u00fcrgen Howaldt, Anna Butzin, Dmitri
+        Domanski und Christoph Kaletka, 60\u201378. http:\/\/www.si-drive.eu\/wp-content\/uploads\/2014\/11\/D1_1-Critical-Literature-Review_final.pdf
+        . Zugegriffen am 29.03.2016."},{"key":"18-1_CR15","volume-title":"Landmarks
+        of tomorrow","author":"PF Drucker","year":"1957","unstructured":"Drucker,
+        Peter F. 1957. Landmarks of tomorrow. New York: Harper and Brothers."},{"key":"18-1_CR16","volume-title":"Social
+        innovation, participation and the development of society: Soziale Innovation,
+        Partizipation und die Entwicklung der Gesellschaft","author":"S Elsen","year":"2014","unstructured":"Elsen,
+        Susanne, und Walter Lorenz. 2014. Social innovation, participation and the
+        development of society: Soziale Innovation, Partizipation und die Entwicklung
+        der Gesellschaft. Bolzano: University Press."},{"key":"18-1_CR17","unstructured":"European
+        Commission. 2010. Europe 2020. A strategy for smart, sustainable and inclusive
+        growth. Br\u00fcssel."},{"key":"18-1_CR18","doi-asserted-by":"publisher","first-page":"218","DOI":"10.1016\/j.respol.2008.12.006","volume":"38","author":"J
+        Fagerberg","year":"2009","unstructured":"Fagerberg, Jan, und Bat Verspagen.
+        2009. Innovation studies \u2013 The emerging structure of a new scientific
+        field. Research Policy 38:218\u2013233.","journal-title":"Research Policy"},{"key":"18-1_CR19","volume-title":"Methods
+        for experimental social innovation","author":"GW Fairweather","year":"1967","unstructured":"Fairweather,
+        George W. 1967. Methods for experimental social innovation. New York: Wiley."},{"key":"18-1_CR20","unstructured":"Gillwald,
+        Katrin. 2000. Konzepte sozialer Innovation. WZB Paper: Querschnittsgruppe
+        Arbeit und \u00d6kologie. Wissenschaftszentrum Berlin f\u00fcr Sozialforschung.
+        Berlin. http:\/\/stages-online.info\/pdfs\/soziale-innovationen.pdf . Zugegriffen
+        am 08.07.2015."},{"key":"18-1_CR21","unstructured":"Godin, Benoit. 2012. Social
+        innovation: Utopias of innovation from c.1830 to the present. Project on the
+        intellectual history of innovation. Working paper no. 11. http:\/\/www.csiic.ca\/PDF\/SocialInnovation_2012.pdf
+        . Zugegriffen am 08.07.2015."},{"key":"18-1_CR22","doi-asserted-by":"publisher","first-page":"86","DOI":"10.1007\/978-3-531-92806-7_5","volume-title":"Social
+        entrepreneurship \u2013 Social business: F\u00fcr die Gesellschaft unternehmen","author":"RG
+        Heinze","year":"2011","unstructured":"Heinze, Rolf G., Katrin Schneiders,
+        und Stephan Grohs. 2011. Social Entrepreneurship im deutschen Wohlfahrtsstaat
+        \u2013 Hybride Organisationen zwischen Markt, Staat und Gemeinschaft. In Social
+        entrepreneurship \u2013 Social business: F\u00fcr die Gesellschaft unternehmen,
+        Hrsg. Helga Hackenberg und Stefan Empter, 86\u2013102. Wiesbaden: Springer
+        VS."},{"key":"18-1_CR23","first-page":"12","volume-title":"Social innovation.
+        New forms of organisation in knowledge-based societies","author":"J Hochgerner","year":"2013","unstructured":"Hochgerner,
+        Josef. 2013. Social innovation and the advancement of the general concept
+        of innovation. In Social innovation. New forms of organisation in knowledge-based
+        societies, Hrsg. Carmen Ruiz Vi\u00f1als und Carmen Parra Rodr\u00edguez,
+        12\u201328. Oxon: Routledge."},{"key":"18-1_CR24","doi-asserted-by":"publisher","DOI":"10.14361\/transcript.9783839415351","volume-title":"\u201eSoziale
+        Innovation\u201c im Fokus. Skizze eines gesellschaftstheoretisch inspirierten
+        Forschungskonzepts","author":"J Howaldt","year":"2010","unstructured":"Howaldt,
+        J\u00fcrgen, und Michael Schwarz. 2010. \u201eSoziale Innovation\u201c im
+        Fokus. Skizze eines gesellschaftstheoretisch inspirierten Forschungskonzepts.
+        Bielefeld: transcript."},{"issue":"2","key":"18-1_CR25","first-page":"159","volume":"38","author":"J
+        Howaldt","year":"2015","unstructured":"Howaldt, J\u00fcrgen, und Michael Schwarz.
+        2015. Innovation neu denken \u2013 \u201eSoziale Innovation\u201c als Kern
+        eines neuen Innovationsverst\u00e4ndnisses. Sozialwissenschaften und Berufspraxis
+        38(2): 159\u2013176.","journal-title":"Sozialwissenschaften und Berufspraxis"},{"key":"18-1_CR26","unstructured":"Howaldt,
+        J\u00fcrgen, und Michael Schwarz. 2016. Social innovation and its relationship
+        to social change. Verifying existing social theories in reference to social
+        innovation and its relationship to social change. SI-Drive Report D 1.3. https:\/\/www.si-drive.eu\/wp-content\/uploads\/2016\/07\/SI-DRIVE-D1-3-Social-Change-final-260416-2.pdf
+        . Zugegriffen am 13.11.2017."},{"issue":"3","key":"18-1_CR27","first-page":"239","volume":"26","author":"J
+        Howaldt","year":"2017","unstructured":"Howaldt, J\u00fcrgen, und Michael Schwarz.
+        2017a. Die Mechanismen transformativen Wandels erfassen. Pl\u00e4doyer f\u00fcr
+        ein praxistheoretisches Konzept sozialer Innovationen. GAiA \u2013 \u00d6kologische
+        Perspektiven f\u00fcr Wissenschaft und Gesellschaft 26(3): 239\u2013244.","journal-title":"GAiA
+        \u2013 \u00d6kologische Perspektiven f\u00fcr Wissenschaft und Gesellschaft"},{"issue":"2","key":"18-1_CR28","doi-asserted-by":"publisher","first-page":"163","DOI":"10.1080\/19452829.2016.1251401","volume":"18","author":"J\u00fcrgen
+        Howaldt","year":"2017","unstructured":"Howaldt, J\u00fcrgen, und Michael Schwarz.
+        2017b. Social innovation and human development \u2013 How the capabilities
+        approach and social innovation theory mutually support each other. Journal
+        of Human Development and Capabilities 18(2): 163\u2013180.","journal-title":"Journal
+        of Human Development and Capabilities"},{"key":"18-1_CR29","unstructured":"Howaldt,
+        J\u00fcrgen, Anna Butzin, Dmitri Domanski, und Christoph Kaletka. 2014a. Theoretical
+        approaches to social innovation: A critical literature review. http:\/\/www.si-drive.eu\/wp-content\/uploads\/2014\/11\/D1_1-Critical-Literature-Review_final.pdf
+        . Zugegriffen am 29.03.2016."},{"key":"18-1_CR30","volume-title":"Zur Theorie
+        sozialer Innovationen. Tardes vernachl\u00e4ssigter Beitrag zur Entwicklung
+        einer soziologischen Innovationstheorie","author":"J Howaldt","year":"2014","unstructured":"Howaldt,
+        J\u00fcrgen, Ralf Kopp, und Michael Schwarz. 2014b. Zur Theorie sozialer Innovationen.
+        Tardes vernachl\u00e4ssigter Beitrag zur Entwicklung einer soziologischen
+        Innovationstheorie. Weinheim\/Basel: Beltz Juventa."},{"key":"18-1_CR31","first-page":"88","volume":"1","author":"J
+        Howaldt","year":"2015","unstructured":"Howaldt, J\u00fcrgen, Dmitri Domanski,
+        und Michael Schwarz. 2015. Rethinking social entrepreneurship: The concept
+        of social entrepreneurship under the perspective of socio-scientific innovation
+        research. Journal of Creativity and Business Innovation 1:88\u201398.","journal-title":"Journal
+        of Creativity and Business Innovation"},{"key":"18-1_CR32","doi-asserted-by":"publisher","DOI":"10.1007\/978-3-531-92819-7","volume-title":"Social
+        entrepreneurship","author":"P J\u00e4hnke","year":"2011","unstructured":"J\u00e4hnke,
+        Petra, Gabriela Christmann, und Karsten Balgar. 2011. Social entrepreneurship.
+        Wiesbaden: Springer VS."},{"key":"18-1_CR33","doi-asserted-by":"publisher","DOI":"10.2307\/j.ctt1f1163h","volume-title":"La
+        transformation sociale par l\u2019innovation sociale","author":"J-L Klein","year":"2016","unstructured":"Klein,
+        Juan-Luis, Christian Jett\u00e9, Annie Camus, Christine Champagne, und Matthieu
+        Roy. 2016. La transformation sociale par l\u2019innovation sociale. Quebec:
+        Presses de l\u2019Universite du Quebec."},{"key":"18-1_CR34","volume-title":"Vivre
+        sans \u00e9tat? Essai sur le pouvoir politique et l\u2019innovation sociale","author":"J-W
+        Lapierre","year":"1977","unstructured":"Lapierre, Jean-William. 1977. Vivre
+        sans \u00e9tat? Essai sur le pouvoir politique et l\u2019innovation sociale.
+        Paris: Seuil."},{"key":"18-1_CR35","first-page":"15","volume-title":"Handbook
+        of research on social entrepreneurship","author":"J Mair","year":"2010","unstructured":"Mair,
+        Johanna. 2010. Social entrepreneurship: Taking stock and looking ahead. In
+        Handbook of research on social entrepreneurship, Hrsg. Alain Fayolle und Harry
+        Matlay, 15\u201328. Cheltenham: Edward Elgar."},{"key":"18-1_CR36","volume-title":"Die
+        neue Macht der B\u00fcrger. Was motiviert die Protestbewegungen? BP-Gesellschaftsstudie","author":"S
+        Marg","year":"2013","unstructured":"Marg, Stine, Lars Geiges, Felix Butzlaff,
+        und Franz Walter. 2013. Die neue Macht der B\u00fcrger. Was motiviert die
+        Protestbewegungen? BP-Gesellschaftsstudie. Bonn: Bundeszentrale f\u00fcr Politische
+        Bildung."},{"key":"18-1_CR37","doi-asserted-by":"publisher","first-page":"52","DOI":"10.1057\/9781137506801_3","volume-title":"New
+        frontiers in social innovation research","author":"K McGowan","year":"2015","unstructured":"McGowan,
+        Katharine, und Frances Westley. 2015. At the root of change: The history of
+        social innovation. In New frontiers in social innovation research, Hrsg. Alex
+        Nicholls, Julie Simon und Madeleine Gabriel, 52\u201368. Basingstoke: Palgrave
+        Macmillan."},{"key":"18-1_CR38","volume-title":"Social theory and social structure","author":"RK
+        Merton","year":"1968","unstructured":"Merton, Robert K. 1968 [1949]. Social
+        theory and social structure. New York\/London: Free Press."},{"key":"18-1_CR39","doi-asserted-by":"publisher","first-page":"114","DOI":"10.1057\/9780230367098_5","volume-title":"Social
+        innovation: Blurring boundaries to reconfigure markets","author":"M-L Moore","year":"2012","unstructured":"Moore,
+        Michele-Lee, Frances Westley, Ola Tjornbo, und Carin Holroyd. 2012. The loop,
+        the lens, and the lesson: Using resilience theory to examine public policy
+        and social innovation. In Social innovation: Blurring boundaries to reconfigure
+        markets, Hrsg. Alex Nicholls und Alex Murdock, 114\u2013136. New York: Palgrave
+        Macmillan."},{"issue":"11","key":"18-1_CR40","doi-asserted-by":"publisher","first-page":"1969","DOI":"10.1080\/00420980500279893","volume":"42","author":"F
+        Moulaert","year":"2005","unstructured":"Moulaert, Frank, Flavia Martinelli,
+        Erik Swyngedouw, und Sara Gonz\u00e1lez. 2005. Towards alternative model(s)
+        of local innovation. Urban Studies 42(11): 1969\u20131990.","journal-title":"Urban
+        Studies"},{"key":"18-1_CR41","doi-asserted-by":"publisher","first-page":"1","DOI":"10.4337\/9781849809993","volume-title":"The
+        international handbook on social innovation. Collective action, social learning
+        and transdisciplinary research","author":"F Moulaert","year":"2013","unstructured":"Moulaert,
+        Frank, Diana MacCallum, Abid Mehmood, und Abdelillah Hamdouch. 2013a. General
+        introduction: The return of social innovation as a scientific concept and
+        a social practice. In The international handbook on social innovation. Collective
+        action, social learning and transdisciplinary research, Hrsg. Frank Moulaert,
+        Diana MacCallum, Abid Mehmood und Abdelillah Hamdouch, 1\u20136. Cheltenham\/Northhampton:
+        Edward Elgar."},{"key":"18-1_CR42","doi-asserted-by":"publisher","DOI":"10.4337\/9781849809993","volume-title":"The
+        international handbook on social innovation. Collective action, social learning
+        and transdisciplinary research","author":"F Moulaert","year":"2013","unstructured":"Moulaert,
+        Frank, Diana MacCallum, Abid Mehmood, und Abdelillah Hamdouch. 2013b. The
+        international handbook on social innovation. Collective action, social learning
+        and transdisciplinary research. Cheltenham\/Northhampton: Edward Elgar."},{"key":"18-1_CR43","doi-asserted-by":"crossref","first-page":"19","DOI":"10.1007\/978-3-642-32879-4_2","volume-title":"Challenge
+        social innovation. Potentials for business, social entrepreneurship, welfare
+        and civil society","author":"G Mulgan","year":"2012","unstructured":"Mulgan,
+        Geoff. 2012. Social innovation theories: Can theory catch up with practice?
+        In Challenge social innovation. Potentials for business, social entrepreneurship,
+        welfare and civil society, Hrsg. Hans-Werner Franz, Josef Hochgerner und J\u00fcrgen
+        Howaldt, 19\u201342. Berlin\/New York: Springer."},{"key":"18-1_CR44","volume-title":"The
+        open book of social innovation, social innovator series: Ways to design, develop
+        and grow social innovation","author":"R Murray","year":"2010","unstructured":"Murray,
+        Robin, Julie Caulier-Grice, und Geoff Mulgan. 2010. The open book of social
+        innovation, social innovator series: Ways to design, develop and grow social
+        innovation. London: The Young Foundation."},{"key":"18-1_CR45","volume-title":"Soziale
+        Innovationen und sozialer Konflikt","author":"O Neuloh","year":"1977","unstructured":"Neuloh,
+        Otto. 1977. Soziale Innovationen und sozialer Konflikt. G\u00f6ttingen: Vandenhoeck
+        und Ruprecht."},{"key":"18-1_CR46","doi-asserted-by":"publisher","first-page":"222","DOI":"10.1057\/9781137035301_11","volume-title":"Social
+        enterprises: An organisational perspective","author":"A Nicholls","year":"2012","unstructured":"Nicholls,
+        Alex. 2012. The legitimacy of social entrepreneurship: Reflexive isomorphism
+        in a pre-paradigmatic field. In Social enterprises: An organisational perspective,
+        Hrsg. Benjamin Gidron und Yeheskel Hasenfeld, 222\u2013247. New York: Palgrave
+        Macmillan."},{"key":"18-1_CR47","doi-asserted-by":"publisher","DOI":"10.1057\/9781137506801","volume-title":"New
+        frontiers in social innovation research","author":"A Nicholls","year":"2015","unstructured":"Nicholls,
+        Alex, Julie Simon, und Madeleine Gabriel. 2015. New frontiers in social innovation
+        research. New York: Palgrave."},{"key":"18-1_CR48","first-page":"50","volume-title":"Soziologische
+        Texte. Band 56. William F. Ogburn. Kultur und Sozialer Wandel. Ausgew\u00e4hlte
+        Schriften","author":"WF Ogburn","year":"1969","unstructured":"Ogburn, William
+        Fielding. 1969. Erneute Betrachtung des Problems der sozialen Evolution. In
+        Soziologische Texte. Band 56. William F. Ogburn. Kultur und Sozialer Wandel.
+        Ausgew\u00e4hlte Schriften, Hrsg. Otis D. Duncan, 50\u201367. Berlin: Luchterhand."},{"issue":"4","key":"18-1_CR49","first-page":"34","volume":"6","author":"JA
+        Phills","year":"2008","unstructured":"Phills, James A., Kriss Deiglmeier,
+        und Dale T. Miller. 2008. Rediscovering social innovation. Stanford Social
+        Innovation Review 6(4): 34\u201343.","journal-title":"Stanford Social Innovation
+        Review"},{"key":"18-1_CR50","doi-asserted-by":"publisher","first-page":"878","DOI":"10.1016\/j.socec.2009.02.011","volume":"38","author":"E
+        Pol","year":"2009","unstructured":"Pol, Eduardo, und Simon Ville. 2009. Social
+        innovation: Buzz word or enduring term? The Journal of Socio-Economics 38:878\u2013885.","journal-title":"The
+        Journal of Socio-Economics"},{"key":"18-1_CR51","volume-title":"Innovation
+        policy lab white paper 2016\u201301, Munk School of Global Affairs","author":"K
+        Pue","year":"2016","unstructured":"Pue, Kristen, Christian Vandergeest, und
+        Dan Breznitz. 2016. Toward a theory of social innovation. In Innovation policy
+        lab white paper 2016\u201301, Munk School of Global Affairs. Toronto: University
+        of Toronto."},{"key":"18-1_CR52","doi-asserted-by":"publisher","first-page":"291","DOI":"10.1007\/978-3-531-90905-9_15","volume-title":"Handbuch
+        der Wirtschaftssoziologie","author":"W Rammert","year":"2008","unstructured":"Rammert,
+        Werner. 2008. Technik und Innovation. In Handbuch der Wirtschaftssoziologie,
+        Hrsg. Andrea Maurer, 291\u2013319. Wiesbaden: VS-Verlag f\u00fcr Sozialwissenschaften."},{"key":"18-1_CR53","first-page":"21","volume-title":"Soziale
+        Innovation. Auf dem Weg zu einem postindustriellen Innovationsparadigma","author":"W
+        Rammert","year":"2010","unstructured":"Rammert, Werner. 2010. Die Innovationen
+        in der Gesellschaft. In Soziale Innovation. Auf dem Weg zu einem postindustriellen
+        Innovationsparadigma, Hrsg. J\u00fcrgen Howaldt und Heike Jacobsen, 21\u201352.
+        Wiesbaden: Springer VS."},{"key":"18-1_CR54","doi-asserted-by":"publisher","DOI":"10.1007\/978-3-658-10874-8","volume-title":"Innovationsgesellschaft
+        heute. Perspektiven, Felder und F\u00e4lle","author":"W Rammert","year":"2016","unstructured":"Rammert,
+        Werner, Arnold Windeler, Hubert Knoblauch, und Michael Hutter. 2016. Innovationsgesellschaft
+        heute. Perspektiven, Felder und F\u00e4lle. Wiesbaden: Springer VS."},{"issue":"4","key":"18-1_CR55","doi-asserted-by":"publisher","first-page":"282","DOI":"10.1515\/zfsoz-2003-0401","volume":"32","author":"A
+        Reckwitz","year":"2003","unstructured":"Reckwitz, Andreas. 2003. Grundelemente
+        einer Theorie sozialer Praktiken. Eine sozialtheoretische Perspektive. Zeitschrift
+        f\u00fcr Soziologie 32(4): 282\u2013301.","journal-title":"Zeitschrift f\u00fcr
+        Soziologie"},{"key":"18-1_CR56","doi-asserted-by":"crossref","unstructured":"R\u00fcede,
+        Dominik, und Kathrin Lurtz. 2012. Mapping the various meanings of social innovation:
+        Towards a differentiated understanding of an emerging concept. EBS Business
+        School. http:\/\/papers.ssrn.com\/sol3\/papers.cfm?abstract_id=2091039 . Zugegriffen
+        am 08.07.2015.","DOI":"10.2139\/ssrn.2091039"},{"key":"18-1_CR57","volume-title":"The
+        quality of life","author":"A Sen","year":"1993","unstructured":"Sen, Amartya,
+        und Martha Nussbaum. 1993. The quality of life. Oxford: Clarendon Press."},{"key":"18-1_CR58","volume-title":"Enabling
+        social innovation ecosystems for community-LED territorial development","author":"F
+        Sgaragli","year":"2014","unstructured":"Sgaragli, Fabio. 2014. Enabling social
+        innovation ecosystems for community-LED territorial development. Rome: Fondazione
+        Giacomo Brodolini."},{"issue":"3","key":"18-1_CR59","doi-asserted-by":"publisher","first-page":"161","DOI":"10.1002\/sej.69","volume":"3","author":"J
+        Short","year":"2009","unstructured":"Short, Jeremy, Todd W. Moss, und G. T.
+        Lumpkin. 2009. Research in social entrepreneurship. Past contributions and
+        future opportunities. Strategic Entrepreneurship Journal 3(3): 161\u2013194.","journal-title":"Strategic
+        Entrepreneurship Journal"},{"key":"18-1_CR60","doi-asserted-by":"publisher","DOI":"10.4135\/9781446250655","volume-title":"The
+        dynamics of social practice. Everyday life and how it changes","author":"E
+        Shove","year":"2012","unstructured":"Shove, Elizabeth, Mika Pantzar, und Matt
+        Watson. 2012. The dynamics of social practice. Everyday life and how it changes.
+        Los Angeles: SAGE."},{"key":"18-1_CR61","volume-title":"Muhammad Yunus \u2013
+        Banker der Armen. Der Friedensnobelpreistr\u00e4ger. Sein Leben. Seine Vision.
+        Seine Wirkung","author":"P Spiegel","year":"2006","unstructured":"Spiegel,
+        Peter. 2006. Muhammad Yunus \u2013 Banker der Armen. Der Friedensnobelpreistr\u00e4ger.
+        Sein Leben. Seine Vision. Seine Wirkung. Freiburg im Breisgau\/Basel\/Wien:
+        Herder-Verlag."},{"key":"18-1_CR62","volume-title":"Die sozialen Gesetze.
+        Skizze einer Soziologie (1898)","author":"G Tarde","year":"2009","unstructured":"Tarde,
+        Gabriel. 2009 [1898]. Die sozialen Gesetze. Skizze einer Soziologie (1898).
+        Marburg: Metropolis-Verlag."},{"key":"18-1_CR63","doi-asserted-by":"crossref","DOI":"10.1093\/oso\/9780199240531.001.0001","volume-title":"The
+        intellectual and social organization of the sciences","author":"R Whitley","year":"2000","unstructured":"Whitley,
+        Richard. 2000. The intellectual and social organization of the sciences. Oxford:
+        Oxford University Press."},{"key":"18-1_CR64","first-page":"111","volume-title":"Innovationsgesellschaft
+        heute. Perspektiven, Felder, F\u00e4lle","author":"A Windeler","year":"2016","unstructured":"Windeler,
+        Arnold. 2016. Reflexive Innovation. Zur Innovation in der radikalisierten
+        Moderne. In Innovationsgesellschaft heute. Perspektiven, Felder, F\u00e4lle,
+        Hrsg. Werner Rammert, Arnold Windeler, Hubert Knoblauch und Michael Huter,
+        111\u2013132. Wiesbaden: Springer VS."},{"key":"18-1_CR65","first-page":"170","volume":"40","author":"W
+        Zapf","year":"1989","unstructured":"Zapf, Wolfgang. 1989. \u00dcber soziale
+        Innovationen. Soziale Welt 40:170\u2013183.","journal-title":"Soziale Welt"},{"key":"18-1_CR66","first-page":"31","volume-title":"Entwicklung.
+        Die Perspektive der Entwicklungssoziologie","author":"W Zapf","year":"1997","unstructured":"Zapf,
+        Wolfgang. 1997. Entwicklung als Modernisierung. In Entwicklung. Die Perspektive
+        der Entwicklungssoziologie, Hrsg. Manfred Schulz, 31\u201345. Opladen: Westdeutscher
+        Verlag."}],"container-title":["Handbuch Innovationsforschung"],"language":"de","link":[{"URL":"http:\/\/link.springer.com\/content\/pdf\/10.1007\/978-3-658-17671-6_18-1","content-type":"unspecified","content-version":"vor","intended-application":"similarity-checking"}],"deposited":{"date-parts":[[2024,7,12]],"date-time":"2024-07-12T11:34:36Z","timestamp":1720784076000},"score":1.0,"resource":{"primary":{"URL":"http:\/\/link.springer.com\/10.1007\/978-3-658-17671-6_18-1"}},"issued":{"date-parts":[[2018,11,3]]},"ISBN":["9783658176716","9783658176716"],"references-count":66,"URL":"https:\/\/doi.org\/10.1007\/978-3-658-17671-6_18-1","published":{"date-parts":[[2018,11,3]]},"assertion":[{"value":"17
+        November 2017, 00:00:00","order":1,"name":"received","label":"Received","group":{"name":"ChapterHistory","label":"Chapter
+        History"}},{"value":"29 May 2018, 00:00:00","order":2,"name":"accepted","label":"Accepted","group":{"name":"ChapterHistory","label":"Chapter
+        History"}},{"value":"3 November 2018","order":3,"name":"first_online","label":"First
+        Online","group":{"name":"ChapterHistory","label":"Chapter History"}}]}],"items-per-page":1,"query":{"start-index":0,"search-terms":null}}}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 04 Mar 2026 04:30:11 GMT
+      access-control-allow-headers:
+      - X-Requested-With, Accept, Accept-Encoding, Accept-Charset, Accept-Language,
+        Accept-Ranges, Cache-Control
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link
+      content-length:
+      - '28327'
+      permissions-policy:
+      - interest-cohort=()
+      server:
+      - Jetty(9.4.40.v20210413)
+      vary:
+      - Accept-Encoding
+      x-api-pool:
+      - polite
+      x-concurrency-limit:
+      - '3'
+      x-rate-limit-interval:
+      - 1s
+      x-rate-limit-limit:
+      - '10'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - api.crossref.org
+      User-Agent:
+      - BioETL/1.0 (mailto:default@example.com)
+    method: GET
+    uri: https://api.crossref.org/works?query=rhodopsin+crystal+structure&rows=1&cursor=%2A&mailto=default%40example.com
+  response:
+    body:
+      string: '{"status":"ok","message-type":"work-list","message-version":"1.0.0","message":{"facets":{},"next-cursor":"DnF1ZXJ5VGhlbkZldGNoJAAAAACvgyvrFlV1U25DZFJ2U2JLRVVuNjdsaVhxWkEAAAAAr4Mr7BZVdVNuQ2RSdlNiS0VVbjY3bGlYcVpBAAAAAK-hJlAWTWpkc1RvTlBTMUdQeGFHUVJGLTgwZwAAAACzednlFkNTcEFMQXBqUlotS2NVR2U1ZnBpeWcAAAAAuBF8hxZnOGNRZlJTclJBZWtPYm04eDVPWEFBAAAAALfGHBsWN085TWY0SHJReld1bHh5SmdoTWlkZwAAAACzednnFkNTcEFMQXBqUlotS2NVR2U1ZnBpeWcAAAAAr6EmUhZNamRzVG9OUFMxR1B4YUdRUkYtODBnAAAAALB9DHMWdXZSSjM5a0VTajI2bnA2N0tJVGdZZwAAAACzednmFkNTcEFMQXBqUlotS2NVR2U1ZnBpeWcAAAAAtEZicxZPWmJKeEJxRlNnUy1sZ2pKd0d3THN3AAAAALDhS8YWTkU2UEFBOTFTcjJ5U1M3WkM5b21QUQAAAACvgyvuFlV1U25DZFJ2U2JLRVVuNjdsaVhxWkEAAAAAtKv1ghZWZWc5bFc5dFRIU2llSC00NUR3bzFnAAAAALSF02cWQWhSeXczSFhUNWVPdVVZMC1ZZ3RFZwAAAAC0q_WEFlZlZzlsVzl0VEhTaWVILTQ1RHdvMWcAAAAAtIXTaBZBaFJ5dzNIWFQ1ZU91VVkwLVlndEVnAAAAALB9DHQWdXZSSjM5a0VTajI2bnA2N0tJVGdZZwAAAAC3xhwdFjdPOU1mNEhyUXpXdWx4eUpnaE1pZGcAAAAAuxZesxZSUy1mNHlpVlE4aXFROG8xREdqd2RRAAAAAK-hJlEWTWpkc1RvTlBTMUdQeGFHUVJGLTgwZwAAAAC4cEW_FlN2NFkzT0EzU0hPamsxZUxrRHJWQncAAAAAspIO8BZFNUVLNG44RlM2ZW8wXzI5dUpWUm9BAAAAALfRv40Wb0FYVXlYV0hUbzJqdy1ua2pYM2VyUQAAAACzednkFkNTcEFMQXBqUlotS2NVR2U1ZnBpeWcAAAAAsH0MdhZ1dlJKMzlrRVNqMjZucDY3S0lUZ1lnAAAAALB9DHUWdXZSSjM5a0VTajI2bnA2N0tJVGdZZwAAAAC0q_WDFlZlZzlsVzl0VEhTaWVILTQ1RHdvMWcAAAAAtHBUdhYyem9obE83aFRMNnZLRjlTbXFNWkh3AAAAALfRv44Wb0FYVXlYV0hUbzJqdy1ua2pYM2VyUQAAAACvgyvtFlV1U25DZFJ2U2JLRVVuNjdsaVhxWkEAAAAAtIXTaRZBaFJ5dzNIWFQ1ZU91VVkwLVlndEVnAAAAALfGHBwWN085TWY0SHJReld1bHh5SmdoTWlkZwAAAAC0q_WBFlZlZzlsVzl0VEhTaWVILTQ1RHdvMWcAAAAAtIXTahZBaFJ5dzNIWFQ1ZU91VVkwLVlndEVnAAAAAK-hJlMWTWpkc1RvTlBTMUdQeGFHUVJGLTgwZw==","total-results":2584108,"items":[{"indexed":{"date-parts":[[2025,5,14]],"date-time":"2025-05-14T05:00:39Z","timestamp":1747198839700,"version":"3.40.5"},"description":"x-ray
+        diffraction structure","reference-count":0,"publisher":"Worldwide Protein
+        Data Bank","content-domain":{"domain":[],"crossmark-restriction":false},"DOI":"10.2210\/pdb2z73\/pdb","type":"component","created":{"date-parts":[[2008,5,13]],"date-time":"2008-05-13T19:00:18Z","timestamp":1210705218000},"source":"Crossref","is-referenced-by-count":0,"title":["Crystal
+        structure of squid rhodopsin"],"prefix":"10.2210","author":[{"given":"M.","family":"Murakami","sequence":"first","affiliation":[]},{"given":"T.","family":"Kouyama","sequence":"additional","affiliation":[]}],"member":"7763","published-online":{"date-parts":[[2008,5,13]]},"deposited":{"date-parts":[[2024,10,15]],"date-time":"2024-10-15T18:14:38Z","timestamp":1729016078000},"score":28.251984,"resource":{"primary":{"URL":"https:\/\/www.wwpdb.org\/pdb?id=pdb_00002z73"}},"issued":{"date-parts":[[2008,5,13]]},"references-count":0,"URL":"https:\/\/doi.org\/10.2210\/pdb2z73\/pdb","published":{"date-parts":[[2008,5,13]]}}],"items-per-page":1,"query":{"start-index":0,"search-terms":"rhodopsin
+        crystal structure"}}}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 04 Mar 2026 04:30:12 GMT
+      access-control-allow-headers:
+      - X-Requested-With, Accept, Accept-Encoding, Accept-Charset, Accept-Language,
+        Accept-Ranges, Cache-Control
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link
+      content-length:
+      - '2866'
+      permissions-policy:
+      - interest-cohort=()
+      server:
+      - Jetty(9.4.40.v20210413)
+      vary:
+      - Accept-Encoding
+      x-api-pool:
+      - polite
+      x-concurrency-limit:
+      - '3'
+      x-rate-limit-interval:
+      - 1s
+      x-rate-limit-limit:
+      - '10'
+    status:
+      code: 200
+      message: OK
+version: 1
