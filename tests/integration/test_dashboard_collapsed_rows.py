@@ -14,15 +14,7 @@ pytestmark = pytest.mark.integration
 PROGRESSIVE_DISCLOSURE_ROWS = {
     (
         "bioetl-control-plane-v1.json",
-        "Incident Drilldown: Replay Safety (Checkpoint / Replay)",
-    ),
-    (
-        "bioetl-control-plane-v1.json",
-        "Incident Drilldown: Manifest / Ledger Integrity",
-    ),
-    (
-        "bioetl-control-plane-v1.json",
-        "Incident Drilldown: Global Control-Plane Store Reliability",
+        "Identity evidence and remaining replay-safety signals",
     ),
     (
         "bioetl-control-plane-v1.json",
@@ -30,21 +22,32 @@ PROGRESSIVE_DISCLOSURE_ROWS = {
     ),
     (
         "bioetl-control-plane-v1.json",
-        "Identity evidence and remaining replay-safety signals",
+        "Incident Drilldown: Global Control-Plane Store Reliability",
     ),
-    ("bioetl-overview-v2.json", "L1 Historical Trends"),
-    ("bioetl-overview-v2.json", "Range Evidence (Historical / Recent History)"),
-    ("bioetl-overview-v2.json", "Diagnostics & Docs (Logs / Traces / Raw Metrics)"),
-    ("bioetl-runtime.json", "Detect"),
-    ("bioetl-runtime.json", "Localize"),
-    ("bioetl-runtime.json", "Escalate"),
+    ("bioetl-control-plane-v1.json", "Incident Drilldown: Manifest / Ledger Integrity"),
     (
-        "bioetl-provider-health-v2.json",
-        "Selected Provider Detail",
+        "bioetl-control-plane-v1.json",
+        "Incident Drilldown: Replay Safety (Checkpoint / Replay)",
     ),
+    ("bioetl-control-plane-v1.json", "Run context (identity / processed records)"),
+    ("bioetl-dq-v2.json", "Range / debug evidence"),
+    ("bioetl-dq-v2.json", "Run context (identity / processed records)"),
     ("bioetl-dq-v2.json", "Silver Structural / Gold Contract-Semantic Rejects"),
     ("bioetl-dq-v2.json", "Validation Failures / Runtime Diagnostics / Trends"),
-    ("bioetl-workflow-overview.json", "Step Diagnostics"),
+    ("bioetl-overview-v2.json", "Alert/SLO Triage"),
+    ("bioetl-overview-v2.json", "Diagnostics & Docs (Logs / Traces / Raw Metrics)"),
+    ("bioetl-overview-v2.json", "L1 Historical Trends"),
+    ("bioetl-overview-v2.json", "Range Evidence (Historical / Recent History)"),
+    ("bioetl-overview-v2.json", "Run context (identity / processed records)"),
+    ("bioetl-provider-health-v2.json", "Range / debug evidence"),
+    ("bioetl-provider-health-v2.json", "Run context (identity / processed records)"),
+    ("bioetl-provider-health-v2.json", "Selected Provider Detail"),
+    ("bioetl-runtime.json", "Detect"),
+    ("bioetl-runtime.json", "Escalate"),
+    ("bioetl-runtime.json", "Localize"),
+    ("bioetl-runtime.json", "Run context (identity / processed records)"),
+    ("bioetl-runtime.json", "Runtime secondary KPIs"),
+    ("bioetl-runtime.json", "Workflow band (merged from bioetl-workflow-overview)"),
 }
 
 
