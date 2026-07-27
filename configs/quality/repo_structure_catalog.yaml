@@ -41,6 +41,10 @@ plans:
       lifecycle: supporting_context
     - path: docs/plans/mcp-shared-http-multi-client-issue-pack-2026-07-24.md
       lifecycle: supporting_context
+    - path: docs/plans/mcp-shared-plane-work-plan-2026-07-24.md
+      lifecycle: supporting_context
+    - path: docs/plans/mcp-phase3-hardening-issue-pack-2026-07-26.md
+      lifecycle: supporting_context
 
 src_sidecars:
   path_prefix: src/
@@ -89,6 +93,8 @@ local_tolerated_root_dirs:
       role: local_ai_runtime_state_untracked
     - path: .agent-work
       role: local_agent_runtime_state_untracked
+    - path: .grok
+      role: local_grok_runtime_state_untracked
     - path: .agentbridge
       role: local_agent_bridge_state_untracked
     - path: .agents

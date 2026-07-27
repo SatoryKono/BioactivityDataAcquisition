@@ -1,18 +1,18 @@
 {
   "summary": {
-    "scanned_modules": 2265,
-    "total_internal_imports": 7082,
+    "scanned_modules": 2266,
+    "total_internal_imports": 7102,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 306,
     "violations": 0,
-    "source_fingerprint": "d95ae98740186839ab5c8251915a172d885bbbc93a5b259bf7288d87aeb7abbb"
+    "source_fingerprint": "ffe7eac610b8745666155fca4271513b35d7f932d82c67e08daefb270423cdf9"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1353,
+      "imports": 1365,
       "allowed": true
     },
     {
@@ -24,19 +24,19 @@
     {
       "source": "composition",
       "target": "application",
-      "imports": 151,
+      "imports": 155,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "composition",
-      "imports": 685,
+      "imports": 688,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 279,
+      "imports": 280,
       "allowed": true
     },
     {
@@ -130,6 +130,11 @@
       "imports": 58
     },
     {
+      "source": "composition.factories",
+      "target": "application.core",
+      "imports": 45
+    },
+    {
       "source": "application.composite",
       "target": "domain.ports",
       "imports": 44
@@ -140,11 +145,6 @@
       "imports": 43
     },
     {
-      "source": "composition.factories",
-      "target": "application.core",
-      "imports": 42
-    },
-    {
       "source": "application.services",
       "target": "domain.ports",
       "imports": 38
@@ -152,7 +152,7 @@
     {
       "source": "composition.bootstrap",
       "target": "application.services",
-      "imports": 36
+      "imports": 37
     },
     {
       "source": "composition.factories",
@@ -175,6 +175,11 @@
       "imports": 29
     },
     {
+      "source": "composition.bootstrap",
+      "target": "domain.ports",
+      "imports": 28
+    },
+    {
       "source": "composition.runtime_builders",
       "target": "domain.control_plane",
       "imports": 28
@@ -186,11 +191,6 @@
     },
     {
       "source": "application.core",
-      "target": "domain.ports",
-      "imports": 27
-    },
-    {
-      "source": "composition.bootstrap",
       "target": "domain.ports",
       "imports": 27
     },

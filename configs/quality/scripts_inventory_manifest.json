@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-26T17:34:35.173349+00:00",
+  "generated_at": "2026-07-27T03:52:20.519760+00:00",
   "summary": {
-    "total_scripts": 545,
+    "total_scripts": 546,
     "status_counts": {
-      "active": 349,
+      "active": 350,
       "supporting": 196
     },
     "reference_group_coverage": {
@@ -12,10 +12,10 @@
       "build": 11,
       "ci": 65,
       "docs": 219,
-      "other": 63,
-      "scripts": 417,
+      "other": 64,
+      "scripts": 429,
       "skills": 16,
-      "tests": 248
+      "tests": 249
     }
   },
   "scripts": [
@@ -175,7 +175,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 136,
+          "line": 138,
           "source_group": "tests",
           "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.bat\").exists()"
         }
@@ -214,7 +214,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 135,
+          "line": 137,
           "source_group": "tests",
           "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.ps1\").exists()"
         }
@@ -265,13 +265,13 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 131,
+          "line": 133,
           "source_group": "tests",
           "text": "assert \"../ai/codex/diagnose_wsl.sh\" in ops_router"
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 134,
+          "line": 136,
           "source_group": "tests",
           "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.sh\").exists()"
         }
@@ -556,7 +556,7 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 736,
+          "line": 738,
           "source_group": "tests",
           "text": "ensure_script = _to_bash_path(root / \"scripts/ai/codex/helper/ensure-mcp.sh\")"
         }
@@ -1354,19 +1354,19 @@
         },
         {
           "path": ".zed/README.md",
-          "line": 155,
+          "line": 158,
           "source_group": "other",
           "text": "- Refresh MCP config — `python scripts/ai/codex/setup_mcp.py ...`"
         },
         {
           "path": ".zed/README.md",
-          "line": 184,
+          "line": 187,
           "source_group": "other",
           "text": "uv run python scripts/ai/codex/setup_mcp.py --skip-codex --skip-gemini-settings"
         },
         {
           "path": ".zed/README.md",
-          "line": 222,
+          "line": 225,
           "source_group": "other",
           "text": "- `scripts/ai/codex/setup_mcp.py`"
         }
@@ -2378,8 +2378,20 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 4,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 38,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/github-mcp-wrapper.ps1\""
+        },
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 38,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/github-mcp-wrapper.ps1\""
+        },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
           "line": 311,
@@ -2399,25 +2411,13 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 4,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 38,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/github-mcp-wrapper.sh\""
-        },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
           "line": 94,
           "source_group": "docs",
           "text": "BIOETL_MCP_VALIDATE_ONLY=1 scripts/ai/mcp/github-mcp-wrapper.sh"
-        },
-        {
-          "path": "scripts/ai/.mcp.json",
-          "line": 38,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/github-mcp-wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
@@ -2444,13 +2444,25 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 5,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 128,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_adr_analysis_wrapper.ps1\""
+        },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 75,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_adr_analysis_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_adr_analysis_wrapper.ps1` (Windows)"
+        },
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 128,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_adr_analysis_wrapper.ps1\""
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
@@ -2475,25 +2487,13 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 2,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 128,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_adr_analysis_wrapper.sh\""
-        },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 75,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_adr_analysis_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_adr_analysis_wrapper.ps1` (Windows)"
-        },
-        {
-          "path": "scripts/ai/.mcp.json",
-          "line": 128,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_adr_analysis_wrapper.sh\""
         },
         {
           "path": "tests/unit/scripts/ai/mcp/test_adr_analysis_wrapper_contracts.py",
@@ -2512,8 +2512,21 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 62,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.ps1\""
+        },
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 62,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.ps1\""
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "windows_compatibility_wrapper",
       "review_by": "2026-07-15",
@@ -2524,20 +2537,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 1,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 62,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.mcp.json",
-          "line": 62,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 12,
@@ -2551,8 +2552,20 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 3,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 90,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.ps1\""
+        },
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 90,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.ps1\""
+        },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
           "line": 56,
@@ -2570,25 +2583,13 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 3,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 90,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
-        },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
           "line": 95,
           "source_group": "docs",
           "text": "BIOETL_MCP_VALIDATE_ONLY=1 scripts/ai/mcp/mcp_brave_search_wrapper.sh"
-        },
-        {
-          "path": "scripts/ai/.mcp.json",
-          "line": 90,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
@@ -2609,13 +2610,25 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 3,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 149,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1\""
+        },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 95,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_code_analyzer_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1` (Windows)"
+        },
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 149,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1\""
         }
       ],
       "owner": "@bioetl-platform",
@@ -2628,25 +2641,13 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 1,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 149,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_code_analyzer_wrapper.sh\""
-        },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 95,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_code_analyzer_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1` (Windows)"
-        },
-        {
-          "path": "scripts/ai/.mcp.json",
-          "line": 149,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_code_analyzer_wrapper.sh\""
         }
       ],
       "owner": "@bioetl-platform",
@@ -2659,8 +2660,20 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 3,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 69,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_code_interpreter_wrapper.ps1\""
+        },
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 69,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_code_interpreter_wrapper.ps1\""
+        },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
           "line": 30,
@@ -2678,20 +2691,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 1,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 69,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_code_interpreter_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.mcp.json",
-          "line": 69,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_code_interpreter_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 13,
@@ -2705,8 +2706,20 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 3,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 55,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_context7_wrapper.ps1\""
+        },
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 55,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_context7_wrapper.ps1\""
+        },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
           "line": 36,
@@ -2724,20 +2737,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 2,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 55,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_context7_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.mcp.json",
-          "line": 55,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_context7_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 11,
@@ -2757,13 +2758,25 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 3,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 118,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_deja_wrapper.ps1\""
+        },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 69,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_deja_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_deja_wrapper.ps1` (Windows)"
+        },
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 118,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_deja_wrapper.ps1\""
         }
       ],
       "owner": "@bioetl-platform",
@@ -2776,25 +2789,13 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 1,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 118,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_deja_wrapper.sh\""
-        },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 69,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_deja_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_deja_wrapper.ps1` (Windows)"
-        },
-        {
-          "path": "scripts/ai/.mcp.json",
-          "line": 118,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_deja_wrapper.sh\""
         }
       ],
       "owner": "@bioetl-platform",
@@ -2826,8 +2827,20 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 4,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 48,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_docker_wrapper.ps1\""
+        },
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 48,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_docker_wrapper.ps1\""
+        },
         {
           "path": "scripts/ops/runtime/mcp/tests/apply-shared-to-grok.fixture.ps1",
           "line": 37,
@@ -2851,20 +2864,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 1,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 48,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_docker_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.mcp.json",
-          "line": 48,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_docker_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 10,
@@ -2916,8 +2917,20 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 3,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 26,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.ps1\""
+        },
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 26,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.ps1\""
+        },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
           "line": 28,
@@ -2935,20 +2948,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 2,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 26,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.mcp.json",
-          "line": 26,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_fetch_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 8,
@@ -2968,8 +2969,21 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 17,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\""
+        },
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 17,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\""
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "windows_compatibility_wrapper",
       "review_by": "2026-09-30",
@@ -2980,20 +2994,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 1,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 17,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.mcp.json",
-          "line": 17,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 20,
@@ -3007,13 +3009,25 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 3,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 159,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_github_actions_wrapper.ps1\""
+        },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 101,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_github_actions_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_github_actions_wrapper.ps1` (Windows)"
+        },
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 159,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_github_actions_wrapper.ps1\""
         }
       ],
       "owner": "@bioetl-platform",
@@ -3026,25 +3040,13 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 1,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 159,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_github_actions_wrapper.sh\""
-        },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 101,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_github_actions_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_github_actions_wrapper.ps1` (Windows)"
-        },
-        {
-          "path": "scripts/ai/.mcp.json",
-          "line": 159,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_github_actions_wrapper.sh\""
         }
       ],
       "owner": "@bioetl-platform",
@@ -3057,8 +3059,20 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 3,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 83,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.ps1\""
+        },
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 83,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.ps1\""
+        },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
           "line": 57,
@@ -3076,25 +3090,13 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 3,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 83,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.sh\""
-        },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
           "line": 96,
           "source_group": "docs",
           "text": "BIOETL_MCP_VALIDATE_ONLY=1 scripts/ai/mcp/mcp_grafana_wrapper.sh"
-        },
-        {
-          "path": "scripts/ai/.mcp.json",
-          "line": 83,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
@@ -3115,8 +3117,20 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 4,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 6,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_memory_wrapper.ps1\""
+        },
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 6,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_memory_wrapper.ps1\""
+        },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
           "line": 194,
@@ -3125,7 +3139,7 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 426,
+          "line": 428,
           "source_group": "tests",
           "text": "(\"mcp_memory_wrapper.sh\", \"mcp_memory_wrapper.ps1\")"
         }
@@ -3136,20 +3150,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 2,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 6,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_memory_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.mcp.json",
-          "line": 6,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_memory_wrapper.sh\""
-        },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
           "line": 194,
@@ -3158,7 +3160,7 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 426,
+          "line": 428,
           "source_group": "tests",
           "text": "(\"mcp_memory_wrapper.sh\", \"mcp_memory_wrapper.ps1\")"
         }
@@ -3169,8 +3171,21 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 111,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_mermaid_wrapper.ps1\""
+        },
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 111,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_mermaid_wrapper.ps1\""
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "windows_compatibility_wrapper",
       "review_by": "2026-07-15",
@@ -3181,20 +3196,8 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 1,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 111,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_mermaid_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.mcp.json",
-          "line": 111,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_mermaid_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 19,
@@ -3212,13 +3215,25 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 4,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 139,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_mutmut_wrapper.ps1\""
+        },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 82,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_mutmut_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_mutmut_wrapper.ps1` (Windows)"
+        },
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 139,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_mutmut_wrapper.ps1\""
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
@@ -3237,25 +3252,13 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 2,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 139,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_mutmut_wrapper.sh\""
-        },
         {
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 82,
           "source_group": "docs",
           "text": "- **Обёртки:** `scripts/ai/mcp/mcp_mutmut_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_mutmut_wrapper.ps1` (Windows)"
-        },
-        {
-          "path": "scripts/ai/.mcp.json",
-          "line": 139,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_mutmut_wrapper.sh\""
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
@@ -3293,8 +3296,20 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 4,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 97,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1\""
+        },
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 97,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1\""
+        },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
           "line": 59,
@@ -3318,20 +3333,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 4,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 97,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.mcp.json",
-          "line": 97,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 17,
@@ -3363,8 +3366,20 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 3,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 104,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1\""
+        },
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 104,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1\""
+        },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
           "line": 60,
@@ -3382,14 +3397,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 25,
+      "reference_count": 23,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 104,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh\""
-        },
         {
           "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
           "line": 74,
@@ -3431,6 +3440,12 @@
           "line": 22,
           "source_group": "docs",
           "text": "# Expected: scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-SESSION-SUMMARY.md",
+          "line": 114,
+          "source_group": "docs",
+          "text": "│ scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh             │"
         }
       ]
     },
@@ -3458,8 +3473,20 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 3,
       "references": [
+        {
+          "path": ".zed/mcp.json",
+          "line": 76,
+          "source_group": "other",
+          "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.ps1\""
+        },
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 76,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.ps1\""
+        },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
           "line": 58,
@@ -3477,20 +3504,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 2,
       "references": [
-        {
-          "path": ".zed/mcp.json",
-          "line": 76,
-          "source_group": "other",
-          "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.mcp.json",
-          "line": 76,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 14,
@@ -4620,7 +4635,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 347,
+          "line": 398,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/data_quality/run_silver_gold_filter_parity.py --check"
         }
@@ -6847,7 +6862,7 @@
         },
         {
           "path": "tests/architecture/test_documentation_cleanup_inventory.py",
-          "line": 299,
+          "line": 332,
           "source_group": "tests",
           "text": "route[\"generator\"] == \"scripts/docs/checks/documentation_cleanup_inventory.py\""
         }
@@ -7471,7 +7486,7 @@
           "path": "docs/filters/inventory-baseline.csv",
           "line": 170,
           "source_group": "docs",
-          "text": ",,,,,,inventory,,surface,source_profile,extraction_params,config_source_profile_policy,scripts/docs/matrix/generate_pipeline_normalization_matrix.py,5,1686,Source-profile extraction policy,extraction_"
+          "text": ",,,,,,inventory,,surface,source_profile,extraction_params,config_source_profile_policy,scripts/docs/matrix/generate_pipeline_normalization_matrix.py,5,1688,Source-profile extraction policy,extraction_"
         },
         {
           "path": "docs/filters/inventory-baseline.json",
@@ -7483,7 +7498,7 @@
           "path": "docs/filters/inventory-baseline.md",
           "line": 127,
           "source_group": "docs",
-          "text": "| `config_source_profile_policy` | `extraction_params` | `scripts/docs/matrix/generate_pipeline_normalization_matrix.py` | 5 | 1686 | Source-profile extraction policy |"
+          "text": "| `config_source_profile_policy` | `extraction_params` | `scripts/docs/matrix/generate_pipeline_normalization_matrix.py` | 5 | 1688 | Source-profile extraction policy |"
         },
         {
           "path": "scripts/data_quality/inventory_silver_filters_migration.py",
@@ -7801,13 +7816,13 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 310,
+          "line": 361,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 465,
+          "line": 516,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory-live"
         },
@@ -8183,7 +8198,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 943,
+          "line": 994,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -9339,7 +9354,7 @@
         },
         {
           "path": ".zed/README.md",
-          "line": 207,
+          "line": 210,
           "source_group": "other",
           "text": "| Missing `.venv-win` | `.\\scripts\\engineering\\dev\\setup_env_windows.ps1` |"
         },
@@ -9570,13 +9585,13 @@
       "references": [
         {
           "path": ".zed/README.md",
-          "line": 154,
+          "line": 157,
           "source_group": "other",
           "text": "- Architecture compliance — `python scripts/engineering/dev/zed_lint_imports.py` (contracts in `.importlinter`)"
         },
         {
           "path": ".zed/tasks.json",
-          "line": 234,
+          "line": 232,
           "source_group": "other",
           "text": "\"scripts/engineering/dev/zed_lint_imports.py\""
         },
@@ -9588,7 +9603,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 210,
+          "line": 216,
           "source_group": "tests",
           "text": "assert \"zed_lint_imports.py\" in serialized"
         }
@@ -9597,6 +9612,39 @@
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
       "next_step": "Retain as a bounded Zed editor adapter for the canonical import-linter contracts; keep it supporting unless editor-specific execution becomes a governed first-class developer workflow."
+    },
+    {
+      "path": "scripts/engineering/dev/zed_mypy.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 4,
+      "references": [
+        {
+          "path": ".zed/README.md",
+          "line": 155,
+          "source_group": "other",
+          "text": "- Type check — `python scripts/engineering/dev/zed_mypy.py` (CI-aligned: `mypy src/bioetl`)"
+        },
+        {
+          "path": ".zed/tasks.json",
+          "line": 34,
+          "source_group": "other",
+          "text": "\"scripts/engineering/dev/zed_mypy.py\""
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
+          "line": 208,
+          "source_group": "tests",
+          "text": "assert type_check[\"args\"] == [\"scripts/engineering/dev/zed_mypy.py\"]"
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
+          "line": 217,
+          "source_group": "tests",
+          "text": "assert \"zed_mypy.py\" in serialized"
+        }
+      ]
     },
     {
       "path": "scripts/engineering/dev/zed_pytest_lane.py",
@@ -9613,43 +9661,43 @@
         },
         {
           "path": ".zed/tasks.json",
-          "line": 46,
+          "line": 44,
           "source_group": "other",
           "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
         },
         {
           "path": ".zed/tasks.json",
-          "line": 66,
+          "line": 64,
           "source_group": "other",
           "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
         },
         {
           "path": ".zed/tasks.json",
-          "line": 84,
+          "line": 82,
           "source_group": "other",
           "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
         },
         {
           "path": ".zed/tasks.json",
-          "line": 99,
+          "line": 97,
           "source_group": "other",
           "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
         },
         {
           "path": ".zed/tasks.json",
-          "line": 114,
+          "line": 112,
           "source_group": "other",
           "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
         },
         {
           "path": ".zed/tasks.json",
-          "line": 129,
+          "line": 127,
           "source_group": "other",
           "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
         },
         {
           "path": ".zed/tasks.json",
-          "line": 144,
+          "line": 142,
           "source_group": "other",
           "text": "\"scripts/engineering/dev/zed_pytest_lane.py\","
         }
@@ -9664,7 +9712,7 @@
       "references": [
         {
           "path": ".zed/README.md",
-          "line": 224,
+          "line": 227,
           "source_group": "other",
           "text": "- `scripts/engineering/dev/zed_task.ps1` — optional Windows helper to run"
         }
@@ -9683,13 +9731,13 @@
       "references": [
         {
           "path": ".zed/README.md",
-          "line": 164,
+          "line": 167,
           "source_group": "other",
           "text": "- Dead code — `python scripts/engineering/dev/zed_vulture.py`"
         },
         {
           "path": ".zed/tasks.json",
-          "line": 270,
+          "line": 268,
           "source_group": "other",
           "text": "\"scripts/engineering/dev/zed_vulture.py\""
         },
@@ -9701,7 +9749,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 212,
+          "line": 219,
           "source_group": "tests",
           "text": "assert \"zed_vulture.py\" in serialized"
         }
@@ -9720,13 +9768,13 @@
       "references": [
         {
           "path": ".zed/README.md",
-          "line": 167,
+          "line": 170,
           "source_group": "other",
           "text": "- Complexity check — `python scripts/engineering/dev/zed_xenon.py`"
         },
         {
           "path": ".zed/tasks.json",
-          "line": 279,
+          "line": 277,
           "source_group": "other",
           "text": "\"scripts/engineering/dev/zed_xenon.py\""
         },
@@ -9744,7 +9792,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 211,
+          "line": 218,
           "source_group": "tests",
           "text": "assert \"zed_xenon.py\" in serialized"
         }
@@ -10435,7 +10483,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 353,
+          "line": 404,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa check-naming-pkg --check"
         },
@@ -10750,7 +10798,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 294,
+          "line": 345,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/check_test_audit_preflight.py --strict"
         },
@@ -11296,7 +11344,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 514,
+          "line": 565,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
@@ -11392,7 +11440,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 862,
+          "line": 913,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/qa/generate_hotspot_degradation_report.py \\"
         },
@@ -12873,19 +12921,19 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 108,
+          "line": 157,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-placement"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 111,
+          "line": 161,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-naming"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 117,
+          "line": 169,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90"
         },
@@ -12959,7 +13007,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 108,
+          "line": 157,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-placement"
         },
@@ -13010,7 +13058,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 111,
+          "line": 161,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-naming"
         },
@@ -13067,7 +13115,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 117,
+          "line": 169,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90"
         },
@@ -13450,7 +13498,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 291,
+          "line": 342,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo check-catalog --catalog scripts/engineering/repo/catalog.yaml"
         },
@@ -13507,7 +13555,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 283,
+          "line": 334,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.repo check-inventory \\"
         },
@@ -15099,7 +15147,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 75,
+          "line": 77,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ops\" / \"launchers\" / \"codex\" / \"start-codex.bat\""
         }
@@ -15120,7 +15168,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 78,
+          "line": 80,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ops\" / \"launchers\" / \"codex\" / \"verify-setup.bat\""
         }
@@ -15159,7 +15207,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 81,
+          "line": 83,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ops\" / \"launchers\" / \"codex\" / \"verify-setup.ps1\""
         }
@@ -15244,7 +15292,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 114,
+          "line": 165,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py --check"
         },
@@ -15554,7 +15602,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_audit_cycle.py",
-          "line": 124,
+          "line": 182,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/check_grafana_dashboard_audit_preflight.py\","
         }
@@ -15642,7 +15690,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_audit_cycle.py",
-          "line": 799,
+          "line": 833,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/run_grafana_dashboard_audit_cycle.py\","
         }
@@ -16862,7 +16910,7 @@
       "references": [
         {
           "path": "scripts/ops/runtime/mcp/start-shared.sh",
-          "line": 218,
+          "line": 236,
           "source_group": "scripts",
           "text": "str(root / \"scripts/ops/runtime/mcp/windows_docker_mcp_bridge.py\"),"
         }
@@ -16877,7 +16925,7 @@
       "references": [
         {
           "path": "scripts/ops/runtime/mcp/windows_docker_mcp_bridge.py",
-          "line": 99,
+          "line": 118,
           "source_group": "scripts",
           "text": "relay_script = Path(__file__).with_name(\"windows_tcp_relay.ps1\")"
         }
@@ -17468,7 +17516,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 344,
+          "line": 395,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.schema generate-config-matrix --check"
         }
