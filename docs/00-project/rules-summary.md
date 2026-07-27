@@ -137,6 +137,26 @@ ______________________________________________________________________
 - Тесты: Unit, Integration (VCR.py), E2E. Coverage ≥85%
 - Детерминизм: без `random` в writers, timestamp только из application context.
 
+### Architecture enforcement (quick reference → RULES.md §1)
+
+- **Inward dependencies:** `domain` MUST NOT depend on `application`/`infrastructure`;
+  `application`/`interfaces` MUST NOT import concrete infrastructure implementations.
+- **DI:** dependencies via constructors or explicit parameters only.
+- **Composition-only wiring:** factories and concrete creation only in `composition/`;
+  no service-locator / global-registry lookup outside composition.
+- **Role suffixes:** `*Port`, `*Service`, `*Factory`, `*Adapter` for corresponding roles.
+- Full normative text: `docs/00-project/RULES.md` (not redefined here).
+
+### Medallion write validation (quick reference → RULES.md §2.1)
+
+- Silver/Gold **MUST** be Delta Lake (raw Parquet forbidden for those layers).
+- Exact final DataFrame **MUST** pass Pandera validation after last transform and
+  immediately before write; any post-validation transform requires re-validation.
+- **Silver:** schema, nullability, types, applicable DQ/business constraints;
+  invalid rows stop write or go to quarantine (result MUST NOT be ignored).
+- **Gold:** fail-closed strict schema (`strict=True`); `SchemaError`/`SchemaErrors`
+  MUST NOT be swallowed before write.
+
 ### Qodo-reconciled change-set gates
 
 - 66 unique Qodo IDs нормализованы в 18 project gates в `RULES.md` §4.5;

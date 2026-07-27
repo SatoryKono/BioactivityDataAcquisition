@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-27T14:48:23.143312+00:00",
+  "generated_at": "2026-07-27T14:56:02.930943+00:00",
   "summary": {
     "total_scripts": 532,
     "status_counts": {
@@ -13089,7 +13089,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 82,
+      "reference_count": 83,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-016-Enforce-Zero-Reference-Script-Governance.md",
@@ -13356,7 +13356,7 @@
       "references": [
         {
           "path": "docs/05-operations/verification/docker-helper-root-relocation-audit.md",
-          "line": 100,
+          "line": 105,
           "source_group": "docs",
           "text": "python3 scripts/engineering/repo/check_root_governance_docs.py"
         },
@@ -14491,43 +14491,43 @@
         },
         {
           "path": "docs/05-operations/verification/docker-helper-root-relocation-audit.md",
-          "line": 34,
+          "line": 39,
           "source_group": "docs",
           "text": "| `docker-setup.ps1` | retired root Windows bootstrap helper | legacy operator docs, launcher instructions | `retired_root_script_2026_07_10` | `scripts/ops/docker-setup.ps1` command-compatible helper"
         },
         {
           "path": "docs/05-operations/verification/docker-helper-root-relocation-audit.md",
-          "line": 55,
+          "line": 60,
           "source_group": "docs",
           "text": "| `docker-setup.ps1` | retired root script; command parity retained in `scripts/ops/docker-setup.ps1` | Do not restore the root filename. |"
         },
         {
           "path": "docs/05-operations/verification/docker-helper-root-relocation-audit.md",
-          "line": 59,
+          "line": 64,
           "source_group": "docs",
           "text": "script filenames: legacy verbs are retained by `scripts/ops/docker-setup.ps1`"
         },
         {
           "path": "docs/05-operations/verification/docker-helper-root-relocation-audit.md",
-          "line": 69,
+          "line": 74,
           "source_group": "docs",
           "text": "| `check` | `scripts/ops/docker-setup.sh check` | `.\\scripts\\ops\\docker-setup.ps1 check` | retained non-mutating Docker/Compose check |"
         },
         {
           "path": "docs/05-operations/verification/docker-helper-root-relocation-audit.md",
-          "line": 70,
+          "line": 75,
           "source_group": "docs",
           "text": "| `build` | `scripts/ops/docker-setup.sh build` | `.\\scripts\\ops\\docker-setup.ps1 build` | retained `bioetl:latest` build from `Dockerfile.bioetl` |"
         },
         {
           "path": "docs/05-operations/verification/docker-helper-root-relocation-audit.md",
-          "line": 71,
+          "line": 76,
           "source_group": "docs",
           "text": "| `start` | `scripts/ops/docker-setup.sh start` | `.\\scripts\\ops\\docker-setup.ps1 start` | retained main stack start plus health check |"
         },
         {
           "path": "docs/05-operations/verification/docker-helper-root-relocation-audit.md",
-          "line": 72,
+          "line": 77,
           "source_group": "docs",
           "text": "| `start-full` | `scripts/ops/docker-setup.sh start-full` | `.\\scripts\\ops\\docker-setup.ps1 start-full` | retained image build, full helper stack start, and health check |"
         }

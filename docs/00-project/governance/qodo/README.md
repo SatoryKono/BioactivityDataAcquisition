@@ -61,7 +61,9 @@ verification in Qodo Portal or GitHub UI:
 
 ## Root Retention Revalidation
 
-Last verified: 2026-07-16 for root hygiene issue #5999.
+Last verified: 2026-07-27 for root hygiene issue #5999 and residual #6702
+(`.pr_agent.toml` restored to tracked root baseline; allowlist phantoms for
+retired desktop compose and root `DOCKER_QUICKSTART.md` removed).
 
 | Root surface | Owner contract | Current decision |
 | --- | --- | --- |

@@ -774,19 +774,28 @@ class TestOTLPAvailability:
     def test_otlp_exporter_class_cache_populated_after_load(
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        """The cache is populated with the resolved class after first load."""
+        """Lazy cache is empty before load, populated after, and reused on second call."""
         from bioetl.infrastructure.observability import tracing
 
         monkeypatch.setattr(tracing, "OTLP_AVAILABLE", True)
         monkeypatch.setattr(tracing, "_OtlpExporterClass", None)
-        exporter_factory = MagicMock()
-        monkeypatch.setattr(
-            tracing,
-            "import_module",
-            lambda name: type("M", (), {"OTLPSpanExporter": exporter_factory})(),
-        )
+        exporter_factory = object()
+        import_calls: list[str] = []
+
+        def _fake_import(name: str) -> ModuleType:
+            import_calls.append(name)
+            return type("M", (), {"OTLPSpanExporter": exporter_factory})()
+
+        monkeypatch.setattr(tracing, "import_module", _fake_import)
+
+        assert tracing._OtlpExporterClass is None
         assert tracing._load_otlp_exporter_class() is exporter_factory
         assert tracing._OtlpExporterClass is exporter_factory
+        assert len(import_calls) == 1
+
+        # Second call must reuse the cache without another import_module.
+        assert tracing._load_otlp_exporter_class() is exporter_factory
+        assert len(import_calls) == 1
 
 
 @pytest.mark.unit
