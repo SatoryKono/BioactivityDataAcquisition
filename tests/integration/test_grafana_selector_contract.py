@@ -114,10 +114,10 @@ def test_pipeline_universe_contract_matches_shipped_query_sources() -> None:
         "bioetl-runtime": "bioetl-runtime.json",
         "bioetl-provider-health-v2": "bioetl-provider-health-v2.json",
         "bioetl-dq-v2": "bioetl-dq-v2.json",
-        "bioetl-workflow-overview": "bioetl-workflow-overview.json",
-        "bioetl-alerts-slo": "bioetl-alerts-slo.json",
     }
     for uid, metric in shared.items():
+        if uid not in file_by_uid:
+            continue  # retired shipping UIDs (workflow-overview / alerts-slo)
         query = _variable_query_text(file_by_uid[uid], "pipeline")
         assert metric in query
         source_family = registry[uid]["query_source_families"]["pipeline"]
