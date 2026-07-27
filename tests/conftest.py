@@ -52,7 +52,7 @@ def _disable_unused_geopandas_backend_on_windows() -> None:
     # Pandera probes its optional GeoPandas backend during every dtype check.
     # Resolving it from a cloud-synced virtualenv can trip the per-test timeout.
     if sys.platform.startswith("win") and "geopandas" not in sys.modules:
-        sys.modules["geopandas"] = cast(ModuleType, None)
+        sys.modules["geopandas"] = cast(ModuleType, cast(object, None))
 
 
 _disable_unused_geopandas_backend_on_windows()
@@ -88,7 +88,7 @@ def _coerce_timeout_seconds(raw_value: object) -> float | None:
     if raw_value in (None, ""):
         return None
     try:
-        timeout_seconds = float(raw_value)
+        timeout_seconds = float(str(raw_value))
     except (TypeError, ValueError):
         return None
     return timeout_seconds if timeout_seconds > 0 else None
@@ -278,7 +278,7 @@ def pytest_configure(config):
 def pytest_itemcollected(item: pytest.Item) -> None:
     """Track pre-deselection collection volume for `--last-failed` runs."""
     config = item.config
-    config._bioetl_last_failed_collected_count = (
+    config.__dict__["_bioetl_last_failed_collected_count"] = (
         _last_failed_collected_count(config) + 1
     )
     _extend_windows_pycharm_vcr_timeout(item)
@@ -425,8 +425,8 @@ def _configure_isolated_run_report_root(config: pytest.Config) -> None:
             dir=str(local_root) if local_root is not None else None,
         )
     )
-    config._bioetl_run_report_root = isolated_root  # type: ignore[attr-defined]
-    config._bioetl_run_report_root_previous = (  # type: ignore[attr-defined]
+    config.__dict__["_bioetl_run_report_root"] = isolated_root
+    config.__dict__["_bioetl_run_report_root_previous"] = (
         run_report_writer.DEFAULT_REPORT_ROOT
     )
     run_report_writer.DEFAULT_REPORT_ROOT = isolated_root
@@ -577,7 +577,7 @@ def _is_last_failed_run(config: pytest.Config) -> bool:
 
 def _reset_last_failed_collection_state(config: pytest.Config) -> None:
     """Initialize per-session collection state used by last-failed policy."""
-    config._bioetl_last_failed_collected_count = 0
+    config.__dict__["_bioetl_last_failed_collected_count"] = 0
 
 
 def _last_failed_collected_count(config: pytest.Config) -> int:

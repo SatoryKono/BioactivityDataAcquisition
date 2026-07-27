@@ -92,8 +92,8 @@ jobs:
 
       - name: Run mutation testing
         env:
-          # mutmut executes pytest from a sandbox; ensure the package tree resolves.
-          PYTHONPATH: ${{ github.workspace }}/src
+          # mutmut executes pytest from a sandbox; ensure package + repo roots resolve.
+          PYTHONPATH: ${{ github.workspace }}/src:${{ github.workspace }}
         run: |
           echo "Running mutation testing for ${{ matrix.target.id }}..."
           # mutmut is a dev dependency; invoke via uv so PATH/venv entrypoints resolve
@@ -103,7 +103,7 @@ jobs:
       - name: Generate mutation report
         if: success()
         env:
-          PYTHONPATH: ${{ github.workspace }}/src
+          PYTHONPATH: ${{ github.workspace }}/src:${{ github.workspace }}
         run: |
           mkdir -p "reports/${{ matrix.target.id }}"
           uv run --frozen --no-build mutmut results > "reports/${{ matrix.target.id }}/mutmut_results.txt"

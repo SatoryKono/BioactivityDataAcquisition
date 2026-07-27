@@ -4,164 +4,169 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-    contents: read
+  contents: read
 
 on:
-    push:
-        branches: [ main, master, develop ]
-        paths-ignore:
-            - 'docs/**'
-            - '*.md'
-            - '.ai/**'
-            - 'LICENSE'
-    pull_request:
-        branches: [ main, master, develop ]
-        paths-ignore:
-            - 'docs/**'
-            - '*.md'
-            - '.ai/**'
-            - 'LICENSE'
-    schedule:
-        -   cron: '30 2 * * *'
-    workflow_dispatch:
-        inputs:
-            run_live:
-                description: 'Run nightly live-check job'
-                required: false
-                default: 'false'
+  push:
+    branches: [main, master, develop]
+    paths-ignore:
+      - "docs/**"
+      - "*.md"
+      - ".ai/**"
+      - "LICENSE"
+  pull_request:
+    branches: [main, master, develop]
+    paths-ignore:
+      - "docs/**"
+      - "*.md"
+      - ".ai/**"
+      - "LICENSE"
+  schedule:
+    - cron: "30 2 * * *"
+  workflow_dispatch:
+    inputs:
+      run_live:
+        description: "Run nightly live-check job"
+        required: false
+        default: "false"
 
 jobs:
-    matrix-smoke-blocking:
-        if: github.event_name != 'schedule'
-        runs-on: ubuntu-latest
-        timeout-minutes: 25
-        env:
-            BIOETL_TEST_MODE: "true"
-            BIOETL_PIPELINE__HEALTH_CHECK_MODE: "probe"
+  matrix-smoke-blocking:
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      BIOETL_TEST_MODE: "true"
+      BIOETL_PIPELINE__HEALTH_CHECK_MODE: "probe"
 
-        steps:
-            -   name: Checkout code
-                uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-                with:
-                    # Critical playback cassettes are a bounded non-LFS set.
-                    lfs: false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          # Critical playback cassettes are a bounded non-LFS set.
+          lfs: false
 
-            -   name: Setup Python + uv
-                uses: ./.github/actions/setup-python-uv
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
 
-            -   name: Run matrix smoke in cassette playback mode (3x rerun)
-                run: |
-                    mkdir -p reports/e2e
-                    for run in 1 2 3; do
-                      set +e
-                      VCR_RECORD_MODE=none uv run --frozen --no-build pytest \
-                        tests/e2e/test_pipeline_matrix_e2e.py \
-                        -k "test_pipeline_matrix_smoke" \
-                        --record-mode=none \
-                        -q --tb=short \
-                        --junitxml="reports/e2e/matrix-smoke-run${run}.xml"
-                      echo $? > "reports/e2e/pytest_exit_code_run${run}.txt"
-                    done
+      - name: Run matrix smoke in cassette playback mode (3x rerun)
+        run: |
+          mkdir -p reports/e2e
+          for run in 1 2 3; do
+            set +e
+            VCR_RECORD_MODE=none uv run --frozen --no-build pytest \
+              tests/e2e/test_pipeline_matrix_e2e.py \
+              -k "test_pipeline_matrix_smoke" \
+              --record-mode=none \
+              -q --tb=short \
+              --junitxml="reports/e2e/matrix-smoke-run${run}.xml"
+            echo $? > "reports/e2e/pytest_exit_code_run${run}.txt"
+          done
 
-            -   name: Enforce matrix smoke skip-rate SLO (run3)
-                run: |
-                    uv run --frozen --no-build python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \
-                      --junit reports/e2e/matrix-smoke-run3.xml \
-                      --expected-total-from-configs \
-                      --configs-root configs/entities \
-                      --max-skips 6 \
-                      --max-skip-rate 0.2308 \
-                      --ignore-failures \
-                      --markdown-out reports/e2e/matrix-smoke-summary.md
+      - name: Enforce matrix smoke skip-rate SLO (run3)
+        run: |
+          # Expected total must match the active smoke matrix (not raw
+          # configs/entities/*.yaml count), which includes deferred exclusions.
+          EXPECTED_TOTAL="$(
+            uv run --frozen --no-build python -c \
+              "from tests.e2e.test_pipeline_matrix_e2e import ACTIVE_PIPELINE_CASES; print(len(ACTIVE_PIPELINE_CASES))"
+          )"
+          uv run --frozen --no-build python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \
+            --junit reports/e2e/matrix-smoke-run3.xml \
+            --expected-total "${EXPECTED_TOTAL}" \
+            --max-skips 6 \
+            --max-skip-rate 0.2308 \
+            --ignore-failures \
+            --markdown-out reports/e2e/matrix-smoke-summary.md
 
-            -   name: Enforce rerun stability gate (3x)
-                run: |
-                    uv run --frozen --no-build python scripts/engineering/ci/check_e2e_rerun_stability.py \
-                      --junit-glob "reports/e2e/matrix-smoke-run*.xml" \
-                      --required-runs 3 \
-                      --max-recurrent-infra-flaky 0 \
-                      --max-recurrent-code-regression 0 \
-                      --markdown-out reports/e2e/matrix-rerun-stability.md
+      - name: Enforce rerun stability gate (3x)
+        run: |
+          uv run --frozen --no-build python scripts/engineering/ci/check_e2e_rerun_stability.py \
+            --junit-glob "reports/e2e/matrix-smoke-run*.xml" \
+            --required-runs 3 \
+            --max-recurrent-infra-flaky 0 \
+            --max-recurrent-code-regression 0 \
+            --markdown-out reports/e2e/matrix-rerun-stability.md
 
-            -   name: Upload E2E matrix health artifacts
-                uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
-                if: always()
-                with:
-                    name: e2e-matrix-health-blocking
-                    path: |
-                        reports/e2e/matrix-smoke-run1.xml
-                        reports/e2e/matrix-smoke-run2.xml
-                        reports/e2e/matrix-smoke-run3.xml
-                        reports/e2e/matrix-smoke-summary.md
-                        reports/e2e/matrix-rerun-stability.md
-                        reports/e2e/pytest_exit_code_run1.txt
-                        reports/e2e/pytest_exit_code_run2.txt
-                        reports/e2e/pytest_exit_code_run3.txt
-                    if-no-files-found: warn
-                    retention-days: 14
+      - name: Upload E2E matrix health artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        if: always()
+        with:
+          name: e2e-matrix-health-blocking
+          path: |
+            reports/e2e/matrix-smoke-run1.xml
+            reports/e2e/matrix-smoke-run2.xml
+            reports/e2e/matrix-smoke-run3.xml
+            reports/e2e/matrix-smoke-summary.md
+            reports/e2e/matrix-rerun-stability.md
+            reports/e2e/pytest_exit_code_run1.txt
+            reports/e2e/pytest_exit_code_run2.txt
+            reports/e2e/pytest_exit_code_run3.txt
+          if-no-files-found: warn
+          retention-days: 14
 
-    matrix-smoke-nightly-live:
-        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.run_live == 'true')
-        runs-on: ubuntu-latest
-        timeout-minutes: 30
-        env:
-            BIOETL_TEST_MODE: "false"
-            BIOETL_PIPELINE__HEALTH_CHECK_MODE: "strict"
+  matrix-smoke-nightly-live:
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.run_live == 'true')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      BIOETL_TEST_MODE: "false"
+      BIOETL_PIPELINE__HEALTH_CHECK_MODE: "strict"
 
-        steps:
-            -   name: Checkout code
-                uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-            -   name: Setup Python + uv
-                uses: ./.github/actions/setup-python-uv
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
 
-            -   name: Enforce strict health-check policy
-                run: |
-                    mode="${BIOETL_PIPELINE__HEALTH_CHECK_MODE:-}"
-                    if [ "$mode" != "strict" ]; then
-                      echo "Strict job requires BIOETL_PIPELINE__HEALTH_CHECK_MODE=strict, got '$mode'"
-                      exit 1
-                    fi
+      - name: Enforce strict health-check policy
+        run: |
+          mode="${BIOETL_PIPELINE__HEALTH_CHECK_MODE:-}"
+          if [ "$mode" != "strict" ]; then
+            echo "Strict job requires BIOETL_PIPELINE__HEALTH_CHECK_MODE=strict, got '$mode'"
+            exit 1
+          fi
 
-                    test_mode="$(printf '%s' "${BIOETL_TEST_MODE:-}" | tr '[:upper:]' '[:lower:]')"
-                    if [ "$test_mode" = "true" ] || [ "$test_mode" = "1" ] || [ "$test_mode" = "yes" ]; then
-                      echo "Strict job forbids probe/test-mode fallback (BIOETL_TEST_MODE=$test_mode)"
-                      exit 1
-                    fi
+          test_mode="$(printf '%s' "${BIOETL_TEST_MODE:-}" | tr '[:upper:]' '[:lower:]')"
+          if [ "$test_mode" = "true" ] || [ "$test_mode" = "1" ] || [ "$test_mode" = "yes" ]; then
+            echo "Strict job forbids probe/test-mode fallback (BIOETL_TEST_MODE=$test_mode)"
+            exit 1
+          fi
 
-            -   name: Run matrix smoke live-check (nightly)
-                run: |
-                    mkdir -p reports/e2e
-                    set +e
-                    VCR_RECORD_MODE=new_episodes uv run --frozen --no-build pytest \
-                      tests/e2e/test_pipeline_matrix_e2e.py \
-                      -k "test_pipeline_matrix_smoke" \
-                      --vcr-record=new_episodes \
-                      -q --tb=short \
-                      --junitxml=reports/e2e/matrix-smoke-live.xml
-                    echo $? > reports/e2e/pytest_exit_code_live.txt
+      - name: Run matrix smoke live-check (nightly)
+        run: |
+          mkdir -p reports/e2e
+          set +e
+          VCR_RECORD_MODE=new_episodes uv run --frozen --no-build pytest \
+            tests/e2e/test_pipeline_matrix_e2e.py \
+            -k "test_pipeline_matrix_smoke" \
+            --vcr-record=new_episodes \
+            -q --tb=short \
+            --junitxml=reports/e2e/matrix-smoke-live.xml
+          echo $? > reports/e2e/pytest_exit_code_live.txt
 
-            -   name: Build nightly health summary
-                run: |
-                    set +e
-                    uv run --frozen --no-build python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \
-                      --junit reports/e2e/matrix-smoke-live.xml \
-                      --expected-total-from-configs \
-                      --configs-root configs/entities \
-                      --max-skips 22 \
-                      --max-skip-rate 1.0 \
-                      --allow-unknown-labels \
-                      --markdown-out reports/e2e/matrix-smoke-live-summary.md
-                    exit 0
+      - name: Build nightly health summary
+        run: |
+          set +e
+          uv run --frozen --no-build python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \
+            --junit reports/e2e/matrix-smoke-live.xml \
+            --expected-total-from-configs \
+            --configs-root configs/entities \
+            --max-skips 22 \
+            --max-skip-rate 1.0 \
+            --allow-unknown-labels \
+            --markdown-out reports/e2e/matrix-smoke-live-summary.md
+          exit 0
 
-            -   name: Upload E2E nightly artifacts
-                uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
-                if: always()
-                with:
-                    name: e2e-matrix-health-nightly-live
-                    path: |
-                        reports/e2e/matrix-smoke-live.xml
-                        reports/e2e/matrix-smoke-live-summary.md
-                        reports/e2e/pytest_exit_code_live.txt
-                    if-no-files-found: warn
-                    retention-days: 14
+      - name: Upload E2E nightly artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        if: always()
+        with:
+          name: e2e-matrix-health-nightly-live
+          path: |
+            reports/e2e/matrix-smoke-live.xml
+            reports/e2e/matrix-smoke-live-summary.md
+            reports/e2e/pytest_exit_code_live.txt
+          if-no-files-found: warn
+          retention-days: 14

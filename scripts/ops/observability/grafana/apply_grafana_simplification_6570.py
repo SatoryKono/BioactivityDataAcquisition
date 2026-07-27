@@ -10,7 +10,7 @@ from __future__ import annotations
 import copy
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 DASH = Path("grafana/dashboards")
 FIRST_Y = 28
@@ -157,7 +157,7 @@ IDENTITY = {
 
 
 def _load(path: Path) -> dict[str, Any]:
-    return json.loads(path.read_text(encoding="utf-8"))
+    return cast(dict[str, Any], json.loads(path.read_text(encoding="utf-8")))
 
 
 def _save(path: Path, payload: dict[str, Any]) -> None:
