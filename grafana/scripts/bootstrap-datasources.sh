@@ -44,8 +44,9 @@ EOF
 fi
 
 # Explicitly drop retired / stale datasources that may still exist in grafana-data.
-# Re-delete Ops HTTP so a previously provisioned empty-url row is replaced.
-cat > "${TARGET_DIR}/retired-prune.yml" <<'EOF'
+# Delete Ops HTTP first (filename sorts before bioetl-ops-http.yml) so a previously
+# provisioned empty-url row is replaced on the subsequent create.
+cat > "${TARGET_DIR}/00-retired-prune.yml" <<'EOF'
 apiVersion: 1
 
 deleteDatasources:
@@ -55,15 +56,6 @@ deleteDatasources:
   - name: BioETL Ops HTTP
     orgId: 1
 EOF
-
-# Re-apply Ops HTTP after delete so provisioning order is: prune, then create.
-# Grafana processes all files in the directory; keep create in bioetl-ops-http.yml
-# and delete in retired-prune.yml. Alphabetical order: bioetl-ops-http.yml runs
-# before retired-prune.yml — so put delete first by name.
-mv "${TARGET_DIR}/retired-prune.yml" "${TARGET_DIR}/00-retired-prune.yml" 2>/dev/null || true
-if [ -f "${TARGET_DIR}/retired-prune.yml" ]; then
-  mv "${TARGET_DIR}/retired-prune.yml" "${TARGET_DIR}/00-retired-prune.yml"
-fi
 
 echo "[bioetl-grafana] Ops HTTP URL=${BIOETL_OPS_HTTP_URL}"
 echo "[bioetl-grafana] provisioned Prometheus + BioETL Ops HTTP (no Loki/Tempo/Quarantine Explorer)"

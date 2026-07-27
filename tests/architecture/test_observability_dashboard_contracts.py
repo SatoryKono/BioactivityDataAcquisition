@@ -97,9 +97,12 @@ def test_all_shipped_dashboards_have_bounded_owner_routes() -> None:
 
 def test_alerts_slo_panels_one_through_five_link_reviewed_owner_runbook() -> None:
     """The alert decision surface must expose a direct owner/runbook handoff."""
-    dashboard = json.loads(
-        (DASHBOARD_DIR / "bioetl-alerts-slo.json").read_text(encoding="utf-8")
-    )
+    dashboard_path = DASHBOARD_DIR / "bioetl-alerts-slo.json"
+    if not dashboard_path.is_file():
+        pytest.skip(
+            "bioetl-alerts-slo.json retired from shipping surface (epic #6647)"
+        )
+    dashboard = json.loads(dashboard_path.read_text(encoding="utf-8"))
     panels = {int(panel["id"]): panel for panel in _iter_panels(dashboard)}
     for panel_id in range(1, 6):
         links = panels[panel_id].get("links", [])
@@ -220,17 +223,23 @@ def test_provider_health_provenance_documents_provider_global_scope() -> None:
 
 
 def test_workflow_overview_exposes_failed_pipeline_run_handoff() -> None:
-    dashboard = json.loads(
-        (DASHBOARD_DIR / "bioetl-workflow-overview.json").read_text(encoding="utf-8")
-    )
+    dashboard_path = DASHBOARD_DIR / "bioetl-workflow-overview.json"
+    if not dashboard_path.is_file():
+        pytest.skip(
+            "bioetl-workflow-overview.json retired from shipping surface (epic #6647)"
+        )
+    dashboard = json.loads(dashboard_path.read_text(encoding="utf-8"))
     titles = {str(panel.get("title", "")) for panel in _iter_panels(dashboard)}
     assert "Failed Entity Pipeline Runs / Range" in titles
 
 
 def test_workflow_overview_exposes_fail_closed_pipeline_status_verdict() -> None:
-    dashboard = json.loads(
-        (DASHBOARD_DIR / "bioetl-workflow-overview.json").read_text(encoding="utf-8")
-    )
+    dashboard_path = DASHBOARD_DIR / "bioetl-workflow-overview.json"
+    if not dashboard_path.is_file():
+        pytest.skip(
+            "bioetl-workflow-overview.json retired from shipping surface (epic #6647)"
+        )
+    dashboard = json.loads(dashboard_path.read_text(encoding="utf-8"))
     panel = next(
         (
             item

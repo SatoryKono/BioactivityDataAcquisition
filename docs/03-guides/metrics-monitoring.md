@@ -804,7 +804,15 @@ ______________________________________________________________________
 1. Проверить endpoint:
 
    ```bash
+   # Host publish of the main health server is for readiness/ops HTTP.
+   # On the default Docker main stack, `GET http://127.0.0.1:8000/metrics` may
+   # return only a short stub comment when process-local scrape exposition is
+   # not attached to that listener. Canonical Prometheus scrape is
+   # `job=bioetl` → `bioetl:8000/metrics` on the monitoring Docker network
+   # (see `grafana/prometheus.yml`). CLI pipeline metrics also push to
+   # Pushgateway (`:9091`) when configured.
    curl http://localhost:8000/metrics | head -20
+   curl -s http://127.0.0.1:9090/api/v1/query?query=up{job=\"bioetl\"}
    ```
 
 1. Проверить порт не занят:

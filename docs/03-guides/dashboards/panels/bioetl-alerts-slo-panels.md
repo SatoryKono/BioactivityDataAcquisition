@@ -1,6 +1,11 @@
 # BioETL Alerts & SLO - Panels Documentation
 
-**Dashboard file:** `grafana/dashboards/bioetl-alerts-slo.json`
+> **REMOVED from shipping surface (2026-07-23 / epic #6647).**  
+> Dashboard JSON is no longer shipped under `grafana/dashboards/`.  
+> Runtime alert condition tiles live on `bioetl-runtime` where recording rules resolve.  
+> This document is retained as historical panel inventory only.
+
+**Dashboard file:** `grafana/dashboards/bioetl-alerts-slo.json` *(absent — retired)*
 
 ## Overview
 

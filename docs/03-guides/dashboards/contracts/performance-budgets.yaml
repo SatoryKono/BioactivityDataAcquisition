@@ -1,21 +1,9 @@
-# Grafana dashboard performance budgets (epic #6570 / phase #6571).
-#
-# Machine-checked by:
-#   python -m scripts.engineering.qa check-dashboard-performance-budgets
-#
-# mode: warn  -> non-zero exit only when --strict is set
-# mode: error -> always fail on budget breaches (post Phase 2)
-#
-# first_screen heuristic: root panels with gridPos.y < first_screen_y_max
-# that are not nested under a collapsed row.
-
 version: 1
 source: grafana/dashboards/*.json
-epic: "#6570"
-phase: "#6571"
+epic: '#6570'
+phase: '#6571'
 mode: error
 first_screen_y_max: 28
-
 budgets:
   worst_first_load_promql: 6
   overview_first_load_promql: 5
@@ -26,9 +14,8 @@ budgets:
   dual_status_identical_pairs: 0
   max_primary_dashboard_count: 5
   max_nav_targets_per_dashboard: 4
-
 baseline_2026_07_27_pre_diet:
-  note: Offline JSON walk before #6571–#6574 lands
+  note: Offline JSON walk before
   worst_first_load_promql: 8
   overview_first_load_promql: 4
   first_paint_ops_http_panels: 12
@@ -37,19 +24,11 @@ baseline_2026_07_27_pre_diet:
   refresh_seconds: 30
   dual_status_identical_pairs: 2
   primary_dashboard_count: 7
-
-# UIDs that remain primary operator surfaces after Phase 3 (interim 5 OK).
 primary_uids:
-  - bioetl-control-plane-v1
-  - bioetl-overview-v2
-  - bioetl-runtime
-  - bioetl-provider-health-v2
-  - bioetl-dq-v2
-
-# Retired from product nav / primary set after Phase 3–4.
-retired_uids:
-  - bioetl-workflow-overview
-  - bioetl-alerts-slo
-
-# Optional expr-length allowlist (empty = none).
+- bioetl-control-plane-v1
+- bioetl-overview-v2
+- bioetl-runtime
+- bioetl-provider-health-v2
+- bioetl-dq-v2
+retired_uids: []
 expr_length_exceptions: []
