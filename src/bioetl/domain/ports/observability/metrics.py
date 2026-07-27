@@ -165,3 +165,12 @@ class MetricsPublisherPort(Protocol):
     ) -> bool:
         """Delete the current bounded metrics snapshot from a gateway backend."""
         ...
+
+
+@runtime_checkable
+class HealthMetricsExpositionPort(Protocol):
+    """Port for Prometheus text exposition on the health-server scrape path."""
+
+    def build_exposition(self) -> str:
+        """Return Prometheus text exposition body for ``GET /metrics``."""
+        ...

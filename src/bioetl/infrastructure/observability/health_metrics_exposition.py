@@ -8,6 +8,7 @@ from __future__ import annotations
 
 __all__ = [
     "HEALTH_SCRAPE_UP_EXPOSITION",
+    "HealthMetricsExpositionAdapter",
     "build_health_server_metrics_exposition",
 ]
 
@@ -38,3 +39,11 @@ def build_health_server_metrics_exposition() -> str:
         ValueError,
     ):
         return HEALTH_SCRAPE_UP_EXPOSITION
+
+
+class HealthMetricsExpositionAdapter:
+    """Infrastructure adapter for :class:`HealthMetricsExpositionPort`."""
+
+    def build_exposition(self) -> str:
+        """Return Prometheus text exposition for the health scrape path."""
+        return build_health_server_metrics_exposition()
