@@ -31,9 +31,6 @@ on:
       - 'docs/03-data-model/json-field-typing-inventory.md'
       - '.github/workflows/schema-governance.yml'
 
-permissions:
-  contents: read
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true

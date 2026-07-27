@@ -1,7 +1,4 @@
 name: Release
-permissions:
-  contents: read
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -26,6 +23,8 @@ jobs:
     name: Build Distribution
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
@@ -70,6 +69,8 @@ jobs:
     name: Test Installation
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       matrix:
         python-version: ["3.13"]

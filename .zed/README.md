@@ -98,7 +98,16 @@ In Zed:
 |--------|------|
 | **basedpyright** | Types / navigation (`strict`, open files only) |
 | **ruff** | Format + lint (config from `pyproject.toml`) |
+| **docker-compose** | Compose completion, validation, hover, and formatting via `microsoft/compose-language-service` |
 | **pylsp** | Explicitly disabled (`!pylsp`) |
+
+Docker Compose support uses the community **Docker Compose** extension
+(`eth0net/zed-docker-compose`). The project declares it in
+`auto_install_extensions`, so Zed installs or updates it when the workspace
+loads. Project `file_types` map root
+`docker-compose*.yml` / `compose*.yml` manifests and the repository's
+`scripts/ops/**` Compose manifests to the dedicated language server instead of
+generic YAML.
 
 Full typecheck: task **Type check** → `uv run mypy src/`.
 
@@ -241,6 +250,7 @@ Python snippets require `from __future__ import annotations` and avoid retired A
 | Wrong interpreter | Toolchain selector → `.venv-win` (Windows) or WSL venv |
 | Missing `.venv-win` | `.\scripts\engineering\dev\setup_env_windows.ps1` |
 | LSP quiet / bad imports | Same toolchain; `editor: restart language server` |
+| Compose files use generic YAML | Reload Zed so `auto_install_extensions` can update **Docker Compose**, then run `editor: restart language server` |
 | Slow on GDrive | Expected; prefer local clone; `openFilesOnly` already set |
 | Tasks missing | Reload window; check `.zed/tasks.json` is a JSON array |
 | Runnable play missing | `gutter.runnables: true`; open a `test_*.py` buffer |

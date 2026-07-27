@@ -41,6 +41,7 @@ import logging
 import os
 import secrets
 import sys
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -478,7 +479,7 @@ def _log_emergency_warning() -> None:
 
 
 def _run_requested_action(args: argparse.Namespace) -> RotationResult | None:
-    actions: list[tuple[str, callable[[], RotationResult]]] = [
+    actions: list[tuple[str, Callable[[], RotationResult]]] = [
         ("initiate", initiate_rotation),
         ("complete", complete_rotation),
         ("cancel", cancel_rotation),

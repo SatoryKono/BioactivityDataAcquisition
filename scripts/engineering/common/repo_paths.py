@@ -112,6 +112,7 @@ def ensure_local_http_url(url: str) -> str:
         "127.0.0.1",
         "::1",
         "prometheus",
+        "pushgateway",
         "grafana",
         "host.docker.internal",
         "bioetl",

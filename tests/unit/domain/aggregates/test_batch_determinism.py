@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from copy import deepcopy
 from datetime import UTC, datetime, timedelta
 
@@ -26,7 +27,7 @@ def run_id() -> RunID:
 
 
 @pytest.fixture
-def stable_payload_factory() -> callable:
+def stable_payload_factory() -> Callable[[], list[dict[str, object]]]:
     """Return fresh deterministic payloads for repeatable batch scenarios."""
 
     def _build() -> list[dict[str, object]]:
@@ -75,7 +76,7 @@ class TestBatchDeterminism:
     def test_index_sequence_is_replay_stable_from_start_index(
         self,
         run_id: RunID,
-        stable_payload_factory: callable,
+        stable_payload_factory: Callable[[], list[dict[str, object]]],
     ) -> None:
         """Repeated runs with the same payloads must yield the same record indices."""
         observed_sequences: list[list[int]] = []
@@ -90,7 +91,7 @@ class TestBatchDeterminism:
     def test_valid_and_quarantined_views_preserve_deterministic_order_under_replay(
         self,
         run_id: RunID,
-        stable_payload_factory: callable,
+        stable_payload_factory: Callable[[], list[dict[str, object]]],
     ) -> None:
         """Valid/quarantined projections should keep the same ordering across replays."""
         replay_snapshots: list[tuple[list[str], list[str]]] = []

@@ -77,6 +77,23 @@ def test_zed_language_settings_delegate_to_project_sources_of_truth() -> None:
     assert "PYTHONPATH" not in settings["terminal"]["env"]
 
 
+def test_zed_docker_compose_language_server_covers_repo_compose_files() -> None:
+    """Compose manifests should use the dedicated Compose language service."""
+    settings = _load_json("settings.json")
+    compose_settings = settings["languages"]["Docker Compose"]
+    compose_file_types = settings["file_types"]["Docker Compose"]
+
+    assert settings["auto_install_extensions"]["docker-compose"] is True
+    assert compose_settings["language_servers"] == ["docker-compose", "..."]
+    assert compose_settings["formatter"] == "language_server"
+    assert compose_settings["hard_tabs"] is False
+    assert compose_settings["tab_size"] == 2
+    assert "docker-compose*.yml" in compose_file_types
+    assert "docker-compose*.yaml" in compose_file_types
+    assert "scripts/ops/runtime/docker/compose/*.yml" in compose_file_types
+    assert "scripts/ops/observability/*compose*.yml" in compose_file_types
+
+
 def test_zed_agent_permissions_preserve_secret_boundaries() -> None:
     """Agent terminal and file tools should preserve the repository secret policy."""
     settings = _load_json("settings.json")

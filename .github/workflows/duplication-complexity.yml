@@ -202,7 +202,7 @@ jobs:
           python-version: "3.13"
 
       - name: Install required dependencies
-        run: "pip install --only-binary=:all: pyyaml"
+        run: "pip install --only-binary=:all: pyyaml==6.0.3"
 
       - name: Check constructor argument counts
         run: python -m scripts.engineering.qa check-constructor-args

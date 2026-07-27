@@ -18,6 +18,9 @@ from bioetl.domain.run_reports.models import PipelineRunReport, WorkflowRunRepor
 
 DEFAULT_REPORT_ROOT = Path("reports") / "run-reports"
 
+_DISABLED_ENV_VALUES = frozenset({"0", "false", "no", "off"})
+_ENABLED_ENV_VALUES = frozenset({"1", "true", "yes", "on"})
+
 
 @dataclass(frozen=True, slots=True)
 class RunReportWriteResult:
@@ -58,6 +61,33 @@ def resolve_workflow_report_dir(
     )
 
 
+def _should_fsync_report_writes(*, os_name: str | None = None) -> bool:
+    """Keep durable flushes unless Windows test runs explicitly relax them.
+
+    Mirrors control-plane durability policy without importing infrastructure
+    (application layer must stay free of infrastructure imports). Cloud-synced
+    Windows worktrees (Google Drive / OneDrive) can stall on ``os.fsync`` long
+    enough to trip the default 60s pytest-timeout while unit tests write
+    incidental pipeline run reports.
+    """
+    current_os_name = os.name if os_name is None else os_name
+    if current_os_name != "nt":
+        return True
+    env_value = os.environ.get("BIOETL_TEST_MODE", "").strip().lower()
+    if env_value in _ENABLED_ENV_VALUES:
+        return False
+    if env_value in _DISABLED_ENV_VALUES:
+        return True
+    return True
+
+
+def _flush_report_file_descriptor(file_descriptor: int) -> None:
+    """Flush one report file descriptor when durable writes are required."""
+    if not _should_fsync_report_writes():
+        return
+    os.fsync(file_descriptor)
+
+
 def _atomic_write_text(path: Path, content: str) -> None:
     """Atomically replace one UTF-8 text artifact."""
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -71,7 +101,7 @@ def _atomic_write_text(path: Path, content: str) -> None:
         with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as stream:
             stream.write(content)
             stream.flush()
-            os.fsync(stream.fileno())
+            _flush_report_file_descriptor(stream.fileno())
         temporary_path.replace(path)
     except BaseException:
         temporary_path.unlink(missing_ok=True)

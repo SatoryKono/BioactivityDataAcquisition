@@ -645,7 +645,10 @@ class TestUnifiedQuarantineUpdateStatus:
             patch(
                 "bioetl.infrastructure.quarantine.unified.apply_latest_statuses",
                 side_effect=lambda records, *_a, **_k: [
-                    {**records[0], "dq_status": QuarantineRecordStatus.REPROCESSED.value}
+                    {
+                        **records[0],
+                        "dq_status": QuarantineRecordStatus.REPROCESSED.value,
+                    }
                 ],
             ),
         ):

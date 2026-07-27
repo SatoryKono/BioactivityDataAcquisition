@@ -52,7 +52,10 @@ class MetricPanelValidationReport:
 
 def _fetch_json(url: str, timeout: float) -> dict[str, Any]:
     """Fetch JSON from URL."""
-    with urlopen(url, timeout=timeout) as response:
+    from scripts.engineering.common.repo_paths import ensure_local_http_url
+
+    safe_url = ensure_local_http_url(url)
+    with urlopen(safe_url, timeout=timeout) as response:
         return json.loads(response.read().decode("utf-8"))
 
 

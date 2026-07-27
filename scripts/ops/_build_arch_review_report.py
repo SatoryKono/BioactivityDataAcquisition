@@ -118,11 +118,12 @@ def main() -> int:
         "docs/02-architecture",
     ):
         n = by_layer.get(layer, 0)
-        done = (
-            "yes"
-            if layer in complete_map
-            else ("partial" if n else "not run / incomplete")
-        )
+        if layer in complete_map:
+            done = "yes"
+        elif n:
+            done = "partial"
+        else:
+            done = "not run / incomplete"
         lines.append(f"| `{layer}` | {n} | {done} |")
     lines.append("")
     lines.append("## Сводка")

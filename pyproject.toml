@@ -313,12 +313,15 @@ disallow_subclassing_any = false  # Allow subclassing pydantic BaseModel and pan
 warn_unreachable = false  # Disable for unreachable code warnings in type narrowing
 strict_equality = true
 extra_checks = true
-# Exclude tools directory (auxiliary scripts without strict type annotations)
-exclude = ["src/tools/"]
+# Exclude non-product trees from default discovery. Product gate is src/bioetl
+# only (type-checking.yml / run_mypy.* / Zed Type check / zed_mypy.py).
+# memory is an approved sidecar (configs/quality/repo_structure_catalog.yaml).
+exclude = [
+    "src/tools/",
+    "src/memory/",
+]
 
-# Sidecar memory subsystem is an approved non-product tree
-# (configs/quality/repo_structure_catalog.yaml). Product typing gate is
-# src/bioetl only (type-checking.yml / run_mypy.* / Zed Type check / zed_mypy.py).
+# Belt-and-suspenders when memory modules are named explicitly on the CLI.
 [[tool.mypy.overrides]]
 module = [
     "memory",

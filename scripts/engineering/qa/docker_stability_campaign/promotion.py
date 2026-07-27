@@ -30,6 +30,8 @@ from .stage_support import (
     probe_services,
 )
 
+_MAX_ENGINE_RECOVERY_TRIALS = 100
+
 
 def run_recovery_trials(
     state: dict[str, Any],
@@ -39,7 +41,10 @@ def run_recovery_trials(
     contract: Path,
     bundle: Sequence[Any],
 ) -> bool:
-    required = int(state["required_engine_recovery_trials"])
+    required = min(
+        max(int(state["required_engine_recovery_trials"]), 0),
+        _MAX_ENGINE_RECOVERY_TRIALS,
+    )
     while int(state["engine_recovery_trials"]) < required:
         number = int(state["engine_recovery_trials"]) + 1
         trial_dir = evidence_dir / "recovery" / f"trial-{number:03d}"

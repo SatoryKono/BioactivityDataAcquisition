@@ -29,6 +29,7 @@ from .stage_support import (
 
 # Sibling lock files younger than this are treated as held by an active worker.
 _CYCLE_LOCK_STALE_SECONDS = 3600.0
+_MAX_CAMPAIGN_CYCLES = 1_000
 
 
 def _acquire_cycle_lock(cycle_dir: Path) -> int | None:
@@ -417,7 +418,11 @@ def run_cycles(
     contract: Path,
     bundle: Sequence[Any],
 ) -> bool:
-    while int(state["completed_cycles"]) < int(state["required_cycles"]):
+    required_cycles = min(
+        max(int(state["required_cycles"]), 0),
+        _MAX_CAMPAIGN_CYCLES,
+    )
+    while int(state["completed_cycles"]) < required_cycles:
         if not run_cycle(
             state, state_path, evidence_dir, runtime_origin, contract, bundle
         ):

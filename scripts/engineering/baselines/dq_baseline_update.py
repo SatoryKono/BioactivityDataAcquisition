@@ -39,6 +39,7 @@ import argparse
 import json
 import logging
 import sys
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -178,7 +179,7 @@ def _load_metrics_from_glob(
     base_dir: Path,
     pattern: str,
     cutoff: datetime,
-    parser: callable,
+    parser: Callable[[Path, datetime], RunMetrics | None],
 ) -> list[RunMetrics]:
     metrics: list[RunMetrics] = []
     if not base_dir.exists():

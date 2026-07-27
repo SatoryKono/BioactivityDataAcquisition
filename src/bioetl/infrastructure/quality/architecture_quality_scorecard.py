@@ -26,9 +26,11 @@ DEFAULT_OUTPUT = (
 )
 
 
-def _load_json(
-    repo_root: Path, rel_path: str
-) -> dict[str, Any]:  # Any: JSON artifact values are heterogeneous.
+# Scorecard inputs are heterogeneous JSON/YAML mappings (artifact payloads).
+JsonMap = dict[str, Any]
+
+
+def _load_json(repo_root: Path, rel_path: str) -> JsonMap:
     """Load one JSON object used by the scorecard."""
     path = repo_root / rel_path
     payload = json.loads(path.read_text(encoding="utf-8"))
@@ -44,44 +46,22 @@ def _as_float(value: object) -> float:
     raise TypeError(f"scorecard metric must be numeric, got {type(value)!r}")
 
 
-def _load_yaml(
-    repo_root: Path, rel_path: str
-) -> dict[str, Any]:  # Any: YAML artifact values are heterogeneous.
+def _load_yaml(repo_root: Path, rel_path: str) -> JsonMap:
     """Load one YAML mapping used by the scorecard."""
     path = repo_root / rel_path
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))
     return payload if isinstance(payload, dict) else {}
 
 
-def _load_scorecard_inputs(
-    repo_root: Path,
-) -> tuple[
-    dict[str, Any],  # Any: JSON artifacts can have any value type
-    dict[str, Any],  # Any: JSON artifacts can have any value type
-    dict[str, Any],  # Any: JSON artifacts can have any value type
-    dict[str, Any],  # Any: JSON artifacts can have any value type
-    dict[str, Any],  # Any: JSON artifacts can have any value type
-    dict[str, Any],  # Any: JSON artifacts can have any value type
-    dict[str, Any],  # Any: JSON artifacts can have any value type
-    dict[str, Any],  # Any: JSON artifacts can have any value type
-    dict[str, Any],  # Any: JSON artifacts can have any value type
-    dict[str, Any],  # Any: JSON artifacts can have any value type
-    dict[str, Any],  # Any: JSON artifacts can have any value type
-    dict[str, Any],  # Any: JSON artifacts can have any value type
-]:
+def _load_scorecard_inputs(repo_root: Path) -> tuple[JsonMap, ...]:
     return (
-        _load_json(
-            repo_root,
-            "docs/02-architecture/generated/module-dependency-map.json",
-        ),
+        _load_json(repo_root, "docs/02-architecture/generated/module-dependency-map.json"),
         _load_json(repo_root, "reports/quality/module-coverage-inventory.json"),
         _load_json(repo_root, "reports/quality/compatibility-importer-census.json"),
         _load_json(repo_root, "reports/quality/dead-code-inventory.json"),
         _load_json(repo_root, "reports/quality/contract-registry-diagnostics.json"),
         build_contract_registry_dq_diagnostics(repo_root),
-        _load_json(
-            repo_root, "reports/observability/runtime_cardinality_inventory.json"
-        ),
+        _load_json(repo_root, "reports/observability/runtime_cardinality_inventory.json"),
         _load_json(repo_root, "reports/quality/full-app-duplication-baseline.json"),
         _load_json(repo_root, "reports/quality/hotspot-family-baseline.json"),
         _load_json(repo_root, "reports/quality/test-governance-current.json"),
@@ -91,23 +71,17 @@ def _load_scorecard_inputs(
 
 
 def _build_source_artifacts(
-    dependency_map: dict[str, Any],  # Any: JSON artifact can have any value type
-    coverage_inventory: dict[str, Any],  # Any: JSON artifact can have any value type
-    compatibility_census: dict[str, Any],  # Any: JSON artifact can have any value type
-    dead_code_inventory: dict[str, Any],  # Any: JSON artifact can have any value type
-    contract_diagnostics: dict[str, Any],  # Any: JSON artifact can have any value type
-    dq_diagnostics: dict[str, Any],  # Any: JSON artifact can have any value type
-    observability_inventory: dict[
-        str, Any  # Any: JSON artifact can have any value type
-    ],  # Any: JSON artifact can have any value type
-    duplication_baseline: dict[str, Any],  # Any: JSON artifact can have any value type
-    hotspot_baseline: dict[str, Any],  # Any: JSON artifact can have any value type
-    test_governance_report: dict[
-        str, Any  # Any: JSON artifact can have any value type
-    ],  # Any: JSON artifact can have any value type
-    adr_enforcement_matrix: dict[
-        str, Any  # Any: JSON artifact can have any value type
-    ],  # Any: JSON artifact can have any value type
+    dependency_map: JsonMap,
+    coverage_inventory: JsonMap,
+    compatibility_census: JsonMap,
+    dead_code_inventory: JsonMap,
+    contract_diagnostics: JsonMap,
+    dq_diagnostics: JsonMap,
+    observability_inventory: JsonMap,
+    duplication_baseline: JsonMap,
+    hotspot_baseline: JsonMap,
+    test_governance_report: JsonMap,
+    adr_enforcement_matrix: JsonMap,
 ) -> dict[str, object]:
     return {
         "dependency_map": {
@@ -182,9 +156,7 @@ def _build_source_artifacts(
     }
 
 
-def _current_compatibility_debt_metrics(
-    debt_budgets: dict[str, Any] | object,  # Any: YAML config can have any value type
-) -> dict[str, Any]:  # Any: Extracted metrics can have any value type
+def _current_compatibility_debt_metrics(debt_budgets: object) -> JsonMap:
     if not isinstance(debt_budgets, dict):
         return {}
     metrics = debt_budgets.get("metrics", {})
@@ -192,9 +164,7 @@ def _current_compatibility_debt_metrics(
 
 
 def _scorecard_metric_count(
-    scorecard: dict[str, Any],  # Any: YAML config can have any value type
-    section_name: str,
-    metric_name: str,
+    scorecard: JsonMap, section_name: str, metric_name: str
 ) -> int:
     section = scorecard.get(section_name, {})
     if not isinstance(section, dict):
@@ -210,17 +180,14 @@ def _scorecard_metric_count(
 
 
 def _build_compatibility_quality_metrics(
-    compatibility_summary: dict[str, Any],  # Any: JSON values are dynamic
-    scorecard: dict[str, Any],  # Any: YAML config values are dynamic
+    compatibility_summary: JsonMap, scorecard: JsonMap
 ) -> dict[str, object]:
     retained_entrypoint_count = int(compatibility_summary["retained_entrypoint_count"])
     retained_public_export_facade_count = int(
         compatibility_summary["retained_public_export_facade_count"]
     )
     reviewed_entrypoint_count = _scorecard_metric_count(
-        scorecard,
-        "sanctioned_public_entrypoint_governance",
-        "public_entrypoint_count",
+        scorecard, "sanctioned_public_entrypoint_governance", "public_entrypoint_count"
     )
     reviewed_public_export_facade_count = _scorecard_metric_count(
         scorecard,
@@ -228,21 +195,15 @@ def _build_compatibility_quality_metrics(
         "public_export_facade_count",
     )
     conflict_count = max(
-        int(
-            compatibility_summary.get(
-                "retained_public_export_facades_with_duplicate_exports", 0
-            )
-        ),
-        int(
-            compatibility_summary.get(
-                "retained_public_export_facades_with_resolution_conflicts", 0
-            )
-        ),
-        int(
-            compatibility_summary.get(
-                "retained_public_export_facades_with_wrapper_contract_drift", 0
-            )
-        ),
+        int(compatibility_summary.get(
+            "retained_public_export_facades_with_duplicate_exports", 0
+        )),
+        int(compatibility_summary.get(
+            "retained_public_export_facades_with_resolution_conflicts", 0
+        )),
+        int(compatibility_summary.get(
+            "retained_public_export_facades_with_wrapper_contract_drift", 0
+        )),
     )
     return {
         "retained_entrypoint_count": retained_entrypoint_count,
@@ -260,8 +221,7 @@ def _build_compatibility_quality_metrics(
             0, retained_entrypoint_count - reviewed_entrypoint_count
         ),
         "public_export_facade_growth_count": max(
-            0,
-            retained_public_export_facade_count - reviewed_public_export_facade_count,
+            0, retained_public_export_facade_count - reviewed_public_export_facade_count
         ),
         "public_export_facade_conflict_count": conflict_count,
         "twin_pair_count": compatibility_summary["twin_pair_count"],
@@ -269,24 +229,18 @@ def _build_compatibility_quality_metrics(
 
 
 def _build_architecture_quality_metrics(
-    dependency_map: dict[str, Any],  # Any: JSON artifact can have any value type
-    coverage_inventory: dict[str, Any],  # Any: JSON artifact can have any value type
-    compatibility_census: dict[str, Any],  # Any: JSON artifact can have any value type
-    dead_code_inventory: dict[str, Any],  # Any: JSON artifact can have any value type
-    contract_diagnostics: dict[str, Any],  # Any: JSON artifact can have any value type
-    dq_diagnostics: dict[str, Any],  # Any: JSON artifact can have any value type
-    observability_inventory: dict[
-        str, Any  # Any: JSON artifact can have any value type
-    ],  # Any: JSON artifact can have any value type
-    duplication_baseline: dict[str, Any],  # Any: JSON artifact can have any value type
-    hotspot_baseline: dict[str, Any],  # Any: JSON artifact can have any value type
-    test_governance_report: dict[
-        str, Any  # Any: JSON artifact can have any value type
-    ],  # Any: JSON artifact can have any value type
-    adr_enforcement_matrix: dict[
-        str, Any  # Any: JSON artifact can have any value type
-    ],  # Any: JSON artifact can have any value type
-    scorecard: dict[str, Any],  # Any: YAML config can have any value type
+    dependency_map: JsonMap,
+    coverage_inventory: JsonMap,
+    compatibility_census: JsonMap,
+    dead_code_inventory: JsonMap,
+    contract_diagnostics: JsonMap,
+    dq_diagnostics: JsonMap,
+    observability_inventory: JsonMap,
+    duplication_baseline: JsonMap,
+    hotspot_baseline: JsonMap,
+    test_governance_report: JsonMap,
+    adr_enforcement_matrix: JsonMap,
+    scorecard: JsonMap,
 ) -> dict[str, object]:
     coverage_summary = coverage_inventory["summary"]
     status_counts = coverage_summary["status_counts"]
@@ -335,9 +289,7 @@ def _build_architecture_quality_metrics(
     }
 
 
-def _build_debt_budget_policy(
-    scorecard: dict[str, Any],  # Any: dynamic scorecard artifact payload.
-) -> dict[str, object]:
+def _build_debt_budget_policy(scorecard: JsonMap) -> dict[str, object]:
     debt_budgets = scorecard.get("compatibility_debt_metrics", {})
     return {
         "budget_growth_allowed": False,

@@ -182,13 +182,24 @@ def smoke_http_server(
     import urllib.error
     import urllib.request
 
-    if not (url.startswith("http://127.0.0.1:") or url.startswith("http://localhost:")):
+    from urllib.parse import urlsplit
+
+    parsed_url = urlsplit(url)
+    if (
+        parsed_url.scheme != "http"
+        or parsed_url.hostname not in {"127.0.0.1", "localhost"}
+        or parsed_url.port is None
+        or parsed_url.path != "/mcp"
+        or parsed_url.query
+        or parsed_url.fragment
+    ):
         raise ValueError(
-            f"HTTP protocol smoke only allows localhost URLs (got {url!r})"
+            f"HTTP protocol smoke requires an exact localhost /mcp URL (got {url!r})"
         )
 
+    safe_url = f"http://{parsed_url.hostname}:{parsed_url.port}/mcp"
     started = time.monotonic()
-    ping_url = _http_ping_url(url)
+    ping_url = f"http://{parsed_url.hostname}:{parsed_url.port}/ping"
     try:
         with urllib.request.urlopen(ping_url, timeout=timeout) as resp:
             ping_code = int(getattr(resp, "status", 200) or 200)
@@ -217,7 +228,7 @@ def smoke_http_server(
     }
     body = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(
-        url,
+        safe_url,
         data=body,
         method="POST",
         headers={
@@ -280,7 +291,7 @@ def smoke_http_server(
         "server": server_name,
         "ok": ok,
         "transport": "http",
-        "url": url,
+        "url": safe_url,
         "ping_url": ping_url,
         "initialize_ok": init_ok,
         "duration_ms": round((time.monotonic() - started) * 1000),

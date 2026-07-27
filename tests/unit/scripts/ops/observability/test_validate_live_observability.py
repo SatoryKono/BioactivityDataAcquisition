@@ -40,11 +40,11 @@ def test_check_prometheus_health_success(monkeypatch: pytest.MonkeyPatch) -> Non
         lambda *args, **kwargs: _FakeResponse(b"Prometheus is Healthy.\n"),
     )
 
-    result = vlo.check_prometheus_health("http://prom.example", 1.0)
+    result = vlo.check_prometheus_health("http://prometheus:9090", 1.0)
 
     assert result.status == "pass"
     assert result.details is not None
-    assert result.details["url"] == "http://prom.example/-/healthy"
+    assert result.details["url"] == "http://prometheus:9090/-/healthy"
     assert "Healthy" in result.details["response"]
 
 
@@ -57,7 +57,7 @@ def test_check_prometheus_health_unexpected_body(
         lambda *args, **kwargs: _FakeResponse(b"NotReady"),
     )
 
-    result = vlo.check_prometheus_health("http://prom.example", 1.0)
+    result = vlo.check_prometheus_health("http://prometheus:9090", 1.0)
 
     assert result.status == "fail"
     assert result.details is not None
@@ -67,16 +67,16 @@ def test_check_prometheus_health_unexpected_body(
 def test_check_prometheus_health_http_error(monkeypatch: pytest.MonkeyPatch) -> None:
     def _raise(*args: object, **kwargs: object) -> object:
         raise HTTPError(
-            "http://prom.example/-/healthy", 503, "down", hdrs=None, fp=None
+            "http://prometheus:9090/-/healthy", 503, "down", hdrs=None, fp=None
         )
 
     monkeypatch.setattr(vlo, "urlopen", _raise)
 
-    result = vlo.check_prometheus_health("http://prom.example", 1.0)
+    result = vlo.check_prometheus_health("http://prometheus:9090", 1.0)
 
     assert result.status == "fail"
     assert result.details is not None
-    assert result.details["url"] == "http://prom.example/-/healthy"
+    assert result.details["url"] == "http://prometheus:9090/-/healthy"
     assert "error" in result.details
 
 
@@ -111,12 +111,12 @@ def test_check_prometheus_targets_malformed_and_success(
         lambda *args, **kwargs: next(payloads),
     )
 
-    bad = vlo.check_prometheus_targets("http://prom.example", 1.0)
+    bad = vlo.check_prometheus_targets("http://prometheus:9090", 1.0)
     assert bad.status == "fail"
     assert bad.details is not None
     assert bad.details["api_response"]["status"] == "error"
 
-    partial = vlo.check_prometheus_targets("http://prom.example", 1.0)
+    partial = vlo.check_prometheus_targets("http://prometheus:9090", 1.0)
     assert partial.status == "partial"
     assert partial.details is not None
     assert partial.details["up_targets"] == 1
@@ -131,7 +131,7 @@ def test_check_grafana_datasources_http_auth_error(
 ) -> None:
     def _raise(*args: object, **kwargs: object) -> object:
         raise HTTPError(
-            "http://grafana.example/api/datasources",
+            "http://grafana:3000/api/datasources",
             401,
             "unauthorized",
             hdrs=None,
@@ -140,9 +140,7 @@ def test_check_grafana_datasources_http_auth_error(
 
     monkeypatch.setattr(vlo, "_fetch_json", _raise)
 
-    result = vlo.check_grafana_datasources(
-        "http://grafana.example", "admin", "bad", 1.0
-    )
+    result = vlo.check_grafana_datasources("http://grafana:3000", "admin", "bad", 1.0)
 
     assert result.status == "fail"
     assert result.details is not None

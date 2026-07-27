@@ -131,6 +131,24 @@ def test_smoke_http_rejects_non_localhost(tmp_path: Path) -> None:
         protocol_smoke.smoke_server(config, "evil", timeout=1)
 
 
+@pytest.mark.parametrize(
+    "url",
+    [
+        "http://localhost:8765/mcp/../admin",
+        "http://localhost:8765/mcp?target=admin",
+    ],
+)
+def test_smoke_http_rejects_noncanonical_mcp_paths(tmp_path: Path, url: str) -> None:
+    config = tmp_path / "mcp.json"
+    config.write_text(
+        json.dumps({"mcpServers": {"unsafe": {"type": "http", "url": url}}}),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="exact localhost /mcp URL"):
+        protocol_smoke.smoke_server(config, "unsafe", timeout=1)
+
+
 def test_smoke_rejects_unapproved_process_launcher(tmp_path: Path) -> None:
     config = tmp_path / "mcp.json"
     config.write_text(
@@ -234,14 +252,14 @@ def test_smoke_stderr_tail_is_character_bounded_after_shutdown(
 @pytest.mark.parametrize(
     ("name", "content"),
     [
-            (
-                "vscode.json",
-                json.dumps({"servers": {"example": {"command": "python"}}}),
-            ),
-            (
-                "codex.toml",
-                '[mcp_servers.example]\ncommand = "python"\nargs = []\n',
-            ),
+        (
+            "vscode.json",
+            json.dumps({"servers": {"example": {"command": "python"}}}),
+        ),
+        (
+            "codex.toml",
+            '[mcp_servers.example]\ncommand = "python"\nargs = []\n',
+        ),
     ],
 )
 def test_supported_frontend_projections_use_the_same_protocol_smoke(

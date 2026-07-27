@@ -4,7 +4,22 @@
   "preferred_line_length": 88,
   "soft_wrap": "preferred_line_length",
   "autosave": "on_focus_change",
+  "auto_install_extensions": {
+    "docker-compose": true
+  },
   "file_scan_inclusions": [],
+  "file_types": {
+    "Docker Compose": [
+      "docker-compose*.yml",
+      "docker-compose*.yaml",
+      "compose*.yml",
+      "compose*.yaml",
+      "scripts/ops/runtime/docker/compose/*.yml",
+      "scripts/ops/runtime/docker/compose/*.yaml",
+      "scripts/ops/observability/*compose*.yml",
+      "scripts/ops/observability/*compose*.yaml"
+    ]
+  },
   "redact_private_values": true,
   "languages": {
     "Python": {
@@ -28,6 +43,16 @@
     "YAML": {
       "format_on_save": "on",
       "formatter": "language_server"
+    },
+    "Docker Compose": {
+      "format_on_save": "on",
+      "formatter": "language_server",
+      "language_servers": [
+        "docker-compose",
+        "..."
+      ],
+      "hard_tabs": false,
+      "tab_size": 2
     },
     "Markdown": {
       "format_on_save": "off",

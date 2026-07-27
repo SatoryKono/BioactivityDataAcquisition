@@ -25,6 +25,9 @@ cd <repo>
 export PYTHONPATH=.
 python3 scripts/ai/codex/setup_mcp.py \
   --profile shared --transport-mode shared --skip-codex-validation
+# Optional: rewrite tracked workspace MCP JSON files onto shared HTTP URLs
+# (does not start the plane; do not commit the rewritten local files).
+python3 scripts/ops/runtime/mcp/_materialize_shared_http_configs.py
 # Do NOT commit OS-flipped tracked portable .mcp.json from Linux apply.
 git checkout -- .mcp.json .devin/config.json 2>/dev/null || true
 

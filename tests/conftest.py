@@ -256,6 +256,8 @@ def pytest_configure(config):
     _configure_windows_asyncio(config)
     _configure_windows_pycharm_traceback_style(config)
     _configure_wsl_timeout(config)
+    _configure_windows_test_mode_for_control_plane_durability()
+    _configure_isolated_run_report_root(config)
     if _selected_paths_need_hypothesis(config):
         _configure_hypothesis_profiles()
 
@@ -324,6 +326,52 @@ def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:
         exitstatus=exitstatus,
     ):
         session.exitstatus = 0
+
+
+def _configure_windows_test_mode_for_control_plane_durability() -> None:
+    """Relax control-plane fsync on Windows test runs (cloud-synced worktrees).
+
+    FileLineageStore / ledger writers call ``os.fsync``. On Google Drive / OneDrive
+    checkouts that can hang long enough for pytest-timeout to kill reproducibility
+    contract tests. Production keeps fsync; Windows pytest explicitly enables
+    test mode even when the parent IDE environment supplied ``false``.
+    """
+    if not sys.platform.startswith("win"):
+        return
+    os.environ["BIOETL_TEST_MODE"] = "true"
+    try:
+        from bioetl.infrastructure.config._base import get_settings
+
+        get_settings.cache_clear()
+    except Exception:
+        # Settings may not be importable during early plugin bootstrap; durability
+        # will read the updated environment when Settings is first constructed.
+        pass
+
+
+def _configure_isolated_run_report_root(config: pytest.Config) -> None:
+    """Redirect incidental run-report writes away from the workspace tree.
+
+    ``PipelineRunnerService`` / workflow runners persist pipeline_run_report_v1
+    artifacts under ``reports/run-reports`` by default. Unit tests that only
+    exercise orchestration still hit that path, and on cloud-synced Windows
+    worktrees the atomic write + fsync path has timed out under the 60s budget.
+    Keep explicit ``root=`` / ``directory=`` callers (writer unit tests) intact.
+    """
+    import tempfile
+
+    try:
+        from bioetl.application.services.run_reports import writer as run_report_writer
+    except Exception:
+        # Application package may be unavailable during partial collection setups.
+        return
+
+    isolated_root = Path(tempfile.mkdtemp(prefix="bioetl-pytest-run-reports-"))
+    config._bioetl_run_report_root = isolated_root  # type: ignore[attr-defined]
+    config._bioetl_run_report_root_previous = (  # type: ignore[attr-defined]
+        run_report_writer.DEFAULT_REPORT_ROOT
+    )
+    run_report_writer.DEFAULT_REPORT_ROOT = isolated_root
 
 
 def _configure_windows_asyncio(config: pytest.Config) -> None:
