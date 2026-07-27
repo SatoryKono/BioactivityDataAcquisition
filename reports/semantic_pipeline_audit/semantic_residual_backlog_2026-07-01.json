@@ -5,8 +5,8 @@
     "blocking_task_count": 0,
     "clusters": 290,
     "normalization_counts": {
-      "COMPATIBLE": 889,
-      "IDENTICAL": 2356
+      "COMPATIBLE": 887,
+      "IDENTICAL": 2358
     },
     "pair_rows": 3245,
     "risk_counts": {
@@ -148,7 +148,7 @@
       "gate": "uv run python -m scripts.engineering.qa check-semantic-pair-budget --check --json",
       "id": "compatible_normalization_ratchet",
       "priority": "P2",
-      "row_count": 889,
+      "row_count": 887,
       "status": "ratcheted",
       "top_clusters": [
         {

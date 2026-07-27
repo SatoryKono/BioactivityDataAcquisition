@@ -18,7 +18,7 @@ Generated: `2026-07-01`
 - Role-governed WEAK clusters: `7`
 - Explicit source-owned assay WEAK clusters: `9`
 - Reviewed generic collision rows: `0`
-- Compatible normalization rows: `889`
+- Compatible normalization rows: `887`
 - Compatible validation rows: `1046`
 - Compatible typing rows: `664`
 - Residual blocking tasks: `0`
