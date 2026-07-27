@@ -308,7 +308,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "max(bioetl_replay_safety_blockers_15m{pipeline=~\"$pipeline\"})",
+          "expr": "max(bioetl_replay_safety_blockers_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
           "instant": true,
           "refId": "A"
         }
@@ -517,7 +517,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "max(bioetl_manifest_ledger_failures_15m{pipeline=~\"$pipeline\"})",
+          "expr": "max(bioetl_manifest_ledger_failures_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
           "instant": true,
           "refId": "A"
         }
@@ -618,7 +618,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "max(bioetl_control_plane_telemetry_missing_5m{pipeline=~\"$pipeline\"})",
+          "expr": "max(bioetl_control_plane_telemetry_missing_5m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
           "instant": true,
           "refId": "A"
         }

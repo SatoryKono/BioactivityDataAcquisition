@@ -156,11 +156,16 @@ def test_dq_quarantine_count_is_visible_on_first_screen() -> None:
     dashboard = json.loads(
         (DASHBOARD_DIR / "bioetl-dq-v2.json").read_text(encoding="utf-8")
     )
+    # Diet surface (#6647): quarantine evidence is shipped as blocked-records panel.
+    accepted_titles = {
+        "Track: Records Quarantined in Range",
+        "Track: DQ Blocked Records in Range (Evidence)",
+    }
     panel = next(
         (
             item
             for item in dashboard.get("panels", [])
-            if item.get("title") == "Track: Records Quarantined in Range"
+            if item.get("title") in accepted_titles
         ),
         None,
     )
