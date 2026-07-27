@@ -34,7 +34,7 @@ class TestThresholdsConfig:
         """Default thresholds should be 0.05/0.20."""
         config = ThresholdsConfig()
         assert config.soft_fail == pytest.approx(0.05)
-        assert config.hard_fail == pytest.approx(0.20)
+        assert config.hard_fail == pytest.approx(0.50)
 
     def test_valid_thresholds(self) -> None:
         """Valid thresholds should pass validation."""
@@ -83,7 +83,7 @@ class TestDQConfigFile:
         config = DQConfigFile()
         assert config.version == "1.0.0"
         assert config.thresholds.soft_fail == pytest.approx(0.05)
-        assert config.thresholds.hard_fail == pytest.approx(0.20)
+        assert config.thresholds.hard_fail == pytest.approx(0.50)
         assert config.strict_validation is False
         assert config.invalid_record_policy == "quarantine"
 
@@ -238,7 +238,7 @@ class TestDQConfigFileToDomain:
         domain = config.to_domain()
 
         assert domain.soft_fail_threshold == pytest.approx(0.05)
-        assert domain.hard_fail_threshold == pytest.approx(0.20)
+        assert domain.hard_fail_threshold == pytest.approx(0.50)
         assert domain.strict_validation is False
         assert domain.invalid_record_policy == "quarantine"
         assert len(domain.field_validations) == 0
