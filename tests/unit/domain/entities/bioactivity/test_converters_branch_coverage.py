@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
-pytestmark = pytest.mark.unit
-
-
 import json
 
 import pytest
 
 from bioetl.domain.entities.bioactivity import _converters as converters
+
+pytestmark = pytest.mark.unit
 
 
 def test_safe_int_covers_null_bool_valid_and_invalid() -> None:

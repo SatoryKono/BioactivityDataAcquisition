@@ -1088,6 +1088,7 @@
       "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_checkpoint_age_seconds": [
+      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
@@ -1889,7 +1890,6 @@
     ],
     "bioetl_provider_range_operational_ok": [
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-provider-health-v2-panels.md",
       "docs/03-guides/dashboards/variables-guide.md",
       "grafana/README.md",
@@ -2132,6 +2132,7 @@
       "grafana/dashboards/bioetl-runtime.json"
     ],
     "bioetl_runtime_error_rate_30m": [
+      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "grafana/dashboards/bioetl-runtime.json"
     ],
     "bioetl_runtime_pipeline_run_type_universe": [
@@ -2315,7 +2316,6 @@
       "grafana/README.md"
     ],
     "bioetl_workflow_pipeline_verdict_status": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-workflow-overview-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
