@@ -76,6 +76,13 @@ def test_create_run_manifest_with_effective_config_uses_yaml_provider_entity(
         "create_run_manifest",
         _fake_create_run_manifest,
     )
+    # Preflight always reads RunnerInputs.settings; this unit case only asserts
+    # provider/entity publication wiring, so stub snapshot resolution.
+    monkeypatch.setattr(
+        control_plane,
+        "resolve_pipeline_input_snapshot_refs",
+        lambda **_: (),
+    )
 
     ctx = SimpleNamespace(
         pipeline_name="custom_runtime_name",
@@ -83,6 +90,7 @@ def test_create_run_manifest_with_effective_config_uses_yaml_provider_entity(
     )
     inputs = SimpleNamespace(
         yaml_config=SimpleNamespace(provider="chembl", entity_type="activity"),
+        settings=SimpleNamespace(),
     )
 
     result = control_plane.create_run_manifest_with_effective_config(
@@ -162,6 +170,11 @@ def test_create_run_manifest_with_effective_config_reuses_publication_context(
         "create_run_manifest",
         _fake_create_run_manifest,
     )
+    monkeypatch.setattr(
+        control_plane,
+        "resolve_pipeline_input_snapshot_refs",
+        lambda **_: (),
+    )
 
     ctx = SimpleNamespace(
         pipeline_name="chembl_activity",
@@ -170,6 +183,7 @@ def test_create_run_manifest_with_effective_config_reuses_publication_context(
     )
     inputs = SimpleNamespace(
         yaml_config=SimpleNamespace(provider="chembl", entity_type="activity"),
+        settings=SimpleNamespace(),
     )
 
     result = control_plane.create_run_manifest_with_effective_config(

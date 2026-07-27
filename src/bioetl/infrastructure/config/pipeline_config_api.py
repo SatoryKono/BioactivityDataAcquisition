@@ -42,6 +42,35 @@ def _deep_merge(
     return config_merge(base, override)
 
 
+def _load_yaml_mapping(path: Path) -> JsonDict | None:
+    """Load one YAML mapping via a full-file read.
+
+    Prefer ``read_bytes`` + ``safe_load`` over a streaming file handle. On
+    cloud-synced Windows worktrees a mid-stream ``yaml.safe_load(open(...))``
+    can stall long enough to trip pytest-timeout while architecture suites
+    re-read the same base/entity configs repeatedly.
+    """
+    try:
+        raw = path.read_bytes()
+    except OSError:
+        return None
+    data = yaml.safe_load(raw) or {}
+    if not isinstance(data, dict):
+        return None
+    return data
+
+
+@lru_cache(maxsize=16)
+def _load_base_config_cached(base_path_key: str) -> JsonDict:
+    """Cache shared base pipeline defaults (same file for every entity)."""
+    payload = _load_yaml_mapping(Path(base_path_key))
+    if payload is None:
+        return {}
+    base_config = dict(payload)
+    base_config.pop("schema_version", None)
+    return base_config
+
+
 def _load_base_config(config_path: Path) -> JsonDict:
     """Load pipeline base configuration from the consolidated base path."""
     candidate_paths = (
@@ -50,12 +79,13 @@ def _load_base_config(config_path: Path) -> JsonDict:
     )
 
     for base_path in candidate_paths:
-        if not base_path.exists():
+        if not base_path.is_file():
             continue
-        with open(base_path, encoding="utf-8") as handle:
-            base_config = yaml.safe_load(handle) or {}
-            base_config.pop("schema_version", None)
-            return base_config
+        try:
+            resolved_key = str(base_path.resolve())
+        except OSError:
+            resolved_key = str(base_path)
+        return _load_base_config_cached(resolved_key)
 
     return {}
 
@@ -73,12 +103,8 @@ def _assert_legacy_pipeline_config_surface_absent(configs_root: Path) -> None:
 
 def _load_unified_entity_raw(path: Path, *, configs_root: Path) -> JsonDict:
     """Load unified entity YAML file, returning empty dict when absent."""
-    if not path.exists():
-        return {}
-
-    with open(path, encoding="utf-8") as handle:
-        raw = yaml.safe_load(handle) or {}
-    if not isinstance(raw, dict):
+    raw = _load_yaml_mapping(path)
+    if raw is None:
         return {}
     return apply_shared_filter_metadata(
         configs_root=configs_root,
@@ -192,12 +218,17 @@ def _configs_root_cache_key(configs_root: Path | None = None) -> str:
     return str(resolve_configs_root(configs_root))
 
 
-@lru_cache(maxsize=10)
+@lru_cache(maxsize=256)
 def _load_pipeline_config_cached(
     pipeline_name: str,
     _configs_root_key: str,
 ) -> PipelineYamlConfig:
-    """Load pipeline configuration with cwd-aware caching."""
+    """Load pipeline configuration with cwd-aware caching.
+
+    Architecture and CI config gates load most entity pipelines in one session;
+    keep the cache large enough to avoid re-parsing shared base/filter YAML on
+    cloud-synced Windows worktrees under suite pressure.
+    """
     return load_pipeline_config_uncached(
         pipeline_name,
         configs_root=Path(_configs_root_key),
@@ -221,7 +252,13 @@ def load_pipeline_config_from_root(
     )
 
 
-load_pipeline_config.cache_clear = _load_pipeline_config_cached.cache_clear  # type: ignore[attr-defined]
+def _clear_pipeline_config_caches() -> None:
+    """Drop both pipeline and shared base-config caches."""
+    _load_pipeline_config_cached.cache_clear()
+    _load_base_config_cached.cache_clear()
+
+
+load_pipeline_config.cache_clear = _clear_pipeline_config_caches  # type: ignore[attr-defined]
 load_pipeline_config.cache_info = _load_pipeline_config_cached.cache_info  # type: ignore[attr-defined]
 load_pipeline_config.__wrapped__ = _load_pipeline_config_cached  # type: ignore[attr-defined]
 

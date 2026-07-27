@@ -46,7 +46,10 @@ class TestMutationTestingRollout:
         assert "MUTATION_SCORE_THRESHOLD" in workflow
         assert 'config["source_paths"]' in workflow
         assert 'config["pytest_add_cli_args_test_selection"]' in workflow
-        assert "          mutmut run\n" in workflow
+        # CI invokes mutmut via uv so the frozen venv entrypoint resolves on runners
+        # (bare `mutmut` is not on PATH). See mutation-testing.yml "Run mutation testing".
+        assert "          uv run --frozen --no-build mutmut run\n" in workflow
+        assert "          mutmut run\n" not in workflow
         assert "--paths-to-mutate=" not in workflow
         assert "--tests-dir=" not in workflow
         assert (

@@ -104,6 +104,9 @@ jobs:
       - name: Validate docker-compose.monitoring.yml syntax
         env:
           NEO4J_PASSWORD: ci-compose-validation-placeholder
+          # Static interpolation only; the validation job does not start Grafana.
+          GF_SECURITY_ADMIN_PASSWORD: ci-compose-validation-placeholder
+          GF_RENDERING_RENDERER_TOKEN: ci-compose-validation-placeholder
         run: docker compose -f docker-compose.monitoring.yml config > /dev/null
 
   docker-build:

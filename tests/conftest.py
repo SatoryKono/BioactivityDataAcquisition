@@ -46,6 +46,17 @@ _RUNTIME_BOOTSTRAP_PIPELINE_PATH = (
 )
 
 
+def _disable_unused_geopandas_backend_on_windows() -> None:
+    """Prevent Pandera from probing an unused backend on Windows test lanes."""
+    # Pandera probes its optional GeoPandas backend during every dtype check.
+    # Resolving it from a cloud-synced virtualenv can trip the per-test timeout.
+    if sys.platform.startswith("win") and "geopandas" not in sys.modules:
+        sys.modules["geopandas"] = None  # type: ignore[assignment]
+
+
+_disable_unused_geopandas_backend_on_windows()
+
+
 def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
     """Apply deterministic opt-in order randomization for flaky telemetry runs."""
     raw_seed = os.environ.get("BIOETL_RANDOM_ORDER_SEED")

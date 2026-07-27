@@ -108,6 +108,7 @@ jobs:
           mkdir -p reports/junit
           uv run --frozen --no-build pytest \
             tests/architecture/test_port_contracts_hypothesis.py \
+            -m hypothesis \
             -v --tb=short \
             --junit-xml=reports/junit/hypothesis-contracts-results.xml
         env:

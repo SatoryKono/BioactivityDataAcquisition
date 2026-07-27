@@ -956,6 +956,12 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as an optional Docker-based screenshot fallback for hosts where the canonical Grafana render flow cannot launch Chromium; keep it supporting and do not make Docker monitoring mandatory."
     },
+    "scripts/ops/observability/grafana/publish_simplification_issue_status.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded manual publisher for the Grafana simplification issue series; keep GitHub writes opt-in and remove it after the tracked issue campaign is complete."
+    },
     "scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1": {
       "owner": "@bioetl-platform",
       "decision": "windows_compatibility_wrapper",

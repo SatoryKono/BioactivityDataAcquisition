@@ -10,8 +10,8 @@ from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort, TracingPort
 from bioetl.domain.ports.noop import NoOpAudit, NoOpMetrics, NoOpTracing
 
 if TYPE_CHECKING:
-    from bioetl.composition.bootstrap.runtime.observability_bundle import (
-        _ObservabilityComponents,
+    from bioetl.composition.bootstrap.runtime._observability_bundle_support import (
+        ObservabilityComponents,
     )
     from bioetl.infrastructure.config.settings_api import Settings
 
@@ -34,7 +34,7 @@ def default_audit_bootstrapper(
 
 
 def create_observability_bundle(
-    components: _ObservabilityComponents,
+    components: ObservabilityComponents,
 ) -> ObservabilityBundle:
     """Create the public bundle object from resolved component ports."""
     return ObservabilityBundle(
@@ -48,7 +48,7 @@ def create_observability_bundle(
 
 def log_observability_initialized(
     *,
-    components: _ObservabilityComponents,
+    components: ObservabilityComponents,
     control_plane: object | None,
 ) -> None:
     """Emit structured bootstrap observability event for one resolved bundle."""
@@ -156,7 +156,7 @@ def settings_control_plane(settings: Settings) -> object | None:
 
 def run_observability_preflight(
     *,
-    components: _ObservabilityComponents,
+    components: ObservabilityComponents,
     settings: Settings,
     preflight_validator: Callable[..., None],
     control_plane: object | None,

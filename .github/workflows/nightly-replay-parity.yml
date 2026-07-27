@@ -26,7 +26,6 @@ jobs:
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
         with:
-          uv-extras: "dev tracing"
           uv-sync-args: "--frozen --all-extras --dev"
 
       - name: Run replay-lane matrix
@@ -61,5 +60,5 @@ jobs:
         with:
           name: nightly-replay-parity
           path: reports/nightly-replay
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 14

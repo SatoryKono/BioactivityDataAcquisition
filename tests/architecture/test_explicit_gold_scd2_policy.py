@@ -6,6 +6,7 @@ REQ-ARCH-052: SCD2-candidate entity configs MUST explicitly declare
 
 from __future__ import annotations
 
+from functools import cache
 from pathlib import Path
 from typing import Any
 
@@ -63,14 +64,17 @@ LEGACY_SCD_CONFIG_ALIAS_KEYS = frozenset(
 
 def _load_yaml(path: str) -> dict[str, object]:
     config_path = PROJECT_ROOT / path
-    with config_path.open(encoding="utf-8") as handle:
-        data = yaml.safe_load(handle) or {}
+    # Full-file read: streaming yaml.safe_load(open(...)) can stall on
+    # cloud-synced Windows worktrees under architecture-suite I/O pressure.
+    data = yaml.safe_load(config_path.read_bytes()) or {}
     if not isinstance(data, dict):
         pytest.fail(f"{path} must load as a mapping")
     return data
 
 
+@cache
 def _load_pipeline_gold_config(path: str) -> dict[str, Any]:
+    """Load effective Gold sink once per entity path (shared by both cases)."""
     config = _load_yaml(path)
     provider = str(config.get("provider", "")).strip()
     entity = str(config.get("entity", "")).strip()
@@ -89,7 +93,8 @@ def _load_pipeline_gold_config(path: str) -> dict[str, Any]:
     if not isinstance(gold_cfg, dict):
         pytest.fail(f"{path} must contain pipeline.sink.gold")
 
-    return gold_cfg
+    # Freeze for safe lru_cache reuse across parametrized assertions.
+    return dict(gold_cfg)
 
 
 class TestExplicitGoldScd2Policy:

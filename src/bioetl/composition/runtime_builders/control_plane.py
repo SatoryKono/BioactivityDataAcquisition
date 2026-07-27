@@ -12,6 +12,9 @@ from bioetl.composition.runtime_builders._manifest_publication_context_support i
 from bioetl.composition.runtime_builders.effective_config_artifact_builder import (
     create_and_persist_effective_config_artifact,
 )
+from bioetl.composition.runtime_builders.input_snapshot_resolution import (
+    resolve_pipeline_input_snapshot_refs,
+)
 from bioetl.composition.runtime_builders.run_manifest_builder import create_run_manifest
 from bioetl.composition.runtime_builders.run_manifest_support import (
     ManifestControlPlaneRefs as _ManifestControlPlaneRefs,
@@ -76,6 +79,28 @@ def attach_manifest_id(
     raise TypeError("PipelineRunContext must support manifest_id attachment")
 
 
+def _preflight_pipeline_input_snapshots(
+    *,
+    ctx: PipelineRunContext,
+    inputs: RunnerInputs,
+    provider: str,
+    entity: str,
+) -> None:
+    """Fail closed on snapshot gaps before durable control-plane writes.
+
+    Exact-replay / cached-Bronze validation must not wait until after
+    effective-config artifacts are persisted: on cloud-synced Windows
+    worktrees the mkdir/write path can exceed the 60s test budget.
+    """
+    resolve_pipeline_input_snapshot_refs(
+        ctx=ctx,
+        cached_bronze=getattr(ctx, "cached_bronze", None),
+        settings=inputs.settings,
+        provider=provider,
+        entity=entity,
+    )
+
+
 def create_run_manifest_with_effective_config(
     *,
     ctx: PipelineRunContext,
@@ -86,6 +111,13 @@ def create_run_manifest_with_effective_config(
     publication_context = resolve_manifest_publication_context(
         ctx=ctx,
         inputs=inputs,
+    )
+    # Validate immutable input snapshots before any control-plane persistence.
+    _preflight_pipeline_input_snapshots(
+        ctx=ctx,
+        inputs=inputs,
+        provider=publication_context.provider,
+        entity=publication_context.entity,
     )
     provenance = build_run_manifest_provenance_bundle(
         create_and_persist_effective_config_artifact(

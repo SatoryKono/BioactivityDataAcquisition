@@ -15,25 +15,34 @@ import time
 from pathlib import Path
 
 
+def _port_is_open(port: int) -> bool:
+    """Probe whether Windows loopback is accepting TCP on ``port``.
+
+    Uses a PowerShell TcpClient from WSL so the check sees the Windows network
+    stack (where Docker MCP gateway listens), not the Linux/WSL stack alone.
+    """
+    probe = subprocess.run(
+        [
+            "powershell.exe",
+            "-NoProfile",
+            "-Command",
+            (
+                "$c=[Net.Sockets.TcpClient]::new();"
+                f"try{{$c.Connect('127.0.0.1',{port});$c.Close();exit 0}}"
+                "catch{exit 1}"
+            ),
+        ],
+        check=False,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    return probe.returncode == 0
+
+
 def _wait_for_port(port: int, timeout: float) -> None:
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
-        probe = subprocess.run(
-            [
-                "powershell.exe",
-                "-NoProfile",
-                "-Command",
-                (
-                    "$c=[Net.Sockets.TcpClient]::new();"
-                    f"try{{$c.Connect('127.0.0.1',{port});$c.Close();exit 0}}"
-                    "catch{exit 1}"
-                ),
-            ],
-            check=False,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
-        if probe.returncode == 0:
+        if _port_is_open(port):
             return
         time.sleep(0.5)
     raise TimeoutError(f"Windows Docker MCP did not listen on 127.0.0.1:{port}")

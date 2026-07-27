@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[3]
 PYPROJECT_PATH = ROOT / "pyproject.toml"
 INIT_PATH = ROOT / "src/bioetl/__init__.py"
 DOC_INDEX_PATH = ROOT / "docs/00-project/index.md"
+RULES_PATH = ROOT / "docs/00-project/RULES.md"
 CHANGELOG_PATH = ROOT / "CHANGELOG.md"
 
 
@@ -32,12 +33,26 @@ def extract_init_version(content: str) -> str:
     return match.group(1)
 
 
-def extract_docs_version(content: str) -> str:
-    match = re.search(r"\*\*v(\d+\.\d+\.\d+)\*\*", content)
+def extract_docs_governance_version(content: str) -> str:
+    """Extract the RULES governance baseline advertised by the docs index."""
+    match = re.search(
+        r"^## Current Version\s+^\*\*v(\d+\.\d+\.\d+)\*\*"
+        r"\s+\(governance baseline",
+        content,
+        re.MULTILINE,
+    )
     if match is None:
         raise VersionCheckError(
-            "Could not find Current Version in docs/00-project/index.md"
+            "Could not find governance baseline in docs/00-project/index.md"
         )
+    return match.group(1)
+
+
+def extract_rules_version(content: str) -> str:
+    """Extract the governance version from the canonical RULES header."""
+    match = re.search(r"^Version:\s*(\d+\.\d+\.\d+)\s*$", content, re.MULTILINE)
+    if match is None:
+        raise VersionCheckError("Could not find Version header in RULES.md")
     return match.group(1)
 
 
@@ -53,26 +68,41 @@ def main() -> int:
         PYPROJECT_PATH.read_text(encoding="utf-8")
     )
     init_version = extract_init_version(INIT_PATH.read_text(encoding="utf-8"))
-    docs_version = extract_docs_version(DOC_INDEX_PATH.read_text(encoding="utf-8"))
+    docs_governance_version = extract_docs_governance_version(
+        DOC_INDEX_PATH.read_text(encoding="utf-8")
+    )
+    rules_version = extract_rules_version(RULES_PATH.read_text(encoding="utf-8"))
     changelog_version = extract_latest_changelog_version(
         CHANGELOG_PATH.read_text(encoding="utf-8")
     )
 
-    versions: dict[str, str] = {
+    release_versions: dict[str, str] = {
         "pyproject.toml": pyproject_version,
         "src/bioetl/__init__.py": init_version,
-        "docs/00-project/index.md": docs_version,
         "CHANGELOG.md (latest release)": changelog_version,
     }
 
-    unique_versions = set(versions.values())
-    if len(unique_versions) != 1:
-        details = "\n".join(f"- {name}: {value}" for name, value in versions.items())
-        sys.stderr.write("Version mismatch detected:\n" + details + "\n")
+    unique_release_versions = set(release_versions.values())
+    if len(unique_release_versions) != 1:
+        details = "\n".join(
+            f"- {name}: {value}" for name, value in release_versions.items()
+        )
+        sys.stderr.write("Release version mismatch detected:\n" + details + "\n")
         return 1
 
-    resolved_version = unique_versions.pop()
-    sys.stdout.write(f"Version consistency check passed: {resolved_version}\n")
+    if docs_governance_version != rules_version:
+        sys.stderr.write(
+            "Governance version mismatch detected:\n"
+            f"- docs/00-project/index.md: {docs_governance_version}\n"
+            f"- docs/00-project/RULES.md: {rules_version}\n"
+        )
+        return 1
+
+    resolved_release_version = unique_release_versions.pop()
+    sys.stdout.write(
+        "Version consistency check passed: "
+        f"release={resolved_release_version}, governance={rules_version}\n"
+    )
     return 0
 
 
