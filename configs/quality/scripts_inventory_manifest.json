@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-27T09:35:51.510229+00:00",
+  "generated_at": "2026-07-27T09:37:07.548023+00:00",
   "summary": {
-    "total_scripts": 539,
+    "total_scripts": 536,
     "status_counts": {
       "active": 341,
-      "supporting": 198
+      "supporting": 195
     },
     "reference_group_coverage": {
       "agents": 5,
@@ -10185,18 +10185,6 @@
       ]
     },
     {
-      "path": "scripts/engineering/qa/audit_pipeline_semantics.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded historical semantic-audit generator while no governed caller references it; either route it through the canonical QA/reporting surface or retire it once the newer semantic governance reports fully supersede this one-off utility."
-    },
-    {
       "path": "scripts/engineering/qa/calibrate_hotspot_budgets.py",
       "type": "py",
       "status": "active",
@@ -11667,18 +11655,6 @@
           "text": "location=\"scripts/engineering/qa/naming_audit.py --check\","
         }
       ]
-    },
-    {
-      "path": "scripts/engineering/qa/py_review_orchestrator.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "platform-architecture",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a historical standalone review orchestrator snapshot; prefer the governed py-review-orchestrator skill and current reports workflow instead of extending this orphan script."
     },
     {
       "path": "scripts/engineering/qa/reduce_architecture_debt.py",
@@ -15509,18 +15485,6 @@
           "text": "\"observability/grafana/ensure_quarantine_explorer.py\""
         }
       ]
-    },
-    {
-      "path": "scripts/ops/observability/grafana/publish_simplification_issue_status.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain as a bounded manual publisher for the Grafana simplification issue series; keep GitHub writes opt-in and remove it after the tracked issue campaign is complete."
     },
     {
       "path": "scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1",
