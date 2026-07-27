@@ -35,11 +35,9 @@ from bioetl.application.pipelines.common.transformer_initialization import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.domain.behavior import EntityIdentityGenerator
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.entities import BaseEntity
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
-    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
     from bioetl.domain.types import BronzeRecord, PrimaryId, SilverRecord
 
 

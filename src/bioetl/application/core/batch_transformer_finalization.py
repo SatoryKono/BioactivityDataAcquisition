@@ -5,14 +5,6 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable
 from typing import Protocol
 
-from bioetl.application.core.batch_transformer_state import (
-    TransformAggregationState,
-    TransformResult,
-    build_transform_result,
-)
-from bioetl.domain.exceptions.data_quality import DataQualityThresholdError
-from bioetl.domain.ports import LoggerPort
-from bioetl.domain.types import BronzeRecord
 from bioetl.application.core.batch_transformer_dq_thresholds import (
     DQThresholdCheckResult,
     ThresholdBreach,
@@ -22,6 +14,14 @@ from bioetl.application.core.batch_transformer_dq_thresholds import (
     compute_error_rate,
     resolve_threshold_value,
 )
+from bioetl.application.core.batch_transformer_state import (
+    TransformAggregationState,
+    TransformResult,
+    build_transform_result,
+)
+from bioetl.domain.exceptions.data_quality import DataQualityThresholdError
+from bioetl.domain.ports import LoggerPort
+from bioetl.domain.types import BronzeRecord
 
 
 class _BatchTransformContext(Protocol):
@@ -140,6 +140,7 @@ async def finalize_stream_transform_result(
         flush_filtered_records=flush_filtered_records,
         flush_dq_records=flush_dq_records,
     )
+
 
 def _resolve_error_count(
     *,
