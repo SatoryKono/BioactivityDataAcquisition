@@ -1167,7 +1167,7 @@
       "metric": "duplicate_test_name_occurrences"
     },
     {
-      "actual": 20,
+      "actual": 23,
       "budget": "markerless_test_functions_max",
       "expected_max": 0,
       "metric": "markerless_test_functions"
@@ -1354,11 +1354,14 @@
     "tests/unit/domain/registry/test_publication_data_branches.py:20",
     "tests/unit/domain/registry/test_publication_data_branches.py:30",
     "tests/unit/domain/registry/test_publication_data_branches.py:43",
+    "tests/unit/infrastructure/config/test_reason_catalog_loader.py:15",
+    "tests/unit/infrastructure/config/test_reason_catalog_loader.py:34",
+    "tests/unit/infrastructure/config/test_reason_catalog_loader.py:42",
     "tests/unit/scripts/engineering/repo/test_check_version_consistency.py:14",
     "tests/unit/scripts/engineering/repo/test_check_version_consistency.py:26",
     "tests/unit/scripts/qa/test_check_dashboard_performance_budgets.py:10"
   ],
-  "markerless_test_functions": 20,
+  "markerless_test_functions": 23,
   "parse_errors": [],
   "refined_assertless_tests": 3,
   "repo_backed_unit_inventory": {
@@ -2379,11 +2382,14 @@
       "tests/unit/domain/registry/test_publication_data_branches.py:20",
       "tests/unit/domain/registry/test_publication_data_branches.py:30",
       "tests/unit/domain/registry/test_publication_data_branches.py:43",
+      "tests/unit/infrastructure/config/test_reason_catalog_loader.py:15",
+      "tests/unit/infrastructure/config/test_reason_catalog_loader.py:34",
+      "tests/unit/infrastructure/config/test_reason_catalog_loader.py:42",
       "tests/unit/scripts/engineering/repo/test_check_version_consistency.py:14",
       "tests/unit/scripts/engineering/repo/test_check_version_consistency.py:26",
       "tests/unit/scripts/qa/test_check_dashboard_performance_budgets.py:10"
     ],
-    "markerless_test_functions": 20,
+    "markerless_test_functions": 23,
     "parse_errors": [],
     "refined_assertless_tests": 3,
     "repo_backed_unit_inventory": {
@@ -2401,8 +2407,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2085,
-      "test_python_file_count": 2300,
+      "test_glob_file_count": 2086,
+      "test_python_file_count": 2301,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2451,13 +2457,13 @@
         "name": "test_should_skip_fsync_for_windows_test_mode"
       }
     ],
-    "total_test_files": 2085,
-    "total_test_functions": 23026,
+    "total_test_files": 2086,
+    "total_test_functions": 23029,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "638cb4ae04f4a46a37e6bd9f38e93c33ac6e2973dc0e1dee2c88424187d81f75",
+  "source_tree_sha256": "0bb838f01f799fb10be7a831aed9e130a824798a0fb8adbc3bb1b61578f0fc46",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 109,
@@ -2484,11 +2490,14 @@
       "tests/unit/domain/registry/test_publication_data_branches.py:20",
       "tests/unit/domain/registry/test_publication_data_branches.py:30",
       "tests/unit/domain/registry/test_publication_data_branches.py:43",
+      "tests/unit/infrastructure/config/test_reason_catalog_loader.py:15",
+      "tests/unit/infrastructure/config/test_reason_catalog_loader.py:34",
+      "tests/unit/infrastructure/config/test_reason_catalog_loader.py:42",
       "tests/unit/scripts/engineering/repo/test_check_version_consistency.py:14",
       "tests/unit/scripts/engineering/repo/test_check_version_consistency.py:26",
       "tests/unit/scripts/qa/test_check_dashboard_performance_budgets.py:10"
     ],
-    "markerless_test_functions": 20,
+    "markerless_test_functions": 23,
     "refined_assertless_tests": 3,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
@@ -2498,8 +2507,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2085,
-    "test_python_file_count": 2300,
+    "test_glob_file_count": 2086,
+    "test_python_file_count": 2301,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2548,8 +2557,8 @@
       "name": "test_should_skip_fsync_for_windows_test_mode"
     }
   ],
-  "total_test_files": 2085,
-  "total_test_functions": 23026,
+  "total_test_files": 2086,
+  "total_test_functions": 23029,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
