@@ -45,7 +45,7 @@ def test_mapping_status_and_numeric_codes() -> None:
         normalizers.normalize_profile_quasi_enum_numeric("x", allowed_values=(1.0, 2.0)) is None
     )
     assert normalizers.normalize_profile_reviewed_flag_code(None) is None
-    assert normalizers.normalize_profile_reviewed_flag_code(1) in {1, 1.0, None}
+    assert normalizers.normalize_profile_reviewed_flag_code(1) in {1, None}
 
 
 def test_assay_parameter_and_target_component_normalizers() -> None:
