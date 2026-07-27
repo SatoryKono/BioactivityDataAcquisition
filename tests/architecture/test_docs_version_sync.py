@@ -45,6 +45,15 @@ REQUIRED_SYNC_DOCS = [
     "docs/03-guides/cleanup-policy.md",
     "docs/02-architecture/00-overview.md",
 ]
+EXACT_NORMATIVE_MIRROR_DOCS = (
+    "docs/00-project/rules-summary.md",
+    "docs/01-requirements/REQUIREMENTS.md",
+)
+FULL_RULES_FRONTMATTER_VERSION_PATTERN = re.compile(
+    r"^Version:\s*(\d+\.\d+\.\d+)\s*$",
+    re.MULTILINE,
+)
+FULL_RULES_DOC_VERSION_PATTERN = re.compile(r"RULES\.md v(\d+\.\d+\.\d+)")
 NONCANONICAL_DOC_PARTS = frozenset(
     {
         "archived",
@@ -288,6 +297,26 @@ def _iter_canonical_docs(
 
 class TestDocsVersionSync:
     """Тесты синхронизации версий документации."""
+
+    def test_normative_mirrors_match_exact_rules_patch_version(
+        self,
+        project_root: Path,
+    ) -> None:
+        """Requirements and summary MUST match the full canonical RULES version."""
+        rules_text = (project_root / "docs" / "00-project" / "RULES.md").read_text(
+            encoding="utf-8"
+        )
+        rules_match = FULL_RULES_FRONTMATTER_VERSION_PATTERN.search(rules_text)
+        assert rules_match is not None, "RULES.md must declare an X.Y.Z version"
+        expected_version = rules_match.group(1)
+
+        for relative_path in EXACT_NORMATIVE_MIRROR_DOCS:
+            text = (project_root / relative_path).read_text(encoding="utf-8")
+            versions = set(FULL_RULES_DOC_VERSION_PATTERN.findall(text))
+            assert versions == {expected_version}, (
+                f"{relative_path} RULES version drift: "
+                f"found {sorted(versions)}, expected only {expected_version}"
+            )
 
     @pytest.fixture(scope="session")
     def project_root(self) -> Path:
