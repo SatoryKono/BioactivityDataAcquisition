@@ -18,7 +18,7 @@
       ],
       "duplication_clusters": 0,
       "files": 183,
-      "total_loc": 22585,
+      "total_loc": 22586,
       "files_ge_250_loc": 5,
       "helper_function_ratio": 0.371,
       "max_internal_fan_in": 7,

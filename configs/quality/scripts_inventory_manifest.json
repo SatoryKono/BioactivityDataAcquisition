@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-27T14:02:34.339031+00:00",
+  "generated_at": "2026-07-27T14:48:23.143312+00:00",
   "summary": {
     "total_scripts": 532,
     "status_counts": {
@@ -10074,7 +10074,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 290,
+      "reference_count": 291,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -15380,7 +15380,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 108,
+          "line": 124,
           "source_group": "other",
           "text": "> `bash scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh`."
         }
@@ -15441,7 +15441,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 110,
+          "line": 126,
           "source_group": "other",
           "text": "> `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1`."
         }
@@ -15514,7 +15514,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 94,
+          "line": 110,
           "source_group": "other",
           "text": "> `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1`."
         },
@@ -15557,19 +15557,19 @@
         },
         {
           "path": "grafana/README.md",
-          "line": 85,
+          "line": 101,
           "source_group": "other",
           "text": "> `bash scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh`."
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 908,
+          "line": 935,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` to install repo-local \""
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 995,
+          "line": 1022,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` or \""
         },
@@ -15606,7 +15606,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 1661,
+          "line": 1677,
           "source_group": "other",
           "text": "powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/start_quarantine_explorer.ps1"
         }
