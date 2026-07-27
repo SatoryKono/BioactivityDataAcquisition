@@ -1,7 +1,7 @@
 # Root local clutter cleanup (operator guidance)
 
-**Status:** active
-**Linked issues:** #6703 (RH-03), #6717 (CR-01), epic #6700 / #6716
+**Status:** active  
+**Linked issues:** #6703 (RH-03), #6717 (CR-01), epic #6700 / #6716  
 **Last verified:** 2026-07-27
 
 This note documents **local-only** cleanup for the repository root. It does not
