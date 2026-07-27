@@ -155,7 +155,7 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
     """Recording outputs, aliases, consumers, and HTTP targets stay distinct."""
     report = inventory.collect_typed_observability_inventory(ROOT)
 
-    assert len(report["recording_rule_outputs"]) == 103
+    assert len(report["recording_rule_outputs"]) == 104
     assert len(report["policy_alias_metrics"]) == 15
     assert report["recording_outputs_without_declaration"] == []
     assert report["recording_declarations_without_output"] == []
