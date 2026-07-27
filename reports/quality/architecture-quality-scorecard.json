@@ -221,7 +221,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "a493140368c90c45d4cee69dd8ca5b8d494c55a674f94f1a317e89a4e3404d91"
+      "source_fingerprint": "ba19def5f471bedf9af79528e3506a97d9878bfb4c1a0fcc07aadab02b3c4767"
     },
     "duplication_baseline": {
       "path": "reports/quality/full-app-duplication-baseline.json",
@@ -236,7 +236,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "3938fbd2bc1a5654e5ad56d4084713831e21cda7abb131fd30b87a83ffe16cd2",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "32d551a540247b39b243df74f1aeebad7ece356d311509625b7cd5134398e987"
+      "source_tree_sha256": "5bac7065d29ba908584e5c1f85b7045732dd82a6d26d18e9eda81b39f10b1635"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

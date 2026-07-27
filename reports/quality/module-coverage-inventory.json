@@ -1923,7 +1923,7 @@
       "missing_lines": 7,
       "module": "bioetl.application.core.batch_transformer_finalization",
       "path": "src/bioetl/application/core/batch_transformer_finalization.py",
-      "source_lines": 171
+      "source_lines": 172
     },
     {
       "coverage_percent": 97.06,
@@ -3163,7 +3163,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.pipelines.chembl.base_chembl_transformer",
       "path": "src/bioetl/application/pipelines/chembl/base_chembl_transformer.py",
-      "source_lines": 204
+      "source_lines": 202
     },
     {
       "coverage_percent": 100.0,
@@ -3793,7 +3793,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.pipelines.pubmed.transformer",
       "path": "src/bioetl/application/pipelines/pubmed/transformer.py",
-      "source_lines": 314
+      "source_lines": 316
     },
     {
       "coverage_percent": 100.0,
@@ -24695,7 +24695,7 @@
       "missing_lines": 7,
       "module": "bioetl.application.core.batch_transformer_finalization",
       "path": "src/bioetl/application/core/batch_transformer_finalization.py",
-      "source_lines": 171
+      "source_lines": 172
     },
     {
       "coverage_percent": 97.06,
@@ -25935,7 +25935,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.pipelines.chembl.base_chembl_transformer",
       "path": "src/bioetl/application/pipelines/chembl/base_chembl_transformer.py",
-      "source_lines": 204
+      "source_lines": 202
     },
     {
       "coverage_percent": 100.0,
@@ -26565,7 +26565,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.pipelines.pubmed.transformer",
       "path": "src/bioetl/application/pipelines/pubmed/transformer.py",
-      "source_lines": 314
+      "source_lines": 316
     },
     {
       "coverage_percent": 100.0,
@@ -45550,7 +45550,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-13",
-  "source_tree_sha256": "6f318738d8a5d17be68e0b9ecfeae50c4dd4c0e121b5ffd3061c428c328d8631",
+  "source_tree_sha256": "5bac7065d29ba908584e5c1f85b7045732dd82a6d26d18e9eda81b39f10b1635",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
