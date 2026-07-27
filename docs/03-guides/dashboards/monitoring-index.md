@@ -24,16 +24,16 @@ For the authoritative shipped dashboard mapping
 
 | Question / symptom | Open first | Then use | Owner doc |
 | ------------------ | ---------- | -------- | --------- |
-| What is currently broken or degraded? | `bioetl-overview-v2` | `Status`, `First Action`, then `0. Control Plane`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`, `6. Alerts & SLO` | [Dashboard v2 Usage](dashboard-v2-usage.md) |
-| Is a Prometheus alert actually firing or pending? | `bioetl-overview-v2` | first-screen `Alert/SLO Triage` -> `Triage Alert State`, then `6. Alerts & SLO` | [Monitoring Guide](../../05-operations/01-monitoring-guide.md) |
-| Need a dashboard dedicated to active alert state or SLO pressure? | `bioetl-alerts-slo` | `Active Alert Status`, `Firing Alerts / Range`, `Firing Alert Details` | [Monitoring Guide](../../05-operations/01-monitoring-guide.md) |
+| What is currently broken or degraded? | `bioetl-overview-v2` | `Status`, `First Action`, then `0. Trust`, `2. Pipeline Diagnostics`, `3. Provider Health`, `4. Data Quality`, `Workflow band (inside Pipeline Diagnostics)`, `Alert/SLO Triage (Overview collapsed row)` | [Dashboard v2 Usage](dashboard-v2-usage.md) |
+| Is a Prometheus alert actually firing or pending? | `bioetl-overview-v2` | first-screen `Alert/SLO Triage` -> `Triage Alert State`, then `Alert/SLO Triage (Overview collapsed row)` | [Monitoring Guide](../../05-operations/01-monitoring-guide.md) |
+| Need a dashboard dedicated to active alert state or SLO pressure? | `bioetl-overview-v2 (Alert/SLO Triage)` | `Active Alert Status`, `Firing Alerts / Range`, `Firing Alert Details` | [Monitoring Guide](../../05-operations/01-monitoring-guide.md) |
 | Runtime latency, logs, memory, or alert-condition concern? | `bioetl-runtime` | `bioetl diagnostics guide`; [Observability Checklist](../../05-operations/runbooks/observability-checklist.md) | [Monitoring Guide](../../05-operations/01-monitoring-guide.md) |
 | Provider retries, slowness, or failures? | `bioetl-provider-health-v2` | `bioetl diagnostics health --json`; provider incident runbook | [Incident Response](../../05-operations/runbooks/incident-response.md) |
 | DQ/freshness/quarantine signal concern? | `bioetl-dq-v2` | `bioetl diagnostics quarantine --pipeline <pipeline>` | [DQ Failure Investigation](../../05-operations/runbooks/dq-failure-investigation.md) |
 | Need exact Silver structural rejected record evidence? | CLI (Explorer UI removed) | `bioetl quarantine inspect --pipeline <pipeline> --silver-filter-only ...` (`FILTERED_OUT_SILVER` legacy alias only); DQ aggregates stay in `bioetl-dq-v2` | [Quarantine Management](../../05-operations/runbooks/quarantine-management.md) |
 | Need Gold contract/semantic reject evidence? | `bioetl-dq-v2` Gold reject panels / processed-records surfaces | Start from `Inspect: Gold Reject Outcomes by Pipeline`; do not use `--silver-filter-only` | [Quarantine Management](../../05-operations/runbooks/quarantine-management.md) |
 | Replay/recovery trust question for run family? | `bioetl-control-plane-v1` | `Track: Replay / Resume Blockers in Range`, `bioetl checkpoint inspect`, `bioetl checkpoint audit-run`, then `bioetl run-manifest show <run-id|manifest-id>` for exact manifest/ledger evidence | [Checkpoint Debugging](../../05-operations/runbooks/checkpoint-debugging.md) |
-| Declarative workflow step failed or skipped? | `bioetl-workflow-overview` | `bioetl_workflow_*` metrics | [Dashboard v2 Usage](dashboard-v2-usage.md) |
+| Declarative workflow step failed or skipped? | `bioetl-runtime (workflow band)` | `bioetl_workflow_*` metrics | [Dashboard v2 Usage](dashboard-v2-usage.md) |
 | Metrics/dashboard vocabulary drift check? | inventory helper | `python -m scripts.engineering.qa report-observability-metric-inventory --json` | [Observability Metrics Contract](../../04-reference/contracts/observability.md) |
 
 Boundary rule: Prometheus/Grafana should answer aggregate operational questions.
@@ -62,7 +62,7 @@ The shared `ID` and `Processed Records` cards are HTTP-backed via
 be interpreted only after `/health/live` (and control-plane readiness) respond;
 backend-down, invalid scope, and true zero/absent run are distinct operator states.
 
-For `0. Control Plane`, exact identity graph evidence is available by expanding
+For `0. Trust`, exact identity graph evidence is available by expanding
 the collapsed-by-default `Identity evidence and remaining replay-safety signals` row. Those
 tables call `/ops/control-plane/identity-evidence` for P0/P1/P2 anchors,
 identity gaps, checkpoint anchor comparison, and copy-friendly full values;
@@ -97,3 +97,7 @@ Current canonical Overview baseline:
 | Grafana dashboards | operator panels, links, variables, Explore handoffs | `grafana/dashboards/*.json` |
 | Prometheus rules | alert and recording rules | `grafana/prometheus-rules/bioetl_observability.yml` |
 | Contracts/docs | metric contracts and operator docs | `docs/04-reference/contracts/observability.md` |
+
+## Operator scenarios (S1–S6)
+
+See [operator-scenarios-s1-s6.md](operator-scenarios-s1-s6.md) for the post-simplification playbook (epic #6570 / #6577).

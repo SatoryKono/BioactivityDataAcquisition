@@ -8,7 +8,6 @@ from bioetl.application.core import (
     _filtered_data_source_fetch_support as fetch_support,
 )
 from bioetl.application.core import _filtered_data_source_support as lifecycle_support
-from bioetl.application.core._fetch_forwarding import build_forwarded_fetch_kwargs
 from bioetl.application.core.data_source_mixins import (
     _WrappedAdapterHealthDelegationMixin,
 )
@@ -129,12 +128,6 @@ class _FilteredDataSourceFetchMixin(
         """
         return fetch_support.fetch_records(
             self,
-            **build_forwarded_fetch_kwargs(
-                entity_type=entity_type,
-                limit=limit,
-                query=query,
-                filter_ids=filter_ids,
-                filter_field=filter_field,
-                offset=offset,
-            ),
+            entity_type,
+            *(limit, query, filter_ids, filter_field, offset),
         )

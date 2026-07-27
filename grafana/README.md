@@ -13,9 +13,9 @@
 >
 > Monitoring stack is **opt-in only** (`make docker-start-monitoring`).
 >
-> **Dashboards: 7 JSON** — `bioetl-control-plane-v1`, `bioetl-overview-v2`,
+> **Dashboards: 5 JSON** — `bioetl-control-plane-v1`, `bioetl-overview-v2`,
 > `bioetl-runtime`, `bioetl-provider-health-v2`, `bioetl-dq-v2`,
-> `bioetl-workflow-overview`, `bioetl-alerts-slo`.
+> `retired: workflow/alerts merged.
 
 ______________________________________________________________________
 
@@ -284,7 +284,7 @@ ______________________________________________________________________
 │  ┌──────────────────────────────────────────────────────────┐    │
 │  │  Provisioning (автоматическая загрузка)                    │    │
 │  │  - Datasources: Prometheus + BioETL Ops HTTP (:8000) │    │
-│  │  - Dashboards: 8 JSON файлов (bioetl.yaml)               │    │
+│  │  - Dashboards: 5 JSON файлов (bioetl.yaml)               │    │
 │  │  - Обновление каждые 30 секунд                            │    │
 │  │  - allowUiUpdates: false для production dashboard-as-code  │    │
 │  └──────────────────────────────────────────────────────────┘    │
@@ -2298,7 +2298,7 @@ Legacy v1 dashboards сохранены только как archived comparison 
 являются operator entrypoints; текущая эксплуатация использует восемь shipped
 JSON surfaces: `bioetl-control-plane-v1`, `bioetl-overview-v2`,
 `bioetl-runtime`, `bioetl-provider-health-v2`, `bioetl-dq-v2`,
-`bioetl-workflow-overview`, `bioetl-alerts-slo`, and
+`retired: workflow/alerts merged, and
 `bioetl-silver-reject-explorer`.
 
 ### Как добавить новую метрику?

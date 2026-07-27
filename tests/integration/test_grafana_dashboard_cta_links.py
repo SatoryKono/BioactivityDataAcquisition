@@ -11,6 +11,15 @@ from tests.integration._grafana_test_support import (
     get_dashboard_panels,
     load_dashboard,
 )
+
+
+def _require_dashboard(name: str) -> Path:
+    path = Path("grafana/dashboards") / name
+    if not path.exists():
+        pytest.skip(f"{name} retired in grafana simplification epic #6570/#6576")
+    return path
+
+
 from tests.integration._grafana_dashboard_links_support import (
     _CANONICAL_GITHUB_BLOB_PREFIX,
     _DASHBOARD_TIME_HANDOFF_TOKENS,
@@ -786,7 +795,7 @@ def test_overview_panels_use_dashboard_handoffs_not_runbook_ctas() -> None:
 
 def test_workflow_range_cards_do_not_ship_panel_level_runbook_links() -> None:
     """Workflow selected-range cards should hand off via First Action instead."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-workflow-overview.json"))
+    dashboard = load_dashboard(_require_dashboard("bioetl-workflow-overview.json"))
     expected_titles = {
         "Failed Workflow Runs / Range",
         "Failed Pipeline Steps / Range",
@@ -893,7 +902,7 @@ def test_provider_dashboard_exposes_single_runtime_link() -> None:
 
 def test_workflow_overview_first_action_cta_contract() -> None:
     """Workflow First Action panel must have exactly 5 dashboard handoffs."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-workflow-overview.json"))
+    dashboard = load_dashboard(_require_dashboard("bioetl-workflow-overview.json"))
     next_diagnostic_panel = next(
         (
             p

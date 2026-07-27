@@ -398,6 +398,7 @@ ______________________________________________________________________
 
 ## Related Resources
 
+- **Extended docs**: [Specialist and repository support index](extended-docs-index.md)
 - **Repository**: [SatoryKono/BioactivityDataAcquisition](https://github.com/SatoryKono/BioactivityDataAcquisition)
 - **Issues**: Report bugs and feature requests
 - **CI/CD**: GitHub Actions workflows ([GitHub Policy](governance/05-github-policy.md))

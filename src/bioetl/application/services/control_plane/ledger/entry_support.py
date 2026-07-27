@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import Protocol
 
 from bioetl.application.services.control_plane.ledger.diagnostic_support import (
-    _RunLedgerCorrelationFieldsProtocol,
+    RunLedgerCorrelationFieldsProtocol,
     build_run_ledger_diagnostic_details,
     build_run_ledger_diagnostic_request,
 )
@@ -50,7 +50,7 @@ class RunLedgerEntryRequest:
     details: dict[str, object] | None = None
 
 
-class _RunLedgerServiceEntryProtocol(_RunLedgerCorrelationFieldsProtocol, Protocol):
+class _RunLedgerServiceEntryProtocol(RunLedgerCorrelationFieldsProtocol, Protocol):
     @property
     def ledger_port(self) -> RunLedgerPort: ...
 

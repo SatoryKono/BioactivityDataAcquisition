@@ -19,6 +19,7 @@ from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_run
 from .conftest import (
     assert_bronze_files_exist,
     assert_bronze_metadata_files_exist,
+    assert_gold_table_has_records,
     assert_run_ledger_has_events,
     assert_run_manifest_exists,
     assert_silver_table_has_records,
@@ -26,6 +27,7 @@ from .conftest import (
     create_test_context,
     get_silver_records,
 )
+from tests.helpers.e2e_schema_assertions import assert_records_have_required_fields
 
 pytestmark = pytest.mark.usefixtures("relaxed_dq_env")
 
@@ -87,12 +89,19 @@ async def test_pubchem_compound_full_cycle(e2e_data_dir: Path):
     )
     assert silver_count <= 5
 
+    # Assert - Gold layer (schema.gold declared; sink writes when enabled by runtime defaults)
+    gold_count = await assert_gold_table_has_records(
+        e2e_data_dir, "pubchem_compound", expected_min=1
+    )
+    assert gold_count >= 1
+
     # Assert - Schema validation
     records = await get_silver_records(e2e_data_dir, "pubchem_compound")
-    required_fields = ["molecule_id"]
-    for record in records:
-        for field in required_fields:
-            assert field in record, f"Missing required field: {field}"
+    assert_records_have_required_fields(
+        records,
+        ("molecule_id",),
+        entity_label="pubchem_compound.silver",
+    )
 
 
 @pytest.mark.e2e

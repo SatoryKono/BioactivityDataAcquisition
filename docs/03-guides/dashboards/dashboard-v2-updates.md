@@ -46,7 +46,7 @@ notes. Если prose ниже расходится с JSON, править ну
 
 ## Current shipped baseline
 
-- Все primary operator dashboards `0..5` используют `refresh: 30s` и
+- Все primary operator dashboards `0..5` используют `refresh: 60s` и
   `time.from=now-12h`.
 - `CLI quarantine inspect` остаётся forensic exception с `refresh: 1m`
   и `time.from=now-24h`.

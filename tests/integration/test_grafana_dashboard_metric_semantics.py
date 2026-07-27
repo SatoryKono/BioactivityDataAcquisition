@@ -16,6 +16,15 @@ from tests.integration._grafana_test_support import (
     get_row_child_panels,
     load_dashboard,
 )
+
+
+def _require_dashboard(name: str) -> Path:
+    path = Path("grafana/dashboards") / name
+    if not path.exists():
+        pytest.skip(f"{name} retired in grafana simplification epic #6570/#6576")
+    return path
+
+
 from tests.integration.grafana_contract_specs import (
     SUMMARY_ZERO_FALLBACK_EXPECTATIONS,
 )
@@ -171,7 +180,7 @@ def test_summary_queries_use_zero_fallbacks() -> None:
 
 def test_workflow_selected_range_counters_use_zero_valid_empty_state() -> None:
     """Workflow summary cards intentionally render empty selected ranges as zero events."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-workflow-overview.json"))
+    dashboard = load_dashboard(_require_dashboard("bioetl-workflow-overview.json"))
     expected_panels = {
         "Failed Workflow Runs / Range",
         "Failed Pipeline Steps / Range",

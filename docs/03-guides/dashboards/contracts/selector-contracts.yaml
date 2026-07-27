@@ -1,7 +1,8 @@
 normative_source:
   scope: selector_taxonomy_registry_semantics
   authority: single_source_of_truth
-  narrative_minimal: 'This YAML is the only normative contract for Grafana selector taxonomy,
+  narrative_minimal: 'This YAML is the only normative contract for Grafana selector
+    taxonomy,
 
     dashboard-family selector eligibility, shipped selector registry, hidden
 
@@ -94,7 +95,8 @@ operator_context_shell:
     Silver `quarantine_run_id`.
 
     '
-  primary_selector_rule: 'Dashboard families retain their role-specific primary selectors. Provider
+  primary_selector_rule: 'Dashboard families retain their role-specific primary selectors.
+    Provider
 
     Health remains provider-first; Workflow remains selected-range workflow
 
@@ -106,7 +108,8 @@ operator_context_shell:
 pipeline_universe_contract:
   status: shipped
   canonical_user_facing_metric: bioetl_overview_pipeline_run_type_universe
-  canonical_relation: 'bioetl_overview_pipeline_run_type_universe is an exact recording-rule alias
+  canonical_relation: 'bioetl_overview_pipeline_run_type_universe is an exact recording-rule
+    alias
 
     of bioetl_runtime_pipeline_run_type_universe. The two metrics MUST expose
 
@@ -120,15 +123,11 @@ pipeline_universe_contract:
   - bioetl-runtime
   - bioetl-provider-health-v2
   - bioetl-dq-v2
-  - bioetl-workflow-overview
-  - bioetl-alerts-slo
   shared_query_metrics:
     bioetl-overview-v2: bioetl_overview_pipeline_run_type_universe
     bioetl-runtime: bioetl_runtime_pipeline_run_type_universe
     bioetl-provider-health-v2: bioetl_overview_pipeline_run_type_universe
     bioetl-dq-v2: bioetl_overview_pipeline_run_type_universe
-    bioetl-workflow-overview: bioetl_overview_pipeline_run_type_universe
-    bioetl-alerts-slo: bioetl_overview_pipeline_run_type_universe
   role_local_exceptions:
     bioetl-control-plane-v1:
       query_metric: bioetl_control_plane_run_type_universe
@@ -155,12 +154,13 @@ pipeline_universe_contract:
         '
       out_of_scope_handoff: fail_closed_with_overview_return_path
   handoff_rules:
-  - Shared-selector links MUST preserve pipeline only when the destination accepts the canonical user-facing
-    universe.
-  - Links into a role-local exception MUST provide an explicit fail-closed empty state or return path;
-    silent blank panels are forbidden.
-  - Control Plane role-local-only scopes MUST be backed by manifest-write provenance; canonical-only scopes
-    MUST be explainable by data-plane telemetry without a manifest artifact.
+  - Shared-selector links MUST preserve pipeline only when the destination accepts
+    the canonical user-facing universe.
+  - Links into a role-local exception MUST provide an explicit fail-closed empty state
+    or return path; silent blank panels are forbidden.
+  - Control Plane role-local-only scopes MUST be backed by manifest-write provenance;
+    canonical-only scopes MUST be explainable by data-plane telemetry without a manifest
+    artifact.
   closure_evidence:
     required_dashboard_count: 7
     shared_required_chembl_pipeline_count: 15
@@ -192,7 +192,8 @@ dashboard_families:
     - run_id
     optional_visible_selectors:
     - stage
-    notes: 'Pipeline-summary dashboards answer pipeline-scoped operator questions and
+    notes: 'Pipeline-summary dashboards answer pipeline-scoped operator questions
+      and
 
       remain Prometheus-first. The shared context shell may expose workflow and
 
@@ -267,8 +268,7 @@ dashboard_families:
 
       '
   workflow_evidence:
-    uids:
-    - bioetl-workflow-overview
+    uids: []
     allowed_visible_selectors:
     - workflow
     - pipeline
@@ -331,8 +331,7 @@ dashboard_families:
 
       '
   alert_triage:
-    uids:
-    - bioetl-alerts-slo
+    uids: []
     allowed_visible_selectors:
     - workflow
     - pipeline
@@ -455,64 +454,6 @@ shipped_selector_registry:
       run_type: prometheus_overview_pipeline_run_type_universe
       run_id: control_plane_filter_options_api
       stage: prometheus_records_processed_total
-  bioetl-workflow-overview:
-    family: workflow_evidence
-    visible_selectors:
-    - workflow
-    - pipeline
-    - run_type
-    - run_id
-    - status
-    - step_status
-    - step_kind
-    hidden_context_selectors:
-    - workflow_context
-    - pipeline_context
-    - pipeline_context_exact
-    - run_type_context
-    - run_type_context_exact
-    - provider_context
-    - provider_context_exact
-    hidden_detail_selectors: []
-    top_bar_order:
-    - workflow
-    - pipeline
-    - run_type
-    - run_id
-    - status
-    - step_status
-    - step_kind
-    query_source_families:
-      workflow: prometheus_workflow_runs_total
-      pipeline: prometheus_overview_pipeline_run_type_universe
-      run_type: prometheus_overview_pipeline_run_type_universe
-      run_id: control_plane_filter_options_api
-      workflow_context: control_plane_filter_options_api
-      pipeline_context: prometheus_workflow_runs_total
-      pipeline_context_exact: control_plane_filter_options_api
-      run_type_context: prometheus_workflow_runs_total
-      run_type_context_exact: control_plane_filter_options_api
-      provider_context: prometheus_workflow_runs_total
-      provider_context_exact: control_plane_filter_options_api
-      status: prometheus_workflow_runs_total
-      step_status: prometheus_workflow_step_events_total
-      step_kind: prometheus_workflow_step_events_total
-  bioetl-alerts-slo:
-    family: alert_triage
-    visible_selectors:
-    - workflow
-    - pipeline
-    - run_type
-    hidden_context_selectors: []
-    hidden_detail_selectors: []
-    top_bar_order:
-    - workflow
-    - pipeline
-    - run_type
-    query_source_families:
-      workflow: prometheus_workflow_runs_total
-      pipeline: prometheus_overview_pipeline_run_type_universe
-      run_type: prometheus_overview_pipeline_run_type_universe
 ship_now_selector_contract_by_uid:
   bioetl-control-plane-v1:
     visible_selectors:
@@ -556,30 +497,6 @@ ship_now_selector_contract_by_uid:
     - run_id
     - stage
     time_range: grafana_builtin
-  bioetl-workflow-overview:
-    visible_selectors:
-    - workflow
-    - pipeline
-    - run_type
-    - run_id
-    - status
-    - step_status
-    - step_kind
-    hidden_context_selectors:
-    - workflow_context
-    - pipeline_context
-    - pipeline_context_exact
-    - run_type_context
-    - run_type_context_exact
-    - provider_context
-    - provider_context_exact
-    time_range: grafana_builtin
-  bioetl-alerts-slo:
-    visible_selectors:
-    - workflow
-    - pipeline
-    - run_type
-    time_range: grafana_builtin
 hidden_handoff_contract:
   allowed_shipped_vars:
   - workflow_context
@@ -602,8 +519,8 @@ hidden_handoff_contract:
   - manifest_id
   - execution_fingerprint
   rules:
-  - Hidden vars preserve navigation or detail-only scope and do not automatically become visible top-level
-    selectors.
+  - Hidden vars preserve navigation or detail-only scope and do not automatically
+    become visible top-level selectors.
   - Visible selectors MUST NOT be propagated implicitly with blanket includeVars semantics.
 control_plane_selector_context_contract:
   status: shipped
@@ -696,7 +613,6 @@ execution_selector_future_contract:
   - bioetl-overview-v2
   excluded_by_default:
   - bioetl-provider-health-v2
-  - bioetl-workflow-overview
 dual_scope_evaluation:
   workflow_plus_pipeline:
     status: future_candidate_only
@@ -711,4 +627,3 @@ dual_scope_evaluation:
     - bioetl-overview-v2
     excluded_default_uids:
     - bioetl-provider-health-v2
-    - bioetl-workflow-overview

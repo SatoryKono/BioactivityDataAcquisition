@@ -1,273 +1,185 @@
-# BioETL Shipped Dashboards Contract Inventory
-#
-# Machine-readable mapping of shipped dashboards to their panels, data sources,
-# and contract metadata. This file enables drift detection and audibility.
-#
-# Version: 1.1.0
-# Last updated: 2026-07-13
-# Source: grafana/dashboards/*.json
-#
-# Schema:
-#   dashboards:
-#     - uid: Grafana dashboard UID
-#       title: Dashboard title
-#       owner: Bounded machine-routable owner handle
-#       owner_route: Reviewed repository runbook path
-#       family: Dashboard family (primary, adjunct, explorer, alert_triage)
-#       navigation_id: Numbered navigation bus position (0-6) or null for an unnumbered adjunct
-#       data_sources: Normalized datasource names discovered from dashboard JSON
-#       panel_count: Total number of panels
-#       key_panels:
-#         - id: Panel ID
-#           title: Panel title
-#           type: Panel type (stat, graph, table, text, etc.)
-#           description: Brief description if available
-#       selector_variables: List of template variable names
-
 dashboards:
-  - uid: bioetl-control-plane-v1
-    title: "0. Control Plane"
-    owner: "@bioetl-observability"
-    owner_route: docs/05-operations/runbooks/run-manifest-inspection.md
-    family: primary
-    navigation_id: 0
-    data_sources:
-      - Prometheus
-      - BioETL Ops HTTP
-      - Grafana
-    panel_count: 57
-    key_panels:
-      - id: 891
-        title: "Monitor: Replay Safety State"
-        type: stat
-        description: "Current replay safety state for selected pipeline"
-      - id: 130
-        title: "Track: Replay / Resume Blockers in Range"
-        type: stat
-        description: "Replay and resume blockers in selected time range"
-      - id: 9402
-        title: "ID"
-        type: table
-        description: "Shared shell panel for run/manifest identity"
-      - id: 9403
-        title: "Processed Records"
-        type: table
-        description: "Shared shell panel for Bronze/Silver/Gold accounting"
-      - id: 9401
-        title: "Status"
-        type: stat
-        description: "Evidence-aware replay/resume verdict; required evidence gaps render INCOMPLETE"
-    selector_variables:
-      - workflow
-      - pipeline
-      - run_id
-      - run_type
-
-  - uid: bioetl-overview-v2
-    title: "1. Overview"
-    owner: "@bioetl-observability"
-    owner_route: docs/05-operations/runbooks/observability-checklist.md
-    family: primary
-    navigation_id: 1
-    data_sources:
-      - Prometheus
-      - BioETL Ops HTTP
-      - Grafana
-    panel_count: 25
-    key_panels:
-      - id: 214
-        title: "Status"
-        type: stat
-        description: "Current system status summary"
-      - id: 215
-        title: "First Action"
-        type: table
-        description: "Recommended first action for current state"
-      - id: 1000
-        title: "Navigation"
-        type: text
-        description: "Theme-safe wrapping navigation bus (0-6 plus global adjuncts)"
-    selector_variables:
-      - workflow
-      - pipeline
-      - run_id
-      - run_type
-
-  - uid: bioetl-runtime
-    title: "2. Runtime"
-    owner: "@bioetl-observability"
-    owner_route: docs/05-operations/runbooks/pipeline-failure-critical.md
-    family: primary
-    navigation_id: 2
-    data_sources:
-      - Prometheus
-      - BioETL Ops HTTP
-      - Grafana
-    panel_count: 37
-    key_panels:
-      - id: 9100
-        title: "Runtime Status"
-        type: stat
-        description: "Trust-gated current runtime health status"
-      - id: 205
-        title: "Failed Runs"
-        type: stat
-        description: "Failed runs in the selected range"
-      - id: 237
-        title: "Worst Stage Lag"
-        type: stat
-        description: "Worst observed stage lag in the selected range"
-      - id: 9102
-        title: "Runtime Telemetry Gap"
-        type: stat
-        description: "Scrape/rule trust gate; a gap forces the headline to INCOMPLETE"
-    selector_variables:
-      - workflow
-      - pipeline
-      - provider_hint
-      - run_id
-      - run_type
-      - stage
-
-  - uid: bioetl-provider-health-v2
-    title: "3. Provider Health"
-    owner: "@bioetl-observability"
-    owner_route: docs/05-operations/runbooks/incident-response.md
-    family: primary
-    navigation_id: 3
-    data_sources:
-      - Prometheus
-      - BioETL Ops HTTP
-      - Grafana
-    panel_count: 29
-    key_panels:
-      - id: 9101
-        title: "Monitor GLOBAL Provider Severity Matrix"
-        type: table
-        description: "Provider health severity matrix"
-      - id: 9103
-        title: "Inspect Provider Top Causes"
-        type: table
-        description: "Top causes of provider failures"
-    selector_variables:
-      - workflow
-      - pipeline
-      - run_type
-      - run_id
-      - provider
-      - pipeline_context
-      - adapter
-
-  - uid: bioetl-dq-v2
-    title: "4. Data Quality"
-    owner: "@bioetl-observability"
-    owner_route: docs/05-operations/runbooks/dq-failure-investigation.md
-    family: primary
-    navigation_id: 4
-    data_sources:
-      - Prometheus
-      - BioETL Ops HTTP
-      - Grafana
-    panel_count: 36
-    key_panels:
-      - id: 9100
-        title: "Monitor DQ Current Status"
-        type: stat
-        description: "Current DQ status summary"
-      - id: 9101
-        title: "Monitor DQ Threshold State"
-        type: stat
-        description: "DQ threshold violation state"
-      - id: 9102
-        title: "Inspect DQ Current Reasons"
-        type: table
-        description: "Current DQ violation reasons breakdown"
-      - id: 8
-        title: "Time Range · Worst Freshness Age (hours; SLA 24/72)"
-        type: gauge
-        description: "TIME RANGE freshness age in hours with WARN 24h and CRIT 72h"
-    selector_variables:
-      - workflow
-      - pipeline
-      - run_id
-      - run_type
-      - stage
-
-  - uid: bioetl-workflow-overview
-    title: "5. Workflow"
-    owner: "@bioetl-observability"
-    owner_route: docs/05-operations/runbooks/pipeline-failure-critical.md
-    family: primary
-    navigation_id: 5
-    data_sources:
-      - Prometheus
-      - BioETL Ops HTTP
-      - Grafana
-    panel_count: 16
-    key_panels:
-      - id: 2
-        title: "Failed Workflow Runs / Range"
-        type: stat
-        description: "Failed workflow runs in the selected range"
-      - id: 5
-        title: "Step Outcomes by Kind / Step Status / Range"
-        type: timeseries
-        description: "Step-by-step workflow execution results"
-    selector_variables:
-      - workflow
-      - pipeline
-      - run_id
-      - run_type
-      - status
-      - step_status
-      - step_kind
-      - workflow_context
-      - pipeline_context
-      - pipeline_context_exact
-      - run_type_context
-      - run_type_context_exact
-      - provider_context
-      - provider_context_exact
-
-  - uid: bioetl-alerts-slo
-    title: "6. Alerts & SLO"
-    owner: "@bioetl-observability"
-    owner_route: docs/05-operations/runbooks/observability-checklist.md
-    family: alert_triage
-    navigation_id: 6
-    data_sources:
-      - Prometheus
-      - Grafana
-    panel_count: 7
-    key_panels:
-      - id: 1
-        title: "Active Alert Status"
-        type: stat
-        description: "Fail-closed firing-alert status from the ALERTS metric family"
-      - id: 5
-        title: "Firing Alert Details"
-        type: table
-        description: "Firing alerts with an explicit Global/Pipeline/Run scope badge per row"
-    selector_variables:
-      - workflow
-      - pipeline
-      - run_type
-
-# Contract metadata
+- uid: bioetl-control-plane-v1
+  title: 0. Trust
+  owner: '@bioetl-observability'
+  owner_route: docs/05-operations/runbooks/run-manifest-inspection.md
+  family: primary
+  navigation_id: 0
+  data_sources:
+  - Prometheus
+  - BioETL Ops HTTP
+  - Grafana
+  panel_count: 57
+  key_panels:
+  - id: 891
+    title: 'Monitor: Replay Safety State'
+    type: stat
+    description: Current replay safety state for selected pipeline
+  - id: 130
+    title: 'Track: Replay / Resume Blockers in Range'
+    type: stat
+    description: Replay and resume blockers in selected time range
+  - id: 9402
+    title: ID
+    type: table
+    description: Shared shell panel for run/manifest identity
+  - id: 9403
+    title: Processed Records
+    type: table
+    description: Shared shell panel for Bronze/Silver/Gold accounting
+  - id: 9401
+    title: Status
+    type: stat
+    description: Evidence-aware replay/resume verdict; required evidence gaps render
+      INCOMPLETE
+  selector_variables:
+  - workflow
+  - pipeline
+  - run_id
+  - run_type
+- uid: bioetl-overview-v2
+  title: 1. Overview
+  owner: '@bioetl-observability'
+  owner_route: docs/05-operations/runbooks/observability-checklist.md
+  family: primary
+  navigation_id: 1
+  data_sources:
+  - Prometheus
+  - BioETL Ops HTTP
+  - Grafana
+  panel_count: 25
+  key_panels:
+  - id: 214
+    title: Status
+    type: stat
+    description: Current system status summary
+  - id: 215
+    title: First Action
+    type: table
+    description: Recommended first action for current state
+  - id: 1000
+    title: Navigation
+    type: text
+    description: Theme-safe wrapping navigation bus (0-6 plus global adjuncts)
+  selector_variables:
+  - workflow
+  - pipeline
+  - run_id
+  - run_type
+- uid: bioetl-runtime
+  title: 2. Pipeline Diagnostics
+  owner: '@bioetl-observability'
+  owner_route: docs/05-operations/runbooks/pipeline-failure-critical.md
+  family: primary
+  navigation_id: 2
+  data_sources:
+  - Prometheus
+  - BioETL Ops HTTP
+  - Grafana
+  panel_count: 37
+  key_panels:
+  - id: 9100
+    title: Runtime Status
+    type: stat
+    description: Trust-gated current runtime health status
+  - id: 205
+    title: Failed Runs
+    type: stat
+    description: Failed runs in the selected range
+  - id: 237
+    title: Worst Stage Lag
+    type: stat
+    description: Worst observed stage lag in the selected range
+  - id: 9102
+    title: Runtime Telemetry Gap
+    type: stat
+    description: Scrape/rule trust gate; a gap forces the headline to INCOMPLETE
+  selector_variables:
+  - workflow
+  - pipeline
+  - provider_hint
+  - run_id
+  - run_type
+  - stage
+- uid: bioetl-provider-health-v2
+  title: 3. Provider Health
+  owner: '@bioetl-observability'
+  owner_route: docs/05-operations/runbooks/incident-response.md
+  family: primary
+  navigation_id: 3
+  data_sources:
+  - Prometheus
+  - BioETL Ops HTTP
+  - Grafana
+  panel_count: 29
+  key_panels:
+  - id: 9101
+    title: Monitor GLOBAL Provider Severity Matrix
+    type: table
+    description: Provider health severity matrix
+  - id: 9103
+    title: Inspect Provider Top Causes
+    type: table
+    description: Top causes of provider failures
+  selector_variables:
+  - workflow
+  - pipeline
+  - run_type
+  - run_id
+  - provider
+  - pipeline_context
+  - adapter
+- uid: bioetl-dq-v2
+  title: 4. Data Quality
+  owner: '@bioetl-observability'
+  owner_route: docs/05-operations/runbooks/dq-failure-investigation.md
+  family: primary
+  navigation_id: 4
+  data_sources:
+  - Prometheus
+  - BioETL Ops HTTP
+  - Grafana
+  panel_count: 36
+  key_panels:
+  - id: 9100
+    title: Monitor DQ Current Status
+    type: stat
+    description: Current DQ status summary
+  - id: 9101
+    title: Monitor DQ Threshold State
+    type: stat
+    description: DQ threshold violation state
+  - id: 9102
+    title: Inspect DQ Current Reasons
+    type: table
+    description: Current DQ violation reasons breakdown
+  - id: 8
+    title: Time Range · Worst Freshness Age (hours; SLA 24/72)
+    type: gauge
+    description: TIME RANGE freshness age in hours with WARN 24h and CRIT 72h
+  selector_variables:
+  - workflow
+  - pipeline
+  - run_id
+  - run_type
+  - stage
 contract_metadata:
-  version: "1.1.0"
-  last_updated: "2026-07-13"
+  version: 1.1.0
+  last_updated: '2026-07-13'
   source_files:
-    - "grafana/dashboards/bioetl-control-plane-v1.json"
-    - "grafana/dashboards/bioetl-overview-v2.json"
-    - "grafana/dashboards/bioetl-runtime.json"
-    - "grafana/dashboards/bioetl-provider-health-v2.json"
-    - "grafana/dashboards/bioetl-dq-v2.json"
-    - "grafana/dashboards/bioetl-workflow-overview.json"
-    - "grafana/dashboards/bioetl-alerts-slo.json"
+  - grafana/dashboards/bioetl-control-plane-v1.json
+  - grafana/dashboards/bioetl-overview-v2.json
+  - grafana/dashboards/bioetl-runtime.json
+  - grafana/dashboards/bioetl-provider-health-v2.json
+  - grafana/dashboards/bioetl-dq-v2.json
+  - grafana/dashboards/bioetl-workflow-overview.json
+  - grafana/dashboards/bioetl-alerts-slo.json
   governance:
-    - All seven shipped dashboards must include navigation panel id=1000
-    - Navigation bus 0-6 (Logs/Traces explore links residual; Loki/Tempo stack removed)
-    - KPI ownership mirrors must be documented in navigation-links.yaml
-    - Selector contracts must match selector-contracts.yaml
-    - Quarantine Explorer UI and Silver Reject Explorer dashboard were removed 2026-07-23
+  - All seven shipped dashboards must include navigation panel id=1000
+  - Navigation bus 0-6 (Logs/Traces explore links residual; Loki/Tempo stack removed)
+  - KPI ownership mirrors must be documented in navigation-links.yaml
+  - Selector contracts must match selector-contracts.yaml
+  - Quarantine Explorer UI and Silver Reject Explorer dashboard were removed 2026-07-23
+metadata:
+  last_updated: '2026-07-27'
+  epic: '#6570'

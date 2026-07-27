@@ -417,12 +417,27 @@ nav:
                     -   Domain:
                             -   "Domain API": 04-reference/api/domain.md
                             -   "Ports": 04-reference/api/domain/ports.md
+                            -   "Entities": 04-reference/api/domain/entities.md
+                            -   "Exceptions": 04-reference/api/domain/exceptions.md
+                            -   "Types": 04-reference/api/domain/types.md
                     -   Application:
                             -   "Application API": 04-reference/api/application.md
+                            -   "Core": 04-reference/api/application/core.md
+                            -   "Pipelines": 04-reference/api/application/pipelines.md
+                            -   "Services": 04-reference/api/application/services.md
+                            -   "Transformers": 04-reference/api/application/transformers.md
                     -   Infrastructure:
                             -   "Infrastructure API": 04-reference/api/infrastructure.md
+                            -   "Adapters": 04-reference/api/infrastructure/adapters.md
+                            -   "Adapter Common": 04-reference/api/infrastructure/adapters-common.md
+                            -   "Observability": 04-reference/api/infrastructure/observability.md
+                            -   "Storage": 04-reference/api/infrastructure/storage.md
+                            -   "Unified HTTP Client": 04-reference/api/infrastructure/unified-http-client.md
                     -   Composition:
                             -   "Composition API": 04-reference/api/composition.md
+                            -   "Bootstrap": 04-reference/api/composition/bootstrap.md
+                            -   "Factories": 04-reference/api/composition/factories.md
+            -   "Extended Documentation": 00-project/extended-docs-index.md
             -   Schemas:
                     -   "Activity Schema": 04-reference/schemas/domain/chembl/activity-schema.md
                     -   "Assay Schema": 04-reference/schemas/domain/chembl/assay-schema.md

@@ -13,8 +13,9 @@ from scripts.engineering.qa.generate_architecture_dependency_map import (
 
 ROOT = Path(__file__).resolve().parents[2]
 
+pytestmark = [pytest.mark.architecture, pytest.mark.slow]
 
-@pytest.mark.architecture
+
 def test_import_graph_respects_layer_matrix() -> None:
     """The aggregated import graph must not contain layer-boundary violations."""
     snapshot = collect_dependency_snapshot(ROOT / "src" / "bioetl")

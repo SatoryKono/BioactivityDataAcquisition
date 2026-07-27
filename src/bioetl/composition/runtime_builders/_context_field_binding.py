@@ -3,15 +3,13 @@
 from __future__ import annotations
 
 from dataclasses import is_dataclass, replace
-from typing import TYPE_CHECKING, TypeVar, cast
+from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     from _typeshed import DataclassInstance
 
-ContextT = TypeVar("ContextT")
 
-
-def bind_context_fields(
+def bind_context_fields[ContextT](
     context: ContextT,
     *,
     updates: dict[str, object],

@@ -11,6 +11,8 @@ import pytest
 from scripts.engineering.qa.file_discovery import discover_files
 from tests.helpers.git_index_scan import git_grep_fixed
 
+pytestmark = [pytest.mark.architecture, pytest.mark.slow]
+
 ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = ROOT / "src"
 REGISTRY_PATH = (

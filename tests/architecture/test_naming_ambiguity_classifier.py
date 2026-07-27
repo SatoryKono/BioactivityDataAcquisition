@@ -9,7 +9,7 @@ from pathlib import Path
 import sys
 from types import ModuleType
 
-pytestmark = pytest.mark.architecture
+pytestmark = [pytest.mark.architecture, pytest.mark.slow]
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 

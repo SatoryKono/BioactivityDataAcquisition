@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-27T07:18:38.843314+00:00",
+  "generated_at": "2026-07-27T07:48:08.589814+00:00",
   "summary": {
-    "total_scripts": 548,
+    "total_scripts": 550,
     "status_counts": {
-      "active": 351,
-      "orphan": 1,
-      "supporting": 196
+      "active": 341,
+      "supporting": 208,
+      "temporary_diagnostic": 1
     },
     "reference_group_coverage": {
       "agents": 5,
@@ -14,7 +14,7 @@
       "ci": 65,
       "docs": 219,
       "other": 66,
-      "scripts": 430,
+      "scripts": 431,
       "skills": 16,
       "tests": 248
     }
@@ -7102,7 +7102,7 @@
     {
       "path": "scripts/docs/fixers/fix_links_auto.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -7118,12 +7118,16 @@
           "source_group": "scripts",
           "text": "\"fix-links-auto\": \"scripts.docs.fixers.fix_links_auto\","
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as an internal implementation module invoked through the canonical docs command surface; keep it supporting unless it becomes a documented standalone entrypoint."
     },
     {
       "path": "scripts/docs/fixers/fix_links_explicit.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -7139,12 +7143,16 @@
           "source_group": "scripts",
           "text": "\"fix-links-explicit\": \"scripts.docs.fixers.fix_links_explicit\","
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as an internal implementation module invoked through the canonical docs command surface; keep it supporting unless it becomes a documented standalone entrypoint."
     },
     {
       "path": "scripts/docs/fixers/link_warnings.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -7160,12 +7168,16 @@
           "source_group": "scripts",
           "text": "\"fix-link-warnings\": \"scripts.docs.fixers.link_warnings\","
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as an internal implementation module invoked through the canonical docs command surface; keep it supporting unless it becomes a documented standalone entrypoint."
     },
     {
       "path": "scripts/docs/fixers/repo_identity.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -7181,12 +7193,16 @@
           "source_group": "scripts",
           "text": "\"sync-repo-identity\": \"scripts.docs.fixers.repo_identity\","
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as an internal implementation module invoked through the canonical docs command surface; keep it supporting unless it becomes a documented standalone entrypoint."
     },
     {
       "path": "scripts/docs/fixers/sentence_audit.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -7202,7 +7218,11 @@
           "source_group": "scripts",
           "text": "\"audit-sentence\": \"scripts.docs.fixers.sentence_audit\","
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as an internal implementation module invoked through the canonical docs command surface; keep it supporting unless it becomes a documented standalone entrypoint."
     },
     {
       "path": "scripts/docs/generate_chembl_activity_field_matrix.py",
@@ -7320,7 +7340,7 @@
     {
       "path": "scripts/docs/matrix/build_matrix_dicts.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 3,
       "references": [
@@ -7342,12 +7362,16 @@
           "source_group": "tests",
           "text": "\"scripts/docs/matrix/build_matrix_dicts.py\","
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint."
     },
     {
       "path": "scripts/docs/matrix/enrich_normalization_details.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 3,
       "references": [
@@ -7369,12 +7393,16 @@
           "source_group": "tests",
           "text": "\"scripts/docs/matrix/enrich_normalization_details.py\","
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint."
     },
     {
       "path": "scripts/docs/matrix/export_structural_contract.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 3,
       "references": [
@@ -7396,12 +7424,16 @@
           "source_group": "tests",
           "text": "\"scripts/docs/matrix/export_structural_contract.py\","
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint."
     },
     {
       "path": "scripts/docs/matrix/filter_rows.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 3,
       "references": [
@@ -7423,12 +7455,16 @@
           "source_group": "tests",
           "text": "\"scripts/docs/matrix/filter_rows.py\","
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint."
     },
     {
       "path": "scripts/docs/matrix/generate_field_matrix.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 3,
       "references": [
@@ -7450,7 +7486,11 @@
           "source_group": "tests",
           "text": "\"scripts/docs/matrix/generate_field_matrix.py\","
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint."
     },
     {
       "path": "scripts/docs/matrix/generate_pipeline_normalization_matrix.py",
@@ -7487,7 +7527,7 @@
           "path": "docs/filters/inventory-baseline.csv",
           "line": 170,
           "source_group": "docs",
-          "text": ",,,,,,inventory,,surface,source_profile,extraction_params,config_source_profile_policy,scripts/docs/matrix/generate_pipeline_normalization_matrix.py,5,1686,Source-profile extraction policy,extraction_"
+          "text": ",,,,,,inventory,,surface,source_profile,extraction_params,config_source_profile_policy,scripts/docs/matrix/generate_pipeline_normalization_matrix.py,5,1688,Source-profile extraction policy,extraction_"
         },
         {
           "path": "docs/filters/inventory-baseline.json",
@@ -7499,7 +7539,7 @@
           "path": "docs/filters/inventory-baseline.md",
           "line": 127,
           "source_group": "docs",
-          "text": "| `config_source_profile_policy` | `extraction_params` | `scripts/docs/matrix/generate_pipeline_normalization_matrix.py` | 5 | 1686 | Source-profile extraction policy |"
+          "text": "| `config_source_profile_policy` | `extraction_params` | `scripts/docs/matrix/generate_pipeline_normalization_matrix.py` | 5 | 1688 | Source-profile extraction policy |"
         },
         {
           "path": "scripts/data_quality/inventory_silver_filters_migration.py",
@@ -7512,7 +7552,7 @@
     {
       "path": "scripts/docs/matrix/normalize_values.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 3,
       "references": [
@@ -7534,7 +7574,11 @@
           "source_group": "tests",
           "text": "\"scripts/docs/matrix/normalize_values.py\","
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a matrix-generation helper used by canonical docs tooling; keep it supporting unless it becomes a documented standalone entrypoint."
     },
     {
       "path": "scripts/docs/matrix/structural_contract.py",
@@ -8019,13 +8063,13 @@
       "references": [
         {
           "path": ".github/workflows/e2e-matrix-health.yml",
-          "line": 67,
+          "line": 68,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \\"
         },
         {
           "path": ".github/workflows/e2e-matrix-health.yml",
-          "line": 146,
+          "line": 147,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \\"
         },
@@ -8064,7 +8108,7 @@
       "references": [
         {
           "path": ".github/workflows/e2e-matrix-health.yml",
-          "line": 78,
+          "line": 79,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/check_e2e_rerun_stability.py \\"
         },
@@ -10052,7 +10096,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 287,
+      "reference_count": 289,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -10156,7 +10200,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 172,
+          "line": 175,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.assemble_observability_closure_evidence\""
         }
@@ -10327,6 +10371,21 @@
           "line": 87,
           "source_group": "scripts",
           "text": "\"check-constructor-args\": \"scripts.engineering.qa.check_constructor_args\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/engineering/qa/check_dashboard_performance_budgets.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 159,
+          "source_group": "scripts",
+          "text": "\"scripts.engineering.qa.check_dashboard_performance_budgets\""
         }
       ]
     },
@@ -10568,7 +10627,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 158,
+          "line": 161,
           "source_group": "scripts",
           "text": "\"check-prometheus-rules\": \"scripts.engineering.qa.check_prometheus_rules\","
         }
@@ -11305,14 +11364,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 29,
+      "reference_count": 28,
       "references": [
-        {
-          "path": ".github/workflows/architecture-docs-nightly.yml",
-          "line": 29,
-          "source_group": "ci",
-          "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --update"
-        },
         {
           "path": ".github/workflows/docs.yml",
           "line": 196,
@@ -11354,6 +11407,12 @@
           "line": 76,
           "source_group": "docs",
           "text": "./.venv/Scripts/python.exe scripts/engineering/qa/generate_architecture_dependency_map.py --check"
+        },
+        {
+          "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
+          "line": 77,
+          "source_group": "docs",
+          "text": "./.venv/Scripts/python.exe scripts/engineering/qa/generate_architecture_dependency_map.py --update"
         }
       ]
     },
@@ -11931,7 +11990,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 159,
+          "line": 162,
           "source_group": "scripts",
           "text": "\"report-dashboard-inventory\": \"scripts.engineering.qa.report_dashboard_inventory\","
         }
@@ -11952,7 +12011,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 163,
+          "line": 166,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_dashboard_panel_audit_matrix\""
         }
@@ -11973,7 +12032,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 161,
+          "line": 164,
           "source_group": "scripts",
           "text": "\"report-dashboard-promql-scope\": \"scripts.engineering.qa.report_dashboard_promql_scope\","
         }
@@ -11992,7 +12051,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 160,
+          "line": 163,
           "source_group": "scripts",
           "text": "\"report-dashboard-query-duplicates\": \"scripts.engineering.qa.report_dashboard_query_duplicates\","
         }
@@ -12376,7 +12435,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 166,
+          "line": 169,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_panel_title_inventory\""
         }
@@ -12775,7 +12834,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 169,
+          "line": 172,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.run_observability_closure_campaign\""
         },
@@ -12866,7 +12925,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 180,
+          "line": 183,
           "source_group": "scripts",
           "text": "\"run-tests\": module_command(\"scripts.engineering.qa.test_health\", \"run-tests\"),"
         }
@@ -15495,6 +15554,18 @@
       ]
     },
     {
+      "path": "scripts/ops/observability/grafana/apply_grafana_simplification_6570.py",
+      "type": "py",
+      "status": "temporary_diagnostic",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": [],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "temporary_diagnostic",
+      "review_by": "2026-08-31",
+      "next_step": "Remove after the bounded Grafana simplification rollout is applied and its issue-specific validation evidence is finalized."
+    },
+    {
       "path": "scripts/ops/observability/grafana/audit_live_grafana_panels.py",
       "type": "py",
       "status": "active",
@@ -15609,10 +15680,14 @@
     {
       "path": "scripts/ops/observability/grafana/publish_simplification_issue_status.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
-      "references": []
+      "references": [],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded manual publisher for the Grafana simplification issue series; keep GitHub writes opt-in and remove it after the tracked issue campaign is complete."
     },
     {
       "path": "scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1",

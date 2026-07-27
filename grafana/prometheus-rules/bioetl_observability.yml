@@ -10,8 +10,11 @@ groups:
       - record: bioetl_runtime_alert_condition_pipeline_runs_failed_15m
         expr: sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status="failed"}[15m])) > bool 0
 
+      - record: bioetl_runtime_error_rate_30m
+        expr: sum by (pipeline) (increase(bioetl_errors_total[30m])) / clamp_min(sum by (pipeline) (max_over_time(bioetl_records_processed_total{stage="bronze"}[30m])), 1)
+
       - record: bioetl_runtime_alert_condition_runtime_error_rate_high_30m
-        expr: ((sum by (pipeline) (increase(bioetl_errors_total[30m])) / clamp_min(sum by (pipeline) (max_over_time(bioetl_records_processed_total{stage="bronze"}[30m])), 1)) > bool 0.05) and (sum by (pipeline) (max_over_time(bioetl_records_processed_total{stage="bronze"}[30m])) >= bool 20)
+        expr: (bioetl_runtime_error_rate_30m > bool 0.05) and (sum by (pipeline) (max_over_time(bioetl_records_processed_total{stage="bronze"}[30m])) >= bool 20)
 
       - record: bioetl_runtime_alert_condition_record_flow_invariant_violated_15m
         expr: sum by (pipeline, run_type, invariant) (increase(bioetl_record_flow_invariants_total{status="violated"}[15m])) > bool 0
@@ -905,7 +908,7 @@ groups:
           severity: warning
         annotations:
           summary: "BioETL scrape endpoint is unavailable but Pushgateway metrics are present"
-          description: "The BioETL /metrics scrape endpoint is unavailable (up{job=\"bioetl\"} is zero or absent), but BioETL metrics are still being received via Pushgateway. This is expected when using Pushgateway instead of direct scraping."
+          description: 'The BioETL /metrics scrape endpoint is unavailable (up{job="bioetl"} is zero or absent), but BioETL metrics are still being received via Pushgateway. This is expected when using Pushgateway instead of direct scraping.'
           runbook: "docs/05-operations/runbooks/observability-checklist.md"
 
       - alert: BioETLPrometheusUnavailable

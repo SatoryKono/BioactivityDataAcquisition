@@ -19,7 +19,7 @@ from bioetl.infrastructure.quality import (
 )
 
 
-pytestmark = pytest.mark.architecture
+pytestmark = [pytest.mark.architecture, pytest.mark.slow]
 
 
 def test_exemption_registry_has_required_sections() -> None:

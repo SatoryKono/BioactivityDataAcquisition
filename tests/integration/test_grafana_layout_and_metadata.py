@@ -154,48 +154,62 @@ def test_runtime_redundant_guidance_panels_stay_out_of_root_layout() -> None:
 
 
 def test_runtime_first_screen_grid_uses_shared_panel_reference_sizes() -> None:
-    """Runtime First Action must share the identity/evidence row."""
+    """Runtime First Action stays on first paint; ID/Processed Records are lazy (#6573)."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
-    panels = {
+    root_panels = {
         panel.get("title"): panel
         for panel in dashboard.get("panels", [])
         if isinstance(panel.get("title"), str)
     }
+    all_panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if isinstance(panel.get("title"), str)
+    }
 
-    first_action_grid = panels["First Action"]["gridPos"]
-    id_grid = panels["ID"]["gridPos"]
-    processed_records_grid = panels["Processed Records"]["gridPos"]
-
-    assert (
-        first_action_grid["x"]
-        == processed_records_grid["x"] + processed_records_grid["w"]
+    first_action_grid = root_panels["First Action"]["gridPos"]
+    assert first_action_grid["y"] == 7
+    assert first_action_grid["w"] >= 8
+    assert "ID" not in root_panels
+    assert "Processed Records" not in root_panels
+    assert "ID" in all_panels
+    assert "Processed Records" in all_panels
+    assert any(
+        panel.get("type") == "row"
+        and "Run context" in str(panel.get("title") or "")
+        and panel.get("collapsed") is True
+        for panel in dashboard.get("panels", [])
     )
-    assert first_action_grid["w"] == 8
-    assert first_action_grid["h"] == processed_records_grid["h"]
-    assert first_action_grid["y"] == id_grid["y"] == processed_records_grid["y"]
-    assert first_action_grid["x"] + first_action_grid["w"] == 24
 
 
 def test_runtime_telemetry_gap_panel_keeps_readable_first_screen_width() -> None:
-    """Runtime datasource trust marker must stay legible on the first-screen evidence row."""
+    """Runtime trust marker stays on first paint; bulk failed-run KPI is collapsed (#6572)."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
-    panels = {
+    root = {
         panel.get("title"): panel
         for panel in dashboard.get("panels", [])
         if isinstance(panel.get("title"), str)
     }
+    all_panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if isinstance(panel.get("title"), str)
+    }
 
-    panel = panels["Runtime Telemetry Gap"]
+    panel = root["Runtime Telemetry Gap"]
     grid = panel.get("gridPos", {})
-    failed_runs_grid = panels["Failed Runs"]["gridPos"]
-
-    assert grid["y"] == 23
+    assert grid["y"] <= 23
     assert grid["w"] >= 4, (
         "Runtime Telemetry Gap must reserve readable width on the first screen"
     )
-    assert failed_runs_grid["y"] == grid["y"]
-    assert grid["x"] + grid["w"] == failed_runs_grid["x"]
-    assert failed_runs_grid["x"] + failed_runs_grid["w"] == 24
+    assert "Failed Runs" not in root
+    assert "Failed Runs" in all_panels
+    assert any(
+        p.get("type") == "row"
+        and "secondary" in str(p.get("title") or "").lower()
+        and p.get("collapsed") is True
+        for p in dashboard.get("panels", [])
+    )
 
 
 def test_control_plane_root_layout_keeps_range_evidence_and_rows_non_overlapping() -> (
@@ -244,13 +258,19 @@ def test_control_plane_row_sequence_matches_operator_flow() -> None:
             row_panels, key=lambda panel: panel.get("gridPos", {}).get("y", 0)
         )
     ]
-    assert row_pairs == [
+    expected_prefix = [
         (902, "Incident Drilldown: Replay Safety (Checkpoint / Replay)"),
         (901, "Incident Drilldown: Manifest / Ledger Integrity"),
         (903, "Incident Drilldown: Global Control-Plane Store Reliability"),
         (904, "Incident Drilldown: Audit / Lineage Completeness"),
         (905, "Identity evidence and remaining replay-safety signals"),
-    ], f"Control Plane row order/title drifted: {row_pairs}"
+    ]
+    assert row_pairs[: len(expected_prefix)] == expected_prefix, (
+        f"Control Plane row order/title drifted: {row_pairs}"
+    )
+    assert any("Run context" in str(title) for _, title in row_pairs), (
+        f"Control Plane must keep collapsed Run context row: {row_pairs}"
+    )
     assert all(panel.get("collapsed") is True for panel in row_panels)
 
 
@@ -620,7 +640,7 @@ def test_control_plane_exposes_terminal_events_and_telemetry_gap() -> None:
 
 
 def test_control_plane_first_screen_normalizes_workflow_pipeline_aliases() -> None:
-    """Current-state trust cards must resolve workflow_<pipeline> selectors back to entity scope."""
+    """Trust first-screen cards use thin pipeline selectors (#6574; no mega-expr glue)."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     panels = {
         panel.get("title"): panel
@@ -640,12 +660,11 @@ def test_control_plane_first_screen_normalizes_workflow_pipeline_aliases() -> No
             for target in panel.get("targets", [])
             if isinstance(target.get("expr"), str)
         )
-        assert "and on(pipeline)" in expr, (
-            f"{title!r} must filter current-state metrics through a normalized "
-            "pipeline selector"
+        assert 'pipeline=~"$pipeline"' in expr, (
+            f"{title!r} must scope current-state metrics by pipeline selector"
         )
-        assert 'label_replace(vector(1), "pipeline_raw", "$pipeline"' in expr
-        assert '"^(?:workflow_)?(.*)$"' in expr
+        assert len(expr) <= 200, f"{title!r} first-screen expr must stay <=200 chars"
+        assert "$__range" not in expr
 
 
 def test_control_plane_failure_ratio_thresholds_match_descriptions() -> None:
@@ -708,7 +727,7 @@ def test_dashboard_default_time_and_refresh_policy_by_uid_class() -> None:
         and isinstance(l2_uids, list)
     )
 
-    baseline = {"time_from": "now-12h", "refresh": "30s"}
+    baseline = {"time_from": "now-12h", "refresh": "60s"}
     explorer_baseline = {"time_from": "now-24h", "refresh": "1m"}
 
     for uid in [*l0_uids, *l1_uids]:
@@ -878,7 +897,7 @@ def test_dashboard_design_system_documents_metadata_policy() -> None:
         "`schemaVersion` MAY remain `30` or `39`",
         "`iteration` is optional",
         "`tags` MUST include the baseline suite tag `bioetl`",
-        "`refresh=30s`",
+        "`refresh=60s`",
         "`refresh=1m`",
     }
     missing = sorted(token for token in required_tokens if token not in text)

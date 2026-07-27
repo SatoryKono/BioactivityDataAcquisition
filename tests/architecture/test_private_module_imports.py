@@ -95,10 +95,18 @@ def _module_name_for_path(src_dir: Path, file_path: Path) -> str:
     return ".".join(rel_parts)
 
 
-def _collect_existing_modules(source_root: Path) -> frozenset[str]:
+def _collect_existing_modules_from_cache(
+    source_ast_cache: dict[Path, ast.Module],
+    *,
+    src_dir: Path,
+) -> frozenset[str]:
+    """Build the module set from the shared architecture AST index."""
     modules: set[str] = set()
-    for py_file in source_root.rglob("*.py"):
-        rel_path = py_file.relative_to(source_root.parent)
+    for py_file in source_ast_cache:
+        try:
+            rel_path = py_file.resolve().relative_to(src_dir.resolve())
+        except ValueError:
+            continue
         if py_file.name == "__init__.py":
             modules.add(".".join(rel_path.parent.parts))
             continue
@@ -165,16 +173,25 @@ def _is_private_module(module: str) -> bool:
 
 def _collect_external_private_imports(
     src_dir: Path,
+    source_ast_cache: dict[Path, ast.Module],
 ) -> dict[tuple[str, str], list[int]]:
     violations: dict[tuple[str, str], list[int]] = {}
-    source_root = src_dir / "bioetl"
-    existing_modules = _collect_existing_modules(source_root)
+    existing_modules = _collect_existing_modules_from_cache(
+        source_ast_cache,
+        src_dir=src_dir,
+    )
+    resolved_src = src_dir.resolve()
 
-    for py_file in sorted(source_root.rglob("*.py")):
+    for py_file, tree in sorted(
+        source_ast_cache.items(),
+        key=lambda item: item[0].as_posix(),
+    ):
+        try:
+            rel_path = py_file.resolve().relative_to(resolved_src).as_posix()
+        except ValueError:
+            continue
         importer_module = _module_name_for_path(src_dir, py_file)
         importer_owner = importer_module.rsplit(".", 1)[0]
-        tree = ast.parse(py_file.read_text(encoding="utf-8"))
-        rel_path = py_file.relative_to(src_dir).as_posix()
 
         for node in ast.walk(tree):
             for target_module in _iter_candidate_import_targets(
@@ -194,9 +211,13 @@ def _collect_external_private_imports(
 
 
 @pytest.mark.architecture
-def test_owner_aware_private_module_imports(src_dir: Path) -> None:
+@pytest.mark.slow
+def test_owner_aware_private_module_imports(
+    src_dir: Path,
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
     """Cross-owner imports of first-party private modules are forbidden in src/."""
-    violations = _collect_external_private_imports(src_dir)
+    violations = _collect_external_private_imports(src_dir, source_ast_cache)
     observed = frozenset(violations)
 
     if STRICT_PRIVATE_IMPORT_GUARD:

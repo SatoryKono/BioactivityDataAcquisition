@@ -11,7 +11,8 @@ from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 import pathlib
 import random
-from typing import Any
+from types import ModuleType
+from typing import Any, cast
 from collections.abc import Generator
 
 import pytest
@@ -51,7 +52,7 @@ def _disable_unused_geopandas_backend_on_windows() -> None:
     # Pandera probes its optional GeoPandas backend during every dtype check.
     # Resolving it from a cloud-synced virtualenv can trip the per-test timeout.
     if sys.platform.startswith("win") and "geopandas" not in sys.modules:
-        sys.modules["geopandas"] = None  # type: ignore[assignment]
+        sys.modules["geopandas"] = cast(ModuleType, None)
 
 
 _disable_unused_geopandas_backend_on_windows()

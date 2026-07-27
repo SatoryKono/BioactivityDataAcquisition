@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any, Protocol, cast
 
 
-pytestmark = pytest.mark.architecture
+pytestmark = [pytest.mark.architecture, pytest.mark.slow]
 
 
 def _normalize_catalog_payload(payload: dict[str, Any]) -> dict[str, Any]:
