@@ -32,6 +32,7 @@ class _PreSilverFinalizationFlowMixin:
 
         def compute_entity_id(
             self,
+            *,
             source_id: str | None,
             record: JsonDict,
         ) -> EntityID: ...
@@ -40,8 +41,8 @@ class _PreSilverFinalizationFlowMixin:
             self,
             context: PipelineContext,
             entity_id: str,
-            content_hash: str,
-            index: int,
+            normalized_content_hash: str,
+            record_index: int,
             business_data: JsonDict,
         ) -> GoldRecord: ...
 

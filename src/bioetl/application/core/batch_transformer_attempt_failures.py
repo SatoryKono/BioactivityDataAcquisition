@@ -50,7 +50,6 @@ class _FilteredOutHandlingContext:
 
 
 def _build_filtered_out_handling_context(
-    *,
     batch_metrics: BatchMetricsRecorderService,
     dq_config: DQConfig | None,
     raw_record: BronzeRecord,

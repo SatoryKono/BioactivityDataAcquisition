@@ -48,11 +48,11 @@ class _LedgerEnrichedSummary:
 class _ProcessedLedgerDiagnostics:
     """Structured ledger diagnostics inputs for final summary assembly."""
 
-    family_counter: Counter[str]
-    type_counter: Counter[str]
-    artifact_refs: list[dict[str, object]]
-    lineage_fragment_ids: set[str]
     dq_details: DQDetailsSummary
+    artifact_refs: list[dict[str, object]]
+    type_counter: Counter[str]
+    lineage_fragment_ids: set[str]
+    family_counter: Counter[str]
     missing_link_count: int
     correlation_anchor_gaps: dict[str, int]
     resume_diagnostics: dict[str, object] | None

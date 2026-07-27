@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 LEDGER_DIAGNOSTIC_CONTRACT_VERSION = "v1"
 
 
-class _RunLedgerCorrelationFieldsProtocol(Protocol):
+class RunLedgerCorrelationFieldsProtocol(Protocol):
     """Shared correlation defaults carried by ledger services and diagnostics."""
 
     pipeline_name: str | None
@@ -35,7 +35,7 @@ class _RunLedgerCorrelationFieldsProtocol(Protocol):
     effective_config_artifact_id: str | None
 
 
-class _RunLedgerDefaultsHost(_RunLedgerCorrelationFieldsProtocol, Protocol):
+class _RunLedgerDefaultsHost(RunLedgerCorrelationFieldsProtocol, Protocol):
     """Structural host for manifest-derived ledger correlation defaults."""
 
 
@@ -67,7 +67,7 @@ class _RunLedgerDiagnosticRequest:
 
 
 def build_run_ledger_diagnostic_request(
-    service: _RunLedgerCorrelationFieldsProtocol,
+    service: RunLedgerCorrelationFieldsProtocol,
     *,
     event_type: str,
     event_family: str,
