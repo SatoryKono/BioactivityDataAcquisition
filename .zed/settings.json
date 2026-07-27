@@ -1,4 +1,5 @@
 {
+  "$schema": "zed://schemas/settings",
   "format_on_save": "on",
   "tab_size": 5,
   "preferred_line_length": 88,

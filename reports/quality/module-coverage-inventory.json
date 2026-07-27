@@ -7433,7 +7433,7 @@
       "missing_lines": 0,
       "module": "bioetl.composition.bootstrap.runtime.observability_bundle",
       "path": "src/bioetl/composition/bootstrap/runtime/observability_bundle.py",
-      "source_lines": 122
+      "source_lines": 121
     },
     {
       "coverage_percent": 79.49,
@@ -30115,7 +30115,7 @@
       "missing_lines": 0,
       "module": "bioetl.composition.bootstrap.runtime.observability_bundle",
       "path": "src/bioetl/composition/bootstrap/runtime/observability_bundle.py",
-      "source_lines": 122
+      "source_lines": 121
     },
     {
       "coverage_percent": 79.49,
@@ -45370,7 +45370,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-13",
-  "source_tree_sha256": "bccb2f7a25db98551b32651ef1c24f252f560a5b36f990f68f9ec1a02e4c81a4",
+  "source_tree_sha256": "8bfb7a4dbe6ecf8956125db41eaa6991cd15dba1e3fec1ae89cf48ba4a9e3baf",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

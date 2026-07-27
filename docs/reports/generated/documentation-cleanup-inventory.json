@@ -49507,7 +49507,7 @@
     },
     {
       "canonical_successor": null,
-      "catalog_lifecycle": null,
+      "catalog_lifecycle": "supporting_context",
       "commit_policy": null,
       "declared_class": null,
       "declared_status": "working planning artifact (non-normative)",
@@ -49522,7 +49522,7 @@
       "github_issue_number": null,
       "github_issue_url": null,
       "inbound_links": 0,
-      "lifecycle": null,
+      "lifecycle": "supporting_context",
       "outbound_links": 0,
       "owner": "BioETL Team",
       "path": "docs/plans/mcp-phase3-hardening-issue-pack-2026-07-26.md",
@@ -49591,7 +49591,7 @@
     },
     {
       "canonical_successor": null,
-      "catalog_lifecycle": null,
+      "catalog_lifecycle": "supporting_context",
       "commit_policy": null,
       "declared_class": null,
       "declared_status": "working execution plan (non-normative)",
@@ -49606,7 +49606,7 @@
       "github_issue_number": null,
       "github_issue_url": null,
       "inbound_links": 0,
-      "lifecycle": null,
+      "lifecycle": "supporting_context",
       "outbound_links": 2,
       "owner": "BioETL Team",
       "path": "docs/plans/mcp-shared-plane-work-plan-2026-07-24.md",
@@ -86541,6 +86541,34 @@
       "lifecycle": "closeout_evidence",
       "outbound_links": 0,
       "owner": "BioETL Team",
+      "path": "reports/quality/tech-debt-issues-6159-6169-closeout.json",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".json",
+      "freshness": "retention-sensitive",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "closeout_evidence",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
       "path": "reports/quality/tech-debt-issues-6220-6229-closeout.json",
       "recommended_action": "keep",
       "root_doc_kind": null,
@@ -88010,7 +88038,7 @@
       "active_backlog": 1,
       "active_draft": 108,
       "active_quality_baseline": 20,
-      "closeout_evidence": 33,
+      "closeout_evidence": 34,
       "docs_reports_curated_entrypoint": 2,
       "docs_reports_curated_or_historical_report": 40,
       "docs_reports_generated_or_route_owned": 23,
@@ -88024,14 +88052,14 @@
       "live_issue_mirror": 4,
       "plans_governance_entrypoint": 1,
       "published_skill_reference_redirect": 36,
-      "supporting_context": 14,
+      "supporting_context": 16,
       "working_report": 50
     },
     "by_recommended_action": {
       "archive-after-github-state-check": 121,
       "archive-after-migration": 101,
       "generate-automatically": 738,
-      "keep": 2154,
+      "keep": 2155,
       "reconcile-with-github-state": 4
     },
     "by_section": {
@@ -88064,7 +88092,7 @@
       "plans": 18,
       "plugins": 4,
       "refactoring_plans": 1,
-      "reports": 1325,
+      "reports": 1326,
       "ru": 3,
       "security": 2,
       "tools": 1
@@ -88074,18 +88102,18 @@
       "Archived": 80,
       "Canonical": 63,
       "Generated": 738,
-      "Working": 279
+      "Working": 280
     },
     "by_surface_family": {
       "active": 1958,
       "archive": 80,
       "canonical": 63,
       "generated": 738,
-      "working": 279
+      "working": 280
     },
     "by_tracking_state": {
       "ignored_local": 1194,
-      "tracked": 1924
+      "tracked": 1925
     },
     "docs_reports_local_count": 1218,
     "duplicate_group_count": 2,
@@ -88106,8 +88134,8 @@
         "path": "docs/reports/evidence/project-legacy-compatibility-remediation/.quarantined-03-synthesis-corrupt-20260521"
       }
     ],
-    "total_doc_like": 3118,
+    "total_doc_like": 3119,
     "total_doc_like_ignored_local": 1194,
-    "total_doc_like_tracked": 1924
+    "total_doc_like_tracked": 1925
   }
 }
