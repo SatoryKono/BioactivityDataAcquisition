@@ -25,6 +25,24 @@ from bioetl.interfaces.cli.main import cli
 
 pytestmark = pytest.mark.unit
 
+# Mirrors _WORKFLOW_PUBLICATION_METRIC_NAMES (no high-cardinality grouping).
+_EXPECTED_WORKFLOW_PUBLICATION_METRIC_NAMES = (
+    "bioetl_workflow_expected",
+    "bioetl_workflow_pipeline_expected",
+    "bioetl_workflow_runs",
+    "bioetl_workflow_runs_total",
+    "bioetl_workflow_runs_created",
+    "bioetl_workflow_current_status",
+    "bioetl_workflow_step_events",
+    "bioetl_workflow_step_events_total",
+    "bioetl_workflow_step_events_created",
+    "bioetl_workflow_step_duration_seconds",
+    "bioetl_workflow_step_duration_seconds_bucket",
+    "bioetl_workflow_step_duration_seconds_count",
+    "bioetl_workflow_step_duration_seconds_sum",
+    "bioetl_workflow_step_duration_seconds_created",
+)
+
 
 @dataclass
 class _FakeWorkflowRunnerService:
@@ -569,10 +587,12 @@ def test_workflow_run_starts_metrics_server_and_publishes_metrics(
             "run_label": "bioetl",
             "pipeline_name": "chembl_activity",
             "run_type": "backfill",
-            "grouping_key_extra": {
-                "workflow_run_id": "00000000-0000-0000-0000-000000000111"
-            },
-            "metric_names": None,
+            "metric_names": _EXPECTED_WORKFLOW_PUBLICATION_METRIC_NAMES,
+        },
+        {
+            "run_label": "bioetl",
+            "pipeline_name": "chembl_activity",
+            "run_type": "backfill",
         },
     ]
 
@@ -706,25 +726,7 @@ def test_workflow_run_omits_pipeline_grouping_for_multi_pipeline_workflow(
             "run_label": "bioetl",
             "pipeline_name": None,
             "run_type": None,
-            "grouping_key_extra": {
-                "workflow_run_id": "00000000-0000-0000-0000-000000000111"
-            },
-            "metric_names": (
-                "bioetl_workflow_expected",
-                "bioetl_workflow_pipeline_expected",
-                "bioetl_workflow_runs",
-                "bioetl_workflow_runs_total",
-                "bioetl_workflow_runs_created",
-                "bioetl_workflow_current_status",
-                "bioetl_workflow_step_events",
-                "bioetl_workflow_step_events_total",
-                "bioetl_workflow_step_events_created",
-                "bioetl_workflow_step_duration_seconds",
-                "bioetl_workflow_step_duration_seconds_bucket",
-                "bioetl_workflow_step_duration_seconds_count",
-                "bioetl_workflow_step_duration_seconds_sum",
-                "bioetl_workflow_step_duration_seconds_created",
-            ),
+            "metric_names": _EXPECTED_WORKFLOW_PUBLICATION_METRIC_NAMES,
         },
     ]
 
@@ -812,10 +814,12 @@ def test_workflow_run_publishes_metrics_even_when_workflow_fails(
             "run_label": "bioetl",
             "pipeline_name": "chembl_activity",
             "run_type": "backfill",
-            "grouping_key_extra": {
-                "workflow_run_id": "00000000-0000-0000-0000-000000000222"
-            },
-            "metric_names": None,
+            "metric_names": _EXPECTED_WORKFLOW_PUBLICATION_METRIC_NAMES,
+        },
+        {
+            "run_label": "bioetl",
+            "pipeline_name": "chembl_activity",
+            "run_type": "backfill",
         },
     ]
 

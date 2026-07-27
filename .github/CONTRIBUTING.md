@@ -52,6 +52,12 @@ For the full local GitHub workflow, including worktrees, sync/rebase, PR creatio
 - Scorecard file-size values describe **exemption debt** from `configs/quality/architecture_metric_exemptions.yaml`.
 - Raw large-file counts like `>10 KB` or `>350 LOC` are **hotspot inventory**, not automatically blocking debt.
 - When you need the structural size snapshot, use the canonical command in [`scripts/engineering/README.md`](../scripts/engineering/README.md) and treat the result as analysis/evidence unless a policy explicitly says otherwise.
+- **Compatibility prevention (TD-10):** do not add transition shims, twin modules,
+  or package-root compatibility facades without inventory updates. Transition /
+  sunset / expired compat metrics and twin pairs must stay at **0**. Debt budgets
+  are shrink-only. See PR template section *Compatibility / tech-debt prevention*
+  and
+  [`docs/02-architecture/compatibility/infrastructure-config-package-root-sunset.md`](../docs/02-architecture/compatibility/infrastructure-config-package-root-sunset.md).
 
 ## Commit Format
 
