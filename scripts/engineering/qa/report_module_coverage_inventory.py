@@ -118,10 +118,15 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def _normalize_source_bytes(source_bytes: bytes) -> bytes:
+    """Normalize newlines so Windows/Linux working trees share digests."""
+    return source_bytes.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+
+
 def _sha256(path: Path) -> str | None:
     if not path.exists():
         return None
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    return hashlib.sha256(_normalize_source_bytes(path.read_bytes())).hexdigest()
 
 
 @dataclass(frozen=True, slots=True)
@@ -194,7 +199,7 @@ def _read_source_module_snapshots(
             continue
         relative = _repo_relative(path, repo_root)
         try:
-            raw_source = path.read_bytes()
+            raw_source = _normalize_source_bytes(path.read_bytes())
         except FileNotFoundError:
             # Shared-drive worktrees can briefly report a stale path as present and
             # then fail on open a few milliseconds later. Skip the vanished file so
@@ -227,7 +232,7 @@ def _read_source_module_content_digest(
             continue
         relative = _repo_relative(path, repo_root)
         try:
-            raw_source = path.read_bytes()
+            raw_source = _normalize_source_bytes(path.read_bytes())
         except FileNotFoundError:
             continue
         digest.update(relative.encode("utf-8"))

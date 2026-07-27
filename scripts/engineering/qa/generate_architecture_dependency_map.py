@@ -154,12 +154,17 @@ def _iter_modules(src_root: Path) -> Iterable[tuple[str, Path]]:
         yield _module_name_from_path(py_file, src_root), py_file
 
 
+def _normalize_source_bytes(source_bytes: bytes) -> bytes:
+    """Normalize newlines so Windows/Linux working trees share fingerprints."""
+    return source_bytes.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+
+
 def _read_source_module_snapshots_once(src_root: Path) -> list[_SourceModuleSnapshot]:
     """Read one full source-tree snapshot, skipping transiently vanished files."""
     snapshots: list[_SourceModuleSnapshot] = []
     for module_name, py_file in _iter_modules(src_root):
         try:
-            source_bytes = py_file.read_bytes()
+            source_bytes = _normalize_source_bytes(py_file.read_bytes())
         except FileNotFoundError:
             continue
         except (OSError, PermissionError):
