@@ -52,7 +52,7 @@ def test_live_audit_reviewed_specs_cover_semantically_sensitive_panels() -> None
     assert covered[("bioetl-overview-v2", 9301)] == "Processed Records"
     assert covered[("bioetl-runtime", 9403)] == "Processed Records"
     assert covered[("bioetl-provider-health-v2", 9403)] == "Processed Records"
-    assert covered[("bioetl-workflow-overview", 9403)] == "Processed Records"
+    assert ("bioetl-workflow-overview", 9403) not in covered
 
 
 def test_live_audit_classifies_prometheus_zero_and_nonzero_results() -> None:
@@ -834,9 +834,12 @@ def test_dashboard_json_has_no_backup_artifacts_in_active_dashboard_tree() -> No
 
 
 def test_alerts_slo_dashboard_is_first_class_shipped_surface() -> None:
-    dashboard = json.loads(
-        Path("grafana/dashboards/bioetl-alerts-slo.json").read_text(encoding="utf-8")
-    )
+    dashboard_path = Path("grafana/dashboards/bioetl-alerts-slo.json")
+    if not dashboard_path.is_file():
+        pytest.skip(
+            "bioetl-alerts-slo.json retired from shipping surface (epic #6647)"
+        )
+    dashboard = json.loads(dashboard_path.read_text(encoding="utf-8"))
     variables = {
         item.get("name") for item in dashboard.get("templating", {}).get("list", [])
     }
@@ -1003,11 +1006,12 @@ def test_run_id_independent_metric_panels_disclose_scope() -> None:
 
 
 def test_workflow_status_titles_make_selected_range_scope_visible() -> None:
-    dashboard = json.loads(
-        Path("grafana/dashboards/bioetl-workflow-overview.json").read_text(
-            encoding="utf-8"
+    dashboard_path = Path("grafana/dashboards/bioetl-workflow-overview.json")
+    if not dashboard_path.is_file():
+        pytest.skip(
+            "bioetl-workflow-overview.json retired from shipping surface (epic #6647)"
         )
-    )
+    dashboard = json.loads(dashboard_path.read_text(encoding="utf-8"))
     titles = {panel.get("id"): panel.get("title") for panel in dashboard["panels"]}
 
     assert titles[9401] == "Status"

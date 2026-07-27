@@ -63,31 +63,24 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
         request_collector: APIRequestCollector | None = None,
         response_mapper: PubChemResponseMapper | None = None,
         fetch_flow: PubChemFetchFlow | None = None,
-        *,
-        # Legacy keyword construction (unit tests / transitional callers).
-        logger: LoggerPort | None = None,
-        rate_limiter: TokenBucketRateLimiter | None = None,
-        circuit_breaker: CircuitBreakerGuard | None = None,
-        run_in_executor: Callable[..., Any] | None = None,
+        **legacy: object,
     ) -> None:
         """Initialize fetch strategies.
 
-        Preferred construction uses ``transport`` with keys ``logger``,
-        ``rate_limiter``, ``circuit_breaker``, and ``run_in_executor``.
-        Legacy keyword arguments remain accepted for unit fixtures.
+        Prefer ``transport`` with keys logger/rate_limiter/circuit_breaker/
+        run_in_executor. Transitional/unit callers may pass them as kwargs.
         """
         from typing import cast
 
         resolved_transport = dict(transport or {})
-        if logger is not None:
-            resolved_transport["logger"] = logger
-        if rate_limiter is not None:
-            resolved_transport["rate_limiter"] = rate_limiter
-        if circuit_breaker is not None:
-            resolved_transport["circuit_breaker"] = circuit_breaker
-        if run_in_executor is not None:
-            resolved_transport["run_in_executor"] = run_in_executor
-
+        for key in ("logger", "rate_limiter", "circuit_breaker", "run_in_executor"):
+            if key in legacy and legacy[key] is not None:
+                resolved_transport[key] = legacy.pop(key)
+        if legacy:
+            raise TypeError(
+                "PubChemFetchStrategies() got unexpected keyword argument(s): "
+                + ", ".join(sorted(str(k) for k in legacy))
+            )
         self._logger = cast("LoggerPort", resolved_transport["logger"])
         self._rate_limiter = cast(
             "TokenBucketRateLimiter", resolved_transport["rate_limiter"]

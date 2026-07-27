@@ -68,25 +68,28 @@ class BatchProcessingSupportService:
         run_id: RunID | None = None,
         domain_event_emitter: DomainEventEmitterProtocol | None = None,
         debug_export_service: DebugExportService | None = None,
-        # Legacy keyword construction (unit tests / transitional callers).
-        batch_metrics: BatchMetricsRecorderService | None = None,
-        transformer: BatchTransformer | None = None,
-        writer: BatchWriter | None = None,
-        tracing: BatchTracingManagerService | None = None,
-        quarantine_manager: QuarantineRuntimeService | None = None,
+        **legacy: object,
     ) -> None:
-        resolved_runtime = dict(batch_runtime or {})
-        if batch_metrics is not None:
-            resolved_runtime["batch_metrics"] = batch_metrics
-        if transformer is not None:
-            resolved_runtime["transformer"] = transformer
-        if writer is not None:
-            resolved_runtime["writer"] = writer
-        if tracing is not None:
-            resolved_runtime["tracing"] = tracing
-        if quarantine_manager is not None:
-            resolved_runtime["quarantine_manager"] = quarantine_manager
+        """Initialize batch processing support.
 
+        Prefer ``batch_runtime`` dict. Transitional/unit callers may pass
+        individual collaborators via keyword args.
+        """
+        resolved_runtime = dict(batch_runtime or {})
+        for key in (
+            "batch_metrics",
+            "transformer",
+            "writer",
+            "tracing",
+            "quarantine_manager",
+        ):
+            if key in legacy and legacy[key] is not None:
+                resolved_runtime[key] = legacy.pop(key)
+        if legacy:
+            raise TypeError(
+                "BatchProcessingSupportService() got unexpected keyword argument(s): "
+                + ", ".join(sorted(str(k) for k in legacy))
+            )
         self._services = services
         self._logger = logger
         self._batch_metrics = cast(

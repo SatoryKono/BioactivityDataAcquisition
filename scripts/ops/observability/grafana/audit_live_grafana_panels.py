@@ -279,8 +279,9 @@ REVIEWED_PANEL_SPECS: tuple[PanelAuditSpec, ...] = (
         dashboard_uid="bioetl-control-plane-v1",
         panel_id=892,
         title="Monitor: Checkpoint Freshness Lag (seconds)",
-        source_kind="http",
+        source_kind="prometheus",
         semantic_kind="freshness",
+        target_ref_id="A",
     ),
     PanelAuditSpec(
         dashboard_uid="bioetl-runtime",
@@ -296,13 +297,7 @@ REVIEWED_PANEL_SPECS: tuple[PanelAuditSpec, ...] = (
         source_kind="http",
         semantic_kind="http_table",
     ),
-    PanelAuditSpec(
-        dashboard_uid="bioetl-workflow-overview",
-        panel_id=9403,
-        title="Processed Records",
-        source_kind="http",
-        semantic_kind="http_table",
-    ),
+    # bioetl-workflow-overview removed from shipping surface (epic #6647).
 )
 
 

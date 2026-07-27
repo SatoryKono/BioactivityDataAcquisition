@@ -77,39 +77,32 @@ class BatchTransformer:
         config: RecordProcessorConfig,
         runtime: dict[str, object] | None = None,
         callbacks: dict[str, object] | None = None,
-        *,
         normalization_processor: RecordNormalizationProcessor | None = None,
         debug_export_service: DebugExportService | None = None,
-        # Legacy keyword construction (unit tests / transitional callers).
-        error_classifier: ErrorClassifier | None = None,
-        quarantine_manager: QuarantineRuntimeService | None = None,
-        batch_metrics: BatchMetricsRecorderService | None = None,
-        transform_callback: TransformCallback | None = None,
-        gold_filter_callback: GoldFilterCallback | None = None,
-        gold_transform_callback: GoldTransformCallback | None = None,
+        **legacy: object,
     ) -> None:
         """Initialize batch transformer.
 
-        Preferred construction uses ``runtime`` + ``callbacks`` dicts. Legacy
-        keyword arguments remain accepted for unit fixtures and transitional
-        call sites.
+        Prefer ``runtime`` + ``callbacks`` dicts. Transitional/unit callers may
+        pass individual collaborators via keyword args.
         """
         resolved_runtime = dict(runtime or {})
-        if error_classifier is not None:
-            resolved_runtime["error_classifier"] = error_classifier
-        if quarantine_manager is not None:
-            resolved_runtime["quarantine_manager"] = quarantine_manager
-        if batch_metrics is not None:
-            resolved_runtime["batch_metrics"] = batch_metrics
-
+        for key in ("error_classifier", "quarantine_manager", "batch_metrics"):
+            if key in legacy and legacy[key] is not None:
+                resolved_runtime[key] = legacy.pop(key)
         resolved_callbacks = dict(callbacks or {})
-        if transform_callback is not None:
-            resolved_callbacks["transform_callback"] = transform_callback
-        if gold_filter_callback is not None:
-            resolved_callbacks["gold_filter_callback"] = gold_filter_callback
-        if gold_transform_callback is not None:
-            resolved_callbacks["gold_transform_callback"] = gold_transform_callback
-
+        for key in (
+            "transform_callback",
+            "gold_filter_callback",
+            "gold_transform_callback",
+        ):
+            if key in legacy and legacy[key] is not None:
+                resolved_callbacks[key] = legacy.pop(key)
+        if legacy:
+            raise TypeError(
+                "BatchTransformer() got unexpected keyword argument(s): "
+                + ", ".join(sorted(str(k) for k in legacy))
+            )
         self._context = context
         self._config = config
         self._error_classifier = cast(

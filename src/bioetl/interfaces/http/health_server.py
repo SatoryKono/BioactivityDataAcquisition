@@ -61,70 +61,32 @@ class HealthServer(
         control_plane: HealthServerControlPlaneDeps | None = None,
         prometheus_base_url: str | None = None,
         logger: LoggerPort | None = None,
-        *,
-        # Legacy keyword construction (unit tests / transitional callers).
-        health_monitor: HealthMonitorPort | None = None,
-        quarantine_service: QuarantineService | None = None,
-        checkpoint_port: CheckpointPort | None = None,
-        run_manifest_port: RunManifestPort | None = None,
-        run_ledger_port: RunLedgerPort | None = None,
-        workflow_manifest_port: WorkflowManifestPort | None = None,
+        **legacy_ports: object,
     ) -> None:
         """Initialize health server.
 
-        Args:
-            host: IP address to bind the server to. Defaults to localhost.
-            port: TCP port to listen on. Defaults to 8081.
-            control_plane: Preferred collaborator bag for optional ports.
-            health_monitor: Optional monitor providing provider health states for
-                /health/ready and /health/providers endpoints. Endpoints report
-                healthy with no provider data when None.
-            quarantine_service: Optional read-only service for
-                /ops/quarantine/* explorer endpoints.
-            checkpoint_port: Optional read-only checkpoint storage used by
-                /ops/control-plane/checkpoint-freshness.
-            run_manifest_port: Optional read-only control-plane manifest catalog
-                used by /ops/control-plane/* selector endpoints.
-            run_ledger_port: Optional read-only control-plane run ledger used
-                to resolve latest terminal run completion for selector endpoints.
-            workflow_manifest_port: Optional read-only workflow manifest catalog used
-                to relate workflow selectors to child pipeline run manifests.
-            prometheus_base_url: Optional Prometheus HTTP API base URL for local
-                dashboard helper endpoints such as
-                /ops/observability/processed-records.
-                Defaults to http://localhost:9090.
-            logger: Optional LoggerPort for structured server event logging.
-                Server events are silently dropped when None.
+        Prefer ``control_plane``. Transitional/unit callers may still pass the
+        individual port kwargs, which are folded into the collaborator bag.
         """
-        base = control_plane or HealthServerControlPlaneDeps()
-        deps = HealthServerControlPlaneDeps(
-            health_monitor=(
-                health_monitor
-                if health_monitor is not None
-                else base.health_monitor
-            ),
-            quarantine_service=(
-                quarantine_service
-                if quarantine_service is not None
-                else base.quarantine_service
-            ),
-            checkpoint_port=(
-                checkpoint_port if checkpoint_port is not None else base.checkpoint_port
-            ),
-            run_manifest_port=(
-                run_manifest_port
-                if run_manifest_port is not None
-                else base.run_manifest_port
-            ),
-            run_ledger_port=(
-                run_ledger_port if run_ledger_port is not None else base.run_ledger_port
-            ),
-            workflow_manifest_port=(
-                workflow_manifest_port
-                if workflow_manifest_port is not None
-                else base.workflow_manifest_port
-            ),
-        )
+        if control_plane is None and legacy_ports:
+            allowed = {
+                "health_monitor",
+                "quarantine_service",
+                "checkpoint_port",
+                "run_manifest_port",
+                "run_ledger_port",
+                "workflow_manifest_port",
+            }
+            unknown = set(legacy_ports) - allowed
+            if unknown:
+                raise TypeError(
+                    "HealthServer() got unexpected keyword argument(s): "
+                    + ", ".join(sorted(str(k) for k in unknown))
+                )
+            control_plane = HealthServerControlPlaneDeps(
+                **{k: legacy_ports.get(k) for k in allowed}  # type: ignore[arg-type]
+            )
+        deps = control_plane or HealthServerControlPlaneDeps()
         self.host = host
         self.port = port
         self._health_monitor = deps.health_monitor
@@ -284,5 +246,6 @@ async def run_health_server(
 __all__ = [
     "HealthResponse",
     "HealthServer",
+    "HealthServerControlPlaneDeps",
     "run_health_server",
 ]
