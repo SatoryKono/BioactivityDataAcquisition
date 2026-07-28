@@ -1,0 +1,88 @@
+{
+  "published_at": "2026-07-28T06:45:00Z",
+  "owner": "SatoryKono",
+  "repo": "BioactivityDataAcquisition",
+  "wave": "architecture-refactoring-2026-07-28",
+  "prior_closed_waves": [
+    "arch-qa-6740-6748",
+    "arch-res-6749-6755",
+    "arch-cont-6757-6764"
+  ],
+  "independent_integral_score": 8.82,
+  "scorecard_integral_score": 9.11,
+  "issue_pack": ".github/ISSUES/ARCH-REF-2026-07-28-ISSUE-PACK.md",
+  "created": [
+    {
+      "code": "ARCH-REF-00",
+      "number": 6817,
+      "title": "[meta][architecture] Architecture refactoring epic (post ARCH-CONT audit, 2026-07-28)",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6817",
+      "state": "open",
+      "priority": "meta"
+    },
+    {
+      "code": "ARCH-REF-01",
+      "number": 6820,
+      "title": "[P0][governance] Stabilize quality artifacts / debt-governance gates on clean tree",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6820",
+      "state": "open",
+      "priority": "P0"
+    },
+    {
+      "code": "ARCH-REF-02",
+      "number": 6825,
+      "title": "[P0][architecture] Rehome application/services root modules; ratchet max 85 → ≤82",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6825",
+      "state": "open",
+      "priority": "P0"
+    },
+    {
+      "code": "ARCH-REF-03",
+      "number": 6824,
+      "title": "[P1][architecture] control_plane files_ge_250 8 → ≤6 (density extract)",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6824",
+      "state": "open",
+      "priority": "P1"
+    },
+    {
+      "code": "ARCH-REF-04",
+      "number": 6818,
+      "title": "[P1][architecture] control_plane max_internal_fan_in headroom 4/4 → ≤3",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6818",
+      "state": "open",
+      "priority": "P1"
+    },
+    {
+      "code": "ARCH-REF-05",
+      "number": 6822,
+      "title": "[P1][coverage] Branch coverage buffer + partial burn-down (800 residual modules)",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6822",
+      "state": "open",
+      "priority": "P1"
+    },
+    {
+      "code": "ARCH-REF-06",
+      "number": 6819,
+      "title": "[P2][architecture] Split composite/workflow orchestration density (~400 LOC blobs)",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6819",
+      "state": "open",
+      "priority": "P2"
+    },
+    {
+      "code": "ARCH-REF-07",
+      "number": 6821,
+      "title": "[P2][documentation] Docs SSOT sync: ADR-051/052 + REQUIREMENTS/NORMATIVE_SOURCES",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6821",
+      "state": "open",
+      "priority": "P2"
+    },
+    {
+      "code": "ARCH-REF-08",
+      "number": 6823,
+      "title": "[P3][architecture] Hold runtime_builders max_internal_fan_in ≤3 (non-growth)",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6823",
+      "state": "open",
+      "priority": "P3"
+    }
+  ]
+}

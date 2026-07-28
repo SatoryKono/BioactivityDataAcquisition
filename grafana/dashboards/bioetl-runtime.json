@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "L2 diagnostic runtime triage dashboard: where pipeline runtime loses time, fails, accumulates backlog, or raises warning/error conditions. Prometheus-first answer row first; logs/traces stay in a below-fold drilldown row for the optional tracing profile. Retry-vs-failure and batch-size distribution remain blocked pending bounded runtime instrumentation, so the dashboard only uses shipped metric families and recording rules.",
+  "description": "Pipeline Explorer dual layout. Unhealthy: blockers + taxonomy first. Healthy: empty blockers are VALID EMPTY, not a dead-end. Runtime Telemetry Gap is the metrics-trust/scrape health gate.",
   "editable": true,
   "graphTooltip": 1,
   "id": null,
@@ -208,13 +208,13 @@
       "title": "First Action",
       "description": "First operator action for Runtime triage. Uses current snapshot panels and the Runtime Telemetry Gap trust gate before selected-range evidence. WARN can come from runtime blockers or scrape/rule health; inspect the telemetry gap first when it is non-zero.",
       "gridPos": {
-        "h": 10,
-        "w": 14,
+        "h": 4,
+        "w": 24,
         "x": 0,
         "y": 7
       },
       "options": {
-        "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\">Read <em>Runtime Status</em> and <em>Runtime Telemetry Gap</em> first.<br>If telemetry gap is WARN/CRIT, fix scrape/rule health before trusting zero cards.<br>If status is CRIT, open <em>Inspect Active Runtime Blocker Detail</em>.<br>If status remains WARN after telemetry is clean, inspect terminal-run and stage-lag evidence.</div>",
+        "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.45\"><b>Unhealthy path:</b> Status → Runtime Blockers → Metrics trust (Telemetry Gap) → Detect/Localize rows.<br/><b>Healthy path:</b> Status OK + empty blockers (VALID EMPTY) → stage progression in secondary KPIs; do not chase empty giant tables.<br/><b>Next:</b> Trust for resume safety · DQ for quarantine · Provider for upstream.</div>",
         "mode": "html"
       },
       "links": [
@@ -299,9 +299,9 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 18,
-        "x": 5,
-        "y": 17
+        "w": 16,
+        "x": 0,
+        "y": 11
       },
       "id": 9101,
       "options": {
@@ -400,10 +400,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
-        "w": 4,
-        "x": 8,
-        "y": 23
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 17
       },
       "id": 220,
       "options": {
@@ -434,7 +434,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Current scrape/rule-health gap for BioETL runtime metrics over 10m. 0=OK/scraping and runtime dashboard recording rules evaluated recently, 1=WARN/no recent scrape, rule-evaluation failures, missing rule group, or stale rule group evaluation, >=2=CRIT/scrape plus rule-health gap, null=UNKNOWN/no scrape series. Time scope: current monitoring health, not selected-range runtime evidence. This is the first trust gate for the row below. If this is non-zero or UNKNOWN, treat zero count panels as inconclusive and open Prometheus Targets before debugging pipeline code.",
+      "description": "Metrics trust / scrape health gate (operator label). Internal name: Runtime Telemetry Gap. When elevated, green OK is impossible on Status — repair scrape/rules before reading latency/error cards. Current scrape/rule-health gap for BioETL runtime metrics over 10m. 0=OK/scraping and runtime dashboard recording rules evaluated recently, 1=WARN/no recent scrape, rule-evaluation failures, missing rule group, or stale rule group evaluation, >=2=CRIT/scrape plus rule-health gap, null=UNKNOWN/no scrape series. Time scope: current monitoring health, not selected-range runtime evidence. This is the first trust gate for the row below. If this is non-zero or UNKNOWN, treat zero count panels as inconclusive and open Prometheus Targets before debugging pipeline code.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -494,8 +494,8 @@
       "gridPos": {
         "h": 6,
         "w": 8,
-        "x": 12,
-        "y": 23
+        "x": 16,
+        "y": 11
       },
       "id": 9102,
       "options": {
@@ -537,7 +537,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 29
+        "y": 22
       },
       "panels": [
         {
@@ -957,7 +957,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 30
+        "y": 23
       },
       "panels": [
         {
@@ -1278,7 +1278,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 31
+        "y": 24
       },
       "panels": [
         {
@@ -2200,7 +2200,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 32
+        "y": 25
       },
       "id": 9992,
       "panels": [
@@ -2450,13 +2450,13 @@
     },
     {
       "type": "row",
-      "title": "Run context (identity / processed records)",
+      "title": "Run context (thin) → Run Explorer",
       "collapsed": true,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 33
+        "y": 26
       },
       "id": 9993,
       "panels": [
@@ -3056,7 +3056,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 34
+        "y": 27
       },
       "id": 9994,
       "panels": [
@@ -3220,7 +3220,9 @@
     "bioetl",
     "runtime",
     "ops",
-    "triage"
+    "triage",
+    "pipeline-explorer",
+    "dashboard-2.0"
   ],
   "templating": {
     "list": [

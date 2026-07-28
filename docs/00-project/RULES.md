@@ -2115,6 +2115,7 @@ fields:
 | [ADR-049](../02-architecture/decisions/ADR-049-context-aware-loc-target-policy.md) | Context-Aware LOC Target Policy | Accepted | 2026-05-26 |
 | [ADR-050](../02-architecture/decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md) | Silver Structural and Gold Semantic Filter Boundary | Accepted | 2026-06-15 |
 | [ADR-051](../02-architecture/decisions/ADR-051-quarantine-entry-aggregate-surface.md) | Quarantine Entry Aggregate Surface | Accepted | 2026-07-27 |
+| [ADR-052](../02-architecture/decisions/ADR-052-infrastructure-config-package-root-public-api.md) | Infrastructure Config Package-Root as Permanent External Public API | Accepted | 2026-07-28 |
 
 ## История Изменений (Changelog)
 

@@ -3,10 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from importlib import import_module
 
-from bioetl.application.services.control_plane.manifest.diagnostics import (
-    build_diagnostics_summary,
-)
 from bioetl.application.services.control_plane.replay import historical_corpus_models
 from bioetl.application.services.control_plane.replay.historical_certification_service import (
     HistoricalReplayCertificationResult,
@@ -38,6 +36,16 @@ from bioetl.domain.control_plane.reproducibility_profiles import (
     resolve_reproducibility_family_profile,
 )
 from bioetl.domain.ports import RunLedgerPort, RunManifestPort
+
+
+def _build_diagnostics_summary(*args: object, **kwargs: object) -> object:
+    """Lazy leaf import to avoid static diagnostics-package fan-in (ARCH-REF-04)."""
+    return import_module(
+        "bioetl.application.services.control_plane.manifest.diagnostics"
+    ).build_diagnostics_summary(*args, **kwargs)
+
+
+build_diagnostics_summary = _build_diagnostics_summary  # type: ignore[assignment]
 
 __all__ = [*historical_corpus_models.__all__, "HistoricalReplayCorpusService"]
 

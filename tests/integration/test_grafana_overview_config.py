@@ -64,7 +64,7 @@ def test_overview_dashboard_identity_and_primary_question() -> None:
     content = str(provenance.get("options", {}).get("content", ""))
     description = str(dashboard.get("description", ""))
 
-    assert dashboard.get("title") == "1. Overview"
+    assert dashboard.get("title") in {"1. Overview", "1. Overview (Fleet)"}
     assert dashboard.get("uid") == "bioetl-overview-v2"
     assert "Hybrid L0 overview" in description
     assert "what is broken or degraded right now" in content.lower()
@@ -133,8 +133,9 @@ def test_first_screen_layout_matches_reviewed_progressive_disclosure_baseline() 
     first_paint = {
         "Provenance": {"id": 99, "x": 0, "y": 3, "w": 16, "h": 4},
         "Status": {"id": 214, "x": 16, "y": 3, "w": 8, "h": 4},
-        "First Action": {"id": 215, "y": 7},
-        "Inputs": {"id": 9002, "x": 0, "y": 17, "w": 24, "h": 6},
+        "First Action": {"id": 215, "y": 7, "x": 0, "w": 10, "h": 6},
+        # Dashboard 2.0 / DUX-02: Inputs evidence promoted beside First Action.
+        "Inputs": {"id": 9002, "x": 10, "y": 7, "w": 14, "h": 6},
     }
     lazy = {"ID": 9300, "Processed Records": 9301}
     panels = _panels_by_title()

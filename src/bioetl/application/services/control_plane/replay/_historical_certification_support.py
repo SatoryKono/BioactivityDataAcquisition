@@ -9,9 +9,6 @@ from typing import cast
 from bioetl.application.services.control_plane.ledger.service import (
     RunLedgerService,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics import (
-    build_diagnostics_summary,
-)
 from bioetl.application.services.control_plane.replay._historical_certification_models import (
     HistoricalReplayCertificationProtocol as HistoricalReplayCertificationProtocol,
 )
@@ -24,9 +21,22 @@ from bioetl.application.services.control_plane.replay._historical_certification_
 from bioetl.application.services.control_plane.replay._historical_certification_models import (
     _source_key,
 )
+from bioetl.application.services.control_plane.replay._historical_certification_upstream import (
+    load_upstream_manifest,
+    validate_upstream_certification_state,
+    validate_upstream_presence,
+    validate_upstream_run_id_match,
+)
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.ports import RunLedgerPort, RunManifestPort
 from bioetl.domain.types import RunID
+
+__all__ = [
+    "HistoricalReplayCertificationProtocol",
+    "HistoricalReplayCertificationResult",
+    "HistoricalReplayCertificationResultAssembler",
+    "HistoricalReplayCertificationValidator",
+]
 
 
 @dataclass(frozen=True, slots=True)
@@ -87,13 +97,19 @@ class HistoricalReplayCertificationValidator:
         certifications: tuple[HistoricalReplayCertificationProtocol, ...],
     ) -> None:
         for certification in certifications:
-            self._validate_upstream_presence(certification)
-            upstream_manifest = self._load_upstream_manifest(certification)
-            self._validate_upstream_run_id_match(
+            validate_upstream_presence(certification)
+            upstream_manifest = load_upstream_manifest(
+                manifest_port=self.manifest_port,
+                certification=certification,
+            )
+            validate_upstream_run_id_match(
                 certification=certification,
                 upstream_manifest=upstream_manifest,
             )
-            self._validate_upstream_certification_state(upstream_manifest)
+            validate_upstream_certification_state(
+                ledger_port=self.ledger_port,
+                upstream_manifest=upstream_manifest,
+            )
 
     def resolve_certification_query(
         self,
@@ -185,55 +201,6 @@ class HistoricalReplayCertificationValidator:
             for key in expected
             if key not in actual and key[:3] not in actual_without_query
         )
-
-    @staticmethod
-    def _validate_upstream_presence(
-        certification: HistoricalReplayCertificationProtocol,
-    ) -> None:
-        upstream_manifest_id = str(certification.upstream_manifest_id or "").strip()
-        upstream_run_id = str(certification.upstream_run_id or "").strip()
-        if not upstream_manifest_id or not upstream_run_id:
-            raise ValueError(
-                "Composite certification requires upstream_run_id and upstream_manifest_id"
-            )
-
-    def _load_upstream_manifest(
-        self,
-        certification: HistoricalReplayCertificationProtocol,
-    ) -> RunManifest:
-        upstream_manifest_id = str(certification.upstream_manifest_id or "").strip()
-        upstream_manifest = self.manifest_port.get(upstream_manifest_id)
-        if upstream_manifest is None:
-            raise ValueError(
-                f"Upstream manifest {upstream_manifest_id!r} was not found"
-            )
-        return upstream_manifest
-
-    def _validate_upstream_run_id_match(
-        self,
-        *,
-        certification: HistoricalReplayCertificationProtocol,
-        upstream_manifest: RunManifest,
-    ) -> None:
-        upstream_run_id = str(certification.upstream_run_id or "").strip()
-        if upstream_run_id != str(upstream_manifest.run_id):
-            raise ValueError(
-                "Composite certification upstream_run_id does not match the persisted upstream manifest"
-            )
-
-    def _validate_upstream_certification_state(
-        self,
-        upstream_manifest: RunManifest,
-    ) -> None:
-        diagnostics = build_diagnostics_summary(
-            upstream_manifest,
-            tuple(self.ledger_port.list_entries(upstream_manifest.manifest_id)),
-        )
-        state = str(diagnostics.get("broader_historical_exact_replay_state") or "")
-        if state != "historical_source_replay_certified":
-            raise ValueError(
-                "Composite certification requires upstream historical_source_replay_certified lineage"
-            )
 
     @staticmethod
     def _find_matching_queries(

@@ -26,12 +26,15 @@ ______________________________________________________________________
 
 ## 1. Текущая карта дашбордов
 
-- `0. Control Plane` (`bioetl-control-plane-v1`) — deep-dive по reproducibility/control-plane paths.
-- `1. Overview` (`bioetl-overview-v2`) — L0 answer-first hub.
-- `2. Runtime` (`bioetl-runtime`) — runtime triage surface.
-- `3. Provider Health` (`bioetl-provider-health-v2`) — provider incident surface по health checks/retries.
-- `4. Data Quality` (`bioetl-dq-v2`) — DQ surface.
-- `5. Workflow` (`bioetl-workflow-overview`) — workflow run/step outcomes.
+Dashboard System 2.0 checklist: [operator-ux-v2.md](operator-ux-v2.md).
+
+- `0. Trust` (`bioetl-control-plane-v1`) — Control Plane Explorer / resume safety.
+- `1. Overview` (`bioetl-overview-v2`) — Fleet Command Center / L0 answer-first hub.
+- `2. Pipeline Diagnostics` (`bioetl-runtime`) — Pipeline Explorer.
+- `3. Provider Health` (`bioetl-provider-health-v2`) — Provider Explorer (population-first).
+- `4. Data Quality` (`bioetl-dq-v2`) — Data Trust Explorer (Now/Run/Range lanes).
+- `Incident Workspace` (`bioetl-incident-v1`) — thin suspects + alert entry.
+- `Run Explorer` (`bioetl-run-explorer-v1`) — single-run identity (HTTP only).
 
 ## 2. Когда расширять существующий дашборд, а когда создавать новый
 

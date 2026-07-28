@@ -31,6 +31,10 @@ Grafana dashboards в BioETL.
 1. Прочитай целевой JSON в `grafana/dashboards/`.
 1. Сверь текущую navigation model и operator role dashboard.
 1. Не выводи структуру dashboard по памяти, скриншотам или старым docs.
+1. **Dashboard 2.0 first-screen checklist** ([operator-ux-v2.md](operator-ux-v2.md)):
+   evidence before prose; ≤4 CTAs; empty-state taxonomy; preserve
+   `${__url_time_range}`; no `run_id` in PromQL; verdict ontology
+   ([verdict-ontology.md](verdict-ontology.md)).
 
 ## 2. Текущая модель shipped dashboards
 

@@ -130,13 +130,16 @@ def test_public_lazy_facade_rows_have_owner_importer_and_exit_metadata() -> None
     assert violations == []
 
 
-def test_infrastructure_config_root_facade_remains_bounded_compatibility_debt() -> None:
+def test_infrastructure_config_root_facade_is_permanent_external_public_api() -> None:
+    """ADR-052 promotes package-root to permanent external_public_api (#6790)."""
     row = _inventory_by_path()["src/bioetl/infrastructure/config/__init__.py"]
 
-    assert row["classification"] == "compatibility_debt"
+    assert row["classification"] == "external_public_api"
     assert row["owner"] == "@bioetl-config"
     assert row["allowed_importers"] == [
-        "external_compatibility_consumers",
+        "external_consumers",
         "tests",
     ]
-    assert "Collapse after first-party callers remain at zero" in row["exit_criteria"]
+    exit_criteria = str(row["exit_criteria"])
+    assert "ADR-052" in exit_criteria
+    assert "first-party src importers remain" in exit_criteria

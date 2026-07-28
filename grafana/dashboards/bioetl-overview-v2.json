@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "Hybrid L0 overview. Keeps aggregate answer-first triage for the selected workflow/pipeline/run_type scope, adds explicit scope/provenance/first-action header semantics, and exposes a control-plane-backed run_id selector without reintroducing run_id into Prometheus labels.",
+  "description": "Hybrid L0 overview / Fleet Command Center. First screen: status strip, compact First Action route, and Inputs evidence matrix above fold. Aggregate-first triage; exact run forensics via Run Explorer and Trust. run_id is HTTP identity context only — never a Prometheus label.",
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
@@ -28,7 +28,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 23
+        "y": 13
       },
       "panels": [
         {
@@ -399,8 +399,8 @@
       "type": "table",
       "title": "First Action",
       "gridPos": {
-        "h": 10,
-        "w": 14,
+        "h": 6,
+        "w": 10,
         "x": 0,
         "y": 7
       },
@@ -709,9 +709,9 @@
       "title": "Inputs",
       "gridPos": {
         "h": 6,
-        "w": 24,
-        "x": 0,
-        "y": 17
+        "w": 14,
+        "x": 10,
+        "y": 7
       },
       "datasource": {
         "type": "prometheus",
@@ -952,7 +952,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 24
+        "y": 14
       },
       "collapsed": true,
       "panels": [
@@ -1245,7 +1245,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 25
+        "y": 15
       },
       "collapsed": true,
       "panels": [
@@ -1527,7 +1527,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 26
+        "y": 16
       },
       "description": "Optional per-subsystem mirrors, raw metric starting points, and cross-dashboard handoffs retained for one-expand drilldown after the deviation-first Inputs matrix identifies a domain. These repeated cards do not compete with the first-level verdict, impact, scope, or action path.",
       "panels": [
@@ -2609,13 +2609,13 @@
     },
     {
       "type": "row",
-      "title": "Run context (identity / processed records)",
+      "title": "Run context (thin) → Run Explorer",
       "collapsed": true,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 27
+        "y": 17
       },
       "id": 9602,
       "panels": [
@@ -3205,7 +3205,8 @@
             }
           ]
         }
-      ]
+      ],
+      "description": "Deep single-run identity lives on Run Explorer (uid bioetl-run-explorer-v1). Keep this row collapsed."
     }
   ],
   "refresh": "60s",
@@ -3217,7 +3218,9 @@
     "pipeline",
     "v3-baseline",
     "hybrid-overview",
-    "answer-first"
+    "answer-first",
+    "fleet",
+    "dashboard-2.0"
   ],
   "templating": {
     "list": [

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-27T16:21:08.672375+00:00",
+  "generated_at": "2026-07-28T07:07:44.183891+00:00",
   "summary": {
     "total_scripts": 532,
     "status_counts": {
@@ -12,7 +12,7 @@
       "build": 12,
       "ci": 64,
       "docs": 220,
-      "other": 66,
+      "other": 67,
       "scripts": 418,
       "skills": 16,
       "tests": 248
@@ -6820,7 +6820,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1412,
+          "line": 1414,
           "source_group": "docs",
           "text": "автоматические docs-проверки (`python -m scripts.docs check-links` и"
         },
@@ -8516,7 +8516,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1775,
+          "line": 1777,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.dev run-tests cov"
         },
@@ -11093,13 +11093,13 @@
       "references": [
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1510,
+          "line": 1512,
           "source_group": "docs",
           "text": "| **Файл:строки**      | Точная ссылка на код (`runner.py:116-123`)    |"
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1522,
+          "line": 1524,
           "source_group": "docs",
           "text": "- **Файл**: `runner.py:116-123` (175 строк, 9 методов)"
         },
@@ -11346,7 +11346,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1633,
+          "line": 1635,
           "source_group": "docs",
           "text": "- `python scripts/engineering/qa/generate_architecture_dependency_map.py --update`"
         },
@@ -12052,7 +12052,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
@@ -12065,12 +12065,6 @@
           "line": 117,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_domain_io_taint_inventory\""
-        },
-        {
-          "path": "scripts/engineering/qa/report_config_surface_backlog.py",
-          "line": 207,
-          "source_group": "scripts",
-          "text": "\"entries.scripts/engineering/qa/report_domain_io_taint_inventory.py\","
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
@@ -12564,7 +12558,7 @@
         },
         {
           "path": "tests/architecture/test_test_matrix_lane_policy.py",
-          "line": 332,
+          "line": 333,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/run_architecture_audit_read_only.py\""
         }
@@ -13089,7 +13083,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 80,
+      "reference_count": 81,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-016-Enforce-Zero-Reference-Script-Governance.md",
@@ -13320,7 +13314,7 @@
         },
         {
           "path": "docs/05-operations/runbooks/incident-response.md",
-          "line": 107,
+          "line": 117,
           "source_group": "docs",
           "text": "2. Replace failing references with vetted pinned SHAs from CI runtime policy (see `scripts/engineering/repo/check_github_actions_runtime_policy.py`)."
         },
@@ -13356,7 +13350,7 @@
       "references": [
         {
           "path": "docs/05-operations/verification/docker-helper-root-relocation-audit.md",
-          "line": 105,
+          "line": 118,
           "source_group": "docs",
           "text": "python3 scripts/engineering/repo/check_root_governance_docs.py"
         },
@@ -14485,43 +14479,43 @@
         },
         {
           "path": "docs/05-operations/verification/docker-helper-root-relocation-audit.md",
-          "line": 39,
+          "line": 49,
           "source_group": "docs",
           "text": "| `docker-setup.ps1` | retired root Windows bootstrap helper | legacy operator docs, launcher instructions | `retired_root_script_2026_07_10` | `scripts/ops/docker-setup.ps1` command-compatible helper"
         },
         {
           "path": "docs/05-operations/verification/docker-helper-root-relocation-audit.md",
-          "line": 60,
+          "line": 73,
           "source_group": "docs",
           "text": "| `docker-setup.ps1` | retired root script; command parity retained in `scripts/ops/docker-setup.ps1` | Do not restore the root filename. |"
         },
         {
           "path": "docs/05-operations/verification/docker-helper-root-relocation-audit.md",
-          "line": 64,
+          "line": 77,
           "source_group": "docs",
           "text": "script filenames: legacy verbs are retained by `scripts/ops/docker-setup.ps1`"
         },
         {
           "path": "docs/05-operations/verification/docker-helper-root-relocation-audit.md",
-          "line": 74,
+          "line": 87,
           "source_group": "docs",
           "text": "| `check` | `scripts/ops/docker-setup.sh check` | `.\\scripts\\ops\\docker-setup.ps1 check` | retained non-mutating Docker/Compose check |"
         },
         {
           "path": "docs/05-operations/verification/docker-helper-root-relocation-audit.md",
-          "line": 75,
+          "line": 88,
           "source_group": "docs",
           "text": "| `build` | `scripts/ops/docker-setup.sh build` | `.\\scripts\\ops\\docker-setup.ps1 build` | retained `bioetl:latest` build from `Dockerfile.bioetl` |"
         },
         {
           "path": "docs/05-operations/verification/docker-helper-root-relocation-audit.md",
-          "line": 76,
+          "line": 89,
           "source_group": "docs",
           "text": "| `start` | `scripts/ops/docker-setup.sh start` | `.\\scripts\\ops\\docker-setup.ps1 start` | retained main stack start plus health check |"
         },
         {
           "path": "docs/05-operations/verification/docker-helper-root-relocation-audit.md",
-          "line": 77,
+          "line": 90,
           "source_group": "docs",
           "text": "| `start-full` | `scripts/ops/docker-setup.sh start-full` | `.\\scripts\\ops\\docker-setup.ps1 start-full` | retained image build, full helper stack start, and health check |"
         }
@@ -15374,7 +15368,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 124,
+          "line": 129,
           "source_group": "other",
           "text": "> `bash scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh`."
         }
@@ -15435,7 +15429,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 126,
+          "line": 131,
           "source_group": "other",
           "text": "> `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1`."
         }
@@ -15508,7 +15502,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 110,
+          "line": 115,
           "source_group": "other",
           "text": "> `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1`."
         },
@@ -15545,13 +15539,13 @@
         },
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 115,
+          "line": 129,
           "source_group": "docs",
           "text": "- On Linux, `setup_grafana_screenshot_runtime.sh` is the canonical bootstrap"
         },
         {
           "path": "grafana/README.md",
-          "line": 101,
+          "line": 106,
           "source_group": "other",
           "text": "> `bash scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh`."
         },
@@ -15600,7 +15594,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 1693,
+          "line": 1698,
           "source_group": "other",
           "text": "powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/start_quarantine_explorer.ps1"
         }
@@ -16375,13 +16369,31 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 5,
       "references": [
+        {
+          "path": ".github/ISSUES/RH4-2026-07-28-ROOT-HYGIENE-POST-RH3-RESIDUAL-ISSUE-PACK.md",
+          "line": 35,
+          "source_group": "other",
+          "text": "| `logs/docker-watchdog/` | **Writer found:** `scripts/ops/runtime/docker/watchdog-docker-stable.ps1` default `$StateDir = Join-Path $Root 'logs\\docker-watchdog'` |"
+        },
+        {
+          "path": ".github/ISSUES/RH4-2026-07-28-ROOT-HYGIENE-POST-RH3-RESIDUAL-ISSUE-PACK.md",
+          "line": 71,
+          "source_group": "other",
+          "text": "- `scripts/ops/runtime/docker/watchdog-docker-stable.ps1`"
+        },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
           "line": 95,
           "source_group": "docs",
           "text": "| Docker host harden + watchdog (Windows)     | `scripts/ops/runtime/docker/harden-desktop-host.ps1` / `watchdog-docker-stable.ps1` |"
+        },
+        {
+          "path": "docs/00-project/governance/root-local-clutter-cleanup.md",
+          "line": 60,
+          "source_group": "docs",
+          "text": "- `scripts/ops/runtime/docker/watchdog-docker-stable.ps1` defaults state/logs to"
         },
         {
           "path": "scripts/ops/runtime/docker/harden-desktop-host.ps1",

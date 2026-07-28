@@ -139,6 +139,8 @@ dashboards:
     owner_route: docs/05-operations/runbooks/dq-failure-investigation.md
     family: primary
     navigation_id: 4
+    target_workspace: Data Trust Explorer
+    ux_phase: dux-06
     data_sources:
       - Prometheus
       - BioETL Ops HTTP
@@ -167,3 +169,53 @@ dashboards:
       - run_id
       - run_type
       - stage
+
+  - uid: bioetl-incident-v1
+    title: Incident Workspace
+    owner: "@bioetl-observability"
+    owner_route: docs/05-operations/runbooks/incident-response.md
+    family: adjunct
+    navigation_id: null
+    target_workspace: Incident Workspace
+    ux_phase: dux-08
+    data_sources:
+      - Prometheus
+      - Grafana
+    panel_count: 6
+    key_panels:
+      - id: 2002
+        title: Ranked Suspects
+        type: table
+        description: Population-first suspects from existing cause/blocker/reason rules
+    selector_variables:
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
+      - provider
+  - uid: bioetl-run-explorer-v1
+    title: Run Explorer
+    owner: "@bioetl-observability"
+    owner_route: docs/05-operations/runbooks/run-manifest-inspection.md
+    family: adjunct
+    navigation_id: null
+    target_workspace: Run Explorer
+    ux_phase: dux-10
+    data_sources:
+      - BioETL Ops HTTP
+      - Grafana
+    panel_count: 5
+    key_panels:
+      - id: 9402
+        title: ID
+        type: table
+        description: HTTP identity; run_id never a Prometheus label
+      - id: 9403
+        title: Processed Records
+        type: table
+        description: Bronze/Silver/Gold accounting via Ops HTTP
+    selector_variables:
+      - workflow
+      - pipeline
+      - run_type
+      - run_id

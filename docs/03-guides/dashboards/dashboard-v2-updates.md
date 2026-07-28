@@ -7,7 +7,8 @@ ______________________________________________________________________
 `docs/reports/dashboard-ux-checks/YYYY-MM-DD.md`.
 
 Latest dashboard UX artifact for current shipped JSON changes:
-`docs/reports/dashboard-ux-checks/2026-05-19.md`
+`docs/reports/dashboard-ux-checks/2026-07-28.md`
+(prior baseline: `docs/reports/dashboard-ux-checks/2026-05-19.md`)
 
 
 Version: 1.0.2
@@ -33,6 +34,15 @@ ______________________________________________________________________
 Этот changelog описывает **текущий shipped contract**, а не historical patch
 notes. Если prose ниже расходится с JSON, править нужно prose, потому что JSON
 остаётся SSOT.
+
+## Dashboard System 2.0 (2026-07-28, epic #6800)
+
+- Operator UX foundation: `operator-ux-v2.md`, `verdict-ontology.md`, `migration-map-v2.md`.
+- First-screen evidence density on primary five boards; shared context shell retained.
+- Adjunct workspaces: `bioetl-incident-v1`, `bioetl-run-explorer-v1` (portfolio = 7).
+- Runtime Telemetry Gap remains the scrape/metrics-trust gate title (operator wording in description).
+- First Action panels remain the primary CTA surface across boards.
+- Provider causes use existing `bioetl_provider_current_cause` recording rules.
 
 ## Проверенные дашборды
 

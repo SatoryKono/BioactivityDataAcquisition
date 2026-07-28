@@ -748,7 +748,7 @@ jobs:
                     # Uses HYPOTHESIS_PROFILE=fast for minimal property-based examples
                     HYPOTHESIS_PROFILE=fast \
                     uv run --frozen --no-build pytest tests/unit/ \
-                      -m "not repo_backed and not slow and not benchmark and not memory" \
+                      -m "not repo_backed and not subprocess_backed and not slow and not benchmark and not memory" \
                       -n auto --dist loadscope --max-worker-restart=0 \
                       -q --tb=short \
                       --junitxml=reports/test-telemetry/junit-fast.xml

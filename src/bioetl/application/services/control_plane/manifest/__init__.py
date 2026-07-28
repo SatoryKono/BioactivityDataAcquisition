@@ -1,22 +1,13 @@
-"""Run-manifest application service seam."""
+"""Run-manifest application service seam.
+
+Public names are resolved lazily so this package facade does not contribute
+static fan-in to leaf collaborator modules (ARCH-REF-04 / #6818).
+"""
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.manifest.inspection_models import (
-    RunManifestDiffEntry,
-    RunManifestDiffResult,
-    RunManifestInspectionResult,
-    RunManifestVerifyResult,
-)
-from bioetl.application.services.control_plane.manifest.inspection_service import (
-    RunManifestInspectionService,
-)
-from bioetl.application.services.control_plane.manifest.models import (
-    RunManifestCreateSpec,
-)
-from bioetl.application.services.control_plane.manifest.service import (
-    RunManifestService,
-)
+from importlib import import_module
+from typing import Any
 
 __all__ = [
     "RunManifestCreateSpec",
@@ -27,3 +18,45 @@ __all__ = [
     "RunManifestService",
     "RunManifestVerifyResult",
 ]
+
+_EXPORTS: dict[str, tuple[str, str]] = {
+    "RunManifestCreateSpec": (
+        "bioetl.application.services.control_plane.manifest.models",
+        "RunManifestCreateSpec",
+    ),
+    "RunManifestDiffEntry": (
+        "bioetl.application.services.control_plane.manifest.inspection_models",
+        "RunManifestDiffEntry",
+    ),
+    "RunManifestDiffResult": (
+        "bioetl.application.services.control_plane.manifest.inspection_models",
+        "RunManifestDiffResult",
+    ),
+    "RunManifestInspectionResult": (
+        "bioetl.application.services.control_plane.manifest.inspection_models",
+        "RunManifestInspectionResult",
+    ),
+    "RunManifestVerifyResult": (
+        "bioetl.application.services.control_plane.manifest.inspection_models",
+        "RunManifestVerifyResult",
+    ),
+    "RunManifestInspectionService": (
+        "bioetl.application.services.control_plane.manifest.inspection_service",
+        "RunManifestInspectionService",
+    ),
+    "RunManifestService": (
+        "bioetl.application.services.control_plane.manifest.service",
+        "RunManifestService",
+    ),
+}
+
+
+def __getattr__(name: str) -> Any:
+    """Lazily resolve public run-manifest symbols."""
+    target = _EXPORTS.get(name)
+    if target is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    module_name, attr = target
+    value = getattr(import_module(module_name), attr)
+    globals()[name] = value
+    return value

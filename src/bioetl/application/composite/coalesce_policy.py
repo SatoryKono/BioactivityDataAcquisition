@@ -11,12 +11,14 @@ from bioetl.application.composite._coalesce_policy_support import (
     build_field_groups,
     can_coalesce,
     coalesce_and_drop,
-    coalesce_by_latest_timestamp,
     compatible_columns,
     extract_field_from_qualified,
     resolve_priority_provider,
     seed_prefix,
     sort_columns,
+)
+from bioetl.application.composite._coalesce_timestamp_support import (
+    coalesce_by_latest_timestamp,
 )
 from bioetl.application.composite.column_service import ColumnOrderService
 

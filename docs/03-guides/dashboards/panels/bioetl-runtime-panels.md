@@ -203,7 +203,7 @@ snapshot evidence, a snapshot denominator, or a presence gate. Event deltas use
 - **Purpose:** Group secondary selected-range runtime evidence.
 - **Data sources:** Prometheus range evidence from the nested panels.
 
-### 39. Run context (identity / processed records)
+### 39. Run context (thin) → Run Explorer
 - **Type:** Row
 - **Purpose:** Group selected-run identity and processed-record HTTP evidence.
 - **Data sources:** BioETL Ops HTTP.

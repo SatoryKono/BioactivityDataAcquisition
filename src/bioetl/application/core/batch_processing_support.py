@@ -6,29 +6,26 @@ from collections.abc import Awaitable, Callable
 from datetime import datetime
 from typing import TYPE_CHECKING, cast
 
+from bioetl.application.core._batch_processing_layer_write_support import (
+    write_silver_then_gold,
+)
 from bioetl.application.core._batch_processing_metrics_support import (
     track_bronze_write_metrics,
-    track_storage_write_metrics,
     track_transform_result_metrics,
 )
 from bioetl.application.core._batch_write_support import (
     emit_batch_written,
     emit_domain_event,
-    safe_write_layer,
 )
 from bioetl.application.core.batch_processing_runtime import (
     execute_transform_with_span,
     execute_with_layer_span,
     get_source_metadata,
 )
-from bioetl.application.core.batch_runtime_failure_policy import (
-    OPERATION_ERRORS as _OPERATION_ERRORS,
-)
 from bioetl.application.core.batch_transformer import TransformResult
 from bioetl.domain.aggregates.events import DomainEvent
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.types import BatchID, BronzeRecord, RunID
-from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 __all__ = ["BatchProcessingSupportService"]
 if TYPE_CHECKING:
@@ -178,44 +175,18 @@ class BatchProcessingSupportService:
 
         The historical method name is preserved for caller compatibility.
         """
-        silver_result: SilverWriteResult | None = None
-        if transform_result.silver_records:
-            silver_result = cast(
-                "SilverWriteResult | None",
-                await safe_write_layer(
-                    execute_with_span=self._execute_with_span,
-                    writer=self._writer,
-                    quarantine_manager=self._quarantine_manager,
-                    logger=self._logger,
-                    run_id=self._run_id,
-                    domain_event_emitter=self._domain_event_emitter,
-                    layer="silver",
-                    records=transform_result.silver_records,
-                    batch_id=batch_id,
-                    ingestion_ts=ingestion_ts,
-                    bronze_refs=bronze_refs,
-                    operation_errors=_OPERATION_ERRORS,
-                ),
-            )
-        if transform_result.gold_records:
-            await safe_write_layer(
-                execute_with_span=self._execute_with_span,
-                writer=self._writer,
-                quarantine_manager=self._quarantine_manager,
-                logger=self._logger,
-                run_id=self._run_id,
-                domain_event_emitter=self._domain_event_emitter,
-                layer="gold",
-                records=transform_result.gold_records,
-                batch_id=batch_id,
-                ingestion_ts=ingestion_ts,
-                bronze_refs=None,
-                silver_refs=[silver_result] if silver_result is not None else None,
-                operation_errors=_OPERATION_ERRORS,
-            )
-        track_storage_write_metrics(
-            self._batch_metrics,
+        await write_silver_then_gold(
+            execute_with_span=self._execute_with_span,
+            writer=self._writer,
+            quarantine_manager=self._quarantine_manager,
+            logger=self._logger,
+            batch_metrics=self._batch_metrics,
+            run_id=self._run_id,
+            domain_event_emitter=self._domain_event_emitter,
             transform_result=transform_result,
+            batch_id=batch_id,
+            ingestion_ts=ingestion_ts,
+            bronze_refs=bronze_refs,
         )
 
     async def _execute_with_span(

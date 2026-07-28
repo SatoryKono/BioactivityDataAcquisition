@@ -86,7 +86,7 @@ _LAZY_COMMAND_SPECS: dict[str, tuple[str, str, str]] = {
         "Inspect and manage local runtime locks",
     ),
     "maintenance": (
-        "bioetl.interfaces.cli.commands.maintenance",
+        "bioetl.interfaces.cli.commands.domains.maintenance.command_group",
         "maintenance",
         "Maintenance operations",
     ),

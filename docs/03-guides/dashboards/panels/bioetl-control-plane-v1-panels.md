@@ -106,11 +106,11 @@ JSON is the source of truth.
 | 9409 | Inspect: P2 Forensic Anchors | table | Quarantine Explorer | Compact secondary forensic anchors for deeper analysis. | shared shell | Incident handoff table. |
 | 139 | Review: Remaining Replay-Safety Signals | text | Static | Static reminder of residual replay-safety signals to inspect after core blockers. | shared shell | No thresholds; review checklist only. |
 
-### Run context (identity / processed records)
+### Run context (thin) → Run Explorer
 
 | ID | Title | Type | Datasource | Query / purpose | Variables | Thresholds / drilldown |
 | --- | --- | --- | --- | --- | --- | --- |
-| 9412 | Run context (identity / processed records) | row | Static | Collapsed selected-run identity and processed-record evidence. | shared shell | Groups HTTP-backed evidence; no direct threshold. |
+| 9412 | Run context (thin) → Run Explorer | row | Static | Collapsed selected-run identity and processed-record evidence. | shared shell | Groups HTTP-backed evidence; no direct threshold. |
 
 ## PromQL Formula Anchors
 

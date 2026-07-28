@@ -152,6 +152,7 @@ nav:
                     -   "Docs Publication Policy": 00-project/governance/06-doc-publication-policy.md
                     -   "Docs Navigation Policy": 00-project/governance/07-doc-nav-policy.md
                     -   "Debt Ownership Playbook": 00-project/governance/08-debt-ownership-playbook.md
+                    -   "Root Local Clutter Cleanup": 00-project/governance/root-local-clutter-cleanup.md
                     -   "Governance Sync Audit 2026-06-25": 00-project/governance/governance-sync-audit-2026-06-25.md
                     -   "Qodo Governance Mirror": 00-project/governance/qodo/README.md
     -   Architecture:
@@ -235,6 +236,10 @@ nav:
                     -   "ADR-048 Domain Schema Boundary and Runtime Pandera Compatibility": 02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md
                     -   "ADR-049 Context-Aware LOC Target Policy": 02-architecture/decisions/ADR-049-context-aware-loc-target-policy.md
                     -   "ADR-050 Silver Structural and Gold Semantic Filter Boundary": 02-architecture/decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md
+                    -   "ADR-051 Quarantine Entry Aggregate Surface": 02-architecture/decisions/ADR-051-quarantine-entry-aggregate-surface.md
+                    -   "ADR-052 Infrastructure Config Package Root Public API": 02-architecture/decisions/ADR-052-infrastructure-config-package-root-public-api.md
+                    -   "Infrastructure Config Package Root Sunset": 02-architecture/compatibility/infrastructure-config-package-root-sunset.md
+                    -   "Public API Freeze": 00-project/ai/agents/guides/PUBLIC_API_FREEZE.md
                     -   "Quality Gates Stabilization Notes": 02-architecture/decisions/notes/2026-03-04-quality-gates-stabilization.md
     -   Guides:
             -   "Overview": 03-guides/index.md

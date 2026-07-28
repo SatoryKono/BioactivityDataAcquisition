@@ -13,26 +13,31 @@
 >
 > Monitoring stack is **opt-in only** (`make docker-start-monitoring`).
 >
-> **Dashboards: 5 JSON** — `bioetl-control-plane-v1`, `bioetl-overview-v2`,
-> `bioetl-runtime`, `bioetl-provider-health-v2`, `bioetl-dq-v2`,
-> `retired: workflow/alerts merged.
+> **Dashboards: 7 JSON** — primary `bioetl-control-plane-v1`, `bioetl-overview-v2`,
+> `bioetl-runtime`, `bioetl-provider-health-v2`, `bioetl-dq-v2`, plus
+> `bioetl-incident-v1` and `bioetl-run-explorer-v1` (Dashboard System 2.0 / #6800).
+> Retired: workflow/alerts merged into Runtime/Overview bands.
+>
+> **Dashboard System 2.0 track:** `docs/03-guides/dashboards/operator-ux-v2.md`.
 
 ______________________________________________________________________
 
 
-## Shipped dashboard surface (2026-07-27)
+## Shipped dashboard surface (2026-07-28)
 
-Exactly **five** primary dashboards under `grafana/dashboards/`:
+**Seven** dashboards under `grafana/dashboards/` (portfolio cap ≤7):
 
-0. `bioetl-control-plane-v1` — Trust / Control Plane  
-1. `bioetl-overview-v2` — Overview  
-2. `bioetl-runtime` — Pipeline Diagnostics (includes retired Workflow band evidence)  
-3. `bioetl-provider-health-v2` — Provider Health  
-4. `bioetl-dq-v2` — Data Quality  
+0. `bioetl-control-plane-v1` — Trust / Control Plane Explorer
+1. `bioetl-overview-v2` — Overview / Fleet Command Center
+2. `bioetl-runtime` — Pipeline Diagnostics (includes retired Workflow band evidence)
+3. `bioetl-provider-health-v2` — Provider Health / Provider Explorer
+4. `bioetl-dq-v2` — Data Quality / Data Trust Explorer
+5. `bioetl-incident-v1` — Incident Workspace
+6. `bioetl-run-explorer-v1` — Run Explorer
 
 Retired (do not reintroduce without architecture review): Workflow Overview, Alerts & SLO, Silver Reject Explorer, Loki/Tempo Explore-only surfaces.
 
-Render/audit gates fail closed on blank screenshots and `renderedPanelCount=0` (#6686).  
+Render/audit gates fail closed on blank screenshots and `renderedPanelCount=0` (#6686).
 Deployed Grafana JSON must match repo after stripping volatile `id` / `version` / `pluginVersion` fields (#6690).
 
 ## Содержание

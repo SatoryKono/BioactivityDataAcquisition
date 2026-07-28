@@ -16,7 +16,7 @@
       "opening_baseline": 54
     },
     "config_surface_duplicate_clusters": {
-      "current": 20,
+      "current": 10,
       "opening_baseline": 24
     },
     "pipeline_duplicate_clusters": {
@@ -99,7 +99,7 @@
     },
     "5794": {
       "closeout_reason": "Shared composite merge and lineage policy blocks now live in a canonical authority surface and composite config duplicate clusters dropped from 24 to 21.",
-      "current_value": 20,
+      "current_value": 10,
       "debt_type": "composite_config_duplication",
       "evidence": [
         "configs/composites/field_groups/shared_policy.yaml",

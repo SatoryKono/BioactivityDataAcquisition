@@ -23,7 +23,9 @@ if TYPE_CHECKING:
     from bioetl.interfaces.cli.commands import export as export
     from bioetl.interfaces.cli.commands import lineage as lineage
     from bioetl.interfaces.cli.commands import lock as lock
-    from bioetl.interfaces.cli.commands import maintenance as maintenance
+    from bioetl.interfaces.cli.commands.domains.maintenance import (
+        maintenance as maintenance,
+    )
     from bioetl.interfaces.cli.commands import run_manifest as run_manifest
     from bioetl.interfaces.cli.commands import vacuum as vacuum
     from bioetl.interfaces.cli.commands import workflow as workflow

@@ -24,7 +24,9 @@ For the authoritative shipped dashboard mapping
 
 | Question / symptom | Open first | Then use | Owner doc |
 | ------------------ | ---------- | -------- | --------- |
-| What is currently broken or degraded? | `bioetl-overview-v2` | `Status`, `First Action`, then `0. Trust`, `2. Pipeline Diagnostics`, `3. Provider Health`, `4. Data Quality`, `Workflow band (inside Pipeline Diagnostics)`, `Alert/SLO Triage (Overview collapsed row)` | [Dashboard v2 Usage](dashboard-v2-usage.md) |
+| What is currently broken or degraded? | `bioetl-overview-v2` (Fleet) | `Status`, `Inputs` matrix, compact `First Action`, then `0. Trust`, `2. Pipeline Diagnostics`, `3. Provider Health`, `4. Data Quality`, Incident Workspace, Run Explorer | [Operator UX v2](operator-ux-v2.md) / [Dashboard v2 Usage](dashboard-v2-usage.md) |
+| Unified incident suspects / alert entry | `bioetl-incident-v1` | Ranked Suspects → domain explorers | [migration-map-v2](migration-map-v2.md) |
+| Single-run identity / processed records | `bioetl-run-explorer-v1` | ID + Processed Records (HTTP); Trust for resume | [Run Explorer panels](panels/bioetl-run-explorer-v1-panels.md) |
 | Is a Prometheus alert actually firing or pending? | `bioetl-overview-v2` | first-screen `Alert/SLO Triage` -> `Triage Alert State`, then `Alert/SLO Triage (Overview collapsed row)` | [Monitoring Guide](../../05-operations/01-monitoring-guide.md) |
 | Need a dashboard dedicated to active alert state or SLO pressure? | `bioetl-overview-v2 (Alert/SLO Triage)` | `Active Alert Status`, `Firing Alerts / Range`, `Firing Alert Details` | [Monitoring Guide](../../05-operations/01-monitoring-guide.md) |
 | Runtime latency, logs, memory, or alert-condition concern? | `bioetl-runtime` | `bioetl diagnostics guide`; [Observability Checklist](../../05-operations/runbooks/observability-checklist.md) | [Monitoring Guide](../../05-operations/01-monitoring-guide.md) |

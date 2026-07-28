@@ -33,6 +33,12 @@ live in [../03-guides/dashboards/dashboard-inventory.md](../03-guides/dashboards
 
 ## 0. Канонический operator workflow
 
+Dashboard System 2.0 (epic #6800): **detect → localize → decide → recover**.
+UI entry is evidence-first: Fleet (`bioetl-overview-v2`) or Incident Workspace
+for alert hops; Trust for resume safety; Run Explorer for exact identity.
+See [operator-ux-v2.md](../03-guides/dashboards/operator-ux-v2.md) and
+[migration-map-v2.md](../03-guides/dashboards/migration-map-v2.md).
+
 Используйте observability surface в таком порядке:
 
 1. `bioetl diagnostics guide` — discovery entrypoint для supported commands.

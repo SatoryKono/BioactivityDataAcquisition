@@ -212,7 +212,11 @@ COMMAND_DELEGATION_CASES: tuple[
 CLI_MAIN_LAZY_COMMAND_CASES = (
     ("diagnostics", "bioetl.interfaces.cli.commands.diagnostics", "diagnostics"),
     ("health", "bioetl.interfaces.cli.commands.health", "health"),
-    ("maintenance", "bioetl.interfaces.cli.commands.maintenance", "maintenance"),
+    (
+        "maintenance",
+        "bioetl.interfaces.cli.commands.domains.maintenance.command_group",
+        "maintenance",
+    ),
     ("quarantine", "bioetl.interfaces.cli.commands.quarantine", "quarantine"),
     ("run", "bioetl.interfaces.cli.commands.run", "run"),
     ("run-all", "bioetl.interfaces.cli.commands.run_all", "run_all"),

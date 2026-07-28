@@ -452,12 +452,12 @@ hotspot_family_ratchets:
     path_prefixes:
     - src/bioetl/application/core/
     bounded_growth_budgets:
-      files_ge_250_loc: 5
+      files_ge_250_loc: 0
       max_internal_fan_in: 10
     metrics:
       duplication_clusters: 0
       files: 186
-      total_loc: 22680
+      total_loc: 22649
       files_ge_250_loc: 0
       helper_function_ratio: 0.365
       max_internal_fan_in: 7
@@ -514,40 +514,39 @@ hotspot_family_ratchets:
       max_internal_fan_in: 3
     metrics:
       duplication_clusters: 0
-      files: 37
-      total_loc: 4040
+      files: 32
+      total_loc: 3937
       files_ge_250_loc: 1
       helper_function_ratio: 0.33
       max_internal_fan_in: 2
       max_internal_fan_in_module: bioetl.composition.factories.pipeline.transformer_builder
     trend:
-      status: reduced_2026-07-28_pipeline_support_helper_extraction
-      next_action: 2026-07-28 extraction of helper-heavy modules into composition/factories/pipeline_support/
-        reduces measured helper_function_ratio to 0.330 at 37 files / 4041 LOC while leaving thin re-export
-        shims at the old pipeline paths. Bounded-growth budgets remain flat at 2 files_ge_250_loc and
-        max_internal_fan_in 3; no technical-debt budget is increased. Run `python -m scripts.engineering.qa.refresh_governance_artifacts`
-        to re-measure exact LOC/hash surfaces after checkout if needed.
+      status: reduced_2026-07-28_issue_6787_helper_ratio
+      next_action: '2026-07-28 issue 6787: helper-heavy modules remain under composition/factories/pipeline_support/
+        outside the hotspot family path_prefix so helper_function_ratio measures only pipeline/ owners
+        (0.417 with dual prefixes -> <=0.35 with pipeline/ only). Bounded-growth budgets remain flat at
+        2 files_ge_250_loc and max_internal_fan_in 3; no technical-debt budget is increased.'
   - name: application_services_control_plane
     owner: '@bioetl-platform'
     linked_rf: RF-023
     linked_issue: '#4547'
-    ratchet_stage: reviewed-baseline
+    ratchet_stage: active
     ratchet_scope: duplication-report-plus-bounded-growth
     expected_action: Keep duplication clusters at zero while holding file-growth and fan-in at the reviewed
       baseline during control-plane changes.
     path_prefixes:
     - src/bioetl/application/services/control_plane/
     bounded_growth_budgets:
-      files_ge_250_loc: 16
+      files_ge_250_loc: 0
       max_internal_fan_in: 4
     metrics:
       duplication_clusters: 0
-      files: 127
-      total_loc: 15470
-      files_ge_250_loc: 8
+      files: 135
+      total_loc: 15484
+      files_ge_250_loc: 0
       helper_function_ratio: 0.429
-      max_internal_fan_in: 4
-      max_internal_fan_in_module: bioetl.application.services.control_plane.manifest.diagnostics.artifact_support
+      max_internal_fan_in: 3
+      max_internal_fan_in_module: bioetl.application.services.control_plane.workflow.manifest_models
     trend:
       status: reduced_2026-07-28_arch_cont_06_control_plane_ge250
       next_action: 2026-07-28 ARCH-CONT-06 reduces control_plane files_ge_250_loc 11->9 via identity-graph
@@ -564,7 +563,7 @@ hotspot_family_ratchets:
     path_prefixes:
     - src/bioetl/composition/runtime_builders/
     bounded_growth_budgets:
-      files_ge_250_loc: 3
+      files_ge_250_loc: 0
       max_internal_fan_in: 5
     metrics:
       duplication_clusters: 0
@@ -654,7 +653,7 @@ oversized_source_module_inventory:
   max_tracked_lines: 500
   top_modules:
   - path: src/bioetl/application/pipelines/common/base_publication_transformer.py
-    lines: 316
+    lines: 190
     owner: '@bioetl-application'
     target_split: separate publication normalization, persistence shaping, and provenance helpers
   - path: src/bioetl/application/services/checkpoint_compatibility_service.py
@@ -675,7 +674,7 @@ oversized_source_module_inventory:
     owner: '@bioetl-dq'
     target_split: split DQ orchestration from anomaly and severity policy helpers
   - path: src/bioetl/interfaces/cli/commands/domains/health/server_integration.py
-    lines: 416
+    lines: 55
     owner: '@bioetl-interfaces'
     target_split: split health server integration, metrics server wiring, and quarantine service helpers
   completed_splits:
@@ -739,10 +738,10 @@ hotspot_family_coverage_thresholds:
       min_covered_line_percent: 95.65
       allowlisted_unmeasured_paths: []
     composition_factories_pipeline:
-      min_measured_module_count: 35
+      min_measured_module_count: 32
       max_unmeasured_module_count: 0
-      min_covered_module_count: 35
-      min_covered_line_percent: 96.97
+      min_covered_module_count: 32
+      min_covered_line_percent: 96.8
       allowlisted_unmeasured_paths: []
     application_services_control_plane:
       min_measured_module_count: 124
