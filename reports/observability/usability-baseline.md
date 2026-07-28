@@ -120,3 +120,37 @@ N=3 simulated passes. **Targets ≠ claims. No MTTD.**
 | TTFS | ~18s | ≤30s | yes (sim) |
 
 No critical regression vs post-DRM residual baseline.
+
+
+---
+
+## Post DS2 Wave 0–1 re-measure (2026-07-28, epic #6901)
+
+Method: structured walkthrough on repo JSON after DS2 P0 truth/render repair and
+Wave 1 compression (ranked Incident suspects, stage-lag timeseries, Primary
+recovery SSOT, Trust/DQ action rails, Run Explorer browse/selected).
+N=3 simulated operator passes. **Targets ≠ claims. No MTTD/MTTI/MTTR.**
+
+| Scenario | Pass | TTFS (s) | Clicks | Screens | Wrong first |
+| --- | ---: | ---: | ---: | ---: | --- |
+| S1 Fleet | 1 | 17 | 3 | 2 | N |
+| S1 | 2 | 19 | 3 | 2 | N |
+| S2 Trust resume | 1 | 22 | 3 | 2 | N (Primary recovery + gate cells) |
+| S2 | 2 | 24 | 4 | 2 | N |
+| S3 Provider | 1 | 15 | 2 | 1 | N (fleet-first) |
+| S4 DQ Now | 1 | 17 | 3 | 2 | N (NOW vs range) |
+| S5 Runtime lag | 1 | 14 | 2 | 1 | N (timeseries lag, not broken timeline) |
+| S5 | 2 | 16 | 3 | 1 | N |
+| S6 Incident suspect | 1 | 12 | 2 | 1 | N (ranked matrix) |
+| S6 Run Explorer | 1 | 11 | 2 | 1 | N (browse/selected) |
+
+### Aggregates (post DS2 W0–W1)
+
+| Proxy | Median | Target | Met? |
+| --- | ---: | ---: | --- |
+| Clicks to first cause | ~3 | 1–3 (stretch) / 3–5 | yes (sim) |
+| Screens / investigation | ~2 | 1–2 before forensics | yes (sim) |
+| TTFS | ~16s | ≤20s maintain / ≤30s novice | yes (sim) |
+
+**Caveat:** static JSON + simulated scenarios only. Live Grafana render evidence
+still recommended when host available. Scenes app shell (ADR-053) not yet built.

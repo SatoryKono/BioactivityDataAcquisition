@@ -22,11 +22,22 @@ from bioetl.application.core.normalization_fallbacks import (
 from bioetl.domain.normalization.json import serialize_json_canonical
 
 if TYPE_CHECKING:
+    from bioetl.application.core._record_normalization_hash_support import (
+        _NormalizationProfileLike,
+    )
+    from bioetl.application.core.normalization_rules import NormalizationRulesPolicy
     from bioetl.domain.normalization.profiles import FieldRule
     from bioetl.domain.types import JsonDict
 
+
 class RecordNormalizationMappingMixin:
     """Own field-by-field mapping normalization for Silver record payloads."""
+
+    provider: str
+    entity_type: str | None
+    profile: _NormalizationProfileLike | None
+    rule_set: NormalizationRulesPolicy
+    allow_compatibility_fallback: bool
 
     def _normalize_mapping(self, record: JsonDict) -> JsonDict:
         object.__setattr__(self, "_normalization_findings", ())

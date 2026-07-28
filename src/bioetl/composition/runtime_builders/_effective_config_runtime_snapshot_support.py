@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 import hashlib
 import json
 
-from bioetl.composition.runtime_builders._run_manifest_refs import (
+from bioetl.composition.runtime_builders._run_manifest_data_roots import (
     resolve_data_root_mode,
 )
 from bioetl.composition.services.versioning import get_dependency_lock_hash
@@ -24,11 +26,11 @@ _EXECUTION_AFFECTING_SETTINGS_SURFACES = semantic_runtime_env_dependencies()
 
 
 def current_silver_filter_compatibility_mode() -> str:
-    return resolve_silver_filter_compatibility_mode()
+    return cast(str, resolve_silver_filter_compatibility_mode())
 
 
 def current_silver_filter_compatibility_snapshot() -> dict[str, object]:
-    return build_silver_filter_compatibility_snapshot()
+    return cast(dict[str, object], build_silver_filter_compatibility_snapshot())
 
 
 def add_silver_filter_compatibility_defaults(payload: dict[str, object]) -> None:

@@ -241,8 +241,8 @@
         "y": 6
       },
       "options": {
-        "content": "<h3>First Action — three lanes (not peer badges)</h3><ol style='margin:0.2rem 0 0 1.1rem;padding:0'><li><b>Now:</b> Status + threshold + current reasons.</li><li><b>Run:</b> expand Silver/Gold reject rows.</li><li><b>Range:</b> freshness/attrition — never compare as peer severity to Now.</li><li>Empty reasons with OK Status = VALID EMPTY.</li></ol>",
-        "mode": "html"
+        "content": "**Data trust — next actions**\n1. Read **NOW Status** + current threshold/reasons (not range zeros).\n2. If blocked/quarantine/rejects > 0, use accounting with denominators.\n3. Selected run → Run Explorer; resume → Trust Primary recovery.\n4. Range cards are SLA/freshness context only.",
+        "mode": "markdown"
       },
       "description": "Data Trust Explorer CTA. Three evidence lanes: Now (current rules/state), Run (rejects/quarantine), Range (freshness/impact). These are not peer-comparable severity badges. Operator CTA for first-pass DQ triage. It explains what to do for CRIT versus WARN states, clarifies that the answer row above is pipeline-wide current state while run_type and stage mainly shape selected-range evidence, and explicitly distinguishes reject-path evidence from quarantine/validation blockers when filtered_out remains zero.",
       "links": [
@@ -2101,7 +2101,7 @@
             "h": 5,
             "w": 8,
             "x": 0,
-            "y": 0
+            "y": 6
           },
           "id": 8,
           "options": {
@@ -2183,7 +2183,7 @@
             "h": 5,
             "w": 16,
             "x": 8,
-            "y": 0
+            "y": 6
           },
           "id": 154,
           "options": {
@@ -2269,7 +2269,7 @@
             "h": 5,
             "w": 12,
             "x": 0,
-            "y": 5
+            "y": 11
           },
           "id": 6,
           "options": {
@@ -2353,7 +2353,7 @@
             "h": 5,
             "w": 12,
             "x": 12,
-            "y": 5
+            "y": 11
           },
           "id": 117,
           "options": {

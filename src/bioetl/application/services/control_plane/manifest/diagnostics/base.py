@@ -27,8 +27,8 @@ from bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_p
 from bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_projection import (
     resolve_resume_identity_maps as _resolve_resume_identity_maps,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.summary import (
-    _build_exact_replay_anchors,
+from bioetl.application.services.control_plane.manifest.diagnostics.summary_support import (
+    build_exact_replay_anchors as _build_exact_replay_anchors,
 )
 from bioetl.domain.control_plane import RunManifest
 

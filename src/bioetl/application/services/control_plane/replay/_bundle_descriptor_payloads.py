@@ -11,11 +11,23 @@ from bioetl.application.services.control_plane.manifest.inspection_result_model 
 )
 
 
-def resolve_replay_taxonomy_projection(*args: object, **kwargs: object) -> object:
+def resolve_replay_taxonomy_projection(
+    primary: Mapping[str, object] | None = None,
+    *,
+    fallback: Mapping[str, object] | None = None,
+    defaults: Mapping[str, object] | None = None,
+) -> dict[str, object]:
     """Lazy import taxonomy projection (ARCH-REF-04 fan-in headroom)."""
-    return import_module(
+    payload: object = import_module(
         "bioetl.application.services.control_plane.manifest.replay_taxonomy"
-    ).resolve_replay_taxonomy_projection(*args, **kwargs)
+    ).resolve_replay_taxonomy_projection(
+        primary,
+        fallback=fallback,
+        defaults=defaults,
+    )
+    if isinstance(payload, Mapping):
+        return {str(key): value for key, value in payload.items()}
+    return {}
 
 
 def dict_or_empty(value: object) -> dict[str, object]:
@@ -115,7 +127,7 @@ def resolve_replay_claims(
     requested_exact_replay_default: object,
 ) -> ReplayClaimSnapshot:
     """Resolve replay claims from diagnostics and identity-graph fallbacks."""
-    replay_taxonomy = resolve_replay_taxonomy_projection(
+    replay_taxonomy: dict[str, object] = resolve_replay_taxonomy_projection(
         diagnostics,
         fallback=identity_graph,
         defaults={

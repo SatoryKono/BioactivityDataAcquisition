@@ -286,7 +286,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "FLEET population severity (all providers in scope), not selected-provider Status. Provider severity mapping: 0=OK, 1=DEGRADED, 2=FAILING; null/NaN=UNKNOWN. This matrix now uses the active Grafana time selector and shows the most severe observed provider-current-status sample for each provider inside that window. Raw provider health status remains panel id=114 with 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY. This matrix intentionally stays GLOBAL and does not filter by pipeline. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id, pipeline, run_type, or selected provider unless the panel title says selected provider. UNKNOWN — provider status series absent (TELEMETRY_ABSENT_OR_STALE).",
+      "description": "FLEET population severity (all providers in scope), not selected-provider Status. Provider severity mapping: 0=OK, 1=DEGRADED, 2=FAILING; null/NaN=UNKNOWN. This matrix now uses the active Grafana time selector and shows the most severe observed provider-current-status sample for each provider inside that window. Raw provider health status remains panel id=114 with 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY. This matrix intentionally stays GLOBAL and does not filter by pipeline. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id, pipeline, run_type, or selected provider unless the panel title says selected provider. UNKNOWN — provider status series absent (TELEMETRY_ABSENT_OR_STALE). Fleet-first matrix: answer without forcing a provider selector; select row to deep-dive.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -340,7 +340,14 @@
             ]
           },
           "unit": "short",
-          "noValue": "UNKNOWN"
+          "noValue": "UNKNOWN",
+          "links": [
+            {
+              "title": "Open selected provider context",
+              "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}&var-workflow=${workflow}&var-provider=${__data.fields.provider:percentencode}&var-pipeline=${pipeline}&var-run_type=${run_type}",
+              "targetBlank": false
+            }
+          ]
         },
         "overrides": []
       },
@@ -409,7 +416,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Only providers currently observed as DEGRADED or FAILING on the first-screen provider-status recording rule (instant/current semantics, not selected-range history). Empty table means no provider is currently above OK in the active trust window. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id.",
+      "description": "Only providers currently observed as DEGRADED or FAILING on the first-screen provider-status recording rule (instant/current semantics, not selected-range history). Empty table means no provider is currently above OK in the active trust window. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id. Fleet-first matrix: answer without forcing a provider selector; select row to deep-dive.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -452,7 +459,14 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "short",
+          "links": [
+            {
+              "title": "Open selected provider context",
+              "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}&var-workflow=${workflow}&var-provider=${__data.fields.provider:percentencode}&var-pipeline=${pipeline}&var-run_type=${run_type}",
+              "targetBlank": false
+            }
+          ]
         },
         "overrides": []
       },
@@ -500,7 +514,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Canonical provider cause projection from bioetl_provider_current_cause. Top provider causes using current/instant selectors (not selected-range history): raw status, failure rate, retry exhaustion, latency, HTTP errors, or rate-limit pressure. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id. Population-first fleet evidence (not selected-provider only). Empty table while GLOBAL severity is non-OK is an explainability gap — check scrape/rules (DUX-09).",
+      "description": "Canonical provider cause projection from bioetl_provider_current_cause. Top provider causes using current/instant selectors (not selected-range history): raw status, failure rate, retry exhaustion, latency, HTTP errors, or rate-limit pressure. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id. Population-first fleet evidence (not selected-provider only). Empty table while GLOBAL severity is non-OK is an explainability gap — check scrape/rules (DUX-09). Fleet-first matrix: answer without forcing a provider selector; select row to deep-dive.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -544,7 +558,14 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "short",
+          "links": [
+            {
+              "title": "Open selected provider context",
+              "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}&var-workflow=${workflow}&var-provider=${__data.fields.provider:percentencode}&var-pipeline=${pipeline}&var-run_type=${run_type}",
+              "targetBlank": false
+            }
+          ]
         },
         "overrides": []
       },

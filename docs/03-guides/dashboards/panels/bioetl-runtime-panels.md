@@ -47,10 +47,11 @@ snapshot evidence, a snapshot denominator, or a presence gate. Event deltas use
   both runtime status panels `INCOMPLETE`.
 - **Data sources:** `bioetl_runtime_trust_gap_status_10m`
 
-### 8. Monitor Aggregate Stage Lag Timeline
-- **Type:** State timeline
-- **Purpose:** Bounded aggregate stage lag status by stage (not exact-run chronology).
+### 8. Monitor Aggregate Stage Lag
+- **Type:** Timeseries
+- **Purpose:** Continuous stage lag seconds by stage for localization (not discrete state timeline; not exact-run chronology).
 - **Data sources:** `bioetl_stage_lag_seconds` (table fallback: Inspect Stage Expectedness)
+- **Frame contract:** range Prom query must render a time field; do not use `state-timeline` for continuous lag.
 
 ### 9. Runtime Blockers
 - **Type:** Table

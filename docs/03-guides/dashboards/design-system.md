@@ -110,8 +110,10 @@ blanket rule for every plugin type.
 | Selected-range trend `stat` | `options.colorMode=value`; `options.graphMode=area`; threshold colors must match the measured operator risk. |
 | Selected-range count `stat` | `options.colorMode=value`; `options.graphMode=none`; `or vector(0)` only when missing series means zero events. |
 | Percentage, score, latency, or duration `gauge` | `options.showThresholdMarkers=true`; `options.showThresholdLabels=false` unless a panel-specific exception is documented with operator rationale. |
-| Status or route `table` column | Use `custom.cellOptions.type=color-background` for the status/route field override. |
-| Data or forensic `table` | Use `custom.cellOptions.type=auto` when an explicit default is configured; datasource/plugin defaults are allowed for HTTP-backed forensic tables. |
+| Status or route `table` column | Use `custom.cellOptions.type=color-background` **only via field override** for the status/Value field. |
+| Data or forensic `table` | Use `custom.cellOptions.type=auto` as the table default when an explicit default is configured; datasource/plugin defaults are allowed for HTTP-backed forensic tables. |
+
+**Forbidden:** table-wide default `color-background` without field overrides (paints Time/name/pipeline as severity).
 | Comparative or multi-series `timeseries` | `options.tooltip.mode=multi`; `options.tooltip.sort=desc`. |
 | Scalar trend `timeseries` | `options.tooltip.mode=single`; `options.tooltip.sort=none` or omitted. |
 

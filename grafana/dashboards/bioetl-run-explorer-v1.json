@@ -104,7 +104,7 @@
       },
       "options": {
         "mode": "markdown",
-        "content": "### Run Explorer — exact completed run (Ops HTTP)\n\npipeline=`$pipeline` · run_type=`$run_type` · run_id=`$run_id` · workflow=`$workflow`\n\n`run_id` is **HTTP-only**. Expand **Run report detail** for recent list, funnel, reasons, reconciliation, artifacts. First paint: identity + processed records only."
+        "content": "**Browse vs Selected run**\n- **Browse:** population/list without `run_id` — identity panels show N/A until selection.\n- **Selected:** set `run_id` (Ops HTTP identity, never a Prometheus label).\n- Handoff from Incident/Runtime/Trust preserves time range + pipeline context."
       }
     },
     {
@@ -709,7 +709,7 @@
           "id": 3010,
           "type": "table",
           "title": "Recent pipeline runs (no selection)",
-          "description": "Index of recent pipeline_run_report_v1 files. Pick run_id into the dashboard variable. Not Prometheus.",
+          "description": "Index of recent pipeline_run_report_v1 files. Pick run_id into the dashboard variable. An empty list is VALID EMPTY when no reports match; an unexpected empty may mean backend unavailable, so verify /health/live. Not Prometheus.",
           "gridPos": {
             "h": 7,
             "w": 24,
@@ -755,7 +755,7 @@
           "id": 3011,
           "type": "table",
           "title": "Selected run · funnel stages",
-          "description": "Stage funnel from pipeline_run_report_v1. Exact run_id required. Not a waterfall (no start/end chronology).",
+          "description": "Stage funnel from pipeline_run_report_v1. Exact run_id required. An empty funnel is VALID EMPTY when no stage rows exist; an unexpected empty may mean backend unavailable, so verify /health/live. Not a waterfall (no start/end chronology).",
           "gridPos": {
             "h": 6,
             "w": 24,
@@ -801,7 +801,7 @@
           "id": 3012,
           "type": "table",
           "title": "Selected run · top reasons",
-          "description": "Top removal/reason codes from pipeline_run_report_v1.",
+          "description": "Top removal/reason codes from pipeline_run_report_v1. An empty result is VALID EMPTY when no reasons exist; an unexpected empty may mean backend unavailable, so verify /health/live.",
           "gridPos": {
             "h": 5,
             "w": 24,
@@ -847,7 +847,7 @@
           "id": 3015,
           "type": "table",
           "title": "Selected run · reconciliation",
-          "description": "Reconciliation block from pipeline_run_report_v1 (object may need backend table shape). UNRESOLVED_SCOPE when run_id not selected; NO DATA when report missing.",
+          "description": "Reconciliation block from pipeline_run_report_v1 (object may need backend table shape). An empty result is VALID EMPTY when reconciliation evidence is absent. UNRESOLVED_SCOPE when run_id is not selected; an unexpected empty may mean backend unavailable, so verify /health/live.",
           "gridPos": {
             "h": 5,
             "w": 24,
@@ -909,7 +909,7 @@
           "id": 3013,
           "type": "table",
           "title": "Selected run · artifacts",
-          "description": "Artifact refs from pipeline_run_report_v1.",
+          "description": "Artifact refs from pipeline_run_report_v1. An empty result is VALID EMPTY when no artifacts exist; an unexpected empty may mean backend unavailable, so verify /health/live.",
           "gridPos": {
             "h": 5,
             "w": 24,

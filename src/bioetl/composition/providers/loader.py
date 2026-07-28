@@ -57,10 +57,7 @@ def load_providers(force: bool = False) -> None:
         >>> config = ProviderRegistry.get("chembl")
 
     """
-    load_provider_registry(
-        _get_loader_registry(),
-        force=force,
-    )
+    load_provider_registry(_get_loader_registry(), force=force)
 
 
 def ensure_providers_loaded() -> None:

@@ -257,19 +257,33 @@ def visualization_upgrades() -> None:
         )
     save("bioetl-dq-v2.json", dq)
 
-    # Trust next action polish
+    # Trust next action polish (SSOT title: Primary recovery — DS2-03)
     cp = load("bioetl-control-plane-v1.json")
     p = by_title(cp)
-    if "Next Action: Replay Diagnostics" in p:
-        p["Next Action: Replay Diagnostics"].setdefault("options", {})["content"] = (
-            "<h3>Next Action (≤4) — explicable Trust verdict</h3>"
-            "<ol style='margin:0.2rem 0 0 1.1rem;padding:0'>"
-            "<li>Read Status (INCOMPLETE blocks resume).</li>"
-            "<li>Replay Safety + Checkpoint Freshness + Manifest/Ledger + Telemetry Missing.</li>"
-            "<li>If INCOMPLETE, repair missing telemetry/scrape first.</li>"
-            "<li>Run Explorer for exact identity; expand drilldown rows only if needed.</li>"
-            "</ol>"
+    recovery = p.get("Primary recovery") or p.get("Next Action: Replay Diagnostics")
+    if recovery is not None:
+        recovery.setdefault("options", {})["content"] = (
+            "**Primary recovery:** Status + four cards below. "
+            "INCOMPLETE/UNKNOWN → repair evidence before resume. "
+            "Exact run → Run Explorer. VALID_EMPTY blockers only when Status=OK and cards clean."
         )
+        recovery["title"] = "Primary recovery"
+        recovery.setdefault("options", {}).setdefault(
+            "dataLinks",
+            [
+                {
+                    "title": "Open Replay Safety Diagnostics",
+                    "url": (
+                        "/d/bioetl-control-plane-v1/bioetl-control-plane-v1"
+                        "?viewPanel=130&var-pipeline=$pipeline&var-run_type=$run_type"
+                        "&${__url_time_range}&var-workflow=$workflow"
+                    ),
+                    "targetBlank": False,
+                    "includeVars": False,
+                }
+            ],
+        )
+        recovery["options"]["mode"] = recovery["options"].get("mode") or "markdown"
     for title in (
         "Monitor: Replay Safety State",
         "Monitor: Manifest / Ledger Integrity",

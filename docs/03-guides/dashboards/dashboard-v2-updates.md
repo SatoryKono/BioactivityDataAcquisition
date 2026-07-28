@@ -131,7 +131,7 @@ notes. Если prose ниже расходится с JSON, править ну
   verdicts when scrape/rule health is degraded.
 - `bioetl-control-plane-v1` keeps first-screen trust evidence dashboard-first:
   replay safety, checkpoint freshness, manifest/ledger integrity, telemetry
-  missing, and `Next Action: Replay Diagnostics`.
+  missing, and `Primary recovery` (next-step rail; id=906).
 
 ## Current key surfaces
 

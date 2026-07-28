@@ -12,9 +12,9 @@
   "schema_version": 1,
   "source": "grafana/dashboards/*.json",
   "target_counts": {
-    "http": 18,
+    "http": 23,
     "loki": 0,
-    "promql": 162,
+    "promql": 167,
     "tempo": 0,
     "unknown": 0
   },
@@ -1796,7 +1796,7 @@
       "formula": "round(sum(max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))",
       "kind": "promql",
       "panel_id": 6,
-      "panel_title": "Track: Records Quarantined in Range",
+      "panel_title": "Range \u00b7 Records Quarantined",
       "query": "round(sum(max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))",
       "query_tokens": [
         "bioetl_dq_records_quarantined_total"
@@ -1992,7 +1992,7 @@
       "formula": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0))",
       "kind": "promql",
       "panel_id": 117,
-      "panel_title": "Track: Silver Filter Rejects in Range",
+      "panel_title": "Range \u00b7 Silver Filter Rejects",
       "query": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0))",
       "query_tokens": [
         "bioetl_records_processed_total"
@@ -2272,7 +2272,7 @@
       "formula": "(max(bioetl_dq_current_reason{pipeline=~\"$pipeline\",severity=\"crit\"}>0)*2) or max(bioetl_dq_current_status{pipeline=~\"$pipeline\"})",
       "kind": "promql",
       "panel_id": 9101,
-      "panel_title": "Monitor DQ Threshold State",
+      "panel_title": "Now \u00b7 DQ Threshold State",
       "query": "(max(bioetl_dq_current_reason{pipeline=~\"$pipeline\",severity=\"crit\"}>0)*2) or max(bioetl_dq_current_status{pipeline=~\"$pipeline\"})",
       "query_tokens": [
         "bioetl_dq_current_reason",
@@ -2304,7 +2304,7 @@
       "formula": "topk(5, bioetl_dq_current_reason{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"} > 0)",
       "kind": "promql",
       "panel_id": 9102,
-      "panel_title": "Inspect DQ Current Reasons",
+      "panel_title": "Now \u00b7 DQ Current Reasons",
       "query": "topk(5, bioetl_dq_current_reason{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"} > 0)",
       "query_tokens": [
         "bioetl_dq_current_reason"
@@ -2400,7 +2400,7 @@
       "formula": "topk(10, max by (pipeline, run_type, reason) (bioetl_runtime_current_blocker_reason) > 0)",
       "kind": "promql",
       "panel_id": 2002,
-      "panel_title": "Suspects \u00b7 Runtime blockers",
+      "panel_title": "Active Suspects \u00b7 Runtime",
       "query": "topk(10, max by (pipeline, run_type, reason) (bioetl_runtime_current_blocker_reason) > 0)",
       "query_tokens": [
         "bioetl_runtime_current_blocker_reason"
@@ -2431,7 +2431,7 @@
       "formula": "topk(10, max by (provider, cause) (bioetl_provider_current_cause) > 0)",
       "kind": "promql",
       "panel_id": 2003,
-      "panel_title": "Suspects \u00b7 Provider causes",
+      "panel_title": "Active Suspects \u00b7 Provider",
       "query": "topk(10, max by (provider, cause) (bioetl_provider_current_cause) > 0)",
       "query_tokens": [
         "bioetl_provider_current_cause"
@@ -2462,7 +2462,7 @@
       "formula": "topk(10, max by (pipeline, reason) (bioetl_dq_current_reason) > 0)",
       "kind": "promql",
       "panel_id": 2004,
-      "panel_title": "Suspects \u00b7 DQ reasons",
+      "panel_title": "Active Suspects \u00b7 DQ",
       "query": "topk(10, max by (pipeline, reason) (bioetl_dq_current_reason) > 0)",
       "query_tokens": [
         "bioetl_dq_current_reason"
@@ -2493,10 +2493,119 @@
       "formula": "count by (alertname, alertstate) (ALERTS{alertstate=~\"firing|pending\"})",
       "kind": "promql",
       "panel_id": 2005,
-      "panel_title": "Alert / Event Timeline (range)",
+      "panel_title": "Current Alerts (firing/pending)",
       "query": "count by (alertname, alertstate) (ALERTS{alertstate=~\"firing|pending\"})",
       "query_tokens": [],
       "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "unit": ""
+    },
+    {
+      "dashboard_uid": "bioetl-incident-v1",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": false,
+      "formula": "ALERTS{alertstate=~\"firing|pending\"}",
+      "kind": "promql",
+      "panel_id": 2006,
+      "panel_title": "Alert State History (range)",
+      "query": "ALERTS{alertstate=~\"firing|pending\"}",
+      "query_tokens": [],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": ""
+    },
+    {
+      "dashboard_uid": "bioetl-incident-v1",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": false,
+      "formula": "topk(15, label_replace(label_replace(max by (pipeline, run_type, reason) (bioetl_runtime_current_blocker_reason) > 0, \"domain\", \"runtime\", \"\", \"\"), \"signal\", \"$1\", \"reason\", \"(.*)\"))",
+      "kind": "promql",
+      "panel_id": 2010,
+      "panel_title": "Ranked Active Suspects",
+      "query": "topk(15, label_replace(label_replace(max by (pipeline, run_type, reason) (bioetl_runtime_current_blocker_reason) > 0, \"domain\", \"runtime\", \"\", \"\"), \"signal\", \"$1\", \"reason\", \"(.*)\"))",
+      "query_tokens": [
+        "bioetl_runtime_current_blocker_reason"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "unit": ""
+    },
+    {
+      "dashboard_uid": "bioetl-incident-v1",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": false,
+      "formula": "topk(15, label_replace(label_replace(max by (provider, cause) (bioetl_provider_current_cause) > 0, \"domain\", \"provider\", \"\", \"\"), \"signal\", \"$1\", \"cause\", \"(.*)\"))",
+      "kind": "promql",
+      "panel_id": 2010,
+      "panel_title": "Ranked Active Suspects",
+      "query": "topk(15, label_replace(label_replace(max by (provider, cause) (bioetl_provider_current_cause) > 0, \"domain\", \"provider\", \"\", \"\"), \"signal\", \"$1\", \"cause\", \"(.*)\"))",
+      "query_tokens": [
+        "bioetl_provider_current_cause"
+      ],
+      "ref_id": "B",
+      "runbook_urls": [],
+      "thresholds": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "unit": ""
+    },
+    {
+      "dashboard_uid": "bioetl-incident-v1",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": false,
+      "formula": "topk(15, label_replace(label_replace(max by (pipeline, reason) (bioetl_dq_current_reason) > 0, \"domain\", \"dq\", \"\", \"\"), \"signal\", \"$1\", \"reason\", \"(.*)\"))",
+      "kind": "promql",
+      "panel_id": 2010,
+      "panel_title": "Ranked Active Suspects",
+      "query": "topk(15, label_replace(label_replace(max by (pipeline, reason) (bioetl_dq_current_reason) > 0, \"domain\", \"dq\", \"\", \"\"), \"signal\", \"$1\", \"reason\", \"(.*)\"))",
+      "query_tokens": [
+        "bioetl_dq_current_reason"
+      ],
+      "ref_id": "C",
       "runbook_urls": [],
       "thresholds": [
         {
@@ -2541,6 +2650,10 @@
         {
           "color": "red",
           "value": 2
+        },
+        {
+          "color": "gray",
+          "value": 3
         }
       ],
       "unit": ""
@@ -3836,6 +3949,106 @@
       "documents_valid_empty": true,
       "formula": "",
       "kind": "http",
+      "panel_id": 3010,
+      "panel_title": "Recent pipeline runs (no selection)",
+      "query": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=20",
+      "query_tokens": [
+        "/ops/observability/pipeline-run-reports",
+        "pipeline",
+        "limit"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": ""
+    },
+    {
+      "dashboard_uid": "bioetl-run-explorer-v1",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "formula": "",
+      "kind": "http",
+      "panel_id": 3011,
+      "panel_title": "Selected run \u00b7 funnel stages",
+      "query": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
+      "query_tokens": [
+        "/ops/observability/pipeline-run-report",
+        "pipeline",
+        "run_id"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": ""
+    },
+    {
+      "dashboard_uid": "bioetl-run-explorer-v1",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "formula": "",
+      "kind": "http",
+      "panel_id": 3012,
+      "panel_title": "Selected run \u00b7 top reasons",
+      "query": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
+      "query_tokens": [
+        "/ops/observability/pipeline-run-report",
+        "pipeline",
+        "run_id"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": ""
+    },
+    {
+      "dashboard_uid": "bioetl-run-explorer-v1",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "formula": "",
+      "kind": "http",
+      "panel_id": 3013,
+      "panel_title": "Selected run \u00b7 artifacts",
+      "query": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
+      "query_tokens": [
+        "/ops/observability/pipeline-run-report",
+        "pipeline",
+        "run_id"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": ""
+    },
+    {
+      "dashboard_uid": "bioetl-run-explorer-v1",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "formula": "",
+      "kind": "http",
+      "panel_id": 3015,
+      "panel_title": "Selected run \u00b7 reconciliation",
+      "query": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
+      "query_tokens": [
+        "/ops/observability/pipeline-run-report",
+        "pipeline",
+        "run_id"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": ""
+    },
+    {
+      "dashboard_uid": "bioetl-run-explorer-v1",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "formula": "",
+      "kind": "http",
       "panel_id": 9402,
       "panel_title": "ID",
       "query": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
@@ -4904,7 +5117,7 @@
       "formula": "max(bioetl_runtime_trust_gap_status_10m)",
       "kind": "promql",
       "panel_id": 9102,
-      "panel_title": "Runtime Telemetry Gap",
+      "panel_title": "Metrics Evidence",
       "query": "max(bioetl_runtime_trust_gap_status_10m)",
       "query_tokens": [
         "bioetl_runtime_trust_gap_status_10m"
@@ -4926,6 +5139,37 @@
         }
       ],
       "unit": "short"
+    },
+    {
+      "dashboard_uid": "bioetl-runtime",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": false,
+      "formula": "max by (stage) (bioetl_stage_lag_seconds{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
+      "kind": "promql",
+      "panel_id": 9105,
+      "panel_title": "Monitor Aggregate Stage Lag",
+      "query": "max by (stage) (bioetl_stage_lag_seconds{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
+      "query_tokens": [
+        "bioetl_stage_lag_seconds"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 60
+        },
+        {
+          "color": "red",
+          "value": 300
+        }
+      ],
+      "unit": "s"
     },
     {
       "dashboard_uid": "bioetl-runtime",

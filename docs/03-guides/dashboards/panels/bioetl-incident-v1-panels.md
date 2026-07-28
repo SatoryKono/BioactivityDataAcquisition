@@ -25,26 +25,27 @@ rules only. Not a persistent working record. Not Grafana Drilldown Investigation
 - **Type:** Stat
 - **Purpose:** Worst-of L0 status for selected pipeline/run_type.
 - **Data sources:** `bioetl_l0_status`
+- **Mappings:** `0=OK`, `1=WARN`, `2=CRIT`, `3/null=UNKNOWN` (labelled; never bare numeric). Threshold step at `3` is gray.
+
+### 3.1 Suspect / alert table color policy
+- Default cell display is plain text (`auto`).
+- Severity `color-background` applies only via field overrides on `Value` columns.
+- Time / alertname / pipeline / provider / reason identity fields MUST NOT inherit table-wide severity paint.
 
 ### 4. Next Best Actions
 - **Type:** Text
 - **Purpose:** ≤4 operator steps; honest read-only bounds; hops via Navigation bus.
 - **Data sources:** Static operator copy.
 
-### 5. Active Suspects · Runtime
-- **Type:** Table
-- **Purpose:** Domain topk runtime blockers (not cross-domain ranking).
-- **Data sources:** `bioetl_runtime_current_blocker_reason`
+### 5. Ranked Active Suspects (`id=2010`)
+- **Type:** Table (primary first-screen localization)
+- **Purpose:** Cross-domain ranked suspects (Runtime / Provider / DQ) with domain label and scoped handoff links.
+- **Data sources:** `bioetl_runtime_current_blocker_reason`, `bioetl_provider_current_cause`, `bioetl_dq_current_reason` (merged instant tables)
+- **Empty:** `VALID_EMPTY — no active suspects across domains`
 
-### 6. Active Suspects · Provider
-- **Type:** Table
-- **Purpose:** Domain topk provider causes (fleet population).
-- **Data sources:** `bioetl_provider_current_cause`
-
-### 7. Active Suspects · DQ
-- **Type:** Table
-- **Purpose:** Domain topk DQ current reasons (NOW lane).
-- **Data sources:** `bioetl_dq_current_reason`
+### 5b. Domain suspect detail (collapsed row)
+- **Runtime / Provider / DQ tables** remain as forensic detail under a collapsed row (not peer first-screen verdicts).
+- Each domain table keeps a data link to its workspace.
 
 ### 8. Current Alerts (firing/pending)
 - **Type:** Table

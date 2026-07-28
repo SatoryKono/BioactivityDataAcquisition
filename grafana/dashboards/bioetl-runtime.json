@@ -247,8 +247,8 @@
         "y": 6
       },
       "options": {
-        "content": "### First Action\n1. Read **Status** + **Metrics Evidence** (trust before latency).\n2. If Metrics Evidence is not OK, fix scrape/rules; do not trust zeros.\n3. Scan **Runtime Blockers** (VALID EMPTY when Status=OK).\n4. Exact completed run goes to **Run Explorer** (HTTP report).\n",
-        "mode": "html"
+        "content": "**Next best actions**\n1. Read **Status** + Metrics Evidence (confidence) before treating OK as final.\n2. Localize via **Aggregate Stage Lag** + Runtime Blockers.\n3. Escalate: DQ / Provider / Trust / Run Explorer with time preserved.\n4. Empty lag series → check scrape/rules (UNKNOWN is not OK).",
+        "mode": "markdown"
       },
       "links": [
         {
@@ -328,7 +328,19 @@
             ]
           },
           "unit": "short",
-          "noValue": "VALID EMPTY — no active blockers (Status=OK path)"
+          "noValue": "VALID EMPTY — no active blockers (Status=OK path)",
+          "links": [
+            {
+              "title": "Open Run Explorer",
+              "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${__url_time_range}&var-workflow=${workflow}&var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=${run_id}",
+              "targetBlank": false
+            },
+            {
+              "title": "Open Data Quality",
+              "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${__url_time_range}&var-workflow=${workflow}&var-pipeline=${pipeline}&var-run_type=${run_type}",
+              "targetBlank": false
+            }
+          ]
         },
         "overrides": []
       },
@@ -392,7 +404,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Metrics Evidence (scrape/rule trust). 0=OK (metrics + recording rules healthy), 1=WARN (scrape or rule gap), >=2=CRIT (scrape+rule gap), null=UNKNOWN. Not a pipeline error. When elevated, Status cannot be green OK — treat zero count panels as inconclusive and open Prometheus Targets before debugging pipeline code. Time scope: current monitoring health, not selected-range runtime evidence. UNKNOWN — metrics trust series absent (TELEMETRY_ABSENT_OR_STALE).",
+      "description": "Runtime Telemetry Gap (scrape/rule trust). 0=SCRAPING (metrics + recording rules healthy), 1=SCRAPE/RULE GAP, >=2=SCRAPE+RULE GAP, null=UNKNOWN. Not a pipeline error. When elevated, Status cannot be green OK — treat zero count panels as inconclusive and open Prometheus Targets before debugging pipeline code. Time scope: current monitoring health, not selected-range runtime evidence. UNKNOWN — metrics trust series absent (TELEMETRY_ABSENT_OR_STALE).",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -414,7 +426,7 @@
               "options": {
                 "0": {
                   "color": "green",
-                  "text": "OK"
+                  "text": "SCRAPING"
                 },
                 "1": {
                   "color": "orange",
@@ -808,9 +820,9 @@
         },
         {
           "id": 9105,
-          "type": "state-timeline",
-          "title": "Monitor Aggregate Stage Lag Timeline",
-          "description": "Bounded aggregate stage health timeline from stage lag/backlog signals. Not exact-run chronology (see Run Explorer). Series capped by selected pipeline/run_type. Table fallback: Inspect Stage Expectedness. VALID_EMPTY when no stage series in window.",
+          "type": "timeseries",
+          "title": "Monitor Aggregate Stage Lag",
+          "description": "Continuous stage lag seconds by stage (Prom low-cardinality). Timeseries frame for localization; not a discrete state timeline. No run_id Prom labels.",
           "gridPos": {
             "h": 5,
             "w": 24,
@@ -832,28 +844,62 @@
           ],
           "fieldConfig": {
             "defaults": {
-              "noValue": "UNKNOWN",
-              "custom": {
-                "fillOpacity": 70,
-                "lineWidth": 0
+              "color": {
+                "mode": "palette-classic"
               },
-              "unit": "s"
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "lag (s)",
+                "drawStyle": "line",
+                "fillOpacity": 15,
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 3,
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 60
+                  },
+                  {
+                    "color": "red",
+                    "value": 300
+                  }
+                ]
+              },
+              "unit": "s",
+              "noValue": "UNKNOWN"
             },
             "overrides": []
           },
           "options": {
-            "mergeValues": true,
-            "showValue": "auto",
-            "alignValue": "left",
-            "rowHeight": 0.85,
             "legend": {
-              "displayMode": "list",
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ],
+              "displayMode": "table",
               "placement": "bottom",
               "showLegend": true
             },
             "tooltip": {
-              "mode": "single",
-              "sort": "none"
+              "mode": "multi",
+              "sort": "desc"
             }
           }
         },

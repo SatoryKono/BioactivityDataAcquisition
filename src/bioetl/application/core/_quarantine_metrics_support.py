@@ -5,7 +5,9 @@ from __future__ import annotations
 from collections import Counter
 from typing import TYPE_CHECKING
 
-from bioetl.application.core.batch_metrics import _record_silver_removal_accounting
+from bioetl.application.core.batch_metrics_accounting import (
+    _record_silver_removal_accounting,
+)
 from bioetl.domain.types import BronzeRecord, ErrorType
 
 if TYPE_CHECKING:
