@@ -82,7 +82,7 @@ Two environment variables control how BioETL responds when records fail validati
 | Variable | Default | Meaning |
 | --- | --- | --- |
 | `BIOETL_DQ_SOFT_THRESHOLD` | `0.05` | Emit a warning when more than 5% of records in a batch fail |
-| `BIOETL_DQ_HARD_THRESHOLD` | `0.20` | Fail the batch when more than 20% of records fail |
+| `BIOETL_DQ_HARD_THRESHOLD` | `0.50` | Fail the batch when more than 50% of records fail |
 
 When the soft threshold is crossed, BioETL logs a warning and continues processing. The batch still completes and data is written.
 
