@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.core.batch_metrics_accounting import (
     _FLOW_ACCOUNTING_STAGES,
+    _record_batch_lifecycle_event,
     _record_filtered_out_stage_metrics,
     _record_processed_stage_accounting,
     _record_silver_removal_accounting,
@@ -88,34 +89,34 @@ class BatchMetricsRecorderService:
 
     def track_batch_created(self, *, stage: str, count: int) -> None:
         """Record one successful batch-created lifecycle projection."""
-        self._pipeline_metrics.record_batch_lifecycle_event(
-            run_type=self._run_type_label,
+        _record_batch_lifecycle_event(
+            self._pipeline_metrics,
+            run_type_label=self._run_type_label,
             event="created",
             stage=stage,
             status="success",
-            count=1,
             record_count=count,
         )
 
     def track_batch_written(self, *, stage: str, count: int) -> None:
         """Record one successful batch-written lifecycle projection."""
-        self._pipeline_metrics.record_batch_lifecycle_event(
-            run_type=self._run_type_label,
+        _record_batch_lifecycle_event(
+            self._pipeline_metrics,
+            run_type_label=self._run_type_label,
             event="written",
             stage=stage,
             status="success",
-            count=1,
             record_count=count,
         )
 
     def track_batch_failed(self, *, stage: str, count: int = 0) -> None:
         """Record one failed batch lifecycle projection."""
-        self._pipeline_metrics.record_batch_lifecycle_event(
-            run_type=self._run_type_label,
+        _record_batch_lifecycle_event(
+            self._pipeline_metrics,
+            run_type_label=self._run_type_label,
             event="failed",
             stage=stage,
             status="failed",
-            count=1,
             record_count=count,
         )
 
@@ -245,8 +246,4 @@ class BatchMetricsRecorderService:
 # Compatibility alias retained for legacy imports.
 BatchMetricsRecorder = BatchMetricsRecorderService
 
-__all__ = [
-    "BatchMetricsRecorder",
-    "BatchMetricsRecorderService",
-    "_record_silver_removal_accounting",
-]
+__all__ = ["BatchMetricsRecorder", "BatchMetricsRecorderService"]

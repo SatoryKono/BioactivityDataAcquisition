@@ -18,6 +18,7 @@
 | `dq/` | DQ report flows, silver statistics helpers | `@bioetl-data-model` |
 | `execution/` | Pipeline runner service collaborators | `@bioetl-architecture` |
 | `run_reports/` | Run-report enrichment, markdown, writer | `@bioetl-architecture` |
+| `protein/` | Protein classification hierarchy resolution | `@bioetl-data-model` |
 | package root (legacy) | Cross-cutting services not yet rehomed (metrics, quarantine, export, checkpoints, …) | `@bioetl-architecture` |
 
 ## No-growth rule (root modules)

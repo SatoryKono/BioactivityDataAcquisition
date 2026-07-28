@@ -14,10 +14,11 @@ Unified Observability Pattern:
 
 from __future__ import annotations
 
-__all__ = ["LifecyclePhase", "PipelineObserver"]
+__all__ = ["LifecyclePhase", "PipelineObserver", "PipelineObserverIdentity"]
 
 import time
 from contextlib import AbstractContextManager
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.observability.observer_context_mixin import (
@@ -37,13 +38,13 @@ from bioetl.domain.runtime_observability_publication_contract import (
     CANONICAL_DOMAIN_EVENT_EMITTER,
     CANONICAL_LIFECYCLE_EMITTER,
 )
+from bioetl.domain.types import RunID, RunType
 
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
     from bioetl.domain.aggregates.events import DomainEvent
     from bioetl.domain.ports import ClockPort, LoggerPort, MetricsPort, TracingPort
-    from bioetl.domain.types import RunID, RunType
 
     class _ObserverEventMixinBase:
         """Typing-only stand-in for skipped observer event mixin imports."""
@@ -65,6 +66,21 @@ else:
     )
 
 PROBE_MODE_FALLBACK_COUNTER = "bioetl_probe_mode_fallback_total"
+
+
+@dataclass(frozen=True, slots=True)
+class PipelineObserverIdentity:
+    """Identity bag for :class:`PipelineObserver` (ARCH-CONT-04 / #6760)."""
+
+    pipeline_name: str
+    run_id: RunID
+    run_type: RunType
+    manifest_id: str | None = None
+    entity: str | None = None
+    effective_config_hash: str | None = None
+    contract_ref: str | None = None
+    contract_version: str | None = None
+    composite_run_id: str | None = None
 
 
 class _ObserverLifecycleEmissionMixin(
@@ -241,31 +257,25 @@ class PipelineObserver(
 
     def __init__(
         self,
-        pipeline_name: str,
-        run_id: RunID,
-        run_type: RunType,
+        identity: PipelineObserverIdentity,
         metrics: MetricsPort,
         logger: LoggerPort,
         clock: ClockPort,
         tracer: TracingPort | None = None,
-        manifest_id: str | None = None,
-        entity: str | None = None,
-        effective_config_hash: str | None = None,
-        contract_ref: str | None = None,
-        contract_version: str | None = None,
-        composite_run_id: str | None = None,
     ) -> None:
-        """Initialize observer."""
-        self.pipeline_name = pipeline_name
-        self.run_id = str(run_id)
-        self.run_type = run_type.value
-        self.provider_name = self._derive_provider_name(pipeline_name)
-        self.manifest_id = manifest_id
-        self.entity = entity or self._derive_entity_name(pipeline_name)
-        self.effective_config_hash = effective_config_hash
-        self.contract_ref = contract_ref
-        self.contract_version = contract_version
-        self.composite_run_id = composite_run_id
+        """Initialize observer from an identity bag and explicit collaborators."""
+        self.pipeline_name = identity.pipeline_name
+        self.run_id = str(identity.run_id)
+        self.run_type = identity.run_type.value
+        self.provider_name = self._derive_provider_name(identity.pipeline_name)
+        self.manifest_id = identity.manifest_id
+        self.entity = identity.entity or self._derive_entity_name(
+            identity.pipeline_name
+        )
+        self.effective_config_hash = identity.effective_config_hash
+        self.contract_ref = identity.contract_ref
+        self.contract_version = identity.contract_version
+        self.composite_run_id = identity.composite_run_id
         self._metrics = metrics
         self._logger = logger
         self._clock = clock

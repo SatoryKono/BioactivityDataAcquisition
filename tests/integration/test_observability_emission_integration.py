@@ -7,7 +7,11 @@ from types import TracebackType
 
 import pytest
 
-from bioetl.application.observability.observer import LifecyclePhase, PipelineObserver
+from bioetl.application.observability.observer import (
+    LifecyclePhase,
+    PipelineObserver,
+    PipelineObserverIdentity,
+)
 from bioetl.domain.events import PipelineEvent
 from bioetl.domain.ports.noop import NoOpTracing
 from bioetl.domain.types import RunType
@@ -154,16 +158,18 @@ def test_pipeline_observer_emits_metrics_and_logs_through_recording_ports() -> N
     metrics = RecordingMetrics()
     logger = RecordingLogger()
     observer = PipelineObserver(
-        pipeline_name="chembl_activity",
-        run_id=deterministic_uuid("observability.integration.run"),
-        run_type=RunType.INCREMENTAL,
+        identity=PipelineObserverIdentity(
+            pipeline_name="chembl_activity",
+            run_id=deterministic_uuid("observability.integration.run"),
+            run_type=RunType.INCREMENTAL,
+            manifest_id="manifest-observability-integration",
+            contract_ref="chembl/activity/gold",
+            contract_version="1.0.0",
+        ),
         metrics=metrics,
-        logger=logger,  # type: ignore[arg-type]
+        logger=logger,
         clock=FixedClock(FIXED_TEST_TIME),
         tracer=NoOpTracing(),
-        manifest_id="manifest-observability-integration",
-        contract_ref="chembl/activity/gold",
-        contract_version="1.0.0",
     )
 
     with observer:
@@ -213,16 +219,18 @@ def test_pipeline_observer_emits_tracing_spans_through_recording_port() -> None:
     logger = RecordingLogger()
     tracer = RecordingTracing()
     observer = PipelineObserver(
-        pipeline_name="chembl_activity",
-        run_id=deterministic_uuid("observability.integration.tracing.run"),
-        run_type=RunType.BACKFILL,
+        identity=PipelineObserverIdentity(
+            pipeline_name="chembl_activity",
+            run_id=deterministic_uuid("observability.integration.tracing.run"),
+            run_type=RunType.BACKFILL,
+            manifest_id="manifest-observability-tracing",
+            contract_ref="chembl/activity/gold",
+            contract_version="1.0.0",
+        ),
         metrics=metrics,
-        logger=logger,  # type: ignore[arg-type]
+        logger=logger,
         clock=FixedClock(FIXED_TEST_TIME),
-        tracer=tracer,  # type: ignore[arg-type]
-        manifest_id="manifest-observability-tracing",
-        contract_ref="chembl/activity/gold",
-        contract_version="1.0.0",
+        tracer=tracer,
     )
 
     with observer:
@@ -264,16 +272,18 @@ def test_pipeline_observer_emits_failure_signals_through_recording_ports() -> No
     logger = RecordingLogger()
     tracer = RecordingTracing()
     observer = PipelineObserver(
-        pipeline_name="chembl_activity",
-        run_id=deterministic_uuid("observability.integration.failure.run"),
-        run_type=RunType.INCREMENTAL,
+        identity=PipelineObserverIdentity(
+            pipeline_name="chembl_activity",
+            run_id=deterministic_uuid("observability.integration.failure.run"),
+            run_type=RunType.INCREMENTAL,
+            manifest_id="manifest-observability-failure",
+            contract_ref="chembl/activity/gold",
+            contract_version="1.0.0",
+        ),
         metrics=metrics,
-        logger=logger,  # type: ignore[arg-type]
+        logger=logger,
         clock=FixedClock(FIXED_TEST_TIME),
-        tracer=tracer,  # type: ignore[arg-type]
-        manifest_id="manifest-observability-failure",
-        contract_ref="chembl/activity/gold",
-        contract_version="1.0.0",
+        tracer=tracer,
     )
 
     expected = RuntimeError("forced failure for observability contract")
@@ -319,16 +329,18 @@ def test_pipeline_observer_records_failure_span_and_error_metrics() -> None:
     logger = RecordingLogger()
     tracer = RecordingTracing()
     observer = PipelineObserver(
-        pipeline_name="chembl_activity",
-        run_id=deterministic_uuid("observability.integration.failure.run"),
-        run_type=RunType.INCREMENTAL,
+        identity=PipelineObserverIdentity(
+            pipeline_name="chembl_activity",
+            run_id=deterministic_uuid("observability.integration.failure.run"),
+            run_type=RunType.INCREMENTAL,
+            manifest_id="manifest-observability-failure",
+            contract_ref="chembl/activity/gold",
+            contract_version="1.0.0",
+        ),
         metrics=metrics,
-        logger=logger,  # type: ignore[arg-type]
+        logger=logger,
         clock=FixedClock(FIXED_TEST_TIME),
-        tracer=tracer,  # type: ignore[arg-type]
-        manifest_id="manifest-observability-failure",
-        contract_ref="chembl/activity/gold",
-        contract_version="1.0.0",
+        tracer=tracer,
     )
 
     with pytest.raises(RuntimeError, match="observer boom"):
@@ -357,16 +369,18 @@ def test_composite_pipeline_observer_emits_composite_provider_labels() -> None:
     metrics = RecordingMetrics()
     logger = RecordingLogger()
     observer = PipelineObserver(
-        pipeline_name="composite_publication",
-        run_id=deterministic_uuid("observability.integration.composite.run"),
-        run_type=RunType.INCREMENTAL,
+        identity=PipelineObserverIdentity(
+            pipeline_name="composite_publication",
+            run_id=deterministic_uuid("observability.integration.composite.run"),
+            run_type=RunType.INCREMENTAL,
+            manifest_id="manifest-composite-observability",
+            contract_ref="composite/publication/gold",
+            contract_version="1.0.0",
+        ),
         metrics=metrics,
-        logger=logger,  # type: ignore[arg-type]
+        logger=logger,
         clock=FixedClock(FIXED_TEST_TIME),
         tracer=NoOpTracing(),
-        manifest_id="manifest-composite-observability",
-        contract_ref="composite/publication/gold",
-        contract_version="1.0.0",
     )
 
     with observer:
@@ -390,16 +404,18 @@ def test_pipeline_observer_emits_checkpoint_finalize_execution_span() -> None:
     logger = RecordingLogger()
     tracer = RecordingTracing()
     observer = PipelineObserver(
-        pipeline_name="chembl_activity",
-        run_id=deterministic_uuid("observability.integration.checkpoint.run"),
-        run_type=RunType.INCREMENTAL,
+        identity=PipelineObserverIdentity(
+            pipeline_name="chembl_activity",
+            run_id=deterministic_uuid("observability.integration.checkpoint.run"),
+            run_type=RunType.INCREMENTAL,
+            manifest_id="manifest-checkpoint-observability",
+            contract_ref="chembl/activity/gold",
+            contract_version="1.0.0",
+        ),
         metrics=metrics,
-        logger=logger,  # type: ignore[arg-type]
+        logger=logger,
         clock=FixedClock(FIXED_TEST_TIME),
-        tracer=tracer,  # type: ignore[arg-type]
-        manifest_id="manifest-checkpoint-observability",
-        contract_ref="chembl/activity/gold",
-        contract_version="1.0.0",
+        tracer=tracer,
     )
 
     with observer:

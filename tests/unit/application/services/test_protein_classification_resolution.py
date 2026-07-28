@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.application.services.protein_classification_resolution import (
+from bioetl.application.services.protein.classification_resolution import (
     ResolveProteinClassificationUseCase,
 )
 from bioetl.domain.mapping.protein_class_target_type import (

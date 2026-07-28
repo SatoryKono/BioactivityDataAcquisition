@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import tempfile
 from collections.abc import Callable, Iterator
 from pathlib import Path
@@ -128,7 +127,7 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
                     h.update(block)
             return h.hexdigest()
 
-        return await asyncio.to_thread(_compute)
+        return _compute()
 
     async def _write_json_copy(
         self,
@@ -160,7 +159,7 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
 
             atomic_write_bytes(json_full_path, jsonl_content)
 
-        await asyncio.to_thread(_write)
+        _write()
 
 
 __all__ = ["BronzeWriterIOMixin"]

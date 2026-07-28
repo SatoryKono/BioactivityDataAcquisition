@@ -6,7 +6,11 @@ from dataclasses import dataclass, field
 
 import pytest
 
-from bioetl.application.observability.observer import LifecyclePhase, PipelineObserver
+from bioetl.application.observability.observer import (
+    LifecyclePhase,
+    PipelineObserver,
+    PipelineObserverIdentity,
+)
 from bioetl.domain.ports.noop import NoOpTracing
 from bioetl.domain.types import RunType
 from tests.helpers.clock import FIXED_TEST_TIME, FixedClock
@@ -70,9 +74,11 @@ def _build_observer(
     metrics = _RecordingMetrics()
     logger = _RecordingLogger()
     observer = PipelineObserver(
-        pipeline_name=pipeline_name,
-        run_id=deterministic_uuid(f"observer.{pipeline_name}"),
-        run_type=RunType.INCREMENTAL,
+        identity=PipelineObserverIdentity(
+            pipeline_name=pipeline_name,
+            run_id=deterministic_uuid(f"observer.{pipeline_name}"),
+            run_type=RunType.INCREMENTAL,
+        ),
         metrics=metrics,
         logger=logger,  # type: ignore[arg-type]
         clock=FixedClock(FIXED_TEST_TIME),
