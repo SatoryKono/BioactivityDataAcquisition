@@ -1,0 +1,86 @@
+{
+  "published_at": "2026-07-28T09:09:15Z",
+  "owner": "SatoryKono",
+  "repo": "BioactivityDataAcquisition",
+  "wave": "architecture-coderabbit-residual-2026-07-28",
+  "prior_closed_waves": [
+    "arch-qa-6740-6748",
+    "arch-res-6749-6755",
+    "arch-cont-6757-6764",
+    "arch-ref-6817-6825"
+  ],
+  "scorecard_integral_score": 9.41,
+  "coderabbit_findings": {
+    "unique": 41,
+    "major": 22,
+    "minor": 8,
+    "trivial": 11
+  },
+  "audit_report": "reports/grok/review_coderabbit_architecture_audit_20260728_1203_FINAL.md",
+  "issue_pack": ".github/ISSUES/ARCH-CR-2026-07-28-ISSUE-PACK.md",
+  "created": [
+    {
+      "code": "ARCH-CR-00",
+      "number": 6862,
+      "title": "[meta][architecture] CodeRabbit residual architecture remediation epic (2026-07-28)",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6862",
+      "priority": "meta"
+    },
+    {
+      "code": "ARCH-CR-01",
+      "number": 6863,
+      "title": "[P0][architecture] Move blocking storage I/O off async event loop",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6863",
+      "priority": "P0"
+    },
+    {
+      "code": "ARCH-CR-02",
+      "number": 6864,
+      "title": "[P0][architecture] Harden composite entity stub detection (path/allowlist only)",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6864",
+      "priority": "P0"
+    },
+    {
+      "code": "ARCH-CR-03",
+      "number": 6865,
+      "title": "[P0][architecture] Health-server lifecycle cleanup correctness",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6865",
+      "priority": "P0"
+    },
+    {
+      "code": "ARCH-CR-04",
+      "number": 6866,
+      "title": "[P0][architecture] Control-plane provenance blanks + medallion vacuum truthfulness",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6866",
+      "priority": "P0"
+    },
+    {
+      "code": "ARCH-CR-05",
+      "number": 6867,
+      "title": "[P1][architecture] Densify tests for identity bags, lazy facades, and checkpoint builders",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6867",
+      "priority": "P1"
+    },
+    {
+      "code": "ARCH-CR-06",
+      "number": 6868,
+      "title": "[P1][architecture] PipelineObserverIdentity migration/compat posture",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6868",
+      "priority": "P1"
+    },
+    {
+      "code": "ARCH-CR-07",
+      "number": 6869,
+      "title": "[P2][documentation] Docs SSOT residual: RULES version + DQ skip vs quarantine",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6869",
+      "priority": "P2"
+    },
+    {
+      "code": "ARCH-CR-08",
+      "number": 6870,
+      "title": "[P3][governance] Enable CodeRabbit CI secret + optional coalesce vectorization",
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6870",
+      "priority": "P3"
+    }
+  ]
+}
