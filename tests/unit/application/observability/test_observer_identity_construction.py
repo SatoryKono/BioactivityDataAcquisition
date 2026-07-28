@@ -4,11 +4,15 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
+import pytest
+
 from bioetl.application.observability.observer import (
     PipelineObserver,
     PipelineObserverIdentity,
 )
 from bioetl.domain.types import RunID, RunType
+
+pytestmark = pytest.mark.unit
 
 
 def _ports() -> tuple[SimpleNamespace, SimpleNamespace, SimpleNamespace]:

@@ -10,13 +10,15 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, StorageMaintenancePort
 
 
-# Align with lifecycle errors: programming TypeError/ValueError must propagate
-# rather than being treated as storage failures (ARCH-CR-04 / #6866).
+# Align with lifecycle errors: programming errors must propagate rather than
+# being treated as successful maintenance (ARCH-CR-04 / #6866). ValueError is
+# logged for operation context and then re-raised unchanged.
 _MAINTENANCE_OPERATION_ERRORS = (
     StorageError,
     BioETLError,
     OSError,
     RuntimeError,
+    ValueError,
 )
 
 

@@ -28,7 +28,7 @@ def test_safe_float_covers_null_bool_valid_and_invalid() -> None:
     assert converters._safe_float(object()) is None
 
 
-def test_safe_str_and_require_field() -> None:
+def test_safe_str_and_require_field_branch_coverage() -> None:
     assert converters._safe_str(None) is None
     assert converters._safe_str(12) == "12"
     assert converters._require_field({"id": 1}, "id") == 1

@@ -332,13 +332,15 @@
           "links": [
             {
               "title": "Open Run Explorer",
-              "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${__url_time_range}&var-workflow=${workflow}&var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=${run_id}",
-              "targetBlank": false
+              "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${__url_time_range}&var-workflow=${workflow}&var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=$run_id",
+              "targetBlank": false,
+              "includeVars": false
             },
             {
-              "title": "Open Data Quality",
-              "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${__url_time_range}&var-workflow=${workflow}&var-pipeline=${pipeline}&var-run_type=${run_type}",
-              "targetBlank": false
+              "title": "Inspect DQ",
+              "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${__url_time_range}&var-workflow=${workflow}&var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=$run_id",
+              "targetBlank": false,
+              "includeVars": false
             }
           ]
         },

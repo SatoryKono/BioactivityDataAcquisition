@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-28T07:27:53.941456+00:00",
+  "generated_at": "2026-07-28T13:08:18.317589+00:00",
   "summary": {
-    "total_scripts": 533,
+    "total_scripts": 537,
     "status_counts": {
       "active": 341,
-      "supporting": 192
+      "supporting": 196
     },
     "reference_group_coverage": {
       "agents": 5,
       "build": 12,
       "ci": 64,
-      "docs": 221,
-      "other": 68,
+      "docs": 219,
+      "other": 70,
       "scripts": 418,
       "skills": 17,
-      "tests": 248
+      "tests": 251
     }
   },
   "scripts": [
@@ -636,7 +636,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py",
-          "line": 441,
+          "line": 439,
           "source_group": "tests",
           "text": "assert \"scripts/ai/codex/helper/run-codex-wsl-noninteractive.sh\" in backlog_text"
         }
@@ -4641,7 +4641,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 77,
+      "reference_count": 86,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -4995,7 +4995,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 462,
+          "line": 464,
           "source_group": "docs",
           "text": ".\\.venv-win\\Scripts\\python.exe scripts/diagrams/check_diagram_visual_smoke.py `"
         },
@@ -5016,7 +5016,7 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 392,
+          "line": 394,
           "source_group": "docs",
           "text": "- post-check: `scripts/diagrams/check_pdf_image_bounds.py`"
         },
@@ -5239,7 +5239,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 533,
+          "line": 535,
           "source_group": "docs",
           "text": "`scripts/diagrams/enforce_diagram_quality_budget.py`."
         },
@@ -5458,13 +5458,13 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 48,
+          "line": 50,
           "source_group": "docs",
           "text": "| `class-diagrams/90-pkg-*.mmd` | generated source | `scripts/diagrams/generate_package_family_class_diagrams.py` | Regenerate from source tree; do not hand-edit for cleanup. |"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 204,
+          "line": 206,
           "source_group": "docs",
           "text": "- Supplemental generator: `scripts/diagrams/generate_package_family_class_diagrams.py`"
         },
@@ -5518,7 +5518,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 389,
+          "line": 391,
           "source_group": "docs",
           "text": "- `scripts/diagrams/generate_with_descriptions_docx.py`"
         },
@@ -5569,7 +5569,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 388,
+          "line": 390,
           "source_group": "docs",
           "text": "- `scripts/diagrams/generate_with_descriptions_pdf.py`"
         },
@@ -5724,7 +5724,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 554,
+          "line": 556,
           "source_group": "docs",
           "text": "uv run python scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json \\"
         }
@@ -5739,7 +5739,7 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 348,
+          "line": 350,
           "source_group": "docs",
           "text": "- repo scripts now use `scripts/diagrams/mmdc_wrapper.sh` as the default `mmdc` entrypoint;"
         },
@@ -5852,25 +5852,25 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 621,
+          "line": 623,
           "source_group": "docs",
           "text": "`scripts/diagrams/prune_orphan_nodes.py` detects nodes defined in a diagram but not"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 629,
+          "line": 631,
           "source_group": "docs",
           "text": "python scripts/diagrams/prune_orphan_nodes.py --check"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 632,
+          "line": 634,
           "source_group": "docs",
           "text": "python scripts/diagrams/prune_orphan_nodes.py --check --json"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 635,
+          "line": 637,
           "source_group": "docs",
           "text": "python scripts/diagrams/prune_orphan_nodes.py --fix"
         }
@@ -5881,29 +5881,29 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 438,
+          "line": 440,
           "source_group": "docs",
           "text": "Run the renderer through `scripts/diagrams/render.ps1` from PowerShell. The"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 454,
+          "line": 456,
           "source_group": "docs",
           "text": ".\\scripts\\diagrams\\render.ps1"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 455,
+          "line": 457,
           "source_group": "docs",
           "text": ".\\scripts\\diagrams\\render.ps1 --svg-only"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 456,
+          "line": 458,
           "source_group": "docs",
           "text": ".\\scripts\\diagrams\\render.ps1 --filter \"01-*\""
         },
@@ -5918,6 +5918,12 @@
           "line": 409,
           "source_group": "docs",
           "text": ".\\scripts\\diagrams\\render.ps1 --svg-only"
+        },
+        {
+          "path": "docs/03-guides/cheatsheets/cli-commands.md",
+          "line": 801,
+          "source_group": "docs",
+          "text": "| `scripts/diagrams/render.ps1` | Diagram render helper |"
         },
         {
           "path": "tests/architecture/test_diagram_regression_workflow.py",
@@ -5983,13 +5989,13 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 569,
+          "line": 571,
           "source_group": "docs",
           "text": "bash scripts/diagrams/run_diagram_checks.sh --profile pr --enforce-budget"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 570,
+          "line": 572,
           "source_group": "docs",
           "text": "bash scripts/diagrams/run_diagram_checks.sh --profile nightly --enforce-budget"
         },
@@ -6022,13 +6028,13 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 383,
+          "line": 385,
           "source_group": "docs",
           "text": "bash scripts/diagrams/run_diagram_docs_agent.sh"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 390,
+          "line": 392,
           "source_group": "docs",
           "text": "- unified orchestrator: `scripts/diagrams/run_diagram_docs_agent.sh`"
         },
@@ -6241,19 +6247,19 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 577,
+          "line": 579,
           "source_group": "docs",
           "text": "Use `scripts/diagrams/uniform_diagram_sizes.py` to normalize class/flowchart object sizes:"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 581,
+          "line": 583,
           "source_group": "docs",
           "text": "python3 scripts/diagrams/uniform_diagram_sizes.py --check"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 584,
+          "line": 586,
           "source_group": "docs",
           "text": "python3 scripts/diagrams/uniform_diagram_sizes.py --fix -f docs/02-architecture/diagrams/class-diagrams/07-application-core-services.mmd"
         },
@@ -6324,13 +6330,13 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 433,
+          "line": 435,
           "source_group": "docs",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh --include-embedded --puppeteer /tmp/puppeteer-config.json"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 451,
+          "line": 453,
           "source_group": "docs",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh --include-embedded --puppeteer /tmp/puppeteer-config.json"
         },
@@ -6412,7 +6418,7 @@
         "grafana-dashboard-extension",
         "py-doc-bot"
       ],
-      "reference_count": 169,
+      "reference_count": 170,
       "references": [
         {
           "path": ".codex/skills/grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md",
@@ -6853,7 +6859,7 @@
         },
         {
           "path": "tests/architecture/test_documentation_cleanup_inventory.py",
-          "line": 299,
+          "line": 311,
           "source_group": "tests",
           "text": "route[\"generator\"] == \"scripts/docs/checks/documentation_cleanup_inventory.py\""
         }
@@ -7253,37 +7259,13 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 3,
       "references": [
         {
           "path": ".github/ISSUES/CHEMBL-016-Close-Remaining-Chembl-Normalization-Governance-Gaps.md",
           "line": 160,
           "source_group": "other",
           "text": "- `scripts/docs/generate_pipeline_normalization_field_matrix.py`"
-        },
-        {
-          "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 254,
-          "source_group": "docs",
-          "text": "| Matrix generation                  | [generate_pipeline_normalization_field_matrix.py](../../scripts/docs/generate_pipeline_normalization_field_matrix.py) | Deterministically emits multi-pipeline CS"
-        },
-        {
-          "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 350,
-          "source_group": "docs",
-          "text": "- [generate_pipeline_normalization_field_matrix.py](../../scripts/docs/generate_pipeline_normalization_field_matrix.py)"
-        },
-        {
-          "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 376,
-          "source_group": "docs",
-          "text": "- rebuild-only multi-pipeline matrix generator: [generate_pipeline_normalization_field_matrix.py](../../scripts/docs/generate_pipeline_normalization_field_matrix.py)"
-        },
-        {
-          "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 734,
-          "source_group": "docs",
-          "text": "- [generate_pipeline_normalization_field_matrix.py](../../scripts/docs/generate_pipeline_normalization_field_matrix.py) already generates deterministic multi-pipeline artifacts"
         },
         {
           "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
@@ -10074,7 +10056,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 291,
+      "reference_count": 283,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -10255,7 +10237,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 11,
       "references": [
         {
           "path": ".github/workflows/import-linter.yml",
@@ -10294,16 +10276,16 @@
           "text": "python -m scripts.engineering.qa check-c901 --mode report"
         },
         {
-          "path": "docs/05-engineering/architecture-refactoring-rf-001-008-closeout-2026-06-17.md",
-          "line": 173,
-          "source_group": "docs",
-          "text": "- `python -m scripts.engineering.qa check-c901`"
-        },
-        {
           "path": "scripts/engineering/qa/README.md",
           "line": 21,
           "source_group": "scripts",
           "text": "| `check-c901`                     | `check_c901_baseline.py`                              | C901 complexity baseline enforcement                                                              |"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 14,
+          "source_group": "scripts",
+          "text": "check-c901           C901 complexity baseline enforcement"
         }
       ]
     },
@@ -10348,13 +10330,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
           "line": 157,
           "source_group": "scripts",
           "text": "\"check-dashboard-visual-semantics\": \"scripts.engineering.qa.check_dashboard_visual_semantics\","
+        },
+        {
+          "path": "tests/architecture/test_adr_enforcement_matrix.py",
+          "line": 85,
+          "source_group": "tests",
+          "text": "\"scripts/engineering/qa/check_dashboard_visual_semantics.py\","
         }
       ]
     },
@@ -11318,7 +11306,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 27,
+      "reference_count": 26,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -12023,7 +12011,7 @@
         },
         {
           "path": "docs/02-architecture/current-state-inventory.md",
-          "line": 289,
+          "line": 294,
           "source_group": "docs",
           "text": "| Generated artifact drift gate did not include module coverage source-tree hash freshness | `report-module-coverage --check` could fail stale source-tree evidence while `report-debt-governance-gates "
         },
@@ -12216,6 +12204,18 @@
       "next_step": "Retain as a bounded invariant-audit rebaseline reporter while issue triage needs stale-path, current-anchor, and duplicate-issue evidence; retire or fold it into a broader audit-to-issue workflow after the June 2026 stale-audit closeout."
     },
     {
+      "path": "scripts/engineering/qa/report_live_residual_snapshot.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": [],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded architecture-freeze reporting utility pending consolidation into the canonical quality-report command surface; do not count it as a new active entrypoint."
+    },
+    {
       "path": "scripts/engineering/qa/report_module_coverage_inventory.py",
       "type": "py",
       "status": "active",
@@ -12277,20 +12277,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 2,
       "references": [
-        {
-          "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 255,
-          "source_group": "docs",
-          "text": "| Fallback inventory                 | [report_normalization_fallback_inventory.py](../../scripts/engineering/qa/report_normalization_fallback_inventory.py) | Reports `fallback_business` vs `fallback_"
-        },
-        {
-          "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 379,
-          "source_group": "docs",
-          "text": "- fallback inventory report: [report_normalization_fallback_inventory.py](../../scripts/engineering/qa/report_normalization_fallback_inventory.py)"
-        },
         {
           "path": "scripts/engineering/qa/__main__.py",
           "line": 138,
@@ -12469,6 +12457,18 @@
       "next_step": "Retain as a bounded manual test-governance report utility while testing guidance still references the direct script path; promote it into the canonical scripts.engineering.qa surface or retire it after the broader test-governance workflow is consolidated."
     },
     {
+      "path": "scripts/engineering/qa/report_vcr_cassette_census.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": [],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded VCR census utility pending consolidation into the canonical QA command surface; do not count it as a new active entrypoint."
+    },
+    {
       "path": "scripts/engineering/qa/report_vcr_metadata_catalog.py",
       "type": "py",
       "status": "active",
@@ -12558,7 +12558,7 @@
         },
         {
           "path": "tests/architecture/test_test_matrix_lane_policy.py",
-          "line": 333,
+          "line": 345,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/run_architecture_audit_read_only.py\""
         }
@@ -12710,7 +12710,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 269,
+          "line": 275,
           "source_group": "tests",
           "text": "Path(\"scripts/engineering/qa/run_observability_closure_campaign.py\"),"
         }
@@ -13152,8 +13152,15 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": ".github/ISSUES/RH-2026-07-28-ROOT-HYGIENE-MINIMIZATION-ISSUE-PACK.md",
+          "line": 14,
+          "source_group": "other",
+          "text": "- `scripts/engineering/repo/_root_governance.py`"
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-07-15",
@@ -14469,13 +14476,25 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 23,
+      "reference_count": 25,
       "references": [
         {
           "path": "docs/00-project/governance/03-file-policy.md",
           "line": 57,
           "source_group": "docs",
           "text": "| `docker-setup.ps1` | retired root script | `scripts/ops/docker-setup.ps1` | do not restore root filename; use the scripts-owned command-compatible helper |"
+        },
+        {
+          "path": "docs/03-guides/cheatsheets/cli-commands.md",
+          "line": 779,
+          "source_group": "docs",
+          "text": "| `scripts.ops` | Ops helpers (docker setup, data maintenance) | `scripts/ops/docker-setup.ps1` / `.sh` |"
+        },
+        {
+          "path": "docs/03-guides/cheatsheets/cli-commands.md",
+          "line": 800,
+          "source_group": "docs",
+          "text": "| `scripts/ops/docker-setup.ps1` | Docker stack helpers (when Docker work is explicitly required) |"
         },
         {
           "path": "docs/05-operations/verification/docker-helper-root-relocation-audit.md",
@@ -14506,18 +14525,6 @@
           "line": 88,
           "source_group": "docs",
           "text": "| `build` | `scripts/ops/docker-setup.sh build` | `.\\scripts\\ops\\docker-setup.ps1 build` | retained `bioetl:latest` build from `Dockerfile.bioetl` |"
-        },
-        {
-          "path": "docs/05-operations/verification/docker-helper-root-relocation-audit.md",
-          "line": 89,
-          "source_group": "docs",
-          "text": "| `start` | `scripts/ops/docker-setup.sh start` | `.\\scripts\\ops\\docker-setup.ps1 start` | retained main stack start plus health check |"
-        },
-        {
-          "path": "docs/05-operations/verification/docker-helper-root-relocation-audit.md",
-          "line": 90,
-          "source_group": "docs",
-          "text": "| `start-full` | `scripts/ops/docker-setup.sh start-full` | `.\\scripts\\ops\\docker-setup.ps1 start-full` | retained image build, full helper stack start, and health check |"
         }
       ]
     },
@@ -14526,7 +14533,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 34,
+      "reference_count": 35,
       "references": [
         {
           "path": "Makefile",
@@ -15309,6 +15316,43 @@
       ]
     },
     {
+      "path": "scripts/ops/observability/grafana/_apply_ds2_all.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": [],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a one-off DS2 migration helper for auditability; do not promote it to an active operator workflow."
+    },
+    {
+      "path": "scripts/ops/observability/grafana/apply_dux2_residual.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": ".github/ISSUES/DS2-2026-07-28-DASHBOARD-SYSTEM-2-REFACTOR-ISSUE-PACK.md",
+          "line": 130,
+          "source_group": "other",
+          "text": "- Residual scripts: `scripts/ops/observability/grafana/apply_dux2_residual.py`, `render_nav_bus.py`"
+        },
+        {
+          "path": "tests/architecture/test_observability_dashboard_tooling.py",
+          "line": 45,
+          "source_group": "tests",
+          "text": "\"apply_dux2_residual.py\","
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a one-off DUX2 residual migration helper for auditability; do not promote it to an active operator workflow."
+    },
+    {
       "path": "scripts/ops/observability/grafana/audit_live_grafana_panels.py",
       "type": "py",
       "status": "active",
@@ -15347,7 +15391,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 267,
+          "line": 273,
           "source_group": "tests",
           "text": "Path(\"scripts/ops/observability/grafana/audit_live_grafana_panels.py\"),"
         },
@@ -15393,7 +15437,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 371,
+          "line": 377,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py\""
         },
@@ -15446,13 +15490,31 @@
       "agent_usage": [
         "grafana-dashboard-extension"
       ],
-      "reference_count": 5,
+      "reference_count": 9,
       "references": [
         {
           "path": ".codex/skills/grafana-dashboard-extension/SKILL.md",
           "line": 78,
           "source_group": "skills",
           "text": "Generate HTML via `scripts/ops/observability/grafana/render_nav_bus.py`."
+        },
+        {
+          "path": ".github/ISSUES/DS2-2026-07-28-DASHBOARD-SYSTEM-2-REFACTOR-ISSUE-PACK.md",
+          "line": 130,
+          "source_group": "other",
+          "text": "- Residual scripts: `scripts/ops/observability/grafana/apply_dux2_residual.py`, `render_nav_bus.py`"
+        },
+        {
+          "path": "docs/00-project/ai/skills/local/grafana-dashboard-extension/SKILL.md",
+          "line": 85,
+          "source_group": "docs",
+          "text": "Generate HTML via `scripts/ops/observability/grafana/render_nav_bus.py`."
+        },
+        {
+          "path": "docs/03-guides/dashboards/dashboard-system-2.0-phase2-residual.md",
+          "line": 47,
+          "source_group": "docs",
+          "text": "5. Nav readability polish via `render_nav_bus.py`."
         },
         {
           "path": "docs/03-guides/dashboards/library-panels-inventory.md",
@@ -15505,7 +15567,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 268,
+          "line": 274,
           "source_group": "tests",
           "text": "Path(\"scripts/ops/observability/grafana/rerender_grafana_screenshots.py\"),"
         }
@@ -15526,7 +15588,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 266,
+          "line": 272,
           "source_group": "tests",
           "text": "Path(\"scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py\"),"
         },
@@ -15584,7 +15646,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 129,
+          "line": 134,
           "source_group": "docs",
           "text": "- On Linux, `setup_grafana_screenshot_runtime.sh` is the canonical bootstrap"
         },
@@ -15608,7 +15670,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 368,
+          "line": 374,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh\""
         },
@@ -15639,7 +15701,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 1704,
+          "line": 1691,
           "source_group": "other",
           "text": "powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/start_quarantine_explorer.ps1"
         }
@@ -16436,7 +16498,7 @@
         },
         {
           "path": "docs/00-project/governance/root-local-clutter-cleanup.md",
-          "line": 60,
+          "line": 73,
           "source_group": "docs",
           "text": "- `scripts/ops/runtime/docker/watchdog-docker-stable.ps1` defaults state/logs to"
         },

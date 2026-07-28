@@ -57,6 +57,7 @@ def test_runtime_stage_lag_primary_panel_is_timeseries() -> None:
 
 
 def test_no_state_timeline_on_continuous_stage_lag() -> None:
+    violations: list[str] = []
     for path in _DASHBOARDS:
         dashboard = load_dashboard(path)
         if dashboard.get("uid") not in _OPERATOR_UIDS:
@@ -67,10 +68,11 @@ def test_no_state_timeline_on_continuous_stage_lag() -> None:
             for target in panel.get("targets") or []:
                 expr = str(target.get("expr") or "")
                 if _continuous_lag_expr(expr):
-                    raise AssertionError(
+                    violations.append(
                         f"{path.name} panel id={panel.get('id')} title={panel.get('title')!r}: "
                         "state-timeline cannot host continuous bioetl_stage_lag_seconds"
                     )
+    assert violations == []
 
 
 def test_incident_status_maps_value_three_and_null() -> None:

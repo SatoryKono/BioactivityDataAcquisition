@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections import Counter
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.manifest.diagnostics.dq_details import (
     DQDetailsSummary,
@@ -196,4 +196,4 @@ def build_final_diagnostics_summary(
         )
     )
     attach_summary_reproducibility_views(final_summary)
-    return cast(dict[str, object], final_summary)
+    return final_summary

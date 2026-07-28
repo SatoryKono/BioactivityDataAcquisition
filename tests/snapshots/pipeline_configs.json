@@ -2765,15 +2765,7 @@
       "exclude_if_present": [],
       "list_contains_filters": [],
       "list_length_filters": [],
-      "range_filters": [
-        {
-          "column": "publication_year",
-          "include_max": true,
-          "include_min": true,
-          "max_value": 2050.0,
-          "min_value": 1950.0
-        }
-      ],
+      "range_filters": [],
       "required_fields": [
         "molecule_id",
         "molecular_formula"
@@ -4795,15 +4787,7 @@
       "exclude_if_present": [],
       "list_contains_filters": [],
       "list_length_filters": [],
-      "range_filters": [
-        {
-          "column": "publication_year",
-          "include_max": true,
-          "include_min": true,
-          "max_value": 2050.0,
-          "min_value": 1950.0
-        }
-      ],
+      "range_filters": [],
       "required_fields": [
         "accession",
         "entry_name",

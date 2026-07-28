@@ -34,6 +34,7 @@ PROGRESSIVE_DISCLOSURE_ROWS = {
     ("bioetl-dq-v2.json", "Run context (thin) → Run Explorer"),
     ("bioetl-dq-v2.json", "Run lane · Silver/Gold rejects"),
     ("bioetl-dq-v2.json", "Now lane · validation diagnostics"),
+    ("bioetl-incident-v1.json", "Domain suspect detail (forensics)"),
     ("bioetl-overview-v2.json", "Alert/SLO Triage"),
     ("bioetl-overview-v2.json", "Diagnostics & Docs (Logs / Traces / Raw Metrics)"),
     ("bioetl-overview-v2.json", "L1 Historical Trends"),

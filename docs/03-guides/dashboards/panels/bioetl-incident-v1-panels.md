@@ -37,7 +37,7 @@ rules only. Not a persistent working record. Not Grafana Drilldown Investigation
 - **Purpose:** ≤4 operator steps; honest read-only bounds; hops via Navigation bus.
 - **Data sources:** Static operator copy.
 
-### 5. Ranked Active Suspects (`id=2010`)
+### 5. Ranked Active Suspects
 - **Type:** Table (primary first-screen localization)
 - **Purpose:** Cross-domain ranked suspects (Runtime / Provider / DQ) with domain label and scoped handoff links.
 - **Data sources:** `bioetl_runtime_current_blocker_reason`, `bioetl_provider_current_cause`, `bioetl_dq_current_reason` (merged instant tables)
@@ -46,6 +46,13 @@ rules only. Not a persistent working record. Not Grafana Drilldown Investigation
 ### 5b. Domain suspect detail (collapsed row)
 - **Runtime / Provider / DQ tables** remain as forensic detail under a collapsed row (not peer first-screen verdicts).
 - Each domain table keeps a data link to its workspace.
+
+| ID | Panel title |
+| --- | --- |
+| 2099 | Domain suspect detail (forensics) |
+| 2002 | Active Suspects · Runtime |
+| 2003 | Active Suspects · Provider |
+| 2004 | Active Suspects · DQ |
 
 ### 8. Current Alerts (firing/pending)
 - **Type:** Table

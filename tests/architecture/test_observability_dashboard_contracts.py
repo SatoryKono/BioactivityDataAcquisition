@@ -35,9 +35,6 @@ _DQ_BLOCKED_RATIO_RE = re.compile(
 )
 _PROMQL_METRIC_SELECTOR_RE = re.compile(r"([a-zA-Z_:][a-zA-Z0-9_:]*)\{([^{}]*)\}")
 _FORBIDDEN_DASHBOARD_TOKENS = ("checkpoint_saved_at_epoch_seconds",)
-_FIRST_SCREEN_MAX_Y = 31
-
-
 def _load_allowlist() -> tuple[frozenset[str], frozenset[str]]:
     payload = yaml.safe_load(ALLOWLIST_PATH.read_text(encoding="utf-8"))
     metrics = frozenset(
@@ -154,7 +151,7 @@ def test_dq_dashboard_must_not_use_hardcoded_blocked_share_verdict_math() -> Non
     assert not offenders, "\n".join(offenders)
 
 
-def test_dq_quarantine_count_is_visible_on_first_screen() -> None:
+def test_dq_quarantine_count_is_shipped_in_range_evidence_lane() -> None:
     dashboard = json.loads(
         (DASHBOARD_DIR / "bioetl-dq-v2.json").read_text(encoding="utf-8")
     )
@@ -163,22 +160,25 @@ def test_dq_quarantine_count_is_visible_on_first_screen() -> None:
         "Range · Records Quarantined",
         "Track: DQ Blocked Records in Range (Evidence)",
     }
-    panel = next(
+    range_lane = next(
         (
             item
             for item in dashboard.get("panels", [])
+            if item.get("title") == "Range lane · debug evidence"
+        ),
+        None,
+    )
+    assert range_lane is not None
+    panel = next(
+        (
+            item
+            for item in range_lane.get("panels", [])
             if item.get("title") in accepted_titles
         ),
         None,
     )
     assert panel is not None
     assert panel.get("type") != "row"
-    grid_pos = panel.get("gridPos", {})
-    assert isinstance(grid_pos, dict)
-    y_pos = int(grid_pos.get("y", 999))
-    assert y_pos < _FIRST_SCREEN_MAX_Y, (
-        f"Quarantine count panel must stay above fold (y < {_FIRST_SCREEN_MAX_Y}), got y={y_pos}"
-    )
 
 
 def test_pipeline_summary_dashboards_apply_run_type_to_labelled_metrics() -> None:

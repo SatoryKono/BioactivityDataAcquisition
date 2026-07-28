@@ -12,7 +12,7 @@ ______________________________________________________________________
 
 Single reference page for composite entity configs (DOC-GOV-05 / #6885).
 
-**Normative decision:** [ADR-026](../../02-architecture/decisions/ADR-026-composite-pipelines.md)
+**Normative decision:** [ADR-026](../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md)
 **Code posture:** path-only composite stubs (entity registry validates paths;
 runtime wiring remains composition-owned). Do not invent a second composite
 provider layer in docs.
@@ -52,7 +52,7 @@ identifier, and DQ policy described in ADR-026.
 
 | Doc | Role |
 | --- | --- |
-| [ADR-026](../../02-architecture/decisions/ADR-026-composite-pipelines.md) | Normative composite decision |
+| [ADR-026](../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md) | Normative composite decision |
 | [data-layers.md](../../02-architecture/data-layers.md) | Medallion storage semantics |
 | [dq-configuration.md](../../03-guides/dq-configuration.md) | DQ multi-default thresholds |
 | [contract-facet-matrix.md](contract-facet-matrix.md) | Contract facet coverage |

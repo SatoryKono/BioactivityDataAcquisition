@@ -1,2 +1,0 @@
-pyproject.toml: [94mnote:[0m unused section(s): module = ['boto3.*', 'botocore', 'botocore.*', 'click', 'click.*', 'httpx', 'httpx.*', 'memory', 'memory.*', 'orjson.*', 'prometheus_client.*', 'psutil', 'psutil.*', 'pubchempy.*', 'pydantic_settings', 'pydantic_settings.*', 's3transfer', 's3transfer.*', 'structlog.*', 'vcr.*', 'yaml.*', 'zstandard', 'zstandard.*'][0m
-[1m[92mSuccess: no issues found in 1 source file[0m

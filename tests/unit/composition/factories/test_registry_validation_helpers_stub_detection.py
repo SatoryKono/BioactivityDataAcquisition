@@ -4,9 +4,13 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from bioetl.composition.factories.pipeline_support.registry_validation_helpers import (
     _is_legacy_composite_entity_stub,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def test_legacy_stub_detected_by_parent_directory_only(tmp_path: Path) -> None:

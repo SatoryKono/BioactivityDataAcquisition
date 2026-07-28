@@ -13,6 +13,8 @@ from bioetl.application.services.control_plane.manifest.validation_provenance im
     _validate_executable_code_provenance,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _spec(**launch: object) -> SimpleNamespace:
     return SimpleNamespace(launch_context=dict(launch))

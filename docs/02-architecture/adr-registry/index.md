@@ -7,19 +7,19 @@ Canonical live ADR index: `docs/02-architecture/decisions/README.md`.
 This page is a generated governance mirror and MUST be regenerated via
 `python3 scripts/generate_adr_registry.py` after ADR additions or metadata changes.
 
-**Total ADRs**: 52
+**Total ADRs**: 53
 **Last Updated**: 2026-07-28
 
 ## 📊 Status Summary
 
 | Status | Count | Percentage |
 |--------|-------|------------|
-| `accepted` | 50 | 96.2% |
+| `accepted` | 51 | 96.2% |
 | `superseded` | 2 | 3.8% |
 
 ## 🟢 Accepted ADRs
 
-### 50 decisions
+### 51 decisions
 
 ### ADR-001: Delta Lake vs Parquet
 
@@ -615,6 +615,19 @@ takes...
 `co...
 
 [📄 View Full ADR](../decisions/ADR-052-infrastructure-config-package-root-public-api.md)
+
+---
+
+### ADR-053: Optional Grafana Scenes App Shell as Presentation Adapter
+
+**Status**: `accepted` | **Category**: `Observability` | **Owner**: `BioETL Team`
+
+**Relationships**: Related: ADR-010, ADR-017
+
+**Context**: BioETL ships a fixed portfolio of **seven** provisioned Grafana dashboards
+(`grafana/dashboards/*.json`) as the operator observability surface. Grafan...
+
+[📄 View Full ADR](../decisions/ADR-053-optional-grafana-scenes-app-shell.md)
 
 ---
 

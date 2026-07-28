@@ -80,9 +80,9 @@ Before editing:
 
 Preserve the current shipped model unless the task explicitly changes it:
 
-- All eight navigation panels (`id=1000`) render the complete visual bus
-  `0. Control Plane` through `6. Alerts & SLO`, followed by
-  `Silver Reject Explorer`, `Explore Logs`, and `Explore Traces`.
+- All seven navigation panels (`id=1000`) render the complete visual bus
+  `0. Trust` through `6. Run Explorer` (Provider on-bus; Incident + Run adjuncts).
+  Generate HTML via `scripts/ops/observability/grafana/render_nav_bus.py`.
 - The current dashboard remains visible as a disabled, theme-safe item;
   machine-readable `panel.links` omit only the self-link.
 - Dashboard handoffs preserve `${__url_time_range}`. Every Logs/Traces
