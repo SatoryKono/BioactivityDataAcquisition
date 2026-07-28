@@ -118,7 +118,7 @@ is `SELECTED RUN`, and score/count/freshness evidence below the answer row is
 - **Purpose:** Count Silver filter rejects.
 - **Data sources:** `bioetl_silver_filter_rejections_total`
 
-### 21. Silver Structural / Gold Contract-Semantic Rejects
+### 21. Run lane · Silver/Gold rejects
 - **Type:** Row
 - **Purpose:** Collapsed-by-default reject analysis; expand after current reasons
   or TIME RANGE delivery-impact cards identify a reject path.
@@ -149,7 +149,7 @@ is `SELECTED RUN`, and score/count/freshness evidence below the answer row is
 - **Purpose:** Show top Silver reject fields.
 - **Data sources:** `bioetl_silver_filter_reject_field_total`
 
-### 27. Validation Failures / Runtime Diagnostics / Trends
+### 27. Now lane · validation diagnostics
 - **Type:** Row
 - **Purpose:** Collapsed-by-default validation/runtime/trend forensics.
 - **Data sources:** `bioetl_dq_validation_failures_total`, `bioetl_dq_anomaly_detected`
@@ -200,12 +200,12 @@ is `SELECTED RUN`, and score/count/freshness evidence below the answer row is
 - **Purpose:** Count Gold strict validation failures.
 - **Data sources:** `bioetl_dq_validation_failures_total`
 
-### 37. Range / debug evidence
+### 37. Range lane · debug evidence
 - **Type:** Row
 - **Purpose:** Group selected-range score, quarantine, and reject evidence.
 - **Data sources:** Prometheus range evidence from the nested panels.
 
-### 38. Run context (identity / processed records)
+### 38. Run context (thin) → Run Explorer
 - **Type:** Row
 - **Purpose:** Group selected-run identity and processed-record HTTP evidence.
 - **Data sources:** BioETL Ops HTTP.

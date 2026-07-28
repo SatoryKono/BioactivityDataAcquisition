@@ -866,6 +866,8 @@ _LOCAL_IDENTITY_DASHBOARDS = frozenset(
         "bioetl-provider-health-v2.json",
         "bioetl-dq-v2.json",
         "bioetl-workflow-overview.json",
+        "bioetl-incident-v1.json",
+        "bioetl-run-explorer-v1.json",
     }
 )
 
@@ -1359,7 +1361,11 @@ def _assert_visual_bus_base_content(
         "sanitization without a style block"
     )
     required_tokens = _SANITIZER_SAFE_NAV_TOKENS
-    if dashboard_name == "bioetl-provider-health-v2.json":
+    if dashboard_name in {
+        "bioetl-provider-health-v2.json",
+        "bioetl-incident-v1.json",
+        "bioetl-run-explorer-v1.json",
+    }:
         required_tokens = tuple(
             token
             for token in _SANITIZER_SAFE_NAV_TOKENS
@@ -1377,9 +1383,13 @@ def _assert_visual_bus_base_content(
 def _assert_current_dashboard_disabled_in_visual_bus(
     *, dashboard_name: str, uid: str, content: str
 ) -> None:
-    if uid == "bioetl-provider-health-v2":
+    if uid in {
+        "bioetl-provider-health-v2",
+        "bioetl-incident-v1",
+        "bioetl-run-explorer-v1",
+    }:
         assert 'aria-current="page"' not in content, (
-            f"{dashboard_name} is off-bus and must not mark a primary title as current"
+            f"{dashboard_name} is off-bus/adjunct and must not mark a primary title as current"
         )
         return
     current_title = _EXPECTED_CURRENT_NAV_TITLE[uid]

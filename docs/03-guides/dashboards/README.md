@@ -19,13 +19,25 @@ monitoring surface reduction 2026-07-23)
 
 ## Актуальные документы
 
+### Dashboard System 2.0 (active design track, epic #6800)
+
+- `operator-ux-v2.md` — first-screen zones, prose budget, empty-state taxonomy, link standard, KPI targets.
+- `verdict-ontology.md` — state×confidence×basis×next_action for all workspaces.
+- `migration-map-v2.md` — current uid → target workspace; alert entry rebind.
+- `library-panels-inventory.md` — logical shared chrome (nav/status/actions/matrices).
+- `metrics-readiness-matrix.md` — first-screen panels vs existing recording rules (no invented series).
+- `usability-baseline-protocol.md` — stopwatch protocol for S1–S6.
+- Baseline report: `reports/observability/usability-baseline.md`.
+
+### Inventory and usage
+
 - `dashboard-inventory.md` — canonical human-readable mapping between shipped
   dashboard JSON, docs, datasources и naming/versioning policy.
 - `monitoring-index.md` — canonical reading order по monitoring docs.
 - `dashboard-v2-usage.md` — как использовать дашборды в операционной работе, включая runtime adaptive-memory triage.
 - `dashboard-extension-human.md` — краткое руководство для инженера по расширению shipped dashboards.
 - `dashboard-extension-llm.md` — краткий playbook для LLM/AI-агента по безопасной правке dashboard JSON и docs cascade.
-- `v3.0/` — draft-spec ветка для следующей линии дашбордов: execution-aware template, selector-resolution mirror и `1. Overview` hybrid L0 plan.
+- `v3.0/` — draft-spec ветка; first-screen surgery for 2.0 supersedes prose-first patterns where they conflict.
 - `variables-guide.md` — фактические Grafana variables и их PromQL.
 - `variable-reference.md` — человеческий contract для shipped dashboard variables: role, fallback, scope, propagation.
 - `selector-architecture.md` — selector taxonomy, dashboard families, hidden handoff model и future execution-selector design.
@@ -40,10 +52,12 @@ monitoring surface reduction 2026-07-23)
   detection and audit tooling;
 - panel docs и usage guides не должны конкурировать с inventory role.
 
-Текущий shipped surface (после reduction 2026-07-23):
+Текущий shipped surface (Dashboard System 2.0 / 2026-07-28):
 
-- **7 dashboards**, navigation bus `0..6` only (no Silver Reject Explorer, no
-  Loki/Tempo Explore adjuncts).
+- **7 dashboards** (portfolio cap): Trust, Overview/Fleet, Pipeline Diagnostics,
+  Provider Health, Data Quality/Data Trust, Incident Workspace, Run Explorer.
+  Navigation bus `0..4` on primary boards; Incident/Run as adjunct workspaces
+  (no Silver Reject Explorer, no Loki/Tempo Explore adjuncts).
 - Identity HTTP panels use datasource **BioETL Ops HTTP** → main health server
   `:8000` (`BIOETL_OPS_HTTP_URL`).
 - Record-level quarantine forensics: CLI `bioetl quarantine inspect` (not Grafana).

@@ -120,15 +120,19 @@ def test_diagnostics_domain_package_lazy_exports_command() -> None:
 
 @pytest.mark.unit
 def test_maintenance_domain_package_lazy_exports_public_group() -> None:
-    """Maintenance domain package should bridge to the public maintenance module."""
+    """Maintenance domain package owns the group; public seam re-exports it."""
     package = importlib.import_module(
         "bioetl.interfaces.cli.commands.domains.maintenance"
+    )
+    owner_module = importlib.import_module(
+        "bioetl.interfaces.cli.commands.domains.maintenance.command_group"
     )
     public_module = importlib.import_module(
         "bioetl.interfaces.cli.commands.maintenance"
     )
 
-    assert package.__getattr__("maintenance") is public_module.maintenance
+    assert package.__getattr__("maintenance") is owner_module.maintenance
+    assert public_module.maintenance is owner_module.maintenance
 
     with pytest.raises(AttributeError, match="unknown"):
         package.__getattr__("unknown")

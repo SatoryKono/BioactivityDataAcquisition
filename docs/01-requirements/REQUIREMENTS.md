@@ -77,7 +77,7 @@ MUST сохранять этот label contract; детализация по col
 
 ## ADR coverage
 
-The catalog explicitly covers the current architecture through ADR-050,
+The catalog explicitly covers the current architecture through ADR-052,
 including:
 
 - ADR-044 — Run Manifest and Run Ledger control plane;
@@ -86,7 +86,9 @@ including:
 - ADR-047 — declarative workflow control plane;
 - ADR-048 — domain schema boundary and Pandera runtime compatibility;
 - ADR-049 — context-aware LOC target policy;
-- ADR-050 — Silver structural and Gold semantic filter boundary.
+- ADR-050 — Silver structural and Gold semantic filter boundary;
+- ADR-051 — QuarantineEntry wide constructor as intentional aggregate surface;
+- ADR-052 — `bioetl.infrastructure.config` package root as permanent public API.
 
 ADR presence is not proof of implementation. Use the executable evidence in the
 traceability CSV and inspect the cited code, configuration, and tests.
@@ -108,6 +110,7 @@ increased as a documentation remedy.
 
 ## Version history
 
+- v1.12.1 (2026-07-28): ADR coverage extended through ADR-052 (ARCH-REF-07).
 - v1.12 (2026-07-23): restored the requirements entry point and explicit
   traceability to all 168 crosswalk rows, `RULES.md` v6.1.4, ADR-001…ADR-050,
   runtime/configuration surfaces, and executable evidence.

@@ -1,6 +1,6 @@
 {
-  "generated": "2026-07-27T18:53:06.571581",
-  "total_adrs": 51,
+  "generated": "2026-07-28T10:03:21.539141",
+  "total_adrs": 52,
   "adrs": [
     {
       "adr_number": "001",
@@ -988,16 +988,34 @@
       "superseded_by": [],
       "related": [],
       "tags": []
+    },
+    {
+      "adr_number": "052",
+      "title": "Infrastructure Config Package Root as Permanent Public API",
+      "file_path": "ADR-052-infrastructure-config-package-root-public-api.md",
+      "status": "accepted",
+      "source_status": "Accepted",
+      "category": "Architecture",
+      "owner": "BioETL Team",
+      "decision_date": "2026-07-28",
+      "last_reviewed": "2026-07-28",
+      "context": "Among public lazy facades, `bioetl.infrastructure.config` (package root at\n`src/bioetl/infrastructure/config/__init__.py`) was still classified as\n`compatibility_debt` while first-party `src/` impo...",
+      "decision": "**Promote `bioetl.infrastructure.config` to permanent external public API.**\n1. Classification in `public_lazy_facade_inventory.yaml` is\n   `external_public_api` (not `compatibility_debt`).\n2. Firs...",
+      "consequences": "- Issue #6790 closes by reclassification + inventory sync, not by deleting the root.\n- Compatibility census continues to fail-fast if first-party src importers reappear.\n- Future removal would requ...",
+      "supersedes": [],
+      "superseded_by": [],
+      "related": [],
+      "tags": []
     }
   ],
   "stats": {
     "by_status": {
-      "accepted": 49,
+      "accepted": 50,
       "superseded": 2
     },
     "by_category": {
       "Storage": 3,
-      "Architecture": 10,
+      "Architecture": 11,
       "Locking": 1,
       "Data Modeling": 3,
       "Observability": 5,

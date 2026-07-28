@@ -43,6 +43,14 @@ required_top_level_links_by_uid:
   - 1. Overview
   - 2. Pipeline Diagnostics
   - 4. Data Quality
+  bioetl-incident-v1:
+  - 0. Trust
+  - 1. Overview
+  - 2. Pipeline Diagnostics
+  - 4. Data Quality
+  bioetl-run-explorer-v1:
+  - 0. Trust
+  - 1. Overview
 top_level_link_priority_by_uid:
   bioetl-overview-v2:
   - title: 2. Pipeline Diagnostics
@@ -85,6 +93,14 @@ required_link_vars_by_target_uid:
   - run_type
   - provider
   - pipeline_context
+  bioetl-incident-v1:
+  - workflow
+  - pipeline
+  - run_type
+  bioetl-run-explorer-v1:
+  - workflow
+  - pipeline
+  - run_type
 allowed_dashboard_link_vars:
   bioetl-overview-v2:
   - workflow
@@ -116,6 +132,17 @@ allowed_dashboard_link_vars:
   - pipeline
   - run_type
   - run_id
+  bioetl-incident-v1:
+  - workflow
+  - pipeline
+  - run_type
+  - run_id
+  - provider
+  bioetl-run-explorer-v1:
+  - workflow
+  - pipeline
+  - run_type
+  - run_id
 forbidden_dashboard_link_vars_by_target_uid:
   bioetl-overview-v2:
   - quarantine_run_id
@@ -142,6 +169,16 @@ forbidden_dashboard_link_vars_by_target_uid:
   - payload_hash
   - manifest_id
   - execution_fingerprint
+  bioetl-incident-v1:
+  - quarantine_run_id
+  - payload_hash
+  - manifest_id
+  - execution_fingerprint
+  bioetl-run-explorer-v1:
+  - quarantine_run_id
+  - payload_hash
+  - manifest_id
+  - execution_fingerprint
 preserved_identity_handoff:
   selector: run_id
   required_value: $run_id
@@ -151,18 +188,21 @@ preserved_identity_handoff:
   - bioetl-overview-v2
   - bioetl-provider-health-v2
   - bioetl-runtime
+  - bioetl-incident-v1
+  - bioetl-run-explorer-v1
   target_uids:
   - bioetl-control-plane-v1
   - bioetl-dq-v2
   - bioetl-overview-v2
   - bioetl-provider-health-v2
   - bioetl-runtime
+  - bioetl-incident-v1
+  - bioetl-run-explorer-v1
   excluded_source_uids: []
   excluded_target_uids: []
-  semantics: Preserve exact primary Run ID when both source and target dashboards expose the primary control-plane
-    run_id selector. Alert dashboard does not preserve primary run_id when it does not own the primary
-    identity selector. Record-level quarantine forensics use CLI bioetl quarantine inspect (Silver Reject
-    Explorer dashboard removed 2026-07-23).
+  semantics: Preserve exact primary Run ID when both source and target dashboards expose the primary control-plane run_id
+    selector. Alert dashboard does not preserve primary run_id when it does not own the primary identity selector. Record-level
+    quarantine forensics use CLI bioetl quarantine inspect (Silver Reject Explorer dashboard removed 2026-07-23).
 required_discoverable_inbound_paths:
   L1:
     bioetl-runtime:
@@ -302,6 +342,8 @@ default_time_refresh_policy:
     - bioetl-control-plane-v1
     - bioetl-provider-health-v2
     - bioetl-dq-v2
+    - bioetl-incident-v1
+    - bioetl-run-explorer-v1
     time_from: now-12h
     refresh: 60s
   Alerts:
@@ -336,8 +378,6 @@ navigation_transition_contract:
       - bioetl-runtime
       - bioetl-control-plane-v1
       - bioetl-dq-v2
-      # Provider Health is interim/off-bus: reachable via First Action dataLinks,
-      # not primary navigation top-level edges.
       required_outbound:
       - bioetl-overview-v2
       required_inbound:

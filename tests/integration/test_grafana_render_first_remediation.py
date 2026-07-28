@@ -212,7 +212,11 @@ def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
             if tag == "span" and attrs.get("aria-current") == "page"
         ]
         uid = str(dashboard.get("uid") or "")
-        if uid == "bioetl-provider-health-v2":
+        if uid in {
+            "bioetl-provider-health-v2",
+            "bioetl-incident-v1",
+            "bioetl-run-explorer-v1",
+        }:
             assert len(links) == 4, path.name
             assert len(current) == 0, path.name
         else:
@@ -259,11 +263,15 @@ def test_rf003_1024_layout_prioritizes_actions_and_readability() -> None:
     overview = _load("bioetl-overview-v2.json")
     first_action = _panel(overview, 215)
     assert first_action["title"] == "First Action"
-    assert first_action["gridPos"]["h"] >= 10
+    # Dashboard 2.0 / DUX-02: compact First Action beside Inputs evidence matrix.
+    assert first_action["gridPos"]["h"] >= 4
     assert first_action["gridPos"]["w"] >= 8
     assert len(str(first_action["title"])) <= 24
     assert len(first_action.get("options", {}).get("dataLinks", [])) >= 4
-    assert _panel(overview, 9002)["gridPos"]["w"] == 24
+    inputs = _panel(overview, 9002)
+    assert inputs["title"] == "Inputs"
+    assert inputs["gridPos"]["y"] == first_action["gridPos"]["y"]
+    assert inputs["gridPos"]["w"] >= 10
 
     provider = _load("bioetl-provider-health-v2.json")
     # Provider detail progressive panels remain first-screen-friendly.

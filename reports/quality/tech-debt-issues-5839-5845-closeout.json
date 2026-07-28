@@ -92,8 +92,8 @@
       "source": "reports/quality/full-app-duplication-baseline.json"
     },
     "config_surface_duplicate_clusters": {
-      "current": 20,
-      "max": 23,
+      "current": 10,
+      "max": 10,
       "previous_audit_baseline": 24,
       "source": "reports/quality/config-surface-backlog.json"
     },

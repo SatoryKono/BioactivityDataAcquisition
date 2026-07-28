@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "Operational provider health incident dashboard for health-check latency, adapter/API pressure, retry exhaustion, circuit-breaker state, and provider-level failure share.",
+  "description": "Provider Explorer (population-first). First screen answers which providers are degraded via GLOBAL severity matrix and top causes. Selected provider detail is secondary. Empty-state taxonomy: VALID EMPTY vs projection gap.",
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
@@ -225,15 +225,15 @@
       "id": 9002,
       "type": "text",
       "title": "First Action",
-      "description": "First operator CTA for global provider incidents and early-warning provider causes. Start with the current GLOBAL severity matrix, then telemetry freshness, then critical providers and top causes. Treat selected-provider Status as supporting scoped evidence; if Status is UNKNOWN, treat that as missing provider-current-status evidence until telemetry freshness and raw enum evidence say otherwise. Use this after the current answer row; selected-range latency/error evidence stays below and downstream Runtime or Control Plane follow-up depends on the diagnosed cause.",
+      "description": "Population-first CTA. Start with GLOBAL severity and top causes before selected-provider scope. Empty top causes with non-OK severity is an explainability gap, not a healthy signal. First operator CTA for global provider incidents and early-warning provider causes. Start with the current GLOBAL severity matrix, then telemetry freshness, then critical providers and top causes. Treat selected-provider Status as supporting scoped evidence; if Status is UNKNOWN, treat that as missing provider-current-status evidence until telemetry freshness and raw enum evidence say otherwise. Use this after the current answer row; selected-range latency/error evidence stays below and downstream Runtime or Control Plane follow-up depends on the diagnosed cause.",
       "gridPos": {
-        "h": 10,
-        "w": 14,
+        "h": 4,
+        "w": 24,
         "x": 0,
         "y": 7
       },
       "options": {
-        "content": "<h3>First Action</h3><p><b>1.</b> Read GLOBAL WARN/CRIT and telemetry freshness. <b>2.</b> Open the top cause/critical provider. <b>3.</b> Use selected-range cards only as supporting evidence.</p>",
+        "content": "<h3>First Action</h3><p><b>Fleet first:</b> GLOBAL severity matrix + top causes (no provider selection required). <b>Then:</b> telemetry freshness, critical providers, selected-provider detail (supporting only).</p><p><b>Empty causes:</b> VALID EMPTY if no active failures; if severity is non-OK while causes empty, treat as projection gap — check scrape/rules (DUX-09) and provider incident runbook.</p><p><b>Fleet vs selected:</b> selected Status may be OK while GLOBAL is CRIT.</p>",
         "mode": "html"
       },
       "links": [
@@ -264,7 +264,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Provider severity mapping: 0=OK, 1=DEGRADED, 2=FAILING; null/NaN=UNKNOWN. This matrix now uses the active Grafana time selector and shows the most severe observed provider-current-status sample for each provider inside that window. Raw provider health status remains panel id=114 with 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY. This matrix intentionally stays GLOBAL and does not filter by pipeline. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id, pipeline, run_type, or selected provider unless the panel title says selected provider.",
+      "description": "FLEET population severity (all providers in scope), not selected-provider Status. Provider severity mapping: 0=OK, 1=DEGRADED, 2=FAILING; null/NaN=UNKNOWN. This matrix now uses the active Grafana time selector and shows the most severe observed provider-current-status sample for each provider inside that window. Raw provider health status remains panel id=114 with 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY. This matrix intentionally stays GLOBAL and does not filter by pipeline. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id, pipeline, run_type, or selected provider unless the panel title says selected provider.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -324,7 +324,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 17
+        "y": 11
       },
       "id": 9101,
       "options": {
@@ -435,7 +435,7 @@
         "h": 7,
         "w": 6,
         "x": 8,
-        "y": 17
+        "y": 11
       },
       "id": 9102,
       "options": {
@@ -475,7 +475,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Top provider causes from canonical cause recording rules using current/instant selectors (not selected-range history): raw status, failure rate, retry exhaustion, latency, HTTP errors, or rate-limit pressure. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id.",
+      "description": "Canonical provider cause projection from bioetl_provider_current_cause. Top provider causes using current/instant selectors (not selected-range history): raw status, failure rate, retry exhaustion, latency, HTTP errors, or rate-limit pressure. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id. Population-first fleet evidence (not selected-provider only). Empty table while GLOBAL severity is non-OK is an explainability gap — check scrape/rules (DUX-09).",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -500,7 +500,7 @@
               }
             }
           ],
-          "noValue": "No canonical provider causes projected. If critical providers remain visible, treat this as an explainability gap and inspect raw provider status plus optional telemetry.",
+          "noValue": "No active causes (VALID EMPTY); non-OK severity without causes = explainability gap",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -526,7 +526,7 @@
         "h": 7,
         "w": 10,
         "x": 14,
-        "y": 17
+        "y": 11
       },
       "id": 9103,
       "options": {
@@ -652,7 +652,7 @@
         "h": 5,
         "w": 8,
         "x": 0,
-        "y": 24
+        "y": 18
       },
       "id": 9104,
       "options": {
@@ -691,7 +691,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 29
+        "y": 23
       },
       "id": 91,
       "title": "Selected Provider Detail",
@@ -1656,7 +1656,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 30
+        "y": 24
       },
       "id": 9404,
       "panels": [
@@ -2142,13 +2142,13 @@
     },
     {
       "type": "row",
-      "title": "Run context (identity / processed records)",
+      "title": "Run context (thin) → Run Explorer",
       "collapsed": true,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 31
+        "y": 25
       },
       "id": 9405,
       "panels": [
@@ -2748,7 +2748,10 @@
     "bioetl",
     "provider",
     "health",
-    "v2"
+    "v2",
+    "provider-explorer",
+    "population-first",
+    "dashboard-2.0"
   ],
   "templating": {
     "list": [

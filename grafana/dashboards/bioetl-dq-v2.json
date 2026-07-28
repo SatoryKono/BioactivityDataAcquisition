@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "Primary question: is Data Quality currently OK/WARN/CRIT/UNKNOWN for the selected pipeline, and which selected-range evidence explains the state? First screen is a pipeline-wide 15m current-status snapshot; selected-range evidence stays below fold.",
+  "description": "Data Trust Explorer with three visually labeled lanes: Now, Run, Range. First screen promotes current reasons; range freshness is supporting impact.",
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
@@ -100,7 +100,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Primary compact Data Quality verdict for the selected pipeline scope. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Workflow is context/evidence only; run_id is local control-plane identity context and does not filter Prometheus. Monitor DQ Current Status below is an expanded first-screen mirror of this same current-status recording rule, not an independent second verdict. Sole first-screen status (dual twin removed #6572).",
+      "description": "NOW-lane current DQ status only (bioetl_dq_current_status). Not comparable to Range freshness or Run reject tables as a peer badge. Primary compact Data Quality verdict for the selected pipeline scope. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Workflow is context/evidence only; run_id is local control-plane identity context and does not filter Prometheus. Monitor DQ Current Status below is an expanded first-screen mirror of this same current-status recording rule, not an independent second verdict. Sole first-screen status (dual twin removed #6572).",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -202,16 +202,16 @@
       "type": "text",
       "title": "Review: First Action",
       "gridPos": {
-        "h": 10,
-        "w": 14,
+        "h": 4,
+        "w": 24,
         "x": 0,
         "y": 7
       },
       "options": {
-        "content": "<h3>First Action</h3><p><b>1.</b> Read CURRENT verdict/reason. <b>2.</b> Read TIME RANGE delivery impact separately. <b>3.</b> Open the Silver explorer for structural rejects or expand the matching cause row.</p>",
+        "content": "<h3>First Action — three lanes (not peer badges)</h3><p><b>Now:</b> Status + threshold + current reasons (conformance now).</p><p><b>Run:</b> expand Silver/Gold reject rows for structural/quarantine evidence.</p><p><b>Range:</b> freshness / attrition impact — do not compare as peer severity to Now.</p>",
         "mode": "html"
       },
-      "description": "Operator CTA for first-pass DQ triage. It explains what to do for CRIT versus WARN states, clarifies that the answer row above is pipeline-wide current state while run_type and stage mainly shape selected-range evidence, and explicitly distinguishes reject-path evidence from quarantine/validation blockers when filtered_out remains zero.",
+      "description": "Data Trust Explorer CTA. Three evidence lanes: Now (current rules/state), Run (rejects/quarantine), Range (freshness/impact). These are not peer-comparable severity badges. Operator CTA for first-pass DQ triage. It explains what to do for CRIT versus WARN states, clarifies that the answer row above is pipeline-wide current state while run_type and stage mainly shape selected-range evidence, and explicitly distinguishes reject-path evidence from quarantine/validation blockers when filtered_out remains zero.",
       "links": [
         {
           "title": "Review current status",
@@ -292,10 +292,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 7,
-        "w": 6,
-        "x": 6,
-        "y": 17
+        "h": 6,
+        "w": 8,
+        "x": 0,
+        "y": 11
       },
       "id": 9101,
       "options": {
@@ -372,10 +372,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 17
+        "h": 6,
+        "w": 16,
+        "x": 8,
+        "y": 11
       },
       "id": 9102,
       "options": {
@@ -450,10 +450,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "x": 0,
+        "y": 17,
         "w": 8,
-        "x": 16,
-        "y": 24
+        "h": 5
       },
       "id": 8,
       "options": {
@@ -532,10 +532,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
-        "w": 8,
-        "x": 16,
-        "y": 30
+        "x": 8,
+        "y": 17,
+        "w": 16,
+        "h": 5
       },
       "id": 154,
       "options": {
@@ -577,10 +577,10 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 35
+        "y": 22
       },
       "id": 220,
-      "title": "Silver Structural / Gold Contract-Semantic Rejects",
+      "title": "Run lane · Silver/Gold rejects",
       "type": "row",
       "panels": [
         {
@@ -995,10 +995,10 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 36
+        "y": 23
       },
       "id": 221,
-      "title": "Validation Failures / Runtime Diagnostics / Trends",
+      "title": "Now lane · validation diagnostics",
       "type": "row",
       "panels": [
         {
@@ -2009,13 +2009,13 @@
     },
     {
       "type": "row",
-      "title": "Range / debug evidence",
+      "title": "Range lane · debug evidence",
       "collapsed": true,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 37
+        "y": 24
       },
       "id": 9404,
       "panels": [
@@ -2351,13 +2351,13 @@
     },
     {
       "type": "row",
-      "title": "Run context (identity / processed records)",
+      "title": "Run context (thin) → Run Explorer",
       "collapsed": true,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 38
+        "y": 25
       },
       "id": 9405,
       "panels": [
@@ -2958,7 +2958,10 @@
     "data-quality",
     "dq",
     "validation",
-    "v2"
+    "v2",
+    "data-trust",
+    "three-lane",
+    "dashboard-2.0"
   ],
   "templating": {
     "list": [

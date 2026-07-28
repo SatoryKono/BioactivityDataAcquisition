@@ -32,6 +32,16 @@ ______________________________________________________________________
 
 ## Procedure
 
+### UI entry (Dashboard System 2.0)
+
+1. **Fleet / Overview** (`bioetl-overview-v2`) or **Incident Workspace**
+   (`bioetl-incident-v1`) for alert/first-suspect hops.
+2. Domain explorers: Pipeline (`bioetl-runtime`), Provider
+   (`bioetl-provider-health-v2`), Data Trust (`bioetl-dq-v2`), Trust
+   (`bioetl-control-plane-v1`).
+3. **Run Explorer** (`bioetl-run-explorer-v1`) for exact HTTP identity / processed
+   records (`run_id` never a Prometheus label).
+
 ### Severity Levels
 
 | Level  | Description                                                                             | Response SLA | Recovery SLA |

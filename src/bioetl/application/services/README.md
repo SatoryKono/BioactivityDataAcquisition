@@ -19,6 +19,7 @@
 | `execution/` | Pipeline runner service collaborators | `@bioetl-architecture` |
 | `run_reports/` | Run-report enrichment, markdown, writer | `@bioetl-architecture` |
 | `protein/` | Protein classification hierarchy resolution | `@bioetl-data-model` |
+| `medallion/` | Medallion lifecycle clear/vacuum/prepare orchestration | `@bioetl-architecture` |
 | package root (legacy) | Cross-cutting services not yet rehomed (metrics, quarantine, export, checkpoints, …) | `@bioetl-architecture` |
 
 ## No-growth rule (root modules)

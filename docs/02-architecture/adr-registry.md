@@ -7,19 +7,19 @@ Canonical live ADR index: `docs/02-architecture/decisions/README.md`.
 This page is a generated governance mirror and MUST be regenerated via
 `python3 scripts/generate_adr_registry.py` after ADR additions or metadata changes.
 
-**Total ADRs**: 51
-**Last Updated**: 2026-07-27
+**Total ADRs**: 52
+**Last Updated**: 2026-07-28
 
 ## 📊 Status Summary
 
 | Status | Count | Percentage |
 |--------|-------|------------|
-| `accepted` | 49 | 96.1% |
-| `superseded` | 2 | 3.9% |
+| `accepted` | 50 | 96.2% |
+| `superseded` | 2 | 3.8% |
 
 ## 🟢 Accepted ADRs
 
-### 49 decisions
+### 50 decisions
 
 ### ADR-001: Delta Lake vs Parquet
 
@@ -606,12 +606,13 @@ takes...
 
 ---
 
-### ADR-052: infrastructure.config Package-Root as Permanent External Public API
+### ADR-052: Infrastructure Config Package Root as Permanent Public API
 
 **Status**: `accepted` | **Category**: `Architecture` | **Owner**: `BioETL Team`
 
-**Context**: Package-root facade `bioetl.infrastructure.config` was residual
-`compatibility_debt` while first-party src importers are already zero...
+**Context**: Among public lazy facades, `bioetl.infrastructure.config` (package root at
+`src/bioetl/infrastructure/config/__init__.py`) was still classified as
+`co...
 
 [📄 View Full ADR](decisions/ADR-052-infrastructure-config-package-root-public-api.md)
 

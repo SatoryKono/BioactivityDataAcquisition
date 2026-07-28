@@ -1721,7 +1721,9 @@
       "implementation_owner_paths": [
         "configs/quality/constructor_waivers.yaml",
         "configs/quality/domain_aggregate_classification.yaml",
+        "docs/00-project/NORMATIVE_SOURCES.md",
         "docs/00-project/RULES.md",
+        "docs/01-requirements/REQUIREMENTS.md",
         "tests/architecture/test_adr_enforcement_matrix.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/unit/domain/aggregates/test_quarantine_entry.py",
@@ -1734,20 +1736,27 @@
     },
     {
       "adr_id": "ADR-052",
-      "category": "architecture",
+      "category": "Architecture",
       "decision_date": "2026-07-28",
       "decision_path": "docs/02-architecture/decisions/ADR-052-infrastructure-config-package-root-public-api.md",
       "enforcement_owner_paths": [
-        "configs/quality/public_lazy_facade_inventory.yaml"
+        "configs/quality/internal_compatibility_shim_inventory.yaml",
+        "configs/quality/public_lazy_facade_inventory.yaml",
+        "tests/architecture/test_adr_registry_governance_sync.py"
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
-        "configs/quality/public_lazy_facade_inventory.yaml"
+        "configs/quality/internal_compatibility_shim_inventory.yaml",
+        "configs/quality/public_lazy_facade_inventory.yaml",
+        "docs/00-project/NORMATIVE_SOURCES.md",
+        "docs/00-project/RULES.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "tests/architecture/test_adr_registry_governance_sync.py"
       ],
       "manual_exception": null,
       "owner": "BioETL Team",
       "status": "enforced",
-      "title": "infrastructure config package root public api"
+      "title": "Infrastructure Config Package Root as Permanent Public API"
     }
   ],
   "schema_version": 1,

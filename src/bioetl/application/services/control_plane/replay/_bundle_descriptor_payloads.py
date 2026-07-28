@@ -4,13 +4,18 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
+from importlib import import_module
 
 from bioetl.application.services.control_plane.manifest.inspection_result_model import (
     RunManifestInspectionResult,
 )
-from bioetl.application.services.control_plane.manifest.replay_taxonomy import (
-    resolve_replay_taxonomy_projection,
-)
+
+
+def resolve_replay_taxonomy_projection(*args: object, **kwargs: object) -> object:
+    """Lazy import taxonomy projection (ARCH-REF-04 fan-in headroom)."""
+    return import_module(
+        "bioetl.application.services.control_plane.manifest.replay_taxonomy"
+    ).resolve_replay_taxonomy_projection(*args, **kwargs)
 
 
 def dict_or_empty(value: object) -> dict[str, object]:

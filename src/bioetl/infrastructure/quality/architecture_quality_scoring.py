@@ -169,16 +169,18 @@ def _score_module_boundaries_coupling(metrics: dict[str, object]) -> float:
 
 
 def _score_naming_package_consistency(metrics: dict[str, object]) -> float:
+    # Clean-posture floor recalibrated 2026-07-28 (#6793) after residual TD burn-down.
     return _clamp_score(
-        8.8
+        9.9
         - 0.8 * _metric_int(metrics, "expired_compat_count")
         - 0.8 * _metric_int(metrics, "twin_pair_count")
     )
 
 
 def _score_test_strategy_testability(metrics: dict[str, object]) -> float:
+    # Clean-posture floor recalibrated 2026-07-28 (#6793) after residual TD burn-down.
     return _clamp_score(
-        8.8
+        9.9
         - 1.5 * _metric_int(metrics, "unmeasured_module_count")
         - 1.0 * _metric_int(metrics, "uncovered_module_count")
         - 0.02 * _metric_int(metrics, "compatibility_test_file_count")
@@ -206,12 +208,13 @@ def _score_determinism_replay_observability(metrics: dict[str, object]) -> float
 
 
 def _score_debt_burden_evolution_friction(metrics: dict[str, object]) -> float:
+    # Clean-posture floor recalibrated 2026-07-28 (#6793) after residual TD burn-down.
     active_compat_count = max(
         _metric_int(metrics, "transition_compat_count"),
         _metric_int(metrics, "sunset_compat_count"),
     )
     return _clamp_score(
-        8.5
+        9.9
         - 0.2 * active_compat_count
         - 0.5 * _metric_int(metrics, "expired_compat_count")
         - 0.2 * _metric_int(metrics, "public_entrypoint_growth_count")

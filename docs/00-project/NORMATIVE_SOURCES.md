@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-16'
+  Last verified: '2026-07-28'
 
 ______________________________________________________________________
 
@@ -51,6 +51,8 @@ mirrors в `docs/00-project/ai/**` остаются navigation/guidance surfaces
 | Composite pipelines | §2.9 | ADR-026 |
 | DQ contracts | §2.8 | ADR-027, ADR-045 |
 | Control-plane / replay | §2.4, §6.1 | ADR-044, ADR-046, ADR-047 |
+| Quarantine aggregate constructor surface | §2.6 | ADR-051 |
+| Infrastructure config public package root | §1, composition | ADR-052 |
 | HTTP client / retry / rate limit | §4.1.1, §5.1 | ADR-032 |
 | Observability | §3.2 | ADR-017, ADR-019 |
 | Testing | §4.2 | ADR-042 |

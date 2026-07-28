@@ -57,6 +57,43 @@ repo_wide_zero_import_classification:
       rationale:
         Canonical owner for the lazily exported StageAccountingPort protocol;
         first-party consumers must import it through the bioetl.domain.ports facade.
+    - module_path: src/bioetl/application/services/control_plane/manifest/diagnostics/base.py
+      module_name: bioetl.application.services.control_plane.manifest.diagnostics.base
+      disposition: retain_dynamic_entrypoint
+      reviewed_on: "2026-07-28"
+      review_by: "2026-10-26"
+      linked_issue: "#6786"
+      rationale:
+        Loaded via importlib from diagnostics/__init__.py for ARCH-REF fan-in
+        control; static import scans stay at zero by design.
+    - module_path: src/bioetl/application/services/control_plane/manifest/diagnostics/finalization.py
+      module_name: bioetl.application.services.control_plane.manifest.diagnostics.finalization
+      disposition: retain_dynamic_entrypoint
+      reviewed_on: "2026-07-28"
+      review_by: "2026-10-26"
+      linked_issue: "#6786"
+      rationale:
+        Loaded via importlib from diagnostics/__init__.py for ARCH-REF fan-in
+        control; static import scans stay at zero by design.
+    - module_path: src/bioetl/application/services/control_plane/manifest/diagnostics/replay_refresh_support.py
+      module_name: bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support
+      disposition: retain_dynamic_entrypoint
+      reviewed_on: "2026-07-28"
+      review_by: "2026-10-26"
+      linked_issue: "#6786"
+      rationale:
+        Loaded via importlib from diagnostics/__init__.py for ARCH-REF fan-in
+        control; static import scans stay at zero by design.
+    - module_path: src/bioetl/interfaces/cli/commands/maintenance.py
+      module_name: bioetl.interfaces.cli.commands.maintenance
+      disposition: retain_public_facade
+      reviewed_on: "2026-07-28"
+      review_by: "2026-10-26"
+      linked_issue: "#6791"
+      rationale:
+        Sanctioned external/public re-export of the maintenance Click group.
+        First-party runtime discovery uses domains.maintenance.command_group;
+        static first-party src importers stay at zero by design after #6791.
 families:
   - name: adapter_layer
     owner: "@bioetl-platform"

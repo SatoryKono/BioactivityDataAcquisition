@@ -1,7 +1,12 @@
 # Dashboard Design System (BioETL)
 
-Дата актуализации: **2026-07-13**
+Дата актуализации: **2026-07-28**
 Источник истины: `grafana/dashboards/*.json`
+
+**Dashboard System 2.0:** operator first-screen contract and verdict model live in
+[operator-ux-v2.md](operator-ux-v2.md) and [verdict-ontology.md](verdict-ontology.md).
+Prose-first first screens (giant Provenance / multi-paragraph First Action without
+evidence) are **deprecated**. Evidence strip + status + ≤4 CTAs is required.
 
 ## 1) Единая семантика состояний (обязательно)
 

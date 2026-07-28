@@ -83,6 +83,19 @@ EXPECTED_VARS_BY_DASHBOARD = {
         "run_type",
         "run_id",
     },
+    "bioetl-incident-v1.json": {
+        "workflow",
+        "pipeline",
+        "run_type",
+        "run_id",
+        "provider",
+    },
+    "bioetl-run-explorer-v1.json": {
+        "workflow",
+        "pipeline",
+        "run_type",
+        "run_id",
+    },
     "bioetl-workflow-overview.json": {
         "workflow",
         "workflow_context",

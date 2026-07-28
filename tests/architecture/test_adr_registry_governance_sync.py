@@ -31,8 +31,8 @@ def test_adr_registry_mirrors_track_latest_decision_index() -> None:
         str(entry["adr_number"]).zfill(3) for entry in registry_payload["adrs"]
     }
 
-    assert expected_total == 51
-    assert latest_adr == "051"
+    assert expected_total == 52
+    assert latest_adr == "052"
     assert registry_payload["total_adrs"] == expected_total
     assert len(registry_payload["adrs"]) == expected_total
     assert latest_adr in registry_numbers
@@ -51,8 +51,10 @@ def test_rules_and_requirements_do_not_publish_stale_adr_ceiling() -> None:
     assert "[ADR-049]" in rules_text
     assert "[ADR-050]" in rules_text
     assert "[ADR-051]" in rules_text
+    assert "[ADR-052]" in rules_text
     assert "ADR-050" in decisions_index_text
     assert "ADR-051" in decisions_index_text
+    assert "ADR-052" in decisions_index_text
 
 
 def test_filters_docs_keep_adr_050_as_canonical_boundary() -> None:
