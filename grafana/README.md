@@ -1,7 +1,7 @@
 # BioETL Мониторинг: Prometheus + Grafana
 
-**Версия документа:** 2.3.0
-**Дата обновления:** 2026-07-27
+**Версия документа:** 2.4.0
+**Дата обновления:** 2026-07-28
 **Статус:** Opt-in local adjunct (ADR-010) — not part of the default release bundle
 **Совместимость:** BioETL v6.x (current main), Grafana 12, Prometheus 3.x
 
@@ -311,20 +311,20 @@ ______________________________________________________________________
 │  ┌──────────────────────────────────────────────────────────┐    │
 │  │  Provisioning (автоматическая загрузка)                    │    │
 │  │  - Datasources: Prometheus + BioETL Ops HTTP (:8000) │    │
-│  │  - Dashboards: 5 JSON файлов (bioetl.yaml)               │    │
+│  │  - Dashboards: 7 JSON files (bioetl.yaml)                │    │
 │  │  - Обновление каждые 30 секунд                            │    │
 │  │  - allowUiUpdates: false для production dashboard-as-code  │    │
 │  └──────────────────────────────────────────────────────────┘    │
 │                                                                   │
-│  Дашборды (shipped):                                             │
-│  - 0. Control Plane (bioetl-control-plane-v1)                    │
-│  - 1. Overview (bioetl-overview-v2)                               │
-│  - 2. Runtime (bioetl-runtime)                                   │
+│  Дашборды (shipped, bus 0..6):                                   │
+│  - 0. Trust / Control Plane (bioetl-control-plane-v1)            │
+│  - 1. Overview (bioetl-overview-v2)                              │
+│  - 2. Pipeline Diagnostics / Runtime (bioetl-runtime)            │
 │  - 3. Provider Health (bioetl-provider-health-v2)                │
 │  - 4. Data Quality (bioetl-dq-v2)                                │
-│  - 5. Workflow (bioetl-workflow-overview)                        │
-│  - 6. Alerts & SLO (bioetl-alerts-slo)                           │
-│  - (removed) Silver Reject Explorer                              │
+│  - 5. Incident Workspace (bioetl-incident-v1)                    │
+│  - 6. Run Explorer (bioetl-run-explorer-v1)                      │
+│  - Retired: workflow-overview, alerts-slo, silver-reject-explorer│
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -355,22 +355,20 @@ grafana/
 ├── provisioning/
 │   ├── datasources-core/
 │   │   ├── prometheus.yml             # Datasource: Prometheus → Grafana
-│   │   └── bioetl-ops-http.yml    # Datasource: BioETL Ops HTTP (Infinity)
-│   ├── datasources-tracing/
-│   │   └── (removed) loki.yml / tempo.yml
+│   │   └── bioetl-ops-http.yml        # Datasource: BioETL Ops HTTP (Infinity)
+│   ├── datasources-tracing/           # removed 2026-07-23 (no Loki/Tempo ship)
 │   └── dashboards/
 │       └── bioetl.yaml                # Dashboard provisioning config
 └── dashboards/
-    ├── bioetl-control-plane-v1.json   # 0. Control Plane, replay/resume safety
-    ├── bioetl-overview-v2.json        # 1. Overview, canonical frozen v3 baseline
-    ├── bioetl-runtime.json            # 2. Runtime triage: blockers, latency, backlog, handoffs
+    ├── bioetl-control-plane-v1.json   # 0. Trust / Control Plane
+    ├── bioetl-overview-v2.json        # 1. Overview (+ collapsed Alert/SLO triage)
+    ├── bioetl-runtime.json            # 2. Pipeline Diagnostics (workflow band)
     ├── bioetl-provider-health-v2.json # 3. Provider Health (v2)
     ├── bioetl-dq-v2.json              # 4. Data Quality (v2)
-    ├── bioetl-workflow-overview.json  # 5. Declarative workflow run/step overview
-    ├── bioetl-alerts-slo.json         # 6. Alerts & SLO triage surface
-    └── (removed) bioetl-silver-reject-explorer.json
+    ├── bioetl-incident-v1.json        # 5. Incident Workspace
+    └── bioetl-run-explorer-v1.json    # 6. Run Explorer (Ops HTTP identity)
 
-docker-compose.monitoring.yml          # Docker Compose для стека мониторинга
+docker-compose.monitoring.yml          # Opt-in: Prometheus + Pushgateway + Grafana + renderer
 
 src/bioetl/
 ├── domain/ports/observability/        # MetricsPort, TracingPort, LoggerPort, DQMonitorPort (Protocols)
@@ -750,27 +748,18 @@ ______________________________________________________________________
 - CLI publishes via `publish_metrics_safely` after `bioetl run` / workflow completion
   (`best_effort_on_run_completion`).
 
-Опциональный профиль `tracing` добавляет:
+### Optional log/trace backends (BYO — not shipping)
 
-- `Loki` на `:3100` для поиска по структурированным логам
-- `Promtail` для ingestion локальных `reports/logs/*.log` и
-  `reports/logs/*.jsonl`
-- legacy-совместимость с историческим `logs/*.log` / `logs/*.jsonl`, если
-  такие runtime surfaces всё ещё примонтированы
-- `Tempo` на `:3200` и OTLP gRPC `:4317` для trace storage
-- дополнительные Grafana datasources `Loki` и `Tempo`
+Loki, Promtail, Tempo, and Quarantine Explorer UI were **removed from the
+shipping monitoring surface on 2026-07-23**. Do not document or provision them
+as required BioETL local adjuncts.
 
-В shipped Loki config уже включено:
-
-```yaml
-limits_config:
-  allow_structured_metadata: true
-  volume_enabled: true
-```
-
-`volume_enabled: true` держим включённым как baseline для Grafana Explore и
-live log-volume inspection. Это не влияет напрямую на Prometheus panels, но
-полезно для Loki-side triage и runtime validation.
+- Use structured application logs on disk / process stdout and Prometheus
+  metrics for default operator forensics.
+- External log/trace backends remain **bring-your-own**; empty Grafana Explore
+  for Loki/Tempo is expected on the default stack.
+- Historical narrative about a compose `tracing` profile is **obsolete** —
+  see `docs/05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md`.
 
 ### 4.2 Сетевая топология
 
@@ -800,11 +789,9 @@ Host override (optional):
 | Prometheus API     | `http://localhost:9090/api/v1/...` | 9090 | HTTP API для PromQL                     |
 | Pushgateway        | `http://localhost:9091`            | 9091 | Push endpoint для ad-hoc/ephemeral jobs |
 | Grafana UI         | `http://localhost:3000`            | 3000 | Дашборды; password from `GF_SECURITY_ADMIN_PASSWORD` |
-| Grafana Explore    | `http://localhost:3000/explore`    | 3000 | Ad-hoc PromQL запросы                   |
+| Grafana Explore    | `http://localhost:3000/explore`    | 3000 | Ad-hoc PromQL (Prometheus only on default stack) |
 | Grafana Dashboards | `http://localhost:3000/dashboards` | 3000 | Список дашбордов                        |
-| Loki API           | `http://localhost:3100`            | 3100 | Log query/search backend                |
-| Tempo API          | `http://localhost:3200`            | 3200 | Trace query backend                     |
-| Tempo OTLP gRPC    | `localhost:4317`                   | 4317 | Trace ingestion endpoint                |
+| Loki / Tempo / OTLP | —                                 | —    | **Not shipping** (removed 2026-07-23); BYO only |
 
 ______________________________________________________________________
 
@@ -2556,19 +2543,22 @@ ______________________________________________________________________
 
 ## 26. Сводная таблица дашбордов
 
-Panel counts below are non-row panels / row panels from shipped JSON
-(`python -m scripts.engineering.qa report-dashboard-inventory --check`).
+Canonical human inventory (panel counts, datasources, versioning):
+`docs/03-guides/dashboards/dashboard-inventory.md`.
+Machine mapping: `docs/03-guides/dashboards/contracts/dashboard-inventory.yaml`.
 
-| Dashboard                 | UID                             | JSON version | Panels / rows | Refresh | Time Range | Primary surface | Purpose |
-| ------------------------- | ------------------------------- | ------------ | ------------- | ------- | ---------- | --------------- | ------- |
-| 0. Control Plane          | `bioetl-control-plane-v1`       | 2            | 52 / 5        | 30s     | 12h        | Prometheus + BioETL Ops HTTP identity | Replay/resume trust, manifest/ledger/checkpoint evidence, shared identity shell |
-| 1. Overview               | `bioetl-overview-v2`            | 1            | 21 / 4        | 30s     | 12h        | Prometheus + BioETL Ops HTTP identity | L0 answer, compact L1 current-state cards, side-by-side Inputs/Workflow matrices, collapsed alert and historical detail |
-| 2. Runtime                | `bioetl-runtime`                | 3            | 38 / 4        | 30s     | 12h        | Prometheus + Loki + BioETL Ops HTTP identity | Incident triage: blockers, latency, backlog, logs/traces row, handoffs |
-| 3. Provider Health        | `bioetl-provider-health-v2`     | 6            | 28 / 1        | 30s     | 12h        | Prometheus + BioETL Ops HTTP identity | Provider latency, health, retries, failure ratios |
-| 4. Data Quality           | `bioetl-dq-v2`                  | 4            | 34 / 2        | 30s     | 12h        | Prometheus + BioETL Ops HTTP identity | CURRENT/SELECTED RUN/TIME RANGE scopes; freshness hours SLA 24/72; collapsed forensics |
-| 5. Workflow               | `bioetl-workflow-overview`      | 2            | 15 / 1        | 30s     | 12h        | Prometheus + BioETL Ops HTTP identity | Neutral zero counts, explicit outcome terminal states, collapsed step detail |
-| 6. Alerts & SLO           | `bioetl-alerts-slo`             | 1            | 7 / 0         | 30s     | 24h        | Prometheus `ALERTS` | First-class firing alert and SLO/SLA pressure triage surface; does not implement alert rules in dashboard queries |
-| Silver Reject Explorer    | `bioetl-silver-reject-explorer` | 1001         | 14 / 2        | 1m      | 24h        | BioETL Ops HTTP API | Backend-health-gated progressive sequence with collapsed trends and narrowed record detail |
+| Dashboard | UID | Primary surface | Purpose |
+| --- | --- | --- | --- |
+| 0. Trust | `bioetl-control-plane-v1` | Prometheus + BioETL Ops HTTP | Replay/resume trust, manifest/ledger/checkpoint |
+| 1. Overview | `bioetl-overview-v2` | Prometheus + BioETL Ops HTTP | L0 answer, L1 cards, collapsed Alert/SLO triage |
+| 2. Pipeline Diagnostics | `bioetl-runtime` | Prometheus + BioETL Ops HTTP | Blockers, latency, backlog, workflow band |
+| 3. Provider Health | `bioetl-provider-health-v2` | Prometheus + BioETL Ops HTTP | Provider latency, health, failure taxonomy |
+| 4. Data Quality | `bioetl-dq-v2` | Prometheus + BioETL Ops HTTP | DQ current/range, quarantine aggregates |
+| 5. Incident Workspace | `bioetl-incident-v1` | Prometheus | Multi-domain suspects + ALERTS support |
+| 6. Run Explorer | `bioetl-run-explorer-v1` | BioETL Ops HTTP | Exact-run identity (never Prom `run_id` labels) |
+
+**Retired (not shipped):** `bioetl-workflow-overview`, `bioetl-alerts-slo`,
+`bioetl-silver-reject-explorer`. Do not list them as active routing targets.
 
 ______________________________________________________________________
 
