@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import platform
 from pathlib import Path
 
 import pytest
@@ -14,6 +15,10 @@ from tests.integration._consolidation_suite_support import (
 pytestmark = [
     pytest.mark.integration,
     pytest.mark.no_api,
+    pytest.mark.skipif(
+        "microsoft" in platform.release().lower(),
+        reason="Skipped on WSL due to asyncio teardown on cloud-mounted storage",
+    ),
 ]
 
 

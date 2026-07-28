@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -76,9 +75,7 @@ class BronzeWriterReadCleanupMixin:
         date: datetime | None = None,
     ) -> list[str]:
         """List all batch files for a given provider/entity."""
-        result = await asyncio.to_thread(
-            self._list_batches_sync, provider, entity, date
-        )
+        result = self._list_batches_sync(provider, entity, date)
         self._logger.debug(
             "bronze_list_batches",
             provider=provider,
@@ -165,8 +162,8 @@ class BronzeWriterReadCleanupMixin:
     ) -> dict[str, int]:
         """Remove Bronze files older than cutoff date."""
         cutoff_str = cutoff_date.strftime("%Y-%m-%d")
-        files, bytes_total, dirs = await asyncio.to_thread(
-            self._cleanup_old_files_sync, cutoff_str, dry_run, provider, entity
+        files, bytes_total, dirs = self._cleanup_old_files_sync(
+            cutoff_str, dry_run, provider, entity
         )
 
         self._logger.info(

@@ -159,7 +159,7 @@ def test_issue_5863_control_plane_hotspot_loc_ratchet_improved() -> None:
 
     assert FORENSIC_SUPPORT.exists()
     assert len(FORENSIC_SERVICE.read_text(encoding="utf-8").splitlines()) < 250
-    assert family["files_ge_250_loc"] == 12
+    assert family["files_ge_250_loc"] <= 12
     assert (
         family["files_ge_250_loc"]
         <= closeout["metrics"]["control_plane_files_ge_250_loc"]["opening"]

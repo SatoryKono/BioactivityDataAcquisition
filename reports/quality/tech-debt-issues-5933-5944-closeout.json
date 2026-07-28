@@ -117,7 +117,7 @@
       "source": "reports/quality/compatibility-importer-census.json"
     },
     "source_module_count": {
-      "current": 2279,
+      "current": 2281,
       "source": "reports/quality/module-coverage-inventory.json"
     },
     "source_tree_sha256": {

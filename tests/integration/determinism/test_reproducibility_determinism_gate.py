@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import platform
 from pathlib import Path
 
 import pytest
@@ -21,6 +22,10 @@ pytestmark = [
     pytest.mark.integration,
     pytest.mark.no_api,
     pytest.mark.asyncio,
+    pytest.mark.skipif(
+        "microsoft" in platform.release().lower(),
+        reason="Skipped on WSL due to asyncio teardown on cloud-mounted storage",
+    ),
 ]
 
 

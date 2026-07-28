@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import platform
 from pathlib import Path, PurePosixPath
 from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
@@ -27,6 +28,10 @@ from tests.helpers.control_plane_replay import (
 pytestmark = [
     pytest.mark.relaxed_dq,
     pytest.mark.usefixtures("relaxed_dq_env"),
+    pytest.mark.skipif(
+        "microsoft" in platform.release().lower(),
+        reason="Skipped on WSL due to asyncio teardown on cloud-mounted storage",
+    ),
 ]
 
 _PIPELINE_KEY = "chembl/activity"

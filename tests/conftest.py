@@ -9,7 +9,7 @@ import random
 import sys
 import threading
 import traceback
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from functools import cache
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
@@ -545,9 +545,22 @@ def _is_wsl() -> bool:
 
 
 def _configure_wsl_timeout(config: pytest.Config) -> None:
-    """Increase pytest timeout on WSL due to slower filesystem access."""
+    """Apply WSL-specific safeguards for the cloud-mounted test runtime."""
     if not _is_wsl():
         return
+
+    async def _run_inline[ResultT](
+        func: Callable[..., ResultT],
+        /,
+        *args: object,
+        **kwargs: object,
+    ) -> ResultT:
+        return func(*args, **kwargs)
+
+    # Python 3.13 on the WSL cloud-mounted checkout can lose the event-loop
+    # completion callback after a default-executor worker has already finished.
+    # Tests then hang indefinitely in otherwise completed local filesystem I/O.
+    asyncio.to_thread = _run_inline
 
     # Increase timeout from default 60s to 180s on WSL
     try:
