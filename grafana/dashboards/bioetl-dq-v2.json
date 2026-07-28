@@ -108,7 +108,7 @@
       "type": "text",
       "title": "Provenance",
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 16,
         "x": 0,
         "y": 3
@@ -124,7 +124,7 @@
       "type": "stat",
       "title": "Status",
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 8,
         "x": 16,
         "y": 3
@@ -133,7 +133,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "NOW-lane current DQ status only (bioetl_dq_current_status). Not comparable to Range freshness or Run reject tables as a peer badge. Primary compact Data Quality verdict for the selected pipeline scope. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Workflow is context/evidence only; run_id is local control-plane identity context and does not filter Prometheus. Monitor DQ Current Status below is an expanded first-screen mirror of this same current-status recording rule, not an independent second verdict. Sole first-screen status (dual twin removed #6572).",
+      "description": "NOW-lane current DQ status only (bioetl_dq_current_status). Not comparable to Range freshness or Run reject tables as a peer badge. Primary compact Data Quality verdict for the selected pipeline scope. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Workflow is context/evidence only; run_id is local control-plane identity context and does not filter Prometheus. Monitor DQ Current Status below is an expanded first-screen mirror of this same current-status recording rule, not an independent second verdict. Sole first-screen status (dual twin removed #6572). UNKNOWN — DQ status series absent (not healthy zero).",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -235,10 +235,10 @@
       "type": "text",
       "title": "Review: First Action",
       "gridPos": {
-        "h": 4,
+        "h": 2,
         "w": 24,
         "x": 0,
-        "y": 7
+        "y": 6
       },
       "options": {
         "content": "<h3>First Action — three lanes (not peer badges)</h3><ol style='margin:0.2rem 0 0 1.1rem;padding:0'><li><b>Now:</b> Status + threshold + current reasons.</li><li><b>Run:</b> expand Silver/Gold reject rows.</li><li><b>Range:</b> freshness/attrition — never compare as peer severity to Now.</li><li>Empty reasons with OK Status = VALID EMPTY.</li></ol>",
@@ -325,10 +325,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 8,
         "x": 0,
-        "y": 11
+        "y": 8
       },
       "id": 9101,
       "options": {
@@ -401,15 +401,16 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "short",
+          "noValue": "VALID_EMPTY — no current DQ reasons in NOW window"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 16,
         "x": 8,
-        "y": 11
+        "y": 8
       },
       "id": 9102,
       "options": {
@@ -485,7 +486,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 17,
+        "y": 13,
         "w": 8,
         "h": 5
       },
@@ -567,7 +568,7 @@
       },
       "gridPos": {
         "x": 8,
-        "y": 17,
+        "y": 13,
         "w": 16,
         "h": 5
       },
@@ -611,7 +612,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 23
       },
       "id": 220,
       "title": "Run lane · Silver/Gold rejects",
@@ -1029,7 +1030,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 23
+        "y": 24
       },
       "id": 221,
       "title": "Now lane · validation diagnostics",
@@ -2049,7 +2050,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 24
+        "y": 25
       },
       "id": 9404,
       "panels": [
@@ -2217,169 +2218,6 @@
           "title": "Monitor: Worst-Entity DQ Score",
           "type": "stat",
           "description": "Latest pipeline-scoped worst-entity DQ score retained for up to 7 days between runs on the canonical 0.0-1.0 ratio scale, where 1.0 means all records are valid. UNKNOWN means no matching validation score sample exists in that window, not a successful run and not a zero score."
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "description": "TIME RANGE delivery impact. Selected-range quarantine count. Non-zero means records were withheld from normal promotion and require quarantine triage even when Silver filter rejects remain zero; 0 means no quarantined records were reported in the selected window. TIME RANGE evidence only — not a peer verdict with Now.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "mappings": [
-                {
-                  "type": "value",
-                  "options": {
-                    "0": {
-                      "text": "0 · valid empty range",
-                      "color": "gray"
-                    }
-                  }
-                },
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "gray"
-                    }
-                  }
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "gray",
-                    "value": null
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 12,
-            "x": 0,
-            "y": 17
-          },
-          "id": 6,
-          "options": {
-            "colorMode": "value",
-            "dataLinks": [
-              {
-                "targetBlank": true,
-                "title": "Open DQ Investigation Runbook",
-                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/dq-failure-investigation.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
-              }
-            ],
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "targets": [
-            {
-              "expr": "round(sum(max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))",
-              "legendFormat": "Quarantined",
-              "refId": "A"
-            }
-          ],
-          "title": "Range · Records Quarantined",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "mappings": [
-                {
-                  "type": "value",
-                  "options": {
-                    "0": {
-                      "text": "0 · valid empty range",
-                      "color": "gray"
-                    }
-                  }
-                },
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "gray"
-                    }
-                  }
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "gray",
-                    "value": null
-                  }
-                ]
-              },
-              "unit": "short",
-              "links": []
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 12,
-            "x": 12,
-            "y": 17
-          },
-          "id": 117,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "targets": [
-            {
-              "expr": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0))",
-              "instant": true,
-              "legendFormat": "Filtered Out",
-              "refId": "A"
-            }
-          ],
-          "title": "Range · Silver Filter Rejects",
-          "type": "stat",
-          "description": "TIME RANGE delivery impact. Selected-range Silver structural reject count from the filtered_out path only. FILTERED_OUT_SILVER is a legacy alias for this Silver structural path and is not a Gold contract/semantic reject code. A zero here does not refute current CRIT because quarantine, Gold reject outcomes, and Silver validation blockers are separate paths; use first-screen DQ reasons and the quarantine/validation/Gold panels before assuming the incident is filter-driven. The Explorer handoff preserves pipeline/run_type and time range so the operator can validate scoped totals before narrowing by reason_code or field. TIME RANGE evidence only — not a peer verdict with Now."
         }
       ]
     },
@@ -2391,7 +2229,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 25
+        "y": 26
       },
       "id": 9405,
       "panels": [
@@ -2982,6 +2820,169 @@
           ]
         }
       ]
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "TIME RANGE delivery impact. Selected-range quarantine count. Non-zero means records were withheld from normal promotion and require quarantine triage even when Silver filter rejects remain zero; 0 means no quarantined records were reported in the selected window. TIME RANGE evidence only — not a peer verdict with Now.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "0 · valid empty range",
+                  "color": "gray"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "gray",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 18,
+        "w": 12,
+        "h": 5
+      },
+      "id": 6,
+      "options": {
+        "colorMode": "value",
+        "dataLinks": [
+          {
+            "targetBlank": true,
+            "title": "Open DQ Investigation Runbook",
+            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/dq-failure-investigation.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
+          }
+        ],
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "round(sum(max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))",
+          "legendFormat": "Quarantined",
+          "refId": "A"
+        }
+      ],
+      "title": "Range · Records Quarantined",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "0 · valid empty range",
+                  "color": "gray"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "gray",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short",
+          "links": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 18,
+        "w": 12,
+        "h": 5
+      },
+      "id": 117,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0))",
+          "instant": true,
+          "legendFormat": "Filtered Out",
+          "refId": "A"
+        }
+      ],
+      "title": "Range · Silver Filter Rejects",
+      "type": "stat",
+      "description": "TIME RANGE delivery impact. Selected-range Silver structural reject count from the filtered_out path only. FILTERED_OUT_SILVER is a legacy alias for this Silver structural path and is not a Gold contract/semantic reject code. A zero here does not refute current CRIT because quarantine, Gold reject outcomes, and Silver validation blockers are separate paths; use first-screen DQ reasons and the quarantine/validation/Gold panels before assuming the incident is filter-driven. The Explorer handoff preserves pipeline/run_type and time range so the operator can validate scoped totals before narrowing by reason_code or field. TIME RANGE evidence only — not a peer verdict with Now."
     }
   ],
   "refresh": "60s",

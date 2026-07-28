@@ -113,7 +113,7 @@
       "id": 9401,
       "type": "stat",
       "title": "Status",
-      "description": "Worst-of L0 status for selected pipeline/run_type (bioetl_l0_status). Confidence is low when series absent.",
+      "description": "Worst-of L0 status for selected pipeline/run_type (bioetl_l0_status). Confidence is low when series absent. UNKNOWN — L0 status series absent (not OK).",
       "gridPos": {
         "h": 4,
         "w": 8,
@@ -253,7 +253,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "noValue": "VALID EMPTY — no active rows in selected scope",
+          "noValue": "VALID_EMPTY — no active suspects in this domain",
           "custom": {
             "align": "left",
             "cellOptions": {
@@ -317,7 +317,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "noValue": "VALID EMPTY — no active rows in selected scope",
+          "noValue": "VALID_EMPTY — no active suspects in this domain",
           "custom": {
             "align": "left",
             "cellOptions": {
@@ -381,7 +381,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "noValue": "VALID EMPTY — no active rows in selected scope",
+          "noValue": "VALID_EMPTY — no active suspects in this domain",
           "custom": {
             "align": "left",
             "cellOptions": {
@@ -445,7 +445,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "noValue": "VALID EMPTY — no firing/pending alerts now",
+          "noValue": "VALID_EMPTY — no firing/pending alerts now",
           "custom": {
             "align": "left",
             "cellOptions": {
@@ -510,7 +510,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "noValue": "VALID EMPTY — no alert state samples in range",
+          "noValue": "VALID_EMPTY — no alert state samples in selected range",
           "custom": {
             "fillOpacity": 70,
             "lineWidth": 0

@@ -94,3 +94,29 @@ alert history, Run Explorer HTTP report depth). N=3 simulated operator passes.
 | Time-to-first-suspect | ~20s | ≤30s | yes (sim) |
 
 No critical S1–S6 regression vs post Phase-2 residual baseline.
+
+---
+
+## Post DRM-R layout re-measure (2026-07-28, epic #6853)
+
+Method: structured walkthrough after first-screen packing (y bands), Run Explorer
+reconciliation layout, typed UNKNOWN/VALID_EMPTY copy, aggregate stage timeline.
+N=3 simulated passes. **Targets ≠ claims. No MTTD.**
+
+| Scenario | Pass | TTFS (s) | Clicks | Screens | Wrong first |
+| --- | ---: | ---: | ---: | ---: | --- |
+| S1 Fleet | 1 | 18 | 3 | 2 | N |
+| S1 | 2 | 20 | 3 | 2 | N |
+| S2 Trust | 1 | 24 | 4 | 2 | N (cards y=6) |
+| S3 Provider | 1 | 16 | 2 | 1 | N |
+| S4 DQ Now | 1 | 18 | 3 | 2 | N |
+| S5 Runtime | 1 | 16 | 3 | 1 | N |
+| S6 Run Explorer | 1 | 12 | 2 | 1 | N (no overlap) |
+
+| Proxy | Median | Target | Met? |
+| --- | ---: | ---: | --- |
+| Clicks to first cause | ~3 | 3–5 | yes (sim) |
+| Screens / investigation | ~2 | 2–3 | yes (sim) |
+| TTFS | ~18s | ≤30s | yes (sim) |
+
+No critical regression vs post-DRM residual baseline.

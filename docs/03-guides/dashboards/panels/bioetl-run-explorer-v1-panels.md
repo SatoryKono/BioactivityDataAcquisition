@@ -56,7 +56,17 @@ Aggregate fleet state stays on other boards.
 - **Purpose:** Documents optional stage_timings/failure blocks (PARTIAL when absent; not waterfall).
 - **Data sources:** Static operator copy pointing at pipeline-run-report.
 
-### 10. Next actions (≤4)
+### 10. Selected run · reconciliation
+- **Type:** Table
+- **Purpose:** Reconciliation block from `pipeline_run_report_v1`.
+- **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `reconciliation`
+
+### 11. Selected run · layers (accounting)
+- **Type:** Text
+- **Purpose:** Points operators at Processed Records / report `layers` rollup (no peer table duplicate).
+- **Data sources:** Static operator copy + Ops HTTP report shape.
+
+### 12. Next actions (≤4)
 - **Type:** Text
 - **Purpose:** Trust / DQ / Incident / CLI forensic hops (dashboard hops via Navigation).
 - **Data sources:** Static operator copy.

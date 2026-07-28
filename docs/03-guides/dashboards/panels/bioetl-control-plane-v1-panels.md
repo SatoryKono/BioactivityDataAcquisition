@@ -34,7 +34,7 @@ JSON is the source of truth.
 | 892 | Monitor: Checkpoint Freshness Lag (seconds) | stat | Quarantine Explorer | Current checkpoint freshness lag from HTTP-backed control-plane evidence. | shared shell | Numeric lag; no PromQL threshold in doc. |
 | 893 | Monitor: Manifest / Ledger Integrity | stat | Prometheus | Current manifest/ledger failure state from `bioetl_manifest_ledger_failures_15m`. | shared shell | Severity/value mapping. |
 | 907 | Inspect: Telemetry Missing | stat | Prometheus | Missing-control-plane-telemetry signal from `bioetl_control_plane_telemetry_missing_5m`. | shared shell | Value mapping distinguishes no-data vs telemetry-missing. |
-| 906 | Next Action: Replay Diagnostics | text | Static | Static operator next-step guidance for replay/control-plane incidents. | shared shell | Drilldown router into the replay-safety row below. |
+| 906 | Primary recovery | text | Static | Static operator next-step guidance for replay/control-plane incidents. | shared shell | Drilldown router into the replay-safety row below. |
 
 ### Incident Drilldown: Replay Safety (Checkpoint / Replay)
 
