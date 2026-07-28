@@ -64,27 +64,32 @@ HTTP identity backend contract:
 
 | Dashboard                 | UID                             | Для чего                                                                                   |
 | ------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------ |
-| 0. Trust          | `bioetl-control-plane-v1`       | L1/L2 replay/resume safety: manifest, ledger, checkpoint, replay, lineage, global reads    |
-| 1. Overview               | `bioetl-overview-v2`            | L0 answer-first dashboard with frozen Overview v3 baseline: explicit scope/provenance header, workflow/run_id context, aggregate-first triage |
-| 2. Pipeline Diagnostics                | `bioetl-runtime`                | L2 diagnostic runtime triage: blockers, latency, backlog, error localization, handoffs     |
-| 3. Provider Health        | `bioetl-provider-health-v2`     | Incident triage по provider health: latency/failures/degraded/retries exhausted            |
-| 4. Data Quality           | `bioetl-dq-v2`                  | Качество данных, карантин, аномалии, freshness                                             |
-| Silver Reject Explorer    | `CLI quarantine inspect` | Record-level explorer для Silver structural `filtered_out`/legacy `FILTERED_OUT_SILVER` записей (quarantine-backed); Gold contract/semantic rejects остаются в `4. Data Quality` Gold panels |
-| 5. Workflow               | `bioetl-workflow-overview`      | Selected-range declarative workflow run/step evidence and transform-step latency handoff   |
-| 6. Alerts & SLO           | `bioetl-alerts-slo`             | Active alert state, critical/page pressure, SLO/SLA pressure, and scope-badged alert rows  |
+| 0. Trust          | `bioetl-control-plane-v1`       | Replay/resume safety: manifest, ledger, checkpoint, telemetry confidence |
+| 1. Overview (Fleet)       | `bioetl-overview-v2`            | L0 answer-first Fleet: Status + Inputs evidence + First Action routes |
+| 2. Pipeline Diagnostics                | `bioetl-runtime`                | Blockers, latency, telemetry gap; workflow band merged in |
+| 3. Provider Health        | `bioetl-provider-health-v2`     | Population-first fleet severity + top causes |
+| 4. Data Quality           | `bioetl-dq-v2`                  | Now / Run / Range lanes; quarantine aggregates |
+| 5. Incident Workspace     | `bioetl-incident-v1`            | Domain-separated suspects + ALERTS timeline |
+| 6. Run Explorer           | `bioetl-run-explorer-v1`        | HTTP identity + processed records (`run_id` not Prom) |
+| Record forensics (CLI)    | `bioetl quarantine inspect`     | Silver structural rejects; not a Grafana board |
+
+**Retired (not shipped):** `bioetl-workflow-overview` (→ Runtime workflow band),
+`bioetl-alerts-slo` (→ Overview Alert/SLO row), `Silver Reject Explorer` UI,
+`Explore Logs` / `Explore Traces` adjuncts (2026-07-23). Historical notes may still
+mention `6. Alerts & SLO` / Explore Logs / Explore Traces as removed surfaces.
 
 ## From where to enter each dashboard in 1 click
 
 | Target dashboard | 1-click entry source |
 | --- | --- |
-| `bioetl-control-plane-v1` | canonical navigation bus `0. Trust` from every primary dashboard except itself |
-| `bioetl-overview-v2` | canonical navigation bus `1. Overview` from every primary dashboard except itself |
-| `bioetl-runtime` | canonical navigation bus `2. Pipeline Diagnostics` from every primary dashboard except itself |
-| `bioetl-provider-health-v2` | canonical navigation bus `3. Provider Health` from every primary dashboard except itself |
-| `bioetl-dq-v2` | canonical navigation bus `4. Data Quality` from every primary dashboard except itself |
-| `bioetl-workflow-overview` | canonical navigation bus `5. Workflow` from every primary dashboard except itself |
-| `bioetl-alerts-slo` | canonical navigation bus `6. Alerts & SLO` from every shipped dashboard except itself |
-| `CLI quarantine inspect` | canonical global adjunct link `Silver Reject Explorer` from every shipped dashboard except itself |
+| `bioetl-control-plane-v1` | Navigation bus `0. Trust` on every other board |
+| `bioetl-overview-v2` | Navigation bus `1. Overview` |
+| `bioetl-runtime` | Navigation bus `2. Pipeline Diagnostics` |
+| `bioetl-provider-health-v2` | Navigation bus `3. Provider Health` |
+| `bioetl-dq-v2` | Navigation bus `4. Data Quality` |
+| `bioetl-incident-v1` | Navigation bus `5. Incident Workspace` (or alert entry hop) |
+| `bioetl-run-explorer-v1` | Navigation bus `6. Run Explorer` |
+| CLI forensics | `bioetl quarantine inspect` / `bioetl run-manifest show` |
 
 ## Фильтрация
 

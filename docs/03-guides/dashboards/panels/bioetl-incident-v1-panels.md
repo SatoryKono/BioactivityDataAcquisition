@@ -5,15 +5,14 @@
 
 ## Overview
 
-Thin, platform-agnostic incident surface (Dashboard System 2.0 / DUX-08).
-Reuses existing recording rules and Prometheus `ALERTS`. Not Grafana Drilldown
-Investigations. Shipped JSON is source of truth.
+Incident Workspace (Phase-2). Domain-separated suspects and ALERTS timeline.
+Reuses existing recording rules only. Not Grafana Drilldown Investigations.
 
 ## Key Panels
 
 ### 1. Navigation
 - **Type:** Text
-- **Purpose:** Theme-safe workspace bus with Incident highlighted; handoffs keep time range.
+- **Purpose:** Full portfolio bus 0–6; current disabled.
 - **Data sources:** Static HTML + panel links.
 
 ### 2. Provenance
@@ -28,15 +27,25 @@ Investigations. Shipped JSON is source of truth.
 
 ### 4. Next Best Actions
 - **Type:** Text
-- **Purpose:** ≤4 CTAs to Pipeline, Provider, Trust, Run Explorer with time+vars.
-- **Data sources:** Static operator copy + panel links.
+- **Purpose:** ≤4 operator steps; dashboard hops via Navigation bus (no duplicate target UIDs).
+- **Data sources:** Static operator copy.
 
-### 5. Ranked Suspects
+### 5. Suspects · Runtime blockers
 - **Type:** Table
-- **Purpose:** Population-first suspects from provider causes, runtime blockers, DQ reasons.
-- **Data sources:** `bioetl_provider_current_cause`, `bioetl_runtime_current_blocker_reason`, `bioetl_dq_current_reason`
+- **Purpose:** Ranked runtime blockers for selected scope.
+- **Data sources:** `bioetl_runtime_current_blocker_reason`
 
-### 6. Alert / Event Timeline (range)
+### 6. Suspects · Provider causes
 - **Type:** Table
-- **Purpose:** Firing/pending alertname support surface (no business-logic rewrite).
+- **Purpose:** Ranked provider causes (fleet population).
+- **Data sources:** `bioetl_provider_current_cause`
+
+### 7. Suspects · DQ reasons
+- **Type:** Table
+- **Purpose:** Ranked DQ current reasons (NOW lane).
+- **Data sources:** `bioetl_dq_current_reason`
+
+### 8. Alert / Event Timeline (range)
+- **Type:** Table
+- **Purpose:** Firing/pending alertname support surface.
 - **Data sources:** Prometheus `ALERTS`

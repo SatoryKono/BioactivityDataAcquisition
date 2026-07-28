@@ -5,7 +5,16 @@
   "debt_budget_policy": "flat_or_decreasing_only",
   "debt_budget_outcome": "reduced_or_unchanged",
   "issue_batch": {
-    "issues": [6220, 6221, 6222, 6224, 6225, 6226, 6227, 6229],
+    "issues": [
+      6220,
+      6221,
+      6222,
+      6224,
+      6225,
+      6226,
+      6227,
+      6229
+    ],
     "theme": "architecture_ownership_governance_drift_closeout"
   },
   "issues": [
@@ -135,8 +144,8 @@
   },
   "ratchets": {
     "public_lazy_facade_rows": {
-      "current": 52,
-      "max": 52,
+      "current": 53,
+      "max": 53,
       "opening": 52,
       "source": "configs/quality/public_lazy_facade_inventory.yaml"
     },

@@ -5,21 +5,19 @@
 
 ## Overview
 
-Run-centric workspace (Dashboard System 2.0 / DUX-10). Single-run identity and
-processed-record accounting via **BioETL Ops HTTP**. `run_id` is never a
-Prometheus label. Other boards keep a thin collapsed run-context row that points
-here.
+Run-centric workspace (Phase-2). Single-run identity and processed-record
+accounting via **BioETL Ops HTTP**. `run_id` is never a Prometheus label.
 
 ## Key Panels
 
 ### 1. Navigation
 - **Type:** Text
-- **Purpose:** Handoffs to Trust and Overview with preserved time range and vars.
+- **Purpose:** Portfolio bus handoffs with preserved time range and vars.
 - **Data sources:** Static HTML + panel links.
 
 ### 2. Run Scope
 - **Type:** Text
-- **Purpose:** Explicit HTTP-only run_id contract and CLI forensic pointers.
+- **Purpose:** Explicit HTTP-only run_id contract and read order.
 - **Data sources:** Dashboard variables and operator copy.
 
 ### 3. ID
@@ -32,7 +30,7 @@ here.
 - **Purpose:** Bronze/Silver/Gold stage/outcome accounting.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/processed-records` (not Prometheus).
 
-### 5. Control-plane / DQ handoffs
+### 5. Next actions (≤4)
 - **Type:** Text
-- **Purpose:** Next hops for resume safety, DQ aggregates, and CLI forensics.
+- **Purpose:** Trust / DQ / Incident / CLI forensic hops (dashboard hops via Navigation).
 - **Data sources:** Static operator copy.

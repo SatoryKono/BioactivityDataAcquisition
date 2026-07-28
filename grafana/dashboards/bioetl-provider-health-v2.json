@@ -29,7 +29,7 @@
       "id": 1000,
       "options": {
         "mode": "html",
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:12px\"><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">0. Trust</a><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">1. Overview</a><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">2. Pipeline Diagnostics</a><span aria-current=\"page\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#fff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default\">3. Provider Health</span><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">4. Data Quality</a><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">5. Incident Workspace</a><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">6. Run Explorer</a></div>"
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:12px\"><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust)\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">0. Trust</a><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview)\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">1. Overview</a><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics)\" href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">2. Pipeline Diagnostics</a><span aria-current=\"page\" title=\"3. Provider Health (Provider Health)\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#fff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default\">3. Provider Health</span><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality)\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">4. Data Quality</a><span style=\"flex:1 1 100%;height:0;overflow:hidden;margin:0;padding:0;border:0\" aria-hidden=\"true\"></span><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace)\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">5. Incident Workspace</a><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer)\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">6. Run Explorer</a></div>"
       },
       "title": "Navigation",
       "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is disabled (aria-current). Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions.",
@@ -247,7 +247,7 @@
       "id": 9002,
       "type": "text",
       "title": "First Action",
-      "description": "Population-first CTA. Start with GLOBAL severity and top causes before selected-provider scope. Empty top causes with non-OK severity is an explainability gap, not a healthy signal. First operator CTA for global provider incidents and early-warning provider causes. Start with the current GLOBAL severity matrix, then telemetry freshness, then critical providers and top causes. Treat selected-provider Status as supporting scoped evidence; if Status is UNKNOWN, treat that as missing provider-current-status evidence until telemetry freshness and raw enum evidence say otherwise. Use this after the current answer row; selected-range latency/error evidence stays below and downstream Runtime or Control Plane follow-up depends on the diagnosed cause.",
+      "description": "Population-first CTA. Start with GLOBAL severity and top causes before selected-provider scope. Empty top causes with non-OK severity is an explainability gap, not a healthy signal. First operator CTA for global provider incidents and early-warning provider causes. Start with the current GLOBAL severity matrix, then telemetry freshness, then critical providers and top causes. Treat selected-provider Status as supporting scoped evidence; if Status is UNKNOWN, treat that as missing provider-current-status evidence until telemetry freshness and raw enum evidence say otherwise. Use this after the current answer row; selected-range latency/error evidence stays below and downstream Runtime or Control Plane follow-up depends on the diagnosed cause. Phase-2 CTA standard. Empty causes with non-OK severity is an explainability gap.",
       "gridPos": {
         "h": 4,
         "w": 24,
@@ -255,7 +255,7 @@
         "y": 7
       },
       "options": {
-        "content": "<h3>First Action</h3><p><b>Fleet first:</b> GLOBAL severity matrix + top causes (no provider selection required). <b>Then:</b> telemetry freshness, critical providers, selected-provider detail (supporting only).</p><p><b>Empty causes:</b> VALID EMPTY if no active failures; if severity is non-OK while causes empty, treat as projection gap — check scrape/rules (DUX-09) and provider incident runbook.</p><p><b>Fleet vs selected:</b> selected Status may be OK while GLOBAL is CRIT.</p>",
+        "content": "<h3>First Action (≤4)</h3><ol style='margin:0.2rem 0 0 1.1rem;padding:0'><li>Read GLOBAL severity matrix (fleet, not selected).</li><li>Open top causes / critical providers.</li><li>Check telemetry freshness (TELEMETRY ABSENT ≠ OK).</li><li>Selected-provider detail is supporting only.</li></ol><p><b>Empty matrix/causes:</b> VALID EMPTY if severity OK; if severity non-OK → explainability/scrape gap, not healthy.</p>",
         "mode": "html"
       },
       "links": [
@@ -295,7 +295,8 @@
           "custom": {
             "align": "auto",
             "cellOptions": {
-              "type": "auto"
+              "type": "color-background",
+              "mode": "basic"
             },
             "inspect": false
           },
@@ -416,7 +417,8 @@
           "custom": {
             "align": "auto",
             "cellOptions": {
-              "type": "auto"
+              "type": "color-background",
+              "mode": "basic"
             },
             "inspect": false
           },
@@ -506,7 +508,8 @@
           "custom": {
             "align": "auto",
             "cellOptions": {
-              "type": "auto"
+              "type": "color-background",
+              "mode": "basic"
             },
             "inspect": false
           },
@@ -522,7 +525,7 @@
               }
             }
           ],
-          "noValue": "No active causes (VALID EMPTY); non-OK severity without causes = explainability gap",
+          "noValue": "VALID EMPTY (no active causes). Non-OK GLOBAL severity without causes = explainability gap — check scrape/rules.",
           "thresholds": {
             "mode": "absolute",
             "steps": [

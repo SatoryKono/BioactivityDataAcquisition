@@ -289,6 +289,7 @@ nav:
                     -   "Dashboard Inventory": 03-guides/dashboards/dashboard-inventory.md
                     -   "Monitoring Index": 03-guides/dashboards/monitoring-index.md
                     -   "Variables Guide": 03-guides/dashboards/variables-guide.md
+                    -   "Operator UX v2": 03-guides/dashboards/operator-ux-v2.md
                     -   "Panels":
                             -   "Panels Guide": 03-guides/dashboards/panels/dashboard-panels-guide.md
                             -   "Overview v2 Panels": 03-guides/dashboards/panels/bioetl-overview-v2-panels.md

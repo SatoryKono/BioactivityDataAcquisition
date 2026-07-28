@@ -7,9 +7,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3163 |
+| Doc-like files | 3164 |
 | Tracked doc-like files | 1968 |
-| Ignored local docs/reports files | 1195 |
+| Ignored local docs/reports files | 1196 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
 | Generated routes | 66 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| ignored_local | 1195 |
+| ignored_local | 1196 |
 | tracked | 1968 |
 
 ## Lifecycle Counts
@@ -30,7 +30,7 @@
 | active_quality_baseline | 20 |
 | closeout_evidence | 35 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 41 |
+| docs_reports_curated_or_historical_report | 42 |
 | docs_reports_generated_or_route_owned | 23 |
 | docs_reports_retention_sensitive_evidence | 1153 |
 | generated_skill_license_mirror | 5 |
@@ -63,7 +63,7 @@
 | Archived | 82 |
 | Canonical | 70 |
 | Generated | 740 |
-| Working | 301 |
+| Working | 302 |
 
 ## Surface Families
 
@@ -73,14 +73,14 @@
 | archive | 82 |
 | canonical | 70 |
 | generated | 740 |
-| working | 301 |
+| working | 302 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 130 |
-| archive-after-migration | 112 |
+| archive-after-migration | 113 |
 | generate-automatically | 740 |
 | keep | 2177 |
 | reconcile-with-github-state | 4 |
@@ -124,6 +124,7 @@
 | `docs/reports/dashboard-ux-checks/2026-05-07.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-05-08.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-05-19.md` | Working | 0 | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/2026-07-28-phase2.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-07-28.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
 | `docs/reports/docs-link-check-report.json` | Working | 0 | archive-after-migration |
@@ -168,7 +169,6 @@
 | `reports/quality/config-compatibility-legacy-taxonomy-review.json` | Working | 0 | archive-after-migration |
 | `reports/quality/config-surface-backlog.json` | Working | 0 | archive-after-migration |
 | `reports/quality/contract-coverage-matrix.json` | Working | 0 | archive-after-migration |
-| `reports/quality/contract-coverage-matrix.md` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -319,6 +319,7 @@
 | `docs/reports/dashboard-ux-checks/2026-05-07.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-05-08.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-05-19.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/2026-07-28-phase2.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-07-28.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/docs-link-check-report.json` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
@@ -343,7 +344,6 @@
 | `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-uniprot-idmapping-creator-encodes-hybrid-input-contract.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/adapter-interface-alignment/03-synthesis/SYN-adapter-interface-alignment.md` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/adapter-interface-alignment/04-decisions/DEC-ADAPT-proposed-decisions-2026-03-20.md` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/adapter-interface-alignment/04-decisions/DECISIONS.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
 
 ## Generated Route Registry
 

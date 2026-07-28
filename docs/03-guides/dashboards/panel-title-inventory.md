@@ -214,8 +214,10 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-incident-v1.json | 9400 | Provenance |
 | bioetl-incident-v1.json | 9401 | Status |
 | bioetl-incident-v1.json | 2001 | Next Best Actions |
-| bioetl-incident-v1.json | 2002 | Ranked Suspects |
-| bioetl-incident-v1.json | 2003 | Alert / Event Timeline (range) |
+| bioetl-incident-v1.json | 2002 | Suspects · Runtime blockers |
+| bioetl-incident-v1.json | 2003 | Suspects · Provider causes |
+| bioetl-incident-v1.json | 2004 | Suspects · DQ reasons |
+| bioetl-incident-v1.json | 2005 | Alert / Event Timeline (range) |
 
 ## bioetl-run-explorer-v1.json
 
@@ -223,4 +225,4 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-run-explorer-v1.json | 1 | Run Scope |
 | bioetl-run-explorer-v1.json | 9402 | ID |
 | bioetl-run-explorer-v1.json | 9403 | Processed Records |
-| bioetl-run-explorer-v1.json | 3001 | Control-plane / DQ handoffs |
+| bioetl-run-explorer-v1.json | 3001 | Next actions (≤4) |
