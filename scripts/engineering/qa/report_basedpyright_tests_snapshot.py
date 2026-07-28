@@ -53,7 +53,9 @@ def _area(path: str) -> str:
 
 def build_tests_snapshot(source: Path) -> dict[str, Any]:
     source = resolve_output_path(source, root=ROOT)
-    payload = json.loads(source.read_text(encoding="utf-8")  # NOSONAR - path confined by resolve_output_path)
+    payload = json.loads(
+        source.read_text(encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
+    )
     summary = payload.get("summary") if isinstance(payload, dict) else {}
     diags = payload.get("generalDiagnostics") if isinstance(payload, dict) else []
     if not isinstance(diags, list):
