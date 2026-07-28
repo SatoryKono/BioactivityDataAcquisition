@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3169 |
-| Tracked doc-like files | 1974 |
+| Doc-like files | 3173 |
+| Tracked doc-like files | 1978 |
 | Ignored local docs/reports files | 1195 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
@@ -19,7 +19,7 @@
 | Tracking State | Count |
 | --- | --- |
 | ignored_local | 1195 |
-| tracked | 1974 |
+| tracked | 1978 |
 
 ## Lifecycle Counts
 
@@ -30,7 +30,7 @@
 | active_quality_baseline | 21 |
 | closeout_evidence | 35 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 42 |
+| docs_reports_curated_or_historical_report | 43 |
 | docs_reports_generated_or_route_owned | 23 |
 | docs_reports_retention_sensitive_evidence | 1153 |
 | generated_skill_license_mirror | 5 |
@@ -38,12 +38,12 @@
 | generated_test_run_evidence | 4 |
 | guide | 2 |
 | index | 4 |
-| issue_pack | 25 |
+| issue_pack | 27 |
 | live_issue_mirror | 4 |
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 36 |
 | supporting_context | 16 |
-| working_report | 59 |
+| working_report | 60 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -52,7 +52,7 @@
 | active_draft | 108 |
 | guide | 2 |
 | index | 4 |
-| issue_pack | 25 |
+| issue_pack | 27 |
 | live_issue_mirror | 4 |
 
 ## Status Counts
@@ -63,7 +63,7 @@
 | Archived | 82 |
 | Canonical | 70 |
 | Generated | 740 |
-| Working | 306 |
+| Working | 310 |
 
 ## Surface Families
 
@@ -73,14 +73,14 @@
 | archive | 82 |
 | canonical | 70 |
 | generated | 740 |
-| working | 306 |
+| working | 310 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-github-state-check | 133 |
-| archive-after-migration | 113 |
+| archive-after-github-state-check | 135 |
+| archive-after-migration | 115 |
 | generate-automatically | 740 |
 | keep | 2179 |
 | reconcile-with-github-state | 4 |
@@ -124,6 +124,7 @@
 | `docs/reports/dashboard-ux-checks/2026-05-07.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-05-08.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-05-19.md` | Working | 0 | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/2026-07-28-drmr.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-07-28-phase2.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-07-28.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
@@ -161,14 +162,13 @@
 | `reports/plans/obs-program-6247-6268/04-refactoring-log.md` | Working | 0 | archive-after-migration |
 | `reports/quality/adr-enforcement-matrix.json` | Working | 0 | archive-after-migration |
 | `reports/quality/adr-enforcement-matrix.md` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture-coderabbit-2026-07-28-issue-publish.json` | Working | 0 | archive-after-migration |
 | `reports/quality/architecture-quality-scorecard.json` | Working | 0 | archive-after-migration |
 | `reports/quality/architecture-refactoring-2026-07-28-issue-publish.json` | Working | 0 | archive-after-migration |
 | `reports/quality/architecture-residual-2026-07-27-issue-publish.json` | Working | 0 | archive-after-migration |
 | `reports/quality/compatibility-importer-census.json` | Working | 0 | archive-after-migration |
 | `reports/quality/compatibility-importer-census.md` | Working | 0 | archive-after-migration |
 | `reports/quality/config-compatibility-legacy-taxonomy-review.json` | Working | 0 | archive-after-migration |
-| `reports/quality/config-surface-backlog.json` | Working | 0 | archive-after-migration |
-| `reports/quality/contract-coverage-matrix.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -264,6 +264,7 @@
 | `.github/ISSUES/AI-RUNTIME-AUDIT-001-Make-AI-Skill-Mirror-CI-Truthful-And-Enforce-Devin-Parity.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/AI-RUNTIME-AUDIT-002-Eliminate-Tracked-Devin-MCP-Workstation-Paths.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/ARCH-CONT-2026-07-28-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
+| `.github/ISSUES/ARCH-CR-2026-07-28-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
 | `.github/ISSUES/ARCH-QA-2026-07-27-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
 | `.github/ISSUES/ARCH-REF-2026-07-28-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
 | `.github/ISSUES/ARCH-RES-2026-07-27-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
@@ -298,7 +299,6 @@
 | `.github/ISSUES/CODERABBIT-REAUDIT-2026-07-27-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
 | `.github/ISSUES/CREATION_GUIDE.md` | guide |  | keep |
 | `.github/ISSUES/CROSS-001-Unified-Enum-Configuration.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CROSS-002-Case-Canonicalization.md` | active_draft |  | archive-after-github-state-check |
 
 ## Docs Reports Evidence Examples
 
@@ -319,6 +319,7 @@
 | `docs/reports/dashboard-ux-checks/2026-05-07.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-05-08.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-05-19.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/2026-07-28-drmr.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-07-28-phase2.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-07-28.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
@@ -343,7 +344,6 @@
 | `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-tests-preserve-minimal-provider-bound-surface.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-uniprot-idmapping-creator-encodes-hybrid-input-contract.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/adapter-interface-alignment/03-synthesis/SYN-adapter-interface-alignment.md` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/adapter-interface-alignment/04-decisions/DEC-ADAPT-proposed-decisions-2026-03-20.md` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
 
 ## Generated Route Registry
 

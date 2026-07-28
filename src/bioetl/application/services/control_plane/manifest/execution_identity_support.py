@@ -109,9 +109,7 @@ def fallback_code_provenance_state(
     payload: dict[str, object] = {
         "git_commit": code_provenance.git_commit,
         "source_revision_state": code_provenance.source_revision_state,
-        "dependency_lock_state": (
-            "present" if dependency_lock_present else "missing"
-        ),
+        "dependency_lock_state": ("present" if dependency_lock_present else "missing"),
         "strict_code_provenance_ready": (
             git_commit_present and source_clean and dependency_lock_present
         ),
