@@ -455,3 +455,14 @@ uv run python -m scripts.engineering.ci quality-gate
 ---
 
 *Generated from live SonarCloud API 2026-07-28; supersedes numeric baseline of 2026-07-27 plan while preserving RF wave structure.*
+
+---
+
+## Progress log
+
+| Date | Wave | Commit / PR | Notes |
+|------|------|-------------|-------|
+| 2026-07-28 | W1–W2 | `b823068c93` / #6936 | Blockers + bugs closed in code |
+| 2026-07-28 | W3 | `df522d62c9` / #6936 | Path/command taint bulk + Docker/GHA pins |
+| — | W4–W9 | pending | Complexity, literals, PS/shell, re-scan |
+
