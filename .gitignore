@@ -125,6 +125,7 @@ log_test.txt
 !/reports/quality/
 /reports/quality/*
 !/reports/quality/documentation-governance-2026-07-28-closeout.md
+!/reports/quality/docs-open-runs-2-4-closeout-2026-07-28.md
 !/reports/docs-evidence/
 /reports/docs-evidence/*
 !/reports/docs-evidence/README.md
@@ -338,8 +339,8 @@ tests.zip
 configs/pipelines.zip
 /all_fixtures.txt
 data/input/chembl_target_component.csv
-# Current diagram SVG/PNG outputs under docs/02-architecture/diagrams/** are
-# tracked render baselines for drift review, not ignored local build output.
+# Diagram policy (ADR-040 / DOC-GOV-02): SVG under **/svg/ remains tracked for
+# PR source-vs-render drift. PNG under **/png/ is gitignored (CI/local render).
 
 # Root-level test dump files (MUST be in tests/fixtures/vcr/)
 /test_backfill_*

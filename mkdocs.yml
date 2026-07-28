@@ -160,6 +160,9 @@ nav:
           - "Qodo Governance Mirror": 00-project/governance/qodo/README.md
   - Architecture:
       - "Overview": 02-architecture/00-overview.md
+      - "Sequence Diagrams": 02-architecture/diagrams/sequence/README.md
+      - "State Machine Diagrams": 02-architecture/diagrams/state-machines/README.md
+      - "Provider Data Flows": 02-architecture/diagrams/providers/README.md
       - "Current State Inventory": 02-architecture/current-state-inventory.md
       - "Current State Diagrams": 02-architecture/current-state-diagrams.md
       - Layers:
@@ -276,6 +279,15 @@ nav:
       - "Cleanup Guide": 03-guides/cleanup.md
       - "Cleanup Policy": 03-guides/cleanup-policy.md
       - "Registry Pattern": 03-guides/registry-pattern.md
+      - "MCP Integration": 03-guides/mcp-integration.md
+      - "Prometheus Metrics Export": 03-guides/prometheus-metrics-export.md
+      - "Grafana Dashboard Configuration": 03-guides/grafana-dashboard-configuration.md
+      - Tutorials:
+          - "Overview": 03-guides/tutorials/README.md
+          - "Create Pipeline (15 min)": 03-guides/tutorials/create-new-pipeline-15min.md
+          - "Debug Medallion Layers": 03-guides/tutorials/debug-medallion-layers.md
+          - "Monitoring and Alerts": 03-guides/tutorials/monitoring-alerts-setup.md
+          - "Quarantine System": 03-guides/tutorials/quarantine-system.md
       - "Cheatsheets":
           - "Overview": 03-guides/cheatsheets/README.md
           - "CLI Commands": 03-guides/cheatsheets/cli-commands.md
@@ -323,6 +335,10 @@ nav:
       - "GitHub Actions Workflows": 04-reference/github-actions-workflows.md
       - "Pipeline Catalog": 04-reference/pipeline-catalog.md
       - "Composite Pipelines": 04-reference/pipelines/composites.md
+      - "ChEMBL Normalization Deep Dive": 04-reference/normalization/chembl-normalization-deep-dive.md
+      - "Ontology Governance": 04-reference/normalization/ontology-governance.md
+      - "Identifier Family Policies": 04-reference/normalization/identifier-family-policies.md
+      - "Publication Processing Workflows": 04-reference/publications/publication-processing-workflows.md
       - Domain:
           - "Overview": 04-reference/domain/README.md
           - "Aggregates": 04-reference/domain/aggregates.md
@@ -456,6 +472,10 @@ nav:
   - Operations:
       - Overview: 05-operations/README.md
       - "CI Workflow Map": 05-operations/ci-workflow-map.md
+      - "CI/CD Integration": 05-operations/ci-cd-integration.md
+      - "Performance Tuning": 05-operations/performance-tuning.md
+      - "DQ Investigation Procedures": 05-operations/dq-investigation-procedures.md
+      - "Lock Contention Resolution": 05-operations/lock-contention-resolution.md
       - "Common Error Patterns": 05-operations/troubleshooting/common-errors.md
       - Runbooks:
           - "Index": 05-operations/runbooks/index.md

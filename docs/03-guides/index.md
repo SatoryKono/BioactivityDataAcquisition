@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-02'
+  Last verified: '2026-07-28'
 
 ______________________________________________________________________
 
@@ -53,8 +53,19 @@ for published contracts, CLI surfaces, and specs.
 | Pipeline config cheatsheet         | [cheatsheets/pipeline-config.md](cheatsheets/pipeline-config.md) |
 | Data quality rules cheatsheet      | [cheatsheets/data-quality-rules.md](cheatsheets/data-quality-rules.md) |
 | ADR decision matrix                | [cheatsheets/adr-matrix.md](cheatsheets/adr-matrix.md) |
+| Tutorials (hands-on)               | [tutorials/README.md](tutorials/README.md) |
+| MCP integration                    | [mcp-integration.md](mcp-integration.md) |
+| Prometheus metrics export          | [prometheus-metrics-export.md](prometheus-metrics-export.md) |
+| Grafana dashboard configuration    | [grafana-dashboard-configuration.md](grafana-dashboard-configuration.md) |
 | ADR-040 diagram compliance map     | [../02-architecture/diagrams/adr-040-compliance-map.md](../02-architecture/diagrams/adr-040-compliance-map.md) |
+| Sequence diagrams                  | [../02-architecture/diagrams/sequence/README.md](../02-architecture/diagrams/sequence/README.md) |
+| State machine diagrams             | [../02-architecture/diagrams/state-machines/README.md](../02-architecture/diagrams/state-machines/README.md) |
+| Provider data-flow diagrams        | [../02-architecture/diagrams/providers/README.md](../02-architecture/diagrams/providers/README.md) |
 | Common error patterns              | [../05-operations/troubleshooting/common-errors.md](../05-operations/troubleshooting/common-errors.md) |
+| Performance tuning                 | [../05-operations/performance-tuning.md](../05-operations/performance-tuning.md) |
+| DQ investigation procedures        | [../05-operations/dq-investigation-procedures.md](../05-operations/dq-investigation-procedures.md) |
+| Lock contention resolution         | [../05-operations/lock-contention-resolution.md](../05-operations/lock-contention-resolution.md) |
+| CI/CD integration                  | [../05-operations/ci-cd-integration.md](../05-operations/ci-cd-integration.md) |
 
 ## Role Boundaries
 
