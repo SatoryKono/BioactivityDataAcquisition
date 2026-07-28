@@ -34,6 +34,7 @@ slo_contracts:
     metrics:
       - up
       - bioetl_pipeline_runs_total
+      - bioetl_health_server_scrape_up
     alerts:
       - name: BioETLMetricsEndpointUnavailable
         severity: critical
@@ -42,6 +43,10 @@ slo_contracts:
       - name: BioETLMetricsEndpointScrapeMissing
         severity: warning
         for: 10m
+        runbook: docs/05-operations/runbooks/observability-checklist.md
+      - name: BioETLMetricsEndpointLivenessMissing
+        severity: warning
+        for: 5m
         runbook: docs/05-operations/runbooks/observability-checklist.md
       - name: BioETLPrometheusUnavailable
         severity: critical
