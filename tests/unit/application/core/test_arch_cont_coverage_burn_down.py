@@ -61,7 +61,7 @@ def test_record_output_ready_skips_when_all_counts_zero() -> None:
     host._services.metrics.increment_counter.assert_not_called()
 
 
-def test_shutdown_signal_request_is_idempotent() -> None:
+def test_unit_shutdown_signal_request_is_idempotent() -> None:
     signal = ShutdownSignal()
     assert signal.is_requested is False
     signal.request()

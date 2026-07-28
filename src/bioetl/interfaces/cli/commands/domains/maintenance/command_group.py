@@ -25,7 +25,6 @@ from bioetl.interfaces.cli.commands.domains.maintenance.control_plane_lifecycle 
 from bioetl.interfaces.cli.commands.domains.shared.click_options import (
     typed_click_group,
 )
-from bioetl.interfaces.cli.commands.vacuum import vacuum_all_command, vacuum_command
 
 __all__ = [
     "maintenance",
@@ -36,6 +35,18 @@ _LAZY_MAINTENANCE_COMMANDS: dict[str, tuple[str, str, str]] = {
         "bioetl.interfaces.cli.commands.domains.maintenance.plan",
         "plan_command",
         "Plan contract migration actions",
+    ),
+    # Lazy vacuum loads break the static package→command_group→vacuum→package SCC
+    # while preserving the same Click surface for operators.
+    "vacuum": (
+        "bioetl.interfaces.cli.commands.vacuum",
+        "vacuum_command",
+        "Vacuum one Delta table",
+    ),
+    "vacuum-all": (
+        "bioetl.interfaces.cli.commands.vacuum",
+        "vacuum_all_command",
+        "Vacuum multiple Delta tables",
     ),
 }
 
@@ -53,13 +64,7 @@ _EAGER_MAINTENANCE_COMMANDS: dict[str, tuple[click.Command | click.Group, str]] 
         cast(click.Command, control_plane_lifecycle_command),
         "Plan/apply control-plane artifact cleanup",
     ),
-    "vacuum": (cast(click.Command, vacuum_command), "Vacuum one Delta table"),
-    "vacuum-all": (
-        cast(click.Command, vacuum_all_command),
-        "Vacuum multiple Delta tables",
-    ),
 }
-
 
 def _load_maintenance_command(name: str) -> click.Command | click.Group | None:
     """Import one maintenance subcommand only when it is requested."""

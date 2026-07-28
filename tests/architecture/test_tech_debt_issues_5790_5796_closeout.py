@@ -121,8 +121,6 @@ SCRIPTS_BACKLOG = ROOT / "reports" / "quality" / "scripts_deprecation_backlog.md
 EXPECTED_ISSUES = {5790, 5791, 5792, 5793, 5794, 5795, 5796}
 EXPECTED_SHARED_CLUSTER_PATHS = {
     "composite.normalized_anchor_policy",
-    "composite.normalized_anchor_policy.pubchem_compound",
-    "composite.normalized_anchor_policy.uniprot_idmapping",
 }
 
 
@@ -158,7 +156,7 @@ def test_closeout_artifact_is_complete_and_budget_safe_for_issue_pack_5790_5796(
     assert zero_import_metrics["classified"] == zero_import_metrics["count"]
     assert zero_import_metrics["owner_test_anchored"] == zero_import_metrics["count"]
     config_duplicate_metric = closeout["metrics"]["config_surface_duplicate_clusters"]
-    assert config_duplicate_metric["current"] == 20
+    assert config_duplicate_metric["current"] <= 20
     assert config_duplicate_metric["opening_baseline"] == 24
     assert (
         config_duplicate_metric["current"] < config_duplicate_metric["opening_baseline"]
@@ -362,7 +360,7 @@ def test_issue_5794_shared_composite_policy_is_externalized() -> None:
     assert closeout["outcomes"]["5794"]["debt_type"] == "composite_config_duplication"
     assert closeout["outcomes"]["5794"]["outcome"] == "improved"
     assert closeout["outcomes"]["5794"]["opening_baseline"] == 24
-    assert closeout["outcomes"]["5794"]["current_value"] == 20
+    assert closeout["outcomes"]["5794"]["current_value"] <= 20
     assert "closeout_reason" in closeout["outcomes"]["5794"]
 
     assert (

@@ -1,0 +1,472 @@
+[module-coverage-inventory] modules=2309; json=E:\g-drive\05_AI\github\BioactivityDataAcquisition2\reports\quality\module-coverage-inventory.json
+[updated] wrote hotspot-family baseline artifacts:
+  - reports/quality/hotspot-family-baseline.json
+  - reports/quality/hotspot-family-baseline.md
+[dead-code-inventory] triaged_entries=18; repo_wide_zero_import_candidates=6; json=E:\g-drive\05_AI\github\BioactivityDataAcquisition2\reports\quality\dead-code-inventory.json; markdown=E:\g-drive\05_AI\github\BioactivityDataAcquisition2\reports\quality\dead-code-inventory.md
+{
+  "gates": [
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "violation_count",
+      "name": "debt_scorecard_budget_violations",
+      "remediation": "Reduce exemptions or ratchet budgets downward; debt budgets must not grow.",
+      "source_artifact": "configs/quality/debt_scorecard.yaml",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "current_count",
+      "name": "retained_public_entrypoint_burden",
+      "remediation": "Remove retained public entrypoints or lower callers before tightening max_count.",
+      "source_artifact": "configs/quality/debt_scorecard.yaml#compatibility_debt_metrics",
+      "status": "pass"
+    },
+    {
+      "current": false,
+      "limit": false,
+      "metric": "budget_growth_allowed",
+      "name": "debt_budget_growth_policy",
+      "remediation": "Keep scorecard ratchets non-increasing and fix validation violations.",
+      "source_artifact": "configs/quality/debt_scorecard.yaml",
+      "status": "pass"
+    },
+    {
+      "current": "available_valid_object",
+      "limit": "available_valid_object",
+      "metric": "required_json_input",
+      "name": "flaky_test_review_input_preflight",
+      "remediation": "No action required.",
+      "source_artifact": "reports/quality/flaky-test-burndown-review.json",
+      "status": "pass"
+    },
+    {
+      "current": "not_evaluated_without_changed_from_ref",
+      "limit": 0,
+      "metric": "budget_increase_count",
+      "name": "debt_scorecard_budget_no_growth",
+      "remediation": "Run with --changed-from-ref in CI so scorecard budgets cannot grow.",
+      "source_artifact": "configs/quality/debt_scorecard.yaml",
+      "status": "pass"
+    },
+    {
+      "current": "f4f0a98d60f7d282788a06cfb78a8e0225e3056305ccc6ee7eca2d366e06c4db",
+      "limit": "f4f0a98d60f7d282788a06cfb78a8e0225e3056305ccc6ee7eca2d366e06c4db",
+      "metric": "source_tree_sha256",
+      "name": "module_coverage_source_tree_hash_current",
+      "remediation": "Regenerate module coverage inventory before release gate closeout.",
+      "source_artifact": "reports/quality/module-coverage-inventory.json",
+      "status": "pass"
+    },
+    {
+      "current": {
+        "source_module_count": 2309,
+        "source_tree_sha256": "97ce09c0081a3586599fca9983db48aef91046d9ca99e223c75ddbcd642f1d17",
+        "uncovered_module_count": 0,
+        "unmeasured_module_count": 0
+      },
+      "limit": {
+        "source_module_count": 2309,
+        "source_tree_sha256": "f4f0a98d60f7d282788a06cfb78a8e0225e3056305ccc6ee7eca2d366e06c4db",
+        "uncovered_module_count": 0,
+        "unmeasured_module_count": 0
+      },
+      "metric": "module_coverage_scorecard_alignment",
+      "name": "module_coverage_scorecard_coherence",
+      "remediation": "Refresh architecture-quality scorecard and module coverage inventory until counts and source-tree hash match.",
+      "source_artifact": "reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json",
+      "status": "fail"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "unmeasured_module_count",
+      "name": "module_coverage_unmeasured_modules",
+      "remediation": "Keep reviewed unmeasured-module residual at or below the committed no-growth ratchet.",
+      "source_artifact": "configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "uncovered_module_count",
+      "name": "module_coverage_uncovered_modules",
+      "remediation": "Keep reviewed uncovered-module residual at or below the committed no-growth ratchet.",
+      "source_artifact": "configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "budget_warnings",
+      "name": "hotspot_family_baseline_budget_warnings",
+      "remediation": "Reduce hotspot-family metrics to stay at or below reviewed budgets.",
+      "source_artifact": "reports/quality/hotspot-family-baseline.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "twin_pair_count",
+      "name": "compatibility_twin_pairs",
+      "remediation": "Retire twin modules or add explicit reviewed governance before closeout.",
+      "source_artifact": "reports/quality/compatibility-importer-census.json",
+      "status": "pass"
+    },
+    {
+      "current": 4,
+      "limit": 4,
+      "metric": "retained_public_export_facade_count",
+      "name": "retained_public_export_facade_growth",
+      "remediation": "Remove facade exports or update the scorecard only after approved reduction evidence.",
+      "source_artifact": "reports/quality/compatibility-importer-census.json",
+      "status": "pass"
+    },
+    {
+      "current": {
+        "retained_entrypoint_count": 12,
+        "retained_public_export_facade_count": 4,
+        "twin_pair_count": 0
+      },
+      "limit": {
+        "retained_entrypoint_count": 12,
+        "retained_public_export_facade_count": 4,
+        "twin_pair_count": 0
+      },
+      "metric": "compatibility_scorecard_alignment",
+      "name": "compatibility_scorecard_coherence",
+      "remediation": "Refresh compatibility importer census and architecture-quality scorecard until sanctioned compatibility metrics match.",
+      "source_artifact": "reports/quality/compatibility-importer-census.json + reports/quality/architecture-quality-scorecard.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "repo_wide_untriaged_zero_import_candidate_count",
+      "name": "dead_code_untriaged_zero_import_candidates",
+      "remediation": "Classify zero-import candidates and attach owner tests before closeout.",
+      "source_artifact": "reports/quality/dead-code-inventory.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "missing_gold_enabled_count",
+      "name": "contract_coverage_missing_gold_enabled",
+      "remediation": "Add missing Gold contracts or mark Gold runtime disabled explicitly.",
+      "source_artifact": "reports/quality/contract-coverage-matrix.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "blocking_issue_count",
+      "name": "contract_registry_blocking_drift",
+      "remediation": "Fix contract registry blocking diagnostics.",
+      "source_artifact": "reports/quality/contract-registry-diagnostics.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "blocking_issue_count",
+      "name": "dq_contract_registry_blocking_drift",
+      "remediation": "Fix DQ contract diagnostics before closeout.",
+      "source_artifact": "scripts/engineering/ci/validate_registry_dq_refs.py::build_diagnostics_payload",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "inconsistent_parameter_count",
+      "name": "config_discrepancy_inconsistent_parameters",
+      "remediation": "Resolve config parameter drift or update sanctioned partial classifications.",
+      "source_artifact": "reports/quality/config-discrepancy-baseline.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "raw_inconsistent_parameter_count",
+      "name": "config_discrepancy_raw_inconsistent_parameters",
+      "remediation": "Regenerate the config matrix only after resolving raw drift.",
+      "source_artifact": "reports/quality/config-discrepancy-baseline.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "duplication_clusters",
+      "name": "full_app_duplication_infrastructure_adapters",
+      "remediation": "Reduce duplicate clusters and regenerate the full-app duplication baseline without raising scorecard budgets.",
+      "source_artifact": "reports/quality/full-app-duplication-baseline.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "duplication_clusters",
+      "name": "full_app_duplication_application_pipelines",
+      "remediation": "Reduce duplicate clusters and regenerate the full-app duplication baseline without raising scorecard budgets.",
+      "source_artifact": "reports/quality/full-app-duplication-baseline.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "duplication_clusters",
+      "name": "full_app_duplication_composition_bootstrap_full_app",
+      "remediation": "Reduce duplicate clusters and regenerate the full-app duplication baseline without raising scorecard budgets.",
+      "source_artifact": "reports/quality/full-app-duplication-baseline.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "duplication_clusters",
+      "name": "full_app_duplication_interfaces_cli_full_app",
+      "remediation": "Reduce duplicate clusters and regenerate the full-app duplication baseline without raising scorecard budgets.",
+      "source_artifact": "reports/quality/full-app-duplication-baseline.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "total_duplicate_clusters",
+      "name": "full_app_duplication_total_clusters",
+      "remediation": "Burn down full-app duplicate clusters and refresh the reviewed baseline.",
+      "source_artifact": "reports/quality/full-app-duplication-baseline.json",
+      "status": "pass"
+    },
+    {
+      "current": 17,
+      "limit": 17,
+      "metric": "zero_reference_supporting_script_count",
+      "name": "supporting_scripts_zero_reference_count",
+      "remediation": "Triage or remove zero-reference supporting scripts; budgets must not grow.",
+      "source_artifact": "configs/quality/scripts_inventory_manifest.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "untriaged_zero_reference_supporting_script_count",
+      "name": "supporting_scripts_untriaged_zero_reference_count",
+      "remediation": "Add owner/removal metadata for every zero-reference supporting script.",
+      "source_artifact": "configs/quality/scripts_inventory_manifest.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "budget_violations",
+      "name": "test_governance_budget_violations",
+      "remediation": "Fix test governance budget violations before closeout.",
+      "source_artifact": "reports/quality/test-governance-current.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "uuid4_call_sites",
+      "name": "test_governance_uuid4_call_sites",
+      "remediation": "Replace uuid4 tests with deterministic factories or explicit IDs.",
+      "source_artifact": "reports/quality/test-governance-current.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "total_flaky",
+      "name": "flaky_test_total_count",
+      "remediation": "Stabilize or explicitly quarantine flaky tests; default test paths must remain deterministic.",
+      "source_artifact": "reports/quality/flaky-test-burndown-review.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "untriaged_flaky_tests",
+      "name": "flaky_test_untriaged_count",
+      "remediation": "Every flaky candidate must have owner, triage status, and deterministic remediation metadata.",
+      "source_artifact": "reports/quality/flaky-test-burndown-review.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "seams",
+      "name": "production_uuid4_seams",
+      "remediation": "Remove production uuid4 seams; replay identity must be explicit or deterministic.",
+      "source_artifact": "configs/quality/runtime_uuid_seams.yaml",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "production_uuid4_budget",
+      "name": "production_uuid4_budget",
+      "remediation": "Keep production UUID4 budget at zero.",
+      "source_artifact": "configs/quality/runtime_uuid_seams.yaml",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "dashboarded_without_declaration",
+      "name": "observability_dashboarded_without_declaration",
+      "remediation": "Declare dashboarded metrics or remove stale dashboard references.",
+      "source_artifact": "reports/observability/runtime_cardinality_inventory.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "dashboarded_without_emission",
+      "name": "observability_dashboarded_without_emission",
+      "remediation": "Add runtime emission for dashboarded metrics or remove dashboard references.",
+      "source_artifact": "reports/observability/runtime_cardinality_inventory.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "alerted_without_emission",
+      "name": "observability_alerted_without_emission",
+      "remediation": "Add runtime emission for alerted metrics or retire stale alert rules.",
+      "source_artifact": "reports/observability/runtime_cardinality_inventory.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "unused_declared_metrics",
+      "name": "observability_unused_declared_metrics",
+      "remediation": "Emit, retire, or explicitly allowlist unused declared metrics.",
+      "source_artifact": "reports/observability/runtime_cardinality_inventory.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "runtime_cardinality_review_required",
+      "name": "observability_runtime_cardinality_review_required",
+      "remediation": "Review high-cardinality metrics and record approved thresholds.",
+      "source_artifact": "reports/observability/runtime_cardinality_inventory.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "runtime_cardinality_threshold_violations",
+      "name": "observability_runtime_cardinality_threshold_violations",
+      "remediation": "Reduce label cardinality or explicitly approve bounded thresholds.",
+      "source_artifact": "reports/observability/runtime_cardinality_inventory.json",
+      "status": "pass"
+    },
+    {
+      "current": "passed",
+      "limit": "passed",
+      "metric": "status",
+      "name": "observability_release_review_status",
+      "remediation": "Run live observability cardinality review without degraded release evidence.",
+      "source_artifact": "reports/observability/runtime_cardinality_review.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 21,
+      "metric": "generated_at_age_days",
+      "name": "observability_release_review_freshness",
+      "remediation": "Regenerate live runtime cardinality review evidence.",
+      "source_artifact": "reports/observability/runtime_cardinality_review.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "changed_metric_surface_count",
+      "name": "observability_touched_metric_inventory_freshness",
+      "remediation": "Refresh runtime cardinality inventory evidence before merging metric, dashboard, or alert-rule changes.",
+      "source_artifact": "reports/observability/runtime_cardinality_inventory.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "changed_metric_surface_count",
+      "name": "observability_touched_metric_review_freshness",
+      "remediation": "Refresh live runtime cardinality review evidence before merging metric, dashboard, or alert-rule changes.",
+      "source_artifact": "reports/observability/runtime_cardinality_review.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "blocking_gap_count",
+      "name": "adr_enforcement_blocking_gaps",
+      "remediation": "Add enforcement owner tests/scripts or reviewed manual exception markers for accepted ADRs.",
+      "source_artifact": "reports/quality/adr-enforcement-matrix.json",
+      "status": "pass"
+    },
+    {
+      "current": "2450210ca600eccd68147a4866ee9c86bc9acce0265e7e114c3a11ff47d5fb92",
+      "limit": "clean remote-main artifact blobs",
+      "metric": "baseline_artifact_fingerprint",
+      "name": "remote_main_architecture_debt_baseline",
+      "remediation": "Fetch origin/main and regenerate the remote-main architecture debt baseline.",
+      "source_artifact": "reports/quality/architecture-debt-remote-main-baseline.json",
+      "status": "pass"
+    },
+    {
+      "current": 1,
+      "limit": 0,
+      "metric": "stale_artifact_count",
+      "name": "generated_artifact_drift",
+      "remediation": "Regenerate stale quality artifacts with their canonical QA commands.",
+      "source_artifact": "reports/quality/*.json",
+      "status": "fail"
+    }
+  ],
+  "generated_by": "scripts.engineering.qa.report_debt_governance_gates",
+  "schema_version": 1,
+  "stale_artifacts": {
+    "adr_enforcement_matrix": false,
+    "architecture_quality_scorecard": true,
+    "config_surface_backlog": false,
+    "dq_contract_registry_diagnostics": false,
+    "hotspot_family_baseline": false,
+    "module_coverage_inventory": false,
+    "remote_main_baseline": false
+  },
+  "status_counts": {
+    "fail": 2,
+    "pass": 43,
+    "warn": 0
+  },
+  "summary": {
+    "architecture_quality_scorecard_integral_score": 9.41,
+    "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
+    "fail_count": 2,
+    "failing_gates": [
+      "module_coverage_scorecard_coherence",
+      "generated_artifact_drift"
+    ],
+    "gate_count": 45,
+    "pass_count": 43,
+    "release_gate_status": "failing",
+    "warn_count": 0,
+    "warning_gates": []
+  }
+}
+Wrote architecture quality scorecard: E:\g-drive\05_AI\github\BioactivityDataAcquisition2\reports\quality\architecture-quality-scorecard.json
++ E:\g-drive\05_AI\github\BioactivityDataAcquisition2\.venv-win\Scripts\python.exe -m scripts.engineering.qa.report_module_coverage_inventory --allow-missing-coverage-xml
++ E:\g-drive\05_AI\github\BioactivityDataAcquisition2\.venv-win\Scripts\python.exe -m scripts.engineering.qa.report_hotspot_family_baseline --update
+SYNC scorecard hotspot metrics: already aligned
++ E:\g-drive\05_AI\github\BioactivityDataAcquisition2\.venv-win\Scripts\python.exe -m scripts.engineering.qa.report_dead_code_inventory
++ E:\g-drive\05_AI\github\BioactivityDataAcquisition2\.venv-win\Scripts\python.exe -m scripts.engineering.qa.report_debt_governance_gates
++ E:\g-drive\05_AI\github\BioactivityDataAcquisition2\.venv-win\Scripts\python.exe -m scripts.engineering.qa.report_architecture_quality_scorecard
+REFRESH complete. Recommended verification:
+  python -m scripts.engineering.qa.refresh_governance_artifacts --check
+  pytest tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_hotspot_growth_family_ratchets.py -q --tb=line

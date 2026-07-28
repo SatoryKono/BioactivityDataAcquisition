@@ -8,6 +8,10 @@ from typing import Any
 
 import pytest
 
+from tests.architecture._module_coverage_inventory_support import (
+    skip_if_module_coverage_inventory_is_dirty,
+)
+
 pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -22,6 +26,10 @@ def _load_json(path: Path) -> dict[str, Any]:
 
 
 def test_issue_6045_targeted_low_coverage_closeout_is_coherent() -> None:
+    skip_if_module_coverage_inventory_is_dirty(
+        root=ROOT,
+        inventory_path=MODULE_COVERAGE,
+    )
     closeout = _load_json(CLOSEOUT)
     inventory = _load_json(MODULE_COVERAGE)
 

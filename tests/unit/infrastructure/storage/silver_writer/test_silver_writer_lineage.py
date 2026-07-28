@@ -99,6 +99,7 @@ class TestSilverWriterAudit:
             ),
             ingestion_ts=datetime(2025, 1, 1, tzinfo=UTC),
         )
+        assert writer._audit is None
 
     @pytest.mark.asyncio
     async def test_log_silver_audit_missing_run_id_raises(self, noop_logger):

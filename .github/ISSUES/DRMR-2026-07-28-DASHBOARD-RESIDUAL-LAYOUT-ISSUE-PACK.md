@@ -1,6 +1,6 @@
 # Dashboard Residual Layout issue pack (post-DRM)
 
-**Status:** published  
+**Status:** closed (2026-07-28, commit `e45e83b4a7`)  
 **Wave code:** DRM-R  
 **Date:** 2026-07-28  
 **Implementation epic:** [#6853](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6853)  

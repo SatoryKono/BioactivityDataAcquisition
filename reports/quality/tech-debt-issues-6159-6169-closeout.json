@@ -18,7 +18,7 @@
     "6163": {
       "control_plane_extracted_helper_owner": "src/bioetl/application/services/control_plane/replay/historical_identity_models.py#HistoricalReplayUniverseRecord",
       "control_plane_family": "application_services_control_plane",
-      "control_plane_files_ge_250_loc": 11,
+      "control_plane_files_ge_250_loc": 0,
       "control_plane_files_ge_250_loc_budget": 16,
       "control_plane_reduced_surface": "src/bioetl/application/services/control_plane/replay/historical_universe_service.py",
       "control_plane_reduced_surface_line_count_after_max": 249,
@@ -43,9 +43,9 @@
     },
     "6165": {
       "debt_type": "dead_code_zero_import_review",
-      "repo_wide_owner_test_anchored_candidate_count": 2,
+      "repo_wide_owner_test_anchored_candidate_count": 6,
       "repo_wide_untriaged_zero_import_candidate_count": 0,
-      "repo_wide_zero_import_candidate_count": 2
+      "repo_wide_zero_import_candidate_count": 6
     },
     "6166": {
       "config_inconsistent_parameter_count": 0,
