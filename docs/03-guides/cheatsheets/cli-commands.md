@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-24'
+  Last verified: '2026-07-28'
 
 ______________________________________________________________________
 
@@ -15,13 +15,17 @@ ______________________________________________________________________
 
 Краткий справочник по командам BioETL CLI для быстрого поиска.
 
-**Версия:** 1.0.0
-**Дата обновления:** 2026-07-24
+**Версия:** 1.1.0
+**Дата обновления:** 2026-07-28 (#6535)
 
 **Оглавление:**
+- [Core Make / setup](#core-make--setup) — install, test, lint, architecture
 - [BioETL Application CLI](#bioetl-application-cli) — команды запуска пайплайнов
+- [Unified script entry points](#unified-script-entry-points) — `python -m scripts.*`
+- [OS-specific wrappers](#os-specific-wrappers) — Windows / WSL helpers
+- [Memory workflow](#memory-workflow) — pre-task / post-task
 - [Build & Test CLI](#build--test-cli) — команды сборки и тестирования
-- [Development Scripts](#development-scripts) — скрипты разработки
+- [См. также](#см-также)
 
 ______________________________________________________________________
 
@@ -726,10 +730,118 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
+## Core Make / setup
+
+Verified against root `Makefile` (2026-07-28). Prefer `make` targets for CI-parity local work.
+
+| Command | Use when |
+| --- | --- |
+| `make install` | Create/sync project env (`uv`/deps) |
+| `make test-deps` | Install test-only dependencies |
+| `make lint` | Ruff + project lint surface |
+| `make test` | Default test suite |
+| `make test-fast` | Faster local subset |
+| `make test-architecture` | Architecture / layer / inventory gates |
+| `make test-unit` | Unit tests only |
+| `make test-integration` | Integration tests |
+| `make run-local` | Local pipeline smoke entry |
+| `make qa-arch-fast` | Fast architecture QA lane |
+| `make qa-debt` | Debt/governance QA lane |
+| `make render-diagrams` | Render Mermaid diagram baselines |
+| `make clean` / `make clean-local-artifacts` | Local hygiene |
+
+Common pytest (when not using make):
+
+```bash
+# From repo root with venv or uv
+pytest tests/unit -q
+pytest tests/architecture -q --tb=line
+uv run ruff check src tests
+uv run mypy src
+```
+
+See also: [testing.md](../testing.md), [docs-verification.md](../docs-verification.md).
+
+______________________________________________________________________
+
+## Unified script entry points
+
+Prefer `python -m scripts.<domain> ...` (or `uv run python -m ...`) over ad-hoc paths.
+
+| Module | Purpose | Examples |
+| --- | --- | --- |
+| `scripts.engineering.qa` | Quality inventories, debt gates, architecture scorecards, hotspot baselines | `python -m scripts.engineering.qa report-debt-governance-gates` |
+| `scripts.engineering.ci` | CI-oriented runners / quality orchestration | See `scripts/engineering/ci/` |
+| `scripts.engineering.repo` | Inventory, catalog, version/root hygiene checks | `python -m scripts.engineering.repo.check_scripts_inventory` (via package entry) |
+| `scripts.schema` | Config/schema generation and validation helpers | Schema parity / generation modules under `scripts/schema/` |
+| `scripts.docs` | Docs links, drift, cleanup inventory | `python -m scripts.docs generate-cleanup-inventory --check` |
+| `scripts.diagrams` | Diagram lint / render / quality gates | `python -m scripts.diagrams lint` |
+| `scripts.ops` | Ops helpers (docker setup, data maintenance) | `scripts/ops/docker-setup.ps1` / `.sh` |
+| `scripts.data_quality` / related | DQ tooling surfaces | Prefer `bioetl dq ...` for operator flows |
+
+Architecture / quality refresh (post-change):
+
+```bash
+python -m scripts.engineering.qa.refresh_governance_artifacts
+python -m scripts.diagrams lint
+python -m scripts.docs check-links --links  # when available in your checkout
+```
+
+Normative policy: [RULES.md](../../00-project/RULES.md), [AGENTS.md](../../../AGENTS.md).
+
+______________________________________________________________________
+
+## OS-specific wrappers
+
+### Windows (PowerShell)
+
+| Script / pattern | Use |
+| --- | --- |
+| `scripts/ops/docker-setup.ps1` | Docker stack helpers (when Docker work is explicitly required) |
+| `scripts/diagrams/render.ps1` | Diagram render helper |
+| Project venv | `.venv-win\Scripts\python.exe -m pytest ...` |
+| `uv run ...` | Preferred cross-platform runner when `uv` is installed |
+
+### WSL / Linux
+
+| Script / pattern | Use |
+| --- | --- |
+| `scripts/ops/docker-setup.sh` | Docker helpers |
+| `scripts/diagrams` make targets | `make render-diagrams` |
+| Codex/WSL setup | [development/codex-wsl2-setup.md](../development/codex-wsl2-setup.md) |
+
+Default product posture remains **local-only** (ADR-010): do not require Docker/Redis for core ETL.
+
+______________________________________________________________________
+
+## Memory workflow
+
+Canonical workflow: `src/memory/DAILY_WORKFLOW.md`.
+
+```bash
+# Before implementation / audit
+python -m memory.tooling.workflow pre-task \
+  --task-id <id> \
+  --title "Short task title"
+
+# After implementation
+python -m memory.tooling.workflow post-task \
+  --task-id <id>
+
+# Cadence: review curated memory notes
+python -m memory.tooling.workflow review-curated
+```
+
+Memory notes never outrank runtime code, configs, accepted ADRs, or runbooks ([AGENTS.md](../../../AGENTS.md)).
+
+______________________________________________________________________
+
 ## См. также
 
 - [CLI Reference](../../04-reference/cli.md) — полная документация по CLI
 - [Running Pipelines](../running-pipelines.md) — руководство по запуску
+- [Pipeline Configuration Cheatsheet](pipeline-config.md) — config hierarchy
 - [Pipeline Configuration](../pipeline-configuration.md) — настройка конфигураций
 - [Metrics & Monitoring](../metrics-monitoring.md) — метрики и мониторинг
 - [Troubleshooting](../troubleshooting.md) — решение проблем
+- [Common errors](../../05-operations/troubleshooting/common-errors.md) — error patterns
