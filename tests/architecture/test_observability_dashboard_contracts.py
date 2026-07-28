@@ -134,7 +134,7 @@ def test_dq_dashboard_must_not_use_hardcoded_blocked_share_verdict_math() -> Non
     verdict_titles = {
         "Status",
         "Monitor DQ Current Status",
-        "Monitor DQ Threshold State",
+        "Now · DQ Threshold State",
     }
     offenders: list[str] = []
     for panel in _iter_panels(dashboard):
@@ -160,7 +160,7 @@ def test_dq_quarantine_count_is_visible_on_first_screen() -> None:
     )
     # Diet surface (#6647): quarantine evidence is shipped as blocked-records panel.
     accepted_titles = {
-        "Track: Records Quarantined in Range",
+        "Range · Records Quarantined",
         "Track: DQ Blocked Records in Range (Evidence)",
     }
     panel = next(

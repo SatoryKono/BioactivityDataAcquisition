@@ -358,7 +358,7 @@
           "refId": "A"
         }
       ],
-      "title": "Monitor DQ Threshold State",
+      "title": "Now · DQ Threshold State",
       "type": "stat"
     },
     {
@@ -434,7 +434,7 @@
           "refId": "A"
         }
       ],
-      "title": "Inspect DQ Current Reasons",
+      "title": "Now · DQ Current Reasons",
       "type": "table"
     },
     {
@@ -2223,7 +2223,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE delivery impact. Selected-range quarantine count. Non-zero means records were withheld from normal promotion and require quarantine triage even when Silver filter rejects remain zero; 0 means no quarantined records were reported in the selected window.",
+          "description": "TIME RANGE delivery impact. Selected-range quarantine count. Non-zero means records were withheld from normal promotion and require quarantine triage even when Silver filter rejects remain zero; 0 means no quarantined records were reported in the selected window. TIME RANGE evidence only — not a peer verdict with Now.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2268,7 +2268,7 @@
             "h": 5,
             "w": 12,
             "x": 0,
-            "y": 6
+            "y": 17
           },
           "id": 6,
           "options": {
@@ -2299,7 +2299,7 @@
               "refId": "A"
             }
           ],
-          "title": "Track: Records Quarantined in Range",
+          "title": "Range · Records Quarantined",
           "type": "stat"
         },
         {
@@ -2352,7 +2352,7 @@
             "h": 5,
             "w": 12,
             "x": 12,
-            "y": 6
+            "y": 17
           },
           "id": 117,
           "options": {
@@ -2377,9 +2377,9 @@
               "refId": "A"
             }
           ],
-          "title": "Track: Silver Filter Rejects in Range",
+          "title": "Range · Silver Filter Rejects",
           "type": "stat",
-          "description": "TIME RANGE delivery impact. Selected-range Silver structural reject count from the filtered_out path only. FILTERED_OUT_SILVER is a legacy alias for this Silver structural path and is not a Gold contract/semantic reject code. A zero here does not refute current CRIT because quarantine, Gold reject outcomes, and Silver validation blockers are separate paths; use first-screen DQ reasons and the quarantine/validation/Gold panels before assuming the incident is filter-driven. The Explorer handoff preserves pipeline/run_type and time range so the operator can validate scoped totals before narrowing by reason_code or field."
+          "description": "TIME RANGE delivery impact. Selected-range Silver structural reject count from the filtered_out path only. FILTERED_OUT_SILVER is a legacy alias for this Silver structural path and is not a Gold contract/semantic reject code. A zero here does not refute current CRIT because quarantine, Gold reject outcomes, and Silver validation blockers are separate paths; use first-screen DQ reasons and the quarantine/validation/Gold panels before assuming the incident is filter-driven. The Explorer handoff preserves pipeline/run_type and time range so the operator can validate scoped totals before narrowing by reason_code or field. TIME RANGE evidence only — not a peer verdict with Now."
         }
       ]
     },

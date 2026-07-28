@@ -2,7 +2,7 @@
   "annotations": {
     "list": []
   },
-  "description": "Run Explorer (Phase-2). Single-run identity + stage accounting via BioETL Ops HTTP. run_id is never a Prometheus label.",
+  "description": "Run Explorer. Exact completed run via Ops HTTP pipeline_run_report_v1. run_id is never a Prometheus label.",
   "editable": true,
   "graphTooltip": 1,
   "id": null,
@@ -104,7 +104,7 @@
       },
       "options": {
         "mode": "markdown",
-        "content": "### Run Explorer — single-run narrative\n\npipeline=`$pipeline` · run_type=`$run_type` · run_id=`$run_id` · workflow=`$workflow`\n\n`run_id` is **HTTP-only** identity context. Never add it to PromQL.\n\n**Read order:** (1) ID identity table · (2) Processed Records (Bronze/Silver/Gold) · (3) handoffs below.\n\nEmpty ID with backend healthy → invalid/absent run scope (not VALID EMPTY records).\n"
+        "content": "### Run Explorer — exact completed run (Ops HTTP)\n\npipeline=`$pipeline` · run_type=`$run_type` · run_id=`$run_id` · workflow=`$workflow`\n\n`run_id` is **HTTP-only** (never PromQL).\n\n**No selection (`run_id=-`):** use Recent pipeline runs, then set run_id.\n**Selected run:** identity, processed records, funnel, reasons, artifacts from pipeline_run_report_v1.\n**CLI:** `bioetl run-manifest show <run-id>` · `bioetl quarantine inspect --pipeline <p>`.\n"
       }
     },
     {
@@ -701,14 +701,214 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 46
       },
       "options": {
         "mode": "markdown",
-        "content": "1. **0. Trust** — resume/replay safety for this family.\n2. **4. Data Quality** — quarantine aggregates (not record forensics).\n3. **5. Incident Workspace** — multi-domain suspects.\n4. **CLI** — `bioetl run-manifest show <run-id>` · `bioetl quarantine inspect --pipeline <pipeline>`.\n"
+        "content": "1. Set **run_id** from Recent runs (or leave `-` to browse).\n2. Read funnel + reasons_top_n + artifacts for this run.\n3. **0. Trust** for resume safety; **4. DQ** for fleet quarantine.\n4. **CLI** for record-level quarantine (dashboard stays aggregate).\n"
       },
       "links": [],
       "description": "Phase-2: CTA list; dashboard hops via Navigation bus to avoid duplicate UIDs."
+    },
+    {
+      "id": 3010,
+      "type": "table",
+      "title": "Recent pipeline runs (no selection)",
+      "description": "Index of recent pipeline_run_report_v1 files. Pick run_id into the dashboard variable. Not Prometheus.",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 15
+      },
+      "datasource": "BioETL Ops HTTP",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "inspect": false
+          },
+          "noValue": "NO DATA — empty report section, unresolved run_id, or Ops HTTP unavailable. Check /health/live."
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "footer": {
+          "show": false
+        },
+        "cellHeight": "sm"
+      },
+      "targets": [
+        {
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "items",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=20",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          },
+          "expr": ""
+        }
+      ]
+    },
+    {
+      "id": 3011,
+      "type": "table",
+      "title": "Selected run · funnel stages",
+      "description": "Stage funnel from pipeline_run_report_v1. Exact run_id required. Not a waterfall (no start/end chronology).",
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 23
+      },
+      "datasource": "BioETL Ops HTTP",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "inspect": false
+          },
+          "noValue": "NO DATA — empty report section, unresolved run_id, or Ops HTTP unavailable. Check /health/live."
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "footer": {
+          "show": false
+        },
+        "cellHeight": "sm"
+      },
+      "targets": [
+        {
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "funnel",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          },
+          "expr": ""
+        }
+      ]
+    },
+    {
+      "id": 3012,
+      "type": "table",
+      "title": "Selected run · top reasons",
+      "description": "Top removal/reason codes from pipeline_run_report_v1.",
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 30
+      },
+      "datasource": "BioETL Ops HTTP",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "inspect": false
+          },
+          "noValue": "NO DATA — empty report section, unresolved run_id, or Ops HTTP unavailable. Check /health/live."
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "footer": {
+          "show": false
+        },
+        "cellHeight": "sm"
+      },
+      "targets": [
+        {
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "reasons_top_n",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          },
+          "expr": ""
+        }
+      ]
+    },
+    {
+      "id": 3013,
+      "type": "table",
+      "title": "Selected run · artifacts",
+      "description": "Artifact refs from pipeline_run_report_v1.",
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 36
+      },
+      "datasource": "BioETL Ops HTTP",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "inspect": false
+          },
+          "noValue": "NO DATA — empty report section, unresolved run_id, or Ops HTTP unavailable. Check /health/live."
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "footer": {
+          "show": false
+        },
+        "cellHeight": "sm"
+      },
+      "targets": [
+        {
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "artifacts",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          },
+          "expr": ""
+        }
+      ]
+    },
+    {
+      "id": 3014,
+      "type": "text",
+      "title": "Selected run · stage timings / failure (optional)",
+      "description": "stage_timings and failure blocks are optional on pipeline_run_report_v1.",
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 41
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "### Optional report blocks\n- **stage_timings:** ordered durations when present; else PARTIAL. Not a waterfall.\n- **failure:** inspect via report JSON or CLI when present.\n- `GET /ops/observability/pipeline-run-report?pipeline=…&run_id=…`\n- `GET /ops/observability/pipeline-run-reports?pipeline=…&limit=20`\n"
+      }
     }
   ],
   "refresh": "60s",

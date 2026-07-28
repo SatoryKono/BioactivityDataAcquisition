@@ -41,7 +41,7 @@ when exact-run accounting is required.
 | S1 | 0 | Status + First Action present on `bioetl-overview-v2` first screen |
 | S2 | 1 | Nav → Pipeline Diagnostics; Status + Runtime Blockers + Error Rate first paint |
 | S3 | 1 | Nav not required if coming from PD; Provider first paint has matrix/causes |
-| S4 | 1 | DQ Status + Inspect DQ Current Reasons + Threshold first paint |
+| S4 | 1 | DQ Status + Now · DQ Current Reasons + Threshold first paint |
 | S5 | 1 | Trust safety cards first paint; Identity evidence collapsed |
 | S6 | 1 | Expand Overview Alert/SLO Triage row |
 

@@ -2,7 +2,7 @@
   "annotations": {
     "list": []
   },
-  "description": "Incident Workspace (Phase-2). Domain-separated suspects (Runtime / Provider / DQ) plus ALERTS timeline. Not Grafana Drilldown Investigations. Entry hop: Fleet or this board.",
+  "description": "Incident Workspace — read-only triage. Active Suspects by domain + current alerts + range alert history. Not a lifecycle/working record.",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
@@ -215,7 +215,7 @@
       "id": 2001,
       "type": "text",
       "title": "Next Best Actions",
-      "description": "Phase-2 Incident CTAs: navigation bus owns dashboard handoffs to avoid duplicate target UIDs. Domain suspect tables below rank evidence.",
+      "description": "Honest read-only investigation console. No lifecycle persistence.",
       "gridPos": {
         "h": 4,
         "w": 24,
@@ -224,15 +224,15 @@
       },
       "options": {
         "mode": "html",
-        "content": "<h3>Next Best Actions (≤4)</h3><ol style='margin:0.2rem 0 0 1.1rem;padding:0'><li>Read Status strip (L0 worst-of).</li><li>Scan domain suspect tables (Runtime / Provider / DQ) — not one mega-OR.</li><li>Open matching workspace via Navigation bus (time range preserved).</li><li>Empty all tables + Status OK = VALID EMPTY; empty with CRIT = TELEMETRY/projection gap.</li></ol>"
+        "content": "<h3>Read-only triage (not a working record)</h3><ol style='margin:0.2rem 0 0 1.1rem;padding:0'><li>Status strip = L0 worst-of (current).</li><li>Active Suspects by domain (Runtime / Provider / DQ).</li><li>Current Alerts = firing/pending snapshot; history = range timeline.</li><li>No persistent incident write path on this board.</li></ol>"
       },
       "links": []
     },
     {
       "id": 2002,
       "type": "table",
-      "title": "Suspects · Runtime blockers",
-      "description": "Runtime current blockers only (bioetl_runtime_current_blocker_reason). VALID EMPTY when no active blockers.",
+      "title": "Active Suspects · Runtime",
+      "description": "Runtime blockers (current topk by domain). VALID EMPTY when none. Handoff: Pipeline Diagnostics. Not cross-domain ranking.",
       "gridPos": {
         "h": 8,
         "w": 8,
@@ -295,8 +295,8 @@
     {
       "id": 2003,
       "type": "table",
-      "title": "Suspects · Provider causes",
-      "description": "Provider causes (bioetl_provider_current_cause). Fleet population; not selected-provider only. Empty + non-OK Status = explainability gap.",
+      "title": "Active Suspects · Provider",
+      "description": "Provider causes (current fleet topk). Empty + non-OK Status is an explainability gap. Handoff: Provider Health.",
       "gridPos": {
         "h": 8,
         "w": 8,
@@ -359,8 +359,8 @@
     {
       "id": 2004,
       "type": "table",
-      "title": "Suspects · DQ reasons",
-      "description": "DQ current reasons (bioetl_dq_current_reason). NOW-lane evidence. VALID EMPTY when no active reasons.",
+      "title": "Active Suspects · DQ",
+      "description": "DQ current reasons (NOW topk). VALID EMPTY when none. Handoff: Data Quality. Not a persistent incident record.",
       "gridPos": {
         "h": 8,
         "w": 8,
@@ -423,8 +423,8 @@
     {
       "id": 2005,
       "type": "table",
-      "title": "Alert / Event Timeline (range)",
-      "description": "Prometheus ALERTS support surface (no business-logic rewrite). Platform-agnostic incident timeline. VALID EMPTY when no firing/pending.",
+      "title": "Current Alerts (firing/pending)",
+      "description": "Instant ALERTS snapshot (firing|pending). Not a range timeline. VALID EMPTY when none. For history use Alert State History.",
       "gridPos": {
         "h": 6,
         "w": 24,
@@ -445,7 +445,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "noValue": "VALID EMPTY — no active rows in selected scope",
+          "noValue": "VALID EMPTY — no firing/pending alerts now",
           "custom": {
             "align": "left",
             "cellOptions": {
@@ -482,6 +482,72 @@
         "footer": {
           "show": false
         }
+      }
+    },
+    {
+      "id": 2006,
+      "type": "state-timeline",
+      "title": "Alert State History (range)",
+      "description": "Range query over ALERTS firing|pending. Shows alertname/state across the selected dashboard range. Not a persistent incident log; Prometheus ALERTS only.",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 25
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "ALERTS{alertstate=~\"firing|pending\"}",
+          "legendFormat": "{{alertname}} {{alertstate}}",
+          "refId": "A",
+          "instant": false,
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "VALID EMPTY — no alert state samples in range",
+          "custom": {
+            "fillOpacity": 70,
+            "lineWidth": 0
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "mergeValues": true,
+        "showValue": "auto",
+        "alignValue": "left",
+        "rowHeight": 0.9,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 2007,
+      "type": "text",
+      "title": "Impact / confidence (honest bounds)",
+      "description": "Qualitative triage aids; not scored ranking.",
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 33
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "### Impact and confidence\n- Impact basis: L0 Status + non-empty Active Suspects tables.\n- Confidence: low when trust markers are UNKNOWN or tables are empty while Status is not OK.\n- Scoring deferred (no explicit score contract). Tables are per-domain topk, not cross-domain rank.\n- Persistence: none on this board.\n"
       }
     }
   ],

@@ -60,7 +60,7 @@ def test_silver_filter_reject_accounting_mismatch_panel_uses_reconciliation_rule
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title"),
     [
-        ("bioetl-dq-v2.json", "Track: Silver Filter Rejects in Range"),
+        ("bioetl-dq-v2.json", "Range · Silver Filter Rejects"),
         ("bioetl-dq-v2.json", "Inspect: Silver Filter Rejects by Pipeline"),
     ],
 )
@@ -465,7 +465,7 @@ def test_silver_filter_breakdown_panels_use_bounded_breakdown_metric(
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title"),
     [
-        ("bioetl-dq-v2.json", "Track: Silver Filter Rejects in Range"),
+        ("bioetl-dq-v2.json", "Range · Silver Filter Rejects"),
     ],
 )
 def test_silver_filter_rejects_summary_panels_use_instant_queries(
@@ -804,7 +804,7 @@ def test_dq_reject_panels_link_to_silver_reject_explorer() -> None:
     """DQ reject panels should hand off directly into the Silver Reject Explorer."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     for panel_title in (
-        "Track: Silver Filter Rejects in Range",
+        "Range · Silver Filter Rejects",
         "Inspect: Top Silver Reject Reasons (Pareto)",
         "Inspect: Top Silver Reject Fields",
     ):
@@ -845,7 +845,7 @@ def test_dq_reject_panels_link_to_silver_reject_explorer() -> None:
             assert "var-reason_code=" in url
         if panel_title == "Inspect: Top Silver Reject Fields":
             assert "var-field=" in url
-        if panel_title == "Track: Silver Filter Rejects in Range":
+        if panel_title == "Range · Silver Filter Rejects":
             assert "var-reason_code=" not in url
             assert "var-field=" not in url
 

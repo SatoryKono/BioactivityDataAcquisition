@@ -208,12 +208,12 @@ Explorer health probe and monitoring setup docs for that reason.
    `Status` is the compact shared-shell verdict; `Runtime Status` is an
    expanded first-screen mirror of the same trust-gated current-status
    recording rule next to blocker causes, not an independent second signal.
-   `Runtime Telemetry Gap` is the trust precondition: non-zero scrape/rule
+   `Metrics Evidence` is the trust precondition: non-zero scrape/rule
    health forces both verdict panels to `INCOMPLETE`; UNKNOWN also blocks zero
    counters from being treated as conclusive.
    Compact evidence row содержит `Worst Stage Lag`,
    `Monitor Runtime Blockers`, `Runtime Error Rate`,
-   `Runtime Telemetry Gap` и `Failed Runs`; selected-range risk
+   `Metrics Evidence` и `Failed Runs`; selected-range risk
    markers не определяют current status and render neutral zero evidence
    instead of green OK cards. Non-zero/UNKNOWN telemetry gap делает zero-count
    cards недоказательными.
@@ -290,8 +290,8 @@ Explorer health probe and monitoring setup docs for that reason.
    severity matrix, inspect critical providers, or inspect provider top causes
    before leaving the page.
 1. `bioetl-dq-v2`, first-screen answer row:
-   `Monitor DQ Current Status`, `Monitor DQ Threshold State`,
-   `Inspect DQ Current Reasons` и `Review: First Action`
+   `Monitor DQ Current Status`, `Now · DQ Threshold State`,
+   `Now · DQ Current Reasons` и `Review: First Action`
    отвечают на вопрос «DQ сейчас OK/WARN/CRIT/UNKNOWN и какое действие
    первое». `Status` is the compact shared-shell verdict; `Monitor DQ Current
    Status` is an expanded first-screen mirror beside threshold/reason
@@ -299,7 +299,7 @@ Explorer health probe and monitoring setup docs for that reason.
    расположен compact band labelled as TIME RANGE:
    `Monitor: Data Quality Score (Volume-weighted)`,
    `Monitor: Worst-Entity DQ Score`, `Time Range · Worst Freshness Age (hours;
-   SLA 24/72)`, `Track: Records Quarantined in Range`, `Track: Silver Filter
+   SLA 24/72)`, `Range · Records Quarantined`, `Track: Silver Filter
    Rejects in Range`, and `Track: DQ Blocked Records in Range (Evidence)`.
    Freshness query output, display unit, and thresholds all use hours: WARN at
    `24h`, CRIT at `72h`. `Track Range Evidence: Bronze -> Silver -> Gold` lives
@@ -395,13 +395,13 @@ Compact evidence ниже первого экрана:
 ## Silver Filter Rejects workflow
 
 - Для быстрых summary используйте `Silver Rejects + Rate` в
-  `bioetl-overview-v2` и `Track: Silver Filter Rejects in Range` в `bioetl-runtime`. Overview
+  `bioetl-overview-v2` и `Range · Silver Filter Rejects` в `bioetl-runtime`. Overview
   intentionally не показывает standalone green reject-rate gauge: rate
   интерпретируется только рядом с Bronze denominator / activity context.
 - `bioetl-overview-v2` и `bioetl-runtime` содержат явный handoff в
   `4. Data Quality`, но runtime dashboard больше не тащит в себя DQ internals:
   он показывает только compact handoff conditions.
-- Для current-state narrowing используйте `Inspect DQ Current Reasons`; для
+- Для current-state narrowing используйте `Now · DQ Current Reasons`; для
   bounded cause summary используйте `Inspect: Top Silver Reject Reasons (Pareto)` и
   `Inspect: Top Silver Reject Fields` в collapsed-by-default rows
   `bioetl-dq-v2` (раскройте их для расследования).
@@ -683,7 +683,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
   quarantine pressure, spike = incident. Next action: `Top Silver Reject
   Reasons` + `Silver Reject Explorer`/quarantine CLI.
 - `runtime.id=16 (Monitor Runtime Blockers)`: non-zero = active blocker count; `UNKNOWN` means missing current runtime status/blocker telemetry and must not be treated as OK. Next action: runtime blockers table + culprit stage panels, затем logs/traces при необходимости.
-- `runtime.id=9102 (Runtime Telemetry Gap)`: `0=SCRAPING/RULES OK`, `1=SCRAPE/RULE GAP`, `>=2=SCRAPE+RULE GAP`, `null=UNKNOWN`; checks scrape health plus runtime dashboard recording-rule evaluation failures, rule-group presence, and rule-group freshness. Any non-zero value forces headline `Status` and `Runtime Status` to `INCOMPLETE` (`3`).
+- `runtime.id=9102 (Metrics Evidence)`: `0=SCRAPING/RULES OK`, `1=SCRAPE/RULE GAP`, `>=2=SCRAPE+RULE GAP`, `null=UNKNOWN`; checks scrape health plus runtime dashboard recording-rule evaluation failures, rule-group presence, and rule-group freshness. Any non-zero value forces headline `Status` and `Runtime Status` to `INCOMPLETE` (`3`).
 - `runtime.id=205/id=236 (Failed Runs / Monitor No-Records Runs)`: `0` is valid only when `bioetl_runtime_pipeline_run_type_universe` confirms the selected scope; missing selected scope remains `UNKNOWN`.
 - `runtime.id=220 (Runtime Error Rate)`: elevated ratio with meaningful 30m Bronze denominator (`>=20`) = degradation risk; WARN starts at 5%, dashboard CRIT escalation at 20%, and lower/missing denominator stays `UNKNOWN`. Next action: `Inspect Errors by Stage / Error Code / Range` + failed runs/backlog/lag panels.
 - `runtime` current-triage panels normalize a manually selected `workflow_<pipeline>` value back to the entity pipeline before reading current runtime recording rules and error-rate/lag evidence. For example, `workflow_chembl_assay` resolves to the same current status and blocker scope as `chembl_assay`; `UNKNOWN` on error-rate still remains valid when the 30m Bronze denominator is absent or `<20`.

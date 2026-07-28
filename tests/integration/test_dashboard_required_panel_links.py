@@ -50,7 +50,7 @@ def test_dq_dashboard_required_panel_links():
 
     # Silver Reject Explorer was removed; panel 9102 must not keep residual handoffs.
     panel_9102 = panels.get(9102)
-    assert panel_9102 is not None, "Panel 9102 (Inspect DQ Current Reasons) must exist"
+    assert panel_9102 is not None, "Panel 9102 (Now · DQ Current Reasons) must exist"
     data_links_9102 = panel_9102.get("options", {}).get("dataLinks", [])
     assert not any(
         "Silver Reject Explorer" in link.get("title", "") for link in data_links_9102

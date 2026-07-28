@@ -241,7 +241,7 @@
         "y": 7
       },
       "options": {
-        "content": "<h3>Next Action (≤4) — explicable Trust verdict</h3><ol style='margin:0.2rem 0 0 1.1rem;padding:0'><li>Read Status (INCOMPLETE blocks resume).</li><li>Replay Safety + Checkpoint Freshness + Manifest/Ledger + Telemetry Missing.</li><li>If INCOMPLETE, repair missing telemetry/scrape first.</li><li>Run Explorer for exact identity; expand drilldown rows only if needed.</li></ol>",
+        "content": "### Primary recovery\n1. Read **Status** (evidence-aware replay verdict).\n2. Four cards: Replay Safety · Checkpoint lag · Manifest/Ledger · Telemetry Missing.\n3. If INCOMPLETE/UNKNOWN, repair evidence before resume.\n4. Exact run forensics → **Run Explorer**.\n",
         "mode": "markdown",
         "dataLinks": [
           {
@@ -253,7 +253,7 @@
         ]
       },
       "transparent": false,
-      "description": "Explicable Trust verdict CTAs: recovery readiness (replay safety), primary blocker signals, missing telemetry confidence, then deep rows. Operator handoff text for the selected pipeline/run_type and selected time range. Use it after checking Replay Safety State and Inspect: Telemetry Missing. It links to the replay/checkpoint diagnostic row; manifest/run identity still requires run manifest inspection outside Prometheus."
+      "description": "Compact readiness composition: status + basis cards + recovery. No new metric family."
     },
     {
       "datasource": {

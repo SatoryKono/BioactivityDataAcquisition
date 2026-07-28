@@ -42,8 +42,8 @@ SUMMARY_ZERO_FALLBACK_EXPECTATIONS = {
         "Inspect Network Timeout Errors by Method": "or vector(0)",
     },
     "bioetl-dq-v2.json": {
-        "Track: Records Quarantined in Range": "or vector(0)",
-        "Track: Silver Filter Rejects in Range": "or vector(0)",
+        "Range · Records Quarantined": "or vector(0)",
+        "Range · Silver Filter Rejects": "or vector(0)",
         "Track: Silver Validation Failures in Range": "or vector(0)",
         "Monitor: Silver Validation Failures": "or vector(0)",
         "Monitor: Gold Strict Validation Failures": "or vector(0)",
