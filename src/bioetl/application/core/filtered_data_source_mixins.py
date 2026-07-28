@@ -26,14 +26,12 @@ else:
     class _FilteredDataSourceStateBase:
         """Runtime placeholder for the type-checking-only state protocol."""
 
-
 class _FilteredDataSourceStateMixin(_FilteredDataSourceStateBase, ABC):
     """Attribute contract shared by FilteredDataSource mixins."""
 
     def _ensure_filterable_adapter(self, mode: str) -> None:
         """Check adapter supports filtering mode."""
         raise NotImplementedError
-
 
 class _FilteredDataSourceLifecycleMixin(_FilteredDataSourceStateMixin, ABC):
     """Lifecycle and filter-loading behavior for FilteredDataSource."""
@@ -51,7 +49,6 @@ class _FilteredDataSourceLifecycleMixin(_FilteredDataSourceStateMixin, ABC):
     ) -> None:
         """Exit async context."""
         await self._data_source.__aexit__(exc_type, exc_val, exc_tb)
-
 
 class _FilteredDataSourceFetchMixin(
     _FilteredDataSourceStateMixin,

@@ -18,7 +18,6 @@ from bioetl.application.core.base_transformer._structural_policy_types import (
 StructuralFieldContract = StructuralFieldSpec
 StructuralPolicyEvent = StructuralPolicySignal
 
-
 __all__ = [
     "NoOpStructuralPolicy",
     "SchemaAwareStructuralPolicy",

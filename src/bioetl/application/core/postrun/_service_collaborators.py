@@ -18,7 +18,6 @@ if TYPE_CHECKING:
         StorageMaintenancePort,
     )
 
-
 @dataclass(frozen=True, slots=True)
 class ResolvedPostrunCollaborators:
     """Resolved postrun collaborators after legacy/service fallback lookup."""
@@ -28,7 +27,6 @@ class ResolvedPostrunCollaborators:
     logger: LoggerPort
     metadata_coordinator: MetadataCoordinatorPort | None
     metadata_writer: MetadataWriterPort | None
-
 
 def resolve_postrun_collaborators(
     *,

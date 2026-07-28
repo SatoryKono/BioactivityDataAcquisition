@@ -24,7 +24,6 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.types import BronzeRecord, RunID, RunType, SilverRecord
 
-
 def _resolve_replay_timestamp_anchor(runtime: RuntimeConfig) -> datetime | None:
     """Resolve one deterministic timestamp anchor for exact replay side effects."""
     if not runtime.exact_replay:
@@ -33,7 +32,6 @@ def _resolve_replay_timestamp_anchor(runtime: RuntimeConfig) -> datetime | None:
         return datetime(1970, 1, 1, tzinfo=UTC)
     replay_date = date.fromisoformat(runtime.replay_anchor_date)
     return datetime.combine(replay_date, datetime.min.time(), tzinfo=UTC)
-
 
 class BasePipeline(ABC):  # noqa: B024
     """Base class for ETL pipelines.

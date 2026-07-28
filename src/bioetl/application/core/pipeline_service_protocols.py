@@ -23,7 +23,6 @@ from bioetl.application.core.pipeline_runtime_service_protocols import (
     PipelineStorageProtocol,
 )
 
-
 @runtime_checkable
 class PipelineServicesProtocol(
     PipelineManagedRuntimeServicesProtocol,
@@ -33,7 +32,6 @@ class PipelineServicesProtocol(
     Protocol,
 ):
     """Full aggregate surface retained as a compatibility facade."""
-
 
 __all__ = [
     "PipelineDQServicesProtocol",

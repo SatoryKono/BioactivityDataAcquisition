@@ -17,7 +17,6 @@ if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
     from bioetl.domain.ports import LockPort, LoggerPort
 
-
 class HeartbeatTask:
     """Manages background heartbeat task for lock maintenance.
 
@@ -121,6 +120,5 @@ class HeartbeatTask:
                 self._logger.error("Lost lock during execution!")
                 self._shutdown_signal.request()
                 raise PipelineShutdownError("Lock lost")
-
 
 __all__ = ["HeartbeatTask"]

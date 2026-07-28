@@ -27,7 +27,6 @@ if TYPE_CHECKING:
         StorageMaintenancePort,
     )
 
-
 class PostrunMetadataWriteService:
     """Handles final metadata writes for Silver and Gold outputs."""
 
@@ -107,6 +106,5 @@ class PostrunMetadataWriteService:
             table_path,
             layer=layer,
         )
-
 
 __all__ = ["PostrunMetadataWriteService"]

@@ -290,6 +290,29 @@ def incident_depth() -> None:
     keep_ids = {1000, 9400, 9401, 2001}
     new_panels = [p for p in panels if p.get("id") in keep_ids]
 
+    # Status (9401): keep runbook-only dataLinks. Nav bus owns Overview/Runtime handoffs
+    # so panel CTAs must not duplicate those target UIDs.
+    status = next(p for p in new_panels if p.get("id") == 9401)
+    status_options = status.setdefault("options", {})
+    status_options["dataLinks"] = [
+        link
+        for link in status_options.get("dataLinks") or []
+        if isinstance(link, dict)
+        and "runbooks/" in str(link.get("url", ""))
+    ]
+    if not status_options["dataLinks"]:
+        status_options["dataLinks"] = [
+            {
+                "title": "Open Runtime Troubleshooting Runbook",
+                "url": (
+                    "https://github.com/SatoryKono/BioactivityDataAcquisition/"
+                    "blob/main/docs/05-operations/runbooks/observability-checklist.md"
+                ),
+                "targetBlank": True,
+                "includeVars": False,
+            }
+        ]
+
     # Update NBA content + links (no duplicates with nav targets for provider if nav has it —
     # use only unique non-nav CTAs: self-view panels avoided; use domain explorers already on nav
     # so NBA uses text-only steps + max 2 extra links not on nav? Nav has all boards.

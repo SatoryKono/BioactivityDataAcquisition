@@ -11,7 +11,6 @@ if TYPE_CHECKING:
     from bioetl.domain.config import PipelineConfig
     from bioetl.domain.ports import LoggerPort, StorageMaintenancePort
 
-
 @dataclass(frozen=True, slots=True)
 class CompactionResult:
     """Typed outcome of Silver compaction: success, skipped, or failed."""
@@ -19,7 +18,6 @@ class CompactionResult:
     status: Literal["success", "skipped", "failed"]
     duplicates_removed: int = 0
     error: str | None = None
-
 
 class PostrunCompactService:
     """Deduplicates Silver table after APPEND or MERGE pipeline runs."""
@@ -68,6 +66,5 @@ class PostrunCompactService:
             self._logger.info("silver_optimize_completed", silver_table=silver_table)
         except self._warning_allowlist as exc:
             self._logger.warning("silver_optimize_failed", error=str(exc))
-
 
 __all__ = ["CompactionResult", "PostrunCompactService"]

@@ -14,7 +14,6 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import SilverRecord
 
-
 class _PreSilverRecordAdapterMixin:
     """Build entity-backed records and adapt Silver hooks to JSON payloads."""
 
@@ -121,7 +120,6 @@ class _PreSilverRecordAdapterMixin:
             cast("SilverRecord", record),
             index,
         )
-
 
 class PreSilverAdapterMixin(
     _PreSilverFinalizationFlowMixin,

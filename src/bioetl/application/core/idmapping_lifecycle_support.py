@@ -13,7 +13,6 @@ if TYPE_CHECKING:
         LoggerPort,
     )
 
-
 class _IDMappingLifecycleState(Protocol):
     """Structural contract for IDMappingDataSource lifecycle helpers."""
 
@@ -24,19 +23,16 @@ class _IDMappingLifecycleState(Protocol):
     _seed_ids: list[str] | None
     _is_open: bool
 
-
 async def enter_data_source(state: _IDMappingLifecycleState) -> None:
     """Enter the underlying mapping client context."""
     await state._client.__aenter__()
     state._is_open = True
-
 
 async def close_data_source(state: _IDMappingLifecycleState) -> None:
     """Close the underlying mapping client when open."""
     if state._is_open:
         await state._client.__aexit__(None, None, None)
     state._is_open = False
-
 
 async def health_check(state: _IDMappingLifecycleState) -> HealthStatus:
     """Validate local input readiness and downstream API health."""

@@ -10,15 +10,27 @@ exact_duplicates:
       linked_issue: "#6360"
       resolution: queries_now_have_distinct_time_semantics
       rationale: The current stat uses a fixed latest-sample lookback while the trend remains selected-range evidence, so the former exact duplicate no longer exists.
-  allowed_groups: []
+  allowed_groups:
+    - id: l0-status-shared-status-card
+      owner: "@bioetl-observability"
+      linked_issue: "#6570"
+      normalized_expression: >-
+        max(bioetl_l0_status{pipeline=~"$pipeline",run_type=~"$run_type"})
+      rationale: >
+        Overview and Incident share the same trusted L0 status card expression
+        as a deliberate cross-dashboard first-action status hop; keep identical
+        semantics so operator drilldown does not diverge by board.
+      panel_refs:
+        - "bioetl-overview-v2.json :: Status"
+        - "bioetl-incident-v1.json :: Status"
 
 near_duplicates:
-  max_count: 4
+  max_count: 5
   owner: "@bioetl-observability"
   linked_issue: "#6360"
   rationale: >
-    Current cross-panel audited baseline is four reviewed near-duplicate
-    families. Growth beyond four or a panel-set change requires review.
+    Current cross-panel audited baseline is five reviewed near-duplicate
+    families. Growth beyond five or a panel-set change requires review.
   reviewed_groups:
     - id: processed-record-stage-range-variants
       disposition: retain_semantic_variants
@@ -51,3 +63,13 @@ near_duplicates:
       panel_refs:
         - "bioetl-runtime.json :: Inspect Active Runtime Blocker Detail"
         - "bioetl-runtime.json :: Runtime Blockers"
+    - id: provider-cause-topk-depth-variants
+      disposition: retain_presentation_variants
+      recording_rule_decision: rejected_topk_is_consumer_specific
+      rationale: >
+        Incident suspect strip uses topk(10) for broader triage while Provider
+        Health keeps topk(5) as the board-first summary; recording either depth
+        would make the other consumer semantically wrong.
+      panel_refs:
+        - "bioetl-incident-v1.json :: Suspects · Provider causes"
+        - "bioetl-provider-health-v2.json :: Inspect Provider Top Causes"

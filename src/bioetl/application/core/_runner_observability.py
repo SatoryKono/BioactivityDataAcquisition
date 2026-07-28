@@ -4,18 +4,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol
 
-
 class _RunnerObservabilityHostProtocol(Protocol):
     _config: PipelineConfig
     _runtime: RuntimeConfig
     _observer: PipelineObserver
 
-
 if TYPE_CHECKING:
     from bioetl.application.core.postrun.service import PostrunResult
     from bioetl.application.observability.observer import PipelineObserver
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
-
 
 def emit_postrun_observability(
     host: _RunnerObservabilityHostProtocol,

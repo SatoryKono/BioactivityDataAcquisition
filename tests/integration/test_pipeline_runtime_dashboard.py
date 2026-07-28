@@ -51,6 +51,12 @@ _ALLOWED_DASHBOARD_LINK_VARS = {
         {"workflow", "pipeline", "run_type", "run_id"}
     ),
     "bioetl-alerts-slo": frozenset({"workflow", "pipeline", "run_type"}),
+    "bioetl-incident-v1": frozenset(
+        {"workflow", "pipeline", "run_type", "run_id"}
+    ),
+    "bioetl-run-explorer-v1": frozenset(
+        {"workflow", "pipeline", "run_type", "run_id"}
+    ),
 }
 
 
@@ -186,7 +192,7 @@ def test_pipeline_runtime_data_panel_titles_are_action_first() -> None:
     offenders = [
         panel.get("title", "<untitled>")
         for panel in get_dashboard_panels(_dashboard())
-        if panel.get("type") != "row"
+        if panel.get("type") not in {"row", "text"}
         and isinstance(panel.get("title"), str)
         and not panel["title"].startswith(allowed_prefixes)
         and panel["title"] not in shared_panel_titles

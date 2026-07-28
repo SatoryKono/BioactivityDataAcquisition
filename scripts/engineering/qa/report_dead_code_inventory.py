@@ -187,6 +187,31 @@ ZERO_IMPORT_OWNER_TEST_EVIDENCE: dict[str, dict[str, object]] = {
         "evidence_lane": "canonical_owner_contract",
         "owner_tests": ("tests/architecture/test_tech_debt_issue_5647_closeout.py",),
     },
+    "src/bioetl/application/services/control_plane/manifest/diagnostics/base.py": {
+        "evidence_lane": "dynamic_runtime_entrypoint",
+        "owner_tests": (
+            "tests/architecture/test_control_plane_diagnostics_dynamic_loaders.py",
+        ),
+    },
+    "src/bioetl/application/services/control_plane/manifest/diagnostics/finalization.py": {
+        "evidence_lane": "dynamic_runtime_entrypoint",
+        "owner_tests": (
+            "tests/architecture/test_control_plane_diagnostics_dynamic_loaders.py",
+        ),
+    },
+    "src/bioetl/application/services/control_plane/manifest/diagnostics/replay_refresh_support.py": {
+        "evidence_lane": "dynamic_runtime_entrypoint",
+        "owner_tests": (
+            "tests/architecture/test_control_plane_diagnostics_dynamic_loaders.py",
+        ),
+    },
+    "src/bioetl/interfaces/cli/commands/maintenance.py": {
+        "evidence_lane": "compatibility_facade_contract",
+        "owner_tests": (
+            "tests/unit/interfaces/cli/commands/test_runtime_wrapper_contracts.py",
+            "tests/architecture/test_control_plane_diagnostics_dynamic_loaders.py",
+        ),
+    },
 }
 
 NON_STATIC_REACHABILITY_DISPOSITIONS = frozenset(

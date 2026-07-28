@@ -24,7 +24,6 @@ if TYPE_CHECKING:
         SilverDQConfigPort,
     )
 
-
 class PostrunDQReportService(PostrunFailureHandlingMixin):
     """Orchestrates optional DQ report generation with strict/warning mode."""
 
@@ -105,6 +104,5 @@ class PostrunDQReportService(PostrunFailureHandlingMixin):
                 emit_warning_error_log=True,
             )
             return None
-
 
 __all__ = ["PostrunDQReportService"]

@@ -13,7 +13,6 @@ _LAYER_PATHS_FIELD = "storage.paths"
 _UNIQUE_LAYER_PATHS_EXPECTED = "unique paths for each layer"
 _DISTINCT_LAYER_PATHS_RULE = "Medallion Architecture: layers MUST have distinct paths"
 
-
 def validate_single_write_mode(
     *,
     write_mode_policy: WriteModePolicy,
@@ -42,7 +41,6 @@ def validate_single_write_mode(
         ]
     return []
 
-
 def validate_layer_formats(
     *,
     silver_format: str | None,
@@ -69,7 +67,6 @@ def validate_layer_formats(
             )
         )
     return errors
-
 
 def validate_path_uniqueness(
     *,
@@ -110,7 +107,6 @@ def validate_path_uniqueness(
             )
         )
     return errors
-
 
 def validate_medallion_policy_consistency(
     *,
@@ -160,7 +156,6 @@ def validate_medallion_policy_consistency(
             )
     return errors
 
-
 def validate_key_nullability_policies(
     *,
     primary_keys: list[str],
@@ -183,7 +178,6 @@ def validate_key_nullability_policies(
             )
         )
     return errors
-
 
 __all__ = [
     "validate_idempotency_contracts",

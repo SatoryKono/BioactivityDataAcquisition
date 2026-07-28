@@ -23,7 +23,6 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="BaseEntity")
 V = TypeVar("V", covariant=True)
 
-
 @dataclass(frozen=True, slots=True)
 class TransformerDependencyContext:
     """Explicit collaborator bundle for ``BaseTransformer`` wiring.
@@ -39,7 +38,6 @@ class TransformerDependencyContext:
     data_normalizer: DataNormalizationPort
     contract_policy: ContractPolicyProtocol
     structural_policy: StructuralPolicyProtocol
-
 
 @runtime_checkable
 class ValueObjectWithFromRaw(Protocol[V]):

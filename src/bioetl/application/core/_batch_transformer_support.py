@@ -7,7 +7,6 @@ from bioetl.application.core.record_normalization_processor import (
 )
 from bioetl.application.core.record_processor_config import RecordProcessorConfig
 
-
 def build_default_normalization_processor(
     config: RecordProcessorConfig,
 ) -> RecordNormalizationProcessor | None:
@@ -25,7 +24,6 @@ def build_default_normalization_processor(
         content_hash_policy_by_version=config.content_hash_policy_by_version,
     )
 
-
 def merge_named_keys(
     base: dict[str, object] | None,
     legacy: dict[str, object],
@@ -38,7 +36,6 @@ def merge_named_keys(
         if value is not None:
             resolved[key] = value
     return resolved
-
 
 def resolve_transformer_bags(
     runtime: dict[str, object] | None,
@@ -62,7 +59,6 @@ def resolve_transformer_bags(
             + ", ".join(sorted(str(k) for k in legacy))
         )
     return resolved_runtime, resolved_callbacks
-
 
 def begin_batch_metrics_if_present(batch_metrics: object) -> None:
     """Invoke optional BatchMetrics begin_batch hook when available."""

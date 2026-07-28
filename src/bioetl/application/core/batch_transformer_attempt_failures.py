@@ -21,13 +21,11 @@ if TYPE_CHECKING:
     from bioetl.domain.error_classifier import ErrorClassifier
     from bioetl.domain.types import BatchID, BronzeRecord, ErrorType
 
-
 def _resolve_invalid_record_policy(dq_config: DQConfig | None) -> str:
     """Resolve invalid-record policy with runtime-safe default."""
     if dq_config is None:
         return "quarantine"
     return dq_config.invalid_record_policy
-
 
 def _transform_failure_entity_id(raw_record: BronzeRecord) -> object:
     """Resolve the best-effort entity identifier for transform failure logs."""
@@ -36,7 +34,6 @@ def _transform_failure_entity_id(raw_record: BronzeRecord) -> object:
         or raw_record.get("document_chembl_id")
         or raw_record.get("activity_id")
     )
-
 
 @dataclass(frozen=True, slots=True)
 class _FilteredOutHandlingContext:
@@ -47,7 +44,6 @@ class _FilteredOutHandlingContext:
     raw_record: BronzeRecord
     debug_export_service: DebugExportService | None
     index: int
-
 
 def _build_filtered_out_handling_context(
     batch_metrics: BatchMetricsRecorderService,
@@ -64,7 +60,6 @@ def _build_filtered_out_handling_context(
         debug_export_service=debug_export_service,
         index=index,
     )
-
 
 def _log_transform_record_failure(
     *,
@@ -87,7 +82,6 @@ def _log_transform_record_failure(
         error=str(error),
         entity_id=_transform_failure_entity_id(raw_record),
     )
-
 
 def handle_filtered_out_error(
     error: FilteredOutError,
@@ -124,7 +118,6 @@ def handle_filtered_out_error(
         ),
     )
 
-
 def handle_transform_processing_error(
     error: Exception,
     *,
@@ -158,7 +151,6 @@ def handle_transform_processing_error(
         index=index,
     )
 
-
 def handle_data_quality_transform_error(
     error: Exception,
     *,
@@ -190,7 +182,6 @@ def handle_data_quality_transform_error(
         gold_record=None,
         dq_entry=DQQuarantineEntry(raw_record, error_type, str(error)),
     )
-
 
 __all__ = [
     "handle_data_quality_transform_error",

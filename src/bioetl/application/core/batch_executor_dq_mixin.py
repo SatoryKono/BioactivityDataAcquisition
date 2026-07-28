@@ -33,7 +33,6 @@ if TYPE_CHECKING:
 _DQ_MAX_SAMPLE_SIZE = 50_000
 _ReservoirT = TypeVar("_ReservoirT")
 
-
 class _BatchExecutorDQMixin:
     """Provides DQ data collection and report context construction.
 

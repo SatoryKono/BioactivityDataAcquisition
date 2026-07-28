@@ -5,7 +5,6 @@ from __future__ import annotations
 from bioetl.application.core.entity_id import compute_publication_term_entity_id
 from bioetl.domain.types import BronzeRecord
 
-
 def extract_terms_from_publication(
     record: BronzeRecord, publication_id: str
 ) -> list[BronzeRecord]:
@@ -57,7 +56,6 @@ def extract_terms_from_publication(
                 )
     return terms
 
-
 def create_term_record(
     *,
     publication_id: str,
@@ -82,7 +80,6 @@ def create_term_record(
         "qualifier": qualifier,
     }
 
-
 def compute_term_entity_id(
     *,
     publication_id: str,
@@ -91,7 +88,6 @@ def compute_term_entity_id(
 ) -> str:
     """Compute deterministic term entity ID."""
     return compute_publication_term_entity_id(publication_id, term_type, term)
-
 
 __all__ = [
     "compute_term_entity_id",

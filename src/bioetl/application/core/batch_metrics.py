@@ -21,7 +21,6 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import MetricsPort
     from bioetl.domain.types import ErrorType, JsonDict
 
-
 class BatchMetricsRecorderService:
     """Record bounded batch-processing metrics; all methods are metrics-safe no-ops."""
 
@@ -241,7 +240,6 @@ class BatchMetricsRecorderService:
             reason_code=reason_code or "FILTERED_OUT_SILVER",
             count=count,
         )
-
 
 # Compatibility alias retained for legacy imports.
 BatchMetricsRecorder = BatchMetricsRecorderService

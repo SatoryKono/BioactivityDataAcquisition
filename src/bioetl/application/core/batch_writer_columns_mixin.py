@@ -18,7 +18,6 @@ _SCHEMA_EXTRACTION_ERRORS = (
     TypeError,
 )
 
-
 class BatchWriterColumnsMixin:
     """Column resolution helpers extracted from BatchWriter."""
 

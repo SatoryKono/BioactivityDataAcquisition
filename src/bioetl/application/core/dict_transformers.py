@@ -14,7 +14,6 @@ from bioetl.domain.validation import validate_smiles as _domain_validate_smiles
 
 T = TypeVar("T")
 
-
 def flatten_nested_dict(
     data: JsonDict | None,  # Any: dict values vary by field type
     prefix: str,
@@ -49,7 +48,6 @@ def flatten_nested_dict(
 
     return result
 
-
 def extract_list_field[T](
     items: list[JsonDict] | None,  # Any: dict values vary by field type
     field: str,
@@ -77,7 +75,6 @@ def extract_list_field[T](
 
     return values if values else None
 
-
 def _extract_nested_values(
     items: list[JsonDict],  # Any: dict values vary by field type
     field: str,
@@ -90,7 +87,6 @@ def _extract_nested_values(
             if isinstance(nested, list):
                 values.extend(nested)
     return values
-
 
 def aggregate_nested_lists(
     items: list[JsonDict] | None,  # Any: dict values vary by field type
@@ -119,12 +115,10 @@ def aggregate_nested_lists(
 
     return values
 
-
 def normalize_string(value: str | None) -> str | None:
     """Normalize one string value via the domain normalization seam."""
     normalized_value: str | None = _domain_normalize_string(value)
     return normalized_value
-
 
 def parse_date_field(
     value: str | None,
@@ -134,12 +128,10 @@ def parse_date_field(
     parsed_value: date | None = _domain_parse_date_field(value, fmt)
     return parsed_value
 
-
 def validate_smiles(smiles: str | None) -> bool:
     """Validate one SMILES string via the domain validation seam."""
     is_valid: bool = _domain_validate_smiles(smiles)
     return is_valid
-
 
 def safe_extract[T](
     record: JsonDict,  # Any: dict values vary by field type
@@ -149,7 +141,6 @@ def safe_extract[T](
     """Read one value from a mapping with a uniform extraction helper."""
     extracted_value: T | object | None = record.get(key, default)
     return extracted_value
-
 
 # Re-export safe_float and safe_int for convenience
 __all__ = [

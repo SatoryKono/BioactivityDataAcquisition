@@ -56,7 +56,6 @@ if TYPE_CHECKING:
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
 
-
 class PostrunServiceSupportMixin:
     """Own thin phase execution helpers outside the main postrun shell."""
 

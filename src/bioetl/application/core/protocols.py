@@ -16,7 +16,6 @@ __all__ = [
     "TransformerProtocol",
 ]
 
-
 from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
@@ -25,7 +24,6 @@ if TYPE_CHECKING:
     from bioetl.application.core.pre_silver_record import PreSilverRecord
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import BronzeRecord, SilverRecord
-
 
 class TransformCallback(Protocol):
     """Bronze to Silver transformation callback."""
@@ -39,7 +37,6 @@ class TransformCallback(Protocol):
         """Execute transformation."""
         ...
 
-
 class GoldFilterCallback(Protocol):
     """Filter callback to determine if Silver record should go to Gold."""
 
@@ -50,7 +47,6 @@ class GoldFilterCallback(Protocol):
     ) -> bool:  # Any: values are heterogeneous
         """Evaluate if record should be included in Gold layer."""
         ...
-
 
 class GoldTransformCallback(Protocol):
     """Silver to Gold transformation callback.
@@ -65,7 +61,6 @@ class GoldTransformCallback(Protocol):
     ) -> JsonDict:  # Any: values are heterogeneous
         """Execute transformation."""
         ...
-
 
 class TransformerProtocol(Protocol):
     """Application-level contract for Bronze → Silver transformers.

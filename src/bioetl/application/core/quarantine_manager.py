@@ -19,7 +19,6 @@ from bioetl.domain.types import BronzeRecord, ErrorType, JsonDict
 
 from .batch_metrics import BatchMetricsRecorderService
 
-
 class DQQuarantineEntry(NamedTuple):
     """A record that failed data-quality checks."""
 
@@ -27,14 +26,12 @@ class DQQuarantineEntry(NamedTuple):
     error_type: ErrorType
     error_details: str
 
-
 class FilteredQuarantineEntry(NamedTuple):
     """A record excluded by Silver filters."""
 
     record: BronzeRecord
     reason: str
     details: JsonDict | None = None
-
 
 class QuarantineRuntimeService(QuarantineManagerSupportMixin):
     """Write records that fail processing to quarantine storage.
@@ -78,7 +75,6 @@ class QuarantineRuntimeService(QuarantineManagerSupportMixin):
             )
         self._pipeline_metrics = resolved_pipeline_metrics
         self._domain_event_emitter = domain_event_emitter
-
 
 __all__ = [
     "DQQuarantineEntry",

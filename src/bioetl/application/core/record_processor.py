@@ -13,7 +13,6 @@ from bioetl.domain.types import JsonDict
 
 __all__ = ["RecordProcessor"]
 
-
 from collections.abc import Callable
 from datetime import datetime
 from typing import TYPE_CHECKING, cast
@@ -36,7 +35,6 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BatchID
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
-
 
 class RecordProcessor:
     """Orchestrates batch transformation and writing across all layers."""

@@ -6,7 +6,6 @@ from bioetl.domain.config.table import APPEND_SAFE_IDEMPOTENCY_CONTRACTS
 from bioetl.domain.medallion import Layer
 from bioetl.domain.types import ConfigValidationError
 
-
 def validate_idempotency_contracts(
     *,
     silver_mode: str,
@@ -27,7 +26,6 @@ def validate_idempotency_contracts(
             contract=gold_contract,
         ),
     ]
-
 
 def _validate_layer_idempotency_contract(
     *,
@@ -80,7 +78,6 @@ def _validate_layer_idempotency_contract(
         )
     ]
 
-
 def _expected_contract_for_mode(*, layer: Layer, mode: str) -> str | None:
     if layer is Layer.SILVER and mode == "merge":
         return "merge_upsert"
@@ -89,7 +86,6 @@ def _expected_contract_for_mode(*, layer: Layer, mode: str) -> str | None:
     if layer is Layer.GOLD and mode == "overwrite":
         return "overwrite_rebuild"
     return None
-
 
 __all__ = [
     "validate_idempotency_contracts",

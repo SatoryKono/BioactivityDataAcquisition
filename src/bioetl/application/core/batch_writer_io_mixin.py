@@ -22,9 +22,7 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
-
 _WRITE_SPAN_ERRORS = SHARED_OPERATION_ERRORS
-
 
 class BatchWriterIOMixin:
     """Layer write orchestration extracted from BatchWriter."""

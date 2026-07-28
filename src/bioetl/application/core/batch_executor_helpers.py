@@ -16,7 +16,6 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.types import BatchID, BronzeRecord, GoldRecord
 
-
 __all__ = [
     "BatchExecutionStateOutcome",
     "BatchProcessedOutcome",
@@ -27,7 +26,6 @@ __all__ = [
     "build_processed_batch_outcome",
     "build_run_statistics",
 ]
-
 
 @dataclass(frozen=True, slots=True)
 class BatchExecutionStateOutcome:
@@ -41,7 +39,6 @@ class BatchExecutionStateOutcome:
     filtered_out_count: int
     source_batch_id: str
 
-
 @dataclass(frozen=True, slots=True)
 class BatchProcessedOutcome:
     """One processed batch projected into state-update and DQ payloads."""
@@ -52,7 +49,6 @@ class BatchProcessedOutcome:
     bronze_result: object
     silver_records: list[BronzeRecord]
     gold_records: list[GoldRecord]
-
 
 def build_batch_execution_state_update(
     *,
@@ -69,7 +65,6 @@ def build_batch_execution_state_update(
         filtered_out_count=output.filtered_out_count,
         source_batch_id=str(output.batch_id),
     )
-
 
 def build_processed_batch_outcome(
     *,
@@ -89,7 +84,6 @@ def build_processed_batch_outcome(
         gold_records=output.gold_records,
     )
 
-
 def apply_batch_execution_state_update(
     *,
     state: BatchExecutionStateProtocol,
@@ -105,7 +99,6 @@ def apply_batch_execution_state_update(
     state.records_quarantined += state_update.quarantined_count
     state.records_filtered_out += state_update.filtered_out_count
     state._source_batch_ids.append(state_update.source_batch_id)
-
 
 def apply_processed_batch_outcome(
     *,
@@ -127,7 +120,6 @@ def apply_processed_batch_outcome(
         gold_records=outcome.gold_records,
     )
 
-
 def build_batch_result_snapshot[BatchResultT](
     *,
     batch_result_type: BatchResultBuilderProtocol[BatchResultT],
@@ -143,7 +135,6 @@ def build_batch_result_snapshot[BatchResultT](
         gold_count=records_gold,
         quarantined_count=records_quarantined,
     )
-
 
 def build_run_statistics(
     *,

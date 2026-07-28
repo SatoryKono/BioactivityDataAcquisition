@@ -17,7 +17,6 @@ if TYPE_CHECKING:
 
 RecordT = TypeVar("RecordT")
 
-
 def ensure_filterable_data_source(
     data_source: object,
     *,
@@ -31,7 +30,6 @@ def ensure_filterable_data_source(
             f"FilterableDataSourcePort. {method_name}() requires a filterable adapter."
         )
     return data_source
-
 
 async def yield_wrapped_fetch_records(
     data_source: DataSourcePort,
@@ -57,7 +55,6 @@ async def yield_wrapped_fetch_records(
     ):
         yield cast("RecordT", record)
 
-
 def yield_plain_wrapped_fetch_records(
     data_source: DataSourcePort,
     entity_type: str,
@@ -75,7 +72,6 @@ def yield_plain_wrapped_fetch_records(
         _UNSET_FETCH_ARG,
         offset,
     )
-
 
 def yield_target_records_from_fallback_fetch[RecordT](
     filterable: FilterableDataSourcePort,
@@ -101,7 +97,6 @@ def yield_target_records_from_fallback_fetch[RecordT](
         ),
         limit,
     )
-
 
 async def yield_target_or_delegate_records[RecordT](
     *,

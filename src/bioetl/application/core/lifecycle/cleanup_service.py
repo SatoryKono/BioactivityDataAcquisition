@@ -8,7 +8,6 @@ from __future__ import annotations
 
 __all__ = ["CleanupPreview", "CleanupResult", "CleanupService", "LayerInfo"]
 
-
 import asyncio
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
@@ -20,7 +19,6 @@ from bioetl.application.core.lifecycle._cleanup_support import (
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import MetaDict
-
 
 class CleanupStorageProtocol(Protocol):
     """Minimal cleanup-focused storage contract for CleanupService."""
@@ -41,7 +39,6 @@ class CleanupStorageProtocol(Protocol):
         """Clear or count Gold-layer data for one table."""
         ...
 
-
 @dataclass(frozen=True, slots=True)
 class LayerInfo:
     """Information about a medallion layer for cleanup preview.
@@ -56,7 +53,6 @@ class LayerInfo:
     file_count: int
     exists: bool
 
-
 @dataclass(frozen=True, slots=True)
 class CleanupPreview:
     """Result of cleanup preview operation.
@@ -70,7 +66,6 @@ class CleanupPreview:
     silver: LayerInfo
     gold: LayerInfo | None
     total_files: int
-
 
 @dataclass(frozen=True, slots=True)
 class CleanupResult:
@@ -94,7 +89,6 @@ class CleanupResult:
             Sum of silver and gold cleared items.
         """
         return self.silver_cleared + self.gold_cleared
-
 
 class CleanupService:
     """Unified service for cleanup operations.

@@ -15,7 +15,6 @@ if TYPE_CHECKING:
 
 __all__ = ["PreSilverFinalizerProtocol", "finalize_pre_silver_record"]
 
-
 class PreSilverFinalizerProtocol(Protocol):
     """Normalization surface required to finalize a staged Silver payload."""
 
@@ -50,7 +49,6 @@ class PreSilverFinalizerProtocol(Protocol):
         """Return whether versioned hash payload should be projected."""
         ...
 
-
 def _active_content_hash(
     normalizer: PreSilverFinalizerProtocol,
     normalized_business_data: JsonDict,
@@ -60,7 +58,6 @@ def _active_content_hash(
     active_version = getattr(policy, "active_version", None)
     content_hash = version_hashes.get(active_version) if active_version else None
     return content_hash or normalizer.compute_content_hash(normalized_business_data)
-
 
 def finalize_pre_silver_record(
     normalizer: PreSilverFinalizerProtocol,

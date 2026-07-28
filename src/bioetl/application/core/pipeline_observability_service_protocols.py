@@ -9,14 +9,12 @@ from bioetl.application.core.pipeline_runtime_service_protocols import (
 )
 from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
 
-
 @runtime_checkable
 class PipelineLoggingServicesProtocol(Protocol):
     """Services surface that only needs the structured logger seam."""
 
     @property
     def logger(self) -> LoggerPort: ...
-
 
 @runtime_checkable
 class PipelineObservabilityServicesProtocol(PipelineLoggingServicesProtocol, Protocol):
@@ -28,7 +26,6 @@ class PipelineObservabilityServicesProtocol(PipelineLoggingServicesProtocol, Pro
     @property
     def tracing(self) -> TracingPort: ...
 
-
 @runtime_checkable
 class PipelineRunnerServicesProtocol(
     PipelineManagedRuntimeServicesProtocol,
@@ -36,7 +33,6 @@ class PipelineRunnerServicesProtocol(
     Protocol,
 ):
     """Narrow service surface required by the runner lifecycle path."""
-
 
 __all__ = [
     "PipelineLoggingServicesProtocol",

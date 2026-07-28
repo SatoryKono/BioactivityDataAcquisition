@@ -22,7 +22,6 @@ _STRUCTURAL_ACTION_BY_EVENT: dict[str, str] = {
     "silver_structural_type_coerced_to_null": "nullable_type_to_null",
 }
 
-
 def classify_structural_action(
     details: dict[str, object] | None,
     event_names: set[str],
@@ -40,7 +39,6 @@ def classify_structural_action(
             return mapped
     return None
 
-
 def classify_structural_shadow_comparison(
     *,
     structural_rejected: bool,
@@ -52,7 +50,6 @@ def classify_structural_shadow_comparison(
     silver_state = "reject" if not silver_filter_decision.include else "pass"
     structural_state = "reject" if structural_rejected else "pass"
     return f"structural_{structural_state}_silver_filter_{silver_state}"
-
 
 def apply_silver_filter(
     owner: TransformerExecutionOwner,
@@ -88,7 +85,6 @@ def apply_silver_filter(
         details={"policy_stage": "structural", **decision.to_dict()},
     )
 
-
 def evaluate_semantic_shadow_decision(
     owner: TransformerExecutionOwner,
     result: SilverRecord | None,
@@ -101,7 +97,6 @@ def evaluate_semantic_shadow_decision(
     ):
         return None
     return owner._silver_filters.evaluate(cast("GoldRecord", result))
-
 
 def record_structural_policy_metrics(
     owner: TransformerExecutionOwner,
@@ -130,7 +125,6 @@ def record_structural_policy_metrics(
                 "comparison": shadow_comparison,
             },
         )
-
 
 def apply_structural_policy(
     owner: TransformerExecutionOwner,

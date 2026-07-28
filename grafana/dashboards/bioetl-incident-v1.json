@@ -200,7 +200,15 @@
         "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "center",
-        "textMode": "value"
+        "textMode": "value",
+        "dataLinks": [
+          {
+            "title": "Open Runtime Troubleshooting Runbook",
+            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md",
+            "targetBlank": true,
+            "includeVars": false
+          }
+        ]
       }
     },
     {
@@ -677,5 +685,6 @@
   "timezone": "browser",
   "title": "Incident Workspace",
   "uid": "bioetl-incident-v1",
-  "version": 1
+  "version": 1,
+  "style": "dark"
 }

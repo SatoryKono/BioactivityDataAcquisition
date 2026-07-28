@@ -19,7 +19,6 @@ from bioetl.application.core.base_transformer._structural_policy_types import (
     StructuralPolicySignal,
 )
 
-
 def evaluate_contract(
     contract: StructuralFieldSpec,
     working_record: dict[str, object],
@@ -62,7 +61,6 @@ def evaluate_contract(
         events=events,
     )
 
-
 def evaluate_missing_required(
     *,
     contract: StructuralFieldSpec,
@@ -92,7 +90,6 @@ def evaluate_missing_required(
         details=details,
     )
 
-
 def evaluate_null_value(
     *,
     contract: StructuralFieldSpec,
@@ -120,7 +117,6 @@ def evaluate_null_value(
         quarantine_reason=f"Optional field '{contract.field_name}' cannot be null",
         details=details,
     )
-
 
 def evaluate_invalid_value(
     *,
@@ -168,7 +164,6 @@ def evaluate_invalid_value(
         details=details,
     )
 
-
 def coerce_invalid_nullable_value(
     *,
     contract: StructuralFieldSpec,
@@ -194,6 +189,5 @@ def coerce_invalid_nullable_value(
             details=details,
         )
     )
-
 
 __all__ = ["evaluate_contract"]

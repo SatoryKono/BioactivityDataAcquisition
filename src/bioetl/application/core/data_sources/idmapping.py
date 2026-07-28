@@ -24,7 +24,6 @@ if TYPE_CHECKING:
         LoggerPort,
     )
 
-
 class IDMappingDataSource:
     """Data source for ChEMBL → UniProt ID mapping."""
 

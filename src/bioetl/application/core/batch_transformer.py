@@ -61,7 +61,6 @@ if TYPE_CHECKING:
     from bioetl.domain.error_classifier import ErrorClassifier
     from bioetl.domain.types import BatchID
 
-
 class BatchTransformer:
     """Transforms Bronze records to Silver/Gold with error handling and DQ checks."""
 

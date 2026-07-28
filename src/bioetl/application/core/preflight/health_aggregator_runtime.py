@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from bioetl.domain.types import ComponentHealthResult, HealthStatus
 
-
 def build_component_result(
     *,
     component: str,
@@ -26,7 +25,6 @@ def build_component_result(
         probe_fallback_reason=probe_fallback_reason,
     )
 
-
 def build_parallel_exception_result(exception: BaseException) -> ComponentHealthResult:
     """Convert gather exceptions into synthetic unhealthy component results."""
     return build_component_result(
@@ -35,7 +33,6 @@ def build_parallel_exception_result(exception: BaseException) -> ComponentHealth
         duration_seconds=0.0,
         error_message=str(exception),
     )
-
 
 def normalize_data_source_status(
     *,
@@ -46,7 +43,6 @@ def normalize_data_source_status(
     if health_check_mode == "probe" and status == HealthStatus.UNHEALTHY:
         return HealthStatus.DEGRADED
     return status
-
 
 def normalize_data_source_error(
     *,
@@ -60,7 +56,6 @@ def normalize_data_source_error(
     detail = error_message or "data_source reported UNHEALTHY in health probe"
     return f"probe_mode_fallback: {detail}"
 
-
 def resolve_probe_fallback_reason(
     *,
     health_check_mode: str,
@@ -70,7 +65,6 @@ def resolve_probe_fallback_reason(
     if health_check_mode == "probe" and status == HealthStatus.UNHEALTHY:
         return "status_downgrade"
     return None
-
 
 def build_data_source_exception_result(
     *,
@@ -91,7 +85,6 @@ def build_data_source_exception_result(
         ),
         probe_fallback_reason="exception" if probe_mode else None,
     )
-
 
 __all__ = [
     "build_component_result",

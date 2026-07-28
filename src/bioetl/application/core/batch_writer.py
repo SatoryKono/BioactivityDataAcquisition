@@ -40,7 +40,6 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
-
 class BatchWriteStorageProtocol(Protocol):
     """Minimal write-only storage contract for BatchWriter."""
 
@@ -92,7 +91,6 @@ class BatchWriteStorageProtocol(Protocol):
         """Persist validated records into Gold storage."""
         ...
 
-
 @dataclass(frozen=True, slots=True)
 class BatchWriterOptions:
     """Optional writer collaborators grouped to reduce constructor width."""
@@ -102,7 +100,6 @@ class BatchWriterOptions:
     data_schema_config: DataSchemaConfig | None = None
     column_orderer: ColumnOrderService | None = None
     debug_export_service: DebugExportService | None = None
-
 
 class BatchWriter(BatchWriterIOMixin, BatchWriterColumnsMixin, BatchWriterTracingMixin):
     """Writes records to medallion layers via narrow write-only port."""

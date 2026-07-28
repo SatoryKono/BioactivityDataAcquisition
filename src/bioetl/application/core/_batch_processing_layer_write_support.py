@@ -29,7 +29,6 @@ if TYPE_CHECKING:
 
 __all__ = ["write_silver_then_gold"]
 
-
 async def write_silver_then_gold(
     *,
     execute_with_span: Callable[..., Awaitable[object]],

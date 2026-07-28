@@ -25,7 +25,6 @@ if TYPE_CHECKING:
     from bioetl.domain.normalization.profiles import FieldRule
     from bioetl.domain.types import JsonDict
 
-
 class RecordNormalizationMappingMixin:
     """Own field-by-field mapping normalization for Silver record payloads."""
 

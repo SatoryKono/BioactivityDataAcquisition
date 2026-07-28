@@ -28,7 +28,6 @@ if TYPE_CHECKING:
 
 __all__ = ["FilteredDataSource"]
 
-
 class FilteredDataSource(
     _FilteredDataSourceFetchMixin,
     _FilteredDataSourceLifecycleMixin,

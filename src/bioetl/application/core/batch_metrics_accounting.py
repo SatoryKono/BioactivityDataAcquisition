@@ -25,7 +25,6 @@ _GOLD_REMOVAL_REASONS = {
     "deduplicated": "DEDUP_KEY_COLLISION",
 }
 
-
 def _record_silver_removal_accounting(
     *,
     outcome: str,
@@ -42,7 +41,6 @@ def _record_silver_removal_accounting(
         reason_code=reason_code,
         count=count,
     )
-
 
 def _record_filtered_out_stage_metrics(
     pipeline_metrics: PipelineMetricsRecorder,
@@ -68,7 +66,6 @@ def _record_filtered_out_stage_metrics(
         reason_code="FILTERED_OUT_SILVER",
         count=count,
     )
-
 
 def _record_processed_stage_accounting(stage: str, count: int) -> None:
     """Update stage-accounting projections for processed-record counters."""
@@ -97,7 +94,6 @@ def _record_processed_stage_accounting(stage: str, count: int) -> None:
         count=count,
     )
 
-
 def _record_stage_outcome_accounting(stage: str, outcome: str, count: int) -> None:
     """Update stage-accounting for one positive stage-model outcome."""
     accounting = get_stage_accounting()
@@ -125,7 +121,6 @@ def _record_stage_outcome_accounting(stage: str, outcome: str, count: int) -> No
             count=count,
         )
 
-
 def _silver_filter_rejection_labels(
     details: JsonDict | None,
 ) -> tuple[str | None, str | None, str | None]:
@@ -144,7 +139,6 @@ def _silver_filter_rejection_labels(
     field_raw = details.get("field")
     field = field_raw if isinstance(field_raw, str) else None
     return reason, rule_type, field
-
 
 def _record_batch_lifecycle_event(
     pipeline_metrics: PipelineMetricsRecorder,
@@ -165,7 +159,6 @@ def _record_batch_lifecycle_event(
         count=count,
         record_count=record_count,
     )
-
 
 __all__ = [
     "_FLOW_ACCOUNTING_STAGES",

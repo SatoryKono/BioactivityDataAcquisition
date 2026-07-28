@@ -50,7 +50,6 @@ _RUN_FAILURE_EXCEPTIONS = (
     ValueError,
 )
 
-
 class PipelineRunner(PipelineRunnerSupportMixin):
     """Run the pipeline lifecycle while preserving stage and observer seams."""
 

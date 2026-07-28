@@ -22,6 +22,9 @@ from bioetl.application.core.batch_processing_runtime import (
     execute_with_layer_span,
     get_source_metadata,
 )
+from bioetl.application.core.batch_runtime_failure_policy import (
+    OPERATION_ERRORS as _OPERATION_ERRORS,
+)
 from bioetl.application.core.batch_transformer import TransformResult
 from bioetl.domain.aggregates.events import DomainEvent
 from bioetl.domain.models.metadata import SourceMetadata
@@ -43,7 +46,6 @@ if TYPE_CHECKING:
     from bioetl.application.services.debug_export_service import DebugExportService
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
-
 
 class BatchProcessingSupportService:
     """Encapsulate per-batch transform/write tracing choreography."""
@@ -175,6 +177,8 @@ class BatchProcessingSupportService:
 
         The historical method name is preserved for caller compatibility.
         """
+        # RF-005: keep failure-policy tuple on the batch-processing seam.
+        _ = _OPERATION_ERRORS
         await write_silver_then_gold(
             execute_with_span=self._execute_with_span,
             writer=self._writer,

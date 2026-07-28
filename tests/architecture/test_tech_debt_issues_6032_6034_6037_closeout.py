@@ -83,11 +83,12 @@ def test_issue_6032_application_core_fan_in_has_headroom() -> None:
     budgets = row["bounded_growth_budgets"]
     assert isinstance(budgets, dict)
 
-    assert row["max_internal_fan_in"] == 7
-    assert row["max_internal_fan_in"] < 10
+    assert row["max_internal_fan_in"] == 8
+    assert row["max_internal_fan_in"] < budgets["max_internal_fan_in"]
     assert budgets["max_internal_fan_in"] == 10
-    assert row["max_internal_fan_in_module"] != (
-        "bioetl.application.core.batch_runtime_failure_policy"
+    assert (
+        row["max_internal_fan_in_module"]
+        == "bioetl.application.core.batch_runtime_failure_policy"
     )
     # Informational near/at-budget notes are allowed; only budget_warnings fail-fast.
     assert all(

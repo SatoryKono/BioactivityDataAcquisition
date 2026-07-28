@@ -17,7 +17,6 @@ if TYPE_CHECKING:
         StorageMaintenancePort,
     )
 
-
 def resolve_report_path(
     dq_reports: DQReportResult | None,
     *,
@@ -34,7 +33,6 @@ def resolve_report_path(
         return None
     return str(path) if path else None
 
-
 def get_run_statistics(executor: ExecutorMetricsPort) -> dict[str, object]:
     """Collect optional run-level statistics from executor."""
     get_stats = getattr(executor, "get_run_statistics", None)
@@ -44,7 +42,6 @@ def get_run_statistics(executor: ExecutorMetricsPort) -> dict[str, object]:
     if isinstance(raw_stats, dict):
         return raw_stats
     return {}
-
 
 def build_final_metadata_write_coroutines(
     *,
@@ -89,7 +86,6 @@ def build_final_metadata_write_coroutines(
         if coro is not None
     ]
 
-
 def _build_silver_metadata_write_coro(
     *,
     metadata_coordinator: MetadataCoordinatorPort | None,
@@ -121,7 +117,6 @@ def _build_silver_metadata_write_coro(
         entity=config.entity_type,
     )
     return silver_metadata_write
-
 
 def _build_gold_metadata_write_coro(
     *,

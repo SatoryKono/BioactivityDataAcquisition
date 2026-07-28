@@ -13,7 +13,6 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 from bioetl.domain.schemas.constants import SUBCELLULAR_FRACTIONS
 from bioetl.domain.types import JsonDict
 
-
 def normalize_fraction(
     raw_fraction: Any,  # Any: type varies at runtime
 ) -> str | None:  # Any: type varies at runtime
@@ -27,11 +26,9 @@ def normalize_fraction(
     )
     return normalized if isinstance(normalized, str) and normalized else None
 
-
 def compute_entity_id(subcellular_fraction: str) -> str:
     """Compute a deterministic entity ID for a subcellular fraction."""
     return compute_subcellular_fraction_entity_id(subcellular_fraction)
-
 
 def create_fraction_record(
     assay: JsonDict,  # Any: heterogeneous record values
@@ -46,7 +43,6 @@ def create_fraction_record(
         "assay_count": 1,
     }
 
-
 def update_fraction_record(
     record: JsonDict,  # Any: heterogeneous record values
     assay: JsonDict,  # Any: heterogeneous record values
@@ -58,7 +54,6 @@ def update_fraction_record(
 
     assay_id = assay.get("assay_id") or assay.get("assay_chembl_id")
     record["example_assay_id"] = str(assay_id).strip() if assay_id else None
-
 
 async def extract_unique_fraction_records(
     assays: AsyncIterator[JsonDict],  # Any: heterogeneous record values

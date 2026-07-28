@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, TracingPort
 
-
 class PostrunCleanupService:
     """Handles shutdown-time cleanup without masking failures."""
 
@@ -41,6 +40,5 @@ class PostrunCleanupService:
                 reason="tracer_close_failed",
                 reason_code="POSTRUN_TRACER_CLOSE_FAILED",
             )
-
 
 __all__ = ["PostrunCleanupService"]

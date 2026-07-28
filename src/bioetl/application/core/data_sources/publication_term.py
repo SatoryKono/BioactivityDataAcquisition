@@ -29,7 +29,6 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports import DataSourcePort
 
-
 class PublicationTermDataSource(
     PublicationTermFilteringMixin,
     PublicationTermExtractionMixin,
