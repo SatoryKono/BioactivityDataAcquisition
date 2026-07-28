@@ -298,7 +298,9 @@ def _check_artifacts(
     expected_md = render_markdown(payload)
     json_matches = False
     if json_out.exists():
-        actual_json = json_out.read_text(encoding="utf-8")
+        actual_json = json_out.read_text(  # NOSONAR - path confined by resolve_output_path
+            encoding="utf-8"
+        )
         json_matches = actual_json == expected_json
         if not json_matches:
             try:
@@ -311,7 +313,11 @@ def _check_artifacts(
                 )
     if not json_matches:
         errors.append(f"Remote-main debt baseline JSON artifact is stale: {json_out}")
-    if not md_out.exists() or md_out.read_text(encoding="utf-8") != expected_md:
+    if (
+        not md_out.exists()
+        or md_out.read_text(encoding="utf-8")  # NOSONAR - path confined
+        != expected_md
+    ):
         errors.append(f"Remote-main debt baseline Markdown artifact is stale: {md_out}")
     if payload["evidence_source"] != "remote_main_git_tree":
         errors.append("Remote-main debt baseline evidence_source is not clean")

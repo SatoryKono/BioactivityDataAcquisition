@@ -740,10 +740,18 @@ def main(argv: list[str] | None = None) -> int:
         ok = _check_file(args.md_out, markdown_text) and ok
         return 0 if ok else 1
     if args.update:
-        args.json_out.parent.mkdir(parents=True, exist_ok=True)
-        args.md_out.parent.mkdir(parents=True, exist_ok=True)
-        args.json_out.write_text(json_text, encoding="utf-8")
-        args.md_out.write_text(markdown_text, encoding="utf-8")
+        from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+        json_out = resolve_output_path(args.json_out, root=REPO_ROOT)
+        md_out = resolve_output_path(args.md_out, root=REPO_ROOT)
+        json_out.parent.mkdir(parents=True, exist_ok=True)
+        md_out.parent.mkdir(parents=True, exist_ok=True)
+        json_out.write_text(  # NOSONAR - path confined by resolve_output_path
+            json_text, encoding="utf-8"
+        )
+        md_out.write_text(  # NOSONAR - path confined by resolve_output_path
+            markdown_text, encoding="utf-8"
+        )
         return 0
     print(json_text, end="")
     return 0

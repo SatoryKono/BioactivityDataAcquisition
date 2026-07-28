@@ -492,6 +492,32 @@ def _discover_module_refs(
     return discovered
 
 
+def _relative_import_module_names(node: ast.ImportFrom) -> list[str]:
+    if node.module:
+        return [node.module]
+    return [alias.name for alias in node.names if alias.name != "*"]
+
+
+def _relative_import_base_parts(
+    package_parts: tuple[str, ...], level: int
+) -> tuple[str, ...] | None:
+    retained_parts = len(package_parts) - (level - 1)
+    if retained_parts < 0:
+        return None
+    return package_parts[:retained_parts]
+
+
+def _relative_import_candidate_paths(
+    base_parts: tuple[str, ...], module_name: str
+) -> tuple[str, str]:
+    module_parts = tuple(module_name.split("."))
+    candidate_base = Path(*base_parts, *module_parts)
+    return (
+        candidate_base.with_suffix(".py").as_posix(),
+        (candidate_base / "__init__.py").as_posix(),
+    )
+
+
 def _discover_relative_import_refs(
     *,
     rel: str,
@@ -513,15 +539,9 @@ def _discover_relative_import_refs(
     for node in ast.walk(tree):
         if not isinstance(node, ast.ImportFrom) or node.level == 0:
             continue
-        retained_parts = len(package_parts) - (node.level - 1)
-        if retained_parts < 0:
+        base_parts = _relative_import_base_parts(package_parts, node.level)
+        if base_parts is None:
             continue
-        base_parts = package_parts[:retained_parts]
-        module_names = (
-            [node.module]
-            if node.module
-            else [alias.name for alias in node.names if alias.name != "*"]
-        )
         raw_line = lines[node.lineno - 1] if node.lineno <= len(lines) else ""
         evidence = _make_ref_evidence(
             rel=rel,
@@ -529,14 +549,10 @@ def _discover_relative_import_refs(
             raw_line=raw_line,
             source_group=source_group,
         )
-        for module_name in module_names:
-            module_parts = tuple(module_name.split("."))
-            candidate_base = Path(*base_parts, *module_parts)
-            candidate_paths = (
-                candidate_base.with_suffix(".py").as_posix(),
-                (candidate_base / "__init__.py").as_posix(),
-            )
-            for candidate_path in candidate_paths:
+        for module_name in _relative_import_module_names(node):
+            for candidate_path in _relative_import_candidate_paths(
+                base_parts, module_name
+            ):
                 if candidate_path in script_set and candidate_path != rel:
                     discovered.append((candidate_path, evidence))
     return discovered
@@ -901,6 +917,32 @@ def _load_lifecycle_decision_map(root: Path) -> dict[str, str]:
     return decisions
 
 
+def _is_legacy_script(script_rel: str) -> bool:
+    legacy_status_sets = (
+        LEGACY_MANUAL_OPS_SCRIPTS,
+        LEGACY_ISSUE_SPECIFIC_OPS_SCRIPTS,
+        LEGACY_INTERNAL_AI_LAUNCHERS,
+        LEGACY_NAMED_SCRIPTS,
+        LEGACY_SRC_TOOLS_WRAPPERS,
+        DEPRECATED_LEGACY_PATHS,
+    )
+    return any(script_rel in candidates for candidates in legacy_status_sets)
+
+
+def _status_without_refs(script_rel: str, lifecycle_status: str | None) -> str:
+    if lifecycle_status is not None:
+        return lifecycle_status
+    return "legacy" if ("_tmp" in script_rel or "debug_" in script_rel) else "orphan"
+
+
+def _status_from_ref_groups(groups: set[str], lifecycle_status: str | None) -> str:
+    if groups & {"ci", "build", "skills", "tests", "scripts", "agents"}:
+        return "active"
+    if lifecycle_status is not None:
+        return lifecycle_status
+    return "unknown"
+
+
 def _status_for(
     script_rel: str,
     refs: list[RefEvidence],
@@ -913,35 +955,13 @@ def _status_for(
         return lifecycle_status
 
     groups = {item.source_group for item in refs}
-    legacy_status_sets = (
-        LEGACY_MANUAL_OPS_SCRIPTS,
-        LEGACY_ISSUE_SPECIFIC_OPS_SCRIPTS,
-        LEGACY_INTERNAL_AI_LAUNCHERS,
-        LEGACY_NAMED_SCRIPTS,
-        LEGACY_SRC_TOOLS_WRAPPERS,
-        DEPRECATED_LEGACY_PATHS,
-    )
-    if any(script_rel in candidates for candidates in legacy_status_sets):
+    if _is_legacy_script(script_rel):
         return "active" if groups & STRONG_ACTIVE_GROUPS else "legacy"
     if script_rel in ACTIVE_EXPLICIT_SCRIPTS:
         return "active"
-
     if not refs:
-        if lifecycle_status is not None:
-            return lifecycle_status
-        return (
-            "legacy" if ("_tmp" in script_rel or "debug_" in script_rel) else "orphan"
-        )
-
-    if groups & {"ci", "build", "skills", "tests", "scripts", "agents"}:
-        return "active"
-    if groups == {"docs"}:
-        if lifecycle_status is not None:
-            return lifecycle_status
-        return "unknown"
-    if lifecycle_status is not None:
-        return lifecycle_status
-    return "unknown"
+        return _status_without_refs(script_rel, lifecycle_status)
+    return _status_from_ref_groups(groups, lifecycle_status)
 
 
 def _agent_usage(refs: list[RefEvidence]) -> list[str]:
@@ -957,6 +977,51 @@ def _agent_usage(refs: list[RefEvidence]) -> list[str]:
             if agent_name:
                 usages.add(agent_name)
     return sorted(usages)
+
+
+def _apply_lifecycle_meta(row: dict[str, object], lifecycle_meta: object) -> None:
+    if not isinstance(lifecycle_meta, dict):
+        return
+    owner = lifecycle_meta.get("owner")
+    decision = lifecycle_meta.get("decision")
+    review_by = lifecycle_meta.get("review_by")
+    next_step = lifecycle_meta.get("next_step")
+    if isinstance(owner, str) and owner.strip():
+        row["owner"] = owner
+    if isinstance(decision, str) and decision.strip():
+        row["lifecycle_decision"] = decision
+    if isinstance(review_by, str) and review_by.strip():
+        row["review_by"] = review_by
+    if isinstance(next_step, str) and next_step.strip():
+        row["next_step"] = next_step
+
+
+def _script_inventory_row(
+    *,
+    script_rel: str,
+    script: Path,
+    refs: list[RefEvidence],
+    status: str,
+    lifecycle_meta: object,
+) -> dict[str, object]:
+    row: dict[str, object] = {
+        "path": script_rel,
+        "type": script.suffix.lstrip("."),
+        "status": status,
+        "agent_usage": _agent_usage(refs),
+        "reference_count": len(refs),
+        "references": [
+            {
+                "path": item.path,
+                "line": item.line,
+                "source_group": item.source_group,
+                "text": item.text,
+            }
+            for item in refs[:8]
+        ],
+    }
+    _apply_lifecycle_meta(row, lifecycle_meta)
+    return row
 
 
 def _build_inventory(root: Path) -> dict[str, object]:
@@ -975,39 +1040,15 @@ def _build_inventory(root: Path) -> dict[str, object]:
         status_counts[status] += 1
         for group in {item.source_group for item in refs}:
             group_counts[group] += 1
-
-        row = {
-            "path": script_rel,
-            "type": script.suffix.lstrip("."),
-            "status": status,
-            "agent_usage": _agent_usage(refs),
-            "reference_count": len(refs),
-            "references": [
-                {
-                    "path": item.path,
-                    "line": item.line,
-                    "source_group": item.source_group,
-                    "text": item.text,
-                }
-                for item in refs[:8]
-            ],
-        }
-        lifecycle_meta = lifecycle_registry_entries.get(script_rel, {})
-        if isinstance(lifecycle_meta, dict):
-            owner = lifecycle_meta.get("owner")
-            decision = lifecycle_meta.get("decision")
-            review_by = lifecycle_meta.get("review_by")
-            next_step = lifecycle_meta.get("next_step")
-            if isinstance(owner, str) and owner.strip():
-                row["owner"] = owner
-            if isinstance(decision, str) and decision.strip():
-                row["lifecycle_decision"] = decision
-            if isinstance(review_by, str) and review_by.strip():
-                row["review_by"] = review_by
-            if isinstance(next_step, str) and next_step.strip():
-                row["next_step"] = next_step
-
-        rows.append(row)
+        rows.append(
+            _script_inventory_row(
+                script_rel=script_rel,
+                script=script,
+                refs=refs,
+                status=status,
+                lifecycle_meta=lifecycle_registry_entries.get(script_rel, {}),
+            )
+        )
 
     rows.sort(key=lambda item: str(item["path"]))
     summary = {
@@ -1029,15 +1070,9 @@ def _stable_manifest(data: dict[str, object]) -> dict[str, object]:
     return normalized
 
 
-def _manifest_summary_mismatches(payload: dict[str, object]) -> list[str]:
-    summary = payload.get("summary")
-    if not isinstance(summary, dict):
-        return ["Inventory payload must contain object field 'summary'"]
-
-    scripts = payload.get("scripts")
-    if not isinstance(scripts, list):
-        return ["Inventory payload must contain list field 'scripts'"]
-
+def _summary_total_mismatches(
+    summary: dict[str, object], scripts: list[object]
+) -> list[str]:
     mismatches: list[str] = []
     summary_total = summary.get("total_scripts")
     if not isinstance(summary_total, int):
@@ -1047,12 +1082,13 @@ def _manifest_summary_mismatches(payload: dict[str, object]) -> list[str]:
             "summary.total_scripts does not match scripts[] "
             f"({summary_total} != {len(scripts)})"
         )
+    return mismatches
 
-    summary_counts_raw = summary.get("status_counts")
-    if not isinstance(summary_counts_raw, dict):
-        mismatches.append("summary.status_counts must be an object")
-        return mismatches
 
+def _recompute_script_status_counts(
+    scripts: list[object],
+) -> tuple[Counter[str], list[str]]:
+    mismatches: list[str] = []
     recomputed_counts: Counter[str] = Counter()
     for index, item in enumerate(scripts):
         if not isinstance(item, dict):
@@ -1063,9 +1099,15 @@ def _manifest_summary_mismatches(payload: dict[str, object]) -> list[str]:
             mismatches.append(f"scripts[{index}].status must be a non-empty string")
             continue
         recomputed_counts[status] += 1
+    return recomputed_counts, mismatches
 
+
+def _normalize_status_counts(
+    summary_counts_raw: dict[object, object],
+) -> tuple[dict[str, int], list[str]]:
+    mismatches: list[str] = []
     normalized_summary_counts: dict[str, int] = {}
-    for key, value in sorted(summary_counts_raw.items()):
+    for key, value in sorted(summary_counts_raw.items(), key=lambda item: str(item[0])):
         if not isinstance(key, str) or not key.strip():
             mismatches.append("summary.status_counts keys must be non-empty strings")
             continue
@@ -1073,7 +1115,30 @@ def _manifest_summary_mismatches(payload: dict[str, object]) -> list[str]:
             mismatches.append(f"summary.status_counts[{key!r}] must be an int")
             continue
         normalized_summary_counts[key] = value
+    return normalized_summary_counts, mismatches
 
+
+def _manifest_summary_mismatches(payload: dict[str, object]) -> list[str]:
+    summary = payload.get("summary")
+    if not isinstance(summary, dict):
+        return ["Inventory payload must contain object field 'summary'"]
+
+    scripts = payload.get("scripts")
+    if not isinstance(scripts, list):
+        return ["Inventory payload must contain list field 'scripts'"]
+
+    mismatches = _summary_total_mismatches(summary, scripts)
+    summary_counts_raw = summary.get("status_counts")
+    if not isinstance(summary_counts_raw, dict):
+        mismatches.append("summary.status_counts must be an object")
+        return mismatches
+
+    recomputed_counts, status_mismatches = _recompute_script_status_counts(scripts)
+    mismatches.extend(status_mismatches)
+    normalized_summary_counts, count_mismatches = _normalize_status_counts(
+        summary_counts_raw
+    )
+    mismatches.extend(count_mismatches)
     if mismatches:
         return mismatches
 
@@ -1382,6 +1447,39 @@ def _build_script_map(payload: dict[str, object]) -> dict[str, dict[str, object]
     return {str(item["path"]): item for item in script_rows if isinstance(item, dict)}
 
 
+def _validate_registry_entry_fields(
+    path: str, entry: dict[str, object], required: set[str]
+) -> list[str]:
+    invalid: list[str] = []
+    absent = sorted(required - set(entry.keys()))
+    if absent:
+        invalid.append(f"{path}: missing fields {absent}")
+    decision = entry.get("decision")
+    if not isinstance(decision, str) or not decision.strip():
+        invalid.append(f"{path}: decision must be a non-empty string")
+    return invalid
+
+
+def _decision_status_inconsistencies(
+    path: str, status: str, decision: str
+) -> list[str]:
+    expected_status = _status_from_lifecycle_decision(decision)
+    if status == "supporting" and decision not in SUPPORTING_LIFECYCLE_DECISIONS:
+        return [
+            f"{path}: supporting status requires decision in "
+            f"{sorted(SUPPORTING_LIFECYCLE_DECISIONS)}"
+        ]
+    if status == "temporary_diagnostic" and decision != "temporary_diagnostic":
+        return [
+            f"{path}: temporary_diagnostic status requires decision=temporary_diagnostic"
+        ]
+    if expected_status is not None and expected_status != status:
+        return [
+            f"{path}: decision {decision!r} is inconsistent with inventory status {status!r}"
+        ]
+    return []
+
+
 def _validate_target_registry_entries(
     *,
     script_map: dict[str, dict[str, object]],
@@ -1402,29 +1500,13 @@ def _validate_target_registry_entries(
         if not isinstance(entry, dict):
             missing.append(path)
             continue
-        absent = sorted(required - set(entry.keys()))
-        if absent:
-            invalid.append(f"{path}: missing fields {absent}")
+        invalid.extend(_validate_registry_entry_fields(path, entry, required))
         decision = entry.get("decision")
         if not isinstance(decision, str) or not decision.strip():
-            invalid.append(f"{path}: decision must be a non-empty string")
             continue
         if forbid_evaluate_active and decision == "evaluate_active":
             forbidden.append(path)
-        expected_status = _status_from_lifecycle_decision(decision)
-        if status == "supporting" and decision not in SUPPORTING_LIFECYCLE_DECISIONS:
-            invalid.append(
-                f"{path}: supporting status requires decision in "
-                f"{sorted(SUPPORTING_LIFECYCLE_DECISIONS)}"
-            )
-        elif status == "temporary_diagnostic" and decision != "temporary_diagnostic":
-            invalid.append(
-                f"{path}: temporary_diagnostic status requires decision=temporary_diagnostic"
-            )
-        elif expected_status is not None and expected_status != status:
-            invalid.append(
-                f"{path}: decision {decision!r} is inconsistent with inventory status {status!r}"
-            )
+        invalid.extend(_decision_status_inconsistencies(path, status, decision))
 
     return missing, invalid, forbidden
 

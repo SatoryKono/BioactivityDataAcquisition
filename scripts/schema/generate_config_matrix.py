@@ -750,15 +750,19 @@ def _write_artifacts(
     report_content: str,
     root: Path | None = None,
 ) -> None:
-    if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_output_path
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
-        matrix_path = resolve_output_path(matrix_path, root=root)
-        report_path = resolve_output_path(report_path, root=root)
+    base = root if root is not None else REPO_ROOT
+    matrix_path = resolve_output_path(matrix_path, root=base)
+    report_path = resolve_output_path(report_path, root=base)
     matrix_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.parent.mkdir(parents=True, exist_ok=True)
-    matrix_path.write_text(matrix_content, encoding="utf-8", newline="")
-    report_path.write_text(report_content, encoding="utf-8", newline="")
+    matrix_path.write_text(  # NOSONAR - path confined by resolve_output_path
+        matrix_content, encoding="utf-8", newline=""
+    )
+    report_path.write_text(  # NOSONAR - path confined by resolve_output_path
+        report_content, encoding="utf-8", newline=""
+    )
 
 
 def _artifact_matches(path: Path, expected: str, *, root: Path | None = None) -> bool:
@@ -836,7 +840,7 @@ def _write_baseline_json(
     path.parent.mkdir(parents=True, exist_ok=True)
     content = _canonical_baseline_json(payload)
     tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(content, encoding="utf-8")
+    tmp.write_text(content, encoding="utf-8")  # NOSONAR - confined under resolved path
     os.replace(tmp, path)
 
 
@@ -849,7 +853,9 @@ def _baseline_metrics_match(
     if not path.exists():
         print(f"[drift] missing: {path}")
         return False
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload = json.loads(
+        path.read_text(encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
+    )
     metrics = payload.get("metrics")
     if metrics == expected_metrics:
         return True
@@ -869,7 +875,9 @@ def _baseline_families_match(
     if not path.exists():
         print(f"[drift] missing: {path}")
         return False
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload = json.loads(
+        path.read_text(encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
+    )
     families = payload.get("families")
     if families == expected_families:
         return True
@@ -889,7 +897,9 @@ def _baseline_taxonomy_match(
     if not path.exists():
         print(f"[drift] missing: {path}")
         return False
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload = json.loads(
+        path.read_text(encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
+    )
     if payload.get("parameter_taxonomy") == expected_taxonomy:
         return True
     print(f"[drift] mismatch parameter taxonomy: {path}")

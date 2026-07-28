@@ -598,35 +598,40 @@ def _discover_dashboard_panel_specs() -> tuple[PanelAuditSpec, ...]:
     return tuple(specs)
 
 
+def _bind_reviewed_panel_spec(
+    reviewed_spec: PanelAuditSpec,
+    discovered_specs: tuple[PanelAuditSpec, ...] | list[PanelAuditSpec],
+) -> PanelAuditSpec:
+    """Attach a unique discovered target_ref_id when the reviewed spec omits one."""
+    if reviewed_spec.target_ref_id is not None:
+        return reviewed_spec
+    matching_targets = [
+        spec
+        for spec in discovered_specs
+        if spec.dashboard_uid == reviewed_spec.dashboard_uid
+        and spec.panel_id == reviewed_spec.panel_id
+        and spec.source_kind == reviewed_spec.source_kind
+    ]
+    if len(matching_targets) != 1 or not matching_targets[0].target_ref_id:
+        return reviewed_spec
+    return PanelAuditSpec(
+        dashboard_uid=reviewed_spec.dashboard_uid,
+        panel_id=reviewed_spec.panel_id,
+        title=reviewed_spec.title,
+        source_kind=reviewed_spec.source_kind,
+        semantic_kind=reviewed_spec.semantic_kind,
+        target_ref_id=matching_targets[0].target_ref_id,
+        required=reviewed_spec.required,
+    )
+
+
 def effective_panel_specs() -> tuple[PanelAuditSpec, ...]:
     """Return curated required specs plus generated coverage for all executable panels."""
     discovered_specs = _discover_dashboard_panel_specs()
-    specs: list[PanelAuditSpec] = []
-    for reviewed_spec in REVIEWED_PANEL_SPECS:
-        if reviewed_spec.target_ref_id is not None:
-            specs.append(reviewed_spec)
-            continue
-        matching_targets = [
-            spec
-            for spec in discovered_specs
-            if spec.dashboard_uid == reviewed_spec.dashboard_uid
-            and spec.panel_id == reviewed_spec.panel_id
-            and spec.source_kind == reviewed_spec.source_kind
-        ]
-        if len(matching_targets) == 1 and matching_targets[0].target_ref_id:
-            specs.append(
-                PanelAuditSpec(
-                    dashboard_uid=reviewed_spec.dashboard_uid,
-                    panel_id=reviewed_spec.panel_id,
-                    title=reviewed_spec.title,
-                    source_kind=reviewed_spec.source_kind,
-                    semantic_kind=reviewed_spec.semantic_kind,
-                    target_ref_id=matching_targets[0].target_ref_id,
-                    required=reviewed_spec.required,
-                )
-            )
-            continue
-        specs.append(reviewed_spec)
+    specs: list[PanelAuditSpec] = [
+        _bind_reviewed_panel_spec(reviewed_spec, discovered_specs)
+        for reviewed_spec in REVIEWED_PANEL_SPECS
+    ]
 
     covered = {
         (spec.dashboard_uid, spec.panel_id, spec.source_kind, spec.target_ref_id)
@@ -1006,6 +1011,103 @@ def _is_nonnegative_number(raw: str) -> bool:
     return math.isfinite(value) and value >= 0
 
 
+def _validate_processed_records_percentage(
+    parameter: str, percentage: str
+) -> str | None:
+    if percentage == "No data":
+        return None
+    if percentage.endswith("%") and _is_nonnegative_number(percentage[:-1]):
+        return None
+    return f"Processed Records row {parameter!r} has malformed percentage"
+
+
+def _processed_records_parameter(
+    raw_row: dict[str, object], *, index: int, parameters: set[str]
+) -> tuple[str | None, str | None]:
+    parameter = raw_row.get("parameter")
+    if not isinstance(parameter, str) or not parameter.strip():
+        return None, f"Processed Records row {index} has no parameter"
+    if parameter in parameters:
+        return None, f"Processed Records parameter is duplicated: {parameter}"
+    parameters.add(parameter)
+    return parameter, None
+
+
+def _processed_records_numeric_value(
+    parameter: str, value: str
+) -> tuple[float | None, bool, str | None]:
+    if value == "No data":
+        return (None, True, None)
+    if not _is_nonnegative_number(value):
+        return (
+            None,
+            False,
+            f"Processed Records row {parameter!r} has a non-numeric value",
+        )
+    return (float(value.replace(" ", "")), False, None)
+
+
+def _parse_processed_records_row(
+    raw_row: object,
+    *,
+    index: int,
+    parameters: set[str],
+) -> tuple[float | None, bool, str | None]:
+    """Return (numeric_value|None, is_missing, error_detail|None)."""
+    if not isinstance(raw_row, dict):
+        return (None, False, f"Processed Records row {index} is not an object")
+    parameter, parameter_error = _processed_records_parameter(
+        raw_row, index=index, parameters=parameters
+    )
+    if parameter_error is not None:
+        return (None, False, parameter_error)
+    assert parameter is not None
+
+    value, value_error = _prefixed_cell_value(
+        raw_row, parameter=parameter, field="value"
+    )
+    percentage, percentage_error = _prefixed_cell_value(
+        raw_row, parameter=parameter, field="percintage"
+    )
+    if value_error or percentage_error:
+        return (
+            None,
+            False,
+            f"Processed Records row {parameter!r} is malformed: "
+            f"{value_error or percentage_error}",
+        )
+    assert value is not None
+    assert percentage is not None
+    percentage_error_detail = _validate_processed_records_percentage(
+        parameter, percentage
+    )
+    if percentage_error_detail is not None:
+        return (None, False, percentage_error_detail)
+    row_status = raw_row.get("row_status", "")
+    if not isinstance(row_status, str):
+        return (
+            None,
+            False,
+            f"Processed Records row {parameter!r} has malformed row_status",
+        )
+    return _processed_records_numeric_value(parameter, value)
+
+
+def _summarize_processed_records_values(
+    *,
+    row_count: int,
+    missing_values: int,
+    numeric_values: list[float],
+) -> tuple[str, str]:
+    if missing_values == row_count:
+        return ("no_data", "Processed Records returned only No data values")
+    if missing_values:
+        return ("partial_data", "Processed Records mixed numeric and No data values")
+    if all(value == 0 for value in numeric_values):
+        return ("resolved_zero", "Processed Records returned resolved numeric zero")
+    return ("resolved_numeric", "Processed Records returned resolved numeric values")
+
+
 def _classify_processed_records_payload(payload: dict[str, object]) -> tuple[str, str]:
     if payload.get("contract") != _PROCESSED_RECORDS_CONTRACT:
         return (
@@ -1022,63 +1124,22 @@ def _classify_processed_records_payload(payload: dict[str, object]) -> tuple[str
     missing_values = 0
     parameters: set[str] = set()
     for index, raw_row in enumerate(rows):
-        if not isinstance(raw_row, dict):
-            return ("invalid_shape", f"Processed Records row {index} is not an object")
-        parameter = raw_row.get("parameter")
-        if not isinstance(parameter, str) or not parameter.strip():
-            return ("invalid_shape", f"Processed Records row {index} has no parameter")
-        if parameter in parameters:
-            return (
-                "invalid_shape",
-                f"Processed Records parameter is duplicated: {parameter}",
-            )
-        parameters.add(parameter)
-
-        value, value_error = _prefixed_cell_value(
-            raw_row, parameter=parameter, field="value"
+        numeric_value, is_missing, error_detail = _parse_processed_records_row(
+            raw_row, index=index, parameters=parameters
         )
-        percentage, percentage_error = _prefixed_cell_value(
-            raw_row, parameter=parameter, field="percintage"
-        )
-        if value_error or percentage_error:
-            return (
-                "invalid_shape",
-                f"Processed Records row {parameter!r} is malformed: "
-                f"{value_error or percentage_error}",
-            )
-        assert value is not None
-        assert percentage is not None
-        if percentage != "No data":
-            if not percentage.endswith("%") or not _is_nonnegative_number(
-                percentage[:-1]
-            ):
-                return (
-                    "invalid_shape",
-                    f"Processed Records row {parameter!r} has malformed percentage",
-                )
-        row_status = raw_row.get("row_status", "")
-        if not isinstance(row_status, str):
-            return (
-                "invalid_shape",
-                f"Processed Records row {parameter!r} has malformed row_status",
-            )
-        if value == "No data":
+        if error_detail is not None:
+            return ("invalid_shape", error_detail)
+        if is_missing:
             missing_values += 1
             continue
-        if not _is_nonnegative_number(value):
-            return (
-                "invalid_shape",
-                f"Processed Records row {parameter!r} has a non-numeric value",
-            )
-        numeric_values.append(float(value.replace(" ", "")))
+        assert numeric_value is not None
+        numeric_values.append(numeric_value)
 
-    if missing_values == len(rows):
-        return ("no_data", "Processed Records returned only No data values")
-    if missing_values:
-        return ("partial_data", "Processed Records mixed numeric and No data values")
-    if all(value == 0 for value in numeric_values):
-        return ("resolved_zero", "Processed Records returned resolved numeric zero")
-    return ("resolved_numeric", "Processed Records returned resolved numeric values")
+    return _summarize_processed_records_values(
+        row_count=len(rows),
+        missing_values=missing_values,
+        numeric_values=numeric_values,
+    )
 
 
 def _is_identity_placeholder(value: str) -> bool:
@@ -1088,28 +1149,23 @@ def _is_identity_placeholder(value: str) -> bool:
     )
 
 
-def _classify_identity_payload(payload: dict[str, object]) -> tuple[str, str]:
-    resolved_via = payload.get("resolved_via")
-    if not isinstance(resolved_via, str) or not resolved_via:
-        return ("invalid_shape", "Identity payload missing resolved_via")
-    if resolved_via in _UNRESOLVED_IDENTITY_MODES:
-        return ("unresolved_identity", f"Identity scope resolved via {resolved_via}")
-    rows = payload.get("rows")
-    if not isinstance(rows, list):
-        return ("invalid_shape", "Identity payload missing rows list")
-    if not rows:
-        return ("empty_result", "Identity payload returned no rows")
-
+def _collect_identity_anchors(
+    rows: list[object],
+) -> tuple[dict[str, str] | None, tuple[str, str] | None]:
     anchors: dict[str, str] = {}
     for index, row in enumerate(rows):
         if not isinstance(row, dict):
-            return ("invalid_shape", f"Identity row {index} is not an object")
+            return None, ("invalid_shape", f"Identity row {index} is not an object")
         parameter = row.get("parameter")
         value = row.get("value")
         if not isinstance(parameter, str) or not isinstance(value, str):
-            return ("invalid_shape", f"Identity row {index} is malformed")
+            return None, ("invalid_shape", f"Identity row {index} is malformed")
         if parameter in _IDENTITY_ANCHOR_PARAMETERS:
             anchors[parameter] = value
+    return anchors, None
+
+
+def _classify_identity_anchors(anchors: dict[str, str]) -> tuple[str, str]:
     missing_anchors = _IDENTITY_ANCHOR_PARAMETERS - anchors.keys()
     if missing_anchors:
         return (
@@ -1127,6 +1183,25 @@ def _classify_identity_payload(payload: dict[str, object]) -> tuple[str, str]:
             f"Identity payload has placeholder anchors: {placeholder_anchors}",
         )
     return ("resolved_identity", "Identity payload returned concrete run anchors")
+
+
+def _classify_identity_payload(payload: dict[str, object]) -> tuple[str, str]:
+    resolved_via = payload.get("resolved_via")
+    if not isinstance(resolved_via, str) or not resolved_via:
+        return ("invalid_shape", "Identity payload missing resolved_via")
+    if resolved_via in _UNRESOLVED_IDENTITY_MODES:
+        return ("unresolved_identity", f"Identity scope resolved via {resolved_via}")
+    rows = payload.get("rows")
+    if not isinstance(rows, list):
+        return ("invalid_shape", "Identity payload missing rows list")
+    if not rows:
+        return ("empty_result", "Identity payload returned no rows")
+
+    anchors, error = _collect_identity_anchors(rows)
+    if error is not None:
+        return error
+    assert anchors is not None
+    return _classify_identity_anchors(anchors)
 
 
 def _classify_http_table_payload(
@@ -1303,6 +1378,43 @@ def _audit_prometheus_panel(
     )
 
 
+_HTTP_TABLE_ERROR_CLASSIFICATIONS = frozenset(
+    {
+        "empty_result",
+        "invalid_shape",
+        "no_data",
+        "partial_data",
+        "unresolved_identity",
+    }
+)
+
+
+def _classify_http_panel_payload(
+    spec: PanelAuditSpec, payload: object
+) -> tuple[str, str, str]:
+    """Return (status, classification, detail) for an HTTP panel payload."""
+    if spec.semantic_kind == "freshness":
+        classification, detail = _classify_http_freshness_payload(payload)
+        status = (
+            "error" if classification in {"invalid_shape", "empty_result"} else "ok"
+        )
+        return status, classification, detail
+    if spec.semantic_kind == "http_table":
+        classification, detail = _classify_http_table_payload(payload, title=spec.title)
+        status = (
+            "error" if classification in _HTTP_TABLE_ERROR_CLASSIFICATIONS else "ok"
+        )
+        return status, classification, detail
+    if spec.semantic_kind == "http_summary":
+        classification, detail = _classify_http_payload(payload)
+    elif spec.semantic_kind == "http_records":
+        classification, detail = _classify_http_records_payload(payload)
+    else:
+        classification, detail = _classify_http_endpoint_payload(payload)
+    status = "error" if classification == "invalid_shape" and spec.required else "ok"
+    return status, classification, detail
+
+
 def _audit_http_panel(
     spec: PanelAuditSpec,
     panel: dict[str, Any],
@@ -1331,40 +1443,7 @@ def _audit_http_panel(
         config=config,
         timeout_seconds=config.request_timeout_seconds,
     )
-    if spec.semantic_kind == "freshness":
-        classification, detail = _classify_http_freshness_payload(payload)
-        status = (
-            "error" if classification in {"invalid_shape", "empty_result"} else "ok"
-        )
-    elif spec.semantic_kind == "http_table":
-        classification, detail = _classify_http_table_payload(payload, title=spec.title)
-        status = (
-            "error"
-            if classification
-            in {
-                "empty_result",
-                "invalid_shape",
-                "no_data",
-                "partial_data",
-                "unresolved_identity",
-            }
-            else "ok"
-        )
-    elif spec.semantic_kind == "http_summary":
-        classification, detail = _classify_http_payload(payload)
-        status = (
-            "error" if classification == "invalid_shape" and spec.required else "ok"
-        )
-    elif spec.semantic_kind == "http_records":
-        classification, detail = _classify_http_records_payload(payload)
-        status = (
-            "error" if classification == "invalid_shape" and spec.required else "ok"
-        )
-    else:
-        classification, detail = _classify_http_endpoint_payload(payload)
-        status = (
-            "error" if classification == "invalid_shape" and spec.required else "ok"
-        )
+    status, classification, detail = _classify_http_panel_payload(spec, payload)
     return AuditResult(
         dashboard_uid=spec.dashboard_uid,
         panel_id=spec.panel_id,
@@ -1443,32 +1522,28 @@ def _loki_timeout_result(
     )
 
 
-def _audit_loki_panel(
-    spec: PanelAuditSpec,
-    panel: dict[str, Any],
-    config: AuditConfig,
-) -> AuditResult:
-    target = _select_target(panel, spec, field="expr")
-    expr = str(target.get("expr") or "") if target is not None else ""
-    if not expr:
-        return AuditResult(
-            dashboard_uid=spec.dashboard_uid,
-            panel_id=spec.panel_id,
-            title=spec.title,
-            source_kind=spec.source_kind,
-            semantic_kind=spec.semantic_kind,
-            status="error" if spec.required else "ok",
-            classification="missing_query",
-            detail="Panel has no Loki expr target",
-            query_preview="",
-            target_ref_id=spec.target_ref_id,
-        )
-    bounded_range_hours = _bounded_loki_range_hours(config)
-    rendered_expr = _substitute_dashboard_tokens(
-        expr,
-        config,
-        range_hours=bounded_range_hours,
+def _missing_loki_query_result(spec: PanelAuditSpec) -> AuditResult:
+    return AuditResult(
+        dashboard_uid=spec.dashboard_uid,
+        panel_id=spec.panel_id,
+        title=spec.title,
+        source_kind=spec.source_kind,
+        semantic_kind=spec.semantic_kind,
+        status="error" if spec.required else "ok",
+        classification="missing_query",
+        detail="Panel has no Loki expr target",
+        query_preview="",
+        target_ref_id=spec.target_ref_id,
     )
+
+
+def _loki_query_request(
+    *,
+    target: dict[str, Any] | None,
+    rendered_expr: str,
+    config: AuditConfig,
+) -> tuple[str, bool, str, str, str]:
+    """Return (endpoint, instant, start_ns, end_ns, query_url)."""
     start_ns, end_ns = _loki_query_range_bounds(config)
     instant = target.get("instant") is True if target is not None else False
     endpoint = "query" if instant else "query_range"
@@ -1484,6 +1559,93 @@ def _audit_loki_panel(
     )
     query_url = f"{config.loki_base_url}/loki/api/v1/{endpoint}?" + urlencode(
         query_params
+    )
+    return endpoint, instant, start_ns, end_ns, query_url
+
+
+def _loki_fetch_failure_result(
+    spec: PanelAuditSpec,
+    config: AuditConfig,
+    *,
+    rendered_expr: str,
+    started_at: float,
+    exc: Exception,
+) -> AuditResult:
+    latency_seconds = monotonic() - started_at
+    if latency_seconds >= config.request_timeout_seconds:
+        return _loki_timeout_result(
+            spec,
+            config,
+            rendered_expr=rendered_expr,
+            phase="readiness/query",
+            latency_seconds=latency_seconds,
+            last_detail=f"{type(exc).__name__}: {exc}",
+        )
+    return AuditResult(
+        dashboard_uid=spec.dashboard_uid,
+        panel_id=spec.panel_id,
+        title=spec.title,
+        source_kind=spec.source_kind,
+        semantic_kind=spec.semantic_kind,
+        status="error" if spec.required else "ok",
+        classification="blocked_unavailable",
+        detail=f"Loki query could not be executed after readiness: {exc}",
+        query_preview=rendered_expr[:400],
+        target_ref_id=spec.target_ref_id,
+    )
+
+
+def _loki_success_result(
+    spec: PanelAuditSpec,
+    *,
+    payload: object,
+    rendered_expr: str,
+    endpoint: str,
+    bounded_range_hours: int,
+    latency_seconds: float,
+    instant: bool,
+    start_ns: str,
+    end_ns: str,
+) -> AuditResult:
+    classification, detail = _classify_loki_payload(payload)
+    status = "error" if classification in {"invalid_shape", "query_error"} else "ok"
+    time_detail = f"time={end_ns}" if instant else f"start={start_ns}; end={end_ns}"
+    return AuditResult(
+        dashboard_uid=spec.dashboard_uid,
+        panel_id=spec.panel_id,
+        title=spec.title,
+        source_kind=spec.source_kind,
+        semantic_kind=spec.semantic_kind,
+        status=status,
+        classification=classification,
+        detail=(
+            f"{detail}; endpoint={endpoint}; range_hours={bounded_range_hours}; "
+            f"latency_seconds={latency_seconds:.3f}; {time_detail}"
+        ),
+        query_preview=rendered_expr[:400],
+        target_ref_id=spec.target_ref_id,
+    )
+
+
+def _audit_loki_panel(
+    spec: PanelAuditSpec,
+    panel: dict[str, Any],
+    config: AuditConfig,
+) -> AuditResult:
+    target = _select_target(panel, spec, field="expr")
+    expr = str(target.get("expr") or "") if target is not None else ""
+    if not expr:
+        return _missing_loki_query_result(spec)
+    bounded_range_hours = _bounded_loki_range_hours(config)
+    rendered_expr = _substitute_dashboard_tokens(
+        expr,
+        config,
+        range_hours=bounded_range_hours,
+    )
+    endpoint, instant, start_ns, end_ns, query_url = _loki_query_request(
+        target=target,
+        rendered_expr=rendered_expr,
+        config=config,
     )
     started_at = monotonic()
     remaining_timeout, readiness_detail = _wait_for_loki_ready(
@@ -1505,27 +1667,12 @@ def _audit_loki_panel(
             timeout_seconds=remaining_timeout,
         )
     except (HTTPError, URLError, OSError, ValueError, json.JSONDecodeError) as exc:
-        latency_seconds = monotonic() - started_at
-        if latency_seconds >= config.request_timeout_seconds:
-            return _loki_timeout_result(
-                spec,
-                config,
-                rendered_expr=rendered_expr,
-                phase="readiness/query",
-                latency_seconds=latency_seconds,
-                last_detail=f"{type(exc).__name__}: {exc}",
-            )
-        return AuditResult(
-            dashboard_uid=spec.dashboard_uid,
-            panel_id=spec.panel_id,
-            title=spec.title,
-            source_kind=spec.source_kind,
-            semantic_kind=spec.semantic_kind,
-            status="error" if spec.required else "ok",
-            classification="blocked_unavailable",
-            detail=f"Loki query could not be executed after readiness: {exc}",
-            query_preview=rendered_expr[:400],
-            target_ref_id=spec.target_ref_id,
+        return _loki_fetch_failure_result(
+            spec,
+            config,
+            rendered_expr=rendered_expr,
+            started_at=started_at,
+            exc=exc,
         )
     latency_seconds = monotonic() - started_at
     if latency_seconds > config.request_timeout_seconds:
@@ -1536,23 +1683,16 @@ def _audit_loki_panel(
             phase="readiness/query",
             latency_seconds=latency_seconds,
         )
-    classification, detail = _classify_loki_payload(payload)
-    status = "error" if classification in {"invalid_shape", "query_error"} else "ok"
-    return AuditResult(
-        dashboard_uid=spec.dashboard_uid,
-        panel_id=spec.panel_id,
-        title=spec.title,
-        source_kind=spec.source_kind,
-        semantic_kind=spec.semantic_kind,
-        status=status,
-        classification=classification,
-        detail=(
-            f"{detail}; endpoint={endpoint}; range_hours={bounded_range_hours}; "
-            f"latency_seconds={latency_seconds:.3f}; "
-            + (f"time={end_ns}" if instant else f"start={start_ns}; end={end_ns}")
-        ),
-        query_preview=rendered_expr[:400],
-        target_ref_id=spec.target_ref_id,
+    return _loki_success_result(
+        spec,
+        payload=payload,
+        rendered_expr=rendered_expr,
+        endpoint=endpoint,
+        bounded_range_hours=bounded_range_hours,
+        latency_seconds=latency_seconds,
+        instant=instant,
+        start_ns=start_ns,
+        end_ns=end_ns,
     )
 
 

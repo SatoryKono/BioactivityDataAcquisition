@@ -3823,7 +3823,7 @@ def resolve_neo4j_connection(
         http_uri = (
             explicit_http_uri
             or env.get("NEO4J_AUDIT_HTTP_URI")
-            or f"http://{default_host}:7475"
+            or f"http://{default_host}:7475"  # NOSONAR - local Neo4j browser port
         )
     else:
         bolt_uri = env.get("NEO4J_URI", "bolt://localhost:7687")

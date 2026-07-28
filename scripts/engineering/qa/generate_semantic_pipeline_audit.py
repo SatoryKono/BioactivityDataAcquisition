@@ -252,15 +252,21 @@ def _canonical_registry_clusters(
 
 
 def _load_csv(path: Path) -> list[dict[str, str]]:
-    with path.open(encoding="utf-8", newline="") as handle:
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    safe_path = resolve_output_path(path, root=REPO_ROOT)
+    with safe_path.open(  # NOSONAR - path confined by resolve_output_path
+        encoding="utf-8", newline=""
+    ) as handle:
         return list(csv.DictReader(handle))
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    path = resolve_output_path(path, root=REPO_ROOT)
     if not path.exists():
         return {}
-    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
-    path = resolve_output_path(path, root=REPO_ROOT)
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))  # NOSONAR - path confined
     if isinstance(payload, dict):
         return payload
@@ -317,8 +323,13 @@ def _normalize_newlines(payload: str) -> str:
 
 
 def _write(path: Path, payload: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(payload, encoding="utf-8", newline="\n")
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    safe_path = resolve_output_path(path, root=REPO_ROOT)
+    safe_path.parent.mkdir(parents=True, exist_ok=True)
+    safe_path.write_text(  # NOSONAR - path confined by resolve_output_path
+        payload, encoding="utf-8", newline="\n"
+    )
 
 
 def _row_key(row: dict[str, str]) -> str:

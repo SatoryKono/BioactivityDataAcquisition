@@ -13,8 +13,8 @@ function playwright() {
   return _playwright;
 }
 
-function parseArgs(argv) {
-  const config = {
+function defaultScreenshotConfig() {
+  return {
     baseUrl: process.env.GRAFANA_BASE_URL || "http://localhost:3000",
     username: process.env.GRAFANA_USERNAME || "admin",
     password: process.env.GRAFANA_PASSWORD || "",
@@ -51,50 +51,62 @@ function parseArgs(argv) {
       process.env.GRAFANA_SCREENSHOT_EXPAND_COLLAPSED_ROWS || "true",
     ),
   };
-  for (let index = 0; index < argv.length; index += 1) {
-    const arg = argv[index];
-    const next = argv[index + 1];
-    if (arg === "--base-url" && next) {
-      config.baseUrl = next;
-      index += 1;
-    } else if (arg === "--username" && next) {
-      config.username = next;
-      index += 1;
-    } else if (arg === "--password" && next) {
-      config.password = next;
-      index += 1;
-    } else if (arg === "--output-dir" && next) {
-      config.outputDir = path.resolve(next);
-      index += 1;
-    } else if (arg === "--width" && next) {
-      config.viewport.width = Number.parseInt(next, 10);
-      index += 1;
-    } else if (arg === "--height" && next) {
-      config.viewport.height = Number.parseInt(next, 10);
-      index += 1;
-    } else if (arg === "--theme" && next) {
-      config.theme = next.trim().toLowerCase();
-      index += 1;
-    } else if (arg === "--timeout-ms" && next) {
-      config.timeoutMs = Number.parseInt(next, 10);
-      index += 1;
-    } else if (arg === "--capture-timeout-ms" && next) {
-      config.captureTimeoutMs = Number.parseInt(next, 10);
-      index += 1;
-    } else if (arg === "--uids" && next) {
+}
+
+function applyScreenshotArg(config, arg, next) {
+  const valueArgs = {
+    "--base-url": (value) => {
+      config.baseUrl = value;
+    },
+    "--username": (value) => {
+      config.username = value;
+    },
+    "--password": (value) => {
+      config.password = value;
+    },
+    "--output-dir": (value) => {
+      config.outputDir = path.resolve(value);
+    },
+    "--width": (value) => {
+      config.viewport.width = Number.parseInt(value, 10);
+    },
+    "--height": (value) => {
+      config.viewport.height = Number.parseInt(value, 10);
+    },
+    "--theme": (value) => {
+      config.theme = value.trim().toLowerCase();
+    },
+    "--timeout-ms": (value) => {
+      config.timeoutMs = Number.parseInt(value, 10);
+    },
+    "--capture-timeout-ms": (value) => {
+      config.captureTimeoutMs = Number.parseInt(value, 10);
+    },
+    "--uids": (value) => {
       config.selectedUids = new Set(
-        next.split(",").map((item) => item.trim()).filter(Boolean),
+        value.split(",").map((item) => item.trim()).filter(Boolean),
       );
-      index += 1;
-    } else if (arg === "--scope-query" && next) {
-      config.scopeQuery = next;
-      index += 1;
-    } else if (arg === "--expand-collapsed-rows") {
-      config.expandCollapsedRows = true;
-    } else if (arg === "--no-expand-collapsed-rows") {
-      config.expandCollapsedRows = false;
-    }
+    },
+    "--scope-query": (value) => {
+      config.scopeQuery = value;
+    },
+  };
+  if (Object.prototype.hasOwnProperty.call(valueArgs, arg) && next) {
+    valueArgs[arg](next);
+    return 1;
   }
+  if (arg === "--expand-collapsed-rows") {
+    config.expandCollapsedRows = true;
+    return 0;
+  }
+  if (arg === "--no-expand-collapsed-rows") {
+    config.expandCollapsedRows = false;
+    return 0;
+  }
+  return 0;
+}
+
+function validateScreenshotConfig(config) {
   if (!Number.isFinite(config.captureTimeoutMs) || config.captureTimeoutMs <= 0) {
     config.captureTimeoutMs = Math.max(config.timeoutMs, 180000);
   }
@@ -108,6 +120,14 @@ function parseArgs(argv) {
     throw new Error("Playwright screenshot theme must be 'dark' or 'light'");
   }
   return config;
+}
+
+function parseArgs(argv) {
+  const config = defaultScreenshotConfig();
+  for (let index = 0; index < argv.length; index += 1) {
+    index += applyScreenshotArg(config, argv[index], argv[index + 1]);
+  }
+  return validateScreenshotConfig(config);
 }
 
 const CONFIG = parseArgs(process.argv.slice(2));
@@ -150,6 +170,96 @@ const TERMINAL_CLASSIFICATIONS = new Set([
   "contradictory",
 ]);
 
+function classifyStaticPanelEvidence(bodyText, hasVisualEvidence) {
+  return bodyText || hasVisualEvidence
+    ? {
+        classification: "healthy",
+        reason: "static operator copy reached a rendered state",
+      }
+    : {
+        classification: "blank",
+        reason: "text panel body has no visible content",
+      };
+}
+
+function classifyLeadingEmptyState(bodyText, hasErrorIcon) {
+  const leadingValidEmpty = /^(?:VALID EMPTY|EMPTY RESULT)\b/i.test(bodyText);
+  const leadingNoMatch =
+    /^(?:NO MATCHING(?: SCOPE| DATA| ROWS?)?|NOT APPLICABLE|N\/A)\b/i.test(bodyText);
+  if (!leadingValidEmpty && !leadingNoMatch) {
+    return null;
+  }
+  if (hasErrorIcon) {
+    return {
+      classification: "contradictory",
+      reason: "panel combines an error marker with a non-error empty state",
+    };
+  }
+  return leadingValidEmpty
+    ? {
+        classification: "valid-empty",
+        reason: "panel explicitly identifies a successful empty result",
+      }
+    : {
+        classification: "not-applicable",
+        reason: "panel explicitly identifies an unmatched or inapplicable scope",
+      };
+}
+
+function classifyQueryPanelTerminalEvidence(
+  bodyText,
+  hasErrorIcon,
+  hasVisualEvidence,
+) {
+  if (/^(?:ERROR|QUERY ERROR|DATASOURCE ERROR|REQUEST ERROR)\b/i.test(bodyText)) {
+    return {
+      classification: "explicit-error",
+      reason: "panel exposes an explicit terminal query or datasource error",
+    };
+  }
+  const emptyState = classifyLeadingEmptyState(bodyText, hasErrorIcon);
+  if (emptyState) {
+    return emptyState;
+  }
+  if (hasErrorIcon) {
+    return {
+      classification: "explicit-error",
+      reason: "panel exposes a visible terminal error marker",
+    };
+  }
+  if (/^(?:LOADING|PENDING QUERY|WAITING FOR DATA)\b/i.test(bodyText)) {
+    return {
+      classification: "loading",
+      reason: "panel copy still identifies a loading state",
+    };
+  }
+  if (/^(?:TELEMETRY ABSENT|TELEMETRY MISSING)\b/i.test(bodyText)) {
+    return {
+      classification: "telemetry-absent",
+      reason: "panel explicitly identifies missing telemetry",
+    };
+  }
+  if (
+    /^(?:UNKNOWN|INCOMPLETE|NOT RESOLVED|UNRESOLVED)\b/i.test(bodyText) ||
+    /^(?:NO DATA|NO\b|NOT FOUND\b)/i.test(bodyText)
+  ) {
+    return {
+      classification: "incomplete",
+      reason: "panel explicitly identifies incomplete or unresolved evidence",
+    };
+  }
+  if (!bodyText && !hasVisualEvidence) {
+    return {
+      classification: "blank",
+      reason: "panel body has no visible text or visual evidence",
+    };
+  }
+  return {
+    classification: "healthy",
+    reason: "panel body reached a visible terminal rendered state",
+  };
+}
+
 function classifyPanelTerminalEvidence(evidence) {
   const bodyText = String(evidence.bodyText || "").replace(/\s+/g, " ").trim();
   const supportsQueryTerminalState = evidence.type !== "text";
@@ -168,92 +278,13 @@ function classifyPanelTerminalEvidence(evidence) {
     };
   }
   if (!supportsQueryTerminalState) {
-    return bodyText || hasVisualEvidence
-      ? {
-          classification: "healthy",
-          reason: "static operator copy reached a rendered state",
-        }
-      : {
-          classification: "blank",
-          reason: "text panel body has no visible content",
-        };
+    return classifyStaticPanelEvidence(bodyText, hasVisualEvidence);
   }
-
-  const leadingError = /^(?:ERROR|QUERY ERROR|DATASOURCE ERROR|REQUEST ERROR)\b/i.test(
+  return classifyQueryPanelTerminalEvidence(
     bodyText,
+    hasErrorIcon,
+    hasVisualEvidence,
   );
-  const leadingValidEmpty = /^(?:VALID EMPTY|EMPTY RESULT)\b/i.test(bodyText);
-  const leadingNoMatch = /^(?:NO MATCHING(?: SCOPE| DATA| ROWS?)?|NOT APPLICABLE|N\/A)\b/i.test(
-    bodyText,
-  );
-  const leadingTelemetryAbsent = /^(?:TELEMETRY ABSENT|TELEMETRY MISSING)\b/i.test(
-    bodyText,
-  );
-  const leadingIncomplete = /^(?:UNKNOWN|INCOMPLETE|NOT RESOLVED|UNRESOLVED)\b/i.test(
-    bodyText,
-  );
-  const leadingLoading = /^(?:LOADING|PENDING QUERY|WAITING FOR DATA)\b/i.test(
-    bodyText,
-  );
-  const leadingGenericNoData = /^(?:NO DATA|NO\b|NOT FOUND\b)/i.test(bodyText);
-
-  if (leadingError) {
-    return {
-      classification: "explicit-error",
-      reason: "panel exposes an explicit terminal query or datasource error",
-    };
-  }
-  if (leadingValidEmpty || leadingNoMatch) {
-    if (hasErrorIcon) {
-      return {
-        classification: "contradictory",
-        reason: "panel combines an error marker with a non-error empty state",
-      };
-    }
-    return leadingValidEmpty
-      ? {
-          classification: "valid-empty",
-          reason: "panel explicitly identifies a successful empty result",
-        }
-      : {
-          classification: "not-applicable",
-          reason: "panel explicitly identifies an unmatched or inapplicable scope",
-        };
-  }
-  if (hasErrorIcon) {
-    return {
-      classification: "explicit-error",
-      reason: "panel exposes a visible terminal error marker",
-    };
-  }
-  if (leadingLoading) {
-    return {
-      classification: "loading",
-      reason: "panel copy still identifies a loading state",
-    };
-  }
-  if (leadingTelemetryAbsent) {
-    return {
-      classification: "telemetry-absent",
-      reason: "panel explicitly identifies missing telemetry",
-    };
-  }
-  if (leadingIncomplete || leadingGenericNoData) {
-    return {
-      classification: "incomplete",
-      reason: "panel explicitly identifies incomplete or unresolved evidence",
-    };
-  }
-  if (!bodyText && !hasVisualEvidence) {
-    return {
-      classification: "blank",
-      reason: "panel body has no visible text or visual evidence",
-    };
-  }
-  return {
-    classification: "healthy",
-    reason: "panel body reached a visible terminal rendered state",
-  };
 }
 
 async function ensureOutputDir() {
@@ -775,6 +806,22 @@ function terminalStateSummary(dashboard, panelStates, status) {
   };
 }
 
+const ACCEPTED_TERMINAL_CLASSIFICATIONS = new Set([
+  "healthy",
+  "explicit-error",
+  "valid-empty",
+  "telemetry-absent",
+  "not-applicable",
+  "incomplete",
+]);
+
+function requiredTerminalStatesAccepted(dashboard, panelStates) {
+  return dashboard.requiredTerminalPanelIds.every((panelId) => {
+    const state = panelStates.find((item) => item.id === panelId);
+    return Boolean(state && ACCEPTED_TERMINAL_CLASSIFICATIONS.has(state.classification));
+  });
+}
+
 async function validateDashboardTerminalStates(page, dashboard, index, total) {
   // HTTP-backed forensic panels can legitimately settle after Prometheus panels,
   // especially while an observability campaign is writing evidence. Keep the
@@ -786,35 +833,14 @@ async function validateDashboardTerminalStates(page, dashboard, index, total) {
 
   while (Date.now() <= deadline) {
     panelStates = await collectPanelTerminalStates(page, dashboard);
-    const contradiction = panelStates.find(
-      (state) => state.classification === "contradictory",
-    );
-    if (contradiction) {
+    if (panelStates.some((state) => state.classification === "contradictory")) {
       return terminalStateSummary(dashboard, panelStates, "error");
     }
     const pending = panelStates.filter((state) =>
       new Set(["blank", "loading"]).has(state.classification),
     );
     if (pending.length === 0) {
-      const requiredTerminalStates = dashboard.requiredTerminalPanelIds.map((panelId) =>
-        panelStates.find((state) => state.id === panelId),
-      );
-      if (
-        requiredTerminalStates.some(
-          (state) =>
-            !state ||
-            !new Set([
-              "healthy",
-              "explicit-error",
-              "valid-empty",
-              "telemetry-absent",
-              "not-applicable",
-              "incomplete",
-            ]).has(
-              state.classification,
-            ),
-        )
-      ) {
+      if (!requiredTerminalStatesAccepted(dashboard, panelStates)) {
         return terminalStateSummary(dashboard, panelStates, "error");
       }
       console.log(

@@ -1669,10 +1669,15 @@ def _check_artifacts(
         expected_md = render_markdown(payload)
         if (
             not json_out.exists()
-            or json_out.read_text(encoding="utf-8") != expected_json
+            or json_out.read_text(encoding="utf-8")  # NOSONAR - path confined
+            != expected_json
         ):
             errors.append(f"Debt governance gate JSON artifact is stale: {json_out}")
-        if not md_out.exists() or md_out.read_text(encoding="utf-8") != expected_md:
+        if (
+            not md_out.exists()
+            or md_out.read_text(encoding="utf-8")  # NOSONAR - path confined
+            != expected_md
+        ):
             errors.append(f"Debt governance gate Markdown artifact is stale: {md_out}")
     summary = payload["summary"]
     assert isinstance(summary, dict)

@@ -44,23 +44,26 @@ def _err(message: str) -> None:
 
 
 def load_manifest(manifest_path: Path) -> list[Path]:
-    if not manifest_path.exists():
-        raise FileNotFoundError(f"Manifest not found: {manifest_path}")
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
-    from scripts.engineering.common.repo_paths import resolve_output_path
+    safe_manifest = resolve_output_path(manifest_path, root=REPO_ROOT)
+    if not safe_manifest.exists():
+        raise FileNotFoundError(f"Manifest not found: {safe_manifest}")
 
     paths: list[Path] = []
-    for raw in manifest_path.read_text(encoding="utf-8").splitlines():  # NOSONAR - path confined
+    for raw in safe_manifest.read_text(  # NOSONAR - path confined by resolve_output_path
+        encoding="utf-8"
+    ).splitlines():
         line = raw.strip()
         if not line or line.startswith("#"):
             continue
-        path = resolve_output_path(line)
+        path = resolve_output_path(line, root=REPO_ROOT)
         if path.suffix.lower() != ".svg":
             raise ValueError(f"Manifest must contain SVG paths only: {line}")
         paths.append(path)
 
     if not paths:
-        raise ValueError(f"Manifest is empty: {manifest_path}")
+        raise ValueError(f"Manifest is empty: {safe_manifest}")
 
     return paths
 

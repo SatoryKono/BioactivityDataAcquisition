@@ -1138,14 +1138,17 @@ def _canonical_json(payload: dict[str, Any]) -> str:
 
 
 def _check_json_artifact(path: Path, payload: dict[str, Any]) -> bool:
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    safe_path = resolve_output_path(path, root=REPO_ROOT)
     expected = _canonical_json(payload)
-    if not path.exists():
-        print(f"[drift] missing: {path}")
+    if not safe_path.exists():
+        print(f"[drift] missing: {safe_path}")
         return False
-    actual = path.read_text(encoding="utf-8")  # NOSONAR - path confined
+    actual = safe_path.read_text(encoding="utf-8")  # NOSONAR - path confined
     if actual == expected:
         return True
-    print(f"[drift] mismatch: {path}")
+    print(f"[drift] mismatch: {safe_path}")
     return False
 
 
@@ -1219,19 +1222,30 @@ def main(argv: list[str] | None = None) -> int:
         ):
             exit_code = 1
     elif json_out:
-        json_out.parent.mkdir(parents=True, exist_ok=True)
-        json_out.write_text(output, encoding="utf-8")
+        from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+        safe_json_out = resolve_output_path(json_out, root=REPO_ROOT)
+        safe_json_out.parent.mkdir(parents=True, exist_ok=True)
+        safe_json_out.write_text(  # NOSONAR - path confined by resolve_output_path
+            output, encoding="utf-8"
+        )
     else:
         print(output)
     if fixture_duplication_out and not args.check:
-        fixture_duplication_out.parent.mkdir(parents=True, exist_ok=True)
-        fixture_duplication_out.write_text(
+        from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+        safe_fixture_out = resolve_output_path(fixture_duplication_out, root=REPO_ROOT)
+        safe_fixture_out.parent.mkdir(parents=True, exist_ok=True)
+        safe_fixture_out.write_text(  # NOSONAR - path confined by resolve_output_path
             _canonical_json(fixture_duplication_payload),
             encoding="utf-8",
         )
     if duplicate_name_inventory_out and not args.check:
-        duplicate_name_inventory_out.parent.mkdir(parents=True, exist_ok=True)
-        duplicate_name_inventory_out.write_text(
+        from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+        safe_dup_out = resolve_output_path(duplicate_name_inventory_out, root=REPO_ROOT)
+        safe_dup_out.parent.mkdir(parents=True, exist_ok=True)
+        safe_dup_out.write_text(  # NOSONAR - path confined by resolve_output_path
             _canonical_json(duplicate_name_inventory_payload),
             encoding="utf-8",
         )

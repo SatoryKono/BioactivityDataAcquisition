@@ -26,10 +26,14 @@ def _canonical_script_path() -> Path:
 
 
 def main(argv: list[str] | None = None) -> int:
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
     script = _canonical_script_path()
     args = sys.argv[1:] if argv is None else argv
-    cmd = [sys.executable, str(script), *args]
-    result = subprocess.run(cmd, check=False)
+    cmd = ensure_safe_cli_argv([sys.executable, str(script), *[str(a) for a in args]])
+    result = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
+        cmd, check=False
+    )
     return int(result.returncode)
 
 
