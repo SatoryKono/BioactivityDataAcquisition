@@ -1,5 +1,3 @@
-# pyright: reportIncompatibleVariableOverride=false
-# Pandera/ETL nested Config override pattern (PD2-7).
 """Pandera schema for ChEMBL Target Component entity.
 
 Aligned with TargetComponent entity and TargetComponentTransformer output.
@@ -67,7 +65,7 @@ class TargetComponentSchema(ETLRecordSchema):
         nullable=True, description="Canonical JSON array of protein classification IDs."
     )
 
-    class Config:
+    class Config:  # pyright: ignore[reportIncompatibleVariableOverride]
         """Pandera configuration."""
 
         strict = True

@@ -1,4 +1,3 @@
-# pyright: reportConstantRedefinition=false
 # basedpyright residual burn-down (shrink-only product surface).
 """Initialized publication controlled-vocabulary registry for application use."""
 

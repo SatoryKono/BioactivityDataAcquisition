@@ -1,5 +1,3 @@
-# pyright: reportImportCycles=false
-# Import cycle residual tracked in allowlist (product burn-down).
 """Infrastructure layer observability components.
 
 This package contains implementations of observability ports:

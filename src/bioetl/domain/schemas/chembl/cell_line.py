@@ -1,5 +1,3 @@
-# pyright: reportIncompatibleVariableOverride=false
-# Pandera/ETL nested Config override pattern (PD2-7).
 """Pandera schema for ChEMBL Cell Line entity.
 
 Aligned with RULES.md v5.24 and ChEMBL 34 schema.
@@ -122,7 +120,7 @@ class CellLineSchema(ETLRecordSchema):
         description="EFO ontology release/version used for IRI mapping.",
     )
 
-    class Config:
+    class Config:  # pyright: ignore[reportIncompatibleVariableOverride]
         """Pandera configuration."""
 
         strict = True

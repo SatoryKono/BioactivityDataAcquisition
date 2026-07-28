@@ -24,7 +24,7 @@ def test_non_local_otlp_endpoint_does_not_force_insecure(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     exporter_factory = MagicMock(return_value=object())
-    monkeypatch.setattr(tracing, "OTLP_AVAILABLE", True)
+    monkeypatch.setattr(tracing, "otlp_available", True)
     monkeypatch.setattr(tracing, "_OtlpExporterClass", exporter_factory)
     monkeypatch.setenv(
         "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT",

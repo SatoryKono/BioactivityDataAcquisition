@@ -1,5 +1,4 @@
 # pyright: reportUninitializedInstanceVariable=false
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Clear and cleanup operations mixin for StorageBundle."""
 

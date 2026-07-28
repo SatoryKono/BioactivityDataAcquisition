@@ -1,5 +1,4 @@
 # pyright: reportUninitializedInstanceVariable=false
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods provided by concrete composition (PD2 W1).
 """Merge/finalization stage helpers for CompositePipelineRunner."""
 

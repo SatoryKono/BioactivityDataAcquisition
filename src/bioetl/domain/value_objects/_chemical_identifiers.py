@@ -3,9 +3,7 @@
 # Host attrs/methods provided by concrete composition.
 """Chemical structure identifier Value Objects.
 
-Contains InChIKey and SMILES — pure chemical structure identifiers
-with format validation and normalization.
-"""
+Contains validated and normalized InChIKey and SMILES identifiers."""
 
 from __future__ import annotations
 

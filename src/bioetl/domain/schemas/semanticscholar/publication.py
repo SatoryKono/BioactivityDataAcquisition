@@ -1,5 +1,3 @@
-# pyright: reportIncompatibleVariableOverride=false
-# Pandera/ETL nested Config override pattern (PD2-7).
 # src/bioetl/domain/schemas/semanticscholar/publication.py
 """Pandera schema for Semantic Scholar Publication entity.
 
@@ -191,7 +189,7 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         description="Raw provider JSON for citation-context payload.",
     )
 
-    class Config:
+    class Config:  # pyright: ignore[reportIncompatibleVariableOverride]
         """Pandera configuration."""
 
         strict = False  # Allow missing columns and extra columns

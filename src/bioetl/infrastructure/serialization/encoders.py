@@ -1,4 +1,3 @@
-# pyright: reportConstantRedefinition=false
 # basedpyright residual burn-down (shrink-only product surface).
 """JSON encoder implementations.
 
@@ -37,10 +36,10 @@ try:
     import orjson as _orjson_module
 
     _orjson: types.ModuleType | None = _orjson_module
-    ORJSON_AVAILABLE = True
+    orjson_available = True
 except ImportError:
     _orjson = None
-    ORJSON_AVAILABLE = False
+    orjson_available = False
 
 
 def _to_ascii_json(json_text: str, *, sort_keys: bool) -> str:
@@ -139,7 +138,7 @@ class OrjsonEncoder:
         Raises:
             ImportError: If orjson is not installed
         """
-        if not ORJSON_AVAILABLE:
+        if not orjson_available:
             raise ImportError(
                 "orjson is not installed. Install with: pip install orjson"
             )
@@ -239,7 +238,7 @@ def get_json_encoder(encoder_type: str | None = None) -> JsonEncoderPort:
     effective_type = (raw_type or "").strip().lower()
 
     if effective_type == "orjson":
-        if not ORJSON_AVAILABLE:
+        if not orjson_available:
             raise ImportError(
                 "JSON encoder 'orjson' requested but not installed. "
                 "Install with: pip install orjson"
@@ -256,7 +255,7 @@ def get_json_encoder(encoder_type: str | None = None) -> JsonEncoderPort:
         )
 
     # Default: use orjson if available, otherwise stdlib
-    if ORJSON_AVAILABLE:
+    if orjson_available:
         return OrjsonEncoder()
     return StdLibJsonEncoder()
 
@@ -273,7 +272,7 @@ def reset_encoder_cache() -> None:
 _ENCODER_API = (reset_encoder_cache,)
 
 __all__ = [
-    "ORJSON_AVAILABLE",
+    "orjson_available",
     "OrjsonEncoder",
     "StdLibJsonEncoder",
     "get_json_encoder",

@@ -20,7 +20,7 @@ import pytest
 
 from bioetl.domain.ports import JsonEncoderPort
 from bioetl.infrastructure.serialization.encoders import (
-    ORJSON_AVAILABLE,
+    orjson_available,
     OrjsonEncoder,
     StdLibJsonEncoder,
     get_json_encoder,
@@ -153,7 +153,7 @@ class TestStdLibJsonEncoder:
         assert result == data
 
 
-@pytest.mark.skipif(not ORJSON_AVAILABLE, reason="orjson not installed")
+@pytest.mark.skipif(not orjson_available, reason="orjson not installed")
 class TestOrjsonEncoder:
     """Tests for OrjsonEncoder implementation."""
 
@@ -319,7 +319,7 @@ class TestGetJsonEncoder:
             encoder = get_json_encoder(" stdlib ")
             assert isinstance(encoder, StdLibJsonEncoder)
 
-    @pytest.mark.skipif(not ORJSON_AVAILABLE, reason="orjson not installed")
+    @pytest.mark.skipif(not orjson_available, reason="orjson not installed")
     def test_env_orjson_returns_orjson_encoder(self) -> None:
         """BIOETL_JSON_ENCODER=orjson should return OrjsonEncoder."""
         with mock.patch.dict(os.environ, {"BIOETL_JSON_ENCODER": "orjson"}):
@@ -334,7 +334,7 @@ class TestGetJsonEncoder:
             with pytest.raises(ValueError, match="Unknown JSON encoder type"):
                 get_json_encoder()
 
-    @pytest.mark.skipif(not ORJSON_AVAILABLE, reason="orjson not installed")
+    @pytest.mark.skipif(not orjson_available, reason="orjson not installed")
     def test_default_uses_orjson_when_available(self) -> None:
         """Default should use orjson when available."""
         with mock.patch.dict(os.environ, {}, clear=True):
@@ -379,7 +379,7 @@ class TestEncoderOutputConsistency:
             parsed = json.loads(result)
             assert parsed == data
 
-    @pytest.mark.skipif(not ORJSON_AVAILABLE, reason="orjson not installed")
+    @pytest.mark.skipif(not orjson_available, reason="orjson not installed")
     def test_orjson_produces_valid_json(self, test_data: list[dict[str, Any]]) -> None:
         """Orjson encoder should produce valid JSON."""
         encoder = OrjsonEncoder()
@@ -389,7 +389,7 @@ class TestEncoderOutputConsistency:
             parsed = json.loads(result)
             assert parsed == data
 
-    @pytest.mark.skipif(not ORJSON_AVAILABLE, reason="orjson not installed")
+    @pytest.mark.skipif(not orjson_available, reason="orjson not installed")
     def test_both_encoders_produce_same_parsed_result(
         self, test_data: list[dict[str, Any]]
     ) -> None:
@@ -411,7 +411,7 @@ class TestEdgeCases:
         """Parametrized encoder for testing both implementations."""
         if request.param == "stdlib":
             return StdLibJsonEncoder()
-        elif ORJSON_AVAILABLE:
+        elif orjson_available:
             return OrjsonEncoder()
         else:
             pytest.skip("orjson not installed")

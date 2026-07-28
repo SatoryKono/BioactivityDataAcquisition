@@ -1,5 +1,3 @@
-# pyright: reportIncompatibleVariableOverride=false
-# Pandera/ETL nested Config override pattern (PD2-7).
 """Pandera schema for derived ChEMBL target protein classifications."""
 
 from __future__ import annotations
@@ -167,7 +165,7 @@ class TargetProteinClassificationSchema(ETLRecordSchema):
         description="Source protein_class snapshot row count used to build relation.",
     )
 
-    class Config:
+    class Config:  # pyright: ignore[reportIncompatibleVariableOverride]
         """Pandera configuration."""
 
         strict = True

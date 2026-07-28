@@ -1,5 +1,3 @@
-# pyright: reportIncompatibleVariableOverride=false
-# Pandera/ETL nested Config override pattern (PD2-7).
 """Pandera schema for ChEMBL Publication Similarity entity.
 
 Aligned with RULES.md v5.24 and ChEMBL 34 schema.
@@ -66,7 +64,7 @@ class PublicationSimilaritySchema(ETLRecordSchema):
         description="Max Tanimoto coefficient.",
     )
 
-    class Config:
+    class Config:  # pyright: ignore[reportIncompatibleVariableOverride]
         """Pandera configuration."""
 
         strict = True

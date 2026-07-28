@@ -382,9 +382,9 @@ def test_checkpoint_governance_import_contract_is_documented() -> None:
     facade_source = Path(
         "src/bioetl/application/composite/checkpoint/__init__.py"
     ).read_text(encoding="utf-8")
-    plan_source = Path("docs/05-engineering/normalization_plan_P0_P6.md").read_text(
-        encoding="utf-8"
-    )
+    plan_source = Path(
+        "docs/99-archive/engineering/normalization_plan_P0_P6.md"
+    ).read_text(encoding="utf-8")
 
     assert "sanctioned public import surface" in facade_source
     assert "bioetl.application.composite.checkpoint.anchor_context" not in plan_source

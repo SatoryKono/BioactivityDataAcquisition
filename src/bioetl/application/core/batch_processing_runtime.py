@@ -1,5 +1,3 @@
-# pyright: reportImportCycles=false
-# Import cycle residual tracked in allowlist (product burn-down).
 """Family-local runtime helpers for batch-processing support."""
 
 from __future__ import annotations

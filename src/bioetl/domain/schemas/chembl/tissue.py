@@ -1,5 +1,3 @@
-# pyright: reportIncompatibleVariableOverride=false
-# Pandera/ETL nested Config override pattern (PD2-7).
 """Pandera schema for ChEMBL Tissue entity.
 
 Aligned with ChEMBL tissue transformer output and pipeline contract.
@@ -104,7 +102,7 @@ class TissueSchema(ETLRecordSchema):
         description="Uberon ontology release/version used for IRI mapping.",
     )
 
-    class Config:
+    class Config:  # pyright: ignore[reportIncompatibleVariableOverride]
         """Pandera configuration."""
 
         strict = True

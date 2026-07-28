@@ -1012,11 +1012,11 @@ class TestJsonEncoderImplementationContract:
     def test_orjson_encoder_implements_json_encoder_port(self) -> None:
         """OrjsonEncoder MUST satisfy JsonEncoderPort contract (if installed)."""
         from bioetl.infrastructure.serialization.encoders import (
-            ORJSON_AVAILABLE,
+            orjson_available,
             OrjsonEncoder,
         )
 
-        if not ORJSON_AVAILABLE:
+        if not orjson_available:
             pytest.skip("orjson not installed")
 
         encoder = OrjsonEncoder()

@@ -1,5 +1,3 @@
-# pyright: reportIncompatibleVariableOverride=false
-# Pandera/ETL nested Config override pattern (PD2-7).
 """Pandera schema for ChEMBL Molecule entity.
 
 Aligned with RULES.md v5.24 and ChEMBL 34 schema.
@@ -239,7 +237,7 @@ class MoleculeSchema(ETLRecordSchema):
         nullable=True, description="JSON string of ATC classifications."
     )
 
-    class Config:
+    class Config:  # pyright: ignore[reportIncompatibleVariableOverride]
         """Pandera configuration."""
 
         strict = True

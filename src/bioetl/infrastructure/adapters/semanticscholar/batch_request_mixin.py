@@ -1,5 +1,4 @@
 # mypy: disable-error-code=attr-defined
-# pyright: reportUninitializedInstanceVariable=false
 # pyright: reportAttributeAccessIssue=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Batch request internals for SemanticScholarAdapter."""

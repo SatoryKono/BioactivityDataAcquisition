@@ -1,5 +1,3 @@
-# pyright: reportIncompatibleVariableOverride=false
-# Pandera/ETL nested Config override pattern (PD2-7).
 # mypy: disable-error-code="misc"
 """Base Pandera schema for all ETL records.
 
@@ -81,7 +79,7 @@ class ETLRecordSchema(pa.DataFrameModel):
         description="Flag for data quality errors.",
     )
 
-    class Config:
+    class Config:  # pyright: ignore[reportIncompatibleVariableOverride]
         """Pandera configuration."""
 
         strict = True  # Disallow columns not specified in the schema

@@ -1,13 +1,10 @@
 # mypy: disable-error-code=attr-defined
-# pyright: reportUninitializedInstanceVariable=false
-# pyright: reportAttributeAccessIssue=false
-# Host attrs/methods provided by concrete composition (PD2 W1).
 """Column-order and schema helpers for BatchWriter."""
 
 from __future__ import annotations
 
 import itertools
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -24,18 +21,23 @@ _SCHEMA_EXTRACTION_ERRORS = (
 class BatchWriterColumnsMixin:
     """Column resolution helpers extracted from BatchWriter."""
 
+    _column_orderer: Any = cast(Any, None)  # Any: concrete host injects optional column-order service
+    _data_schema: Any = cast(Any, None)  # Any: schema adapters expose heterogeneous runtime APIs
+
     def _project_via_to_schema(
         self,
         schema: object,
         column_order: Sequence[str],
     ) -> object | None:
         """Project a schema object through its conversion surface when available."""
-        if not hasattr(schema, "to_schema"):
+        to_schema = getattr(schema, "to_schema", None)
+        if not callable(to_schema):
             return None
         try:
-            converted = schema.to_schema()
-            if hasattr(converted, "select_columns"):
-                return converted.select_columns(list(column_order))  # type: ignore[no-any-return]
+            converted = to_schema()
+            select_columns = getattr(converted, "select_columns", None)
+            if callable(select_columns):
+                return select_columns(list(column_order))
         except _SCHEMA_EXTRACTION_ERRORS:
             return schema
         return None
@@ -46,10 +48,11 @@ class BatchWriterColumnsMixin:
         column_order: Sequence[str],
     ) -> object | None:
         """Project a schema object through a direct select_columns surface."""
-        if not hasattr(schema, "select_columns"):
+        select_columns = getattr(schema, "select_columns", None)
+        if not callable(select_columns):
             return None
         try:
-            return schema.select_columns(list(column_order))  # type: ignore[no-any-return]
+            return select_columns(list(column_order))
         except _SCHEMA_EXTRACTION_ERRORS:
             return schema
 
@@ -64,10 +67,16 @@ class BatchWriterColumnsMixin:
 
             if not isinstance(schema, pa.Schema):
                 return None
+            names = getattr(schema, "names", ())
+            field_fn = getattr(schema, "field", None)
+            if not callable(field_fn):
+                return None
             projected_fields = [
-                schema.field(name) for name in column_order if name in schema.names
+                field_fn(name) for name in column_order if name in names
             ]
-            return pa.schema(projected_fields, metadata=schema.metadata)  # type: ignore[no-any-return]
+            return pa.schema(
+                projected_fields, metadata=getattr(schema, "metadata", None)
+            )
         except (ImportError, AttributeError, TypeError, ValueError):
             return schema
 
@@ -76,15 +85,19 @@ class BatchWriterColumnsMixin:
         schema: object,
     ) -> set[str] | None:
         """Extract column names from Pandera schema-like objects."""
-        if hasattr(schema, "to_schema"):
+        to_schema = getattr(schema, "to_schema", None)
+        if callable(to_schema):
             try:
-                converted = schema.to_schema()
-                return set(converted.columns.keys())
+                converted = to_schema()
+                columns = getattr(converted, "columns", None)
+                if isinstance(columns, dict):
+                    return set(columns.keys())
             except _SCHEMA_EXTRACTION_ERRORS:
                 pass  # Why: schema hint unavailable, use default column order
 
-        if hasattr(schema, "columns"):
-            return set(schema.columns.keys())
+        columns = getattr(schema, "columns", None)
+        if isinstance(columns, dict):
+            return set(columns.keys())
         return None
 
     def _collect_record_columns(self, records: list[GoldRecord]) -> list[str]:

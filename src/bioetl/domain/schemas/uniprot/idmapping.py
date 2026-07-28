@@ -1,5 +1,3 @@
-# pyright: reportIncompatibleVariableOverride=false
-# Pandera/ETL nested Config override pattern (PD2-7).
 # mypy: disable-error-code="untyped-decorator"
 """Pandera schema for UniProt ID Mapping entity.
 
@@ -131,7 +129,7 @@ class IDMappingSchema(ETLRecordSchema):
         description="JSON array of all accessions when multiple mappings found",
     )
 
-    class Config:
+    class Config:  # pyright: ignore[reportIncompatibleVariableOverride]
         """Pandera configuration."""
 
         strict = True

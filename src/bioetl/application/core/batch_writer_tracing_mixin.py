@@ -1,14 +1,11 @@
 # mypy: disable-error-code=attr-defined
-# pyright: reportUninitializedInstanceVariable=false
-# pyright: reportAttributeAccessIssue=false
-# Host attrs/methods provided by concrete composition (PD2 W1).
 """Tracing, lock-validation, and error-tracking helpers for BatchWriter."""
 
 from __future__ import annotations
 
 import traceback
 from collections.abc import Awaitable, Callable
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.pipeline_span_lifecycle import close_span
 from bioetl.domain.locking import LockNotHeldError
@@ -23,6 +20,14 @@ _WRITE_SPAN_ERRORS = (Exception,)
 
 class BatchWriterTracingMixin:
     """Operational cross-cutting concerns for BatchWriter."""
+
+    _lock_validator: Any = cast(Any, None)  # Any: concrete host injects an optional async validator
+    _provider: str = ""
+    _entity_type: str = ""
+    _context: Any = cast(Any, None)  # Any: concrete BatchWriter supplies the host context
+    _tracer: Any = cast(Any, None)  # Any: tracing port returns an OTel-compatible runtime object
+    _error_classifier: Any = cast(Any, None)  # Any: concrete host supplies the classifier
+    _batch_metrics: Any = cast(Any, None)  # Any: concrete host supplies the metrics recorder
 
     async def _validate_lock(self, operation: str) -> None:
         """Validate lock ownership before write operation."""

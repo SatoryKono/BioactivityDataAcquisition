@@ -1,5 +1,3 @@
-# pyright: reportIncompatibleVariableOverride=false
-# Pandera/ETL nested Config override pattern (PD2-7).
 # src/bioetl/domain/schemas/chembl/assay_parameters.py
 """Pandera schema for ChEMBL AssayParameters entity.
 
@@ -149,7 +147,7 @@ class AssayParametersSchema(ETLRecordSchema):
         description="Standardized text value.",
     )
 
-    class Config:
+    class Config:  # pyright: ignore[reportIncompatibleVariableOverride]
         """Pandera configuration."""
 
         strict = True

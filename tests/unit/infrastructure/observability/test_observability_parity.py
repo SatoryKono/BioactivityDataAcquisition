@@ -113,7 +113,7 @@ def test_tracing_adapters_expose_otel_compatible_surface() -> None:
     if tracing_module.OTEL_AVAILABLE:
         # Disable OTLP so OpenTelemetryTracer uses ConsoleSpanExporter,
         # avoiding the gRPC connection attempt and 5s flush timeout.
-        with patch.object(tracing_module, "OTLP_AVAILABLE", False):
+        with patch.object(tracing_module, "otlp_available", False):
             adapters.append(tracing_module.OpenTelemetryTracer("bioetl-test"))
 
     try:

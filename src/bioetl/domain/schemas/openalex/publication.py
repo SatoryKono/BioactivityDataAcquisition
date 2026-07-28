@@ -1,5 +1,3 @@
-# pyright: reportIncompatibleVariableOverride=false
-# Pandera/ETL nested Config override pattern (PD2-7).
 """Pandera schema for OpenAlex Publication entity.
 
 Aligned with RULES.md v5.24 and Publication Schema Unification spec.
@@ -200,7 +198,7 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
         "May be empty if not returned by Works API.",
     )
 
-    class Config:
+    class Config:  # pyright: ignore[reportIncompatibleVariableOverride]
         """Pandera configuration."""
 
         strict = False  # Allow missing columns and extra columns

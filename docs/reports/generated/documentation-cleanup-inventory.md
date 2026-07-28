@@ -7,10 +7,10 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2083 |
-| Tracked doc-like files | 2029 |
+| Doc-like files | 2134 |
+| Tracked doc-like files | 2080 |
 | Ignored local docs/reports files | 54 |
-| Duplicate groups | 14 |
+| Duplicate groups | 2 |
 | Generated without route or exception | 0 |
 | Generated routes | 66 |
 
@@ -19,7 +19,7 @@
 | Tracking State | Count |
 | --- | --- |
 | ignored_local | 54 |
-| tracked | 2029 |
+| tracked | 2080 |
 
 ## Lifecycle Counts
 
@@ -28,7 +28,7 @@
 | active_backlog | 1 |
 | active_draft | 109 |
 | active_quality_baseline | 22 |
-| closeout_evidence | 36 |
+| closeout_evidence | 37 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 39 |
 | docs_reports_generated_or_route_owned | 23 |
@@ -38,11 +38,11 @@
 | generated_test_run_evidence | 4 |
 | guide | 2 |
 | index | 4 |
-| issue_pack | 30 |
+| issue_pack | 32 |
 | live_issue_mirror | 4 |
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 36 |
-| working_report | 62 |
+| working_report | 67 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -51,61 +51,48 @@
 | active_draft | 109 |
 | guide | 2 |
 | index | 4 |
-| issue_pack | 30 |
+| issue_pack | 32 |
 | live_issue_mirror | 4 |
 
 ## Status Counts
 
 | Status | Count |
 | --- | --- |
-| Active | 831 |
-| Archived | 133 |
+| Active | 862 |
+| Archived | 132 |
 | Canonical | 71 |
-| Duplicate | 12 |
-| Generated | 740 |
-| Working | 296 |
+| Generated | 763 |
+| Working | 306 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 831 |
-| archive | 133 |
+| active | 862 |
+| archive | 132 |
 | canonical | 71 |
-| duplicate | 12 |
-| generated | 740 |
-| working | 296 |
+| generated | 763 |
+| working | 306 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-github-state-check | 139 |
-| archive-after-migration | 95 |
-| generate-automatically | 740 |
-| keep | 1093 |
-| merge | 12 |
+| archive-after-github-state-check | 141 |
+| archive-after-migration | 102 |
+| generate-automatically | 763 |
+| keep | 1124 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
 
 | Path | Status | Inbound | Action |
 | --- | --- | --- | --- |
-| `docs/00-project/ai/audit/observability-issues/OBS-002-metric-to-panel-runtime.md` | Duplicate | 0 | merge |
-| `docs/00-project/ai/audit/observability-issues/OBS-002-validation-findings.md` | Duplicate | 0 | merge |
-| `docs/00-project/ai/audit/observability-issues/OBS-003-live-validation.md` | Duplicate | 0 | merge |
-| `docs/00-project/ai/audit/observability-issues/OBS-003-validation-findings.md` | Duplicate | 0 | merge |
-| `docs/00-project/ai/audit/observability-issues/OBS-004-emitter-bypass-proof.md` | Duplicate | 0 | merge |
-| `docs/00-project/ai/audit/observability-issues/OBS-004-validation-findings.md` | Duplicate | 0 | merge |
-| `docs/00-project/ai/audit/observability-issues/OBS-006-live-datasource-compliance.md` | Duplicate | 0 | merge |
-| `docs/00-project/ai/audit/observability-issues/OBS-006-validation-findings.md` | Duplicate | 0 | merge |
-| `docs/00-project/ai/audit/observability-issues/README.md` | Duplicate | 0 | merge |
-| `docs/00-project/ai/audit/observability-issues/VALIDATION-SUMMARY.md` | Duplicate | 0 | merge |
 | `docs/00-project/ai/sessions/review-1776233608.md` | Working | 0 | archive-after-migration |
 | `docs/00-project/ai/skills/global/documentation-audit/references/audit-checklist.md` | Working | 0 | archive-after-migration |
 | `docs/00-project/ai/skills/global/documentation-audit/references/report-template.md` | Working | 0 | archive-after-migration |
-| `docs/03-guides/dashboards/migration-map-v2.md` | Duplicate | 3 | merge |
-| `docs/filters/migration-plan.md` | Duplicate | 1 | merge |
+| `docs/03-guides/dashboards/migration-map-v2.md` | Working | 3 | archive-after-migration |
+| `docs/filters/migration-plan.md` | Working | 1 | archive-after-migration |
 | `docs/reports/2026-04-23-documentation-audit-summary.md` | Working | 0 | archive-after-migration |
 | `docs/reports/adr-compliance-verification-2026-07-24.md` | Working | 0 | archive-after-migration |
 | `docs/reports/audits/compatibility-surface-issue-pack-20260413.md` | Working | 0 | archive-after-migration |
@@ -153,6 +140,7 @@
 | `reports/observability/runtime_cardinality_allowlist_review_5574.json` | Working | 0 | archive-after-migration |
 | `reports/observability/runtime_cardinality_review.json` | Working | 0 | archive-after-migration |
 | `reports/plans/obs-program-6247-6268/04-refactoring-log.md` | Working | 0 | archive-after-migration |
+| `reports/plans/sonar-remediation-plan-2026-07-28/01-plan-initial.md` | Working | 0 | archive-after-migration |
 | `reports/quality/adr-enforcement-matrix.json` | Working | 0 | archive-after-migration |
 | `reports/quality/adr-enforcement-matrix.md` | Working | 0 | archive-after-migration |
 | `reports/quality/architecture-coderabbit-2026-07-28-issue-publish.json` | Working | 0 | archive-after-migration |
@@ -171,6 +159,15 @@
 | `reports/quality/issue-6480-application-core-partial-tranche.json` | Working | 0 | archive-after-migration |
 | `reports/quality/low-coverage-targeted-tests-6045.json` | Working | 0 | archive-after-migration |
 | `reports/quality/partial-coverage-top50-arch-res-03.json` | Working | 0 | archive-after-migration |
+| `reports/quality/partial-coverage-top50-arch-res-03.md` | Working | 0 | archive-after-migration |
+| `reports/quality/port-adapter-factory-coverage.json` | Working | 0 | archive-after-migration |
+| `reports/quality/port-adapter-factory-coverage.md` | Working | 0 | archive-after-migration |
+| `reports/quality/reports-workspace-review.json` | Working | 0 | archive-after-migration |
+| `reports/quality/root-hygiene-2026-07-28-issue-publish.json` | Working | 0 | archive-after-migration |
+| `reports/quality/root-hygiene-cleanup-classification.json` | Working | 0 | archive-after-migration |
+| `reports/quality/root-hygiene-review-evidence.json` | Working | 0 | archive-after-migration |
+| `reports/quality/silver-gold-filter-parity-report.json` | Working | 0 | archive-after-migration |
+| `reports/quality/sonar/live-issues-20260728-manifest.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -246,7 +243,6 @@
 | `docs/02-architecture/diagrams/architecture/51b-chembl-pipeline-activity-silver-fields-2.mmd` | pipeline-dataflow-generated-docs |  | diagram_canonical_source | scripts/diagrams/generate_pipeline_dataflows.py |
 | `docs/02-architecture/diagrams/architecture/52a-chembl-pipeline-activity-gold-fields-1.mmd` | pipeline-dataflow-generated-docs |  | diagram_canonical_source | scripts/diagrams/generate_pipeline_dataflows.py |
 | `docs/02-architecture/diagrams/architecture/52b-chembl-pipeline-activity-gold-fields-2.mmd` | pipeline-dataflow-generated-docs |  | diagram_canonical_source | scripts/diagrams/generate_pipeline_dataflows.py |
-| `docs/02-architecture/diagrams/architecture/png/INDEX.md` | architecture-diagram-render-artifacts |  | diagram_render_artifact | docs/02-architecture/diagrams/tooling/render.sh |
 | `docs/02-architecture/diagrams/architecture/svg/INDEX.md` | architecture-diagram-render-artifacts |  | diagram_render_artifact | docs/02-architecture/diagrams/tooling/render.sh |
 | `docs/02-architecture/diagrams/bundles/architecture.bundle.md` | architecture-diagram-bundles |  | diagram_bundle | scripts/diagrams/generate_all_bundles.py |
 | `docs/02-architecture/diagrams/bundles/class.bundle.md` | architecture-diagram-bundles |  | diagram_bundle | scripts/diagrams/generate_all_bundles.py |
@@ -256,6 +252,7 @@
 | `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-composite-runner-pkg-part1.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/generate_package_family_class_diagrams.py |
 | `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-composite-runner-pkg-part2.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/generate_package_family_class_diagrams.py |
 | `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-base-transformer.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/generate_package_family_class_diagrams.py |
+| `docs/02-architecture/diagrams/class-diagrams/90-pkg-application-core-batch-execution.mmd` | architecture-diagram-package-family-sources |  | diagram_generated_source | scripts/diagrams/generate_package_family_class_diagrams.py |
 
 ## GitHub Issue Evidence Examples
 

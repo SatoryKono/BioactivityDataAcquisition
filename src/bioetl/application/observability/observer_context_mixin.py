@@ -1,5 +1,4 @@
 # pyright: reportUninitializedInstanceVariable=false
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods provided by concrete composition (PD2 W1).
 # pyright: reportOptionalMemberAccess=false
 # basedpyright residual burn-down (shrink-only product surface).
