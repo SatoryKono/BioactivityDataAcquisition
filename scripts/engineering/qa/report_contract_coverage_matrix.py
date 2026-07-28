@@ -125,23 +125,22 @@ def _load_json_if_exists(path: Path) -> dict[str, Any]:
     return payload if isinstance(payload, dict) else {}
 
 
-def _contract_artifact_summary(paths: list[str]) -> dict[str, Any]:
-    artifacts = [
-        _load_json_if_exists(_resolve_registry_relative(path)) for path in paths
-    ]
-    artifacts = [artifact for artifact in artifacts if artifact]
-    if not artifacts:
-        return {
-            "published_contract_schema_version": "",
-            "published_contract_property_count": 0,
-            "published_contract_required_count": 0,
-            "published_contract_nullable_count": 0,
-            "published_contract_non_nullable_count": 0,
-            "published_contract_check_constraint_count": 0,
-            "published_contract_nullable_policy_declared": False,
-            "published_contract_required_fields": [],
-        }
+def _empty_contract_artifact_summary() -> dict[str, Any]:
+    return {
+        "published_contract_schema_version": "",
+        "published_contract_property_count": 0,
+        "published_contract_required_count": 0,
+        "published_contract_nullable_count": 0,
+        "published_contract_non_nullable_count": 0,
+        "published_contract_check_constraint_count": 0,
+        "published_contract_nullable_policy_declared": False,
+        "published_contract_required_fields": [],
+    }
 
+
+def _merge_contract_artifacts(
+    artifacts: list[dict[str, Any]],
+) -> tuple[dict[str, Any], set[str], set[str]]:
     properties: dict[str, Any] = {}
     required_fields: set[str] = set()
     schema_versions: set[str] = set()
@@ -153,7 +152,12 @@ def _contract_artifact_summary(paths: list[str]) -> dict[str, Any]:
         if isinstance(artifact_properties, dict):
             properties.update(artifact_properties)
         required_fields.update(_string_list(artifact.get("required")))
+    return properties, required_fields, schema_versions
 
+
+def _property_nullability_counts(
+    properties: dict[str, Any],
+) -> tuple[int, int, int]:
     nullable_count = 0
     non_nullable_count = 0
     check_constraint_count = 0
@@ -166,6 +170,21 @@ def _contract_artifact_summary(paths: list[str]) -> dict[str, Any]:
             non_nullable_count += 1
         if PANDERA_CONSTRAINT_KEYS.intersection(property_payload):
             check_constraint_count += 1
+    return nullable_count, non_nullable_count, check_constraint_count
+
+
+def _contract_artifact_summary(paths: list[str]) -> dict[str, Any]:
+    artifacts = [
+        _load_json_if_exists(_resolve_registry_relative(path)) for path in paths
+    ]
+    artifacts = [artifact for artifact in artifacts if artifact]
+    if not artifacts:
+        return _empty_contract_artifact_summary()
+
+    properties, required_fields, schema_versions = _merge_contract_artifacts(artifacts)
+    nullable_count, non_nullable_count, check_constraint_count = (
+        _property_nullability_counts(properties)
+    )
 
     return {
         "published_contract_schema_version": ",".join(sorted(schema_versions)),
@@ -293,18 +312,14 @@ def _golden_contract_test_paths(contract_test_paths: list[str]) -> list[str]:
     return sorted(paths)
 
 
-def _constraint_completeness(
+def _missing_constraint_surfaces(
     *,
-    gold_enabled: bool,
     schema_source_summary: dict[str, Any],
     contract_artifact_summary: dict[str, Any],
     primary_keys_required: bool,
     contract_test_paths: list[str],
     golden_test_paths: list[str],
-) -> tuple[str, list[str], list[str]]:
-    if not gold_enabled:
-        return "excluded", [], []
-
+) -> list[str]:
     missing: list[str] = []
     if schema_source_summary["pandera_field_count_in_source"] <= 0:
         missing.append("pandera_fields")
@@ -320,7 +335,17 @@ def _constraint_completeness(
         missing.append("contract_tests")
     if not golden_test_paths:
         missing.append("golden_tests")
+    return missing
 
+
+def _present_constraint_surfaces(
+    *,
+    schema_source_summary: dict[str, Any],
+    contract_artifact_summary: dict[str, Any],
+    primary_keys_required: bool,
+    contract_test_paths: list[str],
+    golden_test_paths: list[str],
+) -> list[str]:
     surfaces: list[str] = []
     if schema_source_summary["pandera_field_count_in_source"] > 0:
         surfaces.append("pandera_fields")
@@ -336,6 +361,35 @@ def _constraint_completeness(
         surfaces.append("contract_tests")
     if golden_test_paths:
         surfaces.append("golden_tests")
+    return surfaces
+
+
+def _constraint_completeness(
+    *,
+    gold_enabled: bool,
+    schema_source_summary: dict[str, Any],
+    contract_artifact_summary: dict[str, Any],
+    primary_keys_required: bool,
+    contract_test_paths: list[str],
+    golden_test_paths: list[str],
+) -> tuple[str, list[str], list[str]]:
+    if not gold_enabled:
+        return "excluded", [], []
+
+    missing = _missing_constraint_surfaces(
+        schema_source_summary=schema_source_summary,
+        contract_artifact_summary=contract_artifact_summary,
+        primary_keys_required=primary_keys_required,
+        contract_test_paths=contract_test_paths,
+        golden_test_paths=golden_test_paths,
+    )
+    surfaces = _present_constraint_surfaces(
+        schema_source_summary=schema_source_summary,
+        contract_artifact_summary=contract_artifact_summary,
+        primary_keys_required=primary_keys_required,
+        contract_test_paths=contract_test_paths,
+        golden_test_paths=golden_test_paths,
+    )
 
     status = "covered" if not missing else "missing_constraint_evidence"
     return status, sorted(surfaces), sorted(missing)
@@ -541,9 +595,7 @@ def _assemble_missing_surfaces(
         source_path=identity["source_path"],
         source_exists=identity["source_exists"],
         published_artifacts=identity["published_artifacts"],
-        published_artifact_missing_paths=identity[
-            "published_artifact_missing_paths"
-        ],
+        published_artifact_missing_paths=identity["published_artifact_missing_paths"],
     )
     if identity["gold_enabled"]:
         missing_surfaces.extend(

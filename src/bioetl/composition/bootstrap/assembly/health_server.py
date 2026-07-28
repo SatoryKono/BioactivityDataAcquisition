@@ -64,12 +64,15 @@ class _ReadOnlyHealthMonitor:
         result: HealthCheckResult,
         logger: object | None = None,
     ) -> HealthStatus:
+        _ = logger  # protocol-compatible optional logger for real monitors
         return result.status
 
     def record_success(self, provider: str) -> HealthStatus:
+        _ = provider  # protocol-compatible provider identity
         return HealthStatus.HEALTHY
 
     def record_error(self, provider: str) -> HealthStatus:
+        _ = provider  # protocol-compatible provider identity
         return HealthStatus.DEGRADED
 
     def get_all_states(self) -> Mapping[str, HealthStatePort]:

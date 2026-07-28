@@ -43,19 +43,19 @@ def _rel_bioetl(path: str) -> str:
     return normalized
 
 
-def build_snapshot(source: Path) -> dict[str, Any]:
-    source = resolve_output_path(source, root=ROOT)
-    source_text = source.read_text(encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
-    payload = json.loads(source_text)
-    summary = payload.get("summary") if isinstance(payload, dict) else {}
-    diags = payload.get("generalDiagnostics") if isinstance(payload, dict) else []
-    if not isinstance(diags, list):
-        diags = []
+def _split_diagnostics(
+    diags: list[Any],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     errors = [d for d in diags if isinstance(d, dict) and d.get("severity") == "error"]
     warnings = [
         d for d in diags if isinstance(d, dict) and d.get("severity") == "warning"
     ]
+    return errors, warnings
 
+
+def _aggregate_error_counts(
+    errors: list[dict[str, Any]],
+) -> tuple[Counter[str], Counter[str], Counter[str]]:
     by_rule = Counter(str(d.get("rule") or "unknown") for d in errors)
     by_layer: Counter[str] = Counter()
     by_file: Counter[str] = Counter()
@@ -65,6 +65,52 @@ def build_snapshot(source: Path) -> dict[str, Any]:
         layer = rel.split("/", 1)[0] if "/" in rel else rel
         if layer:
             by_layer[layer] += 1
+    return by_rule, by_layer, by_file
+
+
+def _snapshot_policy_block() -> dict[str, str]:
+    return {
+        "direction": "shrink_only",
+        "tech_debt_budget_growth": "forbidden",
+        "merge_blocking_type_gate": "mypy src/bioetl (CI)",
+        "project_diagnostics_surface": "product src/bioetl basedpyright errors (advisory unless promoted)",
+        "tests_advisory_snapshot": "reports/quality/basedpyright-tests-snapshot.json",
+        "warnings": "advisory; not merge-blocking in this campaign",
+    }
+
+
+def _snapshot_regen_block() -> dict[str, list[str]]:
+    return {
+        "preferred": [
+            "basedpyright --outputjson src/bioetl > reports/bp_live.json",
+            "python -m scripts.engineering.qa.report_basedpyright_error_snapshot --source reports/bp_live.json",
+        ],
+        "check": [
+            "python -m scripts.engineering.qa.report_basedpyright_error_snapshot --source reports/bp_live.json --check",
+        ],
+        "tests_advisory": [
+            "basedpyright --outputjson > reports/bp_workspace.json",
+            "python -m scripts.engineering.qa.report_basedpyright_tests_snapshot --source reports/bp_workspace.json",
+        ],
+        "notes": [
+            "If basedpyright CLI is unavailable, keep reports/bp_live.json from IDE export and re-run the snapshot command.",
+            "Do not use full-workspace error counts as the product residual baseline.",
+        ],
+    }
+
+
+def build_snapshot(source: Path) -> dict[str, Any]:
+    source = resolve_output_path(source, root=ROOT)
+    source_text = source.read_text(
+        encoding="utf-8"
+    )  # NOSONAR - path confined by resolve_output_path
+    payload = json.loads(source_text)
+    summary = payload.get("summary") if isinstance(payload, dict) else {}
+    diags = payload.get("generalDiagnostics") if isinstance(payload, dict) else []
+    if not isinstance(diags, list):
+        diags = []
+    errors, warnings = _split_diagnostics(diags)
+    by_rule, by_layer, by_file = _aggregate_error_counts(errors)
 
     return {
         "schema_version": "basedpyright-error-snapshot-v1",
@@ -74,31 +120,8 @@ def build_snapshot(source: Path) -> dict[str, Any]:
         "snapshot_date": date.today().isoformat(),
         "generated_by": "scripts.engineering.qa.report_basedpyright_error_snapshot",
         "source_report": str(source.relative_to(ROOT)).replace("\\", "/"),
-        "policy": {
-            "direction": "shrink_only",
-            "tech_debt_budget_growth": "forbidden",
-            "merge_blocking_type_gate": "mypy src/bioetl (CI)",
-            "project_diagnostics_surface": "product src/bioetl basedpyright errors (advisory unless promoted)",
-            "tests_advisory_snapshot": "reports/quality/basedpyright-tests-snapshot.json",
-            "warnings": "advisory; not merge-blocking in this campaign",
-        },
-        "regen": {
-            "preferred": [
-                "basedpyright --outputjson src/bioetl > reports/bp_live.json",
-                "python -m scripts.engineering.qa.report_basedpyright_error_snapshot --source reports/bp_live.json",
-            ],
-            "check": [
-                "python -m scripts.engineering.qa.report_basedpyright_error_snapshot --source reports/bp_live.json --check",
-            ],
-            "tests_advisory": [
-                "basedpyright --outputjson > reports/bp_workspace.json",
-                "python -m scripts.engineering.qa.report_basedpyright_tests_snapshot --source reports/bp_workspace.json",
-            ],
-            "notes": [
-                "If basedpyright CLI is unavailable, keep reports/bp_live.json from IDE export and re-run the snapshot command.",
-                "Do not use full-workspace error counts as the product residual baseline.",
-            ],
-        },
+        "policy": _snapshot_policy_block(),
+        "regen": _snapshot_regen_block(),
         "summary": {
             "files_analyzed": int((summary or {}).get("filesAnalyzed") or 0),
             "error_count": len(errors),
@@ -132,7 +155,9 @@ def check_snapshot(*, source: Path, output: Path) -> None:
     output = resolve_output_path(output, root=ROOT)
     if not output.is_file():
         raise SystemExit(f"missing snapshot: {output}")
-    committed_text = output.read_text(encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
+    committed_text = output.read_text(
+        encoding="utf-8"
+    )  # NOSONAR - path confined by resolve_output_path
     committed = json.loads(committed_text)
     live = build_snapshot(source)
     committed_errors = int(committed.get("summary", {}).get("error_count", 0))

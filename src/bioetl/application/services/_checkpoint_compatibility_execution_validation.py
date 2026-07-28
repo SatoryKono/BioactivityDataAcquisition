@@ -48,8 +48,6 @@ def validate_execution_identity_compatibility(
         return compatible and not fingerprint_messages, True, final_messages
 
     compatible, continuity_proven, messages = _initial_execution_identity_outcome(
-        current_metadata,
-        checkpoint_metadata,
         execution_identity_result,
     )
     _validate_mismatch_reasons(
@@ -124,8 +122,6 @@ def _build_execution_identity_context(
 
 
 def _initial_execution_identity_outcome(
-    current_metadata: CheckpointMetadata,
-    checkpoint_metadata: CheckpointMetadata,
     execution_identity_result: dict[str, object],
 ) -> tuple[bool, bool, list[str]]:
     """Resolve initial strict identity verdict before metadata cross-checks."""

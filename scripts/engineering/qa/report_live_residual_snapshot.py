@@ -163,6 +163,43 @@ def write_snapshot(path: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
     return snapshot
 
 
+def _check_hotspot_family_non_growth(
+    committed_families: dict[str, Any],
+    live_families: dict[str, Any],
+) -> None:
+    for name, committed_row in committed_families.items():
+        live_row = live_families.get(name)
+        if not isinstance(committed_row, dict) or not isinstance(live_row, dict):
+            continue
+        for key in ("files_ge_250_loc", "max_internal_fan_in", "total_loc"):
+            if int(live_row.get(key, 0)) > int(committed_row.get(key, 0)):
+                raise SystemExit(
+                    f"residual growth for {name}.{key}: "
+                    f"live={live_row.get(key)} committed={committed_row.get(key)}"
+                )
+        if (
+            float(live_row.get("helper_function_ratio", 0.0))
+            > float(committed_row.get("helper_function_ratio", 0.0)) + 1e-9
+        ):
+            raise SystemExit(
+                f"residual growth for {name}.helper_function_ratio: "
+                f"live={live_row.get('helper_function_ratio')} "
+                f"committed={committed_row.get('helper_function_ratio')}"
+            )
+
+
+def _check_int_metric_non_growth(
+    *,
+    live_value: int,
+    committed_value: int,
+    label: str,
+) -> None:
+    if live_value > committed_value:
+        raise SystemExit(
+            f"residual growth for {label}: live={live_value} committed={committed_value}"
+        )
+
+
 def check_snapshot(path: Path = DEFAULT_OUTPUT) -> None:
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
@@ -178,43 +215,23 @@ def check_snapshot(path: Path = DEFAULT_OUTPUT) -> None:
     live_families = live.get("hotspot_families", {})
     assert isinstance(committed_families, dict)
     assert isinstance(live_families, dict)
-    for name, committed_row in committed_families.items():
-        live_row = live_families.get(name)
-        if not isinstance(committed_row, dict) or not isinstance(live_row, dict):
-            continue
-        for key in ("files_ge_250_loc", "max_internal_fan_in", "total_loc"):
-            if int(live_row.get(key, 0)) > int(committed_row.get(key, 0)):
-                raise SystemExit(
-                    f"residual growth for {name}.{key}: "
-                    f"live={live_row.get(key)} committed={committed_row.get(key)}"
-                )
-        if float(live_row.get("helper_function_ratio", 0.0)) > float(
-            committed_row.get("helper_function_ratio", 0.0)
-        ) + 1e-9:
-            raise SystemExit(
-                f"residual growth for {name}.helper_function_ratio: "
-                f"live={live_row.get('helper_function_ratio')} "
-                f"committed={committed_row.get('helper_function_ratio')}"
-            )
+    _check_hotspot_family_non_growth(committed_families, live_families)
     # Dead-code untriaged must stay zero; candidate counts may not grow.
     for key in (
         "repo_wide_zero_import_candidate_count",
         "repo_wide_untriaged_zero_import_candidate_count",
         "repo_wide_candidates_without_owner_tests_count",
     ):
-        live_v = int(live["dead_code"][key])
-        committed_v = int(committed["dead_code"][key])
-        if live_v > committed_v:
-            raise SystemExit(
-                f"residual growth for dead_code.{key}: live={live_v} committed={committed_v}"
-            )
-    live_clusters = int(live["config_surface"]["duplicate_cluster_count"])
-    committed_clusters = int(committed["config_surface"]["duplicate_cluster_count"])
-    if live_clusters > committed_clusters:
-        raise SystemExit(
-            "residual growth for config_surface.duplicate_cluster_count: "
-            f"live={live_clusters} committed={committed_clusters}"
+        _check_int_metric_non_growth(
+            live_value=int(live["dead_code"][key]),
+            committed_value=int(committed["dead_code"][key]),
+            label=f"dead_code.{key}",
         )
+    _check_int_metric_non_growth(
+        live_value=int(live["config_surface"]["duplicate_cluster_count"]),
+        committed_value=int(committed["config_surface"]["duplicate_cluster_count"]),
+        label="config_surface.duplicate_cluster_count",
+    )
     print(f"[ok] live residual snapshot non-growth holds: {path}")
 
 

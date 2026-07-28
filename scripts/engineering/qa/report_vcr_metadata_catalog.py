@@ -26,33 +26,31 @@ RF013_HEALTH_CASE_OWNER = Path("tests/integration/adapters/vcr_rebalance_support
 CLASS_METHOD_STEM_PATTERN = re.compile(
     r"^(?P<class_name>[A-Za-z_]\w*)\.(?P<method_name>[A-Za-z_]\w*)$"
 )
+_TEST_CROSSREF = Path("tests/integration/adapters/test_crossref.py")
+_TEST_UNIPROT = Path("tests/integration/adapters/test_uniprot.py")
+_TEST_PIPELINE_MATRIX_E2E = Path("tests/e2e/test_pipeline_matrix_e2e.py")
+
 LEGACY_METADATA_OWNER_ALIASES: dict[str, tuple[Path, ...]] = {
     "tests/fixtures/vcr/chembl/test_chembl_subcellular_fraction_full_cycle.yaml": (
-        Path("tests/e2e/test_pipeline_matrix_e2e.py"),
+        _TEST_PIPELINE_MATRIX_E2E,
     ),
     "tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_tissue.yaml": (
-        Path("tests/e2e/test_pipeline_matrix_e2e.py"),
+        _TEST_PIPELINE_MATRIX_E2E,
     ),
     "tests/fixtures/vcr/chembl/TestChEMBLIntegration.test_chembl_extract_transform_load.yaml": (
         Path("tests/e2e/test_full_pipeline.py"),
     ),
-    "tests/fixtures/vcr/crossref/test_crossref_batch_fetch.yaml": (
-        Path("tests/integration/adapters/test_crossref.py"),
-    ),
-    "tests/fixtures/vcr/crossref/test_crossref_fetch_by_doi.yaml": (
-        Path("tests/integration/adapters/test_crossref.py"),
-    ),
-    "tests/fixtures/vcr/crossref/test_crossref_health_check.yaml": (
-        Path("tests/integration/adapters/test_crossref.py"),
-    ),
+    "tests/fixtures/vcr/crossref/test_crossref_batch_fetch.yaml": (_TEST_CROSSREF,),
+    "tests/fixtures/vcr/crossref/test_crossref_fetch_by_doi.yaml": (_TEST_CROSSREF,),
+    "tests/fixtures/vcr/crossref/test_crossref_health_check.yaml": (_TEST_CROSSREF,),
     "tests/fixtures/vcr/uniprot/TestUniProtAdapterIntegration.test_health_check.yaml": (
-        Path("tests/integration/adapters/test_uniprot.py"),
+        _TEST_UNIPROT,
     ),
     "tests/fixtures/vcr/uniprot/TestUniProtClientIntegration.test_fetch_proteins.yaml": (
-        Path("tests/integration/adapters/test_uniprot.py"),
+        _TEST_UNIPROT,
     ),
     "tests/fixtures/vcr/uniprot/TestUniProtClientIntegration.test_health_check.yaml": (
-        Path("tests/integration/adapters/test_uniprot.py"),
+        _TEST_UNIPROT,
     ),
     "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_health_check.yaml": (
         Path("tests/integration/adapters/test_uniprot_idmapping.py"),

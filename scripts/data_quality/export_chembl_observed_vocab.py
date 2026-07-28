@@ -164,32 +164,52 @@ def _load_jsonl(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
+def _parse_pipeline_field_ref(field_ref: object) -> tuple[str, str] | None:
+    if not isinstance(field_ref, str) or "." not in field_ref:
+        return None
+    pipeline_name, field_name = field_ref.split(".", maxsplit=1)
+    return pipeline_name, field_name
+
+
+def _register_ontology_family_fields(
+    result: dict[tuple[str, str], str],
+    families: object,
+) -> None:
+    if not isinstance(families, dict):
+        return
+    for family_name, family_payload in families.items():
+        if not isinstance(family_payload, dict):
+            continue
+        for field_ref in family_payload.get("fields", []):
+            parsed = _parse_pipeline_field_ref(field_ref)
+            if parsed is None:
+                continue
+            result[parsed] = f"ontology:{family_name}"
+
+
+def _register_unit_policy_fields(
+    result: dict[tuple[str, str], str],
+    unit_policies: object,
+) -> None:
+    if not isinstance(unit_policies, dict):
+        return
+    for policy_payload in unit_policies.values():
+        if not isinstance(policy_payload, dict):
+            continue
+        for field_ref in policy_payload.get("fields", []):
+            parsed = _parse_pipeline_field_ref(field_ref)
+            if parsed is None:
+                continue
+            result.setdefault(parsed, "unit_boundary")
+
+
 def _ontology_field_map() -> dict[tuple[str, str], str]:
     payload = _load_yaml(ONTOLOGY_PATH)
     result: dict[tuple[str, str], str] = {}
     families = payload.get("families", {})
     assert isinstance(families, dict)
-    for family_name, family_payload in families.items():
-        if not isinstance(family_payload, dict):
-            continue
-        for field_ref in family_payload.get("fields", []):
-            if not isinstance(field_ref, str) or "." not in field_ref:
-                continue
-            pipeline_name, field_name = field_ref.split(".", maxsplit=1)
-            result[(pipeline_name, field_name)] = f"ontology:{family_name}"
-    unit_policies = payload.get("unit_companion_policies", {})
-    if isinstance(unit_policies, dict):
-        for policy_payload in unit_policies.values():
-            if not isinstance(policy_payload, dict):
-                continue
-            for field_ref in policy_payload.get("fields", []):
-                if not isinstance(field_ref, str) or "." not in field_ref:
-                    continue
-                pipeline_name, field_name = field_ref.split(".", maxsplit=1)
-                result.setdefault(
-                    (pipeline_name, field_name),
-                    "unit_boundary",
-                )
+    _register_ontology_family_fields(result, families)
+    _register_unit_policy_fields(result, payload.get("unit_companion_policies", {}))
     return result
 
 
@@ -260,6 +280,147 @@ def _governed_profile_fields(
     return governed
 
 
+def _init_governed_field_state(
+    *,
+    pipeline_name: str,
+    fixture_key: str,
+    field_name: str,
+    classification: str,
+) -> dict[str, object]:
+    return {
+        "pipeline_name": pipeline_name,
+        "fixture_key": fixture_key,
+        "field_name": field_name,
+        "classification_hint": classification,
+        "fixture_paths": set(),
+        "raw_field_present": False,
+        "observed_values": set(),
+        "normalized_values": set(),
+    }
+
+
+def _register_governed_fields_for_fixture(
+    governed_field_states: dict[tuple[str, str], dict[str, object]],
+    *,
+    pipeline_name: str,
+    fixture_key: str,
+    fixture_path_raw: str,
+    governed_fields: dict[str, str],
+) -> None:
+    for field_name, classification in governed_fields.items():
+        state = governed_field_states.setdefault(
+            (pipeline_name, field_name),
+            _init_governed_field_state(
+                pipeline_name=pipeline_name,
+                fixture_key=fixture_key,
+                field_name=field_name,
+                classification=classification,
+            ),
+        )
+        cast_fixture_paths = state["fixture_paths"]
+        assert isinstance(cast_fixture_paths, set)
+        cast_fixture_paths.add(fixture_path_raw)
+
+
+def _normalized_field_value(
+    profile: Any,
+    field_name: str,
+    value: object,
+    record: dict[str, Any],
+) -> str:
+    normalized_value_obj = (
+        profile.rule_for(field_name).apply(value, record=record)
+        if profile is not None and profile.rule_for(field_name) is not None
+        else value
+    )
+    if normalized_value_obj is None:
+        return ""
+    return _canonical_value(normalized_value_obj)
+
+
+def _record_governed_observation(
+    governed_state: dict[str, object] | None,
+    *,
+    observed_value: str,
+    normalized_value: str,
+) -> None:
+    if governed_state is None:
+        return
+    governed_state["raw_field_present"] = True
+    observed_values = governed_state["observed_values"]
+    normalized_values = governed_state["normalized_values"]
+    assert isinstance(observed_values, set)
+    assert isinstance(normalized_values, set)
+    observed_values.add(observed_value)
+    if normalized_value:
+        normalized_values.add(normalized_value)
+
+
+def _count_fixture_field_values(
+    *,
+    fixture_path: Path,
+    pipeline_name: str,
+    entity_type: str,
+    profile: Any,
+    ontology_fields: dict[tuple[str, str], str],
+    governed_field_states: dict[tuple[str, str], dict[str, object]],
+) -> dict[tuple[str, str, str], Counter[str]]:
+    field_counters: dict[tuple[str, str, str], Counter[str]] = {}
+    for record in _load_jsonl(fixture_path):
+        for field_name, value in record.items():
+            if value is None:
+                continue
+            classification = _classification_hint(
+                pipeline_name,
+                entity_type,
+                field_name,
+                ontology_fields=ontology_fields,
+            )
+            if classification is None:
+                continue
+            observed_value = _canonical_value(value)
+            normalized_value = _normalized_field_value(
+                profile, field_name, value, record
+            )
+            counter_key = (field_name, classification, normalized_value)
+            field_counters.setdefault(counter_key, Counter())[observed_value] += 1
+            _record_governed_observation(
+                governed_field_states.get((pipeline_name, field_name)),
+                observed_value=observed_value,
+                normalized_value=normalized_value,
+            )
+    return field_counters
+
+
+def _observed_rows_from_counters(
+    *,
+    field_counters: dict[tuple[str, str, str], Counter[str]],
+    pipeline_name: str,
+    fixture_key: str,
+    layer_hint: str,
+    fixture_path_raw: str,
+) -> list[ObservedVocabRow]:
+    rows: list[ObservedVocabRow] = []
+    for (field_name, classification, normalized_value), counter in sorted(
+        field_counters.items()
+    ):
+        for observed_value, count in sorted(counter.items()):
+            rows.append(
+                ObservedVocabRow(
+                    pipeline_name=pipeline_name,
+                    fixture_key=fixture_key,
+                    field_name=field_name,
+                    layer_hint=layer_hint,
+                    observed_value=observed_value,
+                    count=count,
+                    normalized_value=normalized_value,
+                    classification_hint=classification,
+                    fixture_path=fixture_path_raw,
+                )
+            )
+    return rows
+
+
 def build_inventory_payload() -> dict[str, object]:
     ontology_fields = _ontology_field_map()
     rows: list[ObservedVocabRow] = []
@@ -287,78 +448,30 @@ def build_inventory_payload() -> dict[str, object]:
             entity_type,
             ontology_fields=ontology_fields,
         )
-        for field_name, classification in governed_fields.items():
-            state = governed_field_states.setdefault(
-                (pipeline_name, field_name),
-                {
-                    "pipeline_name": pipeline_name,
-                    "fixture_key": fixture_key,
-                    "field_name": field_name,
-                    "classification_hint": classification,
-                    "fixture_paths": set(),
-                    "raw_field_present": False,
-                    "observed_values": set(),
-                    "normalized_values": set(),
-                },
+        _register_governed_fields_for_fixture(
+            governed_field_states,
+            pipeline_name=pipeline_name,
+            fixture_key=fixture_key,
+            fixture_path_raw=fixture_path_raw,
+            governed_fields=governed_fields,
+        )
+        field_counters = _count_fixture_field_values(
+            fixture_path=fixture_path,
+            pipeline_name=pipeline_name,
+            entity_type=entity_type,
+            profile=profile,
+            ontology_fields=ontology_fields,
+            governed_field_states=governed_field_states,
+        )
+        rows.extend(
+            _observed_rows_from_counters(
+                field_counters=field_counters,
+                pipeline_name=pipeline_name,
+                fixture_key=fixture_key,
+                layer_hint=fixture_source.layer_hint,
+                fixture_path_raw=fixture_path_raw,
             )
-            cast_fixture_paths = state["fixture_paths"]
-            assert isinstance(cast_fixture_paths, set)
-            cast_fixture_paths.add(fixture_path_raw)
-
-        field_counters: dict[tuple[str, str, str], Counter[str]] = {}
-        for record in _load_jsonl(fixture_path):
-            for field_name, value in record.items():
-                if value is None:
-                    continue
-                classification = _classification_hint(
-                    pipeline_name,
-                    entity_type,
-                    field_name,
-                    ontology_fields=ontology_fields,
-                )
-                if classification is None:
-                    continue
-                observed_value = _canonical_value(value)
-                normalized_value_obj = (
-                    profile.rule_for(field_name).apply(value, record=record)
-                    if profile is not None and profile.rule_for(field_name) is not None
-                    else value
-                )
-                normalized_value = (
-                    ""
-                    if normalized_value_obj is None
-                    else _canonical_value(normalized_value_obj)
-                )
-                counter_key = (field_name, classification, normalized_value)
-                field_counters.setdefault(counter_key, Counter())[observed_value] += 1
-                governed_state = governed_field_states.get((pipeline_name, field_name))
-                if governed_state is not None:
-                    governed_state["raw_field_present"] = True
-                    observed_values = governed_state["observed_values"]
-                    normalized_values = governed_state["normalized_values"]
-                    assert isinstance(observed_values, set)
-                    assert isinstance(normalized_values, set)
-                    observed_values.add(observed_value)
-                    if normalized_value:
-                        normalized_values.add(normalized_value)
-
-        for (field_name, classification, normalized_value), counter in sorted(
-            field_counters.items()
-        ):
-            for observed_value, count in sorted(counter.items()):
-                rows.append(
-                    ObservedVocabRow(
-                        pipeline_name=pipeline_name,
-                        fixture_key=fixture_key,
-                        field_name=field_name,
-                        layer_hint=fixture_source.layer_hint,
-                        observed_value=observed_value,
-                        count=count,
-                        normalized_value=normalized_value,
-                        classification_hint=classification,
-                        fixture_path=fixture_path_raw,
-                    )
-                )
+        )
 
     rows.sort(
         key=lambda row: (

@@ -113,6 +113,61 @@ def _iter_gold_json_occurrences(
     return tuple(occurrences)
 
 
+def _append_denied_string_fields(
+    occurrences: list[GenericFieldOccurrence],
+    *,
+    fields: object,
+    denied_terms: frozenset[str],
+    surface: str,
+    path: str,
+    context: str,
+) -> None:
+    if not isinstance(fields, list):
+        return
+    for field in fields:
+        if isinstance(field, str) and _is_denied_field(field, denied_terms):
+            occurrences.append(
+                GenericFieldOccurrence(
+                    surface=surface,
+                    path=path,
+                    field=field,
+                    context=context,
+                )
+            )
+
+
+def _append_denied_base_name_fields(
+    occurrences: list[GenericFieldOccurrence],
+    *,
+    fields: object,
+    denied_terms: frozenset[str],
+    surface: str,
+    path: str,
+    context: str,
+) -> None:
+    if not isinstance(fields, list):
+        return
+    for field_entry in fields:
+        if not isinstance(field_entry, dict):
+            continue
+        base_name = field_entry.get("base_name")
+        if isinstance(base_name, str) and _is_denied_field(base_name, denied_terms):
+            occurrences.append(
+                GenericFieldOccurrence(
+                    surface=surface,
+                    path=path,
+                    field=base_name,
+                    context=context,
+                )
+            )
+
+
+def _iter_dict_groups(groups: object) -> list[dict[str, Any]]:
+    if not isinstance(groups, list):
+        return []
+    return [group for group in groups if isinstance(group, dict)]
+
+
 def _iter_composite_column_group_occurrences(
     *,
     repo_root: Path,
@@ -125,25 +180,17 @@ def _iter_composite_column_group_occurrences(
         composite = payload.get("composite", {})
         merge = composite.get("merge", {}) if isinstance(composite, dict) else {}
         groups = merge.get("column_groups", []) if isinstance(merge, dict) else []
-        if not isinstance(groups, list):
-            continue
-        for group in groups:
-            if not isinstance(group, dict):
-                continue
+        path = _repo_rel(config_path, repo_root)
+        for group in _iter_dict_groups(groups):
             context = str(group.get("name") or "<unnamed>")
-            fields = group.get("fields", [])
-            if not isinstance(fields, list):
-                continue
-            for field in fields:
-                if isinstance(field, str) and _is_denied_field(field, denied_terms):
-                    occurrences.append(
-                        GenericFieldOccurrence(
-                            surface="composite_column_group_field",
-                            path=_repo_rel(config_path, repo_root),
-                            field=field,
-                            context=context,
-                        )
-                    )
+            _append_denied_string_fields(
+                occurrences,
+                fields=group.get("fields", []),
+                denied_terms=denied_terms,
+                surface="composite_column_group_field",
+                path=path,
+                context=context,
+            )
     return tuple(occurrences)
 
 
@@ -158,32 +205,17 @@ def _iter_composite_field_group_occurrences(
         return tuple(occurrences)
     for config_path in sorted(field_group_dir.glob("*.yaml")):
         payload = _load_yaml(config_path)
-        groups = payload.get("groups", [])
-        if not isinstance(groups, list):
-            continue
-        for group in groups:
-            if not isinstance(group, dict):
-                continue
+        path = _repo_rel(config_path, repo_root)
+        for group in _iter_dict_groups(payload.get("groups", [])):
             context = str(group.get("id") or "<unnamed>")
-            fields = group.get("fields", [])
-            if not isinstance(fields, list):
-                continue
-            for field_entry in fields:
-                if not isinstance(field_entry, dict):
-                    continue
-                base_name = field_entry.get("base_name")
-                if isinstance(base_name, str) and _is_denied_field(
-                    base_name,
-                    denied_terms,
-                ):
-                    occurrences.append(
-                        GenericFieldOccurrence(
-                            surface="composite_field_group_base_name",
-                            path=_repo_rel(config_path, repo_root),
-                            field=base_name,
-                            context=context,
-                        )
-                    )
+            _append_denied_base_name_fields(
+                occurrences,
+                fields=group.get("fields", []),
+                denied_terms=denied_terms,
+                surface="composite_field_group_base_name",
+                path=path,
+                context=context,
+            )
     return tuple(occurrences)
 
 

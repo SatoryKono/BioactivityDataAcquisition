@@ -44,11 +44,12 @@ def build_lenient_checkpoint_compatibility_result(
     degraded_messages: tuple[str, ...],
 ) -> CheckpointCompatibilityResult:
     """Build the lenient resume compatibility result payload."""
-    resume_verdict = (
-        "resume_only_degraded"
-        if degraded_messages
-        else ("resume_only" if compatible else "non_replayable")
-    )
+    if degraded_messages:
+        resume_verdict = "resume_only_degraded"
+    elif compatible:
+        resume_verdict = "resume_only"
+    else:
+        resume_verdict = "non_replayable"
     return CheckpointCompatibilityResult(
         compatible=compatible,
         dq_compatible=dq_compatible,

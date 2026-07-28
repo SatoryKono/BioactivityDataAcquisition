@@ -150,6 +150,32 @@ def _allowed_cleanup_paths(
     return frozenset(allowed)
 
 
+def _registry_row_is_cleanup_eligible(
+    *,
+    lane_id: str,
+    raw_path: object,
+    live_state: object,
+    selected_paths: frozenset[str],
+    allowed_paths: frozenset[str],
+    blocked_cleanup_paths: frozenset[str],
+    tracked_paths: frozenset[str],
+) -> str | None:
+    """Return a normalized root-local path when the registry row is eligible."""
+    if lane_id not in ALLOWED_LANES or not isinstance(raw_path, str):
+        return None
+    if raw_path not in selected_paths or raw_path not in allowed_paths:
+        return None
+    if raw_path in SECURITY_ROOT_PATHS or "/" in raw_path:
+        return None
+    if live_state != "present_local_only_root_surface":
+        return None
+    if is_within_blocked_cleanup_zone(raw_path, blocked_cleanup_paths):
+        return None
+    if _path_is_tracked(raw_path, tracked_paths):
+        return None
+    return raw_path
+
+
 def collect_root_local_cleanup_candidates(
     repo_root: Path,
     *,
@@ -171,19 +197,16 @@ def collect_root_local_cleanup_candidates(
     candidates: list[RootLocalCleanupCandidate] = []
 
     for lane_id, row in _registry_candidates(repo_root):
-        raw_path = row.get("path")
-        live_state = row.get("current_live_state")
-        if lane_id not in ALLOWED_LANES or not isinstance(raw_path, str):
-            continue
-        if raw_path not in selected_paths or raw_path not in allowed_paths:
-            continue
-        if raw_path in SECURITY_ROOT_PATHS or "/" in raw_path:
-            continue
-        if live_state != "present_local_only_root_surface":
-            continue
-        if is_within_blocked_cleanup_zone(raw_path, policy.blocked_cleanup_paths):
-            continue
-        if _path_is_tracked(raw_path, tracked_paths):
+        raw_path = _registry_row_is_cleanup_eligible(
+            lane_id=lane_id,
+            raw_path=row.get("path"),
+            live_state=row.get("current_live_state"),
+            selected_paths=selected_paths,
+            allowed_paths=allowed_paths,
+            blocked_cleanup_paths=policy.blocked_cleanup_paths,
+            tracked_paths=tracked_paths,
+        )
+        if raw_path is None:
             continue
 
         absolute_path = repo_root / raw_path
@@ -271,6 +294,59 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def _apply_candidate_deletions(
+    repo_root: Path,
+    candidates: list[RootLocalCleanupCandidate],
+) -> tuple[list[str], list[dict[str, str]]]:
+    deleted: list[str] = []
+    deletion_errors: list[dict[str, str]] = []
+    for candidate in candidates:
+        try:
+            _delete_candidate(repo_root, candidate)
+        except OSError as exc:
+            deletion_errors.append(
+                {
+                    "path": candidate.rel_path,
+                    "error": f"{type(exc).__name__}: {exc}",
+                }
+            )
+            continue
+        deleted.append(candidate.rel_path)
+    return deleted, deletion_errors
+
+
+def _emit_cleanup_report(
+    payload: dict[str, object],
+    *,
+    as_json: bool,
+    apply: bool,
+) -> int:
+    deletion_errors = payload["deletion_errors"]
+    assert isinstance(deletion_errors, list)
+    if as_json:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+        return 1 if deletion_errors else 0
+
+    print(f"Root-local cleanup mode: {payload['mode']}")
+    candidates = payload["candidates"]
+    assert isinstance(candidates, list)
+    if not candidates:
+        print("No reviewed root-local cleanup candidates found.")
+        return 0
+    for row in candidates:
+        assert isinstance(row, dict)
+        print(f"- {row['path']} ({row['category']}, {row['lane_id']})")
+    if deletion_errors:
+        print("Deletion errors:")
+        for row in deletion_errors:
+            assert isinstance(row, dict)
+            print(f"- {row['path']}: {row['error']}")
+        return 1
+    if not apply:
+        print("Dry-run only. Re-run with --apply to delete these exact paths.")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     repo_root = _project_root()
@@ -285,20 +361,9 @@ def main(argv: list[str] | None = None) -> int:
     deleted: list[str] = []
     deletion_errors: list[dict[str, str]] = []
     if args.apply:
-        for candidate in candidates:
-            try:
-                _delete_candidate(repo_root, candidate)
-            except OSError as exc:
-                deletion_errors.append(
-                    {
-                        "path": candidate.rel_path,
-                        "error": f"{type(exc).__name__}: {exc}",
-                    }
-                )
-                continue
-            deleted.append(candidate.rel_path)
+        deleted, deletion_errors = _apply_candidate_deletions(repo_root, candidates)
 
-    payload = {
+    payload: dict[str, object] = {
         "schema_version": 1,
         "mode": "apply" if args.apply else "dry-run",
         "repository_root": repo_root.as_posix(),
@@ -307,24 +372,7 @@ def main(argv: list[str] | None = None) -> int:
         "deletion_errors": deletion_errors,
         "candidates": _report_rows(candidates),
     }
-    if args.json:
-        print(json.dumps(payload, indent=2, sort_keys=True))
-        return 1 if deletion_errors else 0
-
-    print(f"Root-local cleanup mode: {payload['mode']}")
-    if not candidates:
-        print("No reviewed root-local cleanup candidates found.")
-        return 0
-    for row in payload["candidates"]:
-        print(f"- {row['path']} ({row['category']}, {row['lane_id']})")
-    if deletion_errors:
-        print("Deletion errors:")
-        for row in deletion_errors:
-            print(f"- {row['path']}: {row['error']}")
-        return 1
-    if not args.apply:
-        print("Dry-run only. Re-run with --apply to delete these exact paths.")
-    return 0
+    return _emit_cleanup_report(payload, as_json=args.json, apply=args.apply)
 
 
 if __name__ == "__main__":

@@ -22,6 +22,7 @@ from scripts.engineering.qa.config_surface_governance import is_sanctioned_parti
 DEFAULT_BASELINE_JSON = Path("reports/quality/config-discrepancy-baseline.json")
 SANCTIONED_DEFAULT_SCALAR = "<sanctioned-default>"
 CONFIG_PARAMETER_TAXONOMY_OWNER = "BioETL Team"
+YAML_GLOB = "*.yaml"
 _DEFAULT_TAXONOMY_GROUP = "domain_entity_contract"
 _CONFIG_PARAMETER_FAMILY_OWNERS: dict[str, dict[str, str]] = {
     "compatibility_legacy": {
@@ -426,7 +427,7 @@ def _collect_configs() -> dict[str, dict[str, Any]]:
     configs: dict[str, dict[str, Any]] = {}
 
     entities_dir = Path("configs/entities")
-    for yaml_file in sorted(entities_dir.rglob("*.yaml")):
+    for yaml_file in sorted(entities_dir.rglob(YAML_GLOB)):
         if yaml_file.name.startswith("_"):
             continue
         provider = yaml_file.relative_to(entities_dir).parts[0]
@@ -441,7 +442,7 @@ def _collect_configs() -> dict[str, dict[str, Any]]:
         )
 
     composites_dir = Path("configs/composites")
-    for yaml_file in sorted(composites_dir.glob("*.yaml")):
+    for yaml_file in sorted(composites_dir.glob(YAML_GLOB)):
         if yaml_file.name.startswith("_"):
             continue
         name = f"composite/{yaml_file.stem}"
@@ -508,6 +509,155 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def _family_partial_breakdowns(
+    family_configs: dict[str, dict[str, dict[str, Any]]],
+) -> list[tuple[str, dict[str, dict[str, Any]], list[str], list[str]]]:
+    breakdowns: list[
+        tuple[str, dict[str, dict[str, Any]], list[str], list[str]]
+    ] = []
+    for family_name, family_payload in family_configs.items():
+        family_partial = _partial_keys(family_payload)
+        actionable_partial, sanctioned_partial = _partition_partial_keys(family_partial)
+        breakdowns.append(
+            (family_name, family_payload, actionable_partial, sanctioned_partial)
+        )
+    return breakdowns
+
+
+def _render_parameter_matrix(
+    *,
+    active_configs: dict[str, dict[str, Any]],
+    all_keys: list[str],
+    config_names: list[str],
+) -> str:
+    matrix_handle = io.StringIO(newline="")
+    writer = csv.writer(matrix_handle)
+    writer.writerow(["Parameter Path", *config_names])
+    for key in all_keys:
+        row = [key]
+        for cfg_name in config_names:
+            row.append(active_configs[cfg_name].get(key, "—"))
+        writer.writerow(row)
+    return matrix_handle.getvalue()
+
+
+def _append_partial_parameter_sections(
+    report_lines: list[str],
+    *,
+    family_breakdowns: list[
+        tuple[str, dict[str, dict[str, Any]], list[str], list[str]]
+    ],
+    partial_index: int,
+    empty_message: str,
+) -> None:
+    count = sum(len(item[partial_index]) for item in family_breakdowns)
+    if not count:
+        report_lines.append(empty_message)
+        return
+    for family_name, family_payload, actionable_partial, sanctioned_partial in (
+        family_breakdowns
+    ):
+        keys = actionable_partial if partial_index == 2 else sanctioned_partial
+        if not keys:
+            continue
+        report_lines.extend(["", f"### {family_name}", ""])
+        for key in keys:
+            report_lines.append(
+                _parameter_presence_line(
+                    key,
+                    configs=family_payload,
+                    total_configs=len(family_payload),
+                )
+            )
+
+
+def _append_taxonomy_sections(
+    report_lines: list[str],
+    taxonomy_payload: dict[str, Any],
+) -> None:
+    taxonomy_families = taxonomy_payload["families"]
+    for family_name in sorted(taxonomy_families):
+        family_taxonomy = taxonomy_families[family_name]
+        report_lines.extend(["", f"### {family_name}", ""])
+        report_lines.append(f"Owner: {family_taxonomy['owner']}")
+        report_lines.append(f"Parameters: {family_taxonomy['parameter_count']}")
+        report_lines.append("")
+        for group_name, count in family_taxonomy["groups"].items():
+            report_lines.append(f"- `{group_name}`: {count}")
+
+
+def _build_discrepancy_report(
+    *,
+    active_configs: dict[str, dict[str, Any]],
+    all_keys: list[str],
+    family_breakdowns: list[
+        tuple[str, dict[str, dict[str, Any]], list[str], list[str]]
+    ],
+    actionable_count: int,
+    sanctioned_count: int,
+    family_raw_count: int,
+    taxonomy_payload: dict[str, Any],
+) -> str:
+    report_lines = [
+        "# Config Discrepancies Report",
+        "",
+        f"Total configs: {len(active_configs)}",
+        f"Total unique parameters: {len(all_keys)}",
+        f"Actionable inconsistent parameters: {actionable_count}",
+        f"Sanctioned partial variance parameters: {sanctioned_count}",
+        f"Raw partial parameter count: {family_raw_count}",
+        "",
+        "## Actionable Drift Parameters",
+        "",
+    ]
+    _append_partial_parameter_sections(
+        report_lines,
+        family_breakdowns=family_breakdowns,
+        partial_index=2,
+        empty_message="No unsanctioned config drift detected.",
+    )
+    report_lines.extend(
+        [
+            "",
+            "## Sanctioned Partial Variance Parameters",
+            "",
+            "These parameters are intentionally partial across governed config "
+            "families and remain tracked as sanctioned variance rather than "
+            "actionable drift.",
+            "",
+        ]
+    )
+    _append_partial_parameter_sections(
+        report_lines,
+        family_breakdowns=family_breakdowns,
+        partial_index=3,
+        empty_message="No sanctioned partial variance detected.",
+    )
+    report_lines.extend(
+        [
+            "",
+            "## Parameter Ownership Taxonomy",
+            "",
+            "Parameter ownership taxonomy is derived from flattened config "
+            "parameter paths. It is a governance/reporting projection, not a "
+            "second config source of truth.",
+            "",
+        ]
+    )
+    _append_taxonomy_sections(report_lines, taxonomy_payload)
+    report_lines.extend(
+        [
+            "",
+            "## Interpretation",
+            "",
+            "- CI should fail on actionable drift.",
+            "- Sanctioned partial variance remains inventory debt, not a merge blocker, "
+            "while its governance contract stays current.",
+        ]
+    )
+    return "\n".join(report_lines)
+
+
 def _build_artifact_state(
     configs: dict[str, dict[str, Any]] | None = None,
 ) -> tuple[
@@ -528,129 +678,28 @@ def _build_artifact_state(
         {key for values in active_configs.values() for key in values}, key=_sort_key
     )
     config_names = sorted(active_configs.keys())
-
-    if active_configs:
-        common = set.intersection(
-            *(set(values.keys()) for values in active_configs.values())
-        )
-    else:
-        common = set()
-
-    family_breakdowns: list[
-        tuple[str, dict[str, dict[str, Any]], list[str], list[str]]
-    ] = []
-    for family_name, family_payload in family_configs.items():
-        family_partial = _partial_keys(family_payload)
-        actionable_partial, sanctioned_partial = _partition_partial_keys(family_partial)
-        family_breakdowns.append(
-            (
-                family_name,
-                family_payload,
-                actionable_partial,
-                sanctioned_partial,
-            )
-        )
+    family_breakdowns = _family_partial_breakdowns(family_configs)
     actionable_count = sum(len(item[2]) for item in family_breakdowns)
     sanctioned_count = sum(len(item[3]) for item in family_breakdowns)
     family_raw_count = actionable_count + sanctioned_count
-    matrix_handle = io.StringIO(newline="")
-    writer = csv.writer(matrix_handle)
-    writer.writerow(["Parameter Path", *config_names])
-    for key in all_keys:
-        row = [key]
-        for cfg_name in config_names:
-            row.append(active_configs[cfg_name].get(key, "—"))
-        writer.writerow(row)
-
-    report_lines = [
-        "# Config Discrepancies Report",
-        "",
-        f"Total configs: {len(active_configs)}",
-        f"Total unique parameters: {len(all_keys)}",
-        f"Actionable inconsistent parameters: {actionable_count}",
-        f"Sanctioned partial variance parameters: {sanctioned_count}",
-        f"Raw partial parameter count: {family_raw_count}",
-        "",
-        "## Actionable Drift Parameters",
-        "",
-    ]
-    if actionable_count:
-        for family_name, family_payload, actionable_partial, _ in family_breakdowns:
-            if not actionable_partial:
-                continue
-            report_lines.extend(["", f"### {family_name}", ""])
-            for key in actionable_partial:
-                report_lines.append(
-                    _parameter_presence_line(
-                        key,
-                        configs=family_payload,
-                        total_configs=len(family_payload),
-                    )
-                )
-    else:
-        report_lines.append("No unsanctioned config drift detected.")
-
-    report_lines.extend(
-        [
-            "",
-            "## Sanctioned Partial Variance Parameters",
-            "",
-            "These parameters are intentionally partial across governed config "
-            "families and remain tracked as sanctioned variance rather than "
-            "actionable drift.",
-            "",
-        ]
-    )
-    if sanctioned_count:
-        for family_name, family_payload, _, sanctioned_partial in family_breakdowns:
-            if not sanctioned_partial:
-                continue
-            report_lines.extend(["", f"### {family_name}", ""])
-            for key in sanctioned_partial:
-                report_lines.append(
-                    _parameter_presence_line(
-                        key,
-                        configs=family_payload,
-                        total_configs=len(family_payload),
-                    )
-                )
-    else:
-        report_lines.append("No sanctioned partial variance detected.")
-    report_lines.extend(
-        [
-            "",
-            "## Parameter Ownership Taxonomy",
-            "",
-            "Parameter ownership taxonomy is derived from flattened config "
-            "parameter paths. It is a governance/reporting projection, not a "
-            "second config source of truth.",
-            "",
-        ]
+    matrix_content = _render_parameter_matrix(
+        active_configs=active_configs,
+        all_keys=all_keys,
+        config_names=config_names,
     )
     taxonomy_payload = build_config_parameter_taxonomy_payload(family_configs)
-    taxonomy_families = taxonomy_payload["families"]
-    for family_name in sorted(taxonomy_families):
-        family_taxonomy = taxonomy_families[family_name]
-        report_lines.extend(["", f"### {family_name}", ""])
-        report_lines.append(f"Owner: {family_taxonomy['owner']}")
-        report_lines.append(f"Parameters: {family_taxonomy['parameter_count']}")
-        report_lines.append("")
-        for group_name, count in family_taxonomy["groups"].items():
-            report_lines.append(f"- `{group_name}`: {count}")
-
-    report_lines.extend(
-        [
-            "",
-            "## Interpretation",
-            "",
-            "- CI should fail on actionable drift.",
-            "- Sanctioned partial variance remains inventory debt, not a merge blocker, "
-            "while its governance contract stays current.",
-        ]
+    report_content = _build_discrepancy_report(
+        active_configs=active_configs,
+        all_keys=all_keys,
+        family_breakdowns=family_breakdowns,
+        actionable_count=actionable_count,
+        sanctioned_count=sanctioned_count,
+        family_raw_count=family_raw_count,
+        taxonomy_payload=taxonomy_payload,
     )
     return (
-        matrix_handle.getvalue(),
-        "\n".join(report_lines),
+        matrix_content,
+        report_content,
         len(all_keys),
         len(active_configs),
         family_raw_count,
@@ -667,8 +716,8 @@ def _config_evidence_fingerprint() -> str:
         Path(__file__),
         Path("scripts/engineering/qa/config_surface_governance.py"),
     ]
-    paths.extend(sorted(Path("configs/entities").rglob("*.yaml")))
-    paths.extend(sorted(Path("configs/composites").glob("*.yaml")))
+    paths.extend(sorted(Path("configs/entities").rglob(YAML_GLOB)))
+    paths.extend(sorted(Path("configs/composites").glob(YAML_GLOB)))
     digest = hashlib.sha256()
     for path in paths:
         digest.update(path.as_posix().encode("utf-8"))
@@ -772,7 +821,9 @@ def _artifact_matches(path: Path, expected: str, *, root: Path | None = None) ->
     if not path.exists():
         print(f"[drift] missing: {path}")
         return False
-    with path.open(encoding="utf-8", newline="") as handle:  # NOSONAR - path confined by resolve_output_path
+    with path.open(
+        encoding="utf-8", newline=""
+    ) as handle:  # NOSONAR - path confined by resolve_output_path
         actual = handle.read()
     if actual == expected:
         return True
@@ -854,7 +905,9 @@ def _baseline_metrics_match(
         print(f"[drift] missing: {path}")
         return False
     payload = json.loads(
-        path.read_text(encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
+        path.read_text(
+            encoding="utf-8"
+        )  # NOSONAR - path confined by resolve_output_path
     )
     metrics = payload.get("metrics")
     if metrics == expected_metrics:
@@ -876,7 +929,9 @@ def _baseline_families_match(
         print(f"[drift] missing: {path}")
         return False
     payload = json.loads(
-        path.read_text(encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
+        path.read_text(
+            encoding="utf-8"
+        )  # NOSONAR - path confined by resolve_output_path
     )
     families = payload.get("families")
     if families == expected_families:
@@ -898,7 +953,9 @@ def _baseline_taxonomy_match(
         print(f"[drift] missing: {path}")
         return False
     payload = json.loads(
-        path.read_text(encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
+        path.read_text(
+            encoding="utf-8"
+        )  # NOSONAR - path confined by resolve_output_path
     )
     if payload.get("parameter_taxonomy") == expected_taxonomy:
         return True

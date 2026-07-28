@@ -60,9 +60,46 @@ def _is_ops_http_panel(panel: dict[str, Any]) -> bool:
     return False
 
 
-def _measure_dashboard(path: Path, *, y_max: int) -> dict[str, Any]:
-    payload = json.loads(path.read_text(encoding="utf-8"))
-    first = _iter_root_first_screen(payload, y_max=y_max)
+def _expr_has_range_ref(expr: str) -> bool:
+    return (
+        "$__range" in expr
+        or "${__range_s}" in expr
+        or "${__range}" in expr
+        or "[$__range]" in expr
+        or "range_s" in expr
+    )
+
+
+def _count_dual_status_pairs(status_exprs: dict[str, str]) -> int:
+    dual_pairs = 0
+    titles = list(status_exprs)
+    for i, left in enumerate(titles):
+        for right in titles[i + 1 :]:
+            if status_exprs[left] == status_exprs[right] and status_exprs[left]:
+                dual_pairs += 1
+    return dual_pairs
+
+
+def _parse_refresh_seconds(refresh: str) -> int | None:
+    if refresh.endswith("s") and refresh[:-1].isdigit():
+        return int(refresh[:-1])
+    if refresh.endswith("m") and refresh[:-1].isdigit():
+        return int(refresh[:-1]) * 60
+    return None
+
+
+def _count_nav_targets(payload: dict[str, Any]) -> int:
+    for panel in payload.get("panels") or []:
+        if not isinstance(panel, dict) or panel.get("id") != 1000:
+            continue
+        content = str((panel.get("options") or {}).get("content") or "")
+        return content.count('href="/d/')
+    return 0
+
+
+def _accumulate_first_screen_metrics(
+    first: list[dict[str, Any]],
+) -> tuple[int, int, int, int, str, int]:
     promql = 0
     range_refs = 0
     max_expr = 0
@@ -76,58 +113,44 @@ def _measure_dashboard(path: Path, *, y_max: int) -> dict[str, Any]:
         promql += len(exprs)
         title = str(panel.get("title") or "")
         for expr in exprs:
-            if (
-                "$__range" in expr
-                or "${__range_s}" in expr
-                or "${__range}" in expr
-                or "[$__range]" in expr
-                or "range_s" in expr
-            ):
+            if _expr_has_range_ref(expr):
                 range_refs += 1
             if len(expr) > max_expr:
                 max_expr = len(expr)
                 max_expr_title = title
             if title.lower() == "status" or "status" in title.lower():
                 status_exprs[title] = expr
-    # dual status: identical exprs for two *Status* titled first-screen panels
-    dual_pairs = 0
-    titles = list(status_exprs)
-    for i, left in enumerate(titles):
-        for right in titles[i + 1 :]:
-            if status_exprs[left] == status_exprs[right] and status_exprs[left]:
-                dual_pairs += 1
+    return (
+        promql,
+        range_refs,
+        max_expr,
+        http,
+        max_expr_title,
+        _count_dual_status_pairs(status_exprs),
+    )
 
+
+def _measure_dashboard(path: Path, *, y_max: int) -> dict[str, Any]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    first = _iter_root_first_screen(payload, y_max=y_max)
+    promql, range_refs, max_expr, http, max_expr_title, dual_pairs = (
+        _accumulate_first_screen_metrics(first)
+    )
     refresh = str(payload.get("refresh") or "")
-    refresh_seconds: int | None
-    if refresh.endswith("s") and refresh[:-1].isdigit():
-        refresh_seconds = int(refresh[:-1])
-    elif refresh.endswith("m") and refresh[:-1].isdigit():
-        refresh_seconds = int(refresh[:-1]) * 60
-    else:
-        refresh_seconds = None
-
-    # nav targets: count peer links in panel 1000 content
-    nav_targets = 0
-    for panel in payload.get("panels") or []:
-        if not isinstance(panel, dict) or panel.get("id") != 1000:
-            continue
-        content = str((panel.get("options") or {}).get("content") or "")
-        nav_targets = content.count('href="/d/')
-        break
 
     return {
         "uid": payload.get("uid") or path.stem,
         "title": payload.get("title"),
         "path": str(path).replace("\\", "/"),
         "refresh": refresh,
-        "refresh_seconds": refresh_seconds,
+        "refresh_seconds": _parse_refresh_seconds(refresh),
         "first_load_promql": promql,
         "first_paint_ops_http": http,
         "first_screen_range_refs": range_refs,
         "max_first_screen_expr_chars": max_expr,
         "max_first_screen_expr_panel": max_expr_title,
         "dual_status_pairs": dual_pairs,
-        "nav_targets": nav_targets,
+        "nav_targets": _count_nav_targets(payload),
     }
 
 
@@ -262,7 +285,9 @@ def evaluate(
     safe_budgets = resolve_cli_path(budgets_path, root=REPO_ROOT)
     safe_dashboards = resolve_cli_path(dashboards_dir, root=REPO_ROOT)
     budgets = yaml.safe_load(
-        safe_budgets.read_text(encoding="utf-8")  # NOSONAR - confined by resolve_cli_path
+        safe_budgets.read_text(
+            encoding="utf-8"
+        )  # NOSONAR - confined by resolve_cli_path
     )
     y_max = int(budgets.get("first_screen_y_max", 28))
     b = budgets.get("budgets") or {}
@@ -284,9 +309,7 @@ def evaluate(
     violations.extend(primary_violations)
     warnings.extend(retired_warnings)
     violations.extend(
-        _check_first_load_promql(
-            measurements=measurements, by_uid=by_uid, budgets=b
-        )
+        _check_first_load_promql(measurements=measurements, by_uid=by_uid, budgets=b)
     )
     violations.extend(
         _check_expr_and_http_budgets(

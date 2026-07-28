@@ -56,30 +56,39 @@ def _http_entry(url: str, *, timeout: int = 60) -> dict:
     }
 
 
+def _normalize_tracked_host_entry(entry: dict) -> dict:
+    """Prefer bash wrappers on Linux local for PowerShell-oriented tracked entries."""
+    normalized = dict(entry)
+    args = normalized.get("args")
+    if isinstance(args, list) and args and str(args[0]).endswith(".ps1"):
+        normalized["command"] = "bash"
+        normalized["args"] = [str(args[0]).replace(".ps1", ".sh")]
+    return normalized
+
+
+def _seed_tracked_host_servers(tracked: dict) -> dict[str, dict]:
+    servers: dict[str, dict] = {}
+    for name in ("memory", "filesystem"):
+        if name in tracked and isinstance(tracked[name], dict):
+            servers[name] = _normalize_tracked_host_entry(tracked[name])
+    return servers
+
+
+def _load_tracked_servers() -> dict:
+    if not TRACKED_PATH.is_file():
+        return {}
+    raw = json.loads(TRACKED_PATH.read_text(encoding="utf-8"))
+    return raw.get("mcpServers") or {}
+
+
 def build_local_servers(
     *,
     include_optional: bool = False,
 ) -> dict[str, dict]:
     catalog = _load_catalog()
-    servers: dict[str, dict] = {}
-
     # Prefer tracked portable inventory for non-catalog host wrappers that
     # remain useful (memory/filesystem) when present.
-    tracked: dict = {}
-    if TRACKED_PATH.is_file():
-        raw = json.loads(TRACKED_PATH.read_text(encoding="utf-8"))
-        tracked = raw.get("mcpServers") or {}
-
-    # Seed with lightweight host servers from tracked if available.
-    for name in ("memory", "filesystem"):
-        if name in tracked and isinstance(tracked[name], dict):
-            entry = dict(tracked[name])
-            # Prefer bash wrappers on Linux local.
-            args = entry.get("args")
-            if isinstance(args, list) and args and str(args[0]).endswith(".ps1"):
-                entry["command"] = "bash"
-                entry["args"] = [str(args[0]).replace(".ps1", ".sh")]
-            servers[name] = entry
+    servers = _seed_tracked_host_servers(_load_tracked_servers())
 
     for name, entry in catalog["servers"].items():
         is_daily = entry.get("daily", True) is not False

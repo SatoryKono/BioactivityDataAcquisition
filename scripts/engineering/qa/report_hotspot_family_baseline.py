@@ -250,6 +250,45 @@ def _render_markdown(
     return "\n".join(lines)
 
 
+def _content_already_written(path: Path, content: str) -> bool:
+    if not path.exists():
+        return False
+    try:
+        return path.read_text(encoding="utf-8") == content
+    except OSError:
+        return False
+
+
+def _try_atomic_write(path: Path, payload: str) -> OSError | None:
+    temporary_path = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    last_error: OSError | None = None
+    for attempt in range(3):
+        try:
+            # Avoid newline= on flaky FUSE mounts; normalize payload above.
+            temporary_path.write_text(payload, encoding="utf-8")
+            os.replace(temporary_path, path)
+            return None
+        except OSError as exc:
+            last_error = exc
+            if temporary_path.exists():
+                try:
+                    temporary_path.unlink()
+                except OSError:
+                    pass
+            # Brief backoff for Google Drive / antivirus locks.
+            time.sleep(0.05 * (attempt + 1))
+    return last_error
+
+
+def _try_direct_write(path: Path, payload: str) -> OSError | None:
+    try:
+        with path.open("w", encoding="utf-8") as handle:
+            handle.write(payload)
+        return None
+    except OSError as exc:
+        return exc
+
+
 def _write_text(path: Path, content: str, *, root: Path | None = None) -> None:
     """Write UTF-8 text with retries for flaky WSL/Google-Drive mounts.
 
@@ -264,40 +303,19 @@ def _write_text(path: Path, content: str, *, root: Path | None = None) -> None:
 
         path = resolve_output_path(path, root=root)
     path.parent.mkdir(parents=True, exist_ok=True)
-    if path.exists():
-        try:
-            if path.read_text(encoding="utf-8") == content:
-                return
-        except OSError:
-            pass
+    if _content_already_written(path, content):
+        return
 
     payload = content if content.endswith("\n") or content == "" else content + "\n"
-    temporary_path = path.with_name(f".{path.name}.{os.getpid()}.tmp")
-    last_error: OSError | None = None
-    for attempt in range(3):
-        try:
-            # Avoid newline= on flaky FUSE mounts; normalize payload above.
-            temporary_path.write_text(payload, encoding="utf-8")
-            os.replace(temporary_path, path)
-            return
-        except OSError as exc:
-            last_error = exc
-            if temporary_path.exists():
-                try:
-                    temporary_path.unlink()
-                except OSError:
-                    pass
-            # Brief backoff for Google Drive / antivirus locks.
-            time.sleep(0.05 * (attempt + 1))
-    try:
-        with path.open("w", encoding="utf-8") as handle:
-            handle.write(payload)
+    last_error = _try_atomic_write(path, payload)
+    if last_error is None:
         return
-    except OSError as exc:
-        last_error = exc
+    direct_error = _try_direct_write(path, payload)
+    if direct_error is None:
+        return
     raise OSError(
-        f"Unable to write {path} after atomic and direct retries: {last_error}"
-    ) from last_error
+        f"Unable to write {path} after atomic and direct retries: {direct_error}"
+    ) from direct_error
 
 
 def _check_file_sync(path: Path, expected: str, *, root: Path | None = None) -> bool:

@@ -166,6 +166,32 @@ def _is_facade_side_effect_node(node: ast.AST) -> bool:
     return isinstance(node, (ast.Assert, ast.Raise, ast.Pass))
 
 
+def _is_type_checking_if_facade(node: ast.If) -> bool:
+    if not node.orelse:
+        return all(
+            _is_facade_only_statement(child) and not isinstance(child, ast.If)
+            for child in node.body
+        )
+    return all(_is_facade_only_statement(child) for child in node.body) and all(
+        _is_facade_only_statement(child) for child in node.orelse
+    )
+
+
+def _is_plain_if_facade(node: ast.If) -> bool:
+    body_ok = all(
+        _is_facade_only_statement(child) or _is_facade_side_effect_node(child)
+        for child in node.body
+    )
+    if not body_ok:
+        return False
+    if not node.orelse:
+        return True
+    return all(
+        _is_facade_only_statement(child) or _is_facade_side_effect_node(child)
+        for child in node.orelse
+    )
+
+
 def _is_facade_only_statement(node: ast.AST) -> bool:
     """Return whether a top-level node belongs to facade-only structure."""
     if _is_all_assignment(node):
@@ -175,28 +201,27 @@ def _is_facade_only_statement(node: ast.AST) -> bool:
     if _is_facade_side_effect_node(node):
         return True
     if isinstance(node, ast.If) and _is_type_checking_guard(node.test):
-        if not node.orelse:
-            return all(
-                _is_facade_only_statement(child) and not isinstance(child, ast.If)
-                for child in node.body
-            )
-        return all(_is_facade_only_statement(child) for child in node.body) and all(
-            _is_facade_only_statement(child) for child in node.orelse
-        )
+        return _is_type_checking_if_facade(node)
     if isinstance(node, ast.If):
-        body_ok = all(
-            _is_facade_only_statement(child) or _is_facade_side_effect_node(child)
-            for child in node.body
-        )
-        if not body_ok:
-            return False
-        if not node.orelse:
-            return True
-        return all(
-            _is_facade_only_statement(child) or _is_facade_side_effect_node(child)
-            for child in node.orelse
-        )
+        return _is_plain_if_facade(node)
     return False
+
+
+def _facade_node_import_delta(node: ast.AST) -> int | None:
+    """Return import count delta for a facade-compatible node, else None."""
+    if isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant):
+        return 0
+    if isinstance(node, (ast.Import, ast.ImportFrom)):
+        return 1
+    if _is_facade_only_statement(node):
+        return 1 if isinstance(node, (ast.Import, ast.ImportFrom)) else 0
+    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+        return None
+    if isinstance(node, (ast.For, ast.While, ast.Try, ast.If)):
+        return None
+    if isinstance(node, (ast.Assign, ast.AnnAssign)):
+        return 0 if _is_all_assignment(node) else None
+    return None
 
 
 def _is_import_facade_file(*, path: Path, source: str | None = None) -> bool:
@@ -215,25 +240,10 @@ def _is_import_facade_file(*, path: Path, source: str | None = None) -> bool:
 
     import_count = 0
     for node in tree.body:
-        if isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant):
-            continue
-        if isinstance(node, (ast.Import, ast.ImportFrom)):
-            import_count += 1
-            continue
-        if _is_facade_only_statement(node):
-            if isinstance(node, (ast.Import, ast.ImportFrom)):
-                import_count += 1
-            continue
-        # Any operational code means this is not a facade
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+        delta = _facade_node_import_delta(node)
+        if delta is None:
             return False
-        if isinstance(node, (ast.For, ast.While, ast.Try, ast.If)):
-            return False
-        if isinstance(node, (ast.Assign, ast.AnnAssign)):
-            if _is_all_assignment(node):
-                continue
-            return False
-        return False
+        import_count += delta
 
     return import_count >= 1
 

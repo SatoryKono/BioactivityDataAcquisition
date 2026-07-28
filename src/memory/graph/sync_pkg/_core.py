@@ -9600,26 +9600,18 @@ def _add_docs_to_code_drift_edges(snapshot: GraphSnapshot, root: Path) -> None:
         _add_doc_claim_edges(snapshot, source_node, source_path, text, path_pattern)
 
 
-def _add_reverse_module_doc_edges(snapshot: GraphSnapshot) -> None:
-    for relation in tuple(snapshot.relations.values()):
-        if relation.relation_type != "DESCRIBES":
-            continue
-        if relation.source.label not in {
-            "doc_source_surface",
-            "doc_artifact",
-            "policy_surface",
-        }:
-            continue
-        if relation.target.label != "module_surface":
-            continue
-        snapshot.add_relation(
-            relation.target,
-            "DESCRIBED_IN",
-            relation.source,
-            provenance="docs_code_drift_reverse",
-            confidence=relation.properties.get("confidence"),
-        )
+def _is_describes_doc_to_module(relation: GraphRelation) -> bool:
+    return (
+        relation.relation_type == "DESCRIBES"
+        and relation.source.label
+        in {"doc_source_surface", "doc_artifact", "policy_surface"}
+        and relation.target.label == "module_surface"
+    )
 
+
+def _collect_artifact_source_surfaces(
+    snapshot: GraphSnapshot,
+) -> dict[NodeKey, list[NodeKey]]:
     artifact_sources: dict[NodeKey, list[NodeKey]] = {}
     for relation in tuple(snapshot.relations.values()):
         if relation.relation_type != "BACKED_BY":
@@ -9629,7 +9621,22 @@ def _add_reverse_module_doc_edges(snapshot: GraphSnapshot) -> None:
         if relation.target.label != "doc_artifact":
             continue
         artifact_sources.setdefault(relation.target, []).append(relation.source)
+    return artifact_sources
 
+
+def _add_reverse_module_doc_edges(snapshot: GraphSnapshot) -> None:
+    for relation in tuple(snapshot.relations.values()):
+        if not _is_describes_doc_to_module(relation):
+            continue
+        snapshot.add_relation(
+            relation.target,
+            "DESCRIBED_IN",
+            relation.source,
+            provenance="docs_code_drift_reverse",
+            confidence=relation.properties.get("confidence"),
+        )
+
+    artifact_sources = _collect_artifact_source_surfaces(snapshot)
     for relation in tuple(snapshot.relations.values()):
         if relation.relation_type != "DESCRIBED_IN":
             continue
@@ -9803,6 +9810,52 @@ def _docs_command_pattern() -> re.Pattern[str]:
     )
 
 
+def _is_excluded_docs_drift_prefix(normalized_source_path: str) -> bool:
+    return any(
+        normalized_source_path == prefix
+        or normalized_source_path.startswith(f"{prefix}/")
+        for prefix in _DOCS_DRIFT_EXCLUDED_PREFIXES
+    )
+
+
+def _normalize_docs_drift_source_path(
+    root: Path,
+    source_path: object,
+    config: dict[str, object],
+) -> str | None:
+    if not isinstance(source_path, str):
+        return None
+    normalized_source_path = _coerce_repo_relative_path(root, source_path)
+    if not normalized_source_path:
+        return None
+    if _is_excluded_docs_drift_prefix(normalized_source_path):
+        return None
+    if _is_excluded_file_structure_path(normalized_source_path, config):
+        return None
+    if Path(normalized_source_path).suffix.lower() not in _DOCS_DRIFT_TEXT_EXTENSIONS:
+        return None
+    return normalized_source_path
+
+
+def _read_docs_drift_text(
+    root: Path,
+    normalized_source_path: str,
+    cached_text: dict[str, str],
+) -> str | None:
+    text = cached_text.get(normalized_source_path)
+    if text is not None:
+        return text
+    try:
+        text = _read_text(root / normalized_source_path)
+    except OSError:
+        # Some tracked doc paths can exist in the graph but still be
+        # unreadable on a given checkout or platform mount. Skip them
+        # instead of failing the entire snapshot build.
+        return None
+    cached_text[normalized_source_path] = text
+    return text
+
+
 def _docs_drift_sources(
     snapshot: GraphSnapshot,
     root: Path,
@@ -9814,36 +9867,16 @@ def _docs_drift_sources(
             continue
         if not _is_docs_drift_source_candidate(node):
             continue
-        source_path = node.properties.get("source_path")
-        if not isinstance(source_path, str):
+        normalized_source_path = _normalize_docs_drift_source_path(
+            root,
+            node.properties.get("source_path"),
+            config,
+        )
+        if normalized_source_path is None:
             continue
-        normalized_source_path = _coerce_repo_relative_path(root, source_path)
-        if not normalized_source_path:
-            continue
-        if any(
-            normalized_source_path == prefix
-            or normalized_source_path.startswith(f"{prefix}/")
-            for prefix in _DOCS_DRIFT_EXCLUDED_PREFIXES
-        ):
-            continue
-        if _is_excluded_file_structure_path(normalized_source_path, config):
-            continue
-        if (
-            Path(normalized_source_path).suffix.lower()
-            not in _DOCS_DRIFT_TEXT_EXTENSIONS
-        ):
-            continue
-        doc_path = root / normalized_source_path
-        text = cached_text.get(normalized_source_path)
+        text = _read_docs_drift_text(root, normalized_source_path, cached_text)
         if text is None:
-            try:
-                text = _read_text(doc_path)
-            except OSError:
-                # Some tracked doc paths can exist in the graph but still be
-                # unreadable on a given checkout or platform mount. Skip them
-                # instead of failing the entire snapshot build.
-                continue
-            cached_text[normalized_source_path] = text
+            continue
         yield node.key, normalized_source_path, text
 
 
