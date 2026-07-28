@@ -765,7 +765,7 @@ def _run_phase_command(
     try:
         from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 
-        completed = subprocess.run(  # nosec B603
+        completed = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv  # nosec B603
             ensure_safe_cli_argv([str(token) for token in command]),
             cwd=phase_root if isolated_workdir else repo_root,
             env=env,
@@ -1201,8 +1201,10 @@ def _run_attempt(
     started_at = _utc_now()
     timed_out = False
     try:
-        completed = subprocess.run(  # nosec B603
-            command,
+        from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+        completed = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv  # nosec B603
+            ensure_safe_cli_argv([str(token) for token in command]),
             cwd=attempt_root,
             env=env,
             capture_output=True,
@@ -1578,32 +1580,112 @@ def _validate_dq_reconciliation_row(dq_rows: list[dict[str, object]]) -> list[st
     return []
 
 
+def _require_nonempty_fields(
+    row: dict[str, object],
+    field_names: tuple[str, ...],
+    *,
+    prefix: str,
+) -> list[str]:
+    """Return errors for blank required string fields on one row."""
+    errors: list[str] = []
+    for field_name in field_names:
+        if not str(row.get(field_name) or "").strip():
+            errors.append(f"{prefix} {field_name} must be non-empty")
+    return errors
+
+
+def _validate_one_workflow_child(
+    child: dict[str, object],
+    child_by_anchor: dict[tuple[str, str], dict[str, object]],
+) -> list[str]:
+    """Validate one workflow child row and register its anchor."""
+    errors = _require_nonempty_fields(
+        child,
+        (
+            "workflow_run_id",
+            "run_id",
+            "manifest_id",
+            "workflow_name",
+            "workflow_step_id",
+        ),
+        prefix="child",
+    )
+    if child.get("terminal_event") not in TERMINAL_EVENTS:
+        errors.append("child terminal_event must be run_finished or run_failed")
+    anchor = (
+        str(child.get("run_id") or ""),
+        str(child.get("manifest_id") or ""),
+    )
+    if all(anchor):
+        if anchor in child_by_anchor:
+            errors.append("child run/manifest anchors must be unique")
+        child_by_anchor[anchor] = child
+    return errors
+
+
 def _validate_workflow_child_rows(
     children: list[dict[str, object]],
 ) -> tuple[list[str], dict[tuple[str, str], dict[str, object]]]:
     errors: list[str] = []
     child_by_anchor: dict[tuple[str, str], dict[str, object]] = {}
     for child in children:
-        for field_name in (
+        errors.extend(_validate_one_workflow_child(child, child_by_anchor))
+    return errors, child_by_anchor
+
+
+def _parent_child_field_mismatches(
+    parent: dict[str, object],
+    child: dict[str, object],
+) -> list[str]:
+    """Return reciprocal-field mismatches between parent and child rows."""
+    errors: list[str] = []
+    for field_name in ("workflow_run_id", "workflow_name", "workflow_step_id"):
+        if str(child.get(field_name) or "") != str(parent.get(field_name) or ""):
+            errors.append(
+                f"parent/child {field_name} must match for reciprocal anchors"
+            )
+    return errors
+
+
+def _validate_one_workflow_parent(
+    parent: dict[str, object],
+    *,
+    child_by_anchor: dict[tuple[str, str], dict[str, object]],
+    parent_ids: set[str],
+    repeated_steps: dict[tuple[str, str], list[dict[str, object]]],
+) -> list[str]:
+    """Validate one workflow parent row and update aggregate indexes."""
+    errors = _require_nonempty_fields(
+        parent,
+        (
             "workflow_run_id",
-            "run_id",
-            "manifest_id",
             "workflow_name",
             "workflow_step_id",
-        ):
-            if not str(child.get(field_name) or "").strip():
-                errors.append(f"child {field_name} must be non-empty")
-        if child.get("terminal_event") not in TERMINAL_EVENTS:
-            errors.append("child terminal_event must be run_finished or run_failed")
-        anchor = (
-            str(child.get("run_id") or ""),
-            str(child.get("manifest_id") or ""),
-        )
-        if all(anchor):
-            if anchor in child_by_anchor:
-                errors.append("child run/manifest anchors must be unique")
-            child_by_anchor[anchor] = child
-    return errors, child_by_anchor
+            "child_run_id",
+            "child_manifest_id",
+        ),
+        prefix="parent",
+    )
+    workflow_run_id = str(parent.get("workflow_run_id") or "")
+    if workflow_run_id:
+        parent_ids.add(workflow_run_id)
+    repeated_steps.setdefault(
+        (
+            str(parent.get("workflow_name") or ""),
+            str(parent.get("workflow_step_id") or ""),
+        ),
+        [],
+    ).append(parent)
+    anchor = (
+        str(parent.get("child_run_id") or ""),
+        str(parent.get("child_manifest_id") or ""),
+    )
+    child = child_by_anchor.get(anchor)
+    if child is None:
+        errors.append("parent child run/manifest anchors must resolve to a child")
+        return errors
+    errors.extend(_parent_child_field_mismatches(parent, child))
+    return errors
 
 
 def _validate_workflow_parent_rows(
@@ -1614,42 +1696,14 @@ def _validate_workflow_parent_rows(
     parent_ids: set[str] = set()
     repeated_steps: dict[tuple[str, str], list[dict[str, object]]] = {}
     for parent in parents:
-        for field_name in (
-            "workflow_run_id",
-            "workflow_name",
-            "workflow_step_id",
-            "child_run_id",
-            "child_manifest_id",
-        ):
-            if not str(parent.get(field_name) or "").strip():
-                errors.append(f"parent {field_name} must be non-empty")
-        workflow_run_id = str(parent.get("workflow_run_id") or "")
-        if workflow_run_id:
-            parent_ids.add(workflow_run_id)
-        repeated_steps.setdefault(
-            (
-                str(parent.get("workflow_name") or ""),
-                str(parent.get("workflow_step_id") or ""),
-            ),
-            [],
-        ).append(parent)
-        anchor = (
-            str(parent.get("child_run_id") or ""),
-            str(parent.get("child_manifest_id") or ""),
+        errors.extend(
+            _validate_one_workflow_parent(
+                parent,
+                child_by_anchor=child_by_anchor,
+                parent_ids=parent_ids,
+                repeated_steps=repeated_steps,
+            )
         )
-        child = child_by_anchor.get(anchor)
-        if child is None:
-            errors.append("parent child run/manifest anchors must resolve to a child")
-            continue
-        for field_name in (
-            "workflow_run_id",
-            "workflow_name",
-            "workflow_step_id",
-        ):
-            if str(child.get(field_name) or "") != str(parent.get(field_name) or ""):
-                errors.append(
-                    f"parent/child {field_name} must match for reciprocal anchors"
-                )
     return errors, parent_ids, repeated_steps
 
 
@@ -1716,6 +1770,36 @@ def _validate_evidence_object_fields(
     return key_errors, summaries, retained
 
 
+def _validate_sha256_artifact(label: str, artifact: object) -> list[str]:
+    """Validate one path/sha256 artifact descriptor."""
+    if not isinstance(artifact, dict):
+        return [f"{label} must be an object"]
+    path = Path(str(artifact.get("path") or ""))
+    expected = str(artifact.get("sha256") or "")
+    if not path.is_file():
+        return [f"{label} is missing"]
+    if _sha256_file(path) != expected:
+        return [f"{label} hash changed after execution"]
+    return []
+
+
+def _validate_attempt_artifact_field(
+    attempt: dict[str, object],
+    *,
+    attempt_index: int,
+    field_name: str,
+) -> list[str]:
+    """Validate one artifact array field on a campaign attempt."""
+    artifacts = attempt.get(field_name)
+    if not isinstance(artifacts, list):
+        return [f"attempts[{attempt_index}].{field_name} must be an array"]
+    errors: list[str] = []
+    for artifact_index, artifact in enumerate(artifacts):
+        label = f"attempts[{attempt_index}].{field_name}[{artifact_index}]"
+        errors.extend(_validate_sha256_artifact(label, artifact))
+    return errors
+
+
 def _validate_attempt_artifacts(attempts: object) -> list[str]:
     errors: list[str] = []
     if not isinstance(attempts, list) or not attempts:
@@ -1730,23 +1814,13 @@ def _validate_attempt_artifacts(attempts: object) -> list[str]:
             "checkpoint_artifacts",
             "output_artifacts",
         ):
-            artifacts = attempt.get(field_name)
-            if not isinstance(artifacts, list):
-                errors.append(
-                    f"attempts[{attempt_index}].{field_name} must be an array"
+            errors.extend(
+                _validate_attempt_artifact_field(
+                    attempt,
+                    attempt_index=attempt_index,
+                    field_name=field_name,
                 )
-                continue
-            for artifact_index, artifact in enumerate(artifacts):
-                label = f"attempts[{attempt_index}].{field_name}[{artifact_index}]"
-                if not isinstance(artifact, dict):
-                    errors.append(f"{label} must be an object")
-                    continue
-                path = Path(str(artifact.get("path") or ""))
-                expected = str(artifact.get("sha256") or "")
-                if not path.is_file():
-                    errors.append(f"{label} is missing")
-                elif _sha256_file(path) != expected:
-                    errors.append(f"{label} hash changed after execution")
+            )
     return errors
 
 

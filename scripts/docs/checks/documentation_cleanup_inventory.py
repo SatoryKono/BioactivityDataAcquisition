@@ -666,8 +666,15 @@ def _diagram_kind(path: str) -> str | None:
 
 
 
-def _classify_from_lifecycle(lifecycle: str | None, *, path: str, text: str, declared: str) -> tuple[str, str, str] | None:
+def _classify_from_lifecycle(
+    lifecycle: str | None,
+    *,
+    path: str,  # retained for call-site parity / future path rules
+    text: str,  # retained for call-site parity / future content rules
+    declared: str,
+) -> tuple[str, str, str] | None:
     """Map declared lifecycle to inventory class when possible."""
+    _ = path, text, declared
     if lifecycle in {
         "plans_governance_entrypoint",
         "reports_workspace_entrypoint",

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import os
 import concurrent.futures
+import os
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any, cast
