@@ -854,22 +854,10 @@ class _ModuleCoverageViolation:
     message: str
 
 
-def evaluate_module_coverage_gates(
-    payload: dict[str, Any],
-    *,
-    baseline_payload: dict[str, Any],
-    gates: dict[str, Any],
-    enforcement_mode: str,
-) -> list[_ModuleCoverageViolation]:
-    """Return tier/regression violations for the supplied inventory payload."""
-    if enforcement_mode == "off":
-        return []
 
-    rows = payload.get("modules", [])
-    if not isinstance(rows, list):
-        return []
 
-    exempt = _exempt_paths(gates)
+def _coverage_gate_modes(gates: dict[str, Any]) -> tuple[float, str, str, set[str]]:
+    """Parse gate config into min_delta, tier modes, and ranked target paths."""
     regression_cfg = gates.get("regression", {})
     min_delta = 0.01
     if isinstance(regression_cfg, dict):
@@ -902,7 +890,28 @@ def evaluate_module_coverage_gates(
                 path = row.get("path")
                 if isinstance(path, str) and path:
                     ranked_target_paths.add(path)
+    return min_delta, tier_mode, ranked_target_tier_mode, ranked_target_paths
 
+
+def evaluate_module_coverage_gates(
+    payload: dict[str, Any],
+    *,
+    baseline_payload: dict[str, Any],
+    gates: dict[str, Any],
+    enforcement_mode: str,
+) -> list[_ModuleCoverageViolation]:
+    """Return tier/regression violations for the supplied inventory payload."""
+    if enforcement_mode == "off":
+        return []
+
+    rows = payload.get("modules", [])
+    if not isinstance(rows, list):
+        return []
+
+    exempt = _exempt_paths(gates)
+    min_delta, tier_mode, ranked_target_tier_mode, ranked_target_paths = (
+        _coverage_gate_modes(gates)
+    )
     baseline_by_path = _baseline_coverage_by_path(baseline_payload)
     violations: list[_ModuleCoverageViolation] = []
 

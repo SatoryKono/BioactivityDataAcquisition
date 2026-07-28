@@ -664,6 +664,41 @@ def _diagram_kind(path: str) -> str | None:
     return "diagram_support"
 
 
+
+
+def _classify_from_lifecycle(lifecycle: str | None, *, path: str, text: str, declared: str) -> tuple[str, str, str] | None:
+    """Map declared lifecycle to inventory class when possible."""
+    if lifecycle in {
+        "plans_governance_entrypoint",
+        "reports_workspace_entrypoint",
+        "docs_reports_curated_entrypoint",
+        "docs_reports_retention_sensitive_evidence",
+        "published_skill_reference_redirect",
+        "docs_draft_with_canonical_successor",
+        "active_backlog",
+        "active_quality_baseline",
+    }:
+        if lifecycle == "active_quality_baseline":
+            return "Working", "current", "keep"
+        return "Active", "current", "keep"
+    if lifecycle in {
+        "generated_skill_reference_mirror",
+        "generated_skill_license_mirror",
+        "docs_reports_generated_or_route_owned",
+        "generated_test_run_evidence",
+    }:
+        return "Generated", "regenerate", "generate-automatically"
+    if lifecycle == "supporting_context":
+        return "Working", "review-required", "archive-after-migration"
+    if lifecycle == "closeout_evidence":
+        return "Working", "retention-sensitive", "keep"
+    if lifecycle == "docs_reports_curated_or_historical_report":
+        if declared in {"historical", "superseded", "archived"}:
+            return "Archived", "historical", "keep"
+        return "Working", "review-required", "archive-after-migration"
+    return None
+
+
 def _classify(
     path: str,
     text: str,
@@ -688,34 +723,11 @@ def _classify(
         return "Active", "current", "keep"
     if path.startswith("docs/99-archive/"):
         return "Archived", "historical", "keep"
-    if lifecycle in {
-        "plans_governance_entrypoint",
-        "reports_workspace_entrypoint",
-        "docs_reports_curated_entrypoint",
-        "docs_reports_retention_sensitive_evidence",
-        "published_skill_reference_redirect",
-        "docs_draft_with_canonical_successor",
-    }:
-        return "Active", "current", "keep"
-    if lifecycle in {
-        "generated_skill_reference_mirror",
-        "generated_skill_license_mirror",
-        "docs_reports_generated_or_route_owned",
-        "generated_test_run_evidence",
-    }:
-        return "Generated", "regenerate", "generate-automatically"
-    if lifecycle == "active_backlog":
-        return "Active", "current", "keep"
-    if lifecycle == "supporting_context":
-        return "Working", "review-required", "archive-after-migration"
-    if lifecycle == "closeout_evidence":
-        return "Working", "retention-sensitive", "keep"
-    if lifecycle == "active_quality_baseline":
-        return "Working", "current", "keep"
-    if lifecycle == "docs_reports_curated_or_historical_report":
-        if declared in {"historical", "superseded", "archived"}:
-            return "Archived", "historical", "keep"
-        return "Working", "review-required", "archive-after-migration"
+    lifecycle_class = _classify_from_lifecycle(
+        lifecycle, path=path, text=text, declared=declared
+    )
+    if lifecycle_class is not None:
+        return lifecycle_class
     if declared in {"deprecated", "retired"}:
         return "Deprecated", "migration-required", "replace-with-link"
     if "obsolete duplicate" in text[:1000].lower():

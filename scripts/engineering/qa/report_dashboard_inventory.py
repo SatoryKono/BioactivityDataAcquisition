@@ -743,6 +743,39 @@ def _compare_deployed_dashboards(
     return errors, per_dashboard
 
 
+
+
+def _dashboard_item_health_issues(
+    item: DashboardInventoryItem,
+    *,
+    parity_issues: dict[str, list[str]],
+    deployed_issues: dict[str, list[str]],
+) -> list[str]:
+    """Collect non-canonical / missing-field issues for one dashboard inventory row."""
+    uid = str(item["uid"])
+    issues: list[str] = []
+    if not uid or uid == "None":
+        issues.append("missing uid")
+    if not item.get("title"):
+        issues.append("missing title")
+    if item.get("style") != "dark":
+        issues.append(f"non-canonical style={item.get('style')!r}")
+    if item.get("timezone") != "browser":
+        issues.append(f"non-canonical timezone={item.get('timezone')!r}")
+    if item.get("editable") is not True:
+        issues.append(f"editable must be true, got {item.get('editable')!r}")
+    if item.get("graphTooltip") != 1:
+        issues.append(f"graphTooltip must be 1, got {item.get('graphTooltip')!r}")
+    hide_controls = item.get("hideControls")
+    if hide_controls != "<missing>" and hide_controls is not False:
+        issues.append(
+            f"hideControls, when exported, must be false, got {hide_controls!r}"
+        )
+    issues.extend(parity_issues.get(uid, []))
+    issues.extend(deployed_issues.get(uid, []))
+    return issues
+
+
 def _build_health_summary(
     inventory: list[DashboardInventoryItem],
     *,
@@ -759,26 +792,11 @@ def _build_health_summary(
 
     for item in inventory:
         uid = str(item["uid"])
-        issues: list[str] = []
-        if not uid or uid == "None":
-            issues.append("missing uid")
-        if not item.get("title"):
-            issues.append("missing title")
-        if item.get("style") != "dark":
-            issues.append(f"non-canonical style={item.get('style')!r}")
-        if item.get("timezone") != "browser":
-            issues.append(f"non-canonical timezone={item.get('timezone')!r}")
-        if item.get("editable") is not True:
-            issues.append(f"editable must be true, got {item.get('editable')!r}")
-        if item.get("graphTooltip") != 1:
-            issues.append(f"graphTooltip must be 1, got {item.get('graphTooltip')!r}")
-        hide_controls = item.get("hideControls")
-        if hide_controls != "<missing>" and hide_controls is not False:
-            issues.append(
-                f"hideControls, when exported, must be false, got {hide_controls!r}"
-            )
-        issues.extend(parity_issues.get(uid, []))
-        issues.extend(deployed_issues.get(uid, []))
+        issues = _dashboard_item_health_issues(
+            item,
+            parity_issues=parity_issues,
+            deployed_issues=deployed_issues,
+        )
         status = "healthy" if not issues else "degraded"
         if status == "healthy":
             healthy += 1

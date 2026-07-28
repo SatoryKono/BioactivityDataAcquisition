@@ -450,6 +450,123 @@ def _infer_http_semantic_kind(url: str) -> str:
     return "http_endpoint"
 
 
+
+
+def _panel_specs_from_targets(
+    *,
+    dashboard_uid: str,
+    panel_id: int,
+    title: str,
+    panel: dict[str, Any],
+) -> list[PanelAuditSpec]:
+    specs: list[PanelAuditSpec] = []
+    for target in cast(list[dict[str, Any]], panel.get("targets", [])):
+        ref_id = _target_ref_id(target)
+        url = target.get("url")
+        if isinstance(url, str) and url:
+            specs.append(
+                PanelAuditSpec(
+                    dashboard_uid=dashboard_uid,
+                    panel_id=panel_id,
+                    title=title,
+                    source_kind="http",
+                    semantic_kind=cast(
+                        Literal[
+                            "freshness",
+                            "http_endpoint",
+                            "http_records",
+                            "http_summary",
+                            "http_table",
+                        ],
+                        _infer_http_semantic_kind(url),
+                    ),
+                    target_ref_id=ref_id,
+                    required=False,
+                )
+            )
+            continue
+        expr = target.get("expr")
+        if not isinstance(expr, str) or not expr.strip():
+            continue
+        datasource_name = _datasource_name(panel, target).lower()
+        kind = "loki" if "loki" in datasource_name else "prometheus"
+        semantic = "loki_query" if kind == "loki" else "prometheus_query"
+        specs.append(
+            PanelAuditSpec(
+                dashboard_uid=dashboard_uid,
+                panel_id=panel_id,
+                title=title,
+                source_kind=kind,  # type: ignore[arg-type]
+                semantic_kind=semantic,  # type: ignore[arg-type]
+                target_ref_id=ref_id,
+                required=False,
+            )
+        )
+    return specs
+
+
+def _panel_specs_from_links(
+    *,
+    dashboard_uid: str,
+    panel_id: int,
+    title: str,
+    panel: dict[str, Any],
+) -> list[PanelAuditSpec]:
+    specs: list[PanelAuditSpec] = []
+    for link in cast(list[dict[str, Any]], panel.get("links", [])):
+        link_url = str(link.get("url") or "")
+        if "exploretraces-app" not in link_url and "var-ds=tempo" not in link_url:
+            continue
+        specs.append(
+            PanelAuditSpec(
+                dashboard_uid=dashboard_uid,
+                panel_id=panel_id,
+                title=f"{title} :: {link.get('title') or 'Tempo handoff'}",
+                source_kind="tempo",
+                semantic_kind="tempo_handoff",
+                target_ref_id=str(link.get("title") or "tempo"),
+                required=False,
+            )
+        )
+    return specs
+
+
+def _classify_prometheus_vector(result: object) -> tuple[str, str]:
+    if not isinstance(result, list):
+        return ("invalid_shape", "Prometheus vector result must be a list")
+    if not result:
+        return ("empty_result", "Prometheus vector returned no samples")
+    values: list[float] = []
+    for item in result:
+        if not isinstance(item, dict):
+            return ("invalid_shape", "Prometheus vector sample must be an object")
+        sample = item.get("value")
+        if not isinstance(sample, list) or len(sample) != 2:
+            return ("invalid_shape", "Prometheus vector sample missing value pair")
+        try:
+            values.append(float(sample[1]))
+        except (TypeError, ValueError):
+            return (
+                "invalid_shape",
+                "Prometheus vector sample value is not numeric",
+            )
+    if all(abs(value) <= 1e-12 for value in values):
+        return ("zero_result", "Prometheus vector returned only zero values")
+    return ("nonzero_result", "Prometheus vector returned non-zero values")
+
+
+def _classify_prometheus_scalar(result: object) -> tuple[str, str]:
+    if not isinstance(result, list) or len(result) != 2:
+        return ("invalid_shape", "Prometheus scalar result missing value pair")
+    try:
+        value = float(result[1])
+    except (TypeError, ValueError):
+        return ("invalid_shape", "Prometheus scalar value is not numeric")
+    if abs(value) <= 1e-12:
+        return ("zero_result", "Prometheus scalar returned zero")
+    return ("nonzero_result", "Prometheus scalar returned non-zero value")
+
+
 def _discover_dashboard_panel_specs() -> tuple[PanelAuditSpec, ...]:
     specs: list[PanelAuditSpec] = []
     for path in sorted(_DASHBOARD_DIR.glob("*.json")):
@@ -462,77 +579,22 @@ def _discover_dashboard_panel_specs() -> tuple[PanelAuditSpec, ...]:
             if not isinstance(panel_id, int):
                 continue
             title = str(panel.get("title") or f"panel-{panel_id}")
-            for target in cast(list[dict[str, Any]], panel.get("targets", [])):
-                ref_id = _target_ref_id(target)
-                url = target.get("url")
-                if isinstance(url, str) and url:
-                    specs.append(
-                        PanelAuditSpec(
-                            dashboard_uid=dashboard_uid,
-                            panel_id=panel_id,
-                            title=title,
-                            source_kind="http",
-                            semantic_kind=cast(
-                                Literal[
-                                    "freshness",
-                                    "http_endpoint",
-                                    "http_records",
-                                    "http_summary",
-                                    "http_table",
-                                ],
-                                _infer_http_semantic_kind(url),
-                            ),
-                            target_ref_id=ref_id,
-                            required=False,
-                        )
-                    )
-                    continue
-                expr = target.get("expr")
-                if not isinstance(expr, str) or not expr.strip():
-                    continue
-                datasource_name = _datasource_name(panel, target).lower()
-                if "loki" in datasource_name:
-                    specs.append(
-                        PanelAuditSpec(
-                            dashboard_uid=dashboard_uid,
-                            panel_id=panel_id,
-                            title=title,
-                            source_kind="loki",
-                            semantic_kind="loki_query",
-                            target_ref_id=ref_id,
-                            required=False,
-                        )
-                    )
-                else:
-                    specs.append(
-                        PanelAuditSpec(
-                            dashboard_uid=dashboard_uid,
-                            panel_id=panel_id,
-                            title=title,
-                            source_kind="prometheus",
-                            semantic_kind="prometheus_query",
-                            target_ref_id=ref_id,
-                            required=False,
-                        )
-                    )
-            for link in cast(list[dict[str, Any]], panel.get("links", [])):
-                link_url = str(link.get("url") or "")
-                if (
-                    "exploretraces-app" not in link_url
-                    and "var-ds=tempo" not in link_url
-                ):
-                    continue
-                specs.append(
-                    PanelAuditSpec(
-                        dashboard_uid=dashboard_uid,
-                        panel_id=panel_id,
-                        title=f"{title} :: {link.get('title') or 'Tempo handoff'}",
-                        source_kind="tempo",
-                        semantic_kind="tempo_handoff",
-                        target_ref_id=str(link.get("title") or "tempo"),
-                        required=False,
-                    )
+            specs.extend(
+                _panel_specs_from_targets(
+                    dashboard_uid=dashboard_uid,
+                    panel_id=panel_id,
+                    title=title,
+                    panel=panel,
                 )
+            )
+            specs.extend(
+                _panel_specs_from_links(
+                    dashboard_uid=dashboard_uid,
+                    panel_id=panel_id,
+                    title=title,
+                    panel=panel,
+                )
+            )
     return tuple(specs)
 
 
@@ -883,37 +945,9 @@ def _classify_prometheus_payload(payload: object) -> tuple[str, str]:
     result = data.get("result")
     result_type = data.get("resultType")
     if result_type == "vector":
-        if not isinstance(result, list):
-            return ("invalid_shape", "Prometheus vector result must be a list")
-        if not result:
-            return ("empty_result", "Prometheus vector returned no samples")
-        values: list[float] = []
-        for item in result:
-            if not isinstance(item, dict):
-                return ("invalid_shape", "Prometheus vector sample must be an object")
-            sample = item.get("value")
-            if not isinstance(sample, list) or len(sample) != 2:
-                return ("invalid_shape", "Prometheus vector sample missing value pair")
-            try:
-                values.append(float(sample[1]))
-            except (TypeError, ValueError):
-                return (
-                    "invalid_shape",
-                    "Prometheus vector sample value is not numeric",
-                )
-        if all(abs(value) <= 1e-12 for value in values):
-            return ("zero_result", "Prometheus vector returned only zero values")
-        return ("nonzero_result", "Prometheus vector returned non-zero values")
+        return _classify_prometheus_vector(result)
     if result_type == "scalar":
-        if not isinstance(result, list) or len(result) != 2:
-            return ("invalid_shape", "Prometheus scalar result missing value pair")
-        try:
-            value = float(result[1])
-        except (TypeError, ValueError):
-            return ("invalid_shape", "Prometheus scalar value is not numeric")
-        if abs(value) <= 1e-12:
-            return ("zero_result", "Prometheus scalar returned zero")
-        return ("nonzero_result", "Prometheus scalar returned non-zero value")
+        return _classify_prometheus_scalar(result)
     return ("invalid_shape", f"Unsupported Prometheus resultType={result_type!r}")
 
 
