@@ -71,6 +71,8 @@ root_tooling_roots:
       role: curated_shared_agent_runtime_surface
     - path: .cursor
       role: curated_shared_editor_rules_surface
+    - path: .claude
+      role: curated_shared_agent_runtime_surface
     - path: .devin
       role: curated_project_wiki_surface
     - path: .gemini

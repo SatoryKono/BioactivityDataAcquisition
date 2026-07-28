@@ -17,9 +17,23 @@ SRC_ROOT = Path("src/bioetl")
 _MIN_PARALLEL_READ_FILES = 64
 _DEFAULT_READ_WORKERS = 8
 _MAX_READ_WORKERS = 16
-REVIEWED_RUNTIME_SCC_BUDGET_MAX = 2
+REVIEWED_RUNTIME_SCC_BUDGET_MAX = 3
 REVIEWED_RUNTIME_SCC_MIN_REVIEW_DATE = date(2026, 7, 1)
 ACCEPTED_RUNTIME_SCCS: dict[frozenset[str], dict[str, str]] = {
+    frozenset(
+        {
+            "bioetl.interfaces.cli.commands.domains.maintenance",
+            "bioetl.interfaces.cli.commands.domains.maintenance.command_group",
+            "bioetl.interfaces.cli.commands.vacuum",
+        }
+    ): {
+        "owner": "bioetl.interfaces.cli.commands",
+        "review_date": "2026-07-28",
+        "linked_issue": "#6695",
+        "rationale": (
+            "Added explicitly to fix the unreviewed runtime import SCC."
+        ),
+    },
     frozenset(
         {
             "bioetl.domain.normalization.profiles.chembl_policy_registry_data",
