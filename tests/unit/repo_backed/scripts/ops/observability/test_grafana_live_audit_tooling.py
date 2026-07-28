@@ -836,9 +836,7 @@ def test_dashboard_json_has_no_backup_artifacts_in_active_dashboard_tree() -> No
 def test_alerts_slo_dashboard_is_first_class_shipped_surface() -> None:
     dashboard_path = Path("grafana/dashboards/bioetl-alerts-slo.json")
     if not dashboard_path.is_file():
-        pytest.skip(
-            "bioetl-alerts-slo.json retired from shipping surface (epic #6647)"
-        )
+        pytest.skip("bioetl-alerts-slo.json retired from shipping surface (epic #6647)")
     dashboard = json.loads(dashboard_path.read_text(encoding="utf-8"))
     variables = {
         item.get("name") for item in dashboard.get("templating", {}).get("list", [])

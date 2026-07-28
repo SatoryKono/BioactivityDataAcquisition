@@ -1,0 +1,120 @@
+{
+  "schema_version": "tech-debt-issues-5956-5961-closeout-v1",
+  "generated_on": "2026-07-05",
+  "generated_by": "codex",
+  "debt_budget_policy": "flat_or_decreasing_only",
+  "debt_budget_outcome": "reduced_or_unchanged",
+  "issues": [
+    {
+      "number": 5956,
+      "status": "closed-ready",
+      "evidence": [
+        "reports/quality/full-app-duplication-baseline.json",
+        "configs/quality/debt_scorecard.yaml"
+      ]
+    },
+    {
+      "number": 5957,
+      "status": "closed-ready",
+      "evidence": [
+        "reports/quality/compatibility-importer-census.json",
+        "configs/quality/internal_compatibility_shim_inventory.yaml"
+      ]
+    },
+    {
+      "number": 5958,
+      "status": "closed-ready",
+      "evidence": [
+        "reports/quality/compatibility-importer-census.json",
+        "configs/quality/internal_compatibility_shim_inventory.yaml"
+      ]
+    },
+    {
+      "number": 5959,
+      "status": "closed-ready",
+      "evidence": [
+        "configs/quality/scripts_inventory_manifest.json",
+        "configs/quality/scripts_lifecycle_registry.json"
+      ]
+    },
+    {
+      "number": 5960,
+      "status": "closed-ready",
+      "evidence": [
+        "reports/quality/root-hygiene-review-evidence.json"
+      ]
+    },
+    {
+      "number": 5961,
+      "status": "closed-ready",
+      "evidence": [
+        "reports/quality/full-app-duplication-baseline.json",
+        "reports/quality/debt-governance-gates.json"
+      ]
+    }
+  ],
+  "outcomes": {
+    "5956": {
+      "status": "closeable"
+    },
+    "5957": {
+      "status": "closeable"
+    },
+    "5958": {
+      "status": "closeable"
+    },
+    "5959": {
+      "status": "closeable"
+    },
+    "5960": {
+      "status": "closeable"
+    },
+    "5961": {
+      "status": "closeable"
+    }
+  },
+  "ratchets": {
+    "infrastructure_adapter_duplicate_clusters": {
+      "current": 0,
+      "max": 0,
+      "opening": 39,
+      "source": "reports/quality/full-app-duplication-baseline.json"
+    },
+    "application_pipeline_duplicate_clusters": {
+      "current": 0,
+      "max": 2,
+      "opening": 3,
+      "source": "reports/quality/full-app-duplication-baseline.json"
+    },
+    "full_app_duplicate_clusters": {
+      "current": 0,
+      "max": 2,
+      "opening": 41,
+      "source": "reports/quality/full-app-duplication-baseline.json"
+    },
+    "retained_entrypoints": {
+      "current": 12,
+      "max": 12,
+      "opening": 12,
+      "source": "reports/quality/compatibility-importer-census.json"
+    },
+    "retained_public_export_facades": {
+      "current": 4,
+      "max": 4,
+      "opening": 4,
+      "source": "reports/quality/compatibility-importer-census.json"
+    },
+    "zero_reference_supporting_scripts": {
+      "current": 17,
+      "max": 32,
+      "opening": 46,
+      "source": "configs/quality/scripts_inventory_manifest.json"
+    },
+    "root_review_required_surfaces": {
+      "current": 90,
+      "max": 90,
+      "opening": 99,
+      "source": "reports/quality/root-hygiene-review-evidence.json"
+    }
+  }
+}

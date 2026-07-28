@@ -9,9 +9,7 @@ import pytest
 
 pytestmark = pytest.mark.integration
 
-_RETIRED_WORKFLOW_DASHBOARD = Path(
-    "grafana/dashboards/bioetl-workflow-overview.json"
-)
+_RETIRED_WORKFLOW_DASHBOARD = Path("grafana/dashboards/bioetl-workflow-overview.json")
 _RUNTIME_DASHBOARD = Path("grafana/dashboards/bioetl-runtime.json")
 
 

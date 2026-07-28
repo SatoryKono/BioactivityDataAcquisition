@@ -1,0 +1,85 @@
+{
+  "schema_version": "tech-debt-issues-5553-5558-closeout-v1",
+  "reviewed_on": "2026-06-23",
+  "debt_budget_outcome": "reduced_or_unchanged",
+  "issues": [
+    {
+      "number": 5553,
+      "title": "governance: refresh remote-main debt evidence and align module-coverage no-growth ratchets to the committed inventory",
+      "status": "closed-ready",
+      "evidence": [
+        "configs/quality/module_coverage_gates.yaml",
+        "reports/quality/module-coverage-inventory.json",
+        "reports/quality/architecture-debt-remote-main-baseline.json",
+        "reports/quality/architecture-quality-scorecard.json",
+        "reports/quality/debt-governance-gates.json"
+      ]
+    },
+    {
+      "number": 5554,
+      "title": "refactor(composition): move first-party control-plane callers off the retained public facade",
+      "status": "closed-ready",
+      "evidence": [
+        "src/bioetl/composition/control_plane_service_access.py",
+        "reports/quality/compatibility-importer-census.json",
+        "tests/architecture/test_forbidden_imports.py",
+        "tests/unit/composition/test_control_plane_service_access.py"
+      ]
+    },
+    {
+      "number": 5555,
+      "title": "governance(hotspots): ratchet reviewed ownership baselines after control-plane and runtime-builder compatibility cleanup",
+      "status": "closed-ready",
+      "evidence": [
+        "configs/quality/debt_scorecard.yaml",
+        "reports/quality/hotspot-family-baseline.json",
+        "reports/quality/architecture-quality-scorecard.json",
+        "tests/architecture/test_hotspot_duplication_family_ratchets.py"
+      ]
+    },
+    {
+      "number": 5556,
+      "title": "fix(replay): fail closed when checkpoint resume compatibility context is incomplete",
+      "status": "closed-ready",
+      "evidence": [
+        "src/bioetl/application/core/lifecycle/checkpoint_disposition_policy.py",
+        "src/bioetl/application/core/lifecycle/checkpoint_runtime.py",
+        "src/bioetl/application/core/lifecycle/checkpoint_runtime_types.py",
+        "tests/unit/application/core/test_checkpoint_manager.py"
+      ]
+    },
+    {
+      "number": 5557,
+      "title": "governance(github): document and automate safe stale draft PR hygiene",
+      "status": "closed-ready",
+      "evidence": [
+        ".github/PULL_REQUEST_HYGIENE.md",
+        ".github/workflows/pr-hygiene.yml",
+        "tests/architecture/test_pr_hygiene_workflow.py"
+      ]
+    },
+    {
+      "number": 5558,
+      "title": "tracker: close the governance, ownership, replay, and PR-hygiene debt wave",
+      "status": "closed-ready",
+      "evidence": [
+        "reports/quality/tech-debt-issues-5553-5558-closeout.json",
+        "reports/quality/debt-governance-gates.json",
+        "reports/quality/architecture-quality-scorecard.json"
+      ]
+    }
+  ],
+  "metrics": {
+    "module_coverage_unmeasured_max_count": 36,
+    "module_coverage_uncovered_max_count": 1611,
+    "control_plane_root_src_importer_count": 0,
+    "retained_public_export_facade_count": 4,
+    "application_services_control_plane_files_ge_250_loc": 15,
+    "composition_runtime_builders_files": 45,
+    "composition_runtime_builders_max_internal_fan_in": 5,
+    "replay_missing_context_disposition": "missing_context_hard_fail_raised",
+    "pr_hygiene_stale_days": 21,
+    "generated_artifact_drift_count": 0,
+    "remote_main_sha": "f986ed34d82f14ce61da758493be621f4007f0d6"
+  }
+}

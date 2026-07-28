@@ -14,31 +14,29 @@ if TYPE_CHECKING:
 
 R = TypeVar("R")
 
+
 class _SupportsDefaultRegistry(Protocol):
     @classmethod
     def _get_default(cls) -> Self:
         """Return the lazy default registry instance."""
         ...
 
+
 class _SupportsProviderStore(Protocol):
     _providers: dict[str, ProviderConfig]
+
 
 class _SupportsProviderRegistryStore(_SupportsDefaultRegistry, Protocol):
     _store: _SupportsProviderStore
 
     def register(self, name: str, config: ProviderConfig) -> None: ...
 
-    def is_registered(self, name: str) -> bool:
-        """Return whether a provider is registered."""
-        ...
+    def is_registered(self, name: str) -> bool: ...
 
-    def list_providers(self) -> list[str]:
-        """Return registered provider names."""
-        ...
+    def list_providers(self) -> list[str]: ...
 
-    def clear(self) -> None:
-        """Clear registered providers."""
-        ...
+    def clear(self) -> None: ...
+
 
 RegistryT = TypeVar("RegistryT", bound=_SupportsDefaultRegistry)
 ProviderRegistryT = TypeVar("ProviderRegistryT", bound=_SupportsProviderRegistryStore)
@@ -47,6 +45,7 @@ ProviderRegistryT = TypeVar("ProviderRegistryT", bound=_SupportsProviderRegistry
 # ownership seam to remain explicit in this private helper.
 # _default_provider_registry: ProviderRegistry | None = None
 _default_provider_registry: _SupportsProviderRegistryStore | None = None
+
 
 class DefaultRegistryMethod[R]:
     """Dispatch class access to the lazy default registry and instance access locally."""
@@ -90,6 +89,7 @@ class DefaultRegistryMethod[R]:
 
         return bound
 
+
 class ProvidersDescriptor[ProviderRegistryT: _SupportsProviderRegistryStore]:
     """Expose the default singleton store on class access for compatibility."""
 
@@ -101,6 +101,7 @@ class ProvidersDescriptor[ProviderRegistryT: _SupportsProviderRegistryStore]:
         target = obj if obj is not None else objtype._get_default()
         return target._store._providers
 
+
 def get_default_provider_registry() -> _SupportsProviderRegistryStore:
     """Return the lazily-created default provider registry singleton."""
     global _default_provider_registry
@@ -110,6 +111,7 @@ def get_default_provider_registry() -> _SupportsProviderRegistryStore:
         _default_provider_registry = registry
         return registry
     return _default_provider_registry
+
 
 def register_provider_config_in_default_registry(
     name: str, config: ProviderConfig

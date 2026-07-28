@@ -139,8 +139,7 @@ def _accepts_optional_collaborator(
     if name not in LEGACY_PACKED_OPTIONAL_PARAMS:
         return False
     return any(
-        parameter.kind is inspect.Parameter.VAR_KEYWORD
-        for parameter in params.values()
+        parameter.kind is inspect.Parameter.VAR_KEYWORD for parameter in params.values()
     )
 
 
@@ -249,9 +248,7 @@ class TestTransformerSignatures:
         EntityIdentityGenerator provides entity ID and content hash computation.
         May be named or accepted via ``**legacy_collaborators`` (S107 budget).
         """
-        assert _accepts_optional_collaborator(
-            transformer_class, "identity_service"
-        ), (
+        assert _accepts_optional_collaborator(transformer_class, "identity_service"), (
             f"{transformer_class.__name__} should accept 'identity_service' "
             "(named or **legacy_collaborators)"
         )

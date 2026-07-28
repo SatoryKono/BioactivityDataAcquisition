@@ -1,0 +1,2185 @@
+{
+  "row_count": 81,
+  "rows": [
+    {
+      "classification_reason": "Bronze coverage is structural: entity config plus tracked fixture/metadata guardrails; no layer Pandera contract is declared.",
+      "config_contract_path": "configs/entities/chembl/activity.yaml",
+      "config_path": "configs/entities/chembl/activity.yaml",
+      "contract_ref": "chembl.activity",
+      "contract_test_paths": [
+        "tests/architecture/test_bronze_fixture_replay_baseline.py",
+        "tests/architecture/test_bronze_metadata_builder_guardrails.py"
+      ],
+      "coverage_level": "structural_only",
+      "dataset_layer": "bronze",
+      "entity": "activity",
+      "golden_evidence_paths": [
+        "tests/fixtures/bronze/chembl/activity"
+      ],
+      "pandera_schema_paths": [],
+      "pipeline_name": "chembl_activity",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Silver schema snapshot and contract tests provide moderate layer coverage.",
+      "config_contract_path": "configs/entities/chembl/activity.yaml",
+      "config_path": "configs/entities/chembl/activity.yaml",
+      "contract_ref": "chembl.activity",
+      "contract_test_paths": [
+        "tests/contract/silver_schemas/test_schema_stability.py",
+        "tests/contract/silver_schemas/test_selected_pipeline_schema_drift.py",
+        "tests/contract/silver_schemas/test_validations.py"
+      ],
+      "coverage_level": "moderate",
+      "dataset_layer": "silver",
+      "entity": "activity",
+      "golden_evidence_paths": [
+        "tests/contract/silver_schemas/snapshots/chembl_activity_schema.json"
+      ],
+      "pandera_schema_paths": [
+        "tests/contract/silver_schemas/snapshots/chembl_activity_schema.json"
+      ],
+      "pipeline_name": "chembl_activity",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Gold coverage is strict: contract YAML, Pandera schema, contract tests, and golden DQ evidence are present.",
+      "config_contract_path": "configs/contracts/chembl/activity.yaml",
+      "config_path": "configs/entities/chembl/activity.yaml",
+      "contract_ref": "chembl.activity",
+      "contract_test_paths": [
+        "tests/contract/test_chembl_activity_flag_policy.py",
+        "tests/contract/test_gold_entity_coverage_complete.py",
+        "tests/contract/test_gold_pk_consistency.py",
+        "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/e2e/test_chembl_activity_e2e.py",
+        "tests/integration/chembl/test_activity_extraction_params.py",
+        "tests/integration/config/test_activity_hash_policy_alignment.py",
+        "tests/integration/pipelines/test_chembl_activity.py",
+        "tests/unit/application/composite/test_composite_activity.py",
+        "tests/unit/application/pipelines/chembl/test_activity_schema_gap.py",
+        "tests/unit/repo_backed/application/pipelines/chembl/test_activity_transformer.py",
+        "tests/unit/application/pipelines/test_activity_transformer_base.py",
+        "tests/unit/application/pipelines/test_chembl_activity_unit.py",
+        "tests/unit/domain/behavior/activity_aggregator/test_init.py",
+        "tests/unit/domain/entities/test_bioactivity_entity.py",
+        "tests/unit/domain/entities/test_chembl_activity_assay_dtos.py",
+        "tests/unit/domain/entities/test_chembl_activity_entity.py",
+        "tests/unit/domain/normalization/profiles/test_chembl_activity.py",
+        "tests/unit/domain/services/test_activity_aggregator.py",
+        "tests/unit/domain/value_objects/test_activity.py",
+        "tests/unit/scripts/test_generate_chembl_activity_field_matrix.py"
+      ],
+      "coverage_level": "strict",
+      "dataset_layer": "gold",
+      "entity": "activity",
+      "golden_evidence_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "pandera_schema_paths": [
+        "src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py"
+      ],
+      "pipeline_name": "chembl_activity",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Bronze coverage is structural: entity config plus tracked fixture/metadata guardrails; no layer Pandera contract is declared.",
+      "config_contract_path": "configs/entities/chembl/assay.yaml",
+      "config_path": "configs/entities/chembl/assay.yaml",
+      "contract_ref": "chembl.assay",
+      "contract_test_paths": [
+        "tests/architecture/test_bronze_fixture_replay_baseline.py",
+        "tests/architecture/test_bronze_metadata_builder_guardrails.py"
+      ],
+      "coverage_level": "structural_only",
+      "dataset_layer": "bronze",
+      "entity": "assay",
+      "golden_evidence_paths": [
+        "tests/fixtures/bronze/chembl/assay"
+      ],
+      "pandera_schema_paths": [],
+      "pipeline_name": "chembl_assay",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Silver schema snapshot and contract tests provide moderate layer coverage.",
+      "config_contract_path": "configs/entities/chembl/assay.yaml",
+      "config_path": "configs/entities/chembl/assay.yaml",
+      "contract_ref": "chembl.assay",
+      "contract_test_paths": [
+        "tests/contract/silver_schemas/test_schema_stability.py",
+        "tests/contract/silver_schemas/test_selected_pipeline_schema_drift.py",
+        "tests/contract/silver_schemas/test_validations.py"
+      ],
+      "coverage_level": "moderate",
+      "dataset_layer": "silver",
+      "entity": "assay",
+      "golden_evidence_paths": [
+        "tests/contract/silver_schemas/snapshots/chembl_assay_schema.json"
+      ],
+      "pandera_schema_paths": [
+        "tests/contract/silver_schemas/snapshots/chembl_assay_schema.json"
+      ],
+      "pipeline_name": "chembl_assay",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Gold coverage is strict: contract YAML, Pandera schema, contract tests, and golden DQ evidence are present.",
+      "config_contract_path": "configs/contracts/chembl/assay.yaml",
+      "config_path": "configs/entities/chembl/assay.yaml",
+      "contract_ref": "chembl.assay",
+      "contract_test_paths": [
+        "tests/contract/test_gold_entity_coverage_complete.py",
+        "tests/contract/test_gold_pk_consistency.py",
+        "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/e2e/test_chembl_assay_e2e.py",
+        "tests/integration/chembl/test_assay_extraction_params.py",
+        "tests/unit/repo_backed/application/pipelines/chembl/test_assay_transformer_required_fields.py",
+        "tests/unit/application/pipelines/test_chembl_assay_parameters.py",
+        "tests/unit/domain/entities/test_chembl_activity_assay_dtos.py",
+        "tests/unit/domain/normalization/profiles/test_chembl_assay_enum_fields.py",
+        "tests/unit/domain/normalization/profiles/test_chembl_assay_parameters_profile.py",
+        "tests/unit/domain/normalization/profiles/test_chembl_assay_parameters_units.py",
+        "tests/unit/domain/normalization/profiles/test_chembl_assay_pseudo_nulls.py"
+      ],
+      "coverage_level": "strict",
+      "dataset_layer": "gold",
+      "entity": "assay",
+      "golden_evidence_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "pandera_schema_paths": [
+        "src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py"
+      ],
+      "pipeline_name": "chembl_assay",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Bronze coverage is structural: entity config plus tracked fixture/metadata guardrails; no layer Pandera contract is declared.",
+      "config_contract_path": "configs/entities/chembl/assay_parameters.yaml",
+      "config_path": "configs/entities/chembl/assay_parameters.yaml",
+      "contract_ref": "chembl.assay_parameters",
+      "contract_test_paths": [
+        "tests/architecture/test_bronze_fixture_replay_baseline.py",
+        "tests/architecture/test_bronze_metadata_builder_guardrails.py"
+      ],
+      "coverage_level": "structural_only",
+      "dataset_layer": "bronze",
+      "entity": "assay_parameters",
+      "golden_evidence_paths": [
+        "tests/fixtures/bronze/chembl/assay_parameters"
+      ],
+      "pandera_schema_paths": [],
+      "pipeline_name": "chembl_assay_parameters",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Silver schema snapshot and contract tests provide moderate layer coverage.",
+      "config_contract_path": "configs/entities/chembl/assay_parameters.yaml",
+      "config_path": "configs/entities/chembl/assay_parameters.yaml",
+      "contract_ref": "chembl.assay_parameters",
+      "contract_test_paths": [
+        "tests/contract/silver_schemas/test_schema_stability.py",
+        "tests/contract/silver_schemas/test_selected_pipeline_schema_drift.py",
+        "tests/contract/silver_schemas/test_validations.py"
+      ],
+      "coverage_level": "moderate",
+      "dataset_layer": "silver",
+      "entity": "assay_parameters",
+      "golden_evidence_paths": [
+        "tests/contract/silver_schemas/snapshots/chembl_assay_parameters_schema.json"
+      ],
+      "pandera_schema_paths": [
+        "tests/contract/silver_schemas/snapshots/chembl_assay_parameters_schema.json"
+      ],
+      "pipeline_name": "chembl_assay_parameters",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Gold coverage is strict: contract YAML, Pandera schema, contract tests, and golden DQ evidence are present.",
+      "config_contract_path": "configs/contracts/chembl/assay_parameters.yaml",
+      "config_path": "configs/entities/chembl/assay_parameters.yaml",
+      "contract_ref": "chembl.assay_parameters",
+      "contract_test_paths": [
+        "tests/contract/test_gold_entity_coverage_complete.py",
+        "tests/contract/test_gold_pk_consistency.py",
+        "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/unit/application/pipelines/test_chembl_assay_parameters.py",
+        "tests/unit/domain/normalization/profiles/test_chembl_assay_parameters_profile.py",
+        "tests/unit/domain/normalization/profiles/test_chembl_assay_parameters_units.py"
+      ],
+      "coverage_level": "strict",
+      "dataset_layer": "gold",
+      "entity": "assay_parameters",
+      "golden_evidence_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "pandera_schema_paths": [
+        "src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py"
+      ],
+      "pipeline_name": "chembl_assay_parameters",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Bronze coverage is structural: entity config plus tracked fixture/metadata guardrails; no layer Pandera contract is declared.",
+      "config_contract_path": "configs/entities/chembl/cell_line.yaml",
+      "config_path": "configs/entities/chembl/cell_line.yaml",
+      "contract_ref": "chembl.cell_line",
+      "contract_test_paths": [
+        "tests/architecture/test_bronze_fixture_replay_baseline.py",
+        "tests/architecture/test_bronze_metadata_builder_guardrails.py"
+      ],
+      "coverage_level": "structural_only",
+      "dataset_layer": "bronze",
+      "entity": "cell_line",
+      "golden_evidence_paths": [
+        "tests/fixtures/bronze/chembl/cell_line"
+      ],
+      "pandera_schema_paths": [],
+      "pipeline_name": "chembl_cell_line",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Silver schema snapshot and contract tests provide moderate layer coverage.",
+      "config_contract_path": "configs/entities/chembl/cell_line.yaml",
+      "config_path": "configs/entities/chembl/cell_line.yaml",
+      "contract_ref": "chembl.cell_line",
+      "contract_test_paths": [
+        "tests/contract/silver_schemas/test_schema_stability.py",
+        "tests/contract/silver_schemas/test_selected_pipeline_schema_drift.py",
+        "tests/contract/silver_schemas/test_validations.py"
+      ],
+      "coverage_level": "moderate",
+      "dataset_layer": "silver",
+      "entity": "cell_line",
+      "golden_evidence_paths": [
+        "tests/contract/silver_schemas/snapshots/chembl_cell_line_schema.json"
+      ],
+      "pandera_schema_paths": [
+        "tests/contract/silver_schemas/snapshots/chembl_cell_line_schema.json"
+      ],
+      "pipeline_name": "chembl_cell_line",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Gold coverage is strict: contract YAML, Pandera schema, contract tests, and golden DQ evidence are present.",
+      "config_contract_path": "configs/contracts/chembl/cell_line.yaml",
+      "config_path": "configs/entities/chembl/cell_line.yaml",
+      "contract_ref": "chembl.cell_line",
+      "contract_test_paths": [
+        "tests/contract/test_gold_entity_coverage_complete.py",
+        "tests/contract/test_gold_pk_consistency.py",
+        "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/integration/pipelines/test_chembl_cell_line.py",
+        "tests/unit/application/pipelines/test_cell_line_transformer.py"
+      ],
+      "coverage_level": "strict",
+      "dataset_layer": "gold",
+      "entity": "cell_line",
+      "golden_evidence_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "pandera_schema_paths": [
+        "src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py"
+      ],
+      "pipeline_name": "chembl_cell_line",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Bronze coverage is structural: entity config plus tracked fixture/metadata guardrails; no layer Pandera contract is declared.",
+      "config_contract_path": "configs/entities/chembl/compound_record.yaml",
+      "config_path": "configs/entities/chembl/compound_record.yaml",
+      "contract_ref": "chembl.compound_record",
+      "contract_test_paths": [
+        "tests/architecture/test_bronze_fixture_replay_baseline.py",
+        "tests/architecture/test_bronze_metadata_builder_guardrails.py"
+      ],
+      "coverage_level": "structural_only",
+      "dataset_layer": "bronze",
+      "entity": "compound_record",
+      "golden_evidence_paths": [
+        "tests/fixtures/bronze/chembl/compound_record"
+      ],
+      "pandera_schema_paths": [],
+      "pipeline_name": "chembl_compound_record",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Silver schema snapshot and contract tests provide moderate layer coverage.",
+      "config_contract_path": "configs/entities/chembl/compound_record.yaml",
+      "config_path": "configs/entities/chembl/compound_record.yaml",
+      "contract_ref": "chembl.compound_record",
+      "contract_test_paths": [
+        "tests/contract/silver_schemas/test_schema_stability.py",
+        "tests/contract/silver_schemas/test_selected_pipeline_schema_drift.py",
+        "tests/contract/silver_schemas/test_validations.py"
+      ],
+      "coverage_level": "moderate",
+      "dataset_layer": "silver",
+      "entity": "compound_record",
+      "golden_evidence_paths": [
+        "tests/contract/silver_schemas/snapshots/chembl_compound_record_schema.json"
+      ],
+      "pandera_schema_paths": [
+        "tests/contract/silver_schemas/snapshots/chembl_compound_record_schema.json"
+      ],
+      "pipeline_name": "chembl_compound_record",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Gold coverage is strict: contract YAML, Pandera schema, contract tests, and golden DQ evidence are present.",
+      "config_contract_path": "configs/contracts/chembl/compound_record.yaml",
+      "config_path": "configs/entities/chembl/compound_record.yaml",
+      "contract_ref": "chembl.compound_record",
+      "contract_test_paths": [
+        "tests/contract/test_gold_entity_coverage_complete.py",
+        "tests/contract/test_gold_pk_consistency.py",
+        "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/integration/pipelines/test_chembl_compound_record.py",
+        "tests/unit/application/pipelines/test_compound_record_transformer.py"
+      ],
+      "coverage_level": "strict",
+      "dataset_layer": "gold",
+      "entity": "compound_record",
+      "golden_evidence_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "pandera_schema_paths": [
+        "src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py"
+      ],
+      "pipeline_name": "chembl_compound_record",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Bronze coverage is structural: entity config plus tracked fixture/metadata guardrails; no layer Pandera contract is declared.",
+      "config_contract_path": "configs/entities/chembl/molecule.yaml",
+      "config_path": "configs/entities/chembl/molecule.yaml",
+      "contract_ref": "chembl.molecule",
+      "contract_test_paths": [
+        "tests/architecture/test_bronze_fixture_replay_baseline.py",
+        "tests/architecture/test_bronze_metadata_builder_guardrails.py"
+      ],
+      "coverage_level": "structural_only",
+      "dataset_layer": "bronze",
+      "entity": "molecule",
+      "golden_evidence_paths": [
+        "tests/fixtures/bronze/chembl/molecule"
+      ],
+      "pandera_schema_paths": [],
+      "pipeline_name": "chembl_molecule",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Silver schema snapshot and contract tests provide moderate layer coverage.",
+      "config_contract_path": "configs/entities/chembl/molecule.yaml",
+      "config_path": "configs/entities/chembl/molecule.yaml",
+      "contract_ref": "chembl.molecule",
+      "contract_test_paths": [
+        "tests/contract/silver_schemas/test_schema_stability.py",
+        "tests/contract/silver_schemas/test_selected_pipeline_schema_drift.py",
+        "tests/contract/silver_schemas/test_validations.py"
+      ],
+      "coverage_level": "moderate",
+      "dataset_layer": "silver",
+      "entity": "molecule",
+      "golden_evidence_paths": [
+        "tests/contract/silver_schemas/snapshots/chembl_molecule_schema.json"
+      ],
+      "pandera_schema_paths": [
+        "tests/contract/silver_schemas/snapshots/chembl_molecule_schema.json"
+      ],
+      "pipeline_name": "chembl_molecule",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Gold coverage is strict: contract YAML, Pandera schema, contract tests, and golden DQ evidence are present.",
+      "config_contract_path": "configs/contracts/chembl/molecule.yaml",
+      "config_path": "configs/entities/chembl/molecule.yaml",
+      "contract_ref": "chembl.molecule",
+      "contract_test_paths": [
+        "tests/contract/test_gold_entity_coverage_complete.py",
+        "tests/contract/test_gold_pk_consistency.py",
+        "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/e2e/test_chembl_molecule_e2e.py",
+        "tests/integration/chembl/test_molecule_extraction_params.py",
+        "tests/integration/composite/test_molecule_pipeline.py"
+      ],
+      "coverage_level": "strict",
+      "dataset_layer": "gold",
+      "entity": "molecule",
+      "golden_evidence_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "pandera_schema_paths": [
+        "src/bioetl/domain/contracts/gold/_chembl_molecule_protein_schemas.py"
+      ],
+      "pipeline_name": "chembl_molecule",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Bronze coverage is structural: entity config plus tracked fixture/metadata guardrails; no layer Pandera contract is declared.",
+      "config_contract_path": "configs/entities/chembl/protein_class.yaml",
+      "config_path": "configs/entities/chembl/protein_class.yaml",
+      "contract_ref": "chembl.protein_class",
+      "contract_test_paths": [
+        "tests/architecture/test_bronze_fixture_replay_baseline.py",
+        "tests/architecture/test_bronze_metadata_builder_guardrails.py"
+      ],
+      "coverage_level": "structural_only",
+      "dataset_layer": "bronze",
+      "entity": "protein_class",
+      "golden_evidence_paths": [
+        "tests/fixtures/bronze/chembl/protein_class"
+      ],
+      "pandera_schema_paths": [],
+      "pipeline_name": "chembl_protein_class",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Silver schema snapshot and contract tests provide moderate layer coverage.",
+      "config_contract_path": "configs/entities/chembl/protein_class.yaml",
+      "config_path": "configs/entities/chembl/protein_class.yaml",
+      "contract_ref": "chembl.protein_class",
+      "contract_test_paths": [
+        "tests/contract/silver_schemas/test_schema_stability.py",
+        "tests/contract/silver_schemas/test_selected_pipeline_schema_drift.py",
+        "tests/contract/silver_schemas/test_validations.py"
+      ],
+      "coverage_level": "moderate",
+      "dataset_layer": "silver",
+      "entity": "protein_class",
+      "golden_evidence_paths": [
+        "tests/contract/silver_schemas/snapshots/chembl_protein_class_schema.json"
+      ],
+      "pandera_schema_paths": [
+        "tests/contract/silver_schemas/snapshots/chembl_protein_class_schema.json"
+      ],
+      "pipeline_name": "chembl_protein_class",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Gold coverage is strict: contract YAML, Pandera schema, contract tests, and golden DQ evidence are present.",
+      "config_contract_path": "configs/contracts/chembl/protein_class.yaml",
+      "config_path": "configs/entities/chembl/protein_class.yaml",
+      "contract_ref": "chembl.protein_class",
+      "contract_test_paths": [
+        "tests/architecture/test_chembl_protein_classification_contracts.py",
+        "tests/architecture/test_protein_class_target_type_codegen_contract.py",
+        "tests/contract/test_gold_entity_coverage_complete.py",
+        "tests/contract/test_gold_pk_consistency.py",
+        "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/unit/application/composite/test_target_protein_classification_summary.py",
+        "tests/unit/application/pipelines/chembl/test_target_protein_classification_transformer.py",
+        "tests/unit/application/pipelines/test_protein_class_transformer.py",
+        "tests/unit/application/services/test_protein_classification_resolution.py",
+        "tests/unit/composition/providers/test_chembl_target_protein_classification_data_source.py",
+        "tests/unit/composition/providers/test_chembl_target_protein_classification_helpers.py",
+        "tests/unit/domain/test_protein_class_hierarchy.py",
+        "tests/unit/domain/test_protein_class_target_type.py",
+        "tests/unit/infrastructure/adapters/chembl/test_protein_classification_graph.py",
+        "tests/unit/infrastructure/config/test_protein_class_target_type_loader.py"
+      ],
+      "coverage_level": "strict",
+      "dataset_layer": "gold",
+      "entity": "protein_class",
+      "golden_evidence_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "pandera_schema_paths": [
+        "src/bioetl/domain/contracts/gold/_chembl_molecule_protein_schemas.py"
+      ],
+      "pipeline_name": "chembl_protein_class",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Bronze coverage is structural: entity config plus tracked fixture/metadata guardrails; no layer Pandera contract is declared.",
+      "config_contract_path": "configs/entities/chembl/publication.yaml",
+      "config_path": "configs/entities/chembl/publication.yaml",
+      "contract_ref": "chembl.publication",
+      "contract_test_paths": [
+        "tests/architecture/test_bronze_fixture_replay_baseline.py",
+        "tests/architecture/test_bronze_metadata_builder_guardrails.py"
+      ],
+      "coverage_level": "structural_only",
+      "dataset_layer": "bronze",
+      "entity": "publication",
+      "golden_evidence_paths": [
+        "tests/fixtures/bronze/chembl/publication"
+      ],
+      "pandera_schema_paths": [],
+      "pipeline_name": "chembl_publication",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Silver schema snapshot and contract tests provide moderate layer coverage.",
+      "config_contract_path": "configs/entities/chembl/publication.yaml",
+      "config_path": "configs/entities/chembl/publication.yaml",
+      "contract_ref": "chembl.publication",
+      "contract_test_paths": [
+        "tests/contract/silver_schemas/test_schema_stability.py",
+        "tests/contract/silver_schemas/test_selected_pipeline_schema_drift.py",
+        "tests/contract/silver_schemas/test_validations.py"
+      ],
+      "coverage_level": "moderate",
+      "dataset_layer": "silver",
+      "entity": "publication",
+      "golden_evidence_paths": [
+        "tests/contract/silver_schemas/snapshots/chembl_publication_schema.json"
+      ],
+      "pandera_schema_paths": [
+        "tests/contract/silver_schemas/snapshots/chembl_publication_schema.json"
+      ],
+      "pipeline_name": "chembl_publication",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Gold coverage is strict: contract YAML, Pandera schema, contract tests, and golden DQ evidence are present.",
+      "config_contract_path": "configs/contracts/chembl/publication.yaml",
+      "config_path": "configs/entities/chembl/publication.yaml",
+      "contract_ref": "chembl.publication",
+      "contract_test_paths": [
+        "tests/architecture/test_chembl_publication_subset_policy.py",
+        "tests/architecture/test_force_full_scan_publication.py",
+        "tests/architecture/test_publication_classification_test_bootstrap_policy.py",
+        "tests/architecture/test_publication_type_codegen_contract.py",
+        "tests/architecture/test_publication_type_sync.py",
+        "tests/contract/schemas/test_publication_common_schema.py",
+        "tests/contract/test_gold_entity_coverage_complete.py",
+        "tests/contract/test_gold_pk_consistency.py",
+        "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/contract/test_publication_schema_contracts.py",
+        "tests/contract/test_publication_schema_strict_contracts.py",
+        "tests/e2e/test_chembl_publication_e2e.py",
+        "tests/e2e/test_chembl_publication_term_e2e.py",
+        "tests/e2e/test_crossref_publication_e2e.py",
+        "tests/e2e/test_openalex_publication_e2e.py",
+        "tests/e2e/test_pubmed_publication_e2e.py",
+        "tests/e2e/test_semanticscholar_publication_e2e.py",
+        "tests/integration/chembl/test_publication_extraction_params.py",
+        "tests/integration/config/test_publication_controlled_vocab_parity.py",
+        "tests/integration/config/test_publication_nested_vocabulary_inventory.py",
+        "tests/unit/repo_backed/application/composite/test_publication_schema_columns.py",
+        "tests/unit/application/core/test_publication_term_data_source.py",
+        "tests/unit/application/core/test_publication_term_runtime.py",
+        "tests/unit/repo_backed/application/pipelines/common/test_base_publication_transformer.py",
+        "tests/unit/application/pipelines/common/test_publication_assembly.py",
+        "tests/unit/application/pipelines/common/test_publication_issn.py",
+        "tests/unit/application/pipelines/common/test_publication_parity.py",
+        "tests/unit/application/pipelines/crossref/test_publication_field_extractors.py",
+        "tests/unit/application/pipelines/pubmed/test_pubmed_publication.py",
+        "tests/unit/application/pipelines/test_publication_similarity_transformer.py",
+        "tests/unit/domain/contracts/gold/test_publication_common_schema.py",
+        "tests/unit/domain/entities/test_publication_entities.py",
+        "tests/unit/domain/mapping/test_publication_type_classification.py",
+        "tests/unit/domain/mapping/test_publication_type_mapping.py",
+        "tests/unit/domain/normalization/profiles/test_chembl_publication_term.py",
+        "tests/unit/domain/normalization/test_publication_structured_field_policy_specs.py",
+        "tests/unit/domain/normalization/test_publication_structured_fields.py",
+        "tests/unit/domain/ports/test_logger_and_publication_strategy_modules.py",
+        "tests/unit/domain/registry/test_publication_registry.py",
+        "tests/unit/domain/schemas/chembl/test_chembl_publication_validation.py",
+        "tests/unit/domain/schemas/common/test_publication_base.py",
+        "tests/unit/domain/schemas/crossref/test_crossref_publication_validation.py",
+        "tests/unit/domain/schemas/openalex/test_openalex_publication_validation.py",
+        "tests/unit/domain/schemas/openalex/test_publication.py",
+        "tests/unit/domain/schemas/openalex/test_publication_schema.py",
+        "tests/unit/domain/schemas/pubmed/test_pubmed_publication_validation.py",
+        "tests/unit/domain/schemas/semanticscholar/test_publication.py",
+        "tests/unit/domain/schemas/semanticscholar/test_publication_schema.py",
+        "tests/unit/domain/schemas/semanticscholar/test_semanticscholar_publication_validation.py",
+        "tests/unit/domain/test_publication_fields_mapping.py",
+        "tests/unit/domain/test_runtime_observability_publication_contract.py",
+        "tests/unit/domain/validation/test_publication.py",
+        "tests/unit/domain/value_objects/test_publication_field_groups.py",
+        "tests/unit/domain/value_objects/test_publication_year.py",
+        "tests/unit/domain/value_objects/test_publications.py",
+        "tests/unit/infrastructure/config/test_publication_controlled_vocabulary_loader.py",
+        "tests/unit/infrastructure/config/test_publication_type_classification_loader.py",
+        "tests/unit/infrastructure/storage/test_strict_metadata_lineage_publication.py",
+        "tests/unit/interfaces/cli/commands/test_metrics_publication_integration.py",
+        "tests/unit/repo_backed/application/pipelines/test_chembl_publication_term_transformer.py",
+        "tests/unit/repo_backed/domain/normalization/profiles/test_publication_identifier_profiles.py",
+        "tests/unit/scripts/qa/test_extract_publication_nested_vocab.py"
+      ],
+      "coverage_level": "strict",
+      "dataset_layer": "gold",
+      "entity": "publication",
+      "golden_evidence_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "pandera_schema_paths": [
+        "src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py"
+      ],
+      "pipeline_name": "chembl_publication",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Bronze coverage is structural: entity config plus tracked fixture/metadata guardrails; no layer Pandera contract is declared.",
+      "config_contract_path": "configs/entities/chembl/publication_similarity.yaml",
+      "config_path": "configs/entities/chembl/publication_similarity.yaml",
+      "contract_ref": "chembl.publication_similarity",
+      "contract_test_paths": [
+        "tests/architecture/test_bronze_fixture_replay_baseline.py",
+        "tests/architecture/test_bronze_metadata_builder_guardrails.py"
+      ],
+      "coverage_level": "structural_only",
+      "dataset_layer": "bronze",
+      "entity": "publication_similarity",
+      "golden_evidence_paths": [
+        "tests/fixtures/bronze/chembl/publication_similarity"
+      ],
+      "pandera_schema_paths": [],
+      "pipeline_name": "chembl_publication_similarity",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Silver schema snapshot and contract tests provide moderate layer coverage.",
+      "config_contract_path": "configs/entities/chembl/publication_similarity.yaml",
+      "config_path": "configs/entities/chembl/publication_similarity.yaml",
+      "contract_ref": "chembl.publication_similarity",
+      "contract_test_paths": [
+        "tests/contract/silver_schemas/test_schema_stability.py",
+        "tests/contract/silver_schemas/test_selected_pipeline_schema_drift.py",
+        "tests/contract/silver_schemas/test_validations.py"
+      ],
+      "coverage_level": "moderate",
+      "dataset_layer": "silver",
+      "entity": "publication_similarity",
+      "golden_evidence_paths": [
+        "tests/contract/silver_schemas/snapshots/chembl_publication_similarity_schema.json"
+      ],
+      "pandera_schema_paths": [
+        "tests/contract/silver_schemas/snapshots/chembl_publication_similarity_schema.json"
+      ],
+      "pipeline_name": "chembl_publication_similarity",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Gold coverage is strict: contract YAML, Pandera schema, contract tests, and golden DQ evidence are present.",
+      "config_contract_path": "configs/contracts/chembl/publication_similarity.yaml",
+      "config_path": "configs/entities/chembl/publication_similarity.yaml",
+      "contract_ref": "chembl.publication_similarity",
+      "contract_test_paths": [
+        "tests/contract/test_gold_entity_coverage_complete.py",
+        "tests/contract/test_gold_pk_consistency.py",
+        "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/unit/application/pipelines/test_publication_similarity_transformer.py"
+      ],
+      "coverage_level": "strict",
+      "dataset_layer": "gold",
+      "entity": "publication_similarity",
+      "golden_evidence_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "pandera_schema_paths": [
+        "src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py"
+      ],
+      "pipeline_name": "chembl_publication_similarity",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Bronze coverage is structural: entity config plus tracked fixture/metadata guardrails; no layer Pandera contract is declared.",
+      "config_contract_path": "configs/entities/chembl/publication_term.yaml",
+      "config_path": "configs/entities/chembl/publication_term.yaml",
+      "contract_ref": "chembl.publication_term",
+      "contract_test_paths": [
+        "tests/architecture/test_bronze_fixture_replay_baseline.py",
+        "tests/architecture/test_bronze_metadata_builder_guardrails.py"
+      ],
+      "coverage_level": "structural_only",
+      "dataset_layer": "bronze",
+      "entity": "publication_term",
+      "golden_evidence_paths": [
+        "tests/fixtures/bronze/chembl/publication_term"
+      ],
+      "pandera_schema_paths": [],
+      "pipeline_name": "chembl_publication_term",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Silver schema snapshot and contract tests provide moderate layer coverage.",
+      "config_contract_path": "configs/entities/chembl/publication_term.yaml",
+      "config_path": "configs/entities/chembl/publication_term.yaml",
+      "contract_ref": "chembl.publication_term",
+      "contract_test_paths": [
+        "tests/contract/silver_schemas/test_schema_stability.py",
+        "tests/contract/silver_schemas/test_selected_pipeline_schema_drift.py",
+        "tests/contract/silver_schemas/test_validations.py"
+      ],
+      "coverage_level": "moderate",
+      "dataset_layer": "silver",
+      "entity": "publication_term",
+      "golden_evidence_paths": [
+        "tests/contract/silver_schemas/snapshots/chembl_publication_term_schema.json"
+      ],
+      "pandera_schema_paths": [
+        "tests/contract/silver_schemas/snapshots/chembl_publication_term_schema.json"
+      ],
+      "pipeline_name": "chembl_publication_term",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Gold coverage is strict: contract YAML, Pandera schema, contract tests, and golden DQ evidence are present.",
+      "config_contract_path": "configs/contracts/chembl/publication_term.yaml",
+      "config_path": "configs/entities/chembl/publication_term.yaml",
+      "contract_ref": "chembl.publication_term",
+      "contract_test_paths": [
+        "tests/contract/test_gold_entity_coverage_complete.py",
+        "tests/contract/test_gold_pk_consistency.py",
+        "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/e2e/test_chembl_publication_term_e2e.py",
+        "tests/unit/application/core/test_publication_term_data_source.py",
+        "tests/unit/application/core/test_publication_term_runtime.py",
+        "tests/unit/domain/normalization/profiles/test_chembl_publication_term.py",
+        "tests/unit/repo_backed/application/pipelines/test_chembl_publication_term_transformer.py"
+      ],
+      "coverage_level": "strict",
+      "dataset_layer": "gold",
+      "entity": "publication_term",
+      "golden_evidence_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "pandera_schema_paths": [
+        "src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py"
+      ],
+      "pipeline_name": "chembl_publication_term",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Bronze coverage is structural: entity config plus tracked fixture/metadata guardrails; no layer Pandera contract is declared.",
+      "config_contract_path": "configs/entities/chembl/subcellular_fraction.yaml",
+      "config_path": "configs/entities/chembl/subcellular_fraction.yaml",
+      "contract_ref": "chembl.subcellular_fraction",
+      "contract_test_paths": [
+        "tests/architecture/test_bronze_fixture_replay_baseline.py",
+        "tests/architecture/test_bronze_metadata_builder_guardrails.py"
+      ],
+      "coverage_level": "structural_only",
+      "dataset_layer": "bronze",
+      "entity": "subcellular_fraction",
+      "golden_evidence_paths": [
+        "tests/fixtures/bronze/chembl/subcellular_fraction"
+      ],
+      "pandera_schema_paths": [],
+      "pipeline_name": "chembl_subcellular_fraction",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Silver schema snapshot and contract tests provide moderate layer coverage.",
+      "config_contract_path": "configs/entities/chembl/subcellular_fraction.yaml",
+      "config_path": "configs/entities/chembl/subcellular_fraction.yaml",
+      "contract_ref": "chembl.subcellular_fraction",
+      "contract_test_paths": [
+        "tests/contract/silver_schemas/test_schema_stability.py",
+        "tests/contract/silver_schemas/test_selected_pipeline_schema_drift.py",
+        "tests/contract/silver_schemas/test_validations.py"
+      ],
+      "coverage_level": "moderate",
+      "dataset_layer": "silver",
+      "entity": "subcellular_fraction",
+      "golden_evidence_paths": [
+        "tests/contract/silver_schemas/snapshots/chembl_subcellular_fraction_schema.json"
+      ],
+      "pandera_schema_paths": [
+        "tests/contract/silver_schemas/snapshots/chembl_subcellular_fraction_schema.json"
+      ],
+      "pipeline_name": "chembl_subcellular_fraction",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Gold coverage is strict: contract YAML, Pandera schema, contract tests, and golden DQ evidence are present.",
+      "config_contract_path": "configs/contracts/chembl/subcellular_fraction.yaml",
+      "config_path": "configs/entities/chembl/subcellular_fraction.yaml",
+      "contract_ref": "chembl.subcellular_fraction",
+      "contract_test_paths": [
+        "tests/contract/test_gold_entity_coverage_complete.py",
+        "tests/contract/test_gold_pk_consistency.py",
+        "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/unit/application/core/test_subcellular_fraction_contracts.py",
+        "tests/unit/application/core/test_subcellular_fraction_data_source.py",
+        "tests/unit/application/pipelines/chembl/test_subcellular_fraction_transformer.py"
+      ],
+      "coverage_level": "strict",
+      "dataset_layer": "gold",
+      "entity": "subcellular_fraction",
+      "golden_evidence_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "pandera_schema_paths": [
+        "src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py"
+      ],
+      "pipeline_name": "chembl_subcellular_fraction",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Bronze coverage is structural: entity config plus tracked fixture/metadata guardrails; no layer Pandera contract is declared.",
+      "config_contract_path": "configs/entities/chembl/target.yaml",
+      "config_path": "configs/entities/chembl/target.yaml",
+      "contract_ref": "chembl.target",
+      "contract_test_paths": [
+        "tests/architecture/test_bronze_fixture_replay_baseline.py",
+        "tests/architecture/test_bronze_metadata_builder_guardrails.py"
+      ],
+      "coverage_level": "structural_only",
+      "dataset_layer": "bronze",
+      "entity": "target",
+      "golden_evidence_paths": [
+        "tests/fixtures/bronze/chembl/target"
+      ],
+      "pandera_schema_paths": [],
+      "pipeline_name": "chembl_target",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Silver schema snapshot and contract tests provide moderate layer coverage.",
+      "config_contract_path": "configs/entities/chembl/target.yaml",
+      "config_path": "configs/entities/chembl/target.yaml",
+      "contract_ref": "chembl.target",
+      "contract_test_paths": [
+        "tests/contract/silver_schemas/test_schema_stability.py",
+        "tests/contract/silver_schemas/test_selected_pipeline_schema_drift.py",
+        "tests/contract/silver_schemas/test_validations.py"
+      ],
+      "coverage_level": "moderate",
+      "dataset_layer": "silver",
+      "entity": "target",
+      "golden_evidence_paths": [
+        "tests/contract/silver_schemas/snapshots/chembl_target_schema.json"
+      ],
+      "pandera_schema_paths": [
+        "tests/contract/silver_schemas/snapshots/chembl_target_schema.json"
+      ],
+      "pipeline_name": "chembl_target",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Gold coverage is strict: contract YAML, Pandera schema, contract tests, and golden DQ evidence are present.",
+      "config_contract_path": "configs/contracts/chembl/target.yaml",
+      "config_path": "configs/entities/chembl/target.yaml",
+      "contract_ref": "chembl.target",
+      "contract_test_paths": [
+        "tests/architecture/test_protein_class_target_type_codegen_contract.py",
+        "tests/contract/test_gold_entity_coverage_complete.py",
+        "tests/contract/test_gold_pk_consistency.py",
+        "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/e2e/test_chembl_target_e2e.py",
+        "tests/integration/chembl/test_target_extraction_params.py",
+        "tests/integration/pipelines/test_chembl_target_component.py",
+        "tests/unit/application/composite/test_target_protein_classification_summary.py",
+        "tests/unit/application/pipelines/chembl/test_target_protein_classification_transformer.py",
+        "tests/unit/composition/providers/test_chembl_target_protein_classification_data_source.py",
+        "tests/unit/composition/providers/test_chembl_target_protein_classification_helpers.py",
+        "tests/unit/domain/test_protein_class_target_type.py",
+        "tests/unit/infrastructure/config/test_protein_class_target_type_loader.py",
+        "tests/unit/infrastructure/quality/test_quarterly_targets_validation.py",
+        "tests/unit/scripts/ops/neo4j_memory_sync/test_targeted_apply_and_filters.py"
+      ],
+      "coverage_level": "strict",
+      "dataset_layer": "gold",
+      "entity": "target",
+      "golden_evidence_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "pandera_schema_paths": [
+        "src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py"
+      ],
+      "pipeline_name": "chembl_target",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Bronze coverage is structural: entity config plus tracked fixture/metadata guardrails; no layer Pandera contract is declared.",
+      "config_contract_path": "configs/entities/chembl/target_component.yaml",
+      "config_path": "configs/entities/chembl/target_component.yaml",
+      "contract_ref": "chembl.target_component",
+      "contract_test_paths": [
+        "tests/architecture/test_bronze_fixture_replay_baseline.py",
+        "tests/architecture/test_bronze_metadata_builder_guardrails.py"
+      ],
+      "coverage_level": "structural_only",
+      "dataset_layer": "bronze",
+      "entity": "target_component",
+      "golden_evidence_paths": [
+        "tests/fixtures/bronze/chembl/target_component"
+      ],
+      "pandera_schema_paths": [],
+      "pipeline_name": "chembl_target_component",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Silver schema snapshot and contract tests provide moderate layer coverage.",
+      "config_contract_path": "configs/entities/chembl/target_component.yaml",
+      "config_path": "configs/entities/chembl/target_component.yaml",
+      "contract_ref": "chembl.target_component",
+      "contract_test_paths": [
+        "tests/contract/silver_schemas/test_schema_stability.py",
+        "tests/contract/silver_schemas/test_selected_pipeline_schema_drift.py",
+        "tests/contract/silver_schemas/test_validations.py"
+      ],
+      "coverage_level": "moderate",
+      "dataset_layer": "silver",
+      "entity": "target_component",
+      "golden_evidence_paths": [
+        "tests/contract/silver_schemas/snapshots/chembl_target_component_schema.json"
+      ],
+      "pandera_schema_paths": [
+        "tests/contract/silver_schemas/snapshots/chembl_target_component_schema.json"
+      ],
+      "pipeline_name": "chembl_target_component",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Gold coverage is strict: contract YAML, Pandera schema, contract tests, and golden DQ evidence are present.",
+      "config_contract_path": "configs/contracts/chembl/target_component.yaml",
+      "config_path": "configs/entities/chembl/target_component.yaml",
+      "contract_ref": "chembl.target_component",
+      "contract_test_paths": [
+        "tests/contract/test_gold_entity_coverage_complete.py",
+        "tests/contract/test_gold_pk_consistency.py",
+        "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/integration/pipelines/test_chembl_target_component.py"
+      ],
+      "coverage_level": "strict",
+      "dataset_layer": "gold",
+      "entity": "target_component",
+      "golden_evidence_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "pandera_schema_paths": [
+        "src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py"
+      ],
+      "pipeline_name": "chembl_target_component",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Bronze coverage is structural: entity config plus tracked fixture/metadata guardrails; no layer Pandera contract is declared.",
+      "config_contract_path": "configs/entities/chembl/target_protein_classification.yaml",
+      "config_path": "configs/entities/chembl/target_protein_classification.yaml",
+      "contract_ref": "chembl.target_protein_classification",
+      "contract_test_paths": [
+        "tests/architecture/test_bronze_fixture_replay_baseline.py",
+        "tests/architecture/test_bronze_metadata_builder_guardrails.py"
+      ],
+      "coverage_level": "structural_only",
+      "dataset_layer": "bronze",
+      "entity": "target_protein_classification",
+      "golden_evidence_paths": [
+        "tests/fixtures/bronze/chembl/target_protein_classification"
+      ],
+      "pandera_schema_paths": [],
+      "pipeline_name": "chembl_target_protein_classification",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Silver schema snapshot and contract tests provide moderate layer coverage.",
+      "config_contract_path": "configs/entities/chembl/target_protein_classification.yaml",
+      "config_path": "configs/entities/chembl/target_protein_classification.yaml",
+      "contract_ref": "chembl.target_protein_classification",
+      "contract_test_paths": [
+        "tests/contract/silver_schemas/test_schema_stability.py",
+        "tests/contract/silver_schemas/test_selected_pipeline_schema_drift.py",
+        "tests/contract/silver_schemas/test_validations.py"
+      ],
+      "coverage_level": "moderate",
+      "dataset_layer": "silver",
+      "entity": "target_protein_classification",
+      "golden_evidence_paths": [
+        "tests/contract/silver_schemas/snapshots/chembl_target_protein_classification_schema.json"
+      ],
+      "pandera_schema_paths": [
+        "tests/contract/silver_schemas/snapshots/chembl_target_protein_classification_schema.json"
+      ],
+      "pipeline_name": "chembl_target_protein_classification",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Gold coverage is strict: contract YAML, Pandera schema, contract tests, and golden DQ evidence are present.",
+      "config_contract_path": "configs/contracts/chembl/target_protein_classification.yaml",
+      "config_path": "configs/entities/chembl/target_protein_classification.yaml",
+      "contract_ref": "chembl.target_protein_classification",
+      "contract_test_paths": [
+        "tests/contract/test_gold_entity_coverage_complete.py",
+        "tests/contract/test_gold_pk_consistency.py",
+        "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/unit/application/composite/test_target_protein_classification_summary.py",
+        "tests/unit/application/pipelines/chembl/test_target_protein_classification_transformer.py",
+        "tests/unit/composition/providers/test_chembl_target_protein_classification_data_source.py",
+        "tests/unit/composition/providers/test_chembl_target_protein_classification_helpers.py"
+      ],
+      "coverage_level": "strict",
+      "dataset_layer": "gold",
+      "entity": "target_protein_classification",
+      "golden_evidence_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "pandera_schema_paths": [
+        "src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py"
+      ],
+      "pipeline_name": "chembl_target_protein_classification",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Bronze coverage is structural: entity config plus tracked fixture/metadata guardrails; no layer Pandera contract is declared.",
+      "config_contract_path": "configs/entities/chembl/tissue.yaml",
+      "config_path": "configs/entities/chembl/tissue.yaml",
+      "contract_ref": "chembl.tissue",
+      "contract_test_paths": [
+        "tests/architecture/test_bronze_fixture_replay_baseline.py",
+        "tests/architecture/test_bronze_metadata_builder_guardrails.py"
+      ],
+      "coverage_level": "structural_only",
+      "dataset_layer": "bronze",
+      "entity": "tissue",
+      "golden_evidence_paths": [
+        "tests/fixtures/bronze/chembl/tissue"
+      ],
+      "pandera_schema_paths": [],
+      "pipeline_name": "chembl_tissue",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Silver schema snapshot and contract tests provide moderate layer coverage.",
+      "config_contract_path": "configs/entities/chembl/tissue.yaml",
+      "config_path": "configs/entities/chembl/tissue.yaml",
+      "contract_ref": "chembl.tissue",
+      "contract_test_paths": [
+        "tests/contract/silver_schemas/test_schema_stability.py",
+        "tests/contract/silver_schemas/test_selected_pipeline_schema_drift.py",
+        "tests/contract/silver_schemas/test_validations.py"
+      ],
+      "coverage_level": "moderate",
+      "dataset_layer": "silver",
+      "entity": "tissue",
+      "golden_evidence_paths": [
+        "tests/contract/silver_schemas/snapshots/chembl_tissue_schema.json"
+      ],
+      "pandera_schema_paths": [
+        "tests/contract/silver_schemas/snapshots/chembl_tissue_schema.json"
+      ],
+      "pipeline_name": "chembl_tissue",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Gold coverage is strict: contract YAML, Pandera schema, contract tests, and golden DQ evidence are present.",
+      "config_contract_path": "configs/contracts/chembl/tissue.yaml",
+      "config_path": "configs/entities/chembl/tissue.yaml",
+      "contract_ref": "chembl.tissue",
+      "contract_test_paths": [
+        "tests/contract/test_gold_entity_coverage_complete.py",
+        "tests/contract/test_gold_pk_consistency.py",
+        "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/unit/application/pipelines/chembl/test_tissue_transformer.py",
+        "tests/unit/application/pipelines/chembl/test_tissue_transformer_async.py",
+        "tests/unit/domain/entities/test_tissue.py"
+      ],
+      "coverage_level": "strict",
+      "dataset_layer": "gold",
+      "entity": "tissue",
+      "golden_evidence_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "pandera_schema_paths": [
+        "src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py"
+      ],
+      "pipeline_name": "chembl_tissue",
+      "provider": "chembl"
+    },
+    {
+      "classification_reason": "Composite pipelines do not own a provider Bronze capture layer.",
+      "config_contract_path": "configs/entities/composite/activity.yaml",
+      "config_path": "configs/entities/composite/activity.yaml",
+      "contract_ref": "composite.activity",
+      "contract_test_paths": [],
+      "coverage_level": "not_applicable",
+      "dataset_layer": "bronze",
+      "entity": "activity",
+      "golden_evidence_paths": [],
+      "pandera_schema_paths": [],
+      "pipeline_name": "composite_activity",
+      "provider": "composite"
+    },
+    {
+      "classification_reason": "No standalone Silver dataset contract is declared for this composite output.",
+      "config_contract_path": "configs/entities/composite/activity.yaml",
+      "config_path": "configs/entities/composite/activity.yaml",
+      "contract_ref": "composite.activity",
+      "contract_test_paths": [],
+      "coverage_level": "not_applicable",
+      "dataset_layer": "silver",
+      "entity": "activity",
+      "golden_evidence_paths": [],
+      "pandera_schema_paths": [],
+      "pipeline_name": "composite_activity",
+      "provider": "composite"
+    },
+    {
+      "classification_reason": "Gold coverage is strict: contract YAML, Pandera schema, contract tests, and golden DQ evidence are present.",
+      "config_contract_path": "configs/contracts/composite/activity.yaml",
+      "config_path": "configs/entities/composite/activity.yaml",
+      "contract_ref": "composite.activity",
+      "contract_test_paths": [
+        "tests/contract/test_chembl_activity_flag_policy.py",
+        "tests/contract/test_gold_entity_coverage_complete.py",
+        "tests/contract/test_gold_pk_consistency.py",
+        "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/e2e/test_chembl_activity_e2e.py",
+        "tests/integration/chembl/test_activity_extraction_params.py",
+        "tests/integration/config/test_activity_hash_policy_alignment.py",
+        "tests/integration/pipelines/test_chembl_activity.py",
+        "tests/unit/application/composite/test_composite_activity.py",
+        "tests/unit/application/pipelines/chembl/test_activity_schema_gap.py",
+        "tests/unit/repo_backed/application/pipelines/chembl/test_activity_transformer.py",
+        "tests/unit/application/pipelines/test_activity_transformer_base.py",
+        "tests/unit/application/pipelines/test_chembl_activity_unit.py",
+        "tests/unit/domain/behavior/activity_aggregator/test_init.py",
+        "tests/unit/domain/entities/test_bioactivity_entity.py",
+        "tests/unit/domain/entities/test_chembl_activity_assay_dtos.py",
+        "tests/unit/domain/entities/test_chembl_activity_entity.py",
+        "tests/unit/domain/normalization/profiles/test_chembl_activity.py",
+        "tests/unit/domain/services/test_activity_aggregator.py",
+        "tests/unit/domain/value_objects/test_activity.py",
+        "tests/unit/scripts/test_generate_chembl_activity_field_matrix.py"
+      ],
+      "coverage_level": "strict",
+      "dataset_layer": "gold",
+      "entity": "activity",
+      "golden_evidence_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "pandera_schema_paths": [
+        "src/bioetl/domain/contracts/gold/composite_bioassay.py"
+      ],
+      "pipeline_name": "composite_activity",
+      "provider": "composite"
+    },
+    {
+      "classification_reason": "Composite pipelines do not own a provider Bronze capture layer.",
+      "config_contract_path": "configs/entities/composite/assay.yaml",
+      "config_path": "configs/entities/composite/assay.yaml",
+      "contract_ref": "composite.assay",
+      "contract_test_paths": [],
+      "coverage_level": "not_applicable",
+      "dataset_layer": "bronze",
+      "entity": "assay",
+      "golden_evidence_paths": [],
+      "pandera_schema_paths": [],
+      "pipeline_name": "composite_assay",
+      "provider": "composite"
+    },
+    {
+      "classification_reason": "No standalone Silver dataset contract is declared for this composite output.",
+      "config_contract_path": "configs/entities/composite/assay.yaml",
+      "config_path": "configs/entities/composite/assay.yaml",
+      "contract_ref": "composite.assay",
+      "contract_test_paths": [],
+      "coverage_level": "not_applicable",
+      "dataset_layer": "silver",
+      "entity": "assay",
+      "golden_evidence_paths": [],
+      "pandera_schema_paths": [],
+      "pipeline_name": "composite_assay",
+      "provider": "composite"
+    },
+    {
+      "classification_reason": "Gold coverage is strict: contract YAML, Pandera schema, contract tests, and golden DQ evidence are present.",
+      "config_contract_path": "configs/contracts/composite/assay.yaml",
+      "config_path": "configs/entities/composite/assay.yaml",
+      "contract_ref": "composite.assay",
+      "contract_test_paths": [
+        "tests/contract/test_gold_entity_coverage_complete.py",
+        "tests/contract/test_gold_pk_consistency.py",
+        "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/e2e/test_chembl_assay_e2e.py",
+        "tests/integration/chembl/test_assay_extraction_params.py",
+        "tests/unit/repo_backed/application/pipelines/chembl/test_assay_transformer_required_fields.py",
+        "tests/unit/application/pipelines/test_chembl_assay_parameters.py",
+        "tests/unit/domain/entities/test_chembl_activity_assay_dtos.py",
+        "tests/unit/domain/normalization/profiles/test_chembl_assay_enum_fields.py",
+        "tests/unit/domain/normalization/profiles/test_chembl_assay_parameters_profile.py",
+        "tests/unit/domain/normalization/profiles/test_chembl_assay_parameters_units.py",
+        "tests/unit/domain/normalization/profiles/test_chembl_assay_pseudo_nulls.py"
+      ],
+      "coverage_level": "strict",
+      "dataset_layer": "gold",
+      "entity": "assay",
+      "golden_evidence_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "pandera_schema_paths": [
+        "src/bioetl/domain/contracts/gold/composite_bioassay.py"
+      ],
+      "pipeline_name": "composite_assay",
+      "provider": "composite"
+    },
+    {
+      "classification_reason": "Composite pipelines do not own a provider Bronze capture layer.",
+      "config_contract_path": "configs/entities/composite/molecule.yaml",
+      "config_path": "configs/entities/composite/molecule.yaml",
+      "contract_ref": "composite.molecule",
+      "contract_test_paths": [],
+      "coverage_level": "not_applicable",
+      "dataset_layer": "bronze",
+      "entity": "molecule",
+      "golden_evidence_paths": [],
+      "pandera_schema_paths": [],
+      "pipeline_name": "composite_molecule",
+      "provider": "composite"
+    },
+    {
+      "classification_reason": "No standalone Silver dataset contract is declared for this composite output.",
+      "config_contract_path": "configs/entities/composite/molecule.yaml",
+      "config_path": "configs/entities/composite/molecule.yaml",
+      "contract_ref": "composite.molecule",
+      "contract_test_paths": [],
+      "coverage_level": "not_applicable",
+      "dataset_layer": "silver",
+      "entity": "molecule",
+      "golden_evidence_paths": [],
+      "pandera_schema_paths": [],
+      "pipeline_name": "composite_molecule",
+      "provider": "composite"
+    },
+    {
+      "classification_reason": "Gold coverage is strict: contract YAML, Pandera schema, contract tests, and golden DQ evidence are present.",
+      "config_contract_path": "configs/contracts/composite/molecule.yaml",
+      "config_path": "configs/entities/composite/molecule.yaml",
+      "contract_ref": "composite.molecule",
+      "contract_test_paths": [
+        "tests/contract/test_gold_entity_coverage_complete.py",
+        "tests/contract/test_gold_pk_consistency.py",
+        "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/e2e/test_chembl_molecule_e2e.py",
+        "tests/integration/chembl/test_molecule_extraction_params.py",
+        "tests/integration/composite/test_molecule_pipeline.py"
+      ],
+      "coverage_level": "strict",
+      "dataset_layer": "gold",
+      "entity": "molecule",
+      "golden_evidence_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "pandera_schema_paths": [
+        "src/bioetl/domain/contracts/gold/composite_molecule.py"
+      ],
+      "pipeline_name": "composite_molecule",
+      "provider": "composite"
+    },
+    {
+      "classification_reason": "Composite pipelines do not own a provider Bronze capture layer.",
+      "config_contract_path": "configs/entities/composite/publication.yaml",
+      "config_path": "configs/entities/composite/publication.yaml",
+      "contract_ref": "composite.publication",
+      "contract_test_paths": [],
+      "coverage_level": "not_applicable",
+      "dataset_layer": "bronze",
+      "entity": "publication",
+      "golden_evidence_paths": [],
+      "pandera_schema_paths": [],
+      "pipeline_name": "composite_publication",
+      "provider": "composite"
+    },
+    {
+      "classification_reason": "No standalone Silver dataset contract is declared for this composite output.",
+      "config_contract_path": "configs/entities/composite/publication.yaml",
+      "config_path": "configs/entities/composite/publication.yaml",
+      "contract_ref": "composite.publication",
+      "contract_test_paths": [],
+      "coverage_level": "not_applicable",
+      "dataset_layer": "silver",
+      "entity": "publication",
+      "golden_evidence_paths": [],
+      "pandera_schema_paths": [],
+      "pipeline_name": "composite_publication",
+      "provider": "composite"
+    },
+    {
+      "classification_reason": "Gold coverage is strict: contract YAML, Pandera schema, contract tests, and golden DQ evidence are present.",
+      "config_contract_path": "configs/contracts/composite/publication.yaml",
+      "config_path": "configs/entities/composite/publication.yaml",
+      "contract_ref": "composite.publication",
+      "contract_test_paths": [
+        "tests/architecture/test_chembl_publication_subset_policy.py",
+        "tests/architecture/test_force_full_scan_publication.py",
+        "tests/architecture/test_publication_classification_test_bootstrap_policy.py",
+        "tests/architecture/test_publication_type_codegen_contract.py",
+        "tests/architecture/test_publication_type_sync.py",
+        "tests/contract/schemas/test_publication_common_schema.py",
+        "tests/contract/test_gold_entity_coverage_complete.py",
+        "tests/contract/test_gold_pk_consistency.py",
+        "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/contract/test_publication_schema_contracts.py",
+        "tests/contract/test_publication_schema_strict_contracts.py",
+        "tests/e2e/test_chembl_publication_e2e.py",
+        "tests/e2e/test_chembl_publication_term_e2e.py",
+        "tests/e2e/test_crossref_publication_e2e.py",
+        "tests/e2e/test_openalex_publication_e2e.py",
+        "tests/e2e/test_pubmed_publication_e2e.py",
+        "tests/e2e/test_semanticscholar_publication_e2e.py",
+        "tests/integration/chembl/test_publication_extraction_params.py",
+        "tests/integration/config/test_publication_controlled_vocab_parity.py",
+        "tests/integration/config/test_publication_nested_vocabulary_inventory.py",
+        "tests/unit/repo_backed/application/composite/test_publication_schema_columns.py",
+        "tests/unit/application/core/test_publication_term_data_source.py",
+        "tests/unit/application/core/test_publication_term_runtime.py",
+        "tests/unit/repo_backed/application/pipelines/common/test_base_publication_transformer.py",
+        "tests/unit/application/pipelines/common/test_publication_assembly.py",
+        "tests/unit/application/pipelines/common/test_publication_issn.py",
+        "tests/unit/application/pipelines/common/test_publication_parity.py",
+        "tests/unit/application/pipelines/crossref/test_publication_field_extractors.py",
+        "tests/unit/application/pipelines/pubmed/test_pubmed_publication.py",
+        "tests/unit/application/pipelines/test_publication_similarity_transformer.py",
+        "tests/unit/domain/contracts/gold/test_publication_common_schema.py",
+        "tests/unit/domain/entities/test_publication_entities.py",
+        "tests/unit/domain/mapping/test_publication_type_classification.py",
+        "tests/unit/domain/mapping/test_publication_type_mapping.py",
+        "tests/unit/domain/normalization/profiles/test_chembl_publication_term.py",
+        "tests/unit/domain/normalization/test_publication_structured_field_policy_specs.py",
+        "tests/unit/domain/normalization/test_publication_structured_fields.py",
+        "tests/unit/domain/ports/test_logger_and_publication_strategy_modules.py",
+        "tests/unit/domain/registry/test_publication_registry.py",
+        "tests/unit/domain/schemas/chembl/test_chembl_publication_validation.py",
+        "tests/unit/domain/schemas/common/test_publication_base.py",
+        "tests/unit/domain/schemas/crossref/test_crossref_publication_validation.py",
+        "tests/unit/domain/schemas/openalex/test_openalex_publication_validation.py",
+        "tests/unit/domain/schemas/openalex/test_publication.py",
+        "tests/unit/domain/schemas/openalex/test_publication_schema.py",
+        "tests/unit/domain/schemas/pubmed/test_pubmed_publication_validation.py",
+        "tests/unit/domain/schemas/semanticscholar/test_publication.py",
+        "tests/unit/domain/schemas/semanticscholar/test_publication_schema.py",
+        "tests/unit/domain/schemas/semanticscholar/test_semanticscholar_publication_validation.py",
+        "tests/unit/domain/test_publication_fields_mapping.py",
+        "tests/unit/domain/test_runtime_observability_publication_contract.py",
+        "tests/unit/domain/validation/test_publication.py",
+        "tests/unit/domain/value_objects/test_publication_field_groups.py",
+        "tests/unit/domain/value_objects/test_publication_year.py",
+        "tests/unit/domain/value_objects/test_publications.py",
+        "tests/unit/infrastructure/config/test_publication_controlled_vocabulary_loader.py",
+        "tests/unit/infrastructure/config/test_publication_type_classification_loader.py",
+        "tests/unit/infrastructure/storage/test_strict_metadata_lineage_publication.py",
+        "tests/unit/interfaces/cli/commands/test_metrics_publication_integration.py",
+        "tests/unit/repo_backed/application/pipelines/test_chembl_publication_term_transformer.py",
+        "tests/unit/repo_backed/domain/normalization/profiles/test_publication_identifier_profiles.py",
+        "tests/unit/scripts/qa/test_extract_publication_nested_vocab.py"
+      ],
+      "coverage_level": "strict",
+      "dataset_layer": "gold",
+      "entity": "publication",
+      "golden_evidence_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "pandera_schema_paths": [
+        "src/bioetl/domain/contracts/gold/composite_publication.py"
+      ],
+      "pipeline_name": "composite_publication",
+      "provider": "composite"
+    },
+    {
+      "classification_reason": "Composite pipelines do not own a provider Bronze capture layer.",
+      "config_contract_path": "configs/entities/composite/target.yaml",
+      "config_path": "configs/entities/composite/target.yaml",
+      "contract_ref": "composite.target",
+      "contract_test_paths": [],
+      "coverage_level": "not_applicable",
+      "dataset_layer": "bronze",
+      "entity": "target",
+      "golden_evidence_paths": [],
+      "pandera_schema_paths": [],
+      "pipeline_name": "composite_target",
+      "provider": "composite"
+    },
+    {
+      "classification_reason": "No standalone Silver dataset contract is declared for this composite output.",
+      "config_contract_path": "configs/entities/composite/target.yaml",
+      "config_path": "configs/entities/composite/target.yaml",
+      "contract_ref": "composite.target",
+      "contract_test_paths": [],
+      "coverage_level": "not_applicable",
+      "dataset_layer": "silver",
+      "entity": "target",
+      "golden_evidence_paths": [],
+      "pandera_schema_paths": [],
+      "pipeline_name": "composite_target",
+      "provider": "composite"
+    },
+    {
+      "classification_reason": "Gold coverage is strict: contract YAML, Pandera schema, contract tests, and golden DQ evidence are present.",
+      "config_contract_path": "configs/contracts/composite/target.yaml",
+      "config_path": "configs/entities/composite/target.yaml",
+      "contract_ref": "composite.target",
+      "contract_test_paths": [
+        "tests/architecture/test_protein_class_target_type_codegen_contract.py",
+        "tests/contract/test_gold_entity_coverage_complete.py",
+        "tests/contract/test_gold_pk_consistency.py",
+        "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/e2e/test_chembl_target_e2e.py",
+        "tests/integration/chembl/test_target_extraction_params.py",
+        "tests/integration/pipelines/test_chembl_target_component.py",
+        "tests/unit/application/composite/test_target_protein_classification_summary.py",
+        "tests/unit/application/pipelines/chembl/test_target_protein_classification_transformer.py",
+        "tests/unit/composition/providers/test_chembl_target_protein_classification_data_source.py",
+        "tests/unit/composition/providers/test_chembl_target_protein_classification_helpers.py",
+        "tests/unit/domain/test_protein_class_target_type.py",
+        "tests/unit/infrastructure/config/test_protein_class_target_type_loader.py",
+        "tests/unit/infrastructure/quality/test_quarterly_targets_validation.py",
+        "tests/unit/scripts/ops/neo4j_memory_sync/test_targeted_apply_and_filters.py"
+      ],
+      "coverage_level": "strict",
+      "dataset_layer": "gold",
+      "entity": "target",
+      "golden_evidence_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "pandera_schema_paths": [
+        "src/bioetl/domain/contracts/gold/composite_bioassay.py"
+      ],
+      "pipeline_name": "composite_target",
+      "provider": "composite"
+    },
+    {
+      "classification_reason": "Bronze coverage is structural: entity config plus tracked fixture/metadata guardrails; no layer Pandera contract is declared.",
+      "config_contract_path": "configs/entities/crossref/publication.yaml",
+      "config_path": "configs/entities/crossref/publication.yaml",
+      "contract_ref": "crossref.publication",
+      "contract_test_paths": [
+        "tests/architecture/test_bronze_fixture_replay_baseline.py",
+        "tests/architecture/test_bronze_metadata_builder_guardrails.py"
+      ],
+      "coverage_level": "structural_only",
+      "dataset_layer": "bronze",
+      "entity": "publication",
+      "golden_evidence_paths": [
+        "tests/fixtures/bronze/crossref/publication"
+      ],
+      "pandera_schema_paths": [],
+      "pipeline_name": "crossref_publication",
+      "provider": "crossref"
+    },
+    {
+      "classification_reason": "Silver schema snapshot and contract tests provide moderate layer coverage.",
+      "config_contract_path": "configs/entities/crossref/publication.yaml",
+      "config_path": "configs/entities/crossref/publication.yaml",
+      "contract_ref": "crossref.publication",
+      "contract_test_paths": [
+        "tests/contract/silver_schemas/test_schema_stability.py",
+        "tests/contract/silver_schemas/test_selected_pipeline_schema_drift.py",
+        "tests/contract/silver_schemas/test_validations.py"
+      ],
+      "coverage_level": "moderate",
+      "dataset_layer": "silver",
+      "entity": "publication",
+      "golden_evidence_paths": [
+        "tests/contract/silver_schemas/snapshots/crossref_publication_schema.json"
+      ],
+      "pandera_schema_paths": [
+        "tests/contract/silver_schemas/snapshots/crossref_publication_schema.json"
+      ],
+      "pipeline_name": "crossref_publication",
+      "provider": "crossref"
+    },
+    {
+      "classification_reason": "Gold coverage is strict: contract YAML, Pandera schema, contract tests, and golden DQ evidence are present.",
+      "config_contract_path": "configs/contracts/crossref/publication.yaml",
+      "config_path": "configs/entities/crossref/publication.yaml",
+      "contract_ref": "crossref.publication",
+      "contract_test_paths": [
+        "tests/architecture/test_chembl_publication_subset_policy.py",
+        "tests/architecture/test_force_full_scan_publication.py",
+        "tests/architecture/test_publication_classification_test_bootstrap_policy.py",
+        "tests/architecture/test_publication_type_codegen_contract.py",
+        "tests/architecture/test_publication_type_sync.py",
+        "tests/contract/schemas/test_publication_common_schema.py",
+        "tests/contract/test_gold_entity_coverage_complete.py",
+        "tests/contract/test_gold_pk_consistency.py",
+        "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/contract/test_publication_schema_contracts.py",
+        "tests/contract/test_publication_schema_strict_contracts.py",
+        "tests/e2e/test_chembl_publication_e2e.py",
+        "tests/e2e/test_chembl_publication_term_e2e.py",
+        "tests/e2e/test_crossref_publication_e2e.py",
+        "tests/e2e/test_openalex_publication_e2e.py",
+        "tests/e2e/test_pubmed_publication_e2e.py",
+        "tests/e2e/test_semanticscholar_publication_e2e.py",
+        "tests/integration/chembl/test_publication_extraction_params.py",
+        "tests/integration/config/test_publication_controlled_vocab_parity.py",
+        "tests/integration/config/test_publication_nested_vocabulary_inventory.py",
+        "tests/unit/repo_backed/application/composite/test_publication_schema_columns.py",
+        "tests/unit/application/core/test_publication_term_data_source.py",
+        "tests/unit/application/core/test_publication_term_runtime.py",
+        "tests/unit/repo_backed/application/pipelines/common/test_base_publication_transformer.py",
+        "tests/unit/application/pipelines/common/test_publication_assembly.py",
+        "tests/unit/application/pipelines/common/test_publication_issn.py",
+        "tests/unit/application/pipelines/common/test_publication_parity.py",
+        "tests/unit/application/pipelines/crossref/test_publication_field_extractors.py",
+        "tests/unit/application/pipelines/pubmed/test_pubmed_publication.py",
+        "tests/unit/application/pipelines/test_publication_similarity_transformer.py",
+        "tests/unit/domain/contracts/gold/test_publication_common_schema.py",
+        "tests/unit/domain/entities/test_publication_entities.py",
+        "tests/unit/domain/mapping/test_publication_type_classification.py",
+        "tests/unit/domain/mapping/test_publication_type_mapping.py",
+        "tests/unit/domain/normalization/profiles/test_chembl_publication_term.py",
+        "tests/unit/domain/normalization/test_publication_structured_field_policy_specs.py",
+        "tests/unit/domain/normalization/test_publication_structured_fields.py",
+        "tests/unit/domain/ports/test_logger_and_publication_strategy_modules.py",
+        "tests/unit/domain/registry/test_publication_registry.py",
+        "tests/unit/domain/schemas/chembl/test_chembl_publication_validation.py",
+        "tests/unit/domain/schemas/common/test_publication_base.py",
+        "tests/unit/domain/schemas/crossref/test_crossref_publication_validation.py",
+        "tests/unit/domain/schemas/openalex/test_openalex_publication_validation.py",
+        "tests/unit/domain/schemas/openalex/test_publication.py",
+        "tests/unit/domain/schemas/openalex/test_publication_schema.py",
+        "tests/unit/domain/schemas/pubmed/test_pubmed_publication_validation.py",
+        "tests/unit/domain/schemas/semanticscholar/test_publication.py",
+        "tests/unit/domain/schemas/semanticscholar/test_publication_schema.py",
+        "tests/unit/domain/schemas/semanticscholar/test_semanticscholar_publication_validation.py",
+        "tests/unit/domain/test_publication_fields_mapping.py",
+        "tests/unit/domain/test_runtime_observability_publication_contract.py",
+        "tests/unit/domain/validation/test_publication.py",
+        "tests/unit/domain/value_objects/test_publication_field_groups.py",
+        "tests/unit/domain/value_objects/test_publication_year.py",
+        "tests/unit/domain/value_objects/test_publications.py",
+        "tests/unit/infrastructure/config/test_publication_controlled_vocabulary_loader.py",
+        "tests/unit/infrastructure/config/test_publication_type_classification_loader.py",
+        "tests/unit/infrastructure/storage/test_strict_metadata_lineage_publication.py",
+        "tests/unit/interfaces/cli/commands/test_metrics_publication_integration.py",
+        "tests/unit/repo_backed/application/pipelines/test_chembl_publication_term_transformer.py",
+        "tests/unit/repo_backed/domain/normalization/profiles/test_publication_identifier_profiles.py",
+        "tests/unit/scripts/qa/test_extract_publication_nested_vocab.py"
+      ],
+      "coverage_level": "strict",
+      "dataset_layer": "gold",
+      "entity": "publication",
+      "golden_evidence_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "pandera_schema_paths": [
+        "src/bioetl/domain/contracts/gold/publications_crossref.py"
+      ],
+      "pipeline_name": "crossref_publication",
+      "provider": "crossref"
+    },
+    {
+      "classification_reason": "Bronze coverage is structural: entity config plus tracked fixture/metadata guardrails; no layer Pandera contract is declared.",
+      "config_contract_path": "configs/entities/openalex/publication.yaml",
+      "config_path": "configs/entities/openalex/publication.yaml",
+      "contract_ref": "openalex.publication",
+      "contract_test_paths": [
+        "tests/architecture/test_bronze_fixture_replay_baseline.py",
+        "tests/architecture/test_bronze_metadata_builder_guardrails.py"
+      ],
+      "coverage_level": "structural_only",
+      "dataset_layer": "bronze",
+      "entity": "publication",
+      "golden_evidence_paths": [
+        "tests/fixtures/bronze/openalex/publication"
+      ],
+      "pandera_schema_paths": [],
+      "pipeline_name": "openalex_publication",
+      "provider": "openalex"
+    },
+    {
+      "classification_reason": "Silver schema snapshot and contract tests provide moderate layer coverage.",
+      "config_contract_path": "configs/entities/openalex/publication.yaml",
+      "config_path": "configs/entities/openalex/publication.yaml",
+      "contract_ref": "openalex.publication",
+      "contract_test_paths": [
+        "tests/contract/silver_schemas/test_schema_stability.py",
+        "tests/contract/silver_schemas/test_selected_pipeline_schema_drift.py",
+        "tests/contract/silver_schemas/test_validations.py"
+      ],
+      "coverage_level": "moderate",
+      "dataset_layer": "silver",
+      "entity": "publication",
+      "golden_evidence_paths": [
+        "tests/contract/silver_schemas/snapshots/openalex_publication_schema.json"
+      ],
+      "pandera_schema_paths": [
+        "tests/contract/silver_schemas/snapshots/openalex_publication_schema.json"
+      ],
+      "pipeline_name": "openalex_publication",
+      "provider": "openalex"
+    },
+    {
+      "classification_reason": "Gold coverage is strict: contract YAML, Pandera schema, contract tests, and golden DQ evidence are present.",
+      "config_contract_path": "configs/contracts/openalex/publication.yaml",
+      "config_path": "configs/entities/openalex/publication.yaml",
+      "contract_ref": "openalex.publication",
+      "contract_test_paths": [
+        "tests/architecture/test_chembl_publication_subset_policy.py",
+        "tests/architecture/test_force_full_scan_publication.py",
+        "tests/architecture/test_publication_classification_test_bootstrap_policy.py",
+        "tests/architecture/test_publication_type_codegen_contract.py",
+        "tests/architecture/test_publication_type_sync.py",
+        "tests/contract/schemas/test_publication_common_schema.py",
+        "tests/contract/test_gold_entity_coverage_complete.py",
+        "tests/contract/test_gold_pk_consistency.py",
+        "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/contract/test_publication_schema_contracts.py",
+        "tests/contract/test_publication_schema_strict_contracts.py",
+        "tests/e2e/test_chembl_publication_e2e.py",
+        "tests/e2e/test_chembl_publication_term_e2e.py",
+        "tests/e2e/test_crossref_publication_e2e.py",
+        "tests/e2e/test_openalex_publication_e2e.py",
+        "tests/e2e/test_pubmed_publication_e2e.py",
+        "tests/e2e/test_semanticscholar_publication_e2e.py",
+        "tests/integration/chembl/test_publication_extraction_params.py",
+        "tests/integration/config/test_publication_controlled_vocab_parity.py",
+        "tests/integration/config/test_publication_nested_vocabulary_inventory.py",
+        "tests/unit/repo_backed/application/composite/test_publication_schema_columns.py",
+        "tests/unit/application/core/test_publication_term_data_source.py",
+        "tests/unit/application/core/test_publication_term_runtime.py",
+        "tests/unit/repo_backed/application/pipelines/common/test_base_publication_transformer.py",
+        "tests/unit/application/pipelines/common/test_publication_assembly.py",
+        "tests/unit/application/pipelines/common/test_publication_issn.py",
+        "tests/unit/application/pipelines/common/test_publication_parity.py",
+        "tests/unit/application/pipelines/crossref/test_publication_field_extractors.py",
+        "tests/unit/application/pipelines/pubmed/test_pubmed_publication.py",
+        "tests/unit/application/pipelines/test_publication_similarity_transformer.py",
+        "tests/unit/domain/contracts/gold/test_publication_common_schema.py",
+        "tests/unit/domain/entities/test_publication_entities.py",
+        "tests/unit/domain/mapping/test_publication_type_classification.py",
+        "tests/unit/domain/mapping/test_publication_type_mapping.py",
+        "tests/unit/domain/normalization/profiles/test_chembl_publication_term.py",
+        "tests/unit/domain/normalization/test_publication_structured_field_policy_specs.py",
+        "tests/unit/domain/normalization/test_publication_structured_fields.py",
+        "tests/unit/domain/ports/test_logger_and_publication_strategy_modules.py",
+        "tests/unit/domain/registry/test_publication_registry.py",
+        "tests/unit/domain/schemas/chembl/test_chembl_publication_validation.py",
+        "tests/unit/domain/schemas/common/test_publication_base.py",
+        "tests/unit/domain/schemas/crossref/test_crossref_publication_validation.py",
+        "tests/unit/domain/schemas/openalex/test_openalex_publication_validation.py",
+        "tests/unit/domain/schemas/openalex/test_publication.py",
+        "tests/unit/domain/schemas/openalex/test_publication_schema.py",
+        "tests/unit/domain/schemas/pubmed/test_pubmed_publication_validation.py",
+        "tests/unit/domain/schemas/semanticscholar/test_publication.py",
+        "tests/unit/domain/schemas/semanticscholar/test_publication_schema.py",
+        "tests/unit/domain/schemas/semanticscholar/test_semanticscholar_publication_validation.py",
+        "tests/unit/domain/test_publication_fields_mapping.py",
+        "tests/unit/domain/test_runtime_observability_publication_contract.py",
+        "tests/unit/domain/validation/test_publication.py",
+        "tests/unit/domain/value_objects/test_publication_field_groups.py",
+        "tests/unit/domain/value_objects/test_publication_year.py",
+        "tests/unit/domain/value_objects/test_publications.py",
+        "tests/unit/infrastructure/config/test_publication_controlled_vocabulary_loader.py",
+        "tests/unit/infrastructure/config/test_publication_type_classification_loader.py",
+        "tests/unit/infrastructure/storage/test_strict_metadata_lineage_publication.py",
+        "tests/unit/interfaces/cli/commands/test_metrics_publication_integration.py",
+        "tests/unit/repo_backed/application/pipelines/test_chembl_publication_term_transformer.py",
+        "tests/unit/repo_backed/domain/normalization/profiles/test_publication_identifier_profiles.py",
+        "tests/unit/scripts/qa/test_extract_publication_nested_vocab.py"
+      ],
+      "coverage_level": "strict",
+      "dataset_layer": "gold",
+      "entity": "publication",
+      "golden_evidence_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "pandera_schema_paths": [
+        "src/bioetl/domain/contracts/gold/publications_openalex.py"
+      ],
+      "pipeline_name": "openalex_publication",
+      "provider": "openalex"
+    },
+    {
+      "classification_reason": "Bronze coverage is structural: entity config plus tracked fixture/metadata guardrails; no layer Pandera contract is declared.",
+      "config_contract_path": "configs/entities/pubchem/compound.yaml",
+      "config_path": "configs/entities/pubchem/compound.yaml",
+      "contract_ref": "pubchem.compound",
+      "contract_test_paths": [
+        "tests/architecture/test_bronze_fixture_replay_baseline.py",
+        "tests/architecture/test_bronze_metadata_builder_guardrails.py"
+      ],
+      "coverage_level": "structural_only",
+      "dataset_layer": "bronze",
+      "entity": "compound",
+      "golden_evidence_paths": [
+        "tests/fixtures/bronze/pubchem/compound"
+      ],
+      "pandera_schema_paths": [],
+      "pipeline_name": "pubchem_compound",
+      "provider": "pubchem"
+    },
+    {
+      "classification_reason": "Silver schema snapshot and contract tests provide moderate layer coverage.",
+      "config_contract_path": "configs/entities/pubchem/compound.yaml",
+      "config_path": "configs/entities/pubchem/compound.yaml",
+      "contract_ref": "pubchem.compound",
+      "contract_test_paths": [
+        "tests/contract/silver_schemas/test_schema_stability.py",
+        "tests/contract/silver_schemas/test_selected_pipeline_schema_drift.py",
+        "tests/contract/silver_schemas/test_validations.py"
+      ],
+      "coverage_level": "moderate",
+      "dataset_layer": "silver",
+      "entity": "compound",
+      "golden_evidence_paths": [
+        "tests/contract/silver_schemas/snapshots/pubchem_compound_schema.json"
+      ],
+      "pandera_schema_paths": [
+        "tests/contract/silver_schemas/snapshots/pubchem_compound_schema.json"
+      ],
+      "pipeline_name": "pubchem_compound",
+      "provider": "pubchem"
+    },
+    {
+      "classification_reason": "Gold coverage is strict: contract YAML, Pandera schema, contract tests, and golden DQ evidence are present.",
+      "config_contract_path": "configs/contracts/pubchem/compound.yaml",
+      "config_path": "configs/entities/pubchem/compound.yaml",
+      "contract_ref": "pubchem.compound",
+      "contract_test_paths": [
+        "tests/contract/test_gold_entity_coverage_complete.py",
+        "tests/contract/test_gold_pk_consistency.py",
+        "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/e2e/test_pubchem_compound_e2e.py",
+        "tests/integration/pipelines/test_chembl_compound_record.py",
+        "tests/unit/application/pipelines/test_compound_record_transformer.py",
+        "tests/unit/domain/value_objects/test_compound_ids.py"
+      ],
+      "coverage_level": "strict",
+      "dataset_layer": "gold",
+      "entity": "compound",
+      "golden_evidence_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "pandera_schema_paths": [
+        "src/bioetl/domain/contracts/gold/pubchem.py"
+      ],
+      "pipeline_name": "pubchem_compound",
+      "provider": "pubchem"
+    },
+    {
+      "classification_reason": "Bronze coverage is structural: entity config plus tracked fixture/metadata guardrails; no layer Pandera contract is declared.",
+      "config_contract_path": "configs/entities/pubmed/publication.yaml",
+      "config_path": "configs/entities/pubmed/publication.yaml",
+      "contract_ref": "pubmed.publication",
+      "contract_test_paths": [
+        "tests/architecture/test_bronze_fixture_replay_baseline.py",
+        "tests/architecture/test_bronze_metadata_builder_guardrails.py"
+      ],
+      "coverage_level": "structural_only",
+      "dataset_layer": "bronze",
+      "entity": "publication",
+      "golden_evidence_paths": [
+        "tests/fixtures/bronze/pubmed/publication"
+      ],
+      "pandera_schema_paths": [],
+      "pipeline_name": "pubmed_publication",
+      "provider": "pubmed"
+    },
+    {
+      "classification_reason": "Silver schema snapshot and contract tests provide moderate layer coverage.",
+      "config_contract_path": "configs/entities/pubmed/publication.yaml",
+      "config_path": "configs/entities/pubmed/publication.yaml",
+      "contract_ref": "pubmed.publication",
+      "contract_test_paths": [
+        "tests/contract/silver_schemas/test_schema_stability.py",
+        "tests/contract/silver_schemas/test_selected_pipeline_schema_drift.py",
+        "tests/contract/silver_schemas/test_validations.py"
+      ],
+      "coverage_level": "moderate",
+      "dataset_layer": "silver",
+      "entity": "publication",
+      "golden_evidence_paths": [
+        "tests/contract/silver_schemas/snapshots/pubmed_publication_schema.json"
+      ],
+      "pandera_schema_paths": [
+        "tests/contract/silver_schemas/snapshots/pubmed_publication_schema.json"
+      ],
+      "pipeline_name": "pubmed_publication",
+      "provider": "pubmed"
+    },
+    {
+      "classification_reason": "Gold coverage is strict: contract YAML, Pandera schema, contract tests, and golden DQ evidence are present.",
+      "config_contract_path": "configs/contracts/pubmed/publication.yaml",
+      "config_path": "configs/entities/pubmed/publication.yaml",
+      "contract_ref": "pubmed.publication",
+      "contract_test_paths": [
+        "tests/architecture/test_chembl_publication_subset_policy.py",
+        "tests/architecture/test_force_full_scan_publication.py",
+        "tests/architecture/test_publication_classification_test_bootstrap_policy.py",
+        "tests/architecture/test_publication_type_codegen_contract.py",
+        "tests/architecture/test_publication_type_sync.py",
+        "tests/contract/schemas/test_publication_common_schema.py",
+        "tests/contract/test_gold_entity_coverage_complete.py",
+        "tests/contract/test_gold_pk_consistency.py",
+        "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/contract/test_publication_schema_contracts.py",
+        "tests/contract/test_publication_schema_strict_contracts.py",
+        "tests/e2e/test_chembl_publication_e2e.py",
+        "tests/e2e/test_chembl_publication_term_e2e.py",
+        "tests/e2e/test_crossref_publication_e2e.py",
+        "tests/e2e/test_openalex_publication_e2e.py",
+        "tests/e2e/test_pubmed_publication_e2e.py",
+        "tests/e2e/test_semanticscholar_publication_e2e.py",
+        "tests/integration/chembl/test_publication_extraction_params.py",
+        "tests/integration/config/test_publication_controlled_vocab_parity.py",
+        "tests/integration/config/test_publication_nested_vocabulary_inventory.py",
+        "tests/unit/repo_backed/application/composite/test_publication_schema_columns.py",
+        "tests/unit/application/core/test_publication_term_data_source.py",
+        "tests/unit/application/core/test_publication_term_runtime.py",
+        "tests/unit/repo_backed/application/pipelines/common/test_base_publication_transformer.py",
+        "tests/unit/application/pipelines/common/test_publication_assembly.py",
+        "tests/unit/application/pipelines/common/test_publication_issn.py",
+        "tests/unit/application/pipelines/common/test_publication_parity.py",
+        "tests/unit/application/pipelines/crossref/test_publication_field_extractors.py",
+        "tests/unit/application/pipelines/pubmed/test_pubmed_publication.py",
+        "tests/unit/application/pipelines/test_publication_similarity_transformer.py",
+        "tests/unit/domain/contracts/gold/test_publication_common_schema.py",
+        "tests/unit/domain/entities/test_publication_entities.py",
+        "tests/unit/domain/mapping/test_publication_type_classification.py",
+        "tests/unit/domain/mapping/test_publication_type_mapping.py",
+        "tests/unit/domain/normalization/profiles/test_chembl_publication_term.py",
+        "tests/unit/domain/normalization/test_publication_structured_field_policy_specs.py",
+        "tests/unit/domain/normalization/test_publication_structured_fields.py",
+        "tests/unit/domain/ports/test_logger_and_publication_strategy_modules.py",
+        "tests/unit/domain/registry/test_publication_registry.py",
+        "tests/unit/domain/schemas/chembl/test_chembl_publication_validation.py",
+        "tests/unit/domain/schemas/common/test_publication_base.py",
+        "tests/unit/domain/schemas/crossref/test_crossref_publication_validation.py",
+        "tests/unit/domain/schemas/openalex/test_openalex_publication_validation.py",
+        "tests/unit/domain/schemas/openalex/test_publication.py",
+        "tests/unit/domain/schemas/openalex/test_publication_schema.py",
+        "tests/unit/domain/schemas/pubmed/test_pubmed_publication_validation.py",
+        "tests/unit/domain/schemas/semanticscholar/test_publication.py",
+        "tests/unit/domain/schemas/semanticscholar/test_publication_schema.py",
+        "tests/unit/domain/schemas/semanticscholar/test_semanticscholar_publication_validation.py",
+        "tests/unit/domain/test_publication_fields_mapping.py",
+        "tests/unit/domain/test_runtime_observability_publication_contract.py",
+        "tests/unit/domain/validation/test_publication.py",
+        "tests/unit/domain/value_objects/test_publication_field_groups.py",
+        "tests/unit/domain/value_objects/test_publication_year.py",
+        "tests/unit/domain/value_objects/test_publications.py",
+        "tests/unit/infrastructure/config/test_publication_controlled_vocabulary_loader.py",
+        "tests/unit/infrastructure/config/test_publication_type_classification_loader.py",
+        "tests/unit/infrastructure/storage/test_strict_metadata_lineage_publication.py",
+        "tests/unit/interfaces/cli/commands/test_metrics_publication_integration.py",
+        "tests/unit/repo_backed/application/pipelines/test_chembl_publication_term_transformer.py",
+        "tests/unit/repo_backed/domain/normalization/profiles/test_publication_identifier_profiles.py",
+        "tests/unit/scripts/qa/test_extract_publication_nested_vocab.py"
+      ],
+      "coverage_level": "strict",
+      "dataset_layer": "gold",
+      "entity": "publication",
+      "golden_evidence_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "pandera_schema_paths": [
+        "src/bioetl/domain/contracts/gold/publications_pubmed.py"
+      ],
+      "pipeline_name": "pubmed_publication",
+      "provider": "pubmed"
+    },
+    {
+      "classification_reason": "Bronze coverage is structural: entity config plus tracked fixture/metadata guardrails; no layer Pandera contract is declared.",
+      "config_contract_path": "configs/entities/semanticscholar/publication.yaml",
+      "config_path": "configs/entities/semanticscholar/publication.yaml",
+      "contract_ref": "semanticscholar.publication",
+      "contract_test_paths": [
+        "tests/architecture/test_bronze_fixture_replay_baseline.py",
+        "tests/architecture/test_bronze_metadata_builder_guardrails.py"
+      ],
+      "coverage_level": "structural_only",
+      "dataset_layer": "bronze",
+      "entity": "publication",
+      "golden_evidence_paths": [
+        "tests/fixtures/bronze/semanticscholar/publication"
+      ],
+      "pandera_schema_paths": [],
+      "pipeline_name": "semanticscholar_publication",
+      "provider": "semanticscholar"
+    },
+    {
+      "classification_reason": "Silver schema snapshot and contract tests provide moderate layer coverage.",
+      "config_contract_path": "configs/entities/semanticscholar/publication.yaml",
+      "config_path": "configs/entities/semanticscholar/publication.yaml",
+      "contract_ref": "semanticscholar.publication",
+      "contract_test_paths": [
+        "tests/contract/silver_schemas/test_schema_stability.py",
+        "tests/contract/silver_schemas/test_selected_pipeline_schema_drift.py",
+        "tests/contract/silver_schemas/test_validations.py"
+      ],
+      "coverage_level": "moderate",
+      "dataset_layer": "silver",
+      "entity": "publication",
+      "golden_evidence_paths": [
+        "tests/contract/silver_schemas/snapshots/semanticscholar_publication_schema.json"
+      ],
+      "pandera_schema_paths": [
+        "tests/contract/silver_schemas/snapshots/semanticscholar_publication_schema.json"
+      ],
+      "pipeline_name": "semanticscholar_publication",
+      "provider": "semanticscholar"
+    },
+    {
+      "classification_reason": "Gold coverage is strict: contract YAML, Pandera schema, contract tests, and golden DQ evidence are present.",
+      "config_contract_path": "configs/contracts/semanticscholar/publication.yaml",
+      "config_path": "configs/entities/semanticscholar/publication.yaml",
+      "contract_ref": "semanticscholar.publication",
+      "contract_test_paths": [
+        "tests/architecture/test_chembl_publication_subset_policy.py",
+        "tests/architecture/test_force_full_scan_publication.py",
+        "tests/architecture/test_publication_classification_test_bootstrap_policy.py",
+        "tests/architecture/test_publication_type_codegen_contract.py",
+        "tests/architecture/test_publication_type_sync.py",
+        "tests/contract/schemas/test_publication_common_schema.py",
+        "tests/contract/test_gold_entity_coverage_complete.py",
+        "tests/contract/test_gold_pk_consistency.py",
+        "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/contract/test_publication_schema_contracts.py",
+        "tests/contract/test_publication_schema_strict_contracts.py",
+        "tests/e2e/test_chembl_publication_e2e.py",
+        "tests/e2e/test_chembl_publication_term_e2e.py",
+        "tests/e2e/test_crossref_publication_e2e.py",
+        "tests/e2e/test_openalex_publication_e2e.py",
+        "tests/e2e/test_pubmed_publication_e2e.py",
+        "tests/e2e/test_semanticscholar_publication_e2e.py",
+        "tests/integration/chembl/test_publication_extraction_params.py",
+        "tests/integration/config/test_publication_controlled_vocab_parity.py",
+        "tests/integration/config/test_publication_nested_vocabulary_inventory.py",
+        "tests/unit/repo_backed/application/composite/test_publication_schema_columns.py",
+        "tests/unit/application/core/test_publication_term_data_source.py",
+        "tests/unit/application/core/test_publication_term_runtime.py",
+        "tests/unit/repo_backed/application/pipelines/common/test_base_publication_transformer.py",
+        "tests/unit/application/pipelines/common/test_publication_assembly.py",
+        "tests/unit/application/pipelines/common/test_publication_issn.py",
+        "tests/unit/application/pipelines/common/test_publication_parity.py",
+        "tests/unit/application/pipelines/crossref/test_publication_field_extractors.py",
+        "tests/unit/application/pipelines/pubmed/test_pubmed_publication.py",
+        "tests/unit/application/pipelines/test_publication_similarity_transformer.py",
+        "tests/unit/domain/contracts/gold/test_publication_common_schema.py",
+        "tests/unit/domain/entities/test_publication_entities.py",
+        "tests/unit/domain/mapping/test_publication_type_classification.py",
+        "tests/unit/domain/mapping/test_publication_type_mapping.py",
+        "tests/unit/domain/normalization/profiles/test_chembl_publication_term.py",
+        "tests/unit/domain/normalization/test_publication_structured_field_policy_specs.py",
+        "tests/unit/domain/normalization/test_publication_structured_fields.py",
+        "tests/unit/domain/ports/test_logger_and_publication_strategy_modules.py",
+        "tests/unit/domain/registry/test_publication_registry.py",
+        "tests/unit/domain/schemas/chembl/test_chembl_publication_validation.py",
+        "tests/unit/domain/schemas/common/test_publication_base.py",
+        "tests/unit/domain/schemas/crossref/test_crossref_publication_validation.py",
+        "tests/unit/domain/schemas/openalex/test_openalex_publication_validation.py",
+        "tests/unit/domain/schemas/openalex/test_publication.py",
+        "tests/unit/domain/schemas/openalex/test_publication_schema.py",
+        "tests/unit/domain/schemas/pubmed/test_pubmed_publication_validation.py",
+        "tests/unit/domain/schemas/semanticscholar/test_publication.py",
+        "tests/unit/domain/schemas/semanticscholar/test_publication_schema.py",
+        "tests/unit/domain/schemas/semanticscholar/test_semanticscholar_publication_validation.py",
+        "tests/unit/domain/test_publication_fields_mapping.py",
+        "tests/unit/domain/test_runtime_observability_publication_contract.py",
+        "tests/unit/domain/validation/test_publication.py",
+        "tests/unit/domain/value_objects/test_publication_field_groups.py",
+        "tests/unit/domain/value_objects/test_publication_year.py",
+        "tests/unit/domain/value_objects/test_publications.py",
+        "tests/unit/infrastructure/config/test_publication_controlled_vocabulary_loader.py",
+        "tests/unit/infrastructure/config/test_publication_type_classification_loader.py",
+        "tests/unit/infrastructure/storage/test_strict_metadata_lineage_publication.py",
+        "tests/unit/interfaces/cli/commands/test_metrics_publication_integration.py",
+        "tests/unit/repo_backed/application/pipelines/test_chembl_publication_term_transformer.py",
+        "tests/unit/repo_backed/domain/normalization/profiles/test_publication_identifier_profiles.py",
+        "tests/unit/scripts/qa/test_extract_publication_nested_vocab.py"
+      ],
+      "coverage_level": "strict",
+      "dataset_layer": "gold",
+      "entity": "publication",
+      "golden_evidence_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "pandera_schema_paths": [
+        "src/bioetl/domain/contracts/gold/publications_semanticscholar.py"
+      ],
+      "pipeline_name": "semanticscholar_publication",
+      "provider": "semanticscholar"
+    },
+    {
+      "classification_reason": "Bronze coverage is structural: entity config plus tracked fixture/metadata guardrails; no layer Pandera contract is declared.",
+      "config_contract_path": "configs/entities/uniprot/idmapping.yaml",
+      "config_path": "configs/entities/uniprot/idmapping.yaml",
+      "contract_ref": "uniprot.idmapping",
+      "contract_test_paths": [
+        "tests/architecture/test_bronze_fixture_replay_baseline.py",
+        "tests/architecture/test_bronze_metadata_builder_guardrails.py"
+      ],
+      "coverage_level": "structural_only",
+      "dataset_layer": "bronze",
+      "entity": "idmapping",
+      "golden_evidence_paths": [
+        "tests/fixtures/bronze/uniprot/idmapping"
+      ],
+      "pandera_schema_paths": [],
+      "pipeline_name": "uniprot_idmapping",
+      "provider": "uniprot"
+    },
+    {
+      "classification_reason": "Silver schema snapshot and contract tests provide moderate layer coverage.",
+      "config_contract_path": "configs/entities/uniprot/idmapping.yaml",
+      "config_path": "configs/entities/uniprot/idmapping.yaml",
+      "contract_ref": "uniprot.idmapping",
+      "contract_test_paths": [
+        "tests/contract/silver_schemas/test_schema_stability.py",
+        "tests/contract/silver_schemas/test_selected_pipeline_schema_drift.py",
+        "tests/contract/silver_schemas/test_validations.py"
+      ],
+      "coverage_level": "moderate",
+      "dataset_layer": "silver",
+      "entity": "idmapping",
+      "golden_evidence_paths": [
+        "tests/contract/silver_schemas/snapshots/uniprot_idmapping_schema.json"
+      ],
+      "pandera_schema_paths": [
+        "tests/contract/silver_schemas/snapshots/uniprot_idmapping_schema.json"
+      ],
+      "pipeline_name": "uniprot_idmapping",
+      "provider": "uniprot"
+    },
+    {
+      "classification_reason": "Gold coverage is strict: contract YAML, Pandera schema, contract tests, and golden DQ evidence are present.",
+      "config_contract_path": "configs/contracts/uniprot/idmapping.yaml",
+      "config_path": "configs/entities/uniprot/idmapping.yaml",
+      "contract_ref": "uniprot.idmapping",
+      "contract_test_paths": [
+        "tests/contract/test_gold_entity_coverage_complete.py",
+        "tests/contract/test_gold_pk_consistency.py",
+        "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/e2e/test_uniprot_idmapping_e2e.py",
+        "tests/integration/adapters/test_uniprot_idmapping.py",
+        "tests/integration/test_uniprot_idmapping_pipeline.py",
+        "tests/unit/application/core/test_idmapping_data_source.py",
+        "tests/unit/application/pipelines/test_idmapping_transformer.py",
+        "tests/unit/domain/schemas/uniprot/test_idmapping_schema.py",
+        "tests/unit/infrastructure/adapters/test_idmapping_csv_reader_adapter.py",
+        "tests/unit/infrastructure/adapters/uniprot/test_idmapping_client.py",
+        "tests/unit/infrastructure/adapters/uniprot/test_idmapping_retry_mixin.py"
+      ],
+      "coverage_level": "strict",
+      "dataset_layer": "gold",
+      "entity": "idmapping",
+      "golden_evidence_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "pandera_schema_paths": [
+        "src/bioetl/domain/contracts/gold/uniprot.py"
+      ],
+      "pipeline_name": "uniprot_idmapping",
+      "provider": "uniprot"
+    },
+    {
+      "classification_reason": "Bronze coverage is structural: entity config plus tracked fixture/metadata guardrails; no layer Pandera contract is declared.",
+      "config_contract_path": "configs/entities/uniprot/protein.yaml",
+      "config_path": "configs/entities/uniprot/protein.yaml",
+      "contract_ref": "uniprot.protein",
+      "contract_test_paths": [
+        "tests/architecture/test_bronze_fixture_replay_baseline.py",
+        "tests/architecture/test_bronze_metadata_builder_guardrails.py"
+      ],
+      "coverage_level": "structural_only",
+      "dataset_layer": "bronze",
+      "entity": "protein",
+      "golden_evidence_paths": [
+        "tests/fixtures/bronze/uniprot/protein"
+      ],
+      "pandera_schema_paths": [],
+      "pipeline_name": "uniprot_protein",
+      "provider": "uniprot"
+    },
+    {
+      "classification_reason": "Silver schema snapshot and contract tests provide moderate layer coverage.",
+      "config_contract_path": "configs/entities/uniprot/protein.yaml",
+      "config_path": "configs/entities/uniprot/protein.yaml",
+      "contract_ref": "uniprot.protein",
+      "contract_test_paths": [
+        "tests/contract/silver_schemas/test_schema_stability.py",
+        "tests/contract/silver_schemas/test_selected_pipeline_schema_drift.py",
+        "tests/contract/silver_schemas/test_validations.py"
+      ],
+      "coverage_level": "moderate",
+      "dataset_layer": "silver",
+      "entity": "protein",
+      "golden_evidence_paths": [
+        "tests/contract/silver_schemas/snapshots/uniprot_protein_schema.json"
+      ],
+      "pandera_schema_paths": [
+        "tests/contract/silver_schemas/snapshots/uniprot_protein_schema.json"
+      ],
+      "pipeline_name": "uniprot_protein",
+      "provider": "uniprot"
+    },
+    {
+      "classification_reason": "Gold coverage is strict: contract YAML, Pandera schema, contract tests, and golden DQ evidence are present.",
+      "config_contract_path": "configs/contracts/uniprot/protein.yaml",
+      "config_path": "configs/entities/uniprot/protein.yaml",
+      "contract_ref": "uniprot.protein",
+      "contract_test_paths": [
+        "tests/architecture/test_chembl_protein_classification_contracts.py",
+        "tests/architecture/test_protein_class_target_type_codegen_contract.py",
+        "tests/contract/test_gold_entity_coverage_complete.py",
+        "tests/contract/test_gold_pk_consistency.py",
+        "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/e2e/test_uniprot_protein_e2e.py",
+        "tests/unit/application/composite/test_target_protein_classification_summary.py",
+        "tests/unit/application/pipelines/chembl/test_target_protein_classification_transformer.py",
+        "tests/unit/application/pipelines/test_protein_class_transformer.py",
+        "tests/unit/application/services/test_protein_classification_resolution.py",
+        "tests/unit/composition/providers/test_chembl_target_protein_classification_data_source.py",
+        "tests/unit/composition/providers/test_chembl_target_protein_classification_helpers.py",
+        "tests/unit/domain/test_protein_class_hierarchy.py",
+        "tests/unit/domain/test_protein_class_target_type.py",
+        "tests/unit/infrastructure/adapters/chembl/test_protein_classification_graph.py",
+        "tests/unit/infrastructure/config/test_protein_class_target_type_loader.py"
+      ],
+      "coverage_level": "strict",
+      "dataset_layer": "gold",
+      "entity": "protein",
+      "golden_evidence_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "pandera_schema_paths": [
+        "src/bioetl/domain/contracts/gold/uniprot.py"
+      ],
+      "pipeline_name": "uniprot_protein",
+      "provider": "uniprot"
+    }
+  ],
+  "schema_version": "layer-contract-coverage-matrix-v1",
+  "snapshot_date": "2026-06-18",
+  "source_artifact": "reports/quality/contract-coverage-matrix.json",
+  "summary": {
+    "coverage_levels": {
+      "moderate": 22,
+      "not_applicable": 10,
+      "strict": 27,
+      "structural_only": 22
+    },
+    "entity_config_count": 27,
+    "layers": [
+      "bronze",
+      "silver",
+      "gold"
+    ]
+  }
+}

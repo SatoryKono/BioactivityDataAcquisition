@@ -111,7 +111,7 @@ Machine-readable companions: [IR JSON](pipeline-dataflow-ir.json) and [field CSV
 ## Effective DQ Policy
 
 - Soft-fail threshold: `0.05`
-- Hard-fail threshold: `0.25`
+- Hard-fail threshold: `0.5`
 - Strict validation: `false`
 - Invalid-record policy: `quarantine`
 

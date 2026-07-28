@@ -47,6 +47,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 
+
 class BatchProcessingSupportService:
     """Encapsulate per-batch transform/write tracing choreography."""
 
@@ -61,11 +62,7 @@ class BatchProcessingSupportService:
         debug_export_service: DebugExportService | None = None,
         **legacy: object,
     ) -> None:
-        """Initialize batch processing support.
-
-        Prefer ``batch_runtime`` dict. Transitional/unit callers may pass
-        individual collaborators via keyword args.
-        """
+        """Initialize support from batch_runtime or transitional collaborators."""
         resolved_runtime = dict(batch_runtime or {})
         for key in (
             "batch_metrics",
@@ -173,10 +170,7 @@ class BatchProcessingSupportService:
         ingestion_ts: datetime,
         bronze_refs: list[BronzeWriteResult] | None,
     ) -> None:
-        """Write Silver first, then pass its lineage refs into Gold.
-
-        The historical method name is preserved for caller compatibility.
-        """
+        """Write Silver first and pass its lineage refs into Gold."""
         silver_result: SilverWriteResult | None = None
         if transform_result.silver_records:
             silver_result = cast(

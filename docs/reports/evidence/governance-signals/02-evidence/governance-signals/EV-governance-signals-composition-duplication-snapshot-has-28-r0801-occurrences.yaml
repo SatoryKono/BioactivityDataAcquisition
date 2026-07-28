@@ -1,0 +1,19 @@
+id: EV-governance-signals-composition-duplication-snapshot-has-28-r0801-occurrences
+pillar: governance-signals
+source:
+  type: experiment
+  ref: "docs/reports/evidence/governance-signals/02-evidence/governance-signals/RAW-governance-signals-2026-03-20.md; ./.venv/Scripts/python.exe -m pylint --disable=all --enable=duplicate-code src/bioetl/composition"
+  retrieved_at: 2026-03-21
+claim: "An ad hoc duplication scan of `src/bioetl/composition` reports 31 `R0801` duplicate-code occurrences, concentrated around API/facade mirrors, provider creation seams, and pipeline/service assembly helpers."
+quote: "R0801 occurrences counted from the scan output: `31`"
+confidence: 0.88
+assumptions:
+  - "Pylint `duplicate-code` findings are a useful proxy for duplication pressure even though they can over-report on facade modules and export lists."
+  - "The current scan output is representative enough to identify where composition duplication pressure clusters."
+notes: "This is a snapshot, not a historical trend; several flagged pairs are likely intentional compatibility or API-facade overlaps."
+tags:
+  - governance
+  - duplication
+  - composition
+  - pylint
+  - r0801

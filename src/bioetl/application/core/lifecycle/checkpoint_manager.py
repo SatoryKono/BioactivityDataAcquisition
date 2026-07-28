@@ -32,7 +32,7 @@ _OPERATION_ERRORS = SHARED_OPERATION_ERRORS
 
 
 @dataclass(frozen=True, slots=True)
-class CheckpointRuntimeIdentity:
+class CheckpointRuntimeIdentityInfo:
     """Identity and resume policy bag for :class:`CheckpointRuntimeService`."""
 
     pipeline_name: str
@@ -43,6 +43,10 @@ class CheckpointRuntimeIdentity:
     loading_strategy: LoadingStrategy | None = None
     current_metadata: CheckpointMetadata | None = None
     compatibility_policy: CheckpointCompatibilityPolicy = "soft_fail"
+
+
+# Backward-compatible public alias retained for existing composition callers.
+CheckpointRuntimeIdentity = CheckpointRuntimeIdentityInfo
 
 
 class CheckpointRuntimeService:

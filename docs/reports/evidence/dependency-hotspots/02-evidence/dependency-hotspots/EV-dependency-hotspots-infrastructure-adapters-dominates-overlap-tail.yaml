@@ -1,0 +1,19 @@
+id: EV-dependency-hotspots-infrastructure-adapters-dominates-overlap-tail
+pillar: dependency-hotspots
+source:
+  type: dataset
+  ref: "docs/reports/evidence/dependency-hotspots/02-evidence/dependency-hotspots/RAW-dependency-hotspot-metrics-2026-03-20.md"
+  retrieved_at: 2026-03-21
+claim: "The overlap tail is now split across CLI commands, storage, and selected application/service seams rather than centered on adapters; `src/bioetl/interfaces/cli/commands` is the only repeated overlap package with 2 of the 10 files."
+quote: "| `src/bioetl/interfaces/cli/commands` | 2 |"
+confidence: 0.92
+assumptions:
+  - "Package-prefix grouping at `src/bioetl/<layer>/<subpackage>` is granular enough to expose structural concentration."
+  - "Overlap hotspots are the best proxy for the most maintenance-heavy modules in this snapshot."
+notes: "The overlap set now includes `interfaces/cli/commands/domains/run/command.py`, `command_policy.py`, `storage/base_delta_writer.py`, `storage/gold/io_delta_mixins.py`, `schemas/silver_chembl_core.py`, `quality/_governance_validation.py`, `config/_base.py`, `application/services/dq/silver_statistics_helpers.py`, `application/pipelines/pubmed/extractors/date.py`, and `application/pipelines/uniprot/extractors/_comment_facets.py`."
+tags:
+  - hotspot
+  - infrastructure
+  - adapters
+  - package-concentration
+  - overlap

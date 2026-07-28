@@ -1,0 +1,86 @@
+decisions:
+  - id: DEC-documentation-internal-surface-governance-keep-ai-top-level-index-link-only-for-now
+    date: 2026-03-27
+    status: accepted
+    rationale: >
+      The AI top-level index is still coherent and reachable from
+      `docs/00-project/index.md` as a repository-path entrypoint. Promoting the
+      page into nav now would still be a discoverability optimization, not a
+      correction of drift.
+    evidence:
+      - EV-documentation-internal-surface-governance-ai-index-is-coherent-but-link-only
+      - EV-documentation-internal-surface-governance-project-index-routes-readers-to-repo-only-surfaces
+    consequences:
+      - Keep `docs/00-project/ai/README.md` as a curated repository-path entry page.
+      - Revisit nav promotion only if onboarding evidence shows persistent
+        discoverability pain.
+
+  - id: DEC-documentation-internal-surface-governance-keep-broad-internal-published-model-with-index-first-guardrails
+    date: 2026-03-23
+    status: superseded
+    superseded_by: DEC-documentation-internal-surface-governance-treat-plans-and-reports-as-repo-only-reference-surfaces
+    rationale: >
+      This reflected the 2026-03-23 posture before the published-vs-repo-only
+      boundary was tightened for `plans/**` and `reports/**`.
+    evidence:
+      - EV-documentation-internal-surface-governance-kpi-is-healthy-under-current-model
+      - EV-documentation-internal-surface-governance-entry-pages-now-state-non-normative-boundaries
+      - EV-documentation-internal-surface-governance-strict-build-noise-is-info-only-not-drift
+    consequences:
+      - Retain as historical context only.
+      - Do not use this decision as the active publication model for
+        `plans/**` and `reports/**`.
+
+  - id: DEC-documentation-internal-surface-governance-treat-plans-and-reports-as-repo-only-reference-surfaces
+    date: 2026-03-27
+    status: accepted
+    rationale: >
+      The active policy and `mkdocs.yml` now explicitly classify `plans/**` and
+      `reports/**` as `internal + repo-only`, while the project hub keeps those
+      surfaces discoverable through repository-path links. This is a narrower
+      and more governable model than the earlier broad internal-published
+      interpretation.
+    evidence:
+      - EV-documentation-internal-surface-governance-plans-and-reports-are-now-repo-only-by-policy
+      - EV-documentation-internal-surface-governance-project-index-routes-readers-to-repo-only-surfaces
+      - EV-documentation-internal-surface-governance-strict-mkdocs-build-remains-green-under-current-boundary
+    consequences:
+      - Keep `plans/**` and `reports/**` outside the published MkDocs surface.
+      - Reference those surfaces from published docs via repository paths or
+        curated summaries rather than nav entries.
+      - Treat future publication of those clusters as an explicit governance
+        revision, not as a default.
+
+  - id: DEC-documentation-internal-surface-governance-keep-doc-sync-enforcement-in-guard-layer
+    date: 2026-03-27
+    status: accepted
+    rationale: >
+      The current documentation tree is green under the active guard layer:
+      link/config/spec checks pass, drift checks report no drift, strict MkDocs
+      build succeeds, and the experimental deployment subtree is aligned with
+      the helper script. This supports staying on guard-based maintenance rather
+      than reopening a broad manual remediation wave.
+    evidence:
+      - EV-documentation-internal-surface-governance-doc-guards-confirm-current-sync-health
+      - EV-documentation-internal-surface-governance-strict-mkdocs-build-remains-green-under-current-boundary
+      - EV-documentation-internal-surface-governance-deployment-docs-match-helper-overrides
+    consequences:
+      - Prefer targeted fixes when guards fail instead of launching broad docs
+        waves by default.
+      - Re-open large-scale remediation only when a green baseline stops
+        holding.
+
+  - id: DEC-documentation-internal-surface-governance-defer-dedicated-ru-en-normalization-wave
+    date: 2026-03-27
+    status: accepted
+    rationale: >
+      Mixed RU/EN wording is visible in internal docs, but current evidence
+      supports treating it as readability debt rather than correctness drift.
+      A dedicated normalization wave would create large low-signal churn.
+    evidence:
+      - EV-documentation-internal-surface-governance-mixed-language-is-readability-debt
+      - EV-documentation-internal-surface-governance-doc-guards-confirm-current-sync-health
+    consequences:
+      - Language normalization stays opportunistic and file-local.
+      - Future audits should not escalate mixed-language wording as a policy
+        defect unless it begins to create ambiguity or stale guidance.

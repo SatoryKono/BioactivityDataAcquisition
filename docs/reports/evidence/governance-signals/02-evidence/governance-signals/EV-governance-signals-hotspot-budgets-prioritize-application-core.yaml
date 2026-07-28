@@ -1,0 +1,19 @@
+id: EV-governance-signals-hotspot-budgets-prioritize-application-core
+pillar: governance-signals
+source:
+  type: internal-doc
+  ref: "configs/quality/debt_scorecard.yaml; tests/architecture/test_regression_metrics.py; docs/reports/evidence/governance-signals/02-evidence/governance-signals/RAW-governance-signals-2026-03-20.md"
+  retrieved_at: 2026-03-21
+claim: "Named hotspot budgeting is currently selective rather than repo-wide: the scorecard declares a `core_orchestration` hotspot for `src/bioetl/application/core/` with explicit `file_size_limits`, `class_size`, and `god_object` budgets, while the broader raw size tail is not itself encoded as a global hotspot budget."
+quote: "name: \"core_orchestration\""
+confidence: 0.90
+assumptions:
+  - "The presence of a single named hotspot entry indicates deliberate prioritization rather than incomplete YAML maintenance."
+  - "Hotspot budget declarations are intended to focus burn-down effort on especially risky seams."
+notes: "This helps explain why green budget status can coexist with many large files outside the named hotspot path."
+tags:
+  - governance
+  - hotspot-budget
+  - application-core
+  - file-size
+  - prioritization

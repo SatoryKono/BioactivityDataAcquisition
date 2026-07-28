@@ -145,6 +145,7 @@ def _silver_filter_rejection_labels(
     field = field_raw if isinstance(field_raw, str) else None
     return reason, rule_type, field
 
+
 __all__ = [
     "_FLOW_ACCOUNTING_STAGES",
     "_GOLD_REMOVAL_REASONS",

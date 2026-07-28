@@ -1227,7 +1227,9 @@ def _print_manifest_drift_summary(
     expected_summary = expected.get("summary")
     actual_summary = actual.get("summary")
     if expected_summary != actual_summary:
-        print(f"  - summary drift: expected={expected_summary!r} actual={actual_summary!r}")
+        print(
+            f"  - summary drift: expected={expected_summary!r} actual={actual_summary!r}"
+        )
 
 
 def _group_non_active_scripts(

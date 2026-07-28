@@ -1,0 +1,20 @@
+id: EV-patterns-medallion-bronze-silver-gold-flow
+pillar: architecture-patterns
+source:
+  type: internal-doc
+  ref: "README.md:18-19; README.md:49; AGENTS.md:5; AGENTS.md:11"
+  retrieved_at: 2026-03-20
+claim: "BioETL explicitly uses a Medallion data-flow model in which data moves from Bronze to Silver to Gold, with Silver required to use Delta Lake rather than raw Parquet."
+quote: "Structured data flow (Bronze -> Silver -> Gold)"
+confidence: 0.98
+assumptions:
+  - "The active docs still describe the canonical write path for the production codebase."
+  - "The Delta Lake requirement for Silver remains globally applicable and not provider-specific."
+notes: "The Medallion pattern is architecture-level, not just storage naming: it defines the intended quality progression and storage technology expectations between layers."
+tags:
+  - patterns
+  - medallion
+  - bronze
+  - silver
+  - gold
+  - delta-lake

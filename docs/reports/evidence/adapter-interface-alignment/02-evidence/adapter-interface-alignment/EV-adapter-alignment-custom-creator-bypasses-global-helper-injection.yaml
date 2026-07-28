@@ -1,0 +1,19 @@
+id: EV-adapter-alignment-custom-creator-bypasses-global-helper-injection
+pillar: adapter-interface-alignment
+source:
+  type: internal-doc
+  ref: "src/bioetl/composition/providers/_creation.py:88-104; src/bioetl/composition/factories/datasource/data_source_factory.py:68-118"
+  retrieved_at: 2026-03-20
+claim: "The composition layer has two adapter-construction paths with different semantics: `create_provider_adapter()` forwards kwargs directly to `custom_creator`, while `DataSourceFactory.create()` first injects the standard helper bundle."
+quote: "if config.custom_creator is not None: return config.custom_creator(http_client=http_client, logger=logger, settings=settings, **kwargs)"
+confidence: 0.93
+assumptions:
+  - "ProviderRegistry adapter creation in production still reaches `create_provider_adapter()` for custom creators."
+  - "The helper bundle injected by `DataSourceFactory` is intended to be canonical for DI-target providers."
+notes: "This split means alignment bugs can appear whenever a custom creator is called outside `DataSourceFactory.create()` or reimplements helper synthesis differently."
+tags:
+  - adapter
+  - interface-alignment
+  - helper-di
+  - custom-creator
+  - composition

@@ -264,7 +264,9 @@ def test_provider_and_workflow_scope_are_explicit() -> None:
     assert "run_type" in str(workflow.get("description", "")).lower()
     assert "run_id" in str(workflow.get("description", "")).lower()
     workflow_links = workflow.get("options", {}).get("dataLinks", [])
-    assert {link.get("title") for link in workflow_links} == {"Open Pipeline Diagnostics"}
+    assert {link.get("title") for link in workflow_links} == {
+        "Open Pipeline Diagnostics"
+    }
 
 
 def test_range_evidence_and_trend_rows_are_retained() -> None:

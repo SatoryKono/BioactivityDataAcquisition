@@ -1,0 +1,19 @@
+id: EV-adapter-alignment-tests-preserve-minimal-provider-bound-surface
+pillar: adapter-interface-alignment
+source:
+  type: internal-doc
+  ref: "tests/unit/composition/test_generic_factory.py:109-122; tests/unit/composition/providers/test_registration_data_sources.py:154-190; src/bioetl/composition/providers/_models.py:27-40"
+  retrieved_at: 2026-03-20
+claim: "Composition tests encode a minimal provider-bound creator interface of `settings + pipeline_config + logger (+ optional metrics/filter)`, so helper dependency assembly is expected to stay inside composition rather than leak into factory callers."
+quote: "custom_creator.assert_called_once_with(mock_settings, mock_pipeline_config, mock_logger, None, pipeline_name=\"test_pipeline\")"
+confidence: 0.88
+assumptions:
+  - "These tests reflect intentional interface policy rather than incidental fixture shape."
+  - "Future refactoring should preserve this public surface for generic pipeline factories and provider registration."
+notes: "This evidence constrains refactoring direction: improve alignment by moving helper synthesis inward, not by expanding caller responsibilities."
+tags:
+  - adapter
+  - tests
+  - interface-alignment
+  - generic-factory
+  - composition

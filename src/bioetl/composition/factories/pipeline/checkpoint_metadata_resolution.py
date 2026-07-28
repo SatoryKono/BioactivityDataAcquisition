@@ -14,17 +14,16 @@ from bioetl.domain.normalization import (
 from bioetl.domain.control_plane import RunInputSnapshotRef
 
 
-
 def _resolve_run_context_payload(pipeline: object) -> object | None:
     """Resolve metadata run_context from pipeline services when available."""
-    metadata_coordinator = getattr(pipeline.services, "metadata_coordinator", None)
+    services = getattr(pipeline, "services", None)
+    metadata_coordinator = getattr(services, "metadata_coordinator", None)
     if metadata_coordinator is None:
         return None
     return getattr(metadata_coordinator, "run_context", None)
 
 
 def _coerce_optional_str(value: object | None) -> str | None:
-    """Return a string value when present, otherwise None."""
     if value is None:
         return None
     text = str(value)
@@ -175,7 +174,6 @@ def _resolve_checkpoint_snapshot_identity(
         list(input_snapshot_refs)
     )
     return input_snapshot_refs, input_snapshot_ids, input_snapshot_fingerprint
-
 
 
 __all__ = [

@@ -148,6 +148,9 @@ from bioetl.domain.ports.observability import (
     ExecutorMetricsPort as ExecutorMetricsPort,
 )
 from bioetl.domain.ports.observability import (
+    HealthMetricsExpositionPort as HealthMetricsExpositionPort,
+)
+from bioetl.domain.ports.observability import (
     LoggerPort as LoggerPort,
 )
 from bioetl.domain.ports.observability import (

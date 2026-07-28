@@ -1,0 +1,19 @@
+id: EV-enforcement-layer-dependency-suite-passes-baseline
+pillar: enforcement-guardrails
+source:
+  type: experiment
+  ref: "docs/reports/evidence/architecture-foundations/02-evidence/enforcement-guardrails/RAW-enforcement-guardrails-2026-03-20.md; ./.venv/Scripts/python.exe -m pytest -q tests/architecture/test_layer_dependencies.py"
+  retrieved_at: 2026-03-20
+claim: "The current layer-dependency architecture suite passes on the active baseline, indicating that the repository currently satisfies its domain purity, application dependency direction, and port-placement checks."
+quote: ".................                                                        [100%]"
+confidence: 0.95
+assumptions:
+  - "The executed local test command uses the same code and configuration that the repo intends to validate in normal architectural checks."
+  - "A passing layer-dependency suite is a meaningful signal of current architectural conformance, not just a narrow smoke test."
+notes: "The raw note records the exact command and observed output captured during this evidence collection run."
+tags:
+  - enforcement
+  - tests
+  - layer-dependencies
+  - domain-purity
+  - baseline

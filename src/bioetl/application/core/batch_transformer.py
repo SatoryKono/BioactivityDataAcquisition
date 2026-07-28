@@ -141,20 +141,7 @@ class BatchTransformer:
     async def transform_batch(
         self, records: list[BronzeRecord], batch_id: BatchID, start_index: int = 0
     ) -> TransformResult:
-        """Transform all records in batch, returning silver, gold, and quarantine count.
-
-        Args:
-            records: Raw Bronze records to transform.
-            batch_id: Identifier for the current batch.
-            start_index: The starting index for records in this batch.
-
-        Returns:
-            TransformResult with silver records, gold records, and quarantine count.
-
-        Raises:
-            DataQualityThresholdError: If DQ hard threshold exceeded.
-
-        """
+        """Transform a batch to Silver/Gold, enforcing the DQ hard threshold."""
         state = await collect_batch_transform_state(
             records=records,
             batch_id=batch_id,

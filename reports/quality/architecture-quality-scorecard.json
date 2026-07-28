@@ -174,8 +174,10 @@
     "dashboarded_without_emission_count": 0,
     "dq_blocking_issue_count": 0,
     "expired_compat_count": 0,
-    "families_at_budget": [],
-    "families_at_budget_count": 0,
+    "families_at_budget": [
+      "application_core"
+    ],
+    "families_at_budget_count": 1,
     "hotspot_budget_warning_count": 0,
     "hotspot_family_count": 5,
     "layer_violations": 0,
@@ -238,7 +240,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "3938fbd2bc1a5654e5ad56d4084713831e21cda7abb131fd30b87a83ffe16cd2",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "3341c5e80cb4cd5e20f77190e46f2129eac7c49803be53f37e3de45d1acfb102"
+      "source_tree_sha256": "623c25038117ecee026efbf0fd425edf3475cb042f6e6e3f13477c47a39cc031"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

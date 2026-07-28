@@ -1,0 +1,19 @@
+id: EV-governance-signals-file-size-ratchet-tightened-from-six-to-zero
+pillar: governance-signals
+source:
+  type: internal-doc
+  ref: "configs/quality/debt_scorecard.yaml; tests/architecture/test_regression_metrics.py; docs/reports/evidence/governance-signals/02-evidence/governance-signals/RAW-governance-signals-2026-03-20.md"
+  retrieved_at: 2026-03-21
+claim: "The scorecard records a tighter enforceable stance on size debt than its historical snapshot: `historical_baseline.by_registry.file_size_limits` is 6, while the current enforceable `baseline.by_registry.file_size_limits` is 0 and registry sync is explicitly anchored to `baseline`."
+quote: "historical_baseline: ... file_size_limits: 6"
+confidence: 0.94
+assumptions:
+  - "The scorecard's historical section is intended as context rather than a currently enforceable budget."
+  - "Anchoring registry sync to `baseline` is sufficient evidence that the zero-budget state is deliberate rather than accidental."
+notes: "This shows an explicit governance ratchet downward from the previous size-debt snapshot, even though raw size hotspots still exist."
+tags:
+  - governance
+  - file-size
+  - scorecard
+  - ratchet
+  - baseline

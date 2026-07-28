@@ -1,0 +1,19 @@
+id: EV-dependency-hotspots-loc-tail-is-contained-in-size-tail
+pillar: dependency-hotspots
+source:
+  type: dataset
+  ref: "docs/reports/evidence/dependency-hotspots/02-evidence/dependency-hotspots/RAW-dependency-hotspot-metrics-2026-03-20.md"
+  retrieved_at: 2026-03-21
+claim: "Every file above 350 LOC is also above 10 KB, because the overlap set equals the entire LOC-hotspot set (10 files)."
+quote: "| Files exceeding both thresholds | 10 |"
+confidence: 0.91
+assumptions:
+  - "The chosen thresholds are meaningful enough that full overlap indicates a denser subset rather than coincidence."
+  - "Byte size and LOC are measured from the same working-tree snapshot."
+notes: "This means the `>350 LOC` set can be treated as the densest subset of the broader size-hotspot inventory, while the remaining `>10 KB` files represent size-only hotspots."
+tags:
+  - hotspot
+  - overlap
+  - file-size
+  - loc
+  - heuristic
