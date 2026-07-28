@@ -35,7 +35,7 @@ if TYPE_CHECKING:
 
 # Module-level cache for psutil availability (checked once per process)
 _psutil_available: bool | None = None
-_PSUTIL_MODULE: Any = None  # Any: lazy-loaded psutil module reference
+_psutil_module: Any = None  # Any: lazy-loaded psutil module reference
 
 
 def _check_psutil_available() -> bool:
@@ -44,12 +44,12 @@ def _check_psutil_available() -> bool:
     Returns:
         True if psutil is available and importable, False otherwise.
     """
-    global _psutil_available, _PSUTIL_MODULE
+    global _psutil_available, _psutil_module
     if _psutil_available is None:
         try:
             import psutil
 
-            _PSUTIL_MODULE = psutil
+            _psutil_module = psutil
             _psutil_available = True
         except ImportError:
             _psutil_available = False
@@ -97,7 +97,7 @@ class MemoryMonitor:
 
     def _get_stats_psutil(self) -> MemoryStats:
         """Get memory stats using psutil with cached module and process handles."""
-        psutil = _PSUTIL_MODULE
+        psutil = _psutil_module
         self._last_monitor_mode = "psutil"
         vm = psutil.virtual_memory()
         if self._cached_process is None:

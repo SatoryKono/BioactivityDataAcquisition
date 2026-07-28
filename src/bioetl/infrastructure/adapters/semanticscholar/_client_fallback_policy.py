@@ -1,11 +1,10 @@
 # pyright: reportInvalidCast=false
-# pyright: reportUninitializedInstanceVariable=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Internal fallback-policy hook mixin for the Semantic Scholar adapter."""
 
 from __future__ import annotations
 
-from typing import Protocol, cast
+from typing import Any, Protocol, cast
 
 from bioetl.infrastructure.adapters.common import FallbackDecoratorConfig
 from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
@@ -43,7 +42,7 @@ _SEMANTICSCHOLAR_DEFAULT_FALLBACK_CONFIG = FallbackDecoratorConfig(
 class _SemanticScholarFallbackPolicyMixin:
     """Provider-specific hookpoints consumed by ``FallbackPolicyMixin``."""
 
-    _fallback_handler: SemanticScholarTitleFallbackHandler
+    _fallback_handler: SemanticScholarTitleFallbackHandler = cast(Any, None)  # Any: host attr default (PD3)
 
     def _get_default_fallback_config(self) -> FallbackDecoratorConfig:
         """Return Semantic Scholar-specific default fallback config."""

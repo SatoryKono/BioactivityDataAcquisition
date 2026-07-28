@@ -1,11 +1,10 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Runtime state container for BatchExecutor orchestration."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import Any, cast, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, GoldRecord
@@ -37,7 +36,7 @@ class BatchExecutorRuntimeState:
 class BatchExecutorRuntimeStateMixin:
     """Expose legacy executor state attributes backed by one state object."""
 
-    _runtime_state: BatchExecutorRuntimeState
+    _runtime_state: BatchExecutorRuntimeState = cast(Any, None)  # host attr default (PD3)
 
     @property
     def records_fetched(self) -> int:

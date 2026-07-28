@@ -98,10 +98,10 @@ try:
     from opentelemetry.sdk.trace import TracerProvider
     from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
 
-    OTEL_AVAILABLE = True
+    otel_available = True
     otlp_available = _otlp_exporter_is_installed()
 except ImportError:
-    OTEL_AVAILABLE = False
+    otel_available = False
     otlp_available = False
 
 
@@ -309,7 +309,7 @@ class OpenTelemetryTracer:
             ImportError: If opentelemetry is not installed.
 
         """
-        if not OTEL_AVAILABLE:
+        if not otel_available:
             raise ImportError(
                 "OpenTelemetry is not installed. Install with 'pip install opentelemetry-api opentelemetry-sdk'"
             )

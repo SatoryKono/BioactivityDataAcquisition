@@ -1,10 +1,11 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods provided by concrete composition (PD2 W1).
 # pyright: reportArgumentType=false
 # Boundary object/payload typing residual at this module.
 """Support helpers for CompositePipelineRunner."""
 
 from __future__ import annotations
+
+from typing import Any, cast
 
 from collections.abc import Callable
 from datetime import datetime
@@ -70,21 +71,21 @@ __all__ = ["CompositeRunnerSupportMixin"]
 class CompositeRunnerSupportMixin:
     """Mixin with utility and side-effect helpers."""
 
-    _config: CompositeConfig
-    _runtime: CompositeRuntimeConfig
-    _seed_runner_factory: Callable[[], ExecutionMetricsRunnerPort]
-    _checkpoint_manager: CompositeCheckpointService
-    _logger: LoggerPort
-    _metrics: MetricsPort | None
-    _tracing: TracingPort | None
-    _observer: CompositeLifecycleObserverService
-    _run_id_str: str
-    _clock: ClockPort | None
-    _start_time: float | None
-    _started_at: datetime | None
-    _original_run_id: str | None
-    _preflight_validator: CompositePreflightValidationService | None
-    _fsm: FSMStateHelperService
+    _config: CompositeConfig = cast(Any, None)  # Any: host attr default (PD3)
+    _runtime: CompositeRuntimeConfig = cast(Any, None)  # Any: host attr default (PD3)
+    _seed_runner_factory: Callable[[], ExecutionMetricsRunnerPort] = cast(Any, None)  # Any: host attr default (PD3)
+    _checkpoint_manager: CompositeCheckpointService = cast(Any, None)  # Any: host attr default (PD3)
+    _logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)
+    _metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD3)
+    _tracing: TracingPort | None = cast(Any, None)  # Any: host attr default (PD3)
+    _observer: CompositeLifecycleObserverService = cast(Any, None)  # Any: host attr default (PD3)
+    _run_id_str: str = cast(Any, None)  # Any: host attr default (PD3)
+    _clock: ClockPort | None = cast(Any, None)  # Any: host attr default (PD3)
+    _start_time: float | None = cast(Any, None)  # Any: host attr default (PD3)
+    _started_at: datetime | None = cast(Any, None)  # Any: host attr default (PD3)
+    _original_run_id: str | None = cast(Any, None)  # Any: host attr default (PD3)
+    _preflight_validator: CompositePreflightValidationService | None = cast(Any, None)  # Any: host attr default (PD3)
+    _fsm: FSMStateHelperService = cast(Any, None)  # Any: host attr default (PD3)
 
     def _build_correlation_log_context(self, **extra: object) -> dict[str, object]:
         """Build a stable correlation envelope for composite critical logs."""

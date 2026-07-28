@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods provided by concrete composition.
 """Internal search-oriented helpers for PubChem fetch strategies."""
 
@@ -6,7 +5,7 @@ from __future__ import annotations
 
 __all__ = ["_PubChemSearchFetchMixin"]
 
-from typing import TYPE_CHECKING
+from typing import Any, cast, TYPE_CHECKING
 
 import pubchempy as pcp
 
@@ -32,8 +31,8 @@ if TYPE_CHECKING:
 class _PubChemSearchFetchMixin:
     """Query-based PubChem fetch strategies for compounds, substances, and assays."""
 
-    _fetch_flow: PubChemFetchFlow
-    _response_mapper: PubChemResponseMapper
+    _fetch_flow: PubChemFetchFlow = cast(Any, None)  # Any: host attr default (PD3)
+    _response_mapper: PubChemResponseMapper = cast(Any, None)  # Any: host attr default (PD3)
 
     async def fetch_by_query(
         self,

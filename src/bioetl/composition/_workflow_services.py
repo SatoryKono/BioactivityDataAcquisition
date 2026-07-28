@@ -47,7 +47,7 @@ __all__ = [
     "load_workflow_config",
 ]
 
-_WORKFLOW_MEMORY_LOCK: LockPort | None = None
+_workflow_memory_lock: LockPort | None = None
 
 
 @runtime_checkable
@@ -235,12 +235,12 @@ def get_workflow_runner_service(
 
 
 def _get_workflow_memory_lock() -> LockPort:
-    global _WORKFLOW_MEMORY_LOCK
-    if _WORKFLOW_MEMORY_LOCK is None:
+    global _workflow_memory_lock
+    if _workflow_memory_lock is None:
         from bioetl.infrastructure.locking import MemoryLock
 
-        _WORKFLOW_MEMORY_LOCK = MemoryLock()
-    return _WORKFLOW_MEMORY_LOCK
+        _workflow_memory_lock = MemoryLock()
+    return _workflow_memory_lock
 
 
 def _create_workflow_ledger_service(

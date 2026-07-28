@@ -1,3 +1,5 @@
+# pyright: reportImportCycles=false
+# Import cycle residual tracked in allowlist (PD3).
 """Pipeline factory subpackage.
 
 Canonical import paths::

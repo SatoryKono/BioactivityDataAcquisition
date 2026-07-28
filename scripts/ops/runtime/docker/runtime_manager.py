@@ -226,18 +226,13 @@ def _image_digests_for(
     )
 
 
-def _snapshot_from_ps_row(
-    row: Mapping[str, Any],
+def _inspect_container_details(
+    container_id: str,
     *,
     runner: Runner,
     timeout: float,
     observations: list[CommandResult],
-) -> ServiceSnapshot | None:
-    """Inspect one compose ps row into a ServiceSnapshot when identity is complete."""
-    container_id = str(row.get("ID") or row.get("Id") or "")
-    service = str(row.get("Service") or row.get("Name") or "")
-    if not container_id or not service:
-        return None
+) -> dict[str, Any] | None:
     inspection = runner(
         [
             "docker",
@@ -258,7 +253,26 @@ def _snapshot_from_ps_row(
     details = _json_rows(inspection.stdout)
     if inspection.returncode != 0 or not details:
         return None
-    item = details[0]
+    return details[0]
+
+
+def _snapshot_from_ps_row(
+    row: Mapping[str, Any],
+    *,
+    runner: Runner,
+    timeout: float,
+    observations: list[CommandResult],
+) -> ServiceSnapshot | None:
+    """Inspect one compose ps row into a ServiceSnapshot when identity is complete."""
+    container_id = str(row.get("ID") or row.get("Id") or "")
+    service = str(row.get("Service") or row.get("Name") or "")
+    if not container_id or not service:
+        return None
+    item = _inspect_container_details(
+        container_id, runner=runner, timeout=timeout, observations=observations
+    )
+    if item is None:
+        return None
     state = item.get("State") or {}
     config = item.get("Config") or {}
     image = str(item.get("Image") or config.get("Image") or row.get("Image") or "")
@@ -507,6 +521,70 @@ def diagnose(
     return payload
 
 
+def _create_shared_network(
+    name: str,
+    owner: str,
+    inspection: CommandResult,
+    *,
+    runner: Runner,
+    timeout: float,
+) -> tuple[dict[str, Any], dict[str, Any] | None]:
+    creation = runner(
+        [
+            "docker",
+            "network",
+            "create",
+            "--label",
+            f"com.bioetl.owner={owner}",
+            name,
+        ],
+        ROOT,
+        timeout,
+    )
+    created = creation.returncode == 0
+    observation = {
+        "name": name,
+        "owner": owner,
+        "created": created,
+        "inspect": asdict(inspection),
+        "create": asdict(creation),
+    }
+    finding = None
+    if not created:
+        finding = {
+            "cause": "network_owner_drift",
+            "network": name,
+            "owner": owner,
+        }
+    return observation, finding
+
+
+def _verify_shared_network_owner(
+    name: str,
+    owner: str,
+    inspection: CommandResult,
+) -> tuple[dict[str, Any], dict[str, Any] | None]:
+    observed_owner = inspection.stdout.strip()
+    owner_ok = observed_owner == owner
+    observation = {
+        "name": name,
+        "owner": owner,
+        "observed_owner": observed_owner or None,
+        "created": False,
+        "owner_ok": owner_ok,
+        "inspect": asdict(inspection),
+    }
+    finding = None
+    if not owner_ok:
+        finding = {
+            "cause": "network_owner_drift",
+            "network": name,
+            "expected_owner": owner,
+            "observed_owner": observed_owner,
+        }
+    return observation, finding
+
+
 def _ensure_one_shared_network(
     raw: Mapping[str, Any],
     *,
@@ -529,53 +607,10 @@ def _ensure_one_shared_network(
         timeout,
     )
     if inspection.returncode != 0:
-        creation = runner(
-            [
-                "docker",
-                "network",
-                "create",
-                "--label",
-                f"com.bioetl.owner={owner}",
-                name,
-            ],
-            ROOT,
-            timeout,
+        return _create_shared_network(
+            name, owner, inspection, runner=runner, timeout=timeout
         )
-        created = creation.returncode == 0
-        observation = {
-            "name": name,
-            "owner": owner,
-            "created": created,
-            "inspect": asdict(inspection),
-            "create": asdict(creation),
-        }
-        finding = None
-        if not created:
-            finding = {
-                "cause": "network_owner_drift",
-                "network": name,
-                "owner": owner,
-            }
-        return observation, finding
-    observed_owner = inspection.stdout.strip()
-    owner_ok = observed_owner == owner
-    observation = {
-        "name": name,
-        "owner": owner,
-        "observed_owner": observed_owner or None,
-        "created": False,
-        "owner_ok": owner_ok,
-        "inspect": asdict(inspection),
-    }
-    finding = None
-    if not owner_ok:
-        finding = {
-            "cause": "network_owner_drift",
-            "network": name,
-            "expected_owner": owner,
-            "observed_owner": observed_owner,
-        }
-    return observation, finding
+    return _verify_shared_network_owner(name, owner, inspection)
 
 
 def ensure_shared_networks(
@@ -987,6 +1022,83 @@ def _handle_daemon_error_during_attempt(
     return findings, recovered
 
 
+def _compose_up_wait_args(
+    spec: StackSpec, *, attempts: int, remaining: float
+) -> list[str]:
+    # Attempt 1: non-destructive up (covers simple kill).
+    # Later attempts: force-recreate clears sticky pause/unhealthy state.
+    up_args: list[str] = ["up", "-d"]
+    if attempts >= 2:
+        up_args.append("--force-recreate")
+    up_args.extend(
+        [
+            "--wait",
+            "--wait-timeout",
+            str(max(1, int(remaining))),
+            *spec.required_services,
+        ]
+    )
+    return up_args
+
+
+def _evaluate_up_attempt(
+    *,
+    result: CommandResult,
+    attempts: int,
+    max_attempts: int,
+    recovered: bool,
+    spec: StackSpec,
+    baseline: Mapping[str, int],
+    report_dir: Path,
+    history: list[dict[str, Any]],
+    runner: Runner,
+    deadline: float,
+    started: float,
+    poll_interval: float,
+    stabilization_seconds: float,
+    sleep: Sleeper,
+    clock: Clock,
+) -> tuple[list[ServiceSnapshot] | None, list[dict[str, Any]], bool, bool]:
+    """Returns (snapshots|None, findings, recovered, succeeded)."""
+    if result.returncode == 0:
+        snapshots, findings = _wait_ready(
+            spec,
+            baseline,
+            runner=runner,
+            timeout=max(0.0, deadline - clock()),
+            poll_interval=poll_interval,
+            stabilization_seconds=stabilization_seconds,
+            sleep=sleep,
+            clock=clock,
+        )
+        return snapshots, findings, recovered, not findings
+    if _daemon_connection_error(result.stderr, result.stdout):
+        findings, recovered = _handle_daemon_error_during_attempt(
+            result=result,
+            attempts=attempts,
+            max_attempts=max_attempts,
+            desktop_recovery_attempted=recovered,
+            spec=spec,
+            report_dir=report_dir,
+            history=history,
+            runner=runner,
+            deadline=deadline,
+            started=started,
+            poll_interval=poll_interval,
+            sleep=sleep,
+            clock=clock,
+        )
+        return None, findings, recovered, False
+    findings = [
+        {
+            "cause": "service_unready",
+            "stderr": result.stderr,
+            "attempt": attempts,
+        }
+    ]
+    return None, findings, recovered, False
+
+
 def _run_recovery_attempts(
     *,
     spec: StackSpec,
@@ -1018,19 +1130,7 @@ def _run_recovery_attempts(
         if remaining <= 0:
             findings = [{"cause": "readiness_timeout", "attempt": attempts}]
             break
-        # Attempt 1: non-destructive up (covers simple kill).
-        # Later attempts: force-recreate clears sticky pause/unhealthy state.
-        up_args: list[str] = ["up", "-d"]
-        if attempts >= 2:
-            up_args.append("--force-recreate")
-        up_args.extend(
-            [
-                "--wait",
-                "--wait-timeout",
-                str(max(1, int(remaining))),
-                *spec.required_services,
-            ]
-        )
+        up_args = _compose_up_wait_args(spec, attempts=attempts, remaining=remaining)
         result = runner(_compose(spec, *up_args), ROOT, remaining)
         history.append(
             {
@@ -1039,44 +1139,27 @@ def _run_recovery_attempts(
                 "elapsed_seconds": round(clock() - started, 3),
             }
         )
-        if result.returncode == 0:
-            snapshots, findings = _wait_ready(
-                spec,
-                baseline,
-                runner=runner,
-                timeout=max(0.0, deadline - clock()),
-                poll_interval=poll_interval,
-                stabilization_seconds=stabilization_seconds,
-                sleep=sleep,
-                clock=clock,
-            )
-            if not findings:
-                return snapshots, findings, attempts, recovered, True
-        elif _daemon_connection_error(result.stderr, result.stdout):
-            findings, recovered = _handle_daemon_error_during_attempt(
-                result=result,
-                attempts=attempts,
-                max_attempts=max_attempts,
-                desktop_recovery_attempted=recovered,
-                spec=spec,
-                report_dir=report_dir,
-                history=history,
-                runner=runner,
-                deadline=deadline,
-                started=started,
-                poll_interval=poll_interval,
-                sleep=sleep,
-                clock=clock,
-            )
-            continue
-        else:
-            findings = [
-                {
-                    "cause": "service_unready",
-                    "stderr": result.stderr,
-                    "attempt": attempts,
-                }
-            ]
+        maybe_snapshots, findings, recovered, succeeded = _evaluate_up_attempt(
+            result=result,
+            attempts=attempts,
+            max_attempts=max_attempts,
+            recovered=recovered,
+            spec=spec,
+            baseline=baseline,
+            report_dir=report_dir,
+            history=history,
+            runner=runner,
+            deadline=deadline,
+            started=started,
+            poll_interval=poll_interval,
+            stabilization_seconds=stabilization_seconds,
+            sleep=sleep,
+            clock=clock,
+        )
+        if maybe_snapshots is not None:
+            snapshots = maybe_snapshots
+        if succeeded:
+            return snapshots, findings, attempts, recovered, True
         if attempts < max_attempts:
             sleep(
                 min(

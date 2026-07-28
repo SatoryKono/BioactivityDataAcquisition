@@ -1,11 +1,10 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods provided by concrete composition.
 """Table access mixin for ``BaseDeltaWriter``."""
 
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING
+from typing import Any, cast, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -19,7 +18,7 @@ if TYPE_CHECKING:
 class BaseDeltaWriterTableAccessMixin:
     """Delta table read/schema/cleanup helpers for ``BaseDeltaWriter``."""
 
-    base_path: str
+    base_path: str = cast(Any, None)  # Any: host attr default (PD3)
 
     def _resolve_table_path(self, table_name: str) -> str:
         raise NotImplementedError

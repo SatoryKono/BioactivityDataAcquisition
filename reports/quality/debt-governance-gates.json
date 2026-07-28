@@ -46,24 +46,24 @@
       "status": "pass"
     },
     {
-      "current": "be15c3e23954047a5c64bb8069653f656624119aacd68464d189e52d8aa86b13",
-      "limit": "be15c3e23954047a5c64bb8069653f656624119aacd68464d189e52d8aa86b13",
+      "current": "83bf5a31f0258af4e00d0c1e8d94789b1067fb34c60b8206e98f0321dbb6ba02",
+      "limit": "d98c7816060220c0349dd1b3444eb9527128d5807c3010af5c7124839e9e756c",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
       "source_artifact": "reports/quality/module-coverage-inventory.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": {
         "source_module_count": 2309,
-        "source_tree_sha256": "be15c3e23954047a5c64bb8069653f656624119aacd68464d189e52d8aa86b13",
+        "source_tree_sha256": "d98c7816060220c0349dd1b3444eb9527128d5807c3010af5c7124839e9e756c",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
         "source_module_count": 2309,
-        "source_tree_sha256": "be15c3e23954047a5c64bb8069653f656624119aacd68464d189e52d8aa86b13",
+        "source_tree_sha256": "d98c7816060220c0349dd1b3444eb9527128d5807c3010af5c7124839e9e756c",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -92,13 +92,13 @@
       "status": "pass"
     },
     {
-      "current": 0,
+      "current": 1,
       "limit": 0,
       "metric": "budget_warnings",
       "name": "hotspot_family_baseline_budget_warnings",
       "remediation": "Reduce hotspot-family metrics to stay at or below reviewed budgets.",
       "source_artifact": "reports/quality/hotspot-family-baseline.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": 0,
@@ -235,7 +235,7 @@
       "status": "pass"
     },
     {
-      "current": 19,
+      "current": 26,
       "limit": 17,
       "metric": "zero_reference_supporting_script_count",
       "name": "supporting_scripts_zero_reference_count",
@@ -244,13 +244,13 @@
       "status": "fail"
     },
     {
-      "current": 0,
+      "current": 7,
       "limit": 0,
       "metric": "untriaged_zero_reference_supporting_script_count",
       "name": "supporting_scripts_untriaged_zero_reference_count",
       "remediation": "Add owner/removal metadata for every zero-reference supporting script.",
       "source_artifact": "configs/quality/scripts_inventory_manifest.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": 0,
@@ -429,27 +429,30 @@
   "stale_artifacts": {
     "adr_enforcement_matrix": false,
     "architecture_quality_scorecard": false,
-    "config_surface_backlog": true,
+    "config_surface_backlog": false,
     "dq_contract_registry_diagnostics": false,
     "hotspot_family_baseline": true,
-    "module_coverage_inventory": false,
+    "module_coverage_inventory": true,
     "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 2,
-    "pass": 43,
+    "fail": 5,
+    "pass": 40,
     "warn": 0
   },
   "summary": {
-    "architecture_quality_scorecard_integral_score": 9.41,
+    "architecture_quality_scorecard_integral_score": 9.33,
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
-    "fail_count": 2,
+    "fail_count": 5,
     "failing_gates": [
+      "module_coverage_source_tree_hash_current",
+      "hotspot_family_baseline_budget_warnings",
       "supporting_scripts_zero_reference_count",
+      "supporting_scripts_untriaged_zero_reference_count",
       "generated_artifact_drift"
     ],
     "gate_count": 45,
-    "pass_count": 43,
+    "pass_count": 40,
     "release_gate_status": "failing",
     "warn_count": 0,
     "warning_gates": []

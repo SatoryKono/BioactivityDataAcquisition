@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Record-method delegation for DebugExportService."""
 
@@ -6,7 +5,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Sequence
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import Any, cast, TYPE_CHECKING
 
 from bioetl.domain.types import BatchID, BronzeRecord, ErrorType, GoldRecord
 
@@ -19,8 +18,8 @@ if TYPE_CHECKING:
 class DebugExportServiceRecordingMixin:
     """Delegate enabled debug-export recording calls to the collector."""
 
-    _collector: DebugExportCollector
-    _created_at_factory: Callable[[], datetime]
+    _collector: DebugExportCollector = cast(Any, None)  # Any: host attr default (PD3)
+    _created_at_factory: Callable[[], datetime] = cast(Any, None)  # Any: host attr default (PD3)
 
     @property
     def enabled(self) -> bool:

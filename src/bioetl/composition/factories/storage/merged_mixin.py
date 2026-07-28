@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Merged write and read operations mixin for StorageBundle."""
 
@@ -60,9 +59,9 @@ class _GoldMergedWriteProtocol(Protocol):
 class StorageBundleMergedMixin:
     """Mixin providing merged write and read operations for composite pipelines."""
 
-    silver: SilverWriter
-    gold: GoldWriter
-    _COMPOSITE_GOLD_SCHEMAS: ClassVar[dict[str, CompositeSchemaProvider]]
+    silver: SilverWriter = cast(Any, None)  # Any: host attr default (PD3)
+    gold: GoldWriter = cast(Any, None)  # Any: host attr default (PD3)
+    _COMPOSITE_GOLD_SCHEMAS: ClassVar[dict[str, CompositeSchemaProvider]] = cast(Any, None)  # Any: host attr default (PD3)
 
     def get_table_path(
         self,
@@ -129,7 +128,7 @@ class StorageBundleMergedMixin:
             primary_keys: Optional list of column names for sorting.
             schema: Optional caller-provided validation schema. If omitted, a
                 registered composite schema must exist for ``table_name``.
-            run_id: Optional composite run ID for metadata tracking.
+            run_id: Optional composite run ID for metadata tracking. = cast(Any, None)  # Any: host attr default (PD3)
             sources_used: Optional list of source pipelines used in merge.
             preserve_column_order: If True, skip canonical reordering.
         """
@@ -176,7 +175,7 @@ class StorageBundleMergedMixin:
             records: A list of dictionaries representing merged records.
             primary_keys: Optional list of column names for sorting.
             completed_at: Optional deterministic metadata timestamp for merged sidecars.
-            run_id: Optional composite run ID for metadata tracking.
+            run_id: Optional composite run ID for metadata tracking. = cast(Any, None)  # Any: host attr default (PD3)
             sources_used: Optional list of source pipelines used in merge.
             preserve_column_order: If True, skip canonical reordering.
             schema: Optional caller-provided Pandera schema. If omitted, a

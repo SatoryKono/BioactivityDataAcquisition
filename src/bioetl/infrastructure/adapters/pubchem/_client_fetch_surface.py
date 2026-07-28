@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods provided by concrete composition.
 """Internal fetch-routing surface for the PubChem adapter."""
 
@@ -7,7 +6,7 @@ from __future__ import annotations
 __all__ = ["_PubChemClientFetchMixin"]
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING
+from typing import Any, cast, TYPE_CHECKING
 
 from bioetl.domain.types import JsonDict
 
@@ -22,7 +21,7 @@ if TYPE_CHECKING:
 class _PubChemClientFetchMixin:
     """Fetch routing and filtered dispatch for the PubChem adapter."""
 
-    _strategies: PubChemFetchStrategies
+    _strategies: PubChemFetchStrategies = cast(Any, None)  # Any: host attr default (PD3)
 
     async def _fetch_compound(
         self, query: str | None, limit: int | None

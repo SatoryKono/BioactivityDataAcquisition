@@ -822,7 +822,7 @@ class TestBatchExecutorTracing:
 
         from bioetl.infrastructure.observability import tracing
 
-        if not tracing.OTEL_AVAILABLE:
+        if not tracing.otel_available:
             pytest.skip("OpenTelemetry is not available")
 
         exporter = InMemorySpanExporter()

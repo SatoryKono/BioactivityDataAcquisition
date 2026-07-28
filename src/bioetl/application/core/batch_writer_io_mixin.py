@@ -43,10 +43,18 @@ class BatchWriterIOMixin:
     _silver_mode: Any = cast(Any, None)  # Any: concrete host narrows the configured literal
     _gold_mode: Any = cast(Any, None)  # Any: concrete host narrows the configured literal
 
-    # Cross-mixin collaborators (_validate_lock / spans / column helpers) come from
-    # BatchWriterTracingMixin and BatchWriterColumnsMixin on the composed
-    # BatchWriter MRO. Do not install NotImplementedError stubs here — they
-    # shadow real methods if IOMixin is ordered first.
+    # Cross-mixin collaborators provided by BatchWriterTracingMixin /
+    # BatchWriterColumnsMixin on the composed BatchWriter MRO. Declared as Any
+    # host callables so basedpyright sees them on this mixin without installing
+    # NotImplementedError stubs that would shadow real methods at runtime.
+    _validate_lock: Any = cast(Any, None)  # Any: sibling mixin supplies the method
+    _start_span: Any = cast(Any, None)  # Any: sibling mixin owns the OTel span API
+    _end_span: Any = cast(Any, None)  # Any: sibling mixin owns the OTel span API
+    _collect_record_columns: Any = cast(Any, None)  # Any: sibling mixin supplies the method
+    _resolve_layer_columns: Any = cast(Any, None)  # Any: sibling mixin supplies the method
+    _project_schema_for_layer: Any = cast(Any, None)  # Any: sibling mixin bridges schema APIs
+    _apply_renames_to_records: Any = cast(Any, None)  # Any: sibling mixin supplies the method
+    _get_schema_columns: Any = cast(Any, None)  # Any: sibling mixin bridges schema APIs
 
     def _resolve_gold_ingestion_ts(self) -> datetime:
         """Return the deterministic timestamp anchor for Gold write side effects."""

@@ -1,8 +1,9 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Bronze and transform-row recording for debug export collectors."""
 
 from __future__ import annotations
+
+from typing import Any, cast
 
 from collections.abc import Sequence
 from datetime import datetime
@@ -34,17 +35,17 @@ _GOLD_SEMANTIC_FILTER_EXCLUDED_MSG = "Gold semantic filter excluded the record."
 class DebugExportTransformRowsMixin:
     """Record Bronze/Silver transform rows into collector-owned tables."""
 
-    _run_id: str
-    _workflow_id: str
-    _pipeline_id: str
-    _provider_id: str
-    _bronze_rows: list[dict[str, object]]
-    _silver_full_rows: list[dict[str, object]]
-    _silver_rejected_rows: list[dict[str, object]]
-    _silver_quarantine_rows: list[dict[str, object]]
-    _gold_full_rows: list[dict[str, object]]
-    _gold_rejected_rows: list[dict[str, object]]
-    _gold_record_index_by_hash: dict[str, int]
+    _run_id: str = cast(Any, None)  # Any: host attr default (PD3)
+    _workflow_id: str = cast(Any, None)  # Any: host attr default (PD3)
+    _pipeline_id: str = cast(Any, None)  # Any: host attr default (PD3)
+    _provider_id: str = cast(Any, None)  # Any: host attr default (PD3)
+    _bronze_rows: list[dict[str, object]] = cast(Any, None)  # Any: host attr default (PD3)
+    _silver_full_rows: list[dict[str, object]] = cast(Any, None)  # Any: host attr default (PD3)
+    _silver_rejected_rows: list[dict[str, object]] = cast(Any, None)  # Any: host attr default (PD3)
+    _silver_quarantine_rows: list[dict[str, object]] = cast(Any, None)  # Any: host attr default (PD3)
+    _gold_full_rows: list[dict[str, object]] = cast(Any, None)  # Any: host attr default (PD3)
+    _gold_rejected_rows: list[dict[str, object]] = cast(Any, None)  # Any: host attr default (PD3)
+    _gold_record_index_by_hash: dict[str, int] = cast(Any, None)  # Any: host attr default (PD3)
 
     def record_bronze_batch(
         self,

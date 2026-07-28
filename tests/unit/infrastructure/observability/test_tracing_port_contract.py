@@ -48,7 +48,7 @@ class TestTracingPortContract:
         """One canonical span path must forward into the underlying tracer."""
         from bioetl.infrastructure.observability import tracing as tracing_module
 
-        if not tracing_module.OTEL_AVAILABLE:
+        if not tracing_module.otel_available:
             pytest.skip("OpenTelemetry is not available")
 
         from opentelemetry.sdk.trace.export.in_memory_span_exporter import (

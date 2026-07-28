@@ -247,6 +247,81 @@ def _resolve_candidate(
     )
 
 
+_KIND_BY_AUDIT_STATUS = {
+    "CONFLICTING": "conflicting_cluster_requires_owner_review",
+    "PARTIAL": "partial_identity_cluster_requires_owner_review",
+    "WEAK": "weak_same_name_cluster",
+}
+
+
+def _review_covers_cluster(
+    review: dict[str, Any],
+    *,
+    cluster_id: str,
+    status: str,
+) -> bool:
+    statuses = review.get("semantic_statuses", [])
+    if not isinstance(statuses, list) or status not in {
+        str(item).upper() for item in statuses
+    }:
+        return False
+    clusters = review.get("clusters")
+    if clusters is None:
+        return True
+    return isinstance(clusters, list) and cluster_id in {str(item) for item in clusters}
+
+
+def _warning_reviewed(
+    review_payload: dict[str, Any],
+    *,
+    cluster_id: str,
+    status: str,
+) -> bool:
+    for section in ("semantic_reviews", "warning_reviews"):
+        reviews = review_payload.get(section, [])
+        if not isinstance(reviews, list):
+            continue
+        for review in reviews:
+            if isinstance(review, dict) and _review_covers_cluster(
+                review, cluster_id=cluster_id, status=status
+            ):
+                return True
+    return False
+
+
+def _warning_for_audit_cluster(
+    cluster: dict[str, Any],
+    *,
+    source: str,
+    review_payload: dict[str, Any],
+) -> DriftWarning | None:
+    status = cluster.get("semantic_default") or cluster.get("semantic_status")
+    if not isinstance(status, str):
+        return None
+    status = status.upper()
+    if status not in NON_BLOCKING_AUDIT_STATUSES:
+        return None
+    cluster_id = str(cluster.get("cluster_id") or "<unknown>")
+    if _warning_reviewed(review_payload, cluster_id=cluster_id, status=status):
+        return None
+    canonical_name = str(
+        cluster.get("canonical_field")
+        or cluster.get("canonical_name")
+        or "<unknown>"
+    )
+    return DriftWarning(
+        kind=_KIND_BY_AUDIT_STATUS.get(status, "non_blocking_audit_cluster"),
+        cluster_id=cluster_id,
+        canonical_name=canonical_name,
+        status=status,
+        source=source,
+        message=(
+            f"{status} audit cluster {cluster_id!r} for {canonical_name!r} "
+            "is intentionally non-blocking until owner review classifies it"
+        ),
+    )
+
+
 def _iter_non_blocking_audit_warnings(
     repo_root: Path,
     audit_cluster_registry: Path,
@@ -268,81 +343,21 @@ def _iter_non_blocking_audit_warnings(
     if not isinstance(clusters, list):
         return ()
 
-    warnings: list[DriftWarning] = []
     source = (
         path.relative_to(repo_root).as_posix()
         if path.is_relative_to(repo_root)
         else path.as_posix()
     )
+    warnings: list[DriftWarning] = []
     for cluster in clusters:
         if not isinstance(cluster, dict):
             continue
-        status = cluster.get("semantic_default") or cluster.get("semantic_status")
-        if not isinstance(status, str):
-            continue
-        status = status.upper()
-        if status not in NON_BLOCKING_AUDIT_STATUSES:
-            continue
-
-        cluster_id = str(cluster.get("cluster_id") or "<unknown>")
-        if _warning_reviewed(
-            review_payload,
-            cluster_id=cluster_id,
-            status=status,
-        ):
-            continue
-        canonical_name = str(
-            cluster.get("canonical_field")
-            or cluster.get("canonical_name")
-            or "<unknown>"
+        warning = _warning_for_audit_cluster(
+            cluster, source=source, review_payload=review_payload
         )
-        kind_by_status = {
-            "CONFLICTING": "conflicting_cluster_requires_owner_review",
-            "PARTIAL": "partial_identity_cluster_requires_owner_review",
-            "WEAK": "weak_same_name_cluster",
-        }
-        warnings.append(
-            DriftWarning(
-                kind=kind_by_status.get(status, "non_blocking_audit_cluster"),
-                cluster_id=cluster_id,
-                canonical_name=canonical_name,
-                status=status,
-                source=source,
-                message=(
-                    f"{status} audit cluster {cluster_id!r} for {canonical_name!r} "
-                    "is intentionally non-blocking until owner review classifies it"
-                ),
-            )
-        )
+        if warning is not None:
+            warnings.append(warning)
     return tuple(warnings)
-
-
-def _warning_reviewed(
-    review_payload: dict[str, Any],
-    *,
-    cluster_id: str,
-    status: str,
-) -> bool:
-    for section in ("semantic_reviews", "warning_reviews"):
-        reviews = review_payload.get(section, [])
-        if not isinstance(reviews, list):
-            continue
-        for review in reviews:
-            if not isinstance(review, dict):
-                continue
-            statuses = review.get("semantic_statuses", [])
-            if not isinstance(statuses, list) or status not in {
-                str(item).upper() for item in statuses
-            }:
-                continue
-            clusters = review.get("clusters")
-            if clusters is None:
-                return True
-            if isinstance(clusters, list) and cluster_id in {
-                str(item) for item in clusters
-            }:
-                return True
-    return False
 
 
 def validate_semantic_registry_drift(
@@ -406,6 +421,46 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _emit_drift_json(result: DriftValidationResult) -> None:
+    payload = {
+        "ok": result.ok,
+        "candidate_count": len(result.candidates),
+        "blocking_finding_count": len(result.findings),
+        "warning_count": len(result.warnings),
+        "findings": [finding.as_dict() for finding in result.findings],
+        "warnings": [warning.as_dict() for warning in result.warnings],
+    }
+    print(json.dumps(payload, indent=2, sort_keys=True))
+
+
+def _emit_drift_text(result: DriftValidationResult) -> None:
+    if result.findings:
+        print("[semantic-registry-drift] blocking drift detected")
+        for finding in result.findings:
+            print(f"- {finding.message}")
+        if result.warnings:
+            print(
+                "[semantic-registry-drift] "
+                f"{len(result.warnings)} non-blocking audit warnings suppressed"
+            )
+        return
+    print(
+        "[semantic-registry-drift] ok "
+        f"({len(result.candidates)} exact candidates checked)"
+    )
+    if not result.warnings:
+        return
+    print(
+        "[semantic-registry-drift] "
+        f"{len(result.warnings)} non-blocking audit warnings"
+    )
+    for warning in result.warnings[:MAX_WARNING_LINES]:
+        print(f"- {warning.message}")
+    remaining = len(result.warnings) - MAX_WARNING_LINES
+    if remaining > 0:
+        print(f"- ... {remaining} more warnings")
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
@@ -416,39 +471,9 @@ def main(argv: list[str] | None = None) -> int:
         review_registry=args.review_registry,
     )
     if args.json:
-        payload = {
-            "ok": result.ok,
-            "candidate_count": len(result.candidates),
-            "blocking_finding_count": len(result.findings),
-            "warning_count": len(result.warnings),
-            "findings": [finding.as_dict() for finding in result.findings],
-            "warnings": [warning.as_dict() for warning in result.warnings],
-        }
-        print(json.dumps(payload, indent=2, sort_keys=True))
-    elif result.findings:
-        print("[semantic-registry-drift] blocking drift detected")
-        for finding in result.findings:
-            print(f"- {finding.message}")
-        if result.warnings:
-            print(
-                "[semantic-registry-drift] "
-                f"{len(result.warnings)} non-blocking audit warnings suppressed"
-            )
+        _emit_drift_json(result)
     else:
-        print(
-            "[semantic-registry-drift] ok "
-            f"({len(result.candidates)} exact candidates checked)"
-        )
-        if result.warnings:
-            print(
-                "[semantic-registry-drift] "
-                f"{len(result.warnings)} non-blocking audit warnings"
-            )
-            for warning in result.warnings[:MAX_WARNING_LINES]:
-                print(f"- {warning.message}")
-            remaining = len(result.warnings) - MAX_WARNING_LINES
-            if remaining > 0:
-                print(f"- ... {remaining} more warnings")
+        _emit_drift_text(result)
 
     return 1 if args.check and result.findings else 0
 

@@ -1,10 +1,9 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods provided by concrete composition.
 """Internal fallback-policy hook mixin for the CrossRef adapter."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import Any, cast, TYPE_CHECKING
 
 from bioetl.domain.normalization import normalize_doi
 from bioetl.infrastructure.adapters.common import FallbackDecoratorConfig
@@ -29,9 +28,9 @@ if TYPE_CHECKING:
 class _CrossRefFallbackPolicyMixin:
     """Provider-specific hookpoints consumed by ``FallbackPolicyMixin``."""
 
-    _fallback_handler: CrossRefTitleFallbackHandler
-    _fallback_decorator: ComposableFallbackDecorator
-    _fetch_flow: CrossRefFetchFlow
+    _fallback_handler: CrossRefTitleFallbackHandler = cast(Any, None)  # Any: host attr default (PD3)
+    _fallback_decorator: ComposableFallbackDecorator = cast(Any, None)  # Any: host attr default (PD3)
+    _fetch_flow: CrossRefFetchFlow = cast(Any, None)  # Any: host attr default (PD3)
 
     def _get_default_fallback_config(self) -> FallbackDecoratorConfig:
         """Return CrossRef-specific default fallback config."""

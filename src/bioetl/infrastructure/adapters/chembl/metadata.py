@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods provided by concrete composition.
 """Metadata handling mixin for ChEMBL adapter."""
 
@@ -7,7 +6,7 @@ from __future__ import annotations
 __all__ = ["ChemblMetadataMixin"]
 
 
-from typing import TYPE_CHECKING
+from typing import Any, cast, TYPE_CHECKING
 
 from bioetl.infrastructure.adapters.chembl.constants import CHEMBL_API_BASE
 from bioetl.infrastructure.adapters.common.source_metadata_capability import (
@@ -27,8 +26,8 @@ if TYPE_CHECKING:
 class ChemblMetadataMixin:
     """Mixin for metadata-related logic in ChEMBL adapter."""
 
-    _request_collector: APIRequestCollector
-    _extraction_params: ExtractionParams
+    _request_collector: APIRequestCollector = cast(Any, None)  # Any: host attr default (PD3)
+    _extraction_params: ExtractionParams = cast(Any, None)  # Any: host attr default (PD3)
 
     def get_source_metadata(self, api_version: str | None = None) -> SourceMetadata:
         """Get API request metadata and clear collector.

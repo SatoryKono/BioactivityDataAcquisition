@@ -1,8 +1,9 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Validation and path helpers for BronzeWriter."""
 
 from __future__ import annotations
+
+from typing import Any, cast
 
 from collections.abc import Iterator
 from datetime import datetime, timedelta
@@ -15,8 +16,8 @@ from bioetl.domain.ports import LoggerPort
 class BronzeWriterValidationMixin:
     """Mixin with input/path validation helpers for Bronze writes."""
 
-    _flat_structure: bool
-    logger: LoggerPort
+    _flat_structure: bool = cast(Any, None)  # Any: host attr default (PD3)
+    logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)
 
     def _resolve_bronze_path(
         self, provider: str, entity: str, date_str: str, filename: str

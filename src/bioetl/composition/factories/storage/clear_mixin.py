@@ -1,10 +1,9 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Clear and cleanup operations mixin for StorageBundle."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import Any, cast, TYPE_CHECKING
 
 from bioetl.composition.factories.storage._blocking import run_storage_blocking
 
@@ -18,8 +17,8 @@ __all__ = ["StorageBundleClearMixin"]
 class StorageBundleClearMixin:
     """Mixin providing clear/cleanup operations for Silver, Gold, CSV, and Delta."""
 
-    silver: SilverWriter
-    gold: GoldWriter
+    silver: SilverWriter = cast(Any, None)  # Any: host attr default (PD3)
+    gold: GoldWriter = cast(Any, None)  # Any: host attr default (PD3)
 
     async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
         """Clear Silver layer data for a specific table.

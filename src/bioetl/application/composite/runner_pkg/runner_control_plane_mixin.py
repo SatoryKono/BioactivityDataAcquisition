@@ -1,11 +1,10 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Thin control-plane mixins delegating composite runner events to support seams."""
 
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING
+from typing import Any, cast, TYPE_CHECKING
 
 from bioetl.application.composite.runner_pkg.runner_control_plane_support import (
     CompositeRunnerControlPlaneHostProtocol,
@@ -45,8 +44,8 @@ __all__ = ["CompositeRunnerControlPlaneMixin"]
 class _CompositeRunnerLedgerLifecycleMixin:
     """Ledger lifecycle helpers shared by composite runner control-plane flows."""
 
-    _run_ledger_service: RunLedgerService | None
-    _manifest_id: str | None
+    _run_ledger_service: RunLedgerService | None = cast(Any, None)  # Any: host attr default (PD3)
+    _manifest_id: str | None = cast(Any, None)  # Any: host attr default (PD3)
 
     @property
     def manifest_id(self: CompositeRunnerControlPlaneHostProtocol) -> str | None:

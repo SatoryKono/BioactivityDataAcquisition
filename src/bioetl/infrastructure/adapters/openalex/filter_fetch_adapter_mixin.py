@@ -1,11 +1,10 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Fetch/filter orchestration mixin for OpenAlexAdapter."""
 
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
-from typing import TYPE_CHECKING
+from typing import Any, cast, TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord, JsonDict
 from bioetl.infrastructure.adapters.filterable_mixin import NotSupportedMultiFilterMixin
@@ -41,11 +40,11 @@ class OpenAlexAdapterFilterFetchMixin(NotSupportedMultiFilterMixin):
         "Use fetch_filtered() with filter_field='doi' instead."
     )
 
-    logger: LoggerPort
-    _logger: LoggerPort
-    _query_executor: OpenAlexQueryExecutor
-    _cursor_flow: OpenAlexCursorFlow
-    _fallback_orchestrator: OpenAlexFallbackOrchestrator
+    logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)
+    _logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)
+    _query_executor: OpenAlexQueryExecutor = cast(Any, None)  # Any: host attr default (PD3)
+    _cursor_flow: OpenAlexCursorFlow = cast(Any, None)  # Any: host attr default (PD3)
+    _fallback_orchestrator: OpenAlexFallbackOrchestrator = cast(Any, None)  # Any: host attr default (PD3)
 
     @staticmethod
     def _is_supported_entity_type(entity_type: str) -> bool:

@@ -501,7 +501,7 @@ def test_workflow_services_helpers_cover_loading_and_singleton_lock(
         "bioetl.infrastructure.locking.MemoryLock",
         lambda: fake_lock,
     )
-    _workflow_services._WORKFLOW_MEMORY_LOCK = None
+    _workflow_services._workflow_memory_lock = None
     assert _workflow_services._get_workflow_memory_lock() is fake_lock
     assert _workflow_services._get_workflow_memory_lock() is fake_lock
 

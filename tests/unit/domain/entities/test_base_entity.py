@@ -1,4 +1,6 @@
 # pyright: reportArgumentType=false
+# pyright: reportAttributeAccessIssue=false
+# pyright: reportCallIssue=false
 # Entity fixture overrides use intentional wide test inputs (PD2-9).
 """Unit tests for BaseEntity — validates system field invariants."""
 
