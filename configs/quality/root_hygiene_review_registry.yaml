@@ -1,7 +1,7 @@
 version: 1.0.0
 status: active
 owner: Engineering / Architecture
-last_verified: "2026-07-27"
+last_verified: "2026-07-28"
 
 current_live_root_baseline:
   tracked_root_audit_status: pass
@@ -10,11 +10,11 @@ current_live_root_baseline:
     .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py
     --strict-untracked
   note: >-
-    2026-07-27 RH-01..RH-05: removed accidental root JUnit dumps; restored
-    tracked .pr_agent.toml; dropped allowlist phantoms DOCKER_QUICKSTART.md and
-    docker-compose.monitoring.desktop.yml; neo4j compose remains root (RH-04).
-    Local AI/editor/cache roots may exist untracked. See
-    docs/00-project/governance/root-local-clutter-cleanup.md.
+    2026-07-28 RH3-01..RH3-04 (#6795–#6799): tracked root still 37≡allowlist;
+    purged recurring local sinks (.coverage, logs/, test-output/, _tmp_*.py);
+    operator recurring checklist in root-local-clutter-cleanup.md; Docker
+    exact-root shrink remains multi-PR deferred (#6797) with consumer map in
+    docker-helper-root-relocation-audit.md. See also 2026-07-27 RH/RH2 notes.
 
 review_lanes:
   - lane_id: root_env_security

@@ -9,6 +9,16 @@ helper adjuncts and setup helpers are owned by scripts paths.
 `configs/quality/docker_runtime_contracts.yaml` and architecture contract tests.
 Rehome only after a dedicated repoint PR updates contracts, docs, and launchers.
 
+**RH3-03 / #6797 (2026-07-28) gate:** full exact-root Docker shrink remains a
+**future multi-PR** program, not a single hygiene PR. Live consumers still pin
+exact root filenames (`Dockerfile.bioetl`, `docker-compose.yml`,
+`docker-compose.monitoring.yml`, Neo4j compose files) via
+`.github/workflows/docker.yml`, `.github/workflows/tests.yml`, `Makefile`,
+operator docs, and RF-003 scripts under `scripts/ops/docker-setup.*`. This issue
+closes as a documented **implementation gate / deferred** surface: no allowlist
+growth, no root shim restoration, move only when every consumer is repointed in
+coordinated PRs.
+
 This audit closes the "review before move" requirement for the reviewed root
 Docker helper family. It complements
 `configs/quality/docker_helper_contracts.yaml` and the
@@ -45,8 +55,10 @@ Reviewed root Docker helper surfaces:
 
 ## Reference Map Verification
 
-Last verified: 2026-07-27 for root hygiene issues #5995 and #6725. The live
-consumer map below was rechecked after the RH-04 decision.
+Last verified: 2026-07-27 for root hygiene issues #5995 and #6725.
+RH3-03/#6797 consumer recheck: 2026-07-28 (still exact-root retained). The live
+consumer map below was rechecked after the RH-04 decision and the RH3 residual
+audit.
 
 Current root Docker entrypoints remain root-retained because live repository
 consumers still use exact root filenames:

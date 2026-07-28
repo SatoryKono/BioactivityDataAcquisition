@@ -499,18 +499,20 @@ hotspot_family_ratchets:
         max_internal_fan_in: 10
       metrics:
         duplication_clusters: 0
-        files: 183
+        files: 186
         total_loc: 22617
-        files_ge_250_loc: 4
+        files_ge_250_loc: 0
         helper_function_ratio: 0.371
         max_internal_fan_in: 7
         max_internal_fan_in_module: bioetl.application.core.pipeline_span_lifecycle
       trend:
-        status: reduced_2026-07-28_arch_cont_01_core_ge250_headroom
+        status: reduced_2026-07-28_issue_6785_core_ge250
         next_action:
-          2026-07-28 ARCH-CONT-01 reduces application_core files_ge_250_loc 5->4 (batch_metrics
-          extract) while keeping bounded-growth budgets flat at 5 files_ge_250_loc and max_internal_fan_in
-          10; no technical-debt budget is increased.
+          2026-07-28 #6785 reduces application_core files_ge_250_loc 4->0 by extracting
+          batch_transformer bags, medallion idempotency, batch_writer gold helpers, and
+          record-normalization mapping modules. Bounded-growth budgets remain flat at 5
+          files_ge_250_loc and max_internal_fan_in 10; no technical-debt budget is increased.
+          Refresh hotspot baseline + total_loc via report_hotspot_family_baseline --update.
     - name: composition_bootstrap_runtime
       owner: "@bioetl-platform"
       linked_rf: RF-023
@@ -558,18 +560,18 @@ hotspot_family_ratchets:
       metrics:
         duplication_clusters: 0
         files: 37
-        total_loc: 4756
+        total_loc: 4073
         files_ge_250_loc: 1
-        helper_function_ratio: 0.417
+        helper_function_ratio: 0.330
         max_internal_fan_in: 2
         max_internal_fan_in_module: bioetl.composition.factories.pipeline.transformer_builder
       trend:
-        status: reduced_2026-07-27_pipeline_factories_live_metric_refresh
+        status: reduced_2026-07-28_pipeline_support_helper_extraction
         next_action:
-          2026-07-27 refresh aligns the scorecard with the committed hotspot-family baseline
-          at 35 files, 4690 LOC, 3 files_ge_250_loc, helper_function_ratio 0.417, and max_internal_fan_in
-          3 after the earlier factory fan-in reduction. Bounded-growth budgets remain flat at 3 files_ge_250_loc
-          and max_internal_fan_in 3; no technical-debt budget is increased.
+          2026-07-28 extraction of helper-heavy modules into composition/factories/pipeline_support/
+          reduces measured helper_function_ratio to 0.330 at 37 files / 4073 LOC while leaving thin
+          re-export shims at the old pipeline paths. Bounded-growth budgets remain flat at 2
+          files_ge_250_loc and max_internal_fan_in 3; no technical-debt budget is increased.
     - name: application_services_control_plane
       owner: "@bioetl-platform"
       linked_rf: RF-023

@@ -30,19 +30,17 @@ from bioetl.application.pipelines.common.publication_transformer_context import 
     BasePublicationTransformerContext,
     coerce_publication_transformer_init,
 )
+from bioetl.application.pipelines.common.publication_transformer_hooks_mixin import (
+    PublicationTransformerHooksMixin,
+)
 from bioetl.application.pipelines.common.publication_transformer_records import (
     assemble_publication_silver_record,
     build_pre_silver_publication_record,
-    classification_payload,
-)
-from bioetl.application.pipelines.common.publication_vocab_observability import (
-    emit_unknown_publication_vocab_metrics,
 )
 from bioetl.application.pipelines.common.transformer_initialization import (
     initialize_base_transformer,
     transformer_context_kwargs,
 )
-from bioetl.domain.value_objects import PublicationYear
 
 if TYPE_CHECKING:
     from bioetl.application.core.pre_silver_record import PreSilverRecord
@@ -56,7 +54,10 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, JsonDict, PrimaryId, SilverRecord
 
 
-class BasePublicationTransformer(BaseTransformer):  # type: ignore[misc]
+class BasePublicationTransformer(
+    PublicationTransformerHooksMixin,
+    BaseTransformer,  # type: ignore[misc]
+):
     """Shared facade flow for publication transformers."""
 
     DEFAULT_PROVIDER = ""
@@ -155,110 +156,6 @@ class BasePublicationTransformer(BaseTransformer):  # type: ignore[misc]
         """
         return self._post_process_silver_record(silver_record)
 
-    def _pre_extract_validation(
-        self,
-        context: PipelineContext,
-        record: BronzeRecord,
-        index: int,
-    ) -> None:
-        """Optional pre-extraction validation hook."""
-        pass
-
-    def _extract_business_data(self, record: BronzeRecord) -> JsonDict:
-        """Extract and normalize fields from bronze record."""
-        blocks = getattr(self, "extraction_blocks", [])
-        if blocks:
-            result: JsonDict = {}
-            for block in blocks:
-                result.update(block.extract(record))
-            return result
-
-        raise NotImplementedError(
-            f"{self.__class__.__name__} must implement extraction_blocks property "
-            "or override _extract_business_data() method."
-        )
-
-    def _get_primary_id_field(self) -> str:
-        """Return the name of the primary identifier field."""
-        raise NotImplementedError()
-
-    def _get_entity_class(self) -> type[BaseEntity]:
-        """Return the domain entity class for this publication type."""
-        raise NotImplementedError()
-
-    def _should_log_fallback_lookup(self) -> bool:
-        """Return True if fallback lookup logging is enabled."""
-        return True
-
-    def _post_process_silver_record(self, silver_record: SilverRecord) -> SilverRecord:
-        """Finalize a Silver record after entity inflation.
-
-        Subclasses can override this hook for compatibility-sensitive cleanup,
-        but the common publication path should preserve the record unchanged.
-        """
-        return silver_record
-
-    def _validate_primary_id(
-        self,
-        context: PipelineContext,
-        business_data: JsonDict,
-        index: int,
-    ) -> tuple[str, PrimaryId] | None:
-        """Validate primary ID presence."""
-        primary_id_field = self._get_primary_id_field()
-        primary_id = business_data.get(primary_id_field)
-        if not primary_id:
-            context.logger.warning(
-                "record_skipped_no_id",
-                index=index,
-                lookup_method=business_data.get("_lookup_method"),
-            )
-            return None
-        return primary_id_field, primary_id
-
-    def _validate_publication_year_value(self, raw: object) -> int | None:
-        """Validate publication year and return the canonical integer value."""
-        value = self.validate_value_object(
-            PublicationYear,
-            raw,
-            as_string=False,
-        )
-        return value if isinstance(value, int) else None
-
-    _CONTENT_FIELDS: tuple[str, ...] = ("abstract",)
-    """Fields to normalize via ``strip_html_tags`` after extraction."""
-
-    def _normalize_content_fields(
-        self,
-        business_data: dict[
-            str, Any  # Any: transformer record has heterogeneous values
-        ],  # Any: transformer record has heterogeneous values
-    ) -> JsonDict:  # Any: transformer record has heterogeneous values
-        """Apply uniform text cleanup to configured content fields."""
-        for field in self._CONTENT_FIELDS:
-            raw = business_data.get(field)
-            if raw is not None:
-                business_data[field] = self._data_normalizer.strip_html_tags(raw)
-        return business_data
-
-    def _log_fallback_if_needed(
-        self,
-        context: PipelineContext,
-        business_data: JsonDict,
-        primary_id_field: str,
-        primary_id: PrimaryId,
-    ) -> None:
-        """Log fallback lookup usage when applicable."""
-        if self._metadata_strategy.should_log_fallback_lookup():
-            lookup_method = business_data.get("_lookup_method", "unknown")
-            if lookup_method in ("title_fallback", "title_only"):
-                context.logger.info(
-                    "fallback_lookup_used",
-                    **{primary_id_field: primary_id},
-                    lookup_method=lookup_method,
-                    original_id=business_data.get("_original_id"),
-                )
-
     async def transform_pre_silver(
         self,
         context: PipelineContext,
@@ -291,26 +188,3 @@ class BasePublicationTransformer(BaseTransformer):  # type: ignore[misc]
             prepared=prepared,
             normalized_business_data=normalized_business_data,
         )
-
-    def _emit_unknown_publication_vocab_metrics(
-        self,
-        context: PipelineContext,
-        normalized_business_data: JsonDict,
-    ) -> None:
-        """Publish bounded counters for unknown raw publication vocabulary drift."""
-        pipeline_name = context.pipeline_name or f"{self.provider}_{self.entity_type}"
-        emit_unknown_publication_vocab_metrics(
-            metrics=self._metrics,
-            pipeline_name=pipeline_name,
-            provider=self.provider,
-            normalized_business_data=normalized_business_data,
-        )
-
-    def _classify_publication_type(
-        self,
-        provider: str,
-        raw_type: str | None = None,
-        raw_types_list: list[str] | None = None,
-    ) -> dict[str, str | None]:
-        """Classify publication type using the unified 3-level hierarchy."""
-        return classification_payload(provider, raw_type, raw_types_list)

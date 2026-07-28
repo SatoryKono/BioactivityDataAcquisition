@@ -21,7 +21,7 @@ ACTIVE_SURFACES = (
     / "bioetl"
     / "composition"
     / "factories"
-    / "pipeline"
+    / "pipeline_support"
     / "checkpoint_policy_helpers.py",
     ROOT
     / "src"

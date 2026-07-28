@@ -1,26 +1,61 @@
 # Root local clutter cleanup (operator guidance)
 
 **Status:** active  
-**Linked issues:** #6703 (RH-03), epic #6700  
-**Last verified:** 2026-07-27  
+**Linked issues:** #6703 (RH), #6766 (RH2-01), #6798/#6799 (RH3); epics #6700, #6765, #6795  
+**Last verified:** 2026-07-28  
 
 This note documents **local-only** cleanup for the repository root. It does not
 redefine runtime behavior. Canonical policy remains
 `docs/00-project/governance/03-file-policy.md` §0 and
 `.github/root-allowlist.txt`.
 
+Tracked root is already allowlist-minimal (**37 ≡ allowlist**). Most live root
+noise is **recreated by normal tooling** (coverage, logs, test dumps). Use the
+recurring checklist below instead of inventing new allowlist entries.
+
+## Recurring 5-minute checklist (pre-PR / pre-audit)
+
+1. **Never** create, edit, delete, rename, or move `.env` / `.env.local` / real
+   `.env*` without **explicit per-task user approval**.
+2. Confirm tracked root still matches allowlist (expect **37** files):
+   ```bash
+   git ls-files | python -c "import sys; xs=sorted(f.strip() for f in sys.stdin if f.strip() and '/' not in f.strip()); print(len(xs)); print('\\n'.join(xs))"
+   ```
+3. Safe local purge (untracked only), when present:
+   - `.coverage`, root `logs/`, `tmp/`, `test-output/`, `caddy/`, `.tmp_fix/`
+   - `_tmp_*.py`, `temp_closeout.json`, `.tmp_test_run.log`, `mcp-shell.log`
+   - `arch_fail_report.txt` / other root `*report*.txt`
+   - `.gitignore~`
+4. Optional / expensive: tool caches and venvs
+   (`.pytest_cache/`, `.mypy_cache/`, `.ruff_cache/`, `.hypothesis/`,
+   `.venv*`, `node_modules/`) — purge only if you accept rebuild cost.
+5. Leave allowlisted tracked files and curated agent trees
+   (`.codex/`, tracked `.devin`/`.vibe`/`.zed`) alone.
+6. Re-check:
+   ```bash
+   uv run python -m scripts.engineering.repo check-cleanliness --strict-untracked
+   ```
+
+Long-lived retained logs belong under `reports/logs/`, not root `logs/`.
+
 ## Safe to delete locally (untracked)
+
+The following untracked patterns are **safe to delete** on a developer host
+when no active process depends on them:
 
 | Pattern / path | Why |
 |---|---|
 | `uchunk*.xml`, `final_chunk*.xml` | Accidental JUnit / pytest XML dumps |
 | `pytest_*.log`, `mcp-shell.log`, `*.log` at root | Local test/agent logs (also `*.log` gitignored) |
-| `tmp_sub_*.txt`, `temp_closeout.json`, `.tmp_test_run.log` | Agent scratch files |
-| `.gitignore~` | Editor backup; safe to delete because `.gitignore` is the tracked source of truth |
+| `tmp_sub_*.txt`, `temp_closeout.json`, `.tmp_test_run.log`, `_tmp_*.py` | Agent scratch files |
+| `arch_fail_report.txt`, `*report*.txt` at root | Local architecture/test report dumps |
+| `.gitignore~` | Editor backup; `.gitignore` is the tracked source of truth |
 | `.coverage`, `.pytest_cache/`, `.mypy_cache/`, `.ruff_cache/`, `.hypothesis/` | Tool caches |
-| `.venv/`, `.venv-win/`, `node_modules/` | Local environments |
-| `logs/`, `tmp/`, `test-output/`, `caddy/` | Local output trees (not retained git sinks) |
+| `.venv/`, `.venv-win/`, `node_modules/` | Local environments (optional purge) |
+| `logs/`, `tmp/`, `test-output/`, `caddy/`, `.tmp_fix/` | Local output trees (not retained git sinks) |
+| root `~/` | Accidental tool home-mirror directory (not user `$HOME`) |
 | `.idea/`, `.qodo/` (local), `.agents/`, `.ai/`, `.grok/`, `.windsurf/`, `.junie/` | Editor/agent local state |
+| `nul` / `NUL` | Windows reserved-name pseudo-file; ignored. Some hosts cannot unlink via `Path.unlink` |
 
 ## Retain while in use; safe to regenerate
 
@@ -50,8 +85,22 @@ uv run python -m scripts.engineering.repo check-cleanliness --strict-untracked
 # .github/workflows/root-hygiene.yml
 ```
 
+## RH3-01 local purge (2026-07-28)
+
+Deleted on the audit host when present (untracked only):
+
+- `.coverage`
+- `logs/`, `test-output/`
+
+Left in place:
+
+- `.env`, `.env.local` (secret lane)
+- `.mcp-server-context.md` (regenerable MCP context still in use)
+- Windows `nul` (Access denied on unlink; already gitignored)
+
 ## Related
 
 - `.github/workflows/root-hygiene.yml`
 - `configs/quality/root_hygiene_review_registry.yaml`
 - `configs/quality/repo_structure_catalog.yaml`
+- Epic RH3: #6795

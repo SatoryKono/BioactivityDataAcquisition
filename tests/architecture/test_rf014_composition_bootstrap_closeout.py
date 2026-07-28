@@ -15,7 +15,7 @@ COMPOSITION_BOOTSTRAP_RATCHETS: dict[str, tuple[int, set[str]]] = {
         {
             "bioetl.composition.factories.datasource.data_source_factory",
             "bioetl.composition.factories.dq.context_resolver",
-            "bioetl.composition.factories.pipeline.assembler_helpers",
+            "bioetl.composition.factories.pipeline_support.assembler_helpers",
             "bioetl.composition.factories.pipeline.runner_assembly",
         },
     ),

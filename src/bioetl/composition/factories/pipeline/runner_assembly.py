@@ -31,10 +31,10 @@ from bioetl.composition.factories.pipeline._runner_assembly_support import (
 from bioetl.composition.factories.pipeline._runner_assembly_support import (
     build_runner_constructor_payload as _build_runner_constructor_payload_impl,
 )
-from bioetl.composition.factories.pipeline.checkpoint_metadata_helpers import (
+from bioetl.composition.factories.pipeline_support.checkpoint_metadata_helpers import (
     build_current_checkpoint_metadata,
 )
-from bioetl.composition.factories.pipeline.checkpoint_policy_helpers import (
+from bioetl.composition.factories.pipeline_support.checkpoint_policy_helpers import (
     resolve_checkpoint_compatibility_policy,
 )
 from bioetl.composition.factories.pipeline.postrun_assembly import build_postrun_service

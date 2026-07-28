@@ -19,7 +19,7 @@ from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
     get_data_source_creator,
 )
-from bioetl.composition.factories.pipeline.assembler_helpers import (
+from bioetl.composition.factories.pipeline_support.assembler_helpers import (
     _FactoryLike,
     build_factory_context,
     create_runner_from_factory,

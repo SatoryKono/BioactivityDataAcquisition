@@ -606,6 +606,17 @@ takes...
 
 ---
 
+### ADR-052: infrastructure.config Package-Root as Permanent External Public API
+
+**Status**: `accepted` | **Category**: `Architecture` | **Owner**: `BioETL Team`
+
+**Context**: Package-root facade `bioetl.infrastructure.config` was residual
+`compatibility_debt` while first-party src importers are already zero...
+
+[📄 View Full ADR](decisions/ADR-052-infrastructure-config-package-root-public-api.md)
+
+---
+
 ## 🔵 Superseded ADRs
 
 ### 2 decisions

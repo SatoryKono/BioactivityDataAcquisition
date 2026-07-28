@@ -19,7 +19,7 @@ from bioetl.application.services.control_plane.manifest.service import (
 from bioetl.composition.runtime_builders.cached_bronze_snapshot_support import (
     build_cached_bronze_input_snapshot_refs,
 )
-from bioetl.composition.factories.pipeline.checkpoint_metadata_helpers import (
+from bioetl.composition.factories.pipeline_support.checkpoint_metadata_helpers import (
     build_current_checkpoint_metadata,
 )
 from bioetl.domain.context import CachedBronzeContext
@@ -259,7 +259,7 @@ def test_build_current_checkpoint_metadata_prefers_manifest_snapshot_identity(
         immutable_uri="bronze://chembl/activity/manifest.jsonl.zst",
     )
     monkeypatch.setattr(
-        "bioetl.composition.factories.pipeline.checkpoint_metadata_resolution.resolve_manifest_input_snapshot_refs",
+        "bioetl.composition.factories.pipeline_support.checkpoint_metadata_resolution.resolve_manifest_input_snapshot_refs",
         lambda **_: (manifest_snapshot,),
     )
 

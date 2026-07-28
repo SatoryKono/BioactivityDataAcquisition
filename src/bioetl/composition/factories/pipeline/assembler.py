@@ -18,7 +18,7 @@ from bioetl.composition.factories.dq.context_resolver import (
 from bioetl.composition.factories.pipeline._assembler_factory import (
     GenericPipelineFactory as _GenericPipelineFactory,
 )
-from bioetl.composition.factories.pipeline.assembler_helpers import (
+from bioetl.composition.factories.pipeline_support.assembler_helpers import (
     build_factory_services as _rf014_build_factory_services,
     create_pipeline_instance_with_services as _rf014_create_pipeline_instance_with_services,
     extract_entity_type as _rf014_extract_entity_type,
