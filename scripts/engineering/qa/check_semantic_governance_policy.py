@@ -365,61 +365,47 @@ def _partial_policy_findings(
     return findings
 
 
-def _weak_decision_findings(
-    payload: dict[str, Any],
-    *,
-    rows: tuple[dict[str, str], ...],
-) -> list[GovernanceFinding]:
-    findings: list[GovernanceFinding] = []
-    policy = payload.get("weak_cluster_policy", {})
-    if not isinstance(policy, dict):
-        return [
-            GovernanceFinding(
-                kind="missing_weak_cluster_policy",
-                subject="weak_cluster_policy",
-                message="semantic audit review registry must define weak_cluster_policy",
-            )
-        ]
-    threshold = policy.get("weak_decision_min_rows")
-    if not isinstance(threshold, int) or threshold < 1:
-        findings.append(
-            GovernanceFinding(
-                kind="invalid_weak_cluster_policy_threshold",
-                subject="weak_cluster_policy",
-                message="weak_cluster_policy.weak_decision_min_rows must be a positive integer",
-            )
-        )
-        threshold = 1
-    counts = _cluster_counts(rows, "WEAK")
-    expected = {
-        cluster_id for cluster_id, count in counts.items() if count >= threshold
-    }
-    tracked_clusters = {
+def _string_id_set(policy: dict[str, Any], key: str) -> set[str]:
+    """Extract a set of string cluster ids from a policy list field."""
+    return {
         str(cluster_id)
-        for cluster_id in policy.get("tracked_cluster_ids", [])
+        for cluster_id in policy.get(key, [])
         if isinstance(cluster_id, str)
     }
-    role_governed_clusters = {
-        str(cluster_id)
-        for cluster_id in policy.get("role_governed_cluster_ids", [])
-        if isinstance(cluster_id, str)
-    }
-    explicit_contract_clusters = {
-        str(cluster_id)
-        for cluster_id in policy.get("explicit_contract_cluster_ids", [])
-        if isinstance(cluster_id, str)
-    }
+
+
+def _weak_policy_sets(
+    policy: dict[str, Any],
+) -> tuple[set[str], set[str], set[str], tuple[str, ...]]:
+    """Return tracked, role-governed, explicit-contract sets and required metadata."""
+    tracked = _string_id_set(policy, "tracked_cluster_ids")
+    role_governed = _string_id_set(policy, "role_governed_cluster_ids")
+    explicit_contract = _string_id_set(policy, "explicit_contract_cluster_ids")
     required_tracked_metadata = tuple(
         str(key)
         for key in policy.get("required_tracked_decision_metadata", [])
         if isinstance(key, str)
     )
+    return tracked, role_governed, explicit_contract, required_tracked_metadata
+
+
+def _weak_policy_stale_findings(
+    *,
+    counts: dict[str, int],
+    tracked_clusters: set[str],
+    role_governed_clusters: set[str],
+    explicit_contract_clusters: set[str],
+) -> list[GovernanceFinding]:
+    """Findings for policy ids that do not align with current WEAK clusters."""
+    findings: list[GovernanceFinding] = []
     for stale in sorted(tracked_clusters - set(counts)):
         findings.append(
             GovernanceFinding(
                 kind="stale_tracked_weak_cluster_policy",
                 subject=stale,
-                message=f"weak_cluster_policy tracks {stale} but it is not a current WEAK cluster",
+                message=(
+                    f"weak_cluster_policy tracks {stale} but it is not a current WEAK cluster"
+                ),
             )
         )
     for stale in sorted(role_governed_clusters - tracked_clusters):
@@ -444,6 +430,161 @@ def _weak_decision_findings(
                 ),
             )
         )
+    return findings
+
+
+def _weak_decision_entry_findings(
+    entry: dict[str, Any],
+    *,
+    tracked_clusters: set[str],
+    role_governed_clusters: set[str],
+    explicit_contract_clusters: set[str],
+    required_tracked_metadata: tuple[str, ...],
+) -> list[GovernanceFinding]:
+    """Validate one weak_cluster_decisions entry."""
+    findings: list[GovernanceFinding] = []
+    cluster_id = str(entry.get("cluster_id") or "<unknown>")
+    for key in ("cluster_id", "field_name", "decision", "owner", "rationale"):
+        if not _non_empty_str(entry, key):
+            findings.append(
+                GovernanceFinding(
+                    kind="missing_weak_cluster_decision_metadata",
+                    subject=cluster_id,
+                    message=f"weak cluster decision for {cluster_id} is missing {key}",
+                )
+            )
+    decision = entry.get("decision")
+    if isinstance(decision, str) and decision not in ALLOWED_WEAK_DECISIONS:
+        findings.append(
+            GovernanceFinding(
+                kind="invalid_weak_cluster_decision_value",
+                subject=cluster_id,
+                message=(
+                    f"weak cluster decision for {cluster_id} uses unsupported "
+                    f"decision {decision!r}"
+                ),
+            )
+        )
+    if cluster_id in tracked_clusters:
+        for key in required_tracked_metadata:
+            if not _non_empty_str(entry, key):
+                findings.append(
+                    GovernanceFinding(
+                        kind="missing_tracked_weak_cluster_metadata",
+                        subject=cluster_id,
+                        message=(
+                            f"tracked weak cluster decision for {cluster_id} is missing {key}"
+                        ),
+                    )
+                )
+    semantic_scope = str(entry.get("semantic_scope") or "")
+    if cluster_id in role_governed_clusters and not semantic_scope.startswith(
+        "role_governed_"
+    ):
+        findings.append(
+            GovernanceFinding(
+                kind="invalid_role_governed_weak_scope",
+                subject=cluster_id,
+                message=(
+                    f"role-governed weak cluster {cluster_id} must use a "
+                    f"role_governed_* semantic_scope, got {semantic_scope!r}"
+                ),
+            )
+        )
+    if (
+        cluster_id in explicit_contract_clusters
+        and semantic_scope != "explicit_source_owned_assay_contract"
+    ):
+        findings.append(
+            GovernanceFinding(
+                kind="invalid_explicit_contract_weak_scope",
+                subject=cluster_id,
+                message=(
+                    f"explicit-contract weak cluster {cluster_id} must use "
+                    "'explicit_source_owned_assay_contract' semantic_scope"
+                ),
+            )
+        )
+    return findings
+
+
+def _weak_decision_coverage_findings(
+    *,
+    expected: set[str],
+    actual: set[str],
+    counts: dict[str, int],
+) -> list[GovernanceFinding]:
+    """Missing expected decisions and stale decisions not in current WEAK set."""
+    findings: list[GovernanceFinding] = []
+    for missing in sorted(expected - actual):
+        findings.append(
+            GovernanceFinding(
+                kind="missing_weak_cluster_decision",
+                subject=missing,
+                message=(
+                    f"WEAK cluster {missing} meets the review threshold and is missing "
+                    "an explicit owner decision"
+                ),
+            )
+        )
+    for stale in sorted(actual - set(counts)):
+        findings.append(
+            GovernanceFinding(
+                kind="stale_weak_cluster_decision",
+                subject=stale,
+                message=(
+                    f"weak cluster decision {stale} does not map to a current WEAK cluster"
+                ),
+            )
+        )
+    return findings
+
+
+def _weak_decision_findings(
+    payload: dict[str, Any],
+    *,
+    rows: tuple[dict[str, str], ...],
+) -> list[GovernanceFinding]:
+    findings: list[GovernanceFinding] = []
+    policy = payload.get("weak_cluster_policy", {})
+    if not isinstance(policy, dict):
+        return [
+            GovernanceFinding(
+                kind="missing_weak_cluster_policy",
+                subject="weak_cluster_policy",
+                message="semantic audit review registry must define weak_cluster_policy",
+            )
+        ]
+    threshold = policy.get("weak_decision_min_rows")
+    if not isinstance(threshold, int) or threshold < 1:
+        findings.append(
+            GovernanceFinding(
+                kind="invalid_weak_cluster_policy_threshold",
+                subject="weak_cluster_policy",
+                message=(
+                    "weak_cluster_policy.weak_decision_min_rows must be a positive integer"
+                ),
+            )
+        )
+        threshold = 1
+    counts = _cluster_counts(rows, "WEAK")
+    expected = {
+        cluster_id for cluster_id, count in counts.items() if count >= threshold
+    }
+    (
+        tracked_clusters,
+        role_governed_clusters,
+        explicit_contract_clusters,
+        required_tracked_metadata,
+    ) = _weak_policy_sets(policy)
+    findings.extend(
+        _weak_policy_stale_findings(
+            counts=counts,
+            tracked_clusters=tracked_clusters,
+            role_governed_clusters=role_governed_clusters,
+            explicit_contract_clusters=explicit_contract_clusters,
+        )
+    )
     expected |= tracked_clusters
     entries = payload.get("weak_cluster_decisions", [])
     if not isinstance(entries, list):
@@ -467,83 +608,20 @@ def _weak_decision_findings(
             continue
         cluster_id = str(entry.get("cluster_id") or "<unknown>")
         actual.add(cluster_id)
-        for key in ("cluster_id", "field_name", "decision", "owner", "rationale"):
-            if not _non_empty_str(entry, key):
-                findings.append(
-                    GovernanceFinding(
-                        kind="missing_weak_cluster_decision_metadata",
-                        subject=cluster_id,
-                        message=f"weak cluster decision for {cluster_id} is missing {key}",
-                    )
-                )
-        decision = entry.get("decision")
-        if isinstance(decision, str) and decision not in ALLOWED_WEAK_DECISIONS:
-            findings.append(
-                GovernanceFinding(
-                    kind="invalid_weak_cluster_decision_value",
-                    subject=cluster_id,
-                    message=f"weak cluster decision for {cluster_id} uses unsupported decision {decision!r}",
-                )
-            )
-        if cluster_id in tracked_clusters:
-            for key in required_tracked_metadata:
-                if not _non_empty_str(entry, key):
-                    findings.append(
-                        GovernanceFinding(
-                            kind="missing_tracked_weak_cluster_metadata",
-                            subject=cluster_id,
-                            message=(
-                                f"tracked weak cluster decision for {cluster_id} is missing {key}"
-                            ),
-                        )
-                    )
-        semantic_scope = str(entry.get("semantic_scope") or "")
-        if cluster_id in role_governed_clusters and not semantic_scope.startswith(
-            "role_governed_"
-        ):
-            findings.append(
-                GovernanceFinding(
-                    kind="invalid_role_governed_weak_scope",
-                    subject=cluster_id,
-                    message=(
-                        f"role-governed weak cluster {cluster_id} must use a "
-                        f"role_governed_* semantic_scope, got {semantic_scope!r}"
-                    ),
-                )
-            )
-        if (
-            cluster_id in explicit_contract_clusters
-            and semantic_scope != "explicit_source_owned_assay_contract"
-        ):
-            findings.append(
-                GovernanceFinding(
-                    kind="invalid_explicit_contract_weak_scope",
-                    subject=cluster_id,
-                    message=(
-                        f"explicit-contract weak cluster {cluster_id} must use "
-                        "'explicit_source_owned_assay_contract' semantic_scope"
-                    ),
-                )
-            )
-    for missing in sorted(expected - actual):
-        findings.append(
-            GovernanceFinding(
-                kind="missing_weak_cluster_decision",
-                subject=missing,
-                message=(
-                    f"WEAK cluster {missing} meets the review threshold and is missing "
-                    "an explicit owner decision"
-                ),
+        findings.extend(
+            _weak_decision_entry_findings(
+                entry,
+                tracked_clusters=tracked_clusters,
+                role_governed_clusters=role_governed_clusters,
+                explicit_contract_clusters=explicit_contract_clusters,
+                required_tracked_metadata=required_tracked_metadata,
             )
         )
-    for stale in sorted(actual - set(counts)):
-        findings.append(
-            GovernanceFinding(
-                kind="stale_weak_cluster_decision",
-                subject=stale,
-                message=f"weak cluster decision {stale} does not map to a current WEAK cluster",
-            )
+    findings.extend(
+        _weak_decision_coverage_findings(
+            expected=expected, actual=actual, counts=counts
         )
+    )
     return findings
 
 

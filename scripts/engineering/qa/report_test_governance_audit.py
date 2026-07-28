@@ -839,160 +839,199 @@ def _classify_assertless_candidate(
 
 
 @cache
-def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
-    """Collect deterministic static counts used as remediation budgets."""
-    root = Path(root_str).resolve()
-    fresh_artifact = _load_current_artifact_if_fresh(root)
-    if fresh_artifact is not None:
-        return fresh_artifact
-    test_files = _iter_test_files(root)
-    test_name_locations: dict[str, list[str]] = defaultdict(list)
-    assertless_examples: list[str] = []
-    assertless_candidates: list[dict[str, str]] = []
-    assertless_category_counts: Counter[str] = Counter()
-    compatibility_files: list[str] = []
-    parse_errors: list[dict[str, str]] = []
-    critical_behavior_envelopes = _critical_envelope_template()
-    assertion_bypass_allowlist = _load_assertion_bypass_allowlist(root)
-    assertion_bypass_findings: list[dict[str, str]] = []
-    assertion_reachability_scanned_tests = 0
+def _parse_test_module_source(
+    path: Path,
+    *,
+    relative: str,
+) -> tuple[ast.Module | None, dict[str, str] | None]:
+    """Read and parse a test module; return (tree, parse_error)."""
+    try:
+        source = _read_text_file(path)
+    except OSError:
+        return None, None
+    except UnicodeDecodeError as exc:
+        return None, {
+            "path": relative,
+            "error": f"utf-8 decode failed: {exc}",
+        }
+    try:
+        return ast.parse(source, filename=relative), None
+    except SyntaxError as exc:
+        return None, {"path": relative, "error": str(exc)}
 
-    total_functions = 0
-    assertless_total_candidates = 0
-    refined_assertless_tests = 0
-    markerless_test_functions = 0
-    markerless_examples: list[str] = []
-    uuid4_call_sites = 0
-    date_today_call_sites = 0
 
-    for path in test_files:
-        relative = _normalize_repo_relative_path(path.relative_to(root).as_posix())
-        if COMPATIBILITY_FILE_RE.search(relative):
-            compatibility_files.append(relative)
-
-        try:
-            source = _read_text_file(path)
-        except OSError:
-            continue
-        except UnicodeDecodeError as exc:
-            parse_errors.append(
+def _record_assertion_reachability_findings(
+    *,
+    function: ast.FunctionDef | ast.AsyncFunctionDef,
+    relative: str,
+    assertion_bypass_allowlist: list[dict[str, str]],
+    assertion_bypass_findings: list[dict[str, str]],
+) -> None:
+    """Append reviewed assertion-bypass findings for one scanned test."""
+    for finding_line, reason in _assertion_reachability_findings(function):
+        assertion_bypass_findings.append(
+            _review_assertion_bypass(
                 {
                     "path": relative,
-                    "error": f"utf-8 decode failed: {exc}",
-                }
+                    "line": str(finding_line),
+                    "test_name": function.name,
+                    "reason": reason,
+                },
+                assertion_bypass_allowlist,
             )
-            continue
+        )
 
-        try:
-            tree = ast.parse(source, filename=relative)
-        except SyntaxError as exc:
-            parse_errors.append({"path": relative, "error": str(exc)})
-            continue
 
-        module_has_mark = _has_module_pytestmark(tree)
-        for function, class_has_mark in _test_functions(tree):
-            total_functions += 1
-            location = f"{relative}:{function.lineno}"
-            test_name_locations[function.name].append(location)
-
-            visitor = _TestBodyVisitor()
-            visitor.visit(function)
-            uuid4_call_sites += visitor.uuid4_call_sites
-            date_today_call_sites += visitor.date_today_call_sites
-            matched_envelopes = _matching_critical_envelopes(relative)
-            assertless_category: str | None = None
-
-            if relative in ASSERTION_REACHABILITY_PATHS:
-                assertion_reachability_scanned_tests += 1
-                for finding_line, reason in _assertion_reachability_findings(function):
-                    assertion_bypass_findings.append(
-                        _review_assertion_bypass(
-                            {
-                                "path": relative,
-                                "line": str(finding_line),
-                                "test_name": function.name,
-                                "reason": reason,
-                            },
-                            assertion_bypass_allowlist,
-                        )
-                    )
-
-            if not visitor.has_assertion_signal:
-                assertless_total_candidates += 1
-                assertless_category = _classify_assertless_candidate(
-                    relative_path=relative,
-                    function=function,
-                    visitor=visitor,
-                )
-                assertless_category_counts[assertless_category] += 1
-                if assertless_category == "weak_no_value":
-                    refined_assertless_tests += 1
-                assertless_candidates.append(
-                    {
-                        "path": relative,
-                        "line": str(function.lineno),
-                        "test_name": function.name,
-                        "category": assertless_category,
-                        "rationale": ASSERTLESS_CATEGORY_RULES[assertless_category],
-                    }
-                )
-                if len(assertless_examples) < 25:
-                    assertless_examples.append(location)
-
-            for envelope_name in matched_envelopes:
-                envelope = critical_behavior_envelopes[envelope_name]
-                envelope["test_count"] += 1
-                if visitor.has_assertion_signal:
-                    envelope["assertion_backed_tests"] += 1
-                    if len(envelope["assertion_examples"]) < 10:
-                        envelope["assertion_examples"].append(location)
-                else:
-                    if assertless_category == "intentional_no_exception_contract":
-                        envelope["intentional_no_exception_tests"] += 1
-                    envelope["assertless_tests"].append(
-                        {
-                            "path": relative,
-                            "line": str(function.lineno),
-                            "test_name": function.name,
-                            "category": assertless_category or "unknown",
-                        }
-                    )
-
-            if (
-                not module_has_mark
-                and not class_has_mark
-                and not _has_pytest_mark(function.decorator_list)
-            ):
-                markerless_test_functions += 1
-                markerless_examples.append(f"{relative}:{function.lineno}")
-
-    duplicate_names = {
-        name: locations
-        for name, locations in test_name_locations.items()
-        if len(locations) > 1
-    }
-    top_duplicate_names = [
+def _record_assertless_candidate(
+    *,
+    relative: str,
+    function: ast.FunctionDef | ast.AsyncFunctionDef,
+    visitor: _TestBodyVisitor,
+    location: str,
+    assertless_category_counts: Counter[str],
+    assertless_candidates: list[dict[str, str]],
+    assertless_examples: list[str],
+) -> tuple[str, int, int]:
+    """Record one assertless candidate; return (category, total_delta, refined_delta)."""
+    assertless_category = _classify_assertless_candidate(
+        relative_path=relative,
+        function=function,
+        visitor=visitor,
+    )
+    assertless_category_counts[assertless_category] += 1
+    refined_delta = 1 if assertless_category == "weak_no_value" else 0
+    assertless_candidates.append(
         {
-            "name": name,
-            "count": len(locations),
-            "examples": locations[:10],
+            "path": relative,
+            "line": str(function.lineno),
+            "test_name": function.name,
+            "category": assertless_category,
+            "rationale": ASSERTLESS_CATEGORY_RULES[assertless_category],
         }
-        for name, locations in sorted(
-            duplicate_names.items(),
-            key=lambda item: (-len(item[1]), item[0]),
-        )[:25]
-    ]
-    duplicate_inventory, duplicate_inventory_summary = _build_duplicate_name_inventory(
-        duplicate_names
     )
-    assertion_gap_count = sum(
-        1
-        for envelope in critical_behavior_envelopes.values()
-        if int(envelope["test_count"]) <= 0
-        or int(envelope["assertion_backed_tests"]) <= 0
+    if len(assertless_examples) < 25:
+        assertless_examples.append(location)
+    return assertless_category, 1, refined_delta
+
+
+def _update_critical_envelopes(
+    *,
+    matched_envelopes: tuple[str, ...],
+    critical_behavior_envelopes: dict[str, dict[str, Any]],
+    visitor: _TestBodyVisitor,
+    location: str,
+    relative: str,
+    function: ast.FunctionDef | ast.AsyncFunctionDef,
+    assertless_category: str | None,
+) -> None:
+    """Update critical-behavior envelope counters for one test function."""
+    for envelope_name in matched_envelopes:
+        envelope = critical_behavior_envelopes[envelope_name]
+        envelope["test_count"] += 1
+        if visitor.has_assertion_signal:
+            envelope["assertion_backed_tests"] += 1
+            if len(envelope["assertion_examples"]) < 10:
+                envelope["assertion_examples"].append(location)
+            continue
+        if assertless_category == "intentional_no_exception_contract":
+            envelope["intentional_no_exception_tests"] += 1
+        envelope["assertless_tests"].append(
+            {
+                "path": relative,
+                "line": str(function.lineno),
+                "test_name": function.name,
+                "category": assertless_category or "unknown",
+            }
+        )
+
+
+def _scan_one_test_function(
+    *,
+    function: ast.FunctionDef | ast.AsyncFunctionDef,
+    class_has_mark: bool,
+    module_has_mark: bool,
+    relative: str,
+    assertion_bypass_allowlist: list[dict[str, str]],
+    critical_behavior_envelopes: dict[str, dict[str, Any]],
+    test_name_locations: dict[str, list[str]],
+    assertless_examples: list[str],
+    assertless_candidates: list[dict[str, str]],
+    assertless_category_counts: Counter[str],
+    assertion_bypass_findings: list[dict[str, str]],
+    markerless_examples: list[str],
+) -> tuple[int, int, int, int, int, int, int]:
+    """Scan one test function; return metric deltas.
+
+    Returns
+    -------
+    total_functions, assertless_total, refined_assertless, markerless,
+    uuid4_sites, date_today_sites, reachability_scanned
+    """
+    location = f"{relative}:{function.lineno}"
+    test_name_locations[function.name].append(location)
+    visitor = _TestBodyVisitor()
+    visitor.visit(function)
+    assertless_category: str | None = None
+    assertless_total = 0
+    refined_assertless = 0
+    reachability_scanned = 0
+    markerless = 0
+
+    if relative in ASSERTION_REACHABILITY_PATHS:
+        reachability_scanned = 1
+        _record_assertion_reachability_findings(
+            function=function,
+            relative=relative,
+            assertion_bypass_allowlist=assertion_bypass_allowlist,
+            assertion_bypass_findings=assertion_bypass_findings,
+        )
+
+    if not visitor.has_assertion_signal:
+        assertless_category, assertless_total, refined_assertless = (
+            _record_assertless_candidate(
+                relative=relative,
+                function=function,
+                visitor=visitor,
+                location=location,
+                assertless_category_counts=assertless_category_counts,
+                assertless_candidates=assertless_candidates,
+                assertless_examples=assertless_examples,
+            )
+        )
+
+    _update_critical_envelopes(
+        matched_envelopes=_matching_critical_envelopes(relative),
+        critical_behavior_envelopes=critical_behavior_envelopes,
+        visitor=visitor,
+        location=location,
+        relative=relative,
+        function=function,
+        assertless_category=assertless_category,
     )
 
-    # Build assertless_families for file-level aggregation
+    if (
+        not module_has_mark
+        and not class_has_mark
+        and not _has_pytest_mark(function.decorator_list)
+    ):
+        markerless = 1
+        markerless_examples.append(f"{relative}:{function.lineno}")
+
+    return (
+        1,
+        assertless_total,
+        refined_assertless,
+        markerless,
+        visitor.uuid4_call_sites,
+        visitor.date_today_call_sites,
+        reachability_scanned,
+    )
+
+
+def _build_assertless_families(
+    assertless_candidates: list[dict[str, str]],
+) -> dict[str, dict[str, Any]]:
+    """Aggregate assertless candidates by file path."""
     assertless_families: dict[str, dict[str, Any]] = {}
     for candidate in assertless_candidates:
         path = candidate["path"]
@@ -1006,11 +1045,32 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
         assertless_families[path]["categories"][category] = (
             assertless_families[path]["categories"].get(category, 0) + 1
         )
+    return assertless_families
 
-    # Build summary metrics
-    intentional_no_exception_contract = assertless_category_counts.get(
-        "intentional_no_exception_contract", 0
-    )
+
+def _top_duplicate_test_names(
+    duplicate_names: dict[str, list[str]],
+) -> list[dict[str, Any]]:
+    """Top 25 duplicate test names by occurrence count."""
+    return [
+        {
+            "name": name,
+            "count": len(locations),
+            "examples": locations[:10],
+        }
+        for name, locations in sorted(
+            duplicate_names.items(),
+            key=lambda item: (-len(item[1]), item[0]),
+        )[:25]
+    ]
+
+
+def _branch_reachability_percent(
+    *,
+    assertion_reachability_scanned_tests: int,
+    assertion_bypass_findings: list[dict[str, str]],
+) -> tuple[int, float]:
+    """Return (unreviewed_bypass_count, branch_reachability_percent)."""
     unreviewed_assertion_bypass_count = sum(
         finding["reviewed"] == "false" for finding in assertion_bypass_findings
     )
@@ -1026,7 +1086,57 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
         / max(assertion_reachability_scanned_tests, 1),
         3,
     )
+    return unreviewed_assertion_bypass_count, branch_reachability_percent
 
+
+def _assemble_test_governance_payload(
+    *,
+    root: Path,
+    root_str: str,
+    test_files: list[Path],
+    total_functions: int,
+    assertless_total_candidates: int,
+    refined_assertless_tests: int,
+    assertless_category_counts: Counter[str],
+    assertless_candidates: list[dict[str, str]],
+    assertless_examples: list[str],
+    markerless_test_functions: int,
+    markerless_examples: list[str],
+    test_name_locations: dict[str, list[str]],
+    compatibility_files: list[str],
+    uuid4_call_sites: int,
+    date_today_call_sites: int,
+    critical_behavior_envelopes: dict[str, dict[str, Any]],
+    assertion_bypass_findings: list[dict[str, str]],
+    assertion_reachability_scanned_tests: int,
+    parse_errors: list[dict[str, str]],
+) -> dict[str, Any]:
+    """Assemble the final test-governance report payload from scan accumulators."""
+    duplicate_names = {
+        name: locations
+        for name, locations in test_name_locations.items()
+        if len(locations) > 1
+    }
+    top_duplicate_names = _top_duplicate_test_names(duplicate_names)
+    duplicate_inventory, duplicate_inventory_summary = _build_duplicate_name_inventory(
+        duplicate_names
+    )
+    assertion_gap_count = sum(
+        1
+        for envelope in critical_behavior_envelopes.values()
+        if int(envelope["test_count"]) <= 0
+        or int(envelope["assertion_backed_tests"]) <= 0
+    )
+    assertless_families = _build_assertless_families(assertless_candidates)
+    unreviewed_assertion_bypass_count, branch_reachability_percent = (
+        _branch_reachability_percent(
+            assertion_reachability_scanned_tests=assertion_reachability_scanned_tests,
+            assertion_bypass_findings=assertion_bypass_findings,
+        )
+    )
+    intentional_no_exception_contract = assertless_category_counts.get(
+        "intentional_no_exception_contract", 0
+    )
     summary = {
         "assertless_total_candidates": assertless_total_candidates,
         "compatibility_test_files": len(compatibility_files),
@@ -1043,7 +1153,6 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
         "unreviewed_assertion_bypass_count": unreviewed_assertion_bypass_count,
         "assertion_branch_reachability_percent": branch_reachability_percent,
     }
-
     report = {
         "root": ".",
         "total_test_files": len(test_files),
@@ -1088,7 +1197,6 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
         "fixture_asset_duplication": _collect_fixture_asset_duplication(root),
         "parse_errors": parse_errors,
     }
-
     return {
         **report,
         "source_tree_sha256": _compute_test_governance_source_tree_sha256(root_str),
@@ -1098,6 +1206,97 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
         "report": report,
         "summary": summary,
     }
+
+
+def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
+    """Collect deterministic static counts used as remediation budgets."""
+    root = Path(root_str).resolve()
+    fresh_artifact = _load_current_artifact_if_fresh(root)
+    if fresh_artifact is not None:
+        return fresh_artifact
+    test_files = _iter_test_files(root)
+    test_name_locations: dict[str, list[str]] = defaultdict(list)
+    assertless_examples: list[str] = []
+    assertless_candidates: list[dict[str, str]] = []
+    assertless_category_counts: Counter[str] = Counter()
+    compatibility_files: list[str] = []
+    parse_errors: list[dict[str, str]] = []
+    critical_behavior_envelopes = _critical_envelope_template()
+    assertion_bypass_allowlist = _load_assertion_bypass_allowlist(root)
+    assertion_bypass_findings: list[dict[str, str]] = []
+    assertion_reachability_scanned_tests = 0
+
+    total_functions = 0
+    assertless_total_candidates = 0
+    refined_assertless_tests = 0
+    markerless_test_functions = 0
+    markerless_examples: list[str] = []
+    uuid4_call_sites = 0
+    date_today_call_sites = 0
+
+    for path in test_files:
+        relative = _normalize_repo_relative_path(path.relative_to(root).as_posix())
+        if COMPATIBILITY_FILE_RE.search(relative):
+            compatibility_files.append(relative)
+        tree, parse_error = _parse_test_module_source(path, relative=relative)
+        if parse_error is not None:
+            parse_errors.append(parse_error)
+            continue
+        if tree is None:
+            continue
+        module_has_mark = _has_module_pytestmark(tree)
+        for function, class_has_mark in _test_functions(tree):
+            (
+                fn_delta,
+                assertless_delta,
+                refined_delta,
+                markerless_delta,
+                uuid4_delta,
+                date_today_delta,
+                reachability_delta,
+            ) = _scan_one_test_function(
+                function=function,
+                class_has_mark=class_has_mark,
+                module_has_mark=module_has_mark,
+                relative=relative,
+                assertion_bypass_allowlist=assertion_bypass_allowlist,
+                critical_behavior_envelopes=critical_behavior_envelopes,
+                test_name_locations=test_name_locations,
+                assertless_examples=assertless_examples,
+                assertless_candidates=assertless_candidates,
+                assertless_category_counts=assertless_category_counts,
+                assertion_bypass_findings=assertion_bypass_findings,
+                markerless_examples=markerless_examples,
+            )
+            total_functions += fn_delta
+            assertless_total_candidates += assertless_delta
+            refined_assertless_tests += refined_delta
+            markerless_test_functions += markerless_delta
+            uuid4_call_sites += uuid4_delta
+            date_today_call_sites += date_today_delta
+            assertion_reachability_scanned_tests += reachability_delta
+
+    return _assemble_test_governance_payload(
+        root=root,
+        root_str=root_str,
+        test_files=test_files,
+        total_functions=total_functions,
+        assertless_total_candidates=assertless_total_candidates,
+        refined_assertless_tests=refined_assertless_tests,
+        assertless_category_counts=assertless_category_counts,
+        assertless_candidates=assertless_candidates,
+        assertless_examples=assertless_examples,
+        markerless_test_functions=markerless_test_functions,
+        markerless_examples=markerless_examples,
+        test_name_locations=test_name_locations,
+        compatibility_files=compatibility_files,
+        uuid4_call_sites=uuid4_call_sites,
+        date_today_call_sites=date_today_call_sites,
+        critical_behavior_envelopes=critical_behavior_envelopes,
+        assertion_bypass_findings=assertion_bypass_findings,
+        assertion_reachability_scanned_tests=assertion_reachability_scanned_tests,
+        parse_errors=parse_errors,
+    )
 
 
 def collect_test_governance_report(root: Path = ROOT) -> dict[str, Any]:

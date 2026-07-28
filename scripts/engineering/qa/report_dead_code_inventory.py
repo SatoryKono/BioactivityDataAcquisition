@@ -421,6 +421,327 @@ def _review_window_is_stale(review_window: dict[str, object]) -> bool:
     return date.today() > date.fromisoformat(next_review_by)
 
 
+def _triaged_entry_verification_status(
+    *,
+    min_src_importers: object,
+    src_count: int,
+) -> str:
+    """Map min_src_importers check to a verification status string."""
+    if not isinstance(min_src_importers, int):
+        return "not_applicable"
+    return "satisfied" if src_count >= min_src_importers else "below_min"
+
+
+def _build_triaged_entry_row(
+    *,
+    repo_root: Path,
+    family_name: str,
+    entry: dict[str, Any],
+    module_name: object,
+    module_path: str,
+    importer_map: dict[str, dict[str, tuple[str, ...]]],
+) -> dict[str, object]:
+    """Build one triaged retirement-candidate inventory row."""
+    importers = (
+        importer_map.get(str(module_name), {"src": (), "tests": ()})
+        if isinstance(module_name, str)
+        else {"src": (), "tests": ()}
+    )
+    min_src_importers = (
+        entry.get("verification", {}).get("min_src_importers")
+        if isinstance(entry.get("verification"), dict)
+        else None
+    )
+    src_count = len(importers.get("src", ()))
+    disposition = entry.get("disposition")
+    evidence = _owner_test_evidence(
+        repo_root,
+        module_path=module_path,
+        disposition=disposition if isinstance(disposition, str) else None,
+    )
+    return {
+        "family": family_name,
+        "entry_id": entry.get("id"),
+        "disposition": disposition,
+        "module_path": module_path,
+        "module_name": module_name,
+        "src_importer_count": src_count,
+        "test_importer_count": len(importers.get("tests", ())),
+        "min_src_importers": min_src_importers,
+        "verification_status": _triaged_entry_verification_status(
+            min_src_importers=min_src_importers,
+            src_count=src_count,
+        ),
+        **evidence,
+    }
+
+
+def _collect_triaged_rows(
+    *,
+    repo_root: Path,
+    triage_payload: dict[str, Any],
+    importer_map: dict[str, dict[str, tuple[str, ...]]],
+) -> tuple[list[dict[str, object]], dict[str, int]]:
+    """Collect triaged family rows and retain_active evidence-lane counts."""
+    triaged_rows: list[dict[str, object]] = []
+    triaged_retained_evidence_lane_counts: dict[str, int] = {}
+    families = triage_payload.get("families", [])
+    assert isinstance(families, list)
+    for family in families:
+        if not isinstance(family, dict):
+            continue
+        family_name = str(family.get("name", "unknown"))
+        entries = family.get("entries", [])
+        if not isinstance(entries, list):
+            continue
+        for entry in entries:
+            if not isinstance(entry, dict):
+                continue
+            target = entry.get("target", {})
+            if not isinstance(target, dict):
+                continue
+            module_name = target.get("module_name")
+            module_path = target.get("module_path") or target.get("name")
+            if not isinstance(module_path, str):
+                continue
+            row = _build_triaged_entry_row(
+                repo_root=repo_root,
+                family_name=family_name,
+                entry=entry,
+                module_name=module_name,
+                module_path=module_path,
+                importer_map=importer_map,
+            )
+            evidence_lane = row.get("evidence_lane")
+            if (
+                row.get("disposition") == "retain_active"
+                and isinstance(evidence_lane, str)
+                and evidence_lane
+            ):
+                triaged_retained_evidence_lane_counts[evidence_lane] = (
+                    triaged_retained_evidence_lane_counts.get(evidence_lane, 0) + 1
+                )
+            triaged_rows.append(row)
+    return triaged_rows, triaged_retained_evidence_lane_counts
+
+
+def _augment_pyi_only_owner_modules(
+    *,
+    zero_import_rows: list[dict[str, object]],
+    repo_wide_classifications: dict[str, dict[str, object]],
+    importer_map: dict[str, dict[str, tuple[str, ...]]],
+) -> None:
+    """Append pyi-only retain_canonical_owner modules missing from static scan."""
+    discovered_paths = {str(row["path"]) for row in zero_import_rows}
+    for module_path, classification in repo_wide_classifications.items():
+        module_name = classification.get("module_name")
+        importers = importer_map.get(str(module_name), {"src": (), "tests": ()})
+        importer_paths = (*importers.get("src", ()), *importers.get("tests", ()))
+        if (
+            classification.get("disposition") == "retain_canonical_owner_module"
+            and module_path not in discovered_paths
+            and importer_paths
+            and all(path.endswith(".pyi") for path in importer_paths)
+        ):
+            zero_import_rows.append(
+                {
+                    "module_name": module_name,
+                    "path": module_path,
+                    "is_private_module": Path(module_path).name.startswith("_"),
+                    "src_importer_count": 0,
+                    "test_importer_count": 0,
+                }
+            )
+
+
+def _apply_classification_owner(
+    enriched: dict[str, object],
+    *,
+    classification: dict[str, object],
+    repo_wide_default_owner: str | None,
+) -> None:
+    """Attach owner from classification or default; drop when neither applies."""
+    classification_owner = classification.get("owner")
+    if isinstance(classification_owner, str) and classification_owner.strip():
+        enriched["owner"] = classification_owner.strip()
+    elif repo_wide_default_owner is not None:
+        enriched["owner"] = repo_wide_default_owner
+    else:
+        enriched.pop("owner", None)
+
+
+def _enrich_classified_zero_import_row(
+    *,
+    repo_root: Path,
+    row: dict[str, object],
+    module_path: str,
+    classification: dict[str, object],
+    allowed_repo_wide_dispositions: set[str],
+    repo_wide_default_owner: str | None,
+) -> tuple[dict[str, object], str, str | None]:
+    """Enrich one classified zero-import row; return row, disposition, evidence_lane."""
+    module_name = classification.get("module_name")
+    if isinstance(module_name, str):
+        assert module_name == row["module_name"], (
+            f"repo_wide_zero_import_classification module_name mismatch for "
+            f"{module_path}: {module_name!r} != {row['module_name']!r}"
+        )
+    disposition = classification.get("disposition")
+    assert (
+        isinstance(disposition, str) and disposition in allowed_repo_wide_dispositions
+    )
+    enriched = dict(row)
+    enriched.update(
+        {
+            "classification_status": "classified",
+            "disposition": disposition,
+            "reviewed_on": classification.get("reviewed_on"),
+            "review_by": classification.get("review_by"),
+            "linked_issue": classification.get("linked_issue"),
+            "rationale": classification.get("rationale"),
+        }
+    )
+    _apply_classification_owner(
+        enriched,
+        classification=classification,
+        repo_wide_default_owner=repo_wide_default_owner,
+    )
+    evidence = _owner_test_evidence(
+        repo_root,
+        module_path=module_path,
+        disposition=disposition,
+    )
+    enriched.update(evidence)
+    evidence_lane = evidence.get("evidence_lane")
+    lane = evidence_lane if isinstance(evidence_lane, str) and evidence_lane else None
+    return enriched, disposition, lane
+
+
+def _collect_repo_wide_zero_import_candidates(
+    *,
+    repo_root: Path,
+    zero_import_rows: list[dict[str, object]],
+    retained_entrypoint_paths: set[str],
+    repo_wide_classifications: dict[str, dict[str, object]],
+    allowed_repo_wide_dispositions: set[str],
+    repo_wide_default_owner: str | None,
+) -> tuple[
+    list[dict[str, object]],
+    list[dict[str, object]],
+    dict[str, int],
+    dict[str, int],
+]:
+    """Classify zero-import rows into candidates and aggregate disposition counts."""
+    repo_wide_zero_import_candidates: list[dict[str, object]] = []
+    repo_wide_disposition_counts: dict[str, int] = {}
+    repo_wide_evidence_lane_counts: dict[str, int] = {}
+    untriaged_candidates: list[dict[str, object]] = []
+    for row in zero_import_rows:
+        module_path = str(row["path"])
+        if module_path in retained_entrypoint_paths:
+            continue
+        classification = repo_wide_classifications.get(module_path)
+        if classification is None:
+            enriched = dict(row)
+            enriched["classification_status"] = "untriaged"
+            untriaged_candidates.append(enriched)
+            repo_wide_zero_import_candidates.append(enriched)
+            continue
+        enriched, disposition, evidence_lane = _enrich_classified_zero_import_row(
+            repo_root=repo_root,
+            row=row,
+            module_path=module_path,
+            classification=classification,
+            allowed_repo_wide_dispositions=allowed_repo_wide_dispositions,
+            repo_wide_default_owner=repo_wide_default_owner,
+        )
+        repo_wide_disposition_counts[disposition] = (
+            repo_wide_disposition_counts.get(disposition, 0) + 1
+        )
+        if evidence_lane is not None:
+            repo_wide_evidence_lane_counts[evidence_lane] = (
+                repo_wide_evidence_lane_counts.get(evidence_lane, 0) + 1
+            )
+        repo_wide_zero_import_candidates.append(enriched)
+    return (
+        repo_wide_zero_import_candidates,
+        untriaged_candidates,
+        repo_wide_disposition_counts,
+        repo_wide_evidence_lane_counts,
+    )
+
+
+def _owner_test_anchored_count(rows: list[dict[str, object]]) -> int:
+    """Count rows with owner tests where every declared path exists."""
+    return sum(
+        1
+        for row in rows
+        if int(row.get("owner_test_count", 0)) > 0
+        and int(row.get("owner_test_count", 0))
+        == int(row.get("owner_test_paths_exist_count", 0))
+    )
+
+
+def _build_dead_code_summary(
+    *,
+    triaged_rows: list[dict[str, object]],
+    triaged_retained_evidence_lane_counts: dict[str, int],
+    repo_wide_zero_import_candidates: list[dict[str, object]],
+    untriaged_candidates: list[dict[str, object]],
+    repo_wide_disposition_counts: dict[str, int],
+    repo_wide_evidence_lane_counts: dict[str, int],
+) -> dict[str, object]:
+    """Assemble the dead-code inventory summary block."""
+    triaged_retained_rows = [
+        row for row in triaged_rows if row.get("disposition") == "retain_active"
+    ]
+    repo_wide_owner_test_anchored_count = _owner_test_anchored_count(
+        repo_wide_zero_import_candidates
+    )
+    triaged_retained_owner_test_anchored_count = _owner_test_anchored_count(
+        triaged_retained_rows
+    )
+    repo_wide_non_static_reachability_candidate_count = sum(
+        1
+        for row in repo_wide_zero_import_candidates
+        if row.get("disposition") in NON_STATIC_REACHABILITY_DISPOSITIONS
+    )
+    return {
+        "triaged_entry_count": len(triaged_rows),
+        "triaged_entries_below_min_importers": sum(
+            1 for row in triaged_rows if row["verification_status"] == "below_min"
+        ),
+        "repo_wide_zero_import_candidate_count": len(repo_wide_zero_import_candidates),
+        "repo_wide_classified_zero_import_candidate_count": len(
+            repo_wide_zero_import_candidates
+        )
+        - len(untriaged_candidates),
+        "repo_wide_untriaged_zero_import_candidate_count": len(untriaged_candidates),
+        "repo_wide_owner_test_anchored_candidate_count": (
+            repo_wide_owner_test_anchored_count
+        ),
+        "repo_wide_candidates_without_owner_tests_count": len(
+            repo_wide_zero_import_candidates
+        )
+        - repo_wide_owner_test_anchored_count,
+        "repo_wide_non_static_reachability_candidate_count": (
+            repo_wide_non_static_reachability_candidate_count
+        ),
+        "repo_wide_disposition_counts": dict(sorted(repo_wide_disposition_counts.items())),
+        "repo_wide_evidence_lane_counts": dict(
+            sorted(repo_wide_evidence_lane_counts.items())
+        ),
+        "triaged_retained_owner_test_anchored_count": (
+            triaged_retained_owner_test_anchored_count
+        ),
+        "triaged_retained_without_owner_tests_count": len(triaged_retained_rows)
+        - triaged_retained_owner_test_anchored_count,
+        "triaged_retained_evidence_lane_counts": dict(
+            sorted(triaged_retained_evidence_lane_counts.items())
+        ),
+    }
+
+
 def build_dead_code_inventory(
     repo_root: Path,
     *,
@@ -444,153 +765,30 @@ def build_dead_code_inventory(
         repo_wide_default_owner,
     ) = _load_repo_wide_zero_import_classifications(triage_payload)
 
-    triaged_rows: list[dict[str, object]] = []
-    triaged_retained_evidence_lane_counts: dict[str, int] = {}
-    families = triage_payload.get("families", [])
-    assert isinstance(families, list)
-    for family in families:
-        if not isinstance(family, dict):
-            continue
-        family_name = str(family.get("name", "unknown"))
-        entries = family.get("entries", [])
-        if not isinstance(entries, list):
-            continue
-        for entry in entries:
-            if not isinstance(entry, dict):
-                continue
-            target = entry.get("target", {})
-            if not isinstance(target, dict):
-                continue
-            module_name = target.get("module_name")
-            module_path = target.get("module_path") or target.get("name")
-            if not isinstance(module_path, str):
-                continue
-            importers = (
-                importer_map.get(str(module_name), {"src": (), "tests": ()})
-                if isinstance(module_name, str)
-                else {"src": (), "tests": ()}
-            )
-            min_src_importers = (
-                entry.get("verification", {}).get("min_src_importers")
-                if isinstance(entry.get("verification"), dict)
-                else None
-            )
-            src_count = len(importers.get("src", ()))
-            verification_status = "not_applicable"
-            if isinstance(min_src_importers, int):
-                verification_status = (
-                    "satisfied" if src_count >= min_src_importers else "below_min"
-                )
-            disposition = entry.get("disposition")
-            evidence = _owner_test_evidence(
-                repo_root,
-                module_path=module_path,
-                disposition=disposition if isinstance(disposition, str) else None,
-            )
-            evidence_lane = evidence.get("evidence_lane")
-            if (
-                disposition == "retain_active"
-                and isinstance(evidence_lane, str)
-                and evidence_lane
-            ):
-                triaged_retained_evidence_lane_counts[evidence_lane] = (
-                    triaged_retained_evidence_lane_counts.get(evidence_lane, 0) + 1
-                )
-            triaged_rows.append(
-                {
-                    "family": family_name,
-                    "entry_id": entry.get("id"),
-                    "disposition": disposition,
-                    "module_path": module_path,
-                    "module_name": module_name,
-                    "src_importer_count": src_count,
-                    "test_importer_count": len(importers.get("tests", ())),
-                    "min_src_importers": min_src_importers,
-                    "verification_status": verification_status,
-                    **evidence,
-                }
-            )
-
-    repo_wide_zero_import_candidates: list[dict[str, object]] = []
-    repo_wide_disposition_counts: dict[str, int] = {}
-    repo_wide_evidence_lane_counts: dict[str, int] = {}
-    untriaged_candidates: list[dict[str, object]] = []
+    triaged_rows, triaged_retained_evidence_lane_counts = _collect_triaged_rows(
+        repo_root=repo_root,
+        triage_payload=triage_payload,
+        importer_map=importer_map,
+    )
     zero_import_rows = collect_zero_import_bioetl_modules(repo_root)
-    discovered_paths = {str(row["path"]) for row in zero_import_rows}
-    for module_path, classification in repo_wide_classifications.items():
-        module_name = classification.get("module_name")
-        importers = importer_map.get(str(module_name), {"src": (), "tests": ()})
-        importer_paths = (*importers.get("src", ()), *importers.get("tests", ()))
-        if (
-            classification.get("disposition") == "retain_canonical_owner_module"
-            and module_path not in discovered_paths
-            and importer_paths
-            and all(path.endswith(".pyi") for path in importer_paths)
-        ):
-            zero_import_rows.append(
-                {
-                    "module_name": module_name,
-                    "path": module_path,
-                    "is_private_module": Path(module_path).name.startswith("_"),
-                    "src_importer_count": 0,
-                    "test_importer_count": 0,
-                }
-            )
-
-    for row in zero_import_rows:
-        module_path = str(row["path"])
-        if module_path in retained_entrypoint_paths:
-            continue
-        enriched = dict(row)
-        classification = repo_wide_classifications.get(module_path)
-        if classification is None:
-            enriched["classification_status"] = "untriaged"
-            untriaged_candidates.append(enriched)
-            repo_wide_zero_import_candidates.append(enriched)
-            continue
-        module_name = classification.get("module_name")
-        if isinstance(module_name, str):
-            assert module_name == row["module_name"], (
-                f"repo_wide_zero_import_classification module_name mismatch for "
-                f"{module_path}: {module_name!r} != {row['module_name']!r}"
-            )
-        disposition = classification.get("disposition")
-        assert (
-            isinstance(disposition, str)
-            and disposition in allowed_repo_wide_dispositions
-        )
-        repo_wide_disposition_counts[disposition] = (
-            repo_wide_disposition_counts.get(disposition, 0) + 1
-        )
-        classification_owner = classification.get("owner")
-        enriched.update(
-            {
-                "classification_status": "classified",
-                "disposition": disposition,
-                "reviewed_on": classification.get("reviewed_on"),
-                "review_by": classification.get("review_by"),
-                "linked_issue": classification.get("linked_issue"),
-                "rationale": classification.get("rationale"),
-            }
-        )
-        if isinstance(classification_owner, str) and classification_owner.strip():
-            enriched["owner"] = classification_owner.strip()
-        elif repo_wide_default_owner is not None:
-            enriched["owner"] = repo_wide_default_owner
-        else:
-            enriched.pop("owner", None)
-        evidence = _owner_test_evidence(
-            repo_root,
-            module_path=module_path,
-            disposition=disposition,
-        )
-        enriched.update(evidence)
-        evidence_lane = evidence.get("evidence_lane")
-        if isinstance(evidence_lane, str) and evidence_lane:
-            repo_wide_evidence_lane_counts[evidence_lane] = (
-                repo_wide_evidence_lane_counts.get(evidence_lane, 0) + 1
-            )
-        repo_wide_zero_import_candidates.append(enriched)
+    _augment_pyi_only_owner_modules(
+        zero_import_rows=zero_import_rows,
+        repo_wide_classifications=repo_wide_classifications,
+        importer_map=importer_map,
+    )
+    (
+        repo_wide_zero_import_candidates,
+        untriaged_candidates,
+        repo_wide_disposition_counts,
+        repo_wide_evidence_lane_counts,
+    ) = _collect_repo_wide_zero_import_candidates(
+        repo_root=repo_root,
+        zero_import_rows=zero_import_rows,
+        retained_entrypoint_paths=retained_entrypoint_paths,
+        repo_wide_classifications=repo_wide_classifications,
+        allowed_repo_wide_dispositions=allowed_repo_wide_dispositions,
+        repo_wide_default_owner=repo_wide_default_owner,
+    )
 
     resolved_snapshot_date = _resolve_snapshot_date(
         triage_payload,
@@ -600,74 +798,19 @@ def build_dead_code_inventory(
         triage_payload,
         snapshot_date=resolved_snapshot_date,
     )
-    triaged_retained_rows = [
-        row for row in triaged_rows if row.get("disposition") == "retain_active"
-    ]
-    repo_wide_owner_test_anchored_count = sum(
-        1
-        for row in repo_wide_zero_import_candidates
-        if int(row.get("owner_test_count", 0)) > 0
-        and int(row.get("owner_test_count", 0))
-        == int(row.get("owner_test_paths_exist_count", 0))
-    )
-    triaged_retained_owner_test_anchored_count = sum(
-        1
-        for row in triaged_retained_rows
-        if int(row.get("owner_test_count", 0)) > 0
-        and int(row.get("owner_test_count", 0))
-        == int(row.get("owner_test_paths_exist_count", 0))
-    )
-    repo_wide_non_static_reachability_candidate_count = sum(
-        1
-        for row in repo_wide_zero_import_candidates
-        if row.get("disposition") in NON_STATIC_REACHABILITY_DISPOSITIONS
-    )
-
     return {
         "snapshot_date": resolved_snapshot_date,
         "triage_source": "configs/quality/retirement_candidate_triage.yaml",
         "static_inventory_scope": "src/bioetl",
         "review_window": review_window,
-        "summary": {
-            "triaged_entry_count": len(triaged_rows),
-            "triaged_entries_below_min_importers": sum(
-                1 for row in triaged_rows if row["verification_status"] == "below_min"
-            ),
-            "repo_wide_zero_import_candidate_count": len(
-                repo_wide_zero_import_candidates
-            ),
-            "repo_wide_classified_zero_import_candidate_count": len(
-                repo_wide_zero_import_candidates
-            )
-            - len(untriaged_candidates),
-            "repo_wide_untriaged_zero_import_candidate_count": len(
-                untriaged_candidates
-            ),
-            "repo_wide_owner_test_anchored_candidate_count": (
-                repo_wide_owner_test_anchored_count
-            ),
-            "repo_wide_candidates_without_owner_tests_count": len(
-                repo_wide_zero_import_candidates
-            )
-            - repo_wide_owner_test_anchored_count,
-            "repo_wide_non_static_reachability_candidate_count": (
-                repo_wide_non_static_reachability_candidate_count
-            ),
-            "repo_wide_disposition_counts": dict(
-                sorted(repo_wide_disposition_counts.items())
-            ),
-            "repo_wide_evidence_lane_counts": dict(
-                sorted(repo_wide_evidence_lane_counts.items())
-            ),
-            "triaged_retained_owner_test_anchored_count": (
-                triaged_retained_owner_test_anchored_count
-            ),
-            "triaged_retained_without_owner_tests_count": len(triaged_retained_rows)
-            - triaged_retained_owner_test_anchored_count,
-            "triaged_retained_evidence_lane_counts": dict(
-                sorted(triaged_retained_evidence_lane_counts.items())
-            ),
-        },
+        "summary": _build_dead_code_summary(
+            triaged_rows=triaged_rows,
+            triaged_retained_evidence_lane_counts=triaged_retained_evidence_lane_counts,
+            repo_wide_zero_import_candidates=repo_wide_zero_import_candidates,
+            untriaged_candidates=untriaged_candidates,
+            repo_wide_disposition_counts=repo_wide_disposition_counts,
+            repo_wide_evidence_lane_counts=repo_wide_evidence_lane_counts,
+        ),
         "triaged_entries": triaged_rows,
         "repo_wide_zero_import_candidates": repo_wide_zero_import_candidates,
     }

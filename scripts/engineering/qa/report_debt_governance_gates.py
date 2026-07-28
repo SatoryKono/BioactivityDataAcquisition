@@ -892,110 +892,26 @@ def _debt_scorecard_gates() -> list[Gate]:
     return gates
 
 
-def build_payload(
+def _module_coverage_residual_gates(
     *,
-    repo_root: Path = PROJECT_ROOT,
-    changed_from_ref: str | None = None,
-) -> dict[str, object]:
-    """Build normalized debt-governance gate payload."""
-    repo_root = repo_root.resolve()
-    gates: list[Gate] = []
-    flaky_review, flaky_review_preflight_gate = _load_json_input_with_preflight(
-        repo_root,
-        FLAKY_TEST_REVIEW_PATH,
-        gate_name="flaky_test_review_input_preflight",
-    )
-
-    architecture_scorecard = _load_json(
-        repo_root,
-        "reports/quality/architecture-quality-scorecard.json",
-    )
-    module_coverage = _load_json(
-        repo_root, MODULE_COVERAGE_INVENTORY_JSON
-    )
-    module_coverage_policy = _load_yaml(
-        repo_root, "configs/quality/module_coverage_gates.yaml"
-    )
-    hotspot_family = _load_json(
-        repo_root, HOTSPOT_FAMILY_BASELINE_JSON
-    )
-    compatibility = _load_json(
-        repo_root, COMPATIBILITY_IMPORTER_CENSUS_JSON
-    )
-    dead_code = _load_json(repo_root, "reports/quality/dead-code-inventory.json")
-    contract_matrix = _load_json(
-        repo_root, "reports/quality/contract-coverage-matrix.json"
-    )
-    contract_diagnostics = _load_json(
-        repo_root, "reports/quality/contract-registry-diagnostics.json"
-    )
-    dq_diagnostics = build_contract_registry_dq_diagnostics(repo_root)
-    config_discrepancy = _load_json(
-        repo_root, CONFIG_DISCREPANCY_BASELINE_JSON
-    )
-    test_governance = _load_json(
-        repo_root, TEST_GOVERNANCE_CURRENT_JSON
-    )
-    runtime_cardinality = _load_json(
-        repo_root,
-        RUNTIME_CARDINALITY_INVENTORY_JSON,
-    )
-    observability_governance = _load_yaml(
-        repo_root,
-        "configs/quality/observability_metric_governance.yaml",
-    )
-    runtime_review = _load_json(
-        repo_root,
-        RUNTIME_CARDINALITY_REVIEW_JSON,
-    )
-    runtime_uuid = _load_yaml(repo_root, RUNTIME_UUID_SEAMS_YAML)
-    adr_matrix = _load_json(repo_root, ADR_ENFORCEMENT_MATRIX_JSON)
-    remote_baseline = _load_json(
-        repo_root,
-        ARCHITECTURE_DEBT_REMOTE_MAIN_BASELINE_JSON,
-    )
-    changed_paths = _collect_changed_paths(
-        repo_root,
-        changed_from_ref=changed_from_ref,
-    )
-
-    gates.extend(_debt_scorecard_gates())
-    gates.append(flaky_review_preflight_gate)
-    gates.append(
-        _debt_scorecard_budget_no_growth_gate(
-            repo_root=repo_root,
-            changed_from_ref=changed_from_ref,
-        )
-    )
-
-    coverage_summary = module_coverage["summary"]
-    status_counts = coverage_summary["status_counts"]
-    module_coverage_hash_gate = _module_coverage_source_tree_hash_gate(
-        module_coverage,
-        repo_root=repo_root,
-    )
-    gates.append(module_coverage_hash_gate)
-    gates.append(
-        _module_coverage_scorecard_coherence_gate(
-            architecture_scorecard,
-            module_coverage,
-        )
-    )
-    aggregate_residual_limits = _module_coverage_aggregate_residual_limits(
-        module_coverage_policy
-    )
+    coverage_summary: dict[str, Any],
+    status_counts: dict[str, Any],
+    aggregate_residual_limits: dict[str, int] | None,
+) -> list[Gate]:
+    """Build residual unmeasured/uncovered module coverage gates."""
     if aggregate_residual_limits is None:
-        gates.append(
+        return [
             _warn_limit_gate(
                 name="module_coverage_unmeasured_modules",
                 metric="unmeasured_module_count",
                 current=coverage_summary["unmeasured_module_count"],
                 limit=0,
                 source_artifact=MODULE_COVERAGE_INVENTORY_JSON,
-                remediation="Refresh coverage evidence and add coverage owner tests for unmeasured modules.",
-            )
-        )
-        gates.append(
+                remediation=(
+                    "Refresh coverage evidence and add coverage owner tests "
+                    "for unmeasured modules."
+                ),
+            ),
             _warn_limit_gate(
                 name="module_coverage_uncovered_modules",
                 metric="uncovered_module_count",
@@ -1003,33 +919,49 @@ def build_payload(
                 limit=0,
                 source_artifact=MODULE_COVERAGE_INVENTORY_JSON,
                 remediation="Add coverage or classify modules before closeout.",
-            )
-        )
-    else:
-        gates.append(
-            _hard_limit_gate(
-                name="module_coverage_unmeasured_modules",
-                metric="unmeasured_module_count",
-                current=coverage_summary["unmeasured_module_count"],
-                limit=aggregate_residual_limits["unmeasured_module_count"],
-                source_artifact="configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets",
-                remediation="Keep reviewed unmeasured-module residual at or below the committed no-growth ratchet.",
-            )
-        )
-        gates.append(
-            _hard_limit_gate(
-                name="module_coverage_uncovered_modules",
-                metric="uncovered_module_count",
-                current=status_counts.get("uncovered", 0),
-                limit=aggregate_residual_limits["uncovered_module_count"],
-                source_artifact="configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets",
-                remediation="Keep reviewed uncovered-module residual at or below the committed no-growth ratchet.",
-            )
-        )
+            ),
+        ]
+    return [
+        _hard_limit_gate(
+            name="module_coverage_unmeasured_modules",
+            metric="unmeasured_module_count",
+            current=coverage_summary["unmeasured_module_count"],
+            limit=aggregate_residual_limits["unmeasured_module_count"],
+            source_artifact=(
+                "configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets"
+            ),
+            remediation=(
+                "Keep reviewed unmeasured-module residual at or below the "
+                "committed no-growth ratchet."
+            ),
+        ),
+        _hard_limit_gate(
+            name="module_coverage_uncovered_modules",
+            metric="uncovered_module_count",
+            current=status_counts.get("uncovered", 0),
+            limit=aggregate_residual_limits["uncovered_module_count"],
+            source_artifact=(
+                "configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets"
+            ),
+            remediation=(
+                "Keep reviewed uncovered-module residual at or below the "
+                "committed no-growth ratchet."
+            ),
+        ),
+    ]
 
+
+def _hotspot_and_compatibility_gates(
+    *,
+    hotspot_family: dict[str, Any],
+    compatibility: dict[str, Any],
+    architecture_scorecard: dict[str, Any],
+) -> list[Gate]:
+    """Build hotspot-family and compatibility importer gates."""
     hotspot_summary = hotspot_family["summary"]
     budget_warnings = int(hotspot_summary.get("budget_warnings", 0))
-    gates.append(
+    compatibility_summary = compatibility["summary"]
+    return [
         Gate(
             name="hotspot_family_baseline_budget_warnings",
             status="fail" if budget_warnings else "pass",
@@ -1037,22 +969,20 @@ def build_payload(
             current=budget_warnings,
             limit=0,
             source_artifact=HOTSPOT_FAMILY_BASELINE_JSON,
-            remediation="Reduce hotspot-family metrics to stay at or below reviewed budgets.",
-        )
-    )
-
-    compatibility_summary = compatibility["summary"]
-    gates.append(
+            remediation=(
+                "Reduce hotspot-family metrics to stay at or below reviewed budgets."
+            ),
+        ),
         _hard_limit_gate(
             name="compatibility_twin_pairs",
             metric="twin_pair_count",
             current=compatibility_summary["twin_pair_count"],
             limit=0,
             source_artifact=COMPATIBILITY_IMPORTER_CENSUS_JSON,
-            remediation="Retire twin modules or add explicit reviewed governance before closeout.",
-        )
-    )
-    gates.append(
+            remediation=(
+                "Retire twin modules or add explicit reviewed governance before closeout."
+            ),
+        ),
         _hard_limit_gate(
             name="retained_public_export_facade_growth",
             metric="retained_public_export_facade_count",
@@ -1061,18 +991,28 @@ def build_payload(
                 "retained_public_export_facade_count"
             ],
             source_artifact=COMPATIBILITY_IMPORTER_CENSUS_JSON,
-            remediation="Remove facade exports or update the scorecard only after approved reduction evidence.",
-        )
-    )
-    gates.append(
+            remediation=(
+                "Remove facade exports or update the scorecard only after "
+                "approved reduction evidence."
+            ),
+        ),
         _compatibility_scorecard_coherence_gate(
             architecture_scorecard,
             compatibility,
-        )
-    )
+        ),
+    ]
 
+
+def _dead_code_and_contract_gates(
+    *,
+    dead_code: dict[str, Any],
+    contract_matrix: dict[str, Any],
+    contract_diagnostics: dict[str, Any],
+    dq_diagnostics: dict[str, Any],
+) -> list[Gate]:
+    """Build dead-code and contract-registry residual gates."""
     dead_code_summary = dead_code["summary"]
-    gates.append(
+    return [
         _hard_limit_gate(
             name="dead_code_untriaged_zero_import_candidates",
             metric="repo_wide_untriaged_zero_import_candidate_count",
@@ -1081,21 +1021,20 @@ def build_payload(
             ],
             limit=0,
             source_artifact="reports/quality/dead-code-inventory.json",
-            remediation="Classify zero-import candidates and attach owner tests before closeout.",
-        )
-    )
-
-    gates.append(
+            remediation=(
+                "Classify zero-import candidates and attach owner tests before closeout."
+            ),
+        ),
         _hard_limit_gate(
             name="contract_coverage_missing_gold_enabled",
             metric="missing_gold_enabled_count",
             current=contract_matrix["missing_gold_enabled_count"],
             limit=0,
             source_artifact="reports/quality/contract-coverage-matrix.json",
-            remediation="Add missing Gold contracts or mark Gold runtime disabled explicitly.",
-        )
-    )
-    gates.append(
+            remediation=(
+                "Add missing Gold contracts or mark Gold runtime disabled explicitly."
+            ),
+        ),
         _hard_limit_gate(
             name="contract_registry_blocking_drift",
             metric="blocking_issue_count",
@@ -1103,9 +1042,7 @@ def build_payload(
             limit=0,
             source_artifact="reports/quality/contract-registry-diagnostics.json",
             remediation="Fix contract registry blocking diagnostics.",
-        )
-    )
-    gates.append(
+        ),
         _hard_limit_gate(
             name="dq_contract_registry_blocking_drift",
             metric="blocking_issue_count",
@@ -1116,20 +1053,25 @@ def build_payload(
                 "build_diagnostics_payload"
             ),
             remediation="Fix DQ contract diagnostics before closeout.",
-        )
-    )
+        ),
+    ]
+
+
+def _config_discrepancy_gates(config_discrepancy: dict[str, Any]) -> list[Gate]:
+    """Build config-discrepancy residual gates."""
     config_metrics = config_discrepancy["metrics"]
-    gates.append(
+    return [
         _hard_limit_gate(
             name="config_discrepancy_inconsistent_parameters",
             metric="inconsistent_parameter_count",
             current=config_metrics["inconsistent_parameter_count"],
             limit=0,
             source_artifact=CONFIG_DISCREPANCY_BASELINE_JSON,
-            remediation="Resolve config parameter drift or update sanctioned partial classifications.",
-        )
-    )
-    gates.append(
+            remediation=(
+                "Resolve config parameter drift or update sanctioned partial "
+                "classifications."
+            ),
+        ),
         _hard_limit_gate(
             name="config_discrepancy_raw_inconsistent_parameters",
             metric="raw_inconsistent_parameter_count",
@@ -1137,167 +1079,217 @@ def build_payload(
             limit=0,
             source_artifact=CONFIG_DISCREPANCY_BASELINE_JSON,
             remediation="Regenerate the config matrix only after resolving raw drift.",
+        ),
+    ]
+
+
+def _family_duplication_current(
+    *,
+    targets: dict[str, int],
+    path_prefix: str,
+) -> int:
+    """Max duplicate count for targets under ``path_prefix``."""
+    prefix = path_prefix.rstrip("/")
+    return max(count for target, count in targets.items() if target.startswith(prefix))
+
+
+def _full_app_family_duplication_gates(
+    *,
+    families: object,
+    targets: dict[str, int],
+    baseline_artifact: str,
+) -> list[Gate]:
+    """Build per-family full-app duplication ratchet gates."""
+    gates: list[Gate] = []
+    if not isinstance(families, list):
+        return gates
+    for family in families:
+        if not isinstance(family, dict):
+            continue
+        metrics = family.get("metrics", {})
+        duplication = (
+            metrics.get("duplication_clusters", {}) if isinstance(metrics, dict) else {}
+        )
+        max_count = (
+            duplication.get("max_count") if isinstance(duplication, dict) else None
+        )
+        path_prefix = family.get("path_prefix")
+        if not isinstance(max_count, int) or not isinstance(path_prefix, str):
+            continue
+        gates.append(
+            _hard_limit_gate(
+                name=f"full_app_duplication_{family.get('name')}",
+                metric="duplication_clusters",
+                current=_family_duplication_current(
+                    targets=targets, path_prefix=path_prefix
+                ),
+                limit=max_count,
+                source_artifact=baseline_artifact,
+                remediation=(
+                    "Reduce duplicate clusters and regenerate the full-app "
+                    "duplication baseline without raising scorecard budgets."
+                ),
+            )
+        )
+    return gates
+
+
+def _full_app_duplication_gates(
+    *,
+    repo_root: Path,
+    scorecard: dict[str, Any],
+) -> list[Gate]:
+    """Build full-app duplication ratchet gates from the debt scorecard."""
+    gates: list[Gate] = []
+    full_app_policy = scorecard.get("full_app_duplication_ratchets", {})
+    if not isinstance(full_app_policy, dict):
+        return gates
+    artifact_policy = full_app_policy.get("artifact_policy", {})
+    baseline_artifact = (
+        artifact_policy.get("baseline_artifact")
+        if isinstance(artifact_policy, dict)
+        else None
+    )
+    if not isinstance(baseline_artifact, str):
+        return gates
+    full_app_baseline = _load_json(repo_root, baseline_artifact)
+    targets = {
+        str(row["target"]): int(row["duplicate_count"])
+        for row in full_app_baseline.get("targets", [])
+        if isinstance(row, dict) and isinstance(row.get("target"), str)
+    }
+    gates.extend(
+        _full_app_family_duplication_gates(
+            families=full_app_policy.get("families", []),
+            targets=targets,
+            baseline_artifact=baseline_artifact,
         )
     )
-
-    scorecard = load_debt_scorecard()
-    full_app_policy = scorecard.get("full_app_duplication_ratchets", {})
-    if isinstance(full_app_policy, dict):
-        artifact_policy = full_app_policy.get("artifact_policy", {})
-        baseline_artifact = (
-            artifact_policy.get("baseline_artifact")
-            if isinstance(artifact_policy, dict)
-            else None
+    summary_metrics = full_app_policy.get("summary_metrics", {})
+    total_budget = (
+        summary_metrics.get("total_duplicate_clusters", {})
+        if isinstance(summary_metrics, dict)
+        else {}
+    )
+    if isinstance(total_budget, dict) and isinstance(total_budget.get("max_count"), int):
+        summary = full_app_baseline.get("summary", {})
+        current_total = (
+            int(summary["total_duplicate_clusters"])
+            if isinstance(summary, dict)
+            else -1
         )
-        if isinstance(baseline_artifact, str):
-            full_app_baseline = _load_json(repo_root, baseline_artifact)
-            targets = {
-                str(row["target"]): int(row["duplicate_count"])
-                for row in full_app_baseline.get("targets", [])
-                if isinstance(row, dict) and isinstance(row.get("target"), str)
-            }
-            families = full_app_policy.get("families", [])
-            if isinstance(families, list):
-                for family in families:
-                    if not isinstance(family, dict):
-                        continue
-                    metrics = family.get("metrics", {})
-                    duplication = (
-                        metrics.get("duplication_clusters", {})
-                        if isinstance(metrics, dict)
-                        else {}
-                    )
-                    max_count = (
-                        duplication.get("max_count")
-                        if isinstance(duplication, dict)
-                        else None
-                    )
-                    path_prefix = family.get("path_prefix")
-                    if not isinstance(max_count, int) or not isinstance(
-                        path_prefix, str
-                    ):
-                        continue
-                    current = max(
-                        count
-                        for target, count in targets.items()
-                        if target.startswith(path_prefix.rstrip("/"))
-                    )
-                    gates.append(
-                        _hard_limit_gate(
-                            name=f"full_app_duplication_{family.get('name')}",
-                            metric="duplication_clusters",
-                            current=current,
-                            limit=max_count,
-                            source_artifact=baseline_artifact,
-                            remediation=(
-                                "Reduce duplicate clusters and regenerate the full-app "
-                                "duplication baseline without raising scorecard budgets."
-                            ),
-                        )
-                    )
-            summary_metrics = full_app_policy.get("summary_metrics", {})
-            total_budget = (
-                summary_metrics.get("total_duplicate_clusters", {})
-                if isinstance(summary_metrics, dict)
-                else {}
+        gates.append(
+            _hard_limit_gate(
+                name="full_app_duplication_total_clusters",
+                metric="total_duplicate_clusters",
+                current=current_total,
+                limit=int(total_budget["max_count"]),
+                source_artifact=baseline_artifact,
+                remediation=(
+                    "Burn down full-app duplicate clusters and refresh the "
+                    "reviewed baseline."
+                ),
             )
-            if isinstance(total_budget, dict) and isinstance(
-                total_budget.get("max_count"), int
-            ):
-                summary = full_app_baseline.get("summary", {})
-                current_total = (
-                    int(summary["total_duplicate_clusters"])
-                    if isinstance(summary, dict)
-                    else -1
-                )
-                gates.append(
-                    _hard_limit_gate(
-                        name="full_app_duplication_total_clusters",
-                        metric="total_duplicate_clusters",
-                        current=current_total,
-                        limit=int(total_budget["max_count"]),
-                        source_artifact=baseline_artifact,
-                        remediation=(
-                            "Burn down full-app duplicate clusters and refresh the "
-                            "reviewed baseline."
-                        ),
-                    )
-                )
+        )
+    return gates
 
+
+def _script_zero_reference_counts(
+    script_rows: object,
+) -> tuple[int, int]:
+    """Count zero-reference and untriaged zero-reference supporting scripts."""
+    if not isinstance(script_rows, list):
+        return 0, 0
+    zero_ref_count = sum(
+        1
+        for row in script_rows
+        if isinstance(row, dict) and row.get("reference_count") == 0
+    )
+    untriaged_count = sum(
+        1
+        for row in script_rows
+        if isinstance(row, dict)
+        and row.get("reference_count") == 0
+        and (
+            not row.get("owner")
+            or not row.get("lifecycle_decision")
+            or not row.get("review_by")
+            or not row.get("next_step")
+        )
+    )
+    return zero_ref_count, untriaged_count
+
+
+def _supporting_scripts_gates(
+    *,
+    repo_root: Path,
+    scorecard: dict[str, Any],
+) -> list[Gate]:
+    """Build supporting-scripts governance gates from the debt scorecard."""
+    gates: list[Gate] = []
     scripts_policy = scorecard.get("supporting_scripts_governance", {})
-    if isinstance(scripts_policy, dict):
-        scripts_metrics = scripts_policy.get("metrics", {})
-        if isinstance(scripts_metrics, dict):
-            scripts_manifest = _load_json(
-                repo_root, SCRIPTS_INVENTORY_MANIFEST_JSON
+    if not isinstance(scripts_policy, dict):
+        return gates
+    scripts_metrics = scripts_policy.get("metrics", {})
+    if not isinstance(scripts_metrics, dict):
+        return gates
+    scripts_manifest = _load_json(repo_root, SCRIPTS_INVENTORY_MANIFEST_JSON)
+    zero_ref_count, untriaged_count = _script_zero_reference_counts(
+        scripts_manifest.get("scripts", [])
+    )
+    zero_ref_budget = scripts_metrics.get("zero_reference_supporting_script_count", {})
+    untriaged_budget = scripts_metrics.get(
+        "untriaged_zero_reference_supporting_script_count", {}
+    )
+    if isinstance(zero_ref_budget, dict) and isinstance(
+        zero_ref_budget.get("max_count"), int
+    ):
+        gates.append(
+            _hard_limit_gate(
+                name="supporting_scripts_zero_reference_count",
+                metric="zero_reference_supporting_script_count",
+                current=zero_ref_count,
+                limit=int(zero_ref_budget["max_count"]),
+                source_artifact=SCRIPTS_INVENTORY_MANIFEST_JSON,
+                remediation=(
+                    "Triage or remove zero-reference supporting scripts; "
+                    "budgets must not grow."
+                ),
             )
-            script_rows = scripts_manifest.get("scripts", [])
-            zero_ref_count = (
-                sum(
-                    1
-                    for row in script_rows
-                    if isinstance(row, dict) and row.get("reference_count") == 0
-                )
-                if isinstance(script_rows, list)
-                else 0
+        )
+    if isinstance(untriaged_budget, dict) and isinstance(
+        untriaged_budget.get("max_count"), int
+    ):
+        gates.append(
+            _hard_limit_gate(
+                name="supporting_scripts_untriaged_zero_reference_count",
+                metric="untriaged_zero_reference_supporting_script_count",
+                current=untriaged_count,
+                limit=int(untriaged_budget["max_count"]),
+                source_artifact=SCRIPTS_INVENTORY_MANIFEST_JSON,
+                remediation=(
+                    "Add owner/removal metadata for every zero-reference "
+                    "supporting script."
+                ),
             )
-            untriaged_count = (
-                sum(
-                    1
-                    for row in script_rows
-                    if isinstance(row, dict)
-                    and row.get("reference_count") == 0
-                    and (
-                        not row.get("owner")
-                        or not row.get("lifecycle_decision")
-                        or not row.get("review_by")
-                        or not row.get("next_step")
-                    )
-                )
-                if isinstance(script_rows, list)
-                else 0
-            )
-            zero_ref_budget = scripts_metrics.get(
-                "zero_reference_supporting_script_count", {}
-            )
-            untriaged_budget = scripts_metrics.get(
-                "untriaged_zero_reference_supporting_script_count", {}
-            )
-            if isinstance(zero_ref_budget, dict) and isinstance(
-                zero_ref_budget.get("max_count"), int
-            ):
-                gates.append(
-                    _hard_limit_gate(
-                        name="supporting_scripts_zero_reference_count",
-                        metric="zero_reference_supporting_script_count",
-                        current=zero_ref_count,
-                        limit=int(zero_ref_budget["max_count"]),
-                        source_artifact=SCRIPTS_INVENTORY_MANIFEST_JSON,
-                        remediation=(
-                            "Triage or remove zero-reference supporting scripts; "
-                            "budgets must not grow."
-                        ),
-                    )
-                )
-            if isinstance(untriaged_budget, dict) and isinstance(
-                untriaged_budget.get("max_count"), int
-            ):
-                gates.append(
-                    _hard_limit_gate(
-                        name="supporting_scripts_untriaged_zero_reference_count",
-                        metric="untriaged_zero_reference_supporting_script_count",
-                        current=untriaged_count,
-                        limit=int(untriaged_budget["max_count"]),
-                        source_artifact=SCRIPTS_INVENTORY_MANIFEST_JSON,
-                        remediation=(
-                            "Add owner/removal metadata for every zero-reference "
-                            "supporting script."
-                        ),
-                    )
-                )
+        )
+    return gates
 
+
+def _test_governance_and_flaky_gates(
+    *,
+    test_governance: dict[str, Any],
+    flaky_review: dict[str, Any],
+) -> list[Gate]:
+    """Build test-governance and flaky-test residual gates."""
     test_report = test_governance["report"]
-    gates.append(
+    flaky_summary = flaky_review.get("summary", {})
+    total_flaky = (
+        int(flaky_summary.get("total_flaky", 0))
+        if isinstance(flaky_summary, dict)
+        else 0
+    )
+    return [
         _hard_limit_gate(
             name="test_governance_budget_violations",
             metric="budget_violations",
@@ -1305,25 +1297,17 @@ def build_payload(
             limit=0,
             source_artifact=TEST_GOVERNANCE_CURRENT_JSON,
             remediation="Fix test governance budget violations before closeout.",
-        )
-    )
-    gates.append(
+        ),
         _hard_limit_gate(
             name="test_governance_uuid4_call_sites",
             metric="uuid4_call_sites",
             current=test_report["uuid4_call_sites"],
             limit=0,
             source_artifact=TEST_GOVERNANCE_CURRENT_JSON,
-            remediation="Replace uuid4 tests with deterministic factories or explicit IDs.",
-        )
-    )
-    flaky_summary = flaky_review.get("summary", {})
-    total_flaky = (
-        int(flaky_summary.get("total_flaky", 0))
-        if isinstance(flaky_summary, dict)
-        else 0
-    )
-    gates.append(
+            remediation=(
+                "Replace uuid4 tests with deterministic factories or explicit IDs."
+            ),
+        ),
         _hard_limit_gate(
             name="flaky_test_total_count",
             metric="total_flaky",
@@ -1334,9 +1318,7 @@ def build_payload(
                 "Stabilize or explicitly quarantine flaky tests; default test "
                 "paths must remain deterministic."
             ),
-        )
-    )
-    gates.append(
+        ),
         _hard_limit_gate(
             name="flaky_test_untriaged_count",
             metric="untriaged_flaky_tests",
@@ -1347,24 +1329,26 @@ def build_payload(
                 "Every flaky candidate must have owner, triage status, and "
                 "deterministic remediation metadata."
             ),
-        )
-    )
+        ),
+    ]
 
+
+def _runtime_uuid_gates(runtime_uuid: dict[str, Any]) -> list[Gate]:
+    """Build production uuid4 seam residual gates."""
     runtime_uuid_policy = runtime_uuid.get("policy", {})
     runtime_uuid_seams = runtime_uuid.get("seams", [])
-    gates.append(
+    return [
         _hard_limit_gate(
             name="production_uuid4_seams",
             metric="seams",
-            current=len(runtime_uuid_seams)
-            if isinstance(runtime_uuid_seams, list)
-            else 0,
+            current=len(runtime_uuid_seams) if isinstance(runtime_uuid_seams, list) else 0,
             limit=0,
             source_artifact=RUNTIME_UUID_SEAMS_YAML,
-            remediation="Remove production uuid4 seams; replay identity must be explicit or deterministic.",
-        )
-    )
-    gates.append(
+            remediation=(
+                "Remove production uuid4 seams; replay identity must be explicit "
+                "or deterministic."
+            ),
+        ),
         _hard_limit_gate(
             name="production_uuid4_budget",
             metric="production_uuid4_budget",
@@ -1372,73 +1356,74 @@ def build_payload(
             limit=0,
             source_artifact=RUNTIME_UUID_SEAMS_YAML,
             remediation="Keep production UUID4 budget at zero.",
-        )
-    )
+        ),
+    ]
 
-    gates.append(
+
+def _observability_cardinality_list_gates(
+    runtime_cardinality: dict[str, Any],
+) -> list[Gate]:
+    """Build residual list-count gates from runtime cardinality inventory."""
+    specs = (
+        (
+            "observability_dashboarded_without_declaration",
+            "dashboarded_without_declaration",
+            "Declare dashboarded metrics or remove stale dashboard references.",
+        ),
+        (
+            "observability_dashboarded_without_emission",
+            "dashboarded_without_emission",
+            "Add runtime emission for dashboarded metrics or remove dashboard references.",
+        ),
+        (
+            "observability_alerted_without_emission",
+            "alerted_without_emission",
+            "Add runtime emission for alerted metrics or retire stale alert rules.",
+        ),
+        (
+            "observability_unused_declared_metrics",
+            "unused_declared_metrics",
+            "Emit, retire, or explicitly allowlist unused declared metrics.",
+        ),
+        (
+            "observability_runtime_cardinality_review_required",
+            "runtime_cardinality_review_required",
+            "Review high-cardinality metrics and record approved thresholds.",
+        ),
+        (
+            "observability_runtime_cardinality_threshold_violations",
+            "runtime_cardinality_threshold_violations",
+            "Reduce label cardinality or explicitly approve bounded thresholds.",
+        ),
+    )
+    return [
         _hard_limit_gate(
-            name="observability_dashboarded_without_declaration",
-            metric="dashboarded_without_declaration",
-            current=len(runtime_cardinality["dashboarded_without_declaration"]),
+            name=name,
+            metric=metric,
+            current=len(runtime_cardinality[metric]),
             limit=0,
             source_artifact=RUNTIME_CARDINALITY_INVENTORY_JSON,
-            remediation="Declare dashboarded metrics or remove stale dashboard references.",
+            remediation=remediation,
         )
-    )
-    gates.append(
-        _hard_limit_gate(
-            name="observability_dashboarded_without_emission",
-            metric="dashboarded_without_emission",
-            current=len(runtime_cardinality["dashboarded_without_emission"]),
-            limit=0,
-            source_artifact=RUNTIME_CARDINALITY_INVENTORY_JSON,
-            remediation="Add runtime emission for dashboarded metrics or remove dashboard references.",
-        )
-    )
-    gates.append(
-        _hard_limit_gate(
-            name="observability_alerted_without_emission",
-            metric="alerted_without_emission",
-            current=len(runtime_cardinality["alerted_without_emission"]),
-            limit=0,
-            source_artifact=RUNTIME_CARDINALITY_INVENTORY_JSON,
-            remediation="Add runtime emission for alerted metrics or retire stale alert rules.",
-        )
-    )
-    gates.append(
-        _hard_limit_gate(
-            name="observability_unused_declared_metrics",
-            metric="unused_declared_metrics",
-            current=len(runtime_cardinality["unused_declared_metrics"]),
-            limit=0,
-            source_artifact=RUNTIME_CARDINALITY_INVENTORY_JSON,
-            remediation="Emit, retire, or explicitly allowlist unused declared metrics.",
-        )
-    )
-    gates.append(
-        _hard_limit_gate(
-            name="observability_runtime_cardinality_review_required",
-            metric="runtime_cardinality_review_required",
-            current=len(runtime_cardinality["runtime_cardinality_review_required"]),
-            limit=0,
-            source_artifact=RUNTIME_CARDINALITY_INVENTORY_JSON,
-            remediation="Review high-cardinality metrics and record approved thresholds.",
-        )
-    )
-    gates.append(
-        _hard_limit_gate(
-            name="observability_runtime_cardinality_threshold_violations",
-            metric="runtime_cardinality_threshold_violations",
-            current=len(
-                runtime_cardinality["runtime_cardinality_threshold_violations"]
-            ),
-            limit=0,
-            source_artifact=RUNTIME_CARDINALITY_INVENTORY_JSON,
-            remediation="Reduce label cardinality or explicitly approve bounded thresholds.",
-        )
-    )
+        for name, metric, remediation in specs
+    ]
+
+
+def _observability_review_and_touch_gates(
+    *,
+    runtime_cardinality: dict[str, Any],
+    runtime_review: dict[str, Any],
+    observability_governance: dict[str, Any],
+    changed_paths: set[str],
+    repo_root: Path,
+) -> list[Gate]:
+    """Build release-review and metric-touch observability gates."""
     degraded_reasons = runtime_review.get("degraded_reasons", [])
-    gates.append(
+    metric_change_trigger_paths = _collect_metric_change_trigger_paths(
+        runtime_cardinality,
+        observability_governance,
+    )
+    return [
         Gate(
             name="observability_release_review_status",
             status=(
@@ -1450,46 +1435,32 @@ def build_payload(
             current=runtime_review.get("status"),
             limit="passed",
             source_artifact=RUNTIME_CARDINALITY_REVIEW_JSON,
-            remediation="Run live observability cardinality review without degraded release evidence.",
-        )
-    )
-    gates.append(_release_review_freshness_gate(runtime_review))
-    metric_change_trigger_paths = _collect_metric_change_trigger_paths(
-        runtime_cardinality,
-        observability_governance,
-    )
-    gates.append(
+            remediation=(
+                "Run live observability cardinality review without degraded "
+                "release evidence."
+            ),
+        ),
+        _release_review_freshness_gate(runtime_review),
         _observability_touched_metric_inventory_gate(
             runtime_cardinality,
             changed_paths=changed_paths,
             trigger_paths=metric_change_trigger_paths,
             repo_root=repo_root,
-        )
-    )
-    gates.append(
+        ),
         _observability_touched_metric_review_gate(
             runtime_review,
             changed_paths=changed_paths,
             trigger_paths=metric_change_trigger_paths,
-        )
-    )
+        ),
+    ]
 
-    adr_summary = adr_matrix["summary"]
-    gates.append(
-        _hard_limit_gate(
-            name="adr_enforcement_blocking_gaps",
-            metric="blocking_gap_count",
-            current=adr_summary["blocking_gap_count"],
-            limit=0,
-            source_artifact=ADR_ENFORCEMENT_MATRIX_JSON,
-            remediation="Add enforcement owner tests/scripts or reviewed manual exception markers for accepted ADRs.",
-        )
-    )
 
+def _remote_main_baseline_gate(remote_baseline: dict[str, Any]) -> Gate:
+    """Build remote-main architecture debt baseline gate."""
     unavailable_remote_artifacts = _unavailable_required_remote_baseline_artifacts(
         remote_baseline
     )
-    remote_main_baseline_gate = Gate(
+    return Gate(
         name="remote_main_architecture_debt_baseline",
         status=(
             "pass"
@@ -1505,16 +1476,26 @@ def build_payload(
         ),
         limit="clean remote-main artifact blobs",
         source_artifact=ARCHITECTURE_DEBT_REMOTE_MAIN_BASELINE_JSON,
-        remediation="Fetch origin/main and regenerate the remote-main architecture debt baseline.",
+        remediation=(
+            "Fetch origin/main and regenerate the remote-main architecture debt baseline."
+        ),
     )
-    gates.append(remote_main_baseline_gate)
 
-    # Check if we're in test mode by looking for pytest in sys.modules
-    in_test_mode = "pytest" in sys.modules or os.environ.get("PYTEST_CURRENT_TEST")
 
-    if in_test_mode:
-        # In test mode, always report module_coverage_inventory as not stale since we've already regenerated it
-        stale_artifacts = {
+def _in_test_mode() -> bool:
+    """Return True when running under pytest."""
+    return "pytest" in sys.modules or bool(os.environ.get("PYTEST_CURRENT_TEST"))
+
+
+def _collect_stale_artifacts(
+    *,
+    repo_root: Path,
+    module_coverage_hash_gate: Gate,
+    remote_main_baseline_gate: Gate,
+) -> dict[str, bool]:
+    """Detect stale quality artifacts relative to their builders."""
+    if _in_test_mode():
+        return {
             "module_coverage_inventory": False,
             "architecture_quality_scorecard": False,
             "hotspot_family_baseline": not _hotspot_family_baseline_artifact_matches_builder(
@@ -1529,42 +1510,191 @@ def build_payload(
             "remote_main_baseline": False,
             "dq_contract_registry_diagnostics": False,
         }
-    else:
-        remote_main_builder_match = _remote_main_baseline_artifact_matches_builder(
-            repo_root=repo_root
-        )
-        remote_main_baseline_stale = (
-            remote_main_builder_match is not True
-            if remote_main_builder_match is not None
-            else remote_main_baseline_gate.status != "pass"
-        )
-        stale_artifacts = {
-            "module_coverage_inventory": module_coverage_hash_gate.status != "pass",
-            "architecture_quality_scorecard": not _artifact_matches_builder(
-                repo_root=repo_root,
-                rel_path="reports/quality/architecture-quality-scorecard.json",
-                payload_builder=lambda: build_architecture_quality_scorecard(
-                    repo_root=repo_root
-                ),
-            ),
-            "hotspot_family_baseline": not _hotspot_family_baseline_artifact_matches_builder(
+    remote_main_builder_match = _remote_main_baseline_artifact_matches_builder(
+        repo_root=repo_root
+    )
+    remote_main_baseline_stale = (
+        remote_main_builder_match is not True
+        if remote_main_builder_match is not None
+        else remote_main_baseline_gate.status != "pass"
+    )
+    return {
+        "module_coverage_inventory": module_coverage_hash_gate.status != "pass",
+        "architecture_quality_scorecard": not _artifact_matches_builder(
+            repo_root=repo_root,
+            rel_path="reports/quality/architecture-quality-scorecard.json",
+            payload_builder=lambda: build_architecture_quality_scorecard(
                 repo_root=repo_root
             ),
-            "config_surface_backlog": not _artifact_matches_builder(
-                repo_root=repo_root,
-                rel_path="reports/quality/config-surface-backlog.json",
-                payload_builder=build_backlog,
+        ),
+        "hotspot_family_baseline": not _hotspot_family_baseline_artifact_matches_builder(
+            repo_root=repo_root
+        ),
+        "config_surface_backlog": not _artifact_matches_builder(
+            repo_root=repo_root,
+            rel_path="reports/quality/config-surface-backlog.json",
+            payload_builder=build_backlog,
+        ),
+        "adr_enforcement_matrix": not _artifact_matches_builder(
+            repo_root=repo_root,
+            rel_path=ADR_ENFORCEMENT_MATRIX_JSON,
+            payload_builder=lambda: report_adr_enforcement_matrix.build_payload(
+                repo_root=repo_root
             ),
-            "adr_enforcement_matrix": not _artifact_matches_builder(
-                repo_root=repo_root,
-                rel_path=ADR_ENFORCEMENT_MATRIX_JSON,
-                payload_builder=lambda: report_adr_enforcement_matrix.build_payload(
-                    repo_root=repo_root
-                ),
+        ),
+        "remote_main_baseline": remote_main_baseline_stale,
+        "dq_contract_registry_diagnostics": False,
+    }
+
+
+def _gate_status_counts(gates: list[Gate]) -> dict[str, int]:
+    """Count pass/warn/fail gate statuses."""
+    return {
+        "pass": sum(1 for gate in gates if gate.status == "pass"),
+        "warn": sum(1 for gate in gates if gate.status == "warn"),
+        "fail": sum(1 for gate in gates if gate.status == "fail"),
+    }
+
+
+def build_payload(
+    *,
+    repo_root: Path = PROJECT_ROOT,
+    changed_from_ref: str | None = None,
+) -> dict[str, object]:
+    """Build normalized debt-governance gate payload."""
+    repo_root = repo_root.resolve()
+    flaky_review, flaky_review_preflight_gate = _load_json_input_with_preflight(
+        repo_root,
+        FLAKY_TEST_REVIEW_PATH,
+        gate_name="flaky_test_review_input_preflight",
+    )
+
+    architecture_scorecard = _load_json(
+        repo_root,
+        "reports/quality/architecture-quality-scorecard.json",
+    )
+    module_coverage = _load_json(repo_root, MODULE_COVERAGE_INVENTORY_JSON)
+    module_coverage_policy = _load_yaml(
+        repo_root, "configs/quality/module_coverage_gates.yaml"
+    )
+    hotspot_family = _load_json(repo_root, HOTSPOT_FAMILY_BASELINE_JSON)
+    compatibility = _load_json(repo_root, COMPATIBILITY_IMPORTER_CENSUS_JSON)
+    dead_code = _load_json(repo_root, "reports/quality/dead-code-inventory.json")
+    contract_matrix = _load_json(
+        repo_root, "reports/quality/contract-coverage-matrix.json"
+    )
+    contract_diagnostics = _load_json(
+        repo_root, "reports/quality/contract-registry-diagnostics.json"
+    )
+    dq_diagnostics = build_contract_registry_dq_diagnostics(repo_root)
+    config_discrepancy = _load_json(repo_root, CONFIG_DISCREPANCY_BASELINE_JSON)
+    test_governance = _load_json(repo_root, TEST_GOVERNANCE_CURRENT_JSON)
+    runtime_cardinality = _load_json(repo_root, RUNTIME_CARDINALITY_INVENTORY_JSON)
+    observability_governance = _load_yaml(
+        repo_root,
+        "configs/quality/observability_metric_governance.yaml",
+    )
+    runtime_review = _load_json(repo_root, RUNTIME_CARDINALITY_REVIEW_JSON)
+    runtime_uuid = _load_yaml(repo_root, RUNTIME_UUID_SEAMS_YAML)
+    adr_matrix = _load_json(repo_root, ADR_ENFORCEMENT_MATRIX_JSON)
+    remote_baseline = _load_json(
+        repo_root,
+        ARCHITECTURE_DEBT_REMOTE_MAIN_BASELINE_JSON,
+    )
+    changed_paths = _collect_changed_paths(
+        repo_root,
+        changed_from_ref=changed_from_ref,
+    )
+    scorecard = load_debt_scorecard()
+
+    coverage_summary = module_coverage["summary"]
+    coverage_status_counts = coverage_summary["status_counts"]
+    module_coverage_hash_gate = _module_coverage_source_tree_hash_gate(
+        module_coverage,
+        repo_root=repo_root,
+    )
+    remote_main_baseline_gate = _remote_main_baseline_gate(remote_baseline)
+
+    gates: list[Gate] = []
+    gates.extend(_debt_scorecard_gates())
+    gates.append(flaky_review_preflight_gate)
+    gates.append(
+        _debt_scorecard_budget_no_growth_gate(
+            repo_root=repo_root,
+            changed_from_ref=changed_from_ref,
+        )
+    )
+    gates.append(module_coverage_hash_gate)
+    gates.append(
+        _module_coverage_scorecard_coherence_gate(
+            architecture_scorecard,
+            module_coverage,
+        )
+    )
+    gates.extend(
+        _module_coverage_residual_gates(
+            coverage_summary=coverage_summary,
+            status_counts=coverage_status_counts,
+            aggregate_residual_limits=_module_coverage_aggregate_residual_limits(
+                module_coverage_policy
             ),
-            "remote_main_baseline": remote_main_baseline_stale,
-            "dq_contract_registry_diagnostics": False,
-        }
+        )
+    )
+    gates.extend(
+        _hotspot_and_compatibility_gates(
+            hotspot_family=hotspot_family,
+            compatibility=compatibility,
+            architecture_scorecard=architecture_scorecard,
+        )
+    )
+    gates.extend(
+        _dead_code_and_contract_gates(
+            dead_code=dead_code,
+            contract_matrix=contract_matrix,
+            contract_diagnostics=contract_diagnostics,
+            dq_diagnostics=dq_diagnostics,
+        )
+    )
+    gates.extend(_config_discrepancy_gates(config_discrepancy))
+    gates.extend(_full_app_duplication_gates(repo_root=repo_root, scorecard=scorecard))
+    gates.extend(_supporting_scripts_gates(repo_root=repo_root, scorecard=scorecard))
+    gates.extend(
+        _test_governance_and_flaky_gates(
+            test_governance=test_governance,
+            flaky_review=flaky_review,
+        )
+    )
+    gates.extend(_runtime_uuid_gates(runtime_uuid))
+    gates.extend(_observability_cardinality_list_gates(runtime_cardinality))
+    gates.extend(
+        _observability_review_and_touch_gates(
+            runtime_cardinality=runtime_cardinality,
+            runtime_review=runtime_review,
+            observability_governance=observability_governance,
+            changed_paths=changed_paths,
+            repo_root=repo_root,
+        )
+    )
+    gates.append(
+        _hard_limit_gate(
+            name="adr_enforcement_blocking_gaps",
+            metric="blocking_gap_count",
+            current=adr_matrix["summary"]["blocking_gap_count"],
+            limit=0,
+            source_artifact=ADR_ENFORCEMENT_MATRIX_JSON,
+            remediation=(
+                "Add enforcement owner tests/scripts or reviewed manual exception "
+                "markers for accepted ADRs."
+            ),
+        )
+    )
+    gates.append(remote_main_baseline_gate)
+
+    stale_artifacts = _collect_stale_artifacts(
+        repo_root=repo_root,
+        module_coverage_hash_gate=module_coverage_hash_gate,
+        remote_main_baseline_gate=remote_main_baseline_gate,
+    )
     stale_count = sum(1 for stale in stale_artifacts.values() if stale)
     gates.append(
         _hard_limit_gate(
@@ -1579,11 +1709,7 @@ def build_payload(
         )
     )
 
-    status_counts = {
-        "pass": sum(1 for gate in gates if gate.status == "pass"),
-        "warn": sum(1 for gate in gates if gate.status == "warn"),
-        "fail": sum(1 for gate in gates if gate.status == "fail"),
-    }
+    status_counts = _gate_status_counts(gates)
     failing_gates = [gate.name for gate in gates if gate.status == "fail"]
     warning_gates = [gate.name for gate in gates if gate.status == "warn"]
     return {

@@ -1891,6 +1891,60 @@ def _json_payloads_by_kind(
     return payloads, errors
 
 
+def _tracing_pair_errors(
+    payloads: list[dict[str, object]],
+) -> list[str]:
+    """Per-pipeline OFF/ON pair and signature parity errors."""
+    errors: list[str] = []
+    for pipeline in CHEMBL_PIPELINES:
+        pair = [payload for payload in payloads if payload.get("pipeline") == pipeline]
+        modes = {payload.get("tracing") for payload in pair}
+        signatures = {str(payload.get("data_signature") or "") for payload in pair}
+        if len(pair) != 2 or modes != {False, True}:
+            errors.append(f"{pipeline} requires explicit OFF and ON results")
+        if len(signatures) != 1 or "" in signatures:
+            errors.append(
+                f"{pipeline} tracing data signatures must be identical and non-empty"
+            )
+    return errors
+
+
+def _expected_tracing_occurrences(
+    expected_binding: dict[str, object],
+) -> set[tuple[str, object, str, str]]:
+    """Occurrence keys from executed standalone attempt binding."""
+    expected_attempts = expected_binding.get("standalone_attempts")
+    if not isinstance(expected_attempts, list):
+        return set()
+    return {
+        (
+            str(item.get("pipeline") or ""),
+            item.get("tracing"),
+            str((item.get("run_ids") or [""])[0]),
+            str(item.get("result_signature") or ""),
+        )
+        for item in expected_attempts
+        if isinstance(item, dict)
+        and isinstance(item.get("run_ids"), list)
+        and len(item["run_ids"]) == 1
+    }
+
+
+def _actual_tracing_occurrences(
+    payloads: list[dict[str, object]],
+) -> set[tuple[str, object, str, str]]:
+    """Occurrence keys from retained attempt-result payloads."""
+    return {
+        (
+            str(payload.get("pipeline") or ""),
+            payload.get("tracing"),
+            str(payload.get("run_id") or ""),
+            str(payload.get("data_signature") or ""),
+        )
+        for payload in payloads
+    }
+
+
 def _validate_tracing_raw(
     retained: list[dict[str, str]],
     expected_binding: dict[str, object] | None = None,
@@ -1904,44 +1958,11 @@ def _validate_tracing_raw(
         errors.append("tracing attempts must cover all 15 canonical pipelines")
     if statuses != {"success"}:
         errors.append("tracing attempt statuses must all equal success")
-    for pipeline in CHEMBL_PIPELINES:
-        pair = [payload for payload in payloads if payload.get("pipeline") == pipeline]
-        modes = {payload.get("tracing") for payload in pair}
-        signatures = {str(payload.get("data_signature") or "") for payload in pair}
-        if len(pair) != 2 or modes != {False, True}:
-            errors.append(f"{pipeline} requires explicit OFF and ON results")
-        if len(signatures) != 1 or "" in signatures:
-            errors.append(
-                f"{pipeline} tracing data signatures must be identical and non-empty"
-            )
+    errors.extend(_tracing_pair_errors(payloads))
     if expected_binding is not None:
-        expected_attempts = expected_binding.get("standalone_attempts")
-        expected_occurrences = (
-            {
-                (
-                    str(item.get("pipeline") or ""),
-                    item.get("tracing"),
-                    str((item.get("run_ids") or [""])[0]),
-                    str(item.get("result_signature") or ""),
-                )
-                for item in expected_attempts
-                if isinstance(item, dict)
-                and isinstance(item.get("run_ids"), list)
-                and len(item["run_ids"]) == 1
-            }
-            if isinstance(expected_attempts, list)
-            else set()
-        )
-        actual_occurrences = {
-            (
-                str(payload.get("pipeline") or ""),
-                payload.get("tracing"),
-                str(payload.get("run_id") or ""),
-                str(payload.get("data_signature") or ""),
-            )
-            for payload in payloads
-        }
-        if actual_occurrences != expected_occurrences:
+        if _actual_tracing_occurrences(payloads) != _expected_tracing_occurrences(
+            expected_binding
+        ):
             errors.append("tracing raw results do not match executed run occurrences")
     decision_traces = [payload.get("decision_trace") for payload in payloads]
     if not any(isinstance(trace, list) and trace for trace in decision_traces):
@@ -2544,6 +2565,277 @@ def _finalize_campaign(
     return 0 if complete else 1
 
 
+def _bootstrap_campaign_context(
+    args: argparse.Namespace,
+    *,
+    repo_root: Path,
+    audit_root: Path,
+    canonical_roots: tuple[Path, ...],
+) -> tuple[
+    dict[str, str],
+    dict[str, object],
+    tuple[str, ...],
+    subprocess.CompletedProcess[str],
+]:
+    """Validate CLI setup and collect provenance + registry pipeline inventory."""
+    evidence = _parse_evidence(args.evidence)
+    if args.execute and len(canonical_roots) != 2:
+        raise ValueError(
+            "--execute requires --canonical-data-root and --canonical-log-root"
+        )
+    _validate_roots(audit_root, canonical_roots)
+    if args.execute:
+        assert args.canonical_data_root is not None
+        assert args.canonical_log_root is not None
+        _validate_canonical_layout(
+            args.canonical_data_root,
+            args.canonical_log_root,
+        )
+        _validate_fresh_audit_root(audit_root)
+    source_provenance = _source_provenance(repo_root)
+    if (args.execute or args.finalize_report is not None) and not source_provenance[
+        "clean"
+    ]:
+        raise ValueError(
+            "execution and finalization require a clean tracked and untracked source tree"
+        )
+    registered_pipelines, registry_completed = _registry_pipeline_command(
+        repo_root,
+        python=args.python.expanduser().absolute(),
+    )
+    return evidence, source_provenance, registered_pipelines, registry_completed
+
+
+def _planned_payload(
+    *,
+    parity_ok: bool,
+    pipelines: tuple[str, ...],
+    registered_pipelines: tuple[str, ...],
+    planned: list[dict[str, str | bool]],
+    source_revision: str,
+    source_provenance: dict[str, object],
+    registry_completed: subprocess.CompletedProcess[str],
+    external_gate: dict[str, object],
+    scorecard: dict[str, object],
+    residual_limitations: list[str],
+    finding_ids: list[str],
+) -> dict[str, object]:
+    """Dry-run campaign plan payload."""
+    return {
+        "status": "planned",
+        "pipeline_config_parity": parity_ok,
+        "pipelines": list(pipelines),
+        "registered_pipelines": list(registered_pipelines),
+        "attempts": planned,
+        "source_revision": source_revision,
+        "source_provenance": source_provenance,
+        "registry_command": list(registry_completed.args),
+        "registry_stdout": registry_completed.stdout,
+        "external_evidence_gate": external_gate,
+        "scorecard": scorecard,
+        "residual_limitations": residual_limitations,
+        "finding_ids": finding_ids,
+    }
+
+
+def _run_standalone_attempts(
+    *,
+    repo_root: Path,
+    audit_root: Path,
+    python: Path,
+    planned: list[dict[str, str | bool]],
+    limit: int,
+    timeout_seconds: int,
+    cached_bronze_root: Path,
+) -> list[AttemptEvidence]:
+    """Execute planned offline standalone pipeline attempts."""
+    attempts: list[AttemptEvidence] = []
+    for item in planned:
+        attempts.append(
+            _run_attempt(
+                repo_root=repo_root,
+                audit_root=audit_root,
+                python=python,
+                pipeline=str(item["pipeline"]),
+                limit=limit,
+                tracing=bool(item["tracing"]),
+                timeout_seconds=timeout_seconds,
+                cached_bronze_root=cached_bronze_root,
+            )
+        )
+    return attempts
+
+
+def _run_campaign_phases(
+    *,
+    repo_root: Path,
+    audit_root: Path,
+    python: Path,
+    limit: int,
+    timeout_seconds: int,
+    workflow_fixture_root: Path,
+) -> tuple[PhaseEvidence, PhaseEvidence, PhaseEvidence]:
+    """Run baseline, expected-failure, and DQ hard-failure phases."""
+    workflow_phase_root = audit_root / "phases" / "chembl-baseline"
+    workflow_phase = _run_phase_command(
+        name="chembl_baseline",
+        command=_workflow_baseline_command(
+            python=python,
+            limit=limit,
+            cached_bronze_root=workflow_fixture_root,
+        ),
+        repo_root=repo_root,
+        phase_root=workflow_phase_root,
+        data_root=workflow_phase_root / "data",
+        timeout_seconds=timeout_seconds,
+    )
+    failure_phase_root = audit_root / "phases" / "chembl-baseline-failure"
+    empty_bronze_root = failure_phase_root / "empty-bronze"
+    empty_bronze_root.mkdir(parents=True, exist_ok=True)
+    failure_phase = _run_phase_command(
+        name="chembl_baseline_expected_failure",
+        command=_workflow_failure_command(
+            python=python,
+            limit=limit,
+            empty_bronze_root=empty_bronze_root,
+        ),
+        repo_root=repo_root,
+        phase_root=failure_phase_root,
+        data_root=failure_phase_root / "data",
+        timeout_seconds=timeout_seconds,
+        expected_outcome="failure",
+    )
+    dq_phase_root = audit_root / "phases" / "dq-hard-failure"
+    dq_phase = _run_phase_command(
+        name="dq_hard_failure_boundary",
+        command=_dq_hard_failure_test_command(python=python),
+        repo_root=repo_root,
+        phase_root=dq_phase_root,
+        data_root=dq_phase_root / "data",
+        timeout_seconds=timeout_seconds,
+        isolated_workdir=False,
+    )
+    return workflow_phase, failure_phase, dq_phase
+
+
+def _tracing_result_parity(attempts: list[AttemptEvidence]) -> bool:
+    """Whether every pipeline has OFF/ON pairs with matching result signatures."""
+    return all(
+        len(pair) == 2
+        and all(attempt.satisfies_closure for attempt in pair)
+        and all(_has_non_empty_decision_trace(attempt) for attempt in pair)
+        and pair[0].result_signature == pair[1].result_signature
+        for pipeline in CHEMBL_PIPELINES
+        for pair in (
+            tuple(attempt for attempt in attempts if attempt.pipeline == pipeline),
+        )
+    )
+
+
+def _attempt_gate_satisfied(
+    *,
+    tracing_mode: str,
+    attempts: list[AttemptEvidence],
+    tracing_result_parity: bool,
+) -> bool:
+    """Whether standalone attempt gate requirements are met."""
+    expected_attempt_keys = {
+        (pipeline, tracing)
+        for pipeline in CHEMBL_PIPELINES
+        for tracing in (False, True)
+    }
+    actual_attempt_keys = {(attempt.pipeline, attempt.tracing) for attempt in attempts}
+    return bool(
+        tracing_mode == "both"
+        and actual_attempt_keys == expected_attempt_keys
+        and len(attempts) == len(expected_attempt_keys)
+        and all(attempt.retains_attempt_evidence for attempt in attempts)
+        and tracing_result_parity
+    )
+
+
+def _build_execute_report(
+    *,
+    source_revision: str,
+    source_provenance: dict[str, object],
+    parity_ok: bool,
+    pipelines: tuple[str, ...],
+    registered_pipelines: tuple[str, ...],
+    registry_completed: subprocess.CompletedProcess[str],
+    registry_stdout_path: Path,
+    attempts: list[AttemptEvidence],
+    online_attempt: AttemptEvidence,
+    phases: tuple[PhaseEvidence, ...],
+    attempt_gate: bool,
+    tracing_result_parity: bool,
+    tracing_mode: str,
+    tracing_pairs: dict[str, dict[bool, str]],
+    standalone_fixture_evidence: dict[str, object],
+    workflow_fixture_evidence: dict[str, object],
+    canonical_unchanged: bool,
+    before: dict[str, str],
+    after: dict[str, str],
+    binding: dict[str, object],
+    external_gate: dict[str, object],
+    scorecard: dict[str, object],
+    residual_limitations: list[str],
+    finding_ids: list[str],
+    residual_finding_gate: dict[str, object],
+    core_complete: bool,
+) -> dict[str, object]:
+    """Assemble the execute-mode campaign report payload."""
+    return {
+        "schema_version": 1,
+        "generated_at": _utc_now(),
+        "source_revision": source_revision,
+        "source_provenance": source_provenance,
+        "status": "awaiting_external_evidence" if core_complete else "incomplete",
+        "pipeline_config_parity": parity_ok,
+        "pipelines": list(pipelines),
+        "registered_pipelines": list(registered_pipelines),
+        "registry_command_evidence": {
+            "command": list(registry_completed.args),
+            "stdout_path": str(registry_stdout_path),
+            "stdout_sha256": _sha256_file(registry_stdout_path),
+        },
+        "attempt_gate": {
+            "satisfied": attempt_gate,
+            "attempt_count": len(attempts),
+            "required_tracing_mode": "both",
+            "actual_tracing_mode": tracing_mode,
+            "tracing_result_parity": tracing_result_parity,
+            "representative_tracing_result_parity": tracing_result_parity,
+            "tracing_result_signatures": tracing_pairs,
+            "successful_attempt_count": sum(
+                attempt.exit_code == 0 for attempt in attempts
+            ),
+            "failed_attempt_count": sum(attempt.exit_code != 0 for attempt in attempts),
+        },
+        "attempts": [asdict(item) for item in attempts],
+        "online_attempt_gate": {
+            "satisfied": online_attempt.satisfies_closure,
+            "attempt": asdict(online_attempt),
+        },
+        "workflow_phase_gate": {
+            "satisfied": all(phase.satisfies_closure for phase in phases),
+            "phases": [asdict(phase) for phase in phases],
+        },
+        "standalone_fixture_evidence": standalone_fixture_evidence,
+        "workflow_fixture_evidence": workflow_fixture_evidence,
+        "canonical_signature_gate": {
+            "satisfied": canonical_unchanged,
+            "before": before,
+            "after": after,
+        },
+        "campaign_binding": binding,
+        "external_evidence_gate": external_gate,
+        "scorecard": scorecard,
+        "residual_limitations": residual_limitations,
+        "finding_ids": finding_ids,
+        "residual_finding_gate": residual_finding_gate,
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     args = _build_parser().parse_args(argv)
     repo_root = _repo_root()
@@ -2554,30 +2846,16 @@ def main(argv: list[str] | None = None) -> int:
         if path is not None
     )
     try:
-        evidence = _parse_evidence(args.evidence)
-        if args.execute and len(canonical_roots) != 2:
-            raise ValueError(
-                "--execute requires --canonical-data-root and --canonical-log-root"
-            )
-        _validate_roots(audit_root, canonical_roots)
-        if args.execute:
-            assert args.canonical_data_root is not None
-            assert args.canonical_log_root is not None
-            _validate_canonical_layout(
-                args.canonical_data_root,
-                args.canonical_log_root,
-            )
-            _validate_fresh_audit_root(audit_root)
-        source_provenance = _source_provenance(repo_root)
-        if (args.execute or args.finalize_report is not None) and not source_provenance[
-            "clean"
-        ]:
-            raise ValueError(
-                "execution and finalization require a clean tracked and untracked source tree"
-            )
-        registered_pipelines, registry_completed = _registry_pipeline_command(
-            repo_root,
-            python=args.python.expanduser().absolute(),
+        (
+            evidence,
+            source_provenance,
+            registered_pipelines,
+            registry_completed,
+        ) = _bootstrap_campaign_context(
+            args,
+            repo_root=repo_root,
+            audit_root=audit_root,
+            canonical_roots=canonical_roots,
         )
     except (ValueError, OSError, subprocess.SubprocessError) as exc:
         print(json.dumps({"status": "error", "error": str(exc)}, sort_keys=True))
@@ -2608,23 +2886,23 @@ def main(argv: list[str] | None = None) -> int:
         args.finding_id,
     )
     if not args.execute:
-        payload = {
-            "status": "planned",
-            "pipeline_config_parity": parity_ok,
-            "pipelines": list(pipelines),
-            "registered_pipelines": list(registered_pipelines),
-            "attempts": planned,
-            "source_revision": source_revision,
-            "source_provenance": source_provenance,
-            "registry_command": list(registry_completed.args),
-            "registry_stdout": registry_completed.stdout,
-            "external_evidence_gate": external_gate,
-            "scorecard": scorecard,
-            "residual_limitations": args.residual_limitation,
-            "finding_ids": args.finding_id,
-        }
+        payload = _planned_payload(
+            parity_ok=parity_ok,
+            pipelines=pipelines,
+            registered_pipelines=registered_pipelines,
+            planned=planned,
+            source_revision=source_revision,
+            source_provenance=source_provenance,
+            registry_completed=registry_completed,
+            external_gate=external_gate,
+            scorecard=scorecard,
+            residual_limitations=args.residual_limitation,
+            finding_ids=args.finding_id,
+        )
         print(json.dumps(payload, indent=2, sort_keys=True))
         return 0 if parity_ok else 1
+
+    python = args.python.expanduser().absolute()
     audit_root.mkdir(parents=True, exist_ok=True)
     registry_evidence_root = audit_root / "evidence" / "raw"
     registry_evidence_root.mkdir(parents=True, exist_ok=True)
@@ -2643,24 +2921,19 @@ def main(argv: list[str] | None = None) -> int:
         canonical_bronze_root=cached_bronze_root,
         audit_root=audit_root,
     )
-    attempts: list[AttemptEvidence] = []
-    for item in planned:
-        attempts.append(
-            _run_attempt(
-                repo_root=repo_root,
-                audit_root=audit_root,
-                python=args.python.expanduser().absolute(),
-                pipeline=str(item["pipeline"]),
-                limit=args.limit,
-                tracing=bool(item["tracing"]),
-                timeout_seconds=args.timeout_seconds,
-                cached_bronze_root=cached_bronze_root,
-            )
-        )
+    attempts = _run_standalone_attempts(
+        repo_root=repo_root,
+        audit_root=audit_root,
+        python=python,
+        planned=planned,
+        limit=args.limit,
+        timeout_seconds=args.timeout_seconds,
+        cached_bronze_root=cached_bronze_root,
+    )
     online_attempt = _run_attempt(
         repo_root=repo_root,
         audit_root=audit_root,
-        python=args.python.expanduser().absolute(),
+        python=python,
         pipeline="chembl_activity",
         limit=args.limit,
         tracing=False,
@@ -2668,56 +2941,16 @@ def main(argv: list[str] | None = None) -> int:
         cached_bronze_root=None,
         run_mode="online",
     )
-    workflow_phase_root = audit_root / "phases" / "chembl-baseline"
-    workflow_phase = _run_phase_command(
-        name="chembl_baseline",
-        command=_workflow_baseline_command(
-            python=args.python.expanduser().absolute(),
-            limit=args.limit,
-            cached_bronze_root=workflow_fixture_root,
-        ),
+    phases = _run_campaign_phases(
         repo_root=repo_root,
-        phase_root=workflow_phase_root,
-        data_root=workflow_phase_root / "data",
+        audit_root=audit_root,
+        python=python,
+        limit=args.limit,
         timeout_seconds=args.timeout_seconds,
+        workflow_fixture_root=workflow_fixture_root,
     )
-    failure_phase_root = audit_root / "phases" / "chembl-baseline-failure"
-    empty_bronze_root = failure_phase_root / "empty-bronze"
-    empty_bronze_root.mkdir(parents=True, exist_ok=True)
-    failure_phase = _run_phase_command(
-        name="chembl_baseline_expected_failure",
-        command=_workflow_failure_command(
-            python=args.python.expanduser().absolute(),
-            limit=args.limit,
-            empty_bronze_root=empty_bronze_root,
-        ),
-        repo_root=repo_root,
-        phase_root=failure_phase_root,
-        data_root=failure_phase_root / "data",
-        timeout_seconds=args.timeout_seconds,
-        expected_outcome="failure",
-    )
-    dq_phase_root = audit_root / "phases" / "dq-hard-failure"
-    dq_phase = _run_phase_command(
-        name="dq_hard_failure_boundary",
-        command=_dq_hard_failure_test_command(
-            python=args.python.expanduser().absolute()
-        ),
-        repo_root=repo_root,
-        phase_root=dq_phase_root,
-        data_root=dq_phase_root / "data",
-        timeout_seconds=args.timeout_seconds,
-        isolated_workdir=False,
-    )
-    phases = (workflow_phase, failure_phase, dq_phase)
     after = {str(path.resolve()): _tree_signature(path) for path in canonical_roots}
     canonical_unchanged = before == after
-    expected_attempt_keys = {
-        (pipeline, tracing)
-        for pipeline in CHEMBL_PIPELINES
-        for tracing in (False, True)
-    }
-    actual_attempt_keys = {(attempt.pipeline, attempt.tracing) for attempt in attempts}
     tracing_pairs = {
         pipeline: {
             attempt.tracing: attempt.result_signature
@@ -2726,22 +2959,11 @@ def main(argv: list[str] | None = None) -> int:
         }
         for pipeline in CHEMBL_PIPELINES
     }
-    tracing_result_parity = all(
-        len(pair) == 2
-        and all(attempt.satisfies_closure for attempt in pair)
-        and all(_has_non_empty_decision_trace(attempt) for attempt in pair)
-        and pair[0].result_signature == pair[1].result_signature
-        for pipeline in CHEMBL_PIPELINES
-        for pair in (
-            tuple(attempt for attempt in attempts if attempt.pipeline == pipeline),
-        )
-    )
-    attempt_gate = bool(
-        args.tracing_mode == "both"
-        and actual_attempt_keys == expected_attempt_keys
-        and len(attempts) == len(expected_attempt_keys)
-        and all(attempt.retains_attempt_evidence for attempt in attempts)
-        and tracing_result_parity
+    tracing_parity = _tracing_result_parity(attempts)
+    attempt_gate = _attempt_gate_satisfied(
+        tracing_mode=args.tracing_mode,
+        attempts=attempts,
+        tracing_result_parity=tracing_parity,
     )
     core_complete = bool(
         parity_ok
@@ -2756,56 +2978,34 @@ def main(argv: list[str] | None = None) -> int:
         online_attempt=online_attempt,
         phases=phases,
     )
-    report = {
-        "schema_version": 1,
-        "generated_at": _utc_now(),
-        "source_revision": source_revision,
-        "source_provenance": source_provenance,
-        "status": "awaiting_external_evidence" if core_complete else "incomplete",
-        "pipeline_config_parity": parity_ok,
-        "pipelines": list(pipelines),
-        "registered_pipelines": list(registered_pipelines),
-        "registry_command_evidence": {
-            "command": list(registry_completed.args),
-            "stdout_path": str(registry_stdout_path),
-            "stdout_sha256": _sha256_file(registry_stdout_path),
-        },
-        "attempt_gate": {
-            "satisfied": attempt_gate,
-            "attempt_count": len(attempts),
-            "required_tracing_mode": "both",
-            "actual_tracing_mode": args.tracing_mode,
-            "tracing_result_parity": tracing_result_parity,
-            "representative_tracing_result_parity": tracing_result_parity,
-            "tracing_result_signatures": tracing_pairs,
-            "successful_attempt_count": sum(
-                attempt.exit_code == 0 for attempt in attempts
-            ),
-            "failed_attempt_count": sum(attempt.exit_code != 0 for attempt in attempts),
-        },
-        "attempts": [asdict(item) for item in attempts],
-        "online_attempt_gate": {
-            "satisfied": online_attempt.satisfies_closure,
-            "attempt": asdict(online_attempt),
-        },
-        "workflow_phase_gate": {
-            "satisfied": all(phase.satisfies_closure for phase in phases),
-            "phases": [asdict(phase) for phase in phases],
-        },
-        "standalone_fixture_evidence": standalone_fixture_evidence,
-        "workflow_fixture_evidence": workflow_fixture_evidence,
-        "canonical_signature_gate": {
-            "satisfied": canonical_unchanged,
-            "before": before,
-            "after": after,
-        },
-        "campaign_binding": binding,
-        "external_evidence_gate": external_gate,
-        "scorecard": scorecard,
-        "residual_limitations": args.residual_limitation,
-        "finding_ids": args.finding_id,
-        "residual_finding_gate": residual_finding_gate,
-    }
+    report = _build_execute_report(
+        source_revision=source_revision,
+        source_provenance=source_provenance,
+        parity_ok=parity_ok,
+        pipelines=pipelines,
+        registered_pipelines=registered_pipelines,
+        registry_completed=registry_completed,
+        registry_stdout_path=registry_stdout_path,
+        attempts=attempts,
+        online_attempt=online_attempt,
+        phases=phases,
+        attempt_gate=attempt_gate,
+        tracing_result_parity=tracing_parity,
+        tracing_mode=args.tracing_mode,
+        tracing_pairs=tracing_pairs,
+        standalone_fixture_evidence=standalone_fixture_evidence,
+        workflow_fixture_evidence=workflow_fixture_evidence,
+        canonical_unchanged=canonical_unchanged,
+        before=before,
+        after=after,
+        binding=binding,
+        external_gate=external_gate,
+        scorecard=scorecard,
+        residual_limitations=args.residual_limitation,
+        finding_ids=args.finding_id,
+        residual_finding_gate=residual_finding_gate,
+        core_complete=core_complete,
+    )
     output_path = audit_root / "observability-closure-campaign.json"
     atomic_write_text(
         output_path,

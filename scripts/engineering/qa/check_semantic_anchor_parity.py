@@ -667,6 +667,79 @@ def _find_pipeline_entry(
     return None
 
 
+def _merge_section(composite: dict[str, Any]) -> dict[str, Any]:
+    merge = composite.get("merge", {})
+    return merge if isinstance(merge, dict) else {}
+
+
+def _publication_identity(composite: dict[str, Any]) -> dict[str, Any]:
+    policy = composite.get("normalized_join_key_policy", {})
+    if not isinstance(policy, dict):
+        return {}
+    identity = policy.get("publication_identity", {})
+    return identity if isinstance(identity, dict) else {}
+
+
+def _uniprot_join_boundary(composite: dict[str, Any]) -> dict[str, Any]:
+    policy = composite.get("normalized_anchor_policy", {})
+    if not isinstance(policy, dict):
+        return {}
+    idmapping = policy.get("uniprot_idmapping", {})
+    if not isinstance(idmapping, dict):
+        return {}
+    boundary = idmapping.get("join_boundary", {})
+    return boundary if isinstance(boundary, dict) else {}
+
+
+def _pubchem_join_boundary(composite: dict[str, Any]) -> dict[str, Any]:
+    policy = composite.get("normalized_anchor_policy", {})
+    if not isinstance(policy, dict):
+        return {}
+    pubchem = policy.get("pubchem_compound", {})
+    if not isinstance(pubchem, dict):
+        return {}
+    boundary = pubchem.get("join_boundary", {})
+    return boundary if isinstance(boundary, dict) else {}
+
+
+def _has_seed_output_key(composite: dict[str, Any], check_field: str) -> bool:
+    seed = composite.get("seed", {})
+    return isinstance(seed, dict) and check_field in _field_set(seed.get("output_keys"))
+
+
+def _has_field_priority(composite: dict[str, Any], check_field: str) -> bool:
+    priorities = _merge_section(composite).get("field_priorities", {})
+    return isinstance(priorities, dict) and check_field in priorities
+
+
+def _has_column_group_field(
+    composite: dict[str, Any],
+    requirement: CompositeRequirement,
+    check_field: str,
+) -> bool:
+    column_groups = _merge_section(composite).get("column_groups", {})
+    if not isinstance(column_groups, list):
+        return False
+    for group in column_groups:
+        if not isinstance(group, dict):
+            continue
+        if requirement.group is not None and group.get("name") != requirement.group:
+            continue
+        if check_field in _field_set(group.get("fields")):
+            return True
+    return False
+
+
+def _has_pipeline_join_key(
+    entries: object,
+    *,
+    pipeline: str | None,
+    check_field: str,
+) -> bool:
+    entry = _find_pipeline_entry(entries, pipeline=pipeline)
+    return entry is not None and check_field in _field_set(entry.get("join_keys"))
+
+
 def _has_composite_requirement(
     composite_payload: dict[str, Any],
     requirement: CompositeRequirement,
@@ -675,101 +748,45 @@ def _has_composite_requirement(
 ) -> bool:
     composite = _composite_root(composite_payload)
     check_field = requirement.field or field
+    kind = requirement.kind
 
-    if requirement.kind == "seed_output_key":
-        seed = composite.get("seed", {})
-        return isinstance(seed, dict) and check_field in _field_set(
-            seed.get("output_keys")
-        )
-
-    if requirement.kind == "field_priority":
-        merge = composite.get("merge", {})
-        priorities = (
-            merge.get("field_priorities", {}) if isinstance(merge, dict) else {}
-        )
-        return isinstance(priorities, dict) and check_field in priorities
-
-    if requirement.kind == "column_group_field":
-        merge = composite.get("merge", {})
-        column_groups = (
-            merge.get("column_groups", {}) if isinstance(merge, dict) else {}
-        )
-        if not isinstance(column_groups, list):
-            return False
-        for group in column_groups:
-            if not isinstance(group, dict):
-                continue
-            if requirement.group is not None and group.get("name") != requirement.group:
-                continue
-            if check_field in _field_set(group.get("fields")):
-                return True
-        return False
-
-    if requirement.kind == "enricher_join_key":
-        entry = _find_pipeline_entry(
+    if kind == "seed_output_key":
+        return _has_seed_output_key(composite, check_field)
+    if kind == "field_priority":
+        return _has_field_priority(composite, check_field)
+    if kind == "column_group_field":
+        return _has_column_group_field(composite, requirement, check_field)
+    if kind == "enricher_join_key":
+        return _has_pipeline_join_key(
             composite.get("enrichers"),
             pipeline=requirement.pipeline,
+            check_field=check_field,
         )
-        return entry is not None and check_field in _field_set(entry.get("join_keys"))
-
-    if requirement.kind == "dependency_join_key":
-        entry = _find_pipeline_entry(
+    if kind == "dependency_join_key":
+        return _has_pipeline_join_key(
             composite.get("dependencies"),
             pipeline=requirement.pipeline,
+            check_field=check_field,
         )
-        return entry is not None and check_field in _field_set(entry.get("join_keys"))
-
-    if requirement.kind == "publication_primary_join_key":
-        policy = composite.get("normalized_join_key_policy", {})
-        identity = (
-            policy.get("publication_identity", {}) if isinstance(policy, dict) else {}
+    if kind == "publication_primary_join_key":
+        return check_field in _field_set(
+            _publication_identity(composite).get("primary_join_keys")
         )
-        return isinstance(identity, dict) and check_field in _field_set(
-            identity.get("primary_join_keys")
+    if kind == "publication_fallback_join_key":
+        return check_field in _field_set(
+            _publication_identity(composite).get("fallback_join_keys")
         )
-
-    if requirement.kind == "publication_fallback_join_key":
-        policy = composite.get("normalized_join_key_policy", {})
-        identity = (
-            policy.get("publication_identity", {}) if isinstance(policy, dict) else {}
+    if kind == "molecule_active_join_key":
+        return check_field in _field_set(
+            _pubchem_join_boundary(composite).get("active_join_keys")
         )
-        return isinstance(identity, dict) and check_field in _field_set(
-            identity.get("fallback_join_keys")
-        )
-
-    if requirement.kind == "molecule_active_join_key":
-        policy = composite.get("normalized_anchor_policy", {})
-        pubchem = policy.get("pubchem_compound", {}) if isinstance(policy, dict) else {}
-        boundary = pubchem.get("join_boundary", {}) if isinstance(pubchem, dict) else {}
-        return isinstance(boundary, dict) and check_field in _field_set(
-            boundary.get("active_join_keys")
-        )
-
-    if requirement.kind == "target_source_anchor":
-        policy = composite.get("normalized_anchor_policy", {})
-        idmapping = (
-            policy.get("uniprot_idmapping", {}) if isinstance(policy, dict) else {}
-        )
-        boundary = (
-            idmapping.get("join_boundary", {}) if isinstance(idmapping, dict) else {}
-        )
+    if kind == "target_source_anchor":
+        return _uniprot_join_boundary(composite).get("source_anchor") == check_field
+    if kind == "target_normalized_output_anchor":
         return (
-            isinstance(boundary, dict) and boundary.get("source_anchor") == check_field
+            _uniprot_join_boundary(composite).get("normalized_output_anchor")
+            == check_field
         )
-
-    if requirement.kind == "target_normalized_output_anchor":
-        policy = composite.get("normalized_anchor_policy", {})
-        idmapping = (
-            policy.get("uniprot_idmapping", {}) if isinstance(policy, dict) else {}
-        )
-        boundary = (
-            idmapping.get("join_boundary", {}) if isinstance(idmapping, dict) else {}
-        )
-        return (
-            isinstance(boundary, dict)
-            and boundary.get("normalized_output_anchor") == check_field
-        )
-
     raise ValueError(f"Unsupported composite requirement kind: {requirement.kind}")
 
 
