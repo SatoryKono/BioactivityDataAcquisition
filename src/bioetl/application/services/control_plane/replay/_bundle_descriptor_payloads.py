@@ -115,13 +115,15 @@ def resolve_replay_claims(
     requested_exact_replay_default: object,
 ) -> ReplayClaimSnapshot:
     """Resolve replay claims from diagnostics and identity-graph fallbacks."""
-    replay_taxonomy = resolve_replay_taxonomy_projection(
-        diagnostics,
-        fallback=identity_graph,
-        defaults={
-            "replay_capability": replay_capability_default,
-            "requested_exact_replay": requested_exact_replay_default,
-        },
+    replay_taxonomy = dict_or_empty(
+        resolve_replay_taxonomy_projection(
+            diagnostics,
+            fallback=identity_graph,
+            defaults={
+                "replay_capability": replay_capability_default,
+                "requested_exact_replay": requested_exact_replay_default,
+            },
+        )
     )
     return ReplayClaimSnapshot(
         replay_capability=replay_taxonomy.get("replay_capability"),

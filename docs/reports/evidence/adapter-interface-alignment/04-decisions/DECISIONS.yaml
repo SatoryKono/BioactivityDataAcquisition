@@ -1,0 +1,108 @@
+- id: DEC-adapt-canonical-provider-bound-creator
+  decision: "Use provider-bound typed creators as the canonical runtime-facing construction seam and reduce DataSourceFactory to a compatibility facade."
+  status: proposed
+  owner: codex-draft
+  created_at: 2026-03-20
+  alternatives:
+    - "Normalize on DataSourceFactory.create() as the sole helper-synthesis boundary"
+    - "Keep both seam families and rely on local fixes plus tests"
+  evidence:
+    - EV-adapter-alignment-biblio-data-source-creators-centralize-helper-wiring
+    - EV-adapter-alignment-tests-preserve-minimal-provider-bound-surface
+    - EV-adapter-alignment-custom-creator-bypasses-global-helper-injection
+    - EV-adapter-alignment-composite-bootstrap-uses-plan-based-public-facade
+  tradeoffs:
+    wins:
+      - "Preserves the smallest stable caller-facing interface"
+      - "Aligns provider creation with the clearer composite composition style"
+      - "Removes one duplicated owner of helper-injection policy"
+    loses:
+      - "Requires migration of compatibility seams"
+      - "Makes some generic factory shortcuts less direct"
+  risks:
+    - RISK-adapt-compat-facade-drift
+    - RISK-adapt-dual-seam-extension
+  implications:
+    - "New runtime entry paths should prefer typed provider-bound creators"
+    - "DataSourceFactory should become a compatibility layer rather than a competing policy seam"
+
+- id: DEC-adapt-typed-custom-creator-protocol
+  decision: "Replace the open-ended custom_creator callable alias with an explicit internal adapter-factory protocol."
+  status: proposed
+  owner: codex-draft
+  created_at: 2026-03-20
+  alternatives:
+    - "Keep Callable[..., DataSourcePort] and document kwargs informally"
+    - "Eliminate custom_creator immediately without a transition seam"
+  evidence:
+    - EV-adapter-alignment-custom-creator-dynamic-contract
+    - EV-adapter-alignment-openalex-custom-creator-synthesizes-default-helpers
+    - EV-adapter-alignment-pubchem-custom-creator-delegates-to-composition-factory
+  tradeoffs:
+    wins:
+      - "Makes adapter-construction expectations type-reviewable"
+      - "Reduces silent runtime dependency drift"
+      - "Retains room for thin composition-owned wrappers like PubChem"
+    loses:
+      - "Adds protocol design and migration work"
+      - "May require updates to tests that monkeypatch dynamic seams"
+  risks:
+    - RISK-adapt-overfitted-protocol
+    - RISK-adapt-test-patch-breakage
+  implications:
+    - "ProviderConfig.custom_creator must stop being an unbounded callable alias"
+    - "Wrapper patterns remain allowed only behind the explicit protocol"
+
+- id: DEC-adapt-family-helper-bundles
+  decision: "Define adapter helper bundles explicitly by adapter family instead of relying on implicit kwargs assembly."
+  status: proposed
+  owner: codex-draft
+  created_at: 2026-03-20
+  alternatives:
+    - "Keep helper synthesis provider-local and implicit"
+    - "Define one universal helper bundle for all adapters"
+  evidence:
+    - EV-adapter-alignment-http-adapters-require-fallback-helper
+    - EV-adapter-alignment-pubchem-custom-creator-delegates-to-composition-factory
+    - EV-adapter-alignment-openalex-custom-creator-synthesizes-default-helpers
+  tradeoffs:
+    wins:
+      - "Makes helper requirements explicit and reusable"
+      - "Reflects the real split between bibliography-style and specialized adapter families"
+      - "Improves type-level enforcement at the composition boundary"
+    loses:
+      - "Introduces new bundle abstractions"
+      - "Requires deciding which helpers belong to core versus family-specific profiles"
+  risks:
+    - RISK-adapt-helper-bundle-fragmentation
+    - RISK-adapt-premature-generalization
+  implications:
+    - "Composition should build named helper bundles instead of ad hoc kwargs bags"
+    - "Provider factories should consume typed bundle objects or named bundle fields"
+
+- id: DEC-adapt-local-fixes-are-stabilization
+  decision: "Treat local creator fixes as temporary stabilization unless they move a seam toward the canonical target contract."
+  status: proposed
+  owner: codex-draft
+  created_at: 2026-03-20
+  alternatives:
+    - "Accept local fixes as the long-term strategy"
+    - "Freeze local fixes until one large normalization refactor is ready"
+  evidence:
+    - EV-adapter-alignment-openalex-custom-creator-synthesizes-default-helpers
+    - EV-adapter-alignment-custom-creator-bypasses-global-helper-injection
+    - EV-adapter-alignment-composite-support-bundle-centralizes-runner-collaborators
+  tradeoffs:
+    wins:
+      - "Keeps regressions fixable without expanding the wrong seam"
+      - "Creates a practical transition rule for reviews"
+      - "Lets stabilization and normalization proceed in parallel"
+    loses:
+      - "Requires reviewer judgment during the transition period"
+      - "Temporary compatibility code may remain longer than planned"
+  risks:
+    - RISK-adapt-temporary-fix-permanence
+    - RISK-adapt-review-inconsistency
+  implications:
+    - "Every local fix should state which target seam it converges toward"
+    - "Reviews should reject fixes that push helper synthesis back onto callers"

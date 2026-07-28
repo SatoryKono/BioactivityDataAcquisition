@@ -8,15 +8,11 @@ surface. This module validates that the two remain in sync.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
-
 import yaml
 
+from bioetl.composition.factories.pipeline.config_types import PipelineFactoryConfig
 
-if TYPE_CHECKING:
-    from bioetl.composition.factories.pipeline.config_types import PipelineFactoryConfig
-
-__all__: list[str] = []
+__all__ = ["PipelineFactoryConfig"]
 
 
 def _iter_entity_files(configs_root: Path) -> list[Path]:

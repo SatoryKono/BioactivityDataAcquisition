@@ -12,9 +12,9 @@
   "schema_version": 1,
   "source": "grafana/dashboards/*.json",
   "target_counts": {
-    "http": 16,
+    "http": 18,
     "loki": 0,
-    "promql": 157,
+    "promql": 160,
     "tempo": 0,
     "unknown": 0
   },
@@ -2393,6 +2393,75 @@
       "unit": "none"
     },
     {
+      "dashboard_uid": "bioetl-incident-v1",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": true,
+      "formula": "topk(10, bioetl_provider_current_cause > 0) or topk(10, bioetl_runtime_current_blocker_reason > 0) or topk(10, bioetl_dq_current_reason > 0)",
+      "kind": "promql",
+      "panel_id": 2002,
+      "panel_title": "Ranked Suspects",
+      "query": "topk(10, bioetl_provider_current_cause > 0) or topk(10, bioetl_runtime_current_blocker_reason > 0) or topk(10, bioetl_dq_current_reason > 0)",
+      "query_tokens": [
+        "bioetl_dq_current_reason",
+        "bioetl_provider_current_cause",
+        "bioetl_runtime_current_blocker_reason"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": ""
+    },
+    {
+      "dashboard_uid": "bioetl-incident-v1",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": false,
+      "formula": "count by (alertname, alertstate, severity) (ALERTS{alertstate=~\"firing|pending\"} * on() group_left() (bioetl_l0_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or on() vector(1))) or count by (alertname, alertstate) (ALERTS{alertstate=~\"firing|pending\"})",
+      "kind": "promql",
+      "panel_id": 2003,
+      "panel_title": "Alert / Event Timeline (range)",
+      "query": "count by (alertname, alertstate, severity) (ALERTS{alertstate=~\"firing|pending\"} * on() group_left() (bioetl_l0_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or on() vector(1))) or count by (alertname, alertstate) (ALERTS{alertstate=~\"firing|pending\"})",
+      "query_tokens": [
+        "bioetl_l0_status"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": ""
+    },
+    {
+      "dashboard_uid": "bioetl-incident-v1",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": false,
+      "formula": "max(bioetl_l0_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
+      "kind": "promql",
+      "panel_id": 9401,
+      "panel_title": "Status",
+      "query": "max(bioetl_l0_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
+      "query_tokens": [
+        "bioetl_l0_status"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [
+        {
+          "color": "green",
+          "value": null
+        },
+        {
+          "color": "orange",
+          "value": 1
+        },
+        {
+          "color": "red",
+          "value": 2
+        }
+      ],
+      "unit": ""
+    },
+    {
       "dashboard_uid": "bioetl-overview-v2",
       "datasource_type": "prometheus",
       "documents_backend_down": false,
@@ -3657,6 +3726,48 @@
     },
     {
       "dashboard_uid": "bioetl-provider-health-v2",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "formula": "",
+      "kind": "http",
+      "panel_id": 9403,
+      "panel_title": "Processed Records",
+      "query": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+      "query_tokens": [
+        "/ops/observability/processed-records",
+        "pipeline",
+        "run_type",
+        "run_id"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": "none"
+    },
+    {
+      "dashboard_uid": "bioetl-run-explorer-v1",
+      "datasource_type": "yesoreyeram-infinity-datasource",
+      "documents_backend_down": true,
+      "documents_valid_empty": true,
+      "formula": "",
+      "kind": "http",
+      "panel_id": 9402,
+      "panel_title": "ID",
+      "query": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+      "query_tokens": [
+        "/ops/control-plane/identity-table",
+        "pipeline",
+        "run_type",
+        "run_id"
+      ],
+      "ref_id": "A",
+      "runbook_urls": [],
+      "thresholds": [],
+      "unit": "none"
+    },
+    {
+      "dashboard_uid": "bioetl-run-explorer-v1",
       "datasource_type": "yesoreyeram-infinity-datasource",
       "documents_backend_down": true,
       "documents_valid_empty": true,

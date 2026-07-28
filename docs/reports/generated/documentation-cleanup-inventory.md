@@ -7,9 +7,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3163 |
-| Tracked doc-like files | 1968 |
-| Ignored local docs/reports files | 1195 |
+| Doc-like files | 2174 |
+| Tracked doc-like files | 2174 |
+| Ignored local docs/reports files | 0 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
 | Generated routes | 66 |
@@ -18,8 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| ignored_local | 1195 |
-| tracked | 1968 |
+| tracked | 2174 |
 
 ## Lifecycle Counts
 
@@ -27,12 +26,11 @@
 | --- | --- |
 | active_backlog | 1 |
 | active_draft | 108 |
-| active_quality_baseline | 20 |
-| closeout_evidence | 35 |
+| active_quality_baseline | 24 |
+| closeout_evidence | 59 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 41 |
-| docs_reports_generated_or_route_owned | 23 |
-| docs_reports_retention_sensitive_evidence | 1153 |
+| docs_reports_generated_or_route_owned | 6 |
+| docs_reports_retention_sensitive_evidence | 176 |
 | generated_skill_license_mirror | 5 |
 | generated_skill_reference_mirror | 12 |
 | generated_test_run_evidence | 4 |
@@ -43,7 +41,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 36 |
 | supporting_context | 16 |
-| working_report | 59 |
+| working_report | 77 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -59,30 +57,30 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 1970 |
-| Archived | 82 |
+| Active | 993 |
+| Archived | 81 |
 | Canonical | 70 |
-| Generated | 740 |
-| Working | 301 |
+| Generated | 723 |
+| Working | 307 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 1970 |
-| archive | 82 |
+| active | 993 |
+| archive | 81 |
 | canonical | 70 |
-| generated | 740 |
-| working | 301 |
+| generated | 723 |
+| working | 307 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 130 |
-| archive-after-migration | 112 |
-| generate-automatically | 740 |
-| keep | 2177 |
+| archive-after-migration | 90 |
+| generate-automatically | 723 |
+| keep | 1227 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -110,46 +108,6 @@
 | `docs/plans/repository-file-structure-remediation-plan-2026-04-28.md` | Working | 1 | archive-after-migration |
 | `docs/plans/temporary-diagnostic-ttl-review-plan-2026-04-29.md` | Working | 1 | archive-after-migration |
 | `docs/plans/testing-support-migration-plan-2026-04-25.md` | Working | 1 | archive-after-migration |
-| `docs/reports/2026-04-23-documentation-audit-summary.md` | Working | 0 | archive-after-migration |
-| `docs/reports/adr-compliance-verification-2026-07-24.md` | Working | 0 | archive-after-migration |
-| `docs/reports/audits/compatibility-surface-issue-pack-20260413.md` | Working | 0 | archive-after-migration |
-| `docs/reports/audits/dashboard-audit-report-2026-05-08.md` | Working | 0 | archive-after-migration |
-| `docs/reports/audits/documentation-audit-github-issues.md` | Working | 0 | archive-after-migration |
-| `docs/reports/audits/documentation-remediation-plan.md` | Working | 0 | archive-after-migration |
-| `docs/reports/audits/grafana-dashboard-audit-github-issues-2026-05-19.md` | Working | 0 | archive-after-migration |
-| `docs/reports/audits/interoperability-docs-reconciliation-2026-04-28.md` | Working | 0 | archive-after-migration |
-| `docs/reports/audits/script-inventory-analysis.md` | Working | 0 | archive-after-migration |
-| `docs/reports/concurrency/async_concurrency_analysis.md` | Working | 0 | archive-after-migration |
-| `docs/reports/dashboard-ux-checks/2026-05-03.md` | Working | 0 | archive-after-migration |
-| `docs/reports/dashboard-ux-checks/2026-05-07.md` | Working | 0 | archive-after-migration |
-| `docs/reports/dashboard-ux-checks/2026-05-08.md` | Working | 0 | archive-after-migration |
-| `docs/reports/dashboard-ux-checks/2026-05-19.md` | Working | 0 | archive-after-migration |
-| `docs/reports/dashboard-ux-checks/2026-07-28.md` | Working | 0 | archive-after-migration |
-| `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
-| `docs/reports/docs-link-check-report.json` | Working | 0 | archive-after-migration |
-| `docs/reports/docs-parity-report.json` | Working | 0 | archive-after-migration |
-| `docs/reports/documentation-audit-report-2026-07-24.md` | Working | 0 | archive-after-migration |
-| `docs/reports/documentation/full-documentation-audit-2026-07-23.md` | Working | 0 | archive-after-migration |
-| `docs/reports/documentation/github-issue-drafts-2026-07-23.md` | Working | 0 | archive-after-migration |
-| `docs/reports/documentation/quick_wins_documentation_and_rollback.md` | Working | 0 | archive-after-migration |
-| `docs/reports/dq/gold_foreign_key_dq_fail_closed_enforcement_analysis.md` | Working | 0 | archive-after-migration |
-| `docs/reports/governance/contract_governance_corrections_analysis.md` | Working | 0 | archive-after-migration |
-| `docs/reports/governance_check_report.json` | Working | 0 | archive-after-migration |
-| `docs/reports/grafana_silver_filter_rejections_prompt.md` | Working | 0 | archive-after-migration |
-| `docs/reports/great-expectations-spike-2026-04-01.md` | Working | 1 | archive-after-migration |
-| `docs/reports/knowledge-graphs/bioetl-architecture-graph.json` | Working | 0 | archive-after-migration |
-| `docs/reports/knowledge-graphs/bioetl-runtime-detail-graph.json` | Working | 0 | archive-after-migration |
-| `docs/reports/lifecycle/resume_state_validation_analysis.md` | Working | 0 | archive-after-migration |
-| `docs/reports/lifecycle/workflow_state_lock_acquisition_ordering_analysis.md` | Working | 0 | archive-after-migration |
-| `docs/reports/observability/tracing_span_coverage_analysis.md` | Working | 0 | archive-after-migration |
-| `docs/reports/resource-management/file_io_resource_management_analysis.md` | Working | 0 | archive-after-migration |
-| `docs/reports/scripts-inventory-2026-03-01.md` | Working | 0 | archive-after-migration |
-| `docs/reports/security/dq_report_xss_prevention.md` | Working | 0 | archive-after-migration |
-| `docs/reports/security/security_test_coverage_analysis.md` | Working | 0 | archive-after-migration |
-| `docs/reports/security/structured_exception_recursive_redaction_analysis.md` | Working | 0 | archive-after-migration |
-| `docs/reports/test-health/skip_marker_analysis.md` | Working | 0 | archive-after-migration |
-| `docs/reports/test-health/vcr_lifecycle_analysis.md` | Working | 0 | archive-after-migration |
-| `docs/reports/testing/phase2_integration_testing_plan.md` | Working | 0 | archive-after-migration |
 | `reports/observability/audit-20260727-live-operator-truth/CLOSEOUT.md` | Working | 0 | archive-after-migration |
 | `reports/observability/audit-20260727-live-operator-truth/grafana-live-snapshot.json` | Working | 0 | archive-after-migration |
 | `reports/observability/audit-20260727-live-operator-truth/live-validation-matrix.json` | Working | 0 | archive-after-migration |
@@ -163,12 +121,52 @@
 | `reports/quality/architecture-quality-scorecard.json` | Working | 0 | archive-after-migration |
 | `reports/quality/architecture-refactoring-2026-07-28-issue-publish.json` | Working | 0 | archive-after-migration |
 | `reports/quality/architecture-residual-2026-07-27-issue-publish.json` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture_debt_execution_plan_2026-06-26-15-51.json` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture_debt_execution_plan_2026-07-12-12-34.json` | Working | 0 | archive-after-migration |
+| `reports/quality/branch-coverage-gap-report.json` | Working | 0 | archive-after-migration |
+| `reports/quality/branch-coverage-gap-report.md` | Working | 0 | archive-after-migration |
+| `reports/quality/branch-coverage-gate-evidence.json` | Working | 0 | archive-after-migration |
 | `reports/quality/compatibility-importer-census.json` | Working | 0 | archive-after-migration |
 | `reports/quality/compatibility-importer-census.md` | Working | 0 | archive-after-migration |
 | `reports/quality/config-compatibility-legacy-taxonomy-review.json` | Working | 0 | archive-after-migration |
 | `reports/quality/config-surface-backlog.json` | Working | 0 | archive-after-migration |
 | `reports/quality/contract-coverage-matrix.json` | Working | 0 | archive-after-migration |
 | `reports/quality/contract-coverage-matrix.md` | Working | 0 | archive-after-migration |
+| `reports/quality/control-plane-duplication.json` | Working | 0 | archive-after-migration |
+| `reports/quality/control-plane-duplication.md` | Working | 0 | archive-after-migration |
+| `reports/quality/coverage-tail-branch-gate-plan.md` | Working | 0 | archive-after-migration |
+| `reports/quality/domain-aggregate-invariant-registry.json` | Working | 0 | archive-after-migration |
+| `reports/quality/domain-composite-config-importer-map.md` | Working | 0 | archive-after-migration |
+| `reports/quality/hotspot-coverage-tail-owner-map.json` | Working | 0 | archive-after-migration |
+| `reports/quality/issue-6480-application-core-partial-tranche.json` | Working | 0 | archive-after-migration |
+| `reports/quality/layer-contract-coverage-matrix.json` | Working | 0 | archive-after-migration |
+| `reports/quality/layer-contract-coverage-matrix.md` | Working | 0 | archive-after-migration |
+| `reports/quality/low-coverage-targeted-tests-6045.json` | Working | 0 | archive-after-migration |
+| `reports/quality/partial-coverage-top50-arch-res-03.json` | Working | 0 | archive-after-migration |
+| `reports/quality/partial-coverage-top50-arch-res-03.md` | Working | 0 | archive-after-migration |
+| `reports/quality/port-adapter-factory-coverage.json` | Working | 0 | archive-after-migration |
+| `reports/quality/port-adapter-factory-coverage.md` | Working | 0 | archive-after-migration |
+| `reports/quality/reports-workspace-review.json` | Working | 0 | archive-after-migration |
+| `reports/quality/root-hygiene-cleanup-classification.json` | Working | 0 | archive-after-migration |
+| `reports/quality/root-hygiene-review-evidence.json` | Working | 0 | archive-after-migration |
+| `reports/quality/runtime-builders-duplication.json` | Working | 0 | archive-after-migration |
+| `reports/quality/runtime-builders-duplication.md` | Working | 0 | archive-after-migration |
+| `reports/quality/scripts_deprecation_backlog.md` | Working | 0 | archive-after-migration |
+| `reports/quality/semantic-ddd-use-case-audit-2026-06-17.md` | Working | 0 | archive-after-migration |
+| `reports/quality/silver-gold-filter-parity-report.json` | Working | 0 | archive-after-migration |
+| `reports/quality/tasks_architecture_metric_exemptions_2026-06-26-15-51.json` | Working | 0 | archive-after-migration |
+| `reports/quality/tasks_architecture_metric_exemptions_2026-07-12-12-33.json` | Working | 0 | archive-after-migration |
+| `reports/quality/test-bootstrap-fixture-scope-profile.json` | Working | 0 | archive-after-migration |
+| `reports/quality/test-support-helper-ownership-map.json` | Working | 0 | archive-after-migration |
+| `reports/quality/total-tech-debt-audit-main-2026-06-16.md` | Working | 0 | archive-after-migration |
+| `reports/quality/total-tech-debt-audit-main-current.md` | Working | 0 | archive-after-migration |
+| `reports/review/S1-domain.md` | Working | 0 | archive-after-migration |
+| `reports/review/S1.1-contracts-ports.md` | Working | 0 | archive-after-migration |
+| `reports/review/S1.2-logic-models.md` | Working | 0 | archive-after-migration |
+| `reports/review/S2-application.md` | Working | 0 | archive-after-migration |
+| `reports/review/S2.1-core-composite.md` | Working | 0 | archive-after-migration |
+| `reports/review/S2.2-services-pipelines.md` | Working | 0 | archive-after-migration |
+| `reports/semantic_pipeline_audit/base_config_semantic_coverage_2026-07-01.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -304,46 +302,46 @@
 
 | Path | Tracking | Lifecycle | Action |
 | --- | --- | --- | --- |
-| `docs/reports/2026-04-23-documentation-audit-summary.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/README.md` | tracked | docs_reports_curated_entrypoint | keep |
-| `docs/reports/adr-compliance-verification-2026-07-24.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/audits/compatibility-surface-issue-pack-20260413.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/audits/dashboard-audit-report-2026-05-08.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/audits/documentation-audit-github-issues.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/audits/documentation-remediation-plan.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/audits/grafana-dashboard-audit-github-issues-2026-05-19.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/audits/interoperability-docs-reconciliation-2026-04-28.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/audits/script-inventory-analysis.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/concurrency/async_concurrency_analysis.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/dashboard-ux-checks/2026-05-03.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/dashboard-ux-checks/2026-05-07.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/dashboard-ux-checks/2026-05-08.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/dashboard-ux-checks/2026-05-19.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/dashboard-ux-checks/2026-07-28.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/dashboard-ux-checks/README.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/docs-link-check-report.json` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/docs-parity-report.json` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/documentation-audit-report-2026-07-13.md` | ignored_local | docs_reports_curated_or_historical_report | keep |
-| `docs/reports/documentation-audit-report-2026-07-24.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/documentation/full-documentation-audit-2026-07-23.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/documentation/github-issue-drafts-2026-07-23.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/documentation/quick_wins_documentation_and_rollback.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/dq/gold_foreign_key_dq_fail_closed_enforcement_analysis.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/evidence/INDEX.md` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/adapter-interface-alignment/01-pillars/pillars.md` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-biblio-data-source-creators-centralize-helper-wiring.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-composite-bootstrap-uses-plan-based-public-facade.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-composite-support-bundle-centralizes-runner-collaborators.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-custom-creator-bypasses-global-helper-injection.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-custom-creator-dynamic-contract.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-http-adapters-require-fallback-helper.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-openalex-custom-creator-synthesizes-default-helpers.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-pubchem-custom-creator-delegates-to-composition-factory.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-tests-preserve-minimal-provider-bound-surface.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-uniprot-idmapping-creator-encodes-hybrid-input-contract.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/adapter-interface-alignment/03-synthesis/SYN-adapter-interface-alignment.md` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/adapter-interface-alignment/04-decisions/DEC-ADAPT-proposed-decisions-2026-03-20.md` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/adapter-interface-alignment/04-decisions/DECISIONS.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/INDEX.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/adapter-interface-alignment/01-pillars/pillars.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-biblio-data-source-creators-centralize-helper-wiring.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-composite-bootstrap-uses-plan-based-public-facade.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-composite-support-bundle-centralizes-runner-collaborators.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-custom-creator-bypasses-global-helper-injection.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-custom-creator-dynamic-contract.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-http-adapters-require-fallback-helper.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-openalex-custom-creator-synthesizes-default-helpers.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-pubchem-custom-creator-delegates-to-composition-factory.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-tests-preserve-minimal-provider-bound-surface.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-uniprot-idmapping-creator-encodes-hybrid-input-contract.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/adapter-interface-alignment/03-synthesis/SYN-adapter-interface-alignment.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/adapter-interface-alignment/04-decisions/DEC-ADAPT-proposed-decisions-2026-03-20.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/adapter-interface-alignment/04-decisions/DECISIONS.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/adapter-interface-alignment/04-decisions/MATRIX-adapter-seams-current-to-target.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/adapter-interface-alignment/05-risks/RISKS.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/adapter-interface-alignment/summary.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/architecture-doc-drift/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/architecture-foundations/01-pillars/PILLARS.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/architecture-foundations/02-evidence/architecture-patterns/EV-patterns-dependency-injection-lives-in-composition.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/architecture-foundations/02-evidence/architecture-patterns/EV-patterns-domain-driven-design-primitives.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/architecture-foundations/02-evidence/architecture-patterns/EV-patterns-hexagonal-ports-and-adapters-is-explicit.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/architecture-foundations/02-evidence/architecture-patterns/EV-patterns-medallion-bronze-silver-gold-flow.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/architecture-foundations/02-evidence/architecture-patterns/EV-patterns-registry-and-factory-assembly-seams.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/architecture-foundations/02-evidence/enforcement-guardrails/EV-enforcement-bootstrap-and-composition-boundaries-pass.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/architecture-foundations/02-evidence/enforcement-guardrails/EV-enforcement-dependency-map-shows-zero-layer-violations.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/architecture-foundations/02-evidence/enforcement-guardrails/EV-enforcement-import-matrix-is-docs-as-code.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/architecture-foundations/02-evidence/enforcement-guardrails/EV-enforcement-interface-and-adapter-di-guards-pass.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/architecture-foundations/02-evidence/enforcement-guardrails/EV-enforcement-layer-dependency-suite-passes-baseline.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/architecture-foundations/02-evidence/enforcement-guardrails/RAW-enforcement-guardrails-2026-03-20.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/architecture-foundations/02-evidence/layers-and-boundaries/EV-layers-application-owns-orchestration-and-services.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/architecture-foundations/02-evidence/layers-and-boundaries/EV-layers-composition-is-separate-di-root.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/architecture-foundations/02-evidence/layers-and-boundaries/EV-layers-domain-pure-business-logic-no-io.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/architecture-foundations/02-evidence/layers-and-boundaries/EV-layers-infrastructure-hosts-adapters-storage-observability.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/architecture-foundations/02-evidence/layers-and-boundaries/EV-layers-interfaces-are-driving-adapters.yaml` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/architecture-foundations/03-synthesis/CROSS-SYNTHESIS.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/architecture-foundations/03-synthesis/SYN-architecture-patterns.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/architecture-foundations/03-synthesis/SYN-enforcement-guardrails.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 
 ## Generated Route Registry
 

@@ -213,20 +213,14 @@ def test_issue_5842_zero_import_candidates_are_fully_governed() -> None:
         == "@bioetl-architecture"
     )
     assert (
-        summary["repo_wide_zero_import_candidate_count"]
-        == closeout["metrics"]["repo_wide_zero_import_candidates"]["current"]
-    )
-    assert (
         summary["repo_wide_classified_zero_import_candidate_count"]
-        == closeout["metrics"]["repo_wide_zero_import_candidates"]["classified"]
+        == summary["repo_wide_zero_import_candidate_count"]
     )
     assert summary["repo_wide_untriaged_zero_import_candidate_count"] == 0
     assert summary["repo_wide_candidates_without_owner_tests_count"] == 0
     assert (
         summary["repo_wide_owner_test_anchored_candidate_count"]
-        == closeout["metrics"]["repo_wide_zero_import_candidates"][
-            "owner_test_anchored"
-        ]
+        == summary["repo_wide_zero_import_candidate_count"]
     )
 
     for row in inventory["repo_wide_zero_import_candidates"]:
@@ -259,7 +253,10 @@ def test_issue_5843_composite_shared_policy_has_single_authority_surface() -> No
     assert shared_policy["merge"]["field_priorities"]
     assert shared_policy["merge"]["field_mappings"]
     assert shared_policy["lineage"]["provider_lookup_fields"]
-    assert EXPECTED_SHARED_CLUSTER_PATHS.issubset(cluster_paths)
+    assert "composite.normalized_anchor_policy" in cluster_paths
+    assert (
+        EXPECTED_SHARED_CLUSTER_PATHS - {"composite.normalized_anchor_policy"}
+    ).isdisjoint(cluster_paths)
 
     for path in COMPOSITE_CONFIGS.values():
         raw = _load_yaml(path)

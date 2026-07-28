@@ -1,0 +1,108 @@
+-   id: DEC-governance-c901-zero-new-debt-baseline
+    decision: "Keep C901 governance as a zero-new-debt blocking baseline for roadmap work."
+    status: accepted
+    owner: user
+    created_at: 2026-03-20
+    alternatives:
+        - "Reintroduce temporary grace windows for selected folders"
+        - "Convert C901 to non-blocking reporting only"
+    evidence:
+        - EV-governance-signals-c901-enforceable-baseline-is-green
+        - EV-governance-signals-file-size-ratchet-tightened-from-six-to-zero
+    tradeoffs:
+        wins:
+            - "Preserves a clean complexity baseline so fresh regressions are easy to identify."
+            - "Avoids re-normalizing known-complexity debt after the baseline was already burned down."
+            - "Keeps near-term refactor diagnostics simpler across application, composition, infrastructure, and interfaces."
+        loses:
+            - "Reduces flexibility for opportunistic large rewrites that temporarily increase cyclomatic complexity."
+            - "May force more staging and helper extraction during fast-moving refactor waves."
+    risks:
+        - RISK-governance-c901-refactor-friction
+    implications:
+        - "Refactor proposals should plan characterization tests and decomposition steps before touching high-branching flows."
+        - "New complexity exceptions should be treated as exceptional and explicitly justified."
+
+-   id: DEC-governance-duplication-expand-report-only-baseline
+    decision: "Expand duplication governance to composition and application in report-only baseline mode before considering blocking ratchets."
+    status: accepted
+    owner: user
+    created_at: 2026-03-20
+    alternatives:
+        - "Keep duplication governance limited to infrastructure/adapters"
+        - "Expand duplication governance immediately as a blocking gate"
+    evidence:
+        - EV-governance-signals-composition-duplication-snapshot-has-28-r0801-occurrences
+        - EV-governance-signals-application-duplication-snapshot-has-88-r0801-occurrences
+        - EV-governance-signals-duplication-governance-excludes-composition-and-application
+    tradeoffs:
+        wins:
+            - "Creates a historical duplication baseline for the layers that currently have visible but unmanaged pressure."
+            - "Improves visibility without immediately turning noisy R0801 output into merge-blocking debt."
+            - "Lets the team separate intentional facades and compatibility seams from actionable duplication before ratcheting."
+        loses:
+            - "Adds another report stream for maintainers to interpret."
+            - "Does not immediately reduce duplication by itself."
+            - "May expose a large amount of noisy output before normalization rules are in place."
+    risks:
+        - RISK-governance-duplication-noise-overload
+        - RISK-governance-duplication-check-runtime
+    implications:
+        - "A scoped duplication inventory for composition/application should be added to normal review cadence."
+        - "Before any blocking gate, tolerated duplicate classes need explicit normalization rules."
+
+-   id: DEC-governance-file-size-report-dual-track
+    decision: "Keep the zero-exemption file-size ratchet, but add a separate first-class raw hotspot tail report so green dashboards do not imply the large-file tail is gone."
+    status: accepted
+    owner: user
+    created_at: 2026-03-20
+    alternatives:
+        - "Keep current exemption-only semantics with no additional reporting"
+        - "Replace exemption semantics with an immediate repo-wide blocking hotspot budget"
+    evidence:
+        - EV-governance-signals-file-size-ratchet-tracks-exemptions-not-raw-hotspots
+        - EV-governance-signals-file-size-ratchet-tightened-from-six-to-zero
+        - EV-governance-signals-hotspot-budgets-prioritize-application-core
+    tradeoffs:
+        wins:
+            - "Preserves the stronger zero-exemption governance stance already achieved."
+            - "Makes the difference between ratcheted debt and raw structural inventory explicit."
+            - "Improves roadmap planning by surfacing the broad hotspot tail without immediately converting it into blocking debt."
+        loses:
+            - "Introduces another metric that readers must interpret correctly."
+            - "Can make governance reporting feel more complex and less binary."
+            - "Does not itself shrink the hotspot tail."
+    risks:
+        - RISK-governance-metric-semantics-confusion
+    implications:
+        - "Governance dashboards and PR discussions should distinguish 'exemption debt' from 'hotspot inventory'."
+        - "Future hotspot programs can be selected from the raw tail without weakening the current ratchet."
+
+-   id: DEC-governance-expand-named-hotspot-programs-after-calibration
+    decision: "Retain the current application-core hotspot budget, but add one calibration wave to decide whether additional named hotspot programs are needed for application and composition seams."
+    status: accepted
+    owner: user
+    created_at: 2026-03-20
+    alternatives:
+        - "Keep application/core as the only named hotspot program"
+        - "Introduce several new named hotspot budgets immediately"
+        - "Attempt a repo-wide hotspot budgeting model"
+    evidence:
+        - EV-governance-signals-hotspot-budgets-prioritize-application-core
+        - EV-governance-signals-application-duplication-snapshot-has-88-r0801-occurrences
+        - EV-governance-signals-composition-duplication-snapshot-has-28-r0801-occurrences
+        - EV-governance-signals-file-size-ratchet-tracks-exemptions-not-raw-hotspots
+    tradeoffs:
+        wins:
+            - "Protects the existing targeted hotspot program while acknowledging that pressure extends beyond application/core."
+            - "Avoids premature budget sprawl before the team chooses the most meaningful pressure seams."
+            - "Creates a path from raw hotspot inventory to focused, named burn-down programs."
+        loses:
+            - "Defers immediate enforcement on newly observed pressure centers."
+            - "Requires an additional calibration step before new hotspot budgets can be made enforceable."
+            - "May leave some large or duplication-heavy seams unmanaged in the short term."
+    risks:
+        - RISK-governance-misprioritized-hotspots
+    implications:
+        - "The next calibration pass should compare application/core with candidate seams in application and composition."
+        - "Named hotspot budgets should be added only where they represent clear maintenance pressure rather than generic file-size noise."

@@ -84,7 +84,7 @@ def test_issue_6060_composition_runtime_builder_fan_in_has_headroom() -> None:
 
     live_fan_in, live_module = _live_family_fan_in("composition_runtime_builders")
 
-    assert live_fan_in == 4
+    assert live_fan_in == 3
     assert baseline["max_internal_fan_in"] == live_fan_in
     assert scorecard_metrics["max_internal_fan_in"] == live_fan_in
     assert baseline["max_internal_fan_in_module"] == live_module

@@ -33,6 +33,30 @@ ZERO_IMPORT_OWNER_TEST_EVIDENCE: dict[str, dict[str, object]] = {
         "evidence_lane": "module_entrypoint_owner_suite",
         "owner_tests": ("tests/unit/interfaces/cli/test_cli_main_module.py",),
     },
+    "src/bioetl/application/services/control_plane/manifest/diagnostics/base.py": {
+        "evidence_lane": "dynamic_runtime_entrypoint",
+        "owner_tests": (
+            "tests/unit/application/services/test_run_manifest_diagnostics.py",
+        ),
+    },
+    "src/bioetl/application/services/control_plane/manifest/diagnostics/finalization.py": {
+        "evidence_lane": "dynamic_runtime_entrypoint",
+        "owner_tests": (
+            "tests/unit/application/services/test_run_manifest_diagnostics.py",
+        ),
+    },
+    "src/bioetl/application/services/control_plane/manifest/diagnostics/replay_refresh_support.py": {
+        "evidence_lane": "dynamic_runtime_entrypoint",
+        "owner_tests": (
+            "tests/unit/application/services/test_run_manifest_diagnostics.py",
+        ),
+    },
+    "src/bioetl/interfaces/cli/commands/maintenance.py": {
+        "evidence_lane": "compatibility_facade_contract",
+        "owner_tests": (
+            "tests/unit/interfaces/cli/commands/test_runtime_wrapper_contracts.py",
+        ),
+    },
     "src/bioetl/domain/ports/data_normalization.py": {
         "evidence_lane": "canonical_owner_contract",
         "owner_tests": DOMAIN_PORT_OWNER_TESTS,

@@ -22,12 +22,13 @@ def test_record_silver_removal_accounting_noops_without_context() -> None:
     with patch(
         "bioetl.application.core.batch_metrics_accounting.get_stage_accounting",
         return_value=None,
-    ):
+    ) as get_stage_accounting_mock:
         _record_silver_removal_accounting(
             outcome="filtered_out",
             reason_code="FILTERED_OUT_SILVER",
             count=1,
         )
+    get_stage_accounting_mock.assert_called_once_with()
 
 
 def test_record_silver_removal_accounting_records_positive_count() -> None:

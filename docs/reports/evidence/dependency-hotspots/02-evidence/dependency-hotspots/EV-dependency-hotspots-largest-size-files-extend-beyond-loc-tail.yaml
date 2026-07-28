@@ -1,0 +1,19 @@
+id: EV-dependency-hotspots-largest-size-files-extend-beyond-loc-tail
+pillar: dependency-hotspots
+source:
+  type: dataset
+  ref: "docs/reports/evidence/dependency-hotspots/02-evidence/dependency-hotspots/RAW-dependency-hotspot-metrics-2026-03-20.md"
+  retrieved_at: 2026-03-21
+claim: "The largest files are not identical to the >350 LOC tail; for example, `silver_publications.py` is the largest file at 17131 bytes but remains below the LOC cutoff at 341 lines."
+quote: "| `src/bioetl/infrastructure/schemas/silver_publications.py` | 17131 | 341 |"
+confidence: 0.89
+assumptions:
+  - "A file can be a legitimate maintainability hotspot by byte size and content density even if it stays below a line-count threshold."
+  - "The current ordering of top-size files reflects meaningful module density rather than temporary docstring or comment inflation."
+notes: "This is why the 10 KB inventory is useful: it catches dense schema/config modules and packed mixins that the >350 LOC screen does not."
+tags:
+  - hotspot
+  - file-size
+  - loc
+  - schemas
+  - dense-module

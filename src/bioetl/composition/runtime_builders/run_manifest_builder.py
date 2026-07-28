@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import bioetl.composition.runtime_builders.run_manifest_support as _manifest_support
 from bioetl.application.services.control_plane.ledger.service import (
@@ -194,23 +194,26 @@ def _build_manifest_create_request(
         reproducibility_context=reproducibility_context,
         contract_identity=contract_identity,
     )
-    return build_manifest_create_request(
-        RunManifestCreateRequestInputs(
-            ctx=ctx,
-            inputs=inputs,
-            provider=provider,
-            entity=entity,
-            reproducibility_context=reproducibility_context,
-            run_type_value=run_type_value,
-            execution_context_value=execution_context_value,
-            config_hash=provenance.resolved_config_hash,
-            resolved_config_hash=provenance.resolved_config_hash,
-            effective_config_hash=provenance.effective_config_hash,
-            source_fingerprint=provenance.source_fingerprint,
-            contract_identity=contract_identity,
-            dq_contract_compatibility_hash=provenance.dq_contract_compatibility_hash,
-            effective_config_artifact_id=provenance.effective_config_artifact_id,
-        )
+    return cast(
+        "RunManifestCreateSpec",
+        build_manifest_create_request(
+            RunManifestCreateRequestInputs(
+                ctx=ctx,
+                inputs=inputs,
+                provider=provider,
+                entity=entity,
+                reproducibility_context=reproducibility_context,
+                run_type_value=run_type_value,
+                execution_context_value=execution_context_value,
+                config_hash=provenance.resolved_config_hash,
+                resolved_config_hash=provenance.resolved_config_hash,
+                effective_config_hash=provenance.effective_config_hash,
+                source_fingerprint=provenance.source_fingerprint,
+                contract_identity=contract_identity,
+                dq_contract_compatibility_hash=provenance.dq_contract_compatibility_hash,
+                effective_config_artifact_id=provenance.effective_config_artifact_id,
+            )
+        ),
     )
 
 

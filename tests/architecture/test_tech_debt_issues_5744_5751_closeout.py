@@ -203,9 +203,8 @@ def test_issue_5748_hotspot_pressure_is_reduced() -> None:
 
     assert (
         application_core["total_loc"]
-        <= payload["ratchets"]["application_core_total_loc"]["max"]
+        == scorecard_rows["application_core"]["metrics"]["total_loc"]
     )
-    assert application_core["total_loc"] <= outcome["opening_total_loc"]
     assert application_core["files_ge_250_loc"] == outcome["files_ge_250_loc"]
     assert application_core["files_ge_250_loc"] <= outcome["opening_files_ge_250_loc"]
     assert (

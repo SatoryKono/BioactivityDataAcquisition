@@ -1,0 +1,19 @@
+id: EV-adapter-alignment-http-adapters-require-fallback-helper
+pillar: adapter-interface-alignment
+source:
+  type: internal-doc
+  ref: "src/bioetl/infrastructure/adapters/openalex/client.py:113-124; src/bioetl/infrastructure/adapters/pubmed/pubmed_client.py:102-113; src/bioetl/infrastructure/adapters/uniprot/client.py:253-270; src/bioetl/infrastructure/adapters/semanticscholar/adapter.py:126-153"
+  retrieved_at: 2026-03-20
+claim: "Fallback orchestration is not optional implementation detail for the HTTP bibliography adapters: OpenAlex, PubMed, UniProt, and Semantic Scholar all model `fallback_fetch_service` as a required collaborator."
+quote: "fallback_fetch_service: FallbackFetchOrchestratorService"
+confidence: 0.95
+assumptions:
+  - "These constructor and factory checks reflect production-required behavior rather than test-only guards."
+  - "No alternate adapter initialization path fills the dependency after construction."
+notes: "Any interface alignment work that ignores fallback helper injection will remain incomplete, because the implementation contract already treats this collaborator as mandatory."
+tags:
+  - adapter
+  - fallback
+  - helper-di
+  - infrastructure
+  - contract

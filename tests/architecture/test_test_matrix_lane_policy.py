@@ -204,6 +204,7 @@ class TestCanonicalTestLanes:
         assert authority.get("hard_merge_truth") == [
             "live_ci_status",
             "coverage-verify",
+            "branch_coverage",
         ]
         assert "reports/quality/test-runs/rollup.md" in authority.get(
             "historical_evidence",
@@ -264,7 +265,7 @@ class TestCanonicalTestLanes:
         assert lanes["smoke"]["marker_expression"] == "not benchmark and not memory"
         assert (
             lanes["unit-fast"]["marker_expression"]
-            == "not repo_backed and not slow and not benchmark and not memory"
+            == "not repo_backed and not subprocess_backed and not slow and not benchmark and not memory"
         )
         assert (
             lanes["repo-backed-unit"]["marker_expression"]

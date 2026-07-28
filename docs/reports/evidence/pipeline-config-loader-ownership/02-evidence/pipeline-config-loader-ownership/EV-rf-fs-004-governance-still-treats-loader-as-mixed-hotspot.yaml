@@ -1,0 +1,18 @@
+id: EV-rf-fs-004-governance-still-treats-loader-as-mixed-hotspot
+pillar: pipeline-config-loader-ownership
+source:
+  type: internal-doc
+  ref: "docs/plans/consolidated-open-tasks-plan-2026-03-21.md:31-96"
+  retrieved_at: 2026-03-21
+claim: "The active consolidated plan still classifies `pipeline_config_loader.py` as part of the remaining config-topology closeout, not as a settled canonical owner to leave untouched."
+quote: "The active queue keeps `pipeline_config_loader.py` inside `P1. Config topology closeout` together with `dq_config_loader.py` and `registry_manifest.py`."
+confidence: 0.89
+assumptions:
+  - "The current execution plan remains the authoritative governance artifact for the active wave."
+notes: "Governance evidence aligns with the code evidence: retain the class for now, but do not let it re-expand into the canonical config topology owner."
+tags:
+  - rf-fs-004
+  - governance
+  - execution-plan
+  - hotspot
+  - ownership

@@ -52,7 +52,7 @@ class TestShutdownSignal:
 
         assert shutdown.is_requested is True
 
-    async def test_shutdown_signal_request_is_idempotent(self):
+    async def test_e2e_shutdown_signal_request_is_idempotent(self):
         """E2E: Multiple request() calls have no additional effect."""
         await asyncio.sleep(0)
         shutdown = ShutdownSignal()

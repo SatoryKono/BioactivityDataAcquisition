@@ -53,9 +53,6 @@ COMMAND_SPECS = {
     "check-bioetl-prometheus-scrape": (
         "observability/check_bioetl_prometheus_scrape.py"
     ),
-    "ensure-quarantine-explorer": (
-        "observability/grafana/ensure_quarantine_explorer.py"
-    ),
     "run-grafana-audit-cycle": (
         "observability/grafana/run_grafana_dashboard_audit_cycle.py"
     ),

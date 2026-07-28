@@ -6,7 +6,7 @@ Static fan-in is kept off leaf modules via importlib (ARCH-REF-04 / #6818).
 from __future__ import annotations
 
 from importlib import import_module
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
@@ -27,7 +27,7 @@ def _build_base_summary(
     replay_context = base._resolve_base_summary_replay_context(manifest)
     summary = base._build_base_summary_payload(manifest, replay_context)
     finalization.attach_base_summary_runtime_views(manifest, summary)
-    return summary
+    return cast(dict[str, object], summary)
 
 
 def build_diagnostics_summary(
@@ -52,12 +52,15 @@ def build_diagnostics_summary(
             base_summary
         )
         finalization.attach_summary_reproducibility_views(base_summary)
-        return base_summary
-    return finalization.build_final_diagnostics_summary(
-        manifest=manifest,
-        base_summary=base_summary,
-        ledger_entries=ledger_entries,
-        refresh_replay_summary_fn=(
-            replay_refresh._refresh_replay_summary_from_materialized_snapshots
+        return cast(dict[str, object], base_summary)
+    return cast(
+        dict[str, object],
+        finalization.build_final_diagnostics_summary(
+            manifest=manifest,
+            base_summary=base_summary,
+            ledger_entries=ledger_entries,
+            refresh_replay_summary_fn=(
+                replay_refresh._refresh_replay_summary_from_materialized_snapshots
+            ),
         ),
     )

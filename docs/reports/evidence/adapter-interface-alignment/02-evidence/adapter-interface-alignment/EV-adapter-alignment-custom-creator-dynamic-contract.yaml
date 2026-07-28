@@ -1,0 +1,18 @@
+id: EV-adapter-alignment-custom-creator-dynamic-contract
+pillar: adapter-interface-alignment
+source:
+  type: internal-doc
+  ref: "src/bioetl/composition/providers/_models.py:24-27; src/bioetl/composition/providers/_models.py:27-40; src/bioetl/composition/providers/_models.py:52-62"
+  retrieved_at: 2026-03-20
+claim: "The provider registry exposes a dynamically typed `custom_creator` seam while `data_source_creator` is explicitly protocol-typed, so adapter-construction alignment is less constrained than data-source alignment."
+quote: "AdapterCreator = Callable[..., \"DataSourcePort\"]"
+confidence: 0.86
+assumptions:
+  - "No additional static contract narrows `custom_creator` kwargs beyond the Callable alias."
+  - "Provider authors read `ProviderConfig` as the canonical contract surface for registry integration."
+notes: "This asymmetry makes adapter helper requirements easy to hide inside runtime-only kwargs, which increases the chance of drift between interface intent and implementation expectations."
+tags:
+  - adapter
+  - interface-alignment
+  - provider-registry
+  - custom-creator

@@ -34,9 +34,6 @@ APPLICATION_CORE_SHARED_FAILURE_POLICY_USERS: dict[str, set[str]] = {
     "src/bioetl/application/core/batch_execution/run_service.py": {
         "bioetl.application.core.batch_runtime_failure_policy",
     },
-    "src/bioetl/application/core/batch_processing_support.py": {
-        "bioetl.application.core.batch_runtime_failure_policy",
-    },
 }
 
 BATCH_PROCESSING_SUPPORT_USERS: dict[str, set[str]] = {

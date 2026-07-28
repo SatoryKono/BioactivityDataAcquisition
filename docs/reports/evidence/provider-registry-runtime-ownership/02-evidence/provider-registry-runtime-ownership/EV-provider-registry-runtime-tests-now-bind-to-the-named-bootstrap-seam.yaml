@@ -1,0 +1,18 @@
+id: EV-provider-registry-runtime-tests-now-bind-to-the-named-bootstrap-seam
+pillar: provider-registry-runtime-ownership
+source:
+  type: test
+  ref: "tests/unit/composition/bootstrap/runtime/test_pipeline_bootstrap.py:19-20,46-47,68-69,93-94,115-116,130-132; tests/unit/composition/factories/pipeline/test_runner_factory.py:78-81,258-261; tests/unit/composition/runtime_builders/test_runner_builder.py:33-40,107-110,174-177,214-217; tests/unit/composition/bootstrap/test_bootstrap_entrypoints.py:183-186"
+  retrieved_at: 2026-03-20
+claim: "Runtime tests now observe and inject the named bootstrap seam directly, so the current runtime contract is testable without exposing raw ProviderRegistry.ensure_loaded() in production code."
+quote: "Tests patch \"ensure_providers_loaded\" or inject \"ensure_providers_loaded_fn\", and runner-builder defaults now assert the named loader helper directly."
+confidence: 0.94
+assumptions:
+  - "These tests represent the main regression net around runtime/bootstrap provider loading."
+notes: "This reduces the practical need for explicit ProviderRegistry instance threading in runtime code because the seam is already observable and controllable in tests."
+tags:
+  - provider-registry
+  - runtime
+  - tests
+  - regression-net
+  - rf-07d

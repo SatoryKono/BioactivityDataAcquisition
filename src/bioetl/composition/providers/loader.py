@@ -75,16 +75,12 @@ def ensure_providers_loaded() -> None:
 
 
 def get_loaded_status() -> bool:
-    """Return provider loading status.
-
-    Returns:
-        Loaded status.
-    """
+    """Return provider loading status."""
     return get_provider_registry_loaded_status(_get_loader_registry())
 
 
 def reset_loader() -> None:
-    """Reset loading status. Only for tests."""
+    """Reset loading status for tests."""
     reset_provider_registry_loader(_get_loader_registry())
 
 

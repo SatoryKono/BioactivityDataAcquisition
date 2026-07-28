@@ -222,10 +222,7 @@ class BatchMetricsRecorderService:
         details: JsonDict | None = None,
         count: int = 1,
     ) -> None:
-        """Record bounded Silver-filter reject breakdown labels.
-
-        `message` remains display-only and is intentionally ignored here.
-        """
+        """Record bounded labels; ignore the display-only ``message`` field."""
         if not self._metrics:
             return
         reason_code, rule_type, field = _silver_filter_rejection_labels(details)
@@ -243,7 +240,9 @@ class BatchMetricsRecorderService:
         )
 
 
-# Compatibility alias retained for legacy imports.
 BatchMetricsRecorder = BatchMetricsRecorderService
-
-__all__ = ["BatchMetricsRecorder", "BatchMetricsRecorderService"]
+__all__ = [
+    "BatchMetricsRecorder",
+    "BatchMetricsRecorderService",
+    "_record_silver_removal_accounting",
+]

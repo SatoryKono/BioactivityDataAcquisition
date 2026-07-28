@@ -1,0 +1,19 @@
+id: EV-governance-signals-duplication-governance-excludes-composition-and-application
+pillar: governance-signals
+source:
+  type: internal-doc
+  ref: "Makefile; docs/reports/evidence/governance-signals/02-evidence/governance-signals/RAW-governance-signals-2026-03-20.md"
+  retrieved_at: 2026-03-21
+claim: "Current default duplication governance does not enforce a trend for `src/bioetl/composition` or `src/bioetl/application`; the `check-duplication` target scans only `src/bioetl/infrastructure/adapters`, so composition/application duplication is currently visible only through ad hoc measurement."
+quote: "$(RUN) pylint --disable=all --enable=duplicate-code src/bioetl/infrastructure/adapters"
+confidence: 0.96
+assumptions:
+  - "The Makefile target reflects the intended default local governance workflow for duplication checks."
+  - "No separate CI-only duplication gate for composition/application exists outside the discovered repo automation."
+notes: "This is the key governance gap behind the duplication part of this evidence pack: we have a live snapshot for composition/application, but not a ratcheted historical signal."
+tags:
+  - governance
+  - duplication
+  - composition
+  - application
+  - gap

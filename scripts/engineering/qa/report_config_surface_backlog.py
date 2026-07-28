@@ -397,9 +397,7 @@ def _collapse_nested_duplication_clusters(
     collapsed: list[dict[str, Any]] = []
     for cluster in kept:
         block_path = str(cluster["block_path"])
-        decision = str(
-            (cluster.get("governance") or {}).get("decision") or ""
-        )
+        decision = str((cluster.get("governance") or {}).get("decision") or "")
         if (
             decision == "retain_shared_quality_shadow_analysis_policy"
             or block_path.endswith(".shadow_analysis")

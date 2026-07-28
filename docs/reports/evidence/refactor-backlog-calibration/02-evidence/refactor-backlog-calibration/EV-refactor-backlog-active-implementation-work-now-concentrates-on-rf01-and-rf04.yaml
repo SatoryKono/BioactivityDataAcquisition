@@ -1,0 +1,20 @@
+id: EV-refactor-backlog-active-implementation-work-now-concentrates-on-rf01-and-rf04
+pillar: refactor-backlog-calibration
+source:
+  type: internal-doc
+  ref: "docs/reports/evidence/refactor-backlog-calibration/02-evidence/refactor-backlog-calibration/EV-refactor-backlog-governance-baseline-now-fails-only-on-scripts-inventory-drift.yaml; docs/reports/evidence/refactor-backlog-calibration/02-evidence/refactor-backlog-calibration/EV-refactor-backlog-registration-biblio-is-now-a-contained-provider-internal-seam.yaml; docs/reports/evidence/refactor-backlog-calibration/02-evidence/refactor-backlog-calibration/EV-refactor-backlog-pipeline-builder-and-composite-support-remain-the-main-open-composition-seams.yaml; docs/reports/evidence/refactor-backlog-calibration/02-evidence/refactor-backlog-calibration/EV-refactor-backlog-domain-facade-policy-already-settles-runtime-port-placement-and-pipeline-context.yaml; docs/reports/evidence/refactor-backlog-calibration/02-evidence/refactor-backlog-calibration/EV-refactor-backlog-provider-registry-runtime-ownership-remains-a-deferred-watchpoint.yaml"
+  retrieved_at: 2026-03-21
+claim: "After calibrating the backlog against the current codebase, the active implementation queue narrows to finishing RF-01 via inventory refresh and running a focused RF-04 decomposition wave; RF-06 becomes a docs/governance watchpoint, and RF-07 remains deferred."
+quote: "The only remaining failing gate in RF-01 is scripts inventory drift ... the remaining RF-04 implementation pressure is concentrated in `pipeline_builder.py` and `composite_support_service_builders.py`."
+confidence: 0.89
+assumptions:
+  - "No hidden failing gate outside the checked governance commands materially changes the prioritization."
+  - "Backlog prioritization should track current code risk and guardrail coverage rather than historical plan wording."
+notes: "This is the calibration layer that updates the remaining-task list. It is a synthesis claim built on the five factual evidence objects above, not a replacement for them."
+tags:
+  - backlog
+  - prioritization
+  - rf-01
+  - rf-04
+  - rf-06
+  - rf-07

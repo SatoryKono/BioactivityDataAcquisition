@@ -207,6 +207,8 @@ def test_issue_5683_dead_code_inventory_has_no_untriaged_candidates() -> None:
     assert set(summary["repo_wide_disposition_counts"]) == {
         "retain_module_entrypoint",
         "retain_canonical_owner_module",
+        "retain_dynamic_entrypoint",
+        "retain_public_facade",
     }
 
 

@@ -1,0 +1,19 @@
+id: EV-layers-domain-pure-business-logic-no-io
+pillar: layers-and-boundaries
+source:
+  type: internal-doc
+  ref: "README.md:444-450; AGENTS.md:28-30; tests/architecture/test_layer_dependencies.py:63-113"
+  retrieved_at: 2026-03-20
+claim: "The `domain` layer is treated as the pure business-logic core: active project rules define it as no-I/O code, and architecture tests explicitly forbid infrastructure and application imports inside `src/bioetl/domain`."
+quote: "`domain/           # Pure business logic (DDD), NO I/O`"
+confidence: 0.97
+assumptions:
+  - "The active README and AGENTS instructions reflect the intended canonical architecture, not stale historical guidance."
+  - "The current layer dependency tests are representative enough to enforce the documented no-I/O and inward-dependency constraints."
+notes: "This evidence anchors the innermost layer semantics for the rest of the pack: other layers may change, but the domain is still defined as the business core without direct I/O."
+tags:
+  - layers
+  - domain
+  - purity
+  - no-io
+  - boundaries

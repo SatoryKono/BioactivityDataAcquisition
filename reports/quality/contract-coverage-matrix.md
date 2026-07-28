@@ -1,7 +1,7 @@
 # Contract Coverage Matrix
 
 - schema_version: `contract-coverage-matrix-v3`
-- snapshot_date: 2026-07-27
+- snapshot_date: 2026-07-28
 - row_count: 27
 - gold_enabled_count: 27
 - gold_contract_available_count: 27
@@ -26,7 +26,7 @@
 | `chembl_cell_line` | `gold` | `chembl.cell_line` | True | True | `covered` | `covered` | True | 16 | 7 | 0 | `cell_id, entity_id` | 5 | 2 | - | - |
 | `chembl_compound_record` | `gold` | `chembl.compound_record` | True | True | `covered` | `covered` | True | 12 | 9 | 0 | `entity_id, record_id` | 5 | 2 | - | - |
 | `chembl_molecule` | `gold` | `chembl.molecule` | True | True | `covered` | `covered` | True | 57 | 6 | 0 | `entity_id, molecule_id` | 6 | 2 | - | - |
-| `chembl_protein_class` | `gold` | `chembl.protein_class` | True | True | `covered` | `covered` | True | 15 | 6 | 0 | `entity_id, protein_class_id` | 15 | 2 | - | - |
+| `chembl_protein_class` | `gold` | `chembl.protein_class` | True | True | `covered` | `covered` | True | 15 | 6 | 0 | `entity_id, protein_class_id` | 14 | 2 | - | - |
 | `chembl_publication` | `gold` | `chembl.publication` | True | True | `covered` | `covered` | True | 30 | 7 | 0 | `entity_id, publication_id` | 63 | 2 | - | - |
 | `chembl_publication_similarity` | `gold` | `chembl.publication_similarity` | True | True | `covered` | `covered` | True | 14 | 8 | 0 | `entity_id, sim_id` | 4 | 2 | - | - |
 | `chembl_publication_term` | `gold` | `chembl.publication_term` | True | True | `covered` | `covered` | True | 10 | 8 | 0 | `entity_id, publication_id, term, term_type` | 8 | 2 | - | - |

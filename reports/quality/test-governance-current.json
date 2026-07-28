@@ -16,14 +16,18 @@
       "tests/integration/test_grafana_dashboard_links.py",
       "tests/integration/test_grafana_layout_and_metadata.py",
       "tests/integration/test_grafana_navigation_matrix.py",
+      "tests/unit/application/core/test_batch_transformer.py",
       "tests/unit/application/services/test_checkpoint_execution_identity_alignment.py",
       "tests/unit/application/services/test_run_manifest_service.py",
+      "tests/unit/domain/aggregates/test_batch_fsm_exhaustive.py",
+      "tests/unit/domain/aggregates/test_batch_invariant_properties.py",
+      "tests/unit/domain/aggregates/test_pipeline_run.py",
       "tests/unit/domain/aggregates/test_quarantine_entry.py",
       "tests/unit/domain/aggregates/test_quarantine_entry_invariant_properties.py",
       "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py",
       "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
     ],
-    "scanned_test_count": 281,
+    "scanned_test_count": 361,
     "unreviewed_count": 0
   },
   "assertion_branch_reachability_percent": 100.0,
@@ -1119,7 +1123,7 @@
   "compatibility_files": [],
   "compatibility_test_files": 0,
   "critical_behavior_envelope_assertion_gap_count": 0,
-  "critical_behavior_envelope_count": 5,
+  "critical_behavior_envelope_count": 6,
   "critical_behavior_envelopes": {
     "control_plane_replay": {
       "assertion_backed_tests": 56,
@@ -1189,6 +1193,30 @@
         "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
       ],
       "test_count": 9
+    },
+    "pipeline_run_fsm": {
+      "assertion_backed_tests": 80,
+      "assertion_examples": [
+        "tests/unit/application/core/test_batch_transformer.py:46",
+        "tests/unit/application/core/test_batch_transformer.py:64",
+        "tests/unit/application/core/test_batch_transformer.py:74",
+        "tests/unit/application/core/test_batch_transformer.py:133",
+        "tests/unit/application/core/test_batch_transformer.py:174",
+        "tests/unit/application/core/test_batch_transformer.py:221",
+        "tests/unit/application/core/test_batch_transformer.py:297",
+        "tests/unit/application/core/test_batch_transformer.py:364",
+        "tests/unit/application/core/test_batch_transformer.py:405",
+        "tests/unit/application/core/test_batch_transformer.py:475"
+      ],
+      "assertless_tests": [],
+      "intentional_no_exception_tests": 0,
+      "paths": [
+        "tests/unit/domain/aggregates/test_batch_fsm_exhaustive.py",
+        "tests/unit/domain/aggregates/test_pipeline_run.py",
+        "tests/unit/domain/aggregates/test_batch_invariant_properties.py",
+        "tests/unit/application/core/test_batch_transformer.py"
+      ],
+      "test_count": 80
     },
     "quarantine_replay": {
       "assertion_backed_tests": 44,
@@ -1295,14 +1323,18 @@
         "tests/integration/test_grafana_dashboard_links.py",
         "tests/integration/test_grafana_layout_and_metadata.py",
         "tests/integration/test_grafana_navigation_matrix.py",
+        "tests/unit/application/core/test_batch_transformer.py",
         "tests/unit/application/services/test_checkpoint_execution_identity_alignment.py",
         "tests/unit/application/services/test_run_manifest_service.py",
+        "tests/unit/domain/aggregates/test_batch_fsm_exhaustive.py",
+        "tests/unit/domain/aggregates/test_batch_invariant_properties.py",
+        "tests/unit/domain/aggregates/test_pipeline_run.py",
         "tests/unit/domain/aggregates/test_quarantine_entry.py",
         "tests/unit/domain/aggregates/test_quarantine_entry_invariant_properties.py",
         "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py",
         "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
       ],
-      "scanned_test_count": 281,
+      "scanned_test_count": 361,
       "unreviewed_count": 0
     },
     "assertion_branch_reachability_percent": 100.0,
@@ -2089,7 +2121,7 @@
     "compatibility_files": [],
     "compatibility_test_files": 0,
     "critical_behavior_envelope_assertion_gap_count": 0,
-    "critical_behavior_envelope_count": 5,
+    "critical_behavior_envelope_count": 6,
     "critical_behavior_envelopes": {
       "control_plane_replay": {
         "assertion_backed_tests": 56,
@@ -2159,6 +2191,30 @@
           "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
         ],
         "test_count": 9
+      },
+      "pipeline_run_fsm": {
+        "assertion_backed_tests": 80,
+        "assertion_examples": [
+          "tests/unit/application/core/test_batch_transformer.py:46",
+          "tests/unit/application/core/test_batch_transformer.py:64",
+          "tests/unit/application/core/test_batch_transformer.py:74",
+          "tests/unit/application/core/test_batch_transformer.py:133",
+          "tests/unit/application/core/test_batch_transformer.py:174",
+          "tests/unit/application/core/test_batch_transformer.py:221",
+          "tests/unit/application/core/test_batch_transformer.py:297",
+          "tests/unit/application/core/test_batch_transformer.py:364",
+          "tests/unit/application/core/test_batch_transformer.py:405",
+          "tests/unit/application/core/test_batch_transformer.py:475"
+        ],
+        "assertless_tests": [],
+        "intentional_no_exception_tests": 0,
+        "paths": [
+          "tests/unit/domain/aggregates/test_batch_fsm_exhaustive.py",
+          "tests/unit/domain/aggregates/test_pipeline_run.py",
+          "tests/unit/domain/aggregates/test_batch_invariant_properties.py",
+          "tests/unit/application/core/test_batch_transformer.py"
+        ],
+        "test_count": 80
       },
       "quarantine_replay": {
         "assertion_backed_tests": 44,
@@ -2252,8 +2308,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2088,
-      "test_python_file_count": 2312,
+      "test_glob_file_count": 2097,
+      "test_python_file_count": 2322,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2293,13 +2349,13 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 2088,
-    "total_test_functions": 23035,
+    "total_test_files": 2097,
+    "total_test_functions": 23064,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "a1ca035f5a24992e4e203529946689aa1e9dceb76410c5206543c0b2fbe42cd9",
+  "source_tree_sha256": "2028467aa1952c593771c9fd765794b0c0b1b72099375808ad13f095796669d2",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 106,
@@ -2319,8 +2375,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2088,
-    "test_python_file_count": 2312,
+    "test_glob_file_count": 2097,
+    "test_python_file_count": 2322,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2360,8 +2416,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 2088,
-  "total_test_functions": 23035,
+  "total_test_files": 2097,
+  "total_test_functions": 23064,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

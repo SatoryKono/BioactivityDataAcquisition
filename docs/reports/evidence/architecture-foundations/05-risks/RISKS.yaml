@@ -1,0 +1,77 @@
+- id: RISK-arch-found-policy-doc-test-drift
+  risk: "The project states an exception-only outer-layer policy, but ADR text, review guidance, and tests drift apart and recreate ambiguity."
+  linked_decisions:
+    - DEC-arch-found-interfaces-infrastructure-exception-only
+  severity: high
+  likelihood: medium
+  triggers:
+    - "ADR- or instruction-level language keeps broad interface allowances after the canonical rule changes."
+    - "Named carve-outs exist in code but not in reviewer guidance or architecture tests."
+  mitigations:
+    - "Update architecture prose and import-matrix guidance in the same change wave as the decision."
+    - "Add or tighten tests around the exact carve-out categories that remain allowed."
+
+- id: RISK-arch-found-overconstrained-outer-adapters
+  risk: "An exception-only policy becomes so strict that legitimate operational interface adapters are forced into awkward indirection."
+  linked_decisions:
+    - DEC-arch-found-interfaces-infrastructure-exception-only
+  severity: medium
+  likelihood: medium
+  triggers:
+    - "Direct operational seams are banned without documenting acceptable carve-outs."
+    - "Interface-side runtime needs are pushed through composition or application layers that do not fit the use case."
+  mitigations:
+    - "Define explicit carve-out classes before promoting the rule beyond review guidance."
+    - "Review candidate exceptions by seam type rather than by one-off module names."
+
+- id: RISK-arch-found-surface-hierarchy-drift
+  risk: "Contributors continue creating or using composition seams outside the ladder, leaving the hierarchy nominal rather than real."
+  linked_decisions:
+    - DEC-arch-found-composition-surface-ladder
+  severity: high
+  likelihood: medium
+  triggers:
+    - "New entrypaths expose registries or factories directly as runtime defaults."
+    - "Documentation names several surfaces as canonical without caller-specific guidance."
+  mitigations:
+    - "Annotate composition APIs by audience and intended use in docs and code comments where needed."
+    - "Add review checks for new public composition surfaces and bypasses."
+
+- id: RISK-arch-found-surface-bureaucracy
+  risk: "The composition ladder becomes too abstract or heavy, making straightforward extension work slower than the current practice."
+  linked_decisions:
+    - DEC-arch-found-composition-surface-ladder
+  severity: medium
+  likelihood: medium
+  triggers:
+    - "Simple extension cases require several wrapper layers before reaching the needed seam."
+    - "The ladder is defined in theory but does not map cleanly to current provider or bootstrap workflows."
+  mitigations:
+    - "Keep the ladder short and role-based rather than overly granular."
+    - "Validate the ladder against a few common runtime and extension paths before treating it as final."
+
+- id: RISK-arch-found-report-staleness
+  risk: "A consolidated architecture conformance report goes stale and begins to disagree with the underlying tests or dependency-map artifacts."
+  linked_decisions:
+    - DEC-arch-found-consolidated-conformance-report
+  severity: medium
+  likelihood: high
+  triggers:
+    - "The report is manually updated instead of generated from current architecture signals."
+    - "One source artifact changes format or scope and the summary is not updated with it."
+  mitigations:
+    - "Generate the report from existing architecture artifacts wherever practical."
+    - "Keep the report explicitly secondary to the focused checks and include source links."
+
+- id: RISK-arch-found-summary-overconfidence
+  risk: "Readers over-trust a green summary report and miss important nuance in the underlying focused guardrails."
+  linked_decisions:
+    - DEC-arch-found-consolidated-conformance-report
+  severity: medium
+  likelihood: medium
+  triggers:
+    - "Dashboards or reviews quote only the aggregate status."
+    - "The report hides which guardrails were actually sampled or skipped."
+  mitigations:
+    - "List the contributing artifacts and any skipped checks directly in the report."
+    - "Position the report as an index and interpretation aid, not as a replacement for the detailed checks."

@@ -6,6 +6,7 @@ dashboard. Run from repo root:
 
     python scripts/ops/observability/grafana/render_nav_bus.py
 """
+
 from __future__ import annotations
 
 import json
@@ -72,8 +73,7 @@ LINK_STYLE = (
     "border:1px solid #94a3b8;text-decoration:none"
 )
 CURRENT_STYLE = (
-    f"{CHIP_BASE};color:#fff;background:#1d4ed8;"
-    "border:2px solid #7dd3fc;cursor:default"
+    f"{CHIP_BASE};color:#fff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default"
 )
 CONTAINER_STYLE = (
     "display:flex;gap:6px;flex-wrap:wrap;align-items:center;"
@@ -138,8 +138,7 @@ def _url_for(target: dict[str, str], *, source_uid: str) -> str:
 
 def _html_href(url: str) -> str:
     return (
-        url.replace("&", "&amp;")
-        .replace("$", "$")  # keep template vars
+        url.replace("&", "&amp;").replace("$", "$")  # keep template vars
     )
 
 
@@ -152,13 +151,11 @@ def render_html(*, current_uid: str) -> str:
         if item["uid"] == current_uid:
             parts.append(
                 f'<span aria-current="page" style="{CURRENT_STYLE}">'
-                f'{item["title"]}</span>'
+                f"{item['title']}</span>"
             )
         else:
             href = _html_href(_url_for(item, source_uid=current_uid))
-            parts.append(
-                f'<a style="{LINK_STYLE}" href="{href}">{item["title"]}</a>'
-            )
+            parts.append(f'<a style="{LINK_STYLE}" href="{href}">{item["title"]}</a>')
     parts.append("</div>")
     return "".join(parts)
 
@@ -184,7 +181,8 @@ def render_links(*, current_uid: str) -> list[dict[str, object]]:
     return links
 
 
-def apply_to_dashboard(path: Path, *, current_uid: str) -> None:
+def render_dashboard(path: Path, *, current_uid: str) -> str:
+    """Return the canonical dashboard payload without mutating shipped JSON."""
     payload = json.loads(path.read_text(encoding="utf-8"))
     panels = payload.get("panels") or []
     nav = next((p for p in panels if p.get("id") == 1000), None)
@@ -204,10 +202,7 @@ def apply_to_dashboard(path: Path, *, current_uid: str) -> None:
     # Drop stale transparent fields that confuse some exporters.
     nav.pop("transparent", None)
 
-    path.write_text(
-        json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
-        encoding="utf-8",
-    )
+    return json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
 
 
 def main() -> None:
@@ -217,7 +212,9 @@ def main() -> None:
         path = DASH_DIR / filename
         if not path.exists():
             raise SystemExit(f"missing dashboard file: {path}")
-        apply_to_dashboard(path, current_uid=uid)
+        rendered = render_dashboard(path, current_uid=uid)
+        if rendered != path.read_text(encoding="utf-8"):
+            raise SystemExit(f"{path.name}: navigation bus drift")
         print(f"updated {filename} current={item['title']!r}")
 
 

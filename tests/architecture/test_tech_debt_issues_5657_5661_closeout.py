@@ -55,7 +55,7 @@ BASE_PUBLICATION_TRANSFORMER = (
     / "application"
     / "pipelines"
     / "common"
-    / "base_publication_transformer.py"
+    / "publication_transformer_hooks_mixin.py"
 )
 CROSSREF_FETCH_HELPERS = (
     ROOT

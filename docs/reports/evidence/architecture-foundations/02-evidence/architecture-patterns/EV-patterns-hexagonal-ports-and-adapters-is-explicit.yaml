@@ -1,0 +1,19 @@
+id: EV-patterns-hexagonal-ports-and-adapters-is-explicit
+pillar: architecture-patterns
+source:
+  type: internal-doc
+  ref: "README.md:27-49; docs/02-architecture/system-context.md:113-126; AGENTS.md:5"
+  retrieved_at: 2026-03-20
+claim: "BioETL explicitly identifies itself as a Hexagonal (Ports & Adapters) architecture in active docs, with domain ports and infrastructure adapters described as the core organizing pattern."
+quote: "BioETL follows **Hexagonal Architecture** (Ports & Adapters)"
+confidence: 0.97
+assumptions:
+  - "The README architecture overview and system-context doc are maintained as active documentation rather than archival prose."
+  - "The current source layout still materially matches the declared ports/adapters split."
+notes: "This is the top-level architecture-style claim that the other pattern evidence decomposes into concrete layer, storage, and DI behaviors."
+tags:
+  - patterns
+  - hexagonal
+  - ports-and-adapters
+  - clean-architecture
+  - architecture-style

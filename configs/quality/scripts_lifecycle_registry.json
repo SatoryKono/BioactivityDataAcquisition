@@ -944,12 +944,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded legacy Linux bootstrap helper for Grafana screenshot runtime while screenshot orchestration remains primarily governed elsewhere; retire once screenshot bootstrap flows are formalized under a canonical Linux runbook."
     },
-    "scripts/ops/observability/grafana/start_quarantine_explorer.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "windows_compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain as the Windows-side compatibility launcher for the canonical scripts.ops ensure-quarantine-explorer command while Grafana local audit flows may still need a direct PowerShell entrypoint; retire it once Windows-specific observability launch wrappers are fully consolidated."
-    },
     "scripts/ops/observability/validate_emitter_contracts.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",

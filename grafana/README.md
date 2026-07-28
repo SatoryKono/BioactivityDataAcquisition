@@ -1701,7 +1701,6 @@ processed records are different states. Treat generic `No data` as
 
 ```powershell
 # Windows: поднять или переиспользовать backend
-powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/start_quarantine_explorer.ps1
 
 # или
 $env:PYTHONPATH = "src"

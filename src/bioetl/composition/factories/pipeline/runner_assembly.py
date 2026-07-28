@@ -8,7 +8,9 @@ from typing import TYPE_CHECKING, cast
 from bioetl.application.services.checkpoint_compatibility_service import (
     CheckpointCompatibilityService,
 )
-from bioetl.application.services.medallion.medallion_lifecycle import MedallionLifecycleService
+from bioetl.application.services.medallion.medallion_lifecycle import (
+    MedallionLifecycleService,
+)
 from bioetl.composition.bootstrap_contexts import DQConfigsContext
 from bioetl.composition.factories.pipeline._runner_assembly_support import (
     RunnerAssemblyContext as _RunnerAssemblyContext,

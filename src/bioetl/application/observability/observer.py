@@ -14,7 +14,12 @@ Unified Observability Pattern:
 
 from __future__ import annotations
 
-__all__ = ["LifecyclePhase", "PipelineObserver", "PipelineObserverIdentity"]
+__all__ = [
+    "LifecyclePhase",
+    "PipelineObserver",
+    "PipelineObserverIdentity",
+    "PipelineObserverIdentityInfo",
+]
 
 import time
 from contextlib import AbstractContextManager
@@ -69,7 +74,7 @@ PROBE_MODE_FALLBACK_COUNTER = "bioetl_probe_mode_fallback_total"
 
 
 @dataclass(frozen=True, slots=True)
-class PipelineObserverIdentity:
+class PipelineObserverIdentityInfo:
     """Identity bag for :class:`PipelineObserver` (ARCH-CONT-04 / #6760)."""
 
     pipeline_name: str
@@ -81,6 +86,9 @@ class PipelineObserverIdentity:
     contract_ref: str | None = None
     contract_version: str | None = None
     composite_run_id: str | None = None
+
+
+PipelineObserverIdentity = PipelineObserverIdentityInfo
 
 
 class _ObserverLifecycleEmissionMixin(

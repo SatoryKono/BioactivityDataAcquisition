@@ -32,9 +32,7 @@ _OPERATION_ERRORS = SHARED_OPERATION_ERRORS
 
 
 @dataclass(frozen=True, slots=True)
-class CheckpointRuntimeIdentity:
-    """Identity and resume policy bag for :class:`CheckpointRuntimeService`."""
-
+class CheckpointRuntimeIdentityInfo:
     pipeline_name: str
     run_id: RunID
     resume: bool
@@ -43,6 +41,9 @@ class CheckpointRuntimeIdentity:
     loading_strategy: LoadingStrategy | None = None
     current_metadata: CheckpointMetadata | None = None
     compatibility_policy: CheckpointCompatibilityPolicy = "soft_fail"
+
+
+CheckpointRuntimeIdentity = CheckpointRuntimeIdentityInfo
 
 
 class CheckpointRuntimeService:
@@ -60,7 +61,6 @@ class CheckpointRuntimeService:
         clock: ClockPort | None = None,
         checkpoint_compatibility_service: CheckpointCompatibilityService | None = None,
     ) -> None:
-        """Initialize checkpoint management with explicit collaborators."""
         self._checkpoint = checkpoint_port
         self._logger = logger
         self._pipeline_name = identity.pipeline_name

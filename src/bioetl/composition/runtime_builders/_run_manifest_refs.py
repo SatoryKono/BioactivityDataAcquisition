@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.runtime_builders._run_manifest_identity_ref_values import (
     build_contract_identity_field_values,
@@ -25,7 +25,7 @@ def control_plane_root(settings: Settings, leaf: str) -> Path:
     impl = import_module(
         "bioetl.composition.runtime_builders._run_manifest_control_plane_paths"
     ).control_plane_root
-    return impl(settings, leaf)
+    return cast(Path, impl(settings, leaf))
 
 
 def build_planned_artifacts(
@@ -44,15 +44,28 @@ def build_planned_artifacts(
     impl = import_module(
         "bioetl.composition.runtime_builders._run_manifest_planned_artifacts"
     ).build_planned_artifacts
-    return impl(
-        settings=settings,
-        provider=provider,
-        entity=entity,
-        run_id=run_id,
-        pipeline_name=pipeline_name,
-        workflow_id=workflow_id,
-        debug_export_root=debug_export_root,
+    return cast(
+        tuple[RunArtifactRef, ...],
+        impl(
+            settings=settings,
+            provider=provider,
+            entity=entity,
+            run_id=run_id,
+            pipeline_name=pipeline_name,
+            workflow_id=workflow_id,
+            debug_export_root=debug_export_root,
+        ),
     )
+
+
+def resolve_data_root_mode(settings: Settings) -> str:
+    """Resolve the data-root mode through the lazy implementation seam."""
+    from importlib import import_module
+
+    impl = import_module(
+        "bioetl.composition.runtime_builders._run_manifest_data_roots"
+    ).resolve_data_root_mode
+    return cast(str, impl(settings))
 
 
 def __getattr__(name: str) -> object:  # pragma: no cover
@@ -60,7 +73,6 @@ def __getattr__(name: str) -> object:  # pragma: no cover
     if name in {
         "DataRootMode",
         "is_explicit_data_root_configured",
-        "resolve_data_root_mode",
     }:
         from importlib import import_module
 

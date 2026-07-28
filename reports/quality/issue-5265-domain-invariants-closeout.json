@@ -1,0 +1,38 @@
+{
+  "snapshot_date": "2026-06-23",
+  "issue": "#5265",
+  "title": "Stabilize domain invariants and zero-coverage domain behavior",
+  "status": "validated_local_closeable",
+  "debt_outcome": "improved",
+  "baseline_metrics": {
+    "tracked_uncovered_module_count": 13,
+    "tracked_unmeasured_module_count": 0
+  },
+  "current_metrics": {
+    "tracked_uncovered_module_count": 0,
+    "tracked_unmeasured_module_count": 0
+  },
+  "evidence": [
+    "reports/quality/module-coverage-inventory.json",
+    "tests/unit/domain/aggregates/test_batch_internal_modules.py",
+    "tests/unit/domain/aggregates/test_quarantine_entry_internal_mixins.py",
+    "tests/unit/domain/behavior/test_dq_rule_evaluator.py",
+    "tests/unit/domain/behavior/test_dq_rule_evaluators.py",
+    "tests/unit/domain/services/test_value_validator.py"
+  ],
+  "module_expectations": {
+    "bioetl.domain.aggregates._batch_aggregate": "fully_covered",
+    "bioetl.domain.aggregates._batch_lifecycle": "fully_covered",
+    "bioetl.domain.aggregates._batch_mixins": "fully_covered",
+    "bioetl.domain.aggregates._quarantine_aggregate": "fully_covered",
+    "bioetl.domain.aggregates._quarantine_entry_transitions_mixin": "fully_covered",
+    "bioetl.domain.behavior._dq_condition_matchers": "partially_covered",
+    "bioetl.domain.behavior._dq_rule_evaluators": "partially_covered",
+    "bioetl.domain.behavior._dq_rule_evaluators_cross": "partially_covered",
+    "bioetl.domain.behavior._dq_rule_evaluators_vocab": "partially_covered",
+    "bioetl.domain.behavior._dq_value_coercion": "partially_covered",
+    "bioetl.domain.behavior.dq_rule_evaluator": "partially_covered",
+    "bioetl.domain.behavior.value_validator": "fully_covered",
+    "bioetl.domain.behavior.value_validator_rules": "fully_covered"
+  }
+}

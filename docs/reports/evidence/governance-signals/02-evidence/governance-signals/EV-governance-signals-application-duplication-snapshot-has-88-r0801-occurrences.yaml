@@ -1,0 +1,19 @@
+id: EV-governance-signals-application-duplication-snapshot-has-88-r0801-occurrences
+pillar: governance-signals
+source:
+  type: experiment
+  ref: "docs/reports/evidence/governance-signals/02-evidence/governance-signals/RAW-governance-signals-2026-03-20.md; ./.venv/Scripts/python.exe -m pylint --disable=all --enable=duplicate-code src/bioetl/application"
+  retrieved_at: 2026-03-21
+claim: "An ad hoc duplication scan of `src/bioetl/application` reports 88 `R0801` duplicate-code occurrences, with visible clusters in transformer orchestration, publication-term mixins, runner support types, and provider-specific pipeline extractors."
+quote: "R0801 occurrences counted from the scan output: `88`"
+confidence: 0.89
+assumptions:
+  - "Pylint `duplicate-code` findings are a reasonable first-pass proxy for duplication pressure inside application code."
+  - "The scan output is noisy but still useful for locating duplication-heavy seams."
+notes: "The count is much larger than the composition snapshot, but this still should be read as a baseline snapshot rather than an already-ratcheted debt number."
+tags:
+  - governance
+  - duplication
+  - application
+  - pylint
+  - r0801
