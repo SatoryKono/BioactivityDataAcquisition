@@ -8,6 +8,7 @@ from bioetl.application.core.batch_execution.contracts import BatchResultBuilder
 from bioetl.application.core.batch_processing_contracts import BatchProcessingOutcome
 from bioetl.domain.types import BronzeRecord
 
+
 @runtime_checkable
 class PipelineProcessingProtocol(Protocol):
     """Contract for end-to-end processing of one assembled batch."""

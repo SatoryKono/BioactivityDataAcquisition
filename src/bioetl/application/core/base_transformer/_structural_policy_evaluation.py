@@ -19,6 +19,7 @@ from bioetl.application.core.base_transformer._structural_policy_types import (
     StructuralPolicySignal,
 )
 
+
 def evaluate_contract(
     contract: StructuralFieldSpec,
     working_record: dict[str, object],

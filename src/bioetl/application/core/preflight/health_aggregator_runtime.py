@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from bioetl.domain.types import ComponentHealthResult, HealthStatus
 
+
 def build_component_result(
     *,
     component: str,

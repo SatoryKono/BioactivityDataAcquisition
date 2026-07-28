@@ -19,6 +19,7 @@ from bioetl.domain.exceptions.data_quality import DataQualityThresholdError
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import BronzeRecord
 
+
 class _BatchTransformContext(Protocol):
     """Minimal transform context surface needed by finalization helpers."""
 

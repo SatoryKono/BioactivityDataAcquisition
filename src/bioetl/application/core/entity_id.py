@@ -19,6 +19,7 @@ from bioetl.domain.schemas.constants import (
     SUBCELLULAR_FRACTIONS,
 )
 
+
 def _normalize_publication_term_identity_component(value: str) -> str:
     """Canonicalize publication-term identity components before hashing."""
     normalized = value.strip()

@@ -23,6 +23,7 @@ from bioetl.application.core.pipeline_runtime_service_protocols import (
     PipelineStorageProtocol,
 )
 
+
 @runtime_checkable
 class PipelineServicesProtocol(
     PipelineManagedRuntimeServicesProtocol,

@@ -6,6 +6,7 @@ from bioetl.domain.config.table import APPEND_SAFE_IDEMPOTENCY_CONTRACTS
 from bioetl.domain.medallion import Layer
 from bioetl.domain.types import ConfigValidationError
 
+
 def validate_idempotency_contracts(
     *,
     silver_mode: str,

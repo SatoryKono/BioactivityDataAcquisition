@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from enum import Enum
 from numbers import Real
 
+
 class ThresholdBreachReason(Enum):
     """Classification of DQ threshold breaches."""
 

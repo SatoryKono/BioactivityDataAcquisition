@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import MetaDict
 
+
 class CleanupStorageProtocol(Protocol):
     """Minimal cleanup-focused storage contract for CleanupService."""
 

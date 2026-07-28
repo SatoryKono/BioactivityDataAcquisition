@@ -1,0 +1,89 @@
+[31mF[0m[32m.[0m[32m.[0m[32m.[0m[31mF[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[31mF[0m[32m.[0m[31mF[0m[31mF[0m[31mF[0m[32m.[0m[31mF[0m[32m.[0m[31mF[0m[31m                                                       [100%][0m
+================================== FAILURES ===================================
+[1m[31mE   assert 3 == 4[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_tech_debt_issue_6060_closeout.py[0m:87: assert 3 == 4
+[1m[31mE   assert 0 < 0[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_tech_debt_issues_5387_5394_closeout.py[0m:139: assert 0 < 0
+[1m[31mE   assert 'resolved_config_hash as a canonical config ' in '"""Validation policy helpers for immutable run-manifest creation."""\n\nfrom __future__ import annotations\n\nfrom bi...st.launch_context.get("required_persistence_profile")\n    )\n    return configured_profile == "degraded_observable"\n'[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_tech_debt_issues_5387_5394_closeout.py[0m:268: assert 'resolved_config_hash as a canonical config ' in '"""Validation policy helpers for immutable run-manifest creation."""\n\nfrom __future__ import annotations\n\nfrom bi...st.launch_context.get("required_persistence_profile")\n    )\n    return configured_profile == "degraded_observable"\n'
+[1m[31mE   assert 10 == 20[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_tech_debt_issues_5559_5563_closeout.py[0m:117: assert 10 == 20
+[1m[31mE   AssertionError: assert {'files_ge_25...l_fan_in': 10} == {'files_ge_25...l_fan_in': 10}[0m
+[1m[31m      [0m
+[1m[31m      Omitting 1 identical items, use -vv to show[0m
+[1m[31m      Differing items:[0m
+[1m[31m      [0m{[33m'[39;49;00m[33mfiles_ge_250_loc[39;49;00m[33m'[39;49;00m: [94m0[39;49;00m}[90m[39;49;00m != [0m{[33m'[39;49;00m[33mfiles_ge_250_loc[39;49;00m[33m'[39;49;00m: [94m5[39;49;00m}[90m[39;49;00m[0m
+[1m[31m      [0m
+[1m[31m      Full diff:[0m
+[1m[31m      [0m[90m [39;49;00m {[90m[39;49;00m[0m
+[1m[31m      [91m-     'files_ge_250_loc': 5,[39;49;00m[90m[39;49;00m[0m
+[1m[31m      ?                         ^[90m[39;49;00m[0m
+[1m[31m      [92m+     'files_ge_250_loc': 0,[39;49;00m[90m[39;49;00m[0m
+[1m[31m      ?                         ^[90m[39;49;00m[0m
+[1m[31m      [90m [39;49;00m     'max_internal_fan_in': 10,[90m[39;49;00m[0m
+[1m[31m      [90m [39;49;00m }[90m[39;49;00m[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_tech_debt_issues_5564_5603_closeout.py[0m:123: AssertionError: assert {'files_ge_25...l_fan_in': 10} == {'files_ge_25...l_fan_in': 10}
+[1m[31mE   AssertionError: assert '2026-10-26' == '2026-10-21'[0m
+[1m[31m      [0m
+[1m[31m      [0m[91m- 2026-10-21[39;49;00m[90m[39;49;00m[0m
+[1m[31m      ?          ^[90m[39;49;00m[0m
+[1m[31m      [92m+ 2026-10-26[39;49;00m[90m[39;49;00m[0m
+[1m[31m      ?          ^[90m[39;49;00m[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_tech_debt_issues_5564_5603_closeout.py[0m:146: AssertionError: assert '2026-10-26' == '2026-10-21'
+[1m[31mE   AssertionError: assert {'files_ge_25...l_fan_in': 10} == {'files_ge_25...l_fan_in': 10}[0m
+[1m[31m      [0m
+[1m[31m      Omitting 1 identical items, use -vv to show[0m
+[1m[31m      Differing items:[0m
+[1m[31m      [0m{[33m'[39;49;00m[33mfiles_ge_250_loc[39;49;00m[33m'[39;49;00m: [94m0[39;49;00m}[90m[39;49;00m != [0m{[33m'[39;49;00m[33mfiles_ge_250_loc[39;49;00m[33m'[39;49;00m: [94m5[39;49;00m}[90m[39;49;00m[0m
+[1m[31m      [0m
+[1m[31m      Full diff:[0m
+[1m[31m      [0m[90m [39;49;00m {[90m[39;49;00m[0m
+[1m[31m      [91m-     'files_ge_250_loc': 5,[39;49;00m[90m[39;49;00m[0m
+[1m[31m      ?                         ^[90m[39;49;00m[0m
+[1m[31m      [92m+     'files_ge_250_loc': 0,[39;49;00m[90m[39;49;00m[0m
+[1m[31m      ?                         ^[90m[39;49;00m[0m
+[1m[31m      [90m [39;49;00m     'max_internal_fan_in': 10,[90m[39;49;00m[0m
+[1m[31m      [90m [39;49;00m }[90m[39;49;00m[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_tech_debt_issues_5618_5625_closeout.py[0m:184: AssertionError: assert {'files_ge_25...l_fan_in': 10} == {'files_ge_25...l_fan_in': 10}
+[1m[31mE   assert 3 == 4[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_tech_debt_issues_5642_5645_closeout.py[0m:98: assert 3 == 4
+[36m[1m=========================== short test summary info ===========================[0m
+[31mFAILED[0m tests/architecture/test_tech_debt_issue_6060_closeout.py::[1mtest_issue_6060_composition_runtime_builder_fan_in_has_headroom[0m - assert 3 == 4
+[31mFAILED[0m tests/architecture/test_tech_debt_issues_5387_5394_closeout.py::[1mtest_issue_5389_control_plane_use_case_seams_remain_explicit[0m - assert 0 < 0
+[31mFAILED[0m tests/architecture/test_tech_debt_issues_5387_5394_closeout.py::[1mtest_issue_5394_legacy_checkpoint_hydration_is_confined_to_load_seam[0m - assert 'resolved_config_hash as a canonical config ' in '"""Validation policy helpers for immutable run-manifest creation."""\n\nfrom __future__ import annotations\n\nfrom bi...st.launch_context.get("required_persistence_profile")\n    )\n    return configured_profile == "degraded_observable"\n'
+[31mFAILED[0m tests/architecture/test_tech_debt_issues_5559_5563_closeout.py::[1mtest_issue_5561_config_duplication_clusters_are_owner_addressable[0m - assert 10 == 20
+[31mFAILED[0m tests/architecture/test_tech_debt_issues_5564_5603_closeout.py::[1mtest_issue_5599_active_hotspot_total_loc_decreases_without_budget_growth[0m - AssertionError: assert {'files_ge_25...l_fan_in': 10} == {'files_ge_25...l_fan_in': 10}
+  
+  Omitting 1 identical items, use -vv to show
+  Differing items:
+  [0m{[33m'[39;49;00m[33mfiles_ge_250_loc[39;49;00m[33m'[39;49;00m: [94m0[39;49;00m}[90m[39;49;00m != [0m{[33m'[39;49;00m[33mfiles_ge_250_loc[39;49;00m[33m'[39;49;00m: [94m5[39;49;00m}[90m[39;49;00m
+  
+  Full diff:
+  [0m[90m [39;49;00m {[90m[39;49;00m
+  [91m-     'files_ge_250_loc': 5,[39;49;00m[90m[39;49;00m
+  ?                         ^[90m[39;49;00m
+  [92m+     'files_ge_250_loc': 0,[39;49;00m[90m[39;49;00m
+  ?                         ^[90m[39;49;00m
+  [90m [39;49;00m     'max_internal_fan_in': 10,[90m[39;49;00m
+  [90m [39;49;00m }[90m[39;49;00m
+[31mFAILED[0m tests/architecture/test_tech_debt_issues_5564_5603_closeout.py::[1mtest_issue_5600_zero_import_inventory_is_owned_and_time_bounded[0m - AssertionError: assert '2026-10-26' == '2026-10-21'
+  
+  [0m[91m- 2026-10-21[39;49;00m[90m[39;49;00m
+  ?          ^[90m[39;49;00m
+  [92m+ 2026-10-26[39;49;00m[90m[39;49;00m
+  ?          ^[90m[39;49;00m
+[31mFAILED[0m tests/architecture/test_tech_debt_issues_5618_5625_closeout.py::[1mtest_issue_5624_hotspot_budgets_are_ratcheted_to_live_guard_values[0m - AssertionError: assert {'files_ge_25...l_fan_in': 10} == {'files_ge_25...l_fan_in': 10}
+  
+  Omitting 1 identical items, use -vv to show
+  Differing items:
+  [0m{[33m'[39;49;00m[33mfiles_ge_250_loc[39;49;00m[33m'[39;49;00m: [94m0[39;49;00m}[90m[39;49;00m != [0m{[33m'[39;49;00m[33mfiles_ge_250_loc[39;49;00m[33m'[39;49;00m: [94m5[39;49;00m}[90m[39;49;00m
+  
+  Full diff:
+  [0m[90m [39;49;00m {[90m[39;49;00m
+  [91m-     'files_ge_250_loc': 5,[39;49;00m[90m[39;49;00m
+  ?                         ^[90m[39;49;00m
+  [92m+     'files_ge_250_loc': 0,[39;49;00m[90m[39;49;00m
+  ?                         ^[90m[39;49;00m
+  [90m [39;49;00m     'max_internal_fan_in': 10,[90m[39;49;00m
+  [90m [39;49;00m }[90m[39;49;00m
+[31mFAILED[0m tests/architecture/test_tech_debt_issues_5642_5645_closeout.py::[1mtest_issue_5645_hotspot_warning_count_is_ratcheted_down[0m - assert 3 == 4

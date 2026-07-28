@@ -7,6 +7,7 @@ from bioetl.application.core.record_normalization_processor import (
 )
 from bioetl.application.core.record_processor_config import RecordProcessorConfig
 
+
 def build_default_normalization_processor(
     config: RecordProcessorConfig,
 ) -> RecordNormalizationProcessor | None:

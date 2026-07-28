@@ -21,6 +21,7 @@ from bioetl.application.core.batch_runtime_failure_policy import (
 )
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 
+
 class _BatchExtractionLoopRunner(Protocol):
     """Callable that executes the extraction loop for one run."""
 

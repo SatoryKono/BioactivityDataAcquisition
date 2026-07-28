@@ -12,6 +12,7 @@ from bioetl.domain.control_plane.reproducibility_policy import (
 )
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
+
 def strict_checkpoint_resume_required(
     *,
     current_metadata: CheckpointMetadata | None,

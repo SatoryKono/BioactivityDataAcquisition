@@ -8,6 +8,7 @@ from bioetl.application.core._quarantine_metrics_support import FILTERED_OUT_SIL
 from bioetl.domain.ports import QuarantineWriteRequest
 from bioetl.domain.types import BatchID, BronzeRecord, ErrorType, JsonDict, RunID
 
+
 def build_filtered_quarantine_metadata(
     *,
     reason: str,
