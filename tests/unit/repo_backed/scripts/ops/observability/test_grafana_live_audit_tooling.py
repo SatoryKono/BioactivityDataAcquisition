@@ -64,10 +64,18 @@ def test_live_audit_classifies_prometheus_zero_and_nonzero_results() -> None:
         "status": "success",
         "data": {"resultType": "scalar", "result": [1, "5"]},
     }
+    tiny_nonzero_payload = {
+        "status": "success",
+        "data": {"resultType": "vector", "result": [{"value": [1, "1e-13"]}]},
+    }
 
     assert audit_subject._classify_prometheus_payload(zero_payload)[0] == "zero_result"
     assert (
         audit_subject._classify_prometheus_payload(nonzero_payload)[0]
+        == "nonzero_result"
+    )
+    assert (
+        audit_subject._classify_prometheus_payload(tiny_nonzero_payload)[0]
         == "nonzero_result"
     )
 

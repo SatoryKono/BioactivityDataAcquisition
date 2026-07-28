@@ -901,7 +901,7 @@ def _classify_prometheus_payload(payload: object) -> tuple[str, str]:
                     "invalid_shape",
                     "Prometheus vector sample value is not numeric",
                 )
-        if all(abs(value) <= 1e-12 for value in values):
+        if all(value == 0.0 for value in values):
             return ("zero_result", "Prometheus vector returned only zero values")
         return ("nonzero_result", "Prometheus vector returned non-zero values")
     if result_type == "scalar":
@@ -911,7 +911,7 @@ def _classify_prometheus_payload(payload: object) -> tuple[str, str]:
             value = float(result[1])
         except (TypeError, ValueError):
             return ("invalid_shape", "Prometheus scalar value is not numeric")
-        if abs(value) <= 1e-12:
+        if value == 0.0:
             return ("zero_result", "Prometheus scalar returned zero")
         return ("nonzero_result", "Prometheus scalar returned non-zero value")
     return ("invalid_shape", f"Unsupported Prometheus resultType={result_type!r}")
