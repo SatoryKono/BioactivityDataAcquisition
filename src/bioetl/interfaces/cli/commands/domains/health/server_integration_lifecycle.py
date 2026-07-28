@@ -168,6 +168,13 @@ async def health_server_context(
         )
         yield None
         return
+    except BaseException:
+        # Clean up for every startup failure, then re-raise (ARCH-CR-03 / #6865).
+        await _deps.close_health_server_resources(
+            deps=deps,
+            quarantine_service=quarantine_service,
+        )
+        raise
 
     try:
         yield server

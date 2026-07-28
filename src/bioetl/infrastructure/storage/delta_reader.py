@@ -233,7 +233,8 @@ class DeltaReader:
             except DeltaTableNotFoundError:
                 return False
 
-        return _check_exists()
+        # Keep filesystem/Delta existence checks off the event loop (ARCH-CR-01 / #6863).
+        return await asyncio.to_thread(_check_exists)
 
     async def aclose(self) -> None:
         """Gracefully close the reader (no-op, no persistent resources)."""

@@ -98,13 +98,22 @@ def _start_health_observability(logger: LoggerPort | None = None) -> None:
         retry_delay=settings.observability.metrics_retry_delay,
         logger=logger,
     )
-    if logger is not None:
+    if logger is None:
+        return
+    if started:
         logger.info(
             "health_server_metrics_ready",
-            metrics_started=started,
+            metrics_started=True,
             metrics_port=settings.metrics_port,
             metrics_addr=settings.metrics_addr,
         )
+        return
+    logger.warning(
+        "health_server_metrics_not_started",
+        metrics_started=False,
+        metrics_port=settings.metrics_port,
+        metrics_addr=settings.metrics_addr,
+    )
 
 
 __all__ = [

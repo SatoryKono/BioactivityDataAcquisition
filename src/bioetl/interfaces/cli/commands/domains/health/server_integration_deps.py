@@ -112,9 +112,12 @@ async def close_health_server_resources(
     quarantine_service: QuarantineService | None,
 ) -> None:
     """Close resources shared by health-server execution modes."""
-    await deps.checkpoint_port.aclose()
-    if quarantine_service is not None:
-        await quarantine_service.aclose()
+    try:
+        await deps.checkpoint_port.aclose()
+    finally:
+        # Always attempt quarantine close even if checkpoint close fails (ARCH-CR-03 / #6865).
+        if quarantine_service is not None:
+            await quarantine_service.aclose()
 
 
 __all__ = [

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from datetime import datetime
 from pathlib import Path
 
@@ -188,7 +189,8 @@ async def _execute_atomic_metadata_write(
         )
         return int(retry_state.count)
 
-    return _write()
+    # Keep blocking atomic metadata I/O off the event loop (ARCH-CR-01 / #6863).
+    return await asyncio.to_thread(_write)
 
 
 def _finalize_metadata_write_operation(
