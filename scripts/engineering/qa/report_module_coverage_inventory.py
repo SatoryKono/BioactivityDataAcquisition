@@ -893,6 +893,86 @@ def _coverage_gate_modes(gates: dict[str, Any]) -> tuple[float, str, str, set[st
     return min_delta, tier_mode, ranked_target_tier_mode, ranked_target_paths
 
 
+def _row_coverage_violations(
+    row: dict[str, Any],
+    *,
+    exempt: set[str],
+    min_delta: float,
+    baseline_by_path: dict[str, float],
+    gates: dict[str, Any],
+) -> list[_ModuleCoverageViolation]:
+    """Evaluate regression/tier violations for one module coverage row."""
+    path = str(row.get("path", ""))
+    if not path or path in exempt:
+        return []
+    status = str(row.get("coverage_status", ""))
+    if status not in {"partially_covered", "fully_covered"}:
+        return []
+    current = row.get("coverage_percent")
+    if not isinstance(current, int | float):
+        return []
+    current_percent = float(current)
+    found: list[_ModuleCoverageViolation] = []
+    baseline_percent = baseline_by_path.get(path)
+    if baseline_percent is not None and current_percent + min_delta < baseline_percent:
+        found.append(
+            _ModuleCoverageViolation(
+                path=path,
+                kind="regression",
+                tier="regression",
+                current_percent=current_percent,
+                baseline_percent=baseline_percent,
+                required_percent=baseline_percent,
+                message=(
+                    f"{path}: coverage regressed "
+                    f"{baseline_percent:.2f}% -> {current_percent:.2f}%"
+                ),
+            )
+        )
+    tier_name, required_percent = _resolve_module_tier(path, gates=gates)
+    if current_percent + min_delta < required_percent:
+        found.append(
+            _ModuleCoverageViolation(
+                path=path,
+                kind="tier",
+                tier=tier_name,
+                current_percent=current_percent,
+                baseline_percent=baseline_percent,
+                required_percent=required_percent,
+                message=(
+                    f"{path}: {tier_name} tier requires >= {required_percent:.2f}% "
+                    f"(current {current_percent:.2f}%)"
+                ),
+            )
+        )
+    return found
+
+
+def _filter_coverage_violations(
+    violations: list[_ModuleCoverageViolation],
+    *,
+    enforcement_mode: str,
+    ranked_target_paths: set[str],
+    ranked_target_tier_mode: str,
+    tier_mode: str,
+) -> list[_ModuleCoverageViolation]:
+    """Apply enforcement mode filters to collected violations."""
+    if enforcement_mode == "block-regression":
+        return [
+            violation
+            for violation in violations
+            if violation.kind == "regression"
+            or (
+                violation.kind == "tier"
+                and violation.path in ranked_target_paths
+                and ranked_target_tier_mode == "block"
+            )
+        ]
+    if enforcement_mode == "warn" and tier_mode != "warn":
+        return violations
+    return violations
+
+
 def evaluate_module_coverage_gates(
     payload: dict[str, Any],
     *,
@@ -914,72 +994,24 @@ def evaluate_module_coverage_gates(
     )
     baseline_by_path = _baseline_coverage_by_path(baseline_payload)
     violations: list[_ModuleCoverageViolation] = []
-
     for row in rows:
-        if not isinstance(row, dict):
-            continue
-        path = str(row.get("path", ""))
-        if not path or path in exempt:
-            continue
-        status = str(row.get("coverage_status", ""))
-        if status not in {"partially_covered", "fully_covered"}:
-            continue
-        current = row.get("coverage_percent")
-        current_percent = float(current) if isinstance(current, int | float) else None
-        if current_percent is None:
-            continue
-
-        baseline_percent = baseline_by_path.get(path)
-        if (
-            baseline_percent is not None
-            and current_percent + min_delta < baseline_percent
-        ):
-            violations.append(
-                _ModuleCoverageViolation(
-                    path=path,
-                    kind="regression",
-                    tier="regression",
-                    current_percent=current_percent,
-                    baseline_percent=baseline_percent,
-                    required_percent=baseline_percent,
-                    message=(
-                        f"{path}: coverage regressed "
-                        f"{baseline_percent:.2f}% -> {current_percent:.2f}%"
-                    ),
+        if isinstance(row, dict):
+            violations.extend(
+                _row_coverage_violations(
+                    row,
+                    exempt=exempt,
+                    min_delta=min_delta,
+                    baseline_by_path=baseline_by_path,
+                    gates=gates,
                 )
             )
-
-        tier_name, required_percent = _resolve_module_tier(path, gates=gates)
-        if current_percent + min_delta < required_percent:
-            violations.append(
-                _ModuleCoverageViolation(
-                    path=path,
-                    kind="tier",
-                    tier=tier_name,
-                    current_percent=current_percent,
-                    baseline_percent=baseline_percent,
-                    required_percent=required_percent,
-                    message=(
-                        f"{path}: {tier_name} tier requires >= {required_percent:.2f}% "
-                        f"(current {current_percent:.2f}%)"
-                    ),
-                )
-            )
-
-    if enforcement_mode == "block-regression":
-        return [
-            violation
-            for violation in violations
-            if violation.kind == "regression"
-            or (
-                violation.kind == "tier"
-                and violation.path in ranked_target_paths
-                and ranked_target_tier_mode == "block"
-            )
-        ]
-    if enforcement_mode == "warn" and tier_mode != "warn":
-        return violations
-    return violations
+    return _filter_coverage_violations(
+        violations,
+        enforcement_mode=enforcement_mode,
+        ranked_target_paths=ranked_target_paths,
+        ranked_target_tier_mode=ranked_target_tier_mode,
+        tier_mode=tier_mode,
+    )
 
 
 def _report_gate_violations(

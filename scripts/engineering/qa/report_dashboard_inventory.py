@@ -791,7 +791,6 @@ def _build_health_summary(
     deployed_issues = deployed_issues or {}
 
     for item in inventory:
-        uid = str(item["uid"])
         issues = _dashboard_item_health_issues(
             item,
             parity_issues=parity_issues,

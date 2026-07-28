@@ -167,32 +167,37 @@ def _gold_write_retry_delay(attempt: int) -> float:
     return float(0.5 * (2**attempt) + 0.05)
 
 
-async def _run_gold_write_with_retry(
-    module: _GoldWriteRetryModuleProtocol,
-    operation: Callable[[], Awaitable[object]],
-) -> None:
-    """Run one Gold write operation under the canonical retry policy."""
-    retry_errors = module.GOLD_WRITE_RETRY_ERRORS
+def _extend_retry_errors_with_arrow(
+    retry_errors: tuple[type[BaseException], ...],
+) -> tuple[type[BaseException], ...]:
+    """Optionally include pyarrow.ArrowException in the retry set."""
     try:
         import pyarrow as pa
     except ImportError:
-        pass
-    else:
-        if pa.ArrowException not in retry_errors:
-            retry_errors = (*retry_errors, pa.ArrowException)
-    sleep_module = cast(
-        _GoldWriteAsyncioProtocol,
-        getattr(module, "asyncio", asyncio),
-    )
-    # Explicit BaseException tuple for except (python:S5708).
-    retry_exception_types: tuple[type[BaseException], ...] = tuple(
+        return retry_errors
+    if pa.ArrowException in retry_errors:
+        return retry_errors
+    return (*retry_errors, pa.ArrowException)
+
+
+def _base_exception_retry_types(
+    retry_errors: tuple[type[BaseException], ...],
+) -> tuple[type[BaseException], ...]:
+    """Keep only BaseException subclasses for a typed ``except`` clause."""
+    return tuple(
         exc_type
         for exc_type in retry_errors
         if isinstance(exc_type, type) and issubclass(exc_type, BaseException)
     )
-    if not retry_exception_types:
-        await operation()
-        return
+
+
+async def _await_gold_write_attempts(
+    operation: Callable[[], Awaitable[object]],
+    *,
+    retry_exception_types: tuple[type[BaseException], ...],
+    sleep_module: _GoldWriteAsyncioProtocol,
+) -> None:
+    """Execute Gold write with up to three attempts on retryable errors."""
     for attempt in range(3):
         try:
             await operation()
@@ -201,6 +206,28 @@ async def _run_gold_write_with_retry(
             if attempt == 2:
                 raise
             await sleep_module.sleep(_gold_write_retry_delay(attempt))
+
+
+async def _run_gold_write_with_retry(
+    module: _GoldWriteRetryModuleProtocol,
+    operation: Callable[[], Awaitable[object]],
+) -> None:
+    """Run one Gold write operation under the canonical retry policy."""
+    retry_errors = _extend_retry_errors_with_arrow(module.GOLD_WRITE_RETRY_ERRORS)
+    sleep_module = cast(
+        _GoldWriteAsyncioProtocol,
+        getattr(module, "asyncio", asyncio),
+    )
+    # Explicit BaseException tuple for except (python:S5708).
+    retry_exception_types = _base_exception_retry_types(retry_errors)
+    if not retry_exception_types:
+        await operation()
+        return
+    await _await_gold_write_attempts(
+        operation,
+        retry_exception_types=retry_exception_types,
+        sleep_module=sleep_module,
+    )
 
 
 async def _execute_prepared_scd2_gold_write(
