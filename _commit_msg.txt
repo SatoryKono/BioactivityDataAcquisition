@@ -1,9 +1,0 @@
-docs(gov): close DOC-GOV-00..09 documentation governance
-
-Relocate bulk docs/reports evidence to reports/docs-evidence, untrack diagram
-PNG baselines with ADR-040 retention policy, tombstone py-code-bot AI mirrors,
-fix DQ hard_fail 0.50 SSOT narrative, refresh data-layers and add composite
-reference + CI workflow map, strengthen superseded ADR banners and MkDocs
-excludes, archive plans/engineering closeouts, and add ownership/KPI gates.
-
-Closes #6872 #6873 #6875 #6879 #6884 #6885 #6886 #6887 #6888 #6889

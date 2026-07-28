@@ -62,34 +62,36 @@ Required checks for diagram cleanup:
 
 ______________________________________________________________________
 
-## Sequence Diagrams (5 core)
+## Sequence Diagrams (5 core) — issue #6544
 
-|| #   | Diagram                                | File                                                | Description                                                                           |
-|| --- | -------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------- |
-|| 1   | Pipeline Execution Sequence            | `sequence/01-pipeline-execution-sequence.mmd`        | CLI invocation → bootstrap → data extraction → transformation → writes → cleanup      |
-|| 2   | Composite Pipeline Sequence             | `sequence/02-composite-pipeline-sequence.mmd`         | Seed pipeline → enricher coordination → merge operation → final output                  |
-|| 3   | HTTP Request/Response Flow             | `sequence/03-http-request-response-flow.mmd`         | UnifiedHTTPClient with rate limiting, circuit breaker, retry logic                    |
-|| 4   | DQ Validation Sequence                 | `sequence/04-dq-validation-sequence.mmd`             | Schema validation → DQ rules → threshold evaluation → quarantine routing              |
-|| 5   | Quarantine Handling Sequence            | `sequence/05-quarantine-handling-sequence.mmd`       | Failure detection → quarantine record → root cause → alert → remediation              |
+Index: [sequence/README.md](sequence/README.md)
 
-## Provider Data Flow Diagrams (ChEMBL - 4 core)
+| # | Diagram | File |
+| --- | --- | --- |
+| 1 | Pipeline Execution Sequence | `sequence/01-pipeline-execution-sequence.mmd` |
+| 2 | Composite Pipeline Sequence | `sequence/02-composite-pipeline-sequence.mmd` |
+| 3 | HTTP Request/Response Flow | `sequence/03-http-request-response-flow.mmd` |
+| 4 | DQ Validation Sequence | `sequence/04-dq-validation-sequence.mmd` |
+| 5 | Quarantine Handling Sequence | `sequence/05-quarantine-handling-sequence.mmd` |
 
-|| #   | Diagram                                | File                                                | Description                                                                           |
-|| --- | -------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------- |
-|| 1   | ChEMBL API Integration Flow            | `providers/chembl/01-api-integration-flow.mmd`      | Authentication, request construction, pagination, rate limiting, response parsing     |
-|| 2   | ChEMBL Data Transformation Flow        | `providers/chembl/02-data-transformation-flow.mmd`  | Field mapping, normalization, validation, domain entity creation                        |
-|| 3   | ChEMBL Medallion Layer Flow            | `providers/chembl/03-medallion-layer-flow.mmd`       | Bronze write → Silver transformation → Gold enrichment → quarantine routing             |
-|| 4   | ChEMBL Error Handling Flow             | `providers/chembl/04-error-handling-flow.mmd`        | API errors, validation failures, DQ breaches, retry logic, circuit breaker            |
+## Provider Data Flow Diagrams — issue #6545
 
-## State Machine Diagrams (5 core)
+Index: [providers/README.md](providers/README.md)
 
-|| #   | Diagram                                | File                                                | Description                                                                           |
-|| --- | -------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------- |
-|| 1   | Pipeline State Machine                 | `state-machines/01-pipeline-state-machine.mmd`      | Initial → running → success/failure, retry states, circuit breaker, cleanup            |
-|| 2   | Lock Acquisition State Machine          | `state-machines/02-lock-acquisition-state-machine.mmd` | Lock request → pending → acquired/failed, renewal, release, timeout                 |
-|| 3   | Checkpoint State Machine               | `state-machines/03-checkpoint-state-machine.mmd`     | Checkpoint creation → validation → recovery → cleanup → expiration                    |
-|| 4   | Error Recovery State Machine           | `state-machines/04-error-recovery-state-machine.mmd` | Error detection → classification → retry decision → escalation → manual intervention   |
-|| 5   | DQ Validation State Machine            | `state-machines/05-dq-validation-state-machine.mmd`  | Validation start → rule evaluation → threshold check → quarantine routing → success/failure |
+Per provider (4 flows: API, transform, medallion, errors): `chembl`, `pubchem`,
+`uniprot`, `pubmed`, `crossref`, `openalex`, `semanticscholar` under `providers/`.
+
+## State Machine Diagrams (5 core) — issue #6546
+
+Index: [state-machines/README.md](state-machines/README.md)
+
+| # | Diagram | File |
+| --- | --- | --- |
+| 1 | Pipeline State Machine | `state-machines/01-pipeline-state-machine.mmd` |
+| 2 | Lock Acquisition State Machine | `state-machines/02-lock-acquisition-state-machine.mmd` |
+| 3 | Checkpoint State Machine | `state-machines/03-checkpoint-state-machine.mmd` |
+| 4 | Error Recovery State Machine | `state-machines/04-error-recovery-state-machine.mmd` |
+| 5 | DQ Validation State Machine | `state-machines/05-dq-validation-state-machine.mmd` |
 
 ## Supplementary Non-Nav Indexes
 
@@ -509,15 +511,17 @@ docs/02-architecture/diagrams/
 ### CI/CD
 
 Diagrams are validated and rendered automatically in GitHub Actions
-(`.github/workflows/docs.yml`). Current `svg/` and `png/` files under
-`docs/02-architecture/diagrams/**` are render baselines, while CI also uploads
-freshly rendered SVG/PNG and diagram JSON/Markdown reports as build artifacts.
-The PR drift check is intentionally SVG-primary: it fails when `.mmd/.mermaid`
-sources change without corresponding sibling SVG outputs. PNG compatibility is
-checked through the curated `manifests/png-compatibility.txt` nightly gate
-rather than through a full-repository PR PNG drift rule. The workflow also
-validates fenced Mermaid blocks in active Markdown docs and validates SVG text
-visibility for the smoke baseline set.
+(`.github/workflows/docs.yml`, `.github/workflows/diagram-nightly.yml`).
+**SVG** under `docs/02-architecture/diagrams/**/svg/` is the tracked render
+baseline for PR source-vs-render drift. **PNG** under `**/png/` is **not
+tracked** (gitignored; generate locally or via CI artifacts) — see
+[render-retention.md](governance/render-retention.md). Nightly still renders
+first, then runs `--require-png` against the curated
+`manifests/png-compatibility.txt` set (four SVG stems → PNG must exist in the
+job workspace, not in git). CI also uploads freshly rendered SVG/PNG and
+diagram JSON/Markdown reports as build artifacts. The workflow validates fenced
+Mermaid blocks in active Markdown docs and validates SVG text visibility for
+the smoke baseline set.
 
 Visual-smoke coverage is tiered: `visual-smoke.txt` is the PR-sized T0 set,
 `visual-smoke-extended.txt` is nightly blocking coverage, and
