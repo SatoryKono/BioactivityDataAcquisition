@@ -463,11 +463,12 @@ def main():
     print("Validation Results:")
     print("=" * 60)
     for result in report.results:
-        status_symbol = (
-            "[PASS]"
-            if result.status == "pass"
-            else ("[PARTIAL]" if result.status == "partial" else "[FAIL]")
-        )
+        if result.status == "pass":
+            status_symbol = "[PASS]"
+        elif result.status == "partial":
+            status_symbol = "[PARTIAL]"
+        else:
+            status_symbol = "[FAIL]"
         print(f"{status_symbol} {result.check_name}: {result.status}")
         print(f"  {result.message}")
         if result.details:

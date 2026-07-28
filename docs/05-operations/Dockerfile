@@ -22,10 +22,14 @@ COPY pyproject.toml uv.lock README.md ./
 COPY src/ ./src/
 
 # Binary-only uv bootstrap + frozen lockfile sync (Sonar docker:S8541/S8544).
-# Third-party deps: --no-build. Local project: separate editable install.
+# Third-party deps: --no-build. Local project: wheel build + pinned binary install.
 RUN pip install --only-binary=:all: --no-cache-dir uv==0.11.26 && \
     UV_NO_BUILD=1 uv sync --frozen --no-build --no-dev --no-install-project --directory /app && \
-    uv pip install --python /app/.venv/bin/python --no-deps --directory /app -e .
+    uv build --wheel --out-dir /tmp/bioetl-wheels --directory /app && \
+    BIOETL_VERSION="$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")" && \
+    uv pip install --python /app/.venv/bin/python --no-deps --only-binary :all: --no-index \
+    --find-links=/tmp/bioetl-wheels "bioetl==${BIOETL_VERSION}" && \
+    rm -rf /tmp/bioetl-wheels
 
 # ============ Production Stage ============
 FROM base AS production
@@ -63,7 +67,12 @@ COPY docker-compose.yml docker-compose.monitoring.yml docker-compose.neo4j.yml /
 
 # Binary-only uv bootstrap + frozen lockfile sync for dev extras (S8541/S8544).
 RUN pip install --only-binary=:all: --no-cache-dir uv==0.11.26 && \
-    UV_NO_BUILD=1 uv sync --frozen --no-build --extra dev --extra docs --directory /app && \
+    UV_NO_BUILD=1 uv sync --frozen --no-build --no-install-project --extra dev --extra docs --directory /app && \
+    uv build --wheel --out-dir /tmp/bioetl-wheels --directory /app && \
+    BIOETL_VERSION="$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")" && \
+    uv pip install --python /app/.venv/bin/python --no-deps --only-binary :all: --no-index \
+    --find-links=/tmp/bioetl-wheels "bioetl[dev,docs]==${BIOETL_VERSION}" && \
+    rm -rf /tmp/bioetl-wheels && \
     useradd -m -u 1000 bioetl && \
     chown -R bioetl:bioetl /app
 

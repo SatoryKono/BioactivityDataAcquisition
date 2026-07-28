@@ -57,6 +57,16 @@ def build_historical_replay_universe_exact_replay_claim(
             summary.get("historical_replay_universe_durable_evidence_claimed", False)
         )
         fully_claimed = exact_replay_supported and durable_supported
+        if fully_claimed:
+            claim_reason = (
+                "latest_historical_replay_universe_artifact_supports_universal_claim"
+            )
+        elif not exact_replay_supported:
+            claim_reason = (
+                "historical_replay_universe_artifact_blocks_universal_claim"
+            )
+        else:
+            claim_reason = "durable_evidence_coverage_blocks_universal_claim"
         return {
             "scope": str(
                 historical_universe_claim.get("scope") or "all_known_historical_runs"
@@ -67,15 +77,7 @@ def build_historical_replay_universe_exact_replay_claim(
                 if fully_claimed
                 else "historical_universe_exact_replay_not_claimed"
             ),
-            "reason": (
-                "latest_historical_replay_universe_artifact_supports_universal_claim"
-                if fully_claimed
-                else (
-                    "historical_replay_universe_artifact_blocks_universal_claim"
-                    if not exact_replay_supported
-                    else "durable_evidence_coverage_blocks_universal_claim"
-                )
-            ),
+            "reason": claim_reason,
             "exact_replay_support_boundary": summary.get(
                 "exact_replay_support_boundary"
             ),

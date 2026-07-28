@@ -27,35 +27,56 @@ TARGETS = (
 )
 
 
-def main() -> int:
-    catalog = json.loads(CATALOG.read_text(encoding="utf-8"))
+def _catalog_http_servers(catalog: dict[str, object]) -> dict[str, dict[str, object]]:
     servers: dict[str, dict[str, object]] = {}
-    for name, entry in catalog["servers"].items():
+    raw_servers = catalog.get("servers") or {}
+    if not isinstance(raw_servers, dict):
+        return servers
+    for name, entry in raw_servers.items():
+        if not isinstance(entry, dict):
+            continue
         port = int(entry["port"])
         path = str(entry.get("path") or "/mcp")
         timeout = int(entry.get("readiness_timeout_sec") or 180)
-        servers[name] = {
+        servers[str(name)] = {
             "url": f"http://127.0.0.1:{port}{path}",
             "startup_timeout_sec": timeout,
         }
+    return servers
 
-    # Preserve approved remote HTTPS servers from tracked .mcp.json when present.
-    tracked_path = ROOT / _DOT_MCP_JSON
-    if tracked_path.is_file():
-        tracked = json.loads(tracked_path.read_text(encoding="utf-8"))
-        for name, cfg in (tracked.get("mcpServers") or {}).items():
-            if isinstance(cfg, dict):
-                url = str(cfg.get("url") or "")
-                if url.startswith("https://"):
-                    servers[name] = {"type": "http", "url": url}
 
-    payload = {"mcpServers": servers}
-    text = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
+def _merge_tracked_https_servers(
+    servers: dict[str, dict[str, object]],
+    tracked_path: Path,
+) -> None:
+    if not tracked_path.is_file():
+        return
+    tracked = json.loads(tracked_path.read_text(encoding="utf-8"))
+    for name, cfg in (tracked.get("mcpServers") or {}).items():
+        if not isinstance(cfg, dict):
+            continue
+        url = str(cfg.get("url") or "")
+        if url.startswith("https://"):
+            servers[name] = {"type": "http", "url": url}
+
+
+def _write_targets(text: str, *, server_count: int) -> None:
     for target in TARGETS:
         if not target.parent.is_dir():
             continue
         target.write_text(text, encoding="utf-8")
-        print(f"wrote {target.relative_to(ROOT)} ({len(servers)} servers)")
+        print(f"wrote {target.relative_to(ROOT)} ({server_count} servers)")
+
+
+def main() -> int:
+    catalog = json.loads(CATALOG.read_text(encoding="utf-8"))
+    servers = _catalog_http_servers(catalog)
+    # Preserve approved remote HTTPS servers from tracked .mcp.json when present.
+    _merge_tracked_https_servers(servers, ROOT / _DOT_MCP_JSON)
+
+    payload = {"mcpServers": servers}
+    text = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
+    _write_targets(text, server_count=len(servers))
     print("sample memory=", servers.get("memory"))
     print("sample mutmut=", servers.get("mutmut"))
     return 0

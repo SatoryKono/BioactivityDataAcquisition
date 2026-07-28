@@ -191,6 +191,13 @@ def yaml_config_to_domain(
         else None
     )
 
+    if isinstance(yaml_config.data_schema, DataSchemaConfig):
+        data_schema = yaml_config.data_schema
+    elif yaml_config.data_schema is not None:
+        data_schema = DataSchemaConfig(**yaml_config.data_schema.model_dump())
+    else:
+        data_schema = None
+
     return PipelineConfig(
         pipeline_name=yaml_config.pipeline_name,
         provider=yaml_config.provider,
@@ -202,15 +209,7 @@ def yaml_config_to_domain(
         checkpoint_interval=yaml_config.checkpoint_interval,
         fields=tuple(source_fields),
         column_groups=column_groups,
-        data_schema=(
-            yaml_config.data_schema
-            if isinstance(yaml_config.data_schema, DataSchemaConfig)
-            else (
-                DataSchemaConfig(**yaml_config.data_schema.model_dump())
-                if yaml_config.data_schema is not None
-                else None
-            )
-        ),
+        data_schema=data_schema,
         field_policy=field_policy,
         source_profile=yaml_config.source_profile.to_domain(),
         dq=dq_config,

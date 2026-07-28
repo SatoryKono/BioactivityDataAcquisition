@@ -15,6 +15,7 @@ import yaml
 
 BRANCH_TELEMETRY_DIR = Path("reports/test-telemetry")
 TELEMETRY_FRESHNESS_MAX_AGE_DAYS = 45
+UNKNOWN_LABEL = "<unknown>"
 
 
 def compute_test_telemetry_source_tree_sha256(repo_root: Path = Path(".")) -> str:
@@ -177,7 +178,7 @@ def _derive_slowest_summary_from_junit_paths(
             rows.append(
                 {
                     "source": junit_path.name,
-                    "test": full_name or "<unknown>",
+                    "test": full_name or UNKNOWN_LABEL,
                     "duration_s": round(duration, 3),
                 }
             )
@@ -200,8 +201,8 @@ def _derive_slowest_summary_from_junit_paths(
 def _extract_slowest_zone(test_name: object) -> str:
     """Collapse a pytest node id into a module-level hotspot identifier."""
     if not isinstance(test_name, str) or not test_name.strip():
-        return "<unknown>"
-    return test_name.split("::", 1)[0] or "<unknown>"
+        return UNKNOWN_LABEL
+    return test_name.split("::", 1)[0] or UNKNOWN_LABEL
 
 
 def _summarize_slowest_zones(
@@ -320,6 +321,49 @@ def build_baseline_payload(
     }
 
 
+def _format_slowest_test_table_rows(
+    rows: object,
+    *,
+    limit: int,
+    duration_backticks: bool,
+) -> list[str]:
+    if not isinstance(rows, list) or not rows:
+        return []
+    lines = [
+        "| Rank | Duration (s) | Test | Source |",
+        "|---:|---:|---|---|",
+    ]
+    for index, row in enumerate(rows[:limit], start=1):
+        if not isinstance(row, dict):
+            continue
+        duration_s = row.get("duration_s", "unknown")
+        duration_cell = f"`{duration_s}`" if duration_backticks else str(duration_s)
+        lines.append(
+            f"| {index} | {duration_cell} | "
+            f"`{row.get('test', 'unknown')}` | `{row.get('source', 'unknown')}` |"
+        )
+    return lines
+
+
+def _format_slowest_zone_table_rows(rows: object, *, limit: int = 10) -> list[str]:
+    if not isinstance(rows, list) or not rows:
+        return []
+    lines = [
+        "| Rank | Zone | Tests | Total Duration (s) | Max Duration (s) |",
+        "|---:|---|---:|---:|---:|",
+    ]
+    for index, row in enumerate(rows[:limit], start=1):
+        if not isinstance(row, dict):
+            continue
+        lines.append(
+            f"| {index} | `{row.get('zone', UNKNOWN_LABEL)}` | "
+            f"{row.get('test_count', 'unknown')} | "
+            f"{row.get('total_duration_s', 'unknown')} | "
+            f"{row.get('max_duration_s', 'unknown')} |"
+        )
+    return lines
+
+
 def render_baseline_markdown(payload: dict[str, object]) -> str:
     coverage = payload["coverage"]
     duration = payload["duration_telemetry"]
@@ -385,52 +429,23 @@ def render_baseline_markdown(payload: dict[str, object]) -> str:
         "",
     ]
 
-    top_slowest = duration["top_slowest"]
-    if isinstance(top_slowest, list) and top_slowest:
-        lines.extend(
-            [
-                "| Rank | Duration (s) | Test | Source |",
-                "|---:|---:|---|---|",
-            ]
-        )
-        for index, row in enumerate(top_slowest[:10], start=1):
-            if not isinstance(row, dict):
-                continue
-            test_name = row.get("test", "unknown")
-            source = row.get("source", "unknown")
-            duration_s = row.get("duration_s", "unknown")
-            lines.append(f"| {index} | `{duration_s}` | `{test_name}` | `{source}` |")
+    top_slowest_lines = _format_slowest_test_table_rows(
+        duration["top_slowest"],
+        limit=10,
+        duration_backticks=True,
+    )
+    if top_slowest_lines:
+        lines.extend(top_slowest_lines)
     else:
         lines.append(
             "No committed slow-test baseline is present yet. Refresh from a main-branch "
             "CI run using `python -m scripts.engineering.ci.update_test_telemetry_baseline`."
         )
 
-    lines.extend(
-        [
-            "",
-            "### Top Slow Zones",
-            "",
-        ]
-    )
-
-    zone_rows = duration.get("top_slowest_zones")
-    if isinstance(zone_rows, list) and zone_rows:
-        lines.extend(
-            [
-                "| Rank | Zone | Tests | Total Duration (s) | Max Duration (s) |",
-                "|---:|---|---:|---:|---:|",
-            ]
-        )
-        for index, row in enumerate(zone_rows[:10], start=1):
-            if not isinstance(row, dict):
-                continue
-            lines.append(
-                f"| {index} | `{row.get('zone', '<unknown>')}` | "
-                f"{row.get('test_count', 'unknown')} | "
-                f"{row.get('total_duration_s', 'unknown')} | "
-                f"{row.get('max_duration_s', 'unknown')} |"
-            )
+    lines.extend(["", "### Top Slow Zones", ""])
+    zone_lines = _format_slowest_zone_table_rows(duration.get("top_slowest_zones"))
+    if zone_lines:
+        lines.extend(zone_lines)
     else:
         lines.append("No committed slow-zone summary is available yet.")
 
@@ -459,8 +474,6 @@ def render_branch_telemetry_markdown(payload: dict[str, object]) -> str:
     """Render committed slow-test summary as a lightweight branch-readable report."""
     duration = payload["duration_telemetry"]
     total_cases = duration["total_cases"]
-    rows = duration["top_slowest"]
-    zones = duration.get("top_slowest_zones")
     total_cases_display = "pending" if total_cases is None else str(total_cases)
 
     lines = [
@@ -473,39 +486,19 @@ def render_branch_telemetry_markdown(payload: dict[str, object]) -> str:
         f"Freshness guard: `<={int(payload['freshness_guard']['max_age_days'])} days`",
         "",
     ]
-    if isinstance(rows, list) and rows:
-        lines.extend(
-            [
-                "| Rank | Duration (s) | Test | Source |",
-                "|---:|---:|---|---|",
-            ]
-        )
-        for index, row in enumerate(rows[:25], start=1):
-            if not isinstance(row, dict):
-                continue
-            lines.append(
-                f"| {index} | {row.get('duration_s', 'unknown')} | "
-                f"`{row.get('test', 'unknown')}` | `{row.get('source', 'unknown')}` |"
-            )
+    top_slowest_lines = _format_slowest_test_table_rows(
+        duration["top_slowest"],
+        limit=25,
+        duration_backticks=False,
+    )
+    if top_slowest_lines:
+        lines.extend(top_slowest_lines)
     else:
         lines.append("No committed slow-test telemetry is available yet.")
     lines.extend(["", "## Top Slow Zones", ""])
-    if isinstance(zones, list) and zones:
-        lines.extend(
-            [
-                "| Rank | Zone | Tests | Total Duration (s) | Max Duration (s) |",
-                "|---:|---|---:|---:|---:|",
-            ]
-        )
-        for index, row in enumerate(zones[:10], start=1):
-            if not isinstance(row, dict):
-                continue
-            lines.append(
-                f"| {index} | `{row.get('zone', '<unknown>')}` | "
-                f"{row.get('test_count', 'unknown')} | "
-                f"{row.get('total_duration_s', 'unknown')} | "
-                f"{row.get('max_duration_s', 'unknown')} |"
-            )
+    zone_lines = _format_slowest_zone_table_rows(duration.get("top_slowest_zones"))
+    if zone_lines:
+        lines.extend(zone_lines)
     else:
         lines.append("No committed slow-zone summary is available yet.")
     lines.append("")

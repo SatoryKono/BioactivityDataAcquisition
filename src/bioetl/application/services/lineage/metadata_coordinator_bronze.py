@@ -31,6 +31,7 @@ def create_bronze_metadata_payload(
     input_data: BronzeMetadataInput,
 ) -> BronzeMetadata:
     """Create Bronze metadata from one coordinated run context."""
+    _ = run_context  # reserved for future bronze runtime anchors
     duration = (input_data.completed_at - input_data.started_at).total_seconds()
     source = build_bronze_source_metadata(input_data)
     file_metadata = build_bronze_file_output_metadata(input_data)

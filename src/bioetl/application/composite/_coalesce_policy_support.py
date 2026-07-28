@@ -99,7 +99,10 @@ def sort_columns(
 
     def sort_key(col: str) -> tuple[int, str]:
         is_seed = bool(seed_prefix_value and col.startswith(seed_prefix_value))
-        priority = (0 if is_seed else 1) if prefer_seed else 1 if is_seed else 0
+        if prefer_seed:
+            priority = 0 if is_seed else 1
+        else:
+            priority = 1 if is_seed else 0
         return (priority, col)
 
     return sorted(columns, key=sort_key)

@@ -1172,9 +1172,7 @@ def _collect_retained_report_rows(
         if path == Path("reports/logs"):
             reason = "runtime log sink documented in active operator guidance"
         else:
-            reason = (
-                "governed reports workspace surface retained by docs or tracked evidence"
-            )
+            reason = "governed reports workspace surface retained by docs or tracked evidence"
         rows[path.as_posix()] = _reports_workspace_row(
             repo_root,
             tracked_paths,
@@ -2006,6 +2004,12 @@ def main() -> int:
         detail_limit=max(args.detail_limit, 0),
     )
     if args.report_json is not None:
+        if args.apply:
+            classification_mode = "apply"
+        elif args.apply_reports_prune:
+            classification_mode = "apply-reports-prune"
+        else:
+            classification_mode = "dry-run"
         report_path = write_cleanup_classification_report(
             repo_root,
             args.report_json,
@@ -2013,13 +2017,7 @@ def main() -> int:
                 repo_root,
                 candidates=candidates,
                 review_evidence=review_evidence,
-                mode=(
-                    "apply"
-                    if args.apply
-                    else "apply-reports-prune"
-                    if args.apply_reports_prune
-                    else "dry-run"
-                ),
+                mode=classification_mode,
             ),
         )
         logger.info("Wrote cleanup classification report: %s", report_path)

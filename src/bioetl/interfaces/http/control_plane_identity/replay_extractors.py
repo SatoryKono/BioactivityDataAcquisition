@@ -61,13 +61,11 @@ def runtime_mode(manifest: RunManifest) -> str:
 
 
 def replay_mode(manifest: RunManifest) -> str:
-    return (
-        "exact_replay"
-        if requested_exact_replay(manifest)
-        else "replay"
-        if manifest.replay_of_run_id or manifest.replay_of_manifest_id
-        else manifest.run_type.value
-    )
+    if requested_exact_replay(manifest):
+        return "exact_replay"
+    if manifest.replay_of_run_id or manifest.replay_of_manifest_id:
+        return "replay"
+    return manifest.run_type.value
 
 
 def exact_replay_eligible(

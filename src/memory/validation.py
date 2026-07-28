@@ -418,6 +418,26 @@ def _iter_tree_paths(root: Path) -> Iterator[Path]:
         directories.extend(reversed(child_directories))
 
 
+def _is_scanned_markdown_note_entry(
+    entry: os.DirEntry[str],
+    child_path: Path,
+) -> bool | None:
+    """Classify a scandir entry for markdown note walks.
+
+    Returns:
+      True  — yield as a markdown note path
+      False — skip without descending
+      None  — directory to enqueue for descent
+    """
+    if "templates" in child_path.parts:
+        return False
+    if entry.is_dir(follow_symlinks=False):
+        return None
+    if entry.name == "README.md" or not entry.name.endswith(".md"):
+        return False
+    return True
+
+
 def _iter_markdown_note_paths(
     directory: Path,
     *,
@@ -432,12 +452,11 @@ def _iter_markdown_note_paths(
         child_directories: list[Path] = []
         for entry in _sorted_scandir_entries(current):
             child_path = current / entry.name
-            if "templates" in child_path.parts:
-                continue
-            if entry.is_dir(follow_symlinks=False):
+            kind = _is_scanned_markdown_note_entry(entry, child_path)
+            if kind is None:
                 child_directories.append(child_path)
                 continue
-            if entry.name == "README.md" or not entry.name.endswith(".md"):
+            if not kind:
                 continue
             yield child_path
             emitted += 1
@@ -454,6 +473,26 @@ def _bounded_episodic_note_paths(
     return list(_iter_markdown_note_paths(directory, limit=limit))
 
 
+def _episodic_scan_limit(*, include_all_episodic_notes: bool) -> int | None:
+    return None if include_all_episodic_notes else DEFAULT_EPISODIC_NOTE_SCAN_LIMIT
+
+
+def _note_paths_for_directory(
+    directory: Path,
+    *,
+    artifact_class: str,
+    include_all_episodic_notes: bool,
+) -> list[Path]:
+    if not directory.exists():
+        return []
+    if artifact_class == "episodic_note":
+        limit = _episodic_scan_limit(
+            include_all_episodic_notes=include_all_episodic_notes
+        )
+        return _bounded_episodic_note_paths(directory, limit=limit)
+    return list(_iter_markdown_note_paths(directory, limit=None))
+
+
 def _iter_note_paths(
     root: Path,
     *,
@@ -461,18 +500,11 @@ def _iter_note_paths(
 ) -> Iterator[tuple[str, Path]]:
     for artifact_class, directories in _note_dirs(root).items():
         for directory in directories:
-            if not directory.exists():
-                continue
-            if artifact_class == "episodic_note":
-                limit = (
-                    None
-                    if include_all_episodic_notes
-                    else DEFAULT_EPISODIC_NOTE_SCAN_LIMIT
-                )
-                note_paths = _bounded_episodic_note_paths(directory, limit=limit)
-            else:
-                note_paths = list(_iter_markdown_note_paths(directory, limit=None))
-            for path in note_paths:
+            for path in _note_paths_for_directory(
+                directory,
+                artifact_class=artifact_class,
+                include_all_episodic_notes=include_all_episodic_notes,
+            ):
                 yield (artifact_class, path)
 
 

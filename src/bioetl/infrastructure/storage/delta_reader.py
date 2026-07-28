@@ -124,7 +124,7 @@ class DeltaReader:
             limit=limit,
         )
 
-        return _read()
+        return await asyncio.to_thread(_read)
 
     async def read_versioned_table(
         self,
@@ -181,7 +181,7 @@ class DeltaReader:
                 ) from e
             return delta_schema_to_pyarrow(dt.schema())
 
-        return _get_schema()
+        return await asyncio.to_thread(_get_schema)
 
     async def get_row_count(self, table_path: str) -> int:
         """Get the number of rows in a Delta Lake table.
@@ -209,7 +209,7 @@ class DeltaReader:
 
             return _count_delta_rows(dt, resolved_path)
 
-        return _count_rows()
+        return await asyncio.to_thread(_count_rows)
 
     async def table_exists(self, table_path: str) -> bool:
         """Check if a Delta Lake table exists at the given path.

@@ -212,11 +212,12 @@ def _format_text(checks: Iterable[EndpointCheck]) -> str:
     for check in checks:
         published = "ok" if check.published_probe.ok else "failed"
         container_probe = check.container_probe
-        container = (
-            "skipped"
-            if container_probe is None
-            else ("ok" if container_probe.ok else "failed")
-        )
+        if container_probe is None:
+            container = "skipped"
+        elif container_probe.ok:
+            container = "ok"
+        else:
+            container = "failed"
         lines.append(
             f"{check.name}: diagnosis={check.diagnosis} "
             f"published={published} container={container}"

@@ -32,6 +32,72 @@ def _run(cmd: list[str], *, check: bool = True) -> int:
     return completed.returncode
 
 
+_HOTSPOT_METRIC_NAMES = (
+    "duplication_clusters",
+    "files",
+    "total_loc",
+    "files_ge_250_loc",
+    "helper_function_ratio",
+    "max_internal_fan_in",
+    "max_internal_fan_in_module",
+)
+
+
+def _baseline_families_by_name(baseline: dict[str, object]) -> dict[str, dict[str, object]]:
+    return {
+        row["name"]: row
+        for row in baseline.get("families", [])
+        if isinstance(row, dict) and isinstance(row.get("name"), str)
+    }
+
+
+def _sync_family_metrics(
+    metrics: dict[str, object],
+    base: dict[str, object],
+) -> int:
+    changed = 0
+    for metric in _HOTSPOT_METRIC_NAMES:
+        if metrics.get(metric) != base.get(metric):
+            metrics[metric] = base.get(metric)
+            changed += 1
+    return changed
+
+
+def _ratchet_family_budgets(family: dict[str, object], base: dict[str, object]) -> int:
+    """Ratchet budgets down to measured bounded_growth only when lower."""
+    live_budgets = base.get("bounded_growth_budgets") or {}
+    budgets = family.get("bounded_growth_budgets") or {}
+    if not isinstance(live_budgets, dict) or not isinstance(budgets, dict):
+        return 0
+    changed = 0
+    for key, live_val in live_budgets.items():
+        current = budgets.get(key)
+        if (
+            key in budgets
+            and isinstance(live_val, int)
+            and isinstance(current, int)
+            and live_val < current
+        ):
+            budgets[key] = live_val
+            changed += 1
+    family["bounded_growth_budgets"] = budgets
+    return changed
+
+
+def _sync_one_scorecard_family(
+    family: dict[str, object],
+    by_name: dict[str, dict[str, object]],
+) -> int:
+    name = family.get("name")
+    if name not in by_name:
+        return 0
+    base = by_name[str(name)]
+    metrics = family.setdefault("metrics", {})
+    if not isinstance(metrics, dict):
+        return 0
+    return _sync_family_metrics(metrics, base) + _ratchet_family_budgets(family, base)
+
+
 def _sync_scorecard_hotspot_metrics_from_baseline() -> None:
     """Copy measured hotspot metrics from baseline into scorecard (no budget growth)."""
     import yaml
@@ -43,21 +109,8 @@ def _sync_scorecard_hotspot_metrics_from_baseline() -> None:
         return
 
     baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
-    by_name = {
-        row["name"]: row
-        for row in baseline.get("families", [])
-        if isinstance(row, dict) and isinstance(row.get("name"), str)
-    }
+    by_name = _baseline_families_by_name(baseline)
     scorecard = yaml.safe_load(scorecard_path.read_text(encoding="utf-8"))
-    metric_names = (
-        "duplication_clusters",
-        "files",
-        "total_loc",
-        "files_ge_250_loc",
-        "helper_function_ratio",
-        "max_internal_fan_in",
-        "max_internal_fan_in_module",
-    )
     families = (
         scorecard.get("hotspot_family_ratchets", {}).get("families", [])
         if isinstance(scorecard, dict)
@@ -65,33 +118,8 @@ def _sync_scorecard_hotspot_metrics_from_baseline() -> None:
     )
     changed = 0
     for family in families:
-        if not isinstance(family, dict):
-            continue
-        name = family.get("name")
-        if name not in by_name:
-            continue
-        base = by_name[str(name)]
-        metrics = family.setdefault("metrics", {})
-        if not isinstance(metrics, dict):
-            continue
-        for metric in metric_names:
-            if metrics.get(metric) != base.get(metric):
-                metrics[metric] = base.get(metric)
-                changed += 1
-        # Ratchet budgets down to measured bounded_growth only when lower.
-        live_budgets = base.get("bounded_growth_budgets") or {}
-        budgets = family.get("bounded_growth_budgets") or {}
-        if isinstance(live_budgets, dict) and isinstance(budgets, dict):
-            for key, live_val in live_budgets.items():
-                if (
-                    key in budgets
-                    and isinstance(live_val, int)
-                    and isinstance(budgets.get(key), int)
-                ):
-                    if live_val < budgets[key]:
-                        budgets[key] = live_val
-                        changed += 1
-            family["bounded_growth_budgets"] = budgets
+        if isinstance(family, dict):
+            changed += _sync_one_scorecard_family(family, by_name)
 
     if changed:
         scorecard_path.write_text(
@@ -108,43 +136,42 @@ def _sync_scorecard_hotspot_metrics_from_baseline() -> None:
         print("SYNC scorecard hotspot metrics: already aligned")
 
 
-def refresh(*, check_only: bool) -> None:
-    """Refresh or verify governance artifacts in deterministic order."""
-    if check_only:
-        _run(
-            [
-                sys.executable,
-                "-m",
-                "scripts.engineering.qa.report_hotspot_family_baseline",
-                "--check",
-            ],
-            check=False,
-        )
-        _run(
-            [
-                sys.executable,
-                "-m",
-                "scripts.engineering.qa.report_dead_code_inventory",
-                "--check",
-            ],
-            check=False,
-        )
-        _run(
-            [
-                sys.executable,
-                "-m",
-                "pytest",
-                "tests/architecture/test_module_coverage_inventory.py::"
-                "test_module_coverage_inventory_source_tree_hash_is_current",
-                "tests/architecture/test_quality_debt_scorecard.py::"
-                "test_debt_scorecard_hotspot_family_metrics_match_committed_baseline",
-                "-q",
-                "--tb=no",
-            ]
-        )
-        print("CHECK: governance artifacts current")
-        return
+def _run_check_only() -> None:
+    _run(
+        [
+            sys.executable,
+            "-m",
+            "scripts.engineering.qa.report_hotspot_family_baseline",
+            "--check",
+        ],
+        check=False,
+    )
+    _run(
+        [
+            sys.executable,
+            "-m",
+            "scripts.engineering.qa.report_dead_code_inventory",
+            "--check",
+        ],
+        check=False,
+    )
+    _run(
+        [
+            sys.executable,
+            "-m",
+            "pytest",
+            "tests/architecture/test_module_coverage_inventory.py::"
+            "test_module_coverage_inventory_source_tree_hash_is_current",
+            "tests/architecture/test_quality_debt_scorecard.py::"
+            "test_debt_scorecard_hotspot_family_metrics_match_committed_baseline",
+            "-q",
+            "--tb=no",
+        ]
+    )
+    print("CHECK: governance artifacts current")
 
+
+def _run_refresh() -> None:
     # 1) Module coverage inventory (hash path; allow missing coverage.xml)
     _run(
         [
@@ -174,21 +201,11 @@ def refresh(*, check_only: bool) -> None:
     _sync_scorecard_hotspot_metrics_from_baseline()
 
     # 5) Dead-code inventory
-    _run(
-        [
-            sys.executable,
-            "-m",
-            "scripts.engineering.qa.report_dead_code_inventory",
-        ]
-    )
+    _run([sys.executable, "-m", "scripts.engineering.qa.report_dead_code_inventory"])
 
     # 6) Debt governance gates rollup
     _run(
-        [
-            sys.executable,
-            "-m",
-            "scripts.engineering.qa.report_debt_governance_gates",
-        ],
+        [sys.executable, "-m", "scripts.engineering.qa.report_debt_governance_gates"],
         check=False,
     )
 
@@ -208,6 +225,14 @@ def refresh(*, check_only: bool) -> None:
         "  pytest tests/architecture/test_quality_debt_scorecard.py "
         "tests/architecture/test_hotspot_growth_family_ratchets.py -q --tb=line"
     )
+
+
+def refresh(*, check_only: bool) -> None:
+    """Refresh or verify governance artifacts in deterministic order."""
+    if check_only:
+        _run_check_only()
+        return
+    _run_refresh()
 
 
 def main(argv: list[str] | None = None) -> None:

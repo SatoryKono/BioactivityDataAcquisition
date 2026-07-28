@@ -95,24 +95,40 @@ def _read_text_from_git_object(path: Path) -> str | None:
     return str(completed.stdout)
 
 
+def _assert_frontmatter_mapping(metadata: Any, path: Path) -> dict[str, Any]:
+    if not isinstance(metadata, dict):
+        raise ValueError(f"note frontmatter must be a mapping: {path}")
+    return metadata
+
+
+def _parse_frontmatter_from_handle(handle: Any, path: Path) -> dict[str, Any]:
+    """Parse YAML frontmatter from an already-opened text handle."""
+    first_line = handle.readline()
+    if not first_line:
+        raise ValueError(f"note is missing YAML frontmatter: {path}")
+    first_line = first_line.strip()
+    if (
+        first_line != FRONTMATTER_DELIMITER
+        and not LEGACY_FRONTMATTER_DELIMITER_PATTERN.match(first_line)
+    ):
+        raise ValueError(f"note is missing YAML frontmatter: {path}")
+    return _assert_frontmatter_mapping(
+        _read_frontmatter_metadata_only(handle, first_line, path),
+        path,
+    )
+
+
 def _read_frontmatter_metadata_from_text(text: str, path: Path) -> dict[str, Any]:
     """Parse note metadata from raw markdown text without loading the body."""
     handle = io.StringIO(text)
     with handle:
-        first_line = handle.readline()
-        if not first_line:
-            raise ValueError(f"note is missing YAML frontmatter: {path}")
-        first_line = first_line.strip()
-        if (
-            first_line != FRONTMATTER_DELIMITER
-            and not LEGACY_FRONTMATTER_DELIMITER_PATTERN.match(first_line)
-        ):
-            raise ValueError(f"note is missing YAML frontmatter: {path}")
-        delimiter = first_line
-        metadata = _read_frontmatter_metadata_only(handle, delimiter, path)
-        if not isinstance(metadata, dict):
-            raise ValueError(f"note frontmatter must be a mapping: {path}")
-        return metadata
+        return _parse_frontmatter_from_handle(handle, path)
+
+
+def _read_frontmatter_metadata_from_path(path: Path) -> dict[str, Any]:
+    """Open a note path and parse only its frontmatter metadata."""
+    with path.open(encoding="utf-8") as handle:
+        return _parse_frontmatter_from_handle(handle, path)
 
 
 def _is_likely_network_drive(path: Path) -> bool:
@@ -143,6 +159,20 @@ def _is_likely_network_drive(path: Path) -> bool:
         return False
 
 
+def _should_skip_threaded_timeout(
+    path: Path,
+    timeout: float,
+    *,
+    force_threaded_timeout: bool,
+) -> bool:
+    """Local drives with reasonable timeouts skip the threaded path."""
+    return (
+        not force_threaded_timeout
+        and not _is_likely_network_drive(path)
+        and timeout >= 1.0
+    )
+
+
 def _read_markdown_metadata_with_timeout(
     path: Path,
     timeout: float,
@@ -152,29 +182,10 @@ def _read_markdown_metadata_with_timeout(
     """Read only note frontmatter metadata with a timeout."""
     # Skip timeout mechanism for local drives with reasonable timeouts to avoid Windows threading issues
     # Very small timeouts (< 1 second) indicate test scenarios where timeout behavior is being tested
-    if (
-        not force_threaded_timeout
-        and not _is_likely_network_drive(path)
-        and timeout >= 1.0
+    if _should_skip_threaded_timeout(
+        path, timeout, force_threaded_timeout=force_threaded_timeout
     ):
-        try:
-            with path.open(encoding="utf-8") as handle:
-                first_line = handle.readline()
-                if not first_line:
-                    raise ValueError(f"note is missing YAML frontmatter: {path}")
-                first_line = first_line.strip()
-                if (
-                    first_line != FRONTMATTER_DELIMITER
-                    and not LEGACY_FRONTMATTER_DELIMITER_PATTERN.match(first_line)
-                ):
-                    raise ValueError(f"note is missing YAML frontmatter: {path}")
-                delimiter = first_line
-                parsed = _read_frontmatter_metadata_only(handle, delimiter, path)
-                if not isinstance(parsed, dict):
-                    raise ValueError(f"note frontmatter must be a mapping: {path}")
-                return parsed
-        except Exception as exc:
-            raise exc
+        return _read_frontmatter_metadata_from_path(path)
 
     # Use timeout for network drives or test scenarios with small timeouts
     metadata: dict[str, Any] | None = None
@@ -183,21 +194,7 @@ def _read_markdown_metadata_with_timeout(
     def _target() -> None:
         nonlocal metadata, exception
         try:
-            with path.open(encoding="utf-8") as handle:
-                first_line = handle.readline()
-                if not first_line:
-                    raise ValueError(f"note is missing YAML frontmatter: {path}")
-                first_line = first_line.strip()
-                if (
-                    first_line != FRONTMATTER_DELIMITER
-                    and not LEGACY_FRONTMATTER_DELIMITER_PATTERN.match(first_line)
-                ):
-                    raise ValueError(f"note is missing YAML frontmatter: {path}")
-                delimiter = first_line
-                parsed = _read_frontmatter_metadata_only(handle, delimiter, path)
-                if not isinstance(parsed, dict):
-                    raise ValueError(f"note frontmatter must be a mapping: {path}")
-                metadata = parsed
+            metadata = _read_frontmatter_metadata_from_path(path)
         except Exception as e:
             exception = e
 
@@ -393,6 +390,45 @@ def parse_markdown_note_metadata(
     return MemoryNote(metadata=metadata, body="")
 
 
+def _finalize_frontmatter_metadata(metadata: dict[str, Any]) -> dict[str, Any]:
+    """Normalize simple scalar coercions after frontmatter termination."""
+    ttl_days = metadata.get("ttl_days")
+    if isinstance(ttl_days, str) and ttl_days.isdigit():
+        metadata["ttl_days"] = int(ttl_days)
+    return metadata
+
+
+def _apply_frontmatter_list_item(
+    metadata: dict[str, Any],
+    current_list_key: str | None,
+    stripped: str,
+) -> bool:
+    """Append a YAML list item when a list key is open. Returns True if handled."""
+    if not stripped.startswith("- ") or current_list_key is None:
+        return False
+    metadata[current_list_key].append(_coerce_frontmatter_scalar(stripped[2:]))
+    return True
+
+
+def _apply_frontmatter_key_line(
+    metadata: dict[str, Any],
+    line: str,
+) -> str | None:
+    """Apply a ``key: value`` frontmatter line. Returns the next list key."""
+    if ":" not in line:
+        return None
+    key, raw_value = line.split(":", 1)
+    key = key.strip()
+    value = raw_value.strip()
+    if not key:
+        return None
+    if not value:
+        metadata[key] = []
+        return key
+    metadata[key] = _coerce_frontmatter_scalar(value)
+    return None
+
+
 def _read_frontmatter_metadata_only(
     handle: Any,
     delimiter: str,
@@ -405,30 +441,12 @@ def _read_frontmatter_metadata_only(
     for line in handle:
         stripped = line.strip()
         if stripped == delimiter:
-            ttl_days = metadata.get("ttl_days")
-            if isinstance(ttl_days, str) and ttl_days.isdigit():
-                metadata["ttl_days"] = int(ttl_days)
-            return metadata
+            return _finalize_frontmatter_metadata(metadata)
         if not stripped:
             continue
-        if stripped.startswith("- ") and current_list_key is not None:
-            metadata[current_list_key].append(_coerce_frontmatter_scalar(stripped[2:]))
+        if _apply_frontmatter_list_item(metadata, current_list_key, stripped):
             continue
-        if ":" not in line:
-            current_list_key = None
-            continue
-        key, raw_value = line.split(":", 1)
-        key = key.strip()
-        value = raw_value.strip()
-        if not key:
-            current_list_key = None
-            continue
-        if not value:
-            metadata[key] = []
-            current_list_key = key
-            continue
-        metadata[key] = _coerce_frontmatter_scalar(value)
-        current_list_key = None
+        current_list_key = _apply_frontmatter_key_line(metadata, line)
 
     raise ValueError(f"note frontmatter is not terminated: {path}")
 

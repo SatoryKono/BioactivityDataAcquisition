@@ -66,7 +66,7 @@ class CsvFilterReader:
         Returns:
             Loaded FilterLoadResult.
         """
-        df = self._read_csv_dataframe(source_path)
+        df = await asyncio.to_thread(self._read_csv_dataframe, source_path)
         all_ids = self._processor.extract_column_ids(df, column_name)
         unique_ids, unique_count, duplicate_count, duplicates = (
             self._processor.compute_duplicate_stats(all_ids)

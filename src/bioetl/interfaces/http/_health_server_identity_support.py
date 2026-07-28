@@ -160,14 +160,21 @@ def _contract_schema(values: dict[str, object | None]) -> str | None:
     contract_ref = _text(values.get("contract_ref"))
     contract_version = _text(values.get("contract_version"))
     schema_hash = _text(values.get("contract_schema_hash"))
-    contract = (
-        f"{contract_ref}.{contract_version}"
-        if contract_ref and contract_version
-        else contract_ref or (f"version={contract_version}" if contract_version else "")
-    )
+    if contract_ref and contract_version:
+        contract = f"{contract_ref}.{contract_version}"
+    elif contract_ref:
+        contract = contract_ref
+    elif contract_version:
+        contract = f"version={contract_version}"
+    else:
+        contract = ""
     if contract and schema_hash:
         return f"{contract} [{schema_hash}]"
-    return contract or (f"schema={schema_hash}" if schema_hash else None)
+    if contract:
+        return contract
+    if schema_hash:
+        return f"schema={schema_hash}"
+    return None
 
 
 def _execution_summary(

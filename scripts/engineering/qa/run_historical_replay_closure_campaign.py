@@ -225,7 +225,9 @@ def _load_ledger_rows(path: Path) -> list[dict[str, object]]:
     if not path.exists():
         return []
     rows: list[dict[str, object]] = []
-    for line in path.read_text(encoding="utf-8").splitlines():  # NOSONAR - path confined
+    for line in path.read_text(
+        encoding="utf-8"
+    ).splitlines():  # NOSONAR - path confined
         line = line.strip()
         if not line:
             continue
@@ -239,7 +241,9 @@ def _build_bronze_meta_index(
     index: dict[str, list[tuple[Path, dict[str, object]]]] = {}
     for meta_path in bronze_root.rglob("*.meta.json"):
         try:
-            payload = json.loads(meta_path.read_text(encoding="utf-8"))  # NOSONAR - path confined
+            payload = json.loads(
+                meta_path.read_text(encoding="utf-8")
+            )  # NOSONAR - path confined
         except (OSError, json.JSONDecodeError):
             continue
         run_id = str(payload.get("run_id") or "").strip()
@@ -280,9 +284,7 @@ def _source_certification_from_meta(
     bronze_uri = _relative_bronze_uri(bronze_root, artifact_path)
     batch_id = str(payload.get("batch_id") or "").strip()
     return HistoricalReplaySnapshotCertification(
-        provider=(
-            source_ref.provider if source_ref is not None else manifest.provider
-        ),
+        provider=(source_ref.provider if source_ref is not None else manifest.provider),
         entity=(source_ref.entity if source_ref is not None else manifest.entity),
         pipeline_name=(
             source_ref.pipeline_name
@@ -292,9 +294,7 @@ def _source_certification_from_meta(
         snapshot_id=f"sha256:{content_hash}",
         content_hash=content_hash,
         immutable_uri=bronze_uri,
-        bronze_batch_ref=(
-            f"bronze_batch:{batch_id}" if batch_id else bronze_uri
-        ),
+        bronze_batch_ref=(f"bronze_batch:{batch_id}" if batch_id else bronze_uri),
         query=source_ref.query if source_ref is not None else None,
         certification_artifact_ref=(
             "control://historical-replay/auto-source-certification"
@@ -574,6 +574,13 @@ def main() -> int:
             encoding="utf-8",
         )
 
+    if written_dispositions_path is not None:
+        residual_dispositions_path = str(written_dispositions_path)
+    elif dispositions_path is not None:
+        residual_dispositions_path = str(dispositions_path)
+    else:
+        residual_dispositions_path = None
+
     payload = {
         "inventory_summary": {
             "manifest_count": inventory.manifest_count,
@@ -622,11 +629,7 @@ def main() -> int:
         },
         "artifact_paths": {
             "closure_report": str(report_path) if report_path is not None else None,
-            "residual_dispositions": (
-                str(written_dispositions_path)
-                if written_dispositions_path is not None
-                else (str(dispositions_path) if dispositions_path is not None else None)
-            ),
+            "residual_dispositions": residual_dispositions_path,
         },
     }
     print(json.dumps(payload, indent=2, sort_keys=True))

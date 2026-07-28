@@ -395,6 +395,64 @@ def _is_license_filename(name: str) -> bool:
     return name.lower() in _LICENSE_BASENAMES
 
 
+def _collect_license_clones_by_body(skills_root: Path) -> dict[bytes, list[Path]]:
+    by_digest: dict[bytes, list[Path]] = {}
+    for path in sorted(skills_root.rglob("*")):
+        if not path.is_file() or not _is_license_filename(path.name):
+            continue
+        if path.parent.name == "_licenses" and path.parent.parent == skills_root:
+            continue
+        by_digest.setdefault(path.read_bytes(), []).append(path)
+    return by_digest
+
+
+def _license_pointer_text(*, canon_rel: str, rel_link: str) -> str:
+    return (
+        "# License text (thin mirror)\n"
+        "#\n"
+        "# Exact-duplicate license text collapsed for docs skill mirrors.\n"
+        f"# Full text: {canon_rel}\n"
+        f"# Relative from this file: {rel_link}\n"
+    )
+
+
+def _write_license_pointer(
+    path: Path,
+    *,
+    canon_path: Path,
+    skills_root: Path,
+) -> bool:
+    """Rewrite one license clone to a thin pointer. Returns True when rewritten."""
+    canon_rel = canon_path.relative_to(skills_root).as_posix()
+    rel_link = Path(os.path.relpath(canon_path, path.parent)).as_posix()
+    pointer = _license_pointer_text(canon_rel=canon_rel, rel_link=rel_link)
+    if path.read_text(encoding="utf-8", errors="replace") == pointer:
+        return False
+    path.write_text(pointer, encoding="utf-8", newline="\n")
+    return True
+
+
+def _thin_one_license_body(
+    *,
+    skills_root: Path,
+    store: Path,
+    index: int,
+    body: bytes,
+    paths: list[Path],
+) -> int:
+    if len(paths) < 2:
+        return 0
+    store.mkdir(parents=True, exist_ok=True)
+    canon_path = store / f"license-text-{index}.txt"
+    if not canon_path.exists() or canon_path.read_bytes() != body:
+        canon_path.write_bytes(body)
+    thinned = 0
+    for path in paths:
+        if _write_license_pointer(path, canon_path=canon_path, skills_root=skills_root):
+            thinned += 1
+    return thinned
+
+
 def thin_exact_duplicate_license_clones(skills_root: Path) -> int:
     """Collapse byte-identical LICENSE clones under a skills tree.
 
@@ -406,39 +464,20 @@ def thin_exact_duplicate_license_clones(skills_root: Path) -> int:
     if not skills_root.is_dir():
         return 0
 
-    by_digest: dict[bytes, list[Path]] = {}
-    for path in sorted(skills_root.rglob("*")):
-        if not path.is_file() or not _is_license_filename(path.name):
-            continue
-        if path.parent.name == "_licenses" and path.parent.parent == skills_root:
-            continue
-        by_digest.setdefault(path.read_bytes(), []).append(path)
-
+    by_digest = _collect_license_clones_by_body(skills_root)
     thinned = 0
     store = skills_root / "_licenses"
     for index, (body, paths) in enumerate(
         sorted(by_digest.items(), key=lambda item: item[0]),
         start=1,
     ):
-        if len(paths) < 2:
-            continue
-        store.mkdir(parents=True, exist_ok=True)
-        canon_path = store / f"license-text-{index}.txt"
-        if not canon_path.exists() or canon_path.read_bytes() != body:
-            canon_path.write_bytes(body)
-        canon_rel = canon_path.relative_to(skills_root).as_posix()
-        for path in paths:
-            rel_link = Path(os.path.relpath(canon_path, path.parent)).as_posix()
-            pointer = (
-                "# License text (thin mirror)\n"
-                "#\n"
-                "# Exact-duplicate license text collapsed for docs skill mirrors.\n"
-                f"# Full text: {canon_rel}\n"
-                f"# Relative from this file: {rel_link}\n"
-            )
-            if path.read_text(encoding="utf-8", errors="replace") != pointer:
-                path.write_text(pointer, encoding="utf-8", newline="\n")
-                thinned += 1
+        thinned += _thin_one_license_body(
+            skills_root=skills_root,
+            store=store,
+            index=index,
+            body=body,
+            paths=paths,
+        )
     return thinned
 
 

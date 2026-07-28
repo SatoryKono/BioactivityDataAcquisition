@@ -55,7 +55,6 @@ def build_produced_artifact_trace(
     if not artifacts:
         missing_requirements.append("artifact_publication_event")
     artifact_publication_closure = _resolve_artifact_publication_closure(
-        ledger_entries_present=ledger_entries_present,
         artifact_refs=artifact_refs,
         missing_requirements=missing_requirements,
         planned_artifact_count=len(manifest.planned_artifacts),
@@ -74,7 +73,6 @@ def build_produced_artifact_trace(
 
 def _resolve_artifact_publication_closure(
     *,
-    ledger_entries_present: bool,
     artifact_refs: list[dict[str, object]],
     missing_requirements: list[str],
     planned_artifact_count: int,

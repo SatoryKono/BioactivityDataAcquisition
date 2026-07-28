@@ -49,6 +49,11 @@ STRUCTURAL_KEYS: frozenset[str] = frozenset({"required_fields", "exclude_if_pres
 SEMANTIC_KEYS: frozenset[str] = frozenset(
     {"columns", "ranges", "list_lengths", "list_contains"}
 )
+PATH_INFRA_CONFIG = "src/bioetl/infrastructure/config"
+PATH_INFRA_SCHEMAS = "src/bioetl/infrastructure/schemas"
+PATH_GRAFANA_PROMETHEUS_RULES = "grafana/prometheus-rules"
+PATH_DOCS_OPERATIONS = "docs/05-operations"
+PATH_DOCS_RUNNING_PIPELINES = "docs/03-guides/running-pipelines.md"
 ALL_RULE_KEYS: frozenset[str] = STRUCTURAL_KEYS | SEMANTIC_KEYS
 
 ACTION_KEEP = "keep_in_silver"
@@ -133,8 +138,8 @@ SURFACE_PATTERNS: tuple[SurfacePattern, ...] = (
         surface="semantic_silver_guard",
         symbol="validate_no_semantic_silver_filter_payload",
         paths=(
-            "src/bioetl/infrastructure/config",
-            "src/bioetl/infrastructure/schemas",
+            PATH_INFRA_CONFIG,
+            PATH_INFRA_SCHEMAS,
         ),
         role="Fail-fast Silver semantic key guard",
         migration_relevance="Boundary hook that rejects semantic Silver keys before domain conversion.",
@@ -220,8 +225,8 @@ SURFACE_PATTERNS: tuple[SurfacePattern, ...] = (
         surface="config_source_profile_policy",
         symbol="extraction_params",
         paths=(
-            "src/bioetl/infrastructure/config",
-            "src/bioetl/infrastructure/schemas",
+            PATH_INFRA_CONFIG,
+            PATH_INFRA_SCHEMAS,
             "configs/_schema/pipeline.json",
             "scripts/engineering/qa/config_surface_governance.py",
             "scripts/docs/matrix/generate_pipeline_normalization_matrix.py",
@@ -234,8 +239,8 @@ SURFACE_PATTERNS: tuple[SurfacePattern, ...] = (
         surface="config_source_profile_metadata",
         symbol="source_profile",
         paths=(
-            "src/bioetl/infrastructure/config",
-            "src/bioetl/infrastructure/schemas",
+            PATH_INFRA_CONFIG,
+            PATH_INFRA_SCHEMAS,
             "configs/_schema/pipeline.json",
             "tests/architecture/test_config_ci_invariants.py",
         ),
@@ -253,7 +258,7 @@ SURFACE_PATTERNS: tuple[SurfacePattern, ...] = (
             "src/bioetl/application/observability",
             "src/bioetl/infrastructure/observability",
             "grafana/dashboards",
-            "grafana/prometheus-rules",
+            PATH_GRAFANA_PROMETHEUS_RULES,
             "grafana/README.md",
             "docs/04-reference/observability",
             "docs/03-guides/metrics-monitoring.md",
@@ -265,7 +270,7 @@ SURFACE_PATTERNS: tuple[SurfacePattern, ...] = (
         category="observability",
         surface="silver_filter_reconciliation_rule",
         symbol="bioetl_silver_filter_reject_total_mismatch_15m",
-        paths=("grafana/prometheus-rules", "grafana/README.md"),
+        paths=(PATH_GRAFANA_PROMETHEUS_RULES, "grafana/README.md"),
         role="Silver reject accounting reconciliation",
         migration_relevance="Recording rule reconciles stage totals with bounded Silver reject breakdowns.",
     ),
@@ -283,9 +288,9 @@ SURFACE_PATTERNS: tuple[SurfacePattern, ...] = (
             "src/bioetl/interfaces/cli/commands/diagnostics.py",
             "src/bioetl/interfaces/cli/commands/quarantine.py",
             "grafana/dashboards/bioetl-silver-reject-explorer.json",
-            "docs/05-operations",
+            PATH_DOCS_OPERATIONS,
             "docs/04-reference/cli.md",
-            "docs/03-guides/running-pipelines.md",
+            PATH_DOCS_RUNNING_PIPELINES,
             "docs/03-guides/troubleshooting.md",
             "docs/03-guides/dashboards/dashboard-requirements-comprehensive.md",
             "docs/03-guides/dashboards/dashboard-v2-usage.md",
@@ -302,10 +307,10 @@ SURFACE_PATTERNS: tuple[SurfacePattern, ...] = (
             "src/bioetl/interfaces/cli/commands/diagnostics.py",
             "src/bioetl/interfaces/cli/commands/quarantine.py",
             "grafana/dashboards/bioetl-silver-reject-explorer.json",
-            "docs/05-operations",
+            PATH_DOCS_OPERATIONS,
             "docs/04-reference/cli.md",
             "docs/03-guides/metrics-monitoring.md",
-            "docs/03-guides/running-pipelines.md",
+            PATH_DOCS_RUNNING_PIPELINES,
             "docs/03-guides/troubleshooting.md",
             "docs/03-guides/dashboards/dashboard-v2-usage.md",
             "docs/03-guides/dashboards/monitoring-index.md",
@@ -324,9 +329,9 @@ SURFACE_PATTERNS: tuple[SurfacePattern, ...] = (
             "src/bioetl/interfaces/cli/commands/domains/diagnostics/rendering.py",
             "src/bioetl/interfaces/cli/commands/domains/quarantine/_run_scope_stats.py",
             "src/bioetl/interfaces/cli/commands/domains/quarantine/rendering.py",
-            "grafana/prometheus-rules",
-            "docs/05-operations",
-            "docs/03-guides/running-pipelines.md",
+            PATH_GRAFANA_PROMETHEUS_RULES,
+            PATH_DOCS_OPERATIONS,
+            PATH_DOCS_RUNNING_PIPELINES,
             "docs/99-archive/plans/silver-filter-rejects-observability-plan.md",
         ),
         role="Operator summary alias for Silver rejects",

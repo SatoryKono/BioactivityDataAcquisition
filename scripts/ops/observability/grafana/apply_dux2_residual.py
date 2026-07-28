@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Apply Dashboard System 2.0 Phase-2 residual JSON surgeries (DUX2-02…06)."""
+
 from __future__ import annotations
 
 import json
@@ -45,7 +46,9 @@ def by_title(d: dict) -> dict[str, dict]:
     }
 
 
-def ensure_color_bg_table(panel: dict, *, value_fields: list[str] | None = None) -> None:
+def ensure_color_bg_table(
+    panel: dict, *, value_fields: list[str] | None = None
+) -> None:
     """Prefer color-background cells for status-like table columns."""
     fc = panel.setdefault("fieldConfig", {})
     defaults = fc.setdefault("defaults", {})
@@ -159,8 +162,7 @@ def table_panel(
     }
 
 
-def visualization_upgrades() -> None:
-    # Overview Inputs
+def _upgrade_overview_dashboard() -> None:
     ov = load("bioetl-overview-v2.json")
     p = by_title(ov)
     if "Inputs" in p:
@@ -178,7 +180,8 @@ def visualization_upgrades() -> None:
         )
     save("bioetl-overview-v2.json", ov)
 
-    # Provider matrices
+
+def _upgrade_provider_dashboard() -> None:
     pr = load("bioetl-provider-health-v2.json")
     p = by_title(pr)
     for title in (
@@ -213,7 +216,8 @@ def visualization_upgrades() -> None:
         )
     save("bioetl-provider-health-v2.json", pr)
 
-    # Runtime healthy path
+
+def _upgrade_runtime_dashboard() -> None:
     rt = load("bioetl-runtime.json")
     p = by_title(rt)
     if PANEL_RUNTIME_BLOCKERS in p:
@@ -238,7 +242,8 @@ def visualization_upgrades() -> None:
         )
     save("bioetl-runtime.json", rt)
 
-    # DQ
+
+def _upgrade_dq_dashboard() -> None:
     dq = load("bioetl-dq-v2.json")
     p = by_title(dq)
     if PANEL_INSPECT_DQ_CURRENT_REASONS in p:
@@ -263,6 +268,13 @@ def visualization_upgrades() -> None:
             "NOW-lane current DQ status only (bioetl_dq_current_status).",
         )
     save("bioetl-dq-v2.json", dq)
+
+
+def visualization_upgrades() -> None:
+    _upgrade_overview_dashboard()
+    _upgrade_provider_dashboard()
+    _upgrade_runtime_dashboard()
+    _upgrade_dq_dashboard()
 
     # Trust next action polish (SSOT title: Primary recovery — DS2-03)
     cp = load("bioetl-control-plane-v1.json")
@@ -318,8 +330,7 @@ def incident_depth() -> None:
     status_options["dataLinks"] = [
         link
         for link in status_options.get("dataLinks") or []
-        if isinstance(link, dict)
-        and "runbooks/" in str(link.get("url", ""))
+        if isinstance(link, dict) and "runbooks/" in str(link.get("url", ""))
     ]
     if not status_options["dataLinks"]:
         status_options["dataLinks"] = [
@@ -365,7 +376,7 @@ def incident_depth() -> None:
             table_panel(
                 2002,
                 "Suspects · Runtime blockers",
-                'topk(10, max by (pipeline, run_type, reason) (bioetl_runtime_current_blocker_reason) > 0)',
+                "topk(10, max by (pipeline, run_type, reason) (bioetl_runtime_current_blocker_reason) > 0)",
                 x=0,
                 y=y,
                 w=8,
@@ -455,7 +466,9 @@ def run_explorer_depth() -> None:
                 "`bioetl quarantine inspect --pipeline <pipeline>`.\n"
             ),
         }
-        p[PANEL_CONTROL_PLANE_DQ_HANDOFFS]["links"] = []  # avoid dup targets; nav owns hops
+        p[PANEL_CONTROL_PLANE_DQ_HANDOFFS][
+            "links"
+        ] = []  # avoid dup targets; nav owns hops
         append_desc(
             p[PANEL_CONTROL_PLANE_DQ_HANDOFFS],
             "Phase-2: CTA list; dashboard hops via Navigation bus to avoid duplicate UIDs.",

@@ -27,6 +27,16 @@ DOMAIN_PORT_OWNER_TESTS = (
     "tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py",
     "tests/architecture/test_port_contracts.py",
 )
+OWNER_TEST_WAVE3_ADAPTER_FACADE = (
+    "tests/architecture/test_wave3_adapter_facade_closeout.py"
+)
+OWNER_TEST_COMPOSITE_RUNNER = "tests/unit/application/composite/test_runner.py"
+OWNER_TEST_RUNNER_SUPPORT_MIXIN = (
+    "tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py"
+)
+OWNER_TEST_CONTROL_PLANE_DIAGNOSTICS = (
+    "tests/architecture/test_control_plane_diagnostics_dynamic_loaders.py"
+)
 
 ZERO_IMPORT_OWNER_TEST_EVIDENCE: dict[str, dict[str, object]] = {
     "src/bioetl/__main__.py": {
@@ -110,15 +120,15 @@ ZERO_IMPORT_OWNER_TEST_EVIDENCE: dict[str, dict[str, object]] = {
     },
     "src/bioetl/infrastructure/adapters/_error_handling_support.py": {
         "evidence_lane": "retained_module_owner_suite",
-        "owner_tests": ("tests/architecture/test_wave3_adapter_facade_closeout.py",),
+        "owner_tests": (OWNER_TEST_WAVE3_ADAPTER_FACADE,),
     },
     "src/bioetl/infrastructure/adapters/_health_check_observability.py": {
         "evidence_lane": "retained_module_owner_suite",
-        "owner_tests": ("tests/architecture/test_wave3_adapter_facade_closeout.py",),
+        "owner_tests": (OWNER_TEST_WAVE3_ADAPTER_FACADE,),
     },
     "src/bioetl/infrastructure/adapters/_health_check_policy.py": {
         "evidence_lane": "retained_module_owner_suite",
-        "owner_tests": ("tests/architecture/test_wave3_adapter_facade_closeout.py",),
+        "owner_tests": (OWNER_TEST_WAVE3_ADAPTER_FACADE,),
     },
     "src/bioetl/application/composite/fsm_helper.py": {
         "evidence_lane": "retained_module_owner_suite",
@@ -141,20 +151,20 @@ ZERO_IMPORT_OWNER_TEST_EVIDENCE: dict[str, dict[str, object]] = {
         "evidence_lane": "retained_module_owner_suite",
         "owner_tests": (
             "tests/architecture/test_tracing_enforcement.py",
-            "tests/unit/application/composite/test_runner.py",
+            OWNER_TEST_COMPOSITE_RUNNER,
         ),
     },
     "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py": {
         "evidence_lane": "retained_module_owner_suite",
         "owner_tests": (
-            "tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py",
+            OWNER_TEST_RUNNER_SUPPORT_MIXIN,
         ),
     },
     "src/bioetl/application/composite/runner_pkg/runner_support_policy.py": {
         "evidence_lane": "retained_module_owner_suite",
         "owner_tests": (
-            "tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py",
-            "tests/unit/application/composite/test_runner.py",
+            OWNER_TEST_RUNNER_SUPPORT_MIXIN,
+            OWNER_TEST_COMPOSITE_RUNNER,
         ),
     },
     "src/bioetl/application/composite/runner_pkg/runner_support_runtime.py": {
@@ -167,8 +177,8 @@ ZERO_IMPORT_OWNER_TEST_EVIDENCE: dict[str, dict[str, object]] = {
     "src/bioetl/application/composite/runner_pkg/runner_support_types.py": {
         "evidence_lane": "retained_module_owner_suite",
         "owner_tests": (
-            "tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py",
-            "tests/unit/application/composite/test_runner.py",
+            OWNER_TEST_RUNNER_SUPPORT_MIXIN,
+            OWNER_TEST_COMPOSITE_RUNNER,
         ),
     },
     "src/bioetl/application/composite/runtime_models.py": {
@@ -190,26 +200,26 @@ ZERO_IMPORT_OWNER_TEST_EVIDENCE: dict[str, dict[str, object]] = {
     "src/bioetl/application/services/control_plane/manifest/diagnostics/base.py": {
         "evidence_lane": "dynamic_runtime_entrypoint",
         "owner_tests": (
-            "tests/architecture/test_control_plane_diagnostics_dynamic_loaders.py",
+            OWNER_TEST_CONTROL_PLANE_DIAGNOSTICS,
         ),
     },
     "src/bioetl/application/services/control_plane/manifest/diagnostics/finalization.py": {
         "evidence_lane": "dynamic_runtime_entrypoint",
         "owner_tests": (
-            "tests/architecture/test_control_plane_diagnostics_dynamic_loaders.py",
+            OWNER_TEST_CONTROL_PLANE_DIAGNOSTICS,
         ),
     },
     "src/bioetl/application/services/control_plane/manifest/diagnostics/replay_refresh_support.py": {
         "evidence_lane": "dynamic_runtime_entrypoint",
         "owner_tests": (
-            "tests/architecture/test_control_plane_diagnostics_dynamic_loaders.py",
+            OWNER_TEST_CONTROL_PLANE_DIAGNOSTICS,
         ),
     },
     "src/bioetl/interfaces/cli/commands/maintenance.py": {
         "evidence_lane": "compatibility_facade_contract",
         "owner_tests": (
             "tests/unit/interfaces/cli/commands/test_runtime_wrapper_contracts.py",
-            "tests/architecture/test_control_plane_diagnostics_dynamic_loaders.py",
+            OWNER_TEST_CONTROL_PLANE_DIAGNOSTICS,
         ),
     },
 }
@@ -1063,15 +1073,15 @@ def main() -> int:
         print("[dead-code-inventory] PASS: artifacts are up to date")
         return 0
 
-    # Re-bind immediately before sinks so path-taint analysis sees confinement.
-    json_out = resolve_output_path(json_out, root=repo_root)
-    md_out = resolve_output_path(md_out, root=repo_root)
-    json_out.parent.mkdir(parents=True, exist_ok=True)
-    md_out.parent.mkdir(parents=True, exist_ok=True)
-    json_out.write_text(  # NOSONAR - path confined by resolve_output_path
+    # Resolve immediately before each sink so path-taint analysis tracks confinement.
+    safe_json = resolve_output_path(json_out, root=repo_root)
+    safe_json.parent.mkdir(parents=True, exist_ok=True)
+    safe_json.write_text(  # NOSONAR - path confined by resolve_output_path
         rendered_json, encoding="utf-8"
     )
-    md_out.write_text(  # NOSONAR - path confined by resolve_output_path
+    safe_md = resolve_output_path(md_out, root=repo_root)
+    safe_md.parent.mkdir(parents=True, exist_ok=True)
+    safe_md.write_text(  # NOSONAR - path confined by resolve_output_path
         rendered_markdown, encoding="utf-8"
     )
     print(
@@ -1079,7 +1089,7 @@ def main() -> int:
         f"triaged_entries={payload['summary']['triaged_entry_count']}; "
         "repo_wide_zero_import_candidates="
         f"{payload['summary']['repo_wide_zero_import_candidate_count']}; "
-        f"json={json_out}; markdown={md_out}"
+        f"json={safe_json}; markdown={safe_md}"
     )
     return 0
 
