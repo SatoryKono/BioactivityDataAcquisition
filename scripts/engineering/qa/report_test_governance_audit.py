@@ -144,6 +144,12 @@ CRITICAL_BEHAVIOR_ENVELOPES = {
         "tests/unit/domain/aggregates/test_quarantine_entry.py",
         "tests/unit/domain/aggregates/test_quarantine_entry_invariant_properties.py",
     ),
+    "pipeline_run_fsm": (
+        "tests/unit/domain/aggregates/test_batch_fsm_exhaustive.py",
+        "tests/unit/domain/aggregates/test_pipeline_run.py",
+        "tests/unit/domain/aggregates/test_batch_invariant_properties.py",
+        "tests/unit/application/core/test_batch_transformer.py",
+    ),
     "test_governance": ("tests/architecture/test_test_governance_audit.py",),
 }
 ASSERTION_REACHABILITY_PATHS = frozenset(

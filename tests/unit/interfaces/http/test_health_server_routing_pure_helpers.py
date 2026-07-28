@@ -373,7 +373,7 @@ async def test_routing_support_dispatches_control_plane_branches(
         {
             "run_manifest_port": True,
             "run_ledger_port": True,
-            "workflow_manifest_port": False,
+            "workflow_manifest_port": True,
             "checkpoint_port": True,
             "data_root": "/audit-root",
         },
@@ -437,6 +437,7 @@ async def test_routing_support_filter_options_and_selector_context(
 ) -> None:
     host = _RoutingHost()
     writer = _Writer()
+    host._workflow_manifest_port = None
     monkeypatch.setattr(routing_support.asyncio, "to_thread", _inline_to_thread)
 
     def fake_filter_payload(**kwargs: object) -> dict[str, object]:

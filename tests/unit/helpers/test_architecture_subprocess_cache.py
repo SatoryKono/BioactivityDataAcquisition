@@ -8,7 +8,7 @@ import pytest
 
 from tests.architecture import conftest as architecture_conftest
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.subprocess_backed]
 
 
 def _write_cache_payload(path: Path, payload: dict[str, object]) -> None:

@@ -11,7 +11,7 @@ import pytest
 from tests.helpers import git_index_scan
 
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.subprocess_backed]
 
 
 def test_git_grep_fixed_retries_batched_pathspecs_before_filesystem_fallback(

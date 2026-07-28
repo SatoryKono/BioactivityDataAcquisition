@@ -1137,3 +1137,65 @@ class TestBatchTransformerDQThresholds:
         assert len(result.silver_records) == 2
         assert result.quarantined_count == 0
         mock_context.logger.warning.assert_not_called()
+
+    async def test_hard_threshold_uses_batch_local_error_count_not_run_total(
+        self,
+        mock_context,
+        mock_error_classifier,
+        mock_quarantine_manager,
+        gold_filter_callback,
+        gold_transform_callback,
+    ) -> None:
+        """Run-scoped error totals must not inflate the current-batch rate.
+
+        Regression for false ``DQ Hard Threshold exceeded: 620.00%`` when
+        cumulative ``error_count`` was divided by the current batch size only.
+        """
+        metrics = BatchMetricsRecorder(
+            metrics=None, pipeline_label="test", run_type_label="backfill"
+        )
+
+        async def failing_transform(ctx, record, index):
+            await asyncio.sleep(0)
+            if record.get("id") == "bad":
+                raise DataQualityError("Invalid data")
+            return {"entity_id": record.get("id"), "value": record.get("value")}
+
+        config = RecordProcessorConfig(
+            pipeline_name="test",
+            provider="test",
+            entity_type="test",
+            silver_schema=MagicMock(),
+            gold_schema=MagicMock(),
+            dq_config=DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.50),
+        )
+        transformer = BatchTransformer(
+            context=mock_context,
+            config=config,
+            error_classifier=mock_error_classifier,
+            quarantine_manager=mock_quarantine_manager,
+            batch_metrics=metrics,
+            transform_callback=failing_transform,
+            gold_filter_callback=gold_filter_callback,
+            gold_transform_callback=gold_transform_callback,
+        )
+
+        with pytest.raises(DataQualityThresholdError) as first_batch:
+            await transformer.transform_batch(
+                [{"id": "bad", "value": 1}],
+                deterministic_batch_uuid_from_callsite("test_batch_transformer_b1"),
+            )
+        assert first_batch.value.error_rate == pytest.approx(1.0)
+        assert metrics.error_count >= 1
+
+        from bioetl.domain.types import ErrorType
+
+        for _ in range(619):
+            metrics.track_error("silver_write", ErrorType.DATA_QUALITY)
+
+        result = await transformer.transform_batch(
+            [{"id": f"good-{i}", "value": 10} for i in range(100)],
+            deterministic_batch_uuid_from_callsite("test_batch_transformer_b2"),
+        )
+        assert result.quarantined_count == 0
+        assert metrics.batch_error_count == 0
