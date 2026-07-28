@@ -35,3 +35,10 @@ Epic #6800. UIDs stay stable for primary boards unless noted.
 
 ≤7 first-class boards. Adjunct Explore UIs and Silver Reject Explorer remain removed
 (surface reduction 2026-07-23).
+
+## Phase-2 residual (epic #6828)
+
+Do **not** create new uids for Global Ops / Pipeline Overview / DQ Center aliases —
+map names to the fixed seven above. Execution plan:
+`dashboard-system-2.0-phase2-residual.md`. Gated fancy viz (Sankey/Topology/Health
+Score): issue #6830 only after metrics+ADR gates.

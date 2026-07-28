@@ -78,7 +78,7 @@ def test_issue_6220_public_lazy_facades_are_fully_classified() -> None:
         inventory["row_count"]
         == closeout["ratchets"]["public_lazy_facade_rows"]["current"]
     )
-    assert len(facades) == 52
+    assert len(facades) == 53
     assert not [
         row for row in facades if not row.get("classification") or not row.get("owner")
     ]

@@ -259,6 +259,8 @@
         "docs/00-project/index.md",
         "docs/00-project/rules-summary.md",
         "docs/01-requirements/REQUIREMENTS.md",
+        "docs/03-guides/dashboards/README.md",
+        "docs/03-guides/dashboards/dashboard-system-2.0-phase2-residual.md",
         "docs/03-guides/docs-verification.md",
         "docs/03-guides/getting-started.md",
         "docs/03-guides/local-storage-layout.md",

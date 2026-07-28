@@ -44,6 +44,15 @@ notes. Если prose ниже расходится с JSON, править ну
 - First Action panels remain the primary CTA surface across boards.
 - Provider causes use existing `bioetl_provider_current_cause` recording rules.
 
+## Phase-2 residual (2026-07-28, epic #6828)
+
+- SSOT: `dashboard-system-2.0-phase2-residual.md` (greenfield Unified Plan not executable).
+- Visualization: color-background status tables; dual-row nav 0–4 / 5–6.
+- Incident: domain-separated suspect tables (Runtime / Provider / DQ).
+- Run Explorer: HTTP narrative + ≤4 next actions; nav owns board hops.
+- Empty-state / CTA chrome standardized across boards.
+- Usability re-measure: `reports/observability/usability-baseline.md` post-Phase-2 section.
+
 ## Проверенные дашборды
 
 - `bioetl-overview-v2`

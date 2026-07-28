@@ -143,22 +143,38 @@ def _html_href(url: str) -> str:
     )
 
 
+def _chip_html(item: dict[str, str], *, current_uid: str, source_uid: str) -> str:
+    short = item["title"].split(". ", 1)[-1]
+    title_attr = f'{item["title"]} ({short})'
+    if item["uid"] == current_uid:
+        return (
+            f'<span aria-current="page" title="{title_attr}" style="{CURRENT_STYLE}">'
+            f'{item["title"]}</span>'
+        )
+    href = _html_href(_url_for(item, source_uid=source_uid))
+    return (
+        f'<a style="{LINK_STYLE}" title="{title_attr}" href="{href}">'
+        f'{item["title"]}</a>'
+    )
+
+
 def render_html(*, current_uid: str) -> str:
+    """Single bioetl-nav container; primary 0–4 then full-width break then adjunct 5–6."""
+    primary = BUS[:5]
+    adjunct = BUS[5:]
     parts: list[str] = [
         f'<div class="bioetl-nav" role="navigation" '
         f'aria-label="BioETL dashboards" style="{CONTAINER_STYLE}">'
     ]
-    for item in BUS:
-        if item["uid"] == current_uid:
-            parts.append(
-                f'<span aria-current="page" style="{CURRENT_STYLE}">'
-                f'{item["title"]}</span>'
-            )
-        else:
-            href = _html_href(_url_for(item, source_uid=current_uid))
-            parts.append(
-                f'<a style="{LINK_STYLE}" href="{href}">{item["title"]}</a>'
-            )
+    for item in primary:
+        parts.append(_chip_html(item, current_uid=current_uid, source_uid=current_uid))
+    # Force second row for adjunct workspaces (readability at 1024px).
+    parts.append(
+        '<span style="flex:1 1 100%;height:0;overflow:hidden;margin:0;padding:0;'
+        'border:0" aria-hidden="true"></span>'
+    )
+    for item in adjunct:
+        parts.append(_chip_html(item, current_uid=current_uid, source_uid=current_uid))
     parts.append("</div>")
     return "".join(parts)
 

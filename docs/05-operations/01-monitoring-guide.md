@@ -33,11 +33,15 @@ live in [../03-guides/dashboards/dashboard-inventory.md](../03-guides/dashboards
 
 ## 0. Канонический operator workflow
 
-Dashboard System 2.0 (epic #6800): **detect → localize → decide → recover**.
+Dashboard System 2.0: **detect → localize → decide → recover**.
+Phase-1 epic #6800 + Phase-2 residual epic #6828.
 UI entry is evidence-first: Fleet (`bioetl-overview-v2`) or Incident Workspace
-for alert hops; Trust for resume safety; Run Explorer for exact identity.
-See [operator-ux-v2.md](../03-guides/dashboards/operator-ux-v2.md) and
-[migration-map-v2.md](../03-guides/dashboards/migration-map-v2.md).
+(`bioetl-incident-v1`) for alert hops; Trust for resume safety; Run Explorer for
+exact identity. Navigation bus `0..6` on every board.
+See [operator-ux-v2.md](../03-guides/dashboards/operator-ux-v2.md),
+[dashboard-system-2.0-phase2-residual.md](../03-guides/dashboards/dashboard-system-2.0-phase2-residual.md),
+and [migration-map-v2.md](../03-guides/dashboards/migration-map-v2.md).
+Record forensics remain CLI (`bioetl quarantine inspect`) — no Loki/Tempo UI.
 
 Используйте observability surface в таком порядке:
 

@@ -19,8 +19,13 @@ monitoring surface reduction 2026-07-23)
 
 ## Актуальные документы
 
-### Dashboard System 2.0 (active design track, epic #6800)
+### Dashboard System 2.0
 
+- **Phase-1 (done):** epic #6800 — first-screen surgery, full nav bus, thin Incident/Run.
+- **Phase-2 residual (active):** epic #6828 — see
+  `dashboard-system-2.0-phase2-residual.md` (execution SSOT). Greenfield
+  «Unified Plan v2.0» is **not** executable (ADR-010 / ≤7 boards / no invent metrics).
+- Residual gap table: `reports/observability/dashboard-ux-residual-gap-2026-07-28.md`.
 - `operator-ux-v2.md` — first-screen zones, prose budget, empty-state taxonomy, link standard, KPI targets.
 - `verdict-ontology.md` — state×confidence×basis×next_action for all workspaces.
 - `migration-map-v2.md` — current uid → target workspace; alert entry rebind.
@@ -56,8 +61,8 @@ monitoring surface reduction 2026-07-23)
 
 - **7 dashboards** (portfolio cap): Trust, Overview/Fleet, Pipeline Diagnostics,
   Provider Health, Data Quality/Data Trust, Incident Workspace, Run Explorer.
-  Navigation bus `0..4` on primary boards; Incident/Run as adjunct workspaces
-  (no Silver Reject Explorer, no Loki/Tempo Explore adjuncts).
+  Navigation bus **`0..6` on every board** (Provider on-bus; Incident/Run adjunct
+  row). No Silver Reject Explorer, no Loki/Tempo Explore adjuncts.
 - Identity HTTP panels use datasource **BioETL Ops HTTP** → main health server
   `:8000` (`BIOETL_OPS_HTTP_URL`).
 - Record-level quarantine forensics: CLI `bioetl quarantine inspect` (not Grafana).
