@@ -1,5 +1,3 @@
-"""Data-root mode policy helpers for run-manifest builders."""
-
 from __future__ import annotations
 
 import os
@@ -25,21 +23,13 @@ __all__ = [
 
 
 def control_plane_root(*args: object, **kwargs: object) -> object:
-    """Compatibility wrapper for the control-plane path leaf helper."""
-    return (
-        import_module(
-            "bioetl.composition.runtime_builders._run_manifest_control_plane_paths"
-        )
-    ).control_plane_root(*args, **kwargs)
+    module = "bioetl.composition.runtime_builders._run_manifest_control_plane_paths"
+    return import_module(module).control_plane_root(*args, **kwargs)
 
 
 def build_planned_artifacts(*args: object, **kwargs: object) -> object:
-    """Compatibility wrapper for the planned-artifact path leaf helper."""
-    return (
-        import_module(
-            "bioetl.composition.runtime_builders._run_manifest_planned_artifacts"
-        )
-    ).build_planned_artifacts(*args, **kwargs)
+    module = "bioetl.composition.runtime_builders._run_manifest_planned_artifacts"
+    return import_module(module).build_planned_artifacts(*args, **kwargs)
 
 
 def __getattr__(name: str) -> object:  # pragma: no cover
