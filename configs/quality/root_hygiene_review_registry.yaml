@@ -10,11 +10,13 @@ current_live_root_baseline:
     .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py
     --strict-untracked
   note: >-
-    2026-07-28 RH4-01..RH4-04 (#6812–#6816): tracked root still 37≡allowlist;
-    purged recreated _tmp_*.py and root logs/; watchdog default StateDir moved
-    to reports/logs/docker-watchdog/; agent scratch ban documented in
-    root-local-clutter-cleanup.md. Prior RH3 (#6795–#6799): operator checklist;
-    Docker exact-root shrink remains deferred (#6797). See also 2026-07-27 RH/RH2.
+    2026-07-28 RH epic #6874: RH-01 removed unexpected tracked _a.txt
+    (37≡allowlist restored); RH-05 retain .secrets.baseline (detect-secrets
+    architecture gate) and .aiignore (AI-client exact-root ignore); RH-02
+    local-vs-CI guidance in root-local-clutter-cleanup.md; RH-03 CONTRIBUTING
+    already thin-stub→.github/CONTRIBUTING.md; RH-04 Docker adjunct rehome
+    remains owner-gated (not_planned without new owner record; see #6797);
+    RH-07 further shrink deferred. Prior RH4 (#6812–#6816) / RH3 / RH2 intact.
 
 review_lanes:
   - lane_id: root_env_security
