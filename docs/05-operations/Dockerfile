@@ -22,9 +22,10 @@ COPY pyproject.toml uv.lock README.md ./
 COPY src/ ./src/
 
 # Binary-only uv bootstrap + frozen lockfile sync (Sonar docker:S8541/S8544).
-# --no-build refuses sdist/setup-script execution; --frozen pins resolved versions.
+# Third-party deps: --no-build. Local project: separate editable install.
 RUN pip install --only-binary=:all: --no-cache-dir uv==0.11.26 && \
-    UV_NO_BUILD=1 uv sync --frozen --no-build --no-dev --directory /app
+    UV_NO_BUILD=1 uv sync --frozen --no-build --no-dev --no-install-project --directory /app && \
+    uv pip install --python /app/.venv/bin/python --no-deps --directory /app -e .
 
 # ============ Production Stage ============
 FROM base AS production

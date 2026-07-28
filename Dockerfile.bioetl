@@ -19,9 +19,11 @@ RUN apt-get update \
 # Copy package metadata and source required by setuptools/uv build resolution.
 COPY pyproject.toml uv.lock ./
 COPY src/ ./src/
-# Lockfile-backed install; --no-build refuses sdist/setup-script execution (Sonar docker:S8541).
+# Lockfile-backed third-party install without sdist/setup scripts (Sonar docker:S8541).
+# Local project is installed separately: editable installs require a local build step.
 RUN printf '# BioETL\n' > README.md \
-    && UV_NO_BUILD=1 uv sync --no-dev --frozen --no-build --directory /app
+    && UV_NO_BUILD=1 uv sync --no-dev --frozen --no-build --no-install-project --directory /app \
+    && uv pip install --python /app/.venv/bin/python --no-deps --directory /app -e .
 
 # Stage 2: Runtime (minimal image)
 FROM python:3.12-slim@sha256:c3d81d25b3154142b0b42eb1e61300024426268edeb5b5a26dd7ddf64d9daf28
