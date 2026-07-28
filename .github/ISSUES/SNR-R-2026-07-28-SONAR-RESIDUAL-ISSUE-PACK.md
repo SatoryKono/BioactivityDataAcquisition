@@ -1,20 +1,29 @@
 # SonarCloud residual remediation issue pack
 
-**Status:** published
+**Status:** in progress (SNR-R-01 closed; residual burn-down active on `main`)
 **Wave code:** SNR-R
 **Date:** 2026-07-28
 **Epic:** [#6938](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6938)
-**Predecessor PR (in flight):** [#6936](https://github.com/SatoryKono/BioactivityDataAcquisition/pull/6936)
+**Predecessor PR:** [#6936](https://github.com/SatoryKono/BioactivityDataAcquisition/pull/6936) **merged**
 **Plan SSOT:** `reports/plans/sonar-remediation-plan-2026-07-28/01-plan-initial.md`
-**Ledger:** `reports/quality/sonar/live-issues-20260728-manifest.json`
+**Ledger (pre):** `reports/quality/sonar/live-issues-20260728-manifest.json`
+**Ledger (post-merge):** `reports/quality/sonar/live-issues-20260728-postmerge-full.json`
 **Publish artifact:** `reports/quality/snr-r-2026-07-28-issue-publish.json`
 **Project:** `SatoryKono_BioactivityDataAcquisition` (SonarCloud)
+
+### Live progress (server analysis)
+
+| Checkpoint | Total | Blocker | Bugs | Vulns | Smells |
+|------------|------:|--------:|-----:|------:|-------:|
+| Program start | 726 | 5 | 9 | 113 | 604 |
+| Post-#6936 (`85bd9507`) | 435 | 0 | 0 | 26 | 409 |
+| Later tip (`41be8ea4`) | **382** | 0 | 0 | **5** | **377** |
 
 ## Context
 
 Live SonarCloud baseline at program start (2026-07-28): **~725–726** unresolved, quality gate **ERROR**.
 
-PR **#6936** already lands code for:
+PR **#6936** landed and merged with:
 
 | Wave | Scope | PR commits (approx) |
 |------|--------|---------------------|
@@ -23,7 +32,7 @@ PR **#6936** already lands code for:
 | W3 | path/cmd taint bulk + Docker/GHA pins | `df522d62c9` |
 | W4 partial | campaign / Grafana audit / inventory complexity extracts | `b1edda6971` |
 
-**Important:** until #6936 merges and Sonar re-analyzes tip `main`, public API still reports pre-merge counts (blockers/bugs/vulns). Children that depend on live residual **MUST** rebaseline after merge (SNR-R-01 / #6939).
+Follow-on `main` commits continue W4t2/W5/security residual burn-down. SNR-R-01 / #6939 is **closed** with post-merge rebaseline artifacts.
 
 ## Constraints (all children)
 
@@ -39,7 +48,7 @@ PR **#6936** already lands code for:
 | Code | Issue | Pri | Phase | Title |
 |------|------:|-----|-------|-------|
 | SNR-R-00 | [#6938](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6938) | meta | 0 | Epic: Sonar residual after #6936 |
-| SNR-R-01 | [#6939](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6939) | P0 | 1 | Merge #6936 + Sonar re-scan rebaseline |
+| SNR-R-01 | [#6939](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6939) **closed** | P0 | 1 | Merge #6936 + Sonar re-scan rebaseline |
 | SNR-R-02 | [#6940](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6940) | P1 | 2 | W4t2: `check_scripts_inventory` S3776 |
 | SNR-R-03 | [#6941](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6941) | P1 | 2 | W4t2: Grafana cjs + residual audit panels S3776 |
 | SNR-R-04 | [#6942](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6942) | P1 | 2 | W4t2: inventory/semantic residual S3776 |
