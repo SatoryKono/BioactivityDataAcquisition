@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 1.0.3
+Version: 1.0.4
 Status: active
 Class: published
 Owner: BioETL Team
@@ -71,6 +71,7 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-050](ADR-050-silver-structural-gold-semantic-filter-boundary.md) | Silver Structural and Gold Semantic Filter Boundary | Accepted | Data Quality | 2026-06-15 |
 | [ADR-051](ADR-051-quarantine-entry-aggregate-surface.md) | QuarantineEntry Wide Constructor as Intentional Aggregate Surface | Accepted | Architecture | 2026-07-27 |
 | [ADR-052](ADR-052-infrastructure-config-package-root-public-api.md) | Infrastructure Config Package Root as Permanent Public API | Accepted | Architecture | 2026-07-28 |
+| [ADR-053](ADR-053-optional-grafana-scenes-app-shell.md) | Optional Grafana Scenes App Shell as Presentation Adapter | Accepted | Observability | 2026-07-28 |
 
 ## ADRs by Category
 

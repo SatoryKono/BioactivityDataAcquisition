@@ -1027,7 +1027,7 @@ host/WSL setups, prefer an explicit value over assuming `localhost:9090`.
 
 - **`0. Control Plane`** uses the shared context shell and adds
   control-plane-specific trust panels for manifest/ledger/checkpoint/replay/lineage.
-  `Next Action: Replay Diagnostics` now occupies the rightmost shared-shell slot
+  `Primary recovery` occupies the rightmost shared-shell slot
   beside `ID` and `Processed Records`, while the four compact trust cards remain
   directly below the shared context shell.
   Headline `Status` reads `bioetl_control_plane_current_status_trusted`:

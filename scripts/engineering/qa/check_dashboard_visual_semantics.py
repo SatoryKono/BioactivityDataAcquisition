@@ -39,13 +39,13 @@ FORBIDDEN_L0_TERMS = {"DEGRADED", "BROKEN", "HEALTHY"}
 STATUS_PANEL_TOKENS = ("status", "state", "severity", "health")
 STANDARD_SEVERITY_TITLE_TOKENS = (
     "Current Status",
-    "Telemetry Gap",
+    "Metrics Evidence",
     "Threshold State",
 )
 BACKGROUND_SEVERITY_STAT_PANELS = {
     ("bioetl-overview-v2.json", "Status"),
     ("bioetl-runtime.json", "Runtime Status"),
-    ("bioetl-runtime.json", "Runtime Telemetry Gap"),
+    ("bioetl-runtime.json", "Metrics Evidence"),
     ("bioetl-runtime.json", "Monitor Runtime Blockers"),
     ("bioetl-runtime.json", "Failed Runs"),
     ("bioetl-runtime.json", "Runtime Error Rate"),
@@ -77,7 +77,7 @@ EXPLICIT_VALUE_MAPPING_STAT_PANELS = {
         "2": {"text": "CRIT", "color": "red"},
         "3": {"text": "INCOMPLETE", "color": "gray"},
     },
-    ("bioetl-runtime.json", "Runtime Telemetry Gap"): {
+    ("bioetl-runtime.json", "Metrics Evidence"): {
         "0": {"text": "SCRAPING", "color": "green"},
         "1": {"text": "SCRAPE/RULE GAP", "color": "orange"},
         "2": {"text": "SCRAPE+RULE GAP", "color": "red"},
@@ -112,7 +112,7 @@ EXPLICIT_VALUE_MAPPING_STAT_PANELS = {
 FAIL_CLOSED_NO_ZERO_FALLBACK_PANELS = {
     ("bioetl-overview-v2.json", "Status"): "UNKNOWN",
     ("bioetl-runtime.json", "Runtime Status"): "UNKNOWN",
-    ("bioetl-runtime.json", "Runtime Telemetry Gap"): "UNKNOWN",
+    ("bioetl-runtime.json", "Metrics Evidence"): "UNKNOWN",
     ("bioetl-runtime.json", "Monitor Runtime Blockers"): "UNKNOWN",
     ("bioetl-runtime.json", "Runtime Error Rate"): "UNKNOWN",
     ("bioetl-runtime.json", "Worst Stage Lag"): "UNKNOWN",
@@ -126,7 +126,7 @@ FAIL_CLOSED_NO_ZERO_FALLBACK_PANELS = {
     ("bioetl-control-plane-v1.json", "Inspect: Telemetry Missing"): "UNKNOWN",
 }
 REQUIRED_TRUST_MARKER_PANELS = {
-    "bioetl-runtime.json": {"Runtime Telemetry Gap"},
+    "bioetl-runtime.json": {"Metrics Evidence"},
     "bioetl-control-plane-v1.json": {"Inspect: Telemetry Missing"},
 }
 

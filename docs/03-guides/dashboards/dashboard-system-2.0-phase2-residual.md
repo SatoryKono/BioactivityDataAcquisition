@@ -80,3 +80,11 @@ Use Unified Plan only as **benchmark inspiration**, not as delivery scope.
 | Invented series | 0 |
 
 See `usability-baseline-protocol.md` and `reports/observability/usability-baseline.md`.
+
+
+## DS2 follow-on (2026-07-28)
+
+Post-DRM-R audit execution: epic [#6901](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6901).
+Wave 0 truth/render + Wave 1 compression ship on JSON; optional Scenes shell is
+[ADR-053](../../02-architecture/decisions/ADR-053-optional-grafana-scenes-app-shell.md).
+Issue pack: `.github/ISSUES/DS2-2026-07-28-DASHBOARD-SYSTEM-2-REFACTOR-ISSUE-PACK.md`.

@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.runtime_builders._run_manifest_identity_ref_values import (
     build_contract_identity_field_values,
@@ -22,9 +23,12 @@ def control_plane_root(settings: Settings, leaf: str) -> Path:
     # charge this facade against the path-helper module (ARCH-CONT-07).
     from importlib import import_module
 
-    impl = import_module(
-        "bioetl.composition.runtime_builders._run_manifest_control_plane_paths"
-    ).control_plane_root
+    impl = cast(
+        Callable[..., Path],
+        import_module(
+            "bioetl.composition.runtime_builders._run_manifest_control_plane_paths"
+        ).control_plane_root,
+    )
     return impl(settings, leaf)
 
 
@@ -41,9 +45,12 @@ def build_planned_artifacts(
     """Typed forwarding wrapper for planned-artifact materialization."""
     from importlib import import_module
 
-    impl = import_module(
-        "bioetl.composition.runtime_builders._run_manifest_planned_artifacts"
-    ).build_planned_artifacts
+    impl = cast(
+        Callable[..., tuple["RunArtifactRef", ...]],
+        import_module(
+            "bioetl.composition.runtime_builders._run_manifest_planned_artifacts"
+        ).build_planned_artifacts,
+    )
     return impl(
         settings=settings,
         provider=provider,

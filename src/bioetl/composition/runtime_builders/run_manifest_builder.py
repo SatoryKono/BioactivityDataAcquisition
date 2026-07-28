@@ -194,7 +194,7 @@ def _build_manifest_create_request(
         reproducibility_context=reproducibility_context,
         contract_identity=contract_identity,
     )
-    return build_manifest_create_request(
+    request: RunManifestCreateSpec = build_manifest_create_request(
         RunManifestCreateRequestInputs(
             ctx=ctx,
             inputs=inputs,
@@ -212,6 +212,7 @@ def _build_manifest_create_request(
             effective_config_artifact_id=provenance.effective_config_artifact_id,
         )
     )
+    return request
 
 
 def _maybe_create_ledger_service(

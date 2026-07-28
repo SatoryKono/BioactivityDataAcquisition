@@ -1153,7 +1153,7 @@ def test_control_plane_l1_triage_row_has_3_to_5_kpis_and_one_next_step() -> None
         "Monitor: Manifest / Ledger Integrity",
         "Inspect: Telemetry Missing",
     }
-    next_step_title = "Next Action: Replay Diagnostics"
+    next_step_title = "Primary recovery"
     first_screen_titles = {
         panel.get("title") for panel in panels[:13] if panel.get("type") != "row"
     }
@@ -1168,7 +1168,7 @@ def test_control_plane_l1_has_single_next_step_panel_with_expected_target() -> N
     panels = [
         panel
         for panel in get_dashboard_panels(dashboard)
-        if panel.get("title") == "Next Action: Replay Diagnostics"
+        if panel.get("title") == "Primary recovery"
     ]
     assert len(panels) == 1
 

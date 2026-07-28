@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections import Counter
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.services.control_plane.manifest.diagnostics.dq_details import (
     DQDetailsSummary,
@@ -25,9 +25,11 @@ from bioetl.application.services.control_plane.manifest.diagnostics.source_refs 
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.summary import (
     _build_final_summary,
-    _build_runtime_views,
     _FinalSummaryRequest,
     _RuntimeViewsRequest,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.summary_support import (
+    build_runtime_views as _build_runtime_views,
 )
 from bioetl.application.services.control_plane.run_manifest_reproducibility_scoring import (
     build_reproducibility_audit_scoring,
@@ -194,4 +196,4 @@ def build_final_diagnostics_summary(
         )
     )
     attach_summary_reproducibility_views(final_summary)
-    return final_summary
+    return cast(dict[str, object], final_summary)

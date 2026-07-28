@@ -14,10 +14,10 @@ pytestmark = pytest.mark.architecture
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 NORMALIZATION_PLAN_PATH = (
-    PROJECT_ROOT / "docs/05-engineering/normalization_plan_P0_P6.md"
+    PROJECT_ROOT / "docs/99-archive/engineering/normalization_plan_P0_P6.md"
 )
 NORMALIZATION_PLAN_REDIRECT_PATH = (
-    PROJECT_ROOT / "docs/05-engineering/normalization-plan-P0-P6.md"
+    PROJECT_ROOT / "docs/99-archive/engineering/normalization-plan-P0-P6.md"
 )
 CONFIG_MATRIX_PATH = PROJECT_ROOT / "docs/04-reference/config_comparison_matrix.csv"
 LEGACY_CONFIG_MATRIX_PATH = PROJECT_ROOT / "docs/config_comparison_matrix.csv"

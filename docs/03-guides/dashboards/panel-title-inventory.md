@@ -17,7 +17,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 1000 | Navigation |
 | bioetl-control-plane-v1.json | 9400 | Provenance |
 | bioetl-control-plane-v1.json | 9401 | Status |
-| bioetl-control-plane-v1.json | 906 | Next Action: Replay Diagnostics |
+| bioetl-control-plane-v1.json | 906 | Primary recovery |
 | bioetl-control-plane-v1.json | 891 | Monitor: Replay Safety State |
 | bioetl-control-plane-v1.json | 892 | Monitor: Checkpoint Freshness Lag (seconds) |
 | bioetl-control-plane-v1.json | 893 | Monitor: Manifest / Ledger Integrity |
@@ -137,7 +137,8 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 
 | bioetl-incident-v1.json | 1000 | Navigation |
 | bioetl-incident-v1.json | 9400 | Provenance |
-| bioetl-incident-v1.json | 9401 | Status |
+| bioetl-incident-v1.json | 9401 | Status
+| bioetl-incident-v1.json | 2010 | Ranked Active Suspects |
 | bioetl-incident-v1.json | 2001 | Next Best Actions |
 | bioetl-incident-v1.json | 2002 | Active Suspects · Runtime |
 | bioetl-incident-v1.json | 2003 | Active Suspects · Provider |

@@ -241,7 +241,7 @@
         "y": 10
       },
       "options": {
-        "content": "**Primary recovery:** Status + four cards below. INCOMPLETE/UNKNOWN → repair evidence before resume. Exact run → Run Explorer. VALID_EMPTY blockers only when Status=OK and cards clean.",
+        "content": "**Primary recovery (Safety Gate)** — act only after Status + four evidence cells:\n1. **INCOMPLETE/UNKNOWN** → repair telemetry / checkpoint / integrity before resume.\n2. Non-OK gate cell → open that drilldown (Replay Safety / Checkpoint / Manifest / Telemetry).\n3. Exact run selected → **Run Explorer** for identity proof.\n4. VALID_EMPTY blockers only when Status=OK and cards clean.",
         "mode": "markdown",
         "dataLinks": [
           {
@@ -260,7 +260,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Current 15m replay/resume safety blockers for the selected pipeline/run_type. Status mapping: 0=OK when Inspect: Telemetry Missing = 0; if telemetry is non-zero or UNKNOWN, validate scrape/rules before trusting zero blockers. 1=WARN, >=2=CRIT, null=UNKNOWN. This is a current-status panel using a 15m recording rule window. Missing data means the dashboard cannot prove replay safety; inspect telemetry presence and manifest/ledger rows before replay/resume. Trust card: non-OK/INCOMPLETE always has basis in description mapping.",
+      "description": "Current 15m replay/resume safety blockers for the selected pipeline/run_type. Status mapping: 0=OK when Inspect: Telemetry Missing = 0; if telemetry is non-zero or UNKNOWN, validate scrape/rules before trusting zero blockers. 1=WARN, >=2=CRIT, null=UNKNOWN. This is a current-status panel using a 15m recording rule window. Missing data means the dashboard cannot prove replay safety; inspect telemetry presence and manifest/ledger rows before replay/resume. Trust card: non-OK/INCOMPLETE always has basis in description mapping. Safety-gate cell (not an independent KPI); pair with Status + Primary recovery.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -361,7 +361,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Latest persisted checkpoint age in seconds for the selected pipeline. This is bounded freshness evidence derived from persisted checkpoint metadata via /ops/control-plane/checkpoint-freshness and the canonical bioetl_checkpoint_age_seconds recording rule, not from short-lived Prometheus scrape history. Lower is fresher. Null/No data means no persisted checkpoint evidence for the current scope, so treat the result as UNKNOWN and inspect checkpoint artifacts/runbook before replay or resume decisions. VALID EMPTY means a successful HTTP response with zero rows; BACKEND DOWN or datasource error is UNKNOWN, never empty.",
+      "description": "Latest persisted checkpoint age in seconds for the selected pipeline. This is bounded freshness evidence derived from persisted checkpoint metadata via /ops/control-plane/checkpoint-freshness and the canonical bioetl_checkpoint_age_seconds recording rule, not from short-lived Prometheus scrape history. Lower is fresher. Null/No data means no persisted checkpoint evidence for the current scope, so treat the result as UNKNOWN and inspect checkpoint artifacts/runbook before replay or resume decisions. VALID EMPTY means a successful HTTP response with zero rows; BACKEND DOWN or datasource error is UNKNOWN, never empty. Safety-gate cell (not an independent KPI); pair with Status + Primary recovery.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -469,7 +469,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Current 15m manifest/ledger write failure count for selected pipeline/run_type. Status mapping: 0=OK only when manifest and ledger telemetry are present, 1=WARN, >=2=CRIT, null=UNKNOWN. This is a current-status panel using a 15m recording rule window. This does not prove manifest identity or ledger ordering; use run manifest inspection for exact run/manifest evidence. Trust card: non-OK/INCOMPLETE always has basis in description mapping.",
+      "description": "Current 15m manifest/ledger write failure count for selected pipeline/run_type. Status mapping: 0=OK only when manifest and ledger telemetry are present, 1=WARN, >=2=CRIT, null=UNKNOWN. This is a current-status panel using a 15m recording rule window. This does not prove manifest identity or ledger ordering; use run manifest inspection for exact run/manifest evidence. Trust card: non-OK/INCOMPLETE always has basis in description mapping. Safety-gate cell (not an independent KPI); pair with Status + Primary recovery.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -570,7 +570,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Current 5m missing-telemetry risk for manifest and ledger metrics. Status mapping: 0=OK/present, 1=WARN/one required family missing, >=2=CRIT/both required families missing, null=UNKNOWN. This is a current-status panel using a 5m recording rule window. If non-zero or UNKNOWN, do not trust zero blocker cards: validate Prometheus scrape/rules and control-plane emitters before replay/resume. Trust card: non-OK/INCOMPLETE always has basis in description mapping. UNKNOWN — telemetry marker absent (TELEMETRY_ABSENT_OR_STALE).",
+      "description": "Current 5m missing-telemetry risk for manifest and ledger metrics. Status mapping: 0=OK/present, 1=WARN/one required family missing, >=2=CRIT/both required families missing, null=UNKNOWN. This is a current-status panel using a 5m recording rule window. If non-zero or UNKNOWN, do not trust zero blocker cards: validate Prometheus scrape/rules and control-plane emitters before replay/resume. Trust card: non-OK/INCOMPLETE always has basis in description mapping. UNKNOWN — telemetry marker absent (TELEMETRY_ABSENT_OR_STALE). Safety-gate cell (not an independent KPI); pair with Status + Primary recovery.",
       "fieldConfig": {
         "defaults": {
           "color": {

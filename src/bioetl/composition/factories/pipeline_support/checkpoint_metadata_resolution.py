@@ -16,7 +16,8 @@ from bioetl.domain.control_plane import RunInputSnapshotRef
 
 def _resolve_run_context_payload(pipeline: object) -> object | None:
     """Resolve metadata run_context from pipeline services when available."""
-    metadata_coordinator = getattr(pipeline.services, "metadata_coordinator", None)
+    services = getattr(pipeline, "services", None)
+    metadata_coordinator = getattr(services, "metadata_coordinator", None)
     if metadata_coordinator is None:
         return None
     return getattr(metadata_coordinator, "run_context", None)
