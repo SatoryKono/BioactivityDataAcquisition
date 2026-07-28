@@ -21,10 +21,13 @@ test_lanes:
     hard_merge_truth:
       - live_ci_status
       - coverage-verify
-    advisory_telemetry:
       - branch_coverage
+    advisory_telemetry:
       - mutation_testing
       - local_test_health_rollups
+    branch_coverage_policy:
+      policy: blocking
+      hard_gate_threshold_percent: 85
     historical_evidence:
       - reports/quality/test-runs/rollup.md
     dirty_tree_policy: >
@@ -111,13 +114,13 @@ test_lanes:
       runner: scripts/engineering/dev/run_pytest.sh
       paths:
         - tests/unit/
-      marker_expression: "not repo_backed and not slow and not benchmark and not memory"
+      marker_expression: "not repo_backed and not subprocess_backed and not slow and not benchmark and not memory"
       pytest_args:
         - tests/unit/
         - --ignore=tests/unit/scripts
         - --ignore=tests/unit/repo_backed
         - -m
-        - not repo_backed and not slow and not benchmark and not memory
+        - not repo_backed and not subprocess_backed and not slow and not benchmark and not memory
       replay_mode: not_applicable
       coverage_gate: none
       expected_artifacts:

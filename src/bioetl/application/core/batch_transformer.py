@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
-__all__ = ["BatchTransformer", "StreamingBatchProcessor", "TransformResult", "TransformedRecord"]
+__all__ = [
+    "BatchTransformer",
+    "StreamingBatchProcessor",
+    "TransformResult",
+    "TransformedRecord",
+]
 
 import asyncio
 from typing import TYPE_CHECKING, cast
@@ -142,6 +147,10 @@ class BatchTransformer:
             DataQualityThresholdError: If DQ hard threshold exceeded.
 
         """
+        begin_batch = getattr(self._batch_metrics, "begin_batch", None)
+        if callable(begin_batch):
+            begin_batch()
+
         state = await collect_batch_transform_state(
             records=records,
             batch_id=batch_id,
@@ -225,6 +234,10 @@ class BatchTransformer:
             DataQualityThresholdError: If DQ hard threshold exceeded.
 
         """
+        begin_batch = getattr(self._batch_metrics, "begin_batch", None)
+        if callable(begin_batch):
+            begin_batch()
+
         state = await collect_stream_transform_state(
             records=records,
             batch_id=batch_id,

@@ -40,6 +40,9 @@ class _BatchMetricsRecorderService(Protocol):
     @property
     def error_count(self) -> int | None: ...
 
+    @property
+    def batch_error_count(self) -> int | None: ...
+
     def track_dq_validation_failure(self, *, stage: str, severity: str) -> None: ...
 
 
@@ -143,7 +146,18 @@ def _resolve_error_count(
     batch_metrics: _BatchMetricsRecorderService,
     state: TransformAggregationState,
 ) -> int:
-    """Resolve a concrete DQ error count without trusting mock placeholders."""
+    """Resolve a per-batch DQ error count for threshold evaluation.
+
+    Hard/soft thresholds compare ``error_count / len(current_batch)``. The
+    numerator **must** be batch-local. Using run-scoped ``error_count`` against
+    the current batch size produces impossible rates (e.g. 620%) on multi-batch
+    runs because earlier transform/write errors remain in the cumulative counter.
+    """
+    batch_error_count = getattr(batch_metrics, "batch_error_count", None)
+    if isinstance(batch_error_count, int) and not isinstance(batch_error_count, bool):
+        return batch_error_count
+    if state.quarantined_count > 0:
+        return state.quarantined_count
     error_count = getattr(batch_metrics, "error_count", None)
     if isinstance(error_count, int) and not isinstance(error_count, bool):
         return error_count

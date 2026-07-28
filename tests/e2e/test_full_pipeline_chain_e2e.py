@@ -23,7 +23,11 @@ from .conftest import (
     get_silver_records,
 )
 
-pytestmark = pytest.mark.usefixtures("relaxed_dq_env")
+# Large multi-entity VCR chains (10–29 MiB) stay out of default -m "not slow".
+pytestmark = [
+    pytest.mark.usefixtures("relaxed_dq_env"),
+    pytest.mark.slow,
+]
 
 
 @pytest.fixture

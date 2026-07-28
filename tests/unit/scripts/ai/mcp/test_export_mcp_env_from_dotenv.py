@@ -119,13 +119,16 @@ def run_export_script(
     if user_scope:
         cmd.append("-UserScope")
 
-    return subprocess.run(
+    result = subprocess.run(
         cmd,
         capture_output=True,
         text=True,
         check=False,
         env=env if env is not None else _clean_env(),
     )
+    if "UtilBindVsockAnyPort" in result.stderr:
+        pytest.skip("Windows PowerShell interop is unavailable in this WSL session")
+    return result
 
 
 class TestExportMcpEnvFromDotenv:
