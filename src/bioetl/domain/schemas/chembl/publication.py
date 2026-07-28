@@ -1,5 +1,3 @@
-# pyright: reportIncompatibleVariableOverride=false
-# Pandera/ETL nested Config override pattern (PD2-7).
 """Pandera schema for ChEMBL Publication entity.
 
 Aligned with RULES.md v5.24, ChEMBL 34 schema, and Publication Schema Unification spec.
@@ -122,7 +120,7 @@ class ChemblPublicationSchema(PublicationBaseSchema):
 
     # DQ fields (_dq_warn, _dq_error) inherited from ETLRecordSchema as bool, nullable=False
 
-    class Config:
+    class Config:  # pyright: ignore[reportIncompatibleVariableOverride]
         """Pandera configuration."""
 
         strict = False  # Allow extra columns beyond schema definition

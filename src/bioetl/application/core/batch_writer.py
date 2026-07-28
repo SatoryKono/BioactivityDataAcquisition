@@ -101,8 +101,12 @@ class BatchWriterOptions:
     column_orderer: ColumnOrderService | None = None
     debug_export_service: DebugExportService | None = None
 
-class BatchWriter(BatchWriterIOMixin, BatchWriterColumnsMixin, BatchWriterTracingMixin):
-    """Writes records to medallion layers via narrow write-only port."""
+class BatchWriter(BatchWriterTracingMixin, BatchWriterColumnsMixin, BatchWriterIOMixin):
+    """Writes records to medallion layers via narrow write-only port.
+
+    MRO order: tracing/columns collaborators before IO write methods so
+    cross-mixin helpers resolve to real implementations.
+    """
 
     def __init__(
         self,

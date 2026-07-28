@@ -65,6 +65,7 @@ _IMPLEMENTATION_PREFIXES = (
 _MANUAL_EXCEPTION_PREFIX = "manual-exception:"
 _ADR_REFERENCE_RE = re.compile(r"\bADR-\d{3}\b", flags=re.IGNORECASE)
 _ADR_REFERENCE_BYTES_RE = re.compile(rb"\bADR-\d{3}\b", flags=re.IGNORECASE)
+_GIT_ADR_REFERENCE_PATTERN = r"ADR-[0-9]{3}"
 
 
 @dataclass(frozen=True)
@@ -169,7 +170,7 @@ def _git_grep_reference_lines(repo_root: Path) -> list[tuple[str, str]] | None:
                     "-i",
                     "-n",
                     "-e",
-                    r"ADR-\d{3}",
+                    _GIT_ADR_REFERENCE_PATTERN,
                     "--",
                     *_SCAN_PREFIXES,
                     ":(exclude)tests/fixtures/",
@@ -488,7 +489,9 @@ def _write_artifacts(
         json.dumps(payload, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    md_out.write_text(render_markdown(payload), encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
+    md_out.write_text(
+        render_markdown(payload), encoding="utf-8"
+    )  # NOSONAR - path confined by resolve_output_path
 
 
 def _check_artifacts(

@@ -29,7 +29,7 @@ def _use_console_exporter_for_unit_tests(
     """Keep unit tests independent of the optional native gRPC extension."""
     from bioetl.infrastructure.observability import tracing
 
-    monkeypatch.setattr(tracing, "OTLP_AVAILABLE", False)
+    monkeypatch.setattr(tracing, "otlp_available", False)
     monkeypatch.setattr(tracing, "_OtlpExporterClass", None)
 
 
@@ -237,7 +237,7 @@ class TestTelemetryExporterSelection:
         from bioetl.infrastructure.observability import tracing
 
         console_exporter = object()
-        monkeypatch.setattr(tracing, "OTLP_AVAILABLE", False)
+        monkeypatch.setattr(tracing, "otlp_available", False)
         monkeypatch.setattr(tracing, "_OtlpExporterClass", None)
         monkeypatch.setattr(
             tracing, "ConsoleSpanExporter", MagicMock(return_value=console_exporter)
@@ -257,7 +257,7 @@ class TestTelemetryExporterSelection:
         exporter_module = ModuleType("lazy_otlp_exporter")
         exporter_module.OTLPSpanExporter = exporter_factory
         import_module = MagicMock(return_value=exporter_module)
-        monkeypatch.setattr(tracing, "OTLP_AVAILABLE", True)
+        monkeypatch.setattr(tracing, "otlp_available", True)
         monkeypatch.setattr(tracing, "_OtlpExporterClass", None)
         monkeypatch.setattr(tracing, "import_module", import_module)
         monkeypatch.delenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", raising=False)
@@ -278,7 +278,7 @@ class TestTelemetryExporterSelection:
         from bioetl.infrastructure.observability import tracing
 
         exporter_factory = MagicMock(return_value=object())
-        monkeypatch.setattr(tracing, "OTLP_AVAILABLE", True)
+        monkeypatch.setattr(tracing, "otlp_available", True)
         monkeypatch.setattr(tracing, "_OtlpExporterClass", exporter_factory)
         monkeypatch.setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4317")
         monkeypatch.delenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", raising=False)
@@ -300,7 +300,7 @@ class TestTelemetryExporterSelection:
         from bioetl.infrastructure.observability import tracing
 
         exporter_factory = MagicMock(return_value=object())
-        monkeypatch.setattr(tracing, "OTLP_AVAILABLE", True)
+        monkeypatch.setattr(tracing, "otlp_available", True)
         monkeypatch.setattr(tracing, "_OtlpExporterClass", exporter_factory)
         monkeypatch.setenv(
             "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", "http://localhost:4317"
@@ -344,7 +344,7 @@ class TestTelemetryExporterSelection:
         from bioetl.infrastructure.observability import tracing
 
         exporter_factory = MagicMock(return_value=object())
-        monkeypatch.setattr(tracing, "OTLP_AVAILABLE", True)
+        monkeypatch.setattr(tracing, "otlp_available", True)
         monkeypatch.setattr(tracing, "_OtlpExporterClass", exporter_factory)
         monkeypatch.delenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", raising=False)
         monkeypatch.delenv("OTEL_EXPORTER_OTLP_ENDPOINT", raising=False)
@@ -362,7 +362,7 @@ class TestTelemetryExporterSelection:
         from bioetl.infrastructure.observability import tracing
 
         exporter_factory = MagicMock(return_value=object())
-        monkeypatch.setattr(tracing, "OTLP_AVAILABLE", True)
+        monkeypatch.setattr(tracing, "otlp_available", True)
         monkeypatch.setattr(tracing, "_OtlpExporterClass", exporter_factory)
         monkeypatch.setenv(
             "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT",
@@ -416,7 +416,7 @@ class TestOpenTelemetryTracerErrorPaths:
         from bioetl.infrastructure.observability import tracing
 
         exporter_factory = MagicMock(return_value=object())
-        monkeypatch.setattr(tracing, "OTLP_AVAILABLE", True)
+        monkeypatch.setattr(tracing, "otlp_available", True)
         monkeypatch.setattr(tracing, "_OtlpExporterClass", exporter_factory)
         monkeypatch.delenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", raising=False)
         monkeypatch.delenv("OTEL_EXPORTER_OTLP_ENDPOINT", raising=False)
@@ -570,9 +570,9 @@ class TestTracingImportFallbackBranches:
         )
 
         assert module.OTEL_AVAILABLE is True
-        assert module.OTLP_AVAILABLE is True
+        assert module.otlp_available is True
         assert module._load_otlp_exporter_class() is None
-        assert module.OTLP_AVAILABLE is False
+        assert module.otlp_available is False
 
     def test_module_does_not_import_otlp_grpc_eagerly(
         self,
@@ -586,7 +586,7 @@ class TestTracingImportFallbackBranches:
         )
 
         assert module.OTEL_AVAILABLE is True
-        assert module.OTLP_AVAILABLE is True
+        assert module.otlp_available is True
         assert module._OtlpExporterClass is None
 
     def test_module_marks_otel_unavailable_when_base_import_fails(
@@ -600,7 +600,7 @@ class TestTracingImportFallbackBranches:
         )
 
         assert module.OTEL_AVAILABLE is False
-        assert module.OTLP_AVAILABLE is False
+        assert module.otlp_available is False
 
     def test_module_marks_otlp_unavailable_when_distribution_missing(
         self,
@@ -614,7 +614,7 @@ class TestTracingImportFallbackBranches:
         )
 
         assert module.OTEL_AVAILABLE is True
-        assert module.OTLP_AVAILABLE is False
+        assert module.otlp_available is False
 
 
 class TestOpenTelemetryTracerSpanAdapter:
@@ -765,11 +765,11 @@ class TestOTLPAvailability:
     """Tests for OTLP exporter availability checks."""
 
     def test_otlp_available_flag_defined(self) -> None:
-        """Test OTLP_AVAILABLE flag is defined."""
+        """Test otlp_available flag is defined."""
         from bioetl.infrastructure.observability import tracing
 
-        assert hasattr(tracing, "OTLP_AVAILABLE")
-        assert isinstance(tracing.OTLP_AVAILABLE, bool)
+        assert hasattr(tracing, "otlp_available")
+        assert isinstance(tracing.otlp_available, bool)
 
     def test_otlp_exporter_class_cache_populated_after_load(
         self, monkeypatch: pytest.MonkeyPatch
@@ -777,7 +777,7 @@ class TestOTLPAvailability:
         """Lazy cache is empty before load, populated after, and reused on second call."""
         from bioetl.infrastructure.observability import tracing
 
-        monkeypatch.setattr(tracing, "OTLP_AVAILABLE", True)
+        monkeypatch.setattr(tracing, "otlp_available", True)
         monkeypatch.setattr(tracing, "_OtlpExporterClass", None)
         exporter_factory = object()
         import_calls: list[str] = []
@@ -813,7 +813,7 @@ class TestTelemetryExporterResolution:
             pytest.skip("OpenTelemetry is not available")
 
         exporter_factory = MagicMock(return_value=MagicMock())
-        monkeypatch.setattr(tracing, "OTLP_AVAILABLE", True)
+        monkeypatch.setattr(tracing, "otlp_available", True)
         monkeypatch.setattr(tracing, "_OtlpExporterClass", exporter_factory)
         monkeypatch.setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "localhost:4317")
         monkeypatch.delenv("OTEL_EXPORTER_OTLP_INSECURE", raising=False)
@@ -837,7 +837,7 @@ class TestTelemetryExporterResolution:
             pytest.skip("OpenTelemetry is not available")
 
         exporter_factory = MagicMock(return_value=MagicMock())
-        monkeypatch.setattr(tracing, "OTLP_AVAILABLE", True)
+        monkeypatch.setattr(tracing, "otlp_available", True)
         monkeypatch.setattr(tracing, "_OtlpExporterClass", exporter_factory)
         monkeypatch.setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "localhost:4317")
         monkeypatch.setenv("OTEL_EXPORTER_OTLP_INSECURE", "false")
@@ -960,12 +960,12 @@ class TestOpenTelemetryTracerWithMockedOTEL:
         from bioetl.infrastructure.observability import tracing
 
         if tracing.OTEL_AVAILABLE:
-            original_otlp = tracing.OTLP_AVAILABLE
+            original_otlp = tracing.otlp_available
             original_class = tracing._OtlpExporterClass
 
             try:
                 # Simulate OTLP unavailable
-                tracing.OTLP_AVAILABLE = False
+                tracing.otlp_available = False
                 tracing._OtlpExporterClass = None
 
                 # Should still work with ConsoleSpanExporter
@@ -973,7 +973,7 @@ class TestOpenTelemetryTracerWithMockedOTEL:
                 assert otel_tracer is not None
                 otel_tracer.close()
             finally:
-                tracing.OTLP_AVAILABLE = original_otlp
+                tracing.otlp_available = original_otlp
                 tracing._OtlpExporterClass = original_class
         else:
             pytest.skip("OpenTelemetry is not available")

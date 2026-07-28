@@ -1,5 +1,3 @@
-# pyright: reportIncompatibleVariableOverride=false
-# Pandera/ETL nested Config override pattern (PD2-7).
 """Pandera schema for ChEMBL Protein Classification entity.
 
 Aligned with RULES.md v5.24 and ChEMBL 34 schema.
@@ -57,7 +55,7 @@ class ProteinClassificationSchema(ETLRecordSchema):
         description="Downgraded flag.",
     )
 
-    class Config:
+    class Config:  # pyright: ignore[reportIncompatibleVariableOverride]
         """Pandera configuration."""
 
         strict = True

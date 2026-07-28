@@ -1,4 +1,3 @@
-# pyright: reportConstantRedefinition=false
 # basedpyright residual burn-down (shrink-only product surface).
 """Centralized JSON serialization for deterministic content hashing.
 
@@ -49,10 +48,10 @@ if TYPE_CHECKING:
 try:
     import orjson
 
-    _ORJSON_AVAILABLE = True
+    _orjson_available = True
 except ImportError:
     orjson = None  # type: ignore[assignment]
-    _ORJSON_AVAILABLE = False
+    _orjson_available = False
 
 
 def serialize_to_json(
@@ -86,7 +85,7 @@ def serialize_to_json(
         '{"key":"value"}'
 
     """
-    if _ORJSON_AVAILABLE:
+    if _orjson_available:
         return _serialize_with_orjson(
             data, sort_keys=sort_keys, ensure_ascii=ensure_ascii
         )
@@ -238,7 +237,7 @@ def is_orjson_available() -> bool:
         True if orjson is installed, False otherwise.
 
     """
-    return _ORJSON_AVAILABLE
+    return _orjson_available
 
 
 def flatten_arrow_table_for_export(table: pa.Table) -> pa.Table:

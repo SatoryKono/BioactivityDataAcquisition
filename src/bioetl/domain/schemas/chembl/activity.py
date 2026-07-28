@@ -1,5 +1,3 @@
-# pyright: reportIncompatibleVariableOverride=false
-# Pandera/ETL nested Config override pattern (PD2-7).
 """Pandera schema for ChEMBL Activity entity aligned with RULES.md v5.24 and ChEMBL 34 schema."""
 
 from __future__ import annotations
@@ -298,7 +296,7 @@ class ActivitySchema(ETLRecordSchema):
         description="Publication year.",
     )
 
-    class Config:
+    class Config:  # pyright: ignore[reportIncompatibleVariableOverride]
         """Pandera configuration."""
 
         strict = True

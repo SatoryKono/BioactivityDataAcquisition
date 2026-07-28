@@ -1,5 +1,3 @@
-# pyright: reportConstantRedefinition=false
-# Optional dependency probe flags reassigned after try/import (PD2-7).
 """Shared ChEMBL semantic policy surfaces beyond strict enums.
 
 The domain module consumes immutable policy payloads and stays free from

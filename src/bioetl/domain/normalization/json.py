@@ -1,4 +1,3 @@
-# pyright: reportConstantRedefinition=false
 # basedpyright residual burn-down (shrink-only product surface).
 """Pure canonical JSON normalization helpers."""
 
@@ -18,10 +17,10 @@ else:
 try:
     import orjson
 
-    _ORJSON_AVAILABLE = True
+    _orjson_available = True
 except ImportError:
     orjson = None  # type: ignore[assignment]
-    _ORJSON_AVAILABLE = False
+    _orjson_available = False
 
 __all__ = [
     "canonicalize_json_string",
@@ -115,14 +114,14 @@ def _is_nested_json_sequence(value: object) -> bool:
 def serialize_json_canonical(data: JsonDict | Sequence[object]) -> str:
     """Serialize data to deterministic canonical JSON string."""
     _assert_no_non_finite_floats(data)
-    if _ORJSON_AVAILABLE:
+    if _orjson_available:
         return _serialize_with_orjson(data, sort_keys=True, ensure_ascii=True)
     return _serialize_with_stdlib(data, sort_keys=True, ensure_ascii=True)
 
 
 def deserialize_json_value(data: str | bytes) -> JsonDict | list[object]:
     """Deserialize JSON string or bytes to Python object."""
-    if _ORJSON_AVAILABLE:
+    if _orjson_available:
         assert orjson is not None
         try:
             parsed_value = cast("JsonDict | list[object]", orjson.loads(data))

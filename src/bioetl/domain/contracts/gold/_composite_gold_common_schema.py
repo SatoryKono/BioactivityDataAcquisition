@@ -1,6 +1,4 @@
 # mypy: disable-error-code="misc"
-# pyright: reportIncompatibleVariableOverride=false
-# MRO/override residual on mixin or client hierarchies.
 """Shared base schema for composite Gold-layer contracts."""
 
 from __future__ import annotations
@@ -31,7 +29,7 @@ class CompositeGoldCommonSchema(StrictGoldContractSchema):
         nullable=False, alias="_enrichment_status"
     )
 
-    class Config:
+    class Config:  # pyright: ignore[reportIncompatibleVariableOverride]
         """Pandera configuration for composite outputs."""
 
         strict = True

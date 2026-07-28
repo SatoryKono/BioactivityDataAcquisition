@@ -1,5 +1,3 @@
-# pyright: reportIncompatibleVariableOverride=false
-# Pandera/ETL nested Config override pattern (PD2-7).
 """Pandera schema for CrossRef Publication entity.
 
 Aligned with RULES.md v5.24 and CrossRef REST API.
@@ -154,7 +152,7 @@ class PublicationSchema(ETLRecordSchema):
         nullable=True, description="DOI of update policy"
     )
 
-    class Config:
+    class Config:  # pyright: ignore[reportIncompatibleVariableOverride]
         """Pandera configuration."""
 
         strict = True

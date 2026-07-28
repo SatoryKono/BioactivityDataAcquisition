@@ -1,5 +1,3 @@
-# pyright: reportIncompatibleVariableOverride=false
-# Pandera/ETL nested Config override pattern (PD2-7).
 """Base schema for all publication entities across providers.
 
 Aligned with RULES.md v5.24 and Publication Schema Unification spec.
@@ -188,7 +186,7 @@ class PublicationBaseSchema(ETLRecordSchema):
         description="Data source identifier (e.g., chembl, pubmed, crossref, openalex)",
     )
 
-    class Config:
+    class Config:  # pyright: ignore[reportIncompatibleVariableOverride]
         """Pandera configuration."""
 
         strict = False  # Allow extra columns

@@ -1,8 +1,6 @@
-# pyright: reportConstantRedefinition=false
 # pyright: reportInvalidCast=false
 # pyright: reportPossiblyUnboundVariable=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
-# Optional dependency probe flags reassigned after try/import (PD2-7).
 """OpenTelemetry tracer adapter — real TracingPort implementation.
 
 TracingPort is deliberately shaped as an OpenTelemetry Tracing API facade
@@ -74,9 +72,9 @@ def _load_otlp_exporter_class() -> (
     type[Any] | None  # Any: exporter class belongs to an optional runtime dependency.
 ):
     """Load and cache the optional OTLP exporter on first runtime use."""
-    global OTLP_AVAILABLE, _OtlpExporterClass
+    global otlp_available, _OtlpExporterClass
 
-    if not OTLP_AVAILABLE:
+    if not otlp_available:
         return None
     if _OtlpExporterClass is not None:
         return _OtlpExporterClass
@@ -85,7 +83,7 @@ def _load_otlp_exporter_class() -> (
         exporter_module = import_module(_OTLP_EXPORTER_MODULE)
     except ImportError:
         # Optional dependency missing or incomplete; other exceptions must surface.
-        OTLP_AVAILABLE = False
+        otlp_available = False
         return None
 
     _OtlpExporterClass = cast(
@@ -101,10 +99,10 @@ try:
     from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
 
     OTEL_AVAILABLE = True
-    OTLP_AVAILABLE = _otlp_exporter_is_installed()
+    otlp_available = _otlp_exporter_is_installed()
 except ImportError:
     OTEL_AVAILABLE = False
-    OTLP_AVAILABLE = False
+    otlp_available = False
 
 
 _LOCAL_OTLP_HOSTS = {

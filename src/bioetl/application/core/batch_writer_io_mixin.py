@@ -1,13 +1,10 @@
 # mypy: disable-error-code=attr-defined
-# pyright: reportUninitializedInstanceVariable=false
-# pyright: reportAttributeAccessIssue=false
-# Host attrs/methods provided by concrete composition (PD2 W1).
 """Write-path methods for BatchWriter (bronze/silver/gold)."""
 
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 import orjson
 
@@ -29,6 +26,27 @@ _WRITE_SPAN_ERRORS = SHARED_OPERATION_ERRORS
 
 class BatchWriterIOMixin:
     """Layer write orchestration extracted from BatchWriter."""
+
+    # Host attributes initialized by BatchWriter.__init__ (PD3 structural host).
+    _context: Any = cast(Any, None)  # Any: concrete BatchWriter supplies the host context
+    _storage: Any = cast(Any, None)  # Any: concrete BatchWriter supplies its write port
+    _config: Any = cast(Any, None)  # Any: concrete BatchWriter supplies processor configuration
+    _provider: str = ""
+    _entity_type: str = ""
+    _silver_schema: Any = cast(Any, None)  # Any: storage accepts multiple schema implementations
+    _gold_schema: Any = cast(Any, None)  # Any: validation accepts multiple schema implementations
+    _gold_schema_policy_by_version: Any = cast(Any, None)  # Any: versioned schemas are runtime-defined
+    _gold_validator: Any = cast(Any, None)  # Any: concrete host supplies the validator port
+    _silver_table_name: str = ""
+    _gold_table_name: str = ""
+    _table_config: Any = cast(Any, None)  # Any: concrete host supplies validated table configuration
+    _silver_mode: Any = cast(Any, None)  # Any: concrete host narrows the configured literal
+    _gold_mode: Any = cast(Any, None)  # Any: concrete host narrows the configured literal
+
+    # Cross-mixin collaborators (_validate_lock / spans / column helpers) come from
+    # BatchWriterTracingMixin and BatchWriterColumnsMixin on the composed
+    # BatchWriter MRO. Do not install NotImplementedError stubs here — they
+    # shadow real methods if IOMixin is ordered first.
 
     def _resolve_gold_ingestion_ts(self) -> datetime:
         """Return the deterministic timestamp anchor for Gold write side effects."""

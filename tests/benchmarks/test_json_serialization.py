@@ -20,7 +20,7 @@ from typing import Any
 import pytest
 
 from bioetl.infrastructure.serialization.encoders import (
-    ORJSON_AVAILABLE,
+    orjson_available,
     OrjsonEncoder,
     StdLibJsonEncoder,
 )
@@ -100,7 +100,7 @@ class TestJsonEncoderPerformance:
         assert ops_per_sec > 0
 
     @pytest.mark.benchmark
-    @pytest.mark.skipif(not ORJSON_AVAILABLE, reason="orjson not installed")
+    @pytest.mark.skipif(not orjson_available, reason="orjson not installed")
     def test_orjson_dumps_small(self, small_payload: list[dict[str, Any]]) -> None:
         """Benchmark orjson.dumps with small payload."""
         encoder = OrjsonEncoder()
@@ -122,7 +122,7 @@ class TestJsonEncoderPerformance:
         assert ops_per_sec > 0
 
     @pytest.mark.benchmark
-    @pytest.mark.skipif(not ORJSON_AVAILABLE, reason="orjson not installed")
+    @pytest.mark.skipif(not orjson_available, reason="orjson not installed")
     def test_orjson_dumps_medium(self, medium_payload: list[dict[str, Any]]) -> None:
         """Benchmark orjson.dumps with medium payload."""
         encoder = OrjsonEncoder()
@@ -144,7 +144,7 @@ class TestJsonEncoderPerformance:
         assert ops_per_sec > 0
 
     @pytest.mark.benchmark
-    @pytest.mark.skipif(not ORJSON_AVAILABLE, reason="orjson not installed")
+    @pytest.mark.skipif(not orjson_available, reason="orjson not installed")
     def test_performance_comparison(self, medium_payload: list[dict[str, Any]]) -> None:
         """Direct comparison of stdlib vs orjson performance."""
         stdlib_encoder = StdLibJsonEncoder()
@@ -194,7 +194,7 @@ class TestJsonEncoderPerformance:
         assert speedup > 1.5, f"Expected >1.5x speedup, got {speedup:.2f}x"
 
     @pytest.mark.benchmark
-    @pytest.mark.skipif(not ORJSON_AVAILABLE, reason="orjson not installed")
+    @pytest.mark.skipif(not orjson_available, reason="orjson not installed")
     def test_canonical_output_consistency(
         self, nested_payload: list[dict[str, Any]]
     ) -> None:
@@ -216,7 +216,7 @@ class TestJsonEncoderPerformance:
             assert orjson_output.isascii(), "Orjson canonical should be ASCII-only"
 
     @pytest.mark.benchmark
-    @pytest.mark.skipif(not ORJSON_AVAILABLE, reason="orjson not installed")
+    @pytest.mark.skipif(not orjson_available, reason="orjson not installed")
     def test_loads_performance(self, medium_payload: list[dict[str, Any]]) -> None:
         """Benchmark JSON deserialization performance."""
         stdlib_encoder = StdLibJsonEncoder()
@@ -286,7 +286,7 @@ class TestBatchSerializationPerformance:
         assert mb_per_sec > 0
 
     @pytest.mark.benchmark
-    @pytest.mark.skipif(not ORJSON_AVAILABLE, reason="orjson not installed")
+    @pytest.mark.skipif(not orjson_available, reason="orjson not installed")
     def test_batch_serialize_orjson(self, large_payload: list[dict[str, Any]]) -> None:
         """Benchmark batch serialization pattern with orjson."""
         encoder = OrjsonEncoder()

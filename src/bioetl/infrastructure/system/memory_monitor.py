@@ -1,7 +1,5 @@
-# pyright: reportConstantRedefinition=false
 # pyright: reportOptionalMemberAccess=false
 # basedpyright residual burn-down (shrink-only product surface).
-# Optional dependency probe flags reassigned after try/import (PD2-7).
 """Memory monitoring for adaptive batch processing.
 
 Provides memory pressure detection and adaptive batch size recommendations.
@@ -36,7 +34,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 # Module-level cache for psutil availability (checked once per process)
-_PSUTIL_AVAILABLE: bool | None = None
+_psutil_available: bool | None = None
 _PSUTIL_MODULE: Any = None  # Any: lazy-loaded psutil module reference
 
 
@@ -46,16 +44,16 @@ def _check_psutil_available() -> bool:
     Returns:
         True if psutil is available and importable, False otherwise.
     """
-    global _PSUTIL_AVAILABLE, _PSUTIL_MODULE
-    if _PSUTIL_AVAILABLE is None:
+    global _psutil_available, _PSUTIL_MODULE
+    if _psutil_available is None:
         try:
             import psutil
 
             _PSUTIL_MODULE = psutil
-            _PSUTIL_AVAILABLE = True
+            _psutil_available = True
         except ImportError:
-            _PSUTIL_AVAILABLE = False
-    return _PSUTIL_AVAILABLE
+            _psutil_available = False
+    return _psutil_available
 
 
 @dataclass

@@ -1,6 +1,4 @@
 # mypy: disable-error-code="misc"
-# pyright: reportIncompatibleVariableOverride=false
-# MRO/override residual on mixin or client hierarchies.
 """Shared strict tail for Gold-layer Pandera contracts."""
 
 from __future__ import annotations
@@ -26,7 +24,7 @@ class StrictGoldContractSchema(pa.DataFrameModel):
     )
     index: Series[int] = pa.Field(nullable=False, alias="_index")
 
-    class Config:
+    class Config:  # pyright: ignore[reportIncompatibleVariableOverride]
         """Pandera configuration for strict schema validation."""
 
         strict = True

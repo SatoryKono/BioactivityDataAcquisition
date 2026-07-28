@@ -1,5 +1,3 @@
-# pyright: reportIncompatibleVariableOverride=false
-# Pandera/ETL nested Config override pattern (PD2-7).
 """Base schema for molecule/compound entities across providers.
 
 Analogous to ``PublicationBaseSchema``, this schema defines the **canonical**
@@ -123,7 +121,7 @@ class MoleculeBaseSchema(ETLRecordSchema):
         description="Octanol-water partition coefficient.",
     )
 
-    class Config:
+    class Config:  # pyright: ignore[reportIncompatibleVariableOverride]
         """Pandera configuration."""
 
         strict = False  # Allow extra provider-specific columns

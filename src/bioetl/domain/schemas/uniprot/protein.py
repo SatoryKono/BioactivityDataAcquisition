@@ -1,5 +1,3 @@
-# pyright: reportIncompatibleVariableOverride=false
-# Pandera/ETL nested Config override pattern (PD2-7).
 """Pandera schema for UniProt Target entity.
 
 Aligned with RULES.md v5.24 and UniProt REST API.
@@ -31,7 +29,7 @@ class UniprotTargetSchema(
     Inherits fields from core, annotation, xref and feature sub-schemas.
     """
 
-    class Config:
+    class Config:  # pyright: ignore[reportIncompatibleVariableOverride]
         """Pandera configuration."""
 
         strict = False

@@ -71,9 +71,15 @@ class BacklogValidation:
 
 
 def _resolve_path(path: Path) -> Path:
-    from scripts.engineering.common.repo_paths import resolve_cli_path
+    """Resolve an xwalk/backlog path for production or fixture roots.
 
-    return resolve_cli_path(path, root=REPO_ROOT)
+    Relative paths stay confined under the repository root. Absolute paths
+    (pytest ``tmp_path``, operator overrides) are accepted via
+    ``resolve_output_path`` so unit fixtures outside the worktree still work.
+    """
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
+    return resolve_output_path(path, root=REPO_ROOT)
 
 
 def _display_path(path: Path) -> str:
