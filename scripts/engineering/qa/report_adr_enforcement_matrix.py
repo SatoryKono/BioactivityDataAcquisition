@@ -169,7 +169,7 @@ def _git_grep_reference_lines(repo_root: Path) -> list[tuple[str, str]] | None:
                     "-i",
                     "-n",
                     "-e",
-                    r"ADR-[0-9]{3}",
+                    r"ADR-\d{3}",
                     "--",
                     *_SCAN_PREFIXES,
                     ":(exclude)tests/fixtures/",
@@ -215,7 +215,7 @@ def _ripgrep_reference_lines(repo_root: Path) -> list[tuple[str, str]] | None:
                     "--glob",
                     "!tests/fixtures/**",
                     "-e",
-                    r"ADR-[0-9]{3}",
+                    r"ADR-\d{3}",
                     "--",
                     *_SCAN_PREFIXES,
                 ]

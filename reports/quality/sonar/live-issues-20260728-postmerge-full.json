@@ -1,0 +1,3921 @@
+{
+  "total": 435,
+  "revision": "85bd9507c8f90f613b0f978b5bff651a3e673073",
+  "issues": [
+    {
+      "key": "AZ-plNjMScbFJRaCAwQA",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/runtime/mcp/windows_docker_mcp_bridge.py",
+      "line": 44,
+      "message": "Define a constant instead of duplicating this literal \"powershell.exe\" 3 times."
+    },
+    {
+      "key": "AZ-plOCRScbFJRaCAwQM",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "_cr_arch_audit_resume.py",
+      "line": 95,
+      "message": "Define a constant instead of duplicating this literal \"rate limit\" 3 times."
+    },
+    {
+      "key": "AZ-plOCRScbFJRaCAwQO",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "_cr_arch_audit_resume.py",
+      "line": 142,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 23 to the 15 allowed."
+    },
+    {
+      "key": "AZ-plOCRScbFJRaCAwQN",
+      "rule": "python:S1854",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "_cr_arch_audit_resume.py",
+      "line": 145,
+      "message": "Remove this assignment to local variable 'real'; the value is never used."
+    },
+    {
+      "key": "AZ-plOCRScbFJRaCAwQP",
+      "rule": "python:S3457",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "_cr_arch_audit_resume.py",
+      "line": 192,
+      "message": "Add replacement fields or use a normal string instead of an f-string."
+    },
+    {
+      "key": "AZ-plOCRScbFJRaCAwQQ",
+      "rule": "python:S3457",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "_cr_arch_audit_resume.py",
+      "line": 193,
+      "message": "Add replacement fields or use a normal string instead of an f-string."
+    },
+    {
+      "key": "AZ-plOCRScbFJRaCAwQR",
+      "rule": "python:S3457",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "_cr_arch_audit_resume.py",
+      "line": 194,
+      "message": "Add replacement fields or use a normal string instead of an f-string."
+    },
+    {
+      "key": "AZ-plOCRScbFJRaCAwQS",
+      "rule": "python:S3457",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "_cr_arch_audit_resume.py",
+      "line": 195,
+      "message": "Add replacement fields or use a normal string instead of an f-string."
+    },
+    {
+      "key": "AZ-plOCRScbFJRaCAwQT",
+      "rule": "python:S3358",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "_cr_arch_audit_resume.py",
+      "line": 222,
+      "message": "Extract this nested conditional expression into an independent statement."
+    },
+    {
+      "key": "AZ-plOCRScbFJRaCAwQU",
+      "rule": "python:S3358",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "_cr_arch_audit_resume.py",
+      "line": 223,
+      "message": "Extract this nested conditional expression into an independent statement."
+    },
+    {
+      "key": "AZ-plN4CScbFJRaCAwQL",
+      "rule": "powershelldre:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ai/mcp/support/uv_resolver.ps1",
+      "line": 243,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 29 to the 15 allowed."
+    },
+    {
+      "key": "AZ-plNzhScbFJRaCAwQG",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_basedpyright_error_snapshot.py",
+      "line": 44,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 18 to the 15 allowed."
+    },
+    {
+      "key": "AZ-plNzhScbFJRaCAwQK",
+      "rule": "pythonsecurity:S8707",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "component": "scripts/engineering/qa/report_basedpyright_error_snapshot.py",
+      "line": 45,
+      "message": "LLMs running this code with faulty CLI arguments can escape file system restrictions. Refactor this code to validate the constructed path before accessing the file system."
+    },
+    {
+      "key": "AZ-plNzhScbFJRaCAwQI",
+      "rule": "pythonsecurity:S8707",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "component": "scripts/engineering/qa/report_basedpyright_error_snapshot.py",
+      "line": 119,
+      "message": "LLMs running this code with faulty CLI arguments can escape file system restrictions. Refactor this code to validate the constructed path before accessing the file system."
+    },
+    {
+      "key": "AZ-plNzhScbFJRaCAwQJ",
+      "rule": "pythonsecurity:S8707",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "component": "scripts/engineering/qa/report_basedpyright_error_snapshot.py",
+      "line": 128,
+      "message": "LLMs running this code with faulty CLI arguments can escape file system restrictions. Refactor this code to validate the constructed path before accessing the file system."
+    },
+    {
+      "key": "AZ-plNzhScbFJRaCAwQH",
+      "rule": "pythonsecurity:S8707",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "component": "scripts/engineering/qa/report_basedpyright_error_snapshot.py",
+      "line": 168,
+      "message": "LLMs running this code with faulty CLI arguments can escape file system restrictions. Refactor this code to validate the constructed path before accessing the file system."
+    },
+    {
+      "key": "AZ-plNuNScbFJRaCAwQC",
+      "rule": "pythonsecurity:S8707",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "component": "scripts/engineering/qa/report_basedpyright_tests_snapshot.py",
+      "line": 53,
+      "message": "LLMs running this code with faulty CLI arguments can escape file system restrictions. Refactor this code to validate the constructed path before accessing the file system."
+    },
+    {
+      "key": "AZ-plNuNScbFJRaCAwQE",
+      "rule": "pythonsecurity:S8707",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "component": "scripts/engineering/qa/report_basedpyright_tests_snapshot.py",
+      "line": 138,
+      "message": "LLMs running this code with faulty CLI arguments can escape file system restrictions. Refactor this code to validate the constructed path before accessing the file system."
+    },
+    {
+      "key": "AZ-plNuNScbFJRaCAwQD",
+      "rule": "pythonsecurity:S8707",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "component": "scripts/engineering/qa/report_basedpyright_tests_snapshot.py",
+      "line": 147,
+      "message": "LLMs running this code with faulty CLI arguments can escape file system restrictions. Refactor this code to validate the constructed path before accessing the file system."
+    },
+    {
+      "key": "AZ-plNnrScbFJRaCAwQB",
+      "rule": "javascript:S6653",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs",
+      "line": 94,
+      "message": "Use 'Object.hasOwn()' instead of 'Object.prototype.hasOwnProperty.call()'."
+    },
+    {
+      "key": "AZ-plNwZScbFJRaCAwQF",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_module_coverage_inventory.py",
+      "line": 859,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 23 to the 15 allowed."
+    },
+    {
+      "key": "AZ-pLVSaXd3PQyj1KHba",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ai/sync_ai_governance.py",
+      "line": 398,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 19 to the 15 allowed."
+    },
+    {
+      "key": "AZ-o9aHiE83D8vcbSFS5",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_live_residual_snapshot.py",
+      "line": 166,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed."
+    },
+    {
+      "key": "AZ-o9Z0ZE83D8vcbSFS2",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/grafana/_apply_ds2_all.py",
+      "line": 140,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 32 to the 15 allowed."
+    },
+    {
+      "key": "AZ-o9Z0ZE83D8vcbSFS3",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/grafana/_apply_ds2_all.py",
+      "line": 524,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 41 to the 15 allowed."
+    },
+    {
+      "key": "AZ-oBu26W3nRPo6lBSjW",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_dead_code_inventory.py",
+      "line": 193,
+      "message": "Define a constant instead of duplicating this literal \"tests/architecture/test_control_plane_diagnostics_dynamic_loaders.py\" 4 times."
+    },
+    {
+      "key": "AZ-oBunIW3nRPo6lBSjV",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/grafana/apply_dux2_residual.py",
+      "line": 162,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 19 to the 15 allowed."
+    },
+    {
+      "key": "AZ-noB0sKCwolwDKbDz3",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_config_surface_backlog.py",
+      "line": 373,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 23 to the 15 allowed."
+    },
+    {
+      "key": "AZ-nn_-VKCwolwDKbDz2",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/application/services/control_plane/manifest/__init__.py",
+      "line": 28,
+      "message": "Define a constant instead of duplicating this literal \"bioetl.application.services.control_plane.manifest.inspection_models\" 4 times."
+    },
+    {
+      "key": "AZ-nemmoaxAiTHmpAtAx",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/refresh_governance_artifacts.py",
+      "line": 35,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 36 to the 15 allowed."
+    },
+    {
+      "key": "AZ-nemmoaxAiTHmpAtAw",
+      "rule": "python:S1066",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/refresh_governance_artifacts.py",
+      "line": 91,
+      "message": "Merge this if statement with the enclosing one."
+    },
+    {
+      "key": "AZ-negybaxAiTHmpAtAv",
+      "rule": "python:S107",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/composition/factories/pipeline_support/checkpoint_metadata_resolution.py",
+      "line": 35,
+      "message": "Function \"_normalize_execution_identity_payload\" has 14 parameters, which is greater than the 13 authorized."
+    },
+    {
+      "key": "AZ-nb5t-usJz-4V-lAdr",
+      "rule": "python:S7503",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/infrastructure/storage/gold_writer.py",
+      "line": 283,
+      "message": "Use asynchronous features in this function or remove the `async` keyword."
+    },
+    {
+      "key": "AZ-lWkGxIpp1gVoejhtv",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_config_surface_backlog.py",
+      "line": 424,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 17 to the 15 allowed."
+    },
+    {
+      "key": "AZ-kehzTijkeAQsoTi5c",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/repo/check_scripts_inventory.py",
+      "line": 1247,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 27 to the 15 allowed."
+    },
+    {
+      "key": "AZ-kB-My6u5Eiuul1Osc",
+      "rule": "javascript:S2486",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs",
+      "line": 338,
+      "message": "Handle this exception or don't catch it at all."
+    },
+    {
+      "key": "AZ-iq6kr2--BjAy-guX8",
+      "rule": "docker:S7018",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "Dockerfile.bioetl",
+      "line": 11,
+      "message": "Sort these package names alphanumerically."
+    },
+    {
+      "key": "AZ-in86F8BvVdFy84SPZ",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/check_dashboard_performance_budgets.py",
+      "line": 63,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 38 to the 15 allowed."
+    },
+    {
+      "key": "AZ-in86F8BvVdFy84SPb",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/check_dashboard_performance_budgets.py",
+      "line": 134,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 29 to the 15 allowed."
+    },
+    {
+      "key": "AZ-in86F8BvVdFy84SPa",
+      "rule": "python:S1854",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/check_dashboard_performance_budgets.py",
+      "line": 189,
+      "message": "Remove this assignment to local variable 'total_http'; the value is never used."
+    },
+    {
+      "key": "AZ-h__doeR7U07pU29bf",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/runtime/mcp/_materialize_shared_http_configs.py",
+      "line": 19,
+      "message": "Define a constant instead of duplicating this literal \".mcp.json\" 3 times."
+    },
+    {
+      "key": "AZ-h__doeR7U07pU29bg",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/runtime/mcp/_materialize_shared_http_configs.py",
+      "line": 20,
+      "message": "Define a constant instead of duplicating this literal \"mcp.json\" 4 times."
+    },
+    {
+      "key": "AZ-h__doeR7U07pU29bh",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/runtime/mcp/_materialize_shared_http_configs.py",
+      "line": 28,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 18 to the 15 allowed."
+    },
+    {
+      "key": "AZ-faREnQGBSXSRYZVP6",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/dev/zed_pytest_lane.py",
+      "line": 24,
+      "message": "Define a constant instead of duplicating this literal \"--tb=short\" 3 times."
+    },
+    {
+      "key": "AZ-eB1_5_mlnSya7UqIW",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/runtime/mcp/apply-shared-to-devin.py",
+      "line": 21,
+      "message": "Define a constant instead of duplicating this literal \".devin\" 3 times."
+    },
+    {
+      "key": "AZ-eB1_5_mlnSya7UqIX",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/runtime/mcp/apply-shared-to-devin.py",
+      "line": 58,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed."
+    },
+    {
+      "key": "AZ-d-GvDaIb61vOhX1ve",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ai/mcp/protocol_smoke.py",
+      "line": 171,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 35 to the 15 allowed."
+    },
+    {
+      "key": "AZ-d-GvDaIb61vOhX1vd",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ai/mcp/protocol_smoke.py",
+      "line": 246,
+      "message": "Define a constant instead of duplicating this literal \"data:\" 6 times."
+    },
+    {
+      "key": "AZ-d-DjbaIb61vOhX1vH",
+      "rule": "python:S2638",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/application/services/control_plane/ledger/service.py",
+      "line": 209,
+      "message": "Change this method signature to accept the same arguments as the method it overrides."
+    },
+    {
+      "key": "AZ-d-DeKaIb61vOhX1vG",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/composition/observability.py",
+      "line": 166,
+      "message": "Return a value of type \"RunnerInputs\" instead of \"DataclassInstance\" or update function \"bind_manifest_logger_context\" type hint."
+    },
+    {
+      "key": "AZ-d-DRsaIb61vOhX1vF",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/composition/runtime_builders/_run_manifest_identity_ref_values.py",
+      "line": 56,
+      "message": "Define a constant instead of duplicating this literal \"str | None\" 8 times."
+    },
+    {
+      "key": "AZ-d-EPtaIb61vOhX1vJ",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/infrastructure/export/debug_export_adapter.py",
+      "line": 170,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 19 to the 15 allowed."
+    },
+    {
+      "key": "AZ-d-D8eaIb61vOhX1vI",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/infrastructure/storage/silver/delta_write_execution.py",
+      "line": 343,
+      "message": "Return a value of type \"_DeltaWriteRequest\" instead of \"DataclassInstance\" or update function \"_evolve_delta_schema_with_empty_append\" type hint."
+    },
+    {
+      "key": "AZ-TA4gkgxxebCimHd8X",
+      "rule": "powershelldre:S8626",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/runtime/docker/apply-docker-stable-mcp.ps1",
+      "line": 37,
+      "message": "'$Profile' is a PowerShell automatic variable; use a different variable name."
+    },
+    {
+      "key": "AZ-TA2RLgxxebCimHd8W",
+      "rule": "python:S5864",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/domain/run_reports/workflow_reasons.py",
+      "line": 17,
+      "message": "Replace this expression; Previous type checks suggest that \"raw\" has type \"object\" and isn't iterable."
+    },
+    {
+      "key": "AZ-S0pNwQbV6p1GDBv-5",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/check_semantic_governance_policy.py",
+      "line": 114,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 23 to the 15 allowed."
+    },
+    {
+      "key": "AZ-S0pGQQbV6p1GDBv-1",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_domain_io_taint_inventory.py",
+      "line": 74,
+      "message": "Define a constant instead of duplicating this literal \"src/bioetl/domain/run_reports/reason_catalog.py\" 4 times."
+    },
+    {
+      "key": "AZ-S0pGQQbV6p1GDBv-2",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_domain_io_taint_inventory.py",
+      "line": 77,
+      "message": "Define a constant instead of duplicating this literal \"Catalog lookup method named resolve (not filesystem Path.resolve).\" 3 times."
+    },
+    {
+      "key": "AZ-S0k5gQbV6p1GDBv-N",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/application/services/execution/_pipeline_runner_support.py",
+      "line": 176,
+      "message": "Return a value of type \"RunResult\" instead of \"DataclassInstance\" or update function \"finalize_pipeline_run_report\" type hint."
+    },
+    {
+      "key": "AZ-S0k5gQbV6p1GDBv-O",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/application/services/execution/_pipeline_runner_support.py",
+      "line": 181,
+      "message": "Return a value of type \"RunResult\" instead of \"DataclassInstance\" or update function \"finalize_pipeline_run_report\" type hint."
+    },
+    {
+      "key": "AZ-S0k6JQbV6p1GDBv-P",
+      "rule": "python:S107",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/application/services/workflow_runner_service.py",
+      "line": 170,
+      "message": "Function \"_execute_transform_step\" has 15 parameters, which is greater than the 13 authorized."
+    },
+    {
+      "key": "AZ-S0k6JQbV6p1GDBv-Q",
+      "rule": "python:S5655",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/application/services/workflow_runner_service.py",
+      "line": 290,
+      "message": "Change this argument; Function \"attach_workflow_run_report\" expects a different type"
+    },
+    {
+      "key": "AZ-S0nuXQbV6p1GDBv-d",
+      "rule": "python:S5914",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "tests/unit/application/services/test_checkpoint_telemetry_helpers.py",
+      "line": 47,
+      "message": "Replace this expression; its boolean value is constant."
+    },
+    {
+      "key": "AZ-S0Z3pgdAn0gTYaTEO",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_hotspot_family_baseline.py",
+      "line": 253,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 19 to the 15 allowed."
+    },
+    {
+      "key": "AZ-S0k1bQbV6p1GDBv-J",
+      "rule": "python:S5655",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/application/services/run_reports/writer.py",
+      "line": 197,
+      "message": "Change this argument; Function \"render_pipeline_run_report_markdown\" expects a different type"
+    },
+    {
+      "key": "AZ-S0mYPQbV6p1GDBv-T",
+      "rule": "python:S107",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/domain/run_reports/pipeline_builder.py",
+      "line": 50,
+      "message": "Function \"build_pipeline_run_report\" has 14 parameters, which is greater than the 13 authorized."
+    },
+    {
+      "key": "AZ-S0pX9QbV6p1GDBv--",
+      "rule": "shelldre:S7682",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ai/mcp/support/mcp_docker_prune.sh",
+      "line": 3,
+      "message": "Add an explicit return statement at the end of the function."
+    },
+    {
+      "key": "AZ-S0pX9QbV6p1GDBv-_",
+      "rule": "shelldre:S131",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ai/mcp/support/mcp_docker_prune.sh",
+      "line": 10,
+      "message": "Add a default case (*) to handle unexpected values."
+    },
+    {
+      "key": "AZ-S0k6jQbV6p1GDBv-R",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/application/services/workflow_runner_reports.py",
+      "line": 137,
+      "message": "Return a value of type \"WorkflowRunExecutionResult\" instead of \"DataclassInstance\" or update function \"attach_workflow_run_report\" type hint."
+    },
+    {
+      "key": "AZ-S0k6jQbV6p1GDBv-S",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/application/services/workflow_runner_reports.py",
+      "line": 143,
+      "message": "Return a value of type \"WorkflowRunExecutionResult\" instead of \"DataclassInstance\" or update function \"attach_workflow_run_report\" type hint."
+    },
+    {
+      "key": "AZ-S0aHjgdAn0gTYaTEd",
+      "rule": "githubactions:S8543",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "component": ".github/actions/setup-mermaid/action.yml",
+      "line": 37,
+      "message": "Using dependencies without locking resolved versions is security-sensitive."
+    },
+    {
+      "key": "AZ-S0aF4gdAn0gTYaTEZ",
+      "rule": "githubactions:S8544",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "component": ".github/workflows/release.yml",
+      "line": 93,
+      "message": "Using dependencies without locking resolved versions is security-sensitive."
+    },
+    {
+      "key": "AZ-S0aGOgdAn0gTYaTEa",
+      "rule": "githubactions:S8543",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "component": ".github/workflows/reusable-mermaid-setup.yml",
+      "line": 39,
+      "message": "Using dependencies without locking resolved versions is security-sensitive."
+    },
+    {
+      "key": "AZ-PK3UH18-5KNpagQg_",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/memory/tooling/workflow.py",
+      "line": 69,
+      "message": "Define a constant instead of duplicating this literal \"<unknown>\" 3 times."
+    },
+    {
+      "key": "AZ-OnOr3s2nL8M0gWZqT",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/application/core/base_transformer/base.py",
+      "line": 34,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed."
+    },
+    {
+      "key": "AZ-OWAuc8hX2ug1wEz3I",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/_build_arch_review_report.py",
+      "line": 48,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 24 to the 15 allowed."
+    },
+    {
+      "key": "AZ-Ngb3uFrYcVsgA9Tuv",
+      "rule": "shelldre:S7679",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "tests/unit/scripts/ai/mcp/support/test_uv_resolver.sh",
+      "line": 19,
+      "message": "Assign this positional parameter to a local variable."
+    },
+    {
+      "key": "AZ-Ngb3uFrYcVsgA9Tuw",
+      "rule": "shelldre:S7679",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "tests/unit/scripts/ai/mcp/support/test_uv_resolver.sh",
+      "line": 25,
+      "message": "Assign this positional parameter to a local variable."
+    },
+    {
+      "key": "AZ-Ngb3uFrYcVsgA9Tux",
+      "rule": "shelldre:S7679",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "tests/unit/scripts/ai/mcp/support/test_uv_resolver.sh",
+      "line": 32,
+      "message": "Assign this positional parameter to a local variable."
+    },
+    {
+      "key": "AZ-LC-8wa_BUX5jdtFHP",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ai/codex/setup_mcp.py",
+      "line": 820,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 18 to the 15 allowed."
+    },
+    {
+      "key": "AZ-LC-0oa_BUX5jdtFHO",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_flaky_test_burndown_review.py",
+      "line": 160,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 19 to the 15 allowed."
+    },
+    {
+      "key": "AZ-LC-qBa_BUX5jdtFHN",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_test_governance_audit.py",
+      "line": 698,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 17 to the 15 allowed."
+    },
+    {
+      "key": "AZ-LC-_Da_BUX5jdtFHQ",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/schema/generate_config_matrix.py",
+      "line": 429,
+      "message": "Define a constant instead of duplicating this literal \"*.yaml\" 4 times."
+    },
+    {
+      "key": "AZ-LC-_Da_BUX5jdtFHS",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/schema/generate_config_matrix.py",
+      "line": 511,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 30 to the 15 allowed."
+    },
+    {
+      "key": "AZ-LC-_Da_BUX5jdtFHR",
+      "rule": "python:S1481",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/schema/generate_config_matrix.py",
+      "line": 533,
+      "message": "Remove the unused local variable \"common\"."
+    },
+    {
+      "key": "AZ-LC3Z3a_BUX5jdtFGv",
+      "rule": "shelldre:S7684",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ai/mcp/mcp_adr_analysis_wrapper.sh",
+      "line": 23,
+      "message": "Environment variable 'npm_config_ignore_scripts' should use ALL_CAPS naming convention."
+    },
+    {
+      "key": "AZ-LC3Qza_BUX5jdtFGs",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ai/mcp/protocol_smoke.py",
+      "line": 328,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 23 to the 15 allowed."
+    },
+    {
+      "key": "AZ-Jf1hQVZfUK_-5tPTf",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ai/mcp/protocol_smoke.py",
+      "line": 58,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 18 to the 15 allowed."
+    },
+    {
+      "key": "AZ-GDkh_k-ul62LHpjVA",
+      "rule": "docker:S8541",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "component": "Dockerfile.bioetl",
+      "line": 23,
+      "message": "Omitting \"--no-build\" can lead to the execution of setup scripts. Make sure it is safe here."
+    },
+    {
+      "key": "AZ-GDjxkk-ul62LHpjU4",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/docker_stability_campaign/cycles.py",
+      "line": 280,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 30 to the 15 allowed."
+    },
+    {
+      "key": "AZ-GDjxEk-ul62LHpjU3",
+      "rule": "python:S7504",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/docker_stability_campaign/model.py",
+      "line": 265,
+      "message": "Remove this unnecessary `list()` call on an already iterable object."
+    },
+    {
+      "key": "AZ-GDj06k-ul62LHpjU5",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_domain_io_taint_inventory.py",
+      "line": 191,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 23 to the 15 allowed."
+    },
+    {
+      "key": "AZ-GDkLfk-ul62LHpjU8",
+      "rule": "python:S3358",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/validate_live_observability.py",
+      "line": 469,
+      "message": "Extract this nested conditional expression into an independent statement."
+    },
+    {
+      "key": "AZ-FQ8v5WkH5gu_TeBSK",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/docker_stability_campaign/commands.py",
+      "line": 20,
+      "message": "Define a constant instead of duplicating this literal \"powershell.exe\" 3 times."
+    },
+    {
+      "key": "AZ-FQ8vXWkH5gu_TeBSJ",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/docker_stability_campaign/cycles.py",
+      "line": 74,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 18 to the 15 allowed."
+    },
+    {
+      "key": "AZ-FAIS-GvMzVw9ojfjW",
+      "rule": "shelldre:S1066",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ai/mcp/mcp_code_interpreter_wrapper.sh",
+      "line": 19,
+      "message": "Merge this if statement with the enclosing one."
+    },
+    {
+      "key": "AZ-DboJXcja4wyDptN29",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/runtime/docker/_rf017_finalize_observation.py",
+      "line": 66,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 46 to the 15 allowed."
+    },
+    {
+      "key": "AZ-DboJXcja4wyDptN2-",
+      "rule": "python:S5443",
+      "severity": "CRITICAL",
+      "type": "VULNERABILITY",
+      "component": "scripts/ops/runtime/docker/_rf017_finalize_observation.py",
+      "line": 120,
+      "message": "Make sure publicly writable directories are used safely here."
+    },
+    {
+      "key": "AZ-DboJXcja4wyDptN2_",
+      "rule": "python:S5443",
+      "severity": "CRITICAL",
+      "type": "VULNERABILITY",
+      "component": "scripts/ops/runtime/docker/_rf017_finalize_observation.py",
+      "line": 128,
+      "message": "Make sure publicly writable directories are used safely here."
+    },
+    {
+      "key": "AZ-DboKgcja4wyDptN3B",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/runtime/docker/_rf017_restore_and_observe.py",
+      "line": 168,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 25 to the 15 allowed."
+    },
+    {
+      "key": "AZ-DboKgcja4wyDptN3A",
+      "rule": "python:S5797",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/runtime/docker/_rf017_restore_and_observe.py",
+      "line": 274,
+      "message": "Replace this expression; used as a condition it will always be constant."
+    },
+    {
+      "key": "AZ-DboKgcja4wyDptN3D",
+      "rule": "python:S5443",
+      "severity": "CRITICAL",
+      "type": "VULNERABILITY",
+      "component": "scripts/ops/runtime/docker/_rf017_restore_and_observe.py",
+      "line": 360,
+      "message": "Make sure publicly writable directories are used safely here."
+    },
+    {
+      "key": "AZ-DP8bhhtaNZptrh3QI",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/runtime/docker/_rf017_recreate_once.py",
+      "line": 65,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 19 to the 15 allowed."
+    },
+    {
+      "key": "AZ-DP8aOhtaNZptrh3QG",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/runtime/docker/recreate_cutover_stacks.py",
+      "line": 183,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 21 to the 15 allowed."
+    },
+    {
+      "key": "AZ98MI7-iU7-6A8UlEa0",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/memory/tooling/workflow.py",
+      "line": 807,
+      "message": "Define a constant instead of duplicating this literal \"src/memory/DAILY_WORKFLOW.md\" 4 times."
+    },
+    {
+      "key": "AZ97hbikrhMhvDP4FGJM",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/technical_debt_audit_registry.py",
+      "line": 162,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 32 to the 15 allowed."
+    },
+    {
+      "key": "AZ97hYfNrhMhvDP4FGJL",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/memory/rag/_validation_checks.py",
+      "line": 182,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 23 to the 15 allowed."
+    },
+    {
+      "key": "AZ97hYaurhMhvDP4FGJJ",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/memory/rag/validation.py",
+      "line": 47,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 23 to the 15 allowed."
+    },
+    {
+      "key": "AZ97DGV5rhMhvDP4BmgC",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/import_graph_inventory.py",
+      "line": 164,
+      "message": "Define a constant instead of duplicating this literal \"__init__.py\" 4 times."
+    },
+    {
+      "key": "AZ96k0tjMd4rpyh8wg6L",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/generate_adr_registry.py",
+      "line": 223,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed."
+    },
+    {
+      "key": "AZ9xdJvAxmEGli41rBt5",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_observability_metric_inventory.py",
+      "line": 814,
+      "message": "Define a constant instead of duplicating this literal \"src/bioetl/infrastructure\" 3 times."
+    },
+    {
+      "key": "AZ9xdFR0xmEGli41rBt3",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/application/core/wiring/factory.py",
+      "line": 17,
+      "message": "Define a constant instead of duplicating this literal \"bioetl.application.core.lifecycle\" 3 times."
+    },
+    {
+      "key": "AZ9xdFPnxmEGli41rBt2",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/application/core/wiring/transformer.py",
+      "line": 20,
+      "message": "Define a constant instead of duplicating this literal \"bioetl.application.core.base_transformer.structural_policy\" 3 times."
+    },
+    {
+      "key": "AZ9xcanvN-_4W3qLGrbt",
+      "rule": "python:S5869",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/infrastructure/observability/logging_config.py",
+      "line": 74,
+      "message": "Remove duplicates in this character class."
+    },
+    {
+      "key": "AZ9w1-H8BVfBQgd_Q2F7",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/composition/factories/services/bundle.py",
+      "line": 66,
+      "message": "Return a value of type \"BaseServicesFactoryProtocol\" instead of \"type\" or update function \"_resolve\" type hint."
+    },
+    {
+      "key": "AZ9w1-ufBVfBQgd_Q2F-",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/domain/control_plane/run_ledger_replay.py",
+      "line": 66,
+      "message": "Return a value of type \"RunLedgerReplayProjection\" instead of \"DataclassInstance\" or update function \"_project_stage_completed\" type hint."
+    },
+    {
+      "key": "AZ9w1-gUBVfBQgd_Q2F8",
+      "rule": "python:S1542",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/infrastructure/storage/base_delta_writer.py",
+      "line": 28,
+      "message": "Rename function \"DeltaTable\" to match the regular expression ^[a-z_][a-z0-9_]*$."
+    },
+    {
+      "key": "AZ9w1-gvBVfBQgd_Q2F9",
+      "rule": "python:S1542",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/infrastructure/storage/gold_writer.py",
+      "line": 97,
+      "message": "Rename function \"DeltaTable\" to match the regular expression ^[a-z_][a-z0-9_]*$."
+    },
+    {
+      "key": "AZ9w8GE06eoeqR4NfY8b",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/start_read_only_audit_stack.py",
+      "line": 168,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed."
+    },
+    {
+      "key": "AZ9w2Aa2BVfBQgd_Q2GP",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/migrations/active/migrate_gold_parquet_to_delta.py",
+      "line": 125,
+      "message": "Define a constant instead of duplicating this literal \"+00:00\" 3 times."
+    },
+    {
+      "key": "AZ9w1-vXBVfBQgd_Q2GA",
+      "rule": "python:S5869",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/domain/exceptions/_redaction.py",
+      "line": 30,
+      "message": "Remove duplicates in this character class."
+    },
+    {
+      "key": "AZ9w1-vXBVfBQgd_Q2GB",
+      "rule": "python:S5869",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/domain/exceptions/_redaction.py",
+      "line": 33,
+      "message": "Remove duplicates in this character class."
+    },
+    {
+      "key": "AZ9w1-vXBVfBQgd_Q2GC",
+      "rule": "python:S5869",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/domain/exceptions/_redaction.py",
+      "line": 33,
+      "message": "Remove duplicates in this character class."
+    },
+    {
+      "key": "AZ9seey7udde5MzmQ66P",
+      "rule": "python:S8786",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/repo/check_scripts_inventory.py",
+      "line": 126,
+      "message": "Simplify this regular expression to reduce its runtime, as it has super-linear performance due to backtracking."
+    },
+    {
+      "key": "AZ9seey7udde5MzmQ66Q",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/repo/check_scripts_inventory.py",
+      "line": 521,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 20 to the 15 allowed."
+    },
+    {
+      "key": "AZ9sN9uVBbPLws7OB76g",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
+      "line": 481,
+      "message": "Define a constant instead of duplicating this literal \"render-manifest.json\" 3 times."
+    },
+    {
+      "key": "AZ9sN9s3BbPLws7OB76f",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py",
+      "line": 354,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 54 to the 15 allowed."
+    },
+    {
+      "key": "AZ9sN9wtBbPLws7OB76h",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/runtime/docker/runtime_manager.py",
+      "line": 561,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 22 to the 15 allowed."
+    },
+    {
+      "key": "AZ9sN9SFBbPLws7OB76W",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/docker_stability_campaign/promotion.py",
+      "line": 36,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 47 to the 15 allowed."
+    },
+    {
+      "key": "AZ9sN9TcBbPLws7OB76e",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/docker_stability_campaign/commands.py",
+      "line": 350,
+      "message": "Define a constant instead of duplicating this literal \"{{.Name}}\" 3 times."
+    },
+    {
+      "key": "AZ9sN9SnBbPLws7OB76Y",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/docker_stability_campaign/cycles.py",
+      "line": 89,
+      "message": "Define a constant instead of duplicating this literal \"bootstrap.json\" 3 times."
+    },
+    {
+      "key": "AZ9sN9TKBbPLws7OB76c",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/docker_stability_campaign/faults.py",
+      "line": 165,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 25 to the 15 allowed."
+    },
+    {
+      "key": "AZ9sN9TKBbPLws7OB76d",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/docker_stability_campaign/faults.py",
+      "line": 397,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 20 to the 15 allowed."
+    },
+    {
+      "key": "AZ9sN9S4BbPLws7OB76b",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/docker_stability_campaign/soak.py",
+      "line": 79,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 28 to the 15 allowed."
+    },
+    {
+      "key": "AZ9rX7K-04m_SfjR8Nd8",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/grafana/audit_live_grafana_panels.py",
+      "line": 148,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 20 to the 15 allowed."
+    },
+    {
+      "key": "AZ9rX7K-04m_SfjR8Nd-",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/grafana/audit_live_grafana_panels.py",
+      "line": 1762,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 21 to the 15 allowed."
+    },
+    {
+      "key": "AZ9rX7Kh04m_SfjR8Nd6",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py",
+      "line": 855,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 24 to the 15 allowed."
+    },
+    {
+      "key": "AZ9mZO3ZInYqQ25mi70_",
+      "rule": "docker:S8431",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "Dockerfile.bioetl",
+      "line": 3,
+      "message": "Use either the version tag or the digest for the image instead of both."
+    },
+    {
+      "key": "AZ9mZO3ZInYqQ25mi71A",
+      "rule": "docker:S8431",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "Dockerfile.bioetl",
+      "line": 26,
+      "message": "Use either the version tag or the digest for the image instead of both."
+    },
+    {
+      "key": "AZ9mZO2NInYqQ25mi70-",
+      "rule": "docker:S8431",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "docs/05-operations/Dockerfile",
+      "line": 2,
+      "message": "Use either the version tag or the digest for the image instead of both."
+    },
+    {
+      "key": "AZ9mZOtVInYqQ25mi706",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/runtime/docker/docker_runtime_probe.py",
+      "line": 213,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 20 to the 15 allowed."
+    },
+    {
+      "key": "AZ9mZOs4InYqQ25mi700",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/runtime/docker/runtime_manager.py",
+      "line": 196,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 23 to the 15 allowed."
+    },
+    {
+      "key": "AZ9mZOs4InYqQ25mi701",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/runtime/docker/runtime_manager.py",
+      "line": 279,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 18 to the 15 allowed."
+    },
+    {
+      "key": "AZ9mZOwIInYqQ25mi708",
+      "rule": "python:S5754",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ai/mcp/protocol_smoke.py",
+      "line": 91,
+      "message": "Catch a more specific exception or reraise the exception"
+    },
+    {
+      "key": "AZ9mZOtVInYqQ25mi705",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/runtime/docker/docker_runtime_probe.py",
+      "line": 166,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed."
+    },
+    {
+      "key": "AZ9mZOs4InYqQ25mi702",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/runtime/docker/runtime_manager.py",
+      "line": 781,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 67 to the 15 allowed."
+    },
+    {
+      "key": "AZ9kNwHp45TvB5YEtIVD",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/data_quality/inventory_silver_filters_migration.py",
+      "line": 604,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 17 to the 15 allowed."
+    },
+    {
+      "key": "AZ9hnHRno0bPLioU7lHU",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/runtime/docker/docker_runtime_preflight.py",
+      "line": 32,
+      "message": "Define a constant instead of duplicating this literal \"wsl.exe\" 4 times."
+    },
+    {
+      "key": "AZ9hnHRno0bPLioU7lHX",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/runtime/docker/docker_runtime_preflight.py",
+      "line": 383,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 104 to the 15 allowed."
+    },
+    {
+      "key": "AZ9hnHRno0bPLioU7lHY",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/runtime/docker/docker_runtime_preflight.py",
+      "line": 724,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 25 to the 15 allowed."
+    },
+    {
+      "key": "AZ9hnHRno0bPLioU7lHV",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/runtime/docker/docker_runtime_preflight.py",
+      "line": 728,
+      "message": "Define a constant instead of duplicating this literal \"{{json .}}\" 3 times."
+    },
+    {
+      "key": "AZ9hnHRno0bPLioU7lHZ",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/runtime/docker/docker_runtime_preflight.py",
+      "line": 827,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 50 to the 15 allowed."
+    },
+    {
+      "key": "AZ9h1eBYzudzWchVlqlA",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/run_observability_closure_campaign.py",
+      "line": 2547,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 19 to the 15 allowed."
+    },
+    {
+      "key": "AZ9h1eBYzudzWchVlqk0",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/run_observability_closure_campaign.py",
+      "line": 841,
+      "message": "Define a constant instead of duplicating this literal \".jsonl.zst\" 3 times."
+    },
+    {
+      "key": "AZ9h1eBYzudzWchVlqk1",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/run_observability_closure_campaign.py",
+      "line": 859,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 22 to the 15 allowed."
+    },
+    {
+      "key": "AZ9hCP5OqfafUgHtH6CQ",
+      "rule": "javascript:S4624",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs",
+      "line": 871,
+      "message": "Refactor this code to not use nested template literals."
+    },
+    {
+      "key": "AZ9hCP5OqfafUgHtH6CR",
+      "rule": "javascript:S4624",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs",
+      "line": 871,
+      "message": "Refactor this code to not use nested template literals."
+    },
+    {
+      "key": "AZ9h1dzNzudzWchVlqkv",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/check_prometheus_rules.py",
+      "line": 85,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 42 to the 15 allowed."
+    },
+    {
+      "key": "AZ9h1eBYzudzWchVlqkz",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/run_observability_closure_campaign.py",
+      "line": 404,
+      "message": "Define a constant instead of duplicating this literal \"observability-closure-campaign.json\" 3 times."
+    },
+    {
+      "key": "AZ9h1eBYzudzWchVlqk3",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/run_observability_closure_campaign.py",
+      "line": 1894,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 26 to the 15 allowed."
+    },
+    {
+      "key": "AZ9h1eBYzudzWchVlqk8",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/run_observability_closure_campaign.py",
+      "line": 2143,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 31 to the 15 allowed."
+    },
+    {
+      "key": "AZ9h1eBYzudzWchVlqk9",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/run_observability_closure_campaign.py",
+      "line": 2208,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 17 to the 15 allowed."
+    },
+    {
+      "key": "AZ9h1eBYzudzWchVlqk-",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/run_observability_closure_campaign.py",
+      "line": 2274,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 19 to the 15 allowed."
+    },
+    {
+      "key": "AZ9h1eBYzudzWchVlqk7",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/run_observability_closure_campaign.py",
+      "line": 2090,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 17 to the 15 allowed."
+    },
+    {
+      "key": "AZ9gC7X6Ku499Cc-69Fj",
+      "rule": "python:S3457",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/validate_emitter_contracts.py",
+      "line": 276,
+      "message": "Add replacement fields or use a normal string instead of an f-string."
+    },
+    {
+      "key": "AZ9gC7S8Ku499Cc-69Ff",
+      "rule": "python:S3457",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/validate_live_observability.py",
+      "line": 449,
+      "message": "Add replacement fields or use a normal string instead of an f-string."
+    },
+    {
+      "key": "AZ9gC7YJKu499Cc-69Fl",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/validate_metric_to_panel_mapping.py",
+      "line": 253,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 29 to the 15 allowed."
+    },
+    {
+      "key": "AZ9gC7YJKu499Cc-69Fm",
+      "rule": "python:S3457",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/validate_metric_to_panel_mapping.py",
+      "line": 465,
+      "message": "Add replacement fields or use a normal string instead of an f-string."
+    },
+    {
+      "key": "AZ9f-Dr_7FEeKr2n-9yx",
+      "rule": "shelldre:S7688",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ai/codex/login-codex.sh",
+      "line": 9,
+      "message": "Use '[[' instead of '[' for conditional tests. The '[[' construct is safer and more feature-rich."
+    },
+    {
+      "key": "AZ9f-Dr_7FEeKr2n-9yz",
+      "rule": "shelldre:S7688",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ai/codex/login-codex.sh",
+      "line": 17,
+      "message": "Use '[[' instead of '[' for conditional tests. The '[[' construct is safer and more feature-rich."
+    },
+    {
+      "key": "AZ9f-Dr_7FEeKr2n-9y1",
+      "rule": "shelldre:S7688",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ai/codex/login-codex.sh",
+      "line": 25,
+      "message": "Use '[[' instead of '[' for conditional tests. The '[[' construct is safer and more feature-rich."
+    },
+    {
+      "key": "AZ9f-Dq-7FEeKr2n-9yw",
+      "rule": "shelldre:S1192",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ai/codex/setup-wsl-dns.sh",
+      "line": 61,
+      "message": "Define a constant instead of using the literal '========================================' 4 times."
+    },
+    {
+      "key": "AZ9dgpPMPHxFEQyEp2Ju",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
+      "line": 838,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 32 to the 15 allowed."
+    },
+    {
+      "key": "AZ9dgpPMPHxFEQyEp2Jv",
+      "rule": "python:S5655",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
+      "line": 922,
+      "message": "Change this argument; Function \"_run_playwright_with_retry\" expects a different type"
+    },
+    {
+      "key": "AZ9dgpOmPHxFEQyEp2Jq",
+      "rule": "javascript:S2004",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs",
+      "line": 741,
+      "message": "Refactor this code to not nest functions more than 4 levels deep."
+    },
+    {
+      "key": "AZ9dgpNGPHxFEQyEp2Jg",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py",
+      "line": 314,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 95 to the 15 allowed."
+    },
+    {
+      "key": "AZ9dgpOmPHxFEQyEp2Ji",
+      "rule": "javascript:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs",
+      "line": 426,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 20 to the 15 allowed."
+    },
+    {
+      "key": "AZ9dgpOmPHxFEQyEp2Jj",
+      "rule": "javascript:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs",
+      "line": 559,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 17 to the 15 allowed."
+    },
+    {
+      "key": "AZ9dgpOmPHxFEQyEp2Jm",
+      "rule": "javascript:S6594",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs",
+      "line": 589,
+      "message": "Use the \"RegExp.exec()\" method instead."
+    },
+    {
+      "key": "AZ9dgpOmPHxFEQyEp2Jn",
+      "rule": "javascript:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs",
+      "line": 608,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 17 to the 15 allowed."
+    },
+    {
+      "key": "AZ9dgpOmPHxFEQyEp2Jo",
+      "rule": "javascript:S7761",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs",
+      "line": 636,
+      "message": "Prefer `.dataset` over `getAttribute(\u2026)`."
+    },
+    {
+      "key": "AZ9dgpOmPHxFEQyEp2Jp",
+      "rule": "javascript:S7761",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs",
+      "line": 715,
+      "message": "Prefer `.dataset` over `getAttribute(\u2026)`."
+    },
+    {
+      "key": "AZ9YOqfUZpP-TVNRJWJF",
+      "rule": "shelldre:S1066",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "docs/02-architecture/diagrams/tooling/render.sh",
+      "line": 610,
+      "message": "Merge this if statement with the enclosing one."
+    },
+    {
+      "key": "AZ9YOo2PZpP-TVNRJWJD",
+      "rule": "python:S2208",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/tools/apply_elk_layout.py",
+      "line": 9,
+      "message": "Import only needed names or import the module and then use its members."
+    },
+    {
+      "key": "AZ9YOoy2ZpP-TVNRJWJC",
+      "rule": "python:S2208",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/tools/differentiate_linkstyle.py",
+      "line": 9,
+      "message": "Import only needed names or import the module and then use its members."
+    },
+    {
+      "key": "AZ9YOo2aZpP-TVNRJWJE",
+      "rule": "python:S2208",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/tools/harmonize_link_styles.py",
+      "line": 9,
+      "message": "Import only needed names or import the module and then use its members."
+    },
+    {
+      "key": "AZ9WiAb4Ku499Cc-knaT",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/docs/checks/documentation_cleanup_inventory.py",
+      "line": 205,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 27 to the 15 allowed."
+    },
+    {
+      "key": "AZ9WiAlPKu499Cc-knaV",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_dashboard_inventory.py",
+      "line": 35,
+      "message": "Define a constant instead of duplicating this literal \"Quarantine Explorer\" 5 times."
+    },
+    {
+      "key": "AZ9WiAlPKu499Cc-knaX",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_dashboard_inventory.py",
+      "line": 205,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed."
+    },
+    {
+      "key": "AZ9WiAxQKu499Cc-knaf",
+      "rule": "python:S3358",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/support/repo/cleanup_repository.py",
+      "line": 1880,
+      "message": "Extract this nested conditional expression into an independent statement."
+    },
+    {
+      "key": "AZ9WiAsHKu499Cc-knaa",
+      "rule": "shelldre:S1066",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/repo/apply_branch_cleanup_phases_0_2.sh",
+      "line": 47,
+      "message": "Merge this if statement with the enclosing one."
+    },
+    {
+      "key": "AZ9WiAzEKu499Cc-knal",
+      "rule": "shelldre:S7682",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ai/mcp/support/token_validation.sh",
+      "line": 3,
+      "message": "Add an explicit return statement at the end of the function."
+    },
+    {
+      "key": "AZ9WiAzEKu499Cc-knam",
+      "rule": "shelldre:S7682",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ai/mcp/support/token_validation.sh",
+      "line": 75,
+      "message": "Add an explicit return statement at the end of the function."
+    },
+    {
+      "key": "AZ9WiAzEKu499Cc-knan",
+      "rule": "shelldre:S7682",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ai/mcp/support/token_validation.sh",
+      "line": 90,
+      "message": "Add an explicit return statement at the end of the function."
+    },
+    {
+      "key": "AZ9WiArWKu499Cc-knaY",
+      "rule": "python:S6035",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/repo/_branch_cleanup_policy.py",
+      "line": 36,
+      "message": "Replace this alternation with a character class."
+    },
+    {
+      "key": "AZ9WiArWKu499Cc-knaZ",
+      "rule": "python:S6035",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/repo/_branch_cleanup_policy.py",
+      "line": 37,
+      "message": "Replace this alternation with a character class."
+    },
+    {
+      "key": "AZ9WiAsYKu499Cc-knab",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/repo/branch_cleanup.py",
+      "line": 184,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 19 to the 15 allowed."
+    },
+    {
+      "key": "AZ9WiAsYKu499Cc-knac",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/repo/branch_cleanup.py",
+      "line": 324,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 48 to the 15 allowed."
+    },
+    {
+      "key": "AZ9HsNc-5QpVWydBnam1",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ai/codex/setup_mcp.py",
+      "line": 939,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 19 to the 15 allowed."
+    },
+    {
+      "key": "AZ9HsK5m5QpVWydBnalx",
+      "rule": "python:S3358",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/application/composite/_coalesce_policy_support.py",
+      "line": 102,
+      "message": "Extract this nested conditional expression into an independent statement."
+    },
+    {
+      "key": "AZ9HsK5m5QpVWydBnaly",
+      "rule": "python:S3358",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/application/composite/_coalesce_policy_support.py",
+      "line": 102,
+      "message": "Extract this nested conditional expression into an independent statement."
+    },
+    {
+      "key": "AZ9HsNZA5QpVWydBnamv",
+      "rule": "javascript:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs",
+      "line": 941,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 23 to the 15 allowed."
+    },
+    {
+      "key": "AZ9HsNEL5QpVWydBnamp",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/docs/checks/documentation_cleanup_inventory.py",
+      "line": 1334,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 26 to the 15 allowed."
+    },
+    {
+      "key": "AZ9HsLBP5QpVWydBnalz",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py",
+      "line": 30,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed."
+    },
+    {
+      "key": "AZ9HsNVR5QpVWydBnamu",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/repo/cleanup_root_local_clutter.py",
+      "line": 274,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed."
+    },
+    {
+      "key": "AZ82It062PfT68OQZ9Hw",
+      "rule": "python:S5754",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/check_quality_exemptions.py",
+      "line": 39,
+      "message": "Reraise this exception to stop the application as the user expects"
+    },
+    {
+      "key": "AZ8zbRdJxb6etjxqQwKK",
+      "rule": "python:S7503",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/infrastructure/adapters/input/csv_filter_reader.py",
+      "line": 57,
+      "message": "Use asynchronous features in this function or remove the `async` keyword."
+    },
+    {
+      "key": "AZ8zbRc0xb6etjxqQwKI",
+      "rule": "python:S7503",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/infrastructure/adapters/input/idmapping_csv_reader_adapter.py",
+      "line": 25,
+      "message": "Use asynchronous features in this function or remove the `async` keyword."
+    },
+    {
+      "key": "AZ8zbRc0xb6etjxqQwKJ",
+      "rule": "python:S7503",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/infrastructure/adapters/input/idmapping_csv_reader_adapter.py",
+      "line": 33,
+      "message": "Use asynchronous features in this function or remove the `async` keyword."
+    },
+    {
+      "key": "AZ8zbRMXxb6etjxqQwJ-",
+      "rule": "python:S7503",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+      "line": 122,
+      "message": "Use asynchronous features in this function or remove the `async` keyword."
+    },
+    {
+      "key": "AZ8zbRTfxb6etjxqQwKE",
+      "rule": "python:S7503",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/infrastructure/storage/delta_reader.py",
+      "line": 82,
+      "message": "Use asynchronous features in this function or remove the `async` keyword."
+    },
+    {
+      "key": "AZ8zbRTfxb6etjxqQwKF",
+      "rule": "python:S7503",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/infrastructure/storage/delta_reader.py",
+      "line": 161,
+      "message": "Use asynchronous features in this function or remove the `async` keyword."
+    },
+    {
+      "key": "AZ8zbRTfxb6etjxqQwKG",
+      "rule": "python:S7503",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/infrastructure/storage/delta_reader.py",
+      "line": 186,
+      "message": "Use asynchronous features in this function or remove the `async` keyword."
+    },
+    {
+      "key": "AZ8zTmC7gn42AMKbam0h",
+      "rule": "python:S7503",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
+      "line": 135,
+      "message": "Use asynchronous features in this function or remove the `async` keyword."
+    },
+    {
+      "key": "AZ8zTmCvgn42AMKbam0f",
+      "rule": "python:S7503",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py",
+      "line": 74,
+      "message": "Use asynchronous features in this function or remove the `async` keyword."
+    },
+    {
+      "key": "AZ8zTmCvgn42AMKbam0g",
+      "rule": "python:S7503",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py",
+      "line": 159,
+      "message": "Use asynchronous features in this function or remove the `async` keyword."
+    },
+    {
+      "key": "AZ8zTmCggn42AMKbam0e",
+      "rule": "python:S7503",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/infrastructure/storage/bronze/write_execution.py",
+      "line": 150,
+      "message": "Use asynchronous features in this function or remove the `async` keyword."
+    },
+    {
+      "key": "AZ8zGlnAgn42AMKbY_S5",
+      "rule": "python:S7503",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/infrastructure/checkpoint/local_checkpoint.py",
+      "line": 31,
+      "message": "Use asynchronous features in this function or remove the `async` keyword."
+    },
+    {
+      "key": "AZ8zGlnAgn42AMKbY_S6",
+      "rule": "python:S7503",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/infrastructure/checkpoint/local_checkpoint.py",
+      "line": 40,
+      "message": "Use asynchronous features in this function or remove the `async` keyword."
+    },
+    {
+      "key": "AZ8zGlnAgn42AMKbY_S7",
+      "rule": "python:S7503",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/infrastructure/checkpoint/local_checkpoint.py",
+      "line": 44,
+      "message": "Use asynchronous features in this function or remove the `async` keyword."
+    },
+    {
+      "key": "AZ8zGlnAgn42AMKbY_S8",
+      "rule": "python:S7503",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/infrastructure/checkpoint/local_checkpoint.py",
+      "line": 48,
+      "message": "Use asynchronous features in this function or remove the `async` keyword."
+    },
+    {
+      "key": "AZ8zGlnAgn42AMKbY_S9",
+      "rule": "python:S7503",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/infrastructure/checkpoint/local_checkpoint.py",
+      "line": 52,
+      "message": "Use asynchronous features in this function or remove the `async` keyword."
+    },
+    {
+      "key": "AZ8zGlnAgn42AMKbY_S-",
+      "rule": "python:S7503",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/infrastructure/checkpoint/local_checkpoint.py",
+      "line": 56,
+      "message": "Use asynchronous features in this function or remove the `async` keyword."
+    },
+    {
+      "key": "AZ8zGlnAgn42AMKbY_S_",
+      "rule": "python:S7503",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/infrastructure/checkpoint/local_checkpoint.py",
+      "line": 64,
+      "message": "Use asynchronous features in this function or remove the `async` keyword."
+    },
+    {
+      "key": "AZ8zGlnAgn42AMKbY_TA",
+      "rule": "python:S7503",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/infrastructure/checkpoint/local_checkpoint.py",
+      "line": 71,
+      "message": "Use asynchronous features in this function or remove the `async` keyword."
+    },
+    {
+      "key": "AZ8y07wWxb6etjxqL1AX",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/memory/tooling/workflow.py",
+      "line": 384,
+      "message": "Define a constant instead of duplicating this literal \"chunks.jsonl\" 3 times."
+    },
+    {
+      "key": "AZ8y07wWxb6etjxqL1AW",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/memory/tooling/workflow.py",
+      "line": 810,
+      "message": "Define a constant instead of duplicating this literal \"Memory workflow smoke\" 3 times."
+    },
+    {
+      "key": "AZ8tydlXRtbAQg66STNt",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_architecture_debt_remote_main_baseline.py",
+      "line": 284,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 19 to the 15 allowed."
+    },
+    {
+      "key": "AZ8tydooRtbAQg66STN8",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_debt_governance_gates.py",
+      "line": 895,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 80 to the 15 allowed."
+    },
+    {
+      "key": "AZ8tydXuRtbAQg66STNs",
+      "rule": "python:S6019",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ai/sync_ai_governance.py",
+      "line": 48,
+      "message": "Fix this reluctant quantifier that will only ever match 0 repetitions."
+    },
+    {
+      "key": "AZ8tydXYRtbAQg66STNq",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ai/sync_cursor_rules.py",
+      "line": 52,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 19 to the 15 allowed."
+    },
+    {
+      "key": "AZ8oxH81T3NflAFuCLDA",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/application/core/base_transformer/base.py",
+      "line": 48,
+      "message": "Return a value of type \"TransformerDependencyContext\" instead of \"DataclassInstance\" or update function \"_resolve_transformer_dependencies\" type hint."
+    },
+    {
+      "key": "AZ8n7sbioBc5PoNgJ3LF",
+      "rule": "python:S1481",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/check_docs_drift.py",
+      "line": 54,
+      "message": "Remove the unused local variable \"e\"."
+    },
+    {
+      "key": "AZ8nxe5T_PZEko83NPWs",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/repo/cleanup_root_local_clutter.py",
+      "line": 153,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 20 to the 15 allowed."
+    },
+    {
+      "key": "AZ8nxe2A_PZEko83NPWr",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/repo/publish_tdx_audit_issues.py",
+      "line": 301,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 18 to the 15 allowed."
+    },
+    {
+      "key": "AZ8m9OE8a1iEk93CLR7_",
+      "rule": "python:S8786",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ai/sync_windsurf_rules.py",
+      "line": 54,
+      "message": "Simplify this regular expression to reduce its runtime, as it has super-linear performance due to backtracking."
+    },
+    {
+      "key": "AZ8m9OE8a1iEk93CLR8A",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ai/sync_windsurf_rules.py",
+      "line": 150,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 18 to the 15 allowed."
+    },
+    {
+      "key": "AZ8i9X63ewCGJePZ7-3T",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_artifact_duplication_audit.py",
+      "line": 100,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 19 to the 15 allowed."
+    },
+    {
+      "key": "AZ8i9WwiewCGJePZ7-3R",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/memory/validation.py",
+      "line": 421,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 18 to the 15 allowed."
+    },
+    {
+      "key": "AZ8YoBzGYWmv-XNRSugQ",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/interfaces/cli/formatters.py",
+      "line": 290,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 17 to the 15 allowed."
+    },
+    {
+      "key": "AZ8XHo0AF0P-VZ1FwR2m",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_vcr_metadata_catalog.py",
+      "line": 40,
+      "message": "Define a constant instead of duplicating this literal \"tests/integration/adapters/test_crossref.py\" 3 times."
+    },
+    {
+      "key": "AZ8XHo0AF0P-VZ1FwR2l",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_vcr_metadata_catalog.py",
+      "line": 49,
+      "message": "Define a constant instead of duplicating this literal \"tests/integration/adapters/test_uniprot.py\" 3 times."
+    },
+    {
+      "key": "AZ8Ui3uFa2RxxbU4AekI",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/repo/check_scripts_catalog.py",
+      "line": 337,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 19 to the 15 allowed."
+    },
+    {
+      "key": "AZ8UWw_ERs-9Ay15_CMc",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/support/repo/cleanup_repository.py",
+      "line": 695,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 24 to the 15 allowed."
+    },
+    {
+      "key": "AZ8UWw_ERs-9Ay15_CMd",
+      "rule": "python:S3358",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/support/repo/cleanup_repository.py",
+      "line": 752,
+      "message": "Extract this nested conditional expression into an independent statement."
+    },
+    {
+      "key": "AZ8UWw_ERs-9Ay15_CMe",
+      "rule": "python:S3358",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/support/repo/cleanup_repository.py",
+      "line": 761,
+      "message": "Extract this nested conditional expression into an independent statement."
+    },
+    {
+      "key": "AZ8UWw_ERs-9Ay15_CMf",
+      "rule": "python:S3358",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/support/repo/cleanup_repository.py",
+      "line": 770,
+      "message": "Extract this nested conditional expression into an independent statement."
+    },
+    {
+      "key": "AZ8UWw_ERs-9Ay15_CMg",
+      "rule": "python:S3358",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/support/repo/cleanup_repository.py",
+      "line": 779,
+      "message": "Extract this nested conditional expression into an independent statement."
+    },
+    {
+      "key": "AZ8UWtMURs-9Ay15_CLt",
+      "rule": "python:S3358",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/application/services/control_plane/manifest/diagnostics/ledger_processing.py",
+      "line": 248,
+      "message": "Extract this nested conditional expression into an independent statement."
+    },
+    {
+      "key": "AZ8UWtryRs-9Ay15_CLu",
+      "rule": "python:S5754",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/infrastructure/storage/silver/delta_write_execution.py",
+      "line": 91,
+      "message": "Catch a more specific exception or reraise the exception"
+    },
+    {
+      "key": "AZ8UWunyRs-9Ay15_CL3",
+      "rule": "python:S5754",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/memory/graph/sync_pkg/_core.py",
+      "line": 1827,
+      "message": "Catch a more specific exception or reraise the exception"
+    },
+    {
+      "key": "AZ8UWwktRs-9Ay15_CMT",
+      "rule": "powershelldre:S8625",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ai/codex/setup.ps1",
+      "line": 37,
+      "message": "Rename this function; 'Write-Warning' shadows a built-in PowerShell cmdlet."
+    },
+    {
+      "key": "AZ8tydooRtbAQg66STN7",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_debt_governance_gates.py",
+      "line": 682,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 23 to the 15 allowed."
+    },
+    {
+      "key": "AZ71ditkst4krvv_J3Kd",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_pipeline_config_contract_ownership.py",
+      "line": 190,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 17 to the 15 allowed."
+    },
+    {
+      "key": "AZ70bwgk63z8NIpAlkuL",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/support/repo/cleanup_repository.py",
+      "line": 1829,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 21 to the 15 allowed."
+    },
+    {
+      "key": "AZ7z7bKMZOPLubavMmuZ",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ai/codex/setup_mcp.py",
+      "line": 704,
+      "message": "Define a constant instead of duplicating this literal \"mcp.json\" 4 times."
+    },
+    {
+      "key": "AZ7z7bNUZOPLubavMmua",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/ci/update_test_telemetry_baseline.py",
+      "line": 180,
+      "message": "Define a constant instead of duplicating this literal \"<unknown>\" 3 times."
+    },
+    {
+      "key": "AZ7z7bNUZOPLubavMmub",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/ci/update_test_telemetry_baseline.py",
+      "line": 323,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 20 to the 15 allowed."
+    },
+    {
+      "key": "AZ7z7bNUZOPLubavMmuc",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/ci/update_test_telemetry_baseline.py",
+      "line": 458,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 19 to the 15 allowed."
+    },
+    {
+      "key": "AZ-AVI5Tp3bAlirjZtGb",
+      "rule": "githubactions:S6573",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": ".github/workflows/release.yml",
+      "line": 47,
+      "message": "Prefix files and paths with \"./\" or \"--\" when using glob."
+    },
+    {
+      "key": "AZ-AVI-Kp3bAlirjZtK6",
+      "rule": "docker:S8541",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "component": "docs/05-operations/Dockerfile",
+      "line": 25,
+      "message": "Omitting \"--no-build\" or \"--only-binary :all:\" can lead to the execution of setup scripts. Make sure it is safe here."
+    },
+    {
+      "key": "AZ-AVI-Kp3bAlirjZtK7",
+      "rule": "docker:S8544",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "component": "docs/05-operations/Dockerfile",
+      "line": 25,
+      "message": "Using dependencies without locking resolved versions is security-sensitive."
+    },
+    {
+      "key": "AZ-AVI-Kp3bAlirjZtK8",
+      "rule": "docker:S8544",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "component": "docs/05-operations/Dockerfile",
+      "line": 39,
+      "message": "Using dependencies without locking resolved versions is security-sensitive."
+    },
+    {
+      "key": "AZ-AVI-Kp3bAlirjZtK-",
+      "rule": "docker:S8541",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "component": "docs/05-operations/Dockerfile",
+      "line": 66,
+      "message": "Omitting \"--no-build\" or \"--only-binary :all:\" can lead to the execution of setup scripts. Make sure it is safe here."
+    },
+    {
+      "key": "AZ-AVI-Kp3bAlirjZtK_",
+      "rule": "docker:S8544",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "component": "docs/05-operations/Dockerfile",
+      "line": 66,
+      "message": "Using dependencies without locking resolved versions is security-sensitive."
+    },
+    {
+      "key": "AZ8ed0Vmum8CxU13lpkN",
+      "rule": "python:S8786",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/docs/common/markdown.py",
+      "line": 13,
+      "message": "Simplify this regular expression to reduce its runtime, as it has super-linear performance due to backtracking."
+    },
+    {
+      "key": "AZ8ed0ieum8CxU13lpkO",
+      "rule": "python:S8786",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/ci/update_test_telemetry_baseline.py",
+      "line": 135,
+      "message": "Simplify this regular expression to reduce its runtime, as it has super-linear performance due to backtracking."
+    },
+    {
+      "key": "AZ-AVImRp3bAlirjZtFh",
+      "rule": "shell:S5332",
+      "severity": "MINOR",
+      "type": "VULNERABILITY",
+      "component": "scripts/engineering/dev/bash/.wsl_proxy_env.sh",
+      "line": 17,
+      "message": "Make sure that using clear-text protocols is safe here."
+    },
+    {
+      "key": "AZ-AVIobp3bAlirjZtFi",
+      "rule": "shell:S8541",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "component": "scripts/engineering/dev/setup_env_wsl.sh",
+      "line": 29,
+      "message": "Omitting \"--no-build\" can lead to the execution of setup scripts. Make sure it is safe here."
+    },
+    {
+      "key": "AZ8tyd0_RtbAQg66STOG",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/repo/check_scripts_inventory.py",
+      "line": 111,
+      "message": "Define a constant instead of duplicating this literal \"scripts/\" 3 times."
+    },
+    {
+      "key": "AZ8ed1BBum8CxU13lpkT",
+      "rule": "python:S8786",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/generate_adr_registry.py",
+      "line": 102,
+      "message": "Simplify this regular expression to reduce its runtime, as it has super-linear performance due to backtracking."
+    },
+    {
+      "key": "AZ-AVIv9p3bAlirjZtFl",
+      "rule": "shell:S8541",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "component": "scripts/ops/launchers/codex/setup_plugins.sh",
+      "line": 409,
+      "message": "Omitting \"--no-build\" can lead to the execution of setup scripts. Make sure it is safe here."
+    },
+    {
+      "key": "AZ-AVIv9p3bAlirjZtFm",
+      "rule": "shell:S8541",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "component": "scripts/ops/launchers/codex/setup_plugins.sh",
+      "line": 568,
+      "message": "Omitting \"--no-build\" or \"--only-binary :all:\" can lead to the execution of setup scripts. Make sure it is safe here."
+    },
+    {
+      "key": "AZ-AVIv9p3bAlirjZtFn",
+      "rule": "shell:S8541",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "component": "scripts/ops/launchers/codex/setup_plugins.sh",
+      "line": 571,
+      "message": "Omitting \"--no-build\" can lead to the execution of setup scripts. Make sure it is safe here."
+    },
+    {
+      "key": "AZ-AVIt5p3bAlirjZtFj",
+      "rule": "shell:S8541",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "component": "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh",
+      "line": 385,
+      "message": "Omitting \"--no-build\" can lead to the execution of setup scripts. Make sure it is safe here."
+    },
+    {
+      "key": "AZ8edxl9um8CxU13lpkJ",
+      "rule": "python:S8786",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/domain/behavior/_dq_rule_evaluators_vocab.py",
+      "line": 46,
+      "message": "Simplify this regular expression to reduce its runtime, as it has super-linear performance due to backtracking."
+    },
+    {
+      "key": "AZ8tya1KRtbAQg66STNd",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_runtime.py",
+      "line": 194,
+      "message": "Return a value of type \"Union[RunCommandInput, RunAllCommandInput]\" instead of \"DataclassInstance\" or update function \"attach_observability_backend_to_cli_input\" type hint."
+    },
+    {
+      "key": "AZ8edyIAum8CxU13lpkL",
+      "rule": "python:S8786",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/memory/notes.py",
+      "line": 25,
+      "message": "Simplify this regular expression to reduce its runtime, as it has super-linear performance due to backtracking."
+    },
+    {
+      "key": "AZ8edyGjum8CxU13lpkK",
+      "rule": "python:S8786",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/memory/rag/chunking.py",
+      "line": 16,
+      "message": "Simplify this regular expression to reduce its runtime, as it has super-linear performance due to backtracking."
+    },
+    {
+      "key": "AZ7uYBplu8cHo7uIt_j-",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_compatibility_importer_census.py",
+      "line": 1170,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 25 to the 15 allowed."
+    },
+    {
+      "key": "AZ7uYBsHu8cHo7uIt_j_",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_dead_code_inventory.py",
+      "line": 273,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 22 to the 15 allowed."
+    },
+    {
+      "key": "AZ7uYBsHu8cHo7uIt_kA",
+      "rule": "python:S1871",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_dead_code_inventory.py",
+      "line": 292,
+      "message": "Either merge this branch with the identical one on line \"286\" or change one of the implementations."
+    },
+    {
+      "key": "AZ7haWYTpLzj5ptQjnjz",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_duplication_baseline.py",
+      "line": 721,
+      "message": "Define a constant instead of duplicating this literal \"| --- | ---: |\" 3 times."
+    },
+    {
+      "key": "AZ7hWdYd9NX73x3o3wly",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_invariant_audit_rebaseline.py",
+      "line": 557,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 34 to the 15 allowed."
+    },
+    {
+      "key": "AZ7bUbGyVTLq1nTuP9dM",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_contract_coverage_matrix.py",
+      "line": 128,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed."
+    },
+    {
+      "key": "AZ7bUbGyVTLq1nTuP9dN",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_contract_coverage_matrix.py",
+      "line": 296,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed."
+    },
+    {
+      "key": "AZ7bUXpVVTLq1nTuP9dA",
+      "rule": "python:S5864",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py",
+      "line": 157,
+      "message": "Fix this call; Previous type checks suggest that \"increment_counter\" has type object and it is not callable."
+    },
+    {
+      "key": "AZ7bUXpVVTLq1nTuP9dB",
+      "rule": "python:S5864",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py",
+      "line": 178,
+      "message": "Fix this call; Previous type checks suggest that \"set_gauge\" has type object and it is not callable."
+    },
+    {
+      "key": "AZ7bUXpVVTLq1nTuP9dC",
+      "rule": "python:S5864",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py",
+      "line": 184,
+      "message": "Fix this call; Previous type checks suggest that \"increment_counter\" has type object and it is not callable."
+    },
+    {
+      "key": "AZ7bUbBjVTLq1nTuP9dE",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_domain_io_taint_inventory.py",
+      "line": 25,
+      "message": "Define a constant instead of duplicating this literal \"network client\" 3 times."
+    },
+    {
+      "key": "AZ7bUbBjVTLq1nTuP9dH",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_domain_io_taint_inventory.py",
+      "line": 43,
+      "message": "Define a constant instead of duplicating this literal \"filesystem discovery\" 3 times."
+    },
+    {
+      "key": "AZ7bUbBjVTLq1nTuP9dF",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_domain_io_taint_inventory.py",
+      "line": 57,
+      "message": "Define a constant instead of duplicating this literal \"wall-clock timestamp\" 3 times."
+    },
+    {
+      "key": "AZ7bUbBjVTLq1nTuP9dI",
+      "rule": "python:S4144",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_domain_io_taint_inventory.py",
+      "line": 124,
+      "message": "Update this function so that its implementation is not identical to visit_ClassDef on line 119."
+    },
+    {
+      "key": "AZ7bUbBjVTLq1nTuP9dJ",
+      "rule": "python:S4144",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_domain_io_taint_inventory.py",
+      "line": 129,
+      "message": "Update this function so that its implementation is not identical to visit_ClassDef on line 119."
+    },
+    {
+      "key": "AZ7bUbBjVTLq1nTuP9dG",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_domain_io_taint_inventory.py",
+      "line": 136,
+      "message": "Define a constant instead of duplicating this literal \"<module>\" 4 times."
+    },
+    {
+      "key": "AZ7VFlECUH5VzbOCb1XP",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_adr_enforcement_matrix.py",
+      "line": 279,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed."
+    },
+    {
+      "key": "AZ7UR3CbDC12tAEKu--n",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_adr_enforcement_matrix.py",
+      "line": 37,
+      "message": "Define a constant instead of duplicating this literal \"scripts/\" 3 times."
+    },
+    {
+      "key": "AZ7UR3CbDC12tAEKu--m",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_adr_enforcement_matrix.py",
+      "line": 39,
+      "message": "Define a constant instead of duplicating this literal \"tests/\" 3 times."
+    },
+    {
+      "key": "AZ7QfkeEbH8oLnz33IVq",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_dead_code_inventory.py",
+      "line": 113,
+      "message": "Define a constant instead of duplicating this literal \"tests/architecture/test_wave3_adapter_facade_closeout.py\" 3 times."
+    },
+    {
+      "key": "AZ7QfkeEbH8oLnz33IVo",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_dead_code_inventory.py",
+      "line": 144,
+      "message": "Define a constant instead of duplicating this literal \"tests/unit/application/composite/test_runner.py\" 3 times."
+    },
+    {
+      "key": "AZ7QfkeEbH8oLnz33IVp",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_dead_code_inventory.py",
+      "line": 150,
+      "message": "Define a constant instead of duplicating this literal \"tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py\" 3 times."
+    },
+    {
+      "key": "AZ7QS3skNqxzHYuTZVOz",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/docs/checks/check_drift.py",
+      "line": 56,
+      "message": "Define a constant instead of duplicating this literal \"README.md\" 3 times."
+    },
+    {
+      "key": "AZ7LXPEN4NtxwV77hwrR",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/data_quality/inventory_silver_filters_migration.py",
+      "line": 136,
+      "message": "Define a constant instead of duplicating this literal \"src/bioetl/infrastructure/config\" 3 times."
+    },
+    {
+      "key": "AZ7LXPEN4NtxwV77hwrQ",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/data_quality/inventory_silver_filters_migration.py",
+      "line": 137,
+      "message": "Define a constant instead of duplicating this literal \"src/bioetl/infrastructure/schemas\" 3 times."
+    },
+    {
+      "key": "AZ7K_GSdONJ18AjsZlpp",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/data_quality/inventory_silver_filters_migration.py",
+      "line": 256,
+      "message": "Define a constant instead of duplicating this literal \"grafana/prometheus-rules\" 3 times."
+    },
+    {
+      "key": "AZ7K_GSdONJ18AjsZlpq",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/data_quality/inventory_silver_filters_migration.py",
+      "line": 286,
+      "message": "Define a constant instead of duplicating this literal \"docs/05-operations\" 3 times."
+    },
+    {
+      "key": "AZ7K_GSdONJ18AjsZlpo",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/data_quality/inventory_silver_filters_migration.py",
+      "line": 288,
+      "message": "Define a constant instead of duplicating this literal \"docs/03-guides/running-pipelines.md\" 3 times."
+    },
+    {
+      "key": "AZ6UPIFPMX0wusADR4QQ",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_module_coverage_inventory.py",
+      "line": 280,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 18 to the 15 allowed."
+    },
+    {
+      "key": "AZ6UPIFPMX0wusADR4QR",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_module_coverage_inventory.py",
+      "line": 795,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 17 to the 15 allowed."
+    },
+    {
+      "key": "AZ6UPG6eMX0wusADR4QB",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/application/core/postrun/_service_collaborators.py",
+      "line": 40,
+      "message": "Define a constant instead of duplicating this literal \"object | None\" 5 times."
+    },
+    {
+      "key": "AZ6SLs7-KPEJmiI9_k2w",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/application/core/lifecycle/checkpoint_identity_overrides.py",
+      "line": 176,
+      "message": "Return a value of type \"CheckpointMetadata\" instead of \"DataclassInstance\" or update function \"enrich_metadata_with_execution_identity\" type hint."
+    },
+    {
+      "key": "AZ6SLsw6KPEJmiI9_k2u",
+      "rule": "python:S1172",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/application/services/lineage/metadata_coordinator_bronze.py",
+      "line": 29,
+      "message": "Remove the unused function parameter \"run_context\"."
+    },
+    {
+      "key": "AZ6OUEF9IP87Uc_zxcpH",
+      "rule": "python:S6019",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/create_github_issues.py",
+      "line": 31,
+      "message": "Fix this reluctant quantifier that will only ever match 0 repetitions."
+    },
+    {
+      "key": "AZ6Mp8Be3UctT4cSQ06Q",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/hotspot_family_metrics.py",
+      "line": 169,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed."
+    },
+    {
+      "key": "AZ6Mp8Be3UctT4cSQ06R",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/hotspot_family_metrics.py",
+      "line": 202,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 24 to the 15 allowed."
+    },
+    {
+      "key": "AZ6Mp6n93UctT4cSQ06N",
+      "rule": "python:S5890",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/domain/control_plane/run_manifest.py",
+      "line": 191,
+      "message": "Replace the type hint \"InitVar[Optional[object]]\" with \"Optional[InitVar[Optional[object]]]\" or don't assign \"None\" to \"pipeline_config\""
+    },
+    {
+      "key": "AZ6Mp6n93UctT4cSQ06O",
+      "rule": "python:S5890",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/domain/control_plane/run_manifest.py",
+      "line": 192,
+      "message": "Replace the type hint \"InitVar[Optional[object]]\" with \"Optional[InitVar[Optional[object]]]\" or don't assign \"None\" to \"pipeline_identity\""
+    },
+    {
+      "key": "AZ6Mp6n93UctT4cSQ06P",
+      "rule": "python:S5890",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/domain/control_plane/run_manifest.py",
+      "line": 193,
+      "message": "Replace the type hint \"InitVar[Optional[object]]\" with \"Optional[InitVar[Optional[object]]]\" or don't assign \"None\" to \"artifacts\""
+    },
+    {
+      "key": "AZ6Mp6Sb3UctT4cSQ06K",
+      "rule": "python:S108",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/application/pipelines/pubmed/_block_definitions_base.py",
+      "line": 10,
+      "message": "Either remove or fill this block of code."
+    },
+    {
+      "key": "AZ6Mp6fd3UctT4cSQ06M",
+      "rule": "python:S108",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/infrastructure/quarantine/_inspection.py",
+      "line": 15,
+      "message": "Either remove or fill this block of code."
+    },
+    {
+      "key": "AZ6Mp6fI3UctT4cSQ06L",
+      "rule": "python:S108",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/infrastructure/quarantine/_statistics_helpers.py",
+      "line": 9,
+      "message": "Either remove or fill this block of code."
+    },
+    {
+      "key": "AZ6MnIeGkCZi7hnBm05W",
+      "rule": "python:S107",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/interfaces/cli/commands/workflow.py",
+      "line": 254,
+      "message": "Function \"run_workflow_command\" has 35 parameters, which is greater than the 13 authorized."
+    },
+    {
+      "key": "AZ6MTKpqS5oWadeFownl",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/memory/notes.py",
+      "line": 146,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 25 to the 15 allowed."
+    },
+    {
+      "key": "AZ6JtUM8e-V3jupqMYO8",
+      "rule": "python:S3358",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/application/services/checkpoint_compatibility_results.py",
+      "line": 50,
+      "message": "Extract this nested conditional expression into an independent statement."
+    },
+    {
+      "key": "AZ6JGlThRwyFzmiur6T1",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_test_governance_audit.py",
+      "line": 1155,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 30 to the 15 allowed."
+    },
+    {
+      "key": "AZ6JGlayRwyFzmiur6T5",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/schema/generate_config_matrix.py",
+      "line": 178,
+      "message": "Define a constant instead of duplicating this literal \"(dict)\" 3 times."
+    },
+    {
+      "key": "AZ6Gx1Kn9G6DiXiAUXTV",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
+      "line": 1079,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 19 to the 15 allowed."
+    },
+    {
+      "key": "AZ6DRM1EgiETAkWxza5Y",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/schema/generate_schema_artifacts.py",
+      "line": 68,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 19 to the 15 allowed."
+    },
+    {
+      "key": "AZ5-0-3iEMqJBb_R9x5o",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_contract_coverage_matrix.py",
+      "line": 344,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 47 to the 15 allowed."
+    },
+    {
+      "key": "AZ5-06TgEMqJBb_R9x5d",
+      "rule": "python:S1172",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/composition/bootstrap/assembly/health_server.py",
+      "line": 65,
+      "message": "Remove the unused function parameter \"logger\"."
+    },
+    {
+      "key": "AZ5-06TgEMqJBb_R9x5e",
+      "rule": "python:S1172",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/composition/bootstrap/assembly/health_server.py",
+      "line": 69,
+      "message": "Remove the unused function parameter \"provider\"."
+    },
+    {
+      "key": "AZ5-06TgEMqJBb_R9x5f",
+      "rule": "python:S1172",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/composition/bootstrap/assembly/health_server.py",
+      "line": 72,
+      "message": "Remove the unused function parameter \"provider\"."
+    },
+    {
+      "key": "AZ55l6L-xhoxqMM9IBow",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_dashboard_promql_scope.py",
+      "line": 76,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 18 to the 15 allowed."
+    },
+    {
+      "key": "AZ530x1wUqANC3p5diDJ",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/application/services/_quarantine_service_filtered_helpers.py",
+      "line": 205,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 19 to the 15 allowed."
+    },
+    {
+      "key": "AZ54DnSufeNRQCeum_ko",
+      "rule": "python:S1172",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/application/services/control_plane/manifest/diagnostics/artifact_support.py",
+      "line": 77,
+      "message": "Remove the unused function parameter \"ledger_entries_present\"."
+    },
+    {
+      "key": "AZ5yW-O7SgPjiLhZPf5n",
+      "rule": "python:S2737",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "src/memory/notes.py",
+      "line": 45,
+      "message": "Add logic to this except clause or eliminate it and rethrow the exception automatically."
+    },
+    {
+      "key": "AZ5yW-O7SgPjiLhZPf5p",
+      "rule": "python:S2737",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "src/memory/notes.py",
+      "line": 177,
+      "message": "Add logic to this except clause or eliminate it and rethrow the exception automatically."
+    },
+    {
+      "key": "AZ5uRvdwIcrU94kmLln9",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/docs/checks/check_drift.py",
+      "line": 149,
+      "message": "Define a constant instead of duplicating this literal \".codex/agents/py-config-bot.md\" 3 times."
+    },
+    {
+      "key": "AZ5tvwLTwULTZBEuwexT",
+      "rule": "powershelldre:S8625",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ai/gemini/run-gemini-docker.ps1",
+      "line": 22,
+      "message": "Rename this function; 'Write-Error' shadows a built-in PowerShell cmdlet."
+    },
+    {
+      "key": "AZ5tHw4h6rv_DrW9y9W3",
+      "rule": "pythonbugs:S2589",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/domain/ports/workflow_foreign_key_reconciliation.py",
+      "line": 104,
+      "message": "Fix this condition that always evaluates to true."
+    },
+    {
+      "key": "AZ5oHTDUm-o70ylzg1Bb",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py",
+      "line": 645,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 22 to the 15 allowed."
+    },
+    {
+      "key": "AZ7wMR-Q6yTOFY9wArUv",
+      "rule": "javascript:S8786",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs",
+      "line": 307,
+      "message": "Simplify this regular expression to reduce its runtime, as it has super-linear performance due to backtracking."
+    },
+    {
+      "key": "AZ5k7U5o6-HW161UtWWT",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/grafana/audit_live_grafana_panels.py",
+      "line": 229,
+      "message": "Define a constant instead of duplicating this literal \"Processed Records\" 6 times."
+    },
+    {
+      "key": "AZ5j3P-bnDfGUzVzv3Ru",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/memory/graph/sync_pkg/_core.py",
+      "line": 9603,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 23 to the 15 allowed."
+    },
+    {
+      "key": "AZ5i8BvWD_9TE7Os4Nr-",
+      "rule": "python:S3358",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/run_historical_replay_closure_campaign.py",
+      "line": 602,
+      "message": "Extract this nested conditional expression into an independent statement."
+    },
+    {
+      "key": "AZ5i6HNqF8CKQ7K0rH4w",
+      "rule": "python:S2208",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/memory/graph/sync.py",
+      "line": 12,
+      "message": "Import only needed names or import the module and then use its members."
+    },
+    {
+      "key": "AZ5i6HPJF8CKQ7K0rH4x",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/memory/graph/sync_pkg/_core.py",
+      "line": 5314,
+      "message": "Define a constant instead of duplicating this literal \".yaml\" 3 times."
+    },
+    {
+      "key": "AZ5i6HPJF8CKQ7K0rH40",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/memory/graph/sync_pkg/_core.py",
+      "line": 9806,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 21 to the 15 allowed."
+    },
+    {
+      "key": "AZ5gEmyrw3y5MboyhXAN",
+      "rule": "python:S5754",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/common/cli_dispatch.py",
+      "line": 56,
+      "message": "Reraise this exception to stop the application as the user expects"
+    },
+    {
+      "key": "AZ5fAKpfeWi1jYyGBTxn",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/composition/bootstrap/cli/storage.py",
+      "line": 197,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed."
+    },
+    {
+      "key": "AZ5aX-tr8fW-p5SWWTHw",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/memory/notes.py",
+      "line": 396,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 18 to the 15 allowed."
+    },
+    {
+      "key": "AZ5aX-x38fW-p5SWWTHz",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/memory/validation.py",
+      "line": 457,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 17 to the 15 allowed."
+    },
+    {
+      "key": "AZ5aDsCQ3WPTeVMx4aId",
+      "rule": "python:S3358",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/observability/check_published_observability_endpoints.py",
+      "line": 218,
+      "message": "Extract this nested conditional expression into an independent statement."
+    },
+    {
+      "key": "AZ5RTIlM39jb-gq1RJRv",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_module_coverage_inventory.py",
+      "line": 550,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 22 to the 15 allowed."
+    },
+    {
+      "key": "AZ5PsiFqXSDqH0AcYcG2",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_dead_code_inventory.py",
+      "line": 800,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed."
+    },
+    {
+      "key": "AZ5Psg3SXSDqH0AcYcGy",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/infrastructure/control_plane/artifact_byte_comparison.py",
+      "line": 73,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 23 to the 15 allowed."
+    },
+    {
+      "key": "AZ5OE8P43jzJuAa0aEOz",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/check_test_audit_preflight.py",
+      "line": 219,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 23 to the 15 allowed."
+    },
+    {
+      "key": "AZ5OE8LJ3jzJuAa0aEOw",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_dead_code_inventory.py",
+      "line": 424,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 59 to the 15 allowed."
+    },
+    {
+      "key": "AZ5OE8Me3jzJuAa0aEOx",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_vcr_metadata_catalog.py",
+      "line": 123,
+      "message": "Define a constant instead of duplicating this literal \"_meta.yml\" 3 times."
+    },
+    {
+      "key": "AZ5OE8Me3jzJuAa0aEOy",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_vcr_metadata_catalog.py",
+      "line": 123,
+      "message": "Define a constant instead of duplicating this literal \"_meta.yaml\" 3 times."
+    },
+    {
+      "key": "AZ5OE6pv3jzJuAa0aEOu",
+      "rule": "python:S3358",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/application/services/control_plane/run_manifest_reproducibility_claims.py",
+      "line": 74,
+      "message": "Extract this nested conditional expression into an independent statement."
+    },
+    {
+      "key": "AZ5KwjXzS2mGdWM6_X6r",
+      "rule": "python:S1066",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/generate_semantic_pipeline_audit.py",
+      "line": 707,
+      "message": "Merge this if statement with the enclosing one."
+    },
+    {
+      "key": "AZ5KwApWoBh6N3msn3Li",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/__main__.py",
+      "line": 183,
+      "message": "Define a constant instead of duplicating this literal \"scripts.engineering.qa.test_health\" 3 times."
+    },
+    {
+      "key": "AZ5KT_lrMOlC7bH8JCiL",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_test_governance_audit.py",
+      "line": 842,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 57 to the 15 allowed."
+    },
+    {
+      "key": "AZ5KT_tEMOlC7bH8JCiS",
+      "rule": "python:S3358",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/support/repo/cleanup_repository.py",
+      "line": 1236,
+      "message": "Extract this nested conditional expression into an independent statement."
+    },
+    {
+      "key": "AZ5KT_tEMOlC7bH8JCiT",
+      "rule": "python:S3358",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/support/repo/cleanup_repository.py",
+      "line": 1239,
+      "message": "Extract this nested conditional expression into an independent statement."
+    },
+    {
+      "key": "AZ5KT_tEMOlC7bH8JCiU",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/support/repo/cleanup_repository.py",
+      "line": 1717,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 19 to the 15 allowed."
+    },
+    {
+      "key": "AZ5KT_o8MOlC7bH8JCiM",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/file_discovery.py",
+      "line": 40,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 17 to the 15 allowed."
+    },
+    {
+      "key": "AZ5KT-YlMOlC7bH8JCh8",
+      "rule": "python:S107",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/composition/pipeline_runner_request.py",
+      "line": 30,
+      "message": "Function \"build_pipeline_create_runner_request\" has 16 parameters, which is greater than the 13 authorized."
+    },
+    {
+      "key": "AZ5KLRWYUCzLys3d3b8W",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_compatibility_importer_census.py",
+      "line": 591,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 21 to the 15 allowed."
+    },
+    {
+      "key": "AZ5KLRWYUCzLys3d3b8X",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_compatibility_importer_census.py",
+      "line": 619,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 21 to the 15 allowed."
+    },
+    {
+      "key": "AZ5KLRWYUCzLys3d3b8Y",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_compatibility_importer_census.py",
+      "line": 654,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 19 to the 15 allowed."
+    },
+    {
+      "key": "AZ5JQkVyP7Y59EaAVkF0",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/memory/query.py",
+      "line": 52,
+      "message": "Define a constant instead of duplicating this literal \"chunks.jsonl\" 5 times."
+    },
+    {
+      "key": "AZ5E88-iilR_hphl1wB1",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/schema/validate_pipeline_configs.py",
+      "line": 55,
+      "message": "Define a constant instead of duplicating this literal \"*.yaml\" 4 times."
+    },
+    {
+      "key": "AZ5E88-iilR_hphl1wB2",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/schema/validate_pipeline_configs.py",
+      "line": 387,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 19 to the 15 allowed."
+    },
+    {
+      "key": "AZ5E86svilR_hphl1wBy",
+      "rule": "python:S3358",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/infrastructure/config/converters.py",
+      "line": 209,
+      "message": "Extract this nested conditional expression into an independent statement."
+    },
+    {
+      "key": "AZ5EjsIiCb1e-LrpQoKX",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/import_graph_inventory.py",
+      "line": 252,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 46 to the 15 allowed."
+    },
+    {
+      "key": "AZ5EjsIiCb1e-LrpQoKW",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/import_graph_inventory.py",
+      "line": 299,
+      "message": "Define a constant instead of duplicating this literal \"bioetl.\" 4 times."
+    },
+    {
+      "key": "AZ5EjoRnCb1e-LrpQoKM",
+      "rule": "python:S1172",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/application/services/_checkpoint_compatibility_execution_validation.py",
+      "line": 127,
+      "message": "Remove the unused function parameter \"current_metadata\"."
+    },
+    {
+      "key": "AZ5EjoRnCb1e-LrpQoKL",
+      "rule": "python:S1172",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/application/services/_checkpoint_compatibility_execution_validation.py",
+      "line": 128,
+      "message": "Remove the unused function parameter \"checkpoint_metadata\"."
+    },
+    {
+      "key": "AZ5EjpPZCb1e-LrpQoKN",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/domain/control_plane/run_ledger_replay.py",
+      "line": 241,
+      "message": "Return a value of type \"RunLedgerReplayProjection\" instead of \"DataclassInstance\" or update function \"_mark_projection_unsupported\" type hint."
+    },
+    {
+      "key": "AZ5Ejp2sCb1e-LrpQoKO",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/memory/tooling/prune.py",
+      "line": 96,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed."
+    },
+    {
+      "key": "AZ5AGCK8GLFNv6sy1zud",
+      "rule": "python:S3358",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/interfaces/http/control_plane_identity/replay_extractors.py",
+      "line": 67,
+      "message": "Extract this nested conditional expression into an independent statement."
+    },
+    {
+      "key": "AZ4_8WDXVt1rlNBvMZ61",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/application/services/checkpoint_service.py",
+      "line": 188,
+      "message": "Define a constant instead of duplicating this literal \"bioetl.checkpoint_found\" 3 times."
+    },
+    {
+      "key": "AZ4wujdq2fnSISr39Y2m",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/generate_semantic_pipeline_audit.py",
+      "line": 1538,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 41 to the 15 allowed."
+    },
+    {
+      "key": "AZ4wbs9y55rYU4Sf5IPm",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/generate_semantic_pipeline_audit.py",
+      "line": 614,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 43 to the 15 allowed."
+    },
+    {
+      "key": "AZ4wbs9y55rYU4Sf5IPn",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/generate_semantic_pipeline_audit.py",
+      "line": 1008,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 28 to the 15 allowed."
+    },
+    {
+      "key": "AZ4wbr7m55rYU4Sf5IPk",
+      "rule": "python:S3358",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/interfaces/http/_health_server_identity_support.py",
+      "line": 166,
+      "message": "Extract this nested conditional expression into an independent statement."
+    },
+    {
+      "key": "AZ4v71Judn0D8X7NhH46",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/memory/query.py",
+      "line": 346,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 18 to the 15 allowed."
+    },
+    {
+      "key": "AZ4v71Iudn0D8X7NhH45",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/memory/rag/indexing.py",
+      "line": 125,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed."
+    },
+    {
+      "key": "AZ4v71H_dn0D8X7NhH44",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/memory/tooling/refresh_all.py",
+      "line": 93,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 23 to the 15 allowed."
+    },
+    {
+      "key": "AZ4tNsZ_fgdmUmz6bnu4",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/check_semantic_governance_policy.py",
+      "line": 164,
+      "message": "Define a constant instead of duplicating this literal \"<unknown>\" 5 times."
+    },
+    {
+      "key": "AZ4tNsZ_fgdmUmz6bnu5",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/check_semantic_governance_policy.py",
+      "line": 277,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed."
+    },
+    {
+      "key": "AZ4tNsZ_fgdmUmz6bnu6",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/check_semantic_governance_policy.py",
+      "line": 368,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 37 to the 15 allowed."
+    },
+    {
+      "key": "AZ4tNsZ_fgdmUmz6bnu7",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/check_semantic_governance_policy.py",
+      "line": 646,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 30 to the 15 allowed."
+    },
+    {
+      "key": "AZ4tCBHmW4Q6haNCIoSI",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/support/repo/cleanup_repository.py",
+      "line": 1096,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 55 to the 15 allowed."
+    },
+    {
+      "key": "AZ4sT09WLXPCS65kOZZH",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/check_semantic_anchor_parity.py",
+      "line": 670,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 54 to the 15 allowed."
+    },
+    {
+      "key": "AZ4sT03XLXPCS65kOZY9",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/check_semantic_pair_matrix_budget.py",
+      "line": 180,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 25 to the 15 allowed."
+    },
+    {
+      "key": "AZ4sT092LXPCS65kOZZI",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/check_semantic_registry_drift.py",
+      "line": 250,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 17 to the 15 allowed."
+    },
+    {
+      "key": "AZ4sT092LXPCS65kOZZJ",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/check_semantic_registry_drift.py",
+      "line": 320,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 19 to the 15 allowed."
+    },
+    {
+      "key": "AZ4sT092LXPCS65kOZZK",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/check_semantic_registry_drift.py",
+      "line": 409,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 17 to the 15 allowed."
+    },
+    {
+      "key": "AZ7VFk4lUH5VzbOCb1WH",
+      "rule": "pythonsecurity:S8707",
+      "severity": "MAJOR",
+      "type": "VULNERABILITY",
+      "component": "scripts/engineering/qa/report_test_governance_audit.py",
+      "line": 1109,
+      "message": "LLMs running this code with faulty CLI arguments can escape file system restrictions. Refactor this code to validate the constructed path before accessing the file system."
+    },
+    {
+      "key": "AZ4rybFVI5YX8Z4FJmqY",
+      "rule": "python:S6353",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/ci/update_test_telemetry_baseline.py",
+      "line": 135,
+      "message": "Use concise character class syntax '\\d' instead of '[0-9]'."
+    },
+    {
+      "key": "AZ4rybFVI5YX8Z4FJmqZ",
+      "rule": "python:S6353",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/ci/update_test_telemetry_baseline.py",
+      "line": 135,
+      "message": "Use concise character class syntax '\\d' instead of '[0-9]'."
+    },
+    {
+      "key": "AZ4rybJSI5YX8Z4FJmq0",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/generate_semantic_pipeline_audit.py",
+      "line": 838,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed."
+    },
+    {
+      "key": "AZ4rybJSI5YX8Z4FJmq1",
+      "rule": "python:S5864",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/generate_semantic_pipeline_audit.py",
+      "line": 849,
+      "message": "Replace this expression; Previous type checks suggest that \"parsed\" has type \"object\" and isn't iterable."
+    },
+    {
+      "key": "AZ4rybHxI5YX8Z4FJmqa",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/check_generic_field_ownership.py",
+      "line": 116,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 24 to the 15 allowed."
+    },
+    {
+      "key": "AZ4rybHxI5YX8Z4FJmqb",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/check_generic_field_ownership.py",
+      "line": 150,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 25 to the 15 allowed."
+    },
+    {
+      "key": "AZ4luUxJI8TKFvtCdoCc",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/support/repo/cleanup_repository.py",
+      "line": 1356,
+      "message": "Define a constant instead of duplicating this literal \"scripts/ops/support/repo/cleanup_repository.py\" 3 times."
+    },
+    {
+      "key": "AZ4iZ9wetm2WlJS-BYZV",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/docs/checks/check_links.py",
+      "line": 153,
+      "message": "Define a constant instead of duplicating this literal \"Rollback/Recovery\" 3 times."
+    },
+    {
+      "key": "AZ4iZ-BMtm2WlJS-BYZ_",
+      "rule": "shelldre:S7688",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/docker-setup.sh",
+      "line": 9,
+      "message": "Use '[[' instead of '[' for conditional tests. The '[[' construct is safer and more feature-rich."
+    },
+    {
+      "key": "AZ4dmMSKvOJ8H6jdjo0y",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/data_quality/inventory_silver_filters_migration.py",
+      "line": 531,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 19 to the 15 allowed."
+    },
+    {
+      "key": "AZ4dkxRgL9l4NBoXz_4Q",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/data_quality/export_chembl_observed_vocab.py",
+      "line": 167,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 23 to the 15 allowed."
+    },
+    {
+      "key": "AZ4dkxRgL9l4NBoXz_4R",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/data_quality/export_chembl_observed_vocab.py",
+      "line": 263,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 41 to the 15 allowed."
+    },
+    {
+      "key": "AZ4dkuK1L9l4NBoXz_4P",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/interfaces/cli/commands/_run_manifest_historical_support.py",
+      "line": 110,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed."
+    },
+    {
+      "key": "AZ4cUR7ldRxtIbmraLfR",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/run_historical_replay_closure_campaign.py",
+      "line": 268,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 31 to the 15 allowed."
+    },
+    {
+      "key": "AZ4cUR7ldRxtIbmraLfS",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/run_historical_replay_closure_campaign.py",
+      "line": 378,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 25 to the 15 allowed."
+    },
+    {
+      "key": "AZ4cUR7ldRxtIbmraLfT",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/run_historical_replay_closure_campaign.py",
+      "line": 450,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 19 to the 15 allowed."
+    },
+    {
+      "key": "AZ4bUUd0GKlItrhxCmQ-",
+      "rule": "powershelldre:S8641",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/ci/apply-ci-optimizations-fixed.ps1",
+      "line": 71,
+      "message": "Place '$null' on the left-hand side of this comparison."
+    },
+    {
+      "key": "AZ4bUUd0GKlItrhxCmQ_",
+      "rule": "powershelldre:S8641",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/ci/apply-ci-optimizations-fixed.ps1",
+      "line": 74,
+      "message": "Place '$null' on the left-hand side of this comparison."
+    },
+    {
+      "key": "AZ4bUUjSGKlItrhxCmRG",
+      "rule": "powershelldre:S8640",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/launchers/codex/verify-setup.ps1",
+      "line": 5,
+      "message": "Remove this '$true' default value from the switch parameter."
+    },
+    {
+      "key": "AZ4bUUi0GKlItrhxCmRF",
+      "rule": "powershelldre:S8659",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1",
+      "line": 26,
+      "message": "Remove this use of Invoke-Expression."
+    },
+    {
+      "key": "AZ4ayZf8E9WDp8Y-wd-X",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/domain/behavior/dq_rule_evaluator.py",
+      "line": 160,
+      "message": "Return a value of type \"DQRuleOutcome\" instead of \"DataclassInstance\" or update function \"_apply_invalid_record_policy\" type hint."
+    },
+    {
+      "key": "AZ4ayan-E9WDp8Y-wd-Y",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/extract_uniprot_semantic_payload_vocab.py",
+      "line": 20,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 28 to the 15 allowed."
+    },
+    {
+      "key": "AZ4I8ni5cVLtACx6Tbtl",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/domain/control_plane/run_ledger_replay.py",
+      "line": 133,
+      "message": "Return a value of type \"RunLedgerReplayProjection\" instead of \"DataclassInstance\" or update function \"_project_composite_dependency_completed\" type hint."
+    },
+    {
+      "key": "AZ4I8ni5cVLtACx6Tbtm",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/domain/control_plane/run_ledger_replay.py",
+      "line": 162,
+      "message": "Return a value of type \"RunLedgerReplayProjection\" instead of \"DataclassInstance\" or update function \"_project_composite_enricher_completed\" type hint."
+    },
+    {
+      "key": "AZ4I8ni5cVLtACx6Tbtn",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/domain/control_plane/run_ledger_replay.py",
+      "line": 176,
+      "message": "Return a value of type \"RunLedgerReplayProjection\" instead of \"DataclassInstance\" or update function \"_project_composite_merge_completed\" type hint."
+    },
+    {
+      "key": "AZ4I8ni5cVLtACx6Tbto",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/domain/control_plane/run_ledger_replay.py",
+      "line": 207,
+      "message": "Return a value of type \"RunLedgerReplayProjection\" instead of \"DataclassInstance\" or update function \"_project_input_snapshot_published\" type hint."
+    },
+    {
+      "key": "AZ4I8ni5cVLtACx6Tbtp",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/domain/control_plane/run_ledger_replay.py",
+      "line": 226,
+      "message": "Return a value of type \"RunLedgerReplayProjection\" instead of \"DataclassInstance\" or update function \"_advance_watermark\" type hint."
+    },
+    {
+      "key": "AZ4I8ni5cVLtACx6Tbtq",
+      "rule": "python:S5886",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/domain/control_plane/run_ledger_replay.py",
+      "line": 265,
+      "message": "Return a value of type \"RunLedgerReplayProjection\" instead of \"DataclassInstance\" or update function \"_apply_terminal_or_passthrough\" type hint."
+    },
+    {
+      "key": "AZ4IS8dKcVLtACx6OId-",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_dashboard_inventory.py",
+      "line": 230,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed."
+    },
+    {
+      "key": "AZ4IS8bhcVLtACx6OId8",
+      "rule": "python:S3776",
+      "severity": "CRITICAL",
+      "type": "CODE_SMELL",
+      "component": "scripts/engineering/qa/report_dashboard_query_duplicates.py",
+      "line": 126,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed."
+    },
+    {
+      "key": "AZ4GaIs5WUEwcvTwRtQM",
+      "rule": "shelldre:S1192",
+      "severity": "MINOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ai/gemini/helper/ensure-gemini-cli.sh",
+      "line": 95,
+      "message": "Define a constant instead of using the literal 'update' 4 times."
+    },
+    {
+      "key": "AZ4GaIs5WUEwcvTwRtQL",
+      "rule": "shelldre:S1066",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "scripts/ai/gemini/helper/ensure-gemini-cli.sh",
+      "line": 96,
+      "message": "Merge this if statement with the enclosing one."
+    },
+    {
+      "key": "AZ6UPGurMX0wusADR4QA",
+      "rule": "python:S1172",
+      "severity": "MAJOR",
+      "type": "CODE_SMELL",
+      "component": "src/bioetl/composition/runtime_builders/_run_manifest_snapshot_support.py",
+      "line": 81,
+      "message": "Remove the unused function parameter \"execution_context_value\"."
+    }
+  ]
+}

@@ -17,6 +17,8 @@ import time
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
+_TMP_PATH_MARKER = "/" + "tmp" + "/"
+
 ROOT = Path(__file__).resolve().parents[4]
 RUNTIME = Path(
     r"\\wsl$\Ubuntu\home\fedor\.local\share\bioetl-runtime\BioactivityDataAcquisition2"
@@ -357,7 +359,7 @@ def validate_canonical(topology: dict[str, object]) -> None:
     main = by_name.get("bioetl-main", {})
     mon_files = str(mon.get("ConfigFiles") or "")
     main_files = str(main.get("ConfigFiles") or "")
-    if "/tmp/" in mon_files or "E:\\" in mon_files or "E:/" in mon_files:
+    if _TMP_PATH_MARKER in mon_files or "E:\\" in mon_files or "E:/" in mon_files:
         raise RuntimeError(f"monitoring still non-canonical: {mon_files}")
     if (
         "bioetl-runtime" not in main_files

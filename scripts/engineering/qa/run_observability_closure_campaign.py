@@ -882,73 +882,152 @@ def _first_recorded_response(path: Path) -> dict[str, object]:
     raise ValueError(f"no bounded response record found in {path}")
 
 
-def _stage_standalone_fixture_cache(
-    *, repo_root: Path, audit_root: Path
-) -> tuple[Path, dict[str, object]]:
-    """Stage source-bound compatible cached input for every ChEMBL pipeline."""
+def _load_bronze_fixture_mapping(repo_root: Path) -> tuple[Path, dict[str, object]]:
+    """Return the tracked bronze fixture mapping used for standalone staging."""
     manifest_path = repo_root / "configs" / "base" / "bronze_fixture_manifest.yaml"
     manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
     fixtures = manifest.get("fixtures") if isinstance(manifest, dict) else None
     if not isinstance(fixtures, dict):
         raise ValueError("Bronze fixture manifest has no fixtures mapping")
+    return manifest_path, fixtures
 
-    cache_root = audit_root / "fixtures" / "standalone-cache"
-    evidence: list[dict[str, object]] = []
-    compressor = zstandard.ZstdCompressor(level=3)
-    for pipeline in CHEMBL_PIPELINES:
-        entity = pipeline.removeprefix("chembl_")
-        fixture = fixtures.get(f"chembl/{entity}")
-        if not isinstance(fixture, dict) or fixture.get("validation_status") != "valid":
-            raise ValueError(f"missing valid tracked fixture for {pipeline}")
 
-        if pipeline in _RECORDED_SPECIAL_FIXTURES:
-            source_path = (
-                repo_root
-                / "tests"
-                / "fixtures"
-                / "vcr"
-                / "chembl"
-                / f"test_pipeline_matrix__{pipeline}.yaml"
-            )
-            record = _first_recorded_response(source_path)
-            rendered = json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n"
-            raw = rendered.encode()
-            source_kind = "recorded_provider_response"
-        else:
-            source_path = repo_root / str(fixture.get("fixture_path") or "")
-            raw = source_path.read_bytes()
-            source_kind = "tracked_bronze_fixture"
-        if repo_root.resolve() not in source_path.resolve().parents:
-            raise ValueError(f"fixture escapes checkout: {source_path}")
-        if not raw.strip():
-            raise ValueError(f"fixture is empty: {source_path}")
-
-        destination = (
-            cache_root
+def _standalone_pipeline_source(
+    *,
+    repo_root: Path,
+    pipeline: str,
+    fixture: dict[str, object],
+) -> tuple[Path, bytes, str]:
+    """Resolve one pipeline's staged source bytes and provenance kind."""
+    if pipeline in _RECORDED_SPECIAL_FIXTURES:
+        source_path = (
+            repo_root
+            / "tests"
+            / "fixtures"
+            / "vcr"
             / "chembl"
-            / entity
-            / "2026-07-14"
-            / f"batch_2026-07-14_bounded_{entity}.jsonl"
+            / f"test_pipeline_matrix__{pipeline}.yaml"
         )
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        atomic_write_bytes(destination, raw)
-        compressed = destination.with_suffix(".jsonl.zst")
-        atomic_write_bytes(compressed, compressor.compress(raw))
-        evidence.append(
-            {
-                "pipeline": pipeline,
-                "source_kind": source_kind,
-                "source_path": str(source_path),
-                "source_sha256": _sha256_file(source_path),
-                "fixture_path": str(destination),
-                "fixture_sha256": _sha256_file(destination),
-                "compressed_fixture_path": str(compressed),
-                "compressed_fixture_sha256": _sha256_file(compressed),
-                "record_count": sum(bool(line.strip()) for line in raw.splitlines()),
-                "provenance": str(fixture.get("provenance") or ""),
-                "validation_status": fixture.get("validation_status"),
-            }
+        record = _first_recorded_response(source_path)
+        rendered = json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n"
+        return source_path, rendered.encode(), "recorded_provider_response"
+    source_path = repo_root / str(fixture.get("fixture_path") or "")
+    return source_path, source_path.read_bytes(), "tracked_bronze_fixture"
+
+
+def _validate_standalone_fixture_source(
+    *, repo_root: Path, source_path: Path, raw: bytes
+) -> None:
+    """Reject staged fixture sources that escape the checkout or are empty."""
+    if repo_root.resolve() not in source_path.resolve().parents:
+        raise ValueError(f"fixture escapes checkout: {source_path}")
+    if not raw.strip():
+        raise ValueError(f"fixture is empty: {source_path}")
+
+
+def _write_standalone_fixture_files(
+    *,
+    cache_root: Path,
+    entity: str,
+    raw: bytes,
+    compressor: zstandard.ZstdCompressor,
+) -> tuple[Path, Path]:
+    """Materialize one standalone fixture and its compressed twin."""
+    destination = (
+        cache_root
+        / "chembl"
+        / entity
+        / "2026-07-14"
+        / f"batch_2026-07-14_bounded_{entity}.jsonl"
+    )
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    atomic_write_bytes(destination, raw)
+    compressed = destination.with_suffix(".jsonl.zst")
+    atomic_write_bytes(compressed, compressor.compress(raw))
+    return destination, compressed
+
+
+def _standalone_fixture_evidence_record(
+    *,
+    pipeline: str,
+    source_kind: str,
+    source_path: Path,
+    destination: Path,
+    compressed: Path,
+    raw: bytes,
+    fixture: dict[str, object],
+) -> dict[str, object]:
+    """Build one standalone fixture evidence row."""
+    return {
+        "pipeline": pipeline,
+        "source_kind": source_kind,
+        "source_path": str(source_path),
+        "source_sha256": _sha256_file(source_path),
+        "fixture_path": str(destination),
+        "fixture_sha256": _sha256_file(destination),
+        "compressed_fixture_path": str(compressed),
+        "compressed_fixture_sha256": _sha256_file(compressed),
+        "record_count": sum(bool(line.strip()) for line in raw.splitlines()),
+        "provenance": str(fixture.get("provenance") or ""),
+        "validation_status": fixture.get("validation_status"),
+    }
+
+
+def _stage_one_standalone_fixture(
+    *,
+    repo_root: Path,
+    cache_root: Path,
+    pipeline: str,
+    fixtures: dict[str, object],
+    compressor: zstandard.ZstdCompressor,
+) -> dict[str, object]:
+    """Stage one ChEMBL pipeline fixture into the standalone cache root."""
+    entity = pipeline.removeprefix("chembl_")
+    fixture = fixtures.get(f"chembl/{entity}")
+    if not isinstance(fixture, dict) or fixture.get("validation_status") != "valid":
+        raise ValueError(f"missing valid tracked fixture for {pipeline}")
+    source_path, raw, source_kind = _standalone_pipeline_source(
+        repo_root=repo_root,
+        pipeline=pipeline,
+        fixture=fixture,
+    )
+    _validate_standalone_fixture_source(
+        repo_root=repo_root, source_path=source_path, raw=raw
+    )
+    destination, compressed = _write_standalone_fixture_files(
+        cache_root=cache_root,
+        entity=entity,
+        raw=raw,
+        compressor=compressor,
+    )
+    return _standalone_fixture_evidence_record(
+        pipeline=pipeline,
+        source_kind=source_kind,
+        source_path=source_path,
+        destination=destination,
+        compressed=compressed,
+        raw=raw,
+        fixture=fixture,
+    )
+
+
+def _stage_standalone_fixture_cache(
+    *, repo_root: Path, audit_root: Path
+) -> tuple[Path, dict[str, object]]:
+    """Stage source-bound compatible cached input for every ChEMBL pipeline."""
+    manifest_path, fixtures = _load_bronze_fixture_mapping(repo_root)
+    cache_root = audit_root / "fixtures" / "standalone-cache"
+    compressor = zstandard.ZstdCompressor(level=3)
+    evidence = [
+        _stage_one_standalone_fixture(
+            repo_root=repo_root,
+            cache_root=cache_root,
+            pipeline=pipeline,
+            fixtures=fixtures,
+            compressor=compressor,
         )
+        for pipeline in CHEMBL_PIPELINES
+    ]
     return cache_root, {
         "manifest_path": str(manifest_path),
         "manifest_sha256": _sha256_file(manifest_path),
@@ -956,11 +1035,21 @@ def _stage_standalone_fixture_cache(
     }
 
 
-def _stage_workflow_fixture(
-    *, canonical_bronze_root: Path, audit_root: Path
-) -> tuple[Path, dict[str, object]]:
-    """Stage a traceable three-record fixture for ``chembl_baseline`` joins."""
-    chembl_root = canonical_bronze_root / "chembl"
+def _resolve_workflow_join_records(
+    chembl_root: Path,
+) -> tuple[
+    dict[str, object],
+    Path,
+    dict[str, object],
+    dict[str, object],
+    Path,
+    dict[str, object],
+    Path,
+    str,
+    str,
+    str,
+]:
+    """Select assay/target/publication records that can form a baseline join."""
     assay, assay_source = _find_bronze_record(
         chembl_root / "assay",
         predicate=lambda row: (
@@ -984,7 +1073,18 @@ def _stage_workflow_fixture(
                 str(row.get("document_chembl_id") or "") == publication_id
             ),
         )
-        assay_derivation = "lossless_join_compatible_source_record"
+        return (
+            assay,
+            assay_source,
+            source_assay,
+            target,
+            target_source,
+            publication,
+            publication_source,
+            target_id,
+            publication_id,
+            "lossless_join_compatible_source_record",
+        )
     except ValueError:
         target, target_source = _find_bronze_record(
             chembl_root / "target",
@@ -999,15 +1099,91 @@ def _stage_workflow_fixture(
         )
         target_id = str(target["target_chembl_id"])
         publication_id = str(publication["document_chembl_id"])
-        assay = {
+        projected_assay = {
             **assay,
             "target_chembl_id": target_id,
             "document_chembl_id": publication_id,
         }
-        assay_derivation = "deterministic_workflow_join_projection"
+        return (
+            projected_assay,
+            assay_source,
+            source_assay,
+            target,
+            target_source,
+            publication,
+            publication_source,
+            target_id,
+            publication_id,
+            "deterministic_workflow_join_projection",
+        )
+
+
+def _write_workflow_fixture_entity(
+    *,
+    fixture_root: Path,
+    entity: str,
+    record: dict[str, object],
+    source: Path,
+    source_record: dict[str, object],
+    derivation: str,
+) -> dict[str, object]:
+    """Write one workflow fixture entity and return its evidence row."""
+    destination = (
+        fixture_root
+        / "chembl"
+        / entity
+        / "2026-07-14"
+        / f"batch_2026-07-14_bounded_{entity}.jsonl"
+    )
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    rendered = json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n"
+    atomic_write_text(destination, rendered)
+    compressed_destination = destination.with_suffix(".jsonl.zst")
+    atomic_write_bytes(
+        compressed_destination,
+        zstandard.ZstdCompressor(level=3).compress(rendered.encode("utf-8")),
+    )
+    return {
+        "entity": entity,
+        "source_path": str(source),
+        "source_sha256": _sha256_file(source),
+        "source_record_sha256": hashlib.sha256(
+            (
+                json.dumps(
+                    source_record,
+                    sort_keys=True,
+                    separators=(",", ":"),
+                )
+                + "\n"
+            ).encode()
+        ).hexdigest(),
+        "derivation": derivation,
+        "record_sha256": hashlib.sha256(rendered.encode()).hexdigest(),
+        "fixture_path": str(destination),
+        "fixture_sha256": _sha256_file(destination),
+        "compressed_fixture_path": str(compressed_destination),
+        "compressed_fixture_sha256": _sha256_file(compressed_destination),
+    }
+
+
+def _stage_workflow_fixture(
+    *, canonical_bronze_root: Path, audit_root: Path
+) -> tuple[Path, dict[str, object]]:
+    """Stage a traceable three-record fixture for ``chembl_baseline`` joins."""
+    (
+        assay,
+        assay_source,
+        source_assay,
+        target,
+        target_source,
+        publication,
+        publication_source,
+        target_id,
+        publication_id,
+        assay_derivation,
+    ) = _resolve_workflow_join_records(canonical_bronze_root / "chembl")
     fixture_root = audit_root / "fixtures" / "chembl-baseline"
-    evidence_records: list[dict[str, object]] = []
-    for entity, record, source, source_record, derivation in (
+    entity_specs = (
         ("assay", assay, assay_source, source_assay, assay_derivation),
         ("target", target, target_source, target, "lossless_source_record"),
         (
@@ -1017,45 +1193,18 @@ def _stage_workflow_fixture(
             publication,
             "lossless_source_record",
         ),
-    ):
-        destination = (
-            fixture_root
-            / "chembl"
-            / entity
-            / "2026-07-14"
-            / f"batch_2026-07-14_bounded_{entity}.jsonl"
+    )
+    evidence_records = [
+        _write_workflow_fixture_entity(
+            fixture_root=fixture_root,
+            entity=entity,
+            record=record,
+            source=source,
+            source_record=source_record,
+            derivation=derivation,
         )
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        rendered = json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n"
-        atomic_write_text(destination, rendered)
-        compressed_destination = destination.with_suffix(".jsonl.zst")
-        atomic_write_bytes(
-            compressed_destination,
-            zstandard.ZstdCompressor(level=3).compress(rendered.encode("utf-8")),
-        )
-        evidence_records.append(
-            {
-                "entity": entity,
-                "source_path": str(source),
-                "source_sha256": _sha256_file(source),
-                "source_record_sha256": hashlib.sha256(
-                    (
-                        json.dumps(
-                            source_record,
-                            sort_keys=True,
-                            separators=(",", ":"),
-                        )
-                        + "\n"
-                    ).encode()
-                ).hexdigest(),
-                "derivation": derivation,
-                "record_sha256": hashlib.sha256(rendered.encode()).hexdigest(),
-                "fixture_path": str(destination),
-                "fixture_sha256": _sha256_file(destination),
-                "compressed_fixture_path": str(compressed_destination),
-                "compressed_fixture_sha256": _sha256_file(compressed_destination),
-            }
-        )
+        for entity, record, source, source_record, derivation in entity_specs
+    ]
     return fixture_root, {
         "target_id": target_id,
         "publication_id": publication_id,
@@ -1163,6 +1312,154 @@ def _attempt_command(
     return tuple(command)
 
 
+def _execute_attempt_subprocess(
+    *,
+    command: tuple[str, ...],
+    attempt_root: Path,
+    env: dict[str, str],
+    timeout_seconds: int,
+) -> tuple[int, bool, str, str]:
+    """Run one attempt subprocess and normalize timeout/OSError outcomes."""
+    try:
+        from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+        completed = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv  # nosec B603
+            ensure_safe_cli_argv([str(token) for token in command]),
+            cwd=attempt_root,
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=timeout_seconds,
+            check=False,
+        )
+        return completed.returncode, False, completed.stdout, completed.stderr
+    except subprocess.TimeoutExpired as exc:
+        return 124, True, _timeout_output(exc.stdout), _timeout_output(exc.stderr)
+    except OSError as exc:
+        return 126, False, "", f"{type(exc).__name__}: {exc}"
+
+
+def _attempt_output_partitions(
+    *,
+    data_root: Path,
+    before_files: dict[Path, str],
+) -> tuple[tuple[Path, ...], tuple[Path, ...]]:
+    """Partition changed files into checkpoint and semantic output paths."""
+    after_files = _file_snapshot(data_root)
+    changed_files = _changed_files(before_files, after_files)
+    checkpoint_paths = tuple(
+        path for path in changed_files if "/output/checkpoints/" in path.as_posix()
+    )
+    output_paths = tuple(
+        path
+        for path in changed_files
+        if "/output/control/" not in path.as_posix()
+        and "/output/checkpoints/" not in path.as_posix()
+    )
+    return checkpoint_paths, output_paths
+
+
+def _attempt_result_signature(
+    *,
+    terminal_events: tuple[str, ...],
+    metrics: dict[str, int],
+    semantic_output: object,
+    terminal_rows: list[dict[str, object]],
+    semantic_output_records: int,
+) -> str:
+    """Hash the deterministic success signature when one terminal row exists."""
+    if len(terminal_rows) != 1 or semantic_output_records <= 0:
+        return ""
+    return hashlib.sha256(
+        json.dumps(
+            {
+                "terminal_events": terminal_events,
+                "metrics_snapshot": metrics,
+                "semantic_output": semantic_output,
+            },
+            sort_keys=True,
+            default=str,
+        ).encode()
+    ).hexdigest()
+
+
+def _collect_attempt_evidence(
+    *,
+    repo_root: Path,
+    pipeline: str,
+    tracing: bool,
+    limit: int,
+    run_mode: str,
+    command: tuple[str, ...],
+    data_root: Path,
+    stdout_path: Path,
+    stderr_path: Path,
+    started_at: str,
+    finished_at: str,
+    exit_code: int,
+    timed_out: bool,
+    before_manifests: set[Path],
+    before_files: dict[Path, str],
+) -> AttemptEvidence:
+    """Assemble durable attempt evidence from isolated run artifacts."""
+    new_manifests = _manifest_snapshot(data_root) - before_manifests
+    manifest_ids, run_ids, manifest_paths = _read_new_manifest_identity(
+        new_manifests,
+        expected_pipeline=pipeline,
+    )
+    ledger_rows = _read_ledger_rows(data_root)
+    terminal_events = _terminal_events_for_runs(ledger_rows, run_ids)
+    terminal_rows = _terminal_rows_for_runs(ledger_rows, run_ids)
+    metrics, details, _terminal_signature = _terminal_payload(terminal_rows)
+    ledger_paths = tuple(
+        data_root / "output" / "control" / "run_ledger" / f"{manifest_id}.jsonl"
+        for manifest_id in manifest_ids
+    )
+    checkpoint_paths, output_paths = _attempt_output_partitions(
+        data_root=data_root,
+        before_files=before_files,
+    )
+    output_artifacts = _file_artifacts(output_paths, root=data_root)
+    semantic_output, semantic_output_records = _semantic_output_payload(output_paths)
+    checkpoint_disposition, checkpoint_interval = _checkpoint_policy(
+        repo_root, pipeline, limit
+    )
+    if checkpoint_paths:
+        checkpoint_disposition = "retained"
+    result_signature = _attempt_result_signature(
+        terminal_events=terminal_events,
+        metrics=metrics,
+        semantic_output=semantic_output,
+        terminal_rows=terminal_rows,
+        semantic_output_records=semantic_output_records,
+    )
+    return AttemptEvidence(
+        pipeline=pipeline,
+        tracing=tracing,
+        started_at=started_at,
+        finished_at=finished_at,
+        exit_code=exit_code,
+        timed_out=timed_out,
+        command=command,
+        stdout_path=str(stdout_path),
+        stderr_path=str(stderr_path),
+        manifest_ids=manifest_ids,
+        run_ids=run_ids,
+        terminal_ledger_events=terminal_events,
+        manifest_artifacts=_file_artifacts(manifest_paths, root=data_root),
+        ledger_artifacts=_file_artifacts(ledger_paths, root=data_root),
+        checkpoint_artifacts=_file_artifacts(checkpoint_paths, root=data_root),
+        checkpoint_disposition=checkpoint_disposition,
+        checkpoint_interval=checkpoint_interval,
+        output_artifacts=output_artifacts,
+        semantic_output_records=semantic_output_records,
+        terminal_metrics_snapshot=metrics,
+        terminal_details=details,
+        result_signature=result_signature,
+        run_mode=run_mode,
+    )
+
+
 def _run_attempt(
     *,
     repo_root: Path,
@@ -1199,105 +1496,31 @@ def _run_attempt(
         log_path=log_root / "bioetl-audit.log",
     )
     started_at = _utc_now()
-    timed_out = False
-    try:
-        from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
-
-        completed = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv  # nosec B603
-            ensure_safe_cli_argv([str(token) for token in command]),
-            cwd=attempt_root,
-            env=env,
-            capture_output=True,
-            text=True,
-            timeout=timeout_seconds,
-            check=False,
-        )
-        exit_code = completed.returncode
-        stdout = completed.stdout
-        stderr = completed.stderr
-    except subprocess.TimeoutExpired as exc:
-        timed_out = True
-        exit_code = 124
-        stdout = _timeout_output(exc.stdout)
-        stderr = _timeout_output(exc.stderr)
-    except OSError as exc:
-        timed_out = False
-        exit_code = 126
-        stdout = ""
-        stderr = f"{type(exc).__name__}: {exc}"
+    exit_code, timed_out, stdout, stderr = _execute_attempt_subprocess(
+        command=command,
+        attempt_root=attempt_root,
+        env=env,
+        timeout_seconds=timeout_seconds,
+    )
     finished_at = _utc_now()
     atomic_write_text(stdout_path, str(stdout))
     atomic_write_text(stderr_path, str(stderr))
-    new_manifests = _manifest_snapshot(data_root) - before_manifests
-    manifest_ids, run_ids, manifest_paths = _read_new_manifest_identity(
-        new_manifests,
-        expected_pipeline=pipeline,
-    )
-    ledger_rows = _read_ledger_rows(data_root)
-    terminal_events = _terminal_events_for_runs(ledger_rows, run_ids)
-    terminal_rows = _terminal_rows_for_runs(ledger_rows, run_ids)
-    metrics, details, _terminal_signature = _terminal_payload(terminal_rows)
-    ledger_paths = tuple(
-        data_root / "output" / "control" / "run_ledger" / f"{manifest_id}.jsonl"
-        for manifest_id in manifest_ids
-    )
-    after_files = _file_snapshot(data_root)
-    changed_files = _changed_files(before_files, after_files)
-    checkpoint_paths = tuple(
-        path for path in changed_files if "/output/checkpoints/" in path.as_posix()
-    )
-    output_paths = tuple(
-        path
-        for path in changed_files
-        if "/output/control/" not in path.as_posix()
-        and "/output/checkpoints/" not in path.as_posix()
-    )
-    output_artifacts = _file_artifacts(output_paths, root=data_root)
-    semantic_output, semantic_output_records = _semantic_output_payload(output_paths)
-    checkpoint_disposition, checkpoint_interval = _checkpoint_policy(
-        repo_root, pipeline, limit
-    )
-    if checkpoint_paths:
-        checkpoint_disposition = "retained"
-    result_signature = (
-        hashlib.sha256(
-            json.dumps(
-                {
-                    "terminal_events": terminal_events,
-                    "metrics_snapshot": metrics,
-                    "semantic_output": semantic_output,
-                },
-                sort_keys=True,
-                default=str,
-            ).encode()
-        ).hexdigest()
-        if len(terminal_rows) == 1 and semantic_output_records > 0
-        else ""
-    )
-    return AttemptEvidence(
+    return _collect_attempt_evidence(
+        repo_root=repo_root,
         pipeline=pipeline,
         tracing=tracing,
+        limit=limit,
+        run_mode=run_mode,
+        command=command,
+        data_root=data_root,
+        stdout_path=stdout_path,
+        stderr_path=stderr_path,
         started_at=started_at,
         finished_at=finished_at,
         exit_code=exit_code,
         timed_out=timed_out,
-        command=command,
-        stdout_path=str(stdout_path),
-        stderr_path=str(stderr_path),
-        manifest_ids=manifest_ids,
-        run_ids=run_ids,
-        terminal_ledger_events=terminal_events,
-        manifest_artifacts=_file_artifacts(manifest_paths, root=data_root),
-        ledger_artifacts=_file_artifacts(ledger_paths, root=data_root),
-        checkpoint_artifacts=_file_artifacts(checkpoint_paths, root=data_root),
-        checkpoint_disposition=checkpoint_disposition,
-        checkpoint_interval=checkpoint_interval,
-        output_artifacts=output_artifacts,
-        semantic_output_records=semantic_output_records,
-        terminal_metrics_snapshot=metrics,
-        terminal_details=details,
-        result_signature=result_signature,
-        run_mode=run_mode,
+        before_manifests=before_manifests,
+        before_files=before_files,
     )
 
 
@@ -2161,39 +2384,37 @@ def _validate_promtool_raw(retained: list[dict[str, str]]) -> list[str]:
     return errors
 
 
-def _validate_online_raw(
-    retained: list[dict[str, str]],
-    expected_binding: dict[str, object] | None = None,
+def _validate_online_run_payload(
+    runs: list[dict[str, object]],
+    expected_binding: dict[str, object] | None,
 ) -> list[str]:
-    runs, errors = _json_payloads_by_kind(retained, "online-run-result")
-    instrumentation, metric_errors = _json_payloads_by_kind(
-        retained, "instrumentation-response"
-    )
-    errors.extend(metric_errors)
+    """Validate the designated online-run-result payload."""
     if len(runs) != 1:
-        errors.append("online evidence requires exactly one designated run")
-    else:
-        run = runs[0]
-        if (
-            run.get("status") != "success"
-            or run.get("cached_mode") is not False
-            or run.get("terminal_event") != "run_finished"
-        ):
-            errors.append("online run must be successful, uncached, and terminal")
-        for field_name in ("run_id", "manifest_id"):
-            if not str(run.get(field_name) or "").strip():
-                errors.append(f"online run {field_name} must be non-empty")
-        if expected_binding is not None and run.get("run_id") != expected_binding.get(
-            "online_run_id"
-        ):
-            errors.append("online raw result does not match the executed online run")
-    required_deltas = {
-        "bioetl_adapter_requests_total": 1,
-        "bioetl_rate_limiter_wait_seconds_count": 1,
-        "bioetl_circuit_breaker_success_total": 1,
-        "bioetl_adapter_request_duration_seconds_count": 1,
-    }
+        return ["online evidence requires exactly one designated run"]
+    errors: list[str] = []
+    run = runs[0]
+    if (
+        run.get("status") != "success"
+        or run.get("cached_mode") is not False
+        or run.get("terminal_event") != "run_finished"
+    ):
+        errors.append("online run must be successful, uncached, and terminal")
+    for field_name in ("run_id", "manifest_id"):
+        if not str(run.get(field_name) or "").strip():
+            errors.append(f"online run {field_name} must be non-empty")
+    if expected_binding is not None and run.get("run_id") != expected_binding.get(
+        "online_run_id"
+    ):
+        errors.append("online raw result does not match the executed online run")
+    return errors
+
+
+def _collect_online_metric_rows(
+    instrumentation: list[dict[str, object]],
+) -> tuple[dict[str, dict[str, object]], list[str]]:
+    """Collapse instrumentation payloads into metric-name keyed rows."""
     metric_rows: dict[str, dict[str, object]] = {}
+    errors: list[str] = []
     for payload in instrumentation:
         metrics = payload.get("metrics")
         if (
@@ -2205,6 +2426,20 @@ def _validate_online_raw(
         for name, row in metrics.items():
             if isinstance(row, dict):
                 metric_rows[str(name)] = row
+    return metric_rows, errors
+
+
+def _validate_online_metric_deltas(
+    metric_rows: dict[str, dict[str, object]],
+) -> list[str]:
+    """Require governed online metric deltas and the controlled retry probe."""
+    required_deltas = {
+        "bioetl_adapter_requests_total": 1,
+        "bioetl_rate_limiter_wait_seconds_count": 1,
+        "bioetl_circuit_breaker_success_total": 1,
+        "bioetl_adapter_request_duration_seconds_count": 1,
+    }
+    errors: list[str] = []
     for metric_name, minimum_delta in required_deltas.items():
         row = metric_rows.get(metric_name, {})
         if row.get("source_present") is not True:
@@ -2223,6 +2458,22 @@ def _validate_online_raw(
         errors.append(
             "controlled online retry probe must increment retry metric exactly once"
         )
+    return errors
+
+
+def _validate_online_raw(
+    retained: list[dict[str, str]],
+    expected_binding: dict[str, object] | None = None,
+) -> list[str]:
+    runs, errors = _json_payloads_by_kind(retained, "online-run-result")
+    instrumentation, metric_errors = _json_payloads_by_kind(
+        retained, "instrumentation-response"
+    )
+    errors.extend(metric_errors)
+    errors.extend(_validate_online_run_payload(runs, expected_binding))
+    metric_rows, instrumentation_errors = _collect_online_metric_rows(instrumentation)
+    errors.extend(instrumentation_errors)
+    errors.extend(_validate_online_metric_deltas(metric_rows))
     return errors
 
 
@@ -2292,6 +2543,56 @@ def _validate_raw_content(
     return validators[key](retained)
 
 
+def _evidence_path_uniqueness_errors(evidence: dict[str, str]) -> list[str]:
+    """Return errors when evidence artifacts reuse the same path."""
+    resolved_paths = [Path(value).resolve() for value in evidence.values()]
+    if len(set(resolved_paths)) != len(resolved_paths):
+        return ["each evidence type requires a unique artifact"]
+    return []
+
+
+def _gate_one_evidence_key(
+    key: str,
+    raw_path: str | None,
+    *,
+    evidence_root: Path,
+    raw_root: Path,
+    source_revision: str,
+    expected_binding: dict[str, object] | None,
+) -> tuple[list[str], dict[str, str] | None, dict[str, int] | None, list[dict[str, str]]]:
+    """Validate one required external evidence artifact."""
+    if raw_path is None:
+        return ["missing evidence artifact"], None, None, []
+    path = Path(raw_path).resolve()
+    key_errors: list[str] = []
+    if evidence_root not in path.parents:
+        key_errors.append("artifact must be inside AUDIT_ROOT/evidence")
+    if not path.is_file():
+        key_errors.append("artifact is not a file")
+        return key_errors, None, None, []
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return [f"invalid JSON: {exc}"], None, None, []
+    summary: dict[str, int] | None = None
+    retained: list[dict[str, str]] = []
+    if not isinstance(payload, dict):
+        key_errors.append("payload must be an object")
+    else:
+        field_errors, parsed_summary, retained = _validate_evidence_object_fields(
+            key,
+            payload,
+            source_revision=source_revision,
+            expected_binding=expected_binding,
+            raw_root=raw_root,
+        )
+        key_errors.extend(field_errors)
+        if parsed_summary:
+            summary = parsed_summary
+    artifact = {"path": str(path), "sha256": _sha256_file(path)}
+    return key_errors, artifact, summary, retained
+
+
 def _evidence_gate(
     evidence: dict[str, str],
     *,
@@ -2301,9 +2602,9 @@ def _evidence_gate(
 ) -> dict[str, object]:
     errors: dict[str, list[str]] = {}
     evidence_root = (audit_root / "evidence").resolve()
-    resolved_paths = [Path(value).resolve() for value in evidence.values()]
-    if len(set(resolved_paths)) != len(resolved_paths):
-        errors["_paths"] = ["each evidence type requires a unique artifact"]
+    path_errors = _evidence_path_uniqueness_errors(evidence)
+    if path_errors:
+        errors["_paths"] = path_errors
     unexpected_keys = sorted(set(evidence) - set(REQUIRED_EXTERNAL_EVIDENCE))
     if unexpected_keys:
         errors["_keys"] = ["unexpected evidence types: " + ", ".join(unexpected_keys)]
@@ -2312,40 +2613,21 @@ def _evidence_gate(
     summaries: dict[str, dict[str, int]] = {}
     raw_root = (evidence_root / "raw").resolve()
     for key in REQUIRED_EXTERNAL_EVIDENCE:
-        raw_path = evidence.get(key)
-        if raw_path is None:
-            errors[key] = ["missing evidence artifact"]
-            continue
-        path = Path(raw_path).resolve()
-        key_errors: list[str] = []
-        if evidence_root not in path.parents:
-            key_errors.append("artifact must be inside AUDIT_ROOT/evidence")
-        if not path.is_file():
-            key_errors.append("artifact is not a file")
-            errors[key] = key_errors
-            continue
-        try:
-            payload = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError) as exc:
-            errors[key] = [f"invalid JSON: {exc}"]
-            continue
-        if not isinstance(payload, dict):
-            key_errors.append("payload must be an object")
-        else:
-            field_errors, summary, retained = _validate_evidence_object_fields(
-                key,
-                payload,
-                source_revision=source_revision,
-                expected_binding=expected_binding,
-                raw_root=raw_root,
-            )
-            key_errors.extend(field_errors)
-            if summary:
-                summaries[key] = summary
-            raw_artifacts_retained[key] = retained
+        key_errors, artifact, summary, retained = _gate_one_evidence_key(
+            key,
+            evidence.get(key),
+            evidence_root=evidence_root,
+            raw_root=raw_root,
+            source_revision=source_revision,
+            expected_binding=expected_binding,
+        )
         if key_errors:
             errors[key] = key_errors
-        artifacts[key] = {"path": str(path), "sha256": _sha256_file(path)}
+        if artifact is not None:
+            artifacts[key] = artifact
+            raw_artifacts_retained[key] = retained
+        if summary is not None:
+            summaries[key] = summary
     return {
         "satisfied": not errors,
         "errors": errors,
@@ -2486,14 +2768,13 @@ def _retained_artifacts_valid(report: dict[str, object]) -> tuple[bool, list[str
     return not errors, errors
 
 
-def _finalize_campaign(
+def _load_finalize_report(
     *,
-    args: argparse.Namespace,
+    report_path: Path,
     audit_root: Path,
     source_provenance: dict[str, object],
-    evidence: dict[str, str],
-) -> int:
-    report_path = args.finalize_report.expanduser().resolve()
+) -> dict[str, object]:
+    """Load and validate the awaiting-evidence campaign report for finalization."""
     expected_report_path = (
         audit_root / "observability-closure-campaign.json"
     ).resolve()
@@ -2513,10 +2794,44 @@ def _finalize_campaign(
         "tree"
     ) != source_provenance.get("tree"):
         raise ValueError("campaign report source tree no longer matches HEAD")
-    retained_ok, retained_errors = _retained_artifacts_valid(payload)
-    binding = payload.get("campaign_binding")
-    if not isinstance(binding, dict):
+    if not isinstance(payload.get("campaign_binding"), dict):
         raise ValueError("campaign report has no occurrence binding")
+    return payload
+
+
+def _core_campaign_gates_satisfied(payload: dict[str, object]) -> bool:
+    """Return whether execute-time campaign gates remain satisfied."""
+    gate_fields = (
+        "attempt_gate",
+        "online_attempt_gate",
+        "workflow_phase_gate",
+        "canonical_signature_gate",
+    )
+    if payload.get("pipeline_config_parity") is not True:
+        return False
+    for field_name in gate_fields:
+        gate = payload.get(field_name)
+        if not isinstance(gate, dict) or gate.get("satisfied") is not True:
+            return False
+    return True
+
+
+def _finalize_campaign(
+    *,
+    args: argparse.Namespace,
+    audit_root: Path,
+    source_provenance: dict[str, object],
+    evidence: dict[str, str],
+) -> int:
+    report_path = args.finalize_report.expanduser().resolve()
+    payload = _load_finalize_report(
+        report_path=report_path,
+        audit_root=audit_root,
+        source_provenance=source_provenance,
+    )
+    retained_ok, retained_errors = _retained_artifacts_valid(payload)
+    binding = payload["campaign_binding"]
+    assert isinstance(binding, dict)
     external_gate = _evidence_gate(
         evidence,
         audit_root=audit_root,
@@ -2524,21 +2839,10 @@ def _finalize_campaign(
         expected_binding=binding,
     )
     residual_gate = _residual_findings_gate(args.residual_limitation, args.finding_id)
-    core_gates = (
-        payload.get("pipeline_config_parity") is True
-        and isinstance(payload.get("attempt_gate"), dict)
-        and payload["attempt_gate"].get("satisfied") is True
-        and isinstance(payload.get("online_attempt_gate"), dict)
-        and payload["online_attempt_gate"].get("satisfied") is True
-        and isinstance(payload.get("workflow_phase_gate"), dict)
-        and payload["workflow_phase_gate"].get("satisfied") is True
-        and isinstance(payload.get("canonical_signature_gate"), dict)
-        and payload["canonical_signature_gate"].get("satisfied") is True
-    )
     complete = bool(
         source_provenance["clean"]
         and retained_ok
-        and core_gates
+        and _core_campaign_gates_satisfied(payload)
         and external_gate["satisfied"]
         and residual_gate["satisfied"]
     )

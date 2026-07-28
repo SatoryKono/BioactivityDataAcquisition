@@ -1,0 +1,278 @@
+{
+  "date": "2026-07-28",
+  "label": "post-merge-rebaseline",
+  "analysis_date": "2026-07-28T16:30:12+0000",
+  "revision": "85bd9507c8f90f613b0f978b5bff651a3e673073",
+  "total": 435,
+  "measures": {
+    "bugs": "0",
+    "alert_status": "ERROR",
+    "reliability_rating": "1.0",
+    "code_smells": "409",
+    "security_rating": "4.0",
+    "ncloc": "855804",
+    "vulnerabilities": "26",
+    "sqale_rating": "1.0"
+  },
+  "by_type": {
+    "CODE_SMELL": 409,
+    "VULNERABILITY": 26
+  },
+  "by_severity": {
+    "CRITICAL": 253,
+    "MAJOR": 148,
+    "MINOR": 34
+  },
+  "by_rule": [
+    [
+      "python:S3776",
+      159
+    ],
+    [
+      "python:S1192",
+      67
+    ],
+    [
+      "python:S3358",
+      20
+    ],
+    [
+      "python:S7503",
+      20
+    ],
+    [
+      "python:S5886",
+      19
+    ],
+    [
+      "pythonsecurity:S8707",
+      8
+    ],
+    [
+      "python:S8786",
+      8
+    ],
+    [
+      "python:S1172",
+      8
+    ],
+    [
+      "python:S3457",
+      7
+    ],
+    [
+      "python:S107",
+      5
+    ],
+    [
+      "python:S5864",
+      5
+    ],
+    [
+      "python:S5754",
+      5
+    ],
+    [
+      "shell:S8541",
+      5
+    ],
+    [
+      "shelldre:S7682",
+      4
+    ],
+    [
+      "shelldre:S1066",
+      4
+    ],
+    [
+      "python:S5869",
+      4
+    ],
+    [
+      "shelldre:S7688",
+      4
+    ],
+    [
+      "javascript:S3776",
+      4
+    ],
+    [
+      "python:S2208",
+      4
+    ],
+    [
+      "python:S5655",
+      3
+    ],
+    [
+      "shelldre:S7679",
+      3
+    ],
+    [
+      "docker:S8541",
+      3
+    ],
+    [
+      "python:S5443",
+      3
+    ],
+    [
+      "docker:S8431",
+      3
+    ],
+    [
+      "docker:S8544",
+      3
+    ],
+    [
+      "python:S5890",
+      3
+    ],
+    [
+      "python:S108",
+      3
+    ],
+    [
+      "python:S1854",
+      2
+    ],
+    [
+      "python:S1066",
+      2
+    ],
+    [
+      "githubactions:S8543",
+      2
+    ]
+  ],
+  "by_component": [
+    [
+      "scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs",
+      13
+    ],
+    [
+      "scripts/ops/support/repo/cleanup_repository.py",
+      12
+    ],
+    [
+      "_cr_arch_audit_resume.py",
+      9
+    ],
+    [
+      "scripts/engineering/qa/report_domain_io_taint_inventory.py",
+      9
+    ],
+    [
+      "scripts/engineering/qa/run_observability_closure_campaign.py",
+      9
+    ],
+    [
+      "scripts/engineering/qa/report_dead_code_inventory.py",
+      8
+    ],
+    [
+      "src/bioetl/domain/control_plane/run_ledger_replay.py",
+      8
+    ],
+    [
+      "src/bioetl/infrastructure/checkpoint/local_checkpoint.py",
+      8
+    ],
+    [
+      "scripts/data_quality/inventory_silver_filters_migration.py",
+      7
+    ],
+    [
+      "docs/05-operations/Dockerfile",
+      6
+    ],
+    [
+      "scripts/engineering/ci/update_test_telemetry_baseline.py",
+      6
+    ],
+    [
+      "scripts/engineering/qa/generate_semantic_pipeline_audit.py",
+      6
+    ],
+    [
+      "scripts/engineering/qa/report_basedpyright_error_snapshot.py",
+      5
+    ],
+    [
+      "scripts/ai/mcp/protocol_smoke.py",
+      5
+    ],
+    [
+      "scripts/engineering/qa/check_semantic_governance_policy.py",
+      5
+    ],
+    [
+      "scripts/ops/runtime/docker/docker_runtime_preflight.py",
+      5
+    ],
+    [
+      "src/memory/notes.py",
+      5
+    ],
+    [
+      "scripts/engineering/qa/report_module_coverage_inventory.py",
+      4
+    ],
+    [
+      "scripts/engineering/repo/check_scripts_inventory.py",
+      4
+    ],
+    [
+      "Dockerfile.bioetl",
+      4
+    ],
+    [
+      "src/memory/tooling/workflow.py",
+      4
+    ],
+    [
+      "scripts/engineering/qa/report_test_governance_audit.py",
+      4
+    ],
+    [
+      "scripts/schema/generate_config_matrix.py",
+      4
+    ],
+    [
+      "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
+      4
+    ],
+    [
+      "scripts/ops/runtime/docker/runtime_manager.py",
+      4
+    ],
+    [
+      "scripts/engineering/qa/report_vcr_metadata_catalog.py",
+      4
+    ],
+    [
+      "src/memory/graph/sync_pkg/_core.py",
+      4
+    ],
+    [
+      "scripts/engineering/qa/report_compatibility_importer_census.py",
+      4
+    ],
+    [
+      "scripts/engineering/qa/run_historical_replay_closure_campaign.py",
+      4
+    ],
+    [
+      "scripts/engineering/qa/report_basedpyright_tests_snapshot.py",
+      3
+    ]
+  ],
+  "previous_baseline": {
+    "date": "2026-07-28-pre",
+    "total": 726,
+    "bugs": 9,
+    "vulnerabilities": 113,
+    "code_smells": 604,
+    "blocker": 5
+  }
+}

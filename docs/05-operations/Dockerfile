@@ -22,7 +22,7 @@ COPY pyproject.toml uv.lock ./
 
 # Install uv and builder dependencies (binary-only + locked uv version).
 RUN pip install --only-binary=:all: --no-cache-dir uv==0.11.26 && \
-    uv pip install --system -e .
+    uv pip install --system --no-build -e .
 
 # ============ Production Stage ============
 FROM base AS production
@@ -63,7 +63,7 @@ COPY docker-compose.yml docker-compose.monitoring.yml docker-compose.neo4j.yml /
 
 # Install development dependencies (binary-only + locked uv version).
 RUN pip install --only-binary=:all: --no-cache-dir uv==0.11.26 && \
-    uv pip install --system -e ".[dev,docs]" && \
+    uv pip install --system --no-build -e ".[dev,docs]" && \
     useradd -m -u 1000 bioetl && \
     chown -R bioetl:bioetl /app
 

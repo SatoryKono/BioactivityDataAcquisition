@@ -692,6 +692,26 @@ def _review_status_for_evidence(
     return "present_unreviewed"
 
 
+def _optional_str(value: object) -> str | None:
+    """Coerce a present scalar metadata field to str; keep None for missing."""
+    if value is None:
+        return None
+    return str(value)
+
+
+def _candidate_or_lane_str(
+    candidate: dict[str, object],
+    lane_metadata: dict[str, object],
+    field_name: str,
+) -> str | None:
+    """Prefer candidate metadata, then lane metadata, for optional string fields."""
+    if candidate.get(field_name) is not None:
+        return str(candidate.get(field_name))
+    if lane_metadata.get(field_name) is not None:
+        return str(lane_metadata.get(field_name))
+    return None
+
+
 def _review_evidence_from_candidate(
     repo_root: Path,
     tracked_paths: set[str],
@@ -708,11 +728,10 @@ def _review_evidence_from_candidate(
 
     path = Path(raw_path)
     canonical_raw = candidate.get("canonical_path")
-    canonical_path = (
-        Path(canonical_raw)
-        if isinstance(canonical_raw, str) and canonical_raw
-        else None
-    )
+    if isinstance(canonical_raw, str) and canonical_raw:
+        canonical_path = Path(canonical_raw)
+    else:
+        canonical_path = None
     current_live_state = str(candidate.get("current_live_state", ""))
     exists = (repo_root / path).exists()
     tracked = _path_is_tracked_or_has_tracked_descendants(
@@ -723,16 +742,21 @@ def _review_evidence_from_candidate(
         and not tracked
         and current_live_state == "present_local_only_root_surface"
     )
-    cmp_status = (
-        None
-        if skip_local_review_probes or not exists
-        else _cmp_status(repo_root, path, canonical_path)
-    )
-    reference_hits = (
-        0
-        if skip_local_review_probes or not exists
-        else _count_reference_hits(repo_root, path)
-    )
+    if skip_local_review_probes or not exists:
+        cmp_status = None
+        reference_hits = 0
+    else:
+        cmp_status = _cmp_status(repo_root, path, canonical_path)
+        reference_hits = _count_reference_hits(repo_root, path)
+    if skip_local_review_probes:
+        has_history = False
+    else:
+        has_history = _history_signal_for_path(
+            repo_root,
+            path,
+            tracked=tracked,
+            exists=exists,
+        )
 
     return ReviewLaneEvidence(
         lane_id=lane_id,
@@ -740,59 +764,20 @@ def _review_evidence_from_candidate(
         path=path,
         current_live_state=current_live_state,
         canonical_path=canonical_path,
-        action_if_reintroduced=(
-            str(candidate.get("action_if_reintroduced"))
-            if candidate.get("action_if_reintroduced") is not None
-            else None
+        action_if_reintroduced=_optional_str(candidate.get("action_if_reintroduced")),
+        owner=_candidate_or_lane_str(candidate, lane_metadata, "owner"),
+        retention_class=_candidate_or_lane_str(
+            candidate, lane_metadata, "retention_class"
         ),
-        owner=(
-            str(candidate.get("owner"))
-            if candidate.get("owner") is not None
-            else (
-                str(lane_metadata.get("owner"))
-                if lane_metadata.get("owner") is not None
-                else None
-            )
+        retention_action=_candidate_or_lane_str(
+            candidate, lane_metadata, "retention_action"
         ),
-        retention_class=(
-            str(candidate.get("retention_class"))
-            if candidate.get("retention_class") is not None
-            else (
-                str(lane_metadata.get("retention_class"))
-                if lane_metadata.get("retention_class") is not None
-                else None
-            )
-        ),
-        retention_action=(
-            str(candidate.get("retention_action"))
-            if candidate.get("retention_action") is not None
-            else (
-                str(lane_metadata.get("retention_action"))
-                if lane_metadata.get("retention_action") is not None
-                else None
-            )
-        ),
-        cleanup_policy=(
-            str(candidate.get("cleanup_policy"))
-            if candidate.get("cleanup_policy") is not None
-            else (
-                str(lane_metadata.get("cleanup_policy"))
-                if lane_metadata.get("cleanup_policy") is not None
-                else None
-            )
+        cleanup_policy=_candidate_or_lane_str(
+            candidate, lane_metadata, "cleanup_policy"
         ),
         exists=exists,
         tracked=tracked,
-        has_history=(
-            False
-            if skip_local_review_probes
-            else _history_signal_for_path(
-                repo_root,
-                path,
-                tracked=tracked,
-                exists=exists,
-            )
-        ),
+        has_history=has_history,
         canonical_exists=bool(canonical_path and (repo_root / canonical_path).exists()),
         cmp_status=cmp_status,
         reference_hits=reference_hits,
@@ -1084,78 +1069,144 @@ def _reports_workspace_row(
         retention_owner=retention_owner,
         retention_ttl_days=retention_ttl_days,
         age_days=age_days,
-        ttl_expired=(
-            None
-            if retention_ttl_days is None
-            else age_days is not None and age_days > retention_ttl_days
+        ttl_expired=_ttl_expired_flag(
+            retention_ttl_days=retention_ttl_days, age_days=age_days
         ),
         reason=reason,
     )
 
 
-def collect_reports_workspace_evidence(
+def _ttl_expired_flag(
+    *, retention_ttl_days: int | None, age_days: int | None
+) -> bool | None:
+    if retention_ttl_days is None:
+        return None
+    return age_days is not None and age_days > retention_ttl_days
+
+
+def _path_present_or_tracked(
     repo_root: Path,
-) -> list[ReportsWorkspaceEvidence]:
-    tracked_paths = _tracked_path_set(repo_root)
-    tracked_ancestor_dirs = _tracked_ancestor_dirs(repo_root)
-    route_metadata = _reports_registered_route_metadata(repo_root)
-    retention_metadata = _reports_retention_metadata(repo_root)
-    rows: dict[str, ReportsWorkspaceEvidence] = {}
+    path: Path,
+    tracked_paths: set[str],
+    tracked_ancestor_dirs: set[str],
+) -> bool:
+    return (repo_root / path).exists() or _path_is_tracked_or_has_tracked_descendants(
+        path, tracked_paths, tracked_ancestor_dirs
+    )
 
+
+def _tracked_or_prune_classification(tracked: bool) -> str:
+    if tracked:
+        return "REVIEW_REQUIRED"
+    return "PRUNE_CANDIDATE"
+
+
+def _transient_ttl_reason(*, tracked: bool, ttl_expired: bool | None) -> str:
+    if tracked:
+        ttl_state = "exceeds" if ttl_expired else "is still within"
+        return (
+            "tracked transient artifact inside retained reports surface "
+            f"{ttl_state} its TTL and requires manual review before prune"
+        )
+    if ttl_expired:
+        return (
+            "transient retained-surface artifact exceeds its TTL and "
+            "is a bounded local prune candidate"
+        )
+    return (
+        "transient retained-surface artifact is still within its "
+        "TTL window and should be retained"
+    )
+
+
+def _collect_retained_report_rows(
+    repo_root: Path,
+    tracked_paths: set[str],
+    tracked_ancestor_dirs: set[str],
+    *,
+    route_metadata: dict[str, tuple[str | None, str | None]],
+    retention_metadata: dict[str, tuple[str, str | None, int | None]],
+    rows: dict[str, ReportsWorkspaceEvidence],
+) -> None:
     for path in REPORTS_RETAINED_FILES:
-        if (repo_root / path).exists() or _path_is_tracked_or_has_tracked_descendants(
-            path, tracked_paths, tracked_ancestor_dirs
+        if not _path_present_or_tracked(
+            repo_root, path, tracked_paths, tracked_ancestor_dirs
         ):
-            rows[path.as_posix()] = _reports_workspace_row(
-                repo_root,
-                tracked_paths,
-                tracked_ancestor_dirs,
-                path=path,
-                classification="RETAIN",
-                route_metadata=route_metadata,
-                retention_metadata=retention_metadata,
-                reason="canonical reports workspace guide must remain present",
-            )
-
+            continue
+        rows[path.as_posix()] = _reports_workspace_row(
+            repo_root,
+            tracked_paths,
+            tracked_ancestor_dirs,
+            path=path,
+            classification="RETAIN",
+            route_metadata=route_metadata,
+            retention_metadata=retention_metadata,
+            reason="canonical reports workspace guide must remain present",
+        )
     for path in REPORTS_RETAINED_DIRS:
-        if (repo_root / path).exists() or _path_is_tracked_or_has_tracked_descendants(
-            path, tracked_paths, tracked_ancestor_dirs
+        if not _path_present_or_tracked(
+            repo_root, path, tracked_paths, tracked_ancestor_dirs
         ):
-            reason = "governed reports workspace surface retained by docs or tracked evidence"
-            if path == Path("reports/logs"):
-                reason = "runtime log sink documented in active operator guidance"
-            rows[path.as_posix()] = _reports_workspace_row(
-                repo_root,
-                tracked_paths,
-                tracked_ancestor_dirs,
-                path=path,
-                classification="RETAIN",
-                route_metadata=route_metadata,
-                retention_metadata=retention_metadata,
-                reason=reason,
+            continue
+        if path == Path("reports/logs"):
+            reason = "runtime log sink documented in active operator guidance"
+        else:
+            reason = (
+                "governed reports workspace surface retained by docs or tracked evidence"
             )
+        rows[path.as_posix()] = _reports_workspace_row(
+            repo_root,
+            tracked_paths,
+            tracked_ancestor_dirs,
+            path=path,
+            classification="RETAIN",
+            route_metadata=route_metadata,
+            retention_metadata=retention_metadata,
+            reason=reason,
+        )
 
+
+def _collect_local_prune_dir_rows(
+    repo_root: Path,
+    tracked_paths: set[str],
+    tracked_ancestor_dirs: set[str],
+    *,
+    route_metadata: dict[str, tuple[str | None, str | None]],
+    retention_metadata: dict[str, tuple[str, str | None, int | None]],
+    rows: dict[str, ReportsWorkspaceEvidence],
+) -> None:
     for path in REPORTS_LOCAL_PRUNE_DIRS:
-        if (repo_root / path).exists():
-            tracked = _path_is_tracked_or_has_tracked_descendants(
-                path, tracked_paths, tracked_ancestor_dirs
-            )
-            rows[path.as_posix()] = _reports_workspace_row(
-                repo_root,
-                tracked_paths,
-                tracked_ancestor_dirs,
-                path=path,
-                classification="REVIEW_REQUIRED" if tracked else "PRUNE_CANDIDATE",
-                route_metadata=route_metadata,
-                retention_metadata=retention_metadata,
-                reason=(
-                    "local model/tmp reports are exact-path prune candidates"
-                    if not tracked
-                    else "tracked reports subtree requires manual review before prune"
-                ),
-            )
+        if not (repo_root / path).exists():
+            continue
+        tracked = _path_is_tracked_or_has_tracked_descendants(
+            path, tracked_paths, tracked_ancestor_dirs
+        )
+        if tracked:
+            reason = "tracked reports subtree requires manual review before prune"
+        else:
+            reason = "local model/tmp reports are exact-path prune candidates"
+        rows[path.as_posix()] = _reports_workspace_row(
+            repo_root,
+            tracked_paths,
+            tracked_ancestor_dirs,
+            path=path,
+            classification=_tracked_or_prune_classification(tracked),
+            route_metadata=route_metadata,
+            retention_metadata=retention_metadata,
+            reason=reason,
+        )
 
-    for path_text, (generator, commit_policy) in route_metadata.items():
+
+def _collect_registered_route_rows(
+    repo_root: Path,
+    tracked_paths: set[str],
+    tracked_ancestor_dirs: set[str],
+    *,
+    route_metadata: dict[str, tuple[str | None, str | None]],
+    retention_metadata: dict[str, tuple[str, str | None, int | None]],
+    rows: dict[str, ReportsWorkspaceEvidence],
+) -> None:
+    for path_text in route_metadata:
         path = Path(path_text)
         if not (repo_root / path).exists():
             continue
@@ -1164,43 +1215,68 @@ def collect_reports_workspace_evidence(
         tracked = _path_is_tracked_or_has_tracked_descendants(
             path, tracked_paths, tracked_ancestor_dirs
         )
-        classification = "REVIEW_REQUIRED" if tracked else "PRUNE_CANDIDATE"
+        if tracked:
+            reason = (
+                "registered working report exists as tracked output and needs "
+                "explicit retention review"
+            )
+        else:
+            reason = (
+                "registered working report exists only locally and may be pruned "
+                "after review"
+            )
         rows[path.as_posix()] = _reports_workspace_row(
             repo_root,
             tracked_paths,
             tracked_ancestor_dirs,
             path=path,
-            classification=classification,
+            classification=_tracked_or_prune_classification(tracked),
             route_metadata=route_metadata,
             retention_metadata=retention_metadata,
-            reason=(
-                "registered working report exists as tracked output and needs explicit retention review"
-                if tracked
-                else "registered working report exists only locally and may be pruned after review"
-            ),
+            reason=reason,
         )
 
+
+def _collect_root_prune_report_rows(
+    repo_root: Path,
+    tracked_paths: set[str],
+    tracked_ancestor_dirs: set[str],
+    *,
+    route_metadata: dict[str, tuple[str | None, str | None]],
+    retention_metadata: dict[str, tuple[str, str | None, int | None]],
+    rows: dict[str, ReportsWorkspaceEvidence],
+) -> None:
     for path in _iter_reports_root_prune_candidates(repo_root):
         if path.as_posix() in rows:
             continue
         tracked = _path_is_tracked_or_has_tracked_descendants(
             path, tracked_paths, tracked_ancestor_dirs
         )
+        if tracked:
+            reason = "tracked root report requires explicit owner review"
+        else:
+            reason = "untracked root report matches approved local prune pattern"
         rows[path.as_posix()] = _reports_workspace_row(
             repo_root,
             tracked_paths,
             tracked_ancestor_dirs,
             path=path,
-            classification="REVIEW_REQUIRED" if tracked else "PRUNE_CANDIDATE",
+            classification=_tracked_or_prune_classification(tracked),
             route_metadata=route_metadata,
             retention_metadata=retention_metadata,
-            reason=(
-                "tracked root report requires explicit owner review"
-                if tracked
-                else "untracked root report matches approved local prune pattern"
-            ),
+            reason=reason,
         )
 
+
+def _collect_transient_retained_rows(
+    repo_root: Path,
+    tracked_paths: set[str],
+    tracked_ancestor_dirs: set[str],
+    *,
+    route_metadata: dict[str, tuple[str | None, str | None]],
+    retention_metadata: dict[str, tuple[str, str | None, int | None]],
+    rows: dict[str, ReportsWorkspaceEvidence],
+) -> None:
     for path in _iter_reports_retained_dir_transient_candidates(repo_root):
         if path.as_posix() in rows:
             continue
@@ -1231,42 +1307,78 @@ def collect_reports_workspace_evidence(
             classification=classification,
             route_metadata=route_metadata,
             retention_metadata=retention_metadata,
-            reason=(
-                "tracked transient artifact inside retained reports surface "
-                f"{'exceeds' if ttl_expired else 'is still within'} its TTL and "
-                "requires manual review before prune"
-                if tracked
-                else "transient retained-surface artifact exceeds its TTL and "
-                "is a bounded local prune candidate"
-                if ttl_expired
-                else "transient retained-surface artifact is still within its "
-                "TTL window and should be retained"
-            ),
+            reason=_transient_ttl_reason(tracked=tracked, ttl_expired=ttl_expired),
         )
 
+
+def _collect_uncurated_surface_rows(
+    repo_root: Path,
+    tracked_paths: set[str],
+    tracked_ancestor_dirs: set[str],
+    *,
+    route_metadata: dict[str, tuple[str | None, str | None]],
+    retention_metadata: dict[str, tuple[str, str | None, int | None]],
+    rows: dict[str, ReportsWorkspaceEvidence],
+) -> None:
     for path in _iter_reports_top_level_uncurated_surfaces(repo_root):
         if path.as_posix() in rows:
             continue
         tracked = _path_is_tracked_or_has_tracked_descendants(
             path, tracked_paths, tracked_ancestor_dirs
         )
+        if tracked:
+            reason = (
+                "tracked reports workspace surface sits outside retained "
+                "families and needs explicit retention review"
+            )
+        else:
+            reason = (
+                "non-curated top-level reports workspace surface is a "
+                "local prune candidate"
+            )
         rows[path.as_posix()] = _reports_workspace_row(
             repo_root,
             tracked_paths,
             tracked_ancestor_dirs,
             path=path,
-            classification="REVIEW_REQUIRED" if tracked else "PRUNE_CANDIDATE",
+            classification=_tracked_or_prune_classification(tracked),
             route_metadata=route_metadata,
             retention_metadata=retention_metadata,
-            reason=(
-                "tracked reports workspace surface sits outside retained "
-                "families and needs explicit retention review"
-                if tracked
-                else "non-curated top-level reports workspace surface is a "
-                "local prune candidate"
-            ),
+            reason=reason,
         )
 
+
+def collect_reports_workspace_evidence(
+    repo_root: Path,
+) -> list[ReportsWorkspaceEvidence]:
+    tracked_paths = _tracked_path_set(repo_root)
+    tracked_ancestor_dirs = _tracked_ancestor_dirs(repo_root)
+    route_metadata = _reports_registered_route_metadata(repo_root)
+    retention_metadata = _reports_retention_metadata(repo_root)
+    rows: dict[str, ReportsWorkspaceEvidence] = {}
+    collector_kwargs = {
+        "route_metadata": route_metadata,
+        "retention_metadata": retention_metadata,
+        "rows": rows,
+    }
+    _collect_retained_report_rows(
+        repo_root, tracked_paths, tracked_ancestor_dirs, **collector_kwargs
+    )
+    _collect_local_prune_dir_rows(
+        repo_root, tracked_paths, tracked_ancestor_dirs, **collector_kwargs
+    )
+    _collect_registered_route_rows(
+        repo_root, tracked_paths, tracked_ancestor_dirs, **collector_kwargs
+    )
+    _collect_root_prune_report_rows(
+        repo_root, tracked_paths, tracked_ancestor_dirs, **collector_kwargs
+    )
+    _collect_transient_retained_rows(
+        repo_root, tracked_paths, tracked_ancestor_dirs, **collector_kwargs
+    )
+    _collect_uncurated_surface_rows(
+        repo_root, tracked_paths, tracked_ancestor_dirs, **collector_kwargs
+    )
     return sorted(rows.values(), key=lambda item: (item.classification, item.rel_path))
 
 

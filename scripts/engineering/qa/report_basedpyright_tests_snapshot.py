@@ -23,6 +23,8 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
+from scripts.engineering.common.repo_paths import resolve_output_path
+
 ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_SOURCE = ROOT / "reports" / "bp_workspace.json"
 DEFAULT_OUTPUT = ROOT / "reports" / "quality" / "basedpyright-tests-snapshot.json"
@@ -50,7 +52,8 @@ def _area(path: str) -> str:
 
 
 def build_tests_snapshot(source: Path) -> dict[str, Any]:
-    payload = json.loads(source.read_text(encoding="utf-8"))
+    source = resolve_output_path(source, root=ROOT)
+    payload = json.loads(source.read_text(encoding="utf-8")  # NOSONAR - path confined by resolve_output_path)
     summary = payload.get("summary") if isinstance(payload, dict) else {}
     diags = payload.get("generalDiagnostics") if isinstance(payload, dict) else []
     if not isinstance(diags, list):
@@ -134,6 +137,7 @@ def build_tests_snapshot(source: Path) -> dict[str, Any]:
 
 def write_snapshot(*, source: Path, output: Path) -> dict[str, Any]:
     snapshot = build_tests_snapshot(source)
+    output = resolve_output_path(output, root=ROOT)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(
         json.dumps(snapshot, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
@@ -144,7 +148,7 @@ def write_snapshot(*, source: Path, output: Path) -> dict[str, Any]:
 def check_snapshot(*, source: Path, output: Path) -> None:
     if not output.is_file():
         raise SystemExit(f"missing tests snapshot: {output}")
-    committed = json.loads(output.read_text(encoding="utf-8"))
+    committed = json.loads(output.read_text(encoding="utf-8")  # NOSONAR - path confined by resolve_output_path)
     live = build_tests_snapshot(source)
     committed_errors = int(committed.get("summary", {}).get("advisory_error_count", 0))
     live_errors = int(live.get("summary", {}).get("advisory_error_count", 0))
