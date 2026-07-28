@@ -3,14 +3,15 @@
 from __future__ import annotations
 
 from bioetl.application.services.control_plane.manifest.execution_identity_support import (
-    build_contract_identity_anchor_fields,
+    build_degraded_runtime_anchor_payload,
     build_execution_identity_payload_from_code_provenance,
+    build_identity_graph_core,
 )
 from bioetl.application.services.control_plane.manifest.replay_taxonomy import (
     resolve_replay_taxonomy_projection,
 )
 from bioetl.domain.config.runtime import CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE
-from bioetl.domain.control_plane import RunCodeProvenance, RunManifest
+from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.normalization import compute_execution_identity_fingerprint
 
 
@@ -49,11 +50,11 @@ class RunManifestIdentityGraphAssembler:
                 diagnostics,
             )
         )
-        degraded_runtime_anchor_payload = _build_degraded_runtime_anchor_payload(
+        degraded_runtime_anchor_payload = build_degraded_runtime_anchor_payload(
             manifest
         )
         return {
-            **_build_identity_graph_core(
+            **build_identity_graph_core(
                 manifest,
                 diagnostics,
                 code_provenance=code_provenance,
@@ -179,86 +180,3 @@ class RunManifestIdentityGraphAssembler:
                 "occurrence_only_diagnostics", []
             ),
         }
-
-
-def _fallback_code_provenance_state(
-    code_provenance: RunCodeProvenance,
-) -> dict[str, object]:
-    payload: dict[str, object] = {
-        "git_commit": code_provenance.git_commit,
-        "source_revision_state": code_provenance.source_revision_state,
-        "dependency_lock_state": (
-            "present" if code_provenance.dependency_lock_hash is not None else "missing"
-        ),
-        "strict_code_provenance_ready": (
-            bool(code_provenance.git_commit)
-            and str(code_provenance.source_revision_state or "").strip().lower()
-            == "clean"
-        ),
-        "strict_code_provenance_blockers": [
-            blocker
-            for blocker, enabled in (
-                ("git_commit_missing", not code_provenance.git_commit),
-                (
-                    "source_revision_state_not_clean",
-                    str(code_provenance.source_revision_state or "").strip().lower()
-                    != "clean",
-                ),
-            )
-            if enabled
-        ],
-    }
-    if code_provenance.dependency_lock_hash is not None:
-        payload["dependency_lock_hash"] = code_provenance.dependency_lock_hash
-    return payload
-
-
-def _build_degraded_runtime_anchor_payload(
-    manifest: RunManifest,
-) -> dict[str, object]:
-    code_provenance = manifest.code_provenance
-    return {
-        "manifest_id": manifest.manifest_id,
-        **build_contract_identity_anchor_fields(
-            code_provenance,
-            include_effective_config_hash=True,
-        ),
-    }
-
-
-def _build_identity_graph_core(
-    manifest: RunManifest,
-    diagnostics: dict[str, object],
-    *,
-    code_provenance: RunCodeProvenance,
-) -> dict[str, object]:
-    fallback_code_provenance_state = _fallback_code_provenance_state(code_provenance)
-    payload: dict[str, object] = {
-        "run_id": str(manifest.run_id),
-        "manifest_id": manifest.manifest_id,
-        "execution_fingerprint": manifest.execution_fingerprint,
-        "config_hash": code_provenance.config_hash,
-        "resolved_config_hash": code_provenance.resolved_config_hash,
-        "effective_config_hash": code_provenance.effective_config_hash,
-        "source_fingerprint": code_provenance.source_fingerprint,
-        "git_commit": code_provenance.git_commit,
-        "source_revision_state": code_provenance.source_revision_state,
-        "dependency_lock_state": (
-            "present" if code_provenance.dependency_lock_hash is not None else "missing"
-        ),
-        "code_provenance_state": diagnostics.get(
-            "code_provenance_state",
-            fallback_code_provenance_state,
-        ),
-        **build_contract_identity_anchor_fields(
-            code_provenance,
-            include_effective_config_artifact_id=False,
-            include_null_values=True,
-        ),
-        "replay_of_run_id": diagnostics.get("replay_of_run_id"),
-        "replay_of_manifest_id": diagnostics.get("replay_of_manifest_id"),
-        "replay_parentage": diagnostics.get("replay_parentage"),
-    }
-    if code_provenance.dependency_lock_hash is not None:
-        payload["dependency_lock_hash"] = code_provenance.dependency_lock_hash
-    return payload

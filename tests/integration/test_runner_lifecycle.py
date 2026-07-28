@@ -25,7 +25,10 @@ from bioetl.application.core._runner_dependency_support import (
     PipelineRunnerDependencies,
 )
 from bioetl.application.core.runner import PipelineRunner
-from bioetl.application.observability.observer import PipelineObserver
+from bioetl.application.observability.observer import (
+    PipelineObserver,
+    PipelineObserverIdentity,
+)
 from bioetl.application.services.medallion_lifecycle import (
     MedallionLifecycleService,
     PrepareResult,
@@ -410,9 +413,11 @@ class TestPipelineRunnerLifecycle:
             logger=mock_logger,
         )
         observer = PipelineObserver(
-            pipeline_name=config.pipeline_name,
-            run_id=context.run_id,
-            run_type=context.run_type,
+            identity=PipelineObserverIdentity(
+                pipeline_name=config.pipeline_name,
+                run_id=context.run_id,
+                run_type=context.run_type,
+            ),
             metrics=mock_services_with_recorder.metrics,
             logger=mock_logger,
             clock=FixedClock(datetime(2026, 4, 24, 12, 0, tzinfo=UTC)),

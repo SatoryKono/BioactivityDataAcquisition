@@ -191,9 +191,6 @@ def _build_metric_label_sets(payload: dict) -> dict[str, frozenset[str]]:
 
     label_sets: dict[str, frozenset[str]] = {
         "up": frozenset({"job", "instance"}),
-        # Emitted directly by health_metrics_exposition rather than through
-        # prometheus_client's process-global collector registry.
-        "bioetl_health_server_scrape_up": frozenset(),
     }
     docker_contract = yaml.safe_load(
         Path("configs/quality/docker_runtime_contracts.yaml").read_text(

@@ -145,10 +145,33 @@ def _silver_filter_rejection_labels(
     field = field_raw if isinstance(field_raw, str) else None
     return reason, rule_type, field
 
+
+def _record_batch_lifecycle_event(
+    pipeline_metrics: PipelineMetricsRecorder,
+    *,
+    run_type_label: str,
+    event: str,
+    stage: str,
+    status: str,
+    count: int = 1,
+    record_count: int = 0,
+) -> None:
+    """Project one batch lifecycle event through the pipeline metrics recorder."""
+    pipeline_metrics.record_batch_lifecycle_event(
+        run_type=run_type_label,
+        event=event,
+        stage=stage,
+        status=status,
+        count=count,
+        record_count=record_count,
+    )
+
+
 __all__ = [
     "_FLOW_ACCOUNTING_STAGES",
     "_GOLD_REMOVAL_REASONS",
     "_SILVER_REMOVAL_REASONS",
+    "_record_batch_lifecycle_event",
     "_record_filtered_out_stage_metrics",
     "_record_processed_stage_accounting",
     "_record_silver_removal_accounting",

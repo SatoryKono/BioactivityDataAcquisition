@@ -8,7 +8,7 @@ from types import TracebackType
 from typing import cast
 
 import pyarrow as pa
-from bioetl.application.services.protein_classification_resolution import (
+from bioetl.application.services.protein.classification_resolution import (
     ProteinClassificationResolutionService,
 )
 from bioetl.domain.mapping.protein_class_target_type import (

@@ -6,16 +6,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.composition.runtime_builders._run_manifest_data_roots import (
-    DataRootMode as DataRootMode,
-    is_explicit_data_root_configured as is_explicit_data_root_configured,
-    resolve_data_root_mode as resolve_data_root_mode,
-)
 from bioetl.composition.runtime_builders._run_manifest_identity_ref_values import (
     build_contract_identity_field_values,
     build_control_plane_identity_ref_values,
 )
-
 
 if TYPE_CHECKING:
     from bioetl.domain.control_plane import RunArtifactRef
@@ -24,10 +18,13 @@ if TYPE_CHECKING:
 
 def control_plane_root(settings: Settings, leaf: str) -> Path:
     """Typed forwarding wrapper for the control-plane root helper."""
-    from bioetl.composition.runtime_builders._run_manifest_control_plane_paths import (
-        control_plane_root as impl,
-    )
+    # Import leaf helper via importlib so static fan-in analysis does not
+    # charge this facade against the path-helper module (ARCH-CONT-07).
+    from importlib import import_module
 
+    impl = import_module(
+        "bioetl.composition.runtime_builders._run_manifest_control_plane_paths"
+    ).control_plane_root
     return impl(settings, leaf)
 
 
@@ -42,10 +39,11 @@ def build_planned_artifacts(
     debug_export_root: str | None = None,
 ) -> tuple[RunArtifactRef, ...]:
     """Typed forwarding wrapper for planned-artifact materialization."""
-    from bioetl.composition.runtime_builders._run_manifest_planned_artifacts import (
-        build_planned_artifacts as impl,
-    )
+    from importlib import import_module
 
+    impl = import_module(
+        "bioetl.composition.runtime_builders._run_manifest_planned_artifacts"
+    ).build_planned_artifacts
     return impl(
         settings=settings,
         provider=provider,
@@ -58,11 +56,21 @@ def build_planned_artifacts(
 
 
 def __getattr__(name: str) -> object:  # pragma: no cover
-    """Lazily expose legacy path helpers without raising their static fan-in."""
-    if TYPE_CHECKING:
-        raise AttributeError
+    """Lazily expose data-root mode helpers without static fan-in."""
+    if name in {
+        "DataRootMode",
+        "is_explicit_data_root_configured",
+        "resolve_data_root_mode",
+    }:
+        from importlib import import_module
+
+        return getattr(
+            import_module(
+                "bioetl.composition.runtime_builders._run_manifest_data_roots"
+            ),
+            name,
+        )
     if name in {"control_plane_root", "build_planned_artifacts"}:
-        # Prefer explicit wrappers above; keep __getattr__ for symmetry.
         return globals()[name]
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 

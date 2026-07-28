@@ -1,0 +1,1 @@
+"""Protein classification application services."""

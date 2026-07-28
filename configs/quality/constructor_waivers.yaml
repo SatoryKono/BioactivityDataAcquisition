@@ -1,12 +1,7 @@
 # RF-017 Constructor Waivers
-# ARCH-RES-02 / #6750: 3 -> 2. Shrink-only.
-# CheckpointRuntimeService removed via CheckpointRuntimeIdentity bag.
-
-PipelineObserver:
-  max_args: 13
-  owner: "@bioetl-observability"
-  expiry: "2026-12-31"
-  reason: "Observer currently aggregates multiple sinks and lifecycle reporters."
+# ARCH-CONT-04 / #6760: 2 -> 1. Shrink-only.
+# PipelineObserver removed via PipelineObserverIdentity bag.
+# CheckpointRuntimeService removed via CheckpointRuntimeIdentity bag (ARCH-RES-02).
 
 QuarantineEntry:
   max_args: 9

@@ -4,7 +4,7 @@
     "families": 5,
     "scorecard": "configs/quality/debt_scorecard.yaml",
     "budget_warnings": 0,
-    "budget_review_notes": 2
+    "budget_review_notes": 1
   },
   "families": [
     {
@@ -18,8 +18,8 @@
       ],
       "duplication_clusters": 0,
       "files": 183,
-      "total_loc": 22597,
-      "files_ge_250_loc": 5,
+      "total_loc": 22617,
+      "files_ge_250_loc": 4,
       "helper_function_ratio": 0.371,
       "max_internal_fan_in": 7,
       "max_internal_fan_in_module": "bioetl.application.core.pipeline_span_lifecycle",
@@ -29,7 +29,7 @@
       },
       "budget_warnings": [],
       "budget_review_notes": [
-        "at_budget:files_ge_250_loc=5/5"
+        "near_budget:files_ge_250_loc=4/5"
       ]
     },
     {
@@ -66,7 +66,7 @@
       ],
       "duplication_clusters": 0,
       "files": 37,
-      "total_loc": 4756,
+      "total_loc": 4762,
       "files_ge_250_loc": 1,
       "helper_function_ratio": 0.417,
       "max_internal_fan_in": 2,
@@ -89,9 +89,9 @@
       ],
       "duplication_clusters": 0,
       "files": 126,
-      "total_loc": 15398,
-      "files_ge_250_loc": 11,
-      "helper_function_ratio": 0.449,
+      "total_loc": 15440,
+      "files_ge_250_loc": 9,
+      "helper_function_ratio": 0.438,
       "max_internal_fan_in": 3,
       "max_internal_fan_in_module": "bioetl.application.services.control_plane.workflow.manifest_models",
       "bounded_growth_budgets": {
@@ -112,19 +112,17 @@
       ],
       "duplication_clusters": 0,
       "files": 56,
-      "total_loc": 6970,
+      "total_loc": 6978,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.359,
-      "max_internal_fan_in": 4,
-      "max_internal_fan_in_module": "bioetl.composition.runtime_builders._run_manifest_data_roots",
+      "max_internal_fan_in": 3,
+      "max_internal_fan_in_module": "bioetl.composition.runtime_builders.run_manifest_support",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 3,
         "max_internal_fan_in": 5
       },
       "budget_warnings": [],
-      "budget_review_notes": [
-        "near_budget:max_internal_fan_in=4/5"
-      ]
+      "budget_review_notes": []
     }
   ]
 }
