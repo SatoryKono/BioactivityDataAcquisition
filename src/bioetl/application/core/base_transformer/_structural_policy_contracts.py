@@ -14,7 +14,6 @@ from ._structural_policy_types import LogicalType, StructuralFieldSpec
 if TYPE_CHECKING:
     import pandera as pa
 
-
 def resolve_pandera_schema(schema_builder: object | None) -> pa.DataFrameSchema | None:
     """Resolve runtime Pandera schema from DataFrameModel class or schema object."""
     if schema_builder is None:
@@ -25,7 +24,6 @@ def resolve_pandera_schema(schema_builder: object | None) -> pa.DataFrameSchema 
     if callable(to_schema):
         return cast("pa.DataFrameSchema", to_schema())
     return None
-
 
 def resolve_field_contracts(
     *,
@@ -54,7 +52,6 @@ def resolve_field_contracts(
         )
     return contracts
 
-
 def resolve_logical_type(physical_type: str) -> LogicalType:
     """Map Pandera dtype text to logical business type."""
     normalized = physical_type.lower()
@@ -67,7 +64,6 @@ def resolve_logical_type(physical_type: str) -> LogicalType:
     if normalized == "bool" or "boolean" in normalized or normalized.startswith("bool"):
         return "boolean"
     return "unknown"
-
 
 def is_missing_value(
     value: object,

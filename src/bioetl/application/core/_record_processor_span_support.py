@@ -30,7 +30,6 @@ if TYPE_CHECKING:
 
 _PROCESSING_SPAN_ERRORS = SHARED_OPERATION_ERRORS
 
-
 class RecordProcessorSpanExecutor:
     """Wrap RecordProcessor stage coroutines with tracing span lifecycle."""
 

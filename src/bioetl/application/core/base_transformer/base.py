@@ -29,7 +29,6 @@ if TYPE_CHECKING:
 
 __all__ = ["BaseTransformer", "T"]
 
-
 def _resolve_transformer_dependencies(
     *,
     dependencies: TransformerDependencyContext | None,
@@ -74,7 +73,6 @@ def _resolve_transformer_dependencies(
         "'dependencies' (TransformerDependencyContext). Build runtime defaults "
         "in composition when needed."
     )
-
 
 class BaseTransformer(
     _BaseTransformerDependencyHelpersMixin,

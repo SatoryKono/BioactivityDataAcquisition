@@ -4,12 +4,10 @@ from __future__ import annotations
 
 __all__ = ["BatchProgressService"]
 
-
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
-
 
 class BatchProgressService:
     """Tracks and emits pipeline progress during batch execution."""

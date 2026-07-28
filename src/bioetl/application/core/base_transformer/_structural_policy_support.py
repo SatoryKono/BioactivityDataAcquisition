@@ -19,14 +19,12 @@ if TYPE_CHECKING:
         StructuralPolicyProtocol,
     )
 
-
 class NoOpStructuralPolicy:
     """Fallback policy used when no schema-aware enforcement is configured."""
 
     def apply(self, record: SilverRecord) -> StructuralPolicyOutcome:
         """Return the record unchanged."""
         return StructuralPolicyOutcome(record=record)
-
 
 class SchemaAwareStructuralPolicy:
     """Generic presence/type guard built from schema + config contracts."""
@@ -48,7 +46,6 @@ class SchemaAwareStructuralPolicy:
             record=cast("SilverRecord", working_record),
             events=tuple(events),
         )
-
 
 def build_structural_policy(
     *,

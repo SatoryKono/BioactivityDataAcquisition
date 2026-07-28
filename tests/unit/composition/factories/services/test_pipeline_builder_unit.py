@@ -91,8 +91,9 @@ class TestCreateCheckpointManager:
             loading_strategy=strategy,
         )
 
-        call_kwargs = mock_cls.call_args[1]
-        assert call_kwargs["loading_strategy"] is strategy
+        call_args = mock_cls.call_args
+        identity = call_args.args[2]
+        assert identity.loading_strategy is strategy
 
     @patch(
         "bioetl.composition.factories.services.pipeline_builder.CheckpointRuntimeService"
@@ -116,10 +117,12 @@ class TestCreateCheckpointManager:
             compatibility_policy="hard_fail",
         )
 
-        call_kwargs = mock_cls.call_args[1]
+        call_args = mock_cls.call_args
+        identity = call_args.args[2]
+        call_kwargs = call_args.kwargs
         assert call_kwargs["checkpoint_compatibility_service"] is compatibility_service
-        assert call_kwargs["current_metadata"] is current_metadata
-        assert call_kwargs["compatibility_policy"] == "hard_fail"
+        assert identity.current_metadata is current_metadata
+        assert identity.compatibility_policy == "hard_fail"
 
 
 @pytest.mark.unit

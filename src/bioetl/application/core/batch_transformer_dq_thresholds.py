@@ -6,14 +6,12 @@ from dataclasses import dataclass
 from enum import Enum
 from numbers import Real
 
-
 class ThresholdBreachReason(Enum):
     """Classification of DQ threshold breaches."""
 
     NONE = "none"
     SOFT = "soft"
     HARD = "hard"
-
 
 @dataclass(frozen=True, slots=True)
 class DQThresholdCheckResult:
@@ -24,9 +22,7 @@ class DQThresholdCheckResult:
     soft_threshold: float | None
     hard_threshold: float | None
 
-
 ThresholdBreach = ThresholdBreachReason
-
 
 def check_dq_thresholds(
     *,
@@ -69,7 +65,6 @@ def check_dq_thresholds(
         hard_threshold=hard_threshold,
     )
 
-
 def classify_dq_threshold_breach(
     error_rate: float,
     soft_threshold: float | None,
@@ -84,11 +79,9 @@ def classify_dq_threshold_breach(
 
     return ThresholdBreachReason.NONE
 
-
 def compute_error_rate(error_count: int, record_count: int) -> float:
     """Compute the error rate, guarding the zero-record case."""
     return error_count / record_count if record_count > 0 else 0.0
-
 
 def resolve_threshold_value(
     dq_config: object | None,
@@ -102,7 +95,6 @@ def resolve_threshold_value(
         if isinstance(value, Real) and not isinstance(value, bool):
             return float(value)
     return None
-
 
 __all__ = [
     "DQThresholdCheckResult",

@@ -32,7 +32,6 @@ if TYPE_CHECKING:
 
 __all__ = ["NormalizationContractError", "RecordNormalizationProcessor"]
 
-
 @dataclass(frozen=True, slots=True)
 class RecordNormalizationProcessor(
     RecordNormalizationMappingMixin,

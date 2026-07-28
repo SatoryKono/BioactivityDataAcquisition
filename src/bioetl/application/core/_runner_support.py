@@ -35,7 +35,6 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, TracingPort
     from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
-
 _METRICS_CLOSE_EXCEPTIONS = (
     AttributeError,
     OSError,
@@ -43,7 +42,6 @@ _METRICS_CLOSE_EXCEPTIONS = (
     TypeError,
     ValueError,
 )
-
 
 class _PipelineRunnerCleanupHostProtocol(Protocol):
     """Minimal host surface required for cleanup support methods."""
@@ -55,7 +53,6 @@ class _PipelineRunnerCleanupHostProtocol(Protocol):
     _executor: BatchExecutor
 
     def _close_metrics(self) -> None: ...
-
 
 class PipelineRunnerSupportMixin:
     """Delegate thin lifecycle helpers away from the main runner module."""

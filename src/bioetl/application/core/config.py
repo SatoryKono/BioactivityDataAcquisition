@@ -23,7 +23,6 @@ __all__ = [
     "RecordProcessorConfig",
 ]
 
-
 @dataclass(frozen=True, slots=True)
 class LockConfig:
     """Configuration for LockRuntimeService.

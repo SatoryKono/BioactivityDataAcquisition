@@ -19,10 +19,8 @@ if TYPE_CHECKING:
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.ports import LoggerPort
 
-
 _GOLD_SEMANTIC_WRITE_MODES = frozenset({"append", "overwrite", "scd2"})
 _GOLD_SEMANTIC_WRITE_MODES_EXPECTED = "one of: append, overwrite, scd2"
-
 
 class MedallionConfigValidator:
     """Validates Medallion architecture invariants and write-mode policies."""
@@ -174,7 +172,6 @@ class MedallionConfigValidator:
                 "Medallion config validation passed",
                 run_type=runtime.run_type.value,
             )
-
 
 # Backward-compatible alias kept for transitional imports.
 _MedallionConfigValidator = MedallionConfigValidator

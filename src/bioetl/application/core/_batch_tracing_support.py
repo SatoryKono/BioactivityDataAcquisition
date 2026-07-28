@@ -21,7 +21,6 @@ type SpanAttributeValue = (
     | tuple[float, ...]
 )
 
-
 def build_execution_span_attributes(
     *,
     pipeline_name: str | None,
@@ -40,7 +39,6 @@ def build_execution_span_attributes(
         "bioetl.initial_batch_size": initial_batch_size,
     }
 
-
 def build_batch_span_attributes(
     *,
     batch_id: BatchID,
@@ -58,7 +56,6 @@ def build_batch_span_attributes(
         "bioetl.start_index": start_index,
     }
 
-
 def build_layer_span_attributes(
     *,
     batch_id: BatchID,
@@ -68,7 +65,6 @@ def build_layer_span_attributes(
     """Build per-layer span attributes."""
     count_key = "bioetl.input_count" if input_count else "bioetl.record_count"
     return {"bioetl.batch_id": str(batch_id), count_key: count}
-
 
 def set_execution_stats_attributes(
     span: Span,
@@ -92,7 +88,6 @@ def set_execution_stats_attributes(
         ("bioetl.min_batch_size_used", min_batch_size_used),
     ):
         span.set_attribute(key, value)
-
 
 def set_memory_decision_trace_attributes(
     span: Span,
@@ -124,7 +119,6 @@ def set_memory_decision_trace_attributes(
         ",".join(monitor_modes) if monitor_modes else "none",
     )
 
-
 def add_memory_decision_trace_events(
     span: Span,
     *,
@@ -150,7 +144,6 @@ def add_memory_decision_trace_events(
         if (pressure_state := entry.get("pressure_state")) is not None:
             attributes["bioetl.memory.pressure_state"] = bool(pressure_state)
         span.add_event("bioetl.memory.decision", attributes=attributes)
-
 
 def set_record_result_attributes(
     span: Span,

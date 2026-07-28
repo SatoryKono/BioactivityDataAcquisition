@@ -34,7 +34,6 @@ if TYPE_CHECKING:
     from bioetl.application.core.batch_executor import BatchResult
     from bioetl.domain.types import BronzeRecord
 
-
 class _BatchExecutorHostProtocol(BatchExecutionCountersSnapshot, Protocol):
     """Host surface required by batch state-transition helpers.
 
@@ -57,14 +56,12 @@ class _BatchExecutorHostProtocol(BatchExecutionCountersSnapshot, Protocol):
         execution_context: BatchExecutionContext,
     ) -> None: ...
 
-
 __all__ = [
     "execute_batch_run",
     "prepare_batch_execution_context",
     "process_explicit_batch",
     "process_stateful_batch",
 ]
-
 
 def prepare_batch_execution_context(
     host: _BatchExecutorHostProtocol,
@@ -82,7 +79,6 @@ def prepare_batch_execution_context(
     host._resume_offset = execution_context.resume_offset
     host._query_string = execution_context.query
     return execution_context
-
 
 async def execute_batch_run(
     host: _BatchExecutorHostProtocol,
@@ -109,7 +105,6 @@ async def execute_batch_run(
         memory_state=host._memory,
     )
 
-
 async def process_explicit_batch(
     host: _BatchExecutorHostProtocol,
     records: list[BronzeRecord],
@@ -128,7 +123,6 @@ async def process_explicit_batch(
             host._batch_result_type,
         ),
     )
-
 
 async def process_stateful_batch(
     host: _BatchExecutorHostProtocol,

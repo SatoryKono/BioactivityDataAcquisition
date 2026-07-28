@@ -14,7 +14,6 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import PiiHasherPort
 
-
 class _TransformerDependencyOwner(Protocol):
     """Structural contract for dependency-backed transformer helpers."""
 
@@ -29,7 +28,6 @@ class _TransformerDependencyOwner(Protocol):
     def _normalize_lineage_value(field_name: str, value: object) -> object:
         """Normalize lineage/meta field values after rename."""
         ...
-
 
 class _BaseTransformerDependencyHelpersMixin:
     """Helpers that delegate to injected collaborators and policy objects."""

@@ -18,8 +18,8 @@
     "repo_wide_zero_import_candidate_count": 6,
     "repo_wide_classified_zero_import_candidate_count": 6,
     "repo_wide_untriaged_zero_import_candidate_count": 0,
-    "repo_wide_owner_test_anchored_candidate_count": 2,
-    "repo_wide_candidates_without_owner_tests_count": 4,
+    "repo_wide_owner_test_anchored_candidate_count": 6,
+    "repo_wide_candidates_without_owner_tests_count": 0,
     "repo_wide_non_static_reachability_candidate_count": 5,
     "repo_wide_disposition_counts": {
       "retain_canonical_owner_module": 1,
@@ -382,9 +382,11 @@
       "rationale": "Loaded via importlib from diagnostics/__init__.py for ARCH-REF fan-in control; static import scans stay at zero by design.",
       "owner": "@bioetl-architecture",
       "evidence_lane": "dynamic_runtime_entrypoint",
-      "owner_tests": [],
-      "owner_test_count": 0,
-      "owner_test_paths_exist_count": 0
+      "owner_tests": [
+        "tests/architecture/test_control_plane_diagnostics_dynamic_loaders.py"
+      ],
+      "owner_test_count": 1,
+      "owner_test_paths_exist_count": 1
     },
     {
       "module_name": "bioetl.application.services.control_plane.manifest.diagnostics.finalization",
@@ -400,9 +402,11 @@
       "rationale": "Loaded via importlib from diagnostics/__init__.py for ARCH-REF fan-in control; static import scans stay at zero by design.",
       "owner": "@bioetl-architecture",
       "evidence_lane": "dynamic_runtime_entrypoint",
-      "owner_tests": [],
-      "owner_test_count": 0,
-      "owner_test_paths_exist_count": 0
+      "owner_tests": [
+        "tests/architecture/test_control_plane_diagnostics_dynamic_loaders.py"
+      ],
+      "owner_test_count": 1,
+      "owner_test_paths_exist_count": 1
     },
     {
       "module_name": "bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support",
@@ -418,9 +422,11 @@
       "rationale": "Loaded via importlib from diagnostics/__init__.py for ARCH-REF fan-in control; static import scans stay at zero by design.",
       "owner": "@bioetl-architecture",
       "evidence_lane": "dynamic_runtime_entrypoint",
-      "owner_tests": [],
-      "owner_test_count": 0,
-      "owner_test_paths_exist_count": 0
+      "owner_tests": [
+        "tests/architecture/test_control_plane_diagnostics_dynamic_loaders.py"
+      ],
+      "owner_test_count": 1,
+      "owner_test_paths_exist_count": 1
     },
     {
       "module_name": "bioetl.interfaces.cli.commands.maintenance",
@@ -436,9 +442,12 @@
       "rationale": "Sanctioned external/public re-export of the maintenance Click group. First-party runtime discovery uses domains.maintenance.command_group; static first-party src importers stay at zero by design after",
       "owner": "@bioetl-architecture",
       "evidence_lane": "compatibility_facade_contract",
-      "owner_tests": [],
-      "owner_test_count": 0,
-      "owner_test_paths_exist_count": 0
+      "owner_tests": [
+        "tests/unit/interfaces/cli/commands/test_runtime_wrapper_contracts.py",
+        "tests/architecture/test_control_plane_diagnostics_dynamic_loaders.py"
+      ],
+      "owner_test_count": 2,
+      "owner_test_paths_exist_count": 2
     },
     {
       "module_name": "bioetl.domain.ports.stage_accounting",

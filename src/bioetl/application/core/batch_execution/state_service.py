@@ -4,7 +4,6 @@ from __future__ import annotations
 
 __all__ = ["BatchExecutionStateService"]
 
-
 from typing import TYPE_CHECKING, TypeVar, cast
 
 from bioetl.application.core.batch_execution.contracts import (
@@ -26,7 +25,6 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
 
 _BatchResultT = TypeVar("_BatchResultT", covariant=True)
-
 
 class BatchExecutionStateService:
     """Pure service applying processed batch outcomes to executor state."""

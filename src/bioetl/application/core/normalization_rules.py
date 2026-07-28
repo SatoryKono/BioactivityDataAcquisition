@@ -6,7 +6,6 @@ from dataclasses import dataclass, field
 
 __all__ = ["NormalizationRulesPolicy"]
 
-
 @dataclass(frozen=True, slots=True)
 class NormalizationRulesPolicy:
     """Deterministic field buckets for centralized record normalization."""

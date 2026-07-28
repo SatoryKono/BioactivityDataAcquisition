@@ -77,7 +77,9 @@ def test_all_shipped_dashboards_have_bounded_owner_routes() -> None:
     """Every shipped dashboard must route ownership to one reviewed runbook."""
     payload = yaml.safe_load(DASHBOARD_INVENTORY_PATH.read_text(encoding="utf-8"))
     dashboards = payload["dashboards"]
-    assert len(dashboards) == 5
+    assert {dashboard["uid"] for dashboard in dashboards} == {
+        path.stem for path in DASHBOARD_DIR.glob("*.json")
+    }
 
     allowed_owners = {"@bioetl-observability"}
     allowed_routes = {

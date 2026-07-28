@@ -4,7 +4,6 @@ from __future__ import annotations
 
 __all__ = ["BatchExecutionRunService"]
 
-
 from collections.abc import Awaitable
 from typing import Protocol
 
@@ -22,7 +21,6 @@ from bioetl.application.core.batch_runtime_failure_policy import (
 )
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 
-
 class _BatchExtractionLoopRunner(Protocol):
     """Callable that executes the extraction loop for one run."""
 
@@ -30,7 +28,6 @@ class _BatchExtractionLoopRunner(Protocol):
         self,
         execution_context: BatchExecutionContext,
     ) -> Awaitable[None]: ...
-
 
 class BatchExecutionRunService:
     """Coordinates one executor run across start, loop, and finalize paths."""

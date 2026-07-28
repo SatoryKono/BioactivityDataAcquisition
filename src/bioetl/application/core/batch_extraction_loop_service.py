@@ -4,7 +4,6 @@ from __future__ import annotations
 
 __all__ = ["BatchExtractionLoopService", "BatchProcessingServiceProtocol"]
 
-
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.core.batch_execution import BatchExecutionContext
@@ -26,7 +25,6 @@ if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
     from bioetl.domain.types import BronzeRecord
 
-
 class BatchProcessingServiceProtocol(Protocol):
     """Minimal extraction contract required by loop orchestration."""
 
@@ -40,7 +38,6 @@ class BatchProcessingServiceProtocol(Protocol):
         """Yield raw Bronze records from the data source."""
         ...
 
-
 class _BatchStateUpdater(Protocol):
     """Async batch processing callback used by the extraction loop."""
 
@@ -50,7 +47,6 @@ class _BatchStateUpdater(Protocol):
         start_index: int,
     ) -> Awaitable[None]: ...
 
-
 class _BatchProgressState(Protocol):
     """Mutable progress state consumed by loop helpers."""
 
@@ -58,7 +54,6 @@ class _BatchProgressState(Protocol):
     records_bronze: int
     records_silver: int
     records_filtered_out: int
-
 
 class BatchExtractionLoopService:
     """Runs the canonical extraction loop for batch execution."""

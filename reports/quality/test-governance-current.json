@@ -16,14 +16,18 @@
       "tests/integration/test_grafana_dashboard_links.py",
       "tests/integration/test_grafana_layout_and_metadata.py",
       "tests/integration/test_grafana_navigation_matrix.py",
+      "tests/unit/application/core/test_batch_transformer.py",
       "tests/unit/application/services/test_checkpoint_execution_identity_alignment.py",
       "tests/unit/application/services/test_run_manifest_service.py",
+      "tests/unit/domain/aggregates/test_batch_fsm_exhaustive.py",
+      "tests/unit/domain/aggregates/test_batch_invariant_properties.py",
+      "tests/unit/domain/aggregates/test_pipeline_run.py",
       "tests/unit/domain/aggregates/test_quarantine_entry.py",
       "tests/unit/domain/aggregates/test_quarantine_entry_invariant_properties.py",
       "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py",
       "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
     ],
-    "scanned_test_count": 281,
+    "scanned_test_count": 361,
     "unreviewed_count": 0
   },
   "assertion_branch_reachability_percent": 100.0,
@@ -153,6 +157,13 @@
       "path": "tests/integration/infrastructure/storage/test_delta_reader.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_aclose_is_noop"
+    },
+    {
+      "category": "intentional_no_exception_contract",
+      "line": "21",
+      "path": "tests/unit/application/core/test_batch_metrics_accounting.py",
+      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+      "test_name": "test_record_silver_removal_accounting_noops_without_context"
     },
     {
       "category": "intentional_no_exception_contract",
@@ -775,7 +786,7 @@
     "architecture_helper_guard": 16,
     "benchmark_or_performance": 0,
     "helper_asserted": 0,
-    "intentional_no_exception_contract": 90,
+    "intentional_no_exception_contract": 91,
     "weak_no_value": 0
   },
   "assertless_examples": [
@@ -797,13 +808,13 @@
     "tests/architecture/test_quality_debt_scorecard.py:1117",
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:74",
     "tests/integration/infrastructure/storage/test_delta_reader.py:576",
+    "tests/unit/application/core/test_batch_metrics_accounting.py:21",
     "tests/unit/application/core/test_batch_tracing.py:110",
     "tests/unit/application/core/test_batch_writer_tracing_mixin.py:79",
     "tests/unit/application/core/test_batch_writer_tracing_mixin.py:255",
     "tests/unit/application/core/test_dq_metrics.py:33",
     "tests/unit/application/core/test_otel_spans.py:557",
-    "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:102",
-    "tests/unit/application/observability/test_pipeline_metrics.py:270"
+    "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:102"
   ],
   "assertless_families": {
     "tests/architecture/test_antipatterns.py": {
@@ -855,6 +866,12 @@
       }
     },
     "tests/integration/infrastructure/storage/test_delta_reader.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/application/core/test_batch_metrics_accounting.py": {
       "assertless_tests": 1,
       "categories": {
         "intentional_no_exception_contract": 1
@@ -1113,13 +1130,26 @@
       }
     }
   },
-  "assertless_total_candidates": 106,
-  "budget_violations": [],
+  "assertless_total_candidates": 107,
+  "budget_violations": [
+    {
+      "actual": 1,
+      "budget": "duplicate_test_names_max",
+      "expected_max": 0,
+      "metric": "duplicate_test_names"
+    },
+    {
+      "actual": 2,
+      "budget": "duplicate_test_name_occurrences_max",
+      "expected_max": 0,
+      "metric": "duplicate_test_name_occurrences"
+    }
+  ],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
   "critical_behavior_envelope_assertion_gap_count": 0,
-  "critical_behavior_envelope_count": 5,
+  "critical_behavior_envelope_count": 6,
   "critical_behavior_envelopes": {
     "control_plane_replay": {
       "assertion_backed_tests": 56,
@@ -1190,6 +1220,30 @@
       ],
       "test_count": 9
     },
+    "pipeline_run_fsm": {
+      "assertion_backed_tests": 80,
+      "assertion_examples": [
+        "tests/unit/application/core/test_batch_transformer.py:46",
+        "tests/unit/application/core/test_batch_transformer.py:64",
+        "tests/unit/application/core/test_batch_transformer.py:74",
+        "tests/unit/application/core/test_batch_transformer.py:133",
+        "tests/unit/application/core/test_batch_transformer.py:174",
+        "tests/unit/application/core/test_batch_transformer.py:221",
+        "tests/unit/application/core/test_batch_transformer.py:297",
+        "tests/unit/application/core/test_batch_transformer.py:364",
+        "tests/unit/application/core/test_batch_transformer.py:405",
+        "tests/unit/application/core/test_batch_transformer.py:475"
+      ],
+      "assertless_tests": [],
+      "intentional_no_exception_tests": 0,
+      "paths": [
+        "tests/unit/domain/aggregates/test_batch_fsm_exhaustive.py",
+        "tests/unit/domain/aggregates/test_pipeline_run.py",
+        "tests/unit/domain/aggregates/test_batch_invariant_properties.py",
+        "tests/unit/application/core/test_batch_transformer.py"
+      ],
+      "test_count": 80
+    },
     "quarantine_replay": {
       "assertion_backed_tests": 44,
       "assertion_examples": [
@@ -1235,16 +1289,31 @@
     }
   },
   "date_today_call_sites": 0,
-  "duplicate_test_name_inventory": [],
+  "duplicate_test_name_inventory": [
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "e2e": 1,
+        "unit": 1
+      },
+      "locations": [
+        "tests/e2e/test_pipeline_graceful_shutdown_e2e.py:55",
+        "tests/unit/application/core/test_arch_cont_coverage_burn_down.py:64"
+      ],
+      "name": "test_shutdown_signal_request_is_idempotent",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    }
+  ],
   "duplicate_test_name_inventory_summary": {
-    "cross_file_groups": 0,
-    "duplicate_occurrences": 0,
+    "cross_file_groups": 1,
+    "duplicate_occurrences": 2,
     "mixed_groups": 0,
     "same_file_groups": 0,
-    "total_duplicate_names": 0
+    "total_duplicate_names": 1
   },
-  "duplicate_test_name_occurrences": 0,
-  "duplicate_test_names": 0,
+  "duplicate_test_name_occurrences": 2,
+  "duplicate_test_names": 1,
   "fixture_asset_duplication": {
     "duplicate_files": 0,
     "duplicate_groups": 0,
@@ -1263,7 +1332,7 @@
       ".yml"
     ]
   },
-  "intentional_no_exception_contract": 90,
+  "intentional_no_exception_contract": 91,
   "markerless_examples": [],
   "markerless_test_functions": 0,
   "parse_errors": [],
@@ -1295,14 +1364,18 @@
         "tests/integration/test_grafana_dashboard_links.py",
         "tests/integration/test_grafana_layout_and_metadata.py",
         "tests/integration/test_grafana_navigation_matrix.py",
+        "tests/unit/application/core/test_batch_transformer.py",
         "tests/unit/application/services/test_checkpoint_execution_identity_alignment.py",
         "tests/unit/application/services/test_run_manifest_service.py",
+        "tests/unit/domain/aggregates/test_batch_fsm_exhaustive.py",
+        "tests/unit/domain/aggregates/test_batch_invariant_properties.py",
+        "tests/unit/domain/aggregates/test_pipeline_run.py",
         "tests/unit/domain/aggregates/test_quarantine_entry.py",
         "tests/unit/domain/aggregates/test_quarantine_entry_invariant_properties.py",
         "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py",
         "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
       ],
-      "scanned_test_count": 281,
+      "scanned_test_count": 361,
       "unreviewed_count": 0
     },
     "assertion_branch_reachability_percent": 100.0,
@@ -1432,6 +1505,13 @@
         "path": "tests/integration/infrastructure/storage/test_delta_reader.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_aclose_is_noop"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "21",
+        "path": "tests/unit/application/core/test_batch_metrics_accounting.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_record_silver_removal_accounting_noops_without_context"
       },
       {
         "category": "intentional_no_exception_contract",
@@ -2054,7 +2134,7 @@
       "architecture_helper_guard": 16,
       "benchmark_or_performance": 0,
       "helper_asserted": 0,
-      "intentional_no_exception_contract": 90,
+      "intentional_no_exception_contract": 91,
       "weak_no_value": 0
     },
     "assertless_examples": [
@@ -2076,20 +2156,20 @@
       "tests/architecture/test_quality_debt_scorecard.py:1117",
       "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:74",
       "tests/integration/infrastructure/storage/test_delta_reader.py:576",
+      "tests/unit/application/core/test_batch_metrics_accounting.py:21",
       "tests/unit/application/core/test_batch_tracing.py:110",
       "tests/unit/application/core/test_batch_writer_tracing_mixin.py:79",
       "tests/unit/application/core/test_batch_writer_tracing_mixin.py:255",
       "tests/unit/application/core/test_dq_metrics.py:33",
       "tests/unit/application/core/test_otel_spans.py:557",
-      "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:102",
-      "tests/unit/application/observability/test_pipeline_metrics.py:270"
+      "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:102"
     ],
-    "assertless_total_candidates": 106,
+    "assertless_total_candidates": 107,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
     "critical_behavior_envelope_assertion_gap_count": 0,
-    "critical_behavior_envelope_count": 5,
+    "critical_behavior_envelope_count": 6,
     "critical_behavior_envelopes": {
       "control_plane_replay": {
         "assertion_backed_tests": 56,
@@ -2160,6 +2240,30 @@
         ],
         "test_count": 9
       },
+      "pipeline_run_fsm": {
+        "assertion_backed_tests": 80,
+        "assertion_examples": [
+          "tests/unit/application/core/test_batch_transformer.py:46",
+          "tests/unit/application/core/test_batch_transformer.py:64",
+          "tests/unit/application/core/test_batch_transformer.py:74",
+          "tests/unit/application/core/test_batch_transformer.py:133",
+          "tests/unit/application/core/test_batch_transformer.py:174",
+          "tests/unit/application/core/test_batch_transformer.py:221",
+          "tests/unit/application/core/test_batch_transformer.py:297",
+          "tests/unit/application/core/test_batch_transformer.py:364",
+          "tests/unit/application/core/test_batch_transformer.py:405",
+          "tests/unit/application/core/test_batch_transformer.py:475"
+        ],
+        "assertless_tests": [],
+        "intentional_no_exception_tests": 0,
+        "paths": [
+          "tests/unit/domain/aggregates/test_batch_fsm_exhaustive.py",
+          "tests/unit/domain/aggregates/test_pipeline_run.py",
+          "tests/unit/domain/aggregates/test_batch_invariant_properties.py",
+          "tests/unit/application/core/test_batch_transformer.py"
+        ],
+        "test_count": 80
+      },
       "quarantine_replay": {
         "assertion_backed_tests": 44,
         "assertion_examples": [
@@ -2205,16 +2309,31 @@
       }
     },
     "date_today_call_sites": 0,
-    "duplicate_test_name_inventory": [],
+    "duplicate_test_name_inventory": [
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "e2e": 1,
+          "unit": 1
+        },
+        "locations": [
+          "tests/e2e/test_pipeline_graceful_shutdown_e2e.py:55",
+          "tests/unit/application/core/test_arch_cont_coverage_burn_down.py:64"
+        ],
+        "name": "test_shutdown_signal_request_is_idempotent",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      }
+    ],
     "duplicate_test_name_inventory_summary": {
-      "cross_file_groups": 0,
-      "duplicate_occurrences": 0,
+      "cross_file_groups": 1,
+      "duplicate_occurrences": 2,
       "mixed_groups": 0,
       "same_file_groups": 0,
-      "total_duplicate_names": 0
+      "total_duplicate_names": 1
     },
-    "duplicate_test_name_occurrences": 0,
-    "duplicate_test_names": 0,
+    "duplicate_test_name_occurrences": 2,
+    "duplicate_test_names": 1,
     "fixture_asset_duplication": {
       "duplicate_files": 0,
       "duplicate_groups": 0,
@@ -2252,8 +2371,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2088,
-      "test_python_file_count": 2312,
+      "test_glob_file_count": 2098,
+      "test_python_file_count": 2323,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2292,22 +2411,31 @@
       "top_level_directory_count": 15,
       "top_level_directory_count_including_pycache": 16
     },
-    "top_duplicate_test_names": [],
-    "total_test_files": 2088,
-    "total_test_functions": 23035,
+    "top_duplicate_test_names": [
+      {
+        "count": 2,
+        "examples": [
+          "tests/e2e/test_pipeline_graceful_shutdown_e2e.py:55",
+          "tests/unit/application/core/test_arch_cont_coverage_burn_down.py:64"
+        ],
+        "name": "test_shutdown_signal_request_is_idempotent"
+      }
+    ],
+    "total_test_files": 2098,
+    "total_test_functions": 23067,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "a1ca035f5a24992e4e203529946689aa1e9dceb76410c5206543c0b2fbe42cd9",
+  "source_tree_sha256": "a570474a92b13ce8a9f9c360d254dbcddc2aa5d2441bab45e397f296dd060183",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 106,
+    "assertless_total_candidates": 107,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
-    "duplicate_test_name_occurrences": 0,
-    "duplicate_test_names": 0,
-    "intentional_no_exception_contract": 90,
+    "duplicate_test_name_occurrences": 2,
+    "duplicate_test_names": 1,
+    "intentional_no_exception_contract": 91,
     "markerless_examples": [],
     "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
@@ -2319,8 +2447,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2088,
-    "test_python_file_count": 2312,
+    "test_glob_file_count": 2098,
+    "test_python_file_count": 2323,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2359,9 +2487,18 @@
     "top_level_directory_count": 15,
     "top_level_directory_count_including_pycache": 16
   },
-  "top_duplicate_test_names": [],
-  "total_test_files": 2088,
-  "total_test_functions": 23035,
+  "top_duplicate_test_names": [
+    {
+      "count": 2,
+      "examples": [
+        "tests/e2e/test_pipeline_graceful_shutdown_e2e.py:55",
+        "tests/unit/application/core/test_arch_cont_coverage_burn_down.py:64"
+      ],
+      "name": "test_shutdown_signal_request_is_idempotent"
+    }
+  ],
+  "total_test_files": 2098,
+  "total_test_functions": 23067,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

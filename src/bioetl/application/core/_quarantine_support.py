@@ -32,7 +32,6 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.ports import MetricsPort, QuarantinePort
 
-
 @dataclass(frozen=True, slots=True)
 class QuarantineRuntimeDependencies:
     """Shared runtime ports used by quarantine write helpers."""
@@ -44,7 +43,6 @@ class QuarantineRuntimeDependencies:
     pipeline_metrics: PipelineMetricsRecorder
     batch_metrics: BatchMetricsRecorderService | None
     run_type: str = "unknown"
-
 
 def build_quarantine_runtime_ports(
     *,
@@ -66,7 +64,6 @@ def build_quarantine_runtime_ports(
         batch_metrics=batch_metrics,
         run_type=run_type,
     )
-
 
 async def persist_dq_quarantine_request(
     ports: QuarantineRuntimeDependencies,
@@ -107,7 +104,6 @@ async def persist_dq_quarantine_request(
         count=1,
     )
 
-
 async def persist_dq_quarantine_requests(
     ports: QuarantineRuntimeDependencies,
     *,
@@ -140,7 +136,6 @@ async def persist_dq_quarantine_requests(
             count=count,
         )
 
-
 async def persist_filtered_quarantine_request(
     ports: QuarantineRuntimeDependencies,
     *,
@@ -167,7 +162,6 @@ async def persist_filtered_quarantine_request(
         pipeline_metrics=ports.pipeline_metrics,
         count=1,
     )
-
 
 async def persist_filtered_quarantine_requests(
     ports: QuarantineRuntimeDependencies,

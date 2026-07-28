@@ -19,7 +19,6 @@ from bioetl.application.core.transformer_runtime.state import (
 if TYPE_CHECKING:
     from bioetl.domain.types import BatchID, BronzeRecord
 
-
 TransformLoopResult = TypeVar(
     "TransformLoopResult",
     RecordTransformOutcome,
@@ -28,7 +27,6 @@ TransformLoopResult = TypeVar(
 
 YIELD_INTERVAL_SECONDS = 0.5
 
-
 async def yield_control_if_needed(last_yield_at: float) -> float:
     """Cooperatively yield to the event loop during CPU-heavy transforms."""
     now = time.monotonic()
@@ -36,7 +34,6 @@ async def yield_control_if_needed(last_yield_at: float) -> float:
         return last_yield_at
     await asyncio.sleep(0)
     return time.monotonic()
-
 
 async def _collect_transform_state[
     TransformLoopResult: (RecordTransformOutcome, TransformedRecord)
@@ -66,7 +63,6 @@ async def _collect_transform_state[
 
     return state
 
-
 async def collect_batch_transform_state(
     *,
     records: list[BronzeRecord],
@@ -91,7 +87,6 @@ async def collect_batch_transform_state(
         yield_control=yield_control,
     )
 
-
 async def collect_stream_transform_state(
     *,
     records: list[BronzeRecord],
@@ -115,7 +110,6 @@ async def collect_stream_transform_state(
         ),
         yield_control=yield_control,
     )
-
 
 __all__ = [
     "YIELD_INTERVAL_SECONDS",

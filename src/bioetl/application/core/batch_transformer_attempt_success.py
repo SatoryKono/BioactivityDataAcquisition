@@ -24,11 +24,9 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import BronzeRecord
 
-
 def empty_outcome() -> RecordTransformOutcome:
     """Return an empty transform outcome."""
     return RecordTransformOutcome(silver_record=None, gold_record=None)
-
 
 def _finalize_transformed_record(
     *,
@@ -58,7 +56,6 @@ def _finalize_transformed_record(
     )
     return normalized_record
 
-
 def _build_gold_record(
     *,
     context: PipelineContext,
@@ -75,7 +72,6 @@ def _build_gold_record(
     )
     return gold_record, False, None
 
-
 def _resolve_gold_filter_details(
     gold_filter: GoldFilterCallback,
     record: dict[str, object],
@@ -89,7 +85,6 @@ def _resolve_gold_filter_details(
     if isinstance(decision, FilterDecision) and not decision.include:
         return decision.to_dict()
     return None
-
 
 def _apply_runtime_dq_outcomes(
     *,
@@ -131,7 +126,6 @@ def _apply_runtime_dq_outcomes(
     ):
         projected["_dq_error"] = True
     return projected
-
 
 async def build_transform_success_outcome(
     *,
@@ -180,7 +174,6 @@ async def build_transform_success_outcome(
         gold_excluded_by_contract=gold_excluded_by_contract,
     )
 
-
 async def resolve_transform_result(
     transformed_result: dict[str, object] | PreSilverRecord | None | object,
 ) -> dict[str, object] | PreSilverRecord | None:
@@ -191,7 +184,6 @@ async def resolve_transform_result(
             await transformed_result,
         )
     return cast(dict[str, object] | PreSilverRecord | None, transformed_result)
-
 
 __all__ = [
     "build_transform_success_outcome",

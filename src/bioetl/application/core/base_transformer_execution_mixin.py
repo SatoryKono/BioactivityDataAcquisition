@@ -28,7 +28,6 @@ if TYPE_CHECKING:
     from bioetl.domain.filtering import FilterDecision
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
-
 class _BaseTransformerExecutionMixin:
     """Execution lifecycle helpers delegated from BaseTransformer."""
 

@@ -22,7 +22,6 @@ _PMID_SUFFIXES = ("_pmid",)
 _DOI_SUFFIXES = ("_doi",)
 UNHANDLED_FALLBACK_NORMALIZATION = object()
 
-
 def is_json_like_string(value: str) -> bool:
     """Return whether a string should be treated as JSON-like text."""
     stripped = value.strip()
@@ -32,16 +31,13 @@ def is_json_like_string(value: str) -> bool:
         _JSON_END_TOKENS
     )
 
-
 def is_doi_field(field_name: str, *, rule_set: NormalizationRulesPolicy) -> bool:
     """Return whether the field uses DOI fallback normalization."""
     return field_name in rule_set.doi_fields or field_name.endswith(_DOI_SUFFIXES)
 
-
 def is_pmid_field(field_name: str, *, rule_set: NormalizationRulesPolicy) -> bool:
     """Return whether the field uses PMID fallback normalization."""
     return field_name in rule_set.pmid_fields or field_name.endswith(_PMID_SUFFIXES)
-
 
 def is_date_field(field_name: str, *, rule_set: NormalizationRulesPolicy) -> bool:
     """Return whether the field uses partial-date fallback normalization."""
@@ -53,11 +49,9 @@ def is_date_field(field_name: str, *, rule_set: NormalizationRulesPolicy) -> boo
         or field_name.startswith("date_")
     )
 
-
 def is_smiles_field(field_name: str) -> bool:
     """Return whether the field uses SMILES fallback normalization."""
     return field_name == "smiles" or field_name.endswith("_smiles")
-
 
 def normalize_special_fallback_field(
     field_name: str,
@@ -95,7 +89,6 @@ def normalize_special_fallback_field(
         return normalize_partial_date(value) if isinstance(value, str) else value
     return UNHANDLED_FALLBACK_NORMALIZATION
 
-
 def normalize_named_text_field(
     field_name: str,
     value: str,
@@ -117,7 +110,6 @@ def normalize_named_text_field(
         return normalize_oa_status(value)
     return None
 
-
 def canonicalize_json_like_string(value: str) -> str:
     """Canonicalize JSON-like text while preserving invalid JSON as trimmed text."""
     if not is_json_like_string(value):
@@ -128,7 +120,6 @@ def canonicalize_json_like_string(value: str) -> str:
 
     canonical_json = normalize_profile_json_string(value)
     return canonical_json if isinstance(canonical_json, str) else value
-
 
 def normalize_plain_text(value: str) -> str | None:
     """Normalize plain text outside named field buckets."""

@@ -500,18 +500,18 @@ hotspot_family_ratchets:
       metrics:
         duplication_clusters: 0
         files: 187
-        total_loc: 22735
+        total_loc: 22043
         files_ge_250_loc: 0
         helper_function_ratio: 0.365
-        max_internal_fan_in: 7
-        max_internal_fan_in_module: bioetl.application.core.pipeline_span_lifecycle
+        max_internal_fan_in: 8
+        max_internal_fan_in_module: bioetl.application.core.batch_runtime_failure_policy
       trend:
-        status: reduced_2026-07-28_issue_6785_core_ge250
+        status: reduced_2026-07-28_pd05_core_blank_collapse
         next_action:
-          "2026-07-28 issue 6785 reduces application_core files_ge_250_loc 4->0 by extracting
-          batch_transformer bags, medallion idempotency, batch_writer gold helpers, and record-normalization
-          mapping modules. Bounded-growth budgets remain flat at 5 files_ge_250_loc and max_internal_fan_in
-          10; no technical-debt budget is increased. Refresh hotspot baseline + total_loc via report_hotspot_family_baseline
+          "2026-07-28 PD-05 collapses excess blank lines in application/core, lowering
+          total_loc 22735->22043 while files_ge_250_loc remains 0. Bounded-growth budgets
+          stay flat at 0 files_ge_250_loc and max_internal_fan_in 10; no technical-debt
+          budget is increased. Hotspot baseline refreshed via report_hotspot_family_baseline
           --update.
 
           "
@@ -1007,8 +1007,8 @@ retirement_governance_metrics:
       rationale: All repo-wide zero-import candidates are now classified.
       ratchet_policy: Zero-budget fail-fast metric.
     repo_wide_owner_test_anchored_candidate_count:
-      current_count: 2
-      max_count: 2
+      current_count: 6
+      max_count: 6
       linked_issue: "#6353"
       owner: "@bioetl-architecture"
       rationale:
@@ -1018,8 +1018,8 @@ retirement_governance_metrics:
         Non-growth fail-fast unless the reviewed candidate set intentionally shrinks and
         the owner-test evidence is regenerated in lockstep.
     repo_wide_candidates_without_owner_tests_count:
-      current_count: 4
-      max_count: 4
+      current_count: 0
+      max_count: 0
       linked_issue: "#6791"
       owner: "@bioetl-architecture"
       rationale: >-

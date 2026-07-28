@@ -33,7 +33,6 @@ _DQ_DATAFRAME_ERRORS: tuple[type[Exception], ...] = (
     RuntimeError,
 )
 
-
 def dataframe_error_types() -> tuple[type[Exception], ...]:
     """Resolve exception types raised while building Polars dataframes."""
     try:
@@ -42,7 +41,6 @@ def dataframe_error_types() -> tuple[type[Exception], ...]:
         return _DQ_DATAFRAME_ERRORS
     return (*_DQ_DATAFRAME_ERRORS, pl.exceptions.PolarsError)
 
-
 def stringify_value(value: object, keys_to_stringify: set[str], key: str) -> object:
     """Stringify a value if its key requires normalization."""
     if key not in keys_to_stringify or value is None:
@@ -50,7 +48,6 @@ def stringify_value(value: object, keys_to_stringify: set[str], key: str) -> obj
     if isinstance(value, (dict, list, tuple)):
         return json.dumps(value, default=str, sort_keys=True)
     return str(value)
-
 
 def normalize_records_for_polars[RecordT: dict[str, object]](
     records: list[RecordT],
@@ -79,7 +76,6 @@ def normalize_records_for_polars[RecordT: dict[str, object]](
         }
         for record in records
     ]
-
 
 def build_dataframe_from_records(
     *,
@@ -129,7 +125,6 @@ def build_dataframe_from_records(
             )
         return None
 
-
 def get_dq_thresholds(config: RecordProcessorConfig) -> tuple[float, float]:
     """Resolve DQ thresholds from config, falling back to defaults."""
     dq_config = getattr(config, "dq_config", None)
@@ -139,7 +134,6 @@ def get_dq_thresholds(config: RecordProcessorConfig) -> tuple[float, float]:
             dq_config.hard_fail_threshold,
         )
     return (0.05, 0.20)
-
 
 def extract_dq_entity(config: RecordProcessorConfig) -> str:
     """Derive entity name for report naming from silver table naming."""
@@ -154,7 +148,6 @@ def extract_dq_entity(config: RecordProcessorConfig) -> str:
         return dotted_entity
     resolved_entity: str = silver_table or entity_type
     return resolved_entity
-
 
 def build_dq_report_context(
     *,

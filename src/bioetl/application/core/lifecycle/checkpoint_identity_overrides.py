@@ -8,7 +8,6 @@ from typing import TypedDict
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
-
 class _CoreIdentityOverrides(TypedDict):
     dq_contract_compatibility_hash: str | None
     dq_policy_hash: str | None
@@ -20,7 +19,6 @@ class _CoreIdentityOverrides(TypedDict):
     dependency_lock_hash: str | None
     effective_config_hash: str | None
     effective_config_artifact_id: str | None
-
 
 class _ReplayIdentityOverrides(TypedDict):
     execution_fingerprint: str | None
@@ -39,14 +37,12 @@ class _ReplayIdentityOverrides(TypedDict):
     memory_decision_trace: tuple[JsonDict, ...]
     run_context: JsonDict | None
 
-
 def _prefer_identity_value(
     current_value: str | None,
     identity_value: str | None,
 ) -> str | None:
     """Prefer persisted execution identity, then fall back to current identity."""
     return current_value if current_value is not None else identity_value
-
 
 def _prefer_identity_flag(
     current_value: bool | None,
@@ -55,14 +51,12 @@ def _prefer_identity_flag(
     """Prefer persisted boolean identity flag, then fall back to current identity."""
     return current_value if current_value is not None else identity_value
 
-
 def _prefer_identity_sequence[T](
     current_value: tuple[T, ...],
     identity_value: tuple[T, ...],
 ) -> tuple[T, ...]:
     """Prefer persisted non-empty tuple values, otherwise use identity fallback."""
     return current_value if current_value else identity_value
-
 
 def _build_core_identity_overrides(
     metadata: CheckpointMetadata,
@@ -105,7 +99,6 @@ def _build_core_identity_overrides(
             identity.effective_config_artifact_id,
         ),
     }
-
 
 def _build_replay_identity_overrides(
     metadata: CheckpointMetadata,
@@ -171,7 +164,6 @@ def _build_replay_identity_overrides(
         "run_context": metadata.run_context or identity.run_context,
     }
 
-
 def enrich_metadata_with_execution_identity(
     metadata: CheckpointMetadata,
     *,
@@ -185,7 +177,6 @@ def enrich_metadata_with_execution_identity(
         **_build_core_identity_overrides(metadata, identity),
         **_build_replay_identity_overrides(metadata, identity),
     )
-
 
 def checkpoint_identity_payload(
     metadata: CheckpointMetadata | None,
@@ -213,7 +204,6 @@ def checkpoint_identity_payload(
         "required_persistence_profile": metadata.required_persistence_profile,
         "input_snapshot_ids": list(metadata.input_snapshot_ids),
     }
-
 
 __all__ = [
     "checkpoint_identity_payload",

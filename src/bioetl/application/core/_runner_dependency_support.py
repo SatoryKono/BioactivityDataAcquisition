@@ -22,7 +22,6 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
-
 @dataclass(frozen=True, slots=True)
 class PipelineRunnerDependencies:
     """Grouped collaborators for PipelineRunner."""
@@ -40,7 +39,6 @@ class PipelineRunnerDependencies:
     def lock_manager(self) -> LockRuntimeService:
         """Legacy alias retained while callers migrate to runtime-service naming."""
         return self.lock_runtime_service
-
 
 async def load_runner_checkpoint(
     checkpoint_manager: CheckpointRuntimeService,

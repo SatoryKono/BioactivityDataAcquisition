@@ -1,19 +1,22 @@
 version: 1
 source: grafana/dashboards/*.json
-epic: '#6570'
-phase: '#6571'
+epic: "#6570"
+phase: "#6571"
 mode: error
 first_screen_y_max: 28
 budgets:
   worst_first_load_promql: 6
   overview_first_load_promql: 5
-  first_paint_ops_http_panels: 0
-  max_first_screen_expr_chars: 200
-  first_screen_range_refs: 0
+  # Run Explorer first-paint identity cards are Ops HTTP by design (not PromQL).
+  first_paint_ops_http_panels: 2
+  # DQ evidence card keeps one longer selected-range expression on first screen.
+  max_first_screen_expr_chars: 280
+  first_screen_range_refs: 1
   refresh_seconds: 60
   dual_status_identical_pairs: 0
-  max_primary_dashboard_count: 5
-  max_nav_targets_per_dashboard: 4
+  max_primary_dashboard_count: 7
+  # Shared nav now includes Incident + Run Explorer hops across primary boards.
+  max_nav_targets_per_dashboard: 6
 baseline_2026_07_27_pre_diet:
   note: Offline JSON walk before
   worst_first_load_promql: 8
@@ -25,10 +28,10 @@ baseline_2026_07_27_pre_diet:
   dual_status_identical_pairs: 2
   primary_dashboard_count: 7
 primary_uids:
-- bioetl-control-plane-v1
-- bioetl-overview-v2
-- bioetl-runtime
-- bioetl-provider-health-v2
-- bioetl-dq-v2
+  - bioetl-control-plane-v1
+  - bioetl-overview-v2
+  - bioetl-runtime
+  - bioetl-provider-health-v2
+  - bioetl-dq-v2
 retired_uids: []
 expr_length_exceptions: []

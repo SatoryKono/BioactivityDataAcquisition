@@ -1106,7 +1106,7 @@ class TestGoldWriterToArrowTable:
 class TestGoldWriterDeterministicBackoff:
     """Tests for deterministic backoff behavior (ADR-014)."""
 
-    @patch("bioetl.infrastructure.storage.gold_writer.asyncio.sleep")
+    @patch("bioetl.infrastructure.storage.gold.io_delta_runtime.asyncio.sleep")
     @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
     async def test_gold_writer_deterministic_backoff(
         self,
@@ -1148,7 +1148,7 @@ class TestGoldWriterDeterministicBackoff:
         # Attempt 1: 0.5 * (2**1) + 0.05 = 1.05
         assert sleep_calls[1] == pytest.approx(1.05)
 
-    @patch("bioetl.infrastructure.storage.gold_writer.asyncio.sleep")
+    @patch("bioetl.infrastructure.storage.gold.io_delta_runtime.asyncio.sleep")
     @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
     @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
     async def test_gold_writer_scd2_deterministic_backoff(

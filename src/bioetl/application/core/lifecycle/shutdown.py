@@ -23,7 +23,6 @@ from bioetl.application.services.shutdown_service import (
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort
 
-
 @dataclass
 class ShutdownSignal:
     """Shared signal for coordinating graceful shutdown.
@@ -125,7 +124,6 @@ class ShutdownSignal:
         self._completion_event.clear()
         self._reason = ""
 
-
 def create_shutdown_service(
     logger: LoggerPort,
     metrics: MetricsPort | None = None,
@@ -143,7 +141,6 @@ def create_shutdown_service(
         Configured ShutdownService instance.
     """
     return ShutdownService(logger=logger, metrics=metrics)
-
 
 __all__ = [
     "PipelineShutdownError",

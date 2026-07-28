@@ -18,12 +18,10 @@ __all__ = [
     "TransitionResult",
 ]
 
-
 class IllegalStateTransitionError(RuntimeError):
     """Raised when an invalid FSM transition is attempted."""
 
     pass
-
 
 class BatchExecutionState(Enum):
     """Valid states during a batch execution run."""
@@ -36,7 +34,6 @@ class BatchExecutionState(Enum):
     SHUTTING_DOWN = auto()
     DONE = auto()
     FAILED = auto()
-
 
 class BatchExecutionEventSignal(Enum):
     """Events that trigger state transitions."""
@@ -55,7 +52,6 @@ class BatchExecutionEventSignal(Enum):
     CHECKPOINT_FAILED = auto()
     SHUTDOWN_REQUESTED = auto()
 
-
 class BatchExecutionCommandTask(Enum):
     """Commands to be executed by the orchestration layer."""
 
@@ -66,7 +62,6 @@ class BatchExecutionCommandTask(Enum):
     PROPAGATE_ERROR = auto()
     NOOP = auto()
 
-
 @dataclass(frozen=True, slots=True)
 class BatchExecutionTransitionResult:
     """Result of a transition with the next state and orchestration commands."""
@@ -74,14 +69,12 @@ class BatchExecutionTransitionResult:
     new_state: BatchExecutionState
     commands: tuple[BatchExecutionCommandTask, ...]
 
-
 def _transition(
     new_state: BatchExecutionState,
     *commands: BatchExecutionCommandTask,
 ) -> BatchExecutionTransitionResult:
     """Create one immutable transition entry."""
     return BatchExecutionTransitionResult(new_state=new_state, commands=commands)
-
 
 _TRANSITIONS: dict[
     tuple[BatchExecutionState, BatchExecutionEventSignal],
@@ -185,7 +178,6 @@ _TRANSITIONS: dict[
     ),
 }
 
-
 class BatchExecutionCoordinator:
     """Pure coordinator that validates batch lifecycle transitions."""
 
@@ -201,7 +193,6 @@ class BatchExecutionCoordinator:
                 f"Invalid transition: {current_state.name} + {event.name}"
             )
         return transition
-
 
 # Backward-compatible aliases preserved for existing imports/tests.
 BatchExecutionEvent = BatchExecutionEventSignal

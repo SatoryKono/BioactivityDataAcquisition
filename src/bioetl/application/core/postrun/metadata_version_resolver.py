@@ -13,7 +13,6 @@ if TYPE_CHECKING:
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.ports import LoggerPort, StorageMaintenancePort
 
-
 class PostrunMetadataVersionResolver(PostrunFailureHandlingMixin):
     """Resolve Delta table version via injected storage port.
 
@@ -71,6 +70,5 @@ class PostrunMetadataVersionResolver(PostrunFailureHandlingMixin):
                 },
             )
             return None
-
 
 __all__ = ["PostrunMetadataVersionResolver"]

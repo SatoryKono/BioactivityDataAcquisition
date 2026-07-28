@@ -36,7 +36,6 @@ if TYPE_CHECKING:
 
 WrappedDataSourceT = TypeVar("WrappedDataSourceT", bound="_HasWrappedDataSource")
 
-
 class _HasWrappedDataSource(Protocol):
     """Structural protocol for wrappers that delegate to a data source adapter."""
 
@@ -46,7 +45,6 @@ class _HasWrappedDataSource(Protocol):
     def _after_wrapped_data_source_enter(self) -> None:
         """Reset wrapper-local state after entering the wrapped data source."""
         ...
-
 
 class _SourceMetadataDelegationMixin:
     """Mixin for delegating get_source_metadata to wrapped data source."""
@@ -59,7 +57,6 @@ class _SourceMetadataDelegationMixin:
         if get_metadata is not None and callable(get_metadata):
             return cast("object | None", get_metadata(api_version))
         return None
-
 
 class _WrappedAdapterHealthDelegationMixin:
     """Health and shutdown delegation for wrapped data source adapters."""
@@ -91,7 +88,6 @@ class _WrappedAdapterHealthDelegationMixin:
     async def aclose(self: _HasWrappedDataSource) -> None:
         """Delegate resource shutdown to the wrapped data source."""
         await self._data_source.aclose()
-
 
 class _WrappedDataSourceDelegationMixin(_WrappedAdapterHealthDelegationMixin):
     """Common lifecycle and health delegation for wrapped data sources."""

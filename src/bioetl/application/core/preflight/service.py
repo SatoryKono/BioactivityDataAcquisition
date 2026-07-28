@@ -28,13 +28,11 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import LoggerPort, MetricsPort
 
-
 # Backward-compatible aliases retained for legacy tests/import paths that still
 # resolve the helper classes via preflight.service.
 _HealthAggregator = HealthAggregator
 _MedallionConfigValidator = MedallionConfigValidator
 _PREFLIGHT_STAGE_NAME = ORDINARY_RUN_LEDGER_STAGE_NAMES[0]
-
 
 class _PreflightExecutionHostProtocol(Protocol):
     """Runner attributes required by preflight execution."""
@@ -50,7 +48,6 @@ class _PreflightExecutionHostProtocol(Protocol):
 
     @property
     def _observer(self) -> PipelineObserver: ...
-
 
 async def validate_infrastructure(host: _PreflightExecutionHostProtocol) -> None:
     """Validate infrastructure health before pipeline execution."""
@@ -80,7 +77,6 @@ async def validate_infrastructure(host: _PreflightExecutionHostProtocol) -> None
         runner_stage=_PREFLIGHT_STAGE_NAME,
     )
     host._preflight_service.assert_infrastructure_healthy(report)
-
 
 class PreflightService:
     """Validates infrastructure and configuration before pipeline execution."""
@@ -235,7 +231,6 @@ class PreflightService:
         raise ValueError(
             "Preflight validation failed (strict mode): " + ", ".join(error_messages)
         )
-
 
 __all__ = [
     "HealthAggregator",

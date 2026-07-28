@@ -14,7 +14,6 @@ from bioetl.domain.types import BronzeRecord
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-
 class PublicationTermFilteringMixin(
     _FallbackFilterableTargetFetchMixin,
     _FilterableTargetDelegationMixin,

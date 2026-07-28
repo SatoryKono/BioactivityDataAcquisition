@@ -11,7 +11,6 @@ if TYPE_CHECKING:
 
 __all__ = ["PreSilverRecord"]
 
-
 class PreSilverBuilderProtocol(Protocol):
     """Build a final Silver record from normalized business data."""
 
@@ -26,7 +25,6 @@ class PreSilverBuilderProtocol(Protocol):
         """Build finalized Silver record."""
         ...
 
-
 class PreSilverStructuralPolicy(Protocol):
     """Apply structural policy to a finalized Silver record."""
 
@@ -39,7 +37,6 @@ class PreSilverStructuralPolicy(Protocol):
         """Return updated record or ``None`` when it should be dropped."""
         ...
 
-
 class PreSilverFilterProtocol(Protocol):
     """Apply Silver filter semantics to a finalized Silver record."""
 
@@ -51,7 +48,6 @@ class PreSilverFilterProtocol(Protocol):
     ) -> None:
         """Raise when the finalized record should be filtered out."""
         ...
-
 
 @dataclass(frozen=True, slots=True)
 class PreSilverRecord:

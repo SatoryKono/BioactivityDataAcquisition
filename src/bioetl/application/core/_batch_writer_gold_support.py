@@ -12,7 +12,6 @@ from bioetl.domain.exceptions import SchemaViolationError
 if TYPE_CHECKING:
     from bioetl.domain.types import GoldRecord
 
-
 def prepare_gold_records(
     writer: object,
     records: list[GoldRecord],
@@ -36,7 +35,6 @@ def prepare_gold_records(
     ]
     return projected, list(schema_columns)
 
-
 def validate_gold_records(
     writer: object,
     records: list[GoldRecord],
@@ -58,7 +56,6 @@ def validate_gold_records(
                 errors=result.errors,
             )
         raise SchemaViolationError("gold", result.errors)
-
 
 def rebind_gold_validator_schema(
     validator: object,
@@ -89,7 +86,6 @@ def rebind_gold_validator_schema(
         return validator_cls(**validator_kwargs)
     except TypeError:
         return validator
-
 
 def should_defer_gold_validation_to_storage(writer: object) -> bool:
     """Whether Gold validation/projection must happen per-version in storage."""

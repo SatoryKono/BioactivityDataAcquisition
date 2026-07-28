@@ -8,13 +8,11 @@ from typing import TYPE_CHECKING
 
 type LazyExportTarget = str | tuple[str, str]
 
-
 def _resolve_export_target(
     target: LazyExportTarget,
     export_name: str,
 ) -> tuple[str, str]:
     return target if isinstance(target, tuple) else (target, export_name)
-
 
 def resolve_lazy_export(
     *,
@@ -34,14 +32,12 @@ def resolve_lazy_export(
     namespace[name] = value
     return value
 
-
 def lazy_export_dir(
     namespace: dict[str, object],
     export_names: list[str],
 ) -> list[str]:
     """Return directory entries for one lazy wiring facade."""
     return sorted(set(namespace) | set(export_names))
-
 
 def install_lazy_export_facade(
     namespace: dict[str, object],
@@ -69,7 +65,6 @@ def install_lazy_export_facade(
 
     namespace["__getattr__"] = _module_getattr
     namespace["__dir__"] = _module_dir
-
 
 __all__ = [
     "LazyExportTarget",

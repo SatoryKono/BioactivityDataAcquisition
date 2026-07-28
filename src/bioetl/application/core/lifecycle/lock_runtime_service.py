@@ -4,7 +4,6 @@ from __future__ import annotations
 
 __all__ = ["LockRuntimeService", "LockRuntimeServiceCreateContext"]
 
-
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
@@ -32,7 +31,6 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.ports import LockPort, LoggerPort
 
-
 @dataclass(frozen=True, slots=True)
 class LockRuntimeServiceCreateContext:
     lock_port: LockPort
@@ -49,7 +47,6 @@ class LockRuntimeServiceCreateContext:
     checkpoint_manager: CheckpointRuntimeService | None = None
     context_holder: LockContextHolder | None = None
     heartbeat_factory: Callable[..., HeartbeatTask] | None = None
-
 
 class LockRuntimeService:
     """Manage runtime lock acquisition, release, validation, and heartbeat."""

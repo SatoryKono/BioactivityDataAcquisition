@@ -41,7 +41,6 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 
-
 @dataclass(frozen=True, slots=True)
 class BatchProcessingComponents:
     """Injected components shared by RecordProcessor and BatchExecutor."""
@@ -49,7 +48,6 @@ class BatchProcessingComponents:
     batch_metrics: BatchMetricsRecorderService
     transformer: BatchTransformer
     writer: BatchWriter
-
 
 class BatchProcessingService:
     """Handles extract/transform/write processing for one ETL batch."""

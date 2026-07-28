@@ -18,7 +18,6 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.ports import QuarantinePort
 
-
 async def write_quarantine_request(
     quarantine: QuarantinePort,
     request: QuarantineWriteRequest,
@@ -35,14 +34,12 @@ async def write_quarantine_request(
         ingestion_ts=request["ingestion_ts"],
     )
 
-
 async def write_quarantine_requests(
     quarantine: QuarantinePort,
     requests: list[QuarantineWriteRequest],
 ) -> None:
     """Write multiple quarantine requests via the injected port."""
     await quarantine.write_many(requests)
-
 
 async def write_quarantine_request_with_events(
     *,
@@ -69,7 +66,6 @@ async def write_quarantine_request_with_events(
         ingestion_ts=ingestion_ts,
         metadata=request["metadata"],
     )
-
 
 async def write_quarantine_requests_with_events(
     *,
@@ -102,7 +98,6 @@ async def write_quarantine_requests_with_events(
             ingestion_ts=ingestion_ts,
             metadata=request["metadata"],
         )
-
 
 def emit_quarantine_events(
     *,
@@ -143,7 +138,6 @@ def emit_quarantine_events(
             content_hash=entry.payload_hash,
         )
     )
-
 
 def extract_record_id(payload: BronzeRecord) -> str | None:
     """Best-effort extraction of a stable record identifier from raw payloads."""

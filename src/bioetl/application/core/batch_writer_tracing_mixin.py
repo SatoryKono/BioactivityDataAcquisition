@@ -16,9 +16,7 @@ if TYPE_CHECKING:
 
     from bioetl.domain.types import BatchID
 
-
 _WRITE_SPAN_ERRORS = (Exception,)
-
 
 class BatchWriterTracingMixin:
     """Operational cross-cutting concerns for BatchWriter."""
@@ -101,6 +99,5 @@ class BatchWriterTracingMixin:
         )
         self._batch_metrics.track_error(f"{layer}_write", error_type)
         self._batch_metrics.track_batch_failed(stage=layer, count=record_count)
-
 
 BatchWriterLockValidator = Callable[[], Awaitable[bool]] | None

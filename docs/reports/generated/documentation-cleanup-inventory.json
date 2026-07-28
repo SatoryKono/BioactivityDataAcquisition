@@ -1306,6 +1306,34 @@
       "github_issue_number": null,
       "github_issue_url": null,
       "inbound_links": 0,
+      "lifecycle": "issue_pack",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": ".github/ISSUES/DUX2-2026-07-28-DASHBOARD-SYSTEM-2-PHASE2-RESIDUAL-ISSUE-PACK.md",
+      "recommended_action": "archive-after-github-state-check",
+      "root_doc_kind": null,
+      "section": ".github",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
       "lifecycle": "active_draft",
       "outbound_links": 0,
       "owner": "BioETL Team",
@@ -37570,6 +37598,34 @@
       "outbound_links": 1,
       "owner": "BioETL Team",
       "path": "docs/03-guides/dashboards/dashboard-requirements-comprehensive.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "03-guides",
+      "status": "Active",
+      "surface_family": "active",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": "published",
+      "declared_status": "active",
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 3,
+      "lifecycle": null,
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "docs/03-guides/dashboards/dashboard-system-2.0-phase2-residual.md",
       "recommended_action": "keep",
       "root_doc_kind": null,
       "section": "03-guides",
@@ -89328,7 +89384,7 @@
       "generated_test_run_evidence": 4,
       "guide": 2,
       "index": 4,
-      "issue_pack": 22,
+      "issue_pack": 23,
       "live_issue_mirror": 4,
       "plans_governance_entrypoint": 1,
       "published_skill_reference_redirect": 36,
@@ -89336,19 +89392,19 @@
       "working_report": 59
     },
     "by_recommended_action": {
-      "archive-after-github-state-check": 130,
+      "archive-after-github-state-check": 131,
       "archive-after-migration": 113,
       "generate-automatically": 740,
-      "keep": 2177,
+      "keep": 2178,
       "reconcile-with-github-state": 4
     },
     "by_section": {
-      ".github": 140,
+      ".github": 141,
       "00-project": 296,
       "01-requirements": 3,
       "02-architecture": 875,
       "03-data-model": 2,
-      "03-guides": 92,
+      "03-guides": 93,
       "04-reference": 196,
       "05-engineering": 9,
       "05-operations": 81,
@@ -89378,22 +89434,22 @@
       "tools": 1
     },
     "by_status": {
-      "Active": 1970,
+      "Active": 1971,
       "Archived": 82,
       "Canonical": 70,
       "Generated": 740,
-      "Working": 302
+      "Working": 303
     },
     "by_surface_family": {
-      "active": 1970,
+      "active": 1971,
       "archive": 82,
       "canonical": 70,
       "generated": 740,
-      "working": 302
+      "working": 303
     },
     "by_tracking_state": {
       "ignored_local": 1196,
-      "tracked": 1968
+      "tracked": 1970
     },
     "docs_reports_local_count": 1220,
     "duplicate_group_count": 2,
@@ -89404,13 +89460,13 @@
       "active_draft": 108,
       "guide": 2,
       "index": 4,
-      "issue_pack": 22,
+      "issue_pack": 23,
       "live_issue_mirror": 4
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 3164,
+    "total_doc_like": 3166,
     "total_doc_like_ignored_local": 1196,
-    "total_doc_like_tracked": 1968
+    "total_doc_like_tracked": 1970
   }
 }

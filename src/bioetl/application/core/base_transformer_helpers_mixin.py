@@ -28,7 +28,6 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import BronzeRecord
 
-
 class _BaseTransformerRecordHelpersMixin:
     """Serialization and record helper methods shared by transformers."""
 

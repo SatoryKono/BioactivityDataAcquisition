@@ -9,7 +9,6 @@ if TYPE_CHECKING:
 
 _BatchResultT = TypeVar("_BatchResultT", covariant=True)
 
-
 class BatchExecutionCountersSnapshot(Protocol):
     """Shared counter snapshot required by batch-execution finalization flows."""
 
@@ -20,13 +19,11 @@ class BatchExecutionCountersSnapshot(Protocol):
     records_gold_excluded_by_contract: int
     records_quarantined: int
 
-
 class BatchExecutionStatisticsState(BatchExecutionCountersSnapshot, Protocol):
     """Extended statistics snapshot used for public batch/run projections."""
 
     records_filtered_out: int
     _source_batch_ids: list[str]
-
 
 class BatchExecutionMemoryState(Protocol):
     """Memory sizing statistics used during execution finalization."""
@@ -37,7 +34,6 @@ class BatchExecutionMemoryState(Protocol):
     def decision_trace_dicts(self) -> tuple[JsonDict, ...]:
         """Return immutable decision-trace payloads for batch sizing."""
         ...
-
 
 class BatchResultBuilderProtocol(Protocol[_BatchResultT]):
     """Callable result factory used to project cumulative batch counters."""
@@ -50,7 +46,6 @@ class BatchResultBuilderProtocol(Protocol[_BatchResultT]):
         gold_count: int,
         quarantined_count: int,
     ) -> _BatchResultT: ...
-
 
 class BatchExecutionStateProtocol(BatchExecutionStatisticsState, Protocol):
     """Mutable executor state required to apply processed-batch outcomes."""

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from types import ModuleType
@@ -179,6 +180,10 @@ async def _run_gold_write_with_retry(
     else:
         if pa.ArrowException not in retry_errors:
             retry_errors = (*retry_errors, pa.ArrowException)
+    sleep_module = cast(
+        _GoldWriteAsyncioProtocol,
+        getattr(module, "asyncio", asyncio),
+    )
     for attempt in range(3):
         try:
             await operation()
@@ -186,7 +191,7 @@ async def _run_gold_write_with_retry(
         except retry_errors:
             if attempt == 2:
                 raise
-            await module.asyncio.sleep(_gold_write_retry_delay(attempt))
+            await sleep_module.sleep(_gold_write_retry_delay(attempt))
 
 
 async def _execute_prepared_scd2_gold_write(

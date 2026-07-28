@@ -28,7 +28,6 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import TracingPort
     from bioetl.domain.types import BatchID
 
-
 class BatchTracingManagerService:
     """Manage execution, batch, and layer spans for pipeline runs."""
 
@@ -199,6 +198,5 @@ class BatchTracingManagerService:
     def end_span_with_shutdown(self, span: Span | None) -> None:
         """End a tracing span with shutdown markers."""
         close_span_with_shutdown(cast("_ClosableSpan | None", span))
-
 
 __all__ = ["BatchTracingManagerService"]

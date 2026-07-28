@@ -10,7 +10,6 @@ if TYPE_CHECKING:
 
 __all__ = ["BatchExecutorRuntimeState", "BatchExecutorRuntimeStateMixin"]
 
-
 @dataclass(slots=True)
 class BatchExecutorRuntimeState:
     """Mutable execution state owned outside the BatchExecutor coordinator."""
@@ -32,7 +31,6 @@ class BatchExecutorRuntimeState:
     debug_export_result: object | None = None
     resume_offset: int = 0
     query_string: str | None = None
-
 
 class BatchExecutorRuntimeStateMixin:
     """Expose legacy executor state attributes backed by one state object."""

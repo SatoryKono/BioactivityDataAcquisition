@@ -20,14 +20,12 @@ if TYPE_CHECKING:
         SilverDQAnalyzerPort,
     )
 
-
 @runtime_checkable
 class PipelineMetadataServicesProtocol(Protocol):
     """Optional metadata collaborators used after persistence stages."""
 
     metadata_coordinator: MetadataCoordinatorPort | None
     metadata_writer: MetadataWriterPort | None
-
 
 @runtime_checkable
 class PipelineDQServicesProtocol(Protocol):
@@ -40,7 +38,6 @@ class PipelineDQServicesProtocol(Protocol):
     dq_report_writer: DQReportWriterPort | None
     dq_report_service: DQReportService | None
 
-
 @runtime_checkable
 class PipelineExecutionServicesProtocol(
     PipelineObservabilityServicesProtocol,
@@ -48,7 +45,6 @@ class PipelineExecutionServicesProtocol(
     Protocol,
 ):
     """Execution surface used by batch/DQ helpers."""
-
 
 @runtime_checkable
 class PipelinePostrunServicesProtocol(
@@ -59,7 +55,6 @@ class PipelinePostrunServicesProtocol(
     """Services surface required by postrun collaborator resolution."""
 
     storage: StorageMaintenancePort
-
 
 __all__ = [
     "PipelineDQServicesProtocol",

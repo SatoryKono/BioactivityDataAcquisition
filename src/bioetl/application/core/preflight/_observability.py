@@ -11,14 +11,12 @@ if TYPE_CHECKING:
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.types import HealthReport
 
-
 class _PreflightObservabilityHostProtocol(Protocol):
     @property
     def _runtime(self) -> RuntimeConfig: ...
 
     @property
     def _observer(self) -> PipelineObserver: ...
-
 
 def emit_preflight_health_results(
     host: _PreflightObservabilityHostProtocol,

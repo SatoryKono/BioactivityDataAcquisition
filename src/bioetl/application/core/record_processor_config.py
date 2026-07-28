@@ -19,7 +19,6 @@ from bioetl.domain.types import (
 if TYPE_CHECKING:
     from bioetl.domain.composite import DataSchemaConfig
 
-
 @dataclass(frozen=True, slots=True)
 class ContentHashVersionPolicy:
     """Hash include/exclude policy for one contract version."""
@@ -28,7 +27,6 @@ class ContentHashVersionPolicy:
     include_fields: frozenset[str] = field(default_factory=frozenset)
     exclude_fields: frozenset[str] = field(default_factory=frozenset)
     datetime_policy: str = "v2_datetime_utc"
-
 
 @dataclass(frozen=True, slots=True)
 class ContentHashPolicyGroup:
@@ -77,9 +75,7 @@ class ContentHashPolicyGroup:
         """Whether the current rollout must compute per-version hash projections."""
         return self.affects_hash and self.is_multi_version
 
-
 ContentHashPolicyByVersion = ContentHashPolicyGroup
-
 
 @dataclass(frozen=True)
 class RecordProcessorConfig:
@@ -114,7 +110,6 @@ class RecordProcessorConfig:
     content_hash_policy_by_version: ContentHashPolicyByVersion | None = None
     gold_schema_policy_by_version: GoldSchemaPolicyByVersion | None = None
     debug_export_config: DebugExportConfig | None = None
-
 
 __all__ = [
     "ContentHashPolicyByVersion",

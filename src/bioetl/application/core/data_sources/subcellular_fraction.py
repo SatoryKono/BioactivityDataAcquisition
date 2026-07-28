@@ -23,7 +23,6 @@ if TYPE_CHECKING:
 
 __all__ = ["SubcellularFractionDataSource"]
 
-
 class SubcellularFractionDataSource(
     _FallbackFilterableTargetFetchMixin,
     _FilterableTargetDelegationMixin,

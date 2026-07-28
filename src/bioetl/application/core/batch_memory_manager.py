@@ -27,7 +27,6 @@ if TYPE_CHECKING:
     from bioetl.domain.config import MemoryConfig
     from bioetl.domain.ports import LoggerPort, MemoryMonitorPort, MetricsPort
 
-
 class BatchMemoryManagerService:
     """Manages adaptive batch sizing based on memory pressure."""
 
@@ -240,6 +239,5 @@ class BatchMemoryManagerService:
             del self._decision_trace[
                 : len(self._decision_trace) - self._MAX_DECISION_TRACE_ENTRIES
             ]
-
 
 __all__ = ["BatchMemoryManagerService"]

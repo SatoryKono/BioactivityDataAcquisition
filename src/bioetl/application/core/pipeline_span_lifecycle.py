@@ -22,7 +22,6 @@ __all__ = [
     "start_current_span",
 ]
 
-
 class _CurrentSpanStarter(Protocol):
     """Minimal tracer contract for starting current spans."""
 
@@ -33,12 +32,10 @@ class _CurrentSpanStarter(Protocol):
         attributes: dict[str, object],
     ) -> object: ...
 
-
 class _TracingProvider(Protocol):
     """Minimal tracing-provider contract used by internal helpers."""
 
     def get_tracer(self, name: str) -> _CurrentSpanStarter: ...
-
 
 class _ClosableSpan(Protocol):
     """Minimal tracing span contract used by internal helpers."""
@@ -55,7 +52,6 @@ class _ClosableSpan(Protocol):
         exc_val: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> object: ...
-
 
 def build_pipeline_span_attributes(
     *,
@@ -74,7 +70,6 @@ def build_pipeline_span_attributes(
         attributes["bioetl.run_id"] = str(context.run_id)
     return attributes
 
-
 @contextmanager
 def start_current_span(
     *,
@@ -91,7 +86,6 @@ def start_current_span(
     ) as span:
         yield span
 
-
 def close_span(span: _ClosableSpan | None, error: Exception | None = None) -> None:
     """Close a tracing span and optionally record an exception."""
     if not span:
@@ -100,7 +94,6 @@ def close_span(span: _ClosableSpan | None, error: Exception | None = None) -> No
         span.set_attribute("error", True)
         span.record_exception(error)
     span.__exit__(None, None, None)
-
 
 def close_span_with_shutdown(span: _ClosableSpan | None) -> None:
     """Close a tracing span after marking shutdown state."""

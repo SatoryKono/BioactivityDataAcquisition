@@ -43,6 +43,10 @@ slo_contracts:
         severity: warning
         for: 10m
         runbook: docs/05-operations/runbooks/observability-checklist.md
+      - name: BioETLMetricsEndpointLivenessMissing
+        severity: warning
+        for: 5m
+        runbook: docs/05-operations/runbooks/observability-checklist.md
       - name: BioETLPrometheusUnavailable
         severity: critical
         for: 2m

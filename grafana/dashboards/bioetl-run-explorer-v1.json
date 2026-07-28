@@ -877,5 +877,6 @@
   "timezone": "browser",
   "title": "Run Explorer",
   "uid": "bioetl-run-explorer-v1",
-  "version": 1
+  "version": 1,
+  "style": "dark"
 }

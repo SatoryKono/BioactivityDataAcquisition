@@ -10,7 +10,6 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import MemoryMonitorPort
     from bioetl.domain.types import BatchID, BronzeRecord
 
-
 class _StreamingTransformer(Protocol):
     """Structural transform contract required by the streaming helper."""
 
@@ -20,7 +19,6 @@ class _StreamingTransformer(Protocol):
         batch_id: BatchID,
         start_index: int = 0,
     ) -> TransformResult: ...
-
 
 class StreamingBatchProcessor:
     """Memory-efficient streaming processor for large batches."""
@@ -77,6 +75,5 @@ class StreamingBatchProcessor:
             Iterator yielding each record in order.
         """
         yield from records
-
 
 __all__ = ["StreamingBatchProcessor"]

@@ -15,7 +15,6 @@ if TYPE_CHECKING:
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import DataSourcePort, FilterableDataSourcePort
 
-
 class _FilteredFetchState(Protocol):
     """Structural contract for FilteredDataSource fetch helpers."""
 
@@ -31,7 +30,6 @@ class _FilteredFetchState(Protocol):
         """Check adapter supports the requested filtering mode."""
         ...
 
-
 def matches_valid_combination(
     state: _FilteredFetchState,
     record: JsonDict,  # Any: filter record values vary (str|int|float|list)
@@ -41,7 +39,6 @@ def matches_valid_combination(
         return True
     record_values = tuple(str(record.get(field, "")) for field in state._filter_fields)
     return record_values in state._valid_combinations
-
 
 async def fetch_multi_column(
     state: _FilteredFetchState,
@@ -65,7 +62,6 @@ async def fetch_multi_column(
             fetched_count += 1
             if limit and fetched_count >= limit:
                 return
-
 
 async def fetch_single_column(
     state: _FilteredFetchState,
@@ -104,7 +100,6 @@ async def fetch_single_column(
     ):
         yield record
 
-
 def fetch_without_internal_filters(
     state: _FilteredFetchState,
     entity_type: str,
@@ -122,7 +117,6 @@ def fetch_without_internal_filters(
         query=query,
         offset=offset,
     )
-
 
 def fetch_records(
     state: _FilteredFetchState,

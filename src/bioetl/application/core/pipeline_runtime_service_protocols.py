@@ -18,7 +18,6 @@ from bioetl.domain.ports import (
     StorageMaintenancePort,
 )
 
-
 @runtime_checkable
 class PipelineStorageProtocol(
     BronzeStoragePort,
@@ -31,20 +30,17 @@ class PipelineStorageProtocol(
 ):
     """Application DI contract for a full pipeline storage adapter."""
 
-
 @runtime_checkable
 class PipelineDataSourceServicesProtocol(Protocol):
     """Services surface required by extraction and source-metadata helpers."""
 
     data_source: DataSourcePort
 
-
 @runtime_checkable
 class PipelineHealthServicesProtocol(PipelineDataSourceServicesProtocol, Protocol):
     """Infrastructure services required by preflight health checks."""
 
     storage: PipelineStorageProtocol
-
 
 @runtime_checkable
 class PipelineRuntimeControlServicesProtocol(Protocol):
@@ -53,7 +49,6 @@ class PipelineRuntimeControlServicesProtocol(Protocol):
     lock: LockPort
     checkpoint: CheckpointPort
     quarantine: QuarantinePort
-
 
 @runtime_checkable
 class PipelineManagedRuntimeServicesProtocol(
@@ -73,7 +68,6 @@ class PipelineManagedRuntimeServicesProtocol(
     ) -> None: ...
 
     async def aclose(self) -> None: ...
-
 
 __all__ = [
     "PipelineDataSourceServicesProtocol",

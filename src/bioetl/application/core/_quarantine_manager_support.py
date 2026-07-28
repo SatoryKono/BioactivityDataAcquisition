@@ -31,14 +31,12 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import MetricsPort, QuarantinePort
     from bioetl.domain.types import BronzeRecord
 
-
 class _FilteredQuarantineEntryProtocol(Protocol):
     """Structural filtered-entry shape used by the support mixin."""
 
     record: dict[str, Any]  # Any: filtered records carry provider-defined JSON values.
     reason: str
     details: dict[str, Any] | None  # Any: quarantine details are extensible JSON.
-
 
 class QuarantineManagerSupportMixin:
     """Own filtered-record and inspection helpers outside the main service shell."""

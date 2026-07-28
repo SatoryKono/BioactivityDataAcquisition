@@ -39,7 +39,6 @@ if TYPE_CHECKING:
         SilverDQAnalyzerPort,
     )
 
-
 @dataclass(frozen=True)
 class PipelineService:
     """Injected dependencies for pipeline execution.
@@ -160,6 +159,5 @@ class PipelineService:
                 )
 
         self.logger.info("Pipeline services closed.", stage="cleanup")
-
 
 __all__ = ["PipelineService", "PipelineStorageProtocol"]

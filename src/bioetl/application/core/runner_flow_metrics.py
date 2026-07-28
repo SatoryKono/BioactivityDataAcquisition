@@ -14,7 +14,6 @@ if TYPE_CHECKING:
         PipelineMetricsRecorder,
     )
 
-
 def record_output_ready(host: _PipelineRunnerFlowHostProtocol) -> None:
     """Project the terminal output-ready count into the canonical stage model."""
     from bioetl.application.observability.pipeline_metrics import (
@@ -38,7 +37,6 @@ def record_output_ready(host: _PipelineRunnerFlowHostProtocol) -> None:
         outcome="ready",
         count=output_count,
     )
-
 
 def record_flow_invariants(
     host: _PipelineRunnerFlowHostProtocol,
@@ -124,7 +122,6 @@ def record_flow_invariants(
         current_time_fn=current_time_fn,
     )
 
-
 def _record_count_flow_invariants(
     *,
     pipeline_metrics: object,
@@ -181,20 +178,17 @@ def _record_count_flow_invariants(
         ),
     )
 
-
 def _equality_invariant_status(*, left: int, right: int, observed: bool) -> str:
     """Return stable invariant status for equality checks."""
     if not observed:
         return "unknown"
     return "passed" if left == right else "violated"
 
-
 def _monotonic_invariant_status(*, upper: int, lower: int, observed: bool) -> str:
     """Return stable invariant status for monotonicity checks."""
     if not observed:
         return "unknown"
     return "passed" if upper >= lower else "violated"
-
 
 def _record_stage_lag_gauges(
     *,
@@ -229,6 +223,5 @@ def _record_stage_lag_gauges(
         stage="output",
         seconds=lag_seconds if output_backlog > 0 else 0.0,
     )
-
 
 __all__ = ["record_flow_invariants", "record_output_ready"]

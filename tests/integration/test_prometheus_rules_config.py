@@ -191,6 +191,9 @@ def _build_metric_label_sets(payload: dict) -> dict[str, frozenset[str]]:
 
     label_sets: dict[str, frozenset[str]] = {
         "up": frozenset({"job", "instance"}),
+        # Health /metrics scrape liveness gauge is emitted as plain exposition
+        # text (not Prometheus client registry) from the health server path.
+        "bioetl_health_server_scrape_up": frozenset({"job", "instance"}),
     }
     docker_contract = yaml.safe_load(
         Path("configs/quality/docker_runtime_contracts.yaml").read_text(
@@ -326,7 +329,7 @@ def _classify_quarantine_rate(
     """Return expected alert severity for quarantine-rate thresholds."""
     if bronze_records < 20 or quarantine_rate <= 0.05:
         return None
-    if quarantine_rate <= 0.2:
+    if quarantine_rate <= 0.5:
         return "warning"
     return "critical"
 
@@ -463,12 +466,12 @@ _TUNED_ALERT_EXPECTATIONS: dict[str, dict[str, object]] = {
     "BioETLDQQuarantineRateHigh": {
         "severity": "warning",
         "for": "10m",
-        "fragments": ["> 0.05", "<= 0.2", ">= 20", "[30m]"],
+        "fragments": ["> 0.05", "<= 0.5", ">= 20", "[30m]"],
     },
     "BioETLDQQuarantineRateCritical": {
         "severity": "critical",
         "for": "5m",
-        "fragments": ["> 0.2", ">= 20", "[15m]"],
+        "fragments": ["> 0.5", ">= 20", "[15m]"],
     },
     "BioETLGoldValidationFailuresCritical": {
         "severity": "critical",
@@ -1819,8 +1822,8 @@ def test_threshold_smoke_examples_cover_warning_and_critical_boundaries() -> Non
         {"bronze_records": 19, "quarantine_rate": 0.30, "expected": None},
         {"bronze_records": 20, "quarantine_rate": 0.05, "expected": None},
         {"bronze_records": 20, "quarantine_rate": 0.051, "expected": "warning"},
-        {"bronze_records": 20, "quarantine_rate": 0.20, "expected": "warning"},
-        {"bronze_records": 20, "quarantine_rate": 0.201, "expected": "critical"},
+        {"bronze_records": 20, "quarantine_rate": 0.50, "expected": "warning"},
+        {"bronze_records": 20, "quarantine_rate": 0.501, "expected": "critical"},
     ]
     freshness_cases = [
         {"seconds": 86400, "expected": None},

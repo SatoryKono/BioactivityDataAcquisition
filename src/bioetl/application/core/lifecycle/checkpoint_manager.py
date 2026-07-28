@@ -30,7 +30,6 @@ from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
 _OPERATION_ERRORS = SHARED_OPERATION_ERRORS
 
-
 @dataclass(frozen=True, slots=True)
 class CheckpointRuntimeIdentity:
     """Identity and resume policy bag for :class:`CheckpointRuntimeService`."""
@@ -43,7 +42,6 @@ class CheckpointRuntimeIdentity:
     loading_strategy: LoadingStrategy | None = None
     current_metadata: CheckpointMetadata | None = None
     compatibility_policy: CheckpointCompatibilityPolicy = "soft_fail"
-
 
 class CheckpointRuntimeService:
     """Framework-agnostic checkpoint persistence and resume management."""
@@ -202,7 +200,6 @@ class CheckpointRuntimeService:
     async def list_all(self) -> list[str]:
         """List all pipelines that currently have checkpoints."""
         return await self._checkpoint.list_all()
-
 
 __all__ = [
     "CheckpointRuntimeIdentity",

@@ -17,9 +17,7 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.ports import MetricsPort
 
-
 FILTERED_OUT_SILVER = "FILTERED_OUT_SILVER"
-
 
 def track_quarantine_metrics(
     *,
@@ -57,7 +55,6 @@ def track_quarantine_metrics(
         count=count,
     )
 
-
 def track_processed_quarantined(
     *,
     metrics: MetricsPort | None,
@@ -88,13 +85,11 @@ def track_processed_quarantined(
         },
     )
 
-
 def count_dq_error_types(
     records: Sequence[tuple[BronzeRecord, ErrorType, str]],
 ) -> Counter[ErrorType]:
     """Count DQ quarantine entries by error type."""
     return Counter(error_type for _, error_type, _ in records)
-
 
 def record_filtered_quarantine_metrics(
     *,

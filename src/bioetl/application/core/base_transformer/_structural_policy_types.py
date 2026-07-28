@@ -12,7 +12,6 @@ from bioetl.domain.types import JsonDict, SilverRecord
 
 LogicalType = Literal["string", "integer", "float", "boolean", "unknown"]
 
-
 @dataclass(frozen=True, slots=True)
 class StructuralFieldSpec(FieldPolicySpec):
     """Resolved storage/policy contract for one Silver field."""
@@ -23,7 +22,6 @@ class StructuralFieldSpec(FieldPolicySpec):
     nullable: bool
     is_system_field: bool = False
 
-
 @dataclass(frozen=True, slots=True)
 class StructuralPolicySignal:
     """Log event emitted by structural policy evaluation."""
@@ -31,7 +29,6 @@ class StructuralPolicySignal:
     level: Literal["warning", "error"]
     event: str
     details: JsonDict
-
 
 @dataclass(frozen=True, slots=True)
 class StructuralPolicyOutcome:
@@ -46,7 +43,6 @@ class StructuralPolicyOutcome:
     def should_quarantine(self) -> bool:
         """Whether the record must be routed to quarantine before write."""
         return self.quarantine_reason is not None
-
 
 @runtime_checkable
 class StructuralPolicyProtocol(Protocol):

@@ -19,7 +19,6 @@ if TYPE_CHECKING:
 _MALFORMED_JSON_EVENT = "silver_normalization_malformed_json"
 _MALFORMED_JSON_REASON_CODE = "malformed_json_normalized_to_null"
 
-
 def project_normalization_findings(
     findings: tuple[_NormalizationFinding, ...],
     record: JsonDict,
@@ -53,7 +52,6 @@ def project_normalization_findings(
         )
     return projected
 
-
 def profile_json_runtime_finding(
     rule: FieldRule,
     *,
@@ -80,7 +78,6 @@ def profile_json_runtime_finding(
         )
     return None
 
-
 def should_forbid_fallback(
     *,
     has_profile: bool,
@@ -96,7 +93,6 @@ def should_forbid_fallback(
         and field_name not in passthrough_fields
     )
 
-
 def raise_profile_gap(provider: str, entity_type: str | None, field_name: str) -> None:
     """Raise the canonical profile-gap error for implicit fallback attempts."""
     entity_label = entity_type or "<unknown>"
@@ -106,7 +102,6 @@ def raise_profile_gap(provider: str, entity_type: str | None, field_name: str) -
         "add an explicit normalization profile rule or enable "
         "allow_compatibility_fallback for bounded compatibility paths"
     )
-
 
 def _rule_uses_json_policy(rule: FieldRule) -> bool:
     notes = (rule.notes or "").casefold()

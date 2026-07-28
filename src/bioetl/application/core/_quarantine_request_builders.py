@@ -8,7 +8,6 @@ from bioetl.application.core._quarantine_metrics_support import FILTERED_OUT_SIL
 from bioetl.domain.ports import QuarantineWriteRequest
 from bioetl.domain.types import BatchID, BronzeRecord, ErrorType, JsonDict, RunID
 
-
 def build_filtered_quarantine_metadata(
     *,
     reason: str,
@@ -25,7 +24,6 @@ def build_filtered_quarantine_metadata(
         "classification": "filter_rejection",
         "quarantine_category": "silver_filter",
     }
-
 
 def build_dq_quarantine_request(
     *,
@@ -47,7 +45,6 @@ def build_dq_quarantine_request(
         "metadata": {"error_details": {"message": error_details}},
         "ingestion_ts": ingestion_ts,
     }
-
 
 def build_filtered_quarantine_request(
     *,

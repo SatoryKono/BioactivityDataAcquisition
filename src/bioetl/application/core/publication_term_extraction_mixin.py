@@ -16,7 +16,6 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports import FilterableDataSourcePort
 
-
 class PublicationTermExtractionMixin:
     """Shared publication->term extraction flow."""
 

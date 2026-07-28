@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
-
 @dataclass(frozen=True, slots=True)
 class PostrunFailurePolicySpec:
     """Structured log policy for one postrun failure category."""
@@ -19,12 +18,10 @@ class PostrunFailurePolicySpec:
     warning_reason: str
     warning_reason_code: str
 
-
 def is_strict_validation_enabled(runtime: object) -> bool:
     """Return True only when strict validation is explicitly enabled."""
     value = getattr(runtime, "strict_validation", False)
     return bool(value) if isinstance(value, bool) else False
-
 
 def apply_postrun_failure_policy(
     *,
@@ -67,7 +64,6 @@ def apply_postrun_failure_policy(
     logger.warning(spec.event, **warning_kwargs)
     return False
 
-
 def apply_postrun_failure_policy_or_raise(
     *,
     logger: LoggerPort,
@@ -89,7 +85,6 @@ def apply_postrun_failure_policy_or_raise(
     if should_raise:
         raise error
 
-
 class PostrunStrictValidationMixin:
     """Compatibility mixin for postrun collaborators exposing strict mode check."""
 
@@ -99,7 +94,6 @@ class PostrunStrictValidationMixin:
     def _is_strict_validation_enabled(self) -> bool:
         """Compatibility wrapper around shared strict-mode evaluation."""
         return is_strict_validation_enabled(self._runtime)
-
 
 class PostrunFailureHandlingMixin(PostrunStrictValidationMixin):
     """Shared allowlisted failure handling for postrun collaborators."""
