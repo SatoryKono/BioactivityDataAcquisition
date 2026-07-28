@@ -1,3 +1,6 @@
+# pyright: reportArgumentType=false
+# pyright: reportIncompatibleVariableOverride=false
+# MRO/override residual on mixin or client hierarchies.
 """UniProt API adapter facade."""
 
 from __future__ import annotations

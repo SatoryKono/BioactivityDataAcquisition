@@ -38,10 +38,24 @@ DEFAULT_MD = PROJECT_ROOT / "docs/reports/generated/documentation-cleanup-invent
 ROUTING_CONFIG = PROJECT_ROOT / "configs/quality/generated_artifact_routing.yaml"
 STRUCTURE_CATALOG = PROJECT_ROOT / "configs/quality/repo_structure_catalog.yaml"
 
+# Path / filename identities used across inventory classification (python:S1192).
+GITHUB_ISSUES_PREFIX = ".github/ISSUES/"
+DOCS_PREFIX = "docs/"
+REPORTS_PREFIX = "reports/"
+DOCS_REPORTS_PREFIX = "docs/reports/"
+DOCS_ARCHIVE_PREFIX = "docs/99-archive/"
+AI_SKILLS_REFERENCES_PREFIX = "docs/00-project/ai/skills/_references/"
+FILE_AGENTS_MD = "AGENTS.md"
+FILE_CHANGELOG_MD = "CHANGELOG.md"
+FILE_README_MD = "README.md"
+FILE_MKDOCS_YML = "mkdocs.yml"
+EXT_MERMAID = ".mermaid"
+EXT_JSON = ".json"
+
 DOC_ROOTS = (
-    ".github/ISSUES/",
-    "docs/",
-    "reports/",
+    GITHUB_ISSUES_PREFIX,
+    DOCS_PREFIX,
+    REPORTS_PREFIX,
     "plans/",
     "reviews/",
     "audits/",
@@ -51,22 +65,22 @@ DOC_ROOTS = (
     "diagrams/",
 )
 ROOT_DOCS = {
-    "AGENTS.md",
-    "CHANGELOG.md",
+    FILE_AGENTS_MD,
+    FILE_CHANGELOG_MD,
     "CONTRIBUTING.md",
     "GEMINI.md",
-    "README.md",
+    FILE_README_MD,
     "best_practices.md",
-    "mkdocs.yml",
+    FILE_MKDOCS_YML,
 }
 DOC_EXTENSIONS = {
     ".md",
     ".rst",
     ".txt",
     ".mmd",
-    ".mermaid",
+    EXT_MERMAID,
     ".csv",
-    ".json",
+    EXT_JSON,
     ".yaml",
     ".yml",
     ".toml",
@@ -76,9 +90,9 @@ TEXT_EXTENSIONS = {
     ".rst",
     ".txt",
     ".mmd",
-    ".mermaid",
+    EXT_MERMAID,
     ".csv",
-    ".json",
+    EXT_JSON,
     ".yaml",
     ".yml",
     ".toml",
@@ -88,14 +102,14 @@ TEXT_SCAN_EXTENSIONS = {
     ".rst",
     ".txt",
     ".mmd",
-    ".mermaid",
+    EXT_MERMAID,
 }
 MAX_TEXT_SCAN_BYTES = 256_000
 CANONICAL_FILES = {
-    "README.md",
-    "CHANGELOG.md",
-    "mkdocs.yml",
-    "AGENTS.md",
+    FILE_README_MD,
+    FILE_CHANGELOG_MD,
+    FILE_MKDOCS_YML,
+    FILE_AGENTS_MD,
     "docs/00-project/NORMATIVE_SOURCES.md",
     "docs/00-project/RULES.md",
     "docs/01-requirements/REQUIREMENTS.md",
@@ -104,13 +118,13 @@ CANONICAL_FILES = {
     "docs/00-project/architecture-index.md",
 }
 ROOT_DOC_KINDS = {
-    "AGENTS.md": "ai_runtime_entrypoint",
-    "CHANGELOG.md": "release_history",
+    FILE_AGENTS_MD: "ai_runtime_entrypoint",
+    FILE_CHANGELOG_MD: "release_history",
     "CONTRIBUTING.md": "contributor_entrypoint",
     "GEMINI.md": "ai_runtime_mirror",
-    "README.md": "project_entrypoint",
+    FILE_README_MD: "project_entrypoint",
     "best_practices.md": "vendor_review_guidance",
-    "mkdocs.yml": "documentation_tool_config",
+    FILE_MKDOCS_YML: "documentation_tool_config",
 }
 GENERATED_PATH_MARKERS = (
     "/generated/",
@@ -121,8 +135,8 @@ GENERATED_PATH_MARKERS = (
 )
 WORKING_PATH_PREFIXES = (
     "docs/plans/",
-    "docs/reports/",
-    "reports/",
+    DOCS_REPORTS_PREFIX,
+    REPORTS_PREFIX,
     "plans/",
     "reviews/",
     "audits/",
@@ -145,7 +159,7 @@ SKIP_TEXT_SCAN_PATHS = {
     "reports/merged_output.txt",
     "reports/project_structure.md",
 }
-SKIP_TEXT_SCAN_SUFFIXES = {".csv", ".json"}
+SKIP_TEXT_SCAN_SUFFIXES = {".csv", EXT_JSON}
 MAX_LOCAL_DOC_REPORT_FILES = 25_000
 QUARANTINED_PATH_MARKERS = (
     "/.quarantined",
@@ -284,16 +298,16 @@ def _should_scan_text(path: str) -> bool:
         return False
     if path in SKIP_TEXT_SCAN_PATHS:
         return False
-    if path.startswith(".github/ISSUES/"):
+    if path.startswith(GITHUB_ISSUES_PREFIX):
         return False
-    if path.startswith("reports/") and path != "reports/README.md":
+    if path.startswith(REPORTS_PREFIX) and path != f"{REPORTS_PREFIX}{FILE_README_MD}":
         return False
-    if path.startswith("docs/reports/") and path not in {
-        "docs/reports/README.md",
-        "docs/reports/index.md",
+    if path.startswith(DOCS_REPORTS_PREFIX) and path not in {
+        f"{DOCS_REPORTS_PREFIX}{FILE_README_MD}",
+        f"{DOCS_REPORTS_PREFIX}index.md",
     }:
         return False
-    if path.startswith("docs/00-project/ai/skills/_references/"):
+    if path.startswith(AI_SKILLS_REFERENCES_PREFIX):
         return False
     if path.startswith("docs/02-architecture/diagrams/") and path not in {
         "docs/02-architecture/diagrams/README.md",
@@ -338,13 +352,13 @@ def _extract_declared_class(text: str) -> str | None:
 def _surface_family(path: str, status: str) -> str:
     if status == "Canonical":
         return "canonical"
-    if status == "Archived" or path.startswith("docs/99-archive/"):
+    if status == "Archived" or path.startswith(DOCS_ARCHIVE_PREFIX):
         return "archive"
     if status == "Generated":
         return "generated"
     if status == "Working":
         return "working"
-    if path.startswith("docs/00-project/ai/skills/_references/"):
+    if path.startswith(AI_SKILLS_REFERENCES_PREFIX):
         return "mirror"
     if status in {"Duplicate", "Deprecated"}:
         return "duplicate"
@@ -419,7 +433,7 @@ def _docs_draft_successor_map(catalog: dict[str, Any]) -> dict[str, str]:
 
 
 def _github_issue_number(path: str) -> int | None:
-    if not path.startswith(".github/ISSUES/"):
+    if not path.startswith(GITHUB_ISSUES_PREFIX):
         return None
     name = Path(path).name
     for match in re.finditer(r"(?<!\d)(\d{4,6})(?!\d)", name):
@@ -432,10 +446,10 @@ def _github_issue_number(path: str) -> int | None:
 
 
 def _github_issue_lifecycle(path: str) -> str | None:
-    if not path.startswith(".github/ISSUES/"):
+    if not path.startswith(GITHUB_ISSUES_PREFIX):
         return None
     name = Path(path).name
-    if name in {"README.md", "CREATION_GUIDE.md"}:
+    if name in {FILE_README_MD, "CREATION_GUIDE.md"}:
         return "guide"
     if name.endswith("INDEX.md"):
         return "index"
@@ -449,17 +463,20 @@ def _github_issue_lifecycle(path: str) -> str | None:
 
 
 def _reports_lifecycle(path: str) -> str | None:
-    if path.startswith("docs/reports/generated/"):
+    if path.startswith(f"{DOCS_REPORTS_PREFIX}generated/"):
         return "docs_reports_generated_or_route_owned"
-    if path in {"docs/reports/README.md", "docs/reports/index.md"}:
+    if path in {
+        f"{DOCS_REPORTS_PREFIX}{FILE_README_MD}",
+        f"{DOCS_REPORTS_PREFIX}index.md",
+    }:
         return "docs_reports_curated_entrypoint"
-    if path.startswith("docs/reports/evidence/"):
+    if path.startswith(f"{DOCS_REPORTS_PREFIX}evidence/"):
         return "docs_reports_retention_sensitive_evidence"
-    if path.startswith("docs/reports/"):
+    if path.startswith(DOCS_REPORTS_PREFIX):
         return "docs_reports_curated_or_historical_report"
-    if not path.startswith("reports/"):
+    if not path.startswith(REPORTS_PREFIX):
         return None
-    if "/test-runs/" in path or path.startswith("reports/test-telemetry/"):
+    if "/test-runs/" in path or path.startswith(f"{REPORTS_PREFIX}test-telemetry/"):
         return "generated_test_run_evidence"
     if "closeout" in path:
         return "closeout_evidence"
@@ -469,7 +486,7 @@ def _reports_lifecycle(path: str) -> str | None:
 
 
 def _skill_reference_lifecycle(path: str) -> str | None:
-    if path.startswith("docs/00-project/ai/skills/_references/"):
+    if path.startswith(AI_SKILLS_REFERENCES_PREFIX):
         return "generated_skill_reference_mirror"
     if path.startswith("docs/00-project/ai/skills/local/") and "/references/" in path:
         return "published_skill_reference_redirect"
@@ -485,7 +502,7 @@ def _skill_reference_lifecycle(path: str) -> str | None:
 def _tracking_state(path: str, tracked: set[str]) -> str:
     if path in tracked:
         return "tracked"
-    if path.startswith("docs/reports/"):
+    if path.startswith(DOCS_REPORTS_PREFIX):
         return "ignored_local"
     return "untracked_local"
 
@@ -495,9 +512,9 @@ def _path_lifecycle(
     plan_lifecycle: dict[str, str],
     docs_draft_successors: dict[str, str],
 ) -> str | None:
-    if path == "docs/plans/README.md":
+    if path == f"{DOCS_PREFIX}plans/{FILE_README_MD}":
         return "plans_governance_entrypoint"
-    if path == "reports/README.md":
+    if path == f"{REPORTS_PREFIX}{FILE_README_MD}":
         return "reports_workspace_entrypoint"
     return (
         _github_issue_lifecycle(path)
@@ -653,7 +670,7 @@ def _diagram_kind_from_mmd(path: str) -> str | None:
 
 
 def _diagram_kind_from_path_markers(path: str) -> str:
-    if path.endswith(".mermaid") and "/views/" in path:
+    if path.endswith(EXT_MERMAID) and "/views/" in path:
         return "diagram_decomposed_view"
     if "/svg/" in path or "/png/" in path:
         return "diagram_render_artifact"
@@ -770,7 +787,7 @@ def _classify_from_declared_markers(
     ):
         return "Generated", "regenerate", "generate-automatically"
     if duplicate_group and not path.startswith(
-        ("docs/99-archive/", "reports/quality/")
+        (DOCS_ARCHIVE_PREFIX, f"{REPORTS_PREFIX}quality/")
     ):
         return "Duplicate", "migration-required", "merge"
     return _classify_diagram_kind(diagram_kind)
@@ -781,7 +798,7 @@ def _classify_from_path_defaults(path: str) -> tuple[str, str, str]:
         return "Working", "review-required", "archive-after-migration"
     if path.startswith(("architecture/", "diagrams/")):
         return "Working", "review-required", "archive-after-migration"
-    if path.startswith("docs/") or path in ROOT_DOCS:
+    if path.startswith(DOCS_PREFIX) or path in ROOT_DOCS:
         return "Active", "current", "keep"
     return "Unknown", "review-required", "inventory-review"
 
@@ -798,13 +815,13 @@ def _classify(
     diagram_kind = _diagram_kind(path)
     generated_marker = GENERATED_MARKER_RE.search(text[:2500] or "") is not None
 
-    if path.startswith(".github/ISSUES/"):
+    if path.startswith(GITHUB_ISSUES_PREFIX):
         return _classify_github_issue(lifecycle)
     if path in CANONICAL_FILES or path.startswith("docs/02-architecture/decisions/"):
         return "Canonical", "current", "keep"
     if path in ROOT_DOCS:
         return "Active", "current", "keep"
-    if path.startswith("docs/99-archive/"):
+    if path.startswith(DOCS_ARCHIVE_PREFIX):
         return "Archived", "historical", "keep"
     lifecycle_class = _classify_from_lifecycle(
         lifecycle, path=path, text=text, declared=declared
@@ -827,7 +844,7 @@ def _classify(
 
 
 def _inventory_section(path: str) -> str:
-    if path.startswith("docs/") and "/" in path:
+    if path.startswith(DOCS_PREFIX) and "/" in path:
         return path.split("/")[1]
     return path.split("/")[0]
 
@@ -932,7 +949,7 @@ def _accumulate_inventory_counts(
     section_counts[str(record["section"])] += 1
     if lifecycle:
         lifecycle_counts[str(lifecycle)] += 1
-    if path.startswith(".github/ISSUES/") and lifecycle:
+    if path.startswith(GITHUB_ISSUES_PREFIX) and lifecycle:
         github_issue_lifecycle_counts[str(lifecycle)] += 1
     without_route = 0
     without_route_or_exception = 0
@@ -1213,7 +1230,7 @@ def _render_markdown(payload: dict[str, Any]) -> str:
     )
 
     issue_examples = [
-        row for row in files if str(row["path"]).startswith(".github/ISSUES/")
+        row for row in files if str(row["path"]).startswith(GITHUB_ISSUES_PREFIX)
     ][:40]
     lines.extend(
         _md_example_section(
@@ -1232,7 +1249,7 @@ def _render_markdown(payload: dict[str, Any]) -> str:
     )
 
     docs_reports_examples = [
-        row for row in files if str(row["path"]).startswith("docs/reports/")
+        row for row in files if str(row["path"]).startswith(DOCS_REPORTS_PREFIX)
     ][:40]
     lines.extend(
         _md_example_section(

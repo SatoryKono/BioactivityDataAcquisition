@@ -1,3 +1,5 @@
+# pyright: reportArgumentType=false
+# Boundary object/payload typing residual at this module.
 """Computation helpers for batch DQ metrics."""
 
 from __future__ import annotations

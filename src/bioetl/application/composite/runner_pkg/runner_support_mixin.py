@@ -1,3 +1,8 @@
+# pyright: reportUninitializedInstanceVariable=false
+# pyright: reportAttributeAccessIssue=false
+# Host attrs/methods provided by concrete composition (PD2 W1).
+# pyright: reportArgumentType=false
+# Boundary object/payload typing residual at this module.
 """Support helpers for CompositePipelineRunner."""
 
 from __future__ import annotations

@@ -1,4 +1,7 @@
 # mypy: disable-error-code=attr-defined
+# pyright: reportUninitializedInstanceVariable=false
+# pyright: reportAttributeAccessIssue=false
+# Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Public HTTP verb methods for UnifiedHTTPClient."""
 
 from __future__ import annotations

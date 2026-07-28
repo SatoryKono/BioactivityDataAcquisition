@@ -1,3 +1,5 @@
+# pyright: reportUninitializedInstanceVariable=false
+# Host attrs/methods provided by concrete composition.
 """Synchronous local checkpoint operations."""
 
 from __future__ import annotations

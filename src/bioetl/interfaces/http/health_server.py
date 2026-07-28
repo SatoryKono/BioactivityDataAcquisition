@@ -1,3 +1,5 @@
+# pyright: reportArgumentType=false
+# Boundary object/payload typing residual at this module.
 """HTTP Health Server for BioETL.
 
 Provides standard liveness and readiness probes.

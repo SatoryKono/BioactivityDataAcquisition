@@ -1,3 +1,7 @@
+# pyright: reportIncompatibleMethodOverride=false
+# pyright: reportIncompatibleVariableOverride=false
+# pyright: reportUnsafeMultipleInheritance=false
+# MRO/override residual on mixin or client hierarchies.
 """ChEMBL data source adapter implementing DataSourcePort.
 
 Health-aware fetching: HEALTHY=full batch, DEGRADED=batch/2, UNHEALTHY=fail fast.

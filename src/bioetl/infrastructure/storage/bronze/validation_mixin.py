@@ -1,3 +1,6 @@
+# pyright: reportUninitializedInstanceVariable=false
+# pyright: reportAttributeAccessIssue=false
+# Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Validation and path helpers for BronzeWriter."""
 
 from __future__ import annotations

@@ -1,3 +1,6 @@
+# pyright: reportMissingSuperCall=false
+# pyright: reportUninitializedInstanceVariable=false
+# Host attrs/methods provided by concrete composition.
 """Chemical structure identifier Value Objects.
 
 Contains InChIKey and SMILES — pure chemical structure identifiers

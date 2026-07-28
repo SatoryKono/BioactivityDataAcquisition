@@ -61,6 +61,7 @@ def resolve_missing_compatibility_context_disposition(
     compatibility_policy: CheckpointCompatibilityPolicy,
 ) -> CheckpointMissingContextDisposition:
     """Return bounded disposition for missing resume compatibility context."""
+    _ = compatibility_policy  # reserved for future soft/hard policy branching
     return "missing_context_hard_fail_raised"
 
 __all__ = [

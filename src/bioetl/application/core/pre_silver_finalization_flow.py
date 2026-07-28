@@ -1,3 +1,5 @@
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """PreSilver finalization flow mixin."""
 
 from __future__ import annotations

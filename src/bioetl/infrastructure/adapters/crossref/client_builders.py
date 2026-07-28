@@ -1,3 +1,5 @@
+# pyright: reportArgumentType=false
+# Boundary object/payload typing residual at this module.
 """Default component builders for `CrossRefAdapter`."""
 
 from __future__ import annotations

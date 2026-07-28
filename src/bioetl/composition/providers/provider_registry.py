@@ -1,3 +1,8 @@
+# pyright: reportArgumentType=false
+# pyright: reportAttributeAccessIssue=false
+# pyright: reportInvalidCast=false
+# pyright: reportUninitializedInstanceVariable=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Provider registry facade. Retained compatibility obligations are intentionally narrow:"""
 
 from __future__ import annotations

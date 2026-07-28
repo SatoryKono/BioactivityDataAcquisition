@@ -117,10 +117,10 @@ BASENAME_REF_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
 )
 MODULE_REF_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
     r"(?:uv\s+run\s+)?(?:python(?:3(?:\.\d+)?)?|py)\s+-m\s+"
-    r"((?:scripts|src\.tools)(?:\.[A-Za-z0-9_]+)+)"
+    r"((?:scripts|src\.tools)(?:\.\w+)+)"
 )
 MODULE_STRING_REF_PATTERN: Final[re.Pattern[str]] = re.compile(
-    r"[\"']((?:scripts|src\.tools)(?:\.[A-Za-z0-9_]+)+)[\"']"
+    r"[\"']((?:scripts|src\.tools)(?:\.\w+)+)[\"']"
 )
 RELATIVE_IMPORT_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
     r"^\s*from\s+\.+[A-Za-z0-9_.]*\s+import\s+",

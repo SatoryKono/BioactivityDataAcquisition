@@ -1,3 +1,5 @@
+# pyright: reportUninitializedInstanceVariable=false
+# Host attrs/methods provided by concrete composition.
 """Read-side mixin for file-backed run-ledger persistence."""
 
 from __future__ import annotations

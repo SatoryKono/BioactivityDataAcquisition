@@ -1,3 +1,5 @@
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Record assembly helpers for the base publication transformer."""
 
 from __future__ import annotations

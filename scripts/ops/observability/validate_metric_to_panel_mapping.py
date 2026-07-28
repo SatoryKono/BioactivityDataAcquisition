@@ -77,7 +77,7 @@ def extract_metrics_from_promql(expr: str) -> list[str]:
 
     # Simple extraction - match metric name patterns
     # This is a basic implementation; full PromQL parsing would be more complex
-    metric_pattern = r"\b[a-zA-Z_][a-zA-Z0-9_]*\b"
+    metric_pattern = r"\b[a-zA-Z_]\w*\b"
     potential_metrics = re.findall(metric_pattern, expr)
 
     # Filter out PromQL keywords and functions

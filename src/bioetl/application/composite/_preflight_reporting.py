@@ -1,3 +1,5 @@
+# pyright: reportUninitializedInstanceVariable=false
+# Host attrs/methods provided by concrete composition.
 """Reporting helpers for preflight validation results."""
 
 from __future__ import annotations

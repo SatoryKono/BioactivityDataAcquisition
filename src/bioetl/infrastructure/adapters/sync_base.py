@@ -1,3 +1,6 @@
+# pyright: reportImplicitAbstractClass=false
+# pyright: reportIncompatibleMethodOverride=false
+# MRO/override residual on mixin or client hierarchies.
 """Base Sync Adapter for BioETL infrastructure.
 
 Provides common functionality for adapters that must use synchronous libraries

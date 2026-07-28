@@ -1,3 +1,5 @@
+# pyright: reportImportCycles=false
+# Import cycle residual tracked in allowlist (product burn-down).
 """Metadata and audit helpers for SilverWriter."""
 
 from __future__ import annotations

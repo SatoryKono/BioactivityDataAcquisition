@@ -1,3 +1,6 @@
+# pyright: reportUninitializedInstanceVariable=false
+# pyright: reportAttributeAccessIssue=false
+# Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Adapter helper mixin for OpenAlex adapter utility and metadata methods."""
 
 from __future__ import annotations

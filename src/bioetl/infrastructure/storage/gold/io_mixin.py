@@ -1,3 +1,9 @@
+# pyright: reportUninitializedInstanceVariable=false
+# pyright: reportAttributeAccessIssue=false
+# Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
+# pyright: reportArgumentType=false
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Write/read and Delta operation helpers for GoldWriter.
 
 This module re-exports from split modules for backward compatibility.

@@ -26,8 +26,12 @@ DEFAULT_REVIEW_REGISTRY_PATH = (
 )
 PAIR_MATRIX_PREFIX = "semantic_pair_matrix_"
 PAIR_MATRIX_PATTERN = re.compile(r"^semantic_pair_matrix_(\d{4}-\d{2}-\d{2})\.csv$")
+COL_CLUSTER_ID = "Cluster ID"
+COL_DRIFT_RISK = "Drift Risk"
+UNKNOWN_VALUE = "<unknown>"
+BUDGET_PLACEHOLDER = "<budget>"
 ROW_KEY_FIELDS = (
-    "Cluster ID",
+    COL_CLUSTER_ID,
     "Pipeline A",
     "Field A",
     "Pipeline B",
@@ -186,7 +190,7 @@ def _review_registry_metadata_findings(
         for review in reviews:
             if not isinstance(review, dict):
                 continue
-            review_id = str(review.get("id") or "<unknown>")
+            review_id = str(review.get("id") or UNKNOWN_VALUE)
             for field in ("owner", "rationale", "expires_on"):
                 if review.get(field):
                     continue
@@ -232,7 +236,7 @@ def _metadata_findings(
 ) -> list[PairMatrixFinding]:
     findings: list[PairMatrixFinding] = []
     for row_key, row in reviewed.items():
-        cluster_id = str(row.get("cluster_id") or "<unknown>")
+        cluster_id = str(row.get("cluster_id") or UNKNOWN_VALUE)
         for field in ("owner", "rationale", "expires_on"):
             if row.get(field):
                 continue
@@ -280,8 +284,8 @@ def _budget_findings(
         return [
             PairMatrixFinding(
                 kind="missing_budget_section",
-                row_key="<budget>",
-                cluster_id="<budget>",
+                row_key=BUDGET_PLACEHOLDER,
+                cluster_id=BUDGET_PLACEHOLDER,
                 message="semantic pair-matrix budget must define budgets",
             )
         ]
@@ -342,11 +346,11 @@ def _status_budget_findings(
             continue
         unreviewed = sorted(
             {
-                row.get("Cluster ID", "<unknown>")
+                row.get(COL_CLUSTER_ID, UNKNOWN_VALUE)
                 for row in matching_rows
                 if not _cluster_has_review(
                     review_registry,
-                    cluster_id=row.get("Cluster ID", "<unknown>"),
+                    cluster_id=row.get(COL_CLUSTER_ID, UNKNOWN_VALUE),
                     semantic_status=row.get("Semantic Status", ""),
                 )
             }
@@ -370,7 +374,7 @@ def _critical_row_findings(
     rows: tuple[dict[str, str], ...],
     reviewed: dict[str, dict[str, Any]],
 ) -> list[PairMatrixFinding]:
-    critical_rows = [row for row in rows if row.get("Drift Risk") == "CRITICAL"]
+    critical_rows = [row for row in rows if row.get(COL_DRIFT_RISK) == "CRITICAL"]
     current_by_key = {_row_key(row): row for row in critical_rows}
     findings: list[PairMatrixFinding] = []
 
@@ -381,7 +385,7 @@ def _critical_row_findings(
             PairMatrixFinding(
                 kind="unreviewed_critical_row",
                 row_key=row_key,
-                cluster_id=row.get("Cluster ID", "<unknown>"),
+                cluster_id=row.get(COL_CLUSTER_ID, UNKNOWN_VALUE),
                 message=(
                     f"CRITICAL row {row_key} "
                     f"{row.get('Cluster ID')}:{row.get('Pipeline A')}.{row.get('Field A')} "
@@ -397,7 +401,7 @@ def _critical_row_findings(
             PairMatrixFinding(
                 kind="stale_reviewed_critical_row",
                 row_key=row_key,
-                cluster_id=str(reviewed_row.get("cluster_id") or "<unknown>"),
+                cluster_id=str(reviewed_row.get("cluster_id") or UNKNOWN_VALUE),
                 message=(
                     f"reviewed critical row {row_key} is no longer present; "
                     "remove the stale budget entry"
@@ -419,8 +423,8 @@ def _snapshot_binding_findings(
         return [
             PairMatrixFinding(
                 kind="missing_reviewed_on",
-                row_key="<budget>",
-                cluster_id="<budget>",
+                row_key=BUDGET_PLACEHOLDER,
+                cluster_id=BUDGET_PLACEHOLDER,
                 message="semantic pair-matrix budget must define reviewed_on",
             )
         ]
@@ -431,8 +435,8 @@ def _snapshot_binding_findings(
         return [
             PairMatrixFinding(
                 kind="invalid_reviewed_on",
-                row_key="<budget>",
-                cluster_id="<budget>",
+                row_key=BUDGET_PLACEHOLDER,
+                cluster_id=BUDGET_PLACEHOLDER,
                 message=f"semantic pair-matrix budget has invalid reviewed_on {reviewed_on!r}",
             )
         ]
@@ -442,8 +446,8 @@ def _snapshot_binding_findings(
         findings.append(
             PairMatrixFinding(
                 kind="reviewed_snapshot_mismatch",
-                row_key="<budget>",
-                cluster_id="<budget>",
+                row_key=BUDGET_PLACEHOLDER,
+                cluster_id=BUDGET_PLACEHOLDER,
                 message=(
                     f"semantic pair-matrix budget reviewed_on={reviewed_on} does not match "
                     f"matrix snapshot {matrix_path.name}"
@@ -466,8 +470,8 @@ def _snapshot_binding_findings(
         findings.append(
             PairMatrixFinding(
                 kind="stale_reviewed_snapshot",
-                row_key="<budget>",
-                cluster_id="<budget>",
+                row_key=BUDGET_PLACEHOLDER,
+                cluster_id=BUDGET_PLACEHOLDER,
                 message=(
                     f"semantic pair-matrix budget still targets {matrix_path.name}, "
                     f"but newer generated snapshot {latest_matrix_path.name} exists and "
@@ -483,11 +487,11 @@ def _reviewed_identity_findings(
     reviewed: dict[str, dict[str, Any]],
 ) -> list[PairMatrixFinding]:
     current_by_key = {
-        _row_key(row): row for row in rows if row.get("Drift Risk") == "CRITICAL"
+        _row_key(row): row for row in rows if row.get(COL_DRIFT_RISK) == "CRITICAL"
     }
     findings: list[PairMatrixFinding] = []
     field_pairs = (
-        ("cluster_id", "Cluster ID"),
+        ("cluster_id", COL_CLUSTER_ID),
         ("pipeline_a", "Pipeline A"),
         ("field_a", "Field A"),
         ("pipeline_b", "Pipeline B"),
@@ -506,7 +510,7 @@ def _reviewed_identity_findings(
                 PairMatrixFinding(
                     kind="reviewed_row_identity_mismatch",
                     row_key=row_key,
-                    cluster_id=current.get("Cluster ID", "<unknown>"),
+                    cluster_id=current.get(COL_CLUSTER_ID, UNKNOWN_VALUE),
                     message=(
                         f"reviewed row {row_key} expected {review_field}={expected!r}, "
                         f"found {actual!r}"
@@ -525,7 +529,7 @@ def validate_semantic_pair_matrix_budget(
     """Return semantic pair-matrix budget findings."""
     budget = _load_yaml(budget_path)
     rows = _load_matrix_rows(_matrix_path(repo_root, budget))
-    risk_counts = dict(Counter(row.get("Drift Risk", "<unknown>") for row in rows))
+    risk_counts = dict(Counter(row.get(COL_DRIFT_RISK, UNKNOWN_VALUE) for row in rows))
     reviewed = _reviewed_rows(budget)
     review_registry = _load_yaml(_review_registry_path(repo_root, budget))
 

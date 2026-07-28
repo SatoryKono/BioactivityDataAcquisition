@@ -1,6 +1,11 @@
+# pyright: reportArgumentType=false
+# Entity fixture overrides use intentional wide test inputs (PD2-9).
 """Unit tests for publication domain entities — CrossRef, OpenAlex, SemanticScholar, PubMed, ChEMBL."""
 
 from __future__ import annotations
+
+from typing import Any, cast
+
 
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -9,14 +14,14 @@ import pytest
 
 from bioetl.domain.entities.publication_base import PublicationEntityBase
 
-BASE_KWARGS = {
+BASE_KWARGS = cast(Any, {
     "entity_id": "pub:test:001",
     "content_hash": "hash123abc",
     "run_id": "run-001",
     "run_type": "incremental",
     "ingestion_ts": datetime(2024, 1, 15, tzinfo=UTC),
     "_index": 0,
-}
+})
 
 
 @dataclass(frozen=True, kw_only=True)

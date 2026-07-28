@@ -1,3 +1,5 @@
+# pyright: reportImportCycles=false
+# Import cycle residual tracked in allowlist (product burn-down).
 """Batch Data Quality metrics value object.
 
 Immutable value object containing DQ metrics for a batch of records.

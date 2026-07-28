@@ -1,3 +1,6 @@
+# pyright: reportAttributeAccessIssue=false
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Polling/retry logic for UniProt ID mapping jobs."""
 
 from __future__ import annotations

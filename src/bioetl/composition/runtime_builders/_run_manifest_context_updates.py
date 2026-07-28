@@ -1,3 +1,5 @@
+# pyright: reportUninitializedInstanceVariable=false
+# Host attrs/methods provided by concrete composition.
 """Control-plane context update helpers for run manifest attachment."""
 
 from __future__ import annotations

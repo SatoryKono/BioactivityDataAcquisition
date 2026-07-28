@@ -1,3 +1,5 @@
+# pyright: reportUninitializedInstanceVariable=false
+# Host attrs/methods provided by concrete composition.
 """Pipeline Observer Context Manager.
 
 Implements R12/R13: Observability wrapper for pipeline execution.

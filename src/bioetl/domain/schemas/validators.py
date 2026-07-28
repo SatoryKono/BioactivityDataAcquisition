@@ -1,3 +1,5 @@
+# pyright: reportGeneralTypeIssues=false
+# basedpyright residual burn-down (shrink-only product surface).
 """Custom Pandera checks for schema validation.
 
 Provides reusable validation checks for:

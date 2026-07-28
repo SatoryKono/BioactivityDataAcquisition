@@ -76,13 +76,22 @@ function Test-PortOpen {
         $iar = $client.BeginConnect('127.0.0.1', $Port, $null, $null)
         $ok = $iar.AsyncWaitHandle.WaitOne($WaitMs)
         if ($ok -and $client.Connected) {
-            try { $client.EndConnect($iar) } catch {}
+            try {
+                $client.EndConnect($iar)
+            } catch {
+                Write-Verbose "TCP EndConnect failed on port ${Port}: $($_.Exception.Message)"
+            }
             $client.Close()
             return $true
         }
-        try { $client.Close() } catch {}
+        try {
+            $client.Close()
+        } catch {
+            Write-Verbose "TCP client close failed on port ${Port}: $($_.Exception.Message)"
+        }
         return $false
     } catch {
+        Write-Verbose "TCP probe failed on port ${Port}: $($_.Exception.Message)"
         return $false
     }
 }
@@ -121,11 +130,19 @@ function Stop-McpProcessTree {
     if ($null -eq $Proc) { return }
     try {
         if ($Proc.HasExited) { return }
-    } catch { return }
+    } catch {
+        Write-Verbose "Process HasExited probe failed: $($_.Exception.Message)"
+        return
+    }
     try {
         & taskkill.exe /PID $Proc.Id /T /F 2>$null | Out-Null
     } catch {
-        try { Stop-Process -Id $Proc.Id -Force -ErrorAction SilentlyContinue } catch {}
+        Write-Verbose "taskkill failed for pid $($Proc.Id): $($_.Exception.Message)"
+        try {
+            Stop-Process -Id $Proc.Id -Force -ErrorAction SilentlyContinue
+        } catch {
+            Write-Verbose "Stop-Process failed for pid $($Proc.Id): $($_.Exception.Message)"
+        }
     }
 }
 
@@ -418,8 +435,16 @@ foreach ($name in $selected) {
         }
         if ($state -eq 'started') {
             # Best-effort canonical names for operators (ignore lock races).
-            try { Copy-Item $attemptOut $outLog -Force -ErrorAction SilentlyContinue } catch {}
-            try { Copy-Item $attemptErr $errLog -Force -ErrorAction SilentlyContinue } catch {}
+            try {
+                Copy-Item $attemptOut $outLog -Force -ErrorAction SilentlyContinue
+            } catch {
+                Write-Verbose "stdout log promote failed for ${name}: $($_.Exception.Message)"
+            }
+            try {
+                Copy-Item $attemptErr $errLog -Force -ErrorAction SilentlyContinue
+            } catch {
+                Write-Verbose "stderr log promote failed for ${name}: $($_.Exception.Message)"
+            }
             break
         }
         # Failed attempt: kill process tree, wait free/ready, then retry (no double-bind).

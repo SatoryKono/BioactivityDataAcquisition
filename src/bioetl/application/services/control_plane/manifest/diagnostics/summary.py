@@ -1,3 +1,5 @@
+# pyright: reportImportCycles=false
+# Import cycle residual tracked in allowlist (product burn-down).
 """Summary assembly helpers for manifest diagnostics."""
 
 from __future__ import annotations

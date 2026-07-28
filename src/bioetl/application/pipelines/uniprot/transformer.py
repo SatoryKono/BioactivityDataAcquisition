@@ -1,3 +1,5 @@
+# pyright: reportIncompatibleMethodOverride=false
+# MRO/override residual on mixin or client hierarchies.
 """UniProt Target transformer.
 
 Transforms raw UniProt protein records into Silver-layer format using

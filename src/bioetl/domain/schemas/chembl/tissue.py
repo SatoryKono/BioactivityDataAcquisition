@@ -1,3 +1,5 @@
+# pyright: reportIncompatibleVariableOverride=false
+# Pandera/ETL nested Config override pattern (PD2-7).
 """Pandera schema for ChEMBL Tissue entity.
 
 Aligned with ChEMBL tissue transformer output and pipeline contract.

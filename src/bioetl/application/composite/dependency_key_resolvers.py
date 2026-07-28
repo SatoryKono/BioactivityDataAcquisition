@@ -1,3 +1,5 @@
+# pyright: reportAttributeAccessIssue=false
+# Host attrs/methods provided by concrete composition.
 """Key resolver strategies for dependency coordinator (ADR-026)."""
 
 from __future__ import annotations

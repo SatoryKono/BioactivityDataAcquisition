@@ -1,3 +1,5 @@
+# pyright: reportImportCycles=false
+# Import cycle residual tracked in allowlist (product burn-down).
 """Domain mapping utilities for cross-provider field unification."""
 
 from __future__ import annotations

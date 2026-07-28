@@ -19,7 +19,7 @@ function ConvertFrom-BioetlNeo4jAuth {
     }
 }
 
-function Normalize-BioetlRepoEnvAliases {
+function Set-BioetlGithubEnvAliases {
     # GitHub MCP expects GITHUB_PERSONAL_ACCESS_TOKEN; local .env often has GITHUB_TOKEN.
     if (-not $env:GITHUB_PERSONAL_ACCESS_TOKEN) {
         if ($env:GITHUB_TOKEN) {
@@ -34,11 +34,12 @@ function Normalize-BioetlRepoEnvAliases {
     if (-not $env:GITHUB_TOKEN -and $env:GITHUB_PERSONAL_ACCESS_TOKEN) {
         $env:GITHUB_TOKEN = $env:GITHUB_PERSONAL_ACCESS_TOKEN
     }
+}
 
+function Set-BioetlSearchEnvAliases {
     if (-not $env:NEEDLE_API_KEY -and $env:NEEDLE_TOKEN) {
         $env:NEEDLE_API_KEY = $env:NEEDLE_TOKEN
     }
-
     if (-not $env:BRAVE_API_KEY) {
         if ($env:BRAVE_SEARCH_API_KEY) {
             $env:BRAVE_API_KEY = $env:BRAVE_SEARCH_API_KEY
@@ -46,8 +47,6 @@ function Normalize-BioetlRepoEnvAliases {
             $env:BRAVE_API_KEY = $env:BRAVE_API_KEY1
         }
     }
-
-    # Context7 optional key aliases
     if (-not $env:CONTEXT7_API_KEY) {
         if ($env:CONTEXT7_API_TOKEN) {
             $env:CONTEXT7_API_KEY = $env:CONTEXT7_API_TOKEN
@@ -55,7 +54,9 @@ function Normalize-BioetlRepoEnvAliases {
             $env:CONTEXT7_API_KEY = $env:UPSTASH_CONTEXT7_API_KEY
         }
     }
+}
 
+function Set-BioetlDockerHubEnvAliases {
     if (-not $env:HUB_PAT_TOKEN) {
         if ($env:DOCKERHUB_PAT) {
             $env:HUB_PAT_TOKEN = $env:DOCKERHUB_PAT
@@ -71,7 +72,9 @@ function Normalize-BioetlRepoEnvAliases {
     if (-not $env:DOCKERHUB_USERNAME -and $env:DOCKER_USERNAME) {
         $env:DOCKERHUB_USERNAME = $env:DOCKER_USERNAME
     }
+}
 
+function Set-BioetlGrafanaEnvAliases {
     if (-not $env:GRAFANA_SERVICE_ACCOUNT_TOKEN) {
         if ($env:GRAFANA_TOKEN) {
             $env:GRAFANA_SERVICE_ACCOUNT_TOKEN = $env:GRAFANA_TOKEN
@@ -85,8 +88,9 @@ function Normalize-BioetlRepoEnvAliases {
     if (-not $env:GRAFANA_PASSWORD -and $env:GF_SECURITY_ADMIN_PASSWORD) {
         $env:GRAFANA_PASSWORD = $env:GF_SECURITY_ADMIN_PASSWORD
     }
+}
 
-    # Neo4j auth pack → discrete username/password when needed.
+function Set-BioetlNeo4jEnvAliases {
     if ($env:NEO4J_AUTH) {
         $authParts = ConvertFrom-BioetlNeo4jAuth -Auth $env:NEO4J_AUTH
         if (-not $env:NEO4J_USERNAME) { $env:NEO4J_USERNAME = $authParts.Username }
@@ -94,6 +98,71 @@ function Normalize-BioetlRepoEnvAliases {
     }
     if (-not $env:NEO4J_URL -and $env:NEO4J_URI) {
         $env:NEO4J_URL = $env:NEO4J_URI
+    }
+}
+
+function Normalize-BioetlRepoEnvAliases {
+    Set-BioetlGithubEnvAliases
+    Set-BioetlSearchEnvAliases
+    Set-BioetlDockerHubEnvAliases
+    Set-BioetlGrafanaEnvAliases
+    Set-BioetlNeo4jEnvAliases
+}
+
+function ConvertFrom-BioetlEnvFileLine {
+    param(
+        [string]$RawLine,
+        [hashtable]$ShellEnv
+    )
+
+    $line = $RawLine.Trim()
+    if (-not $line -or $line.StartsWith("#") -or -not $RawLine.Contains("=")) {
+        return $null
+    }
+
+    $parts = $RawLine -split '=', 2
+    if ($parts.Count -ne 2) {
+        return $null
+    }
+
+    $name = $parts[0].Trim()
+    if ($name -notmatch '^[A-Za-z_][A-Za-z0-9_]*$') {
+        return $null
+    }
+
+    if ($ShellEnv.ContainsKey($name) -and -not [string]::IsNullOrEmpty($ShellEnv[$name])) {
+        return $null
+    }
+
+    $value = $parts[1].Trim()
+    if ($value.Length -ge 2 -and (
+            ($value.StartsWith('"') -and $value.EndsWith('"')) -or
+            ($value.StartsWith("'") -and $value.EndsWith("'"))
+        )) {
+        $value = $value.Substring(1, $value.Length - 2)
+    } else {
+        $value = [regex]::Replace($value, '\s+#.*$', '').TrimEnd()
+    }
+
+    return [pscustomobject]@{ Name = $name; Value = $value }
+}
+
+function Import-BioetlEnvFile {
+    param(
+        [string]$Path,
+        [hashtable]$ShellEnv
+    )
+
+    if (-not (Test-Path $Path)) {
+        return
+    }
+
+    foreach ($rawLine in Get-Content -Path $Path) {
+        $parsed = ConvertFrom-BioetlEnvFileLine -RawLine $rawLine -ShellEnv $ShellEnv
+        if ($null -eq $parsed) {
+            continue
+        }
+        Set-Item -Path "Env:$($parsed.Name)" -Value $parsed.Value
     }
 }
 
@@ -129,47 +198,9 @@ function Import-BioetlRepoEnv {
         $shellEnv[$_.Name] = $_.Value
     }
 
-    $filesToLoad = @($envFile)
+    Import-BioetlEnvFile -Path $envFile -ShellEnv $shellEnv
     if ($envLocalFile) {
-        $filesToLoad += $envLocalFile
-    }
-    foreach ($file in $filesToLoad) {
-        if (-not (Test-Path $file)) {
-            continue
-        }
-
-        foreach ($rawLine in Get-Content -Path $file) {
-            $line = $rawLine.Trim()
-            if (-not $line -or $line.StartsWith("#") -or -not $rawLine.Contains("=")) {
-                continue
-            }
-
-            $parts = $rawLine -split '=', 2
-            if ($parts.Count -ne 2) {
-                continue
-            }
-
-            $name = $parts[0].Trim()
-            if ($name -notmatch '^[A-Za-z_][A-Za-z0-9_]*$') {
-                continue
-            }
-
-            if ($shellEnv.ContainsKey($name) -and -not [string]::IsNullOrEmpty($shellEnv[$name])) {
-                continue
-            }
-
-            $value = $parts[1].Trim()
-            if ($value.Length -ge 2 -and (
-                    ($value.StartsWith('"') -and $value.EndsWith('"')) -or
-                    ($value.StartsWith("'") -and $value.EndsWith("'"))
-                )) {
-                $value = $value.Substring(1, $value.Length - 2)
-            } else {
-                $value = [regex]::Replace($value, '\s+#.*$', '').TrimEnd()
-            }
-
-            Set-Item -Path "Env:$name" -Value $value
-        }
+        Import-BioetlEnvFile -Path $envLocalFile -ShellEnv $shellEnv
     }
 
     $env:BIOETL_REPO_ENV_LOADED = "1"

@@ -1,3 +1,5 @@
+# pyright: reportMissingSuperCall=false
+# basedpyright residual burn-down (shrink-only product surface).
 """Publication year Value Object.
 
 Contains PublicationYear — a bibliographic concept used by

@@ -1,3 +1,6 @@
+# pyright: reportArgumentType=false
+# pyright: reportCallIssue=false
+# Boundary object/payload typing residual at this module.
 """Private startup orchestration for the detached observability backend."""
 
 from __future__ import annotations

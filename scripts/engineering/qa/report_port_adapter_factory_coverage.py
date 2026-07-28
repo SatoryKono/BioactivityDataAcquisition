@@ -18,6 +18,19 @@ DEFAULT_MD_OUTPUT = (
     PROJECT_ROOT / "reports" / "quality" / "port-adapter-factory-coverage.md"
 )
 
+# Shared coverage evidence path identities (python:S1192).
+TEST_STRICT_ARCHITECTURE_CONTRACTS = (
+    "tests/architecture/test_strict_architecture_contracts.py"
+)
+PATH_STORAGE_BUNDLE = "src/bioetl/composition/factories/storage/bundle.py"
+PATH_STORAGE_BOOTSTRAP_ASSEMBLY = (
+    "src/bioetl/composition/bootstrap/assembly/storage.py"
+)
+PATH_STORAGE_FACTORY = "src/bioetl/composition/factories/storage/factory.py"
+TEST_STORAGE_BOOTSTRAP = (
+    "tests/unit/composition/bootstrap/test_storage_bootstrap.py"
+)
+
 
 @dataclass(frozen=True, slots=True)
 class PortCoverageSpec:
@@ -48,7 +61,7 @@ TRACKED_PORTS: tuple[PortCoverageSpec, ...] = (
             "src/bioetl/composition/factories/datasource/pubchem.py",
         ),
         test_paths=(
-            "tests/architecture/test_strict_architecture_contracts.py",
+            TEST_STRICT_ARCHITECTURE_CONTRACTS,
             "tests/architecture/test_adapter_contracts.py",
             "tests/unit/composition/factories/datasource/test_data_sources.py",
         ),
@@ -64,7 +77,7 @@ TRACKED_PORTS: tuple[PortCoverageSpec, ...] = (
             "src/bioetl/composition/factories/services/port_factories.py",
         ),
         test_paths=(
-            "tests/architecture/test_strict_architecture_contracts.py",
+            TEST_STRICT_ARCHITECTURE_CONTRACTS,
             "tests/unit/composition/bootstrap/test_checkpoint_bootstrap.py",
             "tests/architecture/test_port_contracts_resilience_concurrency.py",
         ),
@@ -80,7 +93,7 @@ TRACKED_PORTS: tuple[PortCoverageSpec, ...] = (
             "src/bioetl/composition/factories/services/port_factories.py",
         ),
         test_paths=(
-            "tests/architecture/test_strict_architecture_contracts.py",
+            TEST_STRICT_ARCHITECTURE_CONTRACTS,
             "tests/unit/composition/bootstrap/test_checkpoint_bootstrap.py",
             "tests/architecture/test_quarantine_immutability.py",
         ),
@@ -97,7 +110,7 @@ TRACKED_PORTS: tuple[PortCoverageSpec, ...] = (
             "src/bioetl/composition/bootstrap/assembly/health_server.py",
         ),
         test_paths=(
-            "tests/architecture/test_strict_architecture_contracts.py",
+            TEST_STRICT_ARCHITECTURE_CONTRACTS,
             "tests/unit/composition/bootstrap/test_control_plane_store_builders.py",
             "tests/unit/infrastructure/control_plane/test_file_run_manifest_store.py",
         ),
@@ -114,7 +127,7 @@ TRACKED_PORTS: tuple[PortCoverageSpec, ...] = (
             "src/bioetl/composition/bootstrap/assembly/health_server.py",
         ),
         test_paths=(
-            "tests/architecture/test_strict_architecture_contracts.py",
+            TEST_STRICT_ARCHITECTURE_CONTRACTS,
             "tests/unit/composition/bootstrap/test_control_plane_store_builders.py",
             "tests/unit/infrastructure/control_plane/test_file_run_ledger_store.py",
         ),
@@ -132,7 +145,7 @@ TRACKED_PORTS: tuple[PortCoverageSpec, ...] = (
             "src/bioetl/composition/observability_resolution.py",
         ),
         test_paths=(
-            "tests/architecture/test_strict_architecture_contracts.py",
+            TEST_STRICT_ARCHITECTURE_CONTRACTS,
             "tests/unit/composition/bootstrap/runtime/test_metrics_bootstrap.py",
             "tests/unit/infrastructure/observability/test_metrics_port_contract.py",
         ),
@@ -158,16 +171,16 @@ TRACKED_PORTS: tuple[PortCoverageSpec, ...] = (
         port_path="src/bioetl/domain/ports/storage/bronze_port.py",
         adapter_symbols=("StorageBundle", "BronzeWriter"),
         adapter_paths=(
-            "src/bioetl/composition/factories/storage/bundle.py",
+            PATH_STORAGE_BUNDLE,
             "src/bioetl/infrastructure/storage/bronze_writer.py",
         ),
         factory_paths=(
-            "src/bioetl/composition/bootstrap/assembly/storage.py",
-            "src/bioetl/composition/factories/storage/factory.py",
+            PATH_STORAGE_BOOTSTRAP_ASSEMBLY,
+            PATH_STORAGE_FACTORY,
         ),
         test_paths=(
-            "tests/architecture/test_strict_architecture_contracts.py",
-            "tests/unit/composition/bootstrap/test_storage_bootstrap.py",
+            TEST_STRICT_ARCHITECTURE_CONTRACTS,
+            TEST_STORAGE_BOOTSTRAP,
             "tests/unit/composition/factories/storage/test_bronze_factory.py",
         ),
     ),
@@ -176,16 +189,16 @@ TRACKED_PORTS: tuple[PortCoverageSpec, ...] = (
         port_path="src/bioetl/domain/ports/storage/silver_port.py",
         adapter_symbols=("StorageBundle", "SilverWriter"),
         adapter_paths=(
-            "src/bioetl/composition/factories/storage/bundle.py",
+            PATH_STORAGE_BUNDLE,
             "src/bioetl/infrastructure/storage/silver_writer.py",
         ),
         factory_paths=(
-            "src/bioetl/composition/bootstrap/assembly/storage.py",
-            "src/bioetl/composition/factories/storage/factory.py",
+            PATH_STORAGE_BOOTSTRAP_ASSEMBLY,
+            PATH_STORAGE_FACTORY,
         ),
         test_paths=(
-            "tests/architecture/test_strict_architecture_contracts.py",
-            "tests/unit/composition/bootstrap/test_storage_bootstrap.py",
+            TEST_STRICT_ARCHITECTURE_CONTRACTS,
+            TEST_STORAGE_BOOTSTRAP,
             "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
         ),
     ),
@@ -194,16 +207,16 @@ TRACKED_PORTS: tuple[PortCoverageSpec, ...] = (
         port_path="src/bioetl/domain/ports/storage/gold_port.py",
         adapter_symbols=("StorageBundle", "GoldWriter"),
         adapter_paths=(
-            "src/bioetl/composition/factories/storage/bundle.py",
+            PATH_STORAGE_BUNDLE,
             "src/bioetl/infrastructure/storage/gold_writer.py",
         ),
         factory_paths=(
-            "src/bioetl/composition/bootstrap/assembly/storage.py",
-            "src/bioetl/composition/factories/storage/factory.py",
+            PATH_STORAGE_BOOTSTRAP_ASSEMBLY,
+            PATH_STORAGE_FACTORY,
         ),
         test_paths=(
-            "tests/architecture/test_strict_architecture_contracts.py",
-            "tests/unit/composition/bootstrap/test_storage_bootstrap.py",
+            TEST_STRICT_ARCHITECTURE_CONTRACTS,
+            TEST_STORAGE_BOOTSTRAP,
             "tests/unit/infrastructure/schemas/test_gold.py",
         ),
     ),

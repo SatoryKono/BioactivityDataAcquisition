@@ -1,4 +1,6 @@
 # mypy: disable-error-code="misc,untyped-decorator"
+# pyright: reportUnsafeMultipleInheritance=false
+# basedpyright residual burn-down (shrink-only product surface).
 """Centralized configuration for BioETL.
 
 Uses pydantic-settings for type-safe, validated configuration from environment

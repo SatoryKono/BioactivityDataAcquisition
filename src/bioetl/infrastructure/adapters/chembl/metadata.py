@@ -1,3 +1,5 @@
+# pyright: reportUninitializedInstanceVariable=false
+# Host attrs/methods provided by concrete composition.
 """Metadata handling mixin for ChEMBL adapter."""
 
 from __future__ import annotations

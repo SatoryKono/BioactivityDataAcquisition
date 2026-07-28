@@ -1,3 +1,5 @@
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Mutation and quarantine helpers for workflow FK reconciliation."""
 
 from __future__ import annotations

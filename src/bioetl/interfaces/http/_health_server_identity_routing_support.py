@@ -1,3 +1,5 @@
+# pyright: reportImportCycles=false
+# Import cycle residual tracked in allowlist (product burn-down).
 """Extracted control-plane identity routing helpers for HealthServer."""
 
 from __future__ import annotations

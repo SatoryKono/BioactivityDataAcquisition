@@ -1,3 +1,5 @@
+# pyright: reportUninitializedInstanceVariable=false
+# Host attrs/methods provided by concrete composition.
 """Hydration helpers for typed control-plane objects from manifest payloads."""
 
 from __future__ import annotations

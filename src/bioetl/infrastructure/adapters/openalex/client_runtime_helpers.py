@@ -1,3 +1,5 @@
+# pyright: reportArgumentType=false
+# OpenAlex payload fields are object-typed at boundary (PD2-6).
 """Runtime assembly helpers for the OpenAlex adapter."""
 
 from __future__ import annotations

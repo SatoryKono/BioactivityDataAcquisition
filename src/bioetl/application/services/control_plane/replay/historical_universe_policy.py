@@ -1,3 +1,5 @@
+# pyright: reportImportCycles=false
+# Import cycle residual tracked in allowlist (product burn-down).
 """Pure policy helpers for full-universe historical replay reporting."""
 
 from __future__ import annotations

@@ -1,3 +1,6 @@
+# pyright: reportAttributeAccessIssue=false
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Internal pipeline creation wiring extracted from service bundle facade."""
 
 from __future__ import annotations

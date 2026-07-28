@@ -1,3 +1,6 @@
+# pyright: reportIncompatibleVariableOverride=false
+# pyright: reportUnsafeMultipleInheritance=false
+# MRO/override residual on mixin or client hierarchies.
 """PubMed adapter implementation for Entrez E-utilities API.
 
 Canonical provider adapter surface:

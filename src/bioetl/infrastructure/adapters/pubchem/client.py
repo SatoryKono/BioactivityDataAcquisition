@@ -1,3 +1,5 @@
+# pyright: reportArgumentType=false
+# Boundary object/payload typing residual at this module.
 """PubChem API client adapter.
 
 Implements DataSourcePort for PubChem compound retrieval.

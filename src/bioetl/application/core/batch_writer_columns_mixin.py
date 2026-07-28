@@ -1,4 +1,7 @@
 # mypy: disable-error-code=attr-defined
+# pyright: reportUninitializedInstanceVariable=false
+# pyright: reportAttributeAccessIssue=false
+# Host attrs/methods provided by concrete composition (PD2 W1).
 """Column-order and schema helpers for BatchWriter."""
 
 from __future__ import annotations

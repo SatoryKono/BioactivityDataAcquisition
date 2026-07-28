@@ -5,6 +5,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+$InformationPreference = "Continue"
 Set-StrictMode -Version Latest
 
 function Show-Usage {
@@ -70,7 +71,7 @@ function Invoke-Step {
         [Parameter(Mandatory = $true)][scriptblock]$Action
     )
 
-    Write-Host $Label
+    Write-Information $Label -InformationAction Continue
     $global:LASTEXITCODE = 0
     & $Action
     if ($LASTEXITCODE -ne 0) {
@@ -109,7 +110,7 @@ function Resolve-PortableNodeToolchain {
         $zipPath = Join-Path $env:TEMP $zipName
         $extractRoot = Join-Path $env:TEMP ("bioetl-node-extract-" + [System.Guid]::NewGuid().ToString("N"))
 
-        Write-Host "Downloading portable Node.js LTS from $downloadUrl..."
+        Write-Information "Downloading portable Node.js LTS from $downloadUrl..." -InformationAction Continue
         Invoke-WebRequest -Uri $downloadUrl -OutFile $zipPath
         Ensure-Directory -Path $extractRoot
         Expand-Archive -LiteralPath $zipPath -DestinationPath $extractRoot -Force

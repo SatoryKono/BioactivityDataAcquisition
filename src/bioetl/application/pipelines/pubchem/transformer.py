@@ -1,3 +1,5 @@
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """PubChem Molecule Transformer.
 
 Transforms raw PubChem compound records into Silver-layer format using

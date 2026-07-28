@@ -1,3 +1,6 @@
+# pyright: reportUninitializedInstanceVariable=false
+# pyright: reportAttributeAccessIssue=false
+# Host attrs/methods provided by concrete composition (PD2 W1).
 """DQ context and accumulation helpers for BatchExecutor."""
 
 from __future__ import annotations

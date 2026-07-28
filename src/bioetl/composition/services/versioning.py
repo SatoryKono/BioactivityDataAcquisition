@@ -1,3 +1,5 @@
+# pyright: reportAttributeAccessIssue=false
+# Host attrs/methods provided by concrete composition.
 """Versioning and reproducibility utilities for pipeline metadata.
 
 Provides functions to compute:

@@ -27,7 +27,7 @@ DEFAULT_OUTPUT = (
 
 
 # Scorecard inputs are heterogeneous JSON/YAML mappings (artifact payloads).
-JsonMap = dict[str, Any]
+JsonMap = dict[str, Any]  # Any: scorecard combines heterogeneous JSON/YAML payloads.
 
 
 def _load_json(repo_root: Path, rel_path: str) -> JsonMap:

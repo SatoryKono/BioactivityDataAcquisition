@@ -196,10 +196,14 @@ def semantic_gate_evidence(results: list[AuditResult]) -> dict[str, Any]:
 
     blocking_count = sum(item["decision"] == "block" for item in outcomes)
     review_count = sum(item["decision"] == "review" for item in outcomes)
+    if blocking_count:
+        status = "fail"
+    elif review_count:
+        status = "review_required"
+    else:
+        status = "pass"
     return {
-        "status": (
-            "fail" if blocking_count else "review_required" if review_count else "pass"
-        ),
+        "status": status,
         "blocking_count": blocking_count,
         "review_count": review_count,
         "classification_policy": SEMANTIC_CLASSIFICATION_POLICY,

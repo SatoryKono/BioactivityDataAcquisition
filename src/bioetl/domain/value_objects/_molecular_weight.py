@@ -1,3 +1,5 @@
+# pyright: reportMissingSuperCall=false
+# basedpyright residual burn-down (shrink-only product surface).
 """Molecular weight Value Object.
 
 Contains MolecularWeight — a chemical property with configurable

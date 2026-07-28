@@ -1,4 +1,6 @@
 # mypy: disable-error-code=attr-defined
+# pyright: reportAttributeAccessIssue=false
+# Host attrs/methods provided by concrete composition.
 """Internal search pagination helpers for Semantic Scholar fetch flow."""
 
 from __future__ import annotations

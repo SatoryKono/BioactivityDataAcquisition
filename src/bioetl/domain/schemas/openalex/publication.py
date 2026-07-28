@@ -1,3 +1,5 @@
+# pyright: reportIncompatibleVariableOverride=false
+# Pandera/ETL nested Config override pattern (PD2-7).
 """Pandera schema for OpenAlex Publication entity.
 
 Aligned with RULES.md v5.24 and Publication Schema Unification spec.

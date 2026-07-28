@@ -7,22 +7,40 @@ import json
 from pathlib import Path
 
 DASHBOARDS_DIR = Path("grafana/dashboards")
+
+# Dashboard / panel title identities (python:S1192).
+DASHBOARD_RUNTIME = "bioetl-runtime.json"
+DASHBOARD_DQ_V2 = "bioetl-dq-v2.json"
+DASHBOARD_CONTROL_PLANE_V1 = "bioetl-control-plane-v1.json"
+DASHBOARD_OVERVIEW_V2 = "bioetl-overview-v2.json"
+PANEL_MONITOR_RUNTIME_BLOCKERS = "Monitor Runtime Blockers"
+PANEL_RUNTIME_ERROR_RATE = "Runtime Error Rate"
+PANEL_WORST_STAGE_LAG = "Worst Stage Lag"
+PANEL_RUNTIME_STATUS = "Runtime Status"
+PANEL_METRICS_EVIDENCE = "Metrics Evidence"
+PANEL_MONITOR_DQ_CURRENT_STATUS = "Monitor DQ Current Status"
+PANEL_MONITOR_DQ_THRESHOLD_STATE = "Monitor DQ Threshold State"
+PANEL_MONITOR_REPLAY_SAFETY_STATE = "Monitor: Replay Safety State"
+PANEL_MONITOR_MANIFEST_LEDGER_INTEGRITY = "Monitor: Manifest / Ledger Integrity"
+PANEL_INSPECT_TELEMETRY_MISSING = "Inspect: Telemetry Missing"
+UNTITLED_PANEL_TITLE = "<untitled>"
+
 EXPECTED_STEPS = [
     {"color": "green", "value": None},
     {"color": "orange", "value": 1},
     {"color": "red", "value": 2},
 ]
 EXPECTED_STEPS_BY_PANEL = {
-    ("bioetl-runtime.json", "Monitor Runtime Blockers"): [
+    (DASHBOARD_RUNTIME, PANEL_MONITOR_RUNTIME_BLOCKERS): [
         {"color": "green", "value": None},
         {"color": "red", "value": 1},
     ],
-    ("bioetl-runtime.json", "Runtime Error Rate"): [
+    (DASHBOARD_RUNTIME, PANEL_RUNTIME_ERROR_RATE): [
         {"color": "green", "value": None},
         {"color": "orange", "value": 0.05},
         {"color": "red", "value": 0.2},
     ],
-    ("bioetl-runtime.json", "Worst Stage Lag"): [
+    (DASHBOARD_RUNTIME, PANEL_WORST_STAGE_LAG): [
         {"color": "green", "value": None},
         {"color": "orange", "value": 300},
         {"color": "red", "value": 900},
@@ -33,101 +51,101 @@ EXPECTED_UNKNOWN_MAPPING = {
     "options": {"match": "null", "result": {"text": "UNKNOWN", "color": "gray"}},
 }
 L0_DASHBOARD_FILES = {
-    "bioetl-overview-v2.json",
+    DASHBOARD_OVERVIEW_V2,
 }
 FORBIDDEN_L0_TERMS = {"DEGRADED", "BROKEN", "HEALTHY"}
 STATUS_PANEL_TOKENS = ("status", "state", "severity", "health")
 STANDARD_SEVERITY_TITLE_TOKENS = (
     "Current Status",
-    "Metrics Evidence",
+    PANEL_METRICS_EVIDENCE,
     "Threshold State",
 )
 BACKGROUND_SEVERITY_STAT_PANELS = {
-    ("bioetl-overview-v2.json", "Status"),
-    ("bioetl-runtime.json", "Runtime Status"),
-    ("bioetl-runtime.json", "Metrics Evidence"),
-    ("bioetl-runtime.json", "Monitor Runtime Blockers"),
-    ("bioetl-runtime.json", "Failed Runs"),
-    ("bioetl-runtime.json", "Runtime Error Rate"),
-    ("bioetl-runtime.json", "Worst Stage Lag"),
-    ("bioetl-dq-v2.json", "Monitor DQ Current Status"),
-    ("bioetl-dq-v2.json", "Monitor DQ Threshold State"),
-    ("bioetl-control-plane-v1.json", "Monitor: Replay Safety State"),
-    ("bioetl-control-plane-v1.json", "Monitor: Manifest / Ledger Integrity"),
-    ("bioetl-control-plane-v1.json", "Inspect: Telemetry Missing"),
+    (DASHBOARD_OVERVIEW_V2, "Status"),
+    (DASHBOARD_RUNTIME, PANEL_RUNTIME_STATUS),
+    (DASHBOARD_RUNTIME, PANEL_METRICS_EVIDENCE),
+    (DASHBOARD_RUNTIME, PANEL_MONITOR_RUNTIME_BLOCKERS),
+    (DASHBOARD_RUNTIME, "Failed Runs"),
+    (DASHBOARD_RUNTIME, PANEL_RUNTIME_ERROR_RATE),
+    (DASHBOARD_RUNTIME, PANEL_WORST_STAGE_LAG),
+    (DASHBOARD_DQ_V2, PANEL_MONITOR_DQ_CURRENT_STATUS),
+    (DASHBOARD_DQ_V2, PANEL_MONITOR_DQ_THRESHOLD_STATE),
+    (DASHBOARD_CONTROL_PLANE_V1, PANEL_MONITOR_REPLAY_SAFETY_STATE),
+    (DASHBOARD_CONTROL_PLANE_V1, PANEL_MONITOR_MANIFEST_LEDGER_INTEGRITY),
+    (DASHBOARD_CONTROL_PLANE_V1, PANEL_INSPECT_TELEMETRY_MISSING),
 }
 SCALAR_TREND_TIMESERIES_PANELS = {
-    ("bioetl-dq-v2.json", "Track: Data Quality Score Trend (Volume-weighted)"),
-    ("bioetl-dq-v2.json", "Track: DQ Threshold Events in Range Trend"),
-    ("bioetl-overview-v2.json", "Runtime Blockers Trend"),
-    ("bioetl-overview-v2.json", "DQ Status Trend"),
-    ("bioetl-overview-v2.json", "Gold Lifecycle Trend"),
+    (DASHBOARD_DQ_V2, "Track: Data Quality Score Trend (Volume-weighted)"),
+    (DASHBOARD_DQ_V2, "Track: DQ Threshold Events in Range Trend"),
+    (DASHBOARD_OVERVIEW_V2, "Runtime Blockers Trend"),
+    (DASHBOARD_OVERVIEW_V2, "DQ Status Trend"),
+    (DASHBOARD_OVERVIEW_V2, "Gold Lifecycle Trend"),
 }
 ALLOWED_TABLE_CELL_OPTION_TYPES = {"auto", "color-background", "color-text"}
 EXPLICIT_VALUE_MAPPING_STAT_PANELS = {
-    ("bioetl-overview-v2.json", "Status"): {
+    (DASHBOARD_OVERVIEW_V2, "Status"): {
         "0": {"text": "OK", "color": "green"},
         "1": {"text": "WARN", "color": "orange"},
         "2": {"text": "CRIT", "color": "red"},
         "3": {"text": "UNKNOWN", "color": "gray"},
     },
-    ("bioetl-runtime.json", "Runtime Status"): {
+    (DASHBOARD_RUNTIME, PANEL_RUNTIME_STATUS): {
         "0": {"text": "OK", "color": "green"},
         "1": {"text": "WARN", "color": "orange"},
         "2": {"text": "CRIT", "color": "red"},
         "3": {"text": "INCOMPLETE", "color": "gray"},
     },
-    ("bioetl-runtime.json", "Metrics Evidence"): {
+    (DASHBOARD_RUNTIME, PANEL_METRICS_EVIDENCE): {
         "0": {"text": "SCRAPING", "color": "green"},
         "1": {"text": "SCRAPE/RULE GAP", "color": "orange"},
         "2": {"text": "SCRAPE+RULE GAP", "color": "red"},
     },
-    ("bioetl-dq-v2.json", "Monitor DQ Current Status"): {
+    (DASHBOARD_DQ_V2, PANEL_MONITOR_DQ_CURRENT_STATUS): {
         "0": {"text": "OK", "color": "green"},
         "1": {"text": "WARN", "color": "orange"},
         "2": {"text": "CRIT", "color": "red"},
         "3": {"text": "INCOMPLETE", "color": "gray"},
     },
-    ("bioetl-dq-v2.json", "Monitor DQ Threshold State"): {
+    (DASHBOARD_DQ_V2, PANEL_MONITOR_DQ_THRESHOLD_STATE): {
         "0": {"text": "OK", "color": "green"},
         "1": {"text": "WARN", "color": "orange"},
         "2": {"text": "CRIT", "color": "red"},
     },
-    ("bioetl-control-plane-v1.json", "Monitor: Replay Safety State"): {
+    (DASHBOARD_CONTROL_PLANE_V1, PANEL_MONITOR_REPLAY_SAFETY_STATE): {
         "0": {"text": "OK", "color": "green"},
         "1": {"text": "WARN", "color": "orange"},
         "2": {"text": "CRIT", "color": "red"},
     },
-    ("bioetl-control-plane-v1.json", "Monitor: Manifest / Ledger Integrity"): {
+    (DASHBOARD_CONTROL_PLANE_V1, PANEL_MONITOR_MANIFEST_LEDGER_INTEGRITY): {
         "0": {"text": "OK", "color": "green"},
         "1": {"text": "WARN", "color": "orange"},
         "2": {"text": "CRIT", "color": "red"},
     },
-    ("bioetl-control-plane-v1.json", "Inspect: Telemetry Missing"): {
+    (DASHBOARD_CONTROL_PLANE_V1, PANEL_INSPECT_TELEMETRY_MISSING): {
         "0": {"text": "OK", "color": "green"},
         "1": {"text": "WARN", "color": "orange"},
         "2": {"text": "CRIT", "color": "red"},
     },
 }
 FAIL_CLOSED_NO_ZERO_FALLBACK_PANELS = {
-    ("bioetl-overview-v2.json", "Status"): "UNKNOWN",
-    ("bioetl-runtime.json", "Runtime Status"): "UNKNOWN",
-    ("bioetl-runtime.json", "Metrics Evidence"): "UNKNOWN",
-    ("bioetl-runtime.json", "Monitor Runtime Blockers"): "UNKNOWN",
-    ("bioetl-runtime.json", "Runtime Error Rate"): "UNKNOWN",
-    ("bioetl-runtime.json", "Worst Stage Lag"): "UNKNOWN",
-    ("bioetl-runtime.json", "Monitor Memory Pressure Active"): "UNKNOWN",
+    (DASHBOARD_OVERVIEW_V2, "Status"): "UNKNOWN",
+    (DASHBOARD_RUNTIME, PANEL_RUNTIME_STATUS): "UNKNOWN",
+    (DASHBOARD_RUNTIME, PANEL_METRICS_EVIDENCE): "UNKNOWN",
+    (DASHBOARD_RUNTIME, PANEL_MONITOR_RUNTIME_BLOCKERS): "UNKNOWN",
+    (DASHBOARD_RUNTIME, PANEL_RUNTIME_ERROR_RATE): "UNKNOWN",
+    (DASHBOARD_RUNTIME, PANEL_WORST_STAGE_LAG): "UNKNOWN",
+    (DASHBOARD_RUNTIME, "Monitor Memory Pressure Active"): "UNKNOWN",
     ("bioetl-provider-health-v2.json", "Monitor GLOBAL Provider Severity Matrix"): None,
     ("bioetl-provider-health-v2.json", "Inspect Provider Top Causes"): None,
-    ("bioetl-dq-v2.json", "Monitor DQ Current Status"): "UNKNOWN",
-    ("bioetl-dq-v2.json", "Monitor DQ Threshold State"): "UNKNOWN",
-    ("bioetl-control-plane-v1.json", "Monitor: Replay Safety State"): "UNKNOWN",
-    ("bioetl-control-plane-v1.json", "Monitor: Manifest / Ledger Integrity"): "UNKNOWN",
-    ("bioetl-control-plane-v1.json", "Inspect: Telemetry Missing"): "UNKNOWN",
+    (DASHBOARD_DQ_V2, PANEL_MONITOR_DQ_CURRENT_STATUS): "UNKNOWN",
+    (DASHBOARD_DQ_V2, PANEL_MONITOR_DQ_THRESHOLD_STATE): "UNKNOWN",
+    (DASHBOARD_CONTROL_PLANE_V1, PANEL_MONITOR_REPLAY_SAFETY_STATE): "UNKNOWN",
+    (DASHBOARD_CONTROL_PLANE_V1, PANEL_MONITOR_MANIFEST_LEDGER_INTEGRITY): "UNKNOWN",
+    (DASHBOARD_CONTROL_PLANE_V1, PANEL_INSPECT_TELEMETRY_MISSING): "UNKNOWN",
 }
 REQUIRED_TRUST_MARKER_PANELS = {
-    "bioetl-runtime.json": {"Metrics Evidence"},
-    "bioetl-control-plane-v1.json": {"Inspect: Telemetry Missing"},
+    DASHBOARD_RUNTIME: {PANEL_METRICS_EVIDENCE},
+    DASHBOARD_CONTROL_PLANE_V1: {PANEL_INSPECT_TELEMETRY_MISSING},
 }
 
 
@@ -242,7 +260,7 @@ def _stat_value_mapping_error(
 
 
 def _stat_panel_visual_semantics_errors(dashboard_path: Path, panel: dict) -> list[str]:
-    title = panel.get("title", "<untitled>")
+    title = panel.get("title", UNTITLED_PANEL_TITLE)
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
     mappings = defaults.get("mappings", [])
     candidates = (
@@ -258,7 +276,7 @@ def _stat_panel_visual_semantics_errors(dashboard_path: Path, panel: dict) -> li
 def _gauge_panel_visual_semantics_errors(
     dashboard_path: Path, panel: dict
 ) -> list[str]:
-    title = panel.get("title", "<untitled>")
+    title = panel.get("title", UNTITLED_PANEL_TITLE)
     options = panel.get("options", {})
     errors: list[str] = []
 
@@ -277,7 +295,7 @@ def _gauge_panel_visual_semantics_errors(
 def _table_panel_visual_semantics_errors(
     dashboard_path: Path, panel: dict
 ) -> list[str]:
-    title = panel.get("title", "<untitled>")
+    title = panel.get("title", UNTITLED_PANEL_TITLE)
     field_config = panel.get("fieldConfig", {})
     errors: list[str] = []
 
@@ -310,7 +328,7 @@ def _table_panel_visual_semantics_errors(
 def _timeseries_panel_visual_semantics_errors(
     dashboard_path: Path, panel: dict
 ) -> list[str]:
-    title = str(panel.get("title", "<untitled>"))
+    title = str(panel.get("title", UNTITLED_PANEL_TITLE))
     tooltip = panel.get("options", {}).get("tooltip", {})
     is_scalar_trend = (dashboard_path.name, title) in SCALAR_TREND_TIMESERIES_PANELS
     expected_mode = "single" if is_scalar_trend else "multi"
@@ -351,7 +369,7 @@ def _l0_terminology_errors(dashboard_path: Path, panel: dict) -> list[str]:
     if dashboard_path.name not in L0_DASHBOARD_FILES:
         return []
 
-    title = panel.get("title", "<untitled>")
+    title = panel.get("title", UNTITLED_PANEL_TITLE)
     text_fields = [str(title), str(panel.get("description", ""))]
     return [
         f"{dashboard_path}: panel '{title}' uses '{term}' in L0 dashboard; "

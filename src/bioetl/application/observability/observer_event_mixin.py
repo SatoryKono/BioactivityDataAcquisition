@@ -1,3 +1,6 @@
+# pyright: reportUninitializedInstanceVariable=false
+# pyright: reportAttributeAccessIssue=false
+# Host attrs/methods provided by concrete composition (PD2 W1).
 """Shared event emission helpers for pipeline observer."""
 
 from __future__ import annotations

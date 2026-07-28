@@ -1,3 +1,5 @@
+# pyright: reportUninitializedInstanceVariable=false
+# Host attrs/methods provided by concrete composition.
 """Internal fetch-routing surface for the PubChem adapter."""
 
 from __future__ import annotations

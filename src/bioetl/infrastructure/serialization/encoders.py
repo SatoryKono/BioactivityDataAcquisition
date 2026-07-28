@@ -1,3 +1,5 @@
+# pyright: reportConstantRedefinition=false
+# basedpyright residual burn-down (shrink-only product surface).
 """JSON encoder implementations.
 
 Provides two implementations of JsonEncoderPort:

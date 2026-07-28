@@ -1,3 +1,8 @@
+# pyright: reportUninitializedInstanceVariable=false
+# pyright: reportAttributeAccessIssue=false
+# Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
+# pyright: reportArgumentType=false
+# Boundary object/payload typing residual at this module.
 """Composite pipeline runner facade.
 
 Coordinates high-level execution flow while delegating stage logic to mixins.

@@ -1,3 +1,6 @@
+# pyright: reportIncompatibleMethodOverride=false
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Shared adapters for transformers that participate in staged PreSilver finalization."""
 
 from __future__ import annotations

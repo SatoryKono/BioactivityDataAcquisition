@@ -1,3 +1,5 @@
+# pyright: reportImportCycles=false
+# Import cycle residual tracked in allowlist (product burn-down).
 """Domain Events for Aggregate Coordination.
 
 Domain events represent something that has happened in the domain.

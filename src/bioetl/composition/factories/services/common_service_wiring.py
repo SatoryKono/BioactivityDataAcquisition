@@ -1,3 +1,5 @@
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Internal wiring helpers for common pipeline service ports."""
 
 from __future__ import annotations

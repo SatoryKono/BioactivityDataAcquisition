@@ -1,6 +1,11 @@
+# pyright: reportArgumentType=false
+# Entity fixture overrides use intentional wide test inputs (PD2-9).
 """Unit tests for low-coverage ChEMBL domain entities."""
 
 from __future__ import annotations
+
+from typing import Any, cast
+
 
 import pytest
 
@@ -11,14 +16,14 @@ from bioetl.domain.entities.chembl_subcellular_fraction import SubcellularFracti
 
 # === Shared fixtures ===
 
-BASE_KWARGS = {
+BASE_KWARGS = cast(Any, {
     "entity_id": "chembl:test:123",
     "content_hash": "abc123hash",
     "run_id": "run-001",
     "run_type": "incremental",
     "ingestion_ts": "2024-01-01T00:00:00",
     "_index": 0,
-}
+})
 
 
 # ============================================================================

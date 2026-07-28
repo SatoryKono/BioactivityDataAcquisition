@@ -9,6 +9,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[4]
 DASH = ROOT / "grafana" / "dashboards"
 
+# Panel title identities (python:S1192).
+PANEL_FIRST_ACTION = "First Action"
+PANEL_INSPECT_PROVIDER_TOP_CAUSES = "Inspect Provider Top Causes"
+PANEL_RUNTIME_BLOCKERS = "Runtime Blockers"
+PANEL_INSPECT_DQ_CURRENT_REASONS = "Inspect DQ Current Reasons"
+PANEL_CONTROL_PLANE_DQ_HANDOFFS = "Control-plane / DQ handoffs"
+
 
 def load(name: str) -> dict:
     return json.loads((DASH / name).read_text(encoding="utf-8"))
@@ -163,9 +170,9 @@ def visualization_upgrades() -> None:
             "Phase-2: status cells use color-background thresholds (OK/WARN/CRIT). "
             "Not peer-comparable to Range evidence elsewhere.",
         )
-    if "First Action" in p:
+    if PANEL_FIRST_ACTION in p:
         append_desc(
-            p["First Action"],
+            p[PANEL_FIRST_ACTION],
             "CTA budget ≤4 routes. Empty/NO_ROUTE: validate pipeline/run_type universe "
             "before treating as healthy.",
         )
@@ -177,12 +184,12 @@ def visualization_upgrades() -> None:
     for title in (
         "Monitor GLOBAL Provider Severity Matrix",
         "Inspect Critical Providers",
-        "Inspect Provider Top Causes",
+        PANEL_INSPECT_PROVIDER_TOP_CAUSES,
     ):
         if title in p:
             ensure_color_bg_table(p[title])
-    if "First Action" in p:
-        p["First Action"].setdefault("options", {})["content"] = (
+    if PANEL_FIRST_ACTION in p:
+        p[PANEL_FIRST_ACTION].setdefault("options", {})["content"] = (
             "<h3>First Action (≤4)</h3>"
             "<ol style='margin:0.2rem 0 0 1.1rem;padding:0'>"
             "<li>Read GLOBAL severity matrix (fleet, not selected).</li>"
@@ -194,11 +201,11 @@ def visualization_upgrades() -> None:
             "non-OK → explainability/scrape gap, not healthy.</p>"
         )
         append_desc(
-            p["First Action"],
+            p[PANEL_FIRST_ACTION],
             "Phase-2 CTA standard. Empty causes with non-OK severity is an explainability gap.",
         )
-    if "Inspect Provider Top Causes" in p:
-        p["Inspect Provider Top Causes"].setdefault("fieldConfig", {}).setdefault(
+    if PANEL_INSPECT_PROVIDER_TOP_CAUSES in p:
+        p[PANEL_INSPECT_PROVIDER_TOP_CAUSES].setdefault("fieldConfig", {}).setdefault(
             "defaults", {}
         )["noValue"] = (
             "VALID EMPTY (no active causes). Non-OK GLOBAL severity without causes = "
@@ -209,18 +216,18 @@ def visualization_upgrades() -> None:
     # Runtime healthy path
     rt = load("bioetl-runtime.json")
     p = by_title(rt)
-    if "Runtime Blockers" in p:
+    if PANEL_RUNTIME_BLOCKERS in p:
         append_desc(
-            p["Runtime Blockers"],
+            p[PANEL_RUNTIME_BLOCKERS],
             "When Status=OK and this table is empty → VALID EMPTY (healthy path). "
             "Do not treat empty as missing telemetry; check Runtime Telemetry Gap for scrape trust.",
         )
-        p["Runtime Blockers"].setdefault("fieldConfig", {}).setdefault(
+        p[PANEL_RUNTIME_BLOCKERS].setdefault("fieldConfig", {}).setdefault(
             "defaults", {}
         )["noValue"] = "VALID EMPTY — no active blockers (healthy path if Status=OK)"
-        ensure_color_bg_table(p["Runtime Blockers"])
-    if "First Action" in p:
-        p["First Action"].setdefault("options", {})["content"] = (
+        ensure_color_bg_table(p[PANEL_RUNTIME_BLOCKERS])
+    if PANEL_FIRST_ACTION in p:
+        p[PANEL_FIRST_ACTION].setdefault("options", {})["content"] = (
             "<div style='padding:0.4rem 0.65rem;line-height:1.45'>"
             "<b>Unhealthy:</b> Status → Blockers → Metrics trust (Telemetry Gap) → "
             "Detect/Localize.<br/>"
@@ -234,10 +241,10 @@ def visualization_upgrades() -> None:
     # DQ
     dq = load("bioetl-dq-v2.json")
     p = by_title(dq)
-    if "Inspect DQ Current Reasons" in p:
-        ensure_color_bg_table(p["Inspect DQ Current Reasons"])
+    if PANEL_INSPECT_DQ_CURRENT_REASONS in p:
+        ensure_color_bg_table(p[PANEL_INSPECT_DQ_CURRENT_REASONS])
         append_desc(
-            p["Inspect DQ Current Reasons"],
+            p[PANEL_INSPECT_DQ_CURRENT_REASONS],
             "NOW lane only — not peer-comparable to Range freshness badges.",
         )
     if "Review: First Action" in p:
@@ -436,9 +443,9 @@ def run_explorer_depth() -> None:
                 "Empty ID with backend healthy → invalid/absent run scope (not VALID EMPTY records).\n"
             ),
         }
-    if "Control-plane / DQ handoffs" in p:
-        p["Control-plane / DQ handoffs"]["title"] = "Next actions (≤4)"
-        p["Control-plane / DQ handoffs"]["options"] = {
+    if PANEL_CONTROL_PLANE_DQ_HANDOFFS in p:
+        p[PANEL_CONTROL_PLANE_DQ_HANDOFFS]["title"] = "Next actions (≤4)"
+        p[PANEL_CONTROL_PLANE_DQ_HANDOFFS]["options"] = {
             "mode": "markdown",
             "content": (
                 "1. **0. Trust** — resume/replay safety for this family.\n"
@@ -448,9 +455,9 @@ def run_explorer_depth() -> None:
                 "`bioetl quarantine inspect --pipeline <pipeline>`.\n"
             ),
         }
-        p["Control-plane / DQ handoffs"]["links"] = []  # avoid dup targets; nav owns hops
+        p[PANEL_CONTROL_PLANE_DQ_HANDOFFS]["links"] = []  # avoid dup targets; nav owns hops
         append_desc(
-            p["Control-plane / DQ handoffs"],
+            p[PANEL_CONTROL_PLANE_DQ_HANDOFFS],
             "Phase-2: CTA list; dashboard hops via Navigation bus to avoid duplicate UIDs.",
         )
     for title in ("ID", "Processed Records"):

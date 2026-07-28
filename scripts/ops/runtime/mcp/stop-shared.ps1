@@ -77,7 +77,8 @@ foreach ($name in $selected) {
             }
         }
     } catch {
-        # Get-NetTCPConnection may be unavailable; ignore.
+        # Get-NetTCPConnection may be unavailable on some Windows SKUs.
+        Write-Verbose "Port $port listener scan skipped: $($_.Exception.Message)"
     }
 }
 

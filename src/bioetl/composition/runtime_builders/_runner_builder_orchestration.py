@@ -1,3 +1,5 @@
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Private orchestration helpers for runtime runner builder leaf module."""
 
 from __future__ import annotations

@@ -51,7 +51,7 @@ _EXPORTS: dict[str, tuple[str, str]] = {
 }
 
 
-def __getattr__(name: str) -> Any:
+def __getattr__(name: str) -> Any:  # Any: lazy module exports have heterogeneous types.
     """Lazily resolve public run-manifest symbols."""
     target = _EXPORTS.get(name)
     if target is None:

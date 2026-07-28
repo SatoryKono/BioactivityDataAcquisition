@@ -15,6 +15,7 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 GIT_STATUS_TIMEOUT_SECONDS = 120
+QA_MODULE = "scripts.engineering.qa"
 
 MUTATION_GUARD_PATHS = (
     ".github",
@@ -97,7 +98,7 @@ def architecture_audit_checks(
             command=(
                 python,
                 "-m",
-                "scripts.engineering.qa",
+                QA_MODULE,
                 "report-module-coverage",
                 "--check",
                 "--allow-missing-coverage-xml",
@@ -108,7 +109,7 @@ def architecture_audit_checks(
             command=(
                 python,
                 "-m",
-                "scripts.engineering.qa",
+                QA_MODULE,
                 "report-family-baseline",
                 "--check",
             ),
@@ -118,7 +119,7 @@ def architecture_audit_checks(
             command=(
                 python,
                 "-m",
-                "scripts.engineering.qa",
+                QA_MODULE,
                 "report-contract-coverage-matrix",
                 "--check",
             ),
@@ -128,7 +129,7 @@ def architecture_audit_checks(
             command=(
                 python,
                 "-m",
-                "scripts.engineering.qa",
+                QA_MODULE,
                 "report-domain-io-taint-inventory",
                 "--check",
             ),
@@ -138,7 +139,7 @@ def architecture_audit_checks(
             command=(
                 python,
                 "-m",
-                "scripts.engineering.qa",
+                QA_MODULE,
                 "report-port-adapter-factory-coverage",
                 "--check",
             ),
@@ -148,7 +149,7 @@ def architecture_audit_checks(
             command=(
                 python,
                 "-m",
-                "scripts.engineering.qa",
+                QA_MODULE,
                 "report-observability-metric-inventory",
                 "--check",
                 "--json",
@@ -172,7 +173,7 @@ def architecture_audit_checks(
             command=(
                 python,
                 "-m",
-                "scripts.engineering.qa",
+                QA_MODULE,
                 "report-architecture-debt-remote-main-baseline",
                 "--check",
             ),
@@ -182,7 +183,7 @@ def architecture_audit_checks(
             command=(
                 python,
                 "-m",
-                "scripts.engineering.qa",
+                QA_MODULE,
                 "report-debt-governance-gates",
                 "--check",
             ),

@@ -1,3 +1,5 @@
+# pyright: reportImportCycles=false
+# Import cycle residual tracked in allowlist (product burn-down).
 """Historical replay and replay-bundle application service seam."""
 
 from __future__ import annotations

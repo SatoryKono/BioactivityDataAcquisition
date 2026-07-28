@@ -1,3 +1,5 @@
+# pyright: reportAttributeAccessIssue=false
+# Host attrs/methods provided by concrete composition.
 """Shared schema metadata extraction for Gold metadata sidecars.
 
 Provides one canonical implementation used by both composition and

@@ -1,3 +1,6 @@
+# pyright: reportAttributeAccessIssue=false
+# pyright: reportImportCycles=false
+# Import cycle residual tracked in allowlist (product burn-down).
 """Lifecycle helpers for :mod:`bioetl.application.core.runner`."""
 
 from __future__ import annotations

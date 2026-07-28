@@ -27,6 +27,7 @@ param(
 )
 
 $ErrorActionPreference = 'Continue'
+$InformationPreference = 'Continue'
 $Root = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..\..')).Path
 Set-Location $Root
 if (-not $StateDir) {
@@ -44,7 +45,7 @@ function Write-Log {
     param([string]$Message, [string]$Level = 'INFO')
     $line = '{0:u} [{1}] {2}' -f (Get-Date).ToUniversalTime(), $Level, $Message
     Add-Content -Path $LogPath -Value $line -Encoding UTF8
-    Write-Host $line
+    Write-Information $line -InformationAction Continue
 }
 
 function Get-HostFreeGb {
@@ -65,7 +66,11 @@ function Test-ContainerRunning {
 
 function Get-State {
     if (Test-Path $StatePath) {
-        try { return Get-Content $StatePath -Raw | ConvertFrom-Json } catch { }
+        try {
+            return Get-Content $StatePath -Raw | ConvertFrom-Json
+        } catch {
+            Write-Verbose "watchdog state parse failed; using defaults: $($_.Exception.Message)"
+        }
     }
     return [pscustomobject]@{ lastHardRestartUnix = 0 }
 }

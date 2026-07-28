@@ -1,3 +1,5 @@
+# pyright: reportAttributeAccessIssue=false
+# Host attrs/methods provided by concrete composition.
 """PubChem entity mapping and conversion utilities.
 
 Provides entity type to data conversion mapping and record normalization.

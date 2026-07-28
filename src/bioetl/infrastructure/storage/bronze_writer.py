@@ -1,3 +1,6 @@
+# pyright: reportArgumentType=false
+# pyright: reportIncompatibleMethodOverride=false
+# MRO/override residual on mixin or client hierarchies.
 """Bronze layer writer (local storage with JSONL + zstd compression)."""
 
 from __future__ import annotations

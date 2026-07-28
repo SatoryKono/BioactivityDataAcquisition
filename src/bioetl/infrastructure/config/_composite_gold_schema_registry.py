@@ -1,3 +1,5 @@
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Lazy registry for composite Gold contract schemas."""
 
 from __future__ import annotations

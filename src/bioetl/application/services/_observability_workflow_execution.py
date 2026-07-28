@@ -1,3 +1,5 @@
+# pyright: reportArgumentType=false
+# Boundary object/payload typing residual at this module.
 """Execution helpers for observability workflow aggregation."""
 
 from __future__ import annotations

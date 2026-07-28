@@ -1,3 +1,6 @@
+# pyright: reportUninitializedInstanceVariable=false
+# pyright: reportAttributeAccessIssue=false
+# Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Thin control-plane mixins delegating composite runner events to support seams."""
 
 from __future__ import annotations

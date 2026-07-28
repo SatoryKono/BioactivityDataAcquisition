@@ -1,4 +1,7 @@
 # mypy: disable-error-code="arg-type,attr-defined,unused-ignore"
+# pyright: reportUninitializedInstanceVariable=false
+# pyright: reportAttributeAccessIssue=false
+# Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Private hook and helper methods for BasePublicationTransformer."""
 
 from __future__ import annotations

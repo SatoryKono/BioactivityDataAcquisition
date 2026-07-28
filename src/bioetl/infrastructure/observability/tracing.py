@@ -1,3 +1,8 @@
+# pyright: reportConstantRedefinition=false
+# pyright: reportInvalidCast=false
+# pyright: reportPossiblyUnboundVariable=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
+# Optional dependency probe flags reassigned after try/import (PD2-7).
 """OpenTelemetry tracer adapter — real TracingPort implementation.
 
 TracingPort is deliberately shaped as an OpenTelemetry Tracing API facade

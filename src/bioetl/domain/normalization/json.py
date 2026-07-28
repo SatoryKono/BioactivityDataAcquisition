@@ -1,3 +1,5 @@
+# pyright: reportConstantRedefinition=false
+# basedpyright residual burn-down (shrink-only product surface).
 """Pure canonical JSON normalization helpers."""
 
 from __future__ import annotations

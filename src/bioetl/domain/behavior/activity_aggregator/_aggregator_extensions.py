@@ -1,3 +1,5 @@
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Extension mixin for ActivityAggregator utility operations."""
 
 from __future__ import annotations

@@ -32,6 +32,14 @@ MIN_DUPLICATE_BLOCK_BYTES = 200
 MAX_DUPLICATION_BLOCK_DEPTH = 2
 MAX_REPORTED_DUPLICATION_CLUSTERS = 25
 
+# Ownership / issue identities shared across backlog governance (python:S1192).
+OWNER_BIOETL_CONFIG = "@bioetl-config"
+OWNER_BIOETL_DQ = "@bioetl-dq"
+OWNER_BIOETL_CONTRACTS = "@bioetl-contracts"
+OWNER_BIOETL_ARCHITECTURE = "@bioetl-architecture"
+OWNER_BIOETL_COMPOSITE = "@bioetl-composite"
+LINKED_ISSUE_5568 = "#5568"
+
 CATEGORY_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("hash_policy_chembl_only", ("hash_policy.",)),
     ("extraction_params_entity_specific", ("filters.extraction_params.",)),
@@ -54,17 +62,17 @@ CATEGORY_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
 
 CATEGORY_GOVERNANCE: dict[str, dict[str, str]] = {
     "extraction_params_entity_specific": {
-        "owner": "@bioetl-config",
+        "owner": OWNER_BIOETL_CONFIG,
         "decision": "retain_entity_specific",
         "rationale": "Extraction filters encode provider/entity source API semantics.",
     },
     "filter_metadata_entity_specific": {
-        "owner": "@bioetl-config",
+        "owner": OWNER_BIOETL_CONFIG,
         "decision": "retain_entity_specific",
         "rationale": "Filter metadata documents entity-specific extraction policy.",
     },
     "gold_filter_entity_specific": {
-        "owner": "@bioetl-contracts",
+        "owner": OWNER_BIOETL_CONTRACTS,
         "decision": "retain_contract_specific",
         "rationale": "Gold filters track entity contract and DQ semantics.",
     },
@@ -74,22 +82,22 @@ CATEGORY_GOVERNANCE: dict[str, dict[str, str]] = {
         "rationale": "Pipeline overrides represent runtime behavior differences.",
     },
     "quality_metadata_entity_specific": {
-        "owner": "@bioetl-dq",
+        "owner": OWNER_BIOETL_DQ,
         "decision": "retain_entity_specific",
         "rationale": "Quality metadata varies by entity data-quality posture.",
     },
     "quality_thresholds": {
-        "owner": "@bioetl-dq",
+        "owner": OWNER_BIOETL_DQ,
         "decision": "retain_entity_specific",
         "rationale": "DQ thresholds are entity-specific validation policy.",
     },
     "schema_field_aliases_entity_specific": {
-        "owner": "@bioetl-contracts",
+        "owner": OWNER_BIOETL_CONTRACTS,
         "decision": "retain_contract_specific",
         "rationale": "Field aliases map provider-specific source names into contracts.",
     },
     "silver_filter_entity_specific": {
-        "owner": "@bioetl-contracts",
+        "owner": OWNER_BIOETL_CONTRACTS,
         "decision": "retain_contract_specific",
         "rationale": "Silver filters track entity contract normalization semantics.",
     },
@@ -99,9 +107,9 @@ DUPLICATION_CLUSTER_GOVERNANCE: tuple[tuple[str, dict[str, str]], ...] = (
     (
         "pipelines",
         {
-            "owner": "@bioetl-dq",
+            "owner": OWNER_BIOETL_DQ,
             "decision": "retain_shared_quality_shadow_analysis_policy",
-            "linked_issue": "#5568",
+            "linked_issue": LINKED_ISSUE_5568,
             "review_date": "2026-09-30",
             "rationale": (
                 "Quality-registry shadow-analysis blocks intentionally share "
@@ -113,9 +121,9 @@ DUPLICATION_CLUSTER_GOVERNANCE: tuple[tuple[str, dict[str, str]], ...] = (
     (
         "$defs.FieldValidationConfig",
         {
-            "owner": "@bioetl-contracts",
+            "owner": OWNER_BIOETL_CONTRACTS,
             "decision": "retain_generated_schema_contract",
-            "linked_issue": "#5568",
+            "linked_issue": LINKED_ISSUE_5568,
             "review_date": "2026-09-30",
             "rationale": (
                 "Field validation definitions are duplicated by generated schema "
@@ -127,9 +135,9 @@ DUPLICATION_CLUSTER_GOVERNANCE: tuple[tuple[str, dict[str, str]], ...] = (
     (
         "$defs.CrossFieldValidationConfig",
         {
-            "owner": "@bioetl-contracts",
+            "owner": OWNER_BIOETL_CONTRACTS,
             "decision": "retain_generated_schema_contract",
-            "linked_issue": "#5568",
+            "linked_issue": LINKED_ISSUE_5568,
             "review_date": "2026-09-30",
             "rationale": (
                 "Cross-field validation definitions are generated schema "
@@ -140,9 +148,9 @@ DUPLICATION_CLUSTER_GOVERNANCE: tuple[tuple[str, dict[str, str]], ...] = (
     (
         "$defs.ConditionalValidationConfig",
         {
-            "owner": "@bioetl-contracts",
+            "owner": OWNER_BIOETL_CONTRACTS,
             "decision": "retain_generated_schema_contract",
-            "linked_issue": "#5568",
+            "linked_issue": LINKED_ISSUE_5568,
             "review_date": "2026-09-30",
             "rationale": (
                 "Conditional validation definitions are generated schema "
@@ -153,9 +161,9 @@ DUPLICATION_CLUSTER_GOVERNANCE: tuple[tuple[str, dict[str, str]], ...] = (
     (
         "$defs.DQReportYamlConfig",
         {
-            "owner": "@bioetl-dq",
+            "owner": OWNER_BIOETL_DQ,
             "decision": "retain_generated_dq_schema_contract",
-            "linked_issue": "#5568",
+            "linked_issue": LINKED_ISSUE_5568,
             "review_date": "2026-09-30",
             "rationale": (
                 "DQ report YAML schema definitions are duplicated by generated "
@@ -167,9 +175,9 @@ DUPLICATION_CLUSTER_GOVERNANCE: tuple[tuple[str, dict[str, str]], ...] = (
     (
         "$defs.ColumnGroupSchema",
         {
-            "owner": "@bioetl-contracts",
+            "owner": OWNER_BIOETL_CONTRACTS,
             "decision": "retain_generated_schema_contract",
-            "linked_issue": "#5568",
+            "linked_issue": LINKED_ISSUE_5568,
             "review_date": "2026-09-30",
             "rationale": (
                 "Column-group schema definitions are generated contract mirrors; "
@@ -180,9 +188,9 @@ DUPLICATION_CLUSTER_GOVERNANCE: tuple[tuple[str, dict[str, str]], ...] = (
     (
         "$defs.GoldFiltersConfig",
         {
-            "owner": "@bioetl-contracts",
+            "owner": OWNER_BIOETL_CONTRACTS,
             "decision": "retain_generated_gold_filter_schema_contract",
-            "linked_issue": "#5568",
+            "linked_issue": LINKED_ISSUE_5568,
             "review_date": "2026-09-30",
             "rationale": (
                 "Gold filter schema properties are generated contract surfaces "
@@ -193,9 +201,9 @@ DUPLICATION_CLUSTER_GOVERNANCE: tuple[tuple[str, dict[str, str]], ...] = (
     (
         "pipeline.sink.gold",
         {
-            "owner": "@bioetl-config",
+            "owner": OWNER_BIOETL_CONFIG,
             "decision": "retain_shared_entity_gold_sink_policy",
-            "linked_issue": "#5568",
+            "linked_issue": LINKED_ISSUE_5568,
             "review_date": "2026-09-30",
             "rationale": (
                 "Gold sink settings are shared intentionally across matching "
@@ -206,9 +214,9 @@ DUPLICATION_CLUSTER_GOVERNANCE: tuple[tuple[str, dict[str, str]], ...] = (
     (
         "entries.scripts/",
         {
-            "owner": "@bioetl-architecture",
+            "owner": OWNER_BIOETL_ARCHITECTURE,
             "decision": "retain_shared_lifecycle_registry_entry",
-            "linked_issue": "#5568",
+            "linked_issue": LINKED_ISSUE_5568,
             "review_date": "2026-09-30",
             "rationale": (
                 "Duplicated script-inventory lifecycle rows are quality-registry "
@@ -222,7 +230,7 @@ DUPLICATION_CLUSTER_GOVERNANCE: tuple[tuple[str, dict[str, str]], ...] = (
         {
             "owner": "@bioetl-test-platform",
             "decision": "retain_shared_test_shard_alias",
-            "linked_issue": "#5568",
+            "linked_issue": LINKED_ISSUE_5568,
             "review_date": "2026-09-30",
             "rationale": (
                 "The S7 architecture shard alias is intentionally mirrored "
@@ -234,9 +242,9 @@ DUPLICATION_CLUSTER_GOVERNANCE: tuple[tuple[str, dict[str, str]], ...] = (
     (
         "composite.merge.field_priorities",
         {
-            "owner": "@bioetl-composite",
+            "owner": OWNER_BIOETL_COMPOSITE,
             "decision": "retain_shared_composite_policy",
-            "linked_issue": "#5568",
+            "linked_issue": LINKED_ISSUE_5568,
             "review_date": "2026-09-30",
             "rationale": (
                 "Composite field-priority blocks intentionally share conflict "
@@ -247,9 +255,9 @@ DUPLICATION_CLUSTER_GOVERNANCE: tuple[tuple[str, dict[str, str]], ...] = (
     (
         "composite.normalized_anchor_policy",
         {
-            "owner": "@bioetl-composite",
+            "owner": OWNER_BIOETL_COMPOSITE,
             "decision": "retain_shared_composite_policy",
-            "linked_issue": "#5568",
+            "linked_issue": LINKED_ISSUE_5568,
             "review_date": "2026-09-30",
             "rationale": (
                 "Composite normalized-anchor policy is shared to keep join-key "
@@ -262,7 +270,7 @@ DUPLICATION_CLUSTER_GOVERNANCE: tuple[tuple[str, dict[str, str]], ...] = (
         {
             "owner": "@bioetl-lineage",
             "decision": "retain_shared_lineage_policy",
-            "linked_issue": "#5568",
+            "linked_issue": LINKED_ISSUE_5568,
             "review_date": "2026-09-30",
             "rationale": (
                 "Provider lookup fields are duplicated intentionally while "
@@ -273,9 +281,9 @@ DUPLICATION_CLUSTER_GOVERNANCE: tuple[tuple[str, dict[str, str]], ...] = (
     (
         "composite.merge.field_mappings",
         {
-            "owner": "@bioetl-composite",
+            "owner": OWNER_BIOETL_COMPOSITE,
             "decision": "retain_shared_composite_policy",
-            "linked_issue": "#5568",
+            "linked_issue": LINKED_ISSUE_5568,
             "review_date": "2026-09-30",
             "rationale": (
                 "Composite field mappings stay colocated with each composite "
@@ -286,9 +294,9 @@ DUPLICATION_CLUSTER_GOVERNANCE: tuple[tuple[str, dict[str, str]], ...] = (
 )
 
 DEFAULT_DUPLICATION_CLUSTER_GOVERNANCE: dict[str, str] = {
-    "owner": "@bioetl-architecture",
+    "owner": OWNER_BIOETL_ARCHITECTURE,
     "decision": "review_required",
-    "linked_issue": "#5568",
+    "linked_issue": LINKED_ISSUE_5568,
     "review_date": "2026-09-30",
     "rationale": (
         "Exact structured config duplication is measured and requires explicit "
@@ -621,7 +629,7 @@ def build_backlog() -> dict[str, Any]:
                     **CATEGORY_GOVERNANCE.get(
                         category,
                         {
-                            "owner": "@bioetl-architecture",
+                            "owner": OWNER_BIOETL_ARCHITECTURE,
                             "decision": "review_required",
                             "rationale": "Unrecognized partial-key category.",
                         },

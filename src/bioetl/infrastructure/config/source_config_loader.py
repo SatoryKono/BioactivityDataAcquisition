@@ -1,3 +1,5 @@
+# pyright: reportFunctionMemberAccess=false
+# basedpyright residual burn-down (shrink-only product surface).
 """Source config loading pipeline.
 
 This module keeps source loading flow explicit and narrow:

@@ -1,3 +1,7 @@
+# pyright: reportImplicitAbstractClass=false
+# pyright: reportIncompatibleVariableOverride=false
+# pyright: reportMissingSuperCall=false
+# MRO/override residual on mixin or client hierarchies.
 """Base ChEMBL Transformer.
 
 Provides common transformation logic for all ChEMBL entity transformers.

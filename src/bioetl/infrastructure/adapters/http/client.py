@@ -1,3 +1,5 @@
+# pyright: reportIncompatibleVariableOverride=false
+# MRO/override residual on mixin or client hierarchies.
 """Unified HTTP client facade with retry/limiter/circuit-breaker orchestration."""
 
 from __future__ import annotations

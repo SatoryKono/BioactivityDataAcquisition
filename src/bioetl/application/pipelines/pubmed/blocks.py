@@ -1,3 +1,5 @@
+# pyright: reportPossiblyUnboundVariable=false
+# basedpyright residual burn-down (shrink-only product surface).
 """Declarative extraction blocks for PubMed publication pipeline."""
 
 from __future__ import annotations

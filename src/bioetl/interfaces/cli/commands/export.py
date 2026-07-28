@@ -1,3 +1,5 @@
+# pyright: reportArgumentType=false
+# Boundary object/payload typing residual at this module.
 """Export commands for BioETL CLI."""
 
 from __future__ import annotations

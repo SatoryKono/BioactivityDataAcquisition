@@ -1,3 +1,5 @@
+# pyright: reportAttributeAccessIssue=false
+# Host attrs/methods provided by concrete composition.
 """Runtime helpers for optional lineage-fragment materialization."""
 
 from __future__ import annotations

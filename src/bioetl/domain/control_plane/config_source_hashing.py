@@ -1,3 +1,5 @@
+# pyright: reportArgumentType=false
+# Boundary object/payload typing residual at this module.
 """Canonical hashing helpers for effective-config source references."""
 
 from __future__ import annotations

@@ -1,3 +1,5 @@
+# pyright: reportArgumentType=false
+# Entity fixture overrides use intentional wide test inputs (PD2-9).
 """Tests for ChEMBL activity/assay Pydantic DTO models.
 
 Tests for ActivityRecord and AssayRecord — frozen Pydantic models

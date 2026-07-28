@@ -1,3 +1,5 @@
+# pyright: reportImportCycles=false
+# Import cycle residual tracked in allowlist (product burn-down).
 """Validation functions for normalization profile contracts."""
 
 from __future__ import annotations

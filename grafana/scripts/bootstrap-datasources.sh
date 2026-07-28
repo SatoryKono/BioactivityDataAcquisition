@@ -11,7 +11,8 @@ STALE_RENDERER_PLUGIN_DIR="/var/lib/grafana/plugins/grafana-image-renderer"
 # Empty BIOETL_OPS_HTTP_URL (e.g. from a blank host env export) must NOT wipe
 # the YAML default — treat empty as unset.
 if [ -z "${BIOETL_OPS_HTTP_URL:-}" ]; then
-  BIOETL_OPS_HTTP_URL="http://bioetl:8000"
+  # Docker-internal compose service name on the monitoring network (ADR-010 local-only).
+  BIOETL_OPS_HTTP_URL="http://bioetl:8000"  # NOSONAR - docker-internal service URL
 fi
 export BIOETL_OPS_HTTP_URL
 

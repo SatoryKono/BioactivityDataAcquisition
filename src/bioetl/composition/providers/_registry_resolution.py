@@ -1,3 +1,5 @@
+# pyright: reportInconsistentOverload=false
+# basedpyright residual burn-down (shrink-only product surface).
 """Canonical provider-registry resolution helpers for composition seams."""
 
 from __future__ import annotations

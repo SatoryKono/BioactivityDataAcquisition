@@ -53,7 +53,8 @@ deploy() {
   echo "✅ Deployment complete!"
   echo ""
   echo "📊 Access points:"
-  echo "  - Metrics: http://bioetl.${ENV}.internal:8000/metrics"
+  # Cluster-internal service DNS only (not a public clear-text edge).
+  echo "  - Metrics: http://bioetl.${ENV}.internal:8000/metrics"  # NOSONAR - internal cluster DNS
   echo "  - Prometheus: kubectl port-forward -n $NAMESPACE svc/prometheus 9090:9090"
   echo "  - Grafana: kubectl port-forward -n $NAMESPACE svc/grafana 3000:3000"
   return 0

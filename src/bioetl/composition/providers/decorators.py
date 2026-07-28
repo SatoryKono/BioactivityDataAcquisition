@@ -1,3 +1,5 @@
+# pyright: reportAttributeAccessIssue=false
+# Host attrs/methods provided by concrete composition.
 """Decorators for provider registration.
 
 Provides a declarative API for registering provider adapters.

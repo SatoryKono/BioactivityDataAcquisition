@@ -1,3 +1,5 @@
+# pyright: reportAttributeAccessIssue=false
+# Host attrs/methods provided by concrete composition.
 """Models for historical replay closure reporting."""
 
 from __future__ import annotations

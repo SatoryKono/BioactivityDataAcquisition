@@ -1,4 +1,6 @@
 # mypy: disable-error-code=attr-defined
+# pyright: reportAttributeAccessIssue=false
+# Host attrs/methods provided by concrete composition.
 """Internal filtered-pagination and dedup helpers for ChEMBL fetch paging."""
 
 from __future__ import annotations

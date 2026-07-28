@@ -27,9 +27,9 @@ ROOT = Path(__file__).resolve().parents[4]
 DEFAULT_CONTRACT = ROOT / "configs/quality/docker_runtime_contracts.yaml"
 DEFAULT_REPORT_DIR = ROOT / "reports/quality"
 _SECRET_KEY = re.compile(r"(?:password|secret|token|credential|auth)", re.I)
-_SECRET_VALUE = re.compile(r"(?:gh[pousr]_[A-Za-z0-9_]{12,}|Bearer\s+\S+)", re.I)
+_SECRET_VALUE = re.compile(r"(?:gh[pousr]_\w{12,}|Bearer\s+\S+)", re.I)
 _SECRET_ASSIGNMENT = re.compile(
-    r"\b([A-Za-z0-9_]*(?:password|secret|token|credential|auth)[A-Za-z0-9_]*)"
+    r"\b(\w*(?:password|secret|token|credential|auth)\w*)"
     r"=([^\s,;]+)",
     re.I,
 )

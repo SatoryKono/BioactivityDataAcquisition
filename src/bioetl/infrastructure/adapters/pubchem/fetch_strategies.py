@@ -77,7 +77,10 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
         self._logger = cast("LoggerPort", resolved["logger"])
         self._rate_limiter = cast("TokenBucketRateLimiter", resolved["rate_limiter"])
         self._circuit_breaker = cast("CircuitBreakerGuard", resolved["circuit_breaker"])
-        self._run_in_executor = cast("Callable[..., Any]", resolved["run_in_executor"])
+        self._run_in_executor = cast(
+            "Callable[..., Any]",  # Any: executor forwards arbitrary callable results.
+            resolved["run_in_executor"],
+        )
         self._mapper = mapper
         self._provider_name = provider_name
         self._request_collector = request_collector

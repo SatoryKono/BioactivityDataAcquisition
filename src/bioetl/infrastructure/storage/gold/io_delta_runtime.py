@@ -1,3 +1,5 @@
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Prepared payloads and retry helpers for Gold Delta IO mixins."""
 
 from __future__ import annotations

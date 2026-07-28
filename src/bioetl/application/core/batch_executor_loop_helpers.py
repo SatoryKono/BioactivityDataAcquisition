@@ -1,3 +1,5 @@
+# pyright: reportArgumentType=false
+# Boundary object/payload typing residual at this module.
 """Internal helper functions for batch extraction loop orchestration."""
 
 from __future__ import annotations

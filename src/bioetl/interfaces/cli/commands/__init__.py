@@ -1,3 +1,5 @@
+# pyright: reportImportCycles=false
+# Import cycle residual tracked in allowlist (product burn-down).
 """CLI commands package for BioETL.
 
 The sanctioned public CLI surface remains at ``bioetl.interfaces.cli.commands.*``,

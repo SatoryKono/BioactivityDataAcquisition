@@ -11,6 +11,13 @@ ROOT = Path(__file__).resolve().parents[4]
 DASH = ROOT / "grafana" / "dashboards"
 TESTS = ROOT / "tests" / "integration"
 
+# Dashboard / panel title identities (python:S1192).
+DASHBOARD_RUNTIME = "bioetl-runtime.json"
+DASHBOARD_INCIDENT_V1 = "bioetl-incident-v1.json"
+DASHBOARD_CONTROL_PLANE_V1 = "bioetl-control-plane-v1.json"
+PANEL_PRIMARY_RECOVERY = "Primary recovery"
+PANEL_NEXT_ACTION_REPLAY_DIAGNOSTICS = "Next Action: Replay Diagnostics"
+
 
 def walk(panels):
     for p in panels or []:
@@ -36,7 +43,7 @@ def save_dash(name: str, data: dict) -> None:
 
 
 def fix_runtime() -> None:
-    rt = load_dash("bioetl-runtime.json")
+    rt = load_dash(DASHBOARD_RUNTIME)
     found = False
     for p in walk(rt.get("panels")):
         if p.get("id") == 9105:
@@ -122,16 +129,16 @@ def fix_runtime() -> None:
             ]
     if not found:
         raise SystemExit("9105 not found")
-    save_dash("bioetl-runtime.json", rt)
+    save_dash(DASHBOARD_RUNTIME, rt)
     # hard verify
-    rt2 = load_dash("bioetl-runtime.json")
+    rt2 = load_dash(DASHBOARD_RUNTIME)
     p9105 = next(p for p in walk(rt2.get("panels")) if p.get("id") == 9105)
     assert p9105["type"] == "timeseries", p9105["type"]
     print("runtime 9105 OK", p9105["type"], p9105["title"])
 
 
 def fix_incident() -> None:
-    inc = load_dash("bioetl-incident-v1.json")
+    inc = load_dash(DASHBOARD_INCIDENT_V1)
     panels = inc.get("panels") or []
     by_id = {p.get("id"): p for p in panels}
 
@@ -441,10 +448,10 @@ def fix_incident() -> None:
         if p is not None
     ]
     inc["panels"] = ordered
-    save_dash("bioetl-incident-v1.json", inc)
+    save_dash(DASHBOARD_INCIDENT_V1, inc)
 
     # verify
-    inc2 = load_dash("bioetl-incident-v1.json")
+    inc2 = load_dash(DASHBOARD_INCIDENT_V1)
     st = next(p for p in walk(inc2.get("panels")) if p.get("id") == 9401)
     maps = (st.get("fieldConfig") or {}).get("defaults", {}).get("mappings") or []
     flat = {}
@@ -468,10 +475,10 @@ def fix_incident() -> None:
 
 
 def fix_trust() -> None:
-    cp = load_dash("bioetl-control-plane-v1.json")
+    cp = load_dash(DASHBOARD_CONTROL_PLANE_V1)
     for p in walk(cp.get("panels")):
         if p.get("id") == 906:
-            p["title"] = "Primary recovery"
+            p["title"] = PANEL_PRIMARY_RECOVERY
             p.setdefault("options", {})["mode"] = "markdown"
             p["options"]["content"] = (
                 "**Primary recovery (Safety Gate)** — act only after Status + four evidence cells:\n"
@@ -506,11 +513,11 @@ def fix_trust() -> None:
             )
             if "Safety-gate cell" not in desc:
                 p["description"] = (desc + note).strip()
-    save_dash("bioetl-control-plane-v1.json", cp)
-    cp2 = load_dash("bioetl-control-plane-v1.json")
+    save_dash(DASHBOARD_CONTROL_PLANE_V1, cp)
+    cp2 = load_dash(DASHBOARD_CONTROL_PLANE_V1)
     titles = {p.get("title") for p in walk(cp2.get("panels"))}
-    assert "Primary recovery" in titles
-    assert "Next Action: Replay Diagnostics" not in titles
+    assert PANEL_PRIMARY_RECOVERY in titles
+    assert PANEL_NEXT_ACTION_REPLAY_DIAGNOSTICS not in titles
     print("trust OK")
 
 
@@ -617,10 +624,10 @@ def fix_dq_provider_run() -> None:
 def fix_tests() -> None:
     path = TESTS / "test_grafana_config.py"
     text = path.read_text(encoding="utf-8")
-    text2 = text.replace("Next Action: Replay Diagnostics", "Primary recovery")
+    text2 = text.replace(PANEL_NEXT_ACTION_REPLAY_DIAGNOSTICS, PANEL_PRIMARY_RECOVERY)
     path.write_text(text2, encoding="utf-8")
-    assert "Primary recovery" in path.read_text(encoding="utf-8")
-    assert "Next Action: Replay Diagnostics" not in path.read_text(encoding="utf-8")
+    assert PANEL_PRIMARY_RECOVERY in path.read_text(encoding="utf-8")
+    assert PANEL_NEXT_ACTION_REPLAY_DIAGNOSTICS not in path.read_text(encoding="utf-8")
     print("tests OK", path)
 
 

@@ -1,3 +1,5 @@
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Typed spec and coercion helpers for standard normalization profiles."""
 
 from __future__ import annotations

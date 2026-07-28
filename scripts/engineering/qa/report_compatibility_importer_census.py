@@ -61,6 +61,12 @@ _CENSUS_METADATA_FIELDS = (
     "internal_callers_zero",
     "usage_classification",
 )
+# Control-plane package owner identities (python:S1192).
+OWNER_CONTROL_PLANE_REPLAY = "bioetl.application.services.control_plane.replay"
+OWNER_CONTROL_PLANE_MANIFEST = "bioetl.application.services.control_plane.manifest"
+OWNER_CONTROL_PLANE_WORKFLOW = "bioetl.application.services.control_plane.workflow"
+COMPATIBILITY_FACADE_INVENTORY_YAML = "compatibility_facade_inventory.yaml"
+ARTIFACT_COMPATIBILITY_CENSUS = "compatibility census"
 REMOVED_COMPATIBILITY_SURFACES: tuple[dict[str, str], ...] = (
     {
         "issue_id": "4541",
@@ -68,7 +74,7 @@ REMOVED_COMPATIBILITY_SURFACES: tuple[dict[str, str], ...] = (
         "path": "src/bioetl/application/services/control_plane/historical_replay_certification_service.py",
         "module_name": "bioetl.application.services.control_plane.historical_replay_certification_service",
         "canonical_target": "bioetl.application.services.control_plane.replay.historical_certification_service",
-        "owner": "bioetl.application.services.control_plane.replay",
+        "owner": OWNER_CONTROL_PLANE_REPLAY,
     },
     {
         "issue_id": "4541",
@@ -76,7 +82,7 @@ REMOVED_COMPATIBILITY_SURFACES: tuple[dict[str, str], ...] = (
         "path": "src/bioetl/application/services/control_plane/historical_replay_closure_models.py",
         "module_name": "bioetl.application.services.control_plane.historical_replay_closure_models",
         "canonical_target": "bioetl.application.services.control_plane.replay.historical_closure_models",
-        "owner": "bioetl.application.services.control_plane.replay",
+        "owner": OWNER_CONTROL_PLANE_REPLAY,
     },
     {
         "issue_id": "4541",
@@ -84,7 +90,7 @@ REMOVED_COMPATIBILITY_SURFACES: tuple[dict[str, str], ...] = (
         "path": "src/bioetl/application/services/control_plane/historical_replay_closure_policy.py",
         "module_name": "bioetl.application.services.control_plane.historical_replay_closure_policy",
         "canonical_target": "bioetl.application.services.control_plane.replay.historical_closure_policy",
-        "owner": "bioetl.application.services.control_plane.replay",
+        "owner": OWNER_CONTROL_PLANE_REPLAY,
     },
     {
         "issue_id": "4541",
@@ -92,7 +98,7 @@ REMOVED_COMPATIBILITY_SURFACES: tuple[dict[str, str], ...] = (
         "path": "src/bioetl/application/services/control_plane/historical_replay_closure_service.py",
         "module_name": "bioetl.application.services.control_plane.historical_replay_closure_service",
         "canonical_target": "bioetl.application.services.control_plane.replay.historical_closure_service",
-        "owner": "bioetl.application.services.control_plane.replay",
+        "owner": OWNER_CONTROL_PLANE_REPLAY,
     },
     {
         "issue_id": "4541",
@@ -100,7 +106,7 @@ REMOVED_COMPATIBILITY_SURFACES: tuple[dict[str, str], ...] = (
         "path": "src/bioetl/application/services/control_plane/historical_replay_corpus_models.py",
         "module_name": "bioetl.application.services.control_plane.historical_replay_corpus_models",
         "canonical_target": "bioetl.application.services.control_plane.replay.historical_corpus_models",
-        "owner": "bioetl.application.services.control_plane.replay",
+        "owner": OWNER_CONTROL_PLANE_REPLAY,
     },
     {
         "issue_id": "4541",
@@ -108,7 +114,7 @@ REMOVED_COMPATIBILITY_SURFACES: tuple[dict[str, str], ...] = (
         "path": "src/bioetl/application/services/control_plane/historical_replay_corpus_policy.py",
         "module_name": "bioetl.application.services.control_plane.historical_replay_corpus_policy",
         "canonical_target": "bioetl.application.services.control_plane.replay.historical_corpus_policy",
-        "owner": "bioetl.application.services.control_plane.replay",
+        "owner": OWNER_CONTROL_PLANE_REPLAY,
     },
     {
         "issue_id": "4541",
@@ -116,7 +122,7 @@ REMOVED_COMPATIBILITY_SURFACES: tuple[dict[str, str], ...] = (
         "path": "src/bioetl/application/services/control_plane/historical_replay_corpus_service.py",
         "module_name": "bioetl.application.services.control_plane.historical_replay_corpus_service",
         "canonical_target": "bioetl.application.services.control_plane.replay.historical_corpus_service",
-        "owner": "bioetl.application.services.control_plane.replay",
+        "owner": OWNER_CONTROL_PLANE_REPLAY,
     },
     {
         "issue_id": "4541",
@@ -124,7 +130,7 @@ REMOVED_COMPATIBILITY_SURFACES: tuple[dict[str, str], ...] = (
         "path": "src/bioetl/application/services/control_plane/historical_replay_universe_policy.py",
         "module_name": "bioetl.application.services.control_plane.historical_replay_universe_policy",
         "canonical_target": "bioetl.application.services.control_plane.replay.historical_universe_policy",
-        "owner": "bioetl.application.services.control_plane.replay",
+        "owner": OWNER_CONTROL_PLANE_REPLAY,
     },
     {
         "issue_id": "4541",
@@ -132,7 +138,7 @@ REMOVED_COMPATIBILITY_SURFACES: tuple[dict[str, str], ...] = (
         "path": "src/bioetl/application/services/control_plane/historical_replay_universe_service.py",
         "module_name": "bioetl.application.services.control_plane.historical_replay_universe_service",
         "canonical_target": "bioetl.application.services.control_plane.replay.historical_universe_service",
-        "owner": "bioetl.application.services.control_plane.replay",
+        "owner": OWNER_CONTROL_PLANE_REPLAY,
     },
     {
         "issue_id": "4541",
@@ -140,7 +146,7 @@ REMOVED_COMPATIBILITY_SURFACES: tuple[dict[str, str], ...] = (
         "path": "src/bioetl/application/services/control_plane/replay_bundle_descriptor_service.py",
         "module_name": "bioetl.application.services.control_plane.replay_bundle_descriptor_service",
         "canonical_target": "bioetl.application.services.control_plane.replay.bundle_descriptor_service",
-        "owner": "bioetl.application.services.control_plane.replay",
+        "owner": OWNER_CONTROL_PLANE_REPLAY,
     },
     {
         "issue_id": "4541",
@@ -148,7 +154,7 @@ REMOVED_COMPATIBILITY_SURFACES: tuple[dict[str, str], ...] = (
         "path": "src/bioetl/application/services/control_plane/run_manifest_diagnostics.py",
         "module_name": "bioetl.application.services.control_plane.run_manifest_diagnostics",
         "canonical_target": "bioetl.application.services.control_plane.manifest.diagnostics",
-        "owner": "bioetl.application.services.control_plane.manifest",
+        "owner": OWNER_CONTROL_PLANE_MANIFEST,
     },
     {
         "issue_id": "4541",
@@ -156,7 +162,7 @@ REMOVED_COMPATIBILITY_SURFACES: tuple[dict[str, str], ...] = (
         "path": "src/bioetl/application/services/control_plane/run_manifest_inspection_service.py",
         "module_name": "bioetl.application.services.control_plane.run_manifest_inspection_service",
         "canonical_target": "bioetl.application.services.control_plane.manifest.inspection_service",
-        "owner": "bioetl.application.services.control_plane.manifest",
+        "owner": OWNER_CONTROL_PLANE_MANIFEST,
     },
     {
         "issue_id": "4700",
@@ -164,7 +170,7 @@ REMOVED_COMPATIBILITY_SURFACES: tuple[dict[str, str], ...] = (
         "path": "src/bioetl/application/services/control_plane/run_manifest_replay_taxonomy.py",
         "module_name": "bioetl.application.services.control_plane.run_manifest_replay_taxonomy",
         "canonical_target": "bioetl.application.services.control_plane.manifest.replay_taxonomy",
-        "owner": "bioetl.application.services.control_plane.manifest",
+        "owner": OWNER_CONTROL_PLANE_MANIFEST,
     },
     {
         "issue_id": "4541",
@@ -172,7 +178,7 @@ REMOVED_COMPATIBILITY_SURFACES: tuple[dict[str, str], ...] = (
         "path": "src/bioetl/application/services/control_plane/workflow_execution_preparation.py",
         "module_name": "bioetl.application.services.control_plane.workflow_execution_preparation",
         "canonical_target": "bioetl.application.services.control_plane.workflow.execution_preparation",
-        "owner": "bioetl.application.services.control_plane.workflow",
+        "owner": OWNER_CONTROL_PLANE_WORKFLOW,
     },
     {
         "issue_id": "4541",
@@ -180,7 +186,7 @@ REMOVED_COMPATIBILITY_SURFACES: tuple[dict[str, str], ...] = (
         "path": "src/bioetl/application/services/control_plane/workflow_execution_recording.py",
         "module_name": "bioetl.application.services.control_plane.workflow_execution_recording",
         "canonical_target": "bioetl.application.services.control_plane.workflow.execution_recording",
-        "owner": "bioetl.application.services.control_plane.workflow",
+        "owner": OWNER_CONTROL_PLANE_WORKFLOW,
     },
     {
         "issue_id": "4541",
@@ -188,7 +194,7 @@ REMOVED_COMPATIBILITY_SURFACES: tuple[dict[str, str], ...] = (
         "path": "src/bioetl/application/services/control_plane/workflow_execution_service.py",
         "module_name": "bioetl.application.services.control_plane.workflow_execution_service",
         "canonical_target": "bioetl.application.services.control_plane.workflow.execution_service",
-        "owner": "bioetl.application.services.control_plane.workflow",
+        "owner": OWNER_CONTROL_PLANE_WORKFLOW,
     },
     {
         "issue_id": "4541",
@@ -196,7 +202,7 @@ REMOVED_COMPATIBILITY_SURFACES: tuple[dict[str, str], ...] = (
         "path": "src/bioetl/application/services/control_plane/workflow_inspection_service.py",
         "module_name": "bioetl.application.services.control_plane.workflow_inspection_service",
         "canonical_target": "bioetl.application.services.control_plane.workflow.inspection_service",
-        "owner": "bioetl.application.services.control_plane.workflow",
+        "owner": OWNER_CONTROL_PLANE_WORKFLOW,
     },
     {
         "issue_id": "4541",
@@ -204,7 +210,7 @@ REMOVED_COMPATIBILITY_SURFACES: tuple[dict[str, str], ...] = (
         "path": "src/bioetl/application/services/control_plane/workflow_ledger_service.py",
         "module_name": "bioetl.application.services.control_plane.workflow_ledger_service",
         "canonical_target": "bioetl.application.services.control_plane.workflow.ledger_service",
-        "owner": "bioetl.application.services.control_plane.workflow",
+        "owner": OWNER_CONTROL_PLANE_WORKFLOW,
     },
     {
         "issue_id": "4541",
@@ -212,7 +218,7 @@ REMOVED_COMPATIBILITY_SURFACES: tuple[dict[str, str], ...] = (
         "path": "src/bioetl/application/services/control_plane/workflow_manifest_models.py",
         "module_name": "bioetl.application.services.control_plane.workflow_manifest_models",
         "canonical_target": "bioetl.application.services.control_plane.workflow.manifest_models",
-        "owner": "bioetl.application.services.control_plane.workflow",
+        "owner": OWNER_CONTROL_PLANE_WORKFLOW,
     },
     {
         "issue_id": "4541",
@@ -220,7 +226,7 @@ REMOVED_COMPATIBILITY_SURFACES: tuple[dict[str, str], ...] = (
         "path": "src/bioetl/application/services/control_plane/workflow_manifest_service.py",
         "module_name": "bioetl.application.services.control_plane.workflow_manifest_service",
         "canonical_target": "bioetl.application.services.control_plane.workflow.manifest_service",
-        "owner": "bioetl.application.services.control_plane.workflow",
+        "owner": OWNER_CONTROL_PLANE_WORKFLOW,
     },
     {
         "issue_id": "4390",
@@ -478,7 +484,7 @@ def validate_compatibility_metadata_consistency(
 ) -> tuple[str, ...]:
     """Validate registry, curated docs, and census semantic parity."""
     registry_payload = _load_mapping(
-        repo_root / "configs" / "quality" / "compatibility_facade_inventory.yaml"
+        repo_root / "configs" / "quality" / COMPATIBILITY_FACADE_INVENTORY_YAML
     )
     transition_rows = _mapping_rows(registry_payload, "transition_debt")
     retained_rows = _mapping_rows(registry_payload, "retained_entrypoints")
@@ -492,7 +498,7 @@ def validate_compatibility_metadata_consistency(
     expected_census_rows = _expected_census_rows(retained_rows)
     census_rows = _index_metadata_rows(
         _mapping_rows(census_payload, "retained_entrypoints"),
-        artifact_name="compatibility census",
+        artifact_name=ARTIFACT_COMPATIBILITY_CENSUS,
     )
     return (
         *_row_set_mismatches(
@@ -507,12 +513,12 @@ def validate_compatibility_metadata_consistency(
             fields=_DOC_METADATA_FIELDS,
         ),
         *_row_set_mismatches(
-            artifact_name="compatibility census",
+            artifact_name=ARTIFACT_COMPATIBILITY_CENSUS,
             expected_rows=expected_census_rows,
             actual_rows=census_rows,
         ),
         *_field_mismatches(
-            artifact_name="compatibility census",
+            artifact_name=ARTIFACT_COMPATIBILITY_CENSUS,
             expected_rows=expected_census_rows,
             actual_rows=census_rows,
             fields=_CENSUS_METADATA_FIELDS,
@@ -1065,10 +1071,10 @@ def build_compatibility_importer_census(
 
     importer_map = collect_bioetl_importers(repo_root)
     retained_entrypoints = _load_retained_entrypoints(
-        repo_root / "configs" / "quality" / "compatibility_facade_inventory.yaml"
+        repo_root / "configs" / "quality" / COMPATIBILITY_FACADE_INVENTORY_YAML
     )
     first_safe_removal_wave = _load_first_safe_removal_wave(
-        repo_root / "configs" / "quality" / "compatibility_facade_inventory.yaml"
+        repo_root / "configs" / "quality" / COMPATIBILITY_FACADE_INVENTORY_YAML
     )
     twin_pairs = find_public_private_twin_modules(repo_root)
     twin_ratchet_path = _resolve_inventory_path(repo_root, DEFAULT_TWIN_RATCHET)
@@ -1110,7 +1116,7 @@ def build_compatibility_importer_census(
 
     return {
         "snapshot_date": snapshot_date or date.today().isoformat(),
-        "inventory_source": "configs/quality/compatibility_facade_inventory.yaml",
+        "inventory_source": f"configs/quality/{COMPATIBILITY_FACADE_INVENTORY_YAML}",
         "twin_ratchet_source": _repo_relative_posix(twin_ratchet_path, repo_root),
         "config_root_facade_source": _repo_relative_posix(
             config_root_facade_path,

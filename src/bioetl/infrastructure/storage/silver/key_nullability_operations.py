@@ -1,3 +1,5 @@
+# pyright: reportArgumentType=false
+# Boundary object/payload typing residual at this module.
 """Key nullability validation operations for Silver layer.
 
 Extracted from ``silver_writer_validation_operations`` to localise the

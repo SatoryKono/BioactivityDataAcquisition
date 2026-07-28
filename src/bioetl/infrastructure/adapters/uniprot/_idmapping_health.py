@@ -1,3 +1,5 @@
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Health endpoint helpers for UniProt ID mapping client."""
 
 from __future__ import annotations

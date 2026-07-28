@@ -24,7 +24,7 @@ RF013_HEALTH_CASE_PATTERN = re.compile(
 )
 RF013_HEALTH_CASE_OWNER = Path("tests/integration/adapters/vcr_rebalance_support.py")
 CLASS_METHOD_STEM_PATTERN = re.compile(
-    r"^(?P<class_name>[A-Za-z_][A-Za-z0-9_]*)\.(?P<method_name>[A-Za-z_][A-Za-z0-9_]*)$"
+    r"^(?P<class_name>[A-Za-z_]\w*)\.(?P<method_name>[A-Za-z_]\w*)$"
 )
 LEGACY_METADATA_OWNER_ALIASES: dict[str, tuple[Path, ...]] = {
     "tests/fixtures/vcr/chembl/test_chembl_subcellular_fraction_full_cycle.yaml": (

@@ -1,3 +1,5 @@
+# pyright: reportUninitializedInstanceVariable=false
+# Host attrs/methods provided by concrete composition.
 """Schema loading and extraction helpers for preflight validation."""
 
 from __future__ import annotations

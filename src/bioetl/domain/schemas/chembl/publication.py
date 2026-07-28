@@ -1,3 +1,5 @@
+# pyright: reportIncompatibleVariableOverride=false
+# Pandera/ETL nested Config override pattern (PD2-7).
 """Pandera schema for ChEMBL Publication entity.
 
 Aligned with RULES.md v5.24, ChEMBL 34 schema, and Publication Schema Unification spec.

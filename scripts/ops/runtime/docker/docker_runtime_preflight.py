@@ -32,7 +32,7 @@ READ_ONLY_COMMANDS = {
     ("wsl.exe", "--status"),
     ("wsl.exe", "--version"),
 }
-ENV_NAME_PATTERN = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)")
+ENV_NAME_PATTERN = re.compile(r"\$\{([A-Za-z_]\w*)")
 WINDOWS_DRIVE_PATTERN = re.compile(r"^([A-Za-z]):[/\\](.*)$")
 
 

@@ -42,55 +42,73 @@ function Protect-SensitiveString {
     return $Protected
 }
 
+function Test-SensitiveKeyName {
+    param([string]$Name)
+
+    return (
+        $Name -match '(?i)(password|secret|credential|authorization|(?<![a-z])auth(?![a-z]))' -or
+        (
+            $Name -match '(?i)token' -and
+            $Name -notmatch '(?i)(valid|enabled|present|count|requested)$'
+        )
+    )
+}
+
+function Protect-SensitiveDictionary {
+    param([System.Collections.IDictionary]$Value)
+
+    $Protected = [ordered]@{}
+    foreach ($Key in $Value.Keys) {
+        $SafeKey = Protect-SensitiveString ([string]$Key)
+        # Redact secret-bearing keys, but keep boolean/metadata flags such as
+        # last_resort_token_valid that only embed the word "token".
+        if (Test-SensitiveKeyName -Name $SafeKey) {
+            $Protected[$SafeKey] = '<redacted>'
+        } else {
+            $Protected[$SafeKey] = Protect-SensitiveValue $Value[$Key]
+        }
+    }
+    return $Protected
+}
+
+function Protect-SensitiveObject {
+    param([pscustomobject]$Value)
+
+    $Protected = [ordered]@{}
+    foreach ($Property in $Value.PSObject.Properties) {
+        $SafeName = Protect-SensitiveString $Property.Name
+        if (Test-SensitiveKeyName -Name $SafeName) {
+            $Protected[$SafeName] = '<redacted>'
+        } else {
+            $Protected[$SafeName] = Protect-SensitiveValue $Property.Value
+        }
+    }
+    return $Protected
+}
+
+function Protect-SensitiveEnumerable {
+    param([System.Collections.IEnumerable]$Value)
+
+    $ProtectedItems = [System.Collections.Generic.List[object]]::new()
+    foreach ($Item in $Value) {
+        [void]$ProtectedItems.Add((Protect-SensitiveValue $Item))
+    }
+    return ,$ProtectedItems
+}
+
 function Protect-SensitiveValue {
     param([AllowNull()] [object]$Value)
 
     if ($null -eq $Value) { return $null }
     if ($Value -is [string]) { return Protect-SensitiveString $Value }
     if ($Value -is [System.Collections.IDictionary]) {
-        $Protected = [ordered]@{}
-        foreach ($Key in $Value.Keys) {
-            $SafeKey = Protect-SensitiveString ([string]$Key)
-            # Redact secret-bearing keys, but keep boolean/metadata flags such as
-            # last_resort_token_valid that only embed the word "token".
-            if (
-                $SafeKey -match '(?i)(password|secret|credential|authorization|(?<![a-z])auth(?![a-z]))' -or
-                (
-                    $SafeKey -match '(?i)token' -and
-                    $SafeKey -notmatch '(?i)(valid|enabled|present|count|requested)$'
-                )
-            ) {
-                $Protected[$SafeKey] = '<redacted>'
-            } else {
-                $Protected[$SafeKey] = Protect-SensitiveValue $Value[$Key]
-            }
-        }
-        return $Protected
+        return Protect-SensitiveDictionary -Value $Value
     }
     if ($Value -is [pscustomobject]) {
-        $Protected = [ordered]@{}
-        foreach ($Property in $Value.PSObject.Properties) {
-            $SafeName = Protect-SensitiveString $Property.Name
-            if (
-                $SafeName -match '(?i)(password|secret|credential|authorization|(?<![a-z])auth(?![a-z]))' -or
-                (
-                    $SafeName -match '(?i)token' -and
-                    $SafeName -notmatch '(?i)(valid|enabled|present|count|requested)$'
-                )
-            ) {
-                $Protected[$SafeName] = '<redacted>'
-            } else {
-                $Protected[$SafeName] = Protect-SensitiveValue $Property.Value
-            }
-        }
-        return $Protected
+        return Protect-SensitiveObject -Value $Value
     }
     if (($Value -is [System.Collections.IEnumerable]) -and -not ($Value -is [string])) {
-        $ProtectedItems = [System.Collections.Generic.List[object]]::new()
-        foreach ($Item in $Value) {
-            [void]$ProtectedItems.Add((Protect-SensitiveValue $Item))
-        }
-        return ,$ProtectedItems
+        return Protect-SensitiveEnumerable -Value $Value
     }
     return $Value
 }
@@ -152,6 +170,70 @@ function Resolve-BoundedCommandPath {
     return $Name
 }
 
+function New-BoundedProcessStartInfo {
+    param(
+        [Parameter(Mandatory)] [string]$ResolvedName,
+        [string[]]$Arguments = @()
+    )
+
+    $StartInfo = [System.Diagnostics.ProcessStartInfo]::new()
+    # .cmd/.bat shims need a shell on Windows; PE apps do not.
+    # Arguments must use cmd-specific quoting (not PE argv rules): bare
+    # pipes in docker --format templates would otherwise split the line.
+    $IsShellScript = $ResolvedName -match '\.(cmd|bat)$'
+    if ($IsShellScript) {
+        $StartInfo.FileName = $env:ComSpec
+        if ([string]::IsNullOrWhiteSpace($StartInfo.FileName)) {
+            $StartInfo.FileName = 'cmd.exe'
+        }
+        $QuotedArgs = @(
+            $Arguments | ForEach-Object { ConvertTo-CmdArgument $_ }
+        ) -join ' '
+        $StartInfo.Arguments = '/d /c ' + (ConvertTo-CmdArgument $ResolvedName) + $(
+            if ($QuotedArgs) { ' ' + $QuotedArgs } else { '' }
+        )
+        $StartInfo.UseShellExecute = $false
+    } else {
+        $StartInfo.FileName = $ResolvedName
+        $StartInfo.UseShellExecute = $false
+        if ($StartInfo.PSObject.Properties.Name -contains 'ArgumentList') {
+            foreach ($Argument in $Arguments) {
+                [void]$StartInfo.ArgumentList.Add($Argument)
+            }
+        } else {
+            $StartInfo.Arguments = @(
+                $Arguments | ForEach-Object { ConvertTo-ProcessArgument $_ }
+            ) -join ' '
+        }
+    }
+    $StartInfo.RedirectStandardOutput = $true
+    $StartInfo.RedirectStandardError = $true
+    $StartInfo.CreateNoWindow = $true
+    return $StartInfo
+}
+
+function Stop-BoundedProcessTree {
+    param([int]$ProcessId)
+
+    if ($ProcessId -le 0) { return }
+    try {
+        $Killer = [System.Diagnostics.Process]::new()
+        $KillInfo = [System.Diagnostics.ProcessStartInfo]::new()
+        $KillInfo.FileName = 'taskkill.exe'
+        $KillInfo.Arguments = "/F /T /PID $ProcessId"
+        $KillInfo.UseShellExecute = $false
+        $KillInfo.CreateNoWindow = $true
+        $KillInfo.RedirectStandardOutput = $true
+        $KillInfo.RedirectStandardError = $true
+        $Killer.StartInfo = $KillInfo
+        [void]$Killer.Start()
+        [void]$Killer.WaitForExit(2000)
+        $Killer.Dispose()
+    } catch {
+        Write-Verbose "taskkill tree cleanup failed for pid ${ProcessId}: $($_.Exception.Message)"
+    }
+}
+
 function Invoke-BoundedCommand {
     param(
         [Parameter(Mandatory)] [string]$Name,
@@ -181,40 +263,7 @@ function Invoke-BoundedCommand {
     } else {
         $Process = [System.Diagnostics.Process]::new()
         try {
-            $StartInfo = [System.Diagnostics.ProcessStartInfo]::new()
-            # .cmd/.bat shims need a shell on Windows; PE apps do not.
-            # Arguments must use cmd-specific quoting (not PE argv rules): bare
-            # pipes in docker --format templates would otherwise split the line.
-            $IsShellScript = $ResolvedName -match '\.(cmd|bat)$'
-            if ($IsShellScript) {
-                $StartInfo.FileName = $env:ComSpec
-                if ([string]::IsNullOrWhiteSpace($StartInfo.FileName)) {
-                    $StartInfo.FileName = 'cmd.exe'
-                }
-                $QuotedArgs = @(
-                    $Arguments | ForEach-Object { ConvertTo-CmdArgument $_ }
-                ) -join ' '
-                $StartInfo.Arguments = '/d /c ' + (ConvertTo-CmdArgument $ResolvedName) + $(
-                    if ($QuotedArgs) { ' ' + $QuotedArgs } else { '' }
-                )
-                $StartInfo.UseShellExecute = $false
-            } else {
-                $StartInfo.FileName = $ResolvedName
-                $StartInfo.UseShellExecute = $false
-                if ($StartInfo.PSObject.Properties.Name -contains 'ArgumentList') {
-                    foreach ($Argument in $Arguments) {
-                        [void]$StartInfo.ArgumentList.Add($Argument)
-                    }
-                } else {
-                    $StartInfo.Arguments = @(
-                        $Arguments | ForEach-Object { ConvertTo-ProcessArgument $_ }
-                    ) -join ' '
-                }
-            }
-            $StartInfo.RedirectStandardOutput = $true
-            $StartInfo.RedirectStandardError = $true
-            $StartInfo.CreateNoWindow = $true
-            $Process.StartInfo = $StartInfo
+            $Process.StartInfo = New-BoundedProcessStartInfo -ResolvedName $ResolvedName -Arguments $Arguments
             if (-not $Process.Start()) { throw "Unable to start $Name" }
             $StdOutTask = $Process.StandardOutput.ReadToEndAsync()
             $StdErrTask = $Process.StandardError.ReadToEndAsync()
@@ -222,25 +271,14 @@ function Invoke-BoundedCommand {
                 $TimedOut = $true
                 $Code = 124
                 $ProcessId = $Process.Id
-                try { $Process.Kill($true) } catch { }
+                try {
+                    $Process.Kill($true)
+                } catch {
+                    Write-Verbose "Process.Kill failed for pid ${ProcessId}: $($_.Exception.Message)"
+                }
                 # Ensure cmd.exe child trees (python sleep fakes) do not outlive
                 # the bounded command deadline on Windows.
-                if ($ProcessId -gt 0) {
-                    try {
-                        $Killer = [System.Diagnostics.Process]::new()
-                        $KillInfo = [System.Diagnostics.ProcessStartInfo]::new()
-                        $KillInfo.FileName = 'taskkill.exe'
-                        $KillInfo.Arguments = "/F /T /PID $ProcessId"
-                        $KillInfo.UseShellExecute = $false
-                        $KillInfo.CreateNoWindow = $true
-                        $KillInfo.RedirectStandardOutput = $true
-                        $KillInfo.RedirectStandardError = $true
-                        $Killer.StartInfo = $KillInfo
-                        [void]$Killer.Start()
-                        [void]$Killer.WaitForExit(2000)
-                        $Killer.Dispose()
-                    } catch { }
-                }
+                Stop-BoundedProcessTree -ProcessId $ProcessId
                 [void]$Process.WaitForExit(2000)
             } else {
                 $Code = $Process.ExitCode
@@ -306,7 +344,11 @@ function ConvertFrom-JsonLines {
         $Rows = [System.Collections.Generic.List[object]]::new()
         foreach ($Line in ($Text -split "`r?`n")) {
             if ([string]::IsNullOrWhiteSpace($Line)) { continue }
-            try { $Rows.Add(($Line | ConvertFrom-Json -ErrorAction Stop)) } catch { }
+            try {
+                $Rows.Add(($Line | ConvertFrom-Json -ErrorAction Stop))
+            } catch {
+                Write-Verbose "Skipping non-JSON diagnostic line: $($_.Exception.Message)"
+            }
         }
         return @($Rows)
     }
@@ -325,11 +367,7 @@ function Get-CliOrigins {
     return $Origins
 }
 
-function Collect-Diagnostics {
-    # Diagnostics are evidence collection, not the recovery wait. Always honor
-    # CommandTimeoutSeconds per probe even when the global TimeoutSeconds budget
-    # is already low; otherwise mid-suite probes starve and restart/start look
-    # "unavailable" or readiness never sees a successful action.
+function Get-DesktopDiagnosticBundle {
     $Capabilities = [ordered]@{}
     $DesktopRows = [ordered]@{}
     foreach ($DesktopCommand in @('status', 'restart', 'stop', 'start', 'logs', 'diagnose')) {
@@ -342,12 +380,15 @@ function Collect-Diagnostics {
             $DesktopRows[$DesktopCommand] = [ordered]@{ returncode = 127; timed_out = $false; output = 'unsupported' }
         }
     }
-    $Diagnostics.desktop = [ordered]@{
+    $Desktop = [ordered]@{
         capabilities = $Capabilities
         status = if ($DesktopRows.status.returncode -eq 0) { 'available' } elseif ($DesktopRows.status.timed_out) { 'timed_out' } else { 'failed_or_unsupported' }
         status_returncode = $DesktopRows.status.returncode
     }
+    return @{ Desktop = $Desktop; Rows = $DesktopRows }
+}
 
+function Get-DockerProbeBundle {
     $Version = Invoke-BoundedCommand 'docker' @('version', '--format', '{{json .}}') -AllowOverrun
     $Info = Invoke-BoundedCommand 'docker' @('info', '--format', '{{json .}}') -AllowOverrun
     $ContextShow = Invoke-BoundedCommand 'docker' @('context', 'show') -AllowOverrun
@@ -358,14 +399,36 @@ function Collect-Diagnostics {
         @((ConvertFrom-JsonLines $Containers.output) | ForEach-Object { $_.ID } | Where-Object { $_ } | Select-Object -First 200)
     )) -AllowOverrun
     $DiskUsage = Invoke-BoundedCommand 'docker' @('system', 'df', '--format', '{{json .}}') -AllowOverrun
+    return @{
+        Version = $Version
+        Info = $Info
+        ContextShow = $ContextShow
+        ContextList = $ContextList
+        Compose = $Compose
+        Containers = $Containers
+        Mounts = $Mounts
+        DiskUsage = $DiskUsage
+    }
+}
 
-    $LocalEngine = $null
+function Get-LocalEngineProbe {
     if (
         -not [string]::IsNullOrWhiteSpace($env:WSL_DISTRO_NAME) -and
         (Get-Command systemctl -ErrorAction SilentlyContinue)
     ) {
-        $LocalEngine = Invoke-BoundedCommand 'systemctl' @('is-active', 'docker') -AllowOverrun
+        return Invoke-BoundedCommand 'systemctl' @('is-active', 'docker') -AllowOverrun
     }
+    return $null
+}
+
+function Get-EngineTopologyDiagnostics {
+    param(
+        $DesktopRows,
+        $Version,
+        $Info,
+        $LocalEngine,
+        $ContextList
+    )
 
     $CliOrigins = @(Get-CliOrigins)
     $Contexts = @(ConvertFrom-JsonLines $ContextList.output)
@@ -375,20 +438,28 @@ function Collect-Diagnostics {
             Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
             Sort-Object -Unique
     )
-    $Diagnostics.daemon_identity = [ordered]@{
-        classification = if ($Version.returncode -eq 0 -and $Info.returncode -eq 0) { 'observed' } else { 'unavailable' }
-        active_context = ($ContextShow.output.Trim())
-        version = $Version.output
-        info = $Info.output
-    }
     $DesktopActive = (
         $DesktopRows.status.returncode -eq 0 -and
         $DesktopRows.status.output -match '(?i)\b(running|started)\b'
     ) -or ($Version.returncode -eq 0 -and $Info.returncode -eq 0)
     $LocalEngineActive = $null -ne $LocalEngine -and $LocalEngine.returncode -eq 0 -and $LocalEngine.output.Trim() -eq 'active'
-    $Diagnostics.engine_topology = [ordered]@{
-        classification = if ($DesktopActive -and $LocalEngineActive) { 'possible_duplicate_active_engines' } elseif ($DesktopActive -or $LocalEngineActive) { 'single_active_engine_observed' } else { 'no_active_engine_observed' }
-        cli_origin_classification = if ($CliOrigins.Count -gt 1) { 'multiple_cli_origins' } elseif ($CliOrigins.Count -eq 1) { 'single_cli_origin' } else { 'cli_unavailable' }
+    $classification = if ($DesktopActive -and $LocalEngineActive) {
+        'possible_duplicate_active_engines'
+    } elseif ($DesktopActive -or $LocalEngineActive) {
+        'single_active_engine_observed'
+    } else {
+        'no_active_engine_observed'
+    }
+    $cliClass = if ($CliOrigins.Count -gt 1) {
+        'multiple_cli_origins'
+    } elseif ($CliOrigins.Count -eq 1) {
+        'single_cli_origin'
+    } else {
+        'cli_unavailable'
+    }
+    return [ordered]@{
+        classification = $classification
+        cli_origin_classification = $cliClass
         cli_origins = $CliOrigins
         context_endpoints = $ContextEndpoints
         context_endpoint_note = 'Multiple configured contexts do not by themselves prove duplicate active engines.'
@@ -396,10 +467,9 @@ function Collect-Diagnostics {
         local_wsl_engine_active = $LocalEngineActive
         local_wsl_engine_status = if ($null -eq $LocalEngine) { 'not_checked' } else { $LocalEngine.output.Trim() }
     }
+}
 
-    $WslStatus = $null
-    $WslList = $null
-    $DockerDataDf = $null
+function Get-WslDiagnosticBundle {
     # Resolve via the same path logic as Invoke-BoundedCommand so PATHEXT shims
     # (wsl.cmd) used by bounded recovery tests are accepted, not only PE wsl.exe.
     $WslResolved = Resolve-BoundedCommandPath -Name 'wsl.exe'
@@ -408,19 +478,40 @@ function Collect-Diagnostics {
         (Get-Command wsl -ErrorAction SilentlyContinue) -or
         (($WslResolved -ne 'wsl.exe') -and (Test-Path -LiteralPath $WslResolved))
     )
-    if ($WslAvailable) {
-        $WslStatus = Invoke-BoundedCommand 'wsl.exe' @('--status') -AllowOverrun
-        $WslList = Invoke-BoundedCommand 'wsl.exe' @('--list', '--verbose') -AllowOverrun
-        $DockerDataDf = Invoke-BoundedCommand 'wsl.exe' @('-d', 'docker-desktop', '--exec', 'df', '-B1', '/var/lib/docker') -AllowOverrun
-        $WslText = @($WslStatus.output, $WslList.output) -join "`n"
-        $Diagnostics.wsl_integration = [ordered]@{
-            classification = if ($WslList.returncode -ne 0) { 'query_failed' } elseif ($WslText -match '(?i)docker-desktop') { 'docker_desktop_distribution_present' } else { 'docker_desktop_distribution_not_detected' }
+    if (-not $WslAvailable) {
+        return @{
+            Integration = [ordered]@{ classification = 'wsl_cli_unavailable' }
+            Status = $null
+            List = $null
+            DockerDataDf = $null
+        }
+    }
+
+    $WslStatus = Invoke-BoundedCommand 'wsl.exe' @('--status') -AllowOverrun
+    $WslList = Invoke-BoundedCommand 'wsl.exe' @('--list', '--verbose') -AllowOverrun
+    $DockerDataDf = Invoke-BoundedCommand 'wsl.exe' @('-d', 'docker-desktop', '--exec', 'df', '-B1', '/var/lib/docker') -AllowOverrun
+    $WslText = @($WslStatus.output, $WslList.output) -join "`n"
+    $integrationClass = if ($WslList.returncode -ne 0) {
+        'query_failed'
+    } elseif ($WslText -match '(?i)docker-desktop') {
+        'docker_desktop_distribution_present'
+    } else {
+        'docker_desktop_distribution_not_detected'
+    }
+    return @{
+        Integration = [ordered]@{
+            classification = $integrationClass
             status = $WslStatus.output
             distributions = $WslList.output
         }
-    } else {
-        $Diagnostics.wsl_integration = [ordered]@{ classification = 'wsl_cli_unavailable' }
+        Status = $WslStatus
+        List = $WslList
+        DockerDataDf = $DockerDataDf
     }
+}
+
+function Get-VhdAttachmentDiagnostics {
+    param($DesktopRows, $WslStatus, $WslList)
 
     $VhdText = @($DesktopRows.logs.output, $DesktopRows.diagnose.output, $WslStatus.output, $WslList.output) -join "`n"
     $VhdReferences = @(
@@ -433,11 +524,24 @@ function Collect-Diagnostics {
             ForEach-Object { $_.Value } |
             Sort-Object -Unique
     )
-    $Diagnostics.vhd_attachment = [ordered]@{
-        classification = if ([string]::IsNullOrWhiteSpace($VhdText)) { 'unavailable' } elseif ($VhdConflicts.Count -gt 0) { 'attachment_conflict_observed' } elseif ($VhdReferences.Count -gt 0) { 'vhd_reference_observed_no_conflict' } else { 'no_attachment_conflict_observed' }
+    $classification = if ([string]::IsNullOrWhiteSpace($VhdText)) {
+        'unavailable'
+    } elseif ($VhdConflicts.Count -gt 0) {
+        'attachment_conflict_observed'
+    } elseif ($VhdReferences.Count -gt 0) {
+        'vhd_reference_observed_no_conflict'
+    } else {
+        'no_attachment_conflict_observed'
+    }
+    return [ordered]@{
+        classification = $classification
         references = $VhdReferences
         conflict_indicators = $VhdConflicts
     }
+}
+
+function Get-ProjectOriginDiagnostics {
+    param($Compose)
 
     $ComposeRows = @(ConvertFrom-JsonLines $Compose.output)
     $Origins = @(
@@ -448,10 +552,27 @@ function Collect-Diagnostics {
     )
     $HasWindowsOrigin = @($Origins | Where-Object { $_ -match '^(?:[A-Za-z]:\\|\\\\)' }).Count -gt 0
     $HasLinuxOrigin = @($Origins | Where-Object { $_ -match '^/' }).Count -gt 0
-    $Diagnostics.project_origins = [ordered]@{
-        classification = if ($Compose.returncode -ne 0) { 'unavailable' } elseif ($Origins.Count -eq 0) { 'no_projects_observed' } elseif ($HasWindowsOrigin -and $HasLinuxOrigin) { 'mixed_windows_linux_origins' } elseif ($HasWindowsOrigin) { 'windows_origins_observed' } elseif ($HasLinuxOrigin) { 'linux_origins_observed' } else { 'unclassified_origins_observed' }
+    $classification = if ($Compose.returncode -ne 0) {
+        'unavailable'
+    } elseif ($Origins.Count -eq 0) {
+        'no_projects_observed'
+    } elseif ($HasWindowsOrigin -and $HasLinuxOrigin) {
+        'mixed_windows_linux_origins'
+    } elseif ($HasWindowsOrigin) {
+        'windows_origins_observed'
+    } elseif ($HasLinuxOrigin) {
+        'linux_origins_observed'
+    } else {
+        'unclassified_origins_observed'
+    }
+    return [ordered]@{
+        classification = $classification
         origins = $Origins
     }
+}
+
+function Get-PortOwnerDiagnostics {
+    param($Containers)
 
     $ContainerRows = @(ConvertFrom-JsonLines $Containers.output)
     $PortOwners = [ordered]@{}
@@ -466,17 +587,44 @@ function Collect-Diagnostics {
         }
     }
     $DuplicatePorts = @($PortOwners.Keys | Where-Object { @($PortOwners[$_]).Count -gt 1 })
-    $Diagnostics.port_owners = [ordered]@{
-        classification = if ($Containers.returncode -ne 0) { 'unavailable' } elseif ($DuplicatePorts.Count -gt 0) { 'duplicate_port_owners' } else { 'unique_or_no_published_ports' }
+    $classification = if ($Containers.returncode -ne 0) {
+        'unavailable'
+    } elseif ($DuplicatePorts.Count -gt 0) {
+        'duplicate_port_owners'
+    } else {
+        'unique_or_no_published_ports'
+    }
+    return [ordered]@{
+        classification = $classification
         owners = Protect-SensitiveValue $PortOwners
         duplicate_ports = $DuplicatePorts
     }
+}
+
+function Get-BindPathDiagnostics {
+    param($Mounts)
 
     $MountText = $Mounts.output
-    $Diagnostics.bind_path_translation = [ordered]@{
-        classification = if ($Mounts.returncode -ne 0) { 'unavailable' } elseif ($MountText -match '(?i)bind\|[A-Z]:\\') { 'windows_source_observed' } elseif ($MountText -match 'bind\|/(?:mnt|host_mnt)/[a-z]/') { 'translated_source_observed' } elseif ($MountText -match '(?m)^bind\|') { 'other_bind_source_observed' } else { 'no_bind_mount_observed' }
+    $classification = if ($Mounts.returncode -ne 0) {
+        'unavailable'
+    } elseif ($MountText -match '(?i)bind\|[A-Z]:\\') {
+        'windows_source_observed'
+    } elseif ($MountText -match 'bind\|/(?:mnt|host_mnt)/[a-z]/') {
+        'translated_source_observed'
+    } elseif ($MountText -match '(?m)^bind\|') {
+        'other_bind_source_observed'
+    } else {
+        'no_bind_mount_observed'
+    }
+    return [ordered]@{
+        classification = $classification
         mounts = $MountText
     }
+}
+
+function Get-DataCapacityDiagnostics {
+    param($DockerDataDf, $DiskUsage)
+
     $AvailableBytes = $null
     if ($null -ne $DockerDataDf -and $DockerDataDf.returncode -eq 0) {
         $DfLines = @($DockerDataDf.output -split "`r?`n" | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
@@ -488,13 +636,61 @@ function Collect-Diagnostics {
         }
     }
     $MinimumReserveBytes = [int64](4 * 1024 * 1024 * 1024)
-    $Diagnostics.data_capacity = [ordered]@{
-        classification = if ($null -ne $AvailableBytes -and $AvailableBytes -ge $MinimumReserveBytes) { 'reserve_at_least_4_gib' } elseif ($null -ne $AvailableBytes) { 'reserve_below_4_gib' } elseif ($DiskUsage.returncode -eq 0) { 'usage_observed_reserve_unverified' } else { 'unavailable' }
+    $classification = if ($null -ne $AvailableBytes -and $AvailableBytes -ge $MinimumReserveBytes) {
+        'reserve_at_least_4_gib'
+    } elseif ($null -ne $AvailableBytes) {
+        'reserve_below_4_gib'
+    } elseif ($DiskUsage.returncode -eq 0) {
+        'usage_observed_reserve_unverified'
+    } else {
+        'unavailable'
+    }
+    return [ordered]@{
+        classification = $classification
         available_bytes = $AvailableBytes
         minimum_reserve_bytes = $MinimumReserveBytes
         docker_data_df = if ($null -eq $DockerDataDf) { 'wsl_query_unavailable' } else { $DockerDataDf.output }
         docker_system_df = $DiskUsage.output
     }
+}
+
+function Collect-Diagnostics {
+    # Diagnostics are evidence collection, not the recovery wait. Always honor
+    # CommandTimeoutSeconds per probe even when the global TimeoutSeconds budget
+    # is already low; otherwise mid-suite probes starve and restart/start look
+    # "unavailable" or readiness never sees a successful action.
+    $DesktopBundle = Get-DesktopDiagnosticBundle
+    $Diagnostics.desktop = $DesktopBundle.Desktop
+    $DesktopRows = $DesktopBundle.Rows
+
+    $Probes = Get-DockerProbeBundle
+    $LocalEngine = Get-LocalEngineProbe
+
+    $Diagnostics.daemon_identity = [ordered]@{
+        classification = if ($Probes.Version.returncode -eq 0 -and $Probes.Info.returncode -eq 0) { 'observed' } else { 'unavailable' }
+        active_context = ($Probes.ContextShow.output.Trim())
+        version = $Probes.Version.output
+        info = $Probes.Info.output
+    }
+    $Diagnostics.engine_topology = Get-EngineTopologyDiagnostics `
+        -DesktopRows $DesktopRows `
+        -Version $Probes.Version `
+        -Info $Probes.Info `
+        -LocalEngine $LocalEngine `
+        -ContextList $Probes.ContextList
+
+    $WslBundle = Get-WslDiagnosticBundle
+    $Diagnostics.wsl_integration = $WslBundle.Integration
+    $Diagnostics.vhd_attachment = Get-VhdAttachmentDiagnostics `
+        -DesktopRows $DesktopRows `
+        -WslStatus $WslBundle.Status `
+        -WslList $WslBundle.List
+    $Diagnostics.project_origins = Get-ProjectOriginDiagnostics -Compose $Probes.Compose
+    $Diagnostics.port_owners = Get-PortOwnerDiagnostics -Containers $Probes.Containers
+    $Diagnostics.bind_path_translation = Get-BindPathDiagnostics -Mounts $Probes.Mounts
+    $Diagnostics.data_capacity = Get-DataCapacityDiagnostics `
+        -DockerDataDf $WslBundle.DockerDataDf `
+        -DiskUsage $Probes.DiskUsage
 }
 
 function Write-RecoveryReport {

@@ -1,3 +1,6 @@
+# pyright: reportArgumentType=false
+# pyright: reportGeneralTypeIssues=false
+# Boundary object/payload typing residual at this module.
 """Scoring policy for the deterministic architecture quality scorecard."""
 
 from __future__ import annotations

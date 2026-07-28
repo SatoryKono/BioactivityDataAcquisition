@@ -1,3 +1,5 @@
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Record-processor assembly helpers for pipeline_builder facade."""
 
 from __future__ import annotations

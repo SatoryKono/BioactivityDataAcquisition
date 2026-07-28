@@ -1,3 +1,6 @@
+# pyright: reportInvalidCast=false
+# pyright: reportUninitializedInstanceVariable=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Internal fallback-policy hook mixin for the Semantic Scholar adapter."""
 
 from __future__ import annotations

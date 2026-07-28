@@ -1,3 +1,6 @@
+# pyright: reportIncompatibleVariableOverride=false
+# pyright: reportUninitializedInstanceVariable=false
+# Host attrs/methods provided by concrete composition.
 """Medallion lifecycle service (Application layer - orchestration).
 
 Implements RULES.md §2.1-2.3 medallion architecture lifecycle operations.

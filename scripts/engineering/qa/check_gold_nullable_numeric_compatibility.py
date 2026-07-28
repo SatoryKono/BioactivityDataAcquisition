@@ -11,6 +11,15 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DOC_PATH = "docs/04-reference/contracts/gold-schemas.md"
 
+# Source marker identities for Pandera nullable-numeric evidence (python:S1192).
+MARKER_PUBLICATION_YEAR_SERIES = "publication_year: Series[float]"
+MARKER_CITATIONS_RECEIVED_SERIES = "citations_received: Series[float]"
+MARKER_CITATIONS_MADE_SERIES = "citations_made: Series[float]"
+MARKER_COERCE_TRUE = "coerce=True"
+SOURCE_PUBLICATION_COMMON_SCHEMA = (
+    "src/bioetl/domain/contracts/gold/_publication_common_schema.py"
+)
+
 
 @dataclass(frozen=True, slots=True)
 class SourceEvidence:
@@ -60,10 +69,10 @@ NULLABLE_NUMERIC_SPECS: tuple[NullableNumericSpec, ...] = (
             SourceEvidence(
                 "src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py",
                 (
-                    "publication_year: Series[float]",
-                    "citations_received: Series[float]",
-                    "citations_made: Series[float]",
-                    "coerce=True",
+                    MARKER_PUBLICATION_YEAR_SERIES,
+                    MARKER_CITATIONS_RECEIVED_SERIES,
+                    MARKER_CITATIONS_MADE_SERIES,
+                    MARKER_COERCE_TRUE,
                 ),
             ),
         ),
@@ -74,12 +83,12 @@ NULLABLE_NUMERIC_SPECS: tuple[NullableNumericSpec, ...] = (
         fields=("publication_year", "citations_received", "citations_made"),
         source_evidence=(
             SourceEvidence(
-                "src/bioetl/domain/contracts/gold/_publication_common_schema.py",
-                ("publication_year: Series[float]", "citations_made: Series[float]"),
+                SOURCE_PUBLICATION_COMMON_SCHEMA,
+                (MARKER_PUBLICATION_YEAR_SERIES, MARKER_CITATIONS_MADE_SERIES),
             ),
             SourceEvidence(
                 "src/bioetl/domain/contracts/gold/publications_crossref.py",
-                ("citations_received: Series[float]", "coerce=True"),
+                (MARKER_CITATIONS_RECEIVED_SERIES, MARKER_COERCE_TRUE),
             ),
         ),
     ),
@@ -89,12 +98,12 @@ NULLABLE_NUMERIC_SPECS: tuple[NullableNumericSpec, ...] = (
         fields=("publication_year", "citations_received", "citations_made"),
         source_evidence=(
             SourceEvidence(
-                "src/bioetl/domain/contracts/gold/_publication_common_schema.py",
-                ("publication_year: Series[float]", "citations_made: Series[float]"),
+                SOURCE_PUBLICATION_COMMON_SCHEMA,
+                (MARKER_PUBLICATION_YEAR_SERIES, MARKER_CITATIONS_MADE_SERIES),
             ),
             SourceEvidence(
                 "src/bioetl/domain/contracts/gold/publications_openalex.py",
-                ("citations_received: Series[float]", "coerce=True"),
+                (MARKER_CITATIONS_RECEIVED_SERIES, MARKER_COERCE_TRUE),
             ),
         ),
     ),
@@ -104,8 +113,8 @@ NULLABLE_NUMERIC_SPECS: tuple[NullableNumericSpec, ...] = (
         fields=("publication_year", "citations_made"),
         source_evidence=(
             SourceEvidence(
-                "src/bioetl/domain/contracts/gold/_publication_common_schema.py",
-                ("publication_year: Series[float]", "citations_made: Series[float]"),
+                SOURCE_PUBLICATION_COMMON_SCHEMA,
+                (MARKER_PUBLICATION_YEAR_SERIES, MARKER_CITATIONS_MADE_SERIES),
             ),
         ),
     ),
@@ -117,12 +126,12 @@ NULLABLE_NUMERIC_SPECS: tuple[NullableNumericSpec, ...] = (
         fields=("publication_year", "citations_received", "citations_made"),
         source_evidence=(
             SourceEvidence(
-                "src/bioetl/domain/contracts/gold/_publication_common_schema.py",
-                ("publication_year: Series[float]", "citations_made: Series[float]"),
+                SOURCE_PUBLICATION_COMMON_SCHEMA,
+                (MARKER_PUBLICATION_YEAR_SERIES, MARKER_CITATIONS_MADE_SERIES),
             ),
             SourceEvidence(
                 "src/bioetl/domain/contracts/gold/publications_semanticscholar.py",
-                ("citations_received: Series[float]", "coerce=True"),
+                (MARKER_CITATIONS_RECEIVED_SERIES, MARKER_COERCE_TRUE),
             ),
         ),
     ),
@@ -145,7 +154,7 @@ NULLABLE_NUMERIC_SPECS: tuple[NullableNumericSpec, ...] = (
                     "polar_surface_area: Series[float]",
                     "hba_count: Series[float]",
                     "hbd_count: Series[float]",
-                    "coerce=True",
+                    MARKER_COERCE_TRUE,
                 ),
             ),
         ),
@@ -163,7 +172,7 @@ NULLABLE_NUMERIC_SPECS: tuple[NullableNumericSpec, ...] = (
                     'alias="xlogp"',
                     "polar_surface_area: Series[float]",
                     'alias="tpsa"',
-                    "coerce=True",
+                    MARKER_COERCE_TRUE,
                 ),
             ),
         ),
@@ -196,8 +205,8 @@ NULLABLE_NUMERIC_SPECS: tuple[NullableNumericSpec, ...] = (
                     "ligand_efficiency_le: Series[float]",
                     "ligand_efficiency_lle: Series[float]",
                     "ligand_efficiency_sei: Series[float]",
-                    "publication_year: Series[float]",
-                    "coerce=True",
+                    MARKER_PUBLICATION_YEAR_SERIES,
+                    MARKER_COERCE_TRUE,
                 ),
             ),
         ),

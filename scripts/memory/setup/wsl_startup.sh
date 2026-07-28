@@ -267,16 +267,17 @@ case "$ENV_TYPE" in
   wsl)
     printf "From WSL (bash):${NC}\n"
     printf "  Bolt URI: ${BLUE}bolt://host.docker.internal:7687${NC}\n"
-    printf "  Browser:  ${BLUE}http://host.docker.internal:7474/browser/${NC}\n\n"
+    # Local Docker Desktop Neo4j Browser (loopback / host gateway only).
+    printf "  Browser:  ${BLUE}http://host.docker.internal:7474/browser/${NC}\n\n"  # NOSONAR - local Neo4j browser
     printf "From Windows (PowerShell/CMD):${NC}\n"
     printf "  Bolt URI: ${BLUE}bolt://localhost:7687${NC}\n"
-    printf "  Browser:  ${BLUE}http://localhost:7474/browser${NC}\n\n"
+    printf "  Browser:  ${BLUE}http://localhost:7474/browser${NC}\n\n"  # NOSONAR - local Neo4j browser
     printf "Credentials: supplied via ${BLUE}NEO4J_USERNAME / NEO4J_PASSWORD${NC}\n"
     ;;
   *)
     printf "Connection details:${NC}\n"
     printf "  Bolt URI: ${BLUE}bolt://localhost:7687${NC}\n"
-    printf "  Browser:  ${BLUE}http://localhost:7474/browser${NC}\n"
+    printf "  Browser:  ${BLUE}http://localhost:7474/browser${NC}\n"  # NOSONAR - local Neo4j browser
     printf "  Credentials: supplied via ${BLUE}NEO4J_USERNAME / NEO4J_PASSWORD${NC}\n"
     ;;
 esac
@@ -312,11 +313,11 @@ printf "2. Access Neo4j Browser:\n"
 
 case "$ENV_TYPE" in
   wsl)
-    printf "   From WSL: ${BLUE}http://host.docker.internal:7474/browser/${NC}\n"
-    printf "   From Windows: ${BLUE}http://localhost:7474/browser${NC}\n\n"
+    printf "   From WSL: ${BLUE}http://host.docker.internal:7474/browser/${NC}\n"  # NOSONAR - local Neo4j browser
+    printf "   From Windows: ${BLUE}http://localhost:7474/browser${NC}\n\n"  # NOSONAR - local Neo4j browser
     ;;
   *)
-    printf "   ${BLUE}http://localhost:7474/browser/${NC}\n\n"
+    printf "   ${BLUE}http://localhost:7474/browser/${NC}\n\n"  # NOSONAR - local Neo4j browser
     ;;
 esac
 

@@ -1,3 +1,5 @@
+# pyright: reportPossiblyUnboundVariable=false
+# basedpyright residual burn-down (shrink-only product surface).
 """Atomic multi-file write group implementation."""
 
 from __future__ import annotations

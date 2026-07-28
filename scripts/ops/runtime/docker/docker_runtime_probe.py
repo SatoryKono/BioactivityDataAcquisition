@@ -56,7 +56,7 @@ except ImportError:  # pragma: no cover - direct script execution
     )
 
 DEFAULT_REPORT_DIR = ROOT / "reports/quality"
-_PERCENT = re.compile(r"^\s*([0-9]+(?:\.[0-9]+)?)%\s*$")
+_PERCENT = re.compile(r"^\s*(\d+(?:\.\d+)?)%\s*$")
 _ALLOWED_CAUSES = {
     "daemon_unavailable",
     "disk_reserve_low",

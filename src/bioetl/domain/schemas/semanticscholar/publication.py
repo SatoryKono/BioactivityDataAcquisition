@@ -1,3 +1,5 @@
+# pyright: reportIncompatibleVariableOverride=false
+# Pandera/ETL nested Config override pattern (PD2-7).
 # src/bioetl/domain/schemas/semanticscholar/publication.py
 """Pandera schema for Semantic Scholar Publication entity.
 

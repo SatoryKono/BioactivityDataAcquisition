@@ -1,19 +1,24 @@
+# pyright: reportArgumentType=false
+# Entity fixture overrides use intentional wide test inputs (PD2-9).
 """Unit tests for ChEMBL structural entities — Target, Molecule, ChemblPublicationTerm, etc."""
 
 from __future__ import annotations
+
+from typing import Any, cast
+
 
 from datetime import UTC, datetime
 
 import pytest
 
-BASE_KWARGS = {
+BASE_KWARGS = cast(Any, {
     "entity_id": "chembl:test:001",
     "content_hash": "hash123",
     "run_id": "run-001",
     "run_type": "incremental",
     "ingestion_ts": datetime(2024, 1, 1, tzinfo=UTC),
     "_index": 0,
-}
+})
 
 
 @pytest.mark.unit

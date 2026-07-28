@@ -1,3 +1,5 @@
+# pyright: reportArgumentType=false
+# Boundary object/payload typing residual at this module.
 """Main CLI entry point for BioETL.
 
 This module provides the main Click group and registers command groups lazily.

@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-import concurrent.futures
 import os
 from collections.abc import Mapping
+from concurrent.futures import Future, ThreadPoolExecutor
+from concurrent.futures import TimeoutError as FuturesTimeoutError
 from pathlib import Path
 from typing import Any, cast
 
@@ -66,14 +67,15 @@ def _load_yaml_with_timeout(
             raise ValueError(f"YAML root must be a mapping: {path}")
         return cast("JsonDict", dict(payload))
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-        future = executor.submit(_load_payload)
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        future: Future[JsonDict] = executor.submit(_load_payload)
         try:
-            return future.result(timeout=timeout)
-        except concurrent.futures.TimeoutError as exc:
+            result = future.result(timeout=timeout)
+        except FuturesTimeoutError as exc:
             raise TimeoutError(
                 f"YAML load did not complete within {timeout} seconds: {path}"
             ) from exc
+        return result
 
 
 __all__ = [
