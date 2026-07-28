@@ -684,6 +684,43 @@ def _duplicates(values: list[str]) -> list[str]:
     return sorted(name for name, count in counts.items() if count > 1)
 
 
+def _export_resolution_providers(
+    export_name: str,
+    *,
+    runtime_bindings: set[str],
+    lazy_export_keys: list[str],
+    getattr_branch_names: list[str],
+) -> list[str]:
+    providers: list[str] = []
+    if export_name in runtime_bindings:
+        providers.append("runtime_binding")
+    if export_name in lazy_export_keys:
+        providers.append("lazy_export_table")
+    if export_name in getattr_branch_names:
+        providers.append("dunder_getattr_branch")
+    return providers
+
+
+def _resolution_conflicts_for_exports(
+    public_exports: list[str],
+    *,
+    runtime_bindings: set[str],
+    lazy_export_keys: list[str],
+    getattr_branch_names: list[str],
+) -> dict[str, list[str]]:
+    resolution_conflicts: dict[str, list[str]] = {}
+    for export_name in public_exports:
+        providers = _export_resolution_providers(
+            export_name,
+            runtime_bindings=runtime_bindings,
+            lazy_export_keys=lazy_export_keys,
+            getattr_branch_names=getattr_branch_names,
+        )
+        if len(providers) != 1:
+            resolution_conflicts[export_name] = providers
+    return resolution_conflicts
+
+
 def _build_public_export_contract_row(
     module_path: Path,
     inventory_row: dict[str, Any],
@@ -708,18 +745,12 @@ def _build_public_export_contract_row(
     )
     runtime_bindings = _collect_runtime_binding_names(tree)
     public_function_bindings = set(_collect_public_top_level_function_names(tree))
-    resolution_conflicts: dict[str, list[str]] = {}
-    for export_name in public_exports:
-        providers: list[str] = []
-        if export_name in runtime_bindings:
-            providers.append("runtime_binding")
-        if export_name in lazy_export_keys:
-            providers.append("lazy_export_table")
-        if export_name in getattr_branch_names:
-            providers.append("dunder_getattr_branch")
-        if len(providers) != 1:
-            resolution_conflicts[export_name] = providers
-
+    resolution_conflicts = _resolution_conflicts_for_exports(
+        public_exports,
+        runtime_bindings=runtime_bindings,
+        lazy_export_keys=lazy_export_keys,
+        getattr_branch_names=getattr_branch_names,
+    )
     public_export_set = set(public_exports)
     lazy_resolution_exports = set(lazy_export_keys) | set(getattr_branch_names)
     retained_wrappers_outside_all = sorted(

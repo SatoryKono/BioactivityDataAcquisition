@@ -351,6 +351,78 @@ def _git_identity() -> dict[str, str]:
     return {"commit": resolve("HEAD"), "tree": resolve("HEAD^{tree}")}
 
 
+def _semantic_artifact_fields(payload: dict[str, object]) -> tuple[str, list[str]]:
+    gate = payload.get("semantic_gate")
+    status = str(gate.get("status") or "fail") if isinstance(gate, dict) else "fail"
+    results = payload.get("results")
+    if not isinstance(results, list):
+        return status, []
+    scope = sorted(
+        {
+            f"{item.get('dashboard_uid')}#{item.get('panel_id')}"
+            for item in results
+            if isinstance(item, dict)
+            and item.get("dashboard_uid")
+            and item.get("panel_id") is not None
+        }
+    )
+    return status, scope
+
+
+def _panel_scope_from_dashboard_item(item: dict[str, object]) -> set[str] | None:
+    """Return panel scope for one dashboard row, or None when incomplete."""
+    if not item.get("uid"):
+        return None
+    terminal_validation = item.get("terminalStateValidation")
+    if (
+        not isinstance(terminal_validation, dict)
+        or terminal_validation.get("status") != "ok"
+    ):
+        return None
+    panel_states = terminal_validation.get("panelStates")
+    if not isinstance(panel_states, list) or not panel_states:
+        return None
+    scope: set[str] = set()
+    for panel_state in panel_states:
+        panel_id = panel_state.get("id") if isinstance(panel_state, dict) else None
+        if panel_id is None:
+            return None
+        scope.add(f"{item['uid']}#{panel_id}")
+    return scope
+
+
+def _render_artifact_fields(payload: dict[str, object]) -> tuple[str, list[str]]:
+    terminal = payload.get("terminal_state_validation")
+    dashboards = payload.get("dashboards")
+    terminal_ok = isinstance(terminal, dict) and terminal.get("status") == "ok"
+    rendered = (
+        isinstance(dashboards, list)
+        and bool(dashboards)
+        and all(
+            isinstance(item, dict) and item.get("renderStatus") == "rendered"
+            for item in dashboards
+        )
+    )
+    panel_scope: set[str] = set()
+    panel_scope_complete = isinstance(dashboards, list) and bool(dashboards)
+    if isinstance(dashboards, list):
+        for item in dashboards:
+            if not isinstance(item, dict):
+                panel_scope_complete = False
+                continue
+            item_scope = _panel_scope_from_dashboard_item(item)
+            if item_scope is None:
+                panel_scope_complete = False
+                continue
+            panel_scope.update(item_scope)
+    status = (
+        "pass"
+        if terminal_ok and rendered and panel_scope_complete and panel_scope
+        else "fail"
+    )
+    return status, sorted(panel_scope)
+
+
 def _artifact_descriptor(
     path: Path,
     *,
@@ -384,64 +456,13 @@ def _artifact_descriptor(
     descriptor["occurrence_id"] = observed_occurrence
     descriptor["occurrence_match"] = observed_occurrence == occurrence_id
     if kind == "semantic":
-        gate = payload.get("semantic_gate")
-        status = str(gate.get("status") or "fail") if isinstance(gate, dict) else "fail"
+        status, scope = _semantic_artifact_fields(payload)
         descriptor["terminal_status"] = status
-        results = payload.get("results")
-        if isinstance(results, list):
-            descriptor["dashboard_scope"] = sorted(
-                {
-                    f"{item.get('dashboard_uid')}#{item.get('panel_id')}"
-                    for item in results
-                    if isinstance(item, dict)
-                    and item.get("dashboard_uid")
-                    and item.get("panel_id") is not None
-                }
-            )
+        descriptor["dashboard_scope"] = scope
     elif kind == "render":
-        terminal = payload.get("terminal_state_validation")
-        dashboards = payload.get("dashboards")
-        terminal_ok = isinstance(terminal, dict) and terminal.get("status") == "ok"
-        rendered = (
-            isinstance(dashboards, list)
-            and bool(dashboards)
-            and all(
-                isinstance(item, dict) and item.get("renderStatus") == "rendered"
-                for item in dashboards
-            )
-        )
-        panel_scope: set[str] = set()
-        panel_scope_complete = isinstance(dashboards, list) and bool(dashboards)
-        if isinstance(dashboards, list):
-            for item in dashboards:
-                if not isinstance(item, dict) or not item.get("uid"):
-                    panel_scope_complete = False
-                    continue
-                terminal_validation = item.get("terminalStateValidation")
-                if (
-                    not isinstance(terminal_validation, dict)
-                    or terminal_validation.get("status") != "ok"
-                ):
-                    panel_scope_complete = False
-                    continue
-                panel_states = terminal_validation.get("panelStates")
-                if not isinstance(panel_states, list) or not panel_states:
-                    panel_scope_complete = False
-                    continue
-                for panel_state in panel_states:
-                    panel_id = (
-                        panel_state.get("id") if isinstance(panel_state, dict) else None
-                    )
-                    if panel_id is None:
-                        panel_scope_complete = False
-                        continue
-                    panel_scope.add(f"{item['uid']}#{panel_id}")
-        descriptor["dashboard_scope"] = sorted(panel_scope)
-        descriptor["terminal_status"] = (
-            "pass"
-            if terminal_ok and rendered and panel_scope_complete and panel_scope
-            else "fail"
-        )
+        status, scope = _render_artifact_fields(payload)
+        descriptor["terminal_status"] = status
+        descriptor["dashboard_scope"] = scope
     descriptor["validated"] = bool(
         descriptor["occurrence_match"]
         and descriptor["generated_at"]
@@ -852,6 +873,124 @@ def _discover_filled_dashboard_uids(
     return tuple(filled)
 
 
+def _run_semantic_phase(
+    config: object,
+    *,
+    backend_ready: bool,
+    app_base_url: str,
+) -> tuple[tuple[str, ...], str, str]:
+    """Run semantic preflight + live audit. Returns (uids, status, detail)."""
+    print("grafana-audit-cycle: semantic preflight")
+    semantic_preflight_status = (
+        _run_preflight(
+            config,
+            app_base_url=app_base_url,
+            include_screenshot_check=False,
+            include_render_checks=False,
+        )
+        if backend_ready
+        else 1
+    )
+    screenshot_uids: tuple[str, ...] = ()
+    semantic_status_code = 1
+    if backend_ready:
+        print("grafana-audit-cycle: discover filled dashboards")
+        try:
+            screenshot_uids = _discover_filled_dashboard_uids(
+                config,
+                app_base_url=app_base_url,
+            )
+        except (
+            FileNotFoundError,
+            LookupError,
+            OSError,
+            TypeError,
+            ValueError,
+            json.JSONDecodeError,
+        ) as exc:
+            print(f"grafana-audit-cycle: filled-dashboard discovery failed ({exc})")
+
+        print("grafana-audit-cycle: live panel semantic gate")
+        try:
+            semantic_status_code = _run_live_audit(
+                config,
+                app_base_url=app_base_url,
+            )
+        except Exception as exc:  # pragma: no cover - fail-closed runtime boundary
+            print(f"grafana-audit-cycle: live panel audit failed ({exc})")
+    else:
+        print(
+            "grafana-audit-cycle: semantic discovery/audit skipped because "
+            "the required backend is unavailable"
+        )
+    semantic_status = (
+        "pass"
+        if backend_ready
+        and semantic_preflight_status == 0
+        and semantic_status_code == 0
+        else "fail"
+    )
+    semantic_detail = (
+        "Semantic preflight and live panel audit passed."
+        if semantic_status == "pass"
+        else "Semantic preflight or live panel audit reported blocking results."
+    )
+    return screenshot_uids, semantic_status, semantic_detail
+
+
+def _run_render_phase(
+    config: object,
+    *,
+    app_base_url: str,
+    screenshot_uids: tuple[str, ...],
+) -> tuple[str, str]:
+    """Rerender screenshots + render-only preflight. Returns (status, detail)."""
+    print("grafana-audit-cycle: rerender screenshots")
+    try:
+        rerender_status = _run_rerender(
+            config,
+            screenshot_uids=screenshot_uids,
+        )
+    except Exception as exc:  # pragma: no cover - fail-closed runtime boundary
+        print(f"grafana-audit-cycle: screenshot rerender failed ({exc})")
+        rerender_status = 1
+
+    screenshot_preflight_status = 1
+    if rerender_status == 0:
+        print("grafana-audit-cycle: render-only preflight")
+        screenshot_preflight_status = _run_preflight(
+            config,
+            app_base_url=app_base_url,
+            include_screenshot_check=True,
+            include_semantic_checks=False,
+            screenshot_uids=screenshot_uids,
+        )
+    render_status = (
+        "pass"
+        if rerender_status == 0 and screenshot_preflight_status == 0
+        else "fail"
+    )
+    render_detail = (
+        "Screenshot render and manifest contract passed."
+        if render_status == "pass"
+        else "Screenshot rerender or render-only preflight failed."
+    )
+    return render_status, render_detail
+
+
+def _terminate_managed_backend(
+    managed_backend_process: subprocess.Popen[bytes] | None,
+) -> None:
+    if managed_backend_process is None or managed_backend_process.poll() is not None:
+        return
+    managed_backend_process.terminate()
+    try:
+        managed_backend_process.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        managed_backend_process.kill()
+        managed_backend_process.wait(timeout=5)
+
+
 def main(argv: list[str] | None = None) -> int:
     config = _parse_args(argv)
     managed_backend_process: subprocess.Popen[bytes] | None = None
@@ -874,95 +1013,12 @@ def main(argv: list[str] | None = None) -> int:
             if backend_result.health_url
             else config.app_base_url
         )
-
-        print("grafana-audit-cycle: semantic preflight")
-        semantic_preflight_status = (
-            _run_preflight(
-                config,
-                app_base_url=app_base_url,
-                include_screenshot_check=False,
-                include_render_checks=False,
-            )
-            if backend_ready
-            else 1
+        screenshot_uids, semantic_status, semantic_detail = _run_semantic_phase(
+            config, backend_ready=backend_ready, app_base_url=app_base_url
         )
-
-        screenshot_uids: tuple[str, ...] = ()
-        semantic_status_code = 1
-        if backend_ready:
-            print("grafana-audit-cycle: discover filled dashboards")
-            try:
-                screenshot_uids = _discover_filled_dashboard_uids(
-                    config,
-                    app_base_url=app_base_url,
-                )
-            except (
-                FileNotFoundError,
-                LookupError,
-                OSError,
-                TypeError,
-                ValueError,
-                json.JSONDecodeError,
-            ) as exc:
-                print(f"grafana-audit-cycle: filled-dashboard discovery failed ({exc})")
-
-            print("grafana-audit-cycle: live panel semantic gate")
-            try:
-                semantic_status_code = _run_live_audit(
-                    config,
-                    app_base_url=app_base_url,
-                )
-            except Exception as exc:  # pragma: no cover - fail-closed runtime boundary
-                print(f"grafana-audit-cycle: live panel audit failed ({exc})")
-        else:
-            print(
-                "grafana-audit-cycle: semantic discovery/audit skipped because "
-                "the required backend is unavailable"
-            )
-        semantic_status = (
-            "pass"
-            if backend_ready
-            and semantic_preflight_status == 0
-            and semantic_status_code == 0
-            else "fail"
+        render_status, render_detail = _run_render_phase(
+            config, app_base_url=app_base_url, screenshot_uids=screenshot_uids
         )
-        semantic_detail = (
-            "Semantic preflight and live panel audit passed."
-            if semantic_status == "pass"
-            else "Semantic preflight or live panel audit reported blocking results."
-        )
-
-        print("grafana-audit-cycle: rerender screenshots")
-        try:
-            rerender_status = _run_rerender(
-                config,
-                screenshot_uids=screenshot_uids,
-            )
-        except Exception as exc:  # pragma: no cover - fail-closed runtime boundary
-            print(f"grafana-audit-cycle: screenshot rerender failed ({exc})")
-            rerender_status = 1
-
-        screenshot_preflight_status = 1
-        if rerender_status == 0:
-            print("grafana-audit-cycle: render-only preflight")
-            screenshot_preflight_status = _run_preflight(
-                config,
-                app_base_url=app_base_url,
-                include_screenshot_check=True,
-                include_semantic_checks=False,
-                screenshot_uids=screenshot_uids,
-            )
-        render_status = (
-            "pass"
-            if rerender_status == 0 and screenshot_preflight_status == 0
-            else "fail"
-        )
-        render_detail = (
-            "Screenshot render and manifest contract passed."
-            if render_status == "pass"
-            else "Screenshot rerender or render-only preflight failed."
-        )
-
         release_passed = _write_gate_report(
             config,
             semantic_status=semantic_status,
@@ -972,16 +1028,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 0 if release_passed else 1
     finally:
-        if (
-            managed_backend_process is not None
-            and managed_backend_process.poll() is None
-        ):
-            managed_backend_process.terminate()
-            try:
-                managed_backend_process.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                managed_backend_process.kill()
-                managed_backend_process.wait(timeout=5)
+        _terminate_managed_backend(managed_backend_process)
 
 
 if __name__ == "__main__":

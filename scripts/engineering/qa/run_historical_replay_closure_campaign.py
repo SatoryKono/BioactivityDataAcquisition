@@ -265,6 +265,44 @@ def _resolve_meta_payload_artifact_path(meta_path: Path) -> Path | None:
     return None
 
 
+def _source_certification_from_meta(
+    *,
+    meta_path: Path,
+    payload: dict[str, object],
+    bronze_root: Path,
+    source_ref: object | None,
+    manifest: RunManifest,
+) -> HistoricalReplaySnapshotCertification | None:
+    artifact_path = _resolve_meta_payload_artifact_path(meta_path)
+    if artifact_path is None or not artifact_path.exists():
+        return None
+    content_hash = _file_sha256(artifact_path)
+    bronze_uri = _relative_bronze_uri(bronze_root, artifact_path)
+    batch_id = str(payload.get("batch_id") or "").strip()
+    return HistoricalReplaySnapshotCertification(
+        provider=(
+            source_ref.provider if source_ref is not None else manifest.provider
+        ),
+        entity=(source_ref.entity if source_ref is not None else manifest.entity),
+        pipeline_name=(
+            source_ref.pipeline_name
+            if source_ref is not None
+            else manifest.pipeline_name
+        ),
+        snapshot_id=f"sha256:{content_hash}",
+        content_hash=content_hash,
+        immutable_uri=bronze_uri,
+        bronze_batch_ref=(
+            f"bronze_batch:{batch_id}" if batch_id else bronze_uri
+        ),
+        query=source_ref.query if source_ref is not None else None,
+        certification_artifact_ref=(
+            "control://historical-replay/auto-source-certification"
+        ),
+        certification_basis="retained_bronze_artifact",
+    )
+
+
 def _build_source_auto_specs(
     *,
     inventory: HistoricalReplayCertifiabilityInventory,
@@ -281,42 +319,20 @@ def _build_source_auto_specs(
             continue
         source_ref = manifest.source_refs[0] if manifest.source_refs else None
         meta_items = bronze_meta_index.get(str(manifest.run_id), ())
-        certifications: list[HistoricalReplaySnapshotCertification] = []
-        for meta_path, payload in meta_items:
-            artifact_path = _resolve_meta_payload_artifact_path(meta_path)
-            if artifact_path is None or not artifact_path.exists():
-                continue
-            content_hash = _file_sha256(artifact_path)
-            certifications.append(
-                HistoricalReplaySnapshotCertification(
-                    provider=(
-                        source_ref.provider
-                        if source_ref is not None
-                        else manifest.provider
-                    ),
-                    entity=(
-                        source_ref.entity if source_ref is not None else manifest.entity
-                    ),
-                    pipeline_name=(
-                        source_ref.pipeline_name
-                        if source_ref is not None
-                        else manifest.pipeline_name
-                    ),
-                    snapshot_id=f"sha256:{content_hash}",
-                    content_hash=content_hash,
-                    immutable_uri=_relative_bronze_uri(bronze_root, artifact_path),
-                    bronze_batch_ref=(
-                        f"bronze_batch:{payload['batch_id']}"
-                        if str(payload.get("batch_id") or "").strip()
-                        else _relative_bronze_uri(bronze_root, artifact_path)
-                    ),
-                    query=source_ref.query if source_ref is not None else None,
-                    certification_artifact_ref=(
-                        "control://historical-replay/auto-source-certification"
-                    ),
-                    certification_basis="retained_bronze_artifact",
+        certifications = [
+            certification
+            for meta_path, payload in meta_items
+            if (
+                certification := _source_certification_from_meta(
+                    meta_path=meta_path,
+                    payload=payload,
+                    bronze_root=bronze_root,
+                    source_ref=source_ref,
+                    manifest=manifest,
                 )
             )
+            is not None
+        ]
         if certifications:
             specs.append(
                 HistoricalReplayBulkCertificationSpec(
@@ -375,6 +391,51 @@ def _choose_upstream_candidate(
     return None
 
 
+def _composite_certification_for_source_ref(
+    source_ref: object,
+    *,
+    manifest: RunManifest,
+    upstream_index: dict[
+        tuple[str, str, str], list[tuple[RunManifest, dict[str, Any]]]
+    ],
+) -> HistoricalReplaySnapshotCertification | None:
+    key = (source_ref.provider, source_ref.entity, source_ref.pipeline_name)
+    candidate = _choose_upstream_candidate(
+        upstream_index.get(key, []),
+        composite_manifest=manifest,
+    )
+    if candidate is None:
+        return None
+    upstream_manifest, diagnostics = candidate
+    snapshots = diagnostics.get("input_snapshots", [])
+    if not isinstance(snapshots, list) or not snapshots:
+        return None
+    snapshot = dict(sorted(dict(snapshots[0]).items()))
+    immutable_uri = str(snapshot.get("immutable_uri") or "").strip()
+    snapshot_id = str(snapshot.get("snapshot_id") or "").strip()
+    content_hash = str(snapshot.get("content_hash") or "").strip()
+    if not immutable_uri or not snapshot_id or not content_hash:
+        return None
+    fingerprint = str(snapshot.get("query_fingerprint") or "").strip() or None
+    return HistoricalReplaySnapshotCertification(
+        provider=source_ref.provider,
+        entity=source_ref.entity,
+        pipeline_name=source_ref.pipeline_name,
+        snapshot_id=snapshot_id,
+        content_hash=content_hash,
+        immutable_uri=immutable_uri,
+        bronze_batch_ref=immutable_uri,
+        query=source_ref.query,
+        query_fingerprint=fingerprint,
+        certification_artifact_ref=(
+            "control://historical-replay/auto-composite-certification"
+        ),
+        certification_basis="certified_source_lineage",
+        upstream_run_id=str(upstream_manifest.run_id),
+        upstream_manifest_id=upstream_manifest.manifest_id,
+    )
+
+
 def _build_composite_auto_specs(
     *,
     inventory: HistoricalReplayCertifiabilityInventory,
@@ -395,48 +456,13 @@ def _build_composite_auto_specs(
             continue
         certifications: list[HistoricalReplaySnapshotCertification] = []
         for source_ref in manifest.source_refs:
-            key = (source_ref.provider, source_ref.entity, source_ref.pipeline_name)
-            candidate = _choose_upstream_candidate(
-                upstream_index.get(key, []),
-                composite_manifest=manifest,
+            certification = _composite_certification_for_source_ref(
+                source_ref, manifest=manifest, upstream_index=upstream_index
             )
-            if candidate is None:
+            if certification is None:
                 certifications = []
                 break
-            upstream_manifest, diagnostics = candidate
-            snapshots = diagnostics.get("input_snapshots", [])
-            if not isinstance(snapshots, list) or not snapshots:
-                certifications = []
-                break
-            snapshot = dict(sorted(dict(snapshots[0]).items()))
-            immutable_uri = str(snapshot.get("immutable_uri") or "").strip()
-            snapshot_id = str(snapshot.get("snapshot_id") or "").strip()
-            content_hash = str(snapshot.get("content_hash") or "").strip()
-            if not immutable_uri or not snapshot_id or not content_hash:
-                certifications = []
-                break
-            certifications.append(
-                HistoricalReplaySnapshotCertification(
-                    provider=source_ref.provider,
-                    entity=source_ref.entity,
-                    pipeline_name=source_ref.pipeline_name,
-                    snapshot_id=snapshot_id,
-                    content_hash=content_hash,
-                    immutable_uri=immutable_uri,
-                    bronze_batch_ref=immutable_uri,
-                    query=source_ref.query,
-                    query_fingerprint=str(
-                        snapshot.get("query_fingerprint") or ""
-                    ).strip()
-                    or None,
-                    certification_artifact_ref=(
-                        "control://historical-replay/auto-composite-certification"
-                    ),
-                    certification_basis="certified_source_lineage",
-                    upstream_run_id=str(upstream_manifest.run_id),
-                    upstream_manifest_id=upstream_manifest.manifest_id,
-                )
-            )
+            certifications.append(certification)
         if certifications:
             specs.append(
                 HistoricalReplayBulkCertificationSpec(

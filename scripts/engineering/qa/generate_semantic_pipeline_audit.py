@@ -817,6 +817,25 @@ def _effective_normalizer(member: dict[str, Any]) -> str:
     return normalizer
 
 
+_TEXT_NULL_FAMILY_FIELDS = frozenset(
+    {
+        "author_keys",
+        "issue",
+        "journal",
+        "language",
+        "inchi",
+        "molecular_formula",
+        "page_first",
+        "page_last",
+        "standard_inchi",
+        "volume",
+    }
+)
+_PROVIDER_LOCAL_MOLECULE_NORMALIZERS = frozenset(
+    {"normalize_profile_chembl_id", "normalize_profile_text"}
+)
+
+
 def _normalizer_family(
     *,
     cluster_id: str,
@@ -828,22 +847,7 @@ def _normalizer_family(
         return "json_collection_family"
     if field == "publication_type" and normalizer in PUBLICATION_TYPE_NORMALIZER_FAMILY:
         return "publication_type_family"
-    if (
-        field
-        in {
-            "author_keys",
-            "issue",
-            "journal",
-            "language",
-            "inchi",
-            "molecular_formula",
-            "page_first",
-            "page_last",
-            "standard_inchi",
-            "volume",
-        }
-        and normalizer in TEXT_NORMALIZER_FAMILY
-    ):
+    if field in _TEXT_NULL_FAMILY_FIELDS and normalizer in TEXT_NORMALIZER_FAMILY:
         return "text_null_family"
     if normalizer in BOOLEAN_NORMALIZER_FAMILY:
         return "boolean_family"
@@ -854,7 +858,7 @@ def _normalizer_family(
     if (
         cluster_id in PROVIDER_LOCAL_IDENTIFIER_CLUSTERS
         and field == "molecule_id"
-        and normalizer in {"normalize_profile_chembl_id", "normalize_profile_text"}
+        and normalizer in _PROVIDER_LOCAL_MOLECULE_NORMALIZERS
     ):
         return "provider_local_molecule_id_family"
     return normalizer
@@ -902,13 +906,42 @@ def _validation_evidence(member: dict[str, Any]) -> str:
     )
 
 
+_TYPE_TOKEN_ALIASES: dict[str, str] = {
+    "int": "integer",
+    "int64": "integer",
+    "integer": "integer",
+    "float": "number",
+    "float64": "number",
+    "double": "number",
+    "number": "number",
+    "bool": "boolean",
+    "boolean": "boolean",
+    "str": "string",
+    "string": "string",
+    "object": "object",
+    "dict": "object",
+    "array": "array",
+    "list": "array",
+    "null": "null",
+    "none": "null",
+}
+
+
+def _normalize_type_token(value: str) -> str | None:
+    lowered = value.lower()
+    if lowered in _TYPE_TOKEN_ALIASES:
+        return _TYPE_TOKEN_ALIASES[lowered]
+    if lowered and lowered != "unknown":
+        return lowered
+    return None
+
+
 def _schema_type_tokens(type_payload: str) -> set[str]:
     if not type_payload:
         return set()
     raw = type_payload.strip()
-    parsed: object
     try:
-        parsed = json.loads(raw)
+        parsed: object = json.loads(raw)
     except json.JSONDecodeError:
         parsed = raw.strip('"')
     values: set[str] = set()
@@ -920,23 +953,9 @@ def _schema_type_tokens(type_payload: str) -> set[str]:
         values.add(str(parsed))
     normalized: set[str] = set()
     for value in values:
-        lowered = value.lower()
-        if lowered in {"int", "int64", "integer"}:
-            normalized.add("integer")
-        elif lowered in {"float", "float64", "double", "number"}:
-            normalized.add("number")
-        elif lowered in {"bool", "boolean"}:
-            normalized.add("boolean")
-        elif lowered in {"str", "string"}:
-            normalized.add("string")
-        elif lowered in {"object", "dict"}:
-            normalized.add("object")
-        elif lowered in {"array", "list"}:
-            normalized.add("array")
-        elif lowered in {"null", "none"}:
-            normalized.add("null")
-        elif lowered and lowered != "unknown":
-            normalized.add(lowered)
+        token = _normalize_type_token(value)
+        if token is not None:
+            normalized.add(token)
     return normalized
 
 
@@ -955,20 +974,17 @@ def _drop_null(tokens: set[str]) -> set[str]:
 def _types_compatible(member_a: dict[str, Any], member_b: dict[str, Any]) -> bool:
     tokens_a = _drop_null(_member_type_tokens(member_a))
     tokens_b = _drop_null(_member_type_tokens(member_b))
-    if not tokens_a or not tokens_b:
-        return True
-    if tokens_a == tokens_b:
+    if not tokens_a or not tokens_b or tokens_a == tokens_b:
         return True
     numeric = {"integer", "number"}
     if tokens_a <= numeric and tokens_b <= numeric:
         return True
-    if tokens_a == {"boolean"} and tokens_b == {"object"}:
+    bool_object = ({"boolean"}, {"object"})
+    if (tokens_a, tokens_b) in {bool_object, (bool_object[1], bool_object[0])}:
         return True
-    if tokens_a == {"object"} and tokens_b == {"boolean"}:
+    if tokens_a == {"boolean"} and tokens_b <= numeric:
         return True
-    if tokens_a == {"boolean"} and tokens_b <= {"integer", "number"}:
-        return True
-    if tokens_a <= {"integer", "number"} and tokens_b == {"boolean"}:
+    if tokens_a <= numeric and tokens_b == {"boolean"}:
         return True
     return False
 
@@ -1072,6 +1088,85 @@ def _drift_risk(
     return previous_risk if previous_risk in {"HIGH", "MEDIUM"} else "MEDIUM"
 
 
+def _ordered_cluster_members(members: object) -> list[dict[str, Any]]:
+    if not isinstance(members, list) or len(members) < 2:
+        return []
+    return sorted(
+        [
+            member
+            for member in members
+            if isinstance(member, dict)
+            and isinstance(member.get("pipeline"), str)
+            and isinstance(member.get("field"), str)
+        ],
+        key=lambda member: (
+            str(member.get("pipeline") or ""),
+            str(member.get("field") or ""),
+        ),
+    )
+
+
+def _pair_row_for_members(
+    member_a: dict[str, Any],
+    member_b: dict[str, Any],
+    *,
+    cluster_id: str,
+    semantic_status: str,
+    review_lookup: dict[str, dict[str, Any]],
+) -> dict[str, str]:
+    normalization = _normalization_status(
+        member_a,
+        member_b,
+        cluster_id=cluster_id,
+        semantic_status=semantic_status,
+    )
+    validation = _validation_status(
+        member_a,
+        member_b,
+        semantic_status=semantic_status,
+    )
+    typing = _typing_status(member_a, member_b)
+    drift_risk = _drift_risk(
+        cluster_id=cluster_id,
+        semantic_status=semantic_status,
+        normalization=normalization,
+        validation=validation,
+        typing=typing,
+        previous_risk="LOW",
+    )
+    row = {
+        COL_CLUSTER_ID: cluster_id,
+        COL_PIPELINE_A: str(member_a.get("pipeline") or ""),
+        COL_FIELD_A: str(member_a.get("field") or ""),
+        COL_PIPELINE_B: str(member_b.get("pipeline") or ""),
+        COL_FIELD_B: str(member_b.get("field") or ""),
+        COL_SEMANTIC_STATUS: semantic_status,
+        "Normalization": normalization,
+        "Validation": validation,
+        "Typing": typing,
+        COL_DRIFT_RISK: _apply_reviewed_risk_cap(
+            drift_risk,
+            cluster_id=cluster_id,
+            review_lookup=review_lookup,
+        ),
+        "Join Semantics A": _join_semantics(member_a, ""),
+        "Join Semantics B": _join_semantics(member_b, ""),
+        "Normalizer A": str(member_a.get("normalizer") or ""),
+        "Normalizer B": str(member_b.get("normalizer") or ""),
+        "Validation Evidence A": _validation_evidence(member_a),
+        "Validation Evidence B": _validation_evidence(member_b),
+        "Type A": str(member_a.get("field_type") or ""),
+        "Type B": str(member_b.get("field_type") or ""),
+        "Gold Contract A": str(member_a.get("gold_path") or ""),
+        "Gold Contract B": str(member_b.get("gold_path") or ""),
+        "Evidence A": str(member_a.get("config_path") or ""),
+        "Evidence B": str(member_b.get("config_path") or ""),
+        COL_ROW_KEY: "",
+    }
+    row[COL_ROW_KEY] = _row_key(row)
+    return row
+
+
 def _refresh_pair_rows(
     registry: dict[str, Any],
     review_lookup: dict[str, dict[str, Any]],
@@ -1082,75 +1177,20 @@ def _refresh_pair_rows(
             continue
         cluster_id = str(cluster.get("cluster_id") or "")
         semantic_status = str(cluster.get("semantic_status") or "")
-        members = cluster.get("members", [])
-        if not isinstance(members, list) or len(members) < 2:
+        ordered_members = _ordered_cluster_members(cluster.get("members", []))
+        if len(ordered_members) < 2:
             continue
-        ordered_members = sorted(
-            [
-                member
-                for member in members
-                if isinstance(member, dict)
-                and isinstance(member.get("pipeline"), str)
-                and isinstance(member.get("field"), str)
-            ],
-            key=lambda member: (
-                str(member.get("pipeline") or ""),
-                str(member.get("field") or ""),
-            ),
-        )
         for index, member_a in enumerate(ordered_members):
             for member_b in ordered_members[index + 1 :]:
-                normalization = _normalization_status(
-                    member_a,
-                    member_b,
-                    cluster_id=cluster_id,
-                    semantic_status=semantic_status,
-                )
-                validation = _validation_status(
-                    member_a,
-                    member_b,
-                    semantic_status=semantic_status,
-                )
-                typing = _typing_status(member_a, member_b)
-                drift_risk = _drift_risk(
-                    cluster_id=cluster_id,
-                    semantic_status=semantic_status,
-                    normalization=normalization,
-                    validation=validation,
-                    typing=typing,
-                    previous_risk="LOW",
-                )
-                row = {
-                    COL_CLUSTER_ID: cluster_id,
-                    COL_PIPELINE_A: str(member_a.get("pipeline") or ""),
-                    COL_FIELD_A: str(member_a.get("field") or ""),
-                    COL_PIPELINE_B: str(member_b.get("pipeline") or ""),
-                    COL_FIELD_B: str(member_b.get("field") or ""),
-                    COL_SEMANTIC_STATUS: semantic_status,
-                    "Normalization": normalization,
-                    "Validation": validation,
-                    "Typing": typing,
-                    COL_DRIFT_RISK: _apply_reviewed_risk_cap(
-                        drift_risk,
+                refreshed.append(
+                    _pair_row_for_members(
+                        member_a,
+                        member_b,
                         cluster_id=cluster_id,
+                        semantic_status=semantic_status,
                         review_lookup=review_lookup,
-                    ),
-                    "Join Semantics A": _join_semantics(member_a, ""),
-                    "Join Semantics B": _join_semantics(member_b, ""),
-                    "Normalizer A": str(member_a.get("normalizer") or ""),
-                    "Normalizer B": str(member_b.get("normalizer") or ""),
-                    "Validation Evidence A": _validation_evidence(member_a),
-                    "Validation Evidence B": _validation_evidence(member_b),
-                    "Type A": str(member_a.get("field_type") or ""),
-                    "Type B": str(member_b.get("field_type") or ""),
-                    "Gold Contract A": str(member_a.get("gold_path") or ""),
-                    "Gold Contract B": str(member_b.get("gold_path") or ""),
-                    "Evidence A": str(member_a.get("config_path") or ""),
-                    "Evidence B": str(member_b.get("config_path") or ""),
-                    COL_ROW_KEY: "",
-                }
-                row[COL_ROW_KEY] = _row_key(row)
-                refreshed.append(row)
+                    )
+                )
     return refreshed
 
 
@@ -1490,6 +1530,53 @@ def _render_critical_inconsistencies(
     return "\n".join(lines)
 
 
+def _count_weak_clusters(
+    registry: dict[str, Any],
+    *,
+    scope_predicate: Any,
+) -> int:
+    count = 0
+    for cluster in registry.get("clusters", []):
+        if not isinstance(cluster, dict):
+            continue
+        if cluster.get("semantic_status") != "WEAK":
+            continue
+        weak_decision = cast(dict[str, Any], cluster.get("weak_decision", {}))
+        if scope_predicate(weak_decision.get("semantic_scope")):
+            count += 1
+    return count
+
+
+def _composite_typing_residual_lines(
+    composite_unknown_typing: dict[str, Any],
+) -> list[str]:
+    if not composite_unknown_typing["row_count"]:
+        return []
+    lines = [
+        "## Reviewed Composite Typing Residuals",
+        "",
+        f"- Reviewed residual rows with composite `unknown` typing: `{composite_unknown_typing['row_count']}`",
+        f"- Covered by review registry: `{composite_unknown_typing['covered_row_count']}`",
+        f"- Uncovered residual rows: `{len(composite_unknown_typing['uncovered'])}`",
+        "",
+        "| Review ID | Rows | Schema authority | Owner | Residual fields |",
+        "| --- | ---: | --- | --- | --- |",
+    ]
+    for entry in composite_unknown_typing["reviews"]:
+        lines.append(
+            "| {review_id} | {row_count} | `{schema_authority}` | {owner} | {fields} |".format(
+                **entry,
+            )
+        )
+    if composite_unknown_typing["uncovered"]:
+        lines.append("")
+        lines.append("Uncovered residuals:")
+        for pipeline_name, field_name in composite_unknown_typing["uncovered"]:
+            lines.append(f"- `{pipeline_name}.{field_name}`")
+    lines.append("")
+    return lines
+
+
 def _render_report(
     rows: list[dict[str, str]],
     registry: dict[str, Any],
@@ -1504,24 +1591,14 @@ def _render_report(
     normalization_counts = Counter(row["Normalization"] for row in rows)
     validation_counts = Counter(row["Validation"] for row in rows)
     typing_counts = Counter(row["Typing"] for row in rows)
-    weak_role_governed_count = sum(
-        1
-        for cluster in registry.get("clusters", [])
-        if isinstance(cluster, dict)
-        and cluster.get("semantic_status") == "WEAK"
-        and str(
-            cast(dict[str, Any], cluster.get("weak_decision", {})).get(
-                "semantic_scope", ""
-            )
-        ).startswith("role_governed_")
+    weak_role_governed_count = _count_weak_clusters(
+        registry,
+        scope_predicate=lambda scope: str(scope or "").startswith("role_governed_"),
     )
-    weak_explicit_contract_count = sum(
-        1
-        for cluster in registry.get("clusters", [])
-        if isinstance(cluster, dict)
-        and cluster.get("semantic_status") == "WEAK"
-        and cast(dict[str, Any], cluster.get("weak_decision", {})).get("semantic_scope")
-        == "explicit_source_owned_assay_contract"
+    weak_explicit_contract_count = _count_weak_clusters(
+        registry,
+        scope_predicate=lambda scope: scope
+        == "explicit_source_owned_assay_contract",
     )
     normalization_mismatches = normalization_counts.get(
         "DIFFERENT", 0
@@ -1574,31 +1651,7 @@ def _render_report(
         "Pandera-derived Gold contracts, and the reviewed semantic cluster registry.",
         "",
     ]
-    if composite_unknown_typing["row_count"]:
-        report_lines.extend(
-            [
-                "## Reviewed Composite Typing Residuals",
-                "",
-                f"- Reviewed residual rows with composite `unknown` typing: `{composite_unknown_typing['row_count']}`",
-                f"- Covered by review registry: `{composite_unknown_typing['covered_row_count']}`",
-                f"- Uncovered residual rows: `{len(composite_unknown_typing['uncovered'])}`",
-                "",
-                "| Review ID | Rows | Schema authority | Owner | Residual fields |",
-                "| --- | ---: | --- | --- | --- |",
-            ]
-        )
-        for entry in composite_unknown_typing["reviews"]:
-            report_lines.append(
-                "| {review_id} | {row_count} | `{schema_authority}` | {owner} | {fields} |".format(
-                    **entry,
-                )
-            )
-        if composite_unknown_typing["uncovered"]:
-            report_lines.append("")
-            report_lines.append("Uncovered residuals:")
-            for pipeline_name, field_name in composite_unknown_typing["uncovered"]:
-                report_lines.append(f"- `{pipeline_name}.{field_name}`")
-        report_lines.append("")
+    report_lines.extend(_composite_typing_residual_lines(composite_unknown_typing))
     return "\n".join(report_lines)
 
 

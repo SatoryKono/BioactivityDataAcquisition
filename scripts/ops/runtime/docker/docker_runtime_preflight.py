@@ -383,260 +383,283 @@ def _published_ports(service: Mapping[str, Any]) -> list[tuple[str, int, int]]:
     return result
 
 
-def _static_observations(
-    root: Path,
-    contract: Mapping[str, Any],
-    *,
-    selected_stack: str | None = None,
-) -> tuple[list[Finding], dict[str, Any]]:
+def _findings_stack_compose_shape(
+    stack_name: str,
+    stack_contract: Mapping[str, Any],
+    services: Mapping[str, Any],
+    actual_project: object,
+) -> list[Finding]:
     findings: list[Finding] = []
-    compose_observations: dict[str, Any] = {}
-    seen_services: dict[str, str] = {}
-    seen_container_names: dict[str, str] = {}
-    seen_ports: dict[int, str] = {}
-    declared_owners = contract.get("service_ownership", {})
-    host_port_contract = contract.get("host_ports", {})
-    environment = os.environ
-
-    for stack_name, stack_contract in contract["stacks"].items():
-        compose_path = root / stack_contract["compose_file"]
-        if not compose_path.exists():
-            findings.append(
-                Finding(
-                    "F003",
-                    "error",
-                    "Contracted Compose file is missing",
-                    {"stack": stack_name, "path": str(compose_path)},
-                )
+    expected_project = stack_contract["project_name"]
+    if actual_project != expected_project:
+        findings.append(
+            Finding(
+                "F003",
+                "error",
+                "Compose project name differs from the runtime contract",
+                {
+                    "stack": stack_name,
+                    "expected": expected_project,
+                    "actual": actual_project,
+                },
             )
+        )
+    expected_services = set(stack_contract.get("required_services", [])) | set(
+        stack_contract.get("optional_services", [])
+    )
+    actual_services = set(services)
+    if expected_services != actual_services:
+        findings.append(
+            Finding(
+                "F003",
+                "error",
+                "Compose service set differs from its single-owner contract",
+                {
+                    "stack": stack_name,
+                    "missing": sorted(expected_services - actual_services),
+                    "unexpected": sorted(actual_services - expected_services),
+                },
+            )
+        )
+    return findings
+
+
+def _findings_service_ownership(
+    service_name: str,
+    stack_name: str,
+    *,
+    declared_owners: Mapping[str, Any],
+    seen_services: dict[str, str],
+) -> list[Finding]:
+    findings: list[Finding] = []
+    owner = declared_owners.get(service_name)
+    if owner != stack_name:
+        findings.append(
+            Finding(
+                "F003",
+                "error",
+                "Service is declared outside its contracted owner stack",
+                {"service": service_name, "stack": stack_name, "owner": owner},
+            )
+        )
+    previous_stack = seen_services.get(service_name)
+    if previous_stack and previous_stack != stack_name:
+        findings.append(
+            Finding(
+                "F003",
+                "error",
+                "Service has multiple Compose owners",
+                {
+                    "service": service_name,
+                    "stacks": sorted({previous_stack, stack_name}),
+                },
+            )
+        )
+    seen_services[service_name] = stack_name
+    return findings
+
+
+def _findings_container_name(
+    service: Mapping[str, Any],
+    service_name: str,
+    stack_name: str,
+    seen_container_names: dict[str, str],
+) -> list[Finding]:
+    container_name = service.get("container_name")
+    if not container_name:
+        return []
+    owner_key = f"{stack_name}/{service_name}"
+    previous_owner = seen_container_names.get(str(container_name))
+    findings: list[Finding] = []
+    if previous_owner and previous_owner != owner_key:
+        findings.append(
+            Finding(
+                "F003",
+                "error",
+                "Explicit container name has multiple owners",
+                {
+                    "container_name": container_name,
+                    "owners": [previous_owner, owner_key],
+                },
+            )
+        )
+    seen_container_names[str(container_name)] = owner_key
+    return findings
+
+
+def _bind_mount_source(volume: object) -> str:
+    if isinstance(volume, str):
+        return volume.split(":", maxsplit=1)[0]
+    if isinstance(volume, Mapping):
+        return str(volume.get("source", ""))
+    return ""
+
+
+def _findings_published_port(
+    *,
+    bind: str,
+    published: int,
+    stack_name: str,
+    service_name: str,
+    host_port_contract: Mapping[str, Any],
+    seen_ports: dict[int, str],
+) -> list[Finding]:
+    findings: list[Finding] = []
+    expected = host_port_contract.get(published) or host_port_contract.get(
+        str(published)
+    )
+    expected_owner = (
+        f"{expected.get('stack')}/{expected.get('service')}"
+        if isinstance(expected, dict)
+        else None
+    )
+    actual_owner = f"{stack_name}/{service_name}"
+    if expected_owner != actual_owner or bind != "127.0.0.1":
+        findings.append(
+            Finding(
+                "F003",
+                "error",
+                "Published port differs from its localhost ownership contract",
+                {
+                    "port": published,
+                    "actual_owner": actual_owner,
+                    "expected_owner": expected_owner,
+                    "bind": bind,
+                },
+            )
+        )
+    prior_port_owner = seen_ports.get(published)
+    if prior_port_owner and prior_port_owner != actual_owner:
+        findings.append(
+            Finding(
+                "F003",
+                "error",
+                "Published host port has multiple owners",
+                {
+                    "port": published,
+                    "owners": [prior_port_owner, actual_owner],
+                },
+            )
+        )
+    seen_ports[published] = actual_owner
+    return findings
+
+
+def _observe_stack_service(
+    service: Mapping[str, Any],
+    *,
+    service_name: str,
+    stack_name: str,
+    forbidden_environment_names: set[str],
+    host_port_contract: Mapping[str, Any],
+    seen_ports: dict[int, str],
+    stack_env_names: set[str],
+    stack_images: list[str],
+    stack_mount_sources: list[dict[str, str]],
+    stack_ports: list[dict[str, Any]],
+) -> list[Finding]:
+    findings: list[Finding] = []
+    container_environment_names = _container_environment_names(service)
+    stack_env_names.update(_environment_names(service))
+    for environment_name in sorted(
+        forbidden_environment_names & container_environment_names
+    ):
+        findings.append(
+            Finding(
+                "F004",
+                "error",
+                "Container environment variable uses an image-owned name",
+                {
+                    "stack": stack_name,
+                    "service": service_name,
+                    "name": environment_name,
+                },
+            )
+        )
+    image = service.get("image")
+    if image:
+        stack_images.append(str(image))
+    for volume in service.get("volumes", []) or []:
+        if not _is_bind_mount(volume):
             continue
-        compose = _load_yaml(compose_path)
-        services = compose.get("services", {})
-        if not isinstance(services, dict):
-            services = {}
-        actual_project = compose.get("name")
-        expected_project = stack_contract["project_name"]
-        if actual_project != expected_project:
-            findings.append(
-                Finding(
-                    "F003",
-                    "error",
-                    "Compose project name differs from the runtime contract",
-                    {
-                        "stack": stack_name,
-                        "expected": expected_project,
-                        "actual": actual_project,
-                    },
-                )
-            )
-
-        expected_services = set(stack_contract.get("required_services", [])) | set(
-            stack_contract.get("optional_services", [])
+        stack_mount_sources.append(
+            {"service": service_name, "source": _bind_mount_source(volume)}
         )
-        actual_services = set(services)
-        if expected_services != actual_services:
-            findings.append(
-                Finding(
-                    "F003",
-                    "error",
-                    "Compose service set differs from its single-owner contract",
-                    {
-                        "stack": stack_name,
-                        "missing": sorted(expected_services - actual_services),
-                        "unexpected": sorted(actual_services - expected_services),
-                    },
-                )
-            )
-
-        stack_env_names: set[str] = set()
-        forbidden_environment_names = {
-            str(name)
-            for name in stack_contract.get("forbidden_container_environment_names", [])
-        }
-        stack_ports: list[dict[str, Any]] = []
-        stack_images: list[str] = []
-        stack_mount_sources: list[dict[str, str]] = []
-        for service_name, raw_service in services.items():
-            service = raw_service if isinstance(raw_service, dict) else {}
-            owner = declared_owners.get(service_name)
-            if owner != stack_name:
-                findings.append(
-                    Finding(
-                        "F003",
-                        "error",
-                        "Service is declared outside its contracted owner stack",
-                        {"service": service_name, "stack": stack_name, "owner": owner},
-                    )
-                )
-            previous_stack = seen_services.get(service_name)
-            if previous_stack and previous_stack != stack_name:
-                findings.append(
-                    Finding(
-                        "F003",
-                        "error",
-                        "Service has multiple Compose owners",
-                        {
-                            "service": service_name,
-                            "stacks": sorted({previous_stack, stack_name}),
-                        },
-                    )
-                )
-            seen_services[service_name] = stack_name
-
-            container_name = service.get("container_name")
-            if container_name:
-                previous_owner = seen_container_names.get(str(container_name))
-                if previous_owner and previous_owner != f"{stack_name}/{service_name}":
-                    findings.append(
-                        Finding(
-                            "F003",
-                            "error",
-                            "Explicit container name has multiple owners",
-                            {
-                                "container_name": container_name,
-                                "owners": [
-                                    previous_owner,
-                                    f"{stack_name}/{service_name}",
-                                ],
-                            },
-                        )
-                    )
-                seen_container_names[str(container_name)] = (
-                    f"{stack_name}/{service_name}"
-                )
-
-            container_environment_names = _container_environment_names(service)
-            stack_env_names.update(_environment_names(service))
-            for environment_name in sorted(
-                forbidden_environment_names & container_environment_names
-            ):
-                findings.append(
-                    Finding(
-                        "F004",
-                        "error",
-                        "Container environment variable uses an image-owned name",
-                        {
-                            "stack": stack_name,
-                            "service": service_name,
-                            "name": environment_name,
-                        },
-                    )
-                )
-            image = service.get("image")
-            if image:
-                stack_images.append(str(image))
-            for volume in service.get("volumes", []) or []:
-                if not _is_bind_mount(volume):
-                    continue
-                if isinstance(volume, str):
-                    source = volume.split(":", maxsplit=1)[0]
-                else:
-                    source = str(volume.get("source", ""))
-                stack_mount_sources.append({"service": service_name, "source": source})
-            for bind, published, target in _published_ports(service):
-                stack_ports.append(
-                    {
-                        "service": service_name,
-                        "bind": bind,
-                        "published": published,
-                        "target": target,
-                    }
-                )
-                expected = host_port_contract.get(published) or host_port_contract.get(
-                    str(published)
-                )
-                expected_owner = (
-                    f"{expected.get('stack')}/{expected.get('service')}"
-                    if isinstance(expected, dict)
-                    else None
-                )
-                actual_owner = f"{stack_name}/{service_name}"
-                if expected_owner != actual_owner or bind != "127.0.0.1":
-                    findings.append(
-                        Finding(
-                            "F003",
-                            "error",
-                            "Published port differs from its localhost ownership contract",
-                            {
-                                "port": published,
-                                "actual_owner": actual_owner,
-                                "expected_owner": expected_owner,
-                                "bind": bind,
-                            },
-                        )
-                    )
-                prior_port_owner = seen_ports.get(published)
-                if prior_port_owner and prior_port_owner != actual_owner:
-                    findings.append(
-                        Finding(
-                            "F003",
-                            "error",
-                            "Published host port has multiple owners",
-                            {
-                                "port": published,
-                                "owners": [prior_port_owner, actual_owner],
-                            },
-                        )
-                    )
-                seen_ports[published] = actual_owner
-
-        required_values = (
-            stack_contract.get("required_non_secret_environment_values", {})
-            if selected_stack in {None, stack_name}
-            else {}
-        )
-        for environment_name, expected_value in required_values.items():
-            actual_value = environment.get(str(environment_name))
-            evidence = {
-                "stack": stack_name,
-                "name": str(environment_name),
-                "expected": str(expected_value),
+    for bind, published, target in _published_ports(service):
+        stack_ports.append(
+            {
+                "service": service_name,
+                "bind": bind,
+                "published": published,
+                "target": target,
             }
-            if actual_value is None:
-                findings.append(
-                    Finding(
-                        "ENVIRONMENT_MISSING",
-                        "error",
-                        "Required non-secret environment variable is absent",
-                        evidence,
-                    )
-                )
-            elif actual_value != str(expected_value):
-                findings.append(
-                    Finding(
-                        "ENVIRONMENT_VALUE_UNSUPPORTED",
-                        "error",
-                        "Environment variable has an unsupported value",
-                        evidence,
-                    )
-                )
-
-        required_secrets = (
-            stack_contract.get("required_secret_environment_names", [])
-            if selected_stack in {None, stack_name}
-            else []
         )
-        for secret_name in required_secrets:
-            if secret_name not in environment:
-                findings.append(
-                    Finding(
-                        "SECRET_MISSING",
-                        "error",
-                        "Required secret environment variable is absent",
-                        {"stack": stack_name, "name": secret_name},
-                    )
-                )
+        findings.extend(
+            _findings_published_port(
+                bind=bind,
+                published=published,
+                stack_name=stack_name,
+                service_name=service_name,
+                host_port_contract=host_port_contract,
+                seen_ports=seen_ports,
+            )
+        )
+    return findings
 
-        compose_observations[stack_name] = {
-            "compose_file": stack_contract["compose_file"],
-            "project_name": actual_project,
-            "services": sorted(actual_services),
-            "environment_names": sorted(stack_env_names),
-            "published_ports": stack_ports,
-            "images": sorted(stack_images),
-            "bind_mount_sources": stack_mount_sources,
+
+def _findings_required_environment(
+    stack_name: str,
+    stack_contract: Mapping[str, Any],
+    *,
+    selected_stack: str | None,
+    environment: Mapping[str, str],
+) -> list[Finding]:
+    if selected_stack not in {None, stack_name}:
+        return []
+    findings: list[Finding] = []
+    required_values = stack_contract.get("required_non_secret_environment_values", {})
+    for environment_name, expected_value in required_values.items():
+        actual_value = environment.get(str(environment_name))
+        evidence = {
+            "stack": stack_name,
+            "name": str(environment_name),
+            "expected": str(expected_value),
         }
+        if actual_value is None:
+            findings.append(
+                Finding(
+                    "ENVIRONMENT_MISSING",
+                    "error",
+                    "Required non-secret environment variable is absent",
+                    evidence,
+                )
+            )
+        elif actual_value != str(expected_value):
+            findings.append(
+                Finding(
+                    "ENVIRONMENT_VALUE_UNSUPPORTED",
+                    "error",
+                    "Environment variable has an unsupported value",
+                    evidence,
+                )
+            )
+    for secret_name in stack_contract.get("required_secret_environment_names", []):
+        if secret_name not in environment:
+            findings.append(
+                Finding(
+                    "SECRET_MISSING",
+                    "error",
+                    "Required secret environment variable is absent",
+                    {"stack": stack_name, "name": secret_name},
+                )
+            )
+    return findings
 
+
+def _findings_shared_networks(
+    root: Path, contract: Mapping[str, Any]
+) -> list[Finding]:
+    findings: list[Finding] = []
     for logical_name, network_contract in contract.get("shared_networks", {}).items():
         expected_name = network_contract["name"]
         for stack_name in network_contract.get("consumers", []):
@@ -672,32 +695,43 @@ def _static_observations(
                         },
                     )
                 )
+    return findings
 
+
+def _findings_codex_filesystem(
+    root: Path,
+    contract: Mapping[str, Any],
+    compose_observations: Mapping[str, Any],
+) -> list[Finding]:
     codex_contract = contract["stacks"].get("codex")
-    if codex_contract:
-        codex = compose_observations.get("codex", {})
-        codex_compose = _load_yaml(root / codex_contract["compose_file"])
-        filesystem_service = codex_compose.get("services", {}).get("mcp-filesystem", {})
-        obscuring_targets = [
-            target
-            for volume in filesystem_service.get("volumes", [])
-            if _is_bind_mount(volume) and (target := _volume_target(volume)) == "/app"
-        ]
-        if obscuring_targets:
-            findings.append(
-                Finding(
-                    "F001",
-                    "error",
-                    "mcp-filesystem bind mount obscures /app and image-installed node_modules",
-                    {
-                        "stack": "codex",
-                        "service": "mcp-filesystem",
-                        "targets": obscuring_targets,
-                        "project": codex.get("project_name"),
-                    },
-                )
-            )
+    if not codex_contract:
+        return []
+    codex = compose_observations.get("codex", {})
+    codex_compose = _load_yaml(root / codex_contract["compose_file"])
+    filesystem_service = codex_compose.get("services", {}).get("mcp-filesystem", {})
+    obscuring_targets = [
+        target
+        for volume in filesystem_service.get("volumes", [])
+        if _is_bind_mount(volume) and (target := _volume_target(volume)) == "/app"
+    ]
+    if not obscuring_targets:
+        return []
+    return [
+        Finding(
+            "F001",
+            "error",
+            "mcp-filesystem bind mount obscures /app and image-installed node_modules",
+            {
+                "stack": "codex",
+                "service": "mcp-filesystem",
+                "targets": obscuring_targets,
+                "project": codex.get("project_name"),
+            },
+        )
+    ]
 
+
+def _findings_warp_dockerfile(root: Path, contract: Mapping[str, Any]) -> list[Finding]:
     main_compose = _load_yaml(root / contract["stacks"]["main"]["compose_file"])
     warp_service = main_compose.get("services", {}).get("warp", {})
     dockerfile = (
@@ -705,34 +739,163 @@ def _static_observations(
         if isinstance(warp_service.get("build"), dict)
         else None
     )
-    if dockerfile:
-        dockerfile_text = (root / str(dockerfile)).read_text(encoding="utf-8")
-        starts_cli = "warp-cli" in dockerfile_text
-        starts_service = (
-            re.search(r"(?:CMD|ENTRYPOINT).*warp-svc", dockerfile_text) is not None
+    if not dockerfile:
+        return []
+    dockerfile_text = (root / str(dockerfile)).read_text(encoding="utf-8")
+    starts_cli = "warp-cli" in dockerfile_text
+    starts_service = (
+        re.search(r"(?:CMD|ENTRYPOINT).*warp-svc", dockerfile_text) is not None
+    )
+    if not (starts_cli and not starts_service):
+        return []
+    return [
+        Finding(
+            "F002",
+            "error",
+            "Warp image invokes warp-cli without starting warp-svc",
+            {"stack": "main", "service": "warp", "dockerfile": str(dockerfile)},
         )
-        if starts_cli and not starts_service:
-            findings.append(
-                Finding(
-                    "F002",
-                    "error",
-                    "Warp image invokes warp-cli without starting warp-svc",
-                    {"stack": "main", "service": "warp", "dockerfile": str(dockerfile)},
-                )
-            )
+    ]
 
+
+def _observe_one_stack(
+    root: Path,
+    stack_name: str,
+    stack_contract: Mapping[str, Any],
+    *,
+    selected_stack: str | None,
+    declared_owners: Mapping[str, Any],
+    host_port_contract: Mapping[str, Any],
+    seen_services: dict[str, str],
+    seen_container_names: dict[str, str],
+    seen_ports: dict[int, str],
+    environment: Mapping[str, str],
+) -> tuple[list[Finding], dict[str, Any] | None]:
+    compose_path = root / stack_contract["compose_file"]
+    if not compose_path.exists():
+        return (
+            [
+                Finding(
+                    "F003",
+                    "error",
+                    "Contracted Compose file is missing",
+                    {"stack": stack_name, "path": str(compose_path)},
+                )
+            ],
+            None,
+        )
+    compose = _load_yaml(compose_path)
+    services = compose.get("services", {})
+    if not isinstance(services, dict):
+        services = {}
+    actual_project = compose.get("name")
+    findings = _findings_stack_compose_shape(
+        stack_name, stack_contract, services, actual_project
+    )
+    stack_env_names: set[str] = set()
+    forbidden_environment_names = {
+        str(name)
+        for name in stack_contract.get("forbidden_container_environment_names", [])
+    }
+    stack_ports: list[dict[str, Any]] = []
+    stack_images: list[str] = []
+    stack_mount_sources: list[dict[str, str]] = []
+    for service_name, raw_service in services.items():
+        service = raw_service if isinstance(raw_service, dict) else {}
+        findings.extend(
+            _findings_service_ownership(
+                service_name,
+                stack_name,
+                declared_owners=declared_owners,
+                seen_services=seen_services,
+            )
+        )
+        findings.extend(
+            _findings_container_name(
+                service, service_name, stack_name, seen_container_names
+            )
+        )
+        findings.extend(
+            _observe_stack_service(
+                service,
+                service_name=service_name,
+                stack_name=stack_name,
+                forbidden_environment_names=forbidden_environment_names,
+                host_port_contract=host_port_contract,
+                seen_ports=seen_ports,
+                stack_env_names=stack_env_names,
+                stack_images=stack_images,
+                stack_mount_sources=stack_mount_sources,
+                stack_ports=stack_ports,
+            )
+        )
+    findings.extend(
+        _findings_required_environment(
+            stack_name,
+            stack_contract,
+            selected_stack=selected_stack,
+            environment=environment,
+        )
+    )
+    observation = {
+        "compose_file": stack_contract["compose_file"],
+        "project_name": actual_project,
+        "services": sorted(services),
+        "environment_names": sorted(stack_env_names),
+        "published_ports": stack_ports,
+        "images": sorted(stack_images),
+        "bind_mount_sources": stack_mount_sources,
+    }
+    return findings, observation
+
+
+def _static_observations(
+    root: Path,
+    contract: Mapping[str, Any],
+    *,
+    selected_stack: str | None = None,
+) -> tuple[list[Finding], dict[str, Any]]:
+    findings: list[Finding] = []
+    compose_observations: dict[str, Any] = {}
+    seen_services: dict[str, str] = {}
+    seen_container_names: dict[str, str] = {}
+    seen_ports: dict[int, str] = {}
+    declared_owners = contract.get("service_ownership", {})
+    host_port_contract = contract.get("host_ports", {})
+    environment = os.environ
+
+    for stack_name, stack_contract in contract["stacks"].items():
+        stack_findings, observation = _observe_one_stack(
+            root,
+            stack_name,
+            stack_contract,
+            selected_stack=selected_stack,
+            declared_owners=declared_owners,
+            host_port_contract=host_port_contract,
+            seen_services=seen_services,
+            seen_container_names=seen_container_names,
+            seen_ports=seen_ports,
+            environment=environment,
+        )
+        findings.extend(stack_findings)
+        if observation is not None:
+            compose_observations[stack_name] = observation
+
+    findings.extend(_findings_shared_networks(root, contract))
+    findings.extend(
+        _findings_codex_filesystem(root, contract, compose_observations)
+    )
+    findings.extend(_findings_warp_dockerfile(root, contract))
     return findings, compose_observations
 
 
-def _capacity_observation(
-    root: Path, contract: Mapping[str, Any]
-) -> tuple[dict[str, Any], list[Finding]]:
-    capacity_contract = contract.get("capacity", {})
+def _docker_root_and_disk(
+    root: Path,
+) -> tuple[str | None, Any | None, list[Finding]]:
     docker_info = _run_read_only(
         ["docker", "info", "--format", _DOCKER_FORMAT_JSON], cwd=root
     )
     docker_root: str | None = None
-    docker_disk: Any | None = None
     findings: list[Finding] = []
     if docker_info.returncode == 0:
         try:
@@ -742,22 +905,7 @@ def _capacity_observation(
         if isinstance(info_payload, dict):
             candidate = info_payload.get("DockerRootDir")
             docker_root = str(candidate) if candidate else None
-    if docker_root:
-        try:
-            docker_disk = shutil.disk_usage(docker_root)
-        except OSError as exc:
-            findings.append(
-                Finding(
-                    "CAPACITY_DOCKER_ROOT",
-                    "error",
-                    "Docker data root capacity cannot be measured from this host",
-                    {
-                        "docker_root_dir": docker_root,
-                        "error": _json_safe_text(str(exc)),
-                    },
-                )
-            )
-    else:
+    if not docker_root:
         findings.append(
             Finding(
                 "CAPACITY_DOCKER_ROOT",
@@ -766,33 +914,49 @@ def _capacity_observation(
                 {"error": docker_info.stderr or "DockerRootDir missing"},
             )
         )
-    memory_bytes: int | None = None
-    meminfo = Path("/proc/meminfo")
-    if meminfo.exists():
-        match = re.search(
-            r"^MemAvailable:\s+(\d+)\s+kB$",
-            meminfo.read_text(encoding="utf-8"),
-            re.MULTILINE,
+        return None, None, findings
+    try:
+        return docker_root, shutil.disk_usage(docker_root), findings
+    except OSError as exc:
+        findings.append(
+            Finding(
+                "CAPACITY_DOCKER_ROOT",
+                "error",
+                "Docker data root capacity cannot be measured from this host",
+                {
+                    "docker_root_dir": docker_root,
+                    "error": _json_safe_text(str(exc)),
+                },
+            )
         )
-        if match:
-            memory_bytes = int(match.group(1)) * 1024
-    observation = {
-        "cpus": os.cpu_count(),
-        "docker_root_dir": docker_root,
-        "docker_total_bytes": docker_disk.total if docker_disk else None,
-        "docker_free_bytes": docker_disk.free if docker_disk else None,
-        "available_memory_bytes": memory_bytes,
-        "thresholds": capacity_contract,
-    }
-    absolute_minimum = int(capacity_contract.get("minimum_free_disk_gib", 0)) * 1024**3
-    percent = int(capacity_contract.get("minimum_free_disk_percent", 0))
-    percentage_minimum = (
-        docker_disk.total * percent // 100 if docker_disk is not None else 0
+        return docker_root, None, findings
+
+
+def _available_memory_bytes() -> int | None:
+    meminfo = Path("/proc/meminfo")
+    if not meminfo.exists():
+        return None
+    match = re.search(
+        r"^MemAvailable:\s+(\d+)\s+kB$",
+        meminfo.read_text(encoding="utf-8"),
+        re.MULTILINE,
     )
-    minimum_disk = max(absolute_minimum, percentage_minimum)
-    observation["required_free_disk_bytes"] = minimum_disk
-    minimum_memory = int(capacity_contract.get("minimum_free_memory_gib", 0)) * 1024**3
-    minimum_cpus = int(capacity_contract.get("minimum_cpus", 0))
+    if match:
+        return int(match.group(1)) * 1024
+    return None
+
+
+def _capacity_threshold_findings(
+    *,
+    docker_root: str | None,
+    docker_disk: Any | None,
+    memory_bytes: int | None,
+    minimum_disk: int,
+    absolute_minimum: int,
+    percentage_minimum: int,
+    minimum_memory: int,
+) -> list[Finding]:
+    findings: list[Finding] = []
     if docker_disk is not None and docker_disk.free < minimum_disk:
         findings.append(
             Finding(
@@ -817,6 +981,43 @@ def _capacity_observation(
                 {"available_bytes": memory_bytes, "minimum_bytes": minimum_memory},
             )
         )
+    return findings
+
+
+def _capacity_observation(
+    root: Path, contract: Mapping[str, Any]
+) -> tuple[dict[str, Any], list[Finding]]:
+    capacity_contract = contract.get("capacity", {})
+    docker_root, docker_disk, findings = _docker_root_and_disk(root)
+    memory_bytes = _available_memory_bytes()
+    observation = {
+        "cpus": os.cpu_count(),
+        "docker_root_dir": docker_root,
+        "docker_total_bytes": docker_disk.total if docker_disk else None,
+        "docker_free_bytes": docker_disk.free if docker_disk else None,
+        "available_memory_bytes": memory_bytes,
+        "thresholds": capacity_contract,
+    }
+    absolute_minimum = int(capacity_contract.get("minimum_free_disk_gib", 0)) * 1024**3
+    percent = int(capacity_contract.get("minimum_free_disk_percent", 0))
+    percentage_minimum = (
+        docker_disk.total * percent // 100 if docker_disk is not None else 0
+    )
+    minimum_disk = max(absolute_minimum, percentage_minimum)
+    observation["required_free_disk_bytes"] = minimum_disk
+    minimum_memory = int(capacity_contract.get("minimum_free_memory_gib", 0)) * 1024**3
+    minimum_cpus = int(capacity_contract.get("minimum_cpus", 0))
+    findings.extend(
+        _capacity_threshold_findings(
+            docker_root=docker_root,
+            docker_disk=docker_disk,
+            memory_bytes=memory_bytes,
+            minimum_disk=minimum_disk,
+            absolute_minimum=absolute_minimum,
+            percentage_minimum=percentage_minimum,
+            minimum_memory=minimum_memory,
+        )
+    )
     if (os.cpu_count() or 0) < minimum_cpus:
         findings.append(
             Finding(

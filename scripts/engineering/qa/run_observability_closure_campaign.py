@@ -856,6 +856,35 @@ def _find_bronze_record(
     raise ValueError(f"no compatible cached Bronze record under {entity_root}")
 
 
+def _record_from_decoded_response(decoded: dict[str, object]) -> dict[str, object] | None:
+    """Pick first list-of-dict entity row from a decoded VCR response body."""
+    if "status" in decoded:
+        return None
+    for value in decoded.values():
+        if isinstance(value, list) and value and isinstance(value[0], dict):
+            return dict(value[0])
+    return None
+
+
+def _record_from_vcr_interaction(
+    interaction: object,
+) -> dict[str, object] | None:
+    if not isinstance(interaction, dict):
+        return None
+    response = interaction.get("response")
+    body = response.get("body") if isinstance(response, dict) else None
+    raw = body.get("string") if isinstance(body, dict) else None
+    if not isinstance(raw, str):
+        return None
+    try:
+        decoded = json.loads(raw)
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(decoded, dict):
+        return None
+    return _record_from_decoded_response(decoded)
+
+
 def _first_recorded_response(path: Path) -> dict[str, object]:
     """Return the first non-status record from one governed VCR cassette."""
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))
@@ -863,22 +892,9 @@ def _first_recorded_response(path: Path) -> dict[str, object]:
     if not isinstance(interactions, list):
         raise ValueError(f"invalid recorded fixture: {path}")
     for interaction in interactions:
-        if not isinstance(interaction, dict):
-            continue
-        response = interaction.get("response")
-        body = response.get("body") if isinstance(response, dict) else None
-        raw = body.get("string") if isinstance(body, dict) else None
-        if not isinstance(raw, str):
-            continue
-        try:
-            decoded = json.loads(raw)
-        except json.JSONDecodeError:
-            continue
-        if not isinstance(decoded, dict) or "status" in decoded:
-            continue
-        for value in decoded.values():
-            if isinstance(value, list) and value and isinstance(value[0], dict):
-                return dict(value[0])
+        record = _record_from_vcr_interaction(interaction)
+        if record is not None:
+            return record
     raise ValueError(f"no bounded response record found in {path}")
 
 
@@ -2168,6 +2184,17 @@ def _actual_tracing_occurrences(
     }
 
 
+def _tracing_coverage_errors(payloads: list[dict[str, object]]) -> list[str]:
+    errors: list[str] = []
+    pipelines = {str(payload.get("pipeline") or "") for payload in payloads}
+    statuses = {payload.get("status") for payload in payloads}
+    if pipelines != set(CHEMBL_PIPELINES):
+        errors.append("tracing attempts must cover all 15 canonical pipelines")
+    if statuses != {"success"}:
+        errors.append("tracing attempt statuses must all equal success")
+    return errors
+
+
 def _validate_tracing_raw(
     retained: list[dict[str, str]],
     expected_binding: dict[str, object] | None = None,
@@ -2175,18 +2202,13 @@ def _validate_tracing_raw(
     payloads, errors = _json_payloads_by_kind(retained, "attempt-result")
     if len(payloads) != 30:
         return [*errors, "tracing parity requires exactly 30 attempt results"]
-    pipelines = {str(payload.get("pipeline") or "") for payload in payloads}
-    statuses = {payload.get("status") for payload in payloads}
-    if pipelines != set(CHEMBL_PIPELINES):
-        errors.append("tracing attempts must cover all 15 canonical pipelines")
-    if statuses != {"success"}:
-        errors.append("tracing attempt statuses must all equal success")
+    errors.extend(_tracing_coverage_errors(payloads))
     errors.extend(_tracing_pair_errors(payloads))
-    if expected_binding is not None:
-        if _actual_tracing_occurrences(payloads) != _expected_tracing_occurrences(
-            expected_binding
-        ):
-            errors.append("tracing raw results do not match executed run occurrences")
+    if expected_binding is not None and (
+        _actual_tracing_occurrences(payloads)
+        != _expected_tracing_occurrences(expected_binding)
+    ):
+        errors.append("tracing raw results do not match executed run occurrences")
     decision_traces = [payload.get("decision_trace") for payload in payloads]
     if not any(isinstance(trace, list) and trace for trace in decision_traces):
         errors.append(
@@ -2242,38 +2264,62 @@ def _validate_workflow_raw(retained: list[dict[str, str]]) -> list[str]:
     return errors
 
 
-def _validate_inventory_raw(retained: list[dict[str, str]]) -> list[str]:
-    payloads, errors = _json_payloads_by_kind(retained, "inventory-report")
-    if len(payloads) != 1:
-        return [*errors, "metric surface requires exactly one inventory report"]
-    payload = payloads[0]
+_INVENTORY_EMPTY_FIELDS = (
+    "recording_declarations_without_output",
+    "recording_outputs_without_declaration",
+    "policy_aliases_without_catalog",
+    "catalog_aliases_without_declaration",
+    "policy_aliases_overlapping_outputs",
+    "http_semantics_violations",
+    "panel_contract_drift",
+    "prometheus_run_id_selector_violations",
+)
+_EXPECTED_TYPED_TARGET_COUNTS = {
+    "promql": 171,
+    "http": 30,
+    "loki": 5,
+    "tempo": 0,
+    "unknown": 0,
+}
+
+
+def _inventory_report_errors(payload: dict[str, object]) -> list[str]:
+    errors: list[str] = []
     outputs = payload.get("recording_rule_outputs")
     if not isinstance(outputs, list) or len(set(map(str, outputs))) < 103:
         errors.append("inventory must retain at least 103 unique recording outputs")
-    for field_name in (
-        "recording_declarations_without_output",
-        "recording_outputs_without_declaration",
-        "policy_aliases_without_catalog",
-        "catalog_aliases_without_declaration",
-        "policy_aliases_overlapping_outputs",
-        "http_semantics_violations",
-        "panel_contract_drift",
-        "prometheus_run_id_selector_violations",
-    ):
+    for field_name in _INVENTORY_EMPTY_FIELDS:
         if payload.get(field_name) != []:
             errors.append(f"inventory {field_name} must be empty")
     aliases = payload.get("policy_alias_metrics")
     if not isinstance(aliases, list) or len(set(map(str, aliases))) != 20:
         errors.append("inventory must retain exactly 20 governed policy aliases")
-    counts = payload.get("typed_target_counts")
-    if counts != {
-        "promql": 171,
-        "http": 30,
-        "loki": 5,
-        "tempo": 0,
-        "unknown": 0,
-    }:
+    if payload.get("typed_target_counts") != _EXPECTED_TYPED_TARGET_COUNTS:
         errors.append("inventory typed target counts do not match shipped dashboards")
+    return errors
+
+
+def _validate_inventory_raw(retained: list[dict[str, str]]) -> list[str]:
+    payloads, errors = _json_payloads_by_kind(retained, "inventory-report")
+    if len(payloads) != 1:
+        return [*errors, "metric surface requires exactly one inventory report"]
+    errors.extend(_inventory_report_errors(payloads[0]))
+    return errors
+
+
+def _dashboard_variable_payload_errors(
+    payload: dict[str, object],
+    dashboard_ids: set[str],
+) -> list[str]:
+    errors: list[str] = []
+    uid = str(payload.get("dashboard_uid") or "")
+    if not uid or uid in dashboard_ids:
+        errors.append("dashboard variable reports require unique non-empty UIDs")
+    dashboard_ids.add(uid)
+    pipelines = payload.get("pipelines")
+    exclusion = str(payload.get("eligibility_exclusion") or "").strip()
+    if pipelines != list(CHEMBL_PIPELINES) and not exclusion:
+        errors.append("dashboard variables require 15 canonical IDs or an exclusion")
     return errors
 
 
@@ -2281,16 +2327,7 @@ def _validate_dashboard_raw(retained: list[dict[str, str]]) -> list[str]:
     payloads, errors = _json_payloads_by_kind(retained, "dashboard-variable-report")
     dashboard_ids: set[str] = set()
     for payload in payloads:
-        uid = str(payload.get("dashboard_uid") or "")
-        if not uid or uid in dashboard_ids:
-            errors.append("dashboard variable reports require unique non-empty UIDs")
-        dashboard_ids.add(uid)
-        pipelines = payload.get("pipelines")
-        exclusion = str(payload.get("eligibility_exclusion") or "").strip()
-        if pipelines != list(CHEMBL_PIPELINES) and not exclusion:
-            errors.append(
-                "dashboard variables require 15 canonical IDs or an exclusion"
-            )
+        errors.extend(_dashboard_variable_payload_errors(payload, dashboard_ids))
     if len(dashboard_ids) < 8:
         errors.append("dashboard variable evidence requires eight dashboards")
     return errors

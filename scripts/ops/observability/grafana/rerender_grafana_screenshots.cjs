@@ -91,7 +91,7 @@ function applyScreenshotArg(config, arg, next) {
       config.scopeQuery = value;
     },
   };
-  if (Object.prototype.hasOwnProperty.call(valueArgs, arg) && next) {
+  if (Object.hasOwn(valueArgs, arg) && next) {
     valueArgs[arg](next);
     return 1;
   }
@@ -335,7 +335,12 @@ function isMateriallyBlankPng(buffer) {
     const dominance = top / samples;
     // Dominant single byte across sample => blank/flat canvas.
     return dominance >= 0.92 && counts.size <= 24;
-  } catch (_err) {
+  } catch (err) {
+    // Decode/sample failures are treated as non-blank so the outer PNG gate
+    // (signature/size) remains the hard fail path rather than false blank.
+    console.warn(
+      `isMateriallyBlankPng: blank-detector failed (${err && err.message ? err.message : err}); treating as non-blank`,
+    );
     return false;
   }
 }
@@ -423,6 +428,44 @@ async function createBrowserContext(browser) {
   };
 }
 
+function dashboardEntryFromPayload(payload) {
+  const uid = typeof payload.uid === "string" ? payload.uid : "";
+  const title = typeof payload.title === "string" ? payload.title : uid;
+  if (!uid) {
+    return null;
+  }
+  if (CONFIG.selectedUids.size > 0 && !CONFIG.selectedUids.has(uid)) {
+    return null;
+  }
+  const slug = grafanaSlugify(title) || uid;
+  const panels = Array.isArray(payload.panels) ? payload.panels : [];
+  const requiredPanels = requiredNonRowPanels(panels, CONFIG.expandCollapsedRows);
+  if (
+    uid === "bioetl-silver-reject-explorer" &&
+    !requiredPanels.some((panel) => panel.id === 13)
+  ) {
+    throw new Error(
+      "Silver Reject Explorer must expose required Backend Health panel 13",
+    );
+  }
+  const collapsedRowTitles = CONFIG.expandCollapsedRows
+    ? panels
+        .filter((panel) => panel?.type === "row" && panel.collapsed === true)
+        .map((panel) => (typeof panel.title === "string" ? panel.title.trim() : ""))
+        .filter(Boolean)
+    : [];
+  return {
+    uid,
+    title,
+    url: `/d/${uid}/${slug}`,
+    file: `${uid}.png`,
+    requiredPanels,
+    requiredTerminalPanelIds:
+      uid === "bioetl-silver-reject-explorer" ? [13] : [],
+    collapsedRowTitles,
+  };
+}
+
 function listDashboardsFromRepo() {
   const dir = dashboardDir();
   const files = fs
@@ -434,40 +477,10 @@ function listDashboardsFromRepo() {
   const dashboards = [];
   for (const filePath of files) {
     const payload = JSON.parse(fs.readFileSync(filePath, "utf8"));
-    const uid = typeof payload.uid === "string" ? payload.uid : "";
-    const title = typeof payload.title === "string" ? payload.title : uid;
-    if (!uid) {
-      continue;
+    const entry = dashboardEntryFromPayload(payload);
+    if (entry) {
+      dashboards.push(entry);
     }
-    if (CONFIG.selectedUids.size > 0 && !CONFIG.selectedUids.has(uid)) {
-      continue;
-    }
-    const slug = grafanaSlugify(title) || uid;
-    const panels = Array.isArray(payload.panels) ? payload.panels : [];
-    const requiredPanels = requiredNonRowPanels(panels, CONFIG.expandCollapsedRows);
-    if (
-      uid === "bioetl-silver-reject-explorer" &&
-      !requiredPanels.some((panel) => panel.id === 13)
-    ) {
-      throw new Error(
-        "Silver Reject Explorer must expose required Backend Health panel 13",
-      );
-    }
-    dashboards.push({
-      uid,
-      title,
-      url: `/d/${uid}/${slug}`,
-      file: `${uid}.png`,
-      requiredPanels,
-      requiredTerminalPanelIds:
-        uid === "bioetl-silver-reject-explorer" ? [13] : [],
-      collapsedRowTitles: CONFIG.expandCollapsedRows
-        ? panels
-            .filter((panel) => panel?.type === "row" && panel.collapsed === true)
-            .map((panel) => (typeof panel.title === "string" ? panel.title.trim() : ""))
-            .filter(Boolean)
-        : [],
-    });
   }
   if (dashboards.length === 0) {
     throw new Error("No local dashboard JSON files matched the current render selection");
@@ -557,6 +570,40 @@ async function countRenderedPanels(page) {
 
 async function detectActualTheme(page) {
   return page.evaluate(() => {
+    const themeFromTokens = (tokens) => {
+      if (/(^|[\s_-])dark($|[\s_-])/.test(tokens)) {
+        return "dark";
+      }
+      if (/(^|[\s_-])light($|[\s_-])/.test(tokens)) {
+        return "light";
+      }
+      return "";
+    };
+    const themeFromScheme = (scheme) => {
+      if (scheme.includes("dark") && !scheme.includes("light")) {
+        return "dark";
+      }
+      if (scheme.includes("light") && !scheme.includes("dark")) {
+        return "light";
+      }
+      return "";
+    };
+    const themeFromBackground = (element) => {
+      if (!element) {
+        return "";
+      }
+      const rgbaPattern = /rgba?\(\s*(\d+)\D+(\d+)\D+(\d+)(?:\D+([\d.]+))?/;
+      const match = rgbaPattern.exec(getComputedStyle(element).backgroundColor);
+      if (!match || (match[4] !== undefined && Number.parseFloat(match[4]) === 0)) {
+        return "";
+      }
+      const red = Number.parseInt(match[1], 10);
+      const green = Number.parseInt(match[2], 10);
+      const blue = Number.parseInt(match[3], 10);
+      const luminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+      return luminance < 128 ? "dark" : "light";
+    };
+
     const root = document.documentElement;
     const body = document.body;
     const tokens = [
@@ -567,91 +614,76 @@ async function detectActualTheme(page) {
     ]
       .join(" ")
       .toLowerCase();
-    if (/(^|[\s_-])dark($|[\s_-])/.test(tokens)) {
-      return "dark";
+    const fromTokens = themeFromTokens(tokens);
+    if (fromTokens) {
+      return fromTokens;
     }
-    if (/(^|[\s_-])light($|[\s_-])/.test(tokens)) {
-      return "light";
-    }
-
     const scheme = root ? getComputedStyle(root).colorScheme.toLowerCase() : "";
-    if (scheme.includes("dark") && !scheme.includes("light")) {
-      return "dark";
+    const fromScheme = themeFromScheme(scheme);
+    if (fromScheme) {
+      return fromScheme;
     }
-    if (scheme.includes("light") && !scheme.includes("dark")) {
-      return "light";
-    }
-
-    for (const element of [body, root]) {
-      if (!element) {
-        continue;
-      }
-      const match = getComputedStyle(element).backgroundColor.match(
-        /rgba?\(\s*(\d+)\D+(\d+)\D+(\d+)(?:\D+([\d.]+))?/,
-      );
-      if (!match || (match[4] !== undefined && Number.parseFloat(match[4]) === 0)) {
-        continue;
-      }
-      const red = Number.parseInt(match[1], 10);
-      const green = Number.parseInt(match[2], 10);
-      const blue = Number.parseInt(match[3], 10);
-      const luminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue;
-      return luminance < 128 ? "dark" : "light";
-    }
-    return "unknown";
+    return themeFromBackground(body) || themeFromBackground(root) || "unknown";
   });
 }
 
 async function collectPanelTerminalStates(page, dashboard) {
   const states = await page.evaluate(({ requiredPanels }) => {
     const normalize = (value) => String(value || "").replace(/\s+/g, " ").trim();
-    const panelContainer = (panelId, panelTitle) => {
-      const selectors = [
-        `[data-panelid="${panelId}"]`,
-        `[data-viz-panel-key="panel-${panelId}"]`,
-        `[data-griditem-key="grid-item-${panelId}"]`,
-        `[data-griditem-key="panel-${panelId}"]`,
-        `[data-griditem-key="${panelId}"]`,
-        `[data-testid="panel-${panelId}"]`,
-      ];
+    const headerIdentityText = (header) =>
+      normalize(
+        [
+          header.innerText || header.textContent || "",
+          header.dataset?.testid || "",
+          header.getAttribute("aria-label") || "",
+          header.getAttribute("title") || "",
+        ].join(" "),
+      );
+    const locateBySelectors = (selectors) => {
       for (const selector of selectors) {
         const element = document.querySelector(selector);
         if (element) {
           return { element, selector };
         }
       }
-      if (panelTitle) {
-        const headerSelectors = [
-          '[data-testid^="data-testid Panel header"]',
-          '[data-testid*="Panel header"]',
-          '[aria-label="Panel header"]',
-          '[aria-label*="Panel header"]',
-          ".panel-title",
-        ];
-        for (const headerSelector of headerSelectors) {
-          for (const header of document.querySelectorAll(headerSelector)) {
-            const headerText = normalize(
-              [
-                header.innerText || header.textContent || "",
-                header.getAttribute("data-testid") || "",
-                header.getAttribute("aria-label") || "",
-                header.getAttribute("title") || "",
-              ].join(" "),
-            );
-            if (!headerText.includes(panelTitle)) {
-              continue;
-            }
-            const container = header.closest(
-              '[data-panelid],[data-viz-panel-key],[data-griditem-key],.react-grid-item',
-            );
-            if (container) {
-              return { element: container, selector: `${headerSelector} -> closest` };
-            }
+      return null;
+    };
+    const locateByTitle = (panelTitle) => {
+      if (!panelTitle) {
+        return null;
+      }
+      const headerSelectors = [
+        '[data-testid^="data-testid Panel header"]',
+        '[data-testid*="Panel header"]',
+        '[aria-label="Panel header"]',
+        '[aria-label*="Panel header"]',
+        ".panel-title",
+      ];
+      for (const headerSelector of headerSelectors) {
+        for (const header of document.querySelectorAll(headerSelector)) {
+          if (!headerIdentityText(header).includes(panelTitle)) {
+            continue;
+          }
+          const container = header.closest(
+            '[data-panelid],[data-viz-panel-key],[data-griditem-key],.react-grid-item',
+          );
+          if (container) {
+            return { element: container, selector: headerSelector + " -> closest" };
           }
         }
       }
-      return { element: null, selector: "" };
+      return null;
     };
+    const panelContainer = (panelId, panelTitle) =>
+      locateBySelectors([
+        `[data-panelid="${panelId}"]`,
+        `[data-viz-panel-key="panel-${panelId}"]`,
+        `[data-griditem-key="grid-item-${panelId}"]`,
+        `[data-griditem-key="panel-${panelId}"]`,
+        `[data-griditem-key="${panelId}"]`,
+        `[data-testid="panel-${panelId}"]`,
+      ]) ||
+      locateByTitle(panelTitle) || { element: null, selector: "" };
     const panelSurface = (element) =>
       element.matches('[data-testid^="data-testid Panel header"]')
         ? element
@@ -672,14 +704,13 @@ async function collectPanelTerminalStates(page, dashboard) {
       }
       return { element: null, selector: "" };
     };
-    const headerContentSelectors = [
+    const headerContentSelector = [
       '[data-testid="header-container"]',
       '[data-testid="title-items-container"]',
       ".panel-title-container",
       ".panel-header",
       ".panel-title",
-    ];
-    const headerContentSelector = headerContentSelectors.join(",");
+    ].join(",");
     const loadingSelector = [
       '[aria-label*="loading" i]',
       '[data-testid*="loading" i]',
@@ -704,19 +735,31 @@ async function collectPanelTerminalStates(page, dashboard) {
       '[role="table"]',
       '[role="grid"]',
     ].join(",");
+    const isElementVisible = (element) => {
+      const rect = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      return (
+        rect.width > 0 &&
+        rect.height > 0 &&
+        style.display !== "none" &&
+        style.visibility !== "hidden" &&
+        style.opacity !== "0"
+      );
+    };
+    const hasVisibleMarker = (root, selector, excludeHeaderContent = false) =>
+      Array.from(root.querySelectorAll(selector)).some((element) => {
+        if (excludeHeaderContent && element.closest(headerContentSelector)) {
+          return false;
+        }
+        return isElementVisible(element);
+      });
     const availablePanelHeaders = Array.from(
-      document.querySelectorAll('[data-testid*="Panel header"],[aria-label*="Panel header"]'),
+      document.querySelectorAll(
+        '[data-testid*="Panel header"],[aria-label*="Panel header"]',
+      ),
     )
       .slice(0, 5)
-      .map((header) =>
-        normalize(
-          [
-            header.innerText || header.textContent || "",
-            header.getAttribute("data-testid") || "",
-            header.getAttribute("aria-label") || "",
-          ].join(" "),
-        ),
-      );
+      .map((header) => headerIdentityText(header));
 
     return requiredPanels.map((panel) => {
       const located = panelContainer(panel.id, panel.title);
@@ -728,7 +771,9 @@ async function collectPanelTerminalStates(page, dashboard) {
           hasLoadingMarker: true,
           hasErrorIcon: false,
           hasVisualEvidence: false,
-          missingReason: `panel container is not rendered yet; visible headers=${JSON.stringify(availablePanelHeaders)}`,
+          missingReason:
+            "panel container is not rendered yet; visible headers=" +
+            JSON.stringify(availablePanelHeaders),
         };
       }
 
@@ -737,38 +782,17 @@ async function collectPanelTerminalStates(page, dashboard) {
       const bodyText = content.element
         ? normalize(content.element.innerText || content.element.textContent || "")
         : "";
-      const hasVisibleMarker = (root, selector, excludeHeaderContent = false) =>
-        Array.from(root.querySelectorAll(selector)).some((element) => {
-          if (
-            excludeHeaderContent &&
-            element.closest(headerContentSelector)
-          ) {
-            return false;
-          }
-          const rect = element.getBoundingClientRect();
-          const style = getComputedStyle(element);
-          return (
-            rect.width > 0 &&
-            rect.height > 0 &&
-            style.display !== "none" &&
-            style.visibility !== "hidden" &&
-            style.opacity !== "0"
-          );
-        });
-      const hasLoadingMarker = hasVisibleMarker(surface, loadingSelector, true);
-      const hasErrorIcon = hasVisibleMarker(surface, errorSelector, true);
-      const hasVisualEvidence = content.element
-        ? hasVisibleMarker(content.element, visualSelector)
-        : false;
 
       return {
         ...panel,
         selector: located.selector,
         contentSelector: content.selector,
         bodyText: bodyText.slice(0, 500),
-        hasLoadingMarker,
-        hasErrorIcon,
-        hasVisualEvidence,
+        hasLoadingMarker: hasVisibleMarker(surface, loadingSelector, true),
+        hasErrorIcon: hasVisibleMarker(surface, errorSelector, true),
+        hasVisualEvidence: content.element
+          ? hasVisibleMarker(content.element, visualSelector)
+          : false,
       };
     });
   }, { requiredPanels: dashboard.requiredPanels });
@@ -868,7 +892,16 @@ function describeTerminalStateFailure(dashboard) {
         .filter(Boolean)
         .join("; ")
         .slice(0, 240);
-      return `panel ${state.id}${state.title ? ` (${state.title})` : ""}: ${state.classification}${evidence ? ` [${evidence}]` : ""}`;
+      const titleSuffix = state.title ? " (" + state.title + ")" : "";
+      const evidenceSuffix = evidence ? " [" + evidence + "]" : "";
+      return (
+        "panel " +
+        state.id +
+        titleSuffix +
+        ": " +
+        state.classification +
+        evidenceSuffix
+      );
     });
   return failures.length > 0
     ? failures.join("; ")
@@ -939,18 +972,19 @@ async function setDashboardScrollPosition(page, position) {
 async function dashboardCaptureMetrics(page) {
   return page.evaluate(
     ({ panelSelectors, panelContainerSelectors, scrollSelectors }) => {
+      const resolveContainer = (marker, containerSelectors) => {
+        for (const containerSelector of containerSelectors) {
+          const container = marker.closest(containerSelector);
+          if (container) {
+            return container;
+          }
+        }
+        return marker;
+      };
       const candidateElements = new Set();
-
       for (const selector of panelSelectors) {
         for (const marker of document.querySelectorAll(selector)) {
-          let container = null;
-          for (const containerSelector of panelContainerSelectors) {
-            container = marker.closest(containerSelector);
-            if (container) {
-              break;
-            }
-          }
-          candidateElements.add(container || marker);
+          candidateElements.add(resolveContainer(marker, panelContainerSelectors));
         }
       }
 

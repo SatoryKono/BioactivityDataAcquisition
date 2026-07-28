@@ -712,6 +712,43 @@ def _candidate_or_lane_str(
     return None
 
 
+def _canonical_path_from_candidate(
+    candidate: dict[str, object],
+) -> Path | None:
+    canonical_raw = candidate.get("canonical_path")
+    if isinstance(canonical_raw, str) and canonical_raw:
+        return Path(canonical_raw)
+    return None
+
+
+def _local_review_probes(
+    repo_root: Path,
+    path: Path,
+    canonical_path: Path | None,
+    *,
+    exists: bool,
+    tracked: bool,
+    current_live_state: str,
+) -> tuple[str | None, int, bool]:
+    """Return (cmp_status, reference_hits, has_history) for one review path."""
+    skip_local_review_probes = (
+        exists
+        and not tracked
+        and current_live_state == "present_local_only_root_surface"
+    )
+    if skip_local_review_probes or not exists:
+        return None, 0, False
+    cmp_status = _cmp_status(repo_root, path, canonical_path)
+    reference_hits = _count_reference_hits(repo_root, path)
+    has_history = _history_signal_for_path(
+        repo_root,
+        path,
+        tracked=tracked,
+        exists=exists,
+    )
+    return cmp_status, reference_hits, has_history
+
+
 def _review_evidence_from_candidate(
     repo_root: Path,
     tracked_paths: set[str],
@@ -727,36 +764,20 @@ def _review_evidence_from_candidate(
         return None
 
     path = Path(raw_path)
-    canonical_raw = candidate.get("canonical_path")
-    if isinstance(canonical_raw, str) and canonical_raw:
-        canonical_path = Path(canonical_raw)
-    else:
-        canonical_path = None
+    canonical_path = _canonical_path_from_candidate(candidate)
     current_live_state = str(candidate.get("current_live_state", ""))
     exists = (repo_root / path).exists()
     tracked = _path_is_tracked_or_has_tracked_descendants(
         path, tracked_paths, tracked_ancestor_dirs
     )
-    skip_local_review_probes = (
-        exists
-        and not tracked
-        and current_live_state == "present_local_only_root_surface"
+    cmp_status, reference_hits, has_history = _local_review_probes(
+        repo_root,
+        path,
+        canonical_path,
+        exists=exists,
+        tracked=tracked,
+        current_live_state=current_live_state,
     )
-    if skip_local_review_probes or not exists:
-        cmp_status = None
-        reference_hits = 0
-    else:
-        cmp_status = _cmp_status(repo_root, path, canonical_path)
-        reference_hits = _count_reference_hits(repo_root, path)
-    if skip_local_review_probes:
-        has_history = False
-    else:
-        has_history = _history_signal_for_path(
-            repo_root,
-            path,
-            tracked=tracked,
-            exists=exists,
-        )
 
     return ReviewLaneEvidence(
         lane_id=lane_id,
@@ -1826,6 +1847,31 @@ def _log_root_policy_mismatches(
     logger.info("")
 
 
+def _format_optional_scalar(value: object) -> str:
+    return str(value) if value is not None else "n/a"
+
+
+def _log_one_reports_workspace_row(row: ReportsWorkspaceEvidence) -> None:
+    logger.info(
+        (
+            "  %s | exists=%s tracked=%s history=%s refs=%d route=%s "
+            "policy=%s ttl=%s age_days=%s ttl_expired=%s owner=%s"
+        ),
+        row.rel_path,
+        str(row.exists).lower(),
+        str(row.tracked).lower(),
+        str(row.has_history).lower(),
+        row.reference_hits,
+        row.generator or "n/a",
+        row.commit_policy or "n/a",
+        _format_optional_scalar(row.retention_ttl_days),
+        _format_optional_scalar(row.age_days),
+        str(row.ttl_expired).lower() if row.ttl_expired is not None else "n/a",
+        row.retention_owner or "n/a",
+    )
+    logger.info("      %s", row.reason)
+
+
 def _log_reports_workspace_evidence(
     rows: list[ReportsWorkspaceEvidence],
     *,
@@ -1844,26 +1890,7 @@ def _log_reports_workspace_evidence(
         visible_rows = evidence_rows[:detail_limit]
         logger.info("### %s (%d)", classification, len(evidence_rows))
         for row in visible_rows:
-            logger.info(
-                (
-                    "  %s | exists=%s tracked=%s history=%s refs=%d route=%s "
-                    "policy=%s ttl=%s age_days=%s ttl_expired=%s owner=%s"
-                ),
-                row.rel_path,
-                str(row.exists).lower(),
-                str(row.tracked).lower(),
-                str(row.has_history).lower(),
-                row.reference_hits,
-                row.generator or "n/a",
-                row.commit_policy or "n/a",
-                str(row.retention_ttl_days)
-                if row.retention_ttl_days is not None
-                else "n/a",
-                str(row.age_days) if row.age_days is not None else "n/a",
-                str(row.ttl_expired).lower() if row.ttl_expired is not None else "n/a",
-                row.retention_owner or "n/a",
-            )
-            logger.info("      %s", row.reason)
+            _log_one_reports_workspace_row(row)
         hidden_count = len(evidence_rows) - len(visible_rows)
         if hidden_count > 0:
             logger.info("  ... %d additional reports row(s) omitted", hidden_count)
