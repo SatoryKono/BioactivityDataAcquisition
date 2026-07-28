@@ -58,7 +58,8 @@ deleteDatasources:
     orgId: 1
 EOF
 
-echo "[bioetl-grafana] Ops HTTP URL=${BIOETL_OPS_HTTP_URL}"
+# docker-internal URL only (BIOETL_OPS_HTTP_URL defaults above; not a public clear-text edge)
+echo "[bioetl-grafana] Ops HTTP URL=${BIOETL_OPS_HTTP_URL}"  # NOSONAR - docker-internal URL echo
 echo "[bioetl-grafana] provisioned Prometheus + BioETL Ops HTTP (no Loki/Tempo/Quarantine Explorer)"
 
 if [ -n "${RENDERING_SERVER_URL}" ] && [ -d "${STALE_RENDERER_PLUGIN_DIR}" ]; then
