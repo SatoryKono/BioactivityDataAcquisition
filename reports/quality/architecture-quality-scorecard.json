@@ -174,8 +174,10 @@
     "dashboarded_without_emission_count": 0,
     "dq_blocking_issue_count": 0,
     "expired_compat_count": 0,
-    "families_at_budget": [],
-    "families_at_budget_count": 0,
+    "families_at_budget": [
+      "application_services_control_plane"
+    ],
+    "families_at_budget_count": 1,
     "hotspot_budget_warning_count": 0,
     "hotspot_family_count": 5,
     "layer_violations": 0,
