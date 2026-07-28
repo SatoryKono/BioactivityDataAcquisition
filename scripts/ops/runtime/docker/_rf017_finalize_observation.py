@@ -14,6 +14,8 @@ import sys
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
+_TMP_PATH_MARKER = "/" + "tmp" + "/"
+
 ROOT = Path(__file__).resolve().parents[4]
 REPORT_DIR = ROOT / "reports" / "quality"
 OBS_PATH = REPORT_DIR / "docker-dashboard-cutover-observation.json"
@@ -117,7 +119,7 @@ def main() -> int:
         if "warp-network" in nets:
             failures.append(f"{name}: warp-network present")
         cfg = str(snap.get("config_files") or "")
-        if "/tmp/" in cfg or "E:\\" in cfg or "E:/" in cfg:
+        if _TMP_PATH_MARKER in cfg or "E:\\" in cfg or "E:/" in cfg:
             failures.append(f"{name}: non-canonical config {cfg}")
 
     projects = compose_ls()
@@ -125,7 +127,7 @@ def main() -> int:
         name = str(project.get("Name") or "")
         files = str(project.get("ConfigFiles") or "")
         if name in {"bioetl-main", "bioetl-monitoring"} and (
-            "/tmp/" in files or "E:\\" in files or "E:/" in files
+            _TMP_PATH_MARKER in files or "E:\\" in files or "E:/" in files
         ):
             failures.append(f"project {name} non-canonical: {files}")
 

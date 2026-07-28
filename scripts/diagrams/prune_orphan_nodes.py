@@ -89,7 +89,7 @@ def _write_repo_text(relative_path: Path, content: str) -> None:
 # ── Regex constants ───────────────────────────────────────────────────────────
 
 # Node ID: letters/digits/underscore, must start with letter or underscore
-_NID = r"[A-Za-z_][A-Za-z0-9_]*"
+_NID = r"[A-Za-z_]\w*"
 
 # Edge arrow / connector variants (Mermaid flowchart).
 # Covers: --> -.-> -..- -.- --- --o --x <--> <-- ==> ~~~ and labelled forms.

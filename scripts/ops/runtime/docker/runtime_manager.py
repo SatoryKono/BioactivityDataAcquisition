@@ -193,6 +193,92 @@ _COMPOSE_PS_LEAN_FORMAT = (
 )
 
 
+def _image_digests_for(
+    image_id: str,
+    *,
+    runner: Runner,
+    timeout: float,
+    observations: list[CommandResult],
+) -> tuple[str, ...]:
+    """Resolve repo digests for one image id, appending inspect observations."""
+    if not image_id:
+        return ()
+    image_inspection = runner(
+        [
+            "docker",
+            "image",
+            "inspect",
+            "--format",
+            '{"RepoDigests":{{json .RepoDigests}}}',
+            image_id,
+        ],
+        ROOT,
+        timeout,
+    )
+    observations.append(image_inspection)
+    image_details = _json_rows(image_inspection.stdout)
+    if image_inspection.returncode != 0 or not image_details:
+        return ()
+    return tuple(
+        str(value)
+        for value in (image_details[0].get("RepoDigests") or [])
+        if value
+    )
+
+
+def _snapshot_from_ps_row(
+    row: Mapping[str, Any],
+    *,
+    runner: Runner,
+    timeout: float,
+    observations: list[CommandResult],
+) -> ServiceSnapshot | None:
+    """Inspect one compose ps row into a ServiceSnapshot when identity is complete."""
+    container_id = str(row.get("ID") or row.get("Id") or "")
+    service = str(row.get("Service") or row.get("Name") or "")
+    if not container_id or not service:
+        return None
+    inspection = runner(
+        [
+            "docker",
+            "inspect",
+            "--format",
+            (
+                '{"State":{{json .State}},'
+                '"RestartCount":{{.RestartCount}},'
+                '"Image":{{json .Config.Image}},'
+                '"ImageID":{{json .Image}}}'
+            ),
+            container_id,
+        ],
+        ROOT,
+        timeout,
+    )
+    observations.append(inspection)
+    details = _json_rows(inspection.stdout)
+    if inspection.returncode != 0 or not details:
+        return None
+    item = details[0]
+    state = item.get("State") or {}
+    config = item.get("Config") or {}
+    image = str(item.get("Image") or config.get("Image") or row.get("Image") or "")
+    image_id = str(item.get("ImageID") or image)
+    image_digests = _image_digests_for(
+        image_id, runner=runner, timeout=timeout, observations=observations
+    )
+    health = (state.get("Health") or {}).get("Status", "none")
+    return ServiceSnapshot(
+        service=service,
+        container_id=container_id[:12],
+        state=str(state.get("Status", "unknown")).lower(),
+        health=str(health).lower(),
+        restart_count=int(item.get("RestartCount") or 0),
+        oom_killed=bool(state.get("OOMKilled", False)),
+        image=image,
+        image_digests=image_digests,
+    )
+
+
 def collect_snapshots(
     spec: StackSpec,
     *,
@@ -209,71 +295,73 @@ def collect_snapshots(
         return [], observations
     snapshots: list[ServiceSnapshot] = []
     for row in _json_rows(ps.stdout):
-        container_id = str(row.get("ID") or row.get("Id") or "")
-        service = str(row.get("Service") or row.get("Name") or "")
-        if not container_id or not service:
-            continue
-        inspection = runner(
-            [
-                "docker",
-                "inspect",
-                "--format",
-                (
-                    '{"State":{{json .State}},'
-                    '"RestartCount":{{.RestartCount}},'
-                    '"Image":{{json .Config.Image}},'
-                    '"ImageID":{{json .Image}}}'
-                ),
-                container_id,
-            ],
-            ROOT,
-            timeout,
+        snapshot = _snapshot_from_ps_row(
+            row, runner=runner, timeout=timeout, observations=observations
         )
-        observations.append(inspection)
-        details = _json_rows(inspection.stdout)
-        if inspection.returncode != 0 or not details:
-            continue
-        item = details[0]
-        state = item.get("State") or {}
-        config = item.get("Config") or {}
-        image = str(item.get("Image") or config.get("Image") or row.get("Image") or "")
-        image_id = str(item.get("ImageID") or image)
-        image_digests: tuple[str, ...] = ()
-        if image_id:
-            image_inspection = runner(
-                [
-                    "docker",
-                    "image",
-                    "inspect",
-                    "--format",
-                    '{"RepoDigests":{{json .RepoDigests}}}',
-                    image_id,
-                ],
-                ROOT,
-                timeout,
-            )
-            observations.append(image_inspection)
-            image_details = _json_rows(image_inspection.stdout)
-            if image_inspection.returncode == 0 and image_details:
-                image_digests = tuple(
-                    str(value)
-                    for value in (image_details[0].get("RepoDigests") or [])
-                    if value
-                )
-        health = (state.get("Health") or {}).get("Status", "none")
-        snapshots.append(
-            ServiceSnapshot(
-                service=service,
-                container_id=container_id[:12],
-                state=str(state.get("Status", "unknown")).lower(),
-                health=str(health).lower(),
-                restart_count=int(item.get("RestartCount") or 0),
-                oom_killed=bool(state.get("OOMKilled", False)),
-                image=image,
-                image_digests=image_digests,
-            )
-        )
+        if snapshot is not None:
+            snapshots.append(snapshot)
     return snapshots, observations
+
+
+def _image_matches_expected(
+    snapshot: ServiceSnapshot, expected: str | None
+) -> bool:
+    """Return whether the snapshot image identity matches the expected reference."""
+    if not expected or not snapshot.image:
+        return True
+    expected_digest = _digest_from_image(expected)
+    observed_images = (snapshot.image, *snapshot.image_digests)
+    if expected_digest:
+        return any(
+            expected_digest == _digest_from_image(image) for image in observed_images
+        )
+    return expected in observed_images
+
+
+def _service_readiness_findings(
+    *,
+    service: str,
+    snapshot: ServiceSnapshot | None,
+    baseline: Mapping[str, int],
+    baseline_provided: bool,
+    expected_image: str | None,
+) -> list[dict[str, Any]]:
+    """Compute readiness findings for one required service."""
+    if snapshot is None:
+        return [{"cause": "service_missing", "service": service}]
+    findings: list[dict[str, Any]] = []
+    if snapshot.oom_killed:
+        findings.append({"cause": "oom_killed", "service": service})
+    if snapshot.state != "running" or snapshot.health != "healthy":
+        findings.append(
+            {
+                "cause": "service_unready",
+                "service": service,
+                "state": snapshot.state,
+                "health": snapshot.health,
+            }
+        )
+    previous = int(
+        baseline.get(service, 0 if baseline_provided else snapshot.restart_count)
+    )
+    if snapshot.restart_count > previous:
+        findings.append(
+            {
+                "cause": "unexpected_restart",
+                "service": service,
+                "restart_delta": snapshot.restart_count - previous,
+            }
+        )
+    if not _image_matches_expected(snapshot, expected_image):
+        findings.append(
+            {
+                "cause": "image_identity_drift",
+                "service": service,
+                "expected": expected_image,
+                "actual": snapshot.image,
+            }
+        )
+    return findings
 
 
 def readiness_findings(
@@ -286,52 +374,15 @@ def readiness_findings(
     by_service = {snapshot.service: snapshot for snapshot in snapshots}
     findings: list[dict[str, Any]] = []
     for service in spec.required_services:
-        snapshot = by_service.get(service)
-        if snapshot is None:
-            findings.append({"cause": "service_missing", "service": service})
-            continue
-        if snapshot.oom_killed:
-            findings.append({"cause": "oom_killed", "service": service})
-        if snapshot.state != "running" or snapshot.health != "healthy":
-            findings.append(
-                {
-                    "cause": "service_unready",
-                    "service": service,
-                    "state": snapshot.state,
-                    "health": snapshot.health,
-                }
+        findings.extend(
+            _service_readiness_findings(
+                service=service,
+                snapshot=by_service.get(service),
+                baseline=baseline,
+                baseline_provided=baseline_provided,
+                expected_image=spec.expected_images.get(service),
             )
-        previous = int(
-            baseline.get(service, 0 if baseline_provided else snapshot.restart_count)
         )
-        if snapshot.restart_count > previous:
-            findings.append(
-                {
-                    "cause": "unexpected_restart",
-                    "service": service,
-                    "restart_delta": snapshot.restart_count - previous,
-                }
-            )
-        expected = spec.expected_images.get(service)
-        expected_digest = _digest_from_image(expected)
-        observed_images = (snapshot.image, *snapshot.image_digests)
-        image_matches = (
-            any(
-                expected_digest == _digest_from_image(image)
-                for image in observed_images
-            )
-            if expected_digest
-            else expected in observed_images
-        )
-        if expected and snapshot.image and not image_matches:
-            findings.append(
-                {
-                    "cause": "image_identity_drift",
-                    "service": service,
-                    "expected": expected,
-                    "actual": snapshot.image,
-                }
-            )
     return findings
 
 
@@ -456,6 +507,77 @@ def diagnose(
     return payload
 
 
+def _ensure_one_shared_network(
+    raw: Mapping[str, Any],
+    *,
+    runner: Runner,
+    timeout: float,
+) -> tuple[dict[str, Any], dict[str, Any] | None]:
+    """Ensure one contracted shared network exists with the expected owner label."""
+    name = str(raw["name"])
+    owner = str(raw["owner"])
+    inspection = runner(
+        [
+            "docker",
+            "network",
+            "inspect",
+            "--format",
+            '{{ index .Labels "com.bioetl.owner" }}',
+            name,
+        ],
+        ROOT,
+        timeout,
+    )
+    if inspection.returncode != 0:
+        creation = runner(
+            [
+                "docker",
+                "network",
+                "create",
+                "--label",
+                f"com.bioetl.owner={owner}",
+                name,
+            ],
+            ROOT,
+            timeout,
+        )
+        created = creation.returncode == 0
+        observation = {
+            "name": name,
+            "owner": owner,
+            "created": created,
+            "inspect": asdict(inspection),
+            "create": asdict(creation),
+        }
+        finding = None
+        if not created:
+            finding = {
+                "cause": "network_owner_drift",
+                "network": name,
+                "owner": owner,
+            }
+        return observation, finding
+    observed_owner = inspection.stdout.strip()
+    owner_ok = observed_owner == owner
+    observation = {
+        "name": name,
+        "owner": owner,
+        "observed_owner": observed_owner or None,
+        "created": False,
+        "owner_ok": owner_ok,
+        "inspect": asdict(inspection),
+    }
+    finding = None
+    if not owner_ok:
+        finding = {
+            "cause": "network_owner_drift",
+            "network": name,
+            "expected_owner": owner,
+            "observed_owner": observed_owner,
+        }
+    return observation, finding
+
+
 def ensure_shared_networks(
     spec: StackSpec,
     contract_path: Path,
@@ -479,70 +601,12 @@ def ensure_shared_networks(
     observations: list[dict[str, Any]] = []
     findings: list[dict[str, Any]] = []
     for raw in networks:
-        name = str(raw["name"])
-        owner = str(raw["owner"])
-        inspection = runner(
-            [
-                "docker",
-                "network",
-                "inspect",
-                "--format",
-                '{{ index .Labels "com.bioetl.owner" }}',
-                name,
-            ],
-            ROOT,
-            timeout,
+        observation, finding = _ensure_one_shared_network(
+            raw, runner=runner, timeout=timeout
         )
-        created = False
-        if inspection.returncode != 0:
-            creation = runner(
-                [
-                    "docker",
-                    "network",
-                    "create",
-                    "--label",
-                    f"com.bioetl.owner={owner}",
-                    name,
-                ],
-                ROOT,
-                timeout,
-            )
-            created = creation.returncode == 0
-            observations.append(
-                {
-                    "name": name,
-                    "owner": owner,
-                    "created": created,
-                    "inspect": asdict(inspection),
-                    "create": asdict(creation),
-                }
-            )
-            if not created:
-                findings.append(
-                    {"cause": "network_owner_drift", "network": name, "owner": owner}
-                )
-            continue
-        observed_owner = inspection.stdout.strip()
-        owner_ok = observed_owner == owner
-        observations.append(
-            {
-                "name": name,
-                "owner": owner,
-                "observed_owner": observed_owner or None,
-                "created": created,
-                "owner_ok": owner_ok,
-                "inspect": asdict(inspection),
-            }
-        )
-        if not owner_ok:
-            findings.append(
-                {
-                    "cause": "network_owner_drift",
-                    "network": name,
-                    "expected_owner": owner,
-                    "observed_owner": observed_owner,
-                }
-            )
+        observations.append(observation)
+        if finding is not None:
+            findings.append(finding)
     write_report(
         output,
         {
@@ -778,6 +842,310 @@ def _wait_for_daemon(
     return False
 
 
+def _maybe_desktop_recovery_before_preflight(
+    *,
+    recover: bool,
+    preflight: CommandResult,
+    preflight_path: Path,
+    spec: StackSpec,
+    contract_path: Path,
+    report_dir: Path,
+    history: list[dict[str, Any]],
+    runner: Runner,
+    deadline: float,
+    started: float,
+    poll_interval: float,
+    sleep: Sleeper,
+    clock: Clock,
+) -> tuple[CommandResult, bool]:
+    """RF-006: optional Desktop recovery when daemon is unavailable at preflight."""
+    if not (
+        recover
+        and preflight.returncode != 0
+        and _preflight_indicates_daemon_unavailable(preflight_path)
+        and clock() < deadline
+    ):
+        return preflight, False
+    desktop_report = report_dir / f"docker-desktop-recovery-{spec.name}.json"
+    desktop = _invoke_desktop_recovery(
+        desktop_report,
+        runner=runner,
+        timeout=min(max(0.1, deadline - clock()), 180.0),
+    )
+    history.append(
+        {
+            "attempt": 0,
+            "action": "desktop_recovery",
+            "returncode": desktop.returncode,
+            "elapsed_seconds": round(clock() - started, 3),
+        }
+    )
+    _wait_for_daemon(
+        runner=runner,
+        deadline=deadline,
+        sleep=sleep,
+        clock=clock,
+        poll_interval=max(poll_interval, 2.0),
+    )
+    refreshed = _preflight(
+        contract_path,
+        preflight_path,
+        spec.name,
+        runner=runner,
+        timeout=min(max(0.1, deadline - clock()), 60.0),
+    )
+    return refreshed, True
+
+
+def _capture_recent_logs(
+    *,
+    spec: StackSpec,
+    runner: Runner,
+    deadline: float,
+    clock: Clock,
+) -> dict[str, Any]:
+    """Capture a bounded compose logs snippet when recovery time remains."""
+    remaining = deadline - clock()
+    if remaining <= 0:
+        return {
+            "captured": False,
+            "stdout": "",
+            "stderr": "global recovery deadline exhausted",
+        }
+    log_result = runner(
+        _compose(spec, "logs", "--no-color", "--tail", "100"),
+        ROOT,
+        min(15.0, remaining),
+    )
+    return {
+        "captured": log_result.returncode == 0,
+        "stdout": _bounded(log_result.stdout),
+        "stderr": _bounded(log_result.stderr),
+    }
+
+
+def _handle_daemon_error_during_attempt(
+    *,
+    result: CommandResult,
+    attempts: int,
+    max_attempts: int,
+    desktop_recovery_attempted: bool,
+    spec: StackSpec,
+    report_dir: Path,
+    history: list[dict[str, Any]],
+    runner: Runner,
+    deadline: float,
+    started: float,
+    poll_interval: float,
+    sleep: Sleeper,
+    clock: Clock,
+) -> tuple[list[dict[str, Any]], bool]:
+    """Wait/recover after a daemon socket flap during an up attempt."""
+    findings = [
+        {
+            "cause": "daemon_unavailable",
+            "stderr": result.stderr,
+            "attempt": attempts,
+        }
+    ]
+    recovered = desktop_recovery_attempted
+    if attempts >= max_attempts or clock() >= deadline:
+        return findings, recovered
+    restored = _wait_for_daemon(
+        runner=runner,
+        deadline=min(deadline, clock() + 20.0),
+        sleep=sleep,
+        clock=clock,
+        poll_interval=max(poll_interval, 2.0),
+    )
+    if restored or recovered or clock() >= deadline:
+        return findings, recovered
+    desktop_report = (
+        report_dir / f"docker-desktop-recovery-{spec.name}-attempt{attempts}.json"
+    )
+    desktop = _invoke_desktop_recovery(
+        desktop_report,
+        runner=runner,
+        timeout=min(max(0.1, deadline - clock()), 180.0),
+    )
+    recovered = True
+    history.append(
+        {
+            "attempt": attempts,
+            "action": "desktop_recovery",
+            "returncode": desktop.returncode,
+            "elapsed_seconds": round(clock() - started, 3),
+        }
+    )
+    _wait_for_daemon(
+        runner=runner,
+        deadline=deadline,
+        sleep=sleep,
+        clock=clock,
+        poll_interval=max(poll_interval, 2.0),
+    )
+    return findings, recovered
+
+
+def _run_recovery_attempts(
+    *,
+    spec: StackSpec,
+    baseline: Mapping[str, int],
+    initial_snapshots: list[ServiceSnapshot],
+    report_dir: Path,
+    history: list[dict[str, Any]],
+    runner: Runner,
+    max_attempts: int,
+    deadline: float,
+    started: float,
+    poll_interval: float,
+    stabilization_seconds: float,
+    sleep: Sleeper,
+    clock: Clock,
+    desktop_recovery_attempted: bool,
+) -> tuple[list[ServiceSnapshot], list[dict[str, Any]], int, bool, bool]:
+    """Execute bounded compose up/wait recovery attempts.
+
+    Returns snapshots, findings, attempt count, desktop-recovery flag, and
+    whether readiness succeeded (caller should return 0 immediately).
+    """
+    findings: list[dict[str, Any]] = [{"cause": "recovery_exhausted"}]
+    snapshots: list[ServiceSnapshot] = list(initial_snapshots)
+    attempts = 0
+    recovered = desktop_recovery_attempted
+    for attempts in range(1, max_attempts + 1):
+        remaining = deadline - clock()
+        if remaining <= 0:
+            findings = [{"cause": "readiness_timeout", "attempt": attempts}]
+            break
+        # Attempt 1: non-destructive up (covers simple kill).
+        # Later attempts: force-recreate clears sticky pause/unhealthy state.
+        up_args: list[str] = ["up", "-d"]
+        if attempts >= 2:
+            up_args.append("--force-recreate")
+        up_args.extend(
+            [
+                "--wait",
+                "--wait-timeout",
+                str(max(1, int(remaining))),
+                *spec.required_services,
+            ]
+        )
+        result = runner(_compose(spec, *up_args), ROOT, remaining)
+        history.append(
+            {
+                "attempt": attempts,
+                "returncode": result.returncode,
+                "elapsed_seconds": round(clock() - started, 3),
+            }
+        )
+        if result.returncode == 0:
+            snapshots, findings = _wait_ready(
+                spec,
+                baseline,
+                runner=runner,
+                timeout=max(0.0, deadline - clock()),
+                poll_interval=poll_interval,
+                stabilization_seconds=stabilization_seconds,
+                sleep=sleep,
+                clock=clock,
+            )
+            if not findings:
+                return snapshots, findings, attempts, recovered, True
+        elif _daemon_connection_error(result.stderr, result.stdout):
+            findings, recovered = _handle_daemon_error_during_attempt(
+                result=result,
+                attempts=attempts,
+                max_attempts=max_attempts,
+                desktop_recovery_attempted=recovered,
+                spec=spec,
+                report_dir=report_dir,
+                history=history,
+                runner=runner,
+                deadline=deadline,
+                started=started,
+                poll_interval=poll_interval,
+                sleep=sleep,
+                clock=clock,
+            )
+            continue
+        else:
+            findings = [
+                {
+                    "cause": "service_unready",
+                    "stderr": result.stderr,
+                    "attempt": attempts,
+                }
+            ]
+        if attempts < max_attempts:
+            sleep(
+                min(
+                    2 ** (attempts - 1),
+                    4,
+                    max(0.0, deadline - clock()),
+                )
+            )
+    return snapshots, findings, attempts, recovered, False
+
+
+def _bootstrap_recovery_surface(
+    *,
+    spec: StackSpec,
+    contract_path: Path,
+    report_dir: Path,
+    preflight: CommandResult,
+    preflight_path: Path,
+    desktop_recovery_attempted: bool,
+    runner: Runner,
+    deadline: float,
+    clock: Clock,
+) -> tuple[list[ServiceSnapshot], list[dict[str, Any]], int, Mapping[str, int] | None]:
+    """Validate preflight/networks/render and collect a restart baseline.
+
+    Returns snapshots, findings, attempts, and baseline when recovery may proceed.
+    baseline is None when the surface failed closed before attempts.
+    """
+    # Both start and recover may proceed when the only preflight errors are live
+    # container health/restart/OOM — those are exactly what up --wait must clear.
+    if preflight.returncode != 0 and not _preflight_errors_are_recoverable(
+        preflight_path
+    ):
+        findings: list[dict[str, Any]] = [
+            {"cause": "preflight_failed", "stderr": preflight.stderr}
+        ]
+        if desktop_recovery_attempted:
+            findings.append({"cause": "daemon_unavailable", "desktop_recovery": True})
+        return [], findings, 0, None
+    networks_ok, network_findings = ensure_shared_networks(
+        spec,
+        contract_path,
+        report_dir / f"docker-runtime-{spec.name}-networks.json",
+        runner=runner,
+        timeout=min(max(0.1, deadline - clock()), 30.0),
+    )
+    if not networks_ok:
+        return [], network_findings, 0, None
+    render = runner(
+        _compose(spec, "config", "--quiet"),
+        ROOT,
+        min(max(0.1, deadline - clock()), 30.0),
+    )
+    if render.returncode != 0:
+        return (
+            [],
+            [{"cause": "compose_render_failed", "stderr": render.stderr}],
+            0,
+            None,
+        )
+    before, _ = collect_snapshots(
+        spec,
+        runner=runner,
+        timeout=min(15.0, max(0.1, deadline - clock())),
+    )
+    baseline = {row.service: row.restart_count for row in before}
+    return before, [{"cause": "recovery_exhausted"}], 0, baseline
+
+
 def start_or_recover(
     spec: StackSpec,
     contract_path: Path,
@@ -796,7 +1164,6 @@ def start_or_recover(
     deadline = started + timeout
     history: list[dict[str, Any]] = []
     recent_logs: dict[str, Any] = {"captured": False, "stdout": "", "stderr": ""}
-    desktop_recovery_attempted = False
     preflight_path = report_dir / f"docker-runtime-{spec.name}-preflight.json"
     preflight = _preflight(
         contract_path,
@@ -805,211 +1172,60 @@ def start_or_recover(
         runner=runner,
         timeout=min(max(0.1, deadline - clock()), 60.0),
     )
-    if (
-        recover
-        and preflight.returncode != 0
-        and _preflight_indicates_daemon_unavailable(preflight_path)
-        and clock() < deadline
-    ):
-        # RF-006: bounded Desktop recovery before failing closed on daemon outage.
-        desktop_report = report_dir / f"docker-desktop-recovery-{spec.name}.json"
-        desktop = _invoke_desktop_recovery(
-            desktop_report,
+    preflight, desktop_recovery_attempted = _maybe_desktop_recovery_before_preflight(
+        recover=recover,
+        preflight=preflight,
+        preflight_path=preflight_path,
+        spec=spec,
+        contract_path=contract_path,
+        report_dir=report_dir,
+        history=history,
+        runner=runner,
+        deadline=deadline,
+        started=started,
+        poll_interval=poll_interval,
+        sleep=sleep,
+        clock=clock,
+    )
+    snapshots, findings, attempts, baseline = _bootstrap_recovery_surface(
+        spec=spec,
+        contract_path=contract_path,
+        report_dir=report_dir,
+        preflight=preflight,
+        preflight_path=preflight_path,
+        desktop_recovery_attempted=desktop_recovery_attempted,
+        runner=runner,
+        deadline=deadline,
+        clock=clock,
+    )
+    if baseline is not None:
+        (
+            snapshots,
+            findings,
+            attempts,
+            _desktop_recovery_attempted,
+            succeeded,
+        ) = _run_recovery_attempts(
+            spec=spec,
+            baseline=baseline,
+            initial_snapshots=snapshots,
+            report_dir=report_dir,
+            history=history,
             runner=runner,
-            timeout=min(max(0.1, deadline - clock()), 180.0),
-        )
-        desktop_recovery_attempted = True
-        history.append(
-            {
-                "attempt": 0,
-                "action": "desktop_recovery",
-                "returncode": desktop.returncode,
-                "elapsed_seconds": round(clock() - started, 3),
-            }
-        )
-        _wait_for_daemon(
-            runner=runner,
+            max_attempts=max_attempts,
             deadline=deadline,
+            started=started,
+            poll_interval=poll_interval,
+            stabilization_seconds=stabilization_seconds,
             sleep=sleep,
             clock=clock,
-            poll_interval=max(poll_interval, 2.0),
+            desktop_recovery_attempted=desktop_recovery_attempted,
         )
-        preflight = _preflight(
-            contract_path,
-            preflight_path,
-            spec.name,
-            runner=runner,
-            timeout=min(max(0.1, deadline - clock()), 60.0),
+        if succeeded:
+            return 0
+        recent_logs = _capture_recent_logs(
+            spec=spec, runner=runner, deadline=deadline, clock=clock
         )
-    # Both start and recover may proceed when the only preflight errors are live
-    # container health/restart/OOM — those are exactly what up --wait must clear.
-    # Origin/port/capacity/daemon environment gates still fail closed.
-    if preflight.returncode != 0 and not _preflight_errors_are_recoverable(
-        preflight_path
-    ):
-        findings = [{"cause": "preflight_failed", "stderr": preflight.stderr}]
-        if desktop_recovery_attempted:
-            findings.append({"cause": "daemon_unavailable", "desktop_recovery": True})
-        snapshots: list[ServiceSnapshot] = []
-        attempts = 0
-    else:
-        networks_ok, network_findings = ensure_shared_networks(
-            spec,
-            contract_path,
-            report_dir / f"docker-runtime-{spec.name}-networks.json",
-            runner=runner,
-            timeout=min(max(0.1, deadline - clock()), 30.0),
-        )
-        if not networks_ok:
-            findings = network_findings
-            snapshots = []
-            attempts = 0
-        else:
-            render = runner(
-                _compose(spec, "config", "--quiet"),
-                ROOT,
-                min(max(0.1, deadline - clock()), 30.0),
-            )
-            if render.returncode != 0:
-                findings = [{"cause": "compose_render_failed", "stderr": render.stderr}]
-                snapshots = []
-                attempts = 0
-            else:
-                before, _ = collect_snapshots(
-                    spec,
-                    runner=runner,
-                    timeout=min(15.0, max(0.1, deadline - clock())),
-                )
-                baseline = {row.service: row.restart_count for row in before}
-                findings = [{"cause": "recovery_exhausted"}]
-                snapshots = before
-                attempts = 0
-                for attempts in range(1, max_attempts + 1):
-                    remaining = deadline - clock()
-                    if remaining <= 0:
-                        findings = [{"cause": "readiness_timeout", "attempt": attempts}]
-                        break
-                    # Attempt 1: non-destructive up (covers simple kill).
-                    # Later attempts: force-recreate clears sticky pause/unhealthy
-                    # state left by fault injection. Avoid always force-recreate —
-                    # it has crashed Desktop under load on this host lane.
-                    up_args: list[str] = ["up", "-d"]
-                    if attempts >= 2:
-                        up_args.append("--force-recreate")
-                    up_args.extend(
-                        [
-                            "--wait",
-                            "--wait-timeout",
-                            str(max(1, int(remaining))),
-                            *spec.required_services,
-                        ]
-                    )
-                    command = _compose(spec, *up_args)
-                    result = runner(command, ROOT, remaining)
-                    history.append(
-                        {
-                            "attempt": attempts,
-                            "returncode": result.returncode,
-                            "elapsed_seconds": round(clock() - started, 3),
-                        }
-                    )
-                    if result.returncode == 0:
-                        remaining = max(0.0, deadline - clock())
-                        snapshots, findings = _wait_ready(
-                            spec,
-                            baseline,
-                            runner=runner,
-                            timeout=remaining,
-                            poll_interval=poll_interval,
-                            stabilization_seconds=stabilization_seconds,
-                            sleep=sleep,
-                            clock=clock,
-                        )
-                        if not findings:
-                            return 0
-                    elif _daemon_connection_error(result.stderr, result.stdout):
-                        findings = [
-                            {
-                                "cause": "daemon_unavailable",
-                                "stderr": result.stderr,
-                                "attempt": attempts,
-                            }
-                        ]
-                        # Transient Desktop flaps: wait for daemon before next attempt
-                        # instead of burning retries while the socket is still down.
-                        if attempts < max_attempts and clock() < deadline:
-                            restored = _wait_for_daemon(
-                                runner=runner,
-                                deadline=min(deadline, clock() + 20.0),
-                                sleep=sleep,
-                                clock=clock,
-                                poll_interval=max(poll_interval, 2.0),
-                            )
-                            if (
-                                not restored
-                                and not desktop_recovery_attempted
-                                and clock() < deadline
-                            ):
-                                desktop_report = (
-                                    report_dir
-                                    / f"docker-desktop-recovery-{spec.name}-attempt{attempts}.json"
-                                )
-                                desktop = _invoke_desktop_recovery(
-                                    desktop_report,
-                                    runner=runner,
-                                    timeout=min(max(0.1, deadline - clock()), 180.0),
-                                )
-                                desktop_recovery_attempted = True
-                                history.append(
-                                    {
-                                        "attempt": attempts,
-                                        "action": "desktop_recovery",
-                                        "returncode": desktop.returncode,
-                                        "elapsed_seconds": round(clock() - started, 3),
-                                    }
-                                )
-                                _wait_for_daemon(
-                                    runner=runner,
-                                    deadline=deadline,
-                                    sleep=sleep,
-                                    clock=clock,
-                                    poll_interval=max(poll_interval, 2.0),
-                                )
-                            continue
-                    else:
-                        findings = [
-                            {
-                                "cause": "service_unready",
-                                "stderr": result.stderr,
-                                "attempt": attempts,
-                            }
-                        ]
-                    if attempts < max_attempts:
-                        sleep(
-                            min(
-                                2 ** (attempts - 1),
-                                4,
-                                max(0.0, deadline - clock()),
-                            )
-                        )
-                remaining = deadline - clock()
-                if remaining > 0:
-                    log_result = runner(
-                        _compose(spec, "logs", "--no-color", "--tail", "100"),
-                        ROOT,
-                        min(15.0, remaining),
-                    )
-                    recent_logs = {
-                        "captured": log_result.returncode == 0,
-                        "stdout": _bounded(log_result.stdout),
-                        "stderr": _bounded(log_result.stderr),
-                    }
-                else:
-                    recent_logs = {
-                        "captured": False,
-                        "stdout": "",
-                        "stderr": "global recovery deadline exhausted",
-                    }
     cause = primary_cause(findings)
     disk = shutil.disk_usage(ROOT)
     incident = {

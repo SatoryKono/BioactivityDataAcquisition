@@ -28,6 +28,8 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
+from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
 ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_SOURCE = ROOT / "reports" / "bp_live.json"
 DEFAULT_OUTPUT = ROOT / "reports" / "quality" / "basedpyright-error-snapshot.json"
@@ -42,7 +44,8 @@ def _rel_bioetl(path: str) -> str:
 
 
 def build_snapshot(source: Path) -> dict[str, Any]:
-    payload = json.loads(source.read_text(encoding="utf-8"))
+    source = resolve_output_path(source, root=ROOT)
+    payload = json.loads(source.read_text(encoding="utf-8"))  # NOSONAR - path confined by resolve_output_path
     summary = payload.get("summary") if isinstance(payload, dict) else {}
     diags = payload.get("generalDiagnostics") if isinstance(payload, dict) else []
     if not isinstance(diags, list):
@@ -123,9 +126,10 @@ def write_snapshot(*, source: Path, output: Path) -> dict[str, Any]:
 
 
 def check_snapshot(*, source: Path, output: Path) -> None:
+    output = resolve_output_path(output, root=ROOT)
     if not output.is_file():
         raise SystemExit(f"missing snapshot: {output}")
-    committed = json.loads(output.read_text(encoding="utf-8"))
+    committed = json.loads(output.read_text(encoding="utf-8"))  # NOSONAR - path confined by resolve_output_path
     live = build_snapshot(source)
     committed_errors = int(committed.get("summary", {}).get("error_count", 0))
     live_errors = int(live.get("summary", {}).get("error_count", 0))
@@ -164,8 +168,9 @@ def _try_live_basedpyright(target: Path) -> bool:
             return False
     if not completed.stdout.strip():
         return False
+    target = resolve_output_path(target, root=ROOT)
     target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(completed.stdout, encoding="utf-8")
+    target.write_text(completed.stdout, encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
     return True
 
 

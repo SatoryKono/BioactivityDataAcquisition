@@ -132,7 +132,7 @@ def _read_coverage_percent(path: Path) -> float | None:
 def _read_coverage_percent_from_log(path: Path) -> float | None:
     if not path.exists():
         return None
-    pattern = re.compile(r"^TOTAL\s+.*?([0-9]+(?:\.[0-9]+)?)%$", re.MULTILINE)
+    pattern = re.compile(r"^TOTAL\s+.*?(\d+(?:\.\d+)?)%$", re.MULTILINE)
     match = pattern.search(path.read_text(encoding="utf-8"))
     if match is None:
         return None
