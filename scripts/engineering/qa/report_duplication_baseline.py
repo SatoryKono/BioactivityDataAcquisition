@@ -363,10 +363,9 @@ def _load_history_records(
     path: Path, *, root: Path | None = None
 ) -> list[dict[str, object]]:
     """Load prior JSONL history records when present."""
-    if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_output_path
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
-        path = resolve_output_path(path, root=root)
+    path = resolve_output_path(path, root=root if root is not None else REPO_ROOT)
     if not path.exists():
         return []
 
@@ -505,7 +504,7 @@ def _scan_target(
     ]
     from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 
-    result = subprocess.run(
+    result = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
         ensure_safe_cli_argv([str(token) for token in cmd]),
         capture_output=True,
         text=True,
@@ -886,22 +885,20 @@ def _trend_markdown_section(trend_summary: dict[str, object] | None) -> list[str
 
 
 def _write_text(path: Path, content: str, *, root: Path | None = None) -> None:
-    if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_output_path
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
-        path = resolve_output_path(path, root=root)
+    path = resolve_output_path(path, root=root if root is not None else REPO_ROOT)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content, encoding="utf-8")
+    path.write_text(content, encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
 
 
 def _append_history_jsonl(
     path: Path, *, payload: dict[str, object], root: Path | None = None
 ) -> None:
     """Append a compact observation record for later trend comparisons."""
-    if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_output_path
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
-        path = resolve_output_path(path, root=root)
+    path = resolve_output_path(path, root=root if root is not None else REPO_ROOT)
     path.parent.mkdir(parents=True, exist_ok=True)
     targets = payload.get("targets", [])
     record = {
@@ -919,7 +916,7 @@ def _append_history_jsonl(
             if isinstance(item, dict)
         ],
     }
-    with path.open("a", encoding="utf-8") as handle:
+    with path.open("a", encoding="utf-8") as handle:  # NOSONAR - path confined by resolve_output_path
         handle.write(json.dumps(record, ensure_ascii=True) + "\n")
 
 

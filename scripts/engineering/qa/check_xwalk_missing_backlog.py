@@ -130,7 +130,7 @@ def load_backlog(path: Path = DEFAULT_BACKLOG_PATH) -> dict[str, Any]:
     """Load the xwalk missing backlog YAML file."""
 
     backlog_path = _resolve_path(path)
-    raw = yaml.safe_load(backlog_path.read_text(encoding="utf-8"))
+    raw = yaml.safe_load(backlog_path.read_text(encoding="utf-8"))  # NOSONAR - path confined
     if raw is None:
         return {}
     if not isinstance(raw, dict):

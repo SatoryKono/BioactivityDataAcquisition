@@ -20,8 +20,8 @@ FROM base AS builder
 # Copy dependency files
 COPY pyproject.toml uv.lock ./
 
-# Install uv and builder dependencies
-RUN pip install uv==0.11.26 && \
+# Install uv and builder dependencies (binary-only + locked uv version).
+RUN pip install --only-binary=:all: --no-cache-dir uv==0.11.26 && \
     uv pip install --system -e .
 
 # ============ Production Stage ============
@@ -35,8 +35,8 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 COPY src/ /app/src/
 COPY pyproject.toml /app/
 
-# Install the package in editable mode
-RUN pip install --no-deps -e .
+# Install the package in editable mode (no transitive build scripts).
+RUN pip install --only-binary=:all: --no-deps --no-cache-dir -e .
 
 # Create non-root user
 RUN useradd -m -u 1000 bioetl && \
@@ -61,8 +61,8 @@ COPY grafana/ /app/grafana/
 COPY package.json package-lock.json /app/
 COPY docker-compose.yml docker-compose.monitoring.yml docker-compose.neo4j.yml /app/
 
-# Install development dependencies
-RUN pip install uv==0.11.26 && \
+# Install development dependencies (binary-only + locked uv version).
+RUN pip install --only-binary=:all: --no-cache-dir uv==0.11.26 && \
     uv pip install --system -e ".[dev,docs]" && \
     useradd -m -u 1000 bioetl && \
     chown -R bioetl:bioetl /app

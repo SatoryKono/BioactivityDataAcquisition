@@ -175,7 +175,7 @@ def _atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
     path = resolve_output_path(path, root=REPO_ROOT)
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(
+    tmp.write_text(  # NOSONAR - confined by resolve_output_path
         json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     tmp.replace(path)

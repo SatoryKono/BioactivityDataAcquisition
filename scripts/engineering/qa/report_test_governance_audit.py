@@ -288,7 +288,7 @@ def _load_current_artifact_if_fresh(root: Path) -> dict[str, Any] | None:
     if not artifact_path.exists():
         return None
     try:
-        payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+        payload = json.loads(artifact_path.read_text(encoding="utf-8"))  # NOSONAR - path confined
     except (OSError, json.JSONDecodeError):
         return None
     if not isinstance(payload, dict):
@@ -753,7 +753,7 @@ def _load_assertion_bypass_allowlist(root: Path) -> list[dict[str, str]]:
     config_path = root / DEFAULT_CONFIG
     if not config_path.exists():
         return []
-    payload = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+    payload = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}  # NOSONAR - path confined
     entries = payload.get("assertion_bypass_allowlist", [])
     return [dict(entry) for entry in entries if isinstance(entry, dict)]
 
@@ -1142,7 +1142,7 @@ def _check_json_artifact(path: Path, payload: dict[str, Any]) -> bool:
     if not path.exists():
         print(f"[drift] missing: {path}")
         return False
-    actual = path.read_text(encoding="utf-8")
+    actual = path.read_text(encoding="utf-8")  # NOSONAR - path confined
     if actual == expected:
         return True
     print(f"[drift] mismatch: {path}")

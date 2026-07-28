@@ -196,12 +196,11 @@ def _write_json_report(
     path: Path, snapshot: WeeklyDebtSnapshot, *, root: Path | None = None
 ) -> None:
     """Write JSON debt snapshot report."""
-    if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_output_path
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
-        path = resolve_output_path(path, root=root)
+    path = resolve_output_path(path, root=root if root is not None else REPO_ROOT)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
+    path.write_text(  # NOSONAR - path confined by resolve_output_path
         json.dumps(asdict(snapshot), ensure_ascii=False, indent=2, sort_keys=True)
         + "\n",
         encoding="utf-8",
@@ -212,24 +211,22 @@ def _write_markdown_report(
     path: Path, snapshot: WeeklyDebtSnapshot, *, root: Path | None = None
 ) -> None:
     """Write markdown debt snapshot report."""
-    if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_output_path
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
-        path = resolve_output_path(path, root=root)
+    path = resolve_output_path(path, root=root if root is not None else REPO_ROOT)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(_render_markdown(snapshot), encoding="utf-8")
+    path.write_text(_render_markdown(snapshot), encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
 
 
 def _write_summary_append(
     path: Path, snapshot: WeeklyDebtSnapshot, *, root: Path | None = None
 ) -> None:
     """Append compact summary block for CI step summary usage."""
-    if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_output_path
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
-        path = resolve_output_path(path, root=root)
+    path = resolve_output_path(path, root=root if root is not None else REPO_ROOT)
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("a", encoding="utf-8") as stream:
+    with path.open("a", encoding="utf-8") as stream:  # NOSONAR - path confined by resolve_output_path
         stream.write(
             "\n".join(
                 [

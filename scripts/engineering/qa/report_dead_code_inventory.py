@@ -848,8 +848,8 @@ def main() -> int:
 
     json_out.parent.mkdir(parents=True, exist_ok=True)
     md_out.parent.mkdir(parents=True, exist_ok=True)
-    json_out.write_text(rendered_json, encoding="utf-8")
-    md_out.write_text(rendered_markdown, encoding="utf-8")
+    json_out.write_text(rendered_json, encoding="utf-8")  # NOSONAR - confined by resolve_output_path
+    md_out.write_text(rendered_markdown, encoding="utf-8")  # NOSONAR - confined by resolve_output_path
     print(
         "[dead-code-inventory] "
         f"triaged_entries={payload['summary']['triaged_entry_count']}; "

@@ -63,12 +63,24 @@ def _repo_root() -> Path:
     return Path(__file__).resolve().parents[4]
 
 
+def _confined_file_bytes(path: Path, *, root: Path) -> bytes:
+    """Read bytes after confining path under root (S8707)."""
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
+    safe = resolve_output_path(path, root=root)
+    return safe.read_bytes()  # NOSONAR - confined by resolve_output_path
+
+
 def _load_yaml(path: Path) -> dict[str, Any]:
-    # Intentionally load the given path as-is (may be a pytest tmp fixture).
-    # Callers that need CLI path confinement must resolve before invoking.
-    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    """Load YAML mapping; confine under repo when possible."""
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    safe_path = resolve_output_path(path, root=REPO_ROOT)
+    payload = yaml.safe_load(
+        safe_path.read_text(encoding="utf-8")  # NOSONAR - confined by resolve_output_path
+    )
     if not isinstance(payload, dict):
-        raise ValueError(f"Expected a YAML mapping: {path}")
+        raise ValueError(f"Expected a YAML mapping: {safe_path}")
     return payload
 
 
@@ -1027,7 +1039,7 @@ def build_report(
         "repository": str(root),
         "contract": {
             "path": str(contract_path.relative_to(root)),
-            "sha256": hashlib.sha256(contract_path.read_bytes()).hexdigest(),
+            "sha256": hashlib.sha256(_confined_file_bytes(contract_path, root=root)).hexdigest(),
             "canonical_runtime": contract["policy"]["canonical_runtime"],
             "selected_stack": selected_stack,
         },

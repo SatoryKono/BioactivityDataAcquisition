@@ -330,7 +330,7 @@ def _git_tracked_files(root: Path, relative_dir: Path) -> list[Path] | None:
     try:
         from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 
-        completed = subprocess.run(
+        completed = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
             ensure_safe_cli_argv(
                 ["git", "-C", str(root), "ls-files", "--", relative_dir.as_posix()]
             ),

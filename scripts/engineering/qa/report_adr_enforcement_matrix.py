@@ -469,18 +469,18 @@ def _write_artifacts(
     md_out: Path,
     root: Path | None = None,
 ) -> None:
-    if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_output_path
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
-        json_out = resolve_output_path(json_out, root=root)
-        md_out = resolve_output_path(md_out, root=root)
+    base = root if root is not None else REPO_ROOT
+    json_out = resolve_output_path(json_out, root=base)
+    md_out = resolve_output_path(md_out, root=base)
     json_out.parent.mkdir(parents=True, exist_ok=True)
     md_out.parent.mkdir(parents=True, exist_ok=True)
-    json_out.write_text(
+    json_out.write_text(  # NOSONAR - path confined by resolve_output_path
         json.dumps(payload, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    md_out.write_text(render_markdown(payload), encoding="utf-8")
+    md_out.write_text(render_markdown(payload), encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
 
 
 def _check_artifacts(
@@ -490,11 +490,11 @@ def _check_artifacts(
     md_out: Path,
     root: Path | None = None,
 ) -> list[str]:
-    if root is not None:
-        from scripts.engineering.common.repo_paths import resolve_output_path
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
-        json_out = resolve_output_path(json_out, root=root)
-        md_out = resolve_output_path(md_out, root=root)
+    base = root if root is not None else REPO_ROOT
+    json_out = resolve_output_path(json_out, root=base)
+    md_out = resolve_output_path(md_out, root=base)
     errors: list[str] = []
     expected_json = json.dumps(payload, indent=2, sort_keys=True) + "\n"
     expected_md = render_markdown(payload)

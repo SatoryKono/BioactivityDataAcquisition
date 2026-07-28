@@ -69,7 +69,7 @@ def _git_stdout(repo_root: Path, *args: str) -> str:
             continue
         from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 
-        completed = subprocess.run(
+        completed = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
             ensure_safe_cli_argv([executable, *[str(a) for a in args]]),
             cwd=repo_root,
             check=False,

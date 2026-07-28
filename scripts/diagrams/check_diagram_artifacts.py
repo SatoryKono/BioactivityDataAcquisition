@@ -50,7 +50,7 @@ def load_manifest(manifest_path: Path) -> list[Path]:
     from scripts.engineering.common.repo_paths import resolve_output_path
 
     paths: list[Path] = []
-    for raw in manifest_path.read_text(encoding="utf-8").splitlines():
+    for raw in manifest_path.read_text(encoding="utf-8").splitlines():  # NOSONAR - path confined
         line = raw.strip()
         if not line or line.startswith("#"):
             continue

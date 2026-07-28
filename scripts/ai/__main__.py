@@ -101,7 +101,7 @@ def main(argv: list[str] | None = None) -> int:
     else:
         command = _module_command(surface, rest)
 
-    return subprocess.run(
+    return subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
         ensure_safe_cli_argv([str(x) for x in command]), check=False
     ).returncode
 

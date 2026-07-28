@@ -286,7 +286,7 @@ def _run_architecture_tests(pytest_path: str) -> ArchitectureTestStats:
         from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 
         cmd = ensure_safe_cli_argv(_architecture_test_cmd(pytest_path, junit_path))
-        result = subprocess.run(
+        result = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
             cmd,
             capture_output=True,
             text=True,

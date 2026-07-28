@@ -197,11 +197,14 @@ def smoke_http_server(
             f"HTTP protocol smoke requires an exact localhost /mcp URL (got {url!r})"
         )
 
-    safe_url = f"http://{parsed_url.hostname}:{parsed_url.port}/mcp"
+    # Loopback-only MCP smoke: local proxy has no TLS in dev (S5332 accepted).
+    host = parsed_url.hostname
+    port = parsed_url.port
+    safe_url = f"http://{host}:{port}/mcp"  # NOSONAR - localhost-only, validated above
     started = time.monotonic()
-    ping_url = f"http://{parsed_url.hostname}:{parsed_url.port}/ping"
+    ping_url = f"http://{host}:{port}/ping"  # NOSONAR - localhost-only, validated above
     try:
-        with urllib.request.urlopen(ping_url, timeout=timeout) as resp:
+        with urllib.request.urlopen(ping_url, timeout=timeout) as resp:  # NOSONAR - loopback
             ping_code = int(getattr(resp, "status", 200) or 200)
             if ping_code >= 500:
                 raise RuntimeError(f"ping HTTP {ping_code} for {ping_url}")
@@ -227,7 +230,7 @@ def smoke_http_server(
         },
     }
     body = json.dumps(payload).encode("utf-8")
-    req = urllib.request.Request(
+    req = urllib.request.Request(  # NOSONAR - safe_url is loopback-validated
         safe_url,
         data=body,
         method="POST",
@@ -257,8 +260,8 @@ def smoke_http_server(
                     "method": "tools/list",
                     "params": {},
                 }
-                tools_req = urllib.request.Request(
-                    url,
+                tools_req = urllib.request.Request(  # NOSONAR - safe_url loopback-validated
+                    safe_url,
                     data=json.dumps(tools_payload).encode("utf-8"),
                     method="POST",
                     headers={

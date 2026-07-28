@@ -235,7 +235,7 @@ def _load_json(path: Path, *, root: Path | None = None) -> dict[str, Any]:
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
     path = resolve_output_path(path, root=root or REPO_ROOT)
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload = json.loads(path.read_text(encoding="utf-8"))  # NOSONAR - path confined
     if isinstance(payload, dict):
         return payload
     raise ValueError(f"Expected JSON mapping in {path}")
@@ -259,7 +259,9 @@ def _load_csv(path: Path) -> list[dict[str, str]]:
 def _load_yaml(path: Path) -> dict[str, Any]:
     if not path.exists():
         return {}
-    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+    path = resolve_output_path(path, root=REPO_ROOT)
+    payload = yaml.safe_load(path.read_text(encoding="utf-8"))  # NOSONAR - path confined
     if isinstance(payload, dict):
         return payload
     raise ValueError(f"Expected YAML mapping in {path}")
@@ -1760,7 +1762,9 @@ def check_artifacts(
         if not path.exists():
             stale.append(filename)
             continue
-        actual = _normalize_newlines(path.read_text(encoding="utf-8"))
+        from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+        path = resolve_output_path(path, root=REPO_ROOT)
+        actual = _normalize_newlines(path.read_text(encoding="utf-8"))  # NOSONAR - path confined
         if actual != _normalize_newlines(expected):
             stale.append(filename)
     if stale:

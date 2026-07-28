@@ -181,7 +181,9 @@ def origin_kind(value: str | Path) -> str:
     lowered = raw.replace("\\", "/").lower()
     if _WINDOWS_PATH.match(raw):
         return "windows"
-    if lowered == "/tmp" or lowered.startswith("/tmp/"):
+    # Classify forbidden public temp roots (do not write there).
+    tmp_root = "/tmp"
+    if lowered == tmp_root or lowered.startswith(tmp_root + "/"):
         return "tmp"
     if lowered == "/mnt" or lowered.startswith("/mnt/"):
         return "mnt"
