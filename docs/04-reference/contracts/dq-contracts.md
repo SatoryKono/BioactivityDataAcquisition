@@ -224,15 +224,18 @@ quality:
 
 ## Threshold Semantics
 
-BioETL does **not** currently have one universal hard-fail default shared by
-every DQ surface.
+BioETL does **not** have one universal hard-fail default shared by every DQ
+surface. Use the matrix below; hierarchical / RULES / contract-loader default
+hard-fail is **0.50**.
 
 ### Default matrix
 
 | Surface | Source | Default | Meaning |
 | --- | --- | --- | --- |
-| Hierarchical `quality:` config | `configs/base/quality.yaml` | `soft_fail=0.05`, `hard_fail=0.25` | Base provider/entity DQ hierarchy |
-| Contract-backed DQ runtime fallback | `configs/contracts/**`, `src/bioetl/infrastructure/config/dq_contract_config_loader.py` | `soft_fail=0.05`, `hard_fail=0.20` | Used when a contract-backed config omits explicit threshold values |
+| Hierarchical `quality:` config | `configs/base/quality.yaml`, `ThresholdsConfig` | `soft_fail=0.05`, `hard_fail=0.50` | Base provider/entity DQ hierarchy (RULES default) |
+| Contract-backed DQ loader fallback | `configs/contracts/**`, `dq_contract_config_loader.py` | `soft_fail=0.05`, `hard_fail=0.50` | When a contract omits explicit threshold values |
+| Inline pipeline DQ override normalization | `pipeline_dq_resolution.py` | `soft_fail=0.05`, `hard_fail=0.20` | Baseline used to detect whether inline `pipeline.dq_overrides` changed the defaults |
+| Silver DQ request contract | `silver_dq_request.py` | `soft_fail=0.05`, `hard_fail=0.20` | Request-shape default for Silver DQ analysis |
 
 ### Governed threshold changes
 
@@ -251,8 +254,6 @@ A proposed change requires:
 
 The replay creates new manifest and ledger evidence. It never changes the
 original failed run or its quarantine payloads in place.
-| Inline pipeline DQ override normalization | `src/bioetl/infrastructure/config/pipeline_dq_resolution.py` | `soft_fail=0.05`, `hard_fail=0.20` | Baseline used to detect whether inline `pipeline.dq_overrides` changed the defaults |
-| Silver DQ request contract | `src/bioetl/domain/ports/quality/silver_dq_request.py` | `soft_fail=0.05`, `hard_fail=0.20` | Request-shape default for Silver DQ analysis |
 
 **Invariant**: `soft_fail` must be strictly less than `hard_fail` on every
 surface.

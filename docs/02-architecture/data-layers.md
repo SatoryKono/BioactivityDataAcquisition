@@ -76,14 +76,20 @@ ______________________________________________________________________
   - **Info/Warning** (например, новые поля или отсутствие необязательных): Данные пропускаются, но метаданные дрейфа схемы логируются.
   - **Data Quality Error** (нарушение типов, провал check-ов):
     - Soft Fail (\<5%): Замена на `NULL` (если поле `nullable`) или пометка флагом `_dq_error`.
-    - Hard Fail (>25% для иерархической конфигурации, >20% для contract/runtime fallback): Батч отклоняется, запись в Quarantine.
+    - Hard Fail (>50% для иерархической / contract-loader default, >20% только для
+      Silver request / pipeline-override baseline без явного override): Батч
+      отклоняется, запись в Quarantine.
   - **Critical Schema Violation**: Исключение, остановка пайплайна.
 
-**Note:** DQ thresholds have dual defaults:
-- Hierarchical configuration (`configs/base/quality.yaml`): `soft_fail: 0.05` (5%), `hard_fail: 0.25` (25%)
-- Contract/runtime fallback (`src/bioetl/domain/ports/quality/silver_dq_request.py`): `soft_fail_threshold: 0.05` (5%), `hard_fail_threshold: 0.20` (20%)
+**Note:** DQ thresholds are multi-surface (see
+[DQ Contracts — Threshold Semantics](../04-reference/contracts/dq-contracts.md#threshold-semantics)):
+- Hierarchical (`configs/base/quality.yaml` / `ThresholdsConfig`): `soft_fail: 0.05` (5%), `hard_fail: 0.50` (50%)
+- Contract-backed loader omitted thresholds: `hard_fail: 0.50`
+- Silver request / pipeline-override baseline (`silver_dq_request.py`,
+  `pipeline_dq_resolution.py`): `hard_fail: 0.20` (20%)
 
-The hierarchical configuration takes precedence when available.
+Hierarchical configuration takes precedence when the entity `quality:` hierarchy
+is the active surface.
 
 ### 2.3. Нормализация
 

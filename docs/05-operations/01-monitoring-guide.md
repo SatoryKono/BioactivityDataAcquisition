@@ -113,16 +113,23 @@ panel guide is historical only).
 
 ### Маршрутизация расследования
 
+Shipped portfolio is **seven boards** (nav bus `0..6`). Retired JSON
+(`bioetl-workflow-overview`, `bioetl-alerts-slo`, `bioetl-silver-reject-explorer`)
+is not a routing target — see
+[Dashboard Inventory](../03-guides/dashboards/dashboard-inventory.md) and
+[monitoring-surface-reduction-2026-07-23](runbooks/monitoring-surface-reduction-2026-07-23.md).
+
 | Вопрос | Dashboard | Следующий шаг |
 | --- | --- | --- |
-| Общий статус run | `1. Overview` | Зафиксировать scope и точный `run_id`. |
-| Manifest, ledger, checkpoint, replay | `0. Control Plane` | Проверить lifecycle evidence. |
-| Ошибка или latency | `2. Runtime` | Открыть связанный runbook. |
-| Provider availability | `3. Provider Health` | Проверить provider/adapter scope. |
-| DQ contract | `4. Data Quality` | Разделить Silver и Gold rejects. |
-| Composite workflow | `5. Workflow` | Проверить состояния шагов. |
-| Alerts и SLO | `6. Alerts & SLO` | Перейти к alert-backed процедуре ниже. |
-| Silver rejects | CLI `bioetl quarantine inspect` (+ aggregates in `4. Data Quality`) | Explorer UI removed; actions остаются в CLI. |
+| Общий статус run / fleet | `1. Overview` | Зафиксировать scope и точный `run_id` (Ops HTTP identity, not a Prom label). |
+| Manifest, ledger, checkpoint, replay safety | `0. Trust` (Control Plane) | Проверить lifecycle evidence; resume safety. |
+| Ошибка, latency, stage accounting | `2. Pipeline Diagnostics` (Runtime) | Workflow step band lives here; open related runbook. |
+| Provider availability / adapter errors | `3. Provider Health` | Provider/adapter scope and cause taxonomy. |
+| DQ contract / soft-hard thresholds | `4. Data Quality` | Разделить Silver rejects vs Gold strict failures. |
+| Multi-domain triage / alert hop | `5. Incident Workspace` | Domain suspects (Runtime / Provider / DQ) + ALERTS support. |
+| Exact completed-run identity | `6. Run Explorer` | Ops HTTP run report; never Prom `run_id` labels. |
+| Alert / SLO triage | `1. Overview` (collapsed Alert/SLO row) + §3 below | No separate Alerts & SLO dashboard JSON. |
+| Silver / quarantine rejects | CLI `bioetl quarantine inspect` (+ aggregates on `4. Data Quality`) | Explorer UI removed 2026-07-23; actions remain CLI. |
 
 `OK/WARN/CRIT` — business severity; `INCOMPLETE` — неполное evidence;
 `UNKNOWN` — отсутствие честного verdict; `ERROR` — query/datasource/backend
@@ -266,12 +273,13 @@ QA image, rule fixtures, and monitoring-profile pins in one reviewed change.
      `docker exec bioetl-grafana wget -qO- http://127.0.0.1:3000/api/health`
      и
      `docker exec bioetl-prometheus wget -qO- http://127.0.0.1:9090/-/healthy`.
-- **Loki drilldown не находит событие**:
-  1. Сначала проверьте, что общий запрос `{job="bioetl"}` вообще возвращает строки.
-  1. Zero lines могут быть легитимны, если Loki shipping/profile выключен или выбранный run не отгрузил BioETL streams в текущем окне.
-  1. Если локальный `reports/logs/bioetl.log` содержит свежие строки BioETL run, а `{job="bioetl"}` пуст, считайте это ingestion defect и проверьте Promtail positions, container mounts и Loki ingestion limits.
-  1. После этого сузьте запрос вручную по `pipeline`, `provider` или `stage` уже в Explore.
-  1. Не полагайтесь на `$pipeline/$provider` interpolation внутри encoded Explore payload.
+- **Нет логов / traces в Grafana Explore (Loki/Tempo)**:
+  1. Loki/Tempo **не** входят в shipping monitoring surface (removed 2026-07-23).
+     Не диагностируйте BioETL run через Grafana Loki/Tempo UI на default stack.
+  1. Используйте локальный structured log surface (например `reports/logs/bioetl.log`
+     или process stdout) и Prometheus metrics / shipped boards.
+  1. Optional external log/trace backends are BYO; empty Explore is expected when
+     those backends are not provisioned.
 - **Метрики показывают UNHEALTHY для storage**: Проверьте права доступа к папкам `data/`.
 - **Control-plane сигналы стали красными**:
   1. Запустите `bioetl run-manifest show <run-id|manifest-id> --format json`.

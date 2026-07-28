@@ -230,16 +230,21 @@ Observed facts:
 
 | Dashboard/component | File | Purpose | Layer |
 | --- | --- | --- | --- |
-| Control Plane | `grafana/dashboards/bioetl-control-plane-v1.json` | Manifest/ledger/control-plane status. | Observability |
-| Overview | `grafana/dashboards/bioetl-overview-v2.json` | Operator summary and pipeline health. | Observability |
-| Runtime | `grafana/dashboards/bioetl-runtime.json` | Runtime execution and record accounting. | Observability |
+| Trust (Control Plane) | `grafana/dashboards/bioetl-control-plane-v1.json` | Manifest/ledger/control-plane status. | Observability |
+| Overview | `grafana/dashboards/bioetl-overview-v2.json` | Operator summary, L0 status, Alert/SLO triage. | Observability |
+| Pipeline Diagnostics (Runtime) | `grafana/dashboards/bioetl-runtime.json` | Runtime execution, blockers, workflow band. | Observability |
 | Provider Health | `grafana/dashboards/bioetl-provider-health-v2.json` | Provider health and adapter status. | Observability |
 | Data Quality | `grafana/dashboards/bioetl-dq-v2.json` | DQ scores, failures, quarantine metrics. | Observability |
-| Workflow Overview | `grafana/dashboards/bioetl-workflow-overview.json` | Workflow step status and rollups. | Observability |
-| Alerts/SLO | `grafana/dashboards/bioetl-alerts-slo.json` | Alert and SLO status. | Observability |
-| Silver Reject Explorer | `grafana/dashboards/bioetl-silver-reject-explorer.json` | Quarantine/silver reject drilldown. | Observability |
+| Incident Workspace | `grafana/dashboards/bioetl-incident-v1.json` | Multi-domain suspects + ALERTS support. | Observability |
+| Run Explorer | `grafana/dashboards/bioetl-run-explorer-v1.json` | Exact-run Ops HTTP identity (no Prom `run_id` labels). | Observability |
 | Prometheus rules | `grafana/prometheus-rules/*.yml` | Recording and alerting rules. | Observability |
-| Datasource provisioning | `grafana/provisioning/{datasources-core,datasources-tracing}/*.yml` | Prometheus and Quarantine Explorer core datasources plus Loki and Tempo tracing datasources. | Observability |
+| Datasource provisioning | `grafana/provisioning/datasources-core/*.yml` | Prometheus + BioETL Ops HTTP (Infinity → `:8000`). | Observability |
+
+**Retired (not shipped JSON, 2026-07-23+):** `bioetl-workflow-overview`,
+`bioetl-alerts-slo`, `bioetl-silver-reject-explorer`; Loki/Tempo /
+`datasources-tracing` / Quarantine Explorer UI. Canonical inventory:
+`docs/03-guides/dashboards/dashboard-inventory.md`. Removal record:
+`docs/05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md`.
 
 ## Control Plane Components
 

@@ -175,8 +175,10 @@ python -m scripts.engineering.qa report-observability-metric-inventory --json
   before switching to trace-first debugging.
 - If dashboard data is missing, stop and verify metrics publication before
   troubleshooting alerts.
-- If tracing is enabled and checkpoint incidents are under investigation, verify
-  Tempo contains `checkpoint_save` spans for the same pipeline and time window.
+- Checkpoint incidents: use Control Plane / Runtime boards, ledger/manifest CLI
+  (`bioetl diagnostics manifest|dossier`), and local structured logs. Do **not**
+  require Grafana Tempo span checks — Tempo is not part of the shipping
+  monitoring surface (removed 2026-07-23).
 
 ### 4. Alert-to-Diagnostics Route
 
