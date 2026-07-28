@@ -392,83 +392,6 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Pipeline-level runtime error rate over last 30m. bioetl_errors_total is scoped by pipeline/stage/error_code, so this panel intentionally ignores run_type in the numerator and uses Bronze input as denominator. Thresholds align with the shipped alert rule: >=5% is WARN when the 30m Bronze denominator is >=20, >=20% is CRIT/dashboard escalation; denominator <20 or missing input telemetry renders UNKNOWN instead of false OK/CRIT. Next action: open Errors by Stage/Error Code and check failed runs/backlog/lag.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [
-            {
-              "type": "special",
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
-                }
-              }
-            }
-          ],
-          "min": 0,
-          "max": 1,
-          "noValue": "UNKNOWN",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 0.05
-              },
-              {
-                "color": "red",
-                "value": 0.2
-              }
-            ]
-          },
-          "unit": "percentunit"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 8,
-        "x": 0,
-        "y": 23
-      },
-      "id": 220,
-      "options": {
-        "colorMode": "none",
-        "graphMode": "none",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "targets": [
-        {
-          "expr": "max(bioetl_runtime_error_rate_30m{pipeline=~\"$pipeline\"})",
-          "refId": "A"
-        }
-      ],
-      "title": "Runtime Error Rate",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
       "description": "Metrics Evidence (scrape/rule trust). 0=OK (metrics + recording rules healthy), 1=WARN (scrape or rule gap), >=2=CRIT (scrape+rule gap), null=UNKNOWN. Not a pipeline error. When elevated, Status cannot be green OK — treat zero count panels as inconclusive and open Prometheus Targets before debugging pipeline code. Time scope: current monitoring health, not selected-range runtime evidence. UNKNOWN — metrics trust series absent (TELEMETRY_ABSENT_OR_STALE).",
       "fieldConfig": {
         "defaults": {
@@ -572,7 +495,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 28
+        "y": 13
       },
       "panels": [
         {
@@ -882,6 +805,232 @@
               "options": {}
             }
           ]
+        },
+        {
+          "id": 9105,
+          "type": "state-timeline",
+          "title": "Monitor Aggregate Stage Lag Timeline",
+          "description": "Bounded aggregate stage health timeline from stage lag/backlog signals. Not exact-run chronology (see Run Explorer). Series capped by selected pipeline/run_type. Table fallback: Inspect Stage Expectedness. VALID_EMPTY when no stage series in window.",
+          "gridPos": {
+            "h": 5,
+            "w": 24,
+            "x": 0,
+            "y": 47
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "expr": "max by (stage) (bioetl_stage_lag_seconds{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
+              "legendFormat": "{{stage}}",
+              "refId": "A",
+              "instant": false,
+              "range": true
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "noValue": "UNKNOWN",
+              "custom": {
+                "fillOpacity": 70,
+                "lineWidth": 0
+              },
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "options": {
+            "mergeValues": true,
+            "showValue": "auto",
+            "alignValue": "left",
+            "rowHeight": 0.85,
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          }
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Shows expected vs observed stage status per entity config. Gold status is contextual: expected (scd2/append/overwrite config), disabled (gold_enabled=false), pending (run active, gold not yet written), or missing (run completed, gold=0). Aggregate stage expectedness (current/range grain as query states). Exact-run chronology lives in Run Explorer, not this board.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "color-text"
+                },
+                "inspect": false
+              },
+              "mappings": [
+                {
+                  "type": "value",
+                  "options": {
+                    "1": {
+                      "color": "green",
+                      "index": 0,
+                      "text": "expected"
+                    },
+                    "0": {
+                      "color": "blue",
+                      "index": 1,
+                      "text": "disabled"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "blue",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "short",
+              "noValue": "N/A"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 24,
+            "x": 0,
+            "y": 52
+          },
+          "id": 243,
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": false,
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "showHeader": true
+          },
+          "pluginVersion": "10.4.0",
+          "targets": [
+            {
+              "expr": "bioetl_pipeline_stage_expected{pipeline=~\"$pipeline\"}",
+              "legendFormat": "{{stage}}",
+              "refId": "A",
+              "instant": true,
+              "format": "table"
+            },
+            {
+              "expr": "max by (pipeline, stage) (max_over_time(bioetl_stage_records_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[15m]))",
+              "legendFormat": "{{stage}} records",
+              "refId": "B",
+              "instant": true,
+              "format": "table"
+            }
+          ],
+          "title": "Inspect Stage Expectedness",
+          "type": "table",
+          "transformations": [
+            {
+              "id": "merge",
+              "options": {}
+            }
+          ]
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Pipeline-level runtime error rate over last 30m. bioetl_errors_total is scoped by pipeline/stage/error_code, so this panel intentionally ignores run_type in the numerator and uses Bronze input as denominator. Thresholds align with the shipped alert rule: >=5% is WARN when the 30m Bronze denominator is >=20, >=20% is CRIT/dashboard escalation; denominator <20 or missing input telemetry renders UNKNOWN instead of false OK/CRIT. Next action: open Errors by Stage/Error Code and check failed runs/backlog/lag.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                }
+              ],
+              "min": 0,
+              "max": 1,
+              "noValue": "UNKNOWN",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 0.05
+                  },
+                  {
+                    "color": "red",
+                    "value": 0.2
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 24,
+            "x": 0,
+            "y": 57
+          },
+          "id": 220,
+          "options": {
+            "colorMode": "none",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "max(bioetl_runtime_error_rate_30m{pipeline=~\"$pipeline\"})",
+              "refId": "A"
+            }
+          ],
+          "title": "Runtime Error Rate",
+          "type": "stat"
         }
       ]
     },
@@ -894,7 +1043,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 29
+        "y": 14
       },
       "panels": [
         {
@@ -1215,7 +1364,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 30
+        "y": 15
       },
       "panels": [
         {
@@ -2137,7 +2286,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 31
+        "y": 16
       },
       "id": 9992,
       "panels": [
@@ -2393,7 +2542,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 32
+        "y": 17
       },
       "id": 9993,
       "panels": [
@@ -2993,7 +3142,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 33
+        "y": 18
       },
       "id": 9994,
       "panels": [
@@ -3148,155 +3297,6 @@
           "description": "Counts failed declarative workflow steps whose `step_kind=pipeline` in the selected time range. `0` means no failed pipeline step events were observed in the selected window; it does not prove stage-level success because the metric has no stage label. Use `2. Runtime` when this panel is non-zero to locate the blocking pipeline stage or runtime error path."
         }
       ]
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Shows expected vs observed stage status per entity config. Gold status is contextual: expected (scd2/append/overwrite config), disabled (gold_enabled=false), pending (run active, gold not yet written), or missing (run completed, gold=0). Aggregate stage expectedness (current/range grain as query states). Exact-run chronology lives in Run Explorer, not this board.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "color-text"
-            },
-            "inspect": false
-          },
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "1": {
-                  "color": "green",
-                  "index": 0,
-                  "text": "expected"
-                },
-                "0": {
-                  "color": "blue",
-                  "index": 1,
-                  "text": "disabled"
-                }
-              }
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "blue",
-                "value": null
-              },
-              {
-                "color": "green",
-                "value": 1
-              }
-            ]
-          },
-          "unit": "short",
-          "noValue": "N/A"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 24,
-        "x": 0,
-        "y": 18
-      },
-      "id": 243,
-      "options": {
-        "cellHeight": "sm",
-        "footer": {
-          "countRows": false,
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": false
-        },
-        "showHeader": true
-      },
-      "pluginVersion": "10.4.0",
-      "targets": [
-        {
-          "expr": "bioetl_pipeline_stage_expected{pipeline=~\"$pipeline\"}",
-          "legendFormat": "{{stage}}",
-          "refId": "A",
-          "instant": true,
-          "format": "table"
-        },
-        {
-          "expr": "max by (pipeline, stage) (max_over_time(bioetl_stage_records_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[15m]))",
-          "legendFormat": "{{stage}} records",
-          "refId": "B",
-          "instant": true,
-          "format": "table"
-        }
-      ],
-      "title": "Inspect Stage Expectedness",
-      "type": "table",
-      "transformations": [
-        {
-          "id": "merge",
-          "options": {}
-        }
-      ]
-    },
-    {
-      "id": 9105,
-      "type": "state-timeline",
-      "title": "Monitor Aggregate Stage Lag Timeline",
-      "description": "Bounded aggregate stage health timeline from stage lag/backlog signals. Not exact-run chronology (see Run Explorer). Series capped by selected pipeline/run_type. Table fallback: Inspect Stage Expectedness. VALID_EMPTY when no stage series in window.",
-      "gridPos": {
-        "h": 5,
-        "w": 24,
-        "x": 0,
-        "y": 13
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "targets": [
-        {
-          "expr": "max by (stage) (bioetl_stage_lag_seconds{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
-          "legendFormat": "{{stage}}",
-          "refId": "A",
-          "instant": false,
-          "range": true
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "noValue": "UNKNOWN",
-          "custom": {
-            "fillOpacity": 70,
-            "lineWidth": 0
-          },
-          "unit": "s"
-        },
-        "overrides": []
-      },
-      "options": {
-        "mergeValues": true,
-        "showValue": "auto",
-        "alignValue": "left",
-        "rowHeight": 0.85,
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      }
     }
   ],
   "refresh": "60s",
