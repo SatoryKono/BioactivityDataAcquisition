@@ -44,7 +44,7 @@ jobs:
           cp "${ACTION_DIR}/package.json" "${ACTION_DIR}/package-lock.json" "${TOOL_DIR}/"
           cd "${TOOL_DIR}"
           # Install from action-local package.json + package-lock.json (S8543).
-          npm install --ignore-scripts --no-fund --no-audit
+          npm ci --ignore-scripts --no-fund --no-audit
           if [ "$INSTALL_LIBRSVG" = "true" ]; then
             sudo apt-get update -qq && sudo apt-get install -y -qq librsvg2-bin
           fi

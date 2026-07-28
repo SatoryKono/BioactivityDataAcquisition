@@ -44,7 +44,7 @@ runs:
         # Install from action-local package.json + package-lock.json (S8543).
         # Exact versions are pinned in package.json; lockfile records resolved URLs.
         # Full tree refresh: cd .github/actions/setup-mermaid && npm install --ignore-scripts
-        npm install --ignore-scripts --no-fund --no-audit
+        npm ci --ignore-scripts --no-fund --no-audit
         # `--ignore-scripts` deliberately suppresses lifecycle hooks. Run the
         # pinned CLI's own Puppeteer installer explicitly, then fail closed if
         # its exact browser revision is unavailable.

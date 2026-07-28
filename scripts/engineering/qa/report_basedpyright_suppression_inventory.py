@@ -18,6 +18,8 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
+from scripts.engineering.common.repo_paths import resolve_output_path
+
 ROOT = Path(__file__).resolve().parents[3]
 SRC = ROOT / "src" / "bioetl"
 DEFAULT_OUTPUT = (
@@ -107,9 +109,12 @@ def write_inventory(output: Path) -> dict[str, Any]:
 
 
 def check_inventory(output: Path) -> None:
+    output = resolve_output_path(output, root=Path(__file__).resolve().parents[3])
     if not output.is_file():
         raise SystemExit(f"missing suppression inventory: {output}")
-    committed = json.loads(output.read_text(encoding="utf-8"))
+    committed = json.loads(
+        output.read_text(encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
+    )
     live = collect_inventory()
     c_files = int(committed.get("summary", {}).get("files_with_suppressions", 0))
     l_files = int(live.get("summary", {}).get("files_with_suppressions", 0))
