@@ -29,7 +29,8 @@ param(
     [string[]]$Servers = @(),
     # Daily multi-client set: catalog minus neo4j-* (auth-dependent optional).
     [switch]$Daily,
-    [switch]$WhatIf,
+    # Dry-run only (avoid reserved -WhatIf).
+    [switch]$DryRun,
     # Host cold-start (npx + wrapper) often exceeds 12s; /ping is the success signal.
     [int]$SettleSeconds = 25,
     [int]$MaxAttempts = 2,
@@ -225,7 +226,7 @@ if ([string]::IsNullOrWhiteSpace($apiKey)) {
     Write-Host 'Auth: BIOETL_MCP_SHARED_API_KEY set (mcp-proxy --apiKey / clients need X-API-Key)'
 }
 
-if (-not $WhatIf -and -not $SkipPrewarm) {
+if (-not $DryRun -and -not $SkipPrewarm) {
     Write-Host "Pre-warming $proxyPkg (cache=$npmCache) ..."
     $warmLog = Join-Path $logDir 'prewarm.err.log'
     $warmOut = Join-Path $logDir 'prewarm.out.log'
@@ -324,8 +325,8 @@ foreach ($name in $selected) {
         $cmdArgs = "/d /c set `"NPM_CONFIG_CACHE=$npmCache`"&& npx -y $proxyPkg $proxyFlags -- powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$wrapper`""
     }
 
-    if ($WhatIf) {
-        Write-Host "WhatIf: $comSpec $cmdArgs"
+    if ($DryRun) {
+        Write-Host "DryRun: $comSpec $cmdArgs"
         $status.servers[$name] = @{ port = $port; state = 'whatif' }
         continue
     }

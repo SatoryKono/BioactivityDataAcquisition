@@ -184,11 +184,20 @@ async def _run_gold_write_with_retry(
         _GoldWriteAsyncioProtocol,
         getattr(module, "asyncio", asyncio),
     )
+    # Explicit BaseException tuple for except (python:S5708).
+    retry_exception_types: tuple[type[BaseException], ...] = tuple(
+        exc_type
+        for exc_type in retry_errors
+        if isinstance(exc_type, type) and issubclass(exc_type, BaseException)
+    )
+    if not retry_exception_types:
+        await operation()
+        return
     for attempt in range(3):
         try:
             await operation()
             return
-        except retry_errors:
+        except retry_exception_types:
             if attempt == 2:
                 raise
             await sleep_module.sleep(_gold_write_retry_delay(attempt))

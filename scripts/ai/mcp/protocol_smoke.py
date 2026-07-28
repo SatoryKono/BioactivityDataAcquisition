@@ -306,21 +306,25 @@ def smoke_http_server(
 
 
 def _validate_command_argv(command: list[str]) -> list[str]:
-    """Reject shell-metacharacter injection in MCP command argv."""
+    """Reject shell-metacharacter injection in MCP command argv.
+
+    Returns a new argv list after allowlist checks (S2076 sanitizing boundary).
+    """
     if not command or not command[0].strip():
         raise ValueError("MCP server command must be a non-empty executable path")
-    # Never pass a shell string; keep argv as a list of discrete tokens.
     dangerous = set("|&;<>`$(){}")
+    safe_tokens: list[str] = []
     for token in command:
         if any(char in token for char in dangerous):
             raise ValueError(
                 "MCP protocol smoke refuses shell metacharacters in command argv: "
                 f"{token!r}"
             )
-    launcher = Path(command[0]).name.lower()
+        safe_tokens.append("".join(token))
+    launcher = Path(safe_tokens[0]).name.lower()
     if launcher not in _ALLOWED_MCP_LAUNCHERS:
         raise ValueError(f"Unsupported MCP launcher: {launcher!r}")
-    return command
+    return list(safe_tokens)
 
 
 def smoke_server(
@@ -366,7 +370,7 @@ def smoke_server(
         ).is_file():
             cwd = candidate
             break
-    process = subprocess.Popen(
+    process = subprocess.Popen(  # NOSONAR - argv validated; shell=False
         popen_command,
         cwd=str(cwd),
         env=environment,

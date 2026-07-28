@@ -1116,6 +1116,13 @@ def main(argv: list[str] | None = None) -> int:
         if config.fallback == "auto":
             return _run_playwright_fallback(config)
         return 1
+    except URLError as exc:
+        # URLError subclasses OSError — handle before generic OSError (S1045).
+        print(f"URL error: {exc.reason}")
+        if config.fallback == "auto":
+            print("Falling back to Playwright screenshot capture.")
+            return _run_playwright_fallback(config)
+        return 1
     except OSError as exc:
         print(
             _render_failure_message(
@@ -1125,12 +1132,6 @@ def main(argv: list[str] | None = None) -> int:
             )
         )
         if config.fallback == "auto":
-            return _run_playwright_fallback(config)
-        return 1
-    except URLError as exc:
-        print(f"URL error: {exc.reason}")
-        if config.fallback == "auto":
-            print("Falling back to Playwright screenshot capture.")
             return _run_playwright_fallback(config)
         return 1
     except RuntimeError as exc:
