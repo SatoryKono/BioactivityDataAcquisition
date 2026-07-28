@@ -9,12 +9,7 @@ from typing import TYPE_CHECKING
 
 import click
 
-from bioetl.interfaces.cli.commands.domains.maintenance.service_access import (
-    get_lifecycle_service as _get_lifecycle_service,
-)
-from bioetl.interfaces.cli.commands.domains.maintenance.service_access import (
-    get_vacuum_service as _get_vacuum_service,
-)
+from bioetl.interfaces.cli.commands.domains.maintenance import service_access
 from bioetl.interfaces.cli.commands.domains.shared.click_options import (
     typed_click_argument,
     typed_click_command,
@@ -45,6 +40,16 @@ __all__ = [
     "vacuum_command",
 ]
 
+
+def get_lifecycle_service() -> MedallionLifecycleServiceProtocol:
+    """Load the lifecycle service through the owner-only maintenance seam."""
+    return service_access.get_lifecycle_service()
+
+
+def get_vacuum_service() -> VacuumService:
+    """Load the vacuum service through the owner-only maintenance seam."""
+    return service_access.get_vacuum_service()
+
 _VACUUM_DOMAIN_ERROR_TITLE = "Maintenance vacuum failed with domain error"
 _VACUUM_UNEXPECTED_ERROR_TITLE = "Unexpected error during maintenance vacuum"
 _VACUUM_INTERRUPTED_MESSAGE = "Maintenance vacuum interrupted by user (Ctrl+C)"
@@ -52,16 +57,6 @@ _VACUUM_INTERRUPTED_MESSAGE = "Maintenance vacuum interrupted by user (Ctrl+C)"
 _VACUUM_ALL_DOMAIN_ERROR_TITLE = "Maintenance vacuum-all failed with domain error"
 _VACUUM_ALL_UNEXPECTED_ERROR_TITLE = "Unexpected error during maintenance vacuum-all"
 _VACUUM_ALL_INTERRUPTED_MESSAGE = "Maintenance vacuum-all interrupted by user (Ctrl+C)"
-
-
-def get_lifecycle_service() -> MedallionLifecycleServiceProtocol:
-    """Load the lifecycle service through the owner-only maintenance seam."""
-    return _get_lifecycle_service()
-
-
-def get_vacuum_service() -> VacuumService:
-    """Load the vacuum service through the owner-only maintenance seam."""
-    return _get_vacuum_service()
 
 
 def _maintenance_policy(

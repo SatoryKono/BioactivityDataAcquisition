@@ -48,6 +48,7 @@ PROGRESSIVE_DISCLOSURE_ROWS = {
     ("bioetl-runtime.json", "Run context (thin) → Run Explorer"),
     ("bioetl-runtime.json", "Runtime secondary KPIs"),
     ("bioetl-runtime.json", "Workflow band (merged from bioetl-workflow-overview)"),
+    ("bioetl-run-explorer-v1.json", "Run report detail (Ops HTTP)"),
 }
 
 
