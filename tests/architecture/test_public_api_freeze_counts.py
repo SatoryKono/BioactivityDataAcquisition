@@ -25,7 +25,10 @@ def test_public_entrypoint_and_export_facade_counts_are_frozen() -> None:
     assert governance["public_export_facade_conflict_count"]["current_count"] == 0
     freeze = inv.get("retained_compatibility_freeze_policy") or {}
     assert freeze.get("status") == "active_no_growth"
-    assert freeze.get("new_retained_surface_policy") == "blocked_without_public_api_decision"
+    assert (
+        freeze.get("new_retained_surface_policy")
+        == "blocked_without_public_api_decision"
+    )
 
 
 def test_transition_debt_remains_empty_under_freeze() -> None:

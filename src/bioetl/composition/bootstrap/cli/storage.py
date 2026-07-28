@@ -25,7 +25,7 @@ from bioetl.application.services.contract_migration_service import (
     ContractMigrationService,
 )
 from bioetl.application.services.export_service import ExportService
-from bioetl.application.services.medallion_lifecycle import (
+from bioetl.application.services.medallion.medallion_lifecycle import (
     MedallionLifecycleService,
     MedallionStorageProtocol,
 )

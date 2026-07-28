@@ -61,4 +61,6 @@ def test_closeout_json_artifacts_declare_no_budget_growth_policy() -> None:
         )
         if not has_marker:
             failures.append(f"{path.name}: missing closeout identity fields")
-    assert failures == [], "Closeout artifact policy regressions:\n" + "\n".join(failures)
+    assert failures == [], "Closeout artifact policy regressions:\n" + "\n".join(
+        failures
+    )

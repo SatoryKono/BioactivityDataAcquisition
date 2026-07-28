@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.postrun.service import PostrunService
     from bioetl.application.core.preflight.service import PreflightService
     from bioetl.application.observability.observer import PipelineObserver
-    from bioetl.application.services.medallion_lifecycle import (
+    from bioetl.application.services.medallion.medallion_lifecycle import (
         MedallionLifecycleService,
     )
     from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata

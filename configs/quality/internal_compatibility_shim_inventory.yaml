@@ -54,15 +54,17 @@ shims:
   - id: infrastructure-config-package-root
     module: bioetl.infrastructure.config
     path: src/bioetl/infrastructure/config/__init__.py
-    lifecycle: retained_external_package_root_facade
+    lifecycle: permanent_external_public_api
     owner: "@bioetl-config"
     disposition: retain_external_public_api_zero_first_party_src
     canonical_target: split infrastructure config owner modules
+    linked_adr: ADR-052-infrastructure-config-package-root-public-api.md
     max_src_importer_count: 0
     allowed_src_importers: []
     owner_tests:
       - tests/unit/infrastructure/config/test_config_package_root_contract.py
       - tests/unit/infrastructure/config/test_public_config_surfaces.py
     exit_criteria: >-
-      Package-root convenience exports remain for external imports only; any
-      first-party src importer requires architecture review before merge.
+      Permanent external public API per ADR-052. Package-root convenience exports
+      remain for external imports only; any first-party src importer requires
+      architecture review before merge.

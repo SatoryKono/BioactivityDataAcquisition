@@ -165,7 +165,7 @@ class TestBootstrapLifecycleService:
 
         result = bootstrap_lifecycle_service()
 
-        from bioetl.application.services.medallion_lifecycle import (
+        from bioetl.application.services.medallion.medallion_lifecycle import (
             MedallionLifecycleService,
         )
 

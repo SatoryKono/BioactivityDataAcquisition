@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
+from bioetl.application.services.medallion.medallion_lifecycle import MedallionLifecycleService
 from bioetl.domain.medallion import MedallionPolicy
 from bioetl.domain.types import RunType
 

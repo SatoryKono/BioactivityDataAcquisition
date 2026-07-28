@@ -228,5 +228,3 @@ class BatchWriterIOMixin:
     ) -> None:
         """Validate Gold records against schema contract."""
         validate_gold_records(self, records, schema=schema)
-
-

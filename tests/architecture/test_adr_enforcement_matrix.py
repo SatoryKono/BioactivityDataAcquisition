@@ -83,9 +83,7 @@ LEGACY_ADR_ENFORCEMENT_ANCHORS = {
 }
 
 
-def _matrix_drift_report(
-    committed: dict[str, object], live: dict[str, object]
-) -> str:
+def _matrix_drift_report(committed: dict[str, object], live: dict[str, object]) -> str:
     """Build a compact drift report for the ADR enforcement matrix artifact."""
     committed_rows = {
         str(row["adr_id"]): row

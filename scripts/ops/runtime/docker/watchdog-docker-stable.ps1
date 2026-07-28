@@ -12,6 +12,11 @@
 
 .EXAMPLE
   .\scripts\ops\runtime\docker\watchdog-docker-stable.ps1 -WithNeo4j
+
+.NOTES
+  Default state/log directory is reports\logs\docker-watchdog (gitignored under
+  reports/logs/*) so the watchdog does not recreate root logs/. Override with
+  -StateDir when needed. Root logs/ remains non-retained per file-policy §0.
 #>
 [CmdletBinding()]
 param(
@@ -25,7 +30,8 @@ $ErrorActionPreference = 'Continue'
 $Root = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..\..')).Path
 Set-Location $Root
 if (-not $StateDir) {
-    $StateDir = Join-Path $Root 'logs\docker-watchdog'
+    # RH4-02 / #6816: do not default to root logs/ (re-clutters exact root).
+    $StateDir = Join-Path $Root 'reports\logs\docker-watchdog'
 }
 if (-not (Test-Path $StateDir)) {
     New-Item -ItemType Directory -Path $StateDir -Force | Out-Null

@@ -362,6 +362,57 @@ def _iter_structured_blocks(
     return blocks
 
 
+def _collapse_nested_duplication_clusters(
+    clusters: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Drop child subtree clusters when a parent block_path is already reported.
+
+    Generated JSON Schema often duplicates both ``$defs.Foo`` and
+    ``$defs.Foo.properties`` as separate exact-match clusters. Those child
+    property bags are not independent governance debt once the parent contract
+    cluster is retained. The same applies to alias ``expands_to`` children and
+    specialized composite policy suffixes under a shared root key.
+    """
+    paths = {str(cluster["block_path"]) for cluster in clusters}
+    kept: list[dict[str, Any]] = []
+    for cluster in clusters:
+        block_path = str(cluster["block_path"])
+        if block_path.endswith(".properties"):
+            parent = block_path[: -len(".properties")]
+            if parent in paths:
+                continue
+        if block_path.endswith(".expands_to"):
+            parent = block_path[: -len(".expands_to")]
+            if parent in paths:
+                continue
+        if (
+            block_path.startswith("composite.normalized_anchor_policy.")
+            and "composite.normalized_anchor_policy" in paths
+        ):
+            continue
+        kept.append(cluster)
+
+    # One representative cluster per shared shadow_analysis governance decision.
+    shadow_seen = False
+    collapsed: list[dict[str, Any]] = []
+    for cluster in kept:
+        block_path = str(cluster["block_path"])
+        decision = str(
+            (cluster.get("governance") or {}).get("decision") or ""
+        )
+        if (
+            decision == "retain_shared_quality_shadow_analysis_policy"
+            or block_path.endswith(".shadow_analysis")
+        ):
+            if shadow_seen:
+                continue
+            shadow_seen = True
+            cluster = dict(cluster)
+            cluster["block_path"] = "pipelines.*.shadow_analysis"
+        collapsed.append(cluster)
+    return collapsed
+
+
 def _build_duplication_audit() -> dict[str, Any]:
     clusters: dict[str, dict[str, Any]] = {}
     surface_files = _iter_duplication_surface_files()
@@ -444,6 +495,7 @@ def _build_duplication_audit() -> dict[str, Any]:
             }
         )
 
+    duplicate_clusters = _collapse_nested_duplication_clusters(duplicate_clusters)
     duplicate_clusters.sort(
         key=lambda cluster: (
             -int(cluster["occurrence_count"]),

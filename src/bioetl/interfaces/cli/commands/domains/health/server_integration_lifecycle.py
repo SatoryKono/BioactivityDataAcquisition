@@ -67,7 +67,9 @@ async def _run_health_server(
         quarantine_service = (
             _deps._get_optional_health_server_quarantine_service()
             if data_root is None
-            else _deps._get_optional_health_server_quarantine_service(data_root=data_root)
+            else _deps._get_optional_health_server_quarantine_service(
+                data_root=data_root
+            )
         )
         server._quarantine_service = quarantine_service
         if start_metrics:

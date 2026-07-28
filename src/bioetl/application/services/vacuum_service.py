@@ -22,7 +22,7 @@ from typing import TYPE_CHECKING
 from bioetl.domain.exceptions import BioETLError, StorageError
 
 if TYPE_CHECKING:
-    from bioetl.application.services.medallion_lifecycle import (
+    from bioetl.application.services.medallion.medallion_lifecycle import (
         MedallionLifecycleService,
     )
     from bioetl.domain.ports import LoggerPort

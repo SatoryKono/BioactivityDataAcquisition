@@ -10,11 +10,11 @@ current_live_root_baseline:
     .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py
     --strict-untracked
   note: >-
-    2026-07-28 RH3-01..RH3-04 (#6795–#6799): tracked root still 37≡allowlist;
-    purged recurring local sinks (.coverage, logs/, test-output/, _tmp_*.py);
-    operator recurring checklist in root-local-clutter-cleanup.md; Docker
-    exact-root shrink remains multi-PR deferred (#6797) with consumer map in
-    docker-helper-root-relocation-audit.md. See also 2026-07-27 RH/RH2 notes.
+    2026-07-28 RH4-01..RH4-04 (#6812–#6816): tracked root still 37≡allowlist;
+    purged recreated _tmp_*.py and root logs/; watchdog default StateDir moved
+    to reports/logs/docker-watchdog/; agent scratch ban documented in
+    root-local-clutter-cleanup.md. Prior RH3 (#6795–#6799): operator checklist;
+    Docker exact-root shrink remains deferred (#6797). See also 2026-07-27 RH/RH2.
 
 review_lanes:
   - lane_id: root_env_security

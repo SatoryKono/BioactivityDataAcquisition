@@ -118,11 +118,11 @@ async def close_health_server_resources(
 
 
 __all__ = [
+    "_get_optional_health_server_quarantine_service",
     "build_health_server",
     "build_health_server_pycache_prefix",
     "close_health_server_resources",
     "get_health_server_dependencies",
     "get_health_server_quarantine_service",
     "get_quarantine_runtime_service",
-    "_get_optional_health_server_quarantine_service",
 ]

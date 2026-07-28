@@ -424,16 +424,13 @@ def test_control_plane_provider_health_handoff_omits_adapter_fallback() -> None:
     # Primary bus intentionally omits Provider Health (epic #6570/#6647).
     control = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     control_titles = {
-        str(item.get("title", ""))
-        for item in get_dashboard_navigation_links(control)
+        str(item.get("title", "")) for item in get_dashboard_navigation_links(control)
     }
     assert "3. Provider Health" not in control_titles
 
     overview = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     first_action = next(
-        panel
-        for panel in get_dashboard_panels(overview)
-        if panel.get("id") == 215
+        panel for panel in get_dashboard_panels(overview) if panel.get("id") == 215
     )
     link = next(
         (

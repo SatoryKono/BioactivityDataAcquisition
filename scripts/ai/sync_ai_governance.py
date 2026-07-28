@@ -601,6 +601,7 @@ def sync_skill_mirrors(root: Path, *, check_only: bool) -> list[str]:
             issues.extend(_compare_trees(expected_docs, paths["docs_mirror"]))
         else:
             if paths["docs_mirror"].exists():
+
                 def _onexc(
                     func: Callable[..., object],
                     path: str,

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.application.services.medallion_types import (
+from bioetl.application.services.medallion.medallion_types import (
     ClearResult,
     PrepareResult,
     VacuumResult,

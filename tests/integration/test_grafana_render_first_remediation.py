@@ -267,10 +267,7 @@ def test_rf003_1024_layout_prioritizes_actions_and_readability() -> None:
 
     provider = _load("bioetl-provider-health-v2.json")
     # Provider detail progressive panels remain first-screen-friendly.
-    assert any(
-        panel.get("type") == "row"
-        for panel in provider.get("panels", [])
-    )
+    assert any(panel.get("type") == "row" for panel in provider.get("panels", []))
     # Workflow overview + Alerts/SLO retired (#6570/#6647).
 
 

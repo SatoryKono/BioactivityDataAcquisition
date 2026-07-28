@@ -108,8 +108,8 @@ def _start_health_observability(logger: LoggerPort | None = None) -> None:
 
 
 __all__ = [
+    "_start_health_observability",
     "get_metrics_server_starter",
     "get_runtime_settings",
     "start_metrics_server",
-    "_start_health_observability",
 ]

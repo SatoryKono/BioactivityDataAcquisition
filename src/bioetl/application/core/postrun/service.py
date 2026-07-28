@@ -24,7 +24,7 @@ from bioetl.application.core.postrun._service_support import (
     PostrunServiceSupportMixin,
 )
 from bioetl.application.services.data_quality_service import DataQualityService
-from bioetl.application.services.medallion_types import VacuumResult
+from bioetl.application.services.medallion.medallion_types import VacuumResult
 from bioetl.domain.ports import ExecutorMetricsPort
 from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 
@@ -51,7 +51,7 @@ if TYPE_CHECKING:
         DQReportContext,
         DQReportResult,
     )
-    from bioetl.application.services.medallion_lifecycle import (
+    from bioetl.application.services.medallion.medallion_lifecycle import (
         MedallionLifecycleService,
     )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig

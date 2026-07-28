@@ -83,8 +83,10 @@ def _sync_scorecard_hotspot_metrics_from_baseline() -> None:
         budgets = family.get("bounded_growth_budgets") or {}
         if isinstance(live_budgets, dict) and isinstance(budgets, dict):
             for key, live_val in live_budgets.items():
-                if key in budgets and isinstance(live_val, int) and isinstance(
-                    budgets.get(key), int
+                if (
+                    key in budgets
+                    and isinstance(live_val, int)
+                    and isinstance(budgets.get(key), int)
                 ):
                     if live_val < budgets[key]:
                         budgets[key] = live_val

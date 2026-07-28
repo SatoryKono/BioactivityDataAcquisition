@@ -25,7 +25,7 @@
     },
     {
       "evidence_metrics": {
-        "source_module_count": 2282,
+        "source_module_count": 2299,
         "uncovered_module_count": 0
       },
       "id": "ddd_invariants",
@@ -116,16 +116,16 @@
         "public_entrypoint_growth_count": 0,
         "public_export_facade_conflict_count": 0,
         "public_export_facade_growth_count": 0,
-        "repo_wide_untriaged_zero_import_candidate_count": 0,
+        "repo_wide_untriaged_zero_import_candidate_count": 5,
         "sunset_compat_count": 0,
         "total_duplicate_clusters": 0,
         "transition_compat_count": 0
       },
       "id": "debt_burden_evolution_friction",
       "name": "Debt burden / evolution friction",
-      "score": 8.5,
+      "score": 6.0,
       "weight": 0.06,
-      "weighted_score": 0.51
+      "weighted_score": 0.36
     }
   ],
   "debt_budget_policy": {
@@ -162,10 +162,10 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 9.11,
+  "integral_score": 8.96,
   "interpretation": "good_targeted_improvements",
   "metrics": {
-    "accepted_adr_count": 49,
+    "accepted_adr_count": 50,
     "adr_enforcement_blocking_gap_count": 0,
     "adr_enforcement_manual_exception_count": 0,
     "compatibility_test_file_count": 0,
@@ -174,20 +174,22 @@
     "dashboarded_without_emission_count": 0,
     "dq_blocking_issue_count": 0,
     "expired_compat_count": 0,
-    "families_at_budget": [],
-    "families_at_budget_count": 0,
+    "families_at_budget": [
+      "application_services_control_plane"
+    ],
+    "families_at_budget_count": 1,
     "hotspot_budget_warning_count": 0,
     "hotspot_family_count": 5,
     "layer_violations": 0,
     "public_entrypoint_growth_count": 0,
     "public_export_facade_conflict_count": 0,
     "public_export_facade_growth_count": 0,
-    "repo_wide_untriaged_zero_import_candidate_count": 0,
+    "repo_wide_untriaged_zero_import_candidate_count": 5,
     "retained_entrypoint_count": 12,
     "retained_public_export_facade_count": 4,
     "runtime_cardinality_review_required_count": 0,
     "runtime_cardinality_threshold_violation_count": 0,
-    "source_module_count": 2282,
+    "source_module_count": 2299,
     "sunset_compat_count": 0,
     "total_duplicate_clusters": 0,
     "transition_compat_count": 0,
@@ -198,7 +200,7 @@
   "schema_version": 1,
   "source_artifacts": {
     "adr_enforcement_matrix": {
-      "accepted_adr_count": 49,
+      "accepted_adr_count": 50,
       "blocking_gap_count": 0,
       "generated_artifact": "reports/quality/adr-enforcement-matrix.json",
       "path": "scripts/engineering/qa/report_adr_enforcement_matrix.py::build_payload"
@@ -238,7 +240,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "fb530e62125256526d43fb0d095621adf2b13e79b827d80b8c96882853368011",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "a549b13f13501fa8108cf8eafb42e100b353cfd7f9e523e68edc1edb5ed0ab40"
+      "source_tree_sha256": "e45f064778f709468aa44e30daeba99b41a17f6ebf158d30e7bd642d09f98bed"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

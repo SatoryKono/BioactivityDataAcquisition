@@ -16,10 +16,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
-from bioetl.application.services.medallion_maintenance_mixin import (
+from bioetl.application.services.medallion.medallion_maintenance_mixin import (
     _MedallionMaintenanceMixin,
 )
-from bioetl.application.services.medallion_types import (
+from bioetl.application.services.medallion.medallion_types import (
     ClearResult,
     PrepareResult,
     VacuumResult,

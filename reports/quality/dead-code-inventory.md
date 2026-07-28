@@ -6,11 +6,11 @@
 - next_review_by: 2026-10-21
 - review_cycle_days: 90
 - triaged_entry_count: 18
-- repo_wide_zero_import_candidate_count: 2
+- repo_wide_zero_import_candidate_count: 7
 - repo_wide_classified_zero_import_candidate_count: 2
-- repo_wide_untriaged_zero_import_candidate_count: 0
+- repo_wide_untriaged_zero_import_candidate_count: 5
 - repo_wide_owner_test_anchored_candidate_count: 2
-- repo_wide_candidates_without_owner_tests_count: 0
+- repo_wide_candidates_without_owner_tests_count: 5
 - repo_wide_non_static_reachability_candidate_count: 1
 - triaged_retained_owner_test_anchored_count: 14
 - triaged_retained_without_owner_tests_count: 0
@@ -45,6 +45,11 @@
 | Module | Disposition | Path |
 | --- | --- | --- |
 | `bioetl.__main__` | `retain_module_entrypoint` | `src/bioetl/__main__.py` |
+| `bioetl.composition.factories.pipeline.assembler_helpers` | `untriaged` | `src/bioetl/composition/factories/pipeline/assembler_helpers.py` |
+| `bioetl.composition.factories.pipeline.checkpoint_metadata_helpers` | `untriaged` | `src/bioetl/composition/factories/pipeline/checkpoint_metadata_helpers.py` |
+| `bioetl.composition.factories.pipeline.checkpoint_metadata_resolution` | `untriaged` | `src/bioetl/composition/factories/pipeline/checkpoint_metadata_resolution.py` |
+| `bioetl.composition.factories.pipeline.checkpoint_policy_helpers` | `untriaged` | `src/bioetl/composition/factories/pipeline/checkpoint_policy_helpers.py` |
+| `bioetl.composition.factories.pipeline.registry_validation_helpers` | `untriaged` | `src/bioetl/composition/factories/pipeline/registry_validation_helpers.py` |
 | `bioetl.domain.ports.stage_accounting` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/stage_accounting.py` |
 
 ## Retained Owner-Test Evidence

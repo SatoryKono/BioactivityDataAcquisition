@@ -85,7 +85,7 @@ def mock_executor():
 @pytest.fixture
 def mock_lifecycle_service():
     """Create a mock lifecycle service."""
-    from bioetl.application.services.medallion_lifecycle import VacuumResult
+    from bioetl.application.services.medallion.medallion_lifecycle import VacuumResult
 
     service = MagicMock()
     service.vacuum = AsyncMock(return_value=10)
@@ -367,7 +367,7 @@ class TestPostrunServiceVacuum:
         mock_metrics,
     ):
         """Test run_vacuum_if_enabled delegates to lifecycle service."""
-        from bioetl.application.services.medallion_lifecycle import VacuumResult
+        from bioetl.application.services.medallion.medallion_lifecycle import VacuumResult
 
         mock_lifecycle_service.finalize_run = AsyncMock(
             return_value=VacuumResult(
@@ -414,7 +414,7 @@ class TestPostrunServiceVacuum:
         mock_metrics,
     ):
         """Test run_vacuum_if_enabled returns finalize_run result."""
-        from bioetl.application.services.medallion_lifecycle import VacuumResult
+        from bioetl.application.services.medallion.medallion_lifecycle import VacuumResult
 
         expected_result = VacuumResult(
             silver_files_removed=10, gold_files_removed=5, skipped=False

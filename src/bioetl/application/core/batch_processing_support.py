@@ -47,6 +47,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 
+
 class BatchProcessingSupportService:
     """Encapsulate per-batch transform/write tracing choreography."""
 
