@@ -12,7 +12,7 @@
   "current_metrics": {
     "repo_uncovered_module_count": 0,
     "repo_unmeasured_module_count": 0,
-    "application_core_covered_line_percent": 96.34,
+    "application_core_covered_line_percent": 96.61,
     "application_core_uncovered_module_count": 0,
     "application_core_unmeasured_module_count": 0
   },
