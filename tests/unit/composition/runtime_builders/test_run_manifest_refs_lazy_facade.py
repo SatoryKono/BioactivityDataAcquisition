@@ -20,4 +20,4 @@ def test_run_manifest_refs_facade_exports_and_unknown() -> None:
     ):
         assert getattr(mod, name) is not None
     with pytest.raises(AttributeError, match="not_a_real_export_symbol_xyz"):
-        getattr(mod, "not_a_real_export_symbol_xyz")
+        mod.not_a_real_export_symbol_xyz

@@ -8,7 +8,9 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from bioetl.interfaces.cli.commands.domains.health import server_integration_deps as deps
+from bioetl.interfaces.cli.commands.domains.health import (
+    server_integration_deps as deps,
+)
 from bioetl.interfaces.cli.commands.domains.health import (
     server_integration_lifecycle as lifecycle,
 )
@@ -94,7 +96,7 @@ def test_start_health_observability_logs_ready_only_when_started(
     monkeypatch.setattr(
         observability,
         "get_metrics_server_starter",
-        lambda: (lambda **_: False),
+        lambda: lambda **_: False,
     )
 
     observability._start_health_observability(logger=_Logger())  # type: ignore[arg-type]

@@ -10,6 +10,10 @@ from pathlib import Path
 import pytest
 import yaml
 
+from tests.architecture._module_coverage_inventory_support import (
+    skip_if_artifact_is_not_authoritative,
+)
+
 pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -19,6 +23,10 @@ ROUTING_PATH = ROOT / "configs/quality/generated_artifact_routing.yaml"
 
 
 def _inventory_payload() -> dict[str, object]:
+    skip_if_artifact_is_not_authoritative(
+        root=ROOT,
+        artifact_path=INVENTORY_JSON,
+    )
     payload = json.loads(INVENTORY_JSON.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
     return payload
@@ -275,6 +283,10 @@ def test_documentation_cleanup_inventory_maps_drafts_and_skill_mirrors() -> None
 
 def test_documentation_cleanup_inventory_check_passes() -> None:
     """Generator --check must stay synchronized with committed inventory artifacts."""
+    skip_if_artifact_is_not_authoritative(
+        root=ROOT,
+        artifact_path=INVENTORY_JSON,
+    )
     result = subprocess.run(
         [sys.executable, "-m", "scripts.docs", "generate-cleanup-inventory", "--check"],
         cwd=ROOT,
