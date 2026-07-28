@@ -466,8 +466,13 @@ def _analyze_file(src_root: Path, path: Path) -> tuple[FileFact, list[ObjectFact
 
 
 def _jsonl_dump(path: Path, rows: Iterable[dict[str, object]]) -> None:
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    path = resolve_output_path(path, root=REPO_ROOT)
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8", newline="\n") as handle:
+    with path.open(  # NOSONAR - path confined by resolve_output_path
+        "w", encoding="utf-8", newline="\n"
+    ) as handle:
         for row in rows:
             handle.write(json.dumps(row, ensure_ascii=False, sort_keys=True))
             handle.write("\n")
@@ -477,11 +482,13 @@ def _yaml_dump(path: Path, payload: dict[str, object]) -> None:
     lines: list[str] = []
     for key, value in payload.items():
         lines.extend(_yaml_lines(key, value, 0))
-    path.parent.mkdir(parents=True, exist_ok=True)
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
     path = resolve_output_path(path, root=REPO_ROOT)
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(  # NOSONAR - path confined by resolve_output_path
+        "\n".join(lines) + "\n", encoding="utf-8"
+    )
 
 
 def _yaml_dict_lines(key: str, value: dict[object, object], indent: int) -> list[str]:
@@ -565,8 +572,13 @@ def _shard_paths(parent_root: Path, shard: str, date_str: str) -> dict[str, Path
 
 
 def _write_text(path: Path, content: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content.rstrip() + "\n", encoding="utf-8")
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    safe_path = resolve_output_path(path, root=REPO_ROOT)
+    safe_path.parent.mkdir(parents=True, exist_ok=True)
+    safe_path.write_text(  # NOSONAR - path confined by resolve_output_path
+        content.rstrip() + "\n", encoding="utf-8"
+    )
 
 
 def _format_table(rows: list[tuple[str, object]]) -> str:

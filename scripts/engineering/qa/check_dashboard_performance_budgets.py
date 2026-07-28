@@ -138,6 +138,7 @@ def evaluate(
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_cli_path
 
     safe_budgets = resolve_cli_path(budgets_path, root=REPO_ROOT)
+    safe_dashboards = resolve_cli_path(dashboards_dir, root=REPO_ROOT)
     budgets = yaml.safe_load(
         safe_budgets.read_text(encoding="utf-8")  # NOSONAR - confined by resolve_cli_path
     )
@@ -148,7 +149,7 @@ def evaluate(
     exceptions = set(budgets.get("expr_length_exceptions") or [])
 
     measurements: list[dict[str, Any]] = []
-    for path in sorted(dashboards_dir.glob("bioetl-*.json")):
+    for path in sorted(safe_dashboards.glob("bioetl-*.json")):
         measurements.append(_measure_dashboard(path, y_max=y_max))
 
     by_uid = {m["uid"]: m for m in measurements}

@@ -56,7 +56,7 @@ def _read_json(path: Path, *, root: Path | None = None) -> JsonDict:
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
     path = resolve_output_path(path, root=root or REPO_ROOT)
-    with path.open("r", encoding="utf-8") as handle:
+    with path.open("r", encoding="utf-8") as handle:  # NOSONAR - path confined
         payload = json.load(handle)
     if not isinstance(payload, dict):
         raise ValueError(f"Expected JSON object at {path}")

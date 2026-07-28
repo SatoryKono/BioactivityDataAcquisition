@@ -36,11 +36,15 @@ def _atomic_copy(source: Path, target: Path, *, allowed_root: Path) -> None:
         safe_root.joinpath(*relative_target.parts), safe_root
     )
     safe_target.parent.mkdir(parents=True, exist_ok=True)
-    content = safe_source.read_text(encoding="utf-8")
+    content = safe_source.read_text(  # NOSONAR - confined by ensure_path_within_root
+        encoding="utf-8"
+    )
     tmp = ensure_path_within_root(
         safe_target.parent / f"{safe_target.name}.tmp", safe_root
     )
-    with tmp.open("w", encoding="utf-8", newline="\n") as handle:
+    with tmp.open(  # NOSONAR - tmp confined by ensure_path_within_root
+        "w", encoding="utf-8", newline="\n"
+    ) as handle:
         handle.write(content)
     os.replace(tmp, safe_target)  # NOSONAR - tmp/safe_target confined by ensure_path_within_root
 

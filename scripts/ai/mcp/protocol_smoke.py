@@ -313,17 +313,12 @@ def _validate_command_argv(command: list[str]) -> list[str]:
 
     Returns a new argv list after allowlist checks (S2076 sanitizing boundary).
     """
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
     if not command or not command[0].strip():
         raise ValueError("MCP server command must be a non-empty executable path")
-    dangerous = set("|&;<>`$(){}")
-    safe_tokens: list[str] = []
-    for token in command:
-        if any(char in token for char in dangerous):
-            raise ValueError(
-                "MCP protocol smoke refuses shell metacharacters in command argv: "
-                f"{token!r}"
-            )
-        safe_tokens.append("".join(token))
+    # Shared metacharacter rejection + token rebuild (pythonsecurity:S8701/S2076).
+    safe_tokens = ensure_safe_cli_argv([str(token) for token in command])
     launcher = Path(safe_tokens[0]).name.lower()
     if launcher not in _ALLOWED_MCP_LAUNCHERS:
         raise ValueError(f"Unsupported MCP launcher: {launcher!r}")
@@ -373,7 +368,12 @@ def smoke_server(
         ).is_file():
             cwd = candidate
             break
-    process = subprocess.Popen(  # NOSONAR - argv validated; shell=False
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+    # Rebuild argv through the shared sanitizer immediately before spawn.
+    if isinstance(popen_command, list):
+        popen_command = ensure_safe_cli_argv([str(token) for token in popen_command])
+    process = subprocess.Popen(  # NOSONAR - argv via ensure_safe_cli_argv; shell=False
         popen_command,
         cwd=str(cwd),
         env=environment,

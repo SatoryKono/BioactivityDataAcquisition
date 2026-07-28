@@ -29,10 +29,11 @@ from bioetl.interfaces.http._processed_records_value_support import (
 )
 
 PROCESSED_RECORDS_TABLE_CONTRACT = "processed_records_table_v1"
-DEFAULT_PROMETHEUS_BASE_URL = "http://localhost:9090"
+# Local-only Prometheus endpoints (ADR-010); cleartext is intentional for loopback.
+DEFAULT_PROMETHEUS_BASE_URL = "http://localhost:9090"  # NOSONAR - loopback probe default
 DEFAULT_PROMETHEUS_BASE_URL_FALLBACKS = (
-    "http://prometheus:9090",
-    "http://host.docker.internal:9090",
+    "http://prometheus:9090",  # NOSONAR - docker-internal service name
+    "http://host.docker.internal:9090",  # NOSONAR - host gateway from container
 )
 PROMETHEUS_QUERY_TIMEOUT_SECONDS = 3.0
 

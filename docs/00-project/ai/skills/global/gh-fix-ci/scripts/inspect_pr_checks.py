@@ -57,8 +57,10 @@ class GhResult:
 
 
 def run_gh_command(args: Sequence[str], cwd: Path) -> GhResult:
-    process = subprocess.run(
-        ["gh", *args],
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+    process = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
+        ensure_safe_cli_argv(["gh", *[str(a) for a in args]]),
         cwd=cwd,
         text=True,
         capture_output=True,
@@ -67,8 +69,10 @@ def run_gh_command(args: Sequence[str], cwd: Path) -> GhResult:
 
 
 def run_gh_command_raw(args: Sequence[str], cwd: Path) -> tuple[int, bytes, str]:
-    process = subprocess.run(
-        ["gh", *args],
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+    process = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
+        ensure_safe_cli_argv(["gh", *[str(a) for a in args]]),
         cwd=cwd,
         capture_output=True,
     )

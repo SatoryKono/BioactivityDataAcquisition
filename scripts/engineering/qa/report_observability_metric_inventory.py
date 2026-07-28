@@ -1794,9 +1794,11 @@ def write_panel_contract_inventory(
     repo_root: Path, typed_report: dict[str, object]
 ) -> Path:
     """Regenerate the deterministic full panel-contract documentation."""
-    path = repo_root / _PANEL_CONTRACT_INVENTORY
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
+    path = resolve_output_path(_PANEL_CONTRACT_INVENTORY, root=repo_root)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
+    path.write_text(  # NOSONAR - path confined by resolve_output_path
         json.dumps(_panel_contract_document(typed_report), indent=2, sort_keys=True)
         + "\n",
         encoding="utf-8",
@@ -3611,11 +3613,11 @@ def _write_evidence_report(
 ) -> None:
     if evidence_path is None:
         return
-    resolved_path = (
-        evidence_path if evidence_path.is_absolute() else repo_root / evidence_path
-    )
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
+    resolved_path = resolve_output_path(evidence_path, root=repo_root)
     resolved_path.parent.mkdir(parents=True, exist_ok=True)
-    resolved_path.write_text(
+    resolved_path.write_text(  # NOSONAR - path confined by resolve_output_path
         json.dumps(report, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
@@ -3672,11 +3674,11 @@ def _write_runtime_cardinality_review_summary(
 ) -> None:
     if output_path is None:
         return
-    resolved_path = (
-        output_path if output_path.is_absolute() else repo_root / output_path
-    )
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
+    resolved_path = resolve_output_path(output_path, root=repo_root)
     resolved_path.parent.mkdir(parents=True, exist_ok=True)
-    resolved_path.write_text(
+    resolved_path.write_text(  # NOSONAR - path confined by resolve_output_path
         json.dumps(summary, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
@@ -3729,14 +3731,16 @@ def _append_runtime_cardinality_review_summary(
 ) -> None:
     if summary_out is None:
         return
-    resolved_path = (
-        summary_out if summary_out.is_absolute() else repo_root / summary_out
-    )
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
+    resolved_path = resolve_output_path(summary_out, root=repo_root)
     resolved_path.parent.mkdir(parents=True, exist_ok=True)
     prefix = ""
     if resolved_path.exists() and resolved_path.stat().st_size > 0:
         prefix = "\n"
-    with resolved_path.open("a", encoding="utf-8") as handle:
+    with resolved_path.open(  # NOSONAR - path confined by resolve_output_path
+        "a", encoding="utf-8"
+    ) as handle:
         handle.write(prefix + _render_runtime_cardinality_review_summary(summary))
 
 

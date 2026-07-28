@@ -370,7 +370,9 @@ def _load_history_records(
         return []
 
     records: list[dict[str, object]] = []
-    for raw_line in path.read_text(encoding="utf-8").splitlines():
+    for raw_line in path.read_text(  # NOSONAR - path confined by resolve_output_path
+        encoding="utf-8"
+    ).splitlines():
         line = raw_line.strip()
         if not line:
             continue

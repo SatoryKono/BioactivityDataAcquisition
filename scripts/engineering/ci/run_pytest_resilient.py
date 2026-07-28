@@ -133,7 +133,7 @@ def _run_pass(
     try:
         from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 
-        completed = subprocess.run(  # nosec B603
+        completed = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv  # nosec B603
             ensure_safe_cli_argv([str(token) for token in command]),
             capture_output=True,
             text=True,

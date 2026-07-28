@@ -747,6 +747,313 @@ def _build_public_export_contract_row(
     }
 
 
+_PUBLIC_EXPORT_ROW_KEYS = frozenset(
+    {
+        "path",
+        "module_name",
+        "canonical_target",
+        "max_public_exports",
+        "public_exports",
+        "public_export_count",
+        "duplicate_public_exports",
+        "lazy_export_table",
+        "lazy_export_keys",
+        "duplicate_lazy_export_keys",
+        "orphan_lazy_export_keys",
+        "dunder_getattr_exports",
+        "orphan_dunder_getattr_exports",
+        "retained_wrapper_contract",
+        "retained_wrappers_outside_all",
+        "missing_retained_wrappers_outside_all",
+        "unexpected_retained_wrappers_outside_all",
+        "resolution_conflicts",
+    }
+)
+
+
+def _build_removed_surface_rows(
+    repo_root: Path,
+    collect_exact_module_import_usage: Any,
+) -> list[dict[str, object]]:
+    removed_surface_rows: list[dict[str, object]] = []
+    for row in REMOVED_COMPATIBILITY_SURFACES:
+        usage = collect_exact_module_import_usage(repo_root, row["module_name"])
+        src_importers = sorted(usage["src"])
+        test_importers = sorted(usage["tests"])
+        removed_surface_rows.append(
+            {
+                **row,
+                "path_exists": (repo_root / row["path"]).exists(),
+                "src_importers": src_importers,
+                "test_importers": test_importers,
+                "src_importer_count": len(src_importers),
+                "test_importer_count": len(test_importers),
+            }
+        )
+    return removed_surface_rows
+
+
+def _public_export_owner_usage_row(retained_row: dict[str, object]) -> dict[str, object]:
+    return {
+        **{
+            key: value
+            for key, value in retained_row.items()
+            if key in _PUBLIC_EXPORT_ROW_KEYS
+        },
+        "owner": retained_row["owner"],
+        "status": retained_row["status"],
+        "external_breaking_change_required": retained_row[
+            "external_breaking_change_required"
+        ],
+        "internal_callers_zero": retained_row["internal_callers_zero"],
+        "usage_classification": retained_row["usage_classification"],
+        "surface_classification": retained_row["surface_classification"],
+        "consumer_class": retained_row["consumer_class"],
+        "sunset_status": retained_row["sunset_status"],
+        "src_importer_count": retained_row["src_importer_count"],
+        "test_importer_count": retained_row["test_importer_count"],
+    }
+
+
+def _retained_entrypoint_base_row(
+    row: dict[str, Any], *, importer_map: dict[str, Any]
+) -> dict[str, object]:
+    repo_path = str(row["path"])
+    module_name = _module_name_from_repo_path(repo_path)
+    importers = importer_map.get(module_name, {"src": (), "tests": ()})
+    retained_row: dict[str, object] = {
+        "path": repo_path,
+        "module_name": module_name,
+        "status": row.get("status"),
+        "canonical_target": row.get("canonical_target"),
+        "owner": row.get("owner"),
+        "external_breaking_change_required": bool(
+            row.get("external_breaking_change_required")
+        ),
+        "internal_callers_zero": bool(row.get("internal_callers_zero")),
+        "usage_classification": _usage_classification(row),
+        "src_importers": list(importers.get("src", ())),
+        "test_importers": list(importers.get("tests", ())),
+        "src_importer_count": len(importers.get("src", ())),
+        "test_importer_count": len(importers.get("tests", ())),
+    }
+    retained_row["surface_classification"] = _surface_classification(
+        row,
+        src_importer_count=int(retained_row["src_importer_count"]),
+    )
+    retained_row["consumer_class"] = retained_row["usage_classification"]
+    retained_row["sunset_status"] = retained_row["surface_classification"]
+    return retained_row
+
+
+def _attach_public_export_contract(
+    repo_root: Path,
+    inventory_row: dict[str, Any],
+    retained_row: dict[str, object],
+) -> dict[str, object] | None:
+    export_contract = inventory_row.get("public_export_contract")
+    if not isinstance(export_contract, dict):
+        return None
+    export_row = _build_public_export_contract_row(
+        repo_root / str(inventory_row["path"]), inventory_row
+    )
+    retained_row.update(
+        {
+            key: value
+            for key, value in export_row.items()
+            if key not in {"path", "module_name", "canonical_target"}
+        }
+    )
+    return _public_export_owner_usage_row(retained_row)
+
+
+def _build_retained_rows(
+    repo_root: Path,
+    retained_entrypoints: list[dict[str, Any]],
+    importer_map: dict[str, Any],
+) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
+    retained_rows: list[dict[str, object]] = []
+    retained_public_export_rows: list[dict[str, object]] = []
+    for row in retained_entrypoints:
+        retained_row = _retained_entrypoint_base_row(row, importer_map=importer_map)
+        export_owner_row = _attach_public_export_contract(
+            repo_root, row, retained_row
+        )
+        if export_owner_row is not None:
+            retained_public_export_rows.append(export_owner_row)
+        retained_rows.append(retained_row)
+    return retained_rows, retained_public_export_rows
+
+
+def _build_first_safe_removal_wave_rows(
+    first_safe_removal_wave: dict[str, Any],
+    importer_map: dict[str, Any],
+) -> list[dict[str, object]]:
+    rows: list[dict[str, object]] = []
+    for row in first_safe_removal_wave["rows"]:
+        repo_path = str(row["path"])
+        module_name = _module_name_from_repo_path(repo_path)
+        importers = importer_map.get(module_name, {"src": (), "tests": ()})
+        rows.append(
+            {
+                "path": repo_path,
+                "module_name": module_name,
+                "owner": row.get("owner"),
+                "previous_status": row.get("previous_status"),
+                "surface_classification": row.get(
+                    "surface_classification",
+                    "confirmed-unused",
+                ),
+                "action": row.get("action"),
+                "rationale": row.get("rationale"),
+                "migration_prerequisites": list(row.get("migration_prerequisites", [])),
+                "src_importers": list(importers.get("src", ())),
+                "test_importers": list(importers.get("tests", ())),
+                "src_importer_count": len(importers.get("src", ())),
+                "test_importer_count": len(importers.get("tests", ())),
+            }
+        )
+    return rows
+
+
+def _build_twin_rows(
+    twin_pairs: list[dict[str, Any]],
+    importer_map: dict[str, Any],
+) -> list[dict[str, object]]:
+    twin_rows: list[dict[str, object]] = []
+    for pair in twin_pairs:
+        public_importers = importer_map.get(
+            pair.get("public_module", ""), {"src": (), "tests": ()}
+        )
+        private_importers = importer_map.get(
+            pair.get("private_module", ""), {"src": (), "tests": ()}
+        )
+        twin_rows.append(
+            {
+                **pair,
+                "public_src_importer_count": len(public_importers.get("src", ())),
+                "public_test_importer_count": len(public_importers.get("tests", ())),
+                "private_src_importer_count": len(private_importers.get("src", ())),
+                "private_test_importer_count": len(private_importers.get("tests", ())),
+                "public_src_importers": list(public_importers.get("src", ())),
+                "private_src_importers": list(private_importers.get("src", ())),
+            }
+        )
+    return twin_rows
+
+
+def _build_tracked_twin_rows(
+    tracked_twin_families: list[dict[str, Any]],
+    twin_rows: list[dict[str, object]],
+) -> list[dict[str, object]]:
+    twin_rows_by_public_module = {
+        str(row["public_module"]): row for row in twin_rows if isinstance(row, dict)
+    }
+    tracked_twin_rows: list[dict[str, object]] = []
+    for family in tracked_twin_families:
+        public_module = str(family.get("public_module", ""))
+        live_row = twin_rows_by_public_module.get(public_module)
+        if live_row is None:
+            continue
+        tracked_twin_rows.append(
+            {
+                **family,
+                "current_public_src_importer_count": live_row[
+                    "public_src_importer_count"
+                ],
+                "current_private_src_importer_count": live_row[
+                    "private_src_importer_count"
+                ],
+                "current_public_src_importers": live_row["public_src_importers"],
+                "current_private_src_importers": live_row["private_src_importers"],
+            }
+        )
+    return tracked_twin_rows
+
+
+def _build_config_symbol_rows(
+    config_root_facade_inventory: dict[str, Any],
+    config_root_usage: dict[str, Any],
+) -> list[dict[str, object]]:
+    configured_symbols = config_root_facade_inventory["symbols"]
+    assert isinstance(configured_symbols, list)
+    configured_symbols_by_name = {
+        str(row["symbol"]): row for row in configured_symbols if isinstance(row, dict)
+    }
+    config_src_usage = config_root_usage["src"]
+    config_symbol_paths: dict[str, list[str]] = {}
+    for importer_path, imported_names in config_src_usage.items():
+        for imported_name in imported_names:
+            config_symbol_paths.setdefault(imported_name, []).append(importer_path)
+
+    config_symbol_rows: list[dict[str, object]] = []
+    for symbol_name, row in configured_symbols_by_name.items():
+        current_paths = sorted(config_symbol_paths.get(symbol_name, []))
+        config_symbol_rows.append(
+            {
+                **row,
+                "current_src_importer_count": len(current_paths),
+                "current_src_importers": current_paths,
+            }
+        )
+    return config_symbol_rows
+
+
+def _census_summary(
+    *,
+    retained_rows: list[dict[str, object]],
+    removed_surface_rows: list[dict[str, object]],
+    twin_rows: list[dict[str, object]],
+    tracked_twin_rows: list[dict[str, object]],
+    config_symbol_rows: list[dict[str, object]],
+    config_src_usage: dict[str, Any],
+    control_plane_root_usage: dict[str, Any],
+    retained_public_export_rows: list[dict[str, object]],
+) -> dict[str, object]:
+    return {
+        "retained_entrypoint_count": len(retained_rows),
+        "retained_public_entrypoint_burden": sum(
+            int(row["src_importer_count"]) for row in retained_rows
+        ),
+        "removed_compatibility_surface_count": len(removed_surface_rows),
+        "removed_compatibility_surfaces_with_src_importers": sum(
+            1 for row in removed_surface_rows if row["src_importer_count"] > 0
+        ),
+        "removed_compatibility_surfaces_with_test_importers": sum(
+            1 for row in removed_surface_rows if row["test_importer_count"] > 0
+        ),
+        "removed_compatibility_surfaces_still_present": sum(
+            1 for row in removed_surface_rows if row["path_exists"]
+        ),
+        "twin_pair_count": len(twin_rows),
+        "twin_pairs_with_private_src_importers": sum(
+            1 for row in twin_rows if row["private_src_importer_count"] > 0
+        ),
+        "twin_pairs_without_public_src_importers": sum(
+            1 for row in twin_rows if row["public_src_importer_count"] == 0
+        ),
+        "tracked_twin_family_count": len(tracked_twin_rows),
+        "config_root_symbol_count": len(config_symbol_rows),
+        "config_root_src_importer_count": len(config_src_usage),
+        "control_plane_root_src_importer_count": len(control_plane_root_usage["src"]),
+        "retained_public_export_facade_count": len(retained_public_export_rows),
+        "retained_public_export_facades_with_duplicate_exports": sum(
+            1
+            for row in retained_public_export_rows
+            if row["duplicate_public_exports"] or row["duplicate_lazy_export_keys"]
+        ),
+        "retained_public_export_facades_with_resolution_conflicts": sum(
+            1 for row in retained_public_export_rows if row["resolution_conflicts"]
+        ),
+        "retained_public_export_facades_with_wrapper_contract_drift": sum(
+            1
+            for row in retained_public_export_rows
+            if row["missing_retained_wrappers_outside_all"]
+            or row["unexpected_retained_wrappers_outside_all"]
+        ),
+    }
+
+
 def build_compatibility_importer_census(
     repo_root: Path, *, snapshot_date: str | None = None
 ) -> dict[str, object]:
@@ -786,193 +1093,20 @@ def build_compatibility_importer_census(
         repo_root,
         str(control_plane_root_facade_inventory["target_module"]),
     )
-    removed_surface_rows: list[dict[str, object]] = []
-    for row in REMOVED_COMPATIBILITY_SURFACES:
-        usage = collect_exact_module_import_usage(repo_root, row["module_name"])
-        src_importers = sorted(usage["src"])
-        test_importers = sorted(usage["tests"])
-        removed_surface_rows.append(
-            {
-                **row,
-                "path_exists": (repo_root / row["path"]).exists(),
-                "src_importers": src_importers,
-                "test_importers": test_importers,
-                "src_importer_count": len(src_importers),
-                "test_importer_count": len(test_importers),
-            }
-        )
-
-    retained_rows: list[dict[str, object]] = []
-    retained_public_export_rows: list[dict[str, object]] = []
-    for row in retained_entrypoints:
-        repo_path = str(row["path"])
-        module_name = _module_name_from_repo_path(repo_path)
-        importers = importer_map.get(module_name, {"src": (), "tests": ()})
-        retained_row = {
-            "path": repo_path,
-            "module_name": module_name,
-            "status": row.get("status"),
-            "canonical_target": row.get("canonical_target"),
-            "owner": row.get("owner"),
-            "external_breaking_change_required": bool(
-                row.get("external_breaking_change_required")
-            ),
-            "internal_callers_zero": bool(row.get("internal_callers_zero")),
-            "usage_classification": _usage_classification(row),
-            "src_importers": list(importers.get("src", ())),
-            "test_importers": list(importers.get("tests", ())),
-            "src_importer_count": len(importers.get("src", ())),
-            "test_importer_count": len(importers.get("tests", ())),
-        }
-        retained_row["surface_classification"] = _surface_classification(
-            row,
-            src_importer_count=int(retained_row["src_importer_count"]),
-        )
-        retained_row["consumer_class"] = retained_row["usage_classification"]
-        retained_row["sunset_status"] = retained_row["surface_classification"]
-        export_contract = row.get("public_export_contract")
-        if isinstance(export_contract, dict):
-            export_row = _build_public_export_contract_row(repo_root / repo_path, row)
-            retained_row.update(
-                {
-                    key: value
-                    for key, value in export_row.items()
-                    if key not in {"path", "module_name", "canonical_target"}
-                }
-            )
-        retained_rows.append(retained_row)
-        if isinstance(export_contract, dict):
-            retained_public_export_rows.append(
-                {
-                    **{
-                        key: value
-                        for key, value in retained_row.items()
-                        if key
-                        in {
-                            "path",
-                            "module_name",
-                            "canonical_target",
-                            "max_public_exports",
-                            "public_exports",
-                            "public_export_count",
-                            "duplicate_public_exports",
-                            "lazy_export_table",
-                            "lazy_export_keys",
-                            "duplicate_lazy_export_keys",
-                            "orphan_lazy_export_keys",
-                            "dunder_getattr_exports",
-                            "orphan_dunder_getattr_exports",
-                            "retained_wrapper_contract",
-                            "retained_wrappers_outside_all",
-                            "missing_retained_wrappers_outside_all",
-                            "unexpected_retained_wrappers_outside_all",
-                            "resolution_conflicts",
-                        }
-                    },
-                    "owner": retained_row["owner"],
-                    "status": retained_row["status"],
-                    "external_breaking_change_required": retained_row[
-                        "external_breaking_change_required"
-                    ],
-                    "internal_callers_zero": retained_row["internal_callers_zero"],
-                    "usage_classification": retained_row["usage_classification"],
-                    "surface_classification": retained_row["surface_classification"],
-                    "consumer_class": retained_row["consumer_class"],
-                    "sunset_status": retained_row["sunset_status"],
-                    "src_importer_count": retained_row["src_importer_count"],
-                    "test_importer_count": retained_row["test_importer_count"],
-                }
-            )
-
-    first_safe_removal_wave_rows: list[dict[str, object]] = []
-    for row in first_safe_removal_wave["rows"]:
-        repo_path = str(row["path"])
-        module_name = _module_name_from_repo_path(repo_path)
-        importers = importer_map.get(module_name, {"src": (), "tests": ()})
-        first_safe_removal_wave_rows.append(
-            {
-                "path": repo_path,
-                "module_name": module_name,
-                "owner": row.get("owner"),
-                "previous_status": row.get("previous_status"),
-                "surface_classification": row.get(
-                    "surface_classification",
-                    "confirmed-unused",
-                ),
-                "action": row.get("action"),
-                "rationale": row.get("rationale"),
-                "migration_prerequisites": list(row.get("migration_prerequisites", [])),
-                "src_importers": list(importers.get("src", ())),
-                "test_importers": list(importers.get("tests", ())),
-                "src_importer_count": len(importers.get("src", ())),
-                "test_importer_count": len(importers.get("tests", ())),
-            }
-        )
-
-    twin_rows: list[dict[str, object]] = []
-    for pair in twin_pairs:
-        public_importers = importer_map.get(
-            pair.get("public_module", ""), {"src": (), "tests": ()}
-        )
-        private_importers = importer_map.get(
-            pair.get("private_module", ""), {"src": (), "tests": ()}
-        )
-        twin_rows.append(
-            {
-                **pair,
-                "public_src_importer_count": len(public_importers.get("src", ())),
-                "public_test_importer_count": len(public_importers.get("tests", ())),
-                "private_src_importer_count": len(private_importers.get("src", ())),
-                "private_test_importer_count": len(private_importers.get("tests", ())),
-                "public_src_importers": list(public_importers.get("src", ())),
-                "private_src_importers": list(private_importers.get("src", ())),
-            }
-        )
-
-    twin_rows_by_public_module = {
-        str(row["public_module"]): row for row in twin_rows if isinstance(row, dict)
-    }
-    tracked_twin_rows: list[dict[str, object]] = []
-    for family in tracked_twin_families:
-        public_module = str(family.get("public_module", ""))
-        live_row = twin_rows_by_public_module.get(public_module)
-        if live_row is None:
-            continue
-        tracked_twin_rows.append(
-            {
-                **family,
-                "current_public_src_importer_count": live_row[
-                    "public_src_importer_count"
-                ],
-                "current_private_src_importer_count": live_row[
-                    "private_src_importer_count"
-                ],
-                "current_public_src_importers": live_row["public_src_importers"],
-                "current_private_src_importers": live_row["private_src_importers"],
-            }
-        )
-
-    configured_symbols = config_root_facade_inventory["symbols"]
-    assert isinstance(configured_symbols, list)
-    configured_symbols_by_name = {
-        str(row["symbol"]): row for row in configured_symbols if isinstance(row, dict)
-    }
-    config_src_usage = config_root_usage["src"]
-    config_symbol_paths: dict[str, list[str]] = {}
-    for importer_path, imported_names in config_src_usage.items():
-        for imported_name in imported_names:
-            config_symbol_paths.setdefault(imported_name, []).append(importer_path)
-
-    config_symbol_rows: list[dict[str, object]] = []
-    for symbol_name, row in configured_symbols_by_name.items():
-        current_paths = sorted(config_symbol_paths.get(symbol_name, []))
-        config_symbol_rows.append(
-            {
-                **row,
-                "current_src_importer_count": len(current_paths),
-                "current_src_importers": current_paths,
-            }
-        )
+    removed_surface_rows = _build_removed_surface_rows(
+        repo_root, collect_exact_module_import_usage
+    )
+    retained_rows, retained_public_export_rows = _build_retained_rows(
+        repo_root, retained_entrypoints, importer_map
+    )
+    first_safe_removal_wave_rows = _build_first_safe_removal_wave_rows(
+        first_safe_removal_wave, importer_map
+    )
+    twin_rows = _build_twin_rows(twin_pairs, importer_map)
+    tracked_twin_rows = _build_tracked_twin_rows(tracked_twin_families, twin_rows)
+    config_symbol_rows = _build_config_symbol_rows(
+        config_root_facade_inventory, config_root_usage
+    )
 
     return {
         "snapshot_date": snapshot_date or date.today().isoformat(),
@@ -986,50 +1120,16 @@ def build_compatibility_importer_census(
             control_plane_root_facade_path,
             repo_root,
         ),
-        "summary": {
-            "retained_entrypoint_count": len(retained_rows),
-            "retained_public_entrypoint_burden": sum(
-                int(row["src_importer_count"]) for row in retained_rows
-            ),
-            "removed_compatibility_surface_count": len(removed_surface_rows),
-            "removed_compatibility_surfaces_with_src_importers": sum(
-                1 for row in removed_surface_rows if row["src_importer_count"] > 0
-            ),
-            "removed_compatibility_surfaces_with_test_importers": sum(
-                1 for row in removed_surface_rows if row["test_importer_count"] > 0
-            ),
-            "removed_compatibility_surfaces_still_present": sum(
-                1 for row in removed_surface_rows if row["path_exists"]
-            ),
-            "twin_pair_count": len(twin_rows),
-            "twin_pairs_with_private_src_importers": sum(
-                1 for row in twin_rows if row["private_src_importer_count"] > 0
-            ),
-            "twin_pairs_without_public_src_importers": sum(
-                1 for row in twin_rows if row["public_src_importer_count"] == 0
-            ),
-            "tracked_twin_family_count": len(tracked_twin_rows),
-            "config_root_symbol_count": len(config_symbol_rows),
-            "config_root_src_importer_count": len(config_src_usage),
-            "control_plane_root_src_importer_count": len(
-                control_plane_root_usage["src"]
-            ),
-            "retained_public_export_facade_count": len(retained_public_export_rows),
-            "retained_public_export_facades_with_duplicate_exports": sum(
-                1
-                for row in retained_public_export_rows
-                if row["duplicate_public_exports"] or row["duplicate_lazy_export_keys"]
-            ),
-            "retained_public_export_facades_with_resolution_conflicts": sum(
-                1 for row in retained_public_export_rows if row["resolution_conflicts"]
-            ),
-            "retained_public_export_facades_with_wrapper_contract_drift": sum(
-                1
-                for row in retained_public_export_rows
-                if row["missing_retained_wrappers_outside_all"]
-                or row["unexpected_retained_wrappers_outside_all"]
-            ),
-        },
+        "summary": _census_summary(
+            retained_rows=retained_rows,
+            removed_surface_rows=removed_surface_rows,
+            twin_rows=twin_rows,
+            tracked_twin_rows=tracked_twin_rows,
+            config_symbol_rows=config_symbol_rows,
+            config_src_usage=config_root_usage["src"],
+            control_plane_root_usage=control_plane_root_usage,
+            retained_public_export_rows=retained_public_export_rows,
+        ),
         "retained_entrypoints": retained_rows,
         "retained_entrypoint_owner_usage_map": retained_rows,
         "retained_public_export_facades": retained_public_export_rows,

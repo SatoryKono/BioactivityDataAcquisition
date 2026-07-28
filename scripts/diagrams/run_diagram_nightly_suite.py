@@ -504,9 +504,11 @@ def probe_render_backend(
     puppeteer: Path | None,
     tmpdir: Path,
 ) -> tuple[bool, str]:
-    probe_src = tmpdir / "probe.mmd"
-    probe_svg = tmpdir / "probe.svg"
-    probe_src.write_text("flowchart TB\nA --> B\n", encoding="utf-8")
+    probe_src = _ensure_path_within_root(tmpdir / "probe.mmd", tmpdir)
+    probe_svg = _ensure_path_within_root(tmpdir / "probe.svg", tmpdir)
+    probe_src.write_text(  # NOSONAR - path confined under tmpdir
+        "flowchart TB\nA --> B\n", encoding="utf-8"
+    )
     return render_with_mmdc(
         probe_src,
         probe_svg,
@@ -520,14 +522,16 @@ def probe_render_backend(
 def check_diag_t024(source_paths: list[Path], max_len: int, max_br: int) -> list[Issue]:
     issues: list[Issue] = []
     for rel in source_paths:
-        path = REPO_ROOT / rel
+        path = _ensure_repo_path(REPO_ROOT / rel)
         if not path.exists():
             _append_missing_source_issue(
                 issues, rule_id="DIAG-T024", path=rel, message=SOURCE_FILE_MISSING
             )
             continue
 
-        lines = path.read_text(encoding="utf-8").splitlines()
+        lines = path.read_text(  # NOSONAR - path confined by _ensure_repo_path
+            encoding="utf-8"
+        ).splitlines()
         long_labels = parse_long_label_count(lines, max_len=max_len, max_br=max_br)
         if long_labels > 0 and not has_interactivity_markers(lines):
             issues.append(
@@ -594,8 +598,12 @@ def check_diag_t026(render_paths: list[Path]) -> list[Issue]:
         ]
 
     try:
-        completed = subprocess.run(
-            ["git", "diff", "--name-only", "--", *pathspecs],
+        from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+        completed = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
+            ensure_safe_cli_argv(
+                ["git", "diff", "--name-only", "--", *pathspecs]
+            ),
             check=False,
             capture_output=True,
             text=True,
@@ -633,7 +641,9 @@ def check_diag_t026(render_paths: list[Path]) -> list[Issue]:
 def write_temp_source(tmpdir: Path, stem: str, lines: list[str]) -> Path:
     path = tmpdir / f"{stem}.mmd"
     safe_path = _ensure_path_within_root(path, tmpdir)
-    safe_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    safe_path.write_text(  # NOSONAR - path confined by _ensure_path_within_root
+        "\n".join(lines) + "\n", encoding="utf-8"
+    )
     return safe_path
 
 
@@ -649,12 +659,14 @@ def check_diag_t027(
     issues: list[Issue] = []
 
     for rel in source_paths:
-        path = REPO_ROOT / rel
+        path = _ensure_repo_path(REPO_ROOT / rel)
         if not path.exists():
             issues.append(Issue("DIAG-T027", "WARNING", str(rel), SOURCE_FILE_MISSING))
             continue
 
-        lines = path.read_text(encoding="utf-8").splitlines()
+        lines = path.read_text(  # NOSONAR - path confined by _ensure_repo_path
+            encoding="utf-8"
+        ).splitlines()
         if not is_flowchart(lines):
             continue
 
@@ -737,12 +749,14 @@ def check_diag_t028(
     issues: list[Issue] = []
 
     for rel in source_paths:
-        path = REPO_ROOT / rel
+        path = _ensure_repo_path(REPO_ROOT / rel)
         if not path.exists():
             issues.append(Issue("DIAG-T028", "WARNING", str(rel), SOURCE_FILE_MISSING))
             continue
 
-        lines = path.read_text(encoding="utf-8").splitlines()
+        lines = path.read_text(  # NOSONAR - path confined by _ensure_repo_path
+            encoding="utf-8"
+        ).splitlines()
         if not is_flowchart(lines):
             continue
 
@@ -808,7 +822,9 @@ def check_diag_t028(
 
 def build_alt_css() -> str:
     safe_original = _ensure_repo_path(DEFAULT_CSS)
-    content = safe_original.read_text(encoding="utf-8")
+    content = safe_original.read_text(  # NOSONAR - path confined by _ensure_repo_path
+        encoding="utf-8"
+    )
     content = content.replace("#f5f3ff", "#ede9fe")
     content = content.replace("#fff1f2", "#ffe4e6")
     content = content.replace("#111827", "#0f172a")
@@ -1114,7 +1130,7 @@ def _build_report_payload(
 def _write_suite_output(path: Path, content: str) -> None:
     safe_path = _ensure_repo_path(path)
     safe_path.parent.mkdir(parents=True, exist_ok=True)
-    safe_path.write_text(content, encoding="utf-8")
+    safe_path.write_text(content, encoding="utf-8")  # NOSONAR - path confined
 
 
 def _write_optional_outputs(

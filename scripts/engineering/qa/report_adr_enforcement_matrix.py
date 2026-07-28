@@ -156,21 +156,25 @@ def _should_scan_path(rel_path: str) -> bool:
 def _git_grep_reference_lines(repo_root: Path) -> list[tuple[str, str]] | None:
     """Return ADR reference lines from git-grep, or None when git-grep is unavailable."""
     try:
-        result = subprocess.run(
-            [
-                "git",
-                "grep",
-                "--untracked",
-                "-I",
-                "-E",
-                "-i",
-                "-n",
-                "-e",
-                r"ADR-[0-9]{3}",
-                "--",
-                *_SCAN_PREFIXES,
-                ":(exclude)tests/fixtures/",
-            ],
+        from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+        result = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
+            ensure_safe_cli_argv(
+                [
+                    "git",
+                    "grep",
+                    "--untracked",
+                    "-I",
+                    "-E",
+                    "-i",
+                    "-n",
+                    "-e",
+                    r"ADR-[0-9]{3}",
+                    "--",
+                    *_SCAN_PREFIXES,
+                    ":(exclude)tests/fixtures/",
+                ]
+            ),
             cwd=repo_root,
             check=False,
             capture_output=True,
@@ -195,23 +199,27 @@ def _git_grep_reference_lines(repo_root: Path) -> list[tuple[str, str]] | None:
 def _ripgrep_reference_lines(repo_root: Path) -> list[tuple[str, str]] | None:
     """Return ADR reference lines from ripgrep, or None when it is unavailable."""
     try:
-        result = subprocess.run(
-            [
-                "rg",
-                "--hidden",
-                "--line-number",
-                "--ignore-case",
-                "--with-filename",
-                "--no-heading",
-                "--color",
-                "never",
-                "--glob",
-                "!tests/fixtures/**",
-                "-e",
-                r"ADR-[0-9]{3}",
-                "--",
-                *_SCAN_PREFIXES,
-            ],
+        from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+        result = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
+            ensure_safe_cli_argv(
+                [
+                    "rg",
+                    "--hidden",
+                    "--line-number",
+                    "--ignore-case",
+                    "--with-filename",
+                    "--no-heading",
+                    "--color",
+                    "never",
+                    "--glob",
+                    "!tests/fixtures/**",
+                    "-e",
+                    r"ADR-[0-9]{3}",
+                    "--",
+                    *_SCAN_PREFIXES,
+                ]
+            ),
             cwd=repo_root,
             check=False,
             capture_output=True,
@@ -498,9 +506,17 @@ def _check_artifacts(
     errors: list[str] = []
     expected_json = json.dumps(payload, indent=2, sort_keys=True) + "\n"
     expected_md = render_markdown(payload)
-    if not json_out.exists() or json_out.read_text(encoding="utf-8") != expected_json:
+    if (
+        not json_out.exists()
+        or json_out.read_text(encoding="utf-8")  # NOSONAR - path confined
+        != expected_json
+    ):
         errors.append(f"ADR enforcement JSON artifact is stale: {json_out}")
-    if not md_out.exists() or md_out.read_text(encoding="utf-8") != expected_md:
+    if (
+        not md_out.exists()
+        or md_out.read_text(encoding="utf-8")  # NOSONAR - path confined
+        != expected_md
+    ):
         errors.append(f"ADR enforcement Markdown artifact is stale: {md_out}")
     summary = payload["summary"]
     assert isinstance(summary, dict)

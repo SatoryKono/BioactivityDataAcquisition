@@ -204,7 +204,9 @@ def apply_to_dashboard(path: Path, *, current_uid: str) -> None:
     from scripts.engineering.common.repo_paths import ensure_path_within_root
 
     safe_path = ensure_path_within_root(path, DASH_DIR)
-    payload = json.loads(safe_path.read_text(encoding="utf-8"))
+    payload = json.loads(
+        safe_path.read_text(encoding="utf-8")  # NOSONAR - confined under DASH_DIR
+    )
     panels = payload.get("panels") or []
     nav = next((p for p in panels if p.get("id") == 1000), None)
     if nav is None:

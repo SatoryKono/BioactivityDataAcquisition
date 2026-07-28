@@ -71,7 +71,9 @@ class BacklogValidation:
 
 
 def _resolve_path(path: Path) -> Path:
-    return path if path.is_absolute() else REPO_ROOT / path
+    from scripts.engineering.common.repo_paths import resolve_cli_path
+
+    return resolve_cli_path(path, root=REPO_ROOT)
 
 
 def _display_path(path: Path) -> str:
@@ -101,11 +103,16 @@ def collect_xwalk_missing_findings(
 ) -> tuple[XwalkMissingFinding, ...]:
     """Return all tracked MISSING_* markers from xwalk CSV files."""
 
+    from scripts.engineering.common.repo_paths import ensure_path_within_root
+
     root = _resolve_path(xwalk_root)
     findings: list[XwalkMissingFinding] = []
     for path in sorted(root.rglob("*-xwalk.csv")):
         provider, entity = _provider_entity(path)
-        with path.open(newline="", encoding="utf-8") as handle:
+        safe_path = ensure_path_within_root(path, root)
+        with safe_path.open(  # NOSONAR - path confined under resolved root
+            newline="", encoding="utf-8"
+        ) as handle:
             for row in csv.DictReader(handle):
                 row_values = " ".join(str(value or "") for value in row.values())
                 markers = sorted(set(MARKER_RE.findall(row_values)))
@@ -387,7 +394,7 @@ def _write_text(path: Path, content: str, *, root: Path | None = None) -> None:
 
     path = resolve_output_path(path, root=root or REPO_ROOT)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content, encoding="utf-8")
+    path.write_text(content, encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
 
 
 def build_arg_parser() -> argparse.ArgumentParser:

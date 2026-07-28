@@ -102,7 +102,10 @@ def main() -> int:
     env["BIOETL_ENABLE_TRACING_DATASOURCES"] = grafana.get(
         "BIOETL_ENABLE_TRACING_DATASOURCES", "auto"
     )
-    env["BIOETL_QUARANTINE_EXPLORER_URL"] = "http://quarantine-explorer:8081"
+    # Docker-internal service name (no TLS inside compose network).
+    env["BIOETL_QUARANTINE_EXPLORER_URL"] = (
+        "http://quarantine-explorer:8081"  # NOSONAR - docker-internal loopback URL
+    )
     env["LOG_LEVEL"] = main.get("LOG_LEVEL", "INFO")
     env["NEO4J_USERNAME"] = main.get("NEO4J_USERNAME", "neo4j")
     env["NEO4J_PASSWORD"] = main["NEO4J_PASSWORD"]

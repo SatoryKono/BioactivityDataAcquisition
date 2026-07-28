@@ -365,8 +365,14 @@ def _vcr_provider_counts(vcr_root: Path) -> dict[str, int]:
 
 
 def _ruff_format_violations() -> int:
-    cmd = [*_resolve_ruff_cmd(), "format", "--check", "src", "tests"]
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+    cmd = ensure_safe_cli_argv(
+        [str(token) for token in [*_resolve_ruff_cmd(), "format", "--check", "src", "tests"]]
+    )
+    result = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
+        cmd, capture_output=True, text=True
+    )
     if result.returncode == 0:
         return 0
     return sum(
