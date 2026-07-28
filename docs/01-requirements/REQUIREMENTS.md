@@ -2,7 +2,7 @@
 
 Version: 1.12
 Status: active
-Aligned with: RULES.md v6.1.4 ([source](../00-project/RULES.md))
+Aligned with: RULES.md v6.1.4 ([source](../00-project/RULES.md); ARCH-CR-07 SSOT check 2026-07-28)
 Last verified: 2026-07-27
 
 ## Purpose and authority

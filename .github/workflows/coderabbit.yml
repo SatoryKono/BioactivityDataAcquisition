@@ -60,7 +60,9 @@ jobs:
           set -euo pipefail
           if [ -z "${CODERABBIT_API_KEY:-}" ]; then
             echo "::warning::CODERABBIT_API_KEY is not set. Skipping CLI review."
-            echo "Add an Agentic API key secret, or rely on the CodeRabbit GitHub App for PR reviews."
+            echo "Add repository secret CODERABBIT_API_KEY (CodeRabbit Agentic API key)."
+            echo "Owner/admin step for ARCH-CR-08 / #6870; do not commit secrets."
+            echo "Until set, rely on the CodeRabbit GitHub App for PR reviews only."
             exit 0
           fi
 

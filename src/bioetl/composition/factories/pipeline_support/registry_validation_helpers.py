@@ -36,10 +36,13 @@ def _load_yaml_mapping(path: Path) -> dict[str, object]:
 
 
 def _is_legacy_composite_entity_stub(config_path: Path) -> bool:
-    """Return True for historical composite stubs under configs/entities."""
-    payload = _load_yaml_mapping(config_path)
-    provider = str(payload.get("provider") or config_path.parent.name)
-    return provider.strip().lower() == "composite"
+    """Return True for historical composite stubs under configs/entities.
+
+    Identification is path-based only (``configs/entities/composite/**``).
+    The YAML ``provider`` field must not bypass registry validation
+    (ARCH-CR-02 / #6864).
+    """
+    return config_path.parent.name.strip().lower() == "composite"
 
 
 def _pipeline_name(provider: str, entity: str) -> str:

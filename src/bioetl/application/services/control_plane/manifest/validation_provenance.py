@@ -61,7 +61,7 @@ def _validate_executable_code_provenance(
         bool(request.launch_context.get("exact_replay"))
         or required_profile in STRICT_PERSISTENCE_PROFILES
     )
-    if not code_provenance.git_commit:
+    if not str(code_provenance.git_commit or "").strip():
         raise RuntimeError(
             "Run manifest requires git_commit code provenance for every "
             "executable run manifest"
@@ -76,7 +76,7 @@ def _validate_executable_code_provenance(
             "replay, replay_ready, and forensic_grade contexts"
             f" ({profile_context})"
         )
-    if not code_provenance.dependency_lock_hash:
+    if not str(code_provenance.dependency_lock_hash or "").strip():
         raise RuntimeError(
             "Run manifest requires dependency_lock_hash code provenance for "
             "every executable run manifest"

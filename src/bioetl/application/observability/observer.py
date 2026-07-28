@@ -263,7 +263,12 @@ class PipelineObserver(
         clock: ClockPort,
         tracer: TracingPort | None = None,
     ) -> None:
-        """Initialize observer from an identity bag and explicit collaborators."""
+        """Initialize observer from an identity bag and explicit collaborators.
+
+        Composition roots must pass :class:`PipelineObserverIdentity`. Prefer
+        :meth:`from_parts` for legacy call sites that still assemble identity
+        fields individually (ARCH-CR-06 / #6868).
+        """
         self.pipeline_name = identity.pipeline_name
         self.run_id = str(identity.run_id)
         self.run_type = identity.run_type.value
@@ -284,6 +289,48 @@ class PipelineObserver(
         self.span: Span | None = None
         self._completed_stage_count = 0
         self._terminal_records_processed = 0
+
+    @classmethod
+    def from_parts(
+        cls,
+        *,
+        pipeline_name: str,
+        run_id: RunID,
+        run_type: RunType,
+        metrics: MetricsPort,
+        logger: LoggerPort,
+        clock: ClockPort,
+        tracer: TracingPort | None = None,
+        manifest_id: str | None = None,
+        entity: str | None = None,
+        effective_config_hash: str | None = None,
+        contract_ref: str | None = None,
+        contract_version: str | None = None,
+        composite_run_id: str | None = None,
+    ) -> PipelineObserver:
+        """Compatibility factory for callers that assemble identity fields.
+
+        Prefer constructing :class:`PipelineObserverIdentity` at composition
+        roots; this adapter preserves a bag-compat path without expanding the
+        primary constructor arity (ARCH-CR-06 / #6868).
+        """
+        return cls(
+            identity=PipelineObserverIdentity(
+                pipeline_name=pipeline_name,
+                run_id=run_id,
+                run_type=run_type,
+                manifest_id=manifest_id,
+                entity=entity,
+                effective_config_hash=effective_config_hash,
+                contract_ref=contract_ref,
+                contract_version=contract_version,
+                composite_run_id=composite_run_id,
+            ),
+            metrics=metrics,
+            logger=logger,
+            clock=clock,
+            tracer=tracer,
+        )
 
     def capture_execution_metrics(
         self,

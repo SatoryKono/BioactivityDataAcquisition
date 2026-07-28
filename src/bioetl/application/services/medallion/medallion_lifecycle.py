@@ -48,13 +48,13 @@ class MedallionStorageProtocol(StorageMaintenancePort, Protocol):
         ...
 
 
+# Programming errors (ValueError/TypeError) must propagate, not look like storage
+# failures (ARCH-CR-04 / #6866).
 _LIFECYCLE_OPERATION_ERRORS = (
     StorageError,
     BioETLError,
     OSError,
     RuntimeError,
-    ValueError,
-    TypeError,
 )
 
 
@@ -223,7 +223,7 @@ class _MedallionRunLifecycleMixin(_MedallionClearMixin):
             metrics: Optional metrics port for observability.
 
         Returns:
-            VacuumResult (counts are 0 as implementation details are hidden).
+            VacuumResult with actual Silver/Gold vacuum removal counts when run.
         """
         if not self._is_optimization_enabled(runtime):
             return VacuumResult(
@@ -243,7 +243,7 @@ class _MedallionRunLifecycleMixin(_MedallionClearMixin):
         )
 
         try:
-            await self._optimize_tables(
+            silver_removed, gold_removed = await self._optimize_tables(
                 silver_table=silver_table,
                 gold_table=gold_table,
                 retention_hours=retention_hours,
@@ -255,8 +255,8 @@ class _MedallionRunLifecycleMixin(_MedallionClearMixin):
                 status="success",
             )
             return VacuumResult(
-                silver_files_removed=0,
-                gold_files_removed=0,
+                silver_files_removed=silver_removed,
+                gold_files_removed=gold_removed,
                 skipped=False,
             )
 
@@ -271,11 +271,8 @@ class _MedallionRunLifecycleMixin(_MedallionClearMixin):
                 pipeline_name=config.pipeline_name,
                 status="failed",
             )
-            return VacuumResult(
-                silver_files_removed=0,
-                gold_files_removed=0,
-                skipped=False,
-            )
+            # Do not return a success-shaped vacuum result after failure (ARCH-CR-04).
+            raise
 
     @staticmethod
     def _is_optimization_enabled(runtime: RuntimeConfig) -> bool:
@@ -293,23 +290,28 @@ class _MedallionRunLifecycleMixin(_MedallionClearMixin):
         gold_table: str,
         retention_hours: int,
         dry_run: bool,
-    ) -> None:
+    ) -> tuple[int, int]:
         """Vacuum Silver and Gold tables while avoiding duplicate targets.
 
         Postrun lifecycle maintenance must not prune Bronze files from the
         active run. Bronze retention remains an explicit maintenance action.
+
+        Returns:
+            Tuple of (silver_files_removed, gold_files_removed).
         """
-        await self.storage.vacuum(
+        silver_removed = await self.storage.vacuum(
             table_name=silver_table,
             retention_hours=retention_hours,
             dry_run=dry_run,
         )
-        if gold_table != silver_table:
-            await self.storage.vacuum(
-                table_name=gold_table,
-                retention_hours=retention_hours,
-                dry_run=dry_run,
-            )
+        if gold_table == silver_table:
+            return int(silver_removed), 0
+        gold_removed = await self.storage.vacuum(
+            table_name=gold_table,
+            retention_hours=retention_hours,
+            dry_run=dry_run,
+        )
+        return int(silver_removed), int(gold_removed)
 
     @staticmethod
     def _emit_optimization_metric(
