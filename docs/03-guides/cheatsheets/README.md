@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-24'
+  Last verified: '2026-07-28'
 
 ______________________________________________________________________
 
@@ -21,9 +21,12 @@ ______________________________________________________________________
 
 ## Available Cheatsheets
 
-| Cheatsheet | Description |
-| ---------- | ----------- |
-| [CLI Commands](cli-commands.md) | Краткий справочник по всем командам BioETL CLI |
+| Cheatsheet | Description | Issue |
+| ---------- | ----------- | ----- |
+| [CLI Commands](cli-commands.md) | BioETL CLI, Make, scripts, memory workflow | #6535 |
+| [Pipeline Configuration](pipeline-config.md) | Config hierarchy, ADR checklist, validation | #6536 |
+| [Data Quality Rules](data-quality-rules.md) | DQ hierarchy, thresholds, investigation | #6537 |
+| [ADR Decision Matrix](adr-matrix.md) | ADR index, impact, interdependencies | #6538 |
 
 ## Usage
 

@@ -7,13 +7,15 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-07-28'
 
 ______________________________________________________________________
 
 # BioETL Architecture & Class Diagrams
 
 *Canonical diagram location — all `.mmd` sources live here.*
+
+> **Issue #6543 compliance map:** [adr-040-compliance-map.md](adr-040-compliance-map.md) — required architecture themes → existing ADR-040 sources.
 
 > **Governance:** [ADR-040 — Diagram Governance and Layout Policy](../decisions/ADR-040-diagram-governance.md)
 > Colour scheme, linkStyle differentiation, view decomposition rules, CI validation — all defined in ADR-040.

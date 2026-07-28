@@ -50,6 +50,11 @@ for published contracts, CLI surfaces, and specs.
 | Dashboard usage and extension      | [dashboards/README.md](dashboards/README.md)           |
 | Configure development tools        | [development/pycharm-setup.md](development/pycharm-setup.md) |
 | CLI commands quick reference       | [cheatsheets/cli-commands.md](cheatsheets/cli-commands.md) |
+| Pipeline config cheatsheet         | [cheatsheets/pipeline-config.md](cheatsheets/pipeline-config.md) |
+| Data quality rules cheatsheet      | [cheatsheets/data-quality-rules.md](cheatsheets/data-quality-rules.md) |
+| ADR decision matrix                | [cheatsheets/adr-matrix.md](cheatsheets/adr-matrix.md) |
+| ADR-040 diagram compliance map     | [../02-architecture/diagrams/adr-040-compliance-map.md](../02-architecture/diagrams/adr-040-compliance-map.md) |
+| Common error patterns              | [../05-operations/troubleshooting/common-errors.md](../05-operations/troubleshooting/common-errors.md) |
 
 ## Role Boundaries
 

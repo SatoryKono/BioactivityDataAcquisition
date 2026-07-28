@@ -7,13 +7,15 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-04'
+  Last verified: '2026-07-28'
 
 ______________________________________________________________________
 
 # Руководство по устранению неполадок
 
 В этом руководстве описаны решения частых проблем при разработке и запуске пайплайнов.
+
+> **Расширенный каталог паттернов:** [Common Error Patterns](../05-operations/troubleshooting/common-errors.md) (#6547) — import/type/DQ/HTTP/pipeline/performance templates.
 
 ## Локальный режим и файловое хранилище
 
