@@ -98,7 +98,9 @@ jobs:
             echo "No wheels found under dist/" >&2
             exit 1
           fi
-          python -m pip install --only-binary=:all: --no-deps --no-index --find-links=dist "${wheels[@]}"
+          # Install the single built wheel by absolute path (no index / no unpinned range).
+          wheel_path="$(pwd)/${wheels[0]}"
+          python -m pip install --only-binary=:all: --no-deps --no-index "${wheel_path}"
 
       - name: Verify installation
         run: |
