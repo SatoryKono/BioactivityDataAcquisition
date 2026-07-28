@@ -82,7 +82,7 @@
     },
     "runtime_builder_max_internal_fan_in": {
       "opening": 5,
-      "current": 4,
+      "current": 3,
       "max": 4,
       "source": "reports/quality/hotspot-family-baseline.json"
     },
