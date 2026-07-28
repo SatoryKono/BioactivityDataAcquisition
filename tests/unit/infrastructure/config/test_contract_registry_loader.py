@@ -245,45 +245,46 @@ class TestLoadYamlWithTimeout:
             with pytest.raises(ValueError, match="YAML root must be a mapping"):
                 _ = _load_yaml_with_timeout(test_file)
 
-    def test_raises_value_error_when_network_thread_leaves_empty_result(
+    def test_raises_timeout_when_executor_exceeds_deadline(
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        """Defensive branch: completed network thread with no payload and no error."""
+        """TimeoutError surfaces when network load exceeds the deadline."""
+        import concurrent.futures
+
         monkeypatch.setattr(
             "bioetl.infrastructure.config.contract_registry_loader._is_likely_network_drive",
             lambda _path: True,
         )
 
         with TemporaryDirectory() as temp_dir:
-            test_file = Path(temp_dir) / "empty.yaml"
+            test_file = Path(temp_dir) / "slow.yaml"
             _ = test_file.write_text("key: value", encoding="utf-8")
 
-            class ImmediateThread:
-                """Stub Thread that finishes immediately without running target."""
-
-                def __init__(
-                    self,
-                    target: object | None = None,
-                    daemon: bool | None = None,
-                ) -> None:
-                    # Intentionally ignore target so result stays None.
-                    del target, daemon
-
-                def start(self) -> None:
-                    return
-
-                def join(self, timeout: float | None = None) -> None:
+            class ImmediateFuture:
+                def result(self, timeout: float | None = None) -> object:
                     del timeout
+                    raise concurrent.futures.TimeoutError()
 
-                def is_alive(self) -> bool:
-                    return False
+            class ImmediateExecutor:
+                def __init__(self, *args: object, **kwargs: object) -> None:
+                    del args, kwargs
+
+                def __enter__(self) -> ImmediateExecutor:
+                    return self
+
+                def __exit__(self, *args: object) -> None:
+                    del args
+
+                def submit(self, fn: object, *args: object, **kwargs: object) -> ImmediateFuture:
+                    del fn, args, kwargs
+                    return ImmediateFuture()
 
             monkeypatch.setattr(
-                "bioetl.infrastructure.config.contract_registry_loader.threading.Thread",
-                ImmediateThread,
+                "bioetl.infrastructure.config.contract_registry_loader.concurrent.futures.ThreadPoolExecutor",
+                ImmediateExecutor,
             )
 
-            with pytest.raises(ValueError, match="YAML load returned None"):
+            with pytest.raises(TimeoutError, match="YAML load did not complete"):
                 _ = _load_yaml_with_timeout(test_file)
 
     def test_reraises_thread_exception_for_network_drive_reads(self, monkeypatch):

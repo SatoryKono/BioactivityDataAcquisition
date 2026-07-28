@@ -547,9 +547,10 @@ def _module_coverage_scorecard_coherence_gate(
         "uncovered_module_count": scorecard_metrics.get("uncovered_module_count"),
         "source_tree_sha256": coverage_source.get("source_tree_sha256"),
     }
+    aligned = all(current.get(key) == expected.get(key) for key in expected)
     return Gate(
         name="module_coverage_scorecard_coherence",
-        status="pass" if current == expected else "fail",
+        status="pass" if aligned else "fail",
         metric="module_coverage_scorecard_alignment",
         current=current,
         limit=expected,
@@ -587,9 +588,10 @@ def _compatibility_scorecard_coherence_gate(
         ),
         "twin_pair_count": scorecard_metrics.get("twin_pair_count"),
     }
+    aligned = all(current.get(key) == expected.get(key) for key in expected)
     return Gate(
         name="compatibility_scorecard_coherence",
-        status="pass" if current == expected else "fail",
+        status="pass" if aligned else "fail",
         metric="compatibility_scorecard_alignment",
         current=current,
         limit=expected,

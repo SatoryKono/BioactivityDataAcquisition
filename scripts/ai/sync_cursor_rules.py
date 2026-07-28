@@ -27,17 +27,22 @@ def _atomic_copy(source: Path, target: Path, *, allowed_root: Path) -> None:
     safe_root = allowed_root.expanduser().resolve(strict=False)
     confined_source = ensure_path_within_root(source, safe_root)
     confined_target = ensure_path_within_root(target, safe_root)
-    safe_source = safe_root.joinpath(*confined_source.relative_to(safe_root).parts)
-    safe_target = safe_root.joinpath(*confined_target.relative_to(safe_root).parts)
+    relative_source = confined_source.relative_to(safe_root)
+    relative_target = confined_target.relative_to(safe_root)
+    safe_source = ensure_path_within_root(
+        safe_root.joinpath(*relative_source.parts), safe_root
+    )
+    safe_target = ensure_path_within_root(
+        safe_root.joinpath(*relative_target.parts), safe_root
+    )
     safe_target.parent.mkdir(parents=True, exist_ok=True)
     content = safe_source.read_text(encoding="utf-8")
-    confined_tmp = ensure_path_within_root(
-        safe_target.with_suffix(safe_target.suffix + ".tmp"),
-        safe_root,
+    tmp = ensure_path_within_root(
+        safe_target.parent / f"{safe_target.name}.tmp", safe_root
     )
-    tmp = safe_root.joinpath(*confined_tmp.relative_to(safe_root).parts)
-    tmp.write_text(content, encoding="utf-8")
-    os.replace(tmp, safe_target)
+    with tmp.open("w", encoding="utf-8", newline="\n") as handle:
+        handle.write(content)
+    os.replace(tmp, safe_target)  # NOSONAR - tmp/safe_target confined by ensure_path_within_root
 
 
 def sync_cursor_rules(

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-import threading
+import concurrent.futures
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any, cast
@@ -59,36 +59,21 @@ def _load_yaml_with_timeout(
             raise ValueError(f"YAML root must be a mapping: {path}")
         return cast("JsonDict", dict(payload))
 
-    # Timeout-protected read for network drives
-    result: JsonDict | None = None
-    exception: Exception | None = None
+    # Timeout-protected read for network drives via Future.result(timeout=).
+    def _load_payload() -> JsonDict:
+        payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+        if not isinstance(payload, Mapping):
+            raise ValueError(f"YAML root must be a mapping: {path}")
+        return cast("JsonDict", dict(payload))
 
-    def _target() -> None:
-        nonlocal result, exception
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+        future = executor.submit(_load_payload)
         try:
-            payload = yaml.safe_load(path.read_text(encoding="utf-8"))
-            if not isinstance(payload, Mapping):
-                raise ValueError(f"YAML root must be a mapping: {path}")
-            result = cast("JsonDict", dict(payload))
-        except (OSError, yaml.YAMLError, ValueError) as e:
-            exception = e
-
-    thread = threading.Thread(target=_target, daemon=True)
-    thread.start()
-    thread.join(timeout=timeout)
-
-    if thread.is_alive():
-        raise TimeoutError(
-            f"YAML load did not complete within {timeout} seconds: {path}"
-        )
-
-    if exception is not None:
-        raise exception
-
-    if result is None:
-        raise ValueError(f"YAML load returned None: {path}")
-
-    return result
+            return future.result(timeout=timeout)
+        except concurrent.futures.TimeoutError as exc:
+            raise TimeoutError(
+                f"YAML load did not complete within {timeout} seconds: {path}"
+            ) from exc
 
 
 __all__ = [

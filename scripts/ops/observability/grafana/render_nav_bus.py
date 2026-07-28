@@ -201,11 +201,14 @@ def render_links(*, current_uid: str) -> list[dict[str, object]]:
 
 
 def apply_to_dashboard(path: Path, *, current_uid: str) -> None:
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    from scripts.engineering.common.repo_paths import ensure_path_within_root
+
+    safe_path = ensure_path_within_root(path, DASH_DIR)
+    payload = json.loads(safe_path.read_text(encoding="utf-8"))
     panels = payload.get("panels") or []
     nav = next((p for p in panels if p.get("id") == 1000), None)
     if nav is None:
-        raise SystemExit(f"{path.name}: missing panel id=1000")
+        raise SystemExit(f"{safe_path.name}: missing panel id=1000")
 
     nav["title"] = "Navigation"
     nav["type"] = "text"
@@ -220,17 +223,21 @@ def apply_to_dashboard(path: Path, *, current_uid: str) -> None:
     # Drop stale transparent fields that confuse some exporters.
     nav.pop("transparent", None)
 
-    path.write_text(
-        json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+    serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
+    write_path = ensure_path_within_root(safe_path, DASH_DIR)
+    write_path.write_text(  # NOSONAR - write_path confined under DASH_DIR
+        serialized,
         encoding="utf-8",
     )
 
 
 def main() -> None:
+    from scripts.engineering.common.repo_paths import ensure_path_within_root
+
     for item in BUS:
         uid = item["uid"]
         filename = FILE_BY_UID[uid]
-        path = DASH_DIR / filename
+        path = ensure_path_within_root(DASH_DIR / filename, DASH_DIR)
         if not path.exists():
             raise SystemExit(f"missing dashboard file: {path}")
         apply_to_dashboard(path, current_uid=uid)
