@@ -234,6 +234,59 @@ function Stop-BoundedProcessTree {
     }
 }
 
+function Invoke-BoundedProcess {
+    param(
+        [Parameter(Mandatory)] [string]$Name,
+        [Parameter(Mandatory)] [string]$ResolvedName,
+        [string[]]$Arguments = @(),
+        [Parameter(Mandatory)] [int]$WaitMilliseconds
+    )
+
+    $Code = 127
+    $TimedOut = $false
+    $Output = ''
+    $Process = [System.Diagnostics.Process]::new()
+    try {
+        $Process.StartInfo = New-BoundedProcessStartInfo -ResolvedName $ResolvedName -Arguments $Arguments
+        if (-not $Process.Start()) { throw "Unable to start $Name" }
+        $StdOutTask = $Process.StandardOutput.ReadToEndAsync()
+        $StdErrTask = $Process.StandardError.ReadToEndAsync()
+        if (-not $Process.WaitForExit($WaitMilliseconds)) {
+            $TimedOut = $true
+            $Code = 124
+            $ProcessId = $Process.Id
+            try {
+                $Process.Kill($true)
+            } catch {
+                Write-Verbose "Process.Kill failed for pid ${ProcessId}: $($_.Exception.Message)"
+            }
+            # Ensure cmd.exe child trees (python sleep fakes) do not outlive
+            # the bounded command deadline on Windows.
+            Stop-BoundedProcessTree -ProcessId $ProcessId
+            [void]$Process.WaitForExit(2000)
+        } else {
+            $Code = $Process.ExitCode
+        }
+        if ($Process.HasExited) {
+            $StdOut = $StdOutTask.GetAwaiter().GetResult()
+            $StdErr = $StdErrTask.GetAwaiter().GetResult()
+            $Output = @($StdOut, $StdErr) -join [Environment]::NewLine
+        } else {
+            $Output = 'Command exceeded its deadline and output capture did not complete.'
+        }
+    } catch {
+        $Output = $_.Exception.Message
+        $Code = 127
+    } finally {
+        $Process.Dispose()
+    }
+    return [ordered]@{
+        returncode = $Code
+        timed_out = $TimedOut
+        output = $Output
+    }
+}
+
 function Invoke-BoundedCommand {
     param(
         [Parameter(Mandatory)] [string]$Name,
@@ -246,64 +299,33 @@ function Invoke-BoundedCommand {
 
     $CommandStarted = Get-Date
     $RemainingMilliseconds = Get-RemainingMilliseconds
-    if ($AllowOverrun) {
-        $WaitMilliseconds = $CommandTimeoutSeconds * 1000
+    $WaitMilliseconds = if ($AllowOverrun) {
+        $CommandTimeoutSeconds * 1000
     } else {
-        $WaitMilliseconds = [math]::Min($CommandTimeoutSeconds * 1000, $RemainingMilliseconds)
+        [math]::Min($CommandTimeoutSeconds * 1000, $RemainingMilliseconds)
     }
-    $Code = 127
-    $TimedOut = $false
-    $Output = ''
     $ResolvedName = Resolve-BoundedCommandPath -Name $Name
 
     if ($WaitMilliseconds -le 0) {
-        $Code = 124
-        $TimedOut = $true
-        $Output = 'Global recovery deadline was exhausted before command start.'
-    } else {
-        $Process = [System.Diagnostics.Process]::new()
-        try {
-            $Process.StartInfo = New-BoundedProcessStartInfo -ResolvedName $ResolvedName -Arguments $Arguments
-            if (-not $Process.Start()) { throw "Unable to start $Name" }
-            $StdOutTask = $Process.StandardOutput.ReadToEndAsync()
-            $StdErrTask = $Process.StandardError.ReadToEndAsync()
-            if (-not $Process.WaitForExit($WaitMilliseconds)) {
-                $TimedOut = $true
-                $Code = 124
-                $ProcessId = $Process.Id
-                try {
-                    $Process.Kill($true)
-                } catch {
-                    Write-Verbose "Process.Kill failed for pid ${ProcessId}: $($_.Exception.Message)"
-                }
-                # Ensure cmd.exe child trees (python sleep fakes) do not outlive
-                # the bounded command deadline on Windows.
-                Stop-BoundedProcessTree -ProcessId $ProcessId
-                [void]$Process.WaitForExit(2000)
-            } else {
-                $Code = $Process.ExitCode
-            }
-            if ($Process.HasExited) {
-                $StdOut = $StdOutTask.GetAwaiter().GetResult()
-                $StdErr = $StdErrTask.GetAwaiter().GetResult()
-                $Output = @($StdOut, $StdErr) -join [Environment]::NewLine
-            } else {
-                $Output = 'Command exceeded its deadline and output capture did not complete.'
-            }
-        } catch {
-            $Output = $_.Exception.Message
-            $Code = 127
-        } finally {
-            $Process.Dispose()
+        $Result = [ordered]@{
+            returncode = 124
+            timed_out = $true
+            output = 'Global recovery deadline was exhausted before command start.'
         }
+    } else {
+        $Result = Invoke-BoundedProcess `
+            -Name $Name `
+            -ResolvedName $ResolvedName `
+            -Arguments $Arguments `
+            -WaitMilliseconds $WaitMilliseconds
     }
 
-    $Output = Protect-SensitiveString $Output
+    $Output = Protect-SensitiveString ([string]$Result.output)
     if ($Output.Length -gt 8000) { $Output = $Output.Substring(0, 8000) }
     $Row = [ordered]@{
         command = Protect-SensitiveValue (@($Name) + $Arguments)
-        returncode = $Code
-        timed_out = $TimedOut
+        returncode = $Result.returncode
+        timed_out = $Result.timed_out
         duration_seconds = [math]::Round(((Get-Date) - $CommandStarted).TotalSeconds, 3)
         output = $Output
     }
