@@ -25,11 +25,14 @@ exclude_docs: |
   02-architecture/adr-registry/README.md
   99-archive/**
   plans/**
+  05-engineering/**
   reports/**
   reports/README.md
+  reports/evidence/**
   site/**
   exports/**
   reports/docs-export-report-*.md
+  02-architecture/diagrams/**/png/**
   **/~$*.docx
 not_in_nav: |
   00-project/ai/README.md
@@ -239,6 +242,7 @@ nav:
           - "ADR-050 Silver Structural and Gold Semantic Filter Boundary": 02-architecture/decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md
           - "ADR-051 Quarantine Entry Aggregate Surface": 02-architecture/decisions/ADR-051-quarantine-entry-aggregate-surface.md
           - "ADR-052 Infrastructure Config Package Root Public API": 02-architecture/decisions/ADR-052-infrastructure-config-package-root-public-api.md
+          - "ADR-053 Optional Grafana Scenes App Shell": 02-architecture/decisions/ADR-053-optional-grafana-scenes-app-shell.md
           - "Infrastructure Config Package Root Sunset": 02-architecture/compatibility/infrastructure-config-package-root-sunset.md
           - "Public API Freeze": 00-project/ai/agents/guides/PUBLIC_API_FREEZE.md
           - "Quality Gates Stabilization Notes": 02-architecture/decisions/notes/2026-03-04-quality-gates-stabilization.md
@@ -318,6 +322,7 @@ nav:
       - "Workflow Catalog": 04-reference/workflow-catalog.md
       - "GitHub Actions Workflows": 04-reference/github-actions-workflows.md
       - "Pipeline Catalog": 04-reference/pipeline-catalog.md
+      - "Composite Pipelines": 04-reference/pipelines/composites.md
       - Domain:
           - "Overview": 04-reference/domain/README.md
           - "Aggregates": 04-reference/domain/aggregates.md
@@ -330,12 +335,7 @@ nav:
           - "Invariants": 04-reference/domain/invariants.md
           - "Aggregate State Machines": 04-reference/domain/aggregate-state-machines.md
           - "Workflow State Machine": 04-reference/domain/workflow-state-machine.md
-      - Engineering:
-          - "Overview": 05-engineering/README.md
-          - "Normalization Plan P0-P6": 05-engineering/normalization_plan_P0_P6.md
-          - "Compatibility Test Files Reduction Plan": 05-engineering/compatibility-test-files-reduction-plan.md
-          - "Test Coverage Issues": 05-engineering/test-coverage-issues.md
-          - "Test Coverage Roadmap Actualized": 05-engineering/test-coverage-roadmap-actualized.md
+      # DOC-GOV-08: docs/05-engineering is a stub+archive lane (exclude_docs).
       - Providers:
           - "Overview": 04-reference/providers/README.md
           - ChEMBL:
@@ -455,6 +455,7 @@ nav:
           - "Target Schema": 04-reference/schemas/domain/chembl/target-schema.md
   - Operations:
       - Overview: 05-operations/README.md
+      - "CI Workflow Map": 05-operations/ci-workflow-map.md
       - "Common Error Patterns": 05-operations/troubleshooting/common-errors.md
       - Runbooks:
           - "Index": 05-operations/runbooks/index.md

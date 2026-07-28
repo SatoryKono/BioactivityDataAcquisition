@@ -305,6 +305,7 @@ ______________________________________________________________________
 - **ADR-005** — Layered Architecture (Hexagonal / Ports & Adapters)
 - **ADR-020** — Composition Layer isolation
 - **POL-LLM-DIAGRAMS-001** — `docs/02-architecture/diagrams/governance/policy.md`
+- **Render retention (DOC-GOV-02)** — `docs/02-architecture/diagrams/governance/render-retention.md`
 
 ## Compliance
 

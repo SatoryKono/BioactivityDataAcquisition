@@ -13,38 +13,8 @@ plans:
   allowed_files:
     - path: docs/plans/consolidated-open-tasks-plan-2026-03-21.md
       lifecycle: active_backlog
-    - path: docs/plans/architecture-review-and-refactor-plan-2026-03-21.md
-      lifecycle: supporting_context
-    - path: docs/plans/curated-memory-density-governance-plan-2026-04-21.md
-      lifecycle: supporting_context
-    - path: docs/plans/monitoring-observability-expansion-plan-2026-03-26.md
-      lifecycle: supporting_context
-    - path: docs/plans/project-memory-layer-implementation-plan-2026-04-20.md
-      lifecycle: supporting_context
-    - path: docs/plans/project-memory-layer-issue-pack-2026-04-20.md
-      lifecycle: supporting_context
-    - path: docs/plans/repository-file-structure-remediation-plan-2026-04-28.md
-      lifecycle: supporting_context
-    - path: docs/plans/mcp-wrapper-contract-audit-2026-04-28.md
-      lifecycle: supporting_context
-    - path: docs/plans/mcp-wrapper-deep-audit-2026-04-29.md
-      lifecycle: supporting_context
-    - path: docs/plans/mcp-wrapper-redesign-prerequisites-2026-04-29.md
-      lifecycle: supporting_context
-    - path: docs/plans/temporary-diagnostic-ttl-review-plan-2026-04-29.md
-      lifecycle: supporting_context
-    - path: docs/plans/testing-support-migration-plan-2026-04-25.md
-      lifecycle: supporting_context
-    - path: docs/plans/chembl-baseline-refactor-plan-2026-06-01.md
-      lifecycle: supporting_context
-    - path: docs/plans/mcp-shared-http-multi-client-plan-2026-07-24.md
-      lifecycle: supporting_context
-    - path: docs/plans/mcp-shared-http-multi-client-issue-pack-2026-07-24.md
-      lifecycle: supporting_context
-    - path: docs/plans/mcp-shared-plane-work-plan-2026-07-24.md
-      lifecycle: supporting_context
-    - path: docs/plans/mcp-phase3-hardening-issue-pack-2026-07-26.md
-      lifecycle: supporting_context
+  # DOC-GOV-08 (2026-07-28): supporting context plans archived to
+  # docs/99-archive/plans/. Do not reintroduce without catalog update.
 
 src_sidecars:
   path_prefix: src/

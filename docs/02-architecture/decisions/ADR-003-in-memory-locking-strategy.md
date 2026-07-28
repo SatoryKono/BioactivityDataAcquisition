@@ -13,6 +13,8 @@ ______________________________________________________________________
 
 # ADR-003: In-Memory Locking Strategy
 
+> **SUPERSEDED — do not implement.** Use [ADR-010](ADR-010-local-only-deployment.md) (Local-Only). Historical text below is retained for ADR history only (DOC-GOV-07).
+>
 > **Status:** Superseded (revised 2025-12-23; see ADR-010)
 > **Archived:** 2026-06-04
 > status: superseded by ADR-010

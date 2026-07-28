@@ -1,39 +1,38 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
-Reviewers:
-
-- BioETL Team
-  Last verified: '2026-04-10'
+Last verified: '2026-07-28'
 
 ______________________________________________________________________
 
-# Engineering Documentation
+# Engineering Documentation (nav stub)
 
-## Purpose
+**DOC-GOV-08 / #6888:** closeout and migration plans formerly under
+`docs/05-engineering/` were archived to
+[docs/99-archive/engineering/](../99-archive/engineering/).
 
-This section contains implementation-facing engineering references that sit
-between architecture policy and code seams.
+## Purpose of this path
 
-Use this section when one rule spans multiple layers or rollout phases and must
-be expressed as one canonical engineering plan instead of being scattered across
-service files, ADRs, and config fragments.
+Keep a stable dual-lane marker (`05-operations` vs historical `05-engineering`)
+so existing links do not 404. This directory is **not** an active engineering
+SSOT.
 
-## Current entry points
+## Where to go instead
 
-| Document                                                | Purpose                                                                                                                                                        |
-| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Normalization Plan P0–P6](normalization_plan_P0_P6.md) | Canonical engineering plan for RunManifest, RunLedger, runtime anchors, shipped normalization profiles, join-key normalization, and generated matrix artifacts |
-| [Test Telemetry Baseline](test-telemetry-baseline.md)   | Committed baseline surface for CI coverage and slow-test telemetry, with refresh procedure tied to main-branch artifacts                                      |
+| Need | Location |
+| --- | --- |
+| Architecture / layering | `docs/02-architecture/` |
+| Operator runbooks | `docs/05-operations/runbooks/` |
+| Active plans | `docs/plans/` (thin; one active backlog) |
+| Historical engineering closeouts | `docs/99-archive/engineering/` |
+| Normalization / control-plane history | archived engineering plans + ADRs 014/044 |
 
-## Related published surfaces
+## Dual-lane note
 
-- [RULES.md](../00-project/RULES.md)
-- [Content Hash Identity Policy](../02-architecture/policies/content-hash-identity-policy.md)
-- [ADR-014 Deterministic Writes](../02-architecture/decisions/ADR-014-deterministic-writes.md)
-- [ADR-044 Run Manifest and Run Ledger](../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md)
-- [Checkpoint Debugging](../05-operations/runbooks/checkpoint-debugging.md)
-- [Run Manifest Inspection](../05-operations/runbooks/run-manifest-inspection.md)
+- **`05-operations`** — published operational surface
+- **`05-engineering`** — stub + archive pointer only (MkDocs excluded)
+
+Do not add new long-form plans here; use `docs/plans/` (active) or archive.

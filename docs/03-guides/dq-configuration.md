@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-06'
+  Last verified: '2026-07-28'
 
 ______________________________________________________________________
 
@@ -38,7 +38,7 @@ thresholds. Operators must treat both as active surfaces.
 
 | Layer | Source | `soft_fail` | `hard_fail` | Notes |
 | --- | --- | ---: | ---: | --- |
-| Global YAML defaults | `configs/base/quality.yaml` | `0.05` | `0.25` | Merged through provider/entity `quality:` sections |
+| Global YAML defaults | `configs/base/quality.yaml` | `0.05` | `0.50` | Merged through provider/entity `quality:` sections (hierarchical SSOT) |
 | Silver analyze request fallback | `src/bioetl/domain/ports/quality/silver_dq_request.py` (`SilverDQAnalyzeRequest`) | `0.05` | `0.20` | Used when runtime request does not override thresholds |
 | Composite overrides | `configs/composites/*.yaml` | per surface | per surface | Explicit per-composite DQ policy |
 

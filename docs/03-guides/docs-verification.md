@@ -110,11 +110,18 @@ uploaded as the `docs-link-check-report` artifact.
 
 ```bash
 uv run python -m scripts.docs check-drift --ports --classes
+uv run python -m scripts.docs check-drift --runtime-mirrors --freshness
+uv run python -m scripts.docs report-docs-kpi
 ```
 
 Use this when docs mention code structures or high-value runtime narratives
 that are expected to stay aligned with current ports, classes, or published
 operator-facing semantics.
+
+**Ownership (DOC-GOV-09):** every new docs path SHOULD declare owner lane, type
+(normative / guide / reference / runbook / mirror / archive / non-normative),
+and retirement criterion. See ownership table in
+[NORMATIVE_SOURCES.md](../00-project/NORMATIVE_SOURCES.md).
 
 Current drift coverage also includes bounded narrative guards for:
 

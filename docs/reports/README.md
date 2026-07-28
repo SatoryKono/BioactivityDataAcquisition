@@ -1,45 +1,40 @@
-# Reports (Non-Normative)
+# Reports (Non-Normative, thin curated surface)
 
-This folder now focuses on **curated internal evidence and report artifacts**.
-Content here is **non-normative**; authoritative guidance remains in:
+**Rebaseline:** 2026-07-28 (DOC-GOV-01 / #6873)
+
+This folder is a **thin curated map**, not a dump of working evidence.
+Authoritative guidance remains in:
 
 - docs/02-architecture (ADRs, policies, diagrams)
 - docs/03-guides (implementation and operations guides)
 - docs/04-reference (pipelines, providers, contracts)
 
-## Surface Model
+## Surface model
 
-- `docs/reports/README.md` is the short orientation note for this directory.
-- [`index.md`](index.md) is the main entry point for navigating the current
-  reports surface.
-- [`evidence/INDEX.md`](evidence/INDEX.md) is the detailed entry point for
-  evidence packs, synthesis, decisions, risks, and roadmaps.
-- Git tracks only reviewed `docs/reports` entrypoints, explicitly allowlisted
-  generated cleanup inventory artifacts, and selected bounded evidence
-  manifests. Other local files under this tree remain inventory-visible but
-  ignored until a retention review promotes or archives them.
+| Path | Role |
+| --- | --- |
+| `docs/reports/README.md` / `index.md` | Orientation for the curated surface |
+| `docs/reports/evidence/` | Thin curated manifests only (freshness governance) |
+| `docs/reports/generated/` | Allowlisted generated inventories/matrices |
+| `reports/docs-evidence/` | Bulk historical evidence packs (relocated) |
+| `reports/` | Working / model-specific / iterative outputs |
 
-Primary retained surface:
+## Boundary contract
 
-- [`evidence/`](evidence/)
-- `audits/`
+- current instructions / operator workflow / contracts → `docs/00-05/`
+- curated repo-only manifests → `docs/reports/` (thin)
+- bulk evidence / investigations → `reports/docs-evidence/` or `reports/{LLM}/`
+- historical retained context → `docs/99-archive/`
 
-Planning material that is still active should live in:
+`docs/reports/**` remains a blocked cleanup zone in
+`configs/quality/repo_structure_catalog.yaml`. Cleanup stays curated; do not
+treat allowlisted manifests as disposable, and do not reintroduce multi-MB
+bulk packs into this tree.
 
-- [`docs/plans/`](../plans/)
+## Entry points
 
-Historical planning/baseline material should live in:
-
-- [`docs/99-archive/README.md`](../99-archive/README.md)
-
-Difference from top-level [`reports/`](../../reports/README.md):
-
-- `docs/reports/` contains curated repo-only artifacts kept for traceability.
-- top-level `reports/` contains generated or working outputs that do not
-  automatically become part of the retained documentation surface.
-
-Use reports for situational evidence, decisions, and curated internal analysis.
-
-`docs/reports/**` is a blocked cleanup zone in
-`configs/quality/repo_structure_catalog.yaml`. Cleanup here must stay bounded
-and curated; do not treat this directory as disposable generated output.
+- [index.md](index.md)
+- [evidence/INDEX.md](evidence/INDEX.md)
+- [evidence/README.md](evidence/README.md)
+- [../../reports/docs-evidence/README.md](../../reports/docs-evidence/README.md)
+- [../../reports/README.md](../../reports/README.md)
