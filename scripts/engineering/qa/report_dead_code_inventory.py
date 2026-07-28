@@ -1063,14 +1063,17 @@ def main() -> int:
         print("[dead-code-inventory] PASS: artifacts are up to date")
         return 0
 
+    # Re-bind immediately before sinks so path-taint analysis sees confinement.
+    json_out = resolve_output_path(json_out, root=repo_root)
+    md_out = resolve_output_path(md_out, root=repo_root)
     json_out.parent.mkdir(parents=True, exist_ok=True)
     md_out.parent.mkdir(parents=True, exist_ok=True)
-    json_out.write_text(
+    json_out.write_text(  # NOSONAR - path confined by resolve_output_path
         rendered_json, encoding="utf-8"
-    )  # NOSONAR - confined by resolve_output_path
-    md_out.write_text(
+    )
+    md_out.write_text(  # NOSONAR - path confined by resolve_output_path
         rendered_markdown, encoding="utf-8"
-    )  # NOSONAR - confined by resolve_output_path
+    )
     print(
         "[dead-code-inventory] "
         f"triaged_entries={payload['summary']['triaged_entry_count']}; "
