@@ -1742,7 +1742,8 @@
       "enforcement_owner_paths": [
         "configs/quality/internal_compatibility_shim_inventory.yaml",
         "configs/quality/public_lazy_facade_inventory.yaml",
-        "tests/architecture/test_adr_registry_governance_sync.py"
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/architecture/test_public_lazy_facade_inventory.py"
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
@@ -1751,7 +1752,8 @@
         "docs/00-project/NORMATIVE_SOURCES.md",
         "docs/00-project/RULES.md",
         "docs/01-requirements/REQUIREMENTS.md",
-        "tests/architecture/test_adr_registry_governance_sync.py"
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/architecture/test_public_lazy_facade_inventory.py"
       ],
       "manual_exception": null,
       "owner": "BioETL Team",

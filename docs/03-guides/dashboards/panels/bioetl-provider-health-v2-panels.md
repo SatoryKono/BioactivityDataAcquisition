@@ -8,7 +8,7 @@ Dashboard `3. Provider Health` monitors provider current status, health-check la
 
 ## Key Panels
 
-### 1. Review Dashboard Navigation
+### 1. Navigation
 - **Type:** Text
 - **Purpose:** Explain dashboard navigation and escalation flow.
 - **Data sources:** Dashboard variables and operator copy.

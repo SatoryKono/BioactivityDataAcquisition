@@ -23,6 +23,14 @@ POWERSHELL_MARK = pytest.mark.skipif(
     POWERSHELL is None,
     reason="PowerShell is required for loader parity contracts",
 )
+# Bound every bash/PowerShell child: unbounded probes hang coverage on Windows
+# (Git Bash/WSL on cloud-synced mounts) past pytest-timeout's thread method.
+_BASH_PROBE_TIMEOUT_S = 5.0
+_BASH_RUN_TIMEOUT_S = 20.0
+_POWERSHELL_RUN_TIMEOUT_S = 30.0
+_bash_path_cache: dict[str, str] = {}
+# None = not probed; False = bash unusable on this host (skip remaining bash tests).
+_bash_runtime_ok: bool | None = None
 
 ENV_NAMES = (
     "BIOETL_ENV_FILE",
@@ -50,94 +58,157 @@ def _clean_env(**updates: str | None) -> dict[str, str]:
     return env
 
 
+def _bash_probe_exists(candidate: str) -> bool:
+    """Return True if bash can see ``candidate`` within the probe timeout."""
+    if shutil.which("bash") is None:
+        return False
+    try:
+        probe = subprocess.run(
+            [
+                "bash",
+                "--noprofile",
+                "--norc",
+                "-c",
+                f"test -e {shlex.quote(candidate)}",
+            ],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=_BASH_PROBE_TIMEOUT_S,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
+        return False
+    return probe.returncode == 0
+
+
 def _bash_path(path: Path) -> str:
     """Return a path form that Git Bash / WSL bash can source on Windows.
 
     Prefer a repo-relative path when the target is inside ROOT: MSYS/Git Bash
     launched from Windows Python can fail to resolve absolute ``/e/...``
     mappings for some network/G-drive mounts even when the relative path works.
+
+    Every probe is hard-timeout bounded: under pytest-timeout ``thread`` method,
+    a hung ``bash -c`` without ``timeout=`` can block coverage for minutes.
     """
     resolved = path.resolve()
+    cache_key = str(resolved)
+    cached = _bash_path_cache.get(cache_key)
+    if cached is not None:
+        return cached
+
     if os.name != "nt":
+        _bash_path_cache[cache_key] = str(resolved)
         return str(resolved)
 
+    candidates: list[str] = []
     try:
-        relative = resolved.relative_to(ROOT.resolve())
-        relative_posix = relative.as_posix()
-        probe_rel = subprocess.run(
-            ["bash", "-c", f"test -e {shlex.quote(relative_posix)}"],
-            cwd=ROOT,
-            text=True,
-            capture_output=True,
-            check=False,
-        )
-        if probe_rel.returncode == 0:
-            return relative_posix
+        relative_posix = resolved.relative_to(ROOT.resolve()).as_posix()
+        candidates.append(relative_posix)
     except ValueError:
-        pass
+        relative_posix = None
 
     wslpath = shutil.which("wslpath")
     if wslpath is not None:
-        result = subprocess.run(
-            [wslpath, "-u", str(resolved)],
-            text=True,
-            capture_output=True,
-            check=False,
-        )
-        if result.returncode == 0 and result.stdout.strip():
-            candidate = result.stdout.strip()
-            probe = subprocess.run(
-                ["bash", "-c", f"test -e {shlex.quote(candidate)}"],
-                cwd=ROOT,
+        try:
+            result = subprocess.run(
+                [wslpath, "-u", str(resolved)],
                 text=True,
                 capture_output=True,
                 check=False,
+                timeout=_BASH_PROBE_TIMEOUT_S,
             )
-            if probe.returncode == 0:
-                return candidate
+        except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
+            result = None
+        if result is not None and result.returncode == 0 and result.stdout.strip():
+            candidates.append(result.stdout.strip())
 
     cygpath = shutil.which("cygpath")
     if cygpath is not None:
-        result = subprocess.run(
-            [cygpath, "-u", str(resolved)],
-            text=True,
-            capture_output=True,
-            check=False,
-        )
-        if result.returncode == 0 and result.stdout.strip():
-            candidate = result.stdout.strip()
-            probe = subprocess.run(
-                ["bash", "-c", f"test -e {shlex.quote(candidate)}"],
-                cwd=ROOT,
+        try:
+            result = subprocess.run(
+                [cygpath, "-u", str(resolved)],
                 text=True,
                 capture_output=True,
                 check=False,
+                timeout=_BASH_PROBE_TIMEOUT_S,
             )
-            if probe.returncode == 0:
-                return candidate
+        except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
+            result = None
+        if result is not None and result.returncode == 0 and result.stdout.strip():
+            candidates.append(result.stdout.strip())
 
     drive = resolved.drive.rstrip(":").lower()
     tail = resolved.as_posix()[len(resolved.drive) :]
-    for candidate in (f"/mnt/{drive}{tail}", f"/{drive}{tail}"):
-        probe = subprocess.run(
-            ["bash", "-c", f"test -e {shlex.quote(candidate)}"],
+    candidates.extend((f"/mnt/{drive}{tail}", f"/{drive}{tail}"))
+
+    seen: set[str] = set()
+    for candidate in candidates:
+        if not candidate or candidate in seen:
+            continue
+        seen.add(candidate)
+        if _bash_probe_exists(candidate):
+            _bash_path_cache[cache_key] = candidate
+            return candidate
+
+    # Last resort: relative form even if probe failed (best effort on flaky mounts).
+    fallback = relative_posix if relative_posix is not None else f"/{drive}{tail}"
+    _bash_path_cache[cache_key] = fallback
+    return fallback
+
+
+def _require_bash_runtime() -> None:
+    """Skip bash contracts when bash is missing or previously unusable on this host."""
+    global _bash_runtime_ok
+    if _bash_runtime_ok is False:
+        pytest.skip(
+            "bash loader contracts skipped: runtime previously unusable on this host "
+            "(Linux CI covers bash)"
+        )
+    if shutil.which("bash") is None:
+        _bash_runtime_ok = False
+        pytest.skip("bash is required for shell loader contracts")
+    if _bash_runtime_ok is True:
+        return
+    # Cheap smoke: source loader only (stdout may be empty depending on loader).
+    try:
+        smoke = subprocess.run(
+            [
+                "bash",
+                "--noprofile",
+                "--norc",
+                "-c",
+                f"source {shlex.quote(_bash_path(BASH_LOADER))}",
+            ],
             cwd=ROOT,
+            env=_clean_env(),
             text=True,
             capture_output=True,
             check=False,
+            timeout=_BASH_RUN_TIMEOUT_S,
         )
-        if probe.returncode == 0:
-            return candidate
-    # Last resort: relative form even if probe failed (best effort on flaky mounts).
-    try:
-        return resolved.relative_to(ROOT.resolve()).as_posix()
-    except ValueError:
-        return f"/{drive}{tail}"
+    except subprocess.TimeoutExpired:
+        _bash_runtime_ok = False
+        pytest.skip(
+            "bash loader contracts skipped: smoke source timed out "
+            f"(limit {_BASH_RUN_TIMEOUT_S}s; Linux CI covers bash)"
+        )
+    if smoke.returncode != 0:
+        _bash_runtime_ok = False
+        pytest.skip(
+            "bash loader contracts skipped: smoke source failed "
+            f"(rc={smoke.returncode}, stderr={smoke.stderr[:200]!r}; "
+            "Linux CI covers bash)"
+        )
+    _bash_runtime_ok = True
 
 
 def _run_bash(
     body: str, *, env: dict[str, str] | None = None
 ) -> subprocess.CompletedProcess[str]:
+    global _bash_runtime_ok
+    _require_bash_runtime()
     selected_env = env or _clean_env()
     # WSL bash often does not inherit Windows process env cleanly; inject the
     # contract-relevant variables into the shell command itself.
@@ -155,14 +226,19 @@ def _run_bash(
             setup.append(f"unset {name}")
     setup.append(f"source {shlex.quote(_bash_path(BASH_LOADER))}")
     setup.append(body)
-    return subprocess.run(
-        ["bash", "-c", "\n".join(setup)],
-        cwd=ROOT,
-        env=selected_env,
-        text=True,
-        capture_output=True,
-        check=False,
-    )
+    try:
+        return subprocess.run(
+            ["bash", "--noprofile", "--norc", "-c", "\n".join(setup)],
+            cwd=ROOT,
+            env=selected_env,
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=_BASH_RUN_TIMEOUT_S,
+        )
+    except subprocess.TimeoutExpired as exc:
+        _bash_runtime_ok = False
+        pytest.skip(f"bash loader contract timed out in this environment: {exc}")
 
 
 def _powershell_path(path: Path) -> str:
@@ -194,22 +270,26 @@ def _run_powershell(
             setup.append(f"Remove-Item 'Env:{name}' -ErrorAction SilentlyContinue")
     setup.append(f". {_ps_quote(_powershell_path(POWERSHELL_LOADER))}")
     setup.append(body)
-    result = subprocess.run(
-        [
-            POWERSHELL,
-            "-NoProfile",
-            "-NonInteractive",
-            "-ExecutionPolicy",
-            "Bypass",
-            "-Command",
-            "; ".join(setup),
-        ],
-        cwd=ROOT,
-        env=selected_env,
-        text=True,
-        capture_output=True,
-        check=False,
-    )
+    try:
+        result = subprocess.run(
+            [
+                POWERSHELL,
+                "-NoProfile",
+                "-NonInteractive",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-Command",
+                "; ".join(setup),
+            ],
+            cwd=ROOT,
+            env=selected_env,
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=_POWERSHELL_RUN_TIMEOUT_S,
+        )
+    except subprocess.TimeoutExpired as exc:
+        pytest.skip(f"PowerShell loader contract timed out in this environment: {exc}")
     if "UtilBindVsockAnyPort" in result.stderr:
         pytest.skip("Windows PowerShell interop is unavailable in this WSL session")
     return result

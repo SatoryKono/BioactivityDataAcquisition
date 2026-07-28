@@ -420,13 +420,21 @@ def test_control_plane_panels_do_not_mix_runbook_families_within_one_panel() -> 
 
 
 def test_control_plane_provider_health_handoff_omits_adapter_fallback() -> None:
-    """Provider Health is off primary bus; Overview First Action owns the fail-closed handoff."""
-    # Primary bus intentionally omits Provider Health (epic #6570/#6647).
+    """Provider Health is on the portfolio bus; fail-closed vars still required."""
     control = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     control_titles = {
         str(item.get("title", "")) for item in get_dashboard_navigation_links(control)
     }
-    assert "3. Provider Health" not in control_titles
+    assert "3. Provider Health" in control_titles
+    provider_nav = next(
+        item
+        for item in get_dashboard_navigation_links(control)
+        if item.get("title") == "3. Provider Health"
+    )
+    provider_nav_url = str(provider_nav.get("url", ""))
+    assert "var-provider=unknown" in provider_nav_url
+    assert "var-pipeline_context=" in provider_nav_url
+    assert "var-adapter=All" not in provider_nav_url
 
     overview = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     first_action = next(
@@ -1016,8 +1024,8 @@ def test_pipeline_and_provider_variables_are_single_select_unknown_default() -> 
 
 def test_provider_health_handoff_fail_closes_and_remembers_return_context() -> None:
     """Overview First Action preserves pipeline_context and fail-closes provider scope."""
-    # Provider Health is interim/off-bus on the primary navigation surface.
-    # Fail-closed provider handoff is owned by Overview First Action (panel 215).
+    # Provider Health is on the primary navigation bus (#3). Fail-closed provider
+    # handoff vars are still required on Overview First Action (panel 215).
     overview = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     first_action = next(
         panel for panel in get_dashboard_panels(overview) if panel.get("id") == 215

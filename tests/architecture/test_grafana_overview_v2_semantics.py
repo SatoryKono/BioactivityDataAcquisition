@@ -43,9 +43,15 @@ def test_overview_v2_semantics_contract():
         if panel.get("id") == 1000:
             nav_links.extend(panel.get("links", []))
     links = " ".join(link.get("title", "") for link in nav_links)
-    # Primary 5-dashboard diet bus (Trust / Overview / Pipeline Diagnostics / DQ).
-    # Provider remains interim/off-bus; Runtime handoff is labeled Pipeline Diagnostics.
-    for token in ["Trust", "Pipeline Diagnostics", "Data Quality"]:
+    # Full portfolio bus 0–6 (Provider on-bus; Incident + Run Explorer adjuncts).
+    for token in [
+        "Trust",
+        "Pipeline Diagnostics",
+        "Provider Health",
+        "Data Quality",
+        "Incident Workspace",
+        "Run Explorer",
+    ]:
         assert token in links
 
     for current_title in [

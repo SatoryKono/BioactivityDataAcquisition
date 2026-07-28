@@ -106,12 +106,20 @@ def test_dq_recovery_does_not_recommend_threshold_weakening() -> None:
 def test_monitoring_guide_routes_panel_detail_to_all_shipped_panel_docs() -> None:
     guide_path = ROOT / "docs/05-operations/01-monitoring-guide.md"
     guide = guide_path.read_text(encoding="utf-8")
-    panel_docs = sorted((ROOT / "docs/03-guides/dashboards/panels").glob("*-panels.md"))
-    assert len(panel_docs) == 8, (
-        "Expected eight shipped panel docs under "
-        "docs/03-guides/dashboards/panels/*-panels.md; "
-        f"found {len(panel_docs)}: {[path.name for path in panel_docs]}"
+    dashboard_stems = {
+        path.stem for path in (ROOT / "grafana/dashboards").glob("*.json")
+    }
+    panel_doc_names = {
+        path.name
+        for path in (ROOT / "docs/03-guides/dashboards/panels").glob("*-panels.md")
+    }
+    missing_panel_docs = sorted(
+        f"{dashboard_stem}-panels.md"
+        for dashboard_stem in dashboard_stems
+        if f"{dashboard_stem}-panels.md" not in panel_doc_names
     )
+    assert len(dashboard_stems) == 7
+    assert not missing_panel_docs, missing_panel_docs
     assert "dashboard-inventory.md" in guide, (
         f"{guide_path} must route inventory ownership to dashboard-inventory.md"
     )

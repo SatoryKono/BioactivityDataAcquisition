@@ -25,32 +25,52 @@ required_top_level_links_by_uid:
   bioetl-control-plane-v1:
   - 1. Overview
   - 2. Pipeline Diagnostics
+  - 3. Provider Health
   - 4. Data Quality
+  - 5. Incident Workspace
+  - 6. Run Explorer
   bioetl-overview-v2:
   - 0. Trust
   - 2. Pipeline Diagnostics
+  - 3. Provider Health
   - 4. Data Quality
+  - 5. Incident Workspace
+  - 6. Run Explorer
   bioetl-runtime:
   - 0. Trust
   - 1. Overview
+  - 3. Provider Health
   - 4. Data Quality
-  bioetl-dq-v2:
-  - 0. Trust
-  - 1. Overview
-  - 2. Pipeline Diagnostics
+  - 5. Incident Workspace
+  - 6. Run Explorer
   bioetl-provider-health-v2:
   - 0. Trust
   - 1. Overview
   - 2. Pipeline Diagnostics
   - 4. Data Quality
+  - 5. Incident Workspace
+  - 6. Run Explorer
+  bioetl-dq-v2:
+  - 0. Trust
+  - 1. Overview
+  - 2. Pipeline Diagnostics
+  - 3. Provider Health
+  - 5. Incident Workspace
+  - 6. Run Explorer
   bioetl-incident-v1:
   - 0. Trust
   - 1. Overview
   - 2. Pipeline Diagnostics
+  - 3. Provider Health
   - 4. Data Quality
+  - 6. Run Explorer
   bioetl-run-explorer-v1:
   - 0. Trust
   - 1. Overview
+  - 2. Pipeline Diagnostics
+  - 3. Provider Health
+  - 4. Data Quality
+  - 5. Incident Workspace
 top_level_link_priority_by_uid:
   bioetl-overview-v2:
   - title: 2. Pipeline Diagnostics
@@ -378,6 +398,9 @@ navigation_transition_contract:
       - bioetl-runtime
       - bioetl-control-plane-v1
       - bioetl-dq-v2
+      - bioetl-provider-health-v2
+      - bioetl-incident-v1
+      - bioetl-run-explorer-v1
       required_outbound:
       - bioetl-overview-v2
       required_inbound:
@@ -504,3 +527,19 @@ navigation_transition_contract:
     worst_backlog_stage:
       canonical_uid: bioetl-overview-v2
       mirror_panels: []
+visual_bus_titles_ordered:
+- 0. Trust
+- 1. Overview
+- 2. Pipeline Diagnostics
+- 3. Provider Health
+- 4. Data Quality
+- 5. Incident Workspace
+- 6. Run Explorer
+visual_bus_uids_ordered:
+- bioetl-control-plane-v1
+- bioetl-overview-v2
+- bioetl-runtime
+- bioetl-provider-health-v2
+- bioetl-dq-v2
+- bioetl-incident-v1
+- bioetl-run-explorer-v1
