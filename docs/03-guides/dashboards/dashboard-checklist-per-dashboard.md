@@ -282,11 +282,11 @@
 - [ ] CTA: Inspect active blocker
 
 ### First-screen структура
-- [ ] Tier 1 включает: First Action, Runtime Status, Runtime Telemetry Gap, Monitor Runtime Blockers, Runtime Blockers
+- [ ] Tier 1 включает: First Action, Runtime Status, Metrics Evidence, Monitor Runtime Blockers, Runtime Blockers
 - [ ] `Runtime Status` описан как mirror of shared-shell `Status`, not independent second signal
 - [ ] Rows `Detect`, `Localize`, `Escalate` и `Tracing-only Log Hygiene (requires optional tracing profile)` collapsed by default
 - [ ] Tier 3: selected-range evidence ниже
-- [ ] `Runtime Status` читает `bioetl_runtime_current_status_trusted`; любой `Runtime Telemetry Gap > 0` принудительно даёт `3=INCOMPLETE`
+- [ ] `Runtime Status` читает `bioetl_runtime_current_status_trusted`; любой `Metrics Evidence > 0` принудительно даёт `3=INCOMPLETE`
 
 ### KPI ownership (mirrors)
 - [ ] System Status mirror (canonical: `bioetl-overview-v2`)
@@ -392,9 +392,9 @@
 - [x] Open Silver Reject Explorer CTA removed — use CLI quarantine inspect
 
 ### First-screen структура
-- [ ] Tier 1 включает: Monitor DQ Current Status, Monitor DQ Threshold State, Inspect DQ Current Reasons, Review: First Action
+- [ ] Tier 1 включает: Monitor DQ Current Status, Now · DQ Threshold State, Now · DQ Current Reasons, Review: First Action
 - [ ] `Monitor DQ Current Status` описан как mirror of shared-shell `Status`, not independent second signal
-- [ ] Tier 2 compact current-context band: `Monitor: Data Quality Score (Volume-weighted)`, `Monitor: Worst-Entity DQ Score`, `Time Range · Worst Freshness Age (hours; SLA 24/72)`, `Track: Records Quarantined in Range`, `Track: Silver Filter Rejects in Range`, `Track: DQ Blocked Records in Range (Evidence)`
+- [ ] Tier 2 compact current-context band: `Monitor: Data Quality Score (Volume-weighted)`, `Monitor: Worst-Entity DQ Score`, `Time Range · Worst Freshness Age (hours; SLA 24/72)`, `Range · Records Quarantined`, `Range · Silver Filter Rejects`, `Track: DQ Blocked Records in Range (Evidence)`
 - [ ] Freshness panel uses hours (`unit=h`) with WARN/CRIT thresholds `24/72`; score panels `id=2` and `id=5` remain stats, not gauges
 - [ ] Tier 3: полноширинный Track Range Evidence: Bronze -> Silver -> Gold
 - [ ] Rows `Silver Structural / Gold Contract-Semantic Rejects` и `Validation Failures / Runtime Diagnostics / Trends` collapsed by default

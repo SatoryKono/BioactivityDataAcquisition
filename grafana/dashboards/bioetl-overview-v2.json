@@ -290,7 +290,7 @@
       },
       "id": 99,
       "options": {
-        "content": "<div style=\"padding:10px 14px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);line-height:1.45;\"><div style=\"font-size:18px;font-weight:700;\">What is broken or degraded right now, and where should the operator drill down first?</div></div>",
+        "content": "### Scope — what is broken or degraded right now?\nworkflow=`$workflow` · pipeline=`$pipeline` · run_type=`$run_type` · run_id=`$run_id` (HTTP only)\n\nRead order: **Status → First Action → Inputs** (where should the operator drill down first).\nNav bus is the portfolio switcher.\n",
         "mode": "html"
       },
       "description": "L0 v3 scope/provenance banner. Primary question: what is broken now and where should the operator drill down first? Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Provenance: shipped Prometheus current-status recording rules plus selected-range evidence. Known limitation: first-screen PromQL remains pipeline/run_type-scoped; workflow is context/evidence-first, and run_id is resolved from persisted control-plane manifests for dashboard handoff rather than exact PromQL intersection.",
@@ -425,7 +425,7 @@
       ],
       "title": "Status",
       "type": "stat",
-      "description": "Current L0 operator state for Overview. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). CRIT means runtime, DQ, control-plane, workflow, or gold signals are failing for the selected pipeline/run_type. WARN means non-fatal DQ, provider, or pending-gold conditions. UNKNOWN means the dashboard cannot prove current health for the selected scope."
+      "description": "Current L0 fleet status (bioetl_l0_status). 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Confidence is low when series is absent (UNKNOWN). Evidence age follows the recording/refresh window, not range history. Primary action is First Action; deeper proof is on domain boards."
     },
     {
       "id": 215,

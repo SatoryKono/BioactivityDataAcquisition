@@ -41,7 +41,7 @@ snapshot evidence, a snapshot denominator, or a presence gate. Event deltas use
 - **Data sources:** BioETL Ops HTTP
   `/ops/observability/processed-records`; this is not a Prometheus panel.
 
-### 7. Runtime Telemetry Gap
+### 7. Metrics Evidence
 - **Type:** Stat
 - **Purpose:** Detect missing/stale scrape or rule-group evidence. Non-zero makes
   both runtime status panels `INCOMPLETE`.

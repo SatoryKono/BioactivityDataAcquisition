@@ -197,7 +197,7 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
         },
         "bioetl-dq-v2.json": {
             "Status": "bioetl_dq_current_status",
-            "Inspect DQ Current Reasons": "bioetl_dq_current_reason",
+            "Now · DQ Current Reasons": "bioetl_dq_current_reason",
         },
     }
 
@@ -307,7 +307,7 @@ def test_current_status_and_current_cause_panels_do_not_use_zero_fallback() -> N
         ],
         "bioetl-dq-v2.json": [
             "Status",
-            "Inspect DQ Current Reasons",
+            "Now · DQ Current Reasons",
         ],
     }
 
@@ -340,7 +340,7 @@ def test_required_trust_markers_stay_visible_on_target_dashboards() -> None:
     """Datasource trust surfaces are targeted: Runtime/Control Plane need explicit first-screen markers."""
     expectations = {
         "bioetl-runtime.json": (
-            "Runtime Telemetry Gap",
+            "Metrics Evidence",
             ("treat zero count panels as inconclusive", "prometheus targets"),
         ),
         "bioetl-control-plane-v1.json": (
@@ -433,7 +433,7 @@ def test_provider_and_dq_range_evidence_panels_are_below_first_screen() -> None:
             dq,
             [
                 "Track Range Evidence: Bronze -> Silver -> Gold",
-                "Track: Silver Filter Rejects in Range",
+                "Range · Silver Filter Rejects",
             ],
         ),
     }

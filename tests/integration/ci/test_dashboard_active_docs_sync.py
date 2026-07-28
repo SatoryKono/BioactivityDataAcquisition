@@ -133,7 +133,7 @@ def test_active_dashboard_changelog_stays_current_to_shipped_surface() -> None:
         "$run_id",
         "bioetl-control-plane-v1",
         "bioetl-workflow-overview",
-        "Runtime Telemetry Gap",
+        "Metrics Evidence",
         "First Action",
     )
     for token in required_tokens:

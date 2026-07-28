@@ -764,8 +764,8 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
             "Track Health Checks Total (Selected Range)": "round(",
         },
         "bioetl-dq-v2.json": {
-            "Track: Records Quarantined in Range": "round(",
-            "Track: Silver Filter Rejects in Range": "round(",
+            "Range · Records Quarantined": "round(",
+            "Range · Silver Filter Rejects": "round(",
             "Track: Silver Validation Failures in Range": "round(",
             "Monitor: Silver Validation Failures": "round(",
         },
@@ -877,7 +877,7 @@ def test_dq_current_status_panels_preserve_unknown_no_data_state() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     expected_panels = {
         "Status",
-        "Monitor DQ Threshold State",
+        "Now · DQ Threshold State",
     }
     panels = {
         panel.get("title"): panel
@@ -902,7 +902,7 @@ def test_dq_current_status_panels_use_explicit_status_value_mappings() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     expected_panels = {
         "Status",
-        "Monitor DQ Threshold State",
+        "Now · DQ Threshold State",
     }
     panels = {
         panel.get("title"): panel
@@ -918,7 +918,7 @@ def test_dq_current_status_panels_use_explicit_status_value_mappings() -> None:
             "2": {"text": "CRIT", "color": "red"},
             "3": {"text": "INCOMPLETE", "color": "gray"},
         },
-        "Monitor DQ Threshold State": {
+        "Now · DQ Threshold State": {
             "0": {"text": "OK", "color": "green"},
             "1": {"text": "WARN", "color": "orange"},
             "2": {"text": "CRIT", "color": "red"},
@@ -943,7 +943,7 @@ def test_dq_current_status_panels_use_canonical_severity_threshold_steps() -> No
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     expected_panels = {
         "Status",
-        "Monitor DQ Threshold State",
+        "Now · DQ Threshold State",
     }
     panels = {
         panel.get("title"): panel
@@ -969,14 +969,14 @@ def test_dq_first_screen_panels_expose_actionable_datalinks() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     expected_panels = {
         "Status",
-        "Monitor DQ Threshold State",
-        "Inspect DQ Current Reasons",
+        "Now · DQ Threshold State",
+        "Now · DQ Current Reasons",
     }
     # Silver Reject Explorer handoffs were removed; keep actionability on the
     # status/threshold cards while the reasons table remains diagnostic-only.
     panels_requiring_links = {
         "Status",
-        "Monitor DQ Threshold State",
+        "Now · DQ Threshold State",
     }
     panels = {
         panel.get("title"): panel
@@ -997,7 +997,7 @@ def test_dq_first_screen_panels_expose_actionable_datalinks() -> None:
         )
 
     reasons_links = (
-        panels["Inspect DQ Current Reasons"].get("options", {}).get("dataLinks", [])
+        panels["Now · DQ Current Reasons"].get("options", {}).get("dataLinks", [])
     )
     assert not any(
         "Silver Reject Explorer" in str(link.get("title", "")) for link in reasons_links
@@ -1013,11 +1013,11 @@ def test_dq_threshold_state_panel_uses_bounded_reason_severity_with_ok_fallback(
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Monitor DQ Threshold State"
+            if item.get("title") == "Now · DQ Threshold State"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Monitor DQ Threshold State' not found"
+    assert panel is not None, "Panel 'Now · DQ Threshold State' not found"
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert any("max(bioetl_dq_current_reason" in expr for expr in expressions), (
@@ -1039,7 +1039,7 @@ def test_runtime_diagnostic_panels_preserve_unknown_no_data_state() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     expected_panels = {
         "Status",
-        "Runtime Telemetry Gap",
+        "Metrics Evidence",
         "Monitor Runtime Blockers",
         "Runtime Error Rate",
         "Worst Stage Lag",
@@ -1071,11 +1071,11 @@ def test_runtime_telemetry_gap_checks_scrape_and_rule_health() -> None:
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Runtime Telemetry Gap"
+            if item.get("title") == "Metrics Evidence"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Runtime Telemetry Gap' not found"
+    assert panel is not None, "Panel 'Metrics Evidence' not found"
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert expressions == ["max(bioetl_runtime_trust_gap_status_10m)"]
@@ -1490,9 +1490,9 @@ def test_dq_selected_range_evidence_panels_use_neutral_thresholds() -> None:
     expected_panels = {
         "Track: Source Records in Range (Bronze)",
         "Track: Clean Records in Range (Gold)",
-        "Track: Records Quarantined in Range",
+        "Range · Records Quarantined",
         "Track: Silver Validation Failures in Range",
-        "Track: Silver Filter Rejects in Range",
+        "Range · Silver Filter Rejects",
     }
 
     panels = {
@@ -1591,7 +1591,7 @@ def test_dq_problem_panels_expose_actionable_datalinks() -> None:
     expected_panels = {
         "Monitor: Worst-Entity DQ Score",
         "Time Range · Worst Freshness Age (hours; SLA 24/72)",
-        "Track: Silver Filter Rejects in Range",
+        "Range · Silver Filter Rejects",
     }
     # Silver Reject Explorer handoffs were removed; reject accounting stays on-panel.
     panels_requiring_links = {
@@ -1613,13 +1613,13 @@ def test_dq_problem_panels_expose_actionable_datalinks() -> None:
             str(link.get("title", "")).startswith("Open ") for link in data_links
         ), f"{panel_title} must use canonical Open ... dataLink titles"
 
-    reject_panel = panels["Track: Silver Filter Rejects in Range"]
+    reject_panel = panels["Range · Silver Filter Rejects"]
     reject_links = reject_panel.get("options", {}).get("dataLinks", [])
     assert not any(
         "Silver Reject Explorer" in str(link.get("title", "")) for link in reject_links
     )
     assert not reject_panel.get("links"), (
-        "Track: Silver Filter Rejects in Range should not use legacy panel links"
+        "Range · Silver Filter Rejects should not use legacy panel links"
     )
 
 

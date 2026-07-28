@@ -255,7 +255,7 @@
         "y": 7
       },
       "options": {
-        "content": "<h3>First Action (≤4)</h3><ol style='margin:0.2rem 0 0 1.1rem;padding:0'><li>Read GLOBAL severity matrix (fleet, not selected).</li><li>Open top causes / critical providers.</li><li>Check telemetry freshness (TELEMETRY ABSENT ≠ OK).</li><li>Selected-provider detail is supporting only.</li></ol><p><b>Empty matrix/causes:</b> VALID EMPTY if severity OK; if severity non-OK → explainability/scrape gap, not healthy.</p>",
+        "content": "### First Action\n1. Fleet matrix + critical providers + causes (above fold).\n2. Telemetry freshness trust gate.\n3. Selected provider is supporting detail (collapsed row).\n4. Exact run accounting → Run Explorer.\n",
         "mode": "html"
       },
       "links": [

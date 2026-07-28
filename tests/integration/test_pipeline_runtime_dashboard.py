@@ -51,12 +51,8 @@ _ALLOWED_DASHBOARD_LINK_VARS = {
         {"workflow", "pipeline", "run_type", "run_id"}
     ),
     "bioetl-alerts-slo": frozenset({"workflow", "pipeline", "run_type"}),
-    "bioetl-incident-v1": frozenset(
-        {"workflow", "pipeline", "run_type", "run_id"}
-    ),
-    "bioetl-run-explorer-v1": frozenset(
-        {"workflow", "pipeline", "run_type", "run_id"}
-    ),
+    "bioetl-incident-v1": frozenset({"workflow", "pipeline", "run_type", "run_id"}),
+    "bioetl-run-explorer-v1": frozenset({"workflow", "pipeline", "run_type", "run_id"}),
 }
 
 
@@ -182,7 +178,7 @@ def test_pipeline_runtime_data_panel_titles_are_action_first() -> None:
         "ID",
         "Processed Records",
         "Runtime Blockers",
-        "Runtime Telemetry Gap",
+        "Metrics Evidence",
         "Runtime Error Rate",
         "Failed Runs",
         "Worst Stage Lag",

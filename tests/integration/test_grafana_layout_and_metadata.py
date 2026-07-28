@@ -196,11 +196,11 @@ def test_runtime_telemetry_gap_panel_keeps_readable_first_screen_width() -> None
         if isinstance(panel.get("title"), str)
     }
 
-    panel = root["Runtime Telemetry Gap"]
+    panel = root["Metrics Evidence"]
     grid = panel.get("gridPos", {})
     assert grid["y"] <= 23
     assert grid["w"] >= 4, (
-        "Runtime Telemetry Gap must reserve readable width on the first screen"
+        "Metrics Evidence must reserve readable width on the first screen"
     )
     assert "Failed Runs" not in root
     assert "Failed Runs" in all_panels

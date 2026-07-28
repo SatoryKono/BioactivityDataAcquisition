@@ -247,7 +247,7 @@
         "y": 7
       },
       "options": {
-        "content": "<div style='padding:0.4rem 0.65rem;line-height:1.45'><b>Unhealthy:</b> Status → Blockers → Metrics trust (Telemetry Gap) → Detect/Localize.<br/><b>Healthy:</b> Status OK + empty blockers (VALID EMPTY) → secondary KPIs; do not chase empty tables.<br/><b>Next (≤4 CTAs via panel links):</b> status · blockers · Trust · DQ.</div>",
+        "content": "### First Action\n1. Read **Status** + **Metrics Evidence** (trust before latency).\n2. If Metrics Evidence is not OK, fix scrape/rules; do not trust zeros.\n3. Scan **Runtime Blockers** (VALID EMPTY when Status=OK).\n4. Exact completed run goes to **Run Explorer** (HTTP report).\n",
         "mode": "html"
       },
       "links": [
@@ -469,7 +469,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Metrics trust / scrape health gate (operator label). Internal name: Runtime Telemetry Gap. When elevated, green OK is impossible on Status — repair scrape/rules before reading latency/error cards. Current scrape/rule-health gap for BioETL runtime metrics over 10m. 0=OK/scraping and runtime dashboard recording rules evaluated recently, 1=WARN/no recent scrape, rule-evaluation failures, missing rule group, or stale rule group evaluation, >=2=CRIT/scrape plus rule-health gap, null=UNKNOWN/no scrape series. Time scope: current monitoring health, not selected-range runtime evidence. This is the first trust gate for the row below. If this is non-zero or UNKNOWN, treat zero count panels as inconclusive and open Prometheus Targets before debugging pipeline code.",
+      "description": "Metrics Evidence (scrape/rule trust). 0=OK (metrics + recording rules healthy), 1=WARN (scrape or rule gap), >=2=CRIT (scrape+rule gap), null=UNKNOWN. Not a pipeline error. When elevated, Status cannot be green OK — treat zero count panels as inconclusive and open Prometheus Targets before debugging pipeline code. Time scope: current monitoring health, not selected-range runtime evidence.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -491,7 +491,7 @@
               "options": {
                 "0": {
                   "color": "green",
-                  "text": "SCRAPING"
+                  "text": "OK"
                 },
                 "1": {
                   "color": "orange",
@@ -560,7 +560,7 @@
           "refId": "A"
         }
       ],
-      "title": "Runtime Telemetry Gap",
+      "title": "Metrics Evidence",
       "type": "stat"
     },
     {
@@ -580,7 +580,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows expected vs observed stage status per entity config. Gold status is contextual: expected (scd2/append/overwrite config), disabled (gold_enabled=false), pending (run active, gold not yet written), or missing (run completed, gold=0).",
+          "description": "Shows expected vs observed stage status per entity config. Gold status is contextual: expected (scd2/append/overwrite config), disabled (gold_enabled=false), pending (run active, gold not yet written), or missing (run completed, gold=0). Aggregate stage expectedness (current/range grain as query states). Exact-run chronology lives in Run Explorer, not this board.",
           "fieldConfig": {
             "defaults": {
               "color": {

@@ -537,7 +537,7 @@ def test_runtime_and_control_plane_operator_panels_use_active_time_windows(
             "bioetl-control-plane-v1.json",
             "Track: GLOBAL Control-Plane Read Latency p50/p95/p99",
         ),
-        ("bioetl-dq-v2.json", "Track: Records Quarantined in Range"),
+        ("bioetl-dq-v2.json", "Range · Records Quarantined"),
         ("bioetl-dq-v2.json", "Track: Silver Validation Failures in Range"),
         ("bioetl-dq-v2.json", "Inspect: Quarantine by Error Type"),
         ("bioetl-dq-v2.json", "Monitor: Silver Validation Failures"),

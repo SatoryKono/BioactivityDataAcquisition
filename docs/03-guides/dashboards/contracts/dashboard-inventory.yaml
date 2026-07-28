@@ -1,4 +1,4 @@
-# Shipped 5-dashboard surface inventory (#6687).
+# Shipped 7-dashboard surface inventory (DRM residual; UIDs stable post-DUX).
 # Source of truth for panel counts is grafana/dashboards/*.json.
 
 dashboards:
@@ -175,18 +175,26 @@ dashboards:
     owner: "@bioetl-observability"
     owner_route: docs/05-operations/runbooks/incident-response.md
     family: adjunct
-    navigation_id: null
+    navigation_id: 5
     target_workspace: Incident Workspace
-    ux_phase: dux-08
+    ux_phase: drm-04
     data_sources:
       - Prometheus
       - Grafana
-    panel_count: 6
+    panel_count: 10
     key_panels:
       - id: 2002
-        title: Ranked Suspects
+        title: "Active Suspects · Runtime"
         type: table
-        description: Population-first suspects from existing cause/blocker/reason rules
+        description: Domain topk runtime blockers (not cross-domain ranking)
+      - id: 2005
+        title: "Current Alerts (firing/pending)"
+        type: table
+        description: Instant ALERTS snapshot
+      - id: 2006
+        title: "Alert State History (range)"
+        type: state-timeline
+        description: Range ALERTS history (not persistent incident log)
     selector_variables:
       - workflow
       - pipeline
@@ -198,13 +206,13 @@ dashboards:
     owner: "@bioetl-observability"
     owner_route: docs/05-operations/runbooks/run-manifest-inspection.md
     family: adjunct
-    navigation_id: null
+    navigation_id: 6
     target_workspace: Run Explorer
-    ux_phase: dux-10
+    ux_phase: drm-05
     data_sources:
       - BioETL Ops HTTP
       - Grafana
-    panel_count: 5
+    panel_count: 10
     key_panels:
       - id: 9402
         title: ID
@@ -214,6 +222,14 @@ dashboards:
         title: Processed Records
         type: table
         description: Bronze/Silver/Gold accounting via Ops HTTP
+      - id: 3010
+        title: Recent pipeline runs (no selection)
+        type: table
+        description: pipeline-run-reports index
+      - id: 3011
+        title: Selected run · funnel stages
+        type: table
+        description: pipeline-run-report funnel
     selector_variables:
       - workflow
       - pipeline

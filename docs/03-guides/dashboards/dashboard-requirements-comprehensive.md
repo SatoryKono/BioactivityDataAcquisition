@@ -401,11 +401,11 @@ L2 diagnostic runtime triage: blockers, latency, backlog, error localization, ha
 - **CTAs**: Review current status, Review range evidence, Inspect top blockers, Inspect active blocker
 
 ### First-screen структура
-- **Tier 1**: `First Action`, `Runtime Status`, `Runtime Telemetry Gap`, `Monitor Runtime Blockers`, `Runtime Blockers`
+- **Tier 1**: `First Action`, `Runtime Status`, `Metrics Evidence`, `Monitor Runtime Blockers`, `Runtime Blockers`
 - `Runtime Status` is an expanded mirror of compact shared-shell `Status`, not an independent second current-status signal.
 - **Tier 2**: rows `Detect`, `Localize`, `Escalate` и `Tracing-only Log Hygiene (requires optional tracing profile)` collapsed by default
 - **Tier 3**: selected-range evidence ниже
-- `Runtime Status` читает `bioetl_runtime_current_status_trusted`; любой `Runtime Telemetry Gap > 0` принудительно даёт `3=INCOMPLETE`.
+- `Runtime Status` читает `bioetl_runtime_current_status_trusted`; любой `Metrics Evidence > 0` принудительно даёт `3=INCOMPLETE`.
 
 ### KPI ownership (canonical mirrors)
 - Status → trusted derivative (canonical verdict: `bioetl-overview-v2`)
@@ -504,16 +504,16 @@ Incident triage по provider health: latency/failures/degraded/retries exhauste
 - `0..6` bus only (adjuncts removed)
 
 ### Required panel links
-- Panel `9102` (Inspect DQ Current Reasons) → Open Silver Reject Explorer
+- Panel `9102` (Now · DQ Current Reasons) → Open Silver Reject Explorer
 
 ### First Action Contract (panel `9103`)
 - **Min CTA**: 3, **Max CTA**: 3
 - **CTAs**: Review current status, Inspect current reasons, Open Silver Reject Explorer
 
 ### First-screen структура
-- **Tier 1**: `Monitor DQ Current Status`, `Monitor DQ Threshold State`, `Inspect DQ Current Reasons`, `Review: First Action`
+- **Tier 1**: `Monitor DQ Current Status`, `Now · DQ Threshold State`, `Now · DQ Current Reasons`, `Review: First Action`
 - `Monitor DQ Current Status` is an expanded mirror of compact shared-shell `Status`, not an independent second current-status signal.
-- **Tier 2**: compact current-context band: `Monitor: Data Quality Score (Volume-weighted)`, `Monitor: Worst-Entity DQ Score`, `Time Range · Worst Freshness Age (hours; SLA 24/72)`, `Track: Records Quarantined in Range`, `Track: Silver Filter Rejects in Range`, `Track: DQ Blocked Records in Range (Evidence)`
+- **Tier 2**: compact current-context band: `Monitor: Data Quality Score (Volume-weighted)`, `Monitor: Worst-Entity DQ Score`, `Time Range · Worst Freshness Age (hours; SLA 24/72)`, `Range · Records Quarantined`, `Range · Silver Filter Rejects`, `Track: DQ Blocked Records in Range (Evidence)`
 - Freshness panel uses hours (`unit=h`) with WARN/CRIT thresholds `24/72`; score panels `id=2` and `id=5` remain stats, not gauges.
 - **Tier 3**: полноширинный `Track Range Evidence: Bronze -> Silver -> Gold`
 - **Tier 4**: rows `Silver Structural / Gold Contract-Semantic Rejects` и `Validation Failures / Runtime Diagnostics / Trends` collapsed by default

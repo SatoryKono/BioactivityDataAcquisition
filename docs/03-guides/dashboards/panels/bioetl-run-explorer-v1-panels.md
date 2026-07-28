@@ -1,12 +1,13 @@
 # BioETL Run Explorer - Panels Documentation
 
-**Dashboard file:** `grafana/dashboards/bioetl-run-explorer-v1.json`  
+**Dashboard file:** `grafana/dashboards/bioetl-run-explorer-v1.json`
 **UID:** `bioetl-run-explorer-v1`
 
 ## Overview
 
-Run-centric workspace (Phase-2). Single-run identity and processed-record
-accounting via **BioETL Ops HTTP**. `run_id` is never a Prometheus label.
+Run-centric workspace (DRM residual). Exact completed-run narrative via
+**BioETL Ops HTTP** `pipeline_run_report_v1`. `run_id` is never a Prometheus label.
+Aggregate fleet state stays on other boards.
 
 ## Key Panels
 
@@ -17,7 +18,7 @@ accounting via **BioETL Ops HTTP**. `run_id` is never a Prometheus label.
 
 ### 2. Run Scope
 - **Type:** Text
-- **Purpose:** Explicit HTTP-only run_id contract and read order.
+- **Purpose:** Explicit HTTP-only run_id contract; no-selection vs selected-run read order.
 - **Data sources:** Dashboard variables and operator copy.
 
 ### 3. ID
@@ -30,7 +31,32 @@ accounting via **BioETL Ops HTTP**. `run_id` is never a Prometheus label.
 - **Purpose:** Bronze/Silver/Gold stage/outcome accounting.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/processed-records` (not Prometheus).
 
-### 5. Next actions (≤4)
+### 5. Recent pipeline runs (no selection)
+- **Type:** Table
+- **Purpose:** Index of recent `pipeline_run_report_v1` files to pick `run_id`.
+- **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-reports`
+
+### 6. Selected run · funnel stages
+- **Type:** Table
+- **Purpose:** Stage funnel (records_in/out, balance) for exact run.
+- **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `funnel`
+
+### 7. Selected run · top reasons
+- **Type:** Table
+- **Purpose:** Top removal/reason codes for exact run.
+- **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `reasons_top_n`
+
+### 8. Selected run · artifacts
+- **Type:** Table
+- **Purpose:** Artifact refs (report paths, exports) for exact run.
+- **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `artifacts`
+
+### 9. Selected run · stage timings / failure (optional)
+- **Type:** Text
+- **Purpose:** Documents optional stage_timings/failure blocks (PARTIAL when absent; not waterfall).
+- **Data sources:** Static operator copy pointing at pipeline-run-report.
+
+### 10. Next actions (≤4)
 - **Type:** Text
 - **Purpose:** Trust / DQ / Incident / CLI forensic hops (dashboard hops via Navigation).
 - **Data sources:** Static operator copy.

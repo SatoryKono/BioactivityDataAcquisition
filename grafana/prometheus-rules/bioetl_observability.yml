@@ -708,13 +708,13 @@ groups:
         labels:
           reason: quarantined_records
           severity: warn
-          action_target: silver_reject_explorer
+          action_target: data_quality
         expr: max by (pipeline) (max_over_time(bioetl_dq_records_quarantined_total[15m])) > bool 0
       - record: bioetl_dq_current_reason
         labels:
           reason: silver_filter_rejects
           severity: warn
-          action_target: silver_reject_explorer
+          action_target: data_quality
         expr: max by (pipeline) (max_over_time(bioetl_silver_filter_rejections_total[15m])) > bool 0
 
       - record: bioetl_dq_current_status

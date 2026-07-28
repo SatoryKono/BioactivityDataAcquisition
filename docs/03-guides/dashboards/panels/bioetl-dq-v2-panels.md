@@ -48,12 +48,12 @@ is `SELECTED RUN`, and score/count/freshness evidence below the answer row is
 - **Purpose:** Compare selected-range record flow and invariant status.
 - **Data sources:** `bioetl_records_processed_total`, `bioetl_record_flow_invariants_total`
 
-### 8. Monitor DQ Threshold State
+### 8. Now · DQ Threshold State
 - **Type:** Stat
 - **Purpose:** Show DQ threshold state.
 - **Data sources:** `bioetl_dq_soft_threshold_exceeded`
 
-### 9. Inspect DQ Current Reasons
+### 9. Now · DQ Current Reasons
 - **Type:** Table
 - **Purpose:** Show DQ failure reasons.
 - **Data sources:** `bioetl_dq_current_reason`
@@ -87,7 +87,7 @@ is `SELECTED RUN`, and score/count/freshness evidence below the answer row is
   remains `UNKNOWN`, never a synthetic zero.
 - **Data sources:** `bioetl_dq_validation_score`
 
-### 15. Track: Records Quarantined in Range
+### 15. Range · Records Quarantined
 - **Type:** Stat
 - **Purpose:** Count quarantined records.
 - **Data sources:** `bioetl_dq_records_quarantined_total`
@@ -113,7 +113,7 @@ is `SELECTED RUN`, and score/count/freshness evidence below the answer row is
 - **Purpose:** Show latest successful data timestamp.
 - **Data sources:** `bioetl_data_freshness_seconds`
 
-### 20. Track: Silver Filter Rejects in Range
+### 20. Range · Silver Filter Rejects
 - **Type:** Stat
 - **Purpose:** Count Silver filter rejects.
 - **Data sources:** `bioetl_silver_filter_rejections_total`
@@ -223,7 +223,7 @@ is `SELECTED RUN`, and score/count/freshness evidence below the answer row is
   rules and validation failure metrics.
 - Legacy aggregate names for generic DQ scores, rule pass rates, Silver reject
   rates, and validation errors are intentionally not documented here.
-- `Track: Records Quarantined in Range`, `Track: Silver Filter Rejects in
+- `Range · Records Quarantined`, `Range · Silver Filter Rejects` in
   Range`, and `Track: DQ Blocked Records in Range (Evidence)` render a zero as
   neutral valid-empty TIME RANGE evidence. They do not override a CURRENT
   WARN/CRIT verdict.

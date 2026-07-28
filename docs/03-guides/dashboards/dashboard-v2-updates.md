@@ -10,6 +10,15 @@ Latest dashboard UX artifact for current shipped JSON changes:
 `docs/reports/dashboard-ux-checks/2026-07-28.md`
 (prior baseline: `docs/reports/dashboard-ux-checks/2026-05-19.md`)
 
+## DRM residual migration (2026-07-28, epic #6844)
+
+- Metrics Evidence replaces SCRAPING jargon on Runtime trust gate.
+- DQ Now vs Range lanes no longer peer-compete on first path.
+- Incident: Active Suspects by domain; Current Alerts + Alert State History (range).
+- Run Explorer: pipeline-run-reports list + pipeline-run-report funnel/reasons/artifacts.
+- Recording rules: retired `action_target=silver_reject_explorer` → `data_quality`.
+- UX freshness gate: calendar today/yesterday (no frozen 2026-05-19 policy date).
+
 
 Version: 1.0.2
 Status: active
@@ -40,7 +49,7 @@ notes. Если prose ниже расходится с JSON, править ну
 - Operator UX foundation: `operator-ux-v2.md`, `verdict-ontology.md`, `migration-map-v2.md`.
 - First-screen evidence density on primary five boards; shared context shell retained.
 - Adjunct workspaces: `bioetl-incident-v1`, `bioetl-run-explorer-v1` (portfolio = 7).
-- Runtime Telemetry Gap remains the scrape/metrics-trust gate title (operator wording in description).
+- Metrics Evidence remains the scrape/metrics-trust gate title (operator wording in description).
 - First Action panels remain the primary CTA surface across boards.
 - Provider causes use existing `bioetl_provider_current_cause` recording rules.
 
@@ -115,7 +124,7 @@ notes. Если prose ниже расходится с JSON, править ну
   `Workflow Run Outcomes / Range`, `First Action`. `Workflow Run Outcomes /
   Range` is a compact neutral `stat` so empty selected-range evidence does not
   render as large colored `success=0` / `failed=0` bars.
-- `bioetl-runtime` keeps `Runtime Telemetry Gap` as a first-screen datasource
+- `bioetl-runtime` keeps `Metrics Evidence` as a first-screen datasource
   trust marker and now reserves readable dashboard width for that panel.
   `Status` / `Runtime Status` are trust-gated by this marker, and compact
   selected-range zero cards render as neutral evidence instead of green
@@ -150,9 +159,9 @@ notes. Если prose ниже расходится с JSON, править ну
    shipped `First Action`.
 4. Updated panel-title/checklist/requirements/test-proposal mirrors to the
    current shipped workflow and overview titles.
-5. Widened `bioetl-runtime` first-screen `Runtime Telemetry Gap` panel so the
+5. Widened `bioetl-runtime` first-screen `Metrics Evidence` panel so the
    trust marker remains readable above fold.
-6. Made Runtime status trust-gated by `Runtime Telemetry Gap` and neutralized
+6. Made Runtime status trust-gated by `Metrics Evidence` and neutralized
    compact selected-range zero cards so scrape/rule gaps visually outrank `0`
    evidence.
 7. Converted `Workflow Run Outcomes / Range` from a colored bar gauge to a
