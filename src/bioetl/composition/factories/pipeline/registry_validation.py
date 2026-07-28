@@ -9,22 +9,16 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 from pathlib import Path
-from typing import TYPE_CHECKING
 
-
-from bioetl.infrastructure.config.config_root import resolve_configs_root
-
-if TYPE_CHECKING:
-    from bioetl.composition.factories.pipeline.config_types import PipelineFactoryConfig
-
-__all__ = ["validate_registry_manifest"]
-
-
+from bioetl.composition.factories.pipeline.config_types import PipelineFactoryConfig
 from bioetl.composition.factories.pipeline_support.registry_validation_helpers import (
     _iter_entity_files,
-    _validate_registry_entry,
     _validate_entity_config_against_registry,
+    _validate_registry_entry,
 )
+from bioetl.infrastructure.config.config_root import resolve_configs_root
+
+__all__ = ["validate_registry_manifest"]
 
 
 def validate_registry_manifest(

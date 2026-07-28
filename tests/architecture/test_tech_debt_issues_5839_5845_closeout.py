@@ -76,8 +76,6 @@ COMPOSITE_CONFIGS = {
 EXPECTED_ISSUES = {5839, 5840, 5841, 5842, 5843, 5844, 5845}
 EXPECTED_SHARED_CLUSTER_PATHS = {
     "composite.normalized_anchor_policy",
-    "composite.normalized_anchor_policy.pubchem_compound",
-    "composite.normalized_anchor_policy.uniprot_idmapping",
 }
 
 

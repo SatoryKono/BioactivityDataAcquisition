@@ -678,14 +678,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "81",
-      "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_lineage.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_log_silver_audit_skips_when_no_audit"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "297",
+      "line": "298",
       "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_lineage.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_write_silver_without_bronze_refs"
@@ -786,7 +779,7 @@
     "architecture_helper_guard": 16,
     "benchmark_or_performance": 0,
     "helper_asserted": 0,
-    "intentional_no_exception_contract": 91,
+    "intentional_no_exception_contract": 90,
     "weak_no_value": 0
   },
   "assertless_examples": [
@@ -1046,9 +1039,9 @@
       }
     },
     "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_lineage.py": {
-      "assertless_tests": 2,
+      "assertless_tests": 1,
       "categories": {
-        "intentional_no_exception_contract": 2
+        "intentional_no_exception_contract": 1
       }
     },
     "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py": {
@@ -1130,21 +1123,8 @@
       }
     }
   },
-  "assertless_total_candidates": 107,
-  "budget_violations": [
-    {
-      "actual": 1,
-      "budget": "duplicate_test_names_max",
-      "expected_max": 0,
-      "metric": "duplicate_test_names"
-    },
-    {
-      "actual": 2,
-      "budget": "duplicate_test_name_occurrences_max",
-      "expected_max": 0,
-      "metric": "duplicate_test_name_occurrences"
-    }
-  ],
+  "assertless_total_candidates": 106,
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1289,31 +1269,16 @@
     }
   },
   "date_today_call_sites": 0,
-  "duplicate_test_name_inventory": [
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "e2e": 1,
-        "unit": 1
-      },
-      "locations": [
-        "tests/e2e/test_pipeline_graceful_shutdown_e2e.py:55",
-        "tests/unit/application/core/test_arch_cont_coverage_burn_down.py:64"
-      ],
-      "name": "test_shutdown_signal_request_is_idempotent",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    }
-  ],
+  "duplicate_test_name_inventory": [],
   "duplicate_test_name_inventory_summary": {
-    "cross_file_groups": 1,
-    "duplicate_occurrences": 2,
+    "cross_file_groups": 0,
+    "duplicate_occurrences": 0,
     "mixed_groups": 0,
     "same_file_groups": 0,
-    "total_duplicate_names": 1
+    "total_duplicate_names": 0
   },
-  "duplicate_test_name_occurrences": 2,
-  "duplicate_test_names": 1,
+  "duplicate_test_name_occurrences": 0,
+  "duplicate_test_names": 0,
   "fixture_asset_duplication": {
     "duplicate_files": 0,
     "duplicate_groups": 0,
@@ -1332,7 +1297,7 @@
       ".yml"
     ]
   },
-  "intentional_no_exception_contract": 91,
+  "intentional_no_exception_contract": 90,
   "markerless_examples": [],
   "markerless_test_functions": 0,
   "parse_errors": [],
@@ -2026,14 +1991,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "81",
-        "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_lineage.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_log_silver_audit_skips_when_no_audit"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "297",
+        "line": "298",
         "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_lineage.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_write_silver_without_bronze_refs"
@@ -2134,7 +2092,7 @@
       "architecture_helper_guard": 16,
       "benchmark_or_performance": 0,
       "helper_asserted": 0,
-      "intentional_no_exception_contract": 91,
+      "intentional_no_exception_contract": 90,
       "weak_no_value": 0
     },
     "assertless_examples": [
@@ -2164,7 +2122,7 @@
       "tests/unit/application/core/test_otel_spans.py:557",
       "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:102"
     ],
-    "assertless_total_candidates": 107,
+    "assertless_total_candidates": 106,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -2309,31 +2267,16 @@
       }
     },
     "date_today_call_sites": 0,
-    "duplicate_test_name_inventory": [
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "e2e": 1,
-          "unit": 1
-        },
-        "locations": [
-          "tests/e2e/test_pipeline_graceful_shutdown_e2e.py:55",
-          "tests/unit/application/core/test_arch_cont_coverage_burn_down.py:64"
-        ],
-        "name": "test_shutdown_signal_request_is_idempotent",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      }
-    ],
+    "duplicate_test_name_inventory": [],
     "duplicate_test_name_inventory_summary": {
-      "cross_file_groups": 1,
-      "duplicate_occurrences": 2,
+      "cross_file_groups": 0,
+      "duplicate_occurrences": 0,
       "mixed_groups": 0,
       "same_file_groups": 0,
-      "total_duplicate_names": 1
+      "total_duplicate_names": 0
     },
-    "duplicate_test_name_occurrences": 2,
-    "duplicate_test_names": 1,
+    "duplicate_test_name_occurrences": 0,
+    "duplicate_test_names": 0,
     "fixture_asset_duplication": {
       "duplicate_files": 0,
       "duplicate_groups": 0,
@@ -2411,31 +2354,22 @@
       "top_level_directory_count": 15,
       "top_level_directory_count_including_pycache": 16
     },
-    "top_duplicate_test_names": [
-      {
-        "count": 2,
-        "examples": [
-          "tests/e2e/test_pipeline_graceful_shutdown_e2e.py:55",
-          "tests/unit/application/core/test_arch_cont_coverage_burn_down.py:64"
-        ],
-        "name": "test_shutdown_signal_request_is_idempotent"
-      }
-    ],
+    "top_duplicate_test_names": [],
     "total_test_files": 2098,
-    "total_test_functions": 23067,
+    "total_test_functions": 23068,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "a570474a92b13ce8a9f9c360d254dbcddc2aa5d2441bab45e397f296dd060183",
+  "source_tree_sha256": "28617df649c80e6c1439bf265176680050117a8697648abfb18a97dfe364f10c",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 107,
+    "assertless_total_candidates": 106,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
-    "duplicate_test_name_occurrences": 2,
-    "duplicate_test_names": 1,
-    "intentional_no_exception_contract": 91,
+    "duplicate_test_name_occurrences": 0,
+    "duplicate_test_names": 0,
+    "intentional_no_exception_contract": 90,
     "markerless_examples": [],
     "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
@@ -2487,18 +2421,9 @@
     "top_level_directory_count": 15,
     "top_level_directory_count_including_pycache": 16
   },
-  "top_duplicate_test_names": [
-    {
-      "count": 2,
-      "examples": [
-        "tests/e2e/test_pipeline_graceful_shutdown_e2e.py:55",
-        "tests/unit/application/core/test_arch_cont_coverage_burn_down.py:64"
-      ],
-      "name": "test_shutdown_signal_request_is_idempotent"
-    }
-  ],
+  "top_duplicate_test_names": [],
   "total_test_files": 2098,
-  "total_test_functions": 23067,
+  "total_test_functions": 23068,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

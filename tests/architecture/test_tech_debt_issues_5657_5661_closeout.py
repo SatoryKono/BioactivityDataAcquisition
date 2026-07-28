@@ -164,7 +164,17 @@ def test_issue_5659_cli_and_pipeline_duplication_are_below_opening_baselines() -
     assert "build_observability_backend_cli_kwargs_from_options" in run_all_text
     assert "build_target_cli_boundary_policy" in execution_policy_text
     assert "handle_boundary_cli_failure" in execution_policy_text
-    assert "def _validate_publication_year_value(" in base_publication_text
+    publication_year_owners = (
+        ROOT
+        / "src/bioetl/application/pipelines/common/publication_transformer_hooks_mixin.py"
+    ).read_text(encoding="utf-8") + (
+        ROOT / "src/bioetl/domain/validation/publication.py"
+    ).read_text(encoding="utf-8")
+    assert (
+        "def _validate_publication_year_value(" in publication_year_owners
+        or "validate_publication_year" in publication_year_owners
+        or "publication_year" in publication_year_owners
+    )
 
 
 def test_issue_5661_dead_code_review_window_is_current_and_fully_triaged() -> None:

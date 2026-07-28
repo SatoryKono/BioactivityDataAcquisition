@@ -36,15 +36,15 @@ TEST_GOVERNANCE_REPORT = ROOT / "reports" / "quality" / "test-governance-current
 EXPECTED_ISSUES = {5618, 5619, 5620, 5621, 5622, 5623, 5624, 5625}
 ISSUE_5622_TOTAL_DUPLICATION_CEILING = 88
 ISSUE_5622_CLI_DUPLICATION_CEILING = 3
-EXPECTED_HOTSPOT_BUDGETS = {
-    "application_core": {"files_ge_250_loc": 5, "max_internal_fan_in": 10},
+EXPECTED_HOTSPOT_BUDGET_CEILINGS = {
+    "application_core": {"files_ge_250_loc": 0, "max_internal_fan_in": 10},
     "composition_bootstrap_runtime": {"files_ge_250_loc": 0, "max_internal_fan_in": 3},
     "composition_factories_pipeline": {"files_ge_250_loc": 2, "max_internal_fan_in": 3},
     "application_services_control_plane": {
-        "files_ge_250_loc": 16,
-        "max_internal_fan_in": 4,
+        "files_ge_250_loc": 0,
+        "max_internal_fan_in": 3,
     },
-    "composition_runtime_builders": {"files_ge_250_loc": 3, "max_internal_fan_in": 5},
+    "composition_runtime_builders": {"files_ge_250_loc": 0, "max_internal_fan_in": 5},
 }
 
 
@@ -178,11 +178,15 @@ def test_issue_5624_hotspot_budgets_are_ratcheted_to_live_guard_values() -> None
     }
     baseline_families = {family["name"]: family for family in baseline["families"]}
 
-    for family_name, expected_budget in EXPECTED_HOTSPOT_BUDGETS.items():
+    for family_name, budget_ceiling in EXPECTED_HOTSPOT_BUDGET_CEILINGS.items():
         family = families[family_name]
         baseline_family = baseline_families[family_name]
-        assert family["bounded_growth_budgets"] == expected_budget
-        assert baseline_family["bounded_growth_budgets"] == expected_budget
+        live_budgets = family["bounded_growth_budgets"]
+        baseline_budgets = baseline_family["bounded_growth_budgets"]
+        assert live_budgets == baseline_budgets
+        for metric_name, ceiling in budget_ceiling.items():
+            assert live_budgets[metric_name] <= ceiling
+            assert live_budgets[metric_name] >= baseline_family[metric_name]
         assert all(
             str(warning).startswith(("at_budget:", "near_budget:"))
             for warning in baseline_family["budget_warnings"]

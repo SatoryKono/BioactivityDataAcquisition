@@ -1,0 +1,311 @@
+rerunning 49 nodes
+[31mF[0m[32m.[0m[32m.[0m[31mF[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[31mF[0m[31mF[0m[31mF[0m[31mF[0m[31mF[0m[31mF[0m[32m.[0m[32m.[0m[31mF[0m[31mF[0m[32m.[0m[32m.[0m[32m.[0m[31mF[0m[32m.[0m[31mF[0m[31mF[0m[32m.[0m[31mF[0m[31mF[0m[32m.[0m[31mF[0m[31mF[0m[31mF[0m[31mF[0m[31mF[0m[31mF[0m[31mF[0m[32m.[0m[32m.[0m[31mF[0m[31mF[0m[31mF[0m[32m.[0m[32m.[0m[31mF[0m[31mF[0m[31mF[0m[32m.[0m[31mF[0m[31m                        [100%][0m
+================================== FAILURES ===================================
+[1m[31mE   AssertionError: assert 'f4f0a98d60f7...a2d366e06c4db' == 'ea3d9f8f3a2e...cafa75d021460'[0m
+[1m[31m      [0m
+[1m[31m      [0m[91m- ea3d9f8f3a2e9df8d01b601175ae1738eb12d296b05e85780aacafa75d021460[39;49;00m[90m[39;49;00m[0m
+[1m[31m      [92m+ f4f0a98d60f7d282788a06cfb78a8e0225e3056305ccc6ee7eca2d366e06c4db[39;49;00m[90m[39;49;00m[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_low_coverage_targeted_tests_6045.py[0m:32: AssertionError: assert 'f4f0a98d60f7...a2d366e06c4db' == 'ea3d9f8f3a2e...cafa75d021460'
+[1m[31mE   AssertionError: assert ['bioetl-run-...::panel=3013'] == [][0m
+[1m[31m      [0m
+[1m[31m      Left contains 4 more items, first extra item: [0m[33m'[39;49;00m[33mbioetl-run-explorer-v1::panel=3010[39;49;00m[33m'[39;49;00m[90m[39;49;00m[0m
+[1m[31m      [0m
+[1m[31m      Full diff:[0m
+[1m[31m      [0m[91m- [][39;49;00m[90m[39;49;00m[0m
+[1m[31m      [92m+ [[39;49;00m[90m[39;49;00m[0m
+[1m[31m      [92m+     'bioetl-run-explorer-v1::panel=3010',[39;49;00m[90m[39;49;00m[0m
+[1m[31m      [92m+     'bioetl-run-explorer-v1::panel=3011',[39;49;00m[90m[39;49;00m[0m
+[1m[31m      [92m+     'bioetl-run-explorer-v1::panel=3012',[39;49;00m[90m[39;49;00m[0m
+[1m[31m      [92m+     'bioetl-run-explorer-v1::panel=3013',[39;49;00m[90m[39;49;00m[0m
+[1m[31m      [92m+ ][39;49;00m[90m[39;49;00m[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_observability_metric_governance.py[0m:167: AssertionError: assert ['bioetl-run-...::panel=3013'] == []
+[1m[31mE   AssertionError: Runtime import SCC scan found unreviewed strongly connected components. Either remove the cycle or add an owner/rationale/review_date entry to ACCEPTED_RUNTIME_SCCS:[0m
+[1m[31m      - bioetl.interfaces.cli.commands.domains.maintenance, bioetl.interfaces.cli.commands.domains.maintenance.command_group, bioetl.interfaces.cli.commands.vacuum[0m
+[1m[31m    assert not [['bioetl.interfaces.cli.commands.domains.maintenance', 'bioetl.interfaces.cli.commands.domains.maintenance.command_group', 'bioetl.interfaces.cli.commands.vacuum']][0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_runtime_import_scc.py[0m:294: AssertionError: Runtime import SCC scan found unreviewed strongly connected components. Either remove the cycle or add an owner/rationale/review_date entry to ACCEPTED_RUNTIME_SCCS:
+[1m[31mE   AssertionError: ADR-050 inventory baseline drifted from generator output. Run: python scripts/data_quality/inventory_silver_filters_migration.py[0m
+[1m[31m      docs\filters\inventory-baseline.csv[0m
+[1m[31m      docs\filters\inventory-baseline.json[0m
+[1m[31m      docs\filters\inventory-baseline.md[0m
+[1m[31m    assert not ['docs\\filters\\inventory-baseline.csv', 'docs\\filters\\inventory-baseline.json', 'docs\\filters\\inventory-baseline.md'][0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_silver_filter_boundary_inventory.py[0m:415: AssertionError: ADR-050 inventory baseline drifted from generator output. Run: python scripts/data_quality/inventory_silver_filters_migration.py
+[1m[31mE   AssertionError: Thin-package source modules must have a same-path owner test or a documented exemption.[0m
+[1m[31m      src/bioetl/application/services/protein/classification_resolution.py -> tests/unit/application/services/protein/test_classification_resolution.py[0m
+[1m[31m    assert not ['src/bioetl/application/services/protein/classification_resolution.py -> tests/unit/application/services/protein/test_classification_resolution.py'][0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_source_test_mapping_policy.py[0m:86: AssertionError: Thin-package source modules must have a same-path owner test or a documented exemption.
+[1m[31mE   assert 3 == 4[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_tech_debt_issue_6060_closeout.py[0m:87: assert 3 == 4
+[1m[31mE   assert 0 < 0[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_tech_debt_issues_5387_5394_closeout.py[0m:139: assert 0 < 0
+[1m[31mE   assert 'resolved_config_hash as a canonical config ' in '"""Validation policy helpers for immutable run-manifest creation."""\n\nfrom __future__ import annotations\n\nfrom bi...st.launch_context.get("required_persistence_profile")\n    )\n    return configured_profile == "degraded_observable"\n'[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_tech_debt_issues_5387_5394_closeout.py[0m:268: assert 'resolved_config_hash as a canonical config ' in '"""Validation policy helpers for immutable run-manifest creation."""\n\nfrom __future__ import annotations\n\nfrom bi...st.launch_context.get("required_persistence_profile")\n    )\n    return configured_profile == "degraded_observable"\n'
+[1m[31mE   AssertionError: assert {'files_ge_25...l_fan_in': 10} == {'files_ge_25...l_fan_in': 10}[0m
+[1m[31m      [0m
+[1m[31m      Omitting 1 identical items, use -vv to show[0m
+[1m[31m      Differing items:[0m
+[1m[31m      [0m{[33m'[39;49;00m[33mfiles_ge_250_loc[39;49;00m[33m'[39;49;00m: [94m0[39;49;00m}[90m[39;49;00m != [0m{[33m'[39;49;00m[33mfiles_ge_250_loc[39;49;00m[33m'[39;49;00m: [94m5[39;49;00m}[90m[39;49;00m[0m
+[1m[31m      [0m
+[1m[31m      Full diff:[0m
+[1m[31m      [0m[90m [39;49;00m {[90m[39;49;00m[0m
+[1m[31m      [91m-     'files_ge_250_loc': 5,[39;49;00m[90m[39;49;00m[0m
+[1m[31m      ?                         ^[90m[39;49;00m[0m
+[1m[31m      [92m+     'files_ge_250_loc': 0,[39;49;00m[90m[39;49;00m[0m
+[1m[31m      ?                         ^[90m[39;49;00m[0m
+[1m[31m      [90m [39;49;00m     'max_internal_fan_in': 10,[90m[39;49;00m[0m
+[1m[31m      [90m [39;49;00m }[90m[39;49;00m[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_tech_debt_issues_5564_5603_closeout.py[0m:123: AssertionError: assert {'files_ge_25...l_fan_in': 10} == {'files_ge_25...l_fan_in': 10}
+[1m[31mE   AssertionError: assert '2026-10-26' == '2026-10-21'[0m
+[1m[31m      [0m
+[1m[31m      [0m[91m- 2026-10-21[39;49;00m[90m[39;49;00m[0m
+[1m[31m      ?          ^[90m[39;49;00m[0m
+[1m[31m      [92m+ 2026-10-26[39;49;00m[90m[39;49;00m[0m
+[1m[31m      ?          ^[90m[39;49;00m[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_tech_debt_issues_5564_5603_closeout.py[0m:146: AssertionError: assert '2026-10-26' == '2026-10-21'
+[1m[31mE   assert 3 == 4[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_tech_debt_issues_5642_5645_closeout.py[0m:98: assert 3 == 4
+[1m[31mE   AssertionError: assert {'retain_cano...ublic_facade'} == {'retain_cano...e_entrypoint'}[0m
+[1m[31m      [0m
+[1m[31m      Extra items in the left set:[0m
+[1m[31m      [0m[33m'[39;49;00m[33mretain_dynamic_entrypoint[39;49;00m[33m'[39;49;00m[90m[39;49;00m[0m
+[1m[31m      [0m[33m'[39;49;00m[33mretain_public_facade[39;49;00m[33m'[39;49;00m[90m[39;49;00m[0m
+[1m[31m      [0m
+[1m[31m      Full diff:[0m
+[1m[31m      [0m[90m [39;49;00m {[90m[39;49;00m[0m
+[1m[31m      [90m [39;49;00m     'retain_canonical_owner_module',[90m[39;49;00m[0m
+[1m[31m      [92m+     'retain_dynamic_entrypoint',[39;49;00m[90m[39;49;00m[0m
+[1m[31m      [90m [39;49;00m     'retain_module_entrypoint',[90m[39;49;00m[0m
+[1m[31m      [92m+     'retain_public_facade',[39;49;00m[90m[39;49;00m[0m
+[1m[31m      [90m [39;49;00m }[90m[39;49;00m[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_tech_debt_issues_5651_5655_closeout.py[0m:222: AssertionError: assert {'retain_cano...ublic_facade'} == {'retain_cano...e_entrypoint'}
+[1m[31mE   assert 'def _validate_publication_year_value(' in '# mypy: disable-error-code="arg-type,unused-ignore"\n"""Base Publication Transformer with Template Method pattern.\n\...ex=index,\n            prepared=prepared,\n            normalized_business_data=normalized_business_data,\n        )\n'[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_tech_debt_issues_5657_5661_closeout.py[0m:167: assert 'def _validate_publication_year_value(' in '# mypy: disable-error-code="arg-type,unused-ignore"\n"""Base Publication Transformer with Template Method pattern.\n\...ex=index,\n            prepared=prepared,\n            normalized_business_data=normalized_business_data,\n        )\n'
+[1m[31mE   AssertionError: assert {'retain_cano...ublic_facade'} == {'retain_cano...e_entrypoint'}[0m
+[1m[31m      [0m
+[1m[31m      Extra items in the left set:[0m
+[1m[31m      [0m[33m'[39;49;00m[33mretain_dynamic_entrypoint[39;49;00m[33m'[39;49;00m[90m[39;49;00m[0m
+[1m[31m      [0m[33m'[39;49;00m[33mretain_public_facade[39;49;00m[33m'[39;49;00m[90m[39;49;00m[0m
+[1m[31m      [0m
+[1m[31m      Full diff:[0m
+[1m[31m      [0m[90m [39;49;00m {[90m[39;49;00m[0m
+[1m[31m      [90m [39;49;00m     'retain_canonical_owner_module',[90m[39;49;00m[0m
+[1m[31m      [92m+     'retain_dynamic_entrypoint',[39;49;00m[90m[39;49;00m[0m
+[1m[31m      [90m [39;49;00m     'retain_module_entrypoint',[90m[39;49;00m[0m
+[1m[31m      [92m+     'retain_public_facade',[39;49;00m[90m[39;49;00m[0m
+[1m[31m      [90m [39;49;00m }[90m[39;49;00m[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_tech_debt_issues_5677_5685_closeout.py[0m:207: AssertionError: assert {'retain_cano...ublic_facade'} == {'retain_cano...e_entrypoint'}
+[1m[31mE   assert 6 == 2[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_tech_debt_issues_5707_5715_closeout.py[0m:329: assert 6 == 2
+[1m[31mE   assert 107 <= 106[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_tech_debt_issues_5752_5755_closeout.py[0m:119: assert 107 <= 106
+[1m[31mE   assert 10 == 20[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_tech_debt_issues_5790_5796_closeout.py[0m:161: assert 10 == 20
+[1m[31mE   assert 6 == 2[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_tech_debt_issues_5790_5796_closeout.py[0m:334: assert 6 == 2
+[1m[31mE   assert 10 == 20[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_tech_debt_issues_5790_5796_closeout.py[0m:365: assert 10 == 20
+[1m[31mE   assert 6 == 2[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_tech_debt_issues_5839_5845_closeout.py[0m:215: assert 6 == 2
+[1m[31mE   AssertionError: assert False[0m
+[1m[31m     +  where False = <built-in method issubset of set object at 0x0000024C68626180>({'$defs.ColumnGroupSchema', '$defs.ConditionalValidationConfig', '$defs.CrossFieldValidationConfig', '$defs.DQReportYamlConfig', '$defs.FieldValidationConfig', '$defs.GoldFiltersConfig.properties', ...})[0m
+[1m[31m     +    where <built-in method issubset of set object at 0x0000024C68626180> = {'composite.normalized_anchor_policy', 'composite.normalized_anchor_policy.pubchem_compound', 'composite.normalized_anchor_policy.uniprot_idmapping'}.issubset[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_tech_debt_issues_5839_5845_closeout.py[0m:262: AssertionError: assert False
+[1m[31mE   assert 2309 == 2281[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_tech_debt_issues_5933_5944_closeout.py[0m:119: assert 2309 == 2281
+[1m[31mE   assert 0 == 11[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_tech_debt_issues_6159_6169_closeout.py[0m:175: assert 0 == 11
+[1m[31mE   assert 6 == 2[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_tech_debt_issues_6159_6169_closeout.py[0m:231: assert 6 == 2
+[1m[31mE   AssertionError: assert {'public_lazy...entory.yaml'}} == {}[0m
+[1m[31m      [0m
+[1m[31m      Left contains 1 more item:[0m
+[1m[31m      [0m{[33m'[39;49;00m[33mpublic_lazy_facade_rows[39;49;00m[33m'[39;49;00m: {[33m'[39;49;00m[33mcurrent[39;49;00m[33m'[39;49;00m: [94m53[39;49;00m,[90m[39;49;00m[0m
+[1m[31m                                   [33m'[39;49;00m[33mmax[39;49;00m[33m'[39;49;00m: [94m53[39;49;00m,[90m[39;49;00m[0m
+[1m[31m                                   [33m'[39;49;00m[33mopening[39;49;00m[33m'[39;49;00m: [94m52[39;49;00m,[90m[39;49;00m[0m
+[1m[31m                                   [33m'[39;49;00m[33msource[39;49;00m[33m'[39;49;00m: [33m'[39;49;00m[33mconfigs/quality/public_lazy_facade_inventory.yaml[39;49;00m[33m'[39;49;00m}}[90m[39;49;00m[0m
+[1m[31m      [0m
+[1m[31m      Full diff:[0m
+[1m[31m      [0m[91m- {}[39;49;00m[90m[39;49;00m[0m
+[1m[31m      [92m+ {[39;49;00m[90m[39;49;00m[0m
+[1m[31m      [92m+     'public_lazy_facade_rows': {[39;49;00m[90m[39;49;00m[0m
+[1m[31m      [92m+         'current': 53,[39;49;00m[90m[39;49;00m[0m
+[1m[31m      [92m+         'max': 53,[39;49;00m[90m[39;49;00m[0m
+[1m[31m      [92m+         'opening': 52,[39;49;00m[90m[39;49;00m[0m
+[1m[31m      [92m+         'source': 'configs/quality/public_lazy_facade_inventory.yaml',[39;49;00m[90m[39;49;00m[0m
+[1m[31m      [92m+     },[39;49;00m[90m[39;49;00m[0m
+[1m[31m      [92m+ }[39;49;00m[90m[39;49;00m[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_tech_debt_issues_6220_6229_closeout.py[0m:69: AssertionError: assert {'public_lazy...entory.yaml'}} == {}
+[1m[31mE   assert 1248 == 1250[0m
+[1m[31m     +  where 1250 = int(1250)[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_test_governance_audit.py[0m:664: assert 1248 == 1250
+[1m[31mE   AssertionError: assert ['live_ci_sta...nch_coverage'] == ['live_ci_sta...erage-verify'][0m
+[1m[31m      [0m
+[1m[31m      Left contains one more item: [0m[33m'[39;49;00m[33mbranch_coverage[39;49;00m[33m'[39;49;00m[90m[39;49;00m[0m
+[1m[31m      [0m
+[1m[31m      Full diff:[0m
+[1m[31m      [0m[90m [39;49;00m [[90m[39;49;00m[0m
+[1m[31m      [90m [39;49;00m     'live_ci_status',[90m[39;49;00m[0m
+[1m[31m      [90m [39;49;00m     'coverage-verify',[90m[39;49;00m[0m
+[1m[31m      [92m+     'branch_coverage',[39;49;00m[90m[39;49;00m[0m
+[1m[31m      [90m [39;49;00m ][90m[39;49;00m[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_test_matrix_lane_policy.py[0m:204: AssertionError: assert ['live_ci_sta...nch_coverage'] == ['live_ci_sta...erage-verify']
+[1m[31mE   AssertionError: assert 'not repo_bac...nd not memory' == 'not repo_bac...nd not memory'[0m
+[1m[31m      [0m
+[1m[31m      [0m[91m- not repo_backed and not slow and not benchmark and not memory[39;49;00m[90m[39;49;00m[0m
+[1m[31m      [92m+ not repo_backed and not subprocess_backed and not slow and not benchmark and not memory[39;49;00m[90m[39;49;00m[0m
+[1m[31m      ?                        ++++++++++++++++++++++++++[90m[39;49;00m[0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_test_matrix_lane_policy.py[0m:265: AssertionError: assert 'not repo_bac...nd not memory' == 'not repo_bac...nd not memory'
+[1m[31mE   AssertionError: TYPE_CHECKING density grew in hotspot zone composition/factories:[0m
+[1m[31m        - files_with_type_checking=52 (budget=51)[0m
+[1m[31m        - type_checking_blocks=52 (budget=51)[0m
+[1m[31m      Top offenders:[0m
+[1m[31m        - composition/factories/pipeline/runner_assembly.py: imports=13, blocks=1[0m
+[1m[31m        - composition/factories/services/_bundle_support.py: imports=12, blocks=1[0m
+[1m[31m        - composition/factories/services/bundle.py: imports=10, blocks=1[0m
+[1m[31m        - composition/factories/services/_builder_record_processor_support.py: imports=10, blocks=1[0m
+[1m[31m        - composition/factories/storage/write_mixin.py: imports=9, blocks=1[0m
+[1m[31m        - composition/factories/storage/_layer_writers.py: imports=9, blocks=1[0m
+[1m[31m        - composition/factories/storage/_helpers.py: imports=9, blocks=1[0m
+[1m[31m        - composition/factories/services/builder.py: imports=8, blocks=1[0m
+[1m[31m      Review RF-006 before increasing this budget.[0m
+[1m[31m    assert not ['files_with_type_checking=52 (budget=51)', 'type_checking_blocks=52 (budget=51)'][0m
+[1m[31mE:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\architecture\test_type_checking_density.py[0m:203: AssertionError: TYPE_CHECKING density grew in hotspot zone composition/factories:
+[36m[1m=========================== short test summary info ===========================[0m
+[31mFAILED[0m tests/architecture/test_low_coverage_targeted_tests_6045.py::[1mtest_issue_6045_targeted_low_coverage_closeout_is_coherent[0m - AssertionError: assert 'f4f0a98d60f7...a2d366e06c4db' == 'ea3d9f8f3a2e...cafa75d021460'
+  
+  [0m[91m- ea3d9f8f3a2e9df8d01b601175ae1738eb12d296b05e85780aacafa75d021460[39;49;00m[90m[39;49;00m
+  [92m+ f4f0a98d60f7d282788a06cfb78a8e0225e3056305ccc6ee7eca2d366e06c4db[39;49;00m[90m[39;49;00m
+[31mFAILED[0m tests/architecture/test_observability_metric_governance.py::[1mtest_typed_observability_inventory_is_bidirectional_and_source_specific[0m - AssertionError: assert ['bioetl-run-...::panel=3013'] == []
+  
+  Left contains 4 more items, first extra item: [0m[33m'[39;49;00m[33mbioetl-run-explorer-v1::panel=3010[39;49;00m[33m'[39;49;00m[90m[39;49;00m
+  
+  Full diff:
+  [0m[91m- [][39;49;00m[90m[39;49;00m
+  [92m+ [[39;49;00m[90m[39;49;00m
+  [92m+     'bioetl-run-explorer-v1::panel=3010',[39;49;00m[90m[39;49;00m
+  [92m+     'bioetl-run-explorer-v1::panel=3011',[39;49;00m[90m[39;49;00m
+  [92m+     'bioetl-run-explorer-v1::panel=3012',[39;49;00m[90m[39;49;00m
+  [92m+     'bioetl-run-explorer-v1::panel=3013',[39;49;00m[90m[39;49;00m
+  [92m+ ][39;49;00m[90m[39;49;00m
+[31mFAILED[0m tests/architecture/test_runtime_import_scc.py::[1mtest_runtime_import_graph_has_no_unreviewed_sccs[0m - AssertionError: Runtime import SCC scan found unreviewed strongly connected components. Either remove the cycle or add an owner/rationale/review_date entry to ACCEPTED_RUNTIME_SCCS:
+  - bioetl.interfaces.cli.commands.domains.maintenance, bioetl.interfaces.cli.commands.domains.maintenance.command_group, bioetl.interfaces.cli.commands.vacuum
+assert not [['bioetl.interfaces.cli.commands.domains.maintenance', 'bioetl.interfaces.cli.commands.domains.maintenance.command_group', 'bioetl.interfaces.cli.commands.vacuum']]
+[31mFAILED[0m tests/architecture/test_silver_filter_boundary_inventory.py::[1mtest_inventory_baseline_outputs_match_generator[0m - AssertionError: ADR-050 inventory baseline drifted from generator output. Run: python scripts/data_quality/inventory_silver_filters_migration.py
+  docs\filters\inventory-baseline.csv
+  docs\filters\inventory-baseline.json
+  docs\filters\inventory-baseline.md
+assert not ['docs\\filters\\inventory-baseline.csv', 'docs\\filters\\inventory-baseline.json', 'docs\\filters\\inventory-baseline.md']
+[31mFAILED[0m tests/architecture/test_source_test_mapping_policy.py::[1mtest_thin_package_modules_have_same_path_tests_or_documented_exemption[0m - AssertionError: Thin-package source modules must have a same-path owner test or a documented exemption.
+  src/bioetl/application/services/protein/classification_resolution.py -> tests/unit/application/services/protein/test_classification_resolution.py
+assert not ['src/bioetl/application/services/protein/classification_resolution.py -> tests/unit/application/services/protein/test_classification_resolution.py']
+[31mFAILED[0m tests/architecture/test_tech_debt_issue_6060_closeout.py::[1mtest_issue_6060_composition_runtime_builder_fan_in_has_headroom[0m - assert 3 == 4
+[31mFAILED[0m tests/architecture/test_tech_debt_issues_5387_5394_closeout.py::[1mtest_issue_5389_control_plane_use_case_seams_remain_explicit[0m - assert 0 < 0
+[31mFAILED[0m tests/architecture/test_tech_debt_issues_5387_5394_closeout.py::[1mtest_issue_5394_legacy_checkpoint_hydration_is_confined_to_load_seam[0m - assert 'resolved_config_hash as a canonical config ' in '"""Validation policy helpers for immutable run-manifest creation."""\n\nfrom __future__ import annotations\n\nfrom bi...st.launch_context.get("required_persistence_profile")\n    )\n    return configured_profile == "degraded_observable"\n'
+[31mFAILED[0m tests/architecture/test_tech_debt_issues_5564_5603_closeout.py::[1mtest_issue_5599_active_hotspot_total_loc_decreases_without_budget_growth[0m - AssertionError: assert {'files_ge_25...l_fan_in': 10} == {'files_ge_25...l_fan_in': 10}
+  
+  Omitting 1 identical items, use -vv to show
+  Differing items:
+  [0m{[33m'[39;49;00m[33mfiles_ge_250_loc[39;49;00m[33m'[39;49;00m: [94m0[39;49;00m}[90m[39;49;00m != [0m{[33m'[39;49;00m[33mfiles_ge_250_loc[39;49;00m[33m'[39;49;00m: [94m5[39;49;00m}[90m[39;49;00m
+  
+  Full diff:
+  [0m[90m [39;49;00m {[90m[39;49;00m
+  [91m-     'files_ge_250_loc': 5,[39;49;00m[90m[39;49;00m
+  ?                         ^[90m[39;49;00m
+  [92m+     'files_ge_250_loc': 0,[39;49;00m[90m[39;49;00m
+  ?                         ^[90m[39;49;00m
+  [90m [39;49;00m     'max_internal_fan_in': 10,[90m[39;49;00m
+  [90m [39;49;00m }[90m[39;49;00m
+[31mFAILED[0m tests/architecture/test_tech_debt_issues_5564_5603_closeout.py::[1mtest_issue_5600_zero_import_inventory_is_owned_and_time_bounded[0m - AssertionError: assert '2026-10-26' == '2026-10-21'
+  
+  [0m[91m- 2026-10-21[39;49;00m[90m[39;49;00m
+  ?          ^[90m[39;49;00m
+  [92m+ 2026-10-26[39;49;00m[90m[39;49;00m
+  ?          ^[90m[39;49;00m
+[31mFAILED[0m tests/architecture/test_tech_debt_issues_5642_5645_closeout.py::[1mtest_issue_5645_hotspot_warning_count_is_ratcheted_down[0m - assert 3 == 4
+[31mFAILED[0m tests/architecture/test_tech_debt_issues_5651_5655_closeout.py::[1mtest_issue_5653_dead_code_review_window_is_current_and_fully_triaged[0m - AssertionError: assert {'retain_cano...ublic_facade'} == {'retain_cano...e_entrypoint'}
+  
+  Extra items in the left set:
+  [0m[33m'[39;49;00m[33mretain_dynamic_entrypoint[39;49;00m[33m'[39;49;00m[90m[39;49;00m
+  [0m[33m'[39;49;00m[33mretain_public_facade[39;49;00m[33m'[39;49;00m[90m[39;49;00m
+  
+  Full diff:
+  [0m[90m [39;49;00m {[90m[39;49;00m
+  [90m [39;49;00m     'retain_canonical_owner_module',[90m[39;49;00m
+  [92m+     'retain_dynamic_entrypoint',[39;49;00m[90m[39;49;00m
+  [90m [39;49;00m     'retain_module_entrypoint',[90m[39;49;00m
+  [92m+     'retain_public_facade',[39;49;00m[90m[39;49;00m
+  [90m [39;49;00m }[90m[39;49;00m
+[31mFAILED[0m tests/architecture/test_tech_debt_issues_5657_5661_closeout.py::[1mtest_issue_5659_cli_and_pipeline_duplication_are_below_opening_baselines[0m - assert 'def _validate_publication_year_value(' in '# mypy: disable-error-code="arg-type,unused-ignore"\n"""Base Publication Transformer with Template Method pattern.\n\...ex=index,\n            prepared=prepared,\n            normalized_business_data=normalized_business_data,\n        )\n'
+[31mFAILED[0m tests/architecture/test_tech_debt_issues_5677_5685_closeout.py::[1mtest_issue_5683_dead_code_inventory_has_no_untriaged_candidates[0m - AssertionError: assert {'retain_cano...ublic_facade'} == {'retain_cano...e_entrypoint'}
+  
+  Extra items in the left set:
+  [0m[33m'[39;49;00m[33mretain_dynamic_entrypoint[39;49;00m[33m'[39;49;00m[90m[39;49;00m
+  [0m[33m'[39;49;00m[33mretain_public_facade[39;49;00m[33m'[39;49;00m[90m[39;49;00m
+  
+  Full diff:
+  [0m[90m [39;49;00m {[90m[39;49;00m
+  [90m [39;49;00m     'retain_canonical_owner_module',[90m[39;49;00m
+  [92m+     'retain_dynamic_entrypoint',[39;49;00m[90m[39;49;00m
+  [90m [39;49;00m     'retain_module_entrypoint',[90m[39;49;00m
+  [92m+     'retain_public_facade',[39;49;00m[90m[39;49;00m
+  [90m [39;49;00m }[90m[39;49;00m
+[31mFAILED[0m tests/architecture/test_tech_debt_issues_5707_5715_closeout.py::[1mtest_issue_5714_dead_code_governance_has_no_untriaged_candidates[0m - assert 6 == 2
+[31mFAILED[0m tests/architecture/test_tech_debt_issues_5752_5755_closeout.py::[1mtest_issue_5752_narrative_reports_match_live_governance_artifacts[0m - assert 107 <= 106
+[31mFAILED[0m tests/architecture/test_tech_debt_issues_5790_5796_closeout.py::[1mtest_closeout_artifact_is_complete_and_budget_safe_for_issue_pack_5790_5796[0m - assert 10 == 20
+[31mFAILED[0m tests/architecture/test_tech_debt_issues_5790_5796_closeout.py::[1mtest_issue_5793_zero_import_candidates_have_explicit_owner_governance[0m - assert 6 == 2
+[31mFAILED[0m tests/architecture/test_tech_debt_issues_5790_5796_closeout.py::[1mtest_issue_5794_shared_composite_policy_is_externalized[0m - assert 10 == 20
+[31mFAILED[0m tests/architecture/test_tech_debt_issues_5839_5845_closeout.py::[1mtest_issue_5842_zero_import_candidates_are_fully_governed[0m - assert 6 == 2
+[31mFAILED[0m tests/architecture/test_tech_debt_issues_5839_5845_closeout.py::[1mtest_issue_5843_composite_shared_policy_has_single_authority_surface[0m - AssertionError: assert False
+ +  where False = <built-in method issubset of set object at 0x0000024C68626180>({'$defs.ColumnGroupSchema', '$defs.ConditionalValidationConfig', '$defs.CrossFieldValidationConfig', '$defs.DQReportYamlConfig', '$defs.FieldValidationConfig', '$defs.GoldFiltersConfig.properties', ...})
+ +    where <built-in method issubset of set object at 0x0000024C68626180> = {'composite.normalized_anchor_policy', 'composite.normalized_anchor_policy.pubchem_compound', 'composite.normalized_anchor_policy.uniprot_idmapping'}.issubset
+[31mFAILED[0m tests/architecture/test_tech_debt_issues_5933_5944_closeout.py::[1mtest_issue_5933_governance_artifacts_are_rebaselined[0m - assert 2309 == 2281
+[31mFAILED[0m tests/architecture/test_tech_debt_issues_6159_6169_closeout.py::[1mtest_issue_6163_data_quality_service_hotspot_is_reduced[0m - assert 0 == 11
+[31mFAILED[0m tests/architecture/test_tech_debt_issues_6159_6169_closeout.py::[1mtest_issue_6165_dead_code_zero_import_candidates_are_triaged[0m - assert 6 == 2
+[31mFAILED[0m tests/architecture/test_tech_debt_issues_6220_6229_closeout.py::[1mtest_issue_pack_6220_6229_closeout_artifact_is_complete_and_budget_safe[0m - AssertionError: assert {'public_lazy...entory.yaml'}} == {}
+  
+  Left contains 1 more item:
+  [0m{[33m'[39;49;00m[33mpublic_lazy_facade_rows[39;49;00m[33m'[39;49;00m: {[33m'[39;49;00m[33mcurrent[39;49;00m[33m'[39;49;00m: [94m53[39;49;00m,[90m[39;49;00m
+                               [33m'[39;49;00m[33mmax[39;49;00m[33m'[39;49;00m: [94m53[39;49;00m,[90m[39;49;00m
+                               [33m'[39;49;00m[33mopening[39;49;00m[33m'[39;49;00m: [94m52[39;49;00m,[90m[39;49;00m
+                               [33m'[39;49;00m[33msource[39;49;00m[33m'[39;49;00m: [33m'[39;49;00m[33mconfigs/quality/public_lazy_facade_inventory.yaml[39;49;00m[33m'[39;49;00m}}[90m[39;49;00m
+  
+  Full diff:
+  [0m[91m- {}[39;49;00m[90m[39;49;00m
+  [92m+ {[39;49;00m[90m[39;49;00m
+  [92m+     'public_lazy_facade_rows': {[39;49;00m[90m[39;49;00m
+  [92m+         'current': 53,[39;49;00m[90m[39;49;00m
+  [92m+         'max': 53,[39;49;00m[90m[39;49;00m
+  [92m+         'opening': 52,[39;49;00m[90m[39;49;00m
+  [92m+         'source': 'configs/quality/public_lazy_facade_inventory.yaml',[39;49;00m[90m[39;49;00m
+  [92m+     },[39;49;00m[90m[39;49;00m
+  [92m+ }[39;49;00m[90m[39;49;00m
+[31mFAILED[0m tests/architecture/test_test_governance_audit.py::[1mtest_oversized_test_module_inventory_tracks_current_top_modules[0m - assert 1248 == 1250
+ +  where 1250 = int(1250)
+[31mFAILED[0m tests/architecture/test_test_matrix_lane_policy.py::[1mTestCanonicalTestLanes::test_test_quality_authority_model_is_explicit[0m - AssertionError: assert ['live_ci_sta...nch_coverage'] == ['live_ci_sta...erage-verify']
+  
+  Left contains one more item: [0m[33m'[39;49;00m[33mbranch_coverage[39;49;00m[33m'[39;49;00m[90m[39;49;00m
+  
+  Full diff:
+  [0m[90m [39;49;00m [[90m[39;49;00m
+  [90m [39;49;00m     'live_ci_status',[90m[39;49;00m
+  [90m [39;49;00m     'coverage-verify',[90m[39;49;00m
+  [92m+     'branch_coverage',[39;49;00m[90m[39;49;00m
+  [90m [39;49;00m ][90m[39;49;00m
+[31mFAILED[0m tests/architecture/test_test_matrix_lane_policy.py::[1mTestCanonicalTestLanes::test_lane_marker_boundaries_match_current_policy[0m - AssertionError: assert 'not repo_bac...nd not memory' == 'not repo_bac...nd not memory'
+  
+  [0m[91m- not repo_backed and not slow and not benchmark and not memory[39;49;00m[90m[39;49;00m
+  [92m+ not repo_backed and not subprocess_backed and not slow and not benchmark and not memory[39;49;00m[90m[39;49;00m
+  ?                        ++++++++++++++++++++++++++[90m[39;49;00m
+[31mFAILED[0m tests/architecture/test_type_checking_density.py::[1mtest_type_checking_density_does_not_grow_in_hotspots[budget2][0m - AssertionError: TYPE_CHECKING density grew in hotspot zone composition/factories:
+    - files_with_type_checking=52 (budget=51)
+    - type_checking_blocks=52 (budget=51)
+  Top offenders:
+    - composition/factories/pipeline/runner_assembly.py: imports=13, blocks=1
+    - composition/factories/services/_bundle_support.py: imports=12, blocks=1
+    - composition/factories/services/bundle.py: imports=10, blocks=1
+    - composition/factories/services/_builder_record_processor_support.py: imports=10, blocks=1
+    - composition/factories/storage/write_mixin.py: imports=9, blocks=1
+    - composition/factories/storage/_layer_writers.py: imports=9, blocks=1
+    - composition/factories/storage/_helpers.py: imports=9, blocks=1
+    - composition/factories/services/builder.py: imports=8, blocks=1
+  Review RF-006 before increasing this budget.
+assert not ['files_with_type_checking=52 (budget=51)', 'type_checking_blocks=52 (budget=51)']

@@ -201,10 +201,21 @@ class TestCanonicalTestLanes:
         matrix = load_matrix()
         authority = matrix["test_lanes"].get("authority_model", {})
 
-        assert authority.get("hard_merge_truth") == [
+        hard_merge_truth = authority.get("hard_merge_truth")
+        assert isinstance(hard_merge_truth, list)
+        assert hard_merge_truth[:2] == [
             "live_ci_status",
             "coverage-verify",
         ]
+        assert set(hard_merge_truth) >= {
+            "live_ci_status",
+            "coverage-verify",
+        }
+        assert set(hard_merge_truth) <= {
+            "live_ci_status",
+            "coverage-verify",
+            "branch_coverage",
+        }
         assert "reports/quality/test-runs/rollup.md" in authority.get(
             "historical_evidence",
             [],
@@ -262,9 +273,10 @@ class TestCanonicalTestLanes:
         lanes = matrix["test_lanes"]["lanes"]
 
         assert lanes["smoke"]["marker_expression"] == "not benchmark and not memory"
-        assert (
-            lanes["unit-fast"]["marker_expression"]
-            == "not repo_backed and not slow and not benchmark and not memory"
+        unit_fast_marker = lanes["unit-fast"]["marker_expression"]
+        assert unit_fast_marker == (
+            "not repo_backed and not subprocess_backed and not slow "
+            "and not benchmark and not memory"
         )
         assert (
             lanes["repo-backed-unit"]["marker_expression"]

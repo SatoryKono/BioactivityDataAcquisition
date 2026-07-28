@@ -7,9 +7,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3166 |
-| Tracked doc-like files | 1970 |
-| Ignored local docs/reports files | 1196 |
+| Doc-like files | 3169 |
+| Tracked doc-like files | 1974 |
+| Ignored local docs/reports files | 1195 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
 | Generated routes | 66 |
@@ -18,8 +18,8 @@
 
 | Tracking State | Count |
 | --- | --- |
-| ignored_local | 1196 |
-| tracked | 1970 |
+| ignored_local | 1195 |
+| tracked | 1974 |
 
 ## Lifecycle Counts
 
@@ -27,7 +27,7 @@
 | --- | --- |
 | active_backlog | 1 |
 | active_draft | 108 |
-| active_quality_baseline | 20 |
+| active_quality_baseline | 21 |
 | closeout_evidence | 35 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 42 |
@@ -38,7 +38,7 @@
 | generated_test_run_evidence | 4 |
 | guide | 2 |
 | index | 4 |
-| issue_pack | 23 |
+| issue_pack | 25 |
 | live_issue_mirror | 4 |
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 36 |
@@ -52,7 +52,7 @@
 | active_draft | 108 |
 | guide | 2 |
 | index | 4 |
-| issue_pack | 23 |
+| issue_pack | 25 |
 | live_issue_mirror | 4 |
 
 ## Status Counts
@@ -63,7 +63,7 @@
 | Archived | 82 |
 | Canonical | 70 |
 | Generated | 740 |
-| Working | 303 |
+| Working | 306 |
 
 ## Surface Families
 
@@ -73,16 +73,16 @@
 | archive | 82 |
 | canonical | 70 |
 | generated | 740 |
-| working | 303 |
+| working | 306 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-github-state-check | 131 |
+| archive-after-github-state-check | 133 |
 | archive-after-migration | 113 |
 | generate-automatically | 740 |
-| keep | 2178 |
+| keep | 2179 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -320,7 +320,7 @@
 | `docs/reports/dashboard-ux-checks/2026-05-08.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-05-19.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-07-28-phase2.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/dashboard-ux-checks/2026-07-28.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/2026-07-28.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/docs-link-check-report.json` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/docs-parity-report.json` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |

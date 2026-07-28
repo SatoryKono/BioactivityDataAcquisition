@@ -136,7 +136,9 @@ def test_issue_5389_control_plane_use_case_seams_remain_explicit() -> None:
         if row["name"] == "application_services_control_plane"
     )
     budgets = family["bounded_growth_budgets"]
-    assert family["files_ge_250_loc"] < budgets["files_ge_250_loc"]
+    assert family["files_ge_250_loc"] <= budgets["files_ge_250_loc"]
+    assert family["files_ge_250_loc"] <= 16
+    assert budgets["files_ge_250_loc"] <= 16
     assert all(
         warning != "at_budget:files_ge_250_loc=16/16"
         for warning in family["budget_warnings"]
@@ -263,7 +265,7 @@ def test_issue_5394_legacy_checkpoint_hydration_is_confined_to_load_seam() -> No
         / "services"
         / "control_plane"
         / "manifest"
-        / "validation.py"
+        / "validation_provenance.py"
     ).read_text(encoding="utf-8")
     assert "resolved_config_hash as a canonical config " in manifest_validation
     assert (
