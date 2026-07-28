@@ -25,6 +25,8 @@ _MAX_SOURCE_BYTES = 512_000
 _READ_WORKERS_ENV = "BIOETL_IMPORT_GRAPH_READ_WORKERS"
 _PARSED_CACHE_VERSION = 2
 _PARSED_CACHE_ENV = "BIOETL_IMPORT_GRAPH_CACHE_DIR"
+_INIT_PY = "__init__.py"
+_INIT_PYI = "__init__.pyi"
 
 
 @dataclass(frozen=True)
@@ -161,7 +163,7 @@ def _iter_module_sources_cached(
         for relative_path in discover_files(root_str, suffix):
             source_file = root / relative_path
             rel_path = source_file.relative_to(root)
-            if source_file.name in {"__init__.py", "__init__.pyi"}:
+            if source_file.name in {_INIT_PY, _INIT_PYI}:
                 rel_parts = rel_path.parent.parts
             else:
                 rel_parts = rel_path.with_suffix("").parts
@@ -274,7 +276,7 @@ def _collect_parsed_modules(repo_root_str: str) -> tuple[ParsedModule, ...]:
         for importer_module, py_file, source_text in _read_module_sources(
             _iter_import_sources(scan)
         ):
-            importer_is_package = py_file.name in {"__init__.py", "__init__.pyi"}
+            importer_is_package = py_file.name in {_INIT_PY, _INIT_PYI}
             try:
                 tree = ast.parse(source_text, filename=str(py_file), mode="exec")
             except SyntaxError:
@@ -455,7 +457,7 @@ def find_public_private_twin_modules(repo_root: Path) -> list[dict[str, str]]:
 
     for relative_path in discover_files(str(src_root.resolve()), ".py", "_"):
         py_file = src_root / relative_path
-        if py_file.name == "__init__.py":
+        if py_file.name == _INIT_PY:
             continue
         public_file = py_file.with_name(py_file.name[1:])
         if not public_file.exists():
@@ -484,7 +486,7 @@ def collect_zero_import_bioetl_modules(repo_root: Path) -> list[dict[str, object
     zero_import_modules: list[dict[str, object]] = []
 
     for module_name, py_file in _iter_python_modules(src_scan):
-        if py_file.name == "__init__.py":
+        if py_file.name == _INIT_PY:
             continue
         importer_entry = importer_map.get(module_name, {"src": (), "tests": ()})
         src_importers = tuple(importer_entry.get("src", ()))

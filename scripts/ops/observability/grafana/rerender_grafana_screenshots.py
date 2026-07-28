@@ -32,6 +32,7 @@ DEFAULT_WIDTH = 1600
 DEFAULT_HEIGHT = 2200
 DEFAULT_THEME = "dark"
 DEFAULT_TIMEOUT_SECONDS = 120.0
+_RENDER_MANIFEST_JSON = "render-manifest.json"
 
 
 def _default_tool_playwright_paths() -> tuple[Path, Path]:
@@ -478,7 +479,7 @@ def _write_manifest(
         "render_results": [asdict(result) for result in render_results],
     }
     atomic_write_text(
-        config.output_dir / "render-manifest.json",
+        config.output_dir / _RENDER_MANIFEST_JSON,
         json.dumps(manifest, indent=2, sort_keys=True) + "\n",
     )
 
@@ -830,7 +831,7 @@ def _write_merged_playwright_manifest(
         "dashboards": dashboards,
     }
     atomic_write_text(
-        config.output_dir / "render-manifest.json",
+        config.output_dir / _RENDER_MANIFEST_JSON,
         json.dumps(merged, indent=2) + "\n",
     )
 
@@ -894,7 +895,7 @@ def _run_playwright_with_retry(
             return result, None
         try:
             manifest = _read_playwright_manifest(
-                config.output_dir / "render-manifest.json"
+                config.output_dir / _RENDER_MANIFEST_JSON
             )
         except RuntimeError as exc:
             print(str(exc))

@@ -23,9 +23,9 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
-from scripts.engineering.common.repo_paths import resolve_output_path
+from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = REPO_ROOT
 DEFAULT_SOURCE = ROOT / "reports" / "bp_workspace.json"
 DEFAULT_OUTPUT = ROOT / "reports" / "quality" / "basedpyright-tests-snapshot.json"
 
@@ -53,9 +53,8 @@ def _area(path: str) -> str:
 
 def build_tests_snapshot(source: Path) -> dict[str, Any]:
     source = resolve_output_path(source, root=ROOT)
-    payload = json.loads(
-        source.read_text(encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
-    )
+    source_text = source.read_text(encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
+    payload = json.loads(source_text)
     summary = payload.get("summary") if isinstance(payload, dict) else {}
     diags = payload.get("generalDiagnostics") if isinstance(payload, dict) else []
     if not isinstance(diags, list):
@@ -141,8 +140,9 @@ def write_snapshot(*, source: Path, output: Path) -> dict[str, Any]:
     snapshot = build_tests_snapshot(source)
     output = resolve_output_path(output, root=ROOT)
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(
-        json.dumps(snapshot, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    output.write_text(  # NOSONAR - path confined by resolve_output_path
+        json.dumps(snapshot, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
     )
     return snapshot
 
@@ -151,9 +151,8 @@ def check_snapshot(*, source: Path, output: Path) -> None:
     output = resolve_output_path(output, root=ROOT)
     if not output.is_file():
         raise SystemExit(f"missing tests snapshot: {output}")
-    committed = json.loads(
-        output.read_text(encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
-    )
+    committed_text = output.read_text(encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
+    committed = json.loads(committed_text)
     live = build_tests_snapshot(source)
     committed_errors = int(committed.get("summary", {}).get("advisory_error_count", 0))
     live_errors = int(live.get("summary", {}).get("advisory_error_count", 0))
@@ -174,11 +173,14 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--json-out", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args(argv)
-    source = args.source if args.source.is_absolute() else ROOT / args.source
-    output = args.json_out if args.json_out.is_absolute() else ROOT / args.json_out
+    source = resolve_output_path(args.source, root=ROOT)
+    output = resolve_output_path(args.json_out, root=ROOT)
     if not source.is_file():
         # Fall back to dated workspace export if present
-        alt = ROOT / "reports" / "bp_workspace_20260728.json"
+        alt = resolve_output_path(
+            ROOT / "reports" / "bp_workspace_20260728.json",
+            root=ROOT,
+        )
         if alt.is_file():
             source = alt
         else:

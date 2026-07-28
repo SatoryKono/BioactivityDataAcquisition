@@ -233,7 +233,10 @@ def _source_tree_hash_workers(total_files: int) -> int:
 
 def _read_source_tree_bytes(path: Path) -> bytes:
     """Read one source-tree file for the freshness hash."""
-    with path.open("rb") as handle:
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    safe_path = resolve_output_path(path, root=REPO_ROOT)
+    with safe_path.open("rb") as handle:  # NOSONAR - path confined by resolve_output_path
         return handle.read()
 
 
@@ -284,11 +287,16 @@ def _compute_test_governance_source_tree_sha256(root_str: str) -> str:
 
 
 def _load_current_artifact_if_fresh(root: Path) -> dict[str, Any] | None:
-    artifact_path = root / DEFAULT_JSON_ARTIFACT
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
+    artifact_path = resolve_output_path(root / DEFAULT_JSON_ARTIFACT, root=root)
     if not artifact_path.exists():
         return None
     try:
-        payload = json.loads(artifact_path.read_text(encoding="utf-8"))  # NOSONAR - path confined
+        artifact_text = artifact_path.read_text(  # NOSONAR - path confined by resolve_output_path
+            encoding="utf-8"
+        )
+        payload = json.loads(artifact_text)
     except (OSError, json.JSONDecodeError):
         return None
     if not isinstance(payload, dict):
@@ -369,9 +377,12 @@ def _fixture_duplication_scope(relative_path: str) -> str:
 
 def _sha256_file(path: Path, *, chunk_size: int = 1024 * 1024) -> tuple[str, int]:
     """Return the SHA-256 digest and byte size for a file path."""
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    safe_path = resolve_output_path(path, root=REPO_ROOT)
     digest = hashlib.sha256()
     total_bytes = 0
-    with path.open("rb") as handle:
+    with safe_path.open("rb") as handle:  # NOSONAR - path confined by resolve_output_path
         while True:
             chunk = handle.read(chunk_size)
             if not chunk:
@@ -750,10 +761,15 @@ def _assertion_reachability_findings(
 
 
 def _load_assertion_bypass_allowlist(root: Path) -> list[dict[str, str]]:
-    config_path = root / DEFAULT_CONFIG
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
+    config_path = resolve_output_path(root / DEFAULT_CONFIG, root=root)
     if not config_path.exists():
         return []
-    payload = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}  # NOSONAR - path confined
+    config_text = config_path.read_text(  # NOSONAR - path confined by resolve_output_path
+        encoding="utf-8"
+    )
+    payload = yaml.safe_load(config_text) or {}
     entries = payload.get("assertion_bypass_allowlist", [])
     return [dict(entry) for entry in entries if isinstance(entry, dict)]
 
@@ -1301,11 +1317,17 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
 
 def collect_test_governance_report(root: Path = ROOT) -> dict[str, Any]:
     """Collect deterministic static counts used as remediation budgets."""
-    return _collect_test_governance_report_cached(str(root.resolve()))
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    safe_root = resolve_output_path(root, root=REPO_ROOT)
+    return _collect_test_governance_report_cached(str(safe_root))
 
 
 def load_config(path: Path) -> dict[str, Any]:
-    with path.open(encoding="utf-8") as handle:
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    safe_path = resolve_output_path(path, root=REPO_ROOT)
+    with safe_path.open(encoding="utf-8") as handle:  # NOSONAR - path confined by resolve_output_path
         return cast(dict[str, Any], yaml.safe_load(handle))
 
 
@@ -1378,24 +1400,33 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args(argv)
 
-    payload = collect_test_governance_report(args.root)
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    safe_root = resolve_output_path(args.root, root=REPO_ROOT)
+    safe_config = resolve_output_path(args.config, root=REPO_ROOT)
+    payload = collect_test_governance_report(safe_root)
     json_out = args.json_out
     fixture_duplication_out = args.fixture_duplication_out
     duplicate_name_inventory_out = args.duplicate_name_inventory_out
     if args.check and json_out is None:
-        candidate = args.root / DEFAULT_JSON_ARTIFACT
+        candidate = safe_root / DEFAULT_JSON_ARTIFACT
         if candidate.exists():
             json_out = candidate
     if args.check and fixture_duplication_out is None:
-        candidate = args.root / DEFAULT_FIXTURE_DUPLICATION_ARTIFACT
+        candidate = safe_root / DEFAULT_FIXTURE_DUPLICATION_ARTIFACT
         if candidate.exists():
             fixture_duplication_out = candidate
     if args.check and duplicate_name_inventory_out is not None:
-        duplicate_name_inventory_out = args.root / duplicate_name_inventory_out
+        duplicate_name_inventory_out = resolve_output_path(
+            duplicate_name_inventory_out
+            if duplicate_name_inventory_out.is_absolute()
+            else safe_root / duplicate_name_inventory_out,
+            root=safe_root,
+        )
     exit_code = 0
 
-    if args.config.exists():
-        config = load_config(args.config)
+    if safe_config.exists():
+        config = load_config(safe_config)
         violations = evaluate_budgets(payload["report"], config)
         payload["budget_violations"] = violations
         if args.check and violations:

@@ -53,19 +53,19 @@ def build_contract_identity_field_values_from_mapping(
 ) -> dict[str, str | None]:
     """Build contract-identity field values from a same-named locals() mapping."""
     return build_contract_identity_field_values(
-        contract_ref=cast("str | None", values.get("contract_ref")),
-        contract_version=cast("str | None", values.get("contract_version")),
-        contract_schema_hash=cast("str | None", values.get("contract_schema_hash")),
-        dq_policy_ref=cast("str | None", values.get("dq_policy_ref")),
-        rule_bundle_version=cast("str | None", values.get("rule_bundle_version")),
+        contract_ref=cast(str | None, values.get("contract_ref")),
+        contract_version=cast(str | None, values.get("contract_version")),
+        contract_schema_hash=cast(str | None, values.get("contract_schema_hash")),
+        dq_policy_ref=cast(str | None, values.get("dq_policy_ref")),
+        rule_bundle_version=cast(str | None, values.get("rule_bundle_version")),
         normalization_profile_ref=cast(
-            "str | None", values.get("normalization_profile_ref")
+            str | None, values.get("normalization_profile_ref")
         ),
         normalization_profile_version=cast(
-            "str | None", values.get("normalization_profile_version")
+            str | None, values.get("normalization_profile_version")
         ),
         normalization_profile_hash=cast(
-            "str | None", values.get("normalization_profile_hash")
+            str | None, values.get("normalization_profile_hash")
         ),
     )
 

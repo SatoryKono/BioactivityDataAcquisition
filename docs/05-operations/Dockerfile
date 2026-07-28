@@ -17,26 +17,25 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # ============ Builder Stage ============
 FROM base AS builder
 
-# Copy dependency files
-COPY pyproject.toml uv.lock ./
+# Copy dependency files + source required by lockfile-backed project install.
+COPY pyproject.toml uv.lock README.md ./
+COPY src/ ./src/
 
-# Install uv and builder dependencies (binary-only + locked uv version).
+# Binary-only uv bootstrap + frozen lockfile sync (Sonar docker:S8541/S8544).
+# --no-build refuses sdist/setup-script execution; --frozen pins resolved versions.
 RUN pip install --only-binary=:all: --no-cache-dir uv==0.11.26 && \
-    uv pip install --system --no-build -e .
+    UV_NO_BUILD=1 uv sync --frozen --no-build --no-dev --directory /app
 
 # ============ Production Stage ============
 FROM base AS production
 
-# Copy installed packages from builder
-COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
-COPY --from=builder /usr/local/bin /usr/local/bin
+# Copy virtual environment from lockfile-backed builder (no unpinned reinstall).
+COPY --from=builder /app/.venv /app/.venv
+COPY --from=builder /app/src /app/src
+COPY --from=builder /app/pyproject.toml /app/pyproject.toml
 
-# Copy application source
-COPY src/ /app/src/
-COPY pyproject.toml /app/
-
-# Install the package in editable mode (no transitive build scripts).
-RUN pip install --only-binary=:all: --no-deps --no-cache-dir -e .
+ENV PATH="/app/.venv/bin:$PATH" \
+    PYTHONPATH="/app/src"
 
 # Create non-root user
 RUN useradd -m -u 1000 bioetl && \
@@ -61,11 +60,14 @@ COPY grafana/ /app/grafana/
 COPY package.json package-lock.json /app/
 COPY docker-compose.yml docker-compose.monitoring.yml docker-compose.neo4j.yml /app/
 
-# Install development dependencies (binary-only + locked uv version).
+# Binary-only uv bootstrap + frozen lockfile sync for dev extras (S8541/S8544).
 RUN pip install --only-binary=:all: --no-cache-dir uv==0.11.26 && \
-    uv pip install --system --no-build -e ".[dev,docs]" && \
+    UV_NO_BUILD=1 uv sync --frozen --no-build --extra dev --extra docs --directory /app && \
     useradd -m -u 1000 bioetl && \
     chown -R bioetl:bioetl /app
+
+ENV PATH="/app/.venv/bin:$PATH" \
+    PYTHONPATH="/app/src"
 
 USER bioetl
 

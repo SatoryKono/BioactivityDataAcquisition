@@ -19,25 +19,28 @@ __all__ = [
     "RunManifestVerifyResult",
 ]
 
+_INSPECTION_MODELS = (
+    "bioetl.application.services.control_plane.manifest.inspection_models"
+)
 _EXPORTS: dict[str, tuple[str, str]] = {
     "RunManifestCreateSpec": (
         "bioetl.application.services.control_plane.manifest.models",
         "RunManifestCreateSpec",
     ),
     "RunManifestDiffEntry": (
-        "bioetl.application.services.control_plane.manifest.inspection_models",
+        _INSPECTION_MODELS,
         "RunManifestDiffEntry",
     ),
     "RunManifestDiffResult": (
-        "bioetl.application.services.control_plane.manifest.inspection_models",
+        _INSPECTION_MODELS,
         "RunManifestDiffResult",
     ),
     "RunManifestInspectionResult": (
-        "bioetl.application.services.control_plane.manifest.inspection_models",
+        _INSPECTION_MODELS,
         "RunManifestInspectionResult",
     ),
     "RunManifestVerifyResult": (
-        "bioetl.application.services.control_plane.manifest.inspection_models",
+        _INSPECTION_MODELS,
         "RunManifestVerifyResult",
     ),
     "RunManifestInspectionService": (

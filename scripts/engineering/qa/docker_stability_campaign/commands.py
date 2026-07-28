@@ -16,8 +16,10 @@ from .model import StackSpec, atomic_json, load_json, redact
 
 COMMAND_OUTPUT_LIMIT = 4000
 DOCKER_VM_MIN_FREE_BYTES = 4 * 1024**3
+_POWERSHELL_EXE = "powershell.exe"
+_DOCKER_FORMAT_NAME = "{{.Name}}"
 _WINDOWS_POWERSHELL_CANDIDATES = (
-    "powershell.exe",
+    _POWERSHELL_EXE,
     "/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
     "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
 )
@@ -106,7 +108,7 @@ def desktop_engine_restart_command(
     if powershell is None:
         return {
             "command": [
-                "powershell.exe",
+                _POWERSHELL_EXE,
                 "-NoProfile",
                 "-Command",
                 "docker desktop restart",
@@ -176,7 +178,7 @@ def desktop_recovery_diagnostic_bundle(
             "diagnostic_bundle_present": False,
         }
     internal_timeout = max(10, min(175, int(timeout) - 5))
-    powershell = resolve_windows_powershell() or "powershell.exe"
+    powershell = resolve_windows_powershell() or _POWERSHELL_EXE
     result = run_command(
         [
             powershell,
@@ -347,13 +349,13 @@ def volume_ids(
                 "--filter",
                 f"label=com.docker.compose.project={spec.project}",
                 "--format",
-                "{{.Name}}",
+                _DOCKER_FORMAT_NAME,
             ],
             timeout,
             cwd=runtime_origin,
         )
         all_volumes = run_command(
-            ["docker", "volume", "ls", "--format", "{{.Name}}"],
+            ["docker", "volume", "ls", "--format", _DOCKER_FORMAT_NAME],
             timeout,
             cwd=runtime_origin,
         )
@@ -384,7 +386,7 @@ def required_volume_precondition(
 ) -> dict[str, Any]:
     """Require target volumes before any campaign lifecycle mutation."""
     result = run_command(
-        ["docker", "volume", "ls", "--format", "{{.Name}}"],
+        ["docker", "volume", "ls", "--format", _DOCKER_FORMAT_NAME],
         timeout,
         cwd=runtime_origin,
     )

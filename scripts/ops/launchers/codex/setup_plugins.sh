@@ -353,12 +353,12 @@ ensure_temp_pytest_runtime_venv() {
     mapfile -t runtime_pkgs < <(project_runtime_packages)
     runtime_pkgs+=("$@")
 
-    PIP_CACHE_DIR="$pip_cache_dir" "$TEMP_PYTEST_VENV_DIR/bin/python" -m pip install --upgrade pip setuptools wheel >/dev/null
-    if ! PIP_CACHE_DIR="$pip_cache_dir" "$TEMP_PYTEST_VENV_DIR/bin/python" -m pip install "${runtime_pkgs[@]}"; then
+    PIP_CACHE_DIR="$pip_cache_dir" "$TEMP_PYTEST_VENV_DIR/bin/python" -m pip install --only-binary=:all: --upgrade "pip==25.0.1" "setuptools==75.8.0" "wheel==0.45.1" >/dev/null
+    if ! PIP_CACHE_DIR="$pip_cache_dir" "$TEMP_PYTEST_VENV_DIR/bin/python" -m pip install --only-binary=:all: "${runtime_pkgs[@]}"; then
         log_warn "Temporary pytest runtime install failed; recreating the runtime from scratch"
         "$bootstrap_python" -m venv --clear "$TEMP_PYTEST_VENV_DIR"
-        PIP_CACHE_DIR="$pip_cache_dir" "$TEMP_PYTEST_VENV_DIR/bin/python" -m pip install --upgrade pip setuptools wheel >/dev/null
-        PIP_CACHE_DIR="$pip_cache_dir" "$TEMP_PYTEST_VENV_DIR/bin/python" -m pip install "${runtime_pkgs[@]}"
+        PIP_CACHE_DIR="$pip_cache_dir" "$TEMP_PYTEST_VENV_DIR/bin/python" -m pip install --only-binary=:all: --upgrade "pip==25.0.1" "setuptools==75.8.0" "wheel==0.45.1" >/dev/null
+        PIP_CACHE_DIR="$pip_cache_dir" "$TEMP_PYTEST_VENV_DIR/bin/python" -m pip install --only-binary=:all: "${runtime_pkgs[@]}"
     fi
 
     PYTHON_BIN="$TEMP_PYTEST_VENV_DIR/bin/python"
@@ -406,10 +406,11 @@ install_dev_dependencies() {
 
     if [[ "$USE_UV" == true ]]; then
         log_info "Syncing dev/test dependencies via uv..."
-        uv sync --extra dev --extra tests --extra tests_full --extra tracing
+        # Lockfile-backed; --no-build refuses sdist/setup-script execution (shell:S8541).
+        UV_NO_BUILD=1 uv sync --frozen --no-build --extra dev --extra tests --extra tests_full --extra tracing
     else
         log_info "Installing dev/test dependencies via pip..."
-        if "$PYTHON_BIN" -m pip install -e ".[dev,tests,tests_full,tracing]"; then
+        if "$PYTHON_BIN" -m pip install --only-binary=:all: -e ".[dev,tests,tests_full,tracing]"; then
             return 0
         fi
         if [[ "$PYTHON_KIND" == "$PYTHON_KIND_POSIX_VENV" || "$PYTHON_KIND" == "$PYTHON_KIND_WINDOWS_VENV" ]]; then
@@ -418,7 +419,7 @@ install_dev_dependencies() {
             return 0
         fi
         log_warn "Pip install blocked by externally managed environment, retrying with --break-system-packages"
-        if "$PYTHON_BIN" -m pip install --break-system-packages -e ".[dev,tests,tests_full,tracing]"; then
+        if "$PYTHON_BIN" -m pip install --only-binary=:all: --break-system-packages -e ".[dev,tests,tests_full,tracing]"; then
             return 0
         fi
         log_warn "Still blocked; creating temporary pytest runtime under /tmp"
@@ -564,18 +565,19 @@ Set-Location '$repo_root_win'
     fi
 
     if [[ "$USE_UV" == true ]]; then
-        if ! uv run python -m pre_commit --version >/dev/null 2>&1; then
-            uv run python -m pip install pre-commit
+        if ! UV_NO_BUILD=1 uv run --frozen --no-build python -m pre_commit --version >/dev/null 2>&1; then
+            # Pin + binary-only install (shell:S8541).
+            UV_NO_BUILD=1 uv run --frozen --no-build python -m pip install --only-binary=:all: "pre-commit==4.0.1"
         fi
         if git rev-parse --git-dir >/dev/null 2>&1; then
-            uv run python -m pre_commit install --hook-type pre-commit --hook-type pre-push --hook-type commit-msg
+            UV_NO_BUILD=1 uv run --frozen --no-build python -m pre_commit install --hook-type pre-commit --hook-type pre-push --hook-type commit-msg
             log_ok "pre-commit hooks installed"
         else
             log_warn "Not a git repository, skipping pre-commit install"
         fi
     else
         if ! "$PYTHON_BIN" -m pre_commit --version >/dev/null 2>&1; then
-            "$PYTHON_BIN" -m pip install pre-commit
+            "$PYTHON_BIN" -m pip install --only-binary=:all: "pre-commit==4.0.1"
         fi
         if git rev-parse --git-dir >/dev/null 2>&1; then
             "$PYTHON_BIN" -m pre_commit install --hook-type pre-commit --hook-type pre-push --hook-type commit-msg

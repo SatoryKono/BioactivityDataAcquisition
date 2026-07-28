@@ -115,6 +115,9 @@ def build_source_inventory(source: Path) -> SourceInventory:
     )
 
 
+_UTC_OFFSET_SUFFIX = "+00:00"
+
+
 def _normalize_timestamp(value: object, *, assume_naive_utc: bool) -> object:
     if value is None:
         return None
@@ -122,7 +125,7 @@ def _normalize_timestamp(value: object, *, assume_naive_utc: bool) -> object:
         timestamp = value
     elif isinstance(value, str):
         try:
-            timestamp = datetime.fromisoformat(value.replace("Z", "+00:00"))
+            timestamp = datetime.fromisoformat(value.replace("Z", _UTC_OFFSET_SUFFIX))
         except ValueError as exc:
             raise ValueError(f"Invalid metadata timestamp: {value!r}") from exc
     else:
@@ -133,7 +136,7 @@ def _normalize_timestamp(value: object, *, assume_naive_utc: bool) -> object:
                 "Naive legacy metadata timestamp requires --assume-naive-utc"
             )
         timestamp = timestamp.replace(tzinfo=UTC)
-    return timestamp.astimezone(UTC).isoformat().replace("+00:00", "Z")
+    return timestamp.astimezone(UTC).isoformat().replace(_UTC_OFFSET_SUFFIX, "Z")
 
 
 def _normalize_metadata_value(
@@ -222,7 +225,7 @@ def _manifest_payload(
         "source": str(source),
         "target": str(target),
         "source_inventory": asdict(inventory),
-        "completed_at_utc": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
+        "completed_at_utc": datetime.now(UTC).isoformat().replace(_UTC_OFFSET_SUFFIX, "Z"),
     }
 
 

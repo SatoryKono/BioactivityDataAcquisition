@@ -21,13 +21,22 @@ SCHEMA_BOUNDARY_PREFIXES = (
     "src/bioetl/domain/schemas/",
 )
 PANDERA_IMPORT_PREFIXES = ("pandera", "pandas")
+_REASON_NETWORK_CLIENT = "network client"
+_REASON_FILESYSTEM_DISCOVERY = "filesystem discovery"
+_REASON_WALL_CLOCK = "wall-clock timestamp"
+_REASON_CATALOG_RESOLVE = (
+    "Catalog lookup method named resolve (not filesystem Path.resolve)."
+)
+_REASON_CATALOG_PATH = "src/bioetl/domain/run_reports/reason_catalog.py"
+_MODULE_SCOPE = "<module>"
+
 FORBIDDEN_IMPORT_PREFIXES = {
-    "aiohttp": "network client",
+    "aiohttp": _REASON_NETWORK_CLIENT,
     "boto3": "external storage client",
     "botocore": "external storage client",
-    "httpx": "network client",
+    "httpx": _REASON_NETWORK_CLIENT,
     "os": "process environment/filesystem",
-    "requests": "network client",
+    "requests": _REASON_NETWORK_CLIENT,
     "socket": "network socket",
     "sqlalchemy": "database client",
     "sqlite3": "database client",
@@ -40,26 +49,26 @@ FORBIDDEN_CALL_NAMES = {
 FORBIDDEN_ATTRIBUTE_CALLS = {
     "connect": "database/network connection",
     "exists": "filesystem existence probe",
-    "glob": "filesystem discovery",
-    "iterdir": "filesystem discovery",
+    "glob": _REASON_FILESYSTEM_DISCOVERY,
+    "iterdir": _REASON_FILESYSTEM_DISCOVERY,
     "mkdir": "filesystem mutation",
     "open": "filesystem read/write",
     "read_bytes": "filesystem read",
     "read_text": "filesystem read",
     "resolve": "filesystem resolution",
-    "rglob": "filesystem discovery",
+    "rglob": _REASON_FILESYSTEM_DISCOVERY,
     "stat": "filesystem metadata read",
     "unlink": "filesystem mutation",
     "write_bytes": "filesystem write",
     "write_text": "filesystem write",
 }
 FORBIDDEN_QUALIFIED_CALLS = {
-    "datetime.now": "wall-clock timestamp",
-    "datetime.utcnow": "wall-clock timestamp",
+    "datetime.now": _REASON_WALL_CLOCK,
+    "datetime.utcnow": _REASON_WALL_CLOCK,
     "os.getenv": "process environment read",
     "random.random": "randomness",
     "subprocess.run": "process execution",
-    "time.time": "wall-clock timestamp",
+    "time.time": _REASON_WALL_CLOCK,
     "uuid.uuid4": "random occurrence identity",
     "uuid4": "random occurrence identity",
 }
@@ -71,22 +80,22 @@ ALLOWED_CALL_EXCEPTIONS = {
     # run_reports: catalog method name `resolve` is not Path.resolve; YAML load is
     # a package-local reason map (bounded shipped asset), not general Domain I/O.
     (
-        "src/bioetl/domain/run_reports/reason_catalog.py",
+        _REASON_CATALOG_PATH,
         "ReasonCatalog.family_for",
         "self.resolve",
-    ): "Catalog lookup method named resolve (not filesystem Path.resolve).",
+    ): _REASON_CATALOG_RESOLVE,
     (
-        "src/bioetl/domain/run_reports/reason_catalog.py",
+        _REASON_CATALOG_PATH,
         "ReasonCatalog.default_outcome_for",
         "self.resolve",
-    ): "Catalog lookup method named resolve (not filesystem Path.resolve).",
+    ): _REASON_CATALOG_RESOLVE,
     (
-        "src/bioetl/domain/run_reports/reason_catalog.py",
+        _REASON_CATALOG_PATH,
         "_read_yaml_mapping",
         "path.read_text",
     ): "Loads package-local run-report reason catalog YAML from an explicit Path.",
     (
-        "src/bioetl/domain/run_reports/reason_catalog.py",
+        _REASON_CATALOG_PATH,
         "default_reason_catalog",
         "resolve",
     ): "Locates package-root relative reason catalog path candidates.",
@@ -94,7 +103,7 @@ ALLOWED_CALL_EXCEPTIONS = {
         "src/bioetl/domain/run_reports/accounting_snapshots.py",
         "StageAccountingSnapshotsMixin._removals_for_bucket",
         "self._catalog.resolve",
-    ): "Catalog lookup method named resolve (not filesystem Path.resolve).",
+    ): _REASON_CATALOG_RESOLVE,
 }
 
 
@@ -133,7 +142,7 @@ class _DomainIOTaintVisitor(ast.NodeVisitor):
 
     def visit_Call(self, node: ast.Call) -> None:
         symbol = _qualified_name(node.func)
-        owner = ".".join(self.scope) or "<module>"
+        owner = ".".join(self.scope) or _MODULE_SCOPE
         reason: str | None = None
         kind: str | None = None
         if isinstance(node.func, ast.Name):
@@ -210,7 +219,7 @@ def _scan_imports(
                         TaintFinding(
                             path=relative_path,
                             line=node.lineno,
-                            symbol="<module>",
+                            symbol=_MODULE_SCOPE,
                             kind=f"import:{root_module}",
                             reason=(
                                 "Pandera/Pandas are allowed only inside machine-checkable "
@@ -223,7 +232,7 @@ def _scan_imports(
                         TaintFinding(
                             path=relative_path,
                             line=node.lineno,
-                            symbol="<module>",
+                            symbol=_MODULE_SCOPE,
                             kind=f"import:{root_module}",
                             reason=(
                                 "Pandera/Pandas imports outside domain contracts/schemas "
@@ -239,7 +248,7 @@ def _scan_imports(
                         TaintFinding(
                             path=relative_path,
                             line=node.lineno,
-                            symbol="<module>",
+                            symbol=_MODULE_SCOPE,
                             kind=f"import:{root_module}",
                             reason=reason,
                         )
