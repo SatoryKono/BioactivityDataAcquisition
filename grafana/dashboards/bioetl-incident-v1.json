@@ -316,23 +316,27 @@
           "links": [
             {
               "title": "Open Pipeline Diagnostics",
-              "url": "/d/bioetl-runtime/bioetl-runtime?${__url_time_range}&var-workflow=${workflow}&var-pipeline=${__data.fields.pipeline:percentencode}&var-run_type=${run_type}&var-run_id=${run_id}",
-              "targetBlank": false
+              "url": "/d/bioetl-runtime/bioetl-runtime?${__url_time_range}&var-workflow=${workflow}&var-pipeline=${__data.fields.pipeline:percentencode}&var-run_type=${run_type}&var-run_id=$run_id",
+              "targetBlank": false,
+              "includeVars": false
             },
             {
               "title": "Open Provider Health",
-              "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}&var-workflow=${workflow}&var-pipeline=${pipeline}&var-run_type=${run_type}&var-provider=${__data.fields.provider:percentencode}",
-              "targetBlank": false
+              "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}&var-workflow=${workflow}&var-pipeline=${pipeline}&var-pipeline_context=$pipeline&var-run_type=${run_type}&var-provider=${__data.fields.provider:percentencode}&var-run_id=$run_id",
+              "targetBlank": false,
+              "includeVars": false
             },
             {
               "title": "Open Data Quality",
-              "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${__url_time_range}&var-workflow=${workflow}&var-pipeline=${__data.fields.pipeline:percentencode}&var-run_type=${run_type}",
-              "targetBlank": false
+              "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${__url_time_range}&var-workflow=${workflow}&var-pipeline=${__data.fields.pipeline:percentencode}&var-run_type=${run_type}&var-run_id=$run_id",
+              "targetBlank": false,
+              "includeVars": false
             },
             {
               "title": "Open Run Explorer",
-              "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${__url_time_range}&var-workflow=${workflow}&var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=${run_id}",
-              "targetBlank": false
+              "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${__url_time_range}&var-workflow=${workflow}&var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=$run_id",
+              "targetBlank": false,
+              "includeVars": false
             }
           ]
         },
@@ -638,8 +642,9 @@
               "links": [
                 {
                   "title": "Open domain workspace",
-                  "url": "/d/bioetl-runtime/bioetl-runtime?${__url_time_range}&var-workflow=${workflow}&var-pipeline=${__data.fields.pipeline:percentencode}&var-run_type=${run_type}",
-                  "targetBlank": false
+                  "url": "/d/bioetl-runtime/bioetl-runtime?${__url_time_range}&var-workflow=${workflow}&var-pipeline=${__data.fields.pipeline:percentencode}&var-run_type=${run_type}&var-run_id=$run_id",
+                  "targetBlank": false,
+                  "includeVars": false
                 }
               ]
             },
@@ -750,8 +755,9 @@
               "links": [
                 {
                   "title": "Open domain workspace",
-                  "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}&var-workflow=${workflow}&var-provider=${__data.fields.provider:percentencode}",
-                  "targetBlank": false
+                  "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}&var-workflow=${workflow}&var-pipeline=$pipeline&var-pipeline_context=$pipeline&var-run_type=$run_type&var-provider=${__data.fields.provider:percentencode}&var-run_id=$run_id",
+                  "targetBlank": false,
+                  "includeVars": false
                 }
               ]
             },
@@ -862,8 +868,9 @@
               "links": [
                 {
                   "title": "Open domain workspace",
-                  "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${__url_time_range}&var-workflow=${workflow}&var-pipeline=${__data.fields.pipeline:percentencode}&var-run_type=${run_type}",
-                  "targetBlank": false
+                  "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${__url_time_range}&var-workflow=${workflow}&var-pipeline=${__data.fields.pipeline:percentencode}&var-run_type=${run_type}&var-run_id=$run_id",
+                  "targetBlank": false,
+                  "includeVars": false
                 }
               ]
             },

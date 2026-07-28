@@ -341,6 +341,10 @@ required_panel_links_by_uid:
     target_uid: bioetl-runtime
     link_titles:
     - Inspect stage expectedness
+  - panel_id: 9101
+    target_uid: bioetl-run-explorer-v1
+    link_titles:
+    - Open Run Explorer
   bioetl-provider-health-v2:
   - panel_id: 110
     target_uid: bioetl-runtime
@@ -350,6 +354,23 @@ required_panel_links_by_uid:
     target_uid: bioetl-control-plane-v1
     link_titles:
     - Open 0. Control Plane
+  bioetl-incident-v1:
+  - panel_id: 2010
+    target_uid: bioetl-runtime
+    link_titles:
+    - Open Pipeline Diagnostics
+  - panel_id: 2010
+    target_uid: bioetl-provider-health-v2
+    link_titles:
+    - Open Provider Health
+  - panel_id: 2010
+    target_uid: bioetl-dq-v2
+    link_titles:
+    - Open Data Quality
+  - panel_id: 2010
+    target_uid: bioetl-run-explorer-v1
+    link_titles:
+    - Open Run Explorer
 default_time_refresh_policy:
   L0:
     dashboards:

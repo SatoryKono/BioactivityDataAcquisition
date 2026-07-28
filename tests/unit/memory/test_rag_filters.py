@@ -46,6 +46,7 @@ def test_candidate_source_paths_prefers_git_tracked_files(
 ) -> None:
     docs_root = tmp_path / "docs" / "00-project"
     docs_root.mkdir(parents=True)
+    (docs_root / "alpha.md").write_text("# Alpha\n", encoding="utf-8")
     (tmp_path / ".git").mkdir()
 
     calls: list[tuple[str, ...]] = []

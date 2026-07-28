@@ -493,6 +493,7 @@ nav:
           - "CLAUDE": 00-project/ai/agents/guides/CLAUDE.md
           - "CODEX": 00-project/ai/agents/guides/CODEX.md
           - "GEMINI": 00-project/ai/agents/guides/GEMINI.md
+          - "Test Lane Mental Model": 00-project/ai/agents/guides/TEST_LANE_MENTAL_MODEL.md
           - "Profiles Catalog": 00-project/ai/agents/agents/README.md
           - "Agent Orchestration Rules": 00-project/ai/agents/policy/agent-orchestration-rules.md
           - "Agent Naming Policy and Rename Plan (2026-03-08)": 00-project/ai/agents/policy/AGENT_NAMING_POLICY_AND_RENAME_PLAN_2026-03-08.md

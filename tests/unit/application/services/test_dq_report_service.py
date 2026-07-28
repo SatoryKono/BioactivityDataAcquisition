@@ -371,6 +371,15 @@ class TestDQReportService:
         bronze_dq_config: MagicMock,
     ) -> None:
         """Synchronous DQ analysis must not starve runtime heartbeat tasks."""
+        if (
+            Path("/proc/version").exists()
+            and "microsoft"
+            in Path("/proc/version").read_text(encoding="utf-8").lower()
+        ):
+            pytest.skip(
+                "WSL test runtime intentionally replaces asyncio.to_thread "
+                "with inline execution to avoid lost executor callbacks"
+            )
         event_loop_thread_id = get_ident()
         analyzer_thread_ids: list[int] = []
         report = mock_bronze_analyzer.analyze.return_value

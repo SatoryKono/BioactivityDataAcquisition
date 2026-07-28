@@ -1130,6 +1130,30 @@
       "review_by": "2026-09-30",
       "next_step": "Retain only as the legacy root shell launcher while canonical Docker helper lifecycle management moves to scripts/ops/docker-setup.sh; keep it supporting and do not expand its fixed-delay startup behavior."
     },
+    "scripts/engineering/qa/report_live_residual_snapshot.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded architecture-freeze reporting utility pending consolidation into the canonical quality-report command surface; do not count it as a new active entrypoint."
+    },
+    "scripts/engineering/qa/report_vcr_cassette_census.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded VCR census utility pending consolidation into the canonical QA command surface; do not count it as a new active entrypoint."
+    },
+    "scripts/ops/observability/grafana/_apply_ds2_all.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a one-off DS2 migration helper for auditability; do not promote it to an active operator workflow."
+    },
+    "scripts/ops/observability/grafana/apply_dux2_residual.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a one-off DUX2 residual migration helper for auditability; do not promote it to an active operator workflow."
+    },
     "src/tools/apply_elk_layout.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",

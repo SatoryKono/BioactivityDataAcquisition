@@ -80,6 +80,10 @@ LEGACY_ADR_ENFORCEMENT_ANCHORS = {
         "configs/quality/constructor_waivers.yaml",
         "tests/unit/domain/aggregates/test_quarantine_entry.py",
     ),
+    "ADR-053": (
+        "docs/03-guides/dashboards/dashboard-system-2.0-phase2-residual.md",
+        "scripts/engineering/qa/check_dashboard_visual_semantics.py",
+    ),
 }
 
 

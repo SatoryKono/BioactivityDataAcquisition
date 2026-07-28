@@ -651,9 +651,8 @@ class TestMedallionLifecycleServiceFinalizeRun:
         )
 
         assert result.skipped is False
-        # Implementation details hidden, counts are 0
-        assert result.silver_files_removed == 0
-        assert result.gold_files_removed == 0
+        assert result.silver_files_removed == 42
+        assert result.gold_files_removed == 42
 
         # Verify vacuum call
         # Called twice: once for Silver ("test_silver"), once for Gold (default "chembl.activity")
@@ -683,14 +682,11 @@ class TestMedallionLifecycleServiceFinalizeRun:
             storage=mock_storage_with_vacuum, logger=mock_logger
         )
 
-        result = await service.finalize_run(
-            config=pipeline_config, runtime=runtime_config_vacuum_enabled
-        )
+        with pytest.raises(RuntimeError, match="Vacuum failed"):
+            await service.finalize_run(
+                config=pipeline_config, runtime=runtime_config_vacuum_enabled
+            )
 
-        # Should return skipped=False (attempted) and 0 files removed
-        assert result.skipped is False
-        assert result.silver_files_removed == 0
-        assert result.gold_files_removed == 0
         # Should log error
         mock_logger.error.assert_called_once()
 

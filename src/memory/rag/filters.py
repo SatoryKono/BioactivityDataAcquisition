@@ -145,6 +145,7 @@ def _candidate_source_paths(
             rel_path
             for rel_path in tracked_paths
             if Path(rel_path).suffix.lower() in suffixes
+            and (root / rel_path).is_file()
         ]
     if not source_dir.exists():
         return []

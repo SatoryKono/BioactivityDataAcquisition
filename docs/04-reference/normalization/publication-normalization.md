@@ -24,7 +24,7 @@ Covered pipelines:
 - `semanticscholar_publication`
 
 Use the generated matrix for full field-by-field detail via the published
-[Normalization Plan P0-P6](../../05-engineering/normalization_plan_P0_P6.md).
+Historical: [Normalization Plan P0-P6](../../99-archive/engineering/normalization_plan_P0_P6.md).
 The generated artifact path is
 `docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md`.
 Use representative fixtures for reviewed examples:

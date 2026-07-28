@@ -298,7 +298,7 @@ filters.gold_filters.ranges.activity_id,—,—,—,—,—,(dict),—,—,—,�
 filters.gold_filters.ranges.confidence_score,—,—,—,—,—,—,(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 filters.gold_filters.ranges.max_tani,—,—,—,—,—,—,—,—,—,—,—,—,—,(dict),—,—,—,—,—,—,—,—,—,—,—,—,—
 filters.gold_filters.ranges.pchembl_value,—,—,—,—,—,(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-filters.gold_filters.ranges.publication_year,—,—,—,—,—,(dict),—,(dict),—,—,(dict),(dict),(dict),(dict),(dict),(dict),—,(dict),—,(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict)
+filters.gold_filters.ranges.publication_year,—,—,—,—,—,(dict),—,(dict),—,—,(dict),(dict),(dict),(dict),(dict),(dict),—,(dict),—,(dict),(dict),(dict),—,(dict),(dict),(dict),—
 filters.gold_filters.ranges.standard_value,—,—,—,—,—,(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 filters.metadata.target_filter_policy.description,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,SOURCE-SPECIFIC ChEMBL target filter policy. Silver and Gold filters intentionally constrain this pipeline to reviewed single-protein target records and do not apply publication-specific fields.,—,—,—,—,—,—,—,—,—,—
 filters.metadata.target_filter_policy.scope,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,source_specific,—,—,—,—,—,—,—,—,—,—
@@ -393,8 +393,8 @@ filters.gold_filters.ranges.max_tani.include_min,—,—,—,—,—,—,—,—
 filters.gold_filters.ranges.max_tani.min,—,—,—,—,—,—,—,—,—,—,—,—,—,0.5,—,—,—,—,—,—,—,—,—,—,—,—,—
 filters.gold_filters.ranges.pchembl_value.max,—,—,—,—,—,10,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 filters.gold_filters.ranges.pchembl_value.min,—,—,—,—,—,3,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-filters.gold_filters.ranges.publication_year.max,—,—,—,—,—,2050,—,2050,—,—,2050,2050,2050,2050,2050,2050,—,2050,—,2050,2050,2050,2050,2050,2050,2050,2050
-filters.gold_filters.ranges.publication_year.min,—,—,—,—,—,1950,—,1950,—,—,1950,1950,1950,1950,1950,1950,—,1950,—,1950,1950,1950,1950,1950,1950,1950,1950
+filters.gold_filters.ranges.publication_year.max,—,—,—,—,—,2050,—,2050,—,—,2050,2050,2050,2050,2050,2050,—,2050,—,2050,2050,2050,—,2050,2050,2050,—
+filters.gold_filters.ranges.publication_year.min,—,—,—,—,—,1950,—,1950,—,—,1950,1950,1950,1950,1950,1950,—,1950,—,1950,1950,1950,—,1950,1950,1950,—
 filters.gold_filters.ranges.standard_value.include_min,—,—,—,—,—,False,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 filters.gold_filters.ranges.standard_value.min,—,—,—,—,—,0,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 hash_policy.hash_policy.normalization.dates.enabled,—,—,—,—,—,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True

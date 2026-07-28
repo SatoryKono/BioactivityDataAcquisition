@@ -38,6 +38,7 @@
         "tests/unit/application/pipelines/test_chembl_activity_unit.py",
         "tests/unit/domain/behavior/activity_aggregator/test_aggregator_branch_coverage.py",
         "tests/unit/domain/behavior/activity_aggregator/test_init.py",
+        "tests/unit/domain/entities/bioactivity/test_converters.py",
         "tests/unit/domain/entities/bioactivity/test_converters_branch_coverage.py",
         "tests/unit/domain/entities/test_bioactivity_entity.py",
         "tests/unit/domain/entities/test_chembl_activity_assay_dtos.py",
@@ -1306,6 +1307,7 @@
         "tests/unit/application/pipelines/test_chembl_activity_unit.py",
         "tests/unit/domain/behavior/activity_aggregator/test_aggregator_branch_coverage.py",
         "tests/unit/domain/behavior/activity_aggregator/test_init.py",
+        "tests/unit/domain/entities/bioactivity/test_converters.py",
         "tests/unit/domain/entities/bioactivity/test_converters_branch_coverage.py",
         "tests/unit/domain/entities/test_bioactivity_entity.py",
         "tests/unit/domain/entities/test_chembl_activity_assay_dtos.py",
@@ -2558,5 +2560,5 @@
     "gold_enabled": "Effective runtime state of pipeline.sink.gold.enabled after hierarchical config resolution; omitted enabled defaults to true. Never infer this from contract/Pandera availability or from unrelated flags such as filters.input_filter.enabled.",
     "missing_gold_enabled_count": "Runtime-enabled Gold rows whose contract parity_status is not covered."
   },
-  "snapshot_date": "2026-07-27"
+  "snapshot_date": "2026-07-28"
 }

@@ -6,6 +6,8 @@ import importlib
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 
 def test_run_manifest_refs_facade_exports_and_unknown() -> None:
     mod = importlib.import_module(

@@ -345,7 +345,8 @@
             {
               "title": "Open selected provider context",
               "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}&var-workflow=${workflow}&var-provider=${__data.fields.provider:percentencode}&var-pipeline=${pipeline}&var-run_type=${run_type}",
-              "targetBlank": false
+              "targetBlank": false,
+              "includeVars": false
             }
           ]
         },
@@ -464,7 +465,8 @@
             {
               "title": "Open selected provider context",
               "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}&var-workflow=${workflow}&var-provider=${__data.fields.provider:percentencode}&var-pipeline=${pipeline}&var-run_type=${run_type}",
-              "targetBlank": false
+              "targetBlank": false,
+              "includeVars": false
             }
           ]
         },
@@ -563,7 +565,8 @@
             {
               "title": "Open selected provider context",
               "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}&var-workflow=${workflow}&var-provider=${__data.fields.provider:percentencode}&var-pipeline=${pipeline}&var-run_type=${run_type}",
-              "targetBlank": false
+              "targetBlank": false,
+              "includeVars": false
             }
           ]
         },

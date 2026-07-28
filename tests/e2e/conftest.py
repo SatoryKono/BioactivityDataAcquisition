@@ -1508,6 +1508,48 @@ def _resolve_silver_table_path(data_dir: Path, table_name: str) -> Path:
     )
 
 
+def _resolve_gold_table_path(data_dir: Path, table_name: str) -> Path:
+    """Resolve Gold Delta table path across naming/layout variants."""
+    variants = _build_table_name_variants(table_name)
+    gold_bases = [
+        data_dir / "output" / "gold",
+        data_dir / "gold",
+    ]
+
+    for gold_base in gold_bases:
+        for variant in variants:
+            candidate = gold_base / variant.replace(".", "/")
+            if candidate.exists() and (candidate / "_delta_log").exists():
+                return candidate
+
+        if gold_base.exists() and (gold_base / "_delta_log").exists():
+            return gold_base
+
+        if gold_base.exists():
+            discovered = sorted({p.parent for p in gold_base.rglob("_delta_log")})
+            variant_set = set(variants)
+            for candidate in discovered:
+                rel = candidate.relative_to(gold_base).as_posix()
+                candidate_variants = {
+                    rel,
+                    rel.replace("/", "."),
+                    rel.replace("/", "_"),
+                }
+                if candidate_variants & variant_set:
+                    return candidate
+
+    checked = [
+        str(gold_base / variant.replace(".", "/"))
+        for gold_base in gold_bases
+        for variant in variants
+    ]
+    raise AssertionError(
+        "Gold table does not exist. "
+        f"table_name={table_name}, checked={checked}, "
+        f"flat={', '.join(str(base) for base in gold_bases)}"
+    )
+
+
 async def assert_silver_table_has_records(
     data_dir: Path, table_name: str, expected_min: int = 1
 ) -> int:
@@ -1562,29 +1604,7 @@ async def assert_gold_table_has_records(
         Handles both current output-root layout and legacy root layout, plus
         flat_structure tables at either gold layer root.
     """
-    gold_bases = [
-        data_dir / "output" / "gold",
-        data_dir / "gold",
-    ]
-    table_path: Path | None = None
-
-    for gold_base in gold_bases:
-        standard_path = gold_base / table_name
-        flat_path = gold_base
-        if standard_path.exists():
-            table_path = standard_path
-            break
-        if flat_path.exists() and (flat_path / "_delta_log").exists():
-            table_path = flat_path
-            break
-
-    if table_path is None:
-        checked = [str(gold_base / table_name) for gold_base in gold_bases]
-        raise AssertionError(
-            "Gold table does not exist: "
-            f"table_name={table_name}, checked={checked}, "
-            f"flat={', '.join(str(base) for base in gold_bases)}"
-        )
+    table_path = _resolve_gold_table_path(data_dir, table_name)
 
     count = len(await _read_delta_records(table_path))
 
@@ -1637,14 +1657,7 @@ async def get_gold_records(data_dir: Path, table_name: str) -> list[dict]:
     Note:
         Handles both standard and flat_structure layouts.
     """
-    # Standard path: data_dir/output/gold/{table_name}/
-    table_path = data_dir / "output" / "gold" / table_name
-
-    # Try flat_structure path if standard doesn't exist
-    if not table_path.exists():
-        flat_path = data_dir / "output" / "gold"
-        if flat_path.exists() and (flat_path / "_delta_log").exists():
-            table_path = flat_path
+    table_path = _resolve_gold_table_path(data_dir, table_name)
 
     records = await _read_delta_records(table_path)
 

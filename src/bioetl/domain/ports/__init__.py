@@ -11,7 +11,9 @@ from importlib import import_module
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports.observability import HealthMetricsExpositionPort
+    from bioetl.domain.ports.observability import (
+        HealthMetricsExpositionPort as HealthMetricsExpositionPort,
+    )
 
 _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
     "bioetl.domain.ports.adr": (

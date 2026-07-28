@@ -18,6 +18,8 @@ from bioetl.interfaces.cli.commands.domains.health import (
     server_integration_observability as observability,
 )
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.mark.asyncio
 async def test_close_health_server_resources_closes_quarantine_after_checkpoint_error() -> (

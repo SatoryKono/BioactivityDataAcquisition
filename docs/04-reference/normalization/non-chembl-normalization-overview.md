@@ -30,7 +30,7 @@ values, canonical normalized values, DQ expectations, and composite impact.
 ## Canonical Evidence Surfaces
 
 - generated-matrix entrypoint:
-  [Normalization Plan P0-P6](../../05-engineering/normalization_plan_P0_P6.md)
+  Historical: [Normalization Plan P0-P6](../../99-archive/engineering/normalization_plan_P0_P6.md)
   with generated artifact path
   `docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md`
 - observed values:
@@ -111,4 +111,4 @@ Do not:
 
 - [Reference Index](../index.md)
 - [Data Providers Documentation](../providers/README.md)
-- [Normalization Plan P0-P6](../../05-engineering/normalization_plan_P0_P6.md)
+- Historical: [Normalization Plan P0-P6](../../99-archive/engineering/normalization_plan_P0_P6.md)

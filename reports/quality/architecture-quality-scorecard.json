@@ -165,7 +165,7 @@
   "integral_score": 9.41,
   "interpretation": "good_targeted_improvements",
   "metrics": {
-    "accepted_adr_count": 50,
+    "accepted_adr_count": 51,
     "adr_enforcement_blocking_gap_count": 0,
     "adr_enforcement_manual_exception_count": 0,
     "compatibility_test_file_count": 0,
@@ -175,9 +175,10 @@
     "dq_blocking_issue_count": 0,
     "expired_compat_count": 0,
     "families_at_budget": [
-      "application_services_control_plane"
+      "application_services_control_plane",
+      "composition_factories_pipeline"
     ],
-    "families_at_budget_count": 1,
+    "families_at_budget_count": 2,
     "hotspot_budget_warning_count": 0,
     "hotspot_family_count": 5,
     "layer_violations": 0,
@@ -200,7 +201,7 @@
   "schema_version": 1,
   "source_artifacts": {
     "adr_enforcement_matrix": {
-      "accepted_adr_count": 50,
+      "accepted_adr_count": 51,
       "blocking_gap_count": 0,
       "generated_artifact": "reports/quality/adr-enforcement-matrix.json",
       "path": "scripts/engineering/qa/report_adr_enforcement_matrix.py::build_payload"
@@ -240,7 +241,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "fb530e62125256526d43fb0d095621adf2b13e79b827d80b8c96882853368011",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "ea3d9f8f3a2e9df8d01b601175ae1738eb12d296b05e85780aacafa75d021460"
+      "source_tree_sha256": "7e71acd6a77267103519670ac3a8228a6b55969fcd45c5c9c9ab68715d4b9ad3"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

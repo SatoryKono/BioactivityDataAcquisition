@@ -1,6 +1,6 @@
 {
-  "generated": "2026-07-28T10:03:21.539141",
-  "total_adrs": 52,
+  "generated": "2026-07-28T15:08:21.333539",
+  "total_adrs": 53,
   "adrs": [
     {
       "adr_number": "001",
@@ -1006,11 +1006,32 @@
       "superseded_by": [],
       "related": [],
       "tags": []
+    },
+    {
+      "adr_number": "053",
+      "title": "Optional Grafana Scenes App Shell as Presentation Adapter",
+      "file_path": "ADR-053-optional-grafana-scenes-app-shell.md",
+      "status": "accepted",
+      "source_status": "Accepted",
+      "category": "Observability",
+      "owner": "BioETL Team",
+      "decision_date": "2026-07-28",
+      "last_reviewed": "2026-07-28",
+      "context": "BioETL ships a fixed portfolio of **seven** provisioned Grafana dashboards\n(`grafana/dashboards/*.json`) as the operator observability surface. Grafana is\n**optional** under ADR-010. Dashboard Resi...",
+      "decision": "1. **Optional presentation adapter only.** A Grafana App Plugin + Scenes shell\n   MAY be introduced as a **read-only** operator interaction layer. It MUST NOT\n   become a control-plane authority, w...",
+      "consequences": "### Positive\n- Clear go/no-go for Scenes work without portfolio shrink\n- Protects DRM/DRM-R/DS2 JSON investments as rollback path\n- Keeps Hex/DDD and control-plane write paths out of Grafana\n### Ne...",
+      "supersedes": [],
+      "superseded_by": [],
+      "related": [
+        "ADR-010",
+        "ADR-017"
+      ],
+      "tags": []
     }
   ],
   "stats": {
     "by_status": {
-      "accepted": 50,
+      "accepted": 51,
       "superseded": 2
     },
     "by_category": {
@@ -1018,7 +1039,7 @@
       "Architecture": 11,
       "Locking": 1,
       "Data Modeling": 3,
-      "Observability": 5,
+      "Observability": 6,
       "Resilience": 2,
       "Lifecycle": 2,
       "Data Fetching": 2,
