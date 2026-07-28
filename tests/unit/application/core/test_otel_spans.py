@@ -92,11 +92,11 @@ class TestPipelineRunnerSpan:
         )
         from bioetl.application.core.preflight.service import PreflightService
         from bioetl.application.core.postrun.service import PostrunService
-        from bioetl.application.services.medallion_lifecycle import (
+        from bioetl.application.services.medallion.medallion_lifecycle import (
             MedallionLifecycleService,
             PrepareResult,
         )
-        from bioetl.application.services.medallion_types import VacuumResult
+        from bioetl.application.services.medallion.medallion_types import VacuumResult
         from bioetl.application.core.postrun.compact_orchestrator import (
             CompactionResult,
         )
@@ -363,10 +363,10 @@ class TestPostrunServiceSpan:
             )
         )
 
-        from bioetl.application.services.medallion_lifecycle import (
+        from bioetl.application.services.medallion.medallion_lifecycle import (
             MedallionLifecycleService,
         )
-        from bioetl.application.services.medallion_types import VacuumResult
+        from bioetl.application.services.medallion.medallion_types import VacuumResult
 
         lifecycle_service = MagicMock(spec=MedallionLifecycleService)
         lifecycle_service.finalize_run = AsyncMock(

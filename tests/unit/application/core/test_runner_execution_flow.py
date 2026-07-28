@@ -26,7 +26,7 @@ from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 from bioetl.domain.control_plane.run_ledger import ORDINARY_RUN_LEDGER_STAGE_NAMES
 from bioetl.application.core.postrun.compact_orchestrator import CompactionResult
 from bioetl.application.core.postrun.service import PostrunResult, PostrunService
-from bioetl.application.services.medallion_types import VacuumResult
+from bioetl.application.services.medallion.medallion_types import VacuumResult
 
 
 class _ExecutionHost:

@@ -209,4 +209,3 @@ class BatchTransformer:
             flush_filtered_records=lambda: asyncio.sleep(0),
             flush_dq_records=lambda: asyncio.sleep(0),
         )
-

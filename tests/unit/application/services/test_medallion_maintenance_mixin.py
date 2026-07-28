@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.services.medallion_maintenance_mixin import (
+from bioetl.application.services.medallion.medallion_maintenance_mixin import (
     _MedallionMaintenanceMixin,
 )
 

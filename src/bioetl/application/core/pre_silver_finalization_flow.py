@@ -35,7 +35,7 @@ class _PreSilverFinalizationFlowMixin:
             self,
             context: PipelineContext,
             entity_id: str,
-            normalized_content_hash: str,
+            content_hash: str,
             record_index: int,
             business_data: JsonDict,
         ) -> GoldRecord: ...

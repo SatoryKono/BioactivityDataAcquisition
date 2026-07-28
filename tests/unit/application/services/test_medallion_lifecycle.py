@@ -9,8 +9,8 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
-from bioetl.application.services.medallion_types import ClearResult
+from bioetl.application.services.medallion.medallion_lifecycle import MedallionLifecycleService
+from bioetl.application.services.medallion.medallion_types import ClearResult
 from bioetl.domain.medallion import ClearPolicy, MedallionPolicy
 
 

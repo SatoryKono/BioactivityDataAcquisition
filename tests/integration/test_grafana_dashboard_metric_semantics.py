@@ -17,11 +17,13 @@ from tests.integration._grafana_test_support import (
     load_dashboard,
 )
 
+
 def _require_dashboard(name: str) -> Path:
     path = Path("grafana/dashboards") / name
     if not path.exists():
         pytest.skip(f"{name} retired in grafana simplification epic #6570/#6576")
     return path
+
 
 from tests.integration.grafana_contract_specs import (
     SUMMARY_ZERO_FALLBACK_EXPECTATIONS,
@@ -91,6 +93,7 @@ _PROCESSED_RECORDS_SECONDARY_LABELS = {
     if label not in _PROCESSED_RECORDS_PRIMARY_COLORS
 }
 
+
 def _expected_processed_records_display_token_mappings() -> list[dict[str, object]]:
     mappings: list[dict[str, object]] = []
     for label in _PROCESSED_RECORDS_PARAMETER_LABELS:
@@ -108,6 +111,7 @@ def _expected_processed_records_display_token_mappings() -> list[dict[str, objec
         )
     return mappings
 
+
 def _expected_processed_records_row_status_mappings() -> list[dict[str, object]]:
     return [
         {
@@ -119,6 +123,7 @@ def _expected_processed_records_row_status_mappings() -> list[dict[str, object]]
             },
         }
     ]
+
 
 def test_design_system_documents_missing_data_panel_class_contract() -> None:
     """Design docs must preserve missing-data semantics by panel class."""
@@ -139,6 +144,7 @@ def test_design_system_documents_missing_data_panel_class_contract() -> None:
         "dashboard design-system must document missing-data semantics; "
         f"missing={missing}"
     )
+
 
 def test_summary_queries_use_zero_fallbacks() -> None:
     """Count summaries may synthesize zero only where absence means no events."""
@@ -168,6 +174,7 @@ def test_summary_queries_use_zero_fallbacks() -> None:
                 f"Dashboard {dashboard_name} panel {panel_title!r} must include "
                 f"{expected_snippet!r} to render zero instead of no-data"
             )
+
 
 def test_workflow_selected_range_counters_use_zero_valid_empty_state() -> None:
     """Workflow summary cards intentionally render empty selected ranges as zero events."""
@@ -210,6 +217,7 @@ def test_workflow_selected_range_counters_use_zero_valid_empty_state() -> None:
         assert "`0` means no" in str(
             panel.get("description", "")
         ) or "0` means no" in str(panel.get("description", ""))
+
 
 def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> None:
     """Historical evidence must stay behind disclosure below the L0 answer path."""
@@ -306,6 +314,7 @@ def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> N
             assert "$__range" not in "\n".join(
                 get_panel_expressions(panels[panel_title])
             )
+
 
 @pytest.mark.parametrize(
     "dashboard_name",
@@ -437,6 +446,7 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
     assert "$run_id" not in dashboard_promql
     assert "${run_id}" not in dashboard_promql
 
+
 def test_control_plane_identity_evidence_uses_http_not_prometheus_labels() -> None:
     """Full identity anchors must stay on HTTP-backed tables, not Prometheus labels."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
@@ -472,6 +482,7 @@ def test_control_plane_identity_evidence_uses_http_not_prometheus_labels() -> No
     )
     assert all(token not in prometheus_expressions for token in forbidden_label_tokens)
 
+
 def test_control_plane_identity_evidence_documents_short_full_split() -> None:
     """The dashboard must keep short overview values and full detail values distinct."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
@@ -488,6 +499,7 @@ def test_control_plane_identity_evidence_documents_short_full_split() -> None:
     assert "value_full" in transformation_payload
     assert "source_type" in transformation_payload
     assert "drilldown_target" in transformation_payload
+
 
 def test_runtime_selected_count_zeroes_are_scope_anchored() -> None:
     """Selected runtime count cards must keep UNKNOWN when selected scope is absent."""
@@ -519,6 +531,7 @@ def test_runtime_selected_count_zeroes_are_scope_anchored() -> None:
         )
         defaults = panel.get("fieldConfig", {}).get("defaults", {})
         assert defaults.get("noValue") == "UNKNOWN"
+
 
 def test_runtime_alert_condition_summaries_are_telemetry_anchored() -> None:
     """Runtime handoff cards must preserve UNKNOWN for missing scope telemetry."""
@@ -568,6 +581,7 @@ def test_runtime_alert_condition_summaries_are_telemetry_anchored() -> None:
         )
         defaults = panel.get("fieldConfig", {}).get("defaults", {})
         assert defaults.get("noValue") == "UNKNOWN"
+
 
 def test_latency_p95_panels_preserve_no_data_state() -> None:
     """Latency p95 panels must not collapse missing samples into zero."""
@@ -619,6 +633,7 @@ def test_latency_p95_panels_preserve_no_data_state() -> None:
                 f"Dashboard {dashboard_name} panel {panel_title!r} must preserve "
                 "no-data instead of rendering zero latency"
             )
+
 
 @pytest.mark.parametrize(
     ("dashboard_name", "panel_title", "description_snippet", "expected_no_value"),
@@ -690,6 +705,7 @@ def test_review_panels_explain_empty_state_explicitly(
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
     assert defaults.get("noValue") == expected_no_value
 
+
 def test_silver_reject_explorer_custom_no_value_copy_is_intentional_http_forensic_behavior() -> (
     None
 ):
@@ -737,6 +753,7 @@ def test_silver_reject_explorer_custom_no_value_copy_is_intentional_http_forensi
         ), (
             f"{panel_title} description must explain HTTP-forensic missing-data semantics"
         )
+
 
 def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
     """Count-like summary panels should avoid fractional event semantics."""
@@ -787,6 +804,7 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
                 f"{expected_snippet!r} for stable count semantics"
             )
 
+
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title"),
     [
@@ -828,6 +846,7 @@ def test_dq_score_uses_validation_metric(dashboard_file, panel_title):
         "samples as UNKNOWN"
     )
 
+
 def test_worst_entity_dq_score_preserves_no_data_state() -> None:
     """Worst-score gauges must not collapse missing DQ samples into score zero."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
@@ -852,6 +871,7 @@ def test_worst_entity_dq_score_preserves_no_data_state() -> None:
         "Monitor: Worst-Entity DQ Score must render missing score samples as UNKNOWN"
     )
 
+
 def test_dq_current_status_panels_preserve_unknown_no_data_state() -> None:
     """Current DQ status panels must not convert missing telemetry to OK."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
@@ -875,6 +895,7 @@ def test_dq_current_status_panels_preserve_unknown_no_data_state() -> None:
         assert defaults.get("noValue") == "UNKNOWN", (
             f"{panel_title} must render missing current status as UNKNOWN"
         )
+
 
 def test_dq_current_status_panels_use_explicit_status_value_mappings() -> None:
     """Current DQ status panels must render operator-facing status text, not raw enums."""
@@ -916,6 +937,7 @@ def test_dq_current_status_panels_use_explicit_status_value_mappings() -> None:
             f"{panel_title} status vocabulary drifted"
         )
 
+
 def test_dq_current_status_panels_use_canonical_severity_threshold_steps() -> None:
     """Current DQ status panels must use standard L0 severity threshold steps."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
@@ -940,6 +962,7 @@ def test_dq_current_status_panels_use_canonical_severity_threshold_steps() -> No
         assert defaults.get("thresholds", {}).get("steps") == expected_steps, (
             f"{panel_title} must use canonical 0/1/2 severity thresholds"
         )
+
 
 def test_dq_first_screen_panels_expose_actionable_datalinks() -> None:
     """Current DQ operator panels must offer a direct next action."""
@@ -980,6 +1003,7 @@ def test_dq_first_screen_panels_expose_actionable_datalinks() -> None:
         "Silver Reject Explorer" in str(link.get("title", "")) for link in reasons_links
     )
 
+
 def test_dq_threshold_state_panel_uses_bounded_reason_severity_with_ok_fallback() -> (
     None
 ):
@@ -1009,6 +1033,7 @@ def test_dq_threshold_state_panel_uses_bounded_reason_severity_with_ok_fallback(
         "Threshold state must not sum current reasons into an unbounded severity value"
     )
 
+
 def test_runtime_diagnostic_panels_preserve_unknown_no_data_state() -> None:
     """Runtime diagnostic gauges must not convert missing telemetry to OK."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
@@ -1036,6 +1061,7 @@ def test_runtime_diagnostic_panels_preserve_unknown_no_data_state() -> None:
         assert defaults.get("noValue") == "UNKNOWN", (
             f"{panel_title} must render missing runtime telemetry as UNKNOWN"
         )
+
 
 def test_runtime_telemetry_gap_checks_scrape_and_rule_health() -> None:
     """Runtime telemetry gap must include Prometheus rule health and actual metrics presence
@@ -1070,6 +1096,7 @@ def test_runtime_telemetry_gap_checks_scrape_and_rule_health() -> None:
     assert "bioetl_runtime_dashboard_recording" in rule_expr, (
         "Telemetry gap must check the runtime dashboard recording group"
     )
+
 
 def test_runtime_domain_thresholds_match_alert_rule_policy() -> None:
     """Runtime domain gauges should use real alert units, not generic 1/2 severity steps."""
@@ -1106,6 +1133,7 @@ def test_runtime_domain_thresholds_match_alert_rule_policy() -> None:
     assert error_defaults.get("min") == 0
     assert error_defaults.get("max") == 1
 
+
 def test_runtime_freshness_handoff_preserves_missing_telemetry() -> None:
     """Freshness handoff must not turn missing freshness telemetry into OK."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
@@ -1129,6 +1157,7 @@ def test_runtime_freshness_handoff_preserves_missing_telemetry() -> None:
     )
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
     assert defaults.get("noValue") == "UNKNOWN"
+
 
 def test_provider_failure_rate_panel_uses_neutral_zero_and_policy_thresholds() -> None:
     """Provider failure rate must keep neutral zero plus explicit WARN/CRIT policy."""
@@ -1158,6 +1187,7 @@ def test_provider_failure_rate_panel_uses_neutral_zero_and_policy_thresholds() -
     ]
     assert panel.get("type") == "stat"
     assert "neutral supporting evidence" in str(panel.get("description", "")).lower()
+
 
 def test_provider_severity_matrix_preserves_unknown_and_critical_mapping() -> None:
     """Provider first-screen severity matrix must fail closed and color CRIT correctly."""
@@ -1195,6 +1225,7 @@ def test_provider_severity_matrix_preserves_unknown_and_critical_mapping() -> No
     ]
     matches = {mapping.get("match") for mapping in special_mappings}
     assert {"null", "nan"} <= matches
+
 
 def test_provider_telemetry_freshness_marks_missing_current_status_as_warn() -> None:
     """Provider first screen must expose telemetry freshness separately from health."""
@@ -1246,6 +1277,7 @@ def test_provider_telemetry_freshness_marks_missing_current_status_as_warn() -> 
     assert "telemetry" in description
     assert "unknown" in description or "fail-closed" in description
 
+
 def test_provider_critical_table_keeps_severity_only_scope() -> None:
     """Critical providers table must only show active degraded/failing rows."""
     dashboard = load_dashboard(
@@ -1262,9 +1294,7 @@ def test_provider_critical_table_keeps_severity_only_scope() -> None:
     assert panel is not None, "Panel 'Inspect Critical Providers' not found"
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
-    assert expressions == [
-        "max by (provider) (bioetl_provider_current_status) >= 1"
-    ]
+    assert expressions == ["max by (provider) (bioetl_provider_current_status) >= 1"]
 
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
     assert defaults.get("thresholds", {}).get("steps") == [
@@ -1276,6 +1306,7 @@ def test_provider_critical_table_keeps_severity_only_scope() -> None:
     description = str(panel.get("description", ""))
     assert "DEGRADED or FAILING" in description
     assert "provider-status" in description.lower() or "current" in description.lower()
+
 
 def test_provider_health_status_panel_fails_closed_to_unknown() -> None:
     """Raw provider status panel must preserve UNKNOWN for known providers with no sample."""
@@ -1316,6 +1347,7 @@ def test_provider_health_status_panel_fails_closed_to_unknown() -> None:
     assert "status is unknown" in description
     assert "not the canonical first-screen verdict" in description
 
+
 def test_provider_top_causes_panel_preserves_canonical_cause_only_semantics() -> None:
     """Provider top causes must not fabricate synthetic rows when canonical causes are absent."""
     dashboard = load_dashboard(
@@ -1348,6 +1380,7 @@ def test_provider_top_causes_panel_preserves_canonical_cause_only_semantics() ->
     combined_lower = combined.lower()
     assert "canonical provider cause" in combined_lower
     assert "explainability gap" in combined_lower
+
 
 def test_provider_diagnostic_panels_preserve_no_data_for_tokens_and_circuit_breakers() -> (
     None
@@ -1389,6 +1422,7 @@ def test_provider_diagnostic_panels_preserve_no_data_for_tokens_and_circuit_brea
             f"Panel '{panel_title}' must preserve diagnostic no-data instead of synthetic fallback"
         )
 
+
 def test_provider_optional_telemetry_panels_explain_empty_samples_do_not_refute_status() -> (
     None
 ):
@@ -1426,6 +1460,7 @@ def test_provider_optional_telemetry_panels_explain_empty_samples_do_not_refute_
             f"{title} must explain its empty optional-telemetry semantics"
         )
 
+
 def test_provider_degraded_checks_panel_uses_neutral_evidence_thresholds() -> None:
     """Selected-range degraded-count evidence must not reuse current-severity thresholds."""
     dashboard = load_dashboard(
@@ -1447,6 +1482,7 @@ def test_provider_degraded_checks_panel_uses_neutral_evidence_thresholds() -> No
     assert defaults.get("thresholds", {}).get("steps") == [
         {"color": "green", "value": None}
     ]
+
 
 def test_dq_selected_range_evidence_panels_use_neutral_thresholds() -> None:
     """Selected-range DQ evidence cards must not reuse live severity thresholds."""
@@ -1477,6 +1513,7 @@ def test_dq_selected_range_evidence_panels_use_neutral_thresholds() -> None:
     ).lower()
     assert "selected-range gold output count" in gold_description
     assert "does not prove the current dq verdict" in gold_description
+
 
 def test_dq_blocked_record_evidence_panels_use_neutral_thresholds() -> None:
     """Blocked-record evidence panels must not reapply entity YAML ratio thresholds in Grafana."""
@@ -1522,6 +1559,7 @@ def test_dq_blocked_record_evidence_panels_use_neutral_thresholds() -> None:
                 "bioetl_dq_soft_threshold_exceeded" in expr for expr in expressions
             ), f"Panel '{panel_title}' must use domain threshold counters"
 
+
 def test_dq_freshness_lag_panel_uses_time_domain_thresholds() -> None:
     """Freshness age must expose the DQ 24h/72h policy directly in hours."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
@@ -1545,6 +1583,7 @@ def test_dq_freshness_lag_panel_uses_time_domain_thresholds() -> None:
     ]
     expressions = get_panel_expressions({"panels": [panel]})
     assert expressions and all("/ 3600" in expr for expr in expressions)
+
 
 def test_dq_problem_panels_expose_actionable_datalinks() -> None:
     """Key DQ incident panels must offer direct operator handoff."""
@@ -1583,6 +1622,7 @@ def test_dq_problem_panels_expose_actionable_datalinks() -> None:
         "Track: Silver Filter Rejects in Range should not use legacy panel links"
     )
 
+
 def test_dashboards_do_not_use_prometheus_created_timestamps() -> None:
     """Operator dashboards must not expose Prometheus client bookkeeping timestamps."""
     for dashboard_path in get_dashboard_files():
@@ -1591,6 +1631,7 @@ def test_dashboards_do_not_use_prometheus_created_timestamps() -> None:
         assert all("_created" not in expr for expr in expressions), (
             f"Dashboard {dashboard_path.name} must not use Prometheus *_created series"
         )
+
 
 def test_selected_range_kpis_follow_declared_counter_window_intent() -> None:
     """Selected-range KPI panels must match their declared counter-window intent."""
@@ -1680,6 +1721,7 @@ def test_selected_range_kpis_follow_declared_counter_window_intent() -> None:
                     f"{expectation['intent']} and must not use {forbidden}"
                 )
 
+
 def test_all_max_over_time_counter_expressions_are_reviewed() -> None:
     """Every Counter used with max_over_time must match the reviewed policy."""
     policy = yaml.safe_load(MAX_OVER_TIME_COUNTER_POLICY_PATH.read_text("utf-8"))
@@ -1727,6 +1769,7 @@ def test_all_max_over_time_counter_expressions_are_reviewed() -> None:
     for source, matched, expression in reviewed:
         if "bioetl_silver_filter_rejections_total" in matched:
             assert "> bool 0" in expression or "> 0" in expression, source
+
 
 @pytest.mark.parametrize("dashboard_name", _PROCESSED_RECORDS_DASHBOARDS)
 def test_processed_records_parameter_rows_sort_and_display_cleanly(

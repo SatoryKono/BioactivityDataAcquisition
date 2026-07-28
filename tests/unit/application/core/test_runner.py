@@ -24,7 +24,7 @@ from bioetl.application.core.lifecycle.shutdown import (
 )
 from bioetl.application.observability.observer import PipelineObserver
 from bioetl.application.services.debug_export_service import DebugExportResult
-from bioetl.application.services.medallion_lifecycle import (
+from bioetl.application.services.medallion.medallion_lifecycle import (
     MedallionLifecycleService,
     PrepareResult,
 )
@@ -232,7 +232,7 @@ def mock_postrun_service():
 @pytest.fixture
 def mock_lifecycle_service():
     """Create a mock MedallionLifecycleService (injected via DI)."""
-    from bioetl.application.services.medallion_lifecycle import (
+    from bioetl.application.services.medallion.medallion_lifecycle import (
         ClearResult,
         VacuumResult,
     )
@@ -1022,7 +1022,7 @@ class TestPipelineRunnerClearViaLifecycle:
         mock_postrun_service,
     ):
         """Test _prepare_medallion_layers delegates to lifecycle service."""
-        from bioetl.application.services.medallion_lifecycle import (
+        from bioetl.application.services.medallion.medallion_lifecycle import (
             ClearResult,
         )
         from bioetl.domain.medallion import MedallionPolicy
@@ -1079,7 +1079,7 @@ class TestPipelineRunnerClearViaLifecycle:
         mock_postrun_service,
     ):
         """Test _prepare_medallion_layers is called as part of run() execution."""
-        from bioetl.application.services.medallion_lifecycle import (
+        from bioetl.application.services.medallion.medallion_lifecycle import (
             ClearResult,
             VacuumResult,
         )

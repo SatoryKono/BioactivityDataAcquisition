@@ -33,11 +33,13 @@ _COUNTER_ALIASES = {
 
 
 class _HistogramObserver(Protocol):
-    def observe(self, amount: float) -> None: ...
+    def observe(self, amount: float) -> None:
+        del amount
 
 
 class _CounterObserver(Protocol):
-    def inc(self, amount: float = 1) -> None: ...
+    def inc(self, amount: float = 1) -> None:
+        del amount
 
 
 class _GaugeObserver(Protocol):
@@ -47,13 +49,15 @@ class _GaugeObserver(Protocol):
 class _HistogramMetric(Protocol):
     def labels(self, **labels: str) -> _HistogramObserver: ...
 
-    def observe(self, amount: float) -> None: ...
+    def observe(self, amount: float) -> None:
+        del amount
 
 
 class _CounterMetric(Protocol):
     def labels(self, **labels: str) -> _CounterObserver: ...
 
-    def inc(self, amount: float = 1) -> None: ...
+    def inc(self, amount: float = 1) -> None:
+        del amount
 
 
 class _GaugeMetric(Protocol):

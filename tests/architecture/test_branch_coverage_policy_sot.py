@@ -35,7 +35,9 @@ def test_branch_coverage_is_hard_merge_truth_not_advisory() -> None:
 def test_module_coverage_gates_branch_policy_matches_matrix() -> None:
     """module_coverage_gates and ci surface matrix must agree on 85% blocking."""
     gates = yaml.safe_load(
-        (_REPO / "configs/quality/module_coverage_gates.yaml").read_text(encoding="utf-8")
+        (_REPO / "configs/quality/module_coverage_gates.yaml").read_text(
+            encoding="utf-8"
+        )
     )
     surface = yaml.safe_load(
         (_REPO / "configs/quality/ci_coverage_surface_matrix.yaml").read_text(

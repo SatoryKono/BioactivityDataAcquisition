@@ -49,10 +49,10 @@ if TYPE_CHECKING:
         DQReportContext,
         DQReportResult,
     )
-    from bioetl.application.services.medallion_lifecycle import (
+    from bioetl.application.services.medallion.medallion_lifecycle import (
         MedallionLifecycleService,
     )
-    from bioetl.application.services.medallion_types import VacuumResult
+    from bioetl.application.services.medallion.medallion_types import VacuumResult
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
 

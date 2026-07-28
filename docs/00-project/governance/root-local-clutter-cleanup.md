@@ -1,7 +1,7 @@
 # Root local clutter cleanup (operator guidance)
 
 **Status:** active  
-**Linked issues:** #6703 (RH), #6766 (RH2-01), #6798/#6799 (RH3); epics #6700, #6765, #6795  
+**Linked issues:** #6703 (RH), #6766 (RH2-01), #6798/#6799 (RH3), #6813/#6814/#6816 (RH4); epics #6700, #6765, #6795, #6812  
 **Last verified:** 2026-07-28  
 
 This note documents **local-only** cleanup for the repository root. It does not
@@ -37,6 +37,29 @@ recurring checklist below instead of inventing new allowlist entries.
    ```
 
 Long-lived retained logs belong under `reports/logs/`, not root `logs/`.
+
+## Agent / scratch placement (RH4-03)
+
+**Do not** create agent or closeout scratch Python at the exact repository root
+(`_tmp_*.py`, ad-hoc `temp_*.py`, one-off verification helpers). Root
+`_tmp_*.py` is gitignored but still fails
+`check-cleanliness --strict-untracked` and re-clutters live root after purge.
+
+Preferred placement for disposable scripts and dumps:
+
+- under `reports/` (generated/local; many paths already gitignored), or
+- under an existing ignored tool cache tree, or
+- OS temp **outside** the repository
+
+Root `_tmp_*.py` remains **safe to delete** and **must not be recreated**.
+Do not weaken `--strict-untracked` to allow root scratch Python. Do not expand
+the root allowlist for temps.
+
+## Ops writers that must not re-clutter root logs/ (RH4-02)
+
+- `scripts/ops/runtime/docker/watchdog-docker-stable.ps1` defaults state/logs to
+  `reports/logs/docker-watchdog/` (not root `logs/`). Override with `-StateDir`
+  if a host already pinned another path.
 
 ## Safe to delete locally (untracked)
 
@@ -98,9 +121,27 @@ Left in place:
 - `.mcp-server-context.md` (regenerable MCP context still in use)
 - Windows `nul` (Access denied on unlink; already gitignored)
 
+## RH4-01 local purge (2026-07-28)
+
+Deleted on the audit host when present (untracked only):
+
+- `_tmp_check_helper_ratio.py`, `_tmp_issue_6787_closeout.py`
+- root `logs/` (including recreated `logs/docker-watchdog/`)
+
+Left in place:
+
+- `.env`, `.env.local` (secret lane)
+- `.mcp-server-context.md` (regenerable MCP context still in use)
+- Windows `nul` (Access denied on unlink; already gitignored)
+
+Watchdog default relocated under `reports/logs/docker-watchdog/` (RH4-02 / #6816)
+so future runs do not recreate root `logs/` by default.
+
 ## Related
 
 - `.github/workflows/root-hygiene.yml`
 - `configs/quality/root_hygiene_review_registry.yaml`
 - `configs/quality/repo_structure_catalog.yaml`
 - Epic RH3: #6795
+- Epic RH4: #6812
+- Pack: `.github/ISSUES/RH4-2026-07-28-ROOT-HYGIENE-POST-RH3-RESIDUAL-ISSUE-PACK.md`

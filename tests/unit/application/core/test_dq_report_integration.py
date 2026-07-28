@@ -63,7 +63,7 @@ def mock_dq_service() -> MagicMock:
 @pytest.fixture
 def mock_lifecycle_service() -> MagicMock:
     """Create mock MedallionLifecycleService."""
-    from bioetl.application.services.medallion_lifecycle import VacuumResult
+    from bioetl.application.services.medallion.medallion_lifecycle import VacuumResult
 
     service = MagicMock()
     service.finalize_run = AsyncMock(

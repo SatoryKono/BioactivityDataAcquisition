@@ -72,8 +72,8 @@ def create_factory(
 
 
 __all__ = [
-    "_resolve_transformer_class_ref",
     "_resolve_silver_columns",
+    "_resolve_transformer_class_ref",
     "_schema_columns",
     "_validate_contract_policy",
     "create_factory",

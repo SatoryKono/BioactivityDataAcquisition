@@ -24,10 +24,16 @@ def test_unit_fast_lane_excludes_scripts_repo_backed_and_subprocess() -> None:
     assert "not repo_backed" in marker
     assert "not subprocess_backed" in marker
     assert "tests/unit/scripts" in " ".join(args) or any(
-        a.endswith("tests/unit/scripts") or a == "tests/unit/scripts" or a.startswith("--ignore=tests/unit/scripts")
+        a.endswith("tests/unit/scripts")
+        or a == "tests/unit/scripts"
+        or a.startswith("--ignore=tests/unit/scripts")
         for a in args
     )
-    assert any("--ignore=tests/unit/scripts" == a or a.startswith("--ignore=tests/unit/scripts") for a in args)
+    assert any(
+        "--ignore=tests/unit/scripts" == a
+        or a.startswith("--ignore=tests/unit/scripts")
+        for a in args
+    )
     assert any("--ignore=tests/unit/repo_backed" == a for a in args)
 
 

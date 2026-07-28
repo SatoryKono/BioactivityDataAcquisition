@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
     from bioetl.application.core.postrun.compact_orchestrator import CompactionResult
     from bioetl.application.services.dq_report_service import DQReportResult
-    from bioetl.application.services.medallion_types import VacuumResult
+    from bioetl.application.services.medallion.medallion_types import VacuumResult
     from bioetl.domain.value_objects.dq_result import DQResult
 
 
