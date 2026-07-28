@@ -24,6 +24,7 @@ ______________________________________________________________________
 | --------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | Domain Objects        | [01-domain-layer.md](../02-architecture/01-domain-layer.md)                                                         |
 | ETL Layers            | [data-layers.md](../02-architecture/data-layers.md)                                                                 |
+| Composite entities    | [composites.md](../04-reference/pipelines/composites.md)                                                            |
 | Data Flow             | [data-flow.md](../02-architecture/diagrams/guide/data-flow-reference.md)                                            |
 | Duplication Reduction | [module-consolidation-migration-requirements.md](../02-architecture/module-consolidation-migration-requirements.md) |
 | Physical Layout       | [03-file-policy.md](governance/03-file-policy.md) + [local-storage-layout.md](../03-guides/local-storage-layout.md) |

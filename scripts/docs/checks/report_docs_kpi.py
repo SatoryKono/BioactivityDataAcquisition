@@ -113,6 +113,9 @@ class DocsKpiMetrics:
     deadline_days_remaining: int
     status: str
     breaches: list[str]
+    # DOC-GOV-09: curated reports surface size (not bulk evidence)
+    docs_reports_file_count: int = 0
+    docs_reports_size_mb: float = 0.0
 
 
 def _load_nav_docs() -> set[str]:
@@ -288,6 +291,15 @@ def compute_metrics(
         max_orphans=max_orphans,
     )
 
+    reports_root = DOCS_DIR / "reports"
+    reports_files = (
+        [path for path in reports_root.rglob("*") if _safe_is_file(path)]
+        if reports_root.exists()
+        else []
+    )
+    reports_size = sum(path.stat().st_size for path in reports_files)
+    reports_size_mb = round(reports_size / 1_000_000, 3)
+
     return DocsKpiMetrics(
         generated_at_utc=datetime.now(UTC).isoformat(timespec="seconds"),
         total_docs=len(all_rel_paths),
@@ -305,6 +317,8 @@ def compute_metrics(
         deadline_days_remaining=days_remaining,
         status=status,
         breaches=breaches,
+        docs_reports_file_count=len(reports_files),
+        docs_reports_size_mb=reports_size_mb,
     )
 
 
@@ -322,6 +336,8 @@ def render_markdown(metrics: DocsKpiMetrics) -> str:
         f"- In nav: **{metrics.in_nav}**",
         f"- Outside nav: **{metrics.not_in_nav}**",
         f"- Orphan candidates: **{metrics.orphan_candidates}**",
+        f"- `docs/reports/` files (curated surface): **{metrics.docs_reports_file_count}**",
+        f"- `docs/reports/` size_mb: **{metrics.docs_reports_size_mb}**",
         "",
         "## KPI Thresholds",
         "",

@@ -65,6 +65,32 @@ mirrors в `docs/00-project/ai/**` остаются navigation/guidance surfaces
 - Для актуальной версии RULES читай header `Version:` в [RULES.md](RULES.md).
 - Drift checks: `python -m scripts.docs check-drift --runtime-mirrors --freshness`
 
+
+## Documentation ownership (DOC-GOV-09)
+
+| Surface | Owner lane | Type | Retirement criterion |
+| --- | --- | --- | --- |
+| `docs/00-project/RULES.md` | architecture governance | normative | never without ADR/RFC |
+| `docs/00-project/NORMATIVE_SOURCES.md` | architecture governance | index | update in place |
+| `docs/01-requirements/REQUIREMENTS.md` | product/architecture | normative | versioned revise |
+| `docs/02-architecture/decisions/**` | architecture | ADR | supersede, never silent delete |
+| `docs/02-architecture/*` layer docs | architecture | architecture | re-verify or archive with banner |
+| `docs/03-guides/**` | docs + domain owners | guide | merge/archive when superseded |
+| `docs/04-reference/**` | domain/contracts | reference | contract-driven updates |
+| `docs/05-operations/**` | ops | runbook/ops | re-verify after runtime change |
+| `docs/05-engineering/**` | docs | stub | archive only; no new SSOT |
+| `docs/plans/**` | planning | non-normative | one active backlog; archive rest |
+| `docs/reports/**` | quality/docs | non-normative thin | bulk → `reports/docs-evidence/` |
+| `docs/00-project/ai/**` | AI runtime mirrors | mirror | drift vs `.codex/**`; no behavior SSOT |
+| `docs/99-archive/**` | docs | archive | retain for history |
+| `docs/02-architecture/diagrams/**/*.mmd` | diagram governance | source | ADR-040 lint |
+| Diagram `**/png/**` | diagram governance | render artifact | CI/local only (DOC-GOV-02) |
+
+**KPI / gates:** `python -m scripts.docs report-docs-kpi` (weekly workflow
+`docs-kpi-weekly.yml`); `python -m scripts.docs check-drift --runtime-mirrors --freshness`.
+New docs PRs SHOULD declare owner + type + retirement criterion (see
+`docs/03-guides/docs-verification.md`).
+
 ## Related AI surfaces
 
 - [AGENTS.md](../../AGENTS.md) — root AI runtime contract

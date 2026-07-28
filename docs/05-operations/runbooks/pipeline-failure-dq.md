@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: P1
   Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-  Last verified: '2026-04-03'
+  Last verified: '2026-07-28'
 
 ______________________________________________________________________
 

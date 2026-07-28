@@ -568,3 +568,7 @@ Execution note:
 - historical context удерживается только там, где он ещё нужен для evidence
   traceability;
 - `README.md` показывает реальную, а не историческую структуру планов.
+
+## Freshness note
+
+> Freshness note (2026-07-28, DOC-GOV-08): retained as the single active backlog under docs/plans/. Supporting context plans were archived to docs/99-archive/plans/. Re-verify open items against current GitHub issues and architecture gates before scheduling work.

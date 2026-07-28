@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-07-28'
 
 ______________________________________________________________________
 
@@ -90,6 +90,9 @@ ______________________________________________________________________
 
 Hierarchical configuration takes precedence when the entity `quality:` hierarchy
 is the active surface.
+
+**SSOT for threshold narrative:** [dq-configuration.md](../03-guides/dq-configuration.md)
+(DOC-GOV-04). Composite entity pipelines: [composites.md](../04-reference/pipelines/composites.md).
 
 ### 2.3. Нормализация
 

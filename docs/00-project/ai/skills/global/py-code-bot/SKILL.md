@@ -1,28 +1,20 @@
-> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
-> Canonical runtime source:
-> - Gemini: no tracked runtime counterpart on `main`; treat Gemini behavior as local-only or mirror guidance until a verified `.gemini/**` tree is added.
-> Governance: [AI Runtime Mirror Ownership](../../../agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md), [Memory Usage](../../../agents/guides/MEMORY_USAGE.md), [Post-Change Validation](../../../agents/policy/POST_CHANGE_VALIDATION.md).
-> Edit the runtime source first, then refresh this mirror.
-______________________________________________________________________
+> **DEPRECATED TOMBSTONE (DOC-GOV-03 / #6879)**
+> This file is a published/internal mirror under `docs/00-project/ai/**`.
+> It is **not** an active runtime skill. Do not route new work here.
 
-## name: py-code-bot description: Deprecated legacy mirror; production code workflow moved to the orchestrator in ORCHESTRATION v4.0.
+# py-code-bot (deprecated)
 
-# py-code-bot
+| Field | Value |
+| --- | --- |
+| Status | **deprecated-legacy** |
+| Use for new work | **Never** |
+| Active code path | Orchestrator + relevant `py-*` wrappers |
+| Canonical runtime | `.codex/**` (see root `AGENTS.md`) |
 
-*Статус: deprecated-legacy*
+Historical references to `py-code-bot` mean "implementation work". Map them to
+the current multi-agent model; never revive a standalone code-bot lane.
 
-## Objective
+## See
 
-Historical mirror entry retained only to explain old references to `py-code-bot`.
-
-## Current Status
-
-- `py-code-bot` was removed from the active orchestration model in `ORCHESTRATION.md v4.0`.
-- Production code is now written directly by the orchestrator.
-- This page is intentionally excluded from the active published skill catalog.
-
-## Canonical References
-
-- Current orchestration: `../../agents/ORCHESTRATION.md`
-- Current Codex guide: `../../guides/CODEX.md`
-- Shared project context: `../../../memory/agent-memory.md`
+- `AGENTS.md` — Canonical Precedence
+- `docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md`
