@@ -986,8 +986,8 @@ universal hard-fail default for every DQ surface:
 
 | Surface | Default | Action |
 | --- | --- | --- |
-| Hierarchical `quality:` config | `soft_fail=0.05`, `hard_fail=0.25` | warn above soft; reject/quarantine above hard according to active disposition policy |
-| Contract-backed DQ fallback, inline DQ override normalization, Silver DQ request | `soft_fail=0.05`, `hard_fail=0.20` | warn above soft; reject/quarantine above hard according to active disposition policy |
+| Hierarchical `quality:` config / contract-loader omitted thresholds | `soft_fail=0.05`, `hard_fail=0.50` | warn above soft; reject/quarantine above hard according to active disposition policy |
+| Inline DQ override normalization / Silver DQ request baseline | `soft_fail=0.05`, `hard_fail=0.20` | warn above soft; reject/quarantine above hard according to active disposition policy |
 
 ______________________________________________________________________
 

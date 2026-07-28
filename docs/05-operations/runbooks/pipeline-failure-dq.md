@@ -42,13 +42,18 @@ ______________________________________________________________________
 ### Thresholds
 
 - **Soft Fail**: > 5% errors (Warning).
-- **Hard Fail**: > 25% errors (Pipeline Failure) for hierarchical configuration; > 20% for contract/runtime fallback.
+- **Hard Fail**: > 50% errors (Pipeline Failure) for hierarchical / contract-loader
+  defaults; > 20% only for Silver request / pipeline-override baselines when those
+  code defaults apply without an explicit override.
 
-**Note:** DQ thresholds have dual defaults:
-- Hierarchical configuration (`configs/base/quality.yaml`): `soft_fail: 0.05` (5%), `hard_fail: 0.25` (25%)
-- Contract/runtime fallback (`src/bioetl/domain/ports/quality/silver_dq_request.py`): `soft_fail_threshold: 0.05` (5%), `hard_fail_threshold: 0.20` (20%)
+**Note:** DQ thresholds are multi-surface (see
+[DQ Contracts — Threshold Semantics](../../04-reference/contracts/dq-contracts.md#threshold-semantics)):
+- Hierarchical (`configs/base/quality.yaml` / `ThresholdsConfig`): `soft_fail: 0.05`, `hard_fail: 0.50`
+- Contract-backed loader omitted thresholds: `hard_fail: 0.50`
+- Silver request / pipeline-override baseline: `hard_fail: 0.20`
 
-The hierarchical configuration takes precedence when available.
+Hierarchical configuration takes precedence when the entity `quality:` hierarchy
+is the active surface.
 
 ### Diagnosis Steps
 

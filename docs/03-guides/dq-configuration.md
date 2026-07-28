@@ -75,16 +75,18 @@ Configurations are merged in order (later wins):
 
 ## DQ Thresholds
 
-BioETL currently has **two related default surfaces**, and the hard-fail value
-depends on which one you are reading:
+BioETL has **multiple related default surfaces**. Hard-fail depends on which
+surface is active; do not assume a single universal value.
 
 | Surface | Source of truth | Default | Notes |
 | --- | --- | --- | --- |
-| Hierarchical quality config | `configs/base/quality.yaml` and `DQConfigLoader.load()` | `soft_fail=0.05`, `hard_fail=0.25` | Used by provider/entity `quality:` hierarchy |
-| Contract/runtime request baseline | `src/bioetl/infrastructure/config/dq_contract_config_loader.py`, `src/bioetl/infrastructure/config/pipeline_dq_resolution.py`, `src/bioetl/domain/ports/quality/silver_dq_request.py` | `soft_fail=0.05`, `hard_fail=0.20` | Used when contract-backed config or inline runtime defaults are normalized without an explicit threshold override |
+| Hierarchical quality config | `configs/base/quality.yaml`, `ThresholdsConfig` (`dq_config.py`) | `soft_fail=0.05`, `hard_fail=0.50` | Provider/entity `quality:` hierarchy and RULES default |
+| Contract-backed DQ loader fallback | `src/bioetl/infrastructure/config/dq_contract_config_loader.py` | `soft_fail=0.05`, `hard_fail=0.50` | When contract YAML omits explicit thresholds |
+| Inline pipeline DQ override baseline | `src/bioetl/infrastructure/config/pipeline_dq_resolution.py` | `soft_fail=0.05`, `hard_fail=0.20` | Baseline for detecting whether `pipeline.dq_overrides` changed defaults |
+| Silver DQ request shape | `src/bioetl/domain/ports/quality/silver_dq_request.py` | `soft_fail=0.05`, `hard_fail=0.20` | Request-shape default for Silver analyze |
 
-That means `0.25` is the current **hierarchical config default**, while `0.20`
-is the current **contract/runtime fallback default**.
+Hierarchical / RULES / contract-loader default hard-fail is **0.50 (50%)**.
+The **0.20** value is the Silver request / pipeline-override baseline only.
 
 ### Hierarchical `quality:` default
 
@@ -93,24 +95,26 @@ Configured in `configs/base/quality.yaml`:
 ```yaml
 thresholds:
   soft_fail: 0.05      # >5% errors -> Warning
-  hard_fail: 0.25      # >25% errors -> Fail Batch
+  hard_fail: 0.50      # >50% errors -> Fail Batch (hierarchical default)
 ```
 
-### Contract/runtime fallback default
+### Silver / pipeline-override baseline
 
-When contract-backed config or inline `pipeline.dq_overrides` is normalized
-without an explicit hard-fail value, the runtime falls back to:
+When Silver DQ request fields or inline `pipeline.dq_overrides` normalization
+use code defaults without an explicit hard-fail, the baseline is:
 
 ```text
 soft_fail = 0.05
 hard_fail = 0.20
 ```
 
-This behavior is currently anchored in:
+Anchors:
 
-- `src/bioetl/infrastructure/config/dq_contract_config_loader.py`
 - `src/bioetl/infrastructure/config/pipeline_dq_resolution.py`
 - `src/bioetl/domain/ports/quality/silver_dq_request.py`
+
+Contract-backed loader omitted thresholds resolve to **0.50** via
+`dq_contract_config_loader.py` (`hard_fail` resolve default).
 
 **Invariant**: `soft_fail` must be strictly less than `hard_fail` on every
 surface.

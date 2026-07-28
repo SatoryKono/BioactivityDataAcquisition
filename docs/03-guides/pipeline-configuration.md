@@ -415,7 +415,7 @@ DQ правила загружаются в порядке приоритета 
 # configs/base/quality.yaml
 thresholds:
   soft_fail: 0.05      # >5% errors → Warning
-  hard_fail: 0.25      # >25% errors → Fail Batch in the hierarchical quality default
+  hard_fail: 0.50      # >50% errors → Fail Batch in the hierarchical quality default
 
 strict_validation: false
 invalid_record_policy: quarantine  # quarantine | skip | fail
