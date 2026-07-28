@@ -201,6 +201,16 @@ routes:
       Dashboard panel title inventory mirrors shipped Grafana dashboard JSON
       for documentation and CI drift checks.
 
+  - id: dashboard-navigation-contract-generated-doc
+    generator: scripts/ops/observability/grafana/render_nav_bus.py
+    output_kind: curated_generated_docs
+    commit_policy: tracked_curated_generated_doc
+    outputs:
+      - docs/03-guides/dashboards/navigation-contract.md
+    notes:
+      Dashboard navigation contract mirrors the machine-readable navigation
+      links contract and shipped Grafana navigation bus.
+
   - id: api-reference-generated-docs
     generator: docs API reference generation workflow
     output_kind: curated_generated_docs

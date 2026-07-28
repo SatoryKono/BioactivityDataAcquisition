@@ -12,7 +12,7 @@ snapshot evidence, a snapshot denominator, or a presence gate. Event deltas use
 
 ## Key Panels
 
-### 1. Review Dashboard Navigation
+### 1. Navigation
 - **Type:** Text
 - **Purpose:** Explain the dashboard navigation and escalation flow.
 - **Data sources:** Dashboard variables and operator copy.

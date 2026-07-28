@@ -14,7 +14,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 
 | Dashboard | Panel ID | Title |
 | --- | ---: | --- |
-| bioetl-control-plane-v1.json | 1000 | Review Dashboard Navigation |
+| bioetl-control-plane-v1.json | 1000 | Navigation |
 | bioetl-control-plane-v1.json | 9400 | Provenance |
 | bioetl-control-plane-v1.json | 9401 | Status |
 | bioetl-control-plane-v1.json | 906 | Next Action: Replay Diagnostics |
@@ -72,7 +72,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 9412 | Run context (thin) → Run Explorer |
 | bioetl-control-plane-v1.json | 9402 | ID |
 | bioetl-control-plane-v1.json | 9403 | Processed Records |
-| bioetl-dq-v2.json | 1000 | Review Dashboard Navigation |
+| bioetl-dq-v2.json | 1000 | Navigation |
 | bioetl-dq-v2.json | 9400 | Provenance |
 | bioetl-dq-v2.json | 9401 | Status |
 | bioetl-dq-v2.json | 9103 | Review: First Action |
@@ -135,7 +135,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-overview-v2.json | 9602 | Run context (thin) → Run Explorer |
 | bioetl-overview-v2.json | 9300 | ID |
 | bioetl-overview-v2.json | 9301 | Processed Records |
-| bioetl-provider-health-v2.json | 1000 | Review Dashboard Navigation |
+| bioetl-provider-health-v2.json | 1000 | Navigation |
 | bioetl-provider-health-v2.json | 9400 | Provenance |
 | bioetl-provider-health-v2.json | 9401 | Status |
 | bioetl-provider-health-v2.json | 9002 | First Action |
@@ -166,7 +166,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-provider-health-v2.json | 9405 | Run context (thin) → Run Explorer |
 | bioetl-provider-health-v2.json | 9402 | ID |
 | bioetl-provider-health-v2.json | 9403 | Processed Records |
-| bioetl-runtime.json | 1000 | Review Dashboard Navigation |
+| bioetl-runtime.json | 1000 | Navigation |
 | bioetl-runtime.json | 9400 | Provenance |
 | bioetl-runtime.json | 9401 | Status |
 | bioetl-runtime.json | 9991 | First Action |

@@ -1308,13 +1308,18 @@ _EXPECTED_CURRENT_NAV_TITLE = {
     "bioetl-runtime": "2. Pipeline Diagnostics",
     "bioetl-provider-health-v2": "3. Provider Health",
     "bioetl-dq-v2": "4. Data Quality",
+    "bioetl-incident-v1": "5. Incident Workspace",
+    "bioetl-run-explorer-v1": "6. Run Explorer",
 }
 
 _BASE_VISUAL_NAV_TITLES = (
     "0. Trust",
     "1. Overview",
     "2. Pipeline Diagnostics",
+    "3. Provider Health",
     "4. Data Quality",
+    "5. Incident Workspace",
+    "6. Run Explorer",
 )
 
 _OPTIONAL_VISUAL_NAV_TITLES = (
@@ -1327,7 +1332,7 @@ _SANITIZER_SAFE_NAV_TOKENS = (
     "display:flex",
     "flex-wrap:wrap",
     "overflow:visible",
-    "flex:1 1 145px",
+    "flex:1 1 120px",
     "text-align:center",
     "color:#f8fafc",
     "background:#334155",
@@ -1360,38 +1365,21 @@ def _assert_visual_bus_base_content(
         f"{dashboard_name} navigation must survive Grafana Text-panel "
         "sanitization without a style block"
     )
-    required_tokens = _SANITIZER_SAFE_NAV_TOKENS
-    if dashboard_name in {
-        "bioetl-provider-health-v2.json",
-        "bioetl-incident-v1.json",
-        "bioetl-run-explorer-v1.json",
-    }:
-        required_tokens = tuple(
-            token
-            for token in _SANITIZER_SAFE_NAV_TOKENS
-            if token not in {"background:#1d4ed8", "border:2px solid #7dd3fc"}
-        )
-    for token in required_tokens:
+    for token in _SANITIZER_SAFE_NAV_TOKENS:
         assert token in content, (
             f"{dashboard_name} navigation must define sanitizer-safe {token}"
         )
     description = str(panel.get("description", ""))
     assert "Sanitizer-compatible" in description
     assert "native keyboard focus" in description
+    assert "3. Provider Health" in description or "Provider Health" in description
+    assert "Incident Workspace" in description
+    assert "Run Explorer" in description
 
 
 def _assert_current_dashboard_disabled_in_visual_bus(
     *, dashboard_name: str, uid: str, content: str
 ) -> None:
-    if uid in {
-        "bioetl-provider-health-v2",
-        "bioetl-incident-v1",
-        "bioetl-run-explorer-v1",
-    }:
-        assert 'aria-current="page"' not in content, (
-            f"{dashboard_name} is off-bus/adjunct and must not mark a primary title as current"
-        )
-        return
     current_title = _EXPECTED_CURRENT_NAV_TITLE[uid]
     disabled_pattern = re.compile(
         rf'<span[^>]*aria-current="page"[^>]*>{re.escape(current_title)}</span>'

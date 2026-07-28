@@ -179,7 +179,10 @@ def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
         "0. Trust",
         "1. Overview",
         "2. Pipeline Diagnostics",
+        "3. Provider Health",
         "4. Data Quality",
+        "5. Incident Workspace",
+        "6. Run Explorer",
     )
     for path in sorted(DASHBOARD_DIR.glob("bioetl-*.json")):
         dashboard = json.loads(path.read_text(encoding="utf-8"))
@@ -212,20 +215,13 @@ def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
             if tag == "span" and attrs.get("aria-current") == "page"
         ]
         uid = str(dashboard.get("uid") or "")
-        if uid in {
-            "bioetl-provider-health-v2",
-            "bioetl-incident-v1",
-            "bioetl-run-explorer-v1",
-        }:
-            assert len(links) == 4, path.name
-            assert len(current) == 0, path.name
-        else:
-            assert 3 <= len(links) <= 4, path.name
-            assert len(current) == 1, path.name
+        # Full portfolio bus: 7 workspaces, current is disabled span (6 anchors).
+        assert len(links) == 6, path.name
+        assert len(current) == 1, path.name
         for attrs in links:
             style = attrs.get("style", "")
             for token in (
-                "flex:1 1 145px",
+                "flex:1 1 120px",
                 "text-align:center",
                 "color:#f8fafc",
                 "background:#334155",
@@ -233,11 +229,9 @@ def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
             ):
                 assert token in style, (path.name, token)
             assert attrs.get("href"), path.name
-        if not current:
-            continue
         current_style = current[0].get("style", "")
         for token in (
-            "flex:1 1 145px",
+            "flex:1 1 120px",
             "background:#1d4ed8",
             "border:2px solid #7dd3fc",
         ):

@@ -7,19 +7,19 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3143 |
-| Tracked doc-like files | 1949 |
-| Ignored local docs/reports files | 1194 |
+| Doc-like files | 3163 |
+| Tracked doc-like files | 1968 |
+| Ignored local docs/reports files | 1195 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
-| Generated routes | 65 |
+| Generated routes | 66 |
 
 ## Tracking State
 
 | Tracking State | Count |
 | --- | --- |
-| ignored_local | 1194 |
-| tracked | 1949 |
+| ignored_local | 1195 |
+| tracked | 1968 |
 
 ## Lifecycle Counts
 
@@ -30,7 +30,7 @@
 | active_quality_baseline | 20 |
 | closeout_evidence | 35 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 40 |
+| docs_reports_curated_or_historical_report | 41 |
 | docs_reports_generated_or_route_owned | 23 |
 | docs_reports_retention_sensitive_evidence | 1153 |
 | generated_skill_license_mirror | 5 |
@@ -38,12 +38,12 @@
 | generated_test_run_evidence | 4 |
 | guide | 2 |
 | index | 4 |
-| issue_pack | 16 |
+| issue_pack | 22 |
 | live_issue_mirror | 4 |
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 36 |
 | supporting_context | 16 |
-| working_report | 55 |
+| working_report | 59 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -52,37 +52,37 @@
 | active_draft | 108 |
 | guide | 2 |
 | index | 4 |
-| issue_pack | 16 |
+| issue_pack | 22 |
 | live_issue_mirror | 4 |
 
 ## Status Counts
 
 | Status | Count |
 | --- | --- |
-| Active | 1964 |
+| Active | 1970 |
 | Archived | 82 |
-| Canonical | 69 |
-| Generated | 739 |
-| Working | 289 |
+| Canonical | 70 |
+| Generated | 740 |
+| Working | 301 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 1964 |
+| active | 1970 |
 | archive | 82 |
-| canonical | 69 |
-| generated | 739 |
-| working | 289 |
+| canonical | 70 |
+| generated | 740 |
+| working | 301 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-github-state-check | 124 |
-| archive-after-migration | 106 |
-| generate-automatically | 739 |
-| keep | 2170 |
+| archive-after-github-state-check | 130 |
+| archive-after-migration | 112 |
+| generate-automatically | 740 |
+| keep | 2177 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -92,6 +92,7 @@
 | `docs/00-project/ai/sessions/review-1776233608.md` | Working | 0 | archive-after-migration |
 | `docs/00-project/ai/skills/global/documentation-audit/references/audit-checklist.md` | Working | 0 | archive-after-migration |
 | `docs/00-project/ai/skills/global/documentation-audit/references/report-template.md` | Working | 0 | archive-after-migration |
+| `docs/03-guides/dashboards/migration-map-v2.md` | Working | 3 | archive-after-migration |
 | `docs/filters/migration-plan.md` | Working | 1 | archive-after-migration |
 | `docs/plans/architecture-review-and-refactor-plan-2026-03-21.md` | Working | 1 | archive-after-migration |
 | `docs/plans/chembl-baseline-refactor-plan-2026-06-01.md` | Working | 1 | archive-after-migration |
@@ -123,6 +124,7 @@
 | `docs/reports/dashboard-ux-checks/2026-05-07.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-05-08.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-05-19.md` | Working | 0 | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/2026-07-28.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
 | `docs/reports/docs-link-check-report.json` | Working | 0 | archive-after-migration |
 | `docs/reports/docs-parity-report.json` | Working | 0 | archive-after-migration |
@@ -159,16 +161,14 @@
 | `reports/quality/adr-enforcement-matrix.json` | Working | 0 | archive-after-migration |
 | `reports/quality/adr-enforcement-matrix.md` | Working | 0 | archive-after-migration |
 | `reports/quality/architecture-quality-scorecard.json` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture-refactoring-2026-07-28-issue-publish.json` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture-residual-2026-07-27-issue-publish.json` | Working | 0 | archive-after-migration |
 | `reports/quality/compatibility-importer-census.json` | Working | 0 | archive-after-migration |
 | `reports/quality/compatibility-importer-census.md` | Working | 0 | archive-after-migration |
 | `reports/quality/config-compatibility-legacy-taxonomy-review.json` | Working | 0 | archive-after-migration |
 | `reports/quality/config-surface-backlog.json` | Working | 0 | archive-after-migration |
 | `reports/quality/contract-coverage-matrix.json` | Working | 0 | archive-after-migration |
 | `reports/quality/contract-coverage-matrix.md` | Working | 0 | archive-after-migration |
-| `reports/quality/domain-aggregate-invariant-registry.json` | Working | 0 | archive-after-migration |
-| `reports/quality/domain-composite-config-importer-map.md` | Working | 0 | archive-after-migration |
-| `reports/quality/hotspot-coverage-tail-owner-map.json` | Working | 0 | archive-after-migration |
-| `reports/quality/issue-6480-application-core-partial-tranche.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -263,7 +263,10 @@
 | `.github/ISSUES/AI-AGENT-CONFIG-AUDIT-2026-07-14-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
 | `.github/ISSUES/AI-RUNTIME-AUDIT-001-Make-AI-Skill-Mirror-CI-Truthful-And-Enforce-Devin-Parity.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/AI-RUNTIME-AUDIT-002-Eliminate-Tracked-Devin-MCP-Workstation-Paths.md` | active_draft |  | archive-after-github-state-check |
+| `.github/ISSUES/ARCH-CONT-2026-07-28-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
 | `.github/ISSUES/ARCH-QA-2026-07-27-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
+| `.github/ISSUES/ARCH-REF-2026-07-28-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
+| `.github/ISSUES/ARCH-RES-2026-07-27-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
 | `.github/ISSUES/ARCHITECTURE-FACADE-4745-Enforce-No-Growth-Bioetl-Infrastructure-Config-Seam.md` | live_issue_mirror | 4745 | reconcile-with-github-state |
 | `.github/ISSUES/ARCHITECTURE_AUDIT_2025-01-30_aggregate_invariants.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/ARCHITECTURE_AUDIT_2025-01-30_batch_fsm_tests.md` | active_draft |  | archive-after-github-state-check |
@@ -296,9 +299,6 @@
 | `.github/ISSUES/CREATION_GUIDE.md` | guide |  | keep |
 | `.github/ISSUES/CROSS-001-Unified-Enum-Configuration.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/CROSS-002-Case-Canonicalization.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/DOC-AUDIT-001-Fix-Invalid-CLI-Examples-In-Deployment-And-Bootstrap-Docs.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/DOC-AUDIT-002-Refresh-Grafana-Provisioning-Path-Docs.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/DOC-AUDIT-003-Align-Windows-Pytest-Docs-With-Xdist-Policy.md` | active_draft |  | archive-after-github-state-check |
 
 ## Docs Reports Evidence Examples
 
@@ -319,6 +319,7 @@
 | `docs/reports/dashboard-ux-checks/2026-05-07.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-05-08.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-05-19.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/2026-07-28.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/docs-link-check-report.json` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/docs-parity-report.json` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
@@ -343,7 +344,6 @@
 | `docs/reports/evidence/adapter-interface-alignment/03-synthesis/SYN-adapter-interface-alignment.md` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/adapter-interface-alignment/04-decisions/DEC-ADAPT-proposed-decisions-2026-03-20.md` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/adapter-interface-alignment/04-decisions/DECISIONS.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/adapter-interface-alignment/04-decisions/MATRIX-adapter-seams-current-to-target.md` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
 
 ## Generated Route Registry
 
@@ -372,6 +372,7 @@
 | contract-registry-dq-diagnostics-quality-report | `scripts/engineering/ci/validate_registry_dq_refs.py` | working_output |
 | contract-schema-classifier-diagnostics-quality-report | `scripts/engineering/ci/validate_schema_classifier_gate.py` | working_output |
 | contract-tests-junit-report | `.github/workflows/contract-tests.yml` | ignored_ci_output |
+| dashboard-navigation-contract-generated-doc | `scripts/ops/observability/grafana/render_nav_bus.py` | tracked_curated_generated_doc |
 | dashboard-panel-title-inventory-generated-doc | `scripts/engineering/qa/report_panel_title_inventory.py` | tracked_curated_generated_doc |
 | dead-code-inventory-quality-baseline | `scripts/engineering/qa/report_dead_code_inventory.py` | tracked_quality_baseline |
 | debt-governance-gates-quality-baseline | `scripts/engineering/qa/report_debt_governance_gates.py` | tracked_quality_baseline |

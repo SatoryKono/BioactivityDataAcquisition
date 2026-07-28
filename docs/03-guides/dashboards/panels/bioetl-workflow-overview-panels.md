@@ -30,7 +30,7 @@ is the source of truth.
 
 | ID | Title | Type | Datasource | Query / purpose | Variables | Thresholds / drilldown |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1000 | Review Dashboard Navigation | text | Static | Static navigation handoff into related runtime, provider, and pipeline dashboards. | shared shell | No thresholds; operator routing only. |
+| 1000 | Navigation | text | Static | Static navigation handoff into related runtime, provider, and pipeline dashboards. | shared shell | No thresholds; operator routing only. |
 | 9400 | Provenance | text | Static | Static explanation of selector context, datasource posture, and workflow evidence boundaries. | shared shell | No thresholds; provenance note only. |
 | 9401 | Status | stat | Prometheus | Selected-range workflow severity synthesized from failed workflow runs and skipped/non-success step evidence. | shared shell | `OK` is neutral gray selected-range evidence, not a live-run health claim. |
 | 9404 | Pipeline Status | stat | Prometheus | Supporting workflow pipeline verdict from `bioetl_workflow_pipeline_verdict_status`; no runtime fallback. | shared shell + context selectors | `SUPPORTING OK` is neutral; absent workflow pipeline evidence is `NOT RESOLVED`, never green. |

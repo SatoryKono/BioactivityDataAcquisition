@@ -16,7 +16,7 @@ is `SELECTED RUN`, and score/count/freshness evidence below the answer row is
 
 ## Key Panels
 
-### 1. Review Dashboard Navigation
+### 1. Navigation
 - **Type:** Text
 - **Purpose:** Explain dashboard navigation and escalation flow.
 - **Data sources:** Dashboard variables and operator copy.
