@@ -90,6 +90,10 @@ gate. Use `--sync` to regenerate only `local/`; it does not rewrite
 
 - `docs/00-project/ai/skills/global/` is a documentation snapshot of selected global skills.
 - It is not the canonical source for repository-local skill behavior.
+- **LICENSE thinning:** exact-duplicate Apache-2.0 license bodies are stored once
+  under `global/_licenses/`; per-skill `LICENSE.txt` / `license.txt` files are
+  short pointers. This does **not** break `local/` skill-mirrors generated from
+  `.codex/skills` (`check_skills_mirror.sh` / `sync_ai_governance.py`).
 
 ### System Skill References
 

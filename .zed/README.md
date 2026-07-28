@@ -17,6 +17,33 @@ Project-local Zed config for BioETL. Source of truth for contracts:
 
 Zed loads `.zed/settings.json` and `.zed/tasks.json` from the worktree root automatically.
 
+## Login / account (Zed AI)
+
+Zed **does not** expose a CLI `login` subcommand in current Windows builds
+(`zed --help` is open-path only). Account auth is **in-app**:
+
+1. Install/open Zed (`zed .` from the repo root, or the Start-menu app).
+2. Use the account control (status bar / title-bar avatar) → **Sign in**.
+3. Complete browser OAuth at [zed.dev](https://zed.dev) (GitHub or email).
+4. Confirm Agent Panel can send: Command Palette → `agent: open settings` →
+   pick a model. Project `settings.json` keeps `"show_sign_in": true`.
+5. For **zed.dev** hosted models, a Zed subscription/plan that includes Agent
+   is required; local/OpenAI-compatible providers use keys in **user** settings
+   only (never commit tokens).
+
+**Host checklist (this machine):**
+
+| Check | Expected |
+|-------|----------|
+| CLI on PATH | `%LOCALAPPDATA%\Programs\Zed\bin\zed.exe` |
+| Project config | `.zed/settings.json`, `.zed/tasks.json` |
+| User config | `%APPDATA%\Zed\settings.json` (machine-local; may hold keys) |
+| Agent MCP thrash | Apply `USER_SETTINGS_NO_AGENT_MCP.overlay.json` so extension MCP stays off |
+| Python toolchain | `.venv-win` selected after `setup_env_windows.ps1` |
+
+If Agent shows “Sign in” or cannot send: sign in again, reload window, then
+re-select the default model. Do **not** paste API tokens into project `.zed/`.
+
 ## Agent without MCP thrash
 
 **Problem:** Zed External Agent `grok-build` runs `grok agent stdio`, and user-level

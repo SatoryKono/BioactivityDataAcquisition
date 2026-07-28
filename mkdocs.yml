@@ -254,6 +254,7 @@ nav:
       - "Getting Started": 03-guides/getting-started.md
       - "Quick Start": 03-guides/quick-start.md
       - "Docs Verification": 03-guides/docs-verification.md
+      - "CodeRabbit Audit Playbook": 03-guides/coderabbit-audit-playbook.md
       - "Docs Parity Gate": 03-guides/docs-parity-gate.md
       - "Running Pipelines": 03-guides/running-pipelines.md
       - "Workflows": 03-guides/workflows.md

@@ -388,6 +388,60 @@ def _relative_files(root: Path) -> set[str]:
     }
 
 
+_LICENSE_BASENAMES = frozenset({"license", "license.txt", "license.md"})
+
+
+def _is_license_filename(name: str) -> bool:
+    return name.lower() in _LICENSE_BASENAMES
+
+
+def thin_exact_duplicate_license_clones(skills_root: Path) -> int:
+    """Collapse byte-identical LICENSE clones under a skills tree.
+
+    Keeps one full copy under ``_licenses/`` and rewrites per-skill license
+    files to short pointers. Safe no-op when fewer than two identical bodies
+    exist. Used for docs skill mirrors so ``check_skills_mirror`` stays green
+    after thinning.
+    """
+    if not skills_root.is_dir():
+        return 0
+
+    by_digest: dict[bytes, list[Path]] = {}
+    for path in sorted(skills_root.rglob("*")):
+        if not path.is_file() or not _is_license_filename(path.name):
+            continue
+        if path.parent.name == "_licenses" and path.parent.parent == skills_root:
+            continue
+        by_digest.setdefault(path.read_bytes(), []).append(path)
+
+    thinned = 0
+    store = skills_root / "_licenses"
+    for index, (body, paths) in enumerate(
+        sorted(by_digest.items(), key=lambda item: item[0]),
+        start=1,
+    ):
+        if len(paths) < 2:
+            continue
+        store.mkdir(parents=True, exist_ok=True)
+        canon_path = store / f"license-text-{index}.txt"
+        if not canon_path.exists() or canon_path.read_bytes() != body:
+            canon_path.write_bytes(body)
+        canon_rel = canon_path.relative_to(skills_root).as_posix()
+        for path in paths:
+            rel_link = Path(os.path.relpath(canon_path, path.parent)).as_posix()
+            pointer = (
+                "# License text (thin mirror)\n"
+                "#\n"
+                "# Exact-duplicate license text collapsed for docs skill mirrors.\n"
+                f"# Full text: {canon_rel}\n"
+                f"# Relative from this file: {rel_link}\n"
+            )
+            if path.read_text(encoding="utf-8", errors="replace") != pointer:
+                path.write_text(pointer, encoding="utf-8", newline="\n")
+                thinned += 1
+    return thinned
+
+
 def _missing_skills_roots(canonical_root: Path, devin_root: Path) -> list[str]:
     return [
         f"{label} skills root missing: {path}"
@@ -552,6 +606,9 @@ def _materialize_expected_docs_mirror(
         target = expected_docs / source.relative_to(overlay_root)
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, target)
+
+    # Drop exact-duplicate LICENSE clones before header injection / compare.
+    thin_exact_duplicate_license_clones(expected_docs)
 
     canonical_reference_root = paths["canonical"].relative_to(root_resolved)
     sync_docs_skill_mirrors(
