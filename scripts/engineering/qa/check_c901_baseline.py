@@ -91,7 +91,7 @@ def _run_ruff_c901(target: str) -> list[Violation]:
     ]
     from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 
-    proc = subprocess.run(
+    proc = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
         ensure_safe_cli_argv([str(token) for token in cmd]),
         cwd=PROJECT_ROOT,
         capture_output=True,

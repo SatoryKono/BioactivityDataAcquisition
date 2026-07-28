@@ -49,7 +49,7 @@ def _run(
 
     command = ensure_safe_cli_argv([str(token) for token in command])
     print("+", " ".join(command), flush=True)
-    return subprocess.run(
+    return subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
         command,
         cwd=str(cwd) if cwd is not None else None,
         env=dict(env) if env is not None else None,

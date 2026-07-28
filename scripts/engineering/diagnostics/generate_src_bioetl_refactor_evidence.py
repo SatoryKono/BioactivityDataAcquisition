@@ -124,7 +124,9 @@ def _slug(value: str) -> str:
 
 
 def _read_text(path: Path) -> str:
-    return path.read_text(encoding="utf-8", errors="ignore")
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+    path = resolve_output_path(path, root=REPO_ROOT)
+    return path.read_text(encoding="utf-8", errors="ignore")  # NOSONAR - path confined
 
 
 def _non_empty_lines(lines: list[str]) -> int:

@@ -165,7 +165,9 @@ def load_manifest(manifest_path: Path, allowed_suffixes: tuple[str, ...]) -> lis
     if not manifest_path.exists():
         raise FileNotFoundError(f"Manifest not found: {manifest_path}")
     paths: list[Path] = []
-    for raw in manifest_path.read_text(encoding="utf-8").splitlines():
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+    manifest_path = resolve_output_path(manifest_path, root=REPO_ROOT)
+    for raw in manifest_path.read_text(encoding="utf-8").splitlines():  # NOSONAR - path confined
         line = raw.strip()
         if not line or line.startswith("#"):
             continue
@@ -452,7 +454,7 @@ def run_command(cmd: list[str]) -> tuple[int, str]:
     from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 
     try:
-        completed = subprocess.run(
+        completed = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
             ensure_safe_cli_argv([str(token) for token in cmd]),
             check=False,
             capture_output=True,

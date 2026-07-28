@@ -129,7 +129,7 @@ def rewrite_image_links(markdown_text: str, *, base_dir: Path, prefer_svg: bool)
 def run(cmd: list[str], cwd: Path | None = None) -> None:
     from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 
-    completed = subprocess.run(
+    completed = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
         ensure_safe_cli_argv([str(token) for token in cmd]),
         cwd=str(cwd) if cwd else None,
         capture_output=True,

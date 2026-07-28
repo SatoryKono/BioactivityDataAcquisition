@@ -509,7 +509,7 @@ def _load_json(path: Path, *, root: Path | None = None) -> Any:
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
     path = resolve_output_path(path, root=root or REPO_ROOT)
-    return json.loads(path.read_text(encoding="utf-8"))
+    return json.loads(path.read_text(encoding="utf-8"))  # NOSONAR - path confined
 
 
 def _issue_numbers_from_payload(payload: Any) -> set[str]:
@@ -695,7 +695,9 @@ def _check_file(path: Path, expected: str) -> bool:
     if not path.exists():
         print(f"[drift] missing: {path}")
         return False
-    actual = path.read_text(encoding="utf-8")
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+    path = resolve_output_path(path, root=REPO_ROOT)
+    actual = path.read_text(encoding="utf-8")  # NOSONAR - path confined
     if actual == expected:
         return True
     print(f"[drift] mismatch: {path}")

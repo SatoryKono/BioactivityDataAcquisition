@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 import select
 import signal
 import socket
@@ -14,6 +15,20 @@ import threading
 import time
 from pathlib import Path
 
+_SERVER_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$")
+
+
+def _validated_port(port: int) -> int:
+    if not isinstance(port, int) or not (1 <= port <= 65535):
+        raise ValueError(f"invalid TCP port: {port!r}")
+    return port
+
+
+def _validated_server_name(name: str) -> str:
+    if not _SERVER_NAME_RE.fullmatch(name):
+        raise ValueError(f"invalid MCP server name: {name!r}")
+    return name
+
 
 def _port_is_open(port: int) -> bool:
     """Probe whether Windows loopback is accepting TCP on ``port``.
@@ -21,17 +36,24 @@ def _port_is_open(port: int) -> bool:
     Uses a PowerShell TcpClient from WSL so the check sees the Windows network
     stack (where Docker MCP gateway listens), not the Linux/WSL stack alone.
     """
-    probe = subprocess.run(
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+    safe_port = _validated_port(port)
+    # Port is validated numeric — interpolated only into a fixed Connect call.
+    command = ensure_safe_cli_argv(
         [
             "powershell.exe",
             "-NoProfile",
             "-Command",
             (
                 "$c=[Net.Sockets.TcpClient]::new();"
-                f"try{{$c.Connect('127.0.0.1',{port});$c.Close();exit 0}}"
+                f"try{{$c.Connect('127.0.0.1',{safe_port});$c.Close();exit 0}}"
                 "catch{exit 1}"
             ),
-        ],
+        ]
+    )
+    probe = subprocess.run(  # NOSONAR - argv sanitized; port validated int
+        command,
         check=False,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
@@ -53,15 +75,21 @@ class _ForwardHandler(socketserver.BaseRequestHandler):
     relay_script: str
 
     def handle(self) -> None:
-        relay = subprocess.Popen(
+        from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+        safe_port = _validated_port(int(self.remote_port))
+        command = ensure_safe_cli_argv(
             [
                 "powershell.exe",
                 "-NoProfile",
                 "-File",
                 self.relay_script,
                 "-Port",
-                str(self.remote_port),
-            ],
+                str(safe_port),
+            ]
+        )
+        relay = subprocess.Popen(  # NOSONAR - argv sanitized; port validated
+            command,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
@@ -104,20 +132,32 @@ def main() -> int:
     parser.add_argument("--remote-port", type=int, required=True)
     parser.add_argument("--startup-timeout", type=float, default=120)
     args = parser.parse_args()
+    server = _validated_server_name(str(args.server))
+    remote_port = _validated_port(int(args.remote_port))
+    local_port = _validated_port(int(args.local_port))
+    args.server = server
+    args.remote_port = remote_port
+    args.local_port = local_port
+
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 
     relay_script = Path(__file__).with_name("windows_tcp_relay.ps1")
-    child = subprocess.Popen(
+    # Prefer argv list form (no shell) with validated server/port tokens.
+    command = ensure_safe_cli_argv(
         [
             "powershell.exe",
             "-NoProfile",
             "-Command",
             (
                 "docker mcp gateway run "
-                f"--servers {args.server} --transport streaming "
-                f"--host 127.0.0.1 --port {args.remote_port} "
+                f"--servers {server} --transport streaming "
+                f"--host 127.0.0.1 --port {remote_port} "
                 "--allow-unauthenticated"
             ),
-        ],
+        ]
+    )
+    child = subprocess.Popen(  # NOSONAR - argv sanitized; server/port validated
+        command,
         close_fds=True,
     )
     stopped = threading.Event()

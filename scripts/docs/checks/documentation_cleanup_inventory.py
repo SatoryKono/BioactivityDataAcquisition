@@ -1125,13 +1125,13 @@ def _render_markdown(payload: dict[str, Any]) -> str:
 
 
 def _write_if_changed(path: Path, content: str) -> bool:
-    if path.exists() and path.read_text(encoding="utf-8") == content:
-        return False
-    path.parent.mkdir(parents=True, exist_ok=True)
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
-    path = resolve_output_path(path, root=REPO_ROOT)
-    path.write_text(content, encoding="utf-8")
+    safe_path = resolve_output_path(path, root=REPO_ROOT)
+    if safe_path.exists() and safe_path.read_text(encoding="utf-8") == content:  # NOSONAR
+        return False
+    safe_path.parent.mkdir(parents=True, exist_ok=True)
+    safe_path.write_text(content, encoding="utf-8")  # NOSONAR - confined by resolve_output_path
     return True
 
 

@@ -102,7 +102,9 @@ def run_command(
     from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 
     command = ensure_safe_cli_argv([str(token) for token in command])
-    return subprocess.run(command, check=False).returncode
+    return subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
+        command, check=False
+    ).returncode
 
 
 def print_help(help_text: str) -> None:

@@ -135,7 +135,12 @@ def evaluate(
     budgets_path: Path,
     dashboards_dir: Path,
 ) -> tuple[list[str], list[str], dict[str, Any]]:
-    budgets = yaml.safe_load(budgets_path.read_text(encoding="utf-8"))
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_cli_path
+
+    safe_budgets = resolve_cli_path(budgets_path, root=REPO_ROOT)
+    budgets = yaml.safe_load(
+        safe_budgets.read_text(encoding="utf-8")  # NOSONAR - confined by resolve_cli_path
+    )
     y_max = int(budgets.get("first_screen_y_max", 28))
     b = budgets.get("budgets") or {}
     primary = list(budgets.get("primary_uids") or [])

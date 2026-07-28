@@ -151,9 +151,12 @@ def build_snapshot() -> dict[str, Any]:
 
 
 def write_snapshot(path: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
     snapshot = build_snapshot()
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
+    safe_path = resolve_output_path(path, root=REPO_ROOT)
+    safe_path.parent.mkdir(parents=True, exist_ok=True)
+    safe_path.write_text(  # NOSONAR - confined by resolve_output_path
         json.dumps(snapshot, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
     )
@@ -161,9 +164,14 @@ def write_snapshot(path: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
 
 
 def check_snapshot(path: Path = DEFAULT_OUTPUT) -> None:
-    if not path.is_file():
-        raise SystemExit(f"missing live residual snapshot: {path}")
-    committed = json.loads(path.read_text(encoding="utf-8"))
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    safe_path = resolve_output_path(path, root=REPO_ROOT)
+    if not safe_path.is_file():
+        raise SystemExit(f"missing live residual snapshot: {safe_path}")
+    committed = json.loads(
+        safe_path.read_text(encoding="utf-8")  # NOSONAR - confined
+    )
     live = build_snapshot()
     # Hotspot residual must not grow vs committed snapshot.
     committed_families = committed.get("hotspot_families", {})

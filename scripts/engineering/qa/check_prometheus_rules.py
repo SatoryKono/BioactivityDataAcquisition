@@ -76,7 +76,9 @@ def _run(command: list[str]) -> int:
 
     command = ensure_safe_cli_argv(command)
     print("+ " + " ".join(command))
-    completed = subprocess.run(command, check=False)
+    completed = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
+        command, check=False
+    )
     return int(completed.returncode)
 
 
