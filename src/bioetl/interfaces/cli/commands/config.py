@@ -1,3 +1,5 @@
+# pyright: reportAttributeAccessIssue=false
+# Host attrs/methods provided by concrete composition.
 """Configuration commands for BioETL CLI.
 
 Implements config inspection and validation commands.

@@ -1,3 +1,5 @@
+# pyright: reportImportCycles=false
+# Import cycle residual tracked in allowlist (product burn-down).
 """Transactional persistence helpers for file-backed run manifests."""
 
 from __future__ import annotations

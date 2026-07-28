@@ -1,3 +1,5 @@
+# pyright: reportArgumentType=false
+# Boundary object/payload typing residual at this module.
 """Execution lifecycle helpers for :mod:`bioetl.application.core.runner`."""
 
 from __future__ import annotations

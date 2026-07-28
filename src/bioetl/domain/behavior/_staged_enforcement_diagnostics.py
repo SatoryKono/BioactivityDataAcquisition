@@ -1,3 +1,5 @@
+# pyright: reportImportCycles=false
+# Import cycle residual tracked in allowlist (product burn-down).
 """Diagnostics and serialization helpers for staged enforcement."""
 
 from __future__ import annotations

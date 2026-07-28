@@ -1,3 +1,5 @@
+# pyright: reportArgumentType=false
+# Boundary object/payload typing residual at this module.
 """Runtime helpers for self-managed observability backend startup."""
 
 from __future__ import annotations

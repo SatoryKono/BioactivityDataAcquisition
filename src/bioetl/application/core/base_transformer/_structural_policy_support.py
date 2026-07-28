@@ -1,3 +1,5 @@
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Private support helpers for schema-aware structural policy."""
 
 from __future__ import annotations

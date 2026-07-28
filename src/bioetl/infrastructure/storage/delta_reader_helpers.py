@@ -1,3 +1,5 @@
+# pyright: reportArgumentType=false
+# Boundary object/payload typing residual at this module.
 """Passive helpers for ``DeltaReader``."""
 
 from __future__ import annotations

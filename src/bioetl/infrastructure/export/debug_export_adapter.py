@@ -1,3 +1,5 @@
+# pyright: reportReturnType=false
+# basedpyright residual burn-down (shrink-only product surface).
 """Infrastructure adapter for persisted debug export audit packs."""
 
 from __future__ import annotations

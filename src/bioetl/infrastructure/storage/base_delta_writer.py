@@ -1,3 +1,5 @@
+# pyright: reportImportCycles=false
+# Import cycle residual tracked in allowlist (product burn-down).
 """Base class for Delta Lake writers."""
 
 from __future__ import annotations

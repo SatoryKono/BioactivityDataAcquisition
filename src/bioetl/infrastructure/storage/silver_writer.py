@@ -1,3 +1,6 @@
+# pyright: reportIncompatibleMethodOverride=false
+# pyright: reportUninitializedInstanceVariable=false
+# Host attrs/methods provided by concrete composition.
 """Silver layer writer (Delta Lake with merge/upsert)."""
 
 from __future__ import annotations

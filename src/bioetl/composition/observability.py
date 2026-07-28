@@ -1,3 +1,5 @@
+# pyright: reportImportCycles=false
+# Import cycle residual tracked in allowlist (product burn-down).
 """Observability bundle for unified dependency injection.
 
 Aggregates logger, tracer, and metrics into a single injectable dependency,

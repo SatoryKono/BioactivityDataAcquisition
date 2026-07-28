@@ -1,3 +1,7 @@
+# pyright: reportConstantRedefinition=false
+# pyright: reportOptionalMemberAccess=false
+# basedpyright residual burn-down (shrink-only product surface).
+# Optional dependency probe flags reassigned after try/import (PD2-7).
 """Memory monitoring for adaptive batch processing.
 
 Provides memory pressure detection and adaptive batch size recommendations.

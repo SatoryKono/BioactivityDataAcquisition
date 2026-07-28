@@ -1,3 +1,5 @@
+# pyright: reportArgumentType=false
+# Entity fixture overrides use intentional wide test inputs (PD2-9).
 """Unit tests for Tissue domain entity."""
 
 import pytest

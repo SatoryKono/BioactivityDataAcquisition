@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
+from typing import Any, cast
 from uuid import UUID
 
 from bioetl.domain.entities.base import BaseEntity
@@ -183,10 +184,11 @@ class Bioactivity(BaseEntity):
         }
         entity_fields = _extract_bioactivity_fields(raw_data)
 
-        return cls(
-            **base_fields,  # type: ignore[arg-type]
-            **entity_fields,  # type: ignore[arg-type]
+        merged = cast(
+            dict[str, Any],  # Any: dataclass kwargs contain heterogeneous field values.
+            {**base_fields, **entity_fields},
         )
+        return cls(**merged)
 
     def with_state(self, new_state: BioactivityState) -> Bioactivity:
         """Create copy with new state (immutable pattern).

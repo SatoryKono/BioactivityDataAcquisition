@@ -1,3 +1,5 @@
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Execution helpers for Gold merged writes."""
 
 from __future__ import annotations

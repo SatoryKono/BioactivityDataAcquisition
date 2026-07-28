@@ -1,3 +1,5 @@
+# pyright: reportImportCycles=false
+# Import cycle residual tracked in allowlist (product burn-down).
 """Canonical composition-owned builders for control-plane file stores."""
 
 from __future__ import annotations

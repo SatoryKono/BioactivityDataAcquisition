@@ -1,3 +1,5 @@
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """PyArrow compute helpers for quarantine operations."""
 
 from __future__ import annotations

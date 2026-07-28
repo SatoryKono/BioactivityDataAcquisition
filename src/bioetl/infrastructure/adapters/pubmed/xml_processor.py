@@ -1,4 +1,6 @@
 # mypy: disable-error-code="import-untyped"
+# pyright: reportAttributeAccessIssue=false
+# Host attrs/methods provided by concrete composition.
 """PubMed XML processing utilities.
 
 Provides XML parsing and record extraction for PubMed API responses.

@@ -2,16 +2,18 @@
 # Neo4j MCP Backend - Recovery Checklist
 # Run this after manual Docker Desktop restart
 
+$InformationPreference = 'Continue'
+
 Write-Host "╔════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
 Write-Host "║     Neo4j Backend Recovery - Execution Checklist      ║" -ForegroundColor Cyan
 Write-Host "╚════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
 Write-Host ""
 
 # Checklist functions
-function Check-Item {
+function Test-ChecklistItem {
     param([string]$Name, [bool]$Passed)
     $status = if ($Passed) { "✅" } else { "❌" }
-    Write-Host "  $status $Name"
+    Write-Information "  $status $Name" -InformationAction Continue
     return $Passed
 }
 

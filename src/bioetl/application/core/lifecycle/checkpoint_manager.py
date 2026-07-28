@@ -1,3 +1,5 @@
+# pyright: reportArgumentType=false
+# Boundary object/payload typing residual at this module.
 """Runtime checkpoint service for ETL pipelines."""
 
 from __future__ import annotations

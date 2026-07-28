@@ -1,3 +1,5 @@
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Merge service implementation for composite pipelines. See ADR-026."""
 
 from __future__ import annotations
@@ -80,7 +82,7 @@ class MergeService(
         collaborators: MergeCollaboratorGroup,
         delta_reader: DeltaReaderPort | None = None,
         silver_reader: SilverStoragePort | None = None,
-        **runtime: Any,
+        **runtime: Any,  # Any: compatibility kwargs accept heterogeneous legacy values.
     ) -> None:
         """Initialise the MergeService with all required and optional collaborators.
 

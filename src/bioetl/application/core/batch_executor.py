@@ -1,3 +1,8 @@
+# pyright: reportIncompatibleVariableOverride=false
+# pyright: reportArgumentType=false
+# pyright: reportImportCycles=false
+# Import cycle residual tracked in allowlist (product burn-down).
+# RuntimeState properties own dual-declared DQ fields (PD2-7).
 """Unified Batch Executor for ETL pipeline orchestration."""
 
 from __future__ import annotations

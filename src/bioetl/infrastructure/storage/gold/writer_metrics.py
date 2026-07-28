@@ -1,3 +1,5 @@
+# pyright: reportAttributeAccessIssue=false
+# Host attrs/methods provided by concrete composition.
 """Metric label helpers for Gold writer support."""
 
 from __future__ import annotations

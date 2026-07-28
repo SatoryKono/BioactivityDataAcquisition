@@ -1,3 +1,5 @@
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Support helpers for resolving runtime builder inputs."""
 
 from __future__ import annotations

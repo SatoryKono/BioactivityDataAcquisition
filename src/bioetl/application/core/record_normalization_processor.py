@@ -1,3 +1,5 @@
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Application-owned record normalization stage for Bronze -> Silver flow."""
 
 from __future__ import annotations

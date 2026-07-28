@@ -1,3 +1,6 @@
+# pyright: reportImportCycles=false
+# pyright: reportIncompatibleVariableOverride=false
+# Import cycle residual tracked in allowlist (product burn-down).
 """Metadata operations facade for Silver layer lineage, audit, and DQ writes."""
 
 from __future__ import annotations

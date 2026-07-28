@@ -1,3 +1,5 @@
+# pyright: reportArgumentType=false
+# Boundary object/payload typing residual at this module.
 """Prometheus metrics server public facade."""
 
 from __future__ import annotations

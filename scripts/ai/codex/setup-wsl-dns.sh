@@ -10,7 +10,7 @@ echo ""
 
 # Check if running in WSL
 if ! grep -qi microsoft /proc/version; then
-    echo "ERROR: This script must be run in WSL"
+    echo "ERROR: This script must be run in WSL" >&2
     exit 1
 fi
 

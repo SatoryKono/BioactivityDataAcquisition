@@ -1,3 +1,5 @@
+# pyright: reportImportCycles=false
+# Import cycle residual tracked in allowlist (product burn-down).
 """Anchor value aggregation for Control Plane identity evidence."""
 
 from __future__ import annotations

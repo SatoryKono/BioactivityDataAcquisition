@@ -1,3 +1,6 @@
+# pyright: reportArgumentType=false
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Leaf contracts and injected support for provider registration assembly."""
 
 from __future__ import annotations

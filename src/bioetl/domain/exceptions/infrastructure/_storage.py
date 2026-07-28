@@ -1,3 +1,6 @@
+# pyright: reportAttributeAccessIssue=false
+# pyright: reportReturnType=false
+# Host attrs/methods provided by concrete composition.
 """Storage and schema-evolution exceptions."""
 
 from __future__ import annotations

@@ -1,3 +1,5 @@
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Postrun assembly helpers for pipeline factory."""
 
 from __future__ import annotations

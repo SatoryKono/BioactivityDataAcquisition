@@ -1,3 +1,5 @@
+# pyright: reportArgumentType=false
+# DQ request payload narrowing deferred; Port boundary objects (PD2-6).
 """Structured request contract for Silver DQ analysis."""
 
 from __future__ import annotations

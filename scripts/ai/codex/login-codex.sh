@@ -7,7 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ENV_FILE="$SCRIPT_DIR/.env.codex"
 
 if [ ! -f "$ENV_FILE" ]; then
-    echo "ERROR: .env.codex not found at $ENV_FILE"
+    echo "ERROR: .env.codex not found at $ENV_FILE" >&2
     exit 1
 fi
 
@@ -15,7 +15,7 @@ fi
 source "$ENV_FILE"
 
 if [ -z "$OPENAI_API_KEY" ]; then
-    echo "ERROR: OPENAI_API_KEY not found in $ENV_FILE"
+    echo "ERROR: OPENAI_API_KEY not found in $ENV_FILE" >&2
     exit 1
 fi
 
@@ -28,6 +28,6 @@ if [ $? -eq 0 ]; then
     codex login status
 else
     echo ""
-    echo "ERROR: Failed to login to Codex"
+    echo "ERROR: Failed to login to Codex" >&2
     exit 1
 fi

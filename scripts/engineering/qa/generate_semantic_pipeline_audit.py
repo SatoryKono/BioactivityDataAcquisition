@@ -43,17 +43,31 @@ BASE_CONFIG_DIR = REPO_ROOT / "configs" / "base"
 DEFAULT_SOURCE_DATE = "2026-07-01"
 PAIR_MATRIX_PREFIX = "semantic_pair_matrix_"
 CLUSTER_REGISTRY_PREFIX = "semantic_cluster_registry_"
+
+# Pair-matrix column identities (python:S1192).
+COL_CLUSTER_ID = "Cluster ID"
+COL_PIPELINE_A = "Pipeline A"
+COL_FIELD_A = "Field A"
+COL_PIPELINE_B = "Pipeline B"
+COL_FIELD_B = "Field B"
+COL_SEMANTIC_STATUS = "Semantic Status"
+COL_DRIFT_RISK = "Drift Risk"
+COL_ROW_KEY = "Row Key"
+SEMANTIC_PAIR_BUDGET_GATE = (
+    "uv run python -m scripts.engineering.qa check-semantic-pair-budget --check --json"
+)
+
 PAIR_COLUMNS = (
-    "Cluster ID",
-    "Pipeline A",
-    "Field A",
-    "Pipeline B",
-    "Field B",
-    "Semantic Status",
+    COL_CLUSTER_ID,
+    COL_PIPELINE_A,
+    COL_FIELD_A,
+    COL_PIPELINE_B,
+    COL_FIELD_B,
+    COL_SEMANTIC_STATUS,
     "Normalization",
     "Validation",
     "Typing",
-    "Drift Risk",
+    COL_DRIFT_RISK,
     "Join Semantics A",
     "Join Semantics B",
     "Normalizer A",
@@ -66,14 +80,14 @@ PAIR_COLUMNS = (
     "Gold Contract B",
     "Evidence A",
     "Evidence B",
-    "Row Key",
+    COL_ROW_KEY,
 )
 ROW_KEY_FIELDS = (
-    "Cluster ID",
-    "Pipeline A",
-    "Field A",
-    "Pipeline B",
-    "Field B",
+    COL_CLUSTER_ID,
+    COL_PIPELINE_A,
+    COL_FIELD_A,
+    COL_PIPELINE_B,
+    COL_FIELD_B,
 )
 GENERIC_COLLISION_CLUSTERS = frozenset(
     {
@@ -1040,16 +1054,16 @@ def _refresh_pair_rows(
                     previous_risk="LOW",
                 )
                 row = {
-                    "Cluster ID": cluster_id,
-                    "Pipeline A": str(member_a.get("pipeline") or ""),
-                    "Field A": str(member_a.get("field") or ""),
-                    "Pipeline B": str(member_b.get("pipeline") or ""),
-                    "Field B": str(member_b.get("field") or ""),
-                    "Semantic Status": semantic_status,
+                    COL_CLUSTER_ID: cluster_id,
+                    COL_PIPELINE_A: str(member_a.get("pipeline") or ""),
+                    COL_FIELD_A: str(member_a.get("field") or ""),
+                    COL_PIPELINE_B: str(member_b.get("pipeline") or ""),
+                    COL_FIELD_B: str(member_b.get("field") or ""),
+                    COL_SEMANTIC_STATUS: semantic_status,
                     "Normalization": normalization,
                     "Validation": validation,
                     "Typing": typing,
-                    "Drift Risk": _apply_reviewed_risk_cap(
+                    COL_DRIFT_RISK: _apply_reviewed_risk_cap(
                         drift_risk,
                         cluster_id=cluster_id,
                         review_lookup=review_lookup,
@@ -1066,9 +1080,9 @@ def _refresh_pair_rows(
                     "Gold Contract B": str(member_b.get("gold_path") or ""),
                     "Evidence A": str(member_a.get("config_path") or ""),
                     "Evidence B": str(member_b.get("config_path") or ""),
-                    "Row Key": "",
+                    COL_ROW_KEY: "",
                 }
-                row["Row Key"] = _row_key(row)
+                row[COL_ROW_KEY] = _row_key(row)
                 refreshed.append(row)
     return refreshed
 
@@ -1140,7 +1154,7 @@ def _cluster_review_expiry(registry: dict[str, Any], status: str) -> str:
 def _top_clusters(
     rows: list[dict[str, str]], *, column: str, value: str, limit: int = 12
 ) -> list[dict[str, Any]]:
-    counts = Counter(row["Cluster ID"] for row in rows if row.get(column) == value)
+    counts = Counter(row[COL_CLUSTER_ID] for row in rows if row.get(column) == value)
     return [
         {"cluster_id": cluster_id, "row_count": count}
         for cluster_id, count in counts.most_common(limit)
@@ -1154,8 +1168,8 @@ def _build_residual_backlog(
     base_config_coverage: dict[str, Any],
     source_date: str,
 ) -> dict[str, Any]:
-    risk_counts = Counter(row["Drift Risk"] for row in rows)
-    semantic_counts = Counter(row["Semantic Status"] for row in rows)
+    risk_counts = Counter(row[COL_DRIFT_RISK] for row in rows)
+    semantic_counts = Counter(row[COL_SEMANTIC_STATUS] for row in rows)
     normalization_counts = Counter(row["Normalization"] for row in rows)
     validation_counts = Counter(row["Validation"] for row in rows)
     typing_counts = Counter(row["Typing"] for row in rows)
@@ -1178,7 +1192,7 @@ def _build_residual_backlog(
                 "CRITICAL/HIGH/MEDIUM drift risks remain at zero in the "
                 "semantic pair matrix budget gate."
             ),
-            "gate": "uv run python -m scripts.engineering.qa check-semantic-pair-budget --check --json",
+            "gate": SEMANTIC_PAIR_BUDGET_GATE,
         },
         {
             "id": "hard_status_mismatch_budget",
@@ -1189,7 +1203,7 @@ def _build_residual_backlog(
                 "Normalization DIFFERENT/CONFLICTING, Validation "
                 "STRICTNESS_MISMATCH, and Typing CONFLICTING remain at zero."
             ),
-            "gate": "uv run python -m scripts.engineering.qa check-semantic-pair-budget --check --json",
+            "gate": SEMANTIC_PAIR_BUDGET_GATE,
         },
         {
             "id": "partial_identity_policy_review",
@@ -1198,7 +1212,7 @@ def _build_residual_backlog(
             "row_count": semantic_counts.get("PARTIAL", 0),
             "expires_on": _cluster_review_expiry(registry, "PARTIAL"),
             "top_clusters": _top_clusters(
-                rows, column="Semantic Status", value="PARTIAL"
+                rows, column=COL_SEMANTIC_STATUS, value="PARTIAL"
             ),
             "definition_of_done": (
                 "PARTIAL identities stay documented as join/lineage policy, "
@@ -1212,7 +1226,7 @@ def _build_residual_backlog(
             "status": "reviewed_until_expiry",
             "row_count": semantic_counts.get("WEAK", 0),
             "expires_on": _cluster_review_expiry(registry, "WEAK"),
-            "top_clusters": _top_clusters(rows, column="Semantic Status", value="WEAK"),
+            "top_clusters": _top_clusters(rows, column=COL_SEMANTIC_STATUS, value="WEAK"),
             "definition_of_done": (
                 "WEAK same-name inventory remains owner-reviewed and does not "
                 "assert cross-pipeline business identity."
@@ -1226,7 +1240,7 @@ def _build_residual_backlog(
             "row_count": semantic_counts.get("CONFLICTING", 0),
             "expires_on": _cluster_review_expiry(registry, "CONFLICTING"),
             "top_clusters": _top_clusters(
-                rows, column="Semantic Status", value="CONFLICTING"
+                rows, column=COL_SEMANTIC_STATUS, value="CONFLICTING"
             ),
             "definition_of_done": (
                 "Generic lexical collisions remain explicit owner-reviewed "
@@ -1246,7 +1260,7 @@ def _build_residual_backlog(
                 "Compatible normalization rows may decrease, but must not grow "
                 "without an intentional budget update."
             ),
-            "gate": "uv run python -m scripts.engineering.qa check-semantic-pair-budget --check --json",
+            "gate": SEMANTIC_PAIR_BUDGET_GATE,
         },
         {
             "id": "compatible_validation_ratchet",
@@ -1260,7 +1274,7 @@ def _build_residual_backlog(
                 "Compatible validation rows may decrease, but must not grow "
                 "without an intentional budget update."
             ),
-            "gate": "uv run python -m scripts.engineering.qa check-semantic-pair-budget --check --json",
+            "gate": SEMANTIC_PAIR_BUDGET_GATE,
         },
         {
             "id": "compatible_typing_ratchet",
@@ -1272,7 +1286,7 @@ def _build_residual_backlog(
                 "Compatible typing rows may decrease, but must not grow without "
                 "an intentional budget update."
             ),
-            "gate": "uv run python -m scripts.engineering.qa check-semantic-pair-budget --check --json",
+            "gate": SEMANTIC_PAIR_BUDGET_GATE,
         },
         {
             "id": "base_config_semantic_coverage",
@@ -1374,7 +1388,7 @@ def _render_canonical_fields_csv(registry: dict[str, Any]) -> str:
 def _render_critical_inconsistencies(
     rows: list[dict[str, str]], *, source_date: str
 ) -> str:
-    counts = Counter(row["Drift Risk"] for row in rows)
+    counts = Counter(row[COL_DRIFT_RISK] for row in rows)
     lines = [
         "# Semantic Pipeline Critical Inconsistencies",
         "",
@@ -1396,7 +1410,7 @@ def _render_critical_inconsistencies(
         "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
     for row in rows:
-        if row["Drift Risk"] not in {"CRITICAL", "HIGH"}:
+        if row[COL_DRIFT_RISK] not in {"CRITICAL", "HIGH"}:
             continue
         lines.append(
             (
@@ -1418,8 +1432,8 @@ def _render_report(
     review_registry: dict[str, Any],
     source_date: str,
 ) -> str:
-    risk_counts = Counter(row["Drift Risk"] for row in rows)
-    semantic_counts = Counter(row["Semantic Status"] for row in rows)
+    risk_counts = Counter(row[COL_DRIFT_RISK] for row in rows)
+    semantic_counts = Counter(row[COL_SEMANTIC_STATUS] for row in rows)
     normalization_counts = Counter(row["Normalization"] for row in rows)
     validation_counts = Counter(row["Validation"] for row in rows)
     typing_counts = Counter(row["Typing"] for row in rows)
@@ -1628,10 +1642,10 @@ def _manifest(
             "fields": field_inventory_count,
             "pairs": len(rows),
             "pipelines": len(
-                {row["Pipeline A"] for row in rows}
-                | {row["Pipeline B"] for row in rows}
+                {row[COL_PIPELINE_A] for row in rows}
+                | {row[COL_PIPELINE_B] for row in rows}
             ),
-            "risk": dict(Counter(row["Drift Risk"] for row in rows)),
+            "risk": dict(Counter(row[COL_DRIFT_RISK] for row in rows)),
             "normalization": dict(Counter(row["Normalization"] for row in rows)),
             "validation": dict(Counter(row["Validation"] for row in rows)),
             "typing": dict(Counter(row["Typing"] for row in rows)),

@@ -1,3 +1,5 @@
+# pyright: reportUninitializedInstanceVariable=false
+# Host attrs/methods provided by concrete composition.
 """Synchronous file operations for ``FileAuditAdapter``."""
 
 from __future__ import annotations

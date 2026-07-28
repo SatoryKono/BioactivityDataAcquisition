@@ -1,6 +1,11 @@
+# pyright: reportArgumentType=false
+# Entity fixture overrides use intentional wide test inputs (PD2-9).
 """Unit tests for BaseEntity — validates system field invariants."""
 
 from __future__ import annotations
+
+from typing import Any, cast
+
 
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -10,14 +15,14 @@ import pytest
 from bioetl.domain.entities.base import BaseEntity
 
 
-BASE_KWARGS = {
+BASE_KWARGS = cast(Any, {
     "entity_id": "test:entity:001",
     "content_hash": "sha256hash",
     "run_id": "run-001",
     "run_type": "incremental",
     "ingestion_ts": datetime(2024, 1, 1, tzinfo=UTC),
     "_index": 0,
-}
+})
 
 
 @dataclass(frozen=True, kw_only=True)

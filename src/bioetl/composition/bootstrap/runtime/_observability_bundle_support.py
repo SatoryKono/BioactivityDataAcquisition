@@ -1,3 +1,5 @@
+# pyright: reportImportCycles=false
+# Import cycle residual tracked in allowlist (product burn-down).
 """Support helpers for runtime observability bundle bootstrap."""
 
 from __future__ import annotations

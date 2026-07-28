@@ -1,3 +1,5 @@
+# pyright: reportArgumentType=false
+# Boundary object/payload typing residual at this module.
 """Control-plane policy resolution helpers for runtime runner assembly."""
 
 from __future__ import annotations

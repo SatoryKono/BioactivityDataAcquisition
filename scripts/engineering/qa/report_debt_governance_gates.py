@@ -53,6 +53,26 @@ DEFAULT_MD_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "debt-governance-gate
 RELEASE_REVIEW_MAX_AGE_DAYS = 21
 DEBT_SCORECARD_PATH = "configs/quality/debt_scorecard.yaml"
 FLAKY_TEST_REVIEW_PATH = "reports/quality/flaky-test-burndown-review.json"
+# Quality / observability artifact path identities (python:S1192).
+HOTSPOT_FAMILY_BASELINE_JSON = "reports/quality/hotspot-family-baseline.json"
+ARCHITECTURE_DEBT_REMOTE_MAIN_BASELINE_JSON = (
+    "reports/quality/architecture-debt-remote-main-baseline.json"
+)
+RUNTIME_CARDINALITY_INVENTORY_JSON = (
+    "reports/observability/runtime_cardinality_inventory.json"
+)
+RUNTIME_CARDINALITY_REVIEW_JSON = (
+    "reports/observability/runtime_cardinality_review.json"
+)
+MODULE_COVERAGE_INVENTORY_JSON = "reports/quality/module-coverage-inventory.json"
+COMPATIBILITY_IMPORTER_CENSUS_JSON = (
+    "reports/quality/compatibility-importer-census.json"
+)
+CONFIG_DISCREPANCY_BASELINE_JSON = "reports/quality/config-discrepancy-baseline.json"
+TEST_GOVERNANCE_CURRENT_JSON = "reports/quality/test-governance-current.json"
+RUNTIME_UUID_SEAMS_YAML = "configs/quality/runtime_uuid_seams.yaml"
+ADR_ENFORCEMENT_MATRIX_JSON = "reports/quality/adr-enforcement-matrix.json"
+SCRIPTS_INVENTORY_MANIFEST_JSON = "configs/quality/scripts_inventory_manifest.json"
 BUDGET_KEY_NAMES = frozenset(
     {
         "budget",
@@ -398,7 +418,7 @@ def _hotspot_family_baseline_artifact_matches_builder(*, repo_root: Path) -> boo
         live_payload, live_markdown = report_hotspot_family_baseline.build_artifacts()
         live_json = json.dumps(live_payload, ensure_ascii=False, indent=2) + "\n"
         committed_json = (
-            repo_root / "reports/quality/hotspot-family-baseline.json"
+            repo_root / HOTSPOT_FAMILY_BASELINE_JSON
         ).read_text(encoding="utf-8")
         committed_markdown = (
             repo_root / "reports/quality/hotspot-family-baseline.md"
@@ -414,7 +434,7 @@ def _remote_main_baseline_artifact_matches_builder(*, repo_root: Path) -> bool |
             repo_root=repo_root
         )
         committed = _load_json(
-            repo_root, "reports/quality/architecture-debt-remote-main-baseline.json"
+            repo_root, ARCHITECTURE_DEBT_REMOTE_MAIN_BASELINE_JSON
         )
     except subprocess.CalledProcessError:
         return None
@@ -474,7 +494,7 @@ def _release_review_freshness_gate(
             metric="generated_at_age_days",
             current="missing_or_invalid",
             limit=RELEASE_REVIEW_MAX_AGE_DAYS,
-            source_artifact="reports/observability/runtime_cardinality_review.json",
+            source_artifact=RUNTIME_CARDINALITY_REVIEW_JSON,
             remediation="Regenerate live runtime cardinality review evidence.",
         )
 
@@ -486,7 +506,7 @@ def _release_review_freshness_gate(
         metric="generated_at_age_days",
         current=age_days,
         limit=RELEASE_REVIEW_MAX_AGE_DAYS,
-        source_artifact="reports/observability/runtime_cardinality_review.json",
+        source_artifact=RUNTIME_CARDINALITY_REVIEW_JSON,
         remediation="Regenerate live runtime cardinality review evidence.",
     )
 
@@ -518,7 +538,7 @@ def _module_coverage_source_tree_hash_gate(
         metric="source_tree_sha256",
         current=current_hash,
         limit=expected_hash or "missing",
-        source_artifact="reports/quality/module-coverage-inventory.json",
+        source_artifact=MODULE_COVERAGE_INVENTORY_JSON,
         remediation=(
             "Regenerate module coverage inventory before release gate closeout."
         ),
@@ -742,7 +762,7 @@ def _observability_touched_metric_inventory_gate(
             metric="changed_metric_surface_count",
             current=0,
             limit=0,
-            source_artifact="reports/observability/runtime_cardinality_inventory.json",
+            source_artifact=RUNTIME_CARDINALITY_INVENTORY_JSON,
             remediation=(
                 "Refresh runtime cardinality inventory evidence before merging "
                 "metric, dashboard, or alert-rule changes."
@@ -768,7 +788,7 @@ def _observability_touched_metric_inventory_gate(
         metric="inventory_matches_current_static_report",
         current=inventory_is_current,
         limit=True,
-        source_artifact="reports/observability/runtime_cardinality_inventory.json",
+        source_artifact=RUNTIME_CARDINALITY_INVENTORY_JSON,
         remediation=(
             "Regenerate reports/observability/runtime_cardinality_inventory.json "
             "before merging metric, dashboard, or alert-rule changes."
@@ -794,7 +814,7 @@ def _observability_touched_metric_review_gate(
             metric="changed_metric_surface_count",
             current=0,
             limit=0,
-            source_artifact="reports/observability/runtime_cardinality_review.json",
+            source_artifact=RUNTIME_CARDINALITY_REVIEW_JSON,
             remediation=(
                 "Refresh live runtime cardinality review evidence before merging "
                 "metric, dashboard, or alert-rule changes."
@@ -810,7 +830,7 @@ def _observability_touched_metric_review_gate(
         metric="changed_metric_surface_count",
         current=len(relevant_paths),
         limit=0,
-        source_artifact="reports/observability/runtime_cardinality_review.json",
+        source_artifact=RUNTIME_CARDINALITY_REVIEW_JSON,
         remediation=(
             "Refresh live runtime cardinality review evidence before merging "
             "metric, dashboard, or alert-rule changes."
@@ -827,7 +847,7 @@ def _debt_scorecard_gates() -> list[Gate]:
             metric="violation_count",
             current=violation_count,
             limit=0,
-            source_artifact="configs/quality/debt_scorecard.yaml",
+            source_artifact=DEBT_SCORECARD_PATH,
             remediation=(
                 "Reduce exemptions or ratchet budgets downward; debt budgets must not grow."
             ),
@@ -865,7 +885,7 @@ def _debt_scorecard_gates() -> list[Gate]:
             metric="budget_growth_allowed",
             current=False,
             limit=False,
-            source_artifact="configs/quality/debt_scorecard.yaml",
+            source_artifact=DEBT_SCORECARD_PATH,
             remediation="Keep scorecard ratchets non-increasing and fix validation violations.",
         )
     )
@@ -891,16 +911,16 @@ def build_payload(
         "reports/quality/architecture-quality-scorecard.json",
     )
     module_coverage = _load_json(
-        repo_root, "reports/quality/module-coverage-inventory.json"
+        repo_root, MODULE_COVERAGE_INVENTORY_JSON
     )
     module_coverage_policy = _load_yaml(
         repo_root, "configs/quality/module_coverage_gates.yaml"
     )
     hotspot_family = _load_json(
-        repo_root, "reports/quality/hotspot-family-baseline.json"
+        repo_root, HOTSPOT_FAMILY_BASELINE_JSON
     )
     compatibility = _load_json(
-        repo_root, "reports/quality/compatibility-importer-census.json"
+        repo_root, COMPATIBILITY_IMPORTER_CENSUS_JSON
     )
     dead_code = _load_json(repo_root, "reports/quality/dead-code-inventory.json")
     contract_matrix = _load_json(
@@ -911,14 +931,14 @@ def build_payload(
     )
     dq_diagnostics = build_contract_registry_dq_diagnostics(repo_root)
     config_discrepancy = _load_json(
-        repo_root, "reports/quality/config-discrepancy-baseline.json"
+        repo_root, CONFIG_DISCREPANCY_BASELINE_JSON
     )
     test_governance = _load_json(
-        repo_root, "reports/quality/test-governance-current.json"
+        repo_root, TEST_GOVERNANCE_CURRENT_JSON
     )
     runtime_cardinality = _load_json(
         repo_root,
-        "reports/observability/runtime_cardinality_inventory.json",
+        RUNTIME_CARDINALITY_INVENTORY_JSON,
     )
     observability_governance = _load_yaml(
         repo_root,
@@ -926,13 +946,13 @@ def build_payload(
     )
     runtime_review = _load_json(
         repo_root,
-        "reports/observability/runtime_cardinality_review.json",
+        RUNTIME_CARDINALITY_REVIEW_JSON,
     )
-    runtime_uuid = _load_yaml(repo_root, "configs/quality/runtime_uuid_seams.yaml")
-    adr_matrix = _load_json(repo_root, "reports/quality/adr-enforcement-matrix.json")
+    runtime_uuid = _load_yaml(repo_root, RUNTIME_UUID_SEAMS_YAML)
+    adr_matrix = _load_json(repo_root, ADR_ENFORCEMENT_MATRIX_JSON)
     remote_baseline = _load_json(
         repo_root,
-        "reports/quality/architecture-debt-remote-main-baseline.json",
+        ARCHITECTURE_DEBT_REMOTE_MAIN_BASELINE_JSON,
     )
     changed_paths = _collect_changed_paths(
         repo_root,
@@ -971,7 +991,7 @@ def build_payload(
                 metric="unmeasured_module_count",
                 current=coverage_summary["unmeasured_module_count"],
                 limit=0,
-                source_artifact="reports/quality/module-coverage-inventory.json",
+                source_artifact=MODULE_COVERAGE_INVENTORY_JSON,
                 remediation="Refresh coverage evidence and add coverage owner tests for unmeasured modules.",
             )
         )
@@ -981,7 +1001,7 @@ def build_payload(
                 metric="uncovered_module_count",
                 current=status_counts.get("uncovered", 0),
                 limit=0,
-                source_artifact="reports/quality/module-coverage-inventory.json",
+                source_artifact=MODULE_COVERAGE_INVENTORY_JSON,
                 remediation="Add coverage or classify modules before closeout.",
             )
         )
@@ -1016,7 +1036,7 @@ def build_payload(
             metric="budget_warnings",
             current=budget_warnings,
             limit=0,
-            source_artifact="reports/quality/hotspot-family-baseline.json",
+            source_artifact=HOTSPOT_FAMILY_BASELINE_JSON,
             remediation="Reduce hotspot-family metrics to stay at or below reviewed budgets.",
         )
     )
@@ -1028,7 +1048,7 @@ def build_payload(
             metric="twin_pair_count",
             current=compatibility_summary["twin_pair_count"],
             limit=0,
-            source_artifact="reports/quality/compatibility-importer-census.json",
+            source_artifact=COMPATIBILITY_IMPORTER_CENSUS_JSON,
             remediation="Retire twin modules or add explicit reviewed governance before closeout.",
         )
     )
@@ -1040,7 +1060,7 @@ def build_payload(
             limit=architecture_scorecard["metrics"][
                 "retained_public_export_facade_count"
             ],
-            source_artifact="reports/quality/compatibility-importer-census.json",
+            source_artifact=COMPATIBILITY_IMPORTER_CENSUS_JSON,
             remediation="Remove facade exports or update the scorecard only after approved reduction evidence.",
         )
     )
@@ -1105,7 +1125,7 @@ def build_payload(
             metric="inconsistent_parameter_count",
             current=config_metrics["inconsistent_parameter_count"],
             limit=0,
-            source_artifact="reports/quality/config-discrepancy-baseline.json",
+            source_artifact=CONFIG_DISCREPANCY_BASELINE_JSON,
             remediation="Resolve config parameter drift or update sanctioned partial classifications.",
         )
     )
@@ -1115,7 +1135,7 @@ def build_payload(
             metric="raw_inconsistent_parameter_count",
             current=config_metrics["raw_inconsistent_parameter_count"],
             limit=0,
-            source_artifact="reports/quality/config-discrepancy-baseline.json",
+            source_artifact=CONFIG_DISCREPANCY_BASELINE_JSON,
             remediation="Regenerate the config matrix only after resolving raw drift.",
         )
     )
@@ -1209,7 +1229,7 @@ def build_payload(
         scripts_metrics = scripts_policy.get("metrics", {})
         if isinstance(scripts_metrics, dict):
             scripts_manifest = _load_json(
-                repo_root, "configs/quality/scripts_inventory_manifest.json"
+                repo_root, SCRIPTS_INVENTORY_MANIFEST_JSON
             )
             script_rows = scripts_manifest.get("scripts", [])
             zero_ref_count = (
@@ -1252,7 +1272,7 @@ def build_payload(
                         metric="zero_reference_supporting_script_count",
                         current=zero_ref_count,
                         limit=int(zero_ref_budget["max_count"]),
-                        source_artifact="configs/quality/scripts_inventory_manifest.json",
+                        source_artifact=SCRIPTS_INVENTORY_MANIFEST_JSON,
                         remediation=(
                             "Triage or remove zero-reference supporting scripts; "
                             "budgets must not grow."
@@ -1268,7 +1288,7 @@ def build_payload(
                         metric="untriaged_zero_reference_supporting_script_count",
                         current=untriaged_count,
                         limit=int(untriaged_budget["max_count"]),
-                        source_artifact="configs/quality/scripts_inventory_manifest.json",
+                        source_artifact=SCRIPTS_INVENTORY_MANIFEST_JSON,
                         remediation=(
                             "Add owner/removal metadata for every zero-reference "
                             "supporting script."
@@ -1283,7 +1303,7 @@ def build_payload(
             metric="budget_violations",
             current=len(test_governance["budget_violations"]),
             limit=0,
-            source_artifact="reports/quality/test-governance-current.json",
+            source_artifact=TEST_GOVERNANCE_CURRENT_JSON,
             remediation="Fix test governance budget violations before closeout.",
         )
     )
@@ -1293,7 +1313,7 @@ def build_payload(
             metric="uuid4_call_sites",
             current=test_report["uuid4_call_sites"],
             limit=0,
-            source_artifact="reports/quality/test-governance-current.json",
+            source_artifact=TEST_GOVERNANCE_CURRENT_JSON,
             remediation="Replace uuid4 tests with deterministic factories or explicit IDs.",
         )
     )
@@ -1340,7 +1360,7 @@ def build_payload(
             if isinstance(runtime_uuid_seams, list)
             else 0,
             limit=0,
-            source_artifact="configs/quality/runtime_uuid_seams.yaml",
+            source_artifact=RUNTIME_UUID_SEAMS_YAML,
             remediation="Remove production uuid4 seams; replay identity must be explicit or deterministic.",
         )
     )
@@ -1350,7 +1370,7 @@ def build_payload(
             metric="production_uuid4_budget",
             current=runtime_uuid_policy.get("production_uuid4_budget"),
             limit=0,
-            source_artifact="configs/quality/runtime_uuid_seams.yaml",
+            source_artifact=RUNTIME_UUID_SEAMS_YAML,
             remediation="Keep production UUID4 budget at zero.",
         )
     )
@@ -1361,7 +1381,7 @@ def build_payload(
             metric="dashboarded_without_declaration",
             current=len(runtime_cardinality["dashboarded_without_declaration"]),
             limit=0,
-            source_artifact="reports/observability/runtime_cardinality_inventory.json",
+            source_artifact=RUNTIME_CARDINALITY_INVENTORY_JSON,
             remediation="Declare dashboarded metrics or remove stale dashboard references.",
         )
     )
@@ -1371,7 +1391,7 @@ def build_payload(
             metric="dashboarded_without_emission",
             current=len(runtime_cardinality["dashboarded_without_emission"]),
             limit=0,
-            source_artifact="reports/observability/runtime_cardinality_inventory.json",
+            source_artifact=RUNTIME_CARDINALITY_INVENTORY_JSON,
             remediation="Add runtime emission for dashboarded metrics or remove dashboard references.",
         )
     )
@@ -1381,7 +1401,7 @@ def build_payload(
             metric="alerted_without_emission",
             current=len(runtime_cardinality["alerted_without_emission"]),
             limit=0,
-            source_artifact="reports/observability/runtime_cardinality_inventory.json",
+            source_artifact=RUNTIME_CARDINALITY_INVENTORY_JSON,
             remediation="Add runtime emission for alerted metrics or retire stale alert rules.",
         )
     )
@@ -1391,7 +1411,7 @@ def build_payload(
             metric="unused_declared_metrics",
             current=len(runtime_cardinality["unused_declared_metrics"]),
             limit=0,
-            source_artifact="reports/observability/runtime_cardinality_inventory.json",
+            source_artifact=RUNTIME_CARDINALITY_INVENTORY_JSON,
             remediation="Emit, retire, or explicitly allowlist unused declared metrics.",
         )
     )
@@ -1401,7 +1421,7 @@ def build_payload(
             metric="runtime_cardinality_review_required",
             current=len(runtime_cardinality["runtime_cardinality_review_required"]),
             limit=0,
-            source_artifact="reports/observability/runtime_cardinality_inventory.json",
+            source_artifact=RUNTIME_CARDINALITY_INVENTORY_JSON,
             remediation="Review high-cardinality metrics and record approved thresholds.",
         )
     )
@@ -1413,7 +1433,7 @@ def build_payload(
                 runtime_cardinality["runtime_cardinality_threshold_violations"]
             ),
             limit=0,
-            source_artifact="reports/observability/runtime_cardinality_inventory.json",
+            source_artifact=RUNTIME_CARDINALITY_INVENTORY_JSON,
             remediation="Reduce label cardinality or explicitly approve bounded thresholds.",
         )
     )
@@ -1429,7 +1449,7 @@ def build_payload(
             metric="status",
             current=runtime_review.get("status"),
             limit="passed",
-            source_artifact="reports/observability/runtime_cardinality_review.json",
+            source_artifact=RUNTIME_CARDINALITY_REVIEW_JSON,
             remediation="Run live observability cardinality review without degraded release evidence.",
         )
     )
@@ -1461,7 +1481,7 @@ def build_payload(
             metric="blocking_gap_count",
             current=adr_summary["blocking_gap_count"],
             limit=0,
-            source_artifact="reports/quality/adr-enforcement-matrix.json",
+            source_artifact=ADR_ENFORCEMENT_MATRIX_JSON,
             remediation="Add enforcement owner tests/scripts or reviewed manual exception markers for accepted ADRs.",
         )
     )
@@ -1484,7 +1504,7 @@ def build_payload(
             remote_baseline
         ),
         limit="clean remote-main artifact blobs",
-        source_artifact="reports/quality/architecture-debt-remote-main-baseline.json",
+        source_artifact=ARCHITECTURE_DEBT_REMOTE_MAIN_BASELINE_JSON,
         remediation="Fetch origin/main and regenerate the remote-main architecture debt baseline.",
     )
     gates.append(remote_main_baseline_gate)
@@ -1537,7 +1557,7 @@ def build_payload(
             ),
             "adr_enforcement_matrix": not _artifact_matches_builder(
                 repo_root=repo_root,
-                rel_path="reports/quality/adr-enforcement-matrix.json",
+                rel_path=ADR_ENFORCEMENT_MATRIX_JSON,
                 payload_builder=lambda: report_adr_enforcement_matrix.build_payload(
                     repo_root=repo_root
                 ),

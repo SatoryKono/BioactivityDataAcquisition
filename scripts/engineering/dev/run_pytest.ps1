@@ -143,6 +143,11 @@ function Test-XdistAutoRequested {
     return $false
 }
 
+function Test-PytestCacheDirValue {
+    param([string]$Value)
+    return ($Value -match '(^|;)\s*cache_dir\s*=')
+}
+
 function Test-PytestCacheDirSpecified {
     param(
         [string[]]$Args
@@ -151,17 +156,14 @@ function Test-PytestCacheDirSpecified {
     for ($i = 0; $i -lt $Args.Count; $i++) {
         $Arg = $Args[$i]
         if ($Arg -eq "-o" -or $Arg -eq "--override-ini") {
-            if ($i + 1 -lt $Args.Count) {
-                $Value = $Args[$i + 1]
-                if ($Value -match '(^|;)\s*cache_dir\s*=') {
-                    return $true
-                }
+            if (($i + 1 -lt $Args.Count) -and (Test-PytestCacheDirValue -Value $Args[$i + 1])) {
+                return $true
             }
             continue
         }
         if ($Arg -match '^(-o|--override-ini)[:=]') {
             $Tail = $Arg -replace '^(-o|--override-ini)[:=]', ''
-            if ($Tail -match '(^|;)\s*cache_dir\s*=') {
+            if (Test-PytestCacheDirValue -Value $Tail) {
                 return $true
             }
         }

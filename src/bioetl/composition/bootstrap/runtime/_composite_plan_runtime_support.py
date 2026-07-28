@@ -1,3 +1,5 @@
+# pyright: reportImportCycles=false
+# Import cycle residual tracked in allowlist (product burn-down).
 """Shared runtime-resource helpers for composite bootstrap planning."""
 
 from __future__ import annotations

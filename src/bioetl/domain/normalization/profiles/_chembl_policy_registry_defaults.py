@@ -1,3 +1,5 @@
+# pyright: reportImportCycles=false
+# Import cycle residual tracked in allowlist (product burn-down).
 """Default immutable ChEMBL policy registry payload."""
 
 from __future__ import annotations

@@ -1,3 +1,5 @@
+# pyright: reportPossiblyUnboundVariable=false
+# basedpyright residual burn-down (shrink-only product surface).
 """Pure helper functions for quarantine filtered-row normalization and filtering."""
 
 from __future__ import annotations

@@ -1,19 +1,24 @@
+# pyright: reportUninitializedInstanceVariable=false
+# pyright: reportAttributeAccessIssue=false
+# Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Delta IO sub-mixins used by `GoldWriterIOMixin` composition."""
 
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Awaitable, Callable
+from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from bioetl.infrastructure.storage.gold.io_delta_runtime import (
     _build_simple_gold_write,
     _execute_prepared_scd2_gold_write,
     _execute_prepared_simple_gold_write,
-    _GoldWriteAsyncioProtocol,
+    _gold_write_retry_delay,
     _GoldWriterDeltaModuleProtocol,
-    _GoldWriteRetryModuleProtocol,
     _prepare_scd2_gold_write,
+    _run_gold_write_with_retry,
     _SimpleGoldWriteRequest,
 )
 from bioetl.infrastructure.storage.gold.io_helpers import (
@@ -199,38 +204,6 @@ class _GoldWriterScd2MergeMixin(_GoldWriterExecutorArrowMixin):
                 .execute()
             )
         )
-
-
-def _gold_write_retry_delay(attempt: int) -> float:
-    """Return the deterministic retry delay used by Gold write helpers."""
-    return float((0.5 * (2**attempt)) + 0.05)
-
-
-async def _run_gold_write_with_retry(
-    module: object,
-    operation: Callable[[], Awaitable[object]],
-    max_attempts: int = 3,
-) -> None:
-    """Run a retryable async gold write operation using the legacy helper API."""
-    retry_module = cast(_GoldWriteRetryModuleProtocol, module)
-    retry_errors = retry_module.GOLD_WRITE_RETRY_ERRORS
-    try:
-        import pyarrow as pa
-    except ImportError:
-        pass
-    else:
-        if pa.ArrowException not in retry_errors:
-            retry_errors = (*retry_errors, pa.ArrowException)
-    sleep_module = cast(_GoldWriteAsyncioProtocol, getattr(module, "asyncio", asyncio))
-
-    for attempt in range(max_attempts):
-        try:
-            await operation()
-            return
-        except retry_errors:
-            if attempt >= max_attempts - 1:
-                raise
-            await sleep_module.sleep(_gold_write_retry_delay(attempt))
 
 
 __all__ = [

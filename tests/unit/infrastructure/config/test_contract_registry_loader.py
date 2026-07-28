@@ -280,7 +280,7 @@ class TestLoadYamlWithTimeout:
                     return ImmediateFuture()
 
             monkeypatch.setattr(
-                "bioetl.infrastructure.config.contract_registry_loader.futures.ThreadPoolExecutor",
+                "bioetl.infrastructure.config.contract_registry_loader.ThreadPoolExecutor",
                 ImmediateExecutor,
             )
 

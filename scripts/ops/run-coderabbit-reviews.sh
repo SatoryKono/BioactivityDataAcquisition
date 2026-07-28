@@ -69,11 +69,11 @@ ensure_base() {
 run_coderabbit() {
   if [[ -n "${CODERABBIT_API_KEY:-}" ]]; then
     command -v coderabbit >/dev/null || {
-      echo "[ERROR] coderabbit CLI not installed. Install with: curl -fsSL https://cli.coderabbit.ai/install.sh | sh"
+      echo "[ERROR] coderabbit CLI not installed. Install with: curl -fsSL https://cli.coderabbit.ai/install.sh | sh" >&2
       return 1
     }
   else
-    echo "[ERROR] CODERABBIT_API_KEY is not set"
+    echo "[ERROR] CODERABBIT_API_KEY is not set" >&2
     return 1
   fi
 
@@ -158,13 +158,13 @@ while [[ $# -gt 0 ]]; do
       ;;
     --base)
       if [[ $# -lt 2 ]]; then
-        echo "[ERROR] --base requires argument"
+        echo "[ERROR] --base requires argument" >&2
         usage
         exit 1
       fi
       BASE_COMMIT="$2"
       if [[ -z "$BASE_COMMIT" || "$BASE_COMMIT" == --* ]]; then
-        echo "[ERROR] --base value cannot be empty"
+        echo "[ERROR] --base value cannot be empty" >&2
         usage
         exit 1
       fi
@@ -173,20 +173,20 @@ while [[ $# -gt 0 ]]; do
     --base=*)
       BASE_COMMIT="${1#*=}"
       if [[ -z "$BASE_COMMIT" || "$BASE_COMMIT" == --* ]]; then
-        echo "[ERROR] --base value cannot be empty"
+        echo "[ERROR] --base value cannot be empty" >&2
         usage
         exit 1
       fi
       ;;
     --log-dir)
       if [[ $# -lt 2 ]]; then
-        echo "[ERROR] --log-dir requires argument"
+        echo "[ERROR] --log-dir requires argument" >&2
         usage
         exit 1
       fi
       LOG_DIR="$2"
       if [[ -z "$LOG_DIR" || "$LOG_DIR" == --* ]]; then
-        echo "[ERROR] --log-dir value cannot be empty"
+        echo "[ERROR] --log-dir value cannot be empty" >&2
         usage
         exit 1
       fi
@@ -195,13 +195,13 @@ while [[ $# -gt 0 ]]; do
     --log-dir=*)
       LOG_DIR="${1#*=}"
       if [[ -z "$LOG_DIR" || "$LOG_DIR" == --* ]]; then
-        echo "[ERROR] --log-dir value cannot be empty"
+        echo "[ERROR] --log-dir value cannot be empty" >&2
         usage
         exit 1
       fi
       ;;
     *)
-      echo "[ERROR] Unknown argument: $1"
+      echo "[ERROR] Unknown argument: $1" >&2
       usage
       exit 1
       ;;
@@ -231,7 +231,7 @@ case "$TOPIC" in
     run_all_reviews
     ;;
   *)
-    echo "[ERROR] Unknown topic: $TOPIC"
+    echo "[ERROR] Unknown topic: $TOPIC" >&2
     usage
     exit 1
     ;;

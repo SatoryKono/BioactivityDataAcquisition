@@ -1,3 +1,6 @@
+# pyright: reportUninitializedInstanceVariable=false
+# pyright: reportAttributeAccessIssue=false
+# Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Bioactivity normalization service for ChEMBL activity measurements.
 
 Scope — batch and single-value normalization of bioactivity data (IC50, Ki,

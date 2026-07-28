@@ -1,6 +1,11 @@
+# pyright: reportArgumentType=false
+# Entity fixture overrides use intentional wide test inputs (PD2-9).
 """Unit tests for UniProt domain entities — UniprotTarget and IDMappingResult."""
 
 from __future__ import annotations
+
+from typing import Any, cast
+
 
 from datetime import UTC, datetime
 
@@ -8,14 +13,14 @@ import pytest
 
 from bioetl.domain.entities.uniprot import IDMappingResult, UniprotTarget
 
-BASE_KWARGS = {
+BASE_KWARGS = cast(Any, {
     "entity_id": "uniprot:test:001",
     "content_hash": "hash123",
     "run_id": "run-001",
     "run_type": "incremental",
     "ingestion_ts": datetime(2024, 1, 1, tzinfo=UTC),
     "_index": 0,
-}
+})
 
 
 @pytest.mark.unit

@@ -68,8 +68,9 @@ WIN_HOST_IP=$(/sbin/ip route show default 2>/dev/null | awk '{print $3}' || echo
 if [[ -z "$WIN_HOST_IP" ]]; then
     echo "[WARNING] Could not determine Windows host IP"
     echo "[INFO] Run this command manually to configure proxy:"
-    echo "  export http_proxy=http://<windows-host-ip>:3128"
-    echo "  export https_proxy=http://<windows-host-ip>:3128"
+    # Local WSL->Windows host CONNECT proxy only (not a public clear-text endpoint).
+    echo "  export http_proxy=http://<windows-host-ip>:3128"  # NOSONAR - local WSL host proxy
+    echo "  export https_proxy=http://<windows-host-ip>:3128"  # NOSONAR - local WSL host proxy
 else
     # Check if proxy is accessible
     if timeout 2 bash -c "echo > /dev/tcp/$WIN_HOST_IP/3128" 2>/dev/null; then

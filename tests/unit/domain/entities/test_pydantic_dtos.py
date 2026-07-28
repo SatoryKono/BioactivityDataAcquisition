@@ -1,3 +1,5 @@
+# pyright: reportArgumentType=false
+# Entity fixture overrides use intentional wide test inputs (PD2-9).
 """Unit tests for Pydantic DTO models — frozen, extra=forbid."""
 
 from __future__ import annotations

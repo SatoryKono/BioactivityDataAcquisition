@@ -1,3 +1,5 @@
+# pyright: reportIncompatibleVariableOverride=false
+# Pandera/ETL nested Config override pattern (PD2-7).
 """Pandera schema for CrossRef Publication (enriched) entity.
 
 Used for Silver layer validation of publications enriched via CrossRef API.

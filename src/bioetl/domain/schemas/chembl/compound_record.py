@@ -1,3 +1,5 @@
+# pyright: reportIncompatibleVariableOverride=false
+# Pandera/ETL nested Config override pattern (PD2-7).
 """Pandera schema for ChEMBL Compound Record entity.
 
 Aligned with RULES.md v5.24 and ChEMBL 34 API schema.

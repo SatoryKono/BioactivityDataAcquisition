@@ -16,6 +16,7 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+$InformationPreference = "Continue"
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RepoRoot = Resolve-Path (Join-Path $ScriptDir "../../..")
@@ -47,7 +48,40 @@ $SharedRelativePaths = @(
 
 function Write-Log {
     param([string]$Level, [string]$Message)
-    Write-Host "[sync_pycharm_ide_templates][$Level] $Message"
+    Write-Information "[sync_pycharm_ide_templates][$Level] $Message" -InformationAction Continue
+}
+
+function Get-SharedRunConfigFileFailures {
+    param(
+        [string]$Name,
+        [string]$Text
+    )
+
+    $failures = New-Object System.Collections.Generic.List[string]
+    if ($Text -match 'name="PYTHONPATH"') {
+        [void]$failures.Add("${Name}: forbidden PYTHONPATH env")
+    }
+    if ($Text -match 'ADD_CONTENT_ROOTS" value="true"') {
+        [void]$failures.Add("${Name}: ADD_CONTENT_ROOTS must be false")
+    }
+    if ($Text -match 'ADD_SOURCE_ROOTS" value="true"') {
+        [void]$failures.Add("${Name}: ADD_SOURCE_ROOTS must be false")
+    }
+
+    $isPytest = ($Text -match 'factoryName="py\.test"') -or ($Text -match 'type="tests"')
+    $isCoverageConfig = ($Name -eq "Pytest_Coverage.xml") -or ($Text -match 'name="pytest-coverage"')
+    if ($isPytest -and -not $isCoverageConfig) {
+        if ($Text -notmatch '--no-cov') {
+            [void]$failures.Add("${Name}: non-coverage pytest config must include --no-cov")
+        }
+        if ($Text -match '--cov(=|\s)') {
+            [void]$failures.Add("${Name}: --cov is only allowed on pytest-coverage")
+        }
+    }
+    if ($isCoverageConfig -and $Text -notmatch '--cov=') {
+        [void]$failures.Add("${Name}: pytest-coverage must include --cov=")
+    }
+    return ,$failures
 }
 
 function Test-SharedRunConfigPolicy {
@@ -58,30 +92,8 @@ function Test-SharedRunConfigPolicy {
 
     foreach ($file in $xmlFiles) {
         $text = Get-Content -LiteralPath $file.FullName -Raw -ErrorAction Stop
-        $name = $file.Name
-
-        if ($text -match 'name="PYTHONPATH"') {
-            [void]$failures.Add("${name}: forbidden PYTHONPATH env")
-        }
-        if ($text -match 'ADD_CONTENT_ROOTS" value="true"') {
-            [void]$failures.Add("${name}: ADD_CONTENT_ROOTS must be false")
-        }
-        if ($text -match 'ADD_SOURCE_ROOTS" value="true"') {
-            [void]$failures.Add("${name}: ADD_SOURCE_ROOTS must be false")
-        }
-
-        $isPytest = ($text -match 'factoryName="py\.test"') -or ($text -match 'type="tests"')
-        $isCoverageConfig = ($name -eq "Pytest_Coverage.xml") -or ($text -match 'name="pytest-coverage"')
-        if ($isPytest -and -not $isCoverageConfig) {
-            if ($text -notmatch '--no-cov') {
-                [void]$failures.Add("${name}: non-coverage pytest config must include --no-cov")
-            }
-            if ($text -match '--cov(=|\s)') {
-                [void]$failures.Add("${name}: --cov is only allowed on pytest-coverage")
-            }
-        }
-        if ($isCoverageConfig -and $text -notmatch '--cov=') {
-            [void]$failures.Add("${name}: pytest-coverage must include --cov=")
+        foreach ($f in (Get-SharedRunConfigFileFailures -Name $file.Name -Text $text)) {
+            [void]$failures.Add($f)
         }
     }
 

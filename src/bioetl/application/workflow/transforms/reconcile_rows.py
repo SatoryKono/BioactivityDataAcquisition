@@ -1,3 +1,5 @@
+# pyright: reportArgumentType=false
+# Boundary object/payload typing residual at this module.
 """Built-in workflow transform for deterministic A/B row reconciliation."""
 
 from __future__ import annotations

@@ -28,6 +28,9 @@ ALLOWED_CLASSIFICATIONS = frozenset(
     }
 )
 REBASELINE_ISSUES = ("#5461", "#5462", "#5463")
+ISSUE_5451 = "#5451"
+ISSUE_5447 = "#5447"
+ISSUE_5450 = "#5450"
 
 
 @dataclass(frozen=True)
@@ -59,7 +62,7 @@ FINDINGS: tuple[FindingRebaseline, ...] = (
             "src/bioetl/domain/aggregates/_batch_lifecycle.py",
         ),
         current_test_anchors=("tests/unit/application/core/test_batch_fsm.py",),
-        existing_issue_anchors=("#5444", "#5451"),
+        existing_issue_anchors=("#5444", ISSUE_5451),
         rationale=(
             "The original paths are stale; current Batch lifecycle/FSM guards "
             "exist and are covered by focused transition tests."
@@ -80,7 +83,7 @@ FINDINGS: tuple[FindingRebaseline, ...] = (
             "tests/unit/domain/aggregates/test_pipeline_run.py",
             "tests/unit/domain/aggregates/test_pipeline_run_invariant_properties.py",
         ),
-        existing_issue_anchors=("#5443", "#5451"),
+        existing_issue_anchors=("#5443", ISSUE_5451),
         rationale=(
             "The aggregate completion path checks recorded stages before "
             "COMPLETED and the stale top-level pipeline path is absent."
@@ -101,7 +104,7 @@ FINDINGS: tuple[FindingRebaseline, ...] = (
             "tests/architecture/test_adapter_http_client_enforcement.py",
             "tests/unit/infrastructure/adapters/http/test_http_client.py",
         ),
-        existing_issue_anchors=("#5417", "#5447", "#5451"),
+        existing_issue_anchors=("#5417", ISSUE_5447, ISSUE_5451),
         rationale=(
             "Legacy client paths cited by the audit are absent; runtime adapters "
             "are guarded against direct requests/httpx client construction."
@@ -123,7 +126,7 @@ FINDINGS: tuple[FindingRebaseline, ...] = (
             "tests/architecture/test_quarantine_immutability.py",
             "tests/unit/domain/aggregates/test_quarantine_entry.py",
         ),
-        existing_issue_anchors=("#5420", "#5445", "#5451"),
+        existing_issue_anchors=("#5420", "#5445", ISSUE_5451),
         rationale=(
             "The cited module is stale; current quarantine aggregate/port "
             "surfaces have explicit immutability guards and tests."
@@ -144,7 +147,7 @@ FINDINGS: tuple[FindingRebaseline, ...] = (
             "tests/unit/contracts/test_content_hash_contract.py",
             "tests/contract/test_content_hash_schema_drift_contract.py",
         ),
-        existing_issue_anchors=("#5447", "#5451"),
+        existing_issue_anchors=(ISSUE_5447, ISSUE_5451),
         rationale=(
             "Hashing moved under domain transformations; META_FIELDS are "
             "centralized and schema-drift/content-hash contracts cover exclusion."
@@ -166,7 +169,7 @@ FINDINGS: tuple[FindingRebaseline, ...] = (
             "tests/architecture/test_observability_signal_governance.py",
             "tests/architecture/test_observability_metric_governance.py",
         ),
-        existing_issue_anchors=("#5446", "#5451"),
+        existing_issue_anchors=("#5446", ISSUE_5451),
         rationale=(
             "The current contract is domain-owned and enforces run identity and "
             "canonical labels through dedicated unit and architecture tests."
@@ -188,7 +191,7 @@ FINDINGS: tuple[FindingRebaseline, ...] = (
             "tests/contract/test_gold_schema_strict_violations.py",
             "tests/unit/storage/gold/test_strict_validation.py",
         ),
-        existing_issue_anchors=("#5448", "#5451"),
+        existing_issue_anchors=("#5448", ISSUE_5451),
         rationale=(
             "The top-level medallion path is stale for this claim; strict Gold "
             "schema validation is enforced through storage and contract tests."
@@ -209,7 +212,7 @@ FINDINGS: tuple[FindingRebaseline, ...] = (
             "tests/unit/infrastructure/adapters/http/test_retry_config.py",
             "tests/unit/infrastructure/adapters/http/test_client_retry_mixin.py",
         ),
-        existing_issue_anchors=("#5447", "#5451"),
+        existing_issue_anchors=(ISSUE_5447, ISSUE_5451),
         rationale=(
             "RetryConfig uses deterministic hash-based jitter; tests cover "
             "same-input stability and cross-process stability."
@@ -231,7 +234,7 @@ FINDINGS: tuple[FindingRebaseline, ...] = (
             "tests/integration/ci/test_reproducibility_contract_manifest_diff.py",
             "tests/unit/application/composite/checkpoint/test_checkpoint_service.py",
         ),
-        existing_issue_anchors=("#5449", "#5451"),
+        existing_issue_anchors=("#5449", ISSUE_5451),
         rationale=(
             "Resume compatibility and composite checkpoint anchors are current "
             "control-plane surfaces with strict mismatch tests."
@@ -255,7 +258,7 @@ FINDINGS: tuple[FindingRebaseline, ...] = (
             "tests/architecture/test_strict_architecture_contracts.py",
             "tests/architecture/test_adapter_contracts.py",
         ),
-        existing_issue_anchors=("#5450", "#5451"),
+        existing_issue_anchors=(ISSUE_5450, ISSUE_5451),
         rationale=(
             "The audit evidence used legacy paths and broad conditional-count "
             "heuristics. Current layer-boundary/business-placement remediation "
@@ -278,7 +281,7 @@ FINDINGS: tuple[FindingRebaseline, ...] = (
             "tests/unit/application/composite/test_merger.py",
             "tests/unit/application/composite/test_composite_merge_conflicts.py",
         ),
-        existing_issue_anchors=("#5449", "#5451"),
+        existing_issue_anchors=("#5449", ISSUE_5451),
         rationale=(
             "Composite code is package-based rather than a single domain file; "
             "golden and unit tests cover stable ordering/conflict behavior."
@@ -300,7 +303,7 @@ FINDINGS: tuple[FindingRebaseline, ...] = (
             "tests/contract/silver_schemas/test_selected_pipeline_schema_drift.py",
             "tests/contract/test_content_hash_schema_drift_contract.py",
         ),
-        existing_issue_anchors=("#5448", "#5451"),
+        existing_issue_anchors=("#5448", ISSUE_5451),
         rationale=(
             "Schema drift is implemented and exercised by Silver schema and "
             "pipeline drift tests."
@@ -317,7 +320,7 @@ FINDINGS: tuple[FindingRebaseline, ...] = (
         current_test_anchors=(
             "tests/architecture/test_strict_architecture_contracts.py",
         ),
-        existing_issue_anchors=("#5450", "#5451"),
+        existing_issue_anchors=(ISSUE_5450, ISSUE_5451),
         rationale=(
             "Current strict architecture contracts include an infrastructure "
             "boundary test forbidding application imports outside sanctioned seams."
@@ -336,7 +339,7 @@ FINDINGS: tuple[FindingRebaseline, ...] = (
             "tests/integration/composite/test_composite_cross_validation.py",
             "tests/integration/infrastructure/storage/test_gold_writer_versioning.py",
         ),
-        existing_issue_anchors=("#5450", "#5451"),
+        existing_issue_anchors=(ISSUE_5450, ISSUE_5451),
         rationale=(
             "The broad integration-coverage concern was already part of the "
             "closed architecture gap wave; the current repo has targeted "
@@ -360,7 +363,7 @@ FINDINGS: tuple[FindingRebaseline, ...] = (
             "tests/unit/application/core/test_runner.py",
             "tests/unit/application/composite/test_runner.py",
         ),
-        existing_issue_anchors=("#5450", "#5451"),
+        existing_issue_anchors=(ISSUE_5450, ISSUE_5451),
         rationale=(
             "Run/workflow ledger surfaces and runner ledger tests provide the "
             "current governance audit trail anchors."
@@ -382,7 +385,7 @@ FINDINGS: tuple[FindingRebaseline, ...] = (
             "tests/architecture/test_retirement_candidate_triage.py",
             "tests/architecture/test_source_test_facade_ownership.py",
         ),
-        existing_issue_anchors=("#5450", "#5451"),
+        existing_issue_anchors=(ISSUE_5450, ISSUE_5451),
         rationale=(
             "Dead-code/port-adapter coverage inventories are the current "
             "governance surfaces for abstraction review; the audit did not cite "
@@ -406,7 +409,7 @@ FINDINGS: tuple[FindingRebaseline, ...] = (
             "tests/architecture/test_public_facade_inventory.py",
             "tests/architecture/test_public_surface_importer_census_governance.py",
         ),
-        existing_issue_anchors=("#5410", "#5435", "#5450", "#5451"),
+        existing_issue_anchors=("#5410", "#5435", ISSUE_5450, ISSUE_5451),
         rationale=(
             "Compatibility shape/facade registries, importer census, and ratchet "
             "guards already define bounded lifecycle and no-growth behavior."

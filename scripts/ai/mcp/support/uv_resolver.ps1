@@ -189,11 +189,26 @@ function Resolve-BioetlUvxBin {
                 $candidates += [System.IO.Path]::Combine($entry.Trim(), $name)
             }
             catch {
-                # Ignore unusable PATH entries.
+                Write-Verbose "Skipping unusable PATH entry '${entry}': $($_.Exception.Message)"
             }
         }
     }
 
+    $candidates += Get-BioetlUvxCommandCandidates
+    $candidates += Get-BioetlUvxInstallCandidates
+
+    foreach ($candidate in $candidates) {
+        if ($candidate -and (Test-Path -LiteralPath $candidate)) {
+            return (Resolve-Path -LiteralPath $candidate).Path
+        }
+    }
+
+    # Fall back to bare name (caller may still fail with a clear message).
+    return "uvx"
+}
+
+function Get-BioetlUvxCommandCandidates {
+    $candidates = @()
     $fromPath = Get-Command uvx -ErrorAction SilentlyContinue
     if ($fromPath -and $fromPath.Source) {
         $candidates += $fromPath.Source
@@ -207,22 +222,27 @@ function Resolve-BioetlUvxBin {
                 try {
                     $candidates += [System.IO.Path]::Combine($uvDir, $name)
                 } catch {
-                    # Ignore unusable uv sibling paths on non-Windows hosts.
+                    Write-Verbose "Skipping unusable uv sibling path: $($_.Exception.Message)"
                 }
             }
         }
     }
+    return ,$candidates
+}
 
-    $isWindowsRuntime = $false
+function Test-BioetlWindowsRuntime {
     if ($PSVersionTable.PSEdition -eq "Desktop") {
-        $isWindowsRuntime = $true
-    } elseif (Get-Variable -Name IsWindows -ErrorAction SilentlyContinue) {
-        $isWindowsRuntime = [bool]$IsWindows
-    } elseif ($env:OS -like "*Windows*") {
-        $isWindowsRuntime = $true
+        return $true
     }
+    if (Get-Variable -Name IsWindows -ErrorAction SilentlyContinue) {
+        return [bool]$IsWindows
+    }
+    return ($env:OS -like "*Windows*")
+}
 
-    if ($isWindowsRuntime) {
+function Get-BioetlUvxInstallCandidates {
+    $candidates = @()
+    if (Test-BioetlWindowsRuntime) {
         $localAppData = [Environment]::GetFolderPath("LocalApplicationData")
         $userProfile = $env:USERPROFILE
         if (-not [string]::IsNullOrWhiteSpace($localAppData)) {
@@ -237,6 +257,7 @@ function Resolve-BioetlUvxBin {
                         "uvx.exe"
                     )
                 } catch {
+                    Write-Verbose "Skipping LocalAppData uvx candidate for ${py}: $($_.Exception.Message)"
                 }
             }
         }
@@ -245,6 +266,7 @@ function Resolve-BioetlUvxBin {
                 try {
                     $candidates += [System.IO.Path]::Combine($userProfile, $rel)
                 } catch {
+                    Write-Verbose "Skipping user-profile uvx candidate '${rel}': $($_.Exception.Message)"
                 }
             }
         }
@@ -255,19 +277,12 @@ function Resolve-BioetlUvxBin {
                 try {
                     $candidates += [System.IO.Path]::Combine($homeDir, $rel)
                 } catch {
+                    Write-Verbose "Skipping home uvx candidate '${rel}': $($_.Exception.Message)"
                 }
             }
         }
     }
-
-    foreach ($candidate in $candidates) {
-        if ($candidate -and (Test-Path -LiteralPath $candidate)) {
-            return (Resolve-Path -LiteralPath $candidate).Path
-        }
-    }
-
-    # Fall back to bare name (caller may still fail with a clear message).
-    return "uvx"
+    return ,$candidates
 }
 
 function Test-BioetlUvxAvailable {

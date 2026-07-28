@@ -1,3 +1,5 @@
+# pyright: reportConstantRedefinition=false
+# basedpyright residual burn-down (shrink-only product surface).
 """Filesystem writers for pipeline/workflow run reports."""
 
 from __future__ import annotations

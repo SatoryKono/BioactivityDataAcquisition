@@ -1,3 +1,5 @@
+# pyright: reportUninitializedInstanceVariable=false
+# Host attrs/methods provided by concrete composition.
 """Internal fallback-policy hook mixin for the CrossRef adapter."""
 
 from __future__ import annotations

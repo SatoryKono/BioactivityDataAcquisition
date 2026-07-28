@@ -1,3 +1,5 @@
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Private runtime helpers for CLI run command orchestration."""
 
 from __future__ import annotations

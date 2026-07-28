@@ -1,3 +1,6 @@
+# pyright: reportUninitializedInstanceVariable=false
+# pyright: reportAttributeAccessIssue=false
+# Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Merged write and read operations mixin for StorageBundle."""
 
 from __future__ import annotations
@@ -17,7 +20,9 @@ if TYPE_CHECKING:
 __all__ = ["StorageBundleMergedMixin"]
 
 # Pandera DataFrameModel classes (or resolved DataFrameSchema) used as providers.
-CompositeSchemaProvider = Any
+CompositeSchemaProvider = (
+    Any  # Any: accepts schema classes and resolved schema instances.
+)
 
 
 class _SilverMergedWriteProtocol(Protocol):

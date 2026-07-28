@@ -1,3 +1,5 @@
+# pyright: reportIncompatibleVariableOverride=false
+# Pandera/ETL nested Config override pattern (PD2-7).
 """Base schema for all publication entities across providers.
 
 Aligned with RULES.md v5.24 and Publication Schema Unification spec.

@@ -40,7 +40,7 @@ _SECRET_ASSIGNMENT = re.compile(
 _SECRET_FLAG = re.compile(
     r"(?i)^--?(?:password|passwd|secret|token|credential|authorization|auth)$"
 )
-_BARE_GITHUB_TOKEN = re.compile(r"\bgh[pousr]_[A-Za-z0-9_]{12,}\b")
+_BARE_GITHUB_TOKEN = re.compile(r"\bgh[pousr]_\w{12,}\b")
 _URI_USERINFO = re.compile(r"(://)[^/@\s:]+:[^/@\s]+@")
 _WINDOWS_PATH = re.compile(r"(?i)^(?:[a-z]:[\\/]|\\\\)")
 

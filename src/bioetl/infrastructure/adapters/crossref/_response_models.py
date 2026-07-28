@@ -1,4 +1,6 @@
 # mypy: disable-error-code="misc"
+# pyright: reportImportCycles=false
+# Import cycle residual tracked in allowlist (product burn-down).
 """Response wrapper models for CrossRef API payloads."""
 
 from __future__ import annotations

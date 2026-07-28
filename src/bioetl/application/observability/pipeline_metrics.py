@@ -1,3 +1,5 @@
+# pyright: reportUninitializedInstanceVariable=false
+# Host attrs/methods provided by concrete composition.
 """Application-level helpers for pipeline-specific metrics semantics."""
 
 from __future__ import annotations

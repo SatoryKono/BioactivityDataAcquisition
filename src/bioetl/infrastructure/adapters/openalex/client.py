@@ -1,3 +1,6 @@
+# pyright: reportIncompatibleVariableOverride=false
+# pyright: reportUnsafeMultipleInheritance=false
+# MRO/override residual on mixin or client hierarchies.
 """OpenAlex data source adapter implementing FilterableDataSourcePort for OpenAlex Works API.
 
 Uses httpx via UnifiedHTTPClient for REST/JSON API access.

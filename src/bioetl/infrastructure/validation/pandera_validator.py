@@ -1,3 +1,5 @@
+# pyright: reportArgumentType=false
+# Boundary object/payload typing residual at this module.
 """Pandera-based Medallion layer validators.
 
 Implements SilverValidatorPort and GoldValidatorPort using Pandera for

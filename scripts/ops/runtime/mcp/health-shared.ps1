@@ -46,14 +46,28 @@ function Test-TcpPort {
         if (-not $client.Connected) {
             return $false
         }
-        try { $client.EndConnect($iar) } catch { return $false }
+        try {
+            $client.EndConnect($iar)
+        } catch {
+            Write-Verbose "TCP EndConnect failed on port ${Port}: $($_.Exception.Message)"
+            return $false
+        }
         return $true
     } catch {
+        Write-Verbose "TCP probe failed on port ${Port}: $($_.Exception.Message)"
         return $false
     } finally {
         if ($null -ne $client) {
-            try { $client.Close() } catch {}
-            try { $client.Dispose() } catch {}
+            try {
+                $client.Close()
+            } catch {
+                Write-Verbose "TCP client close failed on port ${Port}: $($_.Exception.Message)"
+            }
+            try {
+                $client.Dispose()
+            } catch {
+                Write-Verbose "TCP client dispose failed on port ${Port}: $($_.Exception.Message)"
+            }
         }
     }
 }

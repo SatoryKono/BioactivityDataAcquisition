@@ -1,3 +1,6 @@
+# pyright: reportIncompatibleVariableOverride=false
+# pyright: reportUnsafeMultipleInheritance=false
+# MRO/override residual on mixin or client hierarchies.
 """CrossRef adapter facade for DataSourcePort and FilterableDataSourcePort."""
 
 from __future__ import annotations

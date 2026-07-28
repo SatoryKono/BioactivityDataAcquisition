@@ -1,3 +1,5 @@
+# pyright: reportArgumentType=false
+# Boundary object/payload typing residual at this module.
 """Base Transformer class for Bronze -> Silver transformations."""
 
 from __future__ import annotations

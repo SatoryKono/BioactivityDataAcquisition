@@ -10,6 +10,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+$InformationPreference = "Continue"
 Set-StrictMode -Version Latest
 
 function Show-Usage {
@@ -77,7 +78,7 @@ function Resolve-PortableNodeToolchain {
         $zipPath = Join-Path $env:TEMP $zipName
         $extractRoot = Join-Path $env:TEMP ("bioetl-node-extract-" + [System.Guid]::NewGuid().ToString("N"))
 
-        Write-Host "Downloading portable Node.js LTS from $downloadUrl..."
+        Write-Information "Downloading portable Node.js LTS from $downloadUrl..." -InformationAction Continue
         Invoke-WebRequest -Uri $downloadUrl -OutFile $zipPath
         Ensure-Directory -Path $extractRoot
         Expand-Archive -LiteralPath $zipPath -DestinationPath $extractRoot -Force

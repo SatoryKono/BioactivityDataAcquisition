@@ -1,3 +1,5 @@
+# pyright: reportAttributeAccessIssue=false
+# Host attrs/methods provided by concrete composition.
 """Invocation and compatibility helpers for the Silver writer runtime facade."""
 
 from __future__ import annotations

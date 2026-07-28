@@ -1,3 +1,5 @@
+# pyright: reportMissingSuperCall=false
+# basedpyright residual burn-down (shrink-only product surface).
 """Compound identifier Value Objects for BioETL domain.
 
 Contains Value Objects for compound identification across sources:

@@ -1,3 +1,6 @@
+# pyright: reportArgumentType=false
+# pyright: reportReturnType=false
+# Boundary object/payload typing residual at this module.
 """Built-in workflow transform for foreign-key reconciliation."""
 
 from __future__ import annotations

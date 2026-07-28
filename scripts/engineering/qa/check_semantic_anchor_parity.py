@@ -25,6 +25,18 @@ from bioetl.infrastructure.config._composite_shared_policy_externalization impor
     merge_external_shared_policy,
 )
 
+# Semantic anchor path identities (python:S1192).
+COMPOSITE_PUBLICATION = "configs/composites/publication.yaml"
+COMPOSITE_ACTIVITY = "configs/composites/activity.yaml"
+COMPOSITE_MOLECULE = "configs/composites/molecule.yaml"
+COMPOSITE_TARGET = "configs/composites/target.yaml"
+ENTITY_PUBMED_PUBLICATION = "configs/entities/pubmed/publication.yaml"
+ENTITY_CHEMBL_MOLECULE = "configs/entities/chembl/molecule.yaml"
+GOLD_PUBMED_PUBLICATION = (
+    "docs/04-reference/contracts/gold/pubmed_publication_v1.0.json"
+)
+GOLD_CHEMBL_MOLECULE = "docs/04-reference/contracts/gold/chembl_molecule_v1.0.json"
+
 
 @dataclass(frozen=True, slots=True)
 class CompositeRequirement:
@@ -97,11 +109,11 @@ ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         require_merge_key=True,
         composite_requirements=(
             CompositeRequirement(
-                "configs/composites/publication.yaml",
+                COMPOSITE_PUBLICATION,
                 "publication_primary_join_key",
             ),
             CompositeRequirement(
-                "configs/composites/publication.yaml",
+                COMPOSITE_PUBLICATION,
                 "enricher_join_key",
                 pipeline="crossref_publication",
             ),
@@ -110,8 +122,8 @@ ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
     AnchorSpec(
         anchor_id="pubmed_pmid_publication_anchor",
         field="pmid",
-        entity_config="configs/entities/pubmed/publication.yaml",
-        gold_contract="docs/04-reference/contracts/gold/pubmed_publication_v1.0.json",
+        entity_config=ENTITY_PUBMED_PUBLICATION,
+        gold_contract=GOLD_PUBMED_PUBLICATION,
         expected_gold_required=True,
         require_join_key_normalization_policy=True,
         require_field_validation=True,
@@ -123,11 +135,11 @@ ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         require_merge_key=True,
         composite_requirements=(
             CompositeRequirement(
-                "configs/composites/publication.yaml",
+                COMPOSITE_PUBLICATION,
                 "publication_primary_join_key",
             ),
             CompositeRequirement(
-                "configs/composites/publication.yaml",
+                COMPOSITE_PUBLICATION,
                 "enricher_join_key",
                 pipeline="pubmed_publication",
             ),
@@ -136,8 +148,8 @@ ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
     AnchorSpec(
         anchor_id="pubmed_title_publication_fallback_anchor",
         field="title",
-        entity_config="configs/entities/pubmed/publication.yaml",
-        gold_contract="docs/04-reference/contracts/gold/pubmed_publication_v1.0.json",
+        entity_config=ENTITY_PUBMED_PUBLICATION,
+        gold_contract=GOLD_PUBMED_PUBLICATION,
         expected_gold_required=True,
         require_join_key_normalization_policy=True,
         require_field_validation=True,
@@ -146,15 +158,15 @@ ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         require_gold_required_filter=True,
         composite_requirements=(
             CompositeRequirement(
-                "configs/composites/publication.yaml",
+                COMPOSITE_PUBLICATION,
                 "publication_fallback_join_key",
             ),
             CompositeRequirement(
-                "configs/composites/publication.yaml",
+                COMPOSITE_PUBLICATION,
                 "field_priority",
             ),
             CompositeRequirement(
-                "configs/composites/publication.yaml",
+                COMPOSITE_PUBLICATION,
                 "seed_output_key",
             ),
         ),
@@ -172,11 +184,11 @@ ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         require_gold_required_filter=True,
         composite_requirements=(
             CompositeRequirement(
-                "configs/composites/publication.yaml",
+                COMPOSITE_PUBLICATION,
                 "publication_fallback_join_key",
             ),
             CompositeRequirement(
-                "configs/composites/publication.yaml",
+                COMPOSITE_PUBLICATION,
                 "field_priority",
             ),
         ),
@@ -194,11 +206,11 @@ ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         require_gold_required_filter=True,
         composite_requirements=(
             CompositeRequirement(
-                "configs/composites/publication.yaml",
+                COMPOSITE_PUBLICATION,
                 "publication_fallback_join_key",
             ),
             CompositeRequirement(
-                "configs/composites/publication.yaml",
+                COMPOSITE_PUBLICATION,
                 "field_priority",
             ),
         ),
@@ -218,11 +230,11 @@ ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         require_gold_required_filter=True,
         composite_requirements=(
             CompositeRequirement(
-                "configs/composites/publication.yaml",
+                COMPOSITE_PUBLICATION,
                 "publication_fallback_join_key",
             ),
             CompositeRequirement(
-                "configs/composites/publication.yaml",
+                COMPOSITE_PUBLICATION,
                 "field_priority",
             ),
         ),
@@ -230,18 +242,18 @@ ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
     AnchorSpec(
         anchor_id="pubmed_pmc_publication_reference_anchor",
         field="pmc_id",
-        entity_config="configs/entities/pubmed/publication.yaml",
-        gold_contract="docs/04-reference/contracts/gold/pubmed_publication_v1.0.json",
+        entity_config=ENTITY_PUBMED_PUBLICATION,
+        gold_contract=GOLD_PUBMED_PUBLICATION,
         expected_gold_required=False,
         require_join_key_normalization_policy=True,
         require_cross_field_validation=True,
         composite_requirements=(
             CompositeRequirement(
-                "configs/composites/publication.yaml",
+                COMPOSITE_PUBLICATION,
                 "seed_output_key",
             ),
             CompositeRequirement(
-                "configs/composites/publication.yaml",
+                COMPOSITE_PUBLICATION,
                 "column_group_field",
                 group="provider_ids",
             ),
@@ -263,11 +275,11 @@ ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         require_merge_key=True,
         composite_requirements=(
             CompositeRequirement(
-                "configs/composites/publication.yaml",
+                COMPOSITE_PUBLICATION,
                 "seed_output_key",
             ),
             CompositeRequirement(
-                "configs/composites/publication.yaml",
+                COMPOSITE_PUBLICATION,
                 "column_group_field",
                 group="provider_ids",
             ),
@@ -282,13 +294,13 @@ ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         require_join_key_normalization_policy=True,
         require_silver_required_filter=True,
         composite_requirements=(
-            CompositeRequirement("configs/composites/activity.yaml", "seed_output_key"),
+            CompositeRequirement(COMPOSITE_ACTIVITY, "seed_output_key"),
             CompositeRequirement(
-                "configs/composites/activity.yaml",
+                COMPOSITE_ACTIVITY,
                 "dependency_join_key",
                 pipeline="chembl_compound_record",
             ),
-            CompositeRequirement("configs/composites/activity.yaml", "field_priority"),
+            CompositeRequirement(COMPOSITE_ACTIVITY, "field_priority"),
         ),
     ),
     AnchorSpec(
@@ -305,14 +317,14 @@ ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         require_merge_key=True,
         composite_requirements=(
             CompositeRequirement("configs/composites/assay.yaml", "seed_output_key"),
-            CompositeRequirement("configs/composites/activity.yaml", "seed_output_key"),
+            CompositeRequirement(COMPOSITE_ACTIVITY, "seed_output_key"),
         ),
     ),
     AnchorSpec(
         anchor_id="chembl_molecule_identifier_anchor",
         field="molecule_id",
-        entity_config="configs/entities/chembl/molecule.yaml",
-        gold_contract="docs/04-reference/contracts/gold/chembl_molecule_v1.0.json",
+        entity_config=ENTITY_CHEMBL_MOLECULE,
+        gold_contract=GOLD_CHEMBL_MOLECULE,
         expected_gold_required=True,
         require_join_key_normalization_policy=True,
         require_field_validation=True,
@@ -322,25 +334,25 @@ ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         require_primary_key=True,
         require_merge_key=True,
         composite_requirements=(
-            CompositeRequirement("configs/composites/molecule.yaml", "seed_output_key"),
-            CompositeRequirement("configs/composites/activity.yaml", "seed_output_key"),
+            CompositeRequirement(COMPOSITE_MOLECULE, "seed_output_key"),
+            CompositeRequirement(COMPOSITE_ACTIVITY, "seed_output_key"),
         ),
     ),
     AnchorSpec(
         anchor_id="chembl_inchi_key_structure_join_anchor",
         field="inchi_key",
-        entity_config="configs/entities/chembl/molecule.yaml",
-        gold_contract="docs/04-reference/contracts/gold/chembl_molecule_v1.0.json",
+        entity_config=ENTITY_CHEMBL_MOLECULE,
+        gold_contract=GOLD_CHEMBL_MOLECULE,
         expected_gold_required=False,
         require_join_key_normalization_policy=True,
         require_cross_field_validation=True,
         composite_requirements=(
-            CompositeRequirement("configs/composites/molecule.yaml", "seed_output_key"),
+            CompositeRequirement(COMPOSITE_MOLECULE, "seed_output_key"),
             CompositeRequirement(
-                "configs/composites/molecule.yaml",
+                COMPOSITE_MOLECULE,
                 "molecule_active_join_key",
             ),
-            CompositeRequirement("configs/composites/molecule.yaml", "field_priority"),
+            CompositeRequirement(COMPOSITE_MOLECULE, "field_priority"),
         ),
     ),
     AnchorSpec(
@@ -353,11 +365,11 @@ ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         require_cross_field_validation=True,
         composite_requirements=(
             CompositeRequirement(
-                "configs/composites/molecule.yaml",
+                COMPOSITE_MOLECULE,
                 "molecule_active_join_key",
             ),
             CompositeRequirement(
-                "configs/composites/molecule.yaml",
+                COMPOSITE_MOLECULE,
                 "enricher_join_key",
                 pipeline="pubchem_compound",
             ),
@@ -366,19 +378,19 @@ ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
     AnchorSpec(
         anchor_id="chembl_canonical_smiles_structure_join_anchor",
         field="canonical_smiles",
-        entity_config="configs/entities/chembl/molecule.yaml",
-        gold_contract="docs/04-reference/contracts/gold/chembl_molecule_v1.0.json",
+        entity_config=ENTITY_CHEMBL_MOLECULE,
+        gold_contract=GOLD_CHEMBL_MOLECULE,
         expected_gold_required=False,
         require_join_key_normalization_policy=True,
         require_field_validation=True,
         require_cross_field_validation=True,
         composite_requirements=(
-            CompositeRequirement("configs/composites/molecule.yaml", "seed_output_key"),
+            CompositeRequirement(COMPOSITE_MOLECULE, "seed_output_key"),
             CompositeRequirement(
-                "configs/composites/molecule.yaml",
+                COMPOSITE_MOLECULE,
                 "molecule_active_join_key",
             ),
-            CompositeRequirement("configs/composites/molecule.yaml", "field_priority"),
+            CompositeRequirement(COMPOSITE_MOLECULE, "field_priority"),
         ),
     ),
     AnchorSpec(
@@ -392,11 +404,11 @@ ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         require_cross_field_validation=True,
         composite_requirements=(
             CompositeRequirement(
-                "configs/composites/molecule.yaml",
+                COMPOSITE_MOLECULE,
                 "molecule_active_join_key",
             ),
             CompositeRequirement(
-                "configs/composites/molecule.yaml",
+                COMPOSITE_MOLECULE,
                 "enricher_join_key",
                 pipeline="pubchem_compound",
             ),
@@ -416,10 +428,10 @@ ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         require_primary_key=True,
         require_merge_key=True,
         composite_requirements=(
-            CompositeRequirement("configs/composites/target.yaml", "seed_output_key"),
-            CompositeRequirement("configs/composites/target.yaml", "field_priority"),
+            CompositeRequirement(COMPOSITE_TARGET, "seed_output_key"),
+            CompositeRequirement(COMPOSITE_TARGET, "field_priority"),
             CompositeRequirement(
-                "configs/composites/target.yaml", "target_source_anchor"
+                COMPOSITE_TARGET, "target_source_anchor"
             ),
         ),
     ),
@@ -434,7 +446,7 @@ ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         require_silver_required_filter=True,
         require_gold_required_filter=True,
         composite_requirements=(
-            CompositeRequirement("configs/composites/activity.yaml", "seed_output_key"),
+            CompositeRequirement(COMPOSITE_ACTIVITY, "seed_output_key"),
         ),
     ),
     AnchorSpec(
@@ -452,12 +464,12 @@ ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         require_merge_key=True,
         composite_requirements=(
             CompositeRequirement(
-                "configs/composites/target.yaml",
+                COMPOSITE_TARGET,
                 "dependency_join_key",
                 pipeline="uniprot_idmapping",
             ),
             CompositeRequirement(
-                "configs/composites/target.yaml", "target_source_anchor"
+                COMPOSITE_TARGET, "target_source_anchor"
             ),
         ),
     ),
@@ -472,16 +484,16 @@ ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         require_conditional_validation=True,
         composite_requirements=(
             CompositeRequirement(
-                "configs/composites/target.yaml",
+                COMPOSITE_TARGET,
                 "dependency_join_key",
                 pipeline="uniprot_protein",
             ),
             CompositeRequirement(
-                "configs/composites/target.yaml",
+                COMPOSITE_TARGET,
                 "target_normalized_output_anchor",
             ),
             CompositeRequirement(
-                "configs/composites/target.yaml",
+                COMPOSITE_TARGET,
                 "column_group_field",
                 group="identifiers",
             ),
@@ -504,7 +516,7 @@ ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         require_merge_key=True,
         composite_requirements=(
             CompositeRequirement(
-                "configs/composites/target.yaml",
+                COMPOSITE_TARGET,
                 "dependency_join_key",
                 field="uniprot_accession",
                 pipeline="uniprot_protein",

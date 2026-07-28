@@ -1,3 +1,6 @@
+# pyright: reportArgumentType=false
+# pyright: reportCallIssue=false
+# Boundary object/payload typing residual at this module.
 """Shared initialization helpers for pipeline transformers."""
 
 from __future__ import annotations

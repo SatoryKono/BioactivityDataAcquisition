@@ -1,3 +1,5 @@
+# pyright: reportTypedDictNotRequiredAccess=false
+# basedpyright residual burn-down (shrink-only product surface).
 """Low-level quarantine write and event emission helpers."""
 
 from __future__ import annotations

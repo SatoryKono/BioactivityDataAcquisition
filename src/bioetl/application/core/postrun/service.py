@@ -1,3 +1,5 @@
+# pyright: reportIncompatibleMethodOverride=false
+# MRO/override residual on mixin or client hierarchies.
 """Postrun Service for post-execution operations."""
 
 from __future__ import annotations

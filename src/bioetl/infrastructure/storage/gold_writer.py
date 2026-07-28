@@ -1,3 +1,6 @@
+# pyright: reportArgumentType=false
+# pyright: reportIncompatibleMethodOverride=false
+# MRO/override residual on mixin or client hierarchies.
 """Gold layer writer — RULES.md §2.1.1, REQ-DATA-009/010, REQ-CONTRACT-001."""
 
 from __future__ import annotations

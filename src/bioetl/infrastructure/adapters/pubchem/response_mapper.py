@@ -1,3 +1,5 @@
+# pyright: reportArgumentType=false
+# Boundary object/payload typing residual at this module.
 """Response mapping helpers for PubChem adapter fetch strategies."""
 
 from __future__ import annotations

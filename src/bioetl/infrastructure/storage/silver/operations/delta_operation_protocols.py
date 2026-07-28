@@ -1,3 +1,5 @@
+# pyright: reportImportCycles=false
+# Import cycle residual tracked in allowlist (product burn-down).
 """Runtime contracts and dependencies for Silver Delta operation services."""
 
 from __future__ import annotations

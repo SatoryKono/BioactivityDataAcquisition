@@ -1,3 +1,5 @@
+# pyright: reportUninitializedInstanceVariable=false
+# Host attrs/methods provided by concrete composition.
 """Internal search-oriented helpers for PubChem fetch strategies."""
 
 from __future__ import annotations

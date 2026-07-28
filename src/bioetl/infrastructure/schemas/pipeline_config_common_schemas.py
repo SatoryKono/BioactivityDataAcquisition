@@ -1,4 +1,6 @@
 # mypy: disable-error-code="misc,untyped-decorator"
+# pyright: reportIncompatibleMethodOverride=false
+# MRO/override residual on mixin or client hierarchies.
 """Common non-provider schemas extracted from pipeline_config."""
 
 from __future__ import annotations

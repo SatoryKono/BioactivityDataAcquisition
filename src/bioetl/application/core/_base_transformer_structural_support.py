@@ -1,3 +1,5 @@
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Private structural-policy helpers for BaseTransformer execution."""
 
 from __future__ import annotations

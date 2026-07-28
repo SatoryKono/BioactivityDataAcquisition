@@ -1,3 +1,5 @@
+# pyright: reportIncompatibleMethodOverride=false
+# MRO/override residual on mixin or client hierarchies.
 """Runtime protocol for ``SilverWriterMetadataMixin`` delegates."""
 
 from __future__ import annotations

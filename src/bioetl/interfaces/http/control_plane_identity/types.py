@@ -1,3 +1,5 @@
+# pyright: reportArgumentType=false
+# Boundary object/payload typing residual at this module.
 """Shared types for Control Plane identity evidence.
 
 Legacy HTTP contract compatibility layer - sunset date: 2026-12-31

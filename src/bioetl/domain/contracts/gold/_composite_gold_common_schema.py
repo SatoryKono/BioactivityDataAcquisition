@@ -1,4 +1,6 @@
 # mypy: disable-error-code="misc"
+# pyright: reportIncompatibleVariableOverride=false
+# MRO/override residual on mixin or client hierarchies.
 """Shared base schema for composite Gold-layer contracts."""
 
 from __future__ import annotations

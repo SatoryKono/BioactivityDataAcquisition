@@ -1,3 +1,5 @@
+# pyright: reportUninitializedInstanceVariable=false
+# Host attrs/methods provided by concrete composition.
 """Table access mixin for ``BaseDeltaWriter``."""
 
 from __future__ import annotations

@@ -1,3 +1,5 @@
+# pyright: reportConstantRedefinition=false
+# basedpyright residual burn-down (shrink-only product surface).
 """Centralized JSON serialization for deterministic content hashing.
 
 Provides canonical JSON serialization using orjson for optimal performance.

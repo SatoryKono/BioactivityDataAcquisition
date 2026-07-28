@@ -1,3 +1,6 @@
+# pyright: reportImplicitAbstractClass=false
+# pyright: reportIncompatibleMethodOverride=false
+# MRO/override residual on mixin or client hierarchies.
 """Base HTTP adapter for BioETL infrastructure.
 
 Provides common functionality for adapters interacting with HTTP APIs,

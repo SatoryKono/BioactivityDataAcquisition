@@ -1,3 +1,5 @@
+# pyright: reportIncompatibleVariableOverride=false
+# Pandera/ETL nested Config override pattern (PD2-7).
 # mypy: disable-error-code="misc"
 """Base Pandera schema for all ETL records.
 

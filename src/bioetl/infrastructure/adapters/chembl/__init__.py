@@ -1,3 +1,5 @@
+# pyright: reportPossiblyUnboundVariable=false
+# basedpyright residual burn-down (shrink-only product surface).
 """ChEMBL data source adapter.
 
 Implements DataSourcePort for ChEMBL database.

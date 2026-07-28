@@ -1,3 +1,5 @@
+# pyright: reportUninitializedInstanceVariable=false
+# Host attrs/methods provided by concrete composition.
 """Health check and preview operations mixin for StorageBundle."""
 
 from __future__ import annotations

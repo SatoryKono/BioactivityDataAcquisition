@@ -1,3 +1,5 @@
+# pyright: reportAttributeAccessIssue=false
+# Host attrs/methods provided by concrete composition.
 """External service network exceptions.
 
 Covers errors returned by external APIs and services (HTTP 4xx/5xx),

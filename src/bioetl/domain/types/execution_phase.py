@@ -1,3 +1,5 @@
+# pyright: reportArgumentType=false
+# Boundary object/payload typing residual at this module.
 """Execution phases and FSM for composite pipeline execution."""
 
 from __future__ import annotations

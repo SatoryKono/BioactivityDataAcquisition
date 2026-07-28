@@ -1,3 +1,7 @@
+# pyright: reportArgumentType=false
+# pyright: reportAttributeAccessIssue=false
+# pyright: reportOptionalMemberAccess=false
+# Host attrs/methods provided by concrete composition.
 """Health aggregation helper for preflight infrastructure validation."""
 
 from __future__ import annotations

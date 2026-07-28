@@ -1,3 +1,5 @@
+# pyright: reportIncompatibleVariableOverride=false
+# Pandera/ETL nested Config override pattern (PD2-7).
 """Pandera schema for ChEMBL Target Component entity.
 
 Aligned with TargetComponent entity and TargetComponentTransformer output.

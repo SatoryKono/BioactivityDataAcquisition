@@ -1,3 +1,5 @@
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Narrow health-service access seam for first-party interface callers."""
 
 from __future__ import annotations

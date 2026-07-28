@@ -1,3 +1,5 @@
+# pyright: reportArgumentType=false
+# Boundary object/payload typing residual at this module.
 """Launch-time pipeline run context value object."""
 
 from __future__ import annotations

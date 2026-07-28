@@ -1,3 +1,5 @@
+# pyright: reportArgumentType=false
+# Boundary object/payload typing residual at this module.
 """Data source creators for bio providers: ChEMBL, PubChem, UniProt, IDMapping."""
 
 from __future__ import annotations

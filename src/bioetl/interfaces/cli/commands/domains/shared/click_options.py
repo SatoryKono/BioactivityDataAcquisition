@@ -1,3 +1,7 @@
+# pyright: reportArgumentType=false
+# pyright: reportCallIssue=false
+# basedpyright residual burn-down (shrink-only product surface).
+# Click callback param objects (PD2-6).
 """Reusable Click option decorators for orchestration command entrypoints."""
 
 from __future__ import annotations

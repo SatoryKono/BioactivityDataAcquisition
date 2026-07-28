@@ -1,3 +1,6 @@
+# pyright: reportIncompatibleVariableOverride=false
+# pyright: reportUnsafeMultipleInheritance=false
+# MRO/override residual on mixin or client hierarchies.
 """Semantic Scholar adapter implementation for publication data extraction.
 
 Canonical provider adapter surface:

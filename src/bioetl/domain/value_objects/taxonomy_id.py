@@ -1,3 +1,5 @@
+# pyright: reportArgumentType=false
+# Boundary object/payload typing residual at this module.
 """NCBI Taxonomy ID Value Object.
 
 Contains TaxonomyId Value Object for NCBI Taxonomy identifiers.

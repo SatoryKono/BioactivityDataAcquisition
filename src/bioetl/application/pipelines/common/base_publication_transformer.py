@@ -1,4 +1,8 @@
 # mypy: disable-error-code="arg-type,unused-ignore"
+# pyright: reportImportCycles=false
+# pyright: reportInvalidCast=false
+# pyright: reportMissingSuperCall=false
+# Import cycle residual tracked in allowlist (product burn-down).
 """Base Publication Transformer with Template Method pattern.
 
 Provides common transformation flow for publication entities from

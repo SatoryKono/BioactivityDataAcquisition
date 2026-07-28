@@ -1,3 +1,5 @@
+# pyright: reportIncompatibleVariableOverride=false
+# Pandera/ETL nested Config override pattern (PD2-7).
 """Base schema for molecule/compound entities across providers.
 
 Analogous to ``PublicationBaseSchema``, this schema defines the **canonical**

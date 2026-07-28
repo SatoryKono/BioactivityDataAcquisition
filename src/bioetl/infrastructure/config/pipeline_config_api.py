@@ -1,3 +1,5 @@
+# pyright: reportFunctionMemberAccess=false
+# basedpyright residual burn-down (shrink-only product surface).
 """Canonical function-based pipeline config loading flow."""
 
 from __future__ import annotations

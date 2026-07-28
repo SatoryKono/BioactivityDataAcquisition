@@ -1,4 +1,7 @@
 # mypy: disable-error-code=attr-defined
+# pyright: reportUninitializedInstanceVariable=false
+# pyright: reportAttributeAccessIssue=false
+# Host attrs/methods provided by concrete composition (PD2 W1).
 """Write-path methods for BatchWriter (bronze/silver/gold)."""
 
 from __future__ import annotations

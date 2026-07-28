@@ -1,3 +1,5 @@
+# pyright: reportUninitializedInstanceVariable=false
+# Host attrs/methods provided by concrete composition.
 """Field-mapping normalization helpers for RecordNormalizationProcessor."""
 
 from __future__ import annotations

@@ -41,16 +41,12 @@ def _port_is_open(port: int) -> bool:
     safe_port = _validated_port(port)
     # Port is validated numeric — interpolated only into a fixed Connect call.
     command = ensure_safe_cli_argv(
-        [
-            "powershell.exe",
-            "-NoProfile",
-            "-Command",
-            (
-                "$c=[Net.Sockets.TcpClient]::new();"
-                f"try{{$c.Connect('127.0.0.1',{safe_port});$c.Close();exit 0}}"
-                "catch{exit 1}"
-            ),
-        ]
+        ["powershell.exe", "-NoProfile", "-Command"]
+    )
+    command.append(
+        "$c=[Net.Sockets.TcpClient]::new();"
+        f"try{{$c.Connect('127.0.0.1',{safe_port});$c.Close();exit 0}}"
+        "catch{exit 1}"
     )
     probe = subprocess.run(  # NOSONAR - argv sanitized; port validated int
         command,

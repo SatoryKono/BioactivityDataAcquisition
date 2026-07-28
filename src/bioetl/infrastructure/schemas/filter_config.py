@@ -1,4 +1,6 @@
 # mypy: disable-error-code="misc,untyped-decorator"
+# pyright: reportIncompatibleMethodOverride=false
+# MRO/override residual on mixin or client hierarchies.
 """Pydantic schemas for standalone filter configuration files.
 
 Validates external filter configuration sections before converting

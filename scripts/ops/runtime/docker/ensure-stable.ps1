@@ -34,6 +34,7 @@ param(
 )
 
 $ErrorActionPreference = 'Continue'
+$InformationPreference = 'Continue'
 $Root = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..\..')).Path
 Set-Location $Root
 
@@ -97,7 +98,7 @@ function Stop-ForeignContainers {
             if ($n -eq $allowed -or $n.StartsWith('bioetl-')) { $keep = $true; break }
         }
         if ($keep) { continue }
-        Write-Host "Stopping foreign container $n (frees host/WSL RAM)..."
+        Write-Information "Stopping foreign container $n (frees host/WSL RAM)..." -InformationAction Continue
         docker stop $n 2>$null | Out-Null
         # Remove so MCP Toolkit random-name orphans do not accumulate.
         docker rm -f $n 2>$null | Out-Null
@@ -106,7 +107,7 @@ function Stop-ForeignContainers {
     $mcpClean = Join-Path $PSScriptRoot 'cleanup-mcp-orphans.ps1'
     if (Test-Path $mcpClean) {
         & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $mcpClean 2>&1 |
-            ForEach-Object { Write-Host $_ }
+            ForEach-Object { Write-Information ([string]$_) -InformationAction Continue }
     }
 }
 
@@ -123,7 +124,7 @@ function Start-ComposeRetry {
         $out = & docker @DockerArgs 2>&1
         $code = $LASTEXITCODE
         $ErrorActionPreference = $prevEap
-        if ($out) { $out | ForEach-Object { Write-Host ([string]$_) } }
+        if ($out) { $out | ForEach-Object { Write-Information ([string]$_) -InformationAction Continue } }
         if ($code -eq 0) { return $true }
         Write-Warning "docker $($DockerArgs -join ' ') failed exit=$code (attempt $i/$Attempts); retrying..."
         Start-Sleep -Seconds (5 * $i)

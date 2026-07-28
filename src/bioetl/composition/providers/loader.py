@@ -1,3 +1,5 @@
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Retained bootstrap convenience seam for provider loading.
 
 Wave 3 ownership classification: retain.

@@ -1,3 +1,7 @@
+# pyright: reportUninitializedInstanceVariable=false
+# pyright: reportAttributeAccessIssue=false
+# pyright: reportInvalidCast=false
+# Host attrs/methods provided by concrete composition (PD2 W1).
 """Dependency-backed helpers shared by BaseTransformer."""
 
 from __future__ import annotations

@@ -39,6 +39,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+$InformationPreference = 'Continue'
 $Root = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..\..')).Path
 $catalogPath = Join-Path $PSScriptRoot 'shared-servers.json'
 if (-not (Test-Path $catalogPath)) {
@@ -140,26 +141,9 @@ function Remove-SharedFromDisabledList {
     return @{ Text = $newText; Changed = $true; Removed = $removed }
 }
 
-function Update-OneGrokConfig {
-    param(
-        [string]$ConfigPath,
-        [switch]$DisableGateways
-    )
-    if (-not (Test-Path $ConfigPath)) {
-        Write-Warning "Skip missing: $ConfigPath"
-        return @{ Ok = $false; Changed = @() }
-    }
-
-    Write-Host "=== $ConfigPath ==="
-    $raw = Get-Content $ConfigPath -Raw -Encoding utf8
-    $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
-    $backup = "$ConfigPath.bak-shared-$stamp"
-    if (-not $WhatIfPreference) {
-        Copy-Item -Path $ConfigPath -Destination $backup -Force
-        Write-Host "Backup: $backup"
-    }
-
-    $updated = $raw
+function Invoke-SharedServerRewrite {
+    param([string]$Text)
+    $updated = $Text
     $changed = @()
     foreach ($prop in $catalog.servers.PSObject.Properties) {
         $name = $prop.Name
@@ -167,7 +151,6 @@ function Update-OneGrokConfig {
         $path = [string]$prop.Value.path
         if ([string]::IsNullOrWhiteSpace($path)) { $path = '/mcp' }
         $block = Get-SharedBlock -Name $name -Port $port -Path $path
-
         $pattern = Get-McpServerSectionPattern -Name $name
         if ($updated -match $pattern) {
             $updated = [regex]::Replace($updated, $pattern, [System.Text.RegularExpressions.MatchEvaluator]{
@@ -175,45 +158,49 @@ function Update-OneGrokConfig {
                 return $block
             }, 1)
             $changed += $name
-            Write-Host "  rewrite $name -> http://127.0.0.1:$port$path (enabled=true)"
-        } else {
-            if ($updated -notmatch "(?m)^\[mcp_servers\.$([regex]::Escape($name))\]") {
-                if (-not $updated.EndsWith("`n")) { $updated += "`n" }
-                $updated += "`n" + $block
-                $changed += $name
-                Write-Host "  append $name -> http://127.0.0.1:$port$path (enabled=true)"
-            }
+            Write-Information "  rewrite $name -> http://127.0.0.1:$port$path (enabled=true)"
+        } elseif ($updated -notmatch "(?m)^\[mcp_servers\.$([regex]::Escape($name))\]") {
+            if (-not $updated.EndsWith("`n")) { $updated += "`n" }
+            $updated += "`n" + $block
+            $changed += $name
+            Write-Information "  append $name -> http://127.0.0.1:$port$path (enabled=true)"
         }
     }
+    return @{ Text = $updated; Changed = $changed }
+}
 
+function Assert-SharedServersEnabled {
+    param([string]$Text)
+    $updated = $Text
     foreach ($name in $sharedNames) {
         $r = Set-SectionEnabled -Text $updated -Name $name -Enabled $true
         $updated = $r.Text
         if ($r.Changed) {
-            Write-Host "  assert enabled=true -> $name"
+            Write-Information "  assert enabled=true -> $name"
         }
     }
+    return @{ Text = $updated }
+}
 
-    $d = Remove-SharedFromDisabledList -Text $updated -Names $sharedNames
-    $updated = $d.Text
-    if ($d.Changed) {
-        Write-Host ("  removed from disabled_mcp_servers: {0}" -f ($d.Removed -join ', '))
-    }
-
-    if ($DisableGateways) {
-        foreach ($gw in @('docker', 'mermaid', 'dockerhub', 'grafana', 'prometheus')) {
-            if ($sharedNames -contains $gw) {
-                Write-Host "  skip disable $gw (present on shared catalog)"
-                continue
-            }
-            $r = Set-SectionEnabled -Text $updated -Name $gw -Enabled $false
-            $updated = $r.Text
-            if ($r.Changed) {
-                Write-Host "  disable $gw (stdio gateway thrash)"
-            }
+function Disable-GatewayThrash {
+    param([string]$Text)
+    $updated = $Text
+    foreach ($gw in @('docker', 'mermaid', 'dockerhub', 'grafana', 'prometheus')) {
+        if ($sharedNames -contains $gw) {
+            Write-Information "  skip disable $gw (present on shared catalog)"
+            continue
+        }
+        $r = Set-SectionEnabled -Text $updated -Name $gw -Enabled $false
+        $updated = $r.Text
+        if ($r.Changed) {
+            Write-Information "  disable $gw (stdio gateway thrash)"
         }
     }
+    return @{ Text = $updated }
+}
 
+function Test-SharedPlaneVerification {
+    param([string]$Text)
     $verifyFailed = @()
     foreach ($prop in $catalog.servers.PSObject.Properties) {
         $name = $prop.Name
@@ -222,7 +209,7 @@ function Update-OneGrokConfig {
         if ([string]::IsNullOrWhiteSpace($path)) { $path = '/mcp' }
         $expectUrl = "http://127.0.0.1:$port$path"
         $pat = Get-McpServerSectionPattern -Name $name
-        if ($updated -notmatch $pat) {
+        if ($Text -notmatch $pat) {
             $verifyFailed += "$name (section missing)"
             continue
         }
@@ -234,6 +221,47 @@ function Update-OneGrokConfig {
             $verifyFailed += "$name (url missing $expectUrl)"
         }
     }
+    return ,$verifyFailed
+}
+
+function Update-OneGrokConfig {
+    param(
+        [string]$ConfigPath,
+        [switch]$DisableGateways
+    )
+    if (-not (Test-Path $ConfigPath)) {
+        Write-Warning "Skip missing: $ConfigPath"
+        return @{ Ok = $false; Changed = @() }
+    }
+
+    Write-Information "=== $ConfigPath ==="
+    $raw = Get-Content $ConfigPath -Raw -Encoding utf8
+    $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
+    $backup = "$ConfigPath.bak-shared-$stamp"
+    if (-not $WhatIfPreference) {
+        Copy-Item -Path $ConfigPath -Destination $backup -Force
+        Write-Information "Backup: $backup"
+    }
+
+    $rewrite = Invoke-SharedServerRewrite -Text $raw
+    $updated = $rewrite.Text
+    $changed = @($rewrite.Changed)
+
+    $enabled = Assert-SharedServersEnabled -Text $updated
+    $updated = $enabled.Text
+
+    $d = Remove-SharedFromDisabledList -Text $updated -Names $sharedNames
+    $updated = $d.Text
+    if ($d.Changed) {
+        Write-Information ("  removed from disabled_mcp_servers: {0}" -f ($d.Removed -join ', '))
+    }
+
+    if ($DisableGateways) {
+        $gw = Disable-GatewayThrash -Text $updated
+        $updated = $gw.Text
+    }
+
+    $verifyFailed = Test-SharedPlaneVerification -Text $updated
     if ($verifyFailed.Count -gt 0) {
         Write-Error ("Shared plane verification failed for ${ConfigPath}: " + ($verifyFailed -join '; '))
         return @{ Ok = $false; Changed = $changed }
@@ -245,7 +273,7 @@ function Update-OneGrokConfig {
     }
 
     if ($WhatIfPreference) {
-        Write-Host "WhatIf: would update $($changed.Count) servers in $ConfigPath : $($changed -join ', ')"
+        Write-Information "WhatIf: would update $($changed.Count) servers in $ConfigPath : $($changed -join ', ')"
         return @{ Ok = $true; Changed = $changed }
     }
 
@@ -253,7 +281,7 @@ function Update-OneGrokConfig {
     $updated = $updated -replace "`n", "`r`n"
     if ($PSCmdlet.ShouldProcess($ConfigPath, "Write shared HTTP MCP URLs for: $($changed -join ', ')")) {
         [System.IO.File]::WriteAllText($ConfigPath, $updated)
-        Write-Host "Updated $ConfigPath ($($changed.Count) servers: $($changed -join ', '))"
+        Write-Information "Updated $ConfigPath ($($changed.Count) servers: $($changed -join ', '))"
     }
     return @{ Ok = $true; Changed = $changed }
 }

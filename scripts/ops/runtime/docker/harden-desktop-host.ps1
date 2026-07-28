@@ -25,6 +25,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+$InformationPreference = 'Continue'
 $Root = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..\..')).Path
 $TaskName = 'BioETL-Docker-Stable-Watchdog'
 $WslConfigPath = Join-Path $env:USERPROFILE '.wslconfig'
@@ -51,16 +52,16 @@ autoMemoryReclaim=gradual
 "@
     $current = if (Test-Path $WslConfigPath) { Get-Content $WslConfigPath -Raw } else { '' }
     if ($current.Trim() -eq $desired.Trim()) {
-        Write-Host "WSL config already hardened: $WslConfigPath"
+        Write-Information "WSL config already hardened: $WslConfigPath"
         return $false
     }
     if (Test-Path $WslConfigPath) {
         $bak = "$WslConfigPath.bak-bioetl-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
         Copy-Item $WslConfigPath $bak -Force
-        Write-Host "Backed up previous .wslconfig -> $bak"
+        Write-Information "Backed up previous .wslconfig -> $bak"
     }
     Set-Content -Path $WslConfigPath -Value $desired.TrimEnd() -Encoding UTF8
-    Write-Host "Wrote hardened .wslconfig (memory=${MemoryGb}GB). Applies after next wsl --shutdown / Desktop restart."
+    Write-Information "Wrote hardened .wslconfig (memory=${MemoryGb}GB). Applies after next wsl --shutdown / Desktop restart."
     return $true
 }
 
@@ -108,14 +109,14 @@ function Write-DockerSettings {
         }
     }
     if (-not $needsWrite) {
-        Write-Host "Docker settings already hardened: $SettingsPath"
+        Write-Information "Docker settings already hardened: $SettingsPath"
         return
     }
 
     if (Test-Path $SettingsPath) {
         $bak = "$SettingsPath.bak-bioetl-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
         Copy-Item $SettingsPath $bak -Force
-        Write-Host "Backed up settings-store.json -> $bak"
+        Write-Information "Backed up settings-store.json -> $bak"
     }
     foreach ($k in $desired.Keys) {
         $obj[$k] = $desired[$k]
@@ -123,18 +124,18 @@ function Write-DockerSettings {
 
     $json = $obj | ConvertTo-Json -Depth 12
     Set-Content -Path $SettingsPath -Value $json -Encoding UTF8
-    Write-Host "Hardened Docker Desktop settings-store.json"
-    Write-Host "  AutoPauseTimeoutSeconds=604800 (Resource Saver effectively off)"
-    Write-Host "  AutoStart=true; Extensions/AI/inference=false; Kubernetes=false"
+    Write-Information "Hardened Docker Desktop settings-store.json"
+    Write-Information "  AutoPauseTimeoutSeconds=604800 (Resource Saver effectively off)"
+    Write-Information "  AutoStart=true; Extensions/AI/inference=false; Kubernetes=false"
 }
 
 function Unregister-WatchdogTask {
     $existing = Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue
     if ($existing) {
         Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false
-        Write-Host "Removed scheduled task: $TaskName"
+        Write-Information "Removed scheduled task: $TaskName"
     } else {
-        Write-Host "No scheduled task named $TaskName"
+        Write-Information "No scheduled task named $TaskName"
     }
 }
 
@@ -165,8 +166,8 @@ function Register-WatchdogTask {
     $principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive -RunLevel Limited
     Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger @($t1, $t2) `
         -Settings $settings -Principal $principal -Force | Out-Null
-    Write-Host "Registered scheduled task: $TaskName (every ${Minutes}m + at logon)"
-    Write-Host "  Runs: $WatchdogScript -WithNeo4j"
+    Write-Information "Registered scheduled task: $TaskName (every ${Minutes}m + at logon)"
+    Write-Information "  Runs: $WatchdogScript -WithNeo4j"
 }
 
 # --- main ---
