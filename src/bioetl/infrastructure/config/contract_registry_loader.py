@@ -66,14 +66,23 @@ def _load_yaml_with_timeout(
             raise ValueError(f"YAML root must be a mapping: {path}")
         return cast("JsonDict", dict(payload))
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-        future = executor.submit(_load_payload)
-        try:
-            return future.result(timeout=timeout)
-        except concurrent.futures.TimeoutError as exc:
-            raise TimeoutError(
-                f"YAML load did not complete within {timeout} seconds: {path}"
-            ) from exc
+    executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+    future = executor.submit(_load_payload)
+    try:
+        return future.result(timeout=timeout)
+    except concurrent.futures.TimeoutError as exc:
+        # Do not wait for a blocked filesystem read during cleanup.  The worker
+        # is intentionally left to finish in the background, as with the
+        # previous daemon-thread implementation.
+        executor.shutdown(wait=False, cancel_futures=True)
+        raise TimeoutError(
+            f"YAML load did not complete within {timeout} seconds: {path}"
+        ) from exc
+    except BaseException:
+        executor.shutdown(wait=True)
+        raise
+    else:
+        executor.shutdown(wait=True)
 
 
 __all__ = [
