@@ -17,9 +17,10 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
+_DEVIN_DIR = ".devin"
 CATALOG_PATH = REPO_ROOT / "scripts/ops/runtime/mcp/shared-servers.json"
-LOCAL_PATH = REPO_ROOT / ".devin" / "config.local.json"
-TRACKED_PATH = REPO_ROOT / ".devin" / "config.json"
+LOCAL_PATH = REPO_ROOT / _DEVIN_DIR / "config.local.json"
+TRACKED_PATH = REPO_ROOT / _DEVIN_DIR / "config.json"
 
 # Gateway thrash leaders — omit from daily multi-client Devin local projection.
 DAILY_DISABLE = frozenset(
@@ -108,7 +109,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
     root = args.root.resolve()
-    local_path = root / ".devin" / "config.local.json"
+    local_path = root / _DEVIN_DIR / "config.local.json"
     local_path.parent.mkdir(parents=True, exist_ok=True)
 
     existing: dict = {}

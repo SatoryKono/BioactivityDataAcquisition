@@ -30,6 +30,7 @@ from .stage_support import (
 # Sibling lock files younger than this are treated as held by an active worker.
 _CYCLE_LOCK_STALE_SECONDS = 3600.0
 _MAX_CAMPAIGN_CYCLES = 1_000
+_BOOTSTRAP_JSON = "bootstrap.json"
 
 
 def _acquire_cycle_lock(cycle_dir: Path) -> int | None:
@@ -86,7 +87,7 @@ def bootstrap_campaign(
     if not volume_precondition["passed"]:
         state["last_failure"] = "bootstrap-required-volumes"
         atomic_json(
-            evidence_dir / "bootstrap" / "bootstrap.json",
+            evidence_dir / "bootstrap" / _BOOTSTRAP_JSON,
             {
                 "schema_version": "bioetl-docker-campaign-bootstrap-v1",
                 "passed": False,
@@ -161,7 +162,7 @@ def bootstrap_campaign(
             if recover["returncode"] != 0:
                 state["last_failure"] = f"bootstrap-start-{spec.stack}"
                 atomic_json(
-                    evidence_dir / "bootstrap" / "bootstrap.json",
+                    evidence_dir / "bootstrap" / _BOOTSTRAP_JSON,
                     {"passed": False, "steps": steps},
                     replace=False,
                 )
@@ -193,7 +194,7 @@ def bootstrap_campaign(
         not origins and len(baselines) == len(bundle) and capacity["returncode"] == 0
     )
     atomic_json(
-        evidence_dir / "bootstrap" / "bootstrap.json",
+        evidence_dir / "bootstrap" / _BOOTSTRAP_JSON,
         {
             "schema_version": "bioetl-docker-campaign-bootstrap-v1",
             "passed": passed,

@@ -11,21 +11,18 @@ from bioetl.application.core.wiring._lazy_export_facade import (
     install_lazy_export_facade,
 )
 
+_STRUCTURAL_POLICY_MODULE = (
+    "bioetl.application.core.base_transformer.structural_policy"
+)
 _PUBLIC_EXPORTS = {
     "BaseTransformer": "bioetl.application.core.base_transformer",
     "DefaultContractPolicy": (
         "bioetl.application.core.base_transformer.contract_policy"
     ),
-    "NoOpStructuralPolicy": (
-        "bioetl.application.core.base_transformer.structural_policy"
-    ),
-    "StructuralPolicyProtocol": (
-        "bioetl.application.core.base_transformer.structural_policy"
-    ),
+    "NoOpStructuralPolicy": _STRUCTURAL_POLICY_MODULE,
+    "StructuralPolicyProtocol": _STRUCTURAL_POLICY_MODULE,
     "TransformerDependencyContext": "bioetl.application.core.base_transformer",
-    "build_structural_policy": (
-        "bioetl.application.core.base_transformer.structural_policy"
-    ),
+    "build_structural_policy": _STRUCTURAL_POLICY_MODULE,
 }
 
 install_lazy_export_facade(globals(), __name__, _PUBLIC_EXPORTS)

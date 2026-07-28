@@ -15,13 +15,15 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[4]
 CATALOG = ROOT / "scripts/ops/runtime/mcp/shared-servers.json"
+_DOT_MCP_JSON = ".mcp.json"
+_MCP_JSON = "mcp.json"
 TARGETS = (
-    ROOT / ".mcp.json",
-    ROOT / ".zed" / "mcp.json",
-    ROOT / "scripts" / "ai" / ".mcp.json",
-    ROOT / ".vscode" / "mcp.json",
-    ROOT / ".cursor" / "mcp.json",
-    ROOT / ".qodo" / "mcp.json",
+    ROOT / _DOT_MCP_JSON,
+    ROOT / ".zed" / _MCP_JSON,
+    ROOT / "scripts" / "ai" / _DOT_MCP_JSON,
+    ROOT / ".vscode" / _MCP_JSON,
+    ROOT / ".cursor" / _MCP_JSON,
+    ROOT / ".qodo" / _MCP_JSON,
 )
 
 
@@ -38,7 +40,7 @@ def main() -> int:
         }
 
     # Preserve approved remote HTTPS servers from tracked .mcp.json when present.
-    tracked_path = ROOT / ".mcp.json"
+    tracked_path = ROOT / _DOT_MCP_JSON
     if tracked_path.is_file():
         tracked = json.loads(tracked_path.read_text(encoding="utf-8"))
         for name, cfg in (tracked.get("mcpServers") or {}).items():

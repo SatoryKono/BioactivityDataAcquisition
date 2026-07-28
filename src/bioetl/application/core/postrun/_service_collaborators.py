@@ -37,24 +37,24 @@ def resolve_postrun_collaborators(
     if services is None:
         raise AssertionError("PostrunService requires services")
 
-    resolved_storage = cast("object | None", getattr(services, "storage", None))
-    resolved_logger = cast("object | None", getattr(services, "logger", None))
+    resolved_storage = cast(object | None, getattr(services, "storage", None))
+    resolved_logger = cast(object | None, getattr(services, "logger", None))
     if resolved_logger is None:
         resolved_logger = context.logger
 
     if resolved_storage is None or resolved_logger is None:
         raise AssertionError("PostrunService requires storage and logger via services")
 
-    resolved_metrics = cast("object | None", getattr(services, "metrics", None))
+    resolved_metrics = cast(object | None, getattr(services, "metrics", None))
     if resolved_metrics is None:
         raise AssertionError("PostrunService requires metrics via services")
 
     resolved_metadata_coordinator = cast(
-        "object | None",
+        object | None,
         getattr(services, "metadata_coordinator", None),
     )
     resolved_metadata_writer = cast(
-        "object | None",
+        object | None,
         getattr(services, "metadata_writer", None),
     )
     return ResolvedPostrunCollaborators(

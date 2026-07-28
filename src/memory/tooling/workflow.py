@@ -17,6 +17,10 @@ DEFAULT_POST_TASK_VALIDATION_TIMEOUT_SECONDS = 15.0
 # Cold workflow refresh on mounted or cloud-synced checkouts can exceed the
 # validation budget while still being bounded enough for the post-task path.
 DEFAULT_POST_TASK_REFRESH_TIMEOUT_SECONDS = 120.0
+_UNKNOWN_PATH = "<unknown>"
+_DAILY_WORKFLOW_MD = "src/memory/DAILY_WORKFLOW.md"
+_CHUNKS_JSONL = "chunks.jsonl"
+_MEMORY_WORKFLOW_SMOKE_TITLE = "Memory workflow smoke"
 
 
 def _discover_memory_root() -> Path:
@@ -66,7 +70,7 @@ def validate_memory_scaffold() -> list[Any]:
 def _format_validation_issues(issues: list[object]) -> list[dict[str, str]]:
     formatted: list[dict[str, str]] = []
     for issue in issues:
-        path = getattr(issue, "path", "<unknown>")
+        path = getattr(issue, "path", _UNKNOWN_PATH)
         message = getattr(issue, "message", str(issue))
         formatted.append({"path": str(path), "message": str(message)})
     return formatted
@@ -381,7 +385,7 @@ def _compact_prune_report(report: dict[str, Any] | None) -> dict[str, Any] | Non
 def _default_pre_task_chunks_path(output_root: Path | None) -> Path:
     if output_root is None:
         return _query_defaults()[0]
-    return output_root / "rag" / "manifests" / "chunks.jsonl"
+    return output_root / "rag" / "manifests" / _CHUNKS_JSONL
 
 
 def _default_pre_task_events_dir(output_root: Path | None) -> Path:
@@ -431,7 +435,7 @@ def _refresh_pre_task_surfaces(
     )
     return (
         resolved_output_root,
-        resolved_output_root / "rag" / "manifests" / "chunks.jsonl",
+        resolved_output_root / "rag" / "manifests" / _CHUNKS_JSONL,
         resolved_output_root / "timeline" / "events",
         refresh_report,
     )
@@ -634,11 +638,11 @@ def _post_task_base_payload(
 def _format_post_task_validation_issue(issue: object) -> dict[str, str]:
     if isinstance(issue, dict):
         return {
-            "path": str(issue.get("path", "<unknown>")),
+            "path": str(issue.get("path", _UNKNOWN_PATH)),
             "message": str(issue.get("message", issue)),
         }
     return {
-        "path": str(getattr(issue, "path", "<unknown>")),
+        "path": str(getattr(issue, "path", _UNKNOWN_PATH)),
         "message": str(getattr(issue, "message", issue)),
     }
 
@@ -804,10 +808,10 @@ def _write_smoke_inputs(root: Path) -> tuple[Path, Path]:
     from memory.rag.chunking import content_hash
 
     chunk_content = "memory workflow pre post smoke"
-    source_path = "src/memory/DAILY_WORKFLOW.md"
+    source_path = _DAILY_WORKFLOW_MD
     chunk = {
         "id": "memory-workflow-smoke-chunk",
-        "title": "Memory workflow smoke",
+        "title": _MEMORY_WORKFLOW_SMOKE_TITLE,
         "content": chunk_content,
         "content_hash": content_hash(chunk_content),
         "source_path": source_path,
@@ -845,7 +849,7 @@ def _write_smoke_inputs(root: Path) -> tuple[Path, Path]:
         + "\n",
         encoding="utf-8",
     )
-    chunks_path = root / "chunks.jsonl"
+    chunks_path = root / _CHUNKS_JSONL
     chunks_path.write_text(
         json.dumps(chunk, sort_keys=True) + "\n",
         encoding="utf-8",
@@ -860,7 +864,7 @@ def _write_smoke_inputs(root: Path) -> tuple[Path, Path]:
                 "event_family": "memory",
                 "severity": "info",
                 "occurred_at": "2026-07-05T00:00:00Z",
-                "source_refs": ["src/memory/DAILY_WORKFLOW.md"],
+                "source_refs": [_DAILY_WORKFLOW_MD],
                 "payload": {"surface": "memory.tooling.workflow"},
             },
             sort_keys=True,
@@ -885,9 +889,9 @@ def smoke_workflow(
         summary_note_path = temp_root / "summary.md"
         pre_payload = pre_task_workflow(
             task_id="memory-workflow-smoke",
-            title="Memory workflow smoke",
+            title=_MEMORY_WORKFLOW_SMOKE_TITLE,
             query="memory workflow",
-            source_refs=["src/memory/DAILY_WORKFLOW.md"],
+            source_refs=[_DAILY_WORKFLOW_MD],
             create_session_note=True,
             session_note_path=session_note_path,
             chunks_path=chunks_path,
@@ -898,9 +902,9 @@ def smoke_workflow(
         )
         post_payload = post_task_workflow(
             task_id="memory-workflow-smoke",
-            title="Memory workflow smoke",
+            title=_MEMORY_WORKFLOW_SMOKE_TITLE,
             summary="Validated lightweight memory workflow pre/post smoke.",
-            source_refs=["src/memory/DAILY_WORKFLOW.md"],
+            source_refs=[_DAILY_WORKFLOW_MD],
             run_refresh=False,
             summary_note_path=summary_note_path,
             validation_timeout_seconds=validation_timeout_seconds,
@@ -1118,7 +1122,7 @@ def _run_post_task_command(args: argparse.Namespace) -> int:
 
 
 def _emit_smoke_text(payload: dict[str, Any]) -> None:
-    print("Memory workflow smoke:")
+    print(f"{_MEMORY_WORKFLOW_SMOKE_TITLE}:")
     print(f"- python: {payload['python_executable']}")
     print(f"- pre-task: {'ok' if payload['pre_task_ok'] else 'failed'}")
     print(f"- post-task: {'ok' if payload['post_task_ok'] else 'failed'}")

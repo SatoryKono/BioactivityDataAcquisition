@@ -20,8 +20,9 @@ import sys
 from collections.abc import Sequence
 
 # Common local defaults for Zed interactive runs.
+_TB_SHORT = "--tb=short"
 _COMMON = (
-    "--tb=short",
+    _TB_SHORT,
     "--no-cov",
     "-p",
     "no:benchmark",
@@ -71,7 +72,7 @@ LANES: dict[str, tuple[str, ...]] = {
         "--lf",
         "-x",
         "-v",
-        "--tb=short",
+        _TB_SHORT,
         "--no-cov",
         "-p",
         "no:benchmark",
@@ -91,7 +92,7 @@ LANES: dict[str, tuple[str, ...]] = {
         "--cov-report=html:reports/coverage/htmlcov",
         "--cov-fail-under=85",
         "-q",
-        "--tb=short",
+        _TB_SHORT,
     ),
 }
 

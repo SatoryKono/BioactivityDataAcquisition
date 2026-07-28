@@ -26,7 +26,8 @@ if command -v uv >/dev/null 2>&1; then
     uv venv "$VENV_DIR" --python 3.13 --allow-existing
     export VIRTUAL_ENV="$VENV_DIR"
     export PATH="$VENV_DIR/bin:$PATH"
-    uv sync --active --extra dev --extra tracing || {
+    # Lockfile-backed sync; --no-build refuses sdist/setup-script execution (shell:S8541).
+    UV_NO_BUILD=1 uv sync --active --frozen --no-build --extra dev --extra tracing || {
         echo "[setup_env_wsl][error] uv sync failed." >&2
         echo "[setup_env_wsl][hint] Retry with the same command; UV_HTTP_TIMEOUT defaults to $UV_HTTP_TIMEOUT seconds." >&2
         exit 1
@@ -41,8 +42,9 @@ else
         exit 1
     fi
 
-    "$VENV_PYTHON" -m pip install --upgrade pip setuptools wheel
-    "$VENV_PYTHON" -m pip install -e '.[dev,tracing]'
+    # Binary-only bootstrap + project extras (shell:S8541).
+    "$VENV_PYTHON" -m pip install --only-binary=:all: --upgrade "pip==25.0.1" "setuptools==75.8.0" "wheel==0.45.1"
+    "$VENV_PYTHON" -m pip install --only-binary=:all: -e '.[dev,tracing]'
 fi
 
 echo "[setup_env_wsl][ok] Environment ready at $VENV_DIR"

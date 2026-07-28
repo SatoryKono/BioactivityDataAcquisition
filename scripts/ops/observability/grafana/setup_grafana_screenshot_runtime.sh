@@ -379,10 +379,11 @@ run_repo_smoke() {
   (
     cd "${REPO_ROOT}"
     UV_CACHE_DIR="${UV_CACHE_DIR}" \
+    UV_NO_BUILD=1 \
     PLAYWRIGHT_BROWSERS_PATH="${PLAYWRIGHT_BROWSERS_PATH}" \
     BIOETL_PLAYWRIGHT_NODE_MODULES="${PLAYWRIGHT_INSTALL_ROOT}/node_modules" \
     NODE_PATH="${PLAYWRIGHT_INSTALL_ROOT}/node_modules${NODE_PATH:+:${NODE_PATH}}" \
-      uv run python -m scripts.ops rerender-grafana \
+      uv run --frozen --no-build python -m scripts.ops rerender-grafana \
         --uids bioetl-control-plane-v1 \
         --timeout-seconds 90 \
         --fallback playwright

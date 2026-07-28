@@ -21,6 +21,8 @@ from typing import Any
 import yaml
 
 DEFAULT_CONTRACT = Path("configs/quality/docker_runtime_contracts.yaml")
+_WSL_EXE = "wsl.exe"
+_DOCKER_FORMAT_JSON = "{{json .}}"
 READ_ONLY_COMMANDS = {
     ("docker", "--version"),
     ("docker", "compose", "version"),
@@ -29,11 +31,12 @@ READ_ONLY_COMMANDS = {
     ("docker", "info"),
     ("docker", "inspect"),
     ("docker", "ps"),
-    ("wsl.exe", "--status"),
-    ("wsl.exe", "--version"),
+    (_WSL_EXE, "--status"),
+    (_WSL_EXE, "--version"),
 }
 ENV_NAME_PATTERN = re.compile(r"\$\{([A-Za-z_]\w*)")
 WINDOWS_DRIVE_PATTERN = re.compile(r"^([A-Za-z]):[/\\](.*)$")
+
 
 
 @dataclass(frozen=True)
@@ -725,7 +728,9 @@ def _capacity_observation(
     root: Path, contract: Mapping[str, Any]
 ) -> tuple[dict[str, Any], list[Finding]]:
     capacity_contract = contract.get("capacity", {})
-    docker_info = _run_read_only(["docker", "info", "--format", "{{json .}}"], cwd=root)
+    docker_info = _run_read_only(
+        ["docker", "info", "--format", _DOCKER_FORMAT_JSON], cwd=root
+    )
     docker_root: str | None = None
     docker_disk: Any | None = None
     findings: list[Finding] = []
@@ -830,11 +835,11 @@ def _live_observations(
     commands = [
         ["docker", "--version"],
         ["docker", "compose", "version"],
-        ["docker", "info", "--format", "{{json .}}"],
+        ["docker", "info", "--format", _DOCKER_FORMAT_JSON],
         ["docker", "compose", "ls", "--all", "--format", "json"],
-        ["docker", "ps", "--all", "--format", "{{json .}}"],
-        ["wsl.exe", "--version"],
-        ["wsl.exe", "--status"],
+        ["docker", "ps", "--all", "--format", _DOCKER_FORMAT_JSON],
+        [_WSL_EXE, "--version"],
+        [_WSL_EXE, "--status"],
     ]
     command_results = [_run_read_only(command, cwd=root) for command in commands]
     findings: list[Finding] = []

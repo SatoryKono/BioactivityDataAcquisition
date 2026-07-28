@@ -108,7 +108,8 @@ SKIP_FILE_EXTENSIONS: Final[set[str]] = {
     ".xz",
     ".zip",
 }
-SCRIPT_PATH_TOKENS: Final[tuple[str, ...]] = ("scripts/", "src/tools/")
+_SCRIPTS_PREFIX = "scripts/"
+SCRIPT_PATH_TOKENS: Final[tuple[str, ...]] = (_SCRIPTS_PREFIX, "src/tools/")
 SCRIPT_PATH_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
     r"(?:scripts|src/tools)/[A-Za-z0-9._/-]+\.(?:py|sh|ps1|cmd|bat|mjs|sql)"
 )
@@ -392,7 +393,7 @@ def _source_group(rel_path: str) -> str:
         return "docs"
     if rel_path == "AGENTS.md":
         return "agents"
-    if rel_path.startswith("scripts/") or rel_path.startswith("src/tools/"):
+    if rel_path.startswith(_SCRIPTS_PREFIX) or rel_path.startswith("src/tools/"):
         return "scripts"
     return "other"
 
@@ -675,7 +676,7 @@ def _discover_refs_in_file(
 
 def _has_dispatcher_module_refs(rel: str, normalized_text: str) -> bool:
     """Detect canonical command dispatcher module mappings."""
-    if not rel.startswith("scripts/") or not rel.endswith("/__main__.py"):
+    if not rel.startswith(_SCRIPTS_PREFIX) or not rel.endswith("/__main__.py"):
         return False
     return "scripts." in normalized_text or "src.tools." in normalized_text
 

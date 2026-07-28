@@ -30,7 +30,7 @@ from typing import Any
 
 from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = REPO_ROOT
 DEFAULT_SOURCE = ROOT / "reports" / "bp_live.json"
 DEFAULT_OUTPUT = ROOT / "reports" / "quality" / "basedpyright-error-snapshot.json"
 
@@ -45,7 +45,8 @@ def _rel_bioetl(path: str) -> str:
 
 def build_snapshot(source: Path) -> dict[str, Any]:
     source = resolve_output_path(source, root=ROOT)
-    payload = json.loads(source.read_text(encoding="utf-8"))  # NOSONAR - path confined by resolve_output_path
+    source_text = source.read_text(encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
+    payload = json.loads(source_text)
     summary = payload.get("summary") if isinstance(payload, dict) else {}
     diags = payload.get("generalDiagnostics") if isinstance(payload, dict) else []
     if not isinstance(diags, list):
@@ -118,9 +119,11 @@ def build_snapshot(source: Path) -> dict[str, Any]:
 
 def write_snapshot(*, source: Path, output: Path) -> dict[str, Any]:
     snapshot = build_snapshot(source)
+    output = resolve_output_path(output, root=ROOT)
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(
-        json.dumps(snapshot, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    output.write_text(  # NOSONAR - path confined by resolve_output_path
+        json.dumps(snapshot, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
     )
     return snapshot
 
@@ -129,7 +132,8 @@ def check_snapshot(*, source: Path, output: Path) -> None:
     output = resolve_output_path(output, root=ROOT)
     if not output.is_file():
         raise SystemExit(f"missing snapshot: {output}")
-    committed = json.loads(output.read_text(encoding="utf-8"))  # NOSONAR - path confined by resolve_output_path
+    committed_text = output.read_text(encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
+    committed = json.loads(committed_text)
     live = build_snapshot(source)
     committed_errors = int(committed.get("summary", {}).get("error_count", 0))
     live_errors = int(live.get("summary", {}).get("error_count", 0))
@@ -170,7 +174,10 @@ def _try_live_basedpyright(target: Path) -> bool:
         return False
     target = resolve_output_path(target, root=ROOT)
     target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(completed.stdout, encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
+    target.write_text(  # NOSONAR - path confined by resolve_output_path
+        completed.stdout,
+        encoding="utf-8",
+    )
     return True
 
 
@@ -199,8 +206,8 @@ def main(argv: list[str] | None = None) -> None:
         help="Attempt live basedpyright --outputjson before snapshotting",
     )
     args = parser.parse_args(argv)
-    source = args.source if args.source.is_absolute() else ROOT / args.source
-    output = args.json_out if args.json_out.is_absolute() else ROOT / args.json_out
+    source = resolve_output_path(args.source, root=ROOT)
+    output = resolve_output_path(args.json_out, root=ROOT)
 
     if args.refresh_source:
         if _try_live_basedpyright(source):

@@ -1,0 +1,9 @@
+{
+  "name": "bioetl-setup-mermaid",
+  "private": true,
+  "description": "Pinned Mermaid CLI tooling for the setup-mermaid composite action (Sonar githubactions:S8543).",
+  "dependencies": {
+    "@mermaid-js/mermaid-cli": "10.6.1",
+    "svgo": "3.3.2"
+  }
+}

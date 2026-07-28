@@ -16,6 +16,7 @@ import time
 from pathlib import Path
 
 _SERVER_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$")
+_POWERSHELL_EXE = "powershell.exe"
 
 
 def _validated_port(port: int) -> int:
@@ -41,7 +42,7 @@ def _port_is_open(port: int) -> bool:
     safe_port = _validated_port(port)
     # Port is validated numeric — interpolated only into a fixed Connect call.
     command = ensure_safe_cli_argv(
-        ["powershell.exe", "-NoProfile", "-Command"]
+        [_POWERSHELL_EXE, "-NoProfile", "-Command"]
     )
     command.append(
         "$c=[Net.Sockets.TcpClient]::new();"
@@ -76,7 +77,7 @@ class _ForwardHandler(socketserver.BaseRequestHandler):
         safe_port = _validated_port(int(self.remote_port))
         command = ensure_safe_cli_argv(
             [
-                "powershell.exe",
+                _POWERSHELL_EXE,
                 "-NoProfile",
                 "-File",
                 self.relay_script,
@@ -141,7 +142,7 @@ def main() -> int:
     # Prefer argv list form (no shell) with validated server/port tokens.
     command = ensure_safe_cli_argv(
         [
-            "powershell.exe",
+            _POWERSHELL_EXE,
             "-NoProfile",
             "-Command",
             (

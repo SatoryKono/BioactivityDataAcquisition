@@ -27,15 +27,24 @@ runs:
       env:
         MERMAID_VERSION: ${{ inputs.mermaid-version }}
         INSTALL_LIBRSVG: ${{ inputs.install-librsvg }}
+        ACTION_DIR: ${{ github.action_path }}
       run: |
         set -euo pipefail
-        # Install into a local prefix with a generated lockfile (Sonar S8543/S6505).
+        # Lockfile-backed install from the action's package-lock.json (Sonar S8543).
+        # Default mermaid-version is 10.6.1 and must match package.json/package-lock.json.
         TOOL_DIR="${RUNNER_TEMP}/mermaid-cli"
         mkdir -p "${TOOL_DIR}"
+        cp "${ACTION_DIR}/package.json" "${ACTION_DIR}/package-lock.json" "${TOOL_DIR}/"
         cd "${TOOL_DIR}"
-        npm init -y >/dev/null
-        npm install --ignore-scripts --no-fund --no-audit \
-          "@mermaid-js/mermaid-cli@${MERMAID_VERSION}"
+        if [ "${MERMAID_VERSION}" != "10.6.1" ]; then
+          echo "setup-mermaid currently pins @mermaid-js/mermaid-cli@10.6.1 via package-lock.json" >&2
+          echo "requested mermaid-version=${MERMAID_VERSION}; refusing unlocked install" >&2
+          exit 1
+        fi
+        # Install from action-local package.json + package-lock.json (S8543).
+        # Exact versions are pinned in package.json; lockfile records resolved URLs.
+        # Full tree refresh: cd .github/actions/setup-mermaid && npm install --ignore-scripts
+        npm install --ignore-scripts --no-fund --no-audit
         # `--ignore-scripts` deliberately suppresses lifecycle hooks. Run the
         # pinned CLI's own Puppeteer installer explicitly, then fail closed if
         # its exact browser revision is unavailable.
@@ -45,7 +54,7 @@ runs:
         )"
         test -x "${PUPPETEER_EXECUTABLE}"
         if [ "$INSTALL_LIBRSVG" = "true" ]; then
-          npm install --ignore-scripts --no-fund --no-audit svgo@3.3.2
+          # svgo is already present via the locked package.json dependencies.
           sudo apt-get update -qq && sudo apt-get install -y -qq librsvg2-bin
         fi
         echo "${TOOL_DIR}/node_modules/.bin" >> "$GITHUB_PATH"

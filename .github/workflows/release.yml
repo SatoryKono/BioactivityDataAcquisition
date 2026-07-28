@@ -89,8 +89,16 @@ jobs:
 
       - name: Install from wheel
         run: |
+          set -euo pipefail
           python -m pip install --only-binary=:all: --upgrade "pip==25.0.1"
-          python -m pip install --only-binary=:all: dist/*.whl
+          # Local artifact only: no index resolution (Sonar githubactions:S8544).
+          shopt -s nullglob
+          wheels=(dist/*.whl)
+          if [[ ${#wheels[@]} -eq 0 ]]; then
+            echo "No wheels found under dist/" >&2
+            exit 1
+          fi
+          python -m pip install --only-binary=:all: --no-deps --no-index --find-links=dist "${wheels[@]}"
 
       - name: Verify installation
         run: |
