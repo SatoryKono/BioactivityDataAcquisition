@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **MCP runtime launcher:** `-WhatIf` is replaced by `-DryRun`; update automation to use
+  `-DryRun` when upgrading the launcher.
+
 ### Added
 
 - **Generated `chembl_activity` pipeline dataflow documentation:** Added a
