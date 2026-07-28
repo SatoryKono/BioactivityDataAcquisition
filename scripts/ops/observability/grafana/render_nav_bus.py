@@ -9,6 +9,7 @@ dashboard. Run from repo root:
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[4]
@@ -225,10 +226,14 @@ def apply_to_dashboard(path: Path, *, current_uid: str) -> None:
 
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     write_path = ensure_path_within_root(safe_path, DASH_DIR)
-    write_path.write_text(  # NOSONAR - write_path confined under DASH_DIR
+    temporary_path = ensure_path_within_root(
+        write_path.with_name(f".{write_path.name}.tmp"), DASH_DIR
+    )
+    temporary_path.write_text(  # NOSONAR - temporary_path confined under DASH_DIR
         serialized,
         encoding="utf-8",
     )
+    os.replace(temporary_path, write_path)
 
 
 def main() -> None:
