@@ -72,8 +72,8 @@ The current code owners / source-of-truth seams are:
 - `src/bioetl/composition/bootstrap/cli/run_manifest.py`
 - `src/bioetl/composition/runtime_builders/run_manifest_builder.py`
 - `src/bioetl/composition/runtime_builders/runner_builder.py`
-- `src/bioetl/composition/factories/pipeline/checkpoint_policy_helpers.py`
-- `src/bioetl/composition/factories/pipeline/checkpoint_metadata_helpers.py`
+- `src/bioetl/composition/factories/pipeline_support/checkpoint_policy_helpers.py`
+- `src/bioetl/composition/factories/pipeline_support/checkpoint_metadata_helpers.py`
 - `src/bioetl/infrastructure/config/_base.py`
 - `src/bioetl/infrastructure/control_plane/`
 

@@ -54,10 +54,10 @@ class TestHealthServerCommand:
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")
     @patch(
-        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_quarantine_service"
+        "bioetl.interfaces.cli.commands.domains.health.server_integration_deps.get_health_server_quarantine_service"
     )
     @patch(
-        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_dependencies"
+        "bioetl.interfaces.cli.commands.domains.health.server_integration_deps.get_health_server_dependencies"
     )
     def test_health_server_default_options(
         self,
@@ -90,10 +90,10 @@ class TestHealthServerCommand:
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")
     @patch(
-        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_quarantine_service"
+        "bioetl.interfaces.cli.commands.domains.health.server_integration_deps.get_health_server_quarantine_service"
     )
     @patch(
-        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_dependencies"
+        "bioetl.interfaces.cli.commands.domains.health.server_integration_deps.get_health_server_dependencies"
     )
     def test_health_server_custom_host_port(
         self,
@@ -122,10 +122,10 @@ class TestHealthServerCommand:
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")
     @patch(
-        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_quarantine_service"
+        "bioetl.interfaces.cli.commands.domains.health.server_integration_deps.get_health_server_quarantine_service"
     )
     @patch(
-        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_dependencies"
+        "bioetl.interfaces.cli.commands.domains.health.server_integration_deps.get_health_server_dependencies"
     )
     def test_health_server_keyboard_interrupt(
         self,
@@ -164,10 +164,10 @@ class TestHealthServerCommand:
         assert result.exit_code == ExitCode.OK.value
 
     @patch(
-        "bioetl.interfaces.cli.commands.domains.health.server_integration.start_metrics_server"
+        "bioetl.interfaces.cli.commands.domains.health.server_integration_observability.start_metrics_server"
     )
     @patch(
-        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_runtime_settings"
+        "bioetl.interfaces.cli.commands.domains.health.server_integration_observability.get_runtime_settings"
     )
     def test_start_health_observability_starts_metrics_server_when_enabled(
         self,
@@ -209,10 +209,10 @@ class TestHealthServerCommand:
         )
 
     @patch(
-        "bioetl.interfaces.cli.commands.domains.health.server_integration.start_metrics_server"
+        "bioetl.interfaces.cli.commands.domains.health.server_integration_observability.start_metrics_server"
     )
     @patch(
-        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_runtime_settings"
+        "bioetl.interfaces.cli.commands.domains.health.server_integration_observability.get_runtime_settings"
     )
     def test_start_health_observability_skips_when_disabled(
         self,
@@ -653,10 +653,10 @@ class TestHealthServerAsyncExecution:
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")
     @patch(
-        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_quarantine_service"
+        "bioetl.interfaces.cli.commands.domains.health.server_integration_deps.get_health_server_quarantine_service"
     )
     @patch(
-        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_dependencies"
+        "bioetl.interfaces.cli.commands.domains.health.server_integration_deps.get_health_server_dependencies"
     )
     def test_health_server_starts_and_stops(
         self,
@@ -683,7 +683,7 @@ class TestHealthServerAsyncExecution:
         with (
             patch("asyncio.sleep", side_effect=cancelling_sleep),
             patch(
-                "bioetl.interfaces.cli.commands.domains.health.server_integration._start_health_observability"
+                "bioetl.interfaces.cli.commands.domains.health.server_integration_observability._start_health_observability"
             ) as mock_start_observability,
         ):
             result = cli_runner.invoke(cli, ["health", "server"])
@@ -697,10 +697,10 @@ class TestHealthServerAsyncExecution:
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")
     @patch(
-        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_quarantine_service"
+        "bioetl.interfaces.cli.commands.domains.health.server_integration_deps.get_health_server_quarantine_service"
     )
     @patch(
-        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_dependencies"
+        "bioetl.interfaces.cli.commands.domains.health.server_integration_deps.get_health_server_dependencies"
     )
     def test_health_server_with_custom_options(
         self,
@@ -728,7 +728,7 @@ class TestHealthServerAsyncExecution:
         with (
             patch("asyncio.sleep", side_effect=cancelling_sleep),
             patch(
-                "bioetl.interfaces.cli.commands.domains.health.server_integration._start_health_observability"
+                "bioetl.interfaces.cli.commands.domains.health.server_integration_observability._start_health_observability"
             ) as mock_start_observability,
         ):
             cli_runner.invoke(
@@ -757,10 +757,10 @@ class TestHealthServerAsyncExecution:
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")
     @patch(
-        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_quarantine_service"
+        "bioetl.interfaces.cli.commands.domains.health.server_integration_deps.get_health_server_quarantine_service"
     )
     @patch(
-        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_dependencies"
+        "bioetl.interfaces.cli.commands.domains.health.server_integration_deps.get_health_server_dependencies"
     )
     def test_health_server_uses_composition_entrypoint(
         self,
@@ -788,7 +788,7 @@ class TestHealthServerAsyncExecution:
         with (
             patch("asyncio.sleep", side_effect=cancelling_sleep),
             patch(
-                "bioetl.interfaces.cli.commands.domains.health.server_integration._start_health_observability"
+                "bioetl.interfaces.cli.commands.domains.health.server_integration_observability._start_health_observability"
             ) as mock_start_observability,
         ):
             cli_runner.invoke(cli, ["health", "server"])

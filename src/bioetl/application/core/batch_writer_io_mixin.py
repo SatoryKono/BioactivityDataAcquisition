@@ -4,16 +4,18 @@
 from __future__ import annotations
 
 from datetime import datetime
-from inspect import signature
 from typing import TYPE_CHECKING
-from unittest.mock import Mock
 
 import orjson
 
+from bioetl.application.core._batch_writer_gold_support import (
+    prepare_gold_records,
+    should_defer_gold_validation_to_storage,
+    validate_gold_records,
+)
 from bioetl.application.core.batch_processing_runtime import (
     OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
 )
-from bioetl.domain.exceptions import SchemaViolationError
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BatchID, BronzeRecord, GoldRecord
@@ -164,7 +166,7 @@ class BatchWriterIOMixin:
 
         try:
             schema_payload: object = self._gold_schema
-            if self._should_defer_gold_validation_to_storage():
+            if should_defer_gold_validation_to_storage(self):
                 available_cols = self._collect_record_columns(records)
                 schema_payload = self._gold_schema_policy_by_version
             else:
@@ -179,11 +181,12 @@ class BatchWriterIOMixin:
                     self._gold_schema,
                     column_order,
                 )
-                records, available_cols = self._prepare_gold_records(
+                records, available_cols = prepare_gold_records(
+                    self,
                     records,
                     schema=schema_payload,
                 )
-                self._validate_gold_records(records, schema=schema_payload)
+                validate_gold_records(self, records, schema=schema_payload)
 
             column_order, rename_map = self._resolve_layer_columns(
                 "gold", available_cols
@@ -215,21 +218,7 @@ class BatchWriterIOMixin:
         schema: object | None = None,
     ) -> tuple[list[GoldRecord], list[str]]:
         """Project records to schema and compute available columns."""
-        target_schema = schema if schema is not None else self._gold_schema
-        schema_columns = self._get_schema_columns(target_schema)
-        if not schema_columns:
-            return records, self._collect_record_columns(records)
-
-        dq_defaults = {"_dq_warn": False, "_dq_error": False}
-        projected = [
-            {
-                key: record.get(key, dq_defaults.get(key))
-                for key in schema_columns
-                if key in record or key in dq_defaults
-            }
-            for record in records
-        ]
-        return projected, list(schema_columns)
+        return prepare_gold_records(self, records, schema=schema)
 
     def _validate_gold_records(
         self,
@@ -238,53 +227,6 @@ class BatchWriterIOMixin:
         schema: object | None = None,
     ) -> None:
         """Validate Gold records against schema contract."""
-        validator = self._gold_validator
-        target_schema = schema if schema is not None else self._gold_schema
-        if schema is not None and hasattr(target_schema, "columns"):
-            validator = self._rebind_gold_validator_schema(validator, target_schema)
+        validate_gold_records(self, records, schema=schema)
 
-        result = validator.validate(records)
-        if not result.valid:
-            debug_export_service = getattr(self, "_debug_export_service", None)
-            if debug_export_service is not None:
-                debug_export_service.record_gold_validation_failure(
-                    records=records,
-                    errors=result.errors,
-                )
-            raise SchemaViolationError("gold", result.errors)
 
-    def _rebind_gold_validator_schema(
-        self,
-        validator: object,
-        schema: object,
-    ) -> object:
-        """Clone schema-aware validators for projected Gold schemas when supported."""
-        if isinstance(validator, Mock):
-            return validator
-
-        validator_cls = type(validator)
-        try:
-            init_params = signature(validator_cls).parameters
-        except (TypeError, ValueError):
-            return validator
-
-        if "schema" not in init_params:
-            return validator
-
-        validator_kwargs: dict[str, object] = {"schema": schema}
-        if "strict" in init_params:
-            validator_kwargs["strict"] = getattr(validator, "_strict", True)
-
-        dq_config = getattr(validator, "_dq_config", None)
-        if "dq_config" in init_params and dq_config is not None:
-            validator_kwargs["dq_config"] = dq_config
-
-        try:
-            return validator_cls(**validator_kwargs)
-        except TypeError:
-            return validator
-
-    def _should_defer_gold_validation_to_storage(self) -> bool:
-        """Whether Gold validation/projection must happen per-version in storage."""
-        policy = getattr(self, "_gold_schema_policy_by_version", None)
-        return bool(policy is not None and policy.is_multi_version)

@@ -1,12 +1,12 @@
 {
   "artifacts": [
     {
-      "blob_sha256": "60d409cabf3737269949ff86d07f15a2dd0db23d39632a13ad3fb98d1616aa1b",
+      "blob_sha256": "7c97ba2f7299bdf2f67e3116dad61a8ef1a951b6642110cb228043da6639b8dc",
       "introduced_after_remote_main": false,
       "path": "reports/quality/architecture-quality-scorecard.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "f7ec4386fda4549fa44faa071ab6627e219ba6c1",
+      "source_revision": "4b8dfd7162c82d6071d88995680cc811b3e3045a",
       "summary": {
         "available": true,
         "integral_score": 9.11,
@@ -15,19 +15,19 @@
       }
     },
     {
-      "blob_sha256": "6c2e1c0db05d637a48af88574f6a0df706327b7990a23d17cc6b50a9aeedab7c",
+      "blob_sha256": "bfa6a7688394ba77b361ee6cf3ebd4377c6ca4d469505c07e6da2a5fec0e3b67",
       "introduced_after_remote_main": false,
       "path": "reports/quality/module-coverage-inventory.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "f7ec4386fda4549fa44faa071ab6627e219ba6c1",
+      "source_revision": "4b8dfd7162c82d6071d88995680cc811b3e3045a",
       "summary": {
         "available": true,
-        "coverage_xml_sha256": "3938fbd2bc1a5654e5ad56d4084713831e21cda7abb131fd30b87a83ffe16cd2",
+        "coverage_xml_sha256": "fb530e62125256526d43fb0d095621adf2b13e79b827d80b8c96882853368011",
         "schema_version": 1,
-        "snapshot_date": "2026-07-13",
-        "source_module_count": 2281,
-        "source_tree_sha256": "3341c5e80cb4cd5e20f77190e46f2129eac7c49803be53f37e3de45d1acfb102",
+        "snapshot_date": "2026-07-28",
+        "source_module_count": 2282,
+        "source_tree_sha256": "a549b13f13501fa8108cf8eafb42e100b353cfd7f9e523e68edc1edb5ed0ab40",
         "unmeasured_module_count": 0
       }
     },
@@ -37,7 +37,7 @@
       "path": "reports/quality/compatibility-importer-census.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "f7ec4386fda4549fa44faa071ab6627e219ba6c1",
+      "source_revision": "4b8dfd7162c82d6071d88995680cc811b3e3045a",
       "summary": {
         "available": true,
         "retained_entrypoint_count": 12,
@@ -50,7 +50,7 @@
       "path": "reports/quality/dead-code-inventory.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "f7ec4386fda4549fa44faa071ab6627e219ba6c1",
+      "source_revision": "4b8dfd7162c82d6071d88995680cc811b3e3045a",
       "summary": {
         "available": true,
         "repo_wide_untriaged_zero_import_candidate_count": 0,
@@ -63,7 +63,7 @@
       "path": "reports/quality/contract-registry-diagnostics.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "f7ec4386fda4549fa44faa071ab6627e219ba6c1",
+      "source_revision": "4b8dfd7162c82d6071d88995680cc811b3e3045a",
       "summary": {
         "available": true,
         "blocking_issue_count": 0,
@@ -76,13 +76,13 @@
       "path": "reports/observability/runtime_cardinality_inventory.json",
       "required": false,
       "required_on_remote": false,
-      "source_revision": "f7ec4386fda4549fa44faa071ab6627e219ba6c1",
+      "source_revision": "4b8dfd7162c82d6071d88995680cc811b3e3045a",
       "summary": {
         "available": true
       }
     }
   ],
-  "baseline_artifact_fingerprint": "d88672502e8ade04eb92ef5cba1236fb26059f83d945fcd5a295fb0a37931c21",
+  "baseline_artifact_fingerprint": "979c02569d310943ec7b1d23da459afdbae7ae4676a5fdc24bd920cef33744c2",
   "branch": "main",
   "dirty_closeout_guard": {
     "command": "git status --porcelain --untracked-files=no",
@@ -102,9 +102,9 @@
   ],
   "local_tracking_ref": "origin/main",
   "local_tracking_ref_matches_remote": true,
-  "local_tracking_ref_sha": "f7ec4386fda4549fa44faa071ab6627e219ba6c1",
+  "local_tracking_ref_sha": "4b8dfd7162c82d6071d88995680cc811b3e3045a",
   "remote": "origin",
   "remote_main_ref": "refs/heads/main",
-  "remote_main_sha": "f7ec4386fda4549fa44faa071ab6627e219ba6c1",
+  "remote_main_sha": "4b8dfd7162c82d6071d88995680cc811b3e3045a",
   "schema_version": 1
 }

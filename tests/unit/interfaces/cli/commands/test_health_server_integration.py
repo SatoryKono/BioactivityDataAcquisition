@@ -49,10 +49,10 @@ class TestHealthServerContext:
 
     @pytest.mark.asyncio
     @patch(
-        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_quarantine_service"
+        "bioetl.interfaces.cli.commands.domains.health.server_integration_deps.get_health_server_quarantine_service"
     )
     @patch(
-        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_dependencies"
+        "bioetl.interfaces.cli.commands.domains.health.server_integration_deps.get_health_server_dependencies"
     )
     @patch("bioetl.interfaces.http.health_server.HealthServer")
     async def test_context_enabled_starts_and_stops_server(
@@ -83,10 +83,10 @@ class TestHealthServerContext:
 
     @pytest.mark.asyncio
     @patch(
-        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_quarantine_service"
+        "bioetl.interfaces.cli.commands.domains.health.server_integration_deps.get_health_server_quarantine_service"
     )
     @patch(
-        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_dependencies"
+        "bioetl.interfaces.cli.commands.domains.health.server_integration_deps.get_health_server_dependencies"
     )
     @patch("bioetl.interfaces.http.health_server.HealthServer")
     async def test_context_stops_server_on_exception(
@@ -115,10 +115,10 @@ class TestHealthServerContext:
 
     @pytest.mark.asyncio
     @patch(
-        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_quarantine_service"
+        "bioetl.interfaces.cli.commands.domains.health.server_integration_deps.get_health_server_quarantine_service"
     )
     @patch(
-        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_dependencies"
+        "bioetl.interfaces.cli.commands.domains.health.server_integration_deps.get_health_server_dependencies"
     )
     @patch("bioetl.interfaces.http.health_server.HealthServer")
     async def test_context_custom_host_port(
@@ -152,10 +152,10 @@ class TestHealthServerContext:
 
     @pytest.mark.asyncio
     @patch(
-        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_quarantine_service"
+        "bioetl.interfaces.cli.commands.domains.health.server_integration_deps.get_health_server_quarantine_service"
     )
     @patch(
-        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_dependencies"
+        "bioetl.interfaces.cli.commands.domains.health.server_integration_deps.get_health_server_dependencies"
     )
     @patch("bioetl.interfaces.http.health_server.HealthServer")
     @patch("click.echo")

@@ -55,7 +55,7 @@ Fast source-of-truth checks:
 rg -n "run_manifest_enabled|run_ledger_enabled|required_persistence_profile|checkpoint_compatibility_policy" \
   src/bioetl/infrastructure/config/_base.py \
   src/bioetl/composition/runtime_builders/runner_builder.py \
-  src/bioetl/composition/factories/pipeline/checkpoint_policy_helpers.py \
+  src/bioetl/composition/factories/pipeline_support/checkpoint_policy_helpers.py \
   src/bioetl/application/core/lifecycle/checkpoint_runtime.py
 ```
 

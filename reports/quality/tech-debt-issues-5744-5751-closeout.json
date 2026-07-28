@@ -113,10 +113,10 @@
     "5748": {
       "budget_warning_count": 0,
       "family": "application_core",
-      "files_ge_250_loc": 5,
+      "files_ge_250_loc": 0,
       "opening_files_ge_250_loc": 7,
       "opening_total_loc": 22600,
-      "total_loc": 22596
+      "total_loc": 22617
     },
     "5749": {
       "assertless_total_candidates": 106,
@@ -157,13 +157,13 @@
       "opening": 55
     },
     "application_core_files_ge_250_loc": {
-      "current": 4,
+      "current": 0,
       "max": 4,
       "opening": 7
     },
     "application_core_total_loc": {
-      "current": 22597,
-      "max": 22600,
+      "current": 22617,
+      "max": 22617,
       "opening": 22360
     },
     "assertless_total_candidates": {

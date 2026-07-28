@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 __all__ = ["validate_registry_manifest"]
 
 
-from bioetl.composition.factories.pipeline.registry_validation_helpers import (
+from bioetl.composition.factories.pipeline_support.registry_validation_helpers import (
     _iter_entity_files,
     _validate_registry_entry,
     _validate_entity_config_against_registry,

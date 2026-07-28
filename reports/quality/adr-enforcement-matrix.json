@@ -1731,6 +1731,23 @@
       "owner": "BioETL Team",
       "status": "enforced",
       "title": "QuarantineEntry Wide Constructor as Intentional Aggregate Surface"
+    },
+    {
+      "adr_id": "ADR-052",
+      "category": "architecture",
+      "decision_date": "2026-07-28",
+      "decision_path": "docs/02-architecture/decisions/ADR-052-infrastructure-config-package-root-public-api.md",
+      "enforcement_owner_paths": [
+        "configs/quality/public_lazy_facade_inventory.yaml"
+      ],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/quality/public_lazy_facade_inventory.yaml"
+      ],
+      "manual_exception": null,
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "infrastructure config package root public api"
     }
   ],
   "schema_version": 1,
@@ -1740,9 +1757,9 @@
     "tracked_file_discovery": "git grep --untracked with python fallback"
   },
   "summary": {
-    "accepted_adr_count": 49,
+    "accepted_adr_count": 50,
     "blocking_gap_count": 0,
-    "enforced_adr_count": 49,
+    "enforced_adr_count": 50,
     "manual_exception_count": 0,
     "missing_enforcement_owner_count": 0,
     "missing_implementation_owner_count": 0

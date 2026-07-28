@@ -13,7 +13,9 @@ import asyncio
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core._batch_transformer_support import (
+    begin_batch_metrics_if_present,
     build_default_normalization_processor,
+    resolve_transformer_bags,
 )
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
@@ -78,7 +80,7 @@ class BatchTransformer:
         Prefer ``runtime`` + ``callbacks`` dicts. Transitional/unit callers may
         pass individual collaborators via keyword args.
         """
-        resolved_runtime, resolved_callbacks = _resolve_transformer_bags(
+        resolved_runtime, resolved_callbacks = resolve_transformer_bags(
             runtime, callbacks, legacy
         )
         self._context = context
@@ -133,23 +135,8 @@ class BatchTransformer:
     async def transform_batch(
         self, records: list[BronzeRecord], batch_id: BatchID, start_index: int = 0
     ) -> TransformResult:
-        """Transform all records in batch, returning silver, gold, and quarantine count.
-
-        Args:
-            records: Raw Bronze records to transform.
-            batch_id: Identifier for the current batch.
-            start_index: The starting index for records in this batch.
-
-        Returns:
-            TransformResult with silver records, gold records, and quarantine count.
-
-        Raises:
-            DataQualityThresholdError: If DQ hard threshold exceeded.
-
-        """
-        begin_batch = getattr(self._batch_metrics, "begin_batch", None)
-        if callable(begin_batch):
-            begin_batch()
+        """Transform all records in batch, returning silver, gold, and quarantine count."""
+        begin_batch_metrics_if_present(self._batch_metrics)
 
         state = await collect_batch_transform_state(
             records=records,
@@ -182,20 +169,7 @@ class BatchTransformer:
     async def transform_single(
         self, raw_record: BronzeRecord, batch_id: BatchID, index: int = 0
     ) -> TransformedRecord:
-        """Transform a single record (for streaming mode).
-
-        This method processes one record at a time, enabling memory-efficient
-        streaming processing of large datasets.
-
-        Args:
-            raw_record: Single Bronze record to transform.
-            batch_id: Identifier for the current batch.
-            index: Sequential index of the record in the pipeline run.
-
-        Returns:
-            TransformedRecord with silver/gold records or quarantine status.
-
-        """
+        """Transform a single record (streaming mode)."""
         attempt = await self._transform_attempt(
             raw_record=raw_record,
             batch_id=batch_id,
@@ -214,29 +188,8 @@ class BatchTransformer:
         batch_id: BatchID,
         start_index: int = 0,
     ) -> TransformResult:
-        """Transform records using streaming mode with memory efficiency.
-
-        This method processes records one-at-a-time but accumulates results
-        for batch writing. Use this for moderate memory savings while
-        maintaining batch write semantics.
-
-        For full streaming (no accumulation), use iter_transform_stream.
-
-        Args:
-            records: Raw Bronze records to transform.
-            batch_id: Identifier for the current batch.
-            start_index: Starting index for the batch.
-
-        Returns:
-            TransformResult with silver records, gold records, and quarantine count.
-
-        Raises:
-            DataQualityThresholdError: If DQ hard threshold exceeded.
-
-        """
-        begin_batch = getattr(self._batch_metrics, "begin_batch", None)
-        if callable(begin_batch):
-            begin_batch()
+        """Transform records one-at-a-time while accumulating batch write results."""
+        begin_batch_metrics_if_present(self._batch_metrics)
 
         state = await collect_stream_transform_state(
             records=records,
@@ -257,40 +210,3 @@ class BatchTransformer:
             flush_dq_records=lambda: asyncio.sleep(0),
         )
 
-
-def _merge_named_keys(
-    base: dict[str, object] | None,
-    legacy: dict[str, object],
-    keys: tuple[str, ...],
-) -> dict[str, object]:
-    """Copy base and overlay non-None legacy values for the given keys."""
-    resolved = dict(base or {})
-    for key in keys:
-        value = legacy.pop(key, None)
-        if value is not None:
-            resolved[key] = value
-    return resolved
-
-
-def _resolve_transformer_bags(
-    runtime: dict[str, object] | None,
-    callbacks: dict[str, object] | None,
-    legacy: dict[str, object],
-) -> tuple[dict[str, object], dict[str, object]]:
-    """Merge runtime/callback dicts with transitional kwargs; reject unknowns."""
-    resolved_runtime = _merge_named_keys(
-        runtime,
-        legacy,
-        ("error_classifier", "quarantine_manager", "batch_metrics"),
-    )
-    resolved_callbacks = _merge_named_keys(
-        callbacks,
-        legacy,
-        ("transform_callback", "gold_filter_callback", "gold_transform_callback"),
-    )
-    if legacy:
-        raise TypeError(
-            "BatchTransformer() got unexpected keyword argument(s): "
-            + ", ".join(sorted(str(k) for k in legacy))
-        )
-    return resolved_runtime, resolved_callbacks

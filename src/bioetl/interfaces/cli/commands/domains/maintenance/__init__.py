@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-from importlib import import_module
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from bioetl.interfaces.cli.commands.maintenance import maintenance as maintenance
+    from click.core import Group
+
+    maintenance: Group
 
 __all__ = ["maintenance"]
 
@@ -16,5 +17,8 @@ def __getattr__(name: str) -> object:
     if name != "maintenance":
         raise AttributeError(name)
 
-    module = import_module("bioetl.interfaces.cli.commands.maintenance")
-    return module.maintenance
+    from bioetl.interfaces.cli.commands.domains.maintenance.command_group import (
+        maintenance as command,
+    )
+
+    return command
