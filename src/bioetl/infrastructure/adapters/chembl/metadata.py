@@ -6,7 +6,7 @@ from __future__ import annotations
 __all__ = ["ChemblMetadataMixin"]
 
 
-from typing import Any, cast, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.infrastructure.adapters.chembl.constants import CHEMBL_API_BASE
 from bioetl.infrastructure.adapters.common.source_metadata_capability import (

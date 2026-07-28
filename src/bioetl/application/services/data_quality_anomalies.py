@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Metric and anomaly helpers for data-quality evaluation."""
 
@@ -6,7 +5,7 @@ from __future__ import annotations
 
 import time
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.observability.pipeline_metrics import PipelineMetricsRecorder
 from bioetl.domain.value_objects.dq_anomaly import DQAnomaly
@@ -19,13 +18,13 @@ if TYPE_CHECKING:
 class DataQualityMetricsMixin:
     """Freshness, DQ timing, and baseline metric helpers."""
 
-    _dq_monitor: DQMonitorPort | None
-    _logger: LoggerPort
-    _metrics: MetricsPort | None
-    _pipeline_name: str
-    _entity_type: str
-    _pipeline_metrics: PipelineMetricsRecorder
-    _run_type: str
+    _dq_monitor: DQMonitorPort | None = cast(Any, None)  # Any: host default (PD4)
+    _logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
+    _metrics: MetricsPort | None = cast(Any, None)  # Any: host default (PD4)
+    _pipeline_name: str = cast(Any, None)  # Any: host default (PD4)
+    _entity_type: str = cast(Any, None)  # Any: host default (PD4)
+    _pipeline_metrics: PipelineMetricsRecorder = cast(Any, None)  # Any: host default (PD4)
+    _run_type: str = cast(Any, None)  # Any: host default (PD4)
 
     @staticmethod
     def _resolve_freshness_anchor_timestamp(
@@ -156,10 +155,10 @@ class DataQualityMetricsMixin:
 class DataQualityAnomalyMixin(DataQualityMetricsMixin):
     """Anomaly detection and anomaly logging helpers."""
 
-    _dq_monitor: DQMonitorPort | None
-    _logger: LoggerPort
-    _metrics: MetricsPort | None
-    _pipeline_name: str
+    _dq_monitor: DQMonitorPort | None = cast(Any, None)  # Any: host default (PD4)
+    _logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
+    _metrics: MetricsPort | None = cast(Any, None)  # Any: host default (PD4)
+    _pipeline_name: str = cast(Any, None)  # Any: host default (PD4)
 
     def _run_anomaly_detection(
         self,

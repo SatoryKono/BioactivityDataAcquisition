@@ -84,7 +84,6 @@ __all__ = [
 
 ValidationError = _ValidationError
 
-
 def __getattr__(name: str) -> object:
     if name == "CompositeRuntimeConfig":
         from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
@@ -104,14 +103,12 @@ def __getattr__(name: str) -> object:
         return _create_dq_report_service
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
-
 def _resolve_composite_gold_schema(composite_name: str) -> type | None:
     """Resolve composite Gold contract by composite pipeline name."""
     return _resolve_composite_gold_schema_impl(
         composite_name,
         schema_registry=DEFAULT_COMPOSITE_GOLD_SCHEMA_REGISTRY,
     )
-
 
 def _resolve_composite_config_path(name: str) -> Path:
     """Resolve composite config path from canonical composites directory."""
@@ -121,7 +118,6 @@ def _resolve_composite_config_path(name: str) -> Path:
         configs_root=resolve_configs_root(),
     )
 
-
 def load_composite_config(name: str) -> CompositeConfig:
     """Load and validate composite pipeline configuration from YAML."""
     return _load_runtime_composite_config_impl(
@@ -129,7 +125,6 @@ def load_composite_config(name: str) -> CompositeConfig:
         resolve_config_path_fn=_resolve_composite_config_path,
         validate_payload=validate_composite_config_payload,
     )
-
 
 def _bootstrap_runtime_basics(
     *,
@@ -142,7 +137,6 @@ def _bootstrap_runtime_basics(
         run_id=run_id,
         bootstrap_runtime_basics_impl=_bootstrap_runtime_basics_impl,
     )
-
 
 def _build_runner_factories(
     *,
@@ -168,7 +162,6 @@ def _build_runner_factories(
     )
     return factories
 
-
 def _build_support_services(
     *,
     config: CompositeConfig,
@@ -186,7 +179,6 @@ def _build_support_services(
         load_field_group_registry_fn=_load_field_group_registry,
     )
 
-
 def _build_composite_bootstrap_plan(
     *,
     config: CompositeConfig,
@@ -202,7 +194,6 @@ def _build_composite_bootstrap_plan(
         build_runner_factories_fn=_build_runner_factories,
         build_support_services_fn=_build_support_services,
     )
-
 
 def _create_composite_runner_from_plan(
     *,
@@ -225,7 +216,6 @@ def _create_composite_runner_from_plan(
         create_composite_runner_builder_fn=_create_composite_runner_builder_impl,
         runner_factory=create_composite_runner_service,
     )
-
 
 def bootstrap_composite_runner(
     config: CompositeConfig,

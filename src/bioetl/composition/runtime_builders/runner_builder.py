@@ -40,7 +40,6 @@ if TYPE_CHECKING:
     from bioetl.composition.registry_api import PipelineRegistry
     from bioetl.domain.context import PipelineRunContext
 
-
 __all__ = [
     "PipelineRunnerProtocol",
     "RunnerBuilderWiring",
@@ -51,9 +50,7 @@ __all__ = [
     "load_source_config",
 ]
 
-
 load_source_config = _load_source_config
-
 
 def build_pipeline_runner(
     ctx: PipelineRunContext,

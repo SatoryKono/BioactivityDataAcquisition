@@ -380,7 +380,7 @@ def fetch_run_metadata(run_id: str, repo_root: Path) -> dict[str, Any] | None:
         return None
     if not isinstance(data, dict):
         return None
-    return data
+    return data  # pyright: ignore[reportUnknownVariableType]
 
 
 def fetch_check_log(

@@ -588,55 +588,74 @@ def _top_level_string_sequence_assignment(
     return []
 
 
-def _top_level_dict_string_keys(tree: ast.Module, target_name: str) -> list[str]:
+def _dict_string_keys(dict_node: ast.Dict) -> list[str]:
+    """Extract string constant keys from a dict AST node."""
+    keys: list[str] = []
+    for key in dict_node.keys:
+        if isinstance(key, ast.Constant) and isinstance(key.value, str):
+            keys.append(key.value)
+    return keys
+
+
+def _assign_targets_name(node: ast.Assign, target_name: str) -> bool:
+    """True when any assignment target is the given bare name."""
+    return any(
+        isinstance(target, ast.Name) and target.id == target_name
+        for target in node.targets
+    )
+
+
+def _top_level_dict_node(tree: ast.Module, target_name: str) -> ast.Dict | None:
+    """Locate a top-level dict assignment (plain or annotated) by name."""
     for node in tree.body:
-        if not isinstance(node, ast.Assign):
-            if not (
-                isinstance(node, ast.AnnAssign)
-                and isinstance(node.target, ast.Name)
-                and node.target.id == target_name
-                and isinstance(node.value, ast.Dict)
+        if isinstance(node, ast.Assign):
+            if _assign_targets_name(node, target_name) and isinstance(
+                node.value, ast.Dict
             ):
-                continue
-            dict_node = node.value
-        else:
-            if not any(
-                isinstance(target, ast.Name) and target.id == target_name
-                for target in node.targets
-            ):
-                continue
-            if not isinstance(node.value, ast.Dict):
-                continue
-            dict_node = node.value
-        keys: list[str] = []
-        for key in dict_node.keys:
-            if isinstance(key, ast.Constant) and isinstance(key.value, str):
-                keys.append(key.value)
-        return keys
-    return []
+                return node.value
+            continue
+        if (
+            isinstance(node, ast.AnnAssign)
+            and isinstance(node.target, ast.Name)
+            and node.target.id == target_name
+            and isinstance(node.value, ast.Dict)
+        ):
+            return node.value
+    return None
+
+
+def _top_level_dict_string_keys(tree: ast.Module, target_name: str) -> list[str]:
+    dict_node = _top_level_dict_node(tree, target_name)
+    if dict_node is None:
+        return []
+    return _dict_string_keys(dict_node)
+
+
+def _binding_names_from_node(node: ast.stmt) -> set[str]:
+    """Extract top-level binding names introduced by one module body node."""
+    if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
+        return {node.name}
+    if isinstance(node, ast.ImportFrom):
+        return {alias.asname or alias.name for alias in node.names}
+    if isinstance(node, ast.Assign):
+        return {
+            target.id
+            for target in node.targets
+            if isinstance(target, ast.Name)
+        }
+    if (
+        isinstance(node, ast.AnnAssign)
+        and node.value is not None
+        and isinstance(node.target, ast.Name)
+    ):
+        return {node.target.id}
+    return set()
 
 
 def _collect_runtime_binding_names(tree: ast.Module) -> set[str]:
     bindings: set[str] = set()
     for node in tree.body:
-        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
-            bindings.add(node.name)
-            continue
-        if isinstance(node, ast.ImportFrom):
-            for alias in node.names:
-                bindings.add(alias.asname or alias.name)
-            continue
-        if isinstance(node, ast.Assign):
-            for target in node.targets:
-                if isinstance(target, ast.Name):
-                    bindings.add(target.id)
-            continue
-        if (
-            isinstance(node, ast.AnnAssign)
-            and node.value is not None
-            and isinstance(node.target, ast.Name)
-        ):
-            bindings.add(node.target.id)
+        bindings.update(_binding_names_from_node(node))
     return bindings
 
 
@@ -651,31 +670,41 @@ def _collect_public_top_level_function_names(tree: ast.Module) -> list[str]:
     return names
 
 
-def _collect_getattr_branch_names(tree: ast.Module) -> set[str]:
-    def _visit_if(node: ast.If, names: set[str]) -> None:
-        test = node.test
-        if (
-            isinstance(test, ast.Compare)
-            and isinstance(test.left, ast.Name)
-            and test.left.id == "name"
-            and len(test.ops) == 1
-            and isinstance(test.ops[0], ast.Eq)
-            and len(test.comparators) == 1
-            and isinstance(test.comparators[0], ast.Constant)
-            and isinstance(test.comparators[0].value, str)
-        ):
-            names.add(test.comparators[0].value)
-        for child in node.orelse:
-            if isinstance(child, ast.If):
-                _visit_if(child, names)
+def _name_eq_string_literal(test: ast.AST) -> str | None:
+    """Return the string literal when test is `name == \"...\"`, else None."""
+    if not isinstance(test, ast.Compare):
+        return None
+    if not isinstance(test.left, ast.Name) or test.left.id != "name":
+        return None
+    if len(test.ops) != 1 or not isinstance(test.ops[0], ast.Eq):
+        return None
+    if len(test.comparators) != 1:
+        return None
+    comparator = test.comparators[0]
+    if not isinstance(comparator, ast.Constant) or not isinstance(comparator.value, str):
+        return None
+    return comparator.value
 
+
+def _visit_getattr_if_chain(node: ast.If, names: set[str]) -> None:
+    """Collect name==\"...\" branch literals from an if/elif chain."""
+    literal = _name_eq_string_literal(node.test)
+    if literal is not None:
+        names.add(literal)
+    for child in node.orelse:
+        if isinstance(child, ast.If):
+            _visit_getattr_if_chain(child, names)
+
+
+def _collect_getattr_branch_names(tree: ast.Module) -> set[str]:
     for node in tree.body:
-        if isinstance(node, ast.FunctionDef) and node.name == "__getattr__":
-            names: set[str] = set()
-            for child in node.body:
-                if isinstance(child, ast.If):
-                    _visit_if(child, names)
-            return names
+        if not isinstance(node, ast.FunctionDef) or node.name != "__getattr__":
+            continue
+        names: set[str] = set()
+        for child in node.body:
+            if isinstance(child, ast.If):
+                _visit_getattr_if_chain(child, names)
+        return names
     return set()
 
 

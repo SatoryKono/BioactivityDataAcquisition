@@ -272,9 +272,9 @@ def reset_encoder_cache() -> None:
 _ENCODER_API = (reset_encoder_cache,)
 
 __all__ = [
-    "orjson_available",
     "OrjsonEncoder",
     "StdLibJsonEncoder",
     "get_json_encoder",
+    "orjson_available",
     "reset_encoder_cache",
 ]

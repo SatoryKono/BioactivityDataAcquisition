@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 # pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
@@ -9,7 +8,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Sequence
 from datetime import datetime, timedelta
-from typing import Literal, cast
+from typing import Any, Literal, cast
 
 import polars as pl
 import pyarrow as pa
@@ -53,7 +52,7 @@ from bioetl.infrastructure.storage.silver.prepared_operation_models import (
 class SilverWriterMetadataFacade:
     """Writer-level metadata helper methods backed by composition services."""
 
-    _metadata: SilverMetadataOperations | None
+    _metadata: SilverMetadataOperations | None = cast(Any, None)  # Any: host default (PD4)
 
     _SILVER_METADATA_OPERATIONS_REQUIRED = "Silver metadata operations are required"
 

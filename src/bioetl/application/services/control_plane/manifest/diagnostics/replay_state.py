@@ -44,7 +44,6 @@ def _resolve_replay_mode(
     resume_requested: bool,
     replay_family_context: ReplayFamilyContext,
 ) -> str:
-    """Resolve operator-facing replay mode from manifest intent and capability."""
     profile = replay_family_context.profile
     if (
         requested_exact_replay
@@ -66,7 +65,6 @@ def _resolve_continuation_mode(
     resume_requested: bool,
     replay_family_context: ReplayFamilyContext,
 ) -> str:
-    """Resolve the bounded continuation/replay/rebuild classification."""
     profile = replay_family_context.profile
     if (
         requested_exact_replay
@@ -91,7 +89,6 @@ def _resolve_replay_capability_reason(
     policy_assessment: ReproducibilityPolicyAssessment,
     replay_family_context: ReplayFamilyContext,
 ) -> str:
-    """Return one operator-facing explanation for replay capability."""
     profile = replay_family_context.profile
     snapshot_envelope = policy_assessment.snapshot_envelope
     if not profile.strict_exact_replay_supported:
@@ -127,7 +124,6 @@ def _resolve_replay_occurrence_kind(
     input_snapshots: list[dict[str, object]],
     policy_assessment: ReproducibilityPolicyAssessment,
 ) -> str:
-    """Return the bounded replay-role classification for one manifested run."""
     replay_parentage = _build_replay_parentage(manifest)
     if bool(replay_parentage["is_exact_replay"]):
         return "exact_replay_child_run"
@@ -155,7 +151,6 @@ def _resolve_historical_live_run_upgrade_state(
     policy_assessment: ReproducibilityPolicyAssessment,
     replay_family_context: ReplayFamilyContext,
 ) -> str:
-    """Return the bounded upgrade path for live runs lacking launch-time snapshots."""
     profile = replay_family_context.profile
     replay_parentage = _build_replay_parentage(manifest)
     if _is_composite_execution_context(manifest) or bool(
@@ -183,7 +178,6 @@ def _resolve_broader_historical_exact_replay_state(
     input_snapshots: list[dict[str, object]],
     policy_assessment: ReproducibilityPolicyAssessment,
 ) -> str:
-    """Return the bounded state for the broader certified historical tranche."""
     replay_parentage = _build_replay_parentage(manifest)
     if bool(replay_parentage["is_exact_replay"]):
         return "exact_replay_child_run"
@@ -211,7 +205,6 @@ def _build_replay_state_projection(
     policy_assessment: ReproducibilityPolicyAssessment,
     replay_family_context: ReplayFamilyContext,
 ) -> dict[str, str]:
-    """Return canonical replay-state fields shared by base and refreshed views."""
     return {
         "replay_occurrence_kind": _resolve_replay_occurrence_kind(
             manifest=manifest,

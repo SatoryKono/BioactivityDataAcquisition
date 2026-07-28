@@ -1,8 +1,9 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods provided by concrete composition.
 """Reporting helpers for preflight validation results."""
 
 from __future__ import annotations
+
+from typing import Any, cast
 
 from bioetl.application.composite._preflight_types import (
     PreflightValidationResult,
@@ -16,7 +17,7 @@ from bioetl.domain.ports import LoggerPort
 class PreflightValidationReportingMixin:
     """Centralized logging/report formatting for preflight validation."""
 
-    _logger: LoggerPort
+    _logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
 
     def _log_schema_loading_summary(
         self, source_fields: dict[str, SchemaFields]

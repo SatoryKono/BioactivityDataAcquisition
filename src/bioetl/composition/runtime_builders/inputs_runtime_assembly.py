@@ -52,7 +52,6 @@ if TYPE_CHECKING:
 
 _DEFAULT_HEALTH_CHECK_MODE: Literal["strict", "probe"] = "strict"
 
-
 def assemble_vacuum_settings(
     *,
     cli_vacuum: CliVacuumSettings,
@@ -66,7 +65,6 @@ def assemble_vacuum_settings(
         enabled=enabled,
         retention_days=retention_days,
     )
-
 
 def assemble_runtime_config(
     *,
@@ -85,7 +83,6 @@ def assemble_runtime_config(
         skip_gold=skip_gold,
     )
 
-
 def assemble_filter_config(
     *,
     yaml_filter: YamlInputFilter,
@@ -100,21 +97,17 @@ def assemble_filter_config(
         filter_builder=filter_builder,
     )
 
-
 def assemble_cached_bronze_context(ctx: PipelineRunContext) -> CachedBronzeContext:
     return _assemble_cached_bronze_context_impl(ctx)
 
-
 def validate_pk_contract(config: PipelineYamlConfig) -> None:
     _validate_pk_contract_impl(config)
-
 
 def resolve_health_check_mode(*, settings: Settings) -> Literal["strict", "probe"]:
     return _resolve_health_check_mode_policy(
         settings=settings,
         default_health_check_mode=_DEFAULT_HEALTH_CHECK_MODE,
     )
-
 
 def resolve_filter_batch_size(
     yaml_config: PipelineYamlConfig,
@@ -128,7 +121,6 @@ def resolve_filter_batch_size(
         yaml_config,
         source_loader=source_loader,
     )
-
 
 def adjust_batch_size_for_filter(
     *,
@@ -146,7 +138,6 @@ def adjust_batch_size_for_filter(
             load_source_config_fn=load_source_config_fn,
         ),
     )
-
 
 __all__ = [
     "ResolvedVacuumSettings",

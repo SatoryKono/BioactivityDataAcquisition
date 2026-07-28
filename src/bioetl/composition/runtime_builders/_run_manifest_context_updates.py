@@ -42,10 +42,8 @@ _CONTROL_PLANE_CONTEXT_UPDATE_FIELDS: tuple[str, ...] = (
     _BASE_CONTROL_PLANE_CONTEXT_UPDATE_FIELDS + CONTRACT_IDENTITY_FIELD_NAMES
 )
 
-
 class _MutableManifestContext:
     manifest_id: str | None
-
 
 def iter_optional_control_plane_updates(
     **fields: object,
@@ -56,7 +54,6 @@ def iter_optional_control_plane_updates(
     ``iter_optional_control_plane_updates_from_mapping`` for bulk projection.
     """
     return iter_optional_control_plane_updates_from_mapping(fields)
-
 
 def iter_optional_control_plane_updates_from_mapping(
     values: Mapping[str, object],
@@ -97,7 +94,6 @@ def iter_optional_control_plane_updates_from_mapping(
         if field_value is not None
     )
 
-
 def extract_optional_updates_from_refs(
     control_plane_refs: object,
 ) -> tuple[tuple[str, str], ...]:
@@ -107,7 +103,6 @@ def extract_optional_updates_from_refs(
         for field_name in _CONTROL_PLANE_CONTEXT_UPDATE_FIELDS
         if (field_value := getattr(control_plane_refs, field_name, None)) is not None
     )
-
 
 def build_dataclass_manifest_updates(
     ctx: PipelineRunContext,
@@ -121,7 +116,6 @@ def build_dataclass_manifest_updates(
         if hasattr(ctx, field_name):
             updates[field_name] = field_value
     return updates
-
 
 def apply_manifest_updates_to_mutable_context(
     ctx: _MutableManifestContext,

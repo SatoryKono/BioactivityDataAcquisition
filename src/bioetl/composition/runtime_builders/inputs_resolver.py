@@ -37,7 +37,6 @@ if TYPE_CHECKING:
         PipelineYamlConfig,
     )
 
-
 adjust_batch_size_for_filter = _runtime_assembly.adjust_batch_size_for_filter
 assemble_cached_bronze_context = _runtime_assembly.assemble_cached_bronze_context
 assemble_filter_config = _runtime_assembly.assemble_filter_config
@@ -47,14 +46,12 @@ resolve_filter_batch_size = _runtime_assembly.resolve_filter_batch_size
 resolve_health_check_mode = _runtime_assembly.resolve_health_check_mode
 validate_pk_contract = _runtime_assembly.validate_pk_contract
 
-
 __all__ = [
     "ResolvedVacuumSettings",
     "RunnerInputs",
     "prepare_runner_inputs",
     "resolve_health_check_mode",
 ]
-
 
 def __getattr__(name: str) -> object:  # pragma: no cover
     """Lazily expose compatibility symbols from the public resolver facade."""
@@ -67,7 +64,6 @@ def __getattr__(name: str) -> object:  # pragma: no cover
 
         return ResolvedVacuumSettings
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
 
 def prepare_runner_inputs(
     *,

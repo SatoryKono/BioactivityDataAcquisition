@@ -370,6 +370,51 @@ def _iter_structured_blocks(
     return blocks
 
 
+def _is_child_of_reported_parent(block_path: str, paths: set[str]) -> bool:
+    """True when a nested suffix path is covered by an already-reported parent."""
+    if block_path.endswith(".properties"):
+        parent = block_path[: -len(".properties")]
+        if parent in paths:
+            return True
+    if block_path.endswith(".expands_to"):
+        parent = block_path[: -len(".expands_to")]
+        if parent in paths:
+            return True
+    if (
+        block_path.startswith("composite.normalized_anchor_policy.")
+        and "composite.normalized_anchor_policy" in paths
+    ):
+        return True
+    return False
+
+
+def _is_shadow_analysis_cluster(cluster: dict[str, Any]) -> bool:
+    """True when the cluster represents shared shadow_analysis policy debt."""
+    block_path = str(cluster["block_path"])
+    decision = str((cluster.get("governance") or {}).get("decision") or "")
+    return (
+        decision == "retain_shared_quality_shadow_analysis_policy"
+        or block_path.endswith(".shadow_analysis")
+    )
+
+
+def _collapse_shadow_analysis_clusters(
+    clusters: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Keep one representative cluster for shared shadow_analysis decisions."""
+    shadow_seen = False
+    collapsed: list[dict[str, Any]] = []
+    for cluster in clusters:
+        if _is_shadow_analysis_cluster(cluster):
+            if shadow_seen:
+                continue
+            shadow_seen = True
+            cluster = dict(cluster)
+            cluster["block_path"] = "pipelines.*.shadow_analysis"
+        collapsed.append(cluster)
+    return collapsed
+
+
 def _collapse_nested_duplication_clusters(
     clusters: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
@@ -382,43 +427,102 @@ def _collapse_nested_duplication_clusters(
     specialized composite policy suffixes under a shared root key.
     """
     paths = {str(cluster["block_path"]) for cluster in clusters}
-    kept: list[dict[str, Any]] = []
-    for cluster in clusters:
-        block_path = str(cluster["block_path"])
-        if block_path.endswith(".properties"):
-            parent = block_path[: -len(".properties")]
-            if parent in paths:
-                continue
-        if block_path.endswith(".expands_to"):
-            parent = block_path[: -len(".expands_to")]
-            if parent in paths:
-                continue
-        if (
-            block_path.startswith("composite.normalized_anchor_policy.")
-            and "composite.normalized_anchor_policy" in paths
-        ):
-            continue
-        kept.append(cluster)
+    kept = [
+        cluster
+        for cluster in clusters
+        if not _is_child_of_reported_parent(str(cluster["block_path"]), paths)
+    ]
+    return _collapse_shadow_analysis_clusters(kept)
 
-    # One representative cluster per shared shadow_analysis governance decision.
-    shadow_seen = False
-    collapsed: list[dict[str, Any]] = []
-    for cluster in kept:
-        block_path = str(cluster["block_path"])
-        decision = str(
-            (cluster.get("governance") or {}).get("decision") or ""
-        )
-        if (
-            decision == "retain_shared_quality_shadow_analysis_policy"
-            or block_path.endswith(".shadow_analysis")
-        ):
-            if shadow_seen:
-                continue
-            shadow_seen = True
-            cluster = dict(cluster)
-            cluster["block_path"] = "pipelines.*.shadow_analysis"
-        collapsed.append(cluster)
-    return collapsed
+
+def _record_block_occurrence(
+    clusters: dict[str, dict[str, Any]],
+    *,
+    block_path: tuple[str, ...],
+    block: object,
+    relative_path: str,
+    surface_kind: str,
+) -> None:
+    """Accumulate one structured block occurrence into fingerprint clusters."""
+    rendered = _canonical_json_text(block)
+    if len(rendered) < MIN_DUPLICATE_BLOCK_BYTES:
+        return
+    fingerprint = sha256(rendered.encode("utf-8")).hexdigest()
+    cluster = clusters.setdefault(
+        fingerprint,
+        {
+            "fingerprint": fingerprint[:12],
+            "serialized_bytes": len(rendered),
+            "block_path": ".".join(block_path),
+            "occurrences": [],
+        },
+    )
+    cluster["occurrences"].append(
+        {
+            "path": relative_path,
+            "surface_kind": surface_kind,
+            "block_path": ".".join(block_path),
+        }
+    )
+
+
+def _is_ignored_single_file_cluster(
+    cluster: dict[str, Any],
+    *,
+    unique_paths: set[str],
+) -> bool:
+    """True for intentional same-file mirrors that are not multi-surface debt."""
+    if len(unique_paths) != 1:
+        return False
+    block_path = str(cluster["block_path"])
+    if block_path.startswith("contracts.hash_"):
+        return True
+    if block_path.startswith("entries.scripts/"):
+        return True
+    return False
+
+
+def _duplicate_cluster_payload(cluster: dict[str, Any]) -> dict[str, Any]:
+    """Build the published duplicate-cluster row for one fingerprint group."""
+    occurrences = cluster["occurrences"]
+    by_kind = Counter(entry["surface_kind"] for entry in occurrences)
+    return {
+        "fingerprint": cluster["fingerprint"],
+        "serialized_bytes": cluster["serialized_bytes"],
+        "block_path": cluster["block_path"],
+        "occurrence_count": len(occurrences),
+        "governance": _duplication_cluster_governance(str(cluster["block_path"])),
+        "surface_kind_counts": {kind: by_kind[kind] for kind in sorted(by_kind)},
+        "occurrences": sorted(
+            occurrences,
+            key=lambda entry: (
+                str(entry["path"]),
+                str(entry["block_path"]),
+                str(entry["surface_kind"]),
+            ),
+        ),
+    }
+
+
+def _select_duplicate_clusters(
+    clusters: dict[str, dict[str, Any]],
+) -> tuple[list[dict[str, Any]], set[str]]:
+    """Filter fingerprint groups into multi-location duplicate clusters."""
+    duplicate_clusters: list[dict[str, Any]] = []
+    affected_files: set[str] = set()
+    for cluster in clusters.values():
+        occurrences = cluster["occurrences"]
+        unique_paths = {entry["path"] for entry in occurrences}
+        unique_locations = {
+            (entry["path"], entry["block_path"]) for entry in occurrences
+        }
+        if len(unique_locations) < 2:
+            continue
+        if _is_ignored_single_file_cluster(cluster, unique_paths=unique_paths):
+            continue
+        affected_files.update(entry["path"] for entry in occurrences)
+        duplicate_clusters.append(_duplicate_cluster_payload(cluster))
+    return duplicate_clusters, affected_files
 
 
 def _build_duplication_audit() -> dict[str, Any]:
@@ -432,76 +536,15 @@ def _build_duplication_audit() -> dict[str, Any]:
         relative_path = path.relative_to(ROOT).as_posix()
         surface_kind = _duplication_surface_kind(path)
         for block_path, block in _iter_structured_blocks(payload):
-            rendered = _canonical_json_text(block)
-            if len(rendered) < MIN_DUPLICATE_BLOCK_BYTES:
-                continue
-            fingerprint = sha256(rendered.encode("utf-8")).hexdigest()
-            cluster = clusters.setdefault(
-                fingerprint,
-                {
-                    "fingerprint": fingerprint[:12],
-                    "serialized_bytes": len(rendered),
-                    "block_path": ".".join(block_path),
-                    "occurrences": [],
-                },
-            )
-            cluster["occurrences"].append(
-                {
-                    "path": relative_path,
-                    "surface_kind": surface_kind,
-                    "block_path": ".".join(block_path),
-                }
+            _record_block_occurrence(
+                clusters,
+                block_path=block_path,
+                block=block,
+                relative_path=relative_path,
+                surface_kind=surface_kind,
             )
 
-    duplicate_clusters: list[dict[str, Any]] = []
-    affected_files: set[str] = set()
-    for cluster in clusters.values():
-        occurrences = cluster["occurrences"]
-        unique_paths = {entry["path"] for entry in occurrences}
-        unique_locations = {
-            (entry["path"], entry["block_path"]) for entry in occurrences
-        }
-        if len(unique_locations) < 2:
-            continue
-        if (
-            cluster["block_path"].startswith("contracts.hash_")
-            and len(unique_paths) == 1
-        ):
-            # Ignore same-file contract/hash_policy mirrors; the audit tracks
-            # reviewable config-surface duplication, not intentional hash aliases.
-            continue
-        if (
-            str(cluster["block_path"]).startswith("entries.scripts/")
-            and len(unique_paths) == 1
-        ):
-            # Same-file scripts lifecycle registry rows share metadata across
-            # sibling entrypoints; that is intentional registry structure, not
-            # multi-surface config debt.
-            continue
-        by_kind = Counter(entry["surface_kind"] for entry in occurrences)
-        affected_files.update(entry["path"] for entry in occurrences)
-        duplicate_clusters.append(
-            {
-                "fingerprint": cluster["fingerprint"],
-                "serialized_bytes": cluster["serialized_bytes"],
-                "block_path": cluster["block_path"],
-                "occurrence_count": len(occurrences),
-                "governance": _duplication_cluster_governance(
-                    str(cluster["block_path"])
-                ),
-                "surface_kind_counts": {
-                    kind: by_kind[kind] for kind in sorted(by_kind)
-                },
-                "occurrences": sorted(
-                    occurrences,
-                    key=lambda entry: (
-                        str(entry["path"]),
-                        str(entry["block_path"]),
-                        str(entry["surface_kind"]),
-                    ),
-                ),
-            }
-        )
+    duplicate_clusters, affected_files = _select_duplicate_clusters(clusters)
 
     duplicate_clusters = _collapse_nested_duplication_clusters(duplicate_clusters)
     duplicate_clusters.sort(

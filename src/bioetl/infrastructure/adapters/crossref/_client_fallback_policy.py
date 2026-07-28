@@ -1,9 +1,10 @@
-# Host attrs/methods provided by concrete composition.
+# pyright: reportUninitializedInstanceVariable=false
+# Host attrs assigned in CrossRefAdapter.__post_init__ (PD4).
 """Internal fallback-policy hook mixin for the CrossRef adapter."""
 
 from __future__ import annotations
 
-from typing import Any, cast, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from bioetl.domain.normalization import normalize_doi
 from bioetl.infrastructure.adapters.common import FallbackDecoratorConfig
@@ -28,9 +29,12 @@ if TYPE_CHECKING:
 class _CrossRefFallbackPolicyMixin:
     """Provider-specific hookpoints consumed by ``FallbackPolicyMixin``."""
 
-    _fallback_handler: CrossRefTitleFallbackHandler = cast(Any, None)  # Any: host attr default (PD3)
-    _fallback_decorator: ComposableFallbackDecorator = cast(Any, None)  # Any: host attr default (PD3)
-    _fetch_flow: CrossRefFetchFlow = cast(Any, None)  # Any: host attr default (PD3)
+    # PD3 host attrs: annotations only. Avoid class-level ``None`` defaults —
+    # ``hasattr(self, "_fetch_flow")`` would be True before ``__post_init__``
+    # assigns the real CrossRefFetchFlow instance.
+    _fallback_handler: CrossRefTitleFallbackHandler
+    _fallback_decorator: ComposableFallbackDecorator
+    _fetch_flow: CrossRefFetchFlow
 
     def _get_default_fallback_config(self) -> FallbackDecoratorConfig:
         """Return CrossRef-specific default fallback config."""
@@ -51,6 +55,12 @@ class _CrossRefFallbackPolicyMixin:
         return self._fallback_handler if enabled else None
 
     def _on_fallback_decorator_updated(self) -> None:
-        """Propagate new decorator to the fetch-flow component."""
-        if hasattr(self, "_fetch_flow"):
-            self._fetch_flow.fallback_decorator = self._fallback_decorator
+        """Propagate new decorator to the fetch-flow component.
+
+        ``configure_fallback_policy`` runs during construction *before*
+        ``_fetch_flow`` is built. Skip propagation until the flow exists.
+        """
+        fetch_flow = getattr(self, "_fetch_flow", None)
+        if fetch_flow is None:
+            return
+        fetch_flow.fallback_decorator = self._fallback_decorator

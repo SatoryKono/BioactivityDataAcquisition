@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
 
-
 def resolve_run_context_values(
     ctx: PipelineRunContext,
 ) -> tuple[str, str]:
@@ -19,6 +18,5 @@ def resolve_run_context_values(
         getattr(raw_execution_context, "value", raw_execution_context)
     )
     return run_type_value, execution_context_value
-
 
 __all__ = ["resolve_run_context_values"]

@@ -1,11 +1,10 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Context, DQ, and persistence facade methods for Silver metadata services."""
 
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.domain.behavior.dq_metrics_calculator import DQMetricsCalculator
 from bioetl.domain.models.metadata import SilverMetadata
@@ -42,14 +41,14 @@ __all__ = ["_SilverMetadataContextFacade"]
 class _SilverMetadataContextFacade:
     """Context, DQ, and sidecar-persistence methods for metadata services."""
 
-    _logger: LoggerPort
-    _metrics: MetricsPort | None
-    _audit: AuditPort | None
-    _metadata_writer: object | None
-    _metadata_coordinator: MetadataCoordinatorPort | None
-    _lineage_store: LineageStorePort | None
-    _dq_calculator: DQMetricsCalculator | None
-    _host: object | None
+    _logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
+    _metrics: MetricsPort | None = cast(Any, None)  # Any: host default (PD4)
+    _audit: AuditPort | None = cast(Any, None)  # Any: host default (PD4)
+    _metadata_writer: object | None = cast(Any, None)  # Any: host default (PD4)
+    _metadata_coordinator: MetadataCoordinatorPort | None = cast(Any, None)  # Any: host default (PD4)
+    _lineage_store: LineageStorePort | None = cast(Any, None)  # Any: host default (PD4)
+    _dq_calculator: DQMetricsCalculator | None = cast(Any, None)  # Any: host default (PD4)
+    _host: object | None = cast(Any, None)  # Any: host default (PD4)
 
     @property
     def _flat_structure(self) -> bool:

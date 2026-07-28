@@ -43,7 +43,6 @@ __all__ = [
     "validate_required_persistence_profile",
 ]
 
-
 @dataclass(frozen=True, slots=True)
 class ControlPlaneSetupResult:
     """Resolved control-plane collaborators for runtime runner assembly."""
@@ -52,7 +51,6 @@ class ControlPlaneSetupResult:
     inputs: _RunnerInputs
     run_ledger_service: RunLedgerService | None
     required_profile: str
-
 
 def _log_effective_required_persistence_profile(
     *,
@@ -79,7 +77,6 @@ def _log_effective_required_persistence_profile(
         exact_replay=exact_replay,
     )
 
-
 def _bind_required_persistence_profile(
     ctx: PipelineRunContext,
     *,
@@ -97,7 +94,6 @@ def _bind_required_persistence_profile(
             "PipelineRunContext must support persistence-profile attachment"
         ),
     )
-
 
 def assemble_runner_control_plane(
     ctx: PipelineRunContext,

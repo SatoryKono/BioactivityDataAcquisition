@@ -18,7 +18,6 @@ CACHED_BRONZE_EMPTY_SNAPSHOT_PROVENANCE_MESSAGE = (
     "for snapshot provenance"
 )
 
-
 def build_cached_bronze_input_snapshot_refs(
     *,
     bronze_root: Path,
@@ -45,7 +44,6 @@ def build_cached_bronze_input_snapshot_refs(
     # does not depend on filesystem enumeration or content hash/path interplay.
     return tuple(sorted(snapshot_refs, key=lambda ref: ref.snapshot_id))
 
-
 def require_cached_bronze_input_snapshot_refs(
     *,
     bronze_root: Path,
@@ -59,7 +57,6 @@ def require_cached_bronze_input_snapshot_refs(
     if not snapshot_refs:
         raise RuntimeError(CACHED_BRONZE_EMPTY_SNAPSHOT_PROVENANCE_MESSAGE)
     return snapshot_refs
-
 
 def _build_cached_bronze_snapshot_ref(
     *,
@@ -79,11 +76,9 @@ def _build_cached_bronze_snapshot_ref(
         captured_at=None,
     )
 
-
 def _content_addressed_snapshot_id(content_hash: str) -> str:
     """Return a portable snapshot identity derived only from captured content."""
     return f"sha256:{content_hash}"
-
 
 def _compute_cached_bronze_batch_content_hash(batch_file: Path) -> str:
     """Compute the content hash for one persisted cached-Bronze batch file."""

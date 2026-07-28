@@ -16,7 +16,6 @@ if TYPE_CHECKING:
     from bioetl.domain.control_plane import RunArtifactRef
     from bioetl.infrastructure.config.settings_api import Settings
 
-
 def control_plane_root(settings: Settings, leaf: str) -> Path:
     """Typed forwarding wrapper for the control-plane root helper."""
     # Import leaf helper via importlib so static fan-in analysis does not
@@ -30,7 +29,6 @@ def control_plane_root(settings: Settings, leaf: str) -> Path:
         ).control_plane_root,
     )
     return impl(settings, leaf)
-
 
 def build_planned_artifacts(
     *,
@@ -61,7 +59,6 @@ def build_planned_artifacts(
         debug_export_root=debug_export_root,
     )
 
-
 def __getattr__(name: str) -> object:  # pragma: no cover
     """Lazily expose data-root mode helpers without static fan-in."""
     if name in {
@@ -80,7 +77,6 @@ def __getattr__(name: str) -> object:  # pragma: no cover
     if name in {"control_plane_root", "build_planned_artifacts"}:
         return globals()[name]
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
 
 @dataclass(frozen=True, slots=True)
 class ManifestControlPlaneRefs:
@@ -106,7 +102,6 @@ class ManifestControlPlaneRefs:
     normalization_profile_version: str | None = None
     normalization_profile_hash: str | None = None
     required_persistence_profile: str | None = None
-
 
 def create_control_plane_refs(
     *,

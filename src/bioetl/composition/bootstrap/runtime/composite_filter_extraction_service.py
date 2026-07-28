@@ -17,7 +17,6 @@ if TYPE_CHECKING:
     from bioetl.domain.composite import DependencyConfig, EnricherConfig
     from bioetl.domain.ports import LoggerPort
 
-
 class CompositeFilterExtractor:
     """Extract runner filter inputs from keys DataFrame."""
 
@@ -195,6 +194,5 @@ class CompositeFilterExtractor:
     def _warning(self, event: str, **kwargs: object) -> None:
         if self._logger is not None:
             self._logger.warning(event, **kwargs)
-
 
 __all__ = ["CompositeFilterExtractor"]

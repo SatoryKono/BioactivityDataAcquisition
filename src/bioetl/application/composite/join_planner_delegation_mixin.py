@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Delegating API surface for ``JoinPlannerService``."""
 
@@ -6,7 +5,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Sequence
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.composite.join_execution import JoinHow
 
@@ -24,9 +23,9 @@ if TYPE_CHECKING:
 class JoinPlannerDelegationMixin:
     """Keep the planner facade thin by delegating focused operations."""
 
-    _join_key_resolver: JoinKeyResolverProtocol
-    _dependency_joiner: DependencyJoinerProtocol
-    _join_executor: JoinExecutorProtocol
+    _join_key_resolver: JoinKeyResolverProtocol = cast(Any, None)  # Any: host default (PD4)
+    _dependency_joiner: DependencyJoinerProtocol = cast(Any, None)  # Any: host default (PD4)
+    _join_executor: JoinExecutorProtocol = cast(Any, None)  # Any: host default (PD4)
 
     def find_join_key_column(
         self,

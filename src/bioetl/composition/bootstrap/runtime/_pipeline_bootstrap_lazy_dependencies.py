@@ -11,7 +11,6 @@ if TYPE_CHECKING:
         PipelineRegistryProtocol,
     )
 
-
 def initialize_chembl_policy_registry(configs_root: Path) -> None:
     """Initialize the ChEMBL normalization-policy registry lazily."""
     from bioetl.composition.bootstrap.runtime.normalization_policy_init import (
@@ -19,7 +18,6 @@ def initialize_chembl_policy_registry(configs_root: Path) -> None:
     )
 
     _initialize(configs_root)
-
 
 def initialize_publication_controlled_vocabulary(configs_root: Path) -> None:
     """Initialize publication controlled vocabularies lazily."""
@@ -29,7 +27,6 @@ def initialize_publication_controlled_vocabulary(configs_root: Path) -> None:
 
     _initialize(configs_root)
 
-
 def initialize_publication_type_classification(configs_root: Path) -> None:
     """Initialize publication-type classification lazily."""
     from bioetl.composition.bootstrap.runtime.classification_init import (
@@ -38,7 +35,6 @@ def initialize_publication_type_classification(configs_root: Path) -> None:
 
     _initialize(configs_root)
 
-
 def initialize_protein_class_target_type_mapping(configs_root: Path) -> None:
     """Initialize protein-class target-type mappings lazily."""
     from bioetl.composition.bootstrap.runtime.classification_init import (
@@ -46,7 +42,6 @@ def initialize_protein_class_target_type_mapping(configs_root: Path) -> None:
     )
 
     _initialize(configs_root)
-
 
 def register_all_pipelines(
     registry: PipelineRegistryProtocol | None = None,

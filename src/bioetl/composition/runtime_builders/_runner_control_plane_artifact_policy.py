@@ -7,14 +7,11 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     normalize_required_persistence_profile,
 )
 
-
 def requires_artifact_publication_closure(required_profile: object) -> bool:
-    """Return ``True`` when artifact publication must be fully wired."""
     return (
         normalize_required_persistence_profile(required_profile)
         in STRICT_PERSISTENCE_PROFILES
     )
-
 
 def validate_artifact_recorder_attachment(
     *,
@@ -24,7 +21,6 @@ def validate_artifact_recorder_attachment(
     missing_attach_method_count: int,
     failed_count: int,
 ) -> None:
-    """Fail closed when strict profiles cannot guarantee artifact publication."""
     if not requires_artifact_publication_closure(required_profile):
         return
     profile = normalize_required_persistence_profile(required_profile)

@@ -5,10 +5,9 @@
 
 from __future__ import annotations
 
-from typing import Any, cast
-
 from collections.abc import Callable
 from datetime import datetime
+from typing import Any, cast
 
 from bioetl.application.composite.checkpoint import (
     CompositeCheckpointService,

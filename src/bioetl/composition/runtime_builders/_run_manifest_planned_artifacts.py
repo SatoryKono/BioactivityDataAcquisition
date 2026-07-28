@@ -13,11 +13,9 @@ from bioetl.domain.control_plane import RunArtifactRef
 if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
 
-
 def _artifact_path_string(path: Path) -> str:
     """Return portable artifact paths with normalized separators."""
     return path.as_posix()
-
 
 def build_planned_artifacts(
     *,

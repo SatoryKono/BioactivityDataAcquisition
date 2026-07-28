@@ -706,16 +706,12 @@ class _AssertionReachabilityAnalyzer:
             active = self._statement(statement, active, in_loop=in_loop)
         return active
 
-    def _statement(
+    def _exit_statement_states(
         self,
         statement: ast.stmt,
         states: set[bool],
-        *,
-        in_loop: bool,
-    ) -> set[bool]:
-        if _direct_assertion_signal(statement):
-            states = {True for _state in states}
-
+    ) -> set[bool] | None:
+        """Handle terminal control-flow statements; None means not terminal."""
         if isinstance(statement, ast.Return):
             if False in states:
                 self.findings.append(
@@ -728,6 +724,16 @@ class _AssertionReachabilityAnalyzer:
             return set()
         if isinstance(statement, (ast.Raise, ast.Break)):
             return set()
+        return None
+
+    def _compound_statement_states(
+        self,
+        statement: ast.stmt,
+        states: set[bool],
+        *,
+        in_loop: bool,
+    ) -> set[bool] | None:
+        """Handle compound statements; None means not a compound form."""
         if isinstance(statement, ast.If):
             return self._block(statement.body, states, in_loop=in_loop) | self._block(
                 statement.orelse, states, in_loop=in_loop
@@ -741,16 +747,45 @@ class _AssertionReachabilityAnalyzer:
         if isinstance(statement, (ast.With, ast.AsyncWith)):
             return self._block(statement.body, states, in_loop=in_loop)
         if isinstance(statement, ast.Try):
-            paths = self._block(statement.body, states, in_loop=in_loop)
-            for handler in statement.handlers:
-                paths |= self._block(handler.body, states, in_loop=in_loop)
-            paths = self._block(statement.orelse, paths, in_loop=in_loop)
-            return self._block(statement.finalbody, paths, in_loop=in_loop)
+            return self._try_statement_states(statement, states, in_loop=in_loop)
         if isinstance(statement, ast.Match):
             paths = set(states)
             for case in statement.cases:
                 paths |= self._block(case.body, states, in_loop=in_loop)
             return paths
+        return None
+
+    def _try_statement_states(
+        self,
+        statement: ast.Try,
+        states: set[bool],
+        *,
+        in_loop: bool,
+    ) -> set[bool]:
+        paths = self._block(statement.body, states, in_loop=in_loop)
+        for handler in statement.handlers:
+            paths |= self._block(handler.body, states, in_loop=in_loop)
+        paths = self._block(statement.orelse, paths, in_loop=in_loop)
+        return self._block(statement.finalbody, paths, in_loop=in_loop)
+
+    def _statement(
+        self,
+        statement: ast.stmt,
+        states: set[bool],
+        *,
+        in_loop: bool,
+    ) -> set[bool]:
+        if _direct_assertion_signal(statement):
+            states = {True for _state in states}
+
+        exit_states = self._exit_statement_states(statement, states)
+        if exit_states is not None:
+            return exit_states
+        compound_states = self._compound_statement_states(
+            statement, states, in_loop=in_loop
+        )
+        if compound_states is not None:
+            return compound_states
         return states
 
 

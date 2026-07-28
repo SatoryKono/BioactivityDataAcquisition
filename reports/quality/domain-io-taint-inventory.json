@@ -227,7 +227,7 @@
     },
     {
       "kind": "attribute_call:resolve",
-      "line": 190,
+      "line": 191,
       "path": "src/bioetl/domain/run_reports/accounting_snapshots.py",
       "reason": "Catalog lookup method named resolve (not filesystem Path.resolve).",
       "symbol": "StageAccountingSnapshotsMixin._removals_for_bucket"
@@ -262,21 +262,21 @@
     },
     {
       "kind": "import:pandas",
-      "line": 5,
-      "path": "src/bioetl/domain/schemas/chembl/activity.py",
-      "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
-      "symbol": "<module>"
-    },
-    {
-      "kind": "import:pandera",
-      "line": 6,
-      "path": "src/bioetl/domain/schemas/chembl/activity.py",
-      "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
-      "symbol": "<module>"
-    },
-    {
-      "kind": "import:pandera",
       "line": 7,
+      "path": "src/bioetl/domain/schemas/chembl/activity.py",
+      "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
+      "symbol": "<module>"
+    },
+    {
+      "kind": "import:pandera",
+      "line": 8,
+      "path": "src/bioetl/domain/schemas/chembl/activity.py",
+      "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
+      "symbol": "<module>"
+    },
+    {
+      "kind": "import:pandera",
+      "line": 9,
       "path": "src/bioetl/domain/schemas/chembl/activity.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
       "symbol": "<module>"

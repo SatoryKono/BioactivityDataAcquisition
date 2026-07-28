@@ -1,5 +1,4 @@
 # pyright: reportIncompatibleVariableOverride=false
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods provided by concrete composition.
 """Medallion lifecycle service (Application layer - orchestration).
 
@@ -17,7 +16,7 @@ All medallion layer operations are consolidated here:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Any, Protocol, cast
 
 from bioetl.application.services.medallion.medallion_maintenance_mixin import (
     _MedallionMaintenanceMixin,
@@ -69,8 +68,8 @@ class _MedallionClearMixin:
     is logged for observability and supports a dry-run mode.
     """
 
-    storage: MedallionStorageProtocol
-    logger: LoggerPort
+    storage: MedallionStorageProtocol = cast(Any, None)  # Any: host default (PD4)
+    logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
 
     async def clear(
         self,
@@ -157,8 +156,8 @@ class _MedallionRunLifecycleMixin(_MedallionClearMixin):
     optimization (vacuum/compact) when configured.
     """
 
-    storage: MedallionStorageProtocol
-    logger: LoggerPort
+    storage: MedallionStorageProtocol = cast(Any, None)  # Any: host default (PD4)
+    logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
 
     # =========================================================================
     # High-level pipeline lifecycle operations

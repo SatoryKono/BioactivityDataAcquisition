@@ -15,7 +15,6 @@ if TYPE_CHECKING:
     )
     from bioetl.infrastructure.config.settings_api import Settings
 
-
 def default_audit_bootstrapper(
     settings: Settings,
     logger: LoggerPort,
@@ -32,7 +31,6 @@ def default_audit_bootstrapper(
         tracing=tracer,
     )
 
-
 def create_observability_bundle(
     components: ObservabilityComponents,
 ) -> ObservabilityBundle:
@@ -44,7 +42,6 @@ def create_observability_bundle(
         audit=components.audit,
         dq_monitor=components.dq_monitor,
     )
-
 
 def log_observability_initialized(
     *,
@@ -107,7 +104,6 @@ def log_observability_initialized(
         mode="disabled" if dq_monitor is None else "active",
     )
 
-
 def _set_component_runtime_gauge(
     *,
     metrics: MetricsPort,
@@ -126,7 +122,6 @@ def _set_component_runtime_gauge(
         },
     )
 
-
 def _control_plane_settings(*, control_plane: object | None) -> tuple[str, bool, bool]:
     from bioetl.domain.control_plane.reproducibility_policy import (
         DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
@@ -144,15 +139,12 @@ def _control_plane_settings(*, control_plane: object | None) -> tuple[str, bool,
     ledger_enabled = bool(getattr(control_plane, "run_ledger_enabled", True))
     return required_profile, manifest_enabled, ledger_enabled
 
-
 # Public alias for bundle preflight helpers that share the assembly owner.
 control_plane_settings = _control_plane_settings
-
 
 def settings_control_plane(settings: Settings) -> object | None:
     pipeline_settings = getattr(settings, "pipeline", None)
     return getattr(pipeline_settings, "control_plane", None)
-
 
 def run_observability_preflight(
     *,

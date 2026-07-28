@@ -145,54 +145,78 @@ _REVIEWED_SEMANTIC_OUTCOMES = frozenset(
 )
 
 
+def _semantic_decision(
+    *,
+    status: str,
+    policy: str,
+    required: bool,
+    reviewed: bool,
+) -> str:
+    """Map status/policy/required/reviewed into a gate decision token."""
+    if status != "ok":
+        return "block"
+    if policy == "block":
+        return "block"
+    if policy == "block_when_required":
+        return "block" if required else "pass_optional"
+    if policy in {
+        "review_required",
+        "review_required_unless_explicitly_reviewed",
+    }:
+        return "pass_reviewed" if reviewed else "review"
+    return "pass"
+
+
+def _semantic_outcome_for_result(
+    result: AuditResult,
+    *,
+    required_by_panel: dict[tuple[str, int, str], bool],
+) -> dict[str, Any]:
+    """Build one panel-attributable semantic outcome row."""
+    key = (result.dashboard_uid, result.panel_id, result.target_ref_id)
+    required = required_by_panel.get(key, True)
+    canonical = _SEMANTIC_CLASSIFICATION_ALIASES.get(
+        result.classification,
+        result.classification,
+    )
+    reviewed = (
+        result.dashboard_uid,
+        result.panel_id,
+        canonical,
+    ) in _REVIEWED_SEMANTIC_OUTCOMES
+    policy = SEMANTIC_CLASSIFICATION_POLICY.get(
+        canonical,
+        _UNREGISTERED_CLASSIFICATION_POLICY,
+    )
+    decision = _semantic_decision(
+        status=result.status,
+        policy=policy,
+        required=required,
+        reviewed=reviewed,
+    )
+    return {
+        "dashboard_uid": result.dashboard_uid,
+        "panel_id": result.panel_id,
+        "target_ref_id": result.target_ref_id,
+        "source_kind": result.source_kind,
+        "required": required,
+        "classification": result.classification,
+        "canonical_classification": canonical,
+        "policy": policy,
+        "decision": decision,
+    }
+
+
 def semantic_gate_evidence(results: list[AuditResult]) -> dict[str, Any]:
     """Build panel-attributable semantic gate evidence from live results."""
     required_by_panel = {
         (spec.dashboard_uid, spec.panel_id, spec.target_ref_id): spec.required
         for spec in effective_panel_specs()
     }
-    outcomes: list[dict[str, Any]] = []
-    for result in results:
-        key = (result.dashboard_uid, result.panel_id, result.target_ref_id)
-        required = required_by_panel.get(key, True)
-        canonical = _SEMANTIC_CLASSIFICATION_ALIASES.get(
-            result.classification,
-            result.classification,
-        )
-        reviewed = (
-            result.dashboard_uid,
-            result.panel_id,
-            canonical,
-        ) in _REVIEWED_SEMANTIC_OUTCOMES
-        policy = SEMANTIC_CLASSIFICATION_POLICY.get(
-            canonical,
-            _UNREGISTERED_CLASSIFICATION_POLICY,
-        )
-        if result.status != "ok":
-            decision = "block"
-        elif policy == "block":
-            decision = "block"
-        elif policy == "block_when_required":
-            decision = "block" if required else "pass_optional"
-        elif policy == "review_required":
-            decision = "pass_reviewed" if reviewed else "review"
-        elif policy == "review_required_unless_explicitly_reviewed":
-            decision = "pass_reviewed" if reviewed else "review"
-        else:
-            decision = "pass"
-        outcomes.append(
-            {
-                "dashboard_uid": result.dashboard_uid,
-                "panel_id": result.panel_id,
-                "target_ref_id": result.target_ref_id,
-                "source_kind": result.source_kind,
-                "required": required,
-                "classification": result.classification,
-                "canonical_classification": canonical,
-                "policy": policy,
-                "decision": decision,
-            }
-        )
+    outcomes = [
+        _semantic_outcome_for_result(result, required_by_panel=required_by_panel)
+        for result in results
+    ]
 
     blocking_count = sum(item["decision"] == "block" for item in outcomes)
     review_count = sum(item["decision"] == "review" for item in outcomes)
@@ -1759,6 +1783,97 @@ def _blocked_http_backend_result(
     )
 
 
+def _resolve_or_block_app_base_url(
+    config: AuditConfig,
+    *,
+    resolved_app_base_url: str | None,
+    app_resolution_error: str | None,
+) -> tuple[str | None, str | None]:
+    """Resolve app base URL once; return (url, error) without retrying on failure."""
+    if app_resolution_error is not None:
+        return None, app_resolution_error
+    if resolved_app_base_url is not None:
+        return resolved_app_base_url, None
+    try:
+        return _resolve_app_base_url(config), None
+    except (
+        HTTPError,
+        URLError,
+        OSError,
+        TimeoutError,
+        json.JSONDecodeError,
+    ) as exc:
+        return None, (
+            "Quarantine Explorer backend could not be resolved; "
+            "all HTTP-backed panel checks are blocked instead of "
+            f"being retried per panel: {exc}"
+        )
+
+
+def _audit_one_panel_spec(
+    spec: PanelAuditSpec,
+    panel: dict[str, Any],
+    config: AuditConfig,
+    *,
+    resolved_app_base_url: str | None,
+    app_resolution_error: str | None,
+) -> tuple[AuditResult, str | None, str | None]:
+    """Audit one panel; return (result, updated_url, updated_error)."""
+    if spec.source_kind == "prometheus":
+        return (
+            _audit_prometheus_panel(spec, panel, config),
+            resolved_app_base_url,
+            app_resolution_error,
+        )
+    if spec.source_kind == "http":
+        url, error = _resolve_or_block_app_base_url(
+            config,
+            resolved_app_base_url=resolved_app_base_url,
+            app_resolution_error=app_resolution_error,
+        )
+        if error is not None:
+            return (
+                _blocked_http_backend_result(spec, detail=error),
+                url,
+                error,
+            )
+        assert url is not None
+        return (
+            _audit_http_panel(spec, panel, config, app_base_url=url),
+            url,
+            None,
+        )
+    if spec.source_kind == "loki":
+        return (
+            _audit_loki_panel(spec, panel, config),
+            resolved_app_base_url,
+            app_resolution_error,
+        )
+    return (
+        _audit_tempo_handoff(spec, config),
+        resolved_app_base_url,
+        app_resolution_error,
+    )
+
+
+def _panel_audit_exception_result(
+    spec: PanelAuditSpec,
+    exc: Exception,
+) -> AuditResult:
+    return AuditResult(
+        dashboard_uid=spec.dashboard_uid,
+        panel_id=spec.panel_id,
+        title=spec.title,
+        source_kind=spec.source_kind,
+        semantic_kind=spec.semantic_kind,
+        status="error" if spec.required else "ok",
+        classification="blocked_unavailable",
+        detail=f"Panel audit target could not be executed: {exc}",
+        query_preview="",
+        target_ref_id=spec.target_ref_id,
+    )
+
+
 def _run_audit_with_provenance(
     config: AuditConfig,
 ) -> tuple[list[AuditResult], str | None]:
@@ -1768,51 +1883,16 @@ def _run_audit_with_provenance(
     for spec in effective_panel_specs():
         panel = _find_panel(spec)
         try:
-            if spec.source_kind == "prometheus":
-                results.append(_audit_prometheus_panel(spec, panel, config))
-            elif spec.source_kind == "http":
-                if app_resolution_error is not None:
-                    results.append(
-                        _blocked_http_backend_result(
-                            spec,
-                            detail=app_resolution_error,
-                        )
-                    )
-                    continue
-                if resolved_app_base_url is None:
-                    try:
-                        resolved_app_base_url = _resolve_app_base_url(config)
-                    except (
-                        HTTPError,
-                        URLError,
-                        OSError,
-                        TimeoutError,
-                        json.JSONDecodeError,
-                    ) as exc:
-                        app_resolution_error = (
-                            "Quarantine Explorer backend could not be resolved; "
-                            "all HTTP-backed panel checks are blocked instead of "
-                            f"being retried per panel: {exc}"
-                        )
-                        results.append(
-                            _blocked_http_backend_result(
-                                spec,
-                                detail=app_resolution_error,
-                            )
-                        )
-                        continue
-                results.append(
-                    _audit_http_panel(
-                        spec,
-                        panel,
-                        config,
-                        app_base_url=resolved_app_base_url,
-                    )
+            result, resolved_app_base_url, app_resolution_error = (
+                _audit_one_panel_spec(
+                    spec,
+                    panel,
+                    config,
+                    resolved_app_base_url=resolved_app_base_url,
+                    app_resolution_error=app_resolution_error,
                 )
-            elif spec.source_kind == "loki":
-                results.append(_audit_loki_panel(spec, panel, config))
-            else:
-                results.append(_audit_tempo_handoff(spec, config))
+            )
+            results.append(result)
         except (
             HTTPError,
             URLError,
@@ -1820,20 +1900,7 @@ def _run_audit_with_provenance(
             TimeoutError,
             json.JSONDecodeError,
         ) as exc:
-            results.append(
-                AuditResult(
-                    dashboard_uid=spec.dashboard_uid,
-                    panel_id=spec.panel_id,
-                    title=spec.title,
-                    source_kind=spec.source_kind,
-                    semantic_kind=spec.semantic_kind,
-                    status="error" if spec.required else "ok",
-                    classification="blocked_unavailable",
-                    detail=f"Panel audit target could not be executed: {exc}",
-                    query_preview="",
-                    target_ref_id=spec.target_ref_id,
-                )
-            )
+            results.append(_panel_audit_exception_result(spec, exc))
     return (results, resolved_app_base_url)
 
 

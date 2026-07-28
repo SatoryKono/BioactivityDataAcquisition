@@ -105,10 +105,12 @@ class CrossRefAdapter(
         "Use fetch_filtered() with a single filter_field instead."
     )
     _fallback_fetch_service: FallbackFetchOrchestrator = field(init=False, repr=False)
-    _fallback_decorator: ComposableFallbackDecorator = field(init=False, repr=False)
+    _fallback_decorator: ComposableFallbackDecorator | None = field(
+        init=False, default=None, repr=False
+    )
     _query_builder: CrossRefQueryPlanner = field(init=False, repr=False)
     _response_mapper: CrossRefResponseMapper = field(init=False, repr=False)
-    _fetch_flow: CrossRefFetchFlow = field(init=False, repr=False)
+    _fetch_flow: CrossRefFetchFlow | None = field(init=False, default=None, repr=False)
 
     def __post_init__(self) -> None:
         """Initialize helper services and decomposed CrossRef flow components."""
@@ -127,7 +129,10 @@ class CrossRefAdapter(
         self._batch_fetcher = runtime_services.batch_fetcher
         self._search_paginator = runtime_services.search_paginator
         self._fallback_handler = runtime_services.fallback_handler
+        # Build decorator before fetch flow; hook no-ops while _fetch_flow is None.
         self.configure_fallback_policy(None)
+        if self._fallback_decorator is None:
+            raise RuntimeError("CrossRef fallback decorator was not configured")
 
         self._fetch_flow = build_crossref_fetch_flow(
             fetch_flow=self.fetch_flow,
@@ -155,7 +160,8 @@ class CrossRefAdapter(
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch CrossRef publications by DOI list (FilterableDataSourcePort)."""
-        async for publication in self._fetch_flow.fetch_filtered(
+        flow = self._require_fetch_flow()
+        async for publication in flow.fetch_filtered(
             entity_type=entity_type,
             filter_ids=filter_ids,
             filter_field=filter_field,
@@ -172,7 +178,8 @@ class CrossRefAdapter(
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch publications by DOI with title-search fallback for misses."""
-        async for publication in self._fetch_flow.fetch_filtered_with_fallback(
+        flow = self._require_fetch_flow()
+        async for publication in flow.fetch_filtered_with_fallback(
             entity_type=entity_type,
             filter_ids=filter_ids,
             filter_field=filter_field,
@@ -192,7 +199,8 @@ class CrossRefAdapter(
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch CrossRef publications via DOI filters or free-text query."""
         del offset
-        async for publication in self._fetch_flow.fetch(
+        flow = self._require_fetch_flow()
+        async for publication in flow.fetch(
             entity_type=entity_type,
             limit=limit,
             query=query,
@@ -200,6 +208,13 @@ class CrossRefAdapter(
             filter_field=filter_field,
         ):
             yield publication
+
+    def _require_fetch_flow(self) -> CrossRefFetchFlow:
+        """Return fetch flow after ``__post_init__`` wiring (never None in use)."""
+        flow = self._fetch_flow
+        if flow is None:
+            raise RuntimeError("CrossRefAdapter fetch flow is not initialized")
+        return flow
 
     async def _probe_health(self) -> HealthStatus:
         """Probe CrossRef API health with response-status classification.

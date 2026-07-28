@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from typing import Any, cast, TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Any, Protocol, cast
 
 from bioetl.application.core._runner_dependency_support import load_runner_checkpoint
 from bioetl.application.core.runner_execution_flow import (

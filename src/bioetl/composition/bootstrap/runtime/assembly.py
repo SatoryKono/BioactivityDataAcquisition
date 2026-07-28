@@ -44,7 +44,6 @@ __all__ = [
     "assemble_vacuum_settings",
 ]
 
-
 @dataclass(frozen=True, slots=True)
 class RuntimeBootstrapPhases:
     """Resolved runtime bootstrap phase outputs passed into runner construction."""
@@ -66,7 +65,6 @@ class RuntimeBootstrapPhases:
             inputs=self.input_wiring,
         )
 
-
 def assemble_runtime_bootstrap_phases(
     *,
     registry: PipelineRegistry,
@@ -81,7 +79,6 @@ def assemble_runtime_bootstrap_phases(
         factory_wiring=factory_wiring,
         input_wiring=input_wiring,
     )
-
 
 def assemble_vacuum_settings(
     *,
@@ -99,7 +96,6 @@ def assemble_vacuum_settings(
         enabled=yaml_maintenance.auto_vacuum,
         retention_days=yaml_maintenance.vacuum_retention_days,
     )
-
 
 def assemble_runtime_config(
     *,
@@ -136,7 +132,6 @@ def assemble_runtime_config(
         silver_filter_compatibility_mode=resolve_silver_filter_compatibility_mode(),
     )
 
-
 def assemble_filter_config(
     *,
     yaml_filter: YamlInputFilter,
@@ -160,7 +155,6 @@ def assemble_filter_config(
         direct_multi_filter_ids=ctx.input_filter.multi_filter_ids,
         direct_valid_combinations=ctx.input_filter.valid_combinations,
     )
-
 
 def assemble_cached_bronze_context(
     ctx: PipelineRunContext,

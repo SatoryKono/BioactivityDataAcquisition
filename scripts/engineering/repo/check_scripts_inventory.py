@@ -519,6 +519,38 @@ def _relative_import_candidate_paths(
     )
 
 
+def _relative_import_hits_for_node(
+    node: ast.ImportFrom,
+    *,
+    package_parts: tuple[str, ...],
+    lines: list[str],
+    rel: str,
+    source_group: str,
+    script_set: set[str],
+) -> list[tuple[str, RefEvidence]]:
+    """Resolve one relative ImportFrom node to inventoried helper module paths."""
+    if node.level == 0:
+        return []
+    base_parts = _relative_import_base_parts(package_parts, node.level)
+    if base_parts is None:
+        return []
+    raw_line = lines[node.lineno - 1] if node.lineno <= len(lines) else ""
+    evidence = _make_ref_evidence(
+        rel=rel,
+        line_no=node.lineno,
+        raw_line=raw_line,
+        source_group=source_group,
+    )
+    discovered: list[tuple[str, RefEvidence]] = []
+    for module_name in _relative_import_module_names(node):
+        for candidate_path in _relative_import_candidate_paths(
+            base_parts, module_name
+        ):
+            if candidate_path in script_set and candidate_path != rel:
+                discovered.append((candidate_path, evidence))
+    return discovered
+
+
 def _discover_relative_import_refs(
     *,
     rel: str,
@@ -538,24 +570,18 @@ def _discover_relative_import_refs(
     lines = text.splitlines()
     discovered: list[tuple[str, RefEvidence]] = []
     for node in ast.walk(tree):
-        if not isinstance(node, ast.ImportFrom) or node.level == 0:
+        if not isinstance(node, ast.ImportFrom):
             continue
-        base_parts = _relative_import_base_parts(package_parts, node.level)
-        if base_parts is None:
-            continue
-        raw_line = lines[node.lineno - 1] if node.lineno <= len(lines) else ""
-        evidence = _make_ref_evidence(
-            rel=rel,
-            line_no=node.lineno,
-            raw_line=raw_line,
-            source_group=source_group,
+        discovered.extend(
+            _relative_import_hits_for_node(
+                node,
+                package_parts=package_parts,
+                lines=lines,
+                rel=rel,
+                source_group=source_group,
+                script_set=script_set,
+            )
         )
-        for module_name in _relative_import_module_names(node):
-            for candidate_path in _relative_import_candidate_paths(
-                base_parts, module_name
-            ):
-                if candidate_path in script_set and candidate_path != rel:
-                    discovered.append((candidate_path, evidence))
     return discovered
 
 
@@ -1245,6 +1271,58 @@ def _check(manifest_path: Path, actual: dict[str, object]) -> int:
     return 1
 
 
+def _scripts_by_path(items: list[object]) -> dict[str, dict[str, object]]:
+    mapped: dict[str, dict[str, object]] = {}
+    for item in items:
+        if isinstance(item, dict) and isinstance(item.get("path"), str):
+            mapped[str(item["path"])] = item
+    return mapped
+
+
+def _first_field_drift(
+    expected: dict[str, object],
+    actual: dict[str, object],
+) -> tuple[str, object, object] | None:
+    """Return the first differing field (key, expected, actual) if any."""
+    for key in sorted(set(expected) | set(actual)):
+        if expected.get(key) != actual.get(key):
+            return key, expected.get(key), actual.get(key)
+    return None
+
+
+def _print_path_set_drift(
+    *,
+    only_expected: list[str],
+    only_actual: list[str],
+) -> None:
+    if only_expected:
+        print(f"  - only in manifest ({len(only_expected)}): {only_expected[:10]}")
+    if only_actual:
+        print(f"  - only in live scan ({len(only_actual)}): {only_actual[:10]}")
+
+
+def _print_field_drift_samples(
+    *,
+    expected_by_path: dict[str, dict[str, object]],
+    actual_by_path: dict[str, dict[str, object]],
+    sample_limit: int = 8,
+) -> int:
+    """Print up to sample_limit field-level drift samples; return total changed count."""
+    changed = 0
+    for path in sorted(set(expected_by_path) & set(actual_by_path)):
+        if expected_by_path[path] == actual_by_path[path]:
+            continue
+        changed += 1
+        if changed > sample_limit:
+            continue
+        drift = _first_field_drift(expected_by_path[path], actual_by_path[path])
+        if drift is None:
+            continue
+        key, exp_value, act_value = drift
+        print(f"  - {path}.{key}: expected={exp_value!r} actual={act_value!r}")
+    return changed
+
+
 def _print_manifest_drift_summary(
     *,
     expected: dict[str, object],
@@ -1258,36 +1336,16 @@ def _print_manifest_drift_summary(
         print("  - scripts[] type mismatch between expected and actual payloads")
         return
 
-    def _by_path(items: list[object]) -> dict[str, dict[str, object]]:
-        mapped: dict[str, dict[str, object]] = {}
-        for item in items:
-            if isinstance(item, dict) and isinstance(item.get("path"), str):
-                mapped[str(item["path"])] = item
-        return mapped
-
-    expected_by_path = _by_path(expected_scripts)
-    actual_by_path = _by_path(actual_scripts)
+    expected_by_path = _scripts_by_path(expected_scripts)
+    actual_by_path = _scripts_by_path(actual_scripts)
     only_expected = sorted(set(expected_by_path) - set(actual_by_path))
     only_actual = sorted(set(actual_by_path) - set(expected_by_path))
-    if only_expected:
-        print(f"  - only in manifest ({len(only_expected)}): {only_expected[:10]}")
-    if only_actual:
-        print(f"  - only in live scan ({len(only_actual)}): {only_actual[:10]}")
+    _print_path_set_drift(only_expected=only_expected, only_actual=only_actual)
 
-    shared = sorted(set(expected_by_path) & set(actual_by_path))
-    changed = 0
-    for path in shared:
-        if expected_by_path[path] != actual_by_path[path]:
-            changed += 1
-            if changed <= 8:
-                exp = expected_by_path[path]
-                act = actual_by_path[path]
-                for key in sorted(set(exp) | set(act)):
-                    if exp.get(key) != act.get(key):
-                        print(
-                            f"  - {path}.{key}: expected={exp.get(key)!r} actual={act.get(key)!r}"
-                        )
-                        break
+    changed = _print_field_drift_samples(
+        expected_by_path=expected_by_path,
+        actual_by_path=actual_by_path,
+    )
     if changed:
         print(f"  - scripts with field drift: {changed}")
     expected_summary = expected.get("summary")

@@ -486,6 +486,45 @@ def _build_triaged_entry_row(
     }
 
 
+def _triaged_family_entries(
+    family: dict[str, Any],
+) -> tuple[str, list[dict[str, Any]]] | None:
+    """Return family name and entry mappings, or None when the family is invalid."""
+    family_name = str(family.get("name", "unknown"))
+    entries = family.get("entries", [])
+    if not isinstance(entries, list):
+        return None
+    valid_entries = [entry for entry in entries if isinstance(entry, dict)]
+    return family_name, valid_entries
+
+
+def _triaged_entry_target_path(
+    entry: dict[str, Any],
+) -> tuple[object, str] | None:
+    """Return (module_name, module_path) for a triaged entry target when valid."""
+    target = entry.get("target", {})
+    if not isinstance(target, dict):
+        return None
+    module_path = target.get("module_path") or target.get("name")
+    if not isinstance(module_path, str):
+        return None
+    return target.get("module_name"), module_path
+
+
+def _record_retain_active_evidence_lane(
+    counts: dict[str, int],
+    row: dict[str, object],
+) -> None:
+    """Increment retain_active evidence-lane counts when applicable."""
+    evidence_lane = row.get("evidence_lane")
+    if (
+        row.get("disposition") == "retain_active"
+        and isinstance(evidence_lane, str)
+        and evidence_lane
+    ):
+        counts[evidence_lane] = counts.get(evidence_lane, 0) + 1
+
+
 def _collect_triaged_rows(
     *,
     repo_root: Path,
@@ -500,20 +539,15 @@ def _collect_triaged_rows(
     for family in families:
         if not isinstance(family, dict):
             continue
-        family_name = str(family.get("name", "unknown"))
-        entries = family.get("entries", [])
-        if not isinstance(entries, list):
+        parsed = _triaged_family_entries(family)
+        if parsed is None:
             continue
+        family_name, entries = parsed
         for entry in entries:
-            if not isinstance(entry, dict):
+            target = _triaged_entry_target_path(entry)
+            if target is None:
                 continue
-            target = entry.get("target", {})
-            if not isinstance(target, dict):
-                continue
-            module_name = target.get("module_name")
-            module_path = target.get("module_path") or target.get("name")
-            if not isinstance(module_path, str):
-                continue
+            module_name, module_path = target
             row = _build_triaged_entry_row(
                 repo_root=repo_root,
                 family_name=family_name,
@@ -522,15 +556,10 @@ def _collect_triaged_rows(
                 module_path=module_path,
                 importer_map=importer_map,
             )
-            evidence_lane = row.get("evidence_lane")
-            if (
-                row.get("disposition") == "retain_active"
-                and isinstance(evidence_lane, str)
-                and evidence_lane
-            ):
-                triaged_retained_evidence_lane_counts[evidence_lane] = (
-                    triaged_retained_evidence_lane_counts.get(evidence_lane, 0) + 1
-                )
+            _record_retain_active_evidence_lane(
+                triaged_retained_evidence_lane_counts,
+                row,
+            )
             triaged_rows.append(row)
     return triaged_rows, triaged_retained_evidence_lane_counts
 
@@ -826,16 +855,13 @@ def build_dead_code_inventory(
     }
 
 
-def _render_markdown(payload: dict[str, object]) -> str:
-    review_window = payload["review_window"]
-    summary = payload["summary"]
-    triaged_rows = payload["triaged_entries"]
-    zero_rows = payload["repo_wide_zero_import_candidates"]
-    assert isinstance(review_window, dict)
-    assert isinstance(summary, dict)
-    assert isinstance(triaged_rows, list)
-    assert isinstance(zero_rows, list)
-    lines = [
+def _md_summary_bullets(
+    payload: dict[str, object],
+    review_window: dict[str, object],
+    summary: dict[str, object],
+) -> list[str]:
+    """Render the inventory header bullet list."""
+    return [
         "# Dead Code Inventory",
         "",
         f"- snapshot_date: {payload['snapshot_date']}",
@@ -861,6 +887,11 @@ def _render_markdown(payload: dict[str, object]) -> str:
         f"{summary['triaged_retained_without_owner_tests_count']}",
         "- note: zero static importer count is a review signal, not automatic removal proof",
         f"- guardrail: {review_window['guardrail_note']}",
+    ]
+
+
+def _md_triaged_table(triaged_rows: list[object]) -> list[str]:
+    lines = [
         "",
         "## Triage Verification",
         "",
@@ -874,65 +905,96 @@ def _render_markdown(payload: dict[str, object]) -> str:
             f"`{row['entry_id']}` | `{row['disposition']}` | "
             f"{row['src_importer_count']} | `{row['verification_status']}` |"
         )
+    return lines
 
-    lines.extend(
-        [
-            "",
-            "## Repo-wide Zero-import Candidates",
-            "",
-            "| Module | Disposition | Path |",
-            "| --- | --- | --- |",
-        ]
-    )
+
+def _md_zero_import_table(zero_rows: list[object]) -> list[str]:
+    lines = [
+        "",
+        "## Repo-wide Zero-import Candidates",
+        "",
+        "| Module | Disposition | Path |",
+        "| --- | --- | --- |",
+    ]
     for row in zero_rows:
         assert isinstance(row, dict)
         lines.append(
             f"| `{row['module_name']}` | `{row.get('disposition', 'untriaged')}` | `{row['path']}` |"
         )
+    return lines
+
+
+def _md_owner_module_cell(row: dict[str, object]) -> str:
+    if "path" in row:
+        return str(row["path"])
+    return str(row["module_path"])
+
+
+def _md_owner_tests_cell(row: dict[str, object]) -> str:
+    return ", ".join(f"`{path}`" for path in row["owner_tests"])
+
+
+def _md_retained_owner_test_table(
+    triaged_rows: list[object],
+    zero_rows: list[object],
+) -> list[str]:
+    lines = [
+        "",
+        "## Retained Owner-Test Evidence",
+        "",
+        "| Scope | Module | Evidence Lane | Owner Tests |",
+        "| --- | --- | --- | --- |",
+    ]
     retained_owner_rows = [
         row
         for row in triaged_rows + zero_rows
         if isinstance(row, dict) and int(row.get("owner_test_count", 0)) > 0
     ]
-    lines.extend(
-        [
-            "",
-            "## Retained Owner-Test Evidence",
-            "",
-            "| Scope | Module | Evidence Lane | Owner Tests |",
-            "| --- | --- | --- | --- |",
-        ]
-    )
     for row in retained_owner_rows:
-        scope = "triaged_retained"
-        if row in zero_rows:
-            scope = "repo_wide_zero_import"
-        owner_tests = ", ".join(f"`{path}`" for path in row["owner_tests"])
+        scope = "repo_wide_zero_import" if row in zero_rows else "triaged_retained"
         lines.append(
-            f"| `{scope}` | `{row['path'] if 'path' in row else row['module_path']}` | "
-            f"`{row['evidence_lane']}` | {owner_tests} |"
+            f"| `{scope}` | `{_md_owner_module_cell(row)}` | "
+            f"`{row['evidence_lane']}` | {_md_owner_tests_cell(row)} |"
         )
+    return lines
+
+
+def _md_non_static_reachability_table(zero_rows: list[object]) -> list[str]:
+    lines = [
+        "",
+        "## Non-Static Reachability Evidence",
+        "",
+        "| Module | Disposition | Evidence Lane | Owner Tests |",
+        "| --- | --- | --- | --- |",
+    ]
     non_static_rows = [
         row
         for row in zero_rows
         if isinstance(row, dict)
         and row.get("disposition") in NON_STATIC_REACHABILITY_DISPOSITIONS
     ]
-    lines.extend(
-        [
-            "",
-            "## Non-Static Reachability Evidence",
-            "",
-            "| Module | Disposition | Evidence Lane | Owner Tests |",
-            "| --- | --- | --- | --- |",
-        ]
-    )
     for row in non_static_rows:
-        owner_tests = ", ".join(f"`{path}`" for path in row["owner_tests"])
         lines.append(
             f"| `{row['module_name']}` | `{row['disposition']}` | "
-            f"`{row['evidence_lane']}` | {owner_tests} |"
+            f"`{row['evidence_lane']}` | {_md_owner_tests_cell(row)} |"
         )
+    return lines
+
+
+def _render_markdown(payload: dict[str, object]) -> str:
+    review_window = payload["review_window"]
+    summary = payload["summary"]
+    triaged_rows = payload["triaged_entries"]
+    zero_rows = payload["repo_wide_zero_import_candidates"]
+    assert isinstance(review_window, dict)
+    assert isinstance(summary, dict)
+    assert isinstance(triaged_rows, list)
+    assert isinstance(zero_rows, list)
+    lines = _md_summary_bullets(payload, review_window, summary)
+    lines.extend(_md_triaged_table(triaged_rows))
+    lines.extend(_md_zero_import_table(zero_rows))
+    lines.extend(_md_retained_owner_test_table(triaged_rows, zero_rows))
+    lines.extend(_md_non_static_reachability_table(zero_rows))
     lines.append("")
     return "\n".join(lines)
 

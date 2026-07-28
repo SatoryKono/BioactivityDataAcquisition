@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
-from typing import Any, cast, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.domain.types import BronzeRecord, JsonDict
 from bioetl.infrastructure.adapters.filterable_mixin import NotSupportedMultiFilterMixin

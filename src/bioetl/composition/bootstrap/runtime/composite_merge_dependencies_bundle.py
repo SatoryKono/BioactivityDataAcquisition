@@ -16,7 +16,6 @@ if TYPE_CHECKING:
         JoinPlannerService,
     )
 
-
 @dataclass(slots=True)
 class MergeDependenciesBundle:
     """Merge-specific collaborators assembled in composition."""
@@ -28,6 +27,5 @@ class MergeDependenciesBundle:
     coalesce_policy: CoalescePolicyService
     conflict_resolver: ConflictResolverService
     join_planner: JoinPlannerService
-
 
 __all__ = ["MergeDependenciesBundle"]

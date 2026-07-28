@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import re
 from copy import deepcopy
 from pathlib import Path
 
@@ -137,12 +136,8 @@ def fix_runtime() -> None:
     print("runtime 9105 OK", p9105["type"], p9105["title"])
 
 
-def fix_incident() -> None:
-    inc = load_dash(DASHBOARD_INCIDENT_V1)
-    panels = inc.get("panels") or []
-    by_id = {p.get("id"): p for p in panels}
-
-    status_mappings = [
+def _incident_status_mappings() -> list[dict]:
+    return [
         {
             "type": "value",
             "options": {
@@ -160,7 +155,10 @@ def fix_incident() -> None:
             },
         },
     ]
-    status_thresholds = {
+
+
+def _incident_status_thresholds() -> dict:
+    return {
         "mode": "absolute",
         "steps": [
             {"color": "green", "value": None},
@@ -169,7 +167,10 @@ def fix_incident() -> None:
             {"color": "gray", "value": 3},
         ],
     }
-    value_override = {
+
+
+def _incident_value_override() -> dict:
+    return {
         "matcher": {
             "id": "byRegexp",
             "options": r"^(Value|#Value|Value \(.*\)|value)$",
@@ -194,36 +195,33 @@ def fix_incident() -> None:
         ],
     }
 
-    def fix_table(p: dict) -> None:
-        fc = p.setdefault("fieldConfig", {})
-        defaults = fc.setdefault("defaults", {})
-        custom = defaults.setdefault("custom", {})
-        custom["cellOptions"] = {"type": "auto"}
-        custom["align"] = "left"
-        custom["inspect"] = False
-        defaults["color"] = {"mode": "thresholds"}
-        fc["overrides"] = [deepcopy(value_override)]
 
-    # Fix status if present at top level or after rebuild
-    if 9401 in by_id:
-        st = by_id[9401]
-        fc = st.setdefault("fieldConfig", {})
-        defaults = fc.setdefault("defaults", {})
-        defaults["mappings"] = status_mappings
-        defaults["thresholds"] = status_thresholds
-        defaults["color"] = {"mode": "thresholds"}
-        defaults["noValue"] = "UNKNOWN"
-        defaults["decimals"] = 0
-        st["description"] = (
-            "Worst-of L0 status for selected pipeline/run_type. "
-            "Vocabulary: 0=OK, 1=WARN, 2=CRIT, 3/null=UNKNOWN (labelled; never bare numeric)."
-        )
+def _fix_incident_table(panel: dict, *, value_override: dict) -> None:
+    fc = panel.setdefault("fieldConfig", {})
+    defaults = fc.setdefault("defaults", {})
+    custom = defaults.setdefault("custom", {})
+    custom["cellOptions"] = {"type": "auto"}
+    custom["align"] = "left"
+    custom["inspect"] = False
+    defaults["color"] = {"mode": "thresholds"}
+    fc["overrides"] = [deepcopy(value_override)]
 
-    for pid in (2002, 2003, 2004, 2005):
-        if pid in by_id:
-            fix_table(by_id[pid])
 
-    handoffs = {
+def _apply_incident_status_panel(panel: dict) -> None:
+    defaults = panel.setdefault("fieldConfig", {}).setdefault("defaults", {})
+    defaults["mappings"] = _incident_status_mappings()
+    defaults["thresholds"] = _incident_status_thresholds()
+    defaults["color"] = {"mode": "thresholds"}
+    defaults["noValue"] = "UNKNOWN"
+    defaults["decimals"] = 0
+    panel["description"] = (
+        "Worst-of L0 status for selected pipeline/run_type. "
+        "Vocabulary: 0=OK, 1=WARN, 2=CRIT, 3/null=UNKNOWN (labelled; never bare numeric)."
+    )
+
+
+def _incident_handoff_urls() -> dict[int, str]:
+    return {
         2002: (
             "/d/bioetl-runtime/bioetl-runtime?${__url_time_range}"
             "&var-workflow=${workflow}"
@@ -242,16 +240,20 @@ def fix_incident() -> None:
             "&var-run_type=${run_type}"
         ),
     }
-    for pid, url in handoffs.items():
-        if pid in by_id:
-            defaults = by_id[pid].setdefault("fieldConfig", {}).setdefault(
-                "defaults", {}
-            )
-            defaults["links"] = [
-                {"title": "Open domain workspace", "url": url, "targetBlank": False}
-            ]
 
-    domain_links = [
+
+def _apply_incident_handoffs(by_id: dict) -> None:
+    for pid, url in _incident_handoff_urls().items():
+        if pid not in by_id:
+            continue
+        defaults = by_id[pid].setdefault("fieldConfig", {}).setdefault("defaults", {})
+        defaults["links"] = [
+            {"title": "Open domain workspace", "url": url, "targetBlank": False}
+        ]
+
+
+def _incident_domain_links() -> list[dict]:
+    return [
         {
             "title": "Open Pipeline Diagnostics",
             "url": (
@@ -293,7 +295,9 @@ def fix_incident() -> None:
         },
     ]
 
-    ranked = {
+
+def _ranked_suspects_panel(*, value_override: dict) -> dict:
+    return {
         "id": 2010,
         "type": "table",
         "title": "Ranked Active Suspects",
@@ -375,7 +379,7 @@ def fix_incident() -> None:
                         {"color": "red", "value": 2},
                     ],
                 },
-                "links": domain_links,
+                "links": _incident_domain_links(),
             },
             "overrides": [deepcopy(value_override)],
         },
@@ -392,6 +396,13 @@ def fix_incident() -> None:
         },
     }
 
+
+def _layout_incident_core_panels(
+    by_id: dict,
+    *,
+    value_override: dict,
+) -> None:
+    """Apply grid positions and NBA content for core incident panels."""
     nav = by_id.get(1000)
     prov = by_id.get(9400)
     status = by_id.get(9401)
@@ -399,7 +410,6 @@ def fix_incident() -> None:
     alerts = by_id.get(2005)
     hist = by_id.get(2006)
     impact = by_id.get(2007)
-
     if nav:
         nav["gridPos"] = {"h": 3, "w": 24, "x": 0, "y": 0}
     if prov:
@@ -419,12 +429,14 @@ def fix_incident() -> None:
         )
     if alerts:
         alerts["gridPos"] = {"h": 6, "w": 12, "x": 0, "y": 17}
-        fix_table(alerts)
+        _fix_incident_table(alerts, value_override=value_override)
     if hist:
         hist["gridPos"] = {"h": 6, "w": 12, "x": 12, "y": 17}
     if impact:
         impact["gridPos"] = {"h": 4, "w": 24, "x": 0, "y": 23}
 
+
+def _incident_detail_row(by_id: dict, *, value_override: dict) -> dict:
     detail_row = {
         "id": 2099,
         "type": "row",
@@ -438,28 +450,23 @@ def fix_incident() -> None:
         if not src:
             continue
         child = deepcopy(src)
-        fix_table(child)
+        _fix_incident_table(child, value_override=value_override)
         child["gridPos"] = {"h": 7, "w": 8, "x": i * 8, "y": 28}
         detail_row["panels"].append(child)
+    return detail_row
 
-    ordered = [
-        p
-        for p in (nav, prov, status, nba, ranked, alerts, hist, impact, detail_row)
-        if p is not None
-    ]
-    inc["panels"] = ordered
-    save_dash(DASHBOARD_INCIDENT_V1, inc)
 
-    # verify
+def _verify_incident_dashboard() -> None:
     inc2 = load_dash(DASHBOARD_INCIDENT_V1)
     st = next(p for p in walk(inc2.get("panels")) if p.get("id") == 9401)
     maps = (st.get("fieldConfig") or {}).get("defaults", {}).get("mappings") or []
     flat = {}
-    for m in maps:
-        if m.get("type") == "value":
-            for k, v in (m.get("options") or {}).items():
-                if isinstance(v, dict):
-                    flat[str(k)] = v.get("text")
+    for mapping in maps:
+        if mapping.get("type") != "value":
+            continue
+        for key, value in (mapping.get("options") or {}).items():
+            if isinstance(value, dict):
+                flat[str(key)] = value.get("text")
     assert flat.get("3") == "UNKNOWN", flat
     t2002 = next(p for p in walk(inc2.get("panels")) if p.get("id") == 2002)
     cell = (
@@ -472,6 +479,41 @@ def fix_incident() -> None:
     assert cell == "auto", cell
     assert any(p.get("id") == 2010 for p in walk(inc2.get("panels")))
     print("incident OK")
+
+
+def fix_incident() -> None:
+    inc = load_dash(DASHBOARD_INCIDENT_V1)
+    panels = inc.get("panels") or []
+    by_id = {p.get("id"): p for p in panels}
+    value_override = _incident_value_override()
+
+    if 9401 in by_id:
+        _apply_incident_status_panel(by_id[9401])
+    for pid in (2002, 2003, 2004, 2005):
+        if pid in by_id:
+            _fix_incident_table(by_id[pid], value_override=value_override)
+    _apply_incident_handoffs(by_id)
+    ranked = _ranked_suspects_panel(value_override=value_override)
+    _layout_incident_core_panels(by_id, value_override=value_override)
+    detail_row = _incident_detail_row(by_id, value_override=value_override)
+    ordered = [
+        p
+        for p in (
+            by_id.get(1000),
+            by_id.get(9400),
+            by_id.get(9401),
+            by_id.get(2001),
+            ranked,
+            by_id.get(2005),
+            by_id.get(2006),
+            by_id.get(2007),
+            detail_row,
+        )
+        if p is not None
+    ]
+    inc["panels"] = ordered
+    save_dash(DASHBOARD_INCIDENT_V1, inc)
+    _verify_incident_dashboard()
 
 
 def fix_trust() -> None:
@@ -521,103 +563,133 @@ def fix_trust() -> None:
     print("trust OK")
 
 
-def fix_dq_provider_run() -> None:
-    dq = load_dash("bioetl-dq-v2.json")
-    for p in walk(dq.get("panels")):
-        if p.get("title") == "Status" and p.get("type") == "stat":
-            desc = p.get("description") or ""
-            note = (
-                " NOW-lane decision only; range KPI cards are accounting, "
-                "not peer severity."
+def _append_desc_note(panel: dict, *, marker: str, note: str) -> None:
+    """Append a description note when the marker is not already present."""
+    desc = panel.get("description") or ""
+    if marker not in desc:
+        panel["description"] = (desc + note).strip()
+
+
+def _fix_dq_panels(dq: dict) -> None:
+    for panel in walk(dq.get("panels")):
+        if panel.get("title") == "Status" and panel.get("type") == "stat":
+            _append_desc_note(
+                panel,
+                marker="NOW-lane",
+                note=(
+                    " NOW-lane decision only; range KPI cards are accounting, "
+                    "not peer severity."
+                ),
             )
-            if "NOW-lane" not in desc:
-                p["description"] = (desc + note).strip()
-        title = p.get("title") or ""
-        if p.get("type") == "text" and (
-            "First Action" in title or p.get("id") in {9103, 9991, 2001}
+        title = panel.get("title") or ""
+        if panel.get("type") == "text" and (
+            "First Action" in title or panel.get("id") in {9103, 9991, 2001}
         ):
-            p.setdefault("options", {})["mode"] = "markdown"
-            p["options"]["content"] = (
+            panel.setdefault("options", {})["mode"] = "markdown"
+            panel["options"]["content"] = (
                 "**Data trust — next actions**\n"
                 "1. Read **NOW Status** + current threshold/reasons (not range zeros).\n"
                 "2. If blocked/quarantine/rejects > 0, use accounting with denominators.\n"
                 "3. Selected run → Run Explorer; resume → Trust Primary recovery.\n"
                 "4. Range cards are SLA/freshness context only."
             )
+
+
+def _is_fleet_matrix_panel(panel: dict) -> bool:
+    title = panel.get("title") or ""
+    if panel.get("type") not in {"table", "bargauge"}:
+        return False
+    if "Provider" not in title and "Fleet" not in title and "Severity" not in title:
+        return False
+    y = (panel.get("gridPos") or {}).get("y", 99)
+    return y <= 25
+
+
+def _provider_context_link() -> dict:
+    return {
+        "title": "Open selected provider context",
+        "url": (
+            "/d/bioetl-provider-health-v2/bioetl-provider-health-v2"
+            "?${__url_time_range}&var-workflow=${workflow}"
+            "&var-provider=${__data.fields.provider:percentencode}"
+            "&var-pipeline=${pipeline}&var-run_type=${run_type}"
+        ),
+        "targetBlank": False,
+    }
+
+
+def _fix_provider_health_panels(ph: dict) -> None:
+    for panel in walk(ph.get("panels")):
+        if not _is_fleet_matrix_panel(panel):
+            continue
+        _append_desc_note(
+            panel,
+            marker="Fleet-first",
+            note=(
+                " Fleet-first matrix: answer without forcing a provider selector; "
+                "select row to deep-dive."
+            ),
+        )
+        if panel.get("type") == "table":
+            defaults = panel.setdefault("fieldConfig", {}).setdefault("defaults", {})
+            defaults.setdefault("links", [_provider_context_link()])
+
+
+_RUN_EXPLORER_BROWSE_CONTENT = (
+    "**Browse vs Selected run**\n"
+    "- **Browse:** population/list without `run_id` — identity panels "
+    "show N/A until selection.\n"
+    "- **Selected:** set `run_id` (Ops HTTP identity, never a Prometheus label).\n"
+    "- Handoff from Incident/Runtime/Trust preserves time range + pipeline context."
+)
+
+_RUN_EXPLORER_GUIDE_CONTENT = (
+    "**Browse vs Selected run**\n"
+    "- **Browse:** no `run_id` — forensics show N/A until exact selection.\n"
+    "- **Selected:** `run_id` is Ops HTTP identity only (never Prom label).\n"
+    "- Preserve time range on handoff back to origin workspace."
+)
+
+
+def _shift_run_explorer_panels(run_explorer: dict, *, delta_y: int = 3) -> None:
+    for panel in run_explorer.get("panels") or []:
+        grid_pos = panel.get("gridPos") or {}
+        if "y" in grid_pos:
+            grid_pos["y"] = int(grid_pos["y"]) + delta_y
+
+
+def _fix_run_explorer_panels(run_explorer: dict) -> None:
+    for panel in run_explorer.get("panels") or []:
+        if panel.get("id") == 1 and panel.get("type") == "text":
+            panel.setdefault("options", {})["mode"] = "markdown"
+            panel["options"]["content"] = _RUN_EXPLORER_BROWSE_CONTENT
+            return
+    guide = {
+        "id": 9405,
+        "type": "text",
+        "title": "Browse · Selected run",
+        "gridPos": {"h": 3, "w": 24, "x": 0, "y": 3},
+        "options": {
+            "mode": "markdown",
+            "content": _RUN_EXPLORER_GUIDE_CONTENT,
+        },
+    }
+    _shift_run_explorer_panels(run_explorer)
+    run_explorer.setdefault("panels", []).insert(1, guide)
+
+
+def fix_dq_provider_run() -> None:
+    dq = load_dash("bioetl-dq-v2.json")
+    _fix_dq_panels(dq)
     save_dash("bioetl-dq-v2.json", dq)
 
     ph = load_dash("bioetl-provider-health-v2.json")
-    for p in walk(ph.get("panels")):
-        title = p.get("title") or ""
-        if p.get("type") not in {"table", "bargauge"}:
-            continue
-        if "Provider" not in title and "Fleet" not in title and "Severity" not in title:
-            continue
-        y = (p.get("gridPos") or {}).get("y", 99)
-        if y > 25:
-            continue
-        desc = p.get("description") or ""
-        note = (
-            " Fleet-first matrix: answer without forcing a provider selector; "
-            "select row to deep-dive."
-        )
-        if "Fleet-first" not in desc:
-            p["description"] = (desc + note).strip()
-        if p.get("type") == "table":
-            defaults = p.setdefault("fieldConfig", {}).setdefault("defaults", {})
-            defaults.setdefault(
-                "links",
-                [
-                    {
-                        "title": "Open selected provider context",
-                        "url": (
-                            "/d/bioetl-provider-health-v2/bioetl-provider-health-v2"
-                            "?${__url_time_range}&var-workflow=${workflow}"
-                            "&var-provider=${__data.fields.provider:percentencode}"
-                            "&var-pipeline=${pipeline}&var-run_type=${run_type}"
-                        ),
-                        "targetBlank": False,
-                    }
-                ],
-            )
+    _fix_provider_health_panels(ph)
     save_dash("bioetl-provider-health-v2.json", ph)
 
-    re = load_dash("bioetl-run-explorer-v1.json")
-    updated = False
-    for p in re.get("panels") or []:
-        if p.get("id") == 1 and p.get("type") == "text":
-            p.setdefault("options", {})["mode"] = "markdown"
-            p["options"]["content"] = (
-                "**Browse vs Selected run**\n"
-                "- **Browse:** population/list without `run_id` — identity panels "
-                "show N/A until selection.\n"
-                "- **Selected:** set `run_id` (Ops HTTP identity, never a Prometheus label).\n"
-                "- Handoff from Incident/Runtime/Trust preserves time range + pipeline context."
-            )
-            updated = True
-            break
-    if not updated:
-        guide = {
-            "id": 9405,
-            "type": "text",
-            "title": "Browse · Selected run",
-            "gridPos": {"h": 3, "w": 24, "x": 0, "y": 3},
-            "options": {
-                "mode": "markdown",
-                "content": (
-                    "**Browse vs Selected run**\n"
-                    "- **Browse:** no `run_id` — forensics show N/A until exact selection.\n"
-                    "- **Selected:** `run_id` is Ops HTTP identity only (never Prom label).\n"
-                    "- Preserve time range on handoff back to origin workspace."
-                ),
-            },
-        }
-        for p in re.get("panels") or []:
-            gp = p.get("gridPos") or {}
-            if "y" in gp:
-                gp["y"] = int(gp["y"]) + 3
-        re.setdefault("panels", []).insert(1, guide)
-    save_dash("bioetl-run-explorer-v1.json", re)
+    run_explorer = load_dash("bioetl-run-explorer-v1.json")
+    _fix_run_explorer_panels(run_explorer)
+    save_dash("bioetl-run-explorer-v1.json", run_explorer)
     print("dq/provider/run OK")
 
 

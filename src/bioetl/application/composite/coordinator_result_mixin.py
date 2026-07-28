@@ -3,9 +3,8 @@
 
 from __future__ import annotations
 
-from typing import Any, cast
-
 from datetime import datetime
+from typing import Any, cast
 
 from bioetl.domain.composite import CompositeDQConfig, EnricherConfig
 from bioetl.domain.composite.result import EnrichmentResult, EnrichmentStatus

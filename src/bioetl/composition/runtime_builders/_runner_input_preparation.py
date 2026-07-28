@@ -42,7 +42,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
-
 @dataclass(frozen=True, slots=True)
 class PreparedRunnerContext:
     settings: Settings
@@ -51,12 +50,10 @@ class PreparedRunnerContext:
     yaml_config: PipelineYamlConfig
     observability: ObservabilityBundle
 
-
 @dataclass(frozen=True, slots=True)
 class ResolvedRunnerDerivedInputs:
     runtime_config: RuntimeConfig
     filter_config: InputFilterConfig | None
-
 
 def _resolve_settings_for_runner(
     *,
@@ -68,7 +65,6 @@ def _resolve_settings_for_runner(
         settings=get_settings_fn(),
         enabled=getattr(ctx, "tracing_enabled_override", None),
     )
-
 
 def _resolve_required_persistence_profile(
     *,
@@ -100,7 +96,6 @@ def _resolve_required_persistence_profile(
         )
     )
 
-
 def _resolve_effective_context(
     *,
     ctx: PipelineRunContext,
@@ -117,7 +112,6 @@ def _resolve_effective_context(
     )
     return _bind_cached_bronze_context(ctx, cached_bronze), cached_bronze
 
-
 def _load_runner_yaml_config(
     *,
     pipeline_name: str,
@@ -128,7 +122,6 @@ def _load_runner_yaml_config(
     yaml_config = load_pipeline_config_fn(pipeline_name)
     validate_pk_contract_fn(yaml_config)
     return yaml_config
-
 
 def _build_runner_observability(
     *,
@@ -146,7 +139,6 @@ def _build_runner_observability(
         yaml_config=yaml_config,
         skip_gold=bool(getattr(ctx, "skip_gold", False)),
     )
-
 
 def prepare_runner_context(
     *,
@@ -195,7 +187,6 @@ def prepare_runner_context(
         yaml_config=yaml_config,
         observability=observability,
     )
-
 
 def resolve_runner_derived_inputs(
     *,

@@ -13,20 +13,16 @@ from bioetl.domain.ports import LoggerPort
 if TYPE_CHECKING:
     LoggerFactory = Callable[[str, UUID, str], LoggerPort]
 
-
 __all__ = [
     "bootstrap_logger",
 ]
 
-
 _FALLBACK_LOG_RUN_ID_COUNTER = count()
-
 
 def _fallback_log_correlation_run_id() -> UUID:
     """Return a deterministic process-local fallback log correlation ID."""
     occurrence = next(_FALLBACK_LOG_RUN_ID_COUNTER)
     return uuid5(NAMESPACE_OID, f"bioetl.logger_bootstrap:{getpid()}:{occurrence}")
-
 
 def _default_logger_factory(pipeline: str, run_id: UUID, log_level: str) -> LoggerPort:
     """Create a UnifiedLogger with standard runtime settings."""
@@ -38,7 +34,6 @@ def _default_logger_factory(pipeline: str, run_id: UUID, log_level: str) -> Logg
         log_level=log_level,
         json_format=True,
     )
-
 
 def bootstrap_logger(
     pipeline: str,

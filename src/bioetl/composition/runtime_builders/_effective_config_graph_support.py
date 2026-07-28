@@ -14,10 +14,8 @@ from bioetl.infrastructure.config.contract_registry_loader import (
 _CONFIG_GRAPH_FILE_SUFFIXES = (".yaml", ".yml", ".toml", ".lock")
 _DEPENDENCY_PROVENANCE_FILES = ("pyproject.toml", "uv.lock", "poetry.lock")
 
-
 def _normalize_relative_posix_path(value: str) -> str:
     return posixpath.normpath(value.replace("\\", "/"))
-
 
 def _core_config_graph_paths(*, provider: str, entity: str) -> list[str]:
     core_paths = ["configs/base/pipeline.yaml", "configs/base/quality.yaml"]
@@ -39,7 +37,6 @@ def _core_config_graph_paths(*, provider: str, entity: str) -> list[str]:
     core_paths.append(DEFAULT_CONTRACT_REGISTRY_PATH.as_posix())
     return core_paths
 
-
 def _candidate_seed_paths(*, provider: str, entity: str) -> tuple[str, ...]:
     if provider == "composite":
         return (
@@ -52,7 +49,6 @@ def _candidate_seed_paths(*, provider: str, entity: str) -> tuple[str, ...]:
         f"configs/quality/entities/{provider}/{entity}.yaml",
     )
 
-
 def _extract_config_reference_strings(payload: object) -> list[str]:
     references: list[str] = []
     if isinstance(payload, str):
@@ -64,7 +60,6 @@ def _extract_config_reference_strings(payload: object) -> list[str]:
         for value in payload:
             references.extend(_extract_config_reference_strings(value))
     return references
-
 
 def _resolve_config_graph_reference(*, raw_value: str, base_dir: str) -> str | None:
     candidate = raw_value.strip()
@@ -88,7 +83,6 @@ def _resolve_config_graph_reference(*, raw_value: str, base_dir: str) -> str | N
         return resolved
     return None
 
-
 def _load_config_graph_references(*, relative_path: str, repo_root: Path) -> list[str]:
     source_path = repo_root / relative_path
     if source_path.suffix not in {".yaml", ".yml"} or not source_path.exists():
@@ -104,7 +98,6 @@ def _load_config_graph_references(*, relative_path: str, repo_root: Path) -> lis
         if resolved is not None:
             discovered.append(resolved)
     return discovered
-
 
 def _discover_effective_config_graph_paths(
     *,
@@ -132,7 +125,6 @@ def _discover_effective_config_graph_paths(
                 pending.append(reference)
     return discovered
 
-
 def build_effective_config_candidate_paths(
     *,
     provider: str,
@@ -155,7 +147,6 @@ def build_effective_config_candidate_paths(
         if relative_path not in candidate_paths:
             candidate_paths.append(relative_path)
     return candidate_paths
-
 
 __all__ = [
     "_DEPENDENCY_PROVENANCE_FILES",

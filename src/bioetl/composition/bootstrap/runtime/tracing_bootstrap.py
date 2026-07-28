@@ -17,13 +17,11 @@ __all__ = [
     "bootstrap_tracer",
 ]
 
-
 def _default_tracer_factory(service_name: str) -> TracingPort:
     """Create OpenTelemetry tracer for the given service name."""
     from bioetl.infrastructure.observability.tracing import OpenTelemetryTracer
 
     return OpenTelemetryTracer(service_name=service_name)
-
 
 def bootstrap_tracer(
     settings: Settings,

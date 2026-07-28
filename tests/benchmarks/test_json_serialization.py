@@ -20,9 +20,9 @@ from typing import Any
 import pytest
 
 from bioetl.infrastructure.serialization.encoders import (
-    orjson_available,
     OrjsonEncoder,
     StdLibJsonEncoder,
+    orjson_available,
 )
 
 logger = logging.getLogger(__name__)

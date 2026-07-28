@@ -6,7 +6,7 @@ from __future__ import annotations
 __all__ = ["_PubChemClientFetchMixin"]
 
 from collections.abc import Callable
-from typing import Any, cast, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.domain.types import JsonDict
 

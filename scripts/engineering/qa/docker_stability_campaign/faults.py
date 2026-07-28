@@ -162,6 +162,79 @@ class HostFaultExecutor:
             raise ValueError(f"unknown release stack: {operation.stack}")
         return self.specs[str(operation.stack)]
 
+    def _execute_manager_kind(
+        self,
+        operation: FaultOperation,
+        *,
+        timeout: float,
+        evidence: Path,
+        ordinal: int,
+    ) -> dict[str, Any]:
+        spec = self._spec(operation)
+        report_dir = evidence / f"manager-{ordinal:02d}-{operation.kind}"
+        return manager_command(
+            self.runtime_origin,
+            operation.kind,
+            spec,
+            timeout,
+            report_dir,
+            contract=self.contract,
+        )
+
+    def _execute_compose_service_kind(
+        self,
+        operation: FaultOperation,
+        *,
+        timeout: float,
+    ) -> dict[str, Any]:
+        spec = self._spec(operation)
+        compose_action = {
+            "kill_service": "kill",
+            "pause_service": "pause",
+            "unpause_service": "unpause",
+        }[operation.kind]
+        return compose_command(
+            self.runtime_origin,
+            spec,
+            (compose_action, str(operation.service)),
+            timeout,
+        )
+
+    def _execute_probe_kind(
+        self,
+        operation: FaultOperation,
+        *,
+        timeout: float,
+        evidence: Path,
+        ordinal: int,
+    ) -> dict[str, Any]:
+        spec = self._spec(operation)
+        output = evidence / f"probe-{ordinal:02d}-{spec.stack}.json"
+        override = None
+        if operation.kind == "probe_image_drift":
+            override = (
+                str(operation.service),
+                "bioetl/fault-injection@sha256:" + "0" * 64,
+            )
+        return probe_command(
+            self.runtime_origin,
+            spec,
+            output,
+            timeout,
+            contract=self.contract,
+            baseline=self.baselines.get(spec.stack),
+            expected_image_override=override,
+        )
+
+    def _execute_reserve_port(self, operation: FaultOperation) -> dict[str, Any]:
+        port = int(operation.port or 0)
+        listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        listener.bind(("127.0.0.1", port))
+        listener.listen(1)
+        self._reserved_ports[port] = listener
+        return {"returncode": 0, "port": port, "owner": "campaign"}
+
     def execute(
         self,
         operation: FaultOperation,
@@ -174,55 +247,23 @@ class HostFaultExecutor:
         evidence = self.evidence_dir / "faults" / case_name
         evidence.mkdir(parents=True, exist_ok=True)
         if operation.kind in {"start", "stop", "recover"}:
-            spec = self._spec(operation)
-            report_dir = evidence / f"manager-{ordinal:02d}-{operation.kind}"
-            return manager_command(
-                self.runtime_origin,
-                operation.kind,
-                spec,
-                timeout,
-                report_dir,
-                contract=self.contract,
+            return self._execute_manager_kind(
+                operation,
+                timeout=timeout,
+                evidence=evidence,
+                ordinal=ordinal,
             )
         if operation.kind in {"kill_service", "pause_service", "unpause_service"}:
-            spec = self._spec(operation)
-            compose_action = {
-                "kill_service": "kill",
-                "pause_service": "pause",
-                "unpause_service": "unpause",
-            }[operation.kind]
-            return compose_command(
-                self.runtime_origin,
-                spec,
-                (compose_action, str(operation.service)),
-                timeout,
-            )
+            return self._execute_compose_service_kind(operation, timeout=timeout)
         if operation.kind in {"probe", "probe_image_drift"}:
-            spec = self._spec(operation)
-            output = evidence / f"probe-{ordinal:02d}-{spec.stack}.json"
-            override = None
-            if operation.kind == "probe_image_drift":
-                override = (
-                    str(operation.service),
-                    "bioetl/fault-injection@sha256:" + "0" * 64,
-                )
-            return probe_command(
-                self.runtime_origin,
-                spec,
-                output,
-                timeout,
-                contract=self.contract,
-                baseline=self.baselines.get(spec.stack),
-                expected_image_override=override,
+            return self._execute_probe_kind(
+                operation,
+                timeout=timeout,
+                evidence=evidence,
+                ordinal=ordinal,
             )
         if operation.kind == "reserve_port":
-            port = int(operation.port or 0)
-            listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            listener.bind(("127.0.0.1", port))
-            listener.listen(1)
-            self._reserved_ports[port] = listener
-            return {"returncode": 0, "port": port, "owner": "campaign"}
+            return self._execute_reserve_port(operation)
         if operation.kind == "release_port":
             port = int(operation.port or 0)
             listener = self._reserved_ports.pop(port, None)
@@ -394,6 +435,67 @@ marker.unlink(missing_ok=True)
         self._reserved_ports.clear()
 
 
+def _fault_step_result(
+    executor: HostFaultExecutor,
+    operation: FaultOperation,
+    *,
+    deadline: float,
+    case_name: str,
+    ordinal: int,
+) -> tuple[dict[str, Any], bool]:
+    """Run one fault operation and return (result, passed)."""
+    try:
+        result = executor.execute(
+            operation,
+            deadline=deadline,
+            case_name=case_name,
+            ordinal=ordinal,
+        )
+        return result, operation_passed(result, operation.expected)
+    except Exception as exc:  # evidence must survive every host failure
+        result = {
+            "returncode": 1,
+            "error": type(exc).__name__,
+            "message": str(exc),
+        }
+        return result, False
+
+
+def _run_fault_phase(
+    *,
+    executor: HostFaultExecutor,
+    operations: Sequence[FaultOperation],
+    phase: str,
+    deadline: float,
+    case_name: str,
+    ordinal: int,
+    steps: list[dict[str, Any]],
+    failures: list[str],
+) -> int:
+    """Execute one phase of operations; return the next ordinal."""
+    for operation in operations:
+        ordinal += 1
+        result, passed = _fault_step_result(
+            executor,
+            operation,
+            deadline=deadline,
+            case_name=case_name,
+            ordinal=ordinal,
+        )
+        steps.append(
+            {
+                "phase": phase,
+                "operation": operation.kind,
+                "expected": operation.expected,
+                "passed": passed,
+                "result": result,
+            }
+        )
+        if not passed:
+            failures.append(f"{phase}:{operation.kind}")
+    return ordinal
+
+
 def execute_fault_case(
     case: FaultCase,
     executor: HostFaultExecutor,
@@ -428,63 +530,27 @@ def execute_fault_case(
             ("apply", case.apply),
             ("observe", case.observe),
         ):
-            for operation in operations:
-                ordinal += 1
-                try:
-                    result = executor.execute(
-                        operation,
-                        deadline=operation_deadline,
-                        case_name=case.name,
-                        ordinal=ordinal,
-                    )
-                    passed = operation_passed(result, operation.expected)
-                except Exception as exc:  # evidence must survive every host failure
-                    result = {
-                        "returncode": 1,
-                        "error": type(exc).__name__,
-                        "message": str(exc),
-                    }
-                    passed = False
-                steps.append(
-                    {
-                        "phase": phase,
-                        "operation": operation.kind,
-                        "expected": operation.expected,
-                        "passed": passed,
-                        "result": result,
-                    }
-                )
-                if not passed:
-                    failures.append(f"{phase}:{operation.kind}")
-    finally:
-        for operation in case.restore:
-            ordinal += 1
-            try:
-                result = executor.execute(
-                    operation,
-                    deadline=deadline,
-                    case_name=case.name,
-                    ordinal=ordinal,
-                )
-                passed = operation_passed(result, operation.expected)
-            except Exception as exc:
-                result = {
-                    "returncode": 1,
-                    "error": type(exc).__name__,
-                    "message": str(exc),
-                }
-                passed = False
-            steps.append(
-                {
-                    "phase": "restore",
-                    "operation": operation.kind,
-                    "expected": operation.expected,
-                    "passed": passed,
-                    "result": result,
-                }
+            ordinal = _run_fault_phase(
+                executor=executor,
+                operations=operations,
+                phase=phase,
+                deadline=operation_deadline,
+                case_name=case.name,
+                ordinal=ordinal,
+                steps=steps,
+                failures=failures,
             )
-            if not passed:
-                failures.append(f"restore:{operation.kind}")
+    finally:
+        ordinal = _run_fault_phase(
+            executor=executor,
+            operations=case.restore,
+            phase="restore",
+            deadline=deadline,
+            case_name=case.name,
+            ordinal=ordinal,
+            steps=steps,
+            failures=failures,
+        )
         executor.close()
     try:
         after = {

@@ -43,7 +43,6 @@ __all__ = [
     "validate_observability_preflight",
 ]
 
-
 class _ObservabilityApiModule(Protocol):
     """Typed subset of the public observability API used by this module."""
 
@@ -59,7 +58,6 @@ class _ObservabilityApiModule(Protocol):
     ) -> bool:
         """Start the public metrics server."""
         ...
-
 
 def _create_runtime_audit_port(
     *,
@@ -80,7 +78,6 @@ def _create_runtime_audit_port(
         tracing=tracing,
     )
 
-
 def _runtime_audit_bootstrapper(
     audit_settings: Settings,
     audit_logger: LoggerPort,
@@ -94,7 +91,6 @@ def _runtime_audit_bootstrapper(
         metrics=audit_metrics,
         tracing=audit_tracer,
     )
-
 
 def validate_observability_preflight(
     tracer: TracingPort,
@@ -123,7 +119,6 @@ def validate_observability_preflight(
         skip_gold=skip_gold,
     )
 
-
 def bootstrap_logger(
     pipeline: str,
     run_id: UUID | None = None,
@@ -136,7 +131,6 @@ def bootstrap_logger(
         log_level=log_level,
     )
 
-
 def bootstrap_tracer(
     settings: Settings,
     service_name: str = "bioetl",
@@ -147,20 +141,17 @@ def bootstrap_tracer(
         service_name=service_name,
     )
 
-
 def bootstrap_metrics(settings: Settings) -> MetricsPort:
     """Create a metrics port implementation."""
     return _bootstrap_metrics_impl(
         settings=settings,
     )
 
-
 def maybe_start_metrics_server(settings: Settings) -> bool:
     """Start metrics server if enabled in settings."""
     return _maybe_start_metrics_server_impl(
         settings=settings,
     )
-
 
 def bootstrap_dq_monitor(
     settings: Settings,
@@ -171,7 +162,6 @@ def bootstrap_dq_monitor(
         settings=settings,
         logger=logger,
     )
-
 
 def bootstrap_observability_bundle(
     pipeline: str,

@@ -3,10 +3,9 @@
 
 from __future__ import annotations
 
-from typing import Any, cast
-
 from pathlib import Path
 from time import perf_counter
+from typing import Any, cast
 
 from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.control_plane.run_ledger import slice_ledger_entries_after
@@ -29,8 +28,8 @@ _RUN_LEDGER_MESSAGE_PREFIX = "Run ledger"
 class FileRunLedgerQueriesMixin:
     """Query and load helpers for ``FileRunLedgerStore``."""
 
-    base_path: Path = cast(Any, None)  # host attr default (PD3)
-    metrics: MetricsPort | None = cast(Any, None)  # host attr default (PD3)
+    base_path: Path = cast(Any, None)  # Any: host attr default (PD3)
+    metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD3)
 
     def list_entries(self, manifest_id: str) -> list[RunLedgerEntry]:
         """Return all entries for one manifest in append order."""

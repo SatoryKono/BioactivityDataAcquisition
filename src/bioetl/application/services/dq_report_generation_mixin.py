@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Layer-specific DQ report generation helpers."""
 
@@ -6,7 +5,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.services._dq_report_layer_flows import (
     generate_bronze_report,
@@ -39,12 +38,12 @@ _DQLayerFlow = Callable[..., Awaitable[Path | None]]
 class DQReportGenerationMixin:
     """Mixin with layer-specific DQ report generation flows."""
 
-    _logger: LoggerPort
-    _metrics: MetricsPort | None
-    _bronze_analyzer: BronzeDQAnalyzerPort | None
-    _silver_analyzer: SilverDQAnalyzerPort | None
-    _gold_analyzer: GoldDQAnalyzerPort | None
-    _report_writer: DQReportWriterPort | None
+    _logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
+    _metrics: MetricsPort | None = cast(Any, None)  # Any: host default (PD4)
+    _bronze_analyzer: BronzeDQAnalyzerPort | None = cast(Any, None)  # Any: host default (PD4)
+    _silver_analyzer: SilverDQAnalyzerPort | None = cast(Any, None)  # Any: host default (PD4)
+    _gold_analyzer: GoldDQAnalyzerPort | None = cast(Any, None)  # Any: host default (PD4)
+    _report_writer: DQReportWriterPort | None = cast(Any, None)  # Any: host default (PD4)
 
     @staticmethod
     def _path_to_str(path: Path | None) -> str | None:

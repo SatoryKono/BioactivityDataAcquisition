@@ -1,11 +1,10 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Shared strict/warning failure policy helpers for postrun collaborators."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -91,7 +90,7 @@ class PostrunStrictValidationMixin:
     """Compatibility mixin for postrun collaborators exposing strict mode check."""
 
     if TYPE_CHECKING:
-        _runtime: object
+        _runtime: object = cast(Any, None)  # Any: host default (PD4)
 
     def _is_strict_validation_enabled(self) -> bool:
         """Compatibility wrapper around shared strict-mode evaluation."""
@@ -101,8 +100,8 @@ class PostrunFailureHandlingMixin(PostrunStrictValidationMixin):
     """Shared allowlisted failure handling for postrun collaborators."""
 
     if TYPE_CHECKING:
-        _logger: LoggerPort
-        _FAILURE_POLICY: PostrunFailurePolicySpec
+        _logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
+        _FAILURE_POLICY: PostrunFailurePolicySpec = cast(Any, None)  # Any: host default (PD4)
 
     def _handle_allowlisted_failure(
         self,

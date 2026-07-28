@@ -101,8 +101,10 @@ def collect_inventory() -> dict[str, Any]:
 
 def write_inventory(output: Path) -> dict[str, Any]:
     payload = collect_inventory()
+    root = Path(__file__).resolve().parents[3]
+    output = resolve_output_path(output, root=root)
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(
+    output.write_text(  # NOSONAR - path confined by resolve_output_path
         json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
     return payload

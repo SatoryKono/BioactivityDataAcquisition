@@ -7,6 +7,7 @@ import argparse
 import csv
 import json
 from collections import Counter
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -299,6 +300,99 @@ def _required_evidence_findings(
     return findings
 
 
+_PARTIAL_POLICY_REQUIRED_KEYS = frozenset(
+    {
+        "cluster_id",
+        "canonical_field",
+        "owner",
+        "business_owner_role",
+        "composite_role",
+        "lineage_role",
+        "promotion_policy",
+        "rationale",
+    }
+)
+
+
+def _partial_entry_metadata_findings(
+    entry: dict[str, Any],
+    *,
+    cluster_id: str,
+) -> list[GovernanceFinding]:
+    """Missing required metadata keys on one partial cluster policy entry."""
+    return [
+        GovernanceFinding(
+            kind="missing_partial_cluster_policy_metadata",
+            subject=cluster_id,
+            message=f"partial cluster policy for {cluster_id} is missing {key}",
+        )
+        for key in _PARTIAL_POLICY_REQUIRED_KEYS
+        if not _non_empty_str(entry, key)
+    ]
+
+
+def _partial_entry_cluster_findings(
+    entry: dict[str, Any],
+    *,
+    cluster_id: str,
+    cluster_lookup: dict[str, dict[str, Any]],
+) -> list[GovernanceFinding]:
+    """Validate one partial entry against the live cluster registry."""
+    cluster = cluster_lookup.get(cluster_id)
+    if cluster is None:
+        return [
+            GovernanceFinding(
+                kind="stale_partial_cluster_policy",
+                subject=cluster_id,
+                message=(
+                    f"partial cluster policy for {cluster_id} does not match a current cluster"
+                ),
+            )
+        ]
+    canonical_field = entry.get("canonical_field")
+    if canonical_field == cluster.get("canonical_field"):
+        return []
+    return [
+        GovernanceFinding(
+            kind="canonical_field_mismatch",
+            subject=cluster_id,
+            message=(
+                f"partial cluster policy for {cluster_id} declares canonical_field "
+                f"{canonical_field!r} but cluster registry reports "
+                f"{cluster.get('canonical_field')!r}"
+            ),
+        )
+    ]
+
+
+def _partial_policy_coverage_findings(
+    *,
+    expected: set[str],
+    actual: set[str],
+) -> list[GovernanceFinding]:
+    """Missing PARTIAL policies and stale policies not in the current PARTIAL set."""
+    findings: list[GovernanceFinding] = []
+    for missing in sorted(expected - actual):
+        findings.append(
+            GovernanceFinding(
+                kind="missing_partial_cluster_policy",
+                subject=missing,
+                message=f"PARTIAL cluster {missing} is missing ownership policy metadata",
+            )
+        )
+    for stale in sorted(actual - expected):
+        findings.append(
+            GovernanceFinding(
+                kind="stale_partial_cluster_policy",
+                subject=stale,
+                message=(
+                    f"partial cluster policy {stale} does not map to a current PARTIAL cluster"
+                ),
+            )
+        )
+    return findings
+
+
 def _partial_policy_findings(
     payload: dict[str, Any],
     *,
@@ -317,16 +411,6 @@ def _partial_policy_findings(
             )
         ]
     actual: set[str] = set()
-    required_keys = {
-        "cluster_id",
-        "canonical_field",
-        "owner",
-        "business_owner_role",
-        "composite_role",
-        "lineage_role",
-        "promotion_policy",
-        "rationale",
-    }
     for entry in entries:
         if not isinstance(entry, dict):
             findings.append(
@@ -339,54 +423,19 @@ def _partial_policy_findings(
             continue
         cluster_id = str(entry.get("cluster_id") or "<unknown>")
         actual.add(cluster_id)
-        for key in required_keys:
-            if not _non_empty_str(entry, key):
-                findings.append(
-                    GovernanceFinding(
-                        kind="missing_partial_cluster_policy_metadata",
-                        subject=cluster_id,
-                        message=f"partial cluster policy for {cluster_id} is missing {key}",
-                    )
-                )
-        cluster = cluster_lookup.get(cluster_id)
-        if cluster is None:
-            findings.append(
-                GovernanceFinding(
-                    kind="stale_partial_cluster_policy",
-                    subject=cluster_id,
-                    message=f"partial cluster policy for {cluster_id} does not match a current cluster",
-                )
-            )
-            continue
-        canonical_field = entry.get("canonical_field")
-        if canonical_field != cluster.get("canonical_field"):
-            findings.append(
-                GovernanceFinding(
-                    kind="canonical_field_mismatch",
-                    subject=cluster_id,
-                    message=(
-                        f"partial cluster policy for {cluster_id} declares canonical_field "
-                        f"{canonical_field!r} but cluster registry reports "
-                        f"{cluster.get('canonical_field')!r}"
-                    ),
-                )
-            )
-    for missing in sorted(expected - actual):
-        findings.append(
-            GovernanceFinding(
-                kind="missing_partial_cluster_policy",
-                subject=missing,
-                message=f"PARTIAL cluster {missing} is missing ownership policy metadata",
+        findings.extend(
+            _partial_entry_metadata_findings(entry, cluster_id=cluster_id)
+        )
+        findings.extend(
+            _partial_entry_cluster_findings(
+                entry,
+                cluster_id=cluster_id,
+                cluster_lookup=cluster_lookup,
             )
         )
-    for stale in sorted(actual - expected):
-        findings.append(
-            GovernanceFinding(
-                kind="stale_partial_cluster_policy",
-                subject=stale,
-                message=f"partial cluster policy {stale} does not map to a current PARTIAL cluster",
-            )
-        )
+    findings.extend(
+        _partial_policy_coverage_findings(expected=expected, actual=actual)
+    )
     return findings
 
 
@@ -458,50 +507,77 @@ def _weak_policy_stale_findings(
     return findings
 
 
-def _weak_decision_entry_findings(
+_WEAK_DECISION_BASE_KEYS = ("cluster_id", "field_name", "decision", "owner", "rationale")
+
+
+def _weak_entry_base_metadata_findings(
     entry: dict[str, Any],
     *,
+    cluster_id: str,
+) -> list[GovernanceFinding]:
+    """Missing base metadata keys on one weak cluster decision entry."""
+    return [
+        GovernanceFinding(
+            kind="missing_weak_cluster_decision_metadata",
+            subject=cluster_id,
+            message=f"weak cluster decision for {cluster_id} is missing {key}",
+        )
+        for key in _WEAK_DECISION_BASE_KEYS
+        if not _non_empty_str(entry, key)
+    ]
+
+
+def _weak_entry_decision_value_findings(
+    entry: dict[str, Any],
+    *,
+    cluster_id: str,
+) -> list[GovernanceFinding]:
+    """Unsupported decision value on one weak cluster decision entry."""
+    decision = entry.get("decision")
+    if not isinstance(decision, str) or decision in ALLOWED_WEAK_DECISIONS:
+        return []
+    return [
+        GovernanceFinding(
+            kind="invalid_weak_cluster_decision_value",
+            subject=cluster_id,
+            message=(
+                f"weak cluster decision for {cluster_id} uses unsupported "
+                f"decision {decision!r}"
+            ),
+        )
+    ]
+
+
+def _weak_entry_tracked_metadata_findings(
+    entry: dict[str, Any],
+    *,
+    cluster_id: str,
     tracked_clusters: set[str],
-    role_governed_clusters: set[str],
-    explicit_contract_clusters: set[str],
     required_tracked_metadata: tuple[str, ...],
 ) -> list[GovernanceFinding]:
-    """Validate one weak_cluster_decisions entry."""
-    findings: list[GovernanceFinding] = []
-    cluster_id = str(entry.get("cluster_id") or "<unknown>")
-    for key in ("cluster_id", "field_name", "decision", "owner", "rationale"):
-        if not _non_empty_str(entry, key):
-            findings.append(
-                GovernanceFinding(
-                    kind="missing_weak_cluster_decision_metadata",
-                    subject=cluster_id,
-                    message=f"weak cluster decision for {cluster_id} is missing {key}",
-                )
-            )
-    decision = entry.get("decision")
-    if isinstance(decision, str) and decision not in ALLOWED_WEAK_DECISIONS:
-        findings.append(
-            GovernanceFinding(
-                kind="invalid_weak_cluster_decision_value",
-                subject=cluster_id,
-                message=(
-                    f"weak cluster decision for {cluster_id} uses unsupported "
-                    f"decision {decision!r}"
-                ),
-            )
+    """Extra metadata required only for tracked weak clusters."""
+    if cluster_id not in tracked_clusters:
+        return []
+    return [
+        GovernanceFinding(
+            kind="missing_tracked_weak_cluster_metadata",
+            subject=cluster_id,
+            message=f"tracked weak cluster decision for {cluster_id} is missing {key}",
         )
-    if cluster_id in tracked_clusters:
-        for key in required_tracked_metadata:
-            if not _non_empty_str(entry, key):
-                findings.append(
-                    GovernanceFinding(
-                        kind="missing_tracked_weak_cluster_metadata",
-                        subject=cluster_id,
-                        message=(
-                            f"tracked weak cluster decision for {cluster_id} is missing {key}"
-                        ),
-                    )
-                )
+        for key in required_tracked_metadata
+        if not _non_empty_str(entry, key)
+    ]
+
+
+def _weak_entry_scope_findings(
+    entry: dict[str, Any],
+    *,
+    cluster_id: str,
+    role_governed_clusters: set[str],
+    explicit_contract_clusters: set[str],
+) -> list[GovernanceFinding]:
+    """Role-governed and explicit-contract semantic_scope constraints."""
+    findings: list[GovernanceFinding] = []
     semantic_scope = str(entry.get("semantic_scope") or "")
     if cluster_id in role_governed_clusters and not semantic_scope.startswith(
         "role_governed_"
@@ -530,6 +606,37 @@ def _weak_decision_entry_findings(
                 ),
             )
         )
+    return findings
+
+
+def _weak_decision_entry_findings(
+    entry: dict[str, Any],
+    *,
+    tracked_clusters: set[str],
+    role_governed_clusters: set[str],
+    explicit_contract_clusters: set[str],
+    required_tracked_metadata: tuple[str, ...],
+) -> list[GovernanceFinding]:
+    """Validate one weak_cluster_decisions entry."""
+    cluster_id = str(entry.get("cluster_id") or "<unknown>")
+    findings = _weak_entry_base_metadata_findings(entry, cluster_id=cluster_id)
+    findings.extend(_weak_entry_decision_value_findings(entry, cluster_id=cluster_id))
+    findings.extend(
+        _weak_entry_tracked_metadata_findings(
+            entry,
+            cluster_id=cluster_id,
+            tracked_clusters=tracked_clusters,
+            required_tracked_metadata=required_tracked_metadata,
+        )
+    )
+    findings.extend(
+        _weak_entry_scope_findings(
+            entry,
+            cluster_id=cluster_id,
+            role_governed_clusters=role_governed_clusters,
+            explicit_contract_clusters=explicit_contract_clusters,
+        )
+    )
     return findings
 
 
@@ -746,6 +853,138 @@ def _current_unknown_composite_fields(
     return fields
 
 
+def _string_list_field(entry: Mapping[str, Any], key: str) -> list[str] | None:
+    """Return a non-empty string list field, or None when invalid."""
+    value = entry.get(key)
+    if not isinstance(value, list) or not all(
+        isinstance(item, str) and item.strip() for item in value
+    ):
+        return None
+    return [str(item) for item in value]
+
+
+def _typing_review_metadata_findings(
+    entry: Mapping[str, Any], review_id: str
+) -> list[GovernanceFinding]:
+    findings: list[GovernanceFinding] = []
+    for key in ("id", "disposition", "schema_authority", "owner", "rationale"):
+        if not _non_empty_str(entry, key):
+            findings.append(
+                GovernanceFinding(
+                    kind="missing_composite_unknown_typing_metadata",
+                    subject=review_id,
+                    message=f"composite unknown typing review {review_id} is missing {key}",
+                )
+            )
+    return findings
+
+
+def _typing_review_list_field_findings(
+    entry: Mapping[str, Any],
+    *,
+    review_id: str,
+    key: str,
+    kind: str,
+) -> tuple[list[GovernanceFinding], list[str] | None]:
+    """Validate a required string-list field on a typing review entry."""
+    values = _string_list_field(entry, key)
+    if values is not None:
+        return [], values
+    return [
+        GovernanceFinding(
+            kind=kind,
+            subject=review_id,
+            message=(
+                f"composite unknown typing review {review_id} must define {key} list"
+            ),
+        )
+    ], None
+
+
+def _apply_typing_review_coverage(
+    pipelines: list[str],
+    fields: list[str],
+    *,
+    actual: set[tuple[str, str]],
+    covered: set[tuple[str, str]],
+) -> bool:
+    """Add matching pipeline/field pairs into covered; return whether any matched."""
+    matched = False
+    for pipeline in pipelines:
+        for field in fields:
+            pair = (pipeline, field)
+            if pair in actual:
+                covered.add(pair)
+                matched = True
+    return matched
+
+
+def _cover_typing_review_entry(
+    entry: Mapping[str, Any],
+    *,
+    actual: set[tuple[str, str]],
+    covered: set[tuple[str, str]],
+) -> list[GovernanceFinding]:
+    """Validate one typing review entry and update covered field pairs."""
+    review_id = str(entry.get("id") or "<unknown>")
+    findings = _typing_review_metadata_findings(entry, review_id)
+    pipeline_findings, pipelines = _typing_review_list_field_findings(
+        entry,
+        review_id=review_id,
+        key="pipelines",
+        kind="invalid_composite_unknown_typing_pipelines",
+    )
+    findings.extend(pipeline_findings)
+    if pipelines is None:
+        return findings
+    field_findings, fields = _typing_review_list_field_findings(
+        entry,
+        review_id=review_id,
+        key="fields",
+        kind="invalid_composite_unknown_typing_fields",
+    )
+    findings.extend(field_findings)
+    if fields is None:
+        return findings
+    matched = _apply_typing_review_coverage(
+        pipelines,
+        fields,
+        actual=actual,
+        covered=covered,
+    )
+    if not matched:
+        findings.append(
+            GovernanceFinding(
+                kind="stale_composite_unknown_typing_review",
+                subject=review_id,
+                message=(
+                    f"composite unknown typing review {review_id} does not cover "
+                    "any current unknown composite schema field"
+                ),
+            )
+        )
+    return findings
+
+
+def _typing_missing_coverage_findings(
+    *,
+    actual: set[tuple[str, str]],
+    covered: set[tuple[str, str]],
+) -> list[GovernanceFinding]:
+    """Unknown composite fields not covered by any typing review."""
+    return [
+        GovernanceFinding(
+            kind="missing_composite_unknown_typing_coverage",
+            subject=f"{missing[0]}.{missing[1]}",
+            message=(
+                f"composite unknown schema field {missing[0]}.{missing[1]} "
+                "is not covered by composite_unknown_typing_reviews"
+            ),
+        )
+        for missing in sorted(actual - covered)
+    ]
+
+
 def _typing_policy_findings(
     payload: dict[str, Any],
     *,
@@ -758,7 +997,10 @@ def _typing_policy_findings(
             GovernanceFinding(
                 kind="missing_composite_unknown_typing_reviews",
                 subject="composite_unknown_typing_reviews",
-                message="semantic audit review registry must define composite_unknown_typing_reviews",
+                message=(
+                    "semantic audit review registry must define "
+                    "composite_unknown_typing_reviews"
+                ),
             )
         ]
     actual = _current_unknown_composite_fields(rows)
@@ -773,69 +1015,16 @@ def _typing_policy_findings(
                 )
             )
             continue
-        review_id = str(entry.get("id") or "<unknown>")
-        for key in ("id", "disposition", "schema_authority", "owner", "rationale"):
-            if not _non_empty_str(entry, key):
-                findings.append(
-                    GovernanceFinding(
-                        kind="missing_composite_unknown_typing_metadata",
-                        subject=review_id,
-                        message=f"composite unknown typing review {review_id} is missing {key}",
-                    )
-                )
-        pipelines = entry.get("pipelines")
-        fields = entry.get("fields")
-        if not isinstance(pipelines, list) or not all(
-            isinstance(item, str) and item.strip() for item in pipelines
-        ):
-            findings.append(
-                GovernanceFinding(
-                    kind="invalid_composite_unknown_typing_pipelines",
-                    subject=review_id,
-                    message=f"composite unknown typing review {review_id} must define pipelines list",
-                )
-            )
-            continue
-        if not isinstance(fields, list) or not all(
-            isinstance(item, str) and item.strip() for item in fields
-        ):
-            findings.append(
-                GovernanceFinding(
-                    kind="invalid_composite_unknown_typing_fields",
-                    subject=review_id,
-                    message=f"composite unknown typing review {review_id} must define fields list",
-                )
-            )
-            continue
-        matched = False
-        for pipeline in pipelines:
-            for field in fields:
-                pair = (pipeline, field)
-                if pair in actual:
-                    covered.add(pair)
-                    matched = True
-        if not matched:
-            findings.append(
-                GovernanceFinding(
-                    kind="stale_composite_unknown_typing_review",
-                    subject=review_id,
-                    message=(
-                        f"composite unknown typing review {review_id} does not cover "
-                        "any current unknown composite schema field"
-                    ),
-                )
-            )
-    for missing in sorted(actual - covered):
-        findings.append(
-            GovernanceFinding(
-                kind="missing_composite_unknown_typing_coverage",
-                subject=f"{missing[0]}.{missing[1]}",
-                message=(
-                    f"composite unknown schema field {missing[0]}.{missing[1]} "
-                    "is not covered by composite_unknown_typing_reviews"
-                ),
+        findings.extend(
+            _cover_typing_review_entry(
+                entry,
+                actual=actual,
+                covered=covered,
             )
         )
+    findings.extend(
+        _typing_missing_coverage_findings(actual=actual, covered=covered)
+    )
     return findings
 
 

@@ -12,7 +12,6 @@ if TYPE_CHECKING:
         RunLedgerService,
     )
 
-
 @dataclass(frozen=True, slots=True)
 class CompositeControlPlaneBundle(ControlPlaneArtifacts):
     """Optional control-plane artifacts materialized for one composite run."""
@@ -20,6 +19,5 @@ class CompositeControlPlaneBundle(ControlPlaneArtifacts):
     run_ledger_service: RunLedgerService | None = None
     contract_ref: str | None = None
     contract_version: str | None = None
-
 
 __all__ = ["CompositeControlPlaneBundle"]

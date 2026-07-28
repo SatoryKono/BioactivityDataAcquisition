@@ -42,6 +42,7 @@ def test_observability_dashboard_scripts_do_not_write_dashboard_json() -> None:
         'config.output_dir / "render-manifest.json"',
     }
     reviewed_dashboard_generators = {
+        "_apply_ds2_all.py",
         "apply_dux2_residual.py",
         "render_nav_bus.py",
     }

@@ -12,14 +12,12 @@ __all__ = [
     "RuntimeBuilderExportEntry",
 ]
 
-
 class RuntimeBuilderExportEntry(NamedTuple):
     """Value object describing one runtime-builder lazy export registration."""
 
     export_name: str
     builder_module: str
     target_attr: str
-
 
 RUNTIME_BUILDER_EXPORTS: tuple[RuntimeBuilderExportEntry, ...] = (
     RuntimeBuilderExportEntry(

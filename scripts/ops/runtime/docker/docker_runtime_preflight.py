@@ -1030,9 +1030,8 @@ def _capacity_observation(
     return observation, findings
 
 
-def _live_observations(
-    root: Path, compose: Mapping[str, Any], contract: Mapping[str, Any]
-) -> tuple[dict[str, Any], list[Finding]]:
+def _probe_docker_commands(root: Path) -> list[Any]:
+    """Run the fixed docker/wsl read-only probe command matrix."""
     commands = [
         ["docker", "--version"],
         ["docker", "compose", "version"],
@@ -1042,30 +1041,40 @@ def _live_observations(
         [_WSL_EXE, "--version"],
         [_WSL_EXE, "--status"],
     ]
-    command_results = [_run_read_only(command, cwd=root) for command in commands]
-    findings: list[Finding] = []
-    info_result = command_results[2]
-    if not info_result.available or info_result.returncode != 0:
-        findings.append(
-            Finding(
-                "DOCKER_DAEMON",
-                "warning",
-                "Docker daemon is unavailable; static contract checks still ran",
-                {"error": info_result.stderr or "docker command unavailable"},
-            )
-        )
+    return [_run_read_only(command, cwd=root) for command in commands]
 
-    image_refs = sorted(
+
+def _daemon_unavailable_findings(info_result: Any) -> list[Finding]:
+    if info_result.available and info_result.returncode == 0:
+        return []
+    return [
+        Finding(
+            "DOCKER_DAEMON",
+            "warning",
+            "Docker daemon is unavailable; static contract checks still ran",
+            {"error": info_result.stderr or "docker command unavailable"},
+        )
+    ]
+
+
+def _compose_image_refs(compose: Mapping[str, Any]) -> list[str]:
+    return sorted(
         {image for stack in compose.values() for image in stack.get("images", [])}
     )
-    image_results = [
+
+
+def _inspect_image_results(root: Path, image_refs: list[str]) -> list[Any]:
+    return [
         _run_read_only(
             ["docker", "image", "inspect", "--format", "{{.Id}}", image], cwd=root
         )
         for image in image_refs
     ]
+
+
+def _container_ids_from_ps_stdout(stdout: str) -> list[str]:
     container_ids: list[str] = []
-    for line in command_results[4].stdout.splitlines():
+    for line in stdout.splitlines():
         try:
             row = json.loads(line)
         except json.JSONDecodeError:
@@ -1073,23 +1082,65 @@ def _live_observations(
         container_id = row.get("ID")
         if container_id:
             container_ids.append(str(container_id))
-    inspect_format = (
-        '{"name":{{json .Name}},"state":{{json .State.Status}},'
-        '"exit_code":{{json .State.ExitCode}},"oom_killed":{{json .State.OOMKilled}},'
-        '"restart_count":{{json .RestartCount}},'
-        '"health":{{if .State.Health}}{{json .State.Health.Status}}{{else}}"none"{{end}},'
-        '"project":{{json (index .Config.Labels "com.docker.compose.project")}},'
-        '"service":{{json (index .Config.Labels "com.docker.compose.service")}},'
-        '"ports":{{json .NetworkSettings.Ports}},"mounts":{{json .Mounts}}}'
-    )
-    container_results = [
-        _run_read_only(
-            ["docker", "inspect", "--format", inspect_format, container_id], cwd=root
+    return container_ids
+
+
+_CONTAINER_INSPECT_FORMAT = (
+    '{"name":{{json .Name}},"state":{{json .State.Status}},'
+    '"exit_code":{{json .State.ExitCode}},"oom_killed":{{json .State.OOMKilled}},'
+    '"restart_count":{{json .RestartCount}},'
+    '"health":{{if .State.Health}}{{json .State.Health.Status}}{{else}}"none"{{end}},'
+    '"project":{{json (index .Config.Labels "com.docker.compose.project")}},'
+    '"service":{{json (index .Config.Labels "com.docker.compose.service")}},'
+    '"ports":{{json .NetworkSettings.Ports}},"mounts":{{json .Mounts}}}'
+)
+
+
+def _container_health_findings(observation: Mapping[str, Any]) -> list[Finding]:
+    findings: list[Finding] = []
+    if observation.get("oom_killed"):
+        findings.append(
+            Finding(
+                "CONTAINER_OOM",
+                "error",
+                "Container was OOM-killed",
+                {"name": observation.get("name")},
+            )
         )
-        for container_id in container_ids
-    ]
+    if int(observation.get("restart_count", 0)) > 0:
+        findings.append(
+            Finding(
+                "CONTAINER_RESTART",
+                "warning",
+                "Container restart count is non-zero",
+                {
+                    "name": observation.get("name"),
+                    "restart_count": observation.get("restart_count"),
+                },
+            )
+        )
+    if observation.get("health") == "unhealthy":
+        findings.append(
+            Finding(
+                "CONTAINER_HEALTH",
+                "error",
+                "Container is unhealthy",
+                {"name": observation.get("name")},
+            )
+        )
+    return findings
+
+
+def _inspect_running_containers(
+    root: Path, container_ids: list[str]
+) -> tuple[list[dict[str, Any]], list[Finding]]:
+    findings: list[Finding] = []
     containers: list[dict[str, Any]] = []
-    for result in container_results:
+    for container_id in container_ids:
+        result = _run_read_only(
+            ["docker", "inspect", "--format", _CONTAINER_INSPECT_FORMAT, container_id],
+            cwd=root,
+        )
         if result.returncode != 0:
             continue
         try:
@@ -1097,37 +1148,11 @@ def _live_observations(
         except json.JSONDecodeError:
             continue
         containers.append(observation)
-        if observation.get("oom_killed"):
-            findings.append(
-                Finding(
-                    "CONTAINER_OOM",
-                    "error",
-                    "Container was OOM-killed",
-                    {"name": observation.get("name")},
-                )
-            )
-        if int(observation.get("restart_count", 0)) > 0:
-            findings.append(
-                Finding(
-                    "CONTAINER_RESTART",
-                    "warning",
-                    "Container restart count is non-zero",
-                    {
-                        "name": observation.get("name"),
-                        "restart_count": observation.get("restart_count"),
-                    },
-                )
-            )
-        if observation.get("health") == "unhealthy":
-            findings.append(
-                Finding(
-                    "CONTAINER_HEALTH",
-                    "error",
-                    "Container is unhealthy",
-                    {"name": observation.get("name")},
-                )
-            )
+        findings.extend(_container_health_findings(observation))
+    return containers, findings
 
+
+def _listened_host_ports() -> set[int]:
     listened_ports: set[int] = set()
     for proc_path in (Path("/proc/net/tcp"), Path("/proc/net/tcp6")):
         if not proc_path.exists():
@@ -1136,15 +1161,28 @@ def _live_observations(
             columns = line.split()
             if len(columns) >= 4 and columns[3] == "0A":
                 listened_ports.add(int(columns[1].split(":", maxsplit=1)[1], 16))
-    contracted_ports = sorted(
+    return listened_ports
+
+
+def _contracted_published_ports(compose: Mapping[str, Any]) -> list[int]:
+    return sorted(
         int(item["published"])
         for stack in compose.values()
         for item in stack.get("published_ports", [])
     )
-    project_to_stack = {
+
+
+def _project_to_stack_map(contract: Mapping[str, Any]) -> dict[Any, Any]:
+    return {
         stack["project_name"]: stack_name
         for stack_name, stack in contract.get("stacks", {}).items()
     }
+
+
+def _port_owners_from_containers(
+    containers: list[dict[str, Any]],
+    project_to_stack: Mapping[Any, Any],
+) -> dict[int, tuple[str | None, str | None]]:
     port_owners: dict[int, tuple[str | None, str | None]] = {}
     for container in containers:
         if container.get("state") != "running":
@@ -1159,13 +1197,16 @@ def _live_observations(
                     project_to_stack.get(container.get("project")),
                     container.get("service"),
                 )
+    return port_owners
 
-    findings.extend(_host_port_findings(listened_ports, port_owners, contract))
 
-    project_rows = _json_rows(command_results[3].stdout)
-    findings.extend(_project_origin_findings(root, project_rows, contract))
-
-    discouraged = tuple(contract.get("path_policy", {}).get("discouraged_origins", []))
+def _mount_origin_findings(
+    containers: list[dict[str, Any]],
+    *,
+    project_to_stack: Mapping[Any, Any],
+    discouraged: tuple[Any, ...],
+) -> list[Finding]:
+    findings: list[Finding] = []
     for container in containers:
         stack_name = project_to_stack.get(container.get("project"))
         if not stack_name:
@@ -1199,6 +1240,39 @@ def _live_observations(
                     {"stack": stack_name, "sources": sorted(bad_sources)},
                 )
             )
+    return findings
+
+
+def _live_observations(
+    root: Path, compose: Mapping[str, Any], contract: Mapping[str, Any]
+) -> tuple[dict[str, Any], list[Finding]]:
+    command_results = _probe_docker_commands(root)
+    findings: list[Finding] = []
+    findings.extend(_daemon_unavailable_findings(command_results[2]))
+
+    image_refs = _compose_image_refs(compose)
+    image_results = _inspect_image_results(root, image_refs)
+    container_ids = _container_ids_from_ps_stdout(command_results[4].stdout)
+    containers, container_findings = _inspect_running_containers(root, container_ids)
+    findings.extend(container_findings)
+
+    listened_ports = _listened_host_ports()
+    contracted_ports = _contracted_published_ports(compose)
+    project_to_stack = _project_to_stack_map(contract)
+    port_owners = _port_owners_from_containers(containers, project_to_stack)
+    findings.extend(_host_port_findings(listened_ports, port_owners, contract))
+
+    project_rows = _json_rows(command_results[3].stdout)
+    findings.extend(_project_origin_findings(root, project_rows, contract))
+
+    discouraged = tuple(contract.get("path_policy", {}).get("discouraged_origins", []))
+    findings.extend(
+        _mount_origin_findings(
+            containers,
+            project_to_stack=project_to_stack,
+            discouraged=discouraged,
+        )
+    )
     return {
         "commands": [_command_evidence(result) for result in command_results],
         "images": [

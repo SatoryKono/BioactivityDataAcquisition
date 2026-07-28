@@ -30,7 +30,6 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.composite import CompositeConfig
 
-
 @dataclass(frozen=True, slots=True)
 class CompositeControlPlaneConfigArtifacts:
     """Resolved config/contract artifacts for composite control-plane bootstrap."""
@@ -52,7 +51,6 @@ class CompositeControlPlaneConfigArtifacts:
     pipeline_version: str
     effective_required_profile: str
 
-
 __all__ = [
     "CompositeControlPlaneConfigArtifacts",
     "_build_composite_control_plane_config_artifacts",
@@ -61,7 +59,6 @@ __all__ = [
     "_resolve_composite_contract_coordinates",
     "_resolve_composite_required_persistence_profile",
 ]
-
 
 def _composite_contract_identity_field_values(
     *,
@@ -88,7 +85,6 @@ def _composite_contract_identity_field_values(
         )
     )
 
-
 def _composite_manifest_contract_identity_kwargs(
     artifacts: CompositeControlPlaneConfigArtifacts,
 ) -> dict[str, object]:
@@ -104,11 +100,9 @@ def _composite_manifest_contract_identity_kwargs(
         normalization_profile_hash=artifacts.normalization_profile_hash,
     )
 
-
 def _read_pipeline_control_plane(settings: object) -> object | None:
     """Return pipeline.control_plane settings for one composite launch."""
     return getattr(getattr(settings, "pipeline", None), "control_plane", None)
-
 
 def _read_configured_required_persistence_profile(
     control_plane: object | None,
@@ -121,7 +115,6 @@ def _read_configured_required_persistence_profile(
             _COMPOSITE_REQUIRED_PERSISTENCE_PROFILE,
         )
     )
-
 
 def _read_composite_control_plane_settings(
     settings: object,
@@ -143,7 +136,6 @@ def _read_composite_control_plane_settings(
         effective_required_profile,
     )
 
-
 def _resolve_composite_required_persistence_profile(
     settings: object,
     *,
@@ -158,7 +150,6 @@ def _resolve_composite_required_persistence_profile(
             debug_mode=getattr(settings, "debug", False),
         ),
     )
-
 
 def _build_composite_control_plane_config_artifacts(
     *,
@@ -220,7 +211,6 @@ def _build_composite_control_plane_config_artifacts(
         normalization_profile_version=normalization_profile_version,
         normalization_profile_hash=normalization_profile_hash,
     )
-
 
 def _resolve_composite_contract_coordinates(
     config: CompositeConfig,

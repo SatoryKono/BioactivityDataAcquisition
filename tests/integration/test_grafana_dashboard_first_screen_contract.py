@@ -280,7 +280,7 @@ def test_overview_and_control_plane_first_screens_use_role_appropriate_queries()
                 f"{dashboard_name} must expose first-screen panel {panel_title!r}"
             )
             # Trust evidence cards may start at y=6; Overview First Action at y=6.
-            max_answer_y = 10 if dashboard_name == "bioetl-overview-v2.json" else 10
+            max_answer_y = 10
             assert panel.get("gridPos", {}).get("y", 999) <= max_answer_y, (
                 f"{dashboard_name}:{panel_title} must stay in the answer/evidence band"
             )

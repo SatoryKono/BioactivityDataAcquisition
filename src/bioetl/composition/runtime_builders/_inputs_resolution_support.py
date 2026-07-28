@@ -31,14 +31,11 @@ if TYPE_CHECKING:
         PipelineYamlConfig,
     )
 
-
 class PaginationConfigLike(Protocol):
     id_batch_size: object
 
-
 class SourceConfigLike(Protocol):
     pagination: PaginationConfigLike
-
 
 def apply_tracing_override(
     *,
@@ -67,7 +64,6 @@ def apply_tracing_override(
     namespace_settings.observability = namespace_observability
     return cast("Settings", namespace_settings)
 
-
 def assemble_vacuum_settings_impl(
     *,
     cli_vacuum: CliVacuumSettings,
@@ -84,7 +80,6 @@ def assemble_vacuum_settings_impl(
         else yaml_maintenance.vacuum_retention_days
     )
     return enabled, retention
-
 
 def assemble_runtime_config_impl(
     *,
@@ -121,7 +116,6 @@ def assemble_runtime_config_impl(
         silver_filter_compatibility_mode=resolve_silver_filter_compatibility_mode(),
     )
 
-
 def assemble_filter_config_impl(
     *,
     yaml_filter: YamlInputFilter,
@@ -144,10 +138,8 @@ def assemble_filter_config_impl(
         direct_valid_combinations=inp_filter.valid_combinations,
     )
 
-
 def assemble_cached_bronze_context_impl(ctx: PipelineRunContext) -> CachedBronzeContext:
     return ctx.cached_bronze
-
 
 def validate_pk_contract_impl(config: PipelineYamlConfig) -> None:
     business_primary_keys = tuple(getattr(config, "business_primary_keys", ()) or ())
@@ -157,7 +149,6 @@ def validate_pk_contract_impl(config: PipelineYamlConfig) -> None:
         raise ValueError("business_primary_keys must be non-empty")
     if not technical_primary_key:
         raise ValueError("technical_primary_key must be non-empty")
-
 
 def resolve_filter_batch_size_impl(
     yaml_config: PipelineYamlConfig,
@@ -170,7 +161,6 @@ def resolve_filter_batch_size_impl(
         return batch_size if isinstance(batch_size, int) else None
     except (ValueError, AttributeError):
         return None
-
 
 def adjust_batch_size_for_filter_impl(
     *,
