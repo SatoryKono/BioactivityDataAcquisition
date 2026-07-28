@@ -1,4 +1,4 @@
-"""Pure final-summary builder helpers for manifest diagnostics."""
+"""Pure final-summary support helpers for manifest diagnostics."""
 
 from __future__ import annotations
 

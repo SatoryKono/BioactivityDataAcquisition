@@ -13,16 +13,16 @@ from bioetl.application.services.control_plane.manifest.diagnostics.artifact_sup
 from bioetl.application.services.control_plane.manifest.diagnostics.composite_projection import (
     build_composite_dossier_projection,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.summary_builders import (
+from bioetl.application.services.control_plane.manifest.diagnostics.summary_support import (
     build_exact_replay_anchors as _build_exact_replay_anchors,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.summary_builders import (
+from bioetl.application.services.control_plane.manifest.diagnostics.summary_support import (
     build_final_summary_updates as _build_final_summary_updates,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.summary_builders import (
+from bioetl.application.services.control_plane.manifest.diagnostics.summary_support import (
     build_identity_graph as _build_identity_graph,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.summary_builders import (
+from bioetl.application.services.control_plane.manifest.diagnostics.summary_support import (
     build_runtime_views as _build_runtime_views,
 )
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest

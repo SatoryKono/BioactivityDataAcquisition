@@ -13,10 +13,9 @@ pytestmark = pytest.mark.architecture
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SCORECARD_PATH = PROJECT_ROOT / "configs/quality/debt_scorecard.yaml"
-ISSUE_BACKED_HOTSPOT_FAMILIES = {
-    "application_services_control_plane": "#4547",
-}
+ISSUE_BACKED_HOTSPOT_FAMILIES: dict[str, str] = {}
 ACTIVE_ISSUE_BACKED_HOTSPOT_FAMILIES = {
+    "application_services_control_plane": "#6818",
     "composition_bootstrap_runtime": "#4548",
     "composition_runtime_builders": "#6621",
 }
@@ -207,7 +206,11 @@ def test_reviewed_baseline_hotspot_families_match_reviewed_duplication_snapshot(
         if isinstance(family, dict)
         and family.get("ratchet_stage") == "reviewed-baseline"
     ]
-    assert reviewed_families, "Expected at least one reviewed-baseline hotspot family"
+    assert {
+        str(family.get("name")) for family in reviewed_families
+    } == {
+        str(row.get("name")) for row in baseline_family_rows
+    }
 
     for family in reviewed_families:
         family_name = family.get("name")

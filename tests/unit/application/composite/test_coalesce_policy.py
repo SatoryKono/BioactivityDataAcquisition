@@ -11,19 +11,21 @@ import pytest
 from bioetl.application.composite._coalesce_policy_support import (
     apply_field_priority,
     build_field_groups,
-    build_latest_timestamp_row_fields,
     compatible_columns,
     coalesce_and_drop,
+    resolve_priority_provider,
+    seed_prefix,
+    sort_columns,
+)
+from bioetl.application.composite._coalesce_timestamp_support import (
+    build_latest_timestamp_row_fields,
     coalesce_by_latest_timestamp,
     count_timestamp_companions,
     drop_coalesced_columns,
     pick_latest_timestamp_value,
-    resolve_priority_provider,
     resolve_row_timestamp_key,
     resolve_timestamp_companion,
-    seed_prefix,
     should_replace_latest_candidate,
-    sort_columns,
     timestamp_sort_key,
     update_fallback_candidate,
 )
