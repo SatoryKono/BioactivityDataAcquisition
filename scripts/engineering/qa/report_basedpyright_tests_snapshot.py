@@ -148,9 +148,12 @@ def write_snapshot(*, source: Path, output: Path) -> dict[str, Any]:
 
 
 def check_snapshot(*, source: Path, output: Path) -> None:
+    output = resolve_output_path(output, root=ROOT)
     if not output.is_file():
         raise SystemExit(f"missing tests snapshot: {output}")
-    committed = json.loads(output.read_text(encoding="utf-8")  # NOSONAR - path confined by resolve_output_path)
+    committed = json.loads(
+        output.read_text(encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
+    )
     live = build_tests_snapshot(source)
     committed_errors = int(committed.get("summary", {}).get("advisory_error_count", 0))
     live_errors = int(live.get("summary", {}).get("advisory_error_count", 0))
