@@ -124,6 +124,10 @@ log_test.txt
 !/reports/review/**
 !/reports/quality/
 /reports/quality/*
+!/reports/quality/documentation-governance-2026-07-28-closeout.md
+!/reports/docs-evidence/
+/reports/docs-evidence/*
+!/reports/docs-evidence/README.md
 !/reports/quality/hotspot-family-baseline.json
 !/reports/quality/hotspot-family-baseline.md
 !/reports/quality/hotspot-duplication-baseline.json
@@ -417,6 +421,11 @@ scripts/docs/build/**/*.pyc
 !/docs/99-archive/reports/
 !/docs/99-archive/reports/quality/
 !/docs/99-archive/reports/quality/total-tech-debt-audit-main-2026-07-01.md
+!/docs/99-archive/README.md
+!/docs/99-archive/plans/
+!/docs/99-archive/plans/**
+!/docs/99-archive/engineering/
+!/docs/99-archive/engineering/**
 # docs/reports is retention-sensitive. Keep broad local reports ignored and
 # allowlist only curated entrypoints, generated cleanup inventory, and reviewed
 # bounded evidence manifests.
@@ -433,6 +442,8 @@ scripts/docs/build/**/*.pyc
 !/docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md
 !/docs/reports/evidence/
 /docs/reports/evidence/*
+!/docs/reports/evidence/README.md
+!/docs/reports/evidence/INDEX.md
 !/docs/reports/evidence/project-test-health/
 /docs/reports/evidence/project-test-health/*
 !/docs/reports/evidence/project-test-health/metadata.yaml
@@ -487,8 +498,23 @@ _local_only_mcp/
 # Local agent temp scratch (never commit)
 _tmp_*.py
 tmp_sub_*.txt
+# Accidental single-letter root scratch dumps (RH-01 / #6876)
+_a.txt
 /_arch_results.xml
 
 /_unit_results.xml
 /_arch_results.xml
 _fail_batch1.txt
+
+!/docs/reports/evidence/technical-debt/
+/docs/reports/evidence/technical-debt/*
+!/docs/reports/evidence/technical-debt/SUMMARY.md
+!/docs/reports/evidence/technical-debt/complexity-hotspots/
+/docs/reports/evidence/technical-debt/complexity-hotspots/*
+!/docs/reports/evidence/technical-debt/complexity-hotspots/SUMMARY.md
+!/docs/reports/evidence/technical-debt/03-synthesis/
+/docs/reports/evidence/technical-debt/03-synthesis/*
+!/docs/reports/evidence/technical-debt/03-synthesis/CROSS-SYNTHESIS.md
+# ADR-040 / DOC-GOV-02 PNG not tracked
+/docs/02-architecture/diagrams/**/png/
+/docs/02-architecture/diagrams/**/png/**

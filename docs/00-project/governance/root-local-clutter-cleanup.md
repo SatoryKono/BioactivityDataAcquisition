@@ -1,17 +1,30 @@
 # Root local clutter cleanup (operator guidance)
 
-**Status:** active  
-**Linked issues:** #6703 (RH), #6766 (RH2-01), #6798/#6799 (RH3), #6813/#6814/#6816 (RH4); epics #6700, #6765, #6795, #6812  
-**Last verified:** 2026-07-28  
+**Status:** active
+**Linked issues:** #6703 (RH), #6766 (RH2-01), #6798/#6799 (RH3), #6813/#6814/#6816 (RH4), #6876/#6877 (RH 2026-07-28); epics #6700, #6765, #6795, #6812, #6874
+**Last verified:** 2026-07-28
 
 This note documents **local-only** cleanup for the repository root. It does not
 redefine runtime behavior. Canonical policy remains
 `docs/00-project/governance/03-file-policy.md` §0 and
 `.github/root-allowlist.txt`.
 
-Tracked root is already allowlist-minimal (**37 ≡ allowlist**). Most live root
-noise is **recreated by normal tooling** (coverage, logs, test dumps). Use the
-recurring checklist below instead of inventing new allowlist entries.
+Tracked root is allowlist-minimal (**37 ≡ allowlist** after RH-01 / #6876). Most
+live root noise is **recreated by normal tooling** (coverage, logs, test dumps).
+Use the recurring checklist below instead of inventing new allowlist entries.
+
+### Local vs CI (RH-02 / #6877)
+
+| Surface | Local developer host | CI `root-hygiene` job |
+|---------|----------------------|------------------------|
+| Tracked root ≡ allowlist | Must hold | Must hold |
+| Untracked caches (`.coverage`, `.pytest_cache/`, …) | Common; purge before strict runs | Clean checkout — usually absent |
+| Secret `.env*` | May exist machine-local; **never** commit | Must stay untracked / absent |
+| `check-cleanliness --strict-untracked` | Can fail on local scratch until purged | Expected green on clean runner |
+| `--check-local-forbidden-outputs` | Documents forbidden patterns | Enforced on CI clean tree |
+
+**Never** follow any guide that says to commit `.env`, `.env.local`, or real
+`.env*` files. Only `.env.example` is the tracked template.
 
 ## Recurring 5-minute checklist (pre-PR / pre-audit)
 
@@ -23,7 +36,7 @@ recurring checklist below instead of inventing new allowlist entries.
    ```
 3. Safe local purge (untracked only), when present:
    - `.coverage`, root `logs/`, `tmp/`, `test-output/`, `caddy/`, `.tmp_fix/`
-   - `_tmp_*.py`, `temp_closeout.json`, `.tmp_test_run.log`, `mcp-shell.log`
+   - `_tmp_*.py`, `_a.txt`, `temp_closeout.json`, `.tmp_test_run.log`, `mcp-shell.log`
    - `arch_fail_report.txt` / other root `*report*.txt`
    - `.gitignore~`
 4. Optional / expensive: tool caches and venvs
@@ -70,7 +83,7 @@ when no active process depends on them:
 |---|---|
 | `uchunk*.xml`, `final_chunk*.xml` | Accidental JUnit / pytest XML dumps |
 | `pytest_*.log`, `mcp-shell.log`, `*.log` at root | Local test/agent logs (also `*.log` gitignored) |
-| `tmp_sub_*.txt`, `temp_closeout.json`, `.tmp_test_run.log`, `_tmp_*.py` | Agent scratch files |
+| `tmp_sub_*.txt`, `temp_closeout.json`, `.tmp_test_run.log`, `_tmp_*.py`, `_a.txt` | Agent / accidental scratch files |
 | `arch_fail_report.txt`, `*report*.txt` at root | Local architecture/test report dumps |
 | `.gitignore~` | Editor backup; `.gitignore` is the tracked source of truth |
 | `.coverage`, `.pytest_cache/`, `.mypy_cache/`, `.ruff_cache/`, `.hypothesis/` | Tool caches |
@@ -137,6 +150,19 @@ Left in place:
 Watchdog default relocated under `reports/logs/docker-watchdog/` (RH4-02 / #6816)
 so future runs do not recreate root `logs/` by default.
 
+## RH-01 tracked scratch closeout (2026-07-28)
+
+- Removed unexpected tracked root file `_a.txt` (not on allowlist).
+- Gitignore now blocks reintroduction of `_a.txt`.
+- Tracked root restored to **37 ≡ allowlist**.
+
+## RH-05 retention decisions (2026-07-28 / #6878)
+
+| Root file | Decision | Consumer evidence |
+|-----------|----------|-------------------|
+| `.secrets.baseline` | **retain** | `tests/architecture/test_antipatterns.py::test_no_hardcoded_secrets` (detect-secrets baseline); pre-commit hook `detect-secrets-baseline`; `tests/architecture/conftest.py` inventory |
+| `.aiignore` | **retain** | Exact-root AI-client ignore surface (Cursor/compatible tooling); no hard Python importer; keep while allowlist lists it — do not grow scope; drop only with allowlist+policy+registry sync |
+
 ## Related
 
 - `.github/workflows/root-hygiene.yml`
@@ -144,4 +170,6 @@ so future runs do not recreate root `logs/` by default.
 - `configs/quality/repo_structure_catalog.yaml`
 - Epic RH3: #6795
 - Epic RH4: #6812
-- Pack: `.github/ISSUES/RH4-2026-07-28-ROOT-HYGIENE-POST-RH3-RESIDUAL-ISSUE-PACK.md`
+- Epic RH (2026-07-28): #6874
+- Pack: `.github/ISSUES/RH-2026-07-28-ROOT-HYGIENE-MINIMIZATION-ISSUE-PACK.md`
+- Pack RH4: `.github/ISSUES/RH4-2026-07-28-ROOT-HYGIENE-POST-RH3-RESIDUAL-ISSUE-PACK.md`
