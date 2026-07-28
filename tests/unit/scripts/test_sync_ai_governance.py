@@ -215,6 +215,33 @@ def test_sync_docs_skill_mirrors_adds_runtime_header_and_tokens(
     assert path.read_text(encoding="utf-8") == before
 
 
+def test_thin_exact_duplicate_license_clones_collapses_identical_bodies(
+    tmp_path: Path,
+) -> None:
+    skill_a = tmp_path / "a"
+    skill_b = tmp_path / "b"
+    skill_a.mkdir()
+    skill_b.mkdir()
+    body = "Apache-2.0 sample license body\n"
+    (skill_a / "LICENSE.txt").write_text(body, encoding="utf-8")
+    (skill_b / "LICENSE.txt").write_text(body, encoding="utf-8")
+
+    thinned = sync_ai_governance.thin_exact_duplicate_license_clones(tmp_path)
+
+    assert thinned == 2
+    store = list((tmp_path / "_licenses").glob("license-text-*.txt"))
+    assert len(store) == 1
+    assert store[0].read_text(encoding="utf-8") == body
+    pointer = (skill_a / "LICENSE.txt").read_text(encoding="utf-8")
+    assert pointer.startswith("# License text (thin mirror)")
+    assert "_licenses/" in pointer
+    assert (
+        (skill_b / "LICENSE.txt")
+        .read_text(encoding="utf-8")
+        .startswith("# License text (thin mirror)")
+    )
+
+
 def test_skills_mirror_reports_missing_devin_entrypoint(tmp_path: Path) -> None:
     _seed_skills_mirror_fixture(tmp_path)
     (tmp_path / ".devin/skills/demo/SKILL.md").unlink()

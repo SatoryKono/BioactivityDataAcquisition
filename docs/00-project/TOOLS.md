@@ -163,3 +163,9 @@ ______________________________________________________________________
 | 2.0    | 2026-01-07 | Разделение на src/tools/ и scripts/ по критерию импорта bioetl                              |
 | 1.1    | 2026-01-07 | Добавлены все инструменты                                                                   |
 | 1.0    | 2025-01-07 | Начальная версия                                                                            |
+
+## CodeRabbit audits
+
+- Playbook: [coderabbit-audit-playbook.md](../03-guides/coderabbit-audit-playbook.md)
+- Workflow: ::error::Unexpected CodeRabbit install script content
+- Config: 

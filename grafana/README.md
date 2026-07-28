@@ -79,9 +79,12 @@ python scripts/ops/observability/grafana/render_nav_bus.py
 
 ______________________________________________________________________
 
-> Примечание: в репозитории сейчас поставляются Control Plane, Runtime,
-> Workflow, Alerts/SLO и `*-v2` dashboard surfaces (7 JSON). Silver Reject Explorer удалён.
-> Исторические v1 surfaces ниже сведены к краткой archival note, без подробного operator walkthrough.
+> Примечание: shipped pack = **7 JSON** (Control Plane, Overview, Runtime,
+> Provider Health, Data Quality, Incident, Run Explorer). Workflow Overview,
+> Alerts & SLO, Silver Reject Explorer, Loki/Tempo Explore-only surfaces
+> **removed** (see top-of-file callout and §8 / §12 archival notes).
+> Исторические v1 walkthroughs below are archival only — treat panel tables as
+> non-authoritative vs `grafana/dashboards/*.json`.
 >
 > Роль этого документа: setup/reference для monitoring stack.
 > Для operator quick-start используйте сначала
@@ -1172,28 +1175,18 @@ ______________________________________________________________________
 `bioetl_dq_validation_failures_total`, `bioetl_dq_records_quarantined_total`,
 control-plane metrics, provider health metrics и `bioetl_workflow_runs_total`.
 
-**Drilldown:** canonical navigation bus `0. Control Plane`, `2. Runtime`,
-`3. Provider Health`, `4. Data Quality`, `5. Workflow`, `6. Alerts & SLO` используют текущее
-временное окно. Critical current-status panels also expose panel `dataLinks`
-to the same canonical dashboards. Navigation panel `id=1000` now also carries
-bus `0..6` only (no Silver/Logs/Traces adjuncts after 2026-07-23) in the same tab. `Explore Traces` is a traced-run-only adjunct
-surface, so `NoOpTracing` runs can legitimately return empty Tempo results. The
-shipped trace handoff opens an explicit search-first Tempo route, preserves the
-active dashboard range via `${__from}` / `${__to}`, pins `var-ds=tempo`, uses
-`var-groupBy=resource.service.name`, and keeps only stable pipeline/provider
-TraceQL scope so Tempo metrics queries stay under the local limit and
-`includeAll` run-type selectors cannot collapse into an empty regex. The
-current dashboard remains visible in `id=1000` as a disabled high-contrast item
-rather than disappearing from the bus.
+**Drilldown (live bus 0–6):** Trust/Control Plane → Overview → Runtime →
+Provider → DQ → Incident → Run Explorer. Navigation panel `id=1000` is the
+shipped bus; do not reintroduce Workflow/Alerts/Silver/Loki/Tempo Explore as
+portfolio boards. Panel `dataLinks` and runbook CTAs are authoritative in JSON
+under `grafana/dashboards/`.
 
-**Silver Rejects triage sequence:**
+**Silver Rejects triage (post-Explorer removal):**
 
-1. Начните с `1. Overview` или `2. Runtime`, чтобы увидеть summary spike по
-   `Silver Rejects + Rate` / `Range · Silver Filter Rejects`.
-1. Перейдите в `4. Data Quality`, чтобы проверить bounded breakdown через
-   `Inspect: Top Silver Reject Reasons (Pareto)` и `Inspect: Top Silver Reject Fields`.
-1. Для record-level browsing: `bioetl quarantine inspect --pipeline ...`.
-1. Используйте quarantine CLI для execution (`resolve/replay`) и final action.
+1. Start on Overview or Runtime for reject-rate signals.
+1. Use Data Quality for bounded Pareto/field breakdowns.
+1. Record-level forensics: `bioetl quarantine inspect --pipeline ...`
+   (resolve/replay via CLI, not a dedicated Explorer dashboard).
 
 ______________________________________________________________________
 
@@ -1264,15 +1257,11 @@ exact multi-run total is required.
 - неизвестные значения схлопываются в `other`
 - raw `message` не используется как Prometheus label
 
-**Drilldown:** canonical navigation bus `0. Control Plane`, `1. Overview`, `2. Runtime`,
-`3. Provider Health`, `5. Workflow`, `6. Alerts & SLO`, bus `0..6` only сохраняет текущее окно dashboard через `${__from}` /
-`${__to}`. Panel-level
-dashboard-to-dashboard handoffs удалены; replay/checkpoint расследование
-открывается через `0. Control Plane` в top-level шине. Tempo drilldown
-предфильтрован по `span."bioetl.pipeline"` для pipeline-scoped dashboards и по
-`span."bioetl.provider"` для provider-only dashboard; `run_type` intentionally
-not shipped in TraceQL handoff because `includeAll` Grafana selectors can
-collapse to an empty regex.
+**Drilldown (live):** bus `0..6` (Trust → Overview → Runtime → Provider → DQ →
+Incident → Run Explorer) preserves the active window via `${__from}` / `${__to}`.
+Replay/checkpoint investigation opens via Control Plane / Run Explorer, not a
+removed Workflow board. Loki/Tempo Explore-only handoffs are **not** part of the
+shipped monitoring surface after 2026-07-23.
 
 ______________________________________________________________________
 
@@ -1338,10 +1327,9 @@ plus primary `$provider`. Health-check counters и histograms в текущем
 по-прежнему фильтруется `$provider`; pipeline/run_type/run_id работают как
 context/identity/evidence shell.
 
-**Drilldown:** canonical navigation bus `0. Control Plane`, `1. Overview`,
-`2. Runtime`, `4. Data Quality`, `5. Workflow`, `6. Alerts & SLO`. Sticky shortcuts в navigation panel
-не заменяют canonical provider triage flow; correlation по-прежнему идёт через
-Runtime/Data Quality или runbook links без дублирования dashboard handoffs.
+**Drilldown (live):** bus `0..6` (Trust → Overview → Runtime → Provider → DQ →
+Incident → Run Explorer). Sticky shortcuts in the navigation panel do not replace
+canonical provider triage; correlate via Runtime/Data Quality or runbook links.
 
 ______________________________________________________________________
 

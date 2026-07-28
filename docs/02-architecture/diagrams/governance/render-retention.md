@@ -54,9 +54,16 @@ Git LFS is optional for future SVG growth. Prefer keeping SVG tracked as plain
 git binaries while corpus size stays acceptable (~25 MB). Revisit LFS only if
 SVG mass exceeds clone budgets; do not use LFS for canonical `.mmd` text.
 
+## Explicit non-goals (residuals)
+
+| Item | Decision | Rationale |
+| --- | --- | --- |
+| Untrack bulk SVG / full CI-only SVG | **Declined** | PR `check-diagram-drift` requires tracked sibling SVG when sources change; SVG is primary SSOT render surface |
+| Keep curated PNG in git for nightly | **Declined** | Nightly `render.sh` then `--require-png` on `png-compatibility.txt`; no git PNG needed |
+
 ## Acceptance
 
 - [x] Policy documented and linked from ADR-040 / diagram governance policy
-- [x] Tracked PNG baselines removed from git index
-- [x] SVG retained for drift gate
+- [x] Tracked PNG baselines removed from git index (including curated smoke set)
+- [x] SVG retained for drift gate (bulk SVG untrack explicitly declined)
 - [x] CI continues to produce PNG artifacts on render jobs

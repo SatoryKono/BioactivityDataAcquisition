@@ -35,6 +35,7 @@ for published contracts, CLI surfaces, and specs.
 | GitHub local workflow              | [github-local-workflow.md](github-local-workflow.md)   |
 | GitHub workflow diagrams           | [github-workflow-diagrams.md](github-workflow-diagrams.md) |
 | Verify docs and strict site build  | [docs-verification.md](docs-verification.md)           |
+| CodeRabbit audit playbook          | [coderabbit-audit-playbook.md](coderabbit-audit-playbook.md) |
 | Understand pipeline lifecycle      | [pipeline-lifecycle.md](pipeline-lifecycle.md)         |
 | Understand run lifecycle           | [run-lifecycle.md](run-lifecycle.md)                   |
 | Understand replay support          | [replay-guide.md](replay-guide.md)                     |
