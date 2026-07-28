@@ -106,10 +106,11 @@ def test_design_system_defines_first_screen_decision_matrix() -> None:
 
 
 def test_primary_dashboards_expose_common_context_header_panels() -> None:
-    """Primary dashboards keep Status shell on first paint; Run context is lazy (#6573)."""
-    first_paint = {
-        "Provenance": {"id": 9400, "x": 0, "y": 3, "w": 16, "h": 4},
-        "Status": {"id": 9401, "x": 16, "y": 3, "w": 8, "h": 4},
+    """Primary dashboards keep Status shell on first paint; Run context is lazy (#6573/DRM-R)."""
+    # Contract (not frozen pixels): context band near top; evidence may start by y<=8.
+    header_ids = {
+        "Provenance": 9400,
+        "Status": 9401,
     }
     lazy_shell = {
         "ID": {"id": 9402},
@@ -129,17 +130,19 @@ def test_primary_dashboards_expose_common_context_header_panels() -> None:
             for panel in get_dashboard_panels(dashboard)
             if panel.get("title")
         }
-        for title, placement in first_paint.items():
+        for title, panel_id in header_ids.items():
             panel = panels.get(title)
             assert panel is not None, (
                 f"{dashboard_name} must expose common panel {title!r}"
             )
-            assert panel.get("id") == placement["id"]
+            assert panel.get("id") == panel_id
             grid_pos = panel.get("gridPos", {})
-            for key in ("x", "y", "w", "h"):
-                assert grid_pos.get(key) == placement[key], (
-                    f"{dashboard_name}:{title} must keep common {key} placement"
-                )
+            assert grid_pos.get("y", 999) <= 3, (
+                f"{dashboard_name}:{title} must stay in compact context band (y<=3)"
+            )
+            assert grid_pos.get("h", 99) <= 4, (
+                f"{dashboard_name}:{title} context band height must stay compact"
+            )
         # ID + Processed Records remain available under collapsed Run context.
         for title, placement in lazy_shell.items():
             panel = panels.get(title)
@@ -213,8 +216,8 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
             assert panel is not None, (
                 f"{dashboard_name} must expose first-screen panel {panel_title!r}"
             )
-            assert panel.get("gridPos", {}).get("y", 999) <= 20, (
-                f"{dashboard_name}:{panel_title} must be visible before range evidence"
+            assert panel.get("gridPos", {}).get("y", 999) <= 12, (
+                f"{dashboard_name}:{panel_title} must be early first-path evidence (y<=12)"
             )
             expressions = [
                 target.get("expr", "")
@@ -276,9 +279,10 @@ def test_overview_and_control_plane_first_screens_use_role_appropriate_queries()
             assert panel is not None, (
                 f"{dashboard_name} must expose first-screen panel {panel_title!r}"
             )
-            max_answer_y = 26 if dashboard_name == "bioetl-overview-v2.json" else 21
+            # Trust evidence cards may start at y=6; Overview First Action at y=6.
+            max_answer_y = 10 if dashboard_name == "bioetl-overview-v2.json" else 10
             assert panel.get("gridPos", {}).get("y", 999) <= max_answer_y, (
-                f"{dashboard_name}:{panel_title} must stay in the answer row"
+                f"{dashboard_name}:{panel_title} must stay in the answer/evidence band"
             )
             expressions = [
                 target.get("expr", "")

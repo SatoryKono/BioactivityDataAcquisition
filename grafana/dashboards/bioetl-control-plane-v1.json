@@ -109,7 +109,7 @@
       "type": "text",
       "title": "Provenance",
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 16,
         "x": 0,
         "y": 3
@@ -117,7 +117,7 @@
       "description": "Unified context/provenance banner for 0. Control Plane. Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Workflow is context/evidence unless documented otherwise; run_id is local control-plane identity context only.",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:10px 14px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);line-height:1.45;\"><div style=\"font-size:18px;font-weight:700;\">Can we trust control-plane state and safely replay or resume?</div></div>"
+        "content": "### Trust scope\nSelectors: workflow, pipeline, run_type, run_id (HTTP identity only).\n\nRead order: **Status → four evidence cards → recovery**. UNKNOWN/INCOMPLETE means missing basis, not green OK."
       }
     },
     {
@@ -125,7 +125,7 @@
       "type": "stat",
       "title": "Status",
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 8,
         "x": 16,
         "y": 3
@@ -233,15 +233,15 @@
     {
       "id": 906,
       "type": "text",
-      "title": "Next Action: Replay Diagnostics",
+      "title": "Primary recovery",
       "gridPos": {
-        "h": 4,
+        "h": 2,
         "w": 24,
         "x": 0,
-        "y": 7
+        "y": 10
       },
       "options": {
-        "content": "### Primary recovery\n1. Read **Status** (evidence-aware replay verdict).\n2. Four cards: Replay Safety · Checkpoint lag · Manifest/Ledger · Telemetry Missing.\n3. If INCOMPLETE/UNKNOWN, repair evidence before resume.\n4. Exact run forensics → **Run Explorer**.\n",
+        "content": "**Primary recovery:** Status + four cards below. INCOMPLETE/UNKNOWN → repair evidence before resume. Exact run → Run Explorer. VALID_EMPTY blockers only when Status=OK and cards clean.",
         "mode": "markdown",
         "dataLinks": [
           {
@@ -321,7 +321,7 @@
         "h": 4,
         "w": 6,
         "x": 0,
-        "y": 11
+        "y": 6
       },
       "id": 891,
       "options": {
@@ -412,7 +412,7 @@
         "h": 4,
         "w": 6,
         "x": 6,
-        "y": 11
+        "y": 6
       },
       "id": 892,
       "options": {
@@ -530,7 +530,7 @@
         "h": 4,
         "w": 6,
         "x": 12,
-        "y": 11
+        "y": 6
       },
       "id": 893,
       "options": {
@@ -570,7 +570,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Current 5m missing-telemetry risk for manifest and ledger metrics. Status mapping: 0=OK/present, 1=WARN/one required family missing, >=2=CRIT/both required families missing, null=UNKNOWN. This is a current-status panel using a 5m recording rule window. If non-zero or UNKNOWN, do not trust zero blocker cards: validate Prometheus scrape/rules and control-plane emitters before replay/resume. Trust card: non-OK/INCOMPLETE always has basis in description mapping.",
+      "description": "Current 5m missing-telemetry risk for manifest and ledger metrics. Status mapping: 0=OK/present, 1=WARN/one required family missing, >=2=CRIT/both required families missing, null=UNKNOWN. This is a current-status panel using a 5m recording rule window. If non-zero or UNKNOWN, do not trust zero blocker cards: validate Prometheus scrape/rules and control-plane emitters before replay/resume. Trust card: non-OK/INCOMPLETE always has basis in description mapping. UNKNOWN — telemetry marker absent (TELEMETRY_ABSENT_OR_STALE).",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -631,7 +631,7 @@
         "h": 4,
         "w": 6,
         "x": 18,
-        "y": 11
+        "y": 6
       },
       "id": 907,
       "options": {
@@ -672,7 +672,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 12
       },
       "id": 902,
       "title": "Incident Drilldown: Replay Safety (Checkpoint / Replay)",
@@ -683,7 +683,7 @@
             "h": 5,
             "w": 24,
             "x": 0,
-            "y": 16
+            "y": 13
           },
           "id": 894,
           "options": {
@@ -754,7 +754,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 21
+            "y": 18
           },
           "id": 130,
           "options": {
@@ -845,7 +845,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 27
+            "y": 24
           },
           "id": 3,
           "options": {
@@ -936,7 +936,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 27
+            "y": 24
           },
           "id": 104,
           "options": {
@@ -1027,7 +1027,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 33
+            "y": 30
           },
           "id": 120,
           "options": {
@@ -1118,7 +1118,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 33
+            "y": 30
           },
           "id": 101,
           "options": {
@@ -1209,7 +1209,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 39
+            "y": 36
           },
           "id": 102,
           "options": {
@@ -1300,7 +1300,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 39
+            "y": 36
           },
           "id": 103,
           "options": {
@@ -1391,7 +1391,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 45
+            "y": 42
           },
           "id": 121,
           "options": {
@@ -1453,7 +1453,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 45
+            "y": 42
           },
           "id": 5,
           "options": {
@@ -1520,7 +1520,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 51
+            "y": 48
           },
           "id": 134,
           "options": {
@@ -1590,7 +1590,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 51
+            "y": 48
           },
           "id": 135,
           "options": {
@@ -1661,7 +1661,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 57
+            "y": 54
           },
           "id": 105,
           "options": {
@@ -1743,7 +1743,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 64
+            "y": 61
           },
           "id": 106,
           "options": {
@@ -1788,7 +1788,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 16
+        "y": 13
       },
       "id": 901,
       "title": "Incident Drilldown: Manifest / Ledger Integrity",
@@ -1821,7 +1821,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 17
+            "y": 14
           },
           "id": 908,
           "options": {
@@ -1901,7 +1901,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 23
+            "y": 20
           },
           "id": 1,
           "options": {
@@ -1992,7 +1992,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 23
+            "y": 20
           },
           "id": 2,
           "options": {
@@ -2054,7 +2054,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 29
+            "y": 26
           },
           "id": 131,
           "options": {
@@ -2107,7 +2107,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 36
+            "y": 33
           },
           "id": 7,
           "options": {
@@ -2189,7 +2189,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 43
+            "y": 40
           },
           "id": 132,
           "options": {
@@ -2280,7 +2280,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 49
+            "y": 46
           },
           "id": 133,
           "options": {
@@ -2323,7 +2323,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 14
       },
       "id": 903,
       "title": "Incident Drilldown: Global Control-Plane Store Reliability",
@@ -2385,7 +2385,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 18
+            "y": 15
           },
           "id": 4,
           "options": {
@@ -2476,7 +2476,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 18
+            "y": 15
           },
           "id": 136,
           "options": {
@@ -2538,7 +2538,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 24
+            "y": 21
           },
           "id": 6,
           "options": {
@@ -2609,7 +2609,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 30
+            "y": 27
           },
           "id": 111,
           "options": {
@@ -2654,7 +2654,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 15
       },
       "id": 904,
       "title": "Incident Drilldown: Audit / Lineage Completeness",
@@ -2717,7 +2717,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 19
+            "y": 16
           },
           "id": 122,
           "options": {
@@ -2808,7 +2808,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 25
+            "y": 22
           },
           "id": 137,
           "options": {
@@ -2888,7 +2888,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 31
+            "y": 28
           },
           "id": 138,
           "options": {
@@ -2939,7 +2939,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 37
+            "y": 34
           },
           "id": 107,
           "options": {
@@ -2992,7 +2992,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 44
+            "y": 41
           },
           "id": 108,
           "options": {
@@ -3063,7 +3063,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 51
+            "y": 48
           },
           "id": 109,
           "options": {
@@ -3144,7 +3144,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 58
+            "y": 55
           },
           "id": 110,
           "options": {
@@ -3207,7 +3207,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 65
+            "y": 62
           },
           "id": 112,
           "options": {
@@ -3241,7 +3241,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 16
       },
       "id": 905,
       "title": "Identity evidence and remaining replay-safety signals",
@@ -3304,7 +3304,7 @@
             "h": 4,
             "w": 24,
             "x": 0,
-            "y": 24
+            "y": 21
           },
           "id": 9407,
           "options": {
@@ -3382,7 +3382,7 @@
             "h": 4,
             "w": 24,
             "x": 0,
-            "y": 20
+            "y": 17
           },
           "id": 9404,
           "options": {
@@ -3465,7 +3465,7 @@
             "h": 4,
             "w": 12,
             "x": 0,
-            "y": 50
+            "y": 47
           },
           "id": 9410,
           "options": {
@@ -3494,7 +3494,7 @@
             "h": 4,
             "w": 12,
             "x": 12,
-            "y": 50
+            "y": 47
           },
           "id": 9411,
           "options": {
@@ -3558,7 +3558,7 @@
             "h": 4,
             "w": 12,
             "x": 0,
-            "y": 54
+            "y": 51
           },
           "id": 9405,
           "options": {
@@ -3636,7 +3636,7 @@
             "h": 4,
             "w": 12,
             "x": 12,
-            "y": 54
+            "y": 51
           },
           "id": 9406,
           "options": {
@@ -3714,7 +3714,7 @@
             "h": 4,
             "w": 12,
             "x": 0,
-            "y": 58
+            "y": 55
           },
           "id": 9408,
           "options": {
@@ -3792,7 +3792,7 @@
             "h": 4,
             "w": 12,
             "x": 12,
-            "y": 58
+            "y": 55
           },
           "id": 9409,
           "options": {
@@ -3826,7 +3826,7 @@
             "h": 3,
             "w": 24,
             "x": 0,
-            "y": 62
+            "y": 59
           },
           "id": 139,
           "options": {
@@ -3847,7 +3847,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 17
       },
       "id": 9412,
       "panels": [
@@ -3859,7 +3859,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 21
+            "y": 18
           },
           "datasource": "BioETL Ops HTTP",
           "description": "Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero.",
@@ -3984,7 +3984,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 21
+            "y": 18
           },
           "datasource": "BioETL Ops HTTP",
           "description": "Current stage/outcome accounting evidence for the shared pipeline/run_type context. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero.",

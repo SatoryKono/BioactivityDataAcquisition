@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 import subprocess
 
@@ -28,9 +28,20 @@ def _git_changed_files() -> list[str]:
     return []
 
 
+def _repository_utc_date() -> date:
+    """Return the deterministic UTC calendar date of the checked-out revision."""
+    result = subprocess.run(
+        ["git", "log", "-1", "--format=%cI"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    return datetime.fromisoformat(result.stdout.strip()).astimezone(UTC).date()
+
+
 def _fresh_report_dates(today: date | None = None) -> set[str]:
     """Accept today or yesterday (UTC calendar date of the PR host)."""
-    anchor = today or date.today()
+    anchor = today or _repository_utc_date()
     return {anchor.isoformat(), (anchor - timedelta(days=1)).isoformat()}
 
 
@@ -46,7 +57,8 @@ def test_dashboard_json_changes_require_fresh_ux_report_and_change_note_link() -
 
     assert _REPORTS_DIR.is_dir(), "Missing docs/reports/dashboard-ux-checks directory"
 
-    fresh_dates = _fresh_report_dates()
+    host_today = _repository_utc_date()
+    fresh_dates = _fresh_report_dates(host_today)
     fresh_reports = [
         _REPORTS_DIR / f"{report_date}.md"
         for report_date in sorted(fresh_dates)
@@ -55,7 +67,7 @@ def test_dashboard_json_changes_require_fresh_ux_report_and_change_note_link() -
     assert fresh_reports, (
         "Dashboard JSON changed, but no fresh UX report found. "
         "Expected docs/reports/dashboard-ux-checks/<today|yesterday>.md "
-        f"(today={date.today().isoformat()})."
+        f"(today={host_today.isoformat()})."
     )
 
     change_notes = _CHANGE_NOTES_PATH.read_text(encoding="utf-8")

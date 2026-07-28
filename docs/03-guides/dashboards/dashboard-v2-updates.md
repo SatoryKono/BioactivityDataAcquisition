@@ -7,8 +7,8 @@ ______________________________________________________________________
 `docs/reports/dashboard-ux-checks/YYYY-MM-DD.md`.
 
 Latest dashboard UX artifact for current shipped JSON changes:
-`docs/reports/dashboard-ux-checks/2026-07-28.md`
-(prior baseline: `docs/reports/dashboard-ux-checks/2026-05-19.md`)
+`docs/reports/dashboard-ux-checks/2026-07-28-drmr.md`
+(also: `docs/reports/dashboard-ux-checks/2026-07-28.md`; prior: `docs/reports/dashboard-ux-checks/2026-05-19.md`)
 
 ## DRM residual migration (2026-07-28, epic #6844)
 
