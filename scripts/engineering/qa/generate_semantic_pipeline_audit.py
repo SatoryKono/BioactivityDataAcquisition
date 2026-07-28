@@ -611,6 +611,148 @@ def _weak_decision_metadata(entry: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _canonical_cluster_member_names(cluster: dict[str, Any]) -> set[str]:
+    """Member field names for a canonical-registry cluster definition."""
+    return {
+        str(name)
+        for name in [
+            cluster.get("canonical_name"),
+            *cast(list[Any], cluster.get("legacy_names", [])),
+            *cast(list[Any], cluster.get("raw_provider_names", [])),
+        ]
+        if isinstance(name, str)
+    }
+
+
+def _facts_matching_cluster(
+    facts: dict[tuple[str, str], dict[str, Any]],
+    *,
+    member_names: set[str],
+    allowed_pipelines: set[str],
+) -> list[dict[str, Any]]:
+    """Facts whose field/pipeline pair belongs to the cluster membership."""
+    return [
+        fact
+        for fact in facts.values()
+        if fact.get("field") in member_names
+        and fact.get("pipeline") in allowed_pipelines
+    ]
+
+
+def _attach_member_counts(
+    refreshed_cluster: dict[str, Any],
+    members: list[dict[str, Any]],
+) -> None:
+    """Set member_count and pipeline_count from current members."""
+    refreshed_cluster["member_count"] = len(members)
+    refreshed_cluster["pipeline_count"] = len(
+        {str(member["pipeline"]) for member in members}
+    )
+
+
+def _build_canonical_refreshed_cluster(
+    cluster: dict[str, Any],
+    facts: dict[tuple[str, str], dict[str, Any]],
+) -> dict[str, Any] | None:
+    """Build one refreshed cluster from the canonical registry, or None to skip."""
+    cluster_id = str(cluster.get("cluster_id") or "")
+    canonical_name = str(cluster.get("canonical_name") or "")
+    if not cluster_id or not canonical_name:
+        return None
+    member_names = _canonical_cluster_member_names(cluster)
+    allowed_pipelines = {
+        str(pipeline)
+        for pipeline in cast(list[Any], cluster.get("pipelines", []))
+        if isinstance(pipeline, str)
+    }
+    members = _facts_matching_cluster(
+        facts,
+        member_names=member_names,
+        allowed_pipelines=allowed_pipelines,
+    )
+    if not members:
+        return None
+    refreshed_cluster = {
+        "aliases": sorted(name for name in member_names if name != canonical_name),
+        "canonical_field": canonical_name,
+        "cluster_id": cluster_id,
+        "rationale": str(cluster.get("notes") or ""),
+        "semantic_status": "EXACT",
+        "source": "canonical_registry",
+    }
+    refreshed_cluster.update(CLUSTER_METADATA_OVERRIDES.get(cluster_id, {}))
+    _attach_member_counts(refreshed_cluster, members)
+    refreshed_cluster["members"] = sorted(
+        members,
+        key=lambda member: (
+            str(member.get("pipeline") or ""),
+            str(member.get("field") or ""),
+        ),
+    )
+    return refreshed_cluster
+
+
+def _refresh_seed_cluster_members(
+    cluster: dict[str, Any],
+    facts: dict[tuple[str, str], dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Rehydrate seed-cluster members from current field facts."""
+    members: list[dict[str, Any]] = []
+    for member in cluster.get("members", []):
+        if not isinstance(member, dict):
+            continue
+        refreshed = facts.get((str(member.get("pipeline")), str(member.get("field"))))
+        if refreshed is not None:
+            members.append(refreshed)
+    return members
+
+
+def _seed_cluster_passes_lexical_filter(
+    *,
+    cluster_id: str,
+    members: list[dict[str, Any]],
+) -> bool:
+    """Return False when a generic-collision lexical field is required but absent."""
+    lexical_field = GENERIC_COLLISION_LEXICAL_FIELDS.get(cluster_id)
+    if lexical_field is None or not members:
+        return True
+    return any(str(member.get("field") or "") == lexical_field for member in members)
+
+
+def _build_seed_refreshed_cluster(
+    cluster: dict[str, Any],
+    facts: dict[tuple[str, str], dict[str, Any]],
+    *,
+    review_registry: dict[str, Any],
+    weak_decision_lookup: dict[str, dict[str, Any]],
+) -> dict[str, Any] | None:
+    """Build one refreshed seed cluster, or None when it should be dropped."""
+    cluster_id = str(cluster.get("cluster_id") or "")
+    members = _refresh_seed_cluster_members(cluster, facts)
+    if not _seed_cluster_passes_lexical_filter(cluster_id=cluster_id, members=members):
+        return None
+    if not members:
+        return None
+    refreshed_cluster = {
+        key: value for key, value in cluster.items() if key not in {"members", "review"}
+    }
+    refreshed_cluster.update(CLUSTER_METADATA_OVERRIDES.get(cluster_id, {}))
+    semantic_status = str(refreshed_cluster.get("semantic_status") or "")
+    review = _review_payload_for_cluster(
+        review_registry,
+        cluster_id=cluster_id,
+        semantic_status=semantic_status,
+    )
+    if review is not None:
+        refreshed_cluster["review"] = _review_metadata(review)
+    weak_decision = weak_decision_lookup.get(cluster_id)
+    if semantic_status == "WEAK" and weak_decision is not None:
+        refreshed_cluster["weak_decision"] = _weak_decision_metadata(weak_decision)
+    _attach_member_counts(refreshed_cluster, members)
+    refreshed_cluster["members"] = members
+    return refreshed_cluster
+
+
 def _refresh_clusters(
     seed_registry: dict[str, Any],
     facts: dict[tuple[str, str], dict[str, Any]],
@@ -618,59 +760,16 @@ def _refresh_clusters(
     review_registry: dict[str, Any],
     source_date: str,
 ) -> dict[str, Any]:
-    clusters = []
+    clusters: list[dict[str, Any]] = []
     seen_cluster_ids: set[str] = set()
     weak_decision_lookup = _weak_decision_lookup(review_registry)
 
     for cluster in _canonical_registry_clusters():
-        cluster_id = str(cluster.get("cluster_id") or "")
-        canonical_name = str(cluster.get("canonical_name") or "")
-        if not cluster_id or not canonical_name:
+        refreshed = _build_canonical_refreshed_cluster(cluster, facts)
+        if refreshed is None:
             continue
-        member_names = {
-            str(name)
-            for name in [
-                cluster.get("canonical_name"),
-                *cast(list[Any], cluster.get("legacy_names", [])),
-                *cast(list[Any], cluster.get("raw_provider_names", [])),
-            ]
-            if isinstance(name, str)
-        }
-        allowed_pipelines = {
-            str(pipeline)
-            for pipeline in cast(list[Any], cluster.get("pipelines", []))
-            if isinstance(pipeline, str)
-        }
-        members = [
-            fact
-            for fact in facts.values()
-            if fact.get("field") in member_names
-            and fact.get("pipeline") in allowed_pipelines
-        ]
-        if not members:
-            continue
-        refreshed_cluster = {
-            "aliases": sorted(name for name in member_names if name != canonical_name),
-            "canonical_field": canonical_name,
-            "cluster_id": cluster_id,
-            "rationale": str(cluster.get("notes") or ""),
-            "semantic_status": "EXACT",
-            "source": "canonical_registry",
-        }
-        refreshed_cluster.update(CLUSTER_METADATA_OVERRIDES.get(cluster_id, {}))
-        refreshed_cluster["member_count"] = len(members)
-        refreshed_cluster["pipeline_count"] = len(
-            {str(member["pipeline"]) for member in members}
-        )
-        refreshed_cluster["members"] = sorted(
-            members,
-            key=lambda member: (
-                str(member.get("pipeline") or ""),
-                str(member.get("field") or ""),
-            ),
-        )
-        clusters.append(refreshed_cluster)
-        seen_cluster_ids.add(cluster_id)
+        clusters.append(refreshed)
+        seen_cluster_ids.add(str(refreshed.get("cluster_id") or ""))
 
     for cluster in seed_registry.get("clusters", []):
         if not isinstance(cluster, dict):
@@ -681,46 +780,14 @@ def _refresh_clusters(
             or cluster.get("source") == "canonical_registry"
         ):
             continue
-        members = []
-        for member in cluster.get("members", []):
-            if not isinstance(member, dict):
-                continue
-            refreshed = facts.get(
-                (str(member.get("pipeline")), str(member.get("field")))
-            )
-            if refreshed is not None:
-                members.append(refreshed)
-        refreshed_cluster = {
-            key: value
-            for key, value in cluster.items()
-            if key not in {"members", "review"}
-        }
-        refreshed_cluster.update(CLUSTER_METADATA_OVERRIDES.get(cluster_id, {}))
-        semantic_status = str(refreshed_cluster.get("semantic_status") or "")
-        review = _review_payload_for_cluster(
-            review_registry,
-            cluster_id=cluster_id,
-            semantic_status=semantic_status,
+        refreshed = _build_seed_refreshed_cluster(
+            cluster,
+            facts,
+            review_registry=review_registry,
+            weak_decision_lookup=weak_decision_lookup,
         )
-        lexical_field = GENERIC_COLLISION_LEXICAL_FIELDS.get(cluster_id)
-        if lexical_field is not None and members:
-            if not any(
-                str(member.get("field") or "") == lexical_field for member in members
-            ):
-                continue
-        if not members:
-            continue
-        if review is not None:
-            refreshed_cluster["review"] = _review_metadata(review)
-        weak_decision = weak_decision_lookup.get(cluster_id)
-        if semantic_status == "WEAK" and weak_decision is not None:
-            refreshed_cluster["weak_decision"] = _weak_decision_metadata(weak_decision)
-        refreshed_cluster["member_count"] = len(members)
-        refreshed_cluster["pipeline_count"] = len(
-            {member["pipeline"] for member in members}
-        )
-        refreshed_cluster["members"] = members
-        clusters.append(refreshed_cluster)
+        if refreshed is not None:
+            clusters.append(refreshed)
     return {
         "generated_at": f"{source_date}T00:00:00Z",
         "source_date": source_date,

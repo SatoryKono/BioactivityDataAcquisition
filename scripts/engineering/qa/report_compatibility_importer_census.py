@@ -1167,25 +1167,24 @@ def build_compatibility_importer_census(
     }
 
 
-def _render_markdown(payload: dict[str, object]) -> str:
-    summary = payload["summary"]
-    retained_rows = payload["retained_entrypoints"]
-    retained_owner_usage_rows = payload["retained_entrypoint_owner_usage_map"]
-    public_export_rows = payload["retained_public_export_facades"]
-    public_export_owner_usage_rows = payload["retained_public_export_owner_usage_map"]
-    first_safe_removal_wave = payload["first_safe_removal_wave"]
-    removed_rows = payload["removed_compatibility_surfaces"]
-    twin_rows = payload["twin_pairs"]
-    assert isinstance(summary, dict)
-    assert isinstance(retained_rows, list)
-    assert isinstance(retained_owner_usage_rows, list)
-    assert isinstance(public_export_rows, list)
-    assert isinstance(public_export_owner_usage_rows, list)
-    assert isinstance(first_safe_removal_wave, dict)
-    assert isinstance(removed_rows, list)
-    assert isinstance(twin_rows, list)
+def _md_yes_no(value: object) -> str:
+    """Render a boolean-ish value as yes/no for markdown tables."""
+    return "yes" if value else "no"
 
-    lines = [
+
+def _md_join_or_none(values: object) -> str:
+    """Join string-ish values for a markdown cell, or ``none`` when empty."""
+    if not values:
+        return "none"
+    if isinstance(values, (list, tuple, set)):
+        rendered = [str(item) for item in values]
+        return ", ".join(rendered) if rendered else "none"
+    return str(values)
+
+
+def _md_summary_lines(payload: dict[str, object], summary: dict[str, object]) -> list[str]:
+    """Render the census summary bullet list."""
+    return [
         "# Compatibility Importer Census",
         "",
         f"- snapshot_date: {payload['snapshot_date']}",
@@ -1212,6 +1211,11 @@ def _render_markdown(payload: dict[str, object]) -> str:
         "- retained_public_export_facades_with_wrapper_contract_drift: "
         f"{summary['retained_public_export_facades_with_wrapper_contract_drift']}",
         "- purpose: measure sanctioned public seams and underscore/public twin usage",
+    ]
+
+
+def _md_retained_entrypoint_lines(retained_rows: list[object]) -> list[str]:
+    lines = [
         "",
         "## Retained Entrypoints",
         "",
@@ -1223,70 +1227,79 @@ def _render_markdown(payload: dict[str, object]) -> str:
         lines.append(
             f"| `{row['path']}` | {row['src_importer_count']} | {row['test_importer_count']} |"
         )
+    return lines
 
-    lines.extend(
-        [
-            "",
-            "## Retained Entrypoint Owner/Usage Map",
-            "",
-            "| Path | Owner | Usage classification | Surface classification | Internal callers zero | "
-            "External breaking change required | src importers | test importers |",
-            "| --- | --- | --- | --- | --- | --- | ---: | ---: |",
-        ]
-    )
+
+def _md_retained_owner_usage_lines(retained_owner_usage_rows: list[object]) -> list[str]:
+    lines = [
+        "",
+        "## Retained Entrypoint Owner/Usage Map",
+        "",
+        "| Path | Owner | Usage classification | Surface classification | Internal callers zero | "
+        "External breaking change required | src importers | test importers |",
+        "| --- | --- | --- | --- | --- | --- | ---: | ---: |",
+    ]
     for row in retained_owner_usage_rows:
         assert isinstance(row, dict)
         lines.append(
             f"| `{row['path']}` | `{row['owner']}` | `{row['usage_classification']}` | "
             f"`{row['surface_classification']}` | "
-            f"{'yes' if row['internal_callers_zero'] else 'no'} | "
-            f"{'yes' if row['external_breaking_change_required'] else 'no'} | "
+            f"{_md_yes_no(row['internal_callers_zero'])} | "
+            f"{_md_yes_no(row['external_breaking_change_required'])} | "
             f"{row['src_importer_count']} | {row['test_importer_count']} |"
         )
+    return lines
 
-    lines.extend(
-        [
-            "",
-            "## Retained Public Export Facades",
-            "",
-            "| Path | Public exports | Lazy exports | Retained wrappers outside "
-            "`__all__` | Duplicate exports | Resolution conflicts |",
-            "| --- | ---: | ---: | --- | --- | --- |",
-        ]
+
+def _md_public_export_wrapper_cell(row: dict[str, object]) -> str:
+    """Render retained-wrapper + drift cell for a public export facade row."""
+    wrapper_names = row["retained_wrappers_outside_all"]
+    wrapper_drift = sorted(
+        set(row["missing_retained_wrappers_outside_all"])
+        | set(row["unexpected_retained_wrappers_outside_all"])
     )
+    wrapper_cell = ", ".join(wrapper_names) if wrapper_names else "none"
+    if wrapper_drift:
+        wrapper_cell = f"{wrapper_cell} (drift: {', '.join(wrapper_drift)})"
+    return wrapper_cell
+
+
+def _md_public_export_lines(public_export_rows: list[object]) -> list[str]:
+    lines = [
+        "",
+        "## Retained Public Export Facades",
+        "",
+        "| Path | Public exports | Lazy exports | Retained wrappers outside "
+        "`__all__` | Duplicate exports | Resolution conflicts |",
+        "| --- | ---: | ---: | --- | --- | --- |",
+    ]
     for row in public_export_rows:
         assert isinstance(row, dict)
         duplicate_exports = sorted(
-            set(row["duplicate_public_exports"])
-            | set(row["duplicate_lazy_export_keys"])
+            set(row["duplicate_public_exports"]) | set(row["duplicate_lazy_export_keys"])
         )
         conflicts = sorted(row["resolution_conflicts"])
-        wrapper_names = row["retained_wrappers_outside_all"]
-        wrapper_drift = sorted(
-            set(row["missing_retained_wrappers_outside_all"])
-            | set(row["unexpected_retained_wrappers_outside_all"])
-        )
-        wrapper_cell = ", ".join(wrapper_names) if wrapper_names else "none"
-        if wrapper_drift:
-            wrapper_cell = f"{wrapper_cell} (drift: {', '.join(wrapper_drift)})"
         lines.append(
             f"| `{row['path']}` | {row['public_export_count']} | "
             f"{len(row['lazy_export_keys']) + len(row['dunder_getattr_exports'])} | "
-            f"{wrapper_cell} | "
-            f"{', '.join(duplicate_exports) if duplicate_exports else 'none'} | "
-            f"{', '.join(conflicts) if conflicts else 'none'} |"
+            f"{_md_public_export_wrapper_cell(row)} | "
+            f"{_md_join_or_none(duplicate_exports)} | "
+            f"{_md_join_or_none(conflicts)} |"
         )
+    return lines
 
-    lines.extend(
-        [
-            "",
-            "## Retained Public Export Facade Owner/Usage Map",
-            "",
-            "| Path | Owner | Usage classification | Surface classification | "
-            "src importers | test importers | Public exports |",
-            "| --- | --- | --- | --- | ---: | ---: | ---: |",
-        ]
-    )
+
+def _md_public_export_owner_usage_lines(
+    public_export_owner_usage_rows: list[object],
+) -> list[str]:
+    lines = [
+        "",
+        "## Retained Public Export Facade Owner/Usage Map",
+        "",
+        "| Path | Owner | Usage classification | Surface classification | "
+        "src importers | test importers | Public exports |",
+        "| --- | --- | --- | --- | ---: | ---: | ---: |",
+    ]
     for row in public_export_owner_usage_rows:
         assert isinstance(row, dict)
         lines.append(
@@ -1295,19 +1308,22 @@ def _render_markdown(payload: dict[str, object]) -> str:
             f"{row['src_importer_count']} | {row['test_importer_count']} | "
             f"{row['public_export_count']} |"
         )
+    return lines
 
-    lines.extend(
-        [
-            "",
-            "## First Safe Removal Wave",
-            "",
-            f"- linked_issue: {first_safe_removal_wave['linked_issue']}",
-            f"- review_date: {first_safe_removal_wave['review_date']}",
-            "",
-            "| Path | Owner | Previous status | Surface classification | src importers | test importers | Action |",
-            "| --- | --- | --- | --- | ---: | ---: | --- |",
-        ]
-    )
+
+def _md_first_safe_removal_wave_lines(
+    first_safe_removal_wave: dict[str, object],
+) -> list[str]:
+    lines = [
+        "",
+        "## First Safe Removal Wave",
+        "",
+        f"- linked_issue: {first_safe_removal_wave['linked_issue']}",
+        f"- review_date: {first_safe_removal_wave['review_date']}",
+        "",
+        "| Path | Owner | Previous status | Surface classification | src importers | test importers | Action |",
+        "| --- | --- | --- | --- | ---: | ---: | --- |",
+    ]
     removal_rows = first_safe_removal_wave["rows"]
     assert isinstance(removal_rows, list)
     for row in removal_rows:
@@ -1324,55 +1340,61 @@ def _render_markdown(payload: dict[str, object]) -> str:
                 f"Migration prerequisites for `{row['path']}`: "
                 + "; ".join(str(item) for item in prerequisites)
             )
+    return lines
 
-    lines.extend(
-        [
-            "",
-            "## Removed Compatibility Surfaces",
-            "",
-            "| Module | Path exists | src importers | test importers | Canonical target |",
-            "| --- | --- | ---: | ---: | --- |",
-        ]
-    )
+
+def _md_removed_surface_lines(removed_rows: list[object]) -> list[str]:
+    lines = [
+        "",
+        "## Removed Compatibility Surfaces",
+        "",
+        "| Module | Path exists | src importers | test importers | Canonical target |",
+        "| --- | --- | ---: | ---: | --- |",
+    ]
     for row in removed_rows:
         assert isinstance(row, dict)
         lines.append(
             f"| `{row['module_name']}` | "
-            f"{'yes' if row['path_exists'] else 'no'} | "
+            f"{_md_yes_no(row['path_exists'])} | "
             f"{row['src_importer_count']} | "
             f"{row['test_importer_count']} | "
             f"`{row['canonical_target']}` |"
         )
+    return lines
 
-    lines.extend(
-        [
-            "",
-            "## Twin Modules",
-            "",
-            "| Public module | Public src | Private src |",
-            "| --- | ---: | ---: |",
-        ]
-    )
+
+def _md_twin_module_lines(twin_rows: list[object]) -> list[str]:
+    lines = [
+        "",
+        "## Twin Modules",
+        "",
+        "| Public module | Public src | Private src |",
+        "| --- | ---: | ---: |",
+    ]
     for row in twin_rows:
         assert isinstance(row, dict)
         lines.append(
-            f"| `{row['public_module']}` | {row['public_src_importer_count']} | {row['private_src_importer_count']} |"
+            f"| `{row['public_module']}` | {row['public_src_importer_count']} | "
+            f"{row['private_src_importer_count']} |"
         )
+    return lines
 
-    tracked_twin_rows = payload["tracked_twin_families"]
-    assert isinstance(tracked_twin_rows, list)
-    lines.extend(
-        [
-            "",
-            "## Tracked Twin Family Ratchet",
-            "",
-            f"- inventory_source: `{payload['twin_ratchet_source']}`",
-            "",
-            "| Family | Canonical first-party module | Current public src | "
-            "Current private src | Max public src | Max private src |",
-            "| --- | --- | ---: | ---: | ---: | ---: |",
-        ]
-    )
+
+def _md_tracked_twin_family_lines(
+    *,
+    payload: dict[str, object],
+    tracked_twin_rows: list[object],
+) -> list[str]:
+    lines = [
+        "",
+        "## Tracked Twin Family Ratchet",
+        "",
+        f"- inventory_source: `{payload['twin_ratchet_source']}`",
+        "",
+        "| Family | Canonical first-party module | Current public src | "
+        "Current private src | Max public src | Max private src |",
+        "| --- | --- | ---: | ---: | ---: | ---: |",
+    ]
     for row in tracked_twin_rows:
         assert isinstance(row, dict)
         lines.append(
@@ -1382,45 +1404,103 @@ def _render_markdown(payload: dict[str, object]) -> str:
             f"{row['max_public_src_importers']} | "
             f"{row['max_private_src_importers']} |"
         )
+    return lines
 
-    config_root_facade = payload["config_root_facade"]
-    assert isinstance(config_root_facade, dict)
+
+def _md_config_root_facade_lines(
+    *,
+    payload: dict[str, object],
+    config_root_facade: dict[str, object],
+) -> list[str]:
     symbol_rows = config_root_facade["symbols"]
     assert isinstance(symbol_rows, list)
-    lines.extend(
-        [
-            "",
-            "## Infrastructure Config Root Facade",
-            "",
-            f"- inventory_source: `{payload['config_root_facade_source']}`",
-            f"- target_module: `{config_root_facade['target_module']}`",
-            f"- new_src_import_policy: `{config_root_facade['new_src_import_policy']}`",
-            "",
-            "| Symbol | Current src importers | Max src importers | Canonical target |",
-            "| --- | ---: | ---: | --- |",
-        ]
-    )
+    lines = [
+        "",
+        "## Infrastructure Config Root Facade",
+        "",
+        f"- inventory_source: `{payload['config_root_facade_source']}`",
+        f"- target_module: `{config_root_facade['target_module']}`",
+        f"- new_src_import_policy: `{config_root_facade['new_src_import_policy']}`",
+        "",
+        "| Symbol | Current src importers | Max src importers | Canonical target |",
+        "| --- | ---: | ---: | --- |",
+    ]
     for row in symbol_rows:
         assert isinstance(row, dict)
         lines.append(
             f"| `{row['symbol']}` | {row['current_src_importer_count']} | "
             f"{row['max_src_importers']} | `{row['canonical_target']}` |"
         )
+    return lines
+
+
+def _md_control_plane_root_facade_lines(
+    *,
+    payload: dict[str, object],
+    control_plane_root_facade: dict[str, object],
+) -> list[str]:
+    return [
+        "",
+        "## Application Control-Plane Root Facade",
+        "",
+        f"- inventory_source: `{payload['control_plane_root_facade_source']}`",
+        f"- target_module: `{control_plane_root_facade['target_module']}`",
+        "- new_src_import_policy: "
+        f"`{control_plane_root_facade['new_src_import_policy']}`",
+        f"- src_importer_count: {control_plane_root_facade['src_importer_count']}",
+        "",
+    ]
+
+
+def _render_markdown(payload: dict[str, object]) -> str:
+    summary = payload["summary"]
+    retained_rows = payload["retained_entrypoints"]
+    retained_owner_usage_rows = payload["retained_entrypoint_owner_usage_map"]
+    public_export_rows = payload["retained_public_export_facades"]
+    public_export_owner_usage_rows = payload["retained_public_export_owner_usage_map"]
+    first_safe_removal_wave = payload["first_safe_removal_wave"]
+    removed_rows = payload["removed_compatibility_surfaces"]
+    twin_rows = payload["twin_pairs"]
+    tracked_twin_rows = payload["tracked_twin_families"]
+    config_root_facade = payload["config_root_facade"]
     control_plane_root_facade = payload["control_plane_root_facade"]
+    assert isinstance(summary, dict)
+    assert isinstance(retained_rows, list)
+    assert isinstance(retained_owner_usage_rows, list)
+    assert isinstance(public_export_rows, list)
+    assert isinstance(public_export_owner_usage_rows, list)
+    assert isinstance(first_safe_removal_wave, dict)
+    assert isinstance(removed_rows, list)
+    assert isinstance(twin_rows, list)
+    assert isinstance(tracked_twin_rows, list)
+    assert isinstance(config_root_facade, dict)
     assert isinstance(control_plane_root_facade, dict)
+
+    lines: list[str] = []
+    lines.extend(_md_summary_lines(payload, summary))
+    lines.extend(_md_retained_entrypoint_lines(retained_rows))
+    lines.extend(_md_retained_owner_usage_lines(retained_owner_usage_rows))
+    lines.extend(_md_public_export_lines(public_export_rows))
+    lines.extend(_md_public_export_owner_usage_lines(public_export_owner_usage_rows))
+    lines.extend(_md_first_safe_removal_wave_lines(first_safe_removal_wave))
+    lines.extend(_md_removed_surface_lines(removed_rows))
+    lines.extend(_md_twin_module_lines(twin_rows))
     lines.extend(
-        [
-            "",
-            "## Application Control-Plane Root Facade",
-            "",
-            f"- inventory_source: `{payload['control_plane_root_facade_source']}`",
-            f"- target_module: `{control_plane_root_facade['target_module']}`",
-            "- new_src_import_policy: "
-            f"`{control_plane_root_facade['new_src_import_policy']}`",
-            f"- src_importer_count: {control_plane_root_facade['src_importer_count']}",
-        ]
+        _md_tracked_twin_family_lines(
+            payload=payload, tracked_twin_rows=tracked_twin_rows
+        )
     )
-    lines.append("")
+    lines.extend(
+        _md_config_root_facade_lines(
+            payload=payload, config_root_facade=config_root_facade
+        )
+    )
+    lines.extend(
+        _md_control_plane_root_facade_lines(
+            payload=payload,
+            control_plane_root_facade=control_plane_root_facade,
+        )
+    )
     return "\n".join(lines)
 
 

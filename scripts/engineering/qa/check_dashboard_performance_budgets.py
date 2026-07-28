@@ -131,6 +131,128 @@ def _measure_dashboard(path: Path, *, y_max: int) -> dict[str, Any]:
     }
 
 
+def _check_primary_and_retired(
+    *,
+    by_uid: dict[str, dict[str, Any]],
+    primary: list[str],
+    retired: set[str],
+    budgets: dict[str, Any],
+) -> tuple[list[str], list[str]]:
+    """Primary-count violations and retired-UID still-shipped warnings."""
+    violations: list[str] = []
+    warnings: list[str] = []
+    primary_count = sum(1 for uid in primary if uid in by_uid)
+    max_primary = int(budgets.get("max_primary_dashboard_count", 5))
+    if primary_count > max_primary:
+        violations.append(
+            f"primary dashboard count {primary_count} > budget {max_primary}"
+        )
+    # Retired UIDs must not remain as shipped files once phase 4 deletes them.
+    for uid in sorted(retired):
+        if uid in by_uid:
+            warnings.append(
+                f"retired uid still shipped as JSON: {uid} (delete in phase #6576)"
+            )
+    return violations, warnings
+
+
+def _check_first_load_promql(
+    *,
+    measurements: list[dict[str, Any]],
+    by_uid: dict[str, dict[str, Any]],
+    budgets: dict[str, Any],
+) -> list[str]:
+    """Worst and overview first-load PromQL budget violations."""
+    violations: list[str] = []
+    worst = max((m["first_load_promql"] for m in measurements), default=0)
+    if worst > int(budgets.get("worst_first_load_promql", 6)):
+        violations.append(
+            f"worst first-load PromQL {worst} > budget "
+            f"{budgets.get('worst_first_load_promql')}"
+        )
+    overview = by_uid.get("bioetl-overview-v2")
+    if overview and overview["first_load_promql"] > int(
+        budgets.get("overview_first_load_promql", 5)
+    ):
+        violations.append(
+            "overview first-load PromQL "
+            f"{overview['first_load_promql']} > budget "
+            f"{budgets.get('overview_first_load_promql')}"
+        )
+    return violations
+
+
+def _check_expr_and_http_budgets(
+    *,
+    measurements: list[dict[str, Any]],
+    budgets: dict[str, Any],
+    exceptions: set[str],
+) -> list[str]:
+    """HTTP panel, expression-length, and $__range ref budget violations."""
+    violations: list[str] = []
+    # Count HTTP only on primary/remaining shipped.
+    total_http = sum(m["first_paint_ops_http"] for m in measurements)
+    if total_http > int(budgets.get("first_paint_ops_http_panels", 0)):
+        violations.append(
+            f"first-paint Ops HTTP panels {total_http} > budget "
+            f"{budgets.get('first_paint_ops_http_panels')}"
+        )
+    max_expr = max((m["max_first_screen_expr_chars"] for m in measurements), default=0)
+    expr_limit = int(budgets.get("max_first_screen_expr_chars", 200))
+    if max_expr > expr_limit:
+        offenders = [
+            f"{m['uid']}:{m['max_first_screen_expr_panel']}={m['max_first_screen_expr_chars']}"
+            for m in measurements
+            if m["max_first_screen_expr_chars"] > expr_limit
+            and m["uid"] not in exceptions
+        ]
+        if offenders:
+            violations.append(
+                "max first-screen expr chars "
+                f"{max_expr} > budget {budgets.get('max_first_screen_expr_chars')}; "
+                f"offenders={offenders}"
+            )
+    total_range = sum(m["first_screen_range_refs"] for m in measurements)
+    if total_range > int(budgets.get("first_screen_range_refs", 0)):
+        violations.append(
+            f"first-screen $__range refs {total_range} > budget "
+            f"{budgets.get('first_screen_range_refs')}"
+        )
+    return violations
+
+
+def _check_refresh_dual_nav_budgets(
+    *,
+    measurements: list[dict[str, Any]],
+    budgets: dict[str, Any],
+    retired: set[str],
+) -> list[str]:
+    """Refresh interval, dual-status, and nav-target budget violations."""
+    violations: list[str] = []
+    refresh_budget = int(budgets.get("refresh_seconds", 60))
+    for m in measurements:
+        rs = m.get("refresh_seconds")
+        if rs is None or rs != refresh_budget:
+            violations.append(
+                f"{m['uid']} refresh={m.get('refresh')!r} expected {refresh_budget}s"
+            )
+    dual = sum(m["dual_status_pairs"] for m in measurements)
+    if dual > int(budgets.get("dual_status_identical_pairs", 0)):
+        violations.append(
+            f"dual Status identical pairs {dual} > budget "
+            f"{budgets.get('dual_status_identical_pairs')}"
+        )
+    nav_budget = int(budgets.get("max_nav_targets_per_dashboard", 4))
+    for m in measurements:
+        if m["uid"] in retired:
+            continue
+        if m["nav_targets"] > nav_budget:
+            violations.append(
+                f"{m['uid']} nav targets {m['nav_targets']} > budget {nav_budget}"
+            )
+    return violations
+
+
 def evaluate(
     budgets_path: Path,
     dashboards_dir: Path,
@@ -156,95 +278,26 @@ def evaluate(
     violations: list[str] = []
     warnings: list[str] = []
 
-    primary_count = sum(1 for uid in primary if uid in by_uid)
-    max_primary = int(b.get("max_primary_dashboard_count", 5))
-    if primary_count > max_primary:
-        violations.append(
-            f"primary dashboard count {primary_count} > budget {max_primary}"
-        )
-
-    # Retired UIDs must not remain as shipped files once phase 4 deletes them.
-    for uid in sorted(retired):
-        if uid in by_uid:
-            warnings.append(
-                f"retired uid still shipped as JSON: {uid} (delete in phase #6576)"
-            )
-
-    worst = max((m["first_load_promql"] for m in measurements), default=0)
-    if worst > int(b.get("worst_first_load_promql", 6)):
-        violations.append(
-            f"worst first-load PromQL {worst} > budget {b.get('worst_first_load_promql')}"
-        )
-
-    overview = by_uid.get("bioetl-overview-v2")
-    if overview and overview["first_load_promql"] > int(
-        b.get("overview_first_load_promql", 5)
-    ):
-        violations.append(
-            "overview first-load PromQL "
-            f"{overview['first_load_promql']} > budget "
-            f"{b.get('overview_first_load_promql')}"
-        )
-
-    total_http = sum(
-        m["first_paint_ops_http"]
-        for m in measurements
-        if m["uid"] in primary or not primary
+    primary_violations, retired_warnings = _check_primary_and_retired(
+        by_uid=by_uid, primary=primary, retired=retired, budgets=b
     )
-    # Count HTTP only on primary/remaining shipped.
-    total_http = sum(m["first_paint_ops_http"] for m in measurements)
-    if total_http > int(b.get("first_paint_ops_http_panels", 0)):
-        violations.append(
-            f"first-paint Ops HTTP panels {total_http} > budget "
-            f"{b.get('first_paint_ops_http_panels')}"
+    violations.extend(primary_violations)
+    warnings.extend(retired_warnings)
+    violations.extend(
+        _check_first_load_promql(
+            measurements=measurements, by_uid=by_uid, budgets=b
         )
-
-    max_expr = max((m["max_first_screen_expr_chars"] for m in measurements), default=0)
-    if max_expr > int(b.get("max_first_screen_expr_chars", 200)):
-        offenders = [
-            f"{m['uid']}:{m['max_first_screen_expr_panel']}={m['max_first_screen_expr_chars']}"
-            for m in measurements
-            if m["max_first_screen_expr_chars"]
-            > int(b.get("max_first_screen_expr_chars", 200))
-            and m["uid"] not in exceptions
-        ]
-        if offenders:
-            violations.append(
-                "max first-screen expr chars "
-                f"{max_expr} > budget {b.get('max_first_screen_expr_chars')}; "
-                f"offenders={offenders}"
-            )
-
-    total_range = sum(m["first_screen_range_refs"] for m in measurements)
-    if total_range > int(b.get("first_screen_range_refs", 0)):
-        violations.append(
-            f"first-screen $__range refs {total_range} > budget "
-            f"{b.get('first_screen_range_refs')}"
+    )
+    violations.extend(
+        _check_expr_and_http_budgets(
+            measurements=measurements, budgets=b, exceptions=exceptions
         )
-
-    refresh_budget = int(b.get("refresh_seconds", 60))
-    for m in measurements:
-        rs = m.get("refresh_seconds")
-        if rs is None or rs != refresh_budget:
-            violations.append(
-                f"{m['uid']} refresh={m.get('refresh')!r} expected {refresh_budget}s"
-            )
-
-    dual = sum(m["dual_status_pairs"] for m in measurements)
-    if dual > int(b.get("dual_status_identical_pairs", 0)):
-        violations.append(
-            f"dual Status identical pairs {dual} > budget "
-            f"{b.get('dual_status_identical_pairs')}"
+    )
+    violations.extend(
+        _check_refresh_dual_nav_budgets(
+            measurements=measurements, budgets=b, retired=retired
         )
-
-    nav_budget = int(b.get("max_nav_targets_per_dashboard", 4))
-    for m in measurements:
-        if m["uid"] in retired:
-            continue
-        if m["nav_targets"] > nav_budget:
-            violations.append(
-                f"{m['uid']} nav targets {m['nav_targets']} > budget {nav_budget}"
-            )
+    )
 
     report = {
         "budgets": b,

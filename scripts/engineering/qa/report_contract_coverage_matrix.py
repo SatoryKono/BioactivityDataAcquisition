@@ -341,13 +341,127 @@ def _constraint_completeness(
     return status, sorted(surfaces), sorted(missing)
 
 
-def _build_row(
+def _collect_structural_missing_surfaces(
+    *,
+    contract_yaml_exists: bool,
+    registry_entry_exists: bool,
+    source_path: str,
+    source_exists: bool,
+    published_artifacts: list[str],
+    published_artifact_missing_paths: list[str],
+) -> list[str]:
+    """Missing structural contract surfaces independent of gold enablement."""
+    missing: list[str] = []
+    if not contract_yaml_exists:
+        missing.append("contract_yaml")
+    if not registry_entry_exists:
+        missing.append("registry_entry")
+    if not source_path:
+        missing.append("gold_schema_source_path")
+    elif not source_exists:
+        missing.append("gold_schema_source_file")
+    if not published_artifacts:
+        missing.append("published_artifact")
+    elif published_artifact_missing_paths:
+        missing.append("published_artifact_file")
+    return missing
+
+
+def _collect_gold_enabled_missing_surfaces(
+    *,
+    schema_source_summary: dict[str, Any],
+    primary_key_fields: list[str],
+    primary_keys_required: bool,
+    contract_artifact_summary: dict[str, Any],
+    contract_test_paths: list[str],
+) -> list[str]:
+    """Missing surfaces required only when gold runtime is enabled."""
+    missing: list[str] = []
+    if not schema_source_summary["pandera_contract_declared"]:
+        missing.append("pandera_contract_source")
+    if not schema_source_summary["gold_strict_validation_declared"]:
+        missing.append("gold_strict_validation")
+    if not primary_key_fields:
+        missing.append("primary_key_contract")
+    elif not primary_keys_required:
+        missing.append("primary_key_required_fields")
+    if contract_artifact_summary["published_contract_property_count"] <= 0:
+        missing.append("published_contract_properties")
+    if contract_artifact_summary["published_contract_required_count"] <= 0:
+        missing.append("published_contract_required_fields")
+    if not contract_test_paths:
+        missing.append("contract_tests")
+    return missing
+
+
+def _collect_identity_mismatch_surfaces(
+    *,
+    contract_yaml_exists: bool,
+    registry_entry_exists: bool,
+    contract_ref: str,
+    yaml_contract_ref: object,
+    yaml_contract_version: object,
+    registry_contract_version: object,
+) -> list[str]:
+    """Missing surfaces for contract_ref / contract_version identity drift."""
+    missing: list[str] = []
+    if contract_yaml_exists and yaml_contract_ref != contract_ref:
+        missing.append("contract_ref_mismatch")
+    if (
+        contract_yaml_exists
+        and registry_entry_exists
+        and yaml_contract_version != registry_contract_version
+    ):
+        missing.append("contract_version_mismatch")
+    return missing
+
+
+def _parity_status_for_row(
+    *,
+    gold_enabled: bool,
+    missing_surfaces: list[str],
+) -> tuple[str, str]:
+    """Return (parity_status, exclusion_reason) for a matrix row."""
+    if not gold_enabled:
+        return "excluded", "gold_runtime_disabled"
+    if missing_surfaces:
+        return "missing_surfaces", ""
+    return "covered", ""
+
+
+def _gold_contract_available(
+    *,
+    contract_yaml_exists: bool,
+    registry_entry_exists: bool,
+    source_exists: bool,
+    published_artifacts: list[str],
+    published_artifact_missing_paths: list[str],
+    schema_source_summary: dict[str, Any],
+) -> bool:
+    """Whether gold contract/schema artifacts are available (CR-01 / #6693).
+
+    Contract/schema availability is independent of runtime sink enablement.
+    Strict Gold validation declaration is required so "available" never means
+    "Pandera present but Gold may be non-strict".
+    """
+    return bool(
+        contract_yaml_exists
+        and registry_entry_exists
+        and source_exists
+        and published_artifacts
+        and not published_artifact_missing_paths
+        and schema_source_summary["pandera_contract_declared"]
+        and schema_source_summary["gold_strict_validation_declared"]
+    )
+
+
+def _resolve_row_identity(
     *,
     config_path: Path,
     config_payload: dict[str, Any],
     registry_entries: dict[str, dict[str, Any]],
-    test_index: list[tuple[str, str]],
 ) -> dict[str, Any]:
+    """Resolve provider/entity/pipeline identity and registry/source artifacts."""
     provider = str(config_payload.get("provider") or config_path.parent.name)
     entity = str(config_payload.get("entity") or config_path.stem)
     pipeline = config_payload.get("pipeline")
@@ -382,7 +496,6 @@ def _build_row(
     source_exists = (
         bool(source_path) and _resolve_registry_relative(source_path).is_file()
     )
-
     published_artifacts = (
         _string_list(registry_entry.get("published_artifacts"))
         if isinstance(registry_entry, dict)
@@ -393,6 +506,99 @@ def _build_row(
         for artifact in published_artifacts
         if not _resolve_registry_relative(artifact).is_file()
     ]
+    return {
+        "provider": provider,
+        "entity": entity,
+        "pipeline_name": pipeline_name,
+        "contract_ref": contract_ref,
+        "gold_enabled": gold_enabled,
+        "primary_key_fields": primary_key_fields,
+        "contract_yaml_path": contract_yaml_path,
+        "contract_yaml_exists": contract_yaml_exists,
+        "contract_payload": contract_payload,
+        "registry_entry": registry_entry,
+        "registry_entry_exists": registry_entry_exists,
+        "registry_identity": registry_identity,
+        "source_path": source_path,
+        "source_exists": source_exists,
+        "published_artifacts": published_artifacts,
+        "published_artifact_missing_paths": published_artifact_missing_paths,
+    }
+
+
+def _assemble_missing_surfaces(
+    *,
+    identity: dict[str, Any],
+    schema_source_summary: dict[str, Any],
+    contract_artifact_summary: dict[str, Any],
+    primary_keys_required: bool,
+    contract_test_paths: list[str],
+) -> list[str]:
+    """Collect all missing surface labels for a coverage matrix row."""
+    missing_surfaces = _collect_structural_missing_surfaces(
+        contract_yaml_exists=identity["contract_yaml_exists"],
+        registry_entry_exists=identity["registry_entry_exists"],
+        source_path=identity["source_path"],
+        source_exists=identity["source_exists"],
+        published_artifacts=identity["published_artifacts"],
+        published_artifact_missing_paths=identity[
+            "published_artifact_missing_paths"
+        ],
+    )
+    if identity["gold_enabled"]:
+        missing_surfaces.extend(
+            _collect_gold_enabled_missing_surfaces(
+                schema_source_summary=schema_source_summary,
+                primary_key_fields=identity["primary_key_fields"],
+                primary_keys_required=primary_keys_required,
+                contract_artifact_summary=contract_artifact_summary,
+                contract_test_paths=contract_test_paths,
+            )
+        )
+    contract_payload = identity["contract_payload"]
+    registry_identity = identity["registry_identity"]
+    missing_surfaces.extend(
+        _collect_identity_mismatch_surfaces(
+            contract_yaml_exists=identity["contract_yaml_exists"],
+            registry_entry_exists=identity["registry_entry_exists"],
+            contract_ref=identity["contract_ref"],
+            yaml_contract_ref=contract_payload.get("contract_ref"),
+            yaml_contract_version=contract_payload.get("contract_version"),
+            registry_contract_version=registry_identity.get("contract_version"),
+        )
+    )
+    return missing_surfaces
+
+
+def _build_row(
+    *,
+    config_path: Path,
+    config_payload: dict[str, Any],
+    registry_entries: dict[str, dict[str, Any]],
+    test_index: list[tuple[str, str]],
+) -> dict[str, Any]:
+    identity = _resolve_row_identity(
+        config_path=config_path,
+        config_payload=config_payload,
+        registry_entries=registry_entries,
+    )
+    provider = identity["provider"]
+    entity = identity["entity"]
+    source_path = identity["source_path"]
+    published_artifacts = identity["published_artifacts"]
+    published_artifact_missing_paths = identity["published_artifact_missing_paths"]
+    primary_key_fields = identity["primary_key_fields"]
+    gold_enabled = identity["gold_enabled"]
+    contract_yaml_exists = identity["contract_yaml_exists"]
+    contract_yaml_path = identity["contract_yaml_path"]
+    contract_payload = identity["contract_payload"]
+    registry_entry = identity["registry_entry"]
+    registry_entry_exists = identity["registry_entry_exists"]
+    registry_identity = identity["registry_identity"]
+    source_exists = identity["source_exists"]
+    contract_ref = identity["contract_ref"]
+    pipeline_name = identity["pipeline_name"]
+
     contract_artifact_summary = _contract_artifact_summary(published_artifacts)
     schema_source_summary = _schema_source_summary(source_path)
     contract_test_paths = _contract_test_paths(provider, entity, test_index)
@@ -414,64 +620,29 @@ def _build_row(
         golden_test_paths=golden_test_paths,
     )
 
-    missing_surfaces: list[str] = []
-    if not contract_yaml_exists:
-        missing_surfaces.append("contract_yaml")
-    if not registry_entry_exists:
-        missing_surfaces.append("registry_entry")
-    if not source_path:
-        missing_surfaces.append("gold_schema_source_path")
-    elif not source_exists:
-        missing_surfaces.append("gold_schema_source_file")
-    if not published_artifacts:
-        missing_surfaces.append("published_artifact")
-    elif published_artifact_missing_paths:
-        missing_surfaces.append("published_artifact_file")
-    if gold_enabled:
-        if not schema_source_summary["pandera_contract_declared"]:
-            missing_surfaces.append("pandera_contract_source")
-        if not schema_source_summary["gold_strict_validation_declared"]:
-            missing_surfaces.append("gold_strict_validation")
-        if not primary_key_fields:
-            missing_surfaces.append("primary_key_contract")
-        elif not primary_keys_required:
-            missing_surfaces.append("primary_key_required_fields")
-        if contract_artifact_summary["published_contract_property_count"] <= 0:
-            missing_surfaces.append("published_contract_properties")
-        if contract_artifact_summary["published_contract_required_count"] <= 0:
-            missing_surfaces.append("published_contract_required_fields")
-        if not contract_test_paths:
-            missing_surfaces.append("contract_tests")
+    missing_surfaces = _assemble_missing_surfaces(
+        identity=identity,
+        schema_source_summary=schema_source_summary,
+        contract_artifact_summary=contract_artifact_summary,
+        primary_keys_required=primary_keys_required,
+        contract_test_paths=contract_test_paths,
+    )
+    parity_status, exclusion_reason = _parity_status_for_row(
+        gold_enabled=gold_enabled,
+        missing_surfaces=missing_surfaces,
+    )
+    gold_contract_available = _gold_contract_available(
+        contract_yaml_exists=contract_yaml_exists,
+        registry_entry_exists=registry_entry_exists,
+        source_exists=source_exists,
+        published_artifacts=published_artifacts,
+        published_artifact_missing_paths=published_artifact_missing_paths,
+        schema_source_summary=schema_source_summary,
+    )
 
     yaml_contract_ref = contract_payload.get("contract_ref")
     yaml_contract_version = contract_payload.get("contract_version")
     registry_contract_version = registry_identity.get("contract_version")
-    if contract_yaml_exists and yaml_contract_ref != contract_ref:
-        missing_surfaces.append("contract_ref_mismatch")
-    if contract_yaml_exists and registry_entry_exists:
-        if yaml_contract_version != registry_contract_version:
-            missing_surfaces.append("contract_version_mismatch")
-
-    parity_status = "covered"
-    exclusion_reason = ""
-    if not gold_enabled:
-        parity_status = "excluded"
-        exclusion_reason = "gold_runtime_disabled"
-    elif missing_surfaces:
-        parity_status = "missing_surfaces"
-
-    # Contract/schema availability is independent of runtime sink enablement.
-    # Strict Gold validation declaration is required so "available" never means
-    # "Pandera present but Gold may be non-strict" (CR-01 / #6693).
-    gold_contract_available = bool(
-        contract_yaml_exists
-        and registry_entry_exists
-        and source_exists
-        and published_artifacts
-        and not published_artifact_missing_paths
-        and schema_source_summary["pandera_contract_declared"]
-        and schema_source_summary["gold_strict_validation_declared"]
-    )
 
     return {
         "pipeline_name": pipeline_name,

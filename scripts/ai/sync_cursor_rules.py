@@ -55,8 +55,13 @@ def sync_cursor_rules(
     deploy: bool,
     check_only: bool,
 ) -> list[str]:
-    canonical_dir = root / CURSOR_RULE_DOCS_DIR
-    deploy_dir = root / CURSOR_RULES_DIR
+    from scripts.engineering.common.repo_paths import ensure_path_within_root
+
+    safe_root = root.expanduser().resolve(strict=False)
+    canonical_dir = ensure_path_within_root(
+        safe_root / CURSOR_RULE_DOCS_DIR, safe_root
+    )
+    deploy_dir = ensure_path_within_root(safe_root / CURSOR_RULES_DIR, safe_root)
     issues: list[str] = []
 
     if not canonical_dir.is_dir():
@@ -73,15 +78,21 @@ def sync_cursor_rules(
         return issues
 
     for source in canonical_files:
-        target = deploy_dir / source.name
+        safe_source = ensure_path_within_root(source, safe_root)
+        target = ensure_path_within_root(deploy_dir / safe_source.name, safe_root)
         if check_only or not deploy:
             if not target.exists():
-                issues.append(f"{target.relative_to(root)}: missing")
+                issues.append(f"{target.relative_to(safe_root)}: missing")
                 continue
-            if source.read_bytes() != target.read_bytes():
-                issues.append(f"{target.relative_to(root)}: out of sync with canonical")
+            if (
+                safe_source.read_bytes()  # NOSONAR - confined by ensure_path_within_root
+                != target.read_bytes()  # NOSONAR - confined by ensure_path_within_root
+            ):
+                issues.append(
+                    f"{target.relative_to(safe_root)}: out of sync with canonical"
+                )
             continue
-        _atomic_copy(source, target, allowed_root=root)
+        _atomic_copy(safe_source, target, allowed_root=safe_root)
 
     if check_only or not deploy:
         extra_deploy_files = sorted(
@@ -91,9 +102,10 @@ def sync_cursor_rules(
         )
         canonical_names = {path.name for path in canonical_files}
         for target in extra_deploy_files:
-            if target.name not in canonical_names:
+            safe_target = ensure_path_within_root(target, safe_root)
+            if safe_target.name not in canonical_names:
                 issues.append(
-                    f"{target.relative_to(root)}: orphan deploy file "
+                    f"{safe_target.relative_to(safe_root)}: orphan deploy file "
                     "(not in canonical cursor rules)"
                 )
 
@@ -101,6 +113,8 @@ def sync_cursor_rules(
 
 
 def main(argv: list[str] | None = None) -> int:
+    from scripts.engineering.common.repo_paths import resolve_cli_path
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--root",
@@ -132,8 +146,16 @@ def main(argv: list[str] | None = None) -> int:
     if not args.check and not args.deploy:
         args.deploy = True
 
+    # CLI --root may be absolute outside the default repo (operator worktree).
+    # Confine relative values under the auto-detected repo root; accept absolute.
+    root = Path(args.root).expanduser()
+    if not root.is_absolute():
+        root = resolve_cli_path(root, root=_repo_root())
+    else:
+        root = root.resolve(strict=False)
+
     issues = sync_cursor_rules(
-        root=args.root,
+        root=root,
         deploy=args.deploy,
         check_only=args.check,
     )

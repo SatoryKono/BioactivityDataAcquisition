@@ -547,6 +547,150 @@ def _coverage_status_counts(rows: list[dict[str, Any]]) -> dict[str, int]:
     return dict(sorted(status_counts.items()))
 
 
+def _family_rows_for_prefixes(
+    rows: list[dict[str, Any]],
+    prefixes: tuple[str, ...] | list[str],
+) -> list[dict[str, Any]]:
+    """Filter inventory rows belonging to a hotspot family path prefix set."""
+    return [
+        row
+        for row in rows
+        if any(str(row["path"]).startswith(prefix) for prefix in prefixes)
+    ]
+
+
+def _family_unmeasured_partition(
+    family_rows: list[dict[str, Any]],
+    allowlisted_unmeasured_paths: set[str],
+) -> tuple[list[str], list[str]]:
+    """Split unmeasured family modules into allowlisted vs unexpected."""
+    allowlisted: list[str] = []
+    unexpected: list[str] = []
+    for row in family_rows:
+        if str(row["coverage_status"]) != "unmeasured":
+            continue
+        path = str(row["path"])
+        if path in allowlisted_unmeasured_paths:
+            allowlisted.append(path)
+        else:
+            unexpected.append(path)
+    return allowlisted, unexpected
+
+
+def _family_line_coverage_stats(
+    family_rows: list[dict[str, Any]],
+) -> tuple[float | None, list[float]]:
+    """Return covered_line_percent and per-module coverage_percent values."""
+    executable_lines_total = sum(int(row["executable_lines"] or 0) for row in family_rows)
+    covered_lines_total = sum(int(row["covered_lines"] or 0) for row in family_rows)
+    coverage_percents = [
+        float(row["coverage_percent"])
+        for row in family_rows
+        if row["coverage_percent"] is not None
+    ]
+    covered_line_percent = (
+        round(100.0 * covered_lines_total / executable_lines_total, 2)
+        if executable_lines_total
+        else None
+    )
+    return covered_line_percent, coverage_percents
+
+
+def _family_threshold_status(
+    *,
+    family_thresholds: dict[str, Any],
+    measured_module_count: int,
+    covered_module_count: int,
+    unexpected_unmeasured_modules: list[str],
+    covered_line_percent: float | None,
+) -> str:
+    """Evaluate hotspot-family coverage thresholds; return pass/fail."""
+    if measured_module_count < int(
+        family_thresholds.get("min_measured_module_count", measured_module_count)
+    ):
+        return "fail"
+    if len(unexpected_unmeasured_modules) > int(
+        family_thresholds.get(
+            "max_unmeasured_module_count",
+            len(unexpected_unmeasured_modules),
+        )
+    ):
+        return "fail"
+    if covered_module_count < int(
+        family_thresholds.get("min_covered_module_count", covered_module_count)
+    ):
+        return "fail"
+    min_covered_line_percent = family_thresholds.get("min_covered_line_percent")
+    if (
+        isinstance(min_covered_line_percent, int | float)
+        and covered_line_percent is not None
+        and covered_line_percent < float(min_covered_line_percent)
+    ):
+        return "fail"
+    return "pass"
+
+
+def _build_one_hotspot_family_coverage(
+    family_rows: list[dict[str, Any]],
+    family_thresholds: dict[str, Any],
+) -> dict[str, Any]:
+    """Build the coverage summary payload for one hotspot family."""
+    measured_module_count = sum(
+        1 for row in family_rows if _status_is_measured(str(row["coverage_status"]))
+    )
+    covered_module_count = sum(
+        1
+        for row in family_rows
+        if str(row["coverage_status"]) in {"partially_covered", "fully_covered"}
+    )
+    unmeasured_module_count = sum(
+        1 for row in family_rows if str(row["coverage_status"]) == "unmeasured"
+    )
+    allowlisted_unmeasured_paths = {
+        str(path)
+        for path in family_thresholds.get("allowlisted_unmeasured_paths", ())
+        if isinstance(path, str)
+    }
+    allowlisted_unmeasured_modules, unexpected_unmeasured_modules = (
+        _family_unmeasured_partition(family_rows, allowlisted_unmeasured_paths)
+    )
+    covered_line_percent, coverage_percents = _family_line_coverage_stats(family_rows)
+    threshold_status = _family_threshold_status(
+        family_thresholds=family_thresholds,
+        measured_module_count=measured_module_count,
+        covered_module_count=covered_module_count,
+        unexpected_unmeasured_modules=unexpected_unmeasured_modules,
+        covered_line_percent=covered_line_percent,
+    )
+    return {
+        "module_count": len(family_rows),
+        "measured_module_count": measured_module_count,
+        "covered_module_count": covered_module_count,
+        "unmeasured_module_count": unmeasured_module_count,
+        "allowlisted_unmeasured_module_count": len(allowlisted_unmeasured_modules),
+        "unexpected_unmeasured_module_count": len(unexpected_unmeasured_modules),
+        "allowlisted_unmeasured_modules": sorted(allowlisted_unmeasured_modules),
+        "unexpected_unmeasured_modules": sorted(unexpected_unmeasured_modules),
+        "covered_line_percent": covered_line_percent,
+        "measured_percent": (
+            round(100.0 * measured_module_count / len(family_rows), 2)
+            if family_rows
+            else 100.0
+        ),
+        "coverage_percent_min": (
+            round(min(coverage_percents), 2) if coverage_percents else None
+        ),
+        "coverage_percent_avg": (
+            round(sum(coverage_percents) / len(coverage_percents), 2)
+            if coverage_percents
+            else None
+        ),
+        "status_counts": _coverage_status_counts(family_rows),
+        "thresholds": family_thresholds,
+        "threshold_status": threshold_status,
+    }
+
+
 def _build_hotspot_family_coverage(
     rows: list[dict[str, Any]],
     *,
@@ -556,105 +700,11 @@ def _build_hotspot_family_coverage(
     thresholds = _load_hotspot_family_thresholds(repo_root)
     family_coverage: dict[str, dict[str, Any]] = {}
     for family_name, prefixes in families.items():
-        family_rows = [
-            row
-            for row in rows
-            if any(str(row["path"]).startswith(prefix) for prefix in prefixes)
-        ]
-        measured_module_count = sum(
-            1 for row in family_rows if _status_is_measured(str(row["coverage_status"]))
+        family_rows = _family_rows_for_prefixes(rows, prefixes)
+        family_coverage[family_name] = _build_one_hotspot_family_coverage(
+            family_rows,
+            thresholds.get(family_name, {}),
         )
-        covered_module_count = sum(
-            1
-            for row in family_rows
-            if str(row["coverage_status"]) in {"partially_covered", "fully_covered"}
-        )
-        unmeasured_module_count = sum(
-            1 for row in family_rows if str(row["coverage_status"]) == "unmeasured"
-        )
-        family_thresholds = thresholds.get(family_name, {})
-        allowlisted_unmeasured_paths = {
-            str(path)
-            for path in family_thresholds.get("allowlisted_unmeasured_paths", ())
-            if isinstance(path, str)
-        }
-        allowlisted_unmeasured_modules = [
-            str(row["path"])
-            for row in family_rows
-            if str(row["coverage_status"]) == "unmeasured"
-            and str(row["path"]) in allowlisted_unmeasured_paths
-        ]
-        unexpected_unmeasured_modules = [
-            str(row["path"])
-            for row in family_rows
-            if str(row["coverage_status"]) == "unmeasured"
-            and str(row["path"]) not in allowlisted_unmeasured_paths
-        ]
-        executable_lines_total = sum(
-            int(row["executable_lines"] or 0) for row in family_rows
-        )
-        covered_lines_total = sum(int(row["covered_lines"] or 0) for row in family_rows)
-        coverage_percents = [
-            float(row["coverage_percent"])
-            for row in family_rows
-            if row["coverage_percent"] is not None
-        ]
-        status_counts = _coverage_status_counts(family_rows)
-        covered_line_percent = (
-            round(100.0 * covered_lines_total / executable_lines_total, 2)
-            if executable_lines_total
-            else None
-        )
-        threshold_status = "pass"
-        if measured_module_count < int(
-            family_thresholds.get("min_measured_module_count", measured_module_count)
-        ):
-            threshold_status = "fail"
-        if len(unexpected_unmeasured_modules) > int(
-            family_thresholds.get(
-                "max_unmeasured_module_count",
-                len(unexpected_unmeasured_modules),
-            )
-        ):
-            threshold_status = "fail"
-        if covered_module_count < int(
-            family_thresholds.get("min_covered_module_count", covered_module_count)
-        ):
-            threshold_status = "fail"
-        min_covered_line_percent = family_thresholds.get("min_covered_line_percent")
-        if (
-            isinstance(min_covered_line_percent, int | float)
-            and covered_line_percent is not None
-            and covered_line_percent < float(min_covered_line_percent)
-        ):
-            threshold_status = "fail"
-        family_coverage[family_name] = {
-            "module_count": len(family_rows),
-            "measured_module_count": measured_module_count,
-            "covered_module_count": covered_module_count,
-            "unmeasured_module_count": unmeasured_module_count,
-            "allowlisted_unmeasured_module_count": len(allowlisted_unmeasured_modules),
-            "unexpected_unmeasured_module_count": len(unexpected_unmeasured_modules),
-            "allowlisted_unmeasured_modules": sorted(allowlisted_unmeasured_modules),
-            "unexpected_unmeasured_modules": sorted(unexpected_unmeasured_modules),
-            "covered_line_percent": covered_line_percent,
-            "measured_percent": (
-                round(100.0 * measured_module_count / len(family_rows), 2)
-                if family_rows
-                else 100.0
-            ),
-            "coverage_percent_min": (
-                round(min(coverage_percents), 2) if coverage_percents else None
-            ),
-            "coverage_percent_avg": (
-                round(sum(coverage_percents) / len(coverage_percents), 2)
-                if coverage_percents
-                else None
-            ),
-            "status_counts": status_counts,
-            "thresholds": family_thresholds,
-            "threshold_status": threshold_status,
-        }
     return family_coverage
 
 
