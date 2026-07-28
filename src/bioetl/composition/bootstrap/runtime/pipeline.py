@@ -1,5 +1,3 @@
-# pyright: reportInvalidCast=false
-# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Main composition-root bootstrap for runtime pipeline execution."""
 
 from __future__ import annotations
