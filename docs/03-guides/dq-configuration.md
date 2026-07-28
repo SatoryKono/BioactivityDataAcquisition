@@ -125,7 +125,7 @@ surface.
 | -------------------------------- | ------ | -------------- | -------------------------------------------------------------- |
 | `version`                        | string | `"1.0.0"`      | Schema version of the DQ config                                |
 | `thresholds.soft_fail`           | float  | `0.05`         | Error rate (>5%) that triggers a warning in the hierarchical `quality:` defaults |
-| `thresholds.hard_fail`           | float  | `0.25`         | Error rate (>25%) that fails the batch in the hierarchical `quality:` defaults |
+| `thresholds.hard_fail`           | float  | `0.50`         | Error rate (>50%) that fails the batch in the hierarchical `quality:` defaults |
 | `strict_validation`              | bool   | `false`        | Runtime flag for stricter validation/error-handling paths      |
 | `invalid_record_policy`          | string | `"quarantine"` | How to handle invalid records: `quarantine`, `skip`, or `fail` |
 | `report.enabled`                 | bool   | `true`         | Enable DQ report generation                                    |
@@ -146,9 +146,9 @@ The current implementation exposes DQ provenance in three places:
 
 Threshold provenance today is **not** a single global constant:
 
-- hierarchical config defaults come from `configs/base/quality.yaml` (`0.25`);
-- contract/runtime fallback defaults come from the runtime helpers listed above
-  (`0.20`);
+- hierarchical config defaults come from `configs/base/quality.yaml` (`hard_fail=0.50`);
+- contract-backed loader omitted thresholds also resolve to `hard_fail=0.50`;
+- Silver request / pipeline-override baselines use `hard_fail=0.20`;
 - provider/entity/composite configs may override both.
 
 What is **not** implemented yet as a unified platform contract:
@@ -220,7 +220,7 @@ quality:
 pipeline:
   pipeline_name: {provider}-{entity}
   dq_overrides:
-    hard_fail_threshold: 0.25
+    hard_fail_threshold: 0.50
 ```
 
 ## Validation Types

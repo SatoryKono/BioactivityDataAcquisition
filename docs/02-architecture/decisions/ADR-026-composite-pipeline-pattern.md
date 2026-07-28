@@ -145,7 +145,7 @@ The original ADR specified CrossRef as a required enricher (`required: true`). H
 | Seed fails                | Composite fails (Critical) | Re-run composite                   |
 | Required enricher fails   | Composite fails            | Re-run composite                   |
 | Optional enricher fails   | Log warning, continue      | Re-run with `--enrich-only <name>` |
-| Enricher DQ hard-fail breach | Depends on `required` flag and configured `hard_fail` threshold (hierarchical default `0.25`, contract/runtime fallback `0.20`, composite overrides allowed) | Review DQ report |
+| Enricher DQ hard-fail breach | Depends on `required` flag and configured `hard_fail` threshold (hierarchical default `0.50`, Silver/pipeline-override baseline `0.20`, composite overrides allowed) | Review DQ report |
 | Network timeout           | Retry with backoff (3x)    | Automatic                          |
 | Partial completion        | Checkpoint saved           | `--resume` flag                    |
 

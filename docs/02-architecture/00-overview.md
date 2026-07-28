@@ -7,13 +7,13 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-30'
+  Last verified: '2026-07-28'
 
 ______________________________________________________________________
 
 # Architecture Overview
 
-*Synced with RULES.md v6.1.4 (2026-06-25)*
+*Synced with RULES.md v6.1.4 (2026-07-28)*
 
 ## Quick Navigation
 
@@ -55,7 +55,7 @@ architecture section focuses on structure, boundaries, and design rationale.
 
 See [decisions/README.md](decisions/README.md) for full index with categories.
 
-50 ADRs documenting key architectural decisions:
+52 ADRs documenting key architectural decisions:
 
 | ADR                                                                | Topic                                     | RULES.md Reference |
 | ------------------------------------------------------------------ | ----------------------------------------- | ------------------ |
@@ -109,6 +109,8 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 | [ADR-048](decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md) | Domain Schema Boundary and Runtime Pandera Compatibility | - |
 | [ADR-049](decisions/ADR-049-context-aware-loc-target-policy.md)     | Context-Aware LOC Target Policy           | -                  |
 | [ADR-050](decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md) | Silver Structural and Gold Semantic Filter Boundary | §2.1, App D |
+| [ADR-051](decisions/ADR-051-quarantine-entry-aggregate-surface.md) | QuarantineEntry aggregate constructor surface | §2.6 |
+| [ADR-052](decisions/ADR-052-infrastructure-config-package-root-public-api.md) | Infrastructure config package root public API | §1, composition |
 
 ______________________________________________________________________
 
