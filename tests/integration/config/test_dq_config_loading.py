@@ -49,7 +49,7 @@ class TestDQConfigIntegration:
 
         # Should have merged config from hierarchy
         assert config.soft_fail_threshold <= 0.10
-        assert config.hard_fail_threshold <= 0.25
+        assert config.hard_fail_threshold == pytest.approx(0.50)
 
         # Should have validations from multiple levels
         assert len(config.field_validations) > 0
@@ -69,11 +69,11 @@ class TestDQConfigIntegration:
 
     def test_provider_threshold_override(self, dq_loader: DQConfigLoader) -> None:
         """Provider config should override default thresholds."""
-        # Load ChEMBL provider defaults; current provider contract keeps hard_fail at 0.25.
+        # Load ChEMBL provider defaults; current provider contract keeps hard_fail at 0.50.
         config = dq_loader.load("chembl", "unknown_entity")
 
-        # ChEMBL provider currently inherits the canonical hard_fail threshold of 0.25.
-        assert config.hard_fail_threshold == pytest.approx(0.25)
+        # ChEMBL provider currently inherits the canonical hard_fail threshold of 0.50.
+        assert config.hard_fail_threshold == pytest.approx(0.50)
 
     def test_load_defaults_for_unknown(self, dq_loader: DQConfigLoader) -> None:
         """Unknown provider/entity should get defaults."""
@@ -81,7 +81,7 @@ class TestDQConfigIntegration:
 
         # Should use defaults
         assert config.soft_fail_threshold == pytest.approx(0.05)
-        assert config.hard_fail_threshold == pytest.approx(0.25)
+        assert config.hard_fail_threshold == pytest.approx(0.50)
 
     def test_uniprot_protein_enum_vocabulary_validations(
         self, dq_loader: DQConfigLoader
@@ -450,7 +450,7 @@ class TestRealConfigValidation:
 
         # Defaults should be set
         assert config.soft_fail_threshold == pytest.approx(0.05)
-        assert config.hard_fail_threshold == pytest.approx(0.25)
+        assert config.hard_fail_threshold == pytest.approx(0.50)
         assert config.strict_validation is False
 
     def test_contract_dq_configs_use_explicit_dq_strict_flag_name(self) -> None:

@@ -1,21 +1,8 @@
-"""Batch transformation from Bronze to Silver/Gold.
-
-Handles record transformation, error handling, and quarantine management.
-Extracted from RecordProcessor for single responsibility (SRP).
-
-Supports two processing modes:
-1. Standard batch processing (transform_batch) - processes all records in memory
-2. Streaming processing (transform_stream) - generator-based for memory efficiency
-"""
+"""Batch transformation from Bronze to Silver/Gold."""
 
 from __future__ import annotations
 
-__all__ = [
-    "BatchTransformer",
-    "StreamingBatchProcessor",
-    "TransformResult",
-    "TransformedRecord",
-]
+__all__ = ["BatchTransformer", "StreamingBatchProcessor", "TransformResult", "TransformedRecord"]
 
 import asyncio
 from typing import TYPE_CHECKING, cast

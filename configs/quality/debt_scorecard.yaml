@@ -457,7 +457,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 183
-      total_loc: 22596
+      total_loc: 22597
       files_ge_250_loc: 5
       helper_function_ratio: 0.371
       max_internal_fan_in: 7
@@ -512,11 +512,11 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 37
-      total_loc: 4754
+      total_loc: 4756
       files_ge_250_loc: 1
       helper_function_ratio: 0.417
-      max_internal_fan_in: 3
-      max_internal_fan_in_module: bioetl.composition.factories.pipeline.registry_manifest
+      max_internal_fan_in: 2
+      max_internal_fan_in_module: bioetl.composition.factories.pipeline.transformer_builder
     trend:
       status: reduced_2026-07-27_pipeline_factories_live_metric_refresh
       next_action: 2026-07-27 refresh aligns the scorecard with the committed hotspot-family baseline
@@ -538,9 +538,9 @@ hotspot_family_ratchets:
       max_internal_fan_in: 4
     metrics:
       duplication_clusters: 0
-      files: 124
-      total_loc: 15364
-      files_ge_250_loc: 12
+      files: 126
+      total_loc: 15398
+      files_ge_250_loc: 11
       helper_function_ratio: 0.449
       max_internal_fan_in: 3
       max_internal_fan_in_module: bioetl.application.services.control_plane.workflow.manifest_models

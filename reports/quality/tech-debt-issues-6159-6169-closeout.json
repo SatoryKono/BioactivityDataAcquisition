@@ -18,7 +18,7 @@
     "6163": {
       "control_plane_extracted_helper_owner": "src/bioetl/application/services/control_plane/replay/historical_identity_models.py#HistoricalReplayUniverseRecord",
       "control_plane_family": "application_services_control_plane",
-      "control_plane_files_ge_250_loc": 12,
+      "control_plane_files_ge_250_loc": 11,
       "control_plane_files_ge_250_loc_budget": 16,
       "control_plane_reduced_surface": "src/bioetl/application/services/control_plane/replay/historical_universe_service.py",
       "control_plane_reduced_surface_line_count_after_max": 249,
