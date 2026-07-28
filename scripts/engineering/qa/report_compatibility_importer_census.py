@@ -638,11 +638,7 @@ def _binding_names_from_node(node: ast.stmt) -> set[str]:
     if isinstance(node, ast.ImportFrom):
         return {alias.asname or alias.name for alias in node.names}
     if isinstance(node, ast.Assign):
-        return {
-            target.id
-            for target in node.targets
-            if isinstance(target, ast.Name)
-        }
+        return {target.id for target in node.targets if isinstance(target, ast.Name)}
     if (
         isinstance(node, ast.AnnAssign)
         and node.value is not None
@@ -681,7 +677,9 @@ def _name_eq_string_literal(test: ast.AST) -> str | None:
     if len(test.comparators) != 1:
         return None
     comparator = test.comparators[0]
-    if not isinstance(comparator, ast.Constant) or not isinstance(comparator.value, str):
+    if not isinstance(comparator, ast.Constant) or not isinstance(
+        comparator.value, str
+    ):
         return None
     return comparator.value
 
@@ -859,7 +857,9 @@ def _build_removed_surface_rows(
     return removed_surface_rows
 
 
-def _public_export_owner_usage_row(retained_row: dict[str, object]) -> dict[str, object]:
+def _public_export_owner_usage_row(
+    retained_row: dict[str, object],
+) -> dict[str, object]:
     return {
         **{
             key: value
@@ -942,9 +942,7 @@ def _build_retained_rows(
     retained_public_export_rows: list[dict[str, object]] = []
     for row in retained_entrypoints:
         retained_row = _retained_entrypoint_base_row(row, importer_map=importer_map)
-        export_owner_row = _attach_public_export_contract(
-            repo_root, row, retained_row
-        )
+        export_owner_row = _attach_public_export_contract(repo_root, row, retained_row)
         if export_owner_row is not None:
             retained_public_export_rows.append(export_owner_row)
         retained_rows.append(retained_row)
@@ -1242,7 +1240,9 @@ def _md_join_or_none(values: object) -> str:
     return str(values)
 
 
-def _md_summary_lines(payload: dict[str, object], summary: dict[str, object]) -> list[str]:
+def _md_summary_lines(
+    payload: dict[str, object], summary: dict[str, object]
+) -> list[str]:
     """Render the census summary bullet list."""
     return [
         "# Compatibility Importer Census",
@@ -1290,7 +1290,9 @@ def _md_retained_entrypoint_lines(retained_rows: list[object]) -> list[str]:
     return lines
 
 
-def _md_retained_owner_usage_lines(retained_owner_usage_rows: list[object]) -> list[str]:
+def _md_retained_owner_usage_lines(
+    retained_owner_usage_rows: list[object],
+) -> list[str]:
     lines = [
         "",
         "## Retained Entrypoint Owner/Usage Map",
@@ -1336,7 +1338,8 @@ def _md_public_export_lines(public_export_rows: list[object]) -> list[str]:
     for row in public_export_rows:
         assert isinstance(row, dict)
         duplicate_exports = sorted(
-            set(row["duplicate_public_exports"]) | set(row["duplicate_lazy_export_keys"])
+            set(row["duplicate_public_exports"])
+            | set(row["duplicate_lazy_export_keys"])
         )
         conflicts = sorted(row["resolution_conflicts"])
         lines.append(

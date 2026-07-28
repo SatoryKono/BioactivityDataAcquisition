@@ -478,8 +478,6 @@ def _infer_http_semantic_kind(url: str) -> str:
     return "http_endpoint"
 
 
-
-
 def _panel_specs_from_targets(
     *,
     dashboard_uid: str,
@@ -1883,14 +1881,12 @@ def _run_audit_with_provenance(
     for spec in effective_panel_specs():
         panel = _find_panel(spec)
         try:
-            result, resolved_app_base_url, app_resolution_error = (
-                _audit_one_panel_spec(
-                    spec,
-                    panel,
-                    config,
-                    resolved_app_base_url=resolved_app_base_url,
-                    app_resolution_error=app_resolution_error,
-                )
+            result, resolved_app_base_url, app_resolution_error = _audit_one_panel_spec(
+                spec,
+                panel,
+                config,
+                resolved_app_base_url=resolved_app_base_url,
+                app_resolution_error=app_resolution_error,
             )
             results.append(result)
         except (

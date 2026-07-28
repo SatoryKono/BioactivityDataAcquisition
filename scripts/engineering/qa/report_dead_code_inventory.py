@@ -766,7 +766,9 @@ def _build_dead_code_summary(
         "repo_wide_non_static_reachability_candidate_count": (
             repo_wide_non_static_reachability_candidate_count
         ),
-        "repo_wide_disposition_counts": dict(sorted(repo_wide_disposition_counts.items())),
+        "repo_wide_disposition_counts": dict(
+            sorted(repo_wide_disposition_counts.items())
+        ),
         "repo_wide_evidence_lane_counts": dict(
             sorted(repo_wide_evidence_lane_counts.items())
         ),
@@ -1063,8 +1065,12 @@ def main() -> int:
 
     json_out.parent.mkdir(parents=True, exist_ok=True)
     md_out.parent.mkdir(parents=True, exist_ok=True)
-    json_out.write_text(rendered_json, encoding="utf-8")  # NOSONAR - confined by resolve_output_path
-    md_out.write_text(rendered_markdown, encoding="utf-8")  # NOSONAR - confined by resolve_output_path
+    json_out.write_text(
+        rendered_json, encoding="utf-8"
+    )  # NOSONAR - confined by resolve_output_path
+    md_out.write_text(
+        rendered_markdown, encoding="utf-8"
+    )  # NOSONAR - confined by resolve_output_path
     print(
         "[dead-code-inventory] "
         f"triaged_entries={payload['summary']['triaged_entry_count']}; "

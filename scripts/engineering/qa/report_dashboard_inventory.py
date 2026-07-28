@@ -202,22 +202,24 @@ def _normalize_datasource_ref(ref: object) -> str | None:
     return None
 
 
+def _collect_datasource_refs(node: object, discovered: set[str]) -> None:
+    """Recursively collect normalized datasource refs into discovered."""
+    if isinstance(node, dict):
+        if "datasource" in node:
+            normalized = _normalize_datasource_ref(node.get("datasource"))
+            if normalized:
+                discovered.add(normalized)
+        for value in node.values():
+            _collect_datasource_refs(value, discovered)
+        return
+    if isinstance(node, list):
+        for item in node:
+            _collect_datasource_refs(item, discovered)
+
+
 def _extract_datasources(payload: dict[str, Any]) -> list[str]:
     discovered: set[str] = set()
-
-    def _visit(node: object) -> None:
-        if isinstance(node, dict):
-            if "datasource" in node:
-                normalized = _normalize_datasource_ref(node.get("datasource"))
-                if normalized:
-                    discovered.add(normalized)
-            for value in node.values():
-                _visit(value)
-        elif isinstance(node, list):
-            for item in node:
-                _visit(item)
-
-    _visit(payload)
+    _collect_datasource_refs(payload, discovered)
     return _sort_data_sources(discovered)
 
 
@@ -227,24 +229,25 @@ def _root_dashboard_payload(payload: dict[str, Any]) -> dict[str, Any]:
     return payload
 
 
+def _normalize_dashboard_node(node: Any, *, is_root: bool = False) -> Any:
+    """Drop volatile keys and recursively normalize dashboard JSON nodes."""
+    if isinstance(node, dict):
+        normalized: dict[str, Any] = {}
+        for key, value in node.items():
+            if is_root and key in VOLATILE_ROOT_KEYS:
+                continue
+            if key in VOLATILE_PANEL_KEYS:
+                continue
+            normalized[key] = _normalize_dashboard_node(value)
+        return normalized
+    if isinstance(node, list):
+        return [_normalize_dashboard_node(item) for item in node]
+    return node
+
+
 def _normalize_dashboard_payload(payload: dict[str, Any]) -> dict[str, Any]:
     dashboard = _root_dashboard_payload(payload)
-
-    def _normalize(node: Any, *, is_root: bool = False) -> Any:
-        if isinstance(node, dict):
-            normalized: dict[str, Any] = {}
-            for key, value in node.items():
-                if is_root and key in VOLATILE_ROOT_KEYS:
-                    continue
-                if key in VOLATILE_PANEL_KEYS:
-                    continue
-                normalized[key] = _normalize(value)
-            return normalized
-        if isinstance(node, list):
-            return [_normalize(item) for item in node]
-        return node
-
-    return cast(dict[str, Any], _normalize(dashboard, is_root=True))
+    return cast(dict[str, Any], _normalize_dashboard_node(dashboard, is_root=True))
 
 
 def _load_inventory() -> list[DashboardInventoryItem]:
@@ -566,8 +569,7 @@ def _check_selector_registry_entry(
             per_dashboard=per_dashboard,
             uid=uid,
             message=(
-                "selector-contracts: missing shipped_selector_registry entry "
-                f"for {uid}"
+                f"selector-contracts: missing shipped_selector_registry entry for {uid}"
             ),
         )
         return
@@ -837,8 +839,6 @@ def _compare_deployed_dashboards(
         )
 
     return errors, per_dashboard
-
-
 
 
 def _dashboard_item_health_issues(

@@ -158,10 +158,9 @@ def _findings_for_dedicated_entry(
                     message=f"{cluster_id} dedicated authority is missing {key}",
                 )
             )
-        elif (
-            key in _DEDICATED_AUTHORITY_PROJECTED_ROLE_KEYS
-            and review_entry.get(key) != entry.get(key)
-        ):
+        elif key in _DEDICATED_AUTHORITY_PROJECTED_ROLE_KEYS and review_entry.get(
+            key
+        ) != entry.get(key):
             findings.append(
                 GovernanceFinding(
                     kind="dedicated_authority_drift",
@@ -423,9 +422,7 @@ def _partial_policy_findings(
             continue
         cluster_id = str(entry.get("cluster_id") or "<unknown>")
         actual.add(cluster_id)
-        findings.extend(
-            _partial_entry_metadata_findings(entry, cluster_id=cluster_id)
-        )
+        findings.extend(_partial_entry_metadata_findings(entry, cluster_id=cluster_id))
         findings.extend(
             _partial_entry_cluster_findings(
                 entry,
@@ -433,9 +430,7 @@ def _partial_policy_findings(
                 cluster_lookup=cluster_lookup,
             )
         )
-    findings.extend(
-        _partial_policy_coverage_findings(expected=expected, actual=actual)
-    )
+    findings.extend(_partial_policy_coverage_findings(expected=expected, actual=actual))
     return findings
 
 
@@ -507,7 +502,13 @@ def _weak_policy_stale_findings(
     return findings
 
 
-_WEAK_DECISION_BASE_KEYS = ("cluster_id", "field_name", "decision", "owner", "rationale")
+_WEAK_DECISION_BASE_KEYS = (
+    "cluster_id",
+    "field_name",
+    "decision",
+    "owner",
+    "rationale",
+)
 
 
 def _weak_entry_base_metadata_findings(
@@ -1022,9 +1023,7 @@ def _typing_policy_findings(
                 covered=covered,
             )
         )
-    findings.extend(
-        _typing_missing_coverage_findings(actual=actual, covered=covered)
-    )
+    findings.extend(_typing_missing_coverage_findings(actual=actual, covered=covered))
     return findings
 
 

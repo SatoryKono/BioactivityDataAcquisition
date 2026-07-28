@@ -836,7 +836,9 @@ def _write_merged_playwright_manifest(
     )
 
 
-def _dashboard_render_status_problem(dashboard: dict[str, Any], *, uid: str) -> str | None:
+def _dashboard_render_status_problem(
+    dashboard: dict[str, Any], *, uid: str
+) -> str | None:
     if dashboard.get("renderStatus") != "rendered":
         return f"dashboard {uid} did not reach rendered status"
     rendered_count = dashboard.get("renderedPanelCount", 0)
@@ -854,7 +856,12 @@ def _dashboard_screenshot_file_problem(
     """Return (problem, file_name, path, size) for a dashboard screenshot file."""
     file_name = dashboard.get("file") or dashboard.get("screenshot")
     if not isinstance(file_name, str) or not file_name:
-        return f"dashboard {uid} does not identify its screenshot file", None, None, None
+        return (
+            f"dashboard {uid} does not identify its screenshot file",
+            None,
+            None,
+            None,
+        )
     screenshot_path = config.output_dir / file_name
     try:
         screenshot_size = screenshot_path.stat().st_size
@@ -895,7 +902,10 @@ def _dashboard_screenshot_evidence_problem(
         return f"dashboard {uid} screenshot filename evidence drift"
     if evidence.get("bytes") != screenshot_size:
         return f"dashboard {uid} screenshot byte-size evidence drift"
-    if evidence.get("width") != dimensions[0] or evidence.get("height") != dimensions[1]:
+    if (
+        evidence.get("width") != dimensions[0]
+        or evidence.get("height") != dimensions[1]
+    ):
         return f"dashboard {uid} screenshot dimension evidence drift"
     return None
 
