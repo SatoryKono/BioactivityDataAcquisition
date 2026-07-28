@@ -45,20 +45,13 @@ class HistoricalReplayCertifiabilityRecord(HistoricalReplayRunIdentity):
     blocking_reasons: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, object]:
-        """Return one JSON-safe inventory row."""
         return build_historical_certified_identity_payload_from_record(
             self,
             family=self.family,
             certification_scope=self.certification_scope,
-            broader_historical_exact_replay_policy=(
-                self.broader_historical_exact_replay_policy
-            ),
-            broader_historical_exact_replay_boundary=(
-                self.broader_historical_exact_replay_boundary
-            ),
-            broader_historical_exact_replay_state=(
-                self.broader_historical_exact_replay_state
-            ),
+            broader_historical_exact_replay_policy=self.broader_historical_exact_replay_policy,
+            broader_historical_exact_replay_boundary=self.broader_historical_exact_replay_boundary,
+            broader_historical_exact_replay_state=self.broader_historical_exact_replay_state,
         )
 
 
@@ -68,72 +61,47 @@ class HistoricalReplayCertifiabilityInventory:
 
     records: tuple[HistoricalReplayCertifiabilityRecord, ...]
 
+    def count_status(self, *statuses: str) -> int:
+        return sum(record.certification_status in statuses for record in self.records)
+
     @property
     def manifest_count(self) -> int:
         return len(self.records)
 
     @property
     def certified_count(self) -> int:
-        return sum(
-            1
-            for record in self.records
-            if record.certification_status == "already_certified"
-        )
+        return self.count_status("already_certified")
 
     @property
     def replayable_count(self) -> int:
-        return sum(
-            1
-            for record in self.records
-            if record.certification_status == "already_replayable"
-        )
+        return self.count_status("already_replayable")
 
     @property
     def awaiting_source_certification_count(self) -> int:
-        return sum(
-            1
-            for record in self.records
-            if record.certification_status == "awaiting_source_snapshot_certification"
-        )
+        return self.count_status("awaiting_source_snapshot_certification")
 
     @property
     def awaiting_composite_lineage_count(self) -> int:
-        return sum(
-            1
-            for record in self.records
-            if record.certification_status == "awaiting_certified_source_lineage"
-        )
+        return self.count_status("awaiting_certified_source_lineage")
 
     @property
     def unsupported_count(self) -> int:
-        return sum(
-            1
-            for record in self.records
-            if record.certification_status == "outside_certified_historical_scope"
-        )
+        return self.count_status("outside_certified_historical_scope")
 
     @property
     def remaining_uncertified_count(self) -> int:
-        return sum(
-            1
-            for record in self.records
-            if record.certification_status
-            in {
-                "awaiting_source_snapshot_certification",
-                "awaiting_certified_source_lineage",
-                "needs_operator_review",
-            }
+        return self.count_status(
+            "awaiting_source_snapshot_certification",
+            "awaiting_certified_source_lineage",
+            "needs_operator_review",
         )
 
     def to_dict(self) -> dict[str, object]:
-        """Return one JSON-safe inventory payload."""
         return {
             "manifest_count": self.manifest_count,
             "certified_count": self.certified_count,
             "replayable_count": self.replayable_count,
-            "awaiting_source_certification_count": (
-                self.awaiting_source_certification_count
-            ),
+            "awaiting_source_certification_count": self.awaiting_source_certification_count,
             "awaiting_composite_lineage_count": self.awaiting_composite_lineage_count,
             "unsupported_count": self.unsupported_count,
             "remaining_uncertified_count": self.remaining_uncertified_count,
@@ -143,8 +111,6 @@ class HistoricalReplayCertifiabilityInventory:
 
 @dataclass(frozen=True, slots=True)
 class HistoricalReplayBulkCertificationSpec:
-    """One deterministic bulk-certification unit."""
-
     manifest_id: str
     certifications: tuple[HistoricalReplaySnapshotCertification, ...]
 
@@ -161,16 +127,13 @@ class HistoricalReplayBulkCertificationRecord:
     broader_historical_exact_replay_state: str
 
     def to_dict(self) -> dict[str, object]:
-        """Return one JSON-safe bulk-certification outcome row."""
         return {
             "manifest_id": self.manifest_id,
             "run_id": self.run_id,
             "certification_scope": self.certification_scope,
             "status": self.status,
             "replay_occurrence_kind": self.replay_occurrence_kind,
-            "broader_historical_exact_replay_state": (
-                self.broader_historical_exact_replay_state
-            ),
+            "broader_historical_exact_replay_state": self.broader_historical_exact_replay_state,
         }
 
 
@@ -191,7 +154,6 @@ class HistoricalReplayBulkCertificationResult:
         return len(self.records) - self.completed_count
 
     def to_dict(self) -> dict[str, object]:
-        """Return one JSON-safe bulk-certification payload."""
         return {
             "completed_count": self.completed_count,
             "skipped_count": self.skipped_count,

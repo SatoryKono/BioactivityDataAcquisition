@@ -824,7 +824,7 @@
           "id": 9105,
           "type": "timeseries",
           "title": "Monitor Aggregate Stage Lag",
-          "description": "Continuous stage lag seconds by stage (Prom low-cardinality). Timeseries frame for localization; not a discrete state timeline. No run_id Prom labels.",
+          "description": "Continuous stage lag seconds by stage for the selected pipeline and run type (Prom low-cardinality). Timeseries frame for localization; not a discrete state timeline. No run_id Prom labels.",
           "gridPos": {
             "h": 5,
             "w": 24,
