@@ -620,7 +620,9 @@ def _family_line_coverage_stats(
     family_rows: list[dict[str, Any]],
 ) -> tuple[float | None, list[float]]:
     """Return covered_line_percent and per-module coverage_percent values."""
-    executable_lines_total = sum(int(row["executable_lines"] or 0) for row in family_rows)
+    executable_lines_total = sum(
+        int(row["executable_lines"] or 0) for row in family_rows
+    )
     covered_lines_total = sum(int(row["covered_lines"] or 0) for row in family_rows)
     coverage_percents = [
         float(row["coverage_percent"])
@@ -792,12 +794,8 @@ def _module_coverage_row(
         "executable_lines": (
             coverage_entry["executable_lines"] if coverage_entry else None
         ),
-        "covered_lines": (
-            coverage_entry["covered_lines"] if coverage_entry else None
-        ),
-        "missing_lines": (
-            coverage_entry["missing_lines"] if coverage_entry else None
-        ),
+        "covered_lines": (coverage_entry["covered_lines"] if coverage_entry else None),
+        "missing_lines": (coverage_entry["missing_lines"] if coverage_entry else None),
     }
 
 
@@ -933,9 +931,7 @@ def _path_matches_tier_prefixes(repo_path: str, tier: dict[str, Any]) -> bool:
     if not isinstance(prefixes, list):
         return False
     return any(
-        repo_path.startswith(prefix)
-        for prefix in prefixes
-        if isinstance(prefix, str)
+        repo_path.startswith(prefix) for prefix in prefixes if isinstance(prefix, str)
     )
 
 
@@ -986,8 +982,6 @@ class _ModuleCoverageViolation:
     baseline_percent: float | None
     required_percent: float | None
     message: str
-
-
 
 
 def _gate_min_delta(gates: dict[str, Any], *, default: float = 0.01) -> float:

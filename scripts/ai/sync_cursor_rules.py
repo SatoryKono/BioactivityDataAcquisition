@@ -46,15 +46,15 @@ def _atomic_copy(source: Path, target: Path, *, allowed_root: Path) -> None:
         "w", encoding="utf-8", newline="\n"
     ) as handle:
         handle.write(content)
-    os.replace(tmp, safe_target)  # NOSONAR - tmp/safe_target confined by ensure_path_within_root
+    os.replace(
+        tmp, safe_target
+    )  # NOSONAR - tmp/safe_target confined by ensure_path_within_root
 
 
 def _list_mdc_files(directory: Path) -> list[Path]:
     """Return sorted non-excluded ``*.mdc`` files under directory."""
     return sorted(
-        path
-        for path in directory.glob("*.mdc")
-        if path.name not in EXCLUDED_FILENAMES
+        path for path in directory.glob("*.mdc") if path.name not in EXCLUDED_FILENAMES
     )
 
 
@@ -80,15 +80,15 @@ def _orphan_deploy_issues(
     deploy_dir: Path,
     canonical_files: list[Path],
     safe_root: Path,
-    ensure_path_within_root: object,
 ) -> list[str]:
     """Report deploy-surface files not present in the canonical set."""
-    ensure = ensure_path_within_root  # typed as callable at call sites
+    from scripts.engineering.common.repo_paths import ensure_path_within_root
+
     issues: list[str] = []
     extra_deploy_files = _list_mdc_files(deploy_dir)
     canonical_names = {path.name for path in canonical_files}
     for target in extra_deploy_files:
-        safe_target = ensure(target, safe_root)  # type: ignore[operator]
+        safe_target = ensure_path_within_root(target, safe_root)
         if safe_target.name not in canonical_names:
             issues.append(
                 f"{safe_target.relative_to(safe_root)}: orphan deploy file "
@@ -106,9 +106,7 @@ def sync_cursor_rules(
     from scripts.engineering.common.repo_paths import ensure_path_within_root
 
     safe_root = root.expanduser().resolve(strict=False)
-    canonical_dir = ensure_path_within_root(
-        safe_root / CURSOR_RULE_DOCS_DIR, safe_root
-    )
+    canonical_dir = ensure_path_within_root(safe_root / CURSOR_RULE_DOCS_DIR, safe_root)
     deploy_dir = ensure_path_within_root(safe_root / CURSOR_RULES_DIR, safe_root)
     issues: list[str] = []
 
@@ -142,7 +140,6 @@ def sync_cursor_rules(
                 deploy_dir=deploy_dir,
                 canonical_files=canonical_files,
                 safe_root=safe_root,
-                ensure_path_within_root=ensure_path_within_root,
             )
         )
 

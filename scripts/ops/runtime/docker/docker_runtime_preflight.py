@@ -38,7 +38,6 @@ ENV_NAME_PATTERN = re.compile(r"\$\{([A-Za-z_]\w*)")
 WINDOWS_DRIVE_PATTERN = re.compile(r"^([A-Za-z]):[/\\](.*)$")
 
 
-
 @dataclass(frozen=True)
 class Finding:
     code: str
@@ -80,7 +79,9 @@ def _load_yaml(path: Path) -> dict[str, Any]:
 
     safe_path = resolve_output_path(path, root=REPO_ROOT)
     payload = yaml.safe_load(
-        safe_path.read_text(encoding="utf-8")  # NOSONAR - confined by resolve_output_path
+        safe_path.read_text(
+            encoding="utf-8"
+        )  # NOSONAR - confined by resolve_output_path
     )
     if not isinstance(payload, dict):
         raise ValueError(f"Expected a YAML mapping: {safe_path}")
@@ -656,9 +657,7 @@ def _findings_required_environment(
     return findings
 
 
-def _findings_shared_networks(
-    root: Path, contract: Mapping[str, Any]
-) -> list[Finding]:
+def _findings_shared_networks(root: Path, contract: Mapping[str, Any]) -> list[Finding]:
     findings: list[Finding] = []
     for logical_name, network_contract in contract.get("shared_networks", {}).items():
         expected_name = network_contract["name"]
@@ -882,9 +881,7 @@ def _static_observations(
             compose_observations[stack_name] = observation
 
     findings.extend(_findings_shared_networks(root, contract))
-    findings.extend(
-        _findings_codex_filesystem(root, contract, compose_observations)
-    )
+    findings.extend(_findings_codex_filesystem(root, contract, compose_observations))
     findings.extend(_findings_warp_dockerfile(root, contract))
     return findings, compose_observations
 
@@ -1319,7 +1316,9 @@ def build_report(
         "repository": str(root),
         "contract": {
             "path": str(contract_path.relative_to(root)),
-            "sha256": hashlib.sha256(_confined_file_bytes(contract_path, root=root)).hexdigest(),
+            "sha256": hashlib.sha256(
+                _confined_file_bytes(contract_path, root=root)
+            ).hexdigest(),
             "canonical_runtime": contract["policy"]["canonical_runtime"],
             "selected_stack": selected_stack,
         },

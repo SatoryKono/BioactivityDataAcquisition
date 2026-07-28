@@ -186,7 +186,9 @@ def _service_resource_ratios(
     }
 
 
-def _pressure_findings_for_resource(resource: Mapping[str, Any]) -> list[dict[str, Any]]:
+def _pressure_findings_for_resource(
+    resource: Mapping[str, Any],
+) -> list[dict[str, Any]]:
     """Emit resource_pressure findings for ratios at or above the 0.8 threshold."""
     findings: list[dict[str, Any]] = []
     service = resource["service"]
@@ -232,22 +234,8 @@ def _resource_findings(
     return resources, findings
 
 
-def build_report(
-    spec: StackSpec,
-    contract_path: Path,
-    *,
-    baseline: Mapping[str, int] | None = None,
-    incident: Mapping[str, Any] | None = None,
-    runner: Runner = _run,
-    disk_usage: DiskUsage = shutil.disk_usage,
-    timeout: float = 15.0,
-) -> dict[str, Any]:
-    """Collect one read-only stability sample for a contracted stack."""
-
-    started = time.monotonic()
-    contract = _load_contract(contract_path)
-    compose = _load_compose(spec.compose_file)
-    limits = {
+def _compose_service_limits(compose: Mapping[str, Any]) -> dict[str, dict[str, float]]:
+    return {
         str(service): {
             "cpus": float(config.get("cpus") or 0.0),
             "pids_limit": float(config.get("pids_limit") or 0.0),
@@ -255,46 +243,62 @@ def build_report(
         for service, config in compose.get("services", {}).items()
         if isinstance(config, Mapping)
     }
-    observations: list[CommandResult] = []
-    info = runner(["docker", "info", "--format", "{{json .}}"], ROOT, timeout)
-    observations.append(info)
 
-    snapshots: list[ServiceSnapshot] = []
-    findings: list[dict[str, Any]] = []
-    compose_rows: list[dict[str, Any]] = []
+
+def _collect_live_probe_observations(
+    *,
+    spec: StackSpec,
+    runner: Runner,
+    timeout: float,
+    limits: Mapping[str, Mapping[str, float]],
+    baseline: Mapping[str, int] | None,
+    observations: list[CommandResult],
+) -> tuple[
+    list[ServiceSnapshot],
+    list[dict[str, Any]],
+    list[dict[str, Any]],
+    list[dict[str, Any]],
+]:
+    """Collect snapshots, compose rows, resources, and findings while daemon is up."""
+    snapshots, snapshot_commands = collect_snapshots(
+        spec, runner=runner, timeout=timeout
+    )
+    observations.extend(snapshot_commands)
+    findings = list(readiness_findings(spec, snapshots, baseline))
+
+    compose_ls = runner(
+        ["docker", "compose", "ls", "--all", "--format", "json"],
+        ROOT,
+        timeout,
+    )
+    observations.append(compose_ls)
+    compose_rows = _json_rows(compose_ls.stdout)
+    if compose_ls.returncode == 0:
+        findings.extend(_project_origin_findings(spec, compose_rows))
+
+    stats = runner(
+        ["docker", "stats", "--no-stream", "--format", "{{json .}}"],
+        ROOT,
+        timeout,
+    )
+    observations.append(stats)
     resources: list[dict[str, Any]] = []
-    if info.returncode != 0:
-        findings.append({"cause": "daemon_unavailable"})
-    else:
-        snapshots, snapshot_commands = collect_snapshots(
-            spec, runner=runner, timeout=timeout
+    if stats.returncode == 0:
+        resources, pressure = _resource_findings(
+            _json_rows(stats.stdout), snapshots, limits
         )
-        observations.extend(snapshot_commands)
-        findings.extend(readiness_findings(spec, snapshots, baseline))
+        findings.extend(pressure)
+    return snapshots, findings, compose_rows, resources
 
-        compose_ls = runner(
-            ["docker", "compose", "ls", "--all", "--format", "json"],
-            ROOT,
-            timeout,
-        )
-        observations.append(compose_ls)
-        compose_rows = _json_rows(compose_ls.stdout)
-        if compose_ls.returncode == 0:
-            findings.extend(_project_origin_findings(spec, compose_rows))
 
-        stats = runner(
-            ["docker", "stats", "--no-stream", "--format", "{{json .}}"],
-            ROOT,
-            timeout,
-        )
-        observations.append(stats)
-        if stats.returncode == 0:
-            resources, pressure = _resource_findings(
-                _json_rows(stats.stdout), snapshots, limits
-            )
-            findings.extend(pressure)
-
-    disk = disk_usage(ROOT)
+def _disk_and_incident_findings(
+    *,
+    contract: Mapping[str, Any],
+    disk: Any,
+    incident: Mapping[str, Any],
+) -> list[dict[str, Any]]:
+    """Capacity and incident-recovery findings for one probe report."""
+    findings: list[dict[str, Any]] = []
     reserve_gib = int(contract.get("capacity", {}).get("minimum_free_disk_gib", 4))
     reserve_bytes = reserve_gib * 1024**3
     if disk.free < reserve_bytes:
@@ -305,8 +309,6 @@ def build_report(
                 "required_free_bytes": reserve_bytes,
             }
         )
-
-    incident = dict(incident or {})
     recovery_attempts = int(incident.get("attempts") or 0)
     recovery_seconds = float(incident.get("elapsed_seconds") or 0.0)
     recovery_limit = float(
@@ -327,6 +329,57 @@ def build_report(
                 "incident_cause": str(incident["primary_cause"]),
             }
         )
+    return findings
+
+
+def build_report(
+    spec: StackSpec,
+    contract_path: Path,
+    *,
+    baseline: Mapping[str, int] | None = None,
+    incident: Mapping[str, Any] | None = None,
+    runner: Runner = _run,
+    disk_usage: DiskUsage = shutil.disk_usage,
+    timeout: float = 15.0,
+) -> dict[str, Any]:
+    """Collect one read-only stability sample for a contracted stack."""
+
+    started = time.monotonic()
+    contract = _load_contract(contract_path)
+    compose = _load_compose(spec.compose_file)
+    limits = _compose_service_limits(compose)
+    observations: list[CommandResult] = []
+    info = runner(["docker", "info", "--format", "{{json .}}"], ROOT, timeout)
+    observations.append(info)
+
+    snapshots: list[ServiceSnapshot] = []
+    findings: list[dict[str, Any]] = []
+    compose_rows: list[dict[str, Any]] = []
+    resources: list[dict[str, Any]] = []
+    if info.returncode != 0:
+        findings.append({"cause": "daemon_unavailable"})
+    else:
+        snapshots, live_findings, compose_rows, resources = (
+            _collect_live_probe_observations(
+                spec=spec,
+                runner=runner,
+                timeout=timeout,
+                limits=limits,
+                baseline=baseline,
+                observations=observations,
+            )
+        )
+        findings.extend(live_findings)
+
+    disk = disk_usage(ROOT)
+    incident = dict(incident or {})
+    findings.extend(
+        _disk_and_incident_findings(
+            contract=contract,
+            disk=disk,
+            incident=incident,
+        )
+    )
 
     cause = primary_cause(findings) if findings else None
     if findings and cause not in _ALLOWED_CAUSES:

@@ -543,9 +543,7 @@ def _relative_import_hits_for_node(
     )
     discovered: list[tuple[str, RefEvidence]] = []
     for module_name in _relative_import_module_names(node):
-        for candidate_path in _relative_import_candidate_paths(
-            base_parts, module_name
-        ):
+        for candidate_path in _relative_import_candidate_paths(base_parts, module_name):
             if candidate_path in script_set and candidate_path != rel:
                 discovered.append((candidate_path, evidence))
     return discovered

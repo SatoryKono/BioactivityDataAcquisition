@@ -21,6 +21,7 @@ from collections.abc import Callable, Iterable
 from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 import yaml
 import zstandard
@@ -765,14 +766,16 @@ def _run_phase_command(
     try:
         from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 
-        completed = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv  # nosec B603
-            ensure_safe_cli_argv([str(token) for token in command]),
-            cwd=phase_root if isolated_workdir else repo_root,
-            env=env,
-            capture_output=True,
-            text=True,
-            timeout=timeout_seconds,
-            check=False,
+        completed = (
+            subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv  # nosec B603
+                ensure_safe_cli_argv([str(token) for token in command]),
+                cwd=phase_root if isolated_workdir else repo_root,
+                env=env,
+                capture_output=True,
+                text=True,
+                timeout=timeout_seconds,
+                check=False,
+            )
         )
         exit_code = completed.returncode
         stdout = completed.stdout
@@ -856,7 +859,9 @@ def _find_bronze_record(
     raise ValueError(f"no compatible cached Bronze record under {entity_root}")
 
 
-def _record_from_decoded_response(decoded: dict[str, object]) -> dict[str, object] | None:
+def _record_from_decoded_response(
+    decoded: dict[str, object],
+) -> dict[str, object] | None:
     """Pick first list-of-dict entity row from a decoded VCR response body."""
     if "status" in decoded:
         return None
@@ -1339,14 +1344,16 @@ def _execute_attempt_subprocess(
     try:
         from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 
-        completed = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv  # nosec B603
-            ensure_safe_cli_argv([str(token) for token in command]),
-            cwd=attempt_root,
-            env=env,
-            capture_output=True,
-            text=True,
-            timeout=timeout_seconds,
-            check=False,
+        completed = (
+            subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv  # nosec B603
+                ensure_safe_cli_argv([str(token) for token in command]),
+                cwd=attempt_root,
+                env=env,
+                capture_output=True,
+                text=True,
+                timeout=timeout_seconds,
+                check=False,
+            )
         )
         return completed.returncode, False, completed.stdout, completed.stderr
     except subprocess.TimeoutExpired as exc:
@@ -1717,8 +1724,6 @@ def _validate_evidence_assertions(assertions: object) -> list[str]:
     return errors
 
 
-
-
 def _validate_one_raw_artifact(
     index: int,
     artifact: object,
@@ -1734,9 +1739,7 @@ def _validate_one_raw_artifact(
     expected_sha256 = str(artifact.get("sha256") or "").strip()
     errors: list[str] = []
     if raw_root not in path.parents:
-        errors.append(
-            f"raw_artifacts[{index}] must be inside AUDIT_ROOT/evidence/raw"
-        )
+        errors.append(f"raw_artifacts[{index}] must be inside AUDIT_ROOT/evidence/raw")
     if path in seen_paths:
         errors.append(f"raw_artifacts[{index}] duplicates another raw artifact")
     seen_paths.add(path)
@@ -2396,18 +2399,14 @@ def _validate_one_render_manifest(
     uid = str(payload.get("dashboard_uid") or "")
     render_index = payload.get("render_index")
     if not uid or type(render_index) is not int:
-        errors.append(
-            "render manifest requires dashboard_uid and integer render_index"
-        )
+        errors.append("render manifest requires dashboard_uid and integer render_index")
         return
     captures.add((uid, render_index))
     stable_windows.add(str(payload.get("stable_window_id") or ""))
     if payload.get("status") != "success":
         errors.append("render manifest status must equal success")
     if payload.get("screenshot_sha256") not in screenshot_hashes:
-        errors.append(
-            "render manifest screenshot hash must resolve to retained PNG"
-        )
+        errors.append("render manifest screenshot hash must resolve to retained PNG")
 
 
 def _validate_render_raw(retained: list[dict[str, str]]) -> list[str]:
@@ -2552,9 +2551,7 @@ def _backend_http_profile_errors(http_rows: list[dict[str, Any]]) -> list[str]:
         or not str(row.get("data_root") or "").strip()
         or int(row.get("record_count", 0)) < 1
     ):
-        return [
-            "backend HTTP response must prove the exact populated read-only root"
-        ]
+        return ["backend HTTP response must prove the exact populated read-only root"]
     return []
 
 
@@ -2636,7 +2633,9 @@ def _gate_one_evidence_key(
     raw_root: Path,
     source_revision: str,
     expected_binding: dict[str, object] | None,
-) -> tuple[list[str], dict[str, str] | None, dict[str, int] | None, list[dict[str, str]]]:
+) -> tuple[
+    list[str], dict[str, str] | None, dict[str, int] | None, list[dict[str, str]]
+]:
     """Validate one required external evidence artifact."""
     if raw_path is None:
         return ["missing evidence artifact"], None, None, []

@@ -202,6 +202,50 @@ def _scan_error(path: str, error: str) -> dict[str, str]:
     return {"path": path, "error": error}
 
 
+def _scan_dir_entries(
+    current: Path,
+) -> tuple[list[os.DirEntry[str]] | None, dict[str, str] | None]:
+    """List directory entries or return a scan error for the relative path."""
+    relative_current = _repo_relative(current)
+    if _is_quarantined_path(relative_current):
+        return None, _scan_error(relative_current, "QuarantinedPath")
+    try:
+        with os.scandir(current) as iterator:
+            return sorted(iterator, key=lambda entry: entry.name), None
+    except OSError as error:
+        return None, _scan_error(relative_current, error.__class__.__name__)
+
+
+def _handle_scan_entry(
+    entry: os.DirEntry[str],
+    *,
+    root_relative: str,
+    paths: list[str],
+    errors: list[dict[str, str]],
+    stack: list[Path],
+) -> bool:
+    """Process one scandir entry. Return False when the file limit is exceeded."""
+    entry_path = Path(entry.path)
+    relative = _repo_relative(entry_path)
+    try:
+        if entry.is_dir(follow_symlinks=False):
+            if _is_quarantined_path(relative):
+                errors.append(_scan_error(relative, "QuarantinedPath"))
+            else:
+                stack.append(entry_path)
+            return True
+        if entry.is_file(follow_symlinks=False) and _is_doc_like(relative):
+            paths.append(relative)
+            if len(paths) > MAX_LOCAL_DOC_REPORT_FILES:
+                errors.append(
+                    _scan_error(root_relative, "LocalScanFileLimitExceeded")
+                )
+                return False
+    except OSError as error:
+        errors.append(_scan_error(relative, error.__class__.__name__))
+    return True
+
+
 def _safe_iter_local_doc_tree(
     root_relative: str,
 ) -> tuple[list[str], list[dict[str, str]]]:
@@ -216,37 +260,20 @@ def _safe_iter_local_doc_tree(
 
     while stack:
         current = stack.pop()
-        relative_current = _repo_relative(current)
-        if _is_quarantined_path(relative_current):
-            errors.append(_scan_error(relative_current, "QuarantinedPath"))
+        entries, scan_error = _scan_dir_entries(current)
+        if scan_error is not None:
+            errors.append(scan_error)
             continue
-
-        try:
-            with os.scandir(current) as iterator:
-                entries = sorted(iterator, key=lambda entry: entry.name)
-        except OSError as error:
-            errors.append(_scan_error(relative_current, error.__class__.__name__))
-            continue
-
+        assert entries is not None
         for entry in entries:
-            entry_path = Path(entry.path)
-            relative = _repo_relative(entry_path)
-            try:
-                if entry.is_dir(follow_symlinks=False):
-                    if _is_quarantined_path(relative):
-                        errors.append(_scan_error(relative, "QuarantinedPath"))
-                    else:
-                        stack.append(entry_path)
-                    continue
-                if entry.is_file(follow_symlinks=False) and _is_doc_like(relative):
-                    paths.append(relative)
-                    if len(paths) > MAX_LOCAL_DOC_REPORT_FILES:
-                        errors.append(
-                            _scan_error(root_relative, "LocalScanFileLimitExceeded")
-                        )
-                        return sorted(set(paths)), errors
-            except OSError as error:
-                errors.append(_scan_error(relative, error.__class__.__name__))
+            if not _handle_scan_entry(
+                entry,
+                root_relative=root_relative,
+                paths=paths,
+                errors=errors,
+                stack=stack,
+            ):
+                return sorted(set(paths)), errors
     return sorted(set(paths)), errors
 
 
@@ -1331,6 +1358,32 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def _check_inventory_drift(
+    *,
+    json_output: Path,
+    markdown_output: Path,
+    json_content: str,
+    md_content: str,
+) -> list[str]:
+    """Return relative paths whose on-disk content differs from the built inventory."""
+    mismatches: list[str] = []
+    for path, content in (
+        (json_output, json_content),
+        (markdown_output, md_content),
+    ):
+        if not path.exists() or path.read_text(encoding="utf-8") != content:
+            mismatches.append(_repo_relative(path))
+    return mismatches
+
+
+def _print_route_violations(route_violations: list[str]) -> None:
+    print("[route-gap] Generated docs without route or exception:")
+    for path in route_violations[:20]:
+        print(f"  - {path}")
+    if len(route_violations) > 20:
+        print(f"  ... and {len(route_violations) - 20} more")
+
+
 def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
     payload = _build_inventory()
@@ -1345,13 +1398,12 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     if args.check:
-        mismatches = []
-        for path, content in (
-            (args.json_output, json_content),
-            (args.markdown_output, md_content),
-        ):
-            if not path.exists() or path.read_text(encoding="utf-8") != content:
-                mismatches.append(_repo_relative(path))
+        mismatches = _check_inventory_drift(
+            json_output=args.json_output,
+            markdown_output=args.markdown_output,
+            json_content=json_content,
+            md_content=md_content,
+        )
         if mismatches:
             for mismatch in mismatches:
                 print(f"[drift] mismatch: {mismatch}")
@@ -1361,11 +1413,7 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         route_violations = _generated_route_violations(payload)
         if route_violations:
-            print("[route-gap] Generated docs without route or exception:")
-            for path in route_violations[:20]:
-                print(f"  - {path}")
-            if len(route_violations) > 20:
-                print(f"  ... and {len(route_violations) - 20} more")
+            _print_route_violations(route_violations)
             print(
                 "[hint] add a route to configs/quality/generated_artifact_routing.yaml"
             )

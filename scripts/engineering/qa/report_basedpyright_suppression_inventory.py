@@ -115,7 +115,9 @@ def check_inventory(output: Path) -> None:
     if not output.is_file():
         raise SystemExit(f"missing suppression inventory: {output}")
     committed = json.loads(
-        output.read_text(encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
+        output.read_text(
+            encoding="utf-8"
+        )  # NOSONAR - path confined by resolve_output_path
     )
     live = collect_inventory()
     c_files = int(committed.get("summary", {}).get("files_with_suppressions", 0))

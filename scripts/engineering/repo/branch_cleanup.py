@@ -181,16 +181,7 @@ def _atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
     tmp.replace(path)
 
 
-def build_inventory(
-    *,
-    token: str,
-    owner: str,
-    repo: str,
-    cutoff_iso: str,
-) -> dict[str, Any]:
-    cutoff = parse_cutoff(cutoff_iso)
-    branches = _list_remote_branches(token=token, owner=owner, repo=repo)
-    open_prs = _list_open_pull_requests(token=token, owner=owner, repo=repo)
+def _index_prs_by_head(open_prs: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     pr_by_head: dict[str, dict[str, Any]] = {}
     for pr in open_prs:
         head = pr.get("head")
@@ -198,17 +189,59 @@ def build_inventory(
             ref = head.get("ref")
             if isinstance(ref, str):
                 pr_by_head[ref] = pr
+    return pr_by_head
 
+
+def _branch_name_and_sha(branch: dict[str, Any]) -> tuple[str, str] | None:
+    name = str(branch.get("name", ""))
+    commit = branch.get("commit")
+    sha = ""
+    if isinstance(commit, dict):
+        sha = str(commit.get("sha", ""))
+    if not name or not sha:
+        return None
+    return name, sha
+
+
+def _pr_fields_for_branch(
+    pr: dict[str, Any] | None,
+) -> tuple[int | None, str | None, bool | None, str | None, tuple[str, ...]]:
+    """Extract open-PR metadata for a branch inventory record."""
+    if pr is None:
+        return None, None, None, None, ()
+    labels: tuple[str, ...] = ()
+    label_rows = pr.get("labels")
+    if isinstance(label_rows, list):
+        labels = tuple(
+            str(row.get("name"))
+            for row in label_rows
+            if isinstance(row, dict) and row.get("name")
+        )
+    return (
+        int(pr["number"]),
+        str(pr.get("state", "")),
+        bool(pr.get("draft", False)),
+        str(pr.get("created_at", "")),
+        labels,
+    )
+
+
+def _build_branch_records(
+    *,
+    token: str,
+    owner: str,
+    repo: str,
+    cutoff: datetime,
+    branches: list[dict[str, Any]],
+    pr_by_head: dict[str, dict[str, Any]],
+) -> list[BranchRecord]:
     commit_cache: dict[str, str] = {}
     records: list[BranchRecord] = []
     for branch in branches:
-        name = str(branch.get("name", ""))
-        commit = branch.get("commit")
-        sha = ""
-        if isinstance(commit, dict):
-            sha = str(commit.get("sha", ""))
-        if not name or not sha:
+        identity = _branch_name_and_sha(branch)
+        if identity is None:
             continue
+        name, sha = identity
         committed_at = _commit_date(
             token=token,
             owner=owner,
@@ -216,24 +249,13 @@ def build_inventory(
             sha=sha,
             cache=commit_cache,
         )
-        pr = pr_by_head.get(name)
-        labels: tuple[str, ...] = ()
-        open_pr_number: int | None = None
-        open_pr_state: str | None = None
-        open_pr_draft: bool | None = None
-        open_pr_created_at: str | None = None
-        if pr is not None:
-            open_pr_number = int(pr["number"])
-            open_pr_state = str(pr.get("state", ""))
-            open_pr_draft = bool(pr.get("draft", False))
-            open_pr_created_at = str(pr.get("created_at", ""))
-            label_rows = pr.get("labels")
-            if isinstance(label_rows, list):
-                labels = tuple(
-                    str(row.get("name"))
-                    for row in label_rows
-                    if isinstance(row, dict) and row.get("name")
-                )
+        (
+            open_pr_number,
+            open_pr_state,
+            open_pr_draft,
+            open_pr_created_at,
+            labels,
+        ) = _pr_fields_for_branch(pr_by_head.get(name))
         records.append(
             build_branch_record(
                 name=name,
@@ -247,8 +269,29 @@ def build_inventory(
                 open_pr_labels=labels,
             )
         )
-
     records.sort(key=lambda row: (row.category, row.name))
+    return records
+
+
+def build_inventory(
+    *,
+    token: str,
+    owner: str,
+    repo: str,
+    cutoff_iso: str,
+) -> dict[str, Any]:
+    cutoff = parse_cutoff(cutoff_iso)
+    branches = _list_remote_branches(token=token, owner=owner, repo=repo)
+    open_prs = _list_open_pull_requests(token=token, owner=owner, repo=repo)
+    pr_by_head = _index_prs_by_head(open_prs)
+    records = _build_branch_records(
+        token=token,
+        owner=owner,
+        repo=repo,
+        cutoff=cutoff,
+        branches=branches,
+        pr_by_head=pr_by_head,
+    )
     category_counts = Counter(record.category for record in records)
     generated_at = datetime.now(tz=UTC).isoformat()
     phase1_targets = [row.name for row in records if row.phase1_garbage]
@@ -321,6 +364,171 @@ def _close_pull_request(
     )
 
 
+def _run_delete_branch_action(
+    *,
+    token: str,
+    owner: str,
+    repo: str,
+    branch: str,
+    phase: int,
+    apply: bool,
+    pr_number: int | None = None,
+) -> dict[str, Any]:
+    action: dict[str, Any] = {
+        "phase": phase,
+        "action": "delete_remote_branch",
+        "branch": branch,
+    }
+    if pr_number is not None:
+        action["pr_number"] = pr_number
+    if not apply:
+        action["status"] = "planned"
+        return action
+    try:
+        _delete_remote_branch(token=token, owner=owner, repo=repo, branch=branch)
+        action["status"] = "done"
+    except RuntimeError as exc:
+        action["status"] = "failed"
+        action["error"] = str(exc)
+    return action
+
+
+def _apply_phase1_actions(
+    *,
+    token: str,
+    owner: str,
+    repo: str,
+    apply: bool,
+    payload: dict[str, Any],
+) -> list[dict[str, Any]]:
+    actions: list[dict[str, Any]] = []
+    for branch in payload.get("phase1_garbage_targets", []):
+        if not isinstance(branch, str) or is_protected_branch(branch):
+            continue
+        action = _run_delete_branch_action(
+            token=token,
+            owner=owner,
+            repo=repo,
+            branch=branch,
+            phase=1,
+            apply=apply,
+        )
+        actions.append(action)
+        print(f"[{action['status'].upper()}] phase1 delete origin/{branch}")
+    return actions
+
+
+def _apply_phase2_close(
+    *,
+    token: str,
+    owner: str,
+    repo: str,
+    branch: str,
+    pr_number: int,
+    apply: bool,
+) -> dict[str, Any]:
+    close_action: dict[str, Any] = {
+        "phase": 2,
+        "action": "close_pull_request",
+        "branch": branch,
+        "pr_number": pr_number,
+    }
+    if not apply:
+        close_action["status"] = "planned"
+        return close_action
+    try:
+        _close_pull_request(
+            token=token,
+            owner=owner,
+            repo=repo,
+            pr_number=pr_number,
+            apply=True,
+        )
+        close_action["status"] = "done"
+    except RuntimeError as exc:
+        close_action["status"] = "failed"
+        close_action["error"] = str(exc)
+    return close_action
+
+
+def _apply_phase2_delete_after_close(
+    *,
+    token: str,
+    owner: str,
+    repo: str,
+    branch: str,
+    pr_number: int,
+    apply: bool,
+    close_status: str,
+) -> dict[str, Any]:
+    if apply and close_status == "done":
+        return _run_delete_branch_action(
+            token=token,
+            owner=owner,
+            repo=repo,
+            branch=branch,
+            phase=2,
+            apply=True,
+            pr_number=pr_number,
+        )
+    delete_action: dict[str, Any] = {
+        "phase": 2,
+        "action": "delete_remote_branch",
+        "branch": branch,
+        "pr_number": pr_number,
+    }
+    if apply:
+        delete_action["status"] = "skipped"
+        delete_action["error"] = "PR close failed"
+    else:
+        delete_action["status"] = "planned"
+    return delete_action
+
+
+def _apply_phase2_actions(
+    *,
+    token: str,
+    owner: str,
+    repo: str,
+    apply: bool,
+    payload: dict[str, Any],
+) -> list[dict[str, Any]]:
+    actions: list[dict[str, Any]] = []
+    for target in payload.get("phase2_stale_draft_targets", []):
+        if not isinstance(target, dict):
+            continue
+        branch = str(target.get("branch", ""))
+        pr_number = target.get("pr_number")
+        if not branch or not isinstance(pr_number, int):
+            continue
+        if is_protected_branch(branch):
+            continue
+        close_action = _apply_phase2_close(
+            token=token,
+            owner=owner,
+            repo=repo,
+            branch=branch,
+            pr_number=pr_number,
+            apply=apply,
+        )
+        actions.append(close_action)
+        print(
+            f"[{close_action['status'].upper()}] phase2 close PR #{pr_number} ({branch})"
+        )
+        delete_action = _apply_phase2_delete_after_close(
+            token=token,
+            owner=owner,
+            repo=repo,
+            branch=branch,
+            pr_number=pr_number,
+            apply=apply,
+            close_status=str(close_action.get("status") or ""),
+        )
+        actions.append(delete_action)
+        print(f"[{delete_action['status'].upper()}] phase2 delete origin/{branch}")
+    return actions
+
+
 def apply_phases(
     *,
     token: str,
@@ -340,82 +548,26 @@ def apply_phases(
     actions: list[dict[str, Any]] = []
 
     if 1 in phases:
-        for branch in payload.get("phase1_garbage_targets", []):
-            if not isinstance(branch, str) or is_protected_branch(branch):
-                continue
-            action = {"phase": 1, "action": "delete_remote_branch", "branch": branch}
-            if apply:
-                try:
-                    _delete_remote_branch(
-                        token=token, owner=owner, repo=repo, branch=branch
-                    )
-                    action["status"] = "done"
-                except RuntimeError as exc:
-                    action["status"] = "failed"
-                    action["error"] = str(exc)
-            else:
-                action["status"] = "planned"
-            actions.append(action)
-            print(f"[{action['status'].upper()}] phase1 delete origin/{branch}")
+        actions.extend(
+            _apply_phase1_actions(
+                token=token,
+                owner=owner,
+                repo=repo,
+                apply=apply,
+                payload=payload,
+            )
+        )
 
     if 2 in phases:
-        for target in payload.get("phase2_stale_draft_targets", []):
-            if not isinstance(target, dict):
-                continue
-            branch = str(target.get("branch", ""))
-            pr_number = target.get("pr_number")
-            if not branch or not isinstance(pr_number, int):
-                continue
-            if is_protected_branch(branch):
-                continue
-            close_action = {
-                "phase": 2,
-                "action": "close_pull_request",
-                "branch": branch,
-                "pr_number": pr_number,
-            }
-            if apply:
-                try:
-                    _close_pull_request(
-                        token=token,
-                        owner=owner,
-                        repo=repo,
-                        pr_number=pr_number,
-                        apply=True,
-                    )
-                    close_action["status"] = "done"
-                except RuntimeError as exc:
-                    close_action["status"] = "failed"
-                    close_action["error"] = str(exc)
-            else:
-                close_action["status"] = "planned"
-            actions.append(close_action)
-            print(
-                f"[{close_action['status'].upper()}] phase2 close PR #{pr_number} ({branch})"
+        actions.extend(
+            _apply_phase2_actions(
+                token=token,
+                owner=owner,
+                repo=repo,
+                apply=apply,
+                payload=payload,
             )
-
-            delete_action = {
-                "phase": 2,
-                "action": "delete_remote_branch",
-                "branch": branch,
-                "pr_number": pr_number,
-            }
-            if apply and close_action.get("status") == "done":
-                try:
-                    _delete_remote_branch(
-                        token=token, owner=owner, repo=repo, branch=branch
-                    )
-                    delete_action["status"] = "done"
-                except RuntimeError as exc:
-                    delete_action["status"] = "failed"
-                    delete_action["error"] = str(exc)
-            elif apply:
-                delete_action["status"] = "skipped"
-                delete_action["error"] = "PR close failed"
-            else:
-                delete_action["status"] = "planned"
-            actions.append(delete_action)
-            print(f"[{delete_action['status'].upper()}] phase2 delete origin/{branch}")
+        )
 
     return {
         "mode": "apply" if apply else "dry-run",

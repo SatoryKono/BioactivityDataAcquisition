@@ -236,7 +236,9 @@ def _read_source_tree_bytes(path: Path) -> bytes:
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
     safe_path = resolve_output_path(path, root=REPO_ROOT)
-    with safe_path.open("rb") as handle:  # NOSONAR - path confined by resolve_output_path
+    with safe_path.open(
+        "rb"
+    ) as handle:  # NOSONAR - path confined by resolve_output_path
         return handle.read()
 
 
@@ -293,8 +295,10 @@ def _load_current_artifact_if_fresh(root: Path) -> dict[str, Any] | None:
     if not artifact_path.exists():
         return None
     try:
-        artifact_text = artifact_path.read_text(  # NOSONAR - path confined by resolve_output_path
-            encoding="utf-8"
+        artifact_text = (
+            artifact_path.read_text(  # NOSONAR - path confined by resolve_output_path
+                encoding="utf-8"
+            )
         )
         payload = json.loads(artifact_text)
     except (OSError, json.JSONDecodeError):
@@ -382,7 +386,9 @@ def _sha256_file(path: Path, *, chunk_size: int = 1024 * 1024) -> tuple[str, int
     safe_path = resolve_output_path(path, root=REPO_ROOT)
     digest = hashlib.sha256()
     total_bytes = 0
-    with safe_path.open("rb") as handle:  # NOSONAR - path confined by resolve_output_path
+    with safe_path.open(
+        "rb"
+    ) as handle:  # NOSONAR - path confined by resolve_output_path
         while True:
             chunk = handle.read(chunk_size)
             if not chunk:
@@ -801,8 +807,10 @@ def _load_assertion_bypass_allowlist(root: Path) -> list[dict[str, str]]:
     config_path = resolve_output_path(root / DEFAULT_CONFIG, root=root)
     if not config_path.exists():
         return []
-    config_text = config_path.read_text(  # NOSONAR - path confined by resolve_output_path
-        encoding="utf-8"
+    config_text = (
+        config_path.read_text(  # NOSONAR - path confined by resolve_output_path
+            encoding="utf-8"
+        )
     )
     payload = yaml.safe_load(config_text) or {}
     entries = payload.get("assertion_bypass_allowlist", [])
@@ -1362,7 +1370,9 @@ def load_config(path: Path) -> dict[str, Any]:
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
     safe_path = resolve_output_path(path, root=REPO_ROOT)
-    with safe_path.open(encoding="utf-8") as handle:  # NOSONAR - path confined by resolve_output_path
+    with safe_path.open(
+        encoding="utf-8"
+    ) as handle:  # NOSONAR - path confined by resolve_output_path
         return cast(dict[str, Any], yaml.safe_load(handle))
 
 
