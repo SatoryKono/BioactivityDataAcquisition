@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import Any, cast, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.observability.pipeline_metrics import PipelineMetricsRecorder
 from bioetl.domain.exceptions.data_quality import DataQualityThresholdError
@@ -17,12 +17,12 @@ if TYPE_CHECKING:
 class DataQualityThresholdMixin:
     """Threshold policy helpers for DQ evaluation."""
 
-    _config: DQConfig = cast(Any, None)  # host attr default (PD3)
-    _logger: LoggerPort = cast(Any, None)  # host attr default (PD3)
-    _metrics: MetricsPort | None = cast(Any, None)  # host attr default (PD3)
-    _pipeline_name: str = cast(Any, None)  # host attr default (PD3)
-    _pipeline_metrics: PipelineMetricsRecorder = cast(Any, None)  # host attr default (PD3)
-    _run_type: str = cast(Any, None)  # host attr default (PD3)
+    _config: DQConfig = cast(Any, None)  # Any: host attr default (PD3)
+    _logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)
+    _metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD3)
+    _pipeline_name: str = cast(Any, None)  # Any: host attr default (PD3)
+    _pipeline_metrics: PipelineMetricsRecorder = cast(Any, None)  # Any: host attr default (PD3)
+    _run_type: str = cast(Any, None)  # Any: host attr default (PD3)
 
     def _emit_quarantine_semantics(
         self,

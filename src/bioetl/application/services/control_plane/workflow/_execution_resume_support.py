@@ -40,7 +40,6 @@ def load_resume_state(
     resume_manifest_id: str | None,
     resume_run_id: RunID | str | None,
 ) -> WorkflowExecutionState:
-    """Load one persisted workflow state from explicit resume selectors."""
     if resume_run_id is not None:
         resolved_run_id = coerce_resume_run_id(resume_run_id)
         state = workflow_state_port.get_by_run_id(resolved_run_id)
@@ -67,7 +66,6 @@ def load_resume_state(
 
 
 def coerce_resume_run_id(resume_run_id: RunID | str) -> RunID:
-    """Normalize external resume selectors into the RunID domain type."""
     if isinstance(resume_run_id, UUID):
         return RunID(resume_run_id)
     return RunID(UUID(str(resume_run_id)))
@@ -81,7 +79,6 @@ def validate_resume_state(
     force_steps: tuple[str, ...],
     repair_steps: tuple[str, ...],
 ) -> None:
-    """Reject resume requests that would violate workflow replay invariants."""
     _validate_workflow_name(latest_state, workflow_name)
     _validate_identity_fields(latest_state)
     step_ids = _validate_step_integrity(latest_state)
@@ -95,7 +92,6 @@ def validate_resume_state(
 def _validate_workflow_name(
     latest_state: WorkflowExecutionState, workflow_name: str
 ) -> None:
-    """Ensure resume state belongs to the correct workflow."""
     if latest_state.workflow_name != workflow_name:
         raise RuntimeError(
             "Workflow resume state belongs to a different workflow: "
@@ -104,7 +100,6 @@ def _validate_workflow_name(
 
 
 def _validate_identity_fields(latest_state: WorkflowExecutionState) -> None:
-    """Ensure critical identity fields are present."""
     if (
         not latest_state.manifest_id.strip()
         or not latest_state.execution_fingerprint.strip()
@@ -115,7 +110,6 @@ def _validate_identity_fields(latest_state: WorkflowExecutionState) -> None:
 
 
 def _validate_step_integrity(latest_state: WorkflowExecutionState) -> tuple[str, ...]:
-    """Validate step identities and return step IDs."""
     step_ids = tuple(step.step_id for step in latest_state.steps)
     if (
         not step_ids
@@ -131,7 +125,6 @@ def _validate_step_integrity(latest_state: WorkflowExecutionState) -> tuple[str,
 def _validate_step_references(
     latest_state: WorkflowExecutionState, step_ids: tuple[str, ...]
 ) -> None:
-    """Ensure persisted step references are consistent."""
     unknown_selected = set(latest_state.selected_step_ids).difference(step_ids)
     unknown_completed = set(latest_state.completed_transform_fingerprints).difference(
         step_ids
@@ -143,7 +136,6 @@ def _validate_step_references(
 
 
 def _validate_lifecycle_status(latest_state: WorkflowExecutionState) -> None:
-    """Ensure all lifecycle statuses are valid."""
     allowed_statuses = {"created", "running", "incomplete", "failed", "success"}
     if latest_state.status not in allowed_statuses or any(
         step.status not in {"pending", "running", "success", "failed"}
@@ -155,7 +147,6 @@ def _validate_lifecycle_status(latest_state: WorkflowExecutionState) -> None:
 def _validate_execution_fingerprint(
     latest_state: WorkflowExecutionState, current_fingerprint: str
 ) -> None:
-    """Ensure execution fingerprint matches current configuration."""
     if latest_state.execution_fingerprint != current_fingerprint:
         raise RuntimeError(
             "Workflow configuration changed since the last execution; "

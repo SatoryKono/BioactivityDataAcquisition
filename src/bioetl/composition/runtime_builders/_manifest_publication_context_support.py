@@ -24,7 +24,6 @@ if TYPE_CHECKING:
     from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
     from bioetl.domain.context import PipelineRunContext
 
-
 @dataclass(frozen=True, slots=True)
 class ResolvedManifestPublicationContext:
     """Provider, entity, reproducibility, and contract identity for one run."""
@@ -34,7 +33,6 @@ class ResolvedManifestPublicationContext:
     reproducibility_context: ManifestReproducibilityContext
     contract_identity: RunManifestContractIdentity
 
-
 class ManifestPublicationIdentityKwargs(TypedDict):
     """Typed keyword payload for manifest publication identity resolution."""
 
@@ -43,7 +41,6 @@ class ManifestPublicationIdentityKwargs(TypedDict):
     provider: str
     entity: str
     reproducibility_context: ManifestReproducibilityContext | None
-
 
 def contract_identity_requires_strict_resolution(
     *,
@@ -55,7 +52,6 @@ def contract_identity_requires_strict_resolution(
         exact_replay_requested
         or required_persistence_profile in STRICT_PERSISTENCE_PROFILES
     )
-
 
 def resolve_manifest_publication_context(
     ctx: PipelineRunContext,
@@ -95,7 +91,6 @@ def resolve_manifest_publication_context(
         contract_identity=contract_identity,
     )
 
-
 def ensure_manifest_publication_identity(
     *,
     ctx: PipelineRunContext,
@@ -128,7 +123,6 @@ def ensure_manifest_publication_identity(
         )
     return reproducibility_context, contract_identity
 
-
 def build_manifest_publication_identity_kwargs(
     ctx: PipelineRunContext,
     inputs: RunnerInputs,
@@ -145,9 +139,7 @@ def build_manifest_publication_identity_kwargs(
         "reproducibility_context": reproducibility_context,
     }
 
-
 resolve_manifest_publication_identity = ensure_manifest_publication_identity
-
 
 __all__ = [
     "ManifestPublicationIdentityKwargs",

@@ -163,6 +163,52 @@ def _project_origin_findings(
     ]
 
 
+def _service_resource_ratios(
+    *,
+    service: str,
+    row: Mapping[str, Any],
+    service_limits: Mapping[str, float],
+) -> dict[str, Any]:
+    """Compute limit ratios for one container stats row."""
+    memory_ratio = _percent(row.get("MemPerc", "0%"))
+    cpu_usage = _percent(row.get("CPUPerc", "0%"))
+    pids = int(row.get("PIDs") or 0)
+    cpu_limit = float(service_limits.get("cpus") or 0.0)
+    pids_limit = float(service_limits.get("pids_limit") or 0.0)
+    cpu_ratio = cpu_usage / cpu_limit if cpu_limit else 0.0
+    pids_ratio = pids / pids_limit if pids_limit else 0.0
+    return {
+        "service": service,
+        "memory_limit_ratio": memory_ratio,
+        "cpu_limit_ratio": cpu_ratio,
+        "pids_limit_ratio": pids_ratio,
+        "pids": pids,
+    }
+
+
+def _pressure_findings_for_resource(resource: Mapping[str, Any]) -> list[dict[str, Any]]:
+    """Emit resource_pressure findings for ratios at or above the 0.8 threshold."""
+    findings: list[dict[str, Any]] = []
+    service = resource["service"]
+    for resource_name, key in (
+        ("memory", "memory_limit_ratio"),
+        ("cpu", "cpu_limit_ratio"),
+        ("pids", "pids_limit_ratio"),
+    ):
+        ratio = float(resource[key])
+        if ratio < 0.8:
+            continue
+        findings.append(
+            {
+                "cause": "resource_pressure",
+                "service": service,
+                "resource": resource_name,
+                "ratio": ratio,
+            }
+        )
+    return findings
+
+
 def _resource_findings(
     stats_rows: Sequence[Mapping[str, Any]],
     snapshots: Sequence[ServiceSnapshot],
@@ -176,37 +222,13 @@ def _resource_findings(
         service = known.get(container_id)
         if not service:
             continue
-        memory_ratio = _percent(row.get("MemPerc", "0%"))
-        cpu_usage = _percent(row.get("CPUPerc", "0%"))
-        pids = int(row.get("PIDs") or 0)
-        service_limits = limits.get(service, {})
-        cpu_limit = float(service_limits.get("cpus") or 0.0)
-        pids_limit = float(service_limits.get("pids_limit") or 0.0)
-        cpu_ratio = cpu_usage / cpu_limit if cpu_limit else 0.0
-        pids_ratio = pids / pids_limit if pids_limit else 0.0
-        resource = {
-            "service": service,
-            "memory_limit_ratio": memory_ratio,
-            "cpu_limit_ratio": cpu_ratio,
-            "pids_limit_ratio": pids_ratio,
-            "pids": pids,
-        }
+        resource = _service_resource_ratios(
+            service=service,
+            row=row,
+            service_limits=limits.get(service, {}),
+        )
         resources.append(resource)
-        for resource_name, ratio in (
-            ("memory", memory_ratio),
-            ("cpu", cpu_ratio),
-            ("pids", pids_ratio),
-        ):
-            if ratio < 0.8:
-                continue
-            findings.append(
-                {
-                    "cause": "resource_pressure",
-                    "service": service,
-                    "resource": resource_name,
-                    "ratio": ratio,
-                }
-            )
+        findings.extend(_pressure_findings_for_resource(resource))
     return resources, findings
 
 

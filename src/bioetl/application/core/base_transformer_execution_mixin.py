@@ -1,11 +1,9 @@
-# pyright: reportInvalidCast=false
-# Host/cast bridge residual (PD3).
 """Execution lifecycle helpers shared by BaseTransformer."""
 
 from __future__ import annotations
 
 import time
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from bioetl.application.core._base_transformer_execution_support import (
     TransformerExecutionOwner,
@@ -30,111 +28,85 @@ if TYPE_CHECKING:
     from bioetl.domain.filtering import FilterDecision
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
+
 class _BaseTransformerExecutionMixin:
     """Execution lifecycle helpers delegated from BaseTransformer."""
 
     def _start_transform_span(
-        self,
+        self: TransformerExecutionOwner,
         context: PipelineContext,
         index: int,
     ) -> _ClosableSpan:
         """Create and enter an OpenTelemetry span for record transformation."""
-        return start_transform_span(
-            cast("TransformerExecutionOwner", self), context, index
-        )
+        return start_transform_span(self, context, index)
 
     def _apply_silver_filter(
-        self,
+        self: TransformerExecutionOwner,
         context: PipelineContext,
         result: SilverRecord | None,
         index: int,
     ) -> None:
         """Check silver filter and raise FilteredOutError if excluded."""
-        apply_silver_filter(
-            cast("TransformerExecutionOwner", self), context, result, index
-        )
+        apply_silver_filter(self, context, result, index)
 
     def _evaluate_semantic_shadow_decision(
-        self,
+        self: TransformerExecutionOwner,
         result: SilverRecord | None,
     ) -> FilterDecision | None:
         """Evaluate structural Silver filters for shadow comparison only."""
-        return evaluate_semantic_shadow_decision(
-            cast("TransformerExecutionOwner", self),
-            result,
-        )
+        return evaluate_semantic_shadow_decision(self, result)
 
     def _record_structural_policy_metrics(
-        self,
+        self: TransformerExecutionOwner,
         *,
         action: str | None,
         shadow_comparison: str | None,
     ) -> None:
         """Emit bounded telemetry for structural actions and shadow comparisons."""
         record_structural_policy_metrics(
-            cast("TransformerExecutionOwner", self),
+            self,
             action=action,
             shadow_comparison=shadow_comparison,
         )
 
     def _apply_structural_policy(
-        self,
+        self: TransformerExecutionOwner,
         context: PipelineContext,
         result: SilverRecord | None,
         index: int,
     ) -> SilverRecord | None:
         """Apply schema-aware structural policy before structural Silver filters."""
-        return apply_structural_policy(
-            cast("TransformerExecutionOwner", self),
-            context,
-            result,
-            index,
-        )
+        return apply_structural_policy(self, context, result, index)
 
     def _handle_transformation_error(
-        self,
+        self: TransformerExecutionOwner,
         error: TransformationError,
         context: PipelineContext,
         span: _ClosableSpan,
     ) -> str:
         """Log and annotate span for transformation errors."""
-        return handle_transformation_error(
-            cast("TransformerExecutionOwner", self),
-            error,
-            context,
-            span,
-        )
+        return handle_transformation_error(self, error, context, span)
 
     def _handle_validation_error(
-        self,
+        self: TransformerExecutionOwner,
         error: ValueError,
         context: PipelineContext,
         span: _ClosableSpan,
     ) -> str:
         """Log and annotate span for validation errors."""
-        return handle_validation_error(
-            cast("TransformerExecutionOwner", self),
-            error,
-            context,
-            span,
-        )
+        return handle_validation_error(self, error, context, span)
 
     def _record_metrics_and_close_span(
-        self,
+        self: TransformerExecutionOwner,
         start_time: float,
         error_type: str | None,
         span: _ClosableSpan,
     ) -> None:
         """Record transform duration/error metrics and close the OTEL span."""
-        record_metrics_and_close_span(
-            cast("TransformerExecutionOwner", self),
-            start_time,
-            error_type,
-            span,
-        )
+        record_metrics_and_close_span(self, start_time, error_type, span)
 
     async def transform(
-        self,
+        self: TransformerExecutionOwner,
         context: PipelineContext,
         record: BronzeRecord,
         index: int,
@@ -142,19 +114,18 @@ class _BaseTransformerExecutionMixin:
         """Transform Bronze record to Silver format (Template Method)."""
         start_time = time.perf_counter()
         error_type: str | None = None
-        span = self._start_transform_span(context, index)
+        span = start_transform_span(self, context, index)
 
         try:
-            owner = cast("TransformerExecutionOwner", self)
-            result = await owner._transform_impl(context, record, index)
-            result = self._apply_structural_policy(context, result, index)
-            self._apply_silver_filter(context, result, index)
+            result = await self._transform_impl(context, record, index)
+            result = apply_structural_policy(self, context, result, index)
+            apply_silver_filter(self, context, result, index)
             return result
         except TransformationError as error:
-            error_type = self._handle_transformation_error(error, context, span)
+            error_type = handle_transformation_error(self, error, context, span)
             return None
         except ValueError as error:
-            error_type = self._handle_validation_error(error, context, span)
+            error_type = handle_validation_error(self, error, context, span)
             raise
         finally:
-            self._record_metrics_and_close_span(start_time, error_type, span)
+            record_metrics_and_close_span(self, start_time, error_type, span)

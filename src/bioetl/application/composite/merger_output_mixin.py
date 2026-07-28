@@ -1,10 +1,9 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Output-writing helpers extracted from MergeIOMixin."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.domain.exceptions import DataQualityError
 
@@ -21,11 +20,11 @@ if TYPE_CHECKING:
 class MergeOutputWriterMixin:
     """Mixin for persisting merged Silver/Gold outputs."""
 
-    _config: MergeConfig
-    _logger: LoggerPort
-    _storage: MergedStoragePort
-    _field_group_registry: FieldGroupRegistry | None
-    _gold_schema: Any | None  # Any: Pandera DataFrameModel class or instance
+    _config: MergeConfig = cast(Any, None)  # Any: host default (PD4)
+    _logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
+    _storage: MergedStoragePort = cast(Any, None)  # Any: host default (PD4)
+    _field_group_registry: FieldGroupRegistry | None = cast(Any, None)  # Any: host default (PD4)
+    _gold_schema: Any | None = cast(Any, None)  # Any: host default (PD4)
 
     @staticmethod
     def _path_to_table_name(path: str) -> str:

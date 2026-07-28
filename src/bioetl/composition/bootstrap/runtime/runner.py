@@ -30,11 +30,9 @@ from bioetl.infrastructure.time import SystemClock
 
 __all__ = ["bootstrap_pipeline_runner_service"]
 
-
 def _pipeline_run_id_factory() -> str:
     """Factory function for pipeline run IDs."""
     return str(create_runtime_occurrence_run_id("pipeline_run"))
-
 
 def bootstrap_pipeline_runner_service(
     registry: PipelineRegistry | None = None,

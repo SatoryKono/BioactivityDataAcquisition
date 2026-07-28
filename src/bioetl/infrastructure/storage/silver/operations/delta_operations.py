@@ -3,10 +3,9 @@
 
 from __future__ import annotations
 
-from typing import Any, cast
-
 from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Any, cast
 
 import pyarrow as pa
 from deltalake import DeltaTable as DeltaTableType
@@ -152,7 +151,8 @@ class _SilverDeltaOperationFacade:
 class SilverDeltaOperations(_SilverDeltaOperationFacade):
     """Delta operations service for Silver layer writes."""
 
-    logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)
-    _metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD3)
-    _merge_resilience_policy: SilverMergeResiliencePolicy = cast(Any, None)  # Any: host attr default (PD3)
+    logger: LoggerPort
+    _metrics: MetricsPort | None = None
+    # Align with facade host contract (non-optional policy surface).
+    _merge_resilience_policy: SilverMergeResiliencePolicy = cast(Any, None)
     _load_delta_module: Callable[[], object] | None = _load_deltalake_module

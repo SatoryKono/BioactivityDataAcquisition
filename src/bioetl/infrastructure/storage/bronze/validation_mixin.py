@@ -3,10 +3,9 @@
 
 from __future__ import annotations
 
-from typing import Any, cast
-
 from collections.abc import Iterator
 from datetime import datetime, timedelta
+from typing import Any, cast
 
 import orjson
 

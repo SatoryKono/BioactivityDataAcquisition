@@ -1,10 +1,9 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """I/O orchestration helpers for MergeService."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.composite.join_planner import JoinPlannerService
 from bioetl.application.composite.merger_output_mixin import MergeOutputWriterMixin
@@ -33,14 +32,16 @@ class MergeIOMixin(MergeOutputWriterMixin):
     """Mixin for merge cross-validation, output persistence, and result assembly."""
 
     # -- Host-class attributes (set by MergeService.__init__) --
-    _config: MergeConfig
-    _logger: LoggerPort
-    _field_group_registry: FieldGroupRegistry | None
-    _cross_validator: EnrichmentCrossValidator | None
-    _gold_schema: Any | None  # Any: Pandera DataFrameModel class or instance
-    _join_planner: JoinPlannerService
-    _calculate_field_coverage: Callable[[pl.DataFrame], dict[str, float]]
-    _count_fully_enriched: Callable[[pl.DataFrame, Sequence[EnricherConfig]], int]
+    _config: MergeConfig = cast(Any, None)  # Any: host default (PD4)
+    _logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
+    _field_group_registry: FieldGroupRegistry | None = cast(Any, None)  # Any: host default (PD4)
+    _cross_validator: EnrichmentCrossValidator | None = cast(Any, None)  # Any: host default (PD4)
+    _gold_schema: Any | None = cast(Any, None)  # Any: host default (PD4)
+    _join_planner: JoinPlannerService = cast(Any, None)  # Any: host default (PD4)
+    _calculate_field_coverage: Callable[[pl.DataFrame], dict[str, float]] = cast(Any, None)  # Any: host default (PD4)
+    _count_fully_enriched: Callable[
+        [pl.DataFrame, Sequence[EnricherConfig]], int
+    ] = cast(Any, None)  # Any: host default (PD4)
 
     async def _apply_dependency_joins_if_needed(
         self,

@@ -3,10 +3,9 @@
 
 from __future__ import annotations
 
-from typing import Any, cast
-
 from collections.abc import Sequence
 from datetime import datetime
+from typing import Any, cast
 
 from bioetl.domain.types import (
     GOLD_CONTRACT_VERSION_UNKNOWN,

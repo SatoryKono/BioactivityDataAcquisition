@@ -10,7 +10,6 @@ __all__ = [
     "initialize_domain_enum_fields",
 ]
 
-
 def create_enum_loader_for_domain() -> EnumLoaderProtocol:
     """Create enum loader instance for domain layer dependency injection.
 
@@ -18,7 +17,6 @@ def create_enum_loader_for_domain() -> EnumLoaderProtocol:
         Configured EnumLoaderProtocol implementation
     """
     return FileSystemEnumLoader()
-
 
 def initialize_domain_enum_fields() -> None:
     """Initialize domain layer enum fields using dependency injection.

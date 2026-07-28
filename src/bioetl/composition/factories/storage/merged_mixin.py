@@ -61,7 +61,9 @@ class StorageBundleMergedMixin:
 
     silver: SilverWriter = cast(Any, None)  # Any: host attr default (PD3)
     gold: GoldWriter = cast(Any, None)  # Any: host attr default (PD3)
-    _COMPOSITE_GOLD_SCHEMAS: ClassVar[dict[str, CompositeSchemaProvider]] = cast(Any, None)  # Any: host attr default (PD3)
+    _COMPOSITE_GOLD_SCHEMAS: ClassVar[dict[str, CompositeSchemaProvider]] = cast(
+        Any, None  # Any: host attr default (PD3)
+    )
 
     def get_table_path(
         self,

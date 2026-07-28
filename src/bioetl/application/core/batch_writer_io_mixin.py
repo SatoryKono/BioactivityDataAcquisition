@@ -21,12 +21,9 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BatchID, BronzeRecord, GoldRecord
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
-
 _WRITE_SPAN_ERRORS = SHARED_OPERATION_ERRORS
-
 class BatchWriterIOMixin:
     """Layer write orchestration extracted from BatchWriter."""
-
     # Host attributes initialized by BatchWriter.__init__ (PD3 structural host).
     _context: Any = cast(Any, None)  # Any: concrete BatchWriter supplies the host context
     _storage: Any = cast(Any, None)  # Any: concrete BatchWriter supplies its write port
@@ -42,7 +39,6 @@ class BatchWriterIOMixin:
     _table_config: Any = cast(Any, None)  # Any: concrete host supplies validated table configuration
     _silver_mode: Any = cast(Any, None)  # Any: concrete host narrows the configured literal
     _gold_mode: Any = cast(Any, None)  # Any: concrete host narrows the configured literal
-
     # Cross-mixin collaborators provided by BatchWriterTracingMixin /
     # BatchWriterColumnsMixin on the composed BatchWriter MRO. Declared as Any
     # host callables so basedpyright sees them on this mixin without installing
@@ -55,7 +51,6 @@ class BatchWriterIOMixin:
     _project_schema_for_layer: Any = cast(Any, None)  # Any: sibling mixin bridges schema APIs
     _apply_renames_to_records: Any = cast(Any, None)  # Any: sibling mixin supplies the method
     _get_schema_columns: Any = cast(Any, None)  # Any: sibling mixin bridges schema APIs
-
     def _resolve_gold_ingestion_ts(self) -> datetime:
         """Return the deterministic timestamp anchor for Gold write side effects."""
         replay_timestamp_anchor = getattr(
@@ -66,7 +61,6 @@ class BatchWriterIOMixin:
             if replay_timestamp_anchor is not None
             else self._context.started_at
         )
-
     async def write_bronze(
         self,
         records: list[BronzeRecord],
@@ -87,14 +81,12 @@ class BatchWriterIOMixin:
         """
         await self._validate_lock("write_bronze")
         span = self._start_span("write_bronze", "bronze", len(records), batch_id)
-
         try:
             json_bytes_list = [
                 orjson.dumps(r, option=orjson.OPT_SORT_KEYS) for r in records
             ]
             json_bytes_list.sort()
             record_bytes = (b + b"\n" for b in json_bytes_list)
-
             bronze_result = await self._storage.write_bronze(
                 records=record_bytes,
                 provider=self._provider,

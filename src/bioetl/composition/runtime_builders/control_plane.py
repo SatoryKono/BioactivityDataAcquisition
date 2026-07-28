@@ -34,7 +34,6 @@ if TYPE_CHECKING:
     from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
     from bioetl.domain.context import PipelineRunContext
 
-
 def attach_manifest_id(
     ctx: PipelineRunContext,
     manifest_id: str | None = None,
@@ -78,7 +77,6 @@ def attach_manifest_id(
         )
     raise TypeError("PipelineRunContext must support manifest_id attachment")
 
-
 def _preflight_pipeline_input_snapshots(
     *,
     ctx: PipelineRunContext,
@@ -99,7 +97,6 @@ def _preflight_pipeline_input_snapshots(
         provider=provider,
         entity=entity,
     )
-
 
 def create_run_manifest_with_effective_config(
     *,

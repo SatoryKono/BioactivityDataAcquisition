@@ -1,4 +1,5 @@
 # pyright: reportImportCycles=false
+# Import cycle residual (PD4).
 # Import cycle residual tracked in allowlist (PD3).
 """Runtime contracts and dependencies for Silver Delta operation services."""
 

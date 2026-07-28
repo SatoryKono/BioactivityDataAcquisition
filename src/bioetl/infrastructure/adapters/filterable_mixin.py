@@ -24,7 +24,7 @@ __all__ = [
 ]
 
 
-from typing import Any, cast, TYPE_CHECKING, ClassVar, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Any, ClassVar, Protocol, cast, runtime_checkable
 
 from bioetl.domain.types import JsonDict
 

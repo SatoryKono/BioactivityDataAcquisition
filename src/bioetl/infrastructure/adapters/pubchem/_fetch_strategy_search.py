@@ -5,7 +5,7 @@ from __future__ import annotations
 
 __all__ = ["_PubChemSearchFetchMixin"]
 
-from typing import Any, cast, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 import pubchempy as pcp
 

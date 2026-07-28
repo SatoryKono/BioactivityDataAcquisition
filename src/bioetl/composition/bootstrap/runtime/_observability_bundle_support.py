@@ -31,7 +31,6 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports import DQMonitorPort
     from bioetl.infrastructure.config.settings_api import Settings
-
 __all__ = [
     "ObservabilityBootstrappers",
     "ObservabilityComponents",
@@ -39,8 +38,6 @@ __all__ = [
     "resolve_observability_bootstrappers",
     "validate_observability_preflight_impl",
 ]
-
-
 @dataclass(frozen=True, slots=True)
 class ObservabilityComponents:
     logger: LoggerPort
@@ -48,11 +45,8 @@ class ObservabilityComponents:
     metrics: MetricsPort
     audit: AuditPort
     dq_monitor: DQMonitorPort | None
-
-
 # Backward-compatible private alias used by assembly/tests.
 _ObservabilityComponents = ObservabilityComponents
-
 
 def build_observability_components(
     *,
@@ -87,11 +81,8 @@ def build_observability_components(
         audit=audit,
         dq_monitor=dq_monitor_bootstrapper(settings, logger),
     )
-
-
 # Backward-compatible private alias used by tests/patches.
 _build_observability_components = build_observability_components
-
 
 def validate_observability_preflight_impl(
     tracer: TracingPort,
@@ -106,17 +97,7 @@ def validate_observability_preflight_impl(
     yaml_config: object | None = None,
     skip_gold: bool = False,
 ) -> None:
-    """Validate observability components for production readiness.
-
-    Emits structured warnings when NoOp implementations are used in production.
-    By default, production fails closed unless explicit override is enabled.
-
-    Args:
-        tracer: TracingPort to validate; warns if NoOpTracing in production.
-        metrics: MetricsPort to validate; warns if NoOpMetrics in production.
-        environment: Deployment environment name (e.g., 'prod', 'staging').
-        logger: LoggerPort used to emit structured preflight warning events.
-    """
+    """Validate observability components for production readiness."""
     required_profile = _control_plane_settings(control_plane=control_plane)[0]
     forensic_grade_required = requires_forensic_grade_observability_evidence(
         required_persistence_profile=required_profile,
@@ -147,8 +128,6 @@ def validate_observability_preflight_impl(
         skip_gold=skip_gold,
         control_plane_settings_fn=_control_plane_settings,
     )
-
-
 @dataclass(frozen=True, slots=True)
 class ObservabilityBootstrappers:
     logger: Callable[[str, UUID, str], LoggerPort]
@@ -158,9 +137,7 @@ class ObservabilityBootstrappers:
     dq_monitor: Callable[[Settings, LoggerPort | None], DQMonitorPort | None]
     preflight: Callable[..., None]
 
-
 _ObservabilityBootstrappers = ObservabilityBootstrappers
-
 
 def resolve_observability_bootstrappers(
     *,
@@ -233,9 +210,7 @@ def resolve_observability_bootstrappers(
         ),
     )
 
-
 _resolve_observability_bootstrappers = resolve_observability_bootstrappers
-
 
 def _audit_required(*, audit: AuditPort | None, audit_required: bool) -> bool:
     return audit_required and audit is not None and isinstance(audit, NoOpAudit)

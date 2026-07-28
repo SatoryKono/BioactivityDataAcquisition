@@ -72,104 +72,121 @@ def _remove_incomplete_cycle_under_lock(cycle_dir: Path) -> None:
         shutil.rmtree(cycle_dir)
 
 
-def bootstrap_campaign(
+def _bootstrap_start_timeout(spec: Any) -> float:
+    # Monitoring has multiple services and can need longer first-start budget
+    # when Desktop is cold; main stays at 180s.
+    return 300.0 if str(spec.stack) == "monitoring" else 180.0
+
+
+def _bootstrap_persist_and_fail(
+    *,
+    state: dict[str, Any],
+    state_path: Path,
+    evidence_dir: Path,
+    failure: str,
+    payload: dict[str, Any],
+) -> bool:
+    """Persist a bootstrap failure payload and return False."""
+    state["last_failure"] = failure
+    atomic_json(
+        evidence_dir / "bootstrap" / _BOOTSTRAP_JSON,
+        payload,
+        replace=False,
+    )
+    index_and_save(state, state_path, evidence_dir)
+    return False
+
+
+def _bootstrap_start_one_stack(
+    *,
     state: dict[str, Any],
     state_path: Path,
     evidence_dir: Path,
     runtime_origin: Path,
     contract: Path,
-    bundle: Sequence[Any],
+    steps: list[dict[str, Any]],
+    spec: Any,
 ) -> bool:
-    if state.get("bootstrap_complete"):
-        return True
-    steps: list[dict[str, Any]] = []
-    volume_precondition = required_volume_precondition(runtime_origin, bundle)
-    if not volume_precondition["passed"]:
-        state["last_failure"] = "bootstrap-required-volumes"
-        atomic_json(
-            evidence_dir / "bootstrap" / _BOOTSTRAP_JSON,
-            {
-                "schema_version": "bioetl-docker-campaign-bootstrap-v1",
-                "passed": False,
-                "runtime_origin": str(runtime_origin),
-                "volume_precondition": volume_precondition,
-                "steps": steps,
-            },
-            replace=False,
-        )
-        index_and_save(state, state_path, evidence_dir)
-        return False
-    state["initial_volume_ids"] = bundle_volume_ids(runtime_origin, bundle)
-    for spec in bundle:
-        # Monitoring has multiple services and can need longer first-start budget
-        # when Desktop is cold; main stays at 180s.
-        start_timeout = 300.0 if str(spec.stack) == "monitoring" else 180.0
-        probe_path = evidence_dir / "bootstrap" / f"probe-prestart-{spec.stack}.json"
-        prestart = probe_command(
-            runtime_origin,
-            spec,
-            probe_path,
-            45.0,
-            contract=contract,
-        )
+    """Start one stack during bootstrap; return False on hard failure."""
+    start_timeout = _bootstrap_start_timeout(spec)
+    probe_path = evidence_dir / "bootstrap" / f"probe-prestart-{spec.stack}.json"
+    prestart = probe_command(
+        runtime_origin,
+        spec,
+        probe_path,
+        45.0,
+        contract=contract,
+    )
+    steps.append(
+        {
+            "stack": spec.stack,
+            "action": "probe-prestart",
+            "result": prestart,
+        }
+    )
+    if prestart.get("returncode") == 0 and prestart.get("summary_ok"):
+        # Stack already green: skip compose start churn that can flap Desktop.
         steps.append(
             {
                 "stack": spec.stack,
-                "action": "probe-prestart",
-                "result": prestart,
+                "action": "start",
+                "result": {
+                    "returncode": 0,
+                    "skipped": True,
+                    "reason": "prestart_probe_ok",
+                },
             }
         )
-        if prestart.get("returncode") == 0 and prestart.get("summary_ok"):
-            # Stack already green: skip compose start churn that can flap Desktop.
-            steps.append(
-                {
-                    "stack": spec.stack,
-                    "action": "start",
-                    "result": {
-                        "returncode": 0,
-                        "skipped": True,
-                        "reason": "prestart_probe_ok",
-                    },
-                }
-            )
-            continue
-        result = manager_step(
-            runtime_origin,
-            contract,
-            spec,
-            "start",
-            evidence_dir / "bootstrap" / f"manager-{spec.stack}",
-            start_timeout,
-        )
-        steps.append({"stack": spec.stack, "action": "start", "result": result})
-        if result["returncode"] != 0:
-            # One bounded recover retry absorbs transient daemon flaps after start.
-            recover = manager_step(
-                runtime_origin,
-                contract,
-                spec,
-                "recover",
-                evidence_dir / "bootstrap" / f"manager-recover-{spec.stack}",
-                start_timeout,
-            )
-            steps.append(
-                {
-                    "stack": spec.stack,
-                    "action": "recover-after-start",
-                    "result": recover,
-                }
-            )
-            if recover["returncode"] != 0:
-                state["last_failure"] = f"bootstrap-start-{spec.stack}"
-                atomic_json(
-                    evidence_dir / "bootstrap" / _BOOTSTRAP_JSON,
-                    {"passed": False, "steps": steps},
-                    replace=False,
-                )
-                index_and_save(state, state_path, evidence_dir)
-                return False
-    rows = live_compose_rows(runtime_origin)
-    origins = compose_origin_findings(rows, bundle, runtime_origin)
+        return True
+    result = manager_step(
+        runtime_origin,
+        contract,
+        spec,
+        "start",
+        evidence_dir / "bootstrap" / f"manager-{spec.stack}",
+        start_timeout,
+    )
+    steps.append({"stack": spec.stack, "action": "start", "result": result})
+    if result["returncode"] == 0:
+        return True
+    # One bounded recover retry absorbs transient daemon flaps after start.
+    recover = manager_step(
+        runtime_origin,
+        contract,
+        spec,
+        "recover",
+        evidence_dir / "bootstrap" / f"manager-recover-{spec.stack}",
+        start_timeout,
+    )
+    steps.append(
+        {
+            "stack": spec.stack,
+            "action": "recover-after-start",
+            "result": recover,
+        }
+    )
+    if recover["returncode"] == 0:
+        return True
+    return _bootstrap_persist_and_fail(
+        state=state,
+        state_path=state_path,
+        evidence_dir=evidence_dir,
+        failure=f"bootstrap-start-{spec.stack}",
+        payload={"passed": False, "steps": steps},
+    )
+
+
+def _bootstrap_probe_baselines(
+    *,
+    state: dict[str, Any],
+    evidence_dir: Path,
+    runtime_origin: Path,
+    contract: Path,
+    bundle: Sequence[Any],
+    steps: list[dict[str, Any]],
+    origins: list[str],
+) -> dict[str, str]:
+    """Probe each stack and write clean baselines; append origin findings on fail."""
     baselines: dict[str, str] = {}
     for spec in bundle:
         probe = evidence_dir / "bootstrap" / f"probe-{spec.stack}.json"
@@ -189,6 +206,58 @@ def bootstrap_campaign(
         clean_baseline(probe, baseline)
         baselines[spec.stack] = baseline.relative_to(evidence_dir).as_posix()
         record_probe(state, probe)
+    return baselines
+
+
+def bootstrap_campaign(
+    state: dict[str, Any],
+    state_path: Path,
+    evidence_dir: Path,
+    runtime_origin: Path,
+    contract: Path,
+    bundle: Sequence[Any],
+) -> bool:
+    if state.get("bootstrap_complete"):
+        return True
+    steps: list[dict[str, Any]] = []
+    volume_precondition = required_volume_precondition(runtime_origin, bundle)
+    if not volume_precondition["passed"]:
+        return _bootstrap_persist_and_fail(
+            state=state,
+            state_path=state_path,
+            evidence_dir=evidence_dir,
+            failure="bootstrap-required-volumes",
+            payload={
+                "schema_version": "bioetl-docker-campaign-bootstrap-v1",
+                "passed": False,
+                "runtime_origin": str(runtime_origin),
+                "volume_precondition": volume_precondition,
+                "steps": steps,
+            },
+        )
+    state["initial_volume_ids"] = bundle_volume_ids(runtime_origin, bundle)
+    for spec in bundle:
+        if not _bootstrap_start_one_stack(
+            state=state,
+            state_path=state_path,
+            evidence_dir=evidence_dir,
+            runtime_origin=runtime_origin,
+            contract=contract,
+            steps=steps,
+            spec=spec,
+        ):
+            return False
+    rows = live_compose_rows(runtime_origin)
+    origins = compose_origin_findings(rows, bundle, runtime_origin)
+    baselines = _bootstrap_probe_baselines(
+        state=state,
+        evidence_dir=evidence_dir,
+        runtime_origin=runtime_origin,
+        contract=contract,
+        bundle=bundle,
+        steps=steps,
+        origins=origins,
+    )
     capacity = observe_docker_vm_reserve(state, runtime_origin)
     passed = (
         not origins and len(baselines) == len(bundle) and capacity["returncode"] == 0
@@ -278,22 +347,18 @@ def run_cycle(
         _release_cycle_lock(cycle_dir, lock_fd)
 
 
-def _run_cycle_body(
+def _cycle_start_and_baseline(
     *,
     state: dict[str, Any],
-    state_path: Path,
-    evidence_dir: Path,
     runtime_origin: Path,
     contract: Path,
     bundle: Sequence[Any],
-    number: int,
     cycle_dir: Path,
-) -> bool:
-    before = bundle_volume_ids(runtime_origin, bundle)
-    steps: list[dict[str, Any]] = []
-    baselines: dict[str, Path] = {}
-    initial_ids: dict[str, dict[str, str]] = {}
-    failure: str | None = None
+    steps: list[dict[str, Any]],
+    baselines: dict[str, Path],
+    initial_ids: dict[str, dict[str, str]],
+) -> str | None:
+    """Start stacks and capture baselines; return failure code or None."""
     for spec in bundle:
         result = manager_step(
             runtime_origin,
@@ -305,65 +370,87 @@ def _run_cycle_body(
         )
         steps.append({"stack": spec.stack, "action": "start", "result": result})
         if result["returncode"] != 0:
-            failure = f"start-{spec.stack}"
-            break
+            return f"start-{spec.stack}"
         probe = cycle_dir / f"probe-baseline-{spec.stack}.json"
         sample = probe_command(runtime_origin, spec, probe, 75.0, contract=contract)
         steps.append({"stack": spec.stack, "action": "baseline", "result": sample})
         if sample["returncode"] != 0:
-            failure = f"baseline-{spec.stack}"
-            break
+            return f"baseline-{spec.stack}"
         baseline = cycle_dir / f"baseline-{spec.stack}.json"
         try:
             initial_ids[spec.stack] = clean_baseline(probe, baseline)
         except ValueError:
-            failure = f"restart-baseline-{spec.stack}"
-            break
+            return f"restart-baseline-{spec.stack}"
         baselines[spec.stack] = baseline
         record_probe(state, probe)
-    if failure is None:
-        for spec in bundle:
-            result = manager_step(
-                runtime_origin,
-                contract,
-                spec,
-                "start",
-                cycle_dir / f"manager-idempotent-{spec.stack}",
-                180.0,
+    return None
+
+
+def _cycle_idempotent_start(
+    *,
+    state: dict[str, Any],
+    runtime_origin: Path,
+    contract: Path,
+    bundle: Sequence[Any],
+    cycle_dir: Path,
+    steps: list[dict[str, Any]],
+    baselines: dict[str, Path],
+    initial_ids: dict[str, dict[str, str]],
+) -> str | None:
+    """Re-start stacks idempotently and verify container identity."""
+    for spec in bundle:
+        result = manager_step(
+            runtime_origin,
+            contract,
+            spec,
+            "start",
+            cycle_dir / f"manager-idempotent-{spec.stack}",
+            180.0,
+        )
+        probe = cycle_dir / f"probe-idempotent-{spec.stack}.json"
+        sample = probe_command(
+            runtime_origin,
+            spec,
+            probe,
+            75.0,
+            contract=contract,
+            baseline=baselines[spec.stack],
+        )
+        steps.extend(
+            (
+                {
+                    "stack": spec.stack,
+                    "action": "idempotent-start",
+                    "result": result,
+                },
+                {
+                    "stack": spec.stack,
+                    "action": "idempotent-probe",
+                    "result": sample,
+                },
             )
-            probe = cycle_dir / f"probe-idempotent-{spec.stack}.json"
-            sample = probe_command(
-                runtime_origin,
-                spec,
-                probe,
-                75.0,
-                contract=contract,
-                baseline=baselines[spec.stack],
+        )
+        if result["returncode"] != 0 or sample["returncode"] != 0:
+            return f"idempotent-{spec.stack}"
+        record_probe(state, probe)
+        if probe_services(probe) != initial_ids[spec.stack]:
+            state["image_or_project_drift"] = (
+                int(state.get("image_or_project_drift", 0)) + 1
             )
-            steps.extend(
-                (
-                    {
-                        "stack": spec.stack,
-                        "action": "idempotent-start",
-                        "result": result,
-                    },
-                    {
-                        "stack": spec.stack,
-                        "action": "idempotent-probe",
-                        "result": sample,
-                    },
-                )
-            )
-            if result["returncode"] != 0 or sample["returncode"] != 0:
-                failure = f"idempotent-{spec.stack}"
-                break
-            record_probe(state, probe)
-            if probe_services(probe) != initial_ids[spec.stack]:
-                state["image_or_project_drift"] = (
-                    int(state.get("image_or_project_drift", 0)) + 1
-                )
-                failure = f"container-identity-{spec.stack}"
-                break
+            return f"container-identity-{spec.stack}"
+    return None
+
+
+def _cycle_stop_stacks(
+    *,
+    runtime_origin: Path,
+    contract: Path,
+    bundle: Sequence[Any],
+    cycle_dir: Path,
+    steps: list[dict[str, Any]],
+    failure: str | None,
+) -> str | None:
+    """Stop stacks twice (idempotent stop); preserve first failure if any."""
     for spec in reversed(bundle):
         for ordinal in (1, 2):
             result = manager_step(
@@ -379,8 +466,23 @@ def _run_cycle_body(
             )
             if result["returncode"] != 0 and failure is None:
                 failure = f"stop-{spec.stack}-{ordinal}"
-    after = bundle_volume_ids(runtime_origin, bundle)
-    capacity = observe_docker_vm_reserve(state, runtime_origin)
+    return failure
+
+
+def _finalize_cycle_result(
+    *,
+    state: dict[str, Any],
+    state_path: Path,
+    evidence_dir: Path,
+    cycle_dir: Path,
+    number: int,
+    failure: str | None,
+    before: dict[str, Any],
+    after: dict[str, Any],
+    capacity: dict[str, Any],
+    steps: list[dict[str, Any]],
+) -> bool:
+    """Write cycle.json, update state counters, return pass/fail."""
     if before != after:
         state["volume_loss"] = True
         failure = failure or "volume-identity"
@@ -409,6 +511,66 @@ def _run_cycle_body(
         state["last_failure"] = f"cycle-{number:03d}:{failure}"
     index_and_save(state, state_path, evidence_dir)
     return passed
+
+
+def _run_cycle_body(
+    *,
+    state: dict[str, Any],
+    state_path: Path,
+    evidence_dir: Path,
+    runtime_origin: Path,
+    contract: Path,
+    bundle: Sequence[Any],
+    number: int,
+    cycle_dir: Path,
+) -> bool:
+    before = bundle_volume_ids(runtime_origin, bundle)
+    steps: list[dict[str, Any]] = []
+    baselines: dict[str, Path] = {}
+    initial_ids: dict[str, dict[str, str]] = {}
+    failure = _cycle_start_and_baseline(
+        state=state,
+        runtime_origin=runtime_origin,
+        contract=contract,
+        bundle=bundle,
+        cycle_dir=cycle_dir,
+        steps=steps,
+        baselines=baselines,
+        initial_ids=initial_ids,
+    )
+    if failure is None:
+        failure = _cycle_idempotent_start(
+            state=state,
+            runtime_origin=runtime_origin,
+            contract=contract,
+            bundle=bundle,
+            cycle_dir=cycle_dir,
+            steps=steps,
+            baselines=baselines,
+            initial_ids=initial_ids,
+        )
+    failure = _cycle_stop_stacks(
+        runtime_origin=runtime_origin,
+        contract=contract,
+        bundle=bundle,
+        cycle_dir=cycle_dir,
+        steps=steps,
+        failure=failure,
+    )
+    after = bundle_volume_ids(runtime_origin, bundle)
+    capacity = observe_docker_vm_reserve(state, runtime_origin)
+    return _finalize_cycle_result(
+        state=state,
+        state_path=state_path,
+        evidence_dir=evidence_dir,
+        cycle_dir=cycle_dir,
+        number=number,
+        failure=failure,
+        before=before,
+        after=after,
+        capacity=capacity,
+        steps=steps,
+    )
 
 
 def run_cycles(

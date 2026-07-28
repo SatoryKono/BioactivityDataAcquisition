@@ -46,7 +46,6 @@ if TYPE_CHECKING:
     )
     from bioetl.infrastructure.config.settings_api import Settings
 
-
 @dataclass(slots=True)
 class CompositeSupportServices:
     """Bundle of support services required by CompositePipelineRunner."""
@@ -61,7 +60,6 @@ class CompositeSupportServices:
     quarantine_port: QuarantinePort | None
     manifest_id: str | None = None
     run_ledger_service: RunLedgerService | None = None
-
 
 class CompositeSupportServicesFactory:
     """Build support services used by composite runtime orchestration."""
@@ -163,6 +161,5 @@ class CompositeSupportServicesFactory:
             manifest_id=runtime_context.control_plane_bundle.manifest_id,
             run_ledger_service=runtime_context.control_plane_bundle.run_ledger_service,
         )
-
 
 __all__ = ["CompositeSupportServices", "CompositeSupportServicesFactory"]

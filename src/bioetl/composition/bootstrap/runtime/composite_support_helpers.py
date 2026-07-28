@@ -30,13 +30,11 @@ if TYPE_CHECKING:
 
 FIELD_GROUP_CONFIG_DIR = Path("configs/composites/field_groups")
 
-
 def _composite_basics_uuid_factory() -> str:
     """Factory function for composite basics UUID generation."""
     from bioetl.composition.occurrence_identity import create_runtime_occurrence_uuid
 
     return str(create_runtime_occurrence_uuid("composite_basics"))
-
 
 def bootstrap_runtime_basics_facade(
     *,
@@ -80,7 +78,6 @@ def bootstrap_runtime_basics_facade(
         lock_factory=MemoryLock,
         uuid_factory=_composite_basics_uuid_factory,
     )
-
 
 def build_runner_factories_facade(
     *,
@@ -126,7 +123,6 @@ def build_runner_factories_facade(
         resolve_bronze_opts_fn=resolve_bronze_opts,
     )
 
-
 def build_support_services_facade(
     *,
     config: CompositeConfig,
@@ -154,7 +150,6 @@ def build_support_services_facade(
         load_field_group_registry_fn=load_field_group_registry_fn,
         create_dq_report_service_fn=_create_dq_report_service,
     )
-
 
 def _load_field_group_registry(
     composite_name: str,
@@ -204,7 +199,6 @@ def _load_field_group_registry(
             config_path=str(config_path),
         )
         return None
-
 
 def _create_dq_report_service(
     logger: LoggerPort,

@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import Any, cast, TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 import pyarrow as pa
 

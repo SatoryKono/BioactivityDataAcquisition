@@ -15,7 +15,6 @@ from bioetl.composition.bootstrap.runtime.composite_runtime_management_bundle im
     RuntimeManagementServicesBundle,
 )
 
-
 __all__ = [
     "CompositeControlPlaneBundle",
     "ExecutionSupportServicesBundle",

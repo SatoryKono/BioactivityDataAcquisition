@@ -13,17 +13,13 @@ from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort, TracingPort
 from bioetl.domain.ports.noop import NoOpAudit, NoOpMetrics, NoOpTracing
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
-
 class _AuditRequiredFn(Protocol):
     def __call__(self, *, audit: AuditPort | None, audit_required: bool) -> bool: ...
-
 
 class _ControlPlaneSettingsFn(Protocol):
     def __call__(self, *, control_plane: object | None) -> tuple[str, bool, bool]: ...
 
-
 _FORENSIC_GRADE_PROFILE = "forensic_grade"
-
 
 def requires_forensic_grade_observability_evidence(
     *,
@@ -31,7 +27,6 @@ def requires_forensic_grade_observability_evidence(
 ) -> bool:
     """Return whether runtime preflight must fail closed for observability evidence."""
     return required_persistence_profile == _FORENSIC_GRADE_PROFILE
-
 
 def _raise_if_noop_in_prod(
     *,
@@ -56,7 +51,6 @@ def _raise_if_noop_in_prod(
     )
     if not allow_noop_in_prod:
         raise ObservabilityContractError(error_message)
-
 
 def validate_prod_noop_components(
     *,
@@ -135,7 +129,6 @@ def validate_prod_noop_components(
         ),
     )
 
-
 def validate_forensic_grade_observability_evidence(
     *,
     tracer: TracingPort,
@@ -171,7 +164,6 @@ def validate_forensic_grade_observability_evidence(
         "forensic_grade runs require non-noop observability evidence; missing: "
         f"{joined}"
     )
-
 
 def validate_control_plane_readiness(
     *,

@@ -277,6 +277,45 @@ def _source_tree_stabilization_profile(
     )
 
 
+def _update_best_snapshot(
+    *,
+    best_snapshots: list[_SourceModuleSnapshot] | None,
+    best_paths: tuple[str, ...],
+    best_digest: str | None,
+    snapshots: list[_SourceModuleSnapshot],
+    repo_paths: tuple[str, ...],
+    digest: str,
+) -> tuple[list[_SourceModuleSnapshot], tuple[str, ...], str]:
+    """Keep the largest snapshot seen so far during stabilization."""
+    if best_snapshots is None or len(repo_paths) > len(best_paths):
+        return snapshots, repo_paths, digest
+    assert best_digest is not None
+    return best_snapshots, best_paths, best_digest
+
+
+def _peak_stable_ready(
+    *,
+    digest: str,
+    repo_paths: tuple[str, ...],
+    previous_digest: str | None,
+    previous_paths: tuple[str, ...] | None,
+    peak_module_count: int,
+    stable_at_peak_reads: int,
+) -> tuple[int, int, bool]:
+    """Return updated peak count, stable-read count, and whether peak is stable."""
+    if len(repo_paths) > peak_module_count:
+        return len(repo_paths), 0, False
+    if (
+        previous_digest is not None
+        and digest == previous_digest
+        and repo_paths == previous_paths
+        and len(repo_paths) == peak_module_count
+    ):
+        stable = stable_at_peak_reads + 1
+        return peak_module_count, stable, stable >= 1
+    return peak_module_count, 0, False
+
+
 def _read_stable_source_module_snapshots(
     repo_root: Path,
     *,
@@ -302,24 +341,24 @@ def _read_stable_source_module_snapshots(
             repo_root,
         )
         repo_paths = tuple(snapshot.repo_path for snapshot in snapshots)
-        if best_snapshots is None or len(repo_paths) > len(best_paths):
-            best_digest = digest
-            best_paths = repo_paths
-            best_snapshots = snapshots
-        if len(repo_paths) > peak_module_count:
-            peak_module_count = len(repo_paths)
-            stable_at_peak_reads = 0
-        elif (
-            previous_digest is not None
-            and digest == previous_digest
-            and repo_paths == previous_paths
-            and len(repo_paths) == peak_module_count
-        ):
-            stable_at_peak_reads += 1
-            if stable_at_peak_reads >= 1:
-                return snapshots, digest
-        else:
-            stable_at_peak_reads = 0
+        best_snapshots, best_paths, best_digest = _update_best_snapshot(
+            best_snapshots=best_snapshots,
+            best_paths=best_paths,
+            best_digest=best_digest,
+            snapshots=snapshots,
+            repo_paths=repo_paths,
+            digest=digest,
+        )
+        peak_module_count, stable_at_peak_reads, ready = _peak_stable_ready(
+            digest=digest,
+            repo_paths=repo_paths,
+            previous_digest=previous_digest,
+            previous_paths=previous_paths,
+            peak_module_count=peak_module_count,
+            stable_at_peak_reads=stable_at_peak_reads,
+        )
+        if ready:
+            return snapshots, digest
         previous_digest = digest
         previous_paths = repo_paths
         if attempt + 1 < attempts:
@@ -708,6 +747,78 @@ def _build_hotspot_family_coverage(
     return family_coverage
 
 
+def _empty_declaration_only_coverage_entry() -> dict[str, int]:
+    return {
+        "executable_lines": 0,
+        "covered_lines": 0,
+        "missing_lines": 0,
+    }
+
+
+def _coverage_entry_for_snapshot(
+    source_snapshot: _SourceModuleSnapshot,
+    *,
+    coverage_by_path: dict[str, dict[str, int]],
+    coverage_xml_exists: bool,
+) -> dict[str, int] | None:
+    """Resolve coverage counts for one source module, including declaration-only."""
+    coverage_entry = coverage_by_path.get(source_snapshot.repo_path)
+    if (
+        coverage_entry is None
+        and coverage_xml_exists
+        and source_snapshot.declaration_only
+    ):
+        coverage_entry = _empty_declaration_only_coverage_entry()
+    return _declaration_only_coverage_entry(source_snapshot, coverage_entry)
+
+
+def _module_coverage_row(
+    source_snapshot: _SourceModuleSnapshot,
+    *,
+    repo_root: Path,
+    coverage_xml_exists: bool,
+    coverage_entry: dict[str, int] | None,
+) -> dict[str, Any]:
+    """Build one modules[] row for the inventory payload."""
+    return {
+        "module": _module_name(source_snapshot.path, repo_root),
+        "path": source_snapshot.repo_path,
+        "source_lines": source_snapshot.source_lines,
+        "coverage_status": _coverage_status(
+            coverage_xml_exists=coverage_xml_exists,
+            coverage_entry=coverage_entry,
+        ),
+        "coverage_percent": _coverage_percent(coverage_entry),
+        "executable_lines": (
+            coverage_entry["executable_lines"] if coverage_entry else None
+        ),
+        "covered_lines": (
+            coverage_entry["covered_lines"] if coverage_entry else None
+        ),
+        "missing_lines": (
+            coverage_entry["missing_lines"] if coverage_entry else None
+        ),
+    }
+
+
+def _modules_with_status(
+    rows: list[dict[str, Any]],
+    *,
+    status: str,
+    reason: str,
+) -> list[dict[str, str]]:
+    """Project module/path rows that match a coverage status."""
+    return [
+        {
+            "module": str(row["module"]),
+            "path": str(row["path"]),
+            "reason": reason,
+        }
+        for row in rows
+        if str(row["coverage_status"]) == status
+    ]
+
+
 def build_module_coverage_inventory(
     *,
     repo_root: Path = PROJECT_ROOT,
@@ -725,65 +836,30 @@ def build_module_coverage_inventory(
     rows: list[dict[str, Any]] = []
 
     for source_snapshot in source_snapshots:
-        coverage_entry = coverage_by_path.get(source_snapshot.repo_path)
-        if (
-            coverage_entry is None
-            and coverage_xml_exists
-            and source_snapshot.declaration_only
-        ):
-            coverage_entry = {
-                "executable_lines": 0,
-                "covered_lines": 0,
-                "missing_lines": 0,
-            }
-        coverage_entry = _declaration_only_coverage_entry(
+        coverage_entry = _coverage_entry_for_snapshot(
             source_snapshot,
-            coverage_entry,
-        )
-        status = _coverage_status(
+            coverage_by_path=coverage_by_path,
             coverage_xml_exists=coverage_xml_exists,
-            coverage_entry=coverage_entry,
         )
         rows.append(
-            {
-                "module": _module_name(source_snapshot.path, repo_root),
-                "path": source_snapshot.repo_path,
-                "source_lines": source_snapshot.source_lines,
-                "coverage_status": status,
-                "coverage_percent": _coverage_percent(coverage_entry),
-                "executable_lines": (
-                    coverage_entry["executable_lines"] if coverage_entry else None
-                ),
-                "covered_lines": (
-                    coverage_entry["covered_lines"] if coverage_entry else None
-                ),
-                "missing_lines": (
-                    coverage_entry["missing_lines"] if coverage_entry else None
-                ),
-            }
+            _module_coverage_row(
+                source_snapshot,
+                repo_root=repo_root,
+                coverage_xml_exists=coverage_xml_exists,
+                coverage_entry=coverage_entry,
+            )
         )
 
-    status_counts = _coverage_status_counts(rows)
-
-    hotspot_family_coverage = _build_hotspot_family_coverage(rows, repo_root=repo_root)
-    unmeasured_modules = [
-        {
-            "module": str(row["module"]),
-            "path": str(row["path"]),
-            "reason": "coverage_xml_has_no_class_entry",
-        }
-        for row in rows
-        if str(row["coverage_status"]) == "unmeasured"
-    ]
-    uncovered_modules = [
-        {
-            "module": str(row["module"]),
-            "path": str(row["path"]),
-            "reason": "coverage_xml_reports_zero_executed_lines",
-        }
-        for row in rows
-        if str(row["coverage_status"]) == "uncovered"
-    ]
+    unmeasured_modules = _modules_with_status(
+        rows,
+        status="unmeasured",
+        reason="coverage_xml_has_no_class_entry",
+    )
+    uncovered_modules = _modules_with_status(
+        rows,
+        status="uncovered",
+        reason="coverage_xml_reports_zero_executed_lines",
+    )
 
     return {
         "schema_version": 1,
@@ -799,12 +875,15 @@ def build_module_coverage_inventory(
         "summary": {
             "source_module_count": len(rows),
             "coverage_xml_present": coverage_xml_exists,
-            "status_counts": status_counts,
+            "status_counts": _coverage_status_counts(rows),
             "unmeasured_module_count": len(unmeasured_modules),
             "unmeasured_modules": unmeasured_modules,
             "uncovered_module_count": len(uncovered_modules),
             "uncovered_modules": uncovered_modules,
-            "hotspot_family_coverage": hotspot_family_coverage,
+            "hotspot_family_coverage": _build_hotspot_family_coverage(
+                rows,
+                repo_root=repo_root,
+            ),
         },
         "modules": rows,
         "rows": rows,
@@ -911,40 +990,59 @@ class _ModuleCoverageViolation:
 
 
 
-def _coverage_gate_modes(gates: dict[str, Any]) -> tuple[float, str, str, set[str]]:
-    """Parse gate config into min_delta, tier modes, and ranked target paths."""
+def _gate_min_delta(gates: dict[str, Any], *, default: float = 0.01) -> float:
+    """Parse regression.min_delta_points from gate config."""
     regression_cfg = gates.get("regression", {})
-    min_delta = 0.01
-    if isinstance(regression_cfg, dict):
-        raw_delta = regression_cfg.get("min_delta_points", min_delta)
-        if isinstance(raw_delta, int | float):
-            min_delta = float(raw_delta)
+    if not isinstance(regression_cfg, dict):
+        return default
+    raw_delta = regression_cfg.get("min_delta_points", default)
+    if isinstance(raw_delta, int | float):
+        return float(raw_delta)
+    return default
 
-    enforcement_cfg = gates.get("enforcement", {})
+
+def _gate_enforcement_modes(gates: dict[str, Any]) -> tuple[str, str]:
+    """Parse tier and ranked-target tier violation modes."""
     tier_mode = "warn"
     ranked_target_tier_mode = "warn"
-    if isinstance(enforcement_cfg, dict):
-        raw_tier_mode = enforcement_cfg.get("tier_violation_mode", tier_mode)
-        if isinstance(raw_tier_mode, str):
-            tier_mode = raw_tier_mode
-        raw_ranked_target_tier_mode = enforcement_cfg.get(
-            "ranked_target_tier_violation_mode",
-            ranked_target_tier_mode,
-        )
-        if isinstance(raw_ranked_target_tier_mode, str):
-            ranked_target_tier_mode = raw_ranked_target_tier_mode
+    enforcement_cfg = gates.get("enforcement", {})
+    if not isinstance(enforcement_cfg, dict):
+        return tier_mode, ranked_target_tier_mode
+    raw_tier_mode = enforcement_cfg.get("tier_violation_mode", tier_mode)
+    if isinstance(raw_tier_mode, str):
+        tier_mode = raw_tier_mode
+    raw_ranked_target_tier_mode = enforcement_cfg.get(
+        "ranked_target_tier_violation_mode",
+        ranked_target_tier_mode,
+    )
+    if isinstance(raw_ranked_target_tier_mode, str):
+        ranked_target_tier_mode = raw_ranked_target_tier_mode
+    return tier_mode, ranked_target_tier_mode
 
+
+def _gate_ranked_target_paths(gates: dict[str, Any]) -> set[str]:
+    """Collect ranked coverage-tail target paths from gate config."""
     ranked_target_paths: set[str] = set()
     coverage_tail_cfg = gates.get("coverage_tail", {})
-    if isinstance(coverage_tail_cfg, dict):
-        ranked_targets = coverage_tail_cfg.get("ranked_targets", [])
-        if isinstance(ranked_targets, list):
-            for row in ranked_targets:
-                if not isinstance(row, dict):
-                    continue
-                path = row.get("path")
-                if isinstance(path, str) and path:
-                    ranked_target_paths.add(path)
+    if not isinstance(coverage_tail_cfg, dict):
+        return ranked_target_paths
+    ranked_targets = coverage_tail_cfg.get("ranked_targets", [])
+    if not isinstance(ranked_targets, list):
+        return ranked_target_paths
+    for row in ranked_targets:
+        if not isinstance(row, dict):
+            continue
+        path = row.get("path")
+        if isinstance(path, str) and path:
+            ranked_target_paths.add(path)
+    return ranked_target_paths
+
+
+def _coverage_gate_modes(gates: dict[str, Any]) -> tuple[float, str, str, set[str]]:
+    """Parse gate config into min_delta, tier modes, and ranked target paths."""
+    min_delta = _gate_min_delta(gates)
+    tier_mode, ranked_target_tier_mode = _gate_enforcement_modes(gates)
+    ranked_target_paths = _gate_ranked_target_paths(gates)
     return min_delta, tier_mode, ranked_target_tier_mode, ranked_target_paths
 
 
@@ -1111,6 +1209,66 @@ def _source_tree_only_row(
     }
 
 
+def _coverage_entry_from_existing_row(
+    row: dict[str, Any],
+) -> dict[str, int] | None:
+    """Rebuild a coverage entry dict from persisted inventory row fields."""
+    if not isinstance(row.get("executable_lines"), int) or not isinstance(
+        row.get("covered_lines"), int
+    ):
+        return None
+    return {
+        "executable_lines": int(row["executable_lines"]),
+        "covered_lines": int(row["covered_lines"]),
+        "missing_lines": int(row.get("missing_lines") or 0),
+    }
+
+
+def _apply_coverage_entry_to_row(
+    row: dict[str, Any],
+    *,
+    coverage_entry: dict[str, int],
+    coverage_xml_present: bool,
+) -> None:
+    """Mutate a refreshed row with status/percent/line counts from coverage_entry."""
+    row["coverage_status"] = _coverage_status(
+        coverage_xml_exists=coverage_xml_present,
+        coverage_entry=coverage_entry,
+    )
+    row["coverage_percent"] = _coverage_percent(coverage_entry)
+    row["executable_lines"] = coverage_entry["executable_lines"]
+    row["covered_lines"] = coverage_entry["covered_lines"]
+    row["missing_lines"] = coverage_entry["missing_lines"]
+
+
+def _refresh_one_inventory_row(
+    source_snapshot: _SourceModuleSnapshot,
+    *,
+    existing: dict[str, Any] | None,
+    repo_root: Path,
+    coverage_xml_present: bool,
+) -> dict[str, Any]:
+    """Refresh one inventory row from a live source-tree snapshot."""
+    if existing is None:
+        row = _source_tree_only_row(source_snapshot, repo_root)
+    else:
+        row = dict(existing)
+        coverage_entry = _declaration_only_coverage_entry(
+            source_snapshot,
+            _coverage_entry_from_existing_row(row),
+        )
+        if coverage_entry is not None:
+            _apply_coverage_entry_to_row(
+                row,
+                coverage_entry=coverage_entry,
+                coverage_xml_present=coverage_xml_present,
+            )
+    row["module"] = _module_name(source_snapshot.path, repo_root)
+    row["path"] = source_snapshot.repo_path
+    row["source_lines"] = source_snapshot.source_lines
+    return row
+
+
 def _refresh_existing_inventory_source_tree(
     payload: dict[str, Any],
     *,
@@ -1125,62 +1283,30 @@ def _refresh_existing_inventory_source_tree(
         for row in rows
         if isinstance(row, dict) and isinstance(row.get("path"), str)
     }
+    coverage_xml_present = bool(
+        payload.get("summary", {}).get("coverage_xml_present", True)
+    )
 
-    refreshed_rows: list[dict[str, Any]] = []
-    for source_snapshot in source_snapshots:
-        existing = rows_by_path.get(source_snapshot.repo_path)
-        if existing is not None:
-            row = dict(existing)
-            coverage_entry = None
-            if isinstance(row.get("executable_lines"), int) and isinstance(
-                row.get("covered_lines"), int
-            ):
-                coverage_entry = {
-                    "executable_lines": int(row["executable_lines"]),
-                    "covered_lines": int(row["covered_lines"]),
-                    "missing_lines": int(row.get("missing_lines") or 0),
-                }
-            coverage_entry = _declaration_only_coverage_entry(
-                source_snapshot,
-                coverage_entry,
-            )
-            if coverage_entry is not None:
-                row["coverage_status"] = _coverage_status(
-                    coverage_xml_exists=bool(
-                        payload.get("summary", {}).get("coverage_xml_present", True)
-                    ),
-                    coverage_entry=coverage_entry,
-                )
-                row["coverage_percent"] = _coverage_percent(coverage_entry)
-                row["executable_lines"] = coverage_entry["executable_lines"]
-                row["covered_lines"] = coverage_entry["covered_lines"]
-                row["missing_lines"] = coverage_entry["missing_lines"]
-        else:
-            row = _source_tree_only_row(source_snapshot, repo_root)
-        row["module"] = _module_name(source_snapshot.path, repo_root)
-        row["path"] = source_snapshot.repo_path
-        row["source_lines"] = source_snapshot.source_lines
-        refreshed_rows.append(row)
+    refreshed_rows = [
+        _refresh_one_inventory_row(
+            source_snapshot,
+            existing=rows_by_path.get(source_snapshot.repo_path),
+            repo_root=repo_root,
+            coverage_xml_present=coverage_xml_present,
+        )
+        for source_snapshot in source_snapshots
+    ]
 
-    status_counts = _coverage_status_counts(refreshed_rows)
-    unmeasured_modules = [
-        {
-            "module": str(row["module"]),
-            "path": str(row["path"]),
-            "reason": "coverage_xml_has_no_class_entry",
-        }
-        for row in refreshed_rows
-        if str(row["coverage_status"]) == "unmeasured"
-    ]
-    uncovered_modules = [
-        {
-            "module": str(row["module"]),
-            "path": str(row["path"]),
-            "reason": "coverage_xml_reports_zero_executed_lines",
-        }
-        for row in refreshed_rows
-        if str(row["coverage_status"]) == "uncovered"
-    ]
+    unmeasured_modules = _modules_with_status(
+        refreshed_rows,
+        status="unmeasured",
+        reason="coverage_xml_has_no_class_entry",
+    )
+    uncovered_modules = _modules_with_status(
+        refreshed_rows,
+        status="uncovered",
+        reason="coverage_xml_reports_zero_executed_lines",
+    )
 
     refreshed = dict(payload)
     summary = dict(refreshed.get("summary", {}))
@@ -1188,7 +1314,7 @@ def _refresh_existing_inventory_source_tree(
     summary.update(
         {
             "source_module_count": len(refreshed_rows),
-            "status_counts": status_counts,
+            "status_counts": _coverage_status_counts(refreshed_rows),
             "unmeasured_module_count": len(unmeasured_modules),
             "unmeasured_modules": unmeasured_modules,
             "uncovered_module_count": len(uncovered_modules),

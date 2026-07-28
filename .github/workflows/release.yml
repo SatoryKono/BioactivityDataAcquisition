@@ -91,16 +91,26 @@ jobs:
         run: |
           set -euo pipefail
           python -m pip install --only-binary=:all: --upgrade "pip==25.0.1"
-          # Local artifact only: no index resolution (Sonar githubactions:S8544).
+          # Local artifact only: pinned name==version from wheel filename, no PyPI.
           shopt -s nullglob
           wheels=(dist/*.whl)
-          if [[ ${#wheels[@]} -eq 0 ]]; then
-            echo "No wheels found under dist/" >&2
+          if [[ ${#wheels[@]} -ne 1 ]]; then
+            echo "Expected exactly one wheel under dist/, found ${#wheels[@]}" >&2
+            ls -la dist/ >&2 || true
             exit 1
           fi
-          # Install the single built wheel by absolute path (no index / no unpinned range).
-          wheel_path="$(pwd)/${wheels[0]}"
-          python -m pip install --only-binary=:all: --no-deps --no-index "${wheel_path}"
+          wheel_base="$(basename "${wheels[0]}")"
+          # Wheel naming: {name}-{version}-*.whl (PEP 427) → pin name==version.
+          read -r pkg_name pkg_version <<EOF
+          $(python -c "import re,sys; m=re.match(r'^([A-Za-z0-9_]+)-([0-9][^/-]+(?:\\.[0-9a-zA-Z]+)*)-', sys.argv[1]);
+assert m, sys.argv[1]; print(m.group(1), m.group(2))" "${wheel_base}")
+          EOF
+          python -m pip install \
+            --only-binary=:all: \
+            --no-deps \
+            --no-index \
+            --find-links=dist \
+            "${pkg_name}==${pkg_version}"
 
       - name: Verify installation
         run: |

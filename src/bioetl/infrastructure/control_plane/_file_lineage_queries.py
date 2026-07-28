@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from time import perf_counter
-from typing import Any, cast, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.domain.lineage import LineageGraphFragment
 from bioetl.domain.types import RunID
@@ -20,8 +20,8 @@ if TYPE_CHECKING:
 class FileLineageQueriesMixin:
     """Query methods for ``FileLineageStore``."""
 
-    base_path: Path = cast(Any, None)  # host attr default (PD3)
-    metrics: MetricsPort | None = cast(Any, None)  # host attr default (PD3)
+    base_path: Path = cast(Any, None)  # Any: host attr default (PD3)
+    metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD3)
 
     if TYPE_CHECKING:
 

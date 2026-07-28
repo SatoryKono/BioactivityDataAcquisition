@@ -8,7 +8,7 @@ from __future__ import annotations
 import asyncio
 import json
 from http import HTTPStatus
-from typing import Any, TYPE_CHECKING, Protocol, cast
+from typing import TYPE_CHECKING, Any, Protocol, cast
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort

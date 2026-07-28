@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Lineage and metrics helpers for MergeService."""
 
@@ -7,6 +6,7 @@ from __future__ import annotations
 import json
 from collections.abc import Sequence
 from datetime import datetime
+from typing import Any, cast
 
 import polars as pl
 
@@ -19,8 +19,8 @@ from bioetl.domain.ports import LoggerPort
 class MergeMetricsRecorderMixin:
     """Mixin for lineage enrichment and post-merge metric calculations."""
 
-    _config: MergeConfig
-    _logger: LoggerPort
+    _config: MergeConfig = cast(Any, None)  # Any: host default (PD4)
+    _logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
 
     def _add_lineage(
         self,

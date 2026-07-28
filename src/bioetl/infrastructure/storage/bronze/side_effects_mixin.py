@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 # pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
@@ -37,14 +36,14 @@ if TYPE_CHECKING:
     )
 
     class _BronzeWriterSideEffectsHost:
-        _audit: AuditPort | None
-        _metadata_writer: MetadataWriterPort
-        _metadata_coordinator: MetadataCoordinatorPort | None
-        _lineage_store: LineageStorePort | None
-        _flat_structure: bool
-        _metrics: MetricsPort
-        base_path: Path
-        logger: LoggerPort
+        _audit: AuditPort | None = cast(Any, None)  # Any: host default (PD4)
+        _metadata_writer: MetadataWriterPort = cast(Any, None)  # Any: host default (PD4)
+        _metadata_coordinator: MetadataCoordinatorPort | None = cast(Any, None)  # Any: host default (PD4)
+        _lineage_store: LineageStorePort | None = cast(Any, None)  # Any: host default (PD4)
+        _flat_structure: bool = cast(Any, None)  # Any: host default (PD4)
+        _metrics: MetricsPort = cast(Any, None)  # Any: host default (PD4)
+        base_path: Path = cast(Any, None)  # Any: host default (PD4)
+        logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
 
         async def _calculate_checksum(self, path: Path) -> str: ...
 

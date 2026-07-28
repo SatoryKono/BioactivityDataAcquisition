@@ -27,7 +27,6 @@ __all__ = [
     "resolve_pipeline_input_snapshot_refs",
 ]
 
-
 def resolve_cached_bronze_input_snapshot_refs(
     *,
     cached_bronze: CachedBronzeContext | None,
@@ -50,7 +49,6 @@ def resolve_cached_bronze_input_snapshot_refs(
         bronze_date=_coerce_optional_str(bronze_date),
     )
 
-
 def collect_manifest_input_snapshot_refs(
     manifest: RunManifest,
 ) -> tuple[RunInputSnapshotRef, ...]:
@@ -60,7 +58,6 @@ def collect_manifest_input_snapshot_refs(
         for source_ref in manifest.source_refs
         for snapshot in source_ref.input_snapshots
     )
-
 
 def resolve_manifest_input_snapshot_refs(
     *,
@@ -77,7 +74,6 @@ def resolve_manifest_input_snapshot_refs(
     if manifest is None:
         return ()
     return collect_manifest_input_snapshot_refs(manifest)
-
 
 def resolve_pipeline_input_snapshot_refs(
     *,
@@ -106,7 +102,6 @@ def resolve_pipeline_input_snapshot_refs(
         return parent_manifest_refs
     return ()
 
-
 def _load_manifest(
     *,
     settings: Settings,
@@ -124,7 +119,6 @@ def _load_manifest(
         return store.get_by_run_id(RunID(UUID(run_id)))
     except ValueError:
         return None
-
 
 def _coerce_optional_str(value: object | None) -> str | None:
     if value is None:

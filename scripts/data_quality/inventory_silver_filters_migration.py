@@ -601,22 +601,30 @@ def _is_scannable_surface_file(path: Path) -> bool:
     return path.suffix in _SURFACE_FILE_SUFFIXES
 
 
+def _register_scannable_file(files: dict[str, Path], path: Path) -> None:
+    """Add path to the scannable-file map when it is an active surface file."""
+    if _is_scannable_surface_file(path):
+        files[path.as_posix()] = path
+
+
+def _collect_surface_files_under(root: Path, files: dict[str, Path]) -> None:
+    """Collect scannable files under a directory into the shared map."""
+    # Use specific glob patterns instead of rglob("*") for better performance
+    for suffix in _SURFACE_FILE_SUFFIXES:
+        for path in sorted(root.rglob(f"*{suffix}")):
+            _register_scannable_file(files, path)
+
+
 def _iter_surface_files(path_specs: tuple[str, ...]) -> list[Path]:
     """Expand relative file/dir scan specs into deterministic active files."""
     files: dict[str, Path] = {}
     for path_spec in path_specs:
         root = PROJECT_ROOT / path_spec
         if root.is_file():
-            if _is_scannable_surface_file(root):
-                files[root.as_posix()] = root
+            _register_scannable_file(files, root)
             continue
-        if not root.is_dir():
-            continue
-        # Use specific glob patterns instead of rglob("*") for better performance
-        for suffix in _SURFACE_FILE_SUFFIXES:
-            for path in sorted(root.rglob(f"*{suffix}")):
-                if _is_scannable_surface_file(path):
-                    files[path.as_posix()] = path
+        if root.is_dir():
+            _collect_surface_files_under(root, files)
     return [files[key] for key in sorted(files)]
 
 

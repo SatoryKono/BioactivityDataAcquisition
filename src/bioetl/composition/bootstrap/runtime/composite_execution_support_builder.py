@@ -24,7 +24,6 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import ClockPort, LoggerPort
     from bioetl.infrastructure.storage.delta_reader import DeltaReader
 
-
 def build_execution_support_services(
     *,
     config: CompositeConfig,
@@ -62,6 +61,5 @@ def build_execution_support_services(
             clock=clock,
         ),
     )
-
 
 __all__ = ["build_execution_support_services"]

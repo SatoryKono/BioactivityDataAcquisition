@@ -2368,33 +2368,61 @@ def _validate_scrape_raw(retained: list[dict[str, str]]) -> list[str]:
     return errors
 
 
-def _validate_render_raw(retained: list[dict[str, str]]) -> list[str]:
-    manifests, errors = _json_payloads_by_kind(retained, "render-manifest")
-    screenshots = [row for row in retained if row["kind"] == "screenshot"]
+def _collect_screenshot_hashes(
+    retained: list[dict[str, str]],
+    errors: list[str],
+) -> set[str]:
+    """Validate PNG magic and collect retained screenshot hashes."""
     screenshot_hashes: set[str] = set()
-    for screenshot in screenshots:
+    for screenshot in retained:
+        if screenshot["kind"] != "screenshot":
+            continue
         path = Path(screenshot["path"])
         if not path.read_bytes().startswith(b"\x89PNG\r\n\x1a\n"):
             errors.append("retained screenshot must be a PNG artifact")
         screenshot_hashes.add(screenshot["sha256"])
+    return screenshot_hashes
+
+
+def _validate_one_render_manifest(
+    payload: dict[str, Any],
+    *,
+    screenshot_hashes: set[str],
+    captures: set[tuple[str, int]],
+    stable_windows: set[str],
+    errors: list[str],
+) -> None:
+    """Validate one render-manifest payload and update capture/window sets."""
+    uid = str(payload.get("dashboard_uid") or "")
+    render_index = payload.get("render_index")
+    if not uid or type(render_index) is not int:
+        errors.append(
+            "render manifest requires dashboard_uid and integer render_index"
+        )
+        return
+    captures.add((uid, render_index))
+    stable_windows.add(str(payload.get("stable_window_id") or ""))
+    if payload.get("status") != "success":
+        errors.append("render manifest status must equal success")
+    if payload.get("screenshot_sha256") not in screenshot_hashes:
+        errors.append(
+            "render manifest screenshot hash must resolve to retained PNG"
+        )
+
+
+def _validate_render_raw(retained: list[dict[str, str]]) -> list[str]:
+    manifests, errors = _json_payloads_by_kind(retained, "render-manifest")
+    screenshot_hashes = _collect_screenshot_hashes(retained, errors)
     captures: set[tuple[str, int]] = set()
     stable_windows: set[str] = set()
     for payload in manifests:
-        uid = str(payload.get("dashboard_uid") or "")
-        render_index = payload.get("render_index")
-        if not uid or type(render_index) is not int:
-            errors.append(
-                "render manifest requires dashboard_uid and integer render_index"
-            )
-            continue
-        captures.add((uid, render_index))
-        stable_windows.add(str(payload.get("stable_window_id") or ""))
-        if payload.get("status") != "success":
-            errors.append("render manifest status must equal success")
-        if payload.get("screenshot_sha256") not in screenshot_hashes:
-            errors.append(
-                "render manifest screenshot hash must resolve to retained PNG"
-            )
+        _validate_one_render_manifest(
+            payload,
+            screenshot_hashes=screenshot_hashes,
+            captures=captures,
+            stable_windows=stable_windows,
+            errors=errors,
+        )
     dashboards = {uid for uid, _index in captures}
     if len(dashboards) < 8 or len(captures) < 16:
         errors.append("render evidence requires eight dashboards rendered twice")
@@ -2514,6 +2542,45 @@ def _validate_online_raw(
     return errors
 
 
+def _backend_http_profile_errors(http_rows: list[dict[str, Any]]) -> list[str]:
+    if len(http_rows) != 1:
+        return ["backend profile requires exactly one retained HTTP response"]
+    row = http_rows[0]
+    if (
+        row.get("state") != "populated"
+        or row.get("read_only_mount") is not True
+        or not str(row.get("data_root") or "").strip()
+        or int(row.get("record_count", 0)) < 1
+    ):
+        return [
+            "backend HTTP response must prove the exact populated read-only root"
+        ]
+    return []
+
+
+def _backend_loki_profile_errors(loki_rows: list[dict[str, Any]]) -> list[str]:
+    if len(loki_rows) != 1:
+        return ["backend profile requires exactly one retained Loki response"]
+    row = loki_rows[0]
+    if (
+        row.get("job") != "bioetl-audit"
+        or row.get("sentinel_match_count") != 1
+        or row.get("read_only_mount") is not True
+        or not str(row.get("log_root") or "").strip()
+    ):
+        return ["Loki response must prove one bounded bioetl-audit sentinel"]
+    return []
+
+
+def _backend_signature_errors(signatures: list[dict[str, Any]]) -> list[str]:
+    if len(signatures) != 1:
+        return ["backend profile requires one canonical before/after signature"]
+    row = signatures[0]
+    if row.get("before") != row.get("after") or row.get("unchanged") is not True:
+        return ["canonical data/log signatures must remain unchanged"]
+    return []
+
+
 def _validate_backend_profile_raw(retained: list[dict[str, str]]) -> list[str]:
     http_rows, errors = _json_payloads_by_kind(retained, "backend-http-response")
     loki_rows, loki_errors = _json_payloads_by_kind(retained, "loki-response")
@@ -2522,36 +2589,9 @@ def _validate_backend_profile_raw(retained: list[dict[str, str]]) -> list[str]:
     )
     errors.extend(loki_errors)
     errors.extend(signature_errors)
-    if len(http_rows) != 1:
-        errors.append("backend profile requires exactly one retained HTTP response")
-    else:
-        row = http_rows[0]
-        if (
-            row.get("state") != "populated"
-            or row.get("read_only_mount") is not True
-            or not str(row.get("data_root") or "").strip()
-            or int(row.get("record_count", 0)) < 1
-        ):
-            errors.append(
-                "backend HTTP response must prove the exact populated read-only root"
-            )
-    if len(loki_rows) != 1:
-        errors.append("backend profile requires exactly one retained Loki response")
-    else:
-        row = loki_rows[0]
-        if (
-            row.get("job") != "bioetl-audit"
-            or row.get("sentinel_match_count") != 1
-            or row.get("read_only_mount") is not True
-            or not str(row.get("log_root") or "").strip()
-        ):
-            errors.append("Loki response must prove one bounded bioetl-audit sentinel")
-    if len(signatures) != 1:
-        errors.append("backend profile requires one canonical before/after signature")
-    else:
-        row = signatures[0]
-        if row.get("before") != row.get("after") or row.get("unchanged") is not True:
-            errors.append("canonical data/log signatures must remain unchanged")
+    errors.extend(_backend_http_profile_errors(http_rows))
+    errors.extend(_backend_loki_profile_errors(loki_rows))
+    errors.extend(_backend_signature_errors(signatures))
     return errors
 
 

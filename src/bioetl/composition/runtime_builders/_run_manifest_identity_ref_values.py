@@ -23,7 +23,6 @@ __all__ = [
     "build_control_plane_identity_ref_values",
 ]
 
-
 def build_contract_identity_field_values(
     *,
     contract_ref: str | None,
@@ -47,7 +46,6 @@ def build_contract_identity_field_values(
         "normalization_profile_hash": normalization_profile_hash,
     }
 
-
 def build_contract_identity_field_values_from_mapping(
     values: Mapping[str, object],
 ) -> dict[str, str | None]:
@@ -68,7 +66,6 @@ def build_contract_identity_field_values_from_mapping(
             str | None, values.get("normalization_profile_hash")
         ),
     )
-
 
 def build_control_plane_identity_ref_values(
     *,

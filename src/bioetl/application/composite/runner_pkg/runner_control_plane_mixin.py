@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Any, cast, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.composite.runner_pkg.runner_control_plane_support import (
     CompositeRunnerControlPlaneHostProtocol,

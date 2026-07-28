@@ -836,6 +836,111 @@ def _write_merged_playwright_manifest(
     )
 
 
+def _dashboard_render_status_problem(dashboard: dict[str, Any], *, uid: str) -> str | None:
+    if dashboard.get("renderStatus") != "rendered":
+        return f"dashboard {uid} did not reach rendered status"
+    rendered_count = dashboard.get("renderedPanelCount", 0)
+    if not isinstance(rendered_count, int) or rendered_count <= 0:
+        return f"dashboard {uid} contains no rendered panel markers"
+    return None
+
+
+def _dashboard_screenshot_file_problem(
+    dashboard: dict[str, Any],
+    *,
+    uid: str,
+    config: RenderConfig,
+) -> tuple[str | None, str | None, Path | None, int | None]:
+    """Return (problem, file_name, path, size) for a dashboard screenshot file."""
+    file_name = dashboard.get("file") or dashboard.get("screenshot")
+    if not isinstance(file_name, str) or not file_name:
+        return f"dashboard {uid} does not identify its screenshot file", None, None, None
+    screenshot_path = config.output_dir / file_name
+    try:
+        screenshot_size = screenshot_path.stat().st_size
+    except OSError as exc:
+        return f"dashboard {uid} screenshot is unreadable: {exc}", None, None, None
+    return None, file_name, screenshot_path, screenshot_size
+
+
+def _dashboard_screenshot_geometry_problem(
+    *,
+    uid: str,
+    config: RenderConfig,
+    screenshot_path: Path,
+) -> tuple[str | None, tuple[int, int] | None]:
+    dimensions = _png_dimensions(screenshot_path)
+    if dimensions is None:
+        return f"dashboard {uid} screenshot is not a valid PNG", None
+    if dimensions[0] != config.width or dimensions[1] <= 0:
+        return (
+            f"dashboard {uid} screenshot dimensions drift: "
+            f"requested_width={config.width} actual={dimensions}"
+        ), None
+    return None, dimensions
+
+
+def _dashboard_screenshot_evidence_problem(
+    dashboard: dict[str, Any],
+    *,
+    uid: str,
+    file_name: str,
+    screenshot_size: int,
+    dimensions: tuple[int, int],
+) -> str | None:
+    evidence = dashboard.get("screenshotEvidence")
+    if not isinstance(evidence, dict):
+        return f"dashboard {uid} lacks screenshotEvidence"
+    if evidence.get("file") != file_name:
+        return f"dashboard {uid} screenshot filename evidence drift"
+    if evidence.get("bytes") != screenshot_size:
+        return f"dashboard {uid} screenshot byte-size evidence drift"
+    if evidence.get("width") != dimensions[0] or evidence.get("height") != dimensions[1]:
+        return f"dashboard {uid} screenshot dimension evidence drift"
+    return None
+
+
+def _one_dashboard_screenshot_problem(
+    dashboard: object,
+    *,
+    config: RenderConfig,
+) -> str | None:
+    if not isinstance(dashboard, dict):
+        return "render manifest contains a malformed dashboard record"
+    uid = str(dashboard.get("uid", "unknown"))
+    status_problem = _dashboard_render_status_problem(dashboard, uid=uid)
+    if status_problem is not None:
+        return status_problem
+    file_problem, file_name, screenshot_path, screenshot_size = (
+        _dashboard_screenshot_file_problem(dashboard, uid=uid, config=config)
+    )
+    if file_problem is not None:
+        return file_problem
+    assert file_name is not None and screenshot_path is not None
+    assert screenshot_size is not None
+    geometry_problem, dimensions = _dashboard_screenshot_geometry_problem(
+        uid=uid,
+        config=config,
+        screenshot_path=screenshot_path,
+    )
+    if geometry_problem is not None:
+        return geometry_problem
+    assert dimensions is not None
+    evidence_problem = _dashboard_screenshot_evidence_problem(
+        dashboard,
+        uid=uid,
+        file_name=file_name,
+        screenshot_size=screenshot_size,
+        dimensions=dimensions,
+    )
+    if evidence_problem is not None:
+        return evidence_problem
+    blank_problem = _materially_blank_png_problem(screenshot_path)
+    if blank_problem is not None:
+        return f"dashboard {uid} {blank_problem}"
+    return None
+
+
 def _playwright_manifest_screenshot_problem(
     config: RenderConfig, manifest: dict[str, Any]
 ) -> str | None:
@@ -844,45 +949,9 @@ def _playwright_manifest_screenshot_problem(
         return "render manifest contains no dashboard screenshot evidence"
 
     for dashboard in dashboards:
-        if not isinstance(dashboard, dict):
-            return "render manifest contains a malformed dashboard record"
-        uid = str(dashboard.get("uid", "unknown"))
-        if dashboard.get("renderStatus") != "rendered":
-            return f"dashboard {uid} did not reach rendered status"
-        rendered_count = dashboard.get("renderedPanelCount", 0)
-        if not isinstance(rendered_count, int) or rendered_count <= 0:
-            return f"dashboard {uid} contains no rendered panel markers"
-        file_name = dashboard.get("file") or dashboard.get("screenshot")
-        if not isinstance(file_name, str) or not file_name:
-            return f"dashboard {uid} does not identify its screenshot file"
-        screenshot_path = config.output_dir / file_name
-        try:
-            screenshot_size = screenshot_path.stat().st_size
-        except OSError as exc:
-            return f"dashboard {uid} screenshot is unreadable: {exc}"
-        dimensions = _png_dimensions(screenshot_path)
-        if dimensions is None:
-            return f"dashboard {uid} screenshot is not a valid PNG"
-        if dimensions[0] != config.width or dimensions[1] <= 0:
-            return (
-                f"dashboard {uid} screenshot dimensions drift: "
-                f"requested_width={config.width} actual={dimensions}"
-            )
-        evidence = dashboard.get("screenshotEvidence")
-        if not isinstance(evidence, dict):
-            return f"dashboard {uid} lacks screenshotEvidence"
-        if evidence.get("file") != file_name:
-            return f"dashboard {uid} screenshot filename evidence drift"
-        if evidence.get("bytes") != screenshot_size:
-            return f"dashboard {uid} screenshot byte-size evidence drift"
-        if (
-            evidence.get("width") != dimensions[0]
-            or evidence.get("height") != dimensions[1]
-        ):
-            return f"dashboard {uid} screenshot dimension evidence drift"
-        blank_problem = _materially_blank_png_problem(screenshot_path)
-        if blank_problem is not None:
-            return f"dashboard {uid} {blank_problem}"
+        problem = _one_dashboard_screenshot_problem(dashboard, config=config)
+        if problem is not None:
+            return problem
     return None
 
 
@@ -1077,14 +1146,49 @@ def _render_via_api(config: RenderConfig) -> None:
         )
 
 
+def _missing_credentials_message() -> str:
+    return (
+        "Grafana render credentials are missing. Set "
+        "GF_SECURITY_ADMIN_PASSWORD / GRAFANA_PASSWORD / "
+        "GRAFANA_ADMIN_PASSWORD or GRAFANA_SERVICE_ACCOUNT_TOKEN."
+    )
+
+
+def _maybe_playwright_fallback(config: RenderConfig) -> int:
+    if config.fallback == "auto":
+        return _run_playwright_fallback(config)
+    return 1
+
+
+def _handle_render_api_failure(config: RenderConfig, exc: RenderApiFailure) -> int:
+    print(
+        _render_failure_message(
+            config,
+            prefix=str(exc),
+            auto_fallback=config.fallback == "auto",
+        )
+    )
+    return _maybe_playwright_fallback(config)
+
+
+def _handle_render_http_error(config: RenderConfig, exc: HTTPError) -> int:
+    if exc.code == 500:
+        print(
+            _render_failure_message(
+                config,
+                prefix=f"HTTP error: {exc.code} {exc.reason}",
+                auto_fallback=config.fallback == "auto",
+            )
+        )
+    else:
+        print(f"HTTP error: {exc.code} {exc.reason}")
+    return _maybe_playwright_fallback(config)
+
+
 def main(argv: list[str] | None = None) -> int:
     config = _parse_args(argv)
     if not config.service_account_token and not config.password:
-        print(
-            "Grafana render credentials are missing. Set "
-            "GF_SECURITY_ADMIN_PASSWORD / GRAFANA_PASSWORD / "
-            "GRAFANA_ADMIN_PASSWORD or GRAFANA_SERVICE_ACCOUNT_TOKEN."
-        )
+        print(_missing_credentials_message())
         return EXIT_CREDENTIALS
     config.output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -1093,30 +1197,9 @@ def main(argv: list[str] | None = None) -> int:
             return _run_playwright_fallback(config)
         _render_via_api(config)
     except RenderApiFailure as exc:
-        print(
-            _render_failure_message(
-                config,
-                prefix=str(exc),
-                auto_fallback=config.fallback == "auto",
-            )
-        )
-        if config.fallback == "auto":
-            return _run_playwright_fallback(config)
-        return 1
+        return _handle_render_api_failure(config, exc)
     except HTTPError as exc:
-        if exc.code == 500:
-            print(
-                _render_failure_message(
-                    config,
-                    prefix=f"HTTP error: {exc.code} {exc.reason}",
-                    auto_fallback=config.fallback == "auto",
-                )
-            )
-        else:
-            print(f"HTTP error: {exc.code} {exc.reason}")
-        if config.fallback == "auto":
-            return _run_playwright_fallback(config)
-        return 1
+        return _handle_render_http_error(config, exc)
     except URLError as exc:
         # URLError subclasses OSError — handle before generic OSError (S1045).
         print(f"URL error: {exc.reason}")

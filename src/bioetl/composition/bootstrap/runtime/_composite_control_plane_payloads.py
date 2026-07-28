@@ -33,7 +33,6 @@ __all__ = [
     "build_composite_source_refs",
 ]
 
-
 def build_composite_launch_context_snapshot(
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
@@ -67,7 +66,6 @@ def build_composite_launch_context_snapshot(
         "required_persistence_profile": required_persistence_profile,
     }
 
-
 def build_composite_source_refs(
     config: CompositeConfig,
     *,
@@ -95,7 +93,6 @@ def build_composite_source_refs(
         for provider, entity in [_resolve_provider_entity(pipeline_name)]
     )
 
-
 def build_composite_planned_artifacts(
     config: CompositeConfig,
 ) -> tuple[RunArtifactRef, ...]:
@@ -105,13 +102,11 @@ def build_composite_planned_artifacts(
         RunArtifactRef(layer="gold", path=config.merge.output_gold_path),
     )
 
-
 def build_composite_runtime_config_snapshot(
     runtime: CompositeRuntimeConfig,
 ) -> dict[str, object]:
     """Normalize composite runtime config into manifest-safe mapping."""
     return to_serializable_mapping(runtime)
-
 
 def build_composite_resolved_config_snapshot(
     config: CompositeConfig,
@@ -119,14 +114,12 @@ def build_composite_resolved_config_snapshot(
     """Normalize resolved composite config into manifest-safe mapping."""
     return to_serializable_mapping(config)
 
-
 def _resolve_provider_entity(pipeline_name: str) -> tuple[str, str]:
     """Resolve provider/entity from a canonical pipeline name."""
     if "_" not in pipeline_name:
         return pipeline_name, pipeline_name
     provider, entity = pipeline_name.split("_", 1)
     return provider, entity
-
 
 def _build_composite_input_snapshots(
     *,
@@ -170,7 +163,6 @@ def _build_composite_input_snapshots(
         provider=provider,
         entity=entity,
     )
-
 
 def _resolve_composite_bronze_root(
     *,

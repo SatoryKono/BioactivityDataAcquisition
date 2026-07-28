@@ -1,10 +1,10 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods provided by concrete composition.
 """Schema loading and extraction helpers for preflight validation."""
 
 from __future__ import annotations
 
 from importlib import import_module
+from typing import Any, cast
 
 from bioetl.application.composite._preflight_types import (
     FieldInfo,
@@ -36,7 +36,7 @@ class PreflightSchemaOrchestrationMixin:
     """Schema discovery and dtype extraction helper methods."""
 
     _SCHEMA_REGISTRY: dict[str, type] | None = None
-    _logger: LoggerPort
+    _logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
 
     def _parse_pipeline_identity(self, pipeline_name: str) -> tuple[str, str] | None:
         """Return ``(provider, entity)`` for ``provider_entity`` pipelines."""

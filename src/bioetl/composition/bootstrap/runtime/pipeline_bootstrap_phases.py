@@ -47,16 +47,13 @@ __all__ = [
     "prepare_runtime_registry",
 ]
 
-
 def _noop_ensure_providers_loaded() -> None:
     """No-op implementation for bootstrap phase."""
     pass
 
-
 def _noop_register_all_pipelines(registry: object = None) -> None:
     """No-op implementation for bootstrap phase."""
     pass
-
 
 def assemble_filter_config(
     *,
@@ -74,7 +71,6 @@ def assemble_filter_config(
         ctx=ctx,
         test_mode=test_mode,
     )
-
 
 def bootstrap_observability_bundle(
     *,
@@ -119,7 +115,6 @@ def bootstrap_observability_bundle(
     }
     return bootstrap(**bootstrap_kwargs)
 
-
 def create_pipeline_config_loader(
     configs_root: Path,
 ) -> Callable[[str], PipelineYamlConfig]:
@@ -130,13 +125,11 @@ def create_pipeline_config_loader(
 
     return _create_pipeline_config_loader(configs_root)
 
-
 def create_registry() -> PipelineRegistry:
     """Lazy wrapper for registry construction."""
     from bioetl.composition.registry_api import create_registry as _create_registry
 
     return _create_registry()
-
 
 def create_source_config_loader(configs_root: Path) -> Callable[[str], object]:
     """Lazy wrapper for source-config loader construction."""
@@ -146,7 +139,6 @@ def create_source_config_loader(configs_root: Path) -> Callable[[str], object]:
 
     return _create_source_config_loader(configs_root)
 
-
 def ensure_providers_loaded() -> None:
     """Lazy wrapper for provider registration discovery."""
     from bioetl.composition.providers import (
@@ -155,7 +147,6 @@ def ensure_providers_loaded() -> None:
 
     _ensure_providers_loaded()
 
-
 def get_settings() -> Settings:
     """Lazy wrapper for runtime settings access."""
     from bioetl.composition.runtime_builders.config_access import (
@@ -163,7 +154,6 @@ def get_settings() -> Settings:
     )
 
     return _get_settings()
-
 
 def prepare_runtime_registry(
     *,
@@ -178,14 +168,12 @@ def prepare_runtime_registry(
     effective_registry.get(pipeline_name)
     return effective_registry
 
-
 def initialize_runtime_policy_sources(configs_root: Path) -> None:
     """Initialize runtime policy/vocabulary registries from the config root."""
     initialize_chembl_policy_registry(configs_root)
     initialize_publication_type_classification(configs_root)
     initialize_protein_class_target_type_mapping(configs_root)
     initialize_publication_controlled_vocabulary(configs_root)
-
 
 def build_runtime_bootstrap_phases_with_registry(
     *,
@@ -210,7 +198,6 @@ def build_runtime_bootstrap_phases_with_registry(
         ),
     )
 
-
 def build_bootstrap_runner_factory_wiring() -> RunnerFactoryWiring:
     """Return no-op factory wiring after bootstrap has already populated registry."""
     from bioetl.composition.runtime_builders.runner_builder_wiring import (
@@ -221,7 +208,6 @@ def build_bootstrap_runner_factory_wiring() -> RunnerFactoryWiring:
         ensure_providers_loaded=_noop_ensure_providers_loaded,
         register_all_pipelines=_noop_register_all_pipelines,
     )
-
 
 def build_bootstrap_runner_input_wiring(
     *,

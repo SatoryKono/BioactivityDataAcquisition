@@ -12,7 +12,6 @@ from bioetl.domain.control_plane.reproducibility_policy import (
 )
 from bioetl.infrastructure.config.settings_api import Settings
 
-
 def validate_strict_data_root_policy(
     *,
     settings: Settings,

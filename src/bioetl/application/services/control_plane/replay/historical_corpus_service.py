@@ -43,7 +43,6 @@ def _build_diagnostics_summary(
     *args: object,
     **kwargs: object,
 ) -> dict[str, object]:
-    """Lazy leaf import to avoid static diagnostics-package fan-in (ARCH-REF-04)."""
     payload = import_module(
         "bioetl.application.services.control_plane.manifest.diagnostics"
     ).build_diagnostics_summary(*args, **kwargs)

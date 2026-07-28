@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Thin metadata and audit facade for GoldWriter."""
 
@@ -7,7 +6,7 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable
 from datetime import datetime
 from types import ModuleType
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.infrastructure.storage.gold.metadata_audit import (
     _build_gold_audit_entry,
@@ -40,17 +39,27 @@ class GoldWriterMetadataMixin:
     calls during the Gold write lifecycle.
     """
 
-    logger: LoggerPort
-    _audit: AuditPort | None
-    _metadata_coordinator: MetadataCoordinatorPort | None
-    _lineage_store: LineageStorePort | None
-    _metadata_writer: MetadataWriterPort
-    _metrics: MetricsPort | None
-    _flat_structure: bool
-    _transform_version: str | None
-    _transform_steps: tuple[str, ...]
-    _load_gold_writer_module: Callable[[], ModuleType]
-    _run_in_executor: Callable[..., Awaitable[object]]
+    logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
+    _audit: AuditPort | None = cast(Any, None)  # Any: host default (PD4)
+    _metadata_coordinator: MetadataCoordinatorPort | None = cast(
+        Any, None  # Any: host default (PD4)
+    )
+    _lineage_store: LineageStorePort | None = cast(
+        Any, None  # Any: host default (PD4)
+    )
+    _metadata_writer: MetadataWriterPort = cast(
+        Any, None  # Any: host default (PD4)
+    )
+    _metrics: MetricsPort | None = cast(Any, None)  # Any: host default (PD4)
+    _flat_structure: bool = cast(Any, None)  # Any: host default (PD4)
+    _transform_version: str | None = cast(Any, None)  # Any: host default (PD4)
+    _transform_steps: tuple[str, ...] = cast(Any, None)  # Any: host default (PD4)
+    _load_gold_writer_module: Callable[[], ModuleType] = cast(
+        Any, None  # Any: host default (PD4)
+    )
+    _run_in_executor: Callable[..., Awaitable[object]] = cast(
+        Any, None  # Any: host default (PD4)
+    )
 
     async def _log_gold_audit(
         self,

@@ -13,7 +13,6 @@ if TYPE_CHECKING:
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.domain.ports import QuarantinePort
 
-
 @dataclass(slots=True)
 class RuntimeManagementServicesBundle:
     """Checkpoint, FSM, DQ, and quarantine services for runtime orchestration."""
@@ -22,6 +21,5 @@ class RuntimeManagementServicesBundle:
     dq_report_service: DQReportService
     fsm_state_helper: FSMStateHelperService
     quarantine_port: QuarantinePort | None
-
 
 __all__ = ["RuntimeManagementServicesBundle"]

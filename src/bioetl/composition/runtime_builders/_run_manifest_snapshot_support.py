@@ -20,7 +20,6 @@ from bioetl.composition.runtime_builders._snapshot_mapping_support import (
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
 
-
 def build_launch_context_snapshot(
     ctx: PipelineRunContext,
     *,
@@ -64,7 +63,6 @@ def build_launch_context_snapshot(
     _add_optional_fields(snapshot, ctx)
     return snapshot
 
-
 def _build_base_snapshot(
     ctx: PipelineRunContext,
     run_type_value: str,
@@ -77,11 +75,9 @@ def _build_base_snapshot(
         execution_context_value=execution_context_value,
     )
 
-
 def _determine_replay_support_boundary(execution_context_value: str) -> str:
     """Determine the replay support boundary."""
     return "snapshot_backed_source_runs_only"
-
 
 def _add_reproducibility_profile_fields(
     snapshot: dict[str, object],
@@ -107,7 +103,6 @@ def _add_reproducibility_profile_fields(
         {key: value for key, value in optional_fields.items() if value is not None}
     )
 
-
 def _add_optional_fields(snapshot: dict[str, object], ctx: PipelineRunContext) -> None:
     """Add optional fields to the snapshot."""
     snapshot["vacuum"] = to_serializable_mapping(getattr(ctx, "vacuum", None))
@@ -117,7 +112,6 @@ def _add_optional_fields(snapshot: dict[str, object], ctx: PipelineRunContext) -
     snapshot["cached_bronze"] = to_serializable_mapping(
         getattr(ctx, "cached_bronze", None)
     )
-
 
 def resolve_replay_parentage(
     *,
@@ -133,7 +127,6 @@ def resolve_replay_parentage(
         ctx, "replay_of_manifest_id", runtime_config_mapping
     )
     return replay_of_run_id, replay_of_manifest_id
-
 
 def _resolve_replay_id(
     ctx: PipelineRunContext,
@@ -151,7 +144,6 @@ def _resolve_replay_id(
         *keys,
     )
 
-
 def resolve_provider_entity(
     *,
     pipeline_name: str,
@@ -163,7 +155,6 @@ def resolve_provider_entity(
     entity = _resolve_entity(yaml_config, fallback_entity)
     return provider, entity
 
-
 def _determine_fallbacks(pipeline_name: str) -> tuple[str, str]:
     """Determine fallback provider and entity from pipeline name."""
     if "_" in pipeline_name:
@@ -171,14 +162,12 @@ def _determine_fallbacks(pipeline_name: str) -> tuple[str, str]:
         return provider, entity
     return pipeline_name, pipeline_name
 
-
 def _resolve_provider(yaml_config: object, fallback: str) -> str:
     """Resolve provider from config or use fallback."""
     return resolve_name_component(
         getattr(yaml_config, "provider", None),
         fallback=fallback,
     )
-
 
 def _resolve_entity(yaml_config: object, fallback: str) -> str:
     """Resolve entity from config or use fallback."""

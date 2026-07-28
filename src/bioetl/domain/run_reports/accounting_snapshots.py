@@ -20,10 +20,10 @@ from bioetl.domain.run_reports.reason_catalog import ReasonCatalog
 class StageAccountingSnapshotsMixin:
     """Projection methods shared by StageAccountingAccumulator."""
 
-    _catalog: ReasonCatalog = cast(Any, None)  # host attr default (PD3)
-    _instrumented_stages: frozenset[str] = cast(Any, None)  # host attr default (PD3)
-    _stages: dict[str, _StageBucket] = cast(Any, None)  # host attr default (PD3)
-    _touched_instrumented: bool = cast(Any, None)  # host attr default (PD3)
+    _catalog: ReasonCatalog = cast(Any, None)  # Any: host attr default (PD3)
+    _instrumented_stages: frozenset[str] = cast(Any, None)  # Any: host attr default (PD3)
+    _stages: dict[str, _StageBucket] = cast(Any, None)  # Any: host attr default (PD3)
+    _touched_instrumented: bool = cast(Any, None)  # Any: host attr default (PD3)
 
     def _sum_outcome(self, stage: str, outcome: str) -> int:
         """Return a stage/outcome total supplied by the accumulator."""

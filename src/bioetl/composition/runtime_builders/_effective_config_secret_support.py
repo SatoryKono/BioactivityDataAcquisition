@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
 
-
 _EXECUTION_SECRET_SETTING_SURFACES: tuple[tuple[str, str], ...] = (
     ("settings.pii_salt_current", "pii_salt_current"),
     ("settings.pii_salt_next", "pii_salt_next"),
@@ -17,7 +16,6 @@ _EXECUTION_SECRET_SETTING_SURFACES: tuple[tuple[str, str], ...] = (
     ("settings.openalex_api_key", "openalex_api_key"),
     ("settings.semanticscholar_api_key", "semanticscholar_api_key"),
 )
-
 
 def _secret_value_hash(
     value: object,
@@ -30,7 +28,6 @@ def _secret_value_hash(
     if raw_value in (None, ""):
         return None
     return value_hash(str(raw_value))
-
 
 def build_secret_surface_inventory(
     *,

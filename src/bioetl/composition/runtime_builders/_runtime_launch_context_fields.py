@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
 
-
 def build_runtime_launch_field_snapshot(
     ctx: PipelineRunContext,
     *,
@@ -31,6 +30,5 @@ def build_runtime_launch_field_snapshot(
     if execution_context_value is not None:
         snapshot["execution_context"] = execution_context_value
     return snapshot
-
 
 __all__ = ["build_runtime_launch_field_snapshot"]
