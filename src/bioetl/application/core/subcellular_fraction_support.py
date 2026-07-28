@@ -13,6 +13,7 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 from bioetl.domain.schemas.constants import SUBCELLULAR_FRACTIONS
 from bioetl.domain.types import JsonDict
 
+
 def normalize_fraction(
     raw_fraction: Any,  # Any: type varies at runtime
 ) -> str | None:  # Any: type varies at runtime

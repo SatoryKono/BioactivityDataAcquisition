@@ -6,6 +6,7 @@ from bioetl.domain.ports import ClockPort, MetricsPort
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
+
 def set_checkpoint_saved_at(
     metrics: MetricsPort | None,
     *,

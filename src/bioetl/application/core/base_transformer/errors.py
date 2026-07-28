@@ -5,6 +5,7 @@ from __future__ import annotations
 from bioetl.domain.exceptions.base import DataQualityError
 from bioetl.domain.types import JsonDict
 
+
 class TransformationError(DataQualityError):
     """Raised when a transformation fails due to missing/invalid data."""
 

@@ -19,6 +19,7 @@ from bioetl.domain.types import BronzeRecord, ErrorType, JsonDict
 
 from .batch_metrics import BatchMetricsRecorderService
 
+
 class DQQuarantineEntry(NamedTuple):
     """A record that failed data-quality checks."""
 

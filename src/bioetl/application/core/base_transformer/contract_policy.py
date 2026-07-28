@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import dataclasses
 
+
 @dataclasses.dataclass(frozen=True)
 class _DefaultContractPolicy:
     """Fallback contract policy when none is injected."""

@@ -19,6 +19,7 @@ from typing import Protocol
 
 from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError
 
+
 class _BatchProgressReporterProtocol(Protocol):
     """Minimal progress reporting contract required by extraction loop helpers."""
 

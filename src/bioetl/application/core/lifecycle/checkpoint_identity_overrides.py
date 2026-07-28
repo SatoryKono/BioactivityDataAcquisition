@@ -8,6 +8,7 @@ from typing import TypedDict
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
+
 class _CoreIdentityOverrides(TypedDict):
     dq_contract_compatibility_hash: str | None
     dq_policy_hash: str | None

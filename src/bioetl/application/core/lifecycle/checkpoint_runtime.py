@@ -21,6 +21,7 @@ from bioetl.application.core.lifecycle.checkpoint_runtime_types import (
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
+
 def validate_compatibility_policy(
     policy: CheckpointCompatibilityPolicy,
 ) -> CheckpointCompatibilityPolicy:

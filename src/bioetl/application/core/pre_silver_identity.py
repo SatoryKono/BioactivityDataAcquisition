@@ -6,6 +6,7 @@ from typing import Protocol
 
 from bioetl.domain.types import EntityID, GoldRecord
 
+
 class PreSilverIdentityHost(Protocol):
     """Host surface that can resolve entity IDs for PreSilver staging."""
 

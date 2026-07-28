@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol
 
+
 class _RunnerObservabilityHostProtocol(Protocol):
     _config: PipelineConfig
     _runtime: RuntimeConfig

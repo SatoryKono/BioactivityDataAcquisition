@@ -18,6 +18,7 @@ from bioetl.domain.ports import (
     StorageMaintenancePort,
 )
 
+
 @runtime_checkable
 class PipelineStorageProtocol(
     BronzeStoragePort,

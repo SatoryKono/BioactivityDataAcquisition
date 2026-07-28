@@ -9,6 +9,7 @@ from bioetl.domain.types.checkpoint_compatibility_result import (
 )
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
+
 class CheckpointCompatibilityService(Protocol):
     """Duck-typed contract for checkpoint compatibility validation."""
 
