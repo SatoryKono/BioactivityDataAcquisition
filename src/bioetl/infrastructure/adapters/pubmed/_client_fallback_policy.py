@@ -1,8 +1,9 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods provided by concrete composition.
 """Internal fallback-policy hook mixin for the PubMed adapter."""
 
 from __future__ import annotations
+
+from typing import Any, cast
 
 from bioetl.infrastructure.adapters.common import FallbackDecoratorConfig
 from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
@@ -29,7 +30,7 @@ _PUBMED_DEFAULT_FALLBACK_CONFIG = FallbackDecoratorConfig(
 class _PubMedFallbackPolicyMixin:
     """Provider-specific hookpoints consumed by ``FallbackPolicyMixin``."""
 
-    _fallback_handler: PubMedTitleFallbackHandler
+    _fallback_handler: PubMedTitleFallbackHandler = cast(Any, None)  # Any: host attr default (PD3)
 
     def _get_default_fallback_config(self) -> FallbackDecoratorConfig:
         """Return PubMed-specific default fallback config."""

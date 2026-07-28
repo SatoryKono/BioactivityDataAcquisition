@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods provided by concrete composition (PD2 W1).
 """Merge/finalization stage helpers for CompositePipelineRunner."""
 
@@ -81,13 +80,13 @@ def _get_explicit_merger_method(
 class CompositeRunnerMergeStageMixin:
     """Mixin containing merge execution and finalization."""
 
-    _runtime: CompositeRuntimeConfig
-    _fsm: FSMStateHelperService
-    _logger: LoggerPort
-    _config: CompositeConfig
-    _run_id_str: str
-    _merger: CompositeMergerProtocol
-    _checkpoint_manager: CompositeCheckpointService
+    _runtime: CompositeRuntimeConfig = cast(Any, None)  # Any: host attr default (PD3)
+    _fsm: FSMStateHelperService = cast(Any, None)  # Any: host attr default (PD3)
+    _logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)
+    _config: CompositeConfig = cast(Any, None)  # Any: host attr default (PD3)
+    _run_id_str: str = cast(Any, None)  # Any: host attr default (PD3)
+    _merger: CompositeMergerProtocol = cast(Any, None)  # Any: host attr default (PD3)
+    _checkpoint_manager: CompositeCheckpointService = cast(Any, None)  # Any: host attr default (PD3)
 
     async def _save_checkpoint_safe(
         self: _CompositeRunnerMergeStageHostProtocol,

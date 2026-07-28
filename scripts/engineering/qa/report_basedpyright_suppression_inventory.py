@@ -38,24 +38,29 @@ def collect_inventory() -> dict[str, Any]:
 
     for path in sorted(SRC.rglob("*.py")):
         text = path.read_text(encoding="utf-8", errors="ignore")
-        if "# pyright:" not in text and "#pyright:" not in text:
-            continue
+        # File-level residual flags only (leading `# pyright: reportX=false`).
+        # Inline `# pyright: ignore[...]` on a statement is narrower and counted
+        # separately as optional metadata, not the PD3 file-level ledger.
         rel = str(path.relative_to(SRC)).replace("\\", "/")
         layer = rel.split("/", 1)[0]
         rules: list[str] = []
+        file_level_lines = 0
+        inline_ignores = 0
         for line in text.splitlines():
-            match = _DIRECTIVE_RE.match(line.strip())
-            if not match:
+            stripped = line.strip()
+            match = _DIRECTIVE_RE.match(stripped)
+            if match:
+                file_level_lines += 1
+                directive_lines += 1
+                for rule_match in _RULE_RE.finditer(match.group("body")):
+                    rule = rule_match.group(1)
+                    rules.append(rule)
+                    by_rule[rule] += 1
                 continue
-            directive_lines += 1
-            for rule_match in _RULE_RE.finditer(match.group("body")):
-                rule = rule_match.group(1)
-                rules.append(rule)
-                by_rule[rule] += 1
+            if "pyright: ignore" in line:
+                inline_ignores += 1
         if not rules:
-            # bare pyright comment without reportX=false still counts as suppression surface
-            rules = ["(other-pyright-directive)"]
-            by_rule["(other-pyright-directive)"] += 1
+            continue
         by_layer[layer] += 1
         files.append(
             {
@@ -63,6 +68,8 @@ def collect_inventory() -> dict[str, Any]:
                 "layer": layer,
                 "rules": sorted(set(rules)),
                 "rule_count": len(set(rules)),
+                "file_level_directive_lines": file_level_lines,
+                "inline_ignore_mentions": inline_ignores,
             }
         )
 

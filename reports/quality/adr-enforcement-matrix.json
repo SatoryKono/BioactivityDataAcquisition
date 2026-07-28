@@ -1435,7 +1435,8 @@
         "scripts/docs/checks/check_drift.py",
         "tests/architecture/test_config_topology_docs_drift.py",
         "tests/architecture/test_diagram_corpus_regression_guards.py",
-        "tests/architecture/test_diagram_lint_policy_rules.py"
+        "tests/architecture/test_diagram_lint_policy_rules.py",
+        "tests/architecture/test_documentation_cleanup_inventory.py"
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
@@ -1464,7 +1465,8 @@
         "scripts/docs/checks/check_drift.py",
         "tests/architecture/test_config_topology_docs_drift.py",
         "tests/architecture/test_diagram_corpus_regression_guards.py",
-        "tests/architecture/test_diagram_lint_policy_rules.py"
+        "tests/architecture/test_diagram_lint_policy_rules.py",
+        "tests/architecture/test_documentation_cleanup_inventory.py"
       ],
       "manual_exception": null,
       "owner": "BioETL Team",

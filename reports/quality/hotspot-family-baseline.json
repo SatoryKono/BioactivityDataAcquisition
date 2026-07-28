@@ -3,8 +3,8 @@
     "snapshot_date": "2026-07-27",
     "families": 5,
     "scorecard": "configs/quality/debt_scorecard.yaml",
-    "budget_warnings": 0,
-    "budget_review_notes": 4
+    "budget_warnings": 1,
+    "budget_review_notes": 3
   },
   "families": [
     {
@@ -18,16 +18,18 @@
       ],
       "duplication_clusters": 0,
       "files": 187,
-      "total_loc": 22085,
-      "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.365,
+      "total_loc": 22214,
+      "files_ge_250_loc": 1,
+      "helper_function_ratio": 0.37,
       "max_internal_fan_in": 8,
       "max_internal_fan_in_module": "bioetl.application.core.batch_runtime_failure_policy",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 0,
         "max_internal_fan_in": 10
       },
-      "budget_warnings": [],
+      "budget_warnings": [
+        "over_budget:files_ge_250_loc=1/0"
+      ],
       "budget_review_notes": [
         "near_budget:max_internal_fan_in=8/10"
       ]
@@ -43,7 +45,7 @@
       ],
       "duplication_clusters": 0,
       "files": 51,
-      "total_loc": 6310,
+      "total_loc": 6314,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.325,
       "max_internal_fan_in": 2,
@@ -66,7 +68,7 @@
       ],
       "duplication_clusters": 0,
       "files": 32,
-      "total_loc": 3931,
+      "total_loc": 3936,
       "files_ge_250_loc": 1,
       "helper_function_ratio": 0.33,
       "max_internal_fan_in": 3,
@@ -91,9 +93,9 @@
       ],
       "duplication_clusters": 0,
       "files": 139,
-      "total_loc": 15910,
+      "total_loc": 15887,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.424,
+      "helper_function_ratio": 0.423,
       "max_internal_fan_in": 3,
       "max_internal_fan_in_module": "bioetl.application.services.control_plane.workflow.manifest_models",
       "bounded_growth_budgets": {
@@ -119,16 +121,14 @@
       "total_loc": 6988,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.359,
-      "max_internal_fan_in": 4,
-      "max_internal_fan_in_module": "bioetl.composition.runtime_builders._run_manifest_data_roots",
+      "max_internal_fan_in": 3,
+      "max_internal_fan_in_module": "bioetl.composition.runtime_builders.run_manifest_support",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 0,
         "max_internal_fan_in": 5
       },
       "budget_warnings": [],
-      "budget_review_notes": [
-        "near_budget:max_internal_fan_in=4/5"
-      ]
+      "budget_review_notes": []
     }
   ]
 }

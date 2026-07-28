@@ -270,6 +270,38 @@ def _module_name_to_repo_path(module_name: str) -> str:
     return f"src/bioetl/{relative}.py"
 
 
+_LAZY_COMMAND_SPECS_NAME = "_LAZY_COMMAND_SPECS"
+
+
+def _lazy_command_specs_value(node: ast.AST) -> ast.AST | None:
+    if isinstance(node, ast.Assign) and any(
+        isinstance(target, ast.Name) and target.id == _LAZY_COMMAND_SPECS_NAME
+        for target in node.targets
+    ):
+        return node.value
+    if (
+        isinstance(node, ast.AnnAssign)
+        and isinstance(node.target, ast.Name)
+        and node.target.id == _LAZY_COMMAND_SPECS_NAME
+    ):
+        return node.value
+    return None
+
+
+def _paths_from_lazy_command_specs_dict(value_node: ast.Dict) -> set[str]:
+    paths: set[str] = set()
+    for value in value_node.values:
+        if not isinstance(value, ast.Tuple) or not value.elts:
+            continue
+        module_node = value.elts[0]
+        if not isinstance(module_node, ast.Constant) or not isinstance(
+            module_node.value, str
+        ):
+            continue
+        paths.add(_module_name_to_repo_path(module_node.value))
+    return paths
+
+
 def _load_lazy_cli_command_entrypoint_paths(repo_root: Path) -> set[str]:
     """Return CLI modules that are imported dynamically from main command specs."""
     main_path = repo_root / "src" / "bioetl" / "interfaces" / "cli" / "main.py"
@@ -278,34 +310,12 @@ def _load_lazy_cli_command_entrypoint_paths(repo_root: Path) -> set[str]:
 
     tree = ast.parse(main_path.read_text(encoding="utf-8"), filename=str(main_path))
     for node in tree.body:
-        value_node: ast.AST | None = None
-        if isinstance(node, ast.Assign) and any(
-            isinstance(target, ast.Name) and target.id == "_LAZY_COMMAND_SPECS"
-            for target in node.targets
-        ):
-            value_node = node.value
-        elif (
-            isinstance(node, ast.AnnAssign)
-            and isinstance(node.target, ast.Name)
-            and node.target.id == "_LAZY_COMMAND_SPECS"
-        ):
-            value_node = node.value
+        value_node = _lazy_command_specs_value(node)
         if value_node is None:
             continue
         if not isinstance(value_node, ast.Dict):
             return set()
-
-        paths: set[str] = set()
-        for value in value_node.values:
-            if not isinstance(value, ast.Tuple) or not value.elts:
-                continue
-            module_node = value.elts[0]
-            if not isinstance(module_node, ast.Constant) or not isinstance(
-                module_node.value, str
-            ):
-                continue
-            paths.add(_module_name_to_repo_path(module_node.value))
-        return paths
+        return _paths_from_lazy_command_specs_dict(value_node)
     return set()
 
 

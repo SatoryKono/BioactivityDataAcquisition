@@ -189,7 +189,7 @@ def test_real_tracer_accepts_non_empty_memory_decision_trace(
 
     from bioetl.infrastructure.observability import tracing
 
-    if not tracing.OTEL_AVAILABLE:
+    if not tracing.otel_available:
         pytest.skip("OpenTelemetry is not available")
 
     exporter = InMemorySpanExporter()

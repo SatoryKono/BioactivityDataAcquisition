@@ -1,10 +1,9 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Validation delegation facade for Silver writer runtime methods."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal
+from typing import Any, cast, TYPE_CHECKING, Literal
 
 import pyarrow as pa
 
@@ -33,7 +32,7 @@ _SILVER_VALIDATION_OPERATIONS_REQUIRED = "Silver validation operations are requi
 class _SilverWriterRuntimeValidationFacade:
     """Validation-service delegation methods for the runtime facade."""
 
-    _validation: SilverValidationOperations | None
+    _validation: SilverValidationOperations | None = cast(Any, None)  # Any: host attr default (PD3)
 
     def _enforce_write_policy(self, mode: SilverWriteMode, table_name: str) -> None:
         """Delegate Silver write-mode enforcement to the validation service."""

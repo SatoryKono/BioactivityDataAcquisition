@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 # pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
@@ -9,7 +8,7 @@ from __future__ import annotations
 import asyncio
 import json
 from http import HTTPStatus
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import Any, TYPE_CHECKING, Protocol, cast
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -29,9 +28,9 @@ class _RouteRequestSupport(Protocol):
 class HealthServerHTTPMixin:
     """Mixin for low-level HTTP request/response lifecycle."""
 
-    _logger: LoggerPort | None
-    _request_error_allowlist: tuple[type[BaseException], ...]
-    _writer_close_allowlist: tuple[type[BaseException], ...]
+    _logger: LoggerPort | None = cast(Any, None)  # Any: host attr default (PD3)
+    _request_error_allowlist: tuple[type[BaseException], ...] = cast(Any, None)  # Any: host attr default (PD3)
+    _writer_close_allowlist: tuple[type[BaseException], ...] = cast(Any, None)  # Any: host attr default (PD3)
     _request_line_timeout_seconds: float = 5.0
     _header_line_timeout_seconds: float = 5.0
     _max_header_lines: int = 100

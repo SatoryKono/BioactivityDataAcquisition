@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Read/list/cleanup helpers extracted from ``BronzeWriterIOMixin``."""
 
@@ -6,7 +5,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import Any, cast, TYPE_CHECKING
 
 import orjson
 import zstandard as zstd
@@ -22,10 +21,10 @@ if TYPE_CHECKING:
 class BronzeWriterReadCleanupMixin:
     """Filesystem read/list/cleanup helpers for Bronze storage."""
 
-    base_path: Path
-    _flat_structure: bool
-    _logger: LoggerPort
-    _metrics: MetricsPort
+    base_path: Path = cast(Any, None)  # Any: host attr default (PD3)
+    _flat_structure: bool = cast(Any, None)  # Any: host attr default (PD3)
+    _logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)
+    _metrics: MetricsPort = cast(Any, None)  # Any: host attr default (PD3)
 
     async def read_bronze(
         self, path: str

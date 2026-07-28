@@ -55,6 +55,22 @@ _ALLOWED_MCP_LAUNCHERS = frozenset(
 )
 
 
+def _resolve_windows_pwsh() -> str | None:
+    for candidate in _WINDOWS_PWSH_CANDIDATES:
+        if candidate.is_file():
+            return str(candidate)
+    return shutil.which("powershell") or shutil.which("powershell.exe")
+
+
+def _prefer_windows_bat_cmd(command: str, resolved: str) -> str:
+    """Keep .bat only as last resort; prefer bare command via cmd."""
+    if command.lower().startswith("npx"):
+        node_npx = Path(r"C:\Program Files\nodejs\npx.cmd")
+        if node_npx.is_file():
+            return str(node_npx)
+    return resolved
+
+
 def _resolve_command(command: str) -> str:
     """Resolve ``command`` to an executable CreateProcess can launch on Windows.
 
@@ -63,22 +79,14 @@ def _resolve_command(command: str) -> str:
     """
     lowered = command.lower()
     if os.name == "nt" and lowered in {"pwsh", "pwsh.exe"}:
-        for candidate in _WINDOWS_PWSH_CANDIDATES:
-            if candidate.is_file():
-                return str(candidate)
-        powershell = shutil.which("powershell") or shutil.which("powershell.exe")
-        if powershell:
-            return powershell
+        pwsh = _resolve_windows_pwsh()
+        if pwsh:
+            return pwsh
     resolved = shutil.which(command)
     if resolved is None:
         return command
     if os.name == "nt" and Path(resolved).suffix.lower() in {".bat", ".cmd"}:
-        # Keep .bat only as last resort; prefer bare command via cmd.
-        if lowered.startswith("npx"):
-            node_npx = Path(r"C:\Program Files\nodejs\npx.cmd")
-            if node_npx.is_file():
-                return str(node_npx)
-        return resolved
+        return _prefer_windows_bat_cmd(command, resolved)
     return resolved
 
 
@@ -160,6 +168,13 @@ def _is_http_server(server: dict[str, Any]) -> bool:
     )
 
 
+_DATA_PREFIX = "data:"
+_JSON_RPC_HEADERS = {
+    "Content-Type": "application/json",
+    "Accept": "application/json, text/event-stream",
+}
+
+
 def _http_ping_url(mcp_url: str) -> str:
     """Derive mcp-proxy /ping URL from a Streamable HTTP MCP endpoint."""
     base = mcp_url.rstrip("/")
@@ -168,20 +183,7 @@ def _http_ping_url(mcp_url: str) -> str:
     return base + "/ping"
 
 
-def smoke_http_server(
-    server_name: str,
-    url: str,
-    *,
-    timeout: float = 15.0,
-) -> dict[str, Any]:
-    """Smoke a localhost shared-plane HTTP MCP endpoint (ping + initialize).
-
-    Streamable HTTP (mcp-proxy): GET /ping for liveness, then POST JSON-RPC
-    initialize to the MCP URL when the proxy accepts application/json.
-    """
-    import urllib.error
-    import urllib.request
-
+def _validate_loopback_mcp_url(url: str) -> tuple[str, int]:
     from urllib.parse import urlsplit
 
     parsed_url = urlsplit(url)
@@ -196,30 +198,67 @@ def smoke_http_server(
         raise ValueError(
             f"HTTP protocol smoke requires an exact localhost /mcp URL (got {url!r})"
         )
+    return str(parsed_url.hostname), int(parsed_url.port)
 
-    # Loopback-only MCP smoke: local proxy has no TLS in dev (S5332 accepted).
-    host = parsed_url.hostname
-    port = parsed_url.port
-    safe_url = f"http://{host}:{port}/mcp"  # NOSONAR - localhost-only, validated above
-    started = time.monotonic()
-    ping_url = f"http://{host}:{port}/ping"  # NOSONAR - localhost-only, validated above
+
+def _extract_json_rpc_body(raw: str) -> str:
+    """Unwrap optional SSE framing (``event:`` / ``data:``) to a JSON body."""
+    if _DATA_PREFIX in raw and raw.lstrip().startswith("event:"):
+        for line in raw.splitlines():
+            if line.startswith(_DATA_PREFIX):
+                return line[len(_DATA_PREFIX) :].strip()
+    if _DATA_PREFIX in raw:
+        for line in raw.splitlines():
+            if line.startswith(_DATA_PREFIX):
+                return line[len(_DATA_PREFIX) :].strip()
+    return raw
+
+
+def _http_json_rpc(
+    safe_url: str,
+    payload: dict[str, Any],
+    *,
+    timeout: float,
+) -> dict[str, Any]:
+    import urllib.request
+
+    req = urllib.request.Request(  # NOSONAR - safe_url is loopback-validated
+        safe_url,
+        data=json.dumps(payload).encode("utf-8"),
+        method="POST",
+        headers=dict(_JSON_RPC_HEADERS),
+    )
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        raw = resp.read().decode("utf-8", errors="replace")
+    return json.loads(_extract_json_rpc_body(raw))
+
+
+def _ping_http_endpoint(ping_url: str, *, timeout: float) -> int:
+    import urllib.error
+    import urllib.request
+
     try:
         with urllib.request.urlopen(ping_url, timeout=timeout) as resp:  # NOSONAR - loopback
             ping_code = int(getattr(resp, "status", 200) or 200)
             if ping_code >= 500:
                 raise RuntimeError(f"ping HTTP {ping_code} for {ping_url}")
+            return ping_code
     except urllib.error.HTTPError as exc:
         if int(exc.code) >= 500:
             raise RuntimeError(f"ping HTTP {exc.code} for {ping_url}") from exc
         # 4xx on /ping: still try initialize
-        ping_code = int(exc.code)
+        return int(exc.code)
     except Exception as exc:
         raise RuntimeError(f"ping failed for {ping_url}: {exc}") from exc
 
-    tool_count: int | None = None
-    init_ok = False
-    init_error: str | None = None
-    payload = {
+
+def _http_initialize_and_tools(
+    safe_url: str,
+    *,
+    timeout: float,
+) -> tuple[bool, str | None, int | None]:
+    """POST initialize (+ best-effort tools/list). Returns (ok, error, tool_count)."""
+    init_payload = {
         "jsonrpc": "2.0",
         "id": 1,
         "method": "initialize",
@@ -229,70 +268,60 @@ def smoke_http_server(
             "clientInfo": {"name": "bioetl-mcp-smoke", "version": "1"},
         },
     }
-    body = json.dumps(payload).encode("utf-8")
-    req = urllib.request.Request(  # NOSONAR - safe_url is loopback-validated
-        safe_url,
-        data=body,
-        method="POST",
-        headers={
-            "Content-Type": "application/json",
-            "Accept": "application/json, text/event-stream",
-        },
-    )
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
-            raw = resp.read().decode("utf-8", errors="replace")
-            # SSE framing: data: {...}
-            if "data:" in raw and raw.lstrip().startswith("event:"):
-                for line in raw.splitlines():
-                    if line.startswith("data:"):
-                        raw = line[len("data:") :].strip()
-                        break
-            parsed = json.loads(raw)
-            if "error" in parsed or "result" not in parsed:
-                init_error = f"initialize failed: {parsed!r}"[:500]
-            else:
-                init_ok = True
-                # Best-effort tools/list
-                tools_payload = {
-                    "jsonrpc": "2.0",
-                    "id": 2,
-                    "method": "tools/list",
-                    "params": {},
-                }
-                tools_req = urllib.request.Request(  # NOSONAR - safe_url loopback-validated
-                    safe_url,
-                    data=json.dumps(tools_payload).encode("utf-8"),
-                    method="POST",
-                    headers={
-                        "Content-Type": "application/json",
-                        "Accept": "application/json, text/event-stream",
-                    },
-                )
-                try:
-                    with urllib.request.urlopen(tools_req, timeout=timeout) as tresp:
-                        traw = tresp.read().decode("utf-8", errors="replace")
-                        if "data:" in traw:
-                            for line in traw.splitlines():
-                                if line.startswith("data:"):
-                                    traw = line[len("data:") :].strip()
-                                    break
-                        tparsed = json.loads(traw)
-                        tools = tparsed.get("result", {}).get("tools")
-                        if isinstance(tools, list):
-                            tool_count = len(tools)
-                except Exception:
-                    tool_count = None
+        parsed = _http_json_rpc(safe_url, init_payload, timeout=timeout)
     except Exception as exc:
         # Ping alone is enough for shared-plane liveness when proxy rejects
         # bare JSON initialize (session/header requirements).
-        init_error = str(exc)[:500]
+        return False, str(exc)[:500], None
+    if "error" in parsed or "result" not in parsed:
+        return False, f"initialize failed: {parsed!r}"[:500], None
+    tool_count = _http_tools_list_count(safe_url, timeout=timeout)
+    return True, None, tool_count
 
-    ok = True  # ping succeeded to reach here
+
+def _http_tools_list_count(safe_url: str, *, timeout: float) -> int | None:
+    tools_payload = {
+        "jsonrpc": "2.0",
+        "id": 2,
+        "method": "tools/list",
+        "params": {},
+    }
+    try:
+        tparsed = _http_json_rpc(safe_url, tools_payload, timeout=timeout)
+        tools = tparsed.get("result", {}).get("tools")
+        if isinstance(tools, list):
+            return len(tools)
+    except Exception:
+        return None
+    return None
+
+
+def smoke_http_server(
+    server_name: str,
+    url: str,
+    *,
+    timeout: float = 15.0,
+) -> dict[str, Any]:
+    """Smoke a localhost shared-plane HTTP MCP endpoint (ping + initialize).
+
+    Streamable HTTP (mcp-proxy): GET /ping for liveness, then POST JSON-RPC
+    initialize to the MCP URL when the proxy accepts application/json.
+    """
+    # Loopback-only MCP smoke: local proxy has no TLS in dev (S5332 accepted).
+    host, port = _validate_loopback_mcp_url(url)
+    safe_url = f"http://{host}:{port}/mcp"  # NOSONAR - localhost-only, validated above
+    started = time.monotonic()
+    ping_url = f"http://{host}:{port}/ping"  # NOSONAR - localhost-only, validated above
+    _ping_http_endpoint(ping_url, timeout=timeout)
+    init_ok, init_error, tool_count = _http_initialize_and_tools(
+        safe_url, timeout=timeout
+    )
+
     report: dict[str, Any] = {
         "schema_version": "bioetl-mcp-protocol-smoke-v1",
         "server": server_name,
-        "ok": ok,
+        "ok": True,  # ping succeeded to reach here
         "transport": "http",
         "url": safe_url,
         "ping_url": ping_url,
@@ -325,12 +354,7 @@ def _validate_command_argv(command: list[str]) -> list[str]:
     return list(safe_tokens)
 
 
-def smoke_server(
-    config_path: Path,
-    server_name: str,
-    *,
-    timeout: float = 15.0,
-) -> dict[str, Any]:
+def _safe_config_path(config_path: Path) -> Path:
     from scripts.engineering.common.repo_paths import (
         REPO_ROOT,
         ensure_path_within_root,
@@ -340,69 +364,45 @@ def smoke_server(
     # used by unit tests to live outside the checkout.
     resolved_config = config_path.expanduser().resolve(strict=False)
     try:
-        safe_config = ensure_path_within_root(resolved_config, REPO_ROOT)
+        return ensure_path_within_root(resolved_config, REPO_ROOT)
     except ValueError:
-        safe_config = ensure_path_within_root(resolved_config, resolved_config.parent)
-    server = _load_server(safe_config, server_name)
-    if _is_http_server(server):
-        return smoke_http_server(server_name, str(server["url"]), timeout=timeout)
+        return ensure_path_within_root(resolved_config, resolved_config.parent)
+
+
+def _stdio_popen_argv(
+    server: dict[str, Any],
+) -> tuple[list[str], list[str], bool]:
+    """Build sanitized argv for stdio MCP spawn. Returns (display_cmd, popen_cmd, use_shell)."""
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
     resolved_cmd = _resolve_command(str(server["command"]))
-    # Prefer absolute resolved executable when available.
     command = _validate_command_argv([resolved_cmd, *map(str, server.get("args", []))])
     # Windows CreateProcess cannot execute .bat/.cmd without a shell/comspec.
-    # Keep argv as a list and use shell only with an explicit comspec invocation
-    # so the child is not launched from a concatenated user-controlled string.
     use_shell = False
-    popen_command: list[str] | str = command
+    popen_command: list[str] = command
     if os.name == "nt" and Path(resolved_cmd).suffix.lower() in {".bat", ".cmd"}:
         comspec = os.environ.get("ComSpec") or "cmd.exe"
         popen_command = [comspec, "/c", *command]
-    environment = os.environ.copy()
-    environment.update({str(k): str(v) for k, v in server.get("env", {}).items()})
-    started = time.monotonic()
+    popen_command = ensure_safe_cli_argv([str(token) for token in popen_command])
+    return command, popen_command, use_shell
+
+
+def _resolve_mcp_cwd(safe_config: Path) -> Path:
     # Prefer repo root when wrappers use absolute paths outside the config dir.
-    cwd = safe_config.parent
     for candidate in (safe_config.parent, Path.cwd(), *safe_config.parents):
         if (candidate / "scripts" / "ai" / "mcp").is_dir() and (
             candidate / ".mcp.json"
         ).is_file():
-            cwd = candidate
-            break
-    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+            return candidate
+    return safe_config.parent
 
-    # Rebuild argv through the shared sanitizer immediately before spawn.
-    if isinstance(popen_command, list):
-        popen_command = ensure_safe_cli_argv([str(token) for token in popen_command])
-    process = subprocess.Popen(  # NOSONAR - argv via ensure_safe_cli_argv; shell=False
-        popen_command,
-        cwd=str(cwd),
-        env=environment,
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-        bufsize=1,
-        shell=use_shell,
-    )
-    # Drain stderr continuously. Servers like mcp-run-python emit large Deno
-    # install logs; if the pipe fills, the child blocks and initialize hangs.
-    stderr_chars: deque[str] = deque(maxlen=_STDERR_RETENTION_CHARS)
 
-    def _stderr_tail() -> str:
-        return "".join(stderr_chars)[-_STDERR_ERROR_TAIL_CHARS:]
-
-    def _drain_stderr() -> None:
-        assert process.stderr is not None
-        try:
-            while chunk := process.stderr.read(_STDERR_READ_CHARS):
-                stderr_chars.extend(chunk)
-        except Exception:
-            return
-
-    stderr_thread = threading.Thread(target=_drain_stderr, daemon=True)
-    stderr_thread.start()
-    report: dict[str, Any] | None = None
-    failure: Exception | None = None
+def _run_stdio_initialize_tools(
+    process: subprocess.Popen[str],
+    *,
+    timeout: float,
+) -> tuple[int, None] | tuple[None, Exception]:
+    """Exchange initialize + tools/list; returns (tool_count, None) or (None, error)."""
     try:
         initialized = _request(
             process,
@@ -433,24 +433,67 @@ def smoke_server(
         tool_rows = tools.get("result", {}).get("tools")
         if "error" in tools or not isinstance(tool_rows, list):
             raise RuntimeError(f"MCP tools/list failed: {tools!r}")
-        report = {
-            "schema_version": "bioetl-mcp-protocol-smoke-v1",
-            "server": server_name,
-            "ok": True,
-            "tool_count": len(tool_rows),
-            "duration_ms": round((time.monotonic() - started) * 1000),
-            "command": command,
-            "environment_names": sorted(server.get("env", {})),
-        }
+        return len(tool_rows), None
     except Exception as exc:
-        failure = exc
-    finally:
-        process.terminate()
+        return None, exc
+
+
+def _terminate_process(process: subprocess.Popen[str]) -> None:
+    process.terminate()
+    try:
+        process.wait(timeout=2)
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.wait(timeout=2)
+
+
+def smoke_server(
+    config_path: Path,
+    server_name: str,
+    *,
+    timeout: float = 15.0,
+) -> dict[str, Any]:
+    safe_config = _safe_config_path(config_path)
+    server = _load_server(safe_config, server_name)
+    if _is_http_server(server):
+        return smoke_http_server(server_name, str(server["url"]), timeout=timeout)
+    command, popen_command, use_shell = _stdio_popen_argv(server)
+    environment = os.environ.copy()
+    environment.update({str(k): str(v) for k, v in server.get("env", {}).items()})
+    started = time.monotonic()
+    cwd = _resolve_mcp_cwd(safe_config)
+    process = subprocess.Popen(  # NOSONAR - argv via ensure_safe_cli_argv; shell=False
+        popen_command,
+        cwd=str(cwd),
+        env=environment,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        bufsize=1,
+        shell=use_shell,
+    )
+    # Drain stderr continuously. Servers like mcp-run-python emit large Deno
+    # install logs; if the pipe fills, the child blocks and initialize hangs.
+    stderr_chars: deque[str] = deque(maxlen=_STDERR_RETENTION_CHARS)
+
+    def _stderr_tail() -> str:
+        return "".join(stderr_chars)[-_STDERR_ERROR_TAIL_CHARS:]
+
+    def _drain_stderr() -> None:
+        assert process.stderr is not None
         try:
-            process.wait(timeout=2)
-        except subprocess.TimeoutExpired:
-            process.kill()
-            process.wait(timeout=2)
+            while chunk := process.stderr.read(_STDERR_READ_CHARS):
+                stderr_chars.extend(chunk)
+        except Exception:
+            return
+
+    stderr_thread = threading.Thread(target=_drain_stderr, daemon=True)
+    stderr_thread.start()
+    try:
+        tool_count, failure = _run_stdio_initialize_tools(process, timeout=timeout)
+    finally:
+        _terminate_process(process)
         stderr_thread.join(timeout=1)
 
     if failure is not None:
@@ -458,8 +501,16 @@ def smoke_server(
         if tail:
             raise RuntimeError(f"{failure} | stderr_tail={tail!r}") from failure
         raise failure
-    assert report is not None
-    return report
+    assert tool_count is not None
+    return {
+        "schema_version": "bioetl-mcp-protocol-smoke-v1",
+        "server": server_name,
+        "ok": True,
+        "tool_count": tool_count,
+        "duration_ms": round((time.monotonic() - started) * 1000),
+        "command": command,
+        "environment_names": sorted(server.get("env", {})),
+    }
 
 
 def _parse_args() -> argparse.Namespace:

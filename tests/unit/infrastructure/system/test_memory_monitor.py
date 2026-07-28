@@ -170,7 +170,7 @@ class TestGetMemoryStatsPsutil:
         monitor._psutil_available = True
 
         with patch(
-            "bioetl.infrastructure.system.memory_monitor._PSUTIL_MODULE", psutil_mock
+            "bioetl.infrastructure.system.memory_monitor._psutil_module", psutil_mock
         ):
             stats = monitor._get_stats_psutil()
 
@@ -185,7 +185,7 @@ class TestGetMemoryStatsPsutil:
         monitor._psutil_available = True
 
         with patch(
-            "bioetl.infrastructure.system.memory_monitor._PSUTIL_MODULE", psutil_mock
+            "bioetl.infrastructure.system.memory_monitor._psutil_module", psutil_mock
         ):
             monitor._get_stats_psutil()
             monitor._get_stats_psutil()

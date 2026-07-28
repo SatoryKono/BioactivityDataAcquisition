@@ -1,11 +1,10 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """State transition and event helpers for `QuarantineEntry` aggregate."""
 
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import Any, cast, TYPE_CHECKING
 
 from bioetl.domain.aggregates._quarantine_value_objects import (
     QuarantineStatus,
@@ -21,12 +20,12 @@ if TYPE_CHECKING:
 class QuarantineEntryTransitionsMixin:
     """Host mixin implementing state machine and event collection."""
 
-    _entry_id: str
-    _run_id: RunID
-    _status: QuarantineStatus
-    _resolution_info: ResolutionInfo | None
-    _metadata: MetaDict
-    _events: list[DomainEvent]
+    _entry_id: str = cast(Any, None)  # Any: host attr default (PD3)
+    _run_id: RunID = cast(Any, None)  # Any: host attr default (PD3)
+    _status: QuarantineStatus = cast(Any, None)  # Any: host attr default (PD3)
+    _resolution_info: ResolutionInfo | None = cast(Any, None)  # Any: host attr default (PD3)
+    _metadata: MetaDict = cast(Any, None)  # Any: host attr default (PD3)
+    _events: list[DomainEvent] = cast(Any, None)  # Any: host attr default (PD3)
 
     def start_review(self) -> None:
         """Mark entry as under review."""

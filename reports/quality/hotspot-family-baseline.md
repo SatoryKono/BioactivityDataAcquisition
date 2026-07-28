@@ -8,8 +8,8 @@
 
 | Family | Files | Total LOC | Files >=250 LOC | Helper ratio | Duplication | Max fan-in | Max fan-in module | Budgets | Budget warnings | Budget review notes |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- | --- | --- |
-| `application_core` | 187 | 22085 | 0 | 0.365 | 0 | 8 | `bioetl.application.core.batch_runtime_failure_policy` | `files_ge_250_loc=0, max_internal_fan_in=10` | `-` | `near_budget:max_internal_fan_in=8/10` |
-| `composition_bootstrap_runtime` | 51 | 6310 | 0 | 0.325 | 0 | 2 | `bioetl.composition.bootstrap.runtime.tracing_bootstrap` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
-| `composition_factories_pipeline` | 32 | 3931 | 1 | 0.330 | 0 | 3 | `bioetl.composition.factories.pipeline.config_types` | `files_ge_250_loc=2, max_internal_fan_in=3` | `-` | `at_budget:max_internal_fan_in=3/3` |
-| `application_services_control_plane` | 139 | 15910 | 0 | 0.424 | 0 | 3 | `bioetl.application.services.control_plane.workflow.manifest_models` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `at_budget:max_internal_fan_in=3/3` |
-| `composition_runtime_builders` | 56 | 6988 | 0 | 0.359 | 0 | 4 | `bioetl.composition.runtime_builders._run_manifest_data_roots` | `files_ge_250_loc=0, max_internal_fan_in=5` | `-` | `near_budget:max_internal_fan_in=4/5` |
+| `application_core` | 187 | 22214 | 1 | 0.370 | 0 | 8 | `bioetl.application.core.batch_runtime_failure_policy` | `files_ge_250_loc=0, max_internal_fan_in=10` | `over_budget:files_ge_250_loc=1/0` | `near_budget:max_internal_fan_in=8/10` |
+| `composition_bootstrap_runtime` | 51 | 6314 | 0 | 0.325 | 0 | 2 | `bioetl.composition.bootstrap.runtime.tracing_bootstrap` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
+| `composition_factories_pipeline` | 32 | 3936 | 1 | 0.330 | 0 | 3 | `bioetl.composition.factories.pipeline.config_types` | `files_ge_250_loc=2, max_internal_fan_in=3` | `-` | `at_budget:max_internal_fan_in=3/3` |
+| `application_services_control_plane` | 139 | 15887 | 0 | 0.423 | 0 | 3 | `bioetl.application.services.control_plane.workflow.manifest_models` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `at_budget:max_internal_fan_in=3/3` |
+| `composition_runtime_builders` | 56 | 6988 | 0 | 0.359 | 0 | 3 | `bioetl.composition.runtime_builders.run_manifest_support` | `files_ge_250_loc=0, max_internal_fan_in=5` | `-` | `-` |

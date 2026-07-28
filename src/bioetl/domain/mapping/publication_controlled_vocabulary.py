@@ -27,20 +27,20 @@ class PublicationControlledVocabularyRegistry:
         )
 
 
-_REGISTRY: PublicationControlledVocabularyRegistry | None = None
+_registry: PublicationControlledVocabularyRegistry | None = None
 
 
 def initialize_publication_controlled_vocabulary(
     registry: PublicationControlledVocabularyRegistry,
 ) -> None:
     """Install the controlled-vocabulary registry for runtime consumers."""
-    global _REGISTRY
-    _REGISTRY = registry
+    global _registry
+    _registry = registry
 
 
 def is_publication_controlled_vocabulary_initialized() -> bool:
     """Return whether the publication controlled-vocabulary registry is ready."""
-    return _REGISTRY is not None
+    return _registry is not None
 
 
 def publication_controlled_vocabulary_values(
@@ -48,6 +48,6 @@ def publication_controlled_vocabulary_values(
     field_name: str,
 ) -> frozenset[str]:
     """Return allowed values for one provider field, or empty when uninitialized."""
-    if _REGISTRY is None:
+    if _registry is None:
         return frozenset()
-    return _REGISTRY.allowed_values(provider, field_name)
+    return _registry.allowed_values(provider, field_name)

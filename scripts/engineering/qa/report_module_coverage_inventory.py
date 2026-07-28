@@ -842,6 +842,24 @@ def _exempt_paths(gates: dict[str, Any]) -> frozenset[str]:
     return frozenset(paths)
 
 
+def _tier_line_min(tier: dict[str, Any], *, default: float = 85.0) -> float:
+    line_min = tier.get("line_min_percent", default)
+    if isinstance(line_min, int | float):
+        return float(line_min)
+    return default
+
+
+def _path_matches_tier_prefixes(repo_path: str, tier: dict[str, Any]) -> bool:
+    prefixes = tier.get("path_prefixes", [])
+    if not isinstance(prefixes, list):
+        return False
+    return any(
+        repo_path.startswith(prefix)
+        for prefix in prefixes
+        if isinstance(prefix, str)
+    )
+
+
 def _resolve_module_tier(
     repo_path: str,
     *,
@@ -857,24 +875,11 @@ def _resolve_module_tier(
         if not isinstance(tier_name, str):
             continue
         tier = tiers.get(tier_name, {})
-        if not isinstance(tier, dict):
-            continue
-        prefixes = tier.get("path_prefixes", [])
-        if not isinstance(prefixes, list):
-            prefixes = []
-        if any(
-            repo_path.startswith(prefix)
-            for prefix in prefixes
-            if isinstance(prefix, str)
-        ):
-            line_min = tier.get("line_min_percent", 85)
-            if isinstance(line_min, int | float):
-                return tier_name, float(line_min)
+        if isinstance(tier, dict) and _path_matches_tier_prefixes(repo_path, tier):
+            return tier_name, _tier_line_min(tier)
     default = tiers.get("default_module", {})
     if isinstance(default, dict):
-        line_min = default.get("line_min_percent", 85)
-        if isinstance(line_min, int | float):
-            return "default_module", float(line_min)
+        return "default_module", _tier_line_min(default)
     return "default_module", 85.0
 
 

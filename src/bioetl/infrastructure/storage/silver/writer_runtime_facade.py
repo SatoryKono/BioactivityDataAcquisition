@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 # pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
@@ -12,7 +11,7 @@ services.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import cast
+from typing import Any, cast
 
 from bioetl.domain.ports import SilverWriteRequest
 from bioetl.domain.types import BronzeRecord
@@ -66,11 +65,11 @@ class SilverWriterRuntimeFacade(
     def _should_dual_write(self) -> bool:
         raise NotImplementedError
 
-    _validation: SilverValidationOperations | None
-    _delta: SilverDeltaOperations | None
-    _postwrite: SilverPostwriteOperations | None
-    _merged: SilverMergedOperations | None
-    _host: object | None
+    _validation: SilverValidationOperations | None = cast(Any, None)  # Any: host attr default (PD3)
+    _delta: SilverDeltaOperations | None = cast(Any, None)  # Any: host attr default (PD3)
+    _postwrite: SilverPostwriteOperations | None = cast(Any, None)  # Any: host attr default (PD3)
+    _merged: SilverMergedOperations | None = cast(Any, None)  # Any: host attr default (PD3)
+    _host: object | None = cast(Any, None)  # Any: host attr default (PD3)
 
     async def _write_single_target(
         self,

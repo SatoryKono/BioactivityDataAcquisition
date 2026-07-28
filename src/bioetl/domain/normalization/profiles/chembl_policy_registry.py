@@ -60,16 +60,16 @@ class ChemblPolicySurface:
     invalid_value_mode: str
 
 
-_CONTROLLED_VOCABULARIES: Mapping[str, ChemblControlledVocabularyFamily] = (
+_controlled_vocabularies: Mapping[str, ChemblControlledVocabularyFamily] = (
     MappingProxyType({})
 )
-_STRICT_BOOLEAN_FAMILIES: Mapping[str, ChemblStrictScalarFamily] = MappingProxyType({})
-_STRICT_FLAG_FAMILIES: Mapping[str, ChemblStrictScalarFamily] = MappingProxyType({})
-_ONTOLOGY_FAMILIES: Mapping[str, ChemblOntologyPolicyFamily] = MappingProxyType({})
-_REFERENCE_IDENTIFIER_FAMILIES: Mapping[str, ChemblReferenceIdentifierFamily] = (
+_strict_boolean_families: Mapping[str, ChemblStrictScalarFamily] = MappingProxyType({})
+_strict_flag_families: Mapping[str, ChemblStrictScalarFamily] = MappingProxyType({})
+_ontology_families: Mapping[str, ChemblOntologyPolicyFamily] = MappingProxyType({})
+_reference_identifier_families: Mapping[str, ChemblReferenceIdentifierFamily] = (
     MappingProxyType({})
 )
-_POLICY_SURFACES: Mapping[tuple[str, str], ChemblPolicySurface] = MappingProxyType({})
+_policy_surfaces: Mapping[tuple[str, str], ChemblPolicySurface] = MappingProxyType({})
 
 
 def _parse_chembl_field_ref(field_ref: str) -> tuple[str, str]:
@@ -207,18 +207,18 @@ def _add_reference_identifier_surfaces(
 
 def initialize_chembl_policy_registry(data: ChemblPolicyRegistryData) -> None:
     """Inject immutable policy data into the domain registry runtime state."""
-    global _CONTROLLED_VOCABULARIES, _ONTOLOGY_FAMILIES, _POLICY_SURFACES
-    global _REFERENCE_IDENTIFIER_FAMILIES, _STRICT_BOOLEAN_FAMILIES
-    global _STRICT_FLAG_FAMILIES
+    global _controlled_vocabularies, _ontology_families, _policy_surfaces
+    global _reference_identifier_families, _strict_boolean_families
+    global _strict_flag_families
 
-    _STRICT_BOOLEAN_FAMILIES = family_mapping_by_name(data.strict_boolean_families)
-    _STRICT_FLAG_FAMILIES = family_mapping_by_name(data.strict_flag_families)
-    _CONTROLLED_VOCABULARIES = family_mapping_by_name(data.controlled_vocabularies)
-    _ONTOLOGY_FAMILIES = family_mapping_by_name(data.ontology_families)
-    _REFERENCE_IDENTIFIER_FAMILIES = family_mapping_by_name(
+    _strict_boolean_families = family_mapping_by_name(data.strict_boolean_families)
+    _strict_flag_families = family_mapping_by_name(data.strict_flag_families)
+    _controlled_vocabularies = family_mapping_by_name(data.controlled_vocabularies)
+    _ontology_families = family_mapping_by_name(data.ontology_families)
+    _reference_identifier_families = family_mapping_by_name(
         data.reference_identifier_families
     )
-    _POLICY_SURFACES = _build_policy_surfaces(data)
+    _policy_surfaces = _build_policy_surfaces(data)
 
 
 def _family_fields(
@@ -237,7 +237,7 @@ def _family_fields(
 
 def chembl_policy_surface(entity: str, field: str) -> ChemblPolicySurface | None:
     """Return the shared ChEMBL policy surface for one field when defined."""
-    return _POLICY_SURFACES.get((entity, field))
+    return _policy_surfaces.get((entity, field))
 
 
 def chembl_boolean_family_fields(
@@ -246,7 +246,7 @@ def chembl_boolean_family_fields(
     entity: str | None = None,
 ) -> frozenset[str]:
     """Return field names governed by one shared strict-boolean family."""
-    payload = _STRICT_BOOLEAN_FAMILIES[family]
+    payload = _strict_boolean_families[family]
     return _family_fields(fields=list(payload.fields), entity=entity)
 
 
@@ -256,7 +256,7 @@ def chembl_flag_family_fields(
     entity: str | None = None,
 ) -> frozenset[str]:
     """Return field names governed by one shared strict-flag family."""
-    payload = _STRICT_FLAG_FAMILIES[family]
+    payload = _strict_flag_families[family]
     return _family_fields(fields=list(payload.fields), entity=entity)
 
 
@@ -266,7 +266,7 @@ def chembl_controlled_family_fields(
     entity: str | None = None,
 ) -> frozenset[str]:
     """Return field names governed by one shared controlled-vocabulary family."""
-    payload = _CONTROLLED_VOCABULARIES[family]
+    payload = _controlled_vocabularies[family]
     return _family_fields(fields=list(payload.fields), entity=entity)
 
 
@@ -277,7 +277,7 @@ def chembl_ontology_family_fields(
     include_code_label_fields: bool = False,
 ) -> frozenset[str]:
     """Return field names governed by one shared ontology/reference-ID family."""
-    payload = _ONTOLOGY_FAMILIES[family]
+    payload = _ontology_families[family]
     fields = list(payload.fields)
     if include_code_label_fields:
         fields.extend(payload.code_label_fields)
@@ -290,7 +290,7 @@ def chembl_reference_identifier_family_fields(
     entity: str | None = None,
 ) -> frozenset[str]:
     """Return field names governed by one shared ChEMBL reference-ID family."""
-    payload = _REFERENCE_IDENTIFIER_FAMILIES[family]
+    payload = _reference_identifier_families[family]
     return _family_fields(fields=list(payload.fields), entity=entity)
 
 

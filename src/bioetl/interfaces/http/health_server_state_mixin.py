@@ -1,8 +1,9 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Provider-state helpers for HealthServer."""
 
 from __future__ import annotations
+
+from typing import Any, cast
 
 from bioetl.domain.ports import HealthMonitorPort
 from bioetl.domain.types import HealthStatus, JsonDict
@@ -11,7 +12,7 @@ from bioetl.domain.types import HealthStatus, JsonDict
 class HealthServerStateMixin:
     """Mixin with provider state aggregation helpers."""
 
-    _health_monitor: HealthMonitorPort | None
+    _health_monitor: HealthMonitorPort | None = cast(Any, None)  # Any: host attr default (PD3)
 
     def _get_overall_status(self) -> HealthStatus:
         """Get overall health status from all providers."""

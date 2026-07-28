@@ -1,10 +1,9 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Maintenance mixin for medallion lifecycle operations."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import Any, cast, TYPE_CHECKING
 
 from bioetl.domain.exceptions import BioETLError, StorageError
 
@@ -27,8 +26,8 @@ _MAINTENANCE_OPERATION_ERRORS = (
 class _MedallionMaintenanceMixin:
     """Direct maintenance operations delegated to StorageMaintenancePort."""
 
-    storage: StorageMaintenancePort
-    logger: LoggerPort
+    storage: StorageMaintenancePort = cast(Any, None)  # Any: host attr default (PD3)
+    logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)
 
     async def vacuum(
         self,

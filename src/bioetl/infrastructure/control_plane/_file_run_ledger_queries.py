@@ -1,8 +1,9 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods provided by concrete composition.
 """Read-side mixin for file-backed run-ledger persistence."""
 
 from __future__ import annotations
+
+from typing import Any, cast
 
 from pathlib import Path
 from time import perf_counter
@@ -28,8 +29,8 @@ _RUN_LEDGER_MESSAGE_PREFIX = "Run ledger"
 class FileRunLedgerQueriesMixin:
     """Query and load helpers for ``FileRunLedgerStore``."""
 
-    base_path: Path
-    metrics: MetricsPort | None
+    base_path: Path = cast(Any, None)  # host attr default (PD3)
+    metrics: MetricsPort | None = cast(Any, None)  # host attr default (PD3)
 
     def list_entries(self, manifest_id: str) -> list[RunLedgerEntry]:
         """Return all entries for one manifest in append order."""

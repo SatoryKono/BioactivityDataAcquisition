@@ -23,7 +23,7 @@ DEFAULT_REPORT_ROOT = Path("reports") / "run-reports"
 # Tests and composition can inject an explicit override; under pytest the
 # runtime is treated as test mode so Windows cloud-synced worktrees do not
 # stall on fsync during incidental report writes.
-_TEST_MODE_OVERRIDE: bool | None = None
+_test_mode_override: bool | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -37,13 +37,13 @@ class RunReportWriteResult:
 
 def set_report_write_test_mode(enabled: bool | None) -> None:
     """Override test-mode detection for report durability policy."""
-    global _TEST_MODE_OVERRIDE
-    _TEST_MODE_OVERRIDE = enabled
+    global _test_mode_override
+    _test_mode_override = enabled
 
 
 def _is_report_write_test_mode() -> bool:
-    if _TEST_MODE_OVERRIDE is not None:
-        return _TEST_MODE_OVERRIDE
+    if _test_mode_override is not None:
+        return _test_mode_override
     # Avoid process env maps: detect pytest runtime without Settings.
     import sys
 

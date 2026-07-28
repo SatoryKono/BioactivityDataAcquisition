@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Mixin providing default stub implementations for FilterableDataSourcePort.
 
@@ -25,7 +24,7 @@ __all__ = [
 ]
 
 
-from typing import TYPE_CHECKING, ClassVar, Protocol, runtime_checkable
+from typing import Any, cast, TYPE_CHECKING, ClassVar, Protocol, runtime_checkable
 
 from bioetl.domain.types import JsonDict
 
@@ -96,7 +95,7 @@ class NotSupportedMultiFilterMixin:
         ...     # fetch_multi_filtered is now provided by mixin
     """
 
-    provider_name: str  # Must be defined by the adapter class
+    provider_name: str = cast(Any, None)  # Any: host attr default (PD3) Must be defined by the adapter class
     unsupported_multi_filter_message: ClassVar[str | None] = None
 
     def fetch_multi_filtered(

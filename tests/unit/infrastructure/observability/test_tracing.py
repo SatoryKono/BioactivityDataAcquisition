@@ -56,11 +56,11 @@ class TestModuleImports:
     """Tests for module-level imports."""
 
     def test_otel_available_defined(self) -> None:
-        """OTEL_AVAILABLE flag is defined."""
+        """otel_available flag is defined."""
         from bioetl.infrastructure.observability import tracing
 
-        assert hasattr(tracing, "OTEL_AVAILABLE")
-        assert isinstance(tracing.OTEL_AVAILABLE, bool)
+        assert hasattr(tracing, "otel_available")
+        assert isinstance(tracing.otel_available, bool)
 
     def test_opentelemetry_tracer_class_defined(self) -> None:
         """OpenTelemetryTracer class is defined."""
@@ -76,7 +76,7 @@ class TestOpenTelemetryTracerWithoutOTEL:
         """OpenTelemetryTracer raises ImportError if OTEL not available."""
         from bioetl.infrastructure.observability import tracing
 
-        if not tracing.OTEL_AVAILABLE:
+        if not tracing.otel_available:
             with pytest.raises(ImportError) as exc_info:
                 tracing.OpenTelemetryTracer()
             assert "OpenTelemetry is not installed" in str(exc_info.value)
@@ -128,7 +128,7 @@ class TestOpenTelemetryTracerWithOTEL:
         """Test when OTEL is available."""
         from bioetl.infrastructure.observability import tracing
 
-        if tracing.OTEL_AVAILABLE:
+        if tracing.otel_available:
             # Create tracer - it should work
             tracer = tracing.OpenTelemetryTracer("test_service")
             assert tracer is not None
@@ -140,7 +140,7 @@ class TestOpenTelemetryTracerWithOTEL:
         """Tracer provider should publish a stable service.name resource."""
         from bioetl.infrastructure.observability import tracing
 
-        if tracing.OTEL_AVAILABLE:
+        if tracing.otel_available:
             tracer = tracing.OpenTelemetryTracer("bioetl")
             try:
                 assert (
@@ -158,7 +158,7 @@ class TestOpenTelemetryTracerWithOTEL:
         """Explicit OTEL_SERVICE_NAME should override the constructor default."""
         from bioetl.infrastructure.observability import tracing
 
-        if tracing.OTEL_AVAILABLE:
+        if tracing.otel_available:
             monkeypatch.setenv("OTEL_SERVICE_NAME", "bioetl-local")
             tracer = tracing.OpenTelemetryTracer("bioetl")
             try:
@@ -181,7 +181,7 @@ class TestOpenTelemetryTracerClose:
         """close() can be called multiple times safely."""
         from bioetl.infrastructure.observability import tracing
 
-        if tracing.OTEL_AVAILABLE:
+        if tracing.otel_available:
             tracer = tracing.OpenTelemetryTracer("test")
             tracer.close()
             tracer.close()  # Should not raise
@@ -518,8 +518,11 @@ class TestTracingImportFallbackBranches:
         from bioetl.infrastructure.observability import tracing
 
         module_path = Path(tracing.__file__)
+        module_suffix = "_".join(
+            prefix.replace(".", "_") for prefix in blocked_prefixes
+        )
         spec = importlib.util.spec_from_file_location(
-            f"_bioetl_tracing_fallback_{'_'.join(blocked_prefixes)}",
+            f"_bioetl_tracing_fallback_{module_suffix or 'available'}",
             module_path,
         )
         assert spec is not None
@@ -569,7 +572,7 @@ class TestTracingImportFallbackBranches:
             otlp_distribution_available=True,
         )
 
-        assert module.OTEL_AVAILABLE is True
+        assert module.otel_available is True
         assert module.otlp_available is True
         assert module._load_otlp_exporter_class() is None
         assert module.otlp_available is False
@@ -585,7 +588,7 @@ class TestTracingImportFallbackBranches:
             otlp_distribution_available=True,
         )
 
-        assert module.OTEL_AVAILABLE is True
+        assert module.otel_available is True
         assert module.otlp_available is True
         assert module._OtlpExporterClass is None
 
@@ -599,7 +602,7 @@ class TestTracingImportFallbackBranches:
             blocked_prefixes=("opentelemetry",),
         )
 
-        assert module.OTEL_AVAILABLE is False
+        assert module.otel_available is False
         assert module.otlp_available is False
 
     def test_module_marks_otlp_unavailable_when_distribution_missing(
@@ -613,7 +616,7 @@ class TestTracingImportFallbackBranches:
             otlp_distribution_available=False,
         )
 
-        assert module.OTEL_AVAILABLE is True
+        assert module.otel_available is True
         assert module.otlp_available is False
 
 
@@ -627,7 +630,7 @@ class TestOpenTelemetryTracerSpanAdapter:
         """Returned handle supports attributes, events, exceptions, and exit."""
         from bioetl.infrastructure.observability import tracing
 
-        if not tracing.OTEL_AVAILABLE:
+        if not tracing.otel_available:
             pytest.skip("OpenTelemetry is not available")
 
         entered_span = MagicMock()
@@ -685,7 +688,7 @@ class TestOpenTelemetryTracerSpanAdapter:
         """Nested adapters must not override global providers or leak contexts."""
         from bioetl.infrastructure.observability import tracing
 
-        if not tracing.OTEL_AVAILABLE:
+        if not tracing.otel_available:
             pytest.skip("OpenTelemetry is not available")
 
         from opentelemetry.sdk.trace.export.in_memory_span_exporter import (
@@ -751,7 +754,7 @@ class TestTracingIntegration:
         from bioetl.infrastructure.observability import tracing
 
         def create_tracer(use_otel: bool = False) -> NoOpTracing:
-            if use_otel and tracing.OTEL_AVAILABLE:
+            if use_otel and tracing.otel_available:
                 return tracing.OpenTelemetryTracer("bioetl")
             return tracing.NoOpTracing()
 
@@ -809,7 +812,7 @@ class TestTelemetryExporterResolution:
         """Local Tempo endpoints should default to insecure OTLP."""
         from bioetl.infrastructure.observability import tracing
 
-        if not tracing.OTEL_AVAILABLE:
+        if not tracing.otel_available:
             pytest.skip("OpenTelemetry is not available")
 
         exporter_factory = MagicMock(return_value=MagicMock())
@@ -833,7 +836,7 @@ class TestTelemetryExporterResolution:
         """Explicit insecure env values should win over local defaults."""
         from bioetl.infrastructure.observability import tracing
 
-        if not tracing.OTEL_AVAILABLE:
+        if not tracing.otel_available:
             pytest.skip("OpenTelemetry is not available")
 
         exporter_factory = MagicMock(return_value=MagicMock())
@@ -859,7 +862,7 @@ class TestOpenTelemetryTracerGetTracer:
         """Test get_tracer returns an OpenTelemetry tracer."""
         from bioetl.infrastructure.observability import tracing
 
-        if tracing.OTEL_AVAILABLE:
+        if tracing.otel_available:
             otel_tracer = tracing.OpenTelemetryTracer("test_service")
             try:
                 tracer = otel_tracer.get_tracer("component")
@@ -873,7 +876,7 @@ class TestOpenTelemetryTracerGetTracer:
         """Test get_tracer can be called with different names."""
         from bioetl.infrastructure.observability import tracing
 
-        if tracing.OTEL_AVAILABLE:
+        if tracing.otel_available:
             otel_tracer = tracing.OpenTelemetryTracer("test_service")
             try:
                 tracer1 = otel_tracer.get_tracer("component1")
@@ -894,7 +897,7 @@ class TestOpenTelemetryTracerCloseExceptionHandling:
         """Test close() handles exceptions from force_flush gracefully."""
         from bioetl.infrastructure.observability import tracing
 
-        if tracing.OTEL_AVAILABLE:
+        if tracing.otel_available:
             otel_tracer = tracing.OpenTelemetryTracer("test_service")
 
             # Mock the provider to raise an exception during force_flush
@@ -914,7 +917,7 @@ class TestOpenTelemetryTracerCloseExceptionHandling:
         """Test close() handles exceptions from shutdown gracefully."""
         from bioetl.infrastructure.observability import tracing
 
-        if tracing.OTEL_AVAILABLE:
+        if tracing.otel_available:
             otel_tracer = tracing.OpenTelemetryTracer("test_service")
 
             # Mock the provider to raise an exception during shutdown
@@ -938,14 +941,14 @@ class TestOpenTelemetryTracerWithMockedOTEL:
 
     def test_init_raises_importerror_when_otel_not_available(self) -> None:
         """Test ImportError is raised when OTEL is not available."""
-        # We need to test the case where OTEL_AVAILABLE is False
+        # We need to test the case where otel_available is False
         # This requires temporarily patching the module
         from bioetl.infrastructure.observability import tracing
 
-        original_available = tracing.OTEL_AVAILABLE
+        original_available = tracing.otel_available
         try:
             # Temporarily set OTEL as unavailable
-            tracing.OTEL_AVAILABLE = False
+            tracing.otel_available = False
 
             with pytest.raises(ImportError) as exc_info:
                 tracing.OpenTelemetryTracer("test")
@@ -953,13 +956,13 @@ class TestOpenTelemetryTracerWithMockedOTEL:
             assert "OpenTelemetry is not installed" in str(exc_info.value)
         finally:
             # Restore original value
-            tracing.OTEL_AVAILABLE = original_available
+            tracing.otel_available = original_available
 
     def test_tracer_with_console_exporter_when_otlp_unavailable(self) -> None:
         """Test tracer uses ConsoleSpanExporter when OTLP is unavailable."""
         from bioetl.infrastructure.observability import tracing
 
-        if tracing.OTEL_AVAILABLE:
+        if tracing.otel_available:
             original_otlp = tracing.otlp_available
             original_class = tracing._OtlpExporterClass
 
@@ -987,7 +990,7 @@ class TestOpenTelemetryTracerServiceName:
         """Test default service name is 'bioetl'."""
         from bioetl.infrastructure.observability import tracing
 
-        if tracing.OTEL_AVAILABLE:
+        if tracing.otel_available:
             # Create with default service name
             otel_tracer = tracing.OpenTelemetryTracer()
             assert otel_tracer is not None
@@ -999,7 +1002,7 @@ class TestOpenTelemetryTracerServiceName:
         """Test custom service name can be set."""
         from bioetl.infrastructure.observability import tracing
 
-        if tracing.OTEL_AVAILABLE:
+        if tracing.otel_available:
             otel_tracer = tracing.OpenTelemetryTracer("custom_service")
             assert otel_tracer is not None
             otel_tracer.close()

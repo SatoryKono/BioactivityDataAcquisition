@@ -1,8 +1,9 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Result and error handling helpers for enrichment coordinator."""
 
 from __future__ import annotations
+
+from typing import Any, cast
 
 from datetime import datetime
 
@@ -15,8 +16,8 @@ from bioetl.domain.types import JsonDict
 class EnrichmentCoordinatorResultMixin:
     """Host mixin with result assembly and exception mapping logic."""
 
-    _logger: LoggerPort
-    _dq_config: CompositeDQConfig
+    _logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)
+    _dq_config: CompositeDQConfig = cast(Any, None)  # Any: host attr default (PD3)
 
     def _build_enricher_result(
         self,

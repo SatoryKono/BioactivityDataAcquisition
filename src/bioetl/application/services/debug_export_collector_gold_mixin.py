@@ -1,8 +1,9 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Gold validation and lineage row recording for debug export collectors."""
 
 from __future__ import annotations
+
+from typing import Any, cast
 
 from collections.abc import Sequence
 from datetime import datetime
@@ -30,12 +31,12 @@ from .debug_export_helpers import (
 class DebugExportGoldRowsMixin:
     """Record Gold rejection and lineage rows into collector-owned tables."""
 
-    _run_id: str
-    _workflow_id: str
-    _pipeline_id: str
-    _provider_id: str
-    _gold_rejected_rows: list[dict[str, object]]
-    _lineage_rows: list[dict[str, object]]
+    _run_id: str = cast(Any, None)  # Any: host attr default (PD3)
+    _workflow_id: str = cast(Any, None)  # Any: host attr default (PD3)
+    _pipeline_id: str = cast(Any, None)  # Any: host attr default (PD3)
+    _provider_id: str = cast(Any, None)  # Any: host attr default (PD3)
+    _gold_rejected_rows: list[dict[str, object]] = cast(Any, None)  # Any: host attr default (PD3)
+    _lineage_rows: list[dict[str, object]] = cast(Any, None)  # Any: host attr default (PD3)
 
     def record_gold_filter(
         self,

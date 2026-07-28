@@ -128,7 +128,9 @@ def test_documentation_cleanup_inventory_routes_diagram_artifacts() -> None:
             "90-pkg-application-composite-checkpoint.mmd"
         ): "architecture-diagram-package-family-sources",
         "docs/02-architecture/diagrams/bundles/class.bundle.md": "architecture-diagram-bundles",
-        "docs/02-architecture/diagrams/architecture/png/INDEX.md": "architecture-diagram-render-artifacts",
+        # PNG under diagrams/**/png/ is gitignored (ADR-040 / DOC-GOV-02).
+        # Tracked render indexes live under svg/.
+        "docs/02-architecture/diagrams/architecture/svg/INDEX.md": "architecture-diagram-render-artifacts",
     }
     missing = sorted(path for path in expected_routes if path not in rows)
     assert not missing
@@ -245,10 +247,10 @@ def test_documentation_cleanup_inventory_classifies_plans_and_reports() -> None:
     assert active_backlog["lifecycle"] == "active_backlog"
     assert active_backlog["recommended_action"] == "keep"
 
-    supporting_context = rows["docs/plans/chembl-baseline-refactor-plan-2026-06-01.md"]
-    assert supporting_context["status"] == "Working"
-    assert supporting_context["lifecycle"] == "supporting_context"
-    assert supporting_context["recommended_action"] == "archive-after-migration"
+    plans_entrypoint = rows["docs/plans/README.md"]
+    assert plans_entrypoint["status"] == "Active"
+    assert plans_entrypoint["lifecycle"] == "plans_governance_entrypoint"
+    assert plans_entrypoint["recommended_action"] == "keep"
 
     closeout = rows["reports/quality/tech-debt-issues-5847-5852-closeout.json"]
     assert closeout["lifecycle"] == "closeout_evidence"

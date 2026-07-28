@@ -111,6 +111,86 @@ def _non_empty_str(mapping: dict[str, Any], key: str) -> bool:
     return isinstance(value, str) and bool(value.strip())
 
 
+_DEDICATED_AUTHORITY_REQUIRED_KEYS = frozenset(
+    {
+        "owner",
+        "business_owner_role",
+        "composite_role",
+        "lineage_role",
+        "promotion_policy",
+        "authority_scope",
+        "rationale",
+    }
+)
+_DEDICATED_AUTHORITY_PROJECTED_ROLE_KEYS = frozenset(
+    {
+        "owner",
+        "business_owner_role",
+        "composite_role",
+        "lineage_role",
+        "promotion_policy",
+    }
+)
+
+
+def _findings_for_dedicated_entry(
+    entry: dict[str, Any],
+    review_lookup: dict[str, Any],
+) -> list[GovernanceFinding]:
+    findings: list[GovernanceFinding] = []
+    cluster_id = str(entry.get("cluster_id") or "<unknown>")
+    review_entry = review_lookup.get(cluster_id)
+    if review_entry is None:
+        return [
+            GovernanceFinding(
+                kind="missing_dedicated_authority_projection",
+                subject=cluster_id,
+                message=f"{cluster_id} is missing from semantic review policy",
+            )
+        ]
+    for key in _DEDICATED_AUTHORITY_REQUIRED_KEYS:
+        if not _non_empty_str(entry, key):
+            findings.append(
+                GovernanceFinding(
+                    kind="missing_dedicated_authority_metadata",
+                    subject=cluster_id,
+                    message=f"{cluster_id} dedicated authority is missing {key}",
+                )
+            )
+        elif (
+            key in _DEDICATED_AUTHORITY_PROJECTED_ROLE_KEYS
+            and review_entry.get(key) != entry.get(key)
+        ):
+            findings.append(
+                GovernanceFinding(
+                    kind="dedicated_authority_drift",
+                    subject=cluster_id,
+                    message=f"{cluster_id} review projection differs for {key}",
+                )
+            )
+    return findings
+
+
+def _findings_for_dedicated_section(
+    section: str,
+    payload: object,
+    review_lookup: dict[str, Any],
+) -> list[GovernanceFinding]:
+    if not isinstance(payload, list):
+        return [
+            GovernanceFinding(
+                kind="invalid_dedicated_authority_registry",
+                subject=section,
+                message=f"{section} authority registry must define a list",
+            )
+        ]
+    findings: list[GovernanceFinding] = []
+    for entry in payload:
+        if isinstance(entry, dict):
+            findings.extend(_findings_for_dedicated_entry(entry, review_lookup))
+    return findings
+
+
 def _dedicated_authority_findings(
     review_payload: dict[str, Any],
     *,
@@ -118,7 +198,6 @@ def _dedicated_authority_findings(
     partial_payload: dict[str, Any],
 ) -> list[GovernanceFinding]:
     """Ensure review inventory cannot drift from dedicated authority registries."""
-    findings: list[GovernanceFinding] = []
     review_partial = {
         str(entry.get("cluster_id")): entry
         for entry in review_payload.get("partial_cluster_policies", [])
@@ -129,68 +208,14 @@ def _dedicated_authority_findings(
         for entry in review_payload.get("weak_cluster_decisions", [])
         if isinstance(entry, dict) and entry.get("cluster_id")
     }
-    required_keys = {
-        "owner",
-        "business_owner_role",
-        "composite_role",
-        "lineage_role",
-        "promotion_policy",
-        "authority_scope",
-        "rationale",
-    }
-    projected_role_keys = {
-        "owner",
-        "business_owner_role",
-        "composite_role",
-        "lineage_role",
-        "promotion_policy",
-    }
+    findings: list[GovernanceFinding] = []
     for section, payload, review_lookup in (
         ("assay_metadata", assay_payload.get("fields"), review_weak),
         ("partial_identifier", partial_payload.get("clusters"), review_partial),
     ):
-        if not isinstance(payload, list):
-            findings.append(
-                GovernanceFinding(
-                    kind="invalid_dedicated_authority_registry",
-                    subject=section,
-                    message=f"{section} authority registry must define a list",
-                )
-            )
-            continue
-        for entry in payload:
-            if not isinstance(entry, dict):
-                continue
-            cluster_id = str(entry.get("cluster_id") or "<unknown>")
-            review_entry = review_lookup.get(cluster_id)
-            if review_entry is None:
-                findings.append(
-                    GovernanceFinding(
-                        kind="missing_dedicated_authority_projection",
-                        subject=cluster_id,
-                        message=f"{cluster_id} is missing from semantic review policy",
-                    )
-                )
-                continue
-            for key in required_keys:
-                if not _non_empty_str(entry, key):
-                    findings.append(
-                        GovernanceFinding(
-                            kind="missing_dedicated_authority_metadata",
-                            subject=cluster_id,
-                            message=f"{cluster_id} dedicated authority is missing {key}",
-                        )
-                    )
-                elif key in projected_role_keys and review_entry.get(key) != entry.get(
-                    key
-                ):
-                    findings.append(
-                        GovernanceFinding(
-                            kind="dedicated_authority_drift",
-                            subject=cluster_id,
-                            message=f"{cluster_id} review projection differs for {key}",
-                        )
-                    )
+        findings.extend(
+            _findings_for_dedicated_section(section, payload, review_lookup)
+        )
     return findings
 
 

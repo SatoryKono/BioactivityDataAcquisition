@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods provided by concrete composition.
 """Health check and preview operations mixin for StorageBundle."""
 
@@ -6,7 +5,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import Any, TYPE_CHECKING, cast
 
 from bioetl.composition.factories.storage._blocking import run_storage_blocking
 from bioetl.domain.types import HealthStatus, JsonDict
@@ -22,9 +21,9 @@ __all__ = ["StorageBundleHealthMixin"]
 class StorageBundleHealthMixin:
     """Mixin providing health check, preview, and lifecycle operations."""
 
-    bronze: BronzeWriter
-    silver: SilverWriter
-    gold: GoldWriter
+    bronze: BronzeWriter = cast(Any, None)  # Any: host attr default (PD3)
+    silver: SilverWriter = cast(Any, None)  # Any: host attr default (PD3)
+    gold: GoldWriter = cast(Any, None)  # Any: host attr default (PD3)
 
     async def aclose(self) -> None:
         """Close resources.

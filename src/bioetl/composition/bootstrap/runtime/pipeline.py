@@ -1,3 +1,5 @@
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual (PD3).
 """Main composition-root bootstrap for runtime pipeline execution."""
 
 from __future__ import annotations

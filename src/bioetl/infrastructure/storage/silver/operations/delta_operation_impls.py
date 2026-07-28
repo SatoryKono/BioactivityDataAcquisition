@@ -1,3 +1,5 @@
+# pyright: reportImportCycles=false
+# Import cycle residual tracked in allowlist (PD3).
 """Implementation helpers for Silver Delta operation facades."""
 
 from __future__ import annotations

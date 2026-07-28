@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Read-only property helpers for `QuarantineEntry` aggregate."""
 
@@ -6,7 +5,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import Any, cast, TYPE_CHECKING
 
 from bioetl.domain.aggregates._quarantine_value_objects import (
     QuarantineStatus,
@@ -20,17 +19,17 @@ if TYPE_CHECKING:
 class QuarantineEntryPropertiesMixin:
     """Host mixin exposing immutable aggregate state and projections."""
 
-    _entry_id: str
-    _pipeline_name: str
-    _error_code: str
-    _payload: BronzeRecord
-    _payload_hash: ContentHash
-    _run_id: RunID
-    _batch_id: BatchID
-    _status: QuarantineStatus
-    _created_at: datetime
-    _metadata: MetaDict
-    _resolution_info: ResolutionInfo | None
+    _entry_id: str = cast(Any, None)  # Any: host attr default (PD3)
+    _pipeline_name: str = cast(Any, None)  # Any: host attr default (PD3)
+    _error_code: str = cast(Any, None)  # Any: host attr default (PD3)
+    _payload: BronzeRecord = cast(Any, None)  # Any: host attr default (PD3)
+    _payload_hash: ContentHash = cast(Any, None)  # Any: host attr default (PD3)
+    _run_id: RunID = cast(Any, None)  # Any: host attr default (PD3)
+    _batch_id: BatchID = cast(Any, None)  # Any: host attr default (PD3)
+    _status: QuarantineStatus = cast(Any, None)  # Any: host attr default (PD3)
+    _created_at: datetime = cast(Any, None)  # Any: host attr default (PD3)
+    _metadata: MetaDict = cast(Any, None)  # Any: host attr default (PD3)
+    _resolution_info: ResolutionInfo | None = cast(Any, None)  # Any: host attr default (PD3)
 
     @property
     def entry_id(self) -> str:

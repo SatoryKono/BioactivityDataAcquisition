@@ -1,11 +1,10 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Routing and endpoint handlers for HealthServer."""
 
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING
+from typing import Any, cast, TYPE_CHECKING
 from urllib.parse import parse_qs, urlsplit
 
 from bioetl.application.runtime_clock import current_utc_time
@@ -34,17 +33,17 @@ _PROMETHEUS_TEXT_CONTENT_TYPE = "text/plain; version=0.0.4; charset=utf-8"
 class HealthServerRoutingMixin:
     """Mixin for health endpoint routing and payload generation."""
 
-    _health_monitor: HealthMonitorPort | None
-    _quarantine_service: QuarantineService | None
-    _checkpoint_port: CheckpointPort | None
-    _run_manifest_port: RunManifestPort | None
-    _run_ledger_port: RunLedgerPort | None
-    _workflow_manifest_port: WorkflowManifestPort | None
-    _metrics_exposition: HealthMetricsExpositionPort
-    _clock: ClockPort | None
-    _data_root: str | None
-    _prometheus_base_url: str
-    _forensic_endpoint_limiter: asyncio.Semaphore
+    _health_monitor: HealthMonitorPort | None = cast(Any, None)  # Any: host attr default (PD3)
+    _quarantine_service: QuarantineService | None = cast(Any, None)  # Any: host attr default (PD3)
+    _checkpoint_port: CheckpointPort | None = cast(Any, None)  # Any: host attr default (PD3)
+    _run_manifest_port: RunManifestPort | None = cast(Any, None)  # Any: host attr default (PD3)
+    _run_ledger_port: RunLedgerPort | None = cast(Any, None)  # Any: host attr default (PD3)
+    _workflow_manifest_port: WorkflowManifestPort | None = cast(Any, None)  # Any: host attr default (PD3)
+    _metrics_exposition: HealthMetricsExpositionPort = cast(Any, None)  # Any: host attr default (PD3)
+    _clock: ClockPort | None = cast(Any, None)  # Any: host attr default (PD3)
+    _data_root: str | None = cast(Any, None)  # Any: host attr default (PD3)
+    _prometheus_base_url: str = cast(Any, None)  # Any: host attr default (PD3)
+    _forensic_endpoint_limiter: asyncio.Semaphore = cast(Any, None)  # Any: host attr default (PD3)
 
     if TYPE_CHECKING:
         # Supplied by sibling mixins in the concrete HealthServer MRO.

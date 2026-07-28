@@ -1,8 +1,9 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Delta operations service for SilverWriter (composition pattern)."""
 
 from __future__ import annotations
+
+from typing import Any, cast
 
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -39,9 +40,9 @@ __all__ = [
 class _SilverDeltaOperationFacade:
     """Shared Delta lifecycle facade for mixin and composition service paths."""
 
-    logger: LoggerPort
-    _metrics: MetricsPort | None
-    _merge_resilience_policy: SilverMergeResiliencePolicy
+    logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)
+    _metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD3)
+    _merge_resilience_policy: SilverMergeResiliencePolicy = cast(Any, None)  # Any: host attr default (PD3)
 
     @property
     def _logger(self) -> LoggerPort:
@@ -151,7 +152,7 @@ class _SilverDeltaOperationFacade:
 class SilverDeltaOperations(_SilverDeltaOperationFacade):
     """Delta operations service for Silver layer writes."""
 
-    logger: LoggerPort
-    _metrics: MetricsPort | None
-    _merge_resilience_policy: SilverMergeResiliencePolicy
+    logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)
+    _metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD3)
+    _merge_resilience_policy: SilverMergeResiliencePolicy = cast(Any, None)  # Any: host attr default (PD3)
     _load_delta_module: Callable[[], object] | None = _load_deltalake_module

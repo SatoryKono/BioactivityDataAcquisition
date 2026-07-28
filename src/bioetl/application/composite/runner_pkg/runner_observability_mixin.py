@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 # pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
@@ -7,7 +6,7 @@
 from __future__ import annotations
 
 from datetime import UTC, date, datetime
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import Any, TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.composite.runner_pkg.runner_constants import (
     DQ_REPORT_NON_FATAL_ERRORS,
@@ -37,16 +36,16 @@ _COMPOSITE_CV_QUARANTINE_VIOLATION_KIND = "cross_validation_mismatch"
 
 
 class _CompositeRunnerObservabilityHostProtocol(Protocol):
-    _config: CompositeConfig
-    _logger: LoggerPort
-    _run_id_str: str
-    _run_id: RunID
-    _runtime: object
-    _started_at: datetime | None
-    _dq_report_service: DQReportService | None
-    _quarantine_port: QuarantinePort | None
-    _metrics: MetricsPort | None
-    _run_ledger_service: RunLedgerService | None
+    _config: CompositeConfig = cast(Any, None)  # Any: host attr default (PD3)
+    _logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)
+    _run_id_str: str = cast(Any, None)  # Any: host attr default (PD3)
+    _run_id: RunID = cast(Any, None)  # Any: host attr default (PD3)
+    _runtime: object = cast(Any, None)  # Any: host attr default (PD3)
+    _started_at: datetime | None = cast(Any, None)  # Any: host attr default (PD3)
+    _dq_report_service: DQReportService | None = cast(Any, None)  # Any: host attr default (PD3)
+    _quarantine_port: QuarantinePort | None = cast(Any, None)  # Any: host attr default (PD3)
+    _metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD3)
+    _run_ledger_service: RunLedgerService | None = cast(Any, None)  # Any: host attr default (PD3)
 
     def _record_with_ledger_service(
         self,
@@ -107,14 +106,14 @@ def _record_cv_quarantine_policy_if_supported(
 class CompositeRunnerObservabilityMixin:
     """Mixin with optional DQ reporting and quarantine side effects."""
 
-    _config: CompositeConfig
-    _logger: LoggerPort
-    _run_id_str: str
-    _run_id: RunID
-    _dq_report_service: DQReportService | None
-    _quarantine_port: QuarantinePort | None
-    _metrics: MetricsPort | None
-    _run_ledger_service: RunLedgerService | None
+    _config: CompositeConfig = cast(Any, None)  # Any: host attr default (PD3)
+    _logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)
+    _run_id_str: str = cast(Any, None)  # Any: host attr default (PD3)
+    _run_id: RunID = cast(Any, None)  # Any: host attr default (PD3)
+    _dq_report_service: DQReportService | None = cast(Any, None)  # Any: host attr default (PD3)
+    _quarantine_port: QuarantinePort | None = cast(Any, None)  # Any: host attr default (PD3)
+    _metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD3)
+    _run_ledger_service: RunLedgerService | None = cast(Any, None)  # Any: host attr default (PD3)
 
     async def _generate_dq_reports(
         self: _CompositeRunnerObservabilityHostProtocol,

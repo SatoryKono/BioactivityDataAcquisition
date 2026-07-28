@@ -110,7 +110,7 @@ def test_tracing_adapters_expose_otel_compatible_surface() -> None:
     from unittest.mock import patch
 
     adapters: list[TracingPort] = [NoOpTracing()]
-    if tracing_module.OTEL_AVAILABLE:
+    if tracing_module.otel_available:
         # Disable OTLP so OpenTelemetryTracer uses ConsoleSpanExporter,
         # avoiding the gRPC connection attempt and 5s flush timeout.
         with patch.object(tracing_module, "otlp_available", False):

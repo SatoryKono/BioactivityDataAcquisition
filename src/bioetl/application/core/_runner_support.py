@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 # pyright: reportArgumentType=false
 # Boundary object/payload typing residual at this module.
@@ -6,7 +5,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import Any, cast, TYPE_CHECKING, Protocol
 
 from bioetl.application.core._runner_dependency_support import load_runner_checkpoint
 from bioetl.application.core.runner_execution_flow import (
@@ -50,22 +49,22 @@ _METRICS_CLOSE_EXCEPTIONS = (
 class _PipelineRunnerCleanupHostProtocol(Protocol):
     """Minimal host surface required for cleanup support methods."""
 
-    _postrun_service: PostrunService
-    _tracer: TracingPort
-    _services: PipelineRunnerServicesProtocol
-    _logger: LoggerPort
-    _executor: BatchExecutor
+    _postrun_service: PostrunService = cast(Any, None)  # Any: host attr default (PD3)
+    _tracer: TracingPort = cast(Any, None)  # Any: host attr default (PD3)
+    _services: PipelineRunnerServicesProtocol = cast(Any, None)  # Any: host attr default (PD3)
+    _logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)
+    _executor: BatchExecutor = cast(Any, None)  # Any: host attr default (PD3)
 
     def _close_metrics(self) -> None: ...
 
 class PipelineRunnerSupportMixin:
     """Delegate thin lifecycle helpers away from the main runner module."""
 
-    _postrun_service: PostrunService
-    _tracer: TracingPort
-    _services: PipelineRunnerServicesProtocol
-    _logger: LoggerPort
-    _executor: BatchExecutor
+    _postrun_service: PostrunService = cast(Any, None)  # Any: host attr default (PD3)
+    _tracer: TracingPort = cast(Any, None)  # Any: host attr default (PD3)
+    _services: PipelineRunnerServicesProtocol = cast(Any, None)  # Any: host attr default (PD3)
+    _logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)
+    _executor: BatchExecutor = cast(Any, None)  # Any: host attr default (PD3)
 
     def _record_terminal_shutdown(self: _PipelineRunnerFlowHostProtocol) -> None:
         record_run_shutdown(self)

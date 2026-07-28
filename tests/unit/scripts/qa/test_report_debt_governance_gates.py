@@ -612,6 +612,26 @@ def test_build_payload_marks_in_budget_hotspot_census_drift_as_stale_artifact(
         lambda *, repo_root: False,
     )
 
+    # Isolate census-drift failure from the live budget residual: force the
+    # committed hotspot summary into an in-budget state (budget_warnings=0).
+    original_load_json = gates._load_json
+
+    def _load_json_in_budget_hotspot(
+        repo_root: Path, relative_path: str, *args: object, **kwargs: object
+    ) -> object:
+        payload = original_load_json(repo_root, relative_path, *args, **kwargs)
+        if relative_path != gates.HOTSPOT_FAMILY_BASELINE_JSON:
+            return payload
+        if not isinstance(payload, dict):
+            return payload
+        forced = dict(payload)
+        summary = dict(forced.get("summary") or {})
+        summary["budget_warnings"] = 0
+        forced["summary"] = summary
+        return forced
+
+    monkeypatch.setattr(gates, "_load_json", _load_json_in_budget_hotspot)
+
     payload = gates.build_payload(repo_root=gates.PROJECT_ROOT)
     summary = payload["summary"]
     assert isinstance(summary, dict)
@@ -622,6 +642,7 @@ def test_build_payload_marks_in_budget_hotspot_census_drift_as_stale_artifact(
         if row["name"] == "hotspot_family_baseline_budget_warnings"
     )
     assert hotspot_gate["current"] == 0
+    assert hotspot_gate["status"] == "pass"
     assert payload["stale_artifacts"]["hotspot_family_baseline"] is True
     assert "generated_artifact_drift" in summary["failing_gates"]
     assert summary["release_gate_status"] == "failing"

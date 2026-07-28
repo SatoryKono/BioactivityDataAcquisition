@@ -127,14 +127,16 @@ def test_write_json_cleans_temporary_file_when_replace_fails(
 
 
 def test_should_skip_fsync_for_windows_test_mode(monkeypatch) -> None:
-    monkeypatch.setattr(run_report_writer, "_TEST_MODE_OVERRIDE", True)
+    # Writer exposes set_report_write_test_mode / _test_mode_override (not
+    # the retired _write_mode_override name).
+    monkeypatch.setattr(run_report_writer, "_test_mode_override", True)
     assert run_report_writer._should_fsync_report_writes(os_name="nt") is False
 
 
 def test_should_keep_fsync_outside_windows_test_mode(monkeypatch) -> None:
-    monkeypatch.setattr(run_report_writer, "_TEST_MODE_OVERRIDE", False)
+    monkeypatch.setattr(run_report_writer, "_test_mode_override", False)
     assert run_report_writer._should_fsync_report_writes(os_name="nt") is True
-    monkeypatch.setattr(run_report_writer, "_TEST_MODE_OVERRIDE", True)
+    monkeypatch.setattr(run_report_writer, "_test_mode_override", True)
     assert run_report_writer._should_fsync_report_writes(os_name="posix") is True
 
 

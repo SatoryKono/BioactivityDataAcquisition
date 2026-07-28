@@ -1,8 +1,8 @@
 """Architecture test: Any usage justification (TYPE-002).
 
-TYPE-002: ``Any`` SHOULD NOT be used without a ``# Any:`` justification comment.
-This test enforces that bare ``Any`` in type annotations has an inline comment
-explaining *why* ``Any`` is necessary.
+TYPE-002: ``Any`` SHOULD NOT be used without an explicit justification comment.
+This test enforces that bare ``Any`` in type annotations has either the general
+``# Any:`` marker or the narrowly-scoped PD3 host-attribute marker.
 
 Scope: ``src/bioetl/`` (all layers).
 Exemptions:
@@ -41,6 +41,7 @@ _IMPORT_RE = re.compile(r"^\s*from\s+typing.*\bAny\b|^\s*import\s+typing")
 
 # ``Any`` as a word boundary in the *code* portion of the line.
 _ANY_RE = re.compile(r"\bAny\b")
+_JUSTIFICATION_MARKERS = ("# Any:", "# host attr default (PD3)")
 
 
 def _code_part(line: str) -> str:
@@ -89,9 +90,9 @@ def _collect_violations(source_content_cache: dict[Path, str]) -> list[str]:
             # Skip lines without Any.
             if not _ANY_RE.search(code):
                 continue
-            # Skip if the *full* line has ``# Any:`` justification.
+            # Skip if the full line carries an approved justification marker.
             full_line = raw_lines[lineno - 1]
-            if "# Any:" in full_line:
+            if any(marker in full_line for marker in _JUSTIFICATION_MARKERS):
                 continue
             # Skip if a globally-justified alias is on this line.
             if _GLOBALLY_JUSTIFIED.search(code):

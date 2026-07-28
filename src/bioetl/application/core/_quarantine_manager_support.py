@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Private support mixin for filtered and admin quarantine operations."""
 
@@ -43,13 +42,13 @@ class _FilteredQuarantineEntryProtocol(Protocol):
 class QuarantineManagerSupportMixin:
     """Own filtered-record and inspection helpers outside the main service shell."""
 
-    _pipeline_name: str
-    _quarantine: QuarantinePort
-    _domain_event_emitter: DomainEventEmitterProtocol | None
-    _metrics: MetricsPort | None
-    _batch_metrics: BatchMetricsRecorderService | None
-    _pipeline_metrics: PipelineMetricsRecorder
-    _run_type: str
+    _pipeline_name: str = cast(Any, None)  # Any: host attr default (PD3)
+    _quarantine: QuarantinePort = cast(Any, None)  # Any: host attr default (PD3)
+    _domain_event_emitter: DomainEventEmitterProtocol | None = cast(Any, None)  # Any: host attr default (PD3)
+    _metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD3)
+    _batch_metrics: BatchMetricsRecorderService | None = cast(Any, None)  # Any: host attr default (PD3)
+    _pipeline_metrics: PipelineMetricsRecorder = cast(Any, None)  # Any: host attr default (PD3)
+    _run_type: str = cast(Any, None)  # Any: host attr default (PD3)
 
     def _quarantine_runtime_ports(self) -> QuarantineRuntimeDependencies:
         return build_quarantine_runtime_ports(

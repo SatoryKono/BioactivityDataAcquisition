@@ -1,3 +1,5 @@
+# pyright: reportInvalidCast=false
+# Host/cast bridge residual (PD3).
 """Dependency-backed helpers shared by BaseTransformer."""
 
 from __future__ import annotations
