@@ -246,6 +246,8 @@ nav:
           - "ADR-051 Quarantine Entry Aggregate Surface": 02-architecture/decisions/ADR-051-quarantine-entry-aggregate-surface.md
           - "ADR-052 Infrastructure Config Package Root Public API": 02-architecture/decisions/ADR-052-infrastructure-config-package-root-public-api.md
           - "ADR-053 Optional Grafana Scenes App Shell": 02-architecture/decisions/ADR-053-optional-grafana-scenes-app-shell.md
+          - "ADR-054 Passport Documentation Projections": 02-architecture/decisions/ADR-054-passport-documentation-projections.md
+          - "ADR-055 Workflow Reconciliation Ownership": 02-architecture/decisions/ADR-055-workflow-reconciliation-data-step-ownership.md
           - "Infrastructure Config Package Root Sunset": 02-architecture/compatibility/infrastructure-config-package-root-sunset.md
           - "Public API Freeze": 00-project/ai/agents/guides/PUBLIC_API_FREEZE.md
           - "Quality Gates Stabilization Notes": 02-architecture/decisions/notes/2026-03-04-quality-gates-stabilization.md
@@ -311,6 +313,7 @@ nav:
           - "Monitoring Index": 03-guides/dashboards/monitoring-index.md
           - "Variables Guide": 03-guides/dashboards/variables-guide.md
           - "Operator UX v2": 03-guides/dashboards/operator-ux-v2.md
+          - "Scenes Dual Path": 03-guides/dashboards/scenes-dual-path.md
           - "Verdict Ontology": 03-guides/dashboards/verdict-ontology.md
           - "Panels":
               - "Panels Guide": 03-guides/dashboards/panels/dashboard-panels-guide.md

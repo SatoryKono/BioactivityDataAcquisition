@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-29T17:40:49.637695+00:00",
+  "generated_at": "2026-07-29T17:45:32.148812+00:00",
   "summary": {
     "total_scripts": 559,
     "status_counts": {
-      "active": 345,
-      "supporting": 209,
+      "active": 341,
+      "supporting": 213,
       "temporary_diagnostic": 5
     },
     "reference_group_coverage": {
@@ -16,7 +16,7 @@
       "other": 76,
       "scripts": 440,
       "skills": 17,
-      "tests": 345
+      "tests": 348
     }
   },
   "scripts": [
@@ -6551,7 +6551,7 @@
         "grafana-dashboard-extension",
         "py-doc-bot"
       ],
-      "reference_count": 173,
+      "reference_count": 175,
       "references": [
         {
           "path": ".codex/skills/grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md",
@@ -7999,7 +7999,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 9,
       "references": [
         {
           "path": "docs/02-architecture/decisions/ADR-005-composition-layer-separation.md",
@@ -8044,49 +8044,69 @@
           "text": "\"cli.py\","
         },
         {
-          "path": "tests/unit/scripts/qa/test_report_duplication_baseline.py",
-          "line": 556,
+          "path": "tests/unit/scripts/docs/passports/test_passport_projector.py",
+          "line": 11,
           "source_group": "tests",
-          "text": "path=\"cli.py\","
+          "text": "from scripts.docs.passports.cli import main"
         }
       ]
     },
     {
       "path": "scripts/docs/passports/inventory.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/docs/passports/projector.py",
           "line": 15,
           "source_group": "scripts",
           "text": "from .inventory import ExecutableUnit, discover_units"
+        },
+        {
+          "path": "tests/unit/scripts/docs/passports/test_passport_projector.py",
+          "line": 12,
+          "source_group": "tests",
+          "text": "from scripts.docs.passports.inventory import discover_units"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal passport inventory collector behind the canonical docs passport command; keep it supporting rather than exposing another standalone script surface."
     },
     {
       "path": "scripts/docs/passports/manual_sidecar.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/docs/passports/projector.py",
           "line": 16,
           "source_group": "scripts",
           "text": "from .manual_sidecar import load_manual_sidecar"
+        },
+        {
+          "path": "tests/unit/scripts/docs/passports/test_passport_projector.py",
+          "line": 13,
+          "source_group": "tests",
+          "text": "from scripts.docs.passports.manual_sidecar import load_manual_sidecar"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal manual-sidecar helper behind the canonical docs passport command; keep it supporting rather than exposing another standalone script surface."
     },
     {
       "path": "scripts/docs/passports/projector.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/docs/passports/__init__.py",
@@ -8096,11 +8116,21 @@
         },
         {
           "path": "scripts/docs/passports/cli.py",
-          "line": 8,
+          "line": 10,
           "source_group": "scripts",
           "text": "from .projector import build_all_outputs, check_outputs, write_outputs"
+        },
+        {
+          "path": "tests/unit/scripts/docs/passports/test_passport_projector.py",
+          "line": 14,
+          "source_group": "tests",
+          "text": "from scripts.docs.passports.projector import ("
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the internal passport projection helper behind the canonical docs passport command; keep it supporting rather than exposing another standalone script surface."
     },
     {
       "path": "scripts/docs/report_docs_kpi.py",
@@ -17669,7 +17699,7 @@
     {
       "path": "scripts/ops/observability/grafana/run_grafana_render_matrix.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -17685,7 +17715,11 @@
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana import ("
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the matrix orchestration backend invoked through the canonical scripts.ops command surface; keep the implementation module supporting so the active script inventory does not duplicate the dispatcher entrypoint."
     },
     {
       "path": "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1",

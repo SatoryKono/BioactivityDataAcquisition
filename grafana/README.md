@@ -105,6 +105,15 @@ ______________________________________________________________________
 > Reproducible evidence passes explicit `--theme dark|light`, `--width`, and
 > `--height`; the Playwright manifest records requested and actual theme and
 > viewport. Closure runs cover `1600px` and responsive `1024px` in both themes.
+> The canonical audit matrix command is
+> `python -m scripts.ops render-grafana-matrix`. It captures 1366×768,
+> 1440×900, and 1920×1080 first viewports in Dark and Light, one expanded
+> full-surface group, a repeated 1440×900 Dark group for geometry consistency,
+> and verified 2560×1440/3840×2160 kiosk groups in both themes. Browser
+> manifests record the requested and actual theme, viewport, kiosk state,
+> 100% zoom, panel terminal states, horizontal overflow, and stable panel
+> geometry. Live values and timestamps are excluded from consistency
+> comparison.
 > Playwright mode additionally requires the local `playwright` npm dependency,
 > downloaded browser runtime, and the usual headless Chromium shared libraries
 > (`libnspr4`, `libnss3`, `libasound2`/`libasound2t64`, etc.) on the host.
@@ -178,7 +187,10 @@ ______________________________________________________________________
 > `frontend/settings` render auth, Prometheus, Playwright browser/runtime
 > availability, canonical BioETL Ops HTTP health probes (`/health/live`
 > before `/health`), and whether local screenshot artifacts are missing or
-> stale relative to shipped dashboard JSON.
+> stale relative to shipped dashboard JSON. The retired Quarantine Explorer
+> HTTP/UI surface is reported as `not_applicable`, not as a backend failure;
+> domain quarantine write/storage is unchanged. If its retired dashboard UID is
+> ever shipped again, preflight restores the fail-closed health probe.
 > Playwright also validates required non-row panel terminal states. Healthy,
 > explicit error, and valid-empty are terminal; blank, loading, or an error
 > marker combined with `No data` fail the capture. Screenshot preflight verifies

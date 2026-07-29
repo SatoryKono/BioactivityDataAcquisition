@@ -66,7 +66,26 @@ def _source_revision() -> str:
     if override:
         return override
     result = subprocess.run(
-        ["git", "log", "-1", "--format=%H", "--", "configs", "src/bioetl"],
+        [
+            "git",
+            "log",
+            "-1",
+            "--format=%H",
+            "--",
+            "configs/entities",
+            "configs/providers",
+            "configs/composites",
+            "configs/workflows",
+            "configs/contracts",
+            "src/bioetl/composition/factories/pipeline",
+            "src/bioetl/application/composite",
+            "src/bioetl/application/services/workflow_runner_service.py",
+            "src/bioetl/application/services/control_plane/workflow",
+            "src/bioetl/application/workflow/transforms",
+            "src/bioetl/infrastructure/config",
+            "src/bioetl/domain/contracts",
+            "src/bioetl/domain/workflow",
+        ],
         cwd=PROJECT_ROOT,
         check=True,
         capture_output=True,

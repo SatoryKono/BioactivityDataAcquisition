@@ -7,19 +7,19 @@ Canonical live ADR index: `docs/02-architecture/decisions/README.md`.
 This page is a generated governance mirror and MUST be regenerated via
 `python3 scripts/generate_adr_registry.py` after ADR additions or metadata changes.
 
-**Total ADRs**: 53
-**Last Updated**: 2026-07-28
+**Total ADRs**: 55
+**Last Updated**: 2026-07-29
 
 ## 📊 Status Summary
 
 | Status | Count | Percentage |
 |--------|-------|------------|
-| `accepted` | 51 | 96.2% |
-| `superseded` | 2 | 3.8% |
+| `accepted` | 53 | 96.4% |
+| `superseded` | 2 | 3.6% |
 
 ## 🟢 Accepted ADRs
 
-### 51 decisions
+### 53 decisions
 
 ### ADR-001: Delta Lake vs Parquet
 
@@ -628,6 +628,29 @@ takes...
 (`grafana/dashboards/*.json`) as the operator observability surface. Grafan...
 
 [📄 View Full ADR](../decisions/ADR-053-optional-grafana-scenes-app-shell.md)
+
+---
+
+### ADR-054: Evidence-Backed Passport Documentation Projections
+
+**Status**: `accepted` | **Category**: `Documentation` | **Owner**: `BioETL Team`
+
+**Context**: BioETL has 22 registered entity pipelines, five composite pipelines, and 27
+ADR-047 workflows. Existing reference pages are useful, but only
+`chembl_a...
+
+[📄 View Full ADR](../decisions/ADR-054-passport-documentation-projections.md)
+
+---
+
+### ADR-055: Workflow Reconciliation Data-Step Ownership
+
+**Status**: `accepted` | **Category**: `Architecture` | **Owner**: `BioETL Team`
+
+**Context**: `chembl_core` and `chembl_baseline` execute `reconcile_foreign_keys` against
+Gold datasets. The operation is data-plane transformation, DQ validation,...
+
+[📄 View Full ADR](../decisions/ADR-055-workflow-reconciliation-data-step-ownership.md)
 
 ---
 
