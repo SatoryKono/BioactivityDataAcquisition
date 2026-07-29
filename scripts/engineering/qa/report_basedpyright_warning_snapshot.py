@@ -56,6 +56,35 @@ def _is_error(diag: dict[str, Any]) -> bool:
     return sev in {"error", "4"}
 
 
+
+def _aggregate_warning_stats(
+    warnings: list[dict[str, Any]],
+) -> tuple[Counter[str], Counter[str], Counter[str], int, int]:
+    by_rule: Counter[str] = Counter()
+    by_layer: Counter[str] = Counter()
+    by_file: Counter[str] = Counter()
+    schema_ish = 0
+    any_unknown = 0
+    schema_markers = (
+        "infrastructure/schemas/",
+        "domain/contracts/gold/",
+        "domain/schemas/",
+    )
+    for d in warnings:
+        rule = str(d.get("rule") or "unknown")
+        by_rule[rule] += 1
+        if rule in ANY_UNKNOWN_RULES:
+            any_unknown += 1
+        rel = _rel_bioetl(str(d.get("file") or ""))
+        by_file[rel] += 1
+        layer = rel.split("/", 1)[0] if "/" in rel else rel
+        if layer:
+            by_layer[layer] += 1
+        if any(key in rel for key in schema_markers):
+            schema_ish += 1
+    return by_rule, by_layer, by_file, schema_ish, any_unknown
+
+
 def build_snapshot(source: Path) -> dict[str, Any]:
     source = resolve_output_path(source, root=ROOT)
     payload = json.loads(source.read_text(encoding="utf-8"))
@@ -67,31 +96,7 @@ def build_snapshot(source: Path) -> dict[str, Any]:
     warnings = [d for d in diags if isinstance(d, dict) and _is_warning(d)]
     errors = [d for d in diags if isinstance(d, dict) and _is_error(d)]
 
-    by_rule: Counter[str] = Counter()
-    by_layer: Counter[str] = Counter()
-    by_file: Counter[str] = Counter()
-    schema_ish = 0
-    any_unknown = 0
-
-    for d in warnings:
-        rule = str(d.get("rule") or "unknown")
-        by_rule[rule] += 1
-        if rule in ANY_UNKNOWN_RULES:
-            any_unknown += 1
-        rel = _rel_bioetl(str(d.get("file") or ""))
-        by_file[rel] += 1
-        layer = rel.split("/", 1)[0] if "/" in rel else rel
-        if layer:
-            by_layer[layer] += 1
-        if any(
-            key in rel
-            for key in (
-                "infrastructure/schemas/",
-                "domain/contracts/gold/",
-                "domain/schemas/",
-            )
-        ):
-            schema_ish += 1
+    by_rule, by_layer, by_file, schema_ish, any_unknown = _aggregate_warning_stats(warnings)
 
     return {
         "schema_version": "basedpyright-warning-snapshot-v1",

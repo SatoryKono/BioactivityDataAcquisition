@@ -53,7 +53,7 @@ def _run_module_command_in_process(spec: CommandSpec, argv: list[str]) -> int:
             parameter_count = 0
 
         result = main(forwarded_argv) if parameter_count else main()
-    except SystemExit as exc:
+    except SystemExit as exc:  # NOSONAR - intentional CLI exit-code bridge
         # Intentional in-process CLI dispatch: convert SystemExit to a return
         # code so module runners do not tear down the parent process (S5754).
         code = exc.code

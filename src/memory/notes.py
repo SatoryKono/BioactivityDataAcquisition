@@ -42,18 +42,18 @@ def _read_text_with_timeout(
     ):
         return path.read_text(encoding="utf-8") or ""
 
-    # Use timeout for network drives or test scenarios with small timeouts
-    text: str | None = None
-    exception: BaseException | None = None
+    # Use timeout for network drives or test scenarios with small timeouts.
+    # Container lists so analyzers see worker-thread side effects (S2583/S5727).
+    results: list[str] = []
+    errors: list[BaseException] = []
 
     def _target() -> None:
-        nonlocal text, exception
         try:
-            text = path.read_text(encoding="utf-8")
+            results.append(path.read_text(encoding="utf-8"))
         except OSError as exc:
-            exception = exc
+            errors.append(exc)
         except UnicodeError as exc:
-            exception = exc
+            errors.append(exc)
 
     thread = threading.Thread(target=_target, daemon=True)
     thread.start()
@@ -67,10 +67,9 @@ def _read_text_with_timeout(
             f"File read did not complete within {timeout} seconds: {path}"
         )
 
-    if exception is not None:
-        raise exception
-
-    return text or ""
+    if errors:
+        raise errors[0]
+    return results[0] if results else ""
 
 
 def _read_text_from_git_object(path: Path) -> str | None:

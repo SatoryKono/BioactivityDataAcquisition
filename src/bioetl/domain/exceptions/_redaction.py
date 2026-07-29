@@ -33,7 +33,7 @@ _REDACTED_PLACEHOLDER = "[REDACTED]"
 _PREFIXED_SECRET = re.compile(
     r"(?i)(?<![-A-Z0-9])(?:sk[-_]|gh[pousr]_|xox[baprs]-)[-A-Z0-9._]+"
 )
-_EMBEDDED_URL = re.compile(r"[A-Za-z][-A-Za-z0-9+.]*(?:://)[^\s<>'\"]+")
+_EMBEDDED_URL = re.compile(r"[A-Za-z][-A-Za-z0-9+.]*://[^\s<>'\"]+")
 _CYCLE_SENTINEL = "[REDACTED CYCLE]"
 
 
