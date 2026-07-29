@@ -361,16 +361,10 @@ def update_final(observation: dict[str, object]) -> None:
 
 def _is_non_canonical_compose_path(path_text: str) -> bool:
     # NOSONAR(S5443) - marker string for non-canonical path detection, not a write sink
-    return (
-        _TMP_PATH_MARKER in path_text
-        or "E:\\" in path_text
-        or "E:/" in path_text
-    )
+    return _TMP_PATH_MARKER in path_text or "E:\\" in path_text or "E:/" in path_text
 
 
-def _validate_canonical_compose_files(
-    mon_files: str, main_files: str
-) -> None:
+def _validate_canonical_compose_files(mon_files: str, main_files: str) -> None:
     if _is_non_canonical_compose_path(mon_files):
         raise RuntimeError(f"monitoring still non-canonical: {mon_files}")
     has_known_root = (

@@ -34,6 +34,7 @@ class HeartbeatTask:
         _logger: Logger for heartbeat messages.
         _task: Background task reference.
     """
+
     def __init__(
         self,
         lock_port: LockPort,
@@ -62,6 +63,7 @@ class HeartbeatTask:
         self._shutdown_signal = shutdown_signal
         self._logger = logger
         self._task: asyncio.Task[None] | None = None
+
     async def start(self) -> None:
         """Start the background heartbeat task.
         Performs initial heartbeat and starts background loop.
@@ -76,6 +78,7 @@ class HeartbeatTask:
             self._shutdown_signal.request()
             raise PipelineShutdownError("Lock lost on heartbeat start")
         self._task = asyncio.create_task(self._heartbeat_loop())
+
     async def stop(self) -> None:
         """Stop the background heartbeat task.
         Cancels the task and waits for completion.
@@ -85,10 +88,12 @@ class HeartbeatTask:
             with contextlib.suppress(asyncio.CancelledError):
                 await self._task
             self._task = None
+
     @property
     def is_running(self) -> bool:
         """Check if heartbeat task is running."""
         return self._task is not None and not self._task.done()
+
     async def _heartbeat_loop(self) -> None:
         """Background loop that sends periodic heartbeats.
         Raises:

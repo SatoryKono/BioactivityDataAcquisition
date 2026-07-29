@@ -64,10 +64,18 @@ class SilverWriterRuntimeFacade(
     def _should_dual_write(self) -> bool:
         raise NotImplementedError
 
-    _validation: SilverValidationOperations | None = cast(Any, None)  # Any: host attr default (PD3)
-    _delta: SilverDeltaOperations | None = cast(Any, None)  # Any: host attr default (PD3)
-    _postwrite: SilverPostwriteOperations | None = cast(Any, None)  # Any: host attr default (PD3)
-    _merged: SilverMergedOperations | None = cast(Any, None)  # Any: host attr default (PD3)
+    _validation: SilverValidationOperations | None = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
+    _delta: SilverDeltaOperations | None = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
+    _postwrite: SilverPostwriteOperations | None = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
+    _merged: SilverMergedOperations | None = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
     _host: object | None = cast(Any, None)  # Any: host attr default (PD3)
 
     async def _write_single_target(
@@ -102,7 +110,8 @@ class SilverWriterRuntimeFacade(
     ) -> SilverWriteResult | None:
         """Execute all configured Silver contract-version write targets."""
         return await _write_dual_targets(
-            cast(_SilverWriterDispatchHost, self), invocation=invocation  # pyright: ignore[reportInvalidCast]
+            cast(_SilverWriterDispatchHost, self),
+            invocation=invocation,  # pyright: ignore[reportInvalidCast]
         )
 
     async def _dispatch_write_with_domain_errors(

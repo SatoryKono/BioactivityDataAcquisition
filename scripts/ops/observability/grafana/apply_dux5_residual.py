@@ -79,7 +79,7 @@ STATUS_CARD_HTML: dict[str, str] = {
         '<div style="padding:4px 8px;border-left:4px solid #ff9830;'
         "background:rgba(255,152,48,0.08);line-height:1.25;font-size:12px;"
         'overflow:hidden">'
-        "<div style=\"font-weight:700\">Is data conformant, and what delivery impact needs action?</div>"
+        '<div style="font-weight:700">Is data conformant, and what delivery impact needs action?</div>'
         "<div><b>Scope:</b> <b>CURRENT</b> = Status/reasons · <b>SELECTED RUN</b> = ID/Processed Records · "
         "<b>TIME RANGE</b> = score, freshness and impact cards below. "
         "Do not compare different badges as peers.</div>"
@@ -98,12 +98,12 @@ STATUS_CARD_HTML: dict[str, str] = {
     ),
     "bioetl-run-explorer-v1": (
         '<div style="padding:8px 12px;border-left:4px solid #64748b;'
-        "background:rgba(100,116,139,0.10);line-height:1.4;font-size:13px\">"
+        'background:rgba(100,116,139,0.10);line-height:1.4;font-size:13px">'
         "<div><strong>Run Explorer</strong> · select a recent run → identity → accounting → actions</div>"
-        "<div style=\"margin-top:4px;opacity:0.9\">"
+        '<div style="margin-top:4px;opacity:0.9">'
         "Exact-run forensic owner. Short run id on strip; full id via Copy/Open report."
         "</div>"
-        "<div style=\"margin-top:4px\">"
+        '<div style="margin-top:4px">'
         "Paths and endpoint syntax stay in report artifacts — not in triage bodies."
         "</div></div>"
     ),
@@ -216,7 +216,9 @@ def ensure_value_display_name(panel: dict[str, Any], display: str) -> bool:
     found = False
     for ov in overrides:
         matcher = ov.get("matcher") or {}
-        if matcher.get("id") == "byRegexp" and "Value" in str(matcher.get("options") or ""):
+        if matcher.get("id") == "byRegexp" and "Value" in str(
+            matcher.get("options") or ""
+        ):
             props = list(ov.get("properties") or [])
             if not any(p.get("id") == "displayName" for p in props):
                 props.append({"id": "displayName", "value": display})
@@ -240,7 +242,9 @@ def ensure_value_display_name(panel: dict[str, Any], display: str) -> bool:
         rename = dict(opts.get("renameByName") or {})
         for key in list(rename.keys()) + ["Value", "Value #A", "Value #B", "Value #C"]:
             if key.startswith("Value") and not rename.get(key):
-                rename[key] = display if key == "Value" else key.replace("Value #", "Series ")
+                rename[key] = (
+                    display if key == "Value" else key.replace("Value #", "Series ")
+                )
                 changed = True
         if rename:
             opts["renameByName"] = rename
@@ -516,7 +520,10 @@ def apply_table_panel(panel: dict[str, Any], *, uid: str) -> list[str]:
                 for k, v in list(opts2.items()):
                     if isinstance(v, dict) and "text" in v:
                         text = str(v.get("text") or "")
-                        if "VALID EMPTY" in text.upper() or "VALID_EMPTY" in text.upper():
+                        if (
+                            "VALID EMPTY" in text.upper()
+                            or "VALID_EMPTY" in text.upper()
+                        ):
                             nv = dict(v)
                             nv["text"] = "None observed / 0"
                             opts2[k] = nv
@@ -616,9 +623,9 @@ def write_docs() -> list[str]:
     copy_dict.write_text(
         """# DUX5 operator copy dictionary
 
-**Status:** active  
-**Wave:** DUX5 (#7116)  
-**Owner:** interface / Grafana dashboard system  
+**Status:** active
+**Wave:** DUX5 (#7116)
+**Owner:** interface / Grafana dashboard system
 **Verdict logic owner:** application / control-plane / recording rules (not Grafana transforms)
 
 ## Reading order
@@ -692,7 +699,7 @@ No auto-shrink below floors; reflow/wrap/shorten instead.
     protocol.write_text(
         """# DUX5 screenshot & accessibility regression protocol
 
-**Issue:** #7133 (DUX5-31)  
+**Issue:** #7133 (DUX5-31)
 **Parent epic:** #7116
 
 ## Purpose
@@ -761,8 +768,7 @@ Store before/after under operator-local evidence; do not commit secrets.
     vo_text = vo.read_text(encoding="utf-8")
     if "dux5-copy-dictionary.md" not in vo_text:
         vo.write_text(
-            vo_text.rstrip()
-            + "\n\n## DUX5 expansion\n\n"
+            vo_text.rstrip() + "\n\n## DUX5 expansion\n\n"
             "Operator-facing empty-state and applicability classes "
             "(None observed / Not started / Not available / Selection required / "
             "Telemetry missing) are listed in "

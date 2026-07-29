@@ -40,8 +40,8 @@ class _MergeInputLoaderMixin:
     _storage: MergedStoragePort  # pyright: ignore[reportUninitializedInstanceVariable]
     _delta_reader: DeltaReaderPort | None  # pyright: ignore[reportUninitializedInstanceVariable]
     _silver_reader: SilverStoragePort | None  # pyright: ignore[reportUninitializedInstanceVariable]
-    _renamer: Any  # Any: Host MergeService injects runtime collaborator without importing infra implementation here.  # pyright: ignore[reportUninitializedInstanceVariable]
-    _config: Any  # Any: Host MergeService provides config object with richer surface than this mixin needs to declare.  # pyright: ignore[reportUninitializedInstanceVariable]
+    _renamer: Any  # Any: host MergeService injects renamer  # pyright: ignore[reportUninitializedInstanceVariable]
+    _config: Any  # Any: host MergeService injects config  # pyright: ignore[reportUninitializedInstanceVariable]
 
     async def _read_optional_merge_input(
         self,

@@ -128,6 +128,11 @@ RELATIVE_IMPORT_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
     r"^[ \t]*from[ \t]+\.{1,32}[A-Za-z0-9_.]{0,256}[ \t]+import[ \t]+",
     re.MULTILINE,
 )
+ABSOLUTE_SCRIPT_IMPORT_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
+    # Absolute first-party imports of inventoried script packages.
+    r"^[ \t]*from[ \t]+(?:scripts|src\.tools)(?:\.[A-Za-z0-9_]+){0,32}[ \t]+import[ \t]+",
+    re.MULTILINE,
+)
 SCRIPT_PATH_ALIASES: Final[dict[str, tuple[str, ...]]] = {
     "scripts/ops/launchers/codex/codex-exec.bat": ("scripts/codex-exec.bat",),
     "scripts/ops/launchers/codex/codex.bat": ("scripts/codex.bat",),
@@ -550,6 +555,55 @@ def _relative_import_hits_for_node(
     return discovered
 
 
+def _absolute_script_import_hits_for_node(
+    node: ast.ImportFrom,
+    *,
+    lines: list[str],
+    rel: str,
+    source_group: str,
+    script_set: set[str],
+) -> list[tuple[str, RefEvidence]]:
+    """Resolve absolute ``scripts.*`` / ``src.tools.*`` imports to inventory paths."""
+    if node.level != 0 or not node.module:
+        return []
+    module = node.module
+    if not (
+        module == "scripts"
+        or module.startswith("scripts.")
+        or module == "src.tools"
+        or module.startswith("src.tools.")
+    ):
+        return []
+    raw_line = lines[node.lineno - 1] if node.lineno <= len(lines) else ""
+    evidence = _make_ref_evidence(
+        rel=rel,
+        line_no=node.lineno,
+        raw_line=raw_line,
+        source_group=source_group,
+    )
+    discovered: list[tuple[str, RefEvidence]] = []
+    candidate_module = Path(*module.split("."))
+    module_candidates = (
+        candidate_module.with_suffix(".py").as_posix(),
+        (candidate_module / "__init__.py").as_posix(),
+    )
+    for candidate_path in module_candidates:
+        if candidate_path in script_set and candidate_path != rel:
+            discovered.append((candidate_path, evidence))
+    # Also resolve imported leaf names as nested modules when present.
+    for alias in node.names:
+        if alias.name == "*":
+            continue
+        leaf = candidate_module / alias.name
+        for candidate_path in (
+            leaf.with_suffix(".py").as_posix(),
+            (leaf / "__init__.py").as_posix(),
+        ):
+            if candidate_path in script_set and candidate_path != rel:
+                discovered.append((candidate_path, evidence))
+    return discovered
+
+
 def _discover_relative_import_refs(
     *,
     rel: str,
@@ -575,6 +629,15 @@ def _discover_relative_import_refs(
             _relative_import_hits_for_node(
                 node,
                 package_parts=package_parts,
+                lines=lines,
+                rel=rel,
+                source_group=source_group,
+                script_set=script_set,
+            )
+        )
+        discovered.extend(
+            _absolute_script_import_hits_for_node(
+                node,
                 lines=lines,
                 rel=rel,
                 source_group=source_group,
@@ -638,6 +701,10 @@ def _discover_refs_in_file(
         rel.endswith(".py")
         and RELATIVE_IMPORT_CANDIDATE_PATTERN.search(text) is not None
     )
+    has_absolute_script_import_refs = (
+        rel.endswith(".py")
+        and ABSOLUTE_SCRIPT_IMPORT_CANDIDATE_PATTERN.search(text) is not None
+    )
     has_dispatcher_module_refs = _has_dispatcher_module_refs(rel, normalized_text)
     has_basename_refs = _line_has_basename_script_candidate(
         normalized_text, basename_map
@@ -646,6 +713,7 @@ def _discover_refs_in_file(
         has_script_path_refs
         or has_module_refs
         or has_relative_import_refs
+        or has_absolute_script_import_refs
         or has_dispatcher_module_refs
         or has_basename_refs
     ):
@@ -659,7 +727,7 @@ def _discover_refs_in_file(
         source_group=source_group,
         script_set=script_set,
     )
-    if has_relative_import_refs:
+    if has_relative_import_refs or has_absolute_script_import_refs:
         discovered.extend(
             _discover_relative_import_refs(
                 rel=rel,

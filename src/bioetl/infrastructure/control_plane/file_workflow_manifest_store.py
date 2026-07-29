@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-from typing import override
-
 import json
 from contextlib import suppress
 from dataclasses import dataclass
 from pathlib import Path
 from time import perf_counter
+from typing import override
 
 from bioetl.domain.control_plane import WorkflowManifest
 from bioetl.domain.ports import MetricsPort, WorkflowManifestPort

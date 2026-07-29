@@ -22,6 +22,7 @@ if TYPE_CHECKING:
 @dataclass(frozen=True, slots=True)
 class ResolvedPostrunCollaborators:
     """Resolved postrun collaborators after legacy/service fallback lookup."""
+
     storage: StorageMaintenancePort
     metrics: MetricsPort
     logger: LoggerPort

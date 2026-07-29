@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 
 class PublicationTermExtractionMixin:
     """Shared publication->term extraction flow."""
+
     async def _yield_terms_from_publications(
         self: Any,  # Any: mixin self type is provided structurally by composed adapter class
         publications: AsyncIterator[BronzeRecord],
@@ -46,8 +47,10 @@ class PublicationTermExtractionMixin:
             if callable(aclose):
                 from collections.abc import Awaitable, Callable
                 from typing import cast
+
                 aclose_fn = cast(Callable[[], Awaitable[object]], aclose)
                 await aclose_fn()
+
     async def _fetch_publication_terms(
         self: Any,  # Any: mixin self type is provided structurally by composed adapter class
         limit: int | None,
@@ -72,6 +75,7 @@ class PublicationTermExtractionMixin:
         )
         async for term in self._yield_terms_from_publications(publications, limit):
             yield term
+
     def _extract_terms_from_publication(
         self: Any,  # Any: mixin self type is provided structurally by composed adapter class
         record: BronzeRecord,
@@ -85,6 +89,7 @@ class PublicationTermExtractionMixin:
             List of Bronze term records, one per MeSH heading, MeSH qualifier, or keyword found.
         """
         return extract_terms_from_publication(record, publication_id)
+
     def _create_term_record(
         self: Any,  # Any: mixin self type is provided structurally by composed adapter class
         publication_id: str,
@@ -111,6 +116,7 @@ class PublicationTermExtractionMixin:
             mesh_id=mesh_id,
             qualifier=qualifier,
         )
+
     def _compute_entity_id(
         self: Any,  # Any: mixin self type is provided structurally by composed adapter class
         publication_id: str,
@@ -130,6 +136,7 @@ class PublicationTermExtractionMixin:
             term_type=term_type,
             term=term,
         )
+
     async def _fetch_filtered_publication_terms(
         self: Any,  # Any: mixin self type is provided structurally by composed adapter class
         filterable: FilterableDataSourcePort,

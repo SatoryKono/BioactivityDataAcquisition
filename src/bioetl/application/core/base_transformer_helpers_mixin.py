@@ -31,6 +31,7 @@ if TYPE_CHECKING:
 
 class _BaseTransformerRecordHelpersMixin:
     """Serialization and record helper methods shared by transformers."""
+
     @staticmethod
     def serialize_json(value: object) -> ScalarValue:
         """Serialize dict/list to JSON string or native type for Silver layer.
@@ -42,12 +43,15 @@ class _BaseTransformerRecordHelpersMixin:
             or None when the value is None or an empty composite.
         """
         return serialize_json(value)
+
     @staticmethod
     def _serialize_dict(d: dict[str, object]) -> str | None:
         return serialize_dict(d)
+
     @staticmethod
     def _serialize_list(lst: list[object]) -> ScalarValue:
         return serialize_list(lst)
+
     @staticmethod
     def serialize_json_list(value: Sequence[object] | None) -> str | None:
         """Serialize list to JSON string without unwrapping single elements.
@@ -58,6 +62,7 @@ class _BaseTransformerRecordHelpersMixin:
             JSON array string, or None when the sequence is None or empty.
         """
         return serialize_json_list(value)
+
     @classmethod
     def serialize_json_fields(
         cls,
@@ -72,6 +77,7 @@ class _BaseTransformerRecordHelpersMixin:
             Dictionary mapping each field name to its serialized scalar value.
         """
         return serialize_json_fields(record=record, field_names=field_names)
+
     @staticmethod
     def _normalize_lineage_value(
         field_name: str,
@@ -79,6 +85,7 @@ class _BaseTransformerRecordHelpersMixin:
     ) -> object:
         """Normalize lineage/meta field values after rename."""
         return normalize_lineage_value(field_name=field_name, value=value)
+
     @staticmethod
     def _get_required_field(
         record: BronzeRecord,
@@ -96,6 +103,7 @@ class _BaseTransformerRecordHelpersMixin:
             The field value if present and non-empty (per ``allow_empty`` rules).
         """
         return get_required_field(record=record, field=field, allow_empty=allow_empty)
+
     @staticmethod
     def _extract_by_path(
         record: BronzeRecord,
@@ -112,6 +120,7 @@ class _BaseTransformerRecordHelpersMixin:
             The extracted value at the end of the key path, or ``default`` if not found.
         """
         return extract_by_path(record=record, keys=keys, default=default)
+
     @staticmethod
     def _extract_nested(
         record: BronzeRecord,
@@ -127,6 +136,7 @@ class _BaseTransformerRecordHelpersMixin:
             The value at the end of the dot path, or ``default`` if not found.
         """
         return extract_nested(record=record, path=path, default=default)
+
     def _create_entity(
         self,
         entity_class: type[T],

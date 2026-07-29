@@ -91,6 +91,7 @@ def build_dataframe_from_records(
         return None
     try:
         import polars as pl
+
         dataframe: object = pl.DataFrame(records, infer_schema_length=None)
         return dataframe
     except dataframe_error_types() as dataframe_error:
@@ -98,6 +99,7 @@ def build_dataframe_from_records(
         if normalized_records is not None:
             try:
                 import polars as pl
+
                 normalized_dataframe: object = pl.DataFrame(
                     normalized_records,
                     infer_schema_length=None,
@@ -169,6 +171,7 @@ def build_dq_report_context(
 ) -> DQReportContext:
     """Build DQ report context from accumulated execution samples."""
     from bioetl.application.services.dq_report_service import DQReportContext
+
     silver_data = build_dataframe(silver_records, "silver")
     gold_data = build_dataframe(gold_records, "gold")
     primary_keys = list(config.table_config.primary_keys)

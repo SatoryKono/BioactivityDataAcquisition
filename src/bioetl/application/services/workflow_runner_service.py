@@ -6,20 +6,20 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass, replace
 from datetime import datetime
 from time import perf_counter
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
+from bioetl.application.services.execution.workflow_runner_step_execution import (
+    TransformStepRuntimeOptions,
+    apply_workflow_step_transition,
+    execute_pipeline_step,
+    execute_transform_step,
+)
 from bioetl.application.services.workflow_runner_models import (
     WorkflowRunExecutionResult,
     WorkflowStepExecutionResult,
 )
 from bioetl.application.services.workflow_runner_reports import (
     attach_workflow_run_report,
-)
-from bioetl.application.services.execution.workflow_runner_step_execution import (
-    TransformStepRuntimeOptions,
-    apply_workflow_step_transition,
-    execute_pipeline_step,
-    execute_transform_step,
 )
 from bioetl.application.services.workflow_runner_support import (
     ResolvedWorkflowStepTransitionRecord,
@@ -130,13 +130,10 @@ class WorkflowRunnerService:
             context_labels=workflow_context_labels,
         )
         result = workflow_result_from_state(config.name, state)
-        result = cast(
-            WorkflowRunExecutionResult,
-            replace(
-                result,
-                workflow_run_id=workflow_run_id,
-                manifest_id=manifest_id,
-            ),
+        result = replace(
+            result,
+            workflow_run_id=workflow_run_id,
+            manifest_id=manifest_id,
         )
         return attach_workflow_run_report(config=config, result=result)
 

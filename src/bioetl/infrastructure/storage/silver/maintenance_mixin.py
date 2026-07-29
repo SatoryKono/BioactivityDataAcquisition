@@ -24,10 +24,18 @@ class SilverWriterMaintenanceMixin:
     """Mixin with CSV export, vacuum, optimize, and table read helpers."""
 
     logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD6)
-    csv_exporter: CsvExporterProtocol | None = cast(Any, None)  # Any: host attr default (PD6)
-    _retention_manager: RetentionPolicy = cast(Any, None)  # Any: host attr default (PD6)
-    get_table_path: Callable[[str], Path] = cast(Any, None)  # Any: host attr default (PD6)
-    read_table: Callable[..., Awaitable[list[BronzeRecord]]] = cast(Any, None)  # Any: host attr default (PD6)
+    csv_exporter: CsvExporterProtocol | None = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
+    _retention_manager: RetentionPolicy = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
+    get_table_path: Callable[[str], Path] = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
+    read_table: Callable[..., Awaitable[list[BronzeRecord]]] = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
 
     async def _maybe_export_csv(
         self,

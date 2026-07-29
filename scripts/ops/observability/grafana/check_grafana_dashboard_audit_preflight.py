@@ -422,12 +422,20 @@ def _extract_panel_states(
 ) -> tuple[dict[str, object] | None, list[object] | None, str | None]:
     dashboard_terminal = dashboard.get("terminalStateValidation")
     if not isinstance(dashboard_terminal, dict):
-        return None, None, f"render manifest dashboard {uid} lacks terminal panel evidence"
+        return (
+            None,
+            None,
+            f"render manifest dashboard {uid} lacks terminal panel evidence",
+        )
     if dashboard_terminal.get("status") != "ok":
         return None, None, f"render manifest dashboard {uid} terminal validation failed"
     panel_states = dashboard_terminal.get("panelStates")
     if not isinstance(panel_states, list) or not panel_states:
-        return None, None, f"render manifest dashboard {uid} has no required panel states"
+        return (
+            None,
+            None,
+            f"render manifest dashboard {uid} has no required panel states",
+        )
     invalid_states = [
         state
         for state in panel_states
@@ -457,9 +465,7 @@ def _validate_panel_id_coverage(
     panel_states: list[object],
     expected_ids: tuple[int, ...],
 ) -> str | None:
-    actual_ids = [
-        state.get("id") for state in panel_states if isinstance(state, dict)
-    ]
+    actual_ids = [state.get("id") for state in panel_states if isinstance(state, dict)]
     if any(not isinstance(panel_id, int) for panel_id in actual_ids):
         return f"render manifest dashboard {uid} has non-integer panel IDs"
     if len(actual_ids) != len(set(actual_ids)):
@@ -553,7 +559,9 @@ def _validate_one_dashboard_render(
     if viewport_error:
         return viewport_error
 
-    dashboard_terminal, panel_states, panel_error = _extract_panel_states(uid, dashboard)
+    dashboard_terminal, panel_states, panel_error = _extract_panel_states(
+        uid, dashboard
+    )
     if panel_error:
         return panel_error
     assert dashboard_terminal is not None and panel_states is not None

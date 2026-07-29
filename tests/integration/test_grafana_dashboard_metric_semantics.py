@@ -105,21 +105,12 @@ _PROCESSED_RECORDS_SECONDARY_LABELS = {
 
 
 def _expected_processed_records_display_token_mappings() -> list[dict[str, object]]:
-    mappings: list[dict[str, object]] = []
-    for label in _PROCESSED_RECORDS_PARAMETER_LABELS:
-        result = {"text": "$1"}
-        if label in _PROCESSED_RECORDS_PRIMARY_COLORS:
-            result["color"] = _PROCESSED_RECORDS_PRIMARY_COLORS[label]
-        mappings.append(
-            {
-                "type": "regex",
-                "options": {
-                    "pattern": f"^{label}\\|(.*)$",
-                    "result": result,
-                },
-            }
-        )
-    return mappings
+    """Historical pipe-token mappings removed (PFILL-01).
+
+    Value/percentage cells now carry plain counts and percents; parameter
+    coloring stays on the ``parameter`` column overrides.
+    """
+    return []
 
 
 def _expected_processed_records_row_status_mappings() -> list[dict[str, object]]:
@@ -1847,11 +1838,11 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     organize_options = transformations[0].get("options", {})
     assert organize_options.get("renameByName", {}).get("parameter") == "parameter"
     assert organize_options.get("renameByName", {}).get("value") == "value"
-    assert organize_options.get("renameByName", {}).get("percintage") == "percintage"
+    assert organize_options.get("renameByName", {}).get("percentage") == "percentage"
     assert organize_options.get("renameByName", {}).get("row_status") == ""
     assert organize_options.get("indexByName", {}).get("parameter") == 0
     assert organize_options.get("indexByName", {}).get("value") == 1
-    assert organize_options.get("indexByName", {}).get("percintage") == 2
+    assert organize_options.get("indexByName", {}).get("percentage") == 2
     assert organize_options.get("indexByName", {}).get("row_status") == 3
     assert not organize_options.get("excludeByName", {}).get("row_status", False)
 
@@ -1904,9 +1895,8 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     assert value_properties["custom.align"] == "right"
     assert value_properties["custom.width"] == 70
     assert value_properties["custom.cellOptions"] == {"type": "color-text"}
-    assert value_properties["mappings"] == (
-        _expected_processed_records_display_token_mappings()
-    )
+    # PFILL-01: plain numeric tokens — pipe-prefix mappings removed.
+    assert value_properties.get("mappings", []) == []
     assert "color" not in value_properties
     assert "thresholds" not in value_properties
     assert "decimals" not in value_properties
@@ -1914,7 +1904,7 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     percentage_overrides = [
         override
         for override in processed.get("fieldConfig", {}).get("overrides", [])
-        if override.get("matcher", {}).get("options") == "percintage"
+        if override.get("matcher", {}).get("options") == "percentage"
     ]
     assert len(percentage_overrides) == 1
     percentage_properties = {
@@ -1923,9 +1913,8 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     }
     assert percentage_properties["custom.align"] == "left"
     assert percentage_properties["custom.cellOptions"] == {"type": "color-text"}
-    assert percentage_properties["mappings"] == (
-        _expected_processed_records_display_token_mappings()
-    )
+    # PFILL-01: plain percentage text — no pipe-token regex mappings required.
+    assert percentage_properties.get("mappings", []) == []
     assert "color" not in percentage_properties
     assert "thresholds" not in percentage_properties
 

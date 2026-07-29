@@ -23,6 +23,7 @@ from bioetl.domain.types import MetaDict
 
 class CleanupStorageProtocol(Protocol):
     """Minimal cleanup-focused storage contract for CleanupService."""
+
     def preview_cleanup(
         self,
         silver_table: str,
@@ -30,9 +31,11 @@ class CleanupStorageProtocol(Protocol):
     ) -> MetaDict:
         """Describe which layer paths and files would be affected."""
         ...
+
     async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
         """Clear or count Silver-layer data for one table."""
         ...
+
     async def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
         """Clear or count Gold-layer data for one table."""
         ...
@@ -46,6 +49,7 @@ class LayerInfo:
         file_count: Number of files in the layer.
         exists: Whether the layer exists.
     """
+
     path: str
     file_count: int
     exists: bool
@@ -59,6 +63,7 @@ class CleanupPreview:
         gold: Gold layer information (None if not specified).
         total_files: Total number of files that would be affected.
     """
+
     silver: LayerInfo
     gold: LayerInfo | None
     total_files: int
@@ -72,9 +77,11 @@ class CleanupResult:
         gold_cleared: Number of items cleared from Gold layer.
         dry_run: Whether this was a dry run (no actual deletion).
     """
+
     silver_cleared: int
     gold_cleared: int
     dry_run: bool
+
     @property
     def total_cleared(self) -> int:
         """Get total items cleared.
@@ -106,6 +113,7 @@ class CleanupService:
         >>> result.total_cleared  # Number of items cleared
         150
     """
+
     def __init__(self, storage: CleanupStorageProtocol, logger: LoggerPort) -> None:
         """Initialize cleanup service.
         Args:
@@ -114,6 +122,7 @@ class CleanupService:
         """
         self._storage = storage
         self._logger = logger
+
     async def preview(
         self,
         silver_table: str,
@@ -149,6 +158,7 @@ class CleanupService:
             total_files=preview.total_files,
         )
         return preview
+
     async def execute(
         self,
         silver_table: str,
@@ -176,6 +186,7 @@ class CleanupService:
         )
         self._log_result(silver_table, gold_table, result)
         return result
+
     def _log_result(
         self,
         silver_table: str,

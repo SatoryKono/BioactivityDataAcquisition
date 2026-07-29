@@ -259,7 +259,9 @@ def _stat_value_mapping_error(
     )
 
 
-def _stat_panel_visual_semantics_errors(dashboard_path: Path, panel: dict[str, object]) -> list[str]:
+def _stat_panel_visual_semantics_errors(
+    dashboard_path: Path, panel: dict[str, object]
+) -> list[str]:
     title = panel.get("title", UNTITLED_PANEL_TITLE)
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
     mappings = defaults.get("mappings", [])
@@ -348,7 +350,9 @@ def _timeseries_panel_visual_semantics_errors(
     return errors
 
 
-def _expected_threshold_steps(dashboard_path: Path, title: str) -> list[dict[str, object]] | None:
+def _expected_threshold_steps(
+    dashboard_path: Path, title: str
+) -> list[dict[str, object]] | None:
     custom_steps = EXPECTED_STEPS_BY_PANEL.get((dashboard_path.name, title))
     if custom_steps is not None:
         return custom_steps
@@ -385,7 +389,9 @@ def _is_status_like_panel(panel: dict[str, object]) -> bool:
     return any(token in title or token in description for token in STATUS_PANEL_TOKENS)
 
 
-def _stat_threshold_color_errors(dashboard_path: Path, panel: dict[str, object]) -> list[str]:
+def _stat_threshold_color_errors(
+    dashboard_path: Path, panel: dict[str, object]
+) -> list[str]:
     if panel.get("type") != "stat":
         return []
 

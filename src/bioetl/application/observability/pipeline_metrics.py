@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import MetricsPort
@@ -34,8 +34,10 @@ class _PipelineMetricsRecorderCore:
     outside the generic domain port.
     """
 
-    metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD6)
-    pipeline: str = cast(Any, None)  # Any: host attr default (PD6)
+    metrics: MetricsPort | None = (
+        None  # Any: host attr default  # Any: host attr default (PD6)
+    )
+    pipeline: str = ""
 
     def record_quarantine_records(
         self,
@@ -306,8 +308,10 @@ class _PipelineMetricsRecorderCore:
 class _CompositePhaseMetricsRecorderMixin:
     """Composite-phase specific metrics emitted by pipeline-scoped recorders."""
 
-    metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD6)
-    pipeline: str = cast(Any, None)  # Any: host attr default (PD6)
+    metrics: MetricsPort | None = (
+        None  # Any: host attr default  # Any: host attr default (PD6)
+    )
+    pipeline: str = ""
 
     def record_composite_phase_records(
         self,

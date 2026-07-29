@@ -67,4 +67,3 @@ class UnifiedHTTPClient(
             tracer=self.tracer,
             metrics=self.metrics,
         )
-

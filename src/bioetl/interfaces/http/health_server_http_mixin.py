@@ -28,8 +28,12 @@ class HealthServerHTTPMixin:
     """Mixin for low-level HTTP request/response lifecycle."""
 
     _logger: LoggerPort | None = cast(Any, None)  # Any: host attr default (PD3)
-    _request_error_allowlist: tuple[type[BaseException], ...] = cast(Any, None)  # Any: host attr default (PD3)
-    _writer_close_allowlist: tuple[type[BaseException], ...] = cast(Any, None)  # Any: host attr default (PD3)
+    _request_error_allowlist: tuple[type[BaseException], ...] = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
+    _writer_close_allowlist: tuple[type[BaseException], ...] = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
     _request_line_timeout_seconds: float = 5.0
     _header_line_timeout_seconds: float = 5.0
     _max_header_lines: int = 100

@@ -47,8 +47,7 @@ def test_overview_v2_semantics_contract():
     )
     assert "Range Evidence" in row_labels
     assert any(
-        label in row_labels
-        for label in ("Diagnostics & Docs", "Domain status matrix")
+        label in row_labels for label in ("Diagnostics & Docs", "Domain status matrix")
     )
 
     nav_links = list(d.get("links", []))

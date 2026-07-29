@@ -23,18 +23,22 @@ __all__ = [
     "create_transform_aggregation_state",
 ]
 
+
 @dataclass(frozen=True, slots=True)
 class RecordTransformOutcome:
     """Internal outcome of transforming one record before quarantine flush."""
+
     silver_record: BronzeRecord | None
     gold_record: GoldRecord | None
     gold_excluded_by_contract: bool = False
     filtered_entry: FilteredQuarantineEntry | None = None
     dq_entry: DQQuarantineEntry | None = None
 
+
 @dataclass(frozen=True, slots=True)
 class TransformResult:
     """Result of batch transformation."""
+
     silver_records: list[BronzeRecord]
     gold_records: list[GoldRecord]
     quarantined_count: int
@@ -42,9 +46,11 @@ class TransformResult:
     filtered_out_count: int = 0
     records_quarantine_failed: int = 0
 
+
 @dataclass(frozen=True, slots=True)
 class TransformedRecord:
     """Single transformed record with routing info."""
+
     silver_record: BronzeRecord | None
     gold_record: GoldRecord | None
     is_quarantined: bool
@@ -52,9 +58,11 @@ class TransformedRecord:
     is_filtered_out: bool = False
     quarantine_write_failed: bool = False
 
+
 @dataclass(slots=True)
 class TransformAggregationState:
     """Mutable aggregation state shared by batch and streaming transforms."""
+
     silver_records: list[BronzeRecord]
     gold_records: list[GoldRecord]
     filtered_records: list[FilteredQuarantineEntry] = field(default_factory=list)
@@ -64,12 +72,14 @@ class TransformAggregationState:
     filtered_out_count: int = 0
     records_quarantine_failed: int = 0
 
+
 def create_transform_aggregation_state() -> TransformAggregationState:
     """Create empty aggregation state for one transform run."""
     return TransformAggregationState(
         silver_records=[],
         gold_records=[],
     )
+
 
 def accumulate_transform_outcome(
     *,
@@ -91,6 +101,7 @@ def accumulate_transform_outcome(
         if attempt.gold_record is not None:
             gold_records.append(attempt.gold_record)
     return 0, 0
+
 
 def apply_transform_outcome_to_state(
     *,
@@ -114,6 +125,7 @@ def apply_transform_outcome_to_state(
     ):
         state.gold_excluded_by_contract_count += 1
 
+
 def accumulate_stream_transform_result(
     *,
     result: TransformedRecord,
@@ -131,6 +143,7 @@ def accumulate_stream_transform_result(
         if result.gold_record is not None:
             gold_records.append(result.gold_record)
     return 0, 0, quarantine_failed_delta
+
 
 def apply_stream_transform_result_to_state(
     *,
@@ -154,6 +167,7 @@ def apply_stream_transform_result_to_state(
         and result.gold_excluded_by_contract
     ):
         state.gold_excluded_by_contract_count += 1
+
 
 def build_transform_result(state: TransformAggregationState) -> TransformResult:
     """Build public transform result from aggregate state."""

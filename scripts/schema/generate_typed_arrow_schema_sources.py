@@ -56,7 +56,9 @@ def _skip_module_header(lines: list[str]) -> int:
     if i < n and re.match(r"^#.*coding[:=]", lines[i]):
         i += 1
     # module docstring
-    if i < n and (lines[i].lstrip().startswith('"""') or lines[i].lstrip().startswith("'''")):
+    if i < n and (
+        lines[i].lstrip().startswith('"""') or lines[i].lstrip().startswith("'''")
+    ):
         quote = '"""' if '"""' in lines[i] else "'''"
         if lines[i].count(quote) >= 2 and lines[i].strip() != quote:
             i += 1

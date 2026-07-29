@@ -6,7 +6,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Protocol, cast, Any
+from typing import Any, Protocol, cast
 
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.models.metadata import SilverMetadata
@@ -225,7 +225,9 @@ def _emit_silver_metadata_write_success(
             {
                 "table": table_name,
                 "records": len(records),
-                "dq_metrics": cast(Any, dq_metrics).dict()  # Any: DQ metrics .dict() duck-type
+                "dq_metrics": cast(
+                    Any, dq_metrics
+                ).dict()  # Any: DQ metrics .dict() duck-type
                 if hasattr(dq_metrics, "dict")
                 else str(dq_metrics),
                 "status": "success",

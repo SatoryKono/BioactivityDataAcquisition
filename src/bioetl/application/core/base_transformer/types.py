@@ -30,6 +30,7 @@ class TransformerDependencyContext:
     The transformer core consumes this contract, while composition remains the
     owner of concrete runtime defaults.
     """
+
     tracer: TracingPort
     metrics: MetricsPort
     identity_service: EntityIdentityGenerator
@@ -42,10 +43,12 @@ class TransformerDependencyContext:
 @runtime_checkable
 class ValueObjectWithFromRaw(Protocol[V]):
     """Protocol for Value Objects exposing ``from_raw`` and ``value``."""
+
     @classmethod
     def from_raw(cls, raw: Any) -> V | None:  # Any: raw input
         """Create a value object from a raw input, returning None if invalid."""
         ...
+
     @property
     def value(self) -> Any:  # Any: VO value type varies (str | int | float)
         """Return the unwrapped primitive value of the value object."""

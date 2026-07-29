@@ -19,7 +19,9 @@ class DebugExportServiceRecordingMixin:
     """Delegate enabled debug-export recording calls to the collector."""
 
     _collector: DebugExportCollector = cast(Any, None)  # Any: host attr default (PD3)
-    _created_at_factory: Callable[[], datetime] = cast(Any, None)  # Any: host attr default (PD3)
+    _created_at_factory: Callable[[], datetime] = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
 
     @property
     def enabled(self) -> bool:

@@ -12,6 +12,7 @@ from bioetl.domain.types import BronzeRecord
 @runtime_checkable
 class PipelineProcessingProtocol(Protocol):
     """Contract for end-to-end processing of one assembled batch."""
+
     async def process_batch(
         self,
         *,
@@ -32,6 +33,7 @@ class PipelineProcessingProtocol(Protocol):
 
 class BatchStateCommitProtocol(Protocol):
     """Applies successful batch outcome to executor-owned cumulative state."""
+
     def commit_successful_batch(
         self,
         *,
@@ -41,6 +43,7 @@ class BatchStateCommitProtocol(Protocol):
     ) -> None:
         """Mutate cumulative executor state after one successful batch."""
         ...
+
     def build_batch_result[BatchResultT](
         self,
         *,
@@ -49,6 +52,7 @@ class BatchStateCommitProtocol(Protocol):
     ) -> BatchResultT:
         """Build the batch-scoped result payload from current state."""
         ...
+
     def build_run_statistics(
         self,
         *,

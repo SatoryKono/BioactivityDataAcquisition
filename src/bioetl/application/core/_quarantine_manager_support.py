@@ -35,6 +35,7 @@ if TYPE_CHECKING:
 
 class _FilteredQuarantineEntryProtocol(Protocol):
     """Structural filtered-entry shape used by the support mixin."""
+
     record: dict[str, Any]  # Any: filtered records carry provider-defined JSON values.
     reason: str
     details: dict[str, Any] | None  # Any: quarantine details are extensible JSON.
@@ -42,13 +43,21 @@ class _FilteredQuarantineEntryProtocol(Protocol):
 
 class QuarantineManagerSupportMixin:
     """Own filtered-record and inspection helpers outside the main service shell."""
+
     _pipeline_name: str = cast(Any, None)  # Any: host attr default (PD3)
     _quarantine: QuarantinePort = cast(Any, None)  # Any: host attr default (PD3)
-    _domain_event_emitter: DomainEventEmitterProtocol | None = cast(Any, None)  # Any: host attr default (PD3)
+    _domain_event_emitter: DomainEventEmitterProtocol | None = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
     _metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD3)
-    _batch_metrics: BatchMetricsRecorderService | None = cast(Any, None)  # Any: host attr default (PD3)
-    _pipeline_metrics: PipelineMetricsRecorder = cast(Any, None)  # Any: host attr default (PD3)
+    _batch_metrics: BatchMetricsRecorderService | None = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
+    _pipeline_metrics: PipelineMetricsRecorder = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
     _run_type: str = cast(Any, None)  # Any: host attr default (PD3)
+
     def _quarantine_runtime_ports(self) -> QuarantineRuntimeDependencies:
         return build_quarantine_runtime_ports(
             quarantine=self._quarantine,
@@ -59,6 +68,7 @@ class QuarantineManagerSupportMixin:
             batch_metrics=self._batch_metrics,
             run_type=getattr(self, "_run_type", "unknown"),
         )
+
     async def quarantine_record(
         self,
         record: JsonDict,
@@ -88,6 +98,7 @@ class QuarantineManagerSupportMixin:
             run_id=run_id,
             ingestion_ts=ingestion_ts,
         )
+
     async def quarantine_records(
         self,
         records: Sequence[tuple[BronzeRecord, ErrorType, str]],
@@ -119,6 +130,7 @@ class QuarantineManagerSupportMixin:
             run_id=run_id,
             ingestion_ts=ingestion_ts,
         )
+
     async def quarantine_filtered_record(
         self,
         record: JsonDict,
@@ -147,6 +159,7 @@ class QuarantineManagerSupportMixin:
             run_id=run_id,
             ingestion_ts=ingestion_ts,
         )
+
     async def quarantine_filtered_records(
         self,
         records: Sequence[Any],  # Any: accepts structural NamedTuple entry variants.
@@ -182,6 +195,7 @@ class QuarantineManagerSupportMixin:
             run_id=run_id,
             ingestion_ts=ingestion_ts,
         )
+
     async def inspect(
         self,
         limit: int = 100,
@@ -197,6 +211,7 @@ class QuarantineManagerSupportMixin:
                 run_id=run_id,
             )
         )
+
     async def get_stats(
         self,
         error_code: str | None = None,

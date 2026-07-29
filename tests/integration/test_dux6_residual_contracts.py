@@ -44,7 +44,9 @@ def test_no_developer_tokens_or_endpoints_in_text_bodies() -> None:
 
 
 def test_run_explorer_orientation_is_compact_html() -> None:
-    data = json.loads((DASH / "bioetl-run-explorer-v1.json").read_text(encoding="utf-8"))
+    data = json.loads(
+        (DASH / "bioetl-run-explorer-v1.json").read_text(encoding="utf-8")
+    )
     for panel in _walk(data.get("panels")):
         title = panel.get("title") or ""
         if title == "Run Scope" or title.startswith("Next actions"):
@@ -56,7 +58,9 @@ def test_run_explorer_orientation_is_compact_html() -> None:
 
 
 def test_browse_hides_raw_path_columns() -> None:
-    data = json.loads((DASH / "bioetl-run-explorer-v1.json").read_text(encoding="utf-8"))
+    data = json.loads(
+        (DASH / "bioetl-run-explorer-v1.json").read_text(encoding="utf-8")
+    )
     browse = next(
         p
         for p in _walk(data.get("panels"))
@@ -96,19 +100,22 @@ def test_primary_status_documents_unknown_class() -> None:
             continue
         if status.get("title") != "Status":
             # find true Status
-            status = next(p for p in _walk(data.get("panels")) if p.get("title") == "Status")
+            status = next(
+                p for p in _walk(data.get("panels")) if p.get("title") == "Status"
+            )
         desc = (status.get("description") or "").lower()
         assert "unknown" in desc
         assert "evidence incomplete" in desc or "missing" in desc
 
 
-def test_run_context_collapsed_outside_explorer() -> None:
+def test_dux6_run_context_collapsed_outside_explorer() -> None:
     for path in sorted(DASH.glob("*.json")):
         data = json.loads(path.read_text(encoding="utf-8"))
         if data.get("uid") == "bioetl-run-explorer-v1":
             continue
         for panel in _walk(data.get("panels")):
-            if panel.get("type") == "row" and "run context" in (
-                panel.get("title") or ""
-            ).lower():
+            if (
+                panel.get("type") == "row"
+                and "run context" in (panel.get("title") or "").lower()
+            ):
                 assert panel.get("collapsed") is True

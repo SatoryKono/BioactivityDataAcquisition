@@ -227,7 +227,7 @@
     },
     {
       "kind": "attribute_call:resolve",
-      "line": 191,
+      "line": 193,
       "path": "src/bioetl/domain/run_reports/accounting_snapshots.py",
       "reason": "Catalog lookup method named resolve (not filesystem Path.resolve).",
       "symbol": "StageAccountingSnapshotsMixin._removals_for_bucket"

@@ -433,9 +433,7 @@ def _is_scanned_markdown_note_entry(
         return False
     if entry.is_dir(follow_symlinks=False):
         return None
-    if entry.name == "README.md" or not entry.name.endswith(".md"):
-        return False
-    return True
+    return entry.name != "README.md" and entry.name.endswith(".md")
 
 
 def _iter_markdown_note_paths(

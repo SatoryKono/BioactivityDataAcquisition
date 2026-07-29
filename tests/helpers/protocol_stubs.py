@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from collections.abc import AsyncIterator, Iterator, Mapping
 from dataclasses import dataclass, field
-from typing import Any, TypeVar
+from typing import Any
 from unittest.mock import AsyncMock, MagicMock
 
 from bioetl.domain.types import BronzeRecord, HealthStatus, JsonDict
@@ -22,10 +22,8 @@ __all__ = [
     "protocol_mock",
 ]
 
-T = TypeVar("T")
 
-
-def protocol_mock(protocol: type[T], **attrs: Any) -> T:
+def protocol_mock[T](protocol: type[T], **attrs: Any) -> T:
     """Return a MagicMock typed as ``protocol`` for assignability."""
     mock = MagicMock(spec=protocol)
     for key, value in attrs.items():
@@ -52,6 +50,7 @@ class RecordingLogger:
     events: list[tuple[str, str, dict[str, Any]]] = field(default_factory=list)
 
     def bind(self, **kwargs: Any) -> RecordingLogger:
+        del kwargs  # LoggerPort.bind contract; binder is intentionally identity
         return self
 
     def info(self, event: str, **kwargs: Any) -> None:

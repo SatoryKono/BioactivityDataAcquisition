@@ -21,7 +21,9 @@ if TYPE_CHECKING:
 class _PubChemClientFetchMixin:
     """Fetch routing and filtered dispatch for the PubChem adapter."""
 
-    _strategies: PubChemFetchStrategies = cast(Any, None)  # Any: host attr default (PD3)
+    _strategies: PubChemFetchStrategies = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
 
     async def _fetch_compound(
         self, query: str | None, limit: int | None

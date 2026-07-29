@@ -55,7 +55,8 @@ class WorkflowCommandOptions:
 
     @classmethod
     def from_click_kwargs(
-        cls, raw: dict[str, Any]  # Any: Click injects heterogeneous option values
+        cls,
+        raw: dict[str, Any],  # Any: Click injects heterogeneous option values
     ) -> WorkflowCommandOptions:
         """Build options from Click-injected keyword arguments."""
         return cls(
@@ -68,9 +69,7 @@ class WorkflowCommandOptions:
             filter_column=cast(str | None, raw.get("filter_column")),
             filter_field=cast(str | None, raw.get("filter_field")),
             vacuum_after_run=cast(bool | None, raw.get("vacuum_after_run")),
-            vacuum_retention_days=cast(
-                int | None, raw.get("vacuum_retention_days")
-            ),
+            vacuum_retention_days=cast(int | None, raw.get("vacuum_retention_days")),
             log_level=cast(str | None, raw.get("log_level")),
             ignore_yaml_filter=cast(bool | None, raw.get("ignore_yaml_filter")),
             skip_gold=cast(bool | None, raw.get("skip_gold")),
@@ -83,13 +82,9 @@ class WorkflowCommandOptions:
                 str | None, raw.get("required_persistence_profile")
             ),
             replay_of_run_id=cast(str | None, raw.get("replay_of_run_id")),
-            replay_of_manifest_id=cast(
-                str | None, raw.get("replay_of_manifest_id")
-            ),
+            replay_of_manifest_id=cast(str | None, raw.get("replay_of_manifest_id")),
             enable_tracing=cast(bool | None, raw.get("enable_tracing")),
-            debug_export_enabled=cast(
-                bool | None, raw.get("debug_export_enabled")
-            ),
+            debug_export_enabled=cast(bool | None, raw.get("debug_export_enabled")),
             debug_export_formats=cast(
                 tuple[str, ...], raw.get("debug_export_formats", ())
             ),

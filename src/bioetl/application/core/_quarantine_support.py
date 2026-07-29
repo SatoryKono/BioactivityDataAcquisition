@@ -36,6 +36,7 @@ if TYPE_CHECKING:
 @dataclass(frozen=True, slots=True)
 class QuarantineRuntimeDependencies:
     """Shared runtime ports used by quarantine write helpers."""
+
     quarantine: QuarantinePort
     emitter: DomainEventEmitterProtocol | None
     pipeline_name: str

@@ -222,11 +222,7 @@ def test_pipeline_selector_live_closure_evidence_is_complete() -> None:
     assert adjunct.issubset(set(registry))
     assert "bioetl-silver-reject-explorer" not in registry
     assert len(registry) == closure.get("required_dashboard_count") == 7
-    assert (
-        len(primary_registry)
-        == closure.get("primary_pipeline_universe_count")
-        == 5
-    )
+    assert len(primary_registry) == closure.get("primary_pipeline_universe_count") == 5
     assert len(dashboards) >= len(primary_registry)
 
     shared_metrics = contract.get("shared_query_metrics")

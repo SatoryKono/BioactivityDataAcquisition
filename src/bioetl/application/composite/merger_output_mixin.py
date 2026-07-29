@@ -23,7 +23,9 @@ class MergeOutputWriterMixin:
     _config: MergeConfig = cast(Any, None)  # Any: host default (PD4)
     _logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
     _storage: MergedStoragePort = cast(Any, None)  # Any: host default (PD4)
-    _field_group_registry: FieldGroupRegistry | None = cast(Any, None)  # Any: host default (PD4)
+    _field_group_registry: FieldGroupRegistry | None = cast(
+        Any, None
+    )  # Any: host default (PD4)
     _gold_schema: Any | None = cast(Any, None)  # Any: host default (PD4)
 
     @staticmethod

@@ -41,20 +41,24 @@ class ShutdownSignal:
         >>> if signal.is_requested:
         ...     await checkpoint_manager.save()
     """
+
     _requested: bool = field(default=False, init=False)
     _event: asyncio.Event = field(default_factory=asyncio.Event, init=False)
     _completion_event: asyncio.Event = field(default_factory=asyncio.Event, init=False)
     _reason: str = field(default="", init=False)
+
     @property
     def is_requested(self) -> bool:
         """Check if shutdown has been requested."""
         return self._requested
+
     def is_shutting_down(self) -> bool:
         """Check if shutdown has been requested (ShutdownPort compatible).
         Returns:
             True if the condition is met, False otherwise.
         """
         return self._requested
+
     def request(self) -> None:
         """Request graceful shutdown.
         All components watching this signal will be notified.
@@ -63,6 +67,7 @@ class ShutdownSignal:
         if not self._requested:
             self._requested = True
             self._event.set()
+
     async def initiate_shutdown(self, reason: str) -> None:
         """Initiate graceful shutdown (ShutdownPort compatible).
         Args:
@@ -73,12 +78,14 @@ class ShutdownSignal:
             self._requested = True
             self._reason = reason
             self._event.set()
+
     async def wait(self) -> None:
         """Wait until shutdown is requested.
         Blocks until request() is called. Use with asyncio.wait_for()
         for timeout-based waiting.
         """
         await self._event.wait()
+
     async def wait_for_completion(self, timeout_seconds: float) -> bool:
         """Wait for shutdown completion (ShutdownPort compatible).
         Args:
@@ -92,9 +99,11 @@ class ShutdownSignal:
             return True
         except TimeoutError:
             return False
+
     def mark_completed(self) -> None:
         """Mark shutdown as completed."""
         self._completion_event.set()
+
     def reset(self) -> None:
         """Reset signal for reuse (e.g., in tests).
         Warning: Only use in tests or when you're certain no components

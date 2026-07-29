@@ -159,7 +159,9 @@ def fix_runtime() -> None:
     for panel in walk(data.get("panels")):
         if panel.get("title") == "Provenance" and panel.get("id") == 9400:
             _set_html_panel(panel, RUNTIME_PROVENANCE)
-            print("Runtime Provenance compact, h=", (panel.get("gridPos") or {}).get("h"))
+            print(
+                "Runtime Provenance compact, h=", (panel.get("gridPos") or {}).get("h")
+            )
     save(path, data)
 
 
@@ -169,7 +171,9 @@ def fix_provider() -> None:
     for panel in walk(data.get("panels")):
         if panel.get("title") == "Provenance" and panel.get("id") == 9400:
             _set_html_panel(panel, PROVIDER_PROVENANCE)
-            print("Provider Provenance compact, h=", (panel.get("gridPos") or {}).get("h"))
+            print(
+                "Provider Provenance compact, h=", (panel.get("gridPos") or {}).get("h")
+            )
     save(path, data)
 
 
@@ -180,7 +184,9 @@ def fix_incident() -> None:
         title = panel.get("title")
         if title == "Provenance" and panel.get("id") == 9400:
             _set_html_panel(panel, INCIDENT_PROVENANCE)
-            print("Incident Provenance compact, h=", (panel.get("gridPos") or {}).get("h"))
+            print(
+                "Incident Provenance compact, h=", (panel.get("gridPos") or {}).get("h")
+            )
         if title == "Next Best Actions":
             _set_html_panel(panel, INCIDENT_NEXT_BEST)
             print(
@@ -201,7 +207,9 @@ def fix_overview() -> None:
             opts["mode"] = "html"
             opts["content"] = OV_PROVENANCE
             panel["options"] = opts
-            print("Overview Provenance compact, h=", (panel.get("gridPos") or {}).get("h"))
+            print(
+                "Overview Provenance compact, h=", (panel.get("gridPos") or {}).get("h")
+            )
         if title == "Inputs" and pid == 9002:
             opts = dict(panel.get("options") or {})
             opts["cellHeight"] = "sm"
@@ -223,7 +231,10 @@ def fix_overview() -> None:
                     prop = dict(prop)
                     if prop.get("id") == "custom.cellOptions":
                         val = dict(prop.get("value") or {})
-                        if val.get("applyToRow") or val.get("type") == "color-background":
+                        if (
+                            val.get("applyToRow")
+                            or val.get("type") == "color-background"
+                        ):
                             prop["value"] = {
                                 "type": "color-background",
                                 "mode": "basic",

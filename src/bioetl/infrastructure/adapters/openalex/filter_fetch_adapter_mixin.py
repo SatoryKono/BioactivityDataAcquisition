@@ -42,9 +42,13 @@ class OpenAlexAdapterFilterFetchMixin(NotSupportedMultiFilterMixin):
 
     logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)
     _logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)
-    _query_executor: OpenAlexQueryExecutor = cast(Any, None)  # Any: host attr default (PD3)
+    _query_executor: OpenAlexQueryExecutor = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
     _cursor_flow: OpenAlexCursorFlow = cast(Any, None)  # Any: host attr default (PD3)
-    _fallback_orchestrator: OpenAlexFallbackOrchestrator = cast(Any, None)  # Any: host attr default (PD3)
+    _fallback_orchestrator: OpenAlexFallbackOrchestrator = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
 
     @staticmethod
     def _is_supported_entity_type(entity_type: str) -> bool:

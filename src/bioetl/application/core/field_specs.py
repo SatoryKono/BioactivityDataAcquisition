@@ -21,11 +21,13 @@ FLOAT: Callable[[object], float | None] = (
 )
 STR: Callable[[object], str] = str  # object: raw field value from Bronze record
 
+
 def normalize_pmid(
     value: object,
 ) -> str | None:  # object: raw PMID value (int, str, or None)
     """Normalize one PubMed identifier via the publication value object."""
     from bioetl.domain.value_objects.publications import PubMedId
+
     normalized_input: str | int | None = None
     if (isinstance(value, int) and not isinstance(value, bool)) or isinstance(
         value, str
@@ -34,13 +36,16 @@ def normalize_pmid(
     vo = PubMedId.from_raw(normalized_input)
     return str(vo) if vo else None
 
+
 PMID: Callable[[object], str | None] = (
     normalize_pmid  # object: raw PMID value from Bronze record
 )
 
+
 @dataclass(frozen=True, slots=True)
 class FieldSpec:
     """Specification for one field mapping."""
+
     source: str
     target: str | None = None
     converter: Callable[[object], object] | None = (
@@ -51,12 +56,15 @@ class FieldSpec:
         None  # object: heterogeneous default values depending on field type
     )
 
+
 @dataclass(frozen=True, slots=True)
 class FieldGroup:
     """Group of related field specifications with an optional target prefix."""
+
     name: str
     fields: tuple[FieldSpec, ...]
     prefix: str = ""
+
 
 def map_field(
     record: BronzeRecord,
@@ -75,6 +83,7 @@ def map_field(
         value = spec.converter(value)
     return target, value
 
+
 def map_fields(
     record: BronzeRecord,
     specs: Sequence[FieldSpec],
@@ -86,6 +95,7 @@ def map_fields(
         result[target] = value
     return result
 
+
 def map_field_group(
     record: BronzeRecord,
     group: FieldGroup,
@@ -95,6 +105,7 @@ def map_field_group(
     if group.prefix:
         return {f"{group.prefix}{k}": v for k, v in mapped.items()}
     return mapped
+
 
 def map_field_groups(
     record: BronzeRecord,
@@ -106,21 +117,26 @@ def map_field_groups(
         result.update(map_field_group(record, group))
     return result
 
+
 # =============================================================================
 # Convenience functions for common patterns
 # =============================================================================
+
 
 def simple_fields(*field_names: str) -> tuple[FieldSpec, ...]:
     """Create pass-through field specs from raw field names."""
     return tuple(FieldSpec(name) for name in field_names)
 
+
 def int_fields(*field_names: str) -> tuple[FieldSpec, ...]:
     """Create field specs that normalize values with `INT`."""
     return tuple(FieldSpec(name, converter=INT) for name in field_names)
 
+
 def float_fields(*field_names: str) -> tuple[FieldSpec, ...]:
     """Create field specs that normalize values with `FLOAT`."""
     return tuple(FieldSpec(name, converter=FLOAT) for name in field_names)
+
 
 def standard_value_fields(
     *,
@@ -148,9 +164,11 @@ def standard_value_fields(
         return (*fields, *int_fields("standard_flag"))
     return fields
 
+
 def pmid_fields(*field_names: str) -> tuple[FieldSpec, ...]:
     """Create field specs that normalize values with `PMID`."""
     return tuple(FieldSpec(name, converter=PMID) for name in field_names)
+
 
 __all__ = [
     "FLOAT",

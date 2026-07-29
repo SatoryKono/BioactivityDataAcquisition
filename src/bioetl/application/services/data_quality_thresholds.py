@@ -21,7 +21,9 @@ class DataQualityThresholdMixin:
     _logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)
     _metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD3)
     _pipeline_name: str = cast(Any, None)  # Any: host attr default (PD3)
-    _pipeline_metrics: PipelineMetricsRecorder = cast(Any, None)  # Any: host attr default (PD3)
+    _pipeline_metrics: PipelineMetricsRecorder = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
     _run_type: str = cast(Any, None)  # Any: host attr default (PD3)
 
     def _emit_quarantine_semantics(

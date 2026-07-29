@@ -10,7 +10,7 @@ ISSUES = ROOT / ".github" / "ISSUES"
 BODIES_DIR = ISSUES / "_dux4_bodies"
 PACK = ISSUES / "DUX4-2026-07-29-DASHBOARD-VISUAL-ENFORCEMENT-ISSUE-PACK.md"
 
-PACK_TEXT = r'''# Dashboard visual enforcement residual — DUX4
+PACK_TEXT = r"""# Dashboard visual enforcement residual — DUX4
 
 **Status:** published (local pack; GH numbers filled after publish)
 **Wave code:** DUX4
@@ -162,7 +162,7 @@ This wave is **DUX4 = pixels enforce DUX3 contracts**.
 ## Publish record
 
 - After `gh issue create`: fill Issue column + `reports/quality/dux4-2026-07-29-issue-publish.json`
-'''
+"""
 
 TITLES: dict[str, str] = {
     "DUX4-00": "chore(grafana): DUX4 epic — visual enforcement residual post-DUX3 UX audit",

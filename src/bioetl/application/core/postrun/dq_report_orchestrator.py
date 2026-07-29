@@ -27,6 +27,7 @@ if TYPE_CHECKING:
 
 class PostrunDQReportService(PostrunFailureHandlingMixin):
     """Orchestrates optional DQ report generation with strict/warning mode."""
+
     _FAILURE_POLICY = PostrunFailurePolicySpec(
         event="dq_report_generation_failed",
         strict_reason="dq_report_generation_failed_strict_mode",
@@ -34,6 +35,7 @@ class PostrunDQReportService(PostrunFailureHandlingMixin):
         warning_reason="dq_report_generation_failed_warning_mode",
         warning_reason_code="POSTRUN_DQ_REPORT_GENERATION_FAILED_WARNING",
     )
+
     def __init__(
         self,
         *,
@@ -56,6 +58,7 @@ class PostrunDQReportService(PostrunFailureHandlingMixin):
             *warning_allowlist,
             BioETLError,
         )
+
     async def generate_reports(
         self,
         context: DQReportContext | None,

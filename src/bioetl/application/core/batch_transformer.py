@@ -64,6 +64,7 @@ if TYPE_CHECKING:
 
 class BatchTransformer:
     """Transforms Bronze records to Silver/Gold with error handling and DQ checks."""
+
     def __init__(
         self,
         context: PipelineContext,
@@ -107,6 +108,7 @@ class BatchTransformer:
             if normalization_processor is not None
             else build_default_normalization_processor(config)
         )
+
     async def _transform_attempt(
         self,
         raw_record: BronzeRecord,
@@ -128,6 +130,7 @@ class BatchTransformer:
             batch_id=batch_id,
             index=index,
         )
+
     async def transform_batch(
         self, records: list[BronzeRecord], batch_id: BatchID, start_index: int = 0
     ) -> TransformResult:
@@ -159,6 +162,7 @@ class BatchTransformer:
                 batch_id=batch_id,
             ),
         )
+
     async def transform_single(
         self, raw_record: BronzeRecord, batch_id: BatchID, index: int = 0
     ) -> TransformedRecord:
@@ -174,6 +178,7 @@ class BatchTransformer:
             attempt=attempt,
             batch_id=batch_id,
         )
+
     async def transform_stream(
         self,
         records: list[BronzeRecord],

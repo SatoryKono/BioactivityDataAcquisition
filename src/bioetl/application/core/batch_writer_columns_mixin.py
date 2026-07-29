@@ -21,8 +21,14 @@ _SCHEMA_EXTRACTION_ERRORS = (
 
 class BatchWriterColumnsMixin:
     """Column resolution helpers extracted from BatchWriter."""
-    _column_orderer: Any = cast(Any, None)  # Any: concrete host injects optional column-order service
-    _data_schema: Any = cast(Any, None)  # Any: schema adapters expose heterogeneous runtime APIs
+
+    _column_orderer: Any = cast(
+        Any, None
+    )  # Any: concrete host injects optional column-order service
+    _data_schema: Any = cast(
+        Any, None
+    )  # Any: schema adapters expose heterogeneous runtime APIs
+
     def _project_via_to_schema(
         self,
         schema: object,
@@ -36,10 +42,11 @@ class BatchWriterColumnsMixin:
             converted = to_schema()
             select_columns = getattr(converted, "select_columns", None)
             if callable(select_columns):
-                return select_columns(list(column_order))
+                return cast(object, select_columns(list(column_order)))
         except _SCHEMA_EXTRACTION_ERRORS:
             return schema
         return None
+
     def _project_via_select_columns(
         self,
         schema: object,
@@ -50,9 +57,10 @@ class BatchWriterColumnsMixin:
         if not callable(select_columns):
             return None
         try:
-            return select_columns(list(column_order))
+            return cast(object, select_columns(list(column_order)))
         except _SCHEMA_EXTRACTION_ERRORS:
             return schema
+
     def _project_pyarrow_schema(
         self,
         schema: object,
@@ -61,6 +69,7 @@ class BatchWriterColumnsMixin:
         """Project a PyArrow schema while preserving metadata when available."""
         try:
             import pyarrow as pa
+
             if not isinstance(schema, pa.Schema):
                 return None
             names = getattr(schema, "names", ())
@@ -70,11 +79,13 @@ class BatchWriterColumnsMixin:
             projected_fields = [
                 field_fn(name) for name in column_order if name in names
             ]
-            return pa.schema(
-                projected_fields, metadata=getattr(schema, "metadata", None)
+            return cast(
+                object,
+                pa.schema(projected_fields, metadata=getattr(schema, "metadata", None)),
             )
         except (ImportError, AttributeError, TypeError, ValueError):
             return schema
+
     def _get_schema_columns(
         self,
         schema: object,
@@ -93,15 +104,18 @@ class BatchWriterColumnsMixin:
         if isinstance(columns, dict):
             return set(columns.keys())
         return None
+
     def _collect_record_columns(self, records: list[GoldRecord]) -> list[str]:
         """Collect columns in stable first-seen order."""
         return list(dict.fromkeys(itertools.chain.from_iterable(records)))
+
     def _get_column_order(self, columns: Sequence[str]) -> list[str] | None:
         """Resolve explicit column order from configured column groups."""
         if not self._column_orderer:
             return None
         ordered = self._column_orderer.order_column_names(columns)
         return self._apply_system_prefix_order(ordered)
+
     def _apply_renames_to_records(
         self, records: list[GoldRecord], rename_map: dict[str, str]
     ) -> list[GoldRecord]:
@@ -115,6 +129,7 @@ class BatchWriterColumnsMixin:
                 renamed[rename_map.get(key, key)] = value
             renamed_records.append(renamed)
         return renamed_records
+
     def _resolve_layer_columns(
         self, layer: Literal["silver", "gold"], available_columns: Sequence[str]
     ) -> tuple[list[str] | None, dict[str, str]]:
@@ -136,6 +151,7 @@ class BatchWriterColumnsMixin:
         )
         ordered_columns = self._apply_system_prefix_order(ordered_columns)
         return ordered_columns, layer_config.rename_fields
+
     def _project_schema_for_layer(
         self,
         layer: Literal["silver", "gold"],
@@ -158,6 +174,7 @@ class BatchWriterColumnsMixin:
         if projected is not None:
             return projected
         return schema
+
     def _apply_system_prefix_order(self, columns: list[str]) -> list[str]:
         """Ensure system fields are first and DQ fields are last."""
         from bioetl.domain.schemas.column_order import (
@@ -165,6 +182,7 @@ class BatchWriterColumnsMixin:
             LOOKUP_FIELDS_PREFIX,
             SYSTEM_FIELDS_PREFIX,
         )
+
         if not columns:
             return columns
         column_set = set(columns)

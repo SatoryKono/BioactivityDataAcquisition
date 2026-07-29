@@ -12,12 +12,14 @@ if TYPE_CHECKING:
 
 class BatchProgressService:
     """Tracks and emits pipeline progress during batch execution."""
+
     def __init__(self, *, logger: LoggerPort, data_source: object) -> None:
         self._logger = logger
         self._data_source = data_source
         self._total_records: int | None = None
         self._progress_interval: int | None = None
         self._next_progress_threshold: int = 0
+
     async def initialize_tracking(self, limit: int | None) -> None:
         """Estimate total records and initialize progress thresholds.
         Args:
@@ -33,11 +35,13 @@ class BatchProgressService:
         if get_total and callable(get_total):
             from collections.abc import Awaitable, Callable
             from typing import cast
+
             get_total_fn = cast(Callable[[], Awaitable[object]], get_total)
             result = await get_total_fn()
             if isinstance(result, int) and result > 0:
                 self._total_records = result
                 self._set_progress_thresholds()
+
     def report_progress(
         self,
         *,
@@ -68,6 +72,7 @@ class BatchProgressService:
                 fetched=records_fetched,
             )
             self._next_progress_threshold += self._progress_interval
+
     def _set_progress_thresholds(self) -> None:
         """Initialize interval and first threshold from total-record estimate."""
         total_records = self._total_records

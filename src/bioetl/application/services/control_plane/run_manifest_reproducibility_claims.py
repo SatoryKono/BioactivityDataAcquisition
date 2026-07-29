@@ -62,9 +62,7 @@ def build_historical_replay_universe_exact_replay_claim(
                 "latest_historical_replay_universe_artifact_supports_universal_claim"
             )
         elif not exact_replay_supported:
-            claim_reason = (
-                "historical_replay_universe_artifact_blocks_universal_claim"
-            )
+            claim_reason = "historical_replay_universe_artifact_blocks_universal_claim"
         else:
             claim_reason = "durable_evidence_coverage_blocks_universal_claim"
         return {

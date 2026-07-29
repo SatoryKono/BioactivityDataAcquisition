@@ -105,6 +105,10 @@ ZERO_IMPORT_OWNER_TEST_EVIDENCE: dict[str, dict[str, object]] = {
             "tests/unit/infrastructure/config/test_reason_catalog_loader.py",
         ),
     },
+    "src/bioetl/infrastructure/arrow_typed.py": {
+        "evidence_lane": "canonical_owner_contract",
+        "owner_tests": ("tests/unit/infrastructure/test_arrow_typed.py",),
+    },
     "src/bioetl/infrastructure/adapters/_cached_bronze_support.py": {
         "evidence_lane": "retained_module_owner_suite",
         "owner_tests": (
@@ -156,9 +160,7 @@ ZERO_IMPORT_OWNER_TEST_EVIDENCE: dict[str, dict[str, object]] = {
     },
     "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py": {
         "evidence_lane": "retained_module_owner_suite",
-        "owner_tests": (
-            OWNER_TEST_RUNNER_SUPPORT_MIXIN,
-        ),
+        "owner_tests": (OWNER_TEST_RUNNER_SUPPORT_MIXIN,),
     },
     "src/bioetl/application/composite/runner_pkg/runner_support_policy.py": {
         "evidence_lane": "retained_module_owner_suite",
@@ -199,21 +201,15 @@ ZERO_IMPORT_OWNER_TEST_EVIDENCE: dict[str, dict[str, object]] = {
     },
     "src/bioetl/application/services/control_plane/manifest/diagnostics/base.py": {
         "evidence_lane": "dynamic_runtime_entrypoint",
-        "owner_tests": (
-            OWNER_TEST_CONTROL_PLANE_DIAGNOSTICS,
-        ),
+        "owner_tests": (OWNER_TEST_CONTROL_PLANE_DIAGNOSTICS,),
     },
     "src/bioetl/application/services/control_plane/manifest/diagnostics/finalization.py": {
         "evidence_lane": "dynamic_runtime_entrypoint",
-        "owner_tests": (
-            OWNER_TEST_CONTROL_PLANE_DIAGNOSTICS,
-        ),
+        "owner_tests": (OWNER_TEST_CONTROL_PLANE_DIAGNOSTICS,),
     },
     "src/bioetl/application/services/control_plane/manifest/diagnostics/replay_refresh_support.py": {
         "evidence_lane": "dynamic_runtime_entrypoint",
-        "owner_tests": (
-            OWNER_TEST_CONTROL_PLANE_DIAGNOSTICS,
-        ),
+        "owner_tests": (OWNER_TEST_CONTROL_PLANE_DIAGNOSTICS,),
     },
     "src/bioetl/interfaces/cli/commands/maintenance.py": {
         "evidence_lane": "compatibility_facade_contract",
@@ -1024,9 +1020,7 @@ def _existing_snapshot_date(path: Path) -> str | None:
     return snapshot_date if isinstance(snapshot_date, str) else None
 
 
-def _artifact_content_mismatch(
-    path: Path, expected: str, *, kind: str
-) -> str | None:
+def _artifact_content_mismatch(path: Path, expected: str, *, kind: str) -> str | None:
     if not path.exists():
         return f"[dead-code-inventory] missing {kind} artifact: {path}"
     if path.read_text(encoding="utf-8") != expected:

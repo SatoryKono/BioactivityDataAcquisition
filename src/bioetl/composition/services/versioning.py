@@ -270,7 +270,7 @@ def compute_config_hash(
         # Legacy Pydantic v1 support
         config_dict = host.dict(exclude_none=True)
     else:
-        config_dict = dict(cast(dict[str, object], config))
+        config_dict = dict(config)
 
     # Normalize for deterministic serialization
     normalized = _normalize_for_hash(config_dict)

@@ -71,18 +71,26 @@ class CompositeRunnerSupportMixin:
 
     _config: CompositeConfig = cast(Any, None)  # Any: host attr default (PD3)
     _runtime: CompositeRuntimeConfig = cast(Any, None)  # Any: host attr default (PD3)
-    _seed_runner_factory: Callable[[], ExecutionMetricsRunnerPort] = cast(Any, None)  # Any: host attr default (PD3)
-    _checkpoint_manager: CompositeCheckpointService = cast(Any, None)  # Any: host attr default (PD3)
+    _seed_runner_factory: Callable[[], ExecutionMetricsRunnerPort] = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
+    _checkpoint_manager: CompositeCheckpointService = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
     _logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)
     _metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD3)
     _tracing: TracingPort | None = cast(Any, None)  # Any: host attr default (PD3)
-    _observer: CompositeLifecycleObserverService = cast(Any, None)  # Any: host attr default (PD3)
+    _observer: CompositeLifecycleObserverService = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
     _run_id_str: str = cast(Any, None)  # Any: host attr default (PD3)
     _clock: ClockPort | None = cast(Any, None)  # Any: host attr default (PD3)
     _start_time: float | None = cast(Any, None)  # Any: host attr default (PD3)
     _started_at: datetime | None = cast(Any, None)  # Any: host attr default (PD3)
     _original_run_id: str | None = cast(Any, None)  # Any: host attr default (PD3)
-    _preflight_validator: CompositePreflightValidationService | None = cast(Any, None)  # Any: host attr default (PD3)
+    _preflight_validator: CompositePreflightValidationService | None = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
     _fsm: FSMStateHelperService = cast(Any, None)  # Any: host attr default (PD3)
 
     def _build_correlation_log_context(self, **extra: object) -> dict[str, object]:

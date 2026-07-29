@@ -115,37 +115,17 @@ class TestProcessedRecordsTable:
 
         rows = {row["parameter"]: row for row in payload["rows"]}
 
-        assert rows["01 bronze_records"]["value"] == "01 bronze_records|10 000"
-        assert rows["02 silver_valid_records"]["value"] == (
-            "02 silver_valid_records| 9 102"
-        )
-        assert rows["03 silver_filtered_out_records"]["value"] == (
-            "03 silver_filtered_out_records|   851"
-        )
-        assert rows["04 silver_quarantined_records"]["value"] == (
-            "04 silver_quarantined_records|    47"
-        )
-        assert rows["05 silver_skipped_records"]["value"] == (
-            "05 silver_skipped_records|     0"
-        )
-        assert rows["06 silver_deduplicated_records"]["value"] == (
-            "06 silver_deduplicated_records|     0"
-        )
-        assert rows["07 gold_written_records"]["value"] == (
-            "07 gold_written_records| 9 009"
-        )
-        assert rows["08 gold_excluded_by_contract_records"]["value"] == (
-            "08 gold_excluded_by_contract_records|     0"
-        )
-        assert rows["09 gold_quarantined_records"]["value"] == (
-            "09 gold_quarantined_records|     0"
-        )
-        assert rows["10 gold_skipped_records"]["value"] == (
-            "10 gold_skipped_records|     0"
-        )
-        assert rows["11 gold_deduplicated_records"]["value"] == (
-            "11 gold_deduplicated_records|     0"
-        )
+        assert rows["01 bronze_records"]["value"] == "10 000"
+        assert rows["02 silver_valid_records"]["value"] == (" 9 102")
+        assert rows["03 silver_filtered_out_records"]["value"] == ("   851")
+        assert rows["04 silver_quarantined_records"]["value"] == ("    47")
+        assert rows["05 silver_skipped_records"]["value"] == ("     0")
+        assert rows["06 silver_deduplicated_records"]["value"] == ("     0")
+        assert rows["07 gold_written_records"]["value"] == (" 9 009")
+        assert rows["08 gold_excluded_by_contract_records"]["value"] == ("     0")
+        assert rows["09 gold_quarantined_records"]["value"] == ("     0")
+        assert rows["10 gold_skipped_records"]["value"] == ("     0")
+        assert rows["11 gold_deduplicated_records"]["value"] == ("     0")
         assert rows["01 bronze_records"]["row_status"] == ""
         assert rows["02 silver_valid_records"]["row_status"] == ""
         assert rows["03 silver_filtered_out_records"]["row_status"] == ""
@@ -159,38 +139,17 @@ class TestProcessedRecordsTable:
         assert rows["09 gold_quarantined_records"]["row_status"] == "gold_deficit"
         assert rows["10 gold_skipped_records"]["row_status"] == "gold_deficit"
         assert rows["11 gold_deduplicated_records"]["row_status"] == ("gold_deficit")
-        assert rows["01 bronze_records"]["percintage"] == "01 bronze_records|100%"
-        assert rows["02 silver_valid_records"]["percintage"] == (
-            "02 silver_valid_records|91.0%"
-        )
-        assert rows["03 silver_filtered_out_records"]["percintage"] == (
-            "03 silver_filtered_out_records|8.51%"
-        )
-        assert rows["04 silver_quarantined_records"]["percintage"] == (
-            "04 silver_quarantined_records|0.47%"
-        )
-        assert (
-            rows["07 gold_written_records"]["percintage"]
-            == "07 gold_written_records|90.1%"
-        )
-        assert rows["05 silver_skipped_records"]["percintage"] == (
-            "05 silver_skipped_records|0%"
-        )
-        assert rows["06 silver_deduplicated_records"]["percintage"] == (
-            "06 silver_deduplicated_records|0%"
-        )
-        assert rows["08 gold_excluded_by_contract_records"]["percintage"] == (
-            "08 gold_excluded_by_contract_records|0%"
-        )
-        assert rows["09 gold_quarantined_records"]["percintage"] == (
-            "09 gold_quarantined_records|0%"
-        )
-        assert rows["10 gold_skipped_records"]["percintage"] == (
-            "10 gold_skipped_records|0%"
-        )
-        assert rows["11 gold_deduplicated_records"]["percintage"] == (
-            "11 gold_deduplicated_records|0%"
-        )
+        assert rows["01 bronze_records"]["percentage"] == "100%"
+        assert rows["02 silver_valid_records"]["percentage"] == ("91.0%")
+        assert rows["03 silver_filtered_out_records"]["percentage"] == ("8.51%")
+        assert rows["04 silver_quarantined_records"]["percentage"] == ("0.47%")
+        assert rows["07 gold_written_records"]["percentage"] == "90.1%"
+        assert rows["05 silver_skipped_records"]["percentage"] == ("0%")
+        assert rows["06 silver_deduplicated_records"]["percentage"] == ("0%")
+        assert rows["08 gold_excluded_by_contract_records"]["percentage"] == ("0%")
+        assert rows["09 gold_quarantined_records"]["percentage"] == ("0%")
+        assert rows["10 gold_skipped_records"]["percentage"] == ("0%")
+        assert rows["11 gold_deduplicated_records"]["percentage"] == ("0%")
         assert len(payload["rows"]) == 11
         assert all("__zero" not in str(row["parameter"]) for row in payload["rows"])
         assert payload["run_type"] == ["backfill"]
@@ -252,7 +211,7 @@ class TestProcessedRecordsTable:
         assert payload["run_type"] == []
         assert len(payload["rows"]) == 11
         assert all("No data" in str(row["value"]) for row in payload["rows"])
-        assert all("No data" in str(row["percintage"]) for row in payload["rows"])
+        assert all("No data" in str(row["percentage"]) for row in payload["rows"])
 
     def test_prometheus_payload_fetches_values_for_known_pipeline(
         self, monkeypatch: pytest.MonkeyPatch
@@ -295,7 +254,7 @@ class TestProcessedRecordsTable:
         ]
         assert payload["pipeline"] == "chembl_activity"
         assert payload["run_type"] == ["backfill", "incremental"]
-        assert rows["01 bronze_records"]["value"] == "01 bronze_records|10 000"
+        assert rows["01 bronze_records"]["value"] == "10 000"
         assert rows["07 gold_written_records"]["row_status"] == "gold_deficit"
 
     def test_empty_ledger_payload_returns_no_data_rows(self) -> None:
@@ -310,7 +269,7 @@ class TestProcessedRecordsTable:
         assert payload["run_type"] == ["backfill", "incremental"]
         assert len(payload["rows"]) == 11
         assert all("No data" in str(row["value"]) for row in payload["rows"])
-        assert all("No data" in str(row["percintage"]) for row in payload["rows"])
+        assert all("No data" in str(row["percentage"]) for row in payload["rows"])
 
     def test_ledger_payload_uses_metrics_snapshot_when_artifacts_are_absent(
         self,
@@ -341,18 +300,12 @@ class TestProcessedRecordsTable:
         )
 
         rows = {row["parameter"]: row for row in payload["rows"]}
-        assert rows["01 bronze_records"]["value"] == "01 bronze_records|10"
-        assert rows["02 silver_valid_records"]["value"] == "02 silver_valid_records| 8"
-        assert rows["03 silver_filtered_out_records"]["value"] == (
-            "03 silver_filtered_out_records| 1"
-        )
-        assert rows["04 silver_quarantined_records"]["value"] == (
-            "04 silver_quarantined_records| 1"
-        )
-        assert rows["07 gold_written_records"]["value"] == "07 gold_written_records| 7"
-        assert rows["08 gold_excluded_by_contract_records"]["value"] == (
-            "08 gold_excluded_by_contract_records| 1"
-        )
+        assert rows["01 bronze_records"]["value"] == "10"
+        assert rows["02 silver_valid_records"]["value"] == " 8"
+        assert rows["03 silver_filtered_out_records"]["value"] == (" 1")
+        assert rows["04 silver_quarantined_records"]["value"] == (" 1")
+        assert rows["07 gold_written_records"]["value"] == " 7"
+        assert rows["08 gold_excluded_by_contract_records"]["value"] == (" 1")
         assert rows["07 gold_written_records"]["row_status"] == ""
 
     def test_ledger_artifact_count_above_snapshot_does_not_deduplicate(
@@ -392,13 +345,9 @@ class TestProcessedRecordsTable:
         )
 
         rows = {row["parameter"]: row for row in payload["rows"]}
-        assert rows["02 silver_valid_records"]["value"] == "02 silver_valid_records| 5"
-        assert rows["06 silver_deduplicated_records"]["value"] == (
-            "06 silver_deduplicated_records| 0"
-        )
-        assert rows["06 silver_deduplicated_records"]["percintage"] == (
-            "06 silver_deduplicated_records|0%"
-        )
+        assert rows["02 silver_valid_records"]["value"] == " 5"
+        assert rows["06 silver_deduplicated_records"]["value"] == (" 0")
+        assert rows["06 silver_deduplicated_records"]["percentage"] == ("0%")
 
     def test_exact_run_payload_uses_run_ledger_artifacts_as_source_of_truth(
         self,
@@ -450,23 +399,13 @@ class TestProcessedRecordsTable:
         )
 
         rows = {row["parameter"]: row for row in payload["rows"]}
-        assert rows["02 silver_valid_records"]["value"] == (
-            "02 silver_valid_records|  990"
-        )
-        assert rows["06 silver_deduplicated_records"]["value"] == (
-            "06 silver_deduplicated_records|    3"
-        )
-        assert rows["06 silver_deduplicated_records"]["percintage"] == (
-            "06 silver_deduplicated_records|0.3%"
-        )
+        assert rows["02 silver_valid_records"]["value"] == ("  990")
+        assert rows["06 silver_deduplicated_records"]["value"] == ("    3")
+        assert rows["06 silver_deduplicated_records"]["percentage"] == ("0.3%")
         assert rows["02 silver_valid_records"]["row_status"] == ""
         assert rows["06 silver_deduplicated_records"]["row_status"] == ""
-        assert rows["07 gold_written_records"]["value"] == (
-            "07 gold_written_records|  993"
-        )
-        assert rows["08 gold_excluded_by_contract_records"]["value"] == (
-            "08 gold_excluded_by_contract_records|    0"
-        )
+        assert rows["07 gold_written_records"]["value"] == ("  993")
+        assert rows["08 gold_excluded_by_contract_records"]["value"] == ("    0")
         assert rows["07 gold_written_records"]["row_status"] == ""
 
     @pytest.mark.asyncio
@@ -507,26 +446,14 @@ class TestProcessedRecordsTable:
         data = json.loads(body)
         rows = {row["parameter"]: row for row in data["rows"]}
         assert data["contract"] == "processed_records_table_v1"
-        assert rows["01 bronze_records"]["value"] == "01 bronze_records|10 000"
-        assert rows["03 silver_filtered_out_records"]["value"] == (
-            "03 silver_filtered_out_records|   851"
-        )
+        assert rows["01 bronze_records"]["value"] == "10 000"
+        assert rows["03 silver_filtered_out_records"]["value"] == ("   851")
         assert rows["02 silver_valid_records"]["row_status"] == ""
         assert rows["07 gold_written_records"]["row_status"] == "gold_deficit"
-        assert (
-            rows["02 silver_valid_records"]["percintage"]
-            == "02 silver_valid_records|91.0%"
-        )
-        assert (
-            rows["07 gold_written_records"]["percintage"]
-            == "07 gold_written_records|90.1%"
-        )
-        assert rows["05 silver_skipped_records"]["value"] == (
-            "05 silver_skipped_records|     0"
-        )
-        assert rows["11 gold_deduplicated_records"]["value"] == (
-            "11 gold_deduplicated_records|     0"
-        )
+        assert rows["02 silver_valid_records"]["percentage"] == "91.0%"
+        assert rows["07 gold_written_records"]["percentage"] == "90.1%"
+        assert rows["05 silver_skipped_records"]["value"] == ("     0")
+        assert rows["11 gold_deduplicated_records"]["value"] == ("     0")
 
     @pytest.mark.asyncio
     async def test_observability_processed_records_endpoint_prefers_exact_run_ledger(
@@ -581,9 +508,5 @@ class TestProcessedRecordsTable:
         assert status_code == 200
         data = json.loads(body)
         rows = {row["parameter"]: row for row in data["rows"]}
-        assert rows["07 gold_written_records"]["value"] == (
-            "07 gold_written_records|  993"
-        )
-        assert rows["08 gold_excluded_by_contract_records"]["value"] == (
-            "08 gold_excluded_by_contract_records|    0"
-        )
+        assert rows["07 gold_written_records"]["value"] == ("  993")
+        assert rows["08 gold_excluded_by_contract_records"]["value"] == ("    0")

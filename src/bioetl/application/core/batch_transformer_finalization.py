@@ -22,23 +22,30 @@ from bioetl.domain.types import BronzeRecord
 
 class _BatchTransformContext(Protocol):
     """Minimal transform context surface needed by finalization helpers."""
+
     @property
     def logger(self) -> LoggerPort: ...
 
+
 class _TransformConfig(Protocol):
     """Loose transform config surface exposing DQ configuration."""
+
     @property
     def dq_config(self) -> object | None: ...
 
+
 class _BatchMetricsRecorderService(Protocol):
     """Minimal batch-metrics surface needed by finalization helpers."""
+
     @property
     def error_count(self) -> int | None: ...
     @property
     def batch_error_count(self) -> int | None: ...
     def track_dq_validation_failure(self, *, stage: str, severity: str) -> None: ...
 
+
 FlushCountCallback = Callable[[], Awaitable[object]]
+
 
 async def finalize_batch_transform_result(
     *,
@@ -105,6 +112,7 @@ async def finalize_batch_transform_result(
     state.records_quarantine_failed += await _await_flush_count(flush_dq_records)
     return build_transform_result(state)
 
+
 async def finalize_stream_transform_result(
     *,
     context: _BatchTransformContext,
@@ -125,6 +133,7 @@ async def finalize_stream_transform_result(
         flush_filtered_records=flush_filtered_records,
         flush_dq_records=flush_dq_records,
     )
+
 
 def _resolve_error_count(
     *,
@@ -147,10 +156,12 @@ def _resolve_error_count(
         return error_count
     return state.quarantined_count
 
+
 async def _await_flush_count(flush_callback: FlushCountCallback) -> int:
     """Await one flush callback and coerce absent counts to zero."""
     flushed = await flush_callback()
     return flushed if isinstance(flushed, int) and not isinstance(flushed, bool) else 0
+
 
 # Keep DQ threshold types/helpers importable from this module for compatibility,
 # but do not re-list their names in ``__all__`` — that duplicates the export barrel

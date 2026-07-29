@@ -9,6 +9,7 @@ from numbers import Real
 
 class ThresholdBreachReason(Enum):
     """Classification of DQ threshold breaches."""
+
     NONE = "none"
     SOFT = "soft"
     HARD = "hard"
@@ -17,6 +18,7 @@ class ThresholdBreachReason(Enum):
 @dataclass(frozen=True, slots=True)
 class DQThresholdCheckResult:
     """Result of DQ threshold validation."""
+
     breach: ThresholdBreachReason
     error_rate: float
     soft_threshold: float | None

@@ -24,6 +24,7 @@ if TYPE_CHECKING:
 
 class BatchMetricsRecorderService:
     """Record bounded batch-processing metrics; all methods are metrics-safe no-ops."""
+
     def __init__(
         self,
         metrics: MetricsPort | None,
@@ -44,17 +45,21 @@ class BatchMetricsRecorderService:
         self._error_count = 0
         # Per-batch total used by DQ hard/soft threshold evaluation.
         self._batch_error_count = 0
+
     @property
     def error_count(self) -> int:
         """Get the run-scoped error count (not safe as a batch-rate numerator)."""
         return self._error_count
+
     @property
     def batch_error_count(self) -> int:
         """Get the error count for the current transform batch only."""
         return self._batch_error_count
+
     def begin_batch(self) -> None:
         """Reset per-batch error accounting before transform/finalize."""
         self._batch_error_count = 0
+
     def track_batch_size(self, stage: str, size: int) -> None:
         """Record a batch-size histogram sample for one processing stage."""
         if self._metrics:
@@ -63,6 +68,7 @@ class BatchMetricsRecorderService:
                 size,
                 {"pipeline": self._pipeline_label, "stage": stage},
             )
+
     def track_records_fetched(self, count: int) -> None:
         """Record the bounded fetched-side record-flow projection."""
         self._pipeline_metrics.record_record_flow(
@@ -80,6 +86,7 @@ class BatchMetricsRecorderService:
         if accounting is not None and count > 0:
             accounting.record_in(StageId.EXTRACT.value, count)
             accounting.mark_instrumented(StageId.EXTRACT.value)
+
     def track_batch_created(self, *, stage: str, count: int) -> None:
         """Record one successful batch-created lifecycle projection."""
         _record_batch_lifecycle_event(
@@ -90,6 +97,7 @@ class BatchMetricsRecorderService:
             status="success",
             record_count=count,
         )
+
     def track_batch_written(self, *, stage: str, count: int) -> None:
         """Record one successful batch-written lifecycle projection."""
         _record_batch_lifecycle_event(
@@ -100,6 +108,7 @@ class BatchMetricsRecorderService:
             status="success",
             record_count=count,
         )
+
     def track_batch_failed(self, *, stage: str, count: int = 0) -> None:
         """Record one failed batch lifecycle projection."""
         _record_batch_lifecycle_event(
@@ -110,6 +119,7 @@ class BatchMetricsRecorderService:
             status="failed",
             record_count=count,
         )
+
     def track_processed_records(self, stage: str, count: int) -> None:
         """Record processed-record counters and canonical flow projections."""
         if self._metrics:
@@ -136,6 +146,7 @@ class BatchMetricsRecorderService:
             )
             return
         _record_processed_stage_accounting(stage, count)
+
     def track_error(self, stage: str, error_type: ErrorType) -> None:
         """Record one stage-scoped error occurrence."""
         self._error_count += 1
@@ -150,6 +161,7 @@ class BatchMetricsRecorderService:
                     "error_code": error_type.value,
                 },
             )
+
     def track_dq_validation_failure(
         self, stage: str, severity: str, count: int = 1
     ) -> None:
@@ -159,6 +171,7 @@ class BatchMetricsRecorderService:
             severity=severity,
             count=count,
         )
+
     def track_stage_records(
         self,
         *,
@@ -176,6 +189,7 @@ class BatchMetricsRecorderService:
             count=count,
         )
         _record_stage_outcome_accounting(stage, outcome, count)
+
     def track_quarantined_records(self, error_type: ErrorType, count: int) -> None:
         """Record quarantined-record counters and flow projections."""
         if self._metrics:
@@ -202,6 +216,7 @@ class BatchMetricsRecorderService:
             reason_code=getattr(error_type, "value", str(error_type)),
             count=count,
         )
+
     def track_silver_filter_rejection(
         self,
         details: JsonDict | None = None,

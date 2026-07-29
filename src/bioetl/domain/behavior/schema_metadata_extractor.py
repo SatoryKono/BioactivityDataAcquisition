@@ -8,7 +8,7 @@ infrastructure metadata builders.
 from __future__ import annotations
 
 import inspect
-from typing import Literal, cast, Any
+from typing import Any, Literal, cast
 
 from bioetl.domain.models.metadata import SchemaColumnMetadata, SchemaMetadata
 

@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 @dataclass(frozen=True, slots=True)
 class CompactionResult:
     """Typed outcome of Silver compaction: success, skipped, or failed."""
+
     status: Literal["success", "skipped", "failed"]
     duplicates_removed: int = 0
     error: str | None = None
@@ -22,8 +23,10 @@ class CompactionResult:
 
 class PostrunCompactService:
     """Deduplicates Silver table after APPEND or MERGE pipeline runs."""
+
     # DELETE overwrites the entire table, so dedup is unnecessary.
     _COMPACTABLE_MODES = frozenset({SilverWriteMode.APPEND, SilverWriteMode.MERGE})
+
     def __init__(
         self,
         *,
@@ -36,6 +39,7 @@ class PostrunCompactService:
         self._storage = storage
         self._logger = logger
         self._warning_allowlist = warning_allowlist
+
     async def run_if_needed(self) -> CompactionResult:
         """Deduplicate Silver if write mode is APPEND or MERGE."""
         table_cfg = self._config.table
@@ -54,6 +58,7 @@ class PostrunCompactService:
         except self._warning_allowlist as exc:
             self._logger.warning("silver_compact_failed", error=str(exc))
             return CompactionResult(status="failed", error=str(exc))
+
     async def _optimize_files(self, silver_table: str) -> None:
         """Compact small parquet files after dedup to improve read performance."""
         try:

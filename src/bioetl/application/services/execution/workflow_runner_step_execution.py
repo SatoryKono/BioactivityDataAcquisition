@@ -192,9 +192,7 @@ async def execute_transform_step(
         if dependency in step_outputs
     }
     created_at = (
-        options.created_at_factory()
-        if options.created_at_factory is not None
-        else None
+        options.created_at_factory() if options.created_at_factory is not None else None
     )
     result = await transform_service.run_step(
         workflow_name=workflow_name,

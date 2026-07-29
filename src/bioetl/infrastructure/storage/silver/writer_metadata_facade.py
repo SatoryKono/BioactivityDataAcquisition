@@ -51,14 +51,17 @@ from bioetl.infrastructure.storage.silver.prepared_operation_models import (
 class SilverWriterMetadataFacade:
     """Writer-level metadata helper methods backed by composition services."""
 
-    _metadata: SilverMetadataOperations | None = cast(Any, None)  # Any: host default (PD4)
+    _metadata: SilverMetadataOperations | None = cast(
+        Any, None
+    )  # Any: host default (PD4)
 
     _SILVER_METADATA_OPERATIONS_REQUIRED = "Silver metadata operations are required"
 
     async def _get_table_schema(self, table_name: str) -> pa.Schema | None:
         """Get the schema of an existing Silver table."""
         return await BaseDeltaWriter._get_table_schema(
-            cast(BaseDeltaWriter, self), table_name  # pyright: ignore[reportInvalidCast]
+            cast(BaseDeltaWriter, self),
+            table_name,  # pyright: ignore[reportInvalidCast]
         )
 
     async def _detect_schema_drift(

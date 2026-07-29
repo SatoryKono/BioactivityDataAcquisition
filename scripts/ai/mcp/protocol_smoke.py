@@ -321,9 +321,13 @@ def smoke_http_server(
     # Loopback-only MCP smoke: local proxy has no TLS in dev.
     host, port = _validate_loopback_mcp_url(url)
     scheme = "http"
-    safe_url = ensure_local_http_url(f"{scheme}://{host}:{port}/mcp")  # NOSONAR - loopback-only
+    safe_url = ensure_local_http_url(
+        f"{scheme}://{host}:{port}/mcp"
+    )  # NOSONAR - loopback-only
     started = time.monotonic()
-    ping_url = ensure_local_http_url(f"{scheme}://{host}:{port}/ping")  # NOSONAR - loopback-only
+    ping_url = ensure_local_http_url(
+        f"{scheme}://{host}:{port}/ping"
+    )  # NOSONAR - loopback-only
     _ping_http_endpoint(ping_url, timeout=timeout)
     init_ok, init_error, tool_count = _http_initialize_and_tools(
         safe_url, timeout=timeout

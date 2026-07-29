@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 
 class _IDMappingLifecycleState(Protocol):
     """Structural contract for IDMappingDataSource lifecycle helpers."""
+
     _client: IDMappingPort
     _id_source_reader: IDMappingSourceReaderPort
     _input_path: str

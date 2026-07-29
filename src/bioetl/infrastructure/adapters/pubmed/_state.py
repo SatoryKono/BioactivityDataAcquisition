@@ -22,8 +22,12 @@ class PubMedAdapterStateMixin:
     email: str = cast(Any, None)  # Any: host attr default (PD6)
     api_key: str | None = cast(Any, None)  # Any: host attr default (PD6)
     _logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD6)
-    _adapter_metrics: AdapterMetricsRecorder = cast(Any, None)  # Any: host attr default (PD6)
-    _request_collector: APIRequestCollector = cast(Any, None)  # Any: host attr default (PD6)
+    _adapter_metrics: AdapterMetricsRecorder = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
+    _request_collector: APIRequestCollector = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
     _error_handler: ErrorHandlerPort = cast(Any, None)  # Any: host attr default (PD6)
     provider_name: str = cast(Any, None)  # Any: host attr default (PD6)
     batch_size: int = cast(Any, None)  # Any: host attr default (PD6)

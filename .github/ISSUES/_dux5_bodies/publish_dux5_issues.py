@@ -25,7 +25,12 @@ from typing import TypedDict
 
 ROOT = Path(__file__).resolve().parents[3]
 BODIES = Path(__file__).resolve().parent
-PACK = ROOT / ".github" / "ISSUES" / "DUX5-2026-07-29-DASHBOARD-TYPOGRAPHY-READING-ORDER-ISSUE-PACK.md"
+PACK = (
+    ROOT
+    / ".github"
+    / "ISSUES"
+    / "DUX5-2026-07-29-DASHBOARD-TYPOGRAPHY-READING-ORDER-ISSUE-PACK.md"
+)
 PUBLISH = ROOT / "reports" / "quality" / "dux5-2026-07-29-issue-publish.json"
 TITLES_PATH = BODIES / "TITLES.md"
 
@@ -41,23 +46,23 @@ class PublishedIssue(TypedDict):
 
 META: dict[str, tuple[str, str]] = {
     "DUX5-00": ("meta", "epic"),
-"DUX5-01": ("P0", "V1"),
-"DUX5-02": ("P0", "V1"),
-"DUX5-03": ("P0", "V1"),
-"DUX5-04": ("P0", "V1"),
-"DUX5-05": ("P0", "V1"),
-"DUX5-06": ("P0", "V1"),
-"DUX5-10": ("P1", "V2"),
-"DUX5-11": ("P1", "V2"),
-"DUX5-12": ("P1", "V2"),
-"DUX5-13": ("P1", "V2"),
-"DUX5-14": ("P1", "V2"),
-"DUX5-20": ("P2", "V3"),
-"DUX5-21": ("P2", "V3"),
-"DUX5-22": ("P2", "V3"),
-"DUX5-23": ("P2", "V3"),
-"DUX5-30": ("P3", "V4"),
-"DUX5-31": ("P3", "V4")
+    "DUX5-01": ("P0", "V1"),
+    "DUX5-02": ("P0", "V1"),
+    "DUX5-03": ("P0", "V1"),
+    "DUX5-04": ("P0", "V1"),
+    "DUX5-05": ("P0", "V1"),
+    "DUX5-06": ("P0", "V1"),
+    "DUX5-10": ("P1", "V2"),
+    "DUX5-11": ("P1", "V2"),
+    "DUX5-12": ("P1", "V2"),
+    "DUX5-13": ("P1", "V2"),
+    "DUX5-14": ("P1", "V2"),
+    "DUX5-20": ("P2", "V3"),
+    "DUX5-21": ("P2", "V3"),
+    "DUX5-22": ("P2", "V3"),
+    "DUX5-23": ("P2", "V3"),
+    "DUX5-30": ("P3", "V4"),
+    "DUX5-31": ("P3", "V4"),
 }
 
 CHILD_ORDER = [c for c in META if c != "DUX5-00"]
@@ -98,9 +103,7 @@ def run_gh(gh: str, args: list[str], *, dry_run: bool) -> str:
         return "https://github.com/example/repo/issues/0"
     proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
     if proc.returncode != 0:
-        raise SystemExit(
-            f"gh failed ({proc.returncode}): {proc.stderr or proc.stdout}"
-        )
+        raise SystemExit(f"gh failed ({proc.returncode}): {proc.stderr or proc.stdout}")
     return (proc.stdout or "").strip()
 
 

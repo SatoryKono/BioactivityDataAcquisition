@@ -75,9 +75,13 @@ def test_no_raw_endpoints_or_valid_empty_tokens_in_text_bodies() -> None:
 
 
 def test_value_columns_have_operator_display_names_on_suspect_tables() -> None:
-    incident = json.loads((DASH / "bioetl-incident-v1.json").read_text(encoding="utf-8"))
+    incident = json.loads(
+        (DASH / "bioetl-incident-v1.json").read_text(encoding="utf-8")
+    )
     suspects = next(
-        p for p in _walk(incident.get("panels")) if p.get("title") == "Ranked Active Suspects"
+        p
+        for p in _walk(incident.get("panels"))
+        if p.get("title") == "Ranked Active Suspects"
     )
     overrides = (suspects.get("fieldConfig") or {}).get("overrides") or []
     display_names = [
@@ -87,7 +91,10 @@ def test_value_columns_have_operator_display_names_on_suspect_tables() -> None:
         if prop.get("id") == "displayName"
     ]
     assert display_names, "Ranked Active Suspects must label Value columns"
-    assert any("Signal" in str(v) or "Count" in str(v) or "Severity" in str(v) for v in display_names)
+    assert any(
+        "Signal" in str(v) or "Count" in str(v) or "Severity" in str(v)
+        for v in display_names
+    )
 
 
 def test_percent_scores_use_integer_precision() -> None:
@@ -101,7 +108,7 @@ def test_percent_scores_use_integer_precision() -> None:
             assert int(defaults.get("decimals") or 0) == 0, title
 
 
-def test_run_context_collapsed_outside_explorer() -> None:
+def test_dux5_run_context_collapsed_outside_explorer() -> None:
     for path in _dashboards():
         data = json.loads(path.read_text(encoding="utf-8"))
         if data.get("uid") == "bioetl-run-explorer-v1":
@@ -127,6 +134,10 @@ def test_status_card_provenance_is_compact_html() -> None:
             opts = panel.get("options") or {}
             content = opts.get("content") or ""
             assert opts.get("mode") == "html"
-            assert "Status" in content or "status" in content.lower() or "trust" in content.lower()
+            assert (
+                "Status" in content
+                or "status" in content.lower()
+                or "trust" in content.lower()
+            )
             assert len(content) < 1200
             assert "GET /ops" not in content

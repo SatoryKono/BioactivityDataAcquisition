@@ -412,7 +412,11 @@ def _iter_candidate_import_targets(
     node: ast.AST,
 ) -> list[str]:
     if isinstance(node, ast.Import):
-        return [alias.name for alias in node.names if alias.name.startswith(_BIOETL_MODULE_PREFIX)]
+        return [
+            alias.name
+            for alias in node.names
+            if alias.name.startswith(_BIOETL_MODULE_PREFIX)
+        ]
 
     if not isinstance(node, ast.ImportFrom):
         return []

@@ -21,11 +21,13 @@ __all__ = [
 
 class IllegalStateTransitionError(RuntimeError):
     """Raised when an invalid FSM transition is attempted."""
+
     pass
 
 
 class BatchExecutionState(Enum):
     """Valid states during a batch execution run."""
+
     IDLE = auto()
     STREAMING = auto()
     PROCESSING = auto()
@@ -38,6 +40,7 @@ class BatchExecutionState(Enum):
 
 class BatchExecutionEventSignal(Enum):
     """Events that trigger state transitions."""
+
     RUN_STARTED = auto()
     BATCH_ASSEMBLED = auto()
     STREAM_EXHAUSTED_EMPTY = auto()
@@ -55,6 +58,7 @@ class BatchExecutionEventSignal(Enum):
 
 class BatchExecutionCommandTask(Enum):
     """Commands to be executed by the orchestration layer."""
+
     PROCESS_BATCH = auto()
     COMMIT_STATE = auto()
     SAVE_CHECKPOINT = auto()
@@ -66,6 +70,7 @@ class BatchExecutionCommandTask(Enum):
 @dataclass(frozen=True, slots=True)
 class BatchExecutionTransitionResult:
     """Result of a transition with the next state and orchestration commands."""
+
     new_state: BatchExecutionState
     commands: tuple[BatchExecutionCommandTask, ...]
 
@@ -183,6 +188,7 @@ _TRANSITIONS: dict[
 
 class BatchExecutionCoordinator:
     """Pure coordinator that validates batch lifecycle transitions."""
+
     def advance(
         self,
         current_state: BatchExecutionState,

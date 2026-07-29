@@ -31,6 +31,7 @@ __all__ = [
 @dataclass(frozen=True, slots=True)
 class BatchExecutionStateOutcome:
     """Counter deltas and metadata produced by one processed batch."""
+
     bronze_count: int
     silver_count: int
     gold_count: int
@@ -43,6 +44,7 @@ class BatchExecutionStateOutcome:
 @dataclass(frozen=True, slots=True)
 class BatchProcessedOutcome:
     """One processed batch projected into state-update and DQ payloads."""
+
     records: list[BronzeRecord]
     state_update: BatchExecutionStateOutcome
     batch_id: BatchID

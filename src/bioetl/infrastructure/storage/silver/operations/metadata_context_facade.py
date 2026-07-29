@@ -45,9 +45,13 @@ class _SilverMetadataContextFacade:
     _metrics: MetricsPort | None = cast(Any, None)  # Any: host default (PD4)
     _audit: AuditPort | None = cast(Any, None)  # Any: host default (PD4)
     _metadata_writer: object | None = cast(Any, None)  # Any: host default (PD4)
-    _metadata_coordinator: MetadataCoordinatorPort | None = cast(Any, None)  # Any: host default (PD4)
+    _metadata_coordinator: MetadataCoordinatorPort | None = cast(
+        Any, None
+    )  # Any: host default (PD4)
     _lineage_store: LineageStorePort | None = cast(Any, None)  # Any: host default (PD4)
-    _dq_calculator: DQMetricsCalculator | None = cast(Any, None)  # Any: host default (PD4)
+    _dq_calculator: DQMetricsCalculator | None = cast(
+        Any, None
+    )  # Any: host default (PD4)
     _host: object | None = cast(Any, None)  # Any: host default (PD4)
 
     @property

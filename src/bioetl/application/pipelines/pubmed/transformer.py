@@ -149,7 +149,9 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             self._cached_xml_root = defused_ET.fromstring(raw_xml)
         except (
             ET.ParseError,
-            cast(type[BaseException], getattr(defused_ET, "EntitiesForbidden", Exception)),
+            cast(
+                type[BaseException], getattr(defused_ET, "EntitiesForbidden", Exception)
+            ),
         ) as e:
             context.logger.warning(
                 "XML_parse_error",

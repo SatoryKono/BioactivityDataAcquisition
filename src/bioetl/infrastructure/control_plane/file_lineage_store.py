@@ -47,7 +47,6 @@ def _build_stored_fragment_id(fragment: LineageGraphFragment) -> str:
     return build_stored_fragment_id(fragment)
 
 
-@override
 def _load_fragment_ids(index_path: Path, *, key: str) -> list[str]:
     """Load fragment identifiers from one JSONL index file."""
     return load_fragment_ids(index_path, key=key)

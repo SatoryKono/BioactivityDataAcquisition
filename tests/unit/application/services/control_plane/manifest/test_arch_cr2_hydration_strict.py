@@ -8,6 +8,8 @@ from bioetl.application.services.control_plane.manifest._service_hydration impor
     RunManifestHydrationMixin,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class _Hydrator(RunManifestHydrationMixin):
     def __init__(self) -> None:

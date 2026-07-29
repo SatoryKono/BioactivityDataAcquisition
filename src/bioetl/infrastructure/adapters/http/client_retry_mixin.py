@@ -50,7 +50,9 @@ class HTTPClientRetryMixin:
     provider: str = cast(Any, None)  # Any: host attr default (PD6)
     logger: LoggerPort | None = cast(Any, None)  # Any: host attr default (PD6)
     rate_limiter: RateLimiterPort = cast(Any, None)  # Any: host attr default (PD6)
-    circuit_breaker: CircuitBreakerPort = cast(Any, None)  # Any: host attr default (PD6)
+    circuit_breaker: CircuitBreakerPort = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
     _tracer: TracingPort | None = cast(Any, None)  # Any: host attr default (PD6)
     run_id: RunID | None = cast(Any, None)  # Any: host attr default (PD6)
 

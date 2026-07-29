@@ -31,9 +31,15 @@ class _CrossRefFallbackPolicyMixin:
     # PD3 host attrs: annotations only. Avoid class-level ``None`` defaults —
     # ``hasattr(self, "_fetch_flow")`` would be True before ``__post_init__``
     # assigns the real CrossRefFetchFlow instance.
-    _fallback_handler: CrossRefTitleFallbackHandler = cast(Any, None)  # Any: host attr default (PD6)
-    _fallback_decorator: ComposableFallbackDecorator = cast(Any, None)  # Any: host attr default (PD6)
-    _fetch_flow: CrossRefFetchFlow = cast(Any, None)  # Any: host attr default (PD6)
+    _fallback_handler: CrossRefTitleFallbackHandler = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
+    _fallback_decorator: ComposableFallbackDecorator | None = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
+    _fetch_flow: CrossRefFetchFlow | None = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
 
     def _get_default_fallback_config(self) -> FallbackDecoratorConfig:
         """Return CrossRef-specific default fallback config."""

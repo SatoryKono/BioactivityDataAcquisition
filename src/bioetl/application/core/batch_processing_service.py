@@ -45,6 +45,7 @@ if TYPE_CHECKING:
 @dataclass(frozen=True, slots=True)
 class BatchProcessingComponents:
     """Injected components shared by RecordProcessor and BatchExecutor."""
+
     batch_metrics: BatchMetricsRecorderService
     transformer: BatchTransformer
     writer: BatchWriter
@@ -52,6 +53,7 @@ class BatchProcessingComponents:
 
 class BatchProcessingService:
     """Handles extract/transform/write processing for one ETL batch."""
+
     def __init__(
         self,
         *,
@@ -74,6 +76,7 @@ class BatchProcessingService:
         self._tracing = tracing_manager
         self._batch_id_factory = batch_id_factory
         self._support = support_service
+
     async def extract_records(
         self,
         *,
@@ -94,6 +97,7 @@ class BatchProcessingService:
             offset=offset,
         ):
             yield record
+
     async def process_batch(
         self,
         *,
@@ -139,16 +143,19 @@ class BatchProcessingService:
                 ),
             ),
         )
+
     def _get_source_metadata(
         self,
         query_string: str | None,
     ) -> SourceMetadata | None:
         """Delegate source metadata retrieval through the support service."""
         return self._support.get_source_metadata(query_string)
+
     @property
     def debug_export_service(self) -> object | None:
         """Expose the optional debug export collaborator to the executor."""
         return getattr(self._support, "_debug_export_service", None)
+
     async def _process_batch_work(
         self,
         *,
@@ -210,6 +217,7 @@ class BatchProcessingService:
                 transform_result.gold_excluded_by_contract_count
             ),
         )
+
     def _publish_batch_events(self, batch: Batch) -> None:
         """Publish domain events collected from the Batch aggregate."""
         for event in batch.collect_events():

@@ -41,10 +41,16 @@ class _CompositeRunnerObservabilityHostProtocol(Protocol):
     _run_id: RunID = cast(Any, None)  # Any: host attr default (PD3)
     _runtime: object = cast(Any, None)  # Any: host attr default (PD3)
     _started_at: datetime | None = cast(Any, None)  # Any: host attr default (PD3)
-    _dq_report_service: DQReportService | None = cast(Any, None)  # Any: host attr default (PD3)
-    _quarantine_port: QuarantinePort | None = cast(Any, None)  # Any: host attr default (PD3)
+    _dq_report_service: DQReportService | None = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
+    _quarantine_port: QuarantinePort | None = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
     _metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD3)
-    _run_ledger_service: RunLedgerService | None = cast(Any, None)  # Any: host attr default (PD3)
+    _run_ledger_service: RunLedgerService | None = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
 
     def _record_with_ledger_service(
         self,
@@ -109,10 +115,16 @@ class CompositeRunnerObservabilityMixin:
     _logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)
     _run_id_str: str = cast(Any, None)  # Any: host attr default (PD3)
     _run_id: RunID = cast(Any, None)  # Any: host attr default (PD3)
-    _dq_report_service: DQReportService | None = cast(Any, None)  # Any: host attr default (PD3)
-    _quarantine_port: QuarantinePort | None = cast(Any, None)  # Any: host attr default (PD3)
+    _dq_report_service: DQReportService | None = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
+    _quarantine_port: QuarantinePort | None = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
     _metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD3)
-    _run_ledger_service: RunLedgerService | None = cast(Any, None)  # Any: host attr default (PD3)
+    _run_ledger_service: RunLedgerService | None = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
 
     async def _generate_dq_reports(
         self: _CompositeRunnerObservabilityHostProtocol,

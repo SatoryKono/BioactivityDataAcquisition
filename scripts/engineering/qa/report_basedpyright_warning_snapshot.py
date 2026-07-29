@@ -56,7 +56,6 @@ def _is_error(diag: dict[str, Any]) -> bool:
     return sev in {"error", "4"}
 
 
-
 def _aggregate_warning_stats(
     warnings: list[dict[str, Any]],
 ) -> tuple[Counter[str], Counter[str], Counter[str], int, int]:
@@ -96,7 +95,9 @@ def build_snapshot(source: Path) -> dict[str, Any]:
     warnings = [d for d in diags if isinstance(d, dict) and _is_warning(d)]
     errors = [d for d in diags if isinstance(d, dict) and _is_error(d)]
 
-    by_rule, by_layer, by_file, schema_ish, any_unknown = _aggregate_warning_stats(warnings)
+    by_rule, by_layer, by_file, schema_ish, any_unknown = _aggregate_warning_stats(
+        warnings
+    )
 
     return {
         "schema_version": "basedpyright-warning-snapshot-v1",
@@ -175,8 +176,7 @@ def check_snapshot(*, source: Path, output: Path) -> None:
         )
     if l_warn > c_warn:
         raise SystemExit(
-            "basedpyright warning residual grew: "
-            f"live={l_warn} committed={c_warn}"
+            f"basedpyright warning residual grew: live={l_warn} committed={c_warn}"
         )
     if c_err > 0:
         # committed ledger should also show 0 errors

@@ -54,7 +54,9 @@ class PipelineRegistry:
             )
         return PipelineDefinition(
             factory=factory,
-            silver_schema=cast(Any, factory.silver_schema),  # Any: factory schema Protocol→concrete
+            silver_schema=cast(
+                Any, factory.silver_schema
+            ),  # Any: factory schema Protocol→concrete
             gold_schema=gold_schema,
             pandera_silver_schema=getattr(factory, "pandera_silver_schema", None),
         )

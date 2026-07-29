@@ -12,7 +12,9 @@ from bioetl.domain.types import HealthStatus, JsonDict
 class HealthServerStateMixin:
     """Mixin with provider state aggregation helpers."""
 
-    _health_monitor: HealthMonitorPort | None = cast(Any, None)  # Any: host attr default (PD3)
+    _health_monitor: HealthMonitorPort | None = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
 
     def _get_overall_status(self) -> HealthStatus:
         """Get overall health status from all providers."""

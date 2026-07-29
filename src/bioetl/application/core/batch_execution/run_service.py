@@ -24,6 +24,7 @@ from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 
 class _BatchExtractionLoopRunner(Protocol):
     """Callable that executes the extraction loop for one run."""
+
     def __call__(
         self,
         execution_context: BatchExecutionContext,
@@ -32,6 +33,7 @@ class _BatchExtractionLoopRunner(Protocol):
 
 class BatchExecutionRunService:
     """Coordinates one executor run across start, loop, and finalize paths."""
+
     def __init__(
         self,
         *,
@@ -39,6 +41,7 @@ class BatchExecutionRunService:
     ) -> None:
         """Initialize execution run service."""
         self._execution_lifecycle = execution_lifecycle_service
+
     async def execute(
         self,
         *,
@@ -58,6 +61,7 @@ class BatchExecutionRunService:
             execution_state=execution_state,
             memory_state=memory_state,
         )
+
     async def _run_with_finalization_policy(
         self,
         *,

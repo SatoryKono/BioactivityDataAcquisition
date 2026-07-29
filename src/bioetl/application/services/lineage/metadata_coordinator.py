@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from typing import override
-
 from datetime import datetime
 from functools import cached_property
+from typing import override
 
 from bioetl.application.services.lineage._metadata_coordinator_helpers import (
     create_metadata_bundle,

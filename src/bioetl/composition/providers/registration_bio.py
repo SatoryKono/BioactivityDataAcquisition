@@ -124,7 +124,11 @@ def _create_chembl_data_source(
         base_adapter = SubcellularFractionDataSource(base_adapter)  # pyright: ignore[reportArgumentType]
 
     return _wrap_with_filter(
-        base_adapter, filter_config, logger, metrics, pipeline_name  # pyright: ignore[reportArgumentType]
+        base_adapter,
+        filter_config,
+        logger,
+        metrics,
+        pipeline_name,  # pyright: ignore[reportArgumentType]
     )
 
 

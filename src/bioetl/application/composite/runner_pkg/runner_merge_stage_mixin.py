@@ -86,7 +86,9 @@ class CompositeRunnerMergeStageMixin:
     _config: CompositeConfig = cast(Any, None)  # Any: host attr default (PD3)
     _run_id_str: str = cast(Any, None)  # Any: host attr default (PD3)
     _merger: CompositeMergerProtocol = cast(Any, None)  # Any: host attr default (PD3)
-    _checkpoint_manager: CompositeCheckpointService = cast(Any, None)  # Any: host attr default (PD3)
+    _checkpoint_manager: CompositeCheckpointService = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
 
     async def _save_checkpoint_safe(
         self: _CompositeRunnerMergeStageHostProtocol,

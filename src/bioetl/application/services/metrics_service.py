@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING
 
 from bioetl.application.observability.tracing_operation_helpers import traced_operation
 from bioetl.application.services._metrics_service_gateway_support import (
@@ -62,7 +62,7 @@ class MetricsServerStatus:
         error: Error message if server failed to start.
     """
 
-    running: bool = cast(Any, None)  # Any: host attr default (PD6)
+    running: bool = False
     port: int | None = None
     started_at: datetime | None = None
     error: str | None = None
@@ -79,8 +79,8 @@ class StartResult:
         error: Error message if failed.
     """
 
-    success: bool = cast(Any, None)  # Any: host attr default (PD6)
-    port: int = cast(Any, None)  # Any: host attr default (PD6)
+    success: bool = False
+    port: int = 0
     addr: str = "0.0.0.0"
     already_running: bool = False
     error: str | None = None
@@ -89,10 +89,12 @@ class StartResult:
 class _MetricsStartMixin(_MetricsTracingMixin):
     """Metrics server start lifecycle helpers."""
 
-    logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD6)
-    _server: MetricsServerPort = cast(Any, None)  # Any: host attr default (PD6)
-    tracer: TracingPort | None = cast(Any, None)  # Any: host attr default (PD6)
-    clock: ClockPort = cast(Any, None)  # Any: host attr default (PD6)
+    logger: LoggerPort
+    _server: MetricsServerPort
+    tracer: TracingPort | None = (
+        None  # Any: host attr default  # Any: host attr default (PD6)
+    )
+    clock: ClockPort
 
     def _handle_start_error(
         self,
@@ -241,8 +243,10 @@ class _MetricsStartMixin(_MetricsTracingMixin):
 class _MetricsStatusMixin(_MetricsTracingMixin):
     """Metrics server status helpers."""
 
-    _server: MetricsServerPort = cast(Any, None)  # Any: host attr default (PD6)
-    tracer: TracingPort | None = cast(Any, None)  # Any: host attr default (PD6)
+    _server: MetricsServerPort
+    tracer: TracingPort | None = (
+        None  # Any: host attr default  # Any: host attr default (PD6)
+    )
 
     def get_status(self) -> MetricsServerStatus:
         """Get the current status of the metrics server.
@@ -297,8 +301,8 @@ class MetricsService(
 ):
     """Service for metrics server operations."""
 
-    logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD6)
-    _server: MetricsServerPort = cast(Any, None)  # Any: host attr default (PD6)
-    clock: ClockPort = cast(Any, None)  # Any: host attr default (PD6)
+    logger: LoggerPort
+    _server: MetricsServerPort
+    clock: ClockPort
     tracer: TracingPort | None = None
     _publisher: MetricsPublisherPort | None = field(default=None, repr=False)

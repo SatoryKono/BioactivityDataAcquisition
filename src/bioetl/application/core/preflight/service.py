@@ -37,6 +37,7 @@ _PREFLIGHT_STAGE_NAME = ORDINARY_RUN_LEDGER_STAGE_NAMES[0]
 
 class _PreflightExecutionHostProtocol(Protocol):
     """Runner attributes required by preflight execution."""
+
     @property
     def _runtime(self) -> RuntimeConfig: ...
     @property
@@ -79,6 +80,7 @@ async def validate_infrastructure(host: _PreflightExecutionHostProtocol) -> None
 
 class PreflightService:
     """Validates infrastructure and configuration before pipeline execution."""
+
     def __init__(
         self,
         config: PipelineConfig,
@@ -94,6 +96,7 @@ class PreflightService:
         self._metrics = metrics
         self._health_aggregator = health_aggregator
         self._medallion_validator = medallion_validator
+
     async def validate_infrastructure(
         self,
         services: PipelineHealthServicesProtocol,
@@ -112,9 +115,11 @@ class PreflightService:
         if raise_on_unhealthy:
             self.assert_infrastructure_healthy(report)
         return report
+
     def assert_infrastructure_healthy(self, report: HealthReport) -> None:
         """Raise InfrastructureError when the report contains unhealthy components."""
         self._health_aggregator.assert_healthy(report)
+
     def validate_medallion_config(
         self,
         runtime: RuntimeConfig,
@@ -143,12 +148,14 @@ class PreflightService:
             silver_format=silver_format,
             gold_format=gold_format,
         )
+
     def validate_write_modes(self) -> list[ConfigValidationError]:
         """Validate that config write modes are allowed by Medallion policy.
         Returns:
             List of ConfigValidationError for any invalid write mode combinations.
         """
         return self._medallion_validator.validate_write_modes()
+
     async def validate_preflight(
         self,
         services: PipelineHealthServicesProtocol,
@@ -195,6 +202,7 @@ class PreflightService:
         )
         self._raise_if_strict_blocking(report, runtime)
         return report
+
     def _raise_if_strict_blocking(
         self,
         report: PreflightReport,

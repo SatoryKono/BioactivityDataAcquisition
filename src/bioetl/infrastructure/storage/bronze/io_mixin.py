@@ -40,7 +40,9 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
     COMPRESSION_THREADS: int = cast(Any, None)  # Any: host attr default (PD6)
     COMPRESSION_CHUNK_SIZE: int = cast(Any, None)  # Any: host attr default (PD6)
     _flat_structure: bool = cast(Any, None)  # Any: host attr default (PD6)
-    _resolve_bronze_path: Callable[[str, str, str, str], str] = cast(Any, None)  # Any: host attr default (PD6)
+    _resolve_bronze_path: Callable[[str, str, str, str], str] = cast(
+        Any, None
+    )  # Any: host attr default (PD6)
 
     def _write_atomic_stream(
         self,

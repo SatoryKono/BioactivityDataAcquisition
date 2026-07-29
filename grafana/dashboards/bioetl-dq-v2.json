@@ -1843,7 +1843,7 @@
             }
           ],
           "options": {
-            "content": "<div style=\"padding:2px 8px;font-size:12px;line-height:1.25;overflow:hidden\"><strong>Lineage handoff</strong> — open Trust/Control Plane for lineage trust, checkpoint integrity, and replay blockers. Preserve time range + pipeline scope.</div>",
+            "content": "<div style=\"padding:2px 8px;font-size:12px;line-height:1.25;overflow:hidden\"><strong>Lineage handoff</strong> — open the canonical Control Plane for lineage trust, checkpoint integrity, and replay blockers. Preserve time range + pipeline scope.</div>",
             "dataLinks": [
               {
                 "includeVars": false,
@@ -2069,7 +2069,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE freshness age in hours. Explicit SLA: WARN at 24h and CRIT at 72h. An ~8h value is green only because it is below the visible 24h SLA; null is UNKNOWN.",
+          "description": "PFILL-11: UNKNOWN/empty freshness is telemetry missing, not a healthy 0h age. SLA 24/72 only applies when samples exist. TIME RANGE freshness age in hours. Explicit SLA: WARN at 24h and CRIT at 72h. An ~8h value is green only because it is below the visible 24h SLA; null is UNKNOWN.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2088,7 +2088,7 @@
                   }
                 }
               ],
-              "noValue": "UNKNOWN",
+              "noValue": "TELEMETRY MISSING — no bioetl_data_freshness_seconds for scope",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -2441,7 +2441,7 @@
                 },
                 {
                   "title": "Check BioETL Ops HTTP health",
-                  "url": "http://localhost:8081/health/live",
+                  "url": "http://localhost:8000/health/live",
                   "targetBlank": true
                 },
                 {
@@ -2594,7 +2594,7 @@
               "links": [
                 {
                   "title": "Check BioETL Ops HTTP health",
-                  "url": "http://localhost:8081/health/live",
+                  "url": "http://localhost:8000/health/live",
                   "targetBlank": true
                 },
                 {
@@ -2692,120 +2692,13 @@
                     "value": {
                       "type": "color-text"
                     }
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "regex",
-                        "options": {
-                          "pattern": "^01 bronze_records\\|(.*)$",
-                          "result": {
-                            "text": "$1",
-                            "color": "#cd7f32"
-                          }
-                        }
-                      },
-                      {
-                        "type": "regex",
-                        "options": {
-                          "pattern": "^02 silver_valid_records\\|(.*)$",
-                          "result": {
-                            "text": "$1",
-                            "color": "#c0c0c0"
-                          }
-                        }
-                      },
-                      {
-                        "type": "regex",
-                        "options": {
-                          "pattern": "^03 silver_filtered_out_records\\|(.*)$",
-                          "result": {
-                            "text": "$1"
-                          }
-                        }
-                      },
-                      {
-                        "type": "regex",
-                        "options": {
-                          "pattern": "^04 silver_quarantined_records\\|(.*)$",
-                          "result": {
-                            "text": "$1"
-                          }
-                        }
-                      },
-                      {
-                        "type": "regex",
-                        "options": {
-                          "pattern": "^05 silver_skipped_records\\|(.*)$",
-                          "result": {
-                            "text": "$1"
-                          }
-                        }
-                      },
-                      {
-                        "type": "regex",
-                        "options": {
-                          "pattern": "^06 silver_deduplicated_records\\|(.*)$",
-                          "result": {
-                            "text": "$1"
-                          }
-                        }
-                      },
-                      {
-                        "type": "regex",
-                        "options": {
-                          "pattern": "^07 gold_written_records\\|(.*)$",
-                          "result": {
-                            "text": "$1",
-                            "color": "#d4af37"
-                          }
-                        }
-                      },
-                      {
-                        "type": "regex",
-                        "options": {
-                          "pattern": "^08 gold_excluded_by_contract_records\\|(.*)$",
-                          "result": {
-                            "text": "$1"
-                          }
-                        }
-                      },
-                      {
-                        "type": "regex",
-                        "options": {
-                          "pattern": "^09 gold_quarantined_records\\|(.*)$",
-                          "result": {
-                            "text": "$1"
-                          }
-                        }
-                      },
-                      {
-                        "type": "regex",
-                        "options": {
-                          "pattern": "^10 gold_skipped_records\\|(.*)$",
-                          "result": {
-                            "text": "$1"
-                          }
-                        }
-                      },
-                      {
-                        "type": "regex",
-                        "options": {
-                          "pattern": "^11 gold_deduplicated_records\\|(.*)$",
-                          "result": {
-                            "text": "$1"
-                          }
-                        }
-                      }
-                    ]
                   }
                 ]
               },
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "percintage"
+                  "options": "percentage"
                 },
                 "properties": [
                   {
@@ -2817,113 +2710,6 @@
                     "value": {
                       "type": "color-text"
                     }
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "regex",
-                        "options": {
-                          "pattern": "^01 bronze_records\\|(.*)$",
-                          "result": {
-                            "text": "$1",
-                            "color": "#cd7f32"
-                          }
-                        }
-                      },
-                      {
-                        "type": "regex",
-                        "options": {
-                          "pattern": "^02 silver_valid_records\\|(.*)$",
-                          "result": {
-                            "text": "$1",
-                            "color": "#c0c0c0"
-                          }
-                        }
-                      },
-                      {
-                        "type": "regex",
-                        "options": {
-                          "pattern": "^03 silver_filtered_out_records\\|(.*)$",
-                          "result": {
-                            "text": "$1"
-                          }
-                        }
-                      },
-                      {
-                        "type": "regex",
-                        "options": {
-                          "pattern": "^04 silver_quarantined_records\\|(.*)$",
-                          "result": {
-                            "text": "$1"
-                          }
-                        }
-                      },
-                      {
-                        "type": "regex",
-                        "options": {
-                          "pattern": "^05 silver_skipped_records\\|(.*)$",
-                          "result": {
-                            "text": "$1"
-                          }
-                        }
-                      },
-                      {
-                        "type": "regex",
-                        "options": {
-                          "pattern": "^06 silver_deduplicated_records\\|(.*)$",
-                          "result": {
-                            "text": "$1"
-                          }
-                        }
-                      },
-                      {
-                        "type": "regex",
-                        "options": {
-                          "pattern": "^07 gold_written_records\\|(.*)$",
-                          "result": {
-                            "text": "$1",
-                            "color": "#d4af37"
-                          }
-                        }
-                      },
-                      {
-                        "type": "regex",
-                        "options": {
-                          "pattern": "^08 gold_excluded_by_contract_records\\|(.*)$",
-                          "result": {
-                            "text": "$1"
-                          }
-                        }
-                      },
-                      {
-                        "type": "regex",
-                        "options": {
-                          "pattern": "^09 gold_quarantined_records\\|(.*)$",
-                          "result": {
-                            "text": "$1"
-                          }
-                        }
-                      },
-                      {
-                        "type": "regex",
-                        "options": {
-                          "pattern": "^10 gold_skipped_records\\|(.*)$",
-                          "result": {
-                            "text": "$1"
-                          }
-                        }
-                      },
-                      {
-                        "type": "regex",
-                        "options": {
-                          "pattern": "^11 gold_deduplicated_records\\|(.*)$",
-                          "result": {
-                            "text": "$1"
-                          }
-                        }
-                      }
-                    ]
                   }
                 ]
               },
@@ -3027,18 +2813,18 @@
                 "indexByName": {
                   "parameter": 0,
                   "value": 1,
-                  "percintage": 2,
-                  "row_status": 3
+                  "row_status": 3,
+                  "percentage": 2
                 },
                 "renameByName": {
                   "parameter": "parameter",
                   "value": "value",
-                  "percintage": "percintage",
                   "row_status": "",
                   "Value": "Count",
                   "Value #A": "Series A",
                   "Value #B": "Series B",
-                  "Value #C": "Series C"
+                  "Value #C": "Series C",
+                  "percentage": "percentage"
                 }
               }
             }

@@ -144,7 +144,7 @@ def run_export_script(
         user_scope_arg = " -UserScope" if user_scope else ""
         command = (
             f"$names = @({names}); "
-            "foreach ($name in $names) { Remove-Item \"Env:$name\" -ErrorAction SilentlyContinue }; "
+            'foreach ($name in $names) { Remove-Item "Env:$name" -ErrorAction SilentlyContinue }; '
             f"& '{export_script_arg}' -RepoRoot '{repo_path}'{user_scope_arg}; "
             "exit $LASTEXITCODE"
         )

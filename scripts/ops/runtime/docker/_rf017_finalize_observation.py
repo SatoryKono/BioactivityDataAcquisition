@@ -80,9 +80,7 @@ def _resolve_container_snapshot(name: str) -> tuple[str, dict[str, object] | Non
     return name, snap
 
 
-def _restart_delta_for(
-    snap: dict[str, object], base: dict[str, object]
-) -> int:
+def _restart_delta_for(snap: dict[str, object], base: dict[str, object]) -> int:
     try:
         return max(
             0,

@@ -23,6 +23,7 @@ class RegistryEntryProtocol(Protocol):
     gold_schema: object | None
     pandera_silver_schema: object | None
 
+
 __all__ = ["RegistryEntryProtocol"]
 
 

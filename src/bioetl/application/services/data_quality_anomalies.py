@@ -23,7 +23,9 @@ class DataQualityMetricsMixin:
     _metrics: MetricsPort | None = cast(Any, None)  # Any: host default (PD4)
     _pipeline_name: str = cast(Any, None)  # Any: host default (PD4)
     _entity_type: str = cast(Any, None)  # Any: host default (PD4)
-    _pipeline_metrics: PipelineMetricsRecorder = cast(Any, None)  # Any: host default (PD4)
+    _pipeline_metrics: PipelineMetricsRecorder = cast(
+        Any, None
+    )  # Any: host default (PD4)
     _run_type: str = cast(Any, None)  # Any: host default (PD4)
 
     @staticmethod

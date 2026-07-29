@@ -4,8 +4,8 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, cast
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 from bioetl.application.observability.span_attribute_values import (
     coerce_span_attribute_value,
@@ -31,10 +31,10 @@ _METRICS_GATEWAY_ERRORS = (
 class PushResult:
     """Result of publishing metrics to an external gateway."""
 
-    success: bool = cast(Any, None)  # Any: host attr default (PD6)
-    gateway: str = cast(Any, None)  # Any: host attr default (PD6)
-    run_label: str = cast(Any, None)  # Any: host attr default (PD6)
-    grouping_key: dict[str, str] = cast(Any, None)  # Any: host attr default (PD6)
+    success: bool = False
+    gateway: str = ""
+    run_label: str = ""
+    grouping_key: dict[str, str] = field(default_factory=dict)
     error: str | None = None
 
 
@@ -42,10 +42,10 @@ class PushResult:
 class DeleteResult:
     """Result of deleting metrics from an external gateway."""
 
-    success: bool = cast(Any, None)  # Any: host attr default (PD6)
-    gateway: str = cast(Any, None)  # Any: host attr default (PD6)
-    run_label: str = cast(Any, None)  # Any: host attr default (PD6)
-    grouping_key: dict[str, str] = cast(Any, None)  # Any: host attr default (PD6)
+    success: bool = False
+    gateway: str = ""
+    run_label: str = ""
+    grouping_key: dict[str, str] = field(default_factory=dict)
     error: str | None = None
 
 
@@ -87,9 +87,13 @@ class _MetricsTracingMixin:
 class _MetricsGatewayMixin(_MetricsTracingMixin):
     """Gateway publication helpers for metrics administration flows."""
 
-    logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD6)
-    tracer: TracingPort | None = cast(Any, None)  # Any: host attr default (PD6)
-    _publisher: MetricsPublisherPort | None = cast(Any, None)  # Any: host attr default (PD6)
+    logger: LoggerPort
+    tracer: TracingPort | None = (
+        None  # Any: host attr default  # Any: host attr default (PD6)
+    )
+    _publisher: MetricsPublisherPort | None = (
+        None  # Any: host attr default  # Any: host attr default (PD6)
+    )
 
     def push_to_gateway(
         self,

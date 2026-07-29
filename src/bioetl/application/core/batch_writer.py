@@ -43,6 +43,7 @@ if TYPE_CHECKING:
 
 class BatchWriteStorageProtocol(Protocol):
     """Minimal write-only storage contract for BatchWriter."""
+
     async def write_bronze(
         self,
         records: Iterator[bytes],
@@ -57,6 +58,7 @@ class BatchWriteStorageProtocol(Protocol):
     ) -> BronzeWriteResult:
         """Persist one Bronze batch and return write metadata."""
         ...
+
     async def write_silver(
         self,
         table_name: str,
@@ -72,6 +74,7 @@ class BatchWriteStorageProtocol(Protocol):
     ) -> SilverWriteResult | None:
         """Persist transformed records into Silver storage."""
         ...
+
     async def write_gold(
         self,
         table_name: str,
@@ -93,6 +96,7 @@ class BatchWriteStorageProtocol(Protocol):
 @dataclass(frozen=True, slots=True)
 class BatchWriterOptions:
     """Optional writer collaborators grouped to reduce constructor width."""
+
     tracer: TracingPort | None = None
     lock_validator: BatchWriterLockValidator | None = None
     data_schema_config: DataSchemaConfig | None = None
@@ -105,6 +109,7 @@ class BatchWriter(BatchWriterTracingMixin, BatchWriterColumnsMixin, BatchWriterI
     MRO order: tracing/columns collaborators before IO write methods so
     cross-mixin helpers resolve to real implementations.
     """
+
     def __init__(
         self,
         storage: BatchWriteStorageProtocol,

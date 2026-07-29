@@ -73,6 +73,7 @@ if TYPE_CHECKING:
 
 __all__ = ["assemble_runner_impl"]
 
+
 def _build_checkpoint_manager(
     *,
     pipeline: BasePipeline,
@@ -102,8 +103,10 @@ def _build_checkpoint_manager(
         compatibility_policy=compatibility_policy,
     )
 
+
 def _build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetadata:
     return build_current_checkpoint_metadata(pipeline)
+
 
 def _build_lock_runtime_service(
     context: _RunnerAssemblyContext,
@@ -116,6 +119,7 @@ def _build_lock_runtime_service(
         checkpoint_manager=checkpoint_manager,
         context_holder=context_holder,
     )
+
 
 def _build_lock_manager(
     context: _RunnerAssemblyContext,
@@ -130,11 +134,14 @@ def _build_lock_manager(
         context_holder=context_holder,
     )
 
+
 def _build_preflight_service(context: _RunnerAssemblyContext) -> PreflightService:
     return _build_preflight_service_impl(context)
 
+
 def _build_observer(context: _RunnerAssemblyContext) -> PipelineObserver:
     return _build_observer_impl(context)
+
 
 def _build_batch_executor(
     context: _RunnerAssemblyContext,
@@ -150,8 +157,10 @@ def _build_batch_executor(
         observer=observer,
     )
 
+
 def _create_pipeline_runner(payload: RunnerConstructorPayload) -> PipelineRunner:
     return create_pipeline_runner_from_payload(payload)
+
 
 def _build_postrun_service(
     context: _RunnerAssemblyContext,
@@ -166,6 +175,7 @@ def _build_postrun_service(
         tracer=context.observability.tracer,
     )
 
+
 def _build_runner_constructor_payload(
     *,
     pipeline: BasePipeline,
@@ -177,6 +187,7 @@ def _build_runner_constructor_payload(
         observability=observability,
         parts=parts,
     )
+
 
 def _assemble_runner_parts(
     context: _RunnerAssemblyContext,
@@ -190,6 +201,7 @@ def _assemble_runner_parts(
         postrun_service_builder=_build_postrun_service,
         batch_executor_builder=_build_batch_executor,
     )
+
 
 def assemble_runner_impl(
     pipeline: BasePipeline,

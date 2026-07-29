@@ -30,7 +30,9 @@ _PUBMED_DEFAULT_FALLBACK_CONFIG = FallbackDecoratorConfig(
 class _PubMedFallbackPolicyMixin:
     """Provider-specific hookpoints consumed by ``FallbackPolicyMixin``."""
 
-    _fallback_handler: PubMedTitleFallbackHandler = cast(Any, None)  # Any: host attr default (PD3)
+    _fallback_handler: PubMedTitleFallbackHandler = cast(
+        Any, None
+    )  # Any: host attr default (PD3)
 
     def _get_default_fallback_config(self) -> FallbackDecoratorConfig:
         """Return PubMed-specific default fallback config."""
