@@ -32,14 +32,37 @@
       "checkpoints": true,
       "run_ledger": true,
       "run_manifest": true
+    },
+    "effective_config_hash": "sha256:da495edce58b092c4204e7afcfc92f8530f112a01acce47740198a90af08c5bf",
+    "projection_profiles": [
+      "batch",
+      "http"
+    ],
+    "resilience": {
+      "resolution_owner": "UnifiedHTTPClient and provider config",
+      "source_refs": [
+        "src/bioetl/infrastructure/adapters/http/client.py",
+        "configs/providers/chembl.yaml"
+      ],
+      "status": "runtime_resolved"
     }
   },
   "extraction": {
     "request": {
       "endpoint_template": {
+        "resolution_inputs": [
+          "provider base_url",
+          "entity resource mapping"
+        ],
+        "resolution_owner": "provider adapter",
         "status": "runtime_resolved"
       },
       "method": {
+        "resolution_inputs": [
+          "effective provider config",
+          "adapter request builder"
+        ],
+        "resolution_owner": "provider adapter",
         "status": "runtime_resolved"
       }
     },
@@ -85,6 +108,11 @@
   },
   "identity": {
     "aliases": [],
+    "derived_source_identity": {
+      "data_source_provider": null,
+      "entity": "molecule",
+      "provider": "chembl"
+    },
     "entity": "molecule",
     "pipeline_id": "chembl_molecule",
     "pipeline_type": "provider_entity",

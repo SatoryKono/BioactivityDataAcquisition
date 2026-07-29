@@ -45,6 +45,7 @@
         "to": "run_chembl_target_protein_classification"
       }
     ],
+    "mermaid": "flowchart TD\n  run_chembl_protein_class[\"chembl_protein_class\"]\n  run_chembl_target[\"chembl_target\"]\n  run_chembl_target_component[\"chembl_target_component\"]\n  run_chembl_target_protein_classification[\"chembl_target_protein_classification\"]\n  run_chembl_protein_class --> run_chembl_target_protein_classification\n  run_chembl_target --> run_chembl_target_component\n  run_chembl_target --> run_chembl_target_protein_classification\n  run_chembl_target_component --> run_chembl_target_protein_classification\n",
     "step_count": 4,
     "steps": [
       {
@@ -135,3 +136,19 @@
 ## Diagnostics
 
 - No blocking diagnostics.
+
+## Owner-approved context
+
+- Owner: `BioETL Team`
+
+### Purpose
+
+Build target and protein-classification inputs before projecting their derived relationship.
+
+### Rationale
+
+The explicit DAG prevents publication of a derived classification before its inputs complete.
+
+### Known limitations
+
+- Derived output is bounded by the source snapshot represented in the run evidence.

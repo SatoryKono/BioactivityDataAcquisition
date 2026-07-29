@@ -28,6 +28,7 @@
   "dag": {
     "edge_count": 0,
     "edges": [],
+    "mermaid": "flowchart TD\n  run_crossref_publication[\"crossref_publication\"]\n",
     "step_count": 1,
     "steps": [
       {

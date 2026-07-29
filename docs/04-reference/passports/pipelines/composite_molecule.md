@@ -48,6 +48,15 @@
         "max_attempts": 3
       }
     },
+    "invariants": {
+      "aggregation_is_explicit": true,
+      "conflict_priorities_are_complete": true,
+      "join_keys_must_exist_in_seed_or_prior_key_source_output": true,
+      "supported_cardinalities": [
+        "one_to_one",
+        "many_to_one"
+      ]
+    },
     "merge": {
       "column_groups": [
         {
@@ -345,3 +354,19 @@
 ## Diagnostics
 
 - No blocking diagnostics.
+
+## Owner-approved context
+
+- Owner: `BioETL Team`
+
+### Purpose
+
+Enrich the ChEMBL molecule seed with compatible external compound facts.
+
+### Rationale
+
+Seed-priority conflict handling preserves the canonical molecule identity.
+
+### Known limitations
+
+- Normalized external anchors are used only when both sides expose compatible values.

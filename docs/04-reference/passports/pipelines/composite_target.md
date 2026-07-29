@@ -89,6 +89,15 @@
         "max_attempts": 3
       }
     },
+    "invariants": {
+      "aggregation_is_explicit": true,
+      "conflict_priorities_are_complete": true,
+      "join_keys_must_exist_in_seed_or_prior_key_source_output": true,
+      "supported_cardinalities": [
+        "one_to_one",
+        "many_to_one"
+      ]
+    },
     "merge": {
       "column_groups": [
         {
@@ -638,3 +647,19 @@
 ## Diagnostics
 
 - No blocking diagnostics.
+
+## Owner-approved context
+
+- Owner: `BioETL Team`
+
+### Purpose
+
+Enrich ChEMBL targets with component, classification, mapping, and protein context.
+
+### Rationale
+
+Ordered dependency boundaries keep target and protein identities auditable.
+
+### Known limitations
+
+- UniProt enrichment requires a successful normalized mapping result.

@@ -28,6 +28,7 @@
   "dag": {
     "edge_count": 0,
     "edges": [],
+    "mermaid": "flowchart TD\n  run_chembl_assay_parameters[\"chembl_assay_parameters\"]\n",
     "step_count": 1,
     "steps": [
       {
