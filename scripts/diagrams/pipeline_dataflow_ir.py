@@ -16,9 +16,7 @@ from pathlib import Path
 from typing import Any, Protocol, cast
 
 from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
-from bioetl.infrastructure.config.pipeline_config_api import (
-    load_pipeline_config_from_root,
-)
+from scripts.docs.passports.source_facts import load_effective_pipeline_facts
 from scripts.schema.generate_unified_schema_map import build_unified_schema_row
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -458,8 +456,10 @@ def build_pipeline_dataflow_ir(
 ) -> PipelineDataflowIR:
     """Resolve live config and contracts into the canonical pipeline diagram IR."""
     root = (configs_root or PROJECT_ROOT / "configs").resolve()
-    config = load_pipeline_config_from_root(pipeline_name, configs_root=root)
-    effective = cast(_JsonObject, _json_compatible(config.model_dump(mode="json")))
+    effective = cast(
+        _JsonObject,
+        load_effective_pipeline_facts(pipeline_name, configs_root=root),
+    )
     provider = str(effective["provider"])
     entity = str(effective["entity_type"])
     schema_row = build_unified_schema_row(pipeline_name, configs_root=root)
@@ -609,8 +609,7 @@ def build_pipeline_dataflow_ir(
         entity=entity,
         effective_config_sha256=_canonical_hash(effective),
         effective_config_loader=(
-            "bioetl.infrastructure.config.pipeline_config_api."
-            "load_pipeline_config_from_root"
+            "scripts.docs.passports.source_facts.load_effective_pipeline_facts"
         ),
         source_profile=dict(effective["source_profile"]),
         sources=_build_sources(

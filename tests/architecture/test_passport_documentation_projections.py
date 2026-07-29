@@ -6,6 +6,8 @@ import ast
 import json
 from pathlib import Path
 
+import yaml
+
 ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -27,10 +29,9 @@ def test_runtime_does_not_import_passport_tooling() -> None:
 
 def test_committed_passport_completeness_is_exact() -> None:
     report = json.loads(
-        (
-            ROOT
-            / "docs/04-reference/passports/completeness-report.json"
-        ).read_text(encoding="utf-8")
+        (ROOT / "docs/04-reference/passports/completeness-report.json").read_text(
+            encoding="utf-8"
+        )
     )
     assert report["counts"] == {
         "composite": 5,
@@ -40,6 +41,8 @@ def test_committed_passport_completeness_is_exact() -> None:
     }
     assert report["orphan_passports"] == []
     assert report["duplicate_typed_identities"] == []
+    assert report["unresolved_aliases"] == []
+    assert report["registry_config_mismatches"] == []
     assert report["blocking_diagnostics"] == 0
 
 
@@ -48,6 +51,26 @@ def test_passport_cli_is_wired_into_docs_governance() -> None:
     workflow = (ROOT / ".github/workflows/docs.yml").read_text(encoding="utf-8")
     assert '"passports": "scripts.docs.passports.cli"' in docs_router
     assert "python -m scripts.docs passports check" in workflow
+    assert "tests/architecture/test_passport_documentation_projections.py" in workflow
+    for source_path in (
+        "configs/entities/**",
+        "configs/providers/**",
+        "configs/composites/**",
+        "configs/workflows/**",
+        "configs/contracts/**",
+    ):
+        assert workflow.count(source_path) == 2
+
+
+def test_passport_nightly_and_release_gates_are_blocking() -> None:
+    nightly = (ROOT / ".github/workflows/architecture-docs-nightly.yml").read_text(
+        encoding="utf-8"
+    )
+    release = (ROOT / ".github/workflows/release.yml").read_text(encoding="utf-8")
+    assert "scripts.docs passports generate" in nightly
+    assert "tests/unit/scripts/docs/passports" in nightly
+    assert "scripts.docs passports check" in release
+    assert "--require-clean-source" in release
 
 
 def test_reconciliation_ownership_is_explicitly_decided() -> None:
@@ -58,3 +81,17 @@ def test_reconciliation_ownership_is_explicitly_decided() -> None:
     assert "**Status:** Accepted" in decision
     assert "data_plane_transformation" in decision
     assert "commit_pending_confirmation" in decision
+
+
+def test_manual_rollout_covers_composites_and_multistep_workflows() -> None:
+    manual_root = ROOT / "docs/04-reference/passports/manual"
+    pipeline_sidecars = sorted((manual_root / "pipelines").glob("*.yaml"))
+    workflow_sidecars = sorted((manual_root / "workflows").glob("*.yaml"))
+    assert len(pipeline_sidecars) == 5
+    assert len(workflow_sidecars) == 6
+    for path in [*pipeline_sidecars, *workflow_sidecars]:
+        payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+        assert payload["owner"] == "BioETL Team"
+        assert payload["owner_approved"] is True
+        assert payload["purpose"]
+        assert payload["rationale"]

@@ -12,8 +12,12 @@ from typing import Any
 
 import yaml
 
+from bioetl.infrastructure.config.workflow_config_api import load_workflow_config
+
 from .inventory import ExecutableUnit, discover_units
 from .manual_sidecar import load_manual_sidecar
+from .source_facts import load_effective_pipeline_facts
+from .validation import validate_composite_payload, workflow_mermaid
 
 SCHEMA_VERSION = "1.0.0"
 PROJECTOR_VERSION = "1.0.0"
@@ -100,10 +104,18 @@ def _contract_path(provider: str, entity: str) -> Path:
 
 def _pipeline_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
     payload = _load_yaml(unit.config_path)
+    effective = load_effective_pipeline_facts(
+        unit.unit_id,
+        configs_root=DEFAULT_CONFIGS_ROOT,
+    )
     pipeline = payload["pipeline"]
     assert isinstance(pipeline, dict)
-    provider = str(pipeline.get("provider") or payload.get("provider") or "")
-    entity = str(pipeline.get("entity_type") or payload.get("entity") or "")
+    provider = unit.provider or str(
+        pipeline.get("provider") or payload.get("provider") or ""
+    )
+    entity = unit.entity or str(
+        pipeline.get("entity_type") or payload.get("entity") or ""
+    )
     contract_path = _contract_path(provider, entity)
     contract = _load_yaml(contract_path) if contract_path.is_file() else {}
     source_refs = [
@@ -118,13 +130,18 @@ def _pipeline_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
         },
     ]
     if contract:
-        source_refs.append(
-            {"role": "dq_contract", "path": _repo_path(contract_path)}
-        )
+        source_refs.append({"role": "dq_contract", "path": _repo_path(contract_path)})
     raw_schema = payload.get("schema")
     schema: JsonObject = raw_schema if isinstance(raw_schema, dict) else {}
     raw_sink = pipeline.get("sink")
     sink: JsonObject = raw_sink if isinstance(raw_sink, dict) else {}
+    projection_profiles = ["batch"]
+    if unit.unit_id == "chembl_target_protein_classification":
+        projection_profiles.extend(["derived", "local_snapshot"])
+    else:
+        projection_profiles.append("http")
+    if unit.unit_id == "uniprot_idmapping":
+        projection_profiles.append("async_mapping")
     return {
         "passport_schema_version": SCHEMA_VERSION,
         "kind": "pipeline",
@@ -135,7 +152,12 @@ def _pipeline_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
             "entity": entity,
             "pipeline_type": "provider_entity",
             "status": "active",
-            "aliases": [],
+            "aliases": list(unit.aliases),
+            "derived_source_identity": {
+                "provider": effective.get("provider"),
+                "entity": effective.get("entity_type"),
+                "data_source_provider": effective.get("data_source_provider"),
+            },
         },
         "provenance": {
             "source_revision": revision,
@@ -146,8 +168,22 @@ def _pipeline_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
         "extraction": {
             "source_type": "runtime_resolved",
             "request": {
-                "method": {"status": "runtime_resolved"},
-                "endpoint_template": {"status": "runtime_resolved"},
+                "method": {
+                    "status": "runtime_resolved",
+                    "resolution_owner": "provider adapter",
+                    "resolution_inputs": [
+                        "effective provider config",
+                        "adapter request builder",
+                    ],
+                },
+                "endpoint_template": {
+                    "status": "runtime_resolved",
+                    "resolution_owner": "provider adapter",
+                    "resolution_inputs": [
+                        "provider base_url",
+                        "entity resource mapping",
+                    ],
+                },
             },
             "source_modes": {
                 "declared": ["runtime_resolved"],
@@ -184,12 +220,22 @@ def _pipeline_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
             "write": sink.get("gold", {}) if isinstance(sink, dict) else {},
         },
         "execution": {
+            "projection_profiles": sorted(projection_profiles),
             "control_plane": {
                 "run_manifest": True,
                 "run_ledger": True,
                 "checkpoints": True,
             },
             "cached_bronze_is_mode": True,
+            "effective_config_hash": _sha(effective),
+            "resilience": {
+                "status": "runtime_resolved",
+                "resolution_owner": "UnifiedHTTPClient and provider config",
+                "source_refs": [
+                    "src/bioetl/infrastructure/adapters/http/client.py",
+                    f"configs/providers/{provider}.yaml",
+                ],
+            },
         },
         "observability": {
             "metric_labels": ["provider", "pipeline", "run_type", "status"],
@@ -205,27 +251,30 @@ def _composite_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
     assert isinstance(composite, dict)
     raw_seed = composite.get("seed")
     seed: JsonObject = raw_seed if isinstance(raw_seed, dict) else {}
-    output_keys = {
-        str(value) for value in seed.get("output_keys", []) if isinstance(value, str)
-    }
-    diagnostics: list[JsonObject] = []
-    for enricher in composite.get("enrichers", []):
-        if not isinstance(enricher, dict):
-            continue
-        missing = [
-            key
-            for key in enricher.get("join_keys", [])
-            if isinstance(key, str) and key not in output_keys
-        ]
-        if missing:
-            diagnostics.append(
-                {
-                    "code": "COMPOSITE_JOIN_KEY_NOT_IN_SEED_OUTPUT",
-                    "severity": "error",
-                    "pipeline": enricher.get("pipeline"),
-                    "keys": missing,
-                }
-            )
+    referenced_pipelines = [
+        str(item["pipeline"])
+        for role in ("dependencies", "enrichers")
+        for item in composite.get(role, [])
+        if isinstance(item, dict) and isinstance(item.get("pipeline"), str)
+    ]
+    pipeline_output_keys: dict[str, set[str]] = {}
+    for pipeline_name in referenced_pipelines:
+        effective = load_effective_pipeline_facts(
+            pipeline_name,
+            configs_root=DEFAULT_CONFIGS_ROOT,
+        )
+        groups = effective.get("data_schema", {}).get("column_groups", [])
+        pipeline_output_keys[pipeline_name] = {
+            str(field)
+            for group in groups
+            if isinstance(group, dict)
+            for field in group.get("fields", [])
+            if isinstance(field, str)
+        }
+    diagnostics = validate_composite_payload(
+        payload,
+        pipeline_output_keys=pipeline_output_keys,
+    )
     provider, entity = unit.unit_id.split("_", 1)
     contract_path = _contract_path(provider, entity)
     return {
@@ -238,7 +287,7 @@ def _composite_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
             "entity": entity,
             "pipeline_type": "composite",
             "status": "active",
-            "aliases": [],
+            "aliases": list(unit.aliases),
         },
         "provenance": {
             "source_revision": revision,
@@ -257,10 +306,14 @@ def _composite_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
             "merge": composite.get("merge", {}),
             "cross_validation": composite.get("cross_validation", {}),
             "execution": composite.get("execution", {}),
+            "invariants": {
+                "join_keys_must_exist_in_seed_or_prior_key_source_output": True,
+                "supported_cardinalities": ["one_to_one", "many_to_one"],
+                "aggregation_is_explicit": True,
+                "conflict_priorities_are_complete": True,
+            },
         },
-        "execution": {
-            "control_plane": {"run_manifest": True, "checkpoints": True}
-        },
+        "execution": {"control_plane": {"run_manifest": True, "checkpoints": True}},
         "observability": {
             "metric_labels": ["pipeline", "run_type", "status"],
             "correlation_fields": ["run_id", "manifest_id"],
@@ -283,9 +336,7 @@ def _topological_order(steps: list[JsonObject]) -> list[str]:
         raise ValueError("Workflow contains duplicate step IDs")
     dependencies = {
         str(step.get("step_id")): {
-            str(value)
-            for value in step.get("depends_on", [])
-            if isinstance(value, str)
+            str(value) for value in step.get("depends_on", []) if isinstance(value, str)
         }
         for step in steps
     }
@@ -301,9 +352,7 @@ def _topological_order(steps: list[JsonObject]) -> list[str]:
     remaining = dict(dependencies)
     while remaining:
         ready = sorted(
-            step_id
-            for step_id, values in remaining.items()
-            if values.issubset(ordered)
+            step_id for step_id, values in remaining.items() if values.issubset(ordered)
         )
         if not ready:
             raise ValueError("Workflow dependency cycle detected")
@@ -319,6 +368,10 @@ def _workflow_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
     assert isinstance(workflow, dict)
     raw_steps = workflow.get("steps", [])
     steps = [step for step in raw_steps if isinstance(step, dict)]
+    domain_workflow = load_workflow_config(
+        unit.unit_id,
+        config_dir=unit.config_path.parent,
+    )
     edges = sorted(
         (str(dep), str(step.get("step_id")))
         for step in steps
@@ -371,9 +424,10 @@ def _workflow_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
         "dag": {
             "step_count": len(steps),
             "edge_count": len(edges),
-            "topological_order": _topological_order(steps),
+            "topological_order": list(domain_workflow.topological_step_ids),
             "steps": steps,
             "edges": [{"from": source, "to": target} for source, target in edges],
+            "mermaid": workflow_mermaid(steps),
         },
         "external_data_operations": operations,
         "control_plane": {
@@ -386,7 +440,13 @@ def _workflow_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
             "commit_pending_confirmation": True,
         },
         "observability": {
-            "metric_labels": ["workflow", "pipeline", "step_kind", "status", "run_type"],
+            "metric_labels": [
+                "workflow",
+                "pipeline",
+                "step_kind",
+                "status",
+                "run_type",
+            ],
             "prohibited_metric_labels": [
                 "run_id",
                 "manifest_id",
@@ -435,9 +495,7 @@ def _render_markdown(facts: JsonObject, manual: dict[str, object]) -> str:
     lines.extend(["```", "", "## Diagnostics", ""])
     if diagnostics:
         for diagnostic in diagnostics:
-            lines.append(
-                f"- `{diagnostic['severity']}` `{diagnostic['code']}`"
-            )
+            lines.append(f"- `{diagnostic['severity']}` `{diagnostic['code']}`")
     else:
         lines.append("- No blocking diagnostics.")
     if manual:
@@ -488,10 +546,9 @@ def build_all_outputs(
         registry_rows.append(
             {
                 "typed_id": unit.typed_id,
+                "aliases": list(unit.aliases),
                 "config_path": _repo_path(unit.config_path),
-                "passport_path": _display_path(
-                    output_root / group / f"{unit.unit_id}.md"
-                ),
+                "passport_path": f"{group}/{unit.unit_id}.md",
             }
         )
     report = {
@@ -505,6 +562,8 @@ def build_all_outputs(
         },
         "orphan_passports": [],
         "duplicate_typed_identities": [],
+        "unresolved_aliases": [],
+        "registry_config_mismatches": [],
         "blocking_diagnostics": error_count,
     }
     outputs[output_root / "executable-unit-registry.json"] = _canonical_bytes(
@@ -523,6 +582,12 @@ def build_all_outputs(
         "- [Pipeline passport schema](schemas/pipeline-passport.schema.json)",
         "- [Workflow passport schema](schemas/workflow-passport.schema.json)",
         "- [Manual metadata schema](schemas/manual-passport-metadata.schema.json)",
+        "",
+        "- Owner: `BioETL Team`; review cadence: each executable/config change and release.",
+        "- Check: `python -m scripts.docs passports check`.",
+        "- Reviewed update: `python -m scripts.docs passports generate`.",
+        "- Generated facts are read-only projections; manual sidecars cannot override them.",
+        "- Diagram dataflow passports are compatibility companions and link back here.",
         "",
         "## Pipelines",
         "",
@@ -554,10 +619,14 @@ def write_outputs(outputs: dict[Path, bytes]) -> None:
     """Atomically write generated outputs."""
     for path, content in outputs.items():
         path.parent.mkdir(parents=True, exist_ok=True)
-        descriptor, temp_name = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
+        descriptor, temp_name = tempfile.mkstemp(
+            prefix=f".{path.name}.", dir=path.parent
+        )
         try:
             with os.fdopen(descriptor, "wb") as handle:
                 handle.write(content)
+                handle.flush()
+                os.fsync(handle.fileno())
             os.replace(temp_name, path)
         except BaseException:
             Path(temp_name).unlink(missing_ok=True)

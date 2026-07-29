@@ -1,0 +1,6 @@
+owner: BioETL Team
+owner_approved: true
+purpose: Preserve ChEMBL activity rows while enriching them with source-backed compound-record context.
+rationale: ADR-026 keeps the seed identity authoritative and makes optional joins explicit.
+known_limitations:
+  - Optional enrichment can be absent without invalidating the seed activity.

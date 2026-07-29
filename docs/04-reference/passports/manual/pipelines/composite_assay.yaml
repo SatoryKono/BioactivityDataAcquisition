@@ -1,0 +1,6 @@
+owner: BioETL Team
+owner_approved: true
+purpose: Assemble assay records with optional cell-line and tissue context.
+rationale: The composite exposes optional joins without weakening the final Gold contract.
+known_limitations:
+  - Source assays do not always provide cell-line or tissue identifiers.

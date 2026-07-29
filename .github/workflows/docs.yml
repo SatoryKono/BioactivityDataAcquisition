@@ -27,6 +27,11 @@ on:
       - 'scripts/schema/generate_unified_schema_map.py'
       - 'configs/base/pipeline.yaml'
       - 'configs/base/quality.yaml'
+      - 'configs/entities/**'
+      - 'configs/providers/**'
+      - 'configs/composites/**'
+      - 'configs/workflows/**'
+      - 'configs/contracts/**'
       - 'configs/providers/chembl.yaml'
       - 'configs/entities/chembl/activity.yaml'
       - 'src/bioetl/application/pipelines/chembl/activity_transformer.py'
@@ -68,6 +73,11 @@ on:
       - 'scripts/schema/generate_unified_schema_map.py'
       - 'configs/base/pipeline.yaml'
       - 'configs/base/quality.yaml'
+      - 'configs/entities/**'
+      - 'configs/providers/**'
+      - 'configs/composites/**'
+      - 'configs/workflows/**'
+      - 'configs/contracts/**'
       - 'configs/providers/chembl.yaml'
       - 'configs/entities/chembl/activity.yaml'
       - 'src/bioetl/application/pipelines/chembl/activity_transformer.py'
@@ -132,6 +142,8 @@ jobs:
             tests/architecture/test_docs_version_sync.py::TestVersionFormat::test_rules_header_format \
             tests/architecture/test_observability_docs_drift.py \
             tests/architecture/test_observability_docs_sync.py \
+            tests/architecture/test_passport_documentation_projections.py \
+            tests/unit/scripts/docs/passports/test_passport_projector.py \
             tests/architecture/test_documentation_sync.py::test_ports_count_matches_docs \
             tests/architecture/test_documentation_sync.py::test_pipeline_count_matches_docs \
             tests/architecture/test_documentation_sync.py::test_pipeline_ids_match_reference_index \

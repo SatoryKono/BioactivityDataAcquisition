@@ -34,6 +34,7 @@ allowed_output_roots:
     - docs/02-architecture/adr-registry.md
     - docs/02-architecture/adr-registry/
     - docs/04-reference/config_comparison_matrix.csv
+    - docs/04-reference/passports/
     - docs/filters/inventory-baseline.csv
     - docs/filters/inventory-baseline.json
     - docs/filters/inventory-baseline.md
@@ -227,6 +228,21 @@ routes:
       - docs/04-reference/api/
     notes: Published API reference pages are generated from source-level layer
       inventories and remain tracked curated docs for documentation builds.
+
+  - id: executable-unit-passport-projections
+    generator: scripts/docs/passports/cli.py
+    output_kind: curated_generated_docs
+    commit_policy: tracked_curated_generated_doc
+    outputs:
+      - docs/04-reference/passports/generated/
+      - docs/04-reference/passports/pipelines/
+      - docs/04-reference/passports/workflows/
+      - docs/04-reference/passports/index.md
+      - docs/04-reference/passports/completeness-report.json
+      - docs/04-reference/passports/executable-unit-registry.json
+    notes:
+      ADR-054 deterministic read-only passport projections generated from
+      executable registration, config, domain-contract, and workflow owners.
 
   - id: dq-contracts-generated-doc
     generator: scripts/check_dq_dsl_parity.py
