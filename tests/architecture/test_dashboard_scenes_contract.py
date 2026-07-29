@@ -34,6 +34,14 @@ def test_scenes_package_is_optional_read_only_app_boundary() -> None:
     assert contract["write_actions"] == []
     assert not (PLUGIN / "pkg").exists()
     assert not (PLUGIN / "Magefile.go").exists()
+    monitoring_compose = (ROOT / "docker-compose.monitoring.yml").read_text(
+        encoding="utf-8"
+    )
+    assert "bioetl-scenes-app" not in monitoring_compose
+    provisioner = (
+        ROOT / "grafana/provisioning/dashboards/bioetl.yaml"
+    ).read_text(encoding="utf-8")
+    assert "/var/lib/grafana/dashboards" in provisioner
 
 
 def test_six_routes_keep_seven_json_fallback_uids() -> None:

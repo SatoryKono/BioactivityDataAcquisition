@@ -25,4 +25,3 @@ promotion:
     - pii
 logging:
   include_matched_values: false
-
