@@ -1,6 +1,6 @@
 # DUX7 live residual protocol (a11y / contrast / theme / copy / screenshots)
 
-**Status:** active  
+**Status:** closed (2026-07-29)  
 **Wave:** DUX7  
 **Predecessor residual:** DUX6 live-only items in `dux6-residual-readability.md`
 

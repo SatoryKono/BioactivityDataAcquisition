@@ -40,10 +40,15 @@ Operator expansion lives in Provenance + descriptions.
 
 ## Residual still live-only
 
-- WCAG contrast computation on real theme tokens
-- Keyboard/focus a11y walkthrough
-- Light theme parity (or explicit unsupported)
-- True Copy button UX if Grafana panel plugin cannot provide it (use data links / explorer)
+**CLOSED by DUX7** — see
+[dux7-live-residual-protocol.md](dux7-live-residual-protocol.md) and
+`reports/quality/dux7-2026-07-29-closeout.md`.
+
+- ~~WCAG contrast~~ → DUX7 PASS
+- ~~Keyboard/focus a11y~~ → DUX7 PASS
+- ~~Light theme~~ → DUX7 `supported_theme_safe_nav`
+- ~~Copy affordance~~ → DUX7 data:text/plain on ID panels
+- ~~Screenshot matrix~~ → DUX7 42/42 evidence
 
 ## DUX7 live residual
 
