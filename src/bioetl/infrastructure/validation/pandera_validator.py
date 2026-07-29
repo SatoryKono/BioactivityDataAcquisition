@@ -1,4 +1,3 @@
-# pyright: reportArgumentType=false
 # Boundary object/payload typing residual at this module.
 """Pandera-based Medallion layer validators.
 
@@ -304,7 +303,7 @@ class PanderaGoldValidator(BasePanderaValidator):
                 # Filter DF to only schema columns
                 # Handle case where schema column is NOT in df (missing column) - Pandera handles that.
                 cols_to_keep = list(schema_columns.intersection(df.columns))
-                df_to_validate = self._reorder_to_schema(df[cols_to_keep])
+                df_to_validate = self._reorder_to_schema(df[cols_to_keep])  # pyright: ignore[reportArgumentType]
 
                 self._schema.validate(df_to_validate, lazy=True)
             else:

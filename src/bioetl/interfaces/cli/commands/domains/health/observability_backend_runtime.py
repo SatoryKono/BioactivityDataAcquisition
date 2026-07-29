@@ -1,4 +1,3 @@
-# pyright: reportArgumentType=false
 # Boundary object/payload typing residual at this module.
 """Runtime helpers for self-managed observability backend startup."""
 
@@ -308,14 +307,14 @@ def ensure_observability_backend_started(
             # Prefer explicit legacy kwargs when tests still pass them.
             pass
     ready_timeout_seconds = float(
-        hook_overrides.pop("ready_timeout_seconds", ready_timeout_seconds)  # type: ignore[arg-type]
+        hook_overrides.pop("ready_timeout_seconds", ready_timeout_seconds)  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
     )
     required_probe_timeout_seconds = float(
-        hook_overrides.pop(  # type: ignore[arg-type]
+        hook_overrides.pop(  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
             "required_probe_timeout_seconds", required_probe_timeout_seconds
         )
     )
-    poll_seconds = float(hook_overrides.pop("poll_seconds", poll_seconds))  # type: ignore[arg-type]
+    poll_seconds = float(hook_overrides.pop("poll_seconds", poll_seconds))  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
     runtime_hooks = {**defaults, **hook_overrides}
     return ensure_observability_backend_started_impl(
         startup_kwargs=_observability_backend_startup_kwargs(
@@ -328,7 +327,7 @@ def ensure_observability_backend_started(
             poll_seconds=poll_seconds,
             required_probe_paths=required_probe_paths,
         ),
-        runtime_hooks=runtime_hooks,  # type: ignore[arg-type]
+        runtime_hooks=runtime_hooks,  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
         failure_handlers=_observability_backend_failure_kwargs(),
         result_factory=ObservabilityBackendEnsureResult,
     )

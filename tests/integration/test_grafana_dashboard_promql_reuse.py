@@ -73,8 +73,9 @@ def _assert_dq_score_time_semantics() -> None:
     assert summary_defaults.get("unit") == "percentunit"
     assert summary_defaults.get("min") == 0
     assert summary_defaults.get("max") == 1
+    # Base step is gray (no-value / unset), then risk bands orange→green.
     assert summary_defaults.get("thresholds", {}).get("steps") == [
-        {"color": "red", "value": None},
+        {"color": "gray", "value": None},
         {"color": "orange", "value": 0.8},
         {"color": "green", "value": 0.95},
     ]

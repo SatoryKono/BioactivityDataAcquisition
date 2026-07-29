@@ -1,6 +1,4 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Merged operations service for SilverWriter (composition pattern)."""
 
@@ -38,11 +36,11 @@ __all__ = [
 class _MergedWriteFacade:
     """Shared merged-write facade used by mixin and composition service paths."""
 
-    logger: LoggerPort
-    csv_exporter: CsvExporterProtocol | None
-    _arrow_converter: ArrowDataConverter
-    _resolve_table_path: Callable[[str], str]
-    _write_silver_merged_metadata: _MergedSilverMetadataWriterProtocol
+    logger: LoggerPort  # pyright: ignore[reportUninitializedInstanceVariable]
+    csv_exporter: CsvExporterProtocol | None  # pyright: ignore[reportUninitializedInstanceVariable]
+    _arrow_converter: ArrowDataConverter  # pyright: ignore[reportUninitializedInstanceVariable]
+    _resolve_table_path: Callable[[str], str]  # pyright: ignore[reportUninitializedInstanceVariable]
+    _write_silver_merged_metadata: _MergedSilverMetadataWriterProtocol  # pyright: ignore[reportUninitializedInstanceVariable]
 
     def _prepare_merged_silver_write(
         self,
@@ -50,7 +48,7 @@ class _MergedWriteFacade:
     ) -> _PreparedMergedSilverWrite:
         """Prepare normalized Arrow payload and resolved table path for merged writes."""
         return _prepare_merged_silver_write(
-            cast(_SilverWriterMergedHostProtocol, self),
+            cast(_SilverWriterMergedHostProtocol, self),  # pyright: ignore[reportInvalidCast]
             request,
         )
 
@@ -74,7 +72,7 @@ class _MergedWriteFacade:
     ) -> None:
         """Export merged table to CSV when exporter is configured."""
         await _export_silver_merged_csv(
-            cast(_SilverWriterMergedHostProtocol, self),
+            cast(_SilverWriterMergedHostProtocol, self),  # pyright: ignore[reportInvalidCast]
             table_name=table_name,
             arrow_table=arrow_table,
         )

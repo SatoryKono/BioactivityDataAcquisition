@@ -142,7 +142,8 @@ def test_provider_health_descriptions_separate_global_and_selected_scope() -> No
 
     provenance_content = str(panels[9400].get("options", {}).get("content", ""))
     assert "GLOBAL severity" in provenance_content
-    assert "selected-provider Status can disagree by design" in provenance_content
+    # Dashboard copy uses sentence case: "Selected-provider Status…"
+    assert "Selected-provider Status can disagree by design" in provenance_content
 
     for panel_id in (9101, 9102, 9103):
         description = str(panels[panel_id].get("description", ""))

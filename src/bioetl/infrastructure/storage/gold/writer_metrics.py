@@ -1,8 +1,9 @@
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods provided by concrete composition.
 """Metric label helpers for Gold writer support."""
 
 from __future__ import annotations
+
+from typing import Any, cast
 
 from bioetl.domain.observability_contract import normalize_observability_pipeline_label
 
@@ -53,11 +54,15 @@ def _gold_write_metric_labels(
     *,
     status: str | None = None,
 ) -> dict[str, str]:
-    pipeline, table = _split_gold_table_label(request.table_name)  # type: ignore[attr-defined]
+    pipeline, table = _split_gold_table_label(
+        cast(Any, request).table_name  # Any: gold write request duck-type  # type: ignore[attr-defined]
+    )
     labels = {
         "pipeline": pipeline,
         "table": table,
-        "mode": _normalize_gold_metric_mode(request.mode),  # type: ignore[attr-defined]
+        "mode": _normalize_gold_metric_mode(
+            cast(Any, request).mode  # Any: gold write request duck-type  # type: ignore[attr-defined]
+        ),
     }
     if status is not None:
         labels["status"] = _normalize_gold_metric_status(status)

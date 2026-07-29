@@ -1,5 +1,4 @@
 # pyright: reportImportCycles=false
-# pyright: reportIncompatibleVariableOverride=false
 # Import cycle residual tracked in allowlist (product burn-down).
 """Metadata operations facade for Silver layer lineage, audit, and DQ writes."""
 
@@ -35,7 +34,7 @@ class SilverMetadataOperations(
     _logger: LoggerPort
     _metrics: MetricsPort | None = None
     _audit: AuditPort | None = None
-    _metadata_writer: MetadataWriterPort | None = None
+    _metadata_writer: MetadataWriterPort | None = None  # pyright: ignore[reportIncompatibleVariableOverride]
     _metadata_coordinator: MetadataCoordinatorPort | None = None
     _lineage_store: LineageStorePort | None = None
     _dq_calculator: DQMetricsCalculator | None = None

@@ -1,5 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Read/history and cleanup-preview helpers for Gold storage."""
 
@@ -51,8 +49,8 @@ def _current_flag_column(column_names: list[str]) -> str | None:
 class GoldWriterReadCleanupMixin:
     """Reusable read/history and cleanup-preview helpers."""
 
-    _resolve_table_path: Callable[[str], str]
-    _run_in_executor: Callable[
+    _resolve_table_path: Callable[[str], str]  # pyright: ignore[reportUninitializedInstanceVariable]
+    _run_in_executor: Callable[  # pyright: ignore[reportUninitializedInstanceVariable]
         ..., Awaitable[Any]  # Any: executor returns untyped Delta/Arrow runtime objects
     ]
 
@@ -95,7 +93,7 @@ class GoldWriterReadCleanupMixin:
         if current_flag is not None:
             import pyarrow.compute as pc
 
-            arrow_table = arrow_table.filter(pc.equal(arrow_table[current_flag], True))
+            arrow_table = arrow_table.filter(pc.equal(arrow_table[current_flag], True))  # pyright: ignore[reportAttributeAccessIssue]
         result: list[GoldRecord] = arrow_table.to_pylist()
         if columns:
             return [{key: record.get(key) for key in columns} for record in result]
@@ -128,8 +126,8 @@ class GoldWriterReadCleanupMixin:
 
             mask = None
             for key, value in business_key_values.items():
-                condition = pc.equal(arrow_table[key], value)
-                mask = condition if mask is None else pc.and_(mask, condition)
+                condition = pc.equal(arrow_table[key], value)  # pyright: ignore[reportAttributeAccessIssue]
+                mask = condition if mask is None else pc.and_(mask, condition)  # pyright: ignore[reportAttributeAccessIssue]
             if mask is not None:
                 arrow_table = arrow_table.filter(mask)
 

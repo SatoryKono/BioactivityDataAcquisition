@@ -1,5 +1,4 @@
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """HTTP protocol and request-processing helpers for HealthServer."""
 
@@ -93,7 +92,7 @@ class HealthServerHTTPMixin:
             await self._send_response(writer, 405, "Method Not Allowed")
             return
 
-        route_support = cast(_RouteRequestSupport, self)
+        route_support = cast(_RouteRequestSupport, self)  # pyright: ignore[reportInvalidCast]
         await route_support._route_request(writer, path)
 
     def _parse_request_line(self, request_line: bytes) -> tuple[str | None, str | None]:
