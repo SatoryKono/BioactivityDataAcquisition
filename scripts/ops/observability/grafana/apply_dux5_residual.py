@@ -70,7 +70,7 @@ STATUS_CARD_HTML: dict[str, str] = {
         'overflow:hidden;white-space:normal">'
         "<strong>Which provider is degraded, and why?</strong> "
         "Start with GLOBAL severity + telemetry freshness · "
-        "selected Status can disagree by design<br>"
+        "Selected-provider Status can disagree by design<br>"
         "Blank Provider → <strong>Selection required</strong>. "
         "UNKNOWN freshness = telemetry missing — inspect scrape target."
         "</div>"

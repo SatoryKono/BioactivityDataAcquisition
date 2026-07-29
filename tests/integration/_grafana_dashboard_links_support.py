@@ -1391,14 +1391,34 @@ def _assert_current_dashboard_disabled_in_visual_bus(
     *, dashboard_name: str, uid: str, content: str
 ) -> None:
     current_title = _EXPECTED_CURRENT_NAV_TITLE[uid]
-    disabled_pattern = re.compile(
-        rf'<span[^>]*aria-current="page"[^>]*>{re.escape(current_title)}</span>'
+    # Current chip is non-interactive: span[aria-current] (legacy) or
+    # a[aria-disabled][aria-current] (DUX7 sanitizer-safe styles).
+    disabled_patterns = (
+        re.compile(
+            rf'<span[^>]*aria-current="page"[^>]*>\s*{re.escape(current_title)}'
+        ),
+        re.compile(
+            rf'<a[^>]*aria-current="page"[^>]*aria-disabled="true"[^>]*>\s*'
+            rf'{re.escape(current_title)}'
+        ),
+        re.compile(
+            rf'<a[^>]*aria-disabled="true"[^>]*aria-current="page"[^>]*>\s*'
+            rf'{re.escape(current_title)}'
+        ),
+        re.compile(
+            rf'<a[^>]*class="[^"]*bioetl-nav-current[^"]*"[^>]*>\s*'
+            rf'{re.escape(current_title)}'
+        ),
     )
-    assert disabled_pattern.search(content), (
+    assert any(p.search(content) for p in disabled_patterns), (
         f"{dashboard_name} must render current dashboard '{current_title}' as disabled item"
     )
-    assert re.search(rf"<a[^>]*>{re.escape(current_title)}</a>", content) is None, (
-        f"{dashboard_name} must not render current dashboard '{current_title}' as active anchor"
+    # Must not be a normal handoff anchor (href to /d/...).
+    active_handoff = re.compile(
+        rf'<a[^>]*href="/d/[^"]*"[^>]*>\s*{re.escape(current_title)}(?:\s*\(current\))?\s*</a>'
+    )
+    assert active_handoff.search(content) is None, (
+        f"{dashboard_name} must not render current dashboard '{current_title}' as active handoff"
     )
 
 
