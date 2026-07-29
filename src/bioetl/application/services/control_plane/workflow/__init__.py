@@ -9,21 +9,16 @@ from bioetl.application.services.control_plane.workflow.inspection_service impor
     WorkflowInspectionResult,
     WorkflowInspectionService,
 )
-from bioetl.application.services.control_plane.workflow.ledger_service import (
-    WorkflowLedgerService,
-)
-from bioetl.application.services.control_plane.workflow.manifest_models import (
-    WorkflowManifestCreateSpec,
-)
 from bioetl.application.services.control_plane.workflow.manifest_service import (
     WorkflowManifestService,
 )
+
+# TD2-02: do not re-export WorkflowLedgerService / WorkflowManifestCreateSpec here.
+# Import from ledger_service / manifest_models (or control_plane lazy facade).
 
 __all__ = [
     "WorkflowExecutionService",
     "WorkflowInspectionResult",
     "WorkflowInspectionService",
-    "WorkflowLedgerService",
-    "WorkflowManifestCreateSpec",
     "WorkflowManifestService",
 ]

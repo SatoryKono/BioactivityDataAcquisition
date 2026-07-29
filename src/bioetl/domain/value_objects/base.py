@@ -15,7 +15,7 @@ See DDD patterns: https://martinfowler.com/bliki/ValueObject.html
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, TypeVar
+from typing import Any, TypeVar, override
 
 __all__ = [
     "T",
@@ -72,24 +72,29 @@ class ValueObject[T](ABC):
         """
         ...
 
+    @override
     def __eq__(self, other: object) -> bool:
         """Compare by value, not identity."""
         if not isinstance(other, self.__class__):
             return NotImplemented
         return bool(self._value == other._value)
 
+    @override
     def __hash__(self) -> int:
         """Hash based on class and value."""
         return hash((self.__class__.__name__, self._value))
 
+    @override
     def __repr__(self) -> str:
         """String representation showing class and value."""
         return f"{self.__class__.__name__}({self._value!r})"
 
+    @override
     def __str__(self) -> str:
         """String representation of the value."""
         return str(self._value)
 
+    @override
     def __setattr__(
         self,
         name: str,
@@ -100,6 +105,7 @@ class ValueObject[T](ABC):
             raise AttributeError(f"{self.__class__.__name__} is immutable")
         object.__setattr__(self, name, value)
 
+    @override
     def __delattr__(self, name: str) -> None:
         """Prevent deletion of attributes."""
         raise AttributeError(f"{self.__class__.__name__} is immutable")

@@ -71,7 +71,8 @@ _SECRET_PATTERNS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"Bearer\s+[\w.-]+", re.IGNORECASE), "Bearer [REDACTED]"),
     # Stripe/OpenAI-style prefixed tokens that can appear outside key=value text.
     (
-        re.compile(r"(?<![\w])(?:sk|pk)_(?:live|test)_[A-Za-z0-9_-]+", re.IGNORECASE),
+        # Omit a-z under IGNORECASE to avoid S5869 duplicate-range findings.
+        re.compile(r"(?<![\w])(?:sk|pk)_(?:live|test)_[-A-Z0-9_]+", re.IGNORECASE),
         "[REDACTED_KEY]",
     ),
     # AWS-style keys

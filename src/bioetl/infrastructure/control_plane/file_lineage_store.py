@@ -7,7 +7,7 @@ import os
 from contextlib import suppress
 from dataclasses import dataclass, replace
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 from bioetl.domain.lineage import LineageGraphFragment
 from bioetl.domain.ports import LineageStorePort
@@ -47,6 +47,7 @@ def _build_stored_fragment_id(fragment: LineageGraphFragment) -> str:
     return build_stored_fragment_id(fragment)
 
 
+@override
 def _load_fragment_ids(index_path: Path, *, key: str) -> list[str]:
     """Load fragment identifiers from one JSONL index file."""
     return load_fragment_ids(index_path, key=key)
@@ -80,6 +81,7 @@ class FileLineageStore(FileLineageQueriesMixin, LineageStorePort):
     base_path: Path
     metrics: MetricsPort | None = None
 
+    @override
     def save(self, fragment: LineageGraphFragment) -> None:
         """Persist one fragment JSON and maintain lightweight lookup indexes."""
         fragments_dir = self.base_path / "fragments"
@@ -173,10 +175,12 @@ class FileLineageStore(FileLineageQueriesMixin, LineageStorePort):
             self.base_path / "fragments" / f"{_stable_key_filename(fragment_id)}.json"
         )
 
+    @override
     def _run_index_path(self, run_id: str) -> Path:
         """Resolve the run-id index path."""
         return self.base_path / "_by_run_id" / f"{_stable_key_filename(run_id)}.jsonl"
 
+    @override
     def _semantic_fragment_index_path(self, fragment_id: str) -> Path:
         """Resolve the semantic-fragment index path."""
         return (
@@ -185,6 +189,7 @@ class FileLineageStore(FileLineageQueriesMixin, LineageStorePort):
             / f"{_stable_key_filename(fragment_id)}.jsonl"
         )
 
+    @override
     def _manifest_index_path(self, manifest_id: str) -> Path:
         """Resolve the manifest-id index path."""
         return (
@@ -193,6 +198,7 @@ class FileLineageStore(FileLineageQueriesMixin, LineageStorePort):
             / f"{_stable_key_filename(manifest_id)}.jsonl"
         )
 
+    @override
     def _node_index_path(self, node_id: str) -> Path:
         """Resolve the node-id index path."""
         return self.base_path / "_by_node_id" / f"{_stable_key_filename(node_id)}.jsonl"
@@ -213,6 +219,7 @@ class FileLineageStore(FileLineageQueriesMixin, LineageStorePort):
         )
         return index_path, checkpoint_offset
 
+    @override
     def _load_from_index(
         self,
         index_path: Path,
@@ -227,9 +234,11 @@ class FileLineageStore(FileLineageQueriesMixin, LineageStorePort):
                 fragments.append(fragment)
         return fragments
 
+    @override
     def _load_fragment_ids(self, index_path: Path, *, key: str) -> list[str]:
         return _load_fragment_ids(index_path, key=key)
 
+    @override
     def _load_fragment(self, fragment_id: str) -> LineageGraphFragment | None:
         """Load one fragment payload without emitting public lookup metrics."""
         fragment_path = self._fragment_path(fragment_id)

@@ -51,7 +51,8 @@ def _repo_root() -> Path:
 def _parse_frontmatter(text: str) -> tuple[dict[str, object], str]:
     if not text.startswith("---"):
         return {}, text
-    match = re.match(r"^---\s*\n(.*?)\n---\s*\n", text, re.DOTALL)
+    # Linear frontmatter parse (S8786: avoid nested/reluctant quantifiers).
+    match = re.match(r"^---\r?\n((?:.*\r?\n)*?)---\r?\n", text)
     if not match:
         return {}, text
     raw = match.group(1)

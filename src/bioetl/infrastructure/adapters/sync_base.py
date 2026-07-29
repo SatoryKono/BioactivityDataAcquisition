@@ -31,7 +31,7 @@ import weakref
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from types import TracebackType
-from typing import TYPE_CHECKING, Self
+from typing import TYPE_CHECKING, Self, override
 
 from bioetl.domain.ports import (
     DataSourcePort,
@@ -154,6 +154,7 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
         )
 
     @property
+    @override
     def _circuit_breaker(self) -> CircuitBreakerPort:
         """Return circuit breaker instance.
 

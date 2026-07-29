@@ -1,11 +1,10 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Postrun emission helpers for the pipeline observer."""
 
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.observability.observer_contract import LifecyclePhase
 from bioetl.domain.events import PipelineEvent
@@ -17,9 +16,9 @@ if TYPE_CHECKING:
 class _ObserverPostrunEmissionMixin:
     """Postrun anomaly and maintenance emission helpers."""
 
-    pipeline_name: str
-    _metrics: MetricsPort
-    emit_event: Callable[..., None]
+    pipeline_name: str = cast(Any, None)  # Any: host attr default (PD6)
+    _metrics: MetricsPort = cast(Any, None)  # Any: host attr default (PD6)
+    emit_event: Callable[..., None] = cast(Any, None)  # Any: host attr default (PD6)
 
     def emit_dq_anomaly(
         self,

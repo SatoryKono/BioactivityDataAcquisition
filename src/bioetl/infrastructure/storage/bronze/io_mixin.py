@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """I/O helpers for BronzeWriter."""
 
@@ -8,7 +7,7 @@ import asyncio
 import tempfile
 from collections.abc import Callable, Iterator
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 import zstandard as zstd
 
@@ -33,15 +32,15 @@ BRONZE_WRITE_ERRORS = (
 class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
     """Mixin with write/read/list/cleanup filesystem operations."""
 
-    base_path: Path
-    logger: LoggerPort
-    _logger: LoggerPort
-    _metrics: MetricsPort
-    COMPRESSION_LEVEL: int
-    COMPRESSION_THREADS: int
-    COMPRESSION_CHUNK_SIZE: int
-    _flat_structure: bool
-    _resolve_bronze_path: Callable[[str, str, str, str], str]
+    base_path: Path = cast(Any, None)  # Any: host attr default (PD6)
+    logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD6)
+    _logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD6)
+    _metrics: MetricsPort = cast(Any, None)  # Any: host attr default (PD6)
+    COMPRESSION_LEVEL: int = cast(Any, None)  # Any: host attr default (PD6)
+    COMPRESSION_THREADS: int = cast(Any, None)  # Any: host attr default (PD6)
+    COMPRESSION_CHUNK_SIZE: int = cast(Any, None)  # Any: host attr default (PD6)
+    _flat_structure: bool = cast(Any, None)  # Any: host attr default (PD6)
+    _resolve_bronze_path: Callable[[str, str, str, str], str] = cast(Any, None)  # Any: host attr default (PD6)
 
     def _write_atomic_stream(
         self,

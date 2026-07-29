@@ -101,12 +101,14 @@ def _validate_optional_source_reference_keys_pair(
     if reference_keys is None:
         raise ValueError("source_keys and reference_keys must be provided together")
 
-    assert source_keys is not None and reference_keys is not None
-    _require_non_empty_keys_tuples(source_keys, reference_keys)
-    _require_equal_key_tuple_lengths(source_keys, reference_keys)
+    # After the guards above both tuple forms are present (S2589).
+    present_source_keys = source_keys
+    present_reference_keys = reference_keys
+    _require_non_empty_keys_tuples(present_source_keys, present_reference_keys)
+    _require_equal_key_tuple_lengths(present_source_keys, present_reference_keys)
     _require_first_keys_match(
-        source_keys=source_keys,
-        reference_keys=reference_keys,
+        source_keys=present_source_keys,
+        reference_keys=present_reference_keys,
         source_key=source_key,
         reference_key=reference_key,
     )

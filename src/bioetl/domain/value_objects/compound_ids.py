@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Literal, Self
+from typing import Literal, Self, override
 
 from bioetl.domain.value_objects.base import ValueObject
 from bioetl.domain.value_objects.identifiers import ChemblId, PubChemCid
@@ -189,16 +189,19 @@ class CompoundId:
         """Backward-compatible alias for PubChem CID accessor."""
         return self.as_pubchem_cid
 
+    @override
     def __str__(self) -> str:
         """Return string representation with source prefix."""
         return f"{self.source.value}:{self.value}"
 
+    @override
     def __eq__(self, other: object) -> bool:
         """Compare equality by value and source."""
         if not isinstance(other, CompoundId):
             return NotImplemented
         return self.value == other.value and self.source == other.source
 
+    @override
     def __hash__(self) -> int:
         """Hash based on value and source."""
         return hash((self.value, self.source))
@@ -238,6 +241,7 @@ class AssayId(ValueObject[str]):
         object.__setattr__(self, "_chembl_id", chembl_id)
         object.__setattr__(self, "_value", chembl_id.value)
 
+    @override
     def _validate(self, value: str) -> str:
         """Validate using ChemblId validation.
 

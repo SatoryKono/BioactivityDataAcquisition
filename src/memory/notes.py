@@ -22,7 +22,8 @@ LEGACY_INDENTED_TOP_LEVEL_KEY_PATTERN = re.compile(
     r"^\s{2,}(confidence|last_verified|summary|query|kind):"
 )
 SLUG_PATTERN = re.compile(r"[^a-z0-9]+")
-HEADING_PATTERN = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
+# Bounded ATX heading capture without open nested quantifiers (S8786).
+HEADING_PATTERN = re.compile(r"^(#{1,6})[ \t]+(\S[^\n]{0,512})$", re.MULTILINE)
 
 
 def _read_text_with_timeout(
@@ -39,10 +40,7 @@ def _read_text_with_timeout(
         and not _is_likely_network_drive(path)
         and timeout >= 1.0
     ):
-        try:
-            return path.read_text(encoding="utf-8") or ""
-        except Exception as exc:
-            raise exc
+        return path.read_text(encoding="utf-8") or ""
 
     # Use timeout for network drives or test scenarios with small timeouts
     text: str | None = None
@@ -52,8 +50,10 @@ def _read_text_with_timeout(
         nonlocal text, exception
         try:
             text = path.read_text(encoding="utf-8")
-        except Exception as e:
-            exception = e
+        except OSError as exc:
+            exception = exc
+        except UnicodeError as exc:
+            exception = exc
 
     thread = threading.Thread(target=_target, daemon=True)
     thread.start()

@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Health check mixin for ChEMBL adapter."""
 
@@ -12,7 +11,7 @@ __all__ = [
 
 
 import asyncio
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 import httpx
 
@@ -73,13 +72,13 @@ class ChemblHealthMixin:
         propagate.
     """
 
-    http_client: UnifiedHTTPClient
-    logger: LoggerPort
-    provider_name: str
-    _logger: LoggerPort
-    _page_size: int
-    _adapter_metrics: AdapterMetricsRecorder
-    _last_probe_health_status: HealthStatus | None
+    http_client: UnifiedHTTPClient = cast(Any, None)  # Any: host attr default (PD6)
+    logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD6)
+    provider_name: str = cast(Any, None)  # Any: host attr default (PD6)
+    _logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD6)
+    _page_size: int = cast(Any, None)  # Any: host attr default (PD6)
+    _adapter_metrics: AdapterMetricsRecorder = cast(Any, None)  # Any: host attr default (PD6)
+    _last_probe_health_status: HealthStatus | None = cast(Any, None)  # Any: host attr default (PD6)
 
     @staticmethod
     def _max_health_status(

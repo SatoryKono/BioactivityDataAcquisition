@@ -9,7 +9,7 @@ import tempfile
 from collections.abc import Mapping
 from dataclasses import dataclass, replace
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from bioetl.application.services.run_reports.markdown import (
     render_pipeline_run_report_markdown,
@@ -193,7 +193,10 @@ def write_pipeline_run_report(
         ),
     )
     write_json(json_path, enriched.to_dict())
-    _atomic_write_text(md_path, render_pipeline_run_report_markdown(enriched))
+    _atomic_write_text(
+        md_path,
+        render_pipeline_run_report_markdown(cast(PipelineRunReport, enriched)),
+    )
     latest_path = _write_latest_pointer(
         owner_dir=out_dir.parent,
         payload={

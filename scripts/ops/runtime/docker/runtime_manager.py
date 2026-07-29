@@ -1086,6 +1086,19 @@ def _compose_up_wait_args(
     return up_args
 
 
+@dataclass(frozen=True, slots=True)
+class _RecoveryTimingContext:
+    """Packed recovery timing/runtime handles (python:S107)."""
+
+    deadline: float
+    started: float
+    poll_interval: float
+    stabilization_seconds: float
+    sleep: Sleeper
+    clock: Clock
+    runner: Runner
+
+
 def _evaluate_up_attempt(
     *,
     result: CommandResult,
@@ -1096,25 +1109,19 @@ def _evaluate_up_attempt(
     baseline: Mapping[str, int],
     report_dir: Path,
     history: list[dict[str, Any]],
-    runner: Runner,
-    deadline: float,
-    started: float,
-    poll_interval: float,
-    stabilization_seconds: float,
-    sleep: Sleeper,
-    clock: Clock,
+    timing: _RecoveryTimingContext,
 ) -> tuple[list[ServiceSnapshot] | None, list[dict[str, Any]], bool, bool]:
     """Returns (snapshots|None, findings, recovered, succeeded)."""
     if result.returncode == 0:
         snapshots, findings = _wait_ready(
             spec,
             baseline,
-            runner=runner,
-            timeout=max(0.0, deadline - clock()),
-            poll_interval=poll_interval,
-            stabilization_seconds=stabilization_seconds,
-            sleep=sleep,
-            clock=clock,
+            runner=timing.runner,
+            timeout=max(0.0, timing.deadline - timing.clock()),
+            poll_interval=timing.poll_interval,
+            stabilization_seconds=timing.stabilization_seconds,
+            sleep=timing.sleep,
+            clock=timing.clock,
         )
         return snapshots, findings, recovered, not findings
     if _daemon_connection_error(result.stderr, result.stdout):
@@ -1126,12 +1133,12 @@ def _evaluate_up_attempt(
             spec=spec,
             report_dir=report_dir,
             history=history,
-            runner=runner,
-            deadline=deadline,
-            started=started,
-            poll_interval=poll_interval,
-            sleep=sleep,
-            clock=clock,
+            runner=timing.runner,
+            deadline=timing.deadline,
+            started=timing.started,
+            poll_interval=timing.poll_interval,
+            sleep=timing.sleep,
+            clock=timing.clock,
         )
         return None, findings, recovered, False
     findings = [
@@ -1151,14 +1158,8 @@ def _run_recovery_attempts(
     initial_snapshots: list[ServiceSnapshot],
     report_dir: Path,
     history: list[dict[str, Any]],
-    runner: Runner,
     max_attempts: int,
-    deadline: float,
-    started: float,
-    poll_interval: float,
-    stabilization_seconds: float,
-    sleep: Sleeper,
-    clock: Clock,
+    timing: _RecoveryTimingContext,
     desktop_recovery_attempted: bool,
 ) -> tuple[list[ServiceSnapshot], list[dict[str, Any]], int, bool, bool]:
     """Execute bounded compose up/wait recovery attempts.
@@ -1171,17 +1172,17 @@ def _run_recovery_attempts(
     attempts = 0
     recovered = desktop_recovery_attempted
     for attempts in range(1, max_attempts + 1):
-        remaining = deadline - clock()
+        remaining = timing.deadline - timing.clock()
         if remaining <= 0:
             findings = [{"cause": "readiness_timeout", "attempt": attempts}]
             break
         up_args = _compose_up_wait_args(spec, attempts=attempts, remaining=remaining)
-        result = runner(_compose(spec, *up_args), ROOT, remaining)
+        result = timing.runner(_compose(spec, *up_args), ROOT, remaining)
         history.append(
             {
                 "attempt": attempts,
                 "returncode": result.returncode,
-                "elapsed_seconds": round(clock() - started, 3),
+                "elapsed_seconds": round(timing.clock() - timing.started, 3),
             }
         )
         maybe_snapshots, findings, recovered, succeeded = _evaluate_up_attempt(
@@ -1193,24 +1194,18 @@ def _run_recovery_attempts(
             baseline=baseline,
             report_dir=report_dir,
             history=history,
-            runner=runner,
-            deadline=deadline,
-            started=started,
-            poll_interval=poll_interval,
-            stabilization_seconds=stabilization_seconds,
-            sleep=sleep,
-            clock=clock,
+            timing=timing,
         )
         if maybe_snapshots is not None:
             snapshots = maybe_snapshots
         if succeeded:
             return snapshots, findings, attempts, recovered, True
         if attempts < max_attempts:
-            sleep(
+            timing.sleep(
                 min(
                     2 ** (attempts - 1),
                     4,
-                    max(0.0, deadline - clock()),
+                    max(0.0, timing.deadline - timing.clock()),
                 )
             )
     return snapshots, findings, attempts, recovered, False
@@ -1339,14 +1334,16 @@ def start_or_recover(
             initial_snapshots=snapshots,
             report_dir=report_dir,
             history=history,
-            runner=runner,
             max_attempts=max_attempts,
-            deadline=deadline,
-            started=started,
-            poll_interval=poll_interval,
-            stabilization_seconds=stabilization_seconds,
-            sleep=sleep,
-            clock=clock,
+            timing=_RecoveryTimingContext(
+                deadline=deadline,
+                started=started,
+                poll_interval=poll_interval,
+                stabilization_seconds=stabilization_seconds,
+                sleep=sleep,
+                clock=clock,
+                runner=runner,
+            ),
             desktop_recovery_attempted=desktop_recovery_attempted,
         )
         if succeeded:

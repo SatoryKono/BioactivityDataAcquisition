@@ -10,7 +10,7 @@ from __future__ import annotations
 __all__ = ["SemanticScholarPublicationTransformer"]
 
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, override
 
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.common.publication_transformer_context import (
@@ -152,6 +152,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "affiliation_list": affiliations_json,
         }
 
+    @override
     def _extract_business_data(self, record: BronzeRecord) -> GoldRecord:
         """Extract and normalize fields from Semantic Scholar record.
 
@@ -242,6 +243,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "_dq_error": False,
         }
 
+    @override
     def _get_primary_id_field(self) -> str:
         """Return the primary ID field name for Semantic Scholar publications.
 
@@ -251,6 +253,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         """
         return "paper_id"
 
+    @override
     def _get_entity_class(self) -> type[SemanticScholarPublicationEntity]:
         """Return the domain entity class for Semantic Scholar publications.
 
@@ -260,6 +263,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         """
         return SemanticScholarPublicationEntity
 
+    @override
     def entity_to_silver_record(
         self,
         entity: Any,  # Any: generic domain entity; type varies by pipeline

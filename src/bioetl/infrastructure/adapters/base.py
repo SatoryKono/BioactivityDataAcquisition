@@ -31,7 +31,7 @@ __all__ = [
 ]
 
 from types import TracebackType
-from typing import TYPE_CHECKING, Protocol, Self
+from typing import TYPE_CHECKING, Protocol, Self, override
 
 from bioetl.domain.ports import (
     DataSourcePort,
@@ -251,6 +251,7 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
         self._fallback_fetch_service = fallback_fetch_service
 
     @property
+    @override
     def _circuit_breaker(self) -> CircuitBreakerPort:
         """Return circuit breaker from HTTP client.
 

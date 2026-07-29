@@ -282,34 +282,6 @@
         "surface_kind_counts": {
           "other_config": 2
         }
-      },
-      {
-        "block_path": "aliases.S7-architecture-fast-boundary",
-        "fingerprint": "1bb34d738e78",
-        "governance": {
-          "decision": "retain_shared_test_shard_alias",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-test-platform",
-          "rationale": "The S7 architecture shard alias is intentionally mirrored between quality registries so local and CI shard routing stay deterministic.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 2,
-        "occurrences": [
-          {
-            "block_path": "aliases.S7-architecture-fast-boundary",
-            "path": "configs/quality/pytest_shards.yaml",
-            "surface_kind": "quality_registry"
-          },
-          {
-            "block_path": "aliases.S7-crosscutting-architecture",
-            "path": "configs/quality/pytest_shards.yaml",
-            "surface_kind": "quality_registry"
-          }
-        ],
-        "serialized_bytes": 222,
-        "surface_kind_counts": {
-          "quality_registry": 2
-        }
       }
     ],
     "notes": [
@@ -336,10 +308,10 @@
       "structured_block_min_bytes": 200
     },
     "summary": {
-      "affected_file_count": 13,
-      "duplicate_cluster_count": 10,
-      "duplicate_occurrence_count": 26,
-      "reported_cluster_count": 10
+      "affected_file_count": 12,
+      "duplicate_cluster_count": 9,
+      "duplicate_occurrence_count": 24,
+      "reported_cluster_count": 9
     }
   },
   "entity_effective": {

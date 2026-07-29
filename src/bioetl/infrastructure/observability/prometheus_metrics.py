@@ -7,7 +7,7 @@ Prometheus client library.
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Protocol
+from typing import Protocol, override
 
 from bioetl.domain.ports import MetricLabels, MetricsPort, resolve_metric_labels
 from bioetl.infrastructure.observability.prometheus_metric_label_dispatch import (
@@ -111,6 +111,7 @@ class PrometheusMetrics(MetricsPort):
     def __init__(self) -> None:
         self._closed = False
 
+    @override
     def observe_histogram(
         self,
         name: str,
@@ -138,6 +139,7 @@ class PrometheusMetrics(MetricsPort):
             **normalize_metric_dispatch_labels(name, resolved_labels)
         ).observe(value)
 
+    @override
     def increment_counter(
         self,
         name: str,
@@ -166,6 +168,7 @@ class PrometheusMetrics(MetricsPort):
             value
         )
 
+    @override
     def set_gauge(
         self,
         name: str,
@@ -193,6 +196,7 @@ class PrometheusMetrics(MetricsPort):
             value
         )
 
+    @override
     def close(self) -> None:
         """Mark the metrics adapter as closed (idempotent)."""
         if self._closed:

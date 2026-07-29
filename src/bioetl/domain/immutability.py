@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Iterator, Mapping, Sequence
 from copy import deepcopy
-from typing import Never, overload
+from typing import Never, overload, override
 
 __all__ = [
     "FrozenDict",
@@ -34,21 +34,26 @@ class FrozenList(Sequence[object]):
     @overload
     def __getitem__(self, index: slice) -> FrozenList: ...
 
+    @override
     def __getitem__(self, index: int | slice) -> object:
         items = self._items
         if isinstance(index, slice):
             return FrozenList(items[index])
         return items[index]
 
+    @override
     def __len__(self) -> int:
         return len(self._items)
 
+    @override
     def __iter__(self) -> Iterator[object]:
         return iter(self._items)
 
+    @override
     def __repr__(self) -> str:
         return f"FrozenList({list(self._items)!r})"
 
+    @override
     def __eq__(self, other: object) -> bool:
         if isinstance(other, FrozenList):
             return self._items == other._items
@@ -58,6 +63,7 @@ class FrozenList(Sequence[object]):
             return list(self._items) == list(other)
         return NotImplemented
 
+    @override
     def __hash__(self) -> int:
         return hash(self._items)
 
@@ -90,23 +96,29 @@ class FrozenDict(Mapping[str, object]):
             data.update(kwargs)
         object.__setattr__(self, "_data", dict(data))
 
+    @override
     def __getitem__(self, key: str) -> object:
         return self._data[key]
 
+    @override
     def __iter__(self) -> Iterator[str]:
         return iter(self._data)
 
+    @override
     def __len__(self) -> int:
         return len(self._data)
 
+    @override
     def __repr__(self) -> str:
         return f"FrozenDict({self._data!r})"
 
+    @override
     def __eq__(self, other: object) -> bool:
         if isinstance(other, Mapping):
             return dict(self._data) == dict(other)
         return NotImplemented
 
+    @override
     def __hash__(self) -> int:
         return hash(tuple(sorted(self._data.items(), key=lambda item: item[0])))
 

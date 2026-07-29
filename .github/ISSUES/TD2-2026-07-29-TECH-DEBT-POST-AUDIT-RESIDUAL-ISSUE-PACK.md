@@ -1,8 +1,9 @@
 # Tech-Debt residual issue pack (principal audit 2026-07-29)
 
-**Status:** published  
+**Status:** closed (2026-07-29)  
 **Wave code:** TD2  
 **Date:** 2026-07-29  
+**Closeout:** gates 45/45; core fan_in 8→7; control_plane re-export trim; shims reviewed; scripts 17→15; API interim review.
 **Baseline SHA:** `4b3469bf01` (local `main` at pack authoring)  
 **Implementation epic:** [#7033](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7033)
 

@@ -10,7 +10,7 @@ Uses unified HTTP client for API requests with proper metrics tracking.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, cast, override
 
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.adapters.common import BaseTitleFallbackHandler, titles_match
@@ -95,36 +95,43 @@ class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
         )
 
     @property
+    @override
     def _event_no_fallback_title(self) -> str:
         """Return log event name for missing fallback title."""
         return "semanticscholar_no_fallback_title"
 
     @property
+    @override
     def _event_fallback_attempt(self) -> str:
         """Return log event name for fallback attempt."""
         return "title_fallback_search"
 
     @property
+    @override
     def _event_fallback_success(self) -> str:
         """Return log event name for successful fallback."""
         return "title_fallback_found"
 
     @property
+    @override
     def _event_fallback_not_found(self) -> str:
         """Return log event name for failed fallback."""
         return "title_fallback_not_found"
 
     @property
+    @override
     def _event_title_only_attempt(self) -> str:
         """Return log event name for title-only lookup attempt."""
         return "title_only_search"
 
     @property
+    @override
     def _event_title_only_success(self) -> str:
         """Return log event name for successful title-only lookup."""
         return "semanticscholar_title_only_success"
 
     @property
+    @override
     def _event_title_only_not_found(self) -> str:
         """Return log event name for failed title-only lookup."""
         return "semanticscholar_title_only_not_found"
@@ -212,6 +219,7 @@ class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
         # Normalize whitespace
         return " ".join(cleaned.split())
 
+    @override
     def _get_result_identifier(
         self,
         result: JsonDict,  # Any: untyped API JSON record

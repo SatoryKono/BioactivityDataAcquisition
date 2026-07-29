@@ -13,7 +13,8 @@ from pathlib import Path
 
 import yaml
 
-HEADING_PATTERN = re.compile(r"^(#{1,6})\s+(.*\S)\s*$")
+# Bounded ATX heading capture without open nested quantifiers (S8786).
+HEADING_PATTERN = re.compile(r"^(#{1,6})[ \t]+(\S[^\n]{0,512})$")
 FRONTMATTER_DELIMITER = "---"
 
 

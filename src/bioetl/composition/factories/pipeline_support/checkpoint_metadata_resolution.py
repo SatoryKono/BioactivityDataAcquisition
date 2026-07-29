@@ -2,16 +2,38 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.composition.runtime_builders.input_snapshot_resolution import (
     resolve_cached_bronze_input_snapshot_refs,
     resolve_manifest_input_snapshot_refs,
 )
+from bioetl.domain.control_plane import RunInputSnapshotRef
 from bioetl.domain.normalization import (
     build_execution_identity_payload,
     compute_input_snapshot_identity_fingerprint,
 )
-from bioetl.domain.control_plane import RunInputSnapshotRef
+
+
+@dataclass(frozen=True, slots=True)
+class ExecutionIdentityNormalizationRequest:
+    """Packed inputs for checkpoint execution-identity normalization (S107)."""
+
+    pipeline_name: str
+    run_type: str
+    pipeline_version: str | None
+    git_commit: str | None
+    dependency_lock_hash: str | None
+    effective_config_hash: str | None
+    dq_contract_compatibility_hash: str | None
+    manifest_id: str | None
+    contract: tuple[str | None, str | None]
+    normalization_profile: tuple[str | None, str | None, str | None]
+    effective_config_artifact_id: str | None
+    exact_replay: bool
+    input_snapshot_fingerprint: str | None
+    silver_filter_compatibility_mode: str | None
 
 
 def _resolve_run_context_payload(pipeline: object) -> object | None:
@@ -32,38 +54,24 @@ def _coerce_optional_str(value: object | None) -> str | None:
 
 
 def _normalize_execution_identity_payload(
-    *,
-    pipeline_name: str,
-    run_type: str,
-    pipeline_version: str | None,
-    git_commit: str | None,
-    dependency_lock_hash: str | None,
-    effective_config_hash: str | None,
-    dq_contract_compatibility_hash: str | None,
-    manifest_id: str | None,
-    contract: tuple[str | None, str | None],
-    normalization_profile: tuple[str | None, str | None, str | None],
-    effective_config_artifact_id: str | None,
-    exact_replay: bool,
-    input_snapshot_fingerprint: str | None,
-    silver_filter_compatibility_mode: str | None,
+    request: ExecutionIdentityNormalizationRequest,
 ) -> dict[str, str | None]:
     """Return the canonical checkpoint execution-identity payload."""
-    del manifest_id
+    _ = request.manifest_id  # accepted for call-site parity; not part of payload
     return build_execution_identity_payload(
-        pipeline_name=pipeline_name,
-        run_type=run_type,
-        pipeline_version=pipeline_version,
-        git_commit=git_commit,
-        dependency_lock_hash=dependency_lock_hash,
-        effective_config_hash=effective_config_hash,
-        dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-        contract=contract,
-        normalization_profile=normalization_profile,
-        effective_config_artifact_id=effective_config_artifact_id,
-        exact_replay=exact_replay,
-        input_snapshot_fingerprint=input_snapshot_fingerprint,
-        silver_filter_compatibility_mode=silver_filter_compatibility_mode,
+        pipeline_name=request.pipeline_name,
+        run_type=request.run_type,
+        pipeline_version=request.pipeline_version,
+        git_commit=request.git_commit,
+        dependency_lock_hash=request.dependency_lock_hash,
+        effective_config_hash=request.effective_config_hash,
+        dq_contract_compatibility_hash=request.dq_contract_compatibility_hash,
+        contract=request.contract,
+        normalization_profile=request.normalization_profile,
+        effective_config_artifact_id=request.effective_config_artifact_id,
+        exact_replay=request.exact_replay,
+        input_snapshot_fingerprint=request.input_snapshot_fingerprint,
+        silver_filter_compatibility_mode=request.silver_filter_compatibility_mode,
     )
 
 

@@ -15,7 +15,7 @@ from __future__ import annotations
 __all__ = ["PublicationTransformer"]
 
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, cast, override
 
 from bioetl.application.core.base_transformer import TransformationError
 from bioetl.application.core.field_specs import (
@@ -120,6 +120,7 @@ class PublicationTransformer(BaseChemblTransformer):
     primary_id_field = "publication_id"
     default_entity_type = "publication"
 
+    @override
     def _resolve_primary_id(self, record: BronzeRecord) -> PrimaryId:
         """Handle legacy and unified publication ID fields."""
         primary_id = record.get(self.primary_id_field) or record.get(
@@ -132,6 +133,7 @@ class PublicationTransformer(BaseChemblTransformer):
             )
         return cast("PrimaryId", primary_id)
 
+    @override
     def _extract_business_data(
         self,
         record: BronzeRecord,
@@ -261,6 +263,7 @@ class PublicationTransformer(BaseChemblTransformer):
         except (TypeError, ValueError):
             return None
 
+    @override
     def entity_to_silver_record(
         self,
         entity: Any,  # Any: generic domain entity; type varies by pipeline

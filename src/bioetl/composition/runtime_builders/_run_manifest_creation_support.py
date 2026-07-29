@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
-from typing import TYPE_CHECKING
+from collections.abc import Callable, Mapping
+from typing import TYPE_CHECKING, Any, cast
 
 import bioetl.composition.runtime_builders.run_manifest_support as _manifest_support
 from bioetl.application.services.control_plane.manifest import RunManifestCreateSpec
@@ -123,10 +123,12 @@ def emit_replay_reconstructability_metric(
     metrics: object,
 ) -> None:
     """Emit replay reconstructability metrics for one manifest request."""
-    increment_counter = _read_attr(metrics, "increment_counter", None)
-    if not callable(increment_counter):
+    increment_counter_obj = _read_attr(metrics, "increment_counter", None)
+    if not callable(increment_counter_obj):
         return
-    set_gauge = _read_attr(metrics, "set_gauge", None)
+    # Cast after callable() narrows for Sonar S5864 (object-not-callable).
+    increment_counter = cast(Callable[..., Any], increment_counter_obj)
+    set_gauge_obj = _read_attr(metrics, "set_gauge", None)
     launch_context = request.launch_context
     strict_replay_requested = bool(
         launch_context.get("exact_replay", False)
@@ -174,8 +176,8 @@ def emit_replay_reconstructability_metric(
         "run_type": bounded_run_type,
         "replay_capability": request.replay_capability.value,
     }
-    if callable(set_gauge):
-        set_gauge(
+    if callable(set_gauge_obj):
+        cast(Callable[..., Any], set_gauge_obj)(
             "bioetl_replay_lag_seconds",
             value=0.0,
             labels={**replay_labels, "status": lag_status},

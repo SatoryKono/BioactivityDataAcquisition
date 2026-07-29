@@ -3,7 +3,7 @@ replace ``PipelineRunContext`` or ``PipelineContext`` for provenance tracking.""
 
 from __future__ import annotations
 
-from dataclasses import InitVar, dataclass, field, fields
+from dataclasses import dataclass, field, fields
 from datetime import UTC, datetime
 from enum import StrEnum
 from uuid import UUID
@@ -188,11 +188,8 @@ class RunManifest:
     replay_capability: ReplayCapability = ReplayCapability.REBUILD_ONLY
     source_refs: tuple[RunSourceRef, ...] = ()
     planned_artifacts: tuple[RunArtifactRef, ...] = ()
-    pipeline_config: InitVar[object | None] = None
-    pipeline_identity: InitVar[object | None] = None
-    artifacts: InitVar[object | None] = None
 
-    def __post_init__(self, *_legacy: object | None) -> None:
+    def __post_init__(self) -> None:
         """Keep manifest timestamps canonical across serialize/deserialize cycles."""
         for field_name in (
             "manifest_id",

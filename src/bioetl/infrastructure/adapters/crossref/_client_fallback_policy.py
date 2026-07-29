@@ -1,10 +1,9 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs assigned in CrossRefAdapter.__post_init__ (PD4).
 """Internal fallback-policy hook mixin for the CrossRef adapter."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.domain.normalization import normalize_doi
 from bioetl.infrastructure.adapters.common import FallbackDecoratorConfig
@@ -32,9 +31,9 @@ class _CrossRefFallbackPolicyMixin:
     # PD3 host attrs: annotations only. Avoid class-level ``None`` defaults —
     # ``hasattr(self, "_fetch_flow")`` would be True before ``__post_init__``
     # assigns the real CrossRefFetchFlow instance.
-    _fallback_handler: CrossRefTitleFallbackHandler
-    _fallback_decorator: ComposableFallbackDecorator
-    _fetch_flow: CrossRefFetchFlow
+    _fallback_handler: CrossRefTitleFallbackHandler = cast(Any, None)  # Any: host attr default (PD6)
+    _fallback_decorator: ComposableFallbackDecorator = cast(Any, None)  # Any: host attr default (PD6)
+    _fetch_flow: CrossRefFetchFlow = cast(Any, None)  # Any: host attr default (PD6)
 
     def _get_default_fallback_config(self) -> FallbackDecoratorConfig:
         """Return CrossRef-specific default fallback config."""

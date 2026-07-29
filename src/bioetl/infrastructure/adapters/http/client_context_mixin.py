@@ -1,12 +1,11 @@
 # mypy: disable-error-code=attr-defined
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Context-manager helpers for UnifiedHTTPClient."""
 
 from __future__ import annotations
 
 from types import TracebackType
-from typing import Self
+from typing import Self, Any, cast
 
 import httpx
 
@@ -16,16 +15,16 @@ from bioetl.infrastructure.adapters.base import build_json_accept_headers
 class HTTPClientContextMixin:
     """Async context lifecycle and client-access helpers."""
 
-    _client: httpx.AsyncClient | None
-    _client_enter_depth: int
-    user_agent: str
-    contact_email: str | None
-    run_id: object | None
-    timeout: float
-    read_timeout_multiplier: float
-    max_connections: int
-    max_keepalive_connections: int
-    trust_env: bool
+    _client: httpx.AsyncClient | None = cast(Any, None)  # Any: host attr default (PD6)
+    _client_enter_depth: int = cast(Any, None)  # Any: host attr default (PD6)
+    user_agent: str = cast(Any, None)  # Any: host attr default (PD6)
+    contact_email: str | None = cast(Any, None)  # Any: host attr default (PD6)
+    run_id: object | None = cast(Any, None)  # Any: host attr default (PD6)
+    timeout: float = cast(Any, None)  # Any: host attr default (PD6)
+    read_timeout_multiplier: float = cast(Any, None)  # Any: host attr default (PD6)
+    max_connections: int = cast(Any, None)  # Any: host attr default (PD6)
+    max_keepalive_connections: int = cast(Any, None)  # Any: host attr default (PD6)
+    trust_env: bool = cast(Any, None)  # Any: host attr default (PD6)
 
     async def __aenter__(
         self,

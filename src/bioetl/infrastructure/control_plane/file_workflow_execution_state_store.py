@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import override
+
 import json
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -28,6 +30,7 @@ class FileWorkflowExecutionStateStore(WorkflowExecutionStatePort):
     base_path: Path
     metrics: MetricsPort | None = None
 
+    @override
     def save(self, state: WorkflowExecutionState) -> None:
         """Persist workflow execution state and its indexes."""
         state_path = self.base_path / f"{state.workflow_run_id}.json"
@@ -55,6 +58,7 @@ class FileWorkflowExecutionStateStore(WorkflowExecutionStatePort):
                 run_id=str(state.workflow_run_id),
             ) from error
 
+    @override
     def get_by_run_id(self, workflow_run_id: RunID) -> WorkflowExecutionState | None:
         """Load workflow execution state by run identifier."""
         return self._load_with_metrics(
@@ -62,6 +66,7 @@ class FileWorkflowExecutionStateStore(WorkflowExecutionStatePort):
             loader=lambda: self._load_state(workflow_run_id),
         )
 
+    @override
     def get_by_manifest_id(self, manifest_id: str) -> WorkflowExecutionState | None:
         """Load workflow execution state by manifest identifier."""
         return self._load_with_metrics(
@@ -69,6 +74,7 @@ class FileWorkflowExecutionStateStore(WorkflowExecutionStatePort):
             loader=lambda: self._load_by_manifest_id(manifest_id),
         )
 
+    @override
     def get_latest(self, workflow_name: str) -> WorkflowExecutionState | None:
         """Load the latest workflow execution state for a workflow name."""
         return self._load_with_metrics(

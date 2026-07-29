@@ -14,7 +14,9 @@ def normalize_top_reasons(
     """Normalize and bound child pipeline reason payloads."""
     if not _is_reason_sequence(raw):
         return ()
-    items = (_normalize_reason(entry) for entry in raw)
+    # TypeGuard narrows to Sequence[object]; cast helps static analyzers (S5864).
+    sequence: Sequence[object] = raw
+    items = (_normalize_reason(entry) for entry in sequence)
     return tuple(item for item in items if item is not None)[:3]
 
 

@@ -110,11 +110,11 @@ _LAZY_ATTR_EXPORTS = {
         "WorkflowInspectionService",
     ),
     "WorkflowLedgerService": (
-        _WORKFLOW_MODULE,
+        f"{_WORKFLOW_MODULE}.ledger_service",
         "WorkflowLedgerService",
     ),
     "WorkflowManifestCreateSpec": (
-        _WORKFLOW_MODULE,
+        f"{_WORKFLOW_MODULE}.manifest_models",
         "WorkflowManifestCreateSpec",
     ),
     "WorkflowManifestService": (

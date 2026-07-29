@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Private support mixin for PostrunService phase and cleanup helpers."""
 
@@ -6,7 +5,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from contextlib import AbstractContextManager
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.postrun._phase_descriptions import (
     PostrunLogLevel,
@@ -62,21 +61,21 @@ if TYPE_CHECKING:
 class PostrunServiceSupportMixin:
     """Own thin phase execution helpers outside the main postrun shell."""
 
-    _config: PipelineConfig
-    _runtime: RuntimeConfig
-    _context: PipelineContext
-    _dq_service: DataQualityService
-    _lifecycle_service: MedallionLifecycleService
-    _compact_orchestrator: PostrunCompactService
-    _cleanup_orchestrator: PostrunCleanupService
-    _dq_report_orchestrator: PostrunDQReportService
-    _metadata_write_orchestrator: PostrunMetadataWriteService
-    _logger: LoggerPort
-    _metrics: MetricsPort
-    _postrun_span: Callable[[str], AbstractContextManager[Span]]
-    OPERATION_ERRORS: tuple[type[BaseException], ...]
-    METRIC_POSTRUN_PHASE_EVENTS_TOTAL: str
-    METRIC_POSTRUN_PHASE_DURATION_SECONDS: str
+    _config: PipelineConfig = cast(Any, None)  # Any: host attr default (PD6)
+    _runtime: RuntimeConfig = cast(Any, None)  # Any: host attr default (PD6)
+    _context: PipelineContext = cast(Any, None)  # Any: host attr default (PD6)
+    _dq_service: DataQualityService = cast(Any, None)  # Any: host attr default (PD6)
+    _lifecycle_service: MedallionLifecycleService = cast(Any, None)  # Any: host attr default (PD6)
+    _compact_orchestrator: PostrunCompactService = cast(Any, None)  # Any: host attr default (PD6)
+    _cleanup_orchestrator: PostrunCleanupService = cast(Any, None)  # Any: host attr default (PD6)
+    _dq_report_orchestrator: PostrunDQReportService = cast(Any, None)  # Any: host attr default (PD6)
+    _metadata_write_orchestrator: PostrunMetadataWriteService = cast(Any, None)  # Any: host attr default (PD6)
+    _logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD6)
+    _metrics: MetricsPort = cast(Any, None)  # Any: host attr default (PD6)
+    _postrun_span: Callable[[str], AbstractContextManager[Span]] = cast(Any, None)  # Any: host attr default (PD6)
+    OPERATION_ERRORS: tuple[type[BaseException], ...] = cast(Any, None)  # Any: host attr default (PD6)
+    METRIC_POSTRUN_PHASE_EVENTS_TOTAL: str = cast(Any, None)  # Any: host attr default (PD6)
+    METRIC_POSTRUN_PHASE_DURATION_SECONDS: str = cast(Any, None)  # Any: host attr default (PD6)
 
     def _emit_postrun_phase_observability(
         self,

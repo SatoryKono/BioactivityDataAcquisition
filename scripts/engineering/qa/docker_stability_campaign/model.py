@@ -264,7 +264,8 @@ def bundle_identity(bundle: Sequence[StackSpec]) -> list[dict[str, Any]]:
         row = asdict(spec)
         tuple_keys = [key for key, value in row.items() if isinstance(value, tuple)]
         for key in tuple_keys:
-            row[key] = list(row[key])
+            # Materialize tuples as lists for JSON/resume equality (S7504: avoid list()).
+            row[key] = [*row[key]]
         rows.append(row)
     return rows
 

@@ -1,11 +1,10 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods provided by concrete composition.
 """Application-level helpers for pipeline-specific metrics semantics."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import MetricsPort
@@ -35,8 +34,8 @@ class _PipelineMetricsRecorderCore:
     outside the generic domain port.
     """
 
-    metrics: MetricsPort | None
-    pipeline: str
+    metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD6)
+    pipeline: str = cast(Any, None)  # Any: host attr default (PD6)
 
     def record_quarantine_records(
         self,
@@ -307,8 +306,8 @@ class _PipelineMetricsRecorderCore:
 class _CompositePhaseMetricsRecorderMixin:
     """Composite-phase specific metrics emitted by pipeline-scoped recorders."""
 
-    metrics: MetricsPort | None
-    pipeline: str
+    metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD6)
+    pipeline: str = cast(Any, None)  # Any: host attr default (PD6)
 
     def record_composite_phase_records(
         self,

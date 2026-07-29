@@ -148,6 +148,10 @@ def finalize_pipeline_run_report(
     try:
         package_version = _package_version()
         # Build a preliminary report to materialize reasons, then enrich.
+        from bioetl.domain.run_reports.pipeline_builder import (
+            PipelineRunReportOptionalBlocks,
+        )
+
         draft = build_pipeline_run_report(
             identity=identity,
             metrics=metrics,
@@ -160,16 +164,18 @@ def finalize_pipeline_run_report(
             metrics=metrics,
             accounting=accounting,
             artifacts=build_artifacts_from_result(result),
-            failure=build_failure_block(result),
-            io=build_io_block(result, options=options),
-            quarantine=build_quarantine_block(result, reasons_top_n=reasons),
-            dq_summary=build_dq_summary(result, reasons_top_n=reasons),
-            schema_versions=build_schema_versions(
-                reason_catalog_version=draft.reason_catalog_version,
-                package_version=package_version,
+            optional_blocks=PipelineRunReportOptionalBlocks(
+                failure=build_failure_block(result),
+                io=build_io_block(result, options=options),
+                quarantine=build_quarantine_block(result, reasons_top_n=reasons),
+                dq_summary=build_dq_summary(result, reasons_top_n=reasons),
+                schema_versions=build_schema_versions(
+                    reason_catalog_version=draft.reason_catalog_version,
+                    package_version=package_version,
+                ),
+                stage_timings=build_stage_timings(stage_timings),
+                http_summary=build_http_summary(http_summary),
             ),
-            stage_timings=build_stage_timings(stage_timings),
-            http_summary=build_http_summary(http_summary),
         )
         written = write_pipeline_run_report(report, root=report_root)
     except Exception as exc:

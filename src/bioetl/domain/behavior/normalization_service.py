@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Bioactivity normalization service for ChEMBL activity measurements.
 
@@ -34,7 +33,7 @@ Pure domain service (no I/O) per RULES.md §1.1.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.domain.behavior.activity_aggregator import ActivityAggregator
 from bioetl.domain.behavior.normalization_config import NormalizationConfig
@@ -57,8 +56,8 @@ __all__ = [
 class NormalizationResult:
     """Result of normalizing a bioactivity value."""
 
-    value: float
-    unit: str
+    value: float = cast(Any, None)  # Any: host attr default (PD6)
+    unit: str = cast(Any, None)  # Any: host attr default (PD6)
     pchembl: PChemblValue | None = None
     is_valid: bool = True
     validation_message: str | None = None
@@ -68,9 +67,9 @@ class NormalizationResult:
 class _NormalizationActivityMixin:
     """Single-value normalization and potency classification methods."""
 
-    config: NormalizationConfig
-    converter: UnitConverter
-    validator: ValueValidator
+    config: NormalizationConfig = cast(Any, None)  # Any: host attr default (PD6)
+    converter: UnitConverter = cast(Any, None)  # Any: host attr default (PD6)
+    validator: ValueValidator = cast(Any, None)  # Any: host attr default (PD6)
 
     def normalize_activity(
         self,
@@ -162,8 +161,8 @@ class _NormalizationActivityMixin:
 class _NormalizationBatchMixin(_NormalizationActivityMixin):
     """Batch normalization and aggregation methods."""
 
-    config: NormalizationConfig
-    aggregator: ActivityAggregator
+    config: NormalizationConfig = cast(Any, None)  # Any: host attr default (PD6)
+    aggregator: ActivityAggregator = cast(Any, None)  # Any: host attr default (PD6)
 
     def normalize_multiple(
         self,

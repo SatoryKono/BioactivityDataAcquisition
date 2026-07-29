@@ -9,7 +9,7 @@ Uses declarative field_specs DSL for mapping.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, cast, override
 
 from bioetl.application.core.base_transformer import TransformationError
 from bioetl.application.core.entity_id import compute_subcellular_fraction_entity_id
@@ -82,6 +82,7 @@ class SubcellularFractionTransformer(BaseChemblTransformer):
             ),
         )
 
+    @override
     def _extract_business_data(
         self,
         record: BronzeRecord,

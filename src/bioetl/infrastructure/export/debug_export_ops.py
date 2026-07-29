@@ -1,4 +1,3 @@
-# pyright: reportReturnType=false
 """Pure helpers for DebugExportAdapter persistence and workbook ops."""
 
 from __future__ import annotations

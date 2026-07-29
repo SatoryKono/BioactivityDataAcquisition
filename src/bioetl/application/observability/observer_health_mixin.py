@@ -1,11 +1,10 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Health-check emission helpers for the pipeline observer."""
 
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.observability.observer_contract import LifecyclePhase
 from bioetl.domain.events import PipelineEvent
@@ -18,10 +17,10 @@ if TYPE_CHECKING:
 class _ObserverHealthEmissionMixin:
     """Health-check and preflight emission helpers for the pipeline observer."""
 
-    pipeline_name: str
-    _metrics: MetricsPort
+    pipeline_name: str = cast(Any, None)  # Any: host attr default (PD6)
+    _metrics: MetricsPort = cast(Any, None)  # Any: host attr default (PD6)
     PROBE_MODE_FALLBACK_COUNTER = "bioetl_probe_mode_fallback_total"
-    emit_event: Callable[..., None]
+    emit_event: Callable[..., None] = cast(Any, None)  # Any: host attr default (PD6)
 
     def emit_health_check_result(
         self,

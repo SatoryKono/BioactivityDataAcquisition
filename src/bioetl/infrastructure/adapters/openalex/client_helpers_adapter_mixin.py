@@ -1,10 +1,9 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Adapter helper mixin for OpenAlex adapter utility and metadata methods."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import (
@@ -36,9 +35,9 @@ class OpenAlexAdapterHelpersMixin:
     """Utility helpers extracted from the main OpenAlex adapter."""
 
     # Host-class attributes (provided by OpenAlexAdapter.__post_init__)
-    mailto: str | None
-    api_key: str | None
-    _request_collector: APIRequestCollector
+    mailto: str | None = cast(Any, None)  # Any: host attr default (PD6)
+    api_key: str | None = cast(Any, None)  # Any: host attr default (PD6)
+    _request_collector: APIRequestCollector = cast(Any, None)  # Any: host attr default (PD6)
 
     def _build_headers(self) -> dict[str, str]:
         """Build request headers for OpenAlex API.

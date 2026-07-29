@@ -7,7 +7,7 @@ from __future__ import annotations
 
 __all__ = ["TargetTransformer"]
 
-from typing import TYPE_CHECKING, ClassVar, cast
+from typing import TYPE_CHECKING, ClassVar, cast, override
 
 from bioetl.application.core.dict_transformers import (
     aggregate_nested_lists,
@@ -40,6 +40,7 @@ class TargetTransformer(BaseChemblTransformer):
     primary_id_field = "target_id"
     _PROVIDER_ALIASES: ClassVar[dict[str, str]] = {"target_id": "target_chembl_id"}
 
+    @override
     def _prepare_record(
         self,
         record: BronzeRecord,
@@ -84,6 +85,7 @@ class TargetTransformer(BaseChemblTransformer):
         synonyms = aggregate_nested_lists(components, "target_component_synonyms")
         return self.serialize_json(synonyms) if synonyms else None
 
+    @override
     def _extract_business_data(
         self,
         record: BronzeRecord,
@@ -162,6 +164,7 @@ class TargetTransformer(BaseChemblTransformer):
             "target_component_synonyms": self._aggregate_synonyms(target_components),
         }
 
+    @override
     def _postprocess_pre_silver_record(
         self,
         silver_record: GoldRecord,
@@ -181,6 +184,7 @@ class TargetTransformer(BaseChemblTransformer):
         target_record["target_description"] = description
         return target_record
 
+    @override
     def transform_for_gold(
         self,
         context: PipelineContext,

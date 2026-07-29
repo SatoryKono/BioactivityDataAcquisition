@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import override
+
 from datetime import datetime
 from functools import cached_property
 
@@ -120,6 +122,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
             environment_metadata=self._metadata_assembler.environment_metadata,
         )
 
+    @override
     def create_bronze_metadata(self, input_data: BronzeMetadataInput) -> BronzeMetadata:
         """Create Bronze layer metadata."""
         return create_bronze_metadata_payload(
@@ -166,6 +169,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
             ingestion_ts=ingestion_ts,
         )
 
+    @override
     def create_silver_metadata(self, input_data: SilverMetadataInput) -> SilverMetadata:
         """Create Silver layer metadata."""
         validate_records_present(
@@ -201,6 +205,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
             strict_manifest_id_required=self._strict_manifest_id_required(),
         )
 
+    @override
     def create_gold_metadata(self, input_data: GoldMetadataInput) -> GoldMetadata:
         """Create Gold layer metadata."""
         validate_records_present(

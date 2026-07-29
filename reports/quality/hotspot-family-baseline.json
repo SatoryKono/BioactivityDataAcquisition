@@ -4,7 +4,7 @@
     "families": 5,
     "scorecard": "configs/quality/debt_scorecard.yaml",
     "budget_warnings": 0,
-    "budget_review_notes": 2
+    "budget_review_notes": 1
   },
   "families": [
     {
@@ -18,19 +18,17 @@
       ],
       "duplication_clusters": 0,
       "files": 187,
-      "total_loc": 21834,
+      "total_loc": 21847,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.365,
-      "max_internal_fan_in": 8,
-      "max_internal_fan_in_module": "bioetl.application.core.batch_runtime_failure_policy",
+      "helper_function_ratio": 0.366,
+      "max_internal_fan_in": 7,
+      "max_internal_fan_in_module": "bioetl.application.core.pipeline_span_lifecycle",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 0,
         "max_internal_fan_in": 10
       },
       "budget_warnings": [],
-      "budget_review_notes": [
-        "near_budget:max_internal_fan_in=8/10"
-      ]
+      "budget_review_notes": []
     },
     {
       "name": "composition_bootstrap_runtime",
@@ -66,7 +64,7 @@
       ],
       "duplication_clusters": 0,
       "files": 32,
-      "total_loc": 3925,
+      "total_loc": 3931,
       "files_ge_250_loc": 1,
       "helper_function_ratio": 0.33,
       "max_internal_fan_in": 2,
@@ -88,12 +86,12 @@
         "src/bioetl/application/services/control_plane/"
       ],
       "duplication_clusters": 0,
-      "files": 139,
-      "total_loc": 15873,
+      "files": 140,
+      "total_loc": 15944,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.423,
+      "helper_function_ratio": 0.421,
       "max_internal_fan_in": 3,
-      "max_internal_fan_in_module": "bioetl.application.services.control_plane.workflow.manifest_models",
+      "max_internal_fan_in_module": "bioetl.application.services.control_plane.run_manifest_reproducibility_scoring_support",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 0,
         "max_internal_fan_in": 3
@@ -114,7 +112,7 @@
       ],
       "duplication_clusters": 0,
       "files": 56,
-      "total_loc": 6968,
+      "total_loc": 6969,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.359,
       "max_internal_fan_in": 3,

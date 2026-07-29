@@ -7,7 +7,7 @@ Uses declarative field_specs DSL for mapping where applicable.
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, ClassVar, cast
+from typing import TYPE_CHECKING, ClassVar, cast, override
 
 from bioetl.domain.types import GoldRecord, JsonDict
 
@@ -155,6 +155,7 @@ class AssayTransformer(BaseChemblTransformer):
     primary_id_field = "assay_id"
     _PROVIDER_ALIASES: ClassVar[Mapping[str, str]] = {"assay_id": "assay_chembl_id"}
 
+    @override
     def _prepare_record(
         self,
         record: BronzeRecord,
@@ -162,6 +163,7 @@ class AssayTransformer(BaseChemblTransformer):
         """Normalize provider-native assay identifiers at the ingestion boundary."""
         return normalize_provider_aliases(record, self._PROVIDER_ALIASES)
 
+    @override
     def _extract_business_data(
         self,
         record: BronzeRecord,
@@ -217,6 +219,7 @@ class AssayTransformer(BaseChemblTransformer):
         )
         return business_data
 
+    @override
     def _postprocess_pre_silver_record(
         self,
         silver_record: JsonDict,
@@ -235,6 +238,7 @@ class AssayTransformer(BaseChemblTransformer):
         silver_record["assay_description"] = description
         return silver_record
 
+    @override
     def transform_for_gold(
         self,
         context: PipelineContext,

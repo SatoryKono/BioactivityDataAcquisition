@@ -19,7 +19,7 @@ __all__ = ["OpenAlexPublicationTransformer"]
 
 
 from collections.abc import Sequence
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.common.publication_issn import build_issn_fields
@@ -248,6 +248,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "is_retracted": rec.get("is_retracted", False),
         }
 
+    @override
     def _extract_business_data(self, record: BronzeRecord) -> GoldRecord:
         """Extract Publication business data from bronze record.
 
@@ -274,6 +275,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             **self._extract_lookup_metadata_bundle(rec),
         }
 
+    @override
     def _get_primary_id_field(self) -> str:
         """Return the primary ID field name for OpenAlex publications.
 
@@ -283,6 +285,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         """
         return "openalex_id"
 
+    @override
     def _get_entity_class(self) -> type[OpenAlexPublicationEntity]:
         """Return the domain entity class for OpenAlex publications.
 

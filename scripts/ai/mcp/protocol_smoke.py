@@ -96,7 +96,9 @@ def _readline(stream: TextIO, timeout: float) -> str:
     def read() -> None:
         try:
             result.put(stream.readline())
-        except Exception as exc:  # pragma: no cover - defensive transport seam
+        except OSError as exc:  # pragma: no cover - defensive transport seam
+            result.put(exc)
+        except ValueError as exc:  # pragma: no cover - closed/invalid stream
             result.put(exc)
 
     threading.Thread(target=read, daemon=True).start()

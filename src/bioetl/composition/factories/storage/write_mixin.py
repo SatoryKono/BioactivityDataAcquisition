@@ -1,10 +1,9 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Write operations mixin for StorageBundle (Bronze/Silver/Gold)."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, Any, cast
 
 from bioetl.domain.ports import SilverWriteRequest, coerce_silver_write_request
 from bioetl.domain.types import JsonDict, ScdConfig
@@ -27,9 +26,9 @@ __all__ = ["StorageBundleWriteMixin"]
 class StorageBundleWriteMixin:
     """Mixin providing core write operations for Bronze, Silver, and Gold layers."""
 
-    bronze: BronzeWriter
-    silver: SilverWriter
-    gold: GoldWriter
+    bronze: BronzeWriter = cast(Any, None)  # Any: host attr default (PD6)
+    silver: SilverWriter = cast(Any, None)  # Any: host attr default (PD6)
+    gold: GoldWriter = cast(Any, None)  # Any: host attr default (PD6)
 
     async def write_bronze(
         self,

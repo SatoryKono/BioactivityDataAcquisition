@@ -1,4 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Health check mixin for unified observability in adapters.
 
@@ -29,7 +28,7 @@ __all__ = [
 import asyncio
 import time
 from abc import abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.domain.types import HealthStatus, JsonDict
 from bioetl.infrastructure.adapters._health_check_observability import (
@@ -87,10 +86,10 @@ class HealthCheckMixin:
     """
 
     # Type hints for attributes provided by the implementing class
-    logger: LoggerPort
-    metrics: MetricsPort | None
-    provider_name: str
-    _logger: LoggerPort
+    logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD6)
+    metrics: MetricsPort | None = cast(Any, None)  # Any: host attr default (PD6)
+    provider_name: str = cast(Any, None)  # Any: host attr default (PD6)
+    _logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD6)
 
     def _get_metrics(self) -> MetricsPort | None:
         """Get metrics port for best-effort health-check telemetry.

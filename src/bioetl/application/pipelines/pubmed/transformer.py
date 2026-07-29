@@ -9,7 +9,7 @@ __all__ = ["PubMedPublicationTransformer"]
 
 import re
 import xml.etree.ElementTree as ET  # nosec B405
-from typing import TYPE_CHECKING, Any, ClassVar, cast
+from typing import TYPE_CHECKING, Any, ClassVar, cast, override
 
 import defusedxml.ElementTree as defused_ET
 
@@ -130,6 +130,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             else DateExtractor()
         )
 
+    @override
     def _pre_extract_validation(
         self,
         context: PipelineContext,
@@ -288,18 +289,22 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             month_map=self._MONTH_MAP,
         )
 
+    @override
     def _get_primary_id_field(self) -> str:
         """Return the PubMed primary identifier field."""
         return "pmid"
 
+    @override
     def _get_entity_class(self) -> type[BaseEntity]:
         """Return the PubMed domain entity class."""
         return cast("type[BaseEntity]", PubMedPublicationEntity)
 
+    @override
     def _should_log_fallback_lookup(self) -> bool:
         """Enable fallback lookup logging for PubMed."""
         return True
 
+    @override
     def entity_to_silver_record(
         self,
         entity: Any,  # Any: generic domain entity; type varies by pipeline

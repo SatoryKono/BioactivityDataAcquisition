@@ -66,12 +66,12 @@ class _Metrics:
 
 
 def test_emit_checkpoint_compatibility_metric_noop_without_metrics() -> None:
+    # Should complete without raising when metrics port is absent.
     emit_checkpoint_compatibility_metric(
         None,
         pipeline_name="chembl_activity",
         disposition="strict_compatible",
     )
-    assert True
 
 
 def test_emit_checkpoint_compatibility_metric_uses_unknown_pipeline_fallback() -> None:
