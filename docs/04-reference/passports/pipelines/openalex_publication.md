@@ -10,6 +10,8 @@
 ## Evidence
 
 - `effective_entity_config`: `configs/entities/openalex/publication.yaml`
+- `gold_validation_contract`: `docs/02-architecture/decisions/ADR-018-gold-strict-validation.md`
+- `observability_contract`: `src/bioetl/domain/_observability_contract_primitives.py`
 - `dq_contract`: `configs/contracts/openalex/publication.yaml`
 
 ## Generated facts
@@ -41,11 +43,16 @@
         "status": "runtime_resolved"
       }
     },
-    "source_type": "runtime_resolved",
-    "supported_source_modes": [
-      "api",
-      "cached_bronze"
-    ]
+    "source_modes": {
+      "cached_bronze": {
+        "availability": "runtime_resolved",
+        "identity_kind": "execution_mode"
+      },
+      "declared": [
+        "runtime_resolved"
+      ]
+    },
+    "source_type": "runtime_resolved"
   },
   "gold": {
     "column_projection": {
@@ -74,7 +81,7 @@
     },
     "contract_ref": "openalex.publication",
     "contract_validation": {
-      "status": "resolved_by_runtime_contract",
+      "status": "resolved_by_adr_018",
       "strict": true
     },
     "contract_version": "1.0.0",
@@ -146,6 +153,14 @@
     {
       "path": "configs/entities/openalex/publication.yaml",
       "role": "effective_entity_config"
+    },
+    {
+      "path": "docs/02-architecture/decisions/ADR-018-gold-strict-validation.md",
+      "role": "gold_validation_contract"
+    },
+    {
+      "path": "src/bioetl/domain/_observability_contract_primitives.py",
+      "role": "observability_contract"
     },
     {
       "path": "configs/contracts/openalex/publication.yaml",

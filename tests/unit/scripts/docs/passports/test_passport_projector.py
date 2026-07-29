@@ -75,6 +75,18 @@ def test_generated_facts_validate_against_published_schemas(tmp_path: Path) -> N
         jsonschema.validate(facts, schema)
 
 
+def test_source_refs_exist_and_metric_labels_are_bounded(tmp_path: Path) -> None:
+    outputs = build_all_outputs(output_root=tmp_path, source_revision=REVISION)
+    prohibited = {"run_id", "manifest_id", "workflow_run_id", "payload_hash", "record_id"}
+    for path, content in outputs.items():
+        if path.suffix != ".json" or "generated" not in path.parts:
+            continue
+        facts = json.loads(content)
+        for source_ref in facts["source_references"]:
+            assert (PROJECT_ROOT / source_ref["path"]).exists(), source_ref
+        assert prohibited.isdisjoint(facts["observability"]["metric_labels"])
+
+
 def test_manual_sidecar_is_strict_and_preserved(tmp_path: Path) -> None:
     sidecar = tmp_path / "manual.yaml"
     sidecar.write_text(
