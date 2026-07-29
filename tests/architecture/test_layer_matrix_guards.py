@@ -97,6 +97,7 @@ INFRASTRUCTURE_ALLOWED_DOMAIN_IMPORT_PREFIXES = (
     "bioetl.domain.locking",
     "bioetl.domain.mapping",
     "bioetl.domain.medallion",
+    "bioetl.domain.mixin_host",
     "bioetl.domain.models",
     "bioetl.domain.normalization",
     "bioetl.domain.observability_contract",

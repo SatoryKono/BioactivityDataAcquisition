@@ -335,7 +335,7 @@ def _format_slowest_test_table_rows(
         "|---:|---:|---|---|",
     ]
     for index, row in enumerate(rows[:limit], start=1):
-        if not isinstance(row, dict[str, object]):
+        if not isinstance(row, dict):
             continue
         duration_s = row.get("duration_s", "unknown")
         duration_cell = f"`{duration_s}`" if duration_backticks else str(duration_s)
@@ -354,7 +354,7 @@ def _format_slowest_zone_table_rows(rows: object, *, limit: int = 10) -> list[st
         "|---:|---|---:|---:|---:|",
     ]
     for index, row in enumerate(rows[:limit], start=1):
-        if not isinstance(row, dict[str, object]):
+        if not isinstance(row, dict):
             continue
         lines.append(
             f"| {index} | `{row.get('zone', UNKNOWN_LABEL)}` | "
@@ -511,7 +511,7 @@ def build_branch_telemetry_reports(payload: dict[str, object]) -> dict[str, str]
     coverage = payload["coverage"]
     duration = payload["duration_telemetry"]
     coverage_percent = (
-        coverage.get("actual_percent") if isinstance(coverage, dict[str, object]) else None
+        coverage.get("actual_percent") if isinstance(coverage, dict) else None
     )
     top_slowest = duration["top_slowest"]
     return {
@@ -560,7 +560,7 @@ def merge_existing_baseline_supplemental_fields(
         return payload
 
     existing_payload = yaml.safe_load(existing_yaml_path.read_text(encoding="utf-8"))
-    if not isinstance(existing_payload, dict[str, object]):
+    if not isinstance(existing_payload, dict):
         return payload
 
     merged = dict[str, object](payload)

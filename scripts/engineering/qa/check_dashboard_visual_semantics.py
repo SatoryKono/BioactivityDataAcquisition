@@ -151,7 +151,7 @@ REQUIRED_TRUST_MARKER_PANELS = {
 
 def _grid_pos(panel: dict[str, object]) -> dict[str, object]:
     grid_pos = panel.get("gridPos", {})
-    return grid_pos if isinstance(grid_pos, dict[str, object]) else {}
+    return grid_pos if isinstance(grid_pos, dict) else {}
 
 
 def _grid_rectangles_overlap(left: dict[str, object], right: dict[str, object]) -> bool:
@@ -174,7 +174,7 @@ def _collapsed_row_grid_overlap_errors(
     dashboard_path: Path, row_panel: dict[str, object]
 ) -> list[str]:
     nested_panels = [
-        panel for panel in row_panel.get("panels", []) if isinstance(panel, dict[str, object])
+        panel for panel in row_panel.get("panels", []) if isinstance(panel, dict)
     ]
     errors: list[str] = []
     for index, left in enumerate(nested_panels):
@@ -302,7 +302,7 @@ def _table_panel_visual_semantics_errors(
     default_cell_options = (
         field_config.get("defaults", {}).get("custom", {}).get("cellOptions")
     )
-    if isinstance(default_cell_options, dict[str, object]):
+    if isinstance(default_cell_options, dict):
         cell_type = default_cell_options.get("type")
         if cell_type not in ALLOWED_TABLE_CELL_OPTION_TYPES:
             errors.append(
@@ -315,7 +315,7 @@ def _table_panel_visual_semantics_errors(
             if prop.get("id") != "custom.cellOptions":
                 continue
             value = prop.get("value")
-            cell_type = value.get("type") if isinstance(value, dict[str, object]) else None
+            cell_type = value.get("type") if isinstance(value, dict) else None
             if cell_type not in ALLOWED_TABLE_CELL_OPTION_TYPES:
                 errors.append(
                     f"{dashboard_path}: table panel '{title}' override {matcher!r} "
@@ -421,7 +421,7 @@ def _panel_expressions(panel: dict[str, object]) -> list[str]:
     return [
         str(target.get("expr", ""))
         for target in panel.get("targets", [])
-        if isinstance(target, dict[str, object]) and isinstance(target.get("expr"), str)
+        if isinstance(target, dict) and isinstance(target.get("expr"), str)
     ]
 
 
@@ -471,7 +471,7 @@ def _trust_marker_is_above_fold(panel: dict[str, object]) -> bool:
     grid_pos = panel.get("gridPos", {})
     # Trust markers must stay on the first screen, including the dedicated
     # first-screen evidence row used by the Runtime dashboard at y=23.
-    return isinstance(grid_pos, dict[str, object]) and int(grid_pos.get("y", 999)) <= 23
+    return isinstance(grid_pos, dict) and int(grid_pos.get("y", 999)) <= 23
 
 
 def _trust_marker_panel_errors(dashboard_path: Path, panels: list) -> list[str]:

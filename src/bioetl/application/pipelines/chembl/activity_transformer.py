@@ -152,10 +152,8 @@ class ActivityTransformer(BaseChemblTransformer):
         Args:
             record: Raw Bronze record from ChEMBL API.
             primary_id: Validated activity_id value.
-
         Returns:
             Dictionary of Activity business fields.
-
         """
         molecule_id = record.get("molecule_id")
         if not molecule_id:
@@ -207,7 +205,6 @@ class ActivityTransformer(BaseChemblTransformer):
             "publication_id"
         ) or record.get("publication_id")
         return business_data
-
     @override
     def _postprocess_pre_silver_record(
         self,

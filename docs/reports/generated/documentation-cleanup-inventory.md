@@ -7,11 +7,11 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2267 |
-| Tracked doc-like files | 2213 |
+| Doc-like files | 2290 |
+| Tracked doc-like files | 2236 |
 | Ignored local docs/reports files | 54 |
 | Duplicate groups | 2 |
-| Generated without route or exception | 0 |
+| Generated without route or exception | 1 |
 | Generated routes | 66 |
 
 ## Tracking State
@@ -19,14 +19,14 @@
 | Tracking State | Count |
 | --- | --- |
 | ignored_local | 54 |
-| tracked | 2213 |
+| tracked | 2236 |
 
 ## Lifecycle Counts
 
 | Lifecycle | Count |
 | --- | --- |
 | active_backlog | 1 |
-| active_draft | 222 |
+| active_draft | 241 |
 | active_quality_baseline | 24 |
 | closeout_evidence | 39 |
 | docs_reports_curated_entrypoint | 2 |
@@ -36,9 +36,9 @@
 | generated_skill_license_mirror | 5 |
 | generated_skill_reference_mirror | 12 |
 | generated_test_run_evidence | 4 |
-| guide | 3 |
+| guide | 4 |
 | index | 4 |
-| issue_pack | 45 |
+| issue_pack | 46 |
 | live_issue_mirror | 4 |
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 36 |
@@ -48,40 +48,40 @@
 
 | Lifecycle | Count |
 | --- | --- |
-| active_draft | 222 |
-| guide | 3 |
+| active_draft | 241 |
+| guide | 4 |
 | index | 4 |
-| issue_pack | 45 |
+| issue_pack | 46 |
 | live_issue_mirror | 4 |
 
 ## Status Counts
 
 | Status | Count |
 | --- | --- |
-| Active | 864 |
+| Active | 866 |
 | Archived | 130 |
 | Canonical | 71 |
-| Generated | 763 |
-| Working | 439 |
+| Generated | 764 |
+| Working | 459 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 864 |
+| active | 866 |
 | archive | 130 |
 | canonical | 71 |
-| generated | 763 |
-| working | 439 |
+| generated | 764 |
+| working | 459 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-github-state-check | 267 |
+| archive-after-github-state-check | 287 |
 | archive-after-migration | 105 |
-| generate-automatically | 763 |
-| keep | 1128 |
+| generate-automatically | 764 |
+| keep | 1130 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
