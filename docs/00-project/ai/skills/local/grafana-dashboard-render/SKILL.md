@@ -6,7 +6,7 @@ ______________________________________________________________________
 
 ---
 name: grafana-dashboard-render
-description: Render, preflight-check, and capture evidence for shipped BioETL Grafana dashboards. Use when the task is to produce reproducible dashboard screenshots, validate Grafana render/auth readiness, run live reviewed panel audits, or explain why full render is blocked on the current host.
+description: Render, preflight-check, and capture runtime evidence for shipped BioETL Grafana dashboards. Use when the task is to produce reproducible dashboard renders, validate Grafana render/auth readiness, run live reviewed panel audits, or explain why full render is blocked on the current host.
 ---
 
 # Grafana Dashboard Render
@@ -18,7 +18,7 @@ this repository, not editing their JSON semantics.
 
 This skill is for:
 
-- full screenshot refresh of `grafana/dashboards/*.json`
+- full runtime-render refresh of `grafana/dashboards/*.json`
 - preflight checks before a dashboard audit
 - live reviewed panel validation against Grafana, Prometheus, and Quarantine
   Explorer
@@ -51,6 +51,40 @@ dashboard JSON, queries, navigation, or operator-facing UX.
 - Operator/tooling docs: `grafana/README.md`
 Do not treat ad-hoc `curl /render/...` experiments as canonical evidence unless
 they match the shipped tooling path.
+
+## Evidence Policy
+
+Runtime-rendered dashboards are the primary evidence for every visual audit.
+Before assessing readability, render every dashboard in scope through the
+canonical project renderer. Use evidence in this order:
+
+1. `RUNTIME_RENDER`
+1. `DASHBOARD_JSON` when layout structure must be confirmed
+1. `GRAFANA_INSPECT`
+1. `BROWSER_INSPECTION`
+1. `USER_SCREENSHOT`
+
+User-provided screenshots are supplemental only when runtime rendering is
+blocked, a panel is missing from the render, or comparison with an older state
+is required. Never prefer a user screenshot over a contradictory runtime
+render.
+
+Every observation must name its evidence source and confidence:
+
+- evidence source: `RUNTIME_RENDER`, `DASHBOARD_JSON`, `GRAFANA_INSPECT`,
+  `BROWSER_INSPECTION`, or `USER_SCREENSHOT`
+- confidence: `FACT`, `INFERENCE`, or `UNKNOWN`
+- use two independent indicators for a conclusion whenever the available
+  evidence permits it
+
+If a panel did not render completely, record:
+
+```text
+Confidence: UNKNOWN
+Reason: Render incomplete.
+```
+
+Do not infer the missing visual state.
 
 ## Default Workflow
 
@@ -115,7 +149,60 @@ Guidance:
 - Use default fallback behavior when you want a best-effort screenshot refresh
   and browser capture is acceptable.
 
-### 4. Run live reviewed panel audit when semantics matter
+### 4. Capture required render groups
+
+A render group is uniquely defined by dashboard, time range, selector state,
+viewport, theme, and render timestamp. If the same dashboard is rendered more
+than once with the same state, retain one group for the visual audit and use
+the repeat only for consistency validation.
+
+For every dashboard record:
+
+- UID and title
+- URL
+- time range
+- template variables and selected values
+- viewport size
+- browser zoom when browser capture is used
+- Grafana version when available
+- render timestamp
+- datasource loading/terminal-state status
+- panels not rendered
+- panels with errors
+
+Capture both the initial viewport and a full-page render. Use the Grafana
+Render API for reproducible viewport evidence and the Playwright path for
+full-page, expanded-row, lazy-panel, actual-theme, and terminal-state evidence.
+
+At minimum render these viewports:
+
+- `1366x768`
+- `1440x900`
+- `1920x1080`
+
+When the canonical render path supports kiosk mode, also render:
+
+- `2560x1440`
+- `3840x2160`
+
+For every supported viewport check clipping, wrapping, overflow, auto-shrink,
+scrollbars, panel resize, navigation and selector wrapping, legend wrapping,
+table overflow, and responsive typography. Do not claim responsive behavior
+from a single viewport.
+
+Render both `dark` and `light` when supported. If light theme is not supported,
+record this as a fact, not a defect:
+
+```text
+Confidence: FACT
+Light Theme is not supported.
+```
+
+Repeat one identical-state render group for every dashboard and compare layout,
+typography, panel size, wrapping, clipping, and layout shifts. Dynamic data
+differences must not be reported as render inconsistency.
+
+### 5. Run live reviewed panel audit when semantics matter
 
 For semantically sensitive validation, use:
 
@@ -138,7 +225,19 @@ Use this when the user cares about:
 - zero-vs-no-data semantics
 - Silver Reject Explorer denominator behavior
 
-### 5. Report render blockers honestly
+### 6. Audit only runtime renders
+
+All readability findings must be based on generated runtime renders. Do not:
+
+- assess clipping from a user screenshot when a runtime render exists
+- infer text size from a downscaled image
+- use JPEG artifacts as evidence
+- claim responsive behavior without multiple viewport renders
+
+Use dashboard JSON only as corroboration for layout, not as a substitute for
+rendered readability evidence.
+
+### 7. Report render blockers honestly
 
 Common outcomes:
 
@@ -170,9 +269,30 @@ When blocked:
 
 - Preflight result captured
 - Render output directory contains expected PNGs and `render-manifest.json`
+- Required viewport/theme render groups captured
+- Initial viewport and full-page evidence distinguished
+- Repeated render consistency checked
+- Every finding includes evidence source and confidence
 - If semantics matter, live reviewed panel audit output captured
 - If full render is blocked, the exact failing preflight/render check is
   reported
+
+## Final Report Format
+
+Use `Render Inventory`, never `Screenshot Inventory`.
+
+| Render Group | Dashboard | Viewport | Theme | Time Range | Variables | Render Status | Missing Panels | Evidence Source |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+
+For each finding include:
+
+```text
+Evidence source:
+- RUNTIME_RENDER
+- DASHBOARD_JSON
+
+Confidence: FACT
+```
 
 ## Definition Of Done
 

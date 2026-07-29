@@ -43,6 +43,11 @@ Nested titles (must match JSON):
 - **Purpose:** Index of recent `pipeline_run_report_v1` files to pick `run_id`.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-reports`
 - **DSA-08:** Visible on first screen; selected-run forensics stay collapsed.
+- **Empty state:** Browse requires written
+  `reports/run-reports/pipeline/<pipeline>/<run_id>/pipeline-run-report.json`
+  artifacts. HTTP `200` with `status=ok`, `count=0`, and `items=[]` means no
+  artifacts exist for that pipeline; `504` with
+  `contract=forensic_endpoint_error_v1` means the forensic endpoint timed out.
 
 ### 7. Selected run · funnel stages
 - **Type:** Table

@@ -28,6 +28,7 @@ CLOSEOUT = ROOT / "reports" / "quality" / "tech-debt-issues-5847-5852-closeout.j
 ROOT_REGISTRY = ROOT / "configs" / "quality" / "root_hygiene_review_registry.yaml"
 ROOT_ALLOWLIST = ROOT / ".github" / "root-allowlist.txt"
 DOCKER_CONTRACTS = ROOT / "configs" / "quality" / "docker_helper_contracts.yaml"
+REPO_STRUCTURE_CATALOG = ROOT / "configs" / "quality" / "repo_structure_catalog.yaml"
 
 EXPECTED_ISSUES = {5847, 5848, 5849, 5850, 5851, 5852}
 RETIRED_ROOT_ENTRIES = {
@@ -141,9 +142,20 @@ def test_issue_5847_root_baseline_is_reduced_without_new_root_directory() -> Non
         for line in ROOT_ALLOWLIST.read_text(encoding="utf-8").splitlines()
         if line.strip() and not line.strip().startswith("#")
     }
+    structure_catalog = yaml.safe_load(
+        REPO_STRUCTURE_CATALOG.read_text(encoding="utf-8")
+    )
+    approved_tooling_roots = {
+        row["path"]
+        for row in structure_catalog["root_tooling_roots"]["approved_roots"]
+    }
 
     assert len(root_files) <= payload["outcomes"]["5847"]["tracked_root_files_after"]
-    assert len(root_dirs) == payload["outcomes"]["5847"]["tracked_root_dirs_after"]
+    assert ".devin" in approved_tooling_roots
+    assert (
+        len(root_dirs - {".devin"})
+        == payload["outcomes"]["5847"]["tracked_root_dirs_after"]
+    )
     assert (
         len(allowlist_entries) <= payload["outcomes"]["5847"]["allowlist_entries_after"]
     )

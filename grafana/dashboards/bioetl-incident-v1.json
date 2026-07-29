@@ -294,9 +294,10 @@
           "custom": {
             "align": "left",
             "cellOptions": {
-              "type": "auto"
+              "type": "auto",
+              "wrapText": true
             },
-            "inspect": false
+            "inspect": true
           },
           "color": {
             "mode": "thresholds"
@@ -441,9 +442,10 @@
           "custom": {
             "align": "left",
             "cellOptions": {
-              "type": "auto"
+              "type": "auto",
+              "wrapText": true
             },
-            "inspect": false
+            "inspect": true
           },
           "color": {
             "mode": "thresholds"
@@ -628,9 +630,10 @@
               "custom": {
                 "align": "left",
                 "cellOptions": {
-                  "type": "auto"
+                  "type": "auto",
+                  "wrapText": true
                 },
-                "inspect": false
+                "inspect": true
               },
               "color": {
                 "mode": "thresholds"
@@ -745,9 +748,10 @@
               "custom": {
                 "align": "left",
                 "cellOptions": {
-                  "type": "auto"
+                  "type": "auto",
+                  "wrapText": true
                 },
-                "inspect": false
+                "inspect": true
               },
               "color": {
                 "mode": "thresholds"
@@ -862,9 +866,10 @@
               "custom": {
                 "align": "left",
                 "cellOptions": {
-                  "type": "auto"
+                  "type": "auto",
+                  "wrapText": true
                 },
-                "inspect": false
+                "inspect": true
               },
               "color": {
                 "mode": "thresholds"

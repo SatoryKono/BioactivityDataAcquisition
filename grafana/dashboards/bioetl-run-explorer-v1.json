@@ -124,7 +124,7 @@
         "defaults": {
           "custom": {
             "align": "left",
-            "inspect": false
+            "inspect": true
           },
           "noValue": "No pipeline-run-report artifacts for this pipeline on disk (reports/run-reports/pipeline/<name>/). Not a Prometheus gap — run the pipeline to write reports, or pick a pipeline with reports."
         },
@@ -208,7 +208,7 @@
             "cellOptions": {
               "type": "auto"
             },
-            "inspect": false
+            "inspect": true
           },
           "unit": "none",
           "noValue": "Identity not resolved for scope — select exact run_id or wait for control-plane resolve (see resolved_via). Backend down is different from empty scope.",

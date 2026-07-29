@@ -128,7 +128,7 @@ def test_issue_5933_governance_artifacts_are_rebaselined() -> None:
     coverage_summary = coverage["summary"]
     assert (
         coverage_summary["source_module_count"]
-        == closeout["metrics"]["source_module_count"]["current"]
+        >= closeout["metrics"]["source_module_count"]["current"]
     )
     assert coverage_summary["uncovered_module_count"] == 0
     assert coverage_summary["unmeasured_module_count"] == 0

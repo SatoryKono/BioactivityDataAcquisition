@@ -73,6 +73,68 @@ def test_browse_hides_raw_path_columns() -> None:
     assert exclude.get("markdown_path") is True
 
 
+def test_pfill_12_browse_explains_artifact_backing_and_backend_failure() -> None:
+    data = json.loads(
+        (DASH / "bioetl-run-explorer-v1.json").read_text(encoding="utf-8")
+    )
+    browse = next(
+        panel
+        for panel in _walk(data.get("panels"))
+        if panel.get("id") == 3010
+    )
+    defaults = (browse.get("fieldConfig") or {}).get("defaults") or {}
+    no_value = str(defaults.get("noValue") or "")
+    description = str(browse.get("description") or "")
+    target = (browse.get("targets") or [])[0]
+
+    assert "No pipeline-run-report artifacts" in no_value
+    assert "reports/run-reports/pipeline/<name>/" in no_value
+    assert "Backend unavailable is distinct" in description
+    assert target.get("root_selector") == "items"
+    assert target.get("url") == (
+        "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=20"
+    )
+
+
+def test_pfill_11_dq_freshness_missing_series_is_explicit() -> None:
+    data = json.loads((DASH / "bioetl-dq-v2.json").read_text(encoding="utf-8"))
+    freshness = next(
+        panel for panel in _walk(data.get("panels")) if panel.get("id") == 8
+    )
+    defaults = (freshness.get("fieldConfig") or {}).get("defaults") or {}
+    expressions = [
+        str(target.get("expr") or "") for target in freshness.get("targets") or []
+    ]
+
+    assert defaults.get("noValue") == (
+        "TELEMETRY MISSING — no bioetl_data_freshness_seconds for scope"
+    )
+    assert any("bioetl_data_freshness_seconds" in expr for expr in expressions)
+    assert all("or vector(0)" not in expr for expr in expressions)
+    assert "telemetry missing" in str(freshness.get("description") or "").lower()
+
+
+def test_pfill_10_provider_missing_series_has_reason_and_action() -> None:
+    data = json.loads(
+        (DASH / "bioetl-provider-health-v2.json").read_text(encoding="utf-8")
+    )
+    panels = {panel.get("id"): panel for panel in _walk(data.get("panels"))}
+    status = panels[9401]
+    matrix = panels[9101]
+    freshness = panels[9104]
+
+    for panel in (status, matrix):
+        description = str(panel.get("description") or "").lower()
+        assert "telemetry missing" in description
+        assert "healthy fleet" in description
+    freshness_expr = str((freshness.get("targets") or [])[0].get("expr") or "")
+    assert "bioetl_provider_current_status" in freshness_expr
+    assert "or vector(0)" not in freshness_expr
+    assert "fail-closed unknown" in str(
+        freshness.get("description") or ""
+    ).lower()
+
+
 def test_percent_scores_integer_precision() -> None:
     for path in sorted(DASH.glob("*.json")):
         data = json.loads(path.read_text(encoding="utf-8"))
