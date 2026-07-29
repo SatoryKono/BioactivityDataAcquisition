@@ -1148,32 +1148,38 @@ def _branch_reachability_percent(
     return unreviewed_assertion_bypass_count, branch_reachability_percent
 
 
+@dataclass(frozen=True, slots=True)
+class _TestGovernanceScanSnapshot:
+    """Packed scan accumulators for governance payload assembly (python:S107)."""
+
+    root: Path
+    root_str: str
+    test_files: list[Path]
+    total_functions: int
+    assertless_total_candidates: int
+    refined_assertless_tests: int
+    assertless_category_counts: Counter[str]
+    assertless_candidates: list[dict[str, str]]
+    assertless_examples: list[str]
+    markerless_test_functions: int
+    markerless_examples: list[str]
+    test_name_locations: dict[str, list[str]]
+    compatibility_files: list[str]
+    uuid4_call_sites: int
+    date_today_call_sites: int
+    critical_behavior_envelopes: dict[str, dict[str, Any]]
+    assertion_bypass_findings: list[dict[str, str]]
+    assertion_reachability_scanned_tests: int
+    parse_errors: list[dict[str, str]]
+
+
 def _assemble_test_governance_payload(
-    *,
-    root: Path,
-    root_str: str,
-    test_files: list[Path],
-    total_functions: int,
-    assertless_total_candidates: int,
-    refined_assertless_tests: int,
-    assertless_category_counts: Counter[str],
-    assertless_candidates: list[dict[str, str]],
-    assertless_examples: list[str],
-    markerless_test_functions: int,
-    markerless_examples: list[str],
-    test_name_locations: dict[str, list[str]],
-    compatibility_files: list[str],
-    uuid4_call_sites: int,
-    date_today_call_sites: int,
-    critical_behavior_envelopes: dict[str, dict[str, Any]],
-    assertion_bypass_findings: list[dict[str, str]],
-    assertion_reachability_scanned_tests: int,
-    parse_errors: list[dict[str, str]],
+    snapshot: _TestGovernanceScanSnapshot,
 ) -> dict[str, Any]:
     """Assemble the final test-governance report payload from scan accumulators."""
     duplicate_names = {
         name: locations
-        for name, locations in test_name_locations.items()
+        for name, locations in snapshot.test_name_locations.items()
         if len(locations) > 1
     }
     top_duplicate_names = _top_duplicate_test_names(duplicate_names)
@@ -1182,52 +1188,58 @@ def _assemble_test_governance_payload(
     )
     assertion_gap_count = sum(
         1
-        for envelope in critical_behavior_envelopes.values()
+        for envelope in snapshot.critical_behavior_envelopes.values()
         if int(envelope["test_count"]) <= 0
         or int(envelope["assertion_backed_tests"]) <= 0
     )
-    assertless_families = _build_assertless_families(assertless_candidates)
+    assertless_families = _build_assertless_families(snapshot.assertless_candidates)
     unreviewed_assertion_bypass_count, branch_reachability_percent = (
         _branch_reachability_percent(
-            assertion_reachability_scanned_tests=assertion_reachability_scanned_tests,
-            assertion_bypass_findings=assertion_bypass_findings,
+            assertion_reachability_scanned_tests=(
+                snapshot.assertion_reachability_scanned_tests
+            ),
+            assertion_bypass_findings=snapshot.assertion_bypass_findings,
         )
     )
-    intentional_no_exception_contract = assertless_category_counts.get(
+    intentional_no_exception_contract = snapshot.assertless_category_counts.get(
         "intentional_no_exception_contract", 0
     )
     summary = {
-        "assertless_total_candidates": assertless_total_candidates,
-        "compatibility_test_files": len(compatibility_files),
-        "date_today_call_sites": date_today_call_sites,
+        "assertless_total_candidates": snapshot.assertless_total_candidates,
+        "compatibility_test_files": len(snapshot.compatibility_files),
+        "date_today_call_sites": snapshot.date_today_call_sites,
         "duplicate_test_name_occurrences": sum(
             len(locations) for locations in duplicate_names.values()
         ),
         "duplicate_test_names": len(duplicate_names),
         "intentional_no_exception_contract": intentional_no_exception_contract,
-        "markerless_test_functions": markerless_test_functions,
-        "markerless_examples": markerless_examples,
-        "refined_assertless_tests": refined_assertless_tests,
-        "uuid4_call_sites": uuid4_call_sites,
+        "markerless_test_functions": snapshot.markerless_test_functions,
+        "markerless_examples": snapshot.markerless_examples,
+        "refined_assertless_tests": snapshot.refined_assertless_tests,
+        "uuid4_call_sites": snapshot.uuid4_call_sites,
         "unreviewed_assertion_bypass_count": unreviewed_assertion_bypass_count,
         "assertion_branch_reachability_percent": branch_reachability_percent,
     }
     report = {
         "root": ".",
-        "total_test_files": len(test_files),
-        "total_test_functions": total_functions,
-        "test_file_inventory": _collect_test_file_inventory(root, test_files),
-        "repo_backed_unit_inventory": _collect_repo_backed_unit_inventory(root),
-        "assertless_total_candidates": assertless_total_candidates,
-        "refined_assertless_tests": refined_assertless_tests,
+        "total_test_files": len(snapshot.test_files),
+        "total_test_functions": snapshot.total_functions,
+        "test_file_inventory": _collect_test_file_inventory(
+            snapshot.root, snapshot.test_files
+        ),
+        "repo_backed_unit_inventory": _collect_repo_backed_unit_inventory(
+            snapshot.root
+        ),
+        "assertless_total_candidates": snapshot.assertless_total_candidates,
+        "refined_assertless_tests": snapshot.refined_assertless_tests,
         "assertless_category_counts": {
-            category: assertless_category_counts.get(category, 0)
+            category: snapshot.assertless_category_counts.get(category, 0)
             for category in sorted(ASSERTLESS_CATEGORY_RULES)
         },
-        "assertless_candidates": assertless_candidates,
-        "assertless_examples": assertless_examples,
-        "markerless_test_functions": markerless_test_functions,
-        "markerless_examples": markerless_examples,
+        "assertless_candidates": snapshot.assertless_candidates,
+        "assertless_examples": snapshot.assertless_examples,
+        "markerless_test_functions": snapshot.markerless_test_functions,
+        "markerless_examples": snapshot.markerless_examples,
         "duplicate_test_names": len(duplicate_names),
         "duplicate_test_name_occurrences": sum(
             len(locations) for locations in duplicate_names.values()
@@ -1235,30 +1247,36 @@ def _assemble_test_governance_payload(
         "top_duplicate_test_names": top_duplicate_names,
         "duplicate_test_name_inventory": duplicate_inventory,
         "duplicate_test_name_inventory_summary": duplicate_inventory_summary,
-        "compatibility_test_files": len(compatibility_files),
-        "compatibility_files": compatibility_files,
-        "compatibility_examples": compatibility_files[:25],
-        "uuid4_call_sites": uuid4_call_sites,
-        "date_today_call_sites": date_today_call_sites,
-        "critical_behavior_envelope_count": len(critical_behavior_envelopes),
+        "compatibility_test_files": len(snapshot.compatibility_files),
+        "compatibility_files": snapshot.compatibility_files,
+        "compatibility_examples": snapshot.compatibility_files[:25],
+        "uuid4_call_sites": snapshot.uuid4_call_sites,
+        "date_today_call_sites": snapshot.date_today_call_sites,
+        "critical_behavior_envelope_count": len(
+            snapshot.critical_behavior_envelopes
+        ),
         "critical_behavior_envelope_assertion_gap_count": assertion_gap_count,
-        "critical_behavior_envelopes": critical_behavior_envelopes,
+        "critical_behavior_envelopes": snapshot.critical_behavior_envelopes,
         "assertion_branch_reachability": {
             "metric_percent": branch_reachability_percent,
-            "scanned_test_count": assertion_reachability_scanned_tests,
+            "scanned_test_count": snapshot.assertion_reachability_scanned_tests,
             "scan_paths": sorted(ASSERTION_REACHABILITY_PATHS),
-            "finding_count": len(assertion_bypass_findings),
+            "finding_count": len(snapshot.assertion_bypass_findings),
             "unreviewed_count": unreviewed_assertion_bypass_count,
-            "findings": assertion_bypass_findings,
+            "findings": snapshot.assertion_bypass_findings,
         },
         "unreviewed_assertion_bypass_count": unreviewed_assertion_bypass_count,
         "assertion_branch_reachability_percent": branch_reachability_percent,
-        "fixture_asset_duplication": _collect_fixture_asset_duplication(root),
-        "parse_errors": parse_errors,
+        "fixture_asset_duplication": _collect_fixture_asset_duplication(
+            snapshot.root
+        ),
+        "parse_errors": snapshot.parse_errors,
     }
     return {
         **report,
-        "source_tree_sha256": _compute_test_governance_source_tree_sha256(root_str),
+        "source_tree_sha256": _compute_test_governance_source_tree_sha256(
+            snapshot.root_str
+        ),
         **summary,
         "assertless_families": assertless_families,
         "budget_violations": [],
@@ -1336,25 +1354,27 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
             assertion_reachability_scanned_tests += reachability_delta
 
     return _assemble_test_governance_payload(
-        root=root,
-        root_str=root_str,
-        test_files=test_files,
-        total_functions=total_functions,
-        assertless_total_candidates=assertless_total_candidates,
-        refined_assertless_tests=refined_assertless_tests,
-        assertless_category_counts=assertless_category_counts,
-        assertless_candidates=assertless_candidates,
-        assertless_examples=assertless_examples,
-        markerless_test_functions=markerless_test_functions,
-        markerless_examples=markerless_examples,
-        test_name_locations=test_name_locations,
-        compatibility_files=compatibility_files,
-        uuid4_call_sites=uuid4_call_sites,
-        date_today_call_sites=date_today_call_sites,
-        critical_behavior_envelopes=critical_behavior_envelopes,
-        assertion_bypass_findings=assertion_bypass_findings,
-        assertion_reachability_scanned_tests=assertion_reachability_scanned_tests,
-        parse_errors=parse_errors,
+        _TestGovernanceScanSnapshot(
+            root=root,
+            root_str=root_str,
+            test_files=test_files,
+            total_functions=total_functions,
+            assertless_total_candidates=assertless_total_candidates,
+            refined_assertless_tests=refined_assertless_tests,
+            assertless_category_counts=assertless_category_counts,
+            assertless_candidates=assertless_candidates,
+            assertless_examples=assertless_examples,
+            markerless_test_functions=markerless_test_functions,
+            markerless_examples=markerless_examples,
+            test_name_locations=test_name_locations,
+            compatibility_files=compatibility_files,
+            uuid4_call_sites=uuid4_call_sites,
+            date_today_call_sites=date_today_call_sites,
+            critical_behavior_envelopes=critical_behavior_envelopes,
+            assertion_bypass_findings=assertion_bypass_findings,
+            assertion_reachability_scanned_tests=assertion_reachability_scanned_tests,
+            parse_errors=parse_errors,
+        )
     )
 
 

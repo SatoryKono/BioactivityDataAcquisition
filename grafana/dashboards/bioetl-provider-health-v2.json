@@ -122,7 +122,7 @@
     {
       "id": 9401,
       "type": "stat",
-      "title": "Status",
+      "title": "[NOW·HEALTH] Status",
       "gridPos": {
         "h": 3,
         "w": 8,
@@ -133,7 +133,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Selected-range provider-first severity for the selected provider. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Uses bioetl_provider_current_status and bioetl_provider_range_operational_ok inside the active Grafana time range (default Last 12 hours). Operational OK is projected when health-check or adapter request counters show successful provider activity without failures or HTTP errors in range; it does not prove the currently selected pipeline run succeeded, but it prevents UNKNOWN after successful provider operations in range. If both series are absent, UNKNOWN remains fail-closed; inspect Monitor Provider Telemetry Freshness and Review Raw Provider Health Enum. Pipeline/run_type/workflow are secondary context only; run_id does not filter Prometheus. This compact Status is selected-provider scope and is intentionally rendered as a supporting selected-provider verdict, not as the visual owner of the fleet answer. GLOBAL Provider Severity Matrix and Critical Providers are global fleet posture and may disagree by design. Do not compare the selected-provider OK card to a GLOBAL WARN/CRIT panel without reading the scope labels. DSA-06: freshness-aware fleet vs selected.",
+      "description": "DUX3-11: Selected-provider HEALTH only when provider is selected. Empty provider → N/A (not green zero success). Selected-range provider-first severity for the selected provider. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Uses bioetl_provider_current_status and bioetl_provider_range_operational_ok inside the active Grafana time range (default Last 12 hours). Operational OK is projected when health-check or adapter request counters show successful provider activity without failures or HTTP errors in range; it does not prove the currently selected pipeline run succeeded, but it prevents UNKNOWN after successful provider operations in range. If both series are absent, UNKNOWN remains fail-closed; inspect Monitor Provider Telemetry Freshness and Review Raw Provider Health Enum. Pipeline/run_type/workflow are secondary context only; run_id does not filter Prometheus. This compact Status is selected-provider scope and is intentionally rendered as a supporting selected-provider verdict, not as the visual owner of the fleet answer. GLOBAL Provider Severity Matrix and Critical Providers are global fleet posture and may disagree by design. Do not compare the selected-provider OK card to a GLOBAL WARN/CRIT panel without reading the scope labels. DSA-06: freshness-aware fleet vs selected.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -247,7 +247,7 @@
       "id": 9002,
       "type": "text",
       "title": "First Action",
-      "description": "Population-first CTA. Start with GLOBAL severity and top causes before selected-provider scope. Empty top causes with non-OK severity is an explainability gap, not a healthy signal. First operator CTA for global provider incidents and early-warning provider causes. Start with the current GLOBAL severity matrix, then telemetry freshness, then critical providers and top causes. Treat selected-provider Status as supporting scoped evidence; if Status is UNKNOWN, treat that as missing provider-current-status evidence until telemetry freshness and raw enum evidence say otherwise. Use this after the current answer row; selected-range latency/error evidence stays below and downstream Runtime or Control Plane follow-up depends on the diagnosed cause. Phase-2 CTA standard. Empty causes with non-OK severity is an explainability gap. DSA-06: current fleet triage with freshness; optional latency collapsed.",
+      "description": "DUX3-22: Start GLOBAL fleet matrix + freshness before selected-provider detail. Population-first CTA. Start with GLOBAL severity and top causes before selected-provider scope. Empty top causes with non-OK severity is an explainability gap, not a healthy signal. First operator CTA for global provider incidents and early-warning provider causes. Start with the current GLOBAL severity matrix, then telemetry freshness, then critical providers and top causes. Treat selected-provider Status as supporting scoped evidence; if Status is UNKNOWN, treat that as missing provider-current-status evidence until telemetry freshness and raw enum evidence say otherwise. Use this after the current answer row; selected-range latency/error evidence stays below and downstream Runtime or Control Plane follow-up depends on the diagnosed cause. Phase-2 CTA standard. Empty causes with non-OK severity is an explainability gap. DSA-06: current fleet triage with freshness; optional latency collapsed.",
       "gridPos": {
         "h": 2,
         "w": 24,
@@ -639,7 +639,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Current provider telemetry freshness marker for the first screen (instant status). Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Missing bioetl_provider_current_status remains fail-closed UNKNOWN, not OK. UNKNOWN — provider freshness marker absent. DSA-06: freshness reduces confidence when stale.",
+      "description": "DUX3-11: Freshness is EVIDENCE confidence. STALE/MISSING reduces trust; does not prove provider OK. Current provider telemetry freshness marker for the first screen (instant status). Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Missing bioetl_provider_current_status remains fail-closed UNKNOWN, not OK. UNKNOWN — provider freshness marker absent. DSA-06: freshness reduces confidence when stale.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -731,7 +731,7 @@
           "refId": "A"
         }
       ],
-      "title": "Monitor Provider Telemetry Freshness",
+      "title": "[NOW·EVIDENCE] Monitor Provider Telemetry Freshness",
       "type": "stat"
     },
     {
@@ -1964,9 +1964,9 @@
               "refId": "A"
             }
           ],
-          "title": "Monitor Healthy Checks (Selected Range)",
+          "title": "[RANGE·HEALTH] Monitor Healthy Checks (Selected Range)",
           "type": "stat",
-          "description": "Selected-range evidence: completed HEALTHY probes in the active Grafana range. This panel is not a current-health source."
+          "description": "DUX3-11/03: Ratios with denominator 0 must render N/A or VALID_EMPTY — never green success 0.00%. Selected-range evidence: completed HEALTHY probes in the active Grafana range. This panel is not a current-health source."
         },
         {
           "datasource": {
@@ -2116,9 +2116,9 @@
               "refId": "A"
             }
           ],
-          "title": "Track Provider Failure Rate (Selected Range)",
+          "title": "[RANGE·HEALTH] Track Provider Failure Rate (Selected Range)",
           "type": "stat",
-          "description": "Selected-range evidence: failed probes divided by completed probes in the active Grafana range. Current status comes from bioetl_provider_current_status. Gauge thresholds follow the provider policy contract: warning at 5%, critical at 20%. A 0.00% value is neutral supporting evidence and never renders as a dominant red gauge arc."
+          "description": "DUX3-11/03: Ratios with denominator 0 must render N/A or VALID_EMPTY — never green success 0.00%. Selected-range evidence: failed probes divided by completed probes in the active Grafana range. Current status comes from bioetl_provider_current_status. Gauge thresholds follow the provider policy contract: warning at 5%, critical at 20%. A 0.00% value is neutral supporting evidence and never renders as a dominant red gauge arc."
         },
         {
           "datasource": {
@@ -2184,9 +2184,9 @@
               "refId": "A"
             }
           ],
-          "title": "Track Health Checks Total (Selected Range)",
+          "title": "[RANGE·HEALTH] Track Health Checks Total (Selected Range)",
           "type": "stat",
-          "description": "Selected-range evidence: total completed provider health checks in the active Grafana range."
+          "description": "DUX3-11/03: Ratios with denominator 0 must render N/A or VALID_EMPTY — never green success 0.00%. Selected-range evidence: total completed provider health checks in the active Grafana range."
         }
       ]
     },
@@ -2207,7 +2207,7 @@
           "type": "table",
           "title": "ID",
           "gridPos": {
-            "h": 10,
+            "h": 6,
             "w": 12,
             "x": 0,
             "y": 0
@@ -2332,7 +2332,7 @@
           "type": "table",
           "title": "Processed Records",
           "gridPos": {
-            "h": 10,
+            "h": 6,
             "w": 12,
             "x": 12,
             "y": 0
@@ -2788,7 +2788,8 @@
             }
           ]
         }
-      ]
+      ],
+      "description": "DUX3-26: Collapsed thin shell; Run Explorer is the hub."
     }
   ],
   "refresh": "60s",
