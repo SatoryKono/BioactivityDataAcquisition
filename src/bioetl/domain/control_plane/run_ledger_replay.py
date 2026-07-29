@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass, field, replace
+from dataclasses import dataclass, field, fields, replace
 from datetime import datetime
-from typing import cast
 
 from bioetl.domain.composite.result import (
     DependencyResult,
@@ -61,7 +60,11 @@ def _evolve_projection(
     projection: RunLedgerReplayProjection,
     **changes: object,
 ) -> RunLedgerReplayProjection:
-    return cast(RunLedgerReplayProjection, replace(projection, **changes))
+    evolved = replace(projection, **changes)
+    # Reconstruct so the return type is the concrete dataclass (python:S5886).
+    return RunLedgerReplayProjection(
+        **{member.name: getattr(evolved, member.name) for member in fields(evolved)}
+    )
 
 
 def _project_stage_completed(

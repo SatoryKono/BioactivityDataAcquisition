@@ -95,7 +95,7 @@ def _normalize_scd_config(
     return _normalize_scd_config_impl(scd_config, primary_keys)
 
 
-def DeltaTable(
+def delta_table(
     table_uri: str | Path,
     version: int | None = None,
     storage_options: dict[str, str] | None = None,
@@ -110,6 +110,10 @@ def DeltaTable(
         storage_options=storage_options,
         without_files=without_files,
     )
+
+
+# PascalCase alias retained for historical monkeypatch/test seams (python:S1542).
+DeltaTable = delta_table
 
 
 def write_deltalake(

@@ -1666,19 +1666,40 @@ def _composite_review_metadata(entry: dict[str, Any]) -> dict[str, str]:
     }
 
 
+def _string_list(value: object) -> list[str] | None:
+    if not isinstance(value, list):
+        return None
+    return [item for item in value if isinstance(item, str)]
+
+
 def _register_composite_review_fields(
     lookup: dict[tuple[str, str], dict[str, str]],
     *,
-    pipelines: list[object],
-    fields: list[object],
+    pipelines: list[str],
+    fields: list[str],
     metadata: dict[str, str],
 ) -> None:
     for pipeline_name in pipelines:
-        if not isinstance(pipeline_name, str):
-            continue
         for field_name in fields:
-            if isinstance(field_name, str):
-                lookup[(pipeline_name, field_name)] = metadata
+            lookup[(pipeline_name, field_name)] = metadata
+
+
+def _ingest_composite_review_entry(
+    lookup: dict[tuple[str, str], dict[str, str]],
+    entry: object,
+) -> None:
+    if not isinstance(entry, dict):
+        return
+    pipelines = _string_list(entry.get("pipelines", []))
+    fields = _string_list(entry.get("fields", []))
+    if pipelines is None or fields is None:
+        return
+    _register_composite_review_fields(
+        lookup,
+        pipelines=pipelines,
+        fields=fields,
+        metadata=_composite_review_metadata(entry),
+    )
 
 
 def _build_composite_unknown_typing_lookup(
@@ -1689,19 +1710,19 @@ def _build_composite_unknown_typing_lookup(
     if not isinstance(entries, list):
         return lookup
     for entry in entries:
-        if not isinstance(entry, dict):
-            continue
-        pipelines = entry.get("pipelines", [])
-        fields = entry.get("fields", [])
-        if not isinstance(pipelines, list) or not isinstance(fields, list):
-            continue
-        _register_composite_review_fields(
-            lookup,
-            pipelines=pipelines,
-            fields=fields,
-            metadata=_composite_review_metadata(entry),
-        )
+        _ingest_composite_review_entry(lookup, entry)
     return lookup
+
+
+def _cell_if_composite_unknown(
+    row: dict[str, str], side: str
+) -> tuple[str, str] | None:
+    pipeline_name = row.get(f"Pipeline {side}", "")
+    field_name = row.get(f"Field {side}", "")
+    field_type = str(row.get(f"Type {side}", "")).strip().lower()
+    if pipeline_name.startswith("composite_") and field_type == "unknown":
+        return pipeline_name, field_name
+    return None
 
 
 def _iter_composite_unknown_typing_cells(
@@ -1711,11 +1732,9 @@ def _iter_composite_unknown_typing_cells(
         return []
     cells: list[tuple[str, str]] = []
     for side in ("A", "B"):
-        pipeline_name = row.get(f"Pipeline {side}", "")
-        field_name = row.get(f"Field {side}", "")
-        field_type = str(row.get(f"Type {side}", "")).strip().lower()
-        if pipeline_name.startswith("composite_") and field_type == "unknown":
-            cells.append((pipeline_name, field_name))
+        cell = _cell_if_composite_unknown(row, side)
+        if cell is not None:
+            cells.append(cell)
     return cells
 
 
@@ -1741,6 +1760,40 @@ def _accumulate_composite_unknown_typing_review(
     cast(set[str], review_entry["fields"]).add(f"{pipeline_name}.{field_name}")
 
 
+def _record_composite_typing_cell(
+    *,
+    pipeline_name: str,
+    field_name: str,
+    lookup: dict[tuple[str, str], dict[str, str]],
+    reviews: dict[str, dict[str, object]],
+    uncovered: set[tuple[str, str]],
+) -> bool:
+    """Return True when the cell is covered by a review registry entry."""
+    metadata = lookup.get((pipeline_name, field_name))
+    if metadata is None:
+        uncovered.add((pipeline_name, field_name))
+        return False
+    _accumulate_composite_unknown_typing_review(
+        reviews,
+        pipeline_name=pipeline_name,
+        field_name=field_name,
+        metadata=metadata,
+    )
+    return True
+
+
+def _format_composite_typing_reviews(
+    reviews: dict[str, dict[str, object]],
+) -> list[dict[str, object]]:
+    return [
+        {
+            **entry,
+            "fields": ", ".join(sorted(cast(set[str], entry["fields"]))),
+        }
+        for _, entry in sorted(reviews.items())
+    ]
+
+
 def _reviewed_composite_unknown_typing_summary(
     rows: list[dict[str, str]],
     *,
@@ -1754,29 +1807,20 @@ def _reviewed_composite_unknown_typing_summary(
     for row in rows:
         for pipeline_name, field_name in _iter_composite_unknown_typing_cells(row):
             row_count += 1
-            metadata = lookup.get((pipeline_name, field_name))
-            if metadata is None:
-                uncovered.add((pipeline_name, field_name))
-                continue
-            covered_row_count += 1
-            _accumulate_composite_unknown_typing_review(
-                reviews,
+            if _record_composite_typing_cell(
                 pipeline_name=pipeline_name,
                 field_name=field_name,
-                metadata=metadata,
-            )
+                lookup=lookup,
+                reviews=reviews,
+                uncovered=uncovered,
+            ):
+                covered_row_count += 1
 
     return {
         "row_count": row_count,
         "covered_row_count": covered_row_count,
         "uncovered": sorted(uncovered),
-        "reviews": [
-            {
-                **entry,
-                "fields": ", ".join(sorted(cast(set[str], entry["fields"]))),
-            }
-            for _, entry in sorted(reviews.items())
-        ],
+        "reviews": _format_composite_typing_reviews(reviews),
     }
 
 

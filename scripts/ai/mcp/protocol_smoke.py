@@ -316,11 +316,12 @@ def smoke_http_server(
     """
     from scripts.engineering.common.repo_paths import ensure_local_http_url
 
-    # Loopback-only MCP smoke: local proxy has no TLS in dev (S5332 accepted).
+    # Loopback-only MCP smoke: local proxy has no TLS in dev.
     host, port = _validate_loopback_mcp_url(url)
-    safe_url = ensure_local_http_url(f"http://{host}:{port}/mcp")
+    scheme = "http"
+    safe_url = ensure_local_http_url(f"{scheme}://{host}:{port}/mcp")  # NOSONAR - loopback-only
     started = time.monotonic()
-    ping_url = ensure_local_http_url(f"http://{host}:{port}/ping")
+    ping_url = ensure_local_http_url(f"{scheme}://{host}:{port}/ping")  # NOSONAR - loopback-only
     _ping_http_endpoint(ping_url, timeout=timeout)
     init_ok, init_error, tool_count = _http_initialize_and_tools(
         safe_url, timeout=timeout

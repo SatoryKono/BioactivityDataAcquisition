@@ -125,20 +125,19 @@ class _DomainIOTaintVisitor(ast.NodeVisitor):
         self.violations: list[TaintFinding] = []
         self.allowed_exceptions: list[TaintFinding] = []
 
-    def visit_ClassDef(self, node: ast.ClassDef) -> None:
-        self.scope.append(node.name)
+    def _visit_scoped(self, node: ast.AST, name: str) -> None:
+        self.scope.append(name)
         self.generic_visit(node)
         self.scope.pop()
+
+    def visit_ClassDef(self, node: ast.ClassDef) -> None:
+        self._visit_scoped(node, node.name)
 
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
-        self.scope.append(node.name)
-        self.generic_visit(node)
-        self.scope.pop()
+        self._visit_scoped(node, node.name)
 
     def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
-        self.scope.append(node.name)
-        self.generic_visit(node)
-        self.scope.pop()
+        self._visit_scoped(node, node.name)
 
     def visit_Call(self, node: ast.Call) -> None:
         symbol = _qualified_name(node.func)
@@ -259,6 +258,19 @@ def _forbidden_import_finding(
     )
 
 
+def _append_import_finding(
+    finding: TaintFinding,
+    *,
+    allowed: bool,
+    violations: list[TaintFinding],
+    allowed_exceptions: list[TaintFinding],
+) -> None:
+    if allowed:
+        allowed_exceptions.append(finding)
+    else:
+        violations.append(finding)
+
+
 def _classify_import_module(
     *,
     relative_path: str,
@@ -273,10 +285,12 @@ def _classify_import_module(
             line=line,
             root_module=root_module,
         )
-        if allowed:
-            allowed_exceptions.append(finding)
-        else:
-            violations.append(finding)
+        _append_import_finding(
+            finding,
+            allowed=allowed,
+            violations=violations,
+            allowed_exceptions=allowed_exceptions,
+        )
         return
     forbidden = _forbidden_import_finding(
         relative_path=relative_path,

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import time
 from collections.abc import Sequence
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -139,7 +140,6 @@ def _post_trial_restore(
     trial_dir: Path,
     baselines: dict[str, Path],
     before: dict[str, Any],
-    after: dict[str, Any],
 ) -> tuple[bool, list[dict[str, Any]], dict[str, Any]]:
     post_trial_restore: list[dict[str, Any]] = []
     desktop_diagnostics = desktop_recovery_diagnostic_bundle(
@@ -185,12 +185,29 @@ def _post_trial_restore(
         if verification.exists():
             record_probe(state, verification)
     try:
-        after = bundle_volume_ids(runtime_origin, bundle)
+        after_volumes = bundle_volume_ids(runtime_origin, bundle)
     except RuntimeError:
-        after = {}
+        after_volumes = {}
         resolved = False
-    resolved = resolved and before == after
-    return resolved, post_trial_restore, after
+    resolved = resolved and before == after_volumes
+    return resolved, post_trial_restore, after_volumes
+
+
+@dataclass(frozen=True, slots=True)
+class _TrialOutcome:
+    """Pack trial result fields for persistence helpers (python:S107)."""
+
+    number: int
+    clean: bool
+    incident_id: str | None
+    duration: float
+    setup: list[dict[str, Any]]
+    steps: list[dict[str, Any]]
+    post_trial_restore: list[dict[str, Any]]
+    resolved: bool
+    capacity: dict[str, Any]
+    before: dict[str, Any]
+    after: dict[str, Any]
 
 
 def _persist_trial_outcome(
@@ -199,43 +216,33 @@ def _persist_trial_outcome(
     state_path: Path,
     evidence_dir: Path,
     trial_dir: Path,
-    number: int,
-    clean: bool,
-    incident_id: str | None,
-    duration: float,
-    setup: list[dict[str, Any]],
-    steps: list[dict[str, Any]],
-    post_trial_restore: list[dict[str, Any]],
-    resolved: bool,
-    capacity: dict[str, Any],
-    before: dict[str, Any],
-    after: dict[str, Any],
+    outcome: _TrialOutcome,
 ) -> None:
-    if before != after:
+    if outcome.before != outcome.after:
         state["volume_loss"] = True
     atomic_json(
         trial_dir / "trial.json",
         {
             "schema_version": "bioetl-docker-engine-recovery-v2",
-            "trial": number,
-            "success": clean,
-            "incident_id": incident_id,
-            "duration_seconds": round(duration, 3),
-            "setup": setup,
-            "steps": steps,
-            "post_trial_restore": post_trial_restore,
-            "incident_resolved": resolved,
-            "capacity": capacity,
-            "volume_ids_before": before,
-            "volume_ids_after": after,
+            "trial": outcome.number,
+            "success": outcome.clean,
+            "incident_id": outcome.incident_id,
+            "duration_seconds": round(outcome.duration, 3),
+            "setup": outcome.setup,
+            "steps": outcome.steps,
+            "post_trial_restore": outcome.post_trial_restore,
+            "incident_resolved": outcome.resolved,
+            "capacity": outcome.capacity,
+            "volume_ids_before": outcome.before,
+            "volume_ids_after": outcome.after,
         },
         replace=False,
     )
-    state["engine_recovery_trials"] = number
+    state["engine_recovery_trials"] = outcome.number
     state["engine_recovery_successes"] = int(state["engine_recovery_successes"]) + int(
-        clean
+        outcome.clean
     )
-    state["last_failure"] = None if resolved else incident_id
+    state["last_failure"] = None if outcome.resolved else outcome.incident_id
     index_and_save(state, state_path, evidence_dir)
 
 
@@ -291,24 +298,25 @@ def _run_one_recovery_trial(
             trial_dir=trial_dir,
             baselines=baselines,
             before=before,
-            after=after,
         )
     _persist_trial_outcome(
         state=state,
         state_path=state_path,
         evidence_dir=evidence_dir,
         trial_dir=trial_dir,
-        number=number,
-        clean=clean,
-        incident_id=incident_id,
-        duration=duration,
-        setup=setup,
-        steps=steps,
-        post_trial_restore=post_trial_restore,
-        resolved=resolved,
-        capacity=capacity,
-        before=before,
-        after=after,
+        outcome=_TrialOutcome(
+            number=number,
+            clean=clean,
+            incident_id=incident_id,
+            duration=duration,
+            setup=setup,
+            steps=steps,
+            post_trial_restore=post_trial_restore,
+            resolved=resolved,
+            capacity=capacity,
+            before=before,
+            after=after,
+        ),
     )
     return resolved
 

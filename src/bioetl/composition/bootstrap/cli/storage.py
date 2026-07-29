@@ -194,47 +194,66 @@ def bootstrap_vacuum_service(
     )
 
 
+def _pipeline_table_names(pipeline_name: str) -> tuple[str | None, str | None]:
+    """Resolve silver/gold table names for one registered pipeline."""
+    pipeline_cfg = load_pipeline_config(pipeline_name)
+    default_table = f"{pipeline_cfg.provider}.{pipeline_cfg.entity_type}"
+    silver_table = pipeline_cfg.silver_table or default_table
+    gold_table = pipeline_cfg.gold_table or default_table
+    return silver_table or None, gold_table or None
+
+
+def _collect_layer_tables(
+    effective_registry: PipelineRegistry,
+) -> tuple[set[str], set[str]]:
+    silver_tables: set[str] = set()
+    gold_tables: set[str] = set()
+    for pipeline_name in effective_registry.list_pipelines():
+        silver_table, gold_table = _pipeline_table_names(pipeline_name)
+        if silver_table:
+            silver_tables.add(silver_table)
+        if gold_table:
+            gold_tables.add(gold_table)
+    return silver_tables, gold_tables
+
+
+def _tables_for_layer(
+    layer: str,
+    *,
+    silver_tables: set[str],
+    gold_tables: set[str],
+) -> list[tuple[str, str]]:
+    tables: list[tuple[str, str]] = []
+    if layer in ("all", "silver"):
+        tables.extend((table_name, "silver") for table_name in sorted(silver_tables))
+    if layer in ("all", "gold"):
+        tables.extend((table_name, "gold") for table_name in sorted(gold_tables))
+    return tables
+
+
+def _resolve_registry_for_collector(
+    registry: PipelineRegistry | None,
+) -> PipelineRegistry:
+    if registry is not None:
+        return registry
+    effective_registry = create_registry()
+    register_all_pipelines(registry=effective_registry)
+    return effective_registry
+
+
 def _create_table_collector(
     *,
     registry: PipelineRegistry | None = None,
 ) -> Callable[[str], list[tuple[str, str]]]:
     """Create a callable that gathers Silver/Gold table names from registry configs."""
-    effective_registry = registry if registry is not None else create_registry()
-    if registry is None:
-        register_all_pipelines(registry=effective_registry)
-
-    def _pipeline_table_names(pipeline_name: str) -> tuple[str | None, str | None]:
-        pipeline_cfg = load_pipeline_config(pipeline_name)
-        silver_table = (
-            pipeline_cfg.silver_table
-            or f"{pipeline_cfg.provider}.{pipeline_cfg.entity_type}"
-        )
-        gold_table = (
-            pipeline_cfg.gold_table
-            or f"{pipeline_cfg.provider}.{pipeline_cfg.entity_type}"
-        )
-        return silver_table or None, gold_table or None
-
-    def _collect_layer_tables() -> tuple[set[str], set[str]]:
-        silver_tables: set[str] = set()
-        gold_tables: set[str] = set()
-        for pipeline_name in effective_registry.list_pipelines():
-            silver_table, gold_table = _pipeline_table_names(pipeline_name)
-            if silver_table:
-                silver_tables.add(silver_table)
-            if gold_table:
-                gold_tables.add(gold_table)
-        return silver_tables, gold_tables
+    effective_registry = _resolve_registry_for_collector(registry)
 
     def collect_tables(layer: str) -> list[tuple[str, str]]:
         """Collect `(table_name, layer)` pairs for requested layer scope."""
-        silver_tables, gold_tables = _collect_layer_tables()
-        tables: list[tuple[str, str]] = []
-        if layer in ("all", "silver"):
-            tables.extend((t, "silver") for t in sorted(silver_tables))
-        if layer in ("all", "gold"):
-            tables.extend((t, "gold") for t in sorted(gold_tables))
-        return tables
+        silver_tables, gold_tables = _collect_layer_tables(effective_registry)
+        return _tables_for_layer(
+            layer, silver_tables=silver_tables, gold_tables=gold_tables
+        )
 
     return collect_tables
 

@@ -51,7 +51,7 @@ def main() -> int:
             if file_path.is_file():
                 violations = check_file_forbidden_patterns(file_path)
                 all_violations.extend(violations)
-        except OSError as e:
+        except OSError:
             # Пропускаем файлы с слишком длинными путями (Windows limitation)
             skipped_files.append(str(file_path))
             print(
