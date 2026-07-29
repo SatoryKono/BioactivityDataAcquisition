@@ -40,9 +40,9 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
+
 class BatchWriteStorageProtocol(Protocol):
     """Minimal write-only storage contract for BatchWriter."""
-
     async def write_bronze(
         self,
         records: Iterator[bytes],
@@ -57,7 +57,6 @@ class BatchWriteStorageProtocol(Protocol):
     ) -> BronzeWriteResult:
         """Persist one Bronze batch and return write metadata."""
         ...
-
     async def write_silver(
         self,
         table_name: str,
@@ -73,7 +72,6 @@ class BatchWriteStorageProtocol(Protocol):
     ) -> SilverWriteResult | None:
         """Persist transformed records into Silver storage."""
         ...
-
     async def write_gold(
         self,
         table_name: str,
@@ -91,23 +89,22 @@ class BatchWriteStorageProtocol(Protocol):
         """Persist validated records into Gold storage."""
         ...
 
+
 @dataclass(frozen=True, slots=True)
 class BatchWriterOptions:
     """Optional writer collaborators grouped to reduce constructor width."""
-
     tracer: TracingPort | None = None
     lock_validator: BatchWriterLockValidator | None = None
     data_schema_config: DataSchemaConfig | None = None
     column_orderer: ColumnOrderService | None = None
     debug_export_service: DebugExportService | None = None
 
+
 class BatchWriter(BatchWriterTracingMixin, BatchWriterColumnsMixin, BatchWriterIOMixin):
     """Writes records to medallion layers via narrow write-only port.
-
     MRO order: tracing/columns collaborators before IO write methods so
     cross-mixin helpers resolve to real implementations.
     """
-
     def __init__(
         self,
         storage: BatchWriteStorageProtocol,
@@ -119,7 +116,6 @@ class BatchWriter(BatchWriterTracingMixin, BatchWriterColumnsMixin, BatchWriterI
         options: BatchWriterOptions | None = None,
     ) -> None:
         """Initialize writer dependencies and static write configuration.
-
         Args:
             storage: Write-only storage port for Bronze, Silver, and Gold layers.
             context: Pipeline execution context carrying run ID, run type, and logger.
@@ -139,7 +135,6 @@ class BatchWriter(BatchWriterTracingMixin, BatchWriterColumnsMixin, BatchWriterI
         self._tracer = opts.tracer
         self._lock_validator = opts.lock_validator
         self._debug_export_service = opts.debug_export_service
-
         self._provider = config.provider
         self._entity_type = config.entity_type
         self._silver_schema = config.silver_schema
@@ -153,14 +148,12 @@ class BatchWriter(BatchWriterTracingMixin, BatchWriterColumnsMixin, BatchWriterI
             else config.data_schema
         )
         self._column_orderer = opts.column_orderer
-
         self._silver_table_name = (
             self._table_config.silver_table or f"{self._provider}.{self._entity_type}"
         )
         self._gold_table_name = (
             self._table_config.gold_table or f"{self._provider}.{self._entity_type}"
         )
-
         silver_mode_val = self._table_config.silver_write_mode
         self._silver_mode = cast(
             Literal["merge", "append", "delete"],

@@ -417,9 +417,9 @@ def _hotspot_family_baseline_artifact_matches_builder(*, repo_root: Path) -> boo
     try:
         live_payload, live_markdown = report_hotspot_family_baseline.build_artifacts()
         live_json = json.dumps(live_payload, ensure_ascii=False, indent=2) + "\n"
-        committed_json = (
-            repo_root / HOTSPOT_FAMILY_BASELINE_JSON
-        ).read_text(encoding="utf-8")
+        committed_json = (repo_root / HOTSPOT_FAMILY_BASELINE_JSON).read_text(
+            encoding="utf-8"
+        )
         committed_markdown = (
             repo_root / "reports/quality/hotspot-family-baseline.md"
         ).read_text(encoding="utf-8")
@@ -433,9 +433,7 @@ def _remote_main_baseline_artifact_matches_builder(*, repo_root: Path) -> bool |
         live_payload = report_architecture_debt_remote_main_baseline.build_payload(
             repo_root=repo_root
         )
-        committed = _load_json(
-            repo_root, ARCHITECTURE_DEBT_REMOTE_MAIN_BASELINE_JSON
-        )
+        committed = _load_json(repo_root, ARCHITECTURE_DEBT_REMOTE_MAIN_BASELINE_JSON)
     except subprocess.CalledProcessError:
         return None
     except RuntimeError as exc:
@@ -1171,7 +1169,9 @@ def _full_app_duplication_gates(
         if isinstance(summary_metrics, dict)
         else {}
     )
-    if isinstance(total_budget, dict) and isinstance(total_budget.get("max_count"), int):
+    if isinstance(total_budget, dict) and isinstance(
+        total_budget.get("max_count"), int
+    ):
         summary = full_app_baseline.get("summary", {})
         current_total = (
             int(summary["total_duplicate_clusters"])
@@ -1341,7 +1341,9 @@ def _runtime_uuid_gates(runtime_uuid: dict[str, Any]) -> list[Gate]:
         _hard_limit_gate(
             name="production_uuid4_seams",
             metric="seams",
-            current=len(runtime_uuid_seams) if isinstance(runtime_uuid_seams, list) else 0,
+            current=len(runtime_uuid_seams)
+            if isinstance(runtime_uuid_seams, list)
+            else 0,
             limit=0,
             source_artifact=RUNTIME_UUID_SEAMS_YAML,
             remediation=(
@@ -1793,7 +1795,9 @@ def _write_artifacts(
         json.dumps(payload, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    md_out.write_text(render_markdown(payload), encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
+    md_out.write_text(
+        render_markdown(payload), encoding="utf-8"
+    )  # NOSONAR - path confined by resolve_output_path
 
 
 def _check_artifacts(

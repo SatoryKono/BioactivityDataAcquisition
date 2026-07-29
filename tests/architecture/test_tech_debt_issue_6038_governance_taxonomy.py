@@ -35,7 +35,7 @@ def _markdown_section(text: str, heading_prefix: str) -> str:
 
 def _mkdocs_block(name: str) -> str:
     match = re.search(
-        rf"^{re.escape(name)}:\s*\|\n(?P<body>(?:    .+\n)+)",
+        rf"^{re.escape(name)}:\s*\|\n(?P<body>(?:[ \t]+.+\n)+)",
         _read("mkdocs.yml"),
         flags=re.MULTILINE,
     )

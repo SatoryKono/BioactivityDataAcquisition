@@ -12,6 +12,7 @@ from bioetl.composition.runtime_builders._run_manifest_data_roots import (
 if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
 
+
 def control_plane_root(settings: Settings, leaf: str) -> Path:
     """Return the canonical control-plane output root for one leaf namespace."""
     return _resolve_data_root(settings) / "output" / "control" / leaf

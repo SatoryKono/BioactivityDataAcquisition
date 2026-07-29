@@ -24,11 +24,13 @@ from bioetl.domain.control_plane.reproducibility_policy import (
 if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
 
+
 @dataclass(frozen=True, slots=True)
 class ResolvedRunnerControlPlanePolicy:
     manifest_enabled: bool
     ledger_enabled: bool
     required_profile: str
+
 
 def resolve_required_artifact_lineage_layers(
     *,
@@ -39,6 +41,7 @@ def resolve_required_artifact_lineage_layers(
         yaml_config=yaml_config,
         skip_gold=skip_gold,
     )
+
 
 def validate_manifest_persistence_requirements(
     *,
@@ -55,6 +58,7 @@ def validate_manifest_persistence_requirements(
         required_profile=required_profile,
         strict_exact_replay_supported=strict_exact_replay_supported,
     )
+
 
 def validate_required_persistence_profile(
     *,
@@ -76,6 +80,7 @@ def validate_required_persistence_profile(
         missing_artifact_lineage_layers=missing_artifact_lineage_layers,
     )
 
+
 def validate_strict_data_root_policy(
     *,
     settings: Settings,
@@ -88,8 +93,10 @@ def validate_strict_data_root_policy(
         exact_replay=exact_replay,
     )
 
+
 def requires_artifact_publication_closure(required_profile: object) -> bool:
     return _requires_artifact_publication_closure_impl(required_profile)
+
 
 def validate_artifact_recorder_attachment(
     *,
@@ -106,6 +113,7 @@ def validate_artifact_recorder_attachment(
         missing_attach_method_count=missing_attach_method_count,
         failed_count=failed_count,
     )
+
 
 def resolve_control_plane_flags(
     settings: object,
@@ -152,6 +160,7 @@ def resolve_control_plane_flags(
         strict_exact_replay_supported=True,
     )
     return True, ledger_enabled
+
 
 def resolve_runner_control_plane_policy(
     settings: object,

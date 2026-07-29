@@ -21,7 +21,6 @@ if TYPE_CHECKING:
 
 class _FilteredDataSourceState(Protocol):
     """Structural state contract for FilteredDataSource support helpers."""
-
     _data_source: DataSourcePort
     _filter_reader: InputFilterPort | None
     _filter_config: InputFilterConfig
@@ -41,18 +40,14 @@ CSV_MULTI_COLUMN_SOURCE_KIND = "csv_multi_column"
 async def enter_filtered_data_source(state: _FilteredDataSourceState) -> None:
     """Enter the wrapped adapter and preload any configured filters."""
     await state._data_source.__aenter__()
-
     if not state._filter_config.enabled:
         return
-
     if state._filter_config.direct_multi_filter_ids:
         load_direct_multi_filter_ids(state)
         return
-
     if state._filter_config.direct_filter_ids:
         load_direct_filter_ids(state)
         return
-
     await load_csv_filter_ids(state)
 
 def log_filter_file_not_found(
@@ -106,11 +101,9 @@ async def load_csv_filter_ids(state: _FilteredDataSourceState) -> None:
     """Load filter IDs from CSV file when a reader and source path exist."""
     if not state._filter_reader:
         return
-
     source_path = state._filter_config.source_path
     if not source_path:
         return
-
     columns = state._filter_config.get_columns()
     try:
         if len(columns) > 1:
@@ -168,7 +161,6 @@ def _record_filter_metrics(state: _FilteredDataSourceState) -> None:
     """Record single-column filter loading metrics."""
     if not state._metrics or not state._filter_result:
         return
-
     state._metrics.increment_counter(
         "bioetl_filter_ids_loaded_total",
         state._filter_result.unique_count,
@@ -191,7 +183,6 @@ def _record_multi_filter_metrics(state: _FilteredDataSourceState) -> None:
     """Record multi-column filter loading metrics."""
     if not state._metrics or not state._filter_result:
         return
-
     if state._valid_combinations:
         state._metrics.increment_counter(
             "bioetl_filter_combinations_loaded_total",
@@ -201,7 +192,6 @@ def _record_multi_filter_metrics(state: _FilteredDataSourceState) -> None:
                 "source_kind": CSV_MULTI_COLUMN_SOURCE_KIND,
             },
         )
-
     for field, ids in state._filter_result.column_ids.items():
         # Keep the counter aligned with the registered metric schema.
         # Per-field breakdown is useful, but it cannot be attached here unless the

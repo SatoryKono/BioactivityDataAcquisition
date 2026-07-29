@@ -225,7 +225,9 @@ def _manifest_payload(
         "source": str(source),
         "target": str(target),
         "source_inventory": asdict(inventory),
-        "completed_at_utc": datetime.now(UTC).isoformat().replace(_UTC_OFFSET_SUFFIX, "Z"),
+        "completed_at_utc": datetime.now(UTC)
+        .isoformat()
+        .replace(_UTC_OFFSET_SUFFIX, "Z"),
     }
 
 

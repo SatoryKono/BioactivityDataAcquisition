@@ -53,6 +53,7 @@ __all__ = [
     "resolve_health_check_mode",
 ]
 
+
 def __getattr__(name: str) -> object:  # pragma: no cover
     """Lazily expose compatibility symbols from the public resolver facade."""
     if TYPE_CHECKING:
@@ -64,6 +65,7 @@ def __getattr__(name: str) -> object:  # pragma: no cover
 
         return ResolvedVacuumSettings
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 
 def prepare_runner_inputs(
     *,

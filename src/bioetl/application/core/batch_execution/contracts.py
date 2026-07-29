@@ -9,9 +9,9 @@ if TYPE_CHECKING:
 
 _BatchResultT = TypeVar("_BatchResultT", covariant=True)
 
+
 class BatchExecutionCountersSnapshot(Protocol):
     """Shared counter snapshot required by batch-execution finalization flows."""
-
     records_fetched: int
     records_bronze: int
     records_silver: int
@@ -19,25 +19,24 @@ class BatchExecutionCountersSnapshot(Protocol):
     records_gold_excluded_by_contract: int
     records_quarantined: int
 
+
 class BatchExecutionStatisticsState(BatchExecutionCountersSnapshot, Protocol):
     """Extended statistics snapshot used for public batch/run projections."""
-
     records_filtered_out: int
     _source_batch_ids: list[str]
 
+
 class BatchExecutionMemoryState(Protocol):
     """Memory sizing statistics used during execution finalization."""
-
     batch_size_reductions: int
     min_batch_size_used: int
-
     def decision_trace_dicts(self) -> tuple[JsonDict, ...]:
         """Return immutable decision-trace payloads for batch sizing."""
         ...
 
+
 class BatchResultBuilderProtocol(Protocol[_BatchResultT]):
     """Callable result factory used to project cumulative batch counters."""
-
     def __call__(
         self,
         *,
@@ -47,11 +46,10 @@ class BatchResultBuilderProtocol(Protocol[_BatchResultT]):
         quarantined_count: int,
     ) -> _BatchResultT: ...
 
+
 class BatchExecutionStateProtocol(BatchExecutionStatisticsState, Protocol):
     """Mutable executor state required to apply processed-batch outcomes."""
-
     def _should_collect_dq_data(self) -> bool: ...
-
     def _collect_dq_data(
         self,
         *,

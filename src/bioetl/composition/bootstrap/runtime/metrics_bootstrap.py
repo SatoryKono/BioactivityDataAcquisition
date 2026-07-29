@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 
 MetricsFactory = Callable[[], MetricsPort]
 
+
 class _MetricsService(Protocol):
     def start(
         self,
@@ -26,6 +27,7 @@ class _MetricsService(Protocol):
         retry_delay: float,
     ) -> StartResult: ...
 
+
 MetricsServiceFactory = Callable[[], _MetricsService]
 
 __all__ = [
@@ -35,11 +37,13 @@ __all__ = [
     "resolve_metrics_fail_fast",
 ]
 
+
 def _default_metrics_factory() -> MetricsPort:
     """Create the Prometheus metrics adapter only when metrics are enabled."""
     from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 
     return PrometheusMetrics()
+
 
 def _metrics_enabled(settings: object) -> bool:
     """Support both nested Settings.observability and legacy flat test doubles."""
@@ -48,12 +52,14 @@ def _metrics_enabled(settings: object) -> bool:
         return bool(observability.metrics_enabled)
     return bool(getattr(settings, "metrics_enabled", False))
 
+
 def _is_production_launcher(settings: object) -> bool:
     """Return True when the runtime launcher is executing in production mode."""
     env = getattr(settings, "env", None)
     test_mode = getattr(settings, "test_mode", False)
     test_mode_enabled = test_mode if isinstance(test_mode, bool) else False
     return env == "prod" and not test_mode_enabled
+
 
 def _observability_field_explicitly_set(
     observability: object | None,
@@ -62,6 +68,7 @@ def _observability_field_explicitly_set(
     """Return True when a pydantic settings field was explicitly configured."""
     fields_set: object = getattr(observability, "model_fields_set", frozenset())
     return isinstance(fields_set, (set, frozenset)) and field_name in fields_set
+
 
 def resolve_metrics_fail_fast(settings: Settings) -> bool:
     """Resolve metrics startup fail-fast policy for runtime launcher paths.
@@ -78,6 +85,7 @@ def resolve_metrics_fail_fast(settings: Settings) -> bool:
     ):
         return True
     return configured_fail_fast
+
 
 def bootstrap_metrics(
     settings: Settings,
@@ -99,6 +107,7 @@ def bootstrap_metrics(
     factory = metrics_factory or _default_metrics_factory
     return factory()
 
+
 def create_metrics_service(
     *,
     logger: LoggerPort | None = None,
@@ -110,6 +119,7 @@ def create_metrics_service(
     )
 
     return _create_metrics_service(logger=logger, tracer=tracer)
+
 
 def maybe_start_metrics_server(
     settings: Settings,

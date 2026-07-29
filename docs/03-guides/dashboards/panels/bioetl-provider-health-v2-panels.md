@@ -162,7 +162,7 @@ Dashboard `3. Provider Health` monitors provider current status, health-check la
 - **Purpose:** Group selected-range provider health and transport diagnostics.
 - **Data sources:** Prometheus range evidence from the nested panels.
 
-### 31. Run context (thin) → Run Explorer
+### 31. Run context (thin) -> Run Explorer hub
 - **Type:** Row
 - **Purpose:** Group selected-run identity and processed-record HTTP evidence.
 - **Data sources:** BioETL Ops HTTP.

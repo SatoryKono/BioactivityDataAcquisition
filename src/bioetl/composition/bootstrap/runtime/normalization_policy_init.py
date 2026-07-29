@@ -9,6 +9,7 @@ from bioetl.domain.normalization.profiles.chembl_policy_registry_data import (
     ChemblPolicyRegistryData,
 )
 
+
 @cache
 def _load_chembl_policy_registry_data(
     configs_root_key: str,
@@ -20,6 +21,7 @@ def _load_chembl_policy_registry_data(
 
     loader = ChemblPolicyRegistryLoader(Path(configs_root_key))
     return loader.load()
+
 
 def initialize_chembl_policy_registry(configs_root: Path) -> None:
     """Load ChEMBL policy registries from configs and inject them into domain state.

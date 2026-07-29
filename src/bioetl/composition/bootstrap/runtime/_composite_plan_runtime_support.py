@@ -38,6 +38,7 @@ if TYPE_CHECKING:
         ConfigPayloadValidator,
     )
 
+
 @dataclass(frozen=True, slots=True)
 class BootstrapRuntimeResources:
     """Resolved runtime-basics bundle shared by bootstrap orchestration."""
@@ -76,6 +77,7 @@ class BootstrapRuntimeResources:
     def clock(self) -> ClockPort | None:
         return self.infra_context.clock
 
+
 def load_runtime_composite_config_impl(
     name: str,
     *,
@@ -92,6 +94,7 @@ def load_runtime_composite_config_impl(
         )
     except ValidationError as error:
         raise ValueError(f"Invalid composite config '{name}': {error}") from error
+
 
 def build_bootstrap_runtime_resources(
     *,
@@ -112,6 +115,7 @@ def build_bootstrap_runtime_resources(
         "metrics/tracer/storage/lock; legacy tuple bundles are no longer supported"
     )
 
+
 def build_bootstrap_support_services(
     *,
     build_support_services_fn: Callable[..., object],
@@ -125,6 +129,7 @@ def build_bootstrap_support_services(
         runtime=runtime,
         infra_context=resources.infra_context,
     )
+
 
 def create_composite_runner_from_plan_impl(
     *,
@@ -149,6 +154,7 @@ def create_composite_runner_from_plan_impl(
         support_services=plan.support_services,
         runner_factory=runner_factory,
     )
+
 
 def _coerce_named_runtime_bundle(
     resolved_bundle: object,

@@ -9,20 +9,22 @@ from typing import TYPE_CHECKING, Any, cast
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
+
 @dataclass(frozen=True, slots=True)
 class PostrunFailurePolicySpec:
     """Structured log policy for one postrun failure category."""
-
     event: str
     strict_reason: str
     strict_reason_code: str
     warning_reason: str
     warning_reason_code: str
 
+
 def is_strict_validation_enabled(runtime: object) -> bool:
     """Return True only when strict validation is explicitly enabled."""
     value = getattr(runtime, "strict_validation", False)
     return bool(value) if isinstance(value, bool) else False
+
 
 def apply_postrun_failure_policy(
     *,
@@ -34,12 +36,10 @@ def apply_postrun_failure_policy(
     emit_warning_error_log: bool = False,
 ) -> bool:
     """Log one postrun failure according to strict/warning mode policy.
-
     Returns:
         True when the caller should re-raise the exception, False otherwise.
     """
     log_extra = dict(log_fields or {})
-
     if is_strict_validation_enabled(runtime):
         logger.error(
             spec.event,
@@ -51,7 +51,6 @@ def apply_postrun_failure_policy(
             **log_extra,
         )
         return True
-
     warning_kwargs = {
         "error": str(error),
         "error_type": type(error).__name__,
@@ -64,6 +63,7 @@ def apply_postrun_failure_policy(
         logger.error(spec.event, **warning_kwargs)
     logger.warning(spec.event, **warning_kwargs)
     return False
+
 
 def apply_postrun_failure_policy_or_raise(
     *,
@@ -86,23 +86,21 @@ def apply_postrun_failure_policy_or_raise(
     if should_raise:
         raise error
 
+
 class PostrunStrictValidationMixin:
     """Compatibility mixin for postrun collaborators exposing strict mode check."""
-
     if TYPE_CHECKING:
         _runtime: object = cast(Any, None)  # Any: host default (PD4)
-
     def _is_strict_validation_enabled(self) -> bool:
         """Compatibility wrapper around shared strict-mode evaluation."""
         return is_strict_validation_enabled(self._runtime)
 
+
 class PostrunFailureHandlingMixin(PostrunStrictValidationMixin):
     """Shared allowlisted failure handling for postrun collaborators."""
-
     if TYPE_CHECKING:
         _logger: LoggerPort = cast(Any, None)  # Any: host default (PD4)
         _FAILURE_POLICY: PostrunFailurePolicySpec = cast(Any, None)  # Any: host default (PD4)
-
     def _handle_allowlisted_failure(
         self,
         error: BaseException,

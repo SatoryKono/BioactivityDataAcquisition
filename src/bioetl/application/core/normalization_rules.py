@@ -6,10 +6,10 @@ from dataclasses import dataclass, field
 
 __all__ = ["NormalizationRulesPolicy"]
 
+
 @dataclass(frozen=True, slots=True)
 class NormalizationRulesPolicy:
     """Deterministic field buckets for centralized record normalization."""
-
     doi_fields: frozenset[str] = field(
         default_factory=lambda: frozenset({"doi", "publication_doi"})
     )

@@ -17,4 +17,5 @@ def install_lazy_export_facade(
     """Install lazy export hooks for one application-core facade module."""
     _install_lazy_export_facade(namespace, module_name, public_exports)
 
+
 __all__ = ["install_lazy_export_facade"]

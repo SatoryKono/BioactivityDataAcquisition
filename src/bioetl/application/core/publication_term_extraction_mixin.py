@@ -16,9 +16,9 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports import FilterableDataSourcePort
 
+
 class PublicationTermExtractionMixin:
     """Shared publication->term extraction flow."""
-
     async def _yield_terms_from_publications(
         self: Any,  # Any: mixin self type is provided structurally by composed adapter class
         publications: AsyncIterator[BronzeRecord],
@@ -33,7 +33,6 @@ class PublicationTermExtractionMixin:
                 )
                 if not publication_id:
                     continue
-
                 terms = self._extract_terms_from_publication(
                     publication, publication_id
                 )
@@ -47,10 +46,8 @@ class PublicationTermExtractionMixin:
             if callable(aclose):
                 from collections.abc import Awaitable, Callable
                 from typing import cast
-
                 aclose_fn = cast(Callable[[], Awaitable[object]], aclose)
                 await aclose_fn()
-
     async def _fetch_publication_terms(
         self: Any,  # Any: mixin self type is provided structurally by composed adapter class
         limit: int | None,
@@ -58,7 +55,6 @@ class PublicationTermExtractionMixin:
         filter_field: str | None,
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch publications from wrapped source and yield extracted terms.
-
         Args:
             limit: Optional maximum number of term records to yield. The upstream
                 publication fetch uses a multiplied limit to account for term expansion.
@@ -76,23 +72,19 @@ class PublicationTermExtractionMixin:
         )
         async for term in self._yield_terms_from_publications(publications, limit):
             yield term
-
     def _extract_terms_from_publication(
         self: Any,  # Any: mixin self type is provided structurally by composed adapter class
         record: BronzeRecord,
         publication_id: str,
     ) -> list[BronzeRecord]:
         """Extract and flatten all terms from a publication record.
-
         Args:
             record: Raw Bronze publication record containing ``mesh_terms`` and ``keywords`` fields.
             publication_id: Identifier of the parent publication used to link each term record.
-
         Returns:
             List of Bronze term records, one per MeSH heading, MeSH qualifier, or keyword found.
         """
         return extract_terms_from_publication(record, publication_id)
-
     def _create_term_record(
         self: Any,  # Any: mixin self type is provided structurally by composed adapter class
         publication_id: str,
@@ -102,14 +94,12 @@ class PublicationTermExtractionMixin:
         qualifier: str | None,
     ) -> BronzeRecord:
         """Create a single publication-term record.
-
         Args:
             publication_id: Identifier of the parent publication.
             term: Text of the extracted term, stripped of surrounding whitespace.
             term_type: Controlled vocabulary type (e.g., ``'MESH_HEADING'``, ``'KEYWORD'``).
             mesh_id: Optional MeSH concept identifier associated with the term.
             qualifier: Optional MeSH qualifier string. Pass None for non-qualified terms.
-
         Returns:
             Bronze record dict with ``entity_id``, ``publication_id``, ``term``,
             ``term_type``, ``mesh_id``, and ``qualifier`` fields.
@@ -121,7 +111,6 @@ class PublicationTermExtractionMixin:
             mesh_id=mesh_id,
             qualifier=qualifier,
         )
-
     def _compute_entity_id(
         self: Any,  # Any: mixin self type is provided structurally by composed adapter class
         publication_id: str,
@@ -129,12 +118,10 @@ class PublicationTermExtractionMixin:
         term: str,
     ) -> str:
         """Compute deterministic term entity ID.
-
         Args:
             publication_id: Identifier of the parent publication.
             term_type: Controlled vocabulary type (e.g., ``'MESH_HEADING'``).
             term: Normalized term text used as part of the hash input.
-
         Returns:
             Deterministic string entity ID derived from the composite key.
         """
@@ -143,7 +130,6 @@ class PublicationTermExtractionMixin:
             term_type=term_type,
             term=term,
         )
-
     async def _fetch_filtered_publication_terms(
         self: Any,  # Any: mixin self type is provided structurally by composed adapter class
         filterable: FilterableDataSourcePort,
@@ -152,7 +138,6 @@ class PublicationTermExtractionMixin:
         limit: int | None,
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch filtered publications and yield extracted terms.
-
         Args:
             filterable: Filterable data source port to delegate publication fetching to.
             filter_ids: List of identifier values to filter upstream publications by.

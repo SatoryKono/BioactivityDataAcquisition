@@ -134,7 +134,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Evidence-aware replay/resume verdict. state×confidence×basis: INCOMPLETE means required evidence is missing/stale (never silent green). Cross-check the four trust cards (replay, checkpoint, integrity, telemetry missing). Evidence-aware Control Plane replay/resume verdict. 0=OK only when replay, manifest/ledger, checkpoint freshness, and required telemetry are complete; 1=WARN, 2=CRIT, 3=INCOMPLETE for missing/stale evidence, null=UNKNOWN/query gap. Inspect the four evidence cards and Next Action before replay or resume.",
+      "description": "Evidence-aware replay/resume verdict. state×confidence×basis: INCOMPLETE means required evidence is missing/stale (never silent green). Cross-check the four trust cards (replay, checkpoint, integrity, telemetry missing). Evidence-aware Control Plane replay/resume verdict. 0=OK only when replay, manifest/ledger, checkpoint freshness, and required telemetry are complete; 1=WARN, 2=CRIT, 3=INCOMPLETE for missing/stale evidence, null=UNKNOWN/query gap. Inspect the four evidence cards and Next Action before replay or resume. DSA-03: Primary recovery next_action; color secondary.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -3841,7 +3841,7 @@
     },
     {
       "type": "row",
-      "title": "Run context (thin) → Run Explorer",
+      "title": "Run context (thin) -> Run Explorer hub",
       "collapsed": true,
       "gridPos": {
         "h": 1,
@@ -3862,7 +3862,7 @@
             "y": 18
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero.",
+          "description": "Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero. DSA-04: thin shell; canonical hub Run Explorer.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3987,7 +3987,7 @@
             "y": 18
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "Current stage/outcome accounting evidence for the shared pipeline/run_type context. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero.",
+          "description": "Current stage/outcome accounting evidence for the shared pipeline/run_type context. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero. DSA-04: thin shell; canonical hub Run Explorer.",
           "fieldConfig": {
             "defaults": {
               "custom": {

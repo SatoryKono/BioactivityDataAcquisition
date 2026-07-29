@@ -9,21 +9,22 @@ from numbers import Real
 
 class ThresholdBreachReason(Enum):
     """Classification of DQ threshold breaches."""
-
     NONE = "none"
     SOFT = "soft"
     HARD = "hard"
 
+
 @dataclass(frozen=True, slots=True)
 class DQThresholdCheckResult:
     """Result of DQ threshold validation."""
-
     breach: ThresholdBreachReason
     error_rate: float
     soft_threshold: float | None
     hard_threshold: float | None
 
+
 ThresholdBreach = ThresholdBreachReason
+
 
 def check_dq_thresholds(
     *,
@@ -40,9 +41,7 @@ def check_dq_thresholds(
             soft_threshold=soft_threshold,
             hard_threshold=hard_threshold,
         )
-
     error_rate = error_count / record_count
-
     if hard_threshold is not None and error_rate >= float(hard_threshold):
         return DQThresholdCheckResult(
             breach=ThresholdBreachReason.HARD,
@@ -50,7 +49,6 @@ def check_dq_thresholds(
             soft_threshold=soft_threshold,
             hard_threshold=hard_threshold,
         )
-
     if soft_threshold is not None and error_rate >= float(soft_threshold):
         return DQThresholdCheckResult(
             breach=ThresholdBreachReason.SOFT,
@@ -58,13 +56,13 @@ def check_dq_thresholds(
             soft_threshold=soft_threshold,
             hard_threshold=hard_threshold,
         )
-
     return DQThresholdCheckResult(
         breach=ThresholdBreachReason.NONE,
         error_rate=error_rate,
         soft_threshold=soft_threshold,
         hard_threshold=hard_threshold,
     )
+
 
 def classify_dq_threshold_breach(
     error_rate: float,
@@ -74,15 +72,15 @@ def classify_dq_threshold_breach(
     """Classify the threshold breach for a concrete error rate."""
     if hard_threshold is not None and error_rate >= hard_threshold:
         return ThresholdBreachReason.HARD
-
     if soft_threshold is not None and error_rate >= soft_threshold:
         return ThresholdBreachReason.SOFT
-
     return ThresholdBreachReason.NONE
+
 
 def compute_error_rate(error_count: int, record_count: int) -> float:
     """Compute the error rate, guarding the zero-record case."""
     return error_count / record_count if record_count > 0 else 0.0
+
 
 def resolve_threshold_value(
     dq_config: object | None,
@@ -96,6 +94,7 @@ def resolve_threshold_value(
         if isinstance(value, Real) and not isinstance(value, bool):
             return float(value)
     return None
+
 
 __all__ = [
     "DQThresholdCheckResult",

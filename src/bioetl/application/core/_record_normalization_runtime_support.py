@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 _MALFORMED_JSON_EVENT = "silver_normalization_malformed_json"
 _MALFORMED_JSON_REASON_CODE = "malformed_json_normalized_to_null"
 
+
 def project_normalization_findings(
     findings: tuple[_NormalizationFinding, ...],
     record: JsonDict,
@@ -31,13 +32,10 @@ def project_normalization_findings(
     """Project transient normalization findings into DQ flags and logs."""
     if not findings:
         return record
-
     projected = dict(record)
     projected["_dq_warn"] = True
-
     if context is None:
         return projected
-
     for finding in findings:
         context.logger.warning(
             _MALFORMED_JSON_EVENT,
@@ -52,6 +50,7 @@ def project_normalization_findings(
         )
     return projected
 
+
 def profile_json_runtime_finding(
     rule: FieldRule,
     *,
@@ -63,11 +62,9 @@ def profile_json_runtime_finding(
     """Return one runtime finding when JSON normalization collapses invalid input."""
     if normalized_value is not None or not isinstance(raw_value, str):
         return None
-
     normalized_text = normalize_string(raw_value)
     if normalized_text is None or not _rule_uses_json_policy(rule):
         return None
-
     try:
         canonicalize_json_string(normalized_text)
     except ValueError:
@@ -77,6 +74,7 @@ def profile_json_runtime_finding(
             action_taken="set_null_and_warn",
         )
     return None
+
 
 def should_forbid_fallback(
     *,
@@ -93,6 +91,7 @@ def should_forbid_fallback(
         and field_name not in passthrough_fields
     )
 
+
 def raise_profile_gap(provider: str, entity_type: str | None, field_name: str) -> None:
     """Raise the canonical profile-gap error for implicit fallback attempts."""
     entity_label = entity_type or "<unknown>"
@@ -102,6 +101,7 @@ def raise_profile_gap(provider: str, entity_type: str | None, field_name: str) -
         "add an explicit normalization profile rule or enable "
         "allow_compatibility_fallback for bounded compatibility paths"
     )
+
 
 def _rule_uses_json_policy(rule: FieldRule) -> bool:
     notes = (rule.notes or "").casefold()

@@ -25,9 +25,11 @@ from bioetl.domain.types import BronzeRecord
 if TYPE_CHECKING:
     from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
 
+
 class _BatchLoopStateProtocol(Protocol):
     current_batch_size: int
     batch: list[BronzeRecord]
+
 
 class _BatchStateUpdater(Protocol):
     def __call__(
@@ -36,20 +38,24 @@ class _BatchStateUpdater(Protocol):
         start_index: int,
     ) -> Awaitable[None]: ...
 
+
 class _BatchFlushContextProtocol(Protocol):
     process_batch: _BatchStateUpdater
     memory_manager: BatchMemoryManagerService
     progress_service: _BatchProgressReporterProtocol
     progress_state: _BatchProgressSnapshot
 
+
 class _BatchIterationContextProtocol(_BatchFlushContextProtocol, Protocol):
     checkpoint_recovery_service: _BatchCheckpointRecoveryProtocol
     resume_offset: int
     checkpoint_interval: int
 
+
 def build_start_index(*, records_fetched: int, batch: list[BronzeRecord]) -> int:
     """Build absolute start index for the current batch buffer."""
     return records_fetched - len(batch)
+
 
 async def flush_batch_if_needed(
     *,
@@ -76,6 +82,7 @@ async def flush_batch_if_needed(
         state=flush_context.progress_state,
     )
 
+
 async def flush_remaining_batch(
     *,
     loop_state: _BatchLoopStateProtocol,
@@ -92,6 +99,7 @@ async def flush_remaining_batch(
             batch=loop_state.batch,
         ),
     )
+
 
 async def process_extracted_record_iteration(
     *,

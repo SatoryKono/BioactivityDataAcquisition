@@ -6,6 +6,7 @@ dashboard. Run from repo root:
 
     python scripts/ops/observability/grafana/render_nav_bus.py
 """
+
 from __future__ import annotations
 
 import json
@@ -72,8 +73,7 @@ LINK_STYLE = (
     "border:1px solid #94a3b8;text-decoration:none"
 )
 CURRENT_STYLE = (
-    f"{CHIP_BASE};color:#fff;background:#1d4ed8;"
-    "border:2px solid #7dd3fc;cursor:default"
+    f"{CHIP_BASE};color:#fff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default"
 )
 CONTAINER_STYLE = (
     "display:flex;gap:6px;flex-wrap:wrap;align-items:center;"
@@ -138,23 +138,22 @@ def _url_for(target: dict[str, str], *, source_uid: str) -> str:
 
 def _html_href(url: str) -> str:
     return (
-        url.replace("&", "&amp;")
-        .replace("$", "$")  # keep template vars
+        url.replace("&", "&amp;").replace("$", "$")  # keep template vars
     )
 
 
 def _chip_html(item: dict[str, str], *, current_uid: str, source_uid: str) -> str:
     short = item["title"].split(". ", 1)[-1]
-    title_attr = f'{item["title"]} ({short})'
+    title_attr = f"{item['title']} ({short})"
     if item["uid"] == current_uid:
         return (
             f'<span aria-current="page" title="{title_attr}" style="{CURRENT_STYLE}">'
-            f'{item["title"]}</span>'
+            f"{item['title']}</span>"
         )
     href = _html_href(_url_for(item, source_uid=source_uid))
     return (
         f'<a style="{LINK_STYLE}" title="{title_attr}" href="{href}">'
-        f'{item["title"]}</a>'
+        f"{item['title']}</a>"
     )
 
 

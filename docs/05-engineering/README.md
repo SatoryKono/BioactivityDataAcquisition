@@ -27,6 +27,7 @@ SSOT.
 | Architecture / layering | `docs/02-architecture/` |
 | Operator runbooks | `docs/05-operations/runbooks/` |
 | Active plans | `docs/plans/` (thin; one active backlog) |
+| Test telemetry baseline | [test-telemetry-baseline.md](test-telemetry-baseline.md) |
 | Historical engineering closeouts | `docs/99-archive/engineering/` |
 | Normalization / control-plane history | archived engineering plans + ADRs 014/044 |
 

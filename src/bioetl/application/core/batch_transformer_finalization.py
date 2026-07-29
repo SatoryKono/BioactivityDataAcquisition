@@ -22,25 +22,20 @@ from bioetl.domain.types import BronzeRecord
 
 class _BatchTransformContext(Protocol):
     """Minimal transform context surface needed by finalization helpers."""
-
     @property
     def logger(self) -> LoggerPort: ...
 
 class _TransformConfig(Protocol):
     """Loose transform config surface exposing DQ configuration."""
-
     @property
     def dq_config(self) -> object | None: ...
 
 class _BatchMetricsRecorderService(Protocol):
     """Minimal batch-metrics surface needed by finalization helpers."""
-
     @property
     def error_count(self) -> int | None: ...
-
     @property
     def batch_error_count(self) -> int | None: ...
-
     def track_dq_validation_failure(self, *, stage: str, severity: str) -> None: ...
 
 FlushCountCallback = Callable[[], Awaitable[object]]
@@ -68,14 +63,12 @@ async def finalize_batch_transform_result(
         "hard_fail_threshold",
     )
     error_count = _resolve_error_count(batch_metrics=batch_metrics, state=state)
-
     threshold_result = check_dq_thresholds(
         error_count=error_count,
         record_count=len(records),
         soft_threshold=soft_threshold,
         hard_threshold=hard_threshold,
     )
-
     if threshold_result.breach == ThresholdBreachReason.HARD:
         assert threshold_result.hard_threshold is not None
         context.logger.error(
@@ -94,7 +87,6 @@ async def finalize_batch_transform_result(
             error_rate=threshold_result.error_rate,
             threshold=threshold_result.hard_threshold,
         )
-
     if threshold_result.breach == ThresholdBreachReason.SOFT:
         context.logger.warning(
             "DQ Soft Threshold exceeded",
@@ -109,7 +101,6 @@ async def finalize_batch_transform_result(
             stage="threshold",
             severity="soft_fail",
         )
-
     state.records_quarantine_failed += await _await_flush_count(flush_filtered_records)
     state.records_quarantine_failed += await _await_flush_count(flush_dq_records)
     return build_transform_result(state)
@@ -141,7 +132,6 @@ def _resolve_error_count(
     state: TransformAggregationState,
 ) -> int:
     """Resolve a per-batch DQ error count for threshold evaluation.
-
     Hard/soft thresholds compare ``error_count / len(current_batch)``. The
     numerator **must** be batch-local. Using run-scoped ``error_count`` against
     the current batch size produces impossible rates (e.g. 620%) on multi-batch

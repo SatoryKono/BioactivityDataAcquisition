@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 
 __all__ = ["normalize_snapshot", "to_serializable_mapping"]
 
+
 def normalize_snapshot(value: object) -> object:
     """Normalize snapshot values into JSON-serializable primitives."""
     if not isinstance(value, type) and is_dataclass(value):
@@ -31,6 +32,7 @@ def normalize_snapshot(value: object) -> object:
     if isinstance(value, UUID):
         return str(value)
     return value
+
 
 def to_serializable_mapping(value: object) -> dict[str, object]:
     """Return a normalized mapping for manifest payload serialization."""

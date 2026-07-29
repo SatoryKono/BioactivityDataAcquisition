@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, cast
 if TYPE_CHECKING:
     from _typeshed import DataclassInstance
 
+
 def bind_context_fields[ContextT](
     context: ContextT,
     *,

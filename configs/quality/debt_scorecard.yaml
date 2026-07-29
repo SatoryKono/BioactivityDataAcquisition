@@ -457,7 +457,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 187
-      total_loc: 22072
+      total_loc: 21834
       files_ge_250_loc: 0
       helper_function_ratio: 0.365
       max_internal_fan_in: 8
@@ -465,7 +465,7 @@ hotspot_family_ratchets:
     trend:
       status: reduced_2026-07-28_pd05_core_blank_collapse
       next_action: '2026-07-28 PD-05 collapses excess blank lines in application/core, lowering total_loc
-        22735->22043 while files_ge_250_loc remains 0. Bounded-growth budgets stay flat at 0 files_ge_250_loc
+        22735->21805 while files_ge_250_loc remains 0. Bounded-growth budgets stay flat at 0 files_ge_250_loc
         and max_internal_fan_in 10; no technical-debt budget is increased. Hotspot baseline refreshed
         via report_hotspot_family_baseline --update.
 
@@ -487,7 +487,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 51
-      total_loc: 6310
+      total_loc: 6299
       files_ge_250_loc: 0
       helper_function_ratio: 0.325
       max_internal_fan_in: 2
@@ -514,7 +514,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 32
-      total_loc: 3937
+      total_loc: 3925
       files_ge_250_loc: 1
       helper_function_ratio: 0.33
       max_internal_fan_in: 2
@@ -567,7 +567,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 56
-      total_loc: 6978
+      total_loc: 6968
       files_ge_250_loc: 0
       helper_function_ratio: 0.359
       max_internal_fan_in: 3
@@ -652,7 +652,7 @@ oversized_source_module_inventory:
   max_tracked_lines: 500
   top_modules:
   - path: src/bioetl/application/pipelines/common/base_publication_transformer.py
-    lines: 190
+    lines: 180
     owner: '@bioetl-application'
     target_split: separate publication normalization, persistence shaping, and provenance helpers
   - path: src/bioetl/application/services/checkpoint_compatibility_service.py
@@ -687,7 +687,7 @@ oversized_source_module_inventory:
   - issue: '#4679'
     source: src/bioetl/domain/ports/__init__.py
     extracted_surface: src/bioetl/domain/ports/__init__.pyi
-    source_lines_after_split: 205
+    source_lines_after_split: 204
     extracted_surface_lines: 396
     rationale: Runtime lazy export resolution remains in the Python module while static re-export type
       declarations live in the adjacent stub, preserving the public API and reducing the governed source

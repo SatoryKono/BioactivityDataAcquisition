@@ -41,6 +41,7 @@ _HEALTH_CHECK_ERRORS = (
     RuntimeError,
 )
 
+
 class HealthAggregator:
     """Aggregates health checks for critical infrastructure components."""
 
@@ -210,6 +211,7 @@ class HealthAggregator:
             f"Health check failed for: {', '.join(failed_components)}. "
             f"Details: {'; '.join(error_messages)}"
         )
+
 
 # Backward-compatible alias kept for transitional imports.
 _HealthAggregator = HealthAggregator

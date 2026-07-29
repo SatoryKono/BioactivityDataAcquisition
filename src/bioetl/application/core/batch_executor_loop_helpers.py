@@ -55,6 +55,7 @@ __all__ = [
     "should_flush_batch",
 ]
 
+
 @dataclass(slots=True)
 class BatchExtractionLoopState:
     """Mutable state held across the extraction loop."""
@@ -62,6 +63,7 @@ class BatchExtractionLoopState:
     current_batch_size: int
     check_interval: int
     batch: list[BronzeRecord] = field(default_factory=list)
+
 
 @dataclass(slots=True)
 class BatchExtractionIterationContext:
@@ -75,6 +77,7 @@ class BatchExtractionIterationContext:
     progress_state: _BatchProgressSnapshot
     checkpoint_interval: int
 
+
 @dataclass(slots=True)
 class _BatchFlushContext:
     """Concrete flush context passed into flow helpers."""
@@ -84,6 +87,7 @@ class _BatchFlushContext:
     progress_service: _BatchProgressReporterProtocol
     progress_state: _BatchProgressSnapshot
 
+
 class _BatchStateUpdater(Protocol):
     """Async batch processing callback used by extraction loop helpers."""
 
@@ -92,6 +96,7 @@ class _BatchStateUpdater(Protocol):
         records: list[BronzeRecord],
         start_index: int,
     ) -> Awaitable[None]: ...
+
 
 def create_batch_extraction_loop_state(
     *,
@@ -103,6 +108,7 @@ def create_batch_extraction_loop_state(
         current_batch_size=batch_size,
         check_interval=check_interval,
     )
+
 
 def append_record_and_update_batch_size(
     *,
@@ -119,9 +125,11 @@ def append_record_and_update_batch_size(
         records_fetched,
     )
 
+
 def should_flush_batch(loop_state: BatchExtractionLoopState) -> bool:
     """Return whether the accumulated batch reached the current flush size."""
     return len(loop_state.batch) >= loop_state.current_batch_size
+
 
 def reset_batch_after_flush(
     *,
@@ -134,9 +142,11 @@ def reset_batch_after_flush(
         loop_state.current_batch_size
     )
 
+
 def build_start_index(*, records_fetched: int, batch: list[BronzeRecord]) -> int:
     """Build absolute start index for the current batch buffer."""
     return build_start_index_from_flow(records_fetched=records_fetched, batch=batch)
+
 
 async def flush_batch_if_needed(
     *,
@@ -159,6 +169,7 @@ async def flush_batch_if_needed(
         ),
     )
 
+
 async def flush_remaining_batch(
     *,
     loop_state: BatchExtractionLoopState,
@@ -172,6 +183,7 @@ async def flush_remaining_batch(
         process_batch=process_batch,
     )
 
+
 def _update_batch_size_for_iteration(
     *,
     loop_state: BatchExtractionLoopState,
@@ -184,6 +196,7 @@ def _update_batch_size_for_iteration(
         loop_state.check_interval,
         records_fetched,
     )
+
 
 async def process_extracted_record_iteration(
     *,

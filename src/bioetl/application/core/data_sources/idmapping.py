@@ -24,11 +24,10 @@ if TYPE_CHECKING:
         LoggerPort,
     )
 
+
 class IDMappingDataSource:
     """Data source for ChEMBL → UniProt ID mapping."""
-
     provider_name: str = "uniprot_idmapping"
-
     def __init__(
         self,
         idmapping_client: IDMappingPort,
@@ -49,11 +48,9 @@ class IDMappingDataSource:
         self._id_column = id_column
         self._seed_ids = seed_ids
         self._is_open = False
-
     async def __aenter__(self) -> Self:
         await lifecycle_support.enter_data_source(self)
         return self
-
     async def __aexit__(
         self,
         exc_type: type[BaseException] | None,
@@ -61,10 +58,8 @@ class IDMappingDataSource:
         exc_tb: TracebackType | None,
     ) -> None:
         await self.aclose()
-
     async def aclose(self) -> None:
         await lifecycle_support.close_data_source(self)
-
     def fetch(
         self,
         entity_type: str,
@@ -77,9 +72,7 @@ class IDMappingDataSource:
         return fetch_support.fetch_records(
             self, entity_type, limit, query, filter_ids, filter_field, offset
         )
-
     async def health_check(self) -> HealthStatus:
         return await lifecycle_support.health_check(self)
-
     def __repr__(self) -> str:
         return fetch_support.format_repr(self)

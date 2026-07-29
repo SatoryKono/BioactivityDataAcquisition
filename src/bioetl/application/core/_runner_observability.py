@@ -10,10 +10,12 @@ class _RunnerObservabilityHostProtocol(Protocol):
     _runtime: RuntimeConfig
     _observer: PipelineObserver
 
+
 if TYPE_CHECKING:
     from bioetl.application.core.postrun.service import PostrunResult
     from bioetl.application.observability.observer import PipelineObserver
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
+
 
 def emit_postrun_observability(
     host: _RunnerObservabilityHostProtocol,
@@ -34,17 +36,14 @@ def emit_postrun_observability(
             message=anomaly.message,
             runner_stage=runner_stage,
         )
-
     if result.vacuum.skipped:
         return
-
     host._observer.emit_vacuum_result(
         layer="silver",
         table=host._config.effective_silver_table,
         files_removed=result.vacuum.silver_files_removed,
         runner_stage=runner_stage,
     )
-
     if not getattr(host._runtime, "skip_gold", False):
         host._observer.emit_vacuum_result(
             layer="gold",

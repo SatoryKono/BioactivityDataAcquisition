@@ -14,6 +14,7 @@ __all__ = [
     "resolve_dependency_runner_limit",
 ]
 
+
 def build_dependency_debug_context(
     *,
     pipeline_name: str,
@@ -48,6 +49,7 @@ def build_dependency_debug_context(
         "is_chained": dep_cfg is not None and dep_cfg.key_source is not None,
         "key_source": None if dep_cfg is None else dep_cfg.key_source,
     }
+
 
 def resolve_dependency_runner_limit(
     *,

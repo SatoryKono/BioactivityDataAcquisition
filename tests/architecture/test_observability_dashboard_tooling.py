@@ -43,6 +43,7 @@ def test_observability_dashboard_scripts_do_not_write_dashboard_json() -> None:
     }
     reviewed_dashboard_generators = {
         "_apply_ds2_all.py",
+        "_apply_dsa_residual.py",
         "apply_dux2_residual.py",
         "render_nav_bus.py",
     }

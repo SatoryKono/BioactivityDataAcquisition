@@ -91,9 +91,9 @@ def test_class_naming_suffixes(src_dir: Path, source_ast_cache: dict) -> None:
                     "Collaborators",
                     "Snapshot",
                     "Owner",
-                        "Completion",
-                        "Identity",
-                    )
+                    "Completion",
+                    "Identity",
+                )
             ):
                 continue
             if not mod.has_valid_suffix(

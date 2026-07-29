@@ -61,6 +61,7 @@ __all__ = [
     "create_composite_runner_service",
 ]
 
+
 def create_composite_runner_service(
     inputs: CompositeRunnerServiceInputs | None = None,
     **kwargs: object,
@@ -136,6 +137,7 @@ def create_composite_runner_service(
         )
     return _create_composite_runner_service_from_inputs_impl(inputs)
 
+
 def create_composite_runner(
     *,
     config: CompositeConfig,
@@ -169,6 +171,7 @@ def create_composite_runner(
         runner_factory=runner_factory,
         inputs=service_inputs,
     )
+
 
 def bootstrap_composite_runner(
     *,

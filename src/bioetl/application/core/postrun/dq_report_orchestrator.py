@@ -24,9 +24,9 @@ if TYPE_CHECKING:
         SilverDQConfigPort,
     )
 
+
 class PostrunDQReportService(PostrunFailureHandlingMixin):
     """Orchestrates optional DQ report generation with strict/warning mode."""
-
     _FAILURE_POLICY = PostrunFailurePolicySpec(
         event="dq_report_generation_failed",
         strict_reason="dq_report_generation_failed_strict_mode",
@@ -34,7 +34,6 @@ class PostrunDQReportService(PostrunFailureHandlingMixin):
         warning_reason="dq_report_generation_failed_warning_mode",
         warning_reason_code="POSTRUN_DQ_REPORT_GENERATION_FAILED_WARNING",
     )
-
     def __init__(
         self,
         *,
@@ -57,31 +56,26 @@ class PostrunDQReportService(PostrunFailureHandlingMixin):
             *warning_allowlist,
             BioETLError,
         )
-
     async def generate_reports(
         self,
         context: DQReportContext | None,
     ) -> DQReportResult | None:
         """Generate DQ reports when service/config/context are available.
-
         Args:
             context: DQ report context with run metadata and table references.
                 If None, report generation is skipped and None is returned.
-
         Returns:
             DQReportResult with generation status for each layer, or None if
             the DQ report service is not configured or context was not provided.
         """
         if self._dq_report_service is None:
             return None
-
         if context is None:
             self._logger.debug(
                 "dq_report_skipped",
                 reason="no context provided",
             )
             return None
-
         try:
             result = await self._dq_report_service.generate_reports(
                 context=context,
@@ -104,5 +98,6 @@ class PostrunDQReportService(PostrunFailureHandlingMixin):
                 emit_warning_error_log=True,
             )
             return None
+
 
 __all__ = ["PostrunDQReportService"]

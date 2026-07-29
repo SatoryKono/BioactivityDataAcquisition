@@ -34,6 +34,7 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
     from bioetl.infrastructure.config.settings_api import Settings
 
+
 def build_runtime_overrides_snapshot(
     ctx: PipelineRunContext,
     settings: Settings,
@@ -93,6 +94,7 @@ def build_runtime_overrides_snapshot(
         "runtime": runtime_fields,
     }
 
+
 def build_composite_runtime_overrides_snapshot(
     *,
     pipeline_name: str,
@@ -119,9 +121,11 @@ def build_composite_runtime_overrides_snapshot(
         "runtime": runtime_payload,
     }
 
+
 def build_resolved_config_snapshot(resolved_config: object) -> dict[str, object]:
     """Convert resolved config into the effective-config artifact mapping shape."""
     return _to_serializable_mapping(resolved_config)
+
 
 def build_effective_config_source_refs(
     *,

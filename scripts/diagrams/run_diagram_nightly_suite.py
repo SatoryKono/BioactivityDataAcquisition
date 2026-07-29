@@ -166,8 +166,11 @@ def load_manifest(manifest_path: Path, allowed_suffixes: tuple[str, ...]) -> lis
         raise FileNotFoundError(f"Manifest not found: {manifest_path}")
     paths: list[Path] = []
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
     manifest_path = resolve_output_path(manifest_path, root=REPO_ROOT)
-    for raw in manifest_path.read_text(encoding="utf-8").splitlines():  # NOSONAR - path confined
+    for raw in manifest_path.read_text(
+        encoding="utf-8"
+    ).splitlines():  # NOSONAR - path confined
         line = raw.strip()
         if not line or line.startswith("#"):
             continue
@@ -601,9 +604,7 @@ def check_diag_t026(render_paths: list[Path]) -> list[Issue]:
         from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 
         completed = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
-            ensure_safe_cli_argv(
-                ["git", "diff", "--name-only", "--", *pathspecs]
-            ),
+            ensure_safe_cli_argv(["git", "diff", "--name-only", "--", *pathspecs]),
             check=False,
             capture_output=True,
             text=True,

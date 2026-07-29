@@ -21,26 +21,26 @@ from bioetl.domain.types import JsonDict
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
+
 @dataclass(frozen=True, slots=True)
 class BatchExecutionContext:
     """Execution-scoped inputs shared across the batch executor loop."""
-
     limit: int | None
     query: str | None
     offset: int | None
     resume_offset: int
 
+
 @dataclass(frozen=True, slots=True)
 class BatchExecutionLifecycleContext:
     """Top-level execution state shared across success and failure handlers."""
-
     execution_context: BatchExecutionContext
     root_span: Span | None
+
 
 @dataclass(frozen=True, slots=True)
 class BatchExecutionFinalizationContext:
     """Execution snapshot used by success, shutdown, and error finalization."""
-
     root_span: Span | None
     resume_offset: int
     total_fetched: int
@@ -52,14 +52,14 @@ class BatchExecutionFinalizationContext:
     min_batch_size_used: int
     memory_decision_trace: tuple[JsonDict, ...]
 
+
 class _BatchProgressInitializerProtocol(Protocol):
     """Minimal progress initialization contract for executor lifecycle."""
-
     async def initialize_tracking(self, limit: int | None) -> None: ...
+
 
 class _BatchCheckpointRecoveryLifecycleProtocol(Protocol):
     """Checkpoint finalization contract used by executor lifecycle."""
-
     async def save_checkpoint_on_exception(
         self,
         *,
@@ -67,7 +67,6 @@ class _BatchCheckpointRecoveryLifecycleProtocol(Protocol):
         resume_offset: int,
         error: BaseException,
     ) -> None: ...
-
     async def save_checkpoint_on_shutdown(
         self,
         *,
@@ -75,11 +74,10 @@ class _BatchCheckpointRecoveryLifecycleProtocol(Protocol):
         resume_offset: int,
     ) -> None: ...
 
+
 class _BatchTracingLifecycleProtocol(Protocol):
     """Tracing contract used by executor lifecycle orchestration."""
-
     def start_execution_span(self) -> Span | None: ...
-
     def set_execution_stats(
         self,
         span: Span | None,
@@ -93,10 +91,9 @@ class _BatchTracingLifecycleProtocol(Protocol):
         min_batch_size_used: int,
         memory_decision_trace: tuple[JsonDict, ...],
     ) -> None: ...
-
     def end_span(self, span: Span | None, error: Exception | None = None) -> None: ...
-
     def end_span_with_shutdown(self, span: Span | None) -> None: ...
+
 
 def prepare_execution_context(
     *,
@@ -112,9 +109,9 @@ def prepare_execution_context(
         resume_offset=offset or 0,
     )
 
+
 class BatchExecutionLifecycleService:
     """Coordinates executor start and finalize flows."""
-
     def __init__(
         self,
         *,
@@ -126,7 +123,6 @@ class BatchExecutionLifecycleService:
         self._progress_service = progress_service
         self._tracing_manager = tracing_manager
         self._checkpoint_recovery_service = checkpoint_recovery_service
-
     async def start_execution(
         self,
         execution_context: BatchExecutionContext,
@@ -137,7 +133,6 @@ class BatchExecutionLifecycleService:
             execution_context=execution_context,
             root_span=self._tracing_manager.start_execution_span(),
         )
-
     async def finalize_execution(
         self,
         execution_state: BatchExecutionCountersSnapshot,
@@ -184,7 +179,6 @@ class BatchExecutionLifecycleService:
             memory_decision_trace=finalization_context.memory_decision_trace,
         )
         self._tracing_manager.end_span(finalization_context.root_span)
-
     @staticmethod
     def _build_finalization_context(
         *,

@@ -146,7 +146,9 @@ def _write_text(path: Path, content: str) -> None:
 
     path = resolve_output_path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content, encoding="utf-8")  # NOSONAR - confined by resolve_output_path
+    path.write_text(
+        content, encoding="utf-8"
+    )  # NOSONAR - confined by resolve_output_path
 
 
 def build_arg_parser() -> argparse.ArgumentParser:

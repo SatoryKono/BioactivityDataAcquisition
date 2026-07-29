@@ -72,6 +72,7 @@ if TYPE_CHECKING:
         DataFrameRunnerFactory,
     ]
 
+
 @dataclass(frozen=True, slots=True)
 class CompositeBootstrapPlan:
     run_id: str
@@ -84,6 +85,7 @@ class CompositeBootstrapPlan:
     enricher_runner_factory: DataFrameRunnerFactory
     support_services: CompositeSupportServices
 
+
 def build_bootstrap_runner_factories(
     *,
     build_runner_factories_fn: Callable[..., RunnerFactoryBundle],
@@ -93,6 +95,7 @@ def build_bootstrap_runner_factories(
 ) -> RunnerFactoryBundle:
     """Resolve the canonical runner-factory bundle."""
     return build_runner_factories_fn(config=config, runtime=runtime, logger=logger)
+
 
 def load_composite_config_impl(
     name: str,
@@ -105,6 +108,7 @@ def load_composite_config_impl(
         resolve_config_path_fn=resolve_config_path_fn,
         validate_payload=validate_payload,
     )
+
 
 def bootstrap_runtime_basics_impl(
     *,
@@ -128,6 +132,7 @@ def bootstrap_runtime_basics_impl(
         lock_factory=lock_factory,
         uuid_factory=uuid_factory,
     )
+
 
 def build_runner_factories_impl(
     *,
@@ -154,6 +159,7 @@ def build_runner_factories_impl(
     )
     return runner_factories
 
+
 def build_support_services_impl(
     *,
     config: CompositeConfig,
@@ -179,6 +185,7 @@ def build_support_services_impl(
         load_field_group_registry_fn=load_field_group_registry_fn,
         create_dq_report_service_fn=create_dq_report_service_fn,
     )
+
 
 def build_composite_bootstrap_plan_impl(
     *,

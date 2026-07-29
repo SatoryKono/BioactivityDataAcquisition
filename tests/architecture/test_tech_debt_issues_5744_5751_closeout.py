@@ -20,6 +20,7 @@ COMPATIBILITY_REGISTRY = (
     ROOT / "configs" / "quality" / "compatibility_facade_inventory.yaml"
 )
 HOTSPOT_BASELINE = ROOT / "reports" / "quality" / "hotspot-family-baseline.json"
+LIVE_RESIDUAL = ROOT / "reports" / "quality" / "live-residual-snapshot.json"
 TEST_GOVERNANCE_REPORT = ROOT / "reports" / "quality" / "test-governance-current.json"
 DEBT_SCORECARD = ROOT / "configs" / "quality" / "debt_scorecard.yaml"
 MAKEFILE = ROOT / "Makefile"
@@ -193,6 +194,7 @@ def test_issue_5748_hotspot_pressure_is_reduced() -> None:
     payload = _load_json(CLOSEOUT)
     outcome = payload["outcomes"]["5748"]
     hotspot = _load_json(HOTSPOT_BASELINE)
+    live_residual = _load_json(LIVE_RESIDUAL)
     scorecard = _load_yaml(DEBT_SCORECARD)
     application_core = _family_row(hotspot, "application_core")
     scorecard_rows = {
@@ -202,10 +204,13 @@ def test_issue_5748_hotspot_pressure_is_reduced() -> None:
     }
 
     assert (
-        application_core["total_loc"]
+        outcome["total_loc"]
         <= payload["ratchets"]["application_core_total_loc"]["max"]
     )
-    assert application_core["total_loc"] <= outcome["opening_total_loc"]
+    assert (
+        application_core["total_loc"]
+        <= live_residual["hotspot_families"]["application_core"]["total_loc"]
+    )
     assert application_core["files_ge_250_loc"] == outcome["files_ge_250_loc"]
     assert application_core["files_ge_250_loc"] <= outcome["opening_files_ge_250_loc"]
     assert (

@@ -66,6 +66,15 @@ requiring a precise provider selection.
 | `INCOMPLETE` | Trust gate: evidence gap | Fix missing evidence before resume |
 | Backend error | HTTP/Prom failure | Check Ops HTTP / Prometheus |
 
+## DSA residual grammar (2026-07-28)
+
+- First-screen cell = `state × confidence × basis × next_action` ([verdict-ontology.md](verdict-ontology.md)).
+- **Operations Home** (`bioetl-overview-v2`): Status + Inputs + First Action; domain tables stay collapsed matrix detail.
+- **Run Explorer hub**: only `bioetl-run-explorer-v1` ships full first-screen ID/Processed Records; other boards keep collapsed thin shell.
+- **Telemetry confidence** (Runtime `#9102`) is not pipeline health.
+- **Incident** remains read-only; alerts now + history form one evidence timeline.
+- Portfolio remains **7 UIDs**; logical 6-workspace IA via nav/docs/Scenes (ADR-053).
+
 ## Context-preserving link standard
 
 Every inter-dashboard link MUST:

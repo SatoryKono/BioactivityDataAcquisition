@@ -47,6 +47,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
+
 class _PipelineRunnerFlowHostProtocol(Protocol):
     _config: PipelineConfig
     _context: PipelineContext
@@ -63,6 +64,7 @@ class _PipelineRunnerFlowHostProtocol(Protocol):
     @property
     def execution_diagnostics(self) -> JsonDict: ...
 
+
 def _record_with_ledger_service(
     host: _PipelineRunnerFlowHostProtocol,
     recorder: Callable[[RunLedgerService], object],
@@ -71,6 +73,7 @@ def _record_with_ledger_service(
     if host._run_ledger_service is None:
         return
     recorder(host._run_ledger_service)
+
 
 def _record_run_metrics_event(
     host: _PipelineRunnerFlowHostProtocol,
@@ -86,6 +89,7 @@ def _record_run_metrics_event(
             details,
         ),
     )
+
 
 async def resolve_execution_offset(
     host: _PipelineRunnerFlowHostProtocol,
@@ -106,6 +110,7 @@ async def resolve_execution_offset(
     checkpoint_meta = await load_checkpoint(host._checkpoint_manager)
     return extract_checkpoint_offset(checkpoint_meta)
 
+
 def extract_checkpoint_offset(
     checkpoint_meta: CheckpointMetadata | dict[str, object] | None,
 ) -> int | None:
@@ -117,6 +122,7 @@ def extract_checkpoint_offset(
     raw_records = checkpoint_meta.get("records_processed")
     return raw_records if isinstance(raw_records, int) else None
 
+
 def emit_pipeline_start(host: _PipelineRunnerFlowHostProtocol) -> None:
     """Emit the pipeline start event."""
     host._logger.info(
@@ -126,12 +132,14 @@ def emit_pipeline_start(host: _PipelineRunnerFlowHostProtocol) -> None:
         run_type=host._runtime.run_type.value,
     )
 
+
 def emit_pipeline_completion(host: _PipelineRunnerFlowHostProtocol) -> None:
     """Emit the pipeline completion event."""
     host._logger.debug(
         PipelineEvent.COMPLETE,
         records_fetched=host._executor.records_fetched,
     )
+
 
 def record_run_started(host: _PipelineRunnerFlowHostProtocol) -> None:
     """Append run_started ledger entry when control-plane ledger is attached."""
@@ -148,6 +156,7 @@ def record_run_started(host: _PipelineRunnerFlowHostProtocol) -> None:
         lambda ledger_service: ledger_service.record_run_started(),
     )
 
+
 def record_stage_started(
     host: _PipelineRunnerFlowHostProtocol,
     stage: str,
@@ -157,6 +166,7 @@ def record_stage_started(
         host,
         lambda ledger_service: ledger_service.record_stage_started(stage=stage),
     )
+
 
 def record_stage_completed(
     host: _PipelineRunnerFlowHostProtocol,
@@ -170,6 +180,7 @@ def record_stage_completed(
             metrics_snapshot=host.execution_metrics,
         ),
     )
+
 
 def record_run_finished(host: _PipelineRunnerFlowHostProtocol) -> None:
     """Append successful completion ledger entry."""
@@ -192,8 +203,10 @@ def record_run_finished(host: _PipelineRunnerFlowHostProtocol) -> None:
 
     _record_run_metrics_event(host, _record_finished)
 
+
 def _record_output_ready(host: _PipelineRunnerFlowHostProtocol) -> None:
     return _record_output_ready_impl(host)
+
 
 def record_run_shutdown(host: _PipelineRunnerFlowHostProtocol) -> None:
     """Append graceful shutdown ledger entry."""
@@ -207,6 +220,7 @@ def record_run_shutdown(host: _PipelineRunnerFlowHostProtocol) -> None:
             )
         ),
     )
+
 
 def record_run_failed(
     host: _PipelineRunnerFlowHostProtocol,
@@ -224,6 +238,7 @@ def record_run_failed(
             )
         ),
     )
+
 
 def _record_flow_invariants(host: _PipelineRunnerFlowHostProtocol) -> None:
     return _record_flow_invariants_impl(host, current_time_fn=current_utc_time)

@@ -143,7 +143,9 @@ def load_backlog(path: Path = DEFAULT_BACKLOG_PATH) -> dict[str, Any]:
     """Load the xwalk missing backlog YAML file."""
 
     backlog_path = _resolve_path(path)
-    raw = yaml.safe_load(backlog_path.read_text(encoding="utf-8"))  # NOSONAR - path confined
+    raw = yaml.safe_load(
+        backlog_path.read_text(encoding="utf-8")
+    )  # NOSONAR - path confined
     if raw is None:
         return {}
     if not isinstance(raw, dict):
@@ -400,7 +402,9 @@ def _write_text(path: Path, content: str, *, root: Path | None = None) -> None:
 
     path = resolve_output_path(path, root=root or REPO_ROOT)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content, encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
+    path.write_text(
+        content, encoding="utf-8"
+    )  # NOSONAR - path confined by resolve_output_path
 
 
 def build_arg_parser() -> argparse.ArgumentParser:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+
 def validate_reproducible_sink_modes(
     *,
     yaml_config: object,
@@ -67,10 +68,12 @@ def validate_reproducible_sink_modes(
             f"{guidance}"
         )
 
+
 def _sink_layer_enabled(layer_config: object) -> bool:
     if isinstance(layer_config, dict):
         return bool(layer_config.get("enabled", True))
     return bool(getattr(layer_config, "enabled", True))
+
 
 def _sink_layer_mode(layer_config: object) -> str:
     raw_mode = (
@@ -80,6 +83,7 @@ def _sink_layer_mode(layer_config: object) -> str:
     )
     return str(raw_mode or "").strip().lower()
 
+
 def _sink_layer_idempotency_contract(layer_config: object | None) -> str | None:
     raw_contract = (
         layer_config.get("idempotency_contract", None)
@@ -88,6 +92,7 @@ def _sink_layer_idempotency_contract(layer_config: object | None) -> str | None:
     )
     contract = str(raw_contract or "").strip().lower()
     return contract or None
+
 
 def _validate_append_idempotency_evidence(
     *,
@@ -113,6 +118,7 @@ def _validate_append_idempotency_evidence(
         "occurrence_only"
     )
 
+
 def _append_idempotency_evidence_present(
     *,
     yaml_config: object,
@@ -134,6 +140,7 @@ def _append_idempotency_evidence_present(
         )
     return False
 
+
 def _sink_layer_idempotency_evidence(
     layer_config: object | None,
 ) -> dict[str, object]:
@@ -145,10 +152,12 @@ def _sink_layer_idempotency_evidence(
         return dict(proof)
     return {}
 
+
 def _sink_layer_field(layer_config: object | None, field_name: str) -> object | None:
     if isinstance(layer_config, dict):
         return layer_config.get(field_name)
     return getattr(layer_config, field_name, None)
+
 
 def _text_items(value: object) -> tuple[str, ...]:
     if value is None or isinstance(value, str | bytes):

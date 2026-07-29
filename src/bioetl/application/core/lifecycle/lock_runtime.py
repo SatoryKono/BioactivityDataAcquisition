@@ -11,6 +11,7 @@ from bioetl.domain.types import RunID, RunType
 if TYPE_CHECKING:
     from bioetl.domain.ports import LockPort
 
+
 def build_lock_config(
     *,
     provider: str,
@@ -32,6 +33,7 @@ def build_lock_config(
         heartbeat_interval=heartbeat_interval,
     )
 
+
 def build_lock_context(
     *,
     config: LockConfig,
@@ -50,6 +52,7 @@ def build_lock_context(
         fencing_token=fencing_token,
     )
 
+
 async def validate_lock_ownership(
     *,
     lock_port: LockPort,
@@ -63,6 +66,7 @@ async def validate_lock_ownership(
         return bool(result)
     result = await lock_port.validate_fencing_token(config.lock_key, fencing_token)
     return bool(result)
+
 
 __all__ = [
     "build_lock_config",

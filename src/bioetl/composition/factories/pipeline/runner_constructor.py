@@ -16,7 +16,9 @@ from bioetl.application.core.wiring.factory import (
     PreflightService,
 )
 from bioetl.application.observability.observer import PipelineObserver
-from bioetl.application.services.medallion.medallion_lifecycle import MedallionLifecycleService
+from bioetl.application.services.medallion.medallion_lifecycle import (
+    MedallionLifecycleService,
+)
 from bioetl.composition.factories.services.common_service_wiring import resolve_tracer
 from bioetl.composition.observability import ObservabilityBundle
 

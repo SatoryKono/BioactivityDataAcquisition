@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `667c3020ce74f87c319f77612c765a5aaf30e6ad`
 
-Evidence surface SHA-256: `61f843ccac65a0b9e8ad6f5c11dbeb9126dcef26d54aefdfebcd72be12090389`
+Evidence surface SHA-256: `9258b4f023e08d7a2c2399854e14f85e91e518b557d7508940bcfb291ef89593`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -19,7 +19,7 @@ Refresh reason: CR-03 / #6695 regenerate from one consistent evidence snapshot a
 ## Executive summary
 
 1. Debt-governance gates: **45 pass / 0 fail** (`45/45` debt-governance gates passing).
-1. Architecture quality integral score: **9.11** (`good_targeted_improvements`). Integral score `9.11`.
+1. Architecture quality integral score: **9.41** (`good_targeted_improvements`). Integral score `9.41`.
 1. Module inventory (from `module-coverage-inventory.json` only):
    - source_module_count: **2277**
    - fully_covered: **1406**

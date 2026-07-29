@@ -43,6 +43,7 @@ if TYPE_CHECKING:
 
 RunManifestProvenanceBundle = _manifest_support.RunManifestProvenanceBundle
 
+
 def _create_control_plane_refs(
     *,
     manifest: RunManifest,
@@ -88,6 +89,7 @@ def _create_control_plane_refs(
         required_persistence_profile=required_persistence_profile,
     )
 
+
 def create_run_manifest(
     *,
     ctx: PipelineRunContext,
@@ -132,6 +134,7 @@ def create_run_manifest(
         provenance=provenance,
     )
 
+
 def _publish_manifest_and_refs(
     *,
     ctx: PipelineRunContext,
@@ -169,6 +172,7 @@ def _publish_manifest_and_refs(
         ),
     )
     return control_plane_refs, ledger_service
+
 
 def _build_manifest_create_request(
     *,
@@ -209,6 +213,7 @@ def _build_manifest_create_request(
         )
     )
     return request
+
 
 def _maybe_create_ledger_service(
     *,

@@ -28,8 +28,10 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import ClockPort, LoggerPort
     from bioetl.infrastructure.storage.delta_reader import DeltaReader
 
+
 class _CompositeMergeStorage(MergedStoragePort, SilverStoragePort, Protocol):
     """Storage capabilities required by composite merge assembly."""
+
 
 def _resolve_join_how(strategy: MergeStrategy) -> JoinHow:
     match strategy:
@@ -41,6 +43,7 @@ def _resolve_join_how(strategy: MergeStrategy) -> JoinHow:
             return "full"
         case _:
             return "left"
+
 
 def build_composite_merge_service(
     *,
@@ -83,5 +86,6 @@ def build_composite_merge_service(
             join_planner=merge_dependencies.join_planner,
         ),
     )
+
 
 __all__ = ["build_composite_merge_service"]

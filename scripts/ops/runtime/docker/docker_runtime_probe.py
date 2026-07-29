@@ -299,8 +299,9 @@ def _disk_and_incident_findings(
 ) -> list[dict[str, Any]]:
     """Capacity and incident-recovery findings for one probe report."""
     findings: list[dict[str, Any]] = []
-    reserve_gib = int(contract.get("capacity", {}).get("minimum_free_disk_gib", 4))
-    reserve_bytes = reserve_gib * 1024**3
+    reserve_bytes, recovery_attempts, recovery_seconds, recovery_limit = (
+        _capacity_recovery_values(contract, incident)
+    )
     if disk.free < reserve_bytes:
         findings.append(
             {
@@ -309,11 +310,6 @@ def _disk_and_incident_findings(
                 "required_free_bytes": reserve_bytes,
             }
         )
-    recovery_attempts = int(incident.get("attempts") or 0)
-    recovery_seconds = float(incident.get("elapsed_seconds") or 0.0)
-    recovery_limit = float(
-        contract.get("stability_slo", {}).get("recovery_seconds_p99", 180)
-    )
     if recovery_attempts > 3 or recovery_seconds > recovery_limit:
         findings.append(
             {
@@ -330,6 +326,20 @@ def _disk_and_incident_findings(
             }
         )
     return findings
+
+
+def _capacity_recovery_values(
+    contract: Mapping[str, Any],
+    incident: Mapping[str, Any],
+) -> tuple[int, int, float, float]:
+    """Resolve capacity and recovery values shared by findings and SLO output."""
+    reserve_gib = int(contract.get("capacity", {}).get("minimum_free_disk_gib", 4))
+    return (
+        reserve_gib * 1024**3,
+        int(incident.get("attempts") or 0),
+        float(incident.get("elapsed_seconds") or 0.0),
+        float(contract.get("stability_slo", {}).get("recovery_seconds_p99", 180)),
+    )
 
 
 def build_report(
@@ -354,12 +364,11 @@ def build_report(
 
     snapshots: list[ServiceSnapshot] = []
     findings: list[dict[str, Any]] = []
-    compose_rows: list[dict[str, Any]] = []
     resources: list[dict[str, Any]] = []
     if info.returncode != 0:
         findings.append({"cause": "daemon_unavailable"})
     else:
-        snapshots, live_findings, compose_rows, resources = (
+        snapshots, live_findings, _compose_rows, resources = (
             _collect_live_probe_observations(
                 spec=spec,
                 runner=runner,
@@ -373,6 +382,9 @@ def build_report(
 
     disk = disk_usage(ROOT)
     incident = dict(incident or {})
+    reserve_bytes, recovery_attempts, recovery_seconds, recovery_limit = (
+        _capacity_recovery_values(contract, incident)
+    )
     findings.extend(
         _disk_and_incident_findings(
             contract=contract,

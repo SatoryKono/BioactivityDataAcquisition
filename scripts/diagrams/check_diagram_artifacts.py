@@ -51,7 +51,9 @@ def load_manifest(manifest_path: Path) -> list[Path]:
         raise FileNotFoundError(f"Manifest not found: {safe_manifest}")
 
     paths: list[Path] = []
-    for raw in safe_manifest.read_text(  # NOSONAR - path confined by resolve_output_path
+    for (
+        raw
+    ) in safe_manifest.read_text(  # NOSONAR - path confined by resolve_output_path
         encoding="utf-8"
     ).splitlines():
         line = raw.strip()

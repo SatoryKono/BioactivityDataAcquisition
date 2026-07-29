@@ -18,14 +18,14 @@ __all__ = [
     "TransitionResult",
 ]
 
+
 class IllegalStateTransitionError(RuntimeError):
     """Raised when an invalid FSM transition is attempted."""
-
     pass
+
 
 class BatchExecutionState(Enum):
     """Valid states during a batch execution run."""
-
     IDLE = auto()
     STREAMING = auto()
     PROCESSING = auto()
@@ -35,9 +35,9 @@ class BatchExecutionState(Enum):
     DONE = auto()
     FAILED = auto()
 
+
 class BatchExecutionEventSignal(Enum):
     """Events that trigger state transitions."""
-
     RUN_STARTED = auto()
     BATCH_ASSEMBLED = auto()
     STREAM_EXHAUSTED_EMPTY = auto()
@@ -52,9 +52,9 @@ class BatchExecutionEventSignal(Enum):
     CHECKPOINT_FAILED = auto()
     SHUTDOWN_REQUESTED = auto()
 
+
 class BatchExecutionCommandTask(Enum):
     """Commands to be executed by the orchestration layer."""
-
     PROCESS_BATCH = auto()
     COMMIT_STATE = auto()
     SAVE_CHECKPOINT = auto()
@@ -62,12 +62,13 @@ class BatchExecutionCommandTask(Enum):
     PROPAGATE_ERROR = auto()
     NOOP = auto()
 
+
 @dataclass(frozen=True, slots=True)
 class BatchExecutionTransitionResult:
     """Result of a transition with the next state and orchestration commands."""
-
     new_state: BatchExecutionState
     commands: tuple[BatchExecutionCommandTask, ...]
+
 
 def _transition(
     new_state: BatchExecutionState,
@@ -75,6 +76,7 @@ def _transition(
 ) -> BatchExecutionTransitionResult:
     """Create one immutable transition entry."""
     return BatchExecutionTransitionResult(new_state=new_state, commands=commands)
+
 
 _TRANSITIONS: dict[
     tuple[BatchExecutionState, BatchExecutionEventSignal],
@@ -178,9 +180,9 @@ _TRANSITIONS: dict[
     ),
 }
 
+
 class BatchExecutionCoordinator:
     """Pure coordinator that validates batch lifecycle transitions."""
-
     def advance(
         self,
         current_state: BatchExecutionState,
@@ -193,6 +195,7 @@ class BatchExecutionCoordinator:
                 f"Invalid transition: {current_state.name} + {event.name}"
             )
         return transition
+
 
 # Backward-compatible aliases preserved for existing imports/tests.
 BatchExecutionEvent = BatchExecutionEventSignal

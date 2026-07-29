@@ -31,6 +31,7 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.ports import LockPort, LoggerPort
 
+
 @dataclass(frozen=True, slots=True)
 class LockRuntimeServiceCreateContext:
     lock_port: LockPort
@@ -48,9 +49,9 @@ class LockRuntimeServiceCreateContext:
     context_holder: LockContextHolder | None = None
     heartbeat_factory: Callable[..., HeartbeatTask] | None = None
 
+
 class LockRuntimeService:
     """Manage runtime lock acquisition, release, validation, and heartbeat."""
-
     def __init__(
         self,
         lock_port: LockPort,
@@ -74,7 +75,6 @@ class LockRuntimeService:
         self._heartbeat: HeartbeatTask | None = None
         self._acquired_at: float | None = None
         self._fencing_token: FencingToken | None = None
-
     @classmethod
     def create(
         cls,
@@ -90,7 +90,6 @@ class LockRuntimeService:
             wait_timeout=request.wait_timeout,
             heartbeat_interval=request.heartbeat_interval,
         )
-
         return cls(
             lock_port=request.lock_port,
             run_id=request.run_id,
@@ -101,15 +100,12 @@ class LockRuntimeService:
             context_holder=request.context_holder,
             heartbeat_factory=request.heartbeat_factory,
         )
-
     async def acquire(self) -> FencingToken | None:
         """Acquire the runtime lock."""
         return await acquire_lock(self)
-
     async def release(self) -> None:
         """Release the runtime lock and stop heartbeat."""
         await release_lock(self)
-
     def get_context(self) -> LockContext | None:
         """Return the current writer-facing LockContext when held."""
         return build_lock_context(
@@ -118,15 +114,12 @@ class LockRuntimeService:
             acquired_at=self._acquired_at,
             fencing_token=self._fencing_token,
         )
-
     async def start_heartbeat(self) -> None:
         """Start the background heartbeat task."""
         await start_heartbeat(self)
-
     async def __aenter__(self) -> LockRuntimeService:
         """Acquire the lock for async context-manager usage."""
         return await enter_lock_context(self)
-
     async def validate(self) -> bool:
         """Validate ownership, renewing a delayed lease before write stages."""
         owned = await validate_lock_ownership(
@@ -147,7 +140,6 @@ class LockRuntimeService:
             run_id=self._run_id,
             fencing_token=self._fencing_token,
         )
-
     async def __aexit__(self, *_exc_info: object) -> None:
         """Release the lock when leaving the async context manager."""
         await self.release()

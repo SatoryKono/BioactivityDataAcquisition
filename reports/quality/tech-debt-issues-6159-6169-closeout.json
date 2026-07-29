@@ -71,7 +71,7 @@
         "scripts/engineering/repo/apply_branch_cleanup_phases_0_2.sh"
       ],
       "untriaged_zero_reference_supporting_script_count": 0,
-      "zero_reference_supporting_script_count": 17
+      "zero_reference_supporting_script_count": 15
     }
   },
   "schema_version": "1.0",

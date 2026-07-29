@@ -24,6 +24,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.types import BronzeRecord, RunID, RunType, SilverRecord
 
+
 def _resolve_replay_timestamp_anchor(runtime: RuntimeConfig) -> datetime | None:
     """Resolve one deterministic timestamp anchor for exact replay side effects."""
     if not runtime.exact_replay:
@@ -33,20 +34,17 @@ def _resolve_replay_timestamp_anchor(runtime: RuntimeConfig) -> datetime | None:
     replay_date = date.fromisoformat(runtime.replay_anchor_date)
     return datetime.combine(replay_date, datetime.min.time(), tzinfo=UTC)
 
+
 class BasePipeline(ABC):  # noqa: B024
     """Base class for ETL pipelines.
-
     Acts as a container for:
     - Configuration (Static & Runtime)
     - Services (Ports)
     - Business Logic (Transformations, Filtering)
-
     It does NOT orchestrate execution. See PipelineRunner for execution logic.
-
     Transformers MUST be injected via DI from GenericPipelineFactory.
     BasePipeline does NOT create transformers internally.
     """
-
     @classmethod
     def create(
         cls,
@@ -60,9 +58,7 @@ class BasePipeline(ABC):  # noqa: B024
         transformer: BaseTransformer | None = None,
     ) -> Self:
         """Create pipeline instance.
-
         Default factory method. Subclasses can override if custom initialization is needed.
-
         Args:
             run_id: Unique identifier for this pipeline run (from CLI/orchestrator).
             runtime: Runtime configuration.
@@ -75,7 +71,6 @@ class BasePipeline(ABC):  # noqa: B024
             transformer: Injected transformer for Bronze→Silver transformation (DI).
                 If provided, the pipeline will use this transformer instead of
                 creating one internally. This is the preferred DI approach.
-
         Returns:
             Newly created Self instance.
         """
@@ -89,7 +84,6 @@ class BasePipeline(ABC):  # noqa: B024
             clock=clock,
             transformer=transformer,
         )
-
     def __init__(
         self,
         config: PipelineConfig,
@@ -102,7 +96,6 @@ class BasePipeline(ABC):  # noqa: B024
         transformer: BaseTransformer | None = None,
     ) -> None:
         """Initialize pipeline definition.
-
         Args:
             config: Pipeline configuration.
             runtime: Runtime configuration.
@@ -116,7 +109,6 @@ class BasePipeline(ABC):  # noqa: B024
             transformer: Injected transformer for Bronze→Silver transformation.
                 MUST be provided via DI from GenericPipelineFactory.
                 If None, transform_bronze_to_silver() will raise NotImplementedError.
-
         """
         self._config = config
         self._runtime = runtime
@@ -141,100 +133,78 @@ class BasePipeline(ABC):  # noqa: B024
             workflow_id=runtime.workflow_id,
         )
         self._shutdown_signal = shutdown_signal
-
     @property
     def config(self) -> PipelineConfig:
         """Access pipeline configuration."""
         return self._config
-
     @property
     def runtime(self) -> RuntimeConfig:
         """Access runtime configuration."""
         return self._runtime
-
     @property
     def services(self) -> PipelineServicesProtocol:
         """Access injected services."""
         return self._services
-
     @property
     def run_id(self) -> RunID:
         """Access run ID."""
         return self._run_id
-
     @property
     def context(self) -> PipelineContext:
         """Access pipeline context."""
         return self._context
-
     @property
     def logger(self) -> LoggerPort:
         """Access bound logger."""
         return self._logger
-
     @property
     def shutdown_signal(self) -> ShutdownSignal:
         """Access shutdown signal."""
         return self._shutdown_signal
-
     # --- Convenience properties (delegate to config) ---
-
     @property
     def pipeline_name(self) -> str:
         """Pipeline name (from config)."""
         return self._config.pipeline_name
-
     @property
     def provider(self) -> str:
         """Provider name (from config)."""
         return self._config.provider
-
     @property
     def entity_type(self) -> str:
         """Entity type (from config)."""
         return self._config.entity_type
-
     @property
     def run_type(self) -> RunType:
         """Run type (from runtime)."""
         return self._runtime.run_type
-
     @property
     def resume(self) -> bool:
         """Resume flag (from runtime)."""
         return self._runtime.resume
-
     @property
     def limit(self) -> int | None:
         """Record limit (from runtime)."""
         return self._runtime.limit
-
     @property
     def transformer(self) -> BaseTransformer | None:
         """Access the injected transformer."""
         return self._transformer
-
     # --- Logic Methods (to be used by Executor) ---
-
     async def transform_bronze_to_silver(
         self, context: PipelineContext, record: BronzeRecord, index: int = 0
     ) -> SilverRecord | None:
         """Transform a raw record from Bronze to Silver format.
-
         If a transformer was injected via DI, delegates to it.
         Otherwise, subclasses MUST override this method.
-
         Args:
             context: Pipeline context with run_id, run_type, logger.
             record: Raw Bronze record from data source.
             index: Sequential index of the record in the pipeline run.
-
         Returns:
             SilverRecord if transformation successful, None if skipped.
-
         Raises:
             NotImplementedError: If no transformer is available and method not overridden.
-
         """
         if self._transformer is not None:
             return await self._transformer.transform(context, record, index)

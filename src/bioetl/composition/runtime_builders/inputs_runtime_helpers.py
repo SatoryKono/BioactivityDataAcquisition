@@ -18,6 +18,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
+
 @dataclass(frozen=True, slots=True)
 class ResolvedRuntimeProjection:
     """Explicit runtime policy projected from settings, CLI context, and YAML."""
@@ -26,9 +27,11 @@ class ResolvedRuntimeProjection:
     health_check_mode: Literal["strict", "probe"]
     skip_gold: bool
 
+
 def resolve_heartbeat_interval_policy(*, settings: Settings) -> int:
     """Resolve heartbeat interval from canonical composition settings."""
     return int(settings.pipeline.heartbeat_interval)
+
 
 def log_filter_config(
     *,
@@ -47,6 +50,7 @@ def log_filter_config(
         source="cli" if from_cli else "config",
     )
 
+
 def log_cached_bronze(
     *,
     observability: ObservabilityBundle,
@@ -61,11 +65,13 @@ def log_cached_bronze(
         bronze_date=cached_bronze.bronze_date,
     )
 
+
 def is_gold_sink_enabled(yaml_config: PipelineYamlConfig) -> bool:
     """Return whether Gold sink remains enabled in YAML configuration."""
     sink = getattr(yaml_config, "sink", {})
     gold_sink = sink.get("gold") if isinstance(sink, dict) else None
     return gold_sink is None or bool(gold_sink.enabled)
+
 
 def resolve_skip_gold_policy(
     *,
@@ -85,6 +91,7 @@ def resolve_skip_gold_policy(
     )
     return True
 
+
 def resolve_health_check_mode_policy(
     *,
     settings: Settings,
@@ -97,6 +104,7 @@ def resolve_health_check_mode_policy(
     if configured_mode in ("strict", "probe"):
         return cast(Literal["strict", "probe"], configured_mode)
     return default_health_check_mode
+
 
 def resolve_runtime_projection(
     *,
@@ -119,6 +127,7 @@ def resolve_runtime_projection(
             observability=observability,
         ),
     )
+
 
 def build_runtime_config(
     *,

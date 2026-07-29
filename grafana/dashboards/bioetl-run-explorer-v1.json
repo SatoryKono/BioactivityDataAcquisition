@@ -2,7 +2,7 @@
   "annotations": {
     "list": []
   },
-  "description": "Run Explorer. Exact completed run via Ops HTTP pipeline_run_report_v1. run_id never a Prometheus label. Non-overlapping no-selection + selected-run layout.",
+  "description": "Run Explorer 2.0 narrative. Exact completed run via Ops HTTP pipeline_run_report_v1. run_id never a Prometheus label. First screen: browse recent runs + identity/accounting hub; selected-run forensics collapsed until expanded.",
   "editable": true,
   "graphTooltip": 1,
   "id": null,
@@ -104,21 +104,68 @@
       },
       "options": {
         "mode": "markdown",
-        "content": "**Browse vs Selected run**\n- **Browse:** population/list without `run_id` — identity panels show N/A until selection.\n- **Selected:** set `run_id` (Ops HTTP identity, never a Prometheus label).\n- Handoff from Incident/Runtime/Trust preserves time range + pipeline context."
-      }
+        "content": "**Run Explorer — empty vs selected narrative**\n\n| Mode | First screen |\n| --- | --- |\n| **No `run_id`** | Use **Recent pipeline runs** to pick a run; ID/Processed stay empty until selection |\n| **Selected `run_id`** | Read **ID**, then continue below fold to **Processed Records** and expand **Selected run detail** (funnel/reasons/artifacts) |\n\n`run_id` is Ops HTTP identity only — never a Prometheus label. Long IDs: copy from table fields.\n"
+      },
+      "description": "DSA-08: empty = browse recent runs; selected = identity -> accounting -> detail."
+    },
+    {
+      "id": 3010,
+      "type": "table",
+      "title": "Browse · Recent pipeline runs (no selection)",
+      "description": "No-selection utility. Pick a run to set run_id. Ops HTTP index — not Prometheus. Valid empty: no matching recent runs for the selected pipeline. Backend unavailable is distinct; check /health/live.",
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 6
+      },
+      "datasource": "BioETL Ops HTTP",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "inspect": false
+          },
+          "noValue": "NO DATA — empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id."
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "footer": {
+          "show": false
+        },
+        "cellHeight": "sm"
+      },
+      "targets": [
+        {
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "items",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=20",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          },
+          "expr": ""
+        }
+      ]
     },
     {
       "id": 9402,
       "type": "table",
       "title": "ID",
       "gridPos": {
-        "h": 8,
+        "h": 6,
         "w": 12,
         "x": 0,
-        "y": 6
+        "y": 13
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero. HTTP Ops only. Generic Grafana No data is not acceptance: check /health/live and selector scope first.",
+      "description": "Exact-run identity hub (Ops HTTP). Canonical portfolio hub for ID panels. Valid empty: no matching identity for the selected run. Backend unavailable is distinct; check /health/live.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -237,13 +284,13 @@
       "type": "table",
       "title": "Processed Records",
       "gridPos": {
-        "h": 8,
+        "h": 6,
         "w": 12,
         "x": 12,
-        "y": 6
+        "y": 28
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "Current stage/outcome accounting evidence for the shared pipeline/run_type context. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero. HTTP Ops only. Generic Grafana No data is not acceptance: check /health/live and selector scope first.",
+      "description": "Bronze/Silver/Gold accounting hub (Ops HTTP). Canonical portfolio hub for Processed Records. Valid empty: no matching accounting rows for the selected run. Backend unavailable is distinct; check /health/live.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -696,61 +743,15 @@
     {
       "id": 3099,
       "type": "row",
-      "title": "Run report detail (Ops HTTP)",
+      "title": "Selected run detail (Ops HTTP; expand after selection)",
       "collapsed": true,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 14
+        "y": 19
       },
       "panels": [
-        {
-          "id": 3010,
-          "type": "table",
-          "title": "Recent pipeline runs (no selection)",
-          "description": "Index of recent pipeline_run_report_v1 files. Pick run_id into the dashboard variable. An empty list is VALID EMPTY when no reports match; an unexpected empty may mean backend unavailable, so verify /health/live. Not Prometheus.",
-          "gridPos": {
-            "h": 7,
-            "w": 24,
-            "x": 0,
-            "y": 0
-          },
-          "datasource": "BioETL Ops HTTP",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {
-                "align": "left",
-                "inspect": false
-              },
-              "noValue": "NO DATA — empty report section, UNRESOLVED_SCOPE, or BACKEND_ERROR. Check /health/live and run_id."
-            },
-            "overrides": []
-          },
-          "options": {
-            "showHeader": true,
-            "footer": {
-              "show": false
-            },
-            "cellHeight": "sm"
-          },
-          "targets": [
-            {
-              "format": "table",
-              "parser": "backend",
-              "refId": "A",
-              "root_selector": "items",
-              "source": "url",
-              "type": "json",
-              "url": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=20",
-              "url_options": {
-                "data": "",
-                "method": "GET"
-              },
-              "expr": ""
-            }
-          ]
-        },
         {
           "id": 3011,
           "type": "table",
@@ -760,7 +761,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 7
+            "y": 0
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -806,7 +807,7 @@
             "h": 5,
             "w": 24,
             "x": 0,
-            "y": 13
+            "y": 6
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -852,7 +853,7 @@
             "h": 5,
             "w": 24,
             "x": 0,
-            "y": 18
+            "y": 11
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -898,7 +899,7 @@
             "h": 3,
             "w": 24,
             "x": 0,
-            "y": 23
+            "y": 16
           },
           "options": {
             "mode": "markdown",
@@ -914,7 +915,7 @@
             "h": 5,
             "w": 24,
             "x": 0,
-            "y": 26
+            "y": 19
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -960,31 +961,31 @@
             "h": 4,
             "w": 24,
             "x": 0,
-            "y": 31
+            "y": 24
           },
           "options": {
             "mode": "markdown",
             "content": "### Optional report blocks\n- **stage_timings:** ordered durations when present; else PARTIAL. Not a waterfall.\n- **failure:** inspect via report JSON or CLI when present.\n- `GET /ops/observability/pipeline-run-report?pipeline=…&run_id=…`\n- `GET /ops/observability/pipeline-run-reports?pipeline=…&limit=20`\n"
           }
-        },
-        {
-          "id": 3001,
-          "type": "text",
-          "title": "Next actions (≤4)",
-          "gridPos": {
-            "h": 4,
-            "w": 24,
-            "x": 0,
-            "y": 35
-          },
-          "options": {
-            "mode": "markdown",
-            "content": "1. Set **run_id** from Recent runs (or leave `-` to browse).\n2. Read funnel + reasons_top_n + artifacts for this run.\n3. **0. Trust** for resume safety; **4. DQ** for fleet quarantine.\n4. **CLI** for record-level quarantine (dashboard stays aggregate).\n"
-          },
-          "links": [],
-          "description": "Phase-2: CTA list; dashboard hops via Navigation bus to avoid duplicate UIDs."
         }
       ]
+    },
+    {
+      "id": 3001,
+      "type": "text",
+      "title": "Next actions (≤4)",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 20
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**Next actions (<=4)**\n1. No selection -> pick from **Recent pipeline runs**.\n2. Selected -> verify **ID** + **Processed Records** accounting invariant.\n3. Expand **Selected run detail** for funnel/reasons/artifacts.\n4. Resume/replay safety -> Trust **Primary recovery** (not this board).\n"
+      },
+      "links": [],
+      "description": "DSA-08 decision rail for empty/selected modes."
     }
   ],
   "refresh": "60s",

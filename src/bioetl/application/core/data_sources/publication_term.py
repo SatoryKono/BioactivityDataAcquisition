@@ -29,6 +29,7 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports import DataSourcePort
 
+
 class PublicationTermDataSource(
     PublicationTermFilteringMixin,
     PublicationTermExtractionMixin,
@@ -37,14 +38,11 @@ class PublicationTermDataSource(
     _SourceMetadataDelegationMixin,
 ):
     """Decorator that exposes publication_term by extracting terms from publications."""
-
     SOURCE_ENTITY_TYPE = "publication"
     TARGET_ENTITY_TYPE = "publication_term"
     PUBLICATION_LIMIT_MULTIPLIER = 50
-
     def __init__(self, data_source: DataSourcePort) -> None:
         self._data_source = data_source
-
     async def _fetch_target_records(
         self,
         limit: int | None = None,

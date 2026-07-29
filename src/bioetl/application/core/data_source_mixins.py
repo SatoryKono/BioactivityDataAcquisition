@@ -36,19 +36,18 @@ if TYPE_CHECKING:
 
 WrappedDataSourceT = TypeVar("WrappedDataSourceT", bound="_HasWrappedDataSource")
 
+
 class _HasWrappedDataSource(Protocol):
     """Structural protocol for wrappers that delegate to a data source adapter."""
-
     _data_source: DataSourcePort
     provider_name: str
-
     def _after_wrapped_data_source_enter(self) -> None:
         """Reset wrapper-local state after entering the wrapped data source."""
         ...
 
+
 class _SourceMetadataDelegationMixin:
     """Mixin for delegating get_source_metadata to wrapped data source."""
-
     def get_source_metadata(
         self: _HasWrappedDataSource, api_version: str | None = None
     ) -> object | None:
@@ -58,22 +57,19 @@ class _SourceMetadataDelegationMixin:
             return cast("object | None", get_metadata(api_version))
         return None
 
+
 class _WrappedAdapterHealthDelegationMixin:
     """Health and shutdown delegation for wrapped data source adapters."""
-
     async def health_check(self: _HasWrappedDataSource) -> HealthStatus:
         """Delegate health checks to the wrapped data source."""
         return await self._data_source.health_check()
-
     async def check_health(self: _HasWrappedDataSource) -> HealthCheckResult:
         """Delegate enhanced health checks when available, else synthesize one."""
         from bioetl.domain.ports import HealthCheckResult
-
         check_health = getattr(self._data_source, "check_health", None)
         if check_health is not None and callable(check_health):
             from collections.abc import Awaitable, Callable
             from typing import cast
-
             check_health_fn = cast(Callable[[], Awaitable[object]], check_health)
             result = await check_health_fn()
             if isinstance(result, HealthCheckResult):
@@ -84,29 +80,25 @@ class _WrappedAdapterHealthDelegationMixin:
             latency_ms=0.0,
             provider=self.provider_name,
         )
-
     async def aclose(self: _HasWrappedDataSource) -> None:
         """Delegate resource shutdown to the wrapped data source."""
         await self._data_source.aclose()
 
+
 class _WrappedDataSourceDelegationMixin(_WrappedAdapterHealthDelegationMixin):
     """Common lifecycle and health delegation for wrapped data sources."""
-
     @property
     def provider_name(self: _HasWrappedDataSource) -> str:
         """Provider name from the wrapped data source."""
         provider_name: str = self._data_source.provider_name
         return provider_name
-
     async def __aenter__(self: WrappedDataSourceT) -> WrappedDataSourceT:
         """Enter async context and allow subclasses to reset wrapper state."""
         await self._data_source.__aenter__()
         self._after_wrapped_data_source_enter()
         return self
-
     def _after_wrapped_data_source_enter(self) -> None:
         """Hook for subclasses that need to reset state after adapter enter."""
-
     async def __aexit__(
         self: _HasWrappedDataSource,
         exc_type: type[BaseException] | None,

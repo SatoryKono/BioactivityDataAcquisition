@@ -56,6 +56,7 @@ _PHASE_BY_STAGE_NAME = {
     _CHECKPOINT_FINALIZE_STAGE_NAME: LifecyclePhase.CLEANUP,
 }
 
+
 class _PipelineRunnerExecutionHostProtocol(Protocol):
     _config: PipelineConfig
     _runtime: RuntimeConfig
@@ -73,6 +74,7 @@ class _PipelineRunnerExecutionHostProtocol(Protocol):
 
     def _record_stage_completed(self, stage: str) -> None: ...
 
+
 @dataclass(frozen=True, slots=True)
 class _TrackedStage:
     """One ordinary runner stage with its tracked async operation."""
@@ -80,15 +82,18 @@ class _TrackedStage:
     name: str
     operation: Callable[[], Awaitable[None]]
 
+
 @dataclass(frozen=True, slots=True)
 class _ExecutionCycleContext:
     """Resolved ordinary execution-cycle runtime inputs."""
 
     offset: int | None
 
+
 def _phase_for_stage_name(stage_name: str) -> LifecyclePhase:
     """Resolve observer phase name for one canonical runner stage."""
     return _PHASE_BY_STAGE_NAME[stage_name]
+
 
 async def _run_tracked_stage(
     host: _PipelineRunnerExecutionHostProtocol,
@@ -120,6 +125,7 @@ async def _run_tracked_stage(
         runner_stage=stage_name,
     )
 
+
 async def _run_tracked_stages(
     host: _PipelineRunnerExecutionHostProtocol,
     stages: tuple[_TrackedStage, ...],
@@ -127,6 +133,7 @@ async def _run_tracked_stages(
     """Execute tracked stages in the declared canonical order."""
     for stage in stages:
         await _run_tracked_stage(host, stage.name, stage.operation)
+
 
 def _managed_pipeline_stages(
     host: _PipelineRunnerExecutionHostProtocol,
@@ -142,6 +149,7 @@ def _managed_pipeline_stages(
             operation=lambda: prepare_medallion_layers(host),
         ),
     )
+
 
 def _execution_cycle_stages(
     host: _PipelineRunnerExecutionHostProtocol,
@@ -164,11 +172,13 @@ def _execution_cycle_stages(
         ),
     )
 
+
 async def _resolve_execution_cycle_context(
     host: _PipelineRunnerExecutionHostProtocol,
 ) -> _ExecutionCycleContext:
     """Resolve ordinary execution-cycle inputs before tracked stage execution."""
     return _ExecutionCycleContext(offset=await host._resolve_execution_offset())
+
 
 async def _run_execution_cycle_stages(
     host: _PipelineRunnerExecutionHostProtocol,
@@ -179,15 +189,18 @@ async def _run_execution_cycle_stages(
         host, _execution_cycle_stages(host, offset=context.offset)
     )
 
+
 async def run_managed_pipeline(host: _PipelineRunnerExecutionHostProtocol) -> None:
     """Run the validated pipeline lifecycle within managed contexts."""
     await _run_tracked_stages(host, _managed_pipeline_stages(host))
     await run_execution_cycle(host)
 
+
 async def run_execution_cycle(host: _PipelineRunnerExecutionHostProtocol) -> None:
     """Execute extraction, postrun, and checkpoint finalization."""
     context = await _resolve_execution_cycle_context(host)
     await _run_execution_cycle_stages(host, context)
+
 
 async def execute_pipeline(
     host: _PipelineRunnerExecutionHostProtocol,
@@ -201,6 +214,7 @@ async def execute_pipeline(
         offset=offset,
     )
 
+
 async def run_postrun_phase(host: _PipelineRunnerExecutionHostProtocol) -> None:
     """Run the postrun workflow using the executor's resolved DQ context."""
     dq_context = host._executor.get_dq_context()
@@ -209,6 +223,7 @@ async def run_postrun_phase(host: _PipelineRunnerExecutionHostProtocol) -> None:
         dq_context=dq_context,
     )
     emit_postrun_observability(host, result, runner_stage=_POSTRUN_STAGE_NAME)
+
 
 async def prepare_medallion_layers(host: _PipelineRunnerExecutionHostProtocol) -> None:
     """Prepare medallion layers according to the runtime policy."""

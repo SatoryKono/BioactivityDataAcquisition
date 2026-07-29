@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import subprocess
-
 from pathlib import Path
 
+import pytest
+
 from scripts.engineering.qa import report_adr_enforcement_matrix as matrix
+
+pytestmark = pytest.mark.unit
 
 
 def test_git_grep_uses_posix_ere_digit_class(

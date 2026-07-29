@@ -18,14 +18,17 @@ from bioetl.domain.entities.chembl_subcellular_fraction import SubcellularFracti
 
 # === Shared fixtures ===
 
-BASE_KWARGS = cast(Any, {
-    "entity_id": "chembl:test:123",
-    "content_hash": "abc123hash",
-    "run_id": "run-001",
-    "run_type": "incremental",
-    "ingestion_ts": "2024-01-01T00:00:00",
-    "_index": 0,
-})
+BASE_KWARGS = cast(
+    Any,
+    {
+        "entity_id": "chembl:test:123",
+        "content_hash": "abc123hash",
+        "run_id": "run-001",
+        "run_type": "incremental",
+        "ingestion_ts": "2024-01-01T00:00:00",
+        "_index": 0,
+    },
+)
 
 
 # ============================================================================

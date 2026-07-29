@@ -215,7 +215,9 @@ def _write_markdown_report(
 
     path = resolve_output_path(path, root=root if root is not None else REPO_ROOT)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(_render_markdown(snapshot), encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
+    path.write_text(
+        _render_markdown(snapshot), encoding="utf-8"
+    )  # NOSONAR - path confined by resolve_output_path
 
 
 def _write_summary_append(
@@ -226,7 +228,9 @@ def _write_summary_append(
 
     path = resolve_output_path(path, root=root if root is not None else REPO_ROOT)
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("a", encoding="utf-8") as stream:  # NOSONAR - path confined by resolve_output_path
+    with path.open(
+        "a", encoding="utf-8"
+    ) as stream:  # NOSONAR - path confined by resolve_output_path
         stream.write(
             "\n".join(
                 [

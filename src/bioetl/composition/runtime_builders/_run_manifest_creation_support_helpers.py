@@ -35,6 +35,7 @@ if TYPE_CHECKING:
     from bioetl.domain.context import CachedBronzeContext, PipelineRunContext
     from bioetl.infrastructure.config.settings_api import Settings
 
+
 class _ManifestSourceRefBuilder(Protocol):
     def build_run_source_refs(
         self,
@@ -46,6 +47,7 @@ class _ManifestSourceRefBuilder(Protocol):
         entity: str,
         required_persistence_profile: object,
     ) -> tuple[RunSourceRef, ...]: ...
+
 
 @dataclass(frozen=True, slots=True)
 class RunManifestCreateRequestInputs:
@@ -64,9 +66,11 @@ class RunManifestCreateRequestInputs:
     dq_contract_compatibility_hash: str
     effective_config_artifact_id: str
 
+
 def current_silver_filter_compatibility_mode() -> str:
     """Expose a stable patch seam for run-manifest silver-filter compatibility."""
     return resolve_silver_filter_compatibility_mode()
+
 
 def build_manifest_source_refs(
     *,
@@ -85,6 +89,7 @@ def build_manifest_source_refs(
         entity=entity,
         required_persistence_profile=required_persistence_profile,
     )
+
 
 def assemble_manifest_create_spec(
     *,
@@ -153,6 +158,7 @@ def assemble_manifest_create_spec(
         effective_config_artifact_id=request_inputs.effective_config_artifact_id,
         replay_capability=replay_capability,
     )
+
 
 def create_ledger_service(
     inputs: RunnerInputs,

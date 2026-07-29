@@ -35,6 +35,7 @@ if TYPE_CHECKING:
     from bioetl.domain.composite import CompositeConfig
     from bioetl.domain.ports import LoggerPort
 
+
 def build_merge_dependencies(
     *,
     config: CompositeConfig,
@@ -109,7 +110,9 @@ def build_merge_dependencies(
         join_planner=join_planner,
     )
 
+
 __all__ = ["build_merge_dependencies"]
+
 
 def _create_join_type_resolver(
     merge_strategy: MergeStrategy,

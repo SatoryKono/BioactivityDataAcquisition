@@ -1,9 +1,4 @@
-"""Port interfaces (Protocols) for dependency inversion.
-
-Implements RULES.md §1.1 - Ports & Adapters architecture.
-This facade preserves historical ``from bioetl.domain.ports import X`` imports
-without eagerly importing every port submodule during package initialization.
-"""
+"""Lazy compatibility facade for dependency-inversion port protocols."""
 
 from __future__ import annotations
 
@@ -11,9 +6,7 @@ from importlib import import_module
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports.observability import (
-        HealthMetricsExpositionPort as HealthMetricsExpositionPort,
-    )
+    from bioetl.domain.ports.observability import HealthMetricsExpositionPort as HealthMetricsExpositionPort  # noqa: I001
 
 _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
     "bioetl.domain.ports.adr": (

@@ -776,6 +776,24 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as a bounded manual artifact-duplication audit utility while architecture governance tests and generated quality artifacts still depend on this exact surface; promote it into the canonical scripts.engineering.qa reporting lane or retire it after duplication governance consolidates elsewhere."
     },
+    "scripts/engineering/qa/report_basedpyright_error_snapshot.py": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded basedpyright error-snapshot utility while the typing debt campaign needs reproducible evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes."
+    },
+    "scripts/engineering/qa/report_basedpyright_suppression_inventory.py": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded basedpyright suppression-inventory utility while suppression governance needs reproducible evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes."
+    },
+    "scripts/engineering/qa/report_basedpyright_tests_snapshot.py": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded basedpyright test-snapshot utility while the test typing campaign needs reproducible evidence; consolidate it into the canonical QA report surface or retire it after the campaign closes."
+    },
     "scripts/engineering/qa/report_config_surface_backlog.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
@@ -1147,6 +1165,12 @@
       "decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
       "next_step": "Retain only as a one-off DS2 migration helper for auditability; do not promote it to an active operator workflow."
+    },
+    "scripts/ops/observability/grafana/_apply_dsa_residual.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a one-off DSA residual migration helper for auditability; do not promote it to an active operator workflow."
     },
     "scripts/ops/observability/grafana/apply_dux2_residual.py": {
       "owner": "@bioetl-platform",

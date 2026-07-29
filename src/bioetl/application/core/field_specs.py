@@ -26,7 +26,6 @@ def normalize_pmid(
 ) -> str | None:  # object: raw PMID value (int, str, or None)
     """Normalize one PubMed identifier via the publication value object."""
     from bioetl.domain.value_objects.publications import PubMedId
-
     normalized_input: str | int | None = None
     if (isinstance(value, int) and not isinstance(value, bool)) or isinstance(
         value, str
@@ -42,7 +41,6 @@ PMID: Callable[[object], str | None] = (
 @dataclass(frozen=True, slots=True)
 class FieldSpec:
     """Specification for one field mapping."""
-
     source: str
     target: str | None = None
     converter: Callable[[object], object] | None = (
@@ -56,7 +54,6 @@ class FieldSpec:
 @dataclass(frozen=True, slots=True)
 class FieldGroup:
     """Group of related field specifications with an optional target prefix."""
-
     name: str
     fields: tuple[FieldSpec, ...]
     prefix: str = ""
@@ -68,17 +65,14 @@ def map_field(
     """Map one source field according to a field specification."""
     value = record.get(spec.source)
     target = spec.target or spec.source
-
     if value is None:
         if spec.required:
             raise ValueError(f"Required field '{spec.source}' is missing or None")
         if spec.default is not None:
             return target, spec.default
         return target, None
-
     if spec.converter is not None:
         value = spec.converter(value)
-
     return target, value
 
 def map_fields(
@@ -87,11 +81,9 @@ def map_fields(
 ) -> JsonDict:  # Any: heterogeneous record values
     """Map multiple fields from one source record."""
     result: JsonDict = {}  # Any: heterogeneous record values
-
     for spec in specs:
         target, value = map_field(record, spec)
         result[target] = value
-
     return result
 
 def map_field_group(
@@ -100,7 +92,6 @@ def map_field_group(
 ) -> JsonDict:  # Any: heterogeneous record values
     """Map one field group and apply its optional target prefix."""
     mapped = map_fields(record, group.fields)
-
     if group.prefix:
         return {f"{group.prefix}{k}": v for k, v in mapped.items()}
     return mapped
@@ -111,10 +102,8 @@ def map_field_groups(
 ) -> JsonDict:  # Any: heterogeneous record values
     """Map multiple field groups and merge the results."""
     result: JsonDict = {}  # Any: heterogeneous record values
-
     for group in groups:
         result.update(map_field_group(record, group))
-
     return result
 
 # =============================================================================
@@ -151,7 +140,6 @@ def standard_value_fields(
         float_field_names.append("standard_upper_value")
     if include_pchembl_value:
         float_field_names.append("pchembl_value")
-
     fields = (
         *simple_fields("standard_type", *relation_unit_fields, "standard_text_value"),
         *float_fields(*float_field_names),

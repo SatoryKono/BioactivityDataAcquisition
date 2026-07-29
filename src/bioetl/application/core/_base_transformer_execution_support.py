@@ -17,16 +17,15 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import MetricsPort, TracingPort
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
+
 class TransformerExecutionOwner(Protocol):
     """Structural contract for execution helpers delegated from BaseTransformer."""
-
     provider: str
     entity_type: str
     _tracer: TracingPort
     _metrics: MetricsPort
     _silver_filters: SilverFilterConfig | None
     _structural_policy: StructuralPolicyProtocol
-
     async def _transform_impl(
         self,
         context: PipelineContext,
@@ -35,6 +34,7 @@ class TransformerExecutionOwner(Protocol):
     ) -> SilverRecord | None:
         """Implement entity-specific transformation logic."""
         ...
+
 
 def start_transform_span(
     owner: TransformerExecutionOwner,
@@ -56,6 +56,7 @@ def start_transform_span(
     closable_span.__enter__()
     return closable_span
 
+
 def handle_transformation_error(
     owner: TransformerExecutionOwner,
     error: TransformationError,
@@ -74,6 +75,7 @@ def handle_transformation_error(
     span.set_attribute("error.type", error_type)
     return error_type
 
+
 def handle_validation_error(
     owner: TransformerExecutionOwner,
     error: ValueError,
@@ -90,6 +92,7 @@ def handle_validation_error(
     span.set_attribute("error", True)
     span.set_attribute("error.type", error_type)
     return error_type
+
 
 def record_metrics_and_close_span(
     owner: TransformerExecutionOwner,

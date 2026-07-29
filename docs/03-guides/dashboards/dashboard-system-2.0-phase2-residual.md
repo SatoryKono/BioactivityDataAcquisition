@@ -88,3 +88,13 @@ Post-DRM-R audit execution: epic [#6901](https://github.com/SatoryKono/Bioactivi
 Wave 0 truth/render + Wave 1 compression ship on JSON; optional Scenes shell is
 [ADR-053](../../02-architecture/decisions/ADR-053-optional-grafana-scenes-app-shell.md).
 Issue pack: `.github/ISSUES/DS2-2026-07-28-DASHBOARD-SYSTEM-2-REFACTOR-ISSUE-PACK.md`.
+
+## DSA deep-audit residual (2026-07-28) — closed
+
+Post DS2/DSS closeout residual from the deep UX audit HTML:
+epic [#6982](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6982) (closed with children #6983–#6993).
+Shipped: Contract Repair inventory/selectors SSOT; first-screen residual narrative on
+7 JSON boards; query parity ledger + usability remeasure. Viz/cutover remain deferred.
+Issue pack: `.github/ISSUES/DSA-2026-07-28-DASHBOARD-DEEP-AUDIT-RESIDUAL-ISSUE-PACK.md`.
+Publish record: `reports/quality/dsa-2026-07-28-issue-publish.json`.
+Ledger: `reports/observability/query-parity-ledger-dsa-2026-07-28.md`.

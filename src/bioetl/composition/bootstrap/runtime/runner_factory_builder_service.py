@@ -22,6 +22,7 @@ from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service im
     CompositeFilterExtractor,
 )
 
+
 class BronzeRunOptions(TypedDict):
     """Cached bronze options passed to RunOptions constructor."""
 
@@ -29,7 +30,9 @@ class BronzeRunOptions(TypedDict):
     cached_bronze_path: str | None
     cached_bronze_date: str | None
 
+
 _RunOptionsT = TypeVar("_RunOptionsT")
+
 
 def resolve_bronze_opts(
     runtime: CompositeRuntimeConfig,
@@ -48,6 +51,7 @@ def resolve_bronze_opts(
         cached_bronze_path=runtime.cached_bronze_path if effective else None,
         cached_bronze_date=runtime.cached_bronze_date if effective else None,
     )
+
 
 class RunnerFactoryBuilder[RunOptionsT]:
     """Build seed/enricher/dependency runner factories."""
@@ -221,5 +225,6 @@ class RunnerFactoryBuilder[RunOptionsT]:
             )
 
         return dependency_runner_factory
+
 
 __all__ = ["BronzeRunOptions", "RunnerFactoryBuilder", "resolve_bronze_opts"]

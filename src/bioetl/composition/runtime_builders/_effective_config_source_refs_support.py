@@ -11,6 +11,7 @@ from bioetl.domain.control_plane.config_source_hashing import (
 )
 from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef
 
+
 class _CandidatePathsFactory(Protocol):
     def __call__(
         self,
@@ -19,6 +20,7 @@ class _CandidatePathsFactory(Protocol):
         entity: str,
         repo_root: Path,
     ) -> list[str]: ...
+
 
 def _compute_file_hashes(
     *,
@@ -33,6 +35,7 @@ def _compute_file_hashes(
         raw_bytes=path.read_bytes(),
     )
     return hashes.semantic_hash, hashes.raw_hash, hashes.hash_strategy
+
 
 def _build_config_source_ref(
     *,
@@ -54,6 +57,7 @@ def _build_config_source_ref(
         source_hash_strategy=source_hash_strategy,
         priority=priority,
     )
+
 
 def build_effective_config_source_refs(
     *,
@@ -82,6 +86,7 @@ def build_effective_config_source_refs(
         )
         priority += 1
     return refs
+
 
 def resolve_effective_config_entity(provider: str, entity: str) -> str:
     """Map runtime entity labels to canonical effective-config source paths."""

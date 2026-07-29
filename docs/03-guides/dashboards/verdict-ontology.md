@@ -47,6 +47,28 @@ Every operator-facing **verdict** is a 4-tuple:
 | Incident Workspace | `bioetl-incident-v1` | `bioetl_l0_status` worst-of for scope | `0/1/2` + **labelled** `3/null=UNKNOWN` (never bare numeric); confidence from missing-telemetry / VALID_EMPTY suspects |
 | Run Explorer | `bioetl-run-explorer-v1` | HTTP identity + processed records | N/A when no run_id selected |
 
+## First-screen cell contract (DSA-03)
+
+Every first-screen decision cell MUST be readable as:
+
+| Slot | Required? | Notes |
+| --- | --- | --- |
+| **state** | yes | OK / WARN / CRIT / INCOMPLETE / UNKNOWN (labelled text, not bare number) |
+| **confidence** | yes | high / medium / low / none — or telemetry chip (e.g. Runtime **Telemetry confidence**) |
+| **basis** | yes | metric/rule/missing-series reason in description or paired panel |
+| **next_action** | yes | ≤4 CTA rail or ranked First Action; never a multi-page runbook |
+
+### Empty-state peers (not interchangeable)
+
+| Signal | Meaning | Green allowed? |
+| --- | --- | --- |
+| `0` / VALID_EMPTY | Query ok, zero matching events | only if expectedness/freshness healthy |
+| UNKNOWN / TELEMETRY_ABSENT | Required series missing | never (not OK) |
+| INCOMPLETE | Trust gate evidence gap | never |
+| SCRAPING / Metrics gap | Collection state | never as pipeline health peer |
+
+Telemetry collection state is a **confidence chip**, not a peer health KPI.
+
 ## Anti-patterns (forbidden)
 
 1. **Silent green** — OK without required evidence present.
@@ -56,6 +78,8 @@ Every operator-facing **verdict** is a 4-tuple:
 5. **UNKNOWN as OK** — mapping null → green.
 6. **Bare status number** — e.g. red `3` without text mapping.
 7. **Table-wide severity paint** — `color-background` on all columns of a table so timestamps/names look like severity.
+8. **Giant peer cards** — SCRAPING / zero / OK at equal visual weight without grammar labels.
+9. **Repeated exact-run shell** — ID/Processed Records as first-screen KPI outside Run Explorer hub.
 
 ## Trust example
 

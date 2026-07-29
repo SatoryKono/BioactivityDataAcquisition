@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.ports import LoggerPort
 
+
 @dataclass(frozen=True, slots=True)
 class CompositeSupportRuntimeContext:
     """Resolved runtime collaborators shared across composite support builders."""
@@ -36,6 +37,7 @@ class CompositeSupportRuntimeContext:
     delta_reader: DeltaReader
     field_group_registry: FieldGroupRegistry | None
     cross_validator: EnrichmentCrossValidator | None
+
 
 def resolve_composite_support_runtime_context(
     *,
@@ -72,6 +74,7 @@ def resolve_composite_support_runtime_context(
         field_group_registry=field_group_registry,
         cross_validator=cross_validator,
     )
+
 
 __all__ = [
     "CompositeSupportRuntimeContext",

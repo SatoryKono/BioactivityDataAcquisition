@@ -23,13 +23,9 @@ TEST_STRICT_ARCHITECTURE_CONTRACTS = (
     "tests/architecture/test_strict_architecture_contracts.py"
 )
 PATH_STORAGE_BUNDLE = "src/bioetl/composition/factories/storage/bundle.py"
-PATH_STORAGE_BOOTSTRAP_ASSEMBLY = (
-    "src/bioetl/composition/bootstrap/assembly/storage.py"
-)
+PATH_STORAGE_BOOTSTRAP_ASSEMBLY = "src/bioetl/composition/bootstrap/assembly/storage.py"
 PATH_STORAGE_FACTORY = "src/bioetl/composition/factories/storage/factory.py"
-TEST_STORAGE_BOOTSTRAP = (
-    "tests/unit/composition/bootstrap/test_storage_bootstrap.py"
-)
+TEST_STORAGE_BOOTSTRAP = "tests/unit/composition/bootstrap/test_storage_bootstrap.py"
 
 
 @dataclass(frozen=True, slots=True)

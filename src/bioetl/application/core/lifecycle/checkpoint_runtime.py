@@ -38,6 +38,7 @@ def validate_compatibility_policy(
         )
     return policy
 
+
 def resolve_current_metadata(
     current_metadata: CheckpointMetadata | None,
     *,
@@ -45,6 +46,7 @@ def resolve_current_metadata(
 ) -> CheckpointMetadata | None:
     """Return explicit metadata when provided, otherwise fall back to default."""
     return current_metadata if current_metadata is not None else default_metadata
+
 
 def missing_compatibility_context_messages(
     *,
@@ -60,6 +62,7 @@ def missing_compatibility_context_messages(
             "Missing checkpoint compatibility service for resume validation"
         )
     return messages or ["Missing checkpoint compatibility context"]
+
 
 def handle_incompatible_checkpoint(
     *,
@@ -121,6 +124,7 @@ def handle_incompatible_checkpoint(
         + "; ".join(messages)
     )
 
+
 def handle_missing_compatibility_context(
     *,
     logger: LoggerPort,
@@ -157,6 +161,7 @@ def handle_missing_compatibility_context(
         "Checkpoint resume requires compatibility context and fails closed when "
         "that context is incomplete: " + "; ".join(messages)
     )
+
 
 __all__ = [
     "CheckpointCompatibilityDisposition",

@@ -35,6 +35,8 @@ _DQ_BLOCKED_RATIO_RE = re.compile(
 )
 _PROMQL_METRIC_SELECTOR_RE = re.compile(r"([a-zA-Z_:][a-zA-Z0-9_:]*)\{([^{}]*)\}")
 _FORBIDDEN_DASHBOARD_TOKENS = ("checkpoint_saved_at_epoch_seconds",)
+
+
 def _load_allowlist() -> tuple[frozenset[str], frozenset[str]]:
     payload = yaml.safe_load(ALLOWLIST_PATH.read_text(encoding="utf-8"))
     metrics = frozenset(

@@ -305,9 +305,7 @@ def _warning_for_audit_cluster(
     if _warning_reviewed(review_payload, cluster_id=cluster_id, status=status):
         return None
     canonical_name = str(
-        cluster.get("canonical_field")
-        or cluster.get("canonical_name")
-        or "<unknown>"
+        cluster.get("canonical_field") or cluster.get("canonical_name") or "<unknown>"
     )
     return DriftWarning(
         kind=_KIND_BY_AUDIT_STATUS.get(status, "non_blocking_audit_cluster"),
@@ -451,8 +449,7 @@ def _emit_drift_text(result: DriftValidationResult) -> None:
     if not result.warnings:
         return
     print(
-        "[semantic-registry-drift] "
-        f"{len(result.warnings)} non-blocking audit warnings"
+        f"[semantic-registry-drift] {len(result.warnings)} non-blocking audit warnings"
     )
     for warning in result.warnings[:MAX_WARNING_LINES]:
         print(f"- {warning.message}")

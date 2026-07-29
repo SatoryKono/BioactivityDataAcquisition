@@ -9,19 +9,17 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
+
 class BatchProgressService:
     """Tracks and emits pipeline progress during batch execution."""
-
     def __init__(self, *, logger: LoggerPort, data_source: object) -> None:
         self._logger = logger
         self._data_source = data_source
         self._total_records: int | None = None
         self._progress_interval: int | None = None
         self._next_progress_threshold: int = 0
-
     async def initialize_tracking(self, limit: int | None) -> None:
         """Estimate total records and initialize progress thresholds.
-
         Args:
             limit: Optional upper bound on records to process. If provided, used
                 directly as the total. If None, attempts to query the data source
@@ -31,18 +29,15 @@ class BatchProgressService:
         if self._total_records:
             self._set_progress_thresholds()
             return
-
         get_total = getattr(self._data_source, "get_total_records", None)
         if get_total and callable(get_total):
             from collections.abc import Awaitable, Callable
             from typing import cast
-
             get_total_fn = cast(Callable[[], Awaitable[object]], get_total)
             result = await get_total_fn()
             if isinstance(result, int) and result > 0:
                 self._total_records = result
                 self._set_progress_thresholds()
-
     def report_progress(
         self,
         *,
@@ -52,7 +47,6 @@ class BatchProgressService:
         records_filtered_out: int,
     ) -> None:
         """Emit progress log when next reporting threshold is reached.
-
         Args:
             records_fetched: Total records received from the data source so far.
             records_bronze: Total records written to Bronze layer so far.
@@ -74,7 +68,6 @@ class BatchProgressService:
                 fetched=records_fetched,
             )
             self._next_progress_threshold += self._progress_interval
-
     def _set_progress_thresholds(self) -> None:
         """Initialize interval and first threshold from total-record estimate."""
         total_records = self._total_records

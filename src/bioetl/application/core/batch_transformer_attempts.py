@@ -40,6 +40,7 @@ if TYPE_CHECKING:
 
 TRANSFORM_PROCESSING_ERRORS = SHARED_OPERATION_ERRORS
 
+
 def bind_record_context(
     *,
     context: PipelineContext,
@@ -51,6 +52,7 @@ def bind_record_context(
         batch_id=str(batch_id),
         entity_id=raw_record.get("activity_id"),
     )
+
 
 async def transform_record_attempt(
     *,
@@ -73,7 +75,6 @@ async def transform_record_attempt(
         batch_id=batch_id,
         raw_record=raw_record,
     )
-
     try:
         return await build_transform_success_outcome(
             context=record_context,

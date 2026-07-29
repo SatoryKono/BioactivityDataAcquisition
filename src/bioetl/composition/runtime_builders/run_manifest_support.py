@@ -75,6 +75,7 @@ __all__ = [
     "validate_reproducible_sink_modes",
 ]
 
+
 @dataclass(frozen=True, slots=True)
 class RunManifestProvenanceBundle:
     """Effective-config provenance bundle passed into manifest creation."""
@@ -84,6 +85,7 @@ class RunManifestProvenanceBundle:
     effective_config_hash: str
     source_fingerprint: str | None
     dq_contract_compatibility_hash: str
+
 
 def build_run_manifest_provenance_bundle(
     artifact_result: tuple[str, str, str, str | None, str],
@@ -103,6 +105,7 @@ def build_run_manifest_provenance_bundle(
         source_fingerprint=source_fingerprint,
         dq_contract_compatibility_hash=dq_contract_compatibility_hash,
     )
+
 
 def build_run_source_refs(
     *,
@@ -141,6 +144,7 @@ def build_run_source_refs(
             input_snapshots=input_snapshots,
         ),
     )
+
 
 def resolve_replay_capability(
     *,

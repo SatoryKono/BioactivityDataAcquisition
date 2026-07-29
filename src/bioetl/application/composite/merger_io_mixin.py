@@ -10,7 +10,7 @@ from bioetl.application.composite.merger_output_mixin import MergeOutputWriterMi
 from bioetl.domain.composite.result import MergeResult
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Sequence
+    from collections.abc import Sequence
     from datetime import datetime
 
     import polars as pl
@@ -38,10 +38,9 @@ class MergeIOMixin(MergeOutputWriterMixin):
     _cross_validator: EnrichmentCrossValidator | None = cast(Any, None)  # Any: host default (PD4)
     _gold_schema: Any | None = cast(Any, None)  # Any: host default (PD4)
     _join_planner: JoinPlannerService = cast(Any, None)  # Any: host default (PD4)
-    _calculate_field_coverage: Callable[[pl.DataFrame], dict[str, float]] = cast(Any, None)  # Any: host default (PD4)
-    _count_fully_enriched: Callable[
-        [pl.DataFrame, Sequence[EnricherConfig]], int
-    ] = cast(Any, None)  # Any: host default (PD4)
+    # NOTE: _count_fully_enriched / _calculate_field_coverage are real methods on
+    # MergeMetricsRecorderMixin (later in MergeService MRO). Do NOT declare them as
+    # host defaults here — class attrs set to None would shadow those methods.
 
     async def _apply_dependency_joins_if_needed(
         self,

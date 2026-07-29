@@ -24,8 +24,10 @@ if TYPE_CHECKING:
 
 _PERSISTENCE_PROFILE_ACTIVE_LAYERS = ("bronze", "silver", "gold")
 
+
 def _normalize_required_persistence_profile(required_profile: object) -> str:
     return normalize_required_persistence_profile(required_profile)
+
 
 def _resolve_sink_layer_config(yaml_config: object, layer: str) -> object | None:
     sink = getattr(yaml_config, "sink", None)
@@ -35,15 +37,18 @@ def _resolve_sink_layer_config(yaml_config: object, layer: str) -> object | None
         return sink.get(layer)
     return getattr(sink, layer, None)
 
+
 def _is_sink_layer_enabled(layer_config: object | None) -> bool:
     if layer_config is None:
         return True
     return bool(getattr(layer_config, "enabled", True))
 
+
 def _has_lineage_sidecar_persistence(layer_config: object | None) -> bool:
     if layer_config is None:
         return False
     return bool(getattr(layer_config, "save_metadata", False))
+
 
 def resolve_required_artifact_lineage_layers(
     *,
@@ -72,6 +77,7 @@ def resolve_required_artifact_lineage_layers(
         if not _has_lineage_sidecar_persistence(layer_config):
             missing_lineage_layers.append(layer)
     return tuple(active_layer_names), tuple(missing_lineage_layers)
+
 
 def validate_required_persistence_profile(
     *,
@@ -120,6 +126,7 @@ def validate_required_persistence_profile(
             "published layer"
         )
 
+
 def validate_strict_data_root_policy(
     *,
     settings: Settings,
@@ -133,8 +140,10 @@ def validate_strict_data_root_policy(
         exact_replay=exact_replay,
     )
 
+
 requires_artifact_publication_closure = _requires_artifact_publication_closure
 validate_artifact_recorder_attachment = _validate_artifact_recorder_attachment
+
 
 def validate_manifest_persistence_requirements(
     *,

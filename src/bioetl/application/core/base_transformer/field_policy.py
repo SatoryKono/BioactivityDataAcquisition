@@ -13,10 +13,10 @@ from bioetl.application.core.base_transformer.optionality import (
 
 FieldCoercionPolicy = Literal["default", "no_string_coercion"]
 
+
 @dataclass(frozen=True, slots=True, kw_only=True)
 class FieldPolicySpec:
     """Shared resolved field-policy contract surface."""
-
     optional: bool
     optional_sources: tuple[OptionalitySource, ...]
     empty_as_missing: bool | None = None
@@ -24,17 +24,17 @@ class FieldPolicySpec:
     boolean_true_values: tuple[str, ...] = ()
     boolean_false_values: tuple[str, ...] = ()
 
+
 @dataclass(frozen=True, slots=True)
 class ResolvedFieldPolicy(FieldPolicySpec):
     """Resolved structural policy contract for one field."""
 
+
 @dataclass(frozen=True, slots=True)
 class FieldPolicyResolver:
     """Resolve explicit field-level structural policy with config fallback."""
-
     optionality_resolver: ConfigSurfaceOptionalityResolver
     explicit_field_policy: dict[str, object]
-
     @classmethod
     def from_domain_config(cls, domain_config: object) -> FieldPolicyResolver:
         """Build resolver from the pipeline domain config."""
@@ -44,7 +44,6 @@ class FieldPolicyResolver:
             ),
             explicit_field_policy=_collect_explicit_field_policy(domain_config),
         )
-
     def resolve(self, field_name: str) -> ResolvedFieldPolicy:
         """Resolve the effective structural policy for one business field."""
         explicit_policy = self.explicit_field_policy.get(field_name)
@@ -54,7 +53,6 @@ class FieldPolicyResolver:
                 optional=resolved_optionality.optional,
                 optional_sources=resolved_optionality.sources,
             )
-
         return ResolvedFieldPolicy(
             optional=resolved_optionality.optional,
             optional_sources=resolved_optionality.sources,
@@ -68,6 +66,7 @@ class FieldPolicyResolver:
             ),
         )
 
+
 def _collect_explicit_field_policy(domain_config: object) -> dict[str, object]:
     """Collect explicit field-level structural policy overrides from config."""
     explicit_policy: dict[str, object] = {}
@@ -78,12 +77,14 @@ def _collect_explicit_field_policy(domain_config: object) -> dict[str, object]:
         explicit_policy[field_name] = policy
     return explicit_policy
 
+
 __all__ = [
     "FieldCoercionPolicy",
     "FieldPolicyResolver",
     "FieldPolicySpec",
     "ResolvedFieldPolicy",
 ]
+
 
 def _resolve_field_coercion_policy(explicit_policy: object) -> FieldCoercionPolicy:
     """Return one validated coercion policy with a conservative default."""

@@ -26,6 +26,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
+
 def validate_runner_data_root_policy(
     *,
     ctx: PipelineRunContext,
@@ -41,6 +42,7 @@ def validate_runner_data_root_policy(
         required_profile=required_persistence_profile,
         exact_replay=bool(getattr(ctx, "exact_replay", False)),
     )
+
 
 def resolve_runner_runtime_config(
     *,
@@ -69,6 +71,7 @@ def resolve_runner_runtime_config(
         vacuum=vacuum,
         runtime_projection=runtime_projection,
     )
+
 
 def resolve_runner_filter_config(
     *,

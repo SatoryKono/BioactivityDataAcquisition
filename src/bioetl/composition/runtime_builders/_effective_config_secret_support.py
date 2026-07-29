@@ -17,6 +17,7 @@ _EXECUTION_SECRET_SETTING_SURFACES: tuple[tuple[str, str], ...] = (
     ("settings.semanticscholar_api_key", "semanticscholar_api_key"),
 )
 
+
 def _secret_value_hash(
     value: object,
     value_hash: Callable[[str], str],
@@ -28,6 +29,7 @@ def _secret_value_hash(
     if raw_value in (None, ""):
         return None
     return value_hash(str(raw_value))
+
 
 def build_secret_surface_inventory(
     *,

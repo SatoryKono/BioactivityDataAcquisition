@@ -34,14 +34,15 @@ __all__ = [
     "build_runtime_bootstrap_phases",
 ]
 
+
 def _coerce_optional_str(value: object | None) -> str | None:
     if value is None:
         return None
     text = str(value).strip()
     return text or None
 
+
 def _fail_fast_empty_explicit_cached_bronze(ctx: PipelineRunContext) -> None:
-    """Reject explicit cached-Bronze replay before heavy runtime bootstrap work."""
     cached_bronze = getattr(ctx, "cached_bronze", None)
     if cached_bronze is None or not getattr(cached_bronze, "enabled", False):
         return
@@ -53,9 +54,11 @@ def _fail_fast_empty_explicit_cached_bronze(ctx: PipelineRunContext) -> None:
         bronze_date=_coerce_optional_str(getattr(cached_bronze, "bronze_date", None)),
     )
 
+
 def apply_runtime_compatibility_patches() -> bool:
     """Retained public bootstrap hook; no runtime compatibility patch is needed."""
     return False
+
 
 def build_runtime_bootstrap_phases(
     *,
@@ -73,6 +76,7 @@ def build_runtime_bootstrap_phases(
         load_pipeline_config_fn=load_pipeline_config_fn,
         resolve_configs_root_fn=resolve_configs_root,
     )
+
 
 def bootstrap_pipeline_runner(
     ctx: PipelineRunContext,

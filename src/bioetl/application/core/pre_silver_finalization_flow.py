@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import ContentHash, GoldRecord, SilverRecord
 
+
 class _PreSilverFinalizationFlowMixin:
     """Finalize staged business payloads into Silver-compatible records."""
 
@@ -196,5 +197,6 @@ class _PreSilverFinalizationFlowMixin:
                 ),
             ),
         )
+
 
 __all__ = ["_PreSilverFinalizationFlowMixin"]

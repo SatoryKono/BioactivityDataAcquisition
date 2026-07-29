@@ -11,7 +11,6 @@ from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 @dataclass(frozen=True, slots=True)
 class BatchProcessingOutcome:
     """Executor-facing immutable result of one successfully processed batch."""
-
     batch_id: BatchID
     bronze_result: BronzeWriteResult | None
     silver_records: list[BronzeRecord]

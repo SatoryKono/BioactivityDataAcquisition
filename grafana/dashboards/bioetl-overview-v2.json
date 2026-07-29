@@ -293,7 +293,7 @@
         "content": "### Scope — what is broken or degraded right now?\nworkflow=`$workflow` · pipeline=`$pipeline` · run_type=`$run_type` · run_id=`$run_id` (HTTP only)\n\nRead order: **Status → First Action → Inputs** (where should the operator drill down first).\nNav bus is the portfolio switcher.\n",
         "mode": "html"
       },
-      "description": "L0 v3 scope/provenance banner. Primary question: what is broken now and where should the operator drill down first? Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Provenance: shipped Prometheus current-status recording rules plus selected-range evidence. Known limitation: first-screen PromQL remains pipeline/run_type-scoped; workflow is context/evidence-first, and run_id is resolved from persisted control-plane manifests for dashboard handoff rather than exact PromQL intersection.",
+      "description": "L0 v3 scope/provenance banner. Primary question: what is broken now and where should the operator drill down first? Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Provenance: shipped Prometheus current-status recording rules plus selected-range evidence. Verdict grammar: state x confidence x basis x next_action. Known limitation: first-screen PromQL remains pipeline/run_type-scoped; workflow is context/evidence-first, and run_id is resolved from persisted control-plane manifests.",
       "title": "Provenance",
       "type": "text"
     },
@@ -425,7 +425,7 @@
       ],
       "title": "Status",
       "type": "stat",
-      "description": "Current L0 fleet status (bioetl_l0_status). 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Confidence is low when series is absent (UNKNOWN). Evidence age follows the recording/refresh window, not range history. Primary action is First Action; deeper proof is on domain boards. Empty Inputs with Status=OK is VALID_EMPTY fleet. null Status is TELEMETRY_ABSENT_OR_STALE/UNKNOWN, not OK."
+      "description": "Composite fleet verdict (state x confidence x basis). Current L0 fleet status (bioetl_l0_status). 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Confidence is low when series is absent (UNKNOWN). Evidence age follows the recording/refresh window, not range history. Primary action is First Action; deeper proof is on domain boards. Empty Inputs with Status=OK is VALID_EMPTY fleet. null Status is TELEMETRY_ABSENT_OR_STALE/UNKNOWN, not OK. Domain tables are collapsed matrix detail, not peer first-screen badges."
     },
     {
       "id": 215,
@@ -734,7 +734,7 @@
           }
         }
       ],
-      "description": "Action route projection for the selected pipeline/run_type. If the panel resolves to `NO_ROUTE`, validate that `bioetl_overview_pipeline_run_type_universe` exists for the selected pipeline/run_type combination. The row exposes `action_target`, `action_reason`, and `action_dashboard_uid`; Runtime > Control Plane > Gold Lifecycle > DQ > Provider > Workflow > Monitor. Use the panel link whose title matches the routed target. Provider route fail-closes to `provider=unknown` while preserving `pipeline_context`; workflow handoff resets scope because the workflow dashboard does not accept pipeline/run_type variables. CTA budget ≤4 routes. Empty/NO_ROUTE: validate pipeline/run_type universe before treating as healthy."
+      "description": "Ranked next-best-action (<=4). Prefer domain handoff with scope preserved. Not a multi-paragraph runbook. Open Incident when multi-domain; domain board for localization."
     },
     {
       "id": 9002,
@@ -1548,7 +1548,7 @@
             },
             "textMode": "auto"
           },
-          "description": "Selected-range Silver filter reject count and ratio against Bronze records. Evidence only; current DQ incident state lives in Data Quality. Reject count is intentionally neutral; only the rate uses visible 5% WARN / 20% CRIT context, preventing contradictory colors."
+          "description": "Range silver rejects evidence — NOT a peer fleet health KPI. Handoff: Data Quality accounting + Run Explorer for exact-run counts."
         }
       ]
     },
@@ -1563,7 +1563,7 @@
         "x": 0,
         "y": 15
       },
-      "description": "Optional per-subsystem mirrors, raw metric starting points, and cross-dashboard handoffs retained for one-expand drilldown after the deviation-first Inputs matrix identifies a domain. These repeated cards do not compete with the first-level verdict, impact, scope, or action path.",
+      "description": "Domain status matrix detail (Control Plane / Runtime / DQ / Provider / Validation / Workflow) plus diagnostics nav. Collapsed by default — first screen uses Status + Inputs + First Action only (DSA-02).",
       "panels": [
         {
           "description": "Operator note for raw metric starting points and cross-dashboard diagnostics handoffs; no datasource query is expected.",
@@ -2643,7 +2643,7 @@
     },
     {
       "type": "row",
-      "title": "Run context (thin) → Run Explorer",
+      "title": "Run context (thin) -> Run Explorer hub",
       "collapsed": true,
       "gridPos": {
         "h": 1,
@@ -2663,7 +2663,7 @@
             "x": 0,
             "y": 0
           },
-          "description": "Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero.",
+          "description": "Thin shell only. Canonical hub: bioetl-run-explorer-v1. Do not treat as first-screen fleet KPI. Valid empty: no matching identity for the selected run. The backend may be unavailable; check /health/live.",
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
             "defaults": {
@@ -2788,7 +2788,7 @@
             "x": 12,
             "y": 0
           },
-          "description": "Current stage/outcome accounting evidence for the selected pipeline/run_type scope. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero.",
+          "description": "Thin shell only. Canonical hub: bioetl-run-explorer-v1. Do not treat as first-screen fleet KPI. Valid empty: no matching processed-record rows for the selected run. The backend may be unavailable; check /health/live.",
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
             "defaults": {
@@ -3240,7 +3240,7 @@
           ]
         }
       ],
-      "description": "Deep single-run identity lives on Run Explorer (uid bioetl-run-explorer-v1). Keep this row collapsed."
+      "description": "DSA-04: exact-run ID/Processed Records live on Run Explorer. This shell is collapsed forensic handoff only."
     }
   ],
   "refresh": "60s",

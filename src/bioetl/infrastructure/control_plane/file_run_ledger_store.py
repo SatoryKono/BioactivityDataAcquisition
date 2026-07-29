@@ -1,6 +1,4 @@
 # pyright: reportArgumentType=false
-# Boundary object/payload typing residual at this module.
-"""File-backed run-ledger persistence."""
 
 from __future__ import annotations
 

@@ -430,9 +430,7 @@ ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
         composite_requirements=(
             CompositeRequirement(COMPOSITE_TARGET, "seed_output_key"),
             CompositeRequirement(COMPOSITE_TARGET, "field_priority"),
-            CompositeRequirement(
-                COMPOSITE_TARGET, "target_source_anchor"
-            ),
+            CompositeRequirement(COMPOSITE_TARGET, "target_source_anchor"),
         ),
     ),
     AnchorSpec(
@@ -468,9 +466,7 @@ ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
                 "dependency_join_key",
                 pipeline="uniprot_idmapping",
             ),
-            CompositeRequirement(
-                COMPOSITE_TARGET, "target_source_anchor"
-            ),
+            CompositeRequirement(COMPOSITE_TARGET, "target_source_anchor"),
         ),
     ),
     AnchorSpec(

@@ -36,6 +36,7 @@ def strict_checkpoint_resume_required(
         or (current_metadata.exact_replay if current_metadata is not None else False)
     )
 
+
 def resolve_incompatible_checkpoint_disposition(
     *,
     compatibility_policy: CheckpointCompatibilityPolicy,
@@ -56,6 +57,7 @@ def resolve_incompatible_checkpoint_disposition(
         return "soft_fail_blocked"
     return "hard_fail_raised"
 
+
 def resolve_missing_compatibility_context_disposition(
     *,
     compatibility_policy: CheckpointCompatibilityPolicy,
@@ -63,6 +65,7 @@ def resolve_missing_compatibility_context_disposition(
     """Return bounded disposition for missing resume compatibility context."""
     _ = compatibility_policy  # reserved for future soft/hard policy branching
     return "missing_context_hard_fail_raised"
+
 
 __all__ = [
     "resolve_incompatible_checkpoint_disposition",

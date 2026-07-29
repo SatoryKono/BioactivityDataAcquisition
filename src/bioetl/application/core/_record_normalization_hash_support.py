@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from bioetl.domain.normalization.profiles import FieldRule
     from bioetl.domain.types import JsonDict
 
+
 class _NormalizationProfileLike(Protocol):
     """Minimal profile surface required for content-hash computation."""
 
@@ -27,6 +28,7 @@ class _NormalizationProfileLike(Protocol):
     field_aliases: Mapping[str, str]
 
     def rule_for(self, field_name: str) -> FieldRule | None: ...
+
 
 class RecordNormalizationHashSupportMixin:
     """Own rollout-aware content-hash policy resolution for normalized records."""

@@ -8,6 +8,7 @@ if TYPE_CHECKING:
     from bioetl.domain.config import MemoryConfig
     from bioetl.domain.ports import MemoryMonitorPort
 
+
 def config_budget_exceeded(
     memory_config: MemoryConfig | None,
     current_size: int,
@@ -19,6 +20,7 @@ def config_budget_exceeded(
     max_records = memory_config.max_batch_memory_mb * records_per_mb
     return current_size > max_records
 
+
 def estimate_from_config(
     memory_config: MemoryConfig | None,
     current_size: int,
@@ -26,15 +28,13 @@ def estimate_from_config(
     """Estimate batch size without memory monitoring."""
     if not memory_config:
         return current_size
-
     records_per_mb = 1000
     max_records = memory_config.max_batch_memory_mb * records_per_mb
-
     if config_budget_exceeded(memory_config, current_size):
         estimated_size: int = max(max_records, memory_config.min_batch_size)
         return estimated_size
-
     return current_size
+
 
 def decision_reason(*, old_size: int, new_size: int) -> str:
     """Return a bounded reason for a monitor-sourced decision."""
@@ -43,6 +43,7 @@ def decision_reason(*, old_size: int, new_size: int) -> str:
     if new_size > old_size:
         return "monitor_recommended_recovery"
     return "monitor_recommended_no_change"
+
 
 def decision_status(
     *,
@@ -61,6 +62,7 @@ def decision_status(
         return "stable"
     return "disabled"
 
+
 def monitor_mode(monitor: MemoryMonitorPort) -> str:
     """Return the monitor mode when exposed by the monitor implementation."""
     getter = getattr(monitor, "get_monitor_mode", None)
@@ -70,6 +72,7 @@ def monitor_mode(monitor: MemoryMonitorPort) -> str:
             return value
     return "unknown"
 
+
 def monitor_pressure_state(monitor: MemoryMonitorPort) -> bool | None:
     """Return the latest monitor pressure state when exposed."""
     getter = getattr(monitor, "get_last_pressure_state", None)
@@ -78,6 +81,7 @@ def monitor_pressure_state(monitor: MemoryMonitorPort) -> bool | None:
         if isinstance(value, bool):
             return value
     return None
+
 
 __all__ = [
     "config_budget_exceeded",

@@ -66,6 +66,7 @@ def _read_json(path: Path, *, root: Path | None = None) -> JsonDict:
 def _write_json(path: Path, payload: Mapping[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
     path = resolve_output_path(path, root=REPO_ROOT)
     path.write_text(  # NOSONAR - confined
         json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",

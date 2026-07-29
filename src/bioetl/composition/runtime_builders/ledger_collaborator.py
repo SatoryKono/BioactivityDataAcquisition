@@ -10,6 +10,7 @@ if TYPE_CHECKING:
         RunLedgerService,
     )
 
+
 class PipelineRunnerProtocol(Protocol):
     """Minimal runner contract required for ledger collaborator attachment."""
 
@@ -18,6 +19,7 @@ class PipelineRunnerProtocol(Protocol):
     def attach_run_ledger_service(self, service: RunLedgerService) -> None:
         """Attach the run-ledger collaborator."""
         ...
+
 
 @dataclass(frozen=True, slots=True)
 class ArtifactRecorderAttachmentResult:
@@ -28,6 +30,7 @@ class ArtifactRecorderAttachmentResult:
     missing_attach_method_count: int
     failed_count: int
 
+
 def _empty_attachment_result() -> ArtifactRecorderAttachmentResult:
     return ArtifactRecorderAttachmentResult(
         candidate_count=0,
@@ -35,6 +38,7 @@ def _empty_attachment_result() -> ArtifactRecorderAttachmentResult:
         missing_attach_method_count=0,
         failed_count=0,
     )
+
 
 def _record_artifact(
     service: RunLedgerService,
@@ -73,6 +77,7 @@ def _record_artifact(
         details=details,
     )
     return entry
+
 
 def _record_input_snapshots_from_artifact(
     service: RunLedgerService,
@@ -113,6 +118,7 @@ def _record_input_snapshots_from_artifact(
             },
         )
 
+
 def _attach_artifact_recorder(
     target: object,
     service: RunLedgerService,
@@ -130,6 +136,7 @@ def _attach_artifact_recorder(
         )
     )
     return True
+
 
 def _collect_metadata_writer_candidates(services: object) -> list[object]:
     candidates: list[object] = []
@@ -150,6 +157,7 @@ def _collect_metadata_writer_candidates(services: object) -> list[object]:
             candidates.append(writer_metadata)
     return candidates
 
+
 def _iter_unique_candidates(candidates: list[object]) -> list[object]:
     unique_candidates: list[object] = []
     seen: set[int] = set()
@@ -160,6 +168,7 @@ def _iter_unique_candidates(candidates: list[object]) -> list[object]:
         seen.add(candidate_id)
         unique_candidates.append(candidate)
     return unique_candidates
+
 
 def _attach_candidate_artifact_recorder(
     candidate: object,
@@ -176,6 +185,7 @@ def _attach_candidate_artifact_recorder(
         )
     except (AttributeError, RuntimeError, TypeError, ValueError):
         return "failed"
+
 
 def attach_control_plane_collaborators(
     runner: PipelineRunnerProtocol,

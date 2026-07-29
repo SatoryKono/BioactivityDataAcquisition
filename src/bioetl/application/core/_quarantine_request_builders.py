@@ -26,6 +26,7 @@ def build_filtered_quarantine_metadata(
         "quarantine_category": "silver_filter",
     }
 
+
 def build_dq_quarantine_request(
     *,
     pipeline_name: str,
@@ -46,6 +47,7 @@ def build_dq_quarantine_request(
         "metadata": {"error_details": {"message": error_details}},
         "ingestion_ts": ingestion_ts,
     }
+
 
 def build_filtered_quarantine_request(
     *,

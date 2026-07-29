@@ -14,6 +14,7 @@ __all__ = [
     "create_source_config_loader",
 ]
 
+
 def create_pipeline_config_loader(
     configs_root: Path,
 ) -> Callable[[str], PipelineYamlConfig]:
@@ -32,6 +33,7 @@ def create_pipeline_config_loader(
 
     return _load
 
+
 def create_dq_config_loader(
     configs_root: Path,
 ) -> Callable[[str], object]:
@@ -49,6 +51,7 @@ def create_dq_config_loader(
         )
 
     return _load
+
 
 def create_source_config_loader(
     configs_root: Path,

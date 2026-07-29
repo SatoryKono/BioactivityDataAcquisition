@@ -81,6 +81,21 @@ POWERSHELL_MARK = pytest.mark.skipif(
 )
 
 
+def _powershell_path(path: Path) -> str:
+    """Translate WSL paths before passing them to Windows PowerShell."""
+    if os.name == "nt" or POWERSHELL is None or not POWERSHELL.lower().endswith(".exe"):
+        return str(path)
+    converted = subprocess.run(
+        ["wslpath", "-w", str(path)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if converted.returncode != 0:
+        pytest.skip("Unable to translate WSL path for Windows PowerShell")
+    return converted.stdout.strip()
+
+
 def _clean_env(**updates: str | None) -> dict[str, str]:
     """Build a subprocess env without host MCP secrets leaking into assertions."""
     env = {
@@ -108,16 +123,33 @@ def run_export_script(
             "Install PowerShell or ensure it is on PATH."
         )
 
-    cmd = [
-        POWERSHELL,
-        "-NoProfile",
-        "-File",
-        str(EXPORT_SCRIPT),
-        "-RepoRoot",
-        str(repo_root),
-    ]
-    if user_scope:
-        cmd.append("-UserScope")
+    export_script_arg = _powershell_path(EXPORT_SCRIPT)
+    repo_path = _powershell_path(repo_root)
+    if os.name != "nt" and POWERSHELL.lower().endswith(".exe"):
+        # WSL-to-Windows interop constructs the Windows process environment
+        # from the Windows host, so ``env=`` below cannot remove host secrets.
+        # Clear the relevant variables inside PowerShell before invoking the
+        # script to keep assertions independent of the developer machine.
+        names = ", ".join(f"'{name}'" for name in _MCP_ENV_KEYS)
+        user_scope_arg = " -UserScope" if user_scope else ""
+        command = (
+            f"$names = @({names}); "
+            "foreach ($name in $names) { Remove-Item \"Env:$name\" -ErrorAction SilentlyContinue }; "
+            f"& '{export_script_arg}' -RepoRoot '{repo_path}'{user_scope_arg}; "
+            "exit $LASTEXITCODE"
+        )
+        cmd = [POWERSHELL, "-NoProfile", "-Command", command]
+    else:
+        cmd = [
+            POWERSHELL,
+            "-NoProfile",
+            "-File",
+            export_script_arg,
+            "-RepoRoot",
+            repo_path,
+        ]
+        if user_scope:
+            cmd.append("-UserScope")
 
     result = subprocess.run(
         cmd,

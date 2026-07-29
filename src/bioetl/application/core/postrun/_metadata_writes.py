@@ -17,6 +17,7 @@ if TYPE_CHECKING:
         StorageMaintenancePort,
     )
 
+
 def resolve_report_path(
     dq_reports: DQReportResult | None,
     *,
@@ -33,6 +34,7 @@ def resolve_report_path(
         return None
     return str(path) if path else None
 
+
 def get_run_statistics(executor: ExecutorMetricsPort) -> dict[str, object]:
     """Collect optional run-level statistics from executor."""
     get_stats = getattr(executor, "get_run_statistics", None)
@@ -42,6 +44,7 @@ def get_run_statistics(executor: ExecutorMetricsPort) -> dict[str, object]:
     if isinstance(raw_stats, dict):
         return raw_stats
     return {}
+
 
 def build_final_metadata_write_coroutines(
     *,
@@ -86,6 +89,7 @@ def build_final_metadata_write_coroutines(
         if coro is not None
     ]
 
+
 def _build_silver_metadata_write_coro(
     *,
     metadata_coordinator: MetadataCoordinatorPort | None,
@@ -105,7 +109,6 @@ def _build_silver_metadata_write_coro(
     silver_table = config.table.silver_table
     if not silver_table:
         return None
-
     silver_path = storage.get_table_path(silver_table, layer="silver")
     version_after = resolve_delta_version(str(silver_path), "silver")
     silver_metadata_write: Awaitable[object] = metadata_writer.finalize_silver_metadata(
@@ -117,6 +120,7 @@ def _build_silver_metadata_write_coro(
         entity=config.entity_type,
     )
     return silver_metadata_write
+
 
 def _build_gold_metadata_write_coro(
     *,
@@ -139,7 +143,6 @@ def _build_gold_metadata_write_coro(
     gold_table = config.table.gold_table
     if not gold_table:
         return None
-
     if not storage.is_table_initialized(gold_table, layer="gold"):
         return None
     gold_path = storage.get_table_path(gold_table, layer="gold")

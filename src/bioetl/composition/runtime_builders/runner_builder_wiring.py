@@ -30,6 +30,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
+
 @dataclass(frozen=True, slots=True)
 class RunnerFactoryWiring:
     """Provider and registry wiring needed before runner construction."""
@@ -37,6 +38,7 @@ class RunnerFactoryWiring:
     create_registry: Callable[[], PipelineRegistry] = create_registry
     ensure_providers_loaded: Callable[[], None] = ensure_providers_loaded
     register_all_pipelines: Callable[..., None] = register_all_pipelines
+
 
 @dataclass(frozen=True, slots=True)
 class RunnerInputWiring:
@@ -57,12 +59,14 @@ class RunnerInputWiring:
         [PipelineRunContext], CachedBronzeContext
     ] = assemble_cached_bronze_context
 
+
 @dataclass(frozen=True, slots=True)
 class RunnerBuilderWiring:
     """Canonical aggregate wiring seam for runtime runner construction."""
 
     factory: RunnerFactoryWiring = field(default_factory=RunnerFactoryWiring)
     inputs: RunnerInputWiring = field(default_factory=RunnerInputWiring)
+
 
 @dataclass(frozen=True, slots=True)
 class LegacyRunnerBuilderOverrides:
@@ -81,6 +85,7 @@ class LegacyRunnerBuilderOverrides:
     assemble_cached_bronze_context_fn: (
         Callable[[PipelineRunContext], CachedBronzeContext] | None
     ) = None
+
 
 def resolve_runner_factory_wiring(
     wiring: RunnerFactoryWiring | None = None,
@@ -115,6 +120,7 @@ def resolve_runner_factory_wiring(
         ),
     )
 
+
 def resolve_runner_builder_wiring(
     wiring: RunnerBuilderWiring | None = None,
     *,
@@ -145,6 +151,7 @@ def resolve_runner_builder_wiring(
     if resolved_factory is resolved.factory and resolved_inputs is resolved.inputs:
         return resolved
     return RunnerBuilderWiring(factory=resolved_factory, inputs=resolved_inputs)
+
 
 def resolve_runner_input_wiring(
     wiring: RunnerInputWiring | None = None,
@@ -214,6 +221,7 @@ def resolve_runner_input_wiring(
             else resolved.assemble_cached_bronze_context
         ),
     )
+
 
 __all__ = [
     "LegacyRunnerBuilderOverrides",

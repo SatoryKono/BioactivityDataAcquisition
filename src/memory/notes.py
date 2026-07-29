@@ -187,16 +187,17 @@ def _read_markdown_metadata_with_timeout(
     ):
         return _read_frontmatter_metadata_from_path(path)
 
-    # Use timeout for network drives or test scenarios with small timeouts
-    metadata: dict[str, Any] | None = None
-    exception: BaseException | None = None
+    # Use timeout for network drives or test scenarios with small timeouts.
+    # Container lists so analyzers see mutable side-effects from the worker thread
+    # (pythonbugs:S2583: plain nonlocal exception flags always looked false).
+    results: list[dict[str, Any]] = []
+    errors: list[BaseException] = []
 
     def _target() -> None:
-        nonlocal metadata, exception
         try:
-            metadata = _read_frontmatter_metadata_from_path(path)
+            results.append(_read_frontmatter_metadata_from_path(path))
         except Exception as e:
-            exception = e
+            errors.append(e)
 
     thread = threading.Thread(target=_target, daemon=True)
     thread.start()
@@ -210,9 +211,9 @@ def _read_markdown_metadata_with_timeout(
             )
         return _read_frontmatter_metadata_from_text(fallback_text, path)
 
-    if exception is not None:
-        raise exception
-    return metadata or {}
+    if errors:
+        raise errors[0]
+    return results[0] if results else {}
 
 
 def _git_repo_root(path: Path) -> Path | None:

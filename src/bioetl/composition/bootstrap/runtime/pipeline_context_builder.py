@@ -21,6 +21,7 @@ from bioetl.domain.types import ExecutionContext, RunID, RunType
 
 __all__ = ["build_pipeline_context"]
 
+
 def _build_input_filter_context(options: RunOptions) -> InputFilterContext:
     """Build input filter context from user-facing run options."""
     if options.multi_filter_ids:
@@ -42,12 +43,14 @@ def _build_input_filter_context(options: RunOptions) -> InputFilterContext:
         )
     return InputFilterContext.disabled()
 
+
 def _build_vacuum_config(options: RunOptions) -> VacuumSettings:
     """Build vacuum config from CLI overrides while preserving tri-state input."""
     return VacuumSettings(
         enabled=options.vacuum_after_run,
         retention_days=options.vacuum_retention_days or 7,
     )
+
 
 def _build_cached_bronze_context(options: RunOptions) -> CachedBronzeContext:
     """Build cached Bronze context from user-facing run options."""
@@ -68,10 +71,12 @@ def _build_cached_bronze_context(options: RunOptions) -> CachedBronzeContext:
         )
     return CachedBronzeContext.disabled()
 
+
 def _coerce_run_id(run_id: RunID | UUID | str) -> RunID:
     if isinstance(run_id, UUID):
         return cast(RunID, run_id)
     return cast(RunID, UUID(str(run_id)))
+
 
 def _resolve_pipeline_run_id(
     *,
@@ -86,6 +91,7 @@ def _resolve_pipeline_run_id(
     if options.exact_replay:
         raise ValueError("exact replay requires explicit run_id or run_id_factory")
     return create_runtime_occurrence_run_id("pipeline_context")
+
 
 def build_pipeline_context(
     name: str,

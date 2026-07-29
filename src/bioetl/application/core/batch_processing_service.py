@@ -41,17 +41,17 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 
+
 @dataclass(frozen=True, slots=True)
 class BatchProcessingComponents:
     """Injected components shared by RecordProcessor and BatchExecutor."""
-
     batch_metrics: BatchMetricsRecorderService
     transformer: BatchTransformer
     writer: BatchWriter
 
+
 class BatchProcessingService:
     """Handles extract/transform/write processing for one ETL batch."""
-
     def __init__(
         self,
         *,
@@ -74,7 +74,6 @@ class BatchProcessingService:
         self._tracing = tracing_manager
         self._batch_id_factory = batch_id_factory
         self._support = support_service
-
     async def extract_records(
         self,
         *,
@@ -83,7 +82,6 @@ class BatchProcessingService:
         offset: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
         """Extract records from source adapter for configured entity.
-
         Args:
             limit: Maximum number of records to yield, or None for all.
             query: Optional query string forwarded to the data source.
@@ -96,7 +94,6 @@ class BatchProcessingService:
             offset=offset,
         ):
             yield record
-
     async def process_batch(
         self,
         *,
@@ -105,12 +102,10 @@ class BatchProcessingService:
         query_string: str | None,
     ) -> BatchProcessingOutcome:
         """Process one batch through Bronze, Silver, and Gold writes.
-
         Args:
             records: List of raw Bronze records to process.
             start_index: Absolute record index of the first record in this batch.
             query_string: Query string used to fetch these records, for logging context.
-
         Returns:
             BatchProcessingOutcome with write counts and source batch ID.
         """
@@ -128,7 +123,6 @@ class BatchProcessingService:
         self._batch_metrics.track_records_fetched(len(records))
         self._batch_metrics.track_batch_created(stage="bronze", count=len(records))
         self._publish_batch_events(batch)
-
         return cast(
             "BatchProcessingOutcome",
             await execute_with_pipeline_failure_policy(
@@ -145,19 +139,16 @@ class BatchProcessingService:
                 ),
             ),
         )
-
     def _get_source_metadata(
         self,
         query_string: str | None,
     ) -> SourceMetadata | None:
         """Delegate source metadata retrieval through the support service."""
         return self._support.get_source_metadata(query_string)
-
     @property
     def debug_export_service(self) -> object | None:
         """Expose the optional debug export collaborator to the executor."""
         return getattr(self._support, "_debug_export_service", None)
-
     async def _process_batch_work(
         self,
         *,
@@ -219,7 +210,6 @@ class BatchProcessingService:
                 transform_result.gold_excluded_by_contract_count
             ),
         )
-
     def _publish_batch_events(self, batch: Batch) -> None:
         """Publish domain events collected from the Batch aggregate."""
         for event in batch.collect_events():

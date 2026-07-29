@@ -13,7 +13,6 @@ import dataclasses
 @dataclasses.dataclass(frozen=True)
 class _DefaultContractPolicy:
     """Fallback contract policy when none is injected."""
-
     primary_key: list[str] = dataclasses.field(default_factory=lambda: ["entity_id"])
     merge_keys: list[str] = dataclasses.field(default_factory=lambda: ["entity_id"])
     rename_map: dict[str, str] = dataclasses.field(
@@ -35,6 +34,7 @@ class _DefaultContractPolicy:
             "_dq_warn",
         ]
     )
+
 
 DefaultContractPolicy = _DefaultContractPolicy
 

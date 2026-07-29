@@ -26,26 +26,22 @@ def flatten_nested_dict(
     # Optimized for speed: Single-pass iteration merging prefixing and renaming.
     # Uses explicit type annotation for mypy strict mode.
     result: JsonDict = {}  # Any: dict values vary by field type
-
     if not data or not isinstance(data, dict):
         for key in field_mapping:
             full_key = f"{prefix}{key}"
             final_key = renames.get(full_key, full_key) if renames else full_key
             result[final_key] = None
         return result
-
     for source_key, converter in field_mapping.items():
         # Construct the full key once
         full_key = f"{prefix}{source_key}"
         # Determine the final key (handle rename immediately)
         final_key = renames.get(full_key, full_key) if renames else full_key
-
         value = data.get(source_key)
         if converter is not None and value is not None:
             result[final_key] = converter(value)
         else:
             result[final_key] = value
-
     return result
 
 def extract_list_field[T](
@@ -57,7 +53,6 @@ def extract_list_field[T](
     """Extract one field from a list of dict-like items."""
     if not items or not isinstance(items, list):
         return None
-
     values: list[T] = []
     for item in items:
         if not isinstance(item, dict):
@@ -65,14 +60,12 @@ def extract_list_field[T](
         raw_value = item.get(field)
         if raw_value is None:
             continue
-
         if converter is not None:
             converted = converter(raw_value)
             if converted is not None:
                 values.append(converted)
         else:
             values.append(raw_value)
-
     return values if values else None
 
 def _extract_nested_values(
@@ -96,11 +89,9 @@ def aggregate_nested_lists(
     """Merge nested list values from a list of mapping-like items."""
     if not isinstance(items, list) or not items:
         return None
-
     values = _extract_nested_values(items, field)
     if not values:
         return None
-
     if deduplicate:
         seen: set[str] = set()
         unique: list[
@@ -112,7 +103,6 @@ def aggregate_nested_lists(
                 seen.add(key)
                 unique.append(val)
         return unique if unique else None
-
     return values
 
 def normalize_string(value: str | None) -> str | None:

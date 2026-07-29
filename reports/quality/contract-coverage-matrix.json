@@ -2487,6 +2487,7 @@
         "tests/unit/application/composite/test_target_protein_classification_summary.py",
         "tests/unit/application/pipelines/chembl/test_target_protein_classification_transformer.py",
         "tests/unit/application/pipelines/test_protein_class_transformer.py",
+        "tests/unit/application/services/protein/test_classification_resolution.py",
         "tests/unit/application/services/test_protein_classification_resolution.py",
         "tests/unit/composition/providers/test_chembl_target_protein_classification_data_source.py",
         "tests/unit/composition/providers/test_chembl_target_protein_classification_helpers.py",

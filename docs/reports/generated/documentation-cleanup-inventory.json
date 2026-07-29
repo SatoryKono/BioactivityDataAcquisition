@@ -1477,6 +1477,34 @@
       "lifecycle": "issue_pack",
       "outbound_links": 0,
       "owner": "BioETL Team",
+      "path": ".github/ISSUES/DSA-2026-07-28-DASHBOARD-DEEP-AUDIT-RESIDUAL-ISSUE-PACK.md",
+      "recommended_action": "archive-after-github-state-check",
+      "root_doc_kind": null,
+      "section": ".github",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "issue_pack",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
       "path": ".github/ISSUES/DUX2-2026-07-28-DASHBOARD-SYSTEM-2-PHASE2-RESIDUAL-ISSUE-PACK.md",
       "recommended_action": "archive-after-github-state-check",
       "root_doc_kind": null,
@@ -2346,6 +2374,34 @@
       "outbound_links": 0,
       "owner": "BioETL Team",
       "path": ".github/ISSUES/PD3-2026-07-28-PROJECT-DIAGNOSTICS-STRUCTURAL-DEBT-ISSUE-PACK.md",
+      "recommended_action": "archive-after-github-state-check",
+      "root_doc_kind": null,
+      "section": ".github",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "issue_pack",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": ".github/ISSUES/PD4-2026-07-28-PROJECT-DIAGNOSTICS-HOST-PROTOCOL-ISSUE-PACK.md",
       "recommended_action": "archive-after-github-state-check",
       "root_doc_kind": null,
       "section": ".github",
@@ -60208,21 +60264,21 @@
       "generated_test_run_evidence": 4,
       "guide": 2,
       "index": 4,
-      "issue_pack": 33,
+      "issue_pack": 35,
       "live_issue_mirror": 4,
       "plans_governance_entrypoint": 1,
       "published_skill_reference_redirect": 36,
       "working_report": 67
     },
     "by_recommended_action": {
-      "archive-after-github-state-check": 142,
+      "archive-after-github-state-check": 144,
       "archive-after-migration": 102,
       "generate-automatically": 763,
       "keep": 1113,
       "reconcile-with-github-state": 4
     },
     "by_section": {
-      ".github": 152,
+      ".github": 154,
       "00-project": 292,
       "01-requirements": 3,
       "02-architecture": 901,
@@ -60261,18 +60317,18 @@
       "Archived": 130,
       "Canonical": 71,
       "Generated": 763,
-      "Working": 307
+      "Working": 309
     },
     "by_surface_family": {
       "active": 853,
       "archive": 130,
       "canonical": 71,
       "generated": 763,
-      "working": 307
+      "working": 309
     },
     "by_tracking_state": {
       "ignored_local": 54,
-      "tracked": 2070
+      "tracked": 2072
     },
     "docs_reports_local_count": 85,
     "duplicate_group_count": 2,
@@ -60283,13 +60339,13 @@
       "active_draft": 109,
       "guide": 2,
       "index": 4,
-      "issue_pack": 33,
+      "issue_pack": 35,
       "live_issue_mirror": 4
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 2124,
+    "total_doc_like": 2126,
     "total_doc_like_ignored_local": 54,
-    "total_doc_like_tracked": 2070
+    "total_doc_like_tracked": 2072
   }
 }

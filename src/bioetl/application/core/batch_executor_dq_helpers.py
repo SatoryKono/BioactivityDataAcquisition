@@ -33,6 +33,7 @@ _DQ_DATAFRAME_ERRORS: tuple[type[Exception], ...] = (
     RuntimeError,
 )
 
+
 def dataframe_error_types() -> tuple[type[Exception], ...]:
     """Resolve exception types raised while building Polars dataframes."""
     try:
@@ -40,6 +41,7 @@ def dataframe_error_types() -> tuple[type[Exception], ...]:
     except (ImportError, ModuleNotFoundError, AttributeError):
         return _DQ_DATAFRAME_ERRORS
     return (*_DQ_DATAFRAME_ERRORS, pl.exceptions.PolarsError)
+
 
 def stringify_value(value: object, keys_to_stringify: set[str], key: str) -> object:
     """Stringify a value if its key requires normalization."""
@@ -49,13 +51,13 @@ def stringify_value(value: object, keys_to_stringify: set[str], key: str) -> obj
         return json.dumps(value, default=str, sort_keys=True)
     return str(value)
 
+
 def normalize_records_for_polars[RecordT: dict[str, object]](
     records: list[RecordT],
 ) -> list[dict[str, object]] | None:
     """Normalize mixed nested/string columns to stable string representation."""
     nested_keys: set[str] = set()
     non_nested_keys: set[str] = set()
-
     for record in records:
         for key, value in record.items():
             if value is None:
@@ -64,11 +66,9 @@ def normalize_records_for_polars[RecordT: dict[str, object]](
                 nested_keys.add(key)
             else:
                 non_nested_keys.add(key)
-
     keys_to_stringify = nested_keys & non_nested_keys
     if not keys_to_stringify:
         return None
-
     return [
         {
             key: stringify_value(value, keys_to_stringify, key)
@@ -76,6 +76,7 @@ def normalize_records_for_polars[RecordT: dict[str, object]](
         }
         for record in records
     ]
+
 
 def build_dataframe_from_records(
     *,
@@ -90,7 +91,6 @@ def build_dataframe_from_records(
         return None
     try:
         import polars as pl
-
         dataframe: object = pl.DataFrame(records, infer_schema_length=None)
         return dataframe
     except dataframe_error_types() as dataframe_error:
@@ -98,7 +98,6 @@ def build_dataframe_from_records(
         if normalized_records is not None:
             try:
                 import polars as pl
-
                 normalized_dataframe: object = pl.DataFrame(
                     normalized_records,
                     infer_schema_length=None,
@@ -125,6 +124,7 @@ def build_dataframe_from_records(
             )
         return None
 
+
 def get_dq_thresholds(config: RecordProcessorConfig) -> tuple[float, float]:
     """Resolve DQ thresholds from config, falling back to defaults."""
     dq_config = getattr(config, "dq_config", None)
@@ -134,6 +134,7 @@ def get_dq_thresholds(config: RecordProcessorConfig) -> tuple[float, float]:
             dq_config.hard_fail_threshold,
         )
     return (0.05, 0.20)
+
 
 def extract_dq_entity(config: RecordProcessorConfig) -> str:
     """Derive entity name for report naming from silver table naming."""
@@ -148,6 +149,7 @@ def extract_dq_entity(config: RecordProcessorConfig) -> str:
         return dotted_entity
     resolved_entity: str = silver_table or entity_type
     return resolved_entity
+
 
 def build_dq_report_context(
     *,
@@ -167,12 +169,10 @@ def build_dq_report_context(
 ) -> DQReportContext:
     """Build DQ report context from accumulated execution samples."""
     from bioetl.application.services.dq_report_service import DQReportContext
-
     silver_data = build_dataframe(silver_records, "silver")
     gold_data = build_dataframe(gold_records, "gold")
     primary_keys = list(config.table_config.primary_keys)
     soft_threshold, hard_threshold = get_dq_thresholds(config)
-
     key_nullability_rules = None
     dq_config = config.dq_config
     if dq_config is not None:
@@ -184,7 +184,6 @@ def build_dq_report_context(
             }
             for rule in dq_config.key_nullability_rules
         ]
-
     replay_timestamp_anchor = getattr(context, "replay_timestamp_anchor", None)
     started_at = getattr(context, "started_at", None)
     if started_at is None:
@@ -192,7 +191,6 @@ def build_dq_report_context(
     dq_timestamp = replay_timestamp_anchor or started_at
     current_date_str = dq_timestamp.strftime("%Y-%m-%d")
     dq_entity = extract_dq_entity(config)
-
     return DQReportContext(
         run_id=str(context.run_id),
         pipeline_name=config.pipeline_name,

@@ -53,7 +53,9 @@ def _area(path: str) -> str:
 
 def build_tests_snapshot(source: Path) -> dict[str, Any]:
     source = resolve_output_path(source, root=ROOT)
-    source_text = source.read_text(encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
+    source_text = source.read_text(
+        encoding="utf-8"
+    )  # NOSONAR - path confined by resolve_output_path
     payload = json.loads(source_text)
     summary = payload.get("summary") if isinstance(payload, dict) else {}
     diags = payload.get("generalDiagnostics") if isinstance(payload, dict) else []
@@ -67,9 +69,7 @@ def build_tests_snapshot(source: Path) -> dict[str, Any]:
 
     # Advisory surface: tests + scripts only (exclude product src/bioetl).
     advisory_errors = [
-        d
-        for d in errors
-        if _area(str(d.get("file") or "")) in {"tests", "scripts"}
+        d for d in errors if _area(str(d.get("file") or "")) in {"tests", "scripts"}
     ]
     entity_errors = [
         d
@@ -151,7 +151,9 @@ def check_snapshot(*, source: Path, output: Path) -> None:
     output = resolve_output_path(output, root=ROOT)
     if not output.is_file():
         raise SystemExit(f"missing tests snapshot: {output}")
-    committed_text = output.read_text(encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
+    committed_text = output.read_text(
+        encoding="utf-8"
+    )  # NOSONAR - path confined by resolve_output_path
     committed = json.loads(committed_text)
     live = build_tests_snapshot(source)
     committed_errors = int(committed.get("summary", {}).get("advisory_error_count", 0))

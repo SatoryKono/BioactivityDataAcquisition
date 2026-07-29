@@ -42,7 +42,9 @@ def test_diagnostics_package_lazy_loads_split_modules() -> None:
         "bioetl.application.services.control_plane.manifest.diagnostics"
     )
     # Importable package with documented split modules on disk.
-    package_dir = ROOT / "src/bioetl/application/services/control_plane/manifest/diagnostics"
+    package_dir = (
+        ROOT / "src/bioetl/application/services/control_plane/manifest/diagnostics"
+    )
     for stem in ("base", "finalization", "replay_refresh_support"):
         assert (package_dir / f"{stem}.py").is_file()
     assert package is not None

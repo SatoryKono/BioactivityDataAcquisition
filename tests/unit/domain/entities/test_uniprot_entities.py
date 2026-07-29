@@ -15,14 +15,17 @@ import pytest
 
 from bioetl.domain.entities.uniprot import IDMappingResult, UniprotTarget
 
-BASE_KWARGS = cast(Any, {
-    "entity_id": "uniprot:test:001",
-    "content_hash": "hash123",
-    "run_id": "run-001",
-    "run_type": "incremental",
-    "ingestion_ts": datetime(2024, 1, 1, tzinfo=UTC),
-    "_index": 0,
-})
+BASE_KWARGS = cast(
+    Any,
+    {
+        "entity_id": "uniprot:test:001",
+        "content_hash": "hash123",
+        "run_id": "run-001",
+        "run_type": "incremental",
+        "ingestion_ts": datetime(2024, 1, 1, tzinfo=UTC),
+        "_index": 0,
+    },
+)
 
 
 @pytest.mark.unit

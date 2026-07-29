@@ -154,3 +154,38 @@ N=3 simulated operator passes. **Targets ≠ claims. No MTTD/MTTI/MTTR.**
 
 **Caveat:** static JSON + simulated scenarios only. Live Grafana render evidence
 still recommended when host available. Scenes app shell (ADR-053) not yet built.
+
+
+---
+
+## Post DSA residual re-measure (2026-07-28, epic #6982)
+
+Method: structured walkthrough on repo JSON after DSA Contract Repair + first-screen
+narrative residual (Operations Home matrix language, Telemetry confidence chip,
+freshness-aware Provider copy, Incident evidence timeline titles, Run Explorer
+browse-first empty state, ID/Processed hub SSOT).
+N=3 simulated operator passes. **Targets ≠ claims. No MTTD/MTTI/MTTR.**
+
+| Scenario | Pass | TTFS (s) | Clicks | Screens | Wrong first |
+| --- | ---: | ---: | ---: | ---: | --- |
+| S1 Fleet | 1 | 15 | 3 | 2 | N (Status+Inputs+First Action) |
+| S1 | 2 | 17 | 3 | 2 | N |
+| S2 Trust resume | 1 | 20 | 3 | 2 | N (Primary recovery) |
+| S3 Provider | 1 | 14 | 2 | 1 | N (freshness-aware Status) |
+| S4 DQ Now | 1 | 16 | 3 | 2 | N |
+| S5 Runtime | 1 | 13 | 2 | 1 | N (Telemetry confidence chip) |
+| S6 Incident | 1 | 11 | 2 | 1 | N (ranked + evidence timeline) |
+| S6 Run Explorer empty | 1 | 10 | 1 | 1 | N (Browse recent runs first) |
+| S6 Run Explorer selected | 1 | 12 | 2 | 1 | N (ID→Processed→detail) |
+
+### Aggregates (post DSA residual)
+
+| Proxy | Median | Target | Met? |
+| --- | ---: | ---: | --- |
+| Clicks to first cause | ~2–3 | 3–5 | yes (sim) |
+| Screens / investigation | ~1–2 | 2–3 | yes (sim) |
+| TTFS | ~14s | ≤30s | yes (sim) |
+
+Ledger: `reports/observability/query-parity-ledger-dsa-2026-07-28.md`.
+
+**Caveat:** simulated on static JSON layout/contracts, not live Grafana with real series.

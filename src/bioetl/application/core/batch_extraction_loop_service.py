@@ -25,9 +25,9 @@ if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
     from bioetl.domain.types import BronzeRecord
 
+
 class BatchProcessingServiceProtocol(Protocol):
     """Minimal extraction contract required by loop orchestration."""
-
     def extract_records(
         self,
         *,
@@ -38,26 +38,26 @@ class BatchProcessingServiceProtocol(Protocol):
         """Yield raw Bronze records from the data source."""
         ...
 
+
 class _BatchStateUpdater(Protocol):
     """Async batch processing callback used by the extraction loop."""
-
     def __call__(
         self,
         records: list[BronzeRecord],
         start_index: int,
     ) -> Awaitable[None]: ...
 
+
 class _BatchProgressState(Protocol):
     """Mutable progress state consumed by loop helpers."""
-
     records_fetched: int
     records_bronze: int
     records_silver: int
     records_filtered_out: int
 
+
 class BatchExtractionLoopService:
     """Runs the canonical extraction loop for batch execution."""
-
     def __init__(
         self,
         *,
@@ -69,7 +69,6 @@ class BatchExtractionLoopService:
         checkpoint_interval: int,
     ) -> None:
         """Initialize extraction loop service.
-
         Args:
             batch_processing_service: Source adapter that yields raw Bronze records.
             shutdown_signal: Checked each iteration to honor graceful shutdown requests.
@@ -84,7 +83,6 @@ class BatchExtractionLoopService:
         self._progress_service = progress_service
         self._checkpoint_recovery_service = checkpoint_recovery_service
         self._checkpoint_interval = checkpoint_interval
-
     async def run(
         self,
         execution_context: BatchExecutionContext,
@@ -107,7 +105,6 @@ class BatchExtractionLoopService:
             progress_state=progress_state,
             checkpoint_interval=self._checkpoint_interval,
         )
-
         records = self._batch_processing_service.extract_records(
             limit=execution_context.limit,
             query=execution_context.query,
@@ -129,10 +126,8 @@ class BatchExtractionLoopService:
             if callable(aclose):
                 from collections.abc import Awaitable, Callable
                 from typing import cast
-
                 aclose_fn = cast(Callable[[], Awaitable[object]], aclose)
                 await aclose_fn()
-
         await flush_remaining_batch(
             loop_state=loop_state,
             records_fetched=progress_state.records_fetched,

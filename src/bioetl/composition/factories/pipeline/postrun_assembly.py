@@ -16,7 +16,9 @@ from bioetl.application.core.postrun import (
     PostrunService,
 )
 from bioetl.application.services.data_quality_service import DataQualityService
-from bioetl.application.services.medallion.medallion_lifecycle import MedallionLifecycleService
+from bioetl.application.services.medallion.medallion_lifecycle import (
+    MedallionLifecycleService,
+)
 from bioetl.composition.bootstrap_contexts import DQConfigsContext
 from bioetl.composition.factories.services.common_service_wiring import resolve_tracer
 from bioetl.domain.context import PipelineContext

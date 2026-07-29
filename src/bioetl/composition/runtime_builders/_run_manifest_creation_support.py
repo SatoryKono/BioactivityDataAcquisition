@@ -51,6 +51,7 @@ if TYPE_CHECKING:
     from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
     from bioetl.domain.context import PipelineRunContext as Context
 
+
 def build_manifest_create_request(
     request_inputs: RunManifestCreateRequestInputs,
 ) -> RunManifestCreateSpec:
@@ -113,6 +114,7 @@ def build_manifest_create_request(
         ),
     )
     return request
+
 
 def emit_replay_reconstructability_metric(
     *,
@@ -188,6 +190,7 @@ def emit_replay_reconstructability_metric(
                 "status": "detected",
             },
         )
+
 
 def create_ledger_service(inputs: RunnerInputs, ctx: Context) -> Ledger | None:
     """Keep the public ownership seam local to this support module."""

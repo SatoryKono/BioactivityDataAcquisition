@@ -52,6 +52,7 @@ __all__ = [
 
 load_source_config = _load_source_config
 
+
 def build_pipeline_runner(
     ctx: PipelineRunContext,
     registry: PipelineRegistry | None = None,

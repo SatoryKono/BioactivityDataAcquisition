@@ -23,6 +23,7 @@ if TYPE_CHECKING:
 
 QUARANTINE_WRITE_WARN_ONLY_ERRORS = SHARED_OPERATION_ERRORS
 
+
 async def flush_filtered_records(
     *,
     context: PipelineContext,
@@ -50,6 +51,7 @@ async def flush_filtered_records(
         )
         return len(records)
 
+
 async def flush_dq_records(
     *,
     context: PipelineContext,
@@ -76,6 +78,7 @@ async def flush_dq_records(
             error=str(exc),
         )
         return len(records)
+
 
 async def route_single_transform_attempt(
     *,

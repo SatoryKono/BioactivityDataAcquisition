@@ -313,7 +313,10 @@ def _run_powershell_command(
         )
     except subprocess.TimeoutExpired as exc:
         pytest.skip(f"PowerShell command timed out in this environment: {exc}")
-    if "UtilBindVsockAnyPort" in result.stderr:
+    if any(
+        marker in result.stderr
+        for marker in ("UtilBindVsockAnyPort", "UtilAcceptVsock")
+    ):
         pytest.skip("Windows PowerShell interop is unavailable in this WSL session")
     return result
 
@@ -352,7 +355,10 @@ def _run_powershell_file(
         pytest.skip(
             f"PowerShell wrapper execution timed out in this environment: {exc}"
         )
-    if "UtilBindVsockAnyPort" in result.stderr:
+    if any(
+        marker in result.stderr
+        for marker in ("UtilBindVsockAnyPort", "UtilAcceptVsock")
+    ):
         pytest.skip("Windows PowerShell interop is unavailable in this WSL session")
     return result
 

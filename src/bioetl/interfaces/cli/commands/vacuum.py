@@ -50,6 +50,7 @@ def get_vacuum_service() -> VacuumService:
     """Load the vacuum service through the owner-only maintenance seam."""
     return service_access.get_vacuum_service()
 
+
 _VACUUM_DOMAIN_ERROR_TITLE = "Maintenance vacuum failed with domain error"
 _VACUUM_UNEXPECTED_ERROR_TITLE = "Unexpected error during maintenance vacuum"
 _VACUUM_INTERRUPTED_MESSAGE = "Maintenance vacuum interrupted by user (Ctrl+C)"

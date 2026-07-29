@@ -26,21 +26,20 @@ else:
     class _FilteredDataSourceStateBase:
         """Runtime placeholder for the type-checking-only state protocol."""
 
+
 class _FilteredDataSourceStateMixin(_FilteredDataSourceStateBase, ABC):
     """Attribute contract shared by FilteredDataSource mixins."""
-
     def _ensure_filterable_adapter(self, mode: str) -> None:
         """Check adapter supports filtering mode."""
         raise NotImplementedError
 
+
 class _FilteredDataSourceLifecycleMixin(_FilteredDataSourceStateMixin, ABC):
     """Lifecycle and filter-loading behavior for FilteredDataSource."""
-
     async def __aenter__(self) -> Self:
         """Enter async context and preload filters when enabled."""
         await lifecycle_support.enter_filtered_data_source(self)
         return self
-
     async def __aexit__(
         self,
         exc_type: type[BaseException] | None,
@@ -50,20 +49,19 @@ class _FilteredDataSourceLifecycleMixin(_FilteredDataSourceStateMixin, ABC):
         """Exit async context."""
         await self._data_source.__aexit__(exc_type, exc_val, exc_tb)
 
+
 class _FilteredDataSourceFetchMixin(
     _FilteredDataSourceStateMixin,
     _WrappedAdapterHealthDelegationMixin,
     ABC,
 ):
     """Fetch and filtering behavior for FilteredDataSource."""
-
     def _matches_valid_combination(
         self,
         record: JsonDict,  # Any: filter record values vary (str|int|float|list)
     ) -> bool:  # Any: filter record values vary (str|int|float|list)
         """Check if record matches one of the valid combinations."""
         return fetch_support.matches_valid_combination(self, record)
-
     async def _fetch_multi_column(
         self,
         entity_type: str,
@@ -74,7 +72,6 @@ class _FilteredDataSourceFetchMixin(
         """Fetch with multi-column filtering (hybrid approach)."""
         async for record in fetch_support.fetch_multi_column(self, entity_type, limit):
             yield record
-
     async def _fetch_single_column(
         self,
         entity_type: str,
@@ -85,7 +82,6 @@ class _FilteredDataSourceFetchMixin(
         """Fetch with single-column filtering."""
         async for record in fetch_support.fetch_single_column(self, entity_type, limit):
             yield record
-
     def _fetch_without_internal_filters(
         self,
         entity_type: str,
@@ -103,7 +99,6 @@ class _FilteredDataSourceFetchMixin(
             query=query,
             offset=offset,
         )
-
     def fetch(
         self,
         entity_type: str,
@@ -116,7 +111,6 @@ class _FilteredDataSourceFetchMixin(
         JsonDict  # Any: filter record values vary (str|int|float|list)
     ]:  # Any: filter record values vary (str|int|float|list)
         """Fetch records with optional filtering from internal config.
-
         Args:
             entity_type: Entity type string passed through to the underlying adapter.
             limit: Maximum number of records to fetch, or None for all.

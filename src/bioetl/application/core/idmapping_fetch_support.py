@@ -15,9 +15,9 @@ if TYPE_CHECKING:
         LoggerPort,
     )
 
+
 class _IDMappingFetchState(Protocol):
     """Structural contract for IDMappingDataSource fetch helpers."""
-
     _client: IDMappingPort
     _id_source_reader: IDMappingSourceReaderPort
     _input_path: str
@@ -26,6 +26,7 @@ class _IDMappingFetchState(Protocol):
     _to_db: str
     _id_column: str
     _seed_ids: list[str] | None
+
 
 async def fetch_records(
     state: _IDMappingFetchState,
@@ -43,7 +44,6 @@ async def fetch_records(
     if not chembl_ids:
         state._logger.warning("no_ids_to_map", input_path=str(state._input_path))
         return
-
     state._logger.info(
         "idmapping_fetch_started",
         source=source,
@@ -61,13 +61,13 @@ async def fetch_records(
         if is_mapped:
             found_count += 1
         yield record
-
     state._logger.info(
         "idmapping_fetch_completed",
         total_ids=len(chembl_ids),
         mapped=found_count,
         not_mapped=len(chembl_ids) - found_count,
     )
+
 
 def warn_unexpected_entity_type(
     state: _IDMappingFetchState,
@@ -81,6 +81,7 @@ def warn_unexpected_entity_type(
         expected="idmapping",
         received=entity_type,
     )
+
 
 async def resolve_chembl_ids(
     state: _IDMappingFetchState,
@@ -101,11 +102,13 @@ async def resolve_chembl_ids(
         source = "csv"
     return apply_limit(chembl_ids, limit), source
 
+
 def apply_limit(ids: list[str], limit: int | None) -> list[str]:
     """Apply an optional limit to the resolved ID list."""
     if limit is None:
         return ids
     return ids[:limit]
+
 
 def build_mapping_record(
     chembl_id: str,
@@ -119,11 +122,11 @@ def build_mapping_record(
         result: JsonDict = {"target_id": chembl_id}
         result.update(entry_data)
         return result, True
-
     return {
         "target_id": chembl_id,
         "uniprot_accession": None,
     }, False
+
 
 async def read_chembl_ids(state: _IDMappingFetchState) -> list[str]:
     """Read source ChEMBL IDs through the injected source reader."""
@@ -132,6 +135,7 @@ async def read_chembl_ids(state: _IDMappingFetchState) -> list[str]:
         id_column=state._id_column,
     )
     return chembl_ids
+
 
 def format_repr(state: _IDMappingFetchState) -> str:
     """Format the debug representation for IDMappingDataSource."""

@@ -27,6 +27,7 @@ if TYPE_CHECKING:
 RecordT = TypeVar("RecordT")
 RecordOutT = TypeVar("RecordOutT", covariant=True)
 
+
 def _invoke_target_fetch[RecordT](
     fetch_target_records: Callable[
         [int | None, str | None, list[str] | None, str | None, int | None],
@@ -37,10 +38,10 @@ def _invoke_target_fetch[RecordT](
     """Call a target-record fetcher through a canonical tuple payload."""
     return fetch_target_records(*fetch_args)
 
+
 class _TargetEntityFetchWrapper(Protocol[RecordOutT]):
     _data_source: DataSourcePort
     TARGET_ENTITY_TYPE: str
-
     def _fetch_target_records(
         self,
         limit: int | None,
@@ -49,6 +50,7 @@ class _TargetEntityFetchWrapper(Protocol[RecordOutT]):
         filter_field: str | None,
         offset: int | None,
     ) -> AsyncIterator[RecordOutT]: ...
+
 
 class _TargetEntityFetchDelegationMixin:
     def fetch(
@@ -80,11 +82,11 @@ class _TargetEntityFetchDelegationMixin:
             ),
         )
 
+
 class _FilterableTargetWrapper(Protocol[RecordOutT]):
     _data_source: DataSourcePort
     SOURCE_ENTITY_TYPE: str
     TARGET_ENTITY_TYPE: str
-
     def _fetch_target_filtered_records(
         self,
         filterable: FilterableDataSourcePort,
@@ -92,14 +94,12 @@ class _FilterableTargetWrapper(Protocol[RecordOutT]):
         filter_field: str,
         limit: int | None,
     ) -> AsyncIterator[RecordOutT]: ...
-
     def _fetch_target_multi_filtered_records(
         self,
         filterable: FilterableDataSourcePort,
         filters: dict[str, list[str]],
         limit: int | None,
     ) -> AsyncIterator[RecordOutT]: ...
-
     def _fetch_target_filtered_with_fallback_records(
         self,
         filterable: FilterableDataSourcePort,
@@ -109,25 +109,26 @@ class _FilterableTargetWrapper(Protocol[RecordOutT]):
         limit: int | None,
     ) -> AsyncIterator[RecordOutT]: ...
 
+
 class _FilterableTargetDelegatingWrapper(
     _FilterableTargetWrapper[RecordOutT],
     Protocol[RecordOutT],
 ):
     def _ensure_filterable(self, method_name: str) -> FilterableDataSourcePort: ...
 
+
 class _FallbackFilterableTargetWrapper(Protocol[RecordOutT]):
     SOURCE_ENTITY_TYPE: str
-
     def _resolve_target_fallback_upstream_limit(
         self,
         limit: int | None,
     ) -> int | None: ...
-
     def _yield_target_records_from_fallback_source_records(
         self,
         source_records: AsyncIterator[object],
         limit: int | None,
     ) -> AsyncIterator[RecordOutT]: ...
+
 
 class _FilterableTargetDelegationMixin:
     def _ensure_filterable(
@@ -140,7 +141,6 @@ class _FilterableTargetDelegationMixin:
             provider_name=self._data_source.provider_name,
             method_name=method_name,
         )
-
     async def fetch_filtered(
         self: _FilterableTargetDelegatingWrapper[RecordT],
         entity_type: str,
@@ -164,7 +164,6 @@ class _FilterableTargetDelegationMixin:
             ),
         ):
             yield cast("RecordT", record)
-
     async def fetch_multi_filtered(
         self: _FilterableTargetDelegatingWrapper[RecordT],
         entity_type: str,
@@ -186,7 +185,6 @@ class _FilterableTargetDelegationMixin:
             ),
         ):
             yield cast("RecordT", record)
-
     async def fetch_filtered_with_fallback(
         self: _FilterableTargetDelegatingWrapper[RecordT],
         entity_type: str,
@@ -216,6 +214,7 @@ class _FilterableTargetDelegationMixin:
             ),
         ):
             yield cast("RecordT", record)
+
 
 class _FallbackFilterableTargetFetchMixin:
     def _fetch_target_filtered_with_fallback_records(

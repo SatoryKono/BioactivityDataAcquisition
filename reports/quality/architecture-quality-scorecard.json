@@ -49,15 +49,15 @@
     },
     {
       "evidence_metrics": {
-        "hotspot_budget_warning_count": 1,
+        "hotspot_budget_warning_count": 0,
         "hotspot_family_count": 5,
         "total_duplicate_clusters": 0
       },
       "id": "module_boundaries_coupling",
       "name": "Module boundaries / coupling",
-      "score": 9.0,
+      "score": 9.5,
       "weight": 0.14,
-      "weighted_score": 1.26
+      "weighted_score": 1.33
     },
     {
       "evidence_metrics": {
@@ -112,7 +112,7 @@
     {
       "evidence_metrics": {
         "expired_compat_count": 0,
-        "hotspot_budget_warning_count": 1,
+        "hotspot_budget_warning_count": 0,
         "public_entrypoint_growth_count": 0,
         "public_export_facade_conflict_count": 0,
         "public_export_facade_growth_count": 0,
@@ -123,9 +123,9 @@
       },
       "id": "debt_burden_evolution_friction",
       "name": "Debt burden / evolution friction",
-      "score": 9.8,
+      "score": 9.9,
       "weight": 0.06,
-      "weighted_score": 0.588
+      "weighted_score": 0.594
     }
   ],
   "debt_budget_policy": {
@@ -162,7 +162,7 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 9.33,
+  "integral_score": 9.41,
   "interpretation": "good_targeted_improvements",
   "metrics": {
     "accepted_adr_count": 51,
@@ -175,11 +175,10 @@
     "dq_blocking_issue_count": 0,
     "expired_compat_count": 0,
     "families_at_budget": [
-      "application_services_control_plane",
-      "composition_factories_pipeline"
+      "application_services_control_plane"
     ],
-    "families_at_budget_count": 2,
-    "hotspot_budget_warning_count": 1,
+    "families_at_budget_count": 1,
+    "hotspot_budget_warning_count": 0,
     "hotspot_family_count": 5,
     "layer_violations": 0,
     "public_entrypoint_growth_count": 0,
@@ -234,14 +233,14 @@
       "total_duplicate_clusters": 0
     },
     "hotspot_family_baseline": {
-      "budget_warnings": 1,
+      "budget_warnings": 0,
       "path": "reports/quality/hotspot-family-baseline.json",
       "snapshot_date": "2026-07-27"
     },
     "module_coverage_inventory": {
       "coverage_xml_sha256": "fb530e62125256526d43fb0d095621adf2b13e79b827d80b8c96882853368011",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "e564ac16eb8f36046983976e0c308bd8fe09e3de75411ce0e538bc97fd67be1e"
+      "source_tree_sha256": "36463a0028d209974ea3f6937371cfa9a0848de46045e95513f4b2f1e7f6ac4d"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

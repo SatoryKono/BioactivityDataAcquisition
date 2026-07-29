@@ -39,6 +39,7 @@ if TYPE_CHECKING:
     from bioetl.domain.types import RunID
     from bioetl.infrastructure.config.settings_api import Settings
 
+
 def _create_and_persist_effective_config_artifact_payload(
     *,
     pipeline_name: str,
@@ -121,6 +122,7 @@ def _create_and_persist_effective_config_artifact_payload(
         artifact.dq_contract_compatibility_hash,
     )
 
+
 def create_and_persist_effective_config_artifact(
     *,
     ctx: PipelineRunContext,
@@ -164,6 +166,7 @@ def create_and_persist_effective_config_artifact(
         logger=inputs.observability.logger,
         run_id=ctx.run_id,
     )
+
 
 def create_and_persist_composite_effective_config_artifact(
     *,
@@ -210,6 +213,7 @@ def create_and_persist_composite_effective_config_artifact(
         logger=logger,
         run_id=run_id,
     )
+
 
 __all__ = [
     "create_and_persist_composite_effective_config_artifact",

@@ -1,5 +1,11 @@
 # PD3 issue pack — structural suppression debt
 
+Governed diagnostic reporters:
+
+- `scripts/engineering/qa/report_basedpyright_error_snapshot.py`
+- `scripts/engineering/qa/report_basedpyright_suppression_inventory.py`
+- `scripts/engineering/qa/report_basedpyright_tests_snapshot.py`
+
 Created: 2026-07-28T16:31:16Z
 
 ## Epic

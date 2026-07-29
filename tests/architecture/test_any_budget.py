@@ -90,9 +90,14 @@ def _collect_violations(source_content_cache: dict[Path, str]) -> list[str]:
             # Skip lines without Any.
             if not _ANY_RE.search(code):
                 continue
-            # Skip if the full line carries an approved justification marker.
+            # Ruff may split ``cast(Any, None)`` across three lines and keep
+            # the justification on the closing line. Inspect only that bounded
+            # statement window so unrelated nearby comments cannot exempt it.
             full_line = raw_lines[lineno - 1]
-            if any(marker in full_line for marker in _JUSTIFICATION_MARKERS):
+            statement_window = "\n".join(raw_lines[lineno - 1 : lineno + 2])
+            if any(
+                marker in statement_window for marker in _JUSTIFICATION_MARKERS
+            ):
                 continue
             # Skip if a globally-justified alias is on this line.
             if _GLOBALLY_JUSTIFIED.search(code):

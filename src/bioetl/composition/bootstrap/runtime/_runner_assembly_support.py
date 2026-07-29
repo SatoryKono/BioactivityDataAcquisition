@@ -49,6 +49,7 @@ if TYPE_CHECKING:
         TracingPort,
     )
 
+
 @dataclass(frozen=True, slots=True)
 class CompositeRunnerServiceInputs:
     config: CompositeConfig
@@ -75,15 +76,19 @@ class CompositeRunnerServiceInputs:
     run_ledger_service: RunLedgerService | None
     clock: ClockPort | None = None
 
+
 CompositeRunnerFactory = Callable[..., CompositePipelineRunner]
+
 
 def resolve_effective_run_id(run_id: str | None) -> str:
     return run_id or create_runtime_occurrence_id("composite_runner")
+
 
 def _requires_explicit_control_plane_run_id(
     inputs: CompositeRunnerServiceInputs,
 ) -> bool:
     return inputs.manifest_id is not None or inputs.run_ledger_service is not None
+
 
 def build_composite_runner_dependencies(
     inputs: CompositeRunnerServiceInputs,
@@ -111,6 +116,7 @@ def build_composite_runner_dependencies(
         run_ledger_service=inputs.run_ledger_service,
         clock=effective_clock,
     )
+
 
 def build_composite_runner_service_inputs(
     *,
@@ -156,6 +162,7 @@ def build_composite_runner_service_inputs(
         clock=SystemClock(),
     )
 
+
 def normalize_composite_runner_service_inputs(
     inputs: CompositeRunnerServiceInputs,
 ) -> CompositeRunnerServiceInputs:
@@ -178,12 +185,14 @@ def normalize_composite_runner_service_inputs(
         inputs = replace(inputs, run_id=resolve_effective_run_id(inputs.run_id))
     return inputs
 
+
 def invoke_composite_runner_factory(
     *,
     runner_factory: CompositeRunnerFactory,
     inputs: CompositeRunnerServiceInputs,
 ) -> CompositePipelineRunner:
     return runner_factory(inputs)
+
 
 def create_composite_runner_service_from_inputs(
     inputs: CompositeRunnerServiceInputs,

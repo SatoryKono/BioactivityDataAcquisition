@@ -21,12 +21,14 @@ if TYPE_CHECKING:
     from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
     from bioetl.infrastructure.control_plane import FileRunManifestStore
 
+
 def create_manifest_store(inputs: RunnerInputs) -> FileRunManifestStore:
     """Create the file-backed run-manifest store."""
     return create_run_manifest_store(
         settings=inputs.settings,
         metrics=inputs.observability.metrics,
     )
+
 
 def create_manifest_record(
     *,

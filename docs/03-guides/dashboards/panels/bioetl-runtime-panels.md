@@ -43,9 +43,10 @@ snapshot evidence, a snapshot denominator, or a presence gate. Event deltas use
 
 ### 7. Metrics Evidence
 - **Type:** Stat
-- **Purpose:** Detect missing/stale scrape or rule-group evidence. Non-zero makes
-  both runtime status panels `INCOMPLETE`.
+- **Purpose:** Confidence chip for missing/stale scrape or rule-group evidence
+  (not pipeline health). Non-zero makes runtime Status `INCOMPLETE`.
 - **Data sources:** `bioetl_runtime_trust_gap_status_10m`
+- **DSA-05:** Do not present SCRAPING/gap as a peer OK health KPI.
 
 ### 8. Monitor Aggregate Stage Lag
 - **Type:** Timeseries
@@ -204,12 +205,12 @@ snapshot evidence, a snapshot denominator, or a presence gate. Event deltas use
 - **Purpose:** Show shutdown completions by reason.
 - **Data sources:** `bioetl_shutdown_completed_total`
 
-### 38. Runtime secondary KPIs
+### 38. Secondary KPIs (collapsed; not peer first-screen cards)
 - **Type:** Row
 - **Purpose:** Group secondary selected-range runtime evidence.
 - **Data sources:** Prometheus range evidence from the nested panels.
 
-### 39. Run context (thin) → Run Explorer
+### 39. Run context (thin) -> Run Explorer hub
 - **Type:** Row
 - **Purpose:** Group selected-run identity and processed-record HTTP evidence.
 - **Data sources:** BioETL Ops HTTP.

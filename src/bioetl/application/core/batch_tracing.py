@@ -28,11 +28,10 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import TracingPort
     from bioetl.domain.types import BatchID
 
+
 class BatchTracingManagerService:
     """Manage execution, batch, and layer spans for pipeline runs."""
-
     TRACER_NAME = "bioetl.batch_executor"
-
     def __init__(
         self,
         tracer: TracingPort | None,
@@ -52,7 +51,6 @@ class BatchTracingManagerService:
         self._config = config
         self._initial_batch_size = initial_batch_size
         self._adaptive_sizing_enabled = adaptive_sizing_enabled
-
     def start_execution_span(self) -> Span | None:
         """Start the root pipeline execution span."""
         otel_tracer = self._tracer.get_tracer(self.TRACER_NAME)
@@ -71,7 +69,6 @@ class BatchTracingManagerService:
         )
         span.__enter__()
         return span
-
     def start_batch_span(
         self, batch_id: BatchID, record_count: int, start_index: int
     ) -> Span | None:
@@ -92,7 +89,6 @@ class BatchTracingManagerService:
         )
         span.__enter__()
         return span
-
     def start_layer_span(
         self,
         name: str,
@@ -114,7 +110,6 @@ class BatchTracingManagerService:
         )
         span.__enter__()
         return span
-
     def set_execution_stats(
         self,
         span: Span | None,
@@ -131,7 +126,6 @@ class BatchTracingManagerService:
         """Set final execution statistics on the root span."""
         if not span:
             return
-
         set_execution_stats_attributes(
             span,
             total_fetched=total_fetched,
@@ -150,7 +144,6 @@ class BatchTracingManagerService:
             span,
             memory_decision_trace=memory_decision_trace,
         )
-
     def set_batch_result(
         self,
         span: Span | None,
@@ -163,7 +156,6 @@ class BatchTracingManagerService:
         """Set batch result counters on a batch span."""
         if not span:
             return
-
         set_record_result_attributes(
             span,
             bronze_count=bronze_count,
@@ -171,7 +163,6 @@ class BatchTracingManagerService:
             gold_count=gold_count,
             quarantined_count=quarantined_count,
         )
-
     def set_transform_result(
         self,
         span: Span | None,
@@ -183,20 +174,18 @@ class BatchTracingManagerService:
         """Set transform result counters on a transform span."""
         if not span:
             return
-
         set_record_result_attributes(
             span,
             silver_count=silver_count,
             gold_count=gold_count,
             quarantined_count=quarantined_count,
         )
-
     def end_span(self, span: Span | None, error: Exception | None = None) -> None:
         """End a tracing span and optionally record an error."""
         close_span(cast("_ClosableSpan | None", span), error)
-
     def end_span_with_shutdown(self, span: Span | None) -> None:
         """End a tracing span with shutdown markers."""
         close_span_with_shutdown(cast("_ClosableSpan | None", span))
+
 
 __all__ = ["BatchTracingManagerService"]

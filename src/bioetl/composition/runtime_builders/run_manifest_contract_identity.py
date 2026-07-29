@@ -22,6 +22,7 @@ __all__ = [
     "resolve_contract_identity",
 ]
 
+
 @dataclass(frozen=True, slots=True)
 class RunManifestContractIdentity:
     """Canonical manifest contract identity resolved from the contract registry."""
@@ -34,6 +35,7 @@ class RunManifestContractIdentity:
     normalization_profile_ref: str | None
     normalization_profile_version: str | None
     normalization_profile_hash: str | None
+
 
 def resolve_contract_identity(
     *,
@@ -72,6 +74,7 @@ def resolve_contract_identity(
         ensure_complete_contract_identity(contract_ref, fields)
     return RunManifestContractIdentity(contract_ref, *fields)
 
+
 def ensure_complete_contract_identity(
     contract_ref: str,
     fields: tuple[
@@ -100,6 +103,7 @@ def ensure_complete_contract_identity(
             f"for '{contract_ref}'; missing: {missing_text}"
         )
 
+
 def _load_contract_registry_entry(
     registry_path: Path,
     contract_ref: str,
@@ -113,6 +117,7 @@ def _load_contract_registry_entry(
     if not isinstance(entry, dict):
         return None
     return entry
+
 
 def _read_contract_registry_entries(
     registry_path: Path,
@@ -128,6 +133,7 @@ def _read_contract_registry_entries(
                 f"registry payload at '{registry_path}'"
             ) from exc
         return None
+
 
 def _extract_contract_identity_fields(
     entry: dict[str, object],
@@ -171,11 +177,13 @@ def _extract_contract_identity_fields(
         normalization_profile_hash,
     )
 
+
 def _identity_payload(entry: Mapping[str, object]) -> Mapping[str, object]:
     identity = entry.get("identity")
     if isinstance(identity, Mapping):
         return identity
     return {}
+
 
 def _coerce_optional_text(value: object) -> str | None:
     if value is None:
