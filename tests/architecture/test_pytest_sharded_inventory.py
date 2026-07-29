@@ -284,6 +284,10 @@ def test_sharded_runner_list_matches_inventory_order() -> None:
 @pytest.mark.architecture
 @_BASH_RUNNER_UNSUPPORTED_ON_WINDOWS
 def test_sharded_runner_dry_run_expands_architecture_alias_from_inventory() -> None:
+    inventory = _load_inventory()
+    expected_shards = inventory["aliases"]["S7-crosscutting-architecture"][
+        "expands_to"
+    ]
     result = subprocess.run(
         [
             "bash",
@@ -301,12 +305,9 @@ def test_sharded_runner_dry_run_expands_architecture_alias_from_inventory() -> N
     dry_run_lines = [
         line for line in result.stdout.splitlines() if line.startswith("[dry-run]")
     ]
-    assert len(dry_run_lines) == 6
+    assert len(dry_run_lines) == len(expected_shards)
     assert all("run_pytest.sh --narrow" in line for line in dry_run_lines)
-    assert any(r"test_\[c-z\]\*.py" in line for line in dry_run_lines)
-    assert any(r"test_\[a-b\]\*.py" in line for line in dry_run_lines)
-    assert any(r"test_\[d-z\]\*.py" in line for line in dry_run_lines)
-    assert any(r"test_\[g-z\]\*.py" in line for line in dry_run_lines)
-    assert any(r"test_\[a-f\]\*.py" in line for line in dry_run_lines)
-    assert any(r"test_\[a-l\]\*.py" in line for line in dry_run_lines)
-    assert any(r"test_\[a-r\]\*.py" in line for line in dry_run_lines)
+    assert all(
+        f".coverage.{shard_name}" in line
+        for shard_name, line in zip(expected_shards, dry_run_lines, strict=True)
+    )

@@ -9743,7 +9743,7 @@
       "missing_lines": 0,
       "module": "bioetl.composition.runtime_builders.run_manifest_support",
       "path": "src/bioetl/composition/runtime_builders/run_manifest_support.py",
-      "source_lines": 157
+      "source_lines": 155
     },
     {
       "coverage_percent": 100.0,
@@ -16343,7 +16343,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.adapters.crossref.client",
       "path": "src/bioetl/infrastructure/adapters/crossref/client.py",
-      "source_lines": 273
+      "source_lines": 271
     },
     {
       "coverage_percent": 100.0,
@@ -32895,7 +32895,7 @@
       "missing_lines": 0,
       "module": "bioetl.composition.runtime_builders.run_manifest_support",
       "path": "src/bioetl/composition/runtime_builders/run_manifest_support.py",
-      "source_lines": 157
+      "source_lines": 155
     },
     {
       "coverage_percent": 100.0,
@@ -39495,7 +39495,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.adapters.crossref.client",
       "path": "src/bioetl/infrastructure/adapters/crossref/client.py",
-      "source_lines": 273
+      "source_lines": 271
     },
     {
       "coverage_percent": 100.0,
@@ -46310,7 +46310,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-28",
-  "source_tree_sha256": "0170122a11055245a17b8faacd5d2d889a354b3c40a6db9b439b0c081359316e",
+  "source_tree_sha256": "0a2c1077a47fad4f12f41468bd12a23ffafb3f5fd3fab29a78556f43ab27f19f",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

@@ -465,7 +465,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "gray",
+                "color": "green",
                 "value": null
               },
               {
@@ -1478,14 +1478,14 @@
           "type": "text",
           "title": "Review Runtime-owned escalation",
           "gridPos": {
-            "h": 2,
+            "h": 3,
             "w": 24,
             "x": 0,
             "y": 32
           },
           "options": {
             "mode": "html",
-            "content": "<div style=\"padding:2px 8px;font-size:12px;line-height:1.25;overflow:hidden\"><strong>Runtime escalation</strong> — blockers + phase evidence first; then Incident for multi-domain blast radius; Run Explorer for exact-run proof.</div>"
+            "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:12px;white-space:normal\"><strong>Runtime escalation:</strong> blockers → phase evidence → action.<br>Use Incident Workspace for multi-domain impact; Run Explorer for exact-run proof.</div>"
           },
           "transparent": true,
           "description": "DUX6: handoff copy compacted; full runbook in description/docs. DUX5: triage copy shortened; caveats in description; no raw endpoints."
@@ -1539,7 +1539,7 @@
             "h": 5,
             "w": 24,
             "x": 0,
-            "y": 34
+            "y": 35
           },
           "id": 230,
           "options": {
@@ -1626,7 +1626,7 @@
             "h": 5,
             "w": 24,
             "x": 0,
-            "y": 39
+            "y": 40
           },
           "id": 236,
           "options": {
@@ -1729,7 +1729,7 @@
             "h": 5,
             "w": 24,
             "x": 0,
-            "y": 44
+            "y": 45
           },
           "id": 21,
           "options": {
@@ -1770,7 +1770,7 @@
             "h": 2,
             "w": 24,
             "x": 0,
-            "y": 49
+            "y": 50
           },
           "options": {
             "mode": "html",
@@ -1828,7 +1828,7 @@
             "h": 5,
             "w": 24,
             "x": 0,
-            "y": 51
+            "y": 52
           },
           "id": 4,
           "options": {
@@ -1915,7 +1915,7 @@
             "h": 5,
             "w": 24,
             "x": 0,
-            "y": 56
+            "y": 57
           },
           "id": 5,
           "options": {
@@ -1996,7 +1996,7 @@
             "h": 5,
             "w": 24,
             "x": 0,
-            "y": 61
+            "y": 62
           },
           "id": 6,
           "options": {
@@ -2084,7 +2084,7 @@
             "h": 5,
             "w": 24,
             "x": 0,
-            "y": 66
+            "y": 67
           },
           "id": 259,
           "options": {
@@ -2172,7 +2172,7 @@
             "h": 5,
             "w": 24,
             "x": 0,
-            "y": 71
+            "y": 72
           },
           "id": 7,
           "options": {
@@ -2218,7 +2218,7 @@
             "h": 2,
             "w": 24,
             "x": 0,
-            "y": 76
+            "y": 77
           },
           "options": {
             "mode": "html",
@@ -2273,7 +2273,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 78
+            "y": 79
           },
           "id": 209,
           "options": {
@@ -2352,7 +2352,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 78
+            "y": 79
           },
           "id": 210,
           "options": {

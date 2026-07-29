@@ -480,8 +480,11 @@ def test_layer_column_config__coerces_mapping_rename_fields() -> None:
 
 def test_noop_metadata_writer__attach_artifact_recorder_accepts_none() -> None:
     writer = NoOpMetadataWriter()
-    writer.attach_artifact_recorder(None)
-    writer.attach_artifact_recorder(lambda *_a, **_k: None)
+    without_recorder = writer.attach_artifact_recorder(None)
+    with_recorder = writer.attach_artifact_recorder(lambda *_a, **_k: None)
+
+    assert without_recorder is None
+    assert with_recorder is None
 
 
 def test_filter_load_result__is_multi_column_true() -> None:

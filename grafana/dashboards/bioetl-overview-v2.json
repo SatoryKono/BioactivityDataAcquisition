@@ -28,7 +28,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 12
+        "y": 13
       },
       "panels": [
         {
@@ -440,14 +440,14 @@
       ],
       "title": "Status",
       "type": "stat",
-      "description": "DUX6: UNKNOWN = evidence incomplete (missing/stale/not-started/backend-error/selection). Pair with Provenance reason + action; never read as OK. DUX5: UNKNOWN = evidence incomplete (missing/stale/not-started/backend-error); pair with Provenance reason + action. Not a healthy OK. DUX4-16: First strip = health + evidence/freshness proxy + action; blast radius via Inputs/alerts. DUX3-20: Composite NOW health. Pair with Inputs + First Action; domain matrix stays collapsed. Composite fleet verdict (state x confidence x basis). Current L0 fleet status (bioetl_l0_status). 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Confidence is low when series is absent (UNKNOWN). Evidence age follows the recording/refresh window, not range history. Primary action is First Action; deeper proof is on domain boards. Empty Inputs with Status=OK is VALID_EMPTY fleet. null Status is TELEMETRY_ABSENT_OR_STALE/UNKNOWN, not OK. Domain tables are collapsed matrix detail, not peer first-screen badges."
+      "description": "DUX6: UNKNOWN = evidence incomplete (missing/stale/not-started/backend-error/selection). Pair with Provenance reason + action; never read as OK. DUX5: UNKNOWN = evidence incomplete (missing/stale/not-started/backend-error); pair with Provenance reason + action. UNKNOWN is not OK. DUX4-16: First strip = status + evidence/freshness proxy + action; blast radius via Inputs/alerts. DUX3-20: Composite NOW status. Pair with Inputs + First Action; domain matrix stays collapsed. Composite fleet verdict (state x confidence x basis). Current L0 fleet status (bioetl_l0_status). 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Confidence is low when series is absent (UNKNOWN). Evidence age follows the recording/refresh window, not range history. Primary action is First Action; deeper proof is on domain boards. Empty Inputs with Status=OK is VALID_EMPTY fleet. null Status is TELEMETRY_ABSENT_OR_STALE/UNKNOWN, not OK. Domain tables are collapsed matrix detail, not peer first-screen badges."
     },
     {
       "id": 215,
       "type": "table",
       "title": "First Action",
       "gridPos": {
-        "h": 6,
+        "h": 7,
         "w": 10,
         "x": 0,
         "y": 6
@@ -772,7 +772,7 @@
       "type": "table",
       "title": "Inputs",
       "gridPos": {
-        "h": 6,
+        "h": 7,
         "w": 14,
         "x": 10,
         "y": 6
@@ -1033,7 +1033,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 13
+        "y": 14
       },
       "collapsed": true,
       "panels": [
@@ -1326,7 +1326,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 14
+        "y": 15
       },
       "collapsed": true,
       "panels": [
@@ -1650,7 +1650,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 16
       },
       "description": "Domain status matrix detail (Control Plane / Runtime / DQ / Provider / Validation / Workflow) plus diagnostics nav. Collapsed by default — first screen uses Status + Inputs + First Action only (DSA-02).",
       "panels": [
@@ -1660,13 +1660,13 @@
           "type": "text",
           "title": "Diagnostics Navigation",
           "gridPos": {
-            "h": 4,
+            "h": 5,
             "w": 24,
             "x": 0,
             "y": 33
           },
           "options": {
-            "content": "<div style=\"padding:0.4rem 0.6rem;line-height:1.6\">Raw metric starting points for this dashboard are<br><strong>System Status:</strong> <code>bioetl_l0_status{pipeline=~&quot;chembl_assay&quot;,run_type=~&quot;incremental&quot;}</code>,<br><strong>First Action route:</strong> <code>bioetl_l0_next_action_route{pipeline=~&quot;chembl_assay&quot;,run_type=~&quot;incremental&quot;}</code>,<br><strong>Input Status:</strong> <code>bioetl_l0_input_status_selected{pipeline=~&quot;chembl_assay&quot;,run_type=~&quot;incremental&quot;}</code>.<br>Exact blocker reasons live in the Control Plane, Runtime, Data Quality, Provider Health, and Workflow dashboards.<br>Historical evidence stays in the row above.</div>",
+            "content": "<div style=\"padding:4px 8px;line-height:1.35;font-size:12px;white-space:normal\"><strong>Raw metric entrypoints</strong><br><code>bioetl_l0_status</code> — current verdict · <code>bioetl_l0_next_action_route</code> — first-action route<br><code>bioetl_l0_input_status_selected</code> — input status. Open Trust, Pipeline Diagnostics, Data Quality, or Provider Health for reasons.</div>",
             "mode": "html"
           },
           "links": [],
@@ -2828,7 +2828,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 16
+        "y": 17
       },
       "id": 9602,
       "panels": [

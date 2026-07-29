@@ -60,6 +60,7 @@ _TEXT_CACHE_NAMES_WITHOUT_DISK = frozenset(
     }
 )
 _WINDOWS_PYCHARM_SUBPROCESS_TIMEOUT_SECONDS = 180.0
+_MOUNTED_WORKTREE_SUBPROCESS_TIMEOUT_SECONDS = 180.0
 
 
 def _is_windows_pycharm_pytest_runner() -> bool:
@@ -72,7 +73,7 @@ def _is_windows_pycharm_pytest_runner() -> bool:
 
 
 def _effective_subprocess_timeout(timeout: float | None) -> float | None:
-    """Give repo-wide scanner subprocesses enough room under Windows/PyCharm."""
+    """Give repo-wide scanners enough room on known slow filesystem surfaces."""
     if (
         timeout is not None
         and _is_windows_pycharm_pytest_runner()
@@ -81,6 +82,13 @@ def _effective_subprocess_timeout(timeout: float | None) -> float | None:
         # Repo-backed scanner subprocesses can stall unpredictably on mixed
         # Windows cloud-synced checkouts when launched from the PyCharm runner.
         return _WINDOWS_PYCHARM_SUBPROCESS_TIMEOUT_SECONDS
+    if (
+        timeout is not None
+        and sys.platform.startswith("linux")
+        and Path(__file__).resolve().is_relative_to("/mnt")
+        and timeout < _MOUNTED_WORKTREE_SUBPROCESS_TIMEOUT_SECONDS
+    ):
+        return _MOUNTED_WORKTREE_SUBPROCESS_TIMEOUT_SECONDS
     return timeout
 
 

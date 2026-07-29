@@ -105,9 +105,7 @@ class CrossRefAdapter(
         "Use fetch_filtered() with a single filter_field instead."
     )
     _fallback_fetch_service: FallbackFetchOrchestrator = field(init=False, repr=False)
-    _fallback_decorator: ComposableFallbackDecorator | None = field(
-        init=False, default=None, repr=False
-    )
+    _fallback_decorator: ComposableFallbackDecorator = field(init=False, repr=False)
     _query_builder: CrossRefQueryPlanner = field(init=False, repr=False)
     _response_mapper: CrossRefResponseMapper = field(init=False, repr=False)
     _fetch_flow: CrossRefFetchFlow | None = field(init=False, default=None, repr=False)

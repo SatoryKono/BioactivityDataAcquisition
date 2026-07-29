@@ -583,8 +583,8 @@
         "y": 23
       },
       "options": {
-        "mode": "markdown",
-        "content": "**Impact / confidence (structured, read-only)**\n\n| Field | How to read |\n| --- | --- |\n| **Impact bounds** | Affected pipelines/providers from Ranked Active Suspects + Current Alerts scope |\n| **Confidence** | high if Status mapped + suspects non-empty; low if Status=UNKNOWN or telemetry missing |\n| **Basis** | Suspect domain label + alertname; not AI diagnosis |\n\n_Details in panel description._"
+        "mode": "html",
+        "content": "<div style=\"display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:4px 8px;line-height:1.3;font-size:12px;white-space:normal\"><div><strong>Impact</strong><br>Affected pipeline/provider scope from suspects and current alerts.</div><div><strong>Confidence</strong><br>High with mapped Status + suspects; low with UNKNOWN or missing telemetry.</div><div><strong>Basis</strong><br>Domain label + alertname; read-only evidence, not AI diagnosis.</div></div>"
       }
     },
     {

@@ -167,7 +167,7 @@ async def _write_merged_metadata_via_operations(
         Any, writer
     )._should_skip_silver_metadata_write(  # Any: host method duck-type
         records=records
-    ):  # type: ignore[attr-defined]
+    ):
         return
     await _execute_silver_metadata_write(
         cast(_SilverMetadataWriteHostProtocol, writer),

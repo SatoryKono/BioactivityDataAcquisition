@@ -5,9 +5,9 @@
   "soft_wrap": "preferred_line_length",
   "autosave": "on_focus_change",
   "auto_install_extensions": {
-    "docker-compose": true,
+    "docker-compose": true
   },
-  "file_scan_inclusions": ["**/src", "**/tests"],
+  "file_scan_inclusions": [],
   "file_scan_exclusions": [
     "**/.git",
     "**/.svn",
@@ -30,7 +30,7 @@
     "**/build",
     "**/coverage",
     "**/target",
-    "**/generated",
+    "**/generated"
   ],
   "file_types": {
     "Docker Compose": [
@@ -41,8 +41,8 @@
       "scripts/ops/runtime/docker/compose/*.yml",
       "scripts/ops/runtime/docker/compose/*.yaml",
       "scripts/ops/observability/*compose*.yml",
-      "scripts/ops/observability/*compose*.yaml",
-    ],
+      "scripts/ops/observability/*compose*.yaml"
+    ]
   },
   "redact_private_values": true,
   "languages": {
@@ -50,44 +50,44 @@
       "format_on_save": "off",
       "formatter": {
         "language_server": {
-          "name": "ruff",
-        },
+          "name": "ruff"
+        }
       },
       "code_actions_on_format": {
-        "source.organizeImports.ruff": true,
+        "source.organizeImports.ruff": true
       },
       "language_servers": ["basedpyright", "ruff", "!pylsp"],
       "hard_tabs": false,
-      "tab_size": 4,
+      "tab_size": 4
     },
     "YAML": {
       "format_on_save": "on",
-      "formatter": "language_server",
+      "formatter": "language_server"
     },
     "Docker Compose": {
       "format_on_save": "on",
       "formatter": "language_server",
       "language_servers": ["docker-compose", "..."],
       "hard_tabs": false,
-      "tab_size": 2,
+      "tab_size": 2
     },
     "Markdown": {
       "format_on_save": "off",
       "soft_wrap": "preferred_line_length",
-      "preferred_line_length": 88,
+      "preferred_line_length": 88
     },
     "JSON": {
       "format_on_save": "on",
-      "formatter": "language_server",
-    },
+      "formatter": "language_server"
+    }
   },
   "lsp": {
     "ruff": {
       "initialization_options": {
         "settings": {
-          "configurationPreference": "filesystemFirst",
-        },
-      },
+          "configurationPreference": "filesystemFirst"
+        }
+      }
     },
     "basedpyright": {
       "settings": {
@@ -96,31 +96,31 @@
           "pythonVersion": "3.12",
           "autoSearchPaths": true,
           "useLibraryCodeForTypes": true,
-          "diagnosticMode": "openFilesOnly",
-        },
-      },
-    },
+          "diagnosticMode": "openFilesOnly"
+        }
+      }
+    }
   },
   "gutter": {
     "runnables": true,
     "line_numbers": true,
     "breakpoints": true,
-    "folds": true,
+    "folds": true
   },
   "terminal": {
     "env": {
       "PYTHONDONTWRITEBYTECODE": "1",
       "VCR_RECORD_MODE": "none",
-      "VIRTUAL_ENV": ".venv-win",
+      "VIRTUAL_ENV": ".venv-win"
     },
     "detect_venv": {
       "on": {
-        "directories": [".venv-win", ".venv", ".venv-wsl", "venv", "env"],
-      },
+        "directories": [".venv-win", ".venv", ".venv-wsl", "venv", "env"]
+      }
     },
     "font_family": "JetBrains Mono",
     "font_size": 14,
-    "line_height": "comfortable",
+    "line_height": "comfortable"
   },
   "vim_mode": false,
   "context_servers": {},
@@ -128,7 +128,7 @@
     "default_profile": "bioetl-ask",
     "auto_compact": {
       "enabled": true,
-      "threshold": "90%",
+      "threshold": "90%"
     },
     "profiles": {
       "bioetl-ask": {
@@ -149,10 +149,10 @@
           "skill": false,
           "spawn_agent": false,
           "terminal": false,
-          "write_file": false,
+          "write_file": false
         },
         "enable_all_context_servers": false,
-        "context_servers": {},
+        "context_servers": {}
       },
       "bioetl-write": {
         "name": "BioETL Write",
@@ -172,11 +172,11 @@
           "skill": true,
           "spawn_agent": false,
           "terminal": true,
-          "write_file": true,
+          "write_file": true
         },
         "enable_all_context_servers": false,
-        "context_servers": {},
-      },
+        "context_servers": {}
+      }
     },
     "tool_permissions": {
       "default": "allow",
@@ -185,120 +185,120 @@
           "default": "confirm",
           "always_deny": [
             {
-              "pattern": "\\brm\\s+-rf\\s+(/|~|\\.|\\.\\.|\\*)",
+              "pattern": "\\brm\\s+-rf\\s+(/|~|\\.|\\.\\.|\\*)"
             },
             {
-              "pattern": "\\bsudo\\s+rm\\b",
-            },
+              "pattern": "\\bsudo\\s+rm\\b"
+            }
           ],
           "always_confirm": [
             {
-              "pattern": "\\.env",
+              "pattern": "\\.env"
             },
             {
-              "pattern": "\\bgit\\s+push\\b",
+              "pattern": "\\bgit\\s+push\\b"
             },
             {
-              "pattern": "\\bsudo\\b",
-            },
-          ],
+              "pattern": "\\bsudo\\b"
+            }
+          ]
         },
         "edit_file": {
           "default": "allow",
           "always_deny": [
             {
-              "pattern": "(^|/)\\.env(\\.|$|/)",
+              "pattern": "(^|/)\\.env(\\.|$|/)"
             },
             {
-              "pattern": "(^|/)secrets?/",
+              "pattern": "(^|/)secrets?/"
             },
             {
-              "pattern": "\\.(pem|key|cert|crt)$",
-            },
-          ],
+              "pattern": "\\.(pem|key|cert|crt)$"
+            }
+          ]
         },
         "write_file": {
           "default": "allow",
           "always_deny": [
             {
-              "pattern": "(^|/)\\.env(\\.|$|/)",
+              "pattern": "(^|/)\\.env(\\.|$|/)"
             },
             {
-              "pattern": "(^|/)secrets?/",
+              "pattern": "(^|/)secrets?/"
             },
             {
-              "pattern": "\\.(pem|key|cert|crt)$",
-            },
-          ],
+              "pattern": "\\.(pem|key|cert|crt)$"
+            }
+          ]
         },
         "delete_path": {
           "default": "allow",
           "always_deny": [
             {
-              "pattern": "(^|/)\\.git(/|$)",
+              "pattern": "(^|/)\\.git(/|$)"
             },
             {
-              "pattern": "(^|/)\\.env(\\.|$|/)",
+              "pattern": "(^|/)\\.env(\\.|$|/)"
             },
             {
-              "pattern": "(^|/)secrets?/",
+              "pattern": "(^|/)secrets?/"
             },
             {
-              "pattern": "\\.(pem|key|cert|crt)$",
-            },
-          ],
+              "pattern": "\\.(pem|key|cert|crt)$"
+            }
+          ]
         },
         "move_path": {
           "default": "allow",
           "always_deny": [
             {
-              "pattern": "(^|/)\\.git(/|$)",
+              "pattern": "(^|/)\\.git(/|$)"
             },
             {
-              "pattern": "(^|/)\\.env(\\.|$|/)",
+              "pattern": "(^|/)\\.env(\\.|$|/)"
             },
             {
-              "pattern": "(^|/)secrets?/",
+              "pattern": "(^|/)secrets?/"
             },
             {
-              "pattern": "\\.(pem|key|cert|crt)$",
-            },
-          ],
+              "pattern": "\\.(pem|key|cert|crt)$"
+            }
+          ]
         },
         "copy_path": {
           "default": "allow",
           "always_deny": [
             {
-              "pattern": "(^|/)\\.env(\\.|$|/)",
+              "pattern": "(^|/)\\.env(\\.|$|/)"
             },
             {
-              "pattern": "(^|/)secrets?/",
-            },
-          ],
+              "pattern": "(^|/)secrets?/"
+            }
+          ]
         },
         "create_directory": {
-          "default": "allow",
+          "default": "allow"
         },
         "fetch": {
-          "default": "allow",
+          "default": "allow"
         },
         "search_web": {
-          "default": "allow",
+          "default": "allow"
         },
         "skill": {
-          "default": "allow",
-        },
-      },
-    },
+          "default": "allow"
+        }
+      }
+    }
   },
   "telemetry": {
     "diagnostics": false,
-    "metrics": false,
+    "metrics": false
   },
   "show_sign_in": true,
   "ui_font_family": "JetBrains Mono",
   "ui_font_size": 14,
   "buffer_font_family": "JetBrains Mono",
   "buffer_font_size": 14,
-  "buffer_line_height": "comfortable",
+  "buffer_line_height": "comfortable"
 }

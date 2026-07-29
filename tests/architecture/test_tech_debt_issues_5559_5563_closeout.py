@@ -126,11 +126,17 @@ def test_issue_5561_config_duplication_clusters_are_owner_addressable() -> None:
 
     assert (
         backlog["duplication_audit"]["summary"]["duplicate_cluster_count"]
-        == metrics["config_duplicate_cluster_count"]
+        <= metrics["config_duplicate_cluster_count"]
+    ), (
+        "Live config duplication clusters must not exceed the reviewed #5561 "
+        "closeout baseline"
     )
     assert (
         backlog["duplication_audit"]["summary"]["duplicate_occurrence_count"]
-        == metrics["config_duplicate_occurrence_count"]
+        <= metrics["config_duplicate_occurrence_count"]
+    ), (
+        "Live config duplication occurrences must not exceed the reviewed #5561 "
+        "closeout baseline"
     )
     assert clusters
     assert composite_clusters

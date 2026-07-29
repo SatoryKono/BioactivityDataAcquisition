@@ -1349,19 +1349,63 @@ def test_control_plane_remaining_replay_safety_text_is_not_stale() -> None:
 
     assert panel is not None
     content = str(panel.get("options", {}).get("content", ""))
-    assert "/ops/control-plane/identity-evidence" in content
-    assert "manifest/run identity" in content
-    assert "execution/config/contract/input anchors" in content
-    assert (
-        "checkpoint freshness lag panel now provides bounded checkpoint-age evidence"
-        in content
-    )
+    assert panel.get("options", {}).get("mode") == "html"
+    assert "Remaining replay-safety signals" in content
+    assert "duplicate-record evidence" in content
+    assert "occurrence-only vs semantic drift" in content
     assert "checkpoint_age <= recovery window / RPO" not in content
     assert "manifest_id/run_id identity table in Grafana" not in content
-    assert "execution_fingerprint, config_hash, contract_ref" not in content
-    assert "replay duplicate-record evidence metric" in content
     description = str(panel.get("description", "")).lower()
-    assert "must not list anchors already available" in description
+    assert "manifest/run identity" in description
+    assert "execution/config/contract/input anchors" in description
+    assert "checkpoint freshness lag" in description
+
+
+def test_review_and_context_panels_use_no_scroll_layout_contract() -> None:
+    """Review/context cards must fit their grids without hidden clipping."""
+    panel_specs = {
+        "bioetl-control-plane-v1.json": {139: ("html", 4)},
+        "bioetl-overview-v2.json": {9021: ("html", 5)},
+        "bioetl-runtime.json": {2541: ("html", 3)},
+        "bioetl-provider-health-v2.json": {9400: ("html", 3)},
+        "bioetl-incident-v1.json": {2007: ("html", 4)},
+        "bioetl-run-explorer-v1.json": {
+            3014: ("html", 4),
+            3016: ("html", 3),
+        },
+    }
+    for filename, expected in panel_specs.items():
+        dashboard = load_dashboard(Path("grafana/dashboards") / filename)
+        panels = {
+            int(panel["id"]): panel
+            for panel in get_dashboard_panels(dashboard)
+            if panel.get("id") in expected
+        }
+        assert panels.keys() == expected.keys()
+        for panel_id, (mode, height) in expected.items():
+            panel = panels[panel_id]
+            assert panel.get("options", {}).get("mode") == mode
+            assert panel.get("gridPos", {}).get("h") == height
+            assert "overflow:hidden" not in str(
+                panel.get("options", {}).get("content", "")
+            )
+
+    overview = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    overview_panels = {
+        int(panel["id"]): panel for panel in get_dashboard_panels(overview)
+    }
+    assert overview_panels[9002]["options"]["cellHeight"] == "sm"
+    assert overview_panels[9002]["gridPos"]["h"] == 7
+    assert overview_panels[215]["gridPos"]["h"] == 7
+
+    run_explorer = load_dashboard(
+        Path("grafana/dashboards/bioetl-run-explorer-v1.json")
+    )
+    run_panels = {
+        int(panel["id"]): panel for panel in get_dashboard_panels(run_explorer)
+    }
+    assert "Layer accounting" in run_panels[3016]["options"]["content"]
+    assert "Stage timing / failure" in run_panels[3014]["options"]["content"]
 
 
 def test_control_plane_dashboard_links_are_scoped() -> None:

@@ -70,6 +70,57 @@ def test_runtime_stage_lag_primary_panel_is_timeseries() -> None:
     assert any("bioetl_stage_lag_seconds" in e for e in exprs)
 
 
+def test_overview_status_uses_only_l0_operator_terminology() -> None:
+    """Overview headline must use the canonical OK/WARN/CRIT/UNKNOWN vocabulary."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    status = next(
+        panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("id") == 214
+    )
+    operator_copy = " ".join(
+        (str(status.get("title") or ""), str(status.get("description") or ""))
+    ).upper()
+    assert "HEALTHY" not in operator_copy
+    assert "DEGRADED" not in operator_copy
+    assert "BROKEN" not in operator_copy
+
+    mappings = status["fieldConfig"]["defaults"]["mappings"]
+    values = next(mapping for mapping in mappings if mapping["type"] == "value")
+    assert {
+        key: option["text"] for key, option in values["options"].items()
+    } == {"0": "OK", "1": "WARN", "2": "CRIT", "3": "UNKNOWN"}
+
+
+def test_runtime_metrics_evidence_uses_standard_threshold_steps() -> None:
+    """Evidence chip follows shared severity thresholds; null mapping stays UNKNOWN."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    evidence = next(
+        panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("id") == 9102
+    )
+    defaults = evidence["fieldConfig"]["defaults"]
+    assert defaults["thresholds"] == {
+        "mode": "absolute",
+        "steps": [
+            {"color": "green", "value": None},
+            {"color": "orange", "value": 1},
+            {"color": "red", "value": 2},
+        ],
+    }
+    null_mapping = next(
+        mapping
+        for mapping in defaults["mappings"]
+        if mapping["type"] == "special"
+        and mapping["options"].get("match") == "null"
+    )
+    assert null_mapping["options"]["result"] == {
+        "text": "UNKNOWN",
+        "color": "gray",
+    }
+
+
 def test_no_state_timeline_on_continuous_stage_lag() -> None:
     violations: list[str] = []
     for path in _DASHBOARDS:
