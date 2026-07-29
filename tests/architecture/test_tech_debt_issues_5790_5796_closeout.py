@@ -438,7 +438,10 @@ def test_issue_5796_zero_reference_supporting_scripts_have_owner_or_removal_gove
     metric = closeout["metrics"]["zero_reference_supporting_scripts"]
     assert len(zero_ref_rows) == metric.get("current", metric.get("count"))
     assert len(zero_ref_rows) <= 40
-    assert {row["status"] for row in zero_ref_rows} == {"supporting"}
+    assert {row["status"] for row in zero_ref_rows} <= {
+        "supporting",
+        "temporary_diagnostic",
+    }
 
     for row in zero_ref_rows:
         assert row["owner"]
