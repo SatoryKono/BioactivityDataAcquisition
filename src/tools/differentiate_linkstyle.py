@@ -6,12 +6,11 @@ retained temporarily for existing direct invocations.
 
 from __future__ import annotations
 
-from scripts.diagrams.differentiate_linkstyle import *
-from scripts.diagrams.differentiate_linkstyle import (
-    _ensure_path_within_root,
-    _write_validated_mermaid_text,
-    main,
-)
+from scripts.diagrams import differentiate_linkstyle as _differentiate_linkstyle
+
+_ensure_path_within_root = _differentiate_linkstyle._ensure_path_within_root
+_write_validated_mermaid_text = _differentiate_linkstyle._write_validated_mermaid_text
+main = _differentiate_linkstyle.main
 
 if __name__ == "__main__":
     main()

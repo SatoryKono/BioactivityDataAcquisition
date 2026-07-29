@@ -242,7 +242,3 @@ def _freeze_ledger_processing_state(
         state.correlation_anchor_gaps,
         resume_diagnostics,
     )
-
-
-def _resolve_policy_value(values: set[str]) -> str | None:
-    return None if not values else next(iter(values)) if len(values) == 1 else "mixed"

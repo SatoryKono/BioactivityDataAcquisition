@@ -1024,6 +1024,16 @@ def _existing_snapshot_date(path: Path) -> str | None:
     return snapshot_date if isinstance(snapshot_date, str) else None
 
 
+def _artifact_content_mismatch(
+    path: Path, expected: str, *, kind: str
+) -> str | None:
+    if not path.exists():
+        return f"[dead-code-inventory] missing {kind} artifact: {path}"
+    if path.read_text(encoding="utf-8") != expected:
+        return f"[dead-code-inventory] FAIL: {kind} artifact drifted: {path}"
+    return None
+
+
 def _check_dead_code_artifacts(
     *,
     json_out: Path,
@@ -1032,18 +1042,14 @@ def _check_dead_code_artifacts(
     rendered_markdown: str,
     payload: dict[str, object],
 ) -> int:
-    if not json_out.exists():
-        print(f"[dead-code-inventory] missing JSON artifact: {json_out}")
-        return 1
-    if not md_out.exists():
-        print(f"[dead-code-inventory] missing Markdown artifact: {md_out}")
-        return 1
-    if json_out.read_text(encoding="utf-8") != rendered_json:
-        print(f"[dead-code-inventory] FAIL: JSON artifact drifted: {json_out}")
-        return 1
-    if md_out.read_text(encoding="utf-8") != rendered_markdown:
-        print(f"[dead-code-inventory] FAIL: Markdown artifact drifted: {md_out}")
-        return 1
+    for path, expected, kind in (
+        (json_out, rendered_json, "JSON"),
+        (md_out, rendered_markdown, "Markdown"),
+    ):
+        mismatch = _artifact_content_mismatch(path, expected, kind=kind)
+        if mismatch is not None:
+            print(mismatch)
+            return 1
     review_window = payload["review_window"]
     assert isinstance(review_window, dict)
     if _review_window_is_stale(review_window):

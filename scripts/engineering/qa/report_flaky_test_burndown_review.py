@@ -157,6 +157,36 @@ def _validate_identical_node_coverage(
         )
 
 
+def _require_empirical_run_fields(
+    metadata: dict[str, object],
+    metadata_path: Path,
+) -> tuple[str, int, str]:
+    run_id = metadata.get("run_id")
+    seed = metadata.get("seed")
+    source_sha = metadata.get("source_sha")
+    if not isinstance(run_id, str) or not run_id:
+        raise ValueError(f"Invalid run_id in {metadata_path}")
+    if isinstance(seed, bool) or not isinstance(seed, int):
+        raise ValueError(f"Invalid seed in {metadata_path}")
+    if not isinstance(source_sha, str) or not source_sha:
+        raise ValueError(f"Invalid source_sha in {metadata_path}")
+    return run_id, seed, source_sha
+
+
+def _load_empirical_outcomes(
+    *,
+    run_id: str,
+    resolved_run_dir: Path,
+) -> dict[str, str]:
+    junit_path = resolved_run_dir / f"junit-{run_id}.xml"
+    if not junit_path.exists():
+        raise ValueError(f"Missing JUnit for {run_id}: {junit_path}")
+    outcomes = _junit_outcomes(junit_path)
+    if not outcomes:
+        raise ValueError(f"Empirical run executed zero tests: {run_id}")
+    return outcomes
+
+
 def _load_empirical_run(
     metadata_path: Path,
     *,
@@ -167,25 +197,14 @@ def _load_empirical_run(
     source_shas: set[str],
 ) -> dict[str, object]:
     metadata = _load_json_mapping(metadata_path)
-    run_id = metadata.get("run_id")
-    seed = metadata.get("seed")
-    source_sha = metadata.get("source_sha")
+    run_id, seed, source_sha = _require_empirical_run_fields(metadata, metadata_path)
     replay_fingerprint = _sha256_digest(
         metadata.get("replay_tree_sha256"),
         label=f"{metadata_path}.replay_tree_sha256",
     )
-    if not isinstance(run_id, str) or not run_id:
-        raise ValueError(f"Invalid run_id in {metadata_path}")
-    if isinstance(seed, bool) or not isinstance(seed, int):
-        raise ValueError(f"Invalid seed in {metadata_path}")
-    if not isinstance(source_sha, str) or not source_sha:
-        raise ValueError(f"Invalid source_sha in {metadata_path}")
-    junit_path = resolved_run_dir / f"junit-{run_id}.xml"
-    if not junit_path.exists():
-        raise ValueError(f"Missing JUnit for {run_id}: {junit_path}")
-    outcomes = _junit_outcomes(junit_path)
-    if not outcomes:
-        raise ValueError(f"Empirical run executed zero tests: {run_id}")
+    outcomes = _load_empirical_outcomes(
+        run_id=run_id, resolved_run_dir=resolved_run_dir
+    )
     node_sets.append((run_id, frozenset(outcomes)))
     for nodeid, status in outcomes.items():
         outcomes_by_node.setdefault(nodeid, set()).add(status)

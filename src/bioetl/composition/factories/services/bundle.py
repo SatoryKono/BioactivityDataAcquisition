@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.factories.pipeline.creation_support import (
     _create_pipeline_with_services_impl,
@@ -63,7 +63,7 @@ class _BaseServicesFactoryProxy:
     def _resolve(self) -> BaseServicesFactoryProtocol:
         from bioetl.composition.factories.services.factory import BaseServicesFactory
 
-        return BaseServicesFactory
+        return cast(BaseServicesFactoryProtocol, BaseServicesFactory)
 
     def _create_metrics(self, settings: Settings) -> MetricsPort:
         return self._resolve()._create_metrics(settings)

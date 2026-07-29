@@ -344,6 +344,80 @@ def _budget_findings(
     return findings
 
 
+def _status_count_exceeded_finding(
+    *,
+    column: str,
+    value: str,
+    matching_rows: list[dict[str, str]],
+    max_count: object,
+) -> PairMatrixFinding | None:
+    if not isinstance(max_count, int) or len(matching_rows) <= max_count:
+        return None
+    return PairMatrixFinding(
+        kind="status_count_budget_exceeded",
+        row_key=f"{column}:{value}",
+        cluster_id=f"{column}:{value}",
+        message=(
+            f"{column}={value} row count {len(matching_rows)} "
+            f"exceeds budget {max_count}"
+        ),
+    )
+
+
+def _unreviewed_cluster_ids(
+    matching_rows: list[dict[str, str]],
+    review_registry: dict[str, Any],
+) -> list[str]:
+    return sorted(
+        {
+            row.get(COL_CLUSTER_ID, UNKNOWN_VALUE)
+            for row in matching_rows
+            if not _cluster_has_review(
+                review_registry,
+                cluster_id=row.get(COL_CLUSTER_ID, UNKNOWN_VALUE),
+                semantic_status=row.get("Semantic Status", ""),
+            )
+        }
+    )
+
+
+def _one_status_budget_findings(
+    status_budget: dict[str, Any],
+    *,
+    rows: tuple[dict[str, str], ...],
+    review_registry: dict[str, Any],
+) -> list[PairMatrixFinding]:
+    column = status_budget.get("column")
+    value = status_budget.get("value")
+    if not isinstance(column, str) or not isinstance(value, str):
+        return []
+    matching_rows = [row for row in rows if row.get(column) == value]
+    findings: list[PairMatrixFinding] = []
+    exceeded = _status_count_exceeded_finding(
+        column=column,
+        value=value,
+        matching_rows=matching_rows,
+        max_count=status_budget.get("max_count"),
+    )
+    if exceeded is not None:
+        findings.append(exceeded)
+    if not status_budget.get("require_reviewed_clusters"):
+        return findings
+    for cluster_id in _unreviewed_cluster_ids(matching_rows, review_registry):
+        findings.append(
+            PairMatrixFinding(
+                kind="unreviewed_status_cluster",
+                row_key=f"{column}:{value}:{cluster_id}",
+                cluster_id=cluster_id,
+                message=(
+                    f"{column}={value} cluster {cluster_id} is not covered "
+                    "by semantic_audit_review_registry reviews"
+                ),
+            )
+        )
+    return findings
+
+
 def _status_budget_findings(
     rows: tuple[dict[str, str], ...],
     budget: dict[str, Any],
@@ -352,54 +426,17 @@ def _status_budget_findings(
     status_budgets = budget.get("status_budgets", [])
     if not isinstance(status_budgets, list):
         return []
-
     findings: list[PairMatrixFinding] = []
     for status_budget in status_budgets:
         if not isinstance(status_budget, dict):
             continue
-        column = status_budget.get("column")
-        value = status_budget.get("value")
-        if not isinstance(column, str) or not isinstance(value, str):
-            continue
-        matching_rows = [row for row in rows if row.get(column) == value]
-        max_count = status_budget.get("max_count")
-        if isinstance(max_count, int) and len(matching_rows) > max_count:
-            findings.append(
-                PairMatrixFinding(
-                    kind="status_count_budget_exceeded",
-                    row_key=f"{column}:{value}",
-                    cluster_id=f"{column}:{value}",
-                    message=(
-                        f"{column}={value} row count {len(matching_rows)} "
-                        f"exceeds budget {max_count}"
-                    ),
-                )
+        findings.extend(
+            _one_status_budget_findings(
+                status_budget,
+                rows=rows,
+                review_registry=review_registry,
             )
-        if not status_budget.get("require_reviewed_clusters"):
-            continue
-        unreviewed = sorted(
-            {
-                row.get(COL_CLUSTER_ID, UNKNOWN_VALUE)
-                for row in matching_rows
-                if not _cluster_has_review(
-                    review_registry,
-                    cluster_id=row.get(COL_CLUSTER_ID, UNKNOWN_VALUE),
-                    semantic_status=row.get("Semantic Status", ""),
-                )
-            }
         )
-        for cluster_id in unreviewed:
-            findings.append(
-                PairMatrixFinding(
-                    kind="unreviewed_status_cluster",
-                    row_key=f"{column}:{value}:{cluster_id}",
-                    cluster_id=cluster_id,
-                    message=(
-                        f"{column}={value} cluster {cluster_id} is not covered "
-                        "by semantic_audit_review_registry reviews"
-                    ),
-                )
-            )
     return findings
 
 

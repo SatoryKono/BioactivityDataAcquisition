@@ -1828,7 +1828,7 @@ def _read_analysis_source_text(
     def _read() -> None:
         try:
             result.put(("ok", _read_text(path)))
-        except BaseException as exc:  # pragma: no cover - defensive thread boundary
+        except Exception as exc:  # pragma: no cover - defensive thread boundary
             result.put(("error", exc))
 
     thread = threading.Thread(

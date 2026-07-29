@@ -244,6 +244,107 @@ def _collect_git_status_surfaces(
     return git_status, vcr_git_status
 
 
+def _append_blocker(
+    blockers: list[dict[str, str]], *, blocker_id: str, message: str
+) -> None:
+    blockers.append({"id": blocker_id, "message": message})
+
+
+def _append_lfs_blockers(
+    blockers: list[dict[str, str]],
+    *,
+    lfs_path: str | None,
+    git_lfs_version: dict[str, Any] | None,
+    lfs_pointer_files: list[str],
+) -> None:
+    if not lfs_path:
+        _append_blocker(
+            blockers,
+            blocker_id="missing_git_lfs",
+            message=(
+                "git-lfs is required before comparing main-branch audit evidence."
+            ),
+        )
+    elif git_lfs_version is not None and not git_lfs_version["ok"]:
+        _append_blocker(
+            blockers,
+            blocker_id="git_lfs_unhealthy",
+            message=(
+                git_lfs_version["stderr"]
+                or git_lfs_version["stdout"]
+                or "git lfs version failed."
+            ),
+        )
+    if lfs_pointer_files:
+        _append_blocker(
+            blockers,
+            blocker_id="lfs_pointer_files_present",
+            message=(
+                f"Found {len(lfs_pointer_files)} unresolved git-lfs pointer "
+                "files under tests/fixtures/vcr; run git lfs install/pull "
+                "before treating VCR-backed audit evidence as reproducible."
+            ),
+        )
+
+
+def _append_git_status_blockers(
+    blockers: list[dict[str, str]],
+    *,
+    git_status: dict[str, Any],
+    vcr_git_status: dict[str, Any],
+    dirty_vcr_paths: list[str],
+) -> None:
+    if not git_status["ok"]:
+        _append_blocker(
+            blockers,
+            blocker_id="git_status_failed",
+            message=(
+                git_status["stderr"] or git_status["stdout"] or "git status failed."
+            ),
+        )
+    if not vcr_git_status["ok"]:
+        _append_blocker(
+            blockers,
+            blocker_id="git_status_failed",
+            message=(
+                vcr_git_status["stderr"]
+                or vcr_git_status["stdout"]
+                or "git status failed for tests/fixtures/vcr."
+            ),
+        )
+    if dirty_vcr_paths:
+        _append_blocker(
+            blockers,
+            blocker_id="dirty_vcr_worktree",
+            message=(
+                f"Found {len(dirty_vcr_paths)} dirty VCR cassette path(s); "
+                "commit, restore, or intentionally re-record them before "
+                "treating VCR-backed audit evidence as reproducible."
+            ),
+        )
+
+
+def _append_baseline_blockers(
+    blockers: list[dict[str, str]],
+    *,
+    baseline_exists: bool,
+    baseline_has_coverage: bool,
+) -> None:
+    if not baseline_exists:
+        _append_blocker(
+            blockers,
+            blocker_id="missing_telemetry_baseline",
+            message=f"Missing {TELEMETRY_BASELINE.as_posix()}.",
+        )
+        return
+    if not baseline_has_coverage:
+        _append_blocker(
+            blockers,
+            blocker_id="telemetry_baseline_without_coverage",
+            message="Telemetry baseline exists but does not expose Actual coverage.",
+        )
+
+
 def _build_preflight_blockers(
     *,
     lfs_path: str | None,
@@ -256,80 +357,23 @@ def _build_preflight_blockers(
     baseline_has_coverage: bool,
 ) -> list[dict[str, str]]:
     blockers: list[dict[str, str]] = []
-    if not lfs_path:
-        blockers.append(
-            {
-                "id": "missing_git_lfs",
-                "message": "git-lfs is required before comparing main-branch audit evidence.",
-            }
-        )
-    if lfs_path and git_lfs_version and not git_lfs_version["ok"]:
-        blockers.append(
-            {
-                "id": "git_lfs_unhealthy",
-                "message": (
-                    git_lfs_version["stderr"]
-                    or git_lfs_version["stdout"]
-                    or "git lfs version failed."
-                ),
-            }
-        )
-    if not git_status["ok"]:
-        blockers.append(
-            {
-                "id": "git_status_failed",
-                "message": (
-                    git_status["stderr"] or git_status["stdout"] or "git status failed."
-                ),
-            }
-        )
-    if not vcr_git_status["ok"]:
-        blockers.append(
-            {
-                "id": "git_status_failed",
-                "message": (
-                    vcr_git_status["stderr"]
-                    or vcr_git_status["stdout"]
-                    or "git status failed for tests/fixtures/vcr."
-                ),
-            }
-        )
-    if dirty_vcr_paths:
-        blockers.append(
-            {
-                "id": "dirty_vcr_worktree",
-                "message": (
-                    f"Found {len(dirty_vcr_paths)} dirty VCR cassette path(s); "
-                    "commit, restore, or intentionally re-record them before "
-                    "treating VCR-backed audit evidence as reproducible."
-                ),
-            }
-        )
-    if lfs_pointer_files:
-        blockers.append(
-            {
-                "id": "lfs_pointer_files_present",
-                "message": (
-                    f"Found {len(lfs_pointer_files)} unresolved git-lfs pointer "
-                    "files under tests/fixtures/vcr; run git lfs install/pull "
-                    "before treating VCR-backed audit evidence as reproducible."
-                ),
-            }
-        )
-    if not baseline_exists:
-        blockers.append(
-            {
-                "id": "missing_telemetry_baseline",
-                "message": f"Missing {TELEMETRY_BASELINE.as_posix()}.",
-            }
-        )
-    if baseline_exists and not baseline_has_coverage:
-        blockers.append(
-            {
-                "id": "telemetry_baseline_without_coverage",
-                "message": "Telemetry baseline exists but does not expose Actual coverage.",
-            }
-        )
+    _append_lfs_blockers(
+        blockers,
+        lfs_path=lfs_path,
+        git_lfs_version=git_lfs_version,
+        lfs_pointer_files=lfs_pointer_files,
+    )
+    _append_git_status_blockers(
+        blockers,
+        git_status=git_status,
+        vcr_git_status=vcr_git_status,
+        dirty_vcr_paths=dirty_vcr_paths,
+    )
+    _append_baseline_blockers(
+        blockers,
+        baseline_exists=baseline_exists,
+        baseline_has_coverage=baseline_has_coverage,
+    )
     return blockers
 
 

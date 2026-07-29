@@ -45,6 +45,38 @@ def parse_body(text: str, file_name: str) -> tuple[str, str, str]:
     return file_name, "?", " ".join(body.split())
 
 
+def _parse_agent_event_line(
+    line: str,
+) -> dict[str, object] | None:
+    if not line.startswith("{"):
+        return None
+    try:
+        obj = json.loads(line)
+    except json.JSONDecodeError:
+        return None
+    return obj if isinstance(obj, dict) else None
+
+
+def _append_agent_finding(
+    findings: list[dict[str, str]],
+    obj: dict[str, object],
+    current: str | None,
+) -> None:
+    file_name = str(obj.get("fileName") or "?")
+    fpath, loc, body = parse_body(
+        str(obj.get("codegenInstructions") or ""), file_name
+    )
+    findings.append(
+        {
+            "layer": layer_of(current),
+            "severity": str(obj.get("severity") or "unknown"),
+            "file": fpath,
+            "loc": loc,
+            "body": body,
+        }
+    )
+
+
 def _ingest_agent_events(
     src: Path,
 ) -> tuple[list[dict[str, str]], list[tuple[str, int]]]:
@@ -52,31 +84,15 @@ def _ingest_agent_events(
     completes: list[tuple[str, int]] = []
     current: str | None = None
     for raw in src.read_text(encoding="utf-8", errors="replace").splitlines():
-        line = raw.strip()
-        if not line.startswith("{"):
-            continue
-        try:
-            obj = json.loads(line)
-        except json.JSONDecodeError:
+        obj = _parse_agent_event_line(raw.strip())
+        if obj is None:
             continue
         kind = obj.get("type")
         if kind == "review_context":
-            current = obj.get("workingDirectory")
+            current = obj.get("workingDirectory")  # type: ignore[assignment]
             continue
         if kind == "finding":
-            file_name = str(obj.get("fileName") or "?")
-            fpath, loc, body = parse_body(
-                str(obj.get("codegenInstructions") or ""), file_name
-            )
-            findings.append(
-                {
-                    "layer": layer_of(current),
-                    "severity": str(obj.get("severity") or "unknown"),
-                    "file": fpath,
-                    "loc": loc,
-                    "body": body,
-                }
-            )
+            _append_agent_finding(findings, obj, current)
             continue
         if kind == "complete":
             completes.append((layer_of(current), int(obj.get("findings") or 0)))

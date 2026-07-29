@@ -9,10 +9,14 @@ without loading this legacy all-in-one public module.
 from __future__ import annotations
 
 from memory.graph import sync_pkg as _sync_pkg
-from memory.graph.sync_pkg import *  # noqa: F403
 
 main = _sync_pkg.main
 __all__ = list(_sync_pkg.__all__)
+
+# Re-export public sync_pkg symbols without a star-import (python:S2208).
+for _name in __all__:
+    globals()[_name] = getattr(_sync_pkg, _name)
+del _name
 
 
 if __name__ == "__main__":

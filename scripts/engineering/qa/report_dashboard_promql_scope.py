@@ -44,6 +44,26 @@ def _panel_queries(panel: dict[str, object]) -> list[tuple[str, str]]:
     return rows
 
 
+def _promql_scope_row(
+    *,
+    dashboard_name: str,
+    title: str,
+    expr: str,
+    pipeline_summary: frozenset[str],
+) -> dict[str, str]:
+    uses_run_type = "run_type=~" in expr or 'run_type="' in expr
+    uses_run_id = "run_id=" in expr
+    deprecated = any(token in expr for token in DEPRECATED_METRIC_TOKENS)
+    return {
+        "dashboard": dashboard_name,
+        "panel_title": title,
+        "uses_run_type_in_promql": str(uses_run_type),
+        "uses_run_id_in_promql": str(uses_run_id),
+        "deprecated_metric_token": str(deprecated),
+        "pipeline_summary_family": str(dashboard_name in pipeline_summary),
+    }
+
+
 def _collect_rows() -> list[dict[str, str]]:
     _, pipeline_summary = _load_allowlist()
     rows: list[dict[str, str]] = []
@@ -55,20 +75,13 @@ def _collect_rows() -> list[dict[str, str]]:
             if not isinstance(panel, dict):
                 continue
             for title, expr in _panel_queries(panel):
-                uses_run_type = "run_type=~" in expr or 'run_type="' in expr
-                uses_run_id = "run_id=" in expr
-                deprecated = any(token in expr for token in DEPRECATED_METRIC_TOKENS)
                 rows.append(
-                    {
-                        "dashboard": dashboard_path.name,
-                        "panel_title": title,
-                        "uses_run_type_in_promql": str(uses_run_type),
-                        "uses_run_id_in_promql": str(uses_run_id),
-                        "deprecated_metric_token": str(deprecated),
-                        "pipeline_summary_family": str(
-                            dashboard_path.name in pipeline_summary
-                        ),
-                    }
+                    _promql_scope_row(
+                        dashboard_name=dashboard_path.name,
+                        title=title,
+                        expr=expr,
+                        pipeline_summary=pipeline_summary,
+                    )
                 )
     return rows
 

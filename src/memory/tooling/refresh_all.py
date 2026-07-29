@@ -160,6 +160,45 @@ def _refresh_graph_export_artifact(root: Path, output_root: Path) -> dict[str, A
     }
 
 
+def _refresh_graph_relations_artifact(
+    summary: dict[str, Any],
+    *,
+    root: Path,
+    output_root: Path,
+    expanded_graph_path: Path | None,
+) -> None:
+    snapshot_path = expanded_graph_path or default_expanded_graph_path(root)
+    if not snapshot_path.exists():
+        summary["ok"] = False
+        summary["artifacts"].append(
+            {
+                "kind": "graph_relations",
+                "paths": [],
+                "error": f"missing expanded graph snapshot: {snapshot_path}",
+            }
+        )
+        return
+    _, _, relation_summary = write_expanded_graph_relation_artifacts(
+        snapshot_path,
+        output_root,
+        repo_root=root,
+    )
+    summary["artifacts"].append(
+        {
+            "kind": "graph_relations",
+            "paths": relation_summary["paths"],
+            "relation_count": relation_summary["relation_count"],
+            "file_count": relation_summary["file_count"],
+            "module_relation_count": relation_summary["module_relation_count"],
+            "module_count": relation_summary["module_count"],
+            "entity_relation_count": relation_summary["entity_relation_count"],
+            "entity_count": relation_summary["entity_count"],
+            "entity_relation_counts": relation_summary["entity_relation_counts"],
+            "source_snapshot": relation_summary["source_snapshot"],
+        }
+    )
+
+
 def refresh_all(
     root: Path,
     output_root: Path,
@@ -208,38 +247,12 @@ def refresh_all(
         )
 
     if include_graph_relations:
-        snapshot_path = expanded_graph_path or default_expanded_graph_path(root)
-        if not snapshot_path.exists():
-            summary["ok"] = False
-            summary["artifacts"].append(
-                {
-                    "kind": "graph_relations",
-                    "paths": [],
-                    "error": f"missing expanded graph snapshot: {snapshot_path}",
-                }
-            )
-        else:
-            _, _, relation_summary = write_expanded_graph_relation_artifacts(
-                snapshot_path,
-                output_root,
-                repo_root=root,
-            )
-            summary["artifacts"].append(
-                {
-                    "kind": "graph_relations",
-                    "paths": relation_summary["paths"],
-                    "relation_count": relation_summary["relation_count"],
-                    "file_count": relation_summary["file_count"],
-                    "module_relation_count": relation_summary["module_relation_count"],
-                    "module_count": relation_summary["module_count"],
-                    "entity_relation_count": relation_summary["entity_relation_count"],
-                    "entity_count": relation_summary["entity_count"],
-                    "entity_relation_counts": relation_summary[
-                        "entity_relation_counts"
-                    ],
-                    "source_snapshot": relation_summary["source_snapshot"],
-                }
-            )
+        _refresh_graph_relations_artifact(
+            summary,
+            root=root,
+            output_root=output_root,
+            expanded_graph_path=expanded_graph_path,
+        )
 
     return summary
 

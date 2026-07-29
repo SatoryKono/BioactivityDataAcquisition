@@ -217,11 +217,14 @@ def _resolve_bronze_for_run(
 ) -> int | None:
     if callable(list_entries_by_run_id):
         try:
-            return _resolve_bronze_records_from_entries(
+            resolved = _resolve_bronze_records_from_entries(
                 list_entries_by_run_id(_lookup_run_id(candidate_run_id))
             )
         except (TypeError, ValueError):
-            pass
+            resolved = None
+        else:
+            if resolved is not None:
+                return resolved
     show_manifest = getattr(run_manifest_service, "show", None)
     if not callable(show_manifest):
         return None

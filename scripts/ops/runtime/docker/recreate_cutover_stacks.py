@@ -230,6 +230,24 @@ def _capture_recreate_env() -> tuple[dict[str, str], dict[str, str]]:
     return monitoring_overrides, main_overrides
 
 
+def _resolve_healthy_targets(*, skip_main: bool) -> list[str]:
+    healthy_targets = [
+        "bioetl-prometheus",
+        "bioetl-pushgateway",
+        "bioetl-grafana",
+        "bioetl-monitoring-renderer-1",
+    ]
+    if skip_main:
+        return healthy_targets
+    # Main container_name is `bioetl` in current compose.
+    for candidate in ("bioetl", "bioetl-main-bioetl-1"):
+        probe = _run(["docker", "inspect", candidate], timeout=30.0)
+        if probe.returncode == 0:
+            healthy_targets.append(candidate)
+            break
+    return healthy_targets
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -273,22 +291,10 @@ def main() -> int:
         )
 
     _detach_warp_network(("bioetl", "bioetl-main-bioetl-1"))
-
-    healthy_targets = [
-        "bioetl-prometheus",
-        "bioetl-pushgateway",
-        "bioetl-grafana",
-        "bioetl-monitoring-renderer-1",
-    ]
-    # Main container_name is `bioetl` in current compose.
-    for candidate in ("bioetl", "bioetl-main-bioetl-1"):
-        probe = _run(["docker", "inspect", candidate], timeout=30.0)
-        if probe.returncode == 0:
-            healthy_targets.append(candidate)
-            break
-
-    wait_healthy(healthy_targets, timeout_seconds=420.0)
-
+    wait_healthy(
+        _resolve_healthy_targets(skip_main=args.skip_main),
+        timeout_seconds=420.0,
+    )
     ls = _run(["docker", "compose", "ls", "--all"], timeout=60.0)
     print(ls.stdout)
     return 0

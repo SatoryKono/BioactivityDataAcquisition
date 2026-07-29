@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass, field, replace
 from datetime import datetime
+from typing import cast
 
 from bioetl.domain.composite.result import (
     DependencyResult,
@@ -56,6 +57,13 @@ _ProjectionFn = Callable[
 ]
 
 
+def _evolve_projection(
+    projection: RunLedgerReplayProjection,
+    **changes: object,
+) -> RunLedgerReplayProjection:
+    return cast(RunLedgerReplayProjection, replace(projection, **changes))
+
+
 def _project_stage_completed(
     projection: RunLedgerReplayProjection,
     entry: RunLedgerEntry,
@@ -63,7 +71,7 @@ def _project_stage_completed(
     update = STAGE_COMPLETION_UPDATES.get((entry.stage or "").strip().lower())
     if update is None:
         return projection
-    return replace(projection, **update)
+    return _evolve_projection(projection, **update)
 
 
 def _details(entry: RunLedgerEntry) -> dict[str, object]:
@@ -130,7 +138,7 @@ def _project_composite_dependency_completed(
         error_message=_optional_text(payload, "error_message"),
         resumed=bool(payload.get("resumed", False)),
     )
-    return replace(
+    return _evolve_projection(
         projection,
         completed_dependencies=frozenset(
             {*projection.completed_dependencies, dependency_name}
@@ -159,7 +167,7 @@ def _project_composite_enricher_completed(
         duration_seconds=_float_value(payload, "duration_seconds"),
         error_message=_optional_text(payload, "error_message"),
     )
-    return replace(
+    return _evolve_projection(
         projection,
         completed_enrichers=frozenset({*projection.completed_enrichers, enricher_name}),
         enrichment_results=dict(sorted(enrichment_results.items())),
@@ -173,7 +181,7 @@ def _project_composite_merge_completed(
     payload = _details(entry)
     if not payload:
         return projection
-    return replace(
+    return _evolve_projection(
         projection,
         merge_completed=True,
         merge_result=dict(sorted(payload.items())),
@@ -204,7 +212,7 @@ def _project_input_snapshot_published(
         str(item.get("snapshot_id")): item for item in projection.input_snapshots
     }
     snapshots_by_id[snapshot_id] = dict(sorted(payload.items()))
-    return replace(
+    return _evolve_projection(
         projection,
         input_snapshots=tuple(snapshots_by_id[key] for key in sorted(snapshots_by_id)),
     )
@@ -223,7 +231,7 @@ def _advance_watermark(
     projection: RunLedgerReplayProjection,
     entry: RunLedgerEntry,
 ) -> RunLedgerReplayProjection:
-    return replace(
+    return _evolve_projection(
         projection,
         last_event_id=entry.entry_id,
         last_event_occurred_at=entry.occurred_at,
@@ -238,7 +246,7 @@ def _mark_projection_unsupported(
         *projection.unsupported_replay_entries,
         (entry.entry_id, entry.event_type, entry.stage),
     }
-    return replace(
+    return _evolve_projection(
         projection,
         projector_coverage_complete=False,
         unsupported_replay_entries=tuple(sorted(unsupported)),
@@ -262,7 +270,7 @@ def _apply_terminal_or_passthrough(
 ) -> RunLedgerReplayProjection:
     terminal_state = TERMINAL_STATES.get(entry.event_type)
     if terminal_state is not None:
-        return replace(replayed, state=terminal_state)
+        return _evolve_projection(replayed, state=terminal_state)
     if entry.event_type in PASS_THROUGH_EVENT_TYPES:
         return replayed
     return _mark_projection_unsupported(replayed, entry)

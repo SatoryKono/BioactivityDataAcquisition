@@ -2,17 +2,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from deltalake import DeltaTable
 from deltalake.exceptions import TableNotFoundError
 
 from bioetl.domain.serialization import deserialize_from_json
 from bioetl.domain.types import JsonDict, QuarantineRecordStatus
 from bioetl.infrastructure.quarantine.status_events import apply_latest_statuses
-
-if TYPE_CHECKING:
-    pass
 
 
 def inspect_records(

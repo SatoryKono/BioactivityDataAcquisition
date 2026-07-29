@@ -1988,39 +1988,15 @@ def _log_root_and_reports_evidence(
     _log_reports_workspace_evidence(reports_evidence, detail_limit=detail_limit)
 
 
-def main() -> int:
-    args = parse_args()
-    repo_root = _discover_repo_root(args.path)
-    if args.dry_run and (args.apply or args.apply_reports_prune):
-        logger.error("Use --dry-run without apply modes.")
-        return 2
-
-    root_hygiene_fast_local_scan = (
-        args.dry_run
-        and not args.apply
-        and not args.apply_reports_prune
-        and args.detail_limit == 0
-    )
-
-    candidates = collect_cleanup_candidates(
-        repo_root,
-        include_cache=args.cache,
-        include_temp=args.temp,
-        include_root_review=args.root,
-        root_only_local_scan=root_hygiene_fast_local_scan,
-    )
-    _log_candidates(candidates, detail_limit=max(args.detail_limit, 0))
-    review_evidence = collect_root_review_evidence(repo_root) if args.root else []
-    root_policy_mismatches = (
-        collect_root_policy_mismatches(repo_root) if args.root else []
-    )
-    reports_evidence = collect_reports_workspace_evidence(repo_root)
-    _log_root_and_reports_evidence(
-        args=args,
-        root_policy_mismatches=root_policy_mismatches,
-        review_evidence=review_evidence,
-        reports_evidence=reports_evidence,
-    )
+def _write_optional_cleanup_reports(
+    *,
+    args: argparse.Namespace,
+    repo_root: Path,
+    candidates: object,
+    review_evidence: list[object],
+    root_policy_mismatches: list[object],
+    reports_evidence: object,
+) -> None:
     if args.report_json is not None:
         report_path = write_cleanup_classification_report(
             repo_root,
@@ -2054,6 +2030,49 @@ def main() -> int:
             ),
         )
         logger.info("Wrote reports workspace review report: %s", report_path)
+
+
+def main() -> int:
+    args = parse_args()
+    repo_root = _discover_repo_root(args.path)
+    if args.dry_run and (args.apply or args.apply_reports_prune):
+        logger.error("Use --dry-run without apply modes.")
+        return 2
+
+    root_hygiene_fast_local_scan = (
+        args.dry_run
+        and not args.apply
+        and not args.apply_reports_prune
+        and args.detail_limit == 0
+    )
+
+    candidates = collect_cleanup_candidates(
+        repo_root,
+        include_cache=args.cache,
+        include_temp=args.temp,
+        include_root_review=args.root,
+        root_only_local_scan=root_hygiene_fast_local_scan,
+    )
+    _log_candidates(candidates, detail_limit=max(args.detail_limit, 0))
+    review_evidence = collect_root_review_evidence(repo_root) if args.root else []
+    root_policy_mismatches = (
+        collect_root_policy_mismatches(repo_root) if args.root else []
+    )
+    reports_evidence = collect_reports_workspace_evidence(repo_root)
+    _log_root_and_reports_evidence(
+        args=args,
+        root_policy_mismatches=root_policy_mismatches,
+        review_evidence=review_evidence,
+        reports_evidence=reports_evidence,
+    )
+    _write_optional_cleanup_reports(
+        args=args,
+        repo_root=repo_root,
+        candidates=candidates,
+        review_evidence=review_evidence,
+        root_policy_mismatches=root_policy_mismatches,
+        reports_evidence=reports_evidence,
+    )
 
     apply_errors: list[str] = []
     deleted_reports: list[str] = []

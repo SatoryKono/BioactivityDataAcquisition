@@ -359,6 +359,38 @@ def update_final(observation: dict[str, object]) -> None:
     )
 
 
+def _is_non_canonical_compose_path(path_text: str) -> bool:
+    # NOSONAR(S5443) - marker string for non-canonical path detection, not a write sink
+    return (
+        _TMP_PATH_MARKER in path_text
+        or "E:\\" in path_text
+        or "E:/" in path_text
+    )
+
+
+def _validate_canonical_compose_files(
+    mon_files: str, main_files: str
+) -> None:
+    if _is_non_canonical_compose_path(mon_files):
+        raise RuntimeError(f"monitoring still non-canonical: {mon_files}")
+    has_known_root = (
+        "bioetl-runtime" in main_files
+        or "BioactivityDataAcquisition2" in main_files
+        or "/home/" in main_files
+    )
+    if not has_known_root:
+        raise RuntimeError(f"main still non-canonical: {main_files}")
+
+
+def _validate_no_warp_on_required(snaps: dict[str, object]) -> None:
+    for name, snap in snaps.items():
+        if not isinstance(snap, dict):
+            continue
+        nets = snap.get("networks") or []
+        if "warp-network" in nets and str(name).startswith("bioetl"):
+            raise RuntimeError(f"{name} still on warp-network: {nets}")
+
+
 def validate_canonical(topology: dict[str, object]) -> None:
     projects = topology["compose_projects"]
     by_name = {str(p.get("Name")): p for p in projects}
@@ -366,21 +398,10 @@ def validate_canonical(topology: dict[str, object]) -> None:
     main = by_name.get("bioetl-main", {})
     mon_files = str(mon.get("ConfigFiles") or "")
     main_files = str(main.get("ConfigFiles") or "")
-    # NOSONAR(S5443) - marker string for non-canonical path detection, not a write sink
-    if _TMP_PATH_MARKER in mon_files or "E:\\" in mon_files or "E:/" in mon_files:
-        raise RuntimeError(f"monitoring still non-canonical: {mon_files}")
-    if (
-        "bioetl-runtime" not in main_files
-        and "BioactivityDataAcquisition2" not in main_files
-    ):
-        # main path should be Linux runtime
-        if "/home/" not in main_files:
-            raise RuntimeError(f"main still non-canonical: {main_files}")
+    _validate_canonical_compose_files(mon_files, main_files)
     snaps = topology["snapshots"]
-    for name, snap in snaps.items():
-        nets = snap.get("networks") or []
-        if "warp-network" in nets and name.startswith("bioetl"):
-            raise RuntimeError(f"{name} still on warp-network: {nets}")
+    if isinstance(snaps, dict):
+        _validate_no_warp_on_required(snaps)
 
 
 def main() -> int:

@@ -677,6 +677,42 @@ def _stabilize_ready_snapshots(
     return last_snapshots, readiness_findings(spec, last_snapshots, baseline)
 
 
+def _poll_ready_once(
+    spec: StackSpec,
+    baseline: Mapping[str, int],
+    *,
+    runner: Runner,
+    deadline: float,
+    stabilization_seconds: float,
+    sleep: Sleeper,
+    clock: Clock,
+) -> tuple[list[ServiceSnapshot], list[dict[str, Any]], bool]:
+    """Return (snapshots, findings, ready). ready True means caller should return."""
+    remaining = deadline - clock()
+    if remaining <= 0:
+        return [], [{"cause": "readiness_timeout"}], False
+    last_snapshots, _ = collect_snapshots(
+        spec, runner=runner, timeout=min(15.0, remaining)
+    )
+    last_findings = readiness_findings(spec, last_snapshots, baseline)
+    if last_findings:
+        return last_snapshots, last_findings, False
+    if stabilization_seconds > 0:
+        last_snapshots, last_findings = _stabilize_ready_snapshots(
+            spec,
+            baseline,
+            runner=runner,
+            deadline=deadline,
+            stabilization_seconds=stabilization_seconds,
+            sleep=sleep,
+            clock=clock,
+            last_snapshots=last_snapshots,
+        )
+    if not last_findings:
+        return last_snapshots, [], True
+    return last_snapshots, last_findings, False
+
+
 def _wait_ready(
     spec: StackSpec,
     baseline: Mapping[str, int],
@@ -692,27 +728,17 @@ def _wait_ready(
     last_snapshots: list[ServiceSnapshot] = []
     last_findings: list[dict[str, Any]] = [{"cause": "readiness_timeout"}]
     while clock() < deadline:
-        remaining = deadline - clock()
-        if remaining <= 0:
-            break
-        last_snapshots, _ = collect_snapshots(
-            spec, runner=runner, timeout=min(15.0, remaining)
+        last_snapshots, last_findings, ready = _poll_ready_once(
+            spec,
+            baseline,
+            runner=runner,
+            deadline=deadline,
+            stabilization_seconds=stabilization_seconds,
+            sleep=sleep,
+            clock=clock,
         )
-        last_findings = readiness_findings(spec, last_snapshots, baseline)
-        if not last_findings:
-            if stabilization_seconds > 0:
-                last_snapshots, last_findings = _stabilize_ready_snapshots(
-                    spec,
-                    baseline,
-                    runner=runner,
-                    deadline=deadline,
-                    stabilization_seconds=stabilization_seconds,
-                    sleep=sleep,
-                    clock=clock,
-                    last_snapshots=last_snapshots,
-                )
-            if not last_findings:
-                return last_snapshots, []
+        if ready:
+            return last_snapshots, []
         remaining = deadline - clock()
         if remaining <= 0:
             break

@@ -7,9 +7,6 @@ from typing import TYPE_CHECKING, cast
 from bioetl.application.services.control_plane.manifest.diagnostics.artifact_support import (
     sorted_text_items,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.ledger_processing import (
-    _resolve_policy_value,
-)
 from bioetl.application.services.control_plane.manifest.diagnostics.persistence import (
     build_alert_signals,
     build_next_steps,
@@ -28,6 +25,14 @@ if TYPE_CHECKING:
         _FinalSummaryRequest,
         _RuntimeViewsRequest,
     )
+
+
+def _resolve_policy_value(values: set[str]) -> str | None:
+    if not values:
+        return None
+    if len(values) == 1:
+        return next(iter(values))
+    return "mixed"
 
 
 def build_exact_replay_anchors(
