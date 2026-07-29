@@ -68,12 +68,17 @@ CHIP_BASE = (
     "box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;"
     "border-radius:3px;font-weight:600;line-height:1.35"
 )
+# Theme-safe chips: slate link surface works on dark and light Grafana themes.
 LINK_STYLE = (
     f"{CHIP_BASE};color:#f8fafc;background:#334155;"
     "border:1px solid #94a3b8;text-decoration:none"
 )
+# Current chip: blue fill + cyan border + underline (not color-only).
+# Rendered as <a aria-disabled> so Grafana HTML sanitizer keeps styles
+# (bare <span aria-current> may lose attributes/styles in text panels).
 CURRENT_STYLE = (
-    f"{CHIP_BASE};color:#fff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default"
+    f"{CHIP_BASE};color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;"
+    "cursor:default;text-decoration:underline;pointer-events:none"
 )
 CONTAINER_STYLE = (
     "display:flex;gap:6px;flex-wrap:wrap;align-items:center;"
@@ -84,9 +89,10 @@ NAV_DESCRIPTION = (
     "Sanitizer-compatible navigation bus with native keyboard focus. "
     "Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / "
     "Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. "
-    "Current workspace is disabled (aria-current). Handoffs open same-tab, "
+    "Current workspace is a non-interactive chip (aria-disabled + data-current=page, "
+    "underlined) so active state is not color-only. Handoffs open same-tab, "
     "preserve current time range, and document scope reset or context mapping "
-    "on cross-scope transitions."
+    "on cross-scope transitions. Chip colors are theme-safe for dark and light."
 )
 
 
@@ -146,14 +152,17 @@ def _chip_html(item: dict[str, str], *, current_uid: str, source_uid: str) -> st
     short = item["title"].split(". ", 1)[-1]
     title_attr = f"{item['title']} ({short})"
     if item["uid"] == current_uid:
+        # Anchor keeps inline styles under Grafana sanitizer; not in tab order.
         return (
-            f'<span aria-current="page" title="{title_attr}" style="{CURRENT_STYLE}">'
-            f"{item['title']}</span>"
+            f'<a class="bioetl-nav-current" href="#{item["uid"]}" '
+            f'aria-disabled="true" aria-current="page" data-current="page" '
+            f'tabindex="-1" title="{title_attr}" style="{CURRENT_STYLE}">'
+            f"{item['title']} (current)</a>"
         )
     href = _html_href(_url_for(item, source_uid=source_uid))
     return (
-        f'<a style="{LINK_STYLE}" title="{title_attr}" href="{href}">'
-        f"{item['title']}</a>"
+        f'<a class="bioetl-nav-link" style="{LINK_STYLE}" title="{title_attr}" '
+        f'href="{href}">{item["title"]}</a>'
     )
 
 
