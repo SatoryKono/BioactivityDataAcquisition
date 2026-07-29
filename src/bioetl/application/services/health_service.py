@@ -18,7 +18,7 @@ __all__ = [
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import cast, Any, TYPE_CHECKING
 
 from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.ports import (
@@ -261,8 +261,10 @@ class HealthService:
             http_client = getattr(adapter, "_http_client", None)
         enter = getattr(http_client, "__aenter__", None)
         exit_ = getattr(http_client, "__aexit__", None)
-        if callable(enter) and callable(exit_):
-            async with http_client:
+        if http_client is not None and callable(enter) and callable(exit_):
+            # Narrowed non-None client; cast for static OptionalContextManager.
+            client = cast(Any, http_client)  # Any: duck-typed async HTTP client context
+            async with client:
                 return await adapter.check_health()
         return await adapter.check_health()
 
