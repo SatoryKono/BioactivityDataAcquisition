@@ -219,7 +219,10 @@ def _resolve_bronze_for_run(
 ) -> int | None:
     if callable(list_entries_by_run_id):
         try:
-            list_entries = cast(Callable[..., Any], list_entries_by_run_id)
+            list_entries = cast(
+                Callable[..., Any],  # Any: duck-typed host method after callable()
+                list_entries_by_run_id,
+            )
             resolved = _resolve_bronze_records_from_entries(
                 list_entries(_lookup_run_id(candidate_run_id))
             )
@@ -232,7 +235,10 @@ def _resolve_bronze_for_run(
     if not callable(show_manifest):
         return None
     try:
-        show = cast(Callable[..., Any], show_manifest)
+        show = cast(
+            Callable[..., Any],  # Any: duck-typed host method after callable()
+            show_manifest,
+        )
         inspection = show(candidate_run_id)
     except ValueError:
         return None

@@ -101,7 +101,9 @@ class WorkflowCommandOptions:
     observability_backend_port: int
 
     @classmethod
-    def from_click_kwargs(cls, raw: dict[str, Any]) -> WorkflowCommandOptions:
+    def from_click_kwargs(
+        cls, raw: dict[str, Any]  # Any: Click injects heterogeneous option values
+    ) -> WorkflowCommandOptions:
         """Build options from Click-injected keyword arguments."""
         return cls(
             dry_run=bool(raw["dry_run"]),
@@ -394,7 +396,7 @@ def run_workflow_command(
     :class:`WorkflowCommandOptions` to stay under the Sonar S107 parameter budget.
     """
     options = WorkflowCommandOptions.from_click_kwargs(
-        cast(dict[str, Any], raw_options)
+        cast(dict[str, Any], raw_options)  # Any: Click kwargs bag before packing
     )
     _validate_run_workflow_options(
         incremental=options.incremental,

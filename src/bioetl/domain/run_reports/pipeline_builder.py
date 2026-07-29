@@ -21,15 +21,15 @@ from bioetl.domain.run_reports.reason_catalog import default_reason_catalog
 class PipelineRunReportOptionalBlocks:
     """Optional operator-facing report blocks packed for S107 headroom."""
 
-    failure: Mapping[str, Any] | None = None
-    io: Mapping[str, Any] | None = None
-    quarantine: Mapping[str, Any] | None = None
-    dq_summary: Mapping[str, Any] | None = None
-    contract_summary: Mapping[str, Any] | None = None
-    schema_versions: Mapping[str, Any] | None = None
-    stage_timings: Mapping[str, Any] | None = None
-    http_summary: Mapping[str, Any] | None = None
-    performance: Mapping[str, Any] | None = None
+    failure: Mapping[str, Any] | None = None  # Any: dynamic operator report block
+    io: Mapping[str, Any] | None = None  # Any: dynamic operator report block
+    quarantine: Mapping[str, Any] | None = None  # Any: dynamic operator report block
+    dq_summary: Mapping[str, Any] | None = None  # Any: dynamic operator report block
+    contract_summary: Mapping[str, Any] | None = None  # Any: dynamic operator report block
+    schema_versions: Mapping[str, Any] | None = None  # Any: dynamic operator report block
+    stage_timings: Mapping[str, Any] | None = None  # Any: dynamic operator report block
+    http_summary: Mapping[str, Any] | None = None  # Any: dynamic operator report block
+    performance: Mapping[str, Any] | None = None  # Any: dynamic operator report block
 
 
 def _optional_mapping(

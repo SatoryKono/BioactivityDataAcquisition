@@ -42,8 +42,11 @@ def get_health_server_dependencies(
 
     # Boundary cast: runtime returns Protocol-shaped deps; callers need concrete alias.
     if data_root is None:
-        return cast(Any, _impl())
-    return cast(Any, _impl(data_root=data_root))
+        return cast(Any, _impl())  # Any: composition seam returns Protocol-shaped deps
+    return cast(
+        Any,  # Any: composition seam returns Protocol-shaped deps
+        _impl(data_root=data_root),
+    )
 
 
 def get_health_service() -> HealthService:
