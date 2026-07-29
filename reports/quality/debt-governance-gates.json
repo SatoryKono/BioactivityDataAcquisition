@@ -46,8 +46,8 @@
       "status": "pass"
     },
     {
-      "current": "642ed02eb0eee03081ff00366b2b5755ce636defd2a1e2f9c1bcd51dbaf0233d",
-      "limit": "642ed02eb0eee03081ff00366b2b5755ce636defd2a1e2f9c1bcd51dbaf0233d",
+      "current": "f32292c29ffa474a365ce3feb957ebd0fe8f3b7780b1afde65fa98d3d1928f71",
+      "limit": "f32292c29ffa474a365ce3feb957ebd0fe8f3b7780b1afde65fa98d3d1928f71",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -56,14 +56,14 @@
     },
     {
       "current": {
-        "source_module_count": 2311,
-        "source_tree_sha256": "642ed02eb0eee03081ff00366b2b5755ce636defd2a1e2f9c1bcd51dbaf0233d",
+        "source_module_count": 2315,
+        "source_tree_sha256": "f32292c29ffa474a365ce3feb957ebd0fe8f3b7780b1afde65fa98d3d1928f71",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
-        "source_module_count": 2311,
-        "source_tree_sha256": "642ed02eb0eee03081ff00366b2b5755ce636defd2a1e2f9c1bcd51dbaf0233d",
+        "source_module_count": 2315,
+        "source_tree_sha256": "f32292c29ffa474a365ce3feb957ebd0fe8f3b7780b1afde65fa98d3d1928f71",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -235,13 +235,13 @@
       "status": "pass"
     },
     {
-      "current": 15,
+      "current": 25,
       "limit": 15,
       "metric": "zero_reference_supporting_script_count",
       "name": "supporting_scripts_zero_reference_count",
       "remediation": "Triage or remove zero-reference supporting scripts; budgets must not grow.",
       "source_artifact": "configs/quality/scripts_inventory_manifest.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": 0,
@@ -436,18 +436,20 @@
     "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 0,
-    "pass": 45,
+    "fail": 1,
+    "pass": 44,
     "warn": 0
   },
   "summary": {
     "architecture_quality_scorecard_integral_score": 9.41,
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
-    "fail_count": 0,
-    "failing_gates": [],
+    "fail_count": 1,
+    "failing_gates": [
+      "supporting_scripts_zero_reference_count"
+    ],
     "gate_count": 45,
-    "pass_count": 45,
-    "release_gate_status": "passing",
+    "pass_count": 44,
+    "release_gate_status": "failing",
     "warn_count": 0,
     "warning_gates": []
   }
