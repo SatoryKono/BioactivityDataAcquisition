@@ -32,6 +32,27 @@ if TYPE_CHECKING:
 __all__ = ["BaseTransformer", "T"]
 
 
+def _merge_legacy_collaborators(
+    dependencies: TransformerDependencyContext,
+    *,
+    tracer: TracingPort | None,
+    metrics: MetricsPort | None,
+    identity_service: EntityIdentityGenerator | None,
+    pii_hasher: PiiHasherPort | None,
+) -> TransformerDependencyContext:
+    return replace(
+        dependencies,
+        tracer=dependencies.tracer if tracer is None else tracer,
+        metrics=dependencies.metrics if metrics is None else metrics,
+        identity_service=(
+            dependencies.identity_service
+            if identity_service is None
+            else identity_service
+        ),
+        pii_hasher=dependencies.pii_hasher if pii_hasher is None else pii_hasher,
+    )
+
+
 def _resolve_transformer_dependencies(
     *,
     dependencies: TransformerDependencyContext | None,
@@ -41,36 +62,26 @@ def _resolve_transformer_dependencies(
     pii_hasher: PiiHasherPort | None,
 ) -> TransformerDependencyContext:
     """Resolve explicit collaborator bundle for transformer construction."""
-    if dependencies is not None:
-        if any(
-            collaborator is not None
-            for collaborator in (tracer, metrics, identity_service, pii_hasher)
-        ):
-            return replace(
-                dependencies,
-                tracer=dependencies.tracer if tracer is None else tracer,
-                metrics=dependencies.metrics if metrics is None else metrics,
-                identity_service=(
-                    dependencies.identity_service
-                    if identity_service is None
-                    else identity_service
-                ),
-                pii_hasher=(
-                    dependencies.pii_hasher if pii_hasher is None else pii_hasher
-                ),
-            )
-        return dependencies
-
-    if any(
+    has_legacy = any(
         collaborator is not None
         for collaborator in (tracer, metrics, identity_service, pii_hasher)
-    ):
+    )
+    if dependencies is not None:
+        if has_legacy:
+            return _merge_legacy_collaborators(
+                dependencies,
+                tracer=tracer,
+                metrics=metrics,
+                identity_service=identity_service,
+                pii_hasher=pii_hasher,
+            )
+        return dependencies
+    if has_legacy:
         raise TypeError(
             "BaseTransformer no longer assembles partial collaborator defaults "
             "from named arguments. Build TransformerDependencyContext in "
             "composition or test support and pass it via 'dependencies'."
         )
-
     raise TypeError(
         "BaseTransformer requires explicit collaborator injection via "
         "'dependencies' (TransformerDependencyContext). Build runtime defaults "

@@ -97,26 +97,18 @@ def classify_artifact_scope(relative_path: str) -> str:
     return "artifact"
 
 
-def collect_artifact_duplication_report(
-    root: Path = ROOT,
+def _discover_scoped_paths(
+    resolved_root: Path,
     *,
-    include_patterns: tuple[str, ...] = DEFAULT_INCLUDE_PATTERNS,
-    exclude_patterns: tuple[str, ...] = DEFAULT_EXCLUDE_PATTERNS,
-) -> dict[str, Any]:
-    """Collect exact-byte duplicate groups for JSCPD-excluded governance artifacts."""
-    resolved_root = root.resolve()
-    groups_by_hash: dict[str, list[str]] = defaultdict(list)
-    total_bytes_by_hash: dict[str, int] = defaultdict(int)
-    scope_file_counts: Counter[str] = Counter()
-    pattern_file_counts: Counter[str] = Counter()
+    include_patterns: tuple[str, ...],
+    exclude_patterns: tuple[str, ...],
+) -> tuple[dict[str, Path], Counter[str]]:
     paths_by_relative: dict[str, Path] = {}
-
+    pattern_file_counts: Counter[str] = Counter()
     for pattern in include_patterns:
         pattern_seen: set[str] = set()
         for path in resolved_root.glob(pattern):
-            if not path.is_file():
-                continue
-            if path.suffix.lower() not in TRACKED_EXTENSIONS:
+            if not path.is_file() or path.suffix.lower() not in TRACKED_EXTENSIONS:
                 continue
             relative = path.relative_to(resolved_root).as_posix()
             if _matches_any(relative, exclude_patterns):
@@ -125,17 +117,31 @@ def collect_artifact_duplication_report(
                 pattern_file_counts[pattern] += 1
                 pattern_seen.add(relative)
             paths_by_relative[relative] = path
+    return paths_by_relative, pattern_file_counts
 
-    for relative, path in sorted(paths_by_relative.items()):
+
+def _hash_path_groups(
+    paths_by_relative: dict[str, Path],
+    *,
+    resolved_root: Path,
+) -> tuple[dict[str, list[str]], dict[str, int], Counter[str]]:
+    groups_by_hash: dict[str, list[str]] = defaultdict(list)
+    total_bytes_by_hash: dict[str, int] = defaultdict(int)
+    scope_file_counts: Counter[str] = Counter()
+    for _relative, path in sorted(paths_by_relative.items()):
         relative = path.relative_to(resolved_root).as_posix()
         payload = path.read_bytes()
         digest = hashlib.sha256(payload).hexdigest()
-        scope = classify_artifact_scope(relative)
-
         groups_by_hash[digest].append(relative)
         total_bytes_by_hash[digest] += len(payload)
-        scope_file_counts[scope] += 1
+        scope_file_counts[classify_artifact_scope(relative)] += 1
+    return groups_by_hash, total_bytes_by_hash, scope_file_counts
 
+
+def _build_duplicate_groups(
+    groups_by_hash: dict[str, list[str]],
+    total_bytes_by_hash: dict[str, int],
+) -> tuple[list[dict[str, Any]], int]:
     duplicate_groups: list[dict[str, Any]] = []
     duplicate_file_count = 0
     for digest, paths in sorted(
@@ -155,6 +161,28 @@ def collect_artifact_duplication_report(
                 "paths": sorted(paths, key=str.lower),
             }
         )
+    return duplicate_groups, duplicate_file_count
+
+
+def collect_artifact_duplication_report(
+    root: Path = ROOT,
+    *,
+    include_patterns: tuple[str, ...] = DEFAULT_INCLUDE_PATTERNS,
+    exclude_patterns: tuple[str, ...] = DEFAULT_EXCLUDE_PATTERNS,
+) -> dict[str, Any]:
+    """Collect exact-byte duplicate groups for JSCPD-excluded governance artifacts."""
+    resolved_root = root.resolve()
+    paths_by_relative, pattern_file_counts = _discover_scoped_paths(
+        resolved_root,
+        include_patterns=include_patterns,
+        exclude_patterns=exclude_patterns,
+    )
+    groups_by_hash, total_bytes_by_hash, scope_file_counts = _hash_path_groups(
+        paths_by_relative, resolved_root=resolved_root
+    )
+    duplicate_groups, duplicate_file_count = _build_duplicate_groups(
+        groups_by_hash, total_bytes_by_hash
+    )
 
     return {
         "schema_version": 1,

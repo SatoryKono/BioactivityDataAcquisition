@@ -298,6 +298,34 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def _publish_or_skip_draft(
+    draft: object, *, token: str, records: list[IssueRecord]
+) -> None:
+    existing = _search_existing_issue(token=token, title=draft.title)  # type: ignore[attr-defined]
+    if existing and existing.get("state") == "open":
+        records.append(
+            IssueRecord(
+                number=int(existing["number"]),
+                title=str(existing["title"]),
+                url=str(existing["html_url"]),
+                state=str(existing["state"]),
+                action="exists-open",
+            )
+        )
+        print(
+            f"Skipping create for {draft.code}; already open as #{existing['number']}."  # type: ignore[attr-defined]
+        )
+        return
+    if existing and existing.get("state") == "closed":
+        print(
+            f"Creating fresh issue for {draft.code}; closed duplicate exists "  # type: ignore[attr-defined]
+            f"as #{existing['number']}."
+        )
+    else:
+        print(f"Creating {draft.code}...")  # type: ignore[attr-defined]
+    records.append(_create_issue(token=token, draft=draft))  # type: ignore[arg-type]
+
+
 def run(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
     codes = None
@@ -330,29 +358,7 @@ def run(argv: list[str] | None = None) -> int:
             )
 
     for draft in drafts:
-        existing = _search_existing_issue(token=token, title=draft.title)
-        if existing and existing.get("state") == "open":
-            records.append(
-                IssueRecord(
-                    number=int(existing["number"]),
-                    title=str(existing["title"]),
-                    url=str(existing["html_url"]),
-                    state=str(existing["state"]),
-                    action="exists-open",
-                )
-            )
-            print(
-                f"Skipping create for {draft.code}; already open as #{existing['number']}."
-            )
-            continue
-        if existing and existing.get("state") == "closed":
-            print(
-                f"Creating fresh issue for {draft.code}; closed duplicate exists "
-                f"as #{existing['number']}."
-            )
-        else:
-            print(f"Creating {draft.code}...")
-        records.append(_create_issue(token=token, draft=draft))
+        _publish_or_skip_draft(draft, token=token, records=records)
 
     if args.update_pack:
         issue_pack = _repo_root() / args.pack

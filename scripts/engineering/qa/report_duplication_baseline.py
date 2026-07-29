@@ -27,6 +27,7 @@ _HEADER_RE = re.compile(
     r"^(?P<path>.+?):(?P<line>\d+):\d+: R0801: Similar lines in 2 files$"
 )
 _MODULE_RE = re.compile(r"^==(?P<module>[^:]+):\[(?P<start>\d+):(?P<end>\d+)\]$")
+_MD_TABLE_SEPARATOR_2COL = "| --- | ---: |"
 
 
 @dataclass(frozen=True)
@@ -718,7 +719,7 @@ def _markdown_summary_lines(
             "> prioritization input rather than immediate blocking debt.",
             "",
             "| Target | Duplicate clusters |",
-            "| --- | ---: |",
+            _MD_TABLE_SEPARATOR_2COL,
         ]
     )
     return lines
@@ -732,7 +733,7 @@ def _actionability_markdown_section(report: TargetDuplicationReport) -> list[str
     lines = [
         "",
         "| Actionability category | Duplicate clusters |",
-        "| --- | ---: |",
+        _MD_TABLE_SEPARATOR_2COL,
     ]
     for row in summary:
         category = row.get("category")
@@ -785,7 +786,7 @@ def _top_pairs_markdown_section(report: TargetDuplicationReport) -> list[str]:
     lines = [
         "",
         "| Top recurring module pairs | Duplicate clusters |",
-        "| --- | ---: |",
+        _MD_TABLE_SEPARATOR_2COL,
     ]
     for item in top_pairs:
         modules = item.get("modules", [])

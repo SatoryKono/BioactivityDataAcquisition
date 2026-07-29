@@ -216,68 +216,45 @@ def _scan_lfs_pointer_files(root: Path) -> list[str]:
     return pointer_files
 
 
-def collect_test_audit_preflight(
-    root: Path = ROOT,
+def _collect_git_status_surfaces(
     *,
-    runner: GitRunner | None = None,
-    git_lfs_path: str | None = None,
-) -> dict[str, Any]:
-    """Collect preflight facts needed before treating an audit as reproducible."""
-    root = root.resolve()
-    using_default_runner = runner is None
-    git_runner = runner or _default_git_runner(root)
-    lfs_path = _detect_git_lfs_path(git_lfs_path)
-
-    current_branch = _git_value(git_runner, ["branch", "--show-current"])
-    current_commit = _git_value(git_runner, ["rev-parse", "--short", "HEAD"])
-    default_branch = _detect_default_branch(git_runner)
-    default_commit = _git_value(git_runner, ["rev-parse", "--short", default_branch])
-    lfs_available = bool(lfs_path)
-    git_lfs_version = (
-        _git_lfs_version(
-            lfs_path=lfs_path,
-            root=root,
-            git_runner=git_runner,
-            prefer_direct_binary=using_default_runner,
-        )
-        if lfs_path
-        else None
+    git_runner: GitRunner,
+    lfs_available: bool,
+    using_default_runner: bool,
+    root: Path,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    if not lfs_available:
+        skipped = _skipped_git_status_due_to_missing_lfs()
+        return skipped, skipped
+    git_status = _git_value(git_runner, ["status", "--short", "--untracked-files=no"])
+    vcr_git_status = _git_value(
+        git_runner,
+        [
+            "status",
+            "--short",
+            "--untracked-files=all",
+            "--",
+            VCR_FIXTURE_ROOT.as_posix(),
+        ],
     )
-    git_status = (
-        _git_value(git_runner, ["status", "--short", "--untracked-files=no"])
-        if lfs_available
-        else _skipped_git_status_due_to_missing_lfs()
-    )
-    vcr_git_status = (
-        _git_value(
-            git_runner,
-            [
-                "status",
-                "--short",
-                "--untracked-files=all",
-                "--",
-                VCR_FIXTURE_ROOT.as_posix(),
-            ],
-        )
-        if lfs_available
-        else _skipped_git_status_due_to_missing_lfs()
-    )
-    if using_default_runner and lfs_available and git_status["timed_out"]:
+    if using_default_runner and git_status["timed_out"]:
         fallback_status = _windows_git_status(root)
         if fallback_status is not None:
             git_status = fallback_status
+    return git_status, vcr_git_status
 
-    baseline_path = root / TELEMETRY_BASELINE
-    baseline_exists = baseline_path.exists()
-    baseline_text = baseline_path.read_text(encoding="utf-8") if baseline_exists else ""
-    baseline_has_coverage = "Actual coverage:" in baseline_text
-    lfs_pointer_files = _scan_lfs_pointer_files(root)
-    dirty_vcr_paths = (
-        _changed_paths_from_git_status(str(vcr_git_status["stdout"]))
-        if vcr_git_status["ok"]
-        else []
-    )
 
+def _build_preflight_blockers(
+    *,
+    lfs_path: str | None,
+    git_lfs_version: dict[str, Any] | None,
+    git_status: dict[str, Any],
+    vcr_git_status: dict[str, Any],
+    dirty_vcr_paths: list[str],
+    lfs_pointer_files: list[str],
+    baseline_exists: bool,
+    baseline_has_coverage: bool,
+) -> list[dict[str, str]]:
     blockers: list[dict[str, str]] = []
     if not lfs_path:
         blockers.append(
@@ -353,6 +330,63 @@ def collect_test_audit_preflight(
                 "message": "Telemetry baseline exists but does not expose Actual coverage.",
             }
         )
+    return blockers
+
+
+def collect_test_audit_preflight(
+    root: Path = ROOT,
+    *,
+    runner: GitRunner | None = None,
+    git_lfs_path: str | None = None,
+) -> dict[str, Any]:
+    """Collect preflight facts needed before treating an audit as reproducible."""
+    root = root.resolve()
+    using_default_runner = runner is None
+    git_runner = runner or _default_git_runner(root)
+    lfs_path = _detect_git_lfs_path(git_lfs_path)
+
+    current_branch = _git_value(git_runner, ["branch", "--show-current"])
+    current_commit = _git_value(git_runner, ["rev-parse", "--short", "HEAD"])
+    default_branch = _detect_default_branch(git_runner)
+    default_commit = _git_value(git_runner, ["rev-parse", "--short", default_branch])
+    lfs_available = bool(lfs_path)
+    git_lfs_version = (
+        _git_lfs_version(
+            lfs_path=lfs_path,
+            root=root,
+            git_runner=git_runner,
+            prefer_direct_binary=using_default_runner,
+        )
+        if lfs_path
+        else None
+    )
+    git_status, vcr_git_status = _collect_git_status_surfaces(
+        git_runner=git_runner,
+        lfs_available=lfs_available,
+        using_default_runner=using_default_runner,
+        root=root,
+    )
+
+    baseline_path = root / TELEMETRY_BASELINE
+    baseline_exists = baseline_path.exists()
+    baseline_text = baseline_path.read_text(encoding="utf-8") if baseline_exists else ""
+    baseline_has_coverage = "Actual coverage:" in baseline_text
+    lfs_pointer_files = _scan_lfs_pointer_files(root)
+    dirty_vcr_paths = (
+        _changed_paths_from_git_status(str(vcr_git_status["stdout"]))
+        if vcr_git_status["ok"]
+        else []
+    )
+    blockers = _build_preflight_blockers(
+        lfs_path=lfs_path,
+        git_lfs_version=git_lfs_version,
+        git_status=git_status,
+        vcr_git_status=vcr_git_status,
+        dirty_vcr_paths=dirty_vcr_paths,
+        lfs_pointer_files=lfs_pointer_files,
+        baseline_exists=baseline_exists,
+        baseline_has_coverage=baseline_has_coverage,
+    )
 
     return {
         "root": root.as_posix(),

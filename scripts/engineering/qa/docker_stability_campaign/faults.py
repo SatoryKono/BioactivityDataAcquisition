@@ -235,6 +235,93 @@ class HostFaultExecutor:
         self._reserved_ports[port] = listener
         return {"returncode": 0, "port": port, "owner": "campaign"}
 
+    def _execute_release_port(self, operation: FaultOperation) -> dict[str, Any]:
+        port = int(operation.port or 0)
+        listener = self._reserved_ports.pop(port, None)
+        if listener is not None:
+            listener.close()
+        return {"returncode": 0, "port": port, "released": True}
+
+    def _execute_interrupt_start(
+        self, operation: FaultOperation, *, timeout: float
+    ) -> dict[str, Any]:
+        spec = self._spec(operation)
+        command = [
+            "docker",
+            "compose",
+            "-p",
+            spec.project,
+            "-f",
+            str(self.runtime_origin / spec.compose_file),
+            "up",
+            "-d",
+            "--wait",
+            *spec.required_services,
+        ]
+        started = time.monotonic()
+        process = subprocess.Popen(
+            command,
+            cwd=self.runtime_origin,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        time.sleep(min(1.0, timeout / 4))
+        process.terminate()
+        try:
+            stdout, stderr = process.communicate(timeout=min(5.0, timeout))
+        except subprocess.TimeoutExpired:
+            process.kill()
+            stdout, stderr = process.communicate(timeout=2.0)
+        return {
+            "command": command,
+            "returncode": process.returncode,
+            "interrupted": True,
+            "duration_seconds": round(time.monotonic() - started, 3),
+            "stdout": stdout[:4000],
+            "stderr": stderr[:4000],
+        }
+
+    def _execute_bounded_pressure(
+        self, operation: FaultOperation, *, timeout: float
+    ) -> dict[str, Any]:
+        spec = self._spec(operation)
+        # Keep the injected load intentionally small and time-bounded. Its purpose
+        # is to exercise resource telemetry and cleanup, not breach the 80% gate.
+        program = """import multiprocessing as m
+import os
+from pathlib import Path
+import time
+
+marker = Path('/tmp/bioetl-fault-pressure.pids')
+buf = bytearray(16 * 1024 * 1024)
+child = m.Process(target=time.sleep, args=(10,))
+child.start()
+marker.write_text(f"{os.getpid()} {child.pid}", encoding="ascii")
+try:
+    time.sleep(10)
+    child.join()
+    assert len(buf) == 16 * 1024 * 1024
+finally:
+    if child.is_alive():
+        child.terminate()
+        child.join(timeout=2)
+    marker.unlink(missing_ok=True)
+"""
+        return compose_command(
+            self.runtime_origin,
+            spec,
+            (
+                "exec",
+                "-T",
+                str(operation.service),
+                "python",
+                "-c",
+                program,
+            ),
+            timeout,
+        )
+
     def execute(
         self,
         operation: FaultOperation,
@@ -265,85 +352,11 @@ class HostFaultExecutor:
         if operation.kind == "reserve_port":
             return self._execute_reserve_port(operation)
         if operation.kind == "release_port":
-            port = int(operation.port or 0)
-            listener = self._reserved_ports.pop(port, None)
-            if listener is not None:
-                listener.close()
-            return {"returncode": 0, "port": port, "released": True}
+            return self._execute_release_port(operation)
         if operation.kind == "interrupt_start":
-            spec = self._spec(operation)
-            command = [
-                "docker",
-                "compose",
-                "-p",
-                spec.project,
-                "-f",
-                str(self.runtime_origin / spec.compose_file),
-                "up",
-                "-d",
-                "--wait",
-                *spec.required_services,
-            ]
-            started = time.monotonic()
-            process = subprocess.Popen(
-                command,
-                cwd=self.runtime_origin,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-            )
-            time.sleep(min(1.0, timeout / 4))
-            process.terminate()
-            try:
-                stdout, stderr = process.communicate(timeout=min(5.0, timeout))
-            except subprocess.TimeoutExpired:
-                process.kill()
-                stdout, stderr = process.communicate(timeout=2.0)
-            return {
-                "command": command,
-                "returncode": process.returncode,
-                "interrupted": True,
-                "duration_seconds": round(time.monotonic() - started, 3),
-                "stdout": stdout[:4000],
-                "stderr": stderr[:4000],
-            }
+            return self._execute_interrupt_start(operation, timeout=timeout)
         if operation.kind == "bounded_pressure":
-            spec = self._spec(operation)
-            # Keep the injected load intentionally small and time-bounded. Its purpose
-            # is to exercise resource telemetry and cleanup, not breach the 80% gate.
-            program = """import multiprocessing as m
-import os
-from pathlib import Path
-import time
-
-marker = Path('/tmp/bioetl-fault-pressure.pids')
-buf = bytearray(16 * 1024 * 1024)
-child = m.Process(target=time.sleep, args=(10,))
-child.start()
-marker.write_text(f"{os.getpid()} {child.pid}", encoding="ascii")
-try:
-    time.sleep(10)
-    child.join()
-    assert len(buf) == 16 * 1024 * 1024
-finally:
-    if child.is_alive():
-        child.terminate()
-        child.join(timeout=2)
-    marker.unlink(missing_ok=True)
-"""
-            return compose_command(
-                self.runtime_origin,
-                spec,
-                (
-                    "exec",
-                    "-T",
-                    str(operation.service),
-                    "python",
-                    "-c",
-                    program,
-                ),
-                timeout,
-            )
+            return self._execute_bounded_pressure(operation, timeout=timeout)
         if operation.kind == "clear_pressure":
             spec = self._spec(operation)
             program = """import os

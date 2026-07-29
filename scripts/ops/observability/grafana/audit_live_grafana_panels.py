@@ -38,6 +38,7 @@ LOKI_READINESS_POLL_INTERVAL_SECONDS = 0.25
 LOKI_READINESS_PROBE_TIMEOUT_SECONDS = 2.0
 _HEALTH_PROBE_PATHS: tuple[str, ...] = ("/health/live", "/health")
 _DASHBOARD_DIR = Path("grafana/dashboards")
+PROCESSED_RECORDS_PANEL_TITLE = "Processed Records"
 _PROCESSED_RECORDS_CONTRACT = "processed_records_table_v1"
 _UNRESOLVED_IDENTITY_MODES = frozenset(
     {
@@ -250,14 +251,14 @@ REVIEWED_PANEL_SPECS: tuple[PanelAuditSpec, ...] = (
     PanelAuditSpec(
         dashboard_uid="bioetl-control-plane-v1",
         panel_id=9403,
-        title="Processed Records",
+        title=PROCESSED_RECORDS_PANEL_TITLE,
         source_kind="http",
         semantic_kind="http_table",
     ),
     PanelAuditSpec(
         dashboard_uid="bioetl-overview-v2",
         panel_id=9301,
-        title="Processed Records",
+        title=PROCESSED_RECORDS_PANEL_TITLE,
         source_kind="http",
         semantic_kind="http_table",
     ),
@@ -299,7 +300,7 @@ REVIEWED_PANEL_SPECS: tuple[PanelAuditSpec, ...] = (
     PanelAuditSpec(
         dashboard_uid="bioetl-dq-v2",
         panel_id=9403,
-        title="Processed Records",
+        title=PROCESSED_RECORDS_PANEL_TITLE,
         source_kind="http",
         semantic_kind="http_table",
     ),
@@ -314,14 +315,14 @@ REVIEWED_PANEL_SPECS: tuple[PanelAuditSpec, ...] = (
     PanelAuditSpec(
         dashboard_uid="bioetl-runtime",
         panel_id=9403,
-        title="Processed Records",
+        title=PROCESSED_RECORDS_PANEL_TITLE,
         source_kind="http",
         semantic_kind="http_table",
     ),
     PanelAuditSpec(
         dashboard_uid="bioetl-provider-health-v2",
         panel_id=9403,
-        title="Processed Records",
+        title=PROCESSED_RECORDS_PANEL_TITLE,
         source_kind="http",
         semantic_kind="http_table",
     ),
@@ -1237,7 +1238,7 @@ def _classify_http_table_payload(
 ) -> tuple[str, str]:
     if not isinstance(payload, dict):
         return ("invalid_shape", "HTTP table payload is not a JSON object")
-    if title == "Processed Records" or "contract" in payload:
+    if title == PROCESSED_RECORDS_PANEL_TITLE or "contract" in payload:
         return _classify_processed_records_payload(payload)
     if title == "ID" or "resolved_via" in payload:
         return _classify_identity_payload(payload)

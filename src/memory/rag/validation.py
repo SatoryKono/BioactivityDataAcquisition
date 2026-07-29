@@ -44,6 +44,80 @@ __all__ = [
 ]
 
 
+def _resolve_eligible_sources(
+    *,
+    root: Path,
+    indexed_sources: set[str],
+    build_scope: str | None,
+    expected_source_paths: list[Path] | tuple[Path, ...] | None,
+    verify_sources: bool,
+) -> set[str]:
+    if expected_source_paths is not None:
+        return {
+            normalize_rag_source_path(path.as_posix(), allow_virtual_fragment=False)
+            for path in expected_source_paths
+        }
+    if build_scope == FULL_BUILD_SCOPE and verify_sources:
+        return current_eligible_sources(root)
+    return set(indexed_sources)
+
+
+def _mark_extra_source_chunks_stale(
+    *,
+    issues: list[RagValidationIssue],
+    build_scope: str | None,
+    indexed_sources: set[str],
+    eligible_sources: set[str],
+    chunk_sources: dict[int, str | None],
+    stale_indices: set[int],
+) -> None:
+    if build_scope != FULL_BUILD_SCOPE or indexed_sources == eligible_sources:
+        return
+    missing_from_catalog = eligible_sources - indexed_sources
+    extra_in_catalog = indexed_sources - eligible_sources
+    add_issue(
+        issues,
+        "source_set_mismatch",
+        "catalog.sources",
+        "full catalog source set differs from the current eligible set "
+        f"(missing={len(missing_from_catalog)}, extra={len(extra_in_catalog)})",
+    )
+    for index, source_path in chunk_sources.items():
+        if source_path in extra_in_catalog:
+            stale_indices.add(index)
+
+
+def _mark_stale_source_chunks(
+    *,
+    chunk_sources: dict[int, str | None],
+    stale_source_paths: set[str],
+    stale_indices: set[int],
+) -> None:
+    for index, source_path in chunk_sources.items():
+        if source_path in stale_source_paths:
+            stale_indices.add(index)
+
+
+def _resolve_source_identity(
+    *,
+    root: Path,
+    catalog: dict[str, Any],
+    issues: list[RagValidationIssue],
+    build_scope: str | None,
+    indexed_sources: set[str],
+    eligible_sources: set[str],
+    verify_sources: bool,
+) -> tuple[str | None, bool]:
+    if verify_sources:
+        identity_sources = (
+            eligible_sources if build_scope == FULL_BUILD_SCOPE else indexed_sources
+        )
+        return validate_source_identity(root, catalog, identity_sources, issues)
+    stored_hash = catalog.get("source_surface_sha256")
+    current_hash = stored_hash if isinstance(stored_hash, str) else None
+    return current_hash, False
+
+
 def validate_rag_manifest_payload(
     root: Path,
     catalog: dict[str, Any],
@@ -77,49 +151,35 @@ def validate_rag_manifest_payload(
     validate_counts(catalog, sources, chunks, chunks_by_source, issues)
 
     indexed_sources = set(sources)
-    if expected_source_paths is not None:
-        eligible_sources = {
-            normalize_rag_source_path(path.as_posix(), allow_virtual_fragment=False)
-            for path in expected_source_paths
-        }
-    elif build_scope == FULL_BUILD_SCOPE and verify_sources:
-        eligible_sources = current_eligible_sources(root)
-    else:
-        eligible_sources = set(indexed_sources)
-
-    if build_scope == FULL_BUILD_SCOPE and indexed_sources != eligible_sources:
-        missing_from_catalog = eligible_sources - indexed_sources
-        extra_in_catalog = indexed_sources - eligible_sources
-        add_issue(
-            issues,
-            "source_set_mismatch",
-            "catalog.sources",
-            "full catalog source set differs from the current eligible set "
-            f"(missing={len(missing_from_catalog)}, extra={len(extra_in_catalog)})",
-        )
-        for index, source_path in chunk_sources.items():
-            if source_path in extra_in_catalog:
-                stale_indices.add(index)
-
-    stale_source_paths = missing_paths | content_stale_paths
-    for index, source_path in chunk_sources.items():
-        if source_path in stale_source_paths:
-            stale_indices.add(index)
-
-    if verify_sources:
-        identity_sources = (
-            eligible_sources if build_scope == FULL_BUILD_SCOPE else indexed_sources
-        )
-        current_hash, identity_mismatch = validate_source_identity(
-            root,
-            catalog,
-            identity_sources,
-            issues,
-        )
-    else:
-        stored_hash = catalog.get("source_surface_sha256")
-        current_hash = stored_hash if isinstance(stored_hash, str) else None
-        identity_mismatch = False
+    eligible_sources = _resolve_eligible_sources(
+        root=root,
+        indexed_sources=indexed_sources,
+        build_scope=build_scope,
+        expected_source_paths=expected_source_paths,
+        verify_sources=verify_sources,
+    )
+    _mark_extra_source_chunks_stale(
+        issues=issues,
+        build_scope=build_scope,
+        indexed_sources=indexed_sources,
+        eligible_sources=eligible_sources,
+        chunk_sources=chunk_sources,
+        stale_indices=stale_indices,
+    )
+    _mark_stale_source_chunks(
+        chunk_sources=chunk_sources,
+        stale_source_paths=missing_paths | content_stale_paths,
+        stale_indices=stale_indices,
+    )
+    current_hash, identity_mismatch = _resolve_source_identity(
+        root=root,
+        catalog=catalog,
+        issues=issues,
+        build_scope=build_scope,
+        indexed_sources=indexed_sources,
+        eligible_sources=eligible_sources,
+        verify_sources=verify_sources,
+    )
     if identity_mismatch:
         stale_indices.update(range(len(chunks)))
 

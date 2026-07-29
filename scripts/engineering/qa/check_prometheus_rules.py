@@ -82,12 +82,9 @@ def _run(command: list[str]) -> int:
     return int(completed.returncode)
 
 
-def collect_rule_test_coverage(
-    *, rules_files: tuple[Path, ...], test_file: Path
-) -> dict[str, object]:
-    """Measure direct promtool fixture coverage for shipped alerts and records."""
-    import re
-
+def _collect_rule_definitions(
+    rules_files: tuple[Path, ...],
+) -> tuple[set[str], set[str], set[str]]:
     import yaml
 
     alert_definitions: set[str] = set()
@@ -99,36 +96,79 @@ def collect_rule_test_coverage(
             for rule in group.get("rules", []):
                 if rule.get("alert"):
                     alert_definitions.add(str(rule["alert"]))
-                if rule.get("record"):
-                    record_name = str(rule["record"])
-                    record_definitions.add(record_name)
-                    if rules_file == CONTROL_PLANE_RULES_FILE:
-                        control_plane_records.add(record_name)
+                record_name = rule.get("record")
+                if not record_name:
+                    continue
+                record_name = str(record_name)
+                record_definitions.add(record_name)
+                if rules_file == CONTROL_PLANE_RULES_FILE:
+                    control_plane_records.add(record_name)
+    return alert_definitions, record_definitions, control_plane_records
 
-    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
-    test_file = resolve_output_path(test_file, root=REPO_ROOT)
-    fixture = yaml.safe_load(test_file.read_text(encoding="utf-8"))
+def _collect_alert_fixture_coverage(
+    test_cases: list[object],
+) -> tuple[set[str], set[str], set[str]]:
     tested_alerts: set[str] = set()
     firing_alerts: set[str] = set()
     non_firing_alerts: set[str] = set()
-    directly_tested_records: set[str] = set()
-    for test_case in fixture.get("tests", []):
+    for test_case in test_cases:
+        if not isinstance(test_case, dict):
+            continue
         for assertion in test_case.get("alert_rule_test", []):
+            if not isinstance(assertion, dict):
+                continue
             alert_name = str(assertion.get("alertname", ""))
-            if alert_name:
-                tested_alerts.add(alert_name)
-                if assertion.get("exp_alerts"):
-                    firing_alerts.add(alert_name)
-                else:
-                    non_firing_alerts.add(alert_name)
+            if not alert_name:
+                continue
+            tested_alerts.add(alert_name)
+            if assertion.get("exp_alerts"):
+                firing_alerts.add(alert_name)
+            else:
+                non_firing_alerts.add(alert_name)
+    return tested_alerts, firing_alerts, non_firing_alerts
+
+
+def _collect_directly_tested_records(
+    test_cases: list[object],
+    record_definitions: set[str],
+) -> set[str]:
+    import re
+
+    directly_tested_records: set[str] = set()
+    for test_case in test_cases:
+        if not isinstance(test_case, dict):
+            continue
         for assertion in test_case.get("promql_expr_test", []):
-            if not assertion.get("exp_samples"):
+            if not isinstance(assertion, dict) or not assertion.get("exp_samples"):
                 continue
             expr = str(assertion.get("expr", ""))
             for record_name in record_definitions:
                 if re.search(rf"\b{re.escape(record_name)}\b", expr):
                     directly_tested_records.add(record_name)
+    return directly_tested_records
+
+
+def collect_rule_test_coverage(
+    *, rules_files: tuple[Path, ...], test_file: Path
+) -> dict[str, object]:
+    """Measure direct promtool fixture coverage for shipped alerts and records."""
+    import yaml
+
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    alert_definitions, record_definitions, control_plane_records = (
+        _collect_rule_definitions(rules_files)
+    )
+    test_file = resolve_output_path(test_file, root=REPO_ROOT)
+    fixture = yaml.safe_load(test_file.read_text(encoding="utf-8"))
+    test_cases = list(fixture.get("tests", []) or [])
+    tested_alerts, firing_alerts, non_firing_alerts = _collect_alert_fixture_coverage(
+        test_cases
+    )
+    directly_tested_records = _collect_directly_tested_records(
+        test_cases, record_definitions
+    )
 
     return {
         "alert_definitions": len(alert_definitions),

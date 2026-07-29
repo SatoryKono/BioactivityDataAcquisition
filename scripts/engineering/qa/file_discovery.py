@@ -36,6 +36,36 @@ def _should_prune(relative_path: str) -> bool:
     return any(relative_path.startswith(prefix) for prefix in _PRUNED_RELATIVE_PREFIXES)
 
 
+def _filter_walk_dirnames(
+    dirnames: list[str],
+    *,
+    relative_prefix: str,
+) -> list[str]:
+    return sorted(
+        dirname
+        for dirname in dirnames
+        if dirname not in _PRUNED_DIR_NAMES
+        and not _should_prune(f"{relative_prefix}{dirname}/")
+    )
+
+
+def _matching_filenames(
+    filenames: list[str],
+    *,
+    relative_prefix: str,
+    suffix: str,
+    filename_prefix: str,
+) -> list[str]:
+    matches: list[str] = []
+    for filename in sorted(filenames):
+        if filename_prefix and not filename.startswith(filename_prefix):
+            continue
+        if not filename.endswith(suffix):
+            continue
+        matches.append(f"{relative_prefix}{filename}")
+    return matches
+
+
 @cache
 def discover_files(
     root_str: str,
@@ -52,22 +82,17 @@ def discover_files(
         current_path = Path(current_root)
         relative_root = current_path.relative_to(root).as_posix()
         relative_prefix = "" if relative_root == "." else f"{relative_root}/"
-
-        dirnames[:] = sorted(
-            dirname
-            for dirname in dirnames
-            if dirname not in _PRUNED_DIR_NAMES
-            and not _should_prune(f"{relative_prefix}{dirname}/")
-        )
+        dirnames[:] = _filter_walk_dirnames(dirnames, relative_prefix=relative_prefix)
         if relative_root != "." and _should_prune(f"{relative_root}/"):
             dirnames[:] = []
             continue
-
-        for filename in sorted(filenames):
-            if filename_prefix and not filename.startswith(filename_prefix):
-                continue
-            if not filename.endswith(suffix):
-                continue
-            discovered.append(f"{relative_prefix}{filename}")
+        discovered.extend(
+            _matching_filenames(
+                filenames,
+                relative_prefix=relative_prefix,
+                suffix=suffix,
+                filename_prefix=filename_prefix,
+            )
+        )
 
     return tuple(discovered)

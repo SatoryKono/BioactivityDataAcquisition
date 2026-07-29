@@ -107,6 +107,34 @@ def _optional_text(value: object) -> str | None:
     return text or None
 
 
+def _coerce_evidence_refs(evidence_refs: object) -> tuple[str, ...]:
+    if evidence_refs is None:
+        return ()
+    if not isinstance(evidence_refs, list):
+        raise ValueError("Residual disposition evidence_refs must be a list")
+    return tuple(str(value).strip() for value in evidence_refs if str(value).strip())
+
+
+def _coerce_residual_disposition(
+    item: object,
+) -> HistoricalReplayResidualDisposition:
+    if not isinstance(item, dict):
+        raise ValueError("Residual disposition entries must be JSON objects")
+    manifest_id = str(item.get("manifest_id") or "").strip()
+    disposition = str(item.get("disposition") or "").strip()
+    rationale = str(item.get("rationale") or "").strip()
+    if not manifest_id or not disposition or not rationale:
+        raise ValueError(
+            "Residual disposition entries require manifest_id, disposition, and rationale"
+        )
+    return HistoricalReplayResidualDisposition(
+        manifest_id=manifest_id,
+        disposition=disposition,
+        rationale=rationale,
+        evidence_refs=_coerce_evidence_refs(item.get("evidence_refs")),
+    )
+
+
 def _load_residual_dispositions(
     dispositions_path: Path | None,
 ) -> tuple[HistoricalReplayResidualDisposition, ...]:
@@ -118,35 +146,7 @@ def _load_residual_dispositions(
     raw_dispositions = payload.get("dispositions")
     if not isinstance(raw_dispositions, list):
         raise ValueError("Residual disposition file requires a dispositions list")
-    dispositions: list[HistoricalReplayResidualDisposition] = []
-    for item in raw_dispositions:
-        if not isinstance(item, dict):
-            raise ValueError("Residual disposition entries must be JSON objects")
-        manifest_id = str(item.get("manifest_id") or "").strip()
-        disposition = str(item.get("disposition") or "").strip()
-        rationale = str(item.get("rationale") or "").strip()
-        if not manifest_id or not disposition or not rationale:
-            raise ValueError(
-                "Residual disposition entries require manifest_id, disposition, and rationale"
-            )
-        evidence_refs = item.get("evidence_refs")
-        if evidence_refs is None:
-            evidence_ref_values: tuple[str, ...] = ()
-        elif isinstance(evidence_refs, list):
-            evidence_ref_values = tuple(
-                str(value).strip() for value in evidence_refs if str(value).strip()
-            )
-        else:
-            raise ValueError("Residual disposition evidence_refs must be a list")
-        dispositions.append(
-            HistoricalReplayResidualDisposition(
-                manifest_id=manifest_id,
-                disposition=disposition,
-                rationale=rationale,
-                evidence_refs=evidence_ref_values,
-            )
-        )
-    return tuple(dispositions)
+    return tuple(_coerce_residual_disposition(item) for item in raw_dispositions)
 
 
 def _load_universe_external_records(

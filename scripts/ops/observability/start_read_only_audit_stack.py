@@ -165,16 +165,12 @@ def write_promtail_audit_sentinel(probe_log_root: Path, *, sentinel_id: str) -> 
     return marker
 
 
-def probe_promtail_audit_delivery(
+def _probe_promtail_ready(
     *,
-    marker: str,
-    sentinel_written_ns: int,
-    opener: Callable[..., Any] = urlopen,
-    wall_time_ns: Callable[[], int] = time.time_ns,
-    deadline: float | None = None,
-    monotonic: Callable[[], float] = time.monotonic,
-) -> PromtailAuditProbeResult:
-    """Require both Promtail readiness and observable Loki sentinel delivery."""
+    opener: Callable[..., Any],
+    deadline: float | None,
+    monotonic: Callable[[], float],
+) -> PromtailAuditProbeResult | None:
     try:
         readiness = _read_text_payload(
             PROMTAIL_READY_URL,
@@ -199,7 +195,18 @@ def probe_promtail_audit_delivery(
             PromtailAuditState.DOWN,
             f"Promtail readiness returned {readiness[:80]!r}",
         )
+    return None
 
+
+def _query_loki_sentinel_payload(
+    *,
+    marker: str,
+    sentinel_written_ns: int,
+    opener: Callable[..., Any],
+    wall_time_ns: Callable[[], int],
+    deadline: float | None,
+    monotonic: Callable[[], float],
+) -> tuple[dict[str, Any] | None, PromtailAuditProbeResult | None]:
     end_ns = max(wall_time_ns(), sentinel_written_ns)
     query_url = f"{LOKI_QUERY_RANGE_URL}?" + urlencode(
         {
@@ -219,15 +226,44 @@ def probe_promtail_audit_delivery(
             ),
         )
     except TimeoutError as exc:
-        return PromtailAuditProbeResult(
+        return None, PromtailAuditProbeResult(
             PromtailAuditState.TIMEOUT,
             f"Loki sentinel query timed out: {exc}",
         )
     except (OSError, UnicodeError, ValueError, json.JSONDecodeError) as exc:
-        return PromtailAuditProbeResult(
+        return None, PromtailAuditProbeResult(
             PromtailAuditState.DOWN,
             f"Loki sentinel query failed: {type(exc).__name__}: {exc}",
         )
+    return payload, None
+
+
+def probe_promtail_audit_delivery(
+    *,
+    marker: str,
+    sentinel_written_ns: int,
+    opener: Callable[..., Any] = urlopen,
+    wall_time_ns: Callable[[], int] = time.time_ns,
+    deadline: float | None = None,
+    monotonic: Callable[[], float] = time.monotonic,
+) -> PromtailAuditProbeResult:
+    """Require both Promtail readiness and observable Loki sentinel delivery."""
+    readiness_error = _probe_promtail_ready(
+        opener=opener, deadline=deadline, monotonic=monotonic
+    )
+    if readiness_error is not None:
+        return readiness_error
+    payload, query_error = _query_loki_sentinel_payload(
+        marker=marker,
+        sentinel_written_ns=sentinel_written_ns,
+        opener=opener,
+        wall_time_ns=wall_time_ns,
+        deadline=deadline,
+        monotonic=monotonic,
+    )
+    if query_error is not None:
+        return query_error
+    assert payload is not None
     data = payload.get("data")
     results = data.get("result") if isinstance(data, dict) else None
     if payload.get("status") != "success" or not isinstance(results, list):

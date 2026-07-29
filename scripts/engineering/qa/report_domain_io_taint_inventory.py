@@ -197,6 +197,68 @@ def _relative(path: Path) -> str:
     return path.relative_to(PROJECT_ROOT).as_posix()
 
 
+def _import_modules_from_node(node: ast.AST) -> list[str] | None:
+    if isinstance(node, ast.Import):
+        return [alias.name for alias in node.names]
+    if isinstance(node, ast.ImportFrom):
+        return [node.module or ""]
+    return None
+
+
+def _pandera_import_finding(
+    *,
+    relative_path: str,
+    line: int,
+    root_module: str,
+) -> tuple[TaintFinding, bool]:
+    """Return (finding, is_allowed_exception)."""
+    if relative_path.startswith(SCHEMA_BOUNDARY_PREFIXES):
+        return (
+            TaintFinding(
+                path=relative_path,
+                line=line,
+                symbol=_MODULE_SCOPE,
+                kind=f"import:{root_module}",
+                reason=(
+                    "Pandera/Pandas are allowed only inside machine-checkable "
+                    "Domain contract/schema boundary modules."
+                ),
+            ),
+            True,
+        )
+    return (
+        TaintFinding(
+            path=relative_path,
+            line=line,
+            symbol=_MODULE_SCOPE,
+            kind=f"import:{root_module}",
+            reason=(
+                "Pandera/Pandas imports outside domain contracts/schemas "
+                "would couple domain behavior to dataframe infrastructure."
+            ),
+        ),
+        False,
+    )
+
+
+def _forbidden_import_finding(
+    *,
+    relative_path: str,
+    line: int,
+    root_module: str,
+) -> TaintFinding | None:
+    reason = FORBIDDEN_IMPORT_PREFIXES.get(root_module)
+    if reason is None:
+        return None
+    return TaintFinding(
+        path=relative_path,
+        line=line,
+        symbol=_MODULE_SCOPE,
+        kind=f"import:{root_module}",
+        reason=reason,
+    )
+
+
 def _scan_imports(
     path: Path, tree: ast.AST
 ) -> tuple[list[TaintFinding], list[TaintFinding]]:
@@ -204,56 +266,29 @@ def _scan_imports(
     violations: list[TaintFinding] = []
     allowed_exceptions: list[TaintFinding] = []
     for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            modules = [alias.name for alias in node.names]
-        elif isinstance(node, ast.ImportFrom):
-            modules = [node.module or ""]
-        else:
+        modules = _import_modules_from_node(node)
+        if modules is None:
             continue
-
         for module in modules:
             root_module = module.split(".", maxsplit=1)[0]
             if root_module in PANDERA_IMPORT_PREFIXES:
-                if relative_path.startswith(SCHEMA_BOUNDARY_PREFIXES):
-                    allowed_exceptions.append(
-                        TaintFinding(
-                            path=relative_path,
-                            line=node.lineno,
-                            symbol=_MODULE_SCOPE,
-                            kind=f"import:{root_module}",
-                            reason=(
-                                "Pandera/Pandas are allowed only inside machine-checkable "
-                                "Domain contract/schema boundary modules."
-                            ),
-                        )
-                    )
+                finding, allowed = _pandera_import_finding(
+                    relative_path=relative_path,
+                    line=node.lineno,
+                    root_module=root_module,
+                )
+                if allowed:
+                    allowed_exceptions.append(finding)
                 else:
-                    violations.append(
-                        TaintFinding(
-                            path=relative_path,
-                            line=node.lineno,
-                            symbol=_MODULE_SCOPE,
-                            kind=f"import:{root_module}",
-                            reason=(
-                                "Pandera/Pandas imports outside domain contracts/schemas "
-                                "would couple domain behavior to dataframe infrastructure."
-                            ),
-                        )
-                    )
+                    violations.append(finding)
                 continue
-
-            for forbidden_prefix, reason in FORBIDDEN_IMPORT_PREFIXES.items():
-                if root_module == forbidden_prefix:
-                    violations.append(
-                        TaintFinding(
-                            path=relative_path,
-                            line=node.lineno,
-                            symbol=_MODULE_SCOPE,
-                            kind=f"import:{root_module}",
-                            reason=reason,
-                        )
-                    )
-                    break
+            forbidden = _forbidden_import_finding(
+                relative_path=relative_path,
+                line=node.lineno,
+                root_module=root_module,
+            )
+            if forbidden is not None:
+                violations.append(forbidden)
     return violations, allowed_exceptions
 
 

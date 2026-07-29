@@ -1658,68 +1658,95 @@ def _render_report(
     return "\n".join(report_lines)
 
 
+def _build_composite_unknown_typing_lookup(
+    review_registry: dict[str, Any],
+) -> dict[tuple[str, str], dict[str, str]]:
+    lookup: dict[tuple[str, str], dict[str, str]] = {}
+    entries = review_registry.get("composite_unknown_typing_reviews", [])
+    if not isinstance(entries, list):
+        return lookup
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+        pipelines = entry.get("pipelines", [])
+        fields = entry.get("fields", [])
+        if not isinstance(pipelines, list) or not isinstance(fields, list):
+            continue
+        metadata = {
+            "review_id": str(entry.get("id") or "<unknown>"),
+            "schema_authority": str(entry.get("schema_authority") or ""),
+            "owner": str(entry.get("owner") or ""),
+        }
+        for pipeline_name in pipelines:
+            if not isinstance(pipeline_name, str):
+                continue
+            for field_name in fields:
+                if isinstance(field_name, str):
+                    lookup[(pipeline_name, field_name)] = metadata
+    return lookup
+
+
+def _iter_composite_unknown_typing_cells(
+    row: dict[str, str],
+) -> list[tuple[str, str]]:
+    if row.get("Typing") != "COMPATIBLE":
+        return []
+    cells: list[tuple[str, str]] = []
+    for side in ("A", "B"):
+        pipeline_name = row.get(f"Pipeline {side}", "")
+        field_name = row.get(f"Field {side}", "")
+        field_type = str(row.get(f"Type {side}", "")).strip().lower()
+        if pipeline_name.startswith("composite_") and field_type == "unknown":
+            cells.append((pipeline_name, field_name))
+    return cells
+
+
+def _accumulate_composite_unknown_typing_review(
+    reviews: dict[str, dict[str, object]],
+    *,
+    pipeline_name: str,
+    field_name: str,
+    metadata: dict[str, str],
+) -> None:
+    review_id = metadata["review_id"]
+    review_entry = reviews.setdefault(
+        review_id,
+        {
+            "review_id": review_id,
+            "schema_authority": metadata["schema_authority"],
+            "owner": metadata["owner"],
+            "row_count": 0,
+            "fields": set(),
+        },
+    )
+    review_entry["row_count"] = int(review_entry["row_count"]) + 1
+    cast(set[str], review_entry["fields"]).add(f"{pipeline_name}.{field_name}")
+
+
 def _reviewed_composite_unknown_typing_summary(
     rows: list[dict[str, str]],
     *,
     review_registry: dict[str, Any],
 ) -> dict[str, object]:
-    lookup: dict[tuple[str, str], dict[str, str]] = {}
-    entries = review_registry.get("composite_unknown_typing_reviews", [])
-    if isinstance(entries, list):
-        for entry in entries:
-            if not isinstance(entry, dict):
-                continue
-            review_id = str(entry.get("id") or "<unknown>")
-            schema_authority = str(entry.get("schema_authority") or "")
-            owner = str(entry.get("owner") or "")
-            pipelines = entry.get("pipelines", [])
-            fields = entry.get("fields", [])
-            if not isinstance(pipelines, list) or not isinstance(fields, list):
-                continue
-            metadata = {
-                "review_id": review_id,
-                "schema_authority": schema_authority,
-                "owner": owner,
-            }
-            for pipeline_name in pipelines:
-                if not isinstance(pipeline_name, str):
-                    continue
-                for field_name in fields:
-                    if isinstance(field_name, str):
-                        lookup[(pipeline_name, field_name)] = metadata
-
+    lookup = _build_composite_unknown_typing_lookup(review_registry)
     reviews: dict[str, dict[str, object]] = {}
     uncovered: set[tuple[str, str]] = set()
     row_count = 0
     covered_row_count = 0
     for row in rows:
-        if row.get("Typing") != "COMPATIBLE":
-            continue
-        for side in ("A", "B"):
-            pipeline_name = row.get(f"Pipeline {side}", "")
-            field_name = row.get(f"Field {side}", "")
-            field_type = str(row.get(f"Type {side}", "")).strip().lower()
-            if not pipeline_name.startswith("composite_") or field_type != "unknown":
-                continue
+        for pipeline_name, field_name in _iter_composite_unknown_typing_cells(row):
             row_count += 1
             metadata = lookup.get((pipeline_name, field_name))
             if metadata is None:
                 uncovered.add((pipeline_name, field_name))
                 continue
             covered_row_count += 1
-            review_id = metadata["review_id"]
-            review_entry = reviews.setdefault(
-                review_id,
-                {
-                    "review_id": review_id,
-                    "schema_authority": metadata["schema_authority"],
-                    "owner": metadata["owner"],
-                    "row_count": 0,
-                    "fields": set(),
-                },
+            _accumulate_composite_unknown_typing_review(
+                reviews,
+                pipeline_name=pipeline_name,
+                field_name=field_name,
+                metadata=metadata,
             )
-            review_entry["row_count"] = int(review_entry["row_count"]) + 1
-            cast(set[str], review_entry["fields"]).add(f"{pipeline_name}.{field_name}")
 
     return {
         "row_count": row_count,

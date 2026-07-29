@@ -48,6 +48,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 COVERAGE_FILE_NAME = ".coverage"
+CLEANUP_REPOSITORY_TOOL = "scripts/ops/support/repo/cleanup_repository.py"
 COVERAGE_GLOB_PATTERN = ".coverage.*"
 COVERAGE_XML_NAME = "coverage.xml"
 
@@ -1484,7 +1485,7 @@ def build_cleanup_classification_report(
     """Build a deterministic machine-readable cleanup classification report."""
     return {
         "schema_version": 1,
-        "tool": "scripts/ops/support/repo/cleanup_repository.py",
+        "tool": CLEANUP_REPOSITORY_TOOL,
         "mode": mode,
         "repository_root": repo_root.as_posix(),
         "safety_contract": {
@@ -1546,7 +1547,7 @@ def build_root_review_evidence_report(
 ) -> dict[str, object]:
     return {
         "schema_version": 1,
-        "tool": "scripts/ops/support/repo/cleanup_repository.py",
+        "tool": CLEANUP_REPOSITORY_TOOL,
         "repository_root": repo_root.as_posix(),
         "summary": _summarize_root_review(
             mismatches=mismatches,
@@ -1597,7 +1598,7 @@ def build_reports_workspace_review_report(
 ) -> dict[str, object]:
     return {
         "schema_version": 1,
-        "tool": "scripts/ops/support/repo/cleanup_repository.py",
+        "tool": CLEANUP_REPOSITORY_TOOL,
         "repository_root": repo_root.as_posix(),
         "summary": _summarize_reports_workspace(reports_evidence),
         "reports_workspace_evidence": [
@@ -1963,6 +1964,30 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def _classification_mode(args: argparse.Namespace) -> str:
+    if args.apply:
+        return "apply"
+    if args.apply_reports_prune:
+        return "apply-reports-prune"
+    return "dry-run"
+
+
+def _log_root_and_reports_evidence(
+    *,
+    args: argparse.Namespace,
+    root_policy_mismatches: list[object],
+    review_evidence: list[object],
+    reports_evidence: object,
+) -> None:
+    detail_limit = max(args.detail_limit, 0)
+    if args.root:
+        _log_root_policy_mismatches(
+            root_policy_mismatches, detail_limit=detail_limit
+        )
+        _log_review_lane_evidence(review_evidence, detail_limit=detail_limit)
+    _log_reports_workspace_evidence(reports_evidence, detail_limit=detail_limit)
+
+
 def main() -> int:
     args = parse_args()
     repo_root = _discover_repo_root(args.path)
@@ -1990,26 +2015,13 @@ def main() -> int:
         collect_root_policy_mismatches(repo_root) if args.root else []
     )
     reports_evidence = collect_reports_workspace_evidence(repo_root)
-    if args.root:
-        _log_root_policy_mismatches(
-            root_policy_mismatches,
-            detail_limit=max(args.detail_limit, 0),
-        )
-        _log_review_lane_evidence(
-            review_evidence,
-            detail_limit=max(args.detail_limit, 0),
-        )
-    _log_reports_workspace_evidence(
-        reports_evidence,
-        detail_limit=max(args.detail_limit, 0),
+    _log_root_and_reports_evidence(
+        args=args,
+        root_policy_mismatches=root_policy_mismatches,
+        review_evidence=review_evidence,
+        reports_evidence=reports_evidence,
     )
     if args.report_json is not None:
-        if args.apply:
-            classification_mode = "apply"
-        elif args.apply_reports_prune:
-            classification_mode = "apply-reports-prune"
-        else:
-            classification_mode = "dry-run"
         report_path = write_cleanup_classification_report(
             repo_root,
             args.report_json,
@@ -2017,7 +2029,7 @@ def main() -> int:
                 repo_root,
                 candidates=candidates,
                 review_evidence=review_evidence,
-                mode=classification_mode,
+                mode=_classification_mode(args),
             ),
         )
         logger.info("Wrote cleanup classification report: %s", report_path)

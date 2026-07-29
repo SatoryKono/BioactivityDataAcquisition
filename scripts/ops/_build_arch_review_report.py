@@ -45,17 +45,9 @@ def parse_body(text: str, file_name: str) -> tuple[str, str, str]:
     return file_name, "?", " ".join(body.split())
 
 
-def main() -> int:
-    if len(sys.argv) < 3:
-        print(
-            "usage: build_arch_review_report.py <agent.ndjson> <out.md>",
-            file=sys.stderr,
-        )
-        return 2
-    from scripts.engineering.common.repo_paths import resolve_output_path
-
-    src = resolve_output_path(sys.argv[1])
-    out = resolve_output_path(sys.argv[2])
+def _ingest_agent_events(
+    src: Path,
+) -> tuple[list[dict[str, str]], list[tuple[str, int]]]:
     findings: list[dict[str, str]] = []
     completes: list[tuple[str, int]] = []
     current: str | None = None
@@ -70,7 +62,8 @@ def main() -> int:
         kind = obj.get("type")
         if kind == "review_context":
             current = obj.get("workingDirectory")
-        elif kind == "finding":
+            continue
+        if kind == "finding":
             file_name = str(obj.get("fileName") or "?")
             fpath, loc, body = parse_body(
                 str(obj.get("codegenInstructions") or ""), file_name
@@ -84,8 +77,33 @@ def main() -> int:
                     "body": body,
                 }
             )
-        elif kind == "complete":
+            continue
+        if kind == "complete":
             completes.append((layer_of(current), int(obj.get("findings") or 0)))
+    return findings, completes
+
+
+def _layer_status_cell(layer: str, by_layer: collections.Counter, complete_map: dict) -> str:
+    n = by_layer.get(layer, 0)
+    if layer in complete_map:
+        return "yes"
+    if n:
+        return "partial"
+    return "not run / incomplete"
+
+
+def main() -> int:
+    if len(sys.argv) < 3:
+        print(
+            "usage: build_arch_review_report.py <agent.ndjson> <out.md>",
+            file=sys.stderr,
+        )
+        return 2
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
+    src = resolve_output_path(sys.argv[1])
+    out = resolve_output_path(sys.argv[2])
+    findings, completes = _ingest_agent_events(src)
 
     by_sev = collections.Counter(f["severity"] for f in findings)
     by_layer = collections.Counter(f["layer"] for f in findings)
@@ -118,12 +136,7 @@ def main() -> int:
         "docs/02-architecture",
     ):
         n = by_layer.get(layer, 0)
-        if layer in complete_map:
-            done = "yes"
-        elif n:
-            done = "partial"
-        else:
-            done = "not run / incomplete"
+        done = _layer_status_cell(layer, by_layer, complete_map)
         lines.append(f"| `{layer}` | {n} | {done} |")
     lines.append("")
     lines.append("## Сводка")

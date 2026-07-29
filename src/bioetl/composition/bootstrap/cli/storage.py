@@ -203,23 +203,24 @@ def _create_table_collector(
     if registry is None:
         register_all_pipelines(registry=effective_registry)
 
+    def _pipeline_table_names(pipeline_name: str) -> tuple[str | None, str | None]:
+        pipeline_cfg = load_pipeline_config(pipeline_name)
+        silver_table = (
+            pipeline_cfg.silver_table
+            or f"{pipeline_cfg.provider}.{pipeline_cfg.entity_type}"
+        )
+        gold_table = (
+            pipeline_cfg.gold_table
+            or f"{pipeline_cfg.provider}.{pipeline_cfg.entity_type}"
+        )
+        return silver_table or None, gold_table or None
+
     def collect_tables(layer: str) -> list[tuple[str, str]]:
         """Collect `(table_name, layer)` pairs for requested layer scope."""
-        pipelines = effective_registry.list_pipelines()
-
         silver_tables: set[str] = set()
         gold_tables: set[str] = set()
-
-        for pipeline_name in pipelines:
-            pipeline_cfg = load_pipeline_config(pipeline_name)
-            silver_table = (
-                pipeline_cfg.silver_table
-                or f"{pipeline_cfg.provider}.{pipeline_cfg.entity_type}"
-            )
-            gold_table = (
-                pipeline_cfg.gold_table
-                or f"{pipeline_cfg.provider}.{pipeline_cfg.entity_type}"
-            )
+        for pipeline_name in effective_registry.list_pipelines():
+            silver_table, gold_table = _pipeline_table_names(pipeline_name)
             if silver_table:
                 silver_tables.add(silver_table)
             if gold_table:
@@ -230,7 +231,6 @@ def _create_table_collector(
             tables.extend((t, "silver") for t in sorted(silver_tables))
         if layer in ("all", "gold"):
             tables.extend((t, "gold") for t in sorted(gold_tables))
-
         return tables
 
     return collect_tables

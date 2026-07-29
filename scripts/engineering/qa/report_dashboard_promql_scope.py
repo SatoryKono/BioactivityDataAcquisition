@@ -103,30 +103,30 @@ def main(argv: list[str] | None = None) -> int:
         writer.writeheader()
         writer.writerows(rows)
 
-    if args.check:
-        deprecated_hits = [
-            row for row in rows if row["deprecated_metric_token"] == "True"
-        ]
-        run_id_hits = [row for row in rows if row["uses_run_id_in_promql"] == "True"]
-        if deprecated_hits or run_id_hits:
-            if deprecated_hits:
-                print(
-                    "Deprecated metric tokens found in dashboard PromQL:",
-                    file=sys.stderr,
-                )
-                for row in deprecated_hits[:10]:
-                    print(
-                        f"  {row['dashboard']} :: {row['panel_title']}", file=sys.stderr
-                    )
-            if run_id_hits:
-                print("run_id used in PromQL (forbidden):", file=sys.stderr)
-                for row in run_id_hits[:10]:
-                    print(
-                        f"  {row['dashboard']} :: {row['panel_title']}", file=sys.stderr
-                    )
-            return 1
+    if args.check and not _check_promql_scope_rows(rows):
+        return 1
     print(f"Wrote {len(rows)} rows to {args.output}")
     return 0
+
+
+def _print_hit_sample(label: str, hits: list[dict[str, str]]) -> None:
+    print(label, file=sys.stderr)
+    for row in hits[:10]:
+        print(f"  {row['dashboard']} :: {row['panel_title']}", file=sys.stderr)
+
+
+def _check_promql_scope_rows(rows: list[dict[str, str]]) -> bool:
+    deprecated_hits = [row for row in rows if row["deprecated_metric_token"] == "True"]
+    run_id_hits = [row for row in rows if row["uses_run_id_in_promql"] == "True"]
+    if not deprecated_hits and not run_id_hits:
+        return True
+    if deprecated_hits:
+        _print_hit_sample(
+            "Deprecated metric tokens found in dashboard PromQL:", deprecated_hits
+        )
+    if run_id_hits:
+        _print_hit_sample("run_id used in PromQL (forbidden):", run_id_hits)
+    return False
 
 
 if __name__ == "__main__":

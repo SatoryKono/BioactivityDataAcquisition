@@ -97,6 +97,31 @@ def _count_nav_targets(payload: dict[str, Any]) -> int:
     return 0
 
 
+def _is_status_panel_title(title: str) -> bool:
+    lowered = title.lower()
+    return lowered == "status" or "status" in lowered
+
+
+def _score_panel_exprs(
+    exprs: list[str],
+    *,
+    title: str,
+    range_refs: int,
+    max_expr: int,
+    max_expr_title: str,
+    status_exprs: dict[str, str],
+) -> tuple[int, int, str]:
+    for expr in exprs:
+        if _expr_has_range_ref(expr):
+            range_refs += 1
+        if len(expr) > max_expr:
+            max_expr = len(expr)
+            max_expr_title = title
+        if _is_status_panel_title(title):
+            status_exprs[title] = expr
+    return range_refs, max_expr, max_expr_title
+
+
 def _accumulate_first_screen_metrics(
     first: list[dict[str, Any]],
 ) -> tuple[int, int, int, int, str, int]:
@@ -112,14 +137,14 @@ def _accumulate_first_screen_metrics(
         exprs = _panel_exprs(panel)
         promql += len(exprs)
         title = str(panel.get("title") or "")
-        for expr in exprs:
-            if _expr_has_range_ref(expr):
-                range_refs += 1
-            if len(expr) > max_expr:
-                max_expr = len(expr)
-                max_expr_title = title
-            if title.lower() == "status" or "status" in title.lower():
-                status_exprs[title] = expr
+        range_refs, max_expr, max_expr_title = _score_panel_exprs(
+            exprs,
+            title=title,
+            range_refs=range_refs,
+            max_expr=max_expr,
+            max_expr_title=max_expr_title,
+            status_exprs=status_exprs,
+        )
     return (
         promql,
         range_refs,

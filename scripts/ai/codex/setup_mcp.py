@@ -23,6 +23,7 @@ if _REPO_ROOT_STR not in sys.path:
     sys.path.insert(0, _REPO_ROOT_STR)
 MANAGED_BLOCK_BEGIN = "# === BEGIN MANAGED MCP SERVERS ==="
 MANAGED_BLOCK_END = "# === END MANAGED MCP SERVERS ==="
+MCP_JSON_FILENAME = "mcp.json"
 CACHE_DIR_NAME = ".cache"
 CODEX_RUNTIME_CACHE_DIR_NAME = "bioetl-mcp"
 REF_API_KEY_ENV_VAR = "REF_TOOL_API_KEY"
@@ -701,10 +702,10 @@ def _write_configs(
 
     mcp_path = output_root / ".mcp.json"
     scripts_ai_mcp_path = output_root / "scripts" / "ai" / ".mcp.json"
-    vscode_path = output_root / ".vscode" / "mcp.json"
-    cursor_path = output_root / ".cursor" / "mcp.json"
-    qodo_path = output_root / ".qodo" / "mcp.json"
-    zed_path = output_root / ".zed" / "mcp.json"
+    vscode_path = output_root / ".vscode" / MCP_JSON_FILENAME
+    cursor_path = output_root / ".cursor" / MCP_JSON_FILENAME
+    qodo_path = output_root / ".qodo" / MCP_JSON_FILENAME
+    zed_path = output_root / ".zed" / MCP_JSON_FILENAME
     codex_settings_path: Path | None = None
     devin_config_path: Path | None = None
     if not qodo_only:
@@ -1023,9 +1024,24 @@ def main(argv: Sequence[str] | None = None) -> int:
         ),
     )
     args = parser.parse_args(list(argv) if argv is not None else None)
-
+    _apply_setup_mcp_flag_shortcuts(args)
     output_root = args.root.absolute()
     workspace_root = args.workspace_root.absolute()
+    written_paths = _write_configs(
+        output_root,
+        workspace_root,
+        qodo_only=args.qodo_only,
+        profile=args.profile,
+        transport_mode=args.transport_mode,
+    )
+    _print_written_mcp_paths(written_paths, qodo_only=args.qodo_only)
+    _write_optional_side_configs(args, output_root, workspace_root)
+    if not args.skip_codex and not args.skip_codex_validation:
+        _run_codex_validation(workspace_root)
+    return 0
+
+
+def _apply_setup_mcp_flag_shortcuts(args: argparse.Namespace) -> None:
     if args.qodo_only:
         args.skip_codex = True
         args.skip_codex_config = True
@@ -1033,6 +1049,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.skip_codex:
         args.skip_codex_config = True
 
+
+def _print_written_mcp_paths(
+    written_paths: tuple[Path | None, ...], *, qodo_only: bool
+) -> None:
     (
         mcp_path,
         vscode_path,
@@ -1041,26 +1061,25 @@ def main(argv: Sequence[str] | None = None) -> int:
         zed_path,
         codex_settings_path,
         devin_config_path,
-    ) = _write_configs(
-        output_root,
-        workspace_root,
-        qodo_only=args.qodo_only,
-        profile=args.profile,
-        transport_mode=args.transport_mode,
+    ) = written_paths
+    optional_paths = (
+        mcp_path,
+        vscode_path,
+        cursor_path,
+        zed_path,
+        codex_settings_path,
+        devin_config_path,
     )
-    if mcp_path is not None and not args.qodo_only:
-        print(f"Wrote {mcp_path}")
-    if vscode_path is not None and not args.qodo_only:
-        print(f"Wrote {vscode_path}")
-    if cursor_path is not None and not args.qodo_only:
-        print(f"Wrote {cursor_path}")
+    if not qodo_only:
+        for path in optional_paths:
+            if path is not None:
+                print(f"Wrote {path}")
     print(f"Wrote {qodo_path}")
-    if zed_path is not None and not args.qodo_only:
-        print(f"Wrote {zed_path}")
-    if codex_settings_path is not None and not args.qodo_only:
-        print(f"Wrote {codex_settings_path}")
-    if devin_config_path is not None and not args.qodo_only:
-        print(f"Wrote {devin_config_path}")
+
+
+def _write_optional_side_configs(
+    args: argparse.Namespace, output_root: Path, workspace_root: Path
+) -> None:
     if not args.skip_codex_config:
         codex_config_path = _write_codex_config(
             workspace_root,
@@ -1076,11 +1095,6 @@ def main(argv: Sequence[str] | None = None) -> int:
             transport_mode=args.transport_mode,
         )
         print(f"Wrote {gemini_settings_path}")
-
-    if not args.skip_codex and not args.skip_codex_validation:
-        _run_codex_validation(workspace_root)
-
-    return 0
 
 
 if __name__ == "__main__":

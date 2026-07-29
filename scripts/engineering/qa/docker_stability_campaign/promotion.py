@@ -33,6 +33,212 @@ from .stage_support import (
 _MAX_ENGINE_RECOVERY_TRIALS = 100
 
 
+def _setup_trial_baselines(
+    *,
+    state: dict[str, Any],
+    state_path: Path,
+    evidence_dir: Path,
+    runtime_origin: Path,
+    contract: Path,
+    bundle: Sequence[Any],
+    trial_dir: Path,
+    number: int,
+) -> tuple[dict[str, Path], dict[str, dict[str, str]], list[dict[str, Any]]] | None:
+    baselines: dict[str, Path] = {}
+    pinned_ids: dict[str, dict[str, str]] = {}
+    setup: list[dict[str, Any]] = []
+    for spec in bundle:
+        probe = trial_dir / f"probe-baseline-{spec.stack}.json"
+        result = probe_command(runtime_origin, spec, probe, 75.0, contract=contract)
+        setup.append({"stack": spec.stack, "result": result})
+        if result["returncode"] != 0:
+            state["last_failure"] = f"recovery-baseline-{number:03d}-{spec.stack}"
+            index_and_save(state, state_path, evidence_dir)
+            return None
+        baseline = trial_dir / f"baseline-{spec.stack}.json"
+        try:
+            pinned_ids[spec.stack] = clean_baseline(probe, baseline)
+        except ValueError:
+            state["last_failure"] = f"recovery-restart-baseline-{number:03d}"
+            index_and_save(state, state_path, evidence_dir)
+            return None
+        baselines[spec.stack] = baseline
+    return baselines, pinned_ids, setup
+
+
+def _execute_recovery_steps(
+    *,
+    state: dict[str, Any],
+    runtime_origin: Path,
+    contract: Path,
+    bundle: Sequence[Any],
+    trial_dir: Path,
+    baselines: dict[str, Path],
+    pinned_ids: dict[str, dict[str, str]],
+    deadline: float,
+) -> tuple[bool, list[dict[str, Any]], dict[str, Any], dict[str, Any]]:
+    steps: list[dict[str, Any]] = []
+    interruption = desktop_engine_restart_command(
+        runtime_origin,
+        remaining_seconds(deadline, reserve=1.0),
+    )
+    steps.append({"action": "desktop-restart", "result": interruption})
+    clean = interruption["returncode"] == 0
+    try:
+        for spec in bundle:
+            result = manager_step(
+                runtime_origin,
+                contract,
+                spec,
+                "recover",
+                trial_dir / f"manager-recover-{spec.stack}",
+                remaining_seconds(deadline, reserve=1.0),
+            )
+            steps.append({"stack": spec.stack, "action": "recover", "result": result})
+            clean = clean and result["returncode"] == 0
+        for spec in bundle:
+            probe = trial_dir / f"probe-recovery-{spec.stack}.json"
+            result = probe_command(
+                runtime_origin,
+                spec,
+                probe,
+                remaining_seconds(deadline, reserve=1.0),
+                contract=contract,
+                baseline=baselines[spec.stack],
+            )
+            steps.append({"stack": spec.stack, "action": "probe", "result": result})
+            clean = clean and result["returncode"] == 0
+            if probe.exists():
+                record_probe(state, probe)
+                clean = clean and probe_services(probe) == pinned_ids[spec.stack]
+        after = bundle_volume_ids(
+            runtime_origin,
+            bundle,
+            timeout=min(20.0, remaining_seconds(deadline, reserve=0.2)),
+        )
+        capacity = observe_docker_vm_reserve(
+            state,
+            runtime_origin,
+            timeout=min(15.0, remaining_seconds(deadline, reserve=0.1)),
+        )
+        clean = clean and capacity["returncode"] == 0
+    except (RuntimeError, TimeoutError) as exc:
+        after = {}
+        capacity = {"returncode": 1, "error": type(exc).__name__}
+        steps.append({"action": "deadline", "error": type(exc).__name__})
+        clean = False
+    return clean, steps, after, capacity
+
+
+def _post_trial_restore(
+    *,
+    state: dict[str, Any],
+    runtime_origin: Path,
+    contract: Path,
+    bundle: Sequence[Any],
+    trial_dir: Path,
+    baselines: dict[str, Path],
+    before: dict[str, Any],
+    after: dict[str, Any],
+) -> tuple[bool, list[dict[str, Any]], dict[str, Any]]:
+    post_trial_restore: list[dict[str, Any]] = []
+    desktop_diagnostics = desktop_recovery_diagnostic_bundle(
+        runtime_origin,
+        trial_dir / "docker-desktop-recovery.json",
+        180.0,
+    )
+    post_trial_restore.append(
+        {
+            "action": "desktop-recovery-diagnostics",
+            "result": desktop_diagnostics,
+        }
+    )
+    resolved = desktop_diagnostics["returncode"] == 0 and bool(
+        desktop_diagnostics.get("diagnostic_bundle_present")
+    )
+    for spec in bundle:
+        repair = manager_step(
+            runtime_origin,
+            contract,
+            spec,
+            "recover",
+            trial_dir / f"post-trial-recover-{spec.stack}",
+            180.0,
+        )
+        post_trial_restore.append(
+            {"stack": spec.stack, "action": "recover", "result": repair}
+        )
+        resolved = resolved and repair["returncode"] == 0
+        verification = trial_dir / f"post-trial-probe-{spec.stack}.json"
+        verified = probe_command(
+            runtime_origin,
+            spec,
+            verification,
+            75.0,
+            contract=contract,
+            baseline=baselines[spec.stack],
+        )
+        post_trial_restore.append(
+            {"stack": spec.stack, "action": "probe", "result": verified}
+        )
+        resolved = resolved and verified["returncode"] == 0
+        if verification.exists():
+            record_probe(state, verification)
+    try:
+        after = bundle_volume_ids(runtime_origin, bundle)
+    except RuntimeError:
+        after = {}
+        resolved = False
+    resolved = resolved and before == after
+    return resolved, post_trial_restore, after
+
+
+def _persist_trial_outcome(
+    *,
+    state: dict[str, Any],
+    state_path: Path,
+    evidence_dir: Path,
+    trial_dir: Path,
+    number: int,
+    clean: bool,
+    incident_id: str | None,
+    duration: float,
+    setup: list[dict[str, Any]],
+    steps: list[dict[str, Any]],
+    post_trial_restore: list[dict[str, Any]],
+    resolved: bool,
+    capacity: dict[str, Any],
+    before: dict[str, Any],
+    after: dict[str, Any],
+) -> None:
+    if before != after:
+        state["volume_loss"] = True
+    atomic_json(
+        trial_dir / "trial.json",
+        {
+            "schema_version": "bioetl-docker-engine-recovery-v2",
+            "trial": number,
+            "success": clean,
+            "incident_id": incident_id,
+            "duration_seconds": round(duration, 3),
+            "setup": setup,
+            "steps": steps,
+            "post_trial_restore": post_trial_restore,
+            "incident_resolved": resolved,
+            "capacity": capacity,
+            "volume_ids_before": before,
+            "volume_ids_after": after,
+        },
+        replace=False,
+    )
+    state["engine_recovery_trials"] = number
+    state["engine_recovery_successes"] = int(state["engine_recovery_successes"]) + int(
+        clean
+    )
+    state["last_failure"] = None if resolved else incident_id
+    index_and_save(state, state_path, evidence_dir)
+
+
 def run_recovery_trials(
     state: dict[str, Any],
     state_path: Path,
@@ -49,79 +255,31 @@ def run_recovery_trials(
         number = int(state["engine_recovery_trials"]) + 1
         trial_dir = evidence_dir / "recovery" / f"trial-{number:03d}"
         before = bundle_volume_ids(runtime_origin, bundle)
-        baselines: dict[str, Path] = {}
-        pinned_ids: dict[str, dict[str, str]] = {}
-        setup: list[dict[str, Any]] = []
-        for spec in bundle:
-            probe = trial_dir / f"probe-baseline-{spec.stack}.json"
-            result = probe_command(runtime_origin, spec, probe, 75.0, contract=contract)
-            setup.append({"stack": spec.stack, "result": result})
-            if result["returncode"] != 0:
-                state["last_failure"] = f"recovery-baseline-{number:03d}-{spec.stack}"
-                index_and_save(state, state_path, evidence_dir)
-                return False
-            baseline = trial_dir / f"baseline-{spec.stack}.json"
-            try:
-                pinned_ids[spec.stack] = clean_baseline(probe, baseline)
-            except ValueError:
-                state["last_failure"] = f"recovery-restart-baseline-{number:03d}"
-                index_and_save(state, state_path, evidence_dir)
-                return False
-            baselines[spec.stack] = baseline
+        setup_result = _setup_trial_baselines(
+            state=state,
+            state_path=state_path,
+            evidence_dir=evidence_dir,
+            runtime_origin=runtime_origin,
+            contract=contract,
+            bundle=bundle,
+            trial_dir=trial_dir,
+            number=number,
+        )
+        if setup_result is None:
+            return False
+        baselines, pinned_ids, setup = setup_result
         started = time.monotonic()
         deadline = started + 180.0
-        steps: list[dict[str, Any]] = []
-        interruption = desktop_engine_restart_command(
-            runtime_origin,
-            remaining_seconds(deadline, reserve=1.0),
+        clean, steps, after, capacity = _execute_recovery_steps(
+            state=state,
+            runtime_origin=runtime_origin,
+            contract=contract,
+            bundle=bundle,
+            trial_dir=trial_dir,
+            baselines=baselines,
+            pinned_ids=pinned_ids,
+            deadline=deadline,
         )
-        steps.append({"action": "desktop-restart", "result": interruption})
-        clean = interruption["returncode"] == 0
-        try:
-            for spec in bundle:
-                result = manager_step(
-                    runtime_origin,
-                    contract,
-                    spec,
-                    "recover",
-                    trial_dir / f"manager-recover-{spec.stack}",
-                    remaining_seconds(deadline, reserve=1.0),
-                )
-                steps.append(
-                    {"stack": spec.stack, "action": "recover", "result": result}
-                )
-                clean = clean and result["returncode"] == 0
-            for spec in bundle:
-                probe = trial_dir / f"probe-recovery-{spec.stack}.json"
-                result = probe_command(
-                    runtime_origin,
-                    spec,
-                    probe,
-                    remaining_seconds(deadline, reserve=1.0),
-                    contract=contract,
-                    baseline=baselines[spec.stack],
-                )
-                steps.append({"stack": spec.stack, "action": "probe", "result": result})
-                clean = clean and result["returncode"] == 0
-                if probe.exists():
-                    record_probe(state, probe)
-                    clean = clean and probe_services(probe) == pinned_ids[spec.stack]
-            after = bundle_volume_ids(
-                runtime_origin,
-                bundle,
-                timeout=min(20.0, remaining_seconds(deadline, reserve=0.2)),
-            )
-            capacity = observe_docker_vm_reserve(
-                state,
-                runtime_origin,
-                timeout=min(15.0, remaining_seconds(deadline, reserve=0.1)),
-            )
-            clean = clean and capacity["returncode"] == 0
-        except (RuntimeError, TimeoutError) as exc:
-            after = {}
-            capacity = {"returncode": 1, "error": type(exc).__name__}
-            steps.append({"action": "deadline", "error": type(exc).__name__})
-            clean = False
         duration = time.monotonic() - started
         clean = clean and duration <= 180.0 and before == after
         incident_id = None if clean else f"engine-recovery-{number:03d}"
@@ -129,80 +287,33 @@ def run_recovery_trials(
         resolved = clean
         if incident_id:
             state.setdefault("incident_ids", []).append(incident_id)
-            desktop_diagnostics = desktop_recovery_diagnostic_bundle(
-                runtime_origin,
-                trial_dir / "docker-desktop-recovery.json",
-                180.0,
+            resolved, post_trial_restore, after = _post_trial_restore(
+                state=state,
+                runtime_origin=runtime_origin,
+                contract=contract,
+                bundle=bundle,
+                trial_dir=trial_dir,
+                baselines=baselines,
+                before=before,
+                after=after,
             )
-            post_trial_restore.append(
-                {
-                    "action": "desktop-recovery-diagnostics",
-                    "result": desktop_diagnostics,
-                }
-            )
-            resolved = desktop_diagnostics["returncode"] == 0 and bool(
-                desktop_diagnostics.get("diagnostic_bundle_present")
-            )
-            for spec in bundle:
-                repair = manager_step(
-                    runtime_origin,
-                    contract,
-                    spec,
-                    "recover",
-                    trial_dir / f"post-trial-recover-{spec.stack}",
-                    180.0,
-                )
-                post_trial_restore.append(
-                    {"stack": spec.stack, "action": "recover", "result": repair}
-                )
-                resolved = resolved and repair["returncode"] == 0
-                verification = trial_dir / f"post-trial-probe-{spec.stack}.json"
-                verified = probe_command(
-                    runtime_origin,
-                    spec,
-                    verification,
-                    75.0,
-                    contract=contract,
-                    baseline=baselines[spec.stack],
-                )
-                post_trial_restore.append(
-                    {"stack": spec.stack, "action": "probe", "result": verified}
-                )
-                resolved = resolved and verified["returncode"] == 0
-                if verification.exists():
-                    record_probe(state, verification)
-            try:
-                after = bundle_volume_ids(runtime_origin, bundle)
-            except RuntimeError:
-                after = {}
-                resolved = False
-            resolved = resolved and before == after
-        if before != after:
-            state["volume_loss"] = True
-        atomic_json(
-            trial_dir / "trial.json",
-            {
-                "schema_version": "bioetl-docker-engine-recovery-v2",
-                "trial": number,
-                "success": clean,
-                "incident_id": incident_id,
-                "duration_seconds": round(duration, 3),
-                "setup": setup,
-                "steps": steps,
-                "post_trial_restore": post_trial_restore,
-                "incident_resolved": resolved,
-                "capacity": capacity,
-                "volume_ids_before": before,
-                "volume_ids_after": after,
-            },
-            replace=False,
+        _persist_trial_outcome(
+            state=state,
+            state_path=state_path,
+            evidence_dir=evidence_dir,
+            trial_dir=trial_dir,
+            number=number,
+            clean=clean,
+            incident_id=incident_id,
+            duration=duration,
+            setup=setup,
+            steps=steps,
+            post_trial_restore=post_trial_restore,
+            resolved=resolved,
+            capacity=capacity,
+            before=before,
+            after=after,
         )
-        state["engine_recovery_trials"] = number
-        state["engine_recovery_successes"] = int(
-            state["engine_recovery_successes"]
-        ) + int(clean)
-        state["last_failure"] = None if resolved else incident_id
-        index_and_save(state, state_path, evidence_dir)
         if not resolved:
             return False
     return True

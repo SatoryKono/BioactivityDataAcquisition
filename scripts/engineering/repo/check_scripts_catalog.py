@@ -334,6 +334,41 @@ def _check_stale_registry_entries(
             violations.append(f"stale lifecycle entry not found in manifest: {path}")
 
 
+def _recompute_script_status_counts(
+    scripts: list[object], *, manifest_rel: str, violations: list[str]
+) -> Counter[str]:
+    recomputed_status_counts: Counter[str] = Counter()
+    for index, item in enumerate(scripts):
+        if not isinstance(item, dict):
+            violations.append(
+                f"manifest script row malformed at index {index}: {manifest_rel}"
+            )
+            continue
+        status = item.get("status")
+        if not isinstance(status, str) or not status.strip():
+            violations.append(
+                f"manifest script status missing or malformed at index {index}: {manifest_rel}"
+            )
+            continue
+        recomputed_status_counts[status] += 1
+    return recomputed_status_counts
+
+
+def _normalized_summary_status_counts(
+    status_counts: dict[str, object], *, manifest_rel: str, violations: list[str]
+) -> dict[str, int] | None:
+    normalized_summary_counts: dict[str, int] = {}
+    for key, value in status_counts.items():
+        if isinstance(key, str) and isinstance(value, int):
+            normalized_summary_counts[key] = value
+            continue
+        violations.append(
+            f"manifest summary status_counts entry malformed: {manifest_rel}"
+        )
+        return None
+    return normalized_summary_counts
+
+
 def _check_active_script_count_budget(
     *,
     lifecycle: dict[str, object],
@@ -358,34 +393,17 @@ def _check_active_script_count_budget(
             f"({summary_total} != {len(scripts)})"
         )
 
-    recomputed_status_counts: Counter[str] = Counter()
-    for index, item in enumerate(scripts):
-        if not isinstance(item, dict):
-            violations.append(
-                f"manifest script row malformed at index {index}: {manifest_rel}"
-            )
-            continue
-        status = item.get("status")
-        if not isinstance(status, str) or not status.strip():
-            violations.append(
-                f"manifest script status missing or malformed at index {index}: {manifest_rel}"
-            )
-            continue
-        recomputed_status_counts[status] += 1
-
-    status_counts = _as_dict(summary.get("status_counts"))
-    normalized_summary_counts: dict[str, int] = {}
-    for key, value in status_counts.items():
-        if isinstance(key, str) and isinstance(value, int):
-            normalized_summary_counts[key] = value
-        else:
-            violations.append(
-                f"manifest summary status_counts entry malformed: {manifest_rel}"
-            )
-            return
-
-    expected_status_counts = dict(sorted(recomputed_status_counts.items()))
-    if normalized_summary_counts != expected_status_counts:
+    recomputed_status_counts = _recompute_script_status_counts(
+        scripts, manifest_rel=manifest_rel, violations=violations
+    )
+    normalized_summary_counts = _normalized_summary_status_counts(
+        _as_dict(summary.get("status_counts")),
+        manifest_rel=manifest_rel,
+        violations=violations,
+    )
+    if normalized_summary_counts is None:
+        return
+    if normalized_summary_counts != dict(sorted(recomputed_status_counts.items())):
         violations.append(
             "manifest summary status_counts does not match scripts list: "
             f"{manifest_rel}"
@@ -399,7 +417,6 @@ def _check_active_script_count_budget(
             "lifecycle.active_script_count_max must be a non-negative int"
         )
         return
-
     active_count = recomputed_status_counts.get("active", 0)
     if active_count > budget:
         violations.append(

@@ -62,30 +62,29 @@ def force_remove(names: list[str]) -> None:
         run(["docker", "rm", "-f", name], timeout=90)
 
 
+def _container_ready_state(name: str) -> bool:
+    completed = run(
+        ["docker", "inspect", name, "--format", "{{json .State}}"],
+        timeout=60,
+    )
+    if completed.returncode != 0:
+        print(f"{name}: missing", flush=True)
+        return False
+    state = json.loads(completed.stdout)
+    status = state.get("Status")
+    health = (state.get("Health") or {}).get("Status")
+    print(f"{name}: status={status} health={health}", flush=True)
+    ok = status == "running" and not state.get("OOMKilled")
+    if health is not None:
+        ok = ok and health == "healthy"
+    return bool(ok)
+
+
 def wait_ready(names: list[str], timeout_s: float = 420) -> None:
     deadline = time.time() + timeout_s
     pending = set(names)
     while pending and time.time() < deadline:
-        still: set[str] = set()
-        for name in sorted(pending):
-            completed = run(
-                ["docker", "inspect", name, "--format", "{{json .State}}"],
-                timeout=60,
-            )
-            if completed.returncode != 0:
-                print(f"{name}: missing", flush=True)
-                still.add(name)
-                continue
-            state = json.loads(completed.stdout)
-            status = state.get("Status")
-            health = (state.get("Health") or {}).get("Status")
-            print(f"{name}: status={status} health={health}", flush=True)
-            ok = status == "running" and not state.get("OOMKilled")
-            if health is not None:
-                ok = ok and health == "healthy"
-            if not ok:
-                still.add(name)
-        pending = still
+        pending = {name for name in sorted(pending) if not _container_ready_state(name)}
         if pending:
             time.sleep(8)
     if pending:

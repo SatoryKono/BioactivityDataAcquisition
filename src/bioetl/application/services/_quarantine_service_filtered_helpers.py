@@ -202,6 +202,36 @@ def _resolve_latest_scope_run_id(
     return str(run_id_value) if run_id_value is not None else None
 
 
+def _lookup_run_id(candidate_run_id: str) -> object:
+    try:
+        return UUID(candidate_run_id)
+    except (TypeError, ValueError):
+        return candidate_run_id
+
+
+def _resolve_bronze_for_run(
+    candidate_run_id: str,
+    *,
+    list_entries_by_run_id: object,
+    run_manifest_service: object,
+) -> int | None:
+    if callable(list_entries_by_run_id):
+        try:
+            return _resolve_bronze_records_from_entries(
+                list_entries_by_run_id(_lookup_run_id(candidate_run_id))
+            )
+        except (TypeError, ValueError):
+            pass
+    show_manifest = getattr(run_manifest_service, "show", None)
+    if not callable(show_manifest):
+        return None
+    try:
+        inspection = show_manifest(candidate_run_id)
+    except ValueError:
+        return None
+    return _resolve_bronze_records_from_inspection(inspection)
+
+
 def _sum_bronze_records_for_runs(
     *,
     run_ids: list[str],
@@ -212,28 +242,11 @@ def _sum_bronze_records_for_runs(
     ledger_port = getattr(run_manifest_service, "ledger_port", None)
     list_entries_by_run_id = getattr(ledger_port, "list_entries_by_run_id", None)
     for candidate_run_id in sorted(set(run_ids)):
-        resolved: int | None = None
-        if callable(list_entries_by_run_id):
-            lookup_run_id: object = candidate_run_id
-            try:
-                lookup_run_id = UUID(candidate_run_id)
-            except (TypeError, ValueError):
-                lookup_run_id = candidate_run_id
-            try:
-                resolved = _resolve_bronze_records_from_entries(
-                    list_entries_by_run_id(lookup_run_id)
-                )
-            except (TypeError, ValueError):
-                resolved = None
-        if resolved is None:
-            show_manifest = getattr(run_manifest_service, "show", None)
-            if not callable(show_manifest):
-                continue
-            try:
-                inspection = show_manifest(candidate_run_id)
-            except ValueError:
-                continue
-            resolved = _resolve_bronze_records_from_inspection(inspection)
+        resolved = _resolve_bronze_for_run(
+            candidate_run_id,
+            list_entries_by_run_id=list_entries_by_run_id,
+            run_manifest_service=run_manifest_service,
+        )
         if resolved is not None:
             bronze_records += resolved
     return bronze_records

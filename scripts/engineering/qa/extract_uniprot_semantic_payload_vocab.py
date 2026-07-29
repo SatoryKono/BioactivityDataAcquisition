@@ -17,28 +17,39 @@ def _iter_jsonl_payloads(paths: list[Path]) -> list[dict[str, object]]:
     return payloads
 
 
+def _collect_field_values(
+    items: object,
+    *,
+    field_name: str,
+) -> set[str]:
+    values: set[str] = set()
+    if not isinstance(items, list):
+        return values
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        value = item.get(field_name)
+        if value is not None:
+            values.add(str(value))
+    return values
+
+
 def extract_uniprot_semantic_payload_vocab(paths: list[Path]) -> dict[str, list[str]]:
-    observed = {
+    observed: dict[str, set[str]] = {
         "feature_types": set(),
         "comment_types": set(),
         "keyword_categories": set(),
     }
     for payload in _iter_jsonl_payloads(paths):
-        for feature in payload.get("features", []):
-            if isinstance(feature, dict):
-                feature_type = feature.get("type")
-                if feature_type is not None:
-                    observed["feature_types"].add(str(feature_type))
-        for comment in payload.get("comments", []):
-            if isinstance(comment, dict):
-                comment_type = comment.get("commentType")
-                if comment_type is not None:
-                    observed["comment_types"].add(str(comment_type))
-        for keyword in payload.get("keywords", []):
-            if isinstance(keyword, dict):
-                keyword_category = keyword.get("category")
-                if keyword_category is not None:
-                    observed["keyword_categories"].add(str(keyword_category))
+        observed["feature_types"].update(
+            _collect_field_values(payload.get("features", []), field_name="type")
+        )
+        observed["comment_types"].update(
+            _collect_field_values(payload.get("comments", []), field_name="commentType")
+        )
+        observed["keyword_categories"].update(
+            _collect_field_values(payload.get("keywords", []), field_name="category")
+        )
     return {key: sorted(values) for key, values in observed.items() if values}
 
 

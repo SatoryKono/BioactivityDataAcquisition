@@ -144,13 +144,14 @@ REQUIRED_PROVIDER_SECTIONS = (
     "Data license",
     "Personal data notes",
 )
+RUNBOOK_ROLLBACK_RECOVERY_SECTION = "Rollback/Recovery"
 REQUIRED_RUNBOOK_SECTIONS = (
     "Trigger",
     "Impact",
     "Preconditions",
     "Procedure",
     "Verification",
-    "Rollback/Recovery",
+    RUNBOOK_ROLLBACK_RECOVERY_SECTION,
     "Post-incident",
 )
 REQUIRED_CONTROL_PLANE_CONTRACT_SECTIONS = (
@@ -506,11 +507,17 @@ def _append_runbook_section_violations(
     headings: set[str],
 ) -> None:
     for section in REQUIRED_RUNBOOK_SECTIONS:
-        if section == "Rollback/Recovery":
-            if _has_any_heading(headings, "Rollback/Recovery", "Rollback", "Recovery"):
+        if section == RUNBOOK_ROLLBACK_RECOVERY_SECTION:
+            if _has_any_heading(
+                headings, RUNBOOK_ROLLBACK_RECOVERY_SECTION, "Rollback", "Recovery"
+            ):
                 continue
             violations.append(
-                (md_file, "runbook: missing required section 'Rollback/Recovery'")
+                (
+                    md_file,
+                    "runbook: missing required section "
+                    f"'{RUNBOOK_ROLLBACK_RECOVERY_SECTION}'",
+                )
             )
             continue
         if not _has_heading(headings, section):

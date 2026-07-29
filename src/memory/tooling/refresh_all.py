@@ -90,6 +90,76 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _run_refresh_step(
+    summary: dict[str, Any],
+    *,
+    kind: str,
+    allow_partial: bool,
+    action: Any,
+) -> None:
+    try:
+        summary["artifacts"].append(action())
+    except Exception as exc:
+        if not allow_partial:
+            raise
+        summary["ok"] = False
+        summary["artifacts"].append(
+            {
+                "kind": kind,
+                "paths": [],
+                "error": f"{exc.__class__.__name__}: {exc}",
+            }
+        )
+
+
+def _refresh_rag_artifact(
+    root: Path,
+    output_root: Path,
+    *,
+    rag_build_scope: str,
+    rag_focus_query: str | None,
+    rag_max_sources: int | None,
+) -> dict[str, Any]:
+    rag_dir = output_root / "rag" / "manifests"
+    catalog_path, chunks_path = write_rag_manifests(
+        root,
+        rag_dir,
+        build_scope=rag_build_scope,
+        focus_query=rag_focus_query,
+        max_sources=rag_max_sources,
+    )
+    return {
+        "kind": "rag",
+        "paths": [str(catalog_path), str(chunks_path)],
+        "build_scope": rag_build_scope,
+        "focus_query": rag_focus_query,
+        "max_sources": rag_max_sources,
+    }
+
+
+def _refresh_timeline_artifact(root: Path, output_root: Path) -> dict[str, Any]:
+    timeline_dir = output_root / "timeline" / "events"
+    run_path = write_run_events(root, timeline_dir / "runs.jsonl")
+    ci_path = write_ci_events(root, timeline_dir / "ci.jsonl")
+    incident_path = write_incident_events(root, timeline_dir / "incidents.jsonl")
+    return {
+        "kind": "timeline",
+        "paths": [str(run_path), str(ci_path), str(incident_path)],
+    }
+
+
+def _refresh_graph_export_artifact(root: Path, output_root: Path) -> dict[str, Any]:
+    graph_export = output_root / "graph" / "exports" / "repo_snapshot.json"
+    snapshot = graph_sync.build_snapshot(root)
+    graph_sync._write_export(graph_export, snapshot)
+    return {
+        "kind": "graph",
+        "paths": [str(graph_export)],
+        "node_count": len(snapshot.nodes),
+        "relation_count": len(snapshot.relations),
+    }
+
+
 def refresh_all(
     root: Path,
     output_root: Path,
@@ -107,76 +177,35 @@ def refresh_all(
     """Refresh supported memory artifacts and return a summary."""
     summary: dict[str, Any] = {"ok": True, "artifacts": []}
 
-    def _record_failure(kind: str, error: Exception) -> None:
-        summary["ok"] = False
-        summary["artifacts"].append(
-            {
-                "kind": kind,
-                "paths": [],
-                "error": f"{error.__class__.__name__}: {error}",
-            }
+    if include_rag:
+        _run_refresh_step(
+            summary,
+            kind="rag",
+            allow_partial=allow_partial,
+            action=lambda: _refresh_rag_artifact(
+                root,
+                output_root,
+                rag_build_scope=rag_build_scope,
+                rag_focus_query=rag_focus_query,
+                rag_max_sources=rag_max_sources,
+            ),
         )
 
-    if include_rag:
-        try:
-            rag_dir = output_root / "rag" / "manifests"
-            catalog_path, chunks_path = write_rag_manifests(
-                root,
-                rag_dir,
-                build_scope=rag_build_scope,
-                focus_query=rag_focus_query,
-                max_sources=rag_max_sources,
-            )
-            summary["artifacts"].append(
-                {
-                    "kind": "rag",
-                    "paths": [str(catalog_path), str(chunks_path)],
-                    "build_scope": rag_build_scope,
-                    "focus_query": rag_focus_query,
-                    "max_sources": rag_max_sources,
-                }
-            )
-        except Exception as exc:
-            if not allow_partial:
-                raise
-            _record_failure("rag", exc)
-
     if include_timeline:
-        try:
-            timeline_dir = output_root / "timeline" / "events"
-            run_path = write_run_events(root, timeline_dir / "runs.jsonl")
-            ci_path = write_ci_events(root, timeline_dir / "ci.jsonl")
-            incident_path = write_incident_events(
-                root, timeline_dir / "incidents.jsonl"
-            )
-            summary["artifacts"].append(
-                {
-                    "kind": "timeline",
-                    "paths": [str(run_path), str(ci_path), str(incident_path)],
-                }
-            )
-        except Exception as exc:
-            if not allow_partial:
-                raise
-            _record_failure("timeline", exc)
+        _run_refresh_step(
+            summary,
+            kind="timeline",
+            allow_partial=allow_partial,
+            action=lambda: _refresh_timeline_artifact(root, output_root),
+        )
 
     if include_graph_export:
-        try:
-            graph_export = output_root / "graph" / "exports" / "repo_snapshot.json"
-            snapshot = graph_sync.build_snapshot(root)
-            graph_sync._write_export(graph_export, snapshot)
-            summary["artifacts"].append(
-                {
-                    "kind": "graph",
-                    "paths": [str(graph_export)],
-                    "node_count": len(snapshot.nodes),
-                    "relation_count": len(snapshot.relations),
-                }
-            )
-        except Exception as exc:
-            if not allow_partial:
-                raise
-            _record_failure("graph", exc)
+        _run_refresh_step(
+            summary,
+            kind="graph",
+            allow_partial=allow_partial,
+            action=lambda: _refresh_graph_export_artifact(root, output_root),
+        )
 
     if include_graph_relations:
         snapshot_path = expanded_graph_path or default_expanded_graph_path(root)

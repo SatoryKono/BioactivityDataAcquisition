@@ -187,77 +187,94 @@ def _gold_exclusion_reason(pipeline: dict[str, Any]) -> str:
     return ""
 
 
+def _optional_repo_relative(path: Path) -> str:
+    if not path.exists():
+        return ""
+    return path.relative_to(PROJECT_ROOT).as_posix()
+
+
+def _registry_status(registry_entry: dict[str, Any] | None) -> str:
+    if registry_entry is None:
+        return ""
+    return str(registry_entry.get("status"))
+
+
+def _build_entity_row(
+    config_path: Path,
+    *,
+    registry_entries: dict[str, Any],
+    exclusion_policies: dict[str, Any],
+) -> dict[str, Any]:
+    payload = _load_yaml(config_path)
+    provider = str(payload.get("provider") or config_path.parent.name)
+    entity = str(payload.get("entity") or config_path.stem)
+    pipeline = payload.get("pipeline", {})
+    assert isinstance(pipeline, dict)
+    effective_pipeline = load_pipeline_config_from_root(
+        f"{provider}_{entity}",
+        configs_root=PROJECT_ROOT / "configs",
+    ).model_dump(mode="python")
+    pipeline_name = str(pipeline.get("pipeline_name") or f"{provider}_{entity}")
+    gold_enabled = _gold_runtime_enabled(effective_pipeline)
+    contract_ref = f"{provider}.{entity}"
+    contract_config = (
+        PROJECT_ROOT / "configs" / "contracts" / provider / f"{entity}.yaml"
+    )
+    composite_runtime_config = (
+        PROJECT_ROOT / "configs" / "composites" / f"{entity}.yaml"
+    )
+    registry_entry = registry_entries.get(contract_ref)
+    registry_source_path = _repo_relative_registry_path(
+        "" if registry_entry is None else registry_entry.get("source_path")
+    )
+    published_artifact_path = _first_published_artifact(registry_entry)
+    gold_schema_title = _gold_schema_title(published_artifact_path)
+    contract_config_path = _optional_repo_relative(contract_config)
+    row: dict[str, Any] = {
+        "pipeline_name": pipeline_name,
+        "provider": provider,
+        "entity": entity,
+        "contract_ref": contract_ref,
+        "config_path": config_path.relative_to(PROJECT_ROOT).as_posix(),
+        "contract_config_path": contract_config_path,
+        "registry_status": _registry_status(registry_entry),
+        "registry_contract_version": _registry_contract_version(registry_entry),
+        "registry_source_path": registry_source_path,
+        "published_artifact_path": published_artifact_path,
+        "gold_schema_title": gold_schema_title,
+        "pipeline_code_owner": _pipeline_owner(provider, entity, pipeline_name),
+        "gold_enabled": gold_enabled,
+        "gold_exclusion_reason": _gold_exclusion_reason(effective_pipeline),
+    }
+    row["coverage_status"] = _coverage_status(
+        gold_enabled=gold_enabled,
+        registry_entry=registry_entry,
+        contract_config_path=contract_config_path,
+        published_artifact_path=published_artifact_path,
+        registry_source_path=registry_source_path,
+        gold_schema_title=gold_schema_title,
+    )
+    if not gold_enabled:
+        row["gold_exclusion_policy"] = exclusion_policies.get(contract_ref, {})
+    if provider == "composite":
+        row["composite_runtime_config_path"] = _optional_repo_relative(
+            composite_runtime_config
+        )
+    return row
+
+
 def _collect_entity_rows() -> list[dict[str, Any]]:
-    rows: list[dict[str, Any]] = []
     entities_root = PROJECT_ROOT / "configs" / "entities"
     registry_entries = _load_registry_entries()
     exclusion_policies = _load_exclusion_policies()
-    for config_path in sorted(entities_root.glob("*/*.yaml")):
-        payload = _load_yaml(config_path)
-        provider = str(payload.get("provider") or config_path.parent.name)
-        entity = str(payload.get("entity") or config_path.stem)
-        pipeline = payload.get("pipeline", {})
-        assert isinstance(pipeline, dict)
-        effective_pipeline = load_pipeline_config_from_root(
-            f"{provider}_{entity}",
-            configs_root=PROJECT_ROOT / "configs",
-        ).model_dump(mode="python")
-        pipeline_name = str(pipeline.get("pipeline_name") or f"{provider}_{entity}")
-        gold_enabled = _gold_runtime_enabled(effective_pipeline)
-        contract_ref = f"{provider}.{entity}"
-        contract_config = (
-            PROJECT_ROOT / "configs" / "contracts" / provider / f"{entity}.yaml"
+    return [
+        _build_entity_row(
+            config_path,
+            registry_entries=registry_entries,
+            exclusion_policies=exclusion_policies,
         )
-        composite_runtime_config = (
-            PROJECT_ROOT / "configs" / "composites" / f"{entity}.yaml"
-        )
-        registry_entry = registry_entries.get(contract_ref)
-        registry_source_path = _repo_relative_registry_path(
-            registry_entry.get("source_path") if registry_entry is not None else ""
-        )
-        published_artifact_path = _first_published_artifact(registry_entry)
-        gold_schema_title = _gold_schema_title(published_artifact_path)
-        contract_config_path = (
-            contract_config.relative_to(PROJECT_ROOT).as_posix()
-            if contract_config.exists()
-            else ""
-        )
-        row: dict[str, Any] = {
-            "pipeline_name": pipeline_name,
-            "provider": provider,
-            "entity": entity,
-            "contract_ref": contract_ref,
-            "config_path": config_path.relative_to(PROJECT_ROOT).as_posix(),
-            "contract_config_path": contract_config_path,
-            "registry_status": (
-                str(registry_entry.get("status")) if registry_entry is not None else ""
-            ),
-            "registry_contract_version": _registry_contract_version(registry_entry),
-            "registry_source_path": registry_source_path,
-            "published_artifact_path": published_artifact_path,
-            "gold_schema_title": gold_schema_title,
-            "pipeline_code_owner": _pipeline_owner(provider, entity, pipeline_name),
-            "gold_enabled": gold_enabled,
-            "gold_exclusion_reason": _gold_exclusion_reason(effective_pipeline),
-        }
-        row["coverage_status"] = _coverage_status(
-            gold_enabled=gold_enabled,
-            registry_entry=registry_entry,
-            contract_config_path=contract_config_path,
-            published_artifact_path=published_artifact_path,
-            registry_source_path=registry_source_path,
-            gold_schema_title=gold_schema_title,
-        )
-        if not gold_enabled:
-            row["gold_exclusion_policy"] = exclusion_policies.get(contract_ref, {})
-        if provider == "composite":
-            row["composite_runtime_config_path"] = (
-                composite_runtime_config.relative_to(PROJECT_ROOT).as_posix()
-                if composite_runtime_config.exists()
-                else ""
-            )
-        rows.append(row)
-    return rows
+        for config_path in sorted(entities_root.glob("*/*.yaml"))
+    ]
 
 
 def _existing_snapshot_date(path: Path, *, root: Path | None = None) -> str | None:

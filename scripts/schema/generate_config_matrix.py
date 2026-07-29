@@ -21,6 +21,7 @@ from scripts.engineering.qa.config_surface_governance import is_sanctioned_parti
 
 DEFAULT_BASELINE_JSON = Path("reports/quality/config-discrepancy-baseline.json")
 SANCTIONED_DEFAULT_SCALAR = "<sanctioned-default>"
+DICT_SHAPE_MARKER = "(dict)"
 CONFIG_PARAMETER_TAXONOMY_OWNER = "BioETL Team"
 YAML_GLOB = "*.yaml"
 _DEFAULT_TAXONOMY_GROUP = "domain_entity_contract"
@@ -176,7 +177,7 @@ def flatten_dict(d: dict[str, Any], parent_key: str = "") -> dict[str, Any]:
     for key, value in d.items():
         new_key = f"{parent_key}.{key}" if parent_key else key
         if isinstance(value, dict):
-            items[new_key] = "(dict)"
+            items[new_key] = DICT_SHAPE_MARKER
             items.update(flatten_dict(value, new_key))
         elif isinstance(value, list):
             items[new_key] = json.dumps(value, ensure_ascii=False) if value else "[]"
@@ -293,8 +294,8 @@ def _partial_keys(configs: dict[str, dict[str, Any]]) -> list[str]:
 
 def _sanctioned_placeholder(values: list[Any]) -> Any:
     """Preserve coarse shape while collapsing sanctioned missing-vs-empty variance."""
-    if "(dict)" in values:
-        return "(dict)"
+    if DICT_SHAPE_MARKER in values:
+        return DICT_SHAPE_MARKER
     if "[]" in values:
         return "[]"
     if "null" in values:

@@ -65,41 +65,56 @@ def _iter_canonical_schema_files() -> list[Path]:
     return files
 
 
+def _column_groups_from_mapping(payload: object, *keys: str) -> list[object]:
+    current: object = payload
+    for key in keys:
+        if not isinstance(current, dict):
+            return []
+        current = current.get(key, {})
+    if isinstance(current, list):
+        return current
+    return []
+
+
+def _load_composite_entry_parts(
+    yaml_path: Path, payload_dict: dict[str, object]
+) -> tuple[str, Path, str, list[object]]:
+    rel = yaml_path.relative_to(COMPOSITES_DIR)
+    groups = _column_groups_from_mapping(payload_dict, "composite", "schema", "column_groups")
+    if not groups:
+        groups = _column_groups_from_mapping(
+            payload_dict, "composite", "merge", "column_groups"
+        )
+    return "composite", rel, f"composite/{rel.as_posix()}", groups
+
+
+def _load_entity_entry_parts(
+    yaml_path: Path, payload_dict: dict[str, object]
+) -> tuple[str, Path, str, list[object]]:
+    rel = yaml_path.relative_to(CANONICAL_DIR)
+    groups = _column_groups_from_mapping(payload_dict, "schema", "column_groups")
+    return rel.parts[0], rel, rel.as_posix(), groups
+
+
 def _load_entry(yaml_path: Path) -> CanonicalSchemaEntry:
     payload = yaml.safe_load(yaml_path.read_text(encoding="utf-8")) or {}
     payload_dict = payload if isinstance(payload, dict) else {}
-
-    group_names: list[str] = []
     if COMPOSITES_DIR in yaml_path.parents:
-        base_dir = COMPOSITES_DIR
-        rel = yaml_path.relative_to(base_dir)
-        provider = "composite"
-        yaml_path_value = f"composite/{rel.as_posix()}"
-
-        composite = payload_dict.get("composite", {})
-        composite_dict = composite if isinstance(composite, dict) else {}
-        schema = composite_dict.get("schema", {})
-        groups = schema.get("column_groups", []) if isinstance(schema, dict) else []
-        if not groups:
-            merge = composite_dict.get("merge", {})
-            groups = merge.get("column_groups", []) if isinstance(merge, dict) else []
+        provider, rel, yaml_path_value, groups = _load_composite_entry_parts(
+            yaml_path, payload_dict
+        )
     else:
-        base_dir = CANONICAL_DIR
-        rel = yaml_path.relative_to(base_dir)
-        provider = rel.parts[0]
-        yaml_path_value = rel.as_posix()
-
-        schema = payload_dict.get("schema", {})
-        groups = schema.get("column_groups", []) if isinstance(schema, dict) else []
-
-    for group in groups:
-        if isinstance(group, dict) and "name" in group:
-            group_names.append(str(group["name"]))
-
-    entity = rel.stem
+        provider, rel, yaml_path_value, groups = _load_entity_entry_parts(
+            yaml_path, payload_dict
+        )
+    group_names = [
+        str(group["name"])
+        for group in groups
+        if isinstance(group, dict) and "name" in group
+    ]
     return CanonicalSchemaEntry(
         provider=provider,
-        entity=entity,
+        entity=rel.stem,
         yaml_path=yaml_path_value,
         column_groups=tuple(group_names),
     )

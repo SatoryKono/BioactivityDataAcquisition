@@ -159,6 +159,75 @@ def _commit_exists(root: Path, commit_sha: str) -> bool:
     return result.returncode == 0
 
 
+def _validate_record_paths(
+    root: Path,
+    records: list[Any],
+) -> list[str]:
+    issues: list[str] = []
+    for record in records:
+        report_path = root / record.report_path
+        if not report_path.is_file():
+            issues.append(f"audit report is missing: {record.report_path}")
+        if record.status == "superseded" and not record.report_path.startswith(
+            "docs/99-archive/"
+        ):
+            issues.append(
+                f"superseded audit must live in archive: {record.report_path}"
+            )
+    return issues
+
+
+def _validate_current_commit(
+    root: Path,
+    current: Any,
+    *,
+    verify_git_commit: bool,
+) -> list[str]:
+    issues: list[str] = []
+    if current.report_path.startswith("docs/99-archive/"):
+        issues.append("current audit must not live in docs/99-archive")
+    if current.audited_commit_sha is None or not SHA_PATTERN.fullmatch(
+        current.audited_commit_sha
+    ):
+        issues.append("current audit requires an exact audited_commit_sha")
+    elif verify_git_commit and not _commit_exists(root, current.audited_commit_sha):
+        issues.append("current audited_commit_sha is not a local Git commit")
+    return issues
+
+
+def _validate_current_evidence_hash(root: Path, current: Any) -> list[str]:
+    if current.evidence_surface_sha256 is None or not SHA256_PATTERN.fullmatch(
+        current.evidence_surface_sha256
+    ):
+        return ["current audit requires evidence_surface_sha256"]
+    try:
+        actual_hash = compute_evidence_surface_sha256(root, current.evidence_paths)
+    except (OSError, ValueError) as exc:
+        return [str(exc)]
+    if actual_hash != current.evidence_surface_sha256:
+        return ["current audit evidence_surface_sha256 is stale"]
+    return []
+
+
+def _validate_current_report_markers(root: Path, current: Any) -> list[str]:
+    report_path = root / current.report_path
+    if not report_path.is_file():
+        return []
+    report = report_path.read_text(encoding="utf-8")
+    issues: list[str] = []
+    expected_markers = (
+        "Lifecycle status: current",
+        f"Audited commit SHA: `{current.audited_commit_sha}`",
+        f"Evidence surface SHA-256: `{current.evidence_surface_sha256}`",
+    )
+    for marker in expected_markers:
+        if marker not in report:
+            issues.append(f"current audit is missing metadata marker: {marker}")
+    if " / current" in report:
+        issues.append("current audit must not use an ambiguous branch/current SHA")
+    return issues
+
+
 def validate_technical_debt_audit_registry(
     root: Path,
     registry_path: Path | None = None,
@@ -186,50 +255,12 @@ def validate_technical_debt_audit_registry(
     if current.audit_id != current_audit_id:
         issues.append("current_audit_id must match the current audit record")
 
-    for record in records:
-        report_path = root / record.report_path
-        if not report_path.is_file():
-            issues.append(f"audit report is missing: {record.report_path}")
-        if record.status == "superseded" and not record.report_path.startswith(
-            "docs/99-archive/"
-        ):
-            issues.append(
-                f"superseded audit must live in archive: {record.report_path}"
-            )
-    if current.report_path.startswith("docs/99-archive/"):
-        issues.append("current audit must not live in docs/99-archive")
-    if current.audited_commit_sha is None or not SHA_PATTERN.fullmatch(
-        current.audited_commit_sha
-    ):
-        issues.append("current audit requires an exact audited_commit_sha")
-    elif verify_git_commit and not _commit_exists(root, current.audited_commit_sha):
-        issues.append("current audited_commit_sha is not a local Git commit")
-    if current.evidence_surface_sha256 is None or not SHA256_PATTERN.fullmatch(
-        current.evidence_surface_sha256
-    ):
-        issues.append("current audit requires evidence_surface_sha256")
-    else:
-        try:
-            actual_hash = compute_evidence_surface_sha256(root, current.evidence_paths)
-        except (OSError, ValueError) as exc:
-            issues.append(str(exc))
-        else:
-            if actual_hash != current.evidence_surface_sha256:
-                issues.append("current audit evidence_surface_sha256 is stale")
-
-    report_path = root / current.report_path
-    if report_path.is_file():
-        report = report_path.read_text(encoding="utf-8")
-        expected_markers = (
-            "Lifecycle status: current",
-            f"Audited commit SHA: `{current.audited_commit_sha}`",
-            f"Evidence surface SHA-256: `{current.evidence_surface_sha256}`",
-        )
-        for marker in expected_markers:
-            if marker not in report:
-                issues.append(f"current audit is missing metadata marker: {marker}")
-        if " / current" in report:
-            issues.append("current audit must not use an ambiguous branch/current SHA")
+    issues.extend(_validate_record_paths(root, records))
+    issues.extend(
+        _validate_current_commit(root, current, verify_git_commit=verify_git_commit)
+    )
+    issues.extend(_validate_current_evidence_hash(root, current))
+    issues.extend(_validate_current_report_markers(root, current))
     return issues
 
 

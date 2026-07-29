@@ -28,11 +28,12 @@ DASHBOARD_INVENTORY_CONTRACT = Path(
 PROVISIONING_CONFIG = Path("grafana/provisioning/dashboards/bioetl.yaml")
 VOLATILE_ROOT_KEYS = frozenset({"id", "version"})
 VOLATILE_PANEL_KEYS = frozenset({"pluginVersion"})
+QUARANTINE_EXPLORER_DATASOURCE = "Quarantine Explorer"
 DATASOURCE_ORDER = {
     "Prometheus": 0,
     "Loki": 1,
     "Tempo": 2,
-    "Quarantine Explorer": 3,
+    QUARANTINE_EXPLORER_DATASOURCE: 3,
     "Grafana": 4,
 }
 
@@ -169,8 +170,8 @@ def _normalize_datasource_string(value: str) -> str | None:
     stripped = value.strip()
     if not stripped:
         return None
-    if stripped == "Quarantine Explorer":
-        return "Quarantine Explorer"
+    if stripped == QUARANTINE_EXPLORER_DATASOURCE:
+        return QUARANTINE_EXPLORER_DATASOURCE
     if stripped == "-- Grafana --":
         return "Grafana"
     return stripped
@@ -181,8 +182,8 @@ def _normalize_datasource_dict(ref: dict[str, object]) -> str | None:
     uid = str(ref.get("uid", "")).strip().lower()
     kind = str(ref.get("type", "")).strip().lower()
 
-    if name == "Quarantine Explorer" or uid == "quarantine-explorer":
-        return "Quarantine Explorer"
+    if name == QUARANTINE_EXPLORER_DATASOURCE or uid == "quarantine-explorer":
+        return QUARANTINE_EXPLORER_DATASOURCE
     if kind == "prometheus" or uid == "prometheus":
         return "Prometheus"
     if kind == "loki" or uid == "loki":

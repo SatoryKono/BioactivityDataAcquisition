@@ -1024,6 +1024,48 @@ def _existing_snapshot_date(path: Path) -> str | None:
     return snapshot_date if isinstance(snapshot_date, str) else None
 
 
+def _check_dead_code_artifacts(
+    *,
+    json_out: Path,
+    md_out: Path,
+    rendered_json: str,
+    rendered_markdown: str,
+    payload: dict[str, object],
+) -> int:
+    if not json_out.exists():
+        print(f"[dead-code-inventory] missing JSON artifact: {json_out}")
+        return 1
+    if not md_out.exists():
+        print(f"[dead-code-inventory] missing Markdown artifact: {md_out}")
+        return 1
+    if json_out.read_text(encoding="utf-8") != rendered_json:
+        print(f"[dead-code-inventory] FAIL: JSON artifact drifted: {json_out}")
+        return 1
+    if md_out.read_text(encoding="utf-8") != rendered_markdown:
+        print(f"[dead-code-inventory] FAIL: Markdown artifact drifted: {md_out}")
+        return 1
+    review_window = payload["review_window"]
+    assert isinstance(review_window, dict)
+    if _review_window_is_stale(review_window):
+        print(
+            "[dead-code-inventory] FAIL: review window is stale: "
+            f"next_review_by={review_window.get('next_review_by')}"
+        )
+        return 1
+    summary = payload["summary"]
+    assert isinstance(summary, dict)
+    untriaged = summary["repo_wide_untriaged_zero_import_candidate_count"]
+    max_untriaged = review_window.get("max_untriaged_zero_import_candidates")
+    if isinstance(max_untriaged, int) and untriaged > max_untriaged:
+        print(
+            "[dead-code-inventory] FAIL: repo-wide zero-import candidates remain "
+            f"untriaged: {untriaged} > {max_untriaged}"
+        )
+        return 1
+    print("[dead-code-inventory] PASS: artifacts are up to date")
+    return 0
+
+
 def main() -> int:
     from scripts.engineering.common.repo_paths import resolve_output_path
 
@@ -1039,39 +1081,13 @@ def main() -> int:
     rendered_markdown = _render_markdown(payload)
 
     if args.check:
-        if not json_out.exists():
-            print(f"[dead-code-inventory] missing JSON artifact: {json_out}")
-            return 1
-        if not md_out.exists():
-            print(f"[dead-code-inventory] missing Markdown artifact: {md_out}")
-            return 1
-        if json_out.read_text(encoding="utf-8") != rendered_json:
-            print(f"[dead-code-inventory] FAIL: JSON artifact drifted: {json_out}")
-            return 1
-        if md_out.read_text(encoding="utf-8") != rendered_markdown:
-            print(f"[dead-code-inventory] FAIL: Markdown artifact drifted: {md_out}")
-            return 1
-        review_window = payload["review_window"]
-        assert isinstance(review_window, dict)
-        if _review_window_is_stale(review_window):
-            print(
-                "[dead-code-inventory] FAIL: review window is stale: "
-                f"next_review_by={review_window.get('next_review_by')}"
-            )
-            return 1
-        summary = payload["summary"]
-        assert isinstance(summary, dict)
-        untriaged = summary["repo_wide_untriaged_zero_import_candidate_count"]
-        max_untriaged = review_window.get("max_untriaged_zero_import_candidates")
-        if isinstance(max_untriaged, int) and untriaged > max_untriaged:
-            print(
-                "[dead-code-inventory] FAIL: repo-wide zero-import candidates remain "
-                "untriaged: "
-                f"{untriaged} > {max_untriaged}"
-            )
-            return 1
-        print("[dead-code-inventory] PASS: artifacts are up to date")
-        return 0
+        return _check_dead_code_artifacts(
+            json_out=json_out,
+            md_out=md_out,
+            rendered_json=rendered_json,
+            rendered_markdown=rendered_markdown,
+            payload=payload,
+        )
 
     # Resolve immediately before each sink so path-taint analysis tracks confinement.
     safe_json = resolve_output_path(json_out, root=repo_root)

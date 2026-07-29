@@ -653,6 +653,30 @@ def ensure_shared_networks(
     return not findings, findings
 
 
+def _stabilize_ready_snapshots(
+    spec: StackSpec,
+    baseline: Mapping[str, int],
+    *,
+    runner: Runner,
+    deadline: float,
+    stabilization_seconds: float,
+    sleep: Sleeper,
+    clock: Clock,
+    last_snapshots: list[ServiceSnapshot],
+) -> tuple[list[ServiceSnapshot], list[dict[str, Any]]]:
+    remaining = deadline - clock()
+    if remaining <= 0:
+        return last_snapshots, [{"cause": "readiness_timeout"}]
+    sleep(min(stabilization_seconds, remaining))
+    remaining = deadline - clock()
+    if remaining <= 0:
+        return last_snapshots, [{"cause": "readiness_timeout"}]
+    last_snapshots, _ = collect_snapshots(
+        spec, runner=runner, timeout=min(15.0, remaining)
+    )
+    return last_snapshots, readiness_findings(spec, last_snapshots, baseline)
+
+
 def _wait_ready(
     spec: StackSpec,
     baseline: Mapping[str, int],
@@ -677,17 +701,16 @@ def _wait_ready(
         last_findings = readiness_findings(spec, last_snapshots, baseline)
         if not last_findings:
             if stabilization_seconds > 0:
-                remaining = deadline - clock()
-                if remaining <= 0:
-                    break
-                sleep(min(stabilization_seconds, remaining))
-                remaining = deadline - clock()
-                if remaining <= 0:
-                    break
-                last_snapshots, _ = collect_snapshots(
-                    spec, runner=runner, timeout=min(15.0, remaining)
+                last_snapshots, last_findings = _stabilize_ready_snapshots(
+                    spec,
+                    baseline,
+                    runner=runner,
+                    deadline=deadline,
+                    stabilization_seconds=stabilization_seconds,
+                    sleep=sleep,
+                    clock=clock,
+                    last_snapshots=last_snapshots,
                 )
-                last_findings = readiness_findings(spec, last_snapshots, baseline)
             if not last_findings:
                 return last_snapshots, []
         remaining = deadline - clock()

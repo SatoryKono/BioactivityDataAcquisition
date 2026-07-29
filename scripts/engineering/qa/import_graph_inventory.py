@@ -27,6 +27,7 @@ _PARSED_CACHE_VERSION = 2
 _PARSED_CACHE_ENV = "BIOETL_IMPORT_GRAPH_CACHE_DIR"
 _INIT_PY = "__init__.py"
 _INIT_PYI = "__init__.pyi"
+_BIOETL_MODULE_PREFIX = "bioetl."
 
 
 @dataclass(frozen=True)
@@ -250,6 +251,93 @@ def _store_parsed_modules_disk_cache(
         return
 
 
+def _record_exact_import_usage(
+    node: ast.AST,
+    *,
+    importer_module: str,
+    importer_is_package: bool,
+    exact_import_usage: dict[str, set[str]],
+) -> None:
+    if isinstance(node, ast.Import):
+        for alias in node.names:
+            if alias.name.startswith(_BIOETL_MODULE_PREFIX):
+                exact_import_usage[alias.name].add("<module>")
+        return
+    if not isinstance(node, ast.ImportFrom):
+        return
+    base_module = _resolve_relative_module(
+        importer_module=importer_module,
+        importer_is_package=importer_is_package,
+        module=node.module,
+        level=node.level,
+    )
+    if not base_module or not base_module.startswith(_BIOETL_MODULE_PREFIX):
+        return
+    for alias in node.names:
+        exact_import_usage[base_module].add(alias.name)
+
+
+def _parse_module_import_graph(
+    *,
+    tree: ast.AST,
+    existing_modules: frozenset[str],
+    importer_module: str,
+    importer_is_package: bool,
+) -> tuple[set[str], dict[str, set[str]]]:
+    candidate_targets: set[str] = set()
+    exact_import_usage: dict[str, set[str]] = defaultdict(set)
+    # Only Import/ImportFrom matter for the inventory; avoid paying for
+    # every AST node type on multi-thousand-file trees.
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.Import, ast.ImportFrom)):
+            continue
+        for target_module in _iter_candidate_import_targets(
+            existing_modules=existing_modules,
+            importer_module=importer_module,
+            importer_is_package=importer_is_package,
+            node=node,
+        ):
+            candidate_targets.add(target_module)
+        _record_exact_import_usage(
+            node,
+            importer_module=importer_module,
+            importer_is_package=importer_is_package,
+            exact_import_usage=exact_import_usage,
+        )
+    return candidate_targets, exact_import_usage
+
+
+def _build_parsed_module(
+    *,
+    scan_label: str,
+    repo_root: Path,
+    py_file: Path,
+    importer_module: str,
+    source_text: str,
+    existing_modules: frozenset[str],
+) -> ParsedModule | None:
+    importer_is_package = py_file.name in {_INIT_PY, _INIT_PYI}
+    try:
+        tree = ast.parse(source_text, filename=str(py_file), mode="exec")
+    except SyntaxError:
+        return None
+    candidate_targets, exact_import_usage = _parse_module_import_graph(
+        tree=tree,
+        existing_modules=existing_modules,
+        importer_module=importer_module,
+        importer_is_package=importer_is_package,
+    )
+    return ParsedModule(
+        scan_label=scan_label,
+        rel_path=py_file.relative_to(repo_root).as_posix(),
+        candidate_targets=tuple(sorted(candidate_targets)),
+        exact_import_usage=tuple(
+            (module_name, tuple(sorted(imported_names)))
+            for module_name, imported_names in sorted(exact_import_usage.items())
+        ),
+    )
+
+
 @cache
 def _collect_parsed_modules(repo_root_str: str) -> tuple[ParsedModule, ...]:
     """Parse first-party Python modules once per repo path for reuse across checks."""
@@ -276,54 +364,16 @@ def _collect_parsed_modules(repo_root_str: str) -> tuple[ParsedModule, ...]:
         for importer_module, py_file, source_text in _read_module_sources(
             _iter_import_sources(scan)
         ):
-            importer_is_package = py_file.name in {_INIT_PY, _INIT_PYI}
-            try:
-                tree = ast.parse(source_text, filename=str(py_file), mode="exec")
-            except SyntaxError:
-                continue
-            candidate_targets: set[str] = set()
-            exact_import_usage: dict[str, set[str]] = defaultdict(set)
-            # Only Import/ImportFrom matter for the inventory; avoid paying for
-            # every AST node type on multi-thousand-file trees.
-            for node in ast.walk(tree):
-                if not isinstance(node, (ast.Import, ast.ImportFrom)):
-                    continue
-                for target_module in _iter_candidate_import_targets(
-                    existing_modules=existing_modules,
-                    importer_module=importer_module,
-                    importer_is_package=importer_is_package,
-                    node=node,
-                ):
-                    candidate_targets.add(target_module)
-
-                if isinstance(node, ast.Import):
-                    for alias in node.names:
-                        if alias.name.startswith("bioetl."):
-                            exact_import_usage[alias.name].add("<module>")
-                else:
-                    base_module = _resolve_relative_module(
-                        importer_module=importer_module,
-                        importer_is_package=importer_is_package,
-                        module=node.module,
-                        level=node.level,
-                    )
-                    if not base_module or not base_module.startswith("bioetl."):
-                        continue
-                    for alias in node.names:
-                        exact_import_usage[base_module].add(alias.name)
-            parsed_modules.append(
-                ParsedModule(
-                    scan_label=scan.label,
-                    rel_path=py_file.relative_to(repo_root).as_posix(),
-                    candidate_targets=tuple(sorted(candidate_targets)),
-                    exact_import_usage=tuple(
-                        (module_name, tuple(sorted(imported_names)))
-                        for module_name, imported_names in sorted(
-                            exact_import_usage.items()
-                        )
-                    ),
-                )
+            parsed = _build_parsed_module(
+                scan_label=scan.label,
+                repo_root=repo_root,
+                py_file=py_file,
+                importer_module=importer_module,
+                source_text=source_text,
+                existing_modules=existing_modules,
             )
+            if parsed is not None:
+                parsed_modules.append(parsed)
 
     result = tuple(parsed_modules)
     _store_parsed_modules_disk_cache(cache_path, result)
@@ -362,7 +412,7 @@ def _iter_candidate_import_targets(
     node: ast.AST,
 ) -> list[str]:
     if isinstance(node, ast.Import):
-        return [alias.name for alias in node.names if alias.name.startswith("bioetl.")]
+        return [alias.name for alias in node.names if alias.name.startswith(_BIOETL_MODULE_PREFIX)]
 
     if not isinstance(node, ast.ImportFrom):
         return []
@@ -373,7 +423,7 @@ def _iter_candidate_import_targets(
         module=node.module,
         level=node.level,
     )
-    if not base_module or not base_module.startswith("bioetl."):
+    if not base_module or not base_module.startswith(_BIOETL_MODULE_PREFIX):
         return []
 
     candidates = [base_module]

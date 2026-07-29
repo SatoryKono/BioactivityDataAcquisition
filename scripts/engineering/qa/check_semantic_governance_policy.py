@@ -42,6 +42,7 @@ DEFAULT_PARTIAL_IDENTIFIER_REGISTRY = (
 ALLOWED_WEAK_DECISIONS = frozenset(
     {"promotable_candidate", "source_owned_same_name", "permanent_weak_inventory"}
 )
+UNKNOWN_ID_PLACEHOLDER = "<unknown>"
 
 
 @dataclass(frozen=True, slots=True)
@@ -139,7 +140,7 @@ def _findings_for_dedicated_entry(
     review_lookup: dict[str, Any],
 ) -> list[GovernanceFinding]:
     findings: list[GovernanceFinding] = []
-    cluster_id = str(entry.get("cluster_id") or "<unknown>")
+    cluster_id = str(entry.get("cluster_id") or UNKNOWN_ID_PLACEHOLDER)
     review_entry = review_lookup.get(cluster_id)
     if review_entry is None:
         return [
@@ -420,7 +421,7 @@ def _partial_policy_findings(
                 )
             )
             continue
-        cluster_id = str(entry.get("cluster_id") or "<unknown>")
+        cluster_id = str(entry.get("cluster_id") or UNKNOWN_ID_PLACEHOLDER)
         actual.add(cluster_id)
         findings.extend(_partial_entry_metadata_findings(entry, cluster_id=cluster_id))
         findings.extend(
@@ -619,7 +620,7 @@ def _weak_decision_entry_findings(
     required_tracked_metadata: tuple[str, ...],
 ) -> list[GovernanceFinding]:
     """Validate one weak_cluster_decisions entry."""
-    cluster_id = str(entry.get("cluster_id") or "<unknown>")
+    cluster_id = str(entry.get("cluster_id") or UNKNOWN_ID_PLACEHOLDER)
     findings = _weak_entry_base_metadata_findings(entry, cluster_id=cluster_id)
     findings.extend(_weak_entry_decision_value_findings(entry, cluster_id=cluster_id))
     findings.extend(
@@ -739,7 +740,7 @@ def _weak_decision_findings(
                 )
             )
             continue
-        cluster_id = str(entry.get("cluster_id") or "<unknown>")
+        cluster_id = str(entry.get("cluster_id") or UNKNOWN_ID_PLACEHOLDER)
         actual.add(cluster_id)
         findings.extend(
             _weak_decision_entry_findings(
@@ -791,7 +792,7 @@ def _generic_collision_findings(
                 )
             )
             continue
-        cluster_id = str(entry.get("cluster_id") or "<unknown>")
+        cluster_id = str(entry.get("cluster_id") or UNKNOWN_ID_PLACEHOLDER)
         actual.add(cluster_id)
         for key in (
             "cluster_id",
@@ -927,7 +928,7 @@ def _cover_typing_review_entry(
     covered: set[tuple[str, str]],
 ) -> list[GovernanceFinding]:
     """Validate one typing review entry and update covered field pairs."""
-    review_id = str(entry.get("id") or "<unknown>")
+    review_id = str(entry.get("id") or UNKNOWN_ID_PLACEHOLDER)
     findings = _typing_review_metadata_findings(entry, review_id)
     pipeline_findings, pipelines = _typing_review_list_field_findings(
         entry,

@@ -178,15 +178,12 @@ COMMAND_MODULES: dict[str, str] = {
 COMMAND_SPECS = {
     name: module_command(module) for name, module in COMMAND_MODULES.items()
 }
+TEST_HEALTH_MODULE = "scripts.engineering.qa.test_health"
 COMMAND_SPECS.update(
     {
-        "run-tests": module_command("scripts.engineering.qa.test_health", "run-tests"),
-        "summarize-junit": module_command(
-            "scripts.engineering.qa.test_health", "summarize-junit"
-        ),
-        "test-health": module_command(
-            "scripts.engineering.qa.test_health", "test-health"
-        ),
+        "run-tests": module_command(TEST_HEALTH_MODULE, "run-tests"),
+        "summarize-junit": module_command(TEST_HEALTH_MODULE, "summarize-junit"),
+        "test-health": module_command(TEST_HEALTH_MODULE, "test-health"),
     }
 )
 
