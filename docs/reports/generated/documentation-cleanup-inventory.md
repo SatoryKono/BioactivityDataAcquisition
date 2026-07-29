@@ -11,8 +11,8 @@
 | Tracked doc-like files | 2236 |
 | Ignored local docs/reports files | 54 |
 | Duplicate groups | 2 |
-| Generated without route or exception | 1 |
-| Generated routes | 66 |
+| Generated without route or exception | 0 |
+| Generated routes | 67 |
 
 ## Tracking State
 
@@ -371,6 +371,7 @@
 | contract-registry-dq-diagnostics-quality-report | `scripts/engineering/ci/validate_registry_dq_refs.py` | working_output |
 | contract-schema-classifier-diagnostics-quality-report | `scripts/engineering/ci/validate_schema_classifier_gate.py` | working_output |
 | contract-tests-junit-report | `.github/workflows/contract-tests.yml` | ignored_ci_output |
+| dashboard-dux7-live-residual-protocol-generated-doc | `scripts/ops/observability/grafana/apply_dux7_live_residual.py` | tracked_curated_generated_doc |
 | dashboard-navigation-contract-generated-doc | `scripts/ops/observability/grafana/render_nav_bus.py` | tracked_curated_generated_doc |
 | dashboard-panel-title-inventory-generated-doc | `scripts/engineering/qa/report_panel_title_inventory.py` | tracked_curated_generated_doc |
 | dead-code-inventory-quality-baseline | `scripts/engineering/qa/report_dead_code_inventory.py` | tracked_quality_baseline |

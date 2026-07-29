@@ -207,9 +207,17 @@ routes:
     commit_policy: tracked_curated_generated_doc
     outputs:
       - docs/03-guides/dashboards/navigation-contract.md
-    notes:
-      Dashboard navigation contract mirrors the machine-readable navigation
+    notes: Dashboard navigation contract mirrors the machine-readable navigation
       links contract and shipped Grafana navigation bus.
+
+  - id: dashboard-dux7-live-residual-protocol-generated-doc
+    generator: scripts/ops/observability/grafana/apply_dux7_live_residual.py
+    output_kind: curated_generated_docs
+    commit_policy: tracked_curated_generated_doc
+    outputs:
+      - docs/03-guides/dashboards/dux7-live-residual-protocol.md
+    notes: DUX7 live residual protocol documents residual panel triage steps for
+      provider-health and related dashboards after DUX residual waves.
 
   - id: api-reference-generated-docs
     generator: docs API reference generation workflow
