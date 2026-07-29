@@ -102,45 +102,48 @@ def test_generation_is_byte_deterministic(tmp_path: Path) -> None:
 
 
 def test_generation_is_subprocess_environment_invariant(tmp_path: Path) -> None:
-    output_roots = [tmp_path / "first", tmp_path / "second"]
-    environments = [
-        {"TZ": "UTC", "PYTHONHASHSEED": "1", "TMPDIR": str(tmp_path / "tmp-a")},
-        {
+    baseline_root = tmp_path / "first"
+    baseline_outputs = build_all_outputs(
+        output_root=baseline_root,
+        source_revision=REVISION,
+    )
+    baseline = {
+        path.relative_to(baseline_root): content
+        for path, content in baseline_outputs.items()
+    }
+    output_root = tmp_path / "second"
+    alternate_tmp = tmp_path / "alternate-tmp"
+    alternate_tmp.mkdir()
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "scripts.docs",
+            "passports",
+            "generate",
+            "--output-root",
+            str(output_root),
+            "--source-revision",
+            REVISION,
+        ],
+        cwd=PROJECT_ROOT,
+        env={
+            **os.environ,
             "TZ": "Pacific/Auckland",
             "PYTHONHASHSEED": "8675309",
-            "TMPDIR": str(tmp_path / "tmp-b"),
+            "TMPDIR": str(alternate_tmp),
         },
-    ]
-    for output_root, overrides in zip(output_roots, environments, strict=True):
-        Path(overrides["TMPDIR"]).mkdir()
-        result = subprocess.run(
-            [
-                sys.executable,
-                "-m",
-                "scripts.docs",
-                "passports",
-                "generate",
-                "--output-root",
-                str(output_root),
-                "--source-revision",
-                REVISION,
-            ],
-            cwd=PROJECT_ROOT,
-            env={**os.environ, **overrides},
-            check=False,
-            capture_output=True,
-            text=True,
-        )
-        assert result.returncode == 0, result.stderr
-    snapshots = [
-        {
-            path.relative_to(root): path.read_bytes()
-            for path in sorted(root.rglob("*"))
-            if path.is_file()
-        }
-        for root in output_roots
-    ]
-    assert snapshots[0] == snapshots[1]
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr
+    alternate = {
+        path.relative_to(output_root): path.read_bytes()
+        for path in sorted(output_root.rglob("*"))
+        if path.is_file()
+    }
+    assert baseline == alternate
 
 
 def test_workflow_operations_are_classified(tmp_path: Path) -> None:

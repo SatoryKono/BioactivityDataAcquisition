@@ -628,6 +628,7 @@
       "decision_date": "2025-12-26",
       "decision_path": "docs/02-architecture/decisions/ADR-018-gold-strict-validation.md",
       "enforcement_owner_paths": [
+        "configs/quality/scripts_inventory_manifest.json",
         "scripts/docs/passports/projector.py",
         "tests/architecture/test_architecture_audit_closeout_gates.py",
         "tests/architecture/test_explicit_gold_scd2_policy.py",
@@ -642,6 +643,7 @@
         "configs/field_registry/canonical_registry.json",
         "configs/field_registry/generic_field_ownership.yaml",
         "configs/field_registry/ontology_unit_semantic_roles.yaml",
+        "configs/quality/scripts_inventory_manifest.json",
         "docs/00-project/00-map.md",
         "docs/00-project/NORMATIVE_SOURCES.md",
         "docs/00-project/RULES.md",
@@ -1254,10 +1256,12 @@
       "decision_date": "2026-02-06",
       "decision_path": "docs/02-architecture/decisions/ADR-033-publication-validation-strategy.md",
       "enforcement_owner_paths": [
+        "configs/quality/scripts_inventory_manifest.json",
         "tests/unit/scripts/test_generate_adr_registry.py"
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
+        "configs/quality/scripts_inventory_manifest.json",
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
         "docs/00-project/ai/memory/memory-py-doc-bot.md",

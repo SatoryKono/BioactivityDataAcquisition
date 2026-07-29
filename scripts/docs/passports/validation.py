@@ -26,8 +26,25 @@ def validate_composite_payload(
     diagnostics: list[JsonObject] = []
     if not output_keys:
         diagnostics.append(_error("COMPOSITE_SEED_OUTPUT_KEYS_EMPTY"))
+    diagnostics.extend(
+        _validate_join_sources(
+            composite,
+            seed_output_keys=set(output_keys),
+            pipeline_output_keys=pipeline_output_keys or {},
+        )
+    )
+    diagnostics.extend(_validate_merge(composite.get("merge")))
+    return diagnostics
+
+
+def _validate_join_sources(
+    composite: JsonObject,
+    *,
+    seed_output_keys: set[str],
+    pipeline_output_keys: dict[str, set[str]],
+) -> list[JsonObject]:
+    diagnostics: list[JsonObject] = []
     available_sources: set[str] = set()
-    known_outputs = pipeline_output_keys or {}
     for role in ("dependencies", "enrichers"):
         for item in _mapping_items(composite.get(role)):
             join_keys = _unique_strings(item.get("join_keys"))
@@ -46,9 +63,9 @@ def validate_composite_payload(
                             key_source=key_source,
                         )
                     )
-                valid_keys = known_outputs.get(key_source, set())
+                valid_keys = pipeline_output_keys.get(key_source, set())
             else:
-                valid_keys = set(output_keys)
+                valid_keys = seed_output_keys
             missing = sorted(set(join_keys) - valid_keys)
             if missing:
                 diagnostics.append(
@@ -70,10 +87,14 @@ def validate_composite_payload(
             pipeline = item.get("pipeline")
             if isinstance(pipeline, str):
                 available_sources.add(pipeline)
-    merge = composite.get("merge")
+    return diagnostics
+
+
+def _validate_merge(value: object) -> list[JsonObject]:
+    diagnostics: list[JsonObject] = []
+    merge = value
     if not isinstance(merge, dict):
-        diagnostics.append(_error("COMPOSITE_MERGE_MISSING"))
-        return diagnostics
+        return [_error("COMPOSITE_MERGE_MISSING")]
     if merge.get("strategy") not in _MERGE_STRATEGIES:
         diagnostics.append(
             _error("COMPOSITE_MERGE_STRATEGY_INVALID", value=merge.get("strategy"))
