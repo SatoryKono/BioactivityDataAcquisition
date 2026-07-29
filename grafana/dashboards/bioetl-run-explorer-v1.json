@@ -95,16 +95,16 @@
     {
       "id": 1,
       "type": "text",
-      "title": "Run Scope",
+      "title": "Provenance · Run Scope",
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 3
       },
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:2px 6px;border-left:3px solid #64748b;background:rgba(100,116,139,0.10);line-height:1.2;font-size:12px;overflow:hidden\"><strong>Run Explorer</strong> · pick recent run → ID → accounting → actions. Exact-run forensic owner. Full paths live in report artifacts, not triage bodies.</div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Which exact run should be inspected?</div><div><b>Scope:</b> <b>BROWSE</b> = recent runs · <b>SELECTED RUN</b> = identity/accounting/actions</div><div><b>FULL PATHS</b> = report artifacts, not triage bodies</div></div></div>"
       },
       "description": "DUX5: status-card shell (reason/action beside Status; no internal scroll). DUX3-25: Empty vs selected modes. run_id is Ops HTTP only — never a Prometheus label. DSA-08: empty = browse recent runs; selected = identity -> accounting -> detail."
     },
@@ -117,7 +117,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 7
       },
       "datasource": "BioETL Ops HTTP",
       "fieldConfig": {
@@ -197,7 +197,7 @@
         "h": 6,
         "w": 12,
         "x": 0,
-        "y": 13
+        "y": 14
       },
       "datasource": "BioETL Ops HTTP",
       "description": "DUX7: Copy/Open full identity value via data:text/plain link. DUX6: prefer short run/manifest display; full value via tooltip/Copy/Open; never put full UUIDs into Prometheus labels. DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Count (no bare Value # headers). DUX4-23/25: Canonical RUN hub — only board with first-class ID/Processed KPIs. DUX3-25: Canonical RUN identity hub. Empty until run_id selected. Exact-run identity hub (Ops HTTP). Canonical portfolio hub for ID panels. Valid empty: no matching identity for the selected run. Backend unavailable is distinct; check /health/live.",
@@ -355,7 +355,7 @@
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 28
+        "y": 29
       },
       "datasource": "BioETL Ops HTTP",
       "description": "DUX6: zero/empty = none observed, Not started, or Not available — never bare success; red only for validated failure (not lifecycle zero). DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Count (no bare Value # headers). DUX4-23/25: Canonical RUN hub — only board with first-class ID/Processed KPIs. DUX3-25: Canonical RUN accounting hub. Expected empty ≠ red failure (DUX3-03). Bronze/Silver/Gold accounting hub (Ops HTTP). Canonical portfolio hub for Processed Records. Valid empty: no matching accounting rows for the selected run. Backend unavailable is distinct; check /health/live.",
@@ -622,7 +622,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 20
       },
       "panels": [
         {
@@ -926,7 +926,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 21
       },
       "options": {
         "mode": "html",

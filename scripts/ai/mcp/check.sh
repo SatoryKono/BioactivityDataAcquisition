@@ -199,6 +199,7 @@ require_contains "$filesystem_wrapper_source" 'REPO_ROOT' "filesystem wrapper sc
 require_wrapper_path "$fetch_out" "$EXPECTED_FETCH_WRAPPER_PATH" "fetch is routed through the project wrapper" || status=1
 fetch_wrapper_source="$(<"$EXPECTED_FETCH_WRAPPER_PATH")"
 require_contains "$fetch_wrapper_source" 'mcp-server-fetch==2025.4.7' "fetch wrapper pins mcp-server-fetch==2025.4.7" || status=1
+require_contains "$fetch_wrapper_source" 'mcp<2' "fetch wrapper constrains the compatible MCP SDK major" || status=1
 require_contains "$fetch_wrapper_source" 'bioetl_resolve_uvx_bin' "fetch wrapper resolves uvx" || status=1
 require_contains "$fetch_wrapper_source" '--python 3.13' "fetch wrapper uses the WSL-compatible CPython 3.13 runtime" || status=1
 require_wrapper_path "$github_out" "$EXPECTED_GITHUB_WRAPPER_PATH" "github is routed through the project wrapper" || status=1

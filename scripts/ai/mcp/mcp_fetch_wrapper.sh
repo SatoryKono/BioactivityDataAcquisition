@@ -26,4 +26,5 @@ if ! command -v "${UVX_BIN}" >/dev/null 2>&1 && [[ ! -x "${UVX_BIN}" ]]; then
 fi
 
 bioetl_enable_uvx_network_bypass
-exec "${UVX_BIN}" --python 3.13 --from "mcp-server-fetch==2025.4.7" mcp-server-fetch
+exec "${UVX_BIN}" --python 3.13 --with "mcp<2" \
+  --from "mcp-server-fetch==2025.4.7" mcp-server-fetch

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-29T18:29:34.145625+00:00",
+  "generated_at": "2026-07-29T18:47:58.032414+00:00",
   "summary": {
     "total_scripts": 561,
     "status_counts": {
@@ -3334,7 +3334,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 1167,
+          "line": 1172,
           "source_group": "tests",
           "text": "powershell_source = (MCP_DIR / \"mcp_neo4j_cypher_wrapper.ps1\").read_text("
         }
@@ -3611,7 +3611,7 @@
       "references": [
         {
           "path": "scripts/ai/mcp/check.sh",
-          "line": 253,
+          "line": 254,
           "source_group": "scripts",
           "text": "if python3 \"${SCRIPT_DIR}/protocol_smoke.py\" --config \"${protocol_config}\" --server memory --timeout 15 >/dev/null; then"
         },
@@ -17900,7 +17900,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 1696,
+          "line": 1704,
           "source_group": "other",
           "text": "powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/start_quarantine_explorer.ps1"
         }
@@ -18782,7 +18782,7 @@
         },
         {
           "path": "scripts/ai/gemini/helper/ensure-mcp.sh",
-          "line": 135,
+          "line": 153,
           "source_group": "scripts",
           "text": "local health=\"${REPO_ROOT}/scripts/ops/runtime/mcp/health-shared.sh\""
         },
@@ -18876,7 +18876,7 @@
         },
         {
           "path": "scripts/ai/gemini/helper/ensure-mcp.sh",
-          "line": 134,
+          "line": 152,
           "source_group": "scripts",
           "text": "local launcher=\"${REPO_ROOT}/scripts/ops/runtime/mcp/start-shared.sh\""
         },

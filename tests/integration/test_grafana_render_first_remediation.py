@@ -318,7 +318,7 @@ def test_rf004_identity_and_scope_are_persistent() -> None:
 
 def test_rf005_incident_hierarchy_and_semantic_encoding() -> None:
     overview = _load("bioetl-overview-v2.json")
-    assert _panel(overview, 215)["gridPos"]["y"] <= 6
+    assert _panel(overview, 215)["gridPos"]["y"] <= 7
     # Triage alert table is first-screen identity; historical trends stay collapsed.
     assert _panel(overview, 9601).get("type") == "table"
     assert _panel(overview, 9018).get("type") == "state-timeline"

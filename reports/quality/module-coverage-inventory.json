@@ -17373,7 +17373,7 @@
       "missing_lines": 2,
       "module": "bioetl.infrastructure.adapters.semanticscholar.fetch_adapter_mixin",
       "path": "src/bioetl/infrastructure/adapters/semanticscholar/fetch_adapter_mixin.py",
-      "source_lines": 243
+      "source_lines": 239
     },
     {
       "coverage_percent": 92.59,
@@ -40525,7 +40525,7 @@
       "missing_lines": 2,
       "module": "bioetl.infrastructure.adapters.semanticscholar.fetch_adapter_mixin",
       "path": "src/bioetl/infrastructure/adapters/semanticscholar/fetch_adapter_mixin.py",
-      "source_lines": 243
+      "source_lines": 239
     },
     {
       "coverage_percent": 92.59,
@@ -46310,7 +46310,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-28",
-  "source_tree_sha256": "0a2c1077a47fad4f12f41468bd12a23ffafb3f5fd3fab29a78556f43ab27f19f",
+  "source_tree_sha256": "ef5663768278abe0520422187c988c21f734068564133c270b9e921859d843fb",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

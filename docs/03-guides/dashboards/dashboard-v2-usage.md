@@ -170,6 +170,12 @@ still belong to each dashboard role; `workflow` remains evidence context unless
 documented otherwise, and `run_id` affects only the local control-plane `ID`
 panel.
 
+Read Provenance as two levels: the 18px first line is the operator question,
+and the 16px lines below define which evidence belongs to `CURRENT`,
+`SELECTED RUN`, `TIME RANGE`, `GLOBAL`, or another explicitly named scope.
+Do not compare badges from different scopes as peer verdicts. Run Explorer
+uses `Provenance · Run Scope` for the same contract.
+
 `Processed Records` is no longer a range-only throughput summary. It is the
 shared compact stage/outcome accounting table for Bronze, Silver outcomes, and
 Gold outcomes backed by local `/ops/observability/processed-records` rows over

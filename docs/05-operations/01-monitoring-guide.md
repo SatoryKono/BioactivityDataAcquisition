@@ -142,6 +142,11 @@ is not a routing target — see
 failure. `VALID EMPTY`, `TELEMETRY ABSENT` и `N/A` различаются. `LOADING`
 временно; пустая панель не является evidence.
 
+На первом экране сначала прочитайте 18px вопрос в Provenance, затем 16px
+scope-строки. `CURRENT`, `SELECTED RUN`, `TIME RANGE` и `GLOBAL` обозначают
+разные основания evidence и не должны интерпретироваться как peer status
+cards. В Run Explorer эту роль выполняет `Provenance · Run Scope`.
+
 Dashboard остаётся read-only surface. Replay и quarantine actions выполняются
 через supported CLI после фиксации scope; изменение query или DQ threshold не
 является recovery.
