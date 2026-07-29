@@ -4,6 +4,7 @@ Linked campaigns:
 
 - PD–PD4 (closed): product errors → 0; suppression inventory; Host Protocol partial burn-down
 - **PD5 (closed):** `#6994` … `#7004` — workspace ~10k → ~2.2k (tests unit surface) + product suppression residual
+- **Next (planned):** ~15k IDE figure is primarily **product warnings** (~15.5k), not product errors — see `reports/quality/PROJECT_DIAGNOSTICS_15062_AUDIT_AND_PLAN_2026-07-29.md`
 
 ## Gate semantics
 
@@ -15,15 +16,17 @@ Linked campaigns:
 | Workspace / tests diagnostics | basedpyright full tree | IDE UX (post-PD5 ~2.2k errors) | **No** |
 | Warnings | basedpyright | Noise budget ~15.5k product | **No** |
 
-### Interpreting large IDE counts (~12k)
+### Interpreting large IDE counts (~12k / ~15k)
 
 | Figure | Meaning |
 | --- | --- |
 | IDE “~12662 errors” (pre-PD5) | Problems panel composite; not exact CLI total |
+| IDE “~15062 errors” (post-PD5) | **Best match: product warnings ~15523** (±3%); **not** product errors |
 | Live workspace errors (PD5 start) | **~10005** |
 | Live workspace errors (**after PD5**) | **~2174** |
 | of which tests (after PD5) | **~909** |
-| Product `src/bioetl` errors | **0** |
+| Product `src/bioetl` **errors** | **0** |
+| Product `src/bioetl` **warnings** | **~15523** (advisory; Any/Unknown ~67%) |
 | Entity unit tests errors | **0** |
 | `tests/unit/{application,composition,infrastructure}` | **0** each (PD5 surface) |
 
@@ -72,7 +75,8 @@ Warnings are advisory. Prefer narrow pilots (`reportImplicitOverride` / Port `An
 
 ## Related
 
-- Plan: `reports/quality/PROJECT_DIAGNOSTICS_12662_AUDIT_AND_PLAN_2026-07-28.md`
+- Plan (~15k / warnings-era): `reports/quality/PROJECT_DIAGNOSTICS_15062_AUDIT_AND_PLAN_2026-07-29.md`
+- Plan (~12k / workspace-era): `reports/quality/PROJECT_DIAGNOSTICS_12662_AUDIT_AND_PLAN_2026-07-28.md`
 - PD5 pack: `.github/ISSUES/PD5-2026-07-29-PROJECT-DIAGNOSTICS-WORKSPACE-ISSUE-PACK.md`
 - PD5 closeout: `reports/quality/pd5-campaign-closeout-2026-07-29.md`
 - Scripts/memory advisory: `reports/quality/pd5-scripts-memory-advisory-note.md`
