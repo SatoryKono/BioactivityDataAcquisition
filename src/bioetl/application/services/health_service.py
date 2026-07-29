@@ -209,7 +209,9 @@ class HealthService:
 
             # Use runtime checkable protocol to verify adapter implements HealthCheckPort
             if isinstance(adapter, HealthCheckPort):
-                result: HealthCheckResult = await adapter.check_health()
+                result: HealthCheckResult = await self._run_adapter_health_check(
+                    adapter
+                )
                 return HealthResult(
                     provider=provider,
                     status=result.status.value.lower(),
@@ -243,6 +245,26 @@ class HealthService:
                 error=str(e),
                 checked_at=self.clock.now(),
             )
+
+    async def _run_adapter_health_check(
+        self,
+        adapter: HealthCheckPort,
+    ) -> HealthCheckResult:
+        """Run adapter health probe inside HTTP client context when available.
+
+        Provider health probes call ``UnifiedHTTPClient.get_once`` and require an
+        entered async client lifecycle. Adapters do not always own that entry
+        point for one-shot diagnostics checks.
+        """
+        http_client = getattr(adapter, "http_client", None)
+        if http_client is None:
+            http_client = getattr(adapter, "_http_client", None)
+        enter = getattr(http_client, "__aenter__", None)
+        exit_ = getattr(http_client, "__aexit__", None)
+        if callable(enter) and callable(exit_):
+            async with http_client:
+                return await adapter.check_health()
+        return await adapter.check_health()
 
     def list_available_providers(self) -> list[str]:
         """List all available providers that can be health checked.
