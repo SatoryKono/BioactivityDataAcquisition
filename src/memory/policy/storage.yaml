@@ -41,7 +41,9 @@ artifact_classes:
   timeline_event:
     storage_mode: rebuild_only
     commit_to_git: false
-    default_paths: ["src/memory/timeline/events"]
+    default_paths:
+      - "src/memory/derived/timeline/events"
+      - "src/memory/timeline/events"
     notes: "Timeline projections are derived from control-plane, workflow, and runbook sources."
   curated_note:
     storage_mode: versioned

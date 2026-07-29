@@ -1,0 +1,27 @@
+version: 1
+default_security_classification: internal
+trust_levels:
+  - trusted_repository
+  - reviewed_external
+  - untrusted
+security_classifications:
+  - public
+  - internal
+  - confidential
+  - secret
+persistence:
+  mode_env_var: BIOETL_AI_MEMORY_MODE
+  default_mode: read-write
+  supported_modes:
+    - "off"
+    - read-only
+    - read-write
+promotion:
+  reject_untrusted_sources: true
+  reviewed_external_requires_explicit_opt_in: true
+  reject_finding_kinds:
+    - prompt_injection
+    - secret
+    - pii
+logging:
+  include_matched_values: false

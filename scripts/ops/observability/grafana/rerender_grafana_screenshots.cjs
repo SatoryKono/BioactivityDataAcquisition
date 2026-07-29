@@ -50,6 +50,16 @@ function defaultScreenshotConfig() {
     expandCollapsedRows: !/^(0|false|no)$/i.test(
       process.env.GRAFANA_SCREENSHOT_EXPAND_COLLAPSED_ROWS || "true",
     ),
+    captureSurface: (
+      process.env.GRAFANA_SCREENSHOT_CAPTURE_SURFACE || "full"
+    ).trim().toLowerCase(),
+    kioskMode: (
+      process.env.GRAFANA_SCREENSHOT_KIOSK_MODE || "off"
+    ).trim().toLowerCase(),
+    browserZoom: Number.parseInt(
+      process.env.GRAFANA_SCREENSHOT_BROWSER_ZOOM || "100",
+      10,
+    ),
   };
 }
 
@@ -90,6 +100,15 @@ function applyScreenshotArg(config, arg, next) {
     "--scope-query": (value) => {
       config.scopeQuery = value;
     },
+    "--capture-surface": (value) => {
+      config.captureSurface = value.trim().toLowerCase();
+    },
+    "--kiosk-mode": (value) => {
+      config.kioskMode = value.trim().toLowerCase();
+    },
+    "--browser-zoom": (value) => {
+      config.browserZoom = Number.parseInt(value, 10);
+    },
   };
   if (Object.hasOwn(valueArgs, arg) && next) {
     valueArgs[arg](next);
@@ -118,6 +137,19 @@ function validateScreenshotConfig(config) {
   }
   if (!new Set(["dark", "light"]).has(config.theme)) {
     throw new Error("Playwright screenshot theme must be 'dark' or 'light'");
+  }
+  if (!new Set(["viewport", "full"]).has(config.captureSurface)) {
+    throw new Error("Playwright capture surface must be 'viewport' or 'full'");
+  }
+  if (!new Set(["off", "full", "tv"]).has(config.kioskMode)) {
+    throw new Error("Playwright kiosk mode must be 'off', 'full', or 'tv'");
+  }
+  if (
+    !Number.isInteger(config.browserZoom) ||
+    config.browserZoom < 50 ||
+    config.browserZoom > 200
+  ) {
+    throw new Error("Playwright browser zoom must be an integer from 50 to 200");
   }
   return config;
 }
@@ -402,6 +434,7 @@ async function createBrowserContext(browser) {
     return {
       context: await browser.newContext({
         viewport: CONFIG.viewport,
+        deviceScaleFactor: 1,
         extraHTTPHeaders: {
           Authorization: `Bearer ${CONFIG.serviceAccountToken}`,
         },
@@ -417,7 +450,10 @@ async function createBrowserContext(browser) {
       `warning: Grafana login failed for Playwright fallback; continuing anonymously (${String(error?.message ?? error)})`,
     );
     return {
-      context: await browser.newContext({ viewport: CONFIG.viewport }),
+      context: await browser.newContext({
+        viewport: CONFIG.viewport,
+        deviceScaleFactor: 1,
+      }),
       api: null,
     };
   }
@@ -426,6 +462,7 @@ async function createBrowserContext(browser) {
     context: await browser.newContext({
       storageState,
       viewport: CONFIG.viewport,
+      deviceScaleFactor: 1,
     }),
     api,
   };
@@ -1032,6 +1069,9 @@ async function dashboardCaptureMetrics(page) {
 }
 
 async function prepareDashboardForCapture(page, dashboard, index, total) {
+  if (CONFIG.captureSurface !== "full") {
+    return false;
+  }
   const metrics = await dashboardCaptureMetrics(page);
   const measuredBottom =
     metrics.panelBottom > 0 ? metrics.panelBottom : metrics.scrollBottom;
@@ -1116,7 +1156,90 @@ function dashboardRenderUrl(dashboard) {
       params.set(key, value);
     }
   }
+  if (CONFIG.kioskMode === "full") {
+    params.set("kiosk", "1");
+  } else if (CONFIG.kioskMode === "tv") {
+    params.set("kiosk", "tv");
+  }
   return `${CONFIG.baseUrl}${dashboard.url}?${params.toString()}`;
+}
+
+async function applyBrowserZoom(page) {
+  await page.evaluate((zoomPercent) => {
+    document.documentElement.style.zoom = `${zoomPercent}%`;
+  }, CONFIG.browserZoom);
+}
+
+async function detectBrowserAndKioskState(page) {
+  return page.evaluate(({ requestedZoom, requestedKiosk }) => {
+    const visible = (element) => {
+      if (!element) return false;
+      const rect = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      return (
+        rect.width > 0 &&
+        rect.height > 0 &&
+        style.display !== "none" &&
+        style.visibility !== "hidden"
+      );
+    };
+    const url = new URL(window.location.href);
+    const kioskParam = url.searchParams.get("kiosk");
+    const chromeSelectors = [
+      '[data-testid="sidemenu"]',
+      '[data-testid="navbarmenu"]',
+      '[aria-label="Main menu"]',
+    ];
+    const visibleChrome = chromeSelectors.some((selector) =>
+      visible(document.querySelector(selector)),
+    );
+    let actualKiosk = "off";
+    if (kioskParam === "tv") actualKiosk = "tv";
+    if (kioskParam === "1" || kioskParam === "true" || kioskParam === "") {
+      actualKiosk = url.searchParams.has("kiosk") ? "full" : "off";
+    }
+    return {
+      requestedZoom,
+      cssZoom: getComputedStyle(document.documentElement).zoom || "1",
+      visualViewportScale: window.visualViewport?.scale || 1,
+      devicePixelRatio: window.devicePixelRatio,
+      requestedKiosk,
+      actualKiosk,
+      kioskParam,
+      visibleGrafanaChrome: visibleChrome,
+    };
+  }, { requestedZoom: CONFIG.browserZoom, requestedKiosk: CONFIG.kioskMode });
+}
+
+async function collectLayoutGeometry(page, dashboard) {
+  return page.evaluate(({ requiredPanels, viewport }) => {
+    const round = (value) => Math.round(value * 10) / 10;
+    const panelGeometry = {};
+    for (const panel of requiredPanels) {
+      const element =
+        document.querySelector(`[data-panelid="${panel.id}"]`) ||
+        document.querySelector(`[data-viz-panel-key="panel-${panel.id}"]`) ||
+        document.querySelector(`[data-griditem-key="grid-item-${panel.id}"]`);
+      if (!element) continue;
+      const rect = element.getBoundingClientRect();
+      panelGeometry[String(panel.id)] = {
+        x: round(rect.x),
+        y: round(rect.y + window.scrollY),
+        width: round(rect.width),
+        height: round(rect.height),
+      };
+    }
+    const documentWidth = Math.max(
+      document.documentElement.scrollWidth,
+      document.body?.scrollWidth || 0,
+    );
+    return {
+      viewport,
+      documentWidth,
+      horizontalOverflow: documentWidth > viewport.width + 2,
+      panelGeometry,
+    };
+  }, { requiredPanels: dashboard.requiredPanels, viewport: CONFIG.viewport });
 }
 
 async function renderDashboard(page, dashboard, index, total) {
@@ -1125,7 +1248,8 @@ async function renderDashboard(page, dashboard, index, total) {
   // Start full-surface audits with enough vertical space for expanded rows.
   // Shrinking/resizing only after queries settle makes Grafana re-run every
   // panel and can strand Infinity/HTTP panels in a loading state.
-  const auditViewport = CONFIG.expandCollapsedRows
+  const auditViewport =
+    CONFIG.captureSurface === "full" && CONFIG.expandCollapsedRows
     ? { width: CONFIG.viewport.width, height: MAX_CAPTURE_VIEWPORT_HEIGHT }
     : CONFIG.viewport;
   await page.setViewportSize(auditViewport);
@@ -1155,6 +1279,7 @@ async function renderDashboard(page, dashboard, index, total) {
     `[${index}/${total}] settling ${dashboard.uid} for ${CONFIG.settleMs}ms ...`,
   );
   await page.waitForTimeout(CONFIG.settleMs);
+  await applyBrowserZoom(page);
   await expandCollapsedRows(page, dashboard, index, total);
   await waitForDashboardContent(page, dashboard, index, total);
   await materializeLazyPanels(page, dashboard, index, total);
@@ -1188,6 +1313,13 @@ async function renderDashboard(page, dashboard, index, total) {
       `Theme verification failed for ${dashboard.uid}: requested=${CONFIG.theme} actual=${dashboard.actualTheme}`,
     );
   }
+  dashboard.browserState = await detectBrowserAndKioskState(page);
+  if (dashboard.browserState.actualKiosk !== CONFIG.kioskMode) {
+    throw new Error(
+      `Kiosk verification failed for ${dashboard.uid}: requested=${CONFIG.kioskMode} actual=${dashboard.browserState.actualKiosk}`,
+    );
+  }
+  dashboard.layoutGeometry = await collectLayoutGeometry(page, dashboard);
   dashboard.terminalStateValidation = await validateDashboardTerminalStates(
     page,
     dashboard,
@@ -1210,7 +1342,14 @@ async function renderDashboard(page, dashboard, index, total) {
     animations: "disabled",
     caret: "hide",
   };
-  if (CONFIG.expandCollapsedRows && Number.isFinite(dashboard.captureHeight)) {
+  if (CONFIG.captureSurface === "viewport") {
+    screenshotOptions.clip = {
+      x: 0,
+      y: 0,
+      width: CONFIG.viewport.width,
+      height: CONFIG.viewport.height,
+    };
+  } else if (CONFIG.expandCollapsedRows && Number.isFinite(dashboard.captureHeight)) {
     screenshotOptions.clip = {
       x: 0,
       y: 0,
@@ -1256,6 +1395,9 @@ async function writeManifest(dashboards) {
     requested: {
       viewport: CONFIG.viewport,
       theme: CONFIG.theme,
+      capture_surface: CONFIG.captureSurface,
+      kiosk_mode: CONFIG.kioskMode,
+      browser_zoom: CONFIG.browserZoom,
     },
     actual: {
       viewports: Object.fromEntries(
@@ -1276,6 +1418,12 @@ async function writeManifest(dashboards) {
           dashboard.terminalStateValidation?.status || "missing",
         ]),
       ),
+    },
+    backend_applicability: {
+      quarantine_explorer: {
+        state: "NOT_APPLICABLE",
+        reason: "Quarantine Explorer HTTP/UI surface is retired from shipping.",
+      },
     },
     dashboards,
   };

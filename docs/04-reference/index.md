@@ -44,6 +44,7 @@ design rationale and layer structure.
 | Workflow Catalog  | Current declarative workflow DAG catalog                                                     | [workflow-catalog.md](workflow-catalog.md)             |
 | GitHub Actions Workflows | Current CI / nightly / release workflow inventory under `.github/workflows/`        | [github-actions-workflows.md](github-actions-workflows.md) |
 | Pipeline Catalog  | Current provider and composite pipeline config catalog                                       | [pipeline-catalog.md](pipeline-catalog.md)             |
+| Passports         | Generated evidence-backed pipeline, composite, and workflow projections                       | [passports/index.md](passports/index.md)               |
 | Domain            | Canonical published catalog for aggregates, value objects, events, ports, invariants, and workflow lifecycle semantics | [domain/README.md](domain/README.md) |
 | Contracts         | Published contract pack for Gold, DQ, control-plane, and observability surfaces             | [contracts/README.md](contracts/README.md)             |
 | Normalization     | Published normalization governance for provider fields and IDs                               | [normalization/chembl-normalization-overview.md](normalization/chembl-normalization-overview.md) |
@@ -70,6 +71,7 @@ design rationale and layer structure.
 - [Data Contracts Current State](contracts/data-contracts-current.md)
 - [Pipeline Catalog](pipeline-catalog.md)
 - [Workflow Catalog](workflow-catalog.md)
+- [Pipeline and Workflow Passports](passports/index.md)
 - [GitHub Actions Workflows](github-actions-workflows.md)
 - [Domain Reference](domain/README.md)
 - [Domain Contexts](domain/contexts.md)

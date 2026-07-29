@@ -554,7 +554,7 @@ run_memory_checks() {
 
     run_step memory-prune-dry-run \
         env PYTHONPATH="$memory_pythonpath" \
-        "$PYTHON_BIN" -m memory.tooling.prune --json
+        "$PYTHON_BIN" -m memory.tooling.prune --json --check
 }
 
 run_architecture_checks() {

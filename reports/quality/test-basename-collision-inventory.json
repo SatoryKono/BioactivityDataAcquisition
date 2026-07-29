@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "linked_issue": 7032,
-  "duplicate_basename_count": 69,
-  "duplicate_file_instances": 155,
+  "duplicate_basename_count": 70,
+  "duplicate_file_instances": 158,
   "top_collisions": [
     {
       "basename": "test_adapter.py",
@@ -98,6 +98,15 @@
         "tests/unit/domain/schemas/openalex/test_publication.py",
         "tests/unit/domain/schemas/semanticscholar/test_publication.py",
         "tests/unit/domain/validation/test_publication.py"
+      ]
+    },
+    {
+      "basename": "test_registry.py",
+      "count": 3,
+      "paths": [
+        "tests/unit/composition/factories/pipeline/test_registry.py",
+        "tests/unit/domain/normalization/profiles/test_registry.py",
+        "tests/unit/memory/test_registry.py"
       ]
     },
     {
@@ -331,14 +340,6 @@
       "paths": [
         "tests/unit/application/core/test_memory_monitor.py",
         "tests/unit/infrastructure/system/test_memory_monitor.py"
-      ]
-    },
-    {
-      "basename": "test_merged_metadata_explainability.py",
-      "count": 2,
-      "paths": [
-        "tests/unit/domain/behavior/test_merged_metadata_explainability.py",
-        "tests/unit/domain/services/test_merged_metadata_explainability.py"
       ]
     }
   ]

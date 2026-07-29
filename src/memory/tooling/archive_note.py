@@ -58,7 +58,10 @@ def archive_note(
     target = output_path or (_archive_root() / parent_name / source.name)
     write_markdown_note(target, metadata, note.body)
     if move:
-        source.unlink()
+        from memory.storage import exclusive_lock
+
+        with exclusive_lock(source):
+            source.unlink(missing_ok=True)
     return target
 
 

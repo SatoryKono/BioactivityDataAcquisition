@@ -75,6 +75,9 @@ class RenderConfig:
     range_hours: int = 12
     expand_collapsed_rows: bool = True
     occurrence_id: str = ""
+    capture_surface: str = "full"
+    kiosk_mode: str = "off"
+    browser_zoom: int = 100
 
 
 @dataclass(frozen=True)
@@ -327,13 +330,33 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
             "Enabled by default for full-surface audit evidence."
         ),
     )
+    parser.add_argument(
+        "--capture-surface",
+        choices=("viewport", "full"),
+        default="full",
+        help="Capture only the requested viewport or the full dashboard surface.",
+    )
+    parser.add_argument(
+        "--kiosk-mode",
+        choices=("off", "full", "tv"),
+        default="off",
+        help="Explicit Grafana kiosk state to request and verify in Playwright.",
+    )
+    parser.add_argument(
+        "--browser-zoom",
+        type=int,
+        choices=range(50, 201),
+        default=100,
+        metavar="PERCENT",
+        help="Browser zoom percentage recorded and applied by Playwright.",
+    )
     args = parser.parse_args(argv)
     return RenderConfig(
         base_url=args.base_url.rstrip("/"),
         username=args.username,
         password=args.password,
         service_account_token=args.service_account_token,
-        output_dir=args.output_dir,
+        output_dir=args.output_dir.resolve(),
         width=args.width,
         height=args.height,
         timeout_seconds=args.timeout_seconds,
@@ -347,6 +370,9 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
         range_hours=max(int(args.range_hours), 1),
         expand_collapsed_rows=bool(args.expand_collapsed_rows),
         occurrence_id=str(args.occurrence_id).strip(),
+        capture_surface=str(args.capture_surface),
+        kiosk_mode=str(args.kiosk_mode),
+        browser_zoom=int(args.browser_zoom),
     )
 
 
@@ -392,6 +418,10 @@ def _scope_query_params(config: RenderConfig) -> dict[str, str]:
         params["var-run_id"] = config.run_id
         if config.run_id != "-":
             params["var-quarantine_run_id"] = config.run_id
+    if config.kiosk_mode == "full":
+        params["kiosk"] = "1"
+    elif config.kiosk_mode == "tv":
+        params["kiosk"] = "tv"
     return params
 
 
@@ -446,6 +476,9 @@ def _write_manifest(
         "requested": {
             "viewport": {"width": config.width, "height": config.height},
             "theme": config.theme,
+            "capture_surface": config.capture_surface,
+            "kiosk_mode": config.kiosk_mode,
+            "browser_zoom": config.browser_zoom,
         },
         "actual": {
             "viewports": {
@@ -460,6 +493,12 @@ def _write_manifest(
                 "Grafana Render API captures pixels but cannot prove panel terminal "
                 "states; use --fallback playwright for auditable evidence."
             ),
+        },
+        "backend_applicability": {
+            "quarantine_explorer": {
+                "state": "NOT_APPLICABLE",
+                "reason": "Quarantine Explorer HTTP/UI surface is retired from shipping.",
+            }
         },
         "selected_uids": list(config.selected_uids),
         "scope": {
@@ -693,6 +732,9 @@ def _playwright_env(config: RenderConfig) -> dict[str, str]:
     env["GRAFANA_SCREENSHOT_EXPAND_COLLAPSED_ROWS"] = (
         "true" if config.expand_collapsed_rows else "false"
     )
+    env["GRAFANA_SCREENSHOT_CAPTURE_SURFACE"] = config.capture_surface
+    env["GRAFANA_SCREENSHOT_KIOSK_MODE"] = config.kiosk_mode
+    env["GRAFANA_SCREENSHOT_BROWSER_ZOOM"] = str(config.browser_zoom)
     if config.selected_uids:
         env["GRAFANA_SCREENSHOT_UIDS"] = ",".join(config.selected_uids)
     scope_query = urlencode(_scope_query_params(config))
@@ -723,6 +765,12 @@ def _run_playwright_process(config: RenderConfig) -> int:
             str(config.height),
             "--theme",
             config.theme,
+            "--capture-surface",
+            config.capture_surface,
+            "--kiosk-mode",
+            config.kiosk_mode,
+            "--browser-zoom",
+            str(config.browser_zoom),
         ]
     )
     scope_query = urlencode(_scope_query_params(config))
@@ -803,6 +851,9 @@ def _write_merged_playwright_manifest(
         "requested": {
             "viewport": {"width": config.width, "height": config.height},
             "theme": config.theme,
+            "capture_surface": config.capture_surface,
+            "kiosk_mode": config.kiosk_mode,
+            "browser_zoom": config.browser_zoom,
         },
         "actual": {
             "viewports": {
@@ -828,6 +879,12 @@ def _write_merged_playwright_manifest(
             },
         },
         "expand_collapsed_rows": config.expand_collapsed_rows,
+        "backend_applicability": {
+            "quarantine_explorer": {
+                "state": "NOT_APPLICABLE",
+                "reason": "Quarantine Explorer HTTP/UI surface is retired from shipping.",
+            }
+        },
         "dashboards": dashboards,
     }
     atomic_write_text(

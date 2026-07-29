@@ -13,6 +13,10 @@ ______________________________________________________________________
 
 # Monitoring Docs Index
 
+> The seven JSON dashboards remain the production fallback and rollback SSOT.
+> Optional `bioetl-scenes-app` routes are read-only, shadow-only, and disabled
+> by default. See [Optional Scenes dual path](scenes-dual-path.md).
+
 ## Incident-Time Operator Index
 
 Use this page first when an incident family is unclear. It is intentionally short.

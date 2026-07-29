@@ -22,6 +22,7 @@ REQUIRED_POLICY_FILES = (
     "freshness.yaml",
     "invalidation.yaml",
     "exclusions.yaml",
+    "security.yaml",
 )
 
 REQUIRED_CATALOG_FILES = (

@@ -72,6 +72,7 @@ Commands:
     report-panel-title-inventory Generate/check generated dashboard panel-title inventory mirror
     report-dashboard-query-duplicates Generate report-only exact/near-duplicate Grafana PromQL inventory
     report-dashboard-promql-scope Generate/check dashboard PromQL scope and forbidden-label inventory
+    report-dashboard-scenes-parity Generate/check ADR-053 JSON-to-Scenes parity ledger
     run-observability-closure-campaign Run the bounded 15-pipeline observability closure campaign
     assemble-observability-closure-evidence Validate and bind one typed campaign evidence envelope
 """
@@ -157,6 +158,9 @@ COMMAND_MODULES: dict[str, str] = {
     "check-dashboard-visual-semantics": "scripts.engineering.qa.check_dashboard_visual_semantics",
     "check-dashboard-performance-budgets": (
         "scripts.engineering.qa.check_dashboard_performance_budgets"
+    ),
+    "report-dashboard-scenes-parity": (
+        "scripts.engineering.qa.report_dashboard_scenes_parity"
     ),
     "check-prometheus-rules": "scripts.engineering.qa.check_prometheus_rules",
     "report-dashboard-inventory": "scripts.engineering.qa.report_dashboard_inventory",

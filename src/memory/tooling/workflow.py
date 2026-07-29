@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -286,7 +287,9 @@ def review_curated_notes(root: Path | None = None) -> dict[str, Any]:
 
 def _write_note(*, path: Path, metadata: dict[str, Any], body: str) -> None:
     from memory.notes import write_markdown_note
+    from memory.security import TrustLevel, assert_safe_for_persistence
 
+    assert_safe_for_persistence(body, trust=TrustLevel.TRUSTED_REPOSITORY)
     write_markdown_note(path, metadata=metadata, body=body)
 
 
@@ -316,12 +319,56 @@ def _timeline_events_ready(path: Path) -> bool:
 
 def _default_note_path(task_id: str, *, kind: str) -> Path:
     memory_root = _discover_memory_root()
-    slug = _slugify_task_id(task_id)
+    from memory.scope import RepositoryScope
+
+    repo_root = _discover_repo_root() or Path(__file__).resolve().parents[3]
+    scope = RepositoryScope.discover(repo_root, task_id=task_id)
+    namespace = scope.namespace_path(memory_root / "episodic" / "tasks")
     if kind == "session":
-        return memory_root / "episodic" / "sessions" / f"{slug}.md"
+        return namespace / "session.md"
     if kind == "summary":
-        return memory_root / "episodic" / "summaries" / f"{slug}.md"
+        return namespace / "summary.md"
     raise ValueError(f"unsupported episodic note kind: {kind}")
+
+
+def _record_envelope_metadata(
+    *,
+    task_id: str,
+    record_id: str,
+    source_refs: list[str],
+) -> dict[str, Any]:
+    """Return version-bound provenance shared by generated task notes."""
+    from memory.records import (
+        ActorIdentity,
+        RecordEnvelope,
+        RecordType,
+        SecurityClass,
+        TrustLevel,
+    )
+    from memory.scope import RepositoryScope
+
+    repo_root = _discover_repo_root() or Path(__file__).resolve().parents[3]
+    scope = RepositoryScope.discover(repo_root, task_id=task_id)
+    envelope = RecordEnvelope.create(
+        record_id=record_id,
+        record_type=RecordType.WORKING,
+        repo_id=scope.repo_id,
+        git_commit=scope.git_commit,
+        branch=scope.branch,
+        worktree_id=scope.worktree_id,
+        task_id=task_id,
+        actor=ActorIdentity(
+            runtime=os.environ.get("BIOETL_AI_RUNTIME", "unknown"),
+            agent=os.environ.get("BIOETL_AI_AGENT", "memory-workflow"),
+            model=os.environ.get("BIOETL_AI_MODEL"),
+        ),
+        source_refs=tuple(source_refs),
+        trust=TrustLevel.TRUSTED_REPOSITORY,
+        security_class=SecurityClass.INTERNAL,
+    )
+    payload = envelope.to_dict()
+    payload["content_digest"] = envelope.content_digest
+    return payload
 
 
 def _session_note_body(
@@ -554,7 +601,31 @@ def pre_task_workflow(
     profile: str = DEFAULT_PROFILE,
 ) -> dict[str, Any]:
     """Run the standard pre-task memory flow."""
+    from memory.persistence import resolve_persistence_policy
+
+    persistence = resolve_persistence_policy()
+    create_session_note = create_session_note and persistence.can_write
+    run_refresh_if_missing = run_refresh_if_missing and persistence.can_write
     retrieval_query = query or title
+    if not persistence.can_read:
+        return {
+            "kind": "pre-task",
+            "task_id": task_id,
+            "title": title,
+            "persistence_mode": persistence.mode.value,
+            "ok": True,
+            "query": retrieval_query,
+            "session_note": None,
+            "refresh_output_root": None,
+            "refresh_report": None,
+            "retrieval": {
+                "kind": "disabled",
+                "query": retrieval_query,
+                "results": {},
+                "degraded": False,
+                "missing_artifacts": [],
+            },
+        }
     resolved_chunks_path, resolved_events_dir, output_root, refresh_report = (
         _resolve_pre_task_surfaces(
             chunks_path=chunks_path,
@@ -592,16 +663,20 @@ def pre_task_workflow(
     session_path: Path | None = None
     if create_session_note:
         session_path = session_note_path or _default_note_path(task_id, kind="session")
+        effective_source_refs = source_refs or ["<add-source-ref>"]
         _write_note(
             path=session_path,
             metadata={
+                **_record_envelope_metadata(
+                    task_id=task_id,
+                    record_id=_slugify_task_id(task_id),
+                    source_refs=effective_source_refs,
+                ),
                 "id": _slugify_task_id(task_id),
                 "title": title,
-                "task_id": task_id,
-                "created_at": _utc_now(),
                 "ttl_days": 14,
                 "confidence": "episodic",
-                "source_refs": source_refs or ["<add-source-ref>"],
+                "source_refs": effective_source_refs,
                 "summary": "Active task session context.",
                 "query": retrieval_query,
             },
@@ -612,6 +687,7 @@ def pre_task_workflow(
         "kind": "pre-task",
         "task_id": task_id,
         "title": title,
+        "persistence_mode": persistence.mode.value,
         "ok": not degraded,
         "query": retrieval_query,
         "session_note": str(session_path) if session_path else None,
@@ -716,16 +792,20 @@ def _write_post_task_summary_note(
     summary_note_path: Path | None,
 ) -> Path:
     summary_path = summary_note_path or _default_note_path(task_id, kind="summary")
+    effective_source_refs = source_refs or ["<add-source-ref>"]
     _write_note(
         path=summary_path,
         metadata={
+            **_record_envelope_metadata(
+                task_id=task_id,
+                record_id=_slugify_task_id(task_id),
+                source_refs=effective_source_refs,
+            ),
             "id": _slugify_task_id(task_id),
             "title": title,
-            "task_id": task_id,
-            "created_at": _utc_now(),
             "ttl_days": 14,
             "confidence": "episodic",
-            "source_refs": source_refs or ["<add-source-ref>"],
+            "source_refs": effective_source_refs,
             "summary": summary,
         },
         body=_summary_note_body(title, summary),
@@ -751,6 +831,32 @@ def post_task_workflow(
     refresh_timeout_seconds: float | None = None,
 ) -> dict[str, Any]:
     """Run the standard post-task memory flow."""
+    from memory.persistence import resolve_persistence_policy
+
+    persistence = resolve_persistence_policy()
+    if not persistence.can_write:
+        if promote_to is not None:
+            persistence.require_write()
+        repo_root = _discover_repo_root() or Path(__file__).resolve().parents[3]
+        validation_result = _run_post_task_validation(
+            timeout_seconds=validation_timeout_seconds,
+            repo_root=repo_root.resolve(),
+        )
+        return {
+            "kind": "post-task",
+            "task_id": task_id,
+            "title": title,
+            "summary_note": None,
+            "persistence_mode": persistence.mode.value,
+            "refresh_output_root": None,
+            "refresh_report": None,
+            "prune_report": None,
+            "promoted_note": None,
+            "validation_status": validation_result.get("status", "completed"),
+            "validation_issues": validation_result.get("issues", []),
+            "degraded": False,
+            "ok": not validation_result.get("issues"),
+        }
     summary_path = _write_post_task_summary_note(
         task_id=task_id,
         title=title,
@@ -796,6 +902,7 @@ def post_task_workflow(
             task_id=task_id, title=title, summary_path=summary_path
         ),
         "refresh_output_root": str(output_root) if output_root else None,
+        "persistence_mode": persistence.mode.value,
         "refresh_report": refresh_report,
         "prune_report": _compact_prune_report(prune_report),
         "promoted_note": str(curated_path) if curated_path else None,
@@ -1063,7 +1170,10 @@ def _emit_pre_task_text(payload: dict[str, Any]) -> None:
 
 def _emit_post_task_text(payload: dict[str, Any]) -> None:
     print(f"Post-task workflow: {payload['task_id']}")
-    print(f"- summary note: {payload['summary_note']}")
+    if payload.get("summary_note"):
+        print(f"- summary note: {payload['summary_note']}")
+    else:
+        print("- summary note: disabled by persistence mode")
     if payload.get("refresh_output_root"):
         print(f"- refresh output root: {payload['refresh_output_root']}")
     if payload.get("promoted_note"):

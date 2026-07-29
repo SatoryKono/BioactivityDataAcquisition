@@ -22,6 +22,28 @@ from memory.notes import parse_markdown_note
 from memory.tooling import workflow
 from tests.helpers.memory_manifests import write_test_rag_manifest
 
+
+def test_pre_task_off_mode_performs_no_persistent_read_or_write(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("BIOETL_AI_MEMORY_MODE", "off")
+    monkeypatch.setattr(
+        workflow,
+        "_resolve_pre_task_surfaces",
+        lambda **_: pytest.fail("off mode must not resolve persistent surfaces"),
+    )
+
+    payload = workflow.pre_task_workflow(
+        task_id="off-task",
+        title="No persistent memory",
+        query=None,
+        source_refs=[],
+    )
+
+    assert payload["persistence_mode"] == "off"
+    assert payload["session_note"] is None
+    assert payload["retrieval"]["kind"] == "disabled"
+
 pytestmark = pytest.mark.integration
 
 

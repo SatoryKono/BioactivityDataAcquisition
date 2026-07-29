@@ -1,0 +1,136 @@
+# chembl_activity passport
+
+> Generated documentation projection. Do not edit manually.
+
+- Kind: `pipeline`
+- Typed identity: `pipeline:chembl_activity`
+- Schema: `1.0.0`
+- Source revision: `b502aa73ed561cd30b5317e5531677a073694912`
+
+## Evidence
+
+- `effective_entity_config`: `configs/entities/chembl/activity.yaml`
+- `dq_contract`: `configs/contracts/chembl/activity.yaml`
+
+## Generated facts
+
+```json
+{
+  "bronze": {
+    "capability": "append_only_snapshot",
+    "content_hash": {
+      "exclude": [],
+      "include": []
+    }
+  },
+  "diagnostics": [],
+  "execution": {
+    "cached_bronze_is_mode": true,
+    "control_plane": {
+      "checkpoints": true,
+      "run_ledger": true,
+      "run_manifest": true
+    }
+  },
+  "extraction": {
+    "request": {
+      "endpoint_template": {
+        "status": "runtime_resolved"
+      },
+      "method": {
+        "status": "runtime_resolved"
+      }
+    },
+    "source_type": "runtime_resolved",
+    "supported_source_modes": [
+      "api",
+      "cached_bronze"
+    ]
+  },
+  "gold": {
+    "column_projection": {
+      "exclude_fields": [
+        "_dq_*",
+        "_source_batch_id",
+        "_index"
+      ],
+      "include_groups": [
+        "system",
+        "business"
+      ]
+    },
+    "contract_ref": "chembl.activity",
+    "contract_validation": {
+      "status": "resolved_by_runtime_contract",
+      "strict": true
+    },
+    "contract_version": "1.0.0",
+    "write": {
+      "enabled": true
+    }
+  },
+  "identity": {
+    "aliases": [],
+    "entity": "activity",
+    "pipeline_id": "chembl_activity",
+    "pipeline_type": "provider_entity",
+    "provider": "chembl",
+    "status": "active",
+    "typed_id": "pipeline:chembl_activity"
+  },
+  "kind": "pipeline",
+  "observability": {
+    "correlation_fields": [
+      "run_id",
+      "manifest_id"
+    ],
+    "metric_labels": [
+      "provider",
+      "pipeline",
+      "run_type",
+      "status"
+    ]
+  },
+  "passport_schema_version": "1.0.0",
+  "provenance": {
+    "projector_version": "1.0.0",
+    "semantic_content_hash": "sha256:dc87c52dcd56cdd02fffb6b9c8884ffacb5e9daf0d13cacb8511e158653c4868",
+    "source_revision": "b502aa73ed561cd30b5317e5531677a073694912"
+  },
+  "silver": {
+    "column_projection": {
+      "exclude_fields": [],
+      "include_groups": [
+        "system",
+        "business",
+        "dq"
+      ]
+    },
+    "dq_execution": {
+      "hard_fail_threshold": 0.5,
+      "invalid_record_policy": "quarantine",
+      "soft_fail_threshold": 0.05,
+      "strict_validation": false
+    },
+    "write": {
+      "idempotency_contract": "merge_upsert",
+      "mode": "merge",
+      "partition_by": []
+    }
+  },
+  "source_references": [
+    {
+      "path": "configs/entities/chembl/activity.yaml",
+      "role": "effective_entity_config"
+    },
+    {
+      "path": "configs/contracts/chembl/activity.yaml",
+      "role": "dq_contract"
+    }
+  ]
+}
+```
+
+## Diagnostics
+
+- No blocking diagnostics.

@@ -19,6 +19,11 @@
 > Retired: workflow/alerts merged into Runtime/Overview bands.
 >
 > **Dashboard System 2.0 track:** `docs/03-guides/dashboards/operator-ux-v2.md`.
+>
+> **Optional Scenes shadow path:** `grafana/plugins/bioetl-scenes-app` provides
+> six read-only task routes under ADR-053. It is disabled by default; the seven
+> JSON UIDs remain authoritative and are the tested rollback surface. See
+> `docs/03-guides/dashboards/scenes-dual-path.md`.
 
 ______________________________________________________________________
 

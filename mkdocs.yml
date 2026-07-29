@@ -311,6 +311,7 @@ nav:
           - "Monitoring Index": 03-guides/dashboards/monitoring-index.md
           - "Variables Guide": 03-guides/dashboards/variables-guide.md
           - "Operator UX v2": 03-guides/dashboards/operator-ux-v2.md
+          - "Verdict Ontology": 03-guides/dashboards/verdict-ontology.md
           - "Panels":
               - "Panels Guide": 03-guides/dashboards/panels/dashboard-panels-guide.md
               - "Overview v2 Panels": 03-guides/dashboards/panels/bioetl-overview-v2-panels.md
@@ -335,6 +336,7 @@ nav:
       - "Workflow Catalog": 04-reference/workflow-catalog.md
       - "GitHub Actions Workflows": 04-reference/github-actions-workflows.md
       - "Pipeline Catalog": 04-reference/pipeline-catalog.md
+      - "Pipeline and Workflow Passports": 04-reference/passports/index.md
       - "Composite Pipelines": 04-reference/pipelines/composites.md
       - "ChEMBL Normalization Deep Dive": 04-reference/normalization/chembl-normalization-deep-dive.md
       - "Ontology Governance": 04-reference/normalization/ontology-governance.md
