@@ -1536,7 +1536,9 @@ def _load_declared_metric_definitions(repo_root: Path) -> dict[str, set[str]]:
             "policy_alias_metrics": set(),
             "declared_label_contract_metrics": set(),
         }
-    payload = yaml.safe_load(path.read_text(encoding="utf-8"))  # NOSONAR - path confined
+    payload = yaml.safe_load(
+        path.read_text(encoding="utf-8")
+    )  # NOSONAR - path confined
     if not isinstance(payload, dict):
         return {
             "recording_rule_metrics": set(),
@@ -1782,7 +1784,9 @@ def _panel_contract_drift(
     if not path.is_file():
         return [f"missing:{_PANEL_CONTRACT_INVENTORY.as_posix()}"]
     try:
-        expected = json.loads(path.read_text(encoding="utf-8"))  # NOSONAR - path confined
+        expected = json.loads(
+            path.read_text(encoding="utf-8")
+        )  # NOSONAR - path confined
     except (OSError, json.JSONDecodeError):
         return [f"invalid:{_PANEL_CONTRACT_INVENTORY.as_posix()}"]
     if expected != _panel_contract_document(typed_report):
@@ -1935,7 +1939,9 @@ def _scan_typed_dashboard_targets(
     run_id_selector_violations: list[str] = []
     dashboards_root = repo_root / "grafana" / "dashboards"
     for dashboard_path in sorted(dashboards_root.glob("*.json")):
-        payload = json.loads(dashboard_path.read_text(encoding="utf-8"))  # NOSONAR - path confined
+        payload = json.loads(
+            dashboard_path.read_text(encoding="utf-8")
+        )  # NOSONAR - path confined
         dashboard_uid = str(payload.get("uid", dashboard_path.stem))
         for panel in _iter_dashboard_panels(payload):
             panel_id = _coerce_int(panel.get("id", -1))
@@ -2189,7 +2195,9 @@ def _scan_rule_metric_mentions(repo_root: Path) -> dict[str, list[str]]:
     mentions: dict[str, list[str]] = defaultdict(list)
     for path in _iter_text_files(repo_root / _RULE_SCAN_ROOT):
         try:
-            payload = yaml.safe_load(path.read_text(encoding="utf-8"))  # NOSONAR - path confined
+            payload = yaml.safe_load(
+                path.read_text(encoding="utf-8")
+            )  # NOSONAR - path confined
         except (UnicodeDecodeError, yaml.YAMLError):
             continue
         if not isinstance(payload, dict):
@@ -2242,7 +2250,9 @@ def _load_retired_observability_event_names(repo_root: Path) -> set[str]:
         import yaml
     except ImportError:
         return set()
-    payload = yaml.safe_load(path.read_text(encoding="utf-8"))  # NOSONAR - path confined
+    payload = yaml.safe_load(
+        path.read_text(encoding="utf-8")
+    )  # NOSONAR - path confined
     if not isinstance(payload, dict):
         return set()
     event_governance = payload.get("event_signal_governance", {})
@@ -2299,7 +2309,9 @@ def _scan_domain_mapping_observability_events(
 ) -> tuple[set[str], dict[str, list[str]]]:
     mapping_path = repo_root / "src/bioetl/domain/observability_event_mapping.py"
     try:
-        tree = ast.parse(mapping_path.read_text(encoding="utf-8"))  # NOSONAR - path confined
+        tree = ast.parse(
+            mapping_path.read_text(encoding="utf-8")
+        )  # NOSONAR - path confined
     except (OSError, SyntaxError, UnicodeDecodeError):
         return set(), {}
 
@@ -2376,7 +2388,9 @@ def _load_runtime_cardinality_thresholds(repo_root: Path) -> dict[str, int]:
         import yaml
     except ImportError:
         return {}
-    payload = yaml.safe_load(allowlist_path.read_text(encoding="utf-8"))  # NOSONAR - path confined
+    payload = yaml.safe_load(
+        allowlist_path.read_text(encoding="utf-8")
+    )  # NOSONAR - path confined
     if not isinstance(payload, dict):
         return {}
     allowed = payload.get("allowed", {})
@@ -3505,7 +3519,9 @@ def _load_drift_allowlist(path: Path) -> dict[str, set[str]]:
         import yaml
     except ImportError:
         return {}
-    payload = yaml.safe_load(path.read_text(encoding="utf-8"))  # NOSONAR - path confined
+    payload = yaml.safe_load(
+        path.read_text(encoding="utf-8")
+    )  # NOSONAR - path confined
     if not isinstance(payload, dict):
         return {}
     raw_allowed = payload.get("allowed", payload)

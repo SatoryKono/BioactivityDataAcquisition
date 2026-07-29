@@ -22,6 +22,7 @@ if TYPE_CHECKING:
         ReproducibilityPolicyAssessment,
     )
 
+
 class _ManifestLaunchContextBuilder(Protocol):
     def build_launch_context_snapshot(
         self,
@@ -40,6 +41,7 @@ class _ManifestLaunchContextBuilder(Protocol):
         replay_support_reason: str,
     ) -> dict[str, object]: ...
 
+
 def validate_exact_replay_boundary(
     ctx: PipelineRunContext,
     context: ManifestReproducibilityContext,
@@ -53,6 +55,7 @@ def validate_exact_replay_boundary(
         "Pipeline execution is outside the published strict exact-replay "
         "support boundary for this run family"
     )
+
 
 def build_manifest_launch_context(
     *,
@@ -84,6 +87,7 @@ def build_manifest_launch_context(
         replay_support_reason=reproducibility_context.reason,
     )
 
+
 def build_replay_assessment(
     *,
     request_inputs: RunManifestCreateRequestInputs,
@@ -104,6 +108,7 @@ def build_replay_assessment(
         run_type=request_inputs.run_type_value,
         debug_only=bool(getattr(request_inputs.inputs.settings, "debug", False)),
     )
+
 
 def apply_replay_assessment(
     launch_context: dict[str, object],

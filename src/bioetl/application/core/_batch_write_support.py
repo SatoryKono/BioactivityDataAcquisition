@@ -24,6 +24,7 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
+
 def emit_domain_event(
     emitter: DomainEventEmitterProtocol | None,
     event: DomainEvent,
@@ -32,6 +33,7 @@ def emit_domain_event(
     if emitter is None:
         return
     emitter.emit_domain_event(event)
+
 
 def emit_batch_written(
     *,
@@ -56,6 +58,7 @@ def emit_batch_written(
         ),
     )
 
+
 def emit_batch_failed(
     *,
     emitter: DomainEventEmitterProtocol | None,
@@ -79,6 +82,7 @@ def emit_batch_failed(
             error_type=type(error).__name__,
         ),
     )
+
 
 async def _execute_layer_write(
     *,
@@ -113,6 +117,7 @@ async def _execute_layer_write(
             record_count=len(records),
         ),
     )
+
 
 async def safe_write_layer(
     *,
@@ -182,6 +187,7 @@ async def safe_write_layer(
                 occurred_at=ingestion_ts,
             )
         raise
+
 
 async def _quarantine_schema_violation(
     *,

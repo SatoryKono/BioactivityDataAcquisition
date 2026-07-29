@@ -10,6 +10,7 @@ from bioetl.domain.mapping.protein_class_target_type import (
     ProteinClassTargetTypeMappingData,
 )
 
+
 @cache
 def _load_publication_type_classification_data(
     configs_root_key: str,
@@ -21,12 +22,14 @@ def _load_publication_type_classification_data(
         Path(configs_root_key)
     ).load()
 
+
 def initialize_publication_type_classification(configs_root: Path) -> None:
     """Load publication type classification data into the domain module."""
     from bioetl.domain.mapping import publication_type_classification
 
     data = _load_publication_type_classification_data(str(configs_root))
     publication_type_classification.initialize_classification(data)
+
 
 @cache
 def _load_protein_class_target_type_mapping_data(
@@ -38,6 +41,7 @@ def _load_protein_class_target_type_mapping_data(
     return protein_class_target_type_loader.ProteinClassTargetTypeMappingLoader(
         Path(configs_root_key)
     ).load()
+
 
 def initialize_protein_class_target_type_mapping(configs_root: Path) -> None:
     """Load protein-class L1 mapping and initialize the domain rule module."""

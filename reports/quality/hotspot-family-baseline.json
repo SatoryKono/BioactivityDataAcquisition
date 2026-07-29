@@ -3,8 +3,8 @@
     "snapshot_date": "2026-07-27",
     "families": 5,
     "scorecard": "configs/quality/debt_scorecard.yaml",
-    "budget_warnings": 1,
-    "budget_review_notes": 3
+    "budget_warnings": 0,
+    "budget_review_notes": 2
   },
   "families": [
     {
@@ -18,18 +18,16 @@
       ],
       "duplication_clusters": 0,
       "files": 187,
-      "total_loc": 22214,
-      "files_ge_250_loc": 1,
-      "helper_function_ratio": 0.37,
+      "total_loc": 21834,
+      "files_ge_250_loc": 0,
+      "helper_function_ratio": 0.365,
       "max_internal_fan_in": 8,
       "max_internal_fan_in_module": "bioetl.application.core.batch_runtime_failure_policy",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 0,
         "max_internal_fan_in": 10
       },
-      "budget_warnings": [
-        "over_budget:files_ge_250_loc=1/0"
-      ],
+      "budget_warnings": [],
       "budget_review_notes": [
         "near_budget:max_internal_fan_in=8/10"
       ]
@@ -45,7 +43,7 @@
       ],
       "duplication_clusters": 0,
       "files": 51,
-      "total_loc": 6314,
+      "total_loc": 6299,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.325,
       "max_internal_fan_in": 2,
@@ -68,19 +66,17 @@
       ],
       "duplication_clusters": 0,
       "files": 32,
-      "total_loc": 3936,
+      "total_loc": 3925,
       "files_ge_250_loc": 1,
       "helper_function_ratio": 0.33,
-      "max_internal_fan_in": 3,
-      "max_internal_fan_in_module": "bioetl.composition.factories.pipeline.config_types",
+      "max_internal_fan_in": 2,
+      "max_internal_fan_in_module": "bioetl.composition.factories.pipeline.transformer_builder",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 2,
         "max_internal_fan_in": 3
       },
       "budget_warnings": [],
-      "budget_review_notes": [
-        "at_budget:max_internal_fan_in=3/3"
-      ]
+      "budget_review_notes": []
     },
     {
       "name": "application_services_control_plane",
@@ -93,7 +89,7 @@
       ],
       "duplication_clusters": 0,
       "files": 139,
-      "total_loc": 15887,
+      "total_loc": 15873,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.423,
       "max_internal_fan_in": 3,
@@ -118,7 +114,7 @@
       ],
       "duplication_clusters": 0,
       "files": 56,
-      "total_loc": 6988,
+      "total_loc": 6968,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.359,
       "max_internal_fan_in": 3,

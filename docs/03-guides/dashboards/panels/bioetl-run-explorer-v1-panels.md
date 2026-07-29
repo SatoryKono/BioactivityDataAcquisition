@@ -31,17 +31,18 @@ collapsed progressive-disclosure row. `run_id` is never a Prometheus label.
 - **Purpose:** Bronze/Silver/Gold stage/outcome accounting (first paint).
 - **Data sources:** BioETL Ops HTTP `/ops/observability/processed-records` (not Prometheus).
 
-### 5. Run report detail (Ops HTTP)
+### 5. Selected run detail (Ops HTTP; expand after selection)
 - **Type:** Row (collapsed by default)
 - **Purpose:** Progressive disclosure for recent runs, funnel, reasons, reconciliation, artifacts, timings, CTA.
 - **Data sources:** Nested panels below.
 
 Nested titles (must match JSON):
 
-### 6. Recent pipeline runs (no selection)
-- **Type:** Table
+### 6. Browse · Recent pipeline runs (no selection)
+- **Type:** Table (first-screen empty-selection utility)
 - **Purpose:** Index of recent `pipeline_run_report_v1` files to pick `run_id`.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-reports`
+- **DSA-08:** Visible on first screen; selected-run forensics stay collapsed.
 
 ### 7. Selected run · funnel stages
 - **Type:** Table

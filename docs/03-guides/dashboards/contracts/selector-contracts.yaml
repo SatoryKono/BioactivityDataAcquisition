@@ -1,7 +1,8 @@
 normative_source:
   scope: selector_taxonomy_registry_semantics
   authority: single_source_of_truth
-  narrative_minimal: 'This YAML is the only normative contract for Grafana selector
+  narrative_minimal:
+    "This YAML is the only normative contract for Grafana selector
     taxonomy,
 
     dashboard-family selector eligibility, shipped selector registry, hidden
@@ -12,65 +13,66 @@ normative_source:
 
     instead of redefining normative selector behavior.
 
-    '
+    "
 version: 1
 selector_taxonomy:
   scope:
-  - pipeline
-  - workflow
-  - provider
-  - stage
+    - pipeline
+    - workflow
+    - provider
+    - stage
   state:
-  - run_type
-  - status
-  - step_status
-  - step_kind
+    - run_type
+    - status
+    - step_status
+    - step_kind
   execution_future:
-  - run_selector_mode
-  - started_at
-  - run_id
-  - manifest_id
-  - execution_fingerprint
+    - run_selector_mode
+    - started_at
+    - run_id
+    - manifest_id
+    - execution_fingerprint
   context_hidden:
     shipped:
-    - workflow_context
-    - pipeline_context
-    - pipeline_context_exact
-    - run_type_context
-    - run_type_context_exact
-    - provider_context
-    - provider_context_exact
-    - adapter
+      - workflow_context
+      - pipeline_context
+      - pipeline_context_exact
+      - run_type_context
+      - run_type_context_exact
+      - provider_context
+      - provider_context_exact
+      - adapter
     reserved_future:
-    - selected_run_id
-    - selected_manifest_id
-    - selected_started_at
+      - selected_run_id
+      - selected_manifest_id
+      - selected_started_at
   forensic_only:
-  - reason_code
-  - field
-  - quarantine_run_id
-  - payload_hash
-  - manifest_id
-  - execution_fingerprint
+    - reason_code
+    - field
+    - quarantine_run_id
+    - payload_hash
+    - manifest_id
+    - execution_fingerprint
 operator_safe_visible_classes:
-- scope
-- state
+  - scope
+  - state
 operator_context_shell:
   status: shipped_context_shell
   visible_selectors:
-  - workflow
-  - pipeline
-  - run_type
-  - run_id
+    - workflow
+    - pipeline
+    - run_type
+    - run_id
   cross_dashboard_handoff_selectors:
-  - workflow
-  - pipeline
-  - run_type
+    - workflow
+    - pipeline
+    - run_type
   preserved_identity_handoff_selectors:
-  - run_id
+    - run_id
   local_identity_selectors:
-  - run_id
-  semantics: 'The operator context shell standardizes the top-level context controls
+    - run_id
+  semantics:
+    "The operator context shell standardizes the top-level context controls
 
     across primary dashboards. It does not make every selector a first-class
 
@@ -94,8 +96,9 @@ operator_context_shell:
 
     Silver `quarantine_run_id`.
 
-    '
-  primary_selector_rule: 'Dashboard families retain their role-specific primary selectors.
+    "
+  primary_selector_rule:
+    "Dashboard families retain their role-specific primary selectors.
     Provider
 
     Health remains provider-first; Workflow remains selected-range workflow
@@ -104,11 +107,12 @@ operator_context_shell:
 
     surfaces.
 
-    '
+    "
 pipeline_universe_contract:
   status: shipped
   canonical_user_facing_metric: bioetl_overview_pipeline_run_type_universe
-  canonical_relation: 'bioetl_overview_pipeline_run_type_universe is an exact recording-rule
+  canonical_relation:
+    "bioetl_overview_pipeline_run_type_universe is an exact recording-rule
     alias
 
     of bioetl_runtime_pipeline_run_type_universe. The two metrics MUST expose
@@ -117,29 +121,34 @@ pipeline_universe_contract:
 
     universes.
 
-    '
+    "
   shared_selector_uids:
-  - bioetl-overview-v2
-  - bioetl-runtime
-  - bioetl-provider-health-v2
-  - bioetl-dq-v2
+    - bioetl-overview-v2
+    - bioetl-runtime
+    - bioetl-provider-health-v2
+    - bioetl-dq-v2
+    - bioetl-incident-v1
+    - bioetl-run-explorer-v1
   shared_query_metrics:
     bioetl-overview-v2: bioetl_overview_pipeline_run_type_universe
     bioetl-runtime: bioetl_runtime_pipeline_run_type_universe
     bioetl-provider-health-v2: bioetl_overview_pipeline_run_type_universe
     bioetl-dq-v2: bioetl_overview_pipeline_run_type_universe
+    bioetl-incident-v1: bioetl_overview_pipeline_run_type_universe
+    bioetl-run-explorer-v1: bioetl_overview_pipeline_run_type_universe
   role_local_exceptions:
     bioetl-control-plane-v1:
       query_metric: bioetl_control_plane_run_type_universe
       required_relation: provenance_gated_overlap
       allowed_role_local_only_sources:
-      - bioetl_control_plane_manifest_writes_total
+        - bioetl_control_plane_manifest_writes_total
       allowed_canonical_only_sources:
-      - bioetl_pipeline_runs_total
-      - bioetl_records_processed_total
+        - bioetl_pipeline_runs_total
+        - bioetl_records_processed_total
       shared_planned_source: bioetl_workflow_pipeline_expected
       unexplained_difference_count_required: 0
-      reason: 'Control Plane lists scopes with manifest evidence or an explicitly
+      reason:
+        "Control Plane lists scopes with manifest evidence or an explicitly
 
         planned workflow child. A manifest-only in-flight scope can therefore
 
@@ -151,18 +160,22 @@ pipeline_universe_contract:
 
         families; unexplained divergence is forbidden.
 
-        '
+        "
       out_of_scope_handoff: fail_closed_with_overview_return_path
   handoff_rules:
-  - Shared-selector links MUST preserve pipeline only when the destination accepts
-    the canonical user-facing universe.
-  - Links into a role-local exception MUST provide an explicit fail-closed empty state
-    or return path; silent blank panels are forbidden.
-  - Control Plane role-local-only scopes MUST be backed by manifest-write provenance;
-    canonical-only scopes MUST be explainable by data-plane telemetry without a manifest
-    artifact.
+    - Shared-selector links MUST preserve pipeline only when the destination accepts
+      the canonical user-facing universe.
+    - Links into a role-local exception MUST provide an explicit fail-closed empty state
+      or return path; silent blank panels are forbidden.
+    - Control Plane role-local-only scopes MUST be backed by manifest-write provenance;
+      canonical-only scopes MUST be explainable by data-plane telemetry without a manifest
+      artifact.
   closure_evidence:
-    required_dashboard_count: 5
+    required_dashboard_count: 7
+    primary_pipeline_universe_count: 5
+    adjunct_uids_not_in_2026_07_20_evidence:
+      - bioetl-incident-v1
+      - bioetl-run-explorer-v1
     shared_required_chembl_pipeline_count: 15
     shared_required_missing_count: 0
     verify_exact_shared_relation: true
@@ -173,7 +186,7 @@ pipeline_universe_contract:
       path: reports/observability/grafana/selector-audit-2026-07-20/selector-evidence.json
       schema_version: 1
       issue_number: 6359
-      captured_at_utc: '2026-07-20T08:05:54Z'
+      captured_at_utc: "2026-07-20T08:05:54Z"
       expected_verdict: pass
       require_relevant_runtime_paths_clean: true
       require_live_dashboard_count: 5
@@ -182,17 +195,18 @@ pipeline_universe_contract:
 dashboard_families:
   pipeline_summary:
     uids:
-    - bioetl-control-plane-v1
-    - bioetl-runtime
-    - bioetl-dq-v2
+      - bioetl-control-plane-v1
+      - bioetl-runtime
+      - bioetl-dq-v2
     allowed_visible_selectors:
-    - workflow
-    - pipeline
-    - run_type
-    - run_id
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
     optional_visible_selectors:
-    - stage
-    notes: 'Pipeline-summary dashboards answer pipeline-scoped operator questions
+      - stage
+    notes:
+      "Pipeline-summary dashboards answer pipeline-scoped operator questions
       and
 
       remain Prometheus-first. The shared context shell may expose workflow and
@@ -219,16 +233,17 @@ dashboard_families:
 
       error-rate, lag, and active-blocker drilldown queries.
 
-      '
+      "
   hybrid_overview:
     uids:
-    - bioetl-overview-v2
+      - bioetl-overview-v2
     allowed_visible_selectors:
-    - workflow
-    - pipeline
-    - run_type
-    - run_id
-    notes: 'The canonical Overview dashboard (`bioetl-overview-v2`) uses the frozen
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
+    notes:
+      "The canonical Overview dashboard (`bioetl-overview-v2`) uses the frozen
 
       Overview v3 hybrid layout as its baseline. Hybrid Overview keeps pipeline-
 
@@ -246,46 +261,48 @@ dashboard_families:
 
       claim that run_id changes aggregate current-status PromQL semantics.
 
-      '
+      "
   provider_first:
     uids:
-    - bioetl-provider-health-v2
+      - bioetl-provider-health-v2
     allowed_visible_selectors:
-    - workflow
-    - pipeline
-    - run_type
-    - run_id
-    - provider
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
+      - provider
     hidden_context_selectors:
-    - pipeline_context
+      - pipeline_context
     hidden_detail_selectors:
-    - adapter
-    notes: 'Provider Health is provider-first. The shared context shell is secondary
+      - adapter
+    notes:
+      "Provider Health is provider-first. The shared context shell is secondary
 
       identity/evidence context only. pipeline_context preserves return-path
 
       context and MUST NOT be treated as a first-class provider business filter.
 
-      '
+      "
   workflow_evidence:
     uids: []
     allowed_visible_selectors:
-    - workflow
-    - pipeline
-    - run_type
-    - run_id
-    - status
-    - step_status
-    - step_kind
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
+      - status
+      - step_status
+      - step_kind
     hidden_context_selectors:
-    - workflow_context
-    - pipeline_context
-    - pipeline_context_exact
-    - run_type_context
-    - run_type_context_exact
-    - provider_context
-    - provider_context_exact
-    notes: 'Workflow Overview is selected-range workflow evidence only. It does not
+      - workflow_context
+      - pipeline_context
+      - pipeline_context_exact
+      - run_type_context
+      - run_type_context_exact
+      - provider_context
+      - provider_context_exact
+    notes:
+      "Workflow Overview is selected-range workflow evidence only. It does not
 
       use visible pipeline/run_type/run_id selectors as live execution filters,
 
@@ -305,17 +322,42 @@ dashboard_families:
 
       alias during migration.
 
-      '
+      "
+  incident_workspace:
+    uids:
+      - bioetl-incident-v1
+    allowed_visible_selectors:
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
+      - provider
+    notes:
+      "Incident Workspace is read-only triage. Shared shell plus optional provider
+      filter for suspect handoff. run_id is identity context only (Ops HTTP / shell),
+      never a Prometheus label."
+  exact_run_explorer:
+    uids:
+      - bioetl-run-explorer-v1
+    allowed_visible_selectors:
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
+    notes:
+      "Run Explorer is the exact-run Ops HTTP hub for identity and accounting.
+      pipeline/run_type selectors use the shared overview universe for browse scope;
+      run_id is control-plane catalog identity only."
   forensic_explorer:
     uids: []
     allowed_visible_selectors:
-    - pipeline
-    - run_type
-    - reason_code
-    - field
-    - quarantine_run_id
-    - payload_hash
-    notes: 'Silver Reject Explorer is the only shipped forensic explorer. It may
+      - pipeline
+      - run_type
+      - reason_code
+      - field
+      - quarantine_run_id
+      - payload_hash
+    notes: "Silver Reject Explorer is the only shipped forensic explorer. It may
 
       surface exact reject/run selectors, but those selectors MUST use
 
@@ -329,35 +371,36 @@ dashboard_families:
 
       identity shell.
 
-      '
+      "
   alert_triage:
     uids: []
     allowed_visible_selectors:
-    - workflow
-    - pipeline
-    - run_type
-    notes: 'Alerts & SLO is a Prometheus-backed alert-triage surface. It reuses the
+      - workflow
+      - pipeline
+      - run_type
+    notes:
+      "Alerts & SLO is a Prometheus-backed alert-triage surface. It reuses the
 
       shared workflow/pipeline/run_type context shell for alert evidence only
 
       and intentionally does not expose `run_id` or forensic selectors.
 
-      '
+      "
 shipped_selector_registry:
   bioetl-control-plane-v1:
     family: pipeline_summary
     visible_selectors:
-    - workflow
-    - pipeline
-    - run_type
-    - run_id
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
     hidden_context_selectors: []
     hidden_detail_selectors: []
     top_bar_order:
-    - workflow
-    - pipeline
-    - run_type
-    - run_id
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
     query_source_families:
       workflow: prometheus_workflow_runs_total
       pipeline: prometheus_control_plane_run_type_universe
@@ -366,17 +409,17 @@ shipped_selector_registry:
   bioetl-overview-v2:
     family: hybrid_overview
     visible_selectors:
-    - workflow
-    - pipeline
-    - run_type
-    - run_id
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
     hidden_context_selectors: []
     hidden_detail_selectors: []
     top_bar_order:
-    - workflow
-    - pipeline
-    - run_type
-    - run_id
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
     query_source_families:
       workflow: prometheus_workflow_runs_total
       pipeline: prometheus_overview_pipeline_run_type_universe
@@ -385,20 +428,20 @@ shipped_selector_registry:
   bioetl-runtime:
     family: pipeline_summary
     visible_selectors:
-    - workflow
-    - pipeline
-    - run_type
-    - run_id
-    - stage
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
+      - stage
     hidden_context_selectors:
-    - provider_hint
+      - provider_hint
     hidden_detail_selectors: []
     top_bar_order:
-    - workflow
-    - pipeline
-    - run_type
-    - run_id
-    - stage
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
+      - stage
     query_source_families:
       workflow: prometheus_workflow_runs_total
       pipeline: prometheus_runtime_pipeline_run_type_universe
@@ -409,21 +452,21 @@ shipped_selector_registry:
   bioetl-provider-health-v2:
     family: provider_first
     visible_selectors:
-    - workflow
-    - pipeline
-    - run_type
-    - run_id
-    - provider
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
+      - provider
     hidden_context_selectors:
-    - pipeline_context
+      - pipeline_context
     hidden_detail_selectors:
-    - adapter
+      - adapter
     top_bar_order:
-    - workflow
-    - pipeline
-    - run_type
-    - run_id
-    - provider
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
+      - provider
     query_source_families:
       workflow: prometheus_workflow_runs_total
       pipeline: prometheus_overview_pipeline_run_type_universe
@@ -435,109 +478,166 @@ shipped_selector_registry:
   bioetl-dq-v2:
     family: pipeline_summary
     visible_selectors:
-    - workflow
-    - pipeline
-    - run_type
-    - run_id
-    - stage
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
+      - stage
     hidden_context_selectors: []
     hidden_detail_selectors: []
     top_bar_order:
-    - workflow
-    - pipeline
-    - run_type
-    - run_id
-    - stage
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
+      - stage
     query_source_families:
       workflow: prometheus_workflow_runs_total
       pipeline: prometheus_overview_pipeline_run_type_universe
       run_type: prometheus_overview_pipeline_run_type_universe
       run_id: control_plane_filter_options_api
       stage: prometheus_records_processed_total
+  bioetl-incident-v1:
+    family: incident_workspace
+    visible_selectors:
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
+      - provider
+    hidden_context_selectors: []
+    hidden_detail_selectors: []
+    top_bar_order:
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
+      - provider
+    query_source_families:
+      workflow: prometheus_workflow_runs_total
+      pipeline: prometheus_overview_pipeline_run_type_universe
+      run_type: prometheus_overview_pipeline_run_type_universe
+      run_id: control_plane_filter_options_api
+      provider: prometheus_provider_health_union
+  bioetl-run-explorer-v1:
+    family: exact_run_explorer
+    visible_selectors:
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
+    hidden_context_selectors: []
+    hidden_detail_selectors: []
+    top_bar_order:
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
+    query_source_families:
+      workflow: prometheus_workflow_runs_total
+      pipeline: prometheus_overview_pipeline_run_type_universe
+      run_type: prometheus_overview_pipeline_run_type_universe
+      run_id: control_plane_filter_options_api
 ship_now_selector_contract_by_uid:
   bioetl-control-plane-v1:
     visible_selectors:
-    - workflow
-    - pipeline
-    - run_type
-    - run_id
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
     time_range: grafana_builtin
   bioetl-overview-v2:
     visible_selectors:
-    - workflow
-    - pipeline
-    - run_type
-    - run_id
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
     time_range: grafana_builtin
   bioetl-runtime:
     visible_selectors:
-    - workflow
-    - pipeline
-    - run_type
-    - run_id
-    - stage
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
+      - stage
     time_range: grafana_builtin
   bioetl-provider-health-v2:
     visible_selectors:
-    - workflow
-    - pipeline
-    - run_type
-    - run_id
-    - provider
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
+      - provider
     hidden_context_selectors:
-    - pipeline_context
+      - pipeline_context
     hidden_detail_selectors:
-    - adapter
+      - adapter
     time_range: grafana_builtin
   bioetl-dq-v2:
     visible_selectors:
-    - workflow
-    - pipeline
-    - run_type
-    - run_id
-    - stage
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
+      - stage
+    time_range: grafana_builtin
+  bioetl-incident-v1:
+    visible_selectors:
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
+      - provider
+    time_range: grafana_builtin
+  bioetl-run-explorer-v1:
+    visible_selectors:
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
     time_range: grafana_builtin
 hidden_handoff_contract:
   allowed_shipped_vars:
-  - pipeline_context
-  - provider_hint
+    - pipeline_context
+    - provider_hint
   detail_only_shipped_vars:
-  - adapter
+    - adapter
   reserved_future_vars:
-  - selected_run_id
-  - selected_manifest_id
-  - selected_started_at
+    - selected_run_id
+    - selected_manifest_id
+    - selected_started_at
   forbidden_cross_dashboard_forensic_vars:
-  - quarantine_run_id
-  - payload_hash
-  - manifest_id
-  - execution_fingerprint
+    - quarantine_run_id
+    - payload_hash
+    - manifest_id
+    - execution_fingerprint
   rules:
-  - Hidden vars preserve navigation or detail-only scope and do not automatically
-    become visible top-level selectors.
-  - Visible selectors MUST NOT be propagated implicitly with blanket includeVars semantics.
+    - Hidden vars preserve navigation or detail-only scope and do not automatically
+      become visible top-level selectors.
+    - Visible selectors MUST NOT be propagated implicitly with blanket includeVars semantics.
 control_plane_selector_context_contract:
   status: shipped
   endpoint: /ops/control-plane/selector-context
   filter_options_endpoint: /ops/control-plane/filter-options
   local_only: true
   source_priority:
-  - run_manifest_catalog
-  - run_ledger_terminal_events
+    - run_manifest_catalog
+    - run_ledger_terminal_events
   visible_selector_resolution:
     selected_run_id: exact_run_identity_wins
     workflow_pipeline_run_type: latest_terminal_run_for_scope
   fallback_rules:
-  - run_id_default_dash_means_no_exact_run_selected
-  - terminal_time_uses_run_ledger_event_when_present
-  - manifest_created_at_is_fallback_only
-  - filter_options_run_id_includes_dash_default
+    - run_id_default_dash_means_no_exact_run_selected
+    - terminal_time_uses_run_ledger_event_when_present
+    - manifest_created_at_is_fallback_only
+    - filter_options_run_id_includes_dash_default
   forbidden:
-  - prometheus_run_id_labels
-  - blanket_includevars_run_id_handoff
-  - run_id_handoff_to_forensic_explorer
-  - cyclic_grafana_variable_dependencies
-  notes: 'The shipped control-plane selector resolver provides coherent local selector
+    - prometheus_run_id_labels
+    - blanket_includevars_run_id_handoff
+    - run_id_handoff_to_forensic_explorer
+    - cyclic_grafana_variable_dependencies
+  notes:
+    "The shipped control-plane selector resolver provides coherent local selector
 
     context for the shared dashboard shell and HTTP-backed identity surfaces.
 
@@ -565,59 +665,59 @@ control_plane_selector_context_contract:
 
     scoped.
 
-    '
+    "
 run_catalog_future_contract:
   status: design_only_for_execution_filtering
   local_only: true
   required_source_properties:
-  - local_manifest_or_ledger_backed
-  - no_prometheus_label_explosion
-  - supports_latest_previous_exact_resolution
+    - local_manifest_or_ledger_backed
+    - no_prometheus_label_explosion
+    - supports_latest_previous_exact_resolution
   minimum_fields:
-  - run_id
-  - pipeline_name
-  - workflow_name
-  - run_type
-  - started_at
-  - manifest_id
-  - status
+    - run_id
+    - pipeline_name
+    - workflow_name
+    - run_type
+    - started_at
+    - manifest_id
+    - status
   optional_fields:
-  - provider
-  - execution_fingerprint
+    - provider
+    - execution_fingerprint
   source_candidates:
-  - manifest_index
-  - ledger_index
-  - local_api
-  - lightweight_table_backed_index
+    - manifest_index
+    - ledger_index
+    - local_api
+    - lightweight_table_backed_index
 execution_selector_future_contract:
   status: design_only
   selector_name: run_selector_mode
   supported_modes:
-  - latest
-  - previous
-  - exact
+    - latest
+    - previous
+    - exact
   resolved_hidden_context:
-  - selected_run_id
-  - selected_manifest_id
-  - selected_started_at
+    - selected_run_id
+    - selected_manifest_id
+    - selected_started_at
   rollout_candidates:
-  - bioetl-runtime
-  - bioetl-dq-v2
-  - bioetl-control-plane-v1
-  - bioetl-overview-v2
-  excluded_by_default:
-  - bioetl-provider-health-v2
-dual_scope_evaluation:
-  workflow_plus_pipeline:
-    status: future_candidate_only
-    prerequisites:
-    - truthful_intersection_semantics
-    - run_catalog_support
-    - explicit_empty_intersection_no_data
-    candidate_uids:
     - bioetl-runtime
     - bioetl-dq-v2
     - bioetl-control-plane-v1
     - bioetl-overview-v2
-    excluded_default_uids:
+  excluded_by_default:
     - bioetl-provider-health-v2
+dual_scope_evaluation:
+  workflow_plus_pipeline:
+    status: future_candidate_only
+    prerequisites:
+      - truthful_intersection_semantics
+      - run_catalog_support
+      - explicit_empty_intersection_no_data
+    candidate_uids:
+      - bioetl-runtime
+      - bioetl-dq-v2
+      - bioetl-control-plane-v1
+      - bioetl-overview-v2
+    excluded_default_uids:
+      - bioetl-provider-health-v2

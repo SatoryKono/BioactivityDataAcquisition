@@ -36,10 +36,12 @@ if TYPE_CHECKING:
         SettingsPort,
     )
 
+
 @dataclass(frozen=True, slots=True)
 class RunnerFactoryBootstrap:
     registry: PipelineRegistry
     factory: PipelineFactoryPort
+
 
 def bootstrap_runner_factory(
     *,
@@ -57,6 +59,7 @@ def bootstrap_runner_factory(
         registry=effective_registry,
         factory=effective_registry.get(pipeline_name).factory,
     )
+
 
 def create_runner(
     *,
@@ -95,6 +98,7 @@ def create_runner(
         cached_bronze=inputs.cached_bronze,
     )
     return cast("PipelineRunnerProtocol", factory.create_runner(request))
+
 
 def attach_runner_control_plane_collaborators(
     *,

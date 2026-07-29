@@ -11,10 +11,12 @@ if TYPE_CHECKING:
 
     from bioetl.infrastructure.config.settings_api import Settings
 
+
 class _ConfigurableDQMonitor(DQMonitorPort, Protocol):
     """DQ monitor contract with detector configuration support."""
 
     detector: _DQDetectorConfig
+
 
 class _DQDetectorConfig(Protocol):
     """Configuration surface used by bootstrap when wiring DQ thresholds."""
@@ -29,9 +31,11 @@ class _DQDetectorConfig(Protocol):
         max_value: float,
     ) -> None: ...
 
+
 __all__ = [
     "bootstrap_dq_monitor",
 ]
+
 
 def _default_monitor_factory(
     *,
@@ -48,11 +52,13 @@ def _default_monitor_factory(
         z_score_threshold=z_score_threshold,
     )
 
+
 def _default_noop_logger_factory() -> LoggerPort:
     """Create the infrastructure no-op logger only when needed."""
     from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
     return NoOpLogger()
+
 
 def bootstrap_dq_monitor(
     settings: Settings,

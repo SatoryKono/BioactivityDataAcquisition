@@ -1,15 +1,5 @@
 # pyright: reportImportCycles=false
-# Import cycle residual (PD4).
-# Import cycle residual tracked in allowlist (PD3).
-"""Pipeline factory subpackage.
-
-Canonical import paths::
-
-    GenericPipelineFactory : from bioetl.composition.factories.pipeline import GenericPipelineFactory
-    PIPELINE_CONFIGS       : from bioetl.composition.factories.pipeline.registry_manifest import PIPELINE_CONFIGS
-    register_all_pipelines : from bioetl.composition.factories.pipeline.registry import register_all_pipelines
-    PipelineRegistry       : from bioetl.composition.registry_api import PipelineRegistry
-"""
+"""Public pipeline-factory imports; registry API lives in ``composition.registry_api``."""
 
 from __future__ import annotations
 

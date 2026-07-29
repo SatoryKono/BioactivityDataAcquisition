@@ -15,6 +15,7 @@ _MEMORY_MONITOR_FALLBACK_EVENTS_METRIC = "bioetl_memory_monitor_fallback_events_
 _MEMORY_PRESSURE_STATE_METRIC = "bioetl_memory_pressure_state"
 _FALLBACK_MONITOR_MODES = frozenset({"resource", "estimate", "unknown"})
 
+
 def emit_decision_metrics(
     metrics: MetricsPort | None,
     *,
@@ -29,7 +30,6 @@ def emit_decision_metrics(
     """Emit bounded adaptive-memory metrics for one decision."""
     if metrics is None:
         return
-
     status = decision_status(
         old_size=old_size,
         new_size=new_size,
@@ -65,5 +65,6 @@ def emit_decision_metrics(
             1,
             labels,
         )
+
 
 __all__ = ["emit_decision_metrics"]

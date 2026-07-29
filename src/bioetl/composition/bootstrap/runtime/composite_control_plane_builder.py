@@ -68,6 +68,7 @@ __all__ = [
     "resolve_composite_control_plane_flags",
 ]
 
+
 def resolve_composite_control_plane_flags(settings: object) -> tuple[bool, bool]:
     """Resolve manifest/ledger feature flags for executable composite runs."""
     _, manifest_enabled, ledger_enabled, _, effective_required_profile = (
@@ -88,13 +89,16 @@ def resolve_composite_control_plane_flags(settings: object) -> tuple[bool, bool]
     )
     return True, ledger_enabled
 
+
 def bind_manifest_logger(logger: LoggerPort, manifest_id: str | None) -> LoggerPort:
     """Bind ``manifest_id`` into logger context when supported."""
     return _bind_manifest_logger(logger, manifest_id)
 
+
 def _normalize_object(value: object) -> dict[str, object]:
     """Convert dataclasses/models into stable JSON-safe mappings."""
     return _support_normalize_object(value)
+
 
 def _build_composite_control_plane_manifest(
     *,
@@ -122,6 +126,7 @@ def _build_composite_control_plane_manifest(
             config_artifacts=config_artifacts,
         )
     )
+
 
 def build_composite_control_plane_bundle(
     *,
@@ -177,6 +182,7 @@ def build_composite_control_plane_bundle(
         contract_ref=config_artifacts.contract_ref,
         contract_version=config_artifacts.contract_version or None,
     )
+
 
 def _build_composite_manifest_create_request(
     *,

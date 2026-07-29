@@ -122,8 +122,14 @@ def test_issue_5599_active_hotspot_total_loc_decreases_without_budget_growth() -
     assert application_core["max_internal_fan_in"] <= 11
     assert application_core["bounded_growth_budgets"]["files_ge_250_loc"] <= 5
     assert application_core["bounded_growth_budgets"]["max_internal_fan_in"] <= 10
-    assert application_core["bounded_growth_budgets"]["files_ge_250_loc"] >= application_core["files_ge_250_loc"]
-    assert application_core["bounded_growth_budgets"]["max_internal_fan_in"] >= application_core["max_internal_fan_in"]
+    assert (
+        application_core["bounded_growth_budgets"]["files_ge_250_loc"]
+        >= application_core["files_ge_250_loc"]
+    )
+    assert (
+        application_core["bounded_growth_budgets"]["max_internal_fan_in"]
+        >= application_core["max_internal_fan_in"]
+    )
     assert (
         scorecard_rows["application_core"]["metrics"]["total_loc"]
         == application_core["total_loc"]

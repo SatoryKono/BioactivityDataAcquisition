@@ -22,25 +22,23 @@ from .batch_metrics import BatchMetricsRecorderService
 
 class DQQuarantineEntry(NamedTuple):
     """A record that failed data-quality checks."""
-
     record: BronzeRecord
     error_type: ErrorType
     error_details: str
 
+
 class FilteredQuarantineEntry(NamedTuple):
     """A record excluded by Silver filters."""
-
     record: BronzeRecord
     reason: str
     details: JsonDict | None = None
 
+
 class QuarantineRuntimeService(QuarantineManagerSupportMixin):
     """Write records that fail processing to quarantine storage.
-
     Admin/operator inspection and purge workflows live in
     ``application.services.quarantine_service.QuarantineService``.
     """
-
     def __init__(
         self,
         quarantine_port: QuarantinePort,
@@ -52,7 +50,6 @@ class QuarantineRuntimeService(QuarantineManagerSupportMixin):
         domain_event_emitter: DomainEventEmitterProtocol | None = None,
     ) -> None:
         """Initialize QuarantineRuntimeService with explicit dependencies.
-
         Args:
             quarantine_port: Port for writing to quarantine storage.
             pipeline_name: Name of the pipeline for identification.
@@ -61,7 +58,6 @@ class QuarantineRuntimeService(QuarantineManagerSupportMixin):
             pipeline_metrics: Optional prebuilt pipeline-scoped metrics recorder.
             batch_metrics: Optional run-type-aware recorder shared with batch processing.
             run_type: Run type label used by fallback direct metric emissions.
-
         """
         self._quarantine = quarantine_port
         self._pipeline_name = pipeline_name
@@ -76,6 +72,7 @@ class QuarantineRuntimeService(QuarantineManagerSupportMixin):
             )
         self._pipeline_metrics = resolved_pipeline_metrics
         self._domain_event_emitter = domain_event_emitter
+
 
 __all__ = [
     "DQQuarantineEntry",

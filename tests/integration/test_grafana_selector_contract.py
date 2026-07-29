@@ -114,6 +114,8 @@ def test_pipeline_universe_contract_matches_shipped_query_sources() -> None:
         "bioetl-runtime": "bioetl-runtime.json",
         "bioetl-provider-health-v2": "bioetl-provider-health-v2.json",
         "bioetl-dq-v2": "bioetl-dq-v2.json",
+        "bioetl-incident-v1": "bioetl-incident-v1.json",
+        "bioetl-run-explorer-v1": "bioetl-run-explorer-v1.json",
     }
     for uid, metric in shared.items():
         if uid not in file_by_uid:
@@ -201,12 +203,21 @@ def test_pipeline_selector_live_closure_evidence_is_complete() -> None:
     assert isinstance(dashboards, list)
     assert isinstance(captures, dict)
     # Historical evidence capture (2026-07-20) still lists 8 UIDs including the
-    # removed Silver Reject Explorer. Shipping registry is authoritative.
+    # removed Silver Reject Explorer. Shipping registry is authoritative and may
+    # include adjunct boards (Incident / Run Explorer) added after that capture.
     evidence_uids = {dashboard.get("uid") for dashboard in dashboards}
-    assert set(registry).issubset(evidence_uids)
+    adjunct = set(closure.get("adjunct_uids_not_in_2026_07_20_evidence") or [])
+    primary_registry = set(registry) - adjunct
+    assert primary_registry.issubset(evidence_uids)
+    assert adjunct.issubset(set(registry))
     assert "bioetl-silver-reject-explorer" not in registry
-    assert len(registry) == closure.get("required_dashboard_count") == 5
-    assert len(dashboards) >= len(registry)
+    assert len(registry) == closure.get("required_dashboard_count") == 7
+    assert (
+        len(primary_registry)
+        == closure.get("primary_pipeline_universe_count")
+        == 5
+    )
+    assert len(dashboards) >= len(primary_registry)
 
     shared_metrics = contract.get("shared_query_metrics")
     exceptions = contract.get("role_local_exceptions")
@@ -377,6 +388,8 @@ def test_dashboard_families_cover_all_shipped_dashboards() -> None:
         ("bioetl-runtime.json", "bioetl-runtime"),
         ("bioetl-provider-health-v2.json", "bioetl-provider-health-v2"),
         ("bioetl-dq-v2.json", "bioetl-dq-v2"),
+        ("bioetl-incident-v1.json", "bioetl-incident-v1"),
+        ("bioetl-run-explorer-v1.json", "bioetl-run-explorer-v1"),
     ],
 )
 def test_shipped_selector_registry_matches_dashboard_variables(

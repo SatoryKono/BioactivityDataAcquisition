@@ -50,7 +50,7 @@ class _BaseTransformerDependencyHelpersMixin:
 
     @staticmethod
     def validate_value_object(
-        vo_class: type[ValueObjectWithFromRaw[Any]],
+        vo_class: type[ValueObjectWithFromRaw[Any]],  # Any: generic VO type parameter
         value: object,
         *,
         as_string: bool = True,
@@ -63,7 +63,7 @@ class _BaseTransformerDependencyHelpersMixin:
 
     @staticmethod
     def validate_value_objects(
-        vo_class: type[ValueObjectWithFromRaw[Any]],
+        vo_class: type[ValueObjectWithFromRaw[Any]],  # Any: generic VO type parameter
         values: list[object] | None,
         *,
         as_string: bool = True,

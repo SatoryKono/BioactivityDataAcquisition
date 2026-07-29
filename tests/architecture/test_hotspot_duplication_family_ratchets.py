@@ -206,9 +206,7 @@ def test_reviewed_baseline_hotspot_families_match_reviewed_duplication_snapshot(
         if isinstance(family, dict)
         and family.get("ratchet_stage") == "reviewed-baseline"
     ]
-    assert {
-        str(family.get("name")) for family in reviewed_families
-    } == {
+    assert {str(family.get("name")) for family in reviewed_families} == {
         str(row.get("name")) for row in baseline_family_rows
     }
 

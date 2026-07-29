@@ -28,6 +28,7 @@ def validate_idempotency_contracts(
         ),
     ]
 
+
 def _validate_layer_idempotency_contract(
     *,
     layer: Layer,
@@ -79,6 +80,7 @@ def _validate_layer_idempotency_contract(
         )
     ]
 
+
 def _expected_contract_for_mode(*, layer: Layer, mode: str) -> str | None:
     if layer is Layer.SILVER and mode == "merge":
         return "merge_upsert"
@@ -87,6 +89,7 @@ def _expected_contract_for_mode(*, layer: Layer, mode: str) -> str | None:
     if layer is Layer.GOLD and mode == "overwrite":
         return "overwrite_rebuild"
     return None
+
 
 __all__ = [
     "validate_idempotency_contracts",

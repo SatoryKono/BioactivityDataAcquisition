@@ -18,6 +18,7 @@ from bioetl.domain.types import RunID
 
 __all__ = ["acquire_lock", "enter_lock_context", "release_lock", "start_heartbeat"]
 
+
 class _LockRuntimeHostProtocol(Protocol):
     _lock: LockPort
     _config: LockConfig
@@ -29,8 +30,8 @@ class _LockRuntimeHostProtocol(Protocol):
     _heartbeat: HeartbeatTask | None
     _acquired_at: float | None
     _fencing_token: FencingToken | None
-
     def get_context(self) -> LockContext | None: ...
+
 
 async def acquire_lock(host: _LockRuntimeHostProtocol) -> FencingToken | None:
     """Acquire the runtime lock and update shared runtime state."""
@@ -62,12 +63,12 @@ async def acquire_lock(host: _LockRuntimeHostProtocol) -> FencingToken | None:
         )
     return token
 
+
 async def release_lock(host: _LockRuntimeHostProtocol) -> None:
     """Release the runtime lock, stop heartbeat, and clear context state."""
     if (heartbeat := host._heartbeat) is not None:
         await heartbeat.stop()
         host._heartbeat = None
-
     await host._lock.release(
         host._config.lock_key,
         host._run_id,
@@ -78,6 +79,7 @@ async def release_lock(host: _LockRuntimeHostProtocol) -> None:
     if host._context_holder is not None:
         host._context_holder.clear()
     host._logger.info("Lock released", stage="cleanup")
+
 
 async def start_heartbeat(host: _LockRuntimeHostProtocol) -> None:
     """Start the background heartbeat task for the acquired lock."""
@@ -91,6 +93,7 @@ async def start_heartbeat(host: _LockRuntimeHostProtocol) -> None:
         logger=host._logger,
     )
     await heartbeat.start()
+
 
 async def enter_lock_context[LockRuntimeHostT: _LockRuntimeHostProtocol](
     host: LockRuntimeHostT,

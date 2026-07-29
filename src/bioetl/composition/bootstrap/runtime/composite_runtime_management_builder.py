@@ -45,6 +45,7 @@ if TYPE_CHECKING:
     )
     from bioetl.infrastructure.config.settings_api import Settings
 
+
 def build_runtime_management_services(
     *,
     config: CompositeConfig,
@@ -91,6 +92,7 @@ def build_runtime_management_services(
         ),
         quarantine_port=quarantine_port,
     )
+
 
 def _create_checkpoint_manager(
     *,
@@ -163,6 +165,7 @@ def _create_checkpoint_manager(
     )
     return checkpoint_manager_cls(checkpoint_context)
 
+
 def _resolve_expected_effective_config_hash(
     *,
     config: CompositeConfig,
@@ -209,5 +212,6 @@ def _resolve_expected_effective_config_hash(
             "checkpoint anchor"
         )
     return config_hash
+
 
 __all__ = ["build_runtime_management_services"]

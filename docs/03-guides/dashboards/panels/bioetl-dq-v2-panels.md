@@ -205,7 +205,7 @@ is `SELECTED RUN`, and score/count/freshness evidence below the answer row is
 - **Purpose:** Group selected-range score, quarantine, and reject evidence.
 - **Data sources:** Prometheus range evidence from the nested panels.
 
-### 38. Run context (thin) → Run Explorer
+### 38. Run context (thin) -> Run Explorer hub
 - **Type:** Row
 - **Purpose:** Group selected-run identity and processed-record HTTP evidence.
 - **Data sources:** BioETL Ops HTTP.

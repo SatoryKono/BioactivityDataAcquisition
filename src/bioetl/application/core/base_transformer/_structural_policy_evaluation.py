@@ -28,10 +28,8 @@ def evaluate_contract(
     """Evaluate one contract against the working record."""
     if contract.is_system_field or contract.logical_type == "unknown":
         return None
-
     field_present = contract.field_name in working_record
     value = working_record.get(contract.field_name)
-
     missing_outcome = evaluate_missing_required(
         contract=contract,
         value=value,
@@ -40,7 +38,6 @@ def evaluate_contract(
     )
     if missing_outcome is not None:
         return missing_outcome
-
     if contract.logical_type == "string" or not field_present:
         return None
     if value is None:
@@ -49,18 +46,17 @@ def evaluate_contract(
             working_record=working_record,
             events=events,
         )
-
     coerced_value = coerce_value(value, contract)
     if coerced_value is not None:
         working_record[contract.field_name] = coerced_value
         return None
-
     return evaluate_invalid_value(
         contract=contract,
         value=value,
         working_record=working_record,
         events=events,
     )
+
 
 def evaluate_missing_required(
     *,
@@ -91,6 +87,7 @@ def evaluate_missing_required(
         details=details,
     )
 
+
 def evaluate_null_value(
     *,
     contract: StructuralFieldSpec,
@@ -119,6 +116,7 @@ def evaluate_null_value(
         details=details,
     )
 
+
 def evaluate_invalid_value(
     *,
     contract: StructuralFieldSpec,
@@ -135,7 +133,6 @@ def evaluate_invalid_value(
             events=events,
         )
         return None
-
     details = build_structural_details(
         reason_code=(
             "optional_nonnullable_field_type_mismatch"
@@ -165,6 +162,7 @@ def evaluate_invalid_value(
         details=details,
     )
 
+
 def coerce_invalid_nullable_value(
     *,
     contract: StructuralFieldSpec,
@@ -190,5 +188,6 @@ def coerce_invalid_nullable_value(
             details=details,
         )
     )
+
 
 __all__ = ["evaluate_contract"]

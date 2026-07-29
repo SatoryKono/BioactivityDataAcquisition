@@ -125,6 +125,7 @@ log_test.txt
 !/reports/quality/
 /reports/quality/*
 !/reports/quality/documentation-governance-2026-07-28-closeout.md
+!/reports/quality/architecture-coderabbit-2026-07-29-issue-publish.json
 !/reports/quality/docs-open-runs-2-4-closeout-2026-07-28.md
 !/reports/docs-evidence/
 /reports/docs-evidence/*

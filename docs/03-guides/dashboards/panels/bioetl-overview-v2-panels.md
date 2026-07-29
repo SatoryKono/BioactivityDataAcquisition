@@ -143,7 +143,7 @@ multiple runs; use RunLedger for exact reconciliation.
 - **Purpose:** Show alert state for triage.
 - **Data sources:** `ALERTS{alertstate="firing"}` (standard Prometheus metric)
 
-### 26. Run context (thin) → Run Explorer
+### 26. Run context (thin) -> Run Explorer hub
 - **Type:** Row
 - **Purpose:** Group selected-run identity and processed-record HTTP evidence.
 - **Data sources:** BioETL Ops HTTP.

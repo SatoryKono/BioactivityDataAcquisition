@@ -14,6 +14,7 @@ __all__ = [
     "track_transform_result_metrics",
 ]
 
+
 def track_bronze_write_metrics(
     batch_metrics: BatchMetricsRecorderService,
     *,
@@ -33,6 +34,7 @@ def track_bronze_write_metrics(
         outcome="records",
         count=record_count,
     )
+
 
 def track_transform_result_metrics(
     batch_metrics: BatchMetricsRecorderService,
@@ -64,6 +66,7 @@ def track_transform_result_metrics(
         outcome="excluded_by_contract",
         count=transform_result.gold_excluded_by_contract_count,
     )
+
 
 def track_storage_write_metrics(
     batch_metrics: BatchMetricsRecorderService,

@@ -24,11 +24,14 @@ from ._effective_config_secret_support import build_secret_surface_inventory
 
 _EXECUTION_AFFECTING_SETTINGS_SURFACES = semantic_runtime_env_dependencies()
 
+
 def current_silver_filter_compatibility_mode() -> str:
     return cast(str, resolve_silver_filter_compatibility_mode())
 
+
 def current_silver_filter_compatibility_snapshot() -> dict[str, object]:
     return cast(dict[str, object], build_silver_filter_compatibility_snapshot())
+
 
 def add_silver_filter_compatibility_defaults(payload: dict[str, object]) -> None:
     payload.setdefault(
@@ -39,6 +42,7 @@ def add_silver_filter_compatibility_defaults(payload: dict[str, object]) -> None
         "silver_filter_compatibility",
         current_silver_filter_compatibility_snapshot(),
     )
+
 
 def build_execution_settings_snapshot(settings: Settings) -> dict[str, object]:
     """Materialize env-derived execution settings without exposing secrets."""
@@ -112,6 +116,7 @@ def build_execution_settings_snapshot(settings: Settings) -> dict[str, object]:
     )
     return snapshot
 
+
 def build_execution_environment_snapshot(settings: Settings) -> dict[str, object]:
     """Materialize sanitized environment/dependency provenance for env overrides."""
     settings_snapshot = build_execution_settings_snapshot(settings)
@@ -127,8 +132,10 @@ def build_execution_environment_snapshot(settings: Settings) -> dict[str, object
         "settings_snapshot_hash": settings_snapshot["snapshot_hash"],
     }
 
+
 def _setting_attr(host: object, name: str, default: object = None) -> object:
     return getattr(host, name, default)
+
 
 def _hashed_optional_text(value: object) -> str | None:
     if value is None:
@@ -137,6 +144,7 @@ def _hashed_optional_text(value: object) -> str | None:
     if not text:
         return None
     return _sha256_text(text)
+
 
 def _sha256_text(value: str) -> str:
     return f"sha256:{hashlib.sha256(value.encode('utf-8')).hexdigest()}"

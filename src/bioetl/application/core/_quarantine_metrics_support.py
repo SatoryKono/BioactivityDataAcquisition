@@ -21,6 +21,7 @@ if TYPE_CHECKING:
 
 FILTERED_OUT_SILVER = "FILTERED_OUT_SILVER"
 
+
 def track_quarantine_metrics(
     *,
     metrics: MetricsPort | None,
@@ -35,14 +36,11 @@ def track_quarantine_metrics(
     if batch_metrics is not None:
         batch_metrics.track_quarantined_records(error_type, count)
         return
-
     if metrics is None:
         return
-
     track_quarantined_records = getattr(metrics, "track_quarantined_records", None)
     if callable(track_quarantined_records):
         track_quarantined_records(error_type, count)
-
     metrics.increment_counter(
         "bioetl_dq_records_quarantined_total",
         count,
@@ -57,6 +55,7 @@ def track_quarantine_metrics(
         count=count,
     )
 
+
 def track_processed_quarantined(
     *,
     metrics: MetricsPort | None,
@@ -69,14 +68,11 @@ def track_processed_quarantined(
     if batch_metrics is not None:
         batch_metrics.track_processed_records("quarantined", count)
         return
-
     if metrics is None:
         return
-
     track_processed_records = getattr(metrics, "track_processed_records", None)
     if callable(track_processed_records):
         track_processed_records("quarantined", count)
-
     metrics.increment_counter(
         "bioetl_records_processed_total",
         count,
@@ -87,11 +83,13 @@ def track_processed_quarantined(
         },
     )
 
+
 def count_dq_error_types(
     records: Sequence[tuple[BronzeRecord, ErrorType, str]],
 ) -> Counter[ErrorType]:
     """Count DQ quarantine entries by error type."""
     return Counter(error_type for _, error_type, _ in records)
+
 
 def record_filtered_quarantine_metrics(
     *,

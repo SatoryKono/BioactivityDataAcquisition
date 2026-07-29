@@ -275,7 +275,9 @@ class TestLoadYamlWithTimeout:
                 def __exit__(self, *args: object) -> None:
                     del args
 
-                def submit(self, fn: object, *args: object, **kwargs: object) -> ImmediateFuture:
+                def submit(
+                    self, fn: object, *args: object, **kwargs: object
+                ) -> ImmediateFuture:
                     del fn, args, kwargs
                     return ImmediateFuture()
 

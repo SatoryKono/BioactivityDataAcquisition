@@ -28,15 +28,18 @@ def _normalize_publication_term_identity_component(value: str) -> str:
         return upper_value
     return normalized
 
+
 def _normalize_publication_id(value: str) -> str:
     """Canonicalize publication identity to the shared CHEMBL identifier form."""
     normalized = normalize_profile_chembl_id(value)
     return normalized if isinstance(normalized, str) else ""
 
+
 def _normalize_publication_term_value(value: str) -> str:
     """Canonicalize publication-term text before computing the digest."""
     normalized = normalize_profile_title(value)
     return normalized if isinstance(normalized, str) else ""
+
 
 def _normalize_subcellular_fraction_value(value: str) -> str:
     """Canonicalize subcellular fractions with the shared governed vocabulary."""
@@ -47,29 +50,27 @@ def _normalize_subcellular_fraction_value(value: str) -> str:
     )
     return normalized if isinstance(normalized, str) else ""
 
+
 def compute_publication_term_entity_id(
     publication_id: str,
     term_type: str,
     term: str,
 ) -> str:
     """Compute entity ID for a publication term based on composite key.
-
     Entity ID is SHA256 hash of: publication_id:term_type:normalized_term
-
     Args:
         publication_id: Document ChEMBL ID.
         term_type: Term type classification.
         term: Term text (will be normalized).
-
     Returns:
         Entity ID string (first 16 chars of SHA256 hex digest).
-
     """
     normalized_publication_id = _normalize_publication_id(publication_id)
     normalized_term_type = _normalize_publication_term_identity_component(term_type)
     normalized_term = _normalize_publication_term_value(term)
     composite = f"{normalized_publication_id}:{normalized_term_type}:{normalized_term}"
     return hashlib.sha256(composite.encode()).hexdigest()[:16]
+
 
 def compute_subcellular_fraction_entity_id(subcellular_fraction: str) -> str:
     """Compute entity ID from the canonical subcellular-fraction value."""

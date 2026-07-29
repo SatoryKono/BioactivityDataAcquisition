@@ -699,6 +699,7 @@ def _check_file(path: Path, expected: str) -> bool:
         print(f"[drift] missing: {path}")
         return False
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
     path = resolve_output_path(path, root=REPO_ROOT)
     actual = path.read_text(encoding="utf-8")  # NOSONAR - path confined
     if actual == expected:

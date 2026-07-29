@@ -23,6 +23,7 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
     from bioetl.infrastructure.config.settings_api import Settings
 
+
 def resolve_exact_replay_cached_bronze_context(
     *,
     ctx: PipelineRunContext,
@@ -54,6 +55,7 @@ def resolve_exact_replay_cached_bronze_context(
         date=bronze_date,
     )
 
+
 def bind_cached_bronze_context(
     ctx: PipelineRunContext,
     cached_bronze: CachedBronzeContext,
@@ -67,6 +69,7 @@ def bind_cached_bronze_context(
     payload = dict(vars(ctx))
     payload["cached_bronze"] = cached_bronze
     return SimpleNamespace(**payload)
+
 
 def _resolve_replay_parent_manifest(
     *,
@@ -107,6 +110,7 @@ def _resolve_replay_parent_manifest(
         )
     return manifest
 
+
 def _resolve_parent_bronze_date(
     *,
     manifest: RunManifest,
@@ -132,6 +136,7 @@ def _resolve_parent_bronze_date(
         )
     return bronze_dates[0]
 
+
 def _collect_ledger_bronze_dates(
     *,
     manifest: RunManifest,
@@ -151,6 +156,7 @@ def _collect_ledger_bronze_dates(
     if dates:
         return tuple(sorted(dates))
     return _collect_manifest_bronze_dates(manifest)
+
 
 def _validated_ledger_snapshot_uri(
     *,
@@ -173,6 +179,7 @@ def _validated_ledger_snapshot_uri(
         )
     return _optional_text(details.get("immutable_uri"))
 
+
 def _collect_manifest_bronze_dates(manifest: RunManifest) -> tuple[str, ...]:
     """Collect the compatibility fallback dates from manifest source refs."""
     dates: set[str] = set()
@@ -191,6 +198,7 @@ def _collect_manifest_bronze_dates(manifest: RunManifest) -> tuple[str, ...]:
                 )
             dates.add(_extract_bronze_date(snapshot.immutable_uri))
     return tuple(sorted(dates))
+
 
 def _extract_bronze_date(immutable_uri: str) -> str:
     prefix = "bronze://"
@@ -213,6 +221,7 @@ def _extract_bronze_date(immutable_uri: str) -> str:
             f"segment: '{immutable_uri}'"
         )
     return bronze_date
+
 
 def _optional_text(value: object) -> str | None:
     if value is None:

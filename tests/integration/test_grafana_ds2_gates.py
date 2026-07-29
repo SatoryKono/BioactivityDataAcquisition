@@ -45,14 +45,18 @@ def _continuous_lag_expr(expr: str) -> bool:
 def test_runtime_stage_lag_primary_panel_is_timeseries() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     panels = {
-        panel.get("id"): panel for panel in get_dashboard_panels(dashboard) if panel.get("id")
+        panel.get("id"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("id")
     }
     panel = panels.get(9105)
     assert panel is not None
     assert panel.get("type") == "timeseries", (
         "DS2-01: continuous stage lag must use timeseries, not state-timeline"
     )
-    exprs = [t.get("expr", "") for t in panel.get("targets") or [] if isinstance(t, dict)]
+    exprs = [
+        t.get("expr", "") for t in panel.get("targets") or [] if isinstance(t, dict)
+    ]
     assert any("bioetl_stage_lag_seconds" in e for e in exprs)
 
 
@@ -110,7 +114,7 @@ def test_incident_operator_tables_no_default_color_background() -> None:
             continue
         if panel.get("id") not in {2002, 2003, 2004, 2005, 2010}:
             continue
-        defaults = ((panel.get("fieldConfig") or {}).get("defaults") or {})
+        defaults = (panel.get("fieldConfig") or {}).get("defaults") or {}
         custom = defaults.get("custom") or {}
         cell = custom.get("cellOptions") or {}
         assert cell.get("type") in {None, "auto"}, (
@@ -126,7 +130,10 @@ def test_incident_operator_tables_no_default_color_background() -> None:
                 if isinstance(prop, dict)
             }
             cell_opt = props.get("custom.cellOptions")
-            if isinstance(cell_opt, dict) and cell_opt.get("type") == "color-background":
+            if (
+                isinstance(cell_opt, dict)
+                and cell_opt.get("type") == "color-background"
+            ):
                 matcher = override.get("matcher") or {}
                 assert matcher.get("id") in {"byName", "byRegexp", "byType"}
 

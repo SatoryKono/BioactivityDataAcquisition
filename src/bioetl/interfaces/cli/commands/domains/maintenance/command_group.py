@@ -66,6 +66,7 @@ _EAGER_MAINTENANCE_COMMANDS: dict[str, tuple[click.Command | click.Group, str]] 
     ),
 }
 
+
 def _load_maintenance_command(name: str) -> click.Command | click.Group | None:
     """Import one maintenance subcommand only when it is requested."""
     eager_spec = _EAGER_MAINTENANCE_COMMANDS.get(name)

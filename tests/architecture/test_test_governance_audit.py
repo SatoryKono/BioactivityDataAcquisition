@@ -496,6 +496,7 @@ def test_critical_behavior_envelopes_have_assertion_evidence() -> None:
         "control_plane_replay",
         "gold_strict_contracts",
         "medallion_storage",
+        "pipeline_run_fsm",
         "quarantine_replay",
         "test_governance",
     }

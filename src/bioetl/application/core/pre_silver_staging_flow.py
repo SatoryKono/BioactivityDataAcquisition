@@ -14,6 +14,7 @@ from bioetl.domain.types import JsonDict
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
 
+
 class _PreSilverStagingFlowMixin:
     """Stage business payloads behind the ``PreSilverRecord`` protocol."""
 
@@ -126,5 +127,6 @@ class _PreSilverStagingFlowMixin:
             business_data=business_data,
             resolve_entity_id=resolve_entity_id,
         )
+
 
 __all__ = ["_PreSilverStagingFlowMixin"]

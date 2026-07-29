@@ -238,7 +238,9 @@ def _ping_http_endpoint(ping_url: str, *, timeout: float) -> int:
     import urllib.request
 
     try:
-        with urllib.request.urlopen(ping_url, timeout=timeout) as resp:  # NOSONAR - loopback
+        with urllib.request.urlopen(
+            ping_url, timeout=timeout
+        ) as resp:  # NOSONAR - loopback
             ping_code = int(getattr(resp, "status", 200) or 200)
             if ping_code >= 500:
                 raise RuntimeError(f"ping HTTP {ping_code} for {ping_url}")

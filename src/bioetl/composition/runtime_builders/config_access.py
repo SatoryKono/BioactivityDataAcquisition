@@ -25,25 +25,30 @@ __all__ = [
     "resolve_configs_root",
 ]
 
+
 def create_pipeline_config_loader(
     configs_root: Path,
 ) -> Callable[[str], PipelineYamlConfig]:
     """Bind pipeline config loading through the owner runtime config seam."""
     return _create_pipeline_config_loader(configs_root)
 
+
 def create_dq_config_loader(configs_root: Path) -> Callable[[str], object]:
     """Bind DQ config loading through the owner runtime config seam."""
     return _create_dq_config_loader(configs_root)
 
+
 def create_source_config_loader(configs_root: Path) -> Callable[[str], object]:
     """Bind provider source config loading through the owner runtime config seam."""
     return _create_source_config_loader(configs_root)
+
 
 def get_settings() -> Settings:
     """Resolve settings through the infrastructure package at call time."""
     from bioetl.infrastructure.config.settings_api import get_settings as _get_settings
 
     return _get_settings()
+
 
 def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
     """Load pipeline YAML through the canonical infrastructure entrypoint."""
@@ -53,6 +58,7 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
 
     return _load_pipeline_config(pipeline_name)
 
+
 def load_source_config(provider: str) -> object:
     """Load source YAML through the canonical infrastructure entrypoint."""
     from bioetl.infrastructure.config.source_config_loader import (
@@ -60,6 +66,7 @@ def load_source_config(provider: str) -> object:
     )
 
     return _load_source_config(provider)
+
 
 def load_dq_config_for_pipeline(
     pipeline_name: str,

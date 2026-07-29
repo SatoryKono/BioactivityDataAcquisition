@@ -13,29 +13,29 @@ if TYPE_CHECKING:
     from bioetl.application.services.medallion.medallion_types import VacuumResult
     from bioetl.domain.value_objects.dq_result import DQResult
 
+
 class _PostrunResultProtocol(Protocol):
     @property
     def dq(self) -> DQResult: ...
-
     @property
     def dq_reports(self) -> DQReportResult | None: ...
-
     @property
     def vacuum(self) -> VacuumResult: ...
-
     @property
     def compaction(self) -> CompactionResult: ...
 
+
 PostrunLogLevel = Literal["info", "warning", "error"]
+
 
 @dataclass(frozen=True, slots=True)
 class PostrunPhaseCompletion:
     """Success metadata for one postrun phase."""
-
     status: str
     span_attributes: dict[str, object]
     observability_fields: dict[str, object]
     level: PostrunLogLevel | None = None
+
 
 def record_run_span_attributes(
     span: Span,
@@ -69,6 +69,7 @@ def record_run_span_attributes(
         result.vacuum.gold_files_removed,
     )
 
+
 def describe_dq_phase(result: DQResult) -> PostrunPhaseCompletion:
     """Describe tracing and logging metadata for the DQ phase."""
     return PostrunPhaseCompletion(
@@ -85,6 +86,7 @@ def describe_dq_phase(result: DQResult) -> PostrunPhaseCompletion:
             "check_duration_ms": result.check_duration_ms,
         },
     )
+
 
 def describe_compaction_phase(result: CompactionResult) -> PostrunPhaseCompletion:
     """Describe tracing and logging metadata for the compaction phase."""
@@ -104,6 +106,7 @@ def describe_compaction_phase(result: CompactionResult) -> PostrunPhaseCompletio
         level="warning" if result.status == "failed" else None,
     )
 
+
 def describe_dq_report_phase(
     result: DQReportResult | None,
 ) -> PostrunPhaseCompletion:
@@ -120,6 +123,7 @@ def describe_dq_report_phase(
         },
     )
 
+
 def describe_vacuum_phase(result: VacuumResult) -> PostrunPhaseCompletion:
     """Describe tracing and logging metadata for the VACUUM phase."""
     return PostrunPhaseCompletion(
@@ -135,6 +139,7 @@ def describe_vacuum_phase(result: VacuumResult) -> PostrunPhaseCompletion:
             "skipped": result.skipped,
         },
     )
+
 
 def describe_final_metadata_phase(
     *,

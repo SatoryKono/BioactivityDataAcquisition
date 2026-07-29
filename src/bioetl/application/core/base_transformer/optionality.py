@@ -38,20 +38,17 @@ FRAMEWORK_MANAGED_FIELDS = frozenset(
 @dataclass(frozen=True, slots=True)
 class ResolvedOptionalityResult:
     """Resolved optionality and its source tags for one field."""
-
     optional: bool
     sources: tuple[OptionalitySource, ...]
 
 @dataclass(frozen=True, slots=True)
 class ConfigSurfaceOptionalityResolver:
     """Resolve field optionality from current config and DQ semantics."""
-
     explicit_optional_overrides: dict[str, bool]
     silver_required_fields: frozenset[str]
     dq_required_fields: frozenset[str]
     dq_not_null_fields: frozenset[str]
     dq_key_nonnullable_fields: frozenset[str]
-
     @classmethod
     def from_domain_config(
         cls, domain_config: object
@@ -72,7 +69,6 @@ class ConfigSurfaceOptionalityResolver:
             ),
             dq_key_nonnullable_fields=_collect_nonnullable_key_fields(domain_config),
         )
-
     def resolve(self, field_name: str) -> ResolvedOptionalityResult:
         """Resolve effective optionality for one business field."""
         explicit_override = self.explicit_optional_overrides.get(field_name)
@@ -86,7 +82,6 @@ class ConfigSurfaceOptionalityResolver:
                 optional=explicit_override,
                 sources=(source,),
             )
-
         sources: list[OptionalitySource] = []
         if field_name in self.silver_required_fields:
             sources.append("silver_required_fields")
@@ -96,7 +91,6 @@ class ConfigSurfaceOptionalityResolver:
             sources.append("dq_not_null_validation")
         if field_name in self.dq_key_nonnullable_fields:
             sources.append("dq_key_nullability")
-
         if sources:
             return ResolvedOptionalityResult(optional=False, sources=tuple(sources))
         return ResolvedOptionalityResult(optional=True, sources=("default_optional",))
@@ -152,7 +146,6 @@ def _collect_nonnullable_key_fields(domain_config: object) -> frozenset[str]:
     dq_config = getattr(domain_config, "dq", None)
     if dq_config is None:
         return frozenset()
-
     fields: set[str] = set()
     for key_rule in getattr(dq_config, "key_nullability_rules", ()):
         if getattr(key_rule, "nullable", True):

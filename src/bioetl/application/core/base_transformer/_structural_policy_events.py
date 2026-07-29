@@ -17,6 +17,7 @@ _SENSITIVE_FIELD_NAME_TOKENS = frozenset(
     {"api_key", "authorization", "password", "secret", "token"}
 )
 
+
 def build_quarantine_outcome(
     *,
     working_record: dict[str, object],
@@ -31,6 +32,7 @@ def build_quarantine_outcome(
         details=details,
         events=tuple(events),
     )
+
 
 def build_structural_details(
     *,
@@ -72,6 +74,7 @@ def build_structural_details(
         details["dq_error"] = True
     return details
 
+
 def build_optional_nonnullable_events(
     details: JsonDict,
 ) -> tuple[StructuralPolicySignal, StructuralPolicySignal]:
@@ -89,6 +92,7 @@ def build_optional_nonnullable_events(
         ),
     )
 
+
 def preview_value(
     value: object,
     *,
@@ -103,6 +107,7 @@ def preview_value(
     if len(preview) <= max_length:
         return preview
     return f"{preview[: max_length - 3]}..."
+
 
 __all__ = [
     "build_optional_nonnullable_events",

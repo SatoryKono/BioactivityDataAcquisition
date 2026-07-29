@@ -36,7 +36,10 @@ def test_overview_v2_semantics_contract():
         p.get("title", "") for p in d.get("panels", []) if p.get("type") == "row"
     )
     assert "Range Evidence" in row_labels
-    assert "Diagnostics" in row_labels
+    assert any(
+        label in row_labels
+        for label in ("Diagnostics & Docs", "Domain status matrix")
+    )
 
     nav_links = list(d.get("links", []))
     for panel in panels:

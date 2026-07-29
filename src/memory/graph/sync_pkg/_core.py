@@ -4061,6 +4061,12 @@ def _add_package_topology_decisions_and_risks(
     project: NodeKey,
     today: str,
 ) -> None:
+    summary_path = (
+        root
+        / "docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md"
+    )
+    if not summary_path.is_file():
+        return
     package_summary, package_doc = _evidence_summary_doc(
         snapshot,
         root,
@@ -4100,6 +4106,11 @@ def _add_governance_decisions_and_risks(
     project: NodeKey,
     today: str,
 ) -> None:
+    summary_path = (
+        root / "docs/reports/evidence/governance-signals/04-decisions/SUMMARY.md"
+    )
+    if not summary_path.is_file():
+        return
     governance_summary, governance_doc = _evidence_summary_doc(
         snapshot,
         root,

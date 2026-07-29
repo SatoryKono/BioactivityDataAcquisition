@@ -7,11 +7,13 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     normalize_required_persistence_profile,
 )
 
+
 def requires_artifact_publication_closure(required_profile: object) -> bool:
     return (
         normalize_required_persistence_profile(required_profile)
         in STRICT_PERSISTENCE_PROFILES
     )
+
 
 def validate_artifact_recorder_attachment(
     *,

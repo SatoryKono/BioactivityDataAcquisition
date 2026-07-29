@@ -9,7 +9,6 @@ from bioetl.domain.types import EntityID, GoldRecord
 
 class PreSilverIdentityHost(Protocol):
     """Host surface that can resolve entity IDs for PreSilver staging."""
-
     def compute_entity_id(
         self,
         source_id: str | None,

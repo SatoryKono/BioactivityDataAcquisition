@@ -60,6 +60,7 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import TracingPort
 
+
 @dataclass(frozen=True, slots=True)
 class PostrunResult:
     """Combined result of all post-run operations."""
@@ -69,6 +70,7 @@ class PostrunResult:
     vacuum: VacuumResult
     compaction: CompactionResult
 
+
 @dataclass(frozen=True, slots=True)
 class PostrunDependencyContext:
     """Injected postrun collaborators created by the composition layer."""
@@ -77,6 +79,7 @@ class PostrunDependencyContext:
     dq_report_orchestrator: PostrunDQReportService
     metadata_write_orchestrator: PostrunMetadataWriteService
     compact_orchestrator: PostrunCompactService
+
 
 class PostrunService(PostrunServiceSupportMixin):
     """Handles post-execution operations."""
@@ -176,6 +179,7 @@ class PostrunService(PostrunServiceSupportMixin):
             vacuum=vacuum_result,
             compaction=compaction,
         )
+
 
 __all__ = [
     "DQEvaluationStatus",

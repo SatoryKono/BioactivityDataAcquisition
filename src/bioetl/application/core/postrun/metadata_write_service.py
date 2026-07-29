@@ -27,9 +27,9 @@ if TYPE_CHECKING:
         StorageMaintenancePort,
     )
 
+
 class PostrunMetadataWriteService:
     """Handles final metadata writes for Silver and Gold outputs."""
-
     def __init__(
         self,
         *,
@@ -50,7 +50,6 @@ class PostrunMetadataWriteService:
         self._metadata_writer = metadata_writer
         self._metadata_version_resolver = metadata_version_resolver
         self._clock = clock
-
     async def write_final_metadata_if_available(
         self,
         executor: ExecutorMetricsPort,
@@ -67,11 +66,9 @@ class PostrunMetadataWriteService:
             await asyncio.gather(*write_coroutines)
             return True
         return False
-
     def _has_metadata_targets(self) -> bool:
         """Return whether postrun has enough collaborators to finalize sidecars."""
         return self._metadata_writer is not None
-
     def _build_write_coroutines(
         self,
         *,
@@ -95,7 +92,6 @@ class PostrunMetadataWriteService:
             ),
             resolve_delta_version=self._resolve_delta_version,
         )
-
     def _resolve_delta_version(
         self,
         table_path: str,
@@ -106,5 +102,6 @@ class PostrunMetadataWriteService:
             table_path,
             layer=layer,
         )
+
 
 __all__ = ["PostrunMetadataWriteService"]

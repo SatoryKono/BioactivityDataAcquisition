@@ -26,7 +26,6 @@ __all__ = [
 @dataclass(frozen=True, slots=True)
 class RecordTransformOutcome:
     """Internal outcome of transforming one record before quarantine flush."""
-
     silver_record: BronzeRecord | None
     gold_record: GoldRecord | None
     gold_excluded_by_contract: bool = False
@@ -36,7 +35,6 @@ class RecordTransformOutcome:
 @dataclass(frozen=True, slots=True)
 class TransformResult:
     """Result of batch transformation."""
-
     silver_records: list[BronzeRecord]
     gold_records: list[GoldRecord]
     quarantined_count: int
@@ -47,7 +45,6 @@ class TransformResult:
 @dataclass(frozen=True, slots=True)
 class TransformedRecord:
     """Single transformed record with routing info."""
-
     silver_record: BronzeRecord | None
     gold_record: GoldRecord | None
     is_quarantined: bool
@@ -58,7 +55,6 @@ class TransformedRecord:
 @dataclass(slots=True)
 class TransformAggregationState:
     """Mutable aggregation state shared by batch and streaming transforms."""
-
     silver_records: list[BronzeRecord]
     gold_records: list[GoldRecord]
     filtered_records: list[FilteredQuarantineEntry] = field(default_factory=list)

@@ -28,7 +28,7 @@ HTTP_IRI_PATTERN = r"^https?://[^\s]+$"
 
 
 class ActivitySchema(ETLRecordSchema):
-    """Activity validation schema for Silver layer."""
+    """Activity validation schema for the Silver layer."""
 
     source_batch_id: Series[str] = pa.Field(
         alias="_source_batch_id",

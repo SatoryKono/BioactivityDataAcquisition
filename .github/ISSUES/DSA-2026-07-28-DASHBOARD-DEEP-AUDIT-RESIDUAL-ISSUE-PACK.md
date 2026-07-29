@@ -1,10 +1,12 @@
 # Dashboard System 2.0 — Deep Audit residual issue pack
 
-**Status:** publishing  
+**Status:** closed (2026-07-28)  
 **Wave code:** DSA  
 **Date:** 2026-07-28  
+**Implementation epic:** [#6982](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6982) (closed)  
 **Source audit:** `BioETL_Dashboard_System_2.0_Deep_Audit_and_Redesign_2026-07-28.html`  
-**Baseline SHA:** `2ba9ae3259` (local `main` at pack authoring)
+**Baseline SHA:** `2ba9ae3259` (local `main` at pack authoring)  
+**Closeout:** A0 inventory PASS; A1 narrative residual shipped on 7 JSON boards; A2 ledger + usability remeasure; DSA-10/11 closed as deferred tracking.
 
 **Predecessors (closed):**
 - [#6901](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6901) DS2 refactor (W0–W1 truth + compression)
@@ -66,18 +68,18 @@ UX grammar: **state → impact → confidence/age → location/cause → safe ac
 
 | Code | Issue | Pri | Wave | Title |
 |------|-------|-----|------|-------|
-| DSA-00 | _TBD_ | meta | epic | Deep-audit residual refactor (post DS2/DSS) |
-| DSA-01 | _TBD_ | P0 | A0 | Contract Repair Gate — inventory/selectors/datasources SSOT |
-| DSA-02 | _TBD_ | P1 | A1 | Operations Home — composite verdict + domain status matrix |
-| DSA-03 | _TBD_ | P1 | A1 | First-screen verdict grammar (state×confidence×basis×action) |
-| DSA-04 | _TBD_ | P1 | A1 | Deduplicate ID/Processed Records shell → Run Explorer hub |
-| DSA-05 | _TBD_ | P1 | A1 | Pipeline Flow residual — telemetry chip + blockers + handoffs |
-| DSA-06 | _TBD_ | P1 | A1 | Dependency Health residual — freshness-aware fleet matrix |
-| DSA-07 | _TBD_ | P1 | A1 | Incident evidence timeline (alerts now + history chain) |
-| DSA-08 | _TBD_ | P1 | A1 | Run Explorer first-screen narrative (empty/selected) |
-| DSA-09 | _TBD_ | P2 | A2 | Query parity ledger + usability proxy remeasure |
-| DSA-10 | _TBD_ | P3 | track | Domain visualization upgrade (contract-gated tracking) |
-| DSA-11 | _TBD_ | P3 | track | Measured cutover / UID retirement tracking |
+| DSA-00 | [#6982](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6982) | meta | epic | Deep-audit residual refactor (post DS2/DSS) |
+| DSA-01 | [#6983](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6983) | P0 | A0 | Contract Repair Gate — inventory/selectors/datasources SSOT |
+| DSA-02 | [#6984](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6984) | P1 | A1 | Operations Home — composite verdict + domain status matrix |
+| DSA-03 | [#6985](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6985) | P1 | A1 | First-screen verdict grammar (state×confidence×basis×action) |
+| DSA-04 | [#6986](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6986) | P1 | A1 | Deduplicate ID/Processed Records shell → Run Explorer hub |
+| DSA-05 | [#6987](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6987) | P1 | A1 | Pipeline Flow residual — telemetry chip + blockers + handoffs |
+| DSA-06 | [#6988](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6988) | P1 | A1 | Dependency Health residual — freshness-aware fleet matrix |
+| DSA-07 | [#6989](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6989) | P1 | A1 | Incident evidence timeline (alerts now + history chain) |
+| DSA-08 | [#6990](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6990) | P1 | A1 | Run Explorer first-screen narrative (empty/selected) |
+| DSA-09 | [#6991](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6991) | P2 | A2 | Query parity ledger + usability proxy remeasure |
+| DSA-10 | [#6992](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6992) | P3 | track | Domain visualization upgrade (contract-gated tracking) |
+| DSA-11 | [#6993](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/6993) | P3 | track | Measured cutover / UID retirement tracking |
 
 ## Delivery order
 

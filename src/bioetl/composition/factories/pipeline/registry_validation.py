@@ -10,8 +10,8 @@ from __future__ import annotations
 from collections.abc import Iterable
 from pathlib import Path
 
-from bioetl.composition.factories.pipeline.config_types import PipelineFactoryConfig
 from bioetl.composition.factories.pipeline_support.registry_validation_helpers import (
+    RegistryEntryProtocol,
     _iter_entity_files,
     _validate_entity_config_against_registry,
     _validate_registry_entry,
@@ -24,7 +24,7 @@ __all__ = ["validate_registry_manifest"]
 def validate_registry_manifest(
     *,
     configs_root: Path,
-    pipeline_configs: Iterable[PipelineFactoryConfig] | None = None,
+    pipeline_configs: Iterable[RegistryEntryProtocol] | None = None,
 ) -> list[str]:
     """Validate registry-manifest entries against tracked entity/provider configs.
 

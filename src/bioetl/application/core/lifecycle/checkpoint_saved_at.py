@@ -26,11 +26,13 @@ def set_checkpoint_saved_at(
         {"pipeline": pipeline_name},
     )
 
+
 def checkpoint_saved_at_epoch_seconds(clock: ClockPort | None) -> float | None:
     """Return checkpoint persistence time from the runtime clock when provided."""
     if clock is None:
         return None
     return float(clock.now().timestamp())
+
 
 def metadata_with_checkpoint_saved_at(
     metadata: CheckpointMetadata,
@@ -43,6 +45,7 @@ def metadata_with_checkpoint_saved_at(
     if checkpoint_saved_at is not None:
         payload.setdefault("checkpoint_saved_at_epoch_seconds", checkpoint_saved_at)
     return payload
+
 
 __all__ = [
     "checkpoint_saved_at_epoch_seconds",

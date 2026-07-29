@@ -368,7 +368,10 @@ def _ruff_format_violations() -> int:
     from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 
     cmd = ensure_safe_cli_argv(
-        [str(token) for token in [*_resolve_ruff_cmd(), "format", "--check", "src", "tests"]]
+        [
+            str(token)
+            for token in [*_resolve_ruff_cmd(), "format", "--check", "src", "tests"]
+        ]
     )
     result = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
         cmd, capture_output=True, text=True

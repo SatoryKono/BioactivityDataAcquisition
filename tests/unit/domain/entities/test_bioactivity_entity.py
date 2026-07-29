@@ -15,14 +15,17 @@ import pytest
 
 from bioetl.domain.entities.bioactivity import Bioactivity, BioactivityState
 
-BASE_KWARGS = cast(Any, {
-    "entity_id": "activity:123",
-    "content_hash": "sha256hash",
-    "run_id": "run-001",
-    "run_type": "incremental",
-    "ingestion_ts": datetime(2024, 6, 1, tzinfo=UTC),
-    "_index": 0,
-})
+BASE_KWARGS = cast(
+    Any,
+    {
+        "entity_id": "activity:123",
+        "content_hash": "sha256hash",
+        "run_id": "run-001",
+        "run_type": "incremental",
+        "ingestion_ts": datetime(2024, 6, 1, tzinfo=UTC),
+        "_index": 0,
+    },
+)
 
 
 @pytest.mark.unit

@@ -281,7 +281,9 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     path = resolve_output_path(path, root=REPO_ROOT)
     if not path.exists():
         return {}
-    payload = yaml.safe_load(path.read_text(encoding="utf-8"))  # NOSONAR - path confined
+    payload = yaml.safe_load(
+        path.read_text(encoding="utf-8")
+    )  # NOSONAR - path confined
     if isinstance(payload, dict):
         return payload
     raise ValueError(f"Expected YAML mapping in {path}")
@@ -1333,7 +1335,9 @@ def _build_residual_backlog(
             "status": "reviewed_until_expiry",
             "row_count": semantic_counts.get("WEAK", 0),
             "expires_on": _cluster_review_expiry(registry, "WEAK"),
-            "top_clusters": _top_clusters(rows, column=COL_SEMANTIC_STATUS, value="WEAK"),
+            "top_clusters": _top_clusters(
+                rows, column=COL_SEMANTIC_STATUS, value="WEAK"
+            ),
             "definition_of_done": (
                 "WEAK same-name inventory remains owner-reviewed and does not "
                 "assert cross-pipeline business identity."
@@ -1597,8 +1601,7 @@ def _render_report(
     )
     weak_explicit_contract_count = _count_weak_clusters(
         registry,
-        scope_predicate=lambda scope: scope
-        == "explicit_source_owned_assay_contract",
+        scope_predicate=lambda scope: scope == "explicit_source_owned_assay_contract",
     )
     normalization_mismatches = normalization_counts.get(
         "DIFFERENT", 0
@@ -1908,8 +1911,11 @@ def check_artifacts(
             stale.append(filename)
             continue
         from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
         path = resolve_output_path(path, root=REPO_ROOT)
-        actual = _normalize_newlines(path.read_text(encoding="utf-8"))  # NOSONAR - path confined
+        actual = _normalize_newlines(
+            path.read_text(encoding="utf-8")
+        )  # NOSONAR - path confined
         if actual != _normalize_newlines(expected):
             stale.append(filename)
     if stale:

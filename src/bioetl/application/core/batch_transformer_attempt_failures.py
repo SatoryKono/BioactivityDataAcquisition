@@ -38,7 +38,6 @@ def _transform_failure_entity_id(raw_record: BronzeRecord) -> object:
 @dataclass(frozen=True, slots=True)
 class _FilteredOutHandlingContext:
     """Captured state needed to apply the filtered-out handling policy."""
-
     batch_metrics: BatchMetricsRecorderService
     dq_config: DQConfig | None
     raw_record: BronzeRecord

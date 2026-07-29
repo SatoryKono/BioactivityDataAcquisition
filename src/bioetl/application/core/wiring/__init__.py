@@ -16,11 +16,13 @@ _WIRING_SUBMODULES = (
     "bioetl.application.core.wiring.transformer",
 )
 
+
 def _build_export_groups() -> dict[str, tuple[str, ...]]:
     return {
         module_name: tuple(import_module(module_name).__all__)
         for module_name in _WIRING_SUBMODULES
     }
+
 
 _EXPORT_GROUPS = _build_export_groups()
 _EXPORT_MODULES = {
@@ -30,6 +32,7 @@ _EXPORT_MODULES = {
 }
 __all__ = [*_EXPORT_MODULES]
 
+
 def __getattr__(name: str) -> object:
     module_name = _EXPORT_MODULES.get(name)
     if module_name is None:
@@ -37,6 +40,7 @@ def __getattr__(name: str) -> object:
     value = getattr(import_module(module_name), name)
     globals()[name] = value
     return value
+
 
 def __dir__() -> list[str]:
     return sorted(set(globals()) | set(__all__))

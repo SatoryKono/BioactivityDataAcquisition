@@ -28,6 +28,7 @@ PostrunPhaseName = Literal[
     "final_metadata",
 ]
 
+
 def resolve_postrun_phase_log_level(status: str) -> PostrunLogLevel:
     """Map bounded postrun statuses to structured log levels."""
     if status == "failed":
@@ -35,6 +36,7 @@ def resolve_postrun_phase_log_level(status: str) -> PostrunLogLevel:
     if status == "warning":
         return "warning"
     return "info"
+
 
 def emit_postrun_phase_observability(
     *,
@@ -65,7 +67,6 @@ def emit_postrun_phase_observability(
         duration_seconds,
         labels=labels,
     )
-
     resolved_level = level or resolve_postrun_phase_log_level(status)
     log_payload: dict[str, object] = {
         "phase": phase,
@@ -79,6 +80,7 @@ def emit_postrun_phase_observability(
         logger.warning("postrun_phase_completed", **log_payload)
     else:
         logger.info("postrun_phase_completed", **log_payload)
+
 
 async def run_async_postrun_phase[ResultT](
     *,
@@ -114,6 +116,7 @@ async def run_async_postrun_phase[ResultT](
             **completion.observability_fields,
         )
         return result
+
 
 def run_sync_postrun_phase[ResultT](
     *,

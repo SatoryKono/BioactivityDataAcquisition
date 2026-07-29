@@ -1871,6 +1871,7 @@
         "docs/00-project/RULES.md",
         "docs/03-guides/coderabbit-audit-playbook.md",
         "docs/03-guides/dashboards/dashboard-system-2.0-phase2-residual.md",
+        "docs/03-guides/dashboards/operator-ux-v2.md",
         "tests/architecture/test_adr_enforcement_matrix.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/unit/scripts/test_documentation_governance_check.py"

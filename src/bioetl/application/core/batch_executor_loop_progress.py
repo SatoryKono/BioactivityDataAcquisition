@@ -22,7 +22,6 @@ from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError
 
 class _BatchProgressReporterProtocol(Protocol):
     """Minimal progress reporting contract required by extraction loop helpers."""
-
     def report_progress(
         self,
         *,
@@ -34,7 +33,6 @@ class _BatchProgressReporterProtocol(Protocol):
 
 class _BatchProgressSnapshot(Protocol):
     """Minimal counter snapshot used for progress reporting."""
-
     records_fetched: int
     records_bronze: int
     records_silver: int
@@ -42,14 +40,12 @@ class _BatchProgressSnapshot(Protocol):
 
 class _BatchCheckpointRecoveryProtocol(Protocol):
     """Minimal checkpoint contract required by extraction loop helpers."""
-
     def save_checkpoint_now(
         self,
         *,
         records_fetched: int,
         resume_offset: int,
     ) -> Awaitable[None]: ...
-
     def save_periodic_checkpoint(
         self,
         *,

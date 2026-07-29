@@ -19,23 +19,22 @@ from bioetl.domain.types import (
 if TYPE_CHECKING:
     from bioetl.domain.composite import DataSchemaConfig
 
+
 @dataclass(frozen=True, slots=True)
 class ContentHashVersionPolicy:
     """Hash include/exclude policy for one contract version."""
-
     version: str
     include_fields: frozenset[str] = field(default_factory=frozenset)
     exclude_fields: frozenset[str] = field(default_factory=frozenset)
     datetime_policy: str = "v2_datetime_utc"
 
+
 @dataclass(frozen=True, slots=True)
 class ContentHashPolicyGroup:
     """Typed container for active and shadow content-hash policies."""
-
     active_version: str
     policies: tuple[ContentHashVersionPolicy, ...]
     affects_hash: bool = False
-
     def __post_init__(self) -> None:
         """Validate version uniqueness and active-version presence."""
         if not self.active_version.strip():
@@ -45,13 +44,11 @@ class ContentHashPolicyGroup:
             raise ValueError("hash policy versions must be unique")
         if self.active_version not in versions:
             raise ValueError("active_version must be present in hash policies")
-
     def for_version(self, version: str) -> ContentHashVersionPolicy | None:
         """Return the policy for one contract version when present."""
         return next(
             (policy for policy in self.policies if policy.version == version), None
         )
-
     @property
     def active_policy(self) -> ContentHashVersionPolicy:
         """Return the active-version content hash policy."""
@@ -59,28 +56,26 @@ class ContentHashPolicyGroup:
         if policy is None:  # pragma: no cover - guarded by __post_init__
             raise ValueError("active_version must be present in hash policies")
         return policy
-
     @property
     def versions(self) -> tuple[str, ...]:
         """Return the ordered policy versions."""
         return tuple(policy.version for policy in self.policies)
-
     @property
     def is_multi_version(self) -> bool:
         """Whether the rollout needs multiple content hashes in one run."""
         return len(self.policies) > 1
-
     @property
     def requires_projected_hashes(self) -> bool:
         """Whether the current rollout must compute per-version hash projections."""
         return self.affects_hash and self.is_multi_version
 
+
 ContentHashPolicyByVersion = ContentHashPolicyGroup
+
 
 @dataclass(frozen=True)
 class RecordProcessorConfig:
     """Configuration for RecordProcessor."""
-
     pipeline_name: str
     provider: str
     entity_type: str
@@ -110,6 +105,7 @@ class RecordProcessorConfig:
     content_hash_policy_by_version: ContentHashPolicyByVersion | None = None
     gold_schema_policy_by_version: GoldSchemaPolicyByVersion | None = None
     debug_export_config: DebugExportConfig | None = None
+
 
 __all__ = [
     "ContentHashPolicyByVersion",

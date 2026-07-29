@@ -15,9 +15,9 @@ if TYPE_CHECKING:
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import DataSourcePort, FilterableDataSourcePort
 
+
 class _FilteredFetchState(Protocol):
     """Structural contract for FilteredDataSource fetch helpers."""
-
     _data_source: DataSourcePort
     _filter_config: InputFilterConfig
     _filter_ids: list[str] | None
@@ -25,10 +25,10 @@ class _FilteredFetchState(Protocol):
     _valid_combinations: frozenset[tuple[str, ...]] | None
     _filter_fields: tuple[str, ...] | None
     _fallback_mapping: dict[str, str] | None
-
     def _ensure_filterable_adapter(self, mode: str) -> None:
         """Check adapter supports the requested filtering mode."""
         ...
+
 
 def matches_valid_combination(
     state: _FilteredFetchState,
@@ -39,6 +39,7 @@ def matches_valid_combination(
         return True
     record_values = tuple(str(record.get(field, "")) for field in state._filter_fields)
     return record_values in state._valid_combinations
+
 
 async def fetch_multi_column(
     state: _FilteredFetchState,
@@ -63,6 +64,7 @@ async def fetch_multi_column(
             if limit and fetched_count >= limit:
                 return
 
+
 async def fetch_single_column(
     state: _FilteredFetchState,
     entity_type: str,
@@ -80,7 +82,6 @@ async def fetch_single_column(
             "when filtering is enabled."
         )
     assert state._filter_ids is not None
-
     if state._fallback_mapping:
         async for record in adapter.fetch_filtered_with_fallback(
             entity_type=entity_type,
@@ -91,7 +92,6 @@ async def fetch_single_column(
         ):
             yield record
         return
-
     async for record in adapter.fetch_filtered(
         entity_type=entity_type,
         filter_ids=state._filter_ids,
@@ -99,6 +99,7 @@ async def fetch_single_column(
         limit=limit,
     ):
         yield record
+
 
 def fetch_without_internal_filters(
     state: _FilteredFetchState,
@@ -118,6 +119,7 @@ def fetch_without_internal_filters(
         offset=offset,
     )
 
+
 def fetch_records(
     state: _FilteredFetchState,
     entity_type: str,
@@ -131,13 +133,10 @@ def fetch_records(
 ]:  # Any: filter record values vary (str|int|float|list)
     """Select the fetch strategy based on loaded filter state."""
     _ = filter_ids, filter_field
-
     if state._filter_config.enabled and state._multi_filter_ids:
         return fetch_multi_column(state, entity_type, limit)
-
     if state._filter_config.enabled and state._filter_ids:
         return fetch_single_column(state, entity_type, limit)
-
     return fetch_without_internal_filters(
         state,
         entity_type,

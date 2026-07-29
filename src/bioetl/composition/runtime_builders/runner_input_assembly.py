@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
+
 def _resolve_optional_functions(
     build_observability_bundle_fn: Callable[..., ObservabilityBundle] | None,
     assemble_vacuum_settings_fn: Callable[..., ResolvedVacuumSettings] | None,
@@ -67,6 +68,7 @@ def _resolve_optional_functions(
         else assemble_cached_bronze_context_fn,
     )
 
+
 def _prepare_runner_inputs_with_resolved_functions(
     ctx: PipelineRunContext,
     get_settings_fn: Callable[[], Settings],
@@ -101,6 +103,7 @@ def _prepare_runner_inputs_with_resolved_functions(
         load_source_config_fn=load_source_config_fn,
     )
 
+
 def _bind_resolved_cached_bronze_context(
     ctx: PipelineRunContext,
     inputs: _RunnerInputs,
@@ -115,6 +118,7 @@ def _bind_resolved_cached_bronze_context(
     payload = dict(vars(ctx))
     payload["cached_bronze"] = resolved
     return SimpleNamespace(**payload)
+
 
 def prepare_runner_context_and_inputs(
     *,

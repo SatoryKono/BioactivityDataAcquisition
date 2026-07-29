@@ -278,7 +278,9 @@ def _write_artifacts(
         json.dumps(payload, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    md_out.write_text(render_markdown(payload), encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
+    md_out.write_text(
+        render_markdown(payload), encoding="utf-8"
+    )  # NOSONAR - path confined by resolve_output_path
 
 
 def _check_artifacts(
@@ -298,8 +300,10 @@ def _check_artifacts(
     expected_md = render_markdown(payload)
     json_matches = False
     if json_out.exists():
-        actual_json = json_out.read_text(  # NOSONAR - path confined by resolve_output_path
-            encoding="utf-8"
+        actual_json = (
+            json_out.read_text(  # NOSONAR - path confined by resolve_output_path
+                encoding="utf-8"
+            )
         )
         json_matches = actual_json == expected_json
         if not json_matches:

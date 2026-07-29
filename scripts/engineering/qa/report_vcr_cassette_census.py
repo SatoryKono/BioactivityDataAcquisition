@@ -66,7 +66,9 @@ def main() -> None:
         ],
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    OUT.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
     print(
         f"[updated] {OUT} cassettes={len(cassettes)} "
         f"used~={len(used)} unused_candidates={len(unused)}"

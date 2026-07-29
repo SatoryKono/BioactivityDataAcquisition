@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
+
 @dataclass(frozen=True, slots=True)
 class RunnerInputs:
     settings: Settings
@@ -21,5 +22,6 @@ class RunnerInputs:
     runtime_config: RuntimeConfig
     filter_config: InputFilterConfig | None
     cached_bronze: CachedBronzeContext
+
 
 __all__ = ["RunnerInputs"]

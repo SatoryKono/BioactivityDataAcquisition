@@ -27,6 +27,7 @@ TransformLoopResult = TypeVar(
 
 YIELD_INTERVAL_SECONDS = 0.5
 
+
 async def yield_control_if_needed(last_yield_at: float) -> float:
     """Cooperatively yield to the event loop during CPU-heavy transforms."""
     now = time.monotonic()
@@ -34,6 +35,7 @@ async def yield_control_if_needed(last_yield_at: float) -> float:
         return last_yield_at
     await asyncio.sleep(0)
     return time.monotonic()
+
 
 async def _collect_transform_state[
     TransformLoopResult: (RecordTransformOutcome, TransformedRecord)
@@ -55,13 +57,12 @@ async def _collect_transform_state[
     """Run a transform loop and accumulate state for batch or streaming mode."""
     state = create_transform_aggregation_state()
     last_yield_at = time.monotonic()
-
     for index, raw_record in enumerate(records, start=start_index):
         last_yield_at = await yield_control(last_yield_at)
         result = await transform_record(raw_record, batch_id, index)
         apply_result(state, result)
-
     return state
+
 
 async def collect_batch_transform_state(
     *,
@@ -87,6 +88,7 @@ async def collect_batch_transform_state(
         yield_control=yield_control,
     )
 
+
 async def collect_stream_transform_state(
     *,
     records: list[BronzeRecord],
@@ -110,6 +112,7 @@ async def collect_stream_transform_state(
         ),
         yield_control=yield_control,
     )
+
 
 __all__ = [
     "YIELD_INTERVAL_SECONDS",

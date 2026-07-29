@@ -10,6 +10,7 @@ from ._structural_policy_types import StructuralFieldSpec
 _BOOL_TRUE_VALUES = frozenset({"1", "true", "yes", "y"})
 _BOOL_FALSE_VALUES = frozenset({"0", "false", "no", "n"})
 
+
 def coerce_value(value: object, contract: StructuralFieldSpec) -> object | None:
     """Return coerced value when conversion is valid, otherwise None."""
     allow_string_coercion = contract.coercion_policy != "no_string_coercion"
@@ -25,6 +26,7 @@ def coerce_value(value: object, contract: StructuralFieldSpec) -> object | None:
             false_values=contract.boolean_false_values,
         )
     return value
+
 
 def _coerce_integer(
     value: object,
@@ -45,11 +47,13 @@ def _coerce_integer(
         )
     return None
 
+
 def _coerce_integer_from_float(value: float) -> int | None:
     """Coerce integer-compatible float values."""
     if not isfinite(value) or not value.is_integer():
         return None
     return int(value)
+
 
 def _coerce_integer_from_string(
     value: str,
@@ -69,6 +73,7 @@ def _coerce_integer_from_string(
     if decimal_value != decimal_value.to_integral_value():
         return None
     return int(decimal_value)
+
 
 def _coerce_float(
     value: object,
@@ -94,6 +99,7 @@ def _coerce_float(
             return None
         return float_value if isfinite(float_value) else None
     return None
+
 
 def _coerce_boolean(
     value: object,

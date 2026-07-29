@@ -31,6 +31,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.config.settings_api import Settings
 
+
 def build_run_ledger_service(
     *,
     manifest_id: str,
@@ -70,9 +71,11 @@ def build_run_ledger_service(
         ),
     )
 
+
 def coerce_run_id(run_id: str) -> RunID:
     """Convert composite runtime run_id string into canonical RunID type."""
     return RunID(UUID(run_id))
+
 
 def compute_composite_input_snapshot_fingerprint(
     source_refs: tuple[RunSourceRef, ...],
@@ -85,13 +88,16 @@ def compute_composite_input_snapshot_fingerprint(
     )
     return compute_input_snapshot_identity_fingerprint(snapshot_ids)
 
+
 def control_plane_root(settings: Settings, leaf: str) -> Path:
     """Return the canonical control-plane output root for one leaf namespace."""
     return _shared_control_plane_root(settings, leaf)
 
+
 def normalize_object(value: object) -> dict[str, object]:
     """Convert dataclasses/models into stable JSON-safe mappings."""
     return _shared_to_serializable_mapping(value)
+
 
 def resolve_composite_replay_capability(
     *,
@@ -124,6 +130,7 @@ def resolve_composite_replay_capability(
             "exact replay or composite rebuild/resume semantics instead"
         )
     return replay_capability
+
 
 def bind_manifest_logger(logger: LoggerPort, manifest_id: str | None) -> LoggerPort:
     """Bind ``manifest_id`` into logger context when supported."""

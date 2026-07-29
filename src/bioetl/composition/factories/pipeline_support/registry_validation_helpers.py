@@ -8,15 +8,19 @@ surface. This module validates that the two remain in sync.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import Protocol
 
 import yaml
 
 
-if TYPE_CHECKING:
-    from bioetl.composition.factories.pipeline.config_types import PipelineFactoryConfig
+class RegistryEntryProtocol(Protocol):
+    """Structural fields required by registry-manifest validation."""
 
-__all__: list[str] = []
+    pipeline_name: str
+    provider: str
+    entity_type: str
+
+__all__ = ["RegistryEntryProtocol"]
 
 
 def _iter_entity_files(configs_root: Path) -> list[Path]:
@@ -58,7 +62,7 @@ def _display_path(path: Path, *, repo_root: Path) -> str:
 
 
 def _validate_registry_entry(
-    entry: PipelineFactoryConfig,
+    entry: RegistryEntryProtocol,
     *,
     resolved_configs_root: Path,
     repo_root: Path,

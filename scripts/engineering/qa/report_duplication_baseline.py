@@ -891,7 +891,9 @@ def _write_text(path: Path, content: str, *, root: Path | None = None) -> None:
 
     path = resolve_output_path(path, root=root if root is not None else REPO_ROOT)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content, encoding="utf-8")  # NOSONAR - path confined by resolve_output_path
+    path.write_text(
+        content, encoding="utf-8"
+    )  # NOSONAR - path confined by resolve_output_path
 
 
 def _append_history_jsonl(
@@ -918,7 +920,9 @@ def _append_history_jsonl(
             if isinstance(item, dict)
         ],
     }
-    with path.open("a", encoding="utf-8") as handle:  # NOSONAR - path confined by resolve_output_path
+    with path.open(
+        "a", encoding="utf-8"
+    ) as handle:  # NOSONAR - path confined by resolve_output_path
         handle.write(json.dumps(record, ensure_ascii=True) + "\n")
 
 

@@ -618,7 +618,9 @@ class TestPipelineRunnerLifecycle:
         )
 
         # Lifecycle service that does NOT clear for incremental runs
-        from bioetl.application.services.medallion.medallion_lifecycle import ClearResult
+        from bioetl.application.services.medallion.medallion_lifecycle import (
+            ClearResult,
+        )
         from bioetl.domain.medallion import MedallionPolicy
 
         lifecycle_service_no_clear = MagicMock(spec=MedallionLifecycleService)
@@ -778,7 +780,9 @@ class TestPipelineRunnerLifecycle:
         )
 
         # Configure mock_lifecycle_service to record clear operations
-        from bioetl.application.services.medallion.medallion_lifecycle import ClearResult
+        from bioetl.application.services.medallion.medallion_lifecycle import (
+            ClearResult,
+        )
         from bioetl.domain.medallion import MedallionPolicy
 
         def prepare_for_run_with_recording(config, runtime):
@@ -1082,7 +1086,9 @@ class TestPipelineRunnerLifecycle:
 
         # Mock postrun service to call DQ checks via run()
         from bioetl.application.core.postrun.service import PostrunResult
-        from bioetl.application.services.medallion.medallion_lifecycle import VacuumResult
+        from bioetl.application.services.medallion.medallion_lifecycle import (
+            VacuumResult,
+        )
         from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 
         def run_with_dq(executor, dq_context=None):
@@ -1178,7 +1184,9 @@ class TestPipelineRunnerLifecycle:
 
         # Mock postrun service to call vacuum via run()
         from bioetl.application.core.postrun.service import PostrunResult
-        from bioetl.application.services.medallion.medallion_lifecycle import VacuumResult
+        from bioetl.application.services.medallion.medallion_lifecycle import (
+            VacuumResult,
+        )
         from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 
         def run_with_vacuum(executor, dq_context=None):

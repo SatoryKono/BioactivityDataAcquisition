@@ -47,9 +47,9 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 
+
 class BatchProcessingSupportService:
     """Encapsulate per-batch transform/write tracing choreography."""
-
     def __init__(
         self,
         *,
@@ -62,7 +62,6 @@ class BatchProcessingSupportService:
         **legacy: object,
     ) -> None:
         """Initialize batch processing support.
-
         Prefer ``batch_runtime`` dict. Transitional/unit callers may pass
         individual collaborators via keyword args.
         """
@@ -95,14 +94,12 @@ class BatchProcessingSupportService:
         self._run_id = run_id
         self._domain_event_emitter = domain_event_emitter
         self._debug_export_service = debug_export_service
-
     def get_source_metadata(self, query_string: str | None) -> SourceMetadata | None:
         return get_source_metadata(
             data_source=self._services.data_source,
             logger=self._logger,
             query_string=query_string,
         )
-
     async def write_bronze_layer(
         self,
         *,
@@ -146,7 +143,6 @@ class BatchProcessingSupportService:
             occurred_at=ingestion_ts,
         )
         return result
-
     async def transform_and_track_metrics(
         self,
         *,
@@ -164,7 +160,6 @@ class BatchProcessingSupportService:
             transform_result=transform_result,
         )
         return transform_result
-
     async def write_silver_gold_concurrent(
         self,
         *,
@@ -174,7 +169,6 @@ class BatchProcessingSupportService:
         bronze_refs: list[BronzeWriteResult] | None,
     ) -> None:
         """Write Silver first, then pass its lineage refs into Gold.
-
         The historical method name is preserved for caller compatibility.
         """
         # RF-005: keep failure-policy tuple on the batch-processing seam.
@@ -192,7 +186,6 @@ class BatchProcessingSupportService:
             ingestion_ts=ingestion_ts,
             bronze_refs=bronze_refs,
         )
-
     async def _execute_with_span(
         self,
         name: str,
@@ -209,7 +202,6 @@ class BatchProcessingSupportService:
             count=count,
             on_error=on_error,
         )
-
     async def _execute_transform_with_span(
         self, *, records: list[BronzeRecord], batch_id: BatchID, start_index: int
     ) -> TransformResult:
@@ -220,6 +212,5 @@ class BatchProcessingSupportService:
             batch_id=batch_id,
             start_index=start_index,
         )
-
     def emit_domain_event(self, event: DomainEvent) -> None:
         emit_domain_event(self._domain_event_emitter, event)

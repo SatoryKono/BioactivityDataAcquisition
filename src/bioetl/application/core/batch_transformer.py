@@ -61,9 +61,9 @@ if TYPE_CHECKING:
     from bioetl.domain.error_classifier import ErrorClassifier
     from bioetl.domain.types import BatchID
 
+
 class BatchTransformer:
     """Transforms Bronze records to Silver/Gold with error handling and DQ checks."""
-
     def __init__(
         self,
         context: PipelineContext,
@@ -75,7 +75,6 @@ class BatchTransformer:
         **legacy: object,
     ) -> None:
         """Initialize batch transformer.
-
         Prefer ``runtime`` + ``callbacks`` dicts. Transitional/unit callers may
         pass individual collaborators via keyword args.
         """
@@ -108,7 +107,6 @@ class BatchTransformer:
             if normalization_processor is not None
             else build_default_normalization_processor(config)
         )
-
     async def _transform_attempt(
         self,
         raw_record: BronzeRecord,
@@ -130,13 +128,11 @@ class BatchTransformer:
             batch_id=batch_id,
             index=index,
         )
-
     async def transform_batch(
         self, records: list[BronzeRecord], batch_id: BatchID, start_index: int = 0
     ) -> TransformResult:
         """Transform all records in batch, returning silver, gold, and quarantine count."""
         begin_batch_metrics_if_present(self._batch_metrics)
-
         state = await collect_batch_transform_state(
             records=records,
             batch_id=batch_id,
@@ -144,7 +140,6 @@ class BatchTransformer:
             transform_attempt=self._transform_attempt,
             yield_control=yield_control_if_needed,
         )
-
         return await finalize_batch_transform_result(
             context=self._context,
             config=self._config,
@@ -164,7 +159,6 @@ class BatchTransformer:
                 batch_id=batch_id,
             ),
         )
-
     async def transform_single(
         self, raw_record: BronzeRecord, batch_id: BatchID, index: int = 0
     ) -> TransformedRecord:
@@ -180,7 +174,6 @@ class BatchTransformer:
             attempt=attempt,
             batch_id=batch_id,
         )
-
     async def transform_stream(
         self,
         records: list[BronzeRecord],
@@ -189,7 +182,6 @@ class BatchTransformer:
     ) -> TransformResult:
         """Transform records one-at-a-time while accumulating batch write results."""
         begin_batch_metrics_if_present(self._batch_metrics)
-
         state = await collect_stream_transform_state(
             records=records,
             batch_id=batch_id,
@@ -197,7 +189,6 @@ class BatchTransformer:
             transform_single=self.transform_single,
             yield_control=yield_control_if_needed,
         )
-
         return await finalize_stream_transform_result(
             context=self._context,
             config=self._config,

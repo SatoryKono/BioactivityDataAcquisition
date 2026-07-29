@@ -6,6 +6,7 @@ from bioetl.domain.types import JsonDict
 
 LayerInfoParts = tuple[str, int, bool]
 
+
 def parse_layer_info_parts(info_dict: JsonDict) -> LayerInfoParts:
     """Parse one medallion-layer preview payload into primitive parts."""
     return (
@@ -13,6 +14,7 @@ def parse_layer_info_parts(info_dict: JsonDict) -> LayerInfoParts:
         info_dict.get("file_count", 0),
         info_dict.get("exists", False),
     )
+
 
 def parse_cleanup_preview_parts(
     preview_dict: JsonDict,

@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, cast
 
 import pyarrow as pa
@@ -154,5 +154,7 @@ class SilverDeltaOperations(_SilverDeltaOperationFacade):
     logger: LoggerPort
     _metrics: MetricsPort | None = None
     # Align with facade host contract (non-optional policy surface).
-    _merge_resilience_policy: SilverMergeResiliencePolicy = cast(Any, None)
+    _merge_resilience_policy: SilverMergeResiliencePolicy = field(
+        default=None  # type: ignore[arg-type]
+    )
     _load_delta_module: Callable[[], object] | None = _load_deltalake_module

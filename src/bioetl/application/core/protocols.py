@@ -25,9 +25,9 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
+
 class TransformCallback(Protocol):
     """Bronze to Silver transformation callback."""
-
     def __call__(
         self,
         context: PipelineContext,
@@ -37,9 +37,9 @@ class TransformCallback(Protocol):
         """Execute transformation."""
         ...
 
+
 class GoldFilterCallback(Protocol):
     """Filter callback to determine if Silver record should go to Gold."""
-
     def __call__(
         self,
         context: PipelineContext,
@@ -48,12 +48,11 @@ class GoldFilterCallback(Protocol):
         """Evaluate if record should be included in Gold layer."""
         ...
 
+
 class GoldTransformCallback(Protocol):
     """Silver to Gold transformation callback.
-
     Removes JSON string fields and prepares record for Gold layer.
     """
-
     def __call__(
         self,
         context: PipelineContext,
@@ -62,13 +61,12 @@ class GoldTransformCallback(Protocol):
         """Execute transformation."""
         ...
 
+
 class TransformerProtocol(Protocol):
     """Application-level contract for Bronze → Silver transformers.
-
     Transformer implementations satisfy this protocol to enable polymorphism and
     dependency injection within the application layer. Cross-layer ports remain
     defined in ``bioetl.domain.ports``.
-
     Example:
         >>> class MyTransformer:
         ...     async def transform(
@@ -76,9 +74,7 @@ class TransformerProtocol(Protocol):
         ...     ) -> SilverRecord | None:
         ...         # Transform logic here
         ...         return silver_record
-
     """
-
     async def transform(
         self,
         context: PipelineContext,
@@ -86,17 +82,13 @@ class TransformerProtocol(Protocol):
         index: int,
     ) -> SilverRecord | PreSilverRecord | None:
         """Transform a Bronze record to Silver format.
-
         Args:
             context: Pipeline context with run_id, run_type, logger.
             record: Raw Bronze record from data source.
             index: Sequential index of the record in the pipeline run.
-
         Returns:
             SilverRecord if transformation successful, None if record should be skipped.
-
         Raises:
             ValueError: If record validation fails (handled by Template Method).
-
         """
         ...

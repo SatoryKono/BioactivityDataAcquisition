@@ -32,16 +32,16 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import MetricsPort, QuarantinePort
     from bioetl.domain.types import BronzeRecord
 
+
 class _FilteredQuarantineEntryProtocol(Protocol):
     """Structural filtered-entry shape used by the support mixin."""
-
     record: dict[str, Any]  # Any: filtered records carry provider-defined JSON values.
     reason: str
     details: dict[str, Any] | None  # Any: quarantine details are extensible JSON.
 
+
 class QuarantineManagerSupportMixin:
     """Own filtered-record and inspection helpers outside the main service shell."""
-
     _pipeline_name: str = cast(Any, None)  # Any: host attr default (PD3)
     _quarantine: QuarantinePort = cast(Any, None)  # Any: host attr default (PD3)
     _domain_event_emitter: DomainEventEmitterProtocol | None = cast(Any, None)  # Any: host attr default (PD3)
@@ -49,7 +49,6 @@ class QuarantineManagerSupportMixin:
     _batch_metrics: BatchMetricsRecorderService | None = cast(Any, None)  # Any: host attr default (PD3)
     _pipeline_metrics: PipelineMetricsRecorder = cast(Any, None)  # Any: host attr default (PD3)
     _run_type: str = cast(Any, None)  # Any: host attr default (PD3)
-
     def _quarantine_runtime_ports(self) -> QuarantineRuntimeDependencies:
         return build_quarantine_runtime_ports(
             quarantine=self._quarantine,
@@ -60,7 +59,6 @@ class QuarantineManagerSupportMixin:
             batch_metrics=self._batch_metrics,
             run_type=getattr(self, "_run_type", "unknown"),
         )
-
     async def quarantine_record(
         self,
         record: JsonDict,
@@ -90,7 +88,6 @@ class QuarantineManagerSupportMixin:
             run_id=run_id,
             ingestion_ts=ingestion_ts,
         )
-
     async def quarantine_records(
         self,
         records: Sequence[tuple[BronzeRecord, ErrorType, str]],
@@ -102,7 +99,6 @@ class QuarantineManagerSupportMixin:
         """Persist a batch of DQ quarantine records with shared run context."""
         if not records:
             return
-
         write_requests = [
             build_dq_quarantine_request(
                 pipeline_name=self._pipeline_name,
@@ -123,7 +119,6 @@ class QuarantineManagerSupportMixin:
             run_id=run_id,
             ingestion_ts=ingestion_ts,
         )
-
     async def quarantine_filtered_record(
         self,
         record: JsonDict,
@@ -152,7 +147,6 @@ class QuarantineManagerSupportMixin:
             run_id=run_id,
             ingestion_ts=ingestion_ts,
         )
-
     async def quarantine_filtered_records(
         self,
         records: Sequence[Any],  # Any: accepts structural NamedTuple entry variants.
@@ -162,13 +156,11 @@ class QuarantineManagerSupportMixin:
         ingestion_ts: datetime,
     ) -> None:
         """Persist filtered-out quarantine records in one port call.
-
         ``records`` is ``Sequence[Any]`` so ``FilteredQuarantineEntry``
         NamedTuples type-check without Protocol/TypeAliasType friction.
         """
         if not records:
             return
-
         typed_records = cast(Sequence[_FilteredQuarantineEntryProtocol], records)
         write_requests = [
             build_filtered_quarantine_request(
@@ -190,7 +182,6 @@ class QuarantineManagerSupportMixin:
             run_id=run_id,
             ingestion_ts=ingestion_ts,
         )
-
     async def inspect(
         self,
         limit: int = 100,
@@ -206,7 +197,6 @@ class QuarantineManagerSupportMixin:
                 run_id=run_id,
             )
         )
-
     async def get_stats(
         self,
         error_code: str | None = None,

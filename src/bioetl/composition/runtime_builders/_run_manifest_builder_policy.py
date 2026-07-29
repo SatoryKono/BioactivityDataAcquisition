@@ -31,6 +31,7 @@ if TYPE_CHECKING:
     from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
     from bioetl.domain.context import PipelineRunContext
 
+
 @dataclass(frozen=True, slots=True)
 class ManifestReproducibilityContext:
     configured_required_persistence_profile: str
@@ -43,6 +44,7 @@ class ManifestReproducibilityContext:
     exact_replay_support_boundary: str
     support_scope: str
     reason: str
+
 
 def resolve_code_revision_for_manifest(
     *,
@@ -64,6 +66,7 @@ def resolve_code_revision_for_manifest(
         source_revision_state="clean",
         dependency_lock_hash=f"sha256:test-lock-{resolved_config_hash[:12]}",
     )
+
 
 def resolve_manifest_reproducibility_context(
     *,
@@ -147,6 +150,7 @@ def resolve_manifest_reproducibility_context(
         reason=reproducibility_profile.reason,
     )
 
+
 def validate_required_runtime_persistence_profile(
     *,
     request: RunManifestCreateSpec,
@@ -176,6 +180,7 @@ def validate_required_runtime_persistence_profile(
             f"'{required_persistence_profile}' because immutable input snapshots "
             "and exact replay capability are not available for this run"
         )
+
 
 __all__ = [
     "ManifestReproducibilityContext",

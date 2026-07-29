@@ -373,8 +373,7 @@ class TestDQReportService:
         """Synchronous DQ analysis must not starve runtime heartbeat tasks."""
         if (
             Path("/proc/version").exists()
-            and "microsoft"
-            in Path("/proc/version").read_text(encoding="utf-8").lower()
+            and "microsoft" in Path("/proc/version").read_text(encoding="utf-8").lower()
         ):
             pytest.skip(
                 "WSL test runtime intentionally replaces asyncio.to_thread "

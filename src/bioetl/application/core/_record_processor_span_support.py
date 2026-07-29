@@ -30,12 +30,11 @@ if TYPE_CHECKING:
 
 _PROCESSING_SPAN_ERRORS = SHARED_OPERATION_ERRORS
 
+
 class RecordProcessorSpanExecutor:
     """Wrap RecordProcessor stage coroutines with tracing span lifecycle."""
-
     def __init__(self, tracer: TracingPort) -> None:
         self._tracer = tracer
-
     async def execute_with_span(
         self,
         name: str,
@@ -55,7 +54,6 @@ class RecordProcessorSpanExecutor:
             if on_error:
                 on_error(error)
             raise
-
     async def execute_transform_with_span(
         self,
         *,
@@ -82,7 +80,6 @@ class RecordProcessorSpanExecutor:
         except _PROCESSING_SPAN_ERRORS as error:
             self._end_span(span, error)
             raise
-
     def _start_span(
         self,
         name: str,
@@ -102,7 +99,6 @@ class RecordProcessorSpanExecutor:
         typed_span = cast("Span", span)
         typed_span.__enter__()
         return typed_span
-
     def _start_transform_span(
         self,
         batch_id: BatchID,
@@ -115,7 +111,6 @@ class RecordProcessorSpanExecutor:
             record_count,
             input_count=True,
         )
-
     async def _transform_records(
         self,
         *,
@@ -131,7 +126,6 @@ class RecordProcessorSpanExecutor:
             batch_id=batch_id,
             start_index=start_index,
         )
-
     def _end_span(self, span: Span | None, error: Exception | None = None) -> None:
         """End a tracing span."""
         close_span(cast("_ClosableSpan | None", span), error)

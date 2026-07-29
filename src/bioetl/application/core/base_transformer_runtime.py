@@ -22,6 +22,7 @@ TEntity_co = TypeVar("TEntity_co", bound="BaseEntity", covariant=True)
 ScalarValue = str | int | float | bool | None
 type _DICT_STR_OBJECT = dict[str, object]
 
+
 class _EntityConstructor(Protocol[TEntity_co]):
     """Constructor protocol for entity dataclasses with lineage kwargs."""
 
@@ -40,11 +41,13 @@ class _EntityConstructor(Protocol[TEntity_co]):
         """Create and return an entity instance."""
         ...
 
+
 def serialize_dict(data: dict[str, object]) -> str | None:
     """Serialize a dictionary deterministically or return None when empty."""
     if not data:
         return None
     return orjson.dumps(data, option=orjson.OPT_SORT_KEYS).decode("utf-8")
+
 
 def serialize_list(values: list[object]) -> ScalarValue:
     """Serialize list payloads using BaseTransformer single-item semantics."""
@@ -63,6 +66,7 @@ def serialize_list(values: list[object]) -> ScalarValue:
         return cast("ScalarValue", item)
     return orjson.dumps(values, option=orjson.OPT_SORT_KEYS).decode("utf-8")
 
+
 def serialize_json(value: object) -> ScalarValue:
     """Serialize dict/list to JSON string or native type for Silver layer."""
     if value is None:
@@ -73,12 +77,14 @@ def serialize_json(value: object) -> ScalarValue:
         return serialize_list(cast("list[object]", value))
     return cast("ScalarValue", value)
 
+
 def serialize_json_list(value: Sequence[object] | None) -> str | None:
     """Serialize list to JSON string without unwrapping single elements."""
     if value is None or len(value) == 0:
         return None
     json_bytes: bytes = orjson.dumps(list(value), option=orjson.OPT_SORT_KEYS)
     return json_bytes.decode("utf-8")
+
 
 def serialize_json_fields(
     *,
@@ -87,6 +93,7 @@ def serialize_json_fields(
 ) -> dict[str, str | int | float | bool | None]:
     """Serialize multiple JSON fields at once."""
     return {name: serialize_json(record.get(name)) for name in field_names}
+
 
 def normalize_lineage_value(
     *,
@@ -103,6 +110,7 @@ def normalize_lineage_value(
     if field_name == "ingestion_ts" and isinstance(value, datetime.datetime):
         return value.isoformat()
     return value
+
 
 def get_required_field(
     *,
@@ -123,6 +131,7 @@ def get_required_field(
             raise TransformationError(f"Required field is empty: {field}", field=field)
     return value
 
+
 def extract_by_path(
     *,
     record: BronzeRecord,
@@ -139,6 +148,7 @@ def extract_by_path(
             return default
     return current
 
+
 def extract_nested(
     *,
     record: BronzeRecord,
@@ -147,6 +157,7 @@ def extract_nested(
 ) -> object | None:
     """Safely extract a value from nested dictionaries using dot path."""
     return extract_by_path(record=record, keys=path.split("."), default=default)
+
 
 def create_entity[T: "BaseEntity"](
     *,
@@ -169,6 +180,7 @@ def create_entity[T: "BaseEntity"](
         _index=index,
         **business_data,
     )
+
 
 EntityConstructor = _EntityConstructor
 

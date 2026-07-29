@@ -1,20 +1,6 @@
 # mypy: disable-error-code="arg-type,unused-ignore"
-# pyright: reportImportCycles=false
-# pyright: reportInvalidCast=false
-# pyright: reportMissingSuperCall=false
-# Import cycle residual tracked in allowlist (product burn-down).
-"""Base Publication Transformer with Template Method pattern.
-
-Provides common transformation flow for publication entities from
-different providers (OpenAlex, SemanticScholar, CrossRef).
-
-Reduces code duplication by extracting shared logic:
-- Business data extraction orchestration
-- Primary ID validation
-- Fallback lookup logging
-- Entity ID and content hash computation
-- Domain entity creation and Silver record conversion
-"""
+# pyright: reportImportCycles=false, reportInvalidCast=false, reportMissingSuperCall=false
+"""Template-method base transformer shared by publication providers."""
 
 from __future__ import annotations
 

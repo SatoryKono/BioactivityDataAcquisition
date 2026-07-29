@@ -1,5 +1,4 @@
 """Result assembly helpers for checkpoint compatibility decisions."""
-
 from __future__ import annotations
 
 from collections.abc import Sequence

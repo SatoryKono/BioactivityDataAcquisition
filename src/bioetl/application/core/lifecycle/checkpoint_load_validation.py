@@ -26,19 +26,18 @@ from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
 OperationErrors = type[BaseException] | tuple[type[BaseException], ...]
 
+
 class CheckpointValidationProtocol(Protocol):
     """Internal service attributes required by checkpoint validation helpers."""
-
     _logger: LoggerPort
     _pipeline_name: str
     _compatibility_policy: CheckpointCompatibilityPolicy
     _compatibility_service: CheckpointCompatibilityService | None
     _current_metadata: CheckpointMetadata | None
-
     @property
     def _operation_errors(self) -> OperationErrors: ...
-
     def _emit_checkpoint_load_status(self, status: str) -> None: ...
+
 
 def resolve_checkpoint_metadata(
     checkpoint_data: tuple[RunID, JsonDict],
@@ -46,6 +45,7 @@ def resolve_checkpoint_metadata(
     """Convert persisted legacy checkpoint payload into typed metadata."""
     _, legacy_metadata = checkpoint_data
     return CheckpointMetadata.from_legacy_metadata(legacy_metadata)
+
 
 def _handle_missing_compatibility_context_result(
     *,
@@ -84,6 +84,7 @@ def _handle_missing_compatibility_context_result(
     emit_checkpoint_load_status("loaded")
     return result
 
+
 def validate_loaded_checkpoint(
     host: CheckpointValidationProtocol,
     checkpoint_metadata: CheckpointMetadata,
@@ -114,7 +115,6 @@ def validate_loaded_checkpoint(
             ),
             True,
         )
-
     assert effective_current_metadata is not None
     assert host._compatibility_service is not None
     compatibility_result = (
@@ -139,6 +139,7 @@ def validate_loaded_checkpoint(
         ),
         True,
     )
+
 
 def handle_incompatible_checkpoint_result(
     *,
@@ -194,6 +195,7 @@ def handle_incompatible_checkpoint_result(
         else "loaded"
     )
     return result
+
 
 __all__ = [
     "resolve_checkpoint_metadata",

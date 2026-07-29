@@ -37,6 +37,7 @@ __all__ = [
     "validate_observability_preflight_impl",
 ]
 
+
 def bootstrap_observability_bundle_impl(
     *,
     pipeline: str,

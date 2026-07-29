@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 
+
 def get_source_metadata(
     *,
     data_source: object,
@@ -60,6 +61,7 @@ def get_source_metadata(
 
     return source_metadata
 
+
 async def execute_with_pipeline_failure_policy[ResultT](
     *,
     tracing: BatchTracingManagerService,
@@ -72,6 +74,7 @@ async def execute_with_pipeline_failure_policy[ResultT](
     except PIPELINE_EXECUTION_ERRORS as error:
         tracing.end_span(span, error)
         raise
+
 
 async def execute_with_layer_span[ResultT](
     *,
@@ -93,6 +96,7 @@ async def execute_with_layer_span[ResultT](
         if on_error is not None:
             on_error(error)
         raise
+
 
 async def execute_transform_with_span(
     *,
@@ -128,6 +132,7 @@ async def execute_transform_with_span(
         tracing.end_span(span, error)
         raise
 
+
 async def _run_transform_batch(
     *,
     transformer: BatchTransformer,
@@ -142,12 +147,14 @@ async def _run_transform_batch(
         start_index=start_index,
     )
 
+
 def build_bronze_refs(
     bronze_result: object,
 ) -> list[BronzeWriteResult] | None:
     """Normalize Bronze write output into writer-compatible references."""
     typed_bronze_result = cast("BronzeWriteResult | None", bronze_result)
     return [typed_bronze_result] if typed_bronze_result else None
+
 
 __all__ = [
     "OPERATION_ERRORS",

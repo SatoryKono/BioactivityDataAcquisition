@@ -40,6 +40,7 @@ from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
 
 __all__ = ["build_observability_bundle"]
 
+
 def _build_logger_bootstrapper(
     logger_factory: Callable[..., LoggerPort],
 ) -> Callable[[str, UUID, str], LoggerPort]:
@@ -59,6 +60,7 @@ def _build_logger_bootstrapper(
 
     return bootstrap_logger
 
+
 def _resolve_tracer_port(
     *,
     tracer_settings: Settings,
@@ -77,6 +79,7 @@ def _resolve_tracer_port(
         return noop_tracing_factory()
     return resolve_tracing_port(tracer=None, settings=tracer_settings)
 
+
 def _build_tracer_bootstrapper(
     *,
     tracer_factory: Callable[[str], TracingPort] | None,
@@ -92,6 +95,7 @@ def _build_tracer_bootstrapper(
         )
 
     return bootstrap_tracer
+
 
 def _resolve_metrics_port(
     *,
@@ -110,6 +114,7 @@ def _resolve_metrics_port(
         return noop_metrics_factory(warn_on_use=False)
     return resolve_metrics_port(metrics=None, settings=metrics_settings)
 
+
 def _build_metrics_bootstrapper(
     *,
     metrics_factory: Callable[[], MetricsPort] | None,
@@ -125,6 +130,7 @@ def _build_metrics_bootstrapper(
         )
 
     return bootstrap_metrics
+
 
 def _build_dq_monitor_bootstrapper(
     *,
@@ -146,6 +152,7 @@ def _build_dq_monitor_bootstrapper(
 
     return bootstrap_dq_monitor
 
+
 def _build_audit_bootstrapper() -> Callable[
     [Settings, LoggerPort, MetricsPort, TracingPort], AuditPort
 ]:
@@ -165,6 +172,7 @@ def _build_audit_bootstrapper() -> Callable[
         )
 
     return bootstrap_audit
+
 
 def build_observability_bundle(
     *,

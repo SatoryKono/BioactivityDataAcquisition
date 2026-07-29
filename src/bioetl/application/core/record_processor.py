@@ -36,9 +36,9 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
+
 class RecordProcessor:
     """Orchestrates batch transformation and writing across all layers."""
-
     def __init__(
         self,
         context: PipelineContext,
@@ -52,7 +52,6 @@ class RecordProcessor:
         ] = RecordProcessorSpanExecutor,
     ) -> None:
         """Initialize RecordProcessor.
-
         Args:
             context: Pipeline execution context.
             batch_metrics: Metrics recorder for Bronze/Silver/Gold stages.
@@ -69,7 +68,6 @@ class RecordProcessor:
         self._batch_metrics = batch_metrics
         self._transformer = transformer
         self._writer = writer
-
     async def process_batch(
         # Any: record vals vary
         self,
@@ -78,12 +76,10 @@ class RecordProcessor:
         start_index: int = 0,
     ) -> BatchResult:
         """Process batch through Bronze -> Silver -> Gold with tracing.
-
         Args:
             records: Raw Bronze records fetched from the data source.
             batch_id: Unique identifier for this batch used in tracing and storage.
             start_index: Absolute record index of the first record for accurate reporting.
-
         Returns:
             BatchResult with bronze, silver, gold, and quarantined record counts.
         """
@@ -119,14 +115,12 @@ class RecordProcessor:
             batch_id=batch_id,
             silver_refs=[silver_result] if silver_result is not None else None,
         )
-
         return BatchResult(
             bronze_count=len(records),
             silver_count=len(result.silver_records),
             gold_count=len(result.gold_records),
             quarantined_count=result.quarantined_count,
         )
-
     def _track_transform_metrics(self, result: TransformResult) -> None:
         self._batch_metrics.track_processed_records(
             "quarantined", result.quarantined_count
@@ -135,13 +129,11 @@ class RecordProcessor:
             "silver", len(result.silver_records)
         )
         self._batch_metrics.track_processed_records("gold", len(result.gold_records))
-
     def _build_bronze_refs(
         self, bronze_result: object
     ) -> list[BronzeWriteResult] | None:
         typed_bronze_result = cast("BronzeWriteResult | None", bronze_result)
         return [typed_bronze_result] if typed_bronze_result else None
-
     async def _write_silver_if_present(
         self,
         *,
@@ -167,7 +159,6 @@ class RecordProcessor:
             ),
         )
         return cast("SilverWriteResult | None", silver_result)
-
     async def _write_gold_if_present(
         self,
         *,

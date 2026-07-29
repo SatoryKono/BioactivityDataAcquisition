@@ -27,6 +27,7 @@ if TYPE_CHECKING:
         CompositeSupportServices,
     )
 
+
 def bootstrap_composite_runner_via_wiring(
     *,
     config: CompositeConfig,

@@ -220,9 +220,7 @@ def _image_digests_for(
     if image_inspection.returncode != 0 or not image_details:
         return ()
     return tuple(
-        str(value)
-        for value in (image_details[0].get("RepoDigests") or [])
-        if value
+        str(value) for value in (image_details[0].get("RepoDigests") or []) if value
     )
 
 
@@ -317,9 +315,7 @@ def collect_snapshots(
     return snapshots, observations
 
 
-def _image_matches_expected(
-    snapshot: ServiceSnapshot, expected: str | None
-) -> bool:
+def _image_matches_expected(snapshot: ServiceSnapshot, expected: str | None) -> bool:
     """Return whether the snapshot image identity matches the expected reference."""
     if not expected or not snapshot.image:
         return True

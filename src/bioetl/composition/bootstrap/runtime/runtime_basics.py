@@ -61,6 +61,7 @@ __all__ = [
     "build_support_services",
 ]
 
+
 def bootstrap_runtime_basics(
     *,
     config: CompositeConfig,
@@ -119,6 +120,7 @@ def bootstrap_runtime_basics(
         lock=lock,
         clock=clock,
     )
+
 
 def build_runner_factories(
     *,
@@ -193,6 +195,7 @@ def build_runner_factories(
         ),
     )
     return seed_factory, dependency_factory, enricher_factory
+
 
 def build_support_services(
     *,

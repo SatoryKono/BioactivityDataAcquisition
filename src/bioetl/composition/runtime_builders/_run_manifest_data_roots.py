@@ -20,13 +20,16 @@ __all__ = [
     "resolve_data_root_mode",
 ]
 
+
 def control_plane_root(*args: object, **kwargs: object) -> object:
     module = "bioetl.composition.runtime_builders._run_manifest_control_plane_paths"
     return import_module(module).control_plane_root(*args, **kwargs)
 
+
 def build_planned_artifacts(*args: object, **kwargs: object) -> object:
     module = "bioetl.composition.runtime_builders._run_manifest_planned_artifacts"
     return import_module(module).build_planned_artifacts(*args, **kwargs)
+
 
 def __getattr__(name: str) -> object:  # pragma: no cover
     """Lazily expose legacy path helpers without static facade fan-in."""
@@ -48,10 +51,12 @@ def __getattr__(name: str) -> object:  # pragma: no cover
         )
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
+
 def is_explicit_data_root_configured(settings: Settings) -> bool:
     """Return ``True`` when settings declare an explicit non-empty data root."""
     configured_root = getattr(settings, "data_dir", None)
     return bool(str(configured_root or "").strip())
+
 
 def resolve_data_root_mode(settings: Settings) -> DataRootMode:
     """Classify which data-root strategy would be used in the current runtime."""
@@ -66,6 +71,7 @@ def resolve_data_root_mode(settings: Settings) -> DataRootMode:
     if not os.access(candidate, os.W_OK):
         return _private_fallback_data_root_mode()
     return "repo_default"
+
 
 def _resolve_data_root(settings: Settings) -> Path:
     """Resolve a writable data root for legacy run-manifest facade callers."""
@@ -82,6 +88,7 @@ def _resolve_data_root(settings: Settings) -> Path:
         return _private_fallback_data_root()
     return candidate
 
+
 def _private_fallback_data_root_mode() -> DataRootMode:
     """Classify which private fallback would be used when checkout is read-only."""
     preferred = Path.home() / ".cache" / "bioetl-data"
@@ -90,6 +97,7 @@ def _private_fallback_data_root_mode() -> DataRootMode:
     except OSError:
         return "tmp"
     return "private_cache"
+
 
 def _private_fallback_data_root() -> Path:
     """Return a user-private fallback data root for legacy facade callers."""
@@ -101,12 +109,14 @@ def _private_fallback_data_root() -> Path:
         fallback = Path(tempfile.gettempdir()) / f"bioetl-data-{runtime_user}"
         return _prepare_private_runtime_dir(fallback)
 
+
 def _prepare_private_runtime_dir(path: Path) -> Path:
     """Create a private runtime directory and normalize its permissions."""
     path.mkdir(parents=True, exist_ok=True, mode=0o700)
     with suppress(OSError):
         path.chmod(0o700)
     return path
+
 
 def _artifact_path_string(path: PurePath) -> str:
     """Return portable artifact paths with normalized separators."""

@@ -14,12 +14,12 @@ from bioetl.domain.types import BronzeRecord
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
+
 class PublicationTermFilteringMixin(
     _FallbackFilterableTargetFetchMixin,
     _FilterableTargetDelegationMixin,
 ):
     """FilterableDataSourcePort-compatible delegation for term extraction wrapper."""
-
     async def _fetch_target_filtered_records(
         self: Any,  # Any: mixin self type is provided structurally by composed adapter class
         filterable: FilterableDataSourcePort,
@@ -32,7 +32,6 @@ class PublicationTermFilteringMixin(
             filterable, filter_ids, filter_field, limit
         ):
             yield record
-
     async def _fetch_target_multi_filtered_records(
         self: Any,  # Any: mixin self type is provided structurally by composed adapter class
         filterable: FilterableDataSourcePort,
@@ -50,14 +49,12 @@ class PublicationTermFilteringMixin(
             limit,
         ):
             yield record
-
     def _resolve_target_fallback_upstream_limit(
         self: Any,  # Any: mixin self type is provided structurally by composed adapter class
         limit: int | None = None,
     ) -> int | None:
         """Scale upstream publication fetches to account for term expansion."""
         return limit * self.PUBLICATION_LIMIT_MULTIPLIER if limit else None
-
     def _yield_target_records_from_fallback_source_records(
         self: Any,  # Any: mixin self type is provided structurally by composed adapter class
         source_records: AsyncIterator[object],

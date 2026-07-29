@@ -12,17 +12,20 @@ __all__ = [
     "resolve_replay_parentage_mapping_value",
 ]
 
+
 def as_runtime_config_mapping(runtime_config: object) -> Mapping[str, object]:
     """Return a mapping view for runtime config-like objects."""
     if isinstance(runtime_config, Mapping):
         return runtime_config
     return {}
 
+
 def resolve_mapping_text(mapping: object, key: str) -> str | None:
     """Read one optional text value from a mapping-like object."""
     if not isinstance(mapping, Mapping):
         return None
     return coerce_optional_text(mapping.get(key))
+
 
 def resolve_replay_parentage_mapping_value(
     runtime_config: Mapping[str, object],
@@ -42,6 +45,7 @@ def resolve_replay_parentage_mapping_value(
                 return resolved
     return None
 
+
 def resolve_name_component(value: object, *, fallback: str) -> str:
     """Return a normalized provider/entity component or the fallback."""
     if isinstance(value, str):
@@ -49,6 +53,7 @@ def resolve_name_component(value: object, *, fallback: str) -> str:
         if normalized:
             return normalized
     return fallback
+
 
 def coerce_optional_text(value: object) -> str | None:
     """Normalize one optional runtime/YAML value into stripped text."""

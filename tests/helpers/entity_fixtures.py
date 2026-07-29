@@ -57,7 +57,9 @@ def lineage_kwargs(
         "entity_id": EntityID(entity_id),
         "content_hash": ContentHash(content_hash),
         "run_id": _as_run_id(run_id),
-        "run_type": run_type if isinstance(run_type, RunType) else RunType(str(run_type)),
+        "run_type": run_type
+        if isinstance(run_type, RunType)
+        else RunType(str(run_type)),
         "ingestion_ts": ingestion_ts
         if ingestion_ts is not None
         else datetime(2024, 6, 1, tzinfo=UTC),

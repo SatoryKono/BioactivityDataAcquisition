@@ -16,7 +16,11 @@ REGISTRY_PATH = ROOT / "configs" / "quality" / "root_hygiene_review_registry.yam
 STRUCTURE_CATALOG_PATH = ROOT / "configs" / "quality" / "repo_structure_catalog.yaml"
 ROOT_POLICY_DOC_PATH = ROOT / "docs" / "00-project" / "governance" / "03-file-policy.md"
 REMEDIATION_PLAN_PATH = (
-    ROOT / "docs" / "plans" / "repository-file-structure-remediation-plan-2026-04-28.md"
+    ROOT
+    / "docs"
+    / "99-archive"
+    / "plans"
+    / "repository-file-structure-remediation-plan-2026-04-28.md"
 )
 
 ALLOWED_CLASSIFICATIONS = {

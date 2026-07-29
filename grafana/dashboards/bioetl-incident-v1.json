@@ -113,7 +113,7 @@
       "id": 9401,
       "type": "stat",
       "title": "Status",
-      "description": "Worst-of L0 status for selected pipeline/run_type. Vocabulary: 0=OK, 1=WARN, 2=CRIT, 3/null=UNKNOWN (labelled; never bare numeric).",
+      "description": "Incident header status (labelled only). Map 0=OK,1=WARN,2=CRIT,3/null=UNKNOWN. Never bare numbers. Confidence from missing telemetry / VALID_EMPTY suspects. Read-only workspace.",
       "gridPos": {
         "h": 3,
         "w": 8,
@@ -214,7 +214,7 @@
       "id": 2001,
       "type": "text",
       "title": "Next Best Actions",
-      "description": "Honest read-only investigation console. No lifecycle persistence.",
+      "description": "DSA-07 decision rail. Read-only.",
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -223,7 +223,7 @@
       },
       "options": {
         "mode": "markdown",
-        "content": "**Next best actions (≤4)**\n1. Read labelled **Status** (never bare numbers).\n2. Open top row in **Ranked Active Suspects** (domain handoff).\n3. Confirm alerts history for the selected range.\n4. Exact identity → Run Explorer; resume → Trust Primary recovery.\nRead-only workspace — no persistent incident record."
+        "content": "**Incident Console — next best actions (<=4, read-only)**\n1. Read labelled **Status** (never bare numbers).\n2. Open top row in **Ranked Active Suspects** (domain handoff).\n3. Confirm **Evidence timeline**: Current Alerts + Alert State History (same chain).\n4. Exact identity -> **Run Explorer**; resume -> Trust **Primary recovery**.\nNo persistent incident write-path in this workspace.\n"
       },
       "links": []
     },
@@ -231,7 +231,7 @@
       "id": 2010,
       "type": "table",
       "title": "Ranked Active Suspects",
-      "description": "Cross-domain ranked suspects (Runtime / Provider / DQ). Domain label identifies source; field links provide scoped handoff. VALID_EMPTY when no active suspects. Read-only.",
+      "description": "Single ranked suspect matrix across Runtime/Provider/DQ. Domain label identifies source; row links preserve scope. VALID_EMPTY when no active suspects. Primary evidence before domain forensics.",
       "gridPos": {
         "h": 8,
         "w": 24,
@@ -406,8 +406,8 @@
     {
       "id": 2005,
       "type": "table",
-      "title": "Current Alerts (firing/pending)",
-      "description": "Instant ALERTS snapshot (firing|pending). Not a range timeline. VALID EMPTY when none. For history use Alert State History.",
+      "title": "Evidence timeline · Current Alerts (now)",
+      "description": "Instant ALERTS snapshot (firing/pending). Pair with Alert State History as one temporal chain. VALID_EMPTY when none.",
       "gridPos": {
         "h": 6,
         "w": 12,
@@ -511,8 +511,8 @@
     {
       "id": 2006,
       "type": "state-timeline",
-      "title": "Alert State History (range)",
-      "description": "Range query over ALERTS firing|pending. Shows alertname/state across the selected dashboard range. Not a persistent incident log; Prometheus ALERTS only.",
+      "title": "Evidence timeline · Alert State History (range)",
+      "description": "Range ALERTS history — not a persistent incident log. Same chain as Current Alerts (now).",
       "gridPos": {
         "h": 6,
         "w": 12,
@@ -562,7 +562,7 @@
       "id": 2007,
       "type": "text",
       "title": "Impact / confidence (honest bounds)",
-      "description": "Qualitative triage aids; not scored ranking.",
+      "description": "DSA-07 structured impact/confidence card (prose template). No owner/ack store.",
       "gridPos": {
         "h": 4,
         "w": 24,
@@ -571,13 +571,13 @@
       },
       "options": {
         "mode": "markdown",
-        "content": "### Impact and confidence\n- Impact basis: L0 Status + non-empty Active Suspects tables.\n- Confidence: low when trust markers are UNKNOWN or tables are empty while Status is not OK.\n- Scoring deferred (no explicit score contract). Tables are per-domain topk, not cross-domain rank.\n- Persistence: none on this board.\n"
+        "content": "**Impact / confidence (structured, read-only)**\n\n| Field | How to read |\n| --- | --- |\n| **Impact bounds** | Affected pipelines/providers from Ranked Active Suspects + Current Alerts scope |\n| **Confidence** | high if Status mapped + suspects non-empty; low if Status=UNKNOWN or telemetry missing |\n| **Basis** | Suspect domain label + alertname; not AI diagnosis |\n| **Next action** | Domain board handoff or Run Explorer for exact-run proof |\n| **Write-path** | None — external incident tools only |\n"
       }
     },
     {
       "id": 2099,
       "type": "row",
-      "title": "Domain suspect detail (forensics)",
+      "title": "Domain suspect detail (forensics; collapsed)",
       "gridPos": {
         "h": 1,
         "w": 24,

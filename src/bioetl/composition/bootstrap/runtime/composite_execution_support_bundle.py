@@ -12,6 +12,7 @@ if TYPE_CHECKING:
         KeyExtractorService,
     )
 
+
 @dataclass(slots=True)
 class ExecutionSupportServicesBundle:
     """Execution-facing services shared across composite runtime phases."""
@@ -19,5 +20,6 @@ class ExecutionSupportServicesBundle:
     key_extractor: KeyExtractorService
     dependency_coordinator: DependencyCoordinatorService
     coordinator: EnrichmentCoordinatorService
+
 
 __all__ = ["ExecutionSupportServicesBundle"]

@@ -966,9 +966,7 @@ def _run_render_phase(
             screenshot_uids=screenshot_uids,
         )
     render_status = (
-        "pass"
-        if rerender_status == 0 and screenshot_preflight_status == 0
-        else "fail"
+        "pass" if rerender_status == 0 and screenshot_preflight_status == 0 else "fail"
     )
     render_detail = (
         "Screenshot render and manifest contract passed."

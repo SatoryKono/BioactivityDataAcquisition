@@ -8,6 +8,7 @@ from bioetl.domain.types import JsonDict
 
 _UNSET_FETCH_ARG = object()
 
+
 def build_forwarded_fetch_kwargs(
     *,
     entity_type: str,
@@ -29,6 +30,7 @@ def build_forwarded_fetch_kwargs(
     if filter_field is not _UNSET_FETCH_ARG:
         fetch_kwargs["filter_field"] = filter_field
     return fetch_kwargs
+
 
 async def forward_fetch_records(
     fetch_fn: Callable[..., AsyncIterator[JsonDict]],

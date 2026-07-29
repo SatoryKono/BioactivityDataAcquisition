@@ -49,22 +49,24 @@ rules only. Not a persistent working record. Not Grafana Drilldown Investigation
 
 | ID | Panel title |
 | --- | --- |
-| 2099 | Domain suspect detail (forensics) |
+| 2099 | Domain suspect detail (forensics; collapsed) |
 | 2002 | Active Suspects · Runtime |
 | 2003 | Active Suspects · Provider |
 | 2004 | Active Suspects · DQ |
 
-### 8. Current Alerts (firing/pending)
+### 8. Evidence timeline · Current Alerts (now)
 - **Type:** Table
 - **Purpose:** Instant ALERTS snapshot (firing|pending). Not a range timeline.
 - **Data sources:** Prometheus `ALERTS` (instant)
 
-### 9. Alert State History (range)
+### 9. Evidence timeline · Alert State History (range)
 - **Type:** State timeline
-- **Purpose:** Range ALERTS history across the selected dashboard time range.
+- **Purpose:** Range ALERTS history — same temporal chain as Current Alerts (now);
+  not a persistent incident log.
 - **Data sources:** Prometheus `ALERTS` (range)
 
 ### 10. Impact / confidence (honest bounds)
 - **Type:** Text
-- **Purpose:** Qualitative impact/confidence notes; no scored ranking claims.
+- **Purpose:** Structured impact/confidence template; no scored ranking claims;
+  no owner/ack write-path.
 - **Data sources:** Static operator copy.

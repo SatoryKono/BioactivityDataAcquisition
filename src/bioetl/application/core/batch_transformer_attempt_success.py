@@ -24,9 +24,11 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import BronzeRecord
 
+
 def empty_outcome() -> RecordTransformOutcome:
     """Return an empty transform outcome."""
     return RecordTransformOutcome(silver_record=None, gold_record=None)
+
 
 def _finalize_transformed_record(
     *,
@@ -56,6 +58,7 @@ def _finalize_transformed_record(
     )
     return normalized_record
 
+
 def _build_gold_record(
     *,
     context: PipelineContext,
@@ -72,6 +75,7 @@ def _build_gold_record(
     )
     return gold_record, False, None
 
+
 def _resolve_gold_filter_details(
     gold_filter: GoldFilterCallback,
     record: dict[str, object],
@@ -86,6 +90,7 @@ def _resolve_gold_filter_details(
         return decision.to_dict()
     return None
 
+
 def _apply_runtime_dq_outcomes(
     *,
     silver_record: dict[str, object],
@@ -94,17 +99,14 @@ def _apply_runtime_dq_outcomes(
     """Evaluate runtime DQ rules and project non-blocking flags onto one record."""
     if dq_config is None:
         return silver_record
-
     from bioetl.domain.behavior.dq_rule_evaluator import (
         evaluate_dq_rules_for_record,
         select_highest_priority_disposition,
     )
     from bioetl.domain.types.dq_contracts import DQDisposition
-
     outcomes = evaluate_dq_rules_for_record(silver_record, dq_config)
     if not outcomes:
         return silver_record
-
     strongest_disposition = select_highest_priority_disposition(outcomes)
     if strongest_disposition in (
         DQDisposition.QUARANTINE,
@@ -116,7 +118,6 @@ def _apply_runtime_dq_outcomes(
             "Runtime DQ validation failed: "
             f"disposition={strongest_disposition.value}; rules=[{violated_rules}]"
         )
-
     projected = dict(silver_record)
     if any(outcome.disposition == DQDisposition.WARN for outcome in outcomes):
         projected["_dq_warn"] = True
@@ -126,6 +127,7 @@ def _apply_runtime_dq_outcomes(
     ):
         projected["_dq_error"] = True
     return projected
+
 
 async def build_transform_success_outcome(
     *,
@@ -174,6 +176,7 @@ async def build_transform_success_outcome(
         gold_excluded_by_contract=gold_excluded_by_contract,
     )
 
+
 async def resolve_transform_result(
     transformed_result: dict[str, object] | PreSilverRecord | None | object,
 ) -> dict[str, object] | PreSilverRecord | None:
@@ -184,6 +187,7 @@ async def resolve_transform_result(
             await transformed_result,
         )
     return cast(dict[str, object] | PreSilverRecord | None, transformed_result)
+
 
 __all__ = [
     "build_transform_success_outcome",

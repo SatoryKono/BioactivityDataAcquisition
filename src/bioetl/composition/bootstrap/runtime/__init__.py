@@ -48,6 +48,7 @@ __all__ = [*RUNTIME_PACKAGE_EXPORT_NAMES]
 _PUBLIC_EXPORTS: dict[str, str] = RUNTIME_PACKAGE_PUBLIC_EXPORTS
 # Includes apply_runtime_compatibility_patches as an explicit lazy bootstrap seam.
 
+
 def __getattr__(
     name: str,
 ) -> (
@@ -65,6 +66,7 @@ def __getattr__(
     value = getattr(import_module(export_module_name), name)
     globals()[name] = value
     return value
+
 
 def __dir__() -> list[str]:
     """Expose lazy re-exports to introspection and wildcard imports."""

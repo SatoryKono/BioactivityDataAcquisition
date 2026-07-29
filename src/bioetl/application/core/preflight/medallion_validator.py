@@ -22,9 +22,9 @@ if TYPE_CHECKING:
 _GOLD_SEMANTIC_WRITE_MODES = frozenset({"append", "overwrite", "scd2"})
 _GOLD_SEMANTIC_WRITE_MODES_EXPECTED = "one of: append, overwrite, scd2"
 
+
 class MedallionConfigValidator:
     """Validates Medallion architecture invariants and write-mode policies."""
-
     def __init__(
         self,
         config: PipelineConfig,
@@ -34,7 +34,6 @@ class MedallionConfigValidator:
         self._config = config
         self._logger = logger
         self._write_mode_policy = write_mode_policy
-
     def validate_medallion_config(
         self,
         runtime: RuntimeConfig,
@@ -45,7 +44,6 @@ class MedallionConfigValidator:
         gold_format: str | None = None,
     ) -> list[ConfigValidationError]:
         """Validate layer formats, path uniqueness and policy consistency.
-
         Args:
             runtime: Runtime configuration supplying run type and strict validation flag.
             bronze_path: Filesystem path configured for the Bronze layer.
@@ -53,13 +51,11 @@ class MedallionConfigValidator:
             gold_path: Filesystem path configured for the Gold layer.
             silver_format: Storage format for Silver (must be ``'delta'`` when provided).
             gold_format: Storage format for Gold (must be ``'delta'`` when provided).
-
         Returns:
             List of ConfigValidationError instances describing each violation found.
             An empty list indicates the configuration is valid.
         """
         errors: list[ConfigValidationError] = []
-
         errors.extend(
             validate_layer_formats(
                 silver_format=silver_format,
@@ -73,7 +69,6 @@ class MedallionConfigValidator:
                 gold_path=gold_path,
             )
         )
-
         policy = MedallionPolicy.for_run_type(runtime.run_type)
         errors.extend(
             validate_medallion_policy_consistency(
@@ -88,13 +83,10 @@ class MedallionConfigValidator:
                 key_nullability_rules=list(self._config.dq.key_nullability_rules),
             )
         )
-
         self._log_medallion_validation_result(errors, runtime)
         return errors
-
     def validate_write_modes(self) -> list[ConfigValidationError]:
         """Validate that configured write modes are allowed by policy.
-
         Returns:
             List of ConfigValidationError instances for each disallowed write mode.
             An empty list indicates both Silver and Gold modes are policy-compliant.
@@ -123,7 +115,6 @@ class MedallionConfigValidator:
             errors, silver_mode_value, gold_mode_value
         )
         return errors
-
     def _validate_gold_semantic_write_mode(
         self, gold_mode_value: str
     ) -> list[ConfigValidationError]:
@@ -137,7 +128,6 @@ class MedallionConfigValidator:
                 rule="RULES §2.1: Gold layer allowed modes",
             )
         ]
-
     def _log_write_mode_validation_result(
         self,
         errors: list[ConfigValidationError],
@@ -156,7 +146,6 @@ class MedallionConfigValidator:
             silver_mode=silver_mode_value,
             gold_mode=gold_mode_value,
         )
-
     def _log_medallion_validation_result(
         self, errors: list[ConfigValidationError], runtime: RuntimeConfig
     ) -> None:
@@ -172,6 +161,7 @@ class MedallionConfigValidator:
                 "Medallion config validation passed",
                 run_type=runtime.run_type.value,
             )
+
 
 # Backward-compatible alias kept for transitional imports.
 _MedallionConfigValidator = MedallionConfigValidator

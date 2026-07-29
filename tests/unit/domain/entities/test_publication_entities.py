@@ -16,14 +16,17 @@ import pytest
 
 from bioetl.domain.entities.publication_base import PublicationEntityBase
 
-BASE_KWARGS = cast(Any, {
-    "entity_id": "pub:test:001",
-    "content_hash": "hash123abc",
-    "run_id": "run-001",
-    "run_type": "incremental",
-    "ingestion_ts": datetime(2024, 1, 15, tzinfo=UTC),
-    "_index": 0,
-})
+BASE_KWARGS = cast(
+    Any,
+    {
+        "entity_id": "pub:test:001",
+        "content_hash": "hash123abc",
+        "run_id": "run-001",
+        "run_type": "incremental",
+        "ingestion_ts": datetime(2024, 1, 15, tzinfo=UTC),
+        "_index": 0,
+    },
+)
 
 
 @dataclass(frozen=True, kw_only=True)
