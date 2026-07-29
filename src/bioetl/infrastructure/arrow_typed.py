@@ -88,6 +88,6 @@ def schema(fields: list[pa.Field], *, metadata: dict[str, str] | None = None) ->
     return cast(pa.Schema, pa.schema(fields, metadata=metadata))
 
 
-def as_data_type(value: Any) -> pa.DataType:
+def as_data_type(value: Any) -> pa.DataType:  # Any: dynamic Arrow type boundary
     """Boundary cast for rare dynamic Arrow type values."""
     return cast(pa.DataType, value)

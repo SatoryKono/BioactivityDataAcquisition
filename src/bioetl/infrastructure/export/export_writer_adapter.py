@@ -29,16 +29,23 @@ class ExportWriterAdapter(ExportWriterPort):
         output_dir_obj = Path(output_dir)
         output_dir_obj.mkdir(parents=True, exist_ok=True)
         safe_name = f"{layer}_{table_name.replace('.', '_')}"
+        arrow_table = cast(Any, table)  # Any: export writer accepts Arrow table duck-type
         if fmt == "csv":
             return str(
-                _write_delimited_file(table, output_dir_obj / f"{safe_name}.csv", ",")
+                _write_delimited_file(
+                    arrow_table, output_dir_obj / f"{safe_name}.csv", ","
+                )
             )
         if fmt == "tsv":
             return str(
-                _write_delimited_file(table, output_dir_obj / f"{safe_name}.tsv", "\t")
+                _write_delimited_file(
+                    arrow_table, output_dir_obj / f"{safe_name}.tsv", "\t"
+                )
             )
         if fmt == "xlsx":
-            return str(_write_xlsx_file(table, output_dir_obj / f"{safe_name}.xlsx"))
+            return str(
+                _write_xlsx_file(arrow_table, output_dir_obj / f"{safe_name}.xlsx")
+            )
         raise ValueError(f"Unsupported format: {fmt}")
 
     def write_manifest(
@@ -73,7 +80,7 @@ class ExportWriterAdapter(ExportWriterPort):
 
 
 def _write_delimited_file(
-    table: pa.Table,
+    table: Any,  # Any: Arrow table duck-type for pyarrow.csv
     output_path: Path,
     delimiter: str = ",",
 ) -> Path:
@@ -88,7 +95,10 @@ def _write_delimited_file(
     return output_path
 
 
-def _write_xlsx_file(table: pa.Table, output_path: Path) -> Path:
+def _write_xlsx_file(
+    table: Any,  # Any: Arrow table duck-type for pandas/xlsx export
+    output_path: Path,
+) -> Path:
     """Write Arrow table to XLSX."""
     from bioetl.domain.serialization import flatten_arrow_table_for_export
 

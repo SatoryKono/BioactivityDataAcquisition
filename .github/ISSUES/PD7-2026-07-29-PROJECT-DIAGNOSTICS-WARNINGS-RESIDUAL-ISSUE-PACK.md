@@ -1,6 +1,8 @@
 # PD7 issue pack — ~15.9k product warnings + suppressions residual
 
-Created: 2026-07-29T06:50:46Z
+Created: 2026-07-29T06:50:46Z  
+**Status: CLOSED 2026-07-29** — closeout `reports/quality/pd7-campaign-closeout-2026-07-29.md`  
+Epic #7078 and children #7079–#7087 closed on GitHub.
 
 ## Epic
 - #7078 — chore(types): PD7 Project Diagnostics — ~15.9k product warnings + suppressions residual

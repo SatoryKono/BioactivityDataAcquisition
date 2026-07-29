@@ -153,7 +153,10 @@ class ArrowDataConverter:
         elif pa.types.is_struct(dtype):
             # StructType is iterable at runtime; local pyarrow stubs type DataType
             # without __iter__, so cast through Any for static checkers.
-            struct_fields = cast(Sequence[pa.Field], cast(Any, dtype))
+            struct_fields = cast(
+                Sequence[pa.Field],
+                cast(Any, dtype),  # Any: pyarrow StructType lacks __iter__ in stubs
+            )
             new_fields = [
                 pa.field(f.name, self.sanitize_type_for_delta(f.type), f.nullable)
                 for f in struct_fields

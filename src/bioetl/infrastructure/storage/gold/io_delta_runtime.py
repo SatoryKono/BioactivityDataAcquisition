@@ -124,9 +124,11 @@ async def _execute_prepared_simple_gold_write(
         ),
     )
     if host.csv_exporter:
+        from typing import Any, cast
+
         await host.csv_exporter.export(
             prepared.request.table_name,
-            prepared.arrow_data,
+            cast(Any, prepared.arrow_data),  # Any: CSV exporter Arrow table duck-type
             append=prepared.request.mode != "overwrite",
             primary_keys=(
                 prepared.request.primary_keys

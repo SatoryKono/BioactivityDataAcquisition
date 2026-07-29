@@ -1,4 +1,3 @@
-# pyright: reportImportCycles=false
 """Public pipeline-factory imports; registry API lives in ``composition.registry_api``."""
 
 from __future__ import annotations

@@ -15,16 +15,19 @@ from bioetl.application.services.workflow_runner_models import (
 from bioetl.application.services.workflow_runner_reports import (
     attach_workflow_run_report,
 )
+from bioetl.application.services.workflow_runner_step_execution import (
+    TransformStepRuntimeOptions,
+    apply_workflow_step_transition,
+    execute_pipeline_step,
+    execute_transform_step,
+)
 from bioetl.application.services.workflow_runner_support import (
     ResolvedWorkflowStepTransitionRecord,
     WorkflowExecutionState,
     build_resume_skipped_step_result,
     build_skipped_step_result,
-    record_step_metrics,
     record_workflow_pipeline_expected_metrics,
     record_workflow_run_metrics,
-    run_options_from_config,
-    step_result_from_transform_result,
     workflow_result_from_state,
 )
 from bioetl.application.services.workflow_transform_service import (
@@ -35,15 +38,11 @@ from bioetl.application.services.workflow_transform_service import (
 )
 from bioetl.application.services.workflow_transition_policy import (
     WorkflowStepDefinition,
-    apply_step_result_transition,
     resolve_step_transition_policy,
 )
-from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.workflow import (
-    TransformStepConfig,
     WorkflowConfig,
     WorkflowStepConfig,
-    WorkflowTransformSpec,
 )
 
 if TYPE_CHECKING:
@@ -60,169 +59,6 @@ __all__ = [
     "WorkflowRunnerService",
     "WorkflowStepExecutionResult",
 ]
-
-_STEP_KIND_PIPELINE = "pipeline"
-_WORKFLOW_STEP_FAILURES = (
-    AttributeError,
-    BioETLError,
-    KeyError,
-    RuntimeError,
-    TypeError,
-    ValueError,
-)
-
-
-def _optional_identity(value: object, field_name: str) -> str | None:
-    """Return a stable child identity exposed by a result or typed failure."""
-    raw_identity = getattr(value, field_name, None)
-    return str(raw_identity) if raw_identity is not None else None
-
-
-def _apply_workflow_step_transition(
-    *,
-    state: WorkflowExecutionState,
-    step: WorkflowStepDefinition,
-    transition: ResolvedWorkflowStepTransitionRecord,
-    step_completed_callback: Callable[[WorkflowStepExecutionResult], None] | None,
-) -> None:
-    """Apply one resolved transition to mutable workflow execution state."""
-    result = transition.result
-    state.step_results.append(result)
-    if step_completed_callback is not None:
-        step_completed_callback(result)
-    if transition.policy.stores_output:
-        state.step_outputs[step.step_id] = result.payload
-    state.status, state.failed_step_id = apply_step_result_transition(
-        step=step,
-        result_status=result.status,
-        workflow_status=state.status,
-        failed_step_id=state.failed_step_id,
-    )
-
-
-async def _execute_pipeline_step(
-    *,
-    pipeline_runner: PipelineRunnerService,
-    metrics: MetricsPort,
-    monotonic: Callable[[], float],
-    workflow_name: str,
-    step: WorkflowStepConfig,
-    workflow_context_labels: Mapping[str, str],
-    step_started_callback: Callable[..., None] | None,
-    workflow_run_id: str | None,
-) -> WorkflowStepExecutionResult:
-    """Run one pipeline step and project step-level metrics."""
-    if step_started_callback is not None:
-        step_started_callback(step, fingerprint=None)
-    started = monotonic()
-    try:
-        step_options = replace(
-            run_options_from_config(step.run_options),
-            workflow_id=workflow_name,
-            workflow_run_id=workflow_run_id,
-            workflow_name=workflow_name,
-            workflow_step_id=step.step_id,
-        )
-        result = await pipeline_runner.run(
-            step.pipeline_name,
-            options=step_options,
-        )
-    except _WORKFLOW_STEP_FAILURES as exc:
-        record_step_metrics(
-            metrics=metrics,
-            workflow_name=workflow_name,
-            step_kind=_STEP_KIND_PIPELINE,
-            status="failed",
-            duration_seconds=monotonic() - started,
-            context_labels=workflow_context_labels,
-        )
-        return WorkflowStepExecutionResult(
-            step_id=step.step_id,
-            step_kind=_STEP_KIND_PIPELINE,
-            status="failed",
-            error_type=type(exc).__name__,
-            error_message=str(exc),
-            child_run_id=_optional_identity(exc, "run_id"),
-            child_manifest_id=_optional_identity(exc, "manifest_id"),
-        )
-    status = "success" if result.is_success else "failed"
-    record_step_metrics(
-        metrics=metrics,
-        workflow_name=workflow_name,
-        step_kind=_STEP_KIND_PIPELINE,
-        status=status,
-        duration_seconds=monotonic() - started,
-        context_labels=workflow_context_labels,
-    )
-    return WorkflowStepExecutionResult(
-        step_id=step.step_id,
-        step_kind=_STEP_KIND_PIPELINE,
-        status=status,
-        payload=result,
-        error_type=getattr(result, "error_type", None),
-        error_message=getattr(result, "error_message", None),
-        child_run_id=_optional_identity(result, "run_id"),
-        child_manifest_id=_optional_identity(result, "manifest_id"),
-    )
-
-
-@dataclass(frozen=True, slots=True)
-class _TransformStepRuntimeOptions:
-    """Packed transform-step runtime options (python:S107)."""
-
-    completed_transform_fingerprints: dict[str, str] | None
-    step_started_callback: Callable[..., None] | None
-    transform_commit_callback: (
-        Callable[[WorkflowTransformDestructiveCommit], None] | None
-    )
-    dry_run: bool
-    workflow_run_id: str | None
-    manifest_id: str | None
-    debug_export_enabled: bool
-    debug_export_dir: str | None
-    created_at_factory: Callable[[], datetime] | None
-
-
-async def _execute_transform_step(
-    *,
-    transform_service: WorkflowTransformService,
-    artifact_sink: WorkflowTransformArtifactSinkProtocol | None,
-    workflow_name: str,
-    step: TransformStepConfig,
-    step_outputs: dict[str, object],
-    workflow_context_labels: Mapping[str, str],
-    options: _TransformStepRuntimeOptions,
-) -> WorkflowStepExecutionResult:
-    """Run one transform step through the workflow transform service."""
-    spec = WorkflowTransformSpec.from_step(step)
-    if options.step_started_callback is not None:
-        options.step_started_callback(step, fingerprint=spec.fingerprint)
-    upstream_outputs = {
-        dependency: step_outputs[dependency]
-        for dependency in step.depends_on
-        if dependency in step_outputs
-    }
-    created_at = (
-        options.created_at_factory()
-        if options.created_at_factory is not None
-        else None
-    )
-    result = await transform_service.run_step(
-        workflow_name=workflow_name,
-        step=step,
-        upstream_outputs=upstream_outputs,
-        context_labels=workflow_context_labels,
-        completed_fingerprints=options.completed_transform_fingerprints,
-        dry_run=options.dry_run,
-        workflow_run_id=options.workflow_run_id,
-        manifest_id=options.manifest_id,
-        debug_export_enabled=options.debug_export_enabled,
-        debug_export_dir=options.debug_export_dir,
-        artifact_sink=artifact_sink,
-        created_at=created_at,
-        destructive_commit_callback=options.transform_commit_callback,
-    )
-    return step_result_from_transform_result(result)
 
 
 @dataclass(slots=True)
@@ -280,7 +116,7 @@ class WorkflowRunnerService:
                 debug_export=(debug_export_enabled, debug_export_dir),
                 created_at_factory=created_at_factory,
             )
-            _apply_workflow_step_transition(
+            apply_workflow_step_transition(
                 state=state,
                 step=step,
                 transition=transition,
@@ -397,7 +233,7 @@ class WorkflowRunnerService:
         created_at_factory: Callable[[], datetime] | None,
     ) -> WorkflowStepExecutionResult:
         if isinstance(step, WorkflowStepConfig):
-            return await _execute_pipeline_step(
+            return await execute_pipeline_step(
                 pipeline_runner=self.pipeline_runner,
                 metrics=self.metrics,
                 monotonic=self.monotonic,
@@ -407,14 +243,14 @@ class WorkflowRunnerService:
                 step_started_callback=step_started_callback,
                 workflow_run_id=workflow_run_id,
             )
-        return await _execute_transform_step(
+        return await execute_transform_step(
             transform_service=self.transform_service,
             artifact_sink=self.workflow_transform_artifact_sink,
             workflow_name=workflow_name,
             step=step,
             step_outputs=step_outputs,
             workflow_context_labels=workflow_context_labels,
-            options=_TransformStepRuntimeOptions(
+            options=TransformStepRuntimeOptions(
                 completed_transform_fingerprints=completed_transform_fingerprints,
                 step_started_callback=step_started_callback,
                 transform_commit_callback=transform_commit_callback,

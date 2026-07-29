@@ -101,7 +101,7 @@ async def export_existing_table(
     )
     output_path = Path(
         writer.write_export(
-            table=cast(Any, export_table),
+            table=cast(Any, export_table),  # Any: export port accepts Arrow/table duck-type
             table_name=table_name,
             layer=layer,
             fmt=options.format,
@@ -110,7 +110,7 @@ async def export_existing_table(
     )
     manifest_paths = write_export_manifests_if_enabled(
         writer=writer,
-        table=cast(Any, export_table),
+        table=cast(Any, export_table),  # Any: export port accepts Arrow/table duck-type
         table_name=table_name,
         layer=layer,
         options=options,
@@ -145,7 +145,7 @@ async def export_existing_table(
 def write_export_manifests_if_enabled(
     *,
     writer: ExportWriterPort,
-    table: pa.Table,
+    table: _SelectableTable,
     table_name: str,
     layer: str,
     options: ExportOptions,
@@ -158,7 +158,7 @@ def write_export_manifests_if_enabled(
         return ()
     return write_export_sidecar_manifests(
         writer=writer,
-        table=table,
+        table=cast(Any, table),  # Any: export port accepts Arrow/table duck-type
         table_name=table_name,
         layer=layer,
         export_format=options.format,

@@ -37,7 +37,7 @@ pytestmark = pytest.mark.architecture
 SRC = Path("src/bioetl")
 
 # ── Graduated threshold (ratchet down over time) ──────────────────────
-MAX_UNJUSTIFIED = 5
+MAX_UNJUSTIFIED = 0
 """Maximum allowed unjustified ``Any`` usages.  Decrease after each iteration."""
 
 # Aliases whose definition already carries ``# Any:`` justification;

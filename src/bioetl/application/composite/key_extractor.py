@@ -77,7 +77,9 @@ class KeyExtractorService:
         import polars as pl
 
         pa_table = await self._delta_reader.read_table(path)
-        result = pl.from_arrow(cast(Any, pa_table))
+        result = pl.from_arrow(
+            cast(Any, pa_table)  # Any: pyarrow Table after read boundary
+        )
         # from_arrow may return Series for single-column tables
         if isinstance(result, pl.Series):
             return result.to_frame()
