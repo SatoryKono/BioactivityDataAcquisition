@@ -65,6 +65,10 @@ A repository tool is compliant only when it propagates the mode to every note,
 refresh, promotion, cache, evidence, user-memory, and MCP write. The variable
 does not prove that an external vendor service obeys it.
 
+The workflow propagates write capability and exposes the selected mode.
+Pre-task in `off` mode returns a bounded disabled result before persistent
+surface resolution, retrieval, refresh, or note creation.
+
 ## Evidence, decisions, and bounded handoff
 
 `src/memory/evidence.py` hashes each evidence envelope and observation.
@@ -84,6 +88,11 @@ Persistent records carry trust and security classification.
 bounded prompt-injection, secret, and PII patterns without exposing matched
 values. Scanning supplements, but does not replace, canonical verification and
 reviewed trust transitions.
+
+Repository-owned promotion, evidence, decision, user-memory, and workflow
+write paths scan durable content before persistence. Shared file MCP
+persistence is disabled unless explicitly enabled. Enforcement inside external
+vendor and hosted backends remains **NOT_PROVEN**.
 
 `src/memory/access.py` fails closed. `src/memory/user_memory.py` requires
 active repository-scoped consent and explicit operation grants for enumerate,

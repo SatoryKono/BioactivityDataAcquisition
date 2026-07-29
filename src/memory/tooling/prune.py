@@ -150,7 +150,7 @@ def find_prunable_episodic_notes(
         metadata = _extract_metadata(path)
         created_at = _coerce_created_at(metadata.get("created_at"))
         if created_at is None:
-            created_at = datetime.fromtimestamp(path.stat().st_mtime, tz=UTC)
+            continue
         ttl_days = int(metadata.get("ttl_days", default_ttl))
         expires_at = created_at + timedelta(days=ttl_days)
         if expires_at <= current_time:
@@ -177,6 +177,7 @@ def prune_episodic_notes(
     resolved_root = root or _episodic_root()
     total_count = _count_episodic_notes(resolved_root)
     active_count = max(total_count - len(candidates), 0)
+    invalid_metadata = _find_invalid_metadata(resolved_root)
     removed_paths: list[str] = []
     if apply:
         from memory.storage import exclusive_lock
@@ -202,6 +203,8 @@ def prune_episodic_notes(
         "max_active": effective_max_active,
         "density_status": density_status,
         "density_excess": density_excess,
+        "invalid_metadata": invalid_metadata,
+        "policy_violation": bool(candidates or density_excess or invalid_metadata),
         "removed_count": len(removed_paths),
         "candidates": [asdict(candidate) for candidate in candidates],
         "removed_paths": removed_paths,
@@ -219,6 +222,23 @@ def _count_episodic_notes(root: Path) -> int:
         and path.name != "README.md"
         and _is_prunable_note_path(path, root)
     )
+
+
+def _find_invalid_metadata(root: Path) -> list[str]:
+    """Report governed notes that cannot be aged without unsafe mtime fallback."""
+    if not root.exists():
+        return []
+    invalid: list[str] = []
+    for path in sorted(root.rglob("*")):
+        if (
+            path.is_file()
+            and path.suffix in SUPPORTED_NOTE_EXTENSIONS
+            and path.name != "README.md"
+            and _is_prunable_note_path(path, root)
+            and _coerce_created_at(_extract_metadata(path).get("created_at")) is None
+        ):
+            invalid.append(str(path))
+    return invalid
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -247,6 +267,11 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Emit prune report as JSON.",
     )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Exit non-zero when expired, excess, or invalid notes are present.",
+    )
     return parser
 
 
@@ -274,7 +299,7 @@ def main(argv: list[str] | None = None) -> int:
                 f"- {candidate['path']} (created_at={candidate['created_at']}, "
                 f"expires_at={candidate['expires_at']})"
             )
-    return 0
+    return 1 if args.check and report["policy_violation"] else 0
 
 
 if __name__ == "__main__":

@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from memory.evidence import DecisionRecord, EvidenceEvent, EvidenceStore
-from memory.records import ActorIdentity, RecordEnvelope, RecordType
+from memory.records import ActorIdentity, RecordEnvelope, RecordType, TrustLevel
 
 pytestmark = pytest.mark.unit
 _COMMIT = "a" * 40
@@ -24,6 +24,7 @@ def _envelope(record_id: str, record_type: RecordType, *, supersedes: tuple[str,
         task_id="issue-7187",
         actor=ActorIdentity(runtime="codex", agent="test", model=None),
         source_refs=("src/memory/README.md",),
+        trust=TrustLevel.TRUSTED_REPOSITORY,
         supersedes=supersedes,
         created_at="2026-07-29T00:00:00+00:00",
     )

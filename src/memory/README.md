@@ -70,7 +70,9 @@ The validator checks:
 `BIOETL_AI_MEMORY_MODE` accepts `off`, `read-only`, or `read-write`. `off`
 denies persistent reads and writes; `read-only` permits retrieval but denies
 writes; `read-write` enables both. Unknown values fail closed. External MCP and
-vendor services require separate verification.
+vendor services require separate verification. In `off` mode, pre-task returns
+a bounded disabled result before resolving, reading, refreshing, or writing
+persistent surfaces.
 
 Evidence events are append-only and content-addressed. Decisions cite exact
 evidence digests and change through supersession. Subagent handoffs are

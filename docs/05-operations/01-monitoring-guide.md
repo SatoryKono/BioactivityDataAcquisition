@@ -19,6 +19,12 @@ ______________________________________________________________________
 
 BioETL использует стек **Prometheus + Grafana** для обеспечения полной наблюдаемости за процессом сбора и трансформации данных. Данный документ описывает структуру системы, доступные дашборды и способы интерпретации данных.
 
+The optional `bioetl-scenes-app` is a read-only shadow presentation adapter and
+is not part of default provisioning. The seven JSON UIDs remain the supported
+fallback; disabling the app restores JSON-only operation without changing
+BioETL core. See
+[Scenes dual path](../03-guides/dashboards/scenes-dual-path.md).
+
 `Observability Checklist` complements this guide: use this page for observability
 surface interpretation and shipped alert semantics, and use
 [runbooks/observability-checklist.md](runbooks/observability-checklist.md) for

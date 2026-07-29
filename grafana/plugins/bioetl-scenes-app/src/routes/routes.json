@@ -1,0 +1,62 @@
+{
+  "schema_version": "bioetl-scenes-routes-v1",
+  "read_only": true,
+  "hidden_datasources": [],
+  "write_actions": [],
+  "routes": [
+    {
+      "slug": "operations-home",
+      "title": "Operations Home",
+      "subtitle": "Fleet verdict, impact and first safe action.",
+      "dominantLocalization": "subsystem",
+      "decisionObjects": ["Context Bar", "Verdict Strip", "Status Matrix", "Action Rail"],
+      "compatibilityUids": ["bioetl-overview-v2"],
+      "primaryPanelIds": [214, 9002, 215]
+    },
+    {
+      "slug": "pipeline-flow",
+      "title": "Pipeline Flow",
+      "subtitle": "Blocker and stage localization for the selected scope.",
+      "dominantLocalization": "pipeline-stage",
+      "decisionObjects": ["Context Bar", "Verdict Strip", "Evidence Confidence", "Status Matrix", "Action Rail"],
+      "compatibilityUids": ["bioetl-runtime"],
+      "primaryPanelIds": [9101, 9102, 9105, 9991]
+    },
+    {
+      "slug": "dependency-health",
+      "title": "Dependency Health",
+      "subtitle": "Provider-global degradation, freshness and causes.",
+      "dominantLocalization": "provider",
+      "decisionObjects": ["Context Bar", "Verdict Strip", "Evidence Confidence", "Status Matrix", "Action Rail"],
+      "compatibilityUids": ["bioetl-provider-health-v2"],
+      "primaryPanelIds": [9101, 9102, 9103, 9104]
+    },
+    {
+      "slug": "incident-console",
+      "title": "Incident Console",
+      "subtitle": "Ranked suspects and read-only evidence timeline.",
+      "dominantLocalization": "incident-domain",
+      "decisionObjects": ["Context Bar", "Verdict Strip", "Alert List", "Event Timeline", "Action Rail"],
+      "compatibilityUids": ["bioetl-incident-v1"],
+      "primaryPanelIds": [2001, 2005, 2006, 2010]
+    },
+    {
+      "slug": "data-trust-recovery",
+      "title": "Data Trust & Recovery",
+      "subtitle": "Trust and DQ remain separate evidence tabs and compatibility UIDs.",
+      "dominantLocalization": "recovery-gate",
+      "decisionObjects": ["Context Bar", "Verdict Strip", "Evidence Confidence", "Status Matrix", "Action Rail"],
+      "compatibilityUids": ["bioetl-control-plane-v1", "bioetl-dq-v2"],
+      "primaryPanelIds": [906, 139, 8, 101]
+    },
+    {
+      "slug": "run-explorer",
+      "title": "Run Explorer",
+      "subtitle": "Exact-run identity, accounting and recorded failure evidence.",
+      "dominantLocalization": "run",
+      "decisionObjects": ["Context Bar", "Verdict Strip", "Evidence Confidence", "Status Matrix", "Action Rail"],
+      "compatibilityUids": ["bioetl-run-explorer-v1"],
+      "primaryPanelIds": [3010, 3011, 3014, 3016]
+    }
+  ]
+}

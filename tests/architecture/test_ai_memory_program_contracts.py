@@ -1,0 +1,33 @@
+"""Closeout gates for the vendor-neutral AI memory architecture program."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+from memory.registry import load_memory_registry, validate_memory_registry
+
+
+def test_registry_is_complete_and_memory_runtime_stays_outside_bioetl() -> None:
+    assert validate_memory_registry(load_memory_registry()) == []
+    assert not Path("src/bioetl/memory").exists()
+
+
+def test_memory_pretest_gate_is_blocking() -> None:
+    script = Path("scripts/engineering/dev/pretest_guardrails.sh").read_text(
+        encoding="utf-8"
+    )
+    assert "memory.tooling.validate" in script
+    assert "memory.tooling.prune --json --check" in script
+
+
+def test_shared_mcp_memory_requires_explicit_write_enablement() -> None:
+    bash_wrapper = Path("scripts/ai/mcp/mcp_memory_wrapper.sh").read_text(
+        encoding="utf-8"
+    )
+    powershell_wrapper = Path("scripts/ai/mcp/mcp_memory_wrapper.ps1").read_text(
+        encoding="utf-8"
+    )
+    assert 'BIOETL_AI_MEMORY_MODE:-off' in bash_wrapper
+    assert "'off'" in powershell_wrapper
+    assert "read-write" in bash_wrapper
+    assert "read-write" in powershell_wrapper

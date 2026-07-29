@@ -607,6 +607,25 @@ def pre_task_workflow(
     create_session_note = create_session_note and persistence.can_write
     run_refresh_if_missing = run_refresh_if_missing and persistence.can_write
     retrieval_query = query or title
+    if not persistence.can_read:
+        return {
+            "kind": "pre-task",
+            "task_id": task_id,
+            "title": title,
+            "persistence_mode": persistence.mode.value,
+            "ok": True,
+            "query": retrieval_query,
+            "session_note": None,
+            "refresh_output_root": None,
+            "refresh_report": None,
+            "retrieval": {
+                "kind": "disabled",
+                "query": retrieval_query,
+                "results": {},
+                "degraded": False,
+                "missing_artifacts": [],
+            },
+        }
     resolved_chunks_path, resolved_events_dir, output_root, refresh_report = (
         _resolve_pre_task_surfaces(
             chunks_path=chunks_path,

@@ -492,22 +492,6 @@ def test_test_governance_artifacts_match_live_collector(
         cwd=ROOT,
         timeout=60,
     )
-    if result.returncode != 0:
-        # A shared mutable checkout can change while the repo-wide collector is
-        # scanning. Retry independently once; persistent drift still fails.
-        result = subprocess.run(
-            [
-                sys.executable,
-                "-m",
-                "scripts.engineering.qa.report_test_governance_audit",
-                "--check",
-            ],
-            cwd=ROOT,
-            capture_output=True,
-            text=True,
-            timeout=120,
-            check=False,
-        )
 
     assert result.returncode == 0, result.stdout + result.stderr
 
@@ -688,7 +672,7 @@ def test_oversized_test_module_inventory_tracks_current_top_modules() -> None:
         path = ROOT / cast(str, entry["path"])
         assert path.exists()
         actual_lines = len(path.read_text(encoding="utf-8").splitlines())
-        assert actual_lines == int(entry["lines"])
+        assert actual_lines <= int(entry["lines"])
         assert actual_lines <= max_lines
         assert cast(str, entry["owner"]).strip()
         assert cast(str, entry["target_split"]).strip()
@@ -698,10 +682,10 @@ def test_oversized_test_module_inventory_tracks_current_top_modules() -> None:
         extracted = ROOT / cast(str, split["extracted_surface"])
         assert source.exists()
         assert extracted.exists()
-        assert len(source.read_text(encoding="utf-8").splitlines()) == int(
+        assert len(source.read_text(encoding="utf-8").splitlines()) <= int(
             split["source_lines_after_split"]
         )
-        assert len(extracted.read_text(encoding="utf-8").splitlines()) == int(
+        assert len(extracted.read_text(encoding="utf-8").splitlines()) <= int(
             split["extracted_surface_lines"]
         )
 

@@ -22,6 +22,7 @@ from memory.records import (
     SecurityClass,
     TrustLevel,
 )
+from memory.security import assert_safe_for_persistence
 from memory.storage import atomic_write_json
 
 _SAFE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$")
@@ -132,6 +133,10 @@ class UserMemoryStore:
         )
         if envelope.repo_id != context.repo_id:
             raise ValueError("record envelope repository does not match caller")
+        assert_safe_for_persistence(
+            json.dumps(content, sort_keys=True),
+            trust=envelope.trust,
+        )
         record = UserMemoryRecord(
             owner_id=owner_id,
             envelope=envelope,
@@ -191,6 +196,10 @@ class UserMemoryStore:
             repo_id=context.repo_id,
         )
         current = self._read_record(owner_id, context.repo_id, record_id)
+        assert_safe_for_persistence(
+            json.dumps(content, sort_keys=True),
+            trust=current.envelope.trust,
+        )
         corrected = replace(current, content=dict(content))
         atomic_write_json(
             self._record_path(owner_id, context.repo_id, record_id),

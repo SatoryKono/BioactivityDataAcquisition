@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from memory.records import SecurityClass
 from memory.storage import atomic_write_json
 
 MANIFEST_NAME = "manifest.json"
@@ -54,7 +55,14 @@ def _source_files(source: Path) -> tuple[Path, ...]:
     )
 
 
-def _manifest(source: Path) -> dict[str, Any]:
+def _manifest(
+    source: Path,
+    *,
+    security_class: SecurityClass,
+    retention_days: int,
+) -> dict[str, Any]:
+    if retention_days < 1:
+        raise ValueError("backup retention_days must be positive")
     files = [
         {
             "path": path.relative_to(source).as_posix(),
@@ -63,10 +71,20 @@ def _manifest(source: Path) -> dict[str, Any]:
         }
         for path in _source_files(source)
     ]
-    identity = json.dumps(files, separators=(",", ":"), sort_keys=True).encode()
+    identity = json.dumps(
+        {
+            "files": files,
+            "retention_days": retention_days,
+            "security_class": security_class.value,
+        },
+        separators=(",", ":"),
+        sort_keys=True,
+    ).encode()
     return {
         "schema_version": 1,
         "algorithm": "sha256",
+        "security_class": security_class.value,
+        "retention_days": retention_days,
         "root_digest": hashlib.sha256(identity).hexdigest(),
         "files": files,
     }
@@ -107,7 +125,11 @@ def verify_backup(bundle_path: Path) -> dict[str, Any]:
             }
         )
     identity = json.dumps(
-        normalized_files,
+        {
+            "files": normalized_files,
+            "retention_days": manifest.get("retention_days"),
+            "security_class": manifest.get("security_class"),
+        },
         separators=(",", ":"),
         sort_keys=True,
     ).encode()
@@ -117,12 +139,22 @@ def verify_backup(bundle_path: Path) -> dict[str, Any]:
     return manifest
 
 
-def create_backup(source: Path, backup_root: Path) -> BackupResult:
+def create_backup(
+    source: Path,
+    backup_root: Path,
+    *,
+    security_class: SecurityClass = SecurityClass.INTERNAL,
+    retention_days: int = 30,
+) -> BackupResult:
     """Create or reuse a deterministic content-addressed directory backup."""
     source = source.resolve()
     if not source.is_dir():
         raise FileNotFoundError(f"memory source directory not found: {source}")
-    manifest = _manifest(source)
+    manifest = _manifest(
+        source,
+        security_class=security_class,
+        retention_days=retention_days,
+    )
     root_digest = str(manifest["root_digest"])
     bundle_path = backup_root / f"memory-backup-{root_digest}"
     if bundle_path.exists():
@@ -148,6 +180,16 @@ def create_backup(source: Path, backup_root: Path) -> BackupResult:
         if staging.exists():
             shutil.rmtree(staging)
     return BackupResult(bundle_path, root_digest, len(manifest["files"]), True)
+
+
+def quarantine_backup(bundle_path: Path, quarantine_root: Path) -> Path:
+    """Move a corrupt bundle into an explicit operator quarantine."""
+    quarantine_root.mkdir(parents=True, exist_ok=True)
+    destination = quarantine_root / bundle_path.name
+    if destination.exists():
+        raise BackupVerificationError("backup quarantine destination exists")
+    os.replace(bundle_path, destination)  # noqa: PTH105 - atomic quarantine move
+    return destination
 
 
 def recover_backup(
