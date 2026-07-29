@@ -64796,6 +64796,62 @@
     {
       "canonical_successor": null,
       "catalog_lifecycle": null,
+      "commit_policy": "tracked_quality_evidence",
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".json",
+      "freshness": "regenerate",
+      "generated_route": "dashboard-scenes-parity-ledger",
+      "generated_route_exception": null,
+      "generator": "scripts/engineering/qa/report_dashboard_scenes_parity.py",
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "working_report",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/observability/scenes-parity-ledger.json",
+      "recommended_action": "generate-automatically",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Generated",
+      "surface_family": "generated",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": "tracked_quality_evidence",
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "regenerate",
+      "generated_route": "dashboard-scenes-parity-ledger",
+      "generated_route_exception": null,
+      "generator": "scripts/engineering/qa/report_dashboard_scenes_parity.py",
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "working_report",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/observability/scenes-parity-ledger.md",
+      "recommended_action": "generate-automatically",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Generated",
+      "surface_family": "generated",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
       "commit_policy": null,
       "declared_class": null,
       "declared_status": null,
@@ -69124,12 +69180,12 @@
       "live_issue_mirror": 4,
       "plans_governance_entrypoint": 1,
       "published_skill_reference_redirect": 36,
-      "working_report": 70
+      "working_report": 72
     },
     "by_recommended_action": {
       "archive-after-github-state-check": 309,
       "archive-after-migration": 105,
-      "generate-automatically": 875,
+      "generate-automatically": 877,
       "keep": 1148,
       "reconcile-with-github-state": 4
     },
@@ -69163,7 +69219,7 @@
       "plans": 2,
       "plugins": 4,
       "refactoring_plans": 1,
-      "reports": 222,
+      "reports": 224,
       "ru": 3,
       "security": 2,
       "tools": 1
@@ -69172,19 +69228,19 @@
       "Active": 882,
       "Archived": 130,
       "Canonical": 73,
-      "Generated": 875,
+      "Generated": 877,
       "Working": 481
     },
     "by_surface_family": {
       "active": 882,
       "archive": 130,
       "canonical": 73,
-      "generated": 875,
+      "generated": 877,
       "working": 481
     },
     "by_tracking_state": {
       "ignored_local": 54,
-      "tracked": 2387
+      "tracked": 2389
     },
     "docs_reports_local_count": 85,
     "duplicate_group_count": 2,
@@ -69200,8 +69256,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 2441,
+    "total_doc_like": 2443,
     "total_doc_like_ignored_local": 54,
-    "total_doc_like_tracked": 2387
+    "total_doc_like_tracked": 2389
   }
 }
