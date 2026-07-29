@@ -218,17 +218,27 @@ def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
         for token in ("display:flex", "flex-wrap:wrap", "overflow:visible"):
             assert token in container_style, (path.name, token)
 
-        links = [attrs for tag, attrs in parser.elements if tag == "a"]
+        anchors = [attrs for tag, attrs in parser.elements if tag == "a"]
         current = [
             attrs
             for tag, attrs in parser.elements
-            if tag == "span" and attrs.get("aria-current") == "page"
+            if attrs.get("aria-current") == "page"
+            or attrs.get("data-current") == "page"
+            or "bioetl-nav-current" in str(attrs.get("class", ""))
+        ]
+        handoff_links = [
+            attrs
+            for attrs in anchors
+            if attrs.get("aria-current") != "page"
+            and attrs.get("aria-disabled") != "true"
+            and "bioetl-nav-current" not in str(attrs.get("class", ""))
         ]
         uid = str(dashboard.get("uid") or "")
-        # Full portfolio bus: 7 workspaces, current is disabled span (6 anchors).
-        assert len(links) == 6, path.name
+        # Full portfolio bus: 7 workspaces; current is non-interactive chip
+        # (anchor with aria-disabled keeps styles under Grafana sanitizer).
+        assert len(handoff_links) == 6, path.name
         assert len(current) == 1, path.name
-        for attrs in links:
+        for attrs in handoff_links:
             style = attrs.get("style", "")
             for token in (
                 "flex:1 1 120px",
