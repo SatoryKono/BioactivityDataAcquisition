@@ -19,11 +19,14 @@ export ADR_PATH="${ADR_PATH:-${REPO_ROOT}/docs/02-architecture/decisions}"
 export EXECUTION_MODE="${EXECUTION_MODE:-prompt-only}"
 export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-${TMPDIR:-/tmp}/bioetl-npm-cache}"
 # tree-sitter native modules often fail outside a full node-gyp toolchain;
-# the server supports reduced mode without them.
-export NPM_CONFIG_IGNORE_SCRIPTS="${NPM_CONFIG_IGNORE_SCRIPTS:-${npm_config_ignore_scripts:-true}}"
-export npm_config_ignore_scripts="${NPM_CONFIG_IGNORE_SCRIPTS}"
+# the server supports reduced mode without them. npm's documented config key is
+# lowercase; pass it only as a child process env (shelldre:S7684 / no shell export).
+export NPM_CONFIG_IGNORE_SCRIPTS="${NPM_CONFIG_IGNORE_SCRIPTS:-true}"
 
 mcp_exit_if_validate_only "adr-analysis"
 
 # Package defaults to stdio MCP transport. Do not pass a bare "--stdio" flag.
-exec npx -y mcp-adr-analysis-server
+exec env \
+  "NPM_CONFIG_IGNORE_SCRIPTS=${NPM_CONFIG_IGNORE_SCRIPTS}" \
+  "npm_config_ignore_scripts=${NPM_CONFIG_IGNORE_SCRIPTS}" \
+  npx -y mcp-adr-analysis-server
