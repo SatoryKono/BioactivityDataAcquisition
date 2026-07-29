@@ -1,0 +1,156 @@
+{
+  "bronze": {
+    "capability": "append_only_snapshot",
+    "content_hash": {
+      "exclude": [],
+      "include": []
+    }
+  },
+  "diagnostics": [],
+  "execution": {
+    "cached_bronze_is_mode": true,
+    "control_plane": {
+      "checkpoints": true,
+      "run_ledger": true,
+      "run_manifest": true
+    }
+  },
+  "extraction": {
+    "request": {
+      "endpoint_template": {
+        "status": "runtime_resolved"
+      },
+      "method": {
+        "status": "runtime_resolved"
+      }
+    },
+    "source_type": "runtime_resolved",
+    "supported_source_modes": [
+      "api",
+      "cached_bronze"
+    ]
+  },
+  "gold": {
+    "column_projection": {
+      "exclude_fields": [
+        "_dq_*",
+        "_source_batch_id",
+        "_index",
+        "_lookup_method",
+        "_original_id",
+        "pmc_id",
+        "publication_type_unified",
+        "publication_subclass",
+        "publication_class",
+        "oa_status",
+        "affiliation_list",
+        "author_orcids",
+        "is_oa",
+        "issn_list",
+        "language",
+        "publication_date"
+      ],
+      "include_groups": [
+        "system",
+        "identifiers",
+        "title",
+        "abstract",
+        "authors",
+        "journal",
+        "year",
+        "pagination",
+        "doc_type"
+      ]
+    },
+    "contract_ref": "chembl.publication",
+    "contract_validation": {
+      "status": "resolved_by_runtime_contract",
+      "strict": true
+    },
+    "contract_version": "1.0.0",
+    "write": {
+      "enabled": true,
+      "idempotency_contract": "scd2",
+      "mode": "scd2",
+      "scd_config": {
+        "current_flag_col": "_is_current",
+        "valid_from_col": "_valid_from",
+        "valid_to_col": "_valid_to",
+        "version_col": "_version"
+      }
+    }
+  },
+  "identity": {
+    "aliases": [],
+    "entity": "publication",
+    "pipeline_id": "chembl_publication",
+    "pipeline_type": "provider_entity",
+    "provider": "chembl",
+    "status": "active",
+    "typed_id": "pipeline:chembl_publication"
+  },
+  "kind": "pipeline",
+  "observability": {
+    "correlation_fields": [
+      "run_id",
+      "manifest_id"
+    ],
+    "metric_labels": [
+      "provider",
+      "pipeline",
+      "run_type",
+      "status"
+    ]
+  },
+  "passport_schema_version": "1.0.0",
+  "provenance": {
+    "projector_version": "1.0.0",
+    "semantic_content_hash": "sha256:23dedf7528a08265a8323a17d69f4256d53c31f000dc247cb332495da8472163",
+    "source_revision": "b502aa73ed561cd30b5317e5531677a073694912"
+  },
+  "silver": {
+    "column_projection": {
+      "exclude_fields": [
+        "affiliation_list",
+        "author_orcids",
+        "is_oa",
+        "issn_list",
+        "language",
+        "publication_date"
+      ],
+      "include_groups": [
+        "system",
+        "identifiers",
+        "title",
+        "abstract",
+        "authors",
+        "journal",
+        "year",
+        "pagination",
+        "doc_type",
+        "open_access",
+        "provider_ids",
+        "dq"
+      ]
+    },
+    "dq_execution": {
+      "hard_fail_threshold": 0.5,
+      "invalid_record_policy": "quarantine",
+      "soft_fail_threshold": 0.05,
+      "strict_validation": false
+    },
+    "write": {
+      "partition_by": []
+    }
+  },
+  "source_references": [
+    {
+      "path": "configs/entities/chembl/publication.yaml",
+      "role": "effective_entity_config"
+    },
+    {
+      "path": "configs/contracts/chembl/publication.yaml",
+      "role": "dq_contract"
+    }
+  ]
+}
