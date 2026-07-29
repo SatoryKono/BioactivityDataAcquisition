@@ -1,5 +1,3 @@
-# pyright: reportArgumentType=false
-
 from __future__ import annotations
 
 import json
@@ -60,7 +58,7 @@ def _append_jsonl_payload(path: Path, payload: bytes) -> int:
         path,
         payload,
         open_flags=_LEDGER_APPEND_OPEN_FLAGS,
-        os_module=os,
+        os_module=os,  # pyright: ignore[reportArgumentType]
         flush_file_descriptor=_flush_file_descriptor,
     )
 
@@ -70,7 +68,7 @@ def _truncate_ledger_to_offset(path: Path, *, offset: int) -> None:
     truncate_ledger_to_offset(
         path,
         offset=offset,
-        os_module=os,
+        os_module=os,  # pyright: ignore[reportArgumentType]
         flush_file_descriptor=_flush_file_descriptor,
     )
 

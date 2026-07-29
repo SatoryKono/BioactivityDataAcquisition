@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Structural policy event and detail builders."""
 
@@ -27,7 +26,7 @@ def build_quarantine_outcome(
 ) -> StructuralPolicyOutcome:
     """Build a quarantine outcome with the current record snapshot."""
     return StructuralPolicyOutcome(
-        record=cast("SilverRecord", working_record),
+        record=cast("SilverRecord", working_record),  # pyright: ignore[reportInvalidCast]
         quarantine_reason=quarantine_reason,
         details=details,
         events=tuple(events),

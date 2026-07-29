@@ -1,5 +1,3 @@
-# pyright: reportImplicitAbstractClass=false
-# pyright: reportIncompatibleMethodOverride=false
 # MRO/override residual on mixin or client hierarchies.
 """Base Sync Adapter for BioETL infrastructure.
 
@@ -48,7 +46,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 
 
-class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
+class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):  # pyright: ignore[reportImplicitAbstractClass]
     """Base class for adapters using synchronous libraries.
 
     Manages a ThreadPoolExecutor, RateLimiter, and CircuitBreakerGuard.
@@ -77,7 +75,7 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
 
     """
 
-    provider_name: str
+    provider_name: str  # pyright: ignore[reportIncompatibleMethodOverride]
     logger: LoggerPort
     metrics: MetricsPort | None
     rate_limiter: TokenBucketRateLimiter

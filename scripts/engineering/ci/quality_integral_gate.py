@@ -22,7 +22,7 @@ from pathlib import Path
 import yaml
 
 if __package__ in {None, ""}:
-    from _compatibility_telemetry import (  # type: ignore[import-not-found]
+    from scripts.engineering.ci._compatibility_telemetry import (  # type: ignore[import-not-found]
         collect_debt_governance_snapshot,
         render_debt_governance_section,
     )

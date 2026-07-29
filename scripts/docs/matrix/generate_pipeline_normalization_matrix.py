@@ -52,7 +52,7 @@ import yaml
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from _bootstrap import ensure_repo_imports
+    from scripts.docs.matrix._bootstrap import ensure_repo_imports
 else:
     from scripts.docs.matrix._bootstrap import ensure_repo_imports
 
@@ -794,12 +794,12 @@ def _composite_gold_contract_properties(
     )
     payload = json.loads(contract_path.read_text(encoding="utf-8"))
     properties = payload.get("properties", {})
-    if not isinstance(properties, dict):
+    if not isinstance(properties, dict[str, object]):
         return {}
     return {
         field_name: spec
         for field_name, spec in properties.items()
-        if isinstance(field_name, str) and isinstance(spec, dict)
+        if isinstance(field_name, str) and isinstance(spec, dict[str, object])
     }
 
 
@@ -820,7 +820,7 @@ def _matrix_field_type_from_json_schema(type_payload: object) -> str:
 def _composite_field_type(pipeline_name: str, field_name: str) -> str:
     properties = _composite_gold_contract_properties(pipeline_name)
     spec = properties.get(field_name)
-    if isinstance(spec, dict):
+    if isinstance(spec, dict[str, object]):
         contract_type = _matrix_field_type_from_json_schema(spec.get("type"))
         if contract_type != "unknown":
             return contract_type
@@ -830,14 +830,14 @@ def _composite_field_type(pipeline_name: str, field_name: str) -> str:
 def _authority_entry_lookup(
     entry: object,
 ) -> dict[tuple[str, str], dict[str, str]]:
-    if not isinstance(entry, dict):
+    if not isinstance(entry, dict[str, object]):
         return {}
     authority_id = entry.get("id")
     pipelines = entry.get("pipelines")
     field_types = entry.get("field_types")
     if not isinstance(authority_id, str):
         return {}
-    if not isinstance(pipelines, list) or not isinstance(field_types, dict):
+    if not isinstance(pipelines, list) or not isinstance(field_types, dict[str, object]):
         return {}
     lookup: dict[tuple[str, str], dict[str, str]] = {}
     for pipeline_name in pipelines:
@@ -858,7 +858,7 @@ def _composite_schema_authority_lookup() -> dict[tuple[str, str], dict[str, str]
     payload = yaml.safe_load(
         Path(_COMPOSITE_SCHEMA_AUTHORITY_REGISTRY).read_text(encoding="utf-8")
     )
-    if not isinstance(payload, dict):
+    if not isinstance(payload, dict[str, object]):
         return {}
     entries = payload.get("authorities", [])
     if not isinstance(entries, list):
@@ -894,7 +894,7 @@ def _entity_schema_field_type(pipeline_name: str, field_name: str) -> str:
 
 
 def _pipeline_name_from_entry(entry: object) -> str | None:
-    if not isinstance(entry, dict):
+    if not isinstance(entry, dict[str, object]):
         return None
     pipeline = entry.get("pipeline")
     if isinstance(pipeline, str) and pipeline:
@@ -915,7 +915,7 @@ def _pipeline_names_from_entries(entries: object) -> list[str]:
 
 def _composite_source_pipeline_names(payload: dict[str, object]) -> tuple[str, ...]:
     composite = payload.get("composite")
-    if not isinstance(composite, dict):
+    if not isinstance(composite, dict[str, object]):
         return ()
     names: list[str] = []
     seed_pipeline = _pipeline_name_from_entry(composite.get("seed"))
@@ -923,13 +923,13 @@ def _composite_source_pipeline_names(payload: dict[str, object]) -> tuple[str, .
         names.append(seed_pipeline)
     for key in ("dependencies", "enrichers"):
         names.extend(_pipeline_names_from_entries(composite.get(key)))
-    return tuple(dict.fromkeys(names))
+    return tuple(dict[str, object].fromkeys(names))
 
 
 def _provider_order_from_column_group(
     entry: object, field_name: str
 ) -> tuple[str, ...] | None:
-    if not isinstance(entry, dict):
+    if not isinstance(entry, dict[str, object]):
         return None
     fields = entry.get("fields")
     if not isinstance(fields, list) or field_name not in fields:
@@ -942,7 +942,7 @@ def _provider_order_from_column_group(
         for provider in provider_order
         if isinstance(provider, str) and provider
     ]
-    return tuple(dict.fromkeys(providers))
+    return tuple(dict[str, object].fromkeys(providers))
 
 
 def _composite_field_provider_order(
@@ -950,10 +950,10 @@ def _composite_field_provider_order(
     field_name: str,
 ) -> tuple[str, ...]:
     composite = payload.get("composite")
-    if not isinstance(composite, dict):
+    if not isinstance(composite, dict[str, object]):
         return ()
     merge = composite.get("merge")
-    if not isinstance(merge, dict):
+    if not isinstance(merge, dict[str, object]):
         return ()
     column_groups = merge.get("column_groups")
     if not isinstance(column_groups, list):
@@ -969,13 +969,13 @@ def _lineage_field_alias(
     composite: dict[str, object], *, field_name: str, provider_name: str
 ) -> str | None:
     lineage = composite.get("lineage")
-    if not isinstance(lineage, dict):
+    if not isinstance(lineage, dict[str, object]):
         return None
     provider_lookup_fields = lineage.get("provider_lookup_fields")
-    if not isinstance(provider_lookup_fields, dict):
+    if not isinstance(provider_lookup_fields, dict[str, object]):
         return None
     provider_entry = provider_lookup_fields.get(provider_name)
-    if not isinstance(provider_entry, dict):
+    if not isinstance(provider_entry, dict[str, object]):
         return None
     alias = provider_entry.get(field_name)
     if isinstance(alias, str) and alias:
@@ -986,10 +986,10 @@ def _lineage_field_alias(
 def _mapped_source_fields(
     merge: object, *, field_name: str, provider_name: str
 ) -> list[str]:
-    if not isinstance(merge, dict):
+    if not isinstance(merge, dict[str, object]):
         return []
     field_mappings = merge.get("field_mappings")
-    if not isinstance(field_mappings, dict):
+    if not isinstance(field_mappings, dict[str, object]):
         return []
     mapped: list[str] = []
     for source_ref, target_field in field_mappings.items():
@@ -1009,7 +1009,7 @@ def _composite_source_field_candidates(
     provider_name: str,
 ) -> tuple[str, ...]:
     composite = payload.get("composite")
-    if not isinstance(composite, dict):
+    if not isinstance(composite, dict[str, object]):
         return (field_name,)
     candidates: list[str] = [field_name]
     alias = _lineage_field_alias(
@@ -1025,7 +1025,7 @@ def _composite_source_field_candidates(
     candidates.extend(
         COMPOSITE_SOURCE_FIELD_TYPE_ALIAS_HINTS.get((pipeline_name, field_name), ())
     )
-    return tuple(dict.fromkeys(candidate for candidate in candidates if candidate))
+    return tuple(dict[str, object].fromkeys(candidate for candidate in candidates if candidate))
 
 
 def _first_known_source_field_type(
@@ -1274,7 +1274,7 @@ def _inferred_controlled_vocabulary_source(
 @cache
 def _load_enum_registry(config_path: str) -> dict[str, object]:
     payload = yaml.safe_load(Path(config_path).read_text(encoding="utf-8"))
-    return payload if isinstance(payload, dict) else {}
+    return payload if isinstance(payload, dict[str, object]) else {}
 
 
 def _registry_values(
@@ -1293,7 +1293,7 @@ def _registry_values(
 
     current: object = _load_enum_registry(config_path)
     for part in registry_path:
-        if not isinstance(current, dict):
+        if not isinstance(current, dict[str, object]):
             return frozenset()
         current = current.get(part)
     if not isinstance(current, list):
@@ -1320,10 +1320,10 @@ def _load_non_chembl_observed_value_inventory() -> dict[str, object]:
 def _non_chembl_pipeline_inventory(pipeline_name: str) -> dict[str, object]:
     payload = _load_non_chembl_observed_value_inventory()
     pipelines = payload.get("pipelines")
-    if not isinstance(pipelines, dict):
+    if not isinstance(pipelines, dict[str, object]):
         return {}
     pipeline_payload = pipelines.get(pipeline_name)
-    return pipeline_payload if isinstance(pipeline_payload, dict) else {}
+    return pipeline_payload if isinstance(pipeline_payload, dict[str, object]) else {}
 
 
 def _inventory_mapping(
@@ -1332,12 +1332,12 @@ def _inventory_mapping(
 ) -> dict[str, object]:
     payload = _non_chembl_pipeline_inventory(pipeline_name)
     section = payload.get(section_name)
-    return section if isinstance(section, dict) else {}
+    return section if isinstance(section, dict[str, object]) else {}
 
 
 def _classification_spec(pipeline_name: str, field_name: str) -> dict[str, str]:
     payload = _inventory_mapping(pipeline_name, "classification").get(field_name)
-    if isinstance(payload, dict):
+    if isinstance(payload, dict[str, object]):
         return {
             str(key): str(value) for key, value in payload.items() if value is not None
         }
@@ -1520,7 +1520,7 @@ def _non_chembl_row_metadata(row: dict[str, str]) -> dict[str, str]:
 
 
 def _augment_row_with_inventory_metadata(row: dict[str, str]) -> dict[str, str]:
-    augmented = dict(row)
+    augmented = dict[str, object](row)
     augmented.update(_non_chembl_row_metadata(augmented))
     return augmented
 
@@ -1679,14 +1679,14 @@ def _filter_value_set(raw_values: object) -> frozenset[str]:
 
 def _filter_mapping(config: dict[str, object]) -> dict[str, object]:
     filters = config.get("filters") or {}
-    return filters if isinstance(filters, dict) else {}
+    return filters if isinstance(filters, dict[str, object]) else {}
 
 
 def _extraction_param_values(
     filters: dict[str, object], *, field_name: str
 ) -> frozenset[str]:
     extraction_params = filters.get("extraction_params") or {}
-    if not isinstance(extraction_params, dict):
+    if not isinstance(extraction_params, dict[str, object]):
         return frozenset()
     return _filter_value_set(extraction_params.get(field_name)) | _filter_value_set(
         extraction_params.get(f"{field_name}__in")
@@ -1697,10 +1697,10 @@ def _column_filter_values(
     filters: dict[str, object], *, filter_key: str, field_name: str
 ) -> frozenset[str]:
     filter_config = filters.get(filter_key) or {}
-    if not isinstance(filter_config, dict):
+    if not isinstance(filter_config, dict[str, object]):
         return frozenset()
     columns = filter_config.get("columns") or {}
-    if not isinstance(columns, dict):
+    if not isinstance(columns, dict[str, object]):
         return frozenset()
     return _filter_value_set(columns.get(field_name))
 
@@ -2117,7 +2117,7 @@ def _composite_config_paths() -> list[Path]:
 
 def _load_yaml(path: Path) -> dict[str, object]:
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))
-    return payload if isinstance(payload, dict) else {}
+    return payload if isinstance(payload, dict[str, object]) else {}
 
 
 def _render_bool(value: bool | None) -> str:
@@ -2359,7 +2359,7 @@ def _alias_field_names(
     ]
     return tuple(
         candidate
-        for candidate in dict.fromkeys(candidates)
+        for candidate in dict[str, object].fromkeys(candidates)
         if candidate is not None and candidate not in schema_field_names
     )
 
@@ -2375,7 +2375,7 @@ def _field_lookup_candidates(*, pipeline_name: str, field_name: str) -> tuple[st
     source_name = reverse_aliases.get(field_name)
     if source_name is not None:
         candidates.append(source_name)
-    return tuple(dict.fromkeys(candidates))
+    return tuple(dict[str, object].fromkeys(candidates))
 
 
 def _resolve_profile_rule(
@@ -2576,10 +2576,10 @@ def _entity_fallback_row(
 
 def _iter_composite_fields(payload: dict[str, object]) -> list[str]:
     composite = payload.get("composite")
-    if not isinstance(composite, dict):
+    if not isinstance(composite, dict[str, object]):
         return []
     merge = composite.get("merge")
-    if not isinstance(merge, dict):
+    if not isinstance(merge, dict[str, object]):
         return []
     column_groups = merge.get("column_groups")
     if not isinstance(column_groups, list):
@@ -2588,7 +2588,7 @@ def _iter_composite_fields(payload: dict[str, object]) -> list[str]:
     ordered: list[str] = []
     seen: set[str] = set()
     for group in column_groups:
-        if not isinstance(group, dict):
+        if not isinstance(group, dict[str, object]):
             continue
         fields = group.get("fields")
         if not isinstance(fields, list):
@@ -2603,7 +2603,7 @@ def _iter_composite_fields(payload: dict[str, object]) -> list[str]:
 
 def _iter_composite_join_keys(payload: dict[str, object]) -> set[str]:
     composite = payload.get("composite")
-    if not isinstance(composite, dict):
+    if not isinstance(composite, dict[str, object]):
         return set()
 
     keys: set[str] = set()
@@ -2626,7 +2626,7 @@ def _join_keys_from_entries(entries: list[object]) -> set[str]:
     """Extract declared join keys from composite dependency-like entries."""
     keys: set[str] = set()
     for entry in entries:
-        if not isinstance(entry, dict):
+        if not isinstance(entry, dict[str, object]):
             continue
         join_keys = entry.get("join_keys")
         if not isinstance(join_keys, list):
@@ -2760,7 +2760,7 @@ def _entity_pipeline_inputs(
     """Resolve matrix inputs for one entity pipeline config."""
     payload = _load_yaml(config_path)
     pipeline = payload.get("pipeline")
-    if not isinstance(pipeline, dict):
+    if not isinstance(pipeline, dict[str, object]):
         return None
     pipeline_name = str(pipeline.get("pipeline_name", "")).strip()
     if not pipeline_name:
@@ -2796,7 +2796,7 @@ def _composite_pipeline_inputs(
     """Resolve matrix inputs for one composite pipeline config."""
     payload = _load_yaml(config_path)
     composite = payload.get("composite")
-    if not isinstance(composite, dict):
+    if not isinstance(composite, dict[str, object]):
         return None
     pipeline_name = str(composite.get("name", "")).strip()
     if not pipeline_name:
@@ -3031,13 +3031,13 @@ def _first_snapshot_id(source_refs: list[object]) -> str | None:
     if not source_refs:
         return None
     first_source = source_refs[0]
-    if not isinstance(first_source, dict):
+    if not isinstance(first_source, dict[str, object]):
         return None
     input_snapshots = first_source.get("input_snapshots")
     if not isinstance(input_snapshots, list) or not input_snapshots:
         return None
     first_snapshot = input_snapshots[0]
-    if not isinstance(first_snapshot, dict):
+    if not isinstance(first_snapshot, dict[str, object]):
         return None
     snapshot_id = first_snapshot.get("snapshot_id")
     return snapshot_id if isinstance(snapshot_id, str) else None

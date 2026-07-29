@@ -1,4 +1,3 @@
-# pyright: reportPossiblyUnboundVariable=false
 # basedpyright residual burn-down (shrink-only product surface).
 """ChEMBL data source adapter.
 
@@ -17,6 +16,6 @@ from bioetl.infrastructure.adapters.chembl.models import (
 for _export_name in _CHEMBL_FACADE_MODEL_EXPORTS:
     globals()[_export_name] = getattr(_chembl_models, _export_name)
 
-del _export_name
+del _export_name  # pyright: ignore[reportPossiblyUnboundVariable]
 
 __all__ = ["ChemblAdapter", *_CHEMBL_FACADE_MODEL_EXPORTS]

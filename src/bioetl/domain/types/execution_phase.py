@@ -1,4 +1,3 @@
-# pyright: reportArgumentType=false
 # Boundary object/payload typing residual at this module.
 """Execution phases and FSM for composite pipeline execution."""
 
@@ -100,9 +99,9 @@ class CompositeFSM:
     def _setup_transition_table(self) -> None:
         """Setup valid phase transitions."""
         self.transition_table = build_transition_table(
-            execution_phase=ExecutionPhase,
-            phase_transition=PhaseTransition,
-            transition_policy=TransitionPolicy,
+            execution_phase=ExecutionPhase,  # pyright: ignore[reportArgumentType]
+            phase_transition=PhaseTransition,  # pyright: ignore[reportArgumentType]
+            transition_policy=TransitionPolicy,  # pyright: ignore[reportArgumentType]
             phase_transition_rule=PhaseTransitionRule,
         )
 

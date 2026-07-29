@@ -1,5 +1,3 @@
-# pyright: reportArgumentType=false
-# pyright: reportCallIssue=false
 # Boundary object/payload typing residual at this module.
 """Shared initialization helpers for pipeline transformers."""
 
@@ -46,7 +44,7 @@ def initialize_base_transformer(
     kwargs: Mapping[str, object],
 ) -> None:
     """Initialize a ``BaseTransformer`` subclass through the shared contract."""
-    BaseTransformer.__init__(transformer, provider, **dict(kwargs))  # type: ignore[arg-type]
+    BaseTransformer.__init__(transformer, provider, **dict(kwargs))  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
 
 
 def initialize_next_transformer_mro(
@@ -57,7 +55,7 @@ def initialize_next_transformer_mro(
     kwargs: Mapping[str, object],
 ) -> None:
     """Initialize the next transformer class in ``owner_type`` MRO."""
-    super(owner_type, transformer).__init__(provider, **dict(kwargs))  # type: ignore[misc]
+    super(owner_type, transformer).__init__(provider, **dict(kwargs))  # type: ignore[misc]  # pyright: ignore[reportCallIssue]
 
 
 def build_runtime_transformer_init(

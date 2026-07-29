@@ -19,10 +19,10 @@
       "id": 1000,
       "options": {
         "mode": "html",
-        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:12px\"><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust)\" \n\n_(DUX4-22: truncated; full text in panel description/docs.)_"
+        "content": "<div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:12px\"><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust)\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">0. Trust</a><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview)\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">1. Overview</a><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics)\" href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">2. Pipeline Diagnostics</a><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health)\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">3. Provider Health</a><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality)\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">4. Data Quality</a><span style=\"flex:1 1 100%;height:0;overflow:hidden;margin:0;padding:0;border:0\" aria-hidden=\"true\"></span><span aria-current=\"page\" title=\"5. Incident Workspace (Incident Workspace)\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#fff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default\">5. Incident Workspace</span><a style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer)\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">6. Run Explorer</a></div>"
       },
       "title": "Navigation",
-      "description": "DUX4-22: Full prose shortened on-canvas to remove internal scroll; details in description/docs. Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is disabled (aria-current). Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions.",
+      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is disabled (aria-current). Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions.",
       "type": "text",
       "links": [
         {
@@ -97,7 +97,7 @@
       "id": 9400,
       "type": "text",
       "title": "Provenance",
-      "description": "DUX4-10: Scope legend — NOW=current, RANGE=window, RUN=exact run_id (HTTP), WORKFLOW/GLOBAL=blast radius/fleet. Family: HEALTH|EXEC|EVIDENCE|IMPACT|APPLICABILITY. DUX3 scope legend: NOW/RANGE/RUN/WORKFLOW/GLOBAL. Incident scope. Variables are filters; suspects use fleet metrics. role=scope_provenance; scope=pipeline,run_type,provider",
+      "description": "DUX5: status-card shell (reason/action beside Status; no internal scroll). DUX4-10: Scope legend — NOW=current, RANGE=window, RUN=exact run_id (HTTP), WORKFLOW/GLOBAL=blast radius/fleet. Family: HEALTH|EXEC|EVIDENCE|IMPACT|APPLICABILITY. DUX3 scope legend: NOW/RANGE/RUN/WORKFLOW/GLOBAL. Incident scope. Variables are filters; suspects use fleet metrics. role=scope_provenance; scope=pipeline,run_type,provider run_id is local control-plane identity context only. Scope: workflow, pipeline, run_type, run_id.",
       "gridPos": {
         "h": 3,
         "w": 16,
@@ -105,15 +105,15 @@
         "y": 3
       },
       "options": {
-        "mode": "markdown",
-        "content": "### Incident scope\n- workflow=`$workflow` pipeline=`$pipeline` run_type=`$run_type`\n- provider filter=`$provider` (optional)\n- Deep identity → Run Explorer; resume safety → Trust"
+        "mode": "html",
+        "content": "<div style=\"padding:2px 6px;border-left:3px solid #64748b;background:rgba(100,116,139,0.10);line-height:1.2;font-size:12px;overflow:hidden;white-space:normal\"><strong>Incident triage</strong> · Status → Impact/confidence → Next action · <code>$workflow</code>/<code>$pipeline</code>/<code>$run_type</code>/run <code>$run_id</code><br>Read labelled Status (never bare numbers). Empty domain = <strong>No active suspects</strong>, not healthy fleet.</div>"
       }
     },
     {
       "id": 9401,
       "type": "stat",
       "title": "Status",
-      "description": "DUX3-14: Incident status is read-only. Ranked suspects may be WORKFLOW/GLOBAL blast radius — check scope labels on tables. Incident header status (labelled only). Map 0=OK,1=WARN,2=CRIT,3/null=UNKNOWN. Never bare numbers. Confidence from missing telemetry / VALID_EMPTY suspects. Read-only workspace.",
+      "description": "DUX6: UNKNOWN = evidence incomplete (missing/stale/not-started/backend-error/selection). Pair with Provenance reason + action; never read as OK. DUX5: UNKNOWN = evidence incomplete (missing/stale/not-started/backend-error); pair with Provenance reason + action. Not a healthy OK. DUX3-14: Incident status is read-only. Ranked suspects may be WORKFLOW/GLOBAL blast radius — check scope labels on tables. Incident header status (labelled only). Map 0=OK,1=WARN,2=CRIT,3/null=UNKNOWN. Never bare numbers. Confidence from missing telemetry / VALID_EMPTY suspects. Read-only workspace.",
       "gridPos": {
         "h": 3,
         "w": 8,
@@ -214,7 +214,7 @@
       "id": 2001,
       "type": "text",
       "title": "Next Best Actions",
-      "description": "DSA-07 decision rail. Read-only.",
+      "description": "DUX5: triage copy shortened; caveats in description; no raw endpoints. DSA-07 decision rail. Read-only.",
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -222,8 +222,8 @@
         "y": 6
       },
       "options": {
-        "mode": "markdown",
-        "content": "**Incident Console — next best actions (<=4, read-only)**\n1. Read labelled **Status** (never bare numbers).\n2. Open top row in **Ranked Active Suspects** (domain handoff).\n3. Confirm **Evidence timeline**: Current Alerts + Alert State History (same chain).\n4. Exact identity -> **Run Explorer**; resume -> Trust **Primary recovery**.\nNo persistent incident write-path in this workspace.\n"
+        "mode": "html",
+        "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:12px;overflow:hidden\"><strong>Next best actions (≤4, read-only)</strong> — 1) Read labelled <strong>Status</strong> · 2) Open top Ranked Active Suspect domain · 3) Confirm Current Alerts age/severity · 4) Run Explorer for exact-run proof</div>"
       },
       "links": []
     },
@@ -231,7 +231,7 @@
       "id": 2010,
       "type": "table",
       "title": "Ranked Active Suspects",
-      "description": "DUX4-15: WORKFLOW blast radius — show selected vs affected pipeline; not a silent filter bug. DUX3-14: WORKFLOW/GLOBAL impact table unless explicitly filtered to selected pipeline. Selected pipeline may differ from row pipeline (blast radius). Single ranked suspect matrix across Runtime/Provider/DQ. Domain label identifies source; row links preserve scope. VALID_EMPTY when no active suspects. Primary evidence before domain forensics.",
+      "description": "DUX5: Value columns labelled as Signal (no bare Value # headers). DUX4-15: WORKFLOW blast radius — show selected vs affected pipeline; not a silent filter bug. DUX3-14: WORKFLOW/GLOBAL impact table unless explicitly filtered to selected pipeline. Selected pipeline may differ from row pipeline (blast radius). Single ranked suspect matrix across Runtime/Provider/DQ. Domain label identifies source; row links preserve scope. VALID_EMPTY when no active suspects. Primary evidence before domain forensics.",
       "gridPos": {
         "h": 8,
         "w": 24,
@@ -279,13 +279,18 @@
               "Time 2": true
             },
             "indexByName": {},
-            "renameByName": {}
+            "renameByName": {
+              "Value": "Signal",
+              "Value #A": "Series A",
+              "Value #B": "Series B",
+              "Value #C": "Series C"
+            }
           }
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "noValue": "VALID_EMPTY — no active suspects across domains",
+          "noValue": "None observed",
           "custom": {
             "align": "left",
             "cellOptions": {
@@ -379,6 +384,10 @@
                     }
                   ]
                 }
+              },
+              {
+                "id": "displayName",
+                "value": "Signal"
               }
             ]
           }
@@ -407,7 +416,7 @@
       "id": 2005,
       "type": "table",
       "title": "Evidence timeline · Current Alerts (now)",
-      "description": "DUX4-17: Firing/pending must not use success-green series colors. Instant ALERTS snapshot (firing/pending). Pair with Alert State History as one temporal chain. VALID_EMPTY when none.",
+      "description": "DUX6: prefer short run/manifest display; full value via tooltip/Copy/Open; never put full UUIDs into Prometheus labels. DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Severity (no bare Value # headers). DUX4-17: Firing/pending must not use success-green series colors. Instant ALERTS snapshot (firing/pending). Pair with Alert State History as one temporal chain. VALID_EMPTY when none.",
       "gridPos": {
         "h": 6,
         "w": 12,
@@ -428,7 +437,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "noValue": "VALID_EMPTY — no firing/pending alerts now",
+          "noValue": "None observed",
           "custom": {
             "align": "left",
             "cellOptions": {
@@ -443,7 +452,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "text",
+                "color": "gray",
                 "value": null
               },
               {
@@ -496,6 +505,10 @@
                     }
                   ]
                 }
+              },
+              {
+                "id": "displayName",
+                "value": "Severity"
               }
             ]
           }
@@ -534,7 +547,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "noValue": "VALID_EMPTY — no alert state samples in selected range",
+          "noValue": "None observed",
           "custom": {
             "fillOpacity": 70,
             "lineWidth": 0
@@ -562,7 +575,7 @@
       "id": 2007,
       "type": "text",
       "title": "Impact / confidence (honest bounds)",
-      "description": "DUX4-22: Full prose shortened on-canvas to remove internal scroll; details in description/docs. DSA-07 structured impact/confidence card (prose template). No owner/ack store.",
+      "description": "DUX5: triage copy shortened; caveats in description; no raw endpoints. DSA-07 structured impact/confidence card (prose template). No owner/ack store.",
       "gridPos": {
         "h": 4,
         "w": 24,
@@ -571,7 +584,7 @@
       },
       "options": {
         "mode": "markdown",
-        "content": "**Impact / confidence (structured, read-only)**\n\n| Field | How to read |\n| --- | --- |\n| **Impact bounds** | Affected pipelines/providers from Ranked Active Suspects + Current Alerts scope |\n| **Confidence** | high if Status mapped + suspects non-empty; low if Status=UNKNOWN or telemetry missing |\n| **Basis** | Suspect domain label + alertname; not AI diagnosis |\n\n_(DUX4-22: truncated; full text in panel description/docs.)_"
+        "content": "**Impact / confidence (structured, read-only)**\n\n| Field | How to read |\n| --- | --- |\n| **Impact bounds** | Affected pipelines/providers from Ranked Active Suspects + Current Alerts scope |\n| **Confidence** | high if Status mapped + suspects non-empty; low if Status=UNKNOWN or telemetry missing |\n| **Basis** | Suspect domain label + alertname; not AI diagnosis |\n\n_Details in panel description._"
       }
     },
     {
@@ -590,7 +603,7 @@
           "id": 2002,
           "type": "table",
           "title": "Active Suspects · Runtime",
-          "description": "DUX4-15: WORKFLOW blast radius — show selected vs affected pipeline; not a silent filter bug. DUX3-14: WORKFLOW/GLOBAL impact table unless explicitly filtered to selected pipeline. Selected pipeline may differ from row pipeline (blast radius). Runtime blockers (current topk by domain). VALID EMPTY when none. Handoff: Pipeline Diagnostics. Not cross-domain ranking.",
+          "description": "DUX5: Value columns labelled as Signal (no bare Value # headers). DUX4-15: WORKFLOW blast radius — show selected vs affected pipeline; not a silent filter bug. DUX3-14: WORKFLOW/GLOBAL impact table unless explicitly filtered to selected pipeline. Selected pipeline may differ from row pipeline (blast radius). Runtime blockers (current topk by domain). VALID EMPTY when none. Handoff: Pipeline Diagnostics. Not cross-domain ranking.",
           "gridPos": {
             "h": 7,
             "w": 8,
@@ -611,7 +624,7 @@
           ],
           "fieldConfig": {
             "defaults": {
-              "noValue": "VALID_EMPTY — no active suspects in this domain",
+              "noValue": "None observed",
               "custom": {
                 "align": "left",
                 "cellOptions": {
@@ -687,6 +700,10 @@
                         }
                       ]
                     }
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Signal"
                   }
                 ]
               }
@@ -703,7 +720,7 @@
           "id": 2003,
           "type": "table",
           "title": "Active Suspects · Provider",
-          "description": "DUX4-15: WORKFLOW blast radius — show selected vs affected pipeline; not a silent filter bug. DUX3-14: WORKFLOW/GLOBAL impact table unless explicitly filtered to selected pipeline. Selected pipeline may differ from row pipeline (blast radius). Provider causes (current fleet topk). Empty + non-OK Status is an explainability gap. Handoff: Provider Health.",
+          "description": "DUX6: prefer short run/manifest display; full value via tooltip/Copy/Open; never put full UUIDs into Prometheus labels. DUX5: show short run/manifest ids in cells where possible; full value via tooltip/Copy/Open. Do not put full UUIDs into Prometheus labels. DUX5: Value columns labelled as Signal (no bare Value # headers). DUX4-15: WORKFLOW blast radius — show selected vs affected pipeline; not a silent filter bug. DUX3-14: WORKFLOW/GLOBAL impact table unless explicitly filtered to selected pipeline. Selected pipeline may differ from row pipeline (blast radius). Provider causes (current fleet topk). Empty + non-OK Status is an explainability gap. Handoff: Provider Health.",
           "gridPos": {
             "h": 7,
             "w": 8,
@@ -724,7 +741,7 @@
           ],
           "fieldConfig": {
             "defaults": {
-              "noValue": "VALID_EMPTY — no active suspects in this domain",
+              "noValue": "None observed",
               "custom": {
                 "align": "left",
                 "cellOptions": {
@@ -800,6 +817,10 @@
                         }
                       ]
                     }
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Signal"
                   }
                 ]
               }
@@ -816,7 +837,7 @@
           "id": 2004,
           "type": "table",
           "title": "Active Suspects · DQ",
-          "description": "DUX4-15: WORKFLOW blast radius — show selected vs affected pipeline; not a silent filter bug. DUX3-14: WORKFLOW/GLOBAL impact table unless explicitly filtered to selected pipeline. Selected pipeline may differ from row pipeline (blast radius). DQ current reasons (NOW topk). VALID EMPTY when none. Handoff: Data Quality. Not a persistent incident record.",
+          "description": "DUX5: Value columns labelled as Signal (no bare Value # headers). DUX4-15: WORKFLOW blast radius — show selected vs affected pipeline; not a silent filter bug. DUX3-14: WORKFLOW/GLOBAL impact table unless explicitly filtered to selected pipeline. Selected pipeline may differ from row pipeline (blast radius). DQ current reasons (NOW topk). VALID EMPTY when none. Handoff: Data Quality. Not a persistent incident record.",
           "gridPos": {
             "h": 7,
             "w": 8,
@@ -837,7 +858,7 @@
           ],
           "fieldConfig": {
             "defaults": {
-              "noValue": "VALID_EMPTY — no active suspects in this domain",
+              "noValue": "None observed",
               "custom": {
                 "align": "left",
                 "cellOptions": {
@@ -913,6 +934,10 @@
                         }
                       ]
                     }
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Signal"
                   }
                 ]
               }

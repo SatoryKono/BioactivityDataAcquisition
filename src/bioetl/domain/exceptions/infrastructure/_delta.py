@@ -1,4 +1,3 @@
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods provided by concrete composition.
 """Delta Lake specific infrastructure exceptions."""
 
@@ -41,7 +40,7 @@ def delta_write_conflict_error(
             conflicting_version=conflicting_version,
         ),
     )
-    error.error_type = ErrorType.NETWORK_ERROR  # type: ignore[misc]  # instance override of ClassVar
+    object.__setattr__(error, "error_type", ErrorType.NETWORK_ERROR)
     return error
 
 
@@ -130,7 +129,7 @@ def delta_schema_validation_error(
             type_mismatches=mismatches,
         ),
     )
-    error.error_type = ErrorType.SCHEMA_MISMATCH_GOLD  # type: ignore[misc]  # instance override of ClassVar
+    object.__setattr__(error, "error_type", ErrorType.SCHEMA_MISMATCH_GOLD)
     return error
 
 
@@ -158,7 +157,7 @@ def delta_optimize_error(
             reason=reason,
         ),
     )
-    error.error_type = ErrorType.NETWORK_ERROR  # type: ignore[misc]  # instance override of ClassVar
+    object.__setattr__(error, "error_type", ErrorType.NETWORK_ERROR)
     return error
 
 

@@ -1,5 +1,3 @@
-# pyright: reportImplicitAbstractClass=false
-# pyright: reportIncompatibleMethodOverride=false
 # MRO/override residual on mixin or client hierarchies.
 """Base HTTP adapter for BioETL infrastructure.
 
@@ -99,7 +97,7 @@ def build_mailto_user_agent_headers(mailto: str) -> dict[str, str]:
     return build_json_accept_headers(f"BioETL/1.0 (mailto:{mailto})")
 
 
-class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
+class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):  # pyright: ignore[reportImplicitAbstractClass]
     """Base class for HTTP adapters.
 
     Enforces usage of UnifiedHTTPClient and standardizes lifecycle management.
@@ -126,7 +124,7 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
     """
 
     http_client: _HttpClientWithCircuitBreaker
-    provider_name: str
+    provider_name: str  # pyright: ignore[reportIncompatibleMethodOverride]
     logger: LoggerPort
     metrics: MetricsPort | None
     _metrics: MetricsPort | None

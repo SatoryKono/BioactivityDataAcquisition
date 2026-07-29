@@ -1,4 +1,3 @@
-# pyright: reportArgumentType=false
 # Boundary object/payload typing residual at this module.
 """Execution helpers for observability workflow aggregation."""
 
@@ -82,7 +81,7 @@ async def inspect_run_dossier(
         run_id=run_id,
         pipeline_name=pipeline_name,
     )
-    lineage = resolve_lineage_for_run(lineage_service, run_id)
+    lineage = resolve_lineage_for_run(lineage_service, run_id)  # pyright: ignore[reportArgumentType]
     quarantine_summary = await resolve_quarantine_summary_for_run(
         quarantine_service=quarantine_service,
         run_id=run_id,

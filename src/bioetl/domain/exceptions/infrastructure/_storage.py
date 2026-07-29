@@ -1,5 +1,3 @@
-# pyright: reportAttributeAccessIssue=false
-# pyright: reportReturnType=false
 # Host attrs/methods provided by concrete composition.
 """Storage and schema-evolution exceptions."""
 
@@ -28,7 +26,7 @@ def bucket_not_found_error(bucket: str) -> StorageError:
     """
     error = StorageError(f"Bucket '{bucket}' not found")
     error = cast(StorageError, error.with_context(bucket=bucket))
-    error.error_type = ErrorType.DB_UNAVAILABLE  # type: ignore[misc]  # instance override of ClassVar
+    error.error_type = ErrorType.DB_UNAVAILABLE  # type: ignore[misc]  # instance override of ClassVar  # pyright: ignore[reportAttributeAccessIssue]
     return error
 
 
@@ -54,7 +52,7 @@ def upload_error(key: str, reason: str) -> StorageError:
     """
     error = StorageError(f"Failed to upload '{key}': {reason}")
     error = cast(StorageError, error.with_context(key=key, reason=reason))
-    error.error_type = ErrorType.NETWORK_ERROR  # type: ignore[misc]  # instance override of ClassVar
+    error.error_type = ErrorType.NETWORK_ERROR  # type: ignore[misc]  # instance override of ClassVar  # pyright: ignore[reportAttributeAccessIssue]
     return error
 
 
@@ -136,7 +134,7 @@ class StorageQuotaExceededError(CriticalError):
             if isinstance(used_bytes, int):
                 version = used_bytes
                 used_bytes = None
-        return quota_bytes, used_bytes, reason, version  # type: ignore[return-value]
+        return quota_bytes, used_bytes, reason, version  # type: ignore[return-value]  # pyright: ignore[reportReturnType]
 
     @staticmethod
     def _resolve_path(path: str | None, table_path: str | None) -> str:
@@ -227,7 +225,7 @@ def bronze_validation_error(
             original_error=original_error,
         ),
     )
-    error.error_type = ErrorType.INVALID_DATA  # type: ignore[misc]  # instance override of ClassVar
+    error.error_type = ErrorType.INVALID_DATA  # type: ignore[misc]  # instance override of ClassVar  # pyright: ignore[reportAttributeAccessIssue]
     return error
 
 
@@ -263,7 +261,7 @@ def cached_bronze_empty_error(
             date_filter=date_filter,
         ),
     )
-    error.error_type = ErrorType.INVALID_DATA  # type: ignore[misc]  # instance override of ClassVar
+    error.error_type = ErrorType.INVALID_DATA  # type: ignore[misc]  # instance override of ClassVar  # pyright: ignore[reportAttributeAccessIssue]
     return error
 
 

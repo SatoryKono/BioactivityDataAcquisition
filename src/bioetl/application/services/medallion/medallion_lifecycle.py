@@ -1,4 +1,3 @@
-# pyright: reportIncompatibleVariableOverride=false
 # Host attrs/methods provided by concrete composition.
 """Medallion lifecycle service (Application layer - orchestration).
 
@@ -336,7 +335,7 @@ class MedallionLifecycleService(
 ):
     """Unified facade for managing medallion layer lifecycle operations."""
 
-    storage: MedallionStorageProtocol
+    storage: MedallionStorageProtocol  # pyright: ignore[reportIncompatibleVariableOverride]
     logger: LoggerPort
 
 

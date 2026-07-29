@@ -1,4 +1,3 @@
-# pyright: reportIncompatibleVariableOverride=false
 # MRO/override residual on mixin or client hierarchies.
 """Unified HTTP client facade with retry/limiter/circuit-breaker orchestration."""
 
@@ -46,7 +45,7 @@ class UnifiedHTTPClient(
     retry_config: RetryConfig = field(default_factory=RetryConfig)
     timeout: float = 30.0
     read_timeout_multiplier: float = 2.0
-    run_id: RunID | None = None
+    run_id: RunID | None = None  # pyright: ignore[reportIncompatibleVariableOverride]
     user_agent: str = "BioETL/5.0.0"
     contact_email: str | None = None
     provider: str = "unknown"

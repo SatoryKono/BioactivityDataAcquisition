@@ -15,7 +15,7 @@ from bioetl.application.services.workflow_runner_models import (
 from bioetl.application.services.workflow_runner_reports import (
     attach_workflow_run_report,
 )
-from bioetl.application.services.workflow_runner_step_execution import (
+from bioetl.application.services.execution.workflow_runner_step_execution import (
     TransformStepRuntimeOptions,
     apply_workflow_step_transition,
     execute_pipeline_step,

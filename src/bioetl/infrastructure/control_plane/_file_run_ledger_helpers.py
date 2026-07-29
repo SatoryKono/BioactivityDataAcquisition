@@ -1,4 +1,3 @@
-# pyright: reportArgumentType=false
 # Boundary object/payload typing residual at this module.
 """Private helpers for file-backed run-ledger persistence."""
 
@@ -141,7 +140,7 @@ def truncate_ledger_to_offset(
     path: Path,
     *,
     offset: int,
-    os_module: _LedgerOSModule = os,
+    os_module: _LedgerOSModule = os,  # pyright: ignore[reportArgumentType]
     flush_file_descriptor: Callable[[int], None],
 ) -> None:
     """Best-effort rollback to one known-good byte offset."""
@@ -160,7 +159,7 @@ def append_jsonl_payload(
     payload: bytes,
     *,
     open_flags: int,
-    os_module: _LedgerOSModule = os,
+    os_module: _LedgerOSModule = os,  # pyright: ignore[reportArgumentType]
     flush_file_descriptor: Callable[[int], None],
 ) -> int:
     """Append one full JSONL payload with rollback on partial writes."""

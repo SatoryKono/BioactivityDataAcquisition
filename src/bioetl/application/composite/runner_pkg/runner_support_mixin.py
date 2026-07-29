@@ -1,5 +1,4 @@
 # Host attrs/methods provided by concrete composition (PD2 W1).
-# pyright: reportArgumentType=false
 # Boundary object/payload typing residual at this module.
 """Support helpers for CompositePipelineRunner."""
 
@@ -88,7 +87,7 @@ class CompositeRunnerSupportMixin:
 
     def _build_correlation_log_context(self, **extra: object) -> dict[str, object]:
         """Build a stable correlation envelope for composite critical logs."""
-        return dict(build_correlation_log_context(self, **extra))
+        return dict(build_correlation_log_context(self, **extra))  # pyright: ignore[reportArgumentType]
 
     def _build_composite_result(
         self: _CompositeRunnerSupportHostProtocol,

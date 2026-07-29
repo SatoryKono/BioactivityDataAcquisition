@@ -14,7 +14,7 @@ from xml.etree import ElementTree as ET
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from _bootstrap import PROJECT_ROOT, ensure_repo_imports
+    from scripts.docs.matrix._bootstrap import PROJECT_ROOT, ensure_repo_imports
 else:
     from scripts.docs.matrix._bootstrap import PROJECT_ROOT, ensure_repo_imports
 
@@ -384,7 +384,7 @@ def _process_workbook(
 
 
 def _extract_headers(
-    rows: list, shared_strings: dict
+    rows: list, shared_strings: dict[str, object]
 ) -> tuple[dict[int, str], dict[str, int]]:
     """Extract headers from the first row."""
     header_by_index: dict[int, str] = {}
@@ -397,7 +397,7 @@ def _extract_headers(
 
 
 def _build_row_map(
-    row: ET.Element, header_by_index: dict[int, str], shared_strings: dict
+    row: ET.Element, header_by_index: dict[int, str], shared_strings: dict[str, object]
 ) -> dict[str, str]:
     """Build a map of header to cell value for a row."""
     return {
@@ -411,7 +411,7 @@ def _apply_updates(
     row: ET.Element,
     updated: dict[str, str],
     index_by_header: dict[str, int],
-    shared_strings: dict,
+    shared_strings: dict[str, object],
     change_counter: Counter[str],
 ) -> None:
     """Apply updates to the row cells."""
@@ -447,7 +447,7 @@ def _handle_check_mode(
         "input": str(input_path),
         "contract_export": str(contract_export_path),
         "contract_rows": len(contract_rows),
-        "updated_headers": dict(change_counter),
+        "updated_headers": dict[str, object](change_counter),
     }
     print(payload)
     return 1 if change_counter else 0
@@ -473,7 +473,7 @@ def _print_summary(
             "output": str(output_path),
             "contract_export": str(contract_export_path),
             "contract_rows": len(contract_rows),
-            "updated_headers": dict(change_counter),
+            "updated_headers": dict[str, object](change_counter),
         }
     )
 

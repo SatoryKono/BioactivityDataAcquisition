@@ -1,4 +1,3 @@
-# pyright: reportArgumentType=false
 # Boundary object/payload typing residual at this module.
 """Prometheus metrics server public facade."""
 
@@ -79,7 +78,7 @@ def push_metrics_to_gateway(
 ) -> bool:
     """Publish a bounded aggregate metrics snapshot to Prometheus Pushgateway."""
     return publish_metrics_to_gateway(
-        registry=REGISTRY,
+        registry=REGISTRY,  # pyright: ignore[reportArgumentType]
         push_gateway=push_to_gateway,
         publication_metric=METRICS_PUBLICATION_EVENTS_TOTAL,
         gateway=gateway,

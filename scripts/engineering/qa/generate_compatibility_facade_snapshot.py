@@ -9,7 +9,7 @@ from pathlib import Path
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "ci"))
-    from _compatibility_registry import (  # type: ignore[import-not-found]
+    from scripts.engineering.ci._compatibility_registry import (  # type: ignore[import-not-found]
         DEFAULT_REGISTRY_PATH,
         DEFAULT_SRC_ROOT,
         CompatibilityRegistry,

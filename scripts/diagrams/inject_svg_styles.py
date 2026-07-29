@@ -37,7 +37,7 @@ from pathlib import Path
 try:
     from .diagram_paths import render_dir
 except ImportError:  # pragma: no cover - direct script execution
-    from diagram_paths import render_dir
+    from scripts.diagrams.diagram_paths import render_dir
 
 # ── Defaults ────────────────────────────────────────────────────────────────
 

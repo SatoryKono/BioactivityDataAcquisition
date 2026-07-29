@@ -1,5 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Mixin for configuring fallback policy on provider adapters.
 
@@ -115,12 +113,12 @@ class FallbackPolicyMixin:
             fallback_handler_hook=self._get_fallback_handler(enabled),
         )
         fallback_fetch_service: FallbackFetchOrchestrator = (
-            self._fallback_fetch_service  # type: ignore[attr-defined]
+            self._fallback_fetch_service  # type: ignore[attr-defined]  # pyright: ignore[reportAttributeAccessIssue]
         )
-        self._fallback_decorator = ComposableFallbackDecorator(
+        self._fallback_decorator = ComposableFallbackDecorator(  # pyright: ignore[reportUninitializedInstanceVariable]
             service=fallback_fetch_service,
             strategy=strategy,
             config=config,
-            logger=self._logger,  # type: ignore[attr-defined]
+            logger=self._logger,  # type: ignore[attr-defined]  # pyright: ignore[reportAttributeAccessIssue]
         )
         self._on_fallback_decorator_updated()

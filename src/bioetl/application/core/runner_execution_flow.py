@@ -1,4 +1,3 @@
-# pyright: reportArgumentType=false
 # Boundary object/payload typing residual at this module.
 """Execution lifecycle helpers for :mod:`bioetl.application.core.runner`."""
 
@@ -219,7 +218,7 @@ async def run_postrun_phase(host: _PipelineRunnerExecutionHostProtocol) -> None:
     """Run the postrun workflow using the executor's resolved DQ context."""
     dq_context = host._executor.get_dq_context()
     result = await host._postrun_service.run(
-        executor=host._executor,
+        executor=host._executor,  # pyright: ignore[reportArgumentType]
         dq_context=dq_context,
     )
     emit_postrun_observability(host, result, runner_stage=_POSTRUN_STAGE_NAME)

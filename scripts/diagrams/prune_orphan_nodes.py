@@ -54,7 +54,7 @@ sys.stdout.reconfigure(encoding="utf-8")
 try:
     from .diagram_paths import DIAGRAM_ROOT, source_dir
 except ImportError:  # pragma: no cover - direct script execution
-    from diagram_paths import DIAGRAM_ROOT, source_dir
+    from scripts.diagrams.diagram_paths import DIAGRAM_ROOT, source_dir
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 DEFAULT_DIRS = [

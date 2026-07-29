@@ -1,4 +1,3 @@
-# pyright: reportMissingSuperCall=false
 # basedpyright residual burn-down (shrink-only product surface).
 """Publication year Value Object.
 
@@ -49,7 +48,7 @@ class PublicationYear(ValueObject[int]):
     _DEFAULT_MIN_YEAR = 1500
     _DEFAULT_MAX_YEAR = 2100
 
-    def __init__(
+    def __init__(  # pyright: ignore[reportMissingSuperCall]
         self,
         value: int | str,
         *,

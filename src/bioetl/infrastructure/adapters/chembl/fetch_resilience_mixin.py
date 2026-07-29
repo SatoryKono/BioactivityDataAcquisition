@@ -1,7 +1,5 @@
 # mypy: disable-error-code=attr-defined
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Resilience, retry, and fallback helpers for ChEMBL fetch flows."""
 
@@ -53,15 +51,15 @@ class ChemblFetchResilienceMixin:
     CHEMBL_ADAPTER_ERRORS = _CHEMBL_ADAPTER_ERRORS
 
     # Host-class attributes (provided by ChemblAdapter.__init__)
-    logger: LoggerPort
-    _logger: LoggerPort
-    provider_name: str
-    _mapper: ChemblEntityMapper
-    _adapter_metrics: AdapterMetricsRecorder
-    http_client: UnifiedHTTPClient
-    _request_collector: APIRequestCollector
-    _error_handler: ErrorHandlerPort
-    _compute_composite_key: Callable[[BronzeRecord, tuple[str, ...]], str]
+    logger: LoggerPort  # pyright: ignore[reportUninitializedInstanceVariable]
+    _logger: LoggerPort  # pyright: ignore[reportUninitializedInstanceVariable]
+    provider_name: str  # pyright: ignore[reportUninitializedInstanceVariable]
+    _mapper: ChemblEntityMapper  # pyright: ignore[reportUninitializedInstanceVariable]
+    _adapter_metrics: AdapterMetricsRecorder  # pyright: ignore[reportUninitializedInstanceVariable]
+    http_client: UnifiedHTTPClient  # pyright: ignore[reportUninitializedInstanceVariable]
+    _request_collector: APIRequestCollector  # pyright: ignore[reportUninitializedInstanceVariable]
+    _error_handler: ErrorHandlerPort  # pyright: ignore[reportUninitializedInstanceVariable]
+    _compute_composite_key: Callable[[BronzeRecord, tuple[str, ...]], str]  # pyright: ignore[reportUninitializedInstanceVariable]
 
     if TYPE_CHECKING:
 
@@ -86,7 +84,7 @@ class ChemblFetchResilienceMixin:
     ) -> BronzeRecord | None:
         """Fetch a single record using direct endpoint as fallback."""
         return await fetch_single_record_direct(
-            cast(_ChemblFallbackHost, self),
+            cast(_ChemblFallbackHost, self),  # pyright: ignore[reportInvalidCast]
             entity_type,
             record_id,
         )
@@ -101,7 +99,7 @@ class ChemblFetchResilienceMixin:
         """Return True when record is new and register its dedup key."""
         return bool(
             mark_record_as_seen(
-                cast(_ChemblFallbackHost, self),
+                cast(_ChemblFallbackHost, self),  # pyright: ignore[reportInvalidCast]
                 record,
                 seen_ids,
                 pk_field,

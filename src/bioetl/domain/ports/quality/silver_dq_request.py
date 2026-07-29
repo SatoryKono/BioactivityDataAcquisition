@@ -1,4 +1,3 @@
-# pyright: reportArgumentType=false
 # DQ request payload narrowing deferred; Port boundary objects (PD2-6).
 """Structured request contract for Silver DQ analysis."""
 
@@ -97,19 +96,19 @@ def coerce_silver_dq_analyze_request(
     )
     return SilverDQAnalyzeRequest(
         data=resolved_kwargs["data"],
-        run_id=resolved_kwargs["run_id"],  # type: ignore[arg-type]
-        pipeline=resolved_kwargs["pipeline"],  # type: ignore[arg-type]
-        target_table=resolved_kwargs["target_table"],  # type: ignore[arg-type]
-        source_batch_ids=resolved_kwargs["source_batch_ids"],  # type: ignore[arg-type]
-        config=resolved_kwargs["config"],  # type: ignore[arg-type]
-        timestamp=resolved_kwargs["timestamp"],  # type: ignore[arg-type]
-        primary_keys=resolved_kwargs["primary_keys"],  # type: ignore[arg-type]
-        soft_fail_threshold=resolved_kwargs["soft_fail_threshold"],  # type: ignore[arg-type]
-        hard_fail_threshold=resolved_kwargs["hard_fail_threshold"],  # type: ignore[arg-type]
-        input_record_count=resolved_kwargs["input_record_count"],  # type: ignore[arg-type]
-        quarantined_count=resolved_kwargs["quarantined_count"],  # type: ignore[arg-type]
-        previous_schema=resolved_kwargs["previous_schema"],  # type: ignore[arg-type]
-        key_nullability_rules=resolved_kwargs["key_nullability_rules"],  # type: ignore[arg-type]
+        run_id=resolved_kwargs["run_id"],  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        pipeline=resolved_kwargs["pipeline"],  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        target_table=resolved_kwargs["target_table"],  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        source_batch_ids=resolved_kwargs["source_batch_ids"],  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        config=resolved_kwargs["config"],  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        timestamp=resolved_kwargs["timestamp"],  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        primary_keys=resolved_kwargs["primary_keys"],  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        soft_fail_threshold=resolved_kwargs["soft_fail_threshold"],  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        hard_fail_threshold=resolved_kwargs["hard_fail_threshold"],  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        input_record_count=resolved_kwargs["input_record_count"],  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        quarantined_count=resolved_kwargs["quarantined_count"],  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        previous_schema=resolved_kwargs["previous_schema"],  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        key_nullability_rules=resolved_kwargs["key_nullability_rules"],  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
     )
 
 

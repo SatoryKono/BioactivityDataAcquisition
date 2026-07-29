@@ -1,5 +1,4 @@
 # mypy: disable-error-code=attr-defined
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Public HTTP verb methods for UnifiedHTTPClient."""
 
@@ -15,8 +14,8 @@ from bioetl.domain.types import JsonDict
 class HTTPClientRequestMethodsMixin:
     """Thin request verb wrappers around retry-orchestrated request flow."""
 
-    rate_limiter: Any  # Any: mixed-in concrete type provides async acquire()
-    circuit_breaker: Any  # Any: mixed-in concrete type provides async call()
+    rate_limiter: Any  # Any: mixed-in concrete type provides async acquire()  # pyright: ignore[reportUninitializedInstanceVariable]
+    circuit_breaker: Any  # Any: mixed-in concrete type provides async call()  # pyright: ignore[reportUninitializedInstanceVariable]
 
     async def _request_with_retry(
         self,

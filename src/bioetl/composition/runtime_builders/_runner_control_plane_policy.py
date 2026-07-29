@@ -1,4 +1,3 @@
-# pyright: reportArgumentType=false
 # Boundary object/payload typing residual at this module.
 """Control-plane policy resolution helpers for runtime runner assembly."""
 
@@ -156,7 +155,7 @@ def resolve_control_plane_flags(
         yaml_config=yaml_config,
         skip_gold=skip_gold,
         ledger_enabled=ledger_enabled,
-        required_profile=required_profile,
+        required_profile=required_profile,  # pyright: ignore[reportArgumentType]
         strict_exact_replay_supported=True,
     )
     return True, ledger_enabled

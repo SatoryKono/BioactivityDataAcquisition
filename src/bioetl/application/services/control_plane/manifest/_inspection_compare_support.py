@@ -1,5 +1,3 @@
-# pyright: reportUninitializedInstanceVariable=false
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
 """Diff/verify collaborators for run-manifest inspection service."""
 
@@ -40,7 +38,7 @@ class _InspectionCompareHost(Protocol):
 class RunManifestInspectionCompareMixin:
     """Compute stable diffs and cross-surface verification for two manifests."""
 
-    effective_config_artifact_port: EffectiveConfigArtifactStorePort | None
+    effective_config_artifact_port: EffectiveConfigArtifactStorePort | None  # pyright: ignore[reportUninitializedInstanceVariable]
 
     def diff(
         self: _InspectionCompareHost, left_identifier: str, right_identifier: str
@@ -105,7 +103,7 @@ class RunManifestInspectionCompareMixin:
         """Verify replay evidence across manifest and effective-config stores."""
         left_result = self.show(left_identifier)
         right_result = self.show(right_identifier)
-        diff_result = RunManifestInspectionCompareMixin.diff(
+        diff_result = RunManifestInspectionCompareMixin.diff(  # pyright: ignore[reportAttributeAccessIssue]
             self, left_identifier, right_identifier
         )
         left_manifest = left_result.manifest

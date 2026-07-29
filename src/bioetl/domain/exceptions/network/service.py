@@ -1,4 +1,3 @@
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods provided by concrete composition.
 """External service network exceptions.
 
@@ -272,7 +271,7 @@ def data_validation_error(
             value=value,
         ),
     )
-    error.error_type = ErrorType.INVALID_DATA  # type: ignore[misc]  # instance override of ClassVar
+    object.__setattr__(error, "error_type", ErrorType.INVALID_DATA)
     return error
 
 

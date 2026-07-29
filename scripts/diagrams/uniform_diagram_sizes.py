@@ -57,7 +57,7 @@ for candidate in (SCRIPT_DIR, REPO_ROOT):
 try:
     from .diagram_paths import source_dir
 except ImportError:  # pragma: no cover - direct script execution
-    from diagram_paths import source_dir
+    from scripts.diagrams.diagram_paths import source_dir
 
 # ── Defaults ────────────────────────────────────────────────────────────────
 

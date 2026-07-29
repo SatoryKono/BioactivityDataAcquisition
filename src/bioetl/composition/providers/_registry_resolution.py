@@ -1,4 +1,3 @@
-# pyright: reportInconsistentOverload=false
 # basedpyright residual burn-down (shrink-only product surface).
 """Canonical provider-registry resolution helpers for composition seams."""
 
@@ -51,7 +50,7 @@ def resolve_provider_registry[RegistryT: ProviderRegistrarProtocol](
     ...
 
 
-def resolve_provider_registry(
+def resolve_provider_registry(  # pyright: ignore[reportInconsistentOverload]
     provider_registry: ProviderRegistrarProtocol | None = None,
     *,
     ensure_ready: bool = False,

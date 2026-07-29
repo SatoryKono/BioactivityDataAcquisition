@@ -1,5 +1,3 @@
-# pyright: reportArgumentType=false
-# pyright: reportReturnType=false
 # Boundary object/payload typing residual at this module.
 """Built-in workflow transform for foreign-key reconciliation."""
 
@@ -251,7 +249,7 @@ async def _persist_reconcile_result_artifact(
         ),
         payload=payload,
     )
-    return artifact_refs_as_dicts(tuple(refs))
+    return artifact_refs_as_dicts(tuple(refs))  # pyright: ignore[reportArgumentType]
 
 
 def _require_delete_orphans_action(config: Mapping[str, object]) -> None:

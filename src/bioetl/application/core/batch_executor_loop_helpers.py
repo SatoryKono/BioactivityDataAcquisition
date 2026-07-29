@@ -1,4 +1,3 @@
-# pyright: reportArgumentType=false
 # Boundary object/payload typing residual at this module.
 """Internal helper functions for batch extraction loop orchestration."""
 
@@ -161,7 +160,7 @@ async def flush_batch_if_needed(
     await flush_batch_if_needed_from_flow(
         loop_state=loop_state,
         records_fetched=records_fetched,
-        flush_context=_BatchFlushContext(
+        flush_context=_BatchFlushContext(  # pyright: ignore[reportArgumentType]
             process_batch=process_batch,
             memory_manager=memory_manager,
             progress_service=progress_service,
@@ -217,5 +216,5 @@ async def process_extracted_record_iteration(
             memory_manager=iteration_context.memory_manager,
             records_fetched=next_records_fetched,
         ),
-        iteration_context=iteration_context,
+        iteration_context=iteration_context,  # pyright: ignore[reportArgumentType]
     )

@@ -1,4 +1,3 @@
-# pyright: reportArgumentType=false
 # OpenAlex payload fields are object-typed at boundary (PD2-6).
 """Runtime assembly helpers for the OpenAlex adapter."""
 
@@ -139,29 +138,29 @@ def _coerce_openalex_runtime_services_request(
         )
 
     return OpenAlexRuntimeServicesRequest(
-        fallback_fetch_service=kwargs.pop("fallback_fetch_service"),  # type: ignore[arg-type]
-        openalex_query_executor=kwargs.pop("openalex_query_executor", None),  # type: ignore[arg-type]
-        openalex_response_mapper=kwargs.pop("openalex_response_mapper", None),  # type: ignore[arg-type]
-        openalex_cursor_flow=kwargs.pop("openalex_cursor_flow", None),  # type: ignore[arg-type]
-        title_fallback_handler=kwargs.pop("title_fallback_handler", None),  # type: ignore[arg-type]
-        openalex_fallback_orchestrator=kwargs.pop(
+        fallback_fetch_service=kwargs.pop("fallback_fetch_service"),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        openalex_query_executor=kwargs.pop("openalex_query_executor", None),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        openalex_response_mapper=kwargs.pop("openalex_response_mapper", None),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        openalex_cursor_flow=kwargs.pop("openalex_cursor_flow", None),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        title_fallback_handler=kwargs.pop("title_fallback_handler", None),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        openalex_fallback_orchestrator=kwargs.pop(  # pyright: ignore[reportArgumentType]
             "openalex_fallback_orchestrator", None
         ),  # type: ignore[arg-type]
-        http_client=kwargs.pop("http_client"),  # type: ignore[arg-type]
-        adapter_metrics=kwargs.pop("adapter_metrics"),  # type: ignore[arg-type]
-        request_collector=kwargs.pop("request_collector"),  # type: ignore[arg-type]
-        headers_provider=kwargs.pop("headers_provider"),  # type: ignore[arg-type]
-        api_base=kwargs.pop("api_base"),  # type: ignore[arg-type]
-        mailto=kwargs.pop("mailto"),  # type: ignore[arg-type]
-        api_key=kwargs.pop("api_key", None),  # type: ignore[arg-type]
-        batch_size=kwargs.pop("batch_size"),  # type: ignore[arg-type]
-        title_search_cache_size=kwargs.pop("title_search_cache_size"),  # type: ignore[arg-type]
-        normalize_doi=kwargs.pop("normalize_doi"),  # type: ignore[arg-type]
-        escape_title_for_search=kwargs.pop("escape_title_for_search"),  # type: ignore[arg-type]
-        extract_record_id=kwargs.pop("extract_record_id"),  # type: ignore[arg-type]
-        search_by_title=kwargs.pop("search_by_title"),  # type: ignore[arg-type]
-        logger=kwargs.pop("logger"),  # type: ignore[arg-type]
-        runtime_errors=kwargs.pop("runtime_errors"),  # type: ignore[arg-type]
+        http_client=kwargs.pop("http_client"),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        adapter_metrics=kwargs.pop("adapter_metrics"),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        request_collector=kwargs.pop("request_collector"),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        headers_provider=kwargs.pop("headers_provider"),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        api_base=kwargs.pop("api_base"),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        mailto=kwargs.pop("mailto"),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        api_key=kwargs.pop("api_key", None),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        batch_size=kwargs.pop("batch_size"),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        title_search_cache_size=kwargs.pop("title_search_cache_size"),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        normalize_doi=kwargs.pop("normalize_doi"),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        escape_title_for_search=kwargs.pop("escape_title_for_search"),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        extract_record_id=kwargs.pop("extract_record_id"),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        search_by_title=kwargs.pop("search_by_title"),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        logger=kwargs.pop("logger"),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        runtime_errors=kwargs.pop("runtime_errors"),  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
     )
 
 

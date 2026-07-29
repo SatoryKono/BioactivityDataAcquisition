@@ -1,4 +1,3 @@
-# pyright: reportMissingSuperCall=false
 # basedpyright residual burn-down (shrink-only product surface).
 """Compound identifier Value Objects for BioETL domain.
 
@@ -227,7 +226,7 @@ class AssayId(ValueObject[str]):
     _value: str
     _chembl_id: ChemblId
 
-    def __init__(self, value: str) -> None:
+    def __init__(self, value: str) -> None:  # pyright: ignore[reportMissingSuperCall]
         """Create AssayId with validated value.
 
         Args:

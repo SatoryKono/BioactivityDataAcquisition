@@ -1,4 +1,3 @@
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Record-processor assembly helpers for pipeline_builder facade."""
 
@@ -142,7 +141,7 @@ def create_record_processor_from_pipeline(
     return create_record_processor_fn(
         request=_RecordProcessorBuildRequest(
             create_batch_processing_components_fn=build_batch_processing_components,
-            services=cast(PipelineService, pipeline.services),
+            services=cast(PipelineService, pipeline.services),  # pyright: ignore[reportInvalidCast]
             context=pipeline.context,
             pipeline_name=pipeline.config.pipeline_name,
             provider=pipeline.config.provider,

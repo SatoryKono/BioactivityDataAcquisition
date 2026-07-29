@@ -1,6 +1,4 @@
-# pyright: reportUninitializedInstanceVariable=false
 # Host attrs/methods are initialized by concrete classes (PD2 W1 host surface).
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Delta IO sub-mixins used by `GoldWriterIOMixin` composition."""
 
@@ -40,7 +38,7 @@ if TYPE_CHECKING:
 class _GoldWriterExecutorArrowMixin:
     """Executor and Arrow conversion primitives reused by IO helpers."""
 
-    logger: LoggerPort
+    logger: LoggerPort  # pyright: ignore[reportUninitializedInstanceVariable]
 
     async def _run_in_executor(
         self,
@@ -73,7 +71,7 @@ class _GoldWriterExecutorArrowMixin:
 class _GoldWriterSimpleDeltaMixin(_GoldWriterExecutorArrowMixin):
     """Simple append/overwrite Delta write logic with retry policy."""
 
-    csv_exporter: CsvExporterProtocol | None
+    csv_exporter: CsvExporterProtocol | None  # pyright: ignore[reportUninitializedInstanceVariable]
 
     async def _write_simple(
         self,
@@ -99,7 +97,7 @@ class _GoldWriterSimpleDeltaMixin(_GoldWriterExecutorArrowMixin):
                 column_order=column_order,
             ),
         )
-        module = cast(_GoldWriterDeltaModuleProtocol, _load_gold_writer_module())
+        module = cast(_GoldWriterDeltaModuleProtocol, _load_gold_writer_module())  # pyright: ignore[reportInvalidCast]
         await _execute_prepared_simple_gold_write(self, module, prepared)
 
     async def finalize_csv_export(

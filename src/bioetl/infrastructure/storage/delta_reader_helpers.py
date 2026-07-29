@@ -1,4 +1,3 @@
-# pyright: reportArgumentType=false
 # Boundary object/payload typing residual at this module.
 """Passive helpers for ``DeltaReader``."""
 
@@ -24,7 +23,7 @@ def count_delta_rows(
     native_count = getattr(dt, "count", None)
     if callable(native_count):
         try:
-            return int(native_count())
+            return int(native_count())  # pyright: ignore[reportArgumentType]
         except (KeyboardInterrupt, SystemExit):
             raise
         except BaseException:
@@ -40,7 +39,7 @@ def try_native_delta_row_count(dt: DeltaTable) -> int | None:
     if not callable(native_count):
         return None
     try:
-        return int(native_count())
+        return int(native_count())  # pyright: ignore[reportArgumentType]
     except (KeyboardInterrupt, SystemExit):
         raise
     except (DeltaError, OSError, RuntimeError, TypeError, ValueError):

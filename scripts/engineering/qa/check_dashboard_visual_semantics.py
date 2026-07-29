@@ -149,12 +149,12 @@ REQUIRED_TRUST_MARKER_PANELS = {
 }
 
 
-def _grid_pos(panel: dict) -> dict:
+def _grid_pos(panel: dict[str, object]) -> dict[str, object]:
     grid_pos = panel.get("gridPos", {})
-    return grid_pos if isinstance(grid_pos, dict) else {}
+    return grid_pos if isinstance(grid_pos, dict[str, object]) else {}
 
 
-def _grid_rectangles_overlap(left: dict, right: dict) -> bool:
+def _grid_rectangles_overlap(left: dict[str, object], right: dict[str, object]) -> bool:
     left_grid = _grid_pos(left)
     right_grid = _grid_pos(right)
     left_x = int(left_grid.get("x", 0))
@@ -171,10 +171,10 @@ def _grid_rectangles_overlap(left: dict, right: dict) -> bool:
 
 
 def _collapsed_row_grid_overlap_errors(
-    dashboard_path: Path, row_panel: dict
+    dashboard_path: Path, row_panel: dict[str, object]
 ) -> list[str]:
     nested_panels = [
-        panel for panel in row_panel.get("panels", []) if isinstance(panel, dict)
+        panel for panel in row_panel.get("panels", []) if isinstance(panel, dict[str, object])
     ]
     errors: list[str] = []
     for index, left in enumerate(nested_panels):
@@ -189,8 +189,8 @@ def _collapsed_row_grid_overlap_errors(
     return errors
 
 
-def iter_panels(panels: list[dict]) -> list[dict]:
-    collected: list[dict] = []
+def iter_panels(panels: list[dict[str, object]]) -> list[dict[str, object]]:
+    collected: list[dict[str, object]] = []
     for panel in panels:
         if panel.get("type") == "row" and isinstance(panel.get("panels"), list):
             collected.extend(iter_panels(panel["panels"]))
@@ -200,7 +200,7 @@ def iter_panels(panels: list[dict]) -> list[dict]:
 
 
 def _stat_color_mode_error(
-    dashboard_path: Path, title: str, defaults: dict
+    dashboard_path: Path, title: str, defaults: dict[str, object]
 ) -> str | None:
     if defaults.get("color", {}).get("mode") == "thresholds":
         return None
@@ -208,7 +208,7 @@ def _stat_color_mode_error(
 
 
 def _stat_threshold_steps_error(
-    dashboard_path: Path, title: str, defaults: dict
+    dashboard_path: Path, title: str, defaults: dict[str, object]
 ) -> str | None:
     expected_steps = _expected_threshold_steps(dashboard_path, str(title))
     steps = defaults.get("thresholds", {}).get("steps")
@@ -218,7 +218,7 @@ def _stat_threshold_steps_error(
 
 
 def _stat_unknown_mapping_error(
-    dashboard_path: Path, title: str, panel: dict, mappings: list
+    dashboard_path: Path, title: str, panel: dict[str, object], mappings: list
 ) -> str | None:
     if not _requires_unknown_mapping(panel):
         return None
@@ -228,7 +228,7 @@ def _stat_unknown_mapping_error(
 
 
 def _stat_background_color_mode_error(
-    dashboard_path: Path, title: str, panel: dict
+    dashboard_path: Path, title: str, panel: dict[str, object]
 ) -> str | None:
     if (dashboard_path.name, str(title)) not in BACKGROUND_SEVERITY_STAT_PANELS:
         return None
@@ -259,7 +259,7 @@ def _stat_value_mapping_error(
     )
 
 
-def _stat_panel_visual_semantics_errors(dashboard_path: Path, panel: dict) -> list[str]:
+def _stat_panel_visual_semantics_errors(dashboard_path: Path, panel: dict[str, object]) -> list[str]:
     title = panel.get("title", UNTITLED_PANEL_TITLE)
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
     mappings = defaults.get("mappings", [])
@@ -274,7 +274,7 @@ def _stat_panel_visual_semantics_errors(dashboard_path: Path, panel: dict) -> li
 
 
 def _gauge_panel_visual_semantics_errors(
-    dashboard_path: Path, panel: dict
+    dashboard_path: Path, panel: dict[str, object]
 ) -> list[str]:
     title = panel.get("title", UNTITLED_PANEL_TITLE)
     options = panel.get("options", {})
@@ -293,7 +293,7 @@ def _gauge_panel_visual_semantics_errors(
 
 
 def _table_panel_visual_semantics_errors(
-    dashboard_path: Path, panel: dict
+    dashboard_path: Path, panel: dict[str, object]
 ) -> list[str]:
     title = panel.get("title", UNTITLED_PANEL_TITLE)
     field_config = panel.get("fieldConfig", {})
@@ -302,7 +302,7 @@ def _table_panel_visual_semantics_errors(
     default_cell_options = (
         field_config.get("defaults", {}).get("custom", {}).get("cellOptions")
     )
-    if isinstance(default_cell_options, dict):
+    if isinstance(default_cell_options, dict[str, object]):
         cell_type = default_cell_options.get("type")
         if cell_type not in ALLOWED_TABLE_CELL_OPTION_TYPES:
             errors.append(
@@ -315,7 +315,7 @@ def _table_panel_visual_semantics_errors(
             if prop.get("id") != "custom.cellOptions":
                 continue
             value = prop.get("value")
-            cell_type = value.get("type") if isinstance(value, dict) else None
+            cell_type = value.get("type") if isinstance(value, dict[str, object]) else None
             if cell_type not in ALLOWED_TABLE_CELL_OPTION_TYPES:
                 errors.append(
                     f"{dashboard_path}: table panel '{title}' override {matcher!r} "
@@ -326,7 +326,7 @@ def _table_panel_visual_semantics_errors(
 
 
 def _timeseries_panel_visual_semantics_errors(
-    dashboard_path: Path, panel: dict
+    dashboard_path: Path, panel: dict[str, object]
 ) -> list[str]:
     title = str(panel.get("title", UNTITLED_PANEL_TITLE))
     tooltip = panel.get("options", {}).get("tooltip", {})
@@ -348,7 +348,7 @@ def _timeseries_panel_visual_semantics_errors(
     return errors
 
 
-def _expected_threshold_steps(dashboard_path: Path, title: str) -> list[dict] | None:
+def _expected_threshold_steps(dashboard_path: Path, title: str) -> list[dict[str, object]] | None:
     custom_steps = EXPECTED_STEPS_BY_PANEL.get((dashboard_path.name, title))
     if custom_steps is not None:
         return custom_steps
@@ -357,7 +357,7 @@ def _expected_threshold_steps(dashboard_path: Path, title: str) -> list[dict] | 
     return None
 
 
-def _requires_unknown_mapping(panel: dict) -> bool:
+def _requires_unknown_mapping(panel: dict[str, object]) -> bool:
     title = str(panel.get("title", ""))
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
     return defaults.get("noValue") == "UNKNOWN" or any(
@@ -365,7 +365,7 @@ def _requires_unknown_mapping(panel: dict) -> bool:
     )
 
 
-def _l0_terminology_errors(dashboard_path: Path, panel: dict) -> list[str]:
+def _l0_terminology_errors(dashboard_path: Path, panel: dict[str, object]) -> list[str]:
     if dashboard_path.name not in L0_DASHBOARD_FILES:
         return []
 
@@ -379,13 +379,13 @@ def _l0_terminology_errors(dashboard_path: Path, panel: dict) -> list[str]:
     ]
 
 
-def _is_status_like_panel(panel: dict) -> bool:
+def _is_status_like_panel(panel: dict[str, object]) -> bool:
     title = str(panel.get("title", "")).lower()
     description = str(panel.get("description", "")).lower()
     return any(token in title or token in description for token in STATUS_PANEL_TOKENS)
 
 
-def _stat_threshold_color_errors(dashboard_path: Path, panel: dict) -> list[str]:
+def _stat_threshold_color_errors(dashboard_path: Path, panel: dict[str, object]) -> list[str]:
     if panel.get("type") != "stat":
         return []
 
@@ -398,7 +398,7 @@ def _stat_threshold_color_errors(dashboard_path: Path, panel: dict) -> list[str]
     return [f"{dashboard_path}: stat panel '{title}' must use color.mode=thresholds"]
 
 
-def _status_panel_errors(dashboard_path: Path, panel: dict) -> list[str]:
+def _status_panel_errors(dashboard_path: Path, panel: dict[str, object]) -> list[str]:
     if panel.get("type") not in {"stat", "gauge"} or not _is_status_like_panel(panel):
         return []
     return _stat_panel_visual_semantics_errors(
@@ -406,7 +406,7 @@ def _status_panel_errors(dashboard_path: Path, panel: dict) -> list[str]:
     ) + _l0_terminology_errors(dashboard_path, panel)
 
 
-def _panel_type_errors(dashboard_path: Path, panel: dict) -> list[str]:
+def _panel_type_errors(dashboard_path: Path, panel: dict[str, object]) -> list[str]:
     panel_type = panel.get("type")
     if panel_type == "gauge":
         return _gauge_panel_visual_semantics_errors(dashboard_path, panel)
@@ -417,16 +417,16 @@ def _panel_type_errors(dashboard_path: Path, panel: dict) -> list[str]:
     return []
 
 
-def _panel_expressions(panel: dict) -> list[str]:
+def _panel_expressions(panel: dict[str, object]) -> list[str]:
     return [
         str(target.get("expr", ""))
         for target in panel.get("targets", [])
-        if isinstance(target, dict) and isinstance(target.get("expr"), str)
+        if isinstance(target, dict[str, object]) and isinstance(target.get("expr"), str)
     ]
 
 
 def _fail_closed_panel_errors(
-    dashboard_path: Path, panel: dict, expected_no_value: str | None
+    dashboard_path: Path, panel: dict[str, object], expected_no_value: str | None
 ) -> list[str]:
     if expected_no_value is None:
         return []
@@ -446,7 +446,7 @@ def _fail_closed_panel_errors(
     return errors
 
 
-def _panel_errors(dashboard_path: Path, panel: dict) -> list[str]:
+def _panel_errors(dashboard_path: Path, panel: dict[str, object]) -> list[str]:
     title = str(panel.get("title", ""))
     panel_key = (dashboard_path.name, title)
     expected_no_value = FAIL_CLOSED_NO_ZERO_FALLBACK_PANELS.get(panel_key)
@@ -467,11 +467,11 @@ def _collapsed_row_errors(dashboard_path: Path, panels: list) -> list[str]:
     ]
 
 
-def _trust_marker_is_above_fold(panel: dict) -> bool:
+def _trust_marker_is_above_fold(panel: dict[str, object]) -> bool:
     grid_pos = panel.get("gridPos", {})
     # Trust markers must stay on the first screen, including the dedicated
     # first-screen evidence row used by the Runtime dashboard at y=23.
-    return isinstance(grid_pos, dict) and int(grid_pos.get("y", 999)) <= 23
+    return isinstance(grid_pos, dict[str, object]) and int(grid_pos.get("y", 999)) <= 23
 
 
 def _trust_marker_panel_errors(dashboard_path: Path, panels: list) -> list[str]:

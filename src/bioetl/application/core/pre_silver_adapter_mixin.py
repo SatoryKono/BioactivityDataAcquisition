@@ -1,5 +1,3 @@
-# pyright: reportIncompatibleMethodOverride=false
-# pyright: reportInvalidCast=false
 # Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Shared adapters for transformers that participate in staged PreSilver finalization."""
 
@@ -108,7 +106,7 @@ class _PreSilverRecordAdapterMixin:
             JsonDict | None,
             self._apply_structural_policy(
                 context,
-                cast("SilverRecord", record),
+                cast("SilverRecord", record),  # pyright: ignore[reportInvalidCast]
                 index,
             ),
         )
@@ -121,12 +119,12 @@ class _PreSilverRecordAdapterMixin:
     ) -> None:
         self._apply_silver_filter(
             context,
-            cast("SilverRecord", record),
+            cast("SilverRecord", record),  # pyright: ignore[reportInvalidCast]
             index,
         )
 
 
-class PreSilverAdapterMixin(
+class PreSilverAdapterMixin(  # pyright: ignore[reportIncompatibleMethodOverride]
     _PreSilverFinalizationFlowMixin,
     _PreSilverStagingFlowMixin,
     _PreSilverRecordAdapterMixin,

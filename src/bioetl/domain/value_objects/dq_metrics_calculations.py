@@ -1,4 +1,3 @@
-# pyright: reportArgumentType=false
 # Boundary object/payload typing residual at this module.
 """Computation helpers for batch DQ metrics."""
 
@@ -69,9 +68,9 @@ def compute_single_column_stats(
     from bioetl.domain.value_objects.dq_metrics import ColumnStats
 
     values = [record.get(col_name) for record in records]
-    non_null_values = filter_non_null(values)
+    non_null_values = filter_non_null(values)  # pyright: ignore[reportArgumentType]
 
-    null_rate = calculate_null_rate(values, len(records))
+    null_rate = calculate_null_rate(values, len(records))  # pyright: ignore[reportArgumentType]
     unique_count = calculate_unique_count(non_null_values)
     min_val, max_val, mean_val = compute_numeric_stats(non_null_values)
 

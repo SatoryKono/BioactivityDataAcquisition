@@ -353,7 +353,7 @@ def _git_identity() -> dict[str, str]:
 
 def _semantic_artifact_fields(payload: dict[str, object]) -> tuple[str, list[str]]:
     gate = payload.get("semantic_gate")
-    status = str(gate.get("status") or "fail") if isinstance(gate, dict) else "fail"
+    status = str(gate.get("status") or "fail") if isinstance(gate, dict[str, object]) else "fail"
     results = payload.get("results")
     if not isinstance(results, list):
         return status, []
@@ -361,7 +361,7 @@ def _semantic_artifact_fields(payload: dict[str, object]) -> tuple[str, list[str
         {
             f"{item.get('dashboard_uid')}#{item.get('panel_id')}"
             for item in results
-            if isinstance(item, dict)
+            if isinstance(item, dict[str, object])
             and item.get("dashboard_uid")
             and item.get("panel_id") is not None
         }
@@ -375,7 +375,7 @@ def _panel_scope_from_dashboard_item(item: dict[str, object]) -> set[str] | None
         return None
     terminal_validation = item.get("terminalStateValidation")
     if (
-        not isinstance(terminal_validation, dict)
+        not isinstance(terminal_validation, dict[str, object])
         or terminal_validation.get("status") != "ok"
     ):
         return None
@@ -384,7 +384,7 @@ def _panel_scope_from_dashboard_item(item: dict[str, object]) -> set[str] | None
         return None
     scope: set[str] = set()
     for panel_state in panel_states:
-        panel_id = panel_state.get("id") if isinstance(panel_state, dict) else None
+        panel_id = panel_state.get("id") if isinstance(panel_state, dict[str, object]) else None
         if panel_id is None:
             return None
         scope.add(f"{item['uid']}#{panel_id}")
@@ -394,12 +394,12 @@ def _panel_scope_from_dashboard_item(item: dict[str, object]) -> set[str] | None
 def _render_artifact_fields(payload: dict[str, object]) -> tuple[str, list[str]]:
     terminal = payload.get("terminal_state_validation")
     dashboards = payload.get("dashboards")
-    terminal_ok = isinstance(terminal, dict) and terminal.get("status") == "ok"
+    terminal_ok = isinstance(terminal, dict[str, object]) and terminal.get("status") == "ok"
     rendered = (
         isinstance(dashboards, list)
         and bool(dashboards)
         and all(
-            isinstance(item, dict) and item.get("renderStatus") == "rendered"
+            isinstance(item, dict[str, object]) and item.get("renderStatus") == "rendered"
             for item in dashboards
         )
     )
@@ -407,7 +407,7 @@ def _render_artifact_fields(payload: dict[str, object]) -> tuple[str, list[str]]
     panel_scope_complete = isinstance(dashboards, list) and bool(dashboards)
     if isinstance(dashboards, list):
         for item in dashboards:
-            if not isinstance(item, dict):
+            if not isinstance(item, dict[str, object]):
                 panel_scope_complete = False
                 continue
             item_scope = _panel_scope_from_dashboard_item(item)
@@ -448,7 +448,7 @@ def _artifact_descriptor(
         payload = json.loads(raw)
     except (OSError, UnicodeDecodeError, json.JSONDecodeError):
         return descriptor
-    if not isinstance(payload, dict):
+    if not isinstance(payload, dict[str, object]):
         return descriptor
     descriptor["sha256"] = hashlib.sha256(raw).hexdigest()
     descriptor["generated_at"] = payload.get("generated_at")
@@ -828,7 +828,7 @@ def _filled_dashboard_uids_from_results(
 def _load_cached_filled_dashboard_uids(config: AuditCycleConfig) -> tuple[str, ...]:
     payload = json.loads(config.semantic_output_path.read_text(encoding="utf-8"))
     report_config = payload.get("config")
-    if not isinstance(report_config, dict):
+    if not isinstance(report_config, dict[str, object]):
         raise ValueError("live-panel-audit cache missing config object")
     if report_config.get("pipeline") != config.pipeline:
         raise ValueError("live-panel-audit cache pipeline does not match current run")
@@ -839,7 +839,7 @@ def _load_cached_filled_dashboard_uids(config: AuditCycleConfig) -> tuple[str, .
         raise ValueError("live-panel-audit cache missing results list")
     results: list[live_audit.AuditResult] = []
     for item in results_payload:
-        if not isinstance(item, dict):
+        if not isinstance(item, dict[str, object]):
             raise ValueError("live-panel-audit cache has non-object result entry")
         results.append(live_audit.AuditResult(**item))
     return _filled_dashboard_uids_from_results(results)

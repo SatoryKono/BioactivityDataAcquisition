@@ -1,4 +1,3 @@
-# pyright: reportArgumentType=false
 # Boundary object/payload typing residual at this module.
 """NCBI Taxonomy ID Value Object.
 
@@ -47,7 +46,7 @@ class TaxonomyId(ValueObject[int]):
         Raises:
             ValueError: If validation fails.
         """
-        super().__init__(value)  # type: ignore[arg-type]
+        super().__init__(value)  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
 
     def _coerce_to_int(self, value: str | int) -> int:
         """Coerce value to integer, raising ValueError on failure."""

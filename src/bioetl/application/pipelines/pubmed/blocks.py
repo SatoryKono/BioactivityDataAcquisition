@@ -1,4 +1,3 @@
-# pyright: reportPossiblyUnboundVariable=false
 # basedpyright residual burn-down (shrink-only product surface).
 """Declarative extraction blocks for PubMed publication pipeline."""
 
@@ -39,4 +38,4 @@ __all__ = list(_blocks.__all__)
 for _name in __all__:
     globals()[_name] = getattr(_blocks, _name)
 
-del _name
+del _name  # pyright: ignore[reportPossiblyUnboundVariable]

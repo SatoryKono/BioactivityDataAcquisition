@@ -1,4 +1,3 @@
-# pyright: reportAttributeAccessIssue=false
 # Host attrs/methods provided by concrete composition.
 """PubChem entity mapping and conversion utilities.
 
@@ -11,7 +10,7 @@ from __future__ import annotations
 __all__ = ["PubChemEntityMapper"]
 
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.domain.types import JsonDict
 
@@ -160,7 +159,7 @@ class PubChemEntityMapper:
             "sid": substance.sid,
             "source_name": substance.source_name,
             "source_id": substance.source_id,
-            "cids": substance.standardized_cids,
+            "cids": cast(Any, substance).standardized_cids,  # Any: optional substance field
             "synonyms": substance.synonyms,
         }
 

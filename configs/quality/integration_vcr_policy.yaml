@@ -156,7 +156,13 @@ tracked_suite_inventory:
     - tests/integration/test_dashboard_units_decimals.py
     - tests/integration/test_dashboard_variable_dependencies.py
     - tests/integration/test_dashboard_visual_semantics.py
+<<<<<<< HEAD
     - tests/integration/test_dux4_scope_title_helpers.py
+||||||| 7a2d6b57b5
+=======
+    - tests/integration/test_dux4_scope_title_helpers.py
+    - tests/integration/test_dux5_residual_contracts.py
+>>>>>>> fix/pd-diagnostics-cycle-10x
     - tests/integration/test_json_hash_stability.py
     - tests/integration/test_organism_classification_csv_coverage.py
     - tests/integration/test_runtime_metric_emission_consistency.py
