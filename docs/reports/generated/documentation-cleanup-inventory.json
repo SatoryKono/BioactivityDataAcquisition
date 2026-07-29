@@ -56794,6 +56794,34 @@
       "diagram_kind": null,
       "duplicate_group": null,
       "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "retention-sensitive",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "closeout_evidence",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/quality/architecture-coderabbit-2026-07-29-arch-cr2-closeout.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
       "extension": ".json",
       "freshness": "review-required",
       "generated_route": null,
@@ -60674,7 +60702,7 @@
       "active_backlog": 1,
       "active_draft": 121,
       "active_quality_baseline": 22,
-      "closeout_evidence": 37,
+      "closeout_evidence": 38,
       "docs_reports_curated_entrypoint": 2,
       "docs_reports_curated_or_historical_report": 39,
       "docs_reports_generated_or_route_owned": 23,
@@ -60694,7 +60722,7 @@
       "archive-after-github-state-check": 158,
       "archive-after-migration": 103,
       "generate-automatically": 763,
-      "keep": 1113,
+      "keep": 1114,
       "reconcile-with-github-state": 4
     },
     "by_section": {
@@ -60727,7 +60755,7 @@
       "plans": 2,
       "plugins": 4,
       "refactoring_plans": 1,
-      "reports": 216,
+      "reports": 217,
       "ru": 3,
       "security": 2,
       "tools": 1
@@ -60737,18 +60765,18 @@
       "Archived": 130,
       "Canonical": 71,
       "Generated": 763,
-      "Working": 324
+      "Working": 325
     },
     "by_surface_family": {
       "active": 853,
       "archive": 130,
       "canonical": 71,
       "generated": 763,
-      "working": 324
+      "working": 325
     },
     "by_tracking_state": {
       "ignored_local": 54,
-      "tracked": 2087
+      "tracked": 2088
     },
     "docs_reports_local_count": 85,
     "duplicate_group_count": 2,
@@ -60764,8 +60792,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 2141,
+    "total_doc_like": 2142,
     "total_doc_like_ignored_local": 54,
-    "total_doc_like_tracked": 2087
+    "total_doc_like_tracked": 2088
   }
 }

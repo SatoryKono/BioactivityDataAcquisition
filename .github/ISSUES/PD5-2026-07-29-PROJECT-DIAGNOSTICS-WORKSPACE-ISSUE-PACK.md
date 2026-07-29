@@ -1,6 +1,8 @@
 # PD5 issue pack — workspace ~10k diagnostics + product suppression debt
 
-Created: 2026-07-29T05:19:20Z
+Created: 2026-07-29T05:19:20Z  
+**Status: CLOSED 2026-07-29** — closeout `reports/quality/pd5-campaign-closeout-2026-07-29.md`  
+Epic #6994 and children #6995–#7004 closed on GitHub.
 
 ## Epic
 - #6994 — chore(types): PD5 Project Diagnostics — workspace ~10k tests + product suppression debt

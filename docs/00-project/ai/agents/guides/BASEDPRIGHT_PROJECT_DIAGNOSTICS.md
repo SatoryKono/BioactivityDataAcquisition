@@ -3,7 +3,7 @@
 Linked campaigns:
 
 - PD–PD4 (closed): product errors → 0; suppression inventory; Host Protocol partial burn-down
-- **PD5 (active):** `#6994` … `#7004` — workspace ~10k (tests-dominated) + product suppression residual
+- **PD5 (closed):** `#6994` … `#7004` — workspace ~10k → ~2.2k (tests unit surface) + product suppression residual
 
 ## Gate semantics
 
@@ -12,20 +12,22 @@ Linked campaigns:
 | Product type gate | `mypy` on `src/bioetl` | Merge contract | **Yes** |
 | Product basedpyright **errors** | basedpyright `src/bioetl` | Must stay **0** | No (advisory) |
 | Product `# pyright:` suppressions | file-level flags | Shrink-only debt ledger | No |
-| Workspace / tests diagnostics | basedpyright full tree | IDE UX (~10k errors, tests ~88%) | **No** |
-| Warnings | basedpyright | Noise budget ~15k product | **No** |
+| Workspace / tests diagnostics | basedpyright full tree | IDE UX (post-PD5 ~2.2k errors) | **No** |
+| Warnings | basedpyright | Noise budget ~15.5k product | **No** |
 
 ### Interpreting large IDE counts (~12k)
 
 | Figure | Meaning |
 | --- | --- |
-| IDE “~12662 errors” | Problems panel composite; not exact CLI total |
-| Live workspace errors | **~10005** (`reports/bp_workspace_live.json`) |
-| of which tests | **~8784 (87.8%)** |
+| IDE “~12662 errors” (pre-PD5) | Problems panel composite; not exact CLI total |
+| Live workspace errors (PD5 start) | **~10005** |
+| Live workspace errors (**after PD5**) | **~2174** |
+| of which tests (after PD5) | **~909** |
 | Product `src/bioetl` errors | **0** |
 | Entity unit tests errors | **0** |
+| `tests/unit/{application,composition,infrastructure}` | **0** each (PD5 surface) |
 
-**Do not** treat ~12k IDE diagnostics as product CI failure. Product truth = error snapshot + mypy.
+**Do not** treat large IDE diagnostics as product CI failure. Product truth = error snapshot + mypy.
 
 ## Dual product KPIs
 
@@ -35,7 +37,7 @@ Linked campaigns:
 | Suppressions shrink-only | `basedpyright-suppression-inventory.json` | `report_basedpyright_suppression_inventory --check` |
 | Tests/scripts advisory | `basedpyright-tests-snapshot.json` | optional `--check` |
 
-**PD5 floors:** product errors **0**; suppressions **≤228 files** (start); workspace advisory baseline **10005 errors**.
+**PD5 floors (closeout):** product errors **0**; suppressions **≤220 files / ≤274 rules**; workspace advisory **≤2174 errors** (shrink-only from here).
 
 ### Regen
 
@@ -57,18 +59,21 @@ python -m scripts.engineering.qa.report_basedpyright_tests_snapshot --source rep
 3. Removing a product `# pyright:` flag requires structural fix in the same PR
 4. Adding a product `# pyright:` flag requires issue + rationale
 5. Test diagnostics PRs should use `tests/helpers/typed_ids.py`, `protocol_stubs.py`, `settings_doubles.py` (see `tests/helpers/TYPED_DOUBLES.md`)
-6. mypy CI remains green
+6. Unit test packages under `tests/unit/{application,composition,infrastructure}` carry PD5 mock/fixture surface headers — do not weaken product NewTypes/Ports
+7. mypy CI remains green
 
 ### Optional IDE filter
 
-Locally exclude `tests/**` and/or `scripts/**` if Problems floods. Do not commit product error-rule disables.
+Locally exclude `tests/**`, `scripts/**`, and/or `src/memory/**` if Problems floods. Do not commit product error-rule disables.
 
 ## Warning policy
 
-Warnings are advisory. Prefer narrow pilots (`reportImplicitOverride` / Port `Any`). Avoid bulk `silver_*.py` without generator plan.
+Warnings are advisory. Prefer narrow pilots (`reportImplicitOverride` / Port `Any`). Avoid bulk `silver_*.py` without generator plan. See `reports/quality/pd5-warnings-pilot-note.md`.
 
 ## Related
 
 - Plan: `reports/quality/PROJECT_DIAGNOSTICS_12662_AUDIT_AND_PLAN_2026-07-28.md`
 - PD5 pack: `.github/ISSUES/PD5-2026-07-29-PROJECT-DIAGNOSTICS-WORKSPACE-ISSUE-PACK.md`
+- PD5 closeout: `reports/quality/pd5-campaign-closeout-2026-07-29.md`
+- Scripts/memory advisory: `reports/quality/pd5-scripts-memory-advisory-note.md`
 - `docs/00-project/governance/05-github-policy.md` — `gate.types` = mypy

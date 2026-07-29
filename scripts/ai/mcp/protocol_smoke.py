@@ -237,21 +237,25 @@ def _ping_http_endpoint(ping_url: str, *, timeout: float) -> int:
     import urllib.error
     import urllib.request
 
+    from scripts.engineering.common.repo_paths import ensure_local_http_url
+
+    # Re-validate loopback host before network I/O (pythonsecurity:S5144).
+    safe_ping = ensure_local_http_url(ping_url)
     try:
-        with urllib.request.urlopen(
-            ping_url, timeout=timeout
-        ) as resp:  # NOSONAR - loopback
+        with urllib.request.urlopen(  # NOSONAR - safe_ping is loopback-validated
+            safe_ping, timeout=timeout
+        ) as resp:
             ping_code = int(getattr(resp, "status", 200) or 200)
             if ping_code >= 500:
-                raise RuntimeError(f"ping HTTP {ping_code} for {ping_url}")
+                raise RuntimeError(f"ping HTTP {ping_code} for {safe_ping}")
             return ping_code
     except urllib.error.HTTPError as exc:
         if int(exc.code) >= 500:
-            raise RuntimeError(f"ping HTTP {exc.code} for {ping_url}") from exc
+            raise RuntimeError(f"ping HTTP {exc.code} for {safe_ping}") from exc
         # 4xx on /ping: still try initialize
         return int(exc.code)
     except Exception as exc:
-        raise RuntimeError(f"ping failed for {ping_url}: {exc}") from exc
+        raise RuntimeError(f"ping failed for {safe_ping}: {exc}") from exc
 
 
 def _http_initialize_and_tools(
@@ -310,11 +314,13 @@ def smoke_http_server(
     Streamable HTTP (mcp-proxy): GET /ping for liveness, then POST JSON-RPC
     initialize to the MCP URL when the proxy accepts application/json.
     """
+    from scripts.engineering.common.repo_paths import ensure_local_http_url
+
     # Loopback-only MCP smoke: local proxy has no TLS in dev (S5332 accepted).
     host, port = _validate_loopback_mcp_url(url)
-    safe_url = f"http://{host}:{port}/mcp"  # NOSONAR - localhost-only, validated above
+    safe_url = ensure_local_http_url(f"http://{host}:{port}/mcp")
     started = time.monotonic()
-    ping_url = f"http://{host}:{port}/ping"  # NOSONAR - localhost-only, validated above
+    ping_url = ensure_local_http_url(f"http://{host}:{port}/ping")
     _ping_http_endpoint(ping_url, timeout=timeout)
     init_ok, init_error, tool_count = _http_initialize_and_tools(
         safe_url, timeout=timeout
