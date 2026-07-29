@@ -11,6 +11,7 @@ import re
 import sys
 from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
 from typing import Any, cast

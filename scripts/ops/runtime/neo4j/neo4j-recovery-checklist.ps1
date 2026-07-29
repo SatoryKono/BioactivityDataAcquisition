@@ -17,14 +17,27 @@ function Test-ChecklistItem {
     return $Passed
 }
 
-function Run-Command {
-    param([string]$Label, [string]$Cmd)
+function Invoke-ChecklistCommand {
+    param(
+        [string]$Label,
+        [Parameter(Mandatory = $true)]
+        [string[]]$CommandArgs
+    )
     Write-Host ""
     Write-Host "Step: $Label" -ForegroundColor Yellow
-    Write-Host "Running: $Cmd"
+    Write-Host "Running: $($CommandArgs -join ' ')"
     Write-Host ""
-    Invoke-Expression $Cmd
+    # argv-only invocation avoids Invoke-Expression (powershelldre:S8659).
+    & $CommandArgs[0] @($CommandArgs | Select-Object -Skip 1)
     return $LASTEXITCODE -eq 0
+}
+
+# Backward-compatible name used by checklist steps below.
+function Run-Command {
+    param([string]$Label, [string]$Cmd)
+    # Split on whitespace for fixed recovery commands only (no user shell metacharacters).
+    $parts = @($Cmd.Trim() -split '\s+')
+    return Invoke-ChecklistCommand -Label $Label -CommandArgs $parts
 }
 
 # Pre-flight checks

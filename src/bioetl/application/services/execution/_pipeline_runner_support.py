@@ -28,7 +28,10 @@ from bioetl.domain.run_reports.context import (
     get_stage_accounting,
 )
 from bioetl.domain.run_reports.models import StageId
-from bioetl.domain.run_reports.pipeline_builder import build_pipeline_run_report
+from bioetl.domain.run_reports.pipeline_builder import (
+    PipelineRunReportOptionalBlocks,
+    build_pipeline_run_report,
+)
 
 if TYPE_CHECKING:
     from bioetl.application.services.execution.pipeline_run_execution_service import (
@@ -148,10 +151,6 @@ def finalize_pipeline_run_report(
     try:
         package_version = _package_version()
         # Build a preliminary report to materialize reasons, then enrich.
-        from bioetl.domain.run_reports.pipeline_builder import (
-            PipelineRunReportOptionalBlocks,
-        )
-
         draft = build_pipeline_run_report(
             identity=identity,
             metrics=metrics,

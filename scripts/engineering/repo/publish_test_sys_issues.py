@@ -305,8 +305,10 @@ def _stamp_one_issue_frontmatter(path: Path, rec: IssueRecord) -> None:
     path.write_text(content, encoding="utf-8")
 
 
-def _stamp_frontmatter_github_issue(records: list[IssueRecord]) -> None:
+def _stamp_frontmatter_github_issue(records: list[IssueRecord]) -> int:
+    """Stamp github_issue frontmatter fields; return how many files changed."""
     by_code = {r.code: r for r in records}
+    stamped = 0
     for path in sorted(ISSUES_DIR.glob("TEST-SYS-*.md")):
         if path.name.startswith("TEST-SYS-2026"):
             continue
@@ -314,6 +316,8 @@ def _stamp_frontmatter_github_issue(records: list[IssueRecord]) -> None:
         if code is None or code not in by_code:
             continue
         _stamp_one_issue_frontmatter(path, by_code[code])
+        stamped += 1
+    return stamped
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -363,9 +367,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.update_pack:
         _write_publish_json(records)
         _update_pack(records)
-        _stamp_frontmatter_github_issue(records)
+        stamped = _stamp_frontmatter_github_issue(records)
         print(f"Updated {ISSUE_PACK.relative_to(REPO_ROOT)}")
         print(f"Wrote {PUBLISH_JSON.relative_to(REPO_ROOT)}")
+        print(f"Stamped github_issue frontmatter on {stamped} issue file(s)")
 
     print("Done.")
     for rec in records:

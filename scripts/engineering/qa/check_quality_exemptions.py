@@ -37,9 +37,13 @@ def main(argv: list[str] | None = None) -> int:
     try:
         runpy.run_path(str(script), run_name="__main__")
     except SystemExit as exc:
+        # Convert integer/None SystemExit from the delegated script into a
+        # process return code. Re-raise unexpected payloads (S5754).
+        if exc.code is None:
+            return 0
         if isinstance(exc.code, int):
             return exc.code
-        return 0 if exc.code is None else 1
+        raise
     finally:
         sys.argv = original_argv
     return 0

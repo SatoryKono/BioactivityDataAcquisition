@@ -38,8 +38,11 @@ class _RunLedgerCoreEventAppender(RunLedgerCorrelationFieldsProtocol, Protocol):
         event_type: str,
         status: str | None,
         stage: str | None = None,
+        message: str | None = None,
+        error_type: str | None = None,
         dataset_ref: str | None = None,
         lineage_fragment_id: str | None = None,
+        metrics_snapshot: dict[str, int] | None = None,
         details: dict[str, object] | None = None,
     ) -> RunLedgerEntry: ...
 
