@@ -33,7 +33,7 @@ class SecurityClass(StrEnum):
     PUBLIC = "public"
     INTERNAL = "internal"
     CONFIDENTIAL = "confidential"
-    SECRET = "secret"
+    SECRET = "secret"  # pragma: allowlist secret
 
 
 class RecordStatus(StrEnum):
