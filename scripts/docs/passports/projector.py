@@ -330,38 +330,6 @@ def _classify_transform(name: str) -> list[str]:
     return ["unknown"]
 
 
-def _topological_order(steps: list[JsonObject]) -> list[str]:
-    step_ids = [str(step.get("step_id")) for step in steps]
-    if len(step_ids) != len(set(step_ids)):
-        raise ValueError("Workflow contains duplicate step IDs")
-    dependencies = {
-        str(step.get("step_id")): {
-            str(value) for value in step.get("depends_on", []) if isinstance(value, str)
-        }
-        for step in steps
-    }
-    unknown = sorted(
-        dependency
-        for values in dependencies.values()
-        for dependency in values
-        if dependency not in dependencies
-    )
-    if unknown:
-        raise ValueError(f"Workflow contains unknown dependencies: {unknown}")
-    ordered: list[str] = []
-    remaining = dict(dependencies)
-    while remaining:
-        ready = sorted(
-            step_id for step_id, values in remaining.items() if values.issubset(ordered)
-        )
-        if not ready:
-            raise ValueError("Workflow dependency cycle detected")
-        for step_id in ready:
-            ordered.append(step_id)
-            del remaining[step_id]
-    return ordered
-
-
 def _workflow_facts(unit: ExecutableUnit, revision: str) -> JsonObject:
     payload = _load_yaml(unit.config_path)
     workflow = payload["workflow"]

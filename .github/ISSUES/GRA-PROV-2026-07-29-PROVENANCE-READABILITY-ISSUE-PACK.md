@@ -8,14 +8,14 @@ Runtime evidence:
 
 | ID | Scope | Priority | GitHub issue |
 | --- | --- | --- | --- |
-| GRA-PROV-00 | Shared visual and render contract | High | pending |
-| GRA-PROV-01 | 0. Trust | Medium | pending |
-| GRA-PROV-02 | 1. Overview clipping | High | pending |
-| GRA-PROV-03 | 2. Pipeline Diagnostics | Medium | pending |
-| GRA-PROV-04 | 3. Provider Health | Medium | pending |
-| GRA-PROV-05 | 4. Data Quality reference | Medium | pending |
-| GRA-PROV-06 | 5. Incident Workspace | Medium | pending |
-| GRA-PROV-07 | 6. Run Explorer scope/provenance | Medium | pending |
+| GRA-PROV-00 | Shared visual and render contract | High | [#7226](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7226) |
+| GRA-PROV-01 | 0. Trust | Medium | [#7227](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7227) |
+| GRA-PROV-02 | 1. Overview clipping | High | [#7228](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7228) |
+| GRA-PROV-03 | 2. Pipeline Diagnostics | Medium | [#7229](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7229) |
+| GRA-PROV-04 | 3. Provider Health | Medium | [#7230](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7230) |
+| GRA-PROV-05 | 4. Data Quality reference | Medium | [#7231](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7231) |
+| GRA-PROV-06 | 5. Incident Workspace | Medium | [#7232](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7232) |
+| GRA-PROV-07 | 6. Run Explorer scope/provenance | Medium | [#7233](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/7233) |
 
 Dependency order:
 

@@ -75,13 +75,26 @@ def discover_units(
     registry_entries: tuple[RegistryEntry, ...] | None = None,
 ) -> tuple[ExecutableUnit, ...]:
     """Discover ordinary, composite, and workflow units deterministically."""
-    units: list[ExecutableUnit] = []
-    entity_configs = _entity_configs(configs_root)
     entries = (
         registry_entries
         if registry_entries is not None
         else _canonical_registry_entries()
     )
+    units = [
+        *_ordinary_units(configs_root, entries),
+        *_composite_units(configs_root),
+        *_workflow_units(configs_root),
+    ]
+    ordered = tuple(sorted(units, key=lambda item: item.typed_id))
+    _validate_unit_identities(ordered)
+    return ordered
+
+
+def _ordinary_units(
+    configs_root: Path,
+    entries: tuple[RegistryEntry, ...],
+) -> list[ExecutableUnit]:
+    entity_configs = _entity_configs(configs_root)
     registry_names = [entry.pipeline_name for entry in entries]
     if len(registry_names) != len(set(registry_names)):
         raise ValueError("Duplicate pipeline identity in composition registry")
@@ -92,6 +105,7 @@ def discover_units(
             "Pipeline registry/config mismatch: "
             f"missing_configs={missing_configs}, orphan_configs={orphan_configs}"
         )
+    units: list[ExecutableUnit] = []
     for entry in sorted(entries, key=lambda item: item.pipeline_name):
         alias = entry.data_source_provider
         aliases = (
@@ -109,7 +123,11 @@ def discover_units(
                 aliases=aliases,
             )
         )
+    return units
 
+
+def _composite_units(configs_root: Path) -> list[ExecutableUnit]:
+    units: list[ExecutableUnit] = []
     for path in sorted((configs_root / "composites").glob("*.yaml")):
         payload = _yaml(path)
         composite = payload.get("composite")
@@ -127,7 +145,11 @@ def discover_units(
                 entity=name.removeprefix("composite_"),
             )
         )
+    return units
 
+
+def _workflow_units(configs_root: Path) -> list[ExecutableUnit]:
+    units: list[ExecutableUnit] = []
     for path in sorted((configs_root / "workflows").glob("*.yaml")):
         payload = _yaml(path)
         workflow = payload.get("workflow")
@@ -137,12 +159,13 @@ def discover_units(
         if not isinstance(name, str) or not name:
             raise ValueError(f"Missing workflow.name: {path}")
         units.append(ExecutableUnit("workflow", name, path))
+    return units
 
-    ordered = tuple(sorted(units, key=lambda item: item.typed_id))
+
+def _validate_unit_identities(ordered: tuple[ExecutableUnit, ...]) -> None:
     typed_ids = [item.typed_id for item in ordered]
     if len(typed_ids) != len(set(typed_ids)):
         raise ValueError("Duplicate executable typed identity")
     aliases = [alias for item in ordered for alias in item.aliases]
     if len(aliases) != len(set(aliases)):
         raise ValueError("Executable aliases must resolve exactly once")
-    return ordered
