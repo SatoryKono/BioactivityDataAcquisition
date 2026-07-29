@@ -273,7 +273,7 @@ def main():
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
     # Run audit
-    print(f"Starting emitter contract audit...")
+    print("Starting emitter contract audit...")
     print(f"Source directory: {args.source_dir}")
     print()
 

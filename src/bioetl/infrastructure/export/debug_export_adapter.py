@@ -180,46 +180,52 @@ class DebugExportAdapter:
     ) -> str:
         return compute_pack_hash(artifacts)
 
-    def _load_lineage_rows(self, pack: DebugExportPack) -> list[dict[str, object]]:
+    def _load_lineage_fragments(self, pack: DebugExportPack) -> list[object]:
         # Keep FileLineageStore resolution in this module so unit tests can
         # monkeypatch bioetl.infrastructure.export.debug_export_adapter.FileLineageStore.
         if self._lineage_store_path is None:
             return []
         try:
             store = FileLineageStore(base_path=Path(self._lineage_store_path))
-            fragments = (
-                store.list_by_manifest_id(pack.manifest_id)
-                if pack.manifest_id is not None
-                else store.list_by_run_id(RunID(UUID(pack.run_id)))
-            )
+            if pack.manifest_id is not None:
+                return list(store.list_by_manifest_id(pack.manifest_id))
+            return list(store.list_by_run_id(RunID(UUID(pack.run_id))))
         except (OSError, TypeError, ValueError):
             return []
+
+    @staticmethod
+    def _lineage_rows_for_fragment(fragment: object) -> list[dict[str, object]]:
         rows: list[dict[str, object]] = []
-        for fragment in fragments:
-            for node in fragment.nodes:
-                rows.append(
-                    {
-                        "fragment_id": fragment.fragment_id,
-                        "stored_fragment_id": fragment.stored_fragment_id,
-                        "manifest_id": fragment.manifest_id,
-                        "run_id": fragment.run_id,
-                        "node_id": node.node_id,
-                        "edge_type": "",
-                        "related_node_id": "",
-                        "node_type": node.node_type,
-                    }
-                )
-            for edge in fragment.edges:
-                rows.append(
-                    {
-                        "fragment_id": fragment.fragment_id,
-                        "stored_fragment_id": fragment.stored_fragment_id,
-                        "manifest_id": fragment.manifest_id,
-                        "run_id": fragment.run_id,
-                        "node_id": edge.source.node_id,
-                        "edge_type": edge.edge_type,
-                        "related_node_id": edge.target.node_id,
-                        "node_type": "",
-                    }
-                )
+        for node in fragment.nodes:  # type: ignore[attr-defined]
+            rows.append(
+                {
+                    "fragment_id": fragment.fragment_id,  # type: ignore[attr-defined]
+                    "stored_fragment_id": fragment.stored_fragment_id,  # type: ignore[attr-defined]
+                    "manifest_id": fragment.manifest_id,  # type: ignore[attr-defined]
+                    "run_id": fragment.run_id,  # type: ignore[attr-defined]
+                    "node_id": node.node_id,
+                    "edge_type": "",
+                    "related_node_id": "",
+                    "node_type": node.node_type,
+                }
+            )
+        for edge in fragment.edges:  # type: ignore[attr-defined]
+            rows.append(
+                {
+                    "fragment_id": fragment.fragment_id,  # type: ignore[attr-defined]
+                    "stored_fragment_id": fragment.stored_fragment_id,  # type: ignore[attr-defined]
+                    "manifest_id": fragment.manifest_id,  # type: ignore[attr-defined]
+                    "run_id": fragment.run_id,  # type: ignore[attr-defined]
+                    "node_id": edge.source.node_id,
+                    "edge_type": edge.edge_type,
+                    "related_node_id": edge.target.node_id,
+                    "node_type": "",
+                }
+            )
+        return rows
+
+    def _load_lineage_rows(self, pack: DebugExportPack) -> list[dict[str, object]]:
+        rows: list[dict[str, object]] = []
+        for fragment in self._load_lineage_fragments(pack):
+            rows.extend(self._lineage_rows_for_fragment(fragment))
         return rows

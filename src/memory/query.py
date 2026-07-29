@@ -374,6 +374,18 @@ def _pick_refreshed_events(
     return events_dir
 
 
+def _require_ready_or_raise(
+    *,
+    chunks_path: Path,
+    events_dir: Path,
+    require_chunks: bool,
+    chunks_ready: bool,
+) -> None:
+    if require_chunks and not chunks_ready:
+        raise _missing_manifest_error(chunks_path, "RAG chunk manifest")
+    raise _missing_manifest_error(events_dir, "timeline event projections")
+
+
 def _resolve_query_paths(
     *,
     chunks_path: Path,
@@ -392,9 +404,12 @@ def _resolve_query_paths(
     if required_chunks_ready and required_events_ready:
         return chunks_path, events_dir, None, None
     if not auto_refresh:
-        if require_chunks and not chunks_ready:
-            raise _missing_manifest_error(chunks_path, "RAG chunk manifest")
-        raise _missing_manifest_error(events_dir, "timeline event projections")
+        _require_ready_or_raise(
+            chunks_path=chunks_path,
+            events_dir=events_dir,
+            require_chunks=require_chunks,
+            chunks_ready=chunks_ready,
+        )
 
     output_root, report = _refresh_query_artifacts(
         refresh_output_root=refresh_output_root,

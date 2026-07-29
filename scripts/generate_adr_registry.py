@@ -261,38 +261,32 @@ class ADRRegistryGenerator:
             return (0, "0000-00-00")
         return (1, normalized)
 
+    @staticmethod
+    def _truncate_section(text: str, *, limit: int = 200) -> str:
+        cleaned = text.strip()
+        if len(cleaned) <= limit:
+            return cleaned
+        return cleaned[: limit - 3] + "..."
+
     def extract_adr_sections(self, content: str) -> dict[str, str]:
         """Extract main sections from ADR content."""
 
         sections = {"context": "", "decision": "", "consequences": "", "status": ""}
+        current_section: str | None = None
 
-        current_section = None
-        lines = content.split("\n")
-
-        for line in lines:
-            # Skip front matter
+        for line in content.split("\n"):
             if line.startswith("---"):
                 continue
-
-            # Detect section headers
             if line.startswith("## "):
                 section_title = line[3:].strip().lower()
-                if section_title in sections:
-                    current_section = section_title
-                else:
-                    current_section = None
-            elif current_section and line.strip():
-                # Add content to current section
+                current_section = section_title if section_title in sections else None
+                continue
+            if current_section and line.strip():
                 sections[current_section] += line + "\n"
 
-        # Clean up sections
-        for section in sections:
-            sections[section] = sections[section].strip()
-            # Limit length for metadata
-            if len(sections[section]) > 200:
-                sections[section] = sections[section][:197] + "..."
-
-        return sections
+        return {
+            name: self._truncate_section(body) for name, body in sections.items()
+        }
 
     def extract_adr_relationships(self, content: str) -> dict[str, list[str]]:
         """Extract relationships (supersedes, related) from ADR content."""

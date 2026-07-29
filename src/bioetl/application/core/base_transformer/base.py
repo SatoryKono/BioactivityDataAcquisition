@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import replace
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, cast
 
 from bioetl.application.core.base_transformer.types import (
     T,
@@ -32,6 +32,12 @@ if TYPE_CHECKING:
 __all__ = ["BaseTransformer", "T"]
 
 
+def _pick_collaborator(override: object | None, current: object) -> object:
+    if override is None:
+        return current
+    return override
+
+
 def _merge_legacy_collaborators(
     dependencies: TransformerDependencyContext,
     *,
@@ -40,16 +46,17 @@ def _merge_legacy_collaborators(
     identity_service: EntityIdentityGenerator | None,
     pii_hasher: PiiHasherPort | None,
 ) -> TransformerDependencyContext:
-    return replace(
-        dependencies,
-        tracer=dependencies.tracer if tracer is None else tracer,
-        metrics=dependencies.metrics if metrics is None else metrics,
-        identity_service=(
-            dependencies.identity_service
-            if identity_service is None
-            else identity_service
+    return cast(
+        TransformerDependencyContext,
+        replace(
+            dependencies,
+            tracer=_pick_collaborator(tracer, dependencies.tracer),
+            metrics=_pick_collaborator(metrics, dependencies.metrics),
+            identity_service=_pick_collaborator(
+                identity_service, dependencies.identity_service
+            ),
+            pii_hasher=_pick_collaborator(pii_hasher, dependencies.pii_hasher),
         ),
-        pii_hasher=dependencies.pii_hasher if pii_hasher is None else pii_hasher,
     )
 
 

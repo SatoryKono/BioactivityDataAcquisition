@@ -446,7 +446,7 @@ def main():
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
     # Run validation
-    print(f"Starting observability validation...")
+    print("Starting observability validation...")
     print(f"Prometheus: {args.prometheus_url}")
     print(f"Grafana: {args.grafana_url}")
     print()

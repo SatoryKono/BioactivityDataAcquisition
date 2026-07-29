@@ -91,10 +91,9 @@ def wait_ready(names: list[str], timeout_s: float = 420) -> None:
         raise RuntimeError(f"not ready: {sorted(pending)}")
 
 
-def main() -> int:
+def _capture_live_compose_env() -> dict[str, str]:
     grafana = env_of("bioetl-grafana")
     main = env_of("bioetl-main-bioetl-1")
-
     env = dict(os.environ)
     env["GF_SECURITY_ADMIN_PASSWORD"] = grafana["GF_SECURITY_ADMIN_PASSWORD"]
     env["GF_RENDERING_RENDERER_TOKEN"] = grafana["GF_RENDERING_RENDERER_TOKEN"]
@@ -108,9 +107,10 @@ def main() -> int:
     env["LOG_LEVEL"] = main.get("LOG_LEVEL", "INFO")
     env["NEO4J_USERNAME"] = main.get("NEO4J_USERNAME", "neo4j")
     env["NEO4J_PASSWORD"] = main["NEO4J_PASSWORD"]
-    print("env captured (secrets redacted)", flush=True)
+    return env
 
-    # Force-remove current monitoring/main containers (volumes retained).
+
+def _force_remove_cutover_containers() -> None:
     labeled = run(
         [
             "docker",
@@ -127,47 +127,34 @@ def main() -> int:
     force_remove(MONITORING_NAMES)
     force_remove(MAIN_NAMES)
 
-    mon = [
+
+def _compose_up(
+    *,
+    project: str,
+    compose_file: Path,
+    env: dict[str, str],
+    profile: str | None = None,
+) -> int:
+    cmd = [
         "docker",
         "compose",
         "--project-directory",
         str(RUNTIME),
         "-p",
-        "bioetl-monitoring",
+        project,
         "-f",
-        str(RUNTIME / "docker-compose.monitoring.yml"),
-        "--profile",
-        "tracing",
-        "up",
-        "-d",
-        "--remove-orphans",
+        str(compose_file),
     ]
-    up_mon = run(mon, env=env, timeout=420)
-    print(up_mon.stdout)
-    print(up_mon.stderr, file=sys.stderr)
-    if up_mon.returncode != 0:
-        return up_mon.returncode
+    if profile is not None:
+        cmd.extend(["--profile", profile])
+    cmd.extend(["up", "-d", "--remove-orphans"])
+    completed = run(cmd, env=env, timeout=420)
+    print(completed.stdout)
+    print(completed.stderr, file=sys.stderr)
+    return completed.returncode
 
-    main_cmd = [
-        "docker",
-        "compose",
-        "--project-directory",
-        str(RUNTIME),
-        "-p",
-        "bioetl-main",
-        "-f",
-        str(RUNTIME / "docker-compose.yml"),
-        "up",
-        "-d",
-        "--remove-orphans",
-    ]
-    up_main = run(main_cmd, env=env, timeout=420)
-    print(up_main.stdout)
-    print(up_main.stderr, file=sys.stderr)
-    if up_main.returncode != 0:
-        return up_main.returncode
 
-    # Drop residual warp attachment if any.
+def _detach_warp_from_main() -> None:
     for name in MAIN_NAMES:
         inspect = run(["docker", "inspect", name], timeout=60)
         if inspect.returncode != 0:
@@ -179,6 +166,30 @@ def main() -> int:
                 timeout=60,
             )
 
+
+def main() -> int:
+    env = _capture_live_compose_env()
+    print("env captured (secrets redacted)", flush=True)
+    _force_remove_cutover_containers()
+
+    mon_rc = _compose_up(
+        project="bioetl-monitoring",
+        compose_file=RUNTIME / "docker-compose.monitoring.yml",
+        env=env,
+        profile="tracing",
+    )
+    if mon_rc != 0:
+        return mon_rc
+
+    main_rc = _compose_up(
+        project="bioetl-main",
+        compose_file=RUNTIME / "docker-compose.yml",
+        env=env,
+    )
+    if main_rc != 0:
+        return main_rc
+
+    _detach_warp_from_main()
     wait_ready(
         [
             "bioetl-prometheus",
@@ -189,7 +200,6 @@ def main() -> int:
         ],
         timeout_s=480,
     )
-
     ls = run(["docker", "compose", "ls", "--all"], timeout=90)
     print(ls.stdout)
     return 0

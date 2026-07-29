@@ -838,7 +838,7 @@ def _find_bronze_record(
 ) -> tuple[dict[str, object], Path]:
     """Return the first deterministic JSONL record satisfying ``predicate``."""
     paths = sorted(
-        (*entity_root.rglob("*.jsonl"), *entity_root.rglob("*.jsonl.zst")),
+        (*entity_root.rglob("*.jsonl"), *entity_root.rglob(f"*{JSONL_ZST_SUFFIX}")),
         key=lambda path: path.as_posix(),
     )
     for path in paths:

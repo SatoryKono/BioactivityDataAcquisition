@@ -172,12 +172,17 @@ def _load_exclusion_policies() -> dict[str, dict[str, Any]]:
     }
 
 
-def _gold_exclusion_reason(pipeline: dict[str, Any]) -> str:
+def _gold_sink_section(pipeline: dict[str, Any]) -> dict[str, Any] | None:
     sink = pipeline.get("sink")
     if not isinstance(sink, dict):
-        return "gold_runtime_disabled"
+        return None
     gold = sink.get("gold")
-    if not isinstance(gold, dict):
+    return gold if isinstance(gold, dict) else None
+
+
+def _gold_exclusion_reason(pipeline: dict[str, Any]) -> str:
+    gold = _gold_sink_section(pipeline)
+    if gold is None:
         return "gold_runtime_disabled"
     reason = gold.get("exclusion_reason")
     if isinstance(reason, str) and reason:

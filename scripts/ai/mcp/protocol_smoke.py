@@ -96,7 +96,7 @@ def _readline(stream: TextIO, timeout: float) -> str:
     def read() -> None:
         try:
             result.put(stream.readline())
-        except BaseException as exc:  # pragma: no cover - defensive transport seam
+        except Exception as exc:  # pragma: no cover - defensive transport seam
             result.put(exc)
 
     threading.Thread(target=read, daemon=True).start()

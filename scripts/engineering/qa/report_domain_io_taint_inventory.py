@@ -259,6 +259,34 @@ def _forbidden_import_finding(
     )
 
 
+def _classify_import_module(
+    *,
+    relative_path: str,
+    line: int,
+    root_module: str,
+    violations: list[TaintFinding],
+    allowed_exceptions: list[TaintFinding],
+) -> None:
+    if root_module in PANDERA_IMPORT_PREFIXES:
+        finding, allowed = _pandera_import_finding(
+            relative_path=relative_path,
+            line=line,
+            root_module=root_module,
+        )
+        if allowed:
+            allowed_exceptions.append(finding)
+        else:
+            violations.append(finding)
+        return
+    forbidden = _forbidden_import_finding(
+        relative_path=relative_path,
+        line=line,
+        root_module=root_module,
+    )
+    if forbidden is not None:
+        violations.append(forbidden)
+
+
 def _scan_imports(
     path: Path, tree: ast.AST
 ) -> tuple[list[TaintFinding], list[TaintFinding]]:
@@ -270,25 +298,13 @@ def _scan_imports(
         if modules is None:
             continue
         for module in modules:
-            root_module = module.split(".", maxsplit=1)[0]
-            if root_module in PANDERA_IMPORT_PREFIXES:
-                finding, allowed = _pandera_import_finding(
-                    relative_path=relative_path,
-                    line=node.lineno,
-                    root_module=root_module,
-                )
-                if allowed:
-                    allowed_exceptions.append(finding)
-                else:
-                    violations.append(finding)
-                continue
-            forbidden = _forbidden_import_finding(
+            _classify_import_module(
                 relative_path=relative_path,
                 line=node.lineno,
-                root_module=root_module,
+                root_module=module.split(".", maxsplit=1)[0],
+                violations=violations,
+                allowed_exceptions=allowed_exceptions,
             )
-            if forbidden is not None:
-                violations.append(forbidden)
     return violations, allowed_exceptions
 
 

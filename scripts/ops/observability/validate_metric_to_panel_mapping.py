@@ -504,7 +504,7 @@ def main():
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
     # Run validation
-    print(f"Starting metric-to-panel validation...")
+    print("Starting metric-to-panel validation...")
     print(f"Prometheus: {args.prometheus_url}")
     print(f"Dashboard directory: {args.dashboard_dir}")
     print()

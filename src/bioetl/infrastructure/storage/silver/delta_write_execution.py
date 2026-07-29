@@ -88,7 +88,7 @@ async def _await_blocking_deltalake_call[BlockingResult](
     def _worker() -> None:
         try:
             result = call()
-        except BaseException as exc:  # pragma: no cover - surfaced through await
+        except Exception as exc:  # pragma: no cover - surfaced through await
             with suppress(RuntimeError):
                 loop.call_soon_threadsafe(_publish_exception, exc)
             return
@@ -339,7 +339,7 @@ async def _evolve_delta_schema_with_empty_append(
             )
         ),
     )
-    updated_request = replace(request, merge_schema=False)
+    updated_request = cast(_DeltaWriteRequest, replace(request, merge_schema=False))
     return updated_request
 
 

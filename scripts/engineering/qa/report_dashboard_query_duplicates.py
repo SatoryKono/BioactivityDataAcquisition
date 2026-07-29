@@ -124,6 +124,26 @@ def _panel_refs(uses: tuple[QueryUse, ...]) -> tuple[str, ...]:
     return tuple(sorted({f"{use.dashboard} :: {use.panel_title}" for use in uses}))
 
 
+def _query_use_from_target(
+    *,
+    dashboard_name: str,
+    title: str,
+    index: int,
+    target: object,
+) -> QueryUse | None:
+    if not isinstance(target, dict):
+        return None
+    expr = target.get("expr")
+    if not isinstance(expr, str) or not expr.strip():
+        return None
+    return QueryUse(
+        dashboard=dashboard_name,
+        panel_title=title,
+        target_ref=f"target[{index}]",
+        expression=_normalize_expression(expr),
+    )
+
+
 def _panel_query_uses_for_dashboard(
     dashboard_path: Path,
     panels: list[dict[str, Any]],
@@ -134,17 +154,14 @@ def _panel_query_uses_for_dashboard(
         if not isinstance(title, str):
             continue
         for index, target in enumerate(panel.get("targets", []), start=1):
-            expr = target.get("expr")
-            if not isinstance(expr, str) or not expr.strip():
-                continue
-            query_uses.append(
-                QueryUse(
-                    dashboard=dashboard_path.name,
-                    panel_title=title,
-                    target_ref=f"target[{index}]",
-                    expression=_normalize_expression(expr),
-                )
+            use = _query_use_from_target(
+                dashboard_name=dashboard_path.name,
+                title=title,
+                index=index,
+                target=target,
             )
+            if use is not None:
+                query_uses.append(use)
     return query_uses
 
 

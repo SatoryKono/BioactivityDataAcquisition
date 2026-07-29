@@ -1658,6 +1658,29 @@ def _render_report(
     return "\n".join(report_lines)
 
 
+def _composite_review_metadata(entry: dict[str, Any]) -> dict[str, str]:
+    return {
+        "review_id": str(entry.get("id") or "<unknown>"),
+        "schema_authority": str(entry.get("schema_authority") or ""),
+        "owner": str(entry.get("owner") or ""),
+    }
+
+
+def _register_composite_review_fields(
+    lookup: dict[tuple[str, str], dict[str, str]],
+    *,
+    pipelines: list[object],
+    fields: list[object],
+    metadata: dict[str, str],
+) -> None:
+    for pipeline_name in pipelines:
+        if not isinstance(pipeline_name, str):
+            continue
+        for field_name in fields:
+            if isinstance(field_name, str):
+                lookup[(pipeline_name, field_name)] = metadata
+
+
 def _build_composite_unknown_typing_lookup(
     review_registry: dict[str, Any],
 ) -> dict[tuple[str, str], dict[str, str]]:
@@ -1672,17 +1695,12 @@ def _build_composite_unknown_typing_lookup(
         fields = entry.get("fields", [])
         if not isinstance(pipelines, list) or not isinstance(fields, list):
             continue
-        metadata = {
-            "review_id": str(entry.get("id") or "<unknown>"),
-            "schema_authority": str(entry.get("schema_authority") or ""),
-            "owner": str(entry.get("owner") or ""),
-        }
-        for pipeline_name in pipelines:
-            if not isinstance(pipeline_name, str):
-                continue
-            for field_name in fields:
-                if isinstance(field_name, str):
-                    lookup[(pipeline_name, field_name)] = metadata
+        _register_composite_review_fields(
+            lookup,
+            pipelines=pipelines,
+            fields=fields,
+            metadata=_composite_review_metadata(entry),
+        )
     return lookup
 
 

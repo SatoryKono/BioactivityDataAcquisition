@@ -187,8 +187,7 @@ def collect_rule_test_coverage(
     }
 
 
-def validate_rule_test_coverage(coverage: dict[str, object]) -> list[str]:
-    """Return fail-closed rule-test coverage violations."""
+def _coverage_count_violations(coverage: dict[str, object]) -> list[str]:
     violations: list[str] = []
     if int(coverage["alert_definitions"]) != EXPECTED_ALERT_DEFINITIONS:
         violations.append(
@@ -199,16 +198,6 @@ def validate_rule_test_coverage(coverage: dict[str, object]) -> list[str]:
         violations.append(
             "record definitions changed from baseline "
             f"{EXPECTED_RECORD_DEFINITIONS}: {coverage['record_definitions']}"
-        )
-    if coverage["undefined_fixture_alerts"]:
-        violations.append(
-            "fixtures reference undefined alerts: "
-            + ", ".join(coverage["undefined_fixture_alerts"])
-        )
-    if coverage["untested_control_plane_records"]:
-        violations.append(
-            "control-plane records lack direct promql fixtures: "
-            + ", ".join(coverage["untested_control_plane_records"])
         )
     if int(coverage["tested_alerts"]) < MIN_TESTED_ALERTS:
         violations.append(
@@ -226,6 +215,26 @@ def validate_rule_test_coverage(coverage: dict[str, object]) -> list[str]:
             f"{coverage['directly_tested_records']}"
         )
     return violations
+
+
+def _coverage_set_violations(coverage: dict[str, object]) -> list[str]:
+    violations: list[str] = []
+    if coverage["undefined_fixture_alerts"]:
+        violations.append(
+            "fixtures reference undefined alerts: "
+            + ", ".join(coverage["undefined_fixture_alerts"])
+        )
+    if coverage["untested_control_plane_records"]:
+        violations.append(
+            "control-plane records lack direct promql fixtures: "
+            + ", ".join(coverage["untested_control_plane_records"])
+        )
+    return violations
+
+
+def validate_rule_test_coverage(coverage: dict[str, object]) -> list[str]:
+    """Return fail-closed rule-test coverage violations."""
+    return _coverage_count_violations(coverage) + _coverage_set_violations(coverage)
 
 
 def _missing_promtool_message(promtool: str) -> str:

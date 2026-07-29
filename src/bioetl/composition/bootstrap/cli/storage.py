@@ -215,8 +215,7 @@ def _create_table_collector(
         )
         return silver_table or None, gold_table or None
 
-    def collect_tables(layer: str) -> list[tuple[str, str]]:
-        """Collect `(table_name, layer)` pairs for requested layer scope."""
+    def _collect_layer_tables() -> tuple[set[str], set[str]]:
         silver_tables: set[str] = set()
         gold_tables: set[str] = set()
         for pipeline_name in effective_registry.list_pipelines():
@@ -225,7 +224,11 @@ def _create_table_collector(
                 silver_tables.add(silver_table)
             if gold_table:
                 gold_tables.add(gold_table)
+        return silver_tables, gold_tables
 
+    def collect_tables(layer: str) -> list[tuple[str, str]]:
+        """Collect `(table_name, layer)` pairs for requested layer scope."""
+        silver_tables, gold_tables = _collect_layer_tables()
         tables: list[tuple[str, str]] = []
         if layer in ("all", "silver"):
             tables.extend((t, "silver") for t in sorted(silver_tables))

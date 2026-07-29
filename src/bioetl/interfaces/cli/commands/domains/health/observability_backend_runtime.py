@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, replace
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.interfaces.cli.commands.domains.health._observability_backend_startup import (
     ensure_observability_backend_started_impl,
@@ -191,7 +191,10 @@ def attach_observability_backend_to_cli_input(
         observability_backend_port=cli_input.observability_backend_port,
         backend_result=backend_result,
     ):
-        return replace(cli_input, health_server=False)
+        return cast(
+            "RunCommandInput | RunAllCommandInput",
+            replace(cli_input, health_server=False),
+        )
     return cli_input
 
 
