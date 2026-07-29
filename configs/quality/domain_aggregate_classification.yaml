@@ -64,53 +64,198 @@ row_templates:
     owner: "@bioetl-domain"
     rationale: "Not an aggregate root; module owns domain support types, policies, or contracts."
 non_aggregate_clusters:
-  - {name: behavior, path: src/bioetl/domain/behavior, <<: *support_cluster}
-  - {name: composite, path: src/bioetl/domain/composite, <<: *support_cluster}
-  - {name: config, path: src/bioetl/domain/config, <<: *support_cluster}
-  - {name: contracts, path: src/bioetl/domain/contracts, <<: *support_cluster}
-  - {name: control_plane, path: src/bioetl/domain/control_plane, <<: *support_cluster}
-  - {name: entities, path: src/bioetl/domain/entities, <<: *support_cluster}
-  - {name: exceptions, path: src/bioetl/domain/exceptions, <<: *support_cluster}
-  - {name: filtering, path: src/bioetl/domain/filtering, <<: *support_cluster}
-  - {name: lineage, path: src/bioetl/domain/lineage, <<: *support_cluster}
-  - {name: mapping, path: src/bioetl/domain/mapping, <<: *support_cluster}
-  - {name: models, path: src/bioetl/domain/models, <<: *support_cluster}
-  - {name: normalization, path: src/bioetl/domain/normalization, <<: *support_cluster}
-  - {name: ports, path: src/bioetl/domain/ports, <<: *support_cluster}
-  - {name: registry, path: src/bioetl/domain/registry, <<: *support_cluster}
-  - {name: run_reports, path: src/bioetl/domain/run_reports, <<: *support_cluster}
-  - {name: schemas, path: src/bioetl/domain/schemas, <<: *support_cluster}
-  - {name: transformations, path: src/bioetl/domain/transformations, <<: *support_cluster}
-  - {name: types, path: src/bioetl/domain/types, <<: *support_cluster}
-  - {name: validation, path: src/bioetl/domain/validation, <<: *support_cluster}
-  - {name: value_objects, path: src/bioetl/domain/value_objects, <<: *support_cluster}
-  - {name: workflow, path: src/bioetl/domain/workflow, <<: *support_cluster}
+  - { name: behavior, path: src/bioetl/domain/behavior, <<: *support_cluster }
+  - { name: composite, path: src/bioetl/domain/composite, <<: *support_cluster }
+  - { name: config, path: src/bioetl/domain/config, <<: *support_cluster }
+  - { name: contracts, path: src/bioetl/domain/contracts, <<: *support_cluster }
+  - {
+      name: control_plane,
+      path: src/bioetl/domain/control_plane,
+      <<: *support_cluster,
+    }
+  - { name: entities, path: src/bioetl/domain/entities, <<: *support_cluster }
+  - {
+      name: exceptions,
+      path: src/bioetl/domain/exceptions,
+      <<: *support_cluster,
+    }
+  - { name: filtering, path: src/bioetl/domain/filtering, <<: *support_cluster }
+  - { name: lineage, path: src/bioetl/domain/lineage, <<: *support_cluster }
+  - { name: mapping, path: src/bioetl/domain/mapping, <<: *support_cluster }
+  - { name: models, path: src/bioetl/domain/models, <<: *support_cluster }
+  - {
+      name: normalization,
+      path: src/bioetl/domain/normalization,
+      <<: *support_cluster,
+    }
+  - { name: ports, path: src/bioetl/domain/ports, <<: *support_cluster }
+  - { name: registry, path: src/bioetl/domain/registry, <<: *support_cluster }
+  - {
+      name: run_reports,
+      path: src/bioetl/domain/run_reports,
+      <<: *support_cluster,
+    }
+  - { name: schemas, path: src/bioetl/domain/schemas, <<: *support_cluster }
+  - {
+      name: transformations,
+      path: src/bioetl/domain/transformations,
+      <<: *support_cluster,
+    }
+  - { name: types, path: src/bioetl/domain/types, <<: *support_cluster }
+  - {
+      name: validation,
+      path: src/bioetl/domain/validation,
+      <<: *support_cluster,
+    }
+  - {
+      name: value_objects,
+      path: src/bioetl/domain/value_objects,
+      <<: *support_cluster,
+    }
+  - { name: workflow, path: src/bioetl/domain/workflow, <<: *support_cluster }
 non_aggregate_root_modules:
-  - {module: bioetl.domain.immutability, path: src/bioetl/domain/immutability.py, <<: *support_module}
-  - {module: bioetl.domain._observability_contract_core, path: src/bioetl/domain/_observability_contract_core.py, <<: *support_module}
-  - {module: bioetl.domain._observability_contract_primitives, path: src/bioetl/domain/_observability_contract_primitives.py, <<: *support_module}
-  - {module: bioetl.domain.adapter_config, path: src/bioetl/domain/adapter_config.py, <<: *support_module}
-  - {module: bioetl.domain.constants, path: src/bioetl/domain/constants.py, <<: *support_module}
-  - {module: bioetl.domain.context, path: src/bioetl/domain/context.py, <<: *support_module}
-  - {module: bioetl.domain.context_cached_bronze, path: src/bioetl/domain/context_cached_bronze.py, <<: *support_module}
-  - {module: bioetl.domain.context_correlation, path: src/bioetl/domain/context_correlation.py, <<: *support_module}
-  - {module: bioetl.domain.context_filtering, path: src/bioetl/domain/context_filtering.py, <<: *support_module}
-  - {module: bioetl.domain.context_run, path: src/bioetl/domain/context_run.py, <<: *support_module}
-  - {module: bioetl.domain.context_time, path: src/bioetl/domain/context_time.py, <<: *support_module}
-  - {module: bioetl.domain.context_validation, path: src/bioetl/domain/context_validation.py, <<: *support_module}
-  - {module: bioetl.domain.deterministic_identity, path: src/bioetl/domain/deterministic_identity.py, <<: *support_module}
-  - {module: bioetl.domain.error_classifier, path: src/bioetl/domain/error_classifier.py, <<: *support_module}
-  - {module: bioetl.domain.error_types, path: src/bioetl/domain/error_types.py, <<: *support_module}
-  - {module: bioetl.domain.events, path: src/bioetl/domain/events.py, <<: *support_module}
-  - {module: bioetl.domain.locking, path: src/bioetl/domain/locking.py, <<: *support_module}
-  - {module: bioetl.domain.medallion, path: src/bioetl/domain/medallion.py, <<: *support_module}
-  - {module: bioetl.domain.observability_contract, path: src/bioetl/domain/observability_contract.py, <<: *support_module}
-  - {module: bioetl.domain.observability_event_mapping, path: src/bioetl/domain/observability_event_mapping.py, <<: *support_module}
-  - {module: bioetl.domain.observability_metric_names, path: src/bioetl/domain/observability_metric_names.py, <<: *support_module}
-  - {module: bioetl.domain.pubchem_standardization_catalog, path: src/bioetl/domain/pubchem_standardization_catalog.py, <<: *support_module}
-  - {module: bioetl.domain.resilience, path: src/bioetl/domain/resilience.py, <<: *support_module}
-  - {module: bioetl.domain.resilience_circuit_breaker, path: src/bioetl/domain/resilience_circuit_breaker.py, <<: *support_module}
-  - {module: bioetl.domain.runtime_observability_publication_contract, path: src/bioetl/domain/runtime_observability_publication_contract.py, <<: *support_module}
-  - {module: bioetl.domain.serialization, path: src/bioetl/domain/serialization.py, <<: *support_module}
-  - {module: bioetl.domain.types_config_validation, path: src/bioetl/domain/types_config_validation.py, <<: *support_module}
-  - {module: bioetl.domain.version, path: src/bioetl/domain/version.py, <<: *support_module}
+  - {
+      module: bioetl.domain.immutability,
+      path: src/bioetl/domain/immutability.py,
+      <<: *support_module,
+    }
+  - {
+      module: bioetl.domain._observability_contract_core,
+      path: src/bioetl/domain/_observability_contract_core.py,
+      <<: *support_module,
+    }
+  - {
+      module: bioetl.domain._observability_contract_primitives,
+      path: src/bioetl/domain/_observability_contract_primitives.py,
+      <<: *support_module,
+    }
+  - {
+      module: bioetl.domain.adapter_config,
+      path: src/bioetl/domain/adapter_config.py,
+      <<: *support_module,
+    }
+  - {
+      module: bioetl.domain.constants,
+      path: src/bioetl/domain/constants.py,
+      <<: *support_module,
+    }
+  - {
+      module: bioetl.domain.context,
+      path: src/bioetl/domain/context.py,
+      <<: *support_module,
+    }
+  - {
+      module: bioetl.domain.context_cached_bronze,
+      path: src/bioetl/domain/context_cached_bronze.py,
+      <<: *support_module,
+    }
+  - {
+      module: bioetl.domain.context_correlation,
+      path: src/bioetl/domain/context_correlation.py,
+      <<: *support_module,
+    }
+  - {
+      module: bioetl.domain.context_filtering,
+      path: src/bioetl/domain/context_filtering.py,
+      <<: *support_module,
+    }
+  - {
+      module: bioetl.domain.context_run,
+      path: src/bioetl/domain/context_run.py,
+      <<: *support_module,
+    }
+  - {
+      module: bioetl.domain.context_time,
+      path: src/bioetl/domain/context_time.py,
+      <<: *support_module,
+    }
+  - {
+      module: bioetl.domain.context_validation,
+      path: src/bioetl/domain/context_validation.py,
+      <<: *support_module,
+    }
+  - {
+      module: bioetl.domain.deterministic_identity,
+      path: src/bioetl/domain/deterministic_identity.py,
+      <<: *support_module,
+    }
+  - {
+      module: bioetl.domain.error_classifier,
+      path: src/bioetl/domain/error_classifier.py,
+      <<: *support_module,
+    }
+  - {
+      module: bioetl.domain.error_types,
+      path: src/bioetl/domain/error_types.py,
+      <<: *support_module,
+    }
+  - {
+      module: bioetl.domain.events,
+      path: src/bioetl/domain/events.py,
+      <<: *support_module,
+    }
+  - {
+      module: bioetl.domain.locking,
+      path: src/bioetl/domain/locking.py,
+      <<: *support_module,
+    }
+  - {
+      module: bioetl.domain.medallion,
+      path: src/bioetl/domain/medallion.py,
+      <<: *support_module,
+    }
+  - {
+      module: bioetl.domain.mixin_host,
+      path: src/bioetl/domain/mixin_host.py,
+      <<: *support_module,
+    }
+  - {
+      module: bioetl.domain.observability_contract,
+      path: src/bioetl/domain/observability_contract.py,
+      <<: *support_module,
+    }
+  - {
+      module: bioetl.domain.observability_event_mapping,
+      path: src/bioetl/domain/observability_event_mapping.py,
+      <<: *support_module,
+    }
+  - {
+      module: bioetl.domain.observability_metric_names,
+      path: src/bioetl/domain/observability_metric_names.py,
+      <<: *support_module,
+    }
+  - {
+      module: bioetl.domain.pubchem_standardization_catalog,
+      path: src/bioetl/domain/pubchem_standardization_catalog.py,
+      <<: *support_module,
+    }
+  - {
+      module: bioetl.domain.resilience,
+      path: src/bioetl/domain/resilience.py,
+      <<: *support_module,
+    }
+  - {
+      module: bioetl.domain.resilience_circuit_breaker,
+      path: src/bioetl/domain/resilience_circuit_breaker.py,
+      <<: *support_module,
+    }
+  - {
+      module: bioetl.domain.runtime_observability_publication_contract,
+      path: src/bioetl/domain/runtime_observability_publication_contract.py,
+      <<: *support_module,
+    }
+  - {
+      module: bioetl.domain.serialization,
+      path: src/bioetl/domain/serialization.py,
+      <<: *support_module,
+    }
+  - {
+      module: bioetl.domain.types_config_validation,
+      path: src/bioetl/domain/types_config_validation.py,
+      <<: *support_module,
+    }
+  - {
+      module: bioetl.domain.version,
+      path: src/bioetl/domain/version.py,
+      <<: *support_module,
+    }

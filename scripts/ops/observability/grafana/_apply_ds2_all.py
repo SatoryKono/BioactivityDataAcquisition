@@ -465,7 +465,7 @@ def _verify_incident_dashboard() -> None:
         if mapping.get("type") != "value":
             continue
         for key, value in (mapping.get("options") or {}).items():
-            if isinstance(value, dict[str, object]):
+            if isinstance(value, dict):
                 flat[str(key)] = value.get("text")
     assert flat.get("3") == "UNKNOWN", flat
     t2002 = next(p for p in walk(inc2.get("panels")) if p.get("id") == 2002)
